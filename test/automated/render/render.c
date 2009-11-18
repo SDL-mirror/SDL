@@ -732,8 +732,8 @@ static int render_testBlitBlendMode( SDL_TextureID tface, int mode )
    for (j=0; j <= nj; j+=4) {
       for (i=0; i <= ni; i+=4) {
          /* Set blend mode. */
-         ret = SDL_SetRenderDrawBlendMode( mode );
-         if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
+         ret = SDL_SetTextureBlendMode( tface, mode );
+         if (SDL_ATassert( "SDL_SetTextureBlendMode", ret == 0))
             return -1;
 
          /* Blitting. */
@@ -782,8 +782,8 @@ static int render_testBlitBlend (void)
    rect.h = img_face.height;
 
    /* Set alpha mod. */
-   ret = SDL_SetRenderDrawColor( 255, 255, 255, 100 );
-   if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
+   ret = SDL_SetTextureAlphaMod( tface, 100 );
+   if (SDL_ATassert( "SDL_SetTextureAlphaMod", ret == 0))
       return -1;
 
    /* Test None. */
@@ -831,8 +831,13 @@ static int render_testBlitBlend (void)
       for (i=0; i <= ni; i+=4) {
 
          /* Set colour mod. */
-         ret = SDL_SetRenderDrawColor( (255/nj)*j, (255/ni)*i, (255/nj)*j, (100/ni)*i );
-         if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
+         ret = SDL_SetTextureColorMod( tface, (255/nj)*j, (255/ni)*i, (255/nj)*j );
+         if (SDL_ATassert( "SDL_SetTextureColorMod", ret == 0))
+            return -1;
+
+         /* Set alpha mod. */
+         ret = SDL_SetTextureAlphaMod( tface, (100/ni)*i );
+         if (SDL_ATassert( "SDL_SetTextureAlphaMod", ret == 0))
             return -1;
 
          /* Crazy blending mode magic. */
@@ -841,8 +846,8 @@ static int render_testBlitBlend (void)
          else if (mode==1) mode = SDL_BLENDMODE_BLEND;
          else if (mode==2) mode = SDL_BLENDMODE_ADD;
          else if (mode==3) mode = SDL_BLENDMODE_MOD;
-         ret = SDL_SetRenderDrawBlendMode( mode );
-         if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
+         ret = SDL_SetTextureBlendMode( tface, mode );
+         if (SDL_ATassert( "SDL_SetTextureBlendMode", ret == 0))
             return -1;
 
          /* Blitting. */
