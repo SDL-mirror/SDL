@@ -8,11 +8,10 @@
 
 
 #include "SDL_at.h"
+#include "SDL_stdinc.h"
 
 #include <stdio.h> /* printf/fprintf */
 #include <stdarg.h> /* va_list */
-#include <string.h> /* strdup */
-#include <stdlib.h> /* free */
 
 
 /*
@@ -45,10 +44,10 @@ static void SDL_ATassertFailed( const char *msg );
 static void SDL_ATcleanup (void)
 {
    if (at_suite_msg != NULL)
-      free(at_suite_msg);
+      SDL_free(at_suite_msg);
    at_suite_msg   = NULL;
    if (at_test_msg != NULL)
-      free(at_test_msg);
+      SDL_free(at_test_msg);
    at_test_msg    = NULL;
    at_success     = 0;
    at_failure     = 0;
@@ -70,7 +69,7 @@ void SDL_ATinit( const char *suite )
       SDL_ATprintErr( "AT testsuite does not have a name.\n");
    }
    SDL_ATcleanup();
-   at_suite_msg = strdup(suite);
+   at_suite_msg = SDL_strdup(suite);
 
    /* Verbose message. */
    SDL_ATprintVerbose( 2, "--+---> Started Test Suite '%s'\n", at_suite_msg );
@@ -166,7 +165,7 @@ void SDL_ATbegin( const char *testcase )
    if (testcase == NULL) {
       SDL_ATprintErr( "AT testcase does not have a name.\n");
    }
-   at_test_msg = strdup(testcase);
+   at_test_msg = SDL_strdup(testcase);
 
    /* Verbose message. */
    SDL_ATprintVerbose( 2, "  +---> StartedTest Case '%s'\n", testcase );
@@ -195,7 +194,7 @@ static void SDL_ATendWith( int success )
 
    /* Clean up. */
    if (at_test_msg != NULL)
-      free(at_test_msg);
+      SDL_free(at_test_msg);
    at_test_msg = NULL;
 }
 
