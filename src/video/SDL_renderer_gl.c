@@ -1273,13 +1273,16 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     } else if (pixel_format == SDL_PIXELFORMAT_INDEX1MSB) {
         data->glPixelStorei(GL_PACK_LSB_FIRST, 0);
     }
-    data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    data->glPixelStorei(GL_PACK_ROW_LENGTH,
-                        (pitch / bytes_per_pixel(pixel_format)));
+    //data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    //data->glPixelStorei(GL_PACK_ROW_LENGTH,
+    //                    (pitch / bytes_per_pixel(pixel_format)));
+    data->glReadBuffer(GL_FRONT);
 
+memset(pixels, 0xff, rect->h*pitch);
     data->glReadPixels(rect->x, rect->y+rect->h-1, rect->w, rect->h,
                        format, type, pixels);
 
+#if 0
     /* Flip the rows to be top-down */
     length = rect->w * bytes_per_pixel(pixel_format);
     src = (Uint8*)pixels + (rect->h-1)*pitch;
@@ -1292,6 +1295,7 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         SDL_memcpy(src, tmp, length);
     }
     SDL_stack_free(tmp);
+#endif
 
     return 0;
 }

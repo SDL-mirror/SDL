@@ -314,7 +314,7 @@ SDL_PROC_UNUSED(void, glRasterPos4iv, (const GLint * v))
 SDL_PROC_UNUSED(void, glRasterPos4s,
                 (GLshort x, GLshort y, GLshort z, GLshort w))
 SDL_PROC_UNUSED(void, glRasterPos4sv, (const GLshort * v))
-SDL_PROC_UNUSED(void, glReadBuffer, (GLenum mode))
+SDL_PROC(void, glReadBuffer, (GLenum mode))
 SDL_PROC(void, glReadPixels,
          (GLint x, GLint y, GLsizei width, GLsizei height,
           GLenum format, GLenum type, GLvoid * pixels))
