@@ -518,7 +518,7 @@ static int render_testPrimitivesBlend (void)
    }
 
    /* See if it's the same. */
-   if (render_compare( "Blended primitives output not the same.", &img_primitives ))
+   if (render_compare( "Blended primitives output not the same.", &img_blend ))
       return -1;
 
    return 0;
