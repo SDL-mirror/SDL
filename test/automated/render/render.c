@@ -67,7 +67,6 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
       return 1;
 
    /* Read pixels. */
-   SDL_RenderPresent();
    ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
    if (SDL_ATassert( "SDL_RenderReadPixels", ret==0) )
       return 1;
@@ -792,7 +791,7 @@ static int render_testBlitBlend (void)
       return -1;
    /* See if it's the same. */
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_NONE).",
-            &img_blitAlpha ))
+            &img_blendNone ))
       return -1;
 
    /* Test Mask. */
@@ -964,9 +963,6 @@ int test_render (void)
       if (driver == NULL)
          goto err;
       SDL_ATprintVerbose( 1, " %d) %s\n", i+1, driver );
-      /* Hack to avoid dummy driver. */
-      if (strcmp(driver,"dummy")==0)
-         continue;
 
       /*
        * Initialize testsuite.
@@ -981,24 +977,24 @@ int test_render (void)
       /* Initialize video mode. */
       ret = SDL_VideoInit( driver, 0 );
       if (SDL_ATvassert( ret==0, "SDL_VideoInit( %s, 0 )", driver ))
-         goto err;
+         goto err_cleanup;
       /* Check to see if it's the one we want. */
       str = SDL_GetCurrentVideoDriver();
       if (SDL_ATassert( "SDL_GetCurrentVideoDriver", strcmp(driver,str)==0))
-         goto err;
+         goto err_cleanup;
       /* Create window. */
       wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            80, 60, SDL_WINDOW_SHOWN );
+            80, 60, 0 );
       if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
-         goto err;
+         goto err_cleanup;
       /* Check title. */
       str = SDL_GetWindowTitle( wid );
       if (SDL_ATassert( "SDL_GetWindowTitle", strcmp(msg,str)==0))
-         goto err;
+         goto err_cleanup;
       /* Get renderers. */
       nr = SDL_GetNumRenderDrivers();
       if (SDL_ATassert("SDL_GetNumRenderDrivers", nr>=0))
-         goto err;
+         goto err_cleanup;
       SDL_ATprintVerbose( 1, "   %d Render Drivers\n", nr );
       SDL_ATend();
       for (j=0; j<nr; j++) {
@@ -1006,7 +1002,7 @@ int test_render (void)
          /* Get renderer info. */
          ret = SDL_GetRenderDriverInfo( j, &renderer );
          if (ret != 0)
-            goto err;
+            goto err_cleanup;
          /* Set testcase name. */
          snprintf( msg, sizeof(msg), "Renderer %s", renderer.name );
          SDL_ATprintVerbose( 1, "    %d) %s\n", j+1, renderer.name );
@@ -1014,7 +1010,7 @@ int test_render (void)
          /* Set renderer. */
          ret = SDL_CreateRenderer( wid, j, 0 );
          if (SDL_ATassert( "SDL_CreateRenderer", ret==0 ))
-            goto err;
+            goto err_cleanup;
 
          /*
           * Run tests.
@@ -1040,6 +1036,9 @@ int test_render (void)
    SDL_Quit();
 
    return failed;
+
+err_cleanup:
+   SDL_ATfinish();
 
 err:
    return 1;
