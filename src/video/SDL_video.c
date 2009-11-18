@@ -256,13 +256,14 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     }
     /* The software renderer is always available */
     for (i = 0; i < _this->num_displays; ++i) {
+        if (_this->GL_CreateContext) {
 #if SDL_VIDEO_RENDER_OGL
-        SDL_AddRenderDriver(i, &GL_RenderDriver);
+            SDL_AddRenderDriver(i, &GL_RenderDriver);
 #endif
-
 #if SDL_VIDEO_RENDER_OGL_ES
-        SDL_AddRenderDriver(i, &GL_ES_RenderDriver);
+            SDL_AddRenderDriver(i, &GL_ES_RenderDriver);
 #endif
+        }
         if (_this->displays[i].num_render_drivers > 0) {
             SDL_AddRenderDriver(i, &SW_RenderDriver);
         }
