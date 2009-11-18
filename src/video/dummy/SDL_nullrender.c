@@ -40,6 +40,14 @@ static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
                                 const SDL_Rect * srcrect,
                                 const SDL_Rect * dstrect);
+static int SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer,
+                                      const SDL_Rect * rect,
+                                      Uint32 format,
+                                      void * pixels, int pitch);
+static int SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer,
+                                       const SDL_Rect * rect,
+                                       Uint32 format,
+                                       const void * pixels, int pitch);
 static void SDL_DUMMY_RenderPresent(SDL_Renderer * renderer);
 static void SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer);
 
@@ -95,6 +103,8 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = SDL_DUMMY_RenderLine;
     renderer->RenderFill = SDL_DUMMY_RenderFill;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
+    renderer->RenderReadPixels = SDL_DUMMY_RenderReadPixels;
+    renderer->RenderWritePixels = SDL_DUMMY_RenderWritePixels;
     renderer->RenderPresent = SDL_DUMMY_RenderPresent;
     renderer->DestroyRenderer = SDL_DUMMY_DestroyRenderer;
     renderer->info.name = SDL_DUMMY_RenderDriver.info.name;
@@ -223,6 +233,46 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         return SDL_LowerBlit(surface, &real_srcrect, target, &real_dstrect);
     }
+}
+
+static int
+SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                           Uint32 format, void * pixels, int pitch)
+{
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Surface *screen = data->screens[data->current_screen];
+    Uint32 screen_format = display->current_mode.format;
+    Uint8 *screen_pixels = (Uint8 *) screen->pixels +
+                            rect->y * screen->pitch +
+                            rect->x * screen->format->BytesPerPixel;
+    int screen_pitch = screen->pitch;
+
+    return SDL_ConvertPixels(rect->w, rect->h,
+                             screen_format, screen_pixels, screen_pitch,
+                             format, pixels, pitch);
+}
+
+static int
+SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                            Uint32 format, const void * pixels, int pitch)
+{
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Surface *screen = data->screens[data->current_screen];
+    Uint32 screen_format = display->current_mode.format;
+    Uint8 *screen_pixels = (Uint8 *) screen->pixels +
+                            rect->y * screen->pitch +
+                            rect->x * screen->format->BytesPerPixel;
+    int screen_pitch = screen->pitch;
+
+    return SDL_ConvertPixels(rect->w, rect->h,
+                             format, pixels, pitch,
+                             screen_format, screen_pixels, screen_pitch);
 }
 
 static void
