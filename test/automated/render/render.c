@@ -74,7 +74,7 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
 
    /* Create surface. */
    testsur = SDL_CreateRGBSurfaceFrom( pix, 80, 60, 32, 80*4,
-         RMASK, GMASK, BMASK, AMASK );
+                                       RMASK, GMASK, BMASK, AMASK);
    if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", testsur!=NULL ))
       return 1;
 
@@ -204,7 +204,18 @@ static SDL_TextureID render_loadTestFace (void)
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
          img_face.width, img_face.height, 32, img_face.width*4,
-         RMASK, GMASK, BMASK, AMASK );
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
    if (face == NULL)
       return 0;
    tface = SDL_CreateTextureFromSurface( 0, face );
@@ -547,7 +558,18 @@ static int render_testBlit (void)
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
          img_face.width, img_face.height, 32, img_face.width*4,
-         RMASK, GMASK, BMASK, AMASK );
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
    if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
       return -1;
    tface = SDL_CreateTextureFromSurface( 0, face );
@@ -608,7 +630,18 @@ static int render_testBlitColour (void)
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
          img_face.width, img_face.height, 32, img_face.width*4,
-         RMASK, GMASK, BMASK, AMASK );
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
    if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
       return -1;
    tface = SDL_CreateTextureFromSurface( 0, face );
@@ -675,7 +708,18 @@ static int render_testBlitAlpha (void)
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
          img_face.width, img_face.height, 32, img_face.width*4,
-         RMASK, GMASK, BMASK, AMASK );
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
    if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
       return -1;
    tface = SDL_CreateTextureFromSurface( 0, face );
@@ -789,7 +833,18 @@ static int render_testBlitBlend (void)
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
          img_face.width, img_face.height, 32, img_face.width*4,
-         RMASK, GMASK, BMASK, AMASK );
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
    if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
       return -1;
    tface = SDL_CreateTextureFromSurface( 0, face );
