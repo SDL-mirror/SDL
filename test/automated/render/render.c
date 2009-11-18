@@ -543,7 +543,6 @@ static int render_testBlit (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_Surface *face;
    SDL_TextureID tface;
    int i, j, ni, nj;
 
@@ -556,34 +555,15 @@ static int render_testBlit (void)
       return 0;
 
    /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
-      return -1;
-   tface = SDL_CreateTextureFromSurface( 0, face );
-   if (SDL_ATassert( "SDL_CreateTextureFromSurface", tface != 0))
+   tface = render_loadTestFace();
+   if (SDL_ATassert( "render_loadTestFace()", tface != 0))
       return -1;
 
    /* Constant values. */
-   rect.w = face->w;
-   rect.h = face->h;
-   ni     = SCREEN_W - face->w;
-   nj     = SCREEN_H - face->h;
-
-   /* Clean up. */
-   SDL_FreeSurface( face );
+   rect.w = img_face.width;
+   rect.h = img_face.height;
+   ni     = SCREEN_W - img_face.width;
+   nj     = SCREEN_H - img_face.height;
 
    /* Loop blit. */
    for (j=0; j <= nj; j+=4) {
@@ -615,7 +595,6 @@ static int render_testBlitColour (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_Surface *face;
    SDL_TextureID tface;
    int i, j, ni, nj;
 
@@ -628,34 +607,15 @@ static int render_testBlitColour (void)
       return 0;
 
    /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
-      return -1;
-   tface = SDL_CreateTextureFromSurface( 0, face );
-   if (SDL_ATassert( "SDL_CreateTextureFromSurface", tface != 0))
+   tface = render_loadTestFace();
+   if (SDL_ATassert( "render_loadTestFace()", tface != 0))
       return -1;
 
    /* Constant values. */
-   rect.w = face->w;
-   rect.h = face->h;
-   ni     = SCREEN_W - face->w;
-   nj     = SCREEN_H - face->h;
-
-   /* Clean up. */
-   SDL_FreeSurface( face );
+   rect.w = img_face.width;
+   rect.h = img_face.height;
+   ni     = SCREEN_W - img_face.width;
+   nj     = SCREEN_H - img_face.height;
 
    /* Test blitting with colour mod. */
    for (j=0; j <= nj; j+=4) {
@@ -693,7 +653,6 @@ static int render_testBlitAlpha (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_Surface *face;
    SDL_TextureID tface;
    int i, j, ni, nj;
 
@@ -706,34 +665,15 @@ static int render_testBlitAlpha (void)
       return 0;
 
    /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
-      return -1;
-   tface = SDL_CreateTextureFromSurface( 0, face );
-   if (SDL_ATassert( "SDL_CreateTextureFromSurface", tface != 0))
+   tface = render_loadTestFace();
+   if (SDL_ATassert( "render_loadTestFace()", tface != 0))
       return -1;
 
    /* Constant values. */
-   rect.w = face->w;
-   rect.h = face->h;
-   ni     = SCREEN_W - face->w;
-   nj     = SCREEN_H - face->h;
-
-   /* Clean up. */
-   SDL_FreeSurface( face );
+   rect.w = img_face.width;
+   rect.h = img_face.height;
+   ni     = SCREEN_W - img_face.width;
+   nj     = SCREEN_H - img_face.height;
 
    /* Clear surface. */
    if (render_clearScreen())
@@ -817,7 +757,6 @@ static int render_testBlitBlend (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_Surface *face;
    SDL_TextureID tface;
    int i, j, ni, nj;
    int mode;
@@ -831,24 +770,8 @@ static int render_testBlitBlend (void)
       return 0;
 
    /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", face != NULL))
-      return -1;
-   tface = SDL_CreateTextureFromSurface( 0, face );
-   if (SDL_ATassert( "SDL_CreateTextureFromSurface", tface != 0))
+   tface = render_loadTestFace();
+   if (SDL_ATassert( "render_loadTestFace()", tface != 0))
       return -1;
 
    /* Steps to take. */
@@ -856,11 +779,8 @@ static int render_testBlitBlend (void)
    nj     = SCREEN_H - FACE_H;
 
    /* Constant values. */
-   rect.w = face->w;
-   rect.h = face->h;
-
-   /* Clean up. */
-   SDL_FreeSurface( face );
+   rect.w = img_face.width;
+   rect.h = img_face.height;
 
    /* Set alpha mod. */
    ret = SDL_SetRenderDrawColor( 255, 255, 255, 100 );
