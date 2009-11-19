@@ -1055,7 +1055,7 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static void
-GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
+GL_SetBlendMode(GL_RenderData * data, int blendMode)
 {
     if (blendMode != data->blendMode) {
         switch (blendMode) {
@@ -1064,14 +1064,10 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
             data->glDisable(GL_BLEND);
             break;
         case SDL_BLENDMODE_MASK:
-            if (isprimitive) {
-                data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                data->glDisable(GL_BLEND);
-                /* The same as SDL_BLENDMODE_NONE */
-                blendMode = SDL_BLENDMODE_NONE;
-                break;
-            }
-            /* fall through */
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
         case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
@@ -1097,7 +1093,7 @@ GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1116,7 +1112,7 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1141,7 +1137,7 @@ GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1210,7 +1206,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    GL_SetBlendMode(data, texture->blendMode, 0);
+    GL_SetBlendMode(data, texture->blendMode);
 
     if (texture->scaleMode != data->scaleMode) {
         switch (texture->scaleMode) {
