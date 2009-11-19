@@ -16,11 +16,17 @@
 #include "render/render.h"
 #include "audio/audio.h"
 
+#if defined(__QNXNTO__)
+#define NO_GETOPT_LONG 1
+#endif /* __QNXNTO__ */
+
 #include <stdio.h> /* printf */
 #include <stdlib.h> /* exit */
 #include <unistd.h> /* getopt */
-#include <getopt.h> /* getopt_long */
 #include <string.h> /* strcmp */
+#if !defined(NO_GETOPT_LONG)
+#include <getopt.h> /* getopt_long */
+#endif /* !NO_GETOPT_LONG */
 
 
 /*
@@ -45,34 +51,53 @@ static void parse_options( int argc, char *argv[] );
 /**
  * @brief Displays program usage.
  */
+#if !defined(NO_GETOPT_LONG)
 static void print_usage( const char *name )
 {
    printf("Usage: %s [OPTIONS]\n", name);
    printf("Options are:\n");
-   printf("   -m, --manual    enables tests that require user interaction\n");
-   printf("   --noplatform    do not run the platform tests\n");
-   printf("   --norwops       do not run the rwops tests\n");
-   printf("   --nosurface     do not run the surface tests\n");
-   printf("   --norender      do not run the render tests\n");
-   printf("   --noaudio       do not run the audio tests\n");
-   printf("   -v, --verbose   increases verbosity level by 1 for each -v\n");
-   printf("   -q, --quiet     only displays errors\n");
-   printf("   -h, --help      display this message and exit\n");
+   printf("   -m, --manual        enables tests that require user interaction\n");
+   printf("   -p, --noplatform    do not run the platform tests\n");
+   printf("   -o, --norwops       do not run the rwops tests\n");
+   printf("   -s, --nosurface     do not run the surface tests\n");
+   printf("   -r, --norender      do not run the render tests\n");
+   printf("   -a, --noaudio       do not run the audio tests\n");
+   printf("   -v, --verbose       increases verbosity level by 1 for each -v\n");
+   printf("   -q, --quiet         only displays errors\n");
+   printf("   -h, --help          display this message and exit\n");
 }
+#endif /* !NO_GETOPT_LONG */
 
+#if defined(NO_GETOPT_LONG)
+static void print_usage( const char *name )
+{
+   printf("Usage: %s [OPTIONS]\n", name);
+   printf("Options are:\n");
+   printf("   -m,     enables tests that require user interaction\n");
+   printf("   -p,     do not run the platform tests\n");
+   printf("   -o,     do not run the rwops tests\n");
+   printf("   -s,     do not run the surface tests\n");
+   printf("   -r,     do not run the render tests\n");
+   printf("   -a,     do not run the audio tests\n");
+   printf("   -v,     increases verbosity level by 1 for each -v\n");
+   printf("   -q,     only displays errors\n");
+   printf("   -h,     display this message and exit\n");
+}
+#endif /* NO_GETOPT_LONG */
 
 /**
  * @brief Handles the options.
  */
+#if !defined(NO_GETOPT_LONG)
 static void parse_options( int argc, char *argv[] )
 {
    static struct option long_options[] = {
       { "manual", no_argument, 0, 'm' },
-      { "noplatform", no_argument, 0, 0 },
-      { "norwops", no_argument, 0, 0 },
-      { "nosurface", no_argument, 0, 0 },
-      { "norender", no_argument, 0, 0 },
-      { "noaudio", no_argument, 0, 0 },
+      { "noplatform", no_argument, 0, 'p' },
+      { "norwops", no_argument, 0, 'o' },
+      { "nosurface", no_argument, 0, 's' },
+      { "norender", no_argument, 0, 'r' },
+      { "noaudio", no_argument, 0, 'a' },
       { "verbose", no_argument, 0, 'v' },
       { "quiet", no_argument, 0, 'q' },
       { "help", no_argument, 0, 'h' },
@@ -85,7 +110,7 @@ static void parse_options( int argc, char *argv[] )
 
    /* Iterate over options. */
    while ((c = getopt_long( argc, argv,
-               "vqh",
+               "mposravqh",
                long_options, &option_index)) != -1) {
 
       /* Handle options. */
@@ -109,6 +134,31 @@ static void parse_options( int argc, char *argv[] )
             run_manual = 1;
             break;
 
+         /* No platform. */
+         case 'p':
+            run_platform = 0;
+            break;
+
+         /* No rwops. */
+         case 'o':
+            run_rwops = 0;
+            break;
+
+         /* No surface. */
+         case 's':
+            run_surface = 0;
+            break;
+
+         /* No render. */
+         case 'r':
+            run_render = 0;
+            break;
+
+         /* No audio. */
+         case 'a':
+            run_audio = 0;
+            break;
+
          /* Verbosity. */
          case 'v':
             SDL_ATgeti( SDL_AT_VERBOSE, &i );
@@ -126,9 +176,69 @@ static void parse_options( int argc, char *argv[] )
             exit(EXIT_SUCCESS);
       }
    }
-
 }
+#endif /* !NO_GETOPT_LONG */
 
+#if defined(NO_GETOPT_LONG)
+static void parse_options( int argc, char *argv[] )
+{
+   static char* short_options="mposravqh";
+   int c = 0;
+   int i;
+
+   /* Iterate over options. */
+   while ((c = getopt(argc, argv, short_options)) != -1) {
+      /* Handle options. */
+      switch (c) {
+         /* Manual. */
+         case 'm':
+            run_manual = 1;
+            break;
+
+         /* No platform. */
+         case 'p':
+            run_platform = 0;
+            break;
+
+         /* No rwops. */
+         case 'o':
+            run_rwops = 0;
+            break;
+
+         /* No surface. */
+         case 's':
+            run_surface = 0;
+            break;
+
+         /* No render. */
+         case 'r':
+            run_render = 0;
+            break;
+
+         /* No audio. */
+         case 'a':
+            run_audio = 0;
+            break;
+
+         /* Verbosity. */
+         case 'v':
+            SDL_ATgeti( SDL_AT_VERBOSE, &i );
+            SDL_ATseti( SDL_AT_VERBOSE, i+1 );
+            break;
+
+         /* Quiet. */
+         case 'q':
+            SDL_ATseti( SDL_AT_QUIET, 1 );
+            break;
+
+         /* Help. */
+         case 'h':
+            print_usage( argv[0] );
+            exit(EXIT_SUCCESS);
+      }
+   }
+}
+#endif /* NO_GETOPT_LONG */
 
 /**
  * @brief Main entry point.
