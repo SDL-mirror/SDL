@@ -1105,7 +1105,7 @@ GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
                     (GLfloat) renderer->a * inv255f);
 
     data->glBegin(GL_POINTS);
-    data->glVertex2i(x, y);
+    data->glVertex2f(0.5f + x, 0.5f + y);
     data->glEnd();
 
     return 0;
@@ -1124,8 +1124,8 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
                     (GLfloat) renderer->a * inv255f);
 
     data->glBegin(GL_LINES);
-    data->glVertex2i(x1, y1);
-    data->glVertex2i(x2, y2);
+    data->glVertex2f(0.5f + x1, 0.5f + y1);
+    data->glVertex2f(0.5f + x2, 0.5f + y2);
     data->glEnd();
 
     return 0;
@@ -1234,13 +1234,13 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
-    data->glVertex2i(minx, miny);
+    data->glVertex2f(0.5f + minx, 0.5f + miny);
     data->glTexCoord2f(maxu, minv);
-    data->glVertex2i(maxx, miny);
+    data->glVertex2f(0.5f + maxx, 0.5f + miny);
     data->glTexCoord2f(minu, maxv);
-    data->glVertex2i(minx, maxy);
+    data->glVertex2f(0.5f + minx, 0.5f + maxy);
     data->glTexCoord2f(maxu, maxv);
-    data->glVertex2i(maxx, maxy);
+    data->glVertex2f(0.5f + maxx, 0.5f + maxy);
     data->glEnd();
 
     if (texturedata->shader != 0) {
