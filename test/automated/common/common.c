@@ -47,22 +47,24 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img )
 
             case 4:
                {
-                  int fail;
+                  int dist = 0;
                   Uint8 R, G, B, A;
 
                   SDL_GetRGBA(*(Uint32*)p, sur->format, &R, &G, &B, &A);
 
                   if (img->bytes_per_pixel == 3) {
-                     fail = !( (R == pd[0]) &&
-                               (G == pd[1]) &&
-                               (B == pd[2]) );
+                     dist += (R-pd[0])*(R-pd[0]);
+                     dist += (G-pd[1])*(G-pd[1]);
+                     dist += (B-pd[2])*(B-pd[2]);
                   } else {
-                     fail = !( (R == pd[0]) &&
-                               (G == pd[1]) &&
-                               (B == pd[2]) &&
-                               (A == pd[3]) );
+                     dist += (R-pd[0])*(R-pd[0]);
+                     dist += (G-pd[1])*(G-pd[1]);
+                     dist += (B-pd[2])*(B-pd[2]);
+                     dist += (A-pd[3])*(A-pd[3]);
                   }
-                  if (fail) {
+                  /* Allow up to sqrt(32) difference in blending accuracy */
+                  if (dist > 32) {
+                     /*printf("pixel %d,%d varies by %d\n", i, j, dist);*/
                      ++ret;
                   }
                }
