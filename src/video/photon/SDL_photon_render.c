@@ -82,6 +82,10 @@ static int photon_renderfill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int photon_rendercopy(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * srcrect,
                              const SDL_Rect * dstrect);
+static int photon_renderreadpixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                   Uint32 format, void * pixels, int pitch);
+static int photon_renderwritepixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                    Uint32 format, const void * pixels, int pitch);
 static void photon_renderpresent(SDL_Renderer * renderer);
 static void photon_destroytexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
@@ -1569,6 +1573,79 @@ photon_destroyrenderer(SDL_Renderer * renderer)
             }
             break;
     }
+}
+
+static int
+photon_renderreadpixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                        Uint32 format, void * pixels, int pitch)
+{
+    SDL_RenderData *rdata = (SDL_RenderData *)renderer->driverdata;
+    Uint32 sformat=0;
+    uint8_t* spixels=NULL;
+    unsigned int spitch=0;
+
+    switch (rdata->surfaces_type)
+    {
+        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_visible_idx]->format);
+             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_visible_idx]);
+             spitch=rdata->osurfaces[rdata->surface_visible_idx]->pitch;
+             break;
+        case SDL_PHOTON_SURFTYPE_PHIMAGE:
+             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_visible_idx]->type);
+             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_visible_idx]->image;
+             spitch=rdata->psurfaces[rdata->surface_visible_idx]->bpl;
+             break;
+        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+        default:
+             SDL_SetError("Photon: surfaces are not initialized");
+             return -1;
+    }
+
+    /* Adjust surface pixels pointer to the rectangle coordinates */
+    spixels+=rect->y*spitch + rect->x*SDL_BYTESPERPIXEL(sformat);
+
+    SDL_ConvertPixels(rect->w, rect->h,
+                      sformat, spixels, spitch,
+                      format, pixels, pitch);
+
+    return 0;
+}
+
+static int
+photon_renderwritepixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                         Uint32 format, const void * pixels, int pitch)
+{
+    SDL_RenderData *rdata = (SDL_RenderData *)renderer->driverdata;
+    Uint32 sformat=0;
+    uint8_t* spixels=NULL;
+    unsigned int spitch=0;
+
+    switch (rdata->surfaces_type)
+    {
+        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_visible_idx]->format);
+             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_visible_idx]);
+             spitch=rdata->osurfaces[rdata->surface_visible_idx]->pitch;
+             break;
+        case SDL_PHOTON_SURFTYPE_PHIMAGE:
+             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_visible_idx]->type);
+             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_visible_idx]->image;
+             spitch=rdata->psurfaces[rdata->surface_visible_idx]->bpl;
+             break;
+        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+        default:
+             SDL_SetError("Photon: surfaces are not initialized");
+             return -1;
+    }
+
+    /* Adjust surface pixels pointer to the rectangle coordinates */
+    spixels+=rect->y*spitch + rect->x*SDL_BYTESPERPIXEL(sformat);
+
+    SDL_ConvertPixels(rect->w, rect->h, format, pixels, pitch,
+                      sformat, spixels, spitch);
+
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
