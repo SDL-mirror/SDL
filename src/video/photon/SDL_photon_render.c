@@ -165,6 +165,8 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = photon_renderline;
     renderer->RenderFill = photon_renderfill;
     renderer->RenderCopy = photon_rendercopy;
+    renderer->RenderReadPixels = photon_renderreadpixels;
+    renderer->RenderWritePixels = photon_renderwritepixels;
     renderer->RenderPresent = photon_renderpresent;
     renderer->DestroyTexture = photon_destroytexture;
     renderer->DestroyRenderer = photon_destroyrenderer;
@@ -320,6 +322,10 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
        {
           /* Create offscreen surfaces */
           allocate_task=SDL_PHOTON_SURFTYPE_OFFSCREEN;
+
+          /* Before destroying surfaces, be sure, that rendering was completed */
+          PgFlush();
+          PgWaitHWIdle();
 
           /* Destroy current surfaces */
           for (it=0; it<SDL_PHOTON_MAX_SURFACES; it++)
@@ -1517,6 +1523,10 @@ photon_destroyrenderer(SDL_Renderer * renderer)
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_WindowData *wdata = (SDL_WindowData *)window->driverdata;
     uint32_t it;
+
+    /* Before destroying the renderer, be sure, that rendering was completed */
+    PgFlush();
+    PgWaitHWIdle();
 
     /* Destroy graphics context */
     if (rdata->gc!=NULL)
