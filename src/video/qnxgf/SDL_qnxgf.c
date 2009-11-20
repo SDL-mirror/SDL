@@ -251,6 +251,9 @@ qnxgf_create(int devindex)
     }
     device->driverdata = gfdata;
 
+    /* By default GF is not initialized */
+    gfdata->gfinitialized = SDL_FALSE;
+
     /* Try to attach to graphics device driver */
     status =
         gf_dev_attach(&gfdata->gfdev, GF_DEVICE_INDEX(devindex),
@@ -543,8 +546,16 @@ qnxgf_videoinit(_THIS)
 void
 qnxgf_videoquit(_THIS)
 {
+    SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata = NULL;
     uint32_t it;
+
+    /* Check if GF was initialized before */
+    if ((gfdata == NULL) || (gfdata->gfinitialized != SDL_TRUE))
+    {
+        /* If not, do not deinitialize */
+        return;
+    }
 
     /* Stop collecting mouse events */
     hiddi_disable_mouse();

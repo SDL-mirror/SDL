@@ -1071,6 +1071,7 @@ hiddi_connect_devices()
 
     status = hidd_connect(&hidparams, &connection);
     if (status != EOK) {
+        connection=NULL;
         return -1;
     }
 
@@ -1097,6 +1098,7 @@ hiddi_connect_devices()
     /* Disconnect from HID server */
     status = hidd_disconnect(connection);
     if (status != EOK) {
+        connection=NULL;
         return -1;
     }
 
@@ -1105,6 +1107,7 @@ hiddi_connect_devices()
 
     status = hidd_connect(&hidparams, &connection);
     if (status != EOK) {
+        connection=NULL;
         return -1;
     }
 
@@ -1119,9 +1122,12 @@ hiddi_disconnect_devices()
     hiddi_disable_mouse();
 
     /* Disconnect from HID server */
-    status = hidd_disconnect(connection);
-    if (status != EOK) {
-        return -1;
+    if (connection!=NULL)
+    {
+        status = hidd_disconnect(connection);
+        if (status != EOK) {
+            return -1;
+        }
     }
 }
 
