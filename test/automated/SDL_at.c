@@ -9,6 +9,7 @@
 
 #include "SDL_at.h"
 #include "SDL_stdinc.h"
+#include "SDL_error.h"
 
 #include <stdio.h> /* printf/fprintf */
 #include <stdarg.h> /* va_list */
@@ -209,6 +210,7 @@ static void SDL_ATassertFailed( const char *msg )
    SDL_ATprintErr( "   %s\n", msg );
    SDL_ATprintErr( "   Test Case '%s'\n", at_test_msg );
    SDL_ATprintErr( "   Test Suite '%s'\n", at_suite_msg );
+   SDL_ATprintErr( "   Last SDL error '%s'\n", SDL_GetError() );
    /* End. */
    SDL_ATendWith(0);
 }
@@ -302,6 +304,3 @@ int SDL_ATprintVerbose( int level, const char *msg, ... )
 
    return ret;
 }
-
-
-
