@@ -329,6 +329,9 @@ static int render_clearScreen (void)
       return -1;
    */
 
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
+
    return 0;
 }
 
@@ -409,6 +412,9 @@ static int render_testPrimitives (void)
    ret = SDL_RenderLine( 0, 60, 80, 0 );
    if (SDL_ATassert( "SDL_RenderLine", ret == 0))
       return -1;
+
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Primitives output not the same.", &img_primitives ))
@@ -527,6 +533,9 @@ static int render_testPrimitivesBlend (void)
       }
    }
 
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
+
    /* See if it's the same. */
    if (render_compare( "Blended primitives output not the same.", &img_blend ))
       return -1;
@@ -578,6 +587,9 @@ static int render_testBlit (void)
 
    /* Clean up. */
    SDL_DestroyTexture( tface );
+
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same.", &img_blit ))
@@ -635,6 +647,9 @@ static int render_testBlitColour (void)
 
    /* Clean up. */
    SDL_DestroyTexture( tface );
+
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetTextureColorMod).",
@@ -698,6 +713,9 @@ static int render_testBlitAlpha (void)
    /* Clean up. */
    SDL_DestroyTexture( tface );
 
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
+
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetSurfaceAlphaMod).",
             &img_blitAlpha ))
@@ -744,6 +762,9 @@ static int render_testBlitBlendMode( SDL_TextureID tface, int mode )
             return -1;
       }
    }
+
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
 
    return 0;
 }
@@ -862,6 +883,9 @@ static int render_testBlitBlend (void)
    /* Clean up. */
    SDL_DestroyTexture( tface );
 
+   /* Flush all asynchronous operations */
+   SDL_RenderPresent();
+
    /* Check to see if matches. */
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_*).",
             &img_blendAll ))
@@ -879,7 +903,7 @@ static int render_testBlitBlend (void)
 int render_runTests (void)
 {
    int ret;
-  
+
    /* No error. */
    ret = 0;
 
@@ -910,7 +934,6 @@ int render_runTests (void)
    if (ret)
       return -1;
    ret = render_testBlitBlend();
-
 
    return ret;
 }
@@ -1004,6 +1027,14 @@ int test_render (void)
       SDL_ATend();
       for (j=0; j<nr; j++) {
 
+         /* We have to recreate window each time, because opengl and opengles renderers */
+         /* both add SDL_WINDOW_OPENGL flag for window, that was last used              */
+         SDL_DestroyWindow(wid);
+         wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+               80, 60, 0 );
+         if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
+            goto err_cleanup;
+
          /* Get renderer info. */
          ret = SDL_GetRenderDriverInfo( j, &renderer );
          if (ret != 0)
@@ -1021,9 +1052,9 @@ int test_render (void)
           * Run tests.
           */
          ret = render_runTests();
+
          if (ret)
             continue;
-
          SDL_ATend();
       }
 
@@ -1035,7 +1066,6 @@ int test_render (void)
        */
       failed += SDL_ATfinish();
    }
-
 
    /* Exit SDL. */
    SDL_Quit();
