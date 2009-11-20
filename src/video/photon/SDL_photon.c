@@ -2685,6 +2685,23 @@ photon_pumpevents(_THIS)
                                 SDL_SendKeyboardKey(0, SDL_RELEASED,
                                                     scancode);
                             }
+
+                        }
+
+                        /* Handle UTF-8 text input if requested by caller */
+                        if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY))
+                        {
+                            char text[5];
+
+                            SDL_memset(text, 0x00, 5);
+                            if (PhKeyToMb(text, keyevent)!=-1)
+                            {
+                                SDL_SendKeyboardText(0, text);
+                            }
+                            else
+                            {
+                                /* Just do nothing if it is not a UTF-8 character */
+                            }
                         }
                     }
                     break;
