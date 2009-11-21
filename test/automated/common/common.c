@@ -63,7 +63,7 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img )
                      dist += (A-pd[3])*(A-pd[3]);
                   }
                   /* Allow up to sqrt(32) difference in blending accuracy */
-                  if (dist > 32) {
+                  if (dist > 64) {
                      /*printf("pixel %d,%d varies by %d\n", i, j, dist);*/
                      ++ret;
                   }
