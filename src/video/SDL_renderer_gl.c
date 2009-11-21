@@ -1292,13 +1292,13 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
-    data->glVertex2f(0.5f + minx, 0.5f + miny);
+    data->glVertex2f((GLfloat) minx, (GLfloat) miny);
     data->glTexCoord2f(maxu, minv);
-    data->glVertex2f(0.5f + maxx, 0.5f + miny);
+    data->glVertex2f((GLfloat) maxx, (GLfloat) miny);
     data->glTexCoord2f(minu, maxv);
-    data->glVertex2f(0.5f + minx, 0.5f + maxy);
+    data->glVertex2f((GLfloat) minx, (GLfloat) maxy);
     data->glTexCoord2f(maxu, maxv);
-    data->glVertex2f(0.5f + maxx, 0.5f + maxy);
+    data->glVertex2f((GLfloat) maxx, (GLfloat) maxy);
     data->glEnd();
 
     if (shader) {
