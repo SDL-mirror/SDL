@@ -58,13 +58,8 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
    (void) msg;
    (void) s;
    int ret;
-   void *pix;
+   Uint8 pix[4*80*60];
    SDL_Surface *testsur;
-
-   /* Allocate pixel space. */
-   pix = malloc( 4*80*60 );
-   if (SDL_ATassert( "malloc", pix!=NULL ))
-      return 1;
 
    /* Read pixels. */
    ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
@@ -84,11 +79,41 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
 
    /* Clean up. */
    SDL_FreeSurface( testsur );
-   free(pix);
 
    return 0;
 }
 
+#if 0
+static int dump_screen( int index )
+{
+   int ret;
+   char name[1024];
+   Uint8 pix[4*80*60];
+   SDL_Surface *testsur;
+   SDL_RendererInfo info;
+
+   /* Read pixels. */
+   ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
+   if (SDL_ATassert( "SDL_RenderReadPixels", ret==0) )
+      return 1;
+
+   /* Create surface. */
+   testsur = SDL_CreateRGBSurfaceFrom( pix, 80, 60, 32, 80*4,
+                                       RMASK, GMASK, BMASK, AMASK);
+   if (SDL_ATassert( "SDL_CreateRGBSurfaceFrom", testsur!=NULL ))
+      return 1;
+
+   /* Dump surface. */
+   SDL_GetRendererInfo(&info);
+   sprintf(name, "%s-%s-%d.bmp", SDL_GetCurrentVideoDriver(), info.name, index);
+   SDL_SaveBMP(testsur, name);
+
+   /* Clean up. */
+   SDL_FreeSurface( testsur );
+
+   return 0;
+}
+#endif
 
 /**
  * @brief Checks to see if functionality is supported.
