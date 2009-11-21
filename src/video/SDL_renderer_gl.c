@@ -1150,20 +1150,30 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    /* The line is half open, so we need tiny segments at the endpoints
-     * so that we guarantee coverage of the beginning and final pixels.
+    data->glBegin(GL_LINES);
+    data->glVertex2f(0.5f + x1, 0.5f + y1);
+    data->glVertex2f(0.5f + x2, 0.5f + y2);
+    data->glEnd();
+
+    /* The line is half open, so we need one more point to complete the line.
      * http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node47.html
      */
-    data->glBegin(GL_LINES);
-    /* Ensure coverage of the first point */
-    data->glVertex2f(0.1f + x1, 0.1f + y1);
-    data->glVertex2f(0.5f + x1, 0.5f + y1);
-    /* Draw the requested line */
-    data->glVertex2f(0.5f + x1, 0.5f + y1);
+    data->glBegin(GL_POINTS);
+#ifdef __APPLE__
+    /* Mac OS X seems to always leave the second point open */
     data->glVertex2f(0.5f + x2, 0.5f + y2);
-    /* Ensure coverage of the second point */
-    data->glVertex2f(0.5f + x2, 0.5f + y2);
-    data->glVertex2f(0.9f + x2, 0.9f + y2);
+#else
+    /* Linux seems to use the right-most or bottom-most point open */
+    if (x1 > x2) {
+        data->glVertex2f(0.5f + x1, 0.5f + y1);
+    } else if (x2 > x1) {
+        data->glVertex2f(0.5f + x2, 0.5f + y2);
+    } else if (y1 > y2) {
+        data->glVertex2f(0.5f + x1, 0.5f + y1);
+    } else if (y2 > y1) {
+        data->glVertex2f(0.5f + x2, 0.5f + y2);
+    }
+#endif
     data->glEnd();
 
     return 0;
