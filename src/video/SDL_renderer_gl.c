@@ -1157,13 +1157,17 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 
     /* The line is half open, so we need one more point to complete the line.
      * http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node47.html
+     * If we have to, we can use vertical line and horizontal line textures
+     * for vertical and horizontal lines, and then create custom textures
+     * for diagonal lines and software render those.  It's terrible, but at
+     * least it would be pixel perfect.
      */
     data->glBegin(GL_POINTS);
 #ifdef __APPLE__
     /* Mac OS X seems to always leave the second point open */
     data->glVertex2f(0.5f + x2, 0.5f + y2);
 #else
-    /* Linux seems to use the right-most or bottom-most point open */
+    /* Linux seems to leave the right-most or bottom-most point open */
     if (x1 > x2) {
         data->glVertex2f(0.5f + x1, 0.5f + y1);
     } else if (x2 > x1) {
