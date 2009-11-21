@@ -29,7 +29,7 @@
 /*
  * Prototypes.
  */
-static int render_compare( const char *msg, const SurfaceImage_t *s );
+static int render_compare( const char *msg, const SurfaceImage_t *s, int allowable_error );
 static int render_isSupported( int code );
 static int render_hasDrawColor (void);
 static int render_hasBlendModes (void);
@@ -53,7 +53,7 @@ static int render_testBlitBlend (void);
  *    @param s Image to compare against.
  *    @return 0 on success.
  */
-static int render_compare( const char *msg, const SurfaceImage_t *s )
+static int render_compare( const char *msg, const SurfaceImage_t *s, int allowable_error )
 {
    (void) msg;
    (void) s;
@@ -73,7 +73,7 @@ static int render_compare( const char *msg, const SurfaceImage_t *s )
       return 1;
 
    /* Compare surface. */
-   ret = surface_compare( testsur, s );
+   ret = surface_compare( testsur, s, allowable_error );
    if (SDL_ATassert( msg, ret==0 ))
       return 1;
 
@@ -445,7 +445,7 @@ static int render_testPrimitives (void)
       return -1;
 
    /* See if it's the same. */
-   if (render_compare( "Primitives output not the same.", &img_primitives ))
+   if (render_compare( "Primitives output not the same.", &img_primitives, ALLOWABLE_ERROR_OPAQUE ))
       return -1;
 
    return 0;
@@ -562,7 +562,7 @@ static int render_testPrimitivesBlend (void)
    }
 
    /* See if it's the same. */
-   if (render_compare( "Blended primitives output not the same.", &img_blend ))
+   if (render_compare( "Blended primitives output not the same.", &img_blend, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    return 0;
@@ -614,7 +614,7 @@ static int render_testBlit (void)
    SDL_DestroyTexture( tface );
 
    /* See if it's the same. */
-   if (render_compare( "Blit output not the same.", &img_blit ))
+   if (render_compare( "Blit output not the same.", &img_blit, ALLOWABLE_ERROR_OPAQUE ))
       return -1;
 
    return 0;
@@ -672,7 +672,7 @@ static int render_testBlitColour (void)
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetTextureColorMod).",
-            &img_blitColour ))
+            &img_blitColour, ALLOWABLE_ERROR_OPAQUE ))
       return -1;
 
    return 0;
@@ -734,7 +734,7 @@ static int render_testBlitAlpha (void)
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetSurfaceAlphaMod).",
-            &img_blitAlpha ))
+            &img_blitAlpha, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    return 0;
@@ -825,35 +825,35 @@ static int render_testBlitBlend (void)
       return -1;
    /* See if it's the same. */
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_NONE).",
-            &img_blendNone ))
+            &img_blendNone, ALLOWABLE_ERROR_OPAQUE ))
       return -1;
 
    /* Test Mask. */
    if (render_testBlitBlendMode( tface, SDL_BLENDMODE_MASK ))
       return -1;
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_MASK).",
-            &img_blendMask ))
+            &img_blendMask, ALLOWABLE_ERROR_OPAQUE ))
       return -1;
 
    /* Test Blend. */
    if (render_testBlitBlendMode( tface, SDL_BLENDMODE_BLEND ))
       return -1;
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_BLEND).",
-            &img_blendBlend ))
+            &img_blendBlend, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    /* Test Add. */
    if (render_testBlitBlendMode( tface, SDL_BLENDMODE_ADD ))
       return -1;
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_ADD).",
-            &img_blendAdd ))
+            &img_blendAdd, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    /* Test Mod. */
    if (render_testBlitBlendMode( tface, SDL_BLENDMODE_MOD ))
       return -1;
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_MOD).",
-            &img_blendMod ))
+            &img_blendMod, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    /* Clear surface. */
@@ -898,7 +898,7 @@ static int render_testBlitBlend (void)
 
    /* Check to see if matches. */
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_*).",
-            &img_blendAll ))
+            &img_blendAll, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
    return 0;

@@ -69,7 +69,7 @@ static void surface_testLoad( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Primitives output not the same.",
-            surface_compare( rface, &img_face)==0 ))
+            surface_compare( rface, &img_face, 0 )==0 ))
       return;
 
    /* Clean up. */
@@ -159,7 +159,7 @@ static void surface_testPrimitives( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Primitives output not the same.",
-            surface_compare( testsur, &img_primitives )==0 ))
+            surface_compare( testsur, &img_primitives, 0 )==0 ))
       return;
 
    SDL_ATend();
@@ -241,7 +241,7 @@ static void surface_testPrimitivesBlend( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Primitives output not the same.",
-            surface_compare( testsur, &img_blend )==0 ))
+            surface_compare( testsur, &img_blend, 0 )==0 ))
       return;
 
    SDL_ATend();
@@ -304,7 +304,7 @@ static void surface_testBlit( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Blitting output not the same (normal blit).",
-            surface_compare( testsur, &img_blit )==0 ))
+            surface_compare( testsur, &img_blit, 0 )==0 ))
       return;
 
    /* Clear surface. */
@@ -332,7 +332,7 @@ static void surface_testBlit( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Blitting output not the same (using SDL_SetSurfaceColorMod).",
-            surface_compare( testsur, &img_blitColour )==0 ))
+            surface_compare( testsur, &img_blitColour, 0 )==0 ))
       return;
 
    /* Clear surface. */
@@ -365,7 +365,7 @@ static void surface_testBlit( SDL_Surface *testsur )
 
    /* See if it's the same. */
    if (SDL_ATassert( "Blitting output not the same (using SDL_SetSurfaceAlphaMod).",
-            surface_compare( testsur, &img_blitAlpha )==0 ))
+            surface_compare( testsur, &img_blitAlpha, 0 )==0 ))
       return;
 
    /* Clean up. */
@@ -473,35 +473,35 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_NONE ))
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_NONE).",
-            surface_compare( testsur, &img_blendNone )==0 ))
+            surface_compare( testsur, &img_blendNone, 0 )==0 ))
       return;
 
    /* Test Mask. */
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_MASK ))
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_MASK).",
-            surface_compare( testsur, &img_blendMask )==0 ))
+            surface_compare( testsur, &img_blendMask, 0 )==0 ))
       return;
 
    /* Test Blend. */
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_BLEND ))
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_BLEND).",
-            surface_compare( testsur, &img_blendBlend )==0 ))
+            surface_compare( testsur, &img_blendBlend, 0 )==0 ))
       return;
 
    /* Test Add. */
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_ADD ))
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_ADD).",
-            surface_compare( testsur, &img_blendAdd )==0 ))
+            surface_compare( testsur, &img_blendAdd, 0 )==0 ))
       return;
 
    /* Test Mod. */
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD ))
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_MOD).",
-            surface_compare( testsur, &img_blendMod )==0 ))
+            surface_compare( testsur, &img_blendMod, 0 )==0 ))
       return;
 
    /* Clear surface. */
@@ -545,7 +545,7 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
 
    /* Check to see if matches. */
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLEND_*).",
-            surface_compare( testsur, &img_blendAll )==0 ))
+            surface_compare( testsur, &img_blendAll, 0 )==0 ))
       return;
 
    /* Clean up. */

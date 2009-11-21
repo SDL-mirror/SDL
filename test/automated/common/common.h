@@ -25,6 +25,8 @@ typedef struct SurfaceImage_s {
    const unsigned char pixel_data[];
 } SurfaceImage_t;
 
+#define ALLOWABLE_ERROR_OPAQUE	0
+#define ALLOWABLE_ERROR_BLENDED	64
 
 /**
  * @brief Compares a surface and a surface image for equality.
@@ -33,7 +35,7 @@ typedef struct SurfaceImage_s {
  *    @param img Image to compare against.
  *    @return 0 if they are the same, -1 on error and positive if different.
  */
-int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img );
+int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img, int allowable_error );
 
 
 #endif /* COMMON_H */
