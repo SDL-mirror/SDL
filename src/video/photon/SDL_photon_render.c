@@ -1594,17 +1594,32 @@ photon_renderreadpixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     uint8_t* spixels=NULL;
     unsigned int spitch=0;
 
+    /* Flush all undrawn graphics data to surface */
     switch (rdata->surfaces_type)
     {
         case SDL_PHOTON_SURFTYPE_OFFSCREEN:
-             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_visible_idx]->format);
-             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_visible_idx]);
-             spitch=rdata->osurfaces[rdata->surface_visible_idx]->pitch;
+             PgFlushCx(rdata->osurfaces[rdata->surface_render_idx]);
+             PgWaitHWIdle();
              break;
         case SDL_PHOTON_SURFTYPE_PHIMAGE:
-             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_visible_idx]->type);
-             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_visible_idx]->image;
-             spitch=rdata->psurfaces[rdata->surface_visible_idx]->bpl;
+             PmMemFlush(rdata->pcontexts[rdata->surface_render_idx], rdata->psurfaces[rdata->surface_render_idx]);
+             break;
+        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+        default:
+             return;
+    }
+
+    switch (rdata->surfaces_type)
+    {
+        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_render_idx]->format);
+             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_render_idx]);
+             spitch=rdata->osurfaces[rdata->surface_render_idx]->pitch;
+             break;
+        case SDL_PHOTON_SURFTYPE_PHIMAGE:
+             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_render_idx]->type);
+             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_render_idx]->image;
+             spitch=rdata->psurfaces[rdata->surface_render_idx]->bpl;
              break;
         case SDL_PHOTON_SURFTYPE_UNKNOWN:
         default:
@@ -1631,17 +1646,32 @@ photon_renderwritepixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     uint8_t* spixels=NULL;
     unsigned int spitch=0;
 
+    /* Flush all undrawn graphics data to surface */
     switch (rdata->surfaces_type)
     {
         case SDL_PHOTON_SURFTYPE_OFFSCREEN:
-             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_visible_idx]->format);
-             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_visible_idx]);
-             spitch=rdata->osurfaces[rdata->surface_visible_idx]->pitch;
+             PgFlushCx(rdata->osurfaces[rdata->surface_render_idx]);
+             PgWaitHWIdle();
              break;
         case SDL_PHOTON_SURFTYPE_PHIMAGE:
-             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_visible_idx]->type);
-             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_visible_idx]->image;
-             spitch=rdata->psurfaces[rdata->surface_visible_idx]->bpl;
+             PmMemFlush(rdata->pcontexts[rdata->surface_render_idx], rdata->psurfaces[rdata->surface_render_idx]);
+             break;
+        case SDL_PHOTON_SURFTYPE_UNKNOWN:
+        default:
+             return;
+    }
+
+    switch (rdata->surfaces_type)
+    {
+        case SDL_PHOTON_SURFTYPE_OFFSCREEN:
+             sformat=photon_image_to_sdl_pixelformat(rdata->osurfaces[rdata->surface_render_idx]->format);
+             spixels=(uint8_t*)PdGetOffscreenContextPtr(rdata->osurfaces[rdata->surface_render_idx]);
+             spitch=rdata->osurfaces[rdata->surface_render_idx]->pitch;
+             break;
+        case SDL_PHOTON_SURFTYPE_PHIMAGE:
+             sformat=photon_image_to_sdl_pixelformat(rdata->psurfaces[rdata->surface_render_idx]->type);
+             spixels=(uint8_t*)rdata->psurfaces[rdata->surface_render_idx]->image;
+             spitch=rdata->psurfaces[rdata->surface_render_idx]->bpl;
              break;
         case SDL_PHOTON_SURFTYPE_UNKNOWN:
         default:
