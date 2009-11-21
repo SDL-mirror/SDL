@@ -1155,9 +1155,17 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     data->glVertex2f(0.5f + x2, 0.5f + y2);
     data->glEnd();
 
-    /* For some reason the second endpoint is skipped */
+    /* For some reason the rightmost or lowest endpoint is skipped */
     data->glBegin(GL_POINTS);
-    data->glVertex2f(0.5f + x2, 0.5f + y2);
+    if (x1 > x2) {
+        data->glVertex2f(0.5f + x1, 0.5f + y1);
+    } else if (x2 > x1) {
+        data->glVertex2f(0.5f + x2, 0.5f + y2);
+    } else if (y1 > y2) {
+        data->glVertex2f(0.5f + x1, 0.5f + y1);
+    } else if (y2 > y1) {
+        data->glVertex2f(0.5f + x2, 0.5f + y2);
+    }
     data->glEnd();
 
     return 0;
