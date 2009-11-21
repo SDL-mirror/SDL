@@ -329,9 +329,6 @@ static int render_clearScreen (void)
       return -1;
    */
 
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
-
    return 0;
 }
 
@@ -412,9 +409,6 @@ static int render_testPrimitives (void)
    ret = SDL_RenderLine( 0, 60, 80, 0 );
    if (SDL_ATassert( "SDL_RenderLine", ret == 0))
       return -1;
-
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Primitives output not the same.", &img_primitives ))
@@ -533,9 +527,6 @@ static int render_testPrimitivesBlend (void)
       }
    }
 
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
-
    /* See if it's the same. */
    if (render_compare( "Blended primitives output not the same.", &img_blend ))
       return -1;
@@ -587,9 +578,6 @@ static int render_testBlit (void)
 
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same.", &img_blit ))
@@ -647,9 +635,6 @@ static int render_testBlitColour (void)
 
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
 
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetTextureColorMod).",
@@ -713,9 +698,6 @@ static int render_testBlitAlpha (void)
    /* Clean up. */
    SDL_DestroyTexture( tface );
 
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
-
    /* See if it's the same. */
    if (render_compare( "Blit output not the same (using SDL_SetSurfaceAlphaMod).",
             &img_blitAlpha ))
@@ -762,9 +744,6 @@ static int render_testBlitBlendMode( SDL_TextureID tface, int mode )
             return -1;
       }
    }
-
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
 
    return 0;
 }
@@ -882,9 +861,6 @@ static int render_testBlitBlend (void)
 
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* Flush all asynchronous operations */
-   SDL_RenderPresent();
 
    /* Check to see if matches. */
    if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_*).",
