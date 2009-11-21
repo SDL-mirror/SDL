@@ -175,6 +175,7 @@ typedef struct
     PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 
     /* (optional) fragment programs */
+    GLuint fragment_program_mask;
     GLuint fragment_program_UYVY;
 } GL_RenderData;
 
@@ -484,6 +485,17 @@ power_of_2(int input)
 
 //#define DEBUG_PROGRAM_COMPILE 1
 
+static void
+set_shader_error(GL_RenderData * data, const char *prefix)
+{
+    GLint pos = 0;
+    const GLubyte *errstr;
+    data->glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
+    errstr = data->glGetString(GL_PROGRAM_ERROR_STRING_ARB);
+    printf("%s: shader compile error at position %d: %s",
+           prefix, (int) pos, (const char *) errstr);
+}
+
 static GLuint
 compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
 {
@@ -540,6 +552,18 @@ compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
     return program;
 }
 
+
+/*
+ * Fragment program that implements mask semantics
+ */
+static const char *fragment_program_mask_source_code = "!!ARBfp1.0\n"
+"OUTPUT output = result.color;\n"
+"TEMP value;\n"
+"TEX value, fragment.texcoord[0], texture[0], %TEXTURETARGET%;\n"
+"MUL value, fragment.color, value;\n"
+"SGE value.a, value.a, 0.001;\n"
+"MOV output, value;\n"
+"END";
 
 /*
  * Fragment program that renders from UYVY textures.
@@ -751,7 +775,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 compile_shader(renderdata, GL_FRAGMENT_PROGRAM_ARB,
                                fragment_program_UYVY_source_code);
             if (renderdata->fragment_program_UYVY == 0) {
-                SDL_SetError("Fragment program compile error");
+                set_shader_error(renderdata, "UYVY");
                 return -1;
             }
         }
@@ -1162,6 +1186,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
+    GLuint shader = 0;
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
 
@@ -1215,6 +1240,23 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     GL_SetBlendMode(data, texture->blendMode, 0);
 
+    /* Set up the shader for the copy, we have a special one for MASK */
+    shader = texturedata->shader;
+    if (texture->blendMode == SDL_BLENDMODE_MASK && !shader) {
+        if (data->fragment_program_mask == 0) {
+            data->fragment_program_mask =
+                compile_shader(data, GL_FRAGMENT_PROGRAM_ARB,
+                               fragment_program_mask_source_code);
+            if (data->fragment_program_mask == 0) {
+                /* That's okay, we'll just miss some of the blend semantics */
+                data->fragment_program_mask = ~0;
+            }
+        }
+        if (data->fragment_program_mask != ~0) {
+            shader = data->fragment_program_mask;
+        }
+    }
+
     if (texture->scaleMode != data->scaleMode) {
         switch (texture->scaleMode) {
         case SDL_TEXTURESCALEMODE_NONE:
@@ -1235,9 +1277,9 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->scaleMode = texture->scaleMode;
     }
 
-    if (texturedata->shader != 0) {
+    if (shader) {
         data->glEnable(GL_FRAGMENT_PROGRAM_ARB);
-        data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, texturedata->shader);
+        data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, shader);
     }
 
     data->glBegin(GL_TRIANGLE_STRIP);
@@ -1251,7 +1293,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glVertex2f(0.5f + maxx, 0.5f + maxy);
     data->glEnd();
 
-    if (texturedata->shader != 0) {
+    if (shader) {
         data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
     }
 
@@ -1377,7 +1419,13 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
             if (data->GL_ARB_fragment_program_supported) {
                 data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
                 data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-                if (data->fragment_program_UYVY != 0) {
+                if (data->fragment_program_mask &&
+                    data->fragment_program_mask != ~0) {
+                    data->glDeleteProgramsARB(1,
+                                              &data->fragment_program_mask);
+                }
+                if (data->fragment_program_UYVY &&
+                    data->fragment_program_UYVY != ~0) {
                     data->glDeleteProgramsARB(1,
                                               &data->fragment_program_UYVY);
                 }
