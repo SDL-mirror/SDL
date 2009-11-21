@@ -431,7 +431,16 @@ static int render_testPrimitives (void)
    ret = SDL_SetRenderDrawColor( 5, 105, 105, SDL_ALPHA_OPAQUE );
    if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
       return -1;
-   ret = SDL_RenderLine( 0, 60, 80, 0 );
+   ret = SDL_RenderLine( 0, 0, 29, 29 );
+   if (SDL_ATassert( "SDL_RenderLine", ret == 0))
+      return -1;
+   ret = SDL_RenderLine( 29, 30, 0, 59 );
+   if (SDL_ATassert( "SDL_RenderLine", ret == 0))
+      return -1;
+   ret = SDL_RenderLine( 79, 0, 50, 29 );
+   if (SDL_ATassert( "SDL_RenderLine", ret == 0))
+      return -1;
+   ret = SDL_RenderLine( 79, 59, 50, 30 );
    if (SDL_ATassert( "SDL_RenderLine", ret == 0))
       return -1;
 
@@ -1013,7 +1022,7 @@ int test_render (void)
          goto err_cleanup;
       /* Create window. */
       wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-            80, 60, 0 );
+            80, 60, SDL_WINDOW_SHOWN );
       if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
          goto err_cleanup;
       /* Check title. */
@@ -1032,7 +1041,7 @@ int test_render (void)
          /* both add SDL_WINDOW_OPENGL flag for window, that was last used              */
          SDL_DestroyWindow(wid);
          wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-               80, 60, 0 );
+               80, 60, SDL_WINDOW_SHOWN );
          if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
             goto err_cleanup;
 
@@ -1040,10 +1049,12 @@ int test_render (void)
          ret = SDL_GetRenderDriverInfo( j, &renderer );
          if (ret != 0)
             goto err_cleanup;
+
          /* Set testcase name. */
          snprintf( msg, sizeof(msg), "Renderer %s", renderer.name );
          SDL_ATprintVerbose( 1, "    %d) %s\n", j+1, renderer.name );
          SDL_ATbegin( msg );
+
          /* Set renderer. */
          ret = SDL_CreateRenderer( wid, j, 0 );
          if (SDL_ATassert( "SDL_CreateRenderer", ret==0 ))

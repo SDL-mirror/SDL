@@ -140,7 +140,19 @@ static void surface_testPrimitives( SDL_Surface *testsur )
          SDL_MapRGB( testsur->format, 55, 55, 5 ) );
    if (SDL_ATassert( "SDL_DrawLine", ret == 0))
       return;
-   ret = SDL_DrawLine( testsur, 0, 60, 80, 0,
+   ret = SDL_DrawLine( testsur, 0, 0, 29, 29,
+         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
+   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
+      return;
+   ret = SDL_DrawLine( testsur, 29, 30, 0, 59,
+         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
+   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
+      return;
+   ret = SDL_DrawLine( testsur, 79, 0, 50, 29,
+         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
+   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
+      return;
+   ret = SDL_DrawLine( testsur, 79, 59, 50, 30,
          SDL_MapRGB( testsur->format, 5, 105, 105 ) );
    if (SDL_ATassert( "SDL_DrawLine", ret == 0))
       return;
