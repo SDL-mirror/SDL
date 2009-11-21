@@ -10,7 +10,11 @@
 #endif
 
 #define DEFAULT_PTSIZE  30
-#define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
+#ifdef __QNXNTO__
+    #define DEFAULT_FONT    "/usr/photon/font_repository/tt0003m_.ttf"
+#else
+    #define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
+#endif
 #define MAX_TEXT_LENGTH 256
 
 SDL_Surface *screen;
@@ -31,7 +35,7 @@ void usage()
 
 void InitVideo(int argc, char *argv[])
 {
-    int width = 500, height = 250;
+    int width = 640, height = 480;
     int flags = SDL_HWSURFACE;
     const char *fontname = DEFAULT_FONT;
     int fullscreen = 0;
@@ -164,6 +168,10 @@ void Redraw()
         SDL_StopTextInput();
         return;
     }
+    else
+    {
+        SDL_StartTextInput();
+    }
 
     cursorRect = markedRect;
     cursorRect.w = 2;
@@ -222,8 +230,51 @@ int main(int argc, char *argv[])
         switch (event.type)
         {
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE) {
-                done = 1;
+            switch (event.key.keysym.sym)
+            {
+                case SDLK_ESCAPE:
+                     done = 1;
+                     break;
+                case SDLK_RETURN:
+                     text[0]=0x00;
+                     Redraw();
+                     break;
+                case SDLK_BACKSPACE:
+                     {
+                         int textlen=SDL_strlen(text);
+
+                         do {
+                             if (textlen==0)
+                             {
+                                 break;
+                             }
+                             if ((text[textlen-1] & 0x80) == 0x00)
+                             {
+                                 /* One byte */
+                                 text[textlen-1]=0x00;
+                                 break;
+                             }
+                             if ((text[textlen-1] & 0xC0) == 0x80)
+                             {
+                                 /* Byte from the multibyte sequence */
+                                 text[textlen-1]=0x00;
+                                 textlen--;
+                             }
+                             if ((text[textlen-1] & 0xC0) == 0xC0)
+                             {
+                                 /* First byte of multibyte sequence */
+                                 text[textlen-1]=0x00;
+                                 break;
+                             }
+                         } while(1);
+
+                         Redraw();
+                     }
+                     break;
+            }
+
+            if (done)
+            {
                 break;
             }
 
@@ -235,15 +286,15 @@ int main(int argc, char *argv[])
             break;
 
         case SDL_TEXTINPUT:
-            if (strlen(event.text.text) == 0 || event.text.text[0] == '\n' ||
+            if (SDL_strlen(event.text.text) == 0 || event.text.text[0] == '\n' ||
                 markedRect.w < 0)
                 break;
 
             fprintf(stderr, "Keyboard %d: text input \"%s\"\n",
                     event.text.which, event.text.text);
 
-            if (strlen(text) + strlen(event.text.text) < sizeof(text))
-                strcpy(text + strlen(text), event.text.text);
+            if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
+                strcpy(text + SDL_strlen(text), event.text.text);
 
             fprintf(stderr, "text inputed: %s\n", text);
 
