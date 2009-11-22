@@ -103,7 +103,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         masks[3] = 0x00000003;
         break;
     default:
-        /* Unknown layout */
+        SDL_SetError("Unknown pixel format");
         return SDL_FALSE;
     }
 
@@ -153,7 +153,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         *Rmask = masks[3];
         break;
     default:
-        /* Unknown order */
+        SDL_SetError("Unknown pixel format");
         return SDL_FALSE;
     }
     return SDL_TRUE;
