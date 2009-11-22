@@ -73,7 +73,9 @@ static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                                void * pixels, int pitch);
+                                Uint32 format, void * pixels, int pitch);
+static int D3D_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                 Uint32 format, const void * pixels, int pitch);
 static void D3D_RenderPresent(SDL_Renderer * renderer);
 static void D3D_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -370,6 +372,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderFill = D3D_RenderFill;
     renderer->RenderCopy = D3D_RenderCopy;
     renderer->RenderReadPixels = D3D_RenderReadPixels;
+    renderer->RenderWritePixels = D3D_RenderWritePixels;
     renderer->RenderPresent = D3D_RenderPresent;
     renderer->DestroyTexture = D3D_DestroyTexture;
     renderer->DestroyRenderer = D3D_DestroyRenderer;
@@ -1150,7 +1153,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                     void * pixels, int pitch)
+                     Uint32 format, void * pixels, int pitch)
 {
     BYTE * pBytes;
     D3DLOCKED_RECT lockedRect;
@@ -1189,6 +1192,14 @@ D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     a = pBytes[index+3];
     // <--
     
+    return -1;
+}
+
+static int
+D3D_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                      Uint32 format, const void * pixels, int pitch)
+{
+    /* Work in progress */
     return -1;
 }
 
