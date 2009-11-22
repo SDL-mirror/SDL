@@ -8,7 +8,7 @@
 
 
 #include "SDL.h"
-#include "SDL_at.h"
+#include "../SDL_at.h"
 
 
 /**

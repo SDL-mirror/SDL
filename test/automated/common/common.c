@@ -8,9 +8,9 @@
 
 
 #include "SDL.h"
-#include "SDL_at.h"
+#include "../SDL_at.h"
 
-#include "common/common.h"
+#include "common.h"
 
 
 /**

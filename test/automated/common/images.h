@@ -4,17 +4,17 @@
 #  define IMAGES_H
 
 
-#include "common/common.h"
+#include "common.h"
 
 
 /*
  * Pull in images for testcases.
  */
-#include "common/img_primitives.c"
-#include "common/img_primitivesblend.c"
-#include "common/img_face.c"
-#include "common/img_blit.c"
-#include "common/img_blitblend.c"
+#include "img_primitives.c"
+#include "img_primitivesblend.c"
+#include "img_face.c"
+#include "img_blit.c"
+#include "img_blitblend.c"
 
 
 #endif /* IMAGES_H */

@@ -1,10 +1,10 @@
 
 
-CFLAGS  := -W -Wall -Wextra -g -I. `sdl-config --cflags`
+CFLAGS  := -W -Wall -Wextra -g `sdl-config --cflags`
 LDFLAGS := `sdl-config --libs`
 
 # If it doesn't pick up defaults
-#CFLAGS  := -I. -D_GNU_SOURCE=1 -D_REENTRANT -I/usr/local/include/SDL
+#CFLAGS  := -D_GNU_SOURCE=1 -D_REENTRANT -I/usr/local/include/SDL
 #LDFLAGS := -lm -ldl -lesd -lpthread
 
 SRC         	:= testsdl.c \

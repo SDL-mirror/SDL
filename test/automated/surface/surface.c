@@ -10,15 +10,15 @@
 #include "SDL.h"
 #include "SDL_surface.h"
 #include "SDL_video.h"
-#include "SDL_at.h"
+#include "../SDL_at.h"
 
-#include "common/common.h"
+#include "../common/common.h"
 
 
 /*
  * Pull in images for testcases.
  */
-#include "common/images.h"
+#include "../common/images.h"
 
 
 /*
