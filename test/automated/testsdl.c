@@ -16,17 +16,21 @@
 #include "render/render.h"
 #include "audio/audio.h"
 
+#if defined(WIN32)
+#define NO_GETOPT
+#endif
 #if defined(__QNXNTO__)
 #define NO_GETOPT_LONG 1
 #endif /* __QNXNTO__ */
 
 #include <stdio.h> /* printf */
 #include <stdlib.h> /* exit */
+#ifndef NO_GETOPT
 #include <unistd.h> /* getopt */
-#include <string.h> /* strcmp */
 #if !defined(NO_GETOPT_LONG)
 #include <getopt.h> /* getopt_long */
 #endif /* !NO_GETOPT_LONG */
+#endif /* !NO_GETOPT */
 
 
 /*
@@ -51,6 +55,11 @@ static void parse_options( int argc, char *argv[] );
 /**
  * @brief Displays program usage.
  */
+#ifdef NO_GETOPT
+static void print_usage( const char *name )
+{
+}
+#else
 #if !defined(NO_GETOPT_LONG)
 static void print_usage( const char *name )
 {
@@ -84,10 +93,16 @@ static void print_usage( const char *name )
    printf("   -h,     display this message and exit\n");
 }
 #endif /* NO_GETOPT_LONG */
+#endif /* NO_GETOPT */
 
 /**
  * @brief Handles the options.
  */
+#ifdef NO_GETOPT
+static void parse_options( int argc, char *argv[] )
+{
+}
+#else
 #if !defined(NO_GETOPT_LONG)
 static void parse_options( int argc, char *argv[] )
 {
@@ -239,6 +254,7 @@ static void parse_options( int argc, char *argv[] )
    }
 }
 #endif /* NO_GETOPT_LONG */
+#endif /* NO_GETOPT */
 
 /**
  * @brief Main entry point.
@@ -283,7 +299,7 @@ int main( int argc, char *argv[] )
             ver.major, ver.minor, ver.patch, rev );
       SDL_ATprintErr( "System is running %s and is %s endian\n",
             SDL_GetPlatform(),
-#ifdef SDL_LIL_ENDIAN
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
             "little"
 #else
             "big"

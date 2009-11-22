@@ -136,8 +136,7 @@ int SDL_ATprintErr( const char *msg, ... );
  *    @param msg printf formatted string to display.
  *    @return Number of character printed.
  */
-#define SDL_ATprint(msg, args...) \
-   SDL_ATprintVerbose( 0, msg, ## args)
+int SDL_ATprint( const char *msg, ... );
 /**
  * @brief Prints some verbose text.
  *

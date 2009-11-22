@@ -100,7 +100,7 @@ static int rwops_testGeneric( SDL_RWops *rw, int write )
    if (SDL_ATassert( "Reading with SDL_RWread", i == sizeof(hello_world)-1 ))
       return 1;
    if (SDL_ATassert( "Memory read does not match memory written",
-            memcmp( buf, hello_world, sizeof(hello_world)-1 ) == 0 ))
+            SDL_memcmp( buf, hello_world, sizeof(hello_world)-1 ) == 0 ))
       return 1;
 
    /* More seek tests. */

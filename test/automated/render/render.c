@@ -55,8 +55,6 @@ static int render_testBlitBlend (void);
  */
 static int render_compare( const char *msg, const SurfaceImage_t *s, int allowable_error )
 {
-   (void) msg;
-   (void) s;
    int ret;
    Uint8 pix[4*80*60];
    SDL_Surface *testsur;
@@ -1005,7 +1003,7 @@ int test_render (void)
       /*
        * Initialize testsuite.
        */
-      snprintf( msg, sizeof(msg) , "Rendering with %s driver", driver );
+      SDL_snprintf( msg, sizeof(msg) , "Rendering with %s driver", driver );
       SDL_ATinit( msg );
 
       /*
@@ -1018,7 +1016,7 @@ int test_render (void)
          goto err_cleanup;
       /* Check to see if it's the one we want. */
       str = SDL_GetCurrentVideoDriver();
-      if (SDL_ATassert( "SDL_GetCurrentVideoDriver", strcmp(driver,str)==0))
+      if (SDL_ATassert( "SDL_GetCurrentVideoDriver", SDL_strcmp(driver,str)==0))
          goto err_cleanup;
       /* Create window. */
       wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -1027,7 +1025,7 @@ int test_render (void)
          goto err_cleanup;
       /* Check title. */
       str = SDL_GetWindowTitle( wid );
-      if (SDL_ATassert( "SDL_GetWindowTitle", strcmp(msg,str)==0))
+      if (SDL_ATassert( "SDL_GetWindowTitle", SDL_strcmp(msg,str)==0))
          goto err_cleanup;
       /* Get renderers. */
       nr = SDL_GetNumRenderDrivers();
@@ -1051,7 +1049,7 @@ int test_render (void)
             goto err_cleanup;
 
          /* Set testcase name. */
-         snprintf( msg, sizeof(msg), "Renderer %s", renderer.name );
+         SDL_snprintf( msg, sizeof(msg), "Renderer %s", renderer.name );
          SDL_ATprintVerbose( 1, "    %d) %s\n", j+1, renderer.name );
          SDL_ATbegin( msg );
 

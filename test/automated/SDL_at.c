@@ -242,7 +242,7 @@ int SDL_ATvassert( int condition, const char *msg, ... )
    if (!condition) {
       /* Get message. */
       va_start( args, msg );
-      vsnprintf( buf, sizeof(buf), msg, args );
+      SDL_vsnprintf( buf, sizeof(buf), msg, args );
       va_end( args );
       /* Failed message. */
       SDL_ATassertFailed( buf );
@@ -274,6 +274,31 @@ int SDL_ATprintErr( const char *msg, ... )
    else {
       va_start(ap, msg);
       ret = vfprintf( stderr, msg, ap );
+      va_end(ap);
+   }
+
+   return ret;
+}
+
+
+/**
+ * @brief Displays a message.
+ */
+int SDL_ATprint( const char *msg, ... )
+{
+   va_list ap;
+   int ret;
+
+   /* Only print if not quiet. */
+   if (at_quiet)
+      return 0;
+
+   /* Make sure there is something to print. */
+   if (msg == NULL)
+      return 0;
+   else {
+      va_start(ap, msg);
+      ret = vfprintf( stdout, msg, ap );
       va_end(ap);
    }
 

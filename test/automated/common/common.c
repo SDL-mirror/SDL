@@ -42,7 +42,7 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img, int allowable_
             case 2:
             case 3:
                ret += 1;
-               printf("%d BPP not supported yet.\n",bpp);
+               /*printf("%d BPP not supported yet.\n",bpp);*/
                break;
 
             case 4:
@@ -86,9 +86,9 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img, int allowable_
       if (bpp == 4) {
          for (j=0; j<sur->h; j++) {
             for (i=0; i<sur->w; i++) {
+               Uint8 R, G, B, A;
                p  = (Uint8 *)sur->pixels + j * sur->pitch + i * bpp;
                pd = (Uint8 *)img->pixel_data + (j*img->width + i) * img->bytes_per_pixel;
-               Uint8 R, G, B, A;
 
                R = pd[0];
                G = pd[1];
