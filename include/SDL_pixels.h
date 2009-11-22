@@ -374,7 +374,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_MapRGBA(const SDL_PixelFormat * format,
                                            Uint8 a);
 
 /**
- *  \brief Maps a pixel value into the RGB components for a given pixel format.
+ *  \brief Get the RGB components from a pixel of the specified format.
  *  
  *  \sa SDL_GetRGBA
  */
@@ -383,7 +383,7 @@ extern DECLSPEC void SDLCALL SDL_GetRGB(Uint32 pixel,
                                         Uint8 * r, Uint8 * g, Uint8 * b);
 
 /**
- *  \brief Maps a pixel value into the RGBA components for a given pixel format.
+ *  \brief Get the RGBA components from a pixel of the specified format.
  *  
  *  \sa SDL_GetRGB
  */
