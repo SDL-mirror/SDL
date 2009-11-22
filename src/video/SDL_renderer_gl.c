@@ -492,7 +492,7 @@ set_shader_error(GL_RenderData * data, const char *prefix)
     const GLubyte *errstr;
     data->glGetIntegerv(GL_PROGRAM_ERROR_POSITION_ARB, &pos);
     errstr = data->glGetString(GL_PROGRAM_ERROR_STRING_ARB);
-    printf("%s: shader compile error at position %d: %s",
+    SDL_SetError("%s: shader compile error at position %d: %s",
            prefix, (int) pos, (const char *) errstr);
 }
 
