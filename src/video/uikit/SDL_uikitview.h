@@ -33,7 +33,11 @@
 #endif
 
 /* *INDENT-OFF* */
+#if SDL_IPHONE_KEYBOARD
 @interface SDL_uikitview : UIView<UITextFieldDelegate> {
+#else
+@interface SDL_uikitview : UIView {
+#endif
 		
 	SDL_Mouse mice[MAX_SIMULTANEOUS_TOUCHES];
 

@@ -141,7 +141,7 @@ typedef unsigned long uintptr_t;
 #define SDL_POWER_MACOSX 1
 
 /* enable iPhone keyboard support */
-#define SDL_IPHONE_KEYBOARD 1
+#define SDL_IPHONE_KEYBOARD 0
 
 /* Enable emulation of multiple mice through multi-touch */
 #define SDL_IPHONE_MULTIPLE_MICE 1
