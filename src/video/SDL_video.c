@@ -1490,31 +1490,35 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
     SDL_DestroyRenderer(windowID);
 
     if (index < 0) {
-        const char *override = SDL_getenv("SDL_VIDEO_RENDERER");
+        char *override = SDL_getenv("SDL_VIDEO_RENDERER");
+        int n = SDL_GetNumRenderDrivers();
+
+        if (!override && (window->flags & SDL_WINDOW_OPENGL)) {
+            override = "opengl";
+        }
         if (override) {
-            int i, n = SDL_GetNumRenderDrivers();
-            for (i = 0; i < n; ++i) {
+            for (index = 0; index < n; ++index) {
                 SDL_RenderDriver *driver =
-                    &SDL_CurrentDisplay.render_drivers[i];
+                    &SDL_CurrentDisplay.render_drivers[index];
+
                 if (SDL_strcasecmp(override, driver->info.name) == 0) {
-                    index = i;
+                    /* Create a new renderer instance */
+                    window->renderer = driver->CreateRenderer(window, flags);
                     break;
                 }
             }
-        }
-    }
-    if (index < 0) {
-        int n = SDL_GetNumRenderDrivers();
-        for (index = 0; index < n; ++index) {
-            SDL_RenderDriver *driver =
-                &SDL_CurrentDisplay.render_drivers[index];
+        } else {
+            for (index = 0; index < n; ++index) {
+                SDL_RenderDriver *driver =
+                    &SDL_CurrentDisplay.render_drivers[index];
 
-            if ((driver->info.flags & flags) == flags) {
-                /* Create a new renderer instance */
-                window->renderer = SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window, flags);
-                if (window->renderer) {
-                    /* Yay, we got one! */
-                    break;
+                if ((driver->info.flags & flags) == flags) {
+                    /* Create a new renderer instance */
+                    window->renderer = driver->CreateRenderer(window, flags);
+                    if (window->renderer) {
+                        /* Yay, we got one! */
+                        break;
+                    }
                 }
             }
         }
@@ -1528,7 +1532,6 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
                          SDL_GetNumRenderDrivers() - 1);
             return -1;
         }
-
         /* Create a new renderer instance */
         window->renderer = SDL_CurrentDisplay.render_drivers[index].CreateRenderer(window, flags);
     }
