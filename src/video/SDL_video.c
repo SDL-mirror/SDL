@@ -862,7 +862,8 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
                                   SDL_WINDOW_OPENGL |
                                   SDL_WINDOW_BORDERLESS |
                                   SDL_WINDOW_RESIZABLE |
-                                  SDL_WINDOW_INPUT_GRABBED);
+                                  SDL_WINDOW_INPUT_GRABBED |
+                                  SDL_WINDOW_FOREIGN);
     char *title = window->title;
 
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
