@@ -1493,9 +1493,16 @@ SDL_CreateRenderer(SDL_WindowID windowID, int index, Uint32 flags)
         char *override = SDL_getenv("SDL_VIDEO_RENDERER");
         int n = SDL_GetNumRenderDrivers();
 
+#if SDL_VIDEO_RENDER_OGL
         if (!override && (window->flags & SDL_WINDOW_OPENGL)) {
             override = "opengl";
         }
+#endif /* SDL_VIDEO_RENDER_OGL */
+#if SDL_VIDEO_RENDER_OGL_ES
+        if (!override && (window->flags & SDL_WINDOW_OPENGL)) {
+            override = "opengl_es";
+        }
+#endif /* SDL_VIDEO_RENDER_OGL_ES */
         if (override) {
             for (index = 0; index < n; ++index) {
                 SDL_RenderDriver *driver =
