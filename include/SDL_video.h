@@ -538,13 +538,11 @@ extern DECLSPEC SDL_WindowID SDLCALL SDL_CreateWindow(const char *title,
                                                       int h, Uint32 flags);
 
 /**
- *  \brief Create an SDL window struct from an existing native window.
+ *  \brief Create an SDL window from an existing native window.
  *  
  *  \param data A pointer to driver-dependent window creation data
  *  
  *  \return The id of the window created, or zero if window creation failed.
- *  
- *  \warning This function is NOT SUPPORTED, use at your own risk!
  *  
  *  \sa SDL_DestroyWindow()
  */
