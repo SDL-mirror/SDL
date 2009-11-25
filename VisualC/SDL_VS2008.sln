@@ -4,6 +4,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL", "SDL\SDL_VS2008.vcpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDLmain", "SDLmain\SDLmain_VS2008.vcproj", "{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CE748C1F-3C21-4825-AA6A-F895A023F7E7}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "automated", "tests\automated\automated.vcproj", "{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
+		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -38,8 +46,20 @@ Global
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|Win32.Build.0 = Release|Win32
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.ActiveCfg = Release|x64
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.Build.0 = Release|x64
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|Win32.Build.0 = Debug|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|x64.ActiveCfg = Debug|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release_NoSTDIO|Win32.ActiveCfg = Release|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release_NoSTDIO|Win32.Build.0 = Release|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release_NoSTDIO|x64.ActiveCfg = Release|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|Win32.ActiveCfg = Release|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|Win32.Build.0 = Release|Win32
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
 	EndGlobalSection
 EndGlobal
