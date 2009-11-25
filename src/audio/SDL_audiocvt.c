@@ -837,7 +837,8 @@ SDL_BuildAudioTypeCVT(SDL_AudioCVT * cvt,
             }
 
             if (filter == NULL) {
-                return -1;      /* Still no matching converter?! */
+                SDL_SetError("No conversion available for these formats");
+                return -1;
             }
         }
 
@@ -930,7 +931,8 @@ SDL_BuildAudioResampleCVT(SDL_AudioCVT * cvt, int dst_channels,
             }
 
             if (filter == NULL) {
-                return -1;      /* Still no matching converter?! */
+                SDL_SetError("No conversion available for these rates");
+                return -1;
             }
         }
 
@@ -969,16 +971,19 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
      * !!! FIXME: good in practice as it sounds in theory, though.
      */
 
-    /* there are no unsigned types over 16 bits, so catch this upfront. */
+    /* there are no unsigned types over 16 bits, so catch this up front. */
     if ((SDL_AUDIO_BITSIZE(src_fmt) > 16) && (!SDL_AUDIO_ISSIGNED(src_fmt))) {
+        SDL_SetError("Invalid source format");
         return -1;
     }
     if ((SDL_AUDIO_BITSIZE(dst_fmt) > 16) && (!SDL_AUDIO_ISSIGNED(dst_fmt))) {
+        SDL_SetError("Invalid destination format");
         return -1;
     }
 
     /* prevent possible divisions by zero, etc. */
     if ((src_rate == 0) || (dst_rate == 0)) {
+        SDL_SetError("Source or destination rate is zero");
         return -1;
     }
 #ifdef DEBUG_CONVERT
