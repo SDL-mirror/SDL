@@ -752,7 +752,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
 /**
  *  \brief Create and make active a 2D rendering context for a window.
  *  
- *  \param windowID The window used for rendering.
+ *  \param windowID The window where rendering is displayed.
  *  \param index    The index of the rendering driver to initialize, or -1 to 
  *                  initialize the first one supporting the requested flags.
  *  \param flags    ::SDL_RendererFlags.
