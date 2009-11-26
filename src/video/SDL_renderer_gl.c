@@ -707,7 +707,7 @@ convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
             *type = GL_UNSIGNED_SHORT_8_8_REV_APPLE;
 #endif
         } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
-            *internalFormat = GL_RGB;
+            *internalFormat = GL_YCBCR_MESA;
             *format = GL_YCBCR_MESA;
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
             *type = GL_UNSIGNED_SHORT_8_8_MESA;
@@ -732,7 +732,7 @@ convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
             *type = GL_UNSIGNED_SHORT_8_8_APPLE;
 #endif
         } else if (renderdata->GL_MESA_ycbcr_texture_supported) {
-            *internalFormat = GL_RGB;
+            *internalFormat = GL_YCBCR_MESA;
             *format = GL_YCBCR_MESA;
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
             *type = GL_UNSIGNED_SHORT_8_8_REV_MESA;
