@@ -228,6 +228,10 @@ PixelFormatToD3DFMT(Uint32 format)
         return D3DFMT_A8R8G8B8;
     case SDL_PIXELFORMAT_ARGB2101010:
         return D3DFMT_A2R10G10B10;
+    case SDL_PIXELFORMAT_YV12:
+        return MAKEFOURCC('Y','V','1','2');
+    case SDL_PIXELFORMAT_IYUV:
+        return MAKEFOURCC('I','4','2','0');
     case SDL_PIXELFORMAT_UYVY:
         return D3DFMT_UYVY;
     case SDL_PIXELFORMAT_YUY2:
