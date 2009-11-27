@@ -411,7 +411,7 @@ typedef struct _SDL_Haptic SDL_Haptic;
 typedef struct SDL_HapticDirection
 {
     Uint8 type;         /**< The type of encoding. */
-    Uint16 dir[3];      /**< The encoded direction. */
+    Sint32 dir[3];      /**< The encoded direction. */
 } SDL_HapticDirection;
 
 
