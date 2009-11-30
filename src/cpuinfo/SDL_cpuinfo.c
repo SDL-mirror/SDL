@@ -153,17 +153,17 @@ CPU_getCPUIDFeatures(void)
 /* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        pushl   %%ebx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
+"        pushl   %%ebx                                                 \n"
 "        cpuid                       # Get and save vendor ID          \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
 "        jl      1f                  # We dont have the CPUID instruction\n"
 "        xorl    %%eax,%%eax                                           \n"
 "        incl    %%eax                                                 \n"
 "        cpuid                       # Get family/model/stepping/features\n"
+"        popl    %%ebx                                                 \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        popl    %%ebx\n"
 	: "=m" (features)
 	:
 	: "%eax", "%ecx", "%edx"
@@ -173,12 +173,10 @@ CPU_getCPUIDFeatures(void)
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        pushq   %%rbx\n"
 "        cpuid                       # Get and save vendor ID          \n"
-"        popq    %%rbx\n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
 "        jl      1f                  # We dont have the CPUID instruction\n"
 "        xorl    %%eax,%%eax                                           \n"
 "        incl    %%eax                                                 \n"
-"        pushq   %%rbx\n"
 "        cpuid                       # Get family/model/stepping/features\n"
 "        popq    %%rbx\n"
 "        movl    %%edx,%0                                              \n"
@@ -190,32 +188,34 @@ CPU_getCPUIDFeatures(void)
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
         xor     eax, eax            ; Set up for CPUID instruction
+        push    ebx
         cpuid                       ; Get and save vendor ID
         cmp     eax, 1              ; Make sure 1 is valid input for CPUID
         jl      done                ; We dont have the CPUID instruction
         xor     eax, eax
         inc     eax
         cpuid                       ; Get family/model/stepping/features
+        pop     ebx
         mov     features, edx
 done:
 	}
 #elif defined(__sun) && (defined(__i386) || defined(__amd64))
 	    __asm(
-"        movl    %ebx,%edi\n"
 "        xorl    %eax,%eax         \n"
+"        pushl   %ebx              \n"
 "        cpuid                     \n"
 "        cmpl    $1,%eax           \n"
 "        jl      1f                \n"
 "        xorl    %eax,%eax         \n"
 "        incl    %eax              \n"
 "        cpuid                     \n"
+"        popl    %ebx              \n"
 #ifdef __i386
 "        movl    %edx,-8(%ebp)     \n"
 #else
 "        movl    %edx,-8(%rbp)     \n"
 #endif
 "1:                                \n"
-"        movl    %edi,%ebx\n" );
 #endif
 /* *INDENT-ON* */
     return features;
@@ -228,16 +228,16 @@ CPU_getCPUIDFeaturesExt(void)
 /* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
 	__asm__ (
-"        pushl   %%ebx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
+"        pushl   %%ebx                                                 \n"
 "        cpuid                       # Get extended function limit     \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
 "        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
 "        cpuid                       # and get the information         \n"
+"        popl    %%ebx                                                 \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        popl    %%ebx\n"
 	: "=m" (features)
 	:
 	: "%eax", "%ecx", "%edx"
@@ -245,15 +245,13 @@ CPU_getCPUIDFeaturesExt(void)
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
-"        pushq   %%rbx\n"
+"        pushq   %%rbx                                                 \n"
 "        cpuid                       # Get extended function limit     \n"
-"        popq    %%rbx\n"
 "        cmpl    $0x80000001,%%eax                                     \n"
 "        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
-"        pushq   %%rbx\n"
 "        cpuid                       # and get the information         \n"
-"        popq    %%rbx\n"
+"        popq    %%rbx                                                 \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
 	: "=m" (features)
@@ -263,30 +261,32 @@ CPU_getCPUIDFeaturesExt(void)
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 	__asm {
         mov     eax,80000000h       ; Query for extended functions
+        push    ebx
         cpuid                       ; Get extended function limit
         cmp     eax,80000001h
         jl      done                ; Nope, we dont have function 800000001h
         mov     eax,80000001h       ; Setup extended function 800000001h
         cpuid                       ; and get the information
+        pop     ebx
         mov     features,edx
 done:
 	}
 #elif defined(__sun) && ( defined(__i386) || defined(__amd64) )
 	    __asm (
-"        movl    %ebx,%edi\n"
 "        movl    $0x80000000,%eax \n"
+"        pushl   %ebx             \n"
 "        cpuid                    \n"
 "        cmpl    $0x80000001,%eax \n"
 "        jl      1f               \n"
 "        movl    $0x80000001,%eax \n"
 "        cpuid                    \n"
+"        popl    %ebx             \n"
 #ifdef __i386
-"        movl    %edx,-8(%ebp)   \n"
+"        movl    %edx,-8(%ebp)    \n"
 #else
-"        movl    %edx,-8(%rbp)   \n"
+"        movl    %edx,-8(%rbp)    \n"
 #endif
 "1:                               \n"
-"        movl    %edi,%ebx\n"
 	    );
 #endif
 /* *INDENT-ON* */
