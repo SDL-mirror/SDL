@@ -170,17 +170,19 @@ CPU_getCPUIDFeatures(void)
 	);
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
-"        pushq   %%rbx\n"
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
+"        pushq   %%rbx\n"
 "        cpuid                       # Get and save vendor ID          \n"
+"        popq    %%rbx\n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
 "        jl      1f                  # We dont have the CPUID instruction\n"
 "        xorl    %%eax,%%eax                                           \n"
 "        incl    %%eax                                                 \n"
+"        pushq   %%rbx\n"
 "        cpuid                       # Get family/model/stepping/features\n"
+"        popq    %%rbx\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        popq    %%rbx\n"
 	: "=m" (features)
 	:
 	: "%rax", "%rcx", "%rdx"
@@ -242,16 +244,18 @@ CPU_getCPUIDFeaturesExt(void)
 	);
 #elif defined(__GNUC__) && defined (__x86_64__)
 	__asm__ (
-"        pushq   %%rbx\n"
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
+"        pushq   %%rbx\n"
 "        cpuid                       # Get extended function limit     \n"
+"        popq    %%rbx\n"
 "        cmpl    $0x80000001,%%eax                                     \n"
 "        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
+"        pushq   %%rbx\n"
 "        cpuid                       # and get the information         \n"
+"        popq    %%rbx\n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
-"        popq    %%rbx\n"
 	: "=m" (features)
 	:
 	: "%rax", "%rcx", "%rdx"
