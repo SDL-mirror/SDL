@@ -160,7 +160,7 @@ Cocoa_InitModes(_THIS)
         SDL_DisplayMode mode;
         CFDictionaryRef moderef;
 
-        if (CGDisplayIsInMirrorSet(displays[i])) {
+        if (CGDisplayMirrorsDisplay(displays[i]) != kCGNullDirectDisplay) {
             continue;
         }
         moderef = CGDisplayCurrentMode(displays[i]);
