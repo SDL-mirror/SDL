@@ -413,12 +413,11 @@ extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_D
 extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
 extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
-extern int SDL_SetDisplayPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors);
-extern int SDL_GetDisplayPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors);
-extern void SDL_AddRenderDriver(SDL_VideoDisplay *display, const SDL_RenderDriver * driver);
-
+extern int SDL_SetPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors);
+extern int SDL_GetPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors);
 extern int SDL_SetGammaRampForDisplay(SDL_VideoDisplay * display, const Uint16 * red, const Uint16 * green, const Uint16 * blue);
 extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, Uint16 * green, Uint16 * blue);
+extern void SDL_AddRenderDriver(SDL_VideoDisplay *display, const SDL_RenderDriver * driver);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 extern SDL_Window *SDL_GetWindowFromID(SDL_WindowID windowID);

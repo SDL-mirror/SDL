@@ -720,7 +720,7 @@ SDL_GetWindowDisplayMode(SDL_WindowID windowID, SDL_DisplayMode * mode)
 }
 
 int
-SDL_SetDisplayPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors)
+SDL_SetPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors)
 {
     SDL_Palette *palette;
     int status = 0;
@@ -747,11 +747,11 @@ SDL_SetDisplayPalette(const SDL_Color * colors, int firstcolor, int ncolors)
         SDL_UninitializedVideo();
         return -1;
     }
-    return SDL_SetDisplayPaletteForDisplay(&SDL_CurrentDisplay, colors, firstcolor, ncolors);
+    return SDL_SetPaletteForDisplay(&SDL_CurrentDisplay, colors, firstcolor, ncolors);
 }
 
 int
-SDL_GetDisplayPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors)
+SDL_GetPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors)
 {
     SDL_Palette *palette;
 
@@ -778,7 +778,7 @@ SDL_GetDisplayPalette(SDL_Color * colors, int firstcolor, int ncolors)
         SDL_UninitializedVideo();
         return -1;
     }
-    return SDL_GetDisplayPaletteForDisplay(&SDL_CurrentDisplay, colors, firstcolor, ncolors);
+    return SDL_GetPaletteForDisplay(&SDL_CurrentDisplay, colors, firstcolor, ncolors);
 }
 
 SDL_WindowID
