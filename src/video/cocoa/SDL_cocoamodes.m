@@ -139,7 +139,7 @@ Cocoa_InitModes(_THIS)
     CGDisplayErr result;
     CGDirectDisplayID *displays;
     CGDisplayCount numDisplays;
-    int i;
+    int pass, i;
 
     result = CGGetOnlineDisplayList(0, NULL, &numDisplays);
     if (result != kCGErrorSuccess) {
@@ -154,35 +154,48 @@ Cocoa_InitModes(_THIS)
         return;
     }
 
-    for (i = 0; i < numDisplays; ++i) {
-        SDL_VideoDisplay display;
-        SDL_DisplayData *displaydata;
-        SDL_DisplayMode mode;
-        CFDictionaryRef moderef;
+    /* Pick up the primary display in the first pass, then get the rest */
+    for (pass = 0; pass < 2; ++pass) {
+        for (i = 0; i < numDisplays; ++i) {
+            SDL_VideoDisplay display;
+            SDL_DisplayData *displaydata;
+            SDL_DisplayMode mode;
+            CFDictionaryRef moderef;
 
-        if (CGDisplayMirrorsDisplay(displays[i]) != kCGNullDirectDisplay) {
-            continue;
-        }
-        moderef = CGDisplayCurrentMode(displays[i]);
-        if (!moderef) {
-            continue;
-        }
+            if (pass == 0) {
+                if (!CGDisplayIsMain(displays[i])) {
+                    continue;
+                }
+            } else {
+                if (CGDisplayIsMain(displays[i])) {
+                    continue;
+                }
+            }
 
-        displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
-        if (!displaydata) {
-            continue;
-        }
-        displaydata->display = displays[i];
+            if (CGDisplayMirrorsDisplay(displays[i]) != kCGNullDirectDisplay) {
+                continue;
+            }
+            moderef = CGDisplayCurrentMode(displays[i]);
+            if (!moderef) {
+                continue;
+            }
 
-        SDL_zero(display);
-        if (!GetDisplayMode (moderef, &mode)) {
-            SDL_free(displaydata);
-            continue;
+            displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
+            if (!displaydata) {
+                continue;
+            }
+            displaydata->display = displays[i];
+
+            SDL_zero(display);
+            if (!GetDisplayMode (moderef, &mode)) {
+                SDL_free(displaydata);
+                continue;
+            }
+            display.desktop_mode = mode;
+            display.current_mode = mode;
+            display.driverdata = displaydata;
+            SDL_AddVideoDisplay(&display);
         }
-        display.desktop_mode = mode;
-        display.current_mode = mode;
-        display.driverdata = displaydata;
-        SDL_AddVideoDisplay(&display);
     }
     SDL_stack_free(displays);
 }
