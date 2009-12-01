@@ -1488,8 +1488,9 @@ SDL_DestroyWindow(SDL_WindowID windowID)
     if (!_this) {
         return;
     }
+
     /* Restore video mode, etc. */
-    SDL_SendWindowEvent(windowID, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+    SDL_SetWindowFullscreen(windowID, 0);
 
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
