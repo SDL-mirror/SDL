@@ -50,7 +50,8 @@ extern "C" {
  *  \sa SDL_GetDesktopDisplayMode()
  *  \sa SDL_GetCurrentDisplayMode()
  *  \sa SDL_GetClosestDisplayMode()
- *  \sa SDL_SetDisplayMode()
+ *  \sa SDL_SetWindowDisplayMode()
+ *  \sa SDL_GetWindowDisplayMode()
  */
 typedef struct
 {
@@ -427,23 +428,25 @@ extern DECLSPEC SDL_DisplayMode *SDLCALL SDL_GetClosestDisplayMode(const
 
 /**
  *  \brief Set the display mode used when a fullscreen window is visible
- *         on the currently selected display.
+ *         on the currently selected display.  By default the window's
+ *         dimensions and the desktop format and refresh rate are used.
  *  
- *  \param mode The mode to use, or NULL for the desktop mode.
+ *  \param mode The mode to use, or NULL for the default mode.
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
  *  
  *  \sa SDL_SetWindowFullscreen()
  */
-extern DECLSPEC int SDLCALL SDL_SetFullscreenDisplayMode(const SDL_DisplayMode
+extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_WindowID windowID,
+                                                     const SDL_DisplayMode
                                                          * mode);
 
 /**
  *  \brief Fill in information about the display mode used when a fullscreen
  *         window is visible on the currently selected display.
  */
-extern DECLSPEC int SDLCALL SDL_GetFullscreenDisplayMode(SDL_DisplayMode *
-                                                         mode);
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_WindowID windowID,
+                                                     SDL_DisplayMode * mode);
 
 /**
  *  \brief Set the palette entries for indexed display modes.
@@ -680,7 +683,7 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_WindowID windowID);
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
  *  
- *  \sa SDL_SetFullscreenDisplayMode()
+ *  \sa SDL_WindowDisplayMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_WindowID windowID,
                                                     int fullscreen);

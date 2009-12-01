@@ -190,18 +190,18 @@ Cocoa_InitModes(_THIS)
 static void
 AddDisplayMode(const void *moderef, void *context)
 {
-    SDL_VideoDevice *_this = (SDL_VideoDevice *) context;
+    SDL_VideoDisplay *display = (SDL_VideoDisplay *) context;
     SDL_DisplayMode mode;
 
     if (GetDisplayMode(moderef, &mode)) {
-        SDL_AddDisplayMode(_this->current_display, &mode);
+        SDL_AddDisplayMode(display, &mode);
     }
 }
 
 void
-Cocoa_GetDisplayModes(_THIS)
+Cocoa_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
-    SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
     CFArrayRef modes;
     CFRange range;
 
@@ -211,13 +211,13 @@ Cocoa_GetDisplayModes(_THIS)
     }
     range.location = 0;
     range.length = CFArrayGetCount(modes);
-    CFArrayApplyFunction(modes, range, AddDisplayMode, _this);
+    CFArrayApplyFunction(modes, range, AddDisplayMode, display);
 }
 
 int
-Cocoa_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode->driverdata;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
     CGError result;
@@ -279,21 +279,17 @@ ERR_NO_CAPTURE:
 void
 Cocoa_QuitModes(_THIS)
 {
-    int i, saved_display;
+    int i;
 
-    saved_display = _this->current_display;
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
 
         if (display->current_mode.driverdata != display->desktop_mode.driverdata) {
-            _this->current_display = i;
-            Cocoa_SetDisplayMode(_this, &display->desktop_mode);
+            Cocoa_SetDisplayMode(_this, display, &display->desktop_mode);
         }
     }
     CGReleaseAllDisplays();
     ShowMenuBar();
-
-    _this->current_display = saved_display;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

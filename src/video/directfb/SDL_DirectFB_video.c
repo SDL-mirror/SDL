@@ -56,11 +56,6 @@ static void DirectFB_VideoQuit(_THIS);
 static int DirectFB_Available(void);
 static SDL_VideoDevice *DirectFB_CreateDevice(int devindex);
 
-#if 0
-static int DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
-static int DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
-#endif
-
 VideoBootStrap DirectFB_bootstrap = {
     "directfb", "DirectFB",
     DirectFB_Available, DirectFB_CreateDevice
@@ -103,13 +98,6 @@ DirectFB_CreateDevice(int devindex)
     device->VideoQuit = DirectFB_VideoQuit;
     device->GetDisplayModes = DirectFB_GetDisplayModes;
     device->SetDisplayMode = DirectFB_SetDisplayMode;
-#if 0
-    device->SetDisplayGammaRamp = DirectFB_SetDisplayGammaRamp;
-    device->GetDisplayGammaRamp = DirectFB_GetDisplayGammaRamp;
-#else
-    device->SetDisplayGammaRamp = NULL;
-    device->GetDisplayGammaRamp = NULL;
-#endif
     device->PumpEvents = DirectFB_PumpEventsWindow;
     device->CreateWindow = DirectFB_CreateWindow;
     device->CreateWindowFrom = DirectFB_CreateWindowFrom;
@@ -300,17 +288,3 @@ DirectFB_VideoQuit(_THIS)
 
     devdata->initialized = 0;
 }
-
-#if 0
-static int
-DirectFB_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
-{
-    return -1;
-}
-
-static int
-DirectFB_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
-{
-    return -1;
-}
-#endif

@@ -60,6 +60,8 @@ gf_addinputdevices(_THIS)
     uint32_t it;
 
     for (it = 0; it < _this->num_displays; it++) {
+        SDL_VideoDisplay *display = &_this->displays[it];
+
         /* Clear SDL mouse structure */
         SDL_memset(&gf_mouse, 0x00, sizeof(struct SDL_Mouse));
 
@@ -81,7 +83,7 @@ gf_addinputdevices(_THIS)
         gf_mouse.FreeMouse = gf_freemouse;
 
         /* Get display data */
-        didata = (SDL_DisplayData *) _this->displays[it].driverdata;
+        didata = (SDL_DisplayData *) display->driverdata;
 
         /* Store SDL_DisplayData pointer in the mouse driver internals */
         mdata->didata = didata;

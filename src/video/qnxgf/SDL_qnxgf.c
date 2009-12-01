@@ -522,12 +522,8 @@ qnxgf_videoinit(_THIS)
         }
 
         /* Get all display modes for this display */
-        _this->current_display = it;
-        qnxgf_getdisplaymodes(_this);
+        qnxgf_getdisplaymodes(_this, display);
     }
-
-    /* Restore default display */
-    _this->current_display = 0;
 
     /* Add GF renderer to SDL */
     gf_addrenderdriver(_this);
@@ -614,10 +610,9 @@ qnxgf_videoquit(_THIS)
 }
 
 void
-qnxgf_getdisplaymodes(_THIS)
+qnxgf_getdisplaymodes(_THIS, SDL_VideoDisplay * display)
 {
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_DisplayMode mode;
     gf_modeinfo_t modeinfo;
     uint32_t it = 0;
@@ -653,7 +648,7 @@ qnxgf_getdisplaymodes(_THIS)
                     mode.format =
                         qnxgf_gf_to_sdl_pixelformat(modeinfo.primary_format);
                     mode.driverdata = NULL;
-                    SDL_AddDisplayMode(_this->current_display, &mode);
+                    SDL_AddDisplayMode(display, &mode);
 
                     /* If mode is RGBA8888, add the same mode as RGBx888 */
                     if (modeinfo.primary_format == GF_FORMAT_BGRA8888) {
@@ -662,7 +657,7 @@ qnxgf_getdisplaymodes(_THIS)
                         mode.refresh_rate = generic_mode[jt].refresh_rate;
                         mode.format = SDL_PIXELFORMAT_RGB888;
                         mode.driverdata = NULL;
-                        SDL_AddDisplayMode(_this->current_display, &mode);
+                        SDL_AddDisplayMode(display, &mode);
                     }
                     /* If mode is RGBA1555, add the same mode as RGBx555 */
                     if (modeinfo.primary_format == GF_FORMAT_PACK_ARGB1555) {
@@ -671,7 +666,7 @@ qnxgf_getdisplaymodes(_THIS)
                         mode.refresh_rate = generic_mode[jt].refresh_rate;
                         mode.format = SDL_PIXELFORMAT_RGB555;
                         mode.driverdata = NULL;
-                        SDL_AddDisplayMode(_this->current_display, &mode);
+                        SDL_AddDisplayMode(display, &mode);
                     }
 
                     jt++;
@@ -689,7 +684,7 @@ qnxgf_getdisplaymodes(_THIS)
                             qnxgf_gf_to_sdl_pixelformat(modeinfo.
                                                         primary_format);
                         mode.driverdata = NULL;
-                        SDL_AddDisplayMode(_this->current_display, &mode);
+                        SDL_AddDisplayMode(display, &mode);
 
                         /* If mode is RGBA8888, add the same mode as RGBx888 */
                         if (modeinfo.primary_format == GF_FORMAT_BGRA8888) {
@@ -698,7 +693,7 @@ qnxgf_getdisplaymodes(_THIS)
                             mode.refresh_rate = modeinfo.refresh[jt];
                             mode.format = SDL_PIXELFORMAT_RGB888;
                             mode.driverdata = NULL;
-                            SDL_AddDisplayMode(_this->current_display, &mode);
+                            SDL_AddDisplayMode(display, &mode);
                         }
                         /* If mode is RGBA1555, add the same mode as RGBx555 */
                         if (modeinfo.primary_format ==
@@ -708,7 +703,7 @@ qnxgf_getdisplaymodes(_THIS)
                             mode.refresh_rate = modeinfo.refresh[jt];
                             mode.format = SDL_PIXELFORMAT_RGB555;
                             mode.driverdata = NULL;
-                            SDL_AddDisplayMode(_this->current_display, &mode);
+                            SDL_AddDisplayMode(display, &mode);
                         }
 
                         jt++;
@@ -731,10 +726,9 @@ qnxgf_getdisplaymodes(_THIS)
 }
 
 int
-qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode)
+qnxgf_setdisplaymode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     uint32_t refresh_rate = 0;
     int status;
 
@@ -760,15 +754,15 @@ qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode)
         tempmode.refresh_rate = 0x0000FFFF;
 
         /* Check if window width and height matches one of our modes */
-        for (it = 0; it < SDL_CurrentDisplay.num_display_modes; it++) {
-            if ((SDL_CurrentDisplay.display_modes[it].w == mode->w) &&
-                (SDL_CurrentDisplay.display_modes[it].h == mode->h) &&
-                (SDL_CurrentDisplay.display_modes[it].format == mode->format))
+        for (it = 0; it < display->num_display_modes; it++) {
+            if ((display->display_modes[it].w == mode->w) &&
+                (display->display_modes[it].h == mode->h) &&
+                (display->display_modes[it].format == mode->format))
             {
                 /* Find the lowest refresh rate available */
                 if (tempmode.refresh_rate >
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                 }
             }
         }
@@ -790,21 +784,21 @@ qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode)
         tempmode.refresh_rate = 0x0000FFFF;
 
         /* Check if window width and height matches one of our modes */
-        for (it = 0; it < SDL_CurrentDisplay.num_display_modes; it++) {
-            if ((SDL_CurrentDisplay.display_modes[it].w == mode->w) &&
-                (SDL_CurrentDisplay.display_modes[it].h == mode->h) &&
-                (SDL_CurrentDisplay.display_modes[it].format == mode->format))
+        for (it = 0; it < display->num_display_modes; it++) {
+            if ((display->display_modes[it].w == mode->w) &&
+                (display->display_modes[it].h == mode->h) &&
+                (display->display_modes[it].format == mode->format))
             {
                 /* Find the lowest refresh rate available */
                 if (tempmode.refresh_rate >
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                 }
 
                 /* Check if requested refresh rate found */
                 if (refresh_rate ==
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                     break;
                 }
             }
@@ -928,36 +922,33 @@ qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode)
 }
 
 int
-qnxgf_setdisplaypalette(_THIS, SDL_Palette * palette)
+qnxgf_setdisplaypalette(_THIS, SDL_VideoDisplay * display, SDL_Palette * palette)
 {
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
 
     /* QNX GF doesn't have support for global palette changing, but we */
     /* could store it for usage in future */
 
-    /* Setting display palette operation has been failed */
+    SDL_Unsupported();
     return -1;
 }
 
 int
-qnxgf_getdisplaypalette(_THIS, SDL_Palette * palette)
+qnxgf_getdisplaypalette(_THIS, SDL_VideoDisplay * display, SDL_Palette * palette)
 {
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
 
     /* We can't provide current palette settings and looks like SDL          */
     /* do not call this function also, in such case this function returns -1 */
 
-    /* Getting display palette operation has been failed */
+    SDL_Unsupported();
     return -1;
 }
 
 int
-qnxgf_setdisplaygammaramp(_THIS, Uint16 * ramp)
+qnxgf_setdisplaygammaramp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp)
 {
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     int status;
 
     /* Setup gamma ramp, for each color channel */
@@ -974,12 +965,12 @@ qnxgf_setdisplaygammaramp(_THIS, Uint16 * ramp)
 }
 
 int
-qnxgf_getdisplaygammaramp(_THIS, Uint16 * ramp)
+qnxgf_getdisplaygammaramp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp)
 {
     /* TODO: We need to return previous gamma set           */
     /*       Also we need some initial fake gamma to return */
 
-    /* Getting display gamma ramp operation has been failed */
+    SDL_Unsupported();
     return -1;
 }
 
@@ -987,8 +978,8 @@ int
 qnxgf_createwindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *wdata;
     int32_t status;
 
@@ -1002,15 +993,15 @@ qnxgf_createwindow(_THIS, SDL_Window * window)
         mode.refresh_rate = 0x0000FFFF;
 
         /* Check if window width and height matches one of our modes */
-        for (it = 0; it < SDL_CurrentDisplay.num_display_modes; it++) {
-            if ((SDL_CurrentDisplay.display_modes[it].w == window->w) &&
-                (SDL_CurrentDisplay.display_modes[it].h == window->h) &&
-                (SDL_CurrentDisplay.display_modes[it].format ==
-                 SDL_CurrentDisplay.desktop_mode.format)) {
+        for (it = 0; it < display->num_display_modes; it++) {
+            if ((display->display_modes[it].w == window->w) &&
+                (display->display_modes[it].h == window->h) &&
+                (display->display_modes[it].format ==
+                 display->desktop_mode.format)) {
                 /* Find the lowest refresh rate available */
                 if (mode.refresh_rate >
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    mode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    mode = display->display_modes[it];
                 }
             }
         }
@@ -1164,7 +1155,7 @@ qnxgf_destroywindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
 
     if (wdata != NULL) {
@@ -1318,7 +1309,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;

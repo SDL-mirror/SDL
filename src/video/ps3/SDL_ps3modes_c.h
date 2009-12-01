@@ -25,8 +25,8 @@
 #define _SDL_ps3modes_h
 
 extern void PS3_InitModes(_THIS);
-extern void PS3_GetDisplayModes(_THIS);
-extern int PS3_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void PS3_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
+extern int PS3_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void PS3_QuitModes(_THIS);
 
 #endif /* SDL_ps3modes_h */

@@ -41,7 +41,6 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     if (!data) {
         return SDL_FALSE;
     }
-    SDL_memcpy(data->DeviceName, deviceName, sizeof(data->DeviceName));
     data->DeviceMode = devmode;
     data->DeviceMode.dmFields =
         (DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT | DM_DISPLAYFREQUENCY |
@@ -196,9 +195,9 @@ WIN_InitModes(_THIS)
 }
 
 void
-WIN_GetDisplayModes(_THIS)
+WIN_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
-    SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
     DWORD i;
     SDL_DisplayMode mode;
 
@@ -207,15 +206,16 @@ WIN_GetDisplayModes(_THIS)
             break;
         }
         if (mode.format != SDL_PIXELFORMAT_UNKNOWN)
-            if (!SDL_AddDisplayMode(_this->current_display, &mode)) {
+            if (!SDL_AddDisplayMode(display, &mode)) {
                 SDL_free(mode.driverdata);
             }
     }
 }
 
 int
-WIN_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+WIN_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode->driverdata;
     LONG status;
 
@@ -228,8 +228,8 @@ WIN_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 #endif
 
     status =
-        ChangeDisplaySettingsEx(data->DeviceName, &data->DeviceMode, NULL,
-                                CDS_FULLSCREEN, NULL);
+        ChangeDisplaySettingsEx(displaydata->DeviceName, &data->DeviceMode,
+                                NULL, CDS_FULLSCREEN, NULL);
     if (status == DISP_CHANGE_SUCCESSFUL) {
         return 0;
     } else {

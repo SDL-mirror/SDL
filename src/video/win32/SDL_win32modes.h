@@ -31,13 +31,12 @@ typedef struct
 
 typedef struct
 {
-    TCHAR DeviceName[32];
     DEVMODE DeviceMode;
 } SDL_DisplayModeData;
 
 extern void WIN_InitModes(_THIS);
-extern void WIN_GetDisplayModes(_THIS);
-extern int WIN_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void WIN_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
+extern int WIN_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void WIN_QuitModes(_THIS);
 
 #endif /* _SDL_win32modes_h */

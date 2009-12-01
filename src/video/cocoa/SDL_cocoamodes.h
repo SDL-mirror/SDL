@@ -35,8 +35,8 @@ typedef struct
 } SDL_DisplayModeData;
 
 extern void Cocoa_InitModes(_THIS);
-extern void Cocoa_GetDisplayModes(_THIS);
-extern int Cocoa_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void Cocoa_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
+extern int Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void Cocoa_QuitModes(_THIS);
 
 #endif /* _SDL_cocoamodes_h */

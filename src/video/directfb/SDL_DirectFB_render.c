@@ -234,7 +234,7 @@ DirectFB_AddRenderDriver(_THIS)
 {
     int i;
     for (i = 0; i < _this->num_displays; i++)
-        SDL_AddRenderDriver(i, &DirectFB_RenderDriver);
+        SDL_AddRenderDriver(&_this->displays[i], &DirectFB_RenderDriver);
 }
 
 static int
@@ -264,6 +264,8 @@ DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
     SDL_DFB_CHECKERR(surfpal->SetEntries(surfpal, entries, ncolors, 0));
     return 0;
   error:
+#else
+    SDL_Unsupported();
 #endif
     return -1;
 }

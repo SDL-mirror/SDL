@@ -124,7 +124,7 @@ X11_TrackColormap(Display * display, int scrNum, Colormap colormap,
    cool. If not, then we just fail  */
 
 int
-X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
+X11_SetDisplayGammaRamp(_THIS, SDL_VideoDisplay * sdl_display, Uint16 * ramp)
 {
     Visual *visual;
     Display *display;
@@ -214,7 +214,7 @@ X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp)
 }
 
 int
-X11_GetDisplayGammaRamp(_THIS, Uint16 * ramp)
+X11_GetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp)
 {
     int i;
 

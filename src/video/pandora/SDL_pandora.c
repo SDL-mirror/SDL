@@ -108,10 +108,6 @@ PND_create()
     device->VideoQuit = PND_videoquit;
     device->GetDisplayModes = PND_getdisplaymodes;
     device->SetDisplayMode = PND_setdisplaymode;
-    device->SetDisplayPalette = PND_setdisplaypalette;
-    device->GetDisplayPalette = PND_getdisplaypalette;
-    device->SetDisplayGammaRamp = PND_setdisplaygammaramp;
-    device->GetDisplayGammaRamp = PND_getdisplaygammaramp;
     device->CreateWindow = PND_createwindow;
     device->CreateWindowFrom = PND_createwindowfrom;
     device->SetWindowTitle = PND_setwindowtitle;
@@ -191,52 +187,15 @@ PND_videoquit(_THIS)
 }
 
 void
-PND_getdisplaymodes(_THIS)
+PND_getdisplaymodes(_THIS, SDL_VideoDisplay * display)
 {
 
 }
 
 int
-PND_setdisplaymode(_THIS, SDL_DisplayMode * mode)
+PND_setdisplaymode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     return 0;
-}
-
-int
-PND_setdisplaypalette(_THIS, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Setting display palette operation has been failed */
-    return -1;
-}
-
-int
-PND_getdisplaypalette(_THIS, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Getting display palette operation has been failed */
-    return -1;
-}
-
-int
-PND_setdisplaygammaramp(_THIS, Uint16 * ramp)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Setting display gamma ramp operation has been failed */
-    return -1;
-}
-
-int
-PND_getdisplaygammaramp(_THIS, Uint16 * ramp)
-{
-    /* Getting display gamma ramp operation has been failed */
-    return -1;
 }
 
 int
@@ -458,7 +417,7 @@ PND_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;
@@ -857,7 +816,7 @@ PND_gl_swapwindow(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
 
 
     if (phdata->egl_initialized != SDL_TRUE) {

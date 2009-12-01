@@ -139,6 +139,8 @@ struct SDL_Window
     int display;
     SDL_Renderer *renderer;
 
+    SDL_DisplayMode fullscreen_mode;
+
     void *userdata;
     void *driverdata;
 };
@@ -158,7 +160,6 @@ struct SDL_VideoDisplay
     SDL_DisplayMode *display_modes;
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
-    SDL_DisplayMode fullscreen_mode;
     SDL_Palette *palette;
 
     Uint16 *gamma;
@@ -213,7 +214,7 @@ struct SDL_VideoDevice
      * Get a list of the available display modes. e.g.
      * SDL_AddDisplayMode(_this->current_display, mode)
      */
-    void (*GetDisplayModes) (_THIS);
+    void (*GetDisplayModes) (_THIS, SDL_VideoDisplay * display);
 
     /*
      * Setting the display mode is independent of creating windows, so
@@ -221,19 +222,19 @@ struct SDL_VideoDevice
      * their data updated accordingly, including the display surfaces
      * associated with them.
      */
-    int (*SetDisplayMode) (_THIS, SDL_DisplayMode * mode);
+    int (*SetDisplayMode) (_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 
     /* Set the color entries of the display palette */
-    int (*SetDisplayPalette) (_THIS, SDL_Palette * palette);
+    int (*SetDisplayPalette) (_THIS, SDL_VideoDisplay * display, SDL_Palette * palette);
 
     /* Get the color entries of the display palette */
-    int (*GetDisplayPalette) (_THIS, SDL_Palette * palette);
+    int (*GetDisplayPalette) (_THIS, SDL_VideoDisplay * display, SDL_Palette * palette);
 
     /* Set the gamma ramp */
-    int (*SetDisplayGammaRamp) (_THIS, Uint16 * ramp);
+    int (*SetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
     /* Get the gamma ramp */
-    int (*GetDisplayGammaRamp) (_THIS, Uint16 * ramp);
+    int (*GetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
     /* * * */
     /*
@@ -405,10 +406,19 @@ extern VideoBootStrap PND_bootstrap;
 extern SDL_VideoDevice *SDL_GetVideoDevice();
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
 extern int SDL_AddVideoDisplay(const SDL_VideoDisplay * display);
-extern SDL_bool
-SDL_AddDisplayMode(int displayIndex, const SDL_DisplayMode * mode);
-extern void
-SDL_AddRenderDriver(int displayIndex, const SDL_RenderDriver * driver);
+extern SDL_bool SDL_AddDisplayMode(SDL_VideoDisplay *display, const SDL_DisplayMode * mode);
+extern int SDL_GetNumDisplayModesForDisplay(SDL_VideoDisplay * display);
+extern int SDL_GetDisplayModeForDisplay(SDL_VideoDisplay * display, int index, SDL_DisplayMode * mode);
+extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
+extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
+extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
+extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
+extern int SDL_SetDisplayPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors);
+extern int SDL_GetDisplayPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors);
+extern void SDL_AddRenderDriver(SDL_VideoDisplay *display, const SDL_RenderDriver * driver);
+
+extern int SDL_SetGammaRampForDisplay(SDL_VideoDisplay * display, const Uint16 * red, const Uint16 * green, const Uint16 * blue);
+extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, Uint16 * green, Uint16 * blue);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 extern SDL_Window *SDL_GetWindowFromID(SDL_WindowID windowID);

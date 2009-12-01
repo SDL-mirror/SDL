@@ -269,10 +269,6 @@ photon_create(int devindex)
     device->VideoQuit = photon_videoquit;
     device->GetDisplayModes = photon_getdisplaymodes;
     device->SetDisplayMode = photon_setdisplaymode;
-    device->SetDisplayPalette = photon_setdisplaypalette;
-    device->GetDisplayPalette = photon_getdisplaypalette;
-    device->SetDisplayGammaRamp = photon_setdisplaygammaramp;
-    device->GetDisplayGammaRamp = photon_getdisplaygammaramp;
     device->CreateWindow = photon_createwindow;
     device->CreateWindowFrom = photon_createwindowfrom;
     device->SetWindowTitle = photon_setwindowtitle;
@@ -524,11 +520,10 @@ photon_videoquit(_THIS)
 }
 
 void
-photon_getdisplaymodes(_THIS)
+photon_getdisplaymodes(_THIS, SDL_VideoDisplay * display)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_DisplayMode mode;
     PgVideoModes_t modes;
     PgVideoModeInfo_t modeinfo;
@@ -569,7 +564,7 @@ photon_getdisplaymodes(_THIS)
                 mode.refresh_rate = modeinfo.refresh_rates[jt];
                 mode.format = photon_image_to_sdl_pixelformat(modeinfo.type);
                 mode.driverdata = NULL;
-                SDL_AddDisplayMode(_this->current_display, &mode);
+                SDL_AddDisplayMode(display, &mode);
 
                 /* If mode is RGBA8888, add the same mode as RGBx888 */
                 if (modeinfo.type == Pg_IMAGE_DIRECT_8888) {
@@ -578,7 +573,7 @@ photon_getdisplaymodes(_THIS)
                     mode.refresh_rate = modeinfo.refresh_rates[jt];
                     mode.format = SDL_PIXELFORMAT_RGB888;
                     mode.driverdata = NULL;
-                    SDL_AddDisplayMode(_this->current_display, &mode);
+                    SDL_AddDisplayMode(display, &mode);
                 }
 
                 /* If mode is RGBA1555, add the same mode as RGBx555 */
@@ -588,7 +583,7 @@ photon_getdisplaymodes(_THIS)
                     mode.refresh_rate = modeinfo.refresh_rates[jt];
                     mode.format = SDL_PIXELFORMAT_RGB555;
                     mode.driverdata = NULL;
-                    SDL_AddDisplayMode(_this->current_display, &mode);
+                    SDL_AddDisplayMode(display, &mode);
                 }
 
                 jt++;
@@ -600,11 +595,10 @@ photon_getdisplaymodes(_THIS)
 }
 
 int
-photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
+photon_setdisplaymode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     PgVideoModes_t modes;
     PgVideoModeInfo_t modeinfo;
     PgDisplaySettings_t modesettings;
@@ -651,15 +645,15 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
         tempmode.refresh_rate = 0x0000FFFF;
 
         /* Check if window width and height matches one of our modes */
-        for (it = 0; it < SDL_CurrentDisplay.num_display_modes; it++) {
-            if ((SDL_CurrentDisplay.display_modes[it].w == mode->w) &&
-                (SDL_CurrentDisplay.display_modes[it].h == mode->h) &&
-                (SDL_CurrentDisplay.display_modes[it].format == mode->format))
+        for (it = 0; it < display->num_display_modes; it++) {
+            if ((display->display_modes[it].w == mode->w) &&
+                (display->display_modes[it].h == mode->h) &&
+                (display->display_modes[it].format == mode->format))
             {
                 /* Find the lowest refresh rate available */
                 if (tempmode.refresh_rate >
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                 }
             }
         }
@@ -680,21 +674,21 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
         tempmode.refresh_rate = 0x0000FFFF;
 
         /* Check if window width and height matches one of our modes */
-        for (it = 0; it < SDL_CurrentDisplay.num_display_modes; it++) {
-            if ((SDL_CurrentDisplay.display_modes[it].w == mode->w) &&
-                (SDL_CurrentDisplay.display_modes[it].h == mode->h) &&
-                (SDL_CurrentDisplay.display_modes[it].format == mode->format))
+        for (it = 0; it < display->num_display_modes; it++) {
+            if ((display->display_modes[it].w == mode->w) &&
+                (display->display_modes[it].h == mode->h) &&
+                (display->display_modes[it].format == mode->format))
             {
                 /* Find the lowest refresh rate available */
                 if (tempmode.refresh_rate >
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                 }
 
                 /* Check if requested refresh rate found */
                 if (refresh_rate ==
-                    SDL_CurrentDisplay.display_modes[it].refresh_rate) {
-                    tempmode = SDL_CurrentDisplay.display_modes[it];
+                    display->display_modes[it].refresh_rate) {
+                    tempmode = display->display_modes[it];
                     break;
                 }
             }
@@ -779,48 +773,11 @@ photon_setdisplaymode(_THIS, SDL_DisplayMode * mode)
 }
 
 int
-photon_setdisplaypalette(_THIS, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Setting display palette operation has been failed */
-    return -1;
-}
-
-int
-photon_getdisplaypalette(_THIS, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Getting display palette operation has been failed */
-    return -1;
-}
-
-int
-photon_setdisplaygammaramp(_THIS, Uint16 * ramp)
-{
-    SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
-
-    /* Setting display gamma ramp operation has been failed */
-    return -1;
-}
-
-int
-photon_getdisplaygammaramp(_THIS, Uint16 * ramp)
-{
-    /* Getting display gamma ramp operation has been failed */
-    return -1;
-}
-
-int
 photon_createwindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     SDL_WindowData *wdata;
     PhDim_t winsize;
     PhPoint_t winpos;
@@ -1098,7 +1055,7 @@ photon_setwindowposition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     PhPoint_t winpos;
     int32_t status;
 
@@ -1266,7 +1223,7 @@ photon_destroywindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     int32_t status;
 
@@ -1457,7 +1414,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;
@@ -1984,7 +1941,7 @@ photon_gl_swapwindow(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     PhRect_t dst_rect;
     PhRect_t src_rect;
     int32_t status;
@@ -2093,7 +2050,7 @@ int photon_gl_recreatesurface(_THIS, SDL_Window * window, uint32_t width, uint32
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     SDL_bool makecurrent=SDL_FALSE;
     int32_t gfstatus;
 
@@ -2194,7 +2151,6 @@ photon_pumpevents(_THIS)
     PhEvent_t *event = (PhEvent_t *) eventbuffer;
     int32_t status;
     uint32_t finish = 0;
-    uint32_t it;
     SDL_Window *window;
     SDL_WindowData *wdata;
 
@@ -2211,23 +2167,22 @@ photon_pumpevents(_THIS)
             {
                 /* Find a window, to which this handle destinated */
                 status = 0;
-                for (it = 0; it < SDL_CurrentDisplay.num_windows; it++) {
-                    wdata =
-                        (SDL_WindowData *) SDL_CurrentDisplay.windows[it].
-                        driverdata;
+                for (i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
+                    SDL_VideoDisplay *display = SDL_GetVideoDisplay(i);
+                    for (j = 0; j < display->num_windows; ++j) {
+                        wdata = (SDL_WindowData *) display->windows[j].driverdata;
 
-                    /* Find the proper window */
-                    if (wdata->window != NULL) {
-                        if (PtWidgetRid(wdata->window) ==
-                            event->collector.rid) {
-                            window =
-                                (SDL_Window *) & SDL_CurrentDisplay.
-                                windows[it];
-                            status = 1;
-                            break;
+                        /* Find the proper window */
+                        if (wdata->window != NULL) {
+                            if (PtWidgetRid(wdata->window) ==
+                                event->collector.rid) {
+                                window = (SDL_Window *) &display->windows[it];
+                                status = 1;
+                                break;
+                            }
+                        } else {
+                            continue;
                         }
-                    } else {
-                        continue;
                     }
                 }
                 if (status == 0) {

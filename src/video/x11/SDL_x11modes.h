@@ -55,8 +55,8 @@ typedef struct
 } SDL_DisplayData;
 
 extern void X11_InitModes(_THIS);
-extern void X11_GetDisplayModes(_THIS);
-extern int X11_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+extern void X11_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
+extern int X11_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void X11_QuitModes(_THIS);
 
 #endif /* _SDL_x11modes_h */

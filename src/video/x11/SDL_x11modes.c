@@ -311,10 +311,10 @@ restore_mode(Display * display, SDL_DisplayData * data)
 #endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
 void
-X11_GetDisplayModes(_THIS)
+X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
-    SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *data = (SDL_DisplayData *) sdl_display->driverdata;
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     int xinerama_major, xinerama_minor;
     int screens;
@@ -341,7 +341,7 @@ X11_GetDisplayModes(_THIS)
      * we have to use the same format for all windows and all display modes.
      * (or support recreating the window with a new visual behind the scenes)
      */
-    mode.format = SDL_CurrentDisplay.current_mode.format;
+    mode.format = sdl_display->current_mode.format;
     mode.driverdata = NULL;
 
     data->use_xinerama = 0;
@@ -382,14 +382,14 @@ X11_GetDisplayModes(_THIS)
                 mode.w = screen_w;
                 mode.h = screen_h;
                 mode.refresh_rate = 0;
-                SDL_AddDisplayMode(_this->current_display, &mode);
+                SDL_AddDisplayMode(sdl_display, &mode);
             }
 
             /* Add the head xinerama mode */
             mode.w = data->xinerama_info.width;
             mode.h = data->xinerama_info.height;
             mode.refresh_rate = 0;
-            SDL_AddDisplayMode(_this->current_display, &mode);
+            SDL_AddDisplayMode(sdl_display, &mode);
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
@@ -426,7 +426,7 @@ X11_GetDisplayModes(_THIS)
                             "XRANDR: mode = %4d[%d], w = %4d, h = %4d, rate = %4d\n",
                             i, j, mode.w, mode.h, mode.refresh_rate);
 #endif
-                    SDL_AddDisplayMode(_this->current_display, &mode);
+                    SDL_AddDisplayMode(sdl_display, &mode);
                 }
             }
 
@@ -462,7 +462,7 @@ X11_GetDisplayModes(_THIS)
             mode.w = modes[i]->hdisplay;
             mode.h = modes[i]->vdisplay;
             mode.refresh_rate = calculate_rate(modes[i]);
-            SDL_AddDisplayMode(_this->current_display, &mode);
+            SDL_AddDisplayMode(sdl_display, &mode);
         }
         XFree(modes);
 
@@ -475,7 +475,7 @@ X11_GetDisplayModes(_THIS)
         mode.w = screen_w;
         mode.h = screen_h;
         mode.refresh_rate = 0;
-        SDL_AddDisplayMode(_this->current_display, &mode);
+        SDL_AddDisplayMode(sdl_display, &mode);
     }
 #ifdef X11MODES_DEBUG
     if (data->use_xinerama) {
@@ -672,10 +672,10 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
 }
 
 int
-X11_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
-    SDL_DisplayData *data = (SDL_DisplayData *) SDL_CurrentDisplay.driverdata;
+    SDL_DisplayData *data = (SDL_DisplayData *) sdl_display->driverdata;
 
     set_best_resolution(display, data, mode->w, mode->h, mode->refresh_rate);
     return 0;

@@ -76,7 +76,7 @@ CommonCreateState(char **argv, Uint32 flags)
     state->argv = argv;
     state->flags = flags;
     state->window_title = argv[0];
-    state->window_flags = SDL_WINDOW_SHOWN;
+    state->window_flags = 0;
     state->window_x = SDL_WINDOWPOS_UNDEFINED;
     state->window_y = SDL_WINDOWPOS_UNDEFINED;
     state->window_w = DEFAULT_WINDOW_WIDTH;
@@ -737,6 +737,7 @@ CommonInit(CommonState * state)
             }
         }
 
+        SDL_zero(fullscreen_mode);
         switch (state->depth) {
         case 8:
             fullscreen_mode.format = SDL_PIXELFORMAT_INDEX8;
@@ -754,14 +755,7 @@ CommonInit(CommonState * state)
             fullscreen_mode.format = SDL_PIXELFORMAT_RGB888;
             break;
         }
-        fullscreen_mode.w = state->window_w;
-        fullscreen_mode.h = state->window_h;
         fullscreen_mode.refresh_rate = state->refresh_rate;
-        if (SDL_SetFullscreenDisplayMode(&fullscreen_mode)<0) {
-            fprintf(stderr, "Can't switch to fullscreen display mode: %s\n",
-                    SDL_GetError());
-            return SDL_FALSE;
-        }
 
         state->windows =
             (SDL_WindowID *) SDL_malloc(state->num_windows *
@@ -788,6 +782,13 @@ CommonInit(CommonState * state)
                         SDL_GetError());
                 return SDL_FALSE;
             }
+
+            if (SDL_SetWindowDisplayMode(state->windows[i], &fullscreen_mode) < 0) {
+                fprintf(stderr, "Can't set up fullscreen display mode: %s\n",
+                        SDL_GetError());
+                return SDL_FALSE;
+            }
+            SDL_ShowWindow(state->windows[i]);
 
             if (!state->skip_renderer
                 && (state->renderdriver

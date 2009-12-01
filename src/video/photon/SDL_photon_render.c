@@ -276,7 +276,7 @@ photon_addrenderdriver(_THIS)
     uint32_t it;
 
     for (it = 0; it < _this->num_displays; it++) {
-        SDL_AddRenderDriver(it, &photon_renderdriver);
+        SDL_AddRenderDriver(&_this->displays[it], &photon_renderdriver);
     }
 }
 

@@ -84,7 +84,8 @@ static PS3_DisplayModeData ps3fb_data[] = {
 };
 
 void
-PS3_GetDisplayModes(_THIS) {
+PS3_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
+{
     deprintf(1, "+PS3_GetDisplayModes()\n");
     SDL_DisplayMode mode;
     unsigned int nummodes;
@@ -98,13 +99,13 @@ PS3_GetDisplayModes(_THIS) {
 
         /* Add DisplayMode to list */
         deprintf(2, "Adding resolution %u x %u\n", ps3fb_modedb[n].w, ps3fb_modedb[n].h);
-        SDL_AddDisplayMode(_this->current_display, &ps3fb_modedb[n]);
+        SDL_AddDisplayMode(display, &ps3fb_modedb[n]);
     }
     deprintf(1, "-PS3_GetDisplayModes()\n");
 }
 
 int
-PS3_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+PS3_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     deprintf(1, "+PS3_SetDisplayMode()\n");
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -123,13 +124,14 @@ PS3_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
 }
 
 void
-PS3_QuitModes(_THIS) {
+PS3_QuitModes(_THIS)
+{
     deprintf(1, "+PS3_QuitModes()\n");
 
     /* There was no mem allocated for driverdata */
     int i, j;
-    for (i = _this->num_displays; i--;) {
-        SDL_VideoDisplay *display = &_this->displays[i];
+    for (i = 0; i < SDL_GetNumVideoDisplays(); ++i) {
+        SDL_VideoDisplay *display = SDL_GetVideoDisplay(i);
         for (j = display->num_display_modes; j--;) {
             display->display_modes[j].driverdata = NULL;
         }

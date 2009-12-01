@@ -482,7 +482,6 @@ SDL_Surface *
 SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
     SDL_DisplayMode desktop_mode;
-    SDL_DisplayMode mode;
     int window_x = SDL_WINDOWPOS_UNDEFINED;
     int window_y = SDL_WINDOWPOS_UNDEFINED;
     Uint32 window_flags;
@@ -552,7 +551,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         window_flags |= SDL_WINDOW_BORDERLESS;
     }
     GetEnvironmentWindowPosition(width, height, &window_x, &window_y);
-    SDL_SetFullscreenDisplayMode(NULL);
     SDL_VideoWindow =
         SDL_CreateWindow(wm_title, window_x, window_y, width, height,
                          window_flags);
@@ -611,14 +609,14 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             return NULL;
         }
     }
-    mode.format = desired_format;
-    mode.w = width;
-    mode.h = height;
-    mode.refresh_rate = 0;
 
-    /* Set the desired display mode */
+    /* Set up the desired display mode */
     if (flags & SDL_FULLSCREEN) {
-        if (SDL_SetFullscreenDisplayMode(&mode) < 0) {
+        SDL_DisplayMode mode;
+
+        SDL_zero(mode);
+        mode.format = desired_format;
+        if (SDL_SetWindowDisplayMode(SDL_VideoWindow, &mode) < 0) {
             return NULL;
         }
     }

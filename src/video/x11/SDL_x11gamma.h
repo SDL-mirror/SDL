@@ -30,7 +30,7 @@ extern void X11_TrackColormap(Display * display, int scrNum,
                               Colormap colormap,
                               Visual * visual, XColor * ramp);
 
-extern int X11_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
-extern int X11_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
+extern int X11_SetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
+extern int X11_GetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
 #endif

@@ -24,8 +24,8 @@
 #ifndef _SDL_win32gamma_h
 #define _SDL_win32gamma_h
 
-extern int WIN_SetDisplayGammaRamp(_THIS, Uint16 * ramp);
-extern int WIN_GetDisplayGammaRamp(_THIS, Uint16 * ramp);
+extern int WIN_SetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
+extern int WIN_GetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
 #endif /* _SDL_win32gamma_h */
 

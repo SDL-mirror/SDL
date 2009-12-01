@@ -261,7 +261,7 @@ gf_addrenderdriver(_THIS)
     uint32_t it;
 
     for (it = 0; it < _this->num_displays; it++) {
-        SDL_AddRenderDriver(it, &gf_renderdriver);
+        SDL_AddRenderDriver(&_this->displays[it], &gf_renderdriver);
     }
 }
 
