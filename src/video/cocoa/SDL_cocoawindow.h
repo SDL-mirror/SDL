@@ -72,6 +72,7 @@ struct SDL_WindowData
     SDL_WindowID windowID;
     NSWindow *window;
     SDL_bool created;
+    CGDirectDisplayID display;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
 };

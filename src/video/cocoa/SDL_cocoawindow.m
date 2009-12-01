@@ -31,7 +31,6 @@
 
 static __inline__ void ConvertNSRect(NSRect *r)
 {
-    /* FIXME: Cache the display used for this window */
     r->origin.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - r->origin.y - r->size.height;
 }
 
@@ -99,10 +98,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidMove:(NSNotification *)aNotification
 {
     int x, y;
+    NSRect disp = CGDisplayBounds(_data->display);
     NSRect rect = [_data->window contentRectForFrameRect:[_data->window frame]];
     ConvertNSRect(&rect);
-    x = (int)rect.origin.x;
-    y = (int)rect.origin.y;
+    x = (int)rect.origin.x - disp.origin.x;
+    y = (int)rect.origin.y - disp.origin.y;
     SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
@@ -309,6 +309,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 {
     NSAutoreleasePool *pool;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -320,6 +321,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     data->windowID = window->id;
     data->window = nswindow;
     data->created = created;
+    data->display = displaydata->display;
     data->videodata = videodata;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -330,10 +332,11 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 
     /* Fill in the SDL window with the window data */
     {
+        NSRect disp = CGDisplayBounds(data->display);
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
         ConvertNSRect(&rect);
-        window->x = (int)rect.origin.x;
-        window->y = (int)rect.origin.y;
+        window->x = (int)rect.origin.x - disp.origin.x;
+        window->y = (int)rect.origin.y - disp.origin.y;
         window->w = (int)rect.size.width;
         window->h = (int)rect.size.height;
     }
@@ -385,30 +388,26 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 int
 Cocoa_CreateWindow(_THIS, SDL_Window * window)
 {
-    NSAutoreleasePool *pool;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     NSRect rect;
     unsigned int style;
     NSString *title;
     int status;
 
-    pool = [[NSAutoreleasePool alloc] init];
-
+    rect = CGDisplayBounds(displaydata->display);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.x = (CGDisplayPixelsWide(kCGDirectMainDisplay) - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
-        rect.origin.x = 0;
-    } else {
-        rect.origin.x = window->x;
+        rect.origin.x += (rect.size.width - window->w) / 2;
+    } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.x += window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.y = (CGDisplayPixelsHigh(kCGDirectMainDisplay) - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
-        rect.origin.y = 0;
-    } else {
-        rect.origin.y = window->y;
+        rect.origin.y += (rect.size.height - window->h) / 2;
+    } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.y += window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
@@ -423,7 +422,22 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         style |= NSResizableWindowMask;
     }
 
-    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE];
+    /* Figure out which screen to place this window */
+    NSArray *screens = [NSScreen screens];
+    NSScreen *screen = nil;
+    NSScreen *candidate;
+    for (candidate in screens) {
+        NSRect screenRect = [candidate frame];
+        if (rect.origin.x >= screenRect.origin.x &&
+            rect.origin.x < screenRect.origin.x + screenRect.size.width &&
+            rect.origin.y >= screenRect.origin.y &&
+            rect.origin.y < screenRect.origin.y + screenRect.size.height) {
+            screen = candidate;
+            rect.origin.x -= screenRect.origin.x;
+            rect.origin.y -= screenRect.origin.y;
+        }
+    }
+    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE screen:screen];
 
     [pool release];
 
@@ -478,19 +492,21 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     NSRect rect;
 
+    rect = CGDisplayBounds(displaydata->display);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.x = (CGDisplayPixelsWide(kCGDirectMainDisplay) - window->w) / 2;
+        rect.origin.x += (rect.size.width - window->w) / 2;
     } else {
-        rect.origin.x = window->x;
+        rect.origin.x += window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.y = (CGDisplayPixelsHigh(kCGDirectMainDisplay) - window->h) / 2;
+        rect.origin.y += (rect.size.height - window->h) / 2;
     } else {
-        rect.origin.y = window->y;
+        rect.origin.y += window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
