@@ -98,11 +98,10 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidMove:(NSNotification *)aNotification
 {
     int x, y;
-    NSRect disp = CGDisplayBounds(_data->display);
     NSRect rect = [_data->window contentRectForFrameRect:[_data->window frame]];
     ConvertNSRect(&rect);
-    x = (int)rect.origin.x - disp.origin.x;
-    y = (int)rect.origin.y - disp.origin.y;
+    x = (int)rect.origin.x;
+    y = (int)rect.origin.y;
     SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
@@ -245,11 +244,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
         point.x = point.x - rect.origin.x;
         point.y = rect.size.height - point.y;
     } else {
-        rect = [_data->window contentRectForFrameRect:[_data->window frame]];
-        point.y = rect.size.height - (point.y - rect.origin.y);
+        point.x -= window->x;
+        point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - window->y;
     }
-    if ( point.x < 0 || point.x >= rect.size.width ||
-         point.y < 0 || point.y >= rect.size.height ) {
+    if ( point.x < 0 || point.x >= window->w ||
+         point.y < 0 || point.y >= window->h ) {
         if (mouse->focus != 0) {
             SDL_SetMouseFocus(index, 0);
         }
@@ -332,11 +331,10 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 
     /* Fill in the SDL window with the window data */
     {
-        NSRect disp = CGDisplayBounds(data->display);
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
         ConvertNSRect(&rect);
-        window->x = (int)rect.origin.x - disp.origin.x;
-        window->y = (int)rect.origin.y - disp.origin.y;
+        window->x = (int)rect.origin.x;
+        window->y = (int)rect.origin.y;
         window->w = (int)rect.size.width;
         window->h = (int)rect.size.height;
     }
@@ -401,13 +399,13 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         || window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x += (rect.size.width - window->w) / 2;
     } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
-        rect.origin.x += window->x;
+        rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
         rect.origin.y += (rect.size.height - window->h) / 2;
     } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
-        rect.origin.y += window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
@@ -500,13 +498,13 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
         || window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x += (rect.size.width - window->w) / 2;
     } else {
-        rect.origin.x += window->x;
+        rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
         rect.origin.y += (rect.size.height - window->h) / 2;
     } else {
-        rect.origin.y += window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
