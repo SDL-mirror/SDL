@@ -652,17 +652,16 @@ SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
     int i;
     SDL_bool focus;
 
-    if (!keyboard || (keyboard->focus == windowID)) {
+    if (!keyboard) {
         return;
     }
 
     /* See if the current window has lost focus */
-    if (keyboard->focus) {
+    if (keyboard->focus && keyboard->focus != windowID) {
         focus = SDL_FALSE;
         for (i = 0; i < SDL_num_keyboards; ++i) {
-            SDL_Keyboard *check;
             if (i != index) {
-                check = SDL_GetKeyboard(i);
+                SDL_Keyboard *check = SDL_GetKeyboard(i);
                 if (check && check->focus == keyboard->focus) {
                     focus = SDL_TRUE;
                     break;
@@ -678,21 +677,8 @@ SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
     keyboard->focus = windowID;
 
     if (keyboard->focus) {
-        focus = SDL_FALSE;
-        for (i = 0; i < SDL_num_keyboards; ++i) {
-            SDL_Keyboard *check;
-            if (i != index) {
-                check = SDL_GetKeyboard(i);
-                if (check && check->focus == keyboard->focus) {
-                    focus = SDL_TRUE;
-                    break;
-                }
-            }
-        }
-        if (!focus) {
-            SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_GAINED,
-                                0, 0);
-        }
+        SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_GAINED,
+                            0, 0);
     }
 }
 

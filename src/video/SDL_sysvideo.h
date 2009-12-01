@@ -147,6 +147,7 @@ struct SDL_Window
 #define FULLSCREEN_VISIBLE(W) \
     (((W)->flags & SDL_WINDOW_FULLSCREEN) && \
      ((W)->flags & SDL_WINDOW_SHOWN) && \
+     ((W)->flags & SDL_WINDOW_INPUT_FOCUS) && \
      !((W)->flags & SDL_WINDOW_MINIMIZED))
 
 /*
@@ -160,6 +161,7 @@ struct SDL_VideoDisplay
     SDL_DisplayMode *display_modes;
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
+    SDL_bool updating_fullscreen;
     SDL_Palette *palette;
 
     Uint16 *gamma;
@@ -426,6 +428,8 @@ extern SDL_VideoDisplay *SDL_GetDisplayFromWindow(SDL_Window * window);
 extern void SDL_OnWindowShown(SDL_Window * window);
 extern void SDL_OnWindowHidden(SDL_Window * window);
 extern void SDL_OnWindowResized(SDL_Window * window);
+extern void SDL_OnWindowMinimized(SDL_Window * window);
+extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern SDL_WindowID SDL_GetFocusWindow(void);

@@ -86,6 +86,7 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
             return 0;
         }
         window->flags |= SDL_WINDOW_MINIMIZED;
+        SDL_OnWindowMinimized(window);
         break;
     case SDL_WINDOWEVENT_MAXIMIZED:
         if (window->flags & SDL_WINDOW_MAXIMIZED) {
@@ -98,6 +99,7 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
             return 0;
         }
         window->flags &= ~(SDL_WINDOW_MINIMIZED | SDL_WINDOW_MAXIMIZED);
+        SDL_OnWindowRestored(window);
         break;
     case SDL_WINDOWEVENT_ENTER:
         if (window->flags & SDL_WINDOW_MOUSE_FOCUS) {
