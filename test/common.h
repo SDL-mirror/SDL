@@ -70,3 +70,5 @@ extern const char *CommonUsage(CommonState * state);
 extern SDL_bool CommonInit(CommonState * state);
 extern void CommonEvent(CommonState * state, SDL_Event * event, int *done);
 extern void CommonQuit(CommonState * state);
+
+/* vi: set ts=4 sw=4 expandtab: */

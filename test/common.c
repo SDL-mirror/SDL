@@ -1031,6 +1031,8 @@ PrintEvent(SDL_Event * event)
 void
 CommonEvent(CommonState * state, SDL_Event * event, int *done)
 {
+    int i;
+
     if (state->verbose & VERBOSE_EVENT) {
         PrintEvent(event);
     }
@@ -1049,6 +1051,15 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_g:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-G toggle grab */
+            }
+            break;
+        case SDLK_z:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-Z minimize */
+                /* FIXME: Which window has focus for this keyboard? */
+                for (i = 0; i < state->num_windows; ++i) {
+                    SDL_MinimizeWindow(state->windows[i]);
+                }
             }
             break;
         case SDLK_ESCAPE:
@@ -1078,3 +1089,5 @@ CommonQuit(CommonState * state)
     }
     SDL_free(state);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */
