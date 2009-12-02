@@ -255,7 +255,9 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     }
 
     /* Hide the menu bar so it doesn't intercept events */
-    HideMenuBar();
+    if (CGDisplayIsMain(displaydata->display)) {
+        HideMenuBar();
+    }
 
     /* Fade in again (asynchronously) */
     if (fade_token != kCGDisplayFadeReservationInvalidToken) {
