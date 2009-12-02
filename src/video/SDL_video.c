@@ -1449,6 +1449,12 @@ SDL_OnWindowFocusLost(SDL_Window * window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
+    /* If we're fullscreen on a single-head system and lose focus, minimize */
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) &&
+        _this->num_displays == 1) {
+        SDL_MinimizeWindow(window->id);
+    }
+
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display, display->saved_gamma);
     }
