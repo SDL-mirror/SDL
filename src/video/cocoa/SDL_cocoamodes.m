@@ -247,16 +247,25 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         goto ERR_NO_CAPTURE;
     }
 
-    /* Do the physical switch */
-    result = CGDisplaySwitchToMode(displaydata->display, data->moderef);
-    if (result != kCGErrorSuccess) {
-        CG_SetError("CGDisplaySwitchToMode()", result);
-        goto ERR_NO_SWITCH;
-    }
+    if (data == display->desktop_mode.driverdata) {
+        /* Restoring desktop mode */
+        CGDisplayRelease(displaydata->display);
 
-    /* Hide the menu bar so it doesn't intercept events */
-    if (CGDisplayIsMain(displaydata->display)) {
-        HideMenuBar();
+        if (CGDisplayIsMain(displaydata->display)) {
+            ShowMenuBar();
+        }
+    } else {
+        /* Do the physical switch */
+        result = CGDisplaySwitchToMode(displaydata->display, data->moderef);
+        if (result != kCGErrorSuccess) {
+            CG_SetError("CGDisplaySwitchToMode()", result);
+            goto ERR_NO_SWITCH;
+        }
+
+        /* Hide the menu bar so it doesn't intercept events */
+        if (CGDisplayIsMain(displaydata->display)) {
+            HideMenuBar();
+        }
     }
 
     /* Fade in again (asynchronously) */
