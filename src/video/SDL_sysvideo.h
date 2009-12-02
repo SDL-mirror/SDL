@@ -147,7 +147,6 @@ struct SDL_Window
 #define FULLSCREEN_VISIBLE(W) \
     (((W)->flags & SDL_WINDOW_FULLSCREEN) && \
      ((W)->flags & SDL_WINDOW_SHOWN) && \
-     ((W)->flags & SDL_WINDOW_INPUT_FOCUS) && \
      !((W)->flags & SDL_WINDOW_MINIMIZED))
 
 /*

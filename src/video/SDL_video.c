@@ -1435,7 +1435,6 @@ SDL_OnWindowFocusGained(SDL_Window * window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
-    SDL_UpdateFullscreenMode(window, SDL_TRUE);
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display, display->gamma);
     }
@@ -1450,7 +1449,6 @@ SDL_OnWindowFocusLost(SDL_Window * window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
 
-    SDL_UpdateFullscreenMode(window, SDL_FALSE);
     if (display->gamma && _this->SetDisplayGammaRamp) {
         _this->SetDisplayGammaRamp(_this, display, display->saved_gamma);
     }
