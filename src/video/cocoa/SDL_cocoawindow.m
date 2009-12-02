@@ -243,7 +243,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         point.x = point.x - rect.origin.x;
         point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - rect.origin.y;
     } else {
-        point.x -= window->x;
+        point.x = point.x - window->x;
         point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - window->y;
     }
     if ( point.x < 0 || point.x >= window->w ||
