@@ -64,11 +64,25 @@ SDL_VideoDriverName(char *namebuf, int maxlen)
     return NULL;
 }
 
+static void
+SelectVideoDisplay()
+{
+    const char *variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_DISPLAY");
+    if ( !variable ) {
+        variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
+    }
+    if ( variable ) {
+        SDL_SelectVideoDisplay(SDL_atoi(variable));
+    }
+}
+
 const SDL_VideoInfo *
 SDL_GetVideoInfo(void)
 {
     static SDL_VideoInfo info;
     SDL_DisplayMode mode;
+
+    SelectVideoDisplay();
 
     /* Memory leak, compatibility code, who cares? */
     if (!info.vfmt && SDL_GetDesktopDisplayMode(&mode) == 0) {
@@ -92,6 +106,8 @@ SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags)
     if (!SDL_GetVideoDevice()) {
         return 0;
     }
+
+    SelectVideoDisplay();
 
     if (!(flags & SDL_FULLSCREEN)) {
         SDL_DisplayMode mode;
@@ -123,6 +139,8 @@ SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags)
     if (!SDL_GetVideoDevice()) {
         return NULL;
     }
+
+    SelectVideoDisplay();
 
     if (!(flags & SDL_FULLSCREEN)) {
         return (SDL_Rect **) (-1);
@@ -494,6 +512,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             return NULL;
         }
     }
+
+    SelectVideoDisplay();
 
     SDL_GetDesktopDisplayMode(&desktop_mode);
 
