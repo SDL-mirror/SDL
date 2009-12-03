@@ -151,10 +151,12 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
 "        pushl   %%ebx                                                 \n"
 "        cpuid                       # Get and save vendor ID          \n"
+"        popl    %%ebx                                                 \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
 "        jl      1f                  # We dont have the CPUID instruction\n"
 "        xorl    %%eax,%%eax                                           \n"
 "        incl    %%eax                                                 \n"
+"        pushl   %%ebx                                                 \n"
 "        cpuid                       # Get family/model/stepping/features\n"
 "        popl    %%ebx                                                 \n"
 "        movl    %%edx,%0                                              \n"
@@ -166,14 +168,16 @@ static __inline__ int CPU_getCPUIDFeatures(void)
 #elif defined(__GNUC__) && defined(__x86_64__)
 	__asm__ (
 "        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
-"        pushq   %%rbx\n"
+"        pushq   %%rbx                                                 \n"
 "        cpuid                       # Get and save vendor ID          \n"
+"        popq    %%rbx                                                 \n"
 "        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
 "        jl      1f                  # We dont have the CPUID instruction\n"
 "        xorl    %%eax,%%eax                                           \n"
 "        incl    %%eax                                                 \n"
+"        pushq   %%rbx                                                 \n"
 "        cpuid                       # Get family/model/stepping/features\n"
-"        popq    %%rbx\n"
+"        popq    %%rbx                                                 \n"
 "        movl    %%edx,%0                                              \n"
 "1:                                                                    \n"
 	: "=m" (features)
@@ -185,10 +189,12 @@ static __inline__ int CPU_getCPUIDFeatures(void)
         xor     eax, eax            ; Set up for CPUID instruction
         push    ebx
         cpuid                       ; Get and save vendor ID
+        pop     ebx
         cmp     eax, 1              ; Make sure 1 is valid input for CPUID
         jl      done                ; We dont have the CPUID instruction
         xor     eax, eax
         inc     eax
+        push    ebx
         cpuid                       ; Get family/model/stepping/features
         pop     ebx
         mov     features, edx
@@ -199,10 +205,12 @@ done:
 "        xorl    %eax,%eax         \n"
 "        pushl   %ebx              \n"
 "        cpuid                     \n"
+"        popl    %ebx              \n"
 "        cmpl    $1,%eax           \n"
 "        jl      1f                \n"
 "        xorl    %eax,%eax         \n"
 "        incl    %eax              \n"
+"        pushl   %ebx              \n"
 "        cpuid                     \n"
 "        popl    %ebx              \n"
 #ifdef __i386
@@ -223,9 +231,11 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        pushl   %%ebx                                                 \n"
 "        cpuid                       # Get extended function limit     \n"
+"        popl    %%ebx                                                 \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
 "        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
+"        pushl   %%ebx                                                 \n"
 "        cpuid                       # and get the information         \n"
 "        popl    %%ebx                                                 \n"
 "        movl    %%edx,%0                                              \n"
@@ -239,9 +249,11 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
 "        movl    $0x80000000,%%eax   # Query for extended functions    \n"
 "        pushq   %%rbx                                                 \n"
 "        cpuid                       # Get extended function limit     \n"
+"        popq    %%rbx                                                 \n"
 "        cmpl    $0x80000001,%%eax                                     \n"
 "        jl      1f                  # Nope, we dont have function 800000001h\n"
 "        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
+"        pushq   %%rbx                                                 \n"
 "        cpuid                       # and get the information         \n"
 "        popq    %%rbx                                                 \n"
 "        movl    %%edx,%0                                              \n"
@@ -255,9 +267,11 @@ static __inline__ int CPU_getCPUIDFeaturesExt(void)
         mov     eax,80000000h       ; Query for extended functions
         push    ebx
         cpuid                       ; Get extended function limit
+        pop     ebx
         cmp     eax,80000001h
         jl      done                ; Nope, we dont have function 800000001h
         mov     eax,80000001h       ; Setup extended function 800000001h
+        push    ebx
         cpuid                       ; and get the information
         pop     ebx
         mov     features,edx
@@ -268,9 +282,11 @@ done:
 "        movl    $0x80000000,%eax \n"
 "        pushl   %ebx             \n"
 "        cpuid                    \n"
+"        popl    %ebx             \n"
 "        cmpl    $0x80000001,%eax \n"
 "        jl      1f               \n"
 "        movl    $0x80000001,%eax \n"
+"        pushl   %ebx             \n"
 "        cpuid                    \n"
 "        popl    %ebx             \n"
 #ifdef __i386
