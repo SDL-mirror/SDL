@@ -1493,9 +1493,6 @@ SDL_DestroyWindow(SDL_WindowID windowID)
         return;
     }
 
-    /* Restore video mode, etc. */
-    SDL_SetWindowFullscreen(windowID, 0);
-
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
         for (j = 0; j < display->num_windows; ++j) {
@@ -1511,6 +1508,10 @@ SDL_DestroyWindow(SDL_WindowID windowID)
                 SDL_DestroyRenderer(window->id);
                 window->renderer = NULL;
             }
+
+            /* Restore video mode, etc. */
+            SDL_UpdateFullscreenMode(window, SDL_FALSE);
+
             if (_this->DestroyWindow) {
                 _this->DestroyWindow(_this, window);
             }
