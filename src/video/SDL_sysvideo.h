@@ -171,6 +171,7 @@ struct SDL_VideoDisplay
 
     int num_windows;
     SDL_Window *windows;
+    SDL_Window *fullscreen_window;
 
     SDL_Renderer *current_renderer;
 

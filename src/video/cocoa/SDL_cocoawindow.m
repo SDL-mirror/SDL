@@ -235,17 +235,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     index = _data->videodata->mouse;
     mouse = SDL_GetMouse(index);
-
-    point = [NSEvent mouseLocation];
-    if ( (window->flags & SDL_WINDOW_FULLSCREEN) ) {
-        NSRect rect = CGDisplayBounds(_data->display);
-
-        point.x = point.x - rect.origin.x;
-        point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - rect.origin.y;
-    } else {
-        point.x = point.x - window->x;
-        point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - window->y;
-    }
+    point = [theEvent locationInWindow];
+    point.y = window->h - point.y;
     if ( point.x < 0 || point.x >= window->w ||
          point.y < 0 || point.y >= window->h ) {
         if (mouse->focus != 0) {

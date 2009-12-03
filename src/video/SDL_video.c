@@ -768,6 +768,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
             SDL_DisplayMode fullscreen_mode;
             if (SDL_GetWindowDisplayMode(window->id, &fullscreen_mode) == 0) {
                 SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
+                display->fullscreen_window = window;
                 return;
             }
         }
@@ -775,6 +776,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
 
     /* Nope, restore the desktop mode */
     SDL_SetDisplayModeForDisplay(display, NULL);
+    display->fullscreen_window = NULL;
 }
 
 int

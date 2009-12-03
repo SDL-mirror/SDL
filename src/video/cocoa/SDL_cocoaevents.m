@@ -187,6 +187,20 @@ Cocoa_PumpEvents(_THIS)
             break;
         }
         switch ([event type]) {
+        case NSLeftMouseDown:
+        case NSOtherMouseDown:
+        case NSRightMouseDown:
+        case NSLeftMouseUp:
+        case NSOtherMouseUp:
+        case NSRightMouseUp:
+        case NSLeftMouseDragged:
+        case NSRightMouseDragged:
+        case NSOtherMouseDragged: /* usually middle mouse dragged */
+        case NSMouseMoved:
+            Cocoa_HandleMouseEvent(_this, event);
+            /* Pass through to NSApp to make sure everything stays in sync */
+            [NSApp sendEvent:event];
+            break;
         case NSKeyDown:
         case NSKeyUp:
         case NSFlagsChanged:
