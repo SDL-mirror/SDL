@@ -257,14 +257,6 @@ GL_LoadFunctions(GL_RenderData * data)
     return 0;
 }
 
-void
-GL_AddRenderDriver(_THIS)
-{
-    if (_this->GL_CreateContext) {
-        SDL_AddRenderDriver(0, &GL_RenderDriver);
-    }
-}
-
 SDL_Renderer *
 GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {

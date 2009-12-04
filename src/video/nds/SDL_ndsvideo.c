@@ -110,8 +110,10 @@ NDS_VideoInit(_THIS)
     mode.refresh_rate = 60;
     mode.driverdata = NULL;
 
-    SDL_AddBasicVideoDisplay(&mode);
-    SDL_AddRenderDriver(0, &NDS_RenderDriver);
+    if (SDL_AddBasicVideoDisplay(&mode) < 0) {
+        return -1;
+    }
+    SDL_AddRenderDriver(&_this->displays[0], &NDS_RenderDriver);
 
     SDL_zero(mode);
     SDL_AddDisplayMode(0, &mode);

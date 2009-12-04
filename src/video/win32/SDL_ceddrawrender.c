@@ -428,7 +428,9 @@ DDRAW_AddRenderDriver(_THIS)
         info->texture_formats[info->num_texture_formats++] =
             SDL_PIXELFORMAT_YVYU;
 
-        SDL_AddRenderDriver(0, &DDRAW_RenderDriver);
+        for (i = 0; i < _this->num_displays; ++i)
+            SDL_AddRenderDriver(&_this->displays[i], &DDRAW_RenderDriver);
+        }
     }
 }
 

@@ -147,7 +147,10 @@ UpdateYUVTextureData(SDL_Texture * texture)
 void
 GDI_AddRenderDriver(_THIS)
 {
-    SDL_AddRenderDriver(0, &GDI_RenderDriver);
+    int i;
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_AddRenderDriver(&_this->displays[i], &GDI_RenderDriver);
+    }
 }
 
 SDL_Renderer *

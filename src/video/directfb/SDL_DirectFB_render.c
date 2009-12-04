@@ -233,8 +233,10 @@ void
 DirectFB_AddRenderDriver(_THIS)
 {
     int i;
-    for (i = 0; i < _this->num_displays; i++)
+
+    for (i = 0; i < _this->num_displays; ++i) {
         SDL_AddRenderDriver(&_this->displays[i], &DirectFB_RenderDriver);
+    }
 }
 
 static int

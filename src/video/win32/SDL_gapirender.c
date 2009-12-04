@@ -92,6 +92,8 @@ GAPI_SetError(const char *prefix, HRESULT result)
 void
 GAPI_AddRenderDriver(_THIS)
 {
+    int i;
+
     /* TODO: should we check for support of GetRawFramebuffer here?
      */
 #if USE_GAPI_EMU
@@ -125,7 +127,9 @@ GAPI_AddRenderDriver(_THIS)
 #undef LINK
     }
 
-    SDL_AddRenderDriver(0, &GAPI_RenderDriver);
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_AddRenderDriver(&_this->displays[i], &GAPI_RenderDriver);
+    }
 }
 
 typedef enum

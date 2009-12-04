@@ -124,6 +124,8 @@ VideoBootStrap PS3_bootstrap = {
 int
 PS3_VideoInit(_THIS)
 {
+    int i;
+
     deprintf(1, "PS3_VideoInit()\n");
 
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -181,7 +183,9 @@ PS3_VideoInit(_THIS)
     memset(data->frame_buffer, 0x00, fb_finfo.smem_len);
 
     PS3_InitModes(_this);
-    SDL_AddRenderDriver(0, &SDL_PS3_RenderDriver);
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_AddRenderDriver(&_this->displays[i], &SDL_PS3_RenderDriver);
+    }
 
     /* We're done! */
     return 0;

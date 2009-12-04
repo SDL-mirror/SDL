@@ -144,6 +144,7 @@ X11_AddRenderDriver(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_RendererInfo *info = &X11_RenderDriver.info;
     SDL_DisplayMode *mode = &SDL_CurrentDisplay.desktop_mode;
+    int i;
 
     info->texture_formats[info->num_texture_formats++] = mode->format;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
@@ -152,7 +153,9 @@ X11_AddRenderDriver(_THIS)
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
 
-    SDL_AddRenderDriver(0, &X11_RenderDriver);
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_AddRenderDriver(&_this->displays[i], &X11_RenderDriver);
+    }
 }
 
 SDL_Renderer *

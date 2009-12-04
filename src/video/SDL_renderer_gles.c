@@ -200,14 +200,6 @@ GLES_LoadFunctions(GLES_RenderData * data)
     return 0;
 }
 
-void
-GLES_AddRenderDriver(_THIS)
-{
-    if (_this->GL_CreateContext) {
-        SDL_AddRenderDriver(0, &GL_ES_RenderDriver);
-    }
-}
-
 SDL_Renderer *
 GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 {

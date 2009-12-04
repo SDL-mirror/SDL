@@ -50,7 +50,7 @@
 
 /* Initialization/Query functions */
 static int DUMMY_VideoInit(_THIS);
-static int DUMMY_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+static int DUMMY_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 static void DUMMY_VideoQuit(_THIS);
 
 /* DUMMY driver bootstrap functions */
@@ -115,8 +115,10 @@ DUMMY_VideoInit(_THIS)
     mode.h = 768;
     mode.refresh_rate = 0;
     mode.driverdata = NULL;
-    SDL_AddBasicVideoDisplay(&mode);
-    SDL_AddRenderDriver(0, &SDL_DUMMY_RenderDriver);
+    if (SDL_AddBasicVideoDisplay(&mode) < 0) {
+        return -1;
+    }
+    SDL_AddRenderDriver(&_this->displays[0], &SDL_DUMMY_RenderDriver);
 
     SDL_zero(mode);
     SDL_AddDisplayMode(0, &mode);
@@ -126,7 +128,7 @@ DUMMY_VideoInit(_THIS)
 }
 
 static int
-DUMMY_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+DUMMY_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     return 0;
 }
