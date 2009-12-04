@@ -391,7 +391,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     pparams.BackBufferHeight = window->h;
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         pparams.BackBufferFormat =
-            PixelFormatToD3DFMT(display->fullscreen_mode.format);
+            PixelFormatToD3DFMT(window->fullscreen_mode.format);
     } else {
         pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
@@ -411,7 +411,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
-            display->fullscreen_mode.refresh_rate;
+            window->fullscreen_mode.refresh_rate;
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
@@ -550,7 +550,7 @@ D3D_DisplayModeChanged(SDL_Renderer * renderer)
     data->pparams.BackBufferHeight = window->h;
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         data->pparams.BackBufferFormat =
-            PixelFormatToD3DFMT(display->fullscreen_mode.format);
+            PixelFormatToD3DFMT(window->fullscreen_mode.format);
     } else {
         data->pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
