@@ -255,7 +255,9 @@ X11_VideoInit(_THIS)
     data->WM_DELETE_WINDOW =
         XInternAtom(data->display, "WM_DELETE_WINDOW", False);
 
-    X11_InitModes(_this);
+    if (X11_InitModes(_this) < 0) {
+        return -1;
+    }
 
 #if SDL_VIDEO_RENDER_X11
     X11_AddRenderDriver(_this);

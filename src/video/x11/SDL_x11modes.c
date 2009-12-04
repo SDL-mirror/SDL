@@ -118,7 +118,7 @@ X11_GetPixelFormatFromVisualInfo(Display * display, XVisualInfo * vinfo)
     return SDL_PIXELFORMAT_UNKNOWN;
 }
 
-void
+int
 X11_InitModes(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -168,6 +168,11 @@ X11_InitModes(_THIS)
         display.driverdata = displaydata;
         SDL_AddVideoDisplay(&display);
     }
+    if (_this->num_displays == 0) {
+        SDL_SetError("No available displays");
+        return -1;
+    }
+    return 0;
 }
 
 /* Global for the error handler */

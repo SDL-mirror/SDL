@@ -207,7 +207,9 @@ VideoBootStrap WIN32_bootstrap = {
 int
 WIN_VideoInit(_THIS)
 {
-    WIN_InitModes(_this);
+    if (WIN_InitModes(_this) < 0) {
+        return -1;
+    }
 
 #if SDL_VIDEO_RENDER_D3D
     D3D_AddRenderDriver(_this);

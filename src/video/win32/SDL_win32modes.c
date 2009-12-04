@@ -157,7 +157,7 @@ WIN_AddDisplay(LPTSTR DeviceName)
     return SDL_TRUE;
 }
 
-void
+int
 WIN_InitModes(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -192,6 +192,11 @@ WIN_InitModes(_THIS)
             WIN_AddDisplay(DeviceName);
         }
     }
+    if (_this->num_displays == 0) {
+        SDL_SetError("No displays available");
+        return -1;
+    }
+    return 0;
 }
 
 void
@@ -205,10 +210,11 @@ WIN_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         if (!WIN_GetDisplayMode(data->DeviceName, i, &mode)) {
             break;
         }
-        if (mode.format != SDL_PIXELFORMAT_UNKNOWN)
+        if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
             if (!SDL_AddDisplayMode(display, &mode)) {
                 SDL_free(mode.driverdata);
             }
+        }
     }
 }
 
