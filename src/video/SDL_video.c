@@ -597,7 +597,7 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
 {
     SDL_DisplayMode display_mode;
     SDL_DisplayMode current_mode;
-    int i, ncolors;
+    int ncolors;
 
     if (mode) {
         display_mode = *mode;
@@ -687,6 +687,7 @@ SDL_SetWindowDisplayMode(SDL_WindowID windowID, const SDL_DisplayMode * mode)
     } else {
         SDL_zero(window->fullscreen_mode);
     }
+    return 0;
 }
 
 int
@@ -832,8 +833,6 @@ SDL_GetPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int fir
 int
 SDL_GetDisplayPalette(SDL_Color * colors, int firstcolor, int ncolors)
 {
-    SDL_Palette *palette;
-
     if (!_this) {
         SDL_UninitializedVideo();
         return -1;
