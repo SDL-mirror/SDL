@@ -384,7 +384,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     NSString *title;
     int status;
 
-    rect = CGDisplayBounds(displaydata->display);
+    rect = Cocoa_DisplayBounds(displaydata->display);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x += (rect.size.width - window->w) / 2;
@@ -414,7 +414,9 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     NSArray *screens = [NSScreen screens];
     NSScreen *screen = nil;
     NSScreen *candidate;
-    for (candidate in screens) {
+    int i, count = [screens count];
+    for (i = 0; i < count; ++i) {
+        screen = [screens objectAtIndex:i];
         NSRect screenRect = [candidate frame];
         if (rect.origin.x >= screenRect.origin.x &&
             rect.origin.x < screenRect.origin.x + screenRect.size.width &&
@@ -483,7 +485,7 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
     NSRect rect;
 
-    rect = CGDisplayBounds(displaydata->display);
+    rect = Cocoa_DisplayBounds(displaydata->display);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
         rect.origin.x += (rect.size.width - window->w) / 2;

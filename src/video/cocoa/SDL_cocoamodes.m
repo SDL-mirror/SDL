@@ -200,6 +200,21 @@ Cocoa_InitModes(_THIS)
     SDL_stack_free(displays);
 }
 
+/* This is needed on 10.4, where NSRect and CGRect are different */
+NSRect
+Cocoa_DisplayBounds(CGDirectDisplayID display)
+{
+    NSRect nsrect;
+    CGRect cgrect;
+
+    cgrect = CGDisplayBounds(display);
+    nsrect.origin.x = cgrect.origin.x;
+    nsrect.origin.y = cgrect.origin.y;
+    nsrect.size.width = cgrect.size.width;
+    nsrect.size.height = cgrect.size.height;
+    return nsrect;
+}
+
 static void
 AddDisplayMode(const void *moderef, void *context)
 {

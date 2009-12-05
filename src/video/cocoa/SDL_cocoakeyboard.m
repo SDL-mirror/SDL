@@ -180,9 +180,10 @@ typedef unsigned int NSUInteger;
     return nil;
 }
 
-- (NSInteger) conversationIdentifier
+/* Needs long instead of NSInteger for compilation on Mac OS X 10.4 */
+- (long) conversationIdentifier
 {
-    return (NSInteger) self;
+    return (long) self;
 }
 
 // This method returns the index for character that is 

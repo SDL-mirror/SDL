@@ -68,7 +68,7 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 
         if (candidate) {
             SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
-            NSRect rect = CGDisplayBounds(displaydata->display);
+            NSRect rect = Cocoa_DisplayBounds(displaydata->display);
 
             point = [NSEvent mouseLocation];
             point.x = point.x - rect.origin.x;
