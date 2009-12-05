@@ -435,6 +435,7 @@ extern DECLSPEC SDL_DisplayMode *SDLCALL SDL_GetClosestDisplayMode(const
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
  *  
+ *  \sa SDL_GetWindowDisplayMode()
  *  \sa SDL_SetWindowFullscreen()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_WindowID windowID,
@@ -444,6 +445,9 @@ extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_WindowID windowID,
 /**
  *  \brief Fill in information about the display mode used when a fullscreen
  *         window is visible on the currently selected display.
+ *
+ *  \sa SDL_SetWindowDisplayMode()
+ *  \sa SDL_SetWindowFullscreen()
  */
 extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_WindowID windowID,
                                                      SDL_DisplayMode * mode);
@@ -683,7 +687,8 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_WindowID windowID);
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
  *  
- *  \sa SDL_WindowDisplayMode()
+ *  \sa SDL_SetWindowDisplayMode()
+ *  \sa SDL_GetWindowDisplayMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_WindowID windowID,
                                                     int fullscreen);
