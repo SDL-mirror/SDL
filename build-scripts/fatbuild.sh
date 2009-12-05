@@ -4,7 +4,9 @@
 
 # Number of CPUs (for make -j)
 NCPU=`sysctl -n hw.ncpu`
-NJOB=$NCPU
+if test x$NJOB = x; then
+    NJOB=$NCPU
+fi
 
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
