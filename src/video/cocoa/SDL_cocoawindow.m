@@ -421,7 +421,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     NSScreen *candidate;
     int i, count = [screens count];
     for (i = 0; i < count; ++i) {
-        screen = [screens objectAtIndex:i];
+        candidate = [screens objectAtIndex:i];
         NSRect screenRect = [candidate frame];
         if (rect.origin.x >= screenRect.origin.x &&
             rect.origin.x < screenRect.origin.x + screenRect.size.width &&
