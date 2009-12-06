@@ -449,7 +449,12 @@ main(int argc, char *argv[])
     }
     printf("Number of displays: %d\n", SDL_GetNumVideoDisplays());
     for (d = 0; d < SDL_GetNumVideoDisplays(); ++d) {
-        printf("Display %d:\n", d);
+        SDL_Rect bounds;
+
+        SDL_GetDisplayBounds(d, &bounds);
+        printf("Display %d: %dx%d at %d,%d\n", d,
+               bounds.w, bounds.h, bounds.x, bounds.y);
+
         SDL_SelectVideoDisplay(d);
 
         SDL_GetDesktopDisplayMode(&mode);

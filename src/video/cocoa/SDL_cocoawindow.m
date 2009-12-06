@@ -378,23 +378,28 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     NSRect rect;
+    SDL_Rect bounds;
     unsigned int style;
     NSString *title;
     int status;
 
-    rect = Cocoa_DisplayBounds(displaydata->display);
+    Cocoa_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.x += (rect.size.width - window->w) / 2;
-    } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
+    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.x = bounds.x;
+    } else {
         rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.y += (rect.size.height - window->h) / 2;
-    } else if (window->x != SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
+    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+        rect.origin.y = bounds.y;
+    } else {
         rect.origin.y = window->y;
     }
     rect.size.width = window->w;
@@ -482,19 +487,20 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     NSRect rect;
+    SDL_Rect bounds;
 
-    rect = Cocoa_DisplayBounds(displaydata->display);
+    Cocoa_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.x += (rect.size.width - window->w) / 2;
+        rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
     } else {
         rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        rect.origin.y += (rect.size.height - window->h) / 2;
+        rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
     } else {
         rect.origin.y = window->y;
     }

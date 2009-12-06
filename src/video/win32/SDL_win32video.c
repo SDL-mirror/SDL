@@ -160,6 +160,7 @@ WIN_CreateDevice(int devindex)
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
     device->VideoQuit = WIN_VideoQuit;
+    device->GetDisplayBounds = WIN_GetDisplayBounds;
     device->GetDisplayModes = WIN_GetDisplayModes;
     device->SetDisplayMode = WIN_SetDisplayMode;
     device->SetDisplayGammaRamp = WIN_SetDisplayGammaRamp;

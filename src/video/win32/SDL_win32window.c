@@ -185,12 +185,14 @@ int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     RAWINPUTDEVICE Rid;
     AXIS TabX, TabY;
     LOGCONTEXTA lc;
     HWND hwnd;
     HWND top;
     RECT rect;
+    SDL_Rect bounds;
     DWORD style = (WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
     int x, y;
     int w, h;
@@ -219,19 +221,28 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
 
+    WIN_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (GetSystemMetrics(SM_CXSCREEN) - w) / 2;
+        x = bounds.x + (bounds.w - window->w) / 2;
     } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
-        x = CW_USEDEFAULT;
+        if (bounds.x == 0) {
+            x = CW_USEDEFAULT;
+        } else {
+            x = bounds.x;
+        }
     } else {
         x = window->x + rect.left;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (GetSystemMetrics(SM_CYSCREEN) - h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
-        y = CW_USEDEFAULT;
+        y = bounds.y + (bounds.h - window->h) / 2;
+    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+        if (bounds.x == 0) {
+            y = CW_USEDEFAULT;
+        } else {
+            y = bounds.y;
+        }
     } else {
         y = window->y + rect.top;
     }
@@ -416,8 +427,10 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
+    SDL_Rect bounds;
     DWORD style;
     HWND top;
     BOOL menu;
@@ -441,15 +454,16 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
 #endif
     AdjustWindowRectEx(&rect, style, menu, 0);
 
+    WIN_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->x == SDL_WINDOWPOS_CENTERED) {
-        x = (GetSystemMetrics(SM_CXSCREEN) - window->w) / 2;
+        x = bounds.x + (bounds.w - window->w) / 2;
     } else {
         x = window->x + rect.left;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
         || window->y == SDL_WINDOWPOS_CENTERED) {
-        y = (GetSystemMetrics(SM_CYSCREEN) - window->h) / 2;
+        y = bounds.y + (bounds.h - window->h) / 2;
     } else {
         y = window->y + rect.top;
     }

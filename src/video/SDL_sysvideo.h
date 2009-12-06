@@ -213,6 +213,11 @@ struct SDL_VideoDevice
      */
 
     /*
+     * Get the bounds of a display
+     */
+    int (*GetDisplayBounds) (_THIS, SDL_VideoDisplay * display, SDL_Rect * rect);
+
+    /*
      * Get a list of the available display modes. e.g.
      * SDL_AddDisplayMode(_this->current_display, mode)
      */

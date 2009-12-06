@@ -54,7 +54,7 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
     mode->driverdata = data;
 #ifdef _WIN32_WCE
     /* In WinCE EnumDisplaySettings(ENUM_CURRENT_SETTINGS) doesn't take the user defined orientation
-       into account but GetSystemMetrixs does. */
+       into account but GetSystemMetrics does. */
     if (index == ENUM_CURRENT_SETTINGS) {
         mode->w = GetSystemMetrics(SM_CXSCREEN);
         mode->h = GetSystemMetrics(SM_CYSCREEN);
@@ -196,6 +196,18 @@ WIN_InitModes(_THIS)
         SDL_SetError("No displays available");
         return -1;
     }
+    return 0;
+}
+
+int
+WIN_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
+{
+    SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->desktop_mode.driverdata;
+
+    rect->x = (int)data->DeviceMode.dmPosition.x;
+    rect->y = (int)data->DeviceMode.dmPosition.y;
+    rect->w = data->DeviceMode.dmPelsWidth;
+    rect->h = data->DeviceMode.dmPelsHeight;
     return 0;
 }
 

@@ -335,6 +335,41 @@ SDL_GetNumVideoDisplays(void)
 }
 
 int
+SDL_GetDisplayBounds(int index, SDL_Rect * rect)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return -1;
+    }
+    if (index < 0 || index >= _this->num_displays) {
+        SDL_SetError("index must be in the range 0 - %d",
+                     _this->num_displays - 1);
+        return -1;
+    }
+    if (rect) {
+        SDL_VideoDisplay *display = &_this->displays[index];
+
+        if (_this->GetDisplayBounds) {
+            if (_this->GetDisplayBounds(_this, display, rect) < 0) {
+                return -1;
+            }
+        } else {
+            /* Assume that the displays are left to right */
+            if (index == 0) {
+                rect->x = 0;
+                rect->y = 0;
+            } else {
+                SDL_GetDisplayBounds(index-1, rect);
+                rect->x += rect->w;
+            }
+            rect->w = display->desktop_mode.w;
+            rect->h = display->desktop_mode.h;
+        }
+    }
+    return 0;
+}
+
+int
 SDL_SelectVideoDisplay(int index)
 {
     if (!_this) {

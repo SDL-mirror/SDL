@@ -67,12 +67,12 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
         SDL_Window *candidate = display->fullscreen_window;
 
         if (candidate) {
-            SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
-            NSRect rect = Cocoa_DisplayBounds(displaydata->display);
+            SDL_Rect bounds;
 
+            Cocoa_GetDisplayBounds(_this, display, &bounds);
             point = [NSEvent mouseLocation];
-            point.x = point.x - rect.origin.x;
-            point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - rect.origin.y;
+            point.x = point.x - bounds.x;
+            point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - bounds.y;
             if (point.x < 0 || point.x >= candidate->w ||
                 point.y < 0 || point.y >= candidate->h) {
                 /* The mouse is out of this fullscreen display */

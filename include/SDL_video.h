@@ -343,9 +343,20 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
 /**
  *  \brief Returns the number of available video displays.
  *  
+ *  \sa SDL_GetDisplayBounds()
  *  \sa SDL_SelectVideoDisplay()
  */
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
+
+/**
+ *  \brief Get the desktop area represented by a display, with the primary
+ *         display located at 0,0
+ *  
+ *  \return 0 on success, or -1 if the index is out of range.
+ *  
+ *  \sa SDL_GetNumVideoDisplays()
+ */
+extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int index, SDL_Rect * rect);
 
 /**
  *  \brief Set the index of the currently selected display.
