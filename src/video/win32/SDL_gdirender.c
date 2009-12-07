@@ -67,6 +67,10 @@ static int GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
 static int GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+static int GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                Uint32 format, void * pixels, int pitch);
+static int GDI_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                 Uint32 format, const void * pixels, int pitch);
 static void GDI_RenderPresent(SDL_Renderer * renderer);
 static void GDI_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -192,6 +196,8 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLine = GDI_RenderLine;
     renderer->RenderFill = GDI_RenderFill;
     renderer->RenderCopy = GDI_RenderCopy;
+    renderer->RenderReadPixels = GDI_RenderReadPixels;
+    renderer->RenderWritePixels = GDI_RenderWritePixels;
     renderer->RenderPresent = GDI_RenderPresent;
     renderer->DestroyTexture = GDI_DestroyTexture;
     renderer->DestroyRenderer = GDI_DestroyRenderer;
@@ -297,6 +303,72 @@ GDI_DisplayModeChanged(SDL_Renderer * renderer)
     return 0;
 }
 
+static HBITMAP
+GDI_CreateDIBSection(HDC hdc, int w, int h, int pitch, Uint32 format,
+                     HPALETTE * hpal, void ** pixels)
+{
+    int bmi_size;
+    LPBITMAPINFO bmi;
+
+    bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
+    bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
+    if (!bmi) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi->bmiHeader.biWidth = w;
+    bmi->bmiHeader.biHeight = -h;  /* topdown bitmap */
+    bmi->bmiHeader.biPlanes = 1;
+    bmi->bmiHeader.biSizeImage = h * pitch;
+    bmi->bmiHeader.biXPelsPerMeter = 0;
+    bmi->bmiHeader.biYPelsPerMeter = 0;
+    bmi->bmiHeader.biClrUsed = 0;
+    bmi->bmiHeader.biClrImportant = 0;
+    bmi->bmiHeader.biBitCount = SDL_BYTESPERPIXEL(format) * 8;
+    if (SDL_ISPIXELFORMAT_INDEXED(format)) {
+        bmi->bmiHeader.biCompression = BI_RGB;
+        if (hpal) {
+            int i, ncolors;
+            LOGPALETTE *palette;
+
+            ncolors = (1 << SDL_BITSPERPIXEL(format));
+            palette =
+                (LOGPALETTE *) SDL_malloc(sizeof(*palette) +
+                                          ncolors * sizeof(PALETTEENTRY));
+            if (!palette) {
+                SDL_free(bmi);
+                SDL_OutOfMemory();
+                return NULL;
+            }
+            palette->palVersion = 0x300;
+            palette->palNumEntries = ncolors;
+            for (i = 0; i < ncolors; ++i) {
+                palette->palPalEntry[i].peRed = 0xFF;
+                palette->palPalEntry[i].peGreen = 0xFF;
+                palette->palPalEntry[i].peBlue = 0xFF;
+                palette->palPalEntry[i].peFlags = 0;
+            }
+            *hpal = CreatePalette(palette);
+            SDL_free(palette);
+        }
+    } else {
+        int bpp;
+        Uint32 Rmask, Gmask, Bmask, Amask;
+
+        bmi->bmiHeader.biCompression = BI_BITFIELDS;
+        SDL_PixelFormatEnumToMasks(format, &bpp, &Rmask, &Gmask, &Bmask,
+                                   &Amask);
+        ((Uint32 *) bmi->bmiColors)[0] = Rmask;
+        ((Uint32 *) bmi->bmiColors)[1] = Gmask;
+        ((Uint32 *) bmi->bmiColors)[2] = Bmask;
+        if (hpal) {
+            *hpal = NULL;
+        }
+    }
+    return CreateDIBSection(hdc, bmi, DIB_RGB_COLORS, pixels, NULL, 0);
+}
+
 static int
 GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
@@ -327,69 +399,13 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING
         || texture->format != display->current_mode.format) {
-        int bmi_size;
-        LPBITMAPINFO bmi;
-
-        bmi_size = sizeof(BITMAPINFOHEADER) + 256 * sizeof(RGBQUAD);
-        bmi = (LPBITMAPINFO) SDL_calloc(1, bmi_size);
-        if (!bmi) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-        bmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-        bmi->bmiHeader.biWidth = texture->w;
-        bmi->bmiHeader.biHeight = -texture->h;  /* topdown bitmap */
-        bmi->bmiHeader.biPlanes = 1;
-        bmi->bmiHeader.biSizeImage = texture->h * data->pitch;
-        bmi->bmiHeader.biXPelsPerMeter = 0;
-        bmi->bmiHeader.biYPelsPerMeter = 0;
-        bmi->bmiHeader.biClrUsed = 0;
-        bmi->bmiHeader.biClrImportant = 0;
-        bmi->bmiHeader.biBitCount = SDL_BYTESPERPIXEL(data->format) * 8;
-        if (SDL_ISPIXELFORMAT_INDEXED(data->format)) {
-            int i, ncolors;
-            LOGPALETTE *palette;
-
-            bmi->bmiHeader.biCompression = BI_RGB;
-            ncolors = (1 << SDL_BITSPERPIXEL(data->format));
-            palette =
-                (LOGPALETTE *) SDL_malloc(sizeof(*palette) +
-                                          ncolors * sizeof(PALETTEENTRY));
-            if (!palette) {
-                SDL_free(bmi);
-                SDL_OutOfMemory();
-                return -1;
-            }
-            palette->palVersion = 0x300;
-            palette->palNumEntries = ncolors;
-            for (i = 0; i < ncolors; ++i) {
-                palette->palPalEntry[i].peRed = 0xFF;
-                palette->palPalEntry[i].peGreen = 0xFF;
-                palette->palPalEntry[i].peBlue = 0xFF;
-                palette->palPalEntry[i].peFlags = 0;
-            }
-            data->hpal = CreatePalette(palette);
-            SDL_free(palette);
-        } else {
-            int bpp;
-            Uint32 Rmask, Gmask, Bmask, Amask;
-
-            bmi->bmiHeader.biCompression = BI_BITFIELDS;
-            SDL_PixelFormatEnumToMasks(data->format, &bpp, &Rmask, &Gmask,
-                                       &Bmask, &Amask);
-            ((Uint32 *) bmi->bmiColors)[0] = Rmask;
-            ((Uint32 *) bmi->bmiColors)[1] = Gmask;
-            ((Uint32 *) bmi->bmiColors)[2] = Bmask;
-            data->hpal = NULL;
-        }
-        data->hbm =
-            CreateDIBSection(renderdata->memory_hdc, bmi, DIB_RGB_COLORS,
-                             &data->pixels, NULL, 0);
+        data->hbm = GDI_CreateDIBSection(renderdata->memory_hdc,
+                                         texture->w, texture->h,
+                                         data->pitch, data->format,
+                                         &data->hpal, &data->pixels);
     } else {
-        data->hbm =
-            CreateCompatibleBitmap(renderdata->window_hdc, texture->w,
-                                   texture->h);
-        data->pixels = NULL;
+        data->hbm = CreateCompatibleBitmap(renderdata->window_hdc,
+                                           texture->w, texture->h);
     }
     if (!data->hbm) {
         WIN_SetError("Couldn't create bitmap");
@@ -818,6 +834,87 @@ GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             }
         }
     }
+    return 0;
+}
+
+static int
+GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     Uint32 format, void * pixels, int pitch)
+{
+    GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    struct {
+        HBITMAP hbm;
+        void *pixels;
+        int pitch;
+        Uint32 format;
+    } data;
+
+    data.format = display->current_mode.format;
+    data.pitch = (rect->w * SDL_BYTESPERPIXEL(data.format));
+
+    data.hbm = GDI_CreateDIBSection(renderdata->memory_hdc, rect->w, rect->h,
+                                    data.pitch, data.format, NULL,
+                                    &data.pixels);
+    if (!data.hbm) {
+        WIN_SetError("Couldn't create bitmap");
+        return -1;
+    }
+
+    SelectObject(renderdata->memory_hdc, data.hbm);
+    if (!BitBlt(renderdata->memory_hdc, 0, 0, rect->w, rect->h,
+                renderdata->current_hdc, rect->x, rect->y, SRCCOPY)) {
+        WIN_SetError("BitBlt()");
+        DeleteObject(data.hbm);
+        return -1;
+    }
+
+    SDL_ConvertPixels(rect->w, rect->h,
+                      data.format, data.pixels, data.pitch,
+                      format, pixels, pitch);
+
+    DeleteObject(data.hbm);
+    return 0;
+}
+
+static int
+GDI_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                      Uint32 format, const void * pixels, int pitch)
+{
+    GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    struct {
+        HBITMAP hbm;
+        void *pixels;
+        int pitch;
+        Uint32 format;
+    } data;
+
+    data.format = display->current_mode.format;
+    data.pitch = (rect->w * SDL_BYTESPERPIXEL(data.format));
+
+    data.hbm = GDI_CreateDIBSection(renderdata->memory_hdc, rect->w, rect->h,
+                                    data.pitch, data.format,
+                                    NULL, &data.pixels);
+    if (!data.hbm) {
+        WIN_SetError("Couldn't create bitmap");
+        return -1;
+    }
+
+    SDL_ConvertPixels(rect->w, rect->h, format, pixels, pitch,
+                      data.format, data.pixels, data.pitch);
+
+    SelectObject(renderdata->memory_hdc, data.hbm);
+    if (!BitBlt(renderdata->current_hdc, rect->x, rect->y, rect->w, rect->h,
+                renderdata->memory_hdc, 0, 0, SRCCOPY)) {
+        WIN_SetError("BitBlt()");
+        DeleteObject(data.hbm);
+        return -1;
+    }
+
+    DeleteObject(data.hbm);
     return 0;
 }
 
