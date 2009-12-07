@@ -56,11 +56,17 @@ static int render_testBlitBlend (void);
 static int render_compare( const char *msg, const SurfaceImage_t *s, int allowable_error )
 {
    int ret;
+   SDL_Rect rect;
    Uint8 pix[4*80*60];
    SDL_Surface *testsur;
 
    /* Read pixels. */
-   ret = SDL_RenderReadPixels( NULL, FORMAT, pix, 80*4 );
+   /* Explicitly specify the rect in case the window isn't expected size... */
+   rect.x = 0;
+   rect.y = 0;
+   rect.w = 80;
+   rect.h = 60;
+   ret = SDL_RenderReadPixels( &rect, FORMAT, pix, 80*4 );
    if (SDL_ATassert( "SDL_RenderReadPixels", ret==0) )
       return 1;
 
