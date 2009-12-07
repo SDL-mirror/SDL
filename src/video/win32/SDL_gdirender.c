@@ -743,6 +743,10 @@ GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     status = Polyline(data->current_hdc, points, 2);
     DeleteObject(pen);
 
+    /* Need to close the endpoint of the line */
+    SetPixel(data->current_hdc, x2, y2,
+             RGB(renderer->r, renderer->g, renderer->b));
+
     if (!status) {
         WIN_SetError("FillRect()");
         return -1;
@@ -764,8 +768,8 @@ GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
 
     rc.left = rect->x;
     rc.top = rect->y;
-    rc.right = rect->x + rect->w + 1;
-    rc.bottom = rect->y + rect->h + 1;
+    rc.right = rect->x + rect->w;
+    rc.bottom = rect->y + rect->h;
 
     /* Should we cache the brushes? .. it looks like GDI does for us. :) */
     brush = CreateSolidBrush(RGB(renderer->r, renderer->g, renderer->b));
