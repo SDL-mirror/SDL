@@ -1155,8 +1155,8 @@ GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
      * least it would be pixel perfect.
      */
     data->glBegin(GL_POINTS);
-#ifdef __APPLE__
-    /* Mac OS X seems to always leave the second point open */
+#if defined(__APPLE__) || defined(__WIN32__)
+    /* Mac OS X and Windows seem to always leave the second point open */
     data->glVertex2f(0.5f + x2, 0.5f + y2);
 #else
     /* Linux seems to leave the right-most or bottom-most point open */
