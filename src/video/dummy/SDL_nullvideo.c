@@ -121,7 +121,7 @@ DUMMY_VideoInit(_THIS)
     SDL_AddRenderDriver(&_this->displays[0], &SDL_DUMMY_RenderDriver);
 
     SDL_zero(mode);
-    SDL_AddDisplayMode(0, &mode);
+    SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     /* We're done! */
     return 0;
