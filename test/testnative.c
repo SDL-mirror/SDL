@@ -83,7 +83,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderFill(NULL);
+    SDL_RenderRect(NULL);
     for (i = 0; i < NUM_SPRITES; ++i) {
         position = &positions[i];
         velocity = &velocities[i];
@@ -158,7 +158,7 @@ main(int argc, char *argv[])
     /* Clear the window, load the sprite and go! */
     SDL_SelectRenderer(window);
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderFill(NULL);
+    SDL_RenderRect(NULL);
 
     sprite = LoadSprite(window, "icon.bmp");
     if (!sprite) {
@@ -199,7 +199,7 @@ main(int argc, char *argv[])
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderFill(NULL);
+                    SDL_RenderRect(NULL);
                     break;
                 }
                 break;

@@ -346,11 +346,11 @@ do { \
 
 #define FILLRECT(type, op) \
 do { \
-    int width = dstrect->w; \
-    int height = dstrect->h; \
+    int width = rect->w; \
+    int height = rect->h; \
     int pitch = (dst->pitch / dst->format->BytesPerPixel); \
     int skip = pitch - width; \
-    type *pixel = (type *)dst->pixels + dstrect->y * pitch + dstrect->x; \
+    type *pixel = (type *)dst->pixels + rect->y * pitch + rect->x; \
     while (height--) { \
         { int n = (width+3)/4; \
             switch (width & 3) { \

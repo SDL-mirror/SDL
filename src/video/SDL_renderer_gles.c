@@ -85,10 +85,12 @@ static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
 static void GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               int numrects, const SDL_Rect * rects);
-static int GLES_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                           int y2);
-static int GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GLES_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                             int count);
+static int GLES_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                            int count);
+static int GLES_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                            int count);
 static int GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * srcrect,
                            const SDL_Rect * dstrect);
@@ -242,9 +244,9 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
     renderer->DirtyTexture = GLES_DirtyTexture;
-    renderer->RenderPoint = GLES_RenderPoint;
-    renderer->RenderLine = GLES_RenderLine;
-    renderer->RenderFill = GLES_RenderFill;
+    renderer->RenderPoints = GLES_RenderPoints;
+    renderer->RenderLines = GLES_RenderLines;
+    renderer->RenderRects = GLES_RenderRects;
     renderer->RenderCopy = GLES_RenderCopy;
     renderer->RenderPresent = GLES_RenderPresent;
     renderer->DestroyTexture = GLES_DestroyTexture;
@@ -641,7 +643,7 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode, int isprimitive)
 }
 
 static int
-GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
+GLES_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
@@ -652,20 +654,16 @@ GLES_RenderPoint(SDL_Renderer * renderer, int x, int y)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    GLshort vertices[2];
-    vertices[0] = x;
-    vertices[1] = y;
-
-    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glVertexPointer(2, GL_INT, 0, points);
     data->glEnableClientState(GL_VERTEX_ARRAY);
-    data->glDrawArrays(GL_POINTS, 0, 1);
+    data->glDrawArrays(GL_POINTS, 0, count);
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
     return 0;
 }
 
 static int
-GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+GLES_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
@@ -676,24 +674,26 @@ GLES_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    GLshort vertices[4];
-    vertices[0] = x1;
-    vertices[1] = y1;
-    vertices[2] = x2;
-    vertices[3] = y2;
-
-    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glVertexPointer(2, GL_INT, 0, points);
     data->glEnableClientState(GL_VERTEX_ARRAY);
-    data->glDrawArrays(GL_LINES, 0, 2);
+    if (count > 2 && 
+        points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
+        /* GL_LINE_LOOP takes care of the final segment */
+        --count;
+        data->glDrawArrays(GL_LINE_LOOP, 0, count);
+    } else {
+        data->glDrawArrays(GL_LINE_STRIP, 0, count);
+    }
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
     return 0;
 }
 
 static int
-GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+GLES_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    int i;
 
     GLES_SetBlendMode(data, renderer->blendMode, 1);
 
@@ -702,24 +702,26 @@ GLES_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    GLshort minx = rect->x;
-    GLshort maxx = rect->x + rect->w;
-    GLshort miny = rect->y;
-    GLshort maxy = rect->y + rect->h;
-
-    GLshort vertices[8];
-    vertices[0] = minx;
-    vertices[1] = miny;
-    vertices[2] = maxx;
-    vertices[3] = miny;
-    vertices[4] = minx;
-    vertices[5] = maxy;
-    vertices[6] = maxx;
-    vertices[7] = maxy;
-
-    data->glVertexPointer(2, GL_SHORT, 0, vertices);
     data->glEnableClientState(GL_VERTEX_ARRAY);
-    data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+        GLshort minx = rect->x;
+        GLshort maxx = rect->x + rect->w;
+        GLshort miny = rect->y;
+        GLshort maxy = rect->y + rect->h;
+        GLshort vertices[8];
+        vertices[0] = minx;
+        vertices[1] = miny;
+        vertices[2] = maxx;
+        vertices[3] = miny;
+        vertices[4] = minx;
+        vertices[5] = maxy;
+        vertices[6] = maxx;
+        vertices[7] = maxy;
+
+        data->glVertexPointer(2, GL_SHORT, 0, vertices);
+        data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    }
     data->glDisableClientState(GL_VERTEX_ARRAY);
 
     return 0;

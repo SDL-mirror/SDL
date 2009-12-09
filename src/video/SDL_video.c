@@ -2485,82 +2485,118 @@ SDL_GetRenderDrawBlendMode(int *blendMode)
 int
 SDL_RenderPoint(int x, int y)
 {
+    SDL_Point point;
+
+    point.x = x;
+    point.y = y;
+    return SDL_RenderPoints(&point, 1);
+}
+
+int
+SDL_RenderPoints(const SDL_Point * points, int count)
+{
     SDL_Renderer *renderer;
-    SDL_Window *window;
+
+    if (!points) {
+        SDL_SetError("SDL_RenderPoints(): Passed NULL points");
+        return -1;
+    }
 
     renderer = SDL_GetCurrentRenderer(SDL_TRUE);
     if (!renderer) {
         return -1;
     }
-    if (!renderer->RenderPoint) {
+    if (!renderer->RenderPoints) {
         SDL_Unsupported();
         return -1;
     }
-    window = SDL_GetWindowFromID(renderer->window);
-    if (x < 0 || y < 0 || x >= window->w || y >= window->h) {
+    if (count < 1) {
         return 0;
     }
-    return renderer->RenderPoint(renderer, x, y);
+    return renderer->RenderPoints(renderer, points, count);
 }
 
 int
 SDL_RenderLine(int x1, int y1, int x2, int y2)
 {
-    SDL_Renderer *renderer;
-    SDL_Window *window;
-    SDL_Rect real_rect;
+    SDL_Point points[2];
 
-    if (x1 == x2 && y1 == y2) {
-        return SDL_RenderPoint(x1, y1);
-    }
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderLine) {
-        SDL_Unsupported();
-        return -1;
-    }
-    window = SDL_GetWindowFromID(renderer->window);
-
-    real_rect.x = 0;
-    real_rect.y = 0;
-    real_rect.w = window->w;
-    real_rect.h = window->h;
-    if (!SDL_IntersectRectAndLine(&real_rect, &x1, &y1, &x2, &y2)) {
-        return (0);
-    }
-    return renderer->RenderLine(renderer, x1, y1, x2, y2);
+    points[0].x = x1;
+    points[0].y = y1;
+    points[1].x = x2;
+    points[1].y = y2;
+    return SDL_RenderLines(points, 2);
 }
 
 int
-SDL_RenderFill(const SDL_Rect * rect)
+SDL_RenderLines(const SDL_Point * points, int count)
 {
     SDL_Renderer *renderer;
-    SDL_Window *window;
-    SDL_Rect real_rect;
+
+    if (!points) {
+        SDL_SetError("SDL_RenderLines(): Passed NULL points");
+        return -1;
+    }
 
     renderer = SDL_GetCurrentRenderer(SDL_TRUE);
     if (!renderer) {
         return -1;
     }
-    if (!renderer->RenderFill) {
+    if (!renderer->RenderLines) {
         SDL_Unsupported();
         return -1;
     }
-    window = SDL_GetWindowFromID(renderer->window);
+    if (count < 2) {
+        return 0;
+    }
+    return renderer->RenderLines(renderer, points, count);
+}
 
-    real_rect.x = 0;
-    real_rect.y = 0;
-    real_rect.w = window->w;
-    real_rect.h = window->h;
-    if (rect) {
-        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
-            return 0;
+int
+SDL_RenderRect(const SDL_Rect * rect)
+{
+    return SDL_RenderRects(&rect, 1);
+}
+
+int
+SDL_RenderRects(const SDL_Rect ** rects, int count)
+{
+    SDL_Renderer *renderer;
+    int i;
+
+    if (!rects) {
+        SDL_SetError("SDL_RenderRects(): Passed NULL rects");
+        return -1;
+    }
+
+    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderRects) {
+        SDL_Unsupported();
+        return -1;
+    }
+    if (count < 1) {
+        return 0;
+    }
+    /* Check for NULL rect, which means fill entire window */
+    for (i = 0; i < count; ++i) {
+        if (rects[i] == NULL) {
+            SDL_Window *window;
+            SDL_Rect full_rect;
+            SDL_Rect *rect;
+
+            window = SDL_GetWindowFromID(renderer->window);
+            full_rect.x = 0;
+            full_rect.y = 0;
+            full_rect.w = window->w;
+            full_rect.h = window->h;
+            rect = &full_rect;
+            return renderer->RenderRects(renderer, &rect, 1);
         }
     }
-    return renderer->RenderFill(renderer, &real_rect);
+    return renderer->RenderRects(renderer, rects, count);
 }
 
 int

@@ -87,7 +87,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 
     /* Draw a gray background */
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderFill(NULL);
+    SDL_RenderRect(NULL);
 
     /* Move the sprite, bounce at the wall, and draw */
     for (i = 0; i < NUM_SPRITES; ++i) {

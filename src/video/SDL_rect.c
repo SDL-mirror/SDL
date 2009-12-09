@@ -119,6 +119,84 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
 }
 
 SDL_bool
+SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
+                  SDL_Rect * result)
+{
+    int minx, miny;
+    int maxx, maxy;
+    int x, y, i;
+
+    if (count < 1) {
+        return SDL_FALSE;
+    }
+
+    if (clip) {
+        SDL_bool added = SDL_FALSE;
+        int clip_minx = clip->x;
+        int clip_miny = clip->y;
+        int clip_maxx = clip->x+clip->w-1;
+        int clip_maxy = clip->y+clip->h-1;
+
+        for (i = 0; i < count; ++i) {
+            x = points[i].x;
+            y = points[i].y;
+
+            if (x < clip_minx || x > clip_maxx ||
+                y < clip_miny || y > clip_maxy) {
+                continue;
+            }
+            if (!added) {
+                minx = maxx = x;
+                miny = maxy = y;
+                added = SDL_TRUE;
+                continue;
+            }
+            if (x < minx) {
+                minx = x;
+            } else if (x > maxx) {
+                maxx = x;
+            }
+            if (y < miny) {
+                miny = y;
+            } else if (y > maxy) {
+                maxy = y;
+            }
+        }
+        if (!added) {
+            return SDL_FALSE;
+        }
+    } else {
+        /* No clipping, always add the first point */
+        minx = maxx = points[0].x;
+        miny = maxy = points[0].y;
+
+        for (i = 1; i < count; ++i) {
+            x = points[i].x;
+            y = points[i].y;
+
+            if (x < minx) {
+                minx = x;
+            } else if (x > maxx) {
+                maxx = x;
+            }
+            if (y < miny) {
+                miny = y;
+            } else if (y > maxy) {
+                maxy = y;
+            }
+        }
+    }
+
+    if (result) {
+        result->x = minx;
+        result->y = miny;
+        result->w = (maxx-minx)+1;
+        result->h = (maxy-miny)+1;
+    }
+    return SDL_TRUE;
+}
+
+SDL_bool
 SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
                          int *Y2)
 {

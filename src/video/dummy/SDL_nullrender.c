@@ -31,11 +31,12 @@
 
 static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
-static int SDL_DUMMY_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1,
-                                int x2, int y2);
-static int SDL_DUMMY_RenderFill(SDL_Renderer * renderer,
-                                const SDL_Rect * rect);
+static int SDL_DUMMY_RenderPoints(SDL_Renderer * renderer,
+                                  const SDL_Point * points, int count);
+static int SDL_DUMMY_RenderLines(SDL_Renderer * renderer,
+                                 const SDL_Point * points, int count);
+static int SDL_DUMMY_RenderRects(SDL_Renderer * renderer,
+                                 const SDL_Rect ** rects, int count);
 static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
                                 const SDL_Rect * srcrect,
@@ -99,9 +100,9 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
-    renderer->RenderPoint = SDL_DUMMY_RenderPoint;
-    renderer->RenderLine = SDL_DUMMY_RenderLine;
-    renderer->RenderFill = SDL_DUMMY_RenderFill;
+    renderer->RenderPoints = SDL_DUMMY_RenderPoints;
+    renderer->RenderLines = SDL_DUMMY_RenderLines;
+    renderer->RenderRects = SDL_DUMMY_RenderRects;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
     renderer->RenderReadPixels = SDL_DUMMY_RenderReadPixels;
     renderer->RenderWritePixels = SDL_DUMMY_RenderWritePixels;
@@ -139,72 +140,70 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
-SDL_DUMMY_RenderPoint(SDL_Renderer * renderer, int x, int y)
+SDL_DUMMY_RenderPoints(SDL_Renderer * renderer,
+                       const SDL_Point * points, int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
-    int status;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE ||
         renderer->blendMode == SDL_BLENDMODE_MASK) {
-        Uint32 color =
-            SDL_MapRGBA(target->format, renderer->r, renderer->g, renderer->b,
-                        renderer->a);
+        Uint32 color = SDL_MapRGBA(target->format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
 
-        status = SDL_DrawPoint(target, x, y, color);
+        return SDL_DrawPoints(target, points, count, color);
     } else {
-        status =
-            SDL_BlendPoint(target, x, y, renderer->blendMode, renderer->r,
-                           renderer->g, renderer->b, renderer->a);
+        return SDL_BlendPoints(target, points, count, renderer->blendMode,
+                               renderer->r, renderer->g, renderer->b,
+                               renderer->a);
     }
-    return status;
 }
 
 static int
-SDL_DUMMY_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+SDL_DUMMY_RenderLines(SDL_Renderer * renderer,
+                      const SDL_Point * points, int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
-    int status;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE ||
         renderer->blendMode == SDL_BLENDMODE_MASK) {
-        Uint32 color =
-            SDL_MapRGBA(target->format, renderer->r, renderer->g, renderer->b,
-                        renderer->a);
+        Uint32 color = SDL_MapRGBA(target->format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
 
-        status = SDL_DrawLine(target, x1, y1, x2, y2, color);
+        return SDL_DrawLines(target, points, count, color);
     } else {
-        status =
-            SDL_BlendLine(target, x1, y1, x2, y2, renderer->blendMode,
-                          renderer->r, renderer->g, renderer->b, renderer->a);
+        return SDL_BlendLines(target, points, count, renderer->blendMode,
+                              renderer->r, renderer->g, renderer->b,
+                              renderer->a);
     }
-    return status;
 }
 
 static int
-SDL_DUMMY_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+SDL_DUMMY_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                      int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
-    SDL_Rect real_rect = *rect;
-    int status;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-        Uint32 color =
-            SDL_MapRGBA(target->format, renderer->r, renderer->g, renderer->b,
-                        renderer->a);
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        Uint32 color = SDL_MapRGBA(target->format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
 
-        status = SDL_FillRect(target, &real_rect, color);
+        return SDL_FillRects(target, rects, count, color);
     } else {
-        status =
-            SDL_BlendRect(target, &real_rect, renderer->blendMode,
-                          renderer->r, renderer->g, renderer->b, renderer->a);
+        return SDL_BlendRects(target, rects, count,
+                              renderer->blendMode,
+                              renderer->r, renderer->g, renderer->b,
+                              renderer->a);
     }
-    return status;
 }
 
 static int

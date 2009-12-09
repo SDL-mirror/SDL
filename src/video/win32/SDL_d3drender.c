@@ -66,10 +66,12 @@ static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              int numrects, const SDL_Rect * rects);
-static int D3D_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                          int y2);
-static int D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int D3D_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                            int count);
+static int D3D_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                           int count);
+static int D3D_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                           int count);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -407,9 +409,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
     renderer->DirtyTexture = D3D_DirtyTexture;
-    renderer->RenderPoint = D3D_RenderPoint;
-    renderer->RenderLine = D3D_RenderLine;
-    renderer->RenderFill = D3D_RenderFill;
+    renderer->RenderPoints = D3D_RenderPoints;
+    renderer->RenderLines = D3D_RenderLines;
+    renderer->RenderRects = D3D_RenderRects;
     renderer->RenderCopy = D3D_RenderCopy;
     renderer->RenderReadPixels = D3D_RenderReadPixels;
     renderer->RenderWritePixels = D3D_RenderWritePixels;
@@ -927,27 +929,18 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
 }
 
 static int
-D3D_RenderPoint(SDL_Renderer * renderer, int x, int y)
+D3D_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     DWORD color;
-    Vertex vertices[1];
+    Vertex *vertices;
+    int i;
     HRESULT result;
 
     if (data->beginScene) {
         IDirect3DDevice9_BeginScene(data->device);
         data->beginScene = SDL_FALSE;
     }
-
-    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
-
-    vertices[0].x = (float) x;
-    vertices[0].y = (float) y;
-    vertices[0].z = 0.0f;
-    vertices[0].rhw = 1.0f;
-    vertices[0].color = color;
-    vertices[0].u = 0.0f;
-    vertices[0].v = 0.0f;
 
     D3D_SetBlendMode(data, renderer->blendMode);
 
@@ -958,9 +951,23 @@ D3D_RenderPoint(SDL_Renderer * renderer, int x, int y)
         D3D_SetError("SetTexture()", result);
         return -1;
     }
+
+    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
+
+    vertices = SDL_stack_alloc(Vertex, count);
+    for (i = 0; i < count; ++i) {
+        vertices[i].x = (float) points[i].x;
+        vertices[i].y = (float) points[i].y;
+        vertices[i].z = 0.0f;
+        vertices[i].rhw = 1.0f;
+        vertices[i].color = color;
+        vertices[i].u = 0.0f;
+        vertices[i].v = 0.0f;
+    }
     result =
-        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_POINTLIST, 1,
+        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_POINTLIST, count,
                                          vertices, sizeof(*vertices));
+    SDL_stack_free(vertices);
     if (FAILED(result)) {
         D3D_SetError("DrawPrimitiveUP()", result);
         return -1;
@@ -969,35 +976,18 @@ D3D_RenderPoint(SDL_Renderer * renderer, int x, int y)
 }
 
 static int
-D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+D3D_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     DWORD color;
-    Vertex vertices[2];
+    Vertex *vertices;
+    int i;
     HRESULT result;
 
     if (data->beginScene) {
         IDirect3DDevice9_BeginScene(data->device);
         data->beginScene = SDL_FALSE;
     }
-
-    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
-
-    vertices[0].x = (float) x1;
-    vertices[0].y = (float) y1;
-    vertices[0].z = 0.0f;
-    vertices[0].rhw = 1.0f;
-    vertices[0].color = color;
-    vertices[0].u = 0.0f;
-    vertices[0].v = 0.0f;
-
-    vertices[1].x = (float) x2;
-    vertices[1].y = (float) y2;
-    vertices[1].z = 0.0f;
-    vertices[1].rhw = 1.0f;
-    vertices[1].color = color;
-    vertices[1].u = 0.0f;
-    vertices[1].v = 0.0f;
 
     D3D_SetBlendMode(data, renderer->blendMode);
 
@@ -1008,9 +998,23 @@ D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
         D3D_SetError("SetTexture()", result);
         return -1;
     }
+
+    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
+
+    vertices = SDL_stack_alloc(Vertex, count);
+    for (i = 0; i < count; ++i) {
+        vertices[i].x = (float) points[i].x;
+        vertices[i].y = (float) points[i].y;
+        vertices[i].z = 0.0f;
+        vertices[i].rhw = 1.0f;
+        vertices[i].color = color;
+        vertices[i].u = 0.0f;
+        vertices[i].v = 0.0f;
+    }
     result =
-        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_LINELIST, 1,
+        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_LINESTRIP, count,
                                          vertices, sizeof(*vertices));
+    SDL_stack_free(vertices);
     if (FAILED(result)) {
         D3D_SetError("DrawPrimitiveUP()", result);
         return -1;
@@ -1019,11 +1023,12 @@ D3D_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 }
 
 static int
-D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+D3D_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    DWORD color;
+    int i;
     float minx, miny, maxx, maxy;
-    DWORD color;
     Vertex vertices[4];
     HRESULT result;
 
@@ -1032,45 +1037,6 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
         data->beginScene = SDL_FALSE;
     }
 
-    minx = (float) rect->x;
-    miny = (float) rect->y;
-    maxx = (float) rect->x + rect->w;
-    maxy = (float) rect->y + rect->h;
-
-    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
-
-    vertices[0].x = minx;
-    vertices[0].y = miny;
-    vertices[0].z = 0.0f;
-    vertices[0].rhw = 1.0f;
-    vertices[0].color = color;
-    vertices[0].u = 0.0f;
-    vertices[0].v = 0.0f;
-
-    vertices[1].x = maxx;
-    vertices[1].y = miny;
-    vertices[1].z = 0.0f;
-    vertices[1].rhw = 1.0f;
-    vertices[1].color = color;
-    vertices[1].u = 0.0f;
-    vertices[1].v = 0.0f;
-
-    vertices[2].x = maxx;
-    vertices[2].y = maxy;
-    vertices[2].z = 0.0f;
-    vertices[2].rhw = 1.0f;
-    vertices[2].color = color;
-    vertices[2].u = 0.0f;
-    vertices[2].v = 0.0f;
-
-    vertices[3].x = minx;
-    vertices[3].y = maxy;
-    vertices[3].z = 0.0f;
-    vertices[3].rhw = 1.0f;
-    vertices[3].color = color;
-    vertices[3].u = 0.0f;
-    vertices[3].v = 0.0f;
-
     D3D_SetBlendMode(data, renderer->blendMode);
 
     result =
@@ -1080,12 +1046,56 @@ D3D_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
         D3D_SetError("SetTexture()", result);
         return -1;
     }
-    result =
-        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_TRIANGLEFAN, 2,
-                                         vertices, sizeof(*vertices));
-    if (FAILED(result)) {
-        D3D_SetError("DrawPrimitiveUP()", result);
-        return -1;
+
+    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
+
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+
+        minx = (float) rect->x;
+        miny = (float) rect->y;
+        maxx = (float) rect->x + rect->w;
+        maxy = (float) rect->y + rect->h;
+
+        vertices[0].x = minx;
+        vertices[0].y = miny;
+        vertices[0].z = 0.0f;
+        vertices[0].rhw = 1.0f;
+        vertices[0].color = color;
+        vertices[0].u = 0.0f;
+        vertices[0].v = 0.0f;
+
+        vertices[1].x = maxx;
+        vertices[1].y = miny;
+        vertices[1].z = 0.0f;
+        vertices[1].rhw = 1.0f;
+        vertices[1].color = color;
+        vertices[1].u = 0.0f;
+        vertices[1].v = 0.0f;
+
+        vertices[2].x = maxx;
+        vertices[2].y = maxy;
+        vertices[2].z = 0.0f;
+        vertices[2].rhw = 1.0f;
+        vertices[2].color = color;
+        vertices[2].u = 0.0f;
+        vertices[2].v = 0.0f;
+
+        vertices[3].x = minx;
+        vertices[3].y = maxy;
+        vertices[3].z = 0.0f;
+        vertices[3].rhw = 1.0f;
+        vertices[3].color = color;
+        vertices[3].u = 0.0f;
+        vertices[3].v = 0.0f;
+
+        result =
+            IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_TRIANGLEFAN,
+                                             2, vertices, sizeof(*vertices));
+        if (FAILED(result)) {
+            D3D_SetError("DrawPrimitiveUP()", result);
+            return -1;
+        }
     }
     return 0;
 }

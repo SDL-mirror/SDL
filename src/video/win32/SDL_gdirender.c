@@ -61,10 +61,12 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GDI_SetDrawBlendMode(SDL_Renderer * renderer);
-static int GDI_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                          int y2);
-static int GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GDI_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                            int count);
+static int GDI_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                           int count);
+static int GDI_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                           int count);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -192,9 +194,9 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
     renderer->SetDrawBlendMode = GDI_SetDrawBlendMode;
-    renderer->RenderPoint = GDI_RenderPoint;
-    renderer->RenderLine = GDI_RenderLine;
-    renderer->RenderFill = GDI_RenderFill;
+    renderer->RenderPoints = GDI_RenderPoints;
+    renderer->RenderLines = GDI_RenderLines;
+    renderer->RenderRects = GDI_RenderRects;
     renderer->RenderCopy = GDI_RenderCopy;
     renderer->RenderReadPixels = GDI_RenderReadPixels;
     renderer->RenderWritePixels = GDI_RenderWritePixels;
@@ -685,96 +687,128 @@ GDI_SetDrawBlendMode(SDL_Renderer * renderer)
 }
 
 static int
-GDI_RenderPoint(SDL_Renderer * renderer, int x, int y)
+GDI_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
+    int i;
+    COLORREF color;
 
     if (data->makedirty) {
+        /* Get the smallest rectangle that contains everything */
+        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
         SDL_Rect rect;
 
-        rect.x = x;
-        rect.y = y;
-        rect.w = 1;
-        rect.h = 1;
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = window->w;
+        rect.h = window->h;
+        if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
+            /* Nothing to draw */
+            return 0;
+        }
 
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
-    SetPixel(data->current_hdc, x, y,
-             RGB(renderer->r, renderer->g, renderer->b));
+    color = RGB(renderer->r, renderer->g, renderer->b);
+    for (i = 0; i < count; ++i) {
+        SetPixel(data->current_hdc, points[i].x, points[i].y, color);
+    }
+
     return 0;
 }
 
 static int
-GDI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+GDI_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
-    POINT points[2];
     HPEN pen;
     BOOL status;
 
     if (data->makedirty) {
-        SDL_Rect rect;
+        /* Get the smallest rectangle that contains everything */
+        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Rect clip, rect;
 
-        if (x1 < x2) {
-            rect.x = x1;
-            rect.w = (x2 - x1) + 1;
-        } else {
-            rect.x = x2;
-            rect.w = (x1 - x2) + 1;
+        clip.x = 0;
+        clip.y = 0;
+        clip.w = window->w;
+        clip.h = window->h;
+        SDL_EnclosePoints(points, count, NULL, &rect);
+        if (!SDL_IntersectRect(&rect, &clip, &rect)) {
+            /* Nothing to draw */
+            return 0;
         }
-        if (y1 < y2) {
-            rect.y = y1;
-            rect.h = (y2 - y1) + 1;
-        } else {
-            rect.y = y2;
-            rect.h = (y1 - y2) + 1;
-        }
+
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
     /* Should we cache the pen? .. it looks like GDI does for us. :) */
     pen = CreatePen(PS_SOLID, 1, RGB(renderer->r, renderer->g, renderer->b));
     SelectObject(data->current_hdc, pen);
-    points[0].x = x1;
-    points[0].y = y1;
-    points[1].x = x2;
-    points[1].y = y2;
-    status = Polyline(data->current_hdc, points, 2);
+    {
+        LPPOINT p = SDL_stack_alloc(POINT, count);
+        int i;
+
+        for (i = 0; i < count; ++i) {
+            p[i].x = points[i].x;
+            p[i].y = points[i].y;
+        }
+        status = Polyline(data->current_hdc, p, count);
+        SDL_stack_free(p);
+    }
     DeleteObject(pen);
 
     /* Need to close the endpoint of the line */
-    SetPixel(data->current_hdc, x2, y2,
-             RGB(renderer->r, renderer->g, renderer->b));
+    if (points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
+        SetPixel(data->current_hdc, points[count-1].x, points[count-1].y,
+                 RGB(renderer->r, renderer->g, renderer->b));
+    }
 
     if (!status) {
-        WIN_SetError("FillRect()");
+        WIN_SetError("Polyline()");
         return -1;
     }
     return 0;
 }
 
 static int
-GDI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+GDI_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     RECT rc;
     HBRUSH brush;
-    int status;
+    int i, status = 1;
 
     if (data->makedirty) {
-        SDL_AddDirtyRect(&data->dirty, rect);
-    }
+        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Rect clip, rect;
 
-    rc.left = rect->x;
-    rc.top = rect->y;
-    rc.right = rect->x + rect->w;
-    rc.bottom = rect->y + rect->h;
+        clip.x = 0;
+        clip.y = 0;
+        clip.w = window->w;
+        clip.h = window->h;
+
+        for (i = 0; i < count; ++i) {
+            if (SDL_IntersectRect(rects[i], &clip, &rect)) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+        }
+    }
 
     /* Should we cache the brushes? .. it looks like GDI does for us. :) */
     brush = CreateSolidBrush(RGB(renderer->r, renderer->g, renderer->b));
     SelectObject(data->current_hdc, brush);
-    status = FillRect(data->current_hdc, &rc, brush);
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+
+        rc.left = rect->x;
+        rc.top = rect->y;
+        rc.right = rect->x + rect->w;
+        rc.bottom = rect->y + rect->h;
+
+        status &= FillRect(data->current_hdc, &rc, brush);
+    }
     DeleteObject(brush);
 
     if (!status) {

@@ -59,10 +59,12 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, int markDirty, void **pixels,
                           int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int SW_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                         int y2);
-static int SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int SW_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                           int count);
+static int SW_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                          int count);
+static int SW_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                          int count);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -228,9 +230,9 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = SW_ActivateRenderer;
     renderer->DisplayModeChanged = SW_DisplayModeChanged;
 
-    renderer->RenderPoint = SW_RenderPoint;
-    renderer->RenderLine = SW_RenderLine;
-    renderer->RenderFill = SW_RenderFill;
+    renderer->RenderPoints = SW_RenderPoints;
+    renderer->RenderLines = SW_RenderLines;
+    renderer->RenderRects = SW_RenderRects;
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderReadPixels = SW_RenderReadPixels;
     renderer->RenderWritePixels = SW_RenderWritePixels;
@@ -537,156 +539,189 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-SW_RenderPoint(SDL_Renderer * renderer, int x, int y)
+SW_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Texture *texture = data->texture[data->current_texture];
     SDL_Rect rect;
-    int status;
+    int i;
+    int x, y;
+    int status = 0;
 
-    rect.x = x;
-    rect.y = y;
-    rect.w = 1;
-    rect.h = 1;
-
-    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
-        SDL_AddDirtyRect(&data->dirty, &rect);
-    }
-
-    if (data->renderer->LockTexture(data->renderer,
-                                    data->texture[data->current_texture],
-                                    &rect, 1,
-                                    &data->surface.pixels,
-                                    &data->surface.pitch) < 0) {
-        return -1;
-    }
-
-    data->surface.w = 1;
-    data->surface.h = 1;
-    data->surface.clip_rect.w = 1;
-    data->surface.clip_rect.h = 1;
-
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
-        Uint32 color =
-            SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
-                        renderer->b, renderer->a);
-
-        status = SDL_DrawPoint(&data->surface, 0, 0, color);
-    } else {
-        status =
-            SDL_BlendPoint(&data->surface, 0, 0, renderer->blendMode,
-                           renderer->r, renderer->g, renderer->b,
-                           renderer->a);
-    }
-
-    data->renderer->UnlockTexture(data->renderer,
-                                  data->texture[data->current_texture]);
-    return status;
-}
-
-static int
-SW_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
-{
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Rect rect;
-    int status;
-
-    if (x1 < x2) {
-        rect.x = x1;
-        rect.w = (x2 - x1) + 1;
-        x2 -= x1;
-        x1 = 0;
-    } else {
-        rect.x = x2;
-        rect.w = (x1 - x2) + 1;
-        x1 -= x2;
-        x2 = 0;
-    }
-    if (y1 < y2) {
-        rect.y = y1;
-        rect.h = (y2 - y1) + 1;
-        y2 -= y1;
-        y1 = 0;
-    } else {
-        rect.y = y2;
-        rect.h = (y1 - y2) + 1;
-        y1 -= y2;
-        y2 = 0;
+    /* Get the smallest rectangle that contains everything */
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = texture->w;
+    rect.h = texture->h;
+    if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
+        /* Nothing to draw */
+        return 0;
     }
 
     if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
-    if (data->renderer->LockTexture(data->renderer,
-                                    data->texture[data->current_texture],
-                                    &rect, 1,
+    if (data->renderer->LockTexture(data->renderer, texture, &rect, 1,
                                     &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
         return -1;
     }
 
-    data->surface.w = rect.w;
-    data->surface.h = rect.h;
-    data->surface.clip_rect.w = rect.w;
-    data->surface.clip_rect.h = rect.h;
+    data->surface.clip_rect.w = data->surface.w = rect.w;
+    data->surface.clip_rect.h = data->surface.h = rect.h;
 
+    /* Draw the points! */
     if (renderer->blendMode == SDL_BLENDMODE_NONE ||
         renderer->blendMode == SDL_BLENDMODE_MASK) {
-        Uint32 color =
-            SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
-                        renderer->b, renderer->a);
+        Uint32 color = SDL_MapRGBA(data->surface.format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
 
-        status = SDL_DrawLine(&data->surface, x1, y1, x2, y2, color);
+        for (i = 0; i < count; ++i) {
+            x = points[i].x - rect.x;
+            y = points[i].y - rect.y;
+
+            status = SDL_DrawPoint(&data->surface, x, y, color);
+        }
     } else {
-        status =
-            SDL_BlendLine(&data->surface, x1, y1, x2, y2, renderer->blendMode,
-                          renderer->r, renderer->g, renderer->b, renderer->a);
+        for (i = 0; i < count; ++i) {
+            x = points[i].x - rect.x;
+            y = points[i].y - rect.y;
+
+            status = SDL_BlendPoint(&data->surface, x, y,
+                                    renderer->blendMode,
+                                    renderer->r, renderer->g, renderer->b,
+                                    renderer->a);
+        }
     }
 
-    data->renderer->UnlockTexture(data->renderer,
-                                  data->texture[data->current_texture]);
+    data->renderer->UnlockTexture(data->renderer, texture);
+
     return status;
 }
 
 static int
-SW_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+SW_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Rect real_rect;
-    int status;
+    SDL_Texture *texture = data->texture[data->current_texture];
+    SDL_Rect clip, rect;
+    int i;
+    int x1, y1, x2, y2;
+    int status = 0;
 
-    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
-        SDL_AddDirtyRect(&data->dirty, rect);
+    /* Get the smallest rectangle that contains everything */
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = texture->w;
+    clip.h = texture->h;
+    SDL_EnclosePoints(points, count, NULL, &rect);
+    if (!SDL_IntersectRect(&rect, &clip, &rect)) {
+        /* Nothing to draw */
+        return 0;
     }
 
-    if (data->renderer->LockTexture(data->renderer,
-                                    data->texture[data->current_texture],
-                                    rect, 1, &data->surface.pixels,
+    if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+
+    if (data->renderer->LockTexture(data->renderer, texture, &rect, 1,
+                                    &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
         return -1;
     }
 
-    data->surface.w = rect->w;
-    data->surface.h = rect->h;
-    data->surface.clip_rect.w = rect->w;
-    data->surface.clip_rect.h = rect->h;
-    real_rect = data->surface.clip_rect;
+    data->surface.clip_rect.w = data->surface.w = rect.w;
+    data->surface.clip_rect.h = data->surface.h = rect.h;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-        Uint32 color =
-            SDL_MapRGBA(data->surface.format, renderer->r, renderer->g,
-                        renderer->b, renderer->a);
+    /* Draw the points! */
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        Uint32 color = SDL_MapRGBA(data->surface.format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
 
-        status = SDL_FillRect(&data->surface, &real_rect, color);
+        for (i = 1; i < count; ++i) {
+            x1 = points[i-1].x - rect.x;
+            y1 = points[i-1].y - rect.y;
+            x2 = points[i].x - rect.x;
+            y2 = points[i].y - rect.y;
+
+            status = SDL_DrawLine(&data->surface, x1, y1, x2, y2, color);
+        }
     } else {
-        status =
-            SDL_BlendRect(&data->surface, &real_rect, renderer->blendMode,
-                          renderer->r, renderer->g, renderer->b, renderer->a);
+        for (i = 1; i < count; ++i) {
+            x1 = points[i-1].x - rect.x;
+            y1 = points[i-1].y - rect.y;
+            x2 = points[i].x - rect.x;
+            y2 = points[i].y - rect.y;
+
+            status = SDL_BlendLine(&data->surface, x1, y1, x2, y2,
+                                   renderer->blendMode,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
+        }
     }
 
-    data->renderer->UnlockTexture(data->renderer,
-                                  data->texture[data->current_texture]);
+    data->renderer->UnlockTexture(data->renderer, texture);
+
+    return status;
+}
+
+static int
+SW_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Texture *texture = data->texture[data->current_texture];
+    SDL_Rect clip, rect;
+    Uint32 color = 0;
+    int i;
+    int status = 0;
+
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = texture->w;
+    clip.h = texture->h;
+
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        color = SDL_MapRGBA(data->surface.format,
+                            renderer->r, renderer->g, renderer->b,
+                            renderer->a);
+    }
+
+    for (i = 0; i < count; ++i) {
+        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+            /* Nothing to draw */
+            continue;
+        }
+
+        if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+
+        if (data->renderer->LockTexture(data->renderer, texture, &rect, 1,
+                                        &data->surface.pixels,
+                                        &data->surface.pitch) < 0) {
+            return -1;
+        }
+
+        data->surface.clip_rect.w = data->surface.w = rect.w;
+        data->surface.clip_rect.h = data->surface.h = rect.h;
+
+        if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+            renderer->blendMode == SDL_BLENDMODE_MASK) {
+            status = SDL_FillRect(&data->surface, NULL, color);
+        } else {
+            status = SDL_BlendRect(&data->surface, NULL,
+                                   renderer->blendMode,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
+        }
+
+        data->renderer->UnlockTexture(data->renderer, texture);
+    }
     return status;
 }
 

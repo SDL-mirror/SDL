@@ -159,7 +159,7 @@ DrawRects(SDL_WindowID window)
         rect.h = rand() % (window_h / 2);
         rect.x = (rand() % window_w) - (rect.w / 2);
         rect.y = (rand() % window_w) - (rect.h / 2);
-        SDL_RenderFill(&rect);
+        SDL_RenderRect(&rect);
     }
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
@@ -231,7 +231,7 @@ main(int argc, char *argv[])
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
         SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderFill(NULL);
+        SDL_RenderRect(NULL);
     }
 
     srand(time(NULL));
@@ -251,7 +251,7 @@ main(int argc, char *argv[])
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderFill(NULL);
+                    SDL_RenderRect(NULL);
                     break;
                 }
                 break;
@@ -262,7 +262,7 @@ main(int argc, char *argv[])
         for (i = 0; i < state->num_windows; ++i) {
             SDL_SelectRenderer(state->windows[i]);
             SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-            SDL_RenderFill(NULL);
+            SDL_RenderRect(NULL);
 
             DrawRects(state->windows[i]);
             DrawLines(state->windows[i]);

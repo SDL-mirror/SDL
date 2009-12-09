@@ -310,24 +310,31 @@ SDL_FillRect4(Uint8 * pixels, int pitch, Uint32 color, int w, int h)
  * This function performs a fast fill of the given rectangle with 'color'
  */
 int
-SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
+SDL_FillRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
 {
+    SDL_Rect clipped;
     Uint8 *pixels;
+
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
 
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_FillRect(): Unsupported surface format");
-        return (-1);
+        return -1;
     }
 
-    /* If 'dstrect' == NULL, then fill the whole surface */
-    if (dstrect) {
+    /* If 'rect' == NULL, then fill the whole surface */
+    if (rect) {
         /* Perform clipping */
-        if (!SDL_IntersectRect(dstrect, &dst->clip_rect, dstrect)) {
-            return (0);
+        if (!SDL_IntersectRect(rect, &dst->clip_rect, &clipped)) {
+            return 0;
         }
+        rect = &clipped;
     } else {
-        dstrect = &dst->clip_rect;
+        rect = &dst->clip_rect;
     }
 
     /* Perform software fill */
@@ -336,9 +343,8 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
         return (-1);
     }
 
-    pixels =
-        (Uint8 *) dst->pixels + dstrect->y * dst->pitch +
-        dstrect->x * dst->format->BytesPerPixel;
+    pixels = (Uint8 *) dst->pixels + rect->y * dst->pitch +
+                                     rect->x * dst->format->BytesPerPixel;
 
     switch (dst->format->BytesPerPixel) {
     case 1:
@@ -347,19 +353,17 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
             color |= (color << 16);
 #ifdef __SSE__
             if (SDL_HasSSE()) {
-                SDL_FillRect1SSE(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect1SSE(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
 #ifdef __MMX__
             if (SDL_HasMMX()) {
-                SDL_FillRect1MMX(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect1MMX(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
-            SDL_FillRect1(pixels, dst->pitch, color, dstrect->w, dstrect->h);
+            SDL_FillRect1(pixels, dst->pitch, color, rect->w, rect->h);
             break;
         }
 
@@ -368,26 +372,24 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
             color |= (color << 16);
 #ifdef __SSE__
             if (SDL_HasSSE()) {
-                SDL_FillRect2SSE(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect2SSE(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
 #ifdef __MMX__
             if (SDL_HasMMX()) {
-                SDL_FillRect2MMX(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect2MMX(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
-            SDL_FillRect2(pixels, dst->pitch, color, dstrect->w, dstrect->h);
+            SDL_FillRect2(pixels, dst->pitch, color, rect->w, rect->h);
             break;
         }
 
     case 3:
         /* 24-bit RGB is a slow path, at least for now. */
         {
-            SDL_FillRect3(pixels, dst->pitch, color, dstrect->w, dstrect->h);
+            SDL_FillRect3(pixels, dst->pitch, color, rect->w, rect->h);
             break;
         }
 
@@ -395,25 +397,36 @@ SDL_FillRect(SDL_Surface * dst, SDL_Rect * dstrect, Uint32 color)
         {
 #ifdef __SSE__
             if (SDL_HasSSE()) {
-                SDL_FillRect4SSE(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect4SSE(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
 #ifdef __MMX__
             if (SDL_HasMMX()) {
-                SDL_FillRect4MMX(pixels, dst->pitch, color, dstrect->w,
-                                 dstrect->h);
+                SDL_FillRect4MMX(pixels, dst->pitch, color, rect->w, rect->h);
                 break;
             }
 #endif
-            SDL_FillRect4(pixels, dst->pitch, color, dstrect->w, dstrect->h);
+            SDL_FillRect4(pixels, dst->pitch, color, rect->w, rect->h);
             break;
         }
     }
 
     /* We're done! */
-    return (0);
+    return 0;
+}
+
+int
+SDL_FillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
+              Uint32 color)
+{
+    int i;
+    int status = 0;
+
+    for (i = 0; i < count; ++i) {
+        status = SDL_FillRect(dst, rects[i], color);
+    }
+    return status;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

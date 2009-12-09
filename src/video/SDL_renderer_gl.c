@@ -96,10 +96,12 @@ static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
-static int GL_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                         int y2);
-static int GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GL_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                           int count);
+static int GL_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                          int count);
+static int GL_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                          int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -304,9 +306,9 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
     renderer->DirtyTexture = GL_DirtyTexture;
-    renderer->RenderPoint = GL_RenderPoint;
-    renderer->RenderLine = GL_RenderLine;
-    renderer->RenderFill = GL_RenderFill;
+    renderer->RenderPoints = GL_RenderPoints;
+    renderer->RenderLines = GL_RenderLines;
+    renderer->RenderRects = GL_RenderRects;
     renderer->RenderCopy = GL_RenderCopy;
     renderer->RenderReadPixels = GL_RenderReadPixels;
     renderer->RenderWritePixels = GL_RenderWritePixels;
@@ -1112,9 +1114,10 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
 }
 
 static int
-GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
+GL_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    int i;
 
     GL_SetBlendMode(data, renderer->blendMode, 1);
 
@@ -1124,61 +1127,19 @@ GL_RenderPoint(SDL_Renderer * renderer, int x, int y)
                     (GLfloat) renderer->a * inv255f);
 
     data->glBegin(GL_POINTS);
-    data->glVertex2f(0.5f + x, 0.5f + y);
-    data->glEnd();
-
-    return 0;
-}
-
-static int
-GL_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-
-    GL_SetBlendMode(data, renderer->blendMode, 1);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
-
-    data->glBegin(GL_LINES);
-    data->glVertex2f(0.5f + x1, 0.5f + y1);
-    data->glVertex2f(0.5f + x2, 0.5f + y2);
-    data->glEnd();
-
-    /* The line is half open, so we need one more point to complete the line.
-     * http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node47.html
-     * If we have to, we can use vertical line and horizontal line textures
-     * for vertical and horizontal lines, and then create custom textures
-     * for diagonal lines and software render those.  It's terrible, but at
-     * least it would be pixel perfect.
-     */
-    data->glBegin(GL_POINTS);
-#if defined(__APPLE__) || defined(__WIN32__)
-    /* Mac OS X and Windows seem to always leave the second point open */
-    data->glVertex2f(0.5f + x2, 0.5f + y2);
-#else
-    /* Linux seems to leave the right-most or bottom-most point open */
-    if (x1 > x2) {
-        data->glVertex2f(0.5f + x1, 0.5f + y1);
-    } else if (x2 > x1) {
-        data->glVertex2f(0.5f + x2, 0.5f + y2);
-    } else if (y1 > y2) {
-        data->glVertex2f(0.5f + x1, 0.5f + y1);
-    } else if (y2 > y1) {
-        data->glVertex2f(0.5f + x2, 0.5f + y2);
+    for (i = 0; i < count; ++i) {
+        data->glVertex2f(0.5f + points[i].x, 0.5f + points[i].y);
     }
-#endif
     data->glEnd();
 
     return 0;
 }
 
 static int
-GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+GL_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    int i;
 
     GL_SetBlendMode(data, renderer->blendMode, 1);
 
@@ -1187,7 +1148,74 @@ GL_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+    if (count > 2 && 
+        points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
+        data->glBegin(GL_LINE_LOOP);
+        /* GL_LINE_LOOP takes care of the final segment */
+        --count;
+        for (i = 0; i < count; ++i) {
+            data->glVertex2f(0.5f + points[i].x, 0.5f + points[i].y);
+        }
+        data->glEnd();
+    } else {
+        data->glBegin(GL_LINE_STRIP);
+        for (i = 0; i < count; ++i) {
+            data->glVertex2f(0.5f + points[i].x, 0.5f + points[i].y);
+        }
+        data->glEnd();
+
+        /* The line is half open, so we need one more point to complete it.
+         * http://www.opengl.org/documentation/specs/version1.1/glspec1.1/node47.html
+         * If we have to, we can use vertical line and horizontal line textures
+         * for vertical and horizontal lines, and then create custom textures
+         * for diagonal lines and software render those.  It's terrible, but at
+         * least it would be pixel perfect.
+         */
+        data->glBegin(GL_POINTS);
+#if defined(__APPLE__) || defined(__WIN32__)
+        /* Mac OS X and Windows seem to always leave the second point open */
+        data->glVertex2f(0.5f + points[count-1].x, 0.5f + points[count-1].y);
+#else
+        /* Linux seems to leave the right-most or bottom-most point open */
+        int x1 = points[0].x;
+        int y1 = points[0].y;
+        int x2 = points[count-1].x;
+        int y2 = points[count-1].y;
+
+        if (x1 > x2) {
+            data->glVertex2f(0.5f + x1, 0.5f + y1);
+        } else if (x2 > x1) {
+            data->glVertex2f(0.5f + x2, 0.5f + y2);
+        } else if (y1 > y2) {
+            data->glVertex2f(0.5f + x1, 0.5f + y1);
+        } else if (y2 > y1) {
+            data->glVertex2f(0.5f + x2, 0.5f + y2);
+        }
+#endif
+        data->glEnd();
+    }
+
+    return 0;
+}
+
+static int
+GL_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    int i;
+
+    GL_SetBlendMode(data, renderer->blendMode, 1);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+
+        data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+    }
 
     return 0;
 }

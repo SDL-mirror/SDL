@@ -141,7 +141,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 
     /* Draw a gray background */
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderFill(NULL);
+    SDL_RenderRect(NULL);
 
     /* Test points */
     SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
@@ -163,25 +163,25 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFill(&temp);
+    SDL_RenderRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFill(&temp);
+    SDL_RenderRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = 1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFill(&temp);
+    SDL_RenderRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFill(&temp);
+    SDL_RenderRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
 
     /* Test diagonal lines */
@@ -304,7 +304,7 @@ main(int argc, char *argv[])
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
         SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderFill(NULL);
+        SDL_RenderRect(NULL);
     }
     if (LoadSprite("icon.bmp") < 0) {
         quit(2);
@@ -350,7 +350,7 @@ main(int argc, char *argv[])
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderFill(NULL);
+                    SDL_RenderRect(NULL);
                     break;
                 }
                 break;

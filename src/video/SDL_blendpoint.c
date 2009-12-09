@@ -195,12 +195,15 @@ int
 SDL_BlendPoint(SDL_Surface * dst, int x, int y, int blendMode, Uint8 r,
                Uint8 g, Uint8 b, Uint8 a)
 {
-    SDL_PixelFormat *fmt = dst->format;
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
 
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_BlendPoint(): Unsupported surface format");
-        return (-1);
+        return -1;
     }
 
     /* Perform clipping */
@@ -210,30 +213,29 @@ SDL_BlendPoint(SDL_Surface * dst, int x, int y, int blendMode, Uint8 r,
         return 0;
     }
 
-    if ((blendMode == SDL_BLENDMODE_BLEND)
-        || (blendMode == SDL_BLENDMODE_ADD)) {
+    if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
         r = DRAW_MUL(r, a);
         g = DRAW_MUL(g, a);
         b = DRAW_MUL(b, a);
     }
 
-    switch (fmt->BitsPerPixel) {
+    switch (dst->format->BitsPerPixel) {
     case 15:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0x7C00:
             return SDL_BlendPoint_RGB555(dst, x, y, blendMode, r, g, b, a);
         }
         break;
     case 16:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0xF800:
             return SDL_BlendPoint_RGB565(dst, x, y, blendMode, r, g, b, a);
         }
         break;
     case 32:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0x00FF0000:
-            if (!fmt->Amask) {
+            if (!dst->format->Amask) {
                 return SDL_BlendPoint_RGB888(dst, x, y, blendMode, r, g, b,
                                              a);
             } else {
@@ -242,15 +244,101 @@ SDL_BlendPoint(SDL_Surface * dst, int x, int y, int blendMode, Uint8 r,
             }
             break;
         }
+        break;
     default:
         break;
     }
 
-    if (!fmt->Amask) {
+    if (!dst->format->Amask) {
         return SDL_BlendPoint_RGB(dst, x, y, blendMode, r, g, b, a);
     } else {
         return SDL_BlendPoint_RGBA(dst, x, y, blendMode, r, g, b, a);
     }
+}
+
+int
+SDL_BlendPoints(SDL_Surface * dst, const SDL_Point * points, int count,
+                int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    int minx, miny;
+    int maxx, maxy;
+    int i;
+    int x, y;
+    int (*func)(SDL_Surface * dst, int x, int y,
+                int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a) = NULL;
+    int status = 0;
+
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
+
+    /* This function doesn't work on surfaces < 8 bpp */
+    if (dst->format->BitsPerPixel < 8) {
+        SDL_SetError("SDL_BlendPoints(): Unsupported surface format");
+        return (-1);
+    }
+
+    if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
+        r = DRAW_MUL(r, a);
+        g = DRAW_MUL(g, a);
+        b = DRAW_MUL(b, a);
+    }
+
+    /* FIXME: Does this function pointer slow things down significantly? */
+    switch (dst->format->BitsPerPixel) {
+    case 15:
+        switch (dst->format->Rmask) {
+        case 0x7C00:
+            func = SDL_BlendPoint_RGB555;
+            break;
+        }
+        break;
+    case 16:
+        switch (dst->format->Rmask) {
+        case 0xF800:
+            func = SDL_BlendPoint_RGB565;
+            break;
+        }
+        break;
+    case 32:
+        switch (dst->format->Rmask) {
+        case 0x00FF0000:
+            if (!dst->format->Amask) {
+                func = SDL_BlendPoint_RGB888;
+            } else {
+                func = SDL_BlendPoint_ARGB8888;
+            }
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+
+    if (!func) {
+        if (!dst->format->Amask) {
+            func = SDL_BlendPoint_RGB;
+        } else {
+            func = SDL_BlendPoint_RGBA;
+        }
+    }
+
+    minx = dst->clip_rect.x;
+    maxx = dst->clip_rect.x + dst->clip_rect.w - 1;
+    miny = dst->clip_rect.y;
+    maxy = dst->clip_rect.y + dst->clip_rect.h - 1;
+
+    for (i = 0; i < count; ++i) {
+        x = points[i].x;
+        y = points[i].y;
+
+        if (x < minx || x > maxx || y < miny || y > maxy) {
+            continue;
+        }
+        status = func(dst, x, y, blendMode, r, g, b, a);
+    }
+    return status;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

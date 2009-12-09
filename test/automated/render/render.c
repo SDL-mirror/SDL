@@ -340,9 +340,9 @@ static int render_clearScreen (void)
    */
 
    /* Clear screen. */
-   ret = SDL_RenderFill( NULL );
+   ret = SDL_RenderRect( NULL );
    /*
-   if (SDL_ATassert( "SDL_RenderFill", ret == 0))
+   if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
    */
 
@@ -387,7 +387,7 @@ static int render_testPrimitives (void)
    ret = SDL_SetRenderDrawColor( 13, 73, 200, SDL_ALPHA_OPAQUE );
    if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
       return -1;
-   ret = SDL_RenderFill( &rect );
+   ret = SDL_RenderRect( &rect );
    if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
 
@@ -399,7 +399,7 @@ static int render_testPrimitives (void)
    ret = SDL_SetRenderDrawColor( 200, 0, 100, SDL_ALPHA_OPAQUE );
    if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
       return -1;
-   ret = SDL_RenderFill( &rect );
+   ret = SDL_RenderRect( &rect );
    if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
 
@@ -480,8 +480,8 @@ static int render_testPrimitivesBlend (void)
    ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_NONE );
    if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
       return -1;
-   ret = SDL_RenderFill( NULL );
-   if (SDL_ATassert( "SDL_RenderFill", ret == 0))
+   ret = SDL_RenderRect( NULL );
+   if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
    rect.x = 10;
    rect.y = 25;
@@ -493,8 +493,8 @@ static int render_testPrimitivesBlend (void)
    ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_ADD );
    if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
       return -1;
-   ret = SDL_RenderFill( &rect );
-   if (SDL_ATassert( "SDL_RenderFill", ret == 0))
+   ret = SDL_RenderRect( &rect );
+   if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
    rect.x = 30;
    rect.y = 40;
@@ -506,8 +506,8 @@ static int render_testPrimitivesBlend (void)
    ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_BLEND );
    if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
       return -1;
-   ret = SDL_RenderFill( &rect );
-   if (SDL_ATassert( "SDL_RenderFill", ret == 0))
+   ret = SDL_RenderRect( &rect );
+   if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
    rect.x = 25;
    rect.y = 25;
@@ -519,8 +519,8 @@ static int render_testPrimitivesBlend (void)
    ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_MOD );
    if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
       return -1;
-   ret = SDL_RenderFill( &rect );
-   if (SDL_ATassert( "SDL_RenderFill", ret == 0))
+   ret = SDL_RenderRect( &rect );
+   if (SDL_ATassert( "SDL_RenderRect", ret == 0))
       return -1;
 
    /* Draw blended lines, lines for everyone. */

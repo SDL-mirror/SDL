@@ -27,13 +27,19 @@
 int
 SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 {
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
+
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_DrawLine(): Unsupported surface format");
-        return (-1);
+        return -1;
     }
 
     /* Perform clipping */
+    /* FIXME: We don't actually want to clip, as it may change line slope */
     if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
         return (0);
     }
@@ -51,6 +57,57 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
     case 4:
         DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4);
         break;
+    }
+    return 0;
+}
+
+int
+SDL_DrawLines(SDL_Surface * dst, const SDL_Point * points, int count,
+              Uint32 color)
+{
+    int i;
+
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
+
+    /* This function doesn't work on surfaces < 8 bpp */
+    if (dst->format->BitsPerPixel < 8) {
+        SDL_SetError("SDL_DrawLine(): Unsupported surface format");
+        return -1;
+    }
+
+    if (count < 2) {
+        return 0;
+    }
+
+    for (i = 1; i < count; ++i) {
+        int x1 = points[i-1].x;
+        int y1 = points[i-1].y;
+        int x2 = points[i].x;
+        int y2 = points[i].y;
+
+        /* Perform clipping */
+        /* FIXME: We don't actually want to clip, as it may change line slope */
+        if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
+            continue;
+        }
+
+        switch (dst->format->BytesPerPixel) {
+        case 1:
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1);
+            break;
+        case 2:
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2);
+            break;
+        case 3:
+            SDL_Unsupported();
+            return -1;
+        case 4:
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4);
+            break;
+        }
     }
     return 0;
 }

@@ -195,8 +195,6 @@ int
 SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    SDL_PixelFormat *fmt = dst->format;
-
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_BlendLine(): Unsupported surface format");
@@ -209,32 +207,31 @@ SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
     }
 
 
-    if ((blendMode == SDL_BLENDMODE_BLEND)
-        || (blendMode == SDL_BLENDMODE_ADD)) {
+    if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
         r = DRAW_MUL(r, a);
         g = DRAW_MUL(g, a);
         b = DRAW_MUL(b, a);
     }
 
-    switch (fmt->BitsPerPixel) {
+    switch (dst->format->BitsPerPixel) {
     case 15:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0x7C00:
             return SDL_BlendLine_RGB555(dst, x1, y1, x2, y2, blendMode, r, g,
                                         b, a);
         }
         break;
     case 16:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0xF800:
             return SDL_BlendLine_RGB565(dst, x1, y1, x2, y2, blendMode, r, g,
                                         b, a);
         }
         break;
     case 32:
-        switch (fmt->Rmask) {
+        switch (dst->format->Rmask) {
         case 0x00FF0000:
-            if (!fmt->Amask) {
+            if (!dst->format->Amask) {
                 return SDL_BlendLine_RGB888(dst, x1, y1, x2, y2, blendMode, r,
                                             g, b, a);
             } else {
@@ -243,15 +240,97 @@ SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2,
             }
             break;
         }
+        break;
     default:
         break;
     }
 
-    if (!fmt->Amask) {
+    if (!dst->format->Amask) {
         return SDL_BlendLine_RGB(dst, x1, y1, x2, y2, blendMode, r, g, b, a);
     } else {
         return SDL_BlendLine_RGBA(dst, x1, y1, x2, y2, blendMode, r, g, b, a);
     }
+}
+
+int
+SDL_BlendLines(SDL_Surface * dst, const SDL_Point * points, int count,
+               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    int i;
+    int x1, y1;
+    int x2, y2;
+    int (*func)(SDL_Surface * dst, int x1, int y1, int x2, int y2,
+                int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a) = NULL;
+    int status = 0;
+
+    if (!dst) {
+        SDL_SetError("Passed NULL destination surface");
+        return -1;
+    }
+
+    /* This function doesn't work on surfaces < 8 bpp */
+    if (dst->format->BitsPerPixel < 8) {
+        SDL_SetError("SDL_BlendLines(): Unsupported surface format");
+        return -1;
+    }
+
+    if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
+        r = DRAW_MUL(r, a);
+        g = DRAW_MUL(g, a);
+        b = DRAW_MUL(b, a);
+    }
+
+    /* FIXME: Does this function pointer slow things down significantly? */
+    switch (dst->format->BitsPerPixel) {
+    case 15:
+        switch (dst->format->Rmask) {
+        case 0x7C00:
+            func = SDL_BlendLine_RGB555;
+        }
+        break;
+    case 16:
+        switch (dst->format->Rmask) {
+        case 0xF800:
+            func = SDL_BlendLine_RGB565;
+        }
+        break;
+    case 32:
+        switch (dst->format->Rmask) {
+        case 0x00FF0000:
+            if (!dst->format->Amask) {
+                func = SDL_BlendLine_RGB888;
+            } else {
+                func = SDL_BlendLine_ARGB8888;
+            }
+            break;
+        }
+    default:
+        break;
+    }
+
+    if (!func) {
+        if (!dst->format->Amask) {
+            func = SDL_BlendLine_RGB;
+        } else {
+            func = SDL_BlendLine_RGBA;
+        }
+    }
+
+    for (i = 1; i < count; ++i) {
+        x1 = points[i-1].x;
+        y1 = points[i-1].y;
+        x2 = points[i].x;
+        y2 = points[i].y;
+
+        /* Perform clipping */
+        /* FIXME: We don't actually want to clip, as it may change line slope */
+        if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
+            continue;
+        }
+
+        status = func(dst, x1, y1, x2, y2, blendMode, r, g, b, a);
+    }
+    return status;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -350,6 +350,8 @@ extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
 extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
+#define SDL_RenderFill  SDL_RenderRect
+
 /*@}*//*Compatibility*/
 
 /* Ends C function definitions when using C++ */

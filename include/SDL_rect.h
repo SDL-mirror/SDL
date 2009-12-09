@@ -43,6 +43,17 @@ extern "C" {
 #endif
 
 /**
+ *  \brief  The structure that defines a point
+ *
+ *  \sa SDL_EnclosePoints
+ */
+typedef struct
+{
+    int x;
+    int y;
+} SDL_Point;
+
+/**
  *  \brief A rectangle, with the origin at the upper left.
  *  
  *  \sa SDL_RectEmpty
@@ -50,6 +61,7 @@ extern "C" {
  *  \sa SDL_HasIntersection
  *  \sa SDL_IntersectRect
  *  \sa SDL_UnionRect
+ *  \sa SDL_EnclosePoints
  */
 typedef struct SDL_Rect
 {
@@ -91,6 +103,16 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRect(const SDL_Rect * A,
 extern DECLSPEC void SDLCALL SDL_UnionRect(const SDL_Rect * A,
                                            const SDL_Rect * B,
                                            SDL_Rect * result);
+
+/**
+ *  \brief Calculate a minimal rectangle enclosing a set of points
+ *
+ *  \return SDL_TRUE if any points were within the clipping rect
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_EnclosePoints(const SDL_Point * points,
+                                                   int count,
+                                                   const SDL_Rect * clip,
+                                                   SDL_Rect * result);
 
 /**
  *  \brief Calculate the intersection of a rectangle and line segment.

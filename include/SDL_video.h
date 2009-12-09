@@ -1148,6 +1148,17 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
 extern DECLSPEC int SDLCALL SDL_RenderPoint(int x, int y);
 
 /**
+ *  \brief Draw some number of points on the current rendering target.
+ *  
+ *  \param points The points to draw
+ *  \param count The number of points to draw
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderPoints(const SDL_Point * points,
+                                             int count);
+
+/**
  *  \brief Draw a line on the current rendering target.
  *  
  *  \param x1 The x coordinate of the start point.
@@ -1160,6 +1171,17 @@ extern DECLSPEC int SDLCALL SDL_RenderPoint(int x, int y);
 extern DECLSPEC int SDLCALL SDL_RenderLine(int x1, int y1, int x2, int y2);
 
 /**
+ *  \brief Draw a series of connected lines on the current rendering target.
+ *  
+ *  \param points The points along the lines
+ *  \param count The number of points, drawing count-1 lines
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderLines(const SDL_Point * points,
+                                            int count);
+
+/**
  *  \brief Fill the current rendering target with the drawing color.
  *  
  *  \param rect A pointer to the destination rectangle, or NULL for the entire 
@@ -1167,7 +1189,17 @@ extern DECLSPEC int SDLCALL SDL_RenderLine(int x1, int y1, int x2, int y2);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderFill(const SDL_Rect * rect);
+extern DECLSPEC int SDLCALL SDL_RenderRect(const SDL_Rect * rect);
+
+/**
+ *  \brief Fill some number of rectangles in the current rendering target with the drawing color.
+ *  
+ *  \param rects A pointer to an array of destination rectangles.
+ *  \param count The number of rectangles.
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderRects(const SDL_Rect ** rect, int count);
 
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
