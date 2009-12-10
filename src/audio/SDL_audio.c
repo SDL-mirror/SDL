@@ -1043,11 +1043,11 @@ SDL_OpenAudioDevice(const char *device, int iscapture,
                              allowed_changes, 2);
 }
 
-SDL_audiostatus
+SDL_AudioStatus
 SDL_GetAudioDeviceStatus(SDL_AudioDeviceID devid)
 {
     SDL_AudioDevice *device = get_audio_device(devid);
-    SDL_audiostatus status = SDL_AUDIO_STOPPED;
+    SDL_AudioStatus status = SDL_AUDIO_STOPPED;
     if (device && device->enabled) {
         if (device->paused) {
             status = SDL_AUDIO_PAUSED;
@@ -1059,7 +1059,7 @@ SDL_GetAudioDeviceStatus(SDL_AudioDeviceID devid)
 }
 
 
-SDL_audiostatus
+SDL_AudioStatus
 SDL_GetAudioStatus(void)
 {
     return SDL_GetAudioDeviceStatus(1);

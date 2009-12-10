@@ -356,10 +356,10 @@ typedef enum
     SDL_AUDIO_STOPPED = 0,
     SDL_AUDIO_PLAYING,
     SDL_AUDIO_PAUSED
-} SDL_audiostatus;
-extern DECLSPEC SDL_audiostatus SDLCALL SDL_GetAudioStatus(void);
+} SDL_AudioStatus;
+extern DECLSPEC SDL_AudioStatus SDLCALL SDL_GetAudioStatus(void);
 
-extern DECLSPEC SDL_audiostatus SDLCALL
+extern DECLSPEC SDL_AudioStatus SDLCALL
 SDL_GetAudioDeviceStatus(SDL_AudioDeviceID dev);
 /*@}*//*Audio State*/
 
