@@ -48,10 +48,12 @@ static int X11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            void **pixels, int *pitch);
 static void X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int X11_SetDrawBlendMode(SDL_Renderer * renderer);
-static int X11_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2,
-                          int y2);
-static int X11_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int X11_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                            int count);
+static int X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
+                           int count);
+static int X11_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                           int count);
 static int X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static void X11_RenderPresent(SDL_Renderer * renderer);
@@ -200,9 +202,9 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = X11_LockTexture;
     renderer->UnlockTexture = X11_UnlockTexture;
     renderer->SetDrawBlendMode = X11_SetDrawBlendMode;
-    renderer->RenderPoint = X11_RenderPoint;
-    renderer->RenderLine = X11_RenderLine;
-    renderer->RenderFill = X11_RenderFill;
+    renderer->RenderPoints = X11_RenderPoints;
+    renderer->RenderLines = X11_RenderLines;
+    renderer->RenderRects = X11_RenderRects;
     renderer->RenderCopy = X11_RenderCopy;
     renderer->RenderPresent = X11_RenderPresent;
     renderer->DestroyTexture = X11_DestroyTexture;
@@ -590,73 +592,126 @@ renderdrawcolor(SDL_Renderer * renderer, int premult)
 }
 
 static int
-X11_RenderPoint(SDL_Renderer * renderer, int x, int y)
+X11_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     unsigned long foreground;
+    XPoint *xpoints, *xpoint;
+    int i, xcount;
 
     if (data->makedirty) {
         SDL_Rect rect;
 
-        rect.x = x;
-        rect.y = y;
-        rect.w = 1;
-        rect.h = 1;
-        SDL_AddDirtyRect(&data->dirty, &rect);
-    }
-
-    foreground = renderdrawcolor(renderer, 1);
-    XSetForeground(data->display, data->gc, foreground);
-    XDrawPoint(data->display, data->drawable, data->gc, x, y);
-    return 0;
-}
-
-static int
-X11_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
-{
-    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    unsigned long foreground;
-
-    if (data->makedirty) {
-        SDL_Rect rect;
-
-        if (x1 < x2) {
-            rect.x = x1;
-            rect.w = (x2 - x1) + 1;
-        } else {
-            rect.x = x2;
-            rect.w = (x1 - x2) + 1;
-        }
-        if (y1 < y2) {
-            rect.y = y1;
-            rect.h = (y2 - y1) + 1;
-        } else {
-            rect.y = y2;
-            rect.h = (y1 - y2) + 1;
+        /* Get the smallest rectangle that contains everything */
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = window->w;
+        rect.h = window->h;
+        if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
+            /* Nothing to draw */
+            return 0;
         }
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
     foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
-    XDrawLine(data->display, data->drawable, data->gc, x1, y1, x2, y2);
+
+    xpoint = xpoints = SDL_stack_alloc(XPoint, count);
+    xcount = 0;
+    for (i = 0; i < count; ++i) {
+        int x = points[i].x;
+        int y = points[i].y;
+        if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
+            continue;
+        }
+        xpoint->x = (short)x;
+        xpoint->y = (short)y;
+        ++xpoint;
+        ++xcount;
+    }
+    if (xcount > 0) {
+        XDrawPoints(data->display, data->drawable, data->gc, xpoints, xcount,
+                    CoordModeOrigin);
+    }
+    SDL_stack_free(xpoints);
+
     return 0;
 }
 
 static int
-X11_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Rect clip, rect;
     unsigned long foreground;
 
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = window->w;
+    clip.h = window->h;
+
     if (data->makedirty) {
-        SDL_AddDirtyRect(&data->dirty, rect);
+        /* Get the smallest rectangle that contains everything */
+        SDL_EnclosePoints(points, count, NULL, &rect);
+        if (!SDL_IntersectRect(&rect, &clip, &rect)) {
+            /* Nothing to draw */
+            return 0;
+        }
+        SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
     foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
-    XFillRectangle(data->display, data->drawable, data->gc, rect->x, rect->y,
-                   rect->w, rect->h);
+    /* FIXME: Can we properly handle lines that extend beyond visible space? */
+    //XDrawLine(data->display, data->drawable, data->gc, x1, y1, x2, y2);
+    return 0;
+}
+
+static int
+X11_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Rect clip, rect;
+    unsigned long foreground;
+    XRectangle *xrects, *xrect;
+    int i, xcount;
+
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = window->w;
+    clip.h = window->h;
+
+    foreground = renderdrawcolor(renderer, 1);
+    XSetForeground(data->display, data->gc, foreground);
+
+    xrect = xrects = SDL_stack_alloc(XRectangle, count);
+    xcount = 0;
+    for (i = 0; i < count; ++i) {
+        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+            continue;
+        }
+
+        xrect->x = (short)rect.x;
+        xrect->y = (short)rect.y;
+        xrect->width = (unsigned short)rect.w;
+        xrect->height = (unsigned short)rect.h;
+        ++xrect;
+        ++xcount;
+
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+    }
+    if (xcount > 0) {
+        XFillRectangles(data->display, data->drawable, data->gc,
+                        xrects, xcount);
+    }
+    SDL_stack_free(xpoints);
+
     return 0;
 }
 
