@@ -196,16 +196,40 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
     return SDL_TRUE;
 }
 
+/* Use the Cohen-Sutherland algorithm for line clipping */
+#define CODE_BOTTOM 1
+#define CODE_TOP    2
+#define CODE_LEFT   4
+#define CODE_RIGHT  8
+
+static int ComputeOutCode(const SDL_Rect * rect, int x, int y)
+{
+    int code = 0;
+    if (y < 0) {
+        code |= CODE_TOP;
+    } else if (y >= rect->y + rect->h) {
+        code |= CODE_BOTTOM;
+    }
+    if (x < 0) {
+        code |= CODE_LEFT;
+    } else if (x >= rect->x + rect->w) {
+        code |= CODE_RIGHT;
+    }
+    return code;
+}
+
 SDL_bool
 SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
                          int *Y2)
 {
+    int x, y;
     int x1, y1;
     int x2, y2;
     int rectx1;
     int recty1;
     int rectx2;
     int recty2;
+    int outcode1, outcode2;
 
     if (!rect || !X1 || !Y1 || !X2 || !Y2) {
         return SDL_FALSE;
@@ -262,95 +286,57 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         return SDL_TRUE;
     }
 
-    else {
-        /* The task of clipping a line with finite slope ratios in a fixed-
-         * precision coordinate space is not as immediately simple as it is
-         * with coordinates of arbitrary precision. If the ratio of slopes
-         * between the input line segment and the result line segment is not
-         * a whole number, you have in fact *moved* the line segment a bit,
-         * and there can be no avoiding it without more precision
-         */
-        int *x_result_[] = { X1, X2, NULL }, **x_result = x_result_;
-        int *y_result_[] = { Y1, Y2, NULL }, **y_result = y_result_;
-        SDL_bool intersection = SDL_FALSE;
-        double b, m, left, right, bottom, top;
-        int xl, xh, yl, yh;
-
-        /* solve mx+b line formula */
-        m = (double) (y1 - y2) / (double) (x1 - x2);
-        b = y2 - m * (double) x2;
-
-        /* find some linear intersections */
-        left = (m * (double) rectx1) + b;
-        right = (m * (double) rectx2) + b;
-        top = (recty1 - b) / m;
-        bottom = (recty2 - b) / m;
-
-        /* sort end-points' x and y components individually */
-        if (x1 < x2) {
-            xl = x1;
-            xh = x2;
-        } else {
-            xl = x2;
-            xh = x1;
-        }
-        if (y1 < y2) {
-            yl = y1;
-            yh = y2;
-        } else {
-            yl = y2;
-            yh = y1;
+    /* More complicated Cohen-Sutherland algorithm */
+    outcode1 = ComputeOutCode(rect, x1, y1);
+    outcode2 = ComputeOutCode(rect, x2, y2);
+    while (outcode1 || outcode2) {
+        if (outcode1 & outcode2) {
+            return SDL_FALSE;
         }
 
-#define RISING(a, b, c) (((a)<=(b))&&((b)<=(c)))
-
-        /* check for a point that's entirely inside the rect */
-        if (RISING(rectx1, x1, rectx2) && RISING(recty1, y1, recty2)) {
-            x_result++;
-            y_result++;
-            intersection = SDL_TRUE;
-        } else
-            /* it was determined earlier that *both* end-points are not contained */
-        if (RISING(rectx1, x2, rectx2) && RISING(recty1, y2, recty2)) {
-            **(x_result++) = x2;
-            **(y_result++) = y2;
-            intersection = SDL_TRUE;
+        if (outcode1) {
+            if (outcode1 & CODE_TOP) {
+                y = recty1;
+                x = x1 + ((x2 - x1) * (y - y1)) / (y2 - y1);
+            } else if (outcode1 & CODE_BOTTOM) {
+                y = recty2;
+                x = x1 + ((x2 - x1) * (y - y1)) / (y2 - y1);
+            } else if (outcode1 & CODE_LEFT) {
+                x = rectx1;
+                y = y1 + ((y2 - y1) * (x - x1)) / (x2 - x1);
+            } else if (outcode1 & CODE_RIGHT) {
+                x = rectx2;
+                y = y1 + ((y2 - y1) * (x - x1)) / (x2 - x1);
+            }
+            x1 = x;
+            y1 = y;
+            outcode1 = ComputeOutCode(rect, x, y);
         }
 
-        if (RISING(recty1, left, recty2) && RISING(xl, rectx1, xh)) {
-            **(x_result++) = rectx1;
-            **(y_result++) = (int) left;
-            intersection = SDL_TRUE;
+        if (outcode2) {
+            if (outcode2 & CODE_TOP) {
+                y = recty1;
+                x = x1 + ((x2 - x1) * (y - y1)) / (y2 - y1);
+            } else if (outcode2 & CODE_BOTTOM) {
+                y = recty2;
+                x = x1 + ((x2 - x1) * (y - y1)) / (y2 - y1);
+            } else if (outcode2 & CODE_LEFT) {
+                x = rectx1;
+                y = y1 + ((y2 - y1) * (x - x1)) / (x2 - x1);
+            } else if (outcode2 & CODE_RIGHT) {
+                x = rectx2;
+                y = y1 + ((y2 - y1) * (x - x1)) / (x2 - x1);
+            }
+            x2 = x;
+            y2 = y;
+            outcode2 = ComputeOutCode(rect, x, y);
         }
-
-        if (*x_result == NULL)
-            return intersection;
-        if (RISING(recty1, right, recty2) && RISING(xl, rectx2, xh)) {
-            **(x_result++) = rectx2;
-            **(y_result++) = (int) right;
-            intersection = SDL_TRUE;
-        }
-
-        if (*x_result == NULL)
-            return intersection;
-        if (RISING(rectx1, top, rectx2) && RISING(yl, recty1, yh)) {
-            **(x_result++) = (int) top;
-            **(y_result++) = recty1;
-            intersection = SDL_TRUE;
-        }
-
-        if (*x_result == NULL)
-            return intersection;
-        if (RISING(rectx1, bottom, rectx2) && RISING(yl, recty2, yh)) {
-            **(x_result++) = (int) bottom;
-            **(y_result++) = recty2;
-            intersection = SDL_TRUE;
-        }
-
-        return intersection;
     }
-
-    return SDL_FALSE;
+    *X1 = x1;
+    *Y1 = y1;
+    *X2 = x2;
+    *Y2 = y2;
+    return SDL_TRUE;
 }
 
 void

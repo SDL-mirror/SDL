@@ -7,12 +7,12 @@
  */
 
 
-#ifndef _TEST_PLATFORM
-#  define _TEST_PLATFORM
+#ifndef _TEST_RECT
+#  define _TEST_RECT
 
 
-int test_platform (void);
+int test_rect (void);
 
 
-#endif /* _TEST_PLATFORM */
+#endif /* _TEST_RECT */
 
