@@ -311,9 +311,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
             x1 = x;
             y1 = y;
             outcode1 = ComputeOutCode(rect, x, y);
-        }
-
-        if (outcode2) {
+        } else {
             if (outcode2 & CODE_TOP) {
                 y = recty1;
                 x = x1 + ((x2 - x1) * (y - y1)) / (y2 - y1);
