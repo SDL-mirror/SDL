@@ -2585,7 +2585,7 @@ SDL_RenderRects(const SDL_Rect ** rects, int count)
         if (rects[i] == NULL) {
             SDL_Window *window;
             SDL_Rect full_rect;
-            SDL_Rect *rect;
+            const SDL_Rect *rect;
 
             window = SDL_GetWindowFromID(renderer->window);
             full_rect.x = 0;
