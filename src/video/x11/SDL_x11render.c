@@ -23,6 +23,8 @@
 
 #if SDL_VIDEO_RENDER_X11
 
+#include <limits.h> /* For INT_MIN and INT_MAX */
+
 #include "SDL_x11video.h"
 #include "../SDL_rect_c.h"
 #include "../SDL_pixels_c.h"
@@ -647,26 +649,134 @@ X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     SDL_Rect clip, rect;
     unsigned long foreground;
+    XPoint *xpoints, *xpoint;
+    int i, xcount;
+    int minx, miny;
+    int maxx, maxy;
 
     clip.x = 0;
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
 
-    if (data->makedirty) {
-        /* Get the smallest rectangle that contains everything */
-        SDL_EnclosePoints(points, count, NULL, &rect);
-        if (!SDL_IntersectRect(&rect, &clip, &rect)) {
-            /* Nothing to draw */
-            return 0;
-        }
-        SDL_AddDirtyRect(&data->dirty, &rect);
-    }
-
     foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
-    /* FIXME: Can we properly handle lines that extend beyond visible space? */
-    //XDrawLine(data->display, data->drawable, data->gc, x1, y1, x2, y2);
+
+    xpoint = xpoints = SDL_stack_alloc(XPoint, count);
+    xcount = 0;
+    minx = INT_MAX;
+    miny = INT_MAX;
+    maxx = INT_MIN;
+    maxy = INT_MIN;
+    for (i = 0; i < count; ++i) {
+        int x = points[i].x;
+        int y = points[i].y;
+
+        /* If the point is inside the window, add it to the list */
+        if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
+            if (x < minx) {
+                minx = x;
+            } else if (x > maxx) {
+                maxx = x;
+            }
+            if (y < miny) {
+                miny = y;
+            } else if (y > maxy) {
+                maxy = y;
+            }
+            xpoint->x = (short)x;
+            xpoint->y = (short)y;
+            ++xpoint;
+            ++xcount;
+            continue;
+        }
+
+        /* We need to clip the line segments joined by this point */
+        if (xcount > 0) {
+            int x1 = xpoint[-1].x;
+            int y1 = xpoint[-1].y;
+            int x2 = x;
+            int y2 = y;
+            if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
+                if (x2 < minx) {
+                    minx = x2;
+                } else if (x2 > maxx) {
+                    maxx = x2;
+                }
+                if (y2 < miny) {
+                    miny = y2;
+                } else if (y2 > maxy) {
+                    maxy = y2;
+                }
+                xpoint->x = (short)x2;
+                xpoint->y = (short)y2;
+                ++xpoint;
+                ++xcount;
+            }
+            XDrawLines(data->display, data->drawable, data->gc,
+                       xpoints, xcount, CoordModeOrigin);
+            if (xpoints[0].x != x2 || xpoints[0].y != y2) {
+                XDrawPoint(data->display, data->drawable, data->gc, x2, y2);
+            }
+            if (data->makedirty) {
+                SDL_Rect rect;
+
+                rect.x = minx;
+                rect.y = miny;
+                rect.w = (maxx - minx) + 1;
+                rect.h = (maxy - miny) + 1;
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+            xpoint = xpoints;
+            xcount = 0;
+            minx = INT_MAX;
+            miny = INT_MAX;
+            maxx = INT_MIN;
+            maxy = INT_MIN;
+        }
+        if (i < (count-1)) {
+            int x1 = x;
+            int y1 = y;
+            int x2 = points[i+1].x;
+            int y2 = points[i+1].y;
+            if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
+                if (x1 < minx) {
+                    minx = x1;
+                } else if (x1 > maxx) {
+                    maxx = x1;
+                }
+                if (y1 < miny) {
+                    miny = y1;
+                } else if (y1 > maxy) {
+                    maxy = y1;
+                }
+                xpoint->x = (short)x1;
+                xpoint->y = (short)y1;
+                ++xpoint;
+                ++xcount;
+            }
+        }
+    }
+    if (xcount > 1) {
+        int x2 = xpoint[-1].x;
+        int y2 = xpoint[-1].y;
+        XDrawLines(data->display, data->drawable, data->gc, xpoints, xcount,
+                   CoordModeOrigin);
+        if (xpoints[0].x != x2 || xpoints[0].y != y2) {
+            XDrawPoint(data->display, data->drawable, data->gc, x2, y2);
+        }
+        if (data->makedirty) {
+            SDL_Rect rect;
+
+            rect.x = minx;
+            rect.y = miny;
+            rect.w = (maxx - minx) + 1;
+            rect.h = (maxy - miny) + 1;
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+    }
+    SDL_stack_free(xpoints);
+
     return 0;
 }
 
