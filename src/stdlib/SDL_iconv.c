@@ -391,7 +391,7 @@ SDL_iconv(SDL_iconv_t cd,
                          */
                         ch = UNKNOWN_UNICODE;
                     } else {
-                        if ((p[0] & 0xCE) == 0xC0) {
+                        if ((p[0] & 0xDE) == 0xC0) {
                             overlong = SDL_TRUE;
                         }
                         ch = (Uint32) (p[0] & 0x1F);
