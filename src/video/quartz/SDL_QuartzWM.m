@@ -151,14 +151,16 @@ int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
 /* Convert Cocoa screen coordinate to Cocoa window coordinate */
 void QZ_PrivateGlobalToLocal (_THIS, NSPoint *p) {
 
-    *p = [ qz_window convertScreenToBase:*p ];
+	if ( ! CGDisplayIsCaptured (display_id) )
+		*p = [ qz_window convertScreenToBase:*p ];
 }
 
 
 /* Convert Cocoa window coordinate to Cocoa screen coordinate */
 void QZ_PrivateLocalToGlobal (_THIS, NSPoint *p) {
 
-    *p = [ qz_window convertBaseToScreen:*p ];
+	if ( ! CGDisplayIsCaptured (display_id) )
+		*p = [ qz_window convertBaseToScreen:*p ];
 }
 
 /* Convert SDL coordinate to Cocoa coordinate */
