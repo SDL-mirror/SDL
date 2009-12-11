@@ -24,7 +24,7 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
-#ifdef __powerpc__  /* I'm gambling they fixed this by 10.4. --ryan. */
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < 1060   /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
