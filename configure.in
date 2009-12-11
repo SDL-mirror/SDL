@@ -1317,6 +1317,7 @@ CheckPS3()
     AC_TRY_COMPILE([
       #include <linux/fb.h>
       #include <asm/ps3fb.h>
+      #include <libspe2.h>
     ],[
     ],[
       video_ps3=yes
