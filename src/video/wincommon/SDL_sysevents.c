@@ -316,10 +316,10 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if ( active ) {
 				/* Gain the following states */
 				appstate = SDL_APPACTIVE|SDL_APPINPUTFOCUS;
-				if ( this->input_grab != SDL_GRAB_OFF ) {
-					WIN_GrabInput(this, SDL_GRAB_ON);
-				}
-				if ( !(SDL_GetAppState()&SDL_APPINPUTFOCUS) ) {
+				if ( !(SDL_GetAppState() & SDL_APPINPUTFOCUS) ) {
+					if ( this->input_grab != SDL_GRAB_OFF ) {
+						WIN_GrabInput(this, SDL_GRAB_ON);
+					}
 					if ( ! DDRAW_FULLSCREEN() ) {
 						DIB_SwapGamma(this);
 					}
@@ -344,14 +344,16 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				if ( minimized ) {
 					appstate |= SDL_APPACTIVE;
 				}
-				if ( this->input_grab != SDL_GRAB_OFF ) {
-					WIN_GrabInput(this, SDL_GRAB_OFF);
-				}
+
 				if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
+					if ( this->input_grab != SDL_GRAB_OFF ) {
+						WIN_GrabInput(this, SDL_GRAB_OFF);
+					}
 					if ( ! DDRAW_FULLSCREEN() ) {
 						DIB_SwapGamma(this);
 					}
 					if ( WINDIB_FULLSCREEN() ) {
+						appstate |= SDL_APPMOUSEFOCUS;
 						SDL_RestoreDesktopMode();
 #if defined(_WIN32_WCE)
 						LoadAygshell();
@@ -372,8 +374,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_MOUSEMOVE: {
 
 #ifdef WM_MOUSELEAVE
-			/* No need to handle SDL_APPMOUSEFOCUS when fullscreen */
-			if ( SDL_VideoSurface && !FULLSCREEN() ) {
+			if ( SDL_VideoSurface ) {
 				/* mouse has entered the window */
 
 				if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
@@ -398,11 +399,8 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #ifdef WM_MOUSELEAVE
 		case WM_MOUSELEAVE: {
 
-			/* No need to handle SDL_APPMOUSEFOCUS when fullscreen */
-			if ( SDL_VideoSurface && !FULLSCREEN() ) {
+			if ( SDL_VideoSurface ) {
 				/* mouse has left the window */
-				/* or */
-				/* Elvis has left the building! */
 				posted = SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
 			}
 		}

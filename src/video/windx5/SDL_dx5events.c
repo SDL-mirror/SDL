@@ -149,8 +149,8 @@ struct {
 #else
 		&c_dfDIMouse,
 #endif
-		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE),
-		(DISCL_FOREGROUND|DISCL_NONEXCLUSIVE), handle_mouse },
+		(DISCL_BACKGROUND|DISCL_NONEXCLUSIVE),
+		(DISCL_BACKGROUND|DISCL_NONEXCLUSIVE), handle_mouse },
 	{ NULL, NULL, NULL, 0, 0, NULL }
 };
 	
@@ -297,8 +297,7 @@ static void post_mouse_motion(int relative, Sint16 x, Sint16 y)
 {
 	extern int mouse_relative;
 
-	if ( (SDL_GetAppState() & (SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS)) ==
-		(SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS) ) {
+	if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 		posted = SDL_PrivateMouseMotion(
 			0, relative, x, y);
 
@@ -355,10 +354,6 @@ static void post_mouse_motion(int relative, Sint16 x, Sint16 y)
 			ClientToScreen(SDL_Window, &center);
 			SetCursorPos(center.x, center.y);
 		}
-	} else {
-		/* No window or mouse focus, control is lost */
-		mouse_lost = 1;
-		ClipCursor(NULL);
 	}
 }
 
@@ -373,6 +368,12 @@ static void handle_mouse(const int numevents, DIDEVICEOBJECTDATA *ptrbuf)
 	/* Sanity check. Mailing list reports this being NULL unexpectedly. */
 	if (SDL_PublicSurface == NULL) {
 		return;
+	}
+
+	/* If mouse focus has been lost, make sure we release the cursor. */
+	if ( !(SDL_GetAppState() & SDL_APPMOUSEFOCUS) ) {
+		mouse_lost = 1;
+		ClipCursor(NULL);
 	}
 
 	/* If the mouse was lost, regain some sense of mouse state */
@@ -667,7 +668,7 @@ static int DX5_CheckInput(_THIS, int timeout, BOOL processInput)
 	}
 
 	/* Pump the DirectInput flow */
-	if ( SDL_GetAppState() & SDL_APPINPUTFOCUS ) {
+	if ( SDL_GetAppState() & SDL_APPMOUSEFOCUS ) {
 		for ( i=0; i<MAX_INPUTS; ++i ) {
 			if ( SDL_DIdev[i] != NULL ) {
 				result = IDirectInputDevice2_Poll(SDL_DIdev[i]);
