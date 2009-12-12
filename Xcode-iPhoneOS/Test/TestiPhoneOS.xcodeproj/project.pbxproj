@@ -67,13 +67,6 @@
 		FDAAC4610E2D4C27001DB1D8 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
 		FDAAC4680E2D4C9C001DB1D8 /* testblitspeed.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7430E2D0F1600EA573E /* testblitspeed.c */; };
 		FDAAC46B0E2D4CDE001DB1D8 /* sample.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AADE0E2D33C100EA573E /* sample.bmp */; };
-		FDAAC4860E2D4E37001DB1D8 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
-		FDAAC4870E2D4E37001DB1D8 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
-		FDAAC4880E2D4E37001DB1D8 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
-		FDAAC4890E2D4E37001DB1D8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89B0E2D111A00EA573E /* CoreGraphics.framework */; };
-		FDAAC48A0E2D4E37001DB1D8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
-		FDAAC48B0E2D4E37001DB1D8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
-		FDAAC48C0E2D4E37001DB1D8 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
 		FDAAC50B0E2D4FEB001DB1D8 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
 		FDAAC50C0E2D4FEB001DB1D8 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
 		FDAAC50D0E2D4FEB001DB1D8 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
@@ -125,7 +118,6 @@
 		FDBDE5890E3134B8006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
 		FDBDE58C0E3134F3006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
 		FDBDE5920E313531006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5970E31355A006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
 		FDBDE59B0E31356A006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
 		FDBDE59F0E31358D006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
 		FDBDE5A10E313594006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
@@ -351,7 +343,6 @@
 		FDAAC3CD0E2D47E6001DB1D8 /* testaudioinfo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testaudioinfo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDAAC4410E2D4961001DB1D8 /* testbitmap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testbitmap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDAAC4650E2D4C27001DB1D8 /* testblitspeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testblitspeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FDAAC4900E2D4E37001DB1D8 /* testcdrom.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testcdrom.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDAAC5150E2D4FEB001DB1D8 /* testdyngles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testdyngles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDAAC5390E2D517D001DB1D8 /* testdyngles.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testdyngles.c; path = ../../test/testdyngles.c; sourceTree = SOURCE_ROOT; };
 		FDAAC59B0E2D5429001DB1D8 /* testerror.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testerror.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -482,21 +473,6 @@
 				FDAAC45F0E2D4C27001DB1D8 /* UIKit.framework in Frameworks */,
 				FDAAC4600E2D4C27001DB1D8 /* Foundation.framework in Frameworks */,
 				FDAAC4610E2D4C27001DB1D8 /* CoreAudio.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FDAAC4830E2D4E37001DB1D8 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FDBDE5970E31355A006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
-				FDAAC4860E2D4E37001DB1D8 /* AudioToolbox.framework in Frameworks */,
-				FDAAC4870E2D4E37001DB1D8 /* QuartzCore.framework in Frameworks */,
-				FDAAC4880E2D4E37001DB1D8 /* OpenGLES.framework in Frameworks */,
-				FDAAC4890E2D4E37001DB1D8 /* CoreGraphics.framework in Frameworks */,
-				FDAAC48A0E2D4E37001DB1D8 /* UIKit.framework in Frameworks */,
-				FDAAC48B0E2D4E37001DB1D8 /* Foundation.framework in Frameworks */,
-				FDAAC48C0E2D4E37001DB1D8 /* CoreAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -827,7 +803,6 @@
 				FDAAC3CD0E2D47E6001DB1D8 /* testaudioinfo.app */,
 				FDAAC4410E2D4961001DB1D8 /* testbitmap.app */,
 				FDAAC4650E2D4C27001DB1D8 /* testblitspeed.app */,
-				FDAAC4900E2D4E37001DB1D8 /* testcdrom.app */,
 				FDAAC5150E2D4FEB001DB1D8 /* testdyngles.app */,
 				FDAAC59B0E2D5429001DB1D8 /* testerror.app */,
 				FDAAC5C90E2D55B5001DB1D8 /* testfile.app */,
@@ -1066,23 +1041,6 @@
 			name = testblitspeed;
 			productName = TestiPhoneOS;
 			productReference = FDAAC4650E2D4C27001DB1D8 /* testblitspeed.app */;
-			productType = "com.apple.product-type.application";
-		};
-		FDAAC47E0E2D4E37001DB1D8 /* testcdrom */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = FDAAC48D0E2D4E37001DB1D8 /* Build configuration list for PBXNativeTarget "testcdrom" */;
-			buildPhases = (
-				FDAAC47F0E2D4E37001DB1D8 /* Resources */,
-				FDAAC4810E2D4E37001DB1D8 /* Sources */,
-				FDAAC4830E2D4E37001DB1D8 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = testcdrom;
-			productName = TestiPhoneOS;
-			productReference = FDAAC4900E2D4E37001DB1D8 /* testcdrom.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FDAAC5040E2D4FEB001DB1D8 /* testdyngles */ = {
@@ -1469,7 +1427,6 @@
 				FDA8AB140E2D386600EA573E /* testalpha */,
 				FDAAC3BB0E2D47E6001DB1D8 /* testaudioinfo */,
 				FDAAC4540E2D4C27001DB1D8 /* testblitspeed */,
-				FDAAC47E0E2D4E37001DB1D8 /* testcdrom */,
 				FDAAC58A0E2D5429001DB1D8 /* testerror */,
 				FDAAC5B80E2D55B5001DB1D8 /* testfile */,
 				FDAAC5E90E2D5843001DB1D8 /* testgamma */,
@@ -1553,13 +1510,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FDAAC46B0E2D4CDE001DB1D8 /* sample.bmp in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FDAAC47F0E2D4E37001DB1D8 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1776,13 +1726,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FDAAC4680E2D4C9C001DB1D8 /* testblitspeed.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FDAAC4810E2D4E37001DB1D8 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2170,32 +2113,6 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testblitspeed;
-			};
-			name = Release;
-		};
-		FDAAC48E0E2D4E37001DB1D8 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
-				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = testcdrom;
-			};
-			name = Debug;
-		};
-		FDAAC48F0E2D4E37001DB1D8 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
-				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = testcdrom;
 			};
 			name = Release;
 		};
@@ -2816,15 +2733,6 @@
 			buildConfigurations = (
 				FDAAC4630E2D4C27001DB1D8 /* Debug */,
 				FDAAC4640E2D4C27001DB1D8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		FDAAC48D0E2D4E37001DB1D8 /* Build configuration list for PBXNativeTarget "testcdrom" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				FDAAC48E0E2D4E37001DB1D8 /* Debug */,
-				FDAAC48F0E2D4E37001DB1D8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
