@@ -36,6 +36,11 @@
  * Add support for querying the number of CPUs and binding threads to them?
  * Allow setting multiple icon sizes
 
+ * Add concept of viewport to fullscreen windows
+ * See why windows are being rearranged.  Is the shield window not up?
+ * Make sure you can create and show a fullscreen window in one step
+ * Figure out how to handle OpenGL context lost on Mac OS X (does it happen?)
+
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
 
