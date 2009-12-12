@@ -1012,8 +1012,17 @@ D3D_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
         vertices[i].v = 0.0f;
     }
     result =
-        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_LINESTRIP, count,
+        IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_LINESTRIP, count-1,
                                          vertices, sizeof(*vertices));
+
+    /* DirectX 9 has the same line rasterization semantics as GDI,
+       so we need to close the endpoint of the line */
+    if (points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
+        vertices[0].x = (float) points[count-1].x;
+        vertices[0].y = (float) points[count-1].y;
+        result = IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_POINTLIST, 1, vertices, sizeof(*vertices));
+    }
+
     SDL_stack_free(vertices);
     if (FAILED(result)) {
         D3D_SetError("DrawPrimitiveUP()", result);
