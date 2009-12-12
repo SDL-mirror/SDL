@@ -214,9 +214,10 @@ FilterEvents(void *userdata, SDL_Event * event)
             visible = !visible;
             SDL_ShowCursor(visible);
         }
-        printf("Mouse button %d has been %s\n",
+        printf("Mouse button %d has been %s at %d,%d\n",
                event->button.button,
-               (event->button.state == SDL_PRESSED) ? "pressed" : "released");
+               (event->button.state == SDL_PRESSED) ? "pressed" : "released",
+               event->button.x, event->button.y);
         return (0);
 
         /* Show relative mouse motion */
