@@ -107,10 +107,10 @@ DrawLines(SDL_WindowID window)
             SDL_RenderLine(0, window_h / 2, window_w - 1, window_h / 2);
             SDL_RenderLine(window_w / 2, 0, window_w / 2, window_h - 1);
         } else {
-            x1 = rand() % window_w;
-            x2 = rand() % window_w;
-            y1 = rand() % window_h;
-            y2 = rand() % window_h;
+            x1 = (rand() % (window_w*2)) - window_w;
+            x2 = (rand() % (window_w*2)) - window_w;
+            y1 = (rand() % (window_h*2)) - window_h;
+            y2 = (rand() % (window_h*2)) - window_h;
             SDL_RenderLine(x1, y1, x2, y2);
         }
     }
@@ -157,8 +157,8 @@ DrawRects(SDL_WindowID window)
 
         rect.w = rand() % (window_h / 2);
         rect.h = rand() % (window_h / 2);
-        rect.x = (rand() % window_w) - (rect.w / 2);
-        rect.y = (rand() % window_w) - (rect.h / 2);
+        rect.x = (rand() % (window_w*2) - window_w) - (rect.w / 2);
+        rect.y = (rand() % (window_h*2) - window_h) - (rect.h / 2);
         SDL_RenderRect(&rect);
     }
     SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
