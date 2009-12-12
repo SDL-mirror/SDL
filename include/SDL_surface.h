@@ -219,7 +219,7 @@ extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface * surface,
                                             Uint32 flag, Uint32 key);
 
 /**
- *  \brief Sets the color key (transparent pixel) in a blittable surface.
+ *  \brief Gets the color key (transparent pixel) in a blittable surface.
  *  
  *  \param surface The surface to update
  *  \param key A pointer filled in with the transparent pixel in the native 
