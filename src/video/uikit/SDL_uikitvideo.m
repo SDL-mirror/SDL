@@ -123,7 +123,6 @@ UIKit_VideoInit(_THIS)
 	
 	display.display_modes[0] = mode;
 	display.desktop_mode = mode;
-	display.fullscreen_mode = mode;
 	display.current_mode = mode;
 		
 	SDL_AddVideoDisplay(&display);

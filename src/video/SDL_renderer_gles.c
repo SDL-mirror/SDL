@@ -646,6 +646,8 @@ static int
 GLES_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    int i;
+    GLshort *vertices;
 
     GLES_SetBlendMode(data, renderer->blendMode, 1);
 
@@ -654,10 +656,16 @@ GLES_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    data->glVertexPointer(2, GL_INT, 0, points);
+    vertices = SDL_stack_alloc(GLshort, count*2);
+    for (i = 0; i < count; ++i) {
+        vertices[2*i+0] = (GLshort)points[i].x;
+        vertices[2*i+1] = (GLshort)points[i].y;
+    }
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
     data->glEnableClientState(GL_VERTEX_ARRAY);
     data->glDrawArrays(GL_POINTS, 0, count);
     data->glDisableClientState(GL_VERTEX_ARRAY);
+    SDL_stack_free(vertices);
 
     return 0;
 }
@@ -666,6 +674,8 @@ static int
 GLES_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    int i;
+    GLshort *vertices;
 
     GLES_SetBlendMode(data, renderer->blendMode, 1);
 
@@ -674,7 +684,12 @@ GLES_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
                     (GLfloat) renderer->b * inv255f,
                     (GLfloat) renderer->a * inv255f);
 
-    data->glVertexPointer(2, GL_INT, 0, points);
+    vertices = SDL_stack_alloc(GLshort, count*2);
+    for (i = 0; i < count; ++i) {
+        vertices[2*i+0] = (GLshort)points[i].x;
+        vertices[2*i+1] = (GLshort)points[i].y;
+    }
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
     data->glEnableClientState(GL_VERTEX_ARRAY);
     if (count > 2 && 
         points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
@@ -685,6 +700,7 @@ GLES_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
         data->glDrawArrays(GL_LINE_STRIP, 0, count);
     }
     data->glDisableClientState(GL_VERTEX_ARRAY);
+    SDL_stack_free(vertices);
 
     return 0;
 }
