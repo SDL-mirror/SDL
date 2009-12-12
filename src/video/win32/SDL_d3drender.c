@@ -1206,44 +1206,67 @@ static int
 D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
-    BYTE * pBytes;
-    D3DLOCKED_RECT lockedRect;
-    BYTE b, g, r, a;
-    unsigned long index;
-    int cur_mouse;
-    int x, y;
-
-    LPDIRECT3DSURFACE9 backBuffer;
-    LPDIRECT3DSURFACE9 pickOffscreenSurface;
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     D3DSURFACE_DESC desc;
+    LPDIRECT3DSURFACE9 backBuffer;
+    LPDIRECT3DSURFACE9 surface;
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    HRESULT result;
 
-    D3D_RenderData * data = (D3D_RenderData *) renderer->driverdata;
-    
-    IDirect3DDevice9_GetBackBuffer(data->device, 0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
-    
-    
-    IDirect3DSurface9_GetDesc(backBuffer, &desc);
+    result = IDirect3DDevice9_GetBackBuffer(data->device, 0, 0, D3DBACKBUFFER_TYPE_MONO, &backBuffer);
+    if (FAILED(result)) {
+        D3D_SetError("GetBackBuffer()", result);
+        return -1;
+    }
 
-    IDirect3DDevice9_CreateOffscreenPlainSurface(data->device, desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pickOffscreenSurface, NULL);
+    result = IDirect3DSurface9_GetDesc(backBuffer, &desc);
+    if (FAILED(result)) {
+        D3D_SetError("GetDesc()", result);
+        IDirect3DSurface9_Release(backBuffer);
+        return -1;
+    }
 
-    IDirect3DDevice9_GetRenderTargetData(data->device, backBuffer, pickOffscreenSurface);
+    result = IDirect3DDevice9_CreateOffscreenPlainSurface(data->device, desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &surface, NULL);
+    if (FAILED(result)) {
+        D3D_SetError("CreateOffscreenPlainSurface()", result);
+        IDirect3DSurface9_Release(backBuffer);
+        return -1;
+    }
 
-    IDirect3DSurface9_LockRect(pickOffscreenSurface, &lockedRect, NULL, D3DLOCK_READONLY);
-    pBytes = (BYTE*)lockedRect.pBits;
-    IDirect3DSurface9_UnlockRect(pickOffscreenSurface);
+    result = IDirect3DDevice9_GetRenderTargetData(data->device, backBuffer, surface);
+    if (FAILED(result)) {
+        D3D_SetError("GetRenderTargetData()", result);
+        IDirect3DSurface9_Release(surface);
+        IDirect3DSurface9_Release(backBuffer);
+        return -1;
+    }
 
-    // just to debug -->
-    cur_mouse = SDL_SelectMouse(-1);
-    SDL_GetMouseState(cur_mouse, &x, &y);
-    index = (x * 4 + (y * lockedRect.Pitch));
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
 
-    b = pBytes[index];
-    g = pBytes[index+1];
-    r = pBytes[index+2];
-    a = pBytes[index+3];
-    // <--
-    
-    return -1;
+    result = IDirect3DSurface9_LockRect(surface, &locked, &d3drect, D3DLOCK_READONLY);
+    if (FAILED(result)) {
+        D3D_SetError("LockRect()", result);
+        IDirect3DSurface9_Release(surface);
+        IDirect3DSurface9_Release(backBuffer);
+        return -1;
+    }
+
+    SDL_ConvertPixels(rect->w, rect->h,
+                      display->current_mode.format, locked.pBits, locked.Pitch,
+                      format, pixels, pitch);
+
+    IDirect3DSurface9_UnlockRect(surface);
+
+    IDirect3DSurface9_Release(surface);
+    IDirect3DSurface9_Release(backBuffer);
+
+    return 0;
 }
 
 static int
