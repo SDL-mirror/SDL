@@ -25,8 +25,10 @@
 #include "SDL_stdinc.h"
 #include "SDL_atomic.h"
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #include "SDL_error.h"
-#include "Windows.h"
 
 /*
   This file provides 32, and 64 bit atomic operations. If the
