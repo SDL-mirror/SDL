@@ -1283,6 +1283,7 @@ D3D_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                       Uint32 format, const void * pixels, int pitch)
 {
     /* Work in progress */
+    SDL_Unsupported();
     return -1;
 }
 
