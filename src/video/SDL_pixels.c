@@ -30,6 +30,13 @@
 #include "SDL_pixels_c.h"
 #include "SDL_RLEaccel_c.h"
 
+struct SDL_PaletteWatch
+{
+    SDL_PaletteChangedFunc callback;
+    void *userdata;
+    struct SDL_PaletteWatch *next;
+};
+
 /* Helper functions */
 
 SDL_bool

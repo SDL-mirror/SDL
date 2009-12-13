@@ -237,13 +237,7 @@ typedef struct SDL_Color
 
 typedef struct SDL_Palette SDL_Palette;
 typedef int (*SDL_PaletteChangedFunc) (void *userdata, SDL_Palette * palette);
-
-typedef struct SDL_PaletteWatch
-{
-    SDL_PaletteChangedFunc callback;
-    void *userdata;
-    struct SDL_PaletteWatch *next;
-} SDL_PaletteWatch;
+typedef struct SDL_PaletteWatch SDL_PaletteWatch;
 
 struct SDL_Palette
 {
