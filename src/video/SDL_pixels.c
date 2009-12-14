@@ -53,6 +53,32 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
     }
     *Rmask = *Gmask = *Bmask = *Amask = 0;
 
+    if (format == SDL_PIXELFORMAT_RGB24) {
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        *Rmask = 0x00FF0000;
+        *Gmask = 0x0000FF00;
+        *Bmask = 0x000000FF;
+#else
+        *Rmask = 0x000000FF;
+        *Gmask = 0x0000FF00;
+        *Bmask = 0x00FF0000;
+#endif
+        return SDL_TRUE;
+    }
+
+    if (format == SDL_PIXELFORMAT_BGR24) {
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        *Rmask = 0x000000FF;
+        *Gmask = 0x0000FF00;
+        *Bmask = 0x00FF0000;
+#else
+        *Rmask = 0x00FF0000;
+        *Gmask = 0x0000FF00;
+        *Bmask = 0x000000FF;
+#endif
+        return SDL_TRUE;
+    }
+
     if (SDL_PIXELTYPE(format) != SDL_PIXELTYPE_PACKED8 &&
         SDL_PIXELTYPE(format) != SDL_PIXELTYPE_PACKED16 &&
         SDL_PIXELTYPE(format) != SDL_PIXELTYPE_PACKED32) {
