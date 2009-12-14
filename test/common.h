@@ -1,6 +1,7 @@
 
 /* A simple test program framework */
 
+#define SDL_NO_COMPAT
 #include "SDL.h"
 
 #define DEFAULT_WINDOW_WIDTH  640

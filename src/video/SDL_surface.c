@@ -239,7 +239,7 @@ SDL_SetSurfaceRLE(SDL_Surface * surface, int flag)
 }
 
 int
-SDL_SetColorKey(SDL_Surface * surface, Uint32 flag, Uint32 key)
+SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
 {
     int flags;
 

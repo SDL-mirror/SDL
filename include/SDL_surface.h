@@ -216,7 +216,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceRLE(SDL_Surface * surface,
  *  \return 0 on success, or -1 if the surface is not valid
  */
 extern DECLSPEC int SDLCALL SDL_SetColorKey(SDL_Surface * surface,
-                                            Uint32 flag, Uint32 key);
+                                            int flag, Uint32 key);
 
 /**
  *  \brief Gets the color key (transparent pixel) in a blittable surface.
