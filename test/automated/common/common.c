@@ -82,7 +82,6 @@ int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img, int allowable_
 
       bpp = sur->format->BytesPerPixel;
 
-      /* Compare image - should be same format. */
       if (bpp == 4) {
          for (j=0; j<sur->h; j++) {
             for (i=0; i<sur->w; i++) {
