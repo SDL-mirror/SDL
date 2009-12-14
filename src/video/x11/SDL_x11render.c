@@ -58,6 +58,10 @@ static int X11_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
                            int count);
 static int X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+static int X11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                Uint32 format, void * pixels, int pitch);
+static int X11_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                 Uint32 format, const void * pixels, int pitch);
 static void X11_RenderPresent(SDL_Renderer * renderer);
 static void X11_DestroyTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -208,6 +212,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderLines = X11_RenderLines;
     renderer->RenderRects = X11_RenderRects;
     renderer->RenderCopy = X11_RenderCopy;
+    renderer->RenderReadPixels = X11_RenderReadPixels;
+    renderer->RenderWritePixels = X11_RenderWritePixels;
     renderer->RenderPresent = X11_RenderPresent;
     renderer->DestroyTexture = X11_DestroyTexture;
     renderer->DestroyRenderer = X11_DestroyRenderer;
@@ -934,6 +940,70 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                   data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
                   srcrect->x, srcrect->y);
     }
+    return 0;
+}
+
+static int
+X11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     Uint32 format, void * pixels, int pitch)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    Uint32 screen_format = display->current_mode.format;
+    XImage *image;
+
+    image = XGetImage(data->display, data->drawable, rect->x, rect->y,
+                      rect->w, rect->h, AllPlanes, ZPixmap);
+
+    SDL_ConvertPixels(rect->w, rect->h,
+                      screen_format, image->data, image->bytes_per_line,
+                      format, pixels, pitch);
+
+    XDestroyImage(image);
+    return 0;
+}
+
+static int
+X11_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                      Uint32 format, const void * pixels, int pitch)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    Uint32 screen_format = display->current_mode.format;
+    XImage *image;
+    void *image_pixels;
+    int image_pitch;
+
+    image_pitch = rect->w * SDL_BYTESPERPIXEL(screen_format);
+    image_pixels = SDL_malloc(rect->h * image_pitch);
+    if (!image_pixels) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    image = XCreateImage(data->display, data->visual,
+                         data->depth, ZPixmap, 0, image_pixels,
+                         rect->w, rect->h,
+                         SDL_BYTESPERPIXEL(screen_format) * 8,
+                         image_pitch);
+    if (!image) {
+        SDL_SetError("XCreateImage() failed");
+        return -1;
+    }
+
+    SDL_ConvertPixels(rect->w, rect->h,
+                      format, pixels, pitch,
+                      screen_format, image->data, image->bytes_per_line);
+
+    XPutImage(data->display, data->drawable, data->gc,
+              image, 0, 0, rect->x, rect->y, rect->w, rect->h);
+
+    image->data = NULL;
+    XDestroyImage(image);
+
+    SDL_free(image_pixels);
     return 0;
 }
 
