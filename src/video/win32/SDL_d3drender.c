@@ -26,6 +26,58 @@
 #include "SDL_win32video.h"
 #include "../SDL_yuv_sw_c.h"
 
+#ifdef ASSEMBLE_SHADER
+///////////////////////////////////////////////////////////////////////////
+// ID3DXBuffer:
+// ------------
+// The buffer object is used by D3DX to return arbitrary size data.
+//
+// GetBufferPointer -
+//    Returns a pointer to the beginning of the buffer.
+//
+// GetBufferSize -
+//    Returns the size of the buffer, in bytes.
+///////////////////////////////////////////////////////////////////////////
+
+typedef interface ID3DXBuffer ID3DXBuffer;
+typedef interface ID3DXBuffer *LPD3DXBUFFER;
+
+// {8BA5FB08-5195-40e2-AC58-0D989C3A0102}
+DEFINE_GUID(IID_ID3DXBuffer, 
+0x8ba5fb08, 0x5195, 0x40e2, 0xac, 0x58, 0xd, 0x98, 0x9c, 0x3a, 0x1, 0x2);
+
+#undef INTERFACE
+#define INTERFACE ID3DXBuffer
+
+typedef interface ID3DXBuffer {
+    const struct ID3DXBufferVtbl FAR* lpVtbl;
+} ID3DXBuffer;
+typedef const struct ID3DXBufferVtbl ID3DXBufferVtbl;
+const struct ID3DXBufferVtbl
+{
+    // IUnknown
+    STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
+    STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+    STDMETHOD_(ULONG, Release)(THIS) PURE;
+
+    // ID3DXBuffer
+    STDMETHOD_(LPVOID, GetBufferPointer)(THIS) PURE;
+    STDMETHOD_(DWORD, GetBufferSize)(THIS) PURE;
+};
+
+HRESULT WINAPI
+    D3DXAssembleShader(
+        LPCSTR                          pSrcData,
+        UINT                            SrcDataLen,
+        CONST LPVOID*                   pDefines,
+        LPVOID                          pInclude,
+        DWORD                           Flags,
+        LPD3DXBUFFER*                   ppShader,
+        LPD3DXBUFFER*                   ppErrorMsgs);
+
+#endif /* ASSEMBLE_SHADER */
+
+
 /* Direct3D renderer implementation */
 
 #if 1                           /* This takes more memory but you won't lose your texture data */
@@ -110,6 +162,7 @@ typedef struct
     IDirect3DDevice9 *device;
     UINT adapter;
     D3DPRESENT_PARAMETERS pparams;
+    LPDIRECT3DPIXELSHADER9 ps_mask;
     SDL_bool beginScene;
 } D3D_RenderData;
 
@@ -549,6 +602,45 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
                                           D3DTOP_DISABLE);
     IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
                                           D3DTOP_DISABLE);
+
+    {
+#ifdef ASSEMBLE_SHADER
+        const char *shader_text =
+"ps_1_1\n"
+"def c0, 0, 0, 0, 0.496\n"
+"def c1, 0, 0, 0, 1\n"
+"def c2, 0, 0, 0, -1\n"
+"tex t0\n"
+"mul r1, t0, v0\n"
+"add r0, r1, c0\n"
+"cnd r0, r0.a, c1, c2\n"
+"add r0, r0, r1\n";
+        LPD3DXBUFFER pCode;         // buffer with the assembled shader code
+        LPD3DXBUFFER pErrorMsgs;    // buffer with error messages
+        LPDWORD shader_data;
+        DWORD   shader_size;
+        result = D3DXAssembleShader( shader_text, SDL_strlen(shader_text), NULL, NULL, 0, &pCode, &pErrorMsgs );
+        if (FAILED(result)) {
+            D3D_SetError("D3DXAssembleShader()", result);
+        }
+        shader_data = (DWORD*)pCode->lpVtbl->GetBufferPointer(pCode);
+        shader_size = pCode->lpVtbl->GetBufferSize(pCode);
+#else
+        const DWORD shader_data[] = {
+            0xffff0101,0x00000051,0xa00f0000,0x00000000,0x00000000,0x00000000,
+            0x3efdf3b6,0x00000051,0xa00f0001,0x00000000,0x00000000,0x00000000,
+            0x3f800000,0x00000051,0xa00f0002,0x00000000,0x00000000,0x00000000,
+            0xbf800000,0x00000042,0xb00f0000,0x00000005,0x800f0001,0xb0e40000,
+            0x90e40000,0x00000002,0x800f0000,0x80e40001,0xa0e40000,0x00000050,
+            0x800f0000,0x80ff0000,0xa0e40001,0xa0e40002,0x00000002,0x800f0000,
+            0x80e40000,0x80e40001,0x0000ffff
+        };
+#endif
+        result = IDirect3DDevice9_CreatePixelShader(data->device, shader_data, &data->ps_mask);
+        if (FAILED(result)) {
+            D3D_SetError("CreatePixelShader()", result);
+        }
+    }
 
     return renderer;
 }
@@ -1115,6 +1207,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *texturedata = (D3D_TextureData *) texture->driverdata;
+    LPDIRECT3DPIXELSHADER9 shader = NULL;
     float minx, miny, maxx, maxy;
     float minu, maxu, minv, maxv;
     DWORD color;
@@ -1172,6 +1265,10 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     D3D_SetBlendMode(data, texture->blendMode);
 
+    if (texture->blendMode == SDL_BLENDMODE_MASK) {
+        shader = data->ps_mask;
+    }
+
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
     case SDL_TEXTURESCALEMODE_FAST:
@@ -1201,12 +1298,26 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         D3D_SetError("SetTexture()", result);
         return -1;
     }
+    if (shader) {
+        result = IDirect3DDevice9_SetPixelShader(data->device, shader);
+        if (FAILED(result)) {
+            D3D_SetError("SetShader()", result);
+            return -1;
+        }
+    }
     result =
         IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_TRIANGLEFAN, 2,
                                          vertices, sizeof(*vertices));
     if (FAILED(result)) {
         D3D_SetError("DrawPrimitiveUP()", result);
         return -1;
+    }
+    if (shader) {
+        result = IDirect3DDevice9_SetPixelShader(data->device, NULL);
+        if (FAILED(result)) {
+            D3D_SetError("SetShader()", result);
+            return -1;
+        }
     }
     return 0;
 }
