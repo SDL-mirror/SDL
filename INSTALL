@@ -1,6 +1,10 @@
 
 To compile and install SDL:
 
+    0.  If you have downloaded this from the website, skip to the next step.
+        If you have checked this out from subversion, you'll need to run
+        ./autogen.sh to build the configure script. 
+
     1.  Run './configure; make; make install'
 
         If you are compiling for Windows using gcc, read the FAQ at:
