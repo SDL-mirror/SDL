@@ -370,7 +370,7 @@ DrawLogoTexture(void)
 int
 RunGLTest(int argc, char *argv[],
           int logo, int logocursor, int slowly, int bpp, float gamma,
-          int noframe, int fsaa, int sync, int noaccel)
+          int noframe, int fsaa, int sync, int accel)
 {
     int i;
     int rgb_size[3];
@@ -454,7 +454,9 @@ RunGLTest(int argc, char *argv[],
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, fsaa);
     }
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, !noaccel);
+    if (accel >= 0) {
+        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, accel);
+    }
     if (SDL_SetVideoMode(w, h, bpp, video_flags) == NULL) {
         fprintf(stderr, "Couldn't set GL mode: %s\n", SDL_GetError());
         SDL_Quit();
@@ -491,8 +493,11 @@ RunGLTest(int argc, char *argv[],
         printf("SDL_GL_MULTISAMPLESAMPLES: requested %d, got %d\n", fsaa,
                value);
     }
-    SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-    printf("SDL_GL_ACCELERATED_VISUAL: requested %d, got %d\n", !noaccel, value);
+    if (accel >= 0) {
+        SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+        printf("SDL_GL_ACCELERATED_VISUAL: requested %d, got %d\n", accel,
+               value);
+    }
     if (sync) {
         printf("Buffer swap interval: requested 1, got %d\n",
                SDL_GL_GetSwapInterval());
@@ -703,7 +708,7 @@ main(int argc, char *argv[])
     float gamma = 0.0;
     int noframe = 0;
     int fsaa = 0;
-    int noaccel = 0;
+    int accel = -1;
     int sync = 0;
 
     logo = 0;
@@ -734,22 +739,22 @@ main(int argc, char *argv[])
         if (strcmp(argv[i], "-fsaa") == 0) {
             ++fsaa;
         }
-        if (strcmp(argv[i], "-noaccel") == 0) {
-            ++noaccel;
+        if (strcmp(argv[i], "-accel") == 0) {
+            accel = atoi(argv[++i]);
         }
         if (strcmp(argv[i], "-sync") == 0) {
             ++sync;
         }
         if (strncmp(argv[i], "-h", 2) == 0) {
             printf
-                ("Usage: %s [-twice] [-logo] [-logocursor] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa] [-noaccel] [-sync] [-fullscreen]\n",
+                ("Usage: %s [-twice] [-logo] [-logocursor] [-slow] [-bpp n] [-gamma n] [-noframe] [-fsaa] [-accel n] [-sync] [-fullscreen]\n",
                  argv[0]);
             exit(0);
         }
     }
     for (i = 0; i < numtests; ++i) {
         RunGLTest(argc, argv, logo, logocursor, slowly, bpp, gamma,
-                  noframe, fsaa, sync, noaccel);
+                  noframe, fsaa, sync, accel);
     }
     return 0;
 }

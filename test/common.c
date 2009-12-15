@@ -104,7 +104,7 @@ CommonCreateState(char **argv, Uint32 flags)
     state->gl_multisamplebuffers = 0;
     state->gl_multisamplesamples = 0;
     state->gl_retained_backing = 1;
-    state->gl_accelerated = 1;
+    state->gl_accelerated = -1;
     state->gl_major_version = 2;
     state->gl_minor_version = 1;
 
@@ -659,7 +659,10 @@ CommonInit(CommonState * state)
         SDL_GL_SetAttribute(SDL_GL_STEREO, state->gl_stereo);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, state->gl_multisamplebuffers);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, state->gl_multisamplesamples);
-        SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, state->gl_accelerated);
+        if (state->gl_accelerated >= 0) {
+            SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL,
+                                state->gl_accelerated);
+        }
         SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, state->gl_retained_backing);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);

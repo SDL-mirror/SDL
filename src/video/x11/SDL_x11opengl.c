@@ -359,7 +359,8 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
         attribs[i++] = _this->gl_config.multisamplesamples;
     }
 
-    if (_this->gl_data->HAS_GLX_EXT_visual_rating) {
+    if (_this->gl_config.accelerated >= 0 &&
+        _this->gl_data->HAS_GLX_EXT_visual_rating) {
         attribs[i++] = GLX_VISUAL_CAVEAT_EXT;
         attribs[i++] = _this->gl_config.accelerated ? GLX_NONE_EXT :
                                                       GLX_SLOW_VISUAL_EXT;
