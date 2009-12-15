@@ -497,6 +497,13 @@ SDL_RWFromFP(FILE * fp, SDL_bool autoclose)
     }
     return (rwops);
 }
+#else
+SDL_RWops *
+SDL_RWFromFP(void * fp, SDL_bool autoclose)
+{
+    SDL_SetError("SDL not compiled with stdio support");
+    return NULL;
+}
 #endif /* HAVE_STDIO_H */
 
 SDL_RWops *

@@ -131,6 +131,9 @@ extern DECLSPEC SDL_RWops *SDLCALL SDL_RWFromFile(const char *file,
 #ifdef HAVE_STDIO_H
 extern DECLSPEC SDL_RWops *SDLCALL SDL_RWFromFP(FILE * fp,
                                                 SDL_bool autoclose);
+#else
+extern DECLSPEC SDL_RWops *SDLCALL SDL_RWFromFP(void * fp,
+                                                SDL_bool autoclose);
 #endif
 
 extern DECLSPEC SDL_RWops *SDLCALL SDL_RWFromMem(void *mem, int size);
