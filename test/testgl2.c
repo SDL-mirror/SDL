@@ -162,7 +162,7 @@ Render()
 int
 main(int argc, char *argv[])
 {
-    int fsaa, accel;
+    int fsaa, noaccel;
     int value;
     int i, done;
     SDL_DisplayMode mode;
@@ -172,7 +172,7 @@ main(int argc, char *argv[])
 
     /* Initialize parameters */
     fsaa = 0;
-    accel = 0;
+    noaccel = 0;
 
     /* Initialize test framework */
     state = CommonCreateState(argv, SDL_INIT_VIDEO);
@@ -187,15 +187,15 @@ main(int argc, char *argv[])
             if (SDL_strcasecmp(argv[i], "--fsaa") == 0) {
                 ++fsaa;
                 consumed = 1;
-            } else if (SDL_strcasecmp(argv[i], "--accel") == 0) {
-                ++accel;
+            } else if (SDL_strcasecmp(argv[i], "--noaccel") == 0) {
+                ++noaccel;
                 consumed = 1;
             } else {
                 consumed = -1;
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel]\n", argv[0],
+            fprintf(stderr, "Usage: %s %s [--fsaa] [--noaccel]\n", argv[0],
                     CommonUsage(state));
             quit(1);
         }
@@ -213,9 +213,7 @@ main(int argc, char *argv[])
         state->gl_multisamplebuffers = 1;
         state->gl_multisamplesamples = fsaa;
     }
-    if (accel) {
-        state->gl_accelerated=1;
-    }
+    state->gl_accelerated = !noaccel;
 
     if (!CommonInit(state)) {
         quit(2);
@@ -284,14 +282,13 @@ main(int argc, char *argv[])
                    SDL_GetError());
         }
     }
-    if (accel) {
-        status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
-        if (!status) {
-            printf("SDL_GL_ACCELERATED_VISUAL: requested 1, got %d\n", value);
-        } else {
-            printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
-                   SDL_GetError());
-        }
+    status = SDL_GL_GetAttribute(SDL_GL_ACCELERATED_VISUAL, &value);
+    if (!status) {
+        printf("SDL_GL_ACCELERATED_VISUAL: requested %d, got %d\n", !noaccel,
+               value);
+    } else {
+        printf("Failed to get SDL_GL_ACCELERATED_VISUAL: %s\n",
+               SDL_GetError());
     }
 
     /* Set rendering settings */

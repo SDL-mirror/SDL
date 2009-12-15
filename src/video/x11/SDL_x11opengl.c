@@ -359,17 +359,19 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
         attribs[i++] = _this->gl_config.multisamplesamples;
     }
 
-    if (_this->gl_config.accelerated >= 0
-        && _this->gl_data->HAS_GLX_EXT_visual_rating) {
+    if (_this->gl_data->HAS_GLX_EXT_visual_rating) {
         attribs[i++] = GLX_VISUAL_CAVEAT_EXT;
-        attribs[i++] = GLX_NONE_EXT;
+        attribs[i++] = _this->gl_config.accelerated ? GLX_NONE_EXT :
+                                                      GLX_SLOW_VISUAL_EXT;
     }
+
 #ifdef GLX_DIRECT_COLOR         /* Try for a DirectColor visual for gamma support */
     if (X11_UseDirectColorVisuals()) {
         attribs[i++] = GLX_X_VISUAL_TYPE;
         attribs[i++] = GLX_DIRECT_COLOR;
     }
 #endif
+
     attribs[i++] = None;
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);

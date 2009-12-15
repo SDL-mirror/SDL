@@ -239,7 +239,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     _this->gl_config.multisamplebuffers = 0;
     _this->gl_config.multisamplesamples = 0;
     _this->gl_config.retained_backing = 1;
-    _this->gl_config.accelerated = -1;  /* not known, don't set */
+    _this->gl_config.accelerated = 1;
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 1;
 
@@ -3274,7 +3274,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_ACCELERATED_VISUAL:
         {
             /* FIXME: How do we get this information? */
-            *value = (_this->gl_config.accelerated != 0);
+            *value = _this->gl_config.accelerated;
             return 0;
         }
     default:
