@@ -732,7 +732,7 @@ WIN_SetError(const char *prefix)
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
                   buffer, SDL_arraysize(buffer), NULL);
     message = WIN_StringToUTF8(buffer);
-    SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ":" : "", message);
+    SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
     SDL_free(message);
 }
 

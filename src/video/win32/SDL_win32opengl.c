@@ -536,7 +536,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
     }
 
     if (!context) {
-        SDL_SetError("Could not create GL context");
+        WIN_SetError("Could not create GL context");
         return NULL;
     }
 
