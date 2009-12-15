@@ -31,6 +31,17 @@
  * Create extended set of (negative) error codes and have the API functions document and return them.
  * Add clipboard support (from scrap demo)
  * Add support for desktop windows?
+	With Qt, I can do this by the codes as follows:
+
+	setAttribute(Qt::WA_X11NetWmWindowTypeDesktop); 
+	setWindowFlags(Qt::SplashScreen);               
+
+	Qt::WindowFlags flags = 0;
+	    flags |= Qt::FramelessWindowHint;
+	    flags |= Qt::Tool;                          
+	    flags |= Qt::WindowStaysOnBottomHint;
+
+	    setWindowFlags(flags);
  * Add support for synchronizing 2D updates with vblank (bug #406)
  * Add support for real-time threads and/or adjusting thread priority?
  * Add support for querying the number of CPUs and binding threads to them?
