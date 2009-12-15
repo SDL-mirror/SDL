@@ -101,6 +101,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     SDL_WindowData *data;
     RAWINPUT *raw;
     PACKET packet;
+    LRESULT returnCode = -1;
 
     /* Send a SDL_SYSWMEVENT if the application wants them */
     if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
@@ -211,7 +212,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 }
             }
         }
-        return (0);
+        returnCode = 0;
+        break;
 
 /* WinCE has no RawInput, so we use the classic mouse events.
    In classic Win32 this is done by WM_INPUT
@@ -263,7 +265,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             if (index < 0) {
                 /* New mouse?  Should we dynamically update mouse list? */
-                return (0);
+                returnCode = 0;
+                break;
             }
 
             GetCursorPos(&point);
@@ -316,7 +319,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             SDL_stack_free(lpb);
         }
-        return (0);
+        returnCode = 0;
+        break;
 #endif /* _WIN32_WCE */
 
     case WM_MOUSELEAVE:
@@ -331,7 +335,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 }
             }
         }
-        return (0);
+        returnCode = 0;
+        break;
 
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
@@ -340,7 +345,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             /* Ignore repeated keys */
             if (lParam & REPEATED_KEYMASK) {
-                return (0);
+                returnCode = 0;
+                break;
             }
 
             index = data->videodata->keyboard;
@@ -364,7 +370,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                         wParam = VK_RSHIFT;
                     } else {
                         /* Probably a key repeat */
-                        return (0);
+                        wParam = 256;
                     }
                 }
                 break;
@@ -384,7 +390,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                     data->videodata->key_layout[wParam]);
             }
         }
-        return (0);
+        returnCode = 0;
+        break;
 
     case WM_SYSKEYUP:
     case WM_KEYUP:
@@ -412,7 +419,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                         wParam = VK_RSHIFT;
                     } else {
                         /* Probably a key repeat */
-                        return (0);
+                        wParam = 256;
                     }
                 }
                 break;
@@ -440,7 +447,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                     data->videodata->key_layout[wParam]);
             }
         }
-        return (0);
+        returnCode = 0;
+        break;
 
     case WM_CHAR:
         {
@@ -462,13 +470,15 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             SDL_SendKeyboardText(data->videodata->keyboard, text);
         }
-        return (0);
+        returnCode = 0;
+        break;
 
     case WM_INPUTLANGCHANGE:
         {
             WIN_UpdateKeymap(data->videodata->keyboard);
         }
-        return (1);
+        returnCode = 1;
+        break;
 
     case WM_GETMINMAXINFO:
         {
@@ -481,7 +491,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             /* If we allow resizing, let the resize happen naturally */
             if (SDL_GetWindowFlags(data->windowID) & SDL_WINDOW_RESIZABLE) {
-                return (0);
+                returnCode = 0;
+                break;
             }
 
             /* Get the current position of our window */
@@ -523,7 +534,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             info->ptMaxTrackSize.x = w;
             info->ptMaxTrackSize.y = h;
         }
-        return (0);
+        returnCode = 0;
+        break;
 
     case WM_WINDOWPOSCHANGED:
         {
@@ -568,7 +580,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     cursor = LoadCursor(NULL, IDC_ARROW);
                 }
                 SetCursor(cursor);
-                return (TRUE);
+                returnCode = TRUE;
             }
         }
         break;
@@ -577,8 +589,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_QUERYNEWPALETTE:
         {
             /*
-               WIN_RealizePalette(current_video);
-               return (TRUE);
+                WIN_RealizePalette(current_video);
+                returnCode = TRUE;
              */
         }
         break;
@@ -602,18 +614,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                     0, 0);
             }
         }
-        return (0);
-
-        /* If this isn't our window, we don't need to repaint the frame.
-           This fixes a reentrancy issue that can cause stack overflows with foreign windows.
-           3/21/09 Mason Wheeler */
-    case WM_NCPAINT:
-        {
-            if (SDL_GetWindowFlags(data->windowID) & SDL_WINDOW_FOREIGN) {
-                return (0);
-            }
-            break;
-        }
+        returnCode = 0;
+        break;
 
         /* We'll do our own drawing, prevent flicker */
     case WM_ERASEBKGND:
@@ -637,9 +639,18 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         {
             SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_CLOSE, 0, 0);
         }
-        return (0);
+        returnCode = 0;
+        break;
     }
-    return CallWindowProc(data->wndproc, hwnd, msg, wParam, lParam);
+
+    /* If there's a window proc, assume it's going to handle messages */
+    if (data->wndproc) {
+        return CallWindowProc(data->wndproc, hwnd, msg, wParam, lParam);
+    } else if (returnCode >= 0) {
+        return returnCode;
+    } else {
+        return CallWindowProc(DefWindowProc, hwnd, msg, wParam, lParam);
+    }
 }
 
 void
