@@ -61,7 +61,9 @@ typedef unsigned long uintptr_t;
 #define HAVE_FREE	1
 #define HAVE_ALLOCA	1
 #define HAVE_GETENV	1
+#define HAVE_SETENV	1
 #define HAVE_PUTENV	1
+#define HAVE_SETENV	1
 #define HAVE_UNSETENV	1
 #define HAVE_QSORT	1
 #define HAVE_ABS	1

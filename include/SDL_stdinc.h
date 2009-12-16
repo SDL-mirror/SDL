@@ -267,20 +267,12 @@ char *alloca();
 extern DECLSPEC char *SDLCALL SDL_getenv(const char *name);
 #endif
 
-/**
- * \warning On some platforms, the string you pass to SDL_putenv() becomes
- *          part of the environment table directly...it will use this specific
- *          buffer, and not a copy of it! This means you can't free it, and
- *          other pieces of code may try to write to it. In practice, this
- *          isn't a big deal, but be aware of the possibility.
- *          However, due to this issue, you should be prepared to
- *          pass a (char*), or be willing to cast away the constness of your
- *          string for this call.
- */
-#ifdef HAVE_PUTENV
-#define SDL_putenv	putenv
+/* SDL_putenv() has moved to SDL_compat. */
+#ifdef HAVE_SETENV
+#define SDL_setenv	setenv
 #else
-extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
+extern DECLSPEC int SDLCALL SDL_setenv(const char *name, const char *value,
+                                       int overwrite);
 #endif
 
 #ifdef HAVE_QSORT

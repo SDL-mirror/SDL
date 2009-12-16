@@ -321,9 +321,7 @@ ESD_Init(SDL_AudioDriverImpl * impl)
         int connection = 0;
 
         /* Don't start ESD if it's not running */
-        if (SDL_getenv("ESD_NO_SPAWN") == NULL) {
-            SDL_putenv("ESD_NO_SPAWN=1");
-        }
+        SDL_setenv("ESD_NO_SPAWN", "1", 0);
 
         connection = SDL_NAME(esd_open_sound) (NULL);
         if (connection < 0) {

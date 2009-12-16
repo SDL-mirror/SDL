@@ -60,7 +60,7 @@ void InitVideo(int argc, char *argv[])
         }
     }
 
-    SDL_putenv("SDL_VIDEO_WINDOW_POS=center");
+    SDL_setenv("SDL_VIDEO_WINDOW_POS", "center", 1);
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());

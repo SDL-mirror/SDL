@@ -35,31 +35,18 @@
 static char *SDL_envmem = NULL; /* Ugh, memory leak */
 static size_t SDL_envmemlen = 0;
 
-/* Put a variable of the form "name=value" into the environment */
+/* Put a variable into the environment */
 int
-SDL_putenv(const char *variable)
+SDL_setenv(const char *name, const char *value, int overwrite)
 {
-    size_t bufferlen;
-    char *value;
-    const char *sep;
-
-    sep = SDL_strchr(variable, '=');
-    if (sep == NULL) {
-        return -1;
-    }
-    bufferlen = SDL_strlen(variable) + 1;
-    if (bufferlen > SDL_envmemlen) {
-        char *newmem = (char *) SDL_realloc(SDL_envmem, bufferlen);
-        if (newmem == NULL) {
-            return -1;
+    if (!overwrite) {
+        char ch = 0;
+        const size_t len = GetEnvironmentVariable(name, &ch, sizeof (ch));
+        if (len > 0) {
+            return 0;  /* asked not to overwrite existing value. */
         }
-        SDL_envmem = newmem;
-        SDL_envmemlen = bufferlen;
     }
-    SDL_strlcpy(SDL_envmem, variable, bufferlen);
-    value = SDL_envmem + (sep - variable);
-    *value++ = '\0';
-    if (!SetEnvironmentVariable(SDL_envmem, *value ? value : NULL)) {
+    if (!SetEnvironmentVariable(name, *value ? value : NULL)) {
         return -1;
     }
     return 0;
@@ -92,35 +79,30 @@ SDL_getenv(const char *name)
 
 static char **SDL_env = (char **) 0;
 
-/* Put a variable of the form "name=value" into the environment */
+/* Put a variable into the environment */
 int
-SDL_putenv(const char *variable)
+SDL_setenv(const char *name, const char *value, int overwrite)
 {
-    const char *name, *value;
     int added;
     int len, i;
     char **new_env;
     char *new_variable;
 
     /* A little error checking */
-    if (!variable) {
-        return (-1);
-    }
-    name = variable;
-    for (value = variable; *value && (*value != '='); ++value) {
-        /* Keep looking for '=' */ ;
-    }
-    if (*value) {
-        ++value;
-    } else {
+    if (!name || !value) {
         return (-1);
     }
 
     /* Allocate memory for the variable */
-    new_variable = SDL_strdup(variable);
+    len = SDL_strlen(name) + SDL_strlen(value) + 2;
+    new_variable = (char *) SDL_malloc(len);
     if (!new_variable) {
         return (-1);
     }
+
+    SDL_snprintf(new_variable, len, "%s=%s", name, value);
+    value = new_variable + SDL_strlen(name) + 1;
+    name = new_variable;
 
     /* Actually put it into the environment */
     added = 0;
@@ -135,6 +117,10 @@ SDL_putenv(const char *variable)
         }
         /* If we found it, just replace the entry */
         if (SDL_env[i]) {
+            if (!overwrite) {
+                SDL_free(new_variable);
+                return 0;
+            }
             SDL_free(SDL_env[i]);
             SDL_env[i] = new_variable;
             added = 1;
@@ -179,6 +165,36 @@ SDL_getenv(const char *name)
 #endif /* __WIN32__ */
 
 #endif /* !HAVE_GETENV */
+
+
+/* We have a real environment table, but no real setenv? Fake it w/ putenv. */
+#if (defined(HAVE_GETENV) && defined(HAVE_PUTENV) && !defined(HAVE_SETENV))
+int
+SDL_setenv(const char *name, const char *value, int overwrite)
+{
+    size_t len;
+    char *new_variable;
+
+    if (getenv(name) != NULL) {
+        if (overwrite) {
+            unsetenv(name);
+        } else {
+            return 0;  /* leave the existing one there. */
+        }
+    }
+
+    /* This leaks. Sorry. Get a better OS so we don't have to do this. */
+    len = SDL_strlen(name) + SDL_strlen(value) + 2;
+    new_variable = (char *) SDL_malloc(len);
+    if (!new_variable) {
+        return (-1);
+    }
+
+    SDL_snprintf(new_variable, len, "%s=%s", name, value);
+    return putenv(new_variable);
+}
+#endif
+
 
 #ifdef TEST_MAIN
 #include <stdio.h>

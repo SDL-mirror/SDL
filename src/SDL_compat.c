@@ -1754,4 +1754,26 @@ SDL_EnableUNICODE(int enable)
     return previous;
 }
 
+
+int
+SDL_putenv(const char *_var)
+{
+    char *ptr = NULL;
+    char *var = SDL_strdup(_var);
+    if (var == NULL) {
+        return -1;  /* we don't set errno. */
+    }
+
+    ptr = strchr(var, '=');
+    if (ptr == NULL) {
+        SDL_free(var);
+        return -1;
+    }
+
+    *ptr = '\0';  /* split the string into name and value. */
+    SDL_setenv(var, ptr + 1, 1);
+    SDL_free(var);
+    return 0;
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

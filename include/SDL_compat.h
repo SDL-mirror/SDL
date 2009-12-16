@@ -297,6 +297,8 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 #define SDL_RenderFill  SDL_RenderRect
 
+extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
+
 /*@}*//*Compatibility*/
 
 /* Ends C function definitions when using C++ */
