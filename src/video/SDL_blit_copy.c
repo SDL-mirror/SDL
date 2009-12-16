@@ -65,7 +65,9 @@ SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
 
     __m64 values[8];
     for (i = len / 64; i--;) {
+#ifdef __SSE__
         _mm_prefetch(src, _MM_HINT_NTA);
+#endif
         values[0] = *(__m64 *) (src + 0);
         values[1] = *(__m64 *) (src + 8);
         values[2] = *(__m64 *) (src + 16);
