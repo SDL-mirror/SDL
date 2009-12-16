@@ -270,7 +270,7 @@ DrawLogoCursor(void)
     }
 
     /* Move the image around */
-    SDL_GetMouseState(0, &x, &y);
+    SDL_GetMouseState(&x, &y);
     x -= w / 2;
     y -= h / 2;
 

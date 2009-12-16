@@ -285,7 +285,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             }
 
             selected = SDL_SelectMouse(event->wheel.which);
-            SDL_GetMouseState(selected, &x, &y);
+            SDL_GetMouseState(&x, &y);
             SDL_SelectMouse(selected);
 
             if (event->wheel.y > 0) {

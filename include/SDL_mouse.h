@@ -111,7 +111,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GetRelativeMouseMode(int index);
  *  mouse cursor position relative to the focus window for the currently
  *  selected mouse.  You can pass NULL for either x or y.
  */
-extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int index, int *x, int *y);
+extern DECLSPEC Uint8 SDLCALL SDL_GetMouseState(int *x, int *y);
 
 /**
  *  \brief Retrieve the state of the specified mouse.

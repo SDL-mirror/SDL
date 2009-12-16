@@ -252,9 +252,9 @@ SDL_GetRelativeMouseMode(int index)
 }
 
 Uint8
-SDL_GetMouseState(int index, int *x, int *y)
+SDL_GetMouseState(int *x, int *y)
 {
-    SDL_Mouse *mouse = SDL_GetMouse(index);
+    SDL_Mouse *mouse = SDL_GetMouse(SDL_current_mouse);
 
     if (!mouse) {
         if (x) {
