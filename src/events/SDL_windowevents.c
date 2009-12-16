@@ -28,6 +28,21 @@
 #include "SDL_mouse_c.h"
 #include "../video/SDL_sysvideo.h"
 
+
+static int
+RemovePendingSizeEvents(void * userdata, SDL_Event *event)
+{
+    SDL_Event *new_event = (SDL_Event *)userdata;
+
+    if (event->type == SDL_WINDOWEVENT &&
+        event->window.event == SDL_WINDOWEVENT_RESIZED &&
+        event->window.windowID == new_event->window.windowID) {
+        /* We're about to post a new size event, drop the old one */
+        return 0;
+    }
+    return 1;
+}
+
 int
 SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
                     int data2)
@@ -138,6 +153,12 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
         event.window.data1 = data1;
         event.window.data2 = data2;
         event.window.windowID = windowID;
+
+        /* Fixes queue overflow with resize events that aren't processed */
+        if (windowevent == SDL_WINDOWEVENT_RESIZED) {
+            SDL_FilterEvents(RemovePendingSizeEvents, &event);
+        }
+
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
