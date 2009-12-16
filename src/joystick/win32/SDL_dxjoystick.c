@@ -794,4 +794,5 @@ SDL_SYS_JoystickQuit(void)
 }
 
 #endif /* SDL_JOYSTICK_DINPUT */
+
 /* vi: set ts=4 sw=4 expandtab: */
