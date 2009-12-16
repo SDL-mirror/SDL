@@ -186,7 +186,8 @@ typedef struct SDL_MouseMotionEvent
     int pressure_max;       /**< Maximum value of the pressure reported by the device */
     int pressure_min;       /**< Minimum value of the pressure reported by the device */
     int rotation;           /**< For future use */
-    int tilt;               /**< For future use */
+    int tilt_x;             /**< For future use */
+    int tilt_y;             /**< For future use */
     int cursor;             /**< The cursor being used in the event */
     int xrel;               /**< The relative motion in the X direction */
     int yrel;               /**< The relative motion in the Y direction */
