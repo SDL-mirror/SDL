@@ -49,4 +49,5 @@ extern void SDL_SYS_SetupThread(void);
 extern void SDL_SYS_WaitThread(SDL_Thread * thread);
 
 #endif /* _SDL_systhread_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

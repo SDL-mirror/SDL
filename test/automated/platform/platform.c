@@ -155,6 +155,7 @@ int test_platform (void)
          "big"
 #endif
          );
+   SDL_ATprintVerbose( 1, "CPU count: %d\n", SDL_GetCPUCount());
    SDL_ATprintVerbose( 1, "Available extensions:\n" );
    SDL_ATprintVerbose( 1, "   RDTSC %s\n", SDL_HasRDTSC()? "detected" : "not detected" );
    SDL_ATprintVerbose( 1, "   MMX %s\n", SDL_HasMMX()? "detected" : "not detected" );

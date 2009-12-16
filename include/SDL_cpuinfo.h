@@ -40,6 +40,11 @@ extern "C" {
 #endif
 
 /**
+ *  This function returns the number of CPU cores available.
+ */
+extern DECLSPEC int SDLCALL SDL_GetCPUCount(void);
+
+/**
  *  This function returns true if the CPU has the RDTSC instruction.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC(void);

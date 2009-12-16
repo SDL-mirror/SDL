@@ -25,6 +25,10 @@
 
 #include "SDL_cpuinfo.h"
 
+#ifdef HAVE_SYSCTLBYNAME
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#endif
 #if defined(__MACOSX__) && (defined(__ppc__) || defined(__ppc64__))
 #include <sys/sysctl.h>         /* For AltiVec check */
 #elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
@@ -32,14 +36,14 @@
 #include <setjmp.h>
 #endif
 
-#define CPU_HAS_RDTSC	0x00000001
-#define CPU_HAS_MMX	0x00000002
-#define CPU_HAS_MMXEXT	0x00000004
-#define CPU_HAS_3DNOW	0x00000010
+#define CPU_HAS_RDTSC   0x00000001
+#define CPU_HAS_MMX     0x00000002
+#define CPU_HAS_MMXEXT  0x00000004
+#define CPU_HAS_3DNOW   0x00000010
 #define CPU_HAS_3DNOWEXT 0x00000020
-#define CPU_HAS_SSE	0x00000040
-#define CPU_HAS_SSE2	0x00000080
-#define CPU_HAS_ALTIVEC	0x00000100
+#define CPU_HAS_SSE     0x00000040
+#define CPU_HAS_SSE2    0x00000080
+#define CPU_HAS_ALTIVEC 0x00000100
 
 #if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP && !__MACOSX__
 /* This is the brute force way of detecting instruction sets...
@@ -59,7 +63,7 @@ CPU_haveCPUID(void)
     int has_CPUID = 0;
 /* *INDENT-OFF* */
 #if defined(__GNUC__) && defined(i386)
-	__asm__ (
+    __asm__ (
 "        pushfl                      # Get original EFLAGS             \n"
 "        popl    %%eax                                                 \n"
 "        movl    %%eax,%%ecx                                           \n"
@@ -72,14 +76,14 @@ CPU_haveCPUID(void)
 "        jz      1f                  # Processor=80486                 \n"
 "        movl    $1,%0               # We have CPUID support           \n"
 "1:                                                                    \n"
-	: "=m" (has_CPUID)
-	:
-	: "%eax", "%ecx"
-	);
+    : "=m" (has_CPUID)
+    :
+    : "%eax", "%ecx"
+    );
 #elif defined(__GNUC__) && defined(__x86_64__)
 /* Technically, if this is being compiled under __x86_64__ then it has 
 CPUid by definition.  But it's nice to be able to prove it.  :)      */
-	__asm__ (
+    __asm__ (
 "        pushfq                      # Get original EFLAGS             \n"
 "        popq    %%rax                                                 \n"
 "        movq    %%rax,%%rcx                                           \n"
@@ -92,12 +96,12 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
 "        jz      1f                  # Processor=80486                 \n"
 "        movl    $1,%0               # We have CPUID support           \n"
 "1:                                                                    \n"
-	: "=m" (has_CPUID)
-	:
-	: "%rax", "%rcx"
-	);
+    : "=m" (has_CPUID)
+    :
+    : "%rax", "%rcx"
+    );
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
-	__asm {
+    __asm {
         pushfd                      ; Get original EFLAGS
         pop     eax
         mov     ecx, eax
@@ -110,24 +114,24 @@ CPUid by definition.  But it's nice to be able to prove it.  :)      */
         jz      done                ; Processor=80486
         mov     has_CPUID,1         ; We have CPUID support
 done:
-	}
+    }
 #elif defined(__sun) && defined(__i386)
-	__asm (
+    __asm (
 "       pushfl                 \n"
-"	popl    %eax           \n"
-"	movl    %eax,%ecx      \n"
-"	xorl    $0x200000,%eax \n"
-"	pushl   %eax           \n"
-"	popfl                  \n"
-"	pushfl                 \n"
-"	popl    %eax           \n"
-"	xorl    %ecx,%eax      \n"
-"	jz      1f             \n"
-"	movl    $1,-8(%ebp)    \n"
+"   popl    %eax           \n"
+"   movl    %eax,%ecx      \n"
+"   xorl    $0x200000,%eax \n"
+"   pushl   %eax           \n"
+"   popfl                  \n"
+"   pushfl                 \n"
+"   popl    %eax           \n"
+"   xorl    %ecx,%eax      \n"
+"   jz      1f             \n"
+"   movl    $1,-8(%ebp)    \n"
 "1:                            \n"
-	);
+    );
 #elif defined(__sun) && defined(__amd64)
-	__asm (
+    __asm (
 "       pushfq                 \n"
 "       popq    %rax           \n"
 "       movq    %rax,%rcx      \n"
@@ -140,92 +144,42 @@ done:
 "       jz      1f             \n"
 "       movl    $1,-8(%rbp)    \n"
 "1:                            \n"
-	);
+    );
 #endif
 /* *INDENT-ON* */
     return has_CPUID;
 }
 
+#if defined(__GNUC__) && (defined(i386) || defined(__x86_64__))
+#define cpuid(func, ax, bx, cx, dx) \
+    __asm__ __volatile__ ("cpuid": \
+    "=a" (ax), "=b" (bx), "=c" (cx), "=d" (dx) : "a" (func))
+#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
+#define cpuid(func, ax, bx, cx, dx) \
+    asm { \
+        mov eax, func \
+        cpuid
+        mov ax, eax \
+        mov bx, ebx \
+        mov cx, ecx \
+        mov dx, edx \
+    }
+#else
+#define cpuid(func, ax, bx, cx, dx) \
+    ax = bx = cx = dx = 0
+#endif
+
 static __inline__ int
 CPU_getCPUIDFeatures(void)
 {
     int features = 0;
-/* *INDENT-OFF* */
-#if defined(__GNUC__) && defined(i386)
-	__asm__ (
-"        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
-"        pushl   %%ebx                                                 \n"
-"        cpuid                       # Get and save vendor ID          \n"
-"        popl    %%ebx                                                 \n"
-"        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
-"        jl      1f                  # We dont have the CPUID instruction\n"
-"        xorl    %%eax,%%eax                                           \n"
-"        incl    %%eax                                                 \n"
-"        pushl   %%ebx                                                 \n"
-"        cpuid                       # Get family/model/stepping/features\n"
-"        popl    %%ebx                                                 \n"
-"        movl    %%edx,%0                                              \n"
-"1:                                                                    \n"
-	: "=m" (features)
-	:
-	: "%eax", "%ecx", "%edx"
-	);
-#elif defined(__GNUC__) && defined(__x86_64__)
-	__asm__ (
-"        xorl    %%eax,%%eax         # Set up for CPUID instruction    \n"
-"        pushq   %%rbx                                                 \n"
-"        cpuid                       # Get and save vendor ID          \n"
-"        popq    %%rbx                                                 \n"
-"        cmpl    $1,%%eax            # Make sure 1 is valid input for CPUID\n"
-"        jl      1f                  # We dont have the CPUID instruction\n"
-"        xorl    %%eax,%%eax                                           \n"
-"        incl    %%eax                                                 \n"
-"        pushq   %%rbx                                                 \n"
-"        cpuid                       # Get family/model/stepping/features\n"
-"        popq    %%rbx                                                 \n"
-"        movl    %%edx,%0                                              \n"
-"1:                                                                    \n"
-	: "=m" (features)
-	:
-	: "%rax", "%rcx", "%rdx"
-	);
-#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
-	__asm {
-        xor     eax, eax            ; Set up for CPUID instruction
-        push    ebx
-        cpuid                       ; Get and save vendor ID
-        pop     ebx
-        cmp     eax, 1              ; Make sure 1 is valid input for CPUID
-        jl      done                ; We dont have the CPUID instruction
-        xor     eax, eax
-        inc     eax
-        push    ebx
-        cpuid                       ; Get family/model/stepping/features
-        pop     ebx
-        mov     features, edx
-done:
-	}
-#elif defined(__sun) && (defined(__i386) || defined(__amd64))
-	    __asm(
-"        xorl    %eax,%eax         \n"
-"        pushl   %ebx              \n"
-"        cpuid                     \n"
-"        popl    %ebx              \n"
-"        cmpl    $1,%eax           \n"
-"        jl      1f                \n"
-"        xorl    %eax,%eax         \n"
-"        incl    %eax              \n"
-"        pushl   %ebx              \n"
-"        cpuid                     \n"
-"        popl    %ebx              \n"
-#ifdef __i386
-"        movl    %edx,-8(%ebp)     \n"
-#else
-"        movl    %edx,-8(%rbp)     \n"
-#endif
-"1:                                \n"
-#endif
-/* *INDENT-ON* */
+    int ax, bx, cx, dx;
+
+    cpuid(0, ax, bx, cx, dx);
+    if (ax >= 1) {
+        cpuid(1, ax, bx, cx, dx);
+        features = dx;
+    }
     return features;
 }
 
@@ -233,79 +187,13 @@ static __inline__ int
 CPU_getCPUIDFeaturesExt(void)
 {
     int features = 0;
-/* *INDENT-OFF* */
-#if defined(__GNUC__) && defined(i386)
-	__asm__ (
-"        movl    $0x80000000,%%eax   # Query for extended functions    \n"
-"        pushl   %%ebx                                                 \n"
-"        cpuid                       # Get extended function limit     \n"
-"        popl    %%ebx                                                 \n"
-"        cmpl    $0x80000001,%%eax                                     \n"
-"        jl      1f                  # Nope, we dont have function 800000001h\n"
-"        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
-"        pushl   %%ebx                                                 \n"
-"        cpuid                       # and get the information         \n"
-"        popl    %%ebx                                                 \n"
-"        movl    %%edx,%0                                              \n"
-"1:                                                                    \n"
-	: "=m" (features)
-	:
-	: "%eax", "%ecx", "%edx"
-	);
-#elif defined(__GNUC__) && defined (__x86_64__)
-	__asm__ (
-"        movl    $0x80000000,%%eax   # Query for extended functions    \n"
-"        pushq   %%rbx                                                 \n"
-"        cpuid                       # Get extended function limit     \n"
-"        popq    %%rbx                                                 \n"
-"        cmpl    $0x80000001,%%eax                                     \n"
-"        jl      1f                  # Nope, we dont have function 800000001h\n"
-"        movl    $0x80000001,%%eax   # Setup extended function 800000001h\n"
-"        pushq   %%rbx                                                 \n"
-"        cpuid                       # and get the information         \n"
-"        popq    %%rbx                                                 \n"
-"        movl    %%edx,%0                                              \n"
-"1:                                                                    \n"
-	: "=m" (features)
-	:
-	: "%rax", "%rcx", "%rdx"
-	);
-#elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
-	__asm {
-        mov     eax,80000000h       ; Query for extended functions
-        push    ebx
-        cpuid                       ; Get extended function limit
-        pop     ebx
-        cmp     eax,80000001h
-        jl      done                ; Nope, we dont have function 800000001h
-        mov     eax,80000001h       ; Setup extended function 800000001h
-        push    ebx
-        cpuid                       ; and get the information
-        pop     ebx
-        mov     features,edx
-done:
-	}
-#elif defined(__sun) && ( defined(__i386) || defined(__amd64) )
-	    __asm (
-"        movl    $0x80000000,%eax \n"
-"        pushl   %ebx             \n"
-"        cpuid                    \n"
-"        popl    %ebx             \n"
-"        cmpl    $0x80000001,%eax \n"
-"        jl      1f               \n"
-"        movl    $0x80000001,%eax \n"
-"        pushl   %ebx             \n"
-"        cpuid                    \n"
-"        popl    %ebx             \n"
-#ifdef __i386
-"        movl    %edx,-8(%ebp)    \n"
-#else
-"        movl    %edx,-8(%rbp)    \n"
-#endif
-"1:                               \n"
-	    );
-#endif
-/* *INDENT-ON* */
+    int ax, bx, cx, dx;
+
+    cpuid(0x80000000, ax, bx, cx, dx);
+    if (ax >= 0x80000001) {
+        cpuid(0x80000001, ax, bx, cx, dx);
+        features = dx;
+    }
     return features;
 }
 
@@ -393,6 +281,97 @@ CPU_haveAltiVec(void)
     signal(SIGILL, handler);
 #endif
     return altivec;
+}
+
+static int SDL_CPUCount = 0;
+
+int
+SDL_GetCPUCount()
+{
+    if (!SDL_CPUCount) {
+#ifdef HAVE_SYSCTLBYNAME
+        size_t size = sizeof(SDL_CPUCount);
+        sysctlbyname("hw.ncpu", &SDL_CPUCount, &size, NULL, 0);
+#endif
+        /* There has to be at least 1, right? :) */
+        if (!SDL_CPUCount) {
+            SDL_CPUCount = 1;
+        }
+    }
+    return SDL_CPUCount;
+}
+
+/* Oh, such a sweet sweet trick, just not very useful. :) */
+const char *
+SDL_GetCPUType()
+{
+    static char SDL_CPUType[48];
+
+    if (!SDL_CPUType[0]) {
+        int i = 0;
+        int ax, bx, cx, dx;
+
+        if (CPU_haveCPUID()) {
+            cpuid(0x80000000, ax, bx, cx, dx);
+            if (ax >= 0x80000004) {
+                cpuid(0x80000002, ax, bx, cx, dx);
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                cpuid(0x80000003, ax, bx, cx, dx);
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                cpuid(0x80000004, ax, bx, cx, dx);
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(ax & 0xff); ax >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(bx & 0xff); bx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(cx & 0xff); cx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+                SDL_CPUType[i++] = (char)(dx & 0xff); dx >>= 8;
+            }
+        }
+        if (!SDL_CPUType[0]) {
+            SDL_strlcpy(SDL_CPUType, "Unknown", sizeof(SDL_CPUType));
+        }
+    }
+    return SDL_CPUType;
 }
 
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
@@ -509,6 +488,8 @@ SDL_HasAltiVec(void)
 int
 main()
 {
+    printf("CPU count: %d\n", SDL_GetCPUCount());
+    printf("CPU name: %s\n", SDL_GetCPUType());
     printf("RDTSC: %d\n", SDL_HasRDTSC());
     printf("MMX: %d\n", SDL_HasMMX());
     printf("MMXExt: %d\n", SDL_HasMMXExt());
