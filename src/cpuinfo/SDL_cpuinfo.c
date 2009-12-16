@@ -122,16 +122,16 @@ done:
 #elif defined(__sun) && defined(__i386)
     __asm (
 "       pushfl                 \n"
-"   popl    %eax           \n"
-"   movl    %eax,%ecx      \n"
-"   xorl    $0x200000,%eax \n"
-"   pushl   %eax           \n"
-"   popfl                  \n"
-"   pushfl                 \n"
-"   popl    %eax           \n"
-"   xorl    %ecx,%eax      \n"
-"   jz      1f             \n"
-"   movl    $1,-8(%ebp)    \n"
+"       popl    %eax           \n"
+"       movl    %eax,%ecx      \n"
+"       xorl    $0x200000,%eax \n"
+"       pushl   %eax           \n"
+"       popfl                  \n"
+"       pushfl                 \n"
+"       popl    %eax           \n"
+"       xorl    %ecx,%eax      \n"
+"       jz      1f             \n"
+"       movl    $1,-8(%ebp)    \n"
 "1:                            \n"
     );
 #elif defined(__sun) && defined(__amd64)
@@ -156,8 +156,12 @@ done:
 
 #if defined(__GNUC__) && (defined(i386) || defined(__x86_64__))
 #define cpuid(func, a, b, c, d) \
-    __asm__ __volatile__ ("cpuid": \
-    "=a" (a), "=b" (b), "=c" (c), "=d" (d) : "a" (func))
+    __asm__ __volatile__ ( \
+"        pushl %%ebx        \n" \
+"        cpuid              \n" \
+"        movl %%ebx, %%esi  \n" \
+"        popl %%ebx         \n" : \
+            "=a" (a), "=S" (b), "=c" (c), "=d" (d) : "a" (func))
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 #define cpuid(func, a, b, c, d) \
     __asm { \
