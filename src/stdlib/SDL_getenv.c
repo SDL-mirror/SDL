@@ -93,6 +93,11 @@ SDL_setenv(const char *name, const char *value, int overwrite)
         return (-1);
     }
 
+    /* See if it already exists */
+    if (!overwrite && SDL_getenv(name)) {
+        return 0;
+    }
+
     /* Allocate memory for the variable */
     len = SDL_strlen(name) + SDL_strlen(value) + 2;
     new_variable = (char *) SDL_malloc(len);
@@ -117,10 +122,6 @@ SDL_setenv(const char *name, const char *value, int overwrite)
         }
         /* If we found it, just replace the entry */
         if (SDL_env[i]) {
-            if (!overwrite) {
-                SDL_free(new_variable);
-                return 0;
-            }
             SDL_free(SDL_env[i]);
             SDL_env[i] = new_variable;
             added = 1;
