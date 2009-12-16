@@ -22,7 +22,7 @@ int SDLCALL
 ThreadFunc(void *data)
 {
     /* Set the child thread error string */
-    SDL_SetError("Thread %s (%d) had a problem: %s",
+    SDL_SetError("Thread %s (%lu) had a problem: %s",
                  (char *) data, SDL_ThreadID(), "nevermind");
     while (alive) {
         printf("Thread '%s' is alive!\n", (char *) data);

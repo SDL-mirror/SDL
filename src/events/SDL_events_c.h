@@ -23,6 +23,7 @@
 
 /* Useful functions and variables from SDL_events.c */
 #include "SDL_events.h"
+#include "SDL_thread.h"
 #include "SDL_mouse_c.h"
 #include "SDL_keyboard_c.h"
 #include "SDL_windowevents_c.h"
@@ -34,7 +35,7 @@ extern void SDL_QuitInterrupt(void);
 
 extern void SDL_Lock_EventThread(void);
 extern void SDL_Unlock_EventThread(void);
-extern Uint32 SDL_EventThreadID(void);
+extern SDL_threadID SDL_EventThreadID(void);
 
 extern int SDL_SendSysWMEvent(SDL_SysWMmsg * message);
 

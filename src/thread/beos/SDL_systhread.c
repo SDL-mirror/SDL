@@ -84,10 +84,10 @@ SDL_SYS_SetupThread(void)
     SDL_MaskSignals(NULL);
 }
 
-Uint32
+SDL_threadID
 SDL_ThreadID(void)
 {
-    return ((Uint32) find_thread(NULL));
+    return ((SDL_threadID) find_thread(NULL));
 }
 
 void

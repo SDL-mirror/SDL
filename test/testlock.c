@@ -11,7 +11,7 @@
 #include "SDL_thread.h"
 
 static SDL_mutex *mutex = NULL;
-static Uint32 mainthread;
+static SDL_threadID mainthread;
 static SDL_Thread *threads[6];
 static volatile int doterminate = 0;
 
@@ -28,7 +28,7 @@ SDL_Quit_Wrapper(void)
 void
 printid(void)
 {
-    printf("Process %u:  exiting\n", SDL_ThreadID());
+    printf("Process %lu:  exiting\n", SDL_ThreadID());
 }
 
 void
@@ -41,9 +41,9 @@ terminate(int sig)
 void
 closemutex(int sig)
 {
-    Uint32 id = SDL_ThreadID();
+    SDL_threadID id = SDL_ThreadID();
     int i;
-    printf("Process %u:  Cleaning up...\n", id == mainthread ? 0 : id);
+    printf("Process %lu:  Cleaning up...\n", id == mainthread ? 0 : id);
     doterminate = 1;
     for (i = 0; i < 6; ++i)
         SDL_WaitThread(threads[i], NULL);
@@ -57,14 +57,14 @@ Run(void *data)
     if (SDL_ThreadID() == mainthread)
         signal(SIGTERM, closemutex);
     while (!doterminate) {
-        printf("Process %u ready to work\n", SDL_ThreadID());
+        printf("Process %lu ready to work\n", SDL_ThreadID());
         if (SDL_mutexP(mutex) < 0) {
             fprintf(stderr, "Couldn't lock mutex: %s", SDL_GetError());
             exit(1);
         }
-        printf("Process %u, working!\n", SDL_ThreadID());
+        printf("Process %lu, working!\n", SDL_ThreadID());
         SDL_Delay(1 * 1000);
-        printf("Process %u, done!\n", SDL_ThreadID());
+        printf("Process %lu, done!\n", SDL_ThreadID());
         if (SDL_mutexV(mutex) < 0) {
             fprintf(stderr, "Couldn't unlock mutex: %s", SDL_GetError());
             exit(1);
@@ -73,7 +73,7 @@ Run(void *data)
         SDL_Delay(10);
     }
     if (SDL_ThreadID() == mainthread && doterminate) {
-        printf("Process %u:  raising SIGTERM\n", SDL_ThreadID());
+        printf("Process %lu:  raising SIGTERM\n", SDL_ThreadID());
         raise(SIGTERM);
     }
     return (0);
@@ -98,7 +98,7 @@ main(int argc, char *argv[])
     }
 
     mainthread = SDL_ThreadID();
-    printf("Main thread: %u\n", mainthread);
+    printf("Main thread: %lu\n", mainthread);
     atexit(printid);
     for (i = 0; i < maxproc; ++i) {
         if ((threads[i] = SDL_CreateThread(Run, NULL)) == NULL)

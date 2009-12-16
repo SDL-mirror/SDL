@@ -39,7 +39,7 @@ SDL_SYS_SetupThread(void)
     return;
 }
 
-Uint32
+SDL_threadID
 SDL_ThreadID(void)
 {
     return (0);

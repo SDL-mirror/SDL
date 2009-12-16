@@ -47,6 +47,9 @@ extern "C" {
 struct SDL_Thread;
 typedef struct SDL_Thread SDL_Thread;
 
+/* The SDL thread ID */
+typedef unsigned long SDL_threadID;
+
 #if defined(__WIN32__) && !defined(HAVE_LIBC)
 /**
  *  \file SDL_thread.h
@@ -127,16 +130,16 @@ SDL_CreateThread(int (SDLCALL * fn) (void *), void *data);
 #endif
 
 /**
- *  Get the 32-bit thread identifier for the current thread.
+ *  Get the thread identifier for the current thread.
  */
-extern DECLSPEC Uint32 SDLCALL SDL_ThreadID(void);
+extern DECLSPEC SDL_threadID SDLCALL SDL_ThreadID(void);
 
 /**
- *  Get the 32-bit thread identifier for the specified thread.
+ *  Get the thread identifier for the specified thread.
  *  
  *  Equivalent to SDL_ThreadID() if the specified thread is NULL.
  */
-extern DECLSPEC Uint32 SDLCALL SDL_GetThreadID(SDL_Thread * thread);
+extern DECLSPEC SDL_threadID SDLCALL SDL_GetThreadID(SDL_Thread * thread);
 
 /**
  *  Wait for a thread to finish.

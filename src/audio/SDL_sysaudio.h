@@ -108,7 +108,7 @@ struct SDL_AudioDevice
 
     /* A thread to feed the audio device */
     SDL_Thread *thread;
-    Uint32 threadid;
+    SDL_threadID threadid;
 
     /* * * */
     /* Data private to this driver */

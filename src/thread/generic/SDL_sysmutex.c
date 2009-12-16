@@ -30,7 +30,7 @@
 struct SDL_mutex
 {
     int recursive;
-    Uint32 owner;
+    SDL_threadID owner;
     SDL_sem *sem;
 };
 
@@ -76,7 +76,7 @@ SDL_mutexP(SDL_mutex * mutex)
 #if SDL_THREADS_DISABLED
     return 0;
 #else
-    Uint32 this_thread;
+    SDL_threadID this_thread;
 
     if (mutex == NULL) {
         SDL_SetError("Passed a NULL mutex");

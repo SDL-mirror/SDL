@@ -50,7 +50,7 @@
 /* This is the system-independent thread info structure */
 struct SDL_Thread
 {
-    Uint32 threadid;
+    SDL_threadID threadid;
     SYS_ThreadHandle handle;
     int status;
     SDL_error errbuf;

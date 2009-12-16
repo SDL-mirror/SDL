@@ -21,7 +21,7 @@ quit(int rc)
 int SDLCALL
 ThreadFunc(void *data)
 {
-    printf("Started thread %s: My thread id is %u\n",
+    printf("Started thread %s: My thread id is %lu\n",
            (char *) data, SDL_ThreadID());
     while (alive) {
         printf("Thread '%s' is alive!\n", (char *) data);

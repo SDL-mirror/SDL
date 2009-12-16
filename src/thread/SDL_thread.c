@@ -159,7 +159,7 @@ SDL_GetErrBuf(void)
     errbuf = &SDL_global_error;
     if (SDL_Threads) {
         int i;
-        Uint32 this_thread;
+        SDL_threadID this_thread;
 
         this_thread = SDL_ThreadID();
         SDL_mutexP(thread_lock);
@@ -292,17 +292,17 @@ SDL_WaitThread(SDL_Thread * thread, int *status)
     }
 }
 
-Uint32
+SDL_threadID
 SDL_GetThreadID(SDL_Thread * thread)
 {
-    Uint32 id;
+    SDL_threadID id;
 
     if (thread) {
         id = thread->threadid;
     } else {
         id = SDL_ThreadID();
     }
-    return (id);
+    return id;
 }
 
 void

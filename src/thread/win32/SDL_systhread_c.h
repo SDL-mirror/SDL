@@ -25,4 +25,5 @@
 #include <windows.h>
 
 typedef HANDLE SYS_ThreadHandle;
+
 /* vi: set ts=4 sw=4 expandtab: */

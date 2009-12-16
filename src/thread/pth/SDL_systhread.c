@@ -88,11 +88,10 @@ SDL_SYS_SetupThread(void)
     pth_cancel_state(PTH_CANCEL_ASYNCHRONOUS, &oldstate);
 }
 
-/* WARNING:  This may not work for systems with 64-bit pid_t */
-Uint32
+SDL_threadID
 SDL_ThreadID(void)
 {
-    return ((Uint32) pth_self());
+    return ((SDL_threadID) pth_self());
 }
 
 void

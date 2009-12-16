@@ -64,14 +64,12 @@ SDL_SYS_SetupThread(void)
     sigprocmask(SIG_BLOCK, &mask, NULL);
 }
 
-/* WARNING:  This may not work for systems with 64-bit pid_t */
-Uint32
+SDL_threadID
 SDL_ThreadID(void)
 {
-    return ((Uint32) getpid());
+    return ((SDL_threadID) getpid());
 }
 
-/* WARNING:  This may not work for systems with 64-bit pid_t */
 void
 SDL_WaitThread(SDL_Thread * thread, int *status)
 {

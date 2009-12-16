@@ -38,7 +38,7 @@ static const int sig_list[] = {
 /* RISC OS needs to know the main thread for
  * it's timer and event processing. */
 int riscos_using_threads = 0;
-Uint32 riscos_main_thread = 0;  /* Thread running events */
+SDL_threadID riscos_main_thread = 0;  /* Thread running events */
 #endif
 
 
@@ -99,11 +99,10 @@ SDL_SYS_SetupThread(void)
 #endif
 }
 
-/* WARNING:  This may not work for systems with 64-bit pid_t */
-Uint32
+SDL_threadID
 SDL_ThreadID(void)
 {
-    return ((Uint32) pthread_self());
+    return ((SDL_threadID) pthread_self());
 }
 
 void

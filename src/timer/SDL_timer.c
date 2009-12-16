@@ -128,7 +128,7 @@ SDL_ThreadedTimerCheck(void)
                 t->last_alarm = now;
             }
 #ifdef DEBUG_TIMERS
-            printf("Executing timer %p (thread = %d)\n", t, SDL_ThreadID());
+            printf("Executing timer %p (thread = %lu)\n", t, SDL_ThreadID());
 #endif
             timer = *t;
             SDL_mutexV(SDL_timer_mutex);
@@ -235,7 +235,7 @@ SDL_RemoveTimer(SDL_TimerID id)
         }
     }
 #ifdef DEBUG_TIMERS
-    printf("SDL_RemoveTimer(%08x) = %d num_timers = %d thread = %d\n",
+    printf("SDL_RemoveTimer(%08x) = %d num_timers = %d thread = %lu\n",
            (Uint32) id, removed, SDL_timer_running, SDL_ThreadID());
 #endif
     SDL_mutexV(SDL_timer_mutex);

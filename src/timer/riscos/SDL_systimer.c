@@ -40,10 +40,10 @@ static Uint32 timerStart;
 void RISCOS_CheckTimer();
 #else
 #include <pthread.h>
-extern Uint32 riscos_main_thread;
+extern SDL_threadID riscos_main_thread;
 extern int riscos_using_threads;
-extern Uint32 SDL_ThreadID();
-extern Uint32 SDL_EventThreadID(void);
+extern SDL_threadID SDL_ThreadID();
+extern SDL_threadID SDL_EventThreadID(void);
 #endif
 
 

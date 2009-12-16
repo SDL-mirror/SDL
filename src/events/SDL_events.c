@@ -62,7 +62,7 @@ static struct
 
 /* Thread functions */
 static SDL_Thread *SDL_EventThread = NULL;      /* Thread handle */
-static Uint32 event_thread;     /* The event thread id */
+static SDL_threadID event_thread;     /* The event thread id */
 
 void
 SDL_Lock_EventThread(void)
@@ -183,7 +183,7 @@ SDL_StopEventThread(void)
     }
 }
 
-Uint32
+SDL_threadID
 SDL_EventThreadID(void)
 {
     return (event_thread);
