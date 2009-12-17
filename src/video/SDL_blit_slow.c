@@ -81,7 +81,7 @@ SDL_Blit_Slow(SDL_BlitInfo * info)
             }
             if (flags & SDL_COPY_COLORKEY) {
                 /* srcpixel isn't set for 24 bpp */
-                if (srcbpp == 24) {
+                if (srcbpp == 3) {
                     srcpixel = (srcR << src_fmt->Rshift) |
                         (srcG << src_fmt->Gshift) | (srcB << src_fmt->Bshift);
                 }
