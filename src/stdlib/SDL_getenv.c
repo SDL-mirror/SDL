@@ -214,7 +214,7 @@ main(int argc, char *argv[])
     }
     printf("Setting FIRST=VALUE1 in the environment... ");
     fflush(stdout);
-    if (SDL_putenv("FIRST=VALUE1") == 0) {
+    if (SDL_setenv("FIRST", "VALUE1", 0) == 0) {
         printf("okay\n");
     } else {
         printf("failed\n");
@@ -229,7 +229,7 @@ main(int argc, char *argv[])
     }
     printf("Setting SECOND=VALUE2 in the environment... ");
     fflush(stdout);
-    if (SDL_putenv("SECOND=VALUE2") == 0) {
+    if (SDL_setenv("SECOND", "VALUE2", 0) == 0) {
         printf("okay\n");
     } else {
         printf("failed\n");
@@ -244,7 +244,7 @@ main(int argc, char *argv[])
     }
     printf("Setting FIRST=NOVALUE in the environment... ");
     fflush(stdout);
-    if (SDL_putenv("FIRST=NOVALUE") == 0) {
+    if (SDL_setenv("FIRST", "NOVALUE", 1) == 0) {
         printf("okay\n");
     } else {
         printf("failed\n");
@@ -267,4 +267,5 @@ main(int argc, char *argv[])
     return (0);
 }
 #endif /* TEST_MAIN */
+
 /* vi: set ts=4 sw=4 expandtab: */
