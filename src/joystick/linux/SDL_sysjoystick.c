@@ -700,7 +700,7 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 				continue;
 			}
 			if ( test_bit(i, absbit) ) {
-				int values[5];
+				int values[6];
 
 				if ( ioctl(fd, EVIOCGABS(i), values) < 0 )
 					continue;
