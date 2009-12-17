@@ -1764,7 +1764,7 @@ SDL_putenv(const char *_var)
         return -1;  /* we don't set errno. */
     }
 
-    ptr = strchr(var, '=');
+    ptr = SDL_strchr(var, '=');
     if (ptr == NULL) {
         SDL_free(var);
         return -1;
