@@ -106,6 +106,7 @@
 #define HAVE_SIGACTION	1
 #define HAVE_SETJMP	1
 #define HAVE_NANOSLEEP	1
+#define HAVE_SYSCONF	1
 #define HAVE_SYSCTLBYNAME 1
 
 /* Enable various audio drivers */

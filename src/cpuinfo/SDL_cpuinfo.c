@@ -25,6 +25,9 @@
 
 #include "SDL_cpuinfo.h"
 
+#ifdef HAVE_SYSCONF
+#include <unistd.h>
+#endif
 #ifdef HAVE_SYSCTLBYNAME
 #include <sys/types.h>
 #include <sys/sysctl.h>
@@ -297,21 +300,26 @@ int
 SDL_GetCPUCount()
 {
     if (!SDL_CPUCount) {
+#ifdef HAVE_SYSCONF
+        if (SDL_CPUCount <= 0) {
+            SDL_CPUCount = (int)sysconf(_SC_NPROCESSORS_ONLN);
+        }
+#endif
 #ifdef HAVE_SYSCTLBYNAME
-        {
+        if (SDL_CPUCount <= 0) {
             size_t size = sizeof(SDL_CPUCount);
             sysctlbyname("hw.ncpu", &SDL_CPUCount, &size, NULL, 0);
         }
 #endif
 #ifdef __WIN32__
-        {
+        if (SDL_CPUCount <= 0) {
             SYSTEM_INFO info;
             GetSystemInfo(&info);
             SDL_CPUCount = info.dwNumberOfProcessors;
         }
 #endif
         /* There has to be at least 1, right? :) */
-        if (!SDL_CPUCount) {
+        if (SDL_CPUCount <= 0) {
             SDL_CPUCount = 1;
         }
     }
