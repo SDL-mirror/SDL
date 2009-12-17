@@ -157,13 +157,21 @@ done:
     return has_CPUID;
 }
 
-#if defined(__GNUC__) && (defined(i386) || defined(__x86_64__))
+#if defined(__GNUC__) && defined(i386)
 #define cpuid(func, a, b, c, d) \
     __asm__ __volatile__ ( \
 "        pushl %%ebx        \n" \
 "        cpuid              \n" \
 "        movl %%ebx, %%esi  \n" \
 "        popl %%ebx         \n" : \
+            "=a" (a), "=S" (b), "=c" (c), "=d" (d) : "a" (func))
+#elif defined(__GNUC__) && defined(__x86_64__)
+#define cpuid(func, a, b, c, d) \
+    __asm__ __volatile__ ( \
+"        pushq %%rbx        \n" \
+"        cpuid              \n" \
+"        movq %%rbx, %%rsi  \n" \
+"        popq %%rbx         \n" : \
             "=a" (a), "=S" (b), "=c" (c), "=d" (d) : "a" (func))
 #elif (defined(_MSC_VER) && defined(_M_IX86)) || defined(__WATCOMC__)
 #define cpuid(func, a, b, c, d) \
