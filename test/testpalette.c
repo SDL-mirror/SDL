@@ -10,11 +10,6 @@
 #include <string.h>
 #include <math.h>
 
-/* This isn't in the Windows headers */
-#ifndef M_PI
-#define M_PI	3.14159265358979323846
-#endif
-
 #include "SDL.h"
 
 /* screen size */
