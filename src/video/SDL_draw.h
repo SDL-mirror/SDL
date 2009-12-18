@@ -341,7 +341,44 @@ do { \
 #define DRAWLINE(x0, y0, x1, y1, op)	BRESENHAM(x0, y0, x1, y1, op)
 
 /*
- * Define blend fill macro
+ * Define draw rect macro
+ */
+#define DRAWRECT(type, op) \
+do { \
+    int width = rect->w; \
+    int height = rect->h; \
+    int pitch = (dst->pitch / dst->format->BytesPerPixel); \
+    int skip = pitch - width; \
+    type *pixel; \
+    pixel = (type *)dst->pixels + rect->y * pitch + rect->x; \
+    { int n = (width+3)/4; \
+        switch (width & 3) { \
+        case 0: do {   op; pixel++; \
+        case 3:        op; pixel++; \
+        case 2:        op; pixel++; \
+        case 1:        op; pixel++; \
+                } while ( --n > 0 ); \
+        } \
+    } \
+    pixel += skip; \
+    width -= 1; \
+    height -= 2; \
+    while (height--) { \
+        op; pixel += width; op; pixel += skip; \
+    } \
+    { int n = (width+3)/4; \
+        switch (width & 3) { \
+        case 0: do {   op; pixel++; \
+        case 3:        op; pixel++; \
+        case 2:        op; pixel++; \
+        case 1:        op; pixel++; \
+                } while ( --n > 0 ); \
+        } \
+    } \
+} while (0)
+
+/*
+ * Define fill rect macro
  */
 
 #define FILLRECT(type, op) \
@@ -364,9 +401,5 @@ do { \
         pixel += skip; \
     } \
 } while (0)
-
-/*
- * Define blend line macro
- */
 
 /* vi: set ts=4 sw=4 expandtab: */

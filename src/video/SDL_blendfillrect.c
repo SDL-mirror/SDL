@@ -25,8 +25,8 @@
 #include "SDL_draw.h"
 
 static int
-SDL_BlendRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect,
+                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -48,8 +48,8 @@ SDL_BlendRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 static int
-SDL_BlendRect_RGB565(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_RGB565(SDL_Surface * dst, const SDL_Rect * rect,
+                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -71,8 +71,8 @@ SDL_BlendRect_RGB565(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 static int
-SDL_BlendRect_RGB888(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                     Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_RGB888(SDL_Surface * dst, const SDL_Rect * rect,
+                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -94,8 +94,8 @@ SDL_BlendRect_RGB888(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 static int
-SDL_BlendRect_ARGB8888(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                       Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_ARGB8888(SDL_Surface * dst, const SDL_Rect * rect,
+                           int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -117,8 +117,8 @@ SDL_BlendRect_ARGB8888(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 static int
-SDL_BlendRect_RGB(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                  Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_RGB(SDL_Surface * dst, const SDL_Rect * rect,
+                      int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_PixelFormat *fmt = dst->format;
     unsigned inva = 0xff - a;
@@ -163,8 +163,8 @@ SDL_BlendRect_RGB(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 static int
-SDL_BlendRect_RGBA(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
-                   Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect_RGBA(SDL_Surface * dst, const SDL_Rect * rect,
+                       int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_PixelFormat *fmt = dst->format;
     unsigned inva = 0xff - a;
@@ -193,8 +193,8 @@ SDL_BlendRect_RGBA(SDL_Surface * dst, const SDL_Rect * rect, int blendMode,
 }
 
 int
-SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
-              int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRect(SDL_Surface * dst, const SDL_Rect * rect,
+                  int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect clipped;
 
@@ -203,9 +203,14 @@ SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
         return -1;
     }
 
+    if (blendMode < SDL_BLENDMODE_BLEND) {
+        Uint32 color = SDL_MapRGBA(dst->format, r, g, b, a);
+        return SDL_FillRect(dst, rect, color);
+    }
+
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
-        SDL_SetError("SDL_BlendRect(): Unsupported surface format");
+        SDL_SetError("SDL_BlendFillRect(): Unsupported surface format");
         return -1;
     }
 
@@ -230,22 +235,22 @@ SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
     case 15:
         switch (dst->format->Rmask) {
         case 0x7C00:
-            return SDL_BlendRect_RGB555(dst, rect, blendMode, r, g, b, a);
+            return SDL_BlendFillRect_RGB555(dst, rect, blendMode, r, g, b, a);
         }
         break;
     case 16:
         switch (dst->format->Rmask) {
         case 0xF800:
-            return SDL_BlendRect_RGB565(dst, rect, blendMode, r, g, b, a);
+            return SDL_BlendFillRect_RGB565(dst, rect, blendMode, r, g, b, a);
         }
         break;
     case 32:
         switch (dst->format->Rmask) {
         case 0x00FF0000:
             if (!dst->format->Amask) {
-                return SDL_BlendRect_RGB888(dst, rect, blendMode, r, g, b, a);
+                return SDL_BlendFillRect_RGB888(dst, rect, blendMode, r, g, b, a);
             } else {
-                return SDL_BlendRect_ARGB8888(dst, rect, blendMode, r, g, b, a);
+                return SDL_BlendFillRect_ARGB8888(dst, rect, blendMode, r, g, b, a);
             }
             break;
         }
@@ -255,15 +260,15 @@ SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
     }
 
     if (!dst->format->Amask) {
-        return SDL_BlendRect_RGB(dst, rect, blendMode, r, g, b, a);
+        return SDL_BlendFillRect_RGB(dst, rect, blendMode, r, g, b, a);
     } else {
-        return SDL_BlendRect_RGBA(dst, rect, blendMode, r, g, b, a);
+        return SDL_BlendFillRect_RGBA(dst, rect, blendMode, r, g, b, a);
     }
 }
 
 int
-SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
-               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
+                   int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect clipped;
     int i;
@@ -276,9 +281,14 @@ SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
         return -1;
     }
 
+    if (blendMode < SDL_BLENDMODE_BLEND) {
+        Uint32 color = SDL_MapRGBA(dst->format, r, g, b, a);
+        return SDL_FillRects(dst, rects, color);
+    }
+
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
-        SDL_SetError("SDL_BlendRects(): Unsupported surface format");
+        SDL_SetError("SDL_BlendFillRects(): Unsupported surface format");
         return -1;
     }
 
@@ -293,22 +303,22 @@ SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
     case 15:
         switch (dst->format->Rmask) {
         case 0x7C00:
-            func = SDL_BlendRect_RGB555;
+            func = SDL_BlendFillRect_RGB555;
         }
         break;
     case 16:
         switch (dst->format->Rmask) {
         case 0xF800:
-            func = SDL_BlendRect_RGB565;
+            func = SDL_BlendFillRect_RGB565;
         }
         break;
     case 32:
         switch (dst->format->Rmask) {
         case 0x00FF0000:
             if (!dst->format->Amask) {
-                func = SDL_BlendRect_RGB888;
+                func = SDL_BlendFillRect_RGB888;
             } else {
-                func = SDL_BlendRect_ARGB8888;
+                func = SDL_BlendFillRect_ARGB8888;
             }
             break;
         }
@@ -319,9 +329,9 @@ SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
 
     if (!func) {
         if (!dst->format->Amask) {
-            func = SDL_BlendRect_RGB;
+            func = SDL_BlendFillRect_RGB;
         } else {
-            func = SDL_BlendRect_RGBA;
+            func = SDL_BlendFillRect_RGBA;
         }
     }
 
