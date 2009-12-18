@@ -283,7 +283,7 @@ do { \
 
 #define ABS(_x) ((_x) < 0 ? -(_x) : (_x))
 
-#define BRESENHAM(x1, y1, x2, y2, op) \
+#define BRESENHAM(x1, y1, x2, y2, op, draw_end) \
 { \
     int i, deltax, deltay, numpixels; \
     int d, dinc1, dinc2; \
@@ -325,6 +325,9 @@ do { \
     x = x1; \
     y = y1; \
  \
+    if (!draw_end) { \
+        --numpixels; \
+    } \
     for (i = 0; i < numpixels; ++i) { \
         op(x, y); \
         if (d < 0) { \
@@ -338,10 +341,11 @@ do { \
         } \
     } \
 }
-#define DRAWLINE(x0, y0, x1, y1, op)	BRESENHAM(x0, y0, x1, y1, op)
+#define DRAWLINE    BRESENHAM
 
 /*
  * Define draw rect macro
+ * (not tested, this level of optimization not needed ... yet?)
  */
 #define DRAWRECT(type, op) \
 do { \

@@ -46,16 +46,16 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 
     switch (dst->format->BytesPerPixel) {
     case 1:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1);
+        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1, SDL_TRUE);
         break;
     case 2:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2);
+        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2, SDL_TRUE);
         break;
     case 3:
         SDL_Unsupported();
         return -1;
     case 4:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4);
+        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4, SDL_TRUE);
         break;
     }
     return 0;
@@ -96,16 +96,16 @@ SDL_DrawLines(SDL_Surface * dst, const SDL_Point * points, int count,
 
         switch (dst->format->BytesPerPixel) {
         case 1:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1);
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1, SDL_TRUE);
             break;
         case 2:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2);
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2, SDL_TRUE);
             break;
         case 3:
             SDL_Unsupported();
             return -1;
         case 4:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4);
+            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4, SDL_TRUE);
             break;
         }
     }

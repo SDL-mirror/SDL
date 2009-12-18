@@ -25,7 +25,8 @@
 
 
 int
-SDL_DrawRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
+SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
+              int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect full_rect;
     SDL_Point points[5];
@@ -54,17 +55,17 @@ SDL_DrawRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
     points[3].y = rect->y+rect->h-1;
     points[4].x = rect->x;
     points[4].y = rect->y;
-    return SDL_DrawLines(dst, points, 5, color);
+    return SDL_BlendLines(dst, points, 5, blendMode, r, g, b, a);
 }
 
 int
-SDL_DrawRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
-              Uint32 color)
+SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
+               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     int i;
 
     for (i = 0; i < count; ++i) {
-        if (SDL_DrawRect(dst, rects[i], color) < 0) {
+        if (SDL_BlendRect(dst, rects[i], blendMode, r, g, b, a) < 0) {
             return -1;
         }
     }

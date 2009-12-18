@@ -203,11 +203,6 @@ SDL_BlendFillRect(SDL_Surface * dst, const SDL_Rect * rect,
         return -1;
     }
 
-    if (blendMode < SDL_BLENDMODE_BLEND) {
-        Uint32 color = SDL_MapRGBA(dst->format, r, g, b, a);
-        return SDL_FillRect(dst, rect, color);
-    }
-
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
         SDL_SetError("SDL_BlendFillRect(): Unsupported surface format");
@@ -279,11 +274,6 @@ SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
     if (!dst) {
         SDL_SetError("Passed NULL destination surface");
         return -1;
-    }
-
-    if (blendMode < SDL_BLENDMODE_BLEND) {
-        Uint32 color = SDL_MapRGBA(dst->format, r, g, b, a);
-        return SDL_FillRects(dst, rects, color);
     }
 
     /* This function doesn't work on surfaces < 8 bpp */
