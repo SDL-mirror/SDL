@@ -239,9 +239,17 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
     case 24:
         switch (Rmask) {
         case 0x00FF0000:
-            return SDL_PIXELFORMAT_RGB888;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            return SDL_PIXELFORMAT_RGB24;
+#else
+            return SDL_PIXELFORMAT_BGR24;
+#endif
         case 0x000000FF:
-            return SDL_PIXELFORMAT_BGR888;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+            return SDL_PIXELFORMAT_BGR24;
+#else
+            return SDL_PIXELFORMAT_RGB24;
+#endif
         case 0x00000000:
             /* FIXME: At this point we can't distinguish */
             /* if this format is RGB24 or BGR24          */
