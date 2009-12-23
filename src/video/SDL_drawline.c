@@ -23,17 +23,116 @@
 
 #include "SDL_draw.h"
 
+static void
+SDL_DrawLine1(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,
+              SDL_bool draw_end)
+{
+    if (y1 == y2) {
+        HLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
+    } else if (x1 == x2) {
+        VLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
+    } else if (ABS(x1 - x2) == ABS(y1 - y2)) {
+        DLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
+    } else {
+        BLINE(x1, y1, x2, y2, DRAW_FASTSETPIXELXY1, draw_end);
+    }
+}
+
+static void
+SDL_DrawLine2(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,
+              SDL_bool draw_end)
+{
+    if (y1 == y2) {
+        HLINE(Uint16, DRAW_FASTSETPIXEL2, draw_end);
+    } else if (x1 == x2) {
+        VLINE(Uint16, DRAW_FASTSETPIXEL2, draw_end);
+    } else if (ABS(x1 - x2) == ABS(y1 - y2)) {
+        DLINE(Uint16, DRAW_FASTSETPIXEL2, draw_end);
+    } else {
+        Uint8 _r, _g, _b, _a;
+        const SDL_PixelFormat * fmt = dst->format;
+        SDL_GetRGBA(color, fmt, &_r, &_g, &_b, &_a);
+        if (fmt->Rmask == 0x7C00) {
+            AALINE(x1, y1, x2, y2,
+                   DRAW_FASTSETPIXELXY2, DRAW_SETPIXELXY_BLEND_RGB555,
+                   draw_end);
+        } else if (fmt->Rmask == 0xF800) {
+            AALINE(x1, y1, x2, y2,
+                   DRAW_FASTSETPIXELXY2, DRAW_SETPIXELXY_BLEND_RGB565,
+                   draw_end);
+        } else {
+            AALINE(x1, y1, x2, y2,
+                   DRAW_FASTSETPIXELXY2, DRAW_SETPIXELXY2_BLEND_RGB,
+                   draw_end);
+        }
+    }
+}
+
+static void
+SDL_DrawLine4(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,
+              SDL_bool draw_end)
+{
+    if (y1 == y2) {
+        HLINE(Uint32, DRAW_FASTSETPIXEL4, draw_end);
+    } else if (x1 == x2) {
+        VLINE(Uint32, DRAW_FASTSETPIXEL4, draw_end);
+    } else if (ABS(x1 - x2) == ABS(y1 - y2)) {
+        DLINE(Uint32, DRAW_FASTSETPIXEL4, draw_end);
+    } else {
+        Uint8 _r, _g, _b, _a;
+        const SDL_PixelFormat * fmt = dst->format;
+        SDL_GetRGBA(color, fmt, &_r, &_g, &_b, &_a);
+        if (fmt->Rmask == 0x00FF0000) {
+            if (!fmt->Amask) {
+                AALINE(x1, y1, x2, y2,
+                       DRAW_FASTSETPIXELXY4, DRAW_SETPIXELXY_BLEND_RGB888,
+                       draw_end);
+            } else {
+                AALINE(x1, y1, x2, y2,
+                       DRAW_FASTSETPIXELXY4, DRAW_SETPIXELXY_BLEND_ARGB8888,
+                       draw_end);
+            }
+        } else {
+            AALINE(x1, y1, x2, y2,
+                   DRAW_FASTSETPIXELXY4, DRAW_SETPIXELXY4_BLEND_RGB,
+                   draw_end);
+        }
+    }
+}
+
+typedef void (*DrawLineFunc) (SDL_Surface * dst,
+                              int x1, int y1, int x2, int y2,
+                              Uint32 color, SDL_bool draw_end);
+
+static DrawLineFunc
+SDL_CalculateDrawLineFunc(const SDL_PixelFormat * fmt)
+{
+    switch (fmt->BytesPerPixel) {
+    case 1:
+        if (fmt->BitsPerPixel < 8) {
+            break;
+        }
+        return SDL_DrawLine1;
+    case 2:
+        return SDL_DrawLine2;
+    case 4:
+        return SDL_DrawLine4;
+    }
+    return NULL;
+}
 
 int
 SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
 {
+    DrawLineFunc func;
+
     if (!dst) {
-        SDL_SetError("Passed NULL destination surface");
+        SDL_SetError("SDL_DrawLine(): Passed NULL destination surface");
         return -1;
     }
 
-    /* This function doesn't work on surfaces < 8 bpp */
-    if (dst->format->BitsPerPixel < 8) {
+    func = SDL_CalculateDrawLineFunc(dst->format);
+    if (!func) {
         SDL_SetError("SDL_DrawLine(): Unsupported surface format");
         return -1;
     }
@@ -41,23 +140,10 @@ SDL_DrawLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color)
     /* Perform clipping */
     /* FIXME: We don't actually want to clip, as it may change line slope */
     if (!SDL_IntersectRectAndLine(&dst->clip_rect, &x1, &y1, &x2, &y2)) {
-        return (0);
+        return 0;
     }
 
-    switch (dst->format->BytesPerPixel) {
-    case 1:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1, SDL_TRUE);
-        break;
-    case 2:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2, SDL_TRUE);
-        break;
-    case 3:
-        SDL_Unsupported();
-        return -1;
-    case 4:
-        DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4, SDL_TRUE);
-        break;
-    }
+    func(dst, x1, y1, x2, y2, color, SDL_TRUE);
     return 0;
 }
 
@@ -66,27 +152,27 @@ SDL_DrawLines(SDL_Surface * dst, const SDL_Point * points, int count,
               Uint32 color)
 {
     int i;
+    int x1, y1;
+    int x2, y2;
+    SDL_bool draw_end;
+    DrawLineFunc func;
 
     if (!dst) {
-        SDL_SetError("Passed NULL destination surface");
+        SDL_SetError("SDL_DrawLines(): Passed NULL destination surface");
         return -1;
     }
 
-    /* This function doesn't work on surfaces < 8 bpp */
-    if (dst->format->BitsPerPixel < 8) {
-        SDL_SetError("SDL_DrawLine(): Unsupported surface format");
+    func = SDL_CalculateDrawLineFunc(dst->format);
+    if (!func) {
+        SDL_SetError("SDL_DrawLines(): Unsupported surface format");
         return -1;
-    }
-
-    if (count < 2) {
-        return 0;
     }
 
     for (i = 1; i < count; ++i) {
-        int x1 = points[i-1].x;
-        int y1 = points[i-1].y;
-        int x2 = points[i].x;
-        int y2 = points[i].y;
+        x1 = points[i-1].x;
+        y1 = points[i-1].y;
+        x2 = points[i].x;
+        y2 = points[i].y;
 
         /* Perform clipping */
         /* FIXME: We don't actually want to clip, as it may change line slope */
@@ -94,20 +180,13 @@ SDL_DrawLines(SDL_Surface * dst, const SDL_Point * points, int count,
             continue;
         }
 
-        switch (dst->format->BytesPerPixel) {
-        case 1:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL1, SDL_TRUE);
-            break;
-        case 2:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL2, SDL_TRUE);
-            break;
-        case 3:
-            SDL_Unsupported();
-            return -1;
-        case 4:
-            DRAWLINE(x1, y1, x2, y2, DRAW_FASTSETPIXEL4, SDL_TRUE);
-            break;
-        }
+        /* Draw the end if it was clipped */
+        draw_end = (x2 != points[i].x || y2 != points[i].y);
+
+        func(dst, x1, y1, x2, y2, color, draw_end);
+    }
+    if (points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
+        SDL_DrawPoint(dst, points[count-1].x, points[count-1].y, color);
     }
     return 0;
 }

@@ -47,16 +47,16 @@ SDL_DrawPoint(SDL_Surface * dst, int x, int y, Uint32 color)
 
     switch (dst->format->BytesPerPixel) {
     case 1:
-        DRAW_FASTSETPIXEL1(x, y);
+        DRAW_FASTSETPIXELXY1(x, y);
         break;
     case 2:
-        DRAW_FASTSETPIXEL2(x, y);
+        DRAW_FASTSETPIXELXY2(x, y);
         break;
     case 3:
         SDL_Unsupported();
         return -1;
     case 4:
-        DRAW_FASTSETPIXEL4(x, y);
+        DRAW_FASTSETPIXELXY4(x, y);
         break;
     }
     return 0;
@@ -97,16 +97,16 @@ SDL_DrawPoints(SDL_Surface * dst, const SDL_Point * points, int count,
 
         switch (dst->format->BytesPerPixel) {
         case 1:
-            DRAW_FASTSETPIXEL1(x, y);
+            DRAW_FASTSETPIXELXY1(x, y);
             break;
         case 2:
-            DRAW_FASTSETPIXEL2(x, y);
+            DRAW_FASTSETPIXELXY2(x, y);
             break;
         case 3:
             SDL_Unsupported();
             return -1;
         case 4:
-            DRAW_FASTSETPIXEL4(x, y);
+            DRAW_FASTSETPIXELXY4(x, y);
             break;
         }
     }

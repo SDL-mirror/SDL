@@ -503,8 +503,9 @@ SDL_PS3_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
         status = SDL_FillRect(target, &real_rect, color);
     } else {
         status =
-            SDL_BlendRect(target, &real_rect, renderer->blendMode,
-                          renderer->r, renderer->g, renderer->b, renderer->a);
+            SDL_BlendFillRect(target, &real_rect, renderer->blendMode,
+                              renderer->r, renderer->g, renderer->b,
+                              renderer->a);
     }
     return status;
 }

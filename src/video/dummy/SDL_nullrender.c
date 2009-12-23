@@ -31,12 +31,14 @@
 
 static SDL_Renderer *SDL_DUMMY_CreateRenderer(SDL_Window * window,
                                               Uint32 flags);
-static int SDL_DUMMY_RenderPoints(SDL_Renderer * renderer,
-                                  const SDL_Point * points, int count);
-static int SDL_DUMMY_RenderLines(SDL_Renderer * renderer,
-                                 const SDL_Point * points, int count);
-static int SDL_DUMMY_RenderRects(SDL_Renderer * renderer,
-                                 const SDL_Rect ** rects, int count);
+static int SDL_DUMMY_RenderDrawPoints(SDL_Renderer * renderer,
+                                      const SDL_Point * points, int count);
+static int SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
+                                     const SDL_Point * points, int count);
+static int SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer,
+                                     const SDL_Rect ** rects, int count);
+static int SDL_DUMMY_RenderFillRects(SDL_Renderer * renderer,
+                                     const SDL_Rect ** rects, int count);
 static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
                                 SDL_Texture * texture,
                                 const SDL_Rect * srcrect,
@@ -100,9 +102,10 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
-    renderer->RenderPoints = SDL_DUMMY_RenderPoints;
-    renderer->RenderLines = SDL_DUMMY_RenderLines;
-    renderer->RenderRects = SDL_DUMMY_RenderRects;
+    renderer->RenderDrawPoints = SDL_DUMMY_RenderDrawPoints;
+    renderer->RenderDrawLines = SDL_DUMMY_RenderDrawLines;
+    renderer->RenderDrawRects = SDL_DUMMY_RenderDrawRects;
+    renderer->RenderFillRects = SDL_DUMMY_RenderFillRects;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
     renderer->RenderReadPixels = SDL_DUMMY_RenderReadPixels;
     renderer->RenderWritePixels = SDL_DUMMY_RenderWritePixels;
@@ -140,8 +143,8 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
-SDL_DUMMY_RenderPoints(SDL_Renderer * renderer,
-                       const SDL_Point * points, int count)
+SDL_DUMMY_RenderDrawPoints(SDL_Renderer * renderer,
+                           const SDL_Point * points, int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
@@ -162,8 +165,8 @@ SDL_DUMMY_RenderPoints(SDL_Renderer * renderer,
 }
 
 static int
-SDL_DUMMY_RenderLines(SDL_Renderer * renderer,
-                      const SDL_Point * points, int count)
+SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
+                          const SDL_Point * points, int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
@@ -184,8 +187,31 @@ SDL_DUMMY_RenderLines(SDL_Renderer * renderer,
 }
 
 static int
-SDL_DUMMY_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                      int count)
+SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                          int count)
+{
+    SDL_DUMMY_RenderData *data =
+        (SDL_DUMMY_RenderData *) renderer->driverdata;
+    SDL_Surface *target = data->screens[data->current_screen];
+
+    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
+        renderer->blendMode == SDL_BLENDMODE_MASK) {
+        Uint32 color = SDL_MapRGBA(target->format,
+                                   renderer->r, renderer->g, renderer->b,
+                                   renderer->a);
+
+        return SDL_DrawRects(target, rects, count, color);
+    } else {
+        return SDL_BlendRects(target, rects, count,
+                              renderer->blendMode,
+                              renderer->r, renderer->g, renderer->b,
+                              renderer->a);
+    }
+}
+
+static int
+SDL_DUMMY_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                          int count)
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
@@ -199,10 +225,10 @@ SDL_DUMMY_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
 
         return SDL_FillRects(target, rects, count, color);
     } else {
-        return SDL_BlendRects(target, rects, count,
-                              renderer->blendMode,
-                              renderer->r, renderer->g, renderer->b,
-                              renderer->a);
+        return SDL_BlendFillRects(target, rects, count,
+                                  renderer->blendMode,
+                                  renderer->r, renderer->g, renderer->b,
+                                  renderer->a);
     }
 }
 

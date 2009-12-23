@@ -1,6 +1,6 @@
 
 
-CFLAGS  := -W -Wall -Wextra -g `sdl-config --cflags`
+CFLAGS  := -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
 LDFLAGS := `sdl-config --libs`
 
 # If it doesn't pick up defaults

@@ -139,21 +139,21 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 
     /* Draw a gray background */
     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderRect(NULL);
+    SDL_RenderClear();
 
     /* Test points */
     SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderPoint(0, 0);
-    SDL_RenderPoint(window_w-1, 0);
-    SDL_RenderPoint(0, window_h-1);
-    SDL_RenderPoint(window_w-1, window_h-1);
+    SDL_RenderDrawPoint(0, 0);
+    SDL_RenderDrawPoint(window_w-1, 0);
+    SDL_RenderDrawPoint(0, window_h-1);
+    SDL_RenderDrawPoint(window_w-1, window_h-1);
 
     /* Test horizontal and vertical lines */
     SDL_SetRenderDrawColor(0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderLine(1, 0, window_w-2, 0);
-    SDL_RenderLine(1, window_h-1, window_w-2, window_h-1);
-    SDL_RenderLine(0, 1, 0, window_h-2);
-    SDL_RenderLine(window_w-1, 1, window_w-1, window_h-2);
+    SDL_RenderDrawLine(1, 0, window_w-2, 0);
+    SDL_RenderDrawLine(1, window_h-1, window_w-2, window_h-1);
+    SDL_RenderDrawLine(0, 1, 0, window_h-2);
+    SDL_RenderDrawLine(window_w-1, 1, window_w-1, window_h-2);
 
     /* Test fill and copy */
     SDL_SetRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
@@ -161,33 +161,33 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderRect(&temp);
+    SDL_RenderFillRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderRect(&temp);
+    SDL_RenderFillRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = 1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderRect(&temp);
+    SDL_RenderFillRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderRect(&temp);
+    SDL_RenderFillRect(&temp);
     SDL_RenderCopy(sprite, NULL, &temp);
 
     /* Test diagonal lines */
     SDL_SetRenderDrawColor(0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderLine(sprite_w, sprite_h,
-                   window_w-sprite_w-2, window_h-sprite_h-2);
-    SDL_RenderLine(window_w-sprite_w-2, sprite_h,
-                   sprite_w, window_h-sprite_h-2);
+    SDL_RenderDrawLine(sprite_w, sprite_h,
+                       window_w-sprite_w-2, window_h-sprite_h-2);
+    SDL_RenderDrawLine(window_w-sprite_w-2, sprite_h,
+                       sprite_w, window_h-sprite_h-2);
 
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
@@ -302,7 +302,7 @@ main(int argc, char *argv[])
     for (i = 0; i < state->num_windows; ++i) {
         SDL_SelectRenderer(state->windows[i]);
         SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderRect(NULL);
+        SDL_RenderClear();
     }
     if (LoadSprite("icon.bmp") < 0) {
         quit(2);
@@ -348,7 +348,7 @@ main(int argc, char *argv[])
                 case SDL_WINDOWEVENT_EXPOSED:
                     SDL_SelectRenderer(event.window.windowID);
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderRect(NULL);
+                    SDL_RenderClear();
                     break;
                 }
                 break;

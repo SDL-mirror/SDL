@@ -56,8 +56,7 @@ static void surface_testLoad( SDL_Surface *testsur )
 
    /* Set transparent pixel as the pixel at (0,0) */
    if (face->format->palette) {
-      ret = SDL_SetColorKey(face, (SDL_SRCCOLORKEY | SDL_RLEACCEL),
-            *(Uint8 *) face->pixels);
+      ret = SDL_SetColorKey(face, SDL_RLEACCEL, *(Uint8 *) face->pixels);
       if (SDL_ATassert( "SDL_SetColorKey", ret == 0))
          return;
    }
@@ -184,29 +183,29 @@ static void surface_testPrimitivesBlend( SDL_Surface *testsur )
       return;
 
    /* Create some rectangles for each blend mode. */
-   ret = SDL_BlendRect( testsur, NULL, SDL_BLENDMODE_NONE, 255, 255, 255, 0 );
-   if (SDL_ATassert( "SDL_BlendRect", ret == 0))
+   ret = SDL_BlendFillRect( testsur, NULL, SDL_BLENDMODE_NONE, 255, 255, 255, 0 );
+   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
       return;
    rect.x = 10;
    rect.y = 25;
    rect.w = 40;
    rect.h = 25;
-   ret = SDL_BlendRect( testsur, &rect, SDL_BLENDMODE_ADD, 240, 10, 10, 75 );
-   if (SDL_ATassert( "SDL_BlendRect", ret == 0))
+   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_ADD, 240, 10, 10, 75 );
+   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
       return;
    rect.x = 30;
    rect.y = 40;
    rect.w = 45;
    rect.h = 15;
-   ret = SDL_BlendRect( testsur, &rect, SDL_BLENDMODE_BLEND, 10, 240, 10, 100 );
-   if (SDL_ATassert( "SDL_BlendRect", ret == 0))
+   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_BLEND, 10, 240, 10, 100 );
+   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
       return;
    rect.x = 25;
    rect.y = 25;
    rect.w = 25;
    rect.h = 25;
-   ret = SDL_BlendRect( testsur, &rect, SDL_BLENDMODE_MOD, 10, 10, 240, 125 );
-   if (SDL_ATassert( "SDL_BlendRect", ret == 0))
+   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_MOD, 10, 10, 240, 125 );
+   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
       return;
 
    /* Draw blended lines, lines for everyone. */

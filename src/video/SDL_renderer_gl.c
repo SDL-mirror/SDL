@@ -96,12 +96,15 @@ static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             int numrects, const SDL_Rect * rects);
-static int GL_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
-                           int count);
-static int GL_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
-                          int count);
-static int GL_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                          int count);
+static int GL_RenderClear(SDL_Renderer * renderer);
+static int GL_RenderDrawPoints(SDL_Renderer * renderer,
+                               const SDL_Point * points, int count);
+static int GL_RenderDrawLines(SDL_Renderer * renderer,
+                              const SDL_Point * points, int count);
+static int GL_RenderDrawRects(SDL_Renderer * renderer,
+                              const SDL_Rect ** rects, int count);
+static int GL_RenderFillRects(SDL_Renderer * renderer,
+                              const SDL_Rect ** rects, int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -306,9 +309,11 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
     renderer->DirtyTexture = GL_DirtyTexture;
-    renderer->RenderPoints = GL_RenderPoints;
-    renderer->RenderLines = GL_RenderLines;
-    renderer->RenderRects = GL_RenderRects;
+    renderer->RenderClear = GL_RenderClear;
+    renderer->RenderDrawPoints = GL_RenderDrawPoints;
+    renderer->RenderDrawLines = GL_RenderDrawLines;
+    renderer->RenderDrawRects = GL_RenderDrawRects;
+    renderer->RenderFillRects = GL_RenderFillRects;
     renderer->RenderCopy = GL_RenderCopy;
     renderer->RenderReadPixels = GL_RenderReadPixels;
     renderer->RenderWritePixels = GL_RenderWritePixels;
@@ -1114,7 +1119,23 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
 }
 
 static int
-GL_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
+GL_RenderClear(SDL_Renderer * renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    data->glClearColor((GLfloat) renderer->r * inv255f,
+                       (GLfloat) renderer->g * inv255f,
+                       (GLfloat) renderer->b * inv255f,
+                       (GLfloat) renderer->a * inv255f);
+
+    data->glClear(GL_COLOR_BUFFER_BIT);
+
+    return 0;
+}
+
+static int
+GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                    int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
@@ -1136,7 +1157,8 @@ GL_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-GL_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
+GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+                   int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
@@ -1199,7 +1221,46 @@ GL_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-GL_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+GL_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    int i, x, y;
+    SDL_Point points[4];
+
+    GL_SetBlendMode(data, renderer->blendMode, 1);
+
+    data->glColor4f((GLfloat) renderer->r * inv255f,
+                    (GLfloat) renderer->g * inv255f,
+                    (GLfloat) renderer->b * inv255f,
+                    (GLfloat) renderer->a * inv255f);
+
+    data->glBegin(GL_LINE_LOOP);
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+
+        x = rect->x;
+        y = rect->y;
+        data->glVertex2f(0.5f + x, 0.5f + y);
+
+        x = rect->x+rect->w-1;
+        y = rect->y;
+        data->glVertex2f(0.5f + x, 0.5f + y);
+
+        x = rect->x+rect->w-1;
+        y = rect->y+rect->h-1;
+        data->glVertex2f(0.5f + x, 0.5f + y);
+
+        x = rect->x;
+        y = rect->y+rect->h-1;
+        data->glVertex2f(0.5f + x, 0.5f + y);
+    }
+    data->glEnd();
+
+    return 0;
+}
+
+static int
+GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;

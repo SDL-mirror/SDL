@@ -2483,22 +2483,49 @@ SDL_GetRenderDrawBlendMode(int *blendMode)
 }
 
 int
-SDL_RenderPoint(int x, int y)
+SDL_RenderClear()
+{
+    SDL_Renderer *renderer;
+
+    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderClear) {
+        int blendMode = renderer->blendMode;
+        int status;
+
+        if (blendMode >= SDL_BLENDMODE_BLEND) {
+            SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
+        }
+
+        status = SDL_RenderFillRect(NULL);
+
+        if (blendMode >= SDL_BLENDMODE_BLEND) {
+            SDL_SetRenderDrawBlendMode(blendMode);
+        }
+        return status;
+    }
+    return renderer->RenderClear(renderer);
+}
+
+int
+SDL_RenderDrawPoint(int x, int y)
 {
     SDL_Point point;
 
     point.x = x;
     point.y = y;
-    return SDL_RenderPoints(&point, 1);
+    return SDL_RenderDrawPoints(&point, 1);
 }
 
 int
-SDL_RenderPoints(const SDL_Point * points, int count)
+SDL_RenderDrawPoints(const SDL_Point * points, int count)
 {
     SDL_Renderer *renderer;
 
     if (!points) {
-        SDL_SetError("SDL_RenderPoints(): Passed NULL points");
+        SDL_SetError("SDL_RenderDrawPoints(): Passed NULL points");
         return -1;
     }
 
@@ -2506,18 +2533,18 @@ SDL_RenderPoints(const SDL_Point * points, int count)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->RenderPoints) {
+    if (!renderer->RenderDrawPoints) {
         SDL_Unsupported();
         return -1;
     }
     if (count < 1) {
         return 0;
     }
-    return renderer->RenderPoints(renderer, points, count);
+    return renderer->RenderDrawPoints(renderer, points, count);
 }
 
 int
-SDL_RenderLine(int x1, int y1, int x2, int y2)
+SDL_RenderDrawLine(int x1, int y1, int x2, int y2)
 {
     SDL_Point points[2];
 
@@ -2525,16 +2552,16 @@ SDL_RenderLine(int x1, int y1, int x2, int y2)
     points[0].y = y1;
     points[1].x = x2;
     points[1].y = y2;
-    return SDL_RenderLines(points, 2);
+    return SDL_RenderDrawLines(points, 2);
 }
 
 int
-SDL_RenderLines(const SDL_Point * points, int count)
+SDL_RenderDrawLines(const SDL_Point * points, int count)
 {
     SDL_Renderer *renderer;
 
     if (!points) {
-        SDL_SetError("SDL_RenderLines(): Passed NULL points");
+        SDL_SetError("SDL_RenderDrawLines(): Passed NULL points");
         return -1;
     }
 
@@ -2542,30 +2569,30 @@ SDL_RenderLines(const SDL_Point * points, int count)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->RenderLines) {
+    if (!renderer->RenderDrawLines) {
         SDL_Unsupported();
         return -1;
     }
     if (count < 2) {
         return 0;
     }
-    return renderer->RenderLines(renderer, points, count);
+    return renderer->RenderDrawLines(renderer, points, count);
 }
 
 int
-SDL_RenderRect(const SDL_Rect * rect)
+SDL_RenderDrawRect(const SDL_Rect * rect)
 {
-    return SDL_RenderRects(&rect, 1);
+    return SDL_RenderDrawRects(&rect, 1);
 }
 
 int
-SDL_RenderRects(const SDL_Rect ** rects, int count)
+SDL_RenderDrawRects(const SDL_Rect ** rects, int count)
 {
     SDL_Renderer *renderer;
     int i;
 
     if (!rects) {
-        SDL_SetError("SDL_RenderRects(): Passed NULL rects");
+        SDL_SetError("SDL_RenderDrawRects(): Passed NULL rects");
         return -1;
     }
 
@@ -2573,7 +2600,7 @@ SDL_RenderRects(const SDL_Rect ** rects, int count)
     if (!renderer) {
         return -1;
     }
-    if (!renderer->RenderRects) {
+    if (!renderer->RenderDrawRects) {
         SDL_Unsupported();
         return -1;
     }
@@ -2593,10 +2620,99 @@ SDL_RenderRects(const SDL_Rect ** rects, int count)
             full_rect.w = window->w;
             full_rect.h = window->h;
             rect = &full_rect;
-            return renderer->RenderRects(renderer, &rect, 1);
+            return renderer->RenderDrawRects(renderer, &rect, 1);
         }
     }
-    return renderer->RenderRects(renderer, rects, count);
+    return renderer->RenderDrawRects(renderer, rects, count);
+}
+
+int
+SDL_RenderFillRect(const SDL_Rect * rect)
+{
+    return SDL_RenderFillRects(&rect, 1);
+}
+
+int
+SDL_RenderFillRects(const SDL_Rect ** rects, int count)
+{
+    SDL_Renderer *renderer;
+    int i;
+
+    if (!rects) {
+        SDL_SetError("SDL_RenderFillRects(): Passed NULL rects");
+        return -1;
+    }
+
+    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderFillRects) {
+        SDL_Unsupported();
+        return -1;
+    }
+    if (count < 1) {
+        return 0;
+    }
+    /* Check for NULL rect, which means fill entire window */
+    for (i = 0; i < count; ++i) {
+        if (rects[i] == NULL) {
+            SDL_Window *window;
+            SDL_Rect full_rect;
+            const SDL_Rect *rect;
+
+            window = SDL_GetWindowFromID(renderer->window);
+            full_rect.x = 0;
+            full_rect.y = 0;
+            full_rect.w = window->w;
+            full_rect.h = window->h;
+            rect = &full_rect;
+            return renderer->RenderFillRects(renderer, &rect, 1);
+        }
+    }
+    return renderer->RenderFillRects(renderer, rects, count);
+}
+
+int
+SDL_RenderDrawCircle(int x, int y, int radius)
+{
+    return SDL_RenderDrawEllipse(x, y, 2*radius, 2*radius);
+}
+
+int
+SDL_RenderFillCircle(int x, int y, int radius)
+{
+    return SDL_RenderFillEllipse(x, y, 2*radius, 2*radius);
+}
+
+int SDL_RenderDrawEllipse(int x, int y, int w, int h)
+{
+    SDL_Renderer *renderer;
+
+    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderDrawEllipse) {
+        SDL_Unsupported();
+        return -1;
+    }
+    return renderer->RenderDrawEllipse(renderer, x, y, w, h);
+}
+
+int SDL_RenderFillEllipse(int x, int y, int w, int h)
+{
+    SDL_Renderer *renderer;
+
+    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
+    if (!renderer) {
+        return -1;
+    }
+    if (!renderer->RenderFillEllipse) {
+        SDL_Unsupported();
+        return -1;
+    }
+    return renderer->RenderFillEllipse(renderer, x, y, w, h);
 }
 
 int

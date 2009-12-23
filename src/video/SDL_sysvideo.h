@@ -90,12 +90,19 @@ struct SDL_Renderer
                           int numrects, const SDL_Rect * rects);
     int (*SetDrawColor) (SDL_Renderer * renderer);
     int (*SetDrawBlendMode) (SDL_Renderer * renderer);
-    int (*RenderPoints) (SDL_Renderer * renderer, const SDL_Point * points,
-                         int count);
-    int (*RenderLines) (SDL_Renderer * renderer, const SDL_Point * points,
-                        int count);
-    int (*RenderRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
-                        int count);
+    int (*RenderClear) (SDL_Renderer * renderer);
+    int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
+                             int count);
+    int (*RenderDrawLines) (SDL_Renderer * renderer, const SDL_Point * points,
+                            int count);
+    int (*RenderDrawRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
+                            int count);
+    int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
+                            int count);
+    int (*RenderDrawEllipse) (SDL_Renderer * renderer, int x, int y,
+                              int w, int h);
+    int (*RenderFillEllipse) (SDL_Renderer * renderer, int x, int y,
+                              int w, int h);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,

@@ -29,12 +29,20 @@
 
 #define DRAW_MUL(_a, _b) (((unsigned)(_a)*(_b))/255)
 
-#define DRAW_FASTSETPIXEL(x, y, type, bpp, color) \
-    *(type *)((Uint8 *)dst->pixels + y * dst->pitch + x * bpp) = (type) color
+#define DRAW_FASTSETPIXEL(type) \
+    *pixel = (type) color
 
-#define DRAW_FASTSETPIXEL1(x, y) DRAW_FASTSETPIXEL(x, y, Uint8, 1, color);
-#define DRAW_FASTSETPIXEL2(x, y) DRAW_FASTSETPIXEL(x, y, Uint16, 2, color);
-#define DRAW_FASTSETPIXEL4(x, y) DRAW_FASTSETPIXEL(x, y, Uint32, 4, color);
+#define DRAW_FASTSETPIXEL1 DRAW_FASTSETPIXEL(Uint8)
+#define DRAW_FASTSETPIXEL2 DRAW_FASTSETPIXEL(Uint16)
+#define DRAW_FASTSETPIXEL4 DRAW_FASTSETPIXEL(Uint32)
+
+#define DRAW_FASTSETPIXELXY(x, y, type, bpp, color) \
+    *(type *)((Uint8 *)dst->pixels + (y) * dst->pitch \
+                                   + (x) * bpp) = (type) color
+
+#define DRAW_FASTSETPIXELXY1(x, y) DRAW_FASTSETPIXELXY(x, y, Uint8, 1, color)
+#define DRAW_FASTSETPIXELXY2(x, y) DRAW_FASTSETPIXELXY(x, y, Uint16, 2, color)
+#define DRAW_FASTSETPIXELXY4(x, y) DRAW_FASTSETPIXELXY(x, y, Uint32, 4, color)
 
 #define DRAW_SETPIXEL(setpixel) \
 do { \
@@ -74,7 +82,8 @@ do { \
 
 #define DRAW_SETPIXELXY(x, y, type, bpp, op) \
 do { \
-    type *pixel = (type *)((Uint8 *)dst->pixels + y * dst->pitch + x * bpp); \
+    type *pixel = (type *)((Uint8 *)dst->pixels + (y) * dst->pitch \
+                                                + (x) * bpp); \
     op; \
 } while (0)
 
@@ -283,7 +292,87 @@ do { \
 
 #define ABS(_x) ((_x) < 0 ? -(_x) : (_x))
 
-#define BRESENHAM(x1, y1, x2, y2, op, draw_end) \
+/* Horizontal line */
+#define HLINE(type, op, draw_end) \
+{ \
+    int length; \
+    int pitch = (dst->pitch / dst->format->BytesPerPixel); \
+    type *pixel; \
+    if (x1 <= x2) { \
+        pixel = (type *)dst->pixels + y1 * pitch + x1; \
+        length = draw_end ? (x2-x1+1) : (x2-x1); \
+    } else { \
+        pixel = (type *)dst->pixels + y1 * pitch + x2; \
+        if (!draw_end) { \
+            ++pixel; \
+        } \
+        length = draw_end ? (x1-x2+1) : (x1-x2); \
+    } \
+    while (length--) { \
+        op; \
+        ++pixel; \
+    } \
+}
+
+/* Vertical line */
+#define VLINE(type, op, draw_end) \
+{ \
+    int length; \
+    int pitch = (dst->pitch / dst->format->BytesPerPixel); \
+    type *pixel; \
+    if (y1 <= y2) { \
+        pixel = (type *)dst->pixels + y1 * pitch + x1; \
+        length = draw_end ? (y2-y1+1) : (y2-y1); \
+    } else { \
+        pixel = (type *)dst->pixels + y2 * pitch + x1; \
+        if (!draw_end) { \
+            pixel += pitch; \
+        } \
+        length = draw_end ? (y1-y2+1) : (y1-y2); \
+    } \
+    while (length--) { \
+        op; \
+        pixel += pitch; \
+    } \
+}
+
+/* Diagonal line */
+#define DLINE(type, op, draw_end) \
+{ \
+    int length; \
+    int pitch = (dst->pitch / dst->format->BytesPerPixel); \
+    type *pixel; \
+    if (y1 <= y2) { \
+        pixel = (type *)dst->pixels + y1 * pitch + x1; \
+        if (x1 <= x2) { \
+            ++pitch; \
+        } else { \
+            --pitch; \
+        } \
+        length = (y2-y1); \
+    } else { \
+        pixel = (type *)dst->pixels + y2 * pitch + x2; \
+        if (x2 <= x1) { \
+            ++pitch; \
+        } else { \
+            --pitch; \
+        } \
+        if (!draw_end) { \
+            pixel += pitch; \
+        } \
+        length = (y1-y2); \
+    } \
+    if (draw_end) { \
+        ++length; \
+    } \
+    while (length--) { \
+        op; \
+        pixel += pitch; \
+    } \
+}
+
+/* Bresenham's line algorithm */
+#define BLINE(x1, y1, x2, y2, op, draw_end) \
 { \
     int i, deltax, deltay, numpixels; \
     int d, dinc1, dinc2; \
@@ -341,45 +430,123 @@ do { \
         } \
     } \
 }
-#define DRAWLINE    BRESENHAM
 
-/*
- * Define draw rect macro
- * (not tested, this level of optimization not needed ... yet?)
- */
-#define DRAWRECT(type, op) \
-do { \
-    int width = rect->w; \
-    int height = rect->h; \
-    int pitch = (dst->pitch / dst->format->BytesPerPixel); \
-    int skip = pitch - width; \
-    type *pixel; \
-    pixel = (type *)dst->pixels + rect->y * pitch + rect->x; \
-    { int n = (width+3)/4; \
-        switch (width & 3) { \
-        case 0: do {   op; pixel++; \
-        case 3:        op; pixel++; \
-        case 2:        op; pixel++; \
-        case 1:        op; pixel++; \
-                } while ( --n > 0 ); \
+/* Xiaolin Wu's line algorithm, based on Michael Abrash's implementation */
+#define WULINE(x1, y1, x2, y2, opaque_op, blend_op, draw_end) \
+{ \
+    Uint16 ErrorAdj, ErrorAcc; \
+    Uint16 ErrorAccTemp, Weighting; \
+    int DeltaX, DeltaY, Temp, XDir; \
+    unsigned r, g, b, a, inva; \
+ \
+    /* Draw the initial pixel, which is always exactly intersected by \
+       the line and so needs no weighting */ \
+    opaque_op(x1, y1); \
+ \
+    /* Draw the final pixel, which is always exactly intersected by the line \
+       and so needs no weighting */ \
+    if (draw_end) { \
+        opaque_op(x2, y2); \
+    } \
+ \
+    /* Make sure the line runs top to bottom */ \
+    if (y1 > y2) { \
+        Temp = y1; y1 = y2; y2 = Temp; \
+        Temp = x1; x1 = x2; x2 = Temp; \
+    } \
+    DeltaY = y2 - y1; \
+ \
+    if ((DeltaX = x2 - x1) >= 0) { \
+        XDir = 1; \
+    } else { \
+        XDir = -1; \
+        DeltaX = -DeltaX; /* make DeltaX positive */ \
+    } \
+ \
+    /* line is not horizontal, diagonal, or vertical */ \
+    ErrorAcc = 0;  /* initialize the line error accumulator to 0 */ \
+ \
+    /* Is this an X-major or Y-major line? */ \
+    if (DeltaY > DeltaX) { \
+        /* Y-major line; calculate 16-bit fixed-point fractional part of a \
+          pixel that X advances each time Y advances 1 pixel, truncating the \
+          result so that we won't overrun the endpoint along the X axis */ \
+        ErrorAdj = ((unsigned long) DeltaX << 16) / (unsigned long) DeltaY; \
+        /* Draw all pixels other than the first and last */ \
+        while (--DeltaY) { \
+            ErrorAccTemp = ErrorAcc;   /* remember currrent accumulated error */ \
+            ErrorAcc += ErrorAdj;      /* calculate error for next pixel */ \
+            if (ErrorAcc <= ErrorAccTemp) { \
+                /* The error accumulator turned over, so advance the X coord */ \
+                x1 += XDir; \
+            } \
+            y1++; /* Y-major, so always advance Y */ \
+            /* The IntensityBits most significant bits of ErrorAcc give us the \
+             intensity weighting for this pixel, and the complement of the \
+             weighting for the paired pixel */ \
+            Weighting = ErrorAcc >> 8; \
+            { \
+                a = DRAW_MUL(_a, (Weighting ^ 255)); \
+                r = DRAW_MUL(_r, a); \
+                g = DRAW_MUL(_g, a); \
+                b = DRAW_MUL(_b, a); \
+                inva = (a ^ 0xFF); \
+                blend_op(x1, y1); \
+            } \
+            { \
+                a = DRAW_MUL(_a, Weighting); \
+                r = DRAW_MUL(_r, a); \
+                g = DRAW_MUL(_g, a); \
+                b = DRAW_MUL(_b, a); \
+                inva = (a ^ 0xFF); \
+                blend_op(x1 + XDir, y1); \
+            } \
+        } \
+    } else { \
+        /* X-major line; calculate 16-bit fixed-point fractional part of a \
+           pixel that Y advances each time X advances 1 pixel, truncating the \
+           result to avoid overrunning the endpoint along the X axis */ \
+        ErrorAdj = ((unsigned long) DeltaY << 16) / (unsigned long) DeltaX; \
+        /* Draw all pixels other than the first and last */ \
+        while (--DeltaX) { \
+            ErrorAccTemp = ErrorAcc;   /* remember currrent accumulated error */ \
+            ErrorAcc += ErrorAdj;      /* calculate error for next pixel */ \
+            if (ErrorAcc <= ErrorAccTemp) { \
+                /* The error accumulator turned over, so advance the Y coord */ \
+                y1++; \
+            } \
+            x1 += XDir; /* X-major, so always advance X */ \
+            /* The IntensityBits most significant bits of ErrorAcc give us the \
+              intensity weighting for this pixel, and the complement of the \
+              weighting for the paired pixel */ \
+            Weighting = ErrorAcc >> 8; \
+            { \
+                a = DRAW_MUL(_a, (Weighting ^ 255)); \
+                r = DRAW_MUL(_r, a); \
+                g = DRAW_MUL(_g, a); \
+                b = DRAW_MUL(_b, a); \
+                inva = (a ^ 0xFF); \
+                blend_op(x1, y1); \
+            } \
+            { \
+                a = DRAW_MUL(_a, Weighting); \
+                r = DRAW_MUL(_r, a); \
+                g = DRAW_MUL(_g, a); \
+                b = DRAW_MUL(_b, a); \
+                inva = (a ^ 0xFF); \
+                blend_op(x1, y1 + 1); \
+            } \
         } \
     } \
-    pixel += skip; \
-    width -= 1; \
-    height -= 2; \
-    while (height--) { \
-        op; pixel += width; op; pixel += skip; \
-    } \
-    { int n = (width+3)/4; \
-        switch (width & 3) { \
-        case 0: do {   op; pixel++; \
-        case 3:        op; pixel++; \
-        case 2:        op; pixel++; \
-        case 1:        op; pixel++; \
-                } while ( --n > 0 ); \
-        } \
-    } \
-} while (0)
+}
+
+#ifdef AA_LINES
+#define AALINE(x1, y1, x2, y2, opaque_op, blend_op, draw_end) \
+            WULINE(x1, y1, x2, y2, opaque_op, blend_op, draw_end)
+#else
+#define AALINE(x1, y1, x2, y2, opaque_op, blend_op, draw_end) \
+            BLINE(x1, y1, x2, y2, opaque_op, draw_end)
+#endif
 
 /*
  * Define fill rect macro

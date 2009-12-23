@@ -50,12 +50,14 @@ static int X11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            void **pixels, int *pitch);
 static void X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int X11_SetDrawBlendMode(SDL_Renderer * renderer);
-static int X11_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
-                            int count);
-static int X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
-                           int count);
-static int X11_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                           int count);
+static int X11_RenderDrawPoints(SDL_Renderer * renderer,
+                                const SDL_Point * points, int count);
+static int X11_RenderDrawLines(SDL_Renderer * renderer,
+                               const SDL_Point * points, int count);
+static int X11_RenderDrawRects(SDL_Renderer * renderer,
+                               const SDL_Rect ** rects, int count);
+static int X11_RenderFillRects(SDL_Renderer * renderer,
+                               const SDL_Rect ** rects, int count);
 static int X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int X11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -208,9 +210,10 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = X11_LockTexture;
     renderer->UnlockTexture = X11_UnlockTexture;
     renderer->SetDrawBlendMode = X11_SetDrawBlendMode;
-    renderer->RenderPoints = X11_RenderPoints;
-    renderer->RenderLines = X11_RenderLines;
-    renderer->RenderRects = X11_RenderRects;
+    renderer->RenderDrawPoints = X11_RenderDrawPoints;
+    renderer->RenderDrawLines = X11_RenderDrawLines;
+    renderer->RenderDrawRects = X11_RenderDrawRects;
+    renderer->RenderFillRects = X11_RenderFillRects;
     renderer->RenderCopy = X11_RenderCopy;
     renderer->RenderReadPixels = X11_RenderReadPixels;
     renderer->RenderWritePixels = X11_RenderWritePixels;
@@ -600,7 +603,8 @@ renderdrawcolor(SDL_Renderer * renderer, int premult)
 }
 
 static int
-X11_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
+X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                     int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
@@ -649,7 +653,8 @@ X11_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
+X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+                    int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
@@ -787,7 +792,52 @@ X11_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-X11_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Rect clip, rect;
+    unsigned long foreground;
+    XRectangle *xrects, *xrect;
+    int i, xcount;
+
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = window->w;
+    clip.h = window->h;
+
+    foreground = renderdrawcolor(renderer, 1);
+    XSetForeground(data->display, data->gc, foreground);
+
+    xrect = xrects = SDL_stack_alloc(XRectangle, count);
+    xcount = 0;
+    for (i = 0; i < count; ++i) {
+        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+            continue;
+        }
+
+        xrect->x = (short)rect.x;
+        xrect->y = (short)rect.y;
+        xrect->width = (unsigned short)rect.w;
+        xrect->height = (unsigned short)rect.h;
+        ++xrect;
+        ++xcount;
+
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+    }
+    if (xcount > 0) {
+        XDrawRectangles(data->display, data->drawable, data->gc,
+                        xrects, xcount);
+    }
+    SDL_stack_free(xpoints);
+
+    return 0;
+}
+
+static int
+X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);

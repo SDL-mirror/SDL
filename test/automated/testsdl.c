@@ -6,7 +6,6 @@
  * Released under Public Domain.
  */
 
-
 #include "SDL.h"
 #include "SDL_at.h"
 
