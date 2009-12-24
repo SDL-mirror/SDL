@@ -1,5 +1,7 @@
 /* Simple program:  Create a native window and attach an SDL renderer */
 
+#include <stdio.h>
+
 #include "testnative.h"
 
 #define WINDOW_W    640
