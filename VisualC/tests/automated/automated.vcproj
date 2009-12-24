@@ -185,6 +185,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\test\automated\rect\rect.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\test\automated\render\render.c"
 				>
 			</File>
