@@ -2673,6 +2673,7 @@ SDL_RenderFillRects(const SDL_Rect ** rects, int count)
     return renderer->RenderFillRects(renderer, rects, count);
 }
 
+#if 0
 int
 SDL_RenderDrawCircle(int x, int y, int radius)
 {
@@ -2714,6 +2715,7 @@ int SDL_RenderFillEllipse(int x, int y, int w, int h)
     }
     return renderer->RenderFillEllipse(renderer, x, y, w, h);
 }
+#endif // 0
 
 int
 SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,

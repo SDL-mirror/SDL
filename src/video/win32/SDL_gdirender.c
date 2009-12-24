@@ -61,12 +61,14 @@ static int GDI_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            void **pixels, int *pitch);
 static void GDI_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GDI_SetDrawBlendMode(SDL_Renderer * renderer);
-static int GDI_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points,
-                            int count);
-static int GDI_RenderLines(SDL_Renderer * renderer, const SDL_Point * points,
-                           int count);
-static int GDI_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                           int count);
+static int GDI_RenderDrawPoints(SDL_Renderer * renderer,
+                                const SDL_Point * points, int count);
+static int GDI_RenderDrawLines(SDL_Renderer * renderer,
+                               const SDL_Point * points, int count);
+static int GDI_RenderDrawRects(SDL_Renderer * renderer,
+                               const SDL_Rect ** rects, int count);
+static int GDI_RenderFillRects(SDL_Renderer * renderer,
+                               const SDL_Rect ** rects, int count);
 static int GDI_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -194,9 +196,10 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GDI_LockTexture;
     renderer->UnlockTexture = GDI_UnlockTexture;
     renderer->SetDrawBlendMode = GDI_SetDrawBlendMode;
-    renderer->RenderPoints = GDI_RenderPoints;
-    renderer->RenderLines = GDI_RenderLines;
-    renderer->RenderRects = GDI_RenderRects;
+    renderer->RenderDrawPoints = GDI_RenderDrawPoints;
+    renderer->RenderDrawLines = GDI_RenderDrawLines;
+    renderer->RenderDrawRects = GDI_RenderDrawRects;
+    renderer->RenderFillRects = GDI_RenderFillRects;
     renderer->RenderCopy = GDI_RenderCopy;
     renderer->RenderReadPixels = GDI_RenderReadPixels;
     renderer->RenderWritePixels = GDI_RenderWritePixels;
@@ -687,7 +690,8 @@ GDI_SetDrawBlendMode(SDL_Renderer * renderer)
 }
 
 static int
-GDI_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
+GDI_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                     int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     int i;
@@ -719,7 +723,8 @@ GDI_RenderPoints(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-GDI_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
+GDI_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+                    int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     HPEN pen;
@@ -773,7 +778,65 @@ GDI_RenderLines(SDL_Renderer * renderer, const SDL_Point * points, int count)
 }
 
 static int
-GDI_RenderRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+GDI_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                    int count)
+{
+    GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
+    HPEN pen;
+    POINT vertices[5];
+    int i, status = 1;
+
+    if (data->makedirty) {
+        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Rect clip, rect;
+
+        clip.x = 0;
+        clip.y = 0;
+        clip.w = window->w;
+        clip.h = window->h;
+
+        for (i = 0; i < count; ++i) {
+            if (SDL_IntersectRect(rects[i], &clip, &rect)) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+        }
+    }
+
+    /* Should we cache the pen? .. it looks like GDI does for us. :) */
+    pen = CreatePen(PS_SOLID, 1, RGB(renderer->r, renderer->g, renderer->b));
+    SelectObject(data->current_hdc, pen);
+    for (i = 0; i < count; ++i) {
+        const SDL_Rect *rect = rects[i];
+
+        vertices[0].x = rect->x;
+        vertices[0].y = rect->y;
+
+        vertices[1].x = rect->x+rect->w-1;
+        vertices[1].y = rect->y;
+
+        vertices[2].x = rect->x+rect->w-1;
+        vertices[2].y = rect->y+rect->h-1;
+
+        vertices[3].x = rect->x;
+        vertices[3].y = rect->y+rect->h-1;
+
+        vertices[4].x = rect->x;
+        vertices[4].y = rect->y;
+
+        status &= Polyline(data->current_hdc, vertices, 5);
+    }
+    DeleteObject(pen);
+
+    if (!status) {
+        WIN_SetError("Polyline()");
+        return -1;
+    }
+    return 0;
+}
+
+static int
+GDI_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+                    int count)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
     RECT rc;

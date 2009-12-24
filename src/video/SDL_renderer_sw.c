@@ -698,6 +698,7 @@ SW_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     }
 
     for (i = 0; i < count; ++i) {
+        /* FIXME: We don't want to draw clipped edges */
         if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
             /* Nothing to draw */
             continue;

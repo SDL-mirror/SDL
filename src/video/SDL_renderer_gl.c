@@ -1225,7 +1225,6 @@ GL_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i, x, y;
-    SDL_Point points[4];
 
     GL_SetBlendMode(data, renderer->blendMode, 1);
 
