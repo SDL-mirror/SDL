@@ -537,15 +537,19 @@ ${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     const int dstsize = cvt->len_cvt $lencvtop $multiple;
 EOF
 
+    my $endcomparison = '!=';
+
     # Upsampling (growing the buffer) needs to work backwards, since we
     #  overwrite the buffer as we go.
     if ($upsample) {
+        $endcomparison = '>';  # dst > target
         print <<EOF;
     $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
     const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
     const $fctype *target = ((const $fctype *) cvt->buf) - $channels;
 EOF
     } else {
+        $endcomparison = '<';  # dst < target
         print <<EOF;
     $fctype *dst = ($fctype *) cvt->buf;
     const $fctype *src = ($fctype *) cvt->buf;
@@ -562,7 +566,7 @@ EOF
     }
 
     print <<EOF;
-    while (dst != target) {
+    while (dst $endcomparison target) {
 EOF
 
     for (my $i = 0; $i < $channels; $i++) {
