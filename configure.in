@@ -79,7 +79,7 @@ case "$host" in
         BASE_LDFLAGS="-mno-cygwin"
         ;;
     *)
-        BASE_CFLAGS="-D_GNU_SOURCE=1"
+        BASE_CFLAGS=""
         BASE_LDFLAGS=""
         ;;
 esac
