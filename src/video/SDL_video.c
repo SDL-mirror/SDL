@@ -2673,50 +2673,6 @@ SDL_RenderFillRects(const SDL_Rect ** rects, int count)
     return renderer->RenderFillRects(renderer, rects, count);
 }
 
-#if 0
-int
-SDL_RenderDrawCircle(int x, int y, int radius)
-{
-    return SDL_RenderDrawEllipse(x, y, 2*radius, 2*radius);
-}
-
-int
-SDL_RenderFillCircle(int x, int y, int radius)
-{
-    return SDL_RenderFillEllipse(x, y, 2*radius, 2*radius);
-}
-
-int SDL_RenderDrawEllipse(int x, int y, int w, int h)
-{
-    SDL_Renderer *renderer;
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderDrawEllipse) {
-        SDL_Unsupported();
-        return -1;
-    }
-    return renderer->RenderDrawEllipse(renderer, x, y, w, h);
-}
-
-int SDL_RenderFillEllipse(int x, int y, int w, int h)
-{
-    SDL_Renderer *renderer;
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderFillEllipse) {
-        SDL_Unsupported();
-        return -1;
-    }
-    return renderer->RenderFillEllipse(renderer, x, y, w, h);
-}
-#endif // 0
-
 int
 SDL_RenderCopy(SDL_TextureID textureID, const SDL_Rect * srcrect,
                const SDL_Rect * dstrect)

@@ -1225,36 +1225,6 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRect(const SDL_Rect * rect);
  */
 extern DECLSPEC int SDLCALL SDL_RenderFillRects(const SDL_Rect ** rect, int count);
 
-#if 0
-/**
- *  \brief Draw a circle on the current rendering target with the drawing color.
- *  
- *  \return 0 on success, or -1 if there is no rendering context current.
- */
-extern DECLSPEC int SDLCALL SDL_RenderDrawCircle(int x, int y, int radius);
-
-/**
- *  \brief Fill a circle on the current rendering target with the drawing color.
- *  
- *  \return 0 on success, or -1 if there is no rendering context current.
- */
-extern DECLSPEC int SDLCALL SDL_RenderFillCircle(int x, int y, int radius);
-
-/**
- *  \brief Draw an ellipse on the current rendering target with the drawing color.
- *  
- *  \return 0 on success, or -1 if there is no rendering context current.
- */
-extern DECLSPEC int SDLCALL SDL_RenderDrawEllipse(int x, int y, int w, int h);
-
-/**
- *  \brief Fill an ellipse on the current rendering target with the drawing color.
- *  
- *  \return 0 on success, or -1 if there is no rendering context current.
- */
-extern DECLSPEC int SDLCALL SDL_RenderFillEllipse(int x, int y, int w, int h);
-#endif // 0
-
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
  *  
