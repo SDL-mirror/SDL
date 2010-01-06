@@ -113,6 +113,7 @@ SDL_Joystick *SDL_JoystickOpen(int device_index)
 	/* Create and initialize the joystick */
 	joystick = (SDL_Joystick *)SDL_malloc((sizeof *joystick));
 	if ( !joystick ) {
+		SDL_OutOfMemory();
 		return(NULL);
 	}
 
