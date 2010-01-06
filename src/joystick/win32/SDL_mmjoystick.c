@@ -362,6 +362,7 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
     if (joystick->hwdata != NULL) {
         /* free system specific hardware data */
         SDL_free(joystick->hwdata);
+        joystick->hwdata = NULL;
     }
 }
 
@@ -373,6 +374,7 @@ SDL_SYS_JoystickQuit(void)
     for (i = 0; i < MAX_JOYSTICKS; i++) {
         if (SYS_JoystickName[i] != NULL) {
             SDL_free(SYS_JoystickName[i]);
+            SYS_JoystickName[i] = NULL;
         }
     }
 }
