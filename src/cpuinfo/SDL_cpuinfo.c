@@ -308,7 +308,7 @@ int
 SDL_GetCPUCount()
 {
     if (!SDL_CPUCount) {
-#ifdef HAVE_SYSCONF
+#if defined(HAVE_SYSCONF) && defined(_SC_NPROCESSORS_ONLN)
         if (SDL_CPUCount <= 0) {
             SDL_CPUCount = (int)sysconf(_SC_NPROCESSORS_ONLN);
         }
