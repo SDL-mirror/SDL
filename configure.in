@@ -2356,8 +2356,6 @@ case "$host" in
         CheckDiskAudio
         CheckDummyAudio
         CheckWIN32
-        #SOURCES="$SOURCES $srcdir/src/video/gapi/*.c"
-        #AC_DEFINE(SDL_VIDEO_DRIVER_GAPI)
         if test x$enable_video = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_WIN32)
             SOURCES="$SOURCES $srcdir/src/video/win32/*.c"
