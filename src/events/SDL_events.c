@@ -176,6 +176,7 @@ SDL_StopEventThread(void)
         SDL_WaitThread(SDL_EventThread, NULL);
         SDL_EventThread = NULL;
         SDL_DestroyMutex(SDL_EventLock.lock);
+        SDL_EventLock.lock = NULL;
     }
     if (SDL_EventQ.lock) {
         SDL_DestroyMutex(SDL_EventQ.lock);
