@@ -24,7 +24,7 @@
 #include <CoreAudio/CoreAudio.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
-#if MAC_OS_X_VERSION_MAX_ALLOWED == 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
@@ -250,12 +250,13 @@ outputCallback(void *inRefCon,
                AudioUnitRenderActionFlags * ioActionFlags,
                const AudioTimeStamp * inTimeStamp,
                UInt32 inBusNumber, UInt32 inNumberFrames,
-               AudioBufferList * ioDataList)
+               AudioBufferList * ioData)
 {
     SDL_AudioDevice *this = (SDL_AudioDevice *) inRefCon;
-    AudioBuffer *ioData = &ioDataList->mBuffers[0];
+    AudioBuffer *abuf;
     UInt32 remaining, len;
     void *ptr;
+    UInt32 i;
 
     /* Is there ever more than one buffer, and what do you do with it? */
     if (ioDataList->mNumberBuffers != 1) {
@@ -264,7 +265,10 @@ outputCallback(void *inRefCon,
 
     /* Only do anything if audio is enabled and not paused */
     if (!this->enabled || this->paused) {
-        SDL_memset(ioData->mData, this->spec.silence, ioData->mDataByteSize);
+        for (i = 0; i < ioData->mNumberBuffers; i++) {
+            abuf = &ioData->mBuffers[i];
+            SDL_memset(abuf->mData, this->spec.silence, abuf->mDataByteSize);
+        }
         return 0;
     }
 
@@ -276,29 +280,29 @@ outputCallback(void *inRefCon,
        assert(this->spec.channels == ioData->mNumberChannels);
      */
 
-    remaining = ioData->mDataByteSize;
-    ptr = ioData->mData;
-    while (remaining > 0) {
-        if (this->hidden->bufferOffset >= this->hidden->bufferSize) {
-            /* Generate the data */
-            SDL_memset(this->hidden->buffer, this->spec.silence,
-                       this->hidden->bufferSize);
-            SDL_mutexP(this->mixer_lock);
-            (*this->spec.callback) (this->spec.userdata, this->hidden->buffer,
-                                    this->hidden->bufferSize);
-            SDL_mutexV(this->mixer_lock);
-            this->hidden->bufferOffset = 0;
-        }
+    for (i = 0; i < ioData->mNumberBuffers; i++) {
+        abuf = &ioData->mBuffers[i];
+        remaining = abuf->mDataByteSize;
+        ptr = abuf->mData;
+        while (remaining > 0) {
+            if (bufferOffset >= bufferSize) {
+                /* Generate the data */
+                SDL_memset(buffer, this->spec.silence, bufferSize);
+                SDL_mutexP(this->mixer_lock);
+                (*this->spec.callback)(this->spec.userdata,
+                            buffer, bufferSize);
+                SDL_mutexV(this->mixer_lock);
+                bufferOffset = 0;
+            }
 
-        len = this->hidden->bufferSize - this->hidden->bufferOffset;
-        if (len > remaining)
-            len = remaining;
-        SDL_memcpy(ptr,
-                   (char *) this->hidden->buffer + this->hidden->bufferOffset,
-                   len);
-        ptr = (char *) ptr + len;
-        remaining -= len;
-        this->hidden->bufferOffset += len;
+            len = bufferSize - bufferOffset;
+            if (len > remaining)
+                len = remaining;
+            SDL_memcpy(ptr, (char *)buffer + bufferOffset, len);
+            ptr = (char *)ptr + len;
+            remaining -= len;
+            bufferOffset += len;
+        }
     }
 
     return 0;
@@ -433,7 +437,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
 
     SDL_memset(&desc, '\0', sizeof(ComponentDescription));
     desc.componentType = kAudioUnitType_Output;
-    desc.componentSubType = kAudioUnitSubType_HALOutput;
+    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
     comp = FindNextComponent(NULL, &desc);
@@ -486,7 +490,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
                                   kAudioUnitProperty_SetRenderCallback,
                                   scope, bus, &callback, sizeof(callback));
     CHECK_RESULT
-        ("AudioUnitSetProperty (kAudioUnitProperty_SetInputCallback)");
+        ("AudioUnitSetProperty (kAudioUnitProperty_SetRenderCallback)");
 
     /* Calculate the final parameters for this audio specification */
     SDL_CalculateAudioSpec(&this->spec);
