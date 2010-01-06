@@ -1454,16 +1454,17 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 pixel_format, const void * pixels, int pitch)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
     GLint internalFormat;
     GLenum format, type;
+    Uint8 *src, *dst, *tmp;
+    int length, rows;
 
     if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
         /* FIXME: Do a temp copy to a format that is supported */
         SDL_SetError("Unsupported pixel format");
         return -1;
     }
-
-    /* FIXME: We need to copy the data and flip it */
 
     if (pixel_format == SDL_PIXELFORMAT_INDEX1LSB) {
         data->glPixelStorei(GL_UNPACK_LSB_FIRST, 1);
@@ -1474,8 +1475,21 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     data->glPixelStorei(GL_UNPACK_ROW_LENGTH,
                         (pitch / bytes_per_pixel(pixel_format)));
 
-    data->glRasterPos2i(rect->x, rect->y);
-    data->glDrawPixels(rect->w, rect->h, format, type, pixels);
+    /* Flip the rows to be bottom-up */
+    length = rect->h * rect->w * pitch;
+    tmp = SDL_stack_alloc(Uint8, length);
+    src = (Uint8*)pixels + (rect->h-1)*pitch;
+    dst = (Uint8*)tmp;
+    rows = rect->h;
+    while (rows--) {
+        SDL_memcpy(dst, src, pitch);
+        dst += pitch;
+        src -= pitch;
+    }
+
+    data->glRasterPos2i(rect->x, (window->h-rect->y));
+    data->glDrawPixels(rect->w, rect->h, format, type, tmp);
+    SDL_stack_free(tmp);
 
     return 0;
 }
