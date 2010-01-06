@@ -56,7 +56,7 @@ typedef struct SDL_RWops
                            int whence);
 
     /**
-     *  Read up to \c num objects each of size \c objsize from the data
+     *  Read up to \c maxnum objects each of size \c size from the data
      *  source to the area pointed at by \c ptr.
      *  
      *  \return the number of objects read, or 0 at error or end of file.
