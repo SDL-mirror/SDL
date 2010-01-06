@@ -38,10 +38,14 @@
 /* GAPI renderer implementation */
 
 static SDL_Renderer *GAPI_CreateRenderer(SDL_Window * window, Uint32 flags);
-static int GAPI_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int GAPI_RenderLine(SDL_Renderer * renderer, int x1, int y1,
-                           int x2, int y2);
-static int GAPI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GAPI_RenderDrawPoints(SDL_Renderer * renderer,
+                                 const SDL_Point * points, int count);
+static int GAPI_RenderDrawLines(SDL_Renderer * renderer,
+                                const SDL_Point * points, int count);
+static int GAPI_RenderDrawRects(SDL_Renderer * renderer,
+                                const SDL_Rect ** rects, int count);
+static int GAPI_RenderFillRects(SDL_Renderer * renderer,
+                                const SDL_Rect ** rects, int count);
 static int GAPI_RenderCopy(SDL_Renderer * renderer,
                            SDL_Texture * texture,
                            const SDL_Rect * srcrect,
@@ -459,9 +463,10 @@ GAPI_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    renderer->RenderPoint = GAPI_RenderPoint;
-    renderer->RenderLine = GAPI_RenderLine;
-    renderer->RenderFill = GAPI_RenderFill;
+    renderer->RenderDrawPoints = GAPI_RenderDrawPoints;
+    renderer->RenderDrawLines = GAPI_RenderDrawLines;
+    renderer->RenderDrawRects = GAPI_RenderDrawRects;
+    renderer->RenderFillRects = GAPI_RenderFillRects;
     renderer->RenderCopy = GAPI_RenderCopy;
     renderer->RenderPresent = GAPI_RenderPresent;
     renderer->DestroyRenderer = GAPI_DestroyRenderer;
@@ -497,23 +502,38 @@ GAPI_CreateRenderer(SDL_Window * window, Uint32 flags)
 }
 
 static int
-GAPI_RenderPoint(SDL_Renderer * renderer, int x, int y)
+GAPI_RenderDrawPoints(SDL_Renderer * renderer,
+                      const SDL_Point * points, int count)
 {
-    //TODO implement
+    // TODO implement
+    SDL_Unsupported();
     return -1;
 }
 
 static int
-GAPI_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+GAPI_RenderDrawLines(SDL_Renderer * renderer,
+                     const SDL_Point * points, int count)
 {
-    //TODO implement
-    return -11;
+    // TODO implement
+    SDL_Unsupported();
+    return -1;
 }
 
 static int
-GAPI_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+GAPI_RenderDrawRects(SDL_Renderer * renderer,
+                     const SDL_Rect ** rects, int count)
 {
-    //TODO implement
+    // TODO implement
+    SDL_Unsupported();
+    return -1;
+}
+
+static int
+GAPI_RenderFillRects(SDL_Renderer * renderer,
+                     const SDL_Rect ** rects, int count)
+{
+    // TODO implement
+    SDL_Unsupported();
     return -1;
 }
 
