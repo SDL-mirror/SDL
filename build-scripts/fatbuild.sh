@@ -27,7 +27,7 @@ CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
 
 # PowerPC 32-bit linker flags
-LFLAGS_PPC="-arch ppc -mmacosx-version-min=10.4 \
+LFLAGS_PPC="-arch ppc -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
 -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
@@ -48,7 +48,7 @@ CPPFLAGS_PPC64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
 -isystem /Developer/SDKs/MacOSX10.5.sdk/usr/include"
 
 # PowerPC 64-bit linker flags
-LFLAGS_PPC64="-arch ppc64 -mmacosx-version-min=10.5 \
+LFLAGS_PPC64="-arch ppc64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
 -F/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks \
 -L/Developer/SDKs/MacOSX10.5.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1/ppc64 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.5.sdk"
@@ -74,7 +74,7 @@ CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
 
 # Intel 32-bit linker flags
-LFLAGS_X86="-arch i386 -mmacosx-version-min=10.4 \
+LFLAGS_X86="-arch i386 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
 -L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
@@ -95,7 +95,7 @@ CPPFLAGS_X64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
 -isystem /Developer/SDKs/MacOSX10.5.sdk/usr/include"
 
 # Intel 64-bit linker flags
-LFLAGS_X64="-arch x86_64 -mmacosx-version-min=10.5 \
+LFLAGS_X64="-arch x86_64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
 -F/Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks \
 -L/Developer/SDKs/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1/x86_64 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.5.sdk"
