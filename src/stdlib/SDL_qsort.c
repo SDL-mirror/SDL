@@ -50,11 +50,29 @@
 */
 #include "SDL_stdinc.h"
 
+#ifdef assert
+#undef assert
+#endif
 #define assert(X)
+#ifdef malloc
+#undef malloc
+#endif
 #define malloc	SDL_malloc
+#ifdef free
+#undef free
+#endif
 #define free	SDL_free
+#ifdef memcpy
+#undef memcpy
+#endif
 #define memcpy	SDL_memcpy
+#ifdef memmove
+#undef memmove
+#endif
 #define memmove	SDL_memmove
+#ifdef qsort
+#undef qsort
+#endif
 #define qsort	SDL_qsort
 
 
