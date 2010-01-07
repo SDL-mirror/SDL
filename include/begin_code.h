@@ -52,12 +52,6 @@
 #  else
 #   define DECLSPEC	__declspec(dllexport)
 #  endif
-# elif defined(__OS2__)
-#   ifdef BUILD_SDL
-#    define DECLSPEC    __declspec(dllexport)
-#   else
-#    define DECLSPEC
-#   endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
 #   define DECLSPEC	__attribute__ ((visibility("default")))
@@ -69,18 +63,11 @@
 
 /* By default SDL uses the C calling convention */
 #ifndef SDLCALL
-# if defined(__WIN32__) && !defined(__GNUC__)
-#  define SDLCALL __cdecl
-# elif defined(__OS2__)
-   /* Use the _System calling convention to be compatible with every OS/2
-      compiler. (Please note that this used to be _cdecl for GCC, but that
-      was a bug. Someone should go examine and fix the XFree86 integration
-      instead. We shouldn't be passing SDLCALL function pointers between SDL
-      and XFree86!) */
-#  define SDLCALL _System
-# else
-#  define SDLCALL
-# endif
+#if defined(__WIN32__) && !defined(__GNUC__)
+#define SDLCALL __cdecl
+#else
+#define SDLCALL
+#endif
 #endif /* SDLCALL */
 
 /* Removed DECLSPEC on Symbian OS because SDL cannot be a DLL in EPOC */
