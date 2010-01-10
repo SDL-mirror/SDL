@@ -1639,7 +1639,7 @@ CheckMacGL()
         case "$host" in
             *-*-darwin*)
                 if test x$enable_video_cocoa = xyes; then
-                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework OpenGL"
+                    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGL"
                 fi
         esac
     fi
@@ -2652,7 +2652,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             AC_DEFINE(SDL_HAPTIC_IOKIT)
             SOURCES="$SOURCES $srcdir/src/haptic/darwin/*.c"
             have_haptic=yes
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework ForceFeedback"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ForceFeedback"
         fi
         # Set up files for the power library
         if test x$enable_power = xyes; then
@@ -2669,12 +2669,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The Mac OS X platform requires special setup.
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lobjc"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework Cocoa"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework Carbon"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework IOKit"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Cocoa"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Carbon"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,IOKit"
         # If audio is used, add the AudioUnit framework
         if test x$enable_audio = xyes; then
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -framework CoreAudio -framework AudioToolbox -framework AudioUnit"
+            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
         fi
         ;;
     *-riscos)

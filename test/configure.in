@@ -28,7 +28,7 @@ case "$host" in
     *-*-darwin* )
         EXE=""
         MATHLIB=""
-        SYS_GL_LIBS="-framework,OpenGL"
+        SYS_GL_LIBS="-Wl,-framework,OpenGL"
         ;;
     *-*-aix*)
         EXE=""
