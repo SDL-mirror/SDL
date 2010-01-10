@@ -63,6 +63,16 @@ CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
 CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
+# They changed this to "darwin10" in Xcode 3.2 (Snow Leopard).
+GCCUSRPATH_X86="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1"
+if [ ! -d "$GCCUSRPATH" ]; then
+    GCCUSRPATH_X86="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1"
+fi
+if [ ! -d "$GCCUSRPATH_X86" ]; then
+    echo "Couldn't find any GCC usr path for x86"
+    exit 1
+fi
+
 # Intel 32-bit compiler flags
 CC_X86="gcc-4.0 -arch i386"
 CXX_X86="g++-4.0 -arch i386"
@@ -70,13 +80,13 @@ CFLAGS_X86="-mmacosx-version-min=10.4"
 CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
--I/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1/include \
+-I$GCCUSRPATH_X86/include \
 -isystem /Developer/SDKs/MacOSX10.4u.sdk/usr/include"
 
 # Intel 32-bit linker flags
 LFLAGS_X86="-arch i386 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
 -F/Developer/SDKs/MacOSX10.4u.sdk/System/Library/Frameworks \
--L/Developer/SDKs/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1 \
+-L$GCCUSRPATH_X86 \
 -Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
 
 # Intel 64-bit configure flags (10.5 runtime compatibility)
