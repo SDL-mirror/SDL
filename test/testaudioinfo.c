@@ -25,6 +25,12 @@ print_devices(int iscapture)
 int
 main(int argc, char **argv)
 {
+    /* Load the SDL library */
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+        return (1);
+    }
+
     /* Print available audio drivers */
     int n = SDL_GetNumAudioDrivers();
     if (n == 0) {
@@ -36,12 +42,6 @@ main(int argc, char **argv)
             printf("  %s\n", SDL_GetAudioDriver(i));
         }
         printf("\n");
-    }
-
-    /* Load the SDL library */
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        return (1);
     }
 
     printf("Using audio driver: %s\n\n", SDL_GetCurrentAudioDriver());
