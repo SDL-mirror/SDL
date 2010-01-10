@@ -92,7 +92,7 @@ SDL_Swap16(Uint16 x)
   __asm__("rlwimi %0,%2,8,16,23": "=&r"(result):"0"(x >> 8), "r"(x));
     return result;
 }
-#elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__))
+#elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__)) && !defined(__mcoldfire__)
 static __inline__ Uint16
 SDL_Swap16(Uint16 x)
 {
@@ -132,7 +132,7 @@ SDL_Swap32(Uint32 x)
   __asm__("rlwimi %0,%2,24,0,7": "=&r"(result):"0"(result), "r"(x));
     return result;
 }
-#elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__))
+#elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__)) && !defined(__mcoldfire__)
 static __inline__ Uint32
 SDL_Swap32(Uint32 x)
 {

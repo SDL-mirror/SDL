@@ -102,7 +102,7 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
 
     case AUDIO_U8:
         {
-#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
+#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
             SDL_MixAudio_m68k_U8((char *) dst, (char *) src,
                                  (unsigned long) len, (long) volume,
                                  (char *) mix8);
@@ -135,7 +135,7 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             } else
 #endif
 #endif
-#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
+#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
                 SDL_MixAudio_m68k_S8((char *) dst, (char *) src,
                                      (unsigned long) len, (long) volume);
 #else
@@ -182,7 +182,7 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
             } else
 #endif
 #endif
-#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
+#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
                 SDL_MixAudio_m68k_S16LSB((short *) dst, (short *) src,
                                          (unsigned long) len, (long) volume);
 #else
@@ -216,7 +216,7 @@ SDL_MixAudioFormat(Uint8 * dst, const Uint8 * src, SDL_AudioFormat format,
 
     case AUDIO_S16MSB:
         {
-#if defined(__GNUC__) && defined(__M68000__) && defined(SDL_ASSEMBLY_ROUTINES)
+#if defined(__GNUC__) && defined(__M68000__) && !defined(__mcoldfire__) && defined(SDL_ASSEMBLY_ROUTINES)
             SDL_MixAudio_m68k_S16MSB((short *) dst, (short *) src,
                                      (unsigned long) len, (long) volume);
 #else
