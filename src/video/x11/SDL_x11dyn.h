@@ -27,7 +27,13 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
+
+/* Apparently some X11 systems can't include this multiple times... */
+#ifndef SDL_INCLUDED_XLIBINT_H
+#define SDL_INCLUDED_XLIBINT_H 1
 #include <X11/Xlibint.h>
+#endif
+
 #include <X11/Xproto.h>
 #include "../Xext/extensions/Xext.h"
 #include "../Xext/extensions/extutil.h"
