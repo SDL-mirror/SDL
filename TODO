@@ -54,6 +54,14 @@
  * Write automated test case for multi-draw APIs
  * Make sure you can build SDL without the renderer to slim it down a bunch
 
+ * Check 1.2 revisions:
+	3554 - Need to resolve semantics for locking keys on different platforms
+	4874 - Do we want screen rotation?  At what level?
+	4974 - Windows file code needs to convert UTF-8 to Unicode, but we don't need to tap dance for Windows 95/98
+	4484, 4485 - Verify that SDL's Windows keyboard handling works correctly
+	4865 - See if this is still needed (mouse coordinate clamping)
+	4866 - See if this is still needed (blocking window repositioning)
+
 Wish list for the 1.3 development branch:
 http://bugzilla.libsdl.org/
 
