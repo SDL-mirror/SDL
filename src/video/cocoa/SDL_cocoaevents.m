@@ -25,6 +25,15 @@
 #include "SDL_cocoavideo.h"
 #include "../../events/SDL_events_c.h"
 
+#if !defined(UsrActivity) && defined(__LP64__) && !defined(__POWER__)
+/*
+ * Workaround for a bug in the 10.5 SDK: By accident, OSService.h does
+ * not include Power.h at all when compiling in 64bit mode. This has
+ * been fixed in 10.6, but for 10.5, we manually define UsrActivity
+ * to ensure compilation works.
+ */
+#define UsrActivity 1
+#endif
 
 /* setAppleMenu disappeared from the headers in 10.4 */
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
@@ -167,8 +176,6 @@ Cocoa_PumpEvents(_THIS)
     NSAutoreleasePool *pool;
 
     /* Update activity every 30 seconds to prevent screensaver */
-    /* FIXME: This define isn't available with 64-bit Mac OS X? */
-#ifdef UsrActivity
     if (_this->suspend_screensaver) {
         SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
         Uint32 now = SDL_GetTicks();
@@ -178,7 +185,6 @@ Cocoa_PumpEvents(_THIS)
             data->screensaver_activity = now;
         }
     }
-#endif
 
     pool = [[NSAutoreleasePool alloc] init];
     while ([NSApp isRunning]) {
