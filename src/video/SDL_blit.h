@@ -444,9 +444,9 @@ do {									   \
 /* Blend the RGB values of two Pixels based on a source alpha value */
 #define ALPHA_BLEND(sR, sG, sB, A, dR, dG, dB)	\
 do {						\
-	dR = ((((int)(sR-dR)*(int)A)/255)+dR);	\
-	dG = ((((int)(sG-dG)*(int)A)/255)+dG);	\
-	dB = ((((int)(sB-dB)*(int)A)/255)+dB);	\
+	dR = (((((int)(sR-dR)*((int)A))+255)/255)+dR);	\
+	dG = (((((int)(sG-dG)*((int)A))+255)/255)+dG);	\
+	dB = (((((int)(sB-dB)*((int)A))+255)/255)+dB);	\
 } while(0)
 
 
