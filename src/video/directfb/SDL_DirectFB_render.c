@@ -72,11 +72,14 @@ static void DirectFB_UnlockTexture(SDL_Renderer * renderer,
 static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture, int numrects,
                                   const SDL_Rect * rects);
-static int DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y);
-static int DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1,
-                               int x2, int y2);
-static int DirectFB_RenderFill(SDL_Renderer * renderer,
-                               const SDL_Rect * rect);
+static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
+                                const SDL_Point * points, int count);
+static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
+                               const SDL_Point * points, int count);
+static int DirectFB_RenderDrawRects(SDL_Renderer * renderer,
+		const SDL_Rect ** rects, int count);
+static int DirectFB_RenderFillRects(SDL_Renderer * renderer,
+		const SDL_Rect ** rects, int count);
 static int DirectFB_RenderCopy(SDL_Renderer * renderer,
                                SDL_Texture * texture,
                                const SDL_Rect * srcrect,
@@ -301,9 +304,10 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
     renderer->DirtyTexture = DirectFB_DirtyTexture;
-    renderer->RenderPoint = DirectFB_RenderPoint;
-    renderer->RenderLine = DirectFB_RenderLine;
-    renderer->RenderFill = DirectFB_RenderFill;
+    renderer->RenderDrawPoints = DirectFB_RenderDrawPoints;
+    renderer->RenderDrawLines = DirectFB_RenderDrawLines;
+    renderer->RenderFillRects = DirectFB_RenderFillRects;
+    renderer->RenderDrawRects = DirectFB_RenderDrawRects;
     renderer->RenderCopy = DirectFB_RenderCopy;
     renderer->RenderPresent = DirectFB_RenderPresent;
     renderer->DestroyTexture = DirectFB_DestroyTexture;
@@ -857,48 +861,76 @@ PrepareDraw(SDL_Renderer * renderer)
     return -1;
 }
 
-static int
-DirectFB_RenderPoint(SDL_Renderer * renderer, int x, int y)
+static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
+                                const SDL_Point * points, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
+    int i;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x, y, x, y));
+    for (i=0; i < count; i++)
+    	SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, points[i].x, points[i].y, points[i].x, points[i].y));
     return 0;
   error:
     return -1;
 }
 
-static int
-DirectFB_RenderLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
+static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
+                               const SDL_Point * points, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
+    int i;
 
     PrepareDraw(renderer);
     /* Use antialiasing when available */
 #if (DFB_VERSION_ATLEAST(1,2,0))
     SDL_DFB_CHECKERR(destsurf->SetRenderOptions(destsurf, DSRO_ANTIALIAS));
 #endif
-    SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x1, y1, x2, y2));
+
+    for (i=0; i < count - 1; i++)
+    	SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, points[i].x, points[i].y, points[i+1].x, points[i+1].y));
+
     return 0;
   error:
     return -1;
 }
 
 static int
-DirectFB_RenderFill(SDL_Renderer * renderer, const SDL_Rect * rect)
+DirectFB_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     SDL_DFB_WINDOWSURFACE(data->window);
     DFBResult ret;
+    int i;
 
     PrepareDraw(renderer);
-    SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, rect->x, rect->y,
-                                             rect->w, rect->h));
+
+    for (i=0; i<count; i++)
+    	SDL_DFB_CHECKERR(destsurf->DrawRectangle(destsurf, rects[i]->x, rects[i]->y,
+    			rects[i]->w, rects[i]->h));
+
+    return 0;
+  error:
+    return -1;
+}
+
+static int
+DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+{
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    SDL_DFB_WINDOWSURFACE(data->window);
+    DFBResult ret;
+    int i;
+
+    PrepareDraw(renderer);
+
+    for (i=0; i<count; i++)
+    	SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, rects[i]->x, rects[i]->y,
+    			rects[i]->w, rects[i]->h));
 
     return 0;
   error:

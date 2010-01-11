@@ -387,6 +387,7 @@ DirectFB_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
     }
 
     SDL_DFB_FREE(data.modelist);
+error:
     return;
 }
 
