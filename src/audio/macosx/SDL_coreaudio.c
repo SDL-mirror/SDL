@@ -258,11 +258,6 @@ outputCallback(void *inRefCon,
     void *ptr;
     UInt32 i;
 
-    /* Is there ever more than one buffer, and what do you do with it? */
-    if (ioDataList->mNumberBuffers != 1) {
-        return noErr;
-    }
-
     /* Only do anything if audio is enabled and not paused */
     if (!this->enabled || this->paused) {
         for (i = 0; i < ioData->mNumberBuffers; i++) {
@@ -285,23 +280,25 @@ outputCallback(void *inRefCon,
         remaining = abuf->mDataByteSize;
         ptr = abuf->mData;
         while (remaining > 0) {
-            if (bufferOffset >= bufferSize) {
+            if (this->hidden->bufferOffset >= this->hidden->bufferSize) {
                 /* Generate the data */
-                SDL_memset(buffer, this->spec.silence, bufferSize);
+                SDL_memset(this->hidden->buffer, this->spec.silence,
+                           this->hidden->bufferSize);
                 SDL_mutexP(this->mixer_lock);
                 (*this->spec.callback)(this->spec.userdata,
-                            buffer, bufferSize);
+                            this->hidden->buffer, this->hidden->bufferSize);
                 SDL_mutexV(this->mixer_lock);
-                bufferOffset = 0;
+                this->hidden->bufferOffset = 0;
             }
 
-            len = bufferSize - bufferOffset;
+            len = this->hidden->bufferSize - this->hidden->bufferOffset;
             if (len > remaining)
                 len = remaining;
-            SDL_memcpy(ptr, (char *)buffer + bufferOffset, len);
+            SDL_memcpy(ptr, (char *)this->hidden->buffer +
+                       this->hidden->bufferOffset, len);
             ptr = (char *)ptr + len;
             remaining -= len;
-            bufferOffset += len;
+            this->hidden->bufferOffset += len;
         }
     }
 
