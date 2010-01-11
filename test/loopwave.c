@@ -102,11 +102,7 @@ main(int argc, char *argv[])
         quit(2);
     }
 
-    /* Right now we're using the 1.2 SDL_OpenAudio(), but if we move to the
-       1.3 device enumeration version, we shouldn't hardcore device id #1 for
-       SDL_GetAudioDeviceName(), below. */
     printf("Using audio driver: %s\n", SDL_GetCurrentAudioDriver());
-    printf("Using audio device: %s\n", SDL_GetAudioDeviceName(1, 0));
 
     /* Let the audio run */
     SDL_PauseAudio(0);
