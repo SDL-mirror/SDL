@@ -420,7 +420,6 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     AURenderCallbackStruct callback;
     ComponentDescription desc;
     Component comp = NULL;
-    UInt32 enableIO = 0;
     const AudioUnitElement output_bus = 0;
     const AudioUnitElement input_bus = 1;
     const AudioUnitElement bus = ((iscapture) ? input_bus : output_bus);
@@ -448,22 +447,6 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     CHECK_RESULT("OpenAComponent");
 
     this->hidden->audioUnitOpened = 1;
-
-    // !!! FIXME: this is wrong?
-    enableIO = ((iscapture) ? 1 : 0);
-    result = AudioUnitSetProperty(this->hidden->audioUnit,
-                                  kAudioOutputUnitProperty_EnableIO,
-                                  kAudioUnitScope_Input, input_bus,
-                                  &enableIO, sizeof(enableIO));
-    CHECK_RESULT("AudioUnitSetProperty (kAudioUnitProperty_EnableIO input)");
-
-    // !!! FIXME: this is wrong?
-    enableIO = ((iscapture) ? 0 : 1);
-    result = AudioUnitSetProperty(this->hidden->audioUnit,
-                                  kAudioOutputUnitProperty_EnableIO,
-                                  kAudioUnitScope_Output, output_bus,
-                                  &enableIO, sizeof(enableIO));
-    CHECK_RESULT("AudioUnitSetProperty (kAudioUnitProperty_EnableIO output)");
 
     result = AudioUnitSetProperty(this->hidden->audioUnit,
                                   kAudioOutputUnitProperty_CurrentDevice,
