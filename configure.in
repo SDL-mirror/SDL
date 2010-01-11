@@ -1323,10 +1323,10 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
         fi
         if test x$video_directfb = xyes; then
             # SuSE 11.1 installs directfb-config without directfb-devel
-            save_CFLAGS="$CFLAGS"
-            CFLAGS="$CFLAGS $DIRECTFB_CFLAGS"
+            save_CPPFLAGS="$CPPFLAGS"
+            CPPFLAGS="$CPPFLAGS $DIRECTFB_CFLAGS"
             AC_CHECK_HEADER(directfb.h, have_directfb_hdr=yes, have_directfb_hdr=no)
-            CFLAGS="$save_CFLAGS"
+            CPPFLAGS="$save_CPPFLAGS"
             video_directfb=$have_directfb_hdr
         fi
         AC_MSG_CHECKING(for DirectFB $DIRECTFB_REQUIRED_VERSION support)
