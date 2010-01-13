@@ -19,10 +19,19 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-#include "SDL_config.h"
 
 #ifndef _SDL_assert_h
 #define _SDL_assert_h
+
+#include "SDL_config.h"
+
+#include "begin_code.h"
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
 
 #ifndef SDL_ASSERT_LEVEL
 #ifdef SDL_DEFAULT_ASSERT_LEVEL
@@ -34,6 +43,34 @@
 #define SDL_ASSERT_LEVEL 1
 #endif
 #endif /* SDL_ASSERT_LEVEL */
+
+/*
+These are macros and not first class functions so that the debugger breaks
+on the assertion line and not in some random guts of SDL, and so each
+macro can have unique static variables associated with it.
+*/
+
+#if (defined(_MSC_VER) && ((_M_IX86) || (_M_X64)))
+    #define SDL_TriggerBreakpoint() __asm { int 3 }
+#elif (defined(__GNUC__) && ((__i386__) || (__x86_64__)))
+    #define SDL_TriggerBreakpoint() __asm__ __volatile__ ( "int $3\n\t" )
+#elif defined(HAVE_SIGNAL_H)
+    #include <signal.h>
+    #define SDL_TriggerBreakpoint() raise(SIGTRAP)
+#else
+    /* How do we trigger breakpoints on this platform? */
+    #define SDL_TriggerBreakpoint()
+#endif
+
+#if (__STDC_VERSION__ >= 199901L) /* C99 supports __func__ as a standard. */
+#   define SDL_FUNCTION __func__
+#elif ((__GNUC__ >= 2) || defined(_MSC_VER))
+#   define SDL_FUNCTION __FUNCTION__
+#else
+#   define SDL_FUNCTION "???"
+#endif
+#define SDL_FILE    __FILE__
+#define SDL_LINE    __LINE__
 
 /*
 sizeof (x) makes the compiler still parse the expression even without
@@ -55,30 +92,6 @@ disable assertions.
 
 #if (SDL_ASSERT_LEVEL > 0)
 
-/*
-These are macros and not first class functions so that the debugger breaks
-on the assertion line and not in some random guts of SDL, and so each
-macro can have unique static variables associated with it.
-*/
-
-#if (defined(_MSC_VER) && ((_M_IX86) || (_M_X64)))
-    #define SDL_TriggerBreakpoint() __asm { int 3 }
-#elif (defined(__GNUC__) && ((__i386__) || (__x86_64__)))
-    #define SDL_TriggerBreakpoint() __asm__ __volatile__ ( "int $3\n\t" )
-#elif defined(HAVE_SIGNAL_H)
-    #include <signal.h>
-    #define SDL_TriggerBreakpoint() raise(SIGTRAP)
-#else
-    #error Please define your platform or set SDL_ASSERT_LEVEL to 0.
-#endif
-
-#if (__STDC_VERSION__ >= 199901L) /* C99 supports __func__ as a standard. */
-#   define SDL_FUNCTION __func__
-#elif ((__GNUC__ >= 2) || defined(_MSC_VER))
-#   define SDL_FUNCTION __FUNCTION__
-#else
-#   define SDL_FUNCTION "???"
-#endif
 
 typedef enum
 {
@@ -100,7 +113,9 @@ typedef struct SDL_assert_data
     struct SDL_assert_data *next;
 } SDL_assert_data;
 
-SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
+extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
+                                                             const char *,
+                                                             const char *, int);
 
 /* the do {} while(0) avoids dangling else problems:
     if (x) SDL_assert(y); else blah();
@@ -113,11 +128,12 @@ SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
     do { \
         while ( !(condition) ) { \
             static struct SDL_assert_data assert_data = { \
-                0, 0, #condition, __FILE__, 0, 0, 0 \
+                0, 0, #condition, 0, 0, 0, 0 \
             }; \
             const SDL_assert_state state = SDL_ReportAssertion(&assert_data, \
                                                                SDL_FUNCTION, \
-                                                               __LINE__); \
+                                                               SDL_FILE, \
+                                                               SDL_LINE); \
             if (state == SDL_ASSERTION_RETRY) { \
                 continue; /* go again. */ \
             } else if (state == SDL_ASSERTION_BREAK) { \
@@ -147,8 +163,16 @@ SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
 #   define SDL_assert_release(condition) SDL_enabled_assert(condition)
 #   define SDL_assert_paranoid(condition) SDL_enabled_assert(condition)
 #else
-#   error Unknown assertion level. Please fix your SDL_config.h.
+#   error Unknown assertion level.
 #endif
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
+#endif
+#include "close_code.h"
 
 #endif /* _SDL_assert_h */
 

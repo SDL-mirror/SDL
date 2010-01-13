@@ -265,7 +265,7 @@ static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
                 data->trigger_count, (data->trigger_count == 1) ? "" : "s",
                 data->condition);
 
-	/* let env. variable override, so unit tests won't block in a GUI. */
+    /* let env. variable override, so unit tests won't block in a GUI. */
     envr = SDL_getenv("SDL_ASSERT");
     if (envr != NULL) {
         if (SDL_strcmp(envr, "abort") == 0) {
@@ -327,7 +327,8 @@ static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
 static SDL_mutex *assertion_mutex = NULL;
 
 SDL_assert_state
-SDL_ReportAssertion(SDL_assert_data *data, const char *func, int line)
+SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
+                    int line)
 {
     SDL_assert_state state;
 
@@ -338,7 +339,8 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, int line)
     /* doing this because Visual C is upset over assigning in the macro. */
     if (data->trigger_count == 0) {
         data->function = func;
-		data->linenum = line;
+        data->filename = file;
+        data->linenum = line;
     }
 
     SDL_AddAssertionToReport(data);
