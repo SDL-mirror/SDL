@@ -4,6 +4,7 @@
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cpuinfo.h"
+#include "SDL_assert.h"
 
 /*
  * Watcom C flags these as Warning 201: "Unreachable code" if you just
@@ -149,6 +150,26 @@ TestCPUInfo(SDL_bool verbose)
 }
 
 int
+TestAssertions(SDL_bool verbose)
+{
+    SDL_assert(1);
+    SDL_assert_release(1);
+    SDL_assert_paranoid(1);
+    SDL_assert(0 || 1);
+    SDL_assert_release(0 || 1);
+    SDL_assert_paranoid(0 || 1);
+
+#if 0   /* enable this to test assertion failures. */
+    SDL_assert_release(1 == 2);
+    SDL_assert_release(5 < 4);
+    SDL_assert_release(0 && "This is a test");
+#endif
+    SDL_assert_release(0 && "This is a test");
+
+    return (0);
+}
+
+int
 main(int argc, char *argv[])
 {
     SDL_bool verbose = SDL_TRUE;
@@ -164,5 +185,7 @@ main(int argc, char *argv[])
     status += TestTypes(verbose);
     status += TestEndian(verbose);
     status += TestCPUInfo(verbose);
+    status += TestAssertions(verbose);
+
     return status;
 }

@@ -181,20 +181,6 @@ SDL_Init(Uint32 flags)
         SDL_InstallParachute();
     }
 
-    /* brief sanity checks for the sanity checks.  :)  */
-    SDL_assert(1);
-    SDL_assert_release(1);
-    SDL_assert_paranoid(1);
-    SDL_assert(0 || 1);
-    SDL_assert_release(0 || 1);
-    SDL_assert_paranoid(0 || 1);
-
-#if 0   /* enable this to test assertion failures. */
-    SDL_assert_release(1 == 2);
-    SDL_assert_release(5 < 4);
-    SDL_assert_release(0 && "This is a test");
-#endif
-
     return (0);
 }
 
