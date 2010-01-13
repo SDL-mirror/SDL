@@ -20,8 +20,8 @@
     slouken@libsdl.org
 */
 
-#include "SDL_assert.h"
 #include "SDL.h"
+#include "SDL_assert.h"
 
 #if (SDL_ASSERT_LEVEL > 0)
 
