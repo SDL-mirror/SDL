@@ -128,9 +128,9 @@ SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
 #   define SDL_assert_release(condition) SDL_disabled_assert(condition)
 #   define SDL_assert_paranoid(condition) SDL_disabled_assert(condition)
 #elif SDL_ASSERT_LEVEL == 1  /* release settings. */
-#   define SDL_assert(condition) SDL_enabled_assert(condition)
+#   define SDL_assert(condition) SDL_disabled_assert(condition)
 #   define SDL_assert_release(condition) SDL_enabled_assert(condition)
-#   define SDL_assert_paranoid(condition) SDL_enabled_assert(condition)
+#   define SDL_assert_paranoid(condition) SDL_disabled_assert(condition)
 #elif SDL_ASSERT_LEVEL == 2  /* normal settings. */
 #   define SDL_assert(condition) SDL_enabled_assert(condition)
 #   define SDL_assert_release(condition) SDL_enabled_assert(condition)
