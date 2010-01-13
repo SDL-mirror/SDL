@@ -109,7 +109,7 @@ typedef struct SDL_assert_data
     const char *filename;
     int linenum;
     const char *function;
-    struct SDL_assert_data *next;
+    const struct SDL_assert_data *next;
 } SDL_assert_data;
 
 /* Never call this directly. Use the SDL_assert* macros. */
@@ -165,6 +165,68 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
 #else
 #   error Unknown assertion level.
 #endif
+
+
+typedef SDL_assert_state (SDLCALL *SDL_AssertionHandler)(
+                                    const SDL_assert_data *, void *userdata);
+
+/**
+ *  \brief Set an application-defined assertion handler.
+ *
+ *  This allows an app to show its own assertion UI and/or force the
+ *  response to an assertion failure. If the app doesn't provide this, SDL
+ *  will try to do the right thing, popping up a system-specific GUI dialog,
+ *  and probably minimizing any fullscreen windows.
+ *
+ *  This callback may fire from any thread, but it runs wrapped in a mutex, so
+ *  it will only fire from one thread at a time.
+ *
+ *  Setting the callback to NULL restores SDL's original internal handler.
+ *
+ *  This callback is NOT reset to SDL's internal handler upon SDL_Quit()!
+ *
+ *  \return SDL_assert_state value of how to handle the assertion failure.
+ *  
+ *  \param handler Callback function, called when an assertion fails.
+ *  \param userdata A pointer passed to the callback as-is.
+ */
+extern DECLSPEC void SDLCALL SDL_SetAssertionHandler(
+                                            SDL_AssertionHandler handler,
+                                            void *userdata);
+
+/**
+ *  \brief Get a list of all assertion failures.
+ *
+ *  Get all assertions triggered since last call to SDL_ResetAssertionReport(),
+ *  or the start of the program.
+ *
+ *  The proper way to examine this data looks something like this:
+ *
+ *  <code>
+ *  const SDL_assert_data *item = SDL_GetAssertionReport();
+ *  while (item->condition) {
+ *      printf("'%s', %s (%s:%d), triggered %u times, always ignore: %s.\n",
+ *             item->condition, item->function, item->filename,
+ *             item->linenum, item->trigger_count,
+ *             item->always_ignore ? "yes" : "no");
+ *      item = item->next;
+ *  }
+ *  </code>
+ *
+ *  \return List of all assertions. This never returns NULL,
+ *          even if there are no items.
+ *  \sa SDL_ResetAssertionReport
+ */
+extern DECLSPEC const SDL_assert_data * SDLCALL SDL_GetAssertionReport(void);
+
+/**
+ *  \brief Reset the list of all assertion failures.
+ *
+ *  Reset list of all assertions triggered.
+ *
+ *  \sa SDL_GetAssertionReport
+ */
+extern DECLSPEC void SDLCALL SDL_ResetAssertionReport(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

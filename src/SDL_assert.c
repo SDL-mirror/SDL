@@ -23,8 +23,6 @@
 #include "SDL.h"
 #include "SDL_assert.h"
 
-#if (SDL_ASSERT_LEVEL > 0)
-
 #ifdef _WINDOWS
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
@@ -34,13 +32,19 @@
 #include <unistd.h>
 #endif
 
-/* We can keep all triggered assertions in a singly-linked list so we can
+static SDL_assert_state
+SDL_PromptAssertion(const SDL_assert_data *data, void *userdata);
+
+/*
+ * We keep all triggered assertions in a singly-linked list so we can
  *  generate a report later.
  */
-#if !SDL_ASSERTION_REPORT_DISABLED
 static SDL_assert_data assertion_list_terminator = { 0, 0, 0, 0, 0, 0, 0 };
 static SDL_assert_data *triggered_assertions = &assertion_list_terminator;
-#endif
+
+static SDL_mutex *assertion_mutex = NULL;
+static SDL_AssertionHandler assertion_handler = SDL_PromptAssertion;
+static void *assertion_userdata = NULL;
 
 #ifdef __GNUC__
 static void
@@ -198,27 +202,30 @@ SDL_PromptAssertion_windows(const SDL_assert_data *data)
 
 static void SDL_AddAssertionToReport(SDL_assert_data *data)
 {
-#if !SDL_ASSERTION_REPORT_DISABLED
     /* (data) is always a static struct defined with the assert macros, so
        we don't have to worry about copying or allocating them. */
     if (data->next == NULL) {  /* not yet added? */
         data->next = triggered_assertions;
         triggered_assertions = data;
     }
-#endif
 }
+
 
 static void SDL_GenerateAssertionReport(void)
 {
-#if !SDL_ASSERTION_REPORT_DISABLED
-    if (triggered_assertions != &assertion_list_terminator)
-    {
-        SDL_assert_data *item = triggered_assertions;
+    const SDL_assert_data *item;
 
+    /* only do this if the app hasn't assigned an assertion handler. */
+    if (assertion_handler != SDL_PromptAssertion)
+        return;
+
+    item = SDL_GetAssertionReport();
+    if (item->condition)
+    {
         debug_print("\n\nSDL assertion report.\n");
         debug_print("All SDL assertions between last init/quit:\n\n");
 
-        while (item != &assertion_list_terminator) {
+        while (item->condition) {
             debug_print(
                 "'%s'\n"
                 "    * %s (%s:%d)\n"
@@ -232,9 +239,8 @@ static void SDL_GenerateAssertionReport(void)
         }
         debug_print("\n");
 
-        triggered_assertions = &assertion_list_terminator;
+        SDL_ResetAssertionReport();
     }
-#endif
 }
 
 static void SDL_ExitProcess(int exitcode)
@@ -253,11 +259,14 @@ static void SDL_AbortAssertion(void)
 }
 
 
-static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
+static SDL_assert_state
+SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 {
     const char *envr;
     SDL_assert_state state = SDL_ASSERTION_ABORT;
     SDL_WindowID window;
+
+    (void) userdata;  /* unused in default handler. */
 
     debug_print("\n\n"
                 "Assertion failure at %s (%s:%d), triggered %u time%s:\n"
@@ -291,6 +300,7 @@ static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
             SDL_MinimizeWindow(window);
         } else {
+            /* !!! FIXME: ungrab the input if we're not fullscreen? */
             /* No need to mess with the window */
             window = 0;
         }
@@ -344,8 +354,6 @@ static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
 }
 
 
-static SDL_mutex *assertion_mutex = NULL;
-
 SDL_assert_state
 SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
                     int line)
@@ -391,7 +399,7 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
     }
 
     if (!data->always_ignore) {
-        state = SDL_PromptAssertion(data);
+        state = assertion_handler(data, assertion_userdata);
     }
 
     switch (state)
@@ -417,8 +425,6 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
     return state;
 }
 
-#endif  /* SDL_ASSERT_LEVEL > 0 */
-
 
 int SDL_AssertionsInit(void)
 {
@@ -428,13 +434,41 @@ int SDL_AssertionsInit(void)
 
 void SDL_AssertionsQuit(void)
 {
-#if (SDL_ASSERT_LEVEL > 0)
     SDL_GenerateAssertionReport();
     if (assertion_mutex != NULL) {
         SDL_DestroyMutex(assertion_mutex);
         assertion_mutex = NULL;
     }
-#endif
+}
+
+void SDL_SetAssertionHandler(SDL_AssertionHandler handler, void *userdata)
+{
+    if (handler != NULL) {
+        assertion_handler = handler;
+        assertion_userdata = userdata;
+    } else {
+        assertion_handler = SDL_PromptAssertion;
+        assertion_userdata = NULL;
+    }
+}
+
+const SDL_assert_data *SDL_GetAssertionReport(void)
+{
+    return triggered_assertions;
+}
+
+void SDL_ResetAssertionReport(void)
+{
+    SDL_assert_data *item = triggered_assertions;
+    SDL_assert_data *next = NULL;
+    for (item = triggered_assertions; item->condition; item = next) {
+        next = (SDL_assert_data *) item->next;
+        item->always_ignore = SDL_FALSE;
+        item->trigger_count = 0;
+        item->next = NULL;
+    }
+
+    triggered_assertions = &assertion_list_terminator;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
