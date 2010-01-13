@@ -93,6 +93,7 @@ static void parse_options( int argc, char *argv[] )
       }
       if (SDL_strcmp(arg, "-q") == 0 || SDL_strcmp(arg, "--quiet") == 0) {
          SDL_ATseti( SDL_AT_QUIET, 1 );
+         SDL_setenv("SDL_ASSERT", "abort", 0);
          continue;
       }
       if (SDL_strcmp(arg, "--noplatform") == 0) {
