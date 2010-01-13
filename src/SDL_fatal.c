@@ -27,7 +27,7 @@
 
 #include <signal.h>
 
-#include "SDL_stdinc.h"
+#include "SDL.h"
 #include "SDL_fatal.h"
 
 /* This installs some signal handlers for the more common fatal signals,
