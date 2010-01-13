@@ -92,7 +92,6 @@ disable assertions.
 
 #if (SDL_ASSERT_LEVEL > 0)
 
-
 typedef enum
 {
     SDL_ASSERTION_RETRY,  /**< Retry the assert immediately. */
