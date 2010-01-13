@@ -28,9 +28,6 @@
 /* This gets us MAC_OS_X_VERSION_MIN_REQUIRED... */
 #include <AvailabilityMacros.h>
 
-/* SDL internal assertion support */
-#define SDL_DEFAULT_ASSERT_LEVEL 1
-
 /* This is a set of defines to configure the SDL features */
 
 #ifdef __LP64__

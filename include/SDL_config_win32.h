@@ -27,9 +27,6 @@
 
 /* This is a set of defines to configure the SDL features */
 
-/* SDL internal assertion support */
-#define SDL_DEFAULT_ASSERT_LEVEL 1
-
 #if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 #if defined(__GNUC__) || defined(__DMC__) || defined(__WATCOMC__)
 #define HAVE_STDINT_H	1
