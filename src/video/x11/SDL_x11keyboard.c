@@ -233,8 +233,8 @@ X11_InitKeyboard(_THIS)
             sym = XKeycodeToKeysym(data->display, i, 0);
             if (sym != NoSymbol) {
                 SDLKey key;
-                printf("code = %d, sym = 0x%X (%s) ", i - min_keycode, sym,
-                       XKeysymToString(sym));
+                printf("code = %d, sym = 0x%X (%s) ", i - min_keycode,
+                       (unsigned int) sym, XKeysymToString(sym));
                 key = X11_KeyCodeToSDLKey(data->display, i);
                 for (j = 0; j < SDL_arraysize(keymap); ++j) {
                     if (keymap[j] == key) {
