@@ -58,7 +58,7 @@ macro can have unique static variables associated with it.
     #define SDL_TriggerBreakpoint() __asm { int 3 }
 #elif (defined(__GNUC__) && ((__i386__) || (__x86_64__)))
     #define SDL_TriggerBreakpoint() __asm__ __volatile__ ( "int $3\n\t" )
-#elif defined(unix)
+#elif defined(HAVE_SIGNAL_H)
     #include <signal.h>
     #define SDL_TriggerBreakpoint() raise(SIGTRAP)
 #else
