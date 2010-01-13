@@ -25,6 +25,8 @@
 
 #include "SDL.h"
 #include "SDL_fatal.h"
+#include "SDL_assert.h"
+
 #if !SDL_VIDEO_DISABLED
 #include "video/SDL_leaks.h"
 #endif
@@ -51,6 +53,9 @@ extern void SDL_TimerQuit(void);
 extern int SDL_HelperWindowCreate(void);
 extern int SDL_HelperWindowDestroy(void);
 #endif
+
+extern int SDL_AssertionsInit(void);
+extern void SDL_AssertionsQuit(void);
 
 /* The initialized subsystems */
 static Uint32 SDL_initialized = 0;
@@ -153,6 +158,10 @@ SDL_Init(Uint32 flags)
     }
 #endif
 
+    if (SDL_AssertionsInit() < 0) {
+        return -1;
+    }
+
     /* Clear the error message */
     SDL_ClearError();
 
@@ -171,6 +180,21 @@ SDL_Init(Uint32 flags)
     if (!(flags & SDL_INIT_NOPARACHUTE)) {
         SDL_InstallParachute();
     }
+
+    /* brief sanity checks for the sanity checks.  :)  */
+    SDL_assert(1);
+    SDL_assert_release(1);
+    SDL_assert_paranoid(1);
+    SDL_assert(0 || 1);
+    SDL_assert_release(0 || 1);
+    SDL_assert_paranoid(0 || 1);
+
+#if 0   /* enable this to test assertion failures. */
+    SDL_assert_release(1 == 2);
+    SDL_assert_release(5 < 4);
+    SDL_assert_release(0 && "This is a test");
+#endif
+
     return (0);
 }
 
@@ -239,6 +263,7 @@ SDL_Quit(void)
     fflush(stdout);
 #endif
 
+    /* !!! FIXME: make this an assertion. */
     /* Print the number of surfaces not freed */
     if (surfaces_allocated != 0) {
         fprintf(stderr, "SDL Warning: %d SDL surfaces extant\n",
@@ -252,6 +277,8 @@ SDL_Quit(void)
 
     /* Uninstall any parachute signal handlers */
     SDL_UninstallParachute();
+
+    SDL_AssertionsQuit();
 
 #if !SDL_THREADS_DISABLED && SDL_THREAD_PTH
     pth_kill();

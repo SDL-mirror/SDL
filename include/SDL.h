@@ -77,6 +77,7 @@
 
 #include "SDL_main.h"
 #include "SDL_stdinc.h"
+#include "SDL_assert.h"
 #include "SDL_atomic.h"
 #include "SDL_audio.h"
 #include "SDL_cpuinfo.h"
@@ -89,8 +90,8 @@
 #include "SDL_rwops.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
-#include "SDL_video.h"
 #include "SDL_version.h"
+#include "SDL_video.h"
 #include "SDL_compat.h"
 
 #include "begin_code.h"

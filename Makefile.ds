@@ -36,6 +36,7 @@ src/SDL.c \
 src/SDL_compat.c \
 src/SDL_error.c \
 src/SDL_fatal.c \
+src/SDL_assert.c \
 src/audio/nds/SDL_ndsaudio.c \
 src/audio/SDL_audio.c \
 src/audio/SDL_audiocvt.c \

@@ -28,6 +28,9 @@
 /* General platform specific identifiers */
 #include "SDL_platform.h"
 
+/* SDL internal assertion support */
+#define SDL_ASSERT_LEVEL 1
+
 /* Make sure that this isn't included by Visual C++ */
 #ifdef _MSC_VER
 #error You should copy include/SDL_config.h.default to include/SDL_config.h

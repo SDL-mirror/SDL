@@ -135,4 +135,44 @@ Cocoa_VideoQuit(_THIS)
     Cocoa_QuitMouse(_this);
 }
 
+
+/*
+ * Mac OS X assertion support.
+ *
+ * This doesn't really have aything to do with the interfaces of the SDL video
+ *  subsystem, but we need to stuff this into an Objective-C source code file.
+ */
+
+SDL_assert_state
+SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    NSString *msg = [NSString stringWithFormat:
+            @"Assertion failure at %s (%s:%d), triggered %u time%s:\n  '%s'",
+                data->function, data->filename, data->linenum,
+                data->trigger_count, (data->trigger_count == 1) ? "" : "s",
+                data->condition];
+
+    NSLog(msg);
+
+    /*
+     * !!! FIXME: this code needs to deal with fullscreen modes:
+     * !!! FIXME:  reset to default desktop, runModal, reset to current?
+     */
+
+    NSAlert* alert = [[NSAlert alloc] init];
+    [alert setAlertStyle:NSCriticalAlertStyle];
+    [alert setMessageText:msg];
+    [alert addButtonWithTitle:@"Retry"];
+    [alert addButtonWithTitle:@"Break"];
+    [alert addButtonWithTitle:@"Abort"];
+    [alert addButtonWithTitle:@"Ignore"];
+    [alert addButtonWithTitle:@"Always Ignore"];
+    const NSInteger clicked = [alert runModal];
+    [pool release];
+    return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
+}
+
 /* vim: set ts=4 sw=4 expandtab: */
+
