@@ -254,6 +254,8 @@ static void SDL_AbortAssertion(void)
 static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
 {
     const char *envr;
+    SDL_assert_state state = SDL_ASSERTION_ABORT;
+    SDL_WindowID window;
 
     debug_print("\n\n"
                 "Assertion failure at %s (%s:%d), triggered %u time%s:\n"
@@ -281,44 +283,62 @@ static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
         }
     }
 
+    /* Leave fullscreen mode, if possible (scary!) */
+    window = SDL_GetFocusWindow();
+    if (window) {
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+            SDL_MinimizeWindow(window);
+        } else {
+            /* No need to mess with the window */
+            window = 0;
+        }
+    }
+
     /* platform-specific UI... */
 
 #ifdef _WINDOWS
-    return SDL_PromptAssertion_windows(data);
+    state = SDL_PromptAssertion_windows(data);
 
 #elif __APPLE__
     /* This has to be done in an Objective-C (*.m) file, so we call out. */
     extern SDL_assert_state SDL_PromptAssertion_cocoa(const SDL_assert_data *);
-    return SDL_PromptAssertion_cocoa(data);
+    state = SDL_PromptAssertion_cocoa(data);
 
-#elif unix
+#else
     /* this is a little hacky. */
     for ( ; ; ) {
         char buf[32];
         fprintf(stderr, "Abort/Break/Retry/Ignore/AlwaysIgnore? [abriA] : ");
         fflush(stderr);
         if (fgets(buf, sizeof (buf), stdin) == NULL) {
-            return SDL_ASSERTION_ABORT;
+            break;
         }
 
         if (SDL_strcmp(buf, "a") == 0) {
-            return SDL_ASSERTION_ABORT;
+            state = SDL_ASSERTION_ABORT;
+            break;
         } else if (SDL_strcmp(envr, "b") == 0) {
-            return SDL_ASSERTION_BREAK;
+            state = SDL_ASSERTION_BREAK;
+            break;
         } else if (SDL_strcmp(envr, "r") == 0) {
-            return SDL_ASSERTION_RETRY;
+            state = SDL_ASSERTION_RETRY;
+            break;
         } else if (SDL_strcmp(envr, "i") == 0) {
-            return SDL_ASSERTION_IGNORE;
+            state = SDL_ASSERTION_IGNORE;
+            break;
         } else if (SDL_strcmp(envr, "A") == 0) {
-            return SDL_ASSERTION_ALWAYS_IGNORE;
+            state = SDL_ASSERTION_ALWAYS_IGNORE;
+            break;
         }
     }
-
-#else
-    #error Please define your platform or set SDL_ASSERT_LEVEL to 0.
 #endif
 
-    return SDL_ASSERTION_ABORT;
+    /* Re-enter fullscreen mode */
+    if (window) {
+        SDL_RestoreWindow(window);
+    }
+
+    return state;
 }
 
 
