@@ -34,6 +34,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		043DD76F10FD8A0000DED673 /* SDL_alphamult.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76B10FD8A0000DED673 /* SDL_alphamult.c */; };
+		043DD77010FD8A0000DED673 /* SDL_alphamult.h in Headers */ = {isa = PBXBuildFile; fileRef = 043DD76C10FD8A0000DED673 /* SDL_alphamult.h */; };
+		043DD77110FD8A0000DED673 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */; };
+		043DD77210FD8A0000DED673 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76E10FD8A0000DED673 /* SDL_drawrect.c */; };
 		04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0463873F0F0B5B7D0041FD65 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387370F0B5B7D0041FD65 /* SDL_blendline.c */; };
 		046387400F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */; };
@@ -207,6 +211,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		043DD76B10FD8A0000DED673 /* SDL_alphamult.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_alphamult.c; sourceTree = "<group>"; };
+		043DD76C10FD8A0000DED673 /* SDL_alphamult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_alphamult.h; sourceTree = "<group>"; };
+		043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
+		043DD76E10FD8A0000DED673 /* SDL_drawrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawrect.c; sourceTree = "<group>"; };
 		04461DED0EA76BA3006C462D /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
 		046387370F0B5B7D0041FD65 /* SDL_blendline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendline.c; sourceTree = "<group>"; };
 		046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendpoint.c; sourceTree = "<group>"; };
@@ -768,6 +776,9 @@
 				0495E6870E97408800152DFE /* SDL_renderer_gl.h */,
 				0495E6880E97408800152DFE /* SDL_renderer_gles.c */,
 				0495E6890E97408800152DFE /* SDL_renderer_gles.h */,
+				043DD76B10FD8A0000DED673 /* SDL_alphamult.c */,
+				043DD76C10FD8A0000DED673 /* SDL_alphamult.h */,
+				043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */,
 				046387370F0B5B7D0041FD65 /* SDL_blendline.c */,
 				046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */,
 				046387390F0B5B7D0041FD65 /* SDL_blendrect.c */,
@@ -787,6 +798,7 @@
 				0463873B0F0B5B7D0041FD65 /* SDL_draw.h */,
 				0463873C0F0B5B7D0041FD65 /* SDL_drawline.c */,
 				0463873D0F0B5B7D0041FD65 /* SDL_drawpoint.c */,
+				043DD76E10FD8A0000DED673 /* SDL_drawrect.c */,
 				0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */,
 				FDA6830D0DF2374E00F98A1A /* SDL_gamma.c */,
 				FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */,
@@ -903,6 +915,7 @@
 				04B2ECEE1025CE4800F9BC5F /* SDL_revision.h in Headers */,
 				04B2ED081025CF9E00F9BC5F /* SDL_config.h in Headers */,
 				04EC8B521025D12900431D42 /* SDL_config_iphoneos.h in Headers */,
+				043DD77010FD8A0000DED673 /* SDL_alphamult.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1079,6 +1092,9 @@
 				046387450F0B5B7D0041FD65 /* SDL_drawpoint.c in Sources */,
 				046387460F0B5B7D0041FD65 /* SDL_fillrect.c in Sources */,
 				04B2ECFF1025CEB900F9BC5F /* SDL_atomic.c in Sources */,
+				043DD76F10FD8A0000DED673 /* SDL_alphamult.c in Sources */,
+				043DD77110FD8A0000DED673 /* SDL_blendfillrect.c in Sources */,
+				043DD77210FD8A0000DED673 /* SDL_drawrect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
