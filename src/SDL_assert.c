@@ -85,7 +85,7 @@ debug_print(const char *fmt, ...)
     /* Unix has it easy. Just dump it to stderr. */
     va_list ap;
     va_start(ap, fmt);
-    fprintf(stderr, fmt, ap);
+    vfprintf(stderr, fmt, ap);
     va_end(ap);
     fflush(stderr);
 #endif
