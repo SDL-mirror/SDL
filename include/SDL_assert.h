@@ -112,6 +112,7 @@ typedef struct SDL_assert_data
     struct SDL_assert_data *next;
 } SDL_assert_data;
 
+/* Never call this directly. Use the SDL_assert* macros. */
 extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
                                                              const char *,
                                                              const char *, int);
