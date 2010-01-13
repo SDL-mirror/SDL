@@ -39,7 +39,8 @@
 
 /* Initialization/Query functions */
 static int UIKit_VideoInit(_THIS);
-static int UIKit_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+static int UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display,
+                                SDL_DisplayMode * mode);
 static void UIKit_VideoQuit(_THIS);
 
 /* DUMMY driver bootstrap functions */
@@ -132,7 +133,7 @@ UIKit_VideoInit(_THIS)
 }
 
 static int
-UIKit_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     return 0;
 }
