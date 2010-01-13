@@ -418,6 +418,10 @@
 		046B91ED0A11B53500FB151C /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 046B91E90A11B53500FB151C /* SDL_sysloadso.c */; };
 		046B92130A11B8AD00FB151C /* SDL_dlcompat.c in Sources */ = {isa = PBXBuildFile; fileRef = 046B92100A11B8AD00FB151C /* SDL_dlcompat.c */; };
 		046B92140A11B8AD00FB151C /* SDL_dlcompat.c in Sources */ = {isa = PBXBuildFile; fileRef = 046B92100A11B8AD00FB151C /* SDL_dlcompat.c */; };
+		04DB838C10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */; };
+		04DB838D10FD8C81000519B5 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838B10FD8C81000519B5 /* SDL_drawrect.c */; };
+		04DB838E10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */; };
+		04DB838F10FD8C81000519B5 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838B10FD8C81000519B5 /* SDL_drawrect.c */; };
 		BECDF62E0761BA81005FE872 /* SDL_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538330006D78D67F000001 /* SDL_audio.c */; };
 		BECDF62F0761BA81005FE872 /* SDL_audiocvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538331006D78D67F000001 /* SDL_audiocvt.c */; };
 		BECDF6300761BA81005FE872 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
@@ -695,6 +699,8 @@
 		01538445006D7EC67F000001 /* SDL_thread.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = SDL_thread.c; path = ../../src/thread/SDL_thread.c; sourceTree = SOURCE_ROOT; };
 		046B91E90A11B53500FB151C /* SDL_sysloadso.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_sysloadso.c; sourceTree = "<group>"; };
 		046B92100A11B8AD00FB151C /* SDL_dlcompat.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_dlcompat.c; sourceTree = "<group>"; };
+		04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
+		04DB838B10FD8C81000519B5 /* SDL_drawrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawrect.c; sourceTree = "<group>"; };
 		083E489D006D88D97F000001 /* SDL_joystick.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_joystick.c; sourceTree = "<group>"; };
 		0C5AF5E501191D2B7F000001 /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = begin_code.h; path = ../../include/begin_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E601191D2B7F000001 /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = close_code.h; path = ../../include/close_code.h; sourceTree = SOURCE_ROOT; };
@@ -1128,6 +1134,7 @@
 				00CFA7EA106B49B500758660 /* mmx.h */,
 				00CFA7EB106B49B500758660 /* SDL_alphamult.c */,
 				00CFA7EC106B49B500758660 /* SDL_alphamult.h */,
+				04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */,
 				00CFA7ED106B49B500758660 /* SDL_blendline.c */,
 				00CFA7EE106B49B500758660 /* SDL_blendpoint.c */,
 				00CFA7EF106B49B500758660 /* SDL_blendrect.c */,
@@ -1147,6 +1154,7 @@
 				00CFA7FD106B49B600758660 /* SDL_draw.h */,
 				00CFA7FE106B49B600758660 /* SDL_drawline.c */,
 				00CFA7FF106B49B600758660 /* SDL_drawpoint.c */,
+				04DB838B10FD8C81000519B5 /* SDL_drawrect.c */,
 				00CFA800106B49B600758660 /* SDL_fillrect.c */,
 				00CFA801106B49B600758660 /* SDL_gamma.c */,
 				00CFA802106B49B600758660 /* SDL_glesfuncs.h */,
@@ -1899,6 +1907,8 @@
 				00CFA845106B49B600758660 /* SDL_yuv_sw.c in Sources */,
 				001798D210743B9F00F5D044 /* SDL_syspower.c in Sources */,
 				001798D410743B9F00F5D044 /* SDL_power.c in Sources */,
+				04DB838C10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */,
+				04DB838D10FD8C81000519B5 /* SDL_drawrect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2011,6 +2021,8 @@
 				00CFA873106B49B600758660 /* SDL_yuv_sw.c in Sources */,
 				001798CC10743B9F00F5D044 /* SDL_syspower.c in Sources */,
 				001798CE10743B9F00F5D044 /* SDL_power.c in Sources */,
+				04DB838E10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */,
+				04DB838F10FD8C81000519B5 /* SDL_drawrect.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
