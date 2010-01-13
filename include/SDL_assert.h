@@ -21,13 +21,11 @@
 */
 #include "SDL_config.h"
 
-/* This is an assert macro for SDL's internal use. Not for the public API! */
-
 #ifndef _SDL_assert_h
 #define _SDL_assert_h
 
 #ifndef SDL_ASSERT_LEVEL
-#error SDL_ASSERT_LEVEL is not defined. Please fix your SDL_config.h.
+#define SDL_ASSERT_LEVEL SDL_DEFAULT_ASSERT_LEVEL
 #endif
 
 /*
@@ -107,12 +105,12 @@ SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
 #define SDL_enabled_assert(condition) \
     do { \
         while ( !(condition) ) { \
-			static struct SDL_assert_data assert_data = { \
+            static struct SDL_assert_data assert_data = { \
                 0, 0, #condition, __FILE__, 0, 0, 0 \
             }; \
-			const SDL_assert_state state = SDL_ReportAssertion(&assert_data, \
+            const SDL_assert_state state = SDL_ReportAssertion(&assert_data, \
                                                                SDL_FUNCTION, \
-															   __LINE__); \
+                                                               __LINE__); \
             if (state == SDL_ASSERTION_RETRY) { \
                 continue; /* go again. */ \
             } else if (state == SDL_ASSERTION_BREAK) { \
@@ -148,4 +146,3 @@ SDL_assert_state SDL_ReportAssertion(SDL_assert_data *, const char *, int);
 #endif /* _SDL_assert_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
-

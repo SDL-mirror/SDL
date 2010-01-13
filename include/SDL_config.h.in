@@ -163,7 +163,7 @@
 #endif /* HAVE_LIBC */
 
 /* SDL internal assertion support */
-#undef SDL_ASSERT_LEVEL
+#undef SDL_DEFAULT_ASSERT_LEVEL
 
 /* Allow disabling of core subsystems */
 #undef SDL_AUDIO_DISABLED

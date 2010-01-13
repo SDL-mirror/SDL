@@ -29,7 +29,7 @@
 #include "SDL_platform.h"
 
 /* SDL internal assertion support */
-#define SDL_ASSERT_LEVEL 1
+#define SDL_DEFAULT_ASSERT_LEVEL 1
 
 #define SDL_HAS_64BIT_TYPE 1
 #define SDL_BYTEORDER 1234

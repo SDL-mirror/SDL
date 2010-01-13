@@ -142,19 +142,19 @@ AC_HELP_STRING([--enable-assertions],
 sdl_valid_assertion_level=no
 if test x$enable_assertions = xno; then
     sdl_valid_assertion_level=yes
-    AC_DEFINE(SDL_ASSERT_LEVEL, 0)
+    AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 0)
 fi
 if test x$enable_assertions = xrelease; then
     sdl_valid_assertion_level=yes
-    AC_DEFINE(SDL_ASSERT_LEVEL, 1)
+    AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 1)
 fi
 if test x$enable_assertions = xyes; then
     sdl_valid_assertion_level=yes
-    AC_DEFINE(SDL_ASSERT_LEVEL, 2)
+    AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 2)
 fi
 if test x$enable_assertions = xparanoid; then
     sdl_valid_assertion_level=yes
-    AC_DEFINE(SDL_ASSERT_LEVEL, 3)
+    AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 3)
 fi
 if test x$sdl_valid_assertion_level = xno; then
     AC_MSG_ERROR([*** unknown assertion level. stop.])

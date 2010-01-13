@@ -34,7 +34,7 @@
 #include <stdarg.h>
 
 /* SDL internal assertion support */
-#define SDL_ASSERT_LEVEL 1
+#define SDL_DEFAULT_ASSERT_LEVEL 1
 
 #if !defined(_STDINT_H_) && (!defined(HAVE_STDINT_H) || !_HAVE_STDINT_H)
 typedef signed char int8_t;
