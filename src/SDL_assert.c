@@ -422,12 +422,7 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
 
 int SDL_AssertionsInit(void)
 {
-#if (SDL_ASSERT_LEVEL > 0)
-    assertion_mutex = SDL_CreateMutex();
-    if (assertion_mutex == NULL) {
-        return -1;
-    }
-#endif
+    /* this is a no-op at the moment. */
     return 0;
 }
 
@@ -435,8 +430,10 @@ void SDL_AssertionsQuit(void)
 {
 #if (SDL_ASSERT_LEVEL > 0)
     SDL_GenerateAssertionReport();
-    SDL_DestroyMutex(assertion_mutex);
-    assertion_mutex = NULL;
+    if (assertion_mutex != NULL) {
+        SDL_DestroyMutex(assertion_mutex);
+        assertion_mutex = NULL;
+    }
 #endif
 }
 
