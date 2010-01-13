@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_cocoavideo.h"
+#include "SDL_assert.h"
 
 /* Initialization/Query functions */
 static int Cocoa_VideoInit(_THIS);
@@ -154,7 +155,7 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
                 data->trigger_count, (data->trigger_count == 1) ? "" : "s",
                 data->condition];
 
-    NSLog(msg);
+    NSLog(@"%s", msg);
 
     /*
      * !!! FIXME: this code needs to deal with fullscreen modes:
