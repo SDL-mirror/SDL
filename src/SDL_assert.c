@@ -245,10 +245,8 @@ static void SDL_AbortAssertion(void)
     SDL_Quit();
 #ifdef _WINDOWS
     ExitProcess(42);
-#elif unix || __APPLE__
-    _exit(42);
 #else
-    #error Please define your platform or set SDL_ASSERT_LEVEL to 0.
+    _exit(42);
 #endif
 }
     
@@ -400,4 +398,3 @@ void SDL_AssertionsQuit(void)
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
-
