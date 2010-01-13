@@ -47,7 +47,7 @@ extern "C" {
 /*
 These are macros and not first class functions so that the debugger breaks
 on the assertion line and not in some random guts of SDL, and so each
-macro can have unique static variables associated with it.
+assert can have unique static variables associated with it.
 */
 
 #if (defined(_MSC_VER) && ((_M_IX86) || (_M_X64)))
