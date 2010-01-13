@@ -351,7 +351,18 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
                     int line)
 {
     static int assertion_running = 0;
+    static SDL_SpinLock spinlock = 0;
     SDL_assert_state state = SDL_ASSERTION_IGNORE;
+
+    SDL_AtomicLock(&spinlock);
+    if (assertion_mutex == NULL) { /* never called SDL_Init()? */
+        assertion_mutex = SDL_CreateMutex();
+        if (assertion_mutex == NULL) {
+            SDL_AtomicUnlock(&spinlock);
+            return SDL_ASSERTION_IGNORE;   /* oh well, I guess. */
+        }
+    }
+    SDL_AtomicUnlock(&spinlock);
 
     if (SDL_LockMutex(assertion_mutex) < 0) {
         return SDL_ASSERTION_IGNORE;   /* oh well, I guess. */
