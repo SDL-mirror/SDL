@@ -31,6 +31,7 @@
 #else  /* fprintf, _exit(), etc. */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #endif
 
 /* We can keep all triggered assertions in a singly-linked list so we can
@@ -43,9 +44,13 @@ static SDL_assert_data *triggered_assertions = &assertion_list_terminator;
 
 static void 
 debug_print(const char *fmt, ...)
-//#ifdef __GNUC__
-//__attribute__((format (printf, 1, 2)))
-//#endif
+#ifdef __GNUC__
+__attribute__((format (printf, 1, 2)))
+#endif
+;
+
+static void
+debug_print(const char *fmt, ...)
 {
 #ifdef _WINDOWS
     /* Format into a buffer for OutputDebugStringA(). */
