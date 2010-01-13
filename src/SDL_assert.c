@@ -42,12 +42,10 @@ static SDL_assert_data assertion_list_terminator = { 0, 0, 0, 0, 0, 0, 0 };
 static SDL_assert_data *triggered_assertions = &assertion_list_terminator;
 #endif
 
-static void 
-debug_print(const char *fmt, ...)
 #ifdef __GNUC__
-__attribute__((format (printf, 1, 2)))
+static void
+debug_print(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 #endif
-;
 
 static void
 debug_print(const char *fmt, ...)
@@ -239,17 +237,21 @@ static void SDL_GenerateAssertionReport(void)
 #endif
 }
 
-
-static void SDL_AbortAssertion(void)
+static void SDL_ExitProcess(int exitcode)
 {
-    SDL_Quit();
 #ifdef _WINDOWS
     ExitProcess(42);
 #else
     _exit(42);
 #endif
 }
-    
+
+static void SDL_AbortAssertion(void)
+{
+    SDL_Quit();
+    SDL_ExitProcess(42);
+}
+
 
 static SDL_assert_state SDL_PromptAssertion(const SDL_assert_data *data)
 {
@@ -348,7 +350,8 @@ SDL_assert_state
 SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
                     int line)
 {
-    SDL_assert_state state;
+    static int assertion_running = 0;
+    SDL_assert_state state = SDL_ASSERTION_IGNORE;
 
     if (SDL_LockMutex(assertion_mutex) < 0) {
         return SDL_ASSERTION_IGNORE;   /* oh well, I guess. */
@@ -364,17 +367,25 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
     SDL_AddAssertionToReport(data);
 
     data->trigger_count++;
-    if (data->always_ignore) {
-        SDL_UnlockMutex(assertion_mutex);
-        return SDL_ASSERTION_IGNORE;
+
+    assertion_running++;
+    if (assertion_running > 1) {   /* assert during assert! Abort. */
+        if (assertion_running == 2) {
+            SDL_AbortAssertion();
+        } else if (assertion_running == 3) {  /* Abort asserted! */
+            SDL_ExitProcess(42);
+        } else {
+            while (1) { /* do nothing but spin; what else can you do?! */ }
+        }
     }
 
-    state = SDL_PromptAssertion(data);
+    if (!data->always_ignore) {
+        state = SDL_PromptAssertion(data);
+    }
 
     switch (state)
     {
         case SDL_ASSERTION_ABORT:
-            SDL_UnlockMutex(assertion_mutex);  /* in case we assert in quit. */
             SDL_AbortAssertion();
             return SDL_ASSERTION_IGNORE;  /* shouldn't return, but oh well. */
 
@@ -389,6 +400,7 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
             break;  /* macro handles these. */
     }
 
+    assertion_running--;
     SDL_UnlockMutex(assertion_mutex);
 
     return state;
