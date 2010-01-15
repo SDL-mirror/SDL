@@ -22,6 +22,7 @@
 
 #include "SDL.h"
 #include "SDL_assert.h"
+#include "video/SDL_sysvideo.h"
 
 #ifdef _WINDOWS
 #define WIN32_LEAN_AND_MEAN 1

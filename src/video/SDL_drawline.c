@@ -28,7 +28,21 @@ SDL_DrawLine1(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,
               SDL_bool draw_end)
 {
     if (y1 == y2) {
-        HLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
+        //HLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
+        int length;
+        int pitch = (dst->pitch / dst->format->BytesPerPixel);
+        Uint8 *pixel;
+        if (x1 <= x2) {
+            pixel = (Uint8 *)dst->pixels + y1 * pitch + x1;
+            length = draw_end ? (x2-x1+1) : (x2-x1);
+        } else {
+            pixel = (Uint8 *)dst->pixels + y1 * pitch + x2;
+            if (!draw_end) {
+                ++pixel;
+            }
+            length = draw_end ? (x1-x2+1) : (x1-x2);
+        }
+        SDL_memset(pixel, color, length);
     } else if (x1 == x2) {
         VLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
     } else if (ABS(x1 - x2) == ABS(y1 - y2)) {

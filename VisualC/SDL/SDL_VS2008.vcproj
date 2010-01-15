@@ -371,6 +371,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_assert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_atomic.h"
 				>
 			</File>
@@ -608,6 +612,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\SDL_assert.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\atomic\win32\SDL_atomic.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\audio\SDL_audio.c"
 			>
 		</File>
@@ -813,6 +825,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\stdlib\SDL_getenv.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_glesfuncs.h"
 			>
 		</File>
 		<File
