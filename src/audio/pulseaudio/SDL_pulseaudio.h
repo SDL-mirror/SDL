@@ -29,25 +29,20 @@
 #include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the audio functions */
-#define _THIS	SDL_AudioDevice *this
+#define _THIS SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
 {
-    /* The audio stream handle */
-    pa_simple *stream;
-
-    /* The parent process id, to detect when application quits */
-    pid_t parent;
+    /* pulseaudio structures */
+    pa_mainloop *mainloop;
+    pa_mainloop_api *mainloop_api;
+    pa_context *context;
+    pa_stream *stream;
 
     /* Raw mixing buffer */
     Uint8 *mixbuf;
     int mixlen;
-
-    /* Support for audio timing using a timer, in addition to select() */
-    float frame_ticks;
-    float next_frame;
 };
-#define FUDGE_TICKS	10      /* The scheduler overhead ticks per frame */
 
 #endif /* _SDL_pulseaudio_h */
 
