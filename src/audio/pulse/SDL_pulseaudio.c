@@ -82,37 +82,37 @@ static pa_channel_map* (*SDL_NAME(pa_channel_map_init_auto))(
 	pa_channel_map_def_t def
 );
 
-pa_mainloop * (*SDL_NAME(pa_mainloop_new))(void);
-pa_mainloop_api * (*SDL_NAME(pa_mainloop_get_api))(pa_mainloop *m);
-int (*SDL_NAME(pa_mainloop_iterate))(pa_mainloop *m, int block, int *retval);
-void (*SDL_NAME(pa_mainloop_free))(pa_mainloop *m);
+static pa_mainloop * (*SDL_NAME(pa_mainloop_new))(void);
+static pa_mainloop_api * (*SDL_NAME(pa_mainloop_get_api))(pa_mainloop *m);
+static int (*SDL_NAME(pa_mainloop_iterate))(pa_mainloop *m, int block, int *retval);
+static void (*SDL_NAME(pa_mainloop_free))(pa_mainloop *m);
 
-pa_operation_state_t (*SDL_NAME(pa_operation_get_state))(pa_operation *o);
-void (*SDL_NAME(pa_operation_cancel))(pa_operation *o);
-void (*SDL_NAME(pa_operation_unref))(pa_operation *o);
+static pa_operation_state_t (*SDL_NAME(pa_operation_get_state))(pa_operation *o);
+static void (*SDL_NAME(pa_operation_cancel))(pa_operation *o);
+static void (*SDL_NAME(pa_operation_unref))(pa_operation *o);
 
-pa_context * (*SDL_NAME(pa_context_new))(
+static pa_context * (*SDL_NAME(pa_context_new))(
 	pa_mainloop_api *m, const char *name);
-int (*SDL_NAME(pa_context_connect))(
+static int (*SDL_NAME(pa_context_connect))(
 	pa_context *c, const char *server,
 	pa_context_flags_t flags, const pa_spawn_api *api);
-pa_context_state_t (*SDL_NAME(pa_context_get_state))(pa_context *c);
-void (*SDL_NAME(pa_context_disconnect))(pa_context *c);
-void (*SDL_NAME(pa_context_unref))(pa_context *c);
+static pa_context_state_t (*SDL_NAME(pa_context_get_state))(pa_context *c);
+static void (*SDL_NAME(pa_context_disconnect))(pa_context *c);
+static void (*SDL_NAME(pa_context_unref))(pa_context *c);
 
-pa_stream * (*SDL_NAME(pa_stream_new))(pa_context *c,
+static pa_stream * (*SDL_NAME(pa_stream_new))(pa_context *c,
 	const char *name, const pa_sample_spec *ss, const pa_channel_map *map);
-int (*SDL_NAME(pa_stream_connect_playback))(pa_stream *s, const char *dev,
+static int (*SDL_NAME(pa_stream_connect_playback))(pa_stream *s, const char *dev,
 	const pa_buffer_attr *attr, pa_stream_flags_t flags,
 	pa_cvolume *volume, pa_stream *sync_stream);
-pa_stream_state_t (*SDL_NAME(pa_stream_get_state))(pa_stream *s);
-size_t (*SDL_NAME(pa_stream_writable_size))(pa_stream *s);
-int (*SDL_NAME(pa_stream_write))(pa_stream *s, const void *data, size_t nbytes,
+static pa_stream_state_t (*SDL_NAME(pa_stream_get_state))(pa_stream *s);
+static size_t (*SDL_NAME(pa_stream_writable_size))(pa_stream *s);
+static int (*SDL_NAME(pa_stream_write))(pa_stream *s, const void *data, size_t nbytes,
 	pa_free_cb_t free_cb, int64_t offset, pa_seek_mode_t seek);
-pa_operation * (*SDL_NAME(pa_stream_drain))(pa_stream *s,
+static pa_operation * (*SDL_NAME(pa_stream_drain))(pa_stream *s,
 	pa_stream_success_cb_t cb, void *userdata);
-int (*SDL_NAME(pa_stream_disconnect))(pa_stream *s);
-void (*SDL_NAME(pa_stream_unref))(pa_stream *s);
+static int (*SDL_NAME(pa_stream_disconnect))(pa_stream *s);
+static void (*SDL_NAME(pa_stream_unref))(pa_stream *s);
 
 static struct {
 	const char *name;
