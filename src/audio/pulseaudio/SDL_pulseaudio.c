@@ -212,14 +212,16 @@ load_pulseaudio_syms(void)
 static void
 PULSEAUDIO_WaitDevice(_THIS)
 {
+    struct SDL_PrivateAudioData *h = this->hidden;
+
     while(1) {
-        if (PULSEAUDIO_pa_context_get_state(this->hidden->context) != PA_CONTEXT_READY ||
-            PULSEAUDIO_pa_stream_get_state(this->hidden->stream) != PA_STREAM_READY ||
-            PULSEAUDIO_pa_mainloop_iterate(this->hidden->mainloop, 1, NULL) < 0) {
+        if (PULSEAUDIO_pa_context_get_state(h->context) != PA_CONTEXT_READY ||
+            PULSEAUDIO_pa_stream_get_state(h->stream) != PA_STREAM_READY ||
+            PULSEAUDIO_pa_mainloop_iterate(h->mainloop, 1, NULL) < 0) {
             this->enabled = 0;
             return;
         }
-        if (PULSEAUDIO_pa_stream_writable_size(this->hidden->stream) >= this->hidden->mixlen) {
+        if (PULSEAUDIO_pa_stream_writable_size(h->stream) >= h->mixlen) {
             return;
         }
     }
@@ -229,8 +231,8 @@ static void
 PULSEAUDIO_PlayDevice(_THIS)
 {
     /* Write the audio data */
-    if (PULSEAUDIO_pa_stream_write(this->hidden->stream, this->hidden->mixbuf,
-                                   this->hidden->mixlen, NULL, 0LL,
+    struct SDL_PrivateAudioData *h = this->hidden;
+    if (PULSEAUDIO_pa_stream_write(h->stream, h->mixbuf, h->mixlen, NULL, 0LL,
                                    PA_SEEK_RELATIVE) < 0) {
         this->enabled = 0;
     }
@@ -245,17 +247,18 @@ stream_drain_complete(pa_stream *s, int success, void *userdata)
 static void
 PULSEAUDIO_WaitDone(_THIS)
 {
+    struct SDL_PrivateAudioData *h = this->hidden;
     pa_operation *o;
 
-    o = PULSEAUDIO_pa_stream_drain(this->hidden->stream, stream_drain_complete, NULL);
+    o = PULSEAUDIO_pa_stream_drain(h->stream, stream_drain_complete, NULL);
     if (!o) {
         return;
     }
 
     while (PULSEAUDIO_pa_operation_get_state(o) != PA_OPERATION_DONE) {
-        if (PULSEAUDIO_pa_context_get_state(this->hidden->context) != PA_CONTEXT_READY ||
-            PULSEAUDIO_pa_stream_get_state(this->hidden->stream) != PA_STREAM_READY ||
-            PULSEAUDIO_pa_mainloop_iterate(this->hidden->mainloop, 1, NULL) < 0) {
+        if (PULSEAUDIO_pa_context_get_state(h->context) != PA_CONTEXT_READY ||
+            PULSEAUDIO_pa_stream_get_state(h->stream) != PA_STREAM_READY ||
+            PULSEAUDIO_pa_mainloop_iterate(h->mainloop, 1, NULL) < 0) {
             PULSEAUDIO_pa_operation_cancel(o);
             break;
         }
@@ -336,6 +339,7 @@ get_progname(void)
 static int
 PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 {
+    struct SDL_PrivateAudioData *h = NULL;
     Uint16 test_format = 0;
     pa_sample_spec paspec;
     pa_buffer_attr paattr;
@@ -351,6 +355,7 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         return 0;
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
+    h = this->hidden;
 
     paspec.format = PA_SAMPLE_INVALID;
 
@@ -392,31 +397,32 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     SDL_CalculateAudioSpec(&this->spec);
 
     /* Allocate mixing buffer */
-    this->hidden->mixlen = this->spec.size;
-    this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
-    if (this->hidden->mixbuf == NULL) {
+    h->mixlen = this->spec.size;
+    h->mixbuf = (Uint8 *) SDL_AllocAudioMem(h->mixlen);
+    if (h->mixbuf == NULL) {
         PULSEAUDIO_CloseDevice(this);
         SDL_OutOfMemory();
         return 0;
     }
-    SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
+    SDL_memset(h->mixbuf, this->spec.silence, this->spec.size);
 
     paspec.channels = this->spec.channels;
     paspec.rate = this->spec.freq;
 
     /* Reduced prebuffering compared to the defaults. */
 #ifdef PA_STREAM_ADJUST_LATENCY
-    paattr.tlength = this->hidden->mixlen * 4; /* 2x original requested bufsize */
+    /* 2x original requested bufsize */
+    paattr.tlength = h->mixlen * 4;
     paattr.prebuf = -1;
     paattr.maxlength = -1;
-    /* -1 can lead to pa_stream_writable_size() >= this->hidden->mixlen never being true */
-    paattr.minreq = this->hidden->mixlen;
+    /* -1 can lead to pa_stream_writable_size() >= mixlen never being true */
+    paattr.minreq = h->mixlen;
     flags = PA_STREAM_ADJUST_LATENCY;
 #else
-    paattr.tlength = this->hidden->mixlen*2;
-    paattr.prebuf = this->hidden->mixlen*2;
-    paattr.maxlength = this->hidden->mixlen*2;
-    paattr.minreq = this->hidden->mixlen;
+    paattr.tlength = h->mixlen*2;
+    paattr.prebuf = h->mixlen*2;
+    paattr.maxlength = h->mixlen*2;
+    paattr.minreq = h->mixlen;
 #endif
 
     /* The SDL ALSA output hints us that we use Windows' channel mapping */
@@ -425,33 +431,34 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
                                         PA_CHANNEL_MAP_WAVEEX);
 
     /* Set up a new main loop */
-    if (!(this->hidden->mainloop = PULSEAUDIO_pa_mainloop_new())) {
+    if (!(h->mainloop = PULSEAUDIO_pa_mainloop_new())) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("pa_mainloop_new() failed");
         return 0;
     }
 
-    this->hidden->mainloop_api = PULSEAUDIO_pa_mainloop_get_api(this->hidden->mainloop);
-    if (!(this->hidden->context = PULSEAUDIO_pa_context_new(this->hidden->mainloop_api, get_progname()))) {
+    h->mainloop_api = PULSEAUDIO_pa_mainloop_get_api(h->mainloop);
+    h->context = PULSEAUDIO_pa_context_new(h->mainloop_api, get_progname());
+    if (!h->context) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("pa_context_new() failed");
         return 0;
     }
 
     /* Connect to the PulseAudio server */
-    if (PULSEAUDIO_pa_context_connect(this->hidden->context, NULL, 0, NULL) < 0) {
+    if (PULSEAUDIO_pa_context_connect(h->context, NULL, 0, NULL) < 0) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("Could not setup connection to PulseAudio");
         return 0;
     }
 
     do {
-        if (PULSEAUDIO_pa_mainloop_iterate(this->hidden->mainloop, 1, NULL) < 0) {
+        if (PULSEAUDIO_pa_mainloop_iterate(h->mainloop, 1, NULL) < 0) {
             PULSEAUDIO_CloseDevice(this);
             SDL_SetError("pa_mainloop_iterate() failed");
             return 0;
         }
-        state = PULSEAUDIO_pa_context_get_state(this->hidden->context);
+        state = PULSEAUDIO_pa_context_get_state(h->context);
         if (!PA_CONTEXT_IS_GOOD(state)) {
             PULSEAUDIO_CloseDevice(this);
             SDL_SetError("Could not connect to PulseAudio");
@@ -459,20 +466,20 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         }
     } while (state != PA_CONTEXT_READY);
 
-    this->hidden->stream = PULSEAUDIO_pa_stream_new(
-        this->hidden->context,
+    h->stream = PULSEAUDIO_pa_stream_new(
+        h->context,
         "Simple DirectMedia Layer", /* stream description */
         &paspec,    /* sample format spec */
         &pacmap     /* channel map */
         );
 
-    if (this->hidden->stream == NULL) {
+    if (h->stream == NULL) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("Could not set up PulseAudio stream");
         return 0;
     }
 
-    if (PULSEAUDIO_pa_stream_connect_playback(this->hidden->stream, NULL, &paattr, flags,
+    if (PULSEAUDIO_pa_stream_connect_playback(h->stream, NULL, &paattr, flags,
             NULL, NULL) < 0) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("Could not connect PulseAudio stream");
@@ -480,12 +487,12 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     do {
-        if (PULSEAUDIO_pa_mainloop_iterate(this->hidden->mainloop, 1, NULL) < 0) {
+        if (PULSEAUDIO_pa_mainloop_iterate(h->mainloop, 1, NULL) < 0) {
             PULSEAUDIO_CloseDevice(this);
             SDL_SetError("pa_mainloop_iterate() failed");
             return 0;
         }
-        state = PULSEAUDIO_pa_stream_get_state(this->hidden->stream);
+        state = PULSEAUDIO_pa_stream_get_state(h->stream);
         if (!PA_STREAM_IS_GOOD(state)) {
             PULSEAUDIO_CloseDevice(this);
             SDL_SetError("Could not create to PulseAudio stream");
