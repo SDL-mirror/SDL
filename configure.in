@@ -1438,31 +1438,6 @@ AC_HELP_STRING([--enable-fusionsound-shared], [dynamically load fusionsound audi
     fi
 }
 
-dnl See if we're running on PlayStation 2 hardware
-CheckPS2GS()
-{
-    AC_ARG_ENABLE(video-ps2gs,
-AC_HELP_STRING([--enable-video-ps2gs], [use PlayStation 2 GS video driver [[default=no]]]),
-                  , enable_video_ps2gs=no)
-    if test x$enable_video = xyes -a x$enable_video_ps2gs = xyes; then
-        AC_MSG_CHECKING(for PlayStation 2 GS support)
-        video_ps2gs=no
-        AC_TRY_COMPILE([
-         #include <linux/ps2/dev.h>
-         #include <linux/ps2/gs.h>
-        ],[
-        ],[
-        video_ps2gs=yes
-        ])
-        AC_MSG_RESULT($video_ps2gs)
-        if test x$video_ps2gs = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_PS2GS)
-            SOURCES="$SOURCES $srcdir/src/video/ps2gs/*.c"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl See if we're running on PlayStation 3 Cell hardware
 CheckPS3()
 {
@@ -2233,7 +2208,6 @@ case "$host" in
         CheckFBCON
         CheckDirectFB
         CheckFusionSound
-        CheckPS2GS
         CheckPS3
         CheckSVGA
         CheckOpenGLX11
