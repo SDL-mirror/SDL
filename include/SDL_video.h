@@ -1140,7 +1140,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
 /**
  *  \brief Clear the current rendering target with the drawing color
  */
-extern DECLSPEC int SDLCALL SDL_RenderClear();
+extern DECLSPEC int SDLCALL SDL_RenderClear(void);
 
 /**
  *  \brief Draw a point on the current rendering target.
