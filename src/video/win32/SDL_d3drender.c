@@ -467,6 +467,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
     renderer->RenderDrawLines = D3D_RenderDrawLines;
     renderer->RenderDrawRects = D3D_RenderDrawRects;
+    renderer->RenderFillRects = D3D_RenderFillRects;
     renderer->RenderCopy = D3D_RenderCopy;
     renderer->RenderReadPixels = D3D_RenderReadPixels;
     renderer->RenderWritePixels = D3D_RenderWritePixels;
