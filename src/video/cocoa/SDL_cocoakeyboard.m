@@ -28,16 +28,6 @@
 
 #include <Carbon/Carbon.h>
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-#if __LP64__
-typedef long NSInteger;
-typedef unsigned long NSUInteger;
-#else
-typedef int NSInteger;
-typedef unsigned int NSUInteger;
-#endif
-#endif
-
 //#define DEBUG_IME NSLog
 #define DEBUG_IME
 
