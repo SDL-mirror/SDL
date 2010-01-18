@@ -422,6 +422,10 @@
 		04DB838D10FD8C81000519B5 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838B10FD8C81000519B5 /* SDL_drawrect.c */; };
 		04DB838E10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */; };
 		04DB838F10FD8C81000519B5 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04DB838B10FD8C81000519B5 /* SDL_drawrect.c */; };
+		04F2AF661104AC0800D6DDF7 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F2AF651104AC0800D6DDF7 /* SDL_assert.c */; };
+		04F2AF671104AC0800D6DDF7 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F2AF651104AC0800D6DDF7 /* SDL_assert.c */; };
+		04F2AF691104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; };
+		04F2AF6A1104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; };
 		BECDF62E0761BA81005FE872 /* SDL_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538330006D78D67F000001 /* SDL_audio.c */; };
 		BECDF62F0761BA81005FE872 /* SDL_audiocvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538331006D78D67F000001 /* SDL_audiocvt.c */; };
 		BECDF6300761BA81005FE872 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
@@ -701,6 +705,8 @@
 		046B92100A11B8AD00FB151C /* SDL_dlcompat.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_dlcompat.c; sourceTree = "<group>"; };
 		04DB838A10FD8C81000519B5 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
 		04DB838B10FD8C81000519B5 /* SDL_drawrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawrect.c; sourceTree = "<group>"; };
+		04F2AF651104AC0800D6DDF7 /* SDL_assert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_assert.c; path = ../../src/SDL_assert.c; sourceTree = SOURCE_ROOT; };
+		04F2AF681104AC4500D6DDF7 /* SDL_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert.h; path = ../../include/SDL_assert.h; sourceTree = SOURCE_ROOT; };
 		083E489D006D88D97F000001 /* SDL_joystick.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_joystick.c; sourceTree = "<group>"; };
 		0C5AF5E501191D2B7F000001 /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = begin_code.h; path = ../../include/begin_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E601191D2B7F000001 /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = close_code.h; path = ../../include/close_code.h; sourceTree = SOURCE_ROOT; };
@@ -1191,6 +1197,7 @@
 		0153844A006D81B07F000001 /* Public Headers */ = {
 			isa = PBXGroup;
 			children = (
+				04F2AF681104AC4500D6DDF7 /* SDL_assert.h */,
 				0C5AF5E501191D2B7F000001 /* begin_code.h */,
 				0C5AF5E601191D2B7F000001 /* close_code.h */,
 				0C5AF5FF01191D2B7F000001 /* SDL.h */,
@@ -1290,6 +1297,13 @@
 		08FB77ACFE841707C02AAC07 /* Library Source */ = {
 			isa = PBXGroup;
 			children = (
+				04F2AF651104AC0800D6DDF7 /* SDL_assert.c */,
+				00CFA6FA106B493800758660 /* SDL_compat.c */,
+				00CFA6FB106B493800758660 /* SDL_error_c.h */,
+				01538438006D7D947F000001 /* SDL_error.c */,
+				00CFA6FC106B493800758660 /* SDL_fatal.h */,
+				01538439006D7D947F000001 /* SDL_fatal.c */,
+				0153843C006D7D947F000001 /* SDL.c */,
 				00CFA69B106B467B00758660 /* atomic */,
 				0153832C006D78D67F000001 /* audio */,
 				B24DA50105A88D52006B9F1C /* cpuinfo */,
@@ -1303,12 +1317,6 @@
 				01538379006D79737F000001 /* thread */,
 				01538391006D79BC7F000001 /* timer */,
 				015383BE006D7A567F000001 /* video */,
-				00CFA6FA106B493800758660 /* SDL_compat.c */,
-				00CFA6FB106B493800758660 /* SDL_error_c.h */,
-				01538438006D7D947F000001 /* SDL_error.c */,
-				00CFA6FC106B493800758660 /* SDL_fatal.h */,
-				01538439006D7D947F000001 /* SDL_fatal.c */,
-				0153843C006D7D947F000001 /* SDL.c */,
 			);
 			name = "Library Source";
 			sourceTree = "<group>";
@@ -1506,6 +1514,7 @@
 				00CFA841106B49B600758660 /* SDL_sysvideo.h in Headers */,
 				00CFA844106B49B600758660 /* SDL_yuv_sw_c.h in Headers */,
 				00A6EBDA1078D569001EEA06 /* SDL_revision.h in Headers */,
+				04F2AF691104AC4500D6DDF7 /* SDL_assert.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1604,6 +1613,7 @@
 				00CFA86F106B49B600758660 /* SDL_sysvideo.h in Headers */,
 				00CFA872106B49B600758660 /* SDL_yuv_sw_c.h in Headers */,
 				00A6EBDB1078D569001EEA06 /* SDL_revision.h in Headers */,
+				04F2AF6A1104AC4500D6DDF7 /* SDL_assert.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1909,6 +1919,7 @@
 				001798D410743B9F00F5D044 /* SDL_power.c in Sources */,
 				04DB838C10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */,
 				04DB838D10FD8C81000519B5 /* SDL_drawrect.c in Sources */,
+				04F2AF661104AC0800D6DDF7 /* SDL_assert.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2023,6 +2034,7 @@
 				001798CE10743B9F00F5D044 /* SDL_power.c in Sources */,
 				04DB838E10FD8C81000519B5 /* SDL_blendfillrect.c in Sources */,
 				04DB838F10FD8C81000519B5 /* SDL_drawrect.c in Sources */,
+				04F2AF671104AC0800D6DDF7 /* SDL_assert.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
