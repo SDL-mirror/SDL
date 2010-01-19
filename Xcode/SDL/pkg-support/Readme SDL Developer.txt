@@ -121,7 +121,7 @@ Xocde Project Templates:
 	/Library/Application Support/Developer/Shared/Xcode/Project Templates/Application
 
 	For Xcode 1.0 to 2.4,
-	/Library/Application Support/Apple/Developer Tools/Project Templates/Appllcation 
+	/Library/Application Support/Apple/Developer Tools/Project Templates/Application 
 
 
 	Also note you may place it in per-user locations, e.g.
