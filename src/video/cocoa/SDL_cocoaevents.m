@@ -212,7 +212,6 @@ Cocoa_PumpEvents(_THIS)
         case NSFlagsChanged:
             Cocoa_HandleKeyEvent(_this, event);
             /* Fall through to pass event to NSApp; er, nevermind... */
-            /* FIXME: Find a way to stop the beeping, using delegate */
 
             /* Add to support system-wide keyboard shortcuts like CMD+Space */
             if (([event modifierFlags] & NSCommandKeyMask) || [event type] == NSFlagsChanged)

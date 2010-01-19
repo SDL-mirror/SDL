@@ -99,7 +99,9 @@
 
 - (void) doCommandBySelector:(SEL) myselector
 {
-    [super doCommandBySelector: myselector];
+    // No need to do anything since we are not using Cocoa
+    // selectors to handle special keys, instead we use SDL
+    // key events to do the same job.
 }
 
 - (BOOL) hasMarkedText
@@ -649,11 +651,13 @@ Cocoa_StopTextInput(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    [data->fieldEdit removeFromSuperview];
-    [data->fieldEdit release];
-    data->fieldEdit = nil;
-    [pool release];
+    if (data && data->fieldEdit) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        [data->fieldEdit removeFromSuperview];
+        [data->fieldEdit release];
+        data->fieldEdit = nil;
+        [pool release];
+    }
 }
 
 void
