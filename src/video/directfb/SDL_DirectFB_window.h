@@ -36,7 +36,7 @@ struct _DFB_WindowData
     IDirectFBWindow *window;
     DirectFB_GLContext *gl_context;
     IDirectFBEventBuffer *eventbuffer;
-    SDL_WindowID sdl_id;
+    SDL_Window *window;
     DFB_WindowData *next;
     Uint8 opacity;
     DFBRectangle client;

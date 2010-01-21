@@ -26,6 +26,7 @@
 #include "SDL_events.h"
 #include "SDL_events_c.h"
 #include "default_cursor.h"
+#include "../video/SDL_sysvideo.h"
 
 
 static int SDL_num_mice = 0;
@@ -190,7 +191,7 @@ SDL_SelectMouse(int index)
     return SDL_current_mouse;
 }
 
-SDL_WindowID
+SDL_Window *
 SDL_GetMouseFocusWindow(int index)
 {
     SDL_Mouse *mouse = SDL_GetMouse(index);
@@ -302,14 +303,14 @@ SDL_GetRelativeMouseState(int index, int *x, int *y)
 }
 
 void
-SDL_SetMouseFocus(int id, SDL_WindowID windowID)
+SDL_SetMouseFocus(int id, SDL_Window * window)
 {
     int index = SDL_GetMouseIndexId(id);
     SDL_Mouse *mouse = SDL_GetMouse(index);
     int i;
     SDL_bool focus;
 
-    if (!mouse || (mouse->focus == windowID)) {
+    if (!mouse || (mouse->focus == window)) {
         return;
     }
 
@@ -331,7 +332,7 @@ SDL_SetMouseFocus(int id, SDL_WindowID windowID)
         }
     }
 
-    mouse->focus = windowID;
+    mouse->focus = window;
 
     if (mouse->focus) {
         focus = SDL_FALSE;
@@ -372,7 +373,7 @@ SDL_SendProximity(int id, int x, int y, int type)
         event.proximity.cursor = mouse->current_end;
         event.proximity.type = type;
         /* FIXME: is this right? */
-        event.proximity.windowID = mouse->focus;
+        event.proximity.windowID = mouse->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
         if (type == SDL_PROXIMITYIN) {
             mouse->proximity = SDL_TRUE;
@@ -478,7 +479,7 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         event.motion.cursor = mouse->current_end;
         event.motion.xrel = xrel;
         event.motion.yrel = yrel;
-        event.motion.windowID = mouse->focus;
+        event.motion.windowID = mouse->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     mouse->last_x = mouse->x;
@@ -531,7 +532,7 @@ SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
         event.button.button = button;
         event.button.x = mouse->x;
         event.button.y = mouse->y;
-        event.button.windowID = mouse->focus;
+        event.button.windowID = mouse->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return posted;
@@ -555,14 +556,14 @@ SDL_SendMouseWheel(int index, int x, int y)
         event.wheel.which = (Uint8) index;
         event.wheel.x = x;
         event.wheel.y = y;
-        event.wheel.windowID = mouse->focus;
+        event.wheel.windowID = mouse->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return posted;
 }
 
 void
-SDL_WarpMouseInWindow(SDL_WindowID windowID, int x, int y)
+SDL_WarpMouseInWindow(SDL_Window * window, int x, int y)
 {
     SDL_Mouse *mouse = SDL_GetMouse(SDL_current_mouse);
 
@@ -571,9 +572,9 @@ SDL_WarpMouseInWindow(SDL_WindowID windowID, int x, int y)
     }
 
     if (mouse->WarpMouse) {
-        mouse->WarpMouse(mouse, windowID, x, y);
+        mouse->WarpMouse(mouse, window, x, y);
     } else {
-        SDL_SetMouseFocus(SDL_current_mouse, windowID);
+        SDL_SetMouseFocus(SDL_current_mouse, window);
         SDL_SendMouseMotion(SDL_current_mouse, 0, x, y, 0);
     }
 }

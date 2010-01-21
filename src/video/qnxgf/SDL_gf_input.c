@@ -41,7 +41,7 @@ SDL_Cursor *gf_createcursor(SDL_Surface * surface, int hot_x, int hot_y);
 int gf_showcursor(SDL_Cursor * cursor);
 void gf_movecursor(SDL_Cursor * cursor);
 void gf_freecursor(SDL_Cursor * cursor);
-void gf_warpmouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y);
+void gf_warpmouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y);
 void gf_freemouse(SDL_Mouse * mouse);
 
 /* HIDDI interacting functions */
@@ -278,7 +278,7 @@ gf_showcursor(SDL_Cursor * cursor)
         /* Sanity checks */
         window = SDL_GetWindowFromID(window_id);
         if (window != NULL) {
-            display = SDL_GetDisplayFromWindow(window);
+            display = window->display;
             if (display != NULL) {
                 didata = (SDL_DisplayData *) display->driverdata;
                 if (didata == NULL) {
@@ -399,7 +399,7 @@ gf_movecursor(SDL_Cursor * cursor)
         /* Sanity checks */
         window = SDL_GetWindowFromID(window_id);
         if (window != NULL) {
-            display = SDL_GetDisplayFromWindow(window);
+            display = window->display;
             if (display != NULL) {
                 didata = (SDL_DisplayData *) display->driverdata;
                 if (didata == NULL) {
@@ -461,19 +461,17 @@ gf_freecursor(SDL_Cursor * cursor)
 }
 
 void
-gf_warpmouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
+gf_warpmouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y)
 {
     SDL_VideoDisplay *display;
     SDL_DisplayData *didata;
-    SDL_Window *window;
     uint32_t xmax;
     uint32_t ymax;
     int32_t status;
 
     /* Sanity checks */
-    window = SDL_GetWindowFromID(windowID);
     if (window != NULL) {
-        display = SDL_GetDisplayFromWindow(window);
+        display = window->display;
         if (display != NULL) {
             didata = (SDL_DisplayData *) display->driverdata;
             if (didata == NULL) {
@@ -495,7 +493,7 @@ gf_warpmouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
     }
 
     /* Get window size to clamp maximum coordinates */
-    SDL_GetWindowSize(windowID, &xmax, &ymax);
+    SDL_GetWindowSize(window, &xmax, &ymax);
     if (x >= xmax) {
         x = xmax - 1;
     }

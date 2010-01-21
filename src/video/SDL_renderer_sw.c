@@ -201,7 +201,7 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
 SDL_Renderer *
 SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     SW_RenderData *data;
@@ -243,7 +243,7 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyRenderer = SW_DestroyRenderer;
     renderer->info.name = SW_RenderDriver.info.name;
     renderer->info.flags = 0;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
     Setup_SoftwareRenderer(renderer);
 
@@ -321,7 +321,7 @@ static int
 SW_ActivateRenderer(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     int i, n;
 
     if (data->renderer && data->renderer->ActivateRenderer) {
@@ -794,7 +794,7 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     int status;
 
     if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {
@@ -928,8 +928,8 @@ static void
 SW_DestroyRenderer(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     int i;
 
     if (data) {

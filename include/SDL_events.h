@@ -127,7 +127,7 @@ typedef enum
 typedef struct SDL_WindowEvent
 {
     Uint8 type;             /**< ::SDL_WINDOWEVENT */
-    SDL_WindowID windowID;  /**< The associated window */
+    Uint32 windowID;        /**< The associated window */
     Uint8 event;            /**< ::SDL_WindowEventID */
     int data1;              /**< event dependent data */
     int data2;              /**< event dependent data */
@@ -139,7 +139,7 @@ typedef struct SDL_WindowEvent
 typedef struct SDL_KeyboardEvent
 {
     Uint8 type;             /**< ::SDL_KEYDOWN or ::SDL_KEYUP */
-    SDL_WindowID windowID;  /**< The window with keyboard focus, if any */
+    Uint32 windowID;        /**< The window with keyboard focus, if any */
     Uint8 which;            /**< The keyboard device index */
     Uint8 state;            /**< ::SDL_PRESSED or ::SDL_RELEASED */
     SDL_keysym keysym;      /**< The key that was pressed or released */
@@ -165,7 +165,7 @@ typedef struct SDL_TextEditingEvent
 typedef struct SDL_TextInputEvent
 {
     Uint8 type;                               /**< ::SDL_TEXTINPUT */
-    SDL_WindowID windowID;                    /**< The window with keyboard focus, if any */
+    Uint32 windowID;                          /**< The window with keyboard focus, if any */
     Uint8 which;                              /**< The keyboard device index */
     char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];  /**< The input text */
 } SDL_TextInputEvent;
@@ -176,7 +176,7 @@ typedef struct SDL_TextInputEvent
 typedef struct SDL_MouseMotionEvent
 {
     Uint8 type;             /**< ::SDL_MOUSEMOTION */
-    SDL_WindowID windowID;  /**< The window with mouse focus, if any */
+    Uint32 windowID;        /**< The window with mouse focus, if any */
     Uint8 which;            /**< The mouse device index */
     Uint8 state;            /**< The current button state */
     int x;                  /**< X coordinate, relative to window */
@@ -199,7 +199,7 @@ typedef struct SDL_MouseMotionEvent
 typedef struct SDL_MouseButtonEvent
 {
     Uint8 type;             /**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
-    SDL_WindowID windowID;  /**< The window with mouse focus, if any */
+    Uint32 windowID;        /**< The window with mouse focus, if any */
     Uint8 which;            /**< The mouse device index */
     Uint8 button;           /**< The mouse button index */
     Uint8 state;            /**< ::SDL_PRESSED or ::SDL_RELEASED */
@@ -213,7 +213,7 @@ typedef struct SDL_MouseButtonEvent
 typedef struct SDL_MouseWheelEvent
 {
     Uint8 type;             /**< ::SDL_MOUSEWHEEL */
-    SDL_WindowID windowID;  /**< The window with mouse focus, if any */
+    Uint32 windowID;        /**< The window with mouse focus, if any */
     Uint8 which;            /**< The mouse device index */
     int x;                  /**< The amount scrolled horizontally */
     int y;                  /**< The amount scrolled vertically */
@@ -284,7 +284,7 @@ typedef struct SDL_QuitEvent
 typedef struct SDL_UserEvent
 {
     Uint8 type;             /**< ::SDL_USEREVENT through ::SDL_NUMEVENTS-1 */
-    SDL_WindowID windowID;  /**< The associated window if any*/
+    Uint32 windowID;        /**< The associated window if any*/
     int code;               /**< User defined event code */
     void *data1;            /**< User defined data pointer */
     void *data2;            /**< User defined data pointer */
@@ -307,7 +307,7 @@ typedef struct SDL_SysWMEvent
 typedef struct SDL_ProximityEvent
 {
     Uint8 type;
-    SDL_WindowID windowID;  /**< The associated window */
+    Uint32 windowID;    /**< The associated window */
     Uint8 which;
     int cursor;
     int x;

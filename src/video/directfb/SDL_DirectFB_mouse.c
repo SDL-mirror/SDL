@@ -31,7 +31,7 @@ static SDL_Cursor *DirectFB_CreateCursor(SDL_Surface * surface,
 static int DirectFB_ShowCursor(SDL_Cursor * cursor);
 static void DirectFB_MoveCursor(SDL_Cursor * cursor);
 static void DirectFB_FreeCursor(SDL_Cursor * cursor);
-static void DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID,
+static void DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_Window * window,
                                int x, int y);
 static void DirectFB_FreeMouse(SDL_Mouse * mouse);
 
@@ -159,14 +159,13 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
 {
     SDL_DFB_CURSORDATA(cursor);
     DFBResult ret;
-    SDL_WindowID wid;
+    SDL_Window *window;
 
-    wid = SDL_GetFocusWindow();
-    if (wid <= 0)
+    window = SDL_GetFocusWindow();
+    if (!window)
         return -1;
     else {
-        SDL_Window *window = SDL_GetWindowFromID(wid);
-        SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+        SDL_VideoDisplay *display = window->display;
 
         if (display) {
             DFB_DisplayData *dispdata =
@@ -216,10 +215,9 @@ DirectFB_FreeCursor(SDL_Cursor * cursor)
 
 /* Warp the mouse to (x,y) */
 static void
-DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
+DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y)
 {
-    SDL_Window *window = SDL_GetWindowFromID(windowID);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
     DFB_WindowData *windata = (DFB_WindowData *) window->driverdata;
     DFBResult ret;

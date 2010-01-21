@@ -427,7 +427,7 @@ D3D_AddRenderDriver(_THIS)
 SDL_Renderer *
 D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_VideoData *videodata = (SDL_VideoData *) display->device->driverdata;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
@@ -475,7 +475,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = D3D_DestroyTexture;
     renderer->DestroyRenderer = D3D_DestroyRenderer;
     renderer->info = D3D_RenderDriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -677,8 +677,8 @@ static int
 D3D_DisplayModeChanged(SDL_Renderer * renderer)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
 
     data->pparams.BackBufferWidth = window->w;
     data->pparams.BackBufferHeight = window->h;
@@ -695,8 +695,8 @@ static int
 D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     Uint32 display_format = display->current_mode.format;
     D3D_TextureData *data;
     HRESULT result;
@@ -1398,8 +1398,8 @@ D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     D3DSURFACE_DESC desc;
     LPDIRECT3DSURFACE9 backBuffer;
     LPDIRECT3DSURFACE9 surface;

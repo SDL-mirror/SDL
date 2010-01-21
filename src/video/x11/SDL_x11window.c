@@ -45,7 +45,7 @@ X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     XWindowAttributes attr;
 
     XGetWindowAttributes(data->display, RootWindow(data->display,
@@ -75,8 +75,8 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         SDL_OutOfMemory();
         return -1;
     }
-    data->windowID = window->id;
-    data->window = w;
+    data->window = window;
+    data->xwindow = w;
 #ifdef X_HAVE_UTF8_STRING
     if (SDL_X11_HAVE_UTF8) {
         data->ic =
@@ -193,7 +193,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
        if (GetFocus() == hwnd) {
        int index = data->videodata->keyboard;
        window->flags |= SDL_WINDOW_INPUT_FOCUS;
-       SDL_SetKeyboardFocus(index, data->windowID);
+       SDL_SetKeyboardFocus(index, data->window);
 
        if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
        RECT rect;
@@ -215,7 +215,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     Visual *visual;
     int depth;
     XSetWindowAttributes xattr;
@@ -782,7 +782,7 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
         status = XStringListToTextProperty(&title_locale, 1, &titleprop);
         SDL_free(title_locale);
         if (status) {
-            XSetTextProperty(display, data->window, &titleprop, XA_WM_NAME);
+            XSetTextProperty(display, data->xwindow, &titleprop, XA_WM_NAME);
             XFree(titleprop.value);
         }
 #ifdef X_HAVE_UTF8_STRING
@@ -791,7 +791,7 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
                 Xutf8TextListToTextProperty(display, (char **) &title, 1,
                                             XUTF8StringStyle, &titleprop);
             if (status == Success) {
-                XSetTextProperty(display, data->window, &titleprop,
+                XSetTextProperty(display, data->xwindow, &titleprop,
                                  _NET_WM_NAME);
                 XFree(titleprop.value);
             }
@@ -807,7 +807,7 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
         status = XStringListToTextProperty(&icon_locale, 1, &iconprop);
         SDL_free(icon_locale);
         if (status) {
-            XSetTextProperty(display, data->window, &iconprop,
+            XSetTextProperty(display, data->xwindow, &iconprop,
                              XA_WM_ICON_NAME);
             XFree(iconprop.value);
         }
@@ -817,7 +817,7 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
                 Xutf8TextListToTextProperty(display, (char **) &icon, 1,
                                             XUTF8StringStyle, &iconprop);
             if (status == Success) {
-                XSetTextProperty(display, data->window, &iconprop,
+                XSetTextProperty(display, data->xwindow, &iconprop,
                                  _NET_WM_ICON_NAME);
                 XFree(iconprop.value);
             }
@@ -855,13 +855,13 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
             propdata[1] = icon->h;
             SDL_memcpy(&propdata[2], surface->pixels,
                        surface->h * surface->pitch);
-            XChangeProperty(display, data->window, _NET_WM_ICON, XA_CARDINAL,
+            XChangeProperty(display, data->xwindow, _NET_WM_ICON, XA_CARDINAL,
                             32, PropModeReplace, (unsigned char *) propdata,
                             propsize);
         }
         SDL_FreeSurface(surface);
     } else {
-        XDeleteProperty(display, data->window, _NET_WM_ICON);
+        XDeleteProperty(display, data->xwindow, _NET_WM_ICON);
     }
 }
 
@@ -870,7 +870,7 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     Display *display = data->videodata->display;
     int x, y;
 
@@ -888,7 +888,7 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     } else {
         y = window->y;
     }
-    XMoveWindow(display, data->window, x, y);
+    XMoveWindow(display, data->xwindow, x, y);
 }
 
 void
@@ -897,7 +897,7 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    XResizeWindow(display, data->window, window->w, window->h);
+    XResizeWindow(display, data->xwindow, window->w, window->h);
 }
 
 void
@@ -906,7 +906,7 @@ X11_ShowWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    XMapRaised(display, data->window);
+    XMapRaised(display, data->xwindow);
 }
 
 void
@@ -915,7 +915,7 @@ X11_HideWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    XUnmapWindow(display, data->window);
+    XUnmapWindow(display, data->xwindow);
 }
 
 void
@@ -924,7 +924,7 @@ X11_RaiseWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    XRaiseWindow(display, data->window);
+    XRaiseWindow(display, data->xwindow);
 }
 
 static void
@@ -932,7 +932,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = XInternAtom(display, "_NET_WM_STATE", False);
     Atom _NET_WM_STATE_MAXIMIZED_VERT =
@@ -942,7 +942,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     XEvent e;
 
     e.xany.type = ClientMessage;
-    e.xany.window = data->window;
+    e.xany.window = data->xwindow;
     e.xclient.message_type = _NET_WM_STATE;
     e.xclient.format = 32;
     e.xclient.data.l[0] =
@@ -986,8 +986,8 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
         /* Try to grab the mouse */
         for (;;) {
             int result =
-                XGrabPointer(display, data->window, True, 0, GrabModeAsync,
-                             GrabModeAsync, data->window, None, CurrentTime);
+                XGrabPointer(display, data->xwindow, True, 0, GrabModeAsync,
+                             GrabModeAsync, data->xwindow, None, CurrentTime);
             if (result == GrabSuccess) {
                 break;
             }
@@ -995,10 +995,10 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
         }
 
         /* Raise the window if we grab the mouse */
-        XRaiseWindow(display, data->window);
+        XRaiseWindow(display, data->xwindow);
 
         /* Now grab the keyboard */
-        XGrabKeyboard(display, data->window, True, GrabModeAsync,
+        XGrabKeyboard(display, data->xwindow, True, GrabModeAsync,
                       GrabModeAsync, CurrentTime);
     } else {
         XUngrabPointer(display, CurrentTime);
@@ -1021,7 +1021,7 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 
         if (windowlist) {
             for (i = 0; i < numwindows; ++i) {
-                if (windowlist[i] && (windowlist[i]->windowID == window->id)) {
+                if (windowlist[i] && (windowlist[i]->window == window)) {
                     windowlist[i] = windowlist[numwindows - 1];
                     windowlist[numwindows - 1] = NULL;
                     videodata->numwindows--;
@@ -1035,7 +1035,7 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
         }
 #endif
         if (data->created) {
-            XDestroyWindow(display, data->window);
+            XDestroyWindow(display, data->xwindow);
         }
         SDL_free(data);
     }

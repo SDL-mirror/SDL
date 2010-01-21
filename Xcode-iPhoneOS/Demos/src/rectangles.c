@@ -38,7 +38,7 @@ int
 main(int argc, char *argv[])
 {
 
-    SDL_WindowID windowID;
+    SDL_Window *window;
     int done;
     SDL_Event event;
 
@@ -51,13 +51,13 @@ main(int argc, char *argv[])
     srand(time(NULL));
 
     /* create window and renderer */
-    windowID =
+    window =
         SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                          SDL_WINDOW_SHOWN);
-    if (windowID == 0) {
+    if (window == 0) {
         fatalError("Could not initialize Window");
     }
-    if (SDL_CreateRenderer(windowID, -1, 0) != 0) {
+    if (SDL_CreateRenderer(window, -1, 0) != 0) {
         fatalError("Could not create renderer");
     }
 

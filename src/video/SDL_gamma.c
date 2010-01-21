@@ -171,7 +171,7 @@ SDL_SetGammaRamp(const Uint16 * red, const Uint16 * green, const Uint16 * blue)
         SDL_UninitializedVideo();
         return -1;
     }
-    return SDL_SetGammaRampForDisplay(&SDL_CurrentDisplay, red, green, blue);
+    return SDL_SetGammaRampForDisplay(SDL_CurrentDisplay, red, green, blue);
 }
 
 int
@@ -230,7 +230,7 @@ SDL_GetGammaRamp(Uint16 * red, Uint16 * green, Uint16 * blue)
         SDL_UninitializedVideo();
         return -1;
     }
-    return SDL_GetGammaRampForDisplay(&SDL_CurrentDisplay, red, green, blue);
+    return SDL_GetGammaRampForDisplay(SDL_CurrentDisplay, red, green, blue);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

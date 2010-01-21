@@ -761,7 +761,7 @@ CommonInit(CommonState * state)
         fullscreen_mode.refresh_rate = state->refresh_rate;
 
         state->windows =
-            (SDL_WindowID *) SDL_malloc(state->num_windows *
+            (SDL_Window **) SDL_malloc(state->num_windows *
                                         sizeof(*state->windows));
         if (!state->windows) {
             fprintf(stderr, "Out of memory!\n");

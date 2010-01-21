@@ -76,7 +76,7 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
             if (point.x < 0 || point.x >= candidate->w ||
                 point.y < 0 || point.y >= candidate->h) {
                 /* The mouse is out of this fullscreen display */
-                if (mouse->focus == candidate->id) {
+                if (mouse->focus == candidate) {
                     SDL_SetMouseFocus(data->mouse, 0);
                 }
             } else {
@@ -91,8 +91,8 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
     }
 
     /* Set the focus appropriately */
-    if (mouse->focus != window->id) {
-        SDL_SetMouseFocus(data->mouse, window->id);
+    if (mouse->focus != window) {
+        SDL_SetMouseFocus(data->mouse, window);
     }
 
     switch ([event type]) {

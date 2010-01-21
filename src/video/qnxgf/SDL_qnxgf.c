@@ -978,7 +978,7 @@ int
 qnxgf_createwindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *wdata;
     int32_t status;
@@ -1081,8 +1081,8 @@ qnxgf_createwindow(_THIS, SDL_Window * window)
     hiddi_enable_mouse();
 
     /* By default last created window got a input focus */
-    SDL_SetKeyboardFocus(0, window->id);
-    SDL_SetMouseFocus(0, window->id);
+    SDL_SetKeyboardFocus(0, window);
+    SDL_SetMouseFocus(0, window);
 
     /* Window has been successfully created */
     return 0;
@@ -1155,7 +1155,7 @@ qnxgf_destroywindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
 
     if (wdata != NULL) {
@@ -1309,7 +1309,7 @@ qnxgf_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *gfdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;

@@ -10,14 +10,14 @@
 #define GLYPH_SIZE_IMAGE 16     /* size of glyphs (characters) in the bitmap font file */
 #define GLYPH_SIZE_SCREEN 32    /* size of glyphs (characters) as shown on the screen */
 
-static SDL_TextureID textureID; /* texture where we'll hold our font */
+static SDL_Texture *texture; /* texture where we'll hold our font */
 
 /* iPhone SDL addition keyboard related function definitions */
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_WindowID windowID);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_WindowID windowID);
-extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_WindowID
-                                                           windowID);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_WindowID windowID);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
+extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window *
+                                                           window);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 
 /* function declarations */
 void cleanup(void);
@@ -157,7 +157,7 @@ drawIndex(int index)
         { GLYPH_SIZE_IMAGE * index, 0, GLYPH_SIZE_IMAGE, GLYPH_SIZE_IMAGE };
     SDL_Rect dstRect = { x, y, GLYPH_SIZE_SCREEN, GLYPH_SIZE_SCREEN };
     drawBlank(x, y);
-    SDL_RenderCopy(textureID, &srcRect, &dstRect);
+    SDL_RenderCopy(texture, &srcRect, &dstRect);
 }
 
 /*  draws the cursor icon at the current end position of the text */
@@ -194,8 +194,8 @@ backspace(void)
     }
 }
 
-/* this function loads our font into an SDL_Texture and returns the SDL_TextureID */
-SDL_TextureID
+/* this function loads our font into an SDL_Texture and returns the SDL_Texture  */
+SDL_Texture*
 loadFont(void)
 {
 
@@ -218,17 +218,17 @@ loadFont(void)
                                  Bmask, Amask);
         SDL_BlitSurface(surface, NULL, converted, NULL);
         /* create our texture */
-        textureID =
+        texture =
             SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ABGR8888, converted);
-        if (textureID == 0) {
+        if (texture == 0) {
             printf("texture creation failed: %s\n", SDL_GetError());
         } else {
             /* set blend mode for our texture */
-            SDL_SetTextureBlendMode(textureID, SDL_BLENDMODE_BLEND);
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
         }
         SDL_FreeSurface(surface);
         SDL_FreeSurface(converted);
-        return textureID;
+        return texture;
     }
 }
 
@@ -237,6 +237,7 @@ main(int argc, char *argv[])
 {
 
     int index;                  /* index of last key we pushed in the bitmap font */
+    SDL_Window *window;
     SDL_Event event;            /* last event received */
     SDLMod mod;                 /* key modifiers of last key we pushed */
     SDL_scancode scancode;      /* scancode of last key we pushed */
@@ -245,11 +246,9 @@ main(int argc, char *argv[])
         printf("Error initializing SDL: %s", SDL_GetError());
     }
     /* create window */
-    SDL_WindowID windowID =
-        SDL_CreateWindow("iPhone keyboard test", 0, 0, SCREEN_WIDTH,
-                         SCREEN_HEIGHT, 0);
+    window = SDL_CreateWindow("iPhone keyboard test", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     /* create renderer */
-    SDL_CreateRenderer(windowID, 0, 0);
+    SDL_CreateRenderer(window, 0, 0);
 
     /* load up our font */
     loadFont();
@@ -301,7 +300,7 @@ main(int argc, char *argv[])
             /*      mouse up toggles onscreen keyboard visibility
                this function is available ONLY on iPhone OS
              */
-            SDL_iPhoneKeyboardToggle(windowID);
+            SDL_iPhoneKeyboardToggle(window);
             break;
 #endif
         }
@@ -314,6 +313,6 @@ main(int argc, char *argv[])
 void
 cleanup(void)
 {
-    SDL_DestroyTexture(textureID);
+    SDL_DestroyTexture(texture);
     SDL_Quit();
 }

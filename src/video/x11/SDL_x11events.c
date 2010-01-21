@@ -66,7 +66,7 @@ X11_DispatchEvent(_THIS)
     if (videodata && videodata->windowlist) {
         for (i = 0; i < videodata->numwindows; ++i) {
             if ((videodata->windowlist[i] != NULL) &&
-                (videodata->windowlist[i]->window == xevent.xany.window)) {
+                (videodata->windowlist[i]->xwindow == xevent.xany.window)) {
                 data = videodata->windowlist[i];
                 break;
             }
@@ -97,7 +97,7 @@ X11_DispatchEvent(_THIS)
             /* FIXME: Should we reset data for all mice? */
             for (i = 0; i < SDL_GetNumMice(); ++i) {
                 SDL_Mouse *mouse = SDL_GetMouse(i);
-                SDL_SetMouseFocus(mouse->id, data->windowID);
+                SDL_SetMouseFocus(mouse->id, data->window);
             }
 #endif
         }
@@ -132,7 +132,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("FocusIn!\n");
 #endif
-            SDL_SetKeyboardFocus(videodata->keyboard, data->windowID);
+            SDL_SetKeyboardFocus(videodata->keyboard, data->window);
 #ifdef X_HAVE_UTF8_STRING
             if (data->ic) {
                 XSetICFocus(data->ic);
@@ -232,9 +232,8 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("UnmapNotify!\n");
 #endif
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_HIDDEN, 0, 0);
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_MINIMIZED, 0,
-                                0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
         }
         break;
 
@@ -243,9 +242,8 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("MapNotify!\n");
 #endif
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_SHOWN, 0, 0);
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_RESTORED, 0,
-                                0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
         }
         break;
 
@@ -255,9 +253,9 @@ X11_DispatchEvent(_THIS)
             printf("ConfigureNotify! (resize: %dx%d)\n",
                    xevent.xconfigure.width, xevent.xconfigure.height);
 #endif
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_MOVED,
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
                                 xevent.xconfigure.x, xevent.xconfigure.y);
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_RESIZED,
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
                                 xevent.xconfigure.width,
                                 xevent.xconfigure.height);
         }
@@ -268,8 +266,7 @@ X11_DispatchEvent(_THIS)
             if ((xevent.xclient.format == 32) &&
                 (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW)) {
 
-                SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_CLOSE, 0,
-                                    0);
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
             }
         }
         break;
@@ -279,8 +276,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("Expose (count = %d)\n", xevent.xexpose.count);
 #endif
-            SDL_SendWindowEvent(data->windowID, SDL_WINDOWEVENT_EXPOSED, 0,
-                                0);
+            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
         }
         break;
 

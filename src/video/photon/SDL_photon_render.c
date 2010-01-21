@@ -124,7 +124,7 @@ SDL_RenderDriver photon_renderdriver = {
 static SDL_Renderer *
 photon_createrenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer = NULL;
@@ -171,7 +171,7 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = photon_destroytexture;
     renderer->DestroyRenderer = photon_destroyrenderer;
     renderer->info = photon_renderdriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = rdata;
 
     /* Copy direct_mode status */
@@ -298,7 +298,7 @@ static int _photon_recreate_surfaces(SDL_Renderer * renderer)
     /* Obtain window and display structures */
     window=SDL_GetWindowFromID(renderer->window);
     wdata=(SDL_WindowData*)window->driverdata;
-    display=SDL_GetDisplayFromWindow(window);
+    display=window->display;
     didata=(SDL_DisplayData *) display->driverdata;
     phdata=(SDL_VideoData *) display->device->driverdata;
 
@@ -723,7 +723,7 @@ photon_displaymodechanged(SDL_Renderer * renderer)
 {
     SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
 
     /* Copy direct_mode status */
@@ -738,7 +738,7 @@ photon_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_TextureData *tdata = NULL;
     uint32_t it;

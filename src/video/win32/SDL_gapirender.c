@@ -430,7 +430,7 @@ GetFramebuffer()
 SDL_Renderer *
 GAPI_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
@@ -472,7 +472,7 @@ GAPI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyRenderer = GAPI_DestroyRenderer;
     renderer->info.name = GAPI_RenderDriver.info.name;
     renderer->info.flags = 0;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     /* Gapi provides only a framebuffer so lets use software implementation */

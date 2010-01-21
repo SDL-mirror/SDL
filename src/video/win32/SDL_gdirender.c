@@ -207,7 +207,7 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GDI_DestroyTexture;
     renderer->DestroyRenderer = GDI_DestroyRenderer;
     renderer->info = GDI_RenderDriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -274,7 +274,7 @@ static int
 GDI_DisplayModeChanged(SDL_Renderer * renderer)
 {
     GDI_RenderData *data = (GDI_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     int i, n;
 
     if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
@@ -378,8 +378,8 @@ static int
 GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     GDI_TextureData *data;
 
     data = (GDI_TextureData *) SDL_calloc(1, sizeof(*data));
@@ -699,7 +699,7 @@ GDI_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 
     if (data->makedirty) {
         /* Get the smallest rectangle that contains everything */
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         SDL_Rect rect;
 
         rect.x = 0;
@@ -732,7 +732,7 @@ GDI_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 
     if (data->makedirty) {
         /* Get the smallest rectangle that contains everything */
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         SDL_Rect clip, rect;
 
         clip.x = 0;
@@ -787,7 +787,7 @@ GDI_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     int i, status = 1;
 
     if (data->makedirty) {
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         SDL_Rect clip, rect;
 
         clip.x = 0;
@@ -844,7 +844,7 @@ GDI_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     int i, status = 1;
 
     if (data->makedirty) {
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         SDL_Rect clip, rect;
 
         clip.x = 0;
@@ -943,8 +943,8 @@ GDI_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
     GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     struct {
         HBITMAP hbm;
         void *pixels;
@@ -984,8 +984,8 @@ GDI_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                       Uint32 format, const void * pixels, int pitch)
 {
     GDI_RenderData *renderdata = (GDI_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     struct {
         HBITMAP hbm;
         void *pixels;

@@ -32,7 +32,7 @@ typedef struct
     int depth;
     int refresh_rate;
     int num_windows;
-    SDL_WindowID *windows;
+    SDL_Window **windows;
 
     /* Renderer info */
     const char *renderdriver;

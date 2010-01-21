@@ -221,7 +221,7 @@ static void
 X11_GL_InitExtensions(_THIS)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
-    int screen = ((SDL_DisplayData *) SDL_CurrentDisplay.driverdata)->screen;
+    int screen = ((SDL_DisplayData *) SDL_CurrentDisplay->driverdata)->screen;
     XVisualInfo *vinfo;
     XSetWindowAttributes xattr;
     Window w;
@@ -394,8 +394,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
     int screen =
-        ((SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->
-         driverdata)->screen;
+        ((SDL_DisplayData *) window->display->driverdata)->screen;
     XWindowAttributes xattr;
     XVisualInfo v, *vinfo;
     int n;
@@ -403,7 +402,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
 
     /* We do this to create a clean separation between X and GLX errors. */
     XSync(display, False);
-    XGetWindowAttributes(display, data->window, &xattr);
+    XGetWindowAttributes(display, data->xwindow, &xattr);
     v.screen = screen;
     v.visualid = XVisualIDFromVisual(xattr.visual);
     vinfo = XGetVisualInfo(display, VisualScreenMask | VisualIDMask, &v, &n);
@@ -492,7 +491,7 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     Window drawable =
-        (window ? ((SDL_WindowData *) window->driverdata)->window : None);
+        (window ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
     GLXContext glx_context = (GLXContext) context;
     int status;
 
@@ -560,7 +559,7 @@ X11_GL_SwapWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    _this->gl_data->glXSwapBuffers(display, data->window);
+    _this->gl_data->glXSwapBuffers(display, data->xwindow);
 }
 
 void

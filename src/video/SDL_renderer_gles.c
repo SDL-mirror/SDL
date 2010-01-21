@@ -332,7 +332,7 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
 {
 
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
 
     if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
         return -1;
@@ -872,7 +872,7 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (data->GL_OES_draw_texture_supported && data->useDrawTexture) {
         /* this code is a little funny because the viewport is upside down vs SDL's coordinate system */
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         GLint cropRect[4];
         cropRect[0] = srcrect->x;
         cropRect[1] = srcrect->y + srcrect->h;

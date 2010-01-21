@@ -133,7 +133,7 @@ SDL_Renderer *
 SDL_PS3_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     deprintf(1, "+SDL_PS3_CreateRenderer()\n");
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_VideoData *devdata = display->device->driverdata;
     SDL_Renderer *renderer;
@@ -179,7 +179,7 @@ SDL_PS3_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyRenderer = SDL_PS3_DestroyRenderer;
     renderer->info.name = SDL_PS3_RenderDriver.info.name;
     renderer->info.flags = 0;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     deprintf(1, "window->w = %u\n", window->w);
@@ -518,7 +518,7 @@ SDL_PS3_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_PS3_RenderData *data =
         (SDL_PS3_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     PS3_TextureData *txdata = (PS3_TextureData *) texture->driverdata;
     SDL_VideoData *devdata = display->device->driverdata;
 
@@ -640,7 +640,7 @@ SDL_PS3_RenderPresent(SDL_Renderer * renderer)
     SDL_PS3_RenderData *data =
         (SDL_PS3_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_VideoData *devdata = display->device->driverdata;
 
     /* Send the data to the screen */

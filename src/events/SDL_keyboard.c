@@ -646,7 +646,7 @@ SDL_SetScancodeName(SDL_scancode scancode, const char *name)
 }
 
 void
-SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
+SDL_SetKeyboardFocus(int index, SDL_Window * window)
 {
     SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
     int i;
@@ -657,7 +657,7 @@ SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
     }
 
     /* See if the current window has lost focus */
-    if (keyboard->focus && keyboard->focus != windowID) {
+    if (keyboard->focus && keyboard->focus != window) {
         focus = SDL_FALSE;
         for (i = 0; i < SDL_num_keyboards; ++i) {
             if (i != index) {
@@ -674,7 +674,7 @@ SDL_SetKeyboardFocus(int index, SDL_WindowID windowID)
         }
     }
 
-    keyboard->focus = windowID;
+    keyboard->focus = window;
 
     if (keyboard->focus) {
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_GAINED,
@@ -809,7 +809,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
         event.key.keysym.sym = keyboard->keymap[scancode];
         event.key.keysym.mod = modstate;
         event.key.keysym.unicode = 0;
-        event.key.windowID = keyboard->focus;
+        event.key.windowID = keyboard->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
@@ -832,7 +832,7 @@ SDL_SendKeyboardText(int index, const char *text)
         event.text.type = SDL_TEXTINPUT;
         event.text.which = (Uint8) index;
         SDL_strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
-        event.text.windowID = keyboard->focus;
+        event.text.windowID = keyboard->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);

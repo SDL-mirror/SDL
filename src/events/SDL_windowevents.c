@@ -44,13 +44,11 @@ RemovePendingSizeEvents(void * userdata, SDL_Event *event)
 }
 
 int
-SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
+SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
                     int data2)
 {
     int posted;
-    SDL_Window *window;
 
-    window = SDL_GetWindowFromID(windowID);
     if (!window) {
         return 0;
     }
@@ -152,7 +150,7 @@ SDL_SendWindowEvent(SDL_WindowID windowID, Uint8 windowevent, int data1,
         event.window.event = windowevent;
         event.window.data1 = data1;
         event.window.data2 = data2;
-        event.window.windowID = windowID;
+        event.window.windowID = window->id;
 
         /* Fixes queue overflow with resize events that aren't processed */
         if (windowevent == SDL_WINDOWEVENT_RESIZED) {

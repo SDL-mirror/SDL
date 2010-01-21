@@ -35,7 +35,7 @@ struct SDL_Keyboard
     void (*FreeKeyboard) (SDL_Keyboard * keyboard);
 
     /* Data common to all keyboards */
-    SDL_WindowID focus;
+    SDL_Window *focus;
     Uint16 modstate;
     Uint8 keystate[SDL_NUM_SCANCODES];
     SDLKey keymap[SDL_NUM_SCANCODES];
@@ -73,7 +73,7 @@ extern void SDL_SetKeymap(int index, int start, SDLKey * keys, int length);
 extern void SDL_SetScancodeName(SDL_scancode scancode, const char *name);
 
 /* Set the keyboard focus window */
-extern void SDL_SetKeyboardFocus(int index, SDL_WindowID windowID);
+extern void SDL_SetKeyboardFocus(int index, SDL_Window * window);
 
 /* Send a keyboard event for a keyboard at an index */
 extern int SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode);

@@ -26,8 +26,8 @@
 
 typedef struct
 {
-    SDL_WindowID windowID;
-    Window window;
+    SDL_Window *window;
+    Window xwindow;
     XIC ic;
     SDL_bool created;
     struct SDL_VideoData *videodata;

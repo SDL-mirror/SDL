@@ -48,7 +48,7 @@ struct SDL_Mouse
     void (*FreeCursor) (SDL_Cursor * cursor);
 
     /* Warp the mouse to (x,y) */
-    void (*WarpMouse) (SDL_Mouse * mouse, SDL_WindowID windowID, int x,
+    void (*WarpMouse) (SDL_Mouse * mouse, SDL_Window * window, int x,
                        int y);
 
     /* Free the mouse when it's time */
@@ -65,7 +65,7 @@ struct SDL_Mouse
 
     /* Data common to all mice */
     int id;
-    SDL_WindowID focus;
+    SDL_Window *focus;
     int which;
     int x;
     int y;
@@ -106,7 +106,7 @@ extern void SDL_DelMouse(int index);
 extern void SDL_ResetMouse(int index);
 
 /* Set the mouse focus window */
-extern void SDL_SetMouseFocus(int id, SDL_WindowID windowID);
+extern void SDL_SetMouseFocus(int id, SDL_Window * window);
 
 /* Send a mouse motion event for a mouse */
 extern int SDL_SendMouseMotion(int id, int relative, int x, int y, int z);

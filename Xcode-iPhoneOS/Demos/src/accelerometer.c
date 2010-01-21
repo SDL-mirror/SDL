@@ -27,8 +27,8 @@ static struct
     SDL_Rect rect;              /* (drawn) position and size of ship */
 } ship;
 
-static SDL_TextureID shipID = 0;        /* texture for spaceship */
-static SDL_TextureID spaceID = 0;       /* texture for space (background */
+static SDL_Texture *ship = 0;        /* texture for spaceship */
+static SDL_Texture *space = 0;       /* texture for space (background */
 
 void
 render(void)
@@ -97,13 +97,13 @@ render(void)
     }
 
     /* draw the background */
-    SDL_RenderCopy(spaceID, NULL, NULL);
+    SDL_RenderCopy(space, NULL, NULL);
 
     /* draw the ship */
     ship.rect.x = ship.x;
     ship.rect.y = ship.y;
 
-    SDL_RenderCopy(shipID, NULL, &ship.rect);
+    SDL_RenderCopy(ship, NULL, &ship.rect);
 
     /* update screen */
     SDL_RenderPresent();
@@ -141,11 +141,11 @@ initializeTextures()
     SDL_BlitSurface(bmp_surface, NULL, bmp_surface_rgba, NULL);
 
     /* create ship texture from surface */
-    shipID = SDL_CreateTextureFromSurface(format, bmp_surface_rgba);
-    if (shipID == 0) {
+    ship = SDL_CreateTextureFromSurface(format, bmp_surface_rgba);
+    if (ship == 0) {
         fatalError("could not create ship texture");
     }
-    SDL_SetTextureBlendMode(shipID, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(ship, SDL_BLENDMODE_BLEND);
 
     /* set the width and height of the ship from the surface dimensions */
     ship.rect.w = bmp_surface->w;
@@ -160,8 +160,8 @@ initializeTextures()
         fatalError("could not load space.bmp");
     }
     /* create space texture from surface */
-    spaceID = SDL_CreateTextureFromSurface(format, bmp_surface);
-    if (spaceID == 0) {
+    space = SDL_CreateTextureFromSurface(format, bmp_surface);
+    if (space == 0) {
         fatalError("could not create space texture");
     }
     SDL_FreeSurface(bmp_surface);
@@ -174,7 +174,7 @@ int
 main(int argc, char *argv[])
 {
 
-    SDL_WindowID windowID;      /* ID of main window */
+    SDL_Window *window;         /* main window */
     Uint32 startFrame;          /* time frame began to process */
     Uint32 endFrame;            /* time frame ended processing */
     Uint32 delay;               /* time to pause waiting to draw next frame */
@@ -186,10 +186,10 @@ main(int argc, char *argv[])
     }
 
     /* create main window and renderer */
-    windowID = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+    window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(windowID, 0, 0);
+    SDL_CreateRenderer(window, 0, 0);
 
     /* print out some info about joysticks and try to open accelerometer for use */
     printf("There are %d joysticks available\n", SDL_NumJoysticks());
@@ -240,8 +240,8 @@ main(int argc, char *argv[])
     }
 
     /* delete textures */
-    SDL_DestroyTexture(shipID);
-    SDL_DestroyTexture(spaceID);
+    SDL_DestroyTexture(ship);
+    SDL_DestroyTexture(space);
 
     /* shutdown SDL */
     SDL_Quit();

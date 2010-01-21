@@ -36,11 +36,11 @@ quit(int rc)
     exit(rc);
 }
 
-SDL_TextureID
-LoadSprite(SDL_WindowID window, char *file)
+SDL_Texture *
+LoadSprite(SDL_Window * window, char *file)
 {
     SDL_Surface *temp;
-    SDL_TextureID sprite;
+    SDL_Texture *sprite;
 
     /* Load the sprite image */
     temp = SDL_LoadBMP(file);
@@ -69,7 +69,7 @@ LoadSprite(SDL_WindowID window, char *file)
 }
 
 void
-MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
+MoveSprites(SDL_Window * window, SDL_Texture * sprite)
 {
     int i, n;
     int window_w, window_h;
@@ -113,8 +113,8 @@ main(int argc, char *argv[])
 {
     int i, done;
     const char *driver;
-    SDL_WindowID window;
-    SDL_TextureID sprite;
+    SDL_Window *window;
+    SDL_Texture *sprite;
     int window_w, window_h;
     int sprite_w, sprite_h;
     SDL_Event event;

@@ -29,8 +29,6 @@
 
 /* The SDL video driver */
 
-typedef struct SDL_Window SDL_Window;
-typedef struct SDL_Texture SDL_Texture;
 typedef struct SDL_Renderer SDL_Renderer;
 typedef struct SDL_RenderDriver SDL_RenderDriver;
 typedef struct SDL_VideoDisplay SDL_VideoDisplay;
@@ -39,21 +37,20 @@ typedef struct SDL_VideoDevice SDL_VideoDevice;
 /* Define the SDL texture structure */
 struct SDL_Texture
 {
-    Uint32 id;
-
     Uint32 format;              /**< The pixel format of the texture */
     int access;                 /**< SDL_TextureAccess */
     int w;                      /**< The width of the texture */
     int h;                      /**< The height of the texture */
     int modMode;                /**< The texture modulation mode */
-    int blendMode;                      /**< The texture blend mode */
-    int scaleMode;                      /**< The texture scale mode */
-    Uint8 r, g, b, a;                   /**< Texture modulation values */
+    int blendMode;              /**< The texture blend mode */
+    int scaleMode;              /**< The texture scale mode */
+    Uint8 r, g, b, a;           /**< Texture modulation values */
 
     SDL_Renderer *renderer;
 
-    void *driverdata;                   /**< Driver specific texture representation */
+    void *driverdata;           /**< Driver specific texture representation */
 
+    SDL_Texture *prev;
     SDL_Texture *next;
 };
 
@@ -118,7 +115,10 @@ struct SDL_Renderer
     SDL_RendererInfo info;
 
     /* The window associated with the renderer */
-    SDL_WindowID window;
+    SDL_Window *window;
+
+    /* The list of textures */
+    SDL_Texture *textures;
 
     Uint8 r, g, b, a;                   /**< Color for drawing operations values */
     int blendMode;                      /**< The drawing blend mode */
@@ -139,19 +139,21 @@ struct SDL_RenderDriver
 struct SDL_Window
 {
     Uint32 id;
-
     char *title;
     int x, y;
     int w, h;
     Uint32 flags;
 
-    int display;
+    SDL_VideoDisplay *display;
     SDL_Renderer *renderer;
 
     SDL_DisplayMode fullscreen_mode;
 
     void *userdata;
     void *driverdata;
+
+    SDL_Window *prev;
+    SDL_Window *next;
 };
 #define FULLSCREEN_VISIBLE(W) \
     (((W)->flags & SDL_WINDOW_FULLSCREEN) && \
@@ -183,9 +185,6 @@ struct SDL_VideoDisplay
     SDL_Window *fullscreen_window;
 
     SDL_Renderer *current_renderer;
-
-    /* The hash list of textures */
-    SDL_Texture *textures[64];
 
     SDL_VideoDevice *device;
 
@@ -413,8 +412,8 @@ extern VideoBootStrap NDS_bootstrap;
 extern VideoBootStrap PND_bootstrap;
 #endif
 
-#define SDL_CurrentDisplay	(_this->displays[_this->current_display])
-#define SDL_CurrentRenderer	(SDL_CurrentDisplay.current_renderer)
+#define SDL_CurrentDisplay	(&_this->displays[_this->current_display])
+#define SDL_CurrentRenderer	(SDL_CurrentDisplay->current_renderer)
 
 extern SDL_VideoDevice *SDL_GetVideoDevice();
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
@@ -433,8 +432,6 @@ extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, 
 extern void SDL_AddRenderDriver(SDL_VideoDisplay *display, const SDL_RenderDriver * driver);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
-extern SDL_Window *SDL_GetWindowFromID(SDL_WindowID windowID);
-extern SDL_VideoDisplay *SDL_GetDisplayFromWindow(SDL_Window * window);
 
 extern void SDL_OnWindowShown(SDL_Window * window);
 extern void SDL_OnWindowHidden(SDL_Window * window);
@@ -443,7 +440,7 @@ extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
-extern SDL_WindowID SDL_GetFocusWindow(void);
+extern SDL_Window * SDL_GetFocusWindow(void);
 
 #endif /* _SDL_sysvideo_h */
 

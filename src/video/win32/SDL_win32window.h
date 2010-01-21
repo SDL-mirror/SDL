@@ -26,7 +26,7 @@
 
 typedef struct
 {
-    SDL_WindowID windowID;
+    SDL_Window *window;
     HWND hwnd;
     HDC hdc;
     WNDPROC wndproc;

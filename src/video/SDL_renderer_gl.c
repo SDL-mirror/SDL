@@ -321,7 +321,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
     renderer->info = GL_RenderDriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags =
@@ -332,12 +332,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    data->context = SDL_GL_CreateContext(window->id);
+    data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
         GL_DestroyRenderer(renderer);
         return NULL;
     }
-    if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
+    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
         GL_DestroyRenderer(renderer);
         return NULL;
     }
@@ -442,9 +442,9 @@ static int
 GL_ActivateRenderer(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
 
-    if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
+    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
         return -1;
     }
     if (data->updateSize) {
@@ -752,7 +752,7 @@ static int
 GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     GL_TextureData *data;
     GLint internalFormat;
     GLenum format, type;
@@ -1407,7 +1407,7 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     Uint32 pixel_format, void * pixels, int pitch)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     GLint internalFormat;
     GLenum format, type;
     Uint8 *src, *dst, *tmp;
@@ -1454,7 +1454,7 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 pixel_format, const void * pixels, int pitch)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     GLint internalFormat;
     GLenum format, type;
     Uint8 *src, *dst, *tmp;

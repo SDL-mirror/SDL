@@ -363,8 +363,7 @@ initializeTexture()
 int
 main(int argc, char *argv[])
 {
-
-    SDL_WindowID windowID;      /* ID of main window */
+    SDL_Window *window;         /* main window */
     Uint32 startFrame;          /* time frame began to process */
     Uint32 endFrame;            /* time frame ended processing */
     Uint32 delay;               /* time to pause waiting to draw next frame */
@@ -389,10 +388,10 @@ main(int argc, char *argv[])
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
     /* create main window and renderer */
-    windowID = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+    window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(windowID, 0, 0);
+    SDL_CreateRenderer(window, 0, 0);
 
     /* load the particle texture */
     initializeTexture();

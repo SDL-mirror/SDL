@@ -69,8 +69,8 @@ typedef struct SDL_WindowData SDL_WindowData;
 
 struct SDL_WindowData
 {
-    SDL_WindowID windowID;
-    NSWindow *window;
+    SDL_Window *window;
+    NSWindow *nswindow;
     SDL_bool created;
     CGDirectDisplayID display;
     Cocoa_WindowListener *listener;

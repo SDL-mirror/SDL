@@ -11,7 +11,7 @@
 
 static CommonState *state;
 static int num_sprites;
-static SDL_TextureID *sprites;
+static SDL_Texture **sprites;
 static SDL_bool cycle_color;
 static SDL_bool cycle_alpha;
 static int cycle_direction = 1;
@@ -98,7 +98,7 @@ LoadSprite(char *file)
 }
 
 void
-MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
+MoveSprites(SDL_Window * window, SDL_Texture * sprite)
 {
     int i, n;
     int window_w, window_h;
@@ -294,7 +294,7 @@ main(int argc, char *argv[])
 
     /* Create the windows, initialize the renderers, and load the textures */
     sprites =
-        (SDL_TextureID *) SDL_malloc(state->num_windows * sizeof(*sprites));
+        (SDL_Texture **) SDL_malloc(state->num_windows * sizeof(*sprites));
     if (!sprites) {
         fprintf(stderr, "Out of memory!\n");
         quit(2);
@@ -346,7 +346,7 @@ main(int argc, char *argv[])
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(event.window.windowID);
+                    SDL_SelectRenderer(SDL_GetWindowFromID(event.window.windowID));
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
                     SDL_RenderClear();
                     break;

@@ -23,10 +23,9 @@
 #ifndef sdl_uikitkeyboard_h
 #define sdl_uikitkeyboard_h
 
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_WindowID windowID);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_WindowID windowID);
-extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_WindowID
-                                                           windowID);
-extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_WindowID windowID);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
+extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 
 #endif

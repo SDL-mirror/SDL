@@ -74,7 +74,7 @@ typedef struct
 SDL_Renderer *
 SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     SDL_DUMMY_RenderData *data;
@@ -113,7 +113,7 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyRenderer = SDL_DUMMY_DestroyRenderer;
     renderer->info.name = SDL_DUMMY_RenderDriver.info.name;
     renderer->info.flags = 0;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
     Setup_SoftwareRenderer(renderer);
 
@@ -238,8 +238,8 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         SDL_Surface *target = data->screens[data->current_screen];
@@ -266,8 +266,8 @@ SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     SDL_Surface *screen = data->screens[data->current_screen];
     Uint32 screen_format = display->current_mode.format;
     Uint8 *screen_pixels = (Uint8 *) screen->pixels +
@@ -286,8 +286,8 @@ SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     SDL_Surface *screen = data->screens[data->current_screen];
     Uint32 screen_format = display->current_mode.format;
     Uint8 *screen_pixels = (Uint8 *) screen->pixels +
@@ -311,7 +311,7 @@ SDL_DUMMY_RenderPresent(SDL_Renderer * renderer)
     if (SDL_getenv("SDL_VIDEO_DUMMY_SAVE_FRAMES")) {
         char file[128];
         SDL_snprintf(file, sizeof(file), "SDL_window%d-%8.8d.bmp",
-                     renderer->window, ++frame_number);
+                     renderer->window->id, ++frame_number);
         SDL_SaveBMP(data->screens[data->current_screen], file);
     }
 

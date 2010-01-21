@@ -417,7 +417,7 @@ PND_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;
@@ -816,7 +816,7 @@ PND_gl_swapwindow(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
 
 
     if (phdata->egl_initialized != SDL_TRUE) {

@@ -196,7 +196,7 @@ void
 DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
 
     windata->window->GetPosition(windata->window,
                                  &windata->restore.x, &windata->restore.y);

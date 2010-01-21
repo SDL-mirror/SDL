@@ -38,7 +38,7 @@ SDL_Cursor *photon_createcursor(SDL_Surface * surface, int hot_x, int hot_y);
 int photon_showcursor(SDL_Cursor * cursor);
 void photon_movecursor(SDL_Cursor * cursor);
 void photon_freecursor(SDL_Cursor * cursor);
-void photon_warpmouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y);
+void photon_warpmouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y);
 void photon_freemouse(SDL_Mouse * mouse);
 
 int32_t
@@ -228,13 +228,12 @@ photon_showcursor(SDL_Cursor * cursor)
     SDL_DisplayData *didata;
     SDL_Window *window;
     SDL_WindowData *wdata;
-    SDL_WindowID window_id;
     PhCursorDef_t *internal_cursor;
     int32_t status;
 
     /* Get current window id */
-    window_id = SDL_GetFocusWindow();
-    if (window_id <= 0) {
+    window = SDL_GetFocusWindow();
+    if (!window) {
         SDL_MouseData *mdata = NULL;
 
         /* If there is no current window, then someone calls this function */
@@ -264,17 +263,12 @@ photon_showcursor(SDL_Cursor * cursor)
         }
     } else {
         /* Sanity checks */
-        window = SDL_GetWindowFromID(window_id);
-        if (window != NULL) {
-            display = SDL_GetDisplayFromWindow(window);
-            if (display != NULL) {
-                didata = (SDL_DisplayData *) display->driverdata;
-                if (didata != NULL) {
-                    wdata = (SDL_WindowData *) window->driverdata;
-                    if (wdata == NULL) {
-                        return -1;
-                    }
-                } else {
+        display = window->display;
+        if (display != NULL) {
+            didata = (SDL_DisplayData *) display->driverdata;
+            if (didata != NULL) {
+                wdata = (SDL_WindowData *) window->driverdata;
+                if (wdata == NULL) {
                     return -1;
                 }
             } else {
@@ -379,7 +373,7 @@ photon_movecursor(SDL_Cursor * cursor)
         /* Sanity checks */
         window = SDL_GetWindowFromID(window_id);
         if (window != NULL) {
-            display = SDL_GetDisplayFromWindow(window);
+            display = window->display;
             if (display != NULL) {
                 didata = (SDL_DisplayData *) display->driverdata;
                 if (didata != NULL) {
@@ -418,19 +412,17 @@ photon_freecursor(SDL_Cursor * cursor)
 }
 
 void
-photon_warpmouse(SDL_Mouse * mouse, SDL_WindowID windowID, int x, int y)
+photon_warpmouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y)
 {
     SDL_VideoDisplay *display;
     SDL_DisplayData *didata;
-    SDL_Window *window;
     SDL_WindowData *wdata;
     int16_t wx;
     int16_t wy;
 
     /* Sanity checks */
-    window = SDL_GetWindowFromID(windowID);
     if (window != NULL) {
-        display = SDL_GetDisplayFromWindow(window);
+        display = window->display;
         if (display != NULL) {
             didata = (SDL_DisplayData *) display->driverdata;
             if (didata != NULL) {

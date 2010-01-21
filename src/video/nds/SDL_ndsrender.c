@@ -126,7 +126,7 @@ typedef struct
 SDL_Renderer *
 NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     NDS_RenderData *data;
@@ -175,7 +175,7 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyRenderer = NDS_DestroyRenderer;
     renderer->info.name = NDS_RenderDriver.info.name;
     renderer->info.flags = 0;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
     renderer->CreateTexture = NDS_CreateTexture;
     renderer->QueryTexturePixels = NDS_QueryTexturePixels;
@@ -490,8 +490,8 @@ NDS_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     int Bpp = SDL_BYTESPERPIXEL(texture->format);
 
     if (txdat->type == NDSTX_BG) {
@@ -515,8 +515,8 @@ static void
 NDS_RenderPresent(SDL_Renderer * renderer)
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
 
     /* update sprites */
 //    NDS_OAM_Update(&(data->oam_copy), data->sub);
@@ -538,8 +538,6 @@ static void
 NDS_DestroyRenderer(SDL_Renderer * renderer)
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
     int i;
 
     if (data) {

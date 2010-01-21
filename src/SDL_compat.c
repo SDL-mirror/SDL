@@ -30,9 +30,9 @@
 #include "video/SDL_pixels_c.h"
 #include "video/SDL_yuv_sw_c.h"
 
-static SDL_WindowID SDL_VideoWindow = 0;
+static SDL_Window *SDL_VideoWindow = NULL;
 static SDL_RendererInfo SDL_VideoRendererInfo;
-static SDL_TextureID SDL_VideoTexture = 0;
+static SDL_Texture *SDL_VideoTexture = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
@@ -294,7 +294,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
                 button = SDL_BUTTON_WHEELDOWN;
             }
 
-            fake.button.which = event->wheel.windowID;
+            fake.button.which = event->wheel.which;
             fake.button.button = button;
             fake.button.x = x;
             fake.button.y = y;
@@ -357,7 +357,7 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
 }
 
 static SDL_Surface *
-CreateVideoSurface(SDL_TextureID textureID)
+CreateVideoSurface(SDL_Texture * texture)
 {
     SDL_Surface *surface;
     Uint32 format;
@@ -367,7 +367,7 @@ CreateVideoSurface(SDL_TextureID textureID)
     void *pixels;
     int pitch;
 
-    if (SDL_QueryTexture(textureID, &format, NULL, &w, &h) < 0) {
+    if (SDL_QueryTexture(texture, &format, NULL, &w, &h) < 0) {
         return NULL;
     }
 
@@ -377,7 +377,7 @@ CreateVideoSurface(SDL_TextureID textureID)
         return NULL;
     }
 
-    if (SDL_QueryTexturePixels(textureID, &pixels, &pitch) == 0) {
+    if (SDL_QueryTexturePixels(texture, &pixels, &pitch) == 0) {
         surface =
             SDL_CreateRGBSurfaceFrom(pixels, w, h, bpp, pitch, Rmask, Gmask,
                                      Bmask, Amask);
@@ -1504,7 +1504,7 @@ struct private_yuvhwdata
 
     SDL_SW_YUVTexture *sw;
 
-    SDL_TextureID textureID;
+    SDL_Texture *texture;
     Uint32 texture_format;
 };
 
@@ -1585,9 +1585,9 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
         break;
     }
 
-    overlay->hwdata->textureID =
+    overlay->hwdata->texture =
         SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_STREAMING, w, h);
-    if (overlay->hwdata->textureID) {
+    if (overlay->hwdata->texture) {
         overlay->hwdata->sw = NULL;
     } else {
         SDL_DisplayMode current_mode;
@@ -1601,11 +1601,11 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
         /* Create a supported RGB format texture for display */
         SDL_GetCurrentDisplayMode(&current_mode);
         texture_format = current_mode.format;
-        overlay->hwdata->textureID =
+        overlay->hwdata->texture =
             SDL_CreateTexture(texture_format,
                               SDL_TEXTUREACCESS_STREAMING, w, h);
     }
-    if (!overlay->hwdata->textureID) {
+    if (!overlay->hwdata->texture) {
         SDL_FreeYUVOverlay(overlay);
         return NULL;
     }
@@ -1631,7 +1631,7 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
         }
     } else {
         if (SDL_LockTexture
-            (overlay->hwdata->textureID, NULL, 1, &pixels, &pitch)
+            (overlay->hwdata->texture, NULL, 1, &pixels, &pitch)
             < 0) {
             return -1;
         }
@@ -1666,7 +1666,7 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
         void *pixels;
         int pitch;
         if (SDL_LockTexture
-            (overlay->hwdata->textureID, NULL, 1, &pixels, &pitch) == 0) {
+            (overlay->hwdata->texture, NULL, 1, &pixels, &pitch) == 0) {
             SDL_Rect srcrect;
 
             srcrect.x = 0;
@@ -1676,10 +1676,10 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
             SDL_SW_CopyYUVToRGB(overlay->hwdata->sw, &srcrect,
                                 overlay->hwdata->texture_format,
                                 overlay->w, overlay->h, pixels, pitch);
-            SDL_UnlockTexture(overlay->hwdata->textureID);
+            SDL_UnlockTexture(overlay->hwdata->texture);
         }
     } else {
-        SDL_UnlockTexture(overlay->hwdata->textureID);
+        SDL_UnlockTexture(overlay->hwdata->texture);
     }
 }
 
@@ -1690,7 +1690,7 @@ SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
         SDL_SetError("Passed a NULL overlay or dstrect");
         return -1;
     }
-    if (SDL_RenderCopy(overlay->hwdata->textureID, NULL, dstrect) < 0) {
+    if (SDL_RenderCopy(overlay->hwdata->texture, NULL, dstrect) < 0) {
         return -1;
     }
     SDL_RenderPresent();
@@ -1704,8 +1704,8 @@ SDL_FreeYUVOverlay(SDL_Overlay * overlay)
         return;
     }
     if (overlay->hwdata) {
-        if (overlay->hwdata->textureID) {
-            SDL_DestroyTexture(overlay->hwdata->textureID);
+        if (overlay->hwdata->texture) {
+            SDL_DestroyTexture(overlay->hwdata->texture);
         }
         SDL_free(overlay->hwdata);
     }

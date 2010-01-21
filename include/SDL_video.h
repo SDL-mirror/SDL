@@ -88,7 +88,8 @@ typedef struct
  *  \sa SDL_SetWindowTitle()
  *  \sa SDL_ShowWindow()
  */
-typedef Uint32 SDL_WindowID;
+struct SDL_Window;
+typedef struct SDL_Window SDL_Window;
 
 /**
  *  \brief The flags on a window
@@ -248,7 +249,8 @@ typedef enum
 /**
  *  \brief An efficient driver-specific representation of pixel data
  */
-typedef Uint32 SDL_TextureID;
+struct SDL_Texture;
+typedef struct SDL_Texture SDL_Texture;
 
 /**
  *  \brief An opaque handle to an OpenGL context.
@@ -449,7 +451,7 @@ extern DECLSPEC SDL_DisplayMode *SDLCALL SDL_GetClosestDisplayMode(const
  *  \sa SDL_GetWindowDisplayMode()
  *  \sa SDL_SetWindowFullscreen()
  */
-extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_WindowID windowID,
+extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_Window * window,
                                                      const SDL_DisplayMode
                                                          * mode);
 
@@ -460,7 +462,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_WindowID windowID,
  *  \sa SDL_SetWindowDisplayMode()
  *  \sa SDL_SetWindowFullscreen()
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_WindowID windowID,
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_Window * window,
                                                      SDL_DisplayMode * mode);
 
 /**
@@ -551,7 +553,7 @@ extern DECLSPEC int SDLCALL SDL_GetGammaRamp(Uint16 * red, Uint16 * green,
  *  
  *  \sa SDL_DestroyWindow()
  */
-extern DECLSPEC SDL_WindowID SDLCALL SDL_CreateWindow(const char *title,
+extern DECLSPEC SDL_Window * SDLCALL SDL_CreateWindow(const char *title,
                                                       int x, int y, int w,
                                                       int h, Uint32 flags);
 
@@ -564,19 +566,29 @@ extern DECLSPEC SDL_WindowID SDLCALL SDL_CreateWindow(const char *title,
  *  
  *  \sa SDL_DestroyWindow()
  */
-extern DECLSPEC SDL_WindowID SDLCALL SDL_CreateWindowFrom(const void *data);
+extern DECLSPEC SDL_Window * SDLCALL SDL_CreateWindowFrom(const void *data);
+
+/**
+ *  \brief Get the numeric ID of the window, for logging purposes.
+ */
+extern DECLSPEC Uint32 SDLCALL SDL_GetWindowID(SDL_Window * window);
+
+/**
+ *  \brief Get a window from a stored ID, or NULL if it doesn't exist.
+ */
+extern DECLSPEC SDL_Window * SDLCALL SDL_GetWindowFromID(Uint32 id);
 
 /**
  *  \brief Get the window flags.
  */
-extern DECLSPEC Uint32 SDLCALL SDL_GetWindowFlags(SDL_WindowID windowID);
+extern DECLSPEC Uint32 SDLCALL SDL_GetWindowFlags(SDL_Window * window);
 
 /**
  *  \brief Set the title of the window, in UTF-8 format.
  *  
  *  \sa SDL_GetWindowTitle()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowTitle(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_SetWindowTitle(SDL_Window * window,
                                                 const char *title);
 
 /**
@@ -584,14 +596,14 @@ extern DECLSPEC void SDLCALL SDL_SetWindowTitle(SDL_WindowID windowID,
  *  
  *  \sa SDL_SetWindowTitle()
  */
-extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_WindowID windowID);
+extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_Window * window);
 
 /**
  *  \brief Set the icon of the window.
  *  
  *  \param icon The icon for the window.
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Window * window,
                                                SDL_Surface * icon);
 
 /**
@@ -599,7 +611,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_WindowID windowID,
  *  
  *  \sa SDL_GetWindowData()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowData(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_SetWindowData(SDL_Window * window,
                                                void *userdata);
 
 /**
@@ -607,12 +619,12 @@ extern DECLSPEC void SDLCALL SDL_SetWindowData(SDL_WindowID windowID,
  *  
  *  \sa SDL_SetWindowData()
  */
-extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_WindowID windowID);
+extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_Window * window);
 
 /**
  *  \brief Set the position of the window.
  *  
- *  \param windowID The window to reposition.
+ *  \param window The window to reposition.
  *  \param x        The x coordinate of the window, ::SDL_WINDOWPOS_CENTERED, or
                     ::SDL_WINDOWPOS_UNDEFINED.
  *  \param y        The y coordinate of the window, ::SDL_WINDOWPOS_CENTERED, or
@@ -622,7 +634,7 @@ extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_WindowID windowID);
  *  
  *  \sa SDL_GetWindowPosition()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowPosition(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_SetWindowPosition(SDL_Window * window,
                                                    int x, int y);
 
 /**
@@ -630,7 +642,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowPosition(SDL_WindowID windowID,
  *  
  *  \sa SDL_SetWindowPosition()
  */
-extern DECLSPEC void SDLCALL SDL_GetWindowPosition(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_GetWindowPosition(SDL_Window * window,
                                                    int *x, int *y);
 
 /**
@@ -641,7 +653,7 @@ extern DECLSPEC void SDLCALL SDL_GetWindowPosition(SDL_WindowID windowID,
  *  
  *  \sa SDL_GetWindowSize()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_WindowID windowID, int w,
+extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
                                                int h);
 
 /**
@@ -649,7 +661,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_WindowID windowID, int w,
  *  
  *  \sa SDL_SetWindowSize()
  */
-extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_WindowID windowID, int *w,
+extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
 
 /**
@@ -657,33 +669,33 @@ extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_WindowID windowID, int *w,
  *  
  *  \sa SDL_HideWindow()
  */
-extern DECLSPEC void SDLCALL SDL_ShowWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_ShowWindow(SDL_Window * window);
 
 /**
  *  \brief Hide the window.
  *  
  *  \sa SDL_ShowWindow()
  */
-extern DECLSPEC void SDLCALL SDL_HideWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_HideWindow(SDL_Window * window);
 
 /**
  *  \brief Raise the window above other windows and set the input focus.
  */
-extern DECLSPEC void SDLCALL SDL_RaiseWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_RaiseWindow(SDL_Window * window);
 
 /**
  *  \brief Make the window as large as possible.
  *  
  *  \sa SDL_RestoreWindow()
  */
-extern DECLSPEC void SDLCALL SDL_MaximizeWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_MaximizeWindow(SDL_Window * window);
 
 /**
  *  \brief Minimize the window to an iconic representation.
  *  
  *  \sa SDL_RestoreWindow()
  */
-extern DECLSPEC void SDLCALL SDL_MinimizeWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_MinimizeWindow(SDL_Window * window);
 
 /**
  *  \brief Restore the size and position of a minimized or maximized window.
@@ -691,7 +703,7 @@ extern DECLSPEC void SDLCALL SDL_MinimizeWindow(SDL_WindowID windowID);
  *  \sa SDL_MaximizeWindow()
  *  \sa SDL_MinimizeWindow()
  */
-extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_Window * window);
 
 /**
  *  \brief Set the window's fullscreen state.
@@ -701,7 +713,7 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_WindowID windowID);
  *  \sa SDL_SetWindowDisplayMode()
  *  \sa SDL_GetWindowDisplayMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_WindowID windowID,
+extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
                                                     int fullscreen);
 
 /**
@@ -711,7 +723,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_WindowID windowID,
  *  
  *  \sa SDL_GetWindowGrab()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_Window * window,
                                                int mode);
 
 /**
@@ -721,7 +733,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_WindowID windowID,
  *  
  *  \sa SDL_SetWindowGrab()
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowGrab(SDL_WindowID windowID);
+extern DECLSPEC int SDLCALL SDL_GetWindowGrab(SDL_Window * window);
 
 /**
  *  \brief Get driver specific information about a window.
@@ -729,14 +741,14 @@ extern DECLSPEC int SDLCALL SDL_GetWindowGrab(SDL_WindowID windowID);
  *  \note Include SDL_syswm.h for the declaration of SDL_SysWMinfo.
  */
 struct SDL_SysWMinfo;
-extern DECLSPEC SDL_bool SDLCALL SDL_GetWindowWMInfo(SDL_WindowID windowID,
+extern DECLSPEC SDL_bool SDLCALL SDL_GetWindowWMInfo(SDL_Window * window,
                                                      struct SDL_SysWMinfo
                                                      *info);
 
 /**
  *  \brief Destroy a window.
  */
-extern DECLSPEC void SDLCALL SDL_DestroyWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_DestroyWindow(SDL_Window * window);
 
 /**
  *  \brief Get the number of 2D rendering drivers available for the current 
@@ -769,7 +781,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
 /**
  *  \brief Create and make active a 2D rendering context for a window.
  *  
- *  \param windowID The window where rendering is displayed.
+ *  \param window The window where rendering is displayed.
  *  \param index    The index of the rendering driver to initialize, or -1 to 
  *                  initialize the first one supporting the requested flags.
  *  \param flags    ::SDL_RendererFlags.
@@ -780,7 +792,7 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
  *  \sa SDL_GetRendererInfo()
  *  \sa SDL_DestroyRenderer()
  */
-extern DECLSPEC int SDLCALL SDL_CreateRenderer(SDL_WindowID windowID,
+extern DECLSPEC int SDLCALL SDL_CreateRenderer(SDL_Window * window,
                                                int index, Uint32 flags);
 
 /**
@@ -789,7 +801,7 @@ extern DECLSPEC int SDLCALL SDL_CreateRenderer(SDL_WindowID windowID,
  *  \return 0 on success, -1 if the selected window doesn't have a
  *          rendering context.
  */
-extern DECLSPEC int SDLCALL SDL_SelectRenderer(SDL_WindowID windowID);
+extern DECLSPEC int SDLCALL SDL_SelectRenderer(SDL_Window * window);
 
 /**
  *  \brief Get information about the current rendering context.
@@ -811,7 +823,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_RendererInfo * info);
  *  \sa SDL_QueryTexture()
  *  \sa SDL_DestroyTexture()
  */
-extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTexture(Uint32 format,
+extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTexture(Uint32 format,
                                                         int access, int w,
                                                         int h);
 
@@ -830,7 +842,7 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTexture(Uint32 format,
  *  \sa SDL_QueryTexture()
  *  \sa SDL_DestroyTexture()
  */
-extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTextureFromSurface(Uint32
+extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTextureFromSurface(Uint32
                                                                    format,
                                                                    SDL_Surface
                                                                    * surface);
@@ -838,7 +850,7 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTextureFromSurface(Uint32
 /**
  *  \brief Query the attributes of a texture
  *  
- *  \param textureID A texture to be queried.
+ *  \param texture A texture to be queried.
  *  \param format  A pointer filled in with the raw format of the texture.  The 
  *                 actual format may differ, but pixel transfers will use this 
  *                 format.
@@ -848,7 +860,7 @@ extern DECLSPEC SDL_TextureID SDLCALL SDL_CreateTextureFromSurface(Uint32
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  */
-extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_Texture * texture,
                                              Uint32 * format, int *access,
                                              int *w, int *h);
 
@@ -856,7 +868,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_TextureID textureID,
  *  \brief Query the pixels of a texture, if the texture does not need to be 
  *         locked for pixel access.
  *  
- *  \param textureID A texture to be queried, which was created with 
+ *  \param texture A texture to be queried, which was created with 
  *                   ::SDL_TEXTUREACCESS_STREAMING.
  *  \param pixels    A pointer filled with a pointer to the pixels for the 
  *                   texture.
@@ -865,13 +877,13 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_TextureID textureID,
  *  \return 0 on success, or -1 if the texture is not valid, or must be locked 
  *          for pixel access.
  */
-extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_Texture * texture,
                                                    void **pixels, int *pitch);
 
 /**
  *  \brief Set the color palette of an indexed texture.
  *  
- *  \param textureID  The texture to update.
+ *  \param texture  The texture to update.
  *  \param colors     The array of RGB color data.
  *  \param firstcolor The first index to update.
  *  \param ncolors    The number of palette entries to fill with the color data.
@@ -879,7 +891,7 @@ extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_TextureID textureID,
  *  \return 0 on success, or -1 if the texture is not valid or not an indexed 
  *          texture.
  */
-extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_Texture * texture,
                                                   const SDL_Color * colors,
                                                   int firstcolor,
                                                   int ncolors);
@@ -887,7 +899,7 @@ extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_TextureID textureID,
 /**
  *  \brief Get the color palette from an indexed texture if it has one.
  *  
- *  \param textureID  The texture to update.
+ *  \param texture  The texture to update.
  *  \param colors     The array to fill with RGB color data.
  *  \param firstcolor The first index to retrieve.
  *  \param ncolors    The number of palette entries to retrieve.
@@ -895,7 +907,7 @@ extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_TextureID textureID,
  *  \return 0 on success, or -1 if the texture is not valid or not an indexed 
  *          texture.
  */
-extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_Texture * texture,
                                                   SDL_Color * colors,
                                                   int firstcolor,
                                                   int ncolors);
@@ -903,7 +915,7 @@ extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_TextureID textureID,
 /**
  *  \brief Set an additional color value used in render copy operations.
  *  
- *  \param textureID The texture to update.
+ *  \param texture The texture to update.
  *  \param r       The red source color value multiplied into copy operations.
  *  \param g       The green source color value multiplied into copy operations.
  *  \param b       The blue source color value multiplied into copy operations.
@@ -913,14 +925,14 @@ extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_TextureID textureID,
  *  
  *  \sa SDL_GetTextureColorMod()
  */
-extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_Texture * texture,
                                                    Uint8 r, Uint8 g, Uint8 b);
 
 
 /**
  *  \brief Get the additional color value used in render copy operations.
  *  
- *  \param textureID The texture to query.
+ *  \param texture The texture to query.
  *  \param r         A pointer filled in with the source red color value.
  *  \param g         A pointer filled in with the source green color value.
  *  \param b         A pointer filled in with the source blue color value.
@@ -929,14 +941,14 @@ extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_TextureID textureID,
  *  
  *  \sa SDL_SetTextureColorMod()
  */
-extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_Texture * texture,
                                                    Uint8 * r, Uint8 * g,
                                                    Uint8 * b);
 
 /**
  *  \brief Set an additional alpha value used in render copy operations.
  *  
- *  \param textureID The texture to update.
+ *  \param texture The texture to update.
  *  \param alpha     The source alpha value multiplied into copy operations.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or alpha modulation 
@@ -944,26 +956,26 @@ extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_TextureID textureID,
  *  
  *  \sa SDL_GetTextureAlphaMod()
  */
-extern DECLSPEC int SDLCALL SDL_SetTextureAlphaMod(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_SetTextureAlphaMod(SDL_Texture * texture,
                                                    Uint8 alpha);
 
 /**
  *  \brief Get the additional alpha value used in render copy operations.
  *  
- *  \param textureID The texture to query.
+ *  \param texture The texture to query.
  *  \param alpha     A pointer filled in with the source alpha value.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  *  
  *  \sa SDL_SetTextureAlphaMod()
  */
-extern DECLSPEC int SDLCALL SDL_GetTextureAlphaMod(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_GetTextureAlphaMod(SDL_Texture * texture,
                                                    Uint8 * alpha);
 
 /**
  *  \brief Set the blend mode used for texture copy operations.
  *  
- *  \param textureID The texture to update.
+ *  \param texture The texture to update.
  *  \param blendMode ::SDL_BlendMode to use for texture blending.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or the blend mode is
@@ -974,26 +986,26 @@ extern DECLSPEC int SDLCALL SDL_GetTextureAlphaMod(SDL_TextureID textureID,
  *  
  *  \sa SDL_GetTextureBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_Texture * texture,
                                                     int blendMode);
 
 /**
  *  \brief Get the blend mode used for texture copy operations.
  *  
- *  \param textureID The texture to query.
+ *  \param texture The texture to query.
  *  \param blendMode A pointer filled in with the current blend mode.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  *  
  *  \sa SDL_SetTextureBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_Texture * texture,
                                                     int *blendMode);
 
 /**
  *  \brief Set the scale mode used for texture copy operations.
  *  
- *  \param textureID The texture to update.
+ *  \param texture The texture to update.
  *  \param scaleMode ::SDL_TextureScaleMode to use for texture scaling.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or the scale mode is
@@ -1004,26 +1016,26 @@ extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_TextureID textureID,
  *  
  *  \sa SDL_GetTextureScaleMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_Texture * texture,
                                                     int scaleMode);
 
 /**
  *  \brief Get the scale mode used for texture copy operations.
  *  
- *  \param textureID The texture to query.
+ *  \param texture The texture to query.
  *  \param scaleMode A pointer filled in with the current scale mode.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  *  
  *  \sa SDL_SetTextureScaleMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_Texture * texture,
                                                     int *scaleMode);
 
 /**
  *  \brief Update the given texture rectangle with new pixel data.
  *  
- *  \param textureID The texture to update
+ *  \param texture The texture to update
  *  \param rect      A pointer to the rectangle of pixels to update, or NULL to 
  *                   update the entire texture.
  *  \param pixels    The raw pixel data.
@@ -1033,14 +1045,14 @@ extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_TextureID textureID,
  *  
  *  \note This is a fairly slow function.
  */
-extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_Texture * texture,
                                               const SDL_Rect * rect,
                                               const void *pixels, int pitch);
 
 /**
  *  \brief Lock a portion of the texture for pixel access.
  *  
- *  \param textureID The texture to lock for access, which was created with 
+ *  \param texture The texture to lock for access, which was created with 
  *                   ::SDL_TEXTUREACCESS_STREAMING.
  *  \param rect      A pointer to the rectangle to lock for access. If the rect 
  *                   is NULL, the entire texture will be locked.
@@ -1056,7 +1068,7 @@ extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_TextureID textureID,
  *  \sa SDL_DirtyTexture()
  *  \sa SDL_UnlockTexture()
  */
-extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
                                             const SDL_Rect * rect,
                                             int markDirty, void **pixels,
                                             int *pitch);
@@ -1067,12 +1079,12 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_TextureID textureID,
  *  \sa SDL_LockTexture()
  *  \sa SDL_DirtyTexture()
  */
-extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_TextureID textureID);
+extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 
 /**
  *  \brief Mark the specified rectangles of the texture as dirty.
  *  
- *  \param textureID The texture to mark dirty, which was created with 
+ *  \param texture The texture to mark dirty, which was created with 
  *                   ::SDL_TEXTUREACCESS_STREAMING.
  *  \param numrects  The number of rectangles pointed to by rects.
  *  \param rects     The pointer to an array of dirty rectangles.
@@ -1080,7 +1092,7 @@ extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_TextureID textureID);
  *  \sa SDL_LockTexture()
  *  \sa SDL_UnlockTexture()
  */
-extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_TextureID textureID,
+extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_Texture * texture,
                                               int numrects,
                                               const SDL_Rect * rects);
 
@@ -1228,7 +1240,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRects(const SDL_Rect ** rect, int coun
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
  *  
- *  \param textureID The source texture.
+ *  \param texture The source texture.
  *  \param srcrect   A pointer to the source rectangle, or NULL for the entire 
  *                   texture.
  *  \param dstrect   A pointer to the destination rectangle, or NULL for the 
@@ -1237,7 +1249,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRects(const SDL_Rect ** rect, int coun
  *  \return 0 on success, or -1 if there is no rendering context current, or the
  *          driver doesn't support the requested operation.
  */
-extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_TextureID textureID,
+extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Texture * texture,
                                            const SDL_Rect * srcrect,
                                            const SDL_Rect * dstrect);
 
@@ -1289,7 +1301,7 @@ extern DECLSPEC void SDLCALL SDL_RenderPresent(void);
  *  \sa SDL_CreateTexture()
  *  \sa SDL_CreateTextureFromSurface()
  */
-extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_TextureID textureID);
+extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_Texture * texture);
 
 /**
  *  \brief Destroy the rendering context for a window and free associated
@@ -1297,7 +1309,7 @@ extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_TextureID textureID);
  *  
  *  \sa SDL_CreateRenderer()
  */
-extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_Window * window);
 
 /**
  *  \brief Returns whether the screensaver is currently enabled (default off).
@@ -1384,15 +1396,15 @@ extern DECLSPEC int SDLCALL SDL_GL_GetAttribute(SDL_GLattr attr, int *value);
  *  
  *  \sa SDL_GL_DeleteContext()
  */
-extern DECLSPEC SDL_GLContext SDLCALL SDL_GL_CreateContext(SDL_WindowID
-                                                           windowID);
+extern DECLSPEC SDL_GLContext SDLCALL SDL_GL_CreateContext(SDL_Window *
+                                                           window);
 
 /**
  *  \brief Set up an OpenGL context for rendering into an OpenGL window.
  *  
  *  \note The context must have been created with a compatible window.
  */
-extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_WindowID windowID,
+extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_Window * window,
                                                SDL_GLContext context);
 
 /**
@@ -1422,7 +1434,7 @@ extern DECLSPEC int SDLCALL SDL_GL_GetSwapInterval(void);
  * \brief Swap the OpenGL buffers for the window, if double-buffering is 
  *        supported.
  */
-extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_WindowID windowID);
+extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_Window * window);
 
 /**
  *  \brief Delete an OpenGL context.

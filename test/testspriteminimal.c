@@ -12,7 +12,7 @@
 #define NUM_SPRITES     100
 #define MAX_SPEED       1
 
-static SDL_TextureID sprite;
+static SDL_Texture *sprite;
 static SDL_Rect positions[NUM_SPRITES];
 static SDL_Rect velocities[NUM_SPRITES];
 static int sprite_w, sprite_h;
@@ -78,7 +78,7 @@ LoadSprite(char *file)
 }
 
 void
-MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
+MoveSprites(SDL_Window * window, SDL_Texture * sprite)
 {
     int i;
     int window_w = WINDOW_WIDTH;
@@ -115,7 +115,7 @@ MoveSprites(SDL_WindowID window, SDL_TextureID sprite)
 int
 main(int argc, char *argv[])
 {
-    SDL_WindowID window;
+    SDL_Window *window;
     int i, done;
     SDL_Event event;
 

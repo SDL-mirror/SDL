@@ -46,7 +46,7 @@ static void DirectFB_InitOSKeymap(_THIS, SDLKey * keypmap, int numkeys);
 static int DirectFB_TranslateButton(DFBInputDeviceButtonIdentifier button);
 
 static void
-DirectFB_SetContext(_THIS, SDL_WindowID id)
+DirectFB_SetContext(_THIS, SDL_Window *window)
 {
 #if (DFB_VERSION_ATLEAST(1,0,0))
     /* FIXME: does not work on 1.0/1.2 with radeon driver
@@ -55,7 +55,7 @@ DirectFB_SetContext(_THIS, SDL_WindowID id)
      */
 
     SDL_Window *window = SDL_GetWindowFromID(id);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
     int ret;
 
@@ -70,7 +70,7 @@ DirectFB_SetContext(_THIS, SDL_WindowID id)
 }
 
 static void
-FocusAllMice(_THIS, SDL_WindowID id)
+FocusAllMice(_THIS, SDL_Window *window)
 {
     SDL_DFB_DEVICEDATA(_this);
     int index;
@@ -81,7 +81,7 @@ FocusAllMice(_THIS, SDL_WindowID id)
 
 
 static void
-FocusAllKeyboards(_THIS, SDL_WindowID id)
+FocusAllKeyboards(_THIS, SDL_Window *window)
 {
     SDL_DFB_DEVICEDATA(_this);
     int index;
@@ -177,7 +177,7 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
             break;
         case DWET_MOTION:
             if (ClientXY(p, &evt->x, &evt->y)) {
-                SDL_Window *window = SDL_GetWindowFromID(p->sdl_id);
+                SDL_Window *window = p->window;
                 if (!devdata->use_linux_input) {
                     if (!(flags & SDL_WINDOW_INPUT_GRABBED))
                         SDL_SendMouseMotion(devdata->mouse_id[0], 0,
@@ -193,7 +193,7 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
                     }
                 }
                 if (!(window->flags & SDL_WINDOW_MOUSE_FOCUS))
-                    SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_ENTER, 0,
+                    SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_ENTER, 0,
                                         0);
             }
             break;
@@ -218,13 +218,13 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
             break;
         case DWET_POSITION:
             if (ClientXY(p, &evt->x, &evt->y)) {
-                SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_MOVED,
+                SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_MOVED,
                                     evt->x, evt->y);
             }
             break;
         case DWET_POSITION_SIZE:
             if (ClientXY(p, &evt->x, &evt->y)) {
-                SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_MOVED,
+                SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_MOVED,
                                     evt->x, evt->y);
             }
             /* fall throught */
@@ -234,32 +234,32 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
             evt->h -=
                 (p->theme.top_size + p->theme.bottom_size +
                  p->theme.caption_size);
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_RESIZED,
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_RESIZED,
                                 evt->w, evt->h);
             break;
         case DWET_CLOSE:
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_CLOSE, 0, 0);
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
             break;
         case DWET_GOTFOCUS:
-            DirectFB_SetContext(_this, p->sdl_id);
-            FocusAllKeyboards(_this, p->sdl_id);
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_FOCUS_GAINED,
+            DirectFB_SetContext(_this, p->window);
+            FocusAllKeyboards(_this, p->window);
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_FOCUS_GAINED,
                                 0, 0);
             break;
         case DWET_LOSTFOCUS:
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
             FocusAllKeyboards(_this, 0);
             break;
         case DWET_ENTER:
             /* SDL_DirectFB_ReshowCursor(_this, 0); */
-            FocusAllMice(_this, p->sdl_id);
+            FocusAllMice(_this, p->window);
             // FIXME: when do we really enter ?
             if (ClientXY(p, &evt->x, &evt->y))
                 MotionAllMice(_this, evt->x, evt->y);
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_ENTER, 0, 0);
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_ENTER, 0, 0);
             break;
         case DWET_LEAVE:
-            SDL_SendWindowEvent(p->sdl_id, SDL_WINDOWEVENT_LEAVE, 0, 0);
+            SDL_SendWindowEvent(p->window, SDL_WINDOWEVENT_LEAVE, 0, 0);
             FocusAllMice(_this, 0);
             /* SDL_DirectFB_ReshowCursor(_this, 1); */
             break;
@@ -372,16 +372,16 @@ DirectFB_PumpEventsWindow(_THIS)
     SDL_DFB_DEVICEDATA(_this);
     DFB_WindowData *p;
     DFBInputEvent ievt;
-    Sint32 /* SDL_WindowID */ grabbed_window;
+    SDL_Window *grabbed_window;
 
-    grabbed_window = -1;
+    grabbed_window = NULL;
 
     for (p = devdata->firstwin; p != NULL; p = p->next) {
         DFBWindowEvent evt;
-        SDL_Window *w = SDL_GetWindowFromID(p->sdl_id);
+        SDL_Window *w = SDL_GetWindowFromID(p->window);
 
         if (w->flags & SDL_WINDOW_INPUT_GRABBED) {
-            grabbed_window = p->sdl_id;
+            grabbed_window = w;
         }
 
         while (p->eventbuffer->GetEvent(p->eventbuffer,

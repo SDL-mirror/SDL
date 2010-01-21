@@ -110,7 +110,7 @@ SDL_RenderDriver gf_renderdriver = {
 static SDL_Renderer *
 gf_createrenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer = NULL;
@@ -162,7 +162,7 @@ gf_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = gf_destroytexture;
     renderer->DestroyRenderer = gf_destroyrenderer;
     renderer->info = gf_renderdriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = rdata;
 
     /* Set render acceleration flag in case it is accelerated */
@@ -284,7 +284,7 @@ static int
 gf_activaterenderer(SDL_Renderer * renderer)
 {
     SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(rdata->window);
+    SDL_VideoDisplay *display = rdata->window->display;
     SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
 
     /* Setup current surface as visible */
@@ -301,7 +301,7 @@ gf_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_RenderData *renderdata = (SDL_RenderData *) renderer->driverdata;
     SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_TextureData *tdata = NULL;
 
     /* Allocate texture driver data */

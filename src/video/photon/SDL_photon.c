@@ -777,7 +777,7 @@ photon_createwindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     SDL_WindowData *wdata;
     PhDim_t winsize;
     PhPoint_t winpos;
@@ -997,7 +997,7 @@ photon_createwindow(_THIS, SDL_Window * window)
     PtFlush();
 
     /* By default last created window got a input focus */
-    SDL_SetKeyboardFocus(0, window->id);
+    SDL_SetKeyboardFocus(0, window);
 
     /* Emit focus gained event, because photon is not sending it */
     SDL_OnWindowFocusGained(window);
@@ -1055,7 +1055,7 @@ photon_setwindowposition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     PhPoint_t winpos;
     int32_t status;
 
@@ -1223,7 +1223,7 @@ photon_destroywindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     int32_t status;
 
@@ -1414,7 +1414,7 @@ photon_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;
@@ -1941,7 +1941,7 @@ photon_gl_swapwindow(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     PhRect_t dst_rect;
     PhRect_t src_rect;
     int32_t status;
@@ -2050,7 +2050,7 @@ int photon_gl_recreatesurface(_THIS, SDL_Window * window, uint32_t width, uint32
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) SDL_GetDisplayFromWindow(window)->driverdata;
+        (SDL_DisplayData *) window->display->driverdata;
     SDL_bool makecurrent=SDL_FALSE;
     int32_t gfstatus;
 
@@ -2199,10 +2199,10 @@ photon_pumpevents(_THIS)
                             {
                                 /* Mouse cursor over handled window */
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_ENTER,
                                                         0, 0);
-                                    SDL_SetMouseFocus(0, window->id);
+                                    SDL_SetMouseFocus(0, window);
                                 }
                             }
                             break;
@@ -2210,7 +2210,7 @@ photon_pumpevents(_THIS)
                             {
                                 /* Mouse cursor out of handled window */
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_LEAVE,
                                                         0, 0);
                                 }
@@ -2682,7 +2682,7 @@ photon_pumpevents(_THIS)
                         case Ph_WM_CLOSE:
                             {
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_CLOSE,
                                                         0, 0);
                                 }
@@ -2695,10 +2695,10 @@ photon_pumpevents(_THIS)
                                     if (window != NULL) {
                                         PhRegion_t wregion;
 
-                                        SDL_SendWindowEvent(window->id,
+                                        SDL_SendWindowEvent(window,
                                                             SDL_WINDOWEVENT_FOCUS_GAINED,
                                                             0, 0);
-                                        SDL_SetKeyboardFocus(0, window->id);
+                                        SDL_SetKeyboardFocus(0, window);
 
                                         /* Set window region sensible to mouse motion events */
                                         PhRegionQuery(PtWidgetRid
@@ -2712,7 +2712,7 @@ photon_pumpevents(_THIS)
                                                        &wregion, NULL, NULL);
 
                                         /* If window got a focus, then it is visible */
-                                        SDL_SendWindowEvent(window->id,
+                                        SDL_SendWindowEvent(window,
                                                             SDL_WINDOWEVENT_SHOWN,
                                                             0, 0);
                                     }
@@ -2722,7 +2722,7 @@ photon_pumpevents(_THIS)
                                     if (window != NULL) {
                                         PhRegion_t wregion;
 
-                                        SDL_SendWindowEvent(window->id,
+                                        SDL_SendWindowEvent(window,
                                                             SDL_WINDOWEVENT_FOCUS_LOST,
                                                             0, 0);
 
@@ -2743,7 +2743,7 @@ photon_pumpevents(_THIS)
                         case Ph_WM_MOVE:
                             {
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_MOVED,
                                                         wmevent->pos.x,
                                                         wmevent->pos.y);
@@ -2754,7 +2754,7 @@ photon_pumpevents(_THIS)
                             {
                                 if (window != NULL) {
                                     /* Set new window position after resize */
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_MOVED,
                                                         wmevent->pos.x,
                                                         wmevent->pos.y);
@@ -2766,7 +2766,7 @@ photon_pumpevents(_THIS)
                                     }
 
                                     /* Set new window size after resize */
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_RESIZED,
                                                         wmevent->size.w,
                                                         wmevent->size.h);
@@ -2777,11 +2777,11 @@ photon_pumpevents(_THIS)
                             {
                                 if (window != NULL) {
                                     /* Send new window state: minimized */
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_MINIMIZED,
                                                         0, 0);
                                     /* In case window is minimized, then it is hidden */
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_HIDDEN,
                                                         0, 0);
                                 }
@@ -2792,7 +2792,7 @@ photon_pumpevents(_THIS)
                                 if (window != NULL) {
                                     if ((window->flags & SDL_WINDOW_RESIZABLE)==SDL_WINDOW_RESIZABLE)
                                     {
-                                       SDL_SendWindowEvent(window->id,
+                                       SDL_SendWindowEvent(window,
                                                            SDL_WINDOWEVENT_MAXIMIZED,
                                                            0, 0);
                                     }
@@ -2806,7 +2806,7 @@ photon_pumpevents(_THIS)
                         case Ph_WM_RESTORE:
                             {
                                 if (window != NULL) {
-                                    SDL_SendWindowEvent(window->id,
+                                    SDL_SendWindowEvent(window,
                                                         SDL_WINDOWEVENT_RESTORED,
                                                         0, 0);
                                 }

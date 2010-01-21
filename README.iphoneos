@@ -67,13 +67,13 @@ Notes -- Keyboard
 
 SDL for iPhone contains several additional functions related to keyboard visibility.  These functions are not part of the SDL standard API, but are necessary for revealing and hiding the iPhone's virtual onscreen keyboard.  You can use them in your own applications by including a copy of the SDL_uikitkeyboard.h header (located in src/video/uikit) in your project.
 
-int SDL_iPhoneKeyboardShow(SDL_WindowID windowID) 
+int SDL_iPhoneKeyboardShow(SDL_Window * window) 
 	-- reveals the onscreen keyboard.  Returns 0 on success and -1 on error.
-int SDL_iPhoneKeyboardHide(SDL_WindowID windowID) 
+int SDL_iPhoneKeyboardHide(SDL_Window * window) 
 	-- hides the onscreen keyboard.  Returns 0 on success and -1 on error.
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_WindowID windowID) 
+SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) 
 	-- returns whether or not the onscreen keyboard is currently visible.
-int SDL_iPhoneKeyboardToggle(SDL_WindowID windowID) 	
+int SDL_iPhoneKeyboardToggle(SDL_Window * window) 	
 	-- toggles the visibility of the onscreen keyboard.  Returns 0 on success and -1 on error.
 
 ==============================================================================

@@ -19,7 +19,7 @@ static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
 void
-DrawPoints(SDL_WindowID window)
+DrawPoints(SDL_Window * window)
 {
     int i;
     int x, y;
@@ -64,7 +64,7 @@ DrawPoints(SDL_WindowID window)
 }
 
 void
-DrawLines(SDL_WindowID window)
+DrawLines(SDL_Window * window)
 {
     int i;
     int x1, y1, x2, y2;
@@ -118,7 +118,7 @@ DrawLines(SDL_WindowID window)
 }
 
 void
-DrawRects(SDL_WindowID window)
+DrawRects(SDL_Window * window)
 {
     int i;
     SDL_Rect rect;
@@ -249,7 +249,7 @@ main(int argc, char *argv[])
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(event.window.windowID);
+                    SDL_SelectRenderer(SDL_GetWindowFromID(event.window.windowID));
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
                     SDL_RenderClear();
                     break;

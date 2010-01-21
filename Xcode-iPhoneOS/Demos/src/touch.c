@@ -11,7 +11,7 @@
 #define BRUSH_SIZE 32           /* width and height of the brush */
 #define PIXELS_PER_ITERATION 5  /* number of pixels between brush blots when forming a line */
 
-static SDL_TextureID brushID = 0;       /* texture for the brush */
+static SDL_Texture *brush = 0;       /* texture for the brush */
 
 /*
 	draws a line from (startx, starty) to (startx + dx, starty + dy)
@@ -43,7 +43,7 @@ drawLine(float startx, float starty, float dx, float dy)
         x += dx_prime;
         y += dy_prime;
         /* draw brush blot */
-        SDL_RenderCopy(brushID, NULL, &dstRect);
+        SDL_RenderCopy(brush, NULL, &dstRect);
     }
 }
 
@@ -58,16 +58,16 @@ initializeTexture()
     if (bmp_surface == NULL) {
         fatalError("could not load stroke.bmp");
     }
-    brushID =
+    brush =
         SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ABGR8888, bmp_surface);
     SDL_FreeSurface(bmp_surface);
-    if (brushID == 0) {
+    if (brush == 0) {
         fatalError("could not create brush texture");
     }
     /* additive blending -- laying strokes on top of eachother makes them brighter */
-    SDL_SetTextureBlendMode(brushID, SDL_BLENDMODE_ADD);
+    SDL_SetTextureBlendMode(brush, SDL_BLENDMODE_ADD);
     /* set brush color (red) */
-    SDL_SetTextureColorMod(brushID, 255, 100, 100);
+    SDL_SetTextureColorMod(brush, 255, 100, 100);
 }
 
 int
@@ -77,7 +77,7 @@ main(int argc, char *argv[])
     int x, y, dx, dy;           /* mouse location          */
     Uint8 state;                /* mouse (touch) state */
     SDL_Event event;
-    SDL_WindowID windowID;      /* main window */
+    SDL_Window *window;         /* main window */
     int done;                   /* does user want to quit? */
 
     /* initialize SDL */
@@ -86,10 +86,10 @@ main(int argc, char *argv[])
     }
 
     /* create main window and renderer */
-    windowID = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+    window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(windowID, 0, 0);
+    SDL_CreateRenderer(window, 0, 0);
 
     /*load brush texture */
     initializeTexture();
@@ -118,7 +118,7 @@ main(int argc, char *argv[])
     }
 
     /* cleanup */
-    SDL_DestroyTexture(brushID);
+    SDL_DestroyTexture(brush);
     SDL_Quit();
 
     return 0;

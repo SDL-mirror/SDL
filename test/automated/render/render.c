@@ -43,7 +43,7 @@ static int render_testPrimitivesBlend (void);
 static int render_testBlit (void);
 static int render_testBlitColour (void);
 static int render_testBlitAlpha (void);
-static int render_testBlitBlendMode( SDL_TextureID tface, int mode );
+static int render_testBlitBlendMode( SDL_Texture * tface, int mode );
 static int render_testBlitBlend (void);
 
 
@@ -225,10 +225,10 @@ static int render_hasBlendModes (void)
 /**
  * @brief Loads the test face.
  */
-static SDL_TextureID render_loadTestFace (void)
+static SDL_Texture * render_loadTestFace (void)
 {
    SDL_Surface *face;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
 
    /* Create face surface. */
    face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
@@ -261,7 +261,7 @@ static int render_hasTexColor (void)
 {
    int fail;
    int ret;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    Uint8 r, g, b;
 
    /* Get test face. */
@@ -296,7 +296,7 @@ static int render_hasTexAlpha (void)
 {
    int fail;
    int ret;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    Uint8 a;
 
    /* Get test face. */
@@ -606,7 +606,7 @@ static int render_testBlit (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    int i, j, ni, nj;
 
    /* Clear surface. */
@@ -658,7 +658,7 @@ static int render_testBlitColour (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    int i, j, ni, nj;
 
    /* Clear surface. */
@@ -716,7 +716,7 @@ static int render_testBlitAlpha (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    int i, j, ni, nj;
 
    /* Clear surface. */
@@ -774,7 +774,7 @@ static int render_testBlitAlpha (void)
 /**
  * @brief Tests a blend mode.
  */
-static int render_testBlitBlendMode( SDL_TextureID tface, int mode )
+static int render_testBlitBlendMode( SDL_Texture * tface, int mode )
 {
    int ret;
    int i, j, ni, nj;
@@ -820,7 +820,7 @@ static int render_testBlitBlend (void)
 {
    int ret;
    SDL_Rect rect;
-   SDL_TextureID tface;
+   SDL_Texture *tface;
    int i, j, ni, nj;
    int mode;
 
@@ -1004,7 +1004,7 @@ int test_render (void)
    int ret;
    const char *driver, *str;
    char msg[256];
-   SDL_WindowID wid;
+   SDL_Window *w;
    SDL_RendererInfo renderer;
 
    /* Initializes the SDL subsystems. */
@@ -1054,12 +1054,12 @@ int test_render (void)
       if (SDL_ATassert( "SDL_GetCurrentVideoDriver", SDL_strcmp(driver,str)==0))
          goto err_cleanup;
       /* Create window. */
-      wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+      w = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
             80, 60, SDL_WINDOW_SHOWN );
-      if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
+      if (SDL_ATassert( "SDL_CreateWindow", w!=NULL ))
          goto err_cleanup;
       /* Check title. */
-      str = SDL_GetWindowTitle( wid );
+      str = SDL_GetWindowTitle( w );
       if (SDL_ATassert( "SDL_GetWindowTitle", SDL_strcmp(msg,str)==0))
          goto err_cleanup;
       /* Get renderers. */
@@ -1072,10 +1072,10 @@ int test_render (void)
 
          /* We have to recreate window each time, because opengl and opengles renderers */
          /* both add SDL_WINDOW_OPENGL flag for window, that was last used              */
-         SDL_DestroyWindow(wid);
-         wid = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+         SDL_DestroyWindow(w);
+         w = SDL_CreateWindow( msg, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
                80, 60, SDL_WINDOW_SHOWN );
-         if (SDL_ATassert( "SDL_CreateWindow", wid!=0 ))
+         if (SDL_ATassert( "SDL_CreateWindow", w!=NULL ))
             goto err_cleanup;
 
          /* Get renderer info. */
@@ -1089,7 +1089,7 @@ int test_render (void)
          SDL_ATbegin( msg );
 
          /* Set renderer. */
-         ret = SDL_CreateRenderer( wid, j, 0 );
+         ret = SDL_CreateRenderer( w, j, 0 );
          if (SDL_ATassert( "SDL_CreateRenderer", ret==0 ))
             goto err_cleanup;
 

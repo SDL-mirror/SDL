@@ -86,7 +86,7 @@ static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -95,7 +95,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
         SDL_OutOfMemory();
         return -1;
     }
-    data->windowID = window->id;
+    data->window = window;
     data->hwnd = hwnd;
     data->hdc = GetDC(hwnd);
     data->created = created;
@@ -167,7 +167,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     if (GetFocus() == hwnd) {
         int index = data->videodata->keyboard;
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
-        SDL_SetKeyboardFocus(index, data->windowID);
+        SDL_SetKeyboardFocus(index, data->window);
 
         if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
             RECT rect;
@@ -187,7 +187,7 @@ int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     RAWINPUTDEVICE Rid;
     AXIS TabX, TabY;
     LOGCONTEXTA lc;
@@ -429,7 +429,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
     SDL_Rect bounds;

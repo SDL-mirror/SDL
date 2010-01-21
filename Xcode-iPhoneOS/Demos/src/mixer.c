@@ -274,7 +274,7 @@ main(int argc, char *argv[])
 {
 
     int done;                   /* has user tried to quit ? */
-    SDL_WindowID windowID;      /* our main window */
+    SDL_Window *window;         /* main window */
     SDL_Event event;
     Uint32 startFrame;          /* holds when frame started processing */
     Uint32 endFrame;            /* holds when frame ended processing */
@@ -283,10 +283,10 @@ main(int argc, char *argv[])
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0) {
         fatalError("could not initialize SDL");
     }
-    windowID =
+    window =
         SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                          SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(windowID, 0, 0);
+    SDL_CreateRenderer(window, 0, 0);
 
     /* initialize the mixer */
     SDL_memset(&mixer, 0, sizeof(mixer));

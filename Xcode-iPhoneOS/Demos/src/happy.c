@@ -11,7 +11,7 @@
 #define MILLESECONDS_PER_FRAME 16       /* about 60 frames per second */
 #define HAPPY_FACE_SIZE 32      /* width and height of happyface (pixels) */
 
-static SDL_TextureID texture_id = 0;    /* reference to texture holding happyface */
+static SDL_Texture *texture = 0;    /* reference to texture holding happyface */
 
 static struct
 {
@@ -86,7 +86,7 @@ render(void)
         }
         dstRect.x = faces[i].x;
         dstRect.y = faces[i].y;
-        SDL_RenderCopy(texture_id, &srcRect, &dstRect);
+        SDL_RenderCopy(texture, &srcRect, &dstRect);
     }
     /* update screen */
     SDL_RenderPresent();
@@ -124,11 +124,11 @@ initializeTexture()
     SDL_BlitSurface(bmp_surface, NULL, bmp_surface_rgba, NULL);
 
     /* convert RGBA surface to texture */
-    texture_id = SDL_CreateTextureFromSurface(format, bmp_surface_rgba);
-    if (texture_id == 0) {
+    texture = SDL_CreateTextureFromSurface(format, bmp_surface_rgba);
+    if (texture == 0) {
         fatalError("could not create texture");
     }
-    SDL_SetTextureBlendMode(texture_id, SDL_BLENDMODE_BLEND);
+    SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
     /* free up allocated memory */
     SDL_FreeSurface(bmp_surface_rgba);
@@ -139,7 +139,7 @@ int
 main(int argc, char *argv[])
 {
 
-    SDL_WindowID windowID;
+    SDL_Window *window;
     Uint32 startFrame;
     Uint32 endFrame;
     Uint32 delay;
@@ -149,11 +149,11 @@ main(int argc, char *argv[])
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fatalError("Could not initialize SDL");
     }
-    windowID = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+    window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
 
-    SDL_CreateRenderer(windowID, -1, 0);
+    SDL_CreateRenderer(window, -1, 0);
 
     initializeTexture();
     initializeHappyFaces();
@@ -182,7 +182,7 @@ main(int argc, char *argv[])
     }
 
     /* cleanup */
-    SDL_DestroyTexture(texture_id);
+    SDL_DestroyTexture(texture);
     /* shutdown SDL */
     SDL_Quit();
 

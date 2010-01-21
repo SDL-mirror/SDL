@@ -265,7 +265,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 {
     const char *envr;
     SDL_assert_state state = SDL_ASSERTION_ABORT;
-    SDL_WindowID window;
+    SDL_Window *window;
 
     (void) userdata;  /* unused in default handler. */
 

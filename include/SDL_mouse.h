@@ -75,7 +75,7 @@ extern DECLSPEC int SDLCALL SDL_SelectMouse(int index);
 /**
  *  \brief Get the window which currently has focus for the specified mouse.
  */
-extern DECLSPEC SDL_WindowID SDLCALL SDL_GetMouseFocusWindow(int index);
+extern DECLSPEC SDL_Window * SDLCALL SDL_GetMouseFocusWindow(int index);
 
 /**
  *  \brief Set relative mouse mode for the specified mouse.
@@ -126,13 +126,13 @@ extern DECLSPEC Uint8 SDLCALL SDL_GetRelativeMouseState(int index, int *x,
 /**
  *  \brief Moves the currently selected mouse to the given position within the window.
  *  
- *  \param windowID The window to move the mouse into, or 0 for the current mouse focus
+ *  \param window The window to move the mouse into, or NULL for the current mouse focus
  *  \param x The x coordinate within the window
  *  \param y The y coordinate within the window
  *  
  *  \note This function generates a mouse motion event
  */
-extern DECLSPEC void SDLCALL SDL_WarpMouseInWindow(SDL_WindowID windowID,
+extern DECLSPEC void SDLCALL SDL_WarpMouseInWindow(SDL_Window * window,
                                                    int x, int y);
 
 /**

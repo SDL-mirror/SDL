@@ -93,7 +93,7 @@ typedef struct
     Visual *visual;
     int depth;
     int scanline_pad;
-    Window window;
+    Window xwindow;
     Pixmap pixmaps[3];
     int current_pixmap;
     Drawable drawable;
@@ -153,7 +153,7 @@ X11_AddRenderDriver(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_RendererInfo *info = &X11_RenderDriver.info;
-    SDL_DisplayMode *mode = &SDL_CurrentDisplay.desktop_mode;
+    SDL_DisplayMode *mode = &SDL_CurrentDisplay->desktop_mode;
     int i;
 
     info->texture_formats[info->num_texture_formats++] = mode->format;
@@ -171,7 +171,7 @@ X11_AddRenderDriver(_THIS)
 SDL_Renderer *
 X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
@@ -199,7 +199,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->visual = displaydata->visual;
     data->depth = displaydata->depth;
     data->scanline_pad = displaydata->scanline_pad;
-    data->window = windowdata->window;
+    data->xwindow = windowdata->xwindow;
 
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
     renderer->CreateTexture = X11_CreateTexture;
@@ -221,7 +221,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = X11_DestroyTexture;
     renderer->DestroyRenderer = X11_DestroyRenderer;
     renderer->info = X11_RenderDriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -242,7 +242,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     for (i = 0; i < n; ++i) {
         data->pixmaps[i] =
-            XCreatePixmap(data->display, data->window, window->w, window->h,
+            XCreatePixmap(data->display, data->xwindow, window->w, window->h,
                           displaydata->depth);
         if (data->pixmaps[i] == None) {
             X11_DestroyRenderer(renderer);
@@ -254,7 +254,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->drawable = data->pixmaps[0];
         data->makedirty = SDL_TRUE;
     } else {
-        data->drawable = data->window;
+        data->drawable = data->xwindow;
         data->makedirty = SDL_FALSE;
     }
     data->current_pixmap = 0;
@@ -272,7 +272,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* Create the drawing context */
     gcv.graphics_exposures = False;
     data->gc =
-        XCreateGC(data->display, data->window, GCGraphicsExposures, &gcv);
+        XCreateGC(data->display, data->xwindow, GCGraphicsExposures, &gcv);
     if (!data->gc) {
         X11_DestroyRenderer(renderer);
         SDL_SetError("XCreateGC() failed");
@@ -286,7 +286,7 @@ static int
 X11_DisplayModeChanged(SDL_Renderer * renderer)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     int i, n;
 
     if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
@@ -306,7 +306,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
     }
     for (i = 0; i < n; ++i) {
         data->pixmaps[i] =
-            XCreatePixmap(data->display, data->window, window->w, window->h,
+            XCreatePixmap(data->display, data->xwindow, window->w, window->h,
                           data->depth);
         if (data->pixmaps[i] == None) {
             SDL_SetError("XCreatePixmap() failed");
@@ -325,8 +325,8 @@ static int
 X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     X11_TextureData *data;
     int pitch_alignmask = ((renderdata->scanline_pad / 8) - 1);
 
@@ -425,7 +425,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
     } else {
         data->pixmap =
-            XCreatePixmap(renderdata->display, renderdata->window, texture->w,
+            XCreatePixmap(renderdata->display, renderdata->xwindow, texture->w,
                           texture->h, renderdata->depth);
         if (data->pixmap == None) {
             X11_DestroyTexture(renderer, texture);
@@ -607,7 +607,7 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                      int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     unsigned long foreground;
     XPoint *xpoints, *xpoint;
     int i, xcount;
@@ -657,7 +657,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                     int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_Rect clip, rect;
     unsigned long foreground;
     XPoint *xpoints, *xpoint;
@@ -795,7 +795,7 @@ static int
 X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_Rect clip, rect;
     unsigned long foreground;
     XRectangle *xrects, *xrect;
@@ -840,7 +840,7 @@ static int
 X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_Rect clip, rect;
     unsigned long foreground;
     XRectangle *xrects, *xrect;
@@ -998,8 +998,8 @@ X11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     Uint32 screen_format = display->current_mode.format;
     XImage *image;
 
@@ -1019,8 +1019,8 @@ X11_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                       Uint32 format, const void * pixels, int pitch)
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_Window *window = renderer->window;
+    SDL_VideoDisplay *display = window->display;
     Uint32 screen_format = display->current_mode.format;
     XImage *image;
     void *image_pixels;
@@ -1067,7 +1067,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
     if (!(renderer->info.flags & SDL_RENDERER_SINGLEBUFFER)) {
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             const SDL_Rect *rect = &dirty->rect;
-            XCopyArea(data->display, data->drawable, data->window,
+            XCopyArea(data->display, data->drawable, data->xwindow,
                       data->gc, rect->x, rect->y, rect->w, rect->h,
                       rect->x, rect->y);
         }

@@ -86,13 +86,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (BOOL)windowShouldClose:(id)sender
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_CLOSE, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
     return NO;
 }
 
 - (void)windowDidExpose:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_EXPOSED, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_EXPOSED, 0, 0);
 }
 
 - (void)windowDidMove:(NSNotification *)aNotification
@@ -102,7 +102,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     ConvertNSRect(&rect);
     x = (int)rect.origin.x;
     y = (int)rect.origin.y;
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_MOVED, x, y);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
 - (void)windowDidResize:(NSNotification *)aNotification
@@ -111,17 +111,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
     NSRect rect = [_data->window contentRectForFrameRect:[_data->window frame]];
     w = (int)rect.size.width;
     h = (int)rect.size.height;
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_RESIZED, w, h);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
 }
 
 - (void)windowDidDeminiaturize:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
 }
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
@@ -130,7 +130,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     /* We're going to get keyboard events, since we're key. */
     index = _data->videodata->keyboard;
-    SDL_SetKeyboardFocus(index, _data->windowID);
+    SDL_SetKeyboardFocus(index, _data->window);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification
@@ -141,7 +141,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     /* Some other window will get mouse events, since we're not key. */
     index = _data->videodata->mouse;
     mouse = SDL_GetMouse(index);
-    if (mouse->focus == _data->windowID) {
+    if (mouse->focus == _data->window) {
         SDL_SetMouseFocus(index, 0);
     }
 
@@ -152,12 +152,12 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)windowDidHide:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
 }
 
 - (void)windowDidUnhide:(NSNotification *)aNotification
 {
-    SDL_SendWindowEvent(_data->windowID, SDL_WINDOWEVENT_SHOWN, 0, 0);
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
 }
 
 - (void)mouseDown:(NSEvent *)theEvent
@@ -228,7 +228,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
-    SDL_Window *window = SDL_GetWindowFromID(_data->windowID);
+    SDL_Window *window = _data->window;
     int index;
     SDL_Mouse *mouse;
     NSPoint point;
@@ -243,8 +243,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
             SDL_SetMouseFocus(index, 0);
         }
     } else {
-        if (mouse->focus != _data->windowID) {
-            SDL_SetMouseFocus(index, _data->windowID);
+        if (mouse->focus != _data->window) {
+            SDL_SetMouseFocus(index, _data->window);
         }
         SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y, 0);
     }
@@ -298,7 +298,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 {
     NSAutoreleasePool *pool;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *data;
 
@@ -308,7 +308,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         SDL_OutOfMemory();
         return -1;
     }
-    data->windowID = window->id;
+    data->window = window;
     data->window = nswindow;
     data->created = created;
     data->display = displaydata->display;
@@ -363,7 +363,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     if ([nswindow isKeyWindow]) {
         int index = data->videodata->keyboard;
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
-        SDL_SetKeyboardFocus(index, data->windowID);
+        SDL_SetKeyboardFocus(index, data->window);
 
         if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
             /* FIXME */
@@ -381,7 +381,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     NSRect rect;
     SDL_Rect bounds;
     unsigned int style;
@@ -490,7 +490,7 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
-    SDL_VideoDisplay *display = SDL_GetDisplayFromWindow(window);
+    SDL_VideoDisplay *display = window->display;
     NSRect rect;
     SDL_Rect bounds;
 

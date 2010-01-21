@@ -20,7 +20,7 @@ static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
 void
-DrawPoints(SDL_WindowID window)
+DrawPoints(SDL_Window * window)
 {
     int i;
     int x, y;
@@ -86,7 +86,7 @@ add_line(int x1, int y1, int x2, int y2)
 
 
 void
-DrawLines(SDL_WindowID window)
+DrawLines(SDL_Window * window)
 {
     int i;
     int x1, y1, x2, y2;
@@ -139,7 +139,7 @@ add_rect(int x1, int y1, int x2, int y2)
 }
 
 static void
-DrawRects(SDL_WindowID window)
+DrawRects(SDL_Window * window)
 {
     int i;
     int window_w, window_h;
@@ -156,7 +156,7 @@ DrawRects(SDL_WindowID window)
 }
 
 static void
-DrawRectLineIntersections(SDL_WindowID window)
+DrawRectLineIntersections(SDL_Window * window)
 {
     int i, j, window_w, window_h;
 
@@ -186,7 +186,7 @@ DrawRectLineIntersections(SDL_WindowID window)
 }
 
 static void
-DrawRectRectIntersections(SDL_WindowID window)
+DrawRectRectIntersections(SDL_Window * window)
 {
     int i, j;
 
@@ -324,7 +324,7 @@ main(int argc, char *argv[])
             case SDL_WINDOWEVENT:
                 switch (event.window.event) {
                 case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(event.window.windowID);
+                    SDL_SelectRenderer(SDL_GetWindowFromID(event.window.windowID));
                     SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
                     SDL_RenderClear();
                     break;
