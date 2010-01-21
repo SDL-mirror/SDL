@@ -44,22 +44,22 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     center = [NSNotificationCenter defaultCenter];
 
-    [_data->window setNextResponder:self];
-    if ([_data->window delegate] != nil) {
-        [center addObserver:self selector:@selector(windowDisExpose:) name:NSWindowDidExposeNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidMiniaturize:) name:NSWindowDidMiniaturizeNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:_data->window];
-        [center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:_data->window];
+    [_data->nswindow setNextResponder:self];
+    if ([_data->nswindow delegate] != nil) {
+        [center addObserver:self selector:@selector(windowDisExpose:) name:NSWindowDidExposeNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidMiniaturize:) name:NSWindowDidMiniaturizeNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:_data->nswindow];
+        [center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:_data->nswindow];
     } else {
-        [_data->window setDelegate:self];
+        [_data->nswindow setDelegate:self];
     }
     [center addObserver:self selector:@selector(windowDidHide:) name:NSApplicationDidHideNotification object:NSApp];
     [center addObserver:self selector:@selector(windowDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
 
-    [_data->window setAcceptsMouseMovedEvents:YES];
+    [_data->nswindow setAcceptsMouseMovedEvents:YES];
 }
 
 - (void)close
@@ -68,17 +68,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     center = [NSNotificationCenter defaultCenter];
 
-    [_data->window setNextResponder:nil];
-    if ([_data->window delegate] != self) {
-        [center removeObserver:self name:NSWindowDidExposeNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidMoveNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidResizeNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidMiniaturizeNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidDeminiaturizeNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidBecomeKeyNotification object:_data->window];
-        [center removeObserver:self name:NSWindowDidResignKeyNotification object:_data->window];
+    [_data->nswindow setNextResponder:nil];
+    if ([_data->nswindow delegate] != self) {
+        [center removeObserver:self name:NSWindowDidExposeNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidMoveNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidResizeNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidMiniaturizeNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidDeminiaturizeNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidBecomeKeyNotification object:_data->nswindow];
+        [center removeObserver:self name:NSWindowDidResignKeyNotification object:_data->nswindow];
     } else {
-        [_data->window setDelegate:nil];
+        [_data->nswindow setDelegate:nil];
     }
     [center removeObserver:self name:NSApplicationDidHideNotification object:NSApp];
     [center removeObserver:self name:NSApplicationDidUnhideNotification object:NSApp];
@@ -98,7 +98,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidMove:(NSNotification *)aNotification
 {
     int x, y;
-    NSRect rect = [_data->window contentRectForFrameRect:[_data->window frame]];
+    NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
     ConvertNSRect(&rect);
     x = (int)rect.origin.x;
     y = (int)rect.origin.y;
@@ -108,7 +108,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidResize:(NSNotification *)aNotification
 {
     int w, h;
-    NSRect rect = [_data->window contentRectForFrameRect:[_data->window frame]];
+    NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
     w = (int)rect.size.width;
     h = (int)rect.size.height;
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
@@ -309,7 +309,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         return -1;
     }
     data->window = window;
-    data->window = nswindow;
+    data->nswindow = nswindow;
     data->created = created;
     data->display = displaydata->display;
     data->videodata = videodata;
@@ -471,7 +471,7 @@ void
 Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     NSString *string;
 
     if(window->title) {
@@ -489,7 +489,7 @@ void
 Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     SDL_VideoDisplay *display = window->display;
     NSRect rect;
     SDL_Rect bounds;
@@ -519,7 +519,7 @@ void
 Cocoa_SetWindowSize(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     NSSize size;
 
     size.width = window->w;
@@ -532,7 +532,7 @@ void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if (![nswindow isMiniaturized]) {
         [nswindow makeKeyAndOrderFront:nil];
@@ -544,7 +544,7 @@ void
 Cocoa_HideWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     [nswindow orderOut:nil];
     [pool release];
@@ -554,7 +554,7 @@ void
 Cocoa_RaiseWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     [nswindow makeKeyAndOrderFront:nil];
     [pool release];
@@ -564,7 +564,7 @@ void
 Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     [nswindow zoom:nil];
     [pool release];
@@ -574,7 +574,7 @@ void
 Cocoa_MinimizeWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     [nswindow miniaturize:nil];
     [pool release];
@@ -584,7 +584,7 @@ void
 Cocoa_RestoreWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if ([nswindow isMiniaturized]) {
         [nswindow deminiaturize:nil];
@@ -615,7 +615,7 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
         [data->listener close];
         [data->listener release];
         if (data->created) {
-            [data->window close];
+            [data->nswindow close];
         }
         SDL_free(data);
     }
@@ -625,7 +625,7 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
 SDL_bool
 Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->window;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if (info->version.major <= SDL_MAJOR_VERSION) {
         //info->window = nswindow;

@@ -255,7 +255,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
     renderer->info = GL_ES_RenderDriver.info;
-    renderer->window = window->id;
+    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags =
@@ -276,12 +276,12 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    data->context = SDL_GL_CreateContext(window->id);
+    data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
         GLES_DestroyRenderer(renderer);
         return NULL;
     }
-    if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
+    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
         GLES_DestroyRenderer(renderer);
         return NULL;
     }
@@ -334,7 +334,7 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
 
-    if (SDL_GL_MakeCurrent(window->id, data->context) < 0) {
+    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
         return -1;
     }
     if (data->updateSize) {
