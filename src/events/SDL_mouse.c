@@ -373,7 +373,7 @@ SDL_SendProximity(int id, int x, int y, int type)
         event.proximity.cursor = mouse->current_end;
         event.proximity.type = type;
         /* FIXME: is this right? */
-        event.proximity.windowID = mouse->focus->id;
+        event.proximity.windowID = mouse->focus ? mouse->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
         if (type == SDL_PROXIMITYIN) {
             mouse->proximity = SDL_TRUE;
@@ -479,7 +479,7 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
         event.motion.cursor = mouse->current_end;
         event.motion.xrel = xrel;
         event.motion.yrel = yrel;
-        event.motion.windowID = mouse->focus->id;
+        event.motion.windowID = mouse->focus ? mouse->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     mouse->last_x = mouse->x;
@@ -532,7 +532,7 @@ SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
         event.button.button = button;
         event.button.x = mouse->x;
         event.button.y = mouse->y;
-        event.button.windowID = mouse->focus->id;
+        event.button.windowID = mouse->focus ? mouse->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return posted;
@@ -556,7 +556,7 @@ SDL_SendMouseWheel(int index, int x, int y)
         event.wheel.which = (Uint8) index;
         event.wheel.x = x;
         event.wheel.y = y;
-        event.wheel.windowID = mouse->focus->id;
+        event.wheel.windowID = mouse->focus ? mouse->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return posted;
