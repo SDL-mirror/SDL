@@ -2711,7 +2711,6 @@ void
 SDL_DestroyRenderer(SDL_Window * window)
 {
     SDL_Renderer *renderer;
-    int i;
 
     if (!window) {
         return;
