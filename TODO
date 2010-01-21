@@ -53,6 +53,8 @@
  * Figure out how to handle OpenGL context lost on Mac OS X (does it happen?)
  * Write automated test case for multi-draw APIs
  * Make sure you can build SDL without the renderer to slim it down a bunch
+ * Implement assertion code on iPhone
+ * Add __WINDOWS__ in addition to __WIN32__
 
  * Check 1.2 revisions:
 	3554 - Need to resolve semantics for locking keys on different platforms

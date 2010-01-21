@@ -25,7 +25,7 @@ static struct
     float x, y;                 /* position of ship */
     float vx, vy;               /* velocity of ship (in pixels per millesecond) */
     SDL_Rect rect;              /* (drawn) position and size of ship */
-} ship;
+} shipData;
 
 static SDL_Texture *ship = 0;        /* texture for spaceship */
 static SDL_Texture *space = 0;       /* texture for space (background */
@@ -41,9 +41,9 @@ render(void)
 
     /* ship screen constraints */
     Uint32 minx = 0.0f;
-    Uint32 maxx = SCREEN_WIDTH - ship.rect.w;
+    Uint32 maxx = SCREEN_WIDTH - shipData.rect.w;
     Uint32 miny = 0.0f;
-    Uint32 maxy = SCREEN_HEIGHT - ship.rect.h;
+    Uint32 maxy = SCREEN_HEIGHT - shipData.rect.h;
 
 #define SINT16_MAX ((float)(0x7FFF))
 
@@ -51,59 +51,59 @@ render(void)
        the factor SDL_IPHONE_MAX_G_FORCE / SINT16_MAX converts between 
        SDL's units reported from the joytick, and units of g-force, as reported by the accelerometer
      */
-    ship.vx +=
+    shipData.vx +=
         ax * SDL_IPHONE_MAX_GFORCE / SINT16_MAX * GRAVITY_CONSTANT *
         MILLESECONDS_PER_FRAME;
-    ship.vy +=
+    shipData.vy +=
         ay * SDL_IPHONE_MAX_GFORCE / SINT16_MAX * GRAVITY_CONSTANT *
         MILLESECONDS_PER_FRAME;
 
-    float speed = sqrt(ship.vx * ship.vx + ship.vy * ship.vy);
+    float speed = sqrt(shipData.vx * shipData.vx + shipData.vy * shipData.vy);
 
     if (speed > 0) {
         /* compensate for friction */
-        float dirx = ship.vx / speed;   /* normalized x velocity */
-        float diry = ship.vy / speed;   /* normalized y velocity */
+        float dirx = shipData.vx / speed;   /* normalized x velocity */
+        float diry = shipData.vy / speed;   /* normalized y velocity */
 
         /* update velocity due to friction */
         if (speed - FRICTION * MILLESECONDS_PER_FRAME > 0) {
             /* apply friction */
-            ship.vx -= dirx * FRICTION * MILLESECONDS_PER_FRAME;
-            ship.vy -= diry * FRICTION * MILLESECONDS_PER_FRAME;
+            shipData.vx -= dirx * FRICTION * MILLESECONDS_PER_FRAME;
+            shipData.vy -= diry * FRICTION * MILLESECONDS_PER_FRAME;
         } else {
             /* applying friction would MORE than stop the ship, so just stop the ship */
-            ship.vx = 0.0f;
-            ship.vy = 0.0f;
+            shipData.vx = 0.0f;
+            shipData.vy = 0.0f;
         }
     }
 
     /* update ship location */
-    ship.x += ship.vx * MILLESECONDS_PER_FRAME;
-    ship.y += ship.vy * MILLESECONDS_PER_FRAME;
+    shipData.x += shipData.vx * MILLESECONDS_PER_FRAME;
+    shipData.y += shipData.vy * MILLESECONDS_PER_FRAME;
 
-    if (ship.x > maxx) {
-        ship.x = maxx;
-        ship.vx = -ship.vx * DAMPING;
-    } else if (ship.x < minx) {
-        ship.x = minx;
-        ship.vx = -ship.vx * DAMPING;
+    if (shipData.x > maxx) {
+        shipData.x = maxx;
+        shipData.vx = -shipData.vx * DAMPING;
+    } else if (shipData.x < minx) {
+        shipData.x = minx;
+        shipData.vx = -shipData.vx * DAMPING;
     }
-    if (ship.y > maxy) {
-        ship.y = maxy;
-        ship.vy = -ship.vy * DAMPING;
-    } else if (ship.y < miny) {
-        ship.y = miny;
-        ship.vy = -ship.vy * DAMPING;
+    if (shipData.y > maxy) {
+        shipData.y = maxy;
+        shipData.vy = -shipData.vy * DAMPING;
+    } else if (shipData.y < miny) {
+        shipData.y = miny;
+        shipData.vy = -shipData.vy * DAMPING;
     }
 
     /* draw the background */
     SDL_RenderCopy(space, NULL, NULL);
 
     /* draw the ship */
-    ship.rect.x = ship.x;
-    ship.rect.y = ship.y;
+    shipData.rect.x = shipData.x;
+    shipData.rect.y = shipData.y;
 
-    SDL_RenderCopy(ship, NULL, &ship.rect);
+    SDL_RenderCopy(ship, NULL, &shipData.rect);
 
     /* update screen */
     SDL_RenderPresent();
@@ -148,8 +148,8 @@ initializeTextures()
     SDL_SetTextureBlendMode(ship, SDL_BLENDMODE_BLEND);
 
     /* set the width and height of the ship from the surface dimensions */
-    ship.rect.w = bmp_surface->w;
-    ship.rect.h = bmp_surface->h;
+    shipData.rect.w = bmp_surface->w;
+    shipData.rect.h = bmp_surface->h;
 
     SDL_FreeSurface(bmp_surface_rgba);
     SDL_FreeSurface(bmp_surface);
@@ -211,10 +211,10 @@ main(int argc, char *argv[])
     initializeTextures();
 
     /* setup ship */
-    ship.x = (SCREEN_WIDTH - ship.rect.w) / 2;
-    ship.y = (SCREEN_HEIGHT - ship.rect.h) / 2;
-    ship.vx = 0.0f;
-    ship.vy = 0.0f;
+    shipData.x = (SCREEN_WIDTH - shipData.rect.w) / 2;
+    shipData.y = (SCREEN_HEIGHT - shipData.rect.h) / 2;
+    shipData.vx = 0.0f;
+    shipData.vy = 0.0f;
 
     done = 0;
     /* enter main loop */
