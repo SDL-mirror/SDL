@@ -1643,6 +1643,9 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
     texture->a = 255;
     texture->renderer = renderer;
     texture->next = renderer->textures;
+    if (renderer->textures) {
+        renderer->textures->prev = texture;
+    }
     renderer->textures = texture;
 
     if (renderer->CreateTexture(renderer, texture) < 0) {
@@ -2696,6 +2699,9 @@ SDL_DestroyTexture(SDL_Texture * texture)
     }
 
     renderer = texture->renderer;
+    if (texture->next) {
+        texture->next->prev = texture->prev;
+    }
     if (texture->prev) {
         texture->prev->next = texture->next;
     } else {
