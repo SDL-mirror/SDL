@@ -138,10 +138,10 @@ typedef enum
     SDL_WINDOWEVENT_MAXIMIZED,      /**< Window has been maximized */
     SDL_WINDOWEVENT_RESTORED,       /**< Window has been restored to normal size
                                          and position */
-    SDL_WINDOWEVENT_ENTER,          /**< The window has gained mouse focus */
-    SDL_WINDOWEVENT_LEAVE,          /**< The window has lost mouse focus */
-    SDL_WINDOWEVENT_FOCUS_GAINED,   /**< The window has gained keyboard focus */
-    SDL_WINDOWEVENT_FOCUS_LOST,     /**< The window has lost keyboard focus */
+    SDL_WINDOWEVENT_ENTER,          /**< Window has gained mouse focus */
+    SDL_WINDOWEVENT_LEAVE,          /**< Window has lost mouse focus */
+    SDL_WINDOWEVENT_FOCUS_GAINED,   /**< Window has gained keyboard focus */
+    SDL_WINDOWEVENT_FOCUS_LOST,     /**< Window has lost keyboard focus */
     SDL_WINDOWEVENT_CLOSE           /**< The window manager requests that the 
                                          window be closed */
 } SDL_WindowEventID;
