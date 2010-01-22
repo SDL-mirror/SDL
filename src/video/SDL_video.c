@@ -903,6 +903,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window->flags = (flags & allowed_flags);
     window->display = display;
     window->next = display->windows;
+    if (display->windows) {
+        display->windows->prev = window;
+    }
     display->windows = window;
 
     if (_this->CreateWindow && _this->CreateWindow(_this, window) < 0) {
@@ -943,6 +946,9 @@ SDL_CreateWindowFrom(const void *data)
     window->flags = SDL_WINDOW_FOREIGN;
     window->display = display;
     window->next = display->windows;
+    if (display->windows) {
+        display->windows->prev = window;
+    }
     display->windows = window;
 
     if (!_this->CreateWindowFrom ||
@@ -1452,6 +1458,9 @@ SDL_DestroyWindow(SDL_Window * window)
 
     /* Unlink the window from the list */
     display = window->display;
+    if (window->next) {
+        window->next->prev = window->prev;
+    }
     if (window->prev) {
         window->prev->next = window->next;
     } else {
