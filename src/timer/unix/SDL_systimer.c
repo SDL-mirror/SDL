@@ -42,10 +42,6 @@
 #include <time.h>
 #endif
 
-#if SDL_THREAD_PTH
-#include <pth.h>
-#endif
-
 #if SDL_THREADS_DISABLED
 #define USE_ITIMER
 #endif
@@ -94,12 +90,6 @@ SDL_GetTicks(void)
 void
 SDL_Delay(Uint32 ms)
 {
-#if SDL_THREAD_PTH
-    pth_time_t tv;
-    tv.tv_sec = ms / 1000;
-    tv.tv_usec = (ms % 1000) * 1000;
-    pth_nap(tv);
-#else
     int was_error;
 
 #if HAVE_NANOSLEEP
@@ -138,7 +128,6 @@ SDL_Delay(Uint32 ms)
         was_error = select(0, NULL, NULL, NULL, &tv);
 #endif /* HAVE_NANOSLEEP */
     } while (was_error && (errno == EINTR));
-#endif /* SDL_THREAD_PTH */
 }
 
 #ifdef USE_ITIMER

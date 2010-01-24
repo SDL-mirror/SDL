@@ -31,10 +31,6 @@
 #include "video/SDL_leaks.h"
 #endif
 
-#if SDL_THREAD_PTH
-#include <pth.h>
-#endif
-
 /* Initialization/Cleanup routines */
 #if !SDL_JOYSTICK_DISABLED
 extern int SDL_JoystickInit(void);
@@ -152,12 +148,6 @@ SDL_InitSubSystem(Uint32 flags)
 int
 SDL_Init(Uint32 flags)
 {
-#if !SDL_THREADS_DISABLED && SDL_THREAD_PTH
-    if (!pth_init()) {
-        return -1;
-    }
-#endif
-
     if (SDL_AssertionsInit() < 0) {
         return -1;
     }
@@ -266,9 +256,6 @@ SDL_Quit(void)
 
     SDL_AssertionsQuit();
 
-#if !SDL_THREADS_DISABLED && SDL_THREAD_PTH
-    pth_kill();
-#endif
 #ifdef DEBUG_BUILD
     printf("[SDL_Quit] : Returning!\n");
     fflush(stdout);
