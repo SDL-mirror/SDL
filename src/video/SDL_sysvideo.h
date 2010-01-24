@@ -37,6 +37,7 @@ typedef struct SDL_VideoDevice SDL_VideoDevice;
 /* Define the SDL texture structure */
 struct SDL_Texture
 {
+    const void *magic;
     Uint32 format;              /**< The pixel format of the texture */
     int access;                 /**< SDL_TextureAccess */
     int w;                      /**< The width of the texture */
@@ -138,6 +139,7 @@ struct SDL_RenderDriver
 /* Define the SDL window structure, corresponding to toplevel windows */
 struct SDL_Window
 {
+    const void *magic;
     Uint32 id;
     char *title;
     int x, y;
@@ -308,6 +310,8 @@ struct SDL_VideoDevice
     int num_displays;
     SDL_VideoDisplay *displays;
     int current_display;
+    Uint8 window_magic;
+    Uint8 texture_magic;
     Uint32 next_object_id;
 
     /* * * */

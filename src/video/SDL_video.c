@@ -105,6 +105,26 @@ static VideoBootStrap *bootstrap[] = {
 
 static SDL_VideoDevice *_this = NULL;
 
+#define CHECK_WINDOW_MAGIC(window, retval) \
+    if (!_this) { \
+        SDL_UninitializedVideo(); \
+        return retval; \
+    } \
+	if (!window || window->magic != &_this->window_magic) { \
+        SDL_SetError("Invalid window"); \
+        return retval; \
+    }
+
+#define CHECK_TEXTURE_MAGIC(texture, retval) \
+    if (!_this) { \
+        SDL_UninitializedVideo(); \
+        return retval; \
+    } \
+	if (!texture || texture->magic != &_this->texture_magic) { \
+        SDL_SetError("Invalid texture"); \
+        return retval; \
+    }
+
 /* Various local functions */
 static void SDL_UpdateWindowGrab(SDL_Window * window);
 
@@ -710,9 +730,7 @@ SDL_SetDisplayMode(const SDL_DisplayMode * mode)
 int
 SDL_SetWindowDisplayMode(SDL_Window * window, const SDL_DisplayMode * mode)
 {
-    if (!window) {
-        return -1;
-    }
+    CHECK_WINDOW_MAGIC(window, -1);
 
     if (mode) {
         window->fullscreen_mode = *mode;
@@ -727,9 +745,7 @@ SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
 {
     SDL_DisplayMode fullscreen_mode;
 
-    if (!window) {
-        return -1;
-    }
+    CHECK_WINDOW_MAGIC(window, -1);
 
     fullscreen_mode = window->fullscreen_mode;
     if (!fullscreen_mode.w) {
@@ -897,6 +913,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     }
     display = SDL_CurrentDisplay;
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
+    window->magic = &_this->window_magic;
     window->id = _this->next_object_id++;
     window->x = x;
     window->y = y;
@@ -944,6 +961,7 @@ SDL_CreateWindowFrom(const void *data)
     }
     display = SDL_CurrentDisplay;
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
+    window->magic = &_this->window_magic;
     window->id = _this->next_object_id++;
     window->flags = SDL_WINDOW_FOREIGN;
     window->display = display;
@@ -1047,9 +1065,8 @@ SDL_GetCurrentRenderer(SDL_bool create)
 Uint32
 SDL_GetWindowID(SDL_Window * window)
 {
-    if (!window) {
-        return 0;
-    }
+    CHECK_WINDOW_MAGIC(window, 0);
+
     return window->id;
 }
 
@@ -1077,16 +1094,17 @@ SDL_GetWindowFromID(Uint32 id)
 Uint32
 SDL_GetWindowFlags(SDL_Window * window)
 {
-    if (!window) {
-        return 0;
-    }
+    CHECK_WINDOW_MAGIC(window, 0);
+
     return window->flags;
 }
 
 void
 SDL_SetWindowTitle(SDL_Window * window, const char *title)
 {
-    if (!window || title == window->title) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (title == window->title) {
         return;
     }
     if (window->title) {
@@ -1106,18 +1124,16 @@ SDL_SetWindowTitle(SDL_Window * window, const char *title)
 const char *
 SDL_GetWindowTitle(SDL_Window * window)
 {
-    if (!window) {
-        return NULL;
-    }
+    CHECK_WINDOW_MAGIC(window, NULL);
+
     return window->title;
 }
 
 void
 SDL_SetWindowIcon(SDL_Window * window, SDL_Surface * icon)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     if (_this->SetWindowIcon) {
         _this->SetWindowIcon(_this, window, icon);
     }
@@ -1126,27 +1142,24 @@ SDL_SetWindowIcon(SDL_Window * window, SDL_Surface * icon)
 void
 SDL_SetWindowData(SDL_Window * window, void *userdata)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     window->userdata = userdata;
 }
 
 void *
 SDL_GetWindowData(SDL_Window * window)
 {
-    if (!window) {
-        return NULL;
-    }
+    CHECK_WINDOW_MAGIC(window, NULL);
+
     return window->userdata;
 }
 
 void
 SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     if (x != SDL_WINDOWPOS_UNDEFINED) {
         window->x = x;
     }
@@ -1162,9 +1175,8 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 void
 SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     if (x) {
         *x = window->x;
     }
@@ -1176,9 +1188,8 @@ SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     window->w = w;
     window->h = h;
 
@@ -1211,7 +1222,9 @@ SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
 void
 SDL_ShowWindow(SDL_Window * window)
 {
-    if (!window || (window->flags & SDL_WINDOW_SHOWN)) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (window->flags & SDL_WINDOW_SHOWN) {
         return;
     }
 
@@ -1224,7 +1237,9 @@ SDL_ShowWindow(SDL_Window * window)
 void
 SDL_HideWindow(SDL_Window * window)
 {
-    if (!window || !(window->flags & SDL_WINDOW_SHOWN)) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (!(window->flags & SDL_WINDOW_SHOWN)) {
         return;
     }
 
@@ -1237,7 +1252,9 @@ SDL_HideWindow(SDL_Window * window)
 void
 SDL_RaiseWindow(SDL_Window * window)
 {
-    if (!window || !(window->flags & SDL_WINDOW_SHOWN)) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (!(window->flags & SDL_WINDOW_SHOWN)) {
         return;
     }
     if (_this->RaiseWindow) {
@@ -1251,7 +1268,9 @@ SDL_RaiseWindow(SDL_Window * window)
 void
 SDL_MaximizeWindow(SDL_Window * window)
 {
-    if (!window || (window->flags & SDL_WINDOW_MAXIMIZED)) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (window->flags & SDL_WINDOW_MAXIMIZED) {
         return;
     }
 
@@ -1264,7 +1283,9 @@ SDL_MaximizeWindow(SDL_Window * window)
 void
 SDL_MinimizeWindow(SDL_Window * window)
 {
-    if (!window || (window->flags & SDL_WINDOW_MINIMIZED)) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (window->flags & SDL_WINDOW_MINIMIZED) {
         return;
     }
 
@@ -1277,8 +1298,9 @@ SDL_MinimizeWindow(SDL_Window * window)
 void
 SDL_RestoreWindow(SDL_Window * window)
 {
-    if (!window
-        || !(window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if (!(window->flags & (SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED))) {
         return;
     }
 
@@ -1291,9 +1313,8 @@ SDL_RestoreWindow(SDL_Window * window)
 int
 SDL_SetWindowFullscreen(SDL_Window * window, int fullscreen)
 {
-    if (!window) {
-        return -1;
-    }
+    CHECK_WINDOW_MAGIC(window, -1);
+
     if (fullscreen) {
         fullscreen = SDL_WINDOW_FULLSCREEN;
     }
@@ -1315,7 +1336,9 @@ SDL_SetWindowFullscreen(SDL_Window * window, int fullscreen)
 void
 SDL_SetWindowGrab(SDL_Window * window, int mode)
 {
-    if (!window || (!!mode == !!(window->flags & SDL_WINDOW_INPUT_GRABBED))) {
+    CHECK_WINDOW_MAGIC(window, );
+
+    if ((!!mode == !!(window->flags & SDL_WINDOW_INPUT_GRABBED))) {
         return;
     }
     if (mode) {
@@ -1337,9 +1360,8 @@ SDL_UpdateWindowGrab(SDL_Window * window)
 int
 SDL_GetWindowGrab(SDL_Window * window)
 {
-    if (!window) {
-        return 0;
-    }
+    CHECK_WINDOW_MAGIC(window, 0);
+
     return ((window->flags & SDL_WINDOW_INPUT_GRABBED) != 0);
 }
 
@@ -1436,10 +1458,8 @@ SDL_DestroyWindow(SDL_Window * window)
 {
     SDL_VideoDisplay *display;
 
-    if (!_this || !window || !window->id) {
-        SDL_SetError("Invalid window");
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+    window->magic = NULL;
 
     if (window->title) {
         SDL_free(window->title);
@@ -1468,9 +1488,6 @@ SDL_DestroyWindow(SDL_Window * window)
     } else {
         display->windows = window->next;
     }
-
-    /* Clear the ID so we know it was destroyed */
-    window->id = 0;
 
     SDL_free(window);
 }
@@ -1519,10 +1536,7 @@ SDL_GetRenderDriverInfo(int index, SDL_RendererInfo * info)
 int
 SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 {
-    if (!window) {
-        SDL_SetError("Invalid window");
-        return -1;
-    }
+    CHECK_WINDOW_MAGIC(window, -1);
 
     /* Free any existing renderer */
     SDL_DestroyRenderer(window);
@@ -1596,10 +1610,8 @@ SDL_SelectRenderer(SDL_Window * window)
 {
     SDL_Renderer *renderer;
 
-    if (!window) {
-        SDL_SetError("Invalid window");
-        return -1;
-    }
+    CHECK_WINDOW_MAGIC(window, -1);
+
     renderer = window->renderer;
     if (!renderer) {
         SDL_SetError("Use SDL_CreateRenderer() to create a renderer");
@@ -1644,6 +1656,7 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
         SDL_OutOfMemory();
         return 0;
     }
+    texture->magic = &_this->texture_magic;
     texture->format = format;
     texture->access = access;
     texture->w = w;
@@ -1972,9 +1985,8 @@ int
 SDL_QueryTexture(SDL_Texture * texture, Uint32 * format, int *access,
                  int *w, int *h)
 {
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     if (format) {
         *format = texture->format;
     }
@@ -1995,9 +2007,8 @@ SDL_QueryTexturePixels(SDL_Texture * texture, void **pixels, int *pitch)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->QueryTexturePixels) {
         SDL_Unsupported();
@@ -2012,9 +2023,8 @@ SDL_SetTexturePalette(SDL_Texture * texture, const SDL_Color * colors,
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->SetTexturePalette) {
         SDL_Unsupported();
@@ -2030,9 +2040,8 @@ SDL_GetTexturePalette(SDL_Texture * texture, SDL_Color * colors,
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->GetTexturePalette) {
         SDL_Unsupported();
@@ -2047,9 +2056,8 @@ SDL_SetTextureColorMod(SDL_Texture * texture, Uint8 r, Uint8 g, Uint8 b)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->SetTextureColorMod) {
         SDL_Unsupported();
@@ -2072,9 +2080,8 @@ SDL_GetTextureColorMod(SDL_Texture * texture, Uint8 * r, Uint8 * g,
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (r) {
         *r = texture->r;
@@ -2093,9 +2100,8 @@ SDL_SetTextureAlphaMod(SDL_Texture * texture, Uint8 alpha)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->SetTextureAlphaMod) {
         SDL_Unsupported();
@@ -2113,9 +2119,8 @@ SDL_SetTextureAlphaMod(SDL_Texture * texture, Uint8 alpha)
 int
 SDL_GetTextureAlphaMod(SDL_Texture * texture, Uint8 * alpha)
 {
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     if (alpha) {
         *alpha = texture->a;
     }
@@ -2127,9 +2132,8 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, int blendMode)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->SetTextureBlendMode) {
         SDL_Unsupported();
@@ -2142,9 +2146,8 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, int blendMode)
 int
 SDL_GetTextureBlendMode(SDL_Texture * texture, int *blendMode)
 {
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     if (blendMode) {
         *blendMode = texture->blendMode;
     }
@@ -2156,9 +2159,8 @@ SDL_SetTextureScaleMode(SDL_Texture * texture, int scaleMode)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->SetTextureScaleMode) {
         SDL_Unsupported();
@@ -2171,9 +2173,8 @@ SDL_SetTextureScaleMode(SDL_Texture * texture, int scaleMode)
 int
 SDL_GetTextureScaleMode(SDL_Texture * texture, int *scaleMode)
 {
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     if (scaleMode) {
         *scaleMode = texture->scaleMode;
     }
@@ -2187,9 +2188,8 @@ SDL_UpdateTexture(SDL_Texture * texture, const SDL_Rect * rect,
     SDL_Renderer *renderer;
     SDL_Rect full_rect;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = texture->renderer;
     if (!renderer->UpdateTexture) {
         SDL_Unsupported();
@@ -2212,9 +2212,8 @@ SDL_LockTexture(SDL_Texture * texture, const SDL_Rect * rect, int markDirty,
     SDL_Renderer *renderer;
     SDL_Rect full_rect;
 
-    if (!texture) {
-        return -1;
-    }
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     if (texture->access != SDL_TEXTUREACCESS_STREAMING) {
         SDL_SetError("SDL_LockTexture(): texture must be streaming");
         return -1;
@@ -2240,9 +2239,8 @@ SDL_UnlockTexture(SDL_Texture * texture)
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return;
-    }
+    CHECK_TEXTURE_MAGIC(texture, );
+
     if (texture->access != SDL_TEXTUREACCESS_STREAMING) {
         return;
     }
@@ -2259,9 +2257,8 @@ SDL_DirtyTexture(SDL_Texture * texture, int numrects,
 {
     SDL_Renderer *renderer;
 
-    if (!texture) {
-        return;
-    }
+    CHECK_TEXTURE_MAGIC(texture, );
+
     if (texture->access != SDL_TEXTUREACCESS_STREAMING) {
         return;
     }
@@ -2544,12 +2541,10 @@ SDL_RenderCopy(SDL_Texture * texture, const SDL_Rect * srcrect,
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
 
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
     renderer = SDL_GetCurrentRenderer(SDL_TRUE);
     if (!renderer) {
-        return -1;
-    }
-    if (!texture) {
-        SDL_SetError("Texture not found");
         return -1;
     }
     if (texture->renderer != renderer) {
@@ -2704,10 +2699,8 @@ SDL_DestroyTexture(SDL_Texture * texture)
 {
     SDL_Renderer *renderer;
 
-    if (!texture || !texture->renderer) {
-        SDL_SetError("Invalid texture");
-        return;
-    }
+    CHECK_TEXTURE_MAGIC(texture, );
+    texture->magic = NULL;
 
     renderer = texture->renderer;
     if (texture->next) {
@@ -2718,7 +2711,6 @@ SDL_DestroyTexture(SDL_Texture * texture)
     } else {
         renderer->textures = texture->next;
     }
-    texture->renderer = NULL;
 
     renderer->DestroyTexture(renderer, texture);
     SDL_free(texture);
@@ -2729,9 +2721,8 @@ SDL_DestroyRenderer(SDL_Window * window)
 {
     SDL_Renderer *renderer;
 
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     renderer = window->renderer;
     if (!renderer) {
         return;
@@ -3215,9 +3206,8 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 SDL_GLContext
 SDL_GL_CreateContext(SDL_Window * window)
 {
-    if (!window) {
-        return NULL;
-    }
+    CHECK_WINDOW_MAGIC(window, NULL);
+
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return NULL;
@@ -3228,7 +3218,9 @@ SDL_GL_CreateContext(SDL_Window * window)
 int
 SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext context)
 {
-    if (window && !(window->flags & SDL_WINDOW_OPENGL)) {
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return -1;
     }
@@ -3271,9 +3263,8 @@ SDL_GL_GetSwapInterval(void)
 void
 SDL_GL_SwapWindow(SDL_Window * window)
 {
-    if (!window) {
-        return;
-    }
+    CHECK_WINDOW_MAGIC(window, );
+
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return;
@@ -3393,7 +3384,9 @@ SDL_WM_SetIcon(SDL_Surface * icon, Uint8 * mask)
 SDL_bool
 SDL_GetWindowWMInfo(SDL_Window * window, struct SDL_SysWMinfo *info)
 {
-    if (!window || !_this->GetWindowWMInfo) {
+    CHECK_WINDOW_MAGIC(window, SDL_FALSE);
+
+    if (!_this->GetWindowWMInfo) {
         return SDL_FALSE;
     }
     return (_this->GetWindowWMInfo(_this, window, info));
