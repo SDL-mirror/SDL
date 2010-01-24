@@ -1676,6 +1676,9 @@ void SDL_GL_Unlock()
 #endif
 }
 
+
+void SDL_Audio_SetCaption(const char *caption);
+
 /*
  * Sets/Gets the title and icon text of the display window, if any.
  */
@@ -1703,7 +1706,6 @@ void SDL_WM_SetCaption (const char *title, const char *icon)
 	}
 
 	/* PulseAudio can make use of this information. */
-	extern void SDL_Audio_SetCaption(const char *caption);
 	SDL_Audio_SetCaption(title);
 }
 
