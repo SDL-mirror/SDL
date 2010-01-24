@@ -497,7 +497,9 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	if (this->hidden->caption == NULL) {
-		this->hidden->caption = SDL_strdup(get_progname());
+		char *title = NULL;
+		SDL_WM_GetCaption(&title, NULL);
+		PULSE_SetCaption(this, title);
 	}
 
 	mainloop_api = SDL_NAME(pa_mainloop_get_api)(mainloop);
