@@ -69,7 +69,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %{__defattr}
-%doc README README-SDL.txt COPYING CREDITS BUGS WhatsNew docs.html
+%doc README README-SDL.txt COPYING CREDITS BUGS WhatsNew
 %doc docs/index.html docs/html
 %{_bindir}/*-config
 %{_libdir}/lib*.a
