@@ -163,6 +163,11 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     int index;
     int i;
 
+    /* Check to make sure we don't overwrite '_this' */
+    if (_this != NULL) {
+        SDL_VideoQuit();
+    }
+
     /* Toggle the event thread flags, based on OS requirements */
 #if defined(MUST_THREAD_EVENTS)
     flags |= SDL_INIT_EVENTTHREAD;
@@ -177,10 +182,7 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
     if (SDL_StartEventLoop(flags) < 0) {
         return -1;
     }
-    /* Check to make sure we don't overwrite '_this' */
-    if (_this != NULL) {
-        SDL_VideoQuit();
-    }
+
     /* Select the proper video driver */
     index = 0;
     video = NULL;
