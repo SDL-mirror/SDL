@@ -59,6 +59,8 @@ struct SDL_AudioDevice {
 	void (*LockAudio)(_THIS);
 	void (*UnlockAudio)(_THIS);
 
+	void (*SetCaption)(_THIS, const char *caption);
+
 	/* * * */
 	/* Data common to all devices */
 

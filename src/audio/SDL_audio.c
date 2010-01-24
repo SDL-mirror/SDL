@@ -693,3 +693,11 @@ void SDL_CalculateAudioSpec(SDL_AudioSpec *spec)
 	spec->size *= spec->channels;
 	spec->size *= spec->samples;
 }
+
+void SDL_Audio_SetCaption(const char *caption)
+{
+	if ((current_audio) && (current_audio->SetCaption)) {
+		current_audio->SetCaption(current_audio, caption);
+	}
+}
+

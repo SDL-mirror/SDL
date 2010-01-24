@@ -1701,7 +1701,12 @@ void SDL_WM_SetCaption (const char *title, const char *icon)
 			video->SetCaption(this, video->wm_title,video->wm_icon);
 		}
 	}
+
+	/* PulseAudio can make use of this information. */
+	extern void SDL_Audio_SetCaption(const char *caption);
+	SDL_Audio_SetCaption(title);
 }
+
 void SDL_WM_GetCaption (char **title, char **icon)
 {
 	SDL_VideoDevice *video = current_video;

@@ -56,6 +56,7 @@ static void PULSE_PlayAudio(_THIS);
 static Uint8 *PULSE_GetAudioBuf(_THIS);
 static void PULSE_CloseAudio(_THIS);
 static void PULSE_WaitDone(_THIS);
+static void PULSE_SetCaption(_THIS, const char *str);
 
 #ifdef SDL_AUDIO_DRIVER_PULSE_DYNAMIC
 
@@ -113,6 +114,8 @@ static pa_operation * (*SDL_NAME(pa_stream_drain))(pa_stream *s,
 	pa_stream_success_cb_t cb, void *userdata);
 static int (*SDL_NAME(pa_stream_disconnect))(pa_stream *s);
 static void (*SDL_NAME(pa_stream_unref))(pa_stream *s);
+static pa_operation* (*SDL_NAME(pa_context_set_name))(pa_context *c,
+	const char *name, pa_context_success_cb_t cb, void *userdata);
 
 static struct {
 	const char *name;
@@ -164,6 +167,8 @@ static struct {
 		(void **)&SDL_NAME(pa_stream_disconnect)	},
 	{ "pa_stream_unref",
 		(void **)&SDL_NAME(pa_stream_unref)		},
+	{ "pa_context_set_name",
+		(void **)&SDL_NAME(pa_context_set_name)		},
 };
 
 static void UnloadPulseLibrary()
@@ -248,6 +253,7 @@ static int Audio_Available(void)
 
 static void Audio_DeleteDevice(SDL_AudioDevice *device)
 {
+	SDL_free(device->hidden->caption);
 	SDL_free(device->hidden);
 	SDL_free(device);
 	UnloadPulseLibrary();
@@ -281,6 +287,7 @@ static SDL_AudioDevice *Audio_CreateDevice(int devindex)
 	this->GetAudioBuf = PULSE_GetAudioBuf;
 	this->CloseAudio = PULSE_CloseAudio;
 	this->WaitDone = PULSE_WaitDone;
+	this->SetCaption = PULSE_SetCaption;
 
 	this->free = Audio_DeleteDevice;
 
@@ -372,7 +379,27 @@ static char *get_progname(void)
 #endif
 }
 
-static void stream_drain_complete(pa_stream *s, int success, void *userdata) {
+static void caption_set_complete(pa_context *c, int success, void *userdata)
+{
+	/* no-op. */
+}
+
+static void PULSE_SetCaption(_THIS, const char *str)
+{
+	SDL_free(this->hidden->caption);
+	if ((str == NULL) || (*str == '\0')) {
+		str = get_progname();  /* set a default so SOMETHING shows up. */
+	}
+	this->hidden->caption = SDL_strdup(str);
+	if (context != NULL) {
+		SDL_NAME(pa_context_set_name)(context, this->hidden->caption,
+		                              caption_set_complete, 0);
+	}
+}
+
+static void stream_drain_complete(pa_stream *s, int success, void *userdata)
+{
+	/* no-op. */
 }
 
 static void PULSE_WaitDone(_THIS)
@@ -469,8 +496,13 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 
+	if (this->hidden->caption == NULL) {
+		this->hidden->caption = SDL_strdup(get_progname());
+	}
+
 	mainloop_api = SDL_NAME(pa_mainloop_get_api)(mainloop);
-	if (!(context = SDL_NAME(pa_context_new)(mainloop_api, get_progname()))) {
+	if (!(context = SDL_NAME(pa_context_new)(mainloop_api,
+	                                         this->hidden->caption))) {
 		PULSE_CloseAudio(this);
 		SDL_SetError("pa_context_new() failed");
 		return(-1);
@@ -479,7 +511,7 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	/* Connect to the PulseAudio server */
 	if (SDL_NAME(pa_context_connect)(context, NULL, 0, NULL) < 0) {
 		PULSE_CloseAudio(this);
-	        SDL_SetError("Could not setup connection to PulseAudio");
+		SDL_SetError("Could not setup connection to PulseAudio");
 		return(-1);
 	}
 
