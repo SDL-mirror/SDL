@@ -581,8 +581,6 @@ SDL_AudioInit(const char *driver_name)
     int i = 0;
     int initialized = 0;
     int tried_to_init = 0;
-    int rc = 0;
-    int best_choice = -1;
 
     if (SDL_WasInit(SDL_INIT_AUDIO)) {
         SDL_AudioQuit();        /* shutdown driver if already running. */
@@ -608,34 +606,14 @@ SDL_AudioInit(const char *driver_name)
         SDL_memset(&current_audio, 0, sizeof(current_audio));
         current_audio.name = backend->name;
         current_audio.desc = backend->desc;
-        rc = backend->init(&current_audio.impl);
-        if (rc == 2) {          /* init'd, and devices available. Take it! */
-            initialized = 1;
-            best_choice = i;
-        } else if (rc == 1) {   /* init'd, but can't see any devices. */
-            if (current_audio.impl.Deinitialize) {
-                current_audio.impl.Deinitialize();
-            }
-            if (best_choice == -1) {
-                best_choice = i;
-            }
-        }
-    }
-
-    /* No definite choice. Pick one that works but can't promise a device. */
-    if ((!initialized) && (best_choice != -1)) {
-        const AudioBootStrap *backend = bootstrap[best_choice];
-        SDL_memset(&current_audio, 0, sizeof(current_audio));
-        current_audio.name = backend->name;
-        current_audio.desc = backend->desc;
-        initialized = (backend->init(&current_audio.impl) > 0);
+        initialized = backend->init(&current_audio.impl);
     }
 
     if (!initialized) {
         /* specific drivers will set the error message if they fail... */
         if (!tried_to_init) {
             if (driver_name) {
-                SDL_SetError("%s not available", driver_name);
+                SDL_SetError("Audio target '%s' not available", driver_name);
             } else {
                 SDL_SetError("No available audio device");
             }

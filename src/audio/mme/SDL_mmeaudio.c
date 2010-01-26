@@ -249,7 +249,7 @@ MME_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = MME_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 /* !!! FIXME: Windows "windib" driver is called waveout, too */

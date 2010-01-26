@@ -120,7 +120,7 @@ NDSAUD_Init(SDL_AudioDriverImpl * impl)
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->OnlyHasDefaultInputDevice = 1;
 
-    return 2;                   /* 2 == definitely has an audio device. */
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap NDSAUD_bootstrap = {

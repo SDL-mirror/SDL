@@ -529,8 +529,7 @@ PULSEAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = PULSEAUDIO_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    /* !!! FIXME: should test if server is available here, return 2 if so. */
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 

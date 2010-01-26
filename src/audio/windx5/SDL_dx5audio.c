@@ -508,8 +508,7 @@ DSOUND_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = DSOUND_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME */
 
-    /* !!! FIXME: not right for device enum? */
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap DSOUND_bootstrap = {

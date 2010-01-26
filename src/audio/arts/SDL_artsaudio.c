@@ -368,7 +368,7 @@ ARTS_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = ARTS_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 

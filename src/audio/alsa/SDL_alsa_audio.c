@@ -681,7 +681,7 @@ ALSA_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = ALSA_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: Add device enum! */
 
-    return 1;                   /* !!! FIXME: return 2 once device enum is implemented. */
+    return 1;   /* this audio target is available. */
 }
 
 

@@ -544,8 +544,7 @@ PAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = DSP_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: add device enum! */
 
-    /* !!! FIXME: device enum might make this 1. */
-    return 2;                   /* 2 == definitely has an audio device. */
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap PAUDIO_bootstrap = {

@@ -574,7 +574,7 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
 
     build_device_lists();       /* do an initial check for devices... */
 
-    return (outputDeviceCount > 0) ? 2 : 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap COREAUDIO_bootstrap = {

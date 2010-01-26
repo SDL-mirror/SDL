@@ -327,8 +327,7 @@ WINWAVEOUT_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = WINWAVEOUT_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: Is this true? */
 
-    /* !!! FIXME: not right for device enum? */
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap WINWAVEOUT_bootstrap = {

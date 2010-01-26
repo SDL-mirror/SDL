@@ -228,7 +228,7 @@ IRIXAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = DSP_CloseDevice;
     impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME: not true, I think. */
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap IRIXAUDIO_bootstrap = {

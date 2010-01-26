@@ -41,7 +41,7 @@ DUMMYAUD_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = DUMMYAUD_OpenDevice;
     impl->OnlyHasDefaultOutputDevice = 1;
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap DUMMYAUD_bootstrap = {

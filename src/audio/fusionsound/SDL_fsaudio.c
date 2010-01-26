@@ -340,7 +340,7 @@ SDL_FS_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = SDL_FS_Deinitialize;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 

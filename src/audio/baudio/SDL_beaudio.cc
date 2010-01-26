@@ -204,7 +204,7 @@ BEOSAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->ProvidesOwnCallbackThread = 1;
     impl->OnlyHasDefaultOutputDevice = 1;
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 extern "C"

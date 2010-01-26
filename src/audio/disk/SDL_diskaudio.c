@@ -158,7 +158,7 @@ DISKAUD_Init(SDL_AudioDriverImpl * impl)
     impl->GetDeviceBuf = DISKAUD_GetDeviceBuf;
     impl->CloseDevice = DISKAUD_CloseDevice;
 
-    return 1;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap DISKAUD_bootstrap = {

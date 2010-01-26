@@ -381,7 +381,8 @@ DSP_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = DSP_Deinitialize;
 
     build_device_lists();
-    return (outputDeviceCount > 0) ? 2 : 1;
+
+    return 1;   /* this audio target is available. */
 }
 
 

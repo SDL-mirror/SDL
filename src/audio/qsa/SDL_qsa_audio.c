@@ -883,8 +883,7 @@ QSA_Init(SDL_AudioDriverImpl * impl)
         return 1;
     }
 
-    /* At this point we are definitely has an audio device */
-    return 2;
+    return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap QSAAUDIO_bootstrap = {
