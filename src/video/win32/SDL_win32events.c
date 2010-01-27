@@ -84,11 +84,16 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
         }
     }
 
-    /* Keypad keys are a little trickier, we always scan for them. */
-    for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
-        if (scancode == keypad_scancodes[i]) {
-            wParam = VK_NUMPAD0 + i;
-            break;
+    /* Keypad keys are a little trickier, we always scan for them.
+       Keypad arrow keys have the same scancode as normal arrow keys,
+       except they don't have the extended bit (0x1000000) set.
+     */
+    if (!(lParam & 0x1000000)) {
+        for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
+            if (scancode == keypad_scancodes[i]) {
+                wParam = VK_NUMPAD0 + i;
+                break;
+            }
         }
     }
 
