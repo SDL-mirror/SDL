@@ -182,7 +182,6 @@ struct SDL_VideoDisplay
     int num_render_drivers;
     SDL_RenderDriver *render_drivers;
 
-    int num_windows;
     SDL_Window *windows;
     SDL_Window *fullscreen_window;
 

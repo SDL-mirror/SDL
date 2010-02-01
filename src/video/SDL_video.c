@@ -110,7 +110,7 @@ static SDL_VideoDevice *_this = NULL;
         SDL_UninitializedVideo(); \
         return retval; \
     } \
-	if (!window || window->magic != &_this->window_magic) { \
+    if (!window || window->magic != &_this->window_magic) { \
         SDL_SetError("Invalid window"); \
         return retval; \
     }
@@ -120,7 +120,7 @@ static SDL_VideoDevice *_this = NULL;
         SDL_UninitializedVideo(); \
         return retval; \
     } \
-	if (!texture || texture->magic != &_this->texture_magic) { \
+    if (!texture || texture->magic != &_this->texture_magic) { \
         SDL_SetError("Invalid texture"); \
         return retval; \
     }
@@ -772,7 +772,6 @@ static void
 SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
 {
     SDL_VideoDisplay *display = window->display;
-    int i;
 
     /* See if we're already processing a window */
     if (display->updating_fullscreen) {
@@ -799,8 +798,8 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
 
     if (FULLSCREEN_VISIBLE(window)) {
         /* Hide any other fullscreen windows */
-        for (i = 0; i < display->num_windows; ++i) {
-            SDL_Window *other = &display->windows[i];
+        SDL_Window *other;
+        for (other = display->windows; other; other = other->next) {
             if (other != window && FULLSCREEN_VISIBLE(other)) {
                 SDL_MinimizeWindow(other);
             }
@@ -810,8 +809,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
     display->updating_fullscreen = SDL_FALSE;
 
     /* See if there are any fullscreen windows */
-    for (i = 0; i < display->num_windows; ++i) {
-        window = &display->windows[i];
+    for (window = display->windows; window; window = window->next) {
         if (FULLSCREEN_VISIBLE(window)) {
             SDL_DisplayMode fullscreen_mode;
             if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
