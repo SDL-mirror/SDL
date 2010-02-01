@@ -1,53 +1,7 @@
 
 1.3 release checklist:
- * Create jobs@libsdl.org
- * Implement landscape mode for iPhone port
- * Add higher precision timers for profiling
- * Implement YUV texture support
-   - in progress, software support is done, Ryan is working on OpenGL shaders
- * Implement desktop video mode change notification?
- * Add OpenGL 3.0 context support
- * Finish multiple display support
- * Open windows on display that is selected when creating a window
- * Create testing plan - becoming more and more important...
-   - unit tests for each feature and combination with expected output
-     and actual output comparison.
- * Public license for SDL_compat.c, tests, and SDL_main*
- * Verify mouse grab support
- * Properly handle mouse grab with Vista DPI scaling
- * Make sure the mouse is where it's supposed to be when un-grabbed
- * Plan how to handle events on foreign windows
- * Add keyboard enumeration / name query API
- * Implement NET_WM_PING and NET_WM_PID/WM_CLIENT_MACHINE (?)
-   - http://standards.freedesktop.org/wm-spec/wm-spec-1.3.html#KILLINGWINDOWS
- * Add a timeout parameter for SDL_WaitEvent() (?)
-   - http://lists.libsdl.org/pipermail/sdl-libsdl.org/2008-May/thread.html#65067
- * Implement key repeat at the driver level
- * Add name -> keysym and name -> scancode lookup functions
- * Fix building haptic system on win32
- * Add always on top window styles
- * Add video modes that have an alpha channel?
- * Implement SDL_RenderReadPixels() for screenshots and automated testing
- * Create extended set of (negative) error codes and have the API functions document and return them.
- * Add clipboard support (from scrap demo)
- * Add support for desktop windows?
-	With Qt, I can do this by the codes as follows:
+ * http://wiki.libsdl.org/moin.cgi/Roadmap
 
-	setAttribute(Qt::WA_X11NetWmWindowTypeDesktop); 
-	setWindowFlags(Qt::SplashScreen);               
-
-	Qt::WindowFlags flags = 0;
-	    flags |= Qt::FramelessWindowHint;
-	    flags |= Qt::Tool;                          
-	    flags |= Qt::WindowStaysOnBottomHint;
-
-	    setWindowFlags(flags);
- * Add support for synchronizing 2D updates with vblank (bug #406)
- * Add support for real-time threads and/or adjusting thread priority?
- * Add support for querying the number of CPUs and binding threads to them?
- * Allow setting multiple icon sizes
-
- * Add concept of viewport to fullscreen windows
  * See why windows are being rearranged.  Is the shield window not up?
  * Make sure you can create and show a fullscreen window in one step
  * Figure out how to handle OpenGL context lost on Mac OS X (does it happen?)
@@ -63,23 +17,3 @@
 	4484, 4485 - Verify that SDL's Windows keyboard handling works correctly
 	4865 - See if this is still needed (mouse coordinate clamping)
 	4866 - See if this is still needed (blocking window repositioning)
-
-Wish list for the 1.3 development branch:
-http://bugzilla.libsdl.org/
-
- * Add a way to register custom events
- * DirectInput joystick support needs to be implemented
- * Explicit vertical retrace wait (maybe separate from SDL_Flip?)
- * Shaped windows, windows without borders
- * Multiple display support
- * Add a timestamp to events
- * Add audio input API
- * Add modifier state to key and button events
-
-In the jump from 1.2 to 1.3, we should change the SDL_Rect members to
-int and evaluate all the rest of the datatypes.  This is the only place
-we should do it though, since the 1.2 series should not break binary
-compatibility in this way.
-
-Requests:
- * PCM volume control (deprecated, but possible)
