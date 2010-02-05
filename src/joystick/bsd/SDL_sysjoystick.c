@@ -307,11 +307,11 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy)
                      strerror(errno));
         goto usberr;
     }
+    rep = &hw->inreport;
 #if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)
     rep->rid = hid_get_report_id(fd);
     if (rep->rid < 0) {
 #else
-    rep = &hw->inreport;
     if (ioctl(fd, USB_GET_REPORT_ID, &rep->rid) < 0) {
 #endif
         rep->rid = -1;          /* XXX */
