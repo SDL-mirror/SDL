@@ -234,9 +234,8 @@ ALSA_WaitDevice(_THIS)
  */
 #define SWIZ6(T) \
     T *ptr = (T *) this->hidden->mixbuf; \
-    const Uint32 count = (this->spec.samples / 6); \
     Uint32 i; \
-    for (i = 0; i < count; i++, ptr += 6) { \
+    for (i = 0; i < this->spec.samples; i++, ptr += 6) { \
         T tmp; \
         tmp = ptr[2]; ptr[2] = ptr[4]; ptr[4] = tmp; \
         tmp = ptr[3]; ptr[3] = ptr[5]; ptr[5] = tmp; \
