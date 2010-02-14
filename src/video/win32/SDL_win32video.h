@@ -27,6 +27,7 @@
 #include "../SDL_sysvideo.h"
 
 #define WIN32_LEAN_AND_MEAN
+#define STRICT
 #define UNICODE
 #define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
 #include <windows.h>
