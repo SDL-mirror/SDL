@@ -80,7 +80,7 @@ typedef struct ThreadStartParms
     pfnSDL_CurrentEndThread pfnCurrentEndThread;
 } tThreadStartParms, *pThreadStartParms;
 
-static unsigned __stdcall
+static DWORD __stdcall
 RunThread(void *data)
 {
     pThreadStartParms pThreadParms = (pThreadStartParms) data;
