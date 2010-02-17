@@ -829,11 +829,14 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     /* YUV formats use RGBA but are really two bytes per pixel */
     if (internalFormat == GL_RGBA && bytes_per_pixel(texture->format) < 4) {
+        texture_w /= 2;
+        if (data->type == GL_TEXTURE_2D) {
+            data->texw *= 2.0f;
+        }
         data->HACK_RYAN_FIXME = 2;
     } else {
         data->HACK_RYAN_FIXME = 1;
     }
-    texture_w /= data->HACK_RYAN_FIXME;
 
     data->format = format;
     data->formattype = type;
