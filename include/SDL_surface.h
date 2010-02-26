@@ -380,8 +380,6 @@ extern DECLSPEC void SDLCALL SDL_GetClipRect(SDL_Surface * surface,
  *  semantics.  You can also pass ::SDL_RLEACCEL in the flags parameter and
  *  SDL will try to RLE accelerate colorkey and alpha blits in the resulting
  *  surface.
- *  
- *  This function is used internally by SDL_DisplayFormat().
  */
 extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurface
     (SDL_Surface * src, SDL_PixelFormat * fmt, Uint32 flags);
