@@ -439,11 +439,13 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
                                                          InputDevice,
                                                          DISFFC_RESET);
 
+        /* Not necessarily supported, ignore if not supported.
         if (FAILED(result)) {
             SetDIerror("IDirectInputDevice2::SendForceFeedbackCommand",
                        result);
             return (-1);
         }
+        */
 
         result = IDirectInputDevice2_Unacquire(joystick->hwdata->InputDevice);
 
@@ -462,10 +464,12 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
             IDirectInputDevice2_SetProperty(joystick->hwdata->InputDevice,
                                             DIPROP_AUTOCENTER, &dipdw.diph);
 
+        /* Not necessarily supported, ignore if not supported.
         if (FAILED(result)) {
             SetDIerror("IDirectInputDevice2::SetProperty", result);
             return (-1);
         }
+        */
     }
 
     /* What buttons and axes does it have? */
