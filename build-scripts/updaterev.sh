@@ -8,7 +8,7 @@ header=$srcdir/include/SDL_revision.h
 
 rev=`sh showrev.sh`
 if [ "$rev" != "" ]; then
-    echo "#define SDL_REVISION $rev" >$header.new
+    echo "#define SDL_REVISION \"$rev\"" >$header.new
     if diff $header $header.new >/dev/null 2>&1; then
         rm $header.new
     else

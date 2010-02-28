@@ -2,14 +2,7 @@
 #
 # Print the current source revision, if available
 
-srcdir=`dirname $0`/..
+# FIXME: this prints the tip, which isn't useful if you're on a different
+#  branch, or just not sync'd to the tip.
+hg tip --template 'hg-{rev}:{node|short}'
 
-if [ -d $srcdir/.svn ]; then
-    cd $srcdir
-    (svnversion -c 2>/dev/null || svnversion .) | \
-        sed -e 's,\([0-9]*\)[A-Z]*,\1,' \
-            -e 's,[0-9]*:\([0-9]*\)[A-Z]*,\1,'
-else
-     cd $srcdir
-     git svn info | grep Revision | awk '{ print $2 }'
-fi

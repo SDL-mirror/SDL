@@ -139,8 +139,11 @@ extern DECLSPEC void SDLCALL SDL_GetVersion(SDL_version * ver);
 
 /**
  *  \brief Get the code revision of SDL that is linked against your program.
+ *
+ *  This is an arbitrary string (a hash value, actually), and is only useful
+ *  in comparing against other revisions. It is NOT an incrementing number.
  */
-extern DECLSPEC int SDLCALL SDL_GetRevision(void);
+extern DECLSPEC const char *SDLCALL SDL_GetRevision(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
