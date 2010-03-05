@@ -101,7 +101,7 @@ typedef int (*SDL_blit) (struct SDL_Surface * src, SDL_Rect * srcrect,
                          struct SDL_Surface * dst, SDL_Rect * dstrect);
 
 /**
- *  Allocate and free an RGB surface (must be called after SDL_SetVideoMode).
+ *  Allocate and free an RGB surface.
  *  
  *  If the depth is 4 or 8 bits, an empty palette is allocated for the surface.
  *  If the depth is greater than 8 bits, the pixel format is set using the
