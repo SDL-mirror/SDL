@@ -22,7 +22,7 @@
 #include "SDL_config.h"
 
 /* This is the DirectDraw implementation of YUV video overlays */
-
+#include "directx.h"
 #include "SDL_video.h"
 #include "SDL_dx5yuv_c.h"
 #include "../SDL_yuvfuncs.h"
