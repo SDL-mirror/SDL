@@ -2382,6 +2382,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             fi
             have_audio=yes
         fi
+        # Set up files for the atomic operations library
+        if test x$enable_atomic = xyes; then
+            AC_DEFINE(SDL_ATOMIC_WIN32)
+            SOURCES="$SOURCES $srcdir/src/atomic/win32/*.c"
+            have_atomic=yes
+        fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
             AC_DEFINE(SDL_THREAD_WIN32)
@@ -2402,12 +2408,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             AC_DEFINE(SDL_LOADSO_WIN32)
             SOURCES="$SOURCES $srcdir/src/loadso/win32/*.c"
             have_loadso=yes
-        fi
-        # Set up files for the system power library
-        if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_WINDOWS)
-            SOURCES="$SOURCES $srcdir/src/power/windows/*.c"
-            have_power=yes
         fi
         # Set up the system libraries we need
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lcoredll -lcommctrl -lmmtimer"
