@@ -37,7 +37,7 @@
 #endif
 
 #if __GNUC__
-typedef unsigned long (__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
+typedef uintptr_t (__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
                                                              unsigned
                                                              (__stdcall *
                                                               func) (void *),

@@ -24,6 +24,13 @@
 #ifndef _SDL_blit_h
 #define _SDL_blit_h
 
+#ifdef __MINGW32__
+#include <_mingw.h>
+#endif
+
+#if defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)
+#include <intrin.h>
+#else
 #ifdef __MMX__
 #include <mmintrin.h>
 #endif
@@ -35,6 +42,7 @@
 #endif
 #ifdef __SSE2__
 #include <emmintrin.h>
+#endif
 #endif
 
 #include "SDL_cpuinfo.h"

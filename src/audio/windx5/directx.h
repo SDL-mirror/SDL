@@ -2,6 +2,10 @@
 #ifndef _directx_h
 #define _directx_h
 
+#ifdef __GNUC__
+#define NONAMELESSUNION
+#endif
+
 /* Include all of the DirectX 5.0 headers and adds any necessary tweaks */
 
 #define WIN32_LEAN_AND_MEAN
@@ -74,9 +78,6 @@
 #define DIRECTSOUND_VERSION 0x0500
 #define DIRECTINPUT_VERSION 0x0500
 
-#ifdef __GNUC__
-#define NONAMELESSUNION
-#endif
 #include <ddraw.h>
 #include <dsound.h>
 #include <dinput.h>
