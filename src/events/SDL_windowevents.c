@@ -144,7 +144,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[SDL_WINDOWEVENT] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_WINDOWEVENT) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_WINDOWEVENT;
         event.window.event = windowevent;

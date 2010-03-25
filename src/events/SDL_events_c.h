@@ -47,7 +47,4 @@ extern void SDL_QuitQuit(void);
 extern SDL_EventFilter SDL_EventOK;
 extern void *SDL_EventOKParam;
 
-/* The array of event processing states */
-extern Uint8 SDL_ProcessEvents[SDL_NUMEVENTS];
-
 /* vi: set ts=4 sw=4 expandtab: */

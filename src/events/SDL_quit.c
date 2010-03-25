@@ -85,7 +85,7 @@ SDL_SendQuit(void)
     int posted;
 
     posted = 0;
-    if (SDL_ProcessEvents[SDL_QUIT] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_QUIT) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_QUIT;
         posted = (SDL_PushEvent(&event) > 0);

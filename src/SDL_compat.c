@@ -196,13 +196,13 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
         case SDL_WINDOWEVENT_EXPOSED:
-            if (!SDL_HasEvent(SDL_VIDEOEXPOSEMASK)) {
+            if (!SDL_HasEvent(SDL_VIDEOEXPOSE)) {
                 fake.type = SDL_VIDEOEXPOSE;
                 SDL_PushEvent(&fake);
             }
             break;
         case SDL_WINDOWEVENT_RESIZED:
-            SDL_PeepEvents(&fake, 1, SDL_GETEVENT, SDL_VIDEORESIZEMASK);
+            SDL_FlushEvent(SDL_VIDEORESIZE);
             fake.type = SDL_VIDEORESIZE;
             fake.resize.w = event->window.data1;
             fake.resize.h = event->window.data2;

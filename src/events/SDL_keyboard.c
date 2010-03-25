@@ -688,7 +688,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
     SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
     int posted;
     Uint16 modstate;
-    Uint8 type;
+    Uint32 type;
 
     if (!keyboard || !scancode) {
         return 0;
@@ -800,7 +800,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[type] == SDL_ENABLE) {
+    if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.key.type = type;
         event.key.which = (Uint8) index;
@@ -827,7 +827,7 @@ SDL_SendKeyboardText(int index, const char *text)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[SDL_TEXTINPUT] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_TEXTINPUT) == SDL_ENABLE) {
         SDL_Event event;
         event.text.type = SDL_TEXTINPUT;
         event.text.which = (Uint8) index;
@@ -845,7 +845,7 @@ SDL_SendEditingText(const char *text, int start, int length)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[SDL_TEXTEDITING] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_TEXTEDITING) == SDL_ENABLE) {
         SDL_Event event;
         event.edit.type = SDL_TEXTEDITING;
         event.edit.start = start;

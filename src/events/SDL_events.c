@@ -37,8 +37,13 @@
 /* Public data -- the event filter */
 SDL_EventFilter SDL_EventOK = NULL;
 void *SDL_EventOKParam;
-Uint8 SDL_ProcessEvents[SDL_NUMEVENTS];
-static Uint32 SDL_eventstate = 0;
+
+typedef struct {
+    Uint32 bits[8];
+} SDL_DisabledEventBlock;
+
+static SDL_DisabledEventBlock *SDL_disabled_events[256];
+static Uint32 SDL_userevents = SDL_USEREVENT;
 
 /* Private data -- event queue */
 #define MAXEVENTS	128
@@ -84,6 +89,17 @@ SDL_Unlock_EventThread(void)
     }
 }
 
+static __inline__ SDL_bool
+SDL_ShouldPollJoystick()
+{
+    if (SDL_numjoysticks &&
+        (!SDL_disabled_events[SDL_JOYAXISMOTION >> 8] ||
+         SDL_JoystickEventState(SDL_QUERY))) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
 static int SDLCALL
 SDL_GobbleEvents(void *unused)
 {
@@ -98,7 +114,7 @@ SDL_GobbleEvents(void *unused)
         }
 #if !SDL_JOYSTICK_DISABLED
         /* Check for joystick state change */
-        if (SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK)) {
+        if (SDL_ShouldPollJoystick()) {
             SDL_JoystickUpdate();
         }
 #endif
@@ -195,6 +211,8 @@ SDL_EventThreadID(void)
 void
 SDL_StopEventLoop(void)
 {
+    int i;
+
     /* Halt the event thread, if running */
     SDL_StopEventThread();
 
@@ -207,6 +225,14 @@ SDL_StopEventLoop(void)
     SDL_EventQ.head = 0;
     SDL_EventQ.tail = 0;
     SDL_EventQ.wmmsg_next = 0;
+
+    /* Clear disabled event state */
+    for (i = 0; i < SDL_arraysize(SDL_disabled_events); ++i) {
+        if (SDL_disabled_events[i]) {
+            SDL_free(SDL_disabled_events[i]);
+            SDL_disabled_events[i] = NULL;
+        }
+    }
 }
 
 /* This function (and associated calls) may be called more than once */
@@ -222,11 +248,7 @@ SDL_StartEventLoop(Uint32 flags)
 
     /* No filter to start with, process most event types */
     SDL_EventOK = NULL;
-    SDL_memset(SDL_ProcessEvents, SDL_ENABLE, sizeof(SDL_ProcessEvents));
-    SDL_eventstate = ~0;
-    /* It's not save to call SDL_EventState() yet */
-    SDL_eventstate &= ~(0x00000001 << SDL_SYSWMEVENT);
-    SDL_ProcessEvents[SDL_SYSWMEVENT] = SDL_IGNORE;
+    SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
 
     /* Initialize event handlers */
     retcode = 0;
@@ -305,7 +327,7 @@ SDL_CutEvent(int spot)
 /* Lock the event queue, take a peep at it, and unlock it */
 int
 SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
-               Uint32 mask)
+               Uint32 minType, Uint32 maxType)
 {
     int i, used;
 
@@ -332,7 +354,8 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
             }
             spot = SDL_EventQ.head;
             while ((used < numevents) && (spot != SDL_EventQ.tail)) {
-                if (mask & SDL_EVENTMASK(SDL_EventQ.event[spot].type)) {
+                Uint32 type = SDL_EventQ.event[spot].type;
+                if (minType <= type && type <= maxType) {
                     events[used++] = SDL_EventQ.event[spot];
                     if (action == SDL_GETEVENT) {
                         spot = SDL_CutEvent(spot);
@@ -353,9 +376,44 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
 }
 
 SDL_bool
-SDL_HasEvent(Uint32 mask)
+SDL_HasEvent(Uint32 type)
 {
-    return (SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, mask) > 0);
+    return (SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, type, type) > 0);
+}
+
+SDL_bool
+SDL_HasEvents(Uint32 minType, Uint32 maxType)
+{
+    return (SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, minType, maxType) > 0);
+}
+
+void
+SDL_FlushEvent(Uint32 type)
+{
+    SDL_FlushEvents(type, type);
+}
+
+void
+SDL_FlushEvents(Uint32 minType, Uint32 maxType)
+{
+    /* Don't look after we've quit */
+    if (!SDL_EventQ.active) {
+        return;
+    }
+
+    /* Lock the event queue */
+    if (SDL_mutexP(SDL_EventQ.lock) == 0) {
+        int spot = SDL_EventQ.head;
+        while (spot != SDL_EventQ.tail) {
+            Uint32 type = SDL_EventQ.event[spot].type;
+            if (minType <= type && type <= maxType) {
+                spot = SDL_CutEvent(spot);
+            } else {
+                spot = (spot + 1) % MAXEVENTS;
+            }
+        }
+        SDL_mutexV(SDL_EventQ.lock);
+    }
 }
 
 /* Run the system dependent event loops */
@@ -371,7 +429,7 @@ SDL_PumpEvents(void)
         }
 #if !SDL_JOYSTICK_DISABLED
         /* Check for joystick state change */
-        if (SDL_numjoysticks && (SDL_eventstate & SDL_JOYEVENTMASK)) {
+        if (SDL_ShouldPollJoystick()) {
             SDL_JoystickUpdate();
         }
 #endif
@@ -402,7 +460,7 @@ SDL_WaitEventTimeout(SDL_Event * event, int timeout)
 
     for (;;) {
         SDL_PumpEvents();
-        switch (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_ALLEVENTS)) {
+        switch (SDL_PeepEvents(event, 1, SDL_GETEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT)) {
         case -1:
             return 0;
         case 1:
@@ -428,7 +486,7 @@ SDL_PushEvent(SDL_Event * event)
     if (SDL_EventOK && !SDL_EventOK(SDL_EventOKParam, event)) {
         return 0;
     }
-    if (SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0) <= 0) {
+    if (SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0, 0) <= 0) {
         return -1;
     }
     return 1;
@@ -476,48 +534,58 @@ SDL_FilterEvents(SDL_EventFilter filter, void *userdata)
 }
 
 Uint8
-SDL_EventState(Uint8 type, int state)
+SDL_EventState(Uint32 type, int state)
 {
-    SDL_Event bitbucket;
     Uint8 current_state;
+    Uint8 hi = ((type >> 8) & 0xff);
+    Uint8 lo = (type & 0xff);
 
-    /* If SDL_ALLEVENTS was specified... */
-    if (type == 0xFF) {
-        current_state = SDL_IGNORE;
-        for (type = 0; type < SDL_NUMEVENTS; ++type) {
-            if (SDL_ProcessEvents[type] != SDL_IGNORE) {
-                current_state = SDL_ENABLE;
-            }
-            SDL_ProcessEvents[type] = state;
-            if (state == SDL_ENABLE) {
-                SDL_eventstate |= (0x00000001 << (type));
-            } else {
-                SDL_eventstate &= ~(0x00000001 << (type));
-            }
-        }
-        while (SDL_PollEvent(&bitbucket) > 0);
-        return (current_state);
+    if (SDL_disabled_events[hi] &&
+        (SDL_disabled_events[hi]->bits[lo/32] & (1 << (lo&31)))) {
+        current_state = SDL_DISABLE;
+    } else {
+        current_state = SDL_ENABLE;
     }
 
-    /* Just set the state for one event type */
-    current_state = SDL_ProcessEvents[type];
-    switch (state) {
-    case SDL_IGNORE:
-    case SDL_ENABLE:
-        /* Set state and discard pending events */
-        SDL_ProcessEvents[type] = state;
-        if (state == SDL_ENABLE) {
-            SDL_eventstate |= (0x00000001 << (type));
-        } else {
-            SDL_eventstate &= ~(0x00000001 << (type));
+    if (state != current_state)
+    {
+        switch (state) {
+        case SDL_DISABLE:
+            /* Disable this event type and discard pending events */
+            if (!SDL_disabled_events[hi]) {
+                SDL_disabled_events[hi] = (SDL_DisabledEventBlock*) SDL_calloc(1, sizeof(SDL_DisabledEventBlock));
+                if (!SDL_disabled_events[hi]) {
+                    /* Out of memory, nothing we can do... */
+                    break;
+                }
+            }
+            SDL_disabled_events[hi]->bits[lo/32] |= (1 << (lo&31));
+            SDL_FlushEvent(type);
+            break;
+        case SDL_ENABLE:
+            SDL_disabled_events[hi]->bits[lo/32] &= ~(1 << (lo&31));
+            break;
+        default:
+            /* Querying state... */
+            break;
         }
-        while (SDL_PollEvent(&bitbucket) > 0);
-        break;
-    default:
-        /* Querying state? */
-        break;
     }
-    return (current_state);
+
+    return current_state;
+}
+
+Uint32
+SDL_RegisterEvents(int numevents)
+{
+    Uint32 event_base;
+
+    if (SDL_userevents+numevents <= SDL_LASTEVENT) {
+        event_base = SDL_userevents;
+        SDL_userevents += numevents;
+    } else {
+        event_base = (Uint32)-1;
+    }
+    return event_base;
 }
 
 /* This is a generic event handler.
@@ -528,7 +596,7 @@ SDL_SendSysWMEvent(SDL_SysWMmsg * message)
     int posted;
 
     posted = 0;
-    if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_SYSWMEVENT) == SDL_ENABLE) {
         SDL_Event event;
         SDL_memset(&event, 0, sizeof(event));
         event.type = SDL_SYSWMEVENT;

@@ -109,7 +109,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     LRESULT returnCode = -1;
 
     /* Send a SDL_SYSWMEVENT if the application wants them */
-    if (SDL_ProcessEvents[SDL_SYSWMEVENT] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_SYSWMEVENT) == SDL_ENABLE) {
         SDL_SysWMmsg wmmsg;
 
         SDL_VERSION(&wmmsg.version);

@@ -365,7 +365,7 @@ SDL_SendProximity(int id, int x, int y, int type)
 
     mouse->last_x = x;
     mouse->last_y = y;
-    if (SDL_ProcessEvents[type] == SDL_ENABLE) {
+    if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.proximity.which = (Uint8) index;
         event.proximity.x = x;
@@ -461,7 +461,7 @@ SDL_SendMouseMotion(int id, int relative, int x, int y, int pressure)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[SDL_MOUSEMOTION] == SDL_ENABLE &&
+    if (SDL_GetEventState(SDL_MOUSEMOTION) == SDL_ENABLE &&
         mouse->proximity == SDL_TRUE) {
         SDL_Event event;
         event.motion.type = SDL_MOUSEMOTION;
@@ -493,7 +493,7 @@ SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
     int index = SDL_GetMouseIndexId(id);
     SDL_Mouse *mouse = SDL_GetMouse(index);
     int posted;
-    Uint8 type;
+    Uint32 type;
 
     if (!mouse) {
         return 0;
@@ -524,7 +524,7 @@ SDL_SendMouseButton(int id, Uint8 state, Uint8 button)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[type] == SDL_ENABLE) {
+    if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.type = type;
         event.button.which = (Uint8) index;
@@ -550,7 +550,7 @@ SDL_SendMouseWheel(int index, int x, int y)
 
     /* Post the event, if desired */
     posted = 0;
-    if (SDL_ProcessEvents[SDL_MOUSEWHEEL] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_MOUSEWHEEL) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_MOUSEWHEEL;
         event.wheel.which = (Uint8) index;

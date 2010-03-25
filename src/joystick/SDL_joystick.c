@@ -445,7 +445,7 @@ SDL_PrivateJoystickAxis(SDL_Joystick * joystick, Uint8 axis, Sint16 value)
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
-    if (SDL_ProcessEvents[SDL_JOYAXISMOTION] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_JOYAXISMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_JOYAXISMOTION;
         event.jaxis.which = joystick->index;
@@ -472,7 +472,7 @@ SDL_PrivateJoystickHat(SDL_Joystick * joystick, Uint8 hat, Uint8 value)
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
-    if (SDL_ProcessEvents[SDL_JOYHATMOTION] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_JOYHATMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.jhat.type = SDL_JOYHATMOTION;
         event.jhat.which = joystick->index;
@@ -501,7 +501,7 @@ SDL_PrivateJoystickBall(SDL_Joystick * joystick, Uint8 ball,
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
-    if (SDL_ProcessEvents[SDL_JOYBALLMOTION] == SDL_ENABLE) {
+    if (SDL_GetEventState(SDL_JOYBALLMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.jball.type = SDL_JOYBALLMOTION;
         event.jball.which = joystick->index;
@@ -544,7 +544,7 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
-    if (SDL_ProcessEvents[event.type] == SDL_ENABLE) {
+    if (SDL_GetEventState(event.type) == SDL_ENABLE) {
         event.jbutton.which = joystick->index;
         event.jbutton.button = button;
         event.jbutton.state = state;
@@ -574,7 +574,7 @@ SDL_JoystickEventState(int state)
 #if SDL_EVENTS_DISABLED
     return SDL_IGNORE;
 #else
-    const Uint8 event_list[] = {
+    const Uint32 event_list[] = {
         SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYHATMOTION,
         SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
     };

@@ -133,14 +133,10 @@ HandleMouse(void *unused)
 {
     SDL_Event events[10];
     int i, found;
-    Uint32 mask;
 
     /* Handle mouse events here */
-    mask =
-        (SDL_MOUSEMOTIONMASK | SDL_MOUSEBUTTONDOWNMASK |
-         SDL_MOUSEBUTTONUPMASK);
     while (!done) {
-        found = SDL_PeepEvents(events, 10, SDL_GETEVENT, mask);
+        found = SDL_PeepEvents(events, 10, SDL_GETEVENT, SDL_MOUSEMOTION, SDL_MOUSEBUTTONUP);
         for (i = 0; i < found; ++i) {
             switch (events[i].type) {
                 /* We want to toggle visibility on buttonpress */
@@ -173,12 +169,10 @@ HandleKeyboard(void *unused)
 {
     SDL_Event events[10];
     int i, found;
-    Uint32 mask;
 
     /* Handle mouse events here */
-    mask = (SDL_KEYDOWNMASK | SDL_KEYUPMASK);
     while (!done) {
-        found = SDL_PeepEvents(events, 10, SDL_GETEVENT, mask);
+        found = SDL_PeepEvents(events, 10, SDL_GETEVENT, SDL_KEYDOWN, SDL_KEYUP);
         for (i = 0; i < found; ++i) {
             switch (events[i].type) {
                 /* We want to toggle visibility on buttonpress */
@@ -329,7 +323,7 @@ main(int argc, char *argv[])
         if (!(init_flags & SDL_INIT_EVENTTHREAD)) {
             SDL_PumpEvents();   /* Needed when event thread is off */
         }
-        if (SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, SDL_QUITMASK)) {
+        if (SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, SDL_QUIT, SDL_QUIT)) {
             done = 1;
         }
         /* Give up some CPU so the events can accumulate */
