@@ -638,13 +638,14 @@ Cocoa_StartTextInput(_THIS)
      * than one copy. When we switched to another window and requesting for
      * text input, simply remove the field editor from its superview then add
      * it to the front most window's content view */
-    if (! data->fieldEdit)
+    if (!data->fieldEdit) {
         data->fieldEdit =
             [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    }
 
     [data->fieldEdit setKeyboard: data->keyboard];
 
-    if (! [[data->fieldEdit superview] isEqual: parentView])
+    if (![[data->fieldEdit superview] isEqual: parentView])
     {
         // DEBUG_IME(@"add fieldEdit to window contentView");
         [data->fieldEdit removeFromSuperview];

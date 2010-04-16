@@ -139,6 +139,7 @@ typedef struct SDL_TextEditingEvent
 {
     Uint32 type;                                /**< ::SDL_TEXTEDITING */
     Uint32 windowID;                            /**< The window with keyboard focus, if any */
+    Uint8 which;                                /**< The keyboard device index */
     char text[SDL_TEXTEDITINGEVENT_TEXT_SIZE];  /**< The editing text */
     int start;                                  /**< The start cursor of selected editing text */
     int length;                                 /**< The length of selected editing text */
