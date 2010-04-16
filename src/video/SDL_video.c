@@ -1649,6 +1649,10 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
         SDL_Unsupported();
         return 0;
     }
+    if (w <= 0 || h <= 0) {
+        SDL_SetError("Texture dimensions can't be 0");
+        return 0;
+    }
     texture = (SDL_Texture *) SDL_calloc(1, sizeof(*texture));
     if (!texture) {
         SDL_OutOfMemory();
