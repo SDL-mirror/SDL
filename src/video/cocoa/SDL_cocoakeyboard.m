@@ -155,7 +155,9 @@
 
 - (NSRect) firstRectForCharacterRange: (NSRange) theRange
 {
-    float windowHeight = [[self window] frame].size.height;
+    NSWindow *window = [self window];
+    NSRect contentRect = [window contentRectForFrameRect: [window frame]];
+    float windowHeight = contentRect.size.height;
     NSRect rect = NSMakeRect(_inputRect.x, windowHeight - _inputRect.y - _inputRect.h,
                              _inputRect.w, _inputRect.h);
 
