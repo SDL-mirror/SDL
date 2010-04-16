@@ -140,7 +140,8 @@
     _selectedRange = selRange;
     _markedRange = NSMakeRange(0, [aString length]);
 
-    SDL_SendEditingText([aString UTF8String], selRange.location, selRange.length);
+    SDL_SendEditingText(_keyboard, [aString UTF8String],
+                        selRange.location, selRange.length);
 
     DEBUG_IME(@"setMarkedText: %@, (%d, %d)", _markedText,
           selRange.location, selRange.length);
@@ -632,7 +633,15 @@ Cocoa_StartTextInput(_THIS)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSView *parentView = [[NSApp keyWindow] contentView];
 
-    data->fieldEdit = [[SDLTranslatorResponder alloc] initWithFrame:NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+    /* We only keep one field editor per process, since only the front most
+     * window can receive text input events, so it make no sense to keep more
+     * than one copy. When we switched to another window and requesting for
+     * text input, simply remove the field editor from its superview then add
+     * it to the front most window's content view */
+    if (! data->fieldEdit)
+        data->fieldEdit =
+            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+
     [data->fieldEdit setKeyboard: data->keyboard];
 
     if (! [[data->fieldEdit superview] isEqual: parentView])

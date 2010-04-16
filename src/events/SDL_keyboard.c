@@ -679,6 +679,8 @@ SDL_SetKeyboardFocus(int index, SDL_Window * window)
     if (keyboard->focus) {
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_GAINED,
                             0, 0);
+        if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY))
+            SDL_StartTextInput();
     }
 }
 
@@ -839,9 +841,13 @@ SDL_SendKeyboardText(int index, const char *text)
 }
 
 int
-SDL_SendEditingText(const char *text, int start, int length)
+SDL_SendEditingText(int index, const char *text, int start, int length)
 {
+    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
     int posted;
+
+    if (!keyboard)
+        return 0;
 
     /* Post the event, if desired */
     posted = 0;
@@ -851,6 +857,7 @@ SDL_SendEditingText(const char *text, int start, int length)
         event.edit.start = start;
         event.edit.length = length;
         SDL_strlcpy(event.edit.text, text, SDL_arraysize(event.text.text));
+        event.edit.windowID = keyboard->focus->id;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
