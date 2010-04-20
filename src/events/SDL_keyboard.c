@@ -813,7 +813,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
         event.key.keysym.sym = keyboard->keymap[scancode];
         event.key.keysym.mod = modstate;
         event.key.keysym.unicode = 0;
-        event.key.windowID = keyboard->focus->id;
+        event.key.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
@@ -837,7 +837,7 @@ SDL_SendKeyboardText(int index, const char *text)
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         event.text.which = (Uint8) index;
         SDL_strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
-        event.text.windowID = keyboard->focus->id;
+        event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
