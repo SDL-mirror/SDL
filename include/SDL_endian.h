@@ -94,7 +94,7 @@ static __inline__ Uint16 SDL_Swap16(Uint16 x)
 }
 #else
 static __inline__ Uint16 SDL_Swap16(Uint16 x) {
-	return (Uint16)((x<<8)|(x>>8));
+	return SDL_static_cast(Uint16, ((x<<8)|(x>>8)));
 }
 #endif
 
@@ -129,7 +129,7 @@ static __inline__ Uint32 SDL_Swap32(Uint32 x)
 }
 #else
 static __inline__ Uint32 SDL_Swap32(Uint32 x) {
-	return (Uint32)((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24));
+	return SDL_static_cast(Uint32, ((x<<24)|((x<<8)&0x00FF0000)|((x>>8)&0x0000FF00)|(x>>24)));
 }
 #endif
 
