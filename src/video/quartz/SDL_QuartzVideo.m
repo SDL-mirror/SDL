@@ -479,6 +479,8 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     NSRect contentRect;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
 
+    contentRect = NSMakeRect (0, 0, width, height);
+
     /* Fade to black to hide resolution-switching flicker (and garbage
        that is displayed by a destroyed OpenGL context, if applicable) */
     if ( CGAcquireDisplayFadeReservation (5, &fade_token) == kCGErrorSuccess ) {
