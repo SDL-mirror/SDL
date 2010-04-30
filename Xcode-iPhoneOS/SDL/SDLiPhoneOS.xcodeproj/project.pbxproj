@@ -65,6 +65,8 @@
 		04EC8B521025D12900431D42 /* SDL_config_iphoneos.h in Headers */ = {isa = PBXBuildFile; fileRef = 04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */; };
 		04F2AF541104ABC300D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF531104ABC300D6DDF7 /* SDL_assert.h */; };
 		04F2AF561104ABD200D6DDF7 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F2AF551104ABD200D6DDF7 /* SDL_assert.c */; };
+		56ED04E1118A8EE200A56AA6 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56ED04E0118A8EE200A56AA6 /* SDL_power.c */; };
+		56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */ = {isa = PBXBuildFile; fileRef = 56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */; };
 		FD24846D0E5655AE0021E198 /* SDL_uikitkeyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = FD24846B0E5655AE0021E198 /* SDL_uikitkeyboard.h */; };
 		FD3F495C0DEA5B2100C5B771 /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8CC0DD52EB400FB1D6B /* begin_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F495D0DEA5B2100C5B771 /* close_code.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8CD0DD52EB400FB1D6B /* close_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -247,6 +249,8 @@
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623EB0D0F72F000981E51 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		56ED04E0118A8EE200A56AA6 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_power.c; path = ../../src/power/SDL_power.c; sourceTree = SOURCE_ROOT; };
+		56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDL_syspower.m; path = ../../src/power/uikit/SDL_syspower.m; sourceTree = SOURCE_ROOT; };
 		FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitview.h; sourceTree = "<group>"; };
 		FD24846B0E5655AE0021E198 /* SDL_uikitkeyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitkeyboard.h; sourceTree = "<group>"; };
 		FD3F4A700DEA620800C5B771 /* SDL_getenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_getenv.c; sourceTree = "<group>"; };
@@ -488,6 +492,23 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		56ED04DE118A8E9A00A56AA6 /* power */ = {
+			isa = PBXGroup;
+			children = (
+				56ED04E0118A8EE200A56AA6 /* SDL_power.c */,
+				56ED04DF118A8EB700A56AA6 /* uikit */,
+			);
+			name = power;
+			sourceTree = "<group>";
+		};
+		56ED04DF118A8EB700A56AA6 /* uikit */ = {
+			isa = PBXGroup;
+			children = (
+				56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */,
+			);
+			name = uikit;
+			sourceTree = "<group>";
+		};
 		FD3F4A6F0DEA620800C5B771 /* stdlib */ = {
 			isa = PBXGroup;
 			children = (
@@ -642,6 +663,7 @@
 				047677B60EA769DF008ABAF1 /* haptic */,
 				FD5F9D080E0E08B3008E885B /* joystick */,
 				FD8BD8150E27E25900B52CD5 /* loadso */,
+				56ED04DE118A8E9A00A56AA6 /* power */,
 				FD3F4A6F0DEA620800C5B771 /* stdlib */,
 				FD99B9E00DD52EDC00FB1D6B /* thread */,
 				FD99BA1E0DD52EDC00FB1D6B /* timer */,
@@ -1103,6 +1125,8 @@
 				043DD77110FD8A0000DED673 /* SDL_blendfillrect.c in Sources */,
 				043DD77210FD8A0000DED673 /* SDL_drawrect.c in Sources */,
 				04F2AF561104ABD200D6DDF7 /* SDL_assert.c in Sources */,
+				56ED04E1118A8EE200A56AA6 /* SDL_power.c in Sources */,
+				56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

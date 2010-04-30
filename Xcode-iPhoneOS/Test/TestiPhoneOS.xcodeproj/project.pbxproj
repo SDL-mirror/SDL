@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		56ED04FE118A8FE400A56AA6 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
+		56ED0502118A8FE400A56AA6 /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
+		56ED0503118A8FE400A56AA6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
+		56ED0504118A8FE400A56AA6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
+		56ED0505118A8FE400A56AA6 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
+		56ED0506118A8FE400A56AA6 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89B0E2D111A00EA573E /* CoreGraphics.framework */; };
+		56ED0507118A8FE400A56AA6 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
+		56ED0508118A8FE400A56AA6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
+		56ED0509118A8FE400A56AA6 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
+		56ED0511118A904200A56AA6 /* testpower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56ED0510118A904200A56AA6 /* testpower.c */; };
 		FDA8A79B0E2D0F8B00EA573E /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7840E2D0F1F00EA573E /* common.c */; };
 		FDA8A79C0E2D0F9300EA573E /* testwm2.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A75F0E2D0F1600EA573E /* testwm2.c */; };
 		FDA8A89F0E2D111A00EA573E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
@@ -288,6 +298,10 @@
 
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* testwm2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testwm2.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		56ED04F7118A8FCC00A56AA6 /* testpower-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testpower-Info.plist"; sourceTree = "<group>"; };
+		56ED050D118A8FE400A56AA6 /* testpower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testpower.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		56ED050F118A8FE400A56AA6 /* Info copy.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info copy.plist"; sourceTree = "<group>"; };
+		56ED0510118A904200A56AA6 /* testpower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testpower.c; path = ../../test/testpower.c; sourceTree = SOURCE_ROOT; };
 		FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDLiPhoneOS.xcodeproj; path = ../SDL/SDLiPhoneOS.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FDA8A7400E2D0F1600EA573E /* testalpha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testalpha.c; path = ../../test/testalpha.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7410E2D0F1600EA573E /* testaudioinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testaudioinfo.c; path = ../../test/testaudioinfo.c; sourceTree = SOURCE_ROOT; };
@@ -383,6 +397,21 @@
 				FDA8A8A30E2D111A00EA573E /* UIKit.framework in Frameworks */,
 				FDA8A8A40E2D111A00EA573E /* Foundation.framework in Frameworks */,
 				FDA8A8A50E2D111A00EA573E /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56ED0501118A8FE400A56AA6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56ED0502118A8FE400A56AA6 /* libSDLiPhoneOS.a in Frameworks */,
+				56ED0503118A8FE400A56AA6 /* AudioToolbox.framework in Frameworks */,
+				56ED0504118A8FE400A56AA6 /* QuartzCore.framework in Frameworks */,
+				56ED0505118A8FE400A56AA6 /* OpenGLES.framework in Frameworks */,
+				56ED0506118A8FE400A56AA6 /* CoreGraphics.framework in Frameworks */,
+				56ED0507118A8FE400A56AA6 /* UIKit.framework in Frameworks */,
+				56ED0508118A8FE400A56AA6 /* Foundation.framework in Frameworks */,
+				56ED0509118A8FE400A56AA6 /* CoreAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -824,6 +853,7 @@
 				FDD2C6B30E2E92D200B7A85F /* threadwin.app */,
 				FDD2C6F40E2E959E00B7A85F /* torturethread.app */,
 				FDC430000F0D866D009C87E1 /* torturethread.app */,
+				56ED050D118A8FE400A56AA6 /* testpower.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -831,11 +861,14 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
+				56ED0510118A904200A56AA6 /* testpower.c */,
 				FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */,
 				FDA8AAD60E2D339A00EA573E /* Resources */,
 				FDA8A7C30E2D10FA00EA573E /* Linked Frameworks */,
 				FDA8A73B0E2D0F0400EA573E /* src */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				56ED04F7118A8FCC00A56AA6 /* testpower-Info.plist */,
+				56ED050F118A8FE400A56AA6 /* Info copy.plist */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -939,6 +972,23 @@
 			name = testwm2;
 			productName = TestiPhoneOS;
 			productReference = 1D6058910D05DD3D006BFB54 /* testwm2.app */;
+			productType = "com.apple.product-type.application";
+		};
+		56ED04FC118A8FE400A56AA6 /* testpower */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 56ED050A118A8FE400A56AA6 /* Build configuration list for PBXNativeTarget "testpower" */;
+			buildPhases = (
+				56ED04FD118A8FE400A56AA6 /* Resources */,
+				56ED04FF118A8FE400A56AA6 /* Sources */,
+				56ED0501118A8FE400A56AA6 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = testpower;
+			productName = TestiPhoneOS;
+			productReference = 56ED050D118A8FE400A56AA6 /* testpower.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FDA8A91D0E2D1C0B00EA573E /* graywin */ = {
@@ -1437,6 +1487,7 @@
 				FDD2C46B0E2E77D700B7A85F /* testlock */,
 				FDD2C4A60E2E79C300B7A85F /* testpalette */,
 				FDD2C4F90E2E7F4800B7A85F /* testplatform */,
+				56ED04FC118A8FE400A56AA6 /* testpower */,
 				FDD2C5170E2E807600B7A85F /* testsem */,
 				FDD2C53D0E2E80E400B7A85F /* testsprite2 */,
 				FDD2C5740E2E8C7400B7A85F /* testtimer */,
@@ -1465,6 +1516,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56ED04FD118A8FE400A56AA6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56ED04FE118A8FE400A56AA6 /* icon.bmp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1678,6 +1737,14 @@
 			files = (
 				FDA8A79B0E2D0F8B00EA573E /* common.c in Sources */,
 				FDA8A79C0E2D0F9300EA573E /* testwm2.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		56ED04FF118A8FE400A56AA6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				56ED0511118A904200A56AA6 /* testpower.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1926,6 +1993,32 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testwm2;
+			};
+			name = Release;
+		};
+		56ED050B118A8FE400A56AA6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Info copy.plist";
+				PRODUCT_NAME = testpower;
+			};
+			name = Debug;
+		};
+		56ED050C118A8FE400A56AA6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Info copy.plist";
+				PRODUCT_NAME = testpower;
 			};
 			name = Release;
 		};
@@ -2670,6 +2763,15 @@
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
 				1D6058950D05DD3E006BFB54 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		56ED050A118A8FE400A56AA6 /* Build configuration list for PBXNativeTarget "testpower" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				56ED050B118A8FE400A56AA6 /* Debug */,
+				56ED050C118A8FE400A56AA6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

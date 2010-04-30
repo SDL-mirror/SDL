@@ -36,6 +36,7 @@ SDL_bool SDL_GetPowerInfo_Windows(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
+SDL_bool SDL_GetPowerInfo_UIKit(SDL_PowerState *, int *, int *);
 
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_HARDWIRED
@@ -61,7 +62,10 @@ static SDL_GetPowerInfo_Impl implementations[] = {
 #ifdef SDL_POWER_WINDOWS        /* handles Win32, Win64, PocketPC. */
     SDL_GetPowerInfo_Windows,
 #endif
-#ifdef SDL_POWER_MACOSX         /* handles Mac OS X, Darwin, iPhone. */
+#ifdef SDL_POWER_UIKIT          /* handles iPhone/iPad/etc */
+    SDL_GetPowerInfo_UIKit,
+#endif
+#ifdef SDL_POWER_MACOSX         /* handles Mac OS X, Darwin. */
     SDL_GetPowerInfo_MacOSX,
 #endif
 #ifdef SDL_POWER_NINTENDODS     /* handles Nintendo DS. */
