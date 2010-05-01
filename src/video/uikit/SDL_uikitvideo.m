@@ -184,8 +184,10 @@ UIKit_VideoInit(_THIS)
 {
     _this->gl_config.driver_loaded = 1;
 
-    const float version = [[[UIDevice currentDevice] systemVersion] floatValue];
-    supports_multiple_displays = (version >= 3.2f);
+    NSString *reqSysVer = @"3.2";
+    NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
+    if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending)
+        supports_multiple_displays = YES;
 
     // If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels.
     //  The iPad added both a larger main screen and the ability to use
