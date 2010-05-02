@@ -23,6 +23,7 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
+#include "SDL_assert.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
@@ -38,8 +39,10 @@
 #include <UIKit/UIKit.h>
 #include <Foundation/Foundation.h>
 
-static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created) {
-
+static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created)
+{
+    SDL_VideoDisplay *display = window->display;
+    UIScreen *uiscreen = (UIScreen *) display->driverdata;
     SDL_WindowData *data;
         
     /* Allocate the window data */
@@ -48,7 +51,6 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         SDL_OutOfMemory();
         return -1;
     }
-    data->window = window;
     data->uiwindow = uiwindow;
     data->view = nil;
 
@@ -68,12 +70,15 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iPod touch, always shown */
     window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    
 
-    /* SDL_WINDOW_BORDERLESS controls whether status bar is hidden */
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
-        [UIApplication sharedApplication].statusBarHidden = YES;
-    }
-    else {
-        [UIApplication sharedApplication].statusBarHidden = NO;
+    // SDL_WINDOW_BORDERLESS controls whether status bar is hidden.
+    // This is only set if the window is on the main screen. Other screens
+    //  just force the window to have the borderless flag.
+    if ([UIScreen mainScreen] == uiscreen) {
+        if (window->flags & SDL_WINDOW_BORDERLESS) {
+            [UIApplication sharedApplication].statusBarHidden = YES;
+        } else {
+            [UIApplication sharedApplication].statusBarHidden = NO;
+        }
     }
     
     return 0;
@@ -82,41 +87,80 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
 
 int UIKit_CreateWindow(_THIS, SDL_Window *window) {
         
-    /* We currently only handle single window applications on iPhone */
-    if (nil != [SDLUIKitDelegate sharedAppDelegate].window) {
-        SDL_SetError("Window already exists, no multi-window support.");
+    SDL_VideoDisplay *display = window->display;
+    UIScreen *uiscreen = (UIScreen *) display->driverdata;
+
+    // SDL currently puts this window at the start of display's linked list. We rely on this.
+    SDL_assert(display->windows == window);
+
+    /* We currently only handle a single window per display on iPhone */
+    if (window->next != NULL) {
+        SDL_SetError("Only one window allowed per display.");
         return -1;
     }
-    
+
+    // Non-mainscreen windows must be force to borderless, as there's no
+    //  status bar there, and we want to get the right dimensions later in
+    //  this function.
+    if ([UIScreen mainScreen] != uiscreen) {
+        window->flags |= SDL_WINDOW_BORDERLESS;
+    }
+
+    // If monitor has a resolution of 0x0 (hasn't been explicitly set by the
+    //  user, so it's in standby), try to force the display to a resolution
+    //  that most closely matches the desired window size.
+    if (SDL_UIKit_supports_multiple_displays) {
+        const CGSize origsize = [[uiscreen currentMode] size];
+        if ((origsize.width == 0.0f) && (origsize.height == 0.0f)) {
+            if (display->num_display_modes == 0) {
+                _this->GetDisplayModes(_this, display);
+            }
+
+            int i;
+            const SDL_DisplayMode *bestmode = NULL;
+            for (i = display->num_display_modes; i >= 0; i--) {
+                const SDL_DisplayMode *mode = &display->display_modes[i];
+                if ((mode->w >= window->w) && (mode->h >= window->h))
+                    bestmode = mode;
+            }
+
+            if (bestmode) {
+                UIScreenMode *uimode = (UIScreenMode *) bestmode->driverdata;
+                [uiscreen setCurrentMode:uimode];
+                display->desktop_mode = *bestmode;
+                display->current_mode = *bestmode;
+            }
+        }
+    }
+
     /* ignore the size user requested, and make a fullscreen window */
-    UIWindow *uiwindow = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
-    
+    // !!! FIXME: can we have a smaller view?
+    UIWindow *uiwindow = [UIWindow alloc];
+    if (window->flags & SDL_WINDOW_BORDERLESS)
+        uiwindow = [uiwindow initWithFrame:[uiscreen bounds]];
+    else
+        uiwindow = [uiwindow initWithFrame:[uiscreen applicationFrame]];
+
+    if (SDL_UIKit_supports_multiple_displays) {
+        [uiwindow setScreen:uiscreen];
+    }
+
     if (SetupWindowData(_this, window, uiwindow, SDL_TRUE) < 0) {
         [uiwindow release];
         return -1;
     }    
-    
-    // This saves the main window in the app delegate so event callbacks can do stuff on the window.
-    // This assumes a single window application design and needs to be fixed for multiple windows.
-    [SDLUIKitDelegate sharedAppDelegate].window = window;
-    [SDLUIKitDelegate sharedAppDelegate].uiwindow = uiwindow;
-    [uiwindow release]; /* release the window (the app delegate has retained it) */
     
     return 1;
     
 }
 
 void UIKit_DestroyWindow(_THIS, SDL_Window * window) {
-    /* don't worry, the delegate will automatically release the window */
-    
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     if (data) {
-        SDL_free( window->driverdata );
+        [data->uiwindow release];
+        SDL_free(data);
+        window->driverdata = NULL;
     }
-
-    /* this will also destroy the window */
-    [SDLUIKitDelegate sharedAppDelegate].window = NULL;
-    [SDLUIKitDelegate sharedAppDelegate].uiwindow = nil;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

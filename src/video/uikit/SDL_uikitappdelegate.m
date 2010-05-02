@@ -20,6 +20,8 @@
  slouken@libsdl.org
 */
 
+#import "../SDL_sysvideo.h"
+
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitopenglview.h"
 #import "SDL_events_c.h"
@@ -55,9 +57,6 @@ int main(int argc, char **argv) {
 
 @implementation SDLUIKitDelegate
 
-@synthesize window;
-@synthesize uiwindow;
-
 /* convenience method */
 +(SDLUIKitDelegate *)sharedAppDelegate {
 	/* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
@@ -66,8 +65,6 @@ int main(int argc, char **argv) {
 
 - (id)init {
 	self = [super init];
-	window = NULL;
-	uiwindow = nil;
 	return self;
 }
 
@@ -106,21 +103,42 @@ afterDelay:0.0];
 
 - (void) applicationWillResignActive:(UIApplication*)application
 {
-//	NSLog(@"%@", NSStringFromSelector(_cmd));
-	SDL_SendWindowEvent(self.window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+    //NSLog(@"%@", NSStringFromSelector(_cmd));
+
+    // Send every window on every screen a MINIMIZED event.
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+    if (!_this) {
+        return;
+    }
+
+    int i;
+    for (i = 0; i < _this->num_displays; i++) {
+        const SDL_VideoDisplay *display = &_this->displays[i];
+        SDL_Window *window;
+        for (window = display->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+        }
+    }
 }
 
 - (void) applicationDidBecomeActive:(UIApplication*)application
 {
-//	NSLog(@"%@", NSStringFromSelector(_cmd));
-	SDL_SendWindowEvent(self.window, SDL_WINDOWEVENT_RESTORED, 0, 0);
-}
+    //NSLog(@"%@", NSStringFromSelector(_cmd));
 
+    // Send every window on every screen a RESTORED event.
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+    if (!_this) {
+        return;
+    }
 
-
--(void)dealloc {
-	[uiwindow release];
-	[super dealloc];
+    int i;
+    for (i = 0; i < _this->num_displays; i++) {
+        const SDL_VideoDisplay *display = &_this->displays[i];
+        SDL_Window *window;
+        for (window = display->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        }
+    }
 }
 
 @end

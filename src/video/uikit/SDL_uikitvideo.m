@@ -49,7 +49,7 @@ static int UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display,
                                 SDL_DisplayMode * mode);
 static void UIKit_VideoQuit(_THIS);
 
-static BOOL supports_multiple_displays = NO;
+BOOL SDL_UIKit_supports_multiple_displays = NO;
 
 /* DUMMY driver bootstrap functions */
 
@@ -124,14 +124,14 @@ The main screen should list a AxB mode for portrait orientation, and then
 static void
 UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
-    const UIScreen *screen = (UIScreen *) display->driverdata;
+    UIScreen *uiscreen = (UIScreen *) display->driverdata;
     SDL_DisplayMode mode;
     SDL_zero(mode);
 
     // availableModes showed up in 3.2 (the iPad and later). We should only
     //  land here for at least that version of the OS.
-    if (!supports_multiple_displays) {
-        const CGRect rect = [screen bounds];
+    if (!SDL_UIKit_supports_multiple_displays) {
+        const CGRect rect = [uiscreen bounds];
         mode.format = SDL_PIXELFORMAT_ABGR8888;
         mode.w = (int) rect.size.width;
         mode.h = (int) rect.size.height;
@@ -141,7 +141,7 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         return;
     }
 
-    const NSArray *modes = [screen availableModes];
+    const NSArray *modes = [uiscreen availableModes];
     const NSUInteger mode_count = [modes count];
     NSUInteger i;
     for (i = 0; i < mode_count; i++) {
@@ -159,11 +159,10 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 
 
 static void
-UIKit_AddDisplay(UIScreen *screen, int w, int h)
+UIKit_AddDisplay(UIScreen *uiscreen, int w, int h)
 {
     SDL_VideoDisplay display;
     SDL_DisplayMode mode;
-
     SDL_zero(mode);
     mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.w = w;
@@ -173,8 +172,9 @@ UIKit_AddDisplay(UIScreen *screen, int w, int h)
     SDL_zero(display);
     display.desktop_mode = mode;
     display.current_mode = mode;
-    display.driverdata = screen;
-    [screen retain];
+
+    [uiscreen retain];
+    display.driverdata = uiscreen;
     SDL_AddVideoDisplay(&display);
 }
 
@@ -187,25 +187,25 @@ UIKit_VideoInit(_THIS)
     NSString *reqSysVer = @"3.2";
     NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
     if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending)
-        supports_multiple_displays = YES;
+        SDL_UIKit_supports_multiple_displays = YES;
 
     // If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels.
     //  The iPad added both a larger main screen and the ability to use
     //  external displays.
-    if (!supports_multiple_displays) {
+    if (!SDL_UIKit_supports_multiple_displays) {
         // Just give 'em the whole main screen.
-        UIScreen *screen = [UIScreen mainScreen];
-        const CGRect rect = [screen bounds];
-        UIKit_AddDisplay(screen, (int)rect.size.width, (int)rect.size.height);
+        UIScreen *uiscreen = [UIScreen mainScreen];
+        const CGRect rect = [uiscreen bounds];
+        UIKit_AddDisplay(uiscreen, (int)rect.size.width, (int)rect.size.height);
     } else {
         const NSArray *screens = [UIScreen screens];
         const NSUInteger screen_count = [screens count];
         NSUInteger i;
         for (i = 0; i < screen_count; i++) {
             // the main screen is the first element in the array.
-            UIScreen *screen = (UIScreen *) [screens objectAtIndex:i];
-            const CGSize size = [[screen currentMode] size];
-            UIKit_AddDisplay(screen, (int) size.width, (int) size.height);
+            UIScreen *uiscreen = (UIScreen *) [screens objectAtIndex:i];
+            const CGSize size = [[uiscreen currentMode] size];
+            UIKit_AddDisplay(uiscreen, (int) size.width, (int) size.height);
         }
     }
 
@@ -216,13 +216,13 @@ UIKit_VideoInit(_THIS)
 static int
 UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
-    UIScreen *screen = (UIScreen *) display->driverdata;
-    if (!supports_multiple_displays) {
+    UIScreen *uiscreen = (UIScreen *) display->driverdata;
+    if (!SDL_UIKit_supports_multiple_displays) {
         // Not on at least iPhoneOS 3.2 (versions prior to iPad).
         SDL_assert(mode->driverdata == NULL);
     } else {
         UIScreenMode *uimode = (UIScreenMode *) mode->driverdata;
-        [screen setCurrentMode:uimode];
+        [uiscreen setCurrentMode:uimode];
     }
 
     return 0;
@@ -235,8 +235,8 @@ UIKit_VideoQuit(_THIS)
     int i, j;
     for (i = 0; i < _this->num_displays; i++) {
         SDL_VideoDisplay *display = &_this->displays[i];
-        UIScreen *screen = (UIScreen *) display->driverdata;
-        [((UIScreen *) display->driverdata) release];
+        UIScreen *uiscreen = (UIScreen *) display->driverdata;
+        [uiscreen release];
         display->driverdata = NULL;
         for (j = 0; j < display->num_display_modes; j++) {
             SDL_DisplayMode *mode = &display->display_modes[j];

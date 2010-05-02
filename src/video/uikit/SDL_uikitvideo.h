@@ -26,6 +26,10 @@
 
 #include "../SDL_sysvideo.h"
 
+#include <UIKit/UIKit.h>
+
+extern BOOL SDL_UIKit_supports_multiple_displays;
+
 #endif /* _SDL_uikitvideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

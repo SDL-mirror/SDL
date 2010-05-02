@@ -99,13 +99,13 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 
 SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
 {
-	
 	SDL_uikitopenglview *view;
+	SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    UIScreen *uiscreen = (UIScreen *) window->display->driverdata;
+	UIWindow *uiwindow = data->uiwindow;
 
-	SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
-	
-	/* construct our view, passing in SDL's OpenGL configuration data */
-	view = [[SDL_uikitopenglview alloc] initWithFrame: [[UIScreen mainScreen] applicationFrame] \
+    /* construct our view, passing in SDL's OpenGL configuration data */
+    view = [[SDL_uikitopenglview alloc] initWithFrame: [uiwindow bounds] \
 									retainBacking: _this->gl_config.retained_backing \
 									rBits: _this->gl_config.red_size \
 									gBits: _this->gl_config.green_size \
@@ -116,7 +116,7 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
 	data->view = view;
 	
 	/* add the view to our window */
-	[data->uiwindow addSubview: view ];
+	[uiwindow addSubview: view ];
 	
 	/* Don't worry, the window retained the view */
 	[view release];
