@@ -50,7 +50,12 @@ static void surface_testLoad( SDL_Surface *testsur )
       return;
 
    /* Create the blit surface. */
-   face = SDL_LoadBMP("../icon.bmp");
+#ifdef __APPLE__
+	face = SDL_LoadBMP("icon.bmp");
+#else
+	face = SDL_LoadBMP("../icon.bmp");
+#endif
+
    if (SDL_ATassert( "SDL_CreateLoadBmp", face != NULL))
       return;
 

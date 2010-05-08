@@ -28,6 +28,10 @@
 #include "SDL_endian.h"
 #include "SDL_rwops.h"
 
+#ifdef __APPLE__
+#include "SDL_rwopsbundlesupport.h"
+#endif /* __APPLE__ */
+
 #ifdef __NDS__
 /* include libfat headers for fatInitDefault(). */
 #include <fat.h>
@@ -459,9 +463,12 @@ SDL_RWFromFile(const char *file, const char *mode)
     rwops->close = win32_file_close;
 
 #elif HAVE_STDIO_H
-
-    fp = fopen(file, mode);
-    if (fp == NULL) {
+	#ifdef __APPLE__
+	fp = SDL_OpenFPFromBundleOrFallback(file, mode);
+    #else
+	fp = fopen(file, mode);
+	#endif
+	if (fp == NULL) {
         SDL_SetError("Couldn't open %s", file);
     } else {
         rwops = SDL_RWFromFP(fp, 1);

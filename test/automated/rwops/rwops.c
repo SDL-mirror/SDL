@@ -9,10 +9,17 @@
 
 #include "SDL.h"
 #include "../SDL_at.h"
-
+#if __APPLE__
+#include "Test_rwopsbundlesupport.h"
+#endif
 
 #define RWOPS_READ      "rwops/read"
+
+#if __APPLE__
+#define RWOPS_WRITE		"write"
+#else
 #define RWOPS_WRITE     "rwops/write"
+#endif
 
 static const char hello_world[] = "Hello World!";
 
@@ -219,7 +226,12 @@ static void rwops_testFP (void)
    SDL_ATbegin( "SDL_RWFromFP" );
 
    /* Run read tests. */
+#if __APPLE__
+	/* Cheating: Using private API in SDL */
+	fp = Test_OpenFPFromBundleOrFallback( RWOPS_READ, "r" );
+#else
    fp = fopen( RWOPS_READ, "r" );
+#endif
    if (SDL_ATassert( "Failed to open file '"RWOPS_READ"'", fp != NULL))
       return;
    rw = SDL_RWFromFP( fp, 1 );
@@ -230,7 +242,12 @@ static void rwops_testFP (void)
    SDL_FreeRW( rw );
 
    /* Run write tests. */
+#if __APPLE__
+	/* Cheating: Using private API in SDL */
+	fp = Test_OpenFPFromTemporaryDir( RWOPS_WRITE, "w+" );
+#else
    fp = fopen( RWOPS_WRITE, "w+" );
+#endif
    if (SDL_ATassert( "Failed to open file '"RWOPS_WRITE"'", fp != NULL))
       return;
    rw = SDL_RWFromFP( fp, 1 );
