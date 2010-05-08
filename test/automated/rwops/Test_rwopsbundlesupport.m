@@ -12,6 +12,12 @@ FILE* Test_OpenFPFromBundleOrFallback(const char *file, const char *mode)
 {
     FILE* fp = NULL;
 
+	// If the file mode is writable, skip all the bundle stuff because generally the bundle is read-only.
+	if(strcmp("r", mode) && strcmp("rb", mode))
+	{
+		return fopen(file, mode);
+	}
+	
 	NSAutoreleasePool* autorelease_pool = [[NSAutoreleasePool alloc] init];
 
 

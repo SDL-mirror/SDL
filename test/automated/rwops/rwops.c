@@ -227,7 +227,6 @@ static void rwops_testFP (void)
 
    /* Run read tests. */
 #if __APPLE__
-	/* Cheating: Using private API in SDL */
 	fp = Test_OpenFPFromBundleOrFallback( RWOPS_READ, "r" );
 #else
    fp = fopen( RWOPS_READ, "r" );
@@ -243,7 +242,6 @@ static void rwops_testFP (void)
 
    /* Run write tests. */
 #if __APPLE__
-	/* Cheating: Using private API in SDL */
 	fp = Test_OpenFPFromTemporaryDir( RWOPS_WRITE, "w+" );
 #else
    fp = fopen( RWOPS_WRITE, "w+" );
