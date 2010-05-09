@@ -752,7 +752,6 @@ static int
 GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
     GL_TextureData *data;
     GLint internalFormat;
     GLenum format, type;
@@ -938,7 +937,6 @@ static int
 GL_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
                      SDL_Color * colors, int firstcolor, int ncolors)
 {
-    GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
     Uint8 *palette;
 
