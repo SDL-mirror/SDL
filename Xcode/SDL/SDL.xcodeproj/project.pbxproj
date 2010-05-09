@@ -96,6 +96,7 @@
 		001798CE10743B9F00F5D044 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798C710743B9F00F5D044 /* SDL_power.c */; };
 		001798D210743B9F00F5D044 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798C410743B9F00F5D044 /* SDL_syspower.c */; };
 		001798D410743B9F00F5D044 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798C710743B9F00F5D044 /* SDL_power.c */; };
+		001E39EE1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = 001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */; };
 		002F328609CA049100EBEB88 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F328509CA049100EBEB88 /* SDL_iconv.c */; };
 		002F328709CA049100EBEB88 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F328509CA049100EBEB88 /* SDL_iconv.c */; };
 		002F32D709CA0BE700EBEB88 /* SDL_diskaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F32D409CA0BE700EBEB88 /* SDL_diskaudio.c */; };
@@ -118,7 +119,6 @@
 		006E95B111952992001DE610 /* SDL_rwopsbundlesupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 006E95AF11952992001DE610 /* SDL_rwopsbundlesupport.m */; };
 		006E95B211952992001DE610 /* SDL_rwopsbundlesupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 006E95AE11952992001DE610 /* SDL_rwopsbundlesupport.h */; };
 		006E95B311952992001DE610 /* SDL_rwopsbundlesupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 006E95AF11952992001DE610 /* SDL_rwopsbundlesupport.m */; };
-		006E95F711952D6E001DE610 /* Test_rwopsbundlesupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 006E95F611952D6E001DE610 /* Test_rwopsbundlesupport.m */; };
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
 		007317A40858DECD00B2BC32 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179D0858DECD00B2BC32 /* Cocoa.framework */; };
@@ -575,6 +575,8 @@
 		00162D6909BD214F0037C8D0 /* SDL_string.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_string.c; sourceTree = "<group>"; };
 		001798C410743B9F00F5D044 /* SDL_syspower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syspower.c; sourceTree = "<group>"; };
 		001798C710743B9F00F5D044 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_power.c; sourceTree = "<group>"; };
+		001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSupportRWops_Cocoa.m; sourceTree = "<group>"; };
+		001E39ED1196F75000A3F5B8 /* TestSupportRWops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSupportRWops.h; sourceTree = "<group>"; };
 		002F328509CA049100EBEB88 /* SDL_iconv.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_iconv.c; sourceTree = "<group>"; };
 		002F32D409CA0BE700EBEB88 /* SDL_diskaudio.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_diskaudio.c; sourceTree = "<group>"; };
 		002F32D509CA0BE700EBEB88 /* SDL_diskaudio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SDL_diskaudio.h; sourceTree = "<group>"; };
@@ -589,8 +591,6 @@
 		006E94A2119511A1001DE610 /* utf8.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = utf8.txt; path = ../../test/utf8.txt; sourceTree = SOURCE_ROOT; };
 		006E95AE11952992001DE610 /* SDL_rwopsbundlesupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rwopsbundlesupport.h; sourceTree = "<group>"; };
 		006E95AF11952992001DE610 /* SDL_rwopsbundlesupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_rwopsbundlesupport.m; sourceTree = "<group>"; };
-		006E95F511952D6E001DE610 /* Test_rwopsbundlesupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test_rwopsbundlesupport.h; sourceTree = "<group>"; };
-		006E95F611952D6E001DE610 /* Test_rwopsbundlesupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Test_rwopsbundlesupport.m; sourceTree = "<group>"; };
 		0073179B0858DECD00B2BC32 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		0073179C0858DECD00B2BC32 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		0073179D0858DECD00B2BC32 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -752,7 +752,6 @@
 		00CFA817106B49B600758660 /* SDL_yuv_sw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_yuv_sw.c; sourceTree = "<group>"; };
 		00CFA89C106B4BA100758660 /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = /System/Library/Frameworks/ForceFeedback.framework; sourceTree = "<absolute>"; };
 		00D0D08310675DD9004B05EF /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		00D8D92E1194EC8500638393 /* UnitTestBundle-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTestBundle-Info.plist"; sourceTree = "<group>"; };
 		00D8D9EF1195090700638393 /* testsdl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testsdl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00D8D9F11195090700638393 /* testsdl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testsdl-Info.plist"; sourceTree = "<group>"; };
 		00D8D9FC1195093100638393 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
@@ -1266,8 +1265,8 @@
 		00D8DA111195093100638393 /* rwops */ = {
 			isa = PBXGroup;
 			children = (
-				006E95F511952D6E001DE610 /* Test_rwopsbundlesupport.h */,
-				006E95F611952D6E001DE610 /* Test_rwopsbundlesupport.m */,
+				001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */,
+				001E39ED1196F75000A3F5B8 /* TestSupportRWops.h */,
 				00D8DA121195093100638393 /* read */,
 				00D8DA131195093100638393 /* rwops.c */,
 				00D8DA141195093100638393 /* rwops.h */,
@@ -1509,7 +1508,6 @@
 				034768DDFF38A45A11DB9C8B /* Products */,
 				BECDF66B0761BA81005FE872 /* Info-Framework.plist */,
 				BEC562FE0761C0E800A33029 /* Linked Frameworks */,
-				00D8D92E1194EC8500638393 /* UnitTestBundle-Info.plist */,
 				00D8D9F11195090700638393 /* testsdl-Info.plist */,
 			);
 			comments = "To build Universal Binaries, we have experimented with a variety of different options.\nThe complication is that we must retain compatibility with at least 10.2. \nThe Universal Binary defaults only work for > 10.3.9\n\nSo far, we have found:\ngcc 4.0.0 with Xcode 2.1 always links against libgcc_s. gcc 4.0.1 from Xcode 2.2 fixes this problem.\n\nBut gcc 4.0 will not work with < 10.3.9 because we continue to get an undefined symbol to _fprintf$LDBL128.\nSo we must use gcc 3.3 on PPC to accomplish 10.2 support. (But 4.0 is required for i386.)\n\nSetting the deployment target to 10.4 will disable prebinding, so for PPC, we set it less than 10.4 to preserve prebinding for legacy support.\n\nSetting the PPC SDKROOT to /Developers/SDKs/MacOSX10.2.8.sdk will link to 63.0.0 libSystem.B.dylib. Leaving it at current or 10.4u links to 88.1.2. However, as long as we are using gcc 3.3, it doesn't seem to matter as testing has demonstrated both will run. We have decided not to invoke the 10.2.8 SDK because it is not a default installed component with Xcode which will probably cause most people problems. However, rather than deleting the SDKROOT_ppc entry entirely, we have mapped it to 10.4u in case we decide we need to change this setting.\n\nTo use Altivec or SSE, we needed architecture specific flags:\nOTHER_CFLAGS_ppc\nOTHER_CFLAGS_i386\nOTHER_CFLAGS=$(OTHER_CFLAGS_($CURRENT_ARCH))\n\nThe general OTHER_CFLAGS needed to be manually mapped to architecture specific options because Xcode didn't do this automatically for us.\n\n\n";
@@ -2087,7 +2085,7 @@
 				00D8DA281195093100638393 /* SDL_at.c in Sources */,
 				00D8DA291195093100638393 /* surface.c in Sources */,
 				00D8DA2A1195093100638393 /* testsdl.c in Sources */,
-				006E95F711952D6E001DE610 /* Test_rwopsbundlesupport.m in Sources */,
+				001E39EE1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
