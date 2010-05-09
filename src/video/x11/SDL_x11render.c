@@ -151,7 +151,6 @@ UpdateYUVTextureData(SDL_Texture * texture)
 void
 X11_AddRenderDriver(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_RendererInfo *info = &X11_RenderDriver.info;
     SDL_DisplayMode *mode = &SDL_CurrentDisplay->desktop_mode;
     int i;
@@ -175,7 +174,6 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
-    SDL_RendererInfo *info;
     X11_RenderData *data;
     XGCValues gcv;
     int i, n;
@@ -658,7 +656,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    SDL_Rect clip, rect;
+    SDL_Rect clip;
     unsigned long foreground;
     XPoint *xpoints, *xpoint;
     int i, xcount;
@@ -917,7 +915,6 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         XImage *image = texturedata->scaling_image;
 
         if (!image) {
-            int depth;
             void *pixels;
             int pitch;
 
