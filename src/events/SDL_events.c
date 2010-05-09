@@ -401,6 +401,9 @@ SDL_FlushEvents(Uint32 minType, Uint32 maxType)
         return;
     }
 
+    /* Make sure the events are current */
+    SDL_PumpEvents();
+
     /* Lock the event queue */
     if (SDL_mutexP(SDL_EventQ.lock) == 0) {
         int spot = SDL_EventQ.head;
