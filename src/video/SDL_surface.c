@@ -42,7 +42,7 @@ SDL_CreateRGBSurface(Uint32 flags,
     SDL_Surface *surface;
 
     /* The flags are no longer used, make the compiler happy */
-    flags;
+    (void)flags;
 
     /* Allocate the surface */
     surface = (SDL_Surface *) SDL_calloc(1, sizeof(*surface));
