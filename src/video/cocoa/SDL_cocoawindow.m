@@ -376,6 +376,30 @@ static __inline__ void ConvertNSRect(NSRect *r)
 }
 @end
 
+@interface SDLView : NSView {
+    Cocoa_WindowListener *listener;
+}
+@end
+
+@implementation SDLView
+
+- (id) initWithFrame: (NSRect) rect
+            listener: (Cocoa_WindowListener *) theListener
+{
+    if (self = [super initWithFrame:rect]) {
+        listener = theListener;
+    }
+
+    return self;
+}
+
+- (void)rightMouseDown:(NSEvent *)theEvent
+{
+    [listener mouseDown:theEvent];
+}
+
+@end
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
 {
@@ -407,6 +431,11 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     {
         SDL_Rect bounds;
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
+        NSView *contentView = [[SDLView alloc] initWithFrame: rect
+                                                    listener: data->listener];
+        [nswindow setContentView: contentView];
+        [contentView release];
+
         ConvertNSRect(&rect);
         Cocoa_GetDisplayBounds(_this, display, &bounds);
         window->x = (int)rect.origin.x - bounds.x;
