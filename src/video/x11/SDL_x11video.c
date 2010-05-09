@@ -27,6 +27,7 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_x11video.h"
+#include "SDL_x11render.h"
 
 #if SDL_VIDEO_DRIVER_PANDORA
 #include "SDL_x11opengles.h"
