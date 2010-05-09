@@ -2652,6 +2652,10 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
+        # Set up additional files for the file library
+        if test x$enable_file = xyes; then
+            SOURCES="$SOURCES $srcdir/src/file/cocoa/*.m"
+        fi
         # The Mac OS X platform requires special setup.
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lobjc"

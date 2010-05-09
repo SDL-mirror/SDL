@@ -29,7 +29,7 @@
 #include "SDL_rwops.h"
 
 #ifdef __APPLE__
-#include "SDL_rwopsbundlesupport.h"
+#include "cocoa/SDL_rwopsbundlesupport.h"
 #endif /* __APPLE__ */
 
 #ifdef __NDS__
