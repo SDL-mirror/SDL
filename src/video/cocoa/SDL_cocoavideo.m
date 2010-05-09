@@ -39,8 +39,6 @@ Cocoa_Available(void)
 static void
 Cocoa_DeleteDevice(SDL_VideoDevice * device)
 {
-    SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
-
     SDL_free(device->driverdata);
     SDL_free(device);
 }
@@ -57,8 +55,10 @@ Cocoa_CreateDevice(int devindex)
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (device) {
         data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    } else {
+        data = NULL;
     }
-    if (!device || !data) {
+    if (!data) {
         SDL_OutOfMemory();
         if (device) {
             SDL_free(device);
@@ -176,4 +176,3 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
 }
 
 /* vim: set ts=4 sw=4 expandtab: */
-
