@@ -9,17 +9,11 @@
 
 #include "SDL.h"
 #include "../SDL_at.h"
-#if __APPLE__
-#include "Test_rwopsbundlesupport.h"
-#endif
+#include "TestSupportRWops.h"
 
-#define RWOPS_READ      "rwops/read"
-
-#if __APPLE__
-#define RWOPS_WRITE		"write"
-#else
-#define RWOPS_WRITE     "rwops/write"
-#endif
+/* Defined in TestSupportRWops implementation to allow flexibility. */
+extern const char* RWOPS_READ;
+extern const char* RWOPS_WRITE;
 
 static const char hello_world[] = "Hello World!";
 
@@ -193,16 +187,16 @@ static void rwops_testFile (void)
    SDL_ATbegin( "SDL_RWFromFile" );
 
    /* Read test. */
-   rw = SDL_RWFromFile( RWOPS_READ, "r" );
-   if (SDL_ATassert( "Opening memory with SDL_RWFromFile '"RWOPS_READ"'", rw != NULL ))
+   rw = TestSupportRWops_OpenRWopsFromReadDir( RWOPS_READ, "r" );
+   if (SDL_ATassert( "Opening memory with SDL_RWFromFile RWOPS_READ", rw != NULL ))
       return;
    if (rwops_testGeneric( rw, 0 ))
       return;
    SDL_FreeRW( rw );
 
    /* Write test. */
-   rw = SDL_RWFromFile( RWOPS_WRITE, "w+" );
-   if (SDL_ATassert( "Opening memory with SDL_RWFromFile '"RWOPS_WRITE"'", rw != NULL ))
+   rw = TestSupportRWops_OpenRWopsFromWriteDir( RWOPS_WRITE, "w+" );
+   if (SDL_ATassert( "Opening memory with SDL_RWFromFile RWOPS_WRITE", rw != NULL ))
       return;
    if (rwops_testGeneric( rw, 1 ))
       return;
@@ -226,12 +220,8 @@ static void rwops_testFP (void)
    SDL_ATbegin( "SDL_RWFromFP" );
 
    /* Run read tests. */
-#if __APPLE__
-	fp = Test_OpenFPFromBundleOrFallback( RWOPS_READ, "r" );
-#else
-   fp = fopen( RWOPS_READ, "r" );
-#endif
-   if (SDL_ATassert( "Failed to open file '"RWOPS_READ"'", fp != NULL))
+   fp = TestSupportRWops_OpenFPFromReadDir( RWOPS_READ, "r" );
+   if (SDL_ATassert( "Failed to open file 'WOPS_READ", fp != NULL))
       return;
    rw = SDL_RWFromFP( fp, 1 );
    if (SDL_ATassert( "Opening memory with SDL_RWFromFP", rw != NULL ))
@@ -241,12 +231,8 @@ static void rwops_testFP (void)
    SDL_FreeRW( rw );
 
    /* Run write tests. */
-#if __APPLE__
-	fp = Test_OpenFPFromTemporaryDir( RWOPS_WRITE, "w+" );
-#else
-   fp = fopen( RWOPS_WRITE, "w+" );
-#endif
-   if (SDL_ATassert( "Failed to open file '"RWOPS_WRITE"'", fp != NULL))
+   fp = TestSupportRWops_OpenFPFromWriteDir( RWOPS_WRITE, "w+" );
+   if (SDL_ATassert( "Failed to open file RWOPS_WRITE", fp != NULL))
       return;
    rw = SDL_RWFromFP( fp, 1 );
    if (SDL_ATassert( "Opening memory with SDL_RWFromFP", rw != NULL ))

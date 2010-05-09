@@ -34,6 +34,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		001E39A71196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = 001E39A51196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m */; };
 		006E9852119550FB001DE610 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9831119550FB001DE610 /* audio.c */; };
 		006E9853119550FB001DE610 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9834119550FB001DE610 /* common.c */; };
 		006E9859119550FB001DE610 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E983D119550FB001DE610 /* platform.c */; };
@@ -42,7 +43,6 @@
 		006E985C119550FB001DE610 /* render.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9844119550FB001DE610 /* render.c */; };
 		006E985D119550FB001DE610 /* read in Copy rwops */ = {isa = PBXBuildFile; fileRef = 006E9847119550FB001DE610 /* read */; };
 		006E985E119550FB001DE610 /* rwops.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9848119550FB001DE610 /* rwops.c */; };
-		006E985F119550FB001DE610 /* Test_rwopsbundlesupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 006E984B119550FB001DE610 /* Test_rwopsbundlesupport.m */; };
 		006E9860119550FB001DE610 /* SDL_at.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E984C119550FB001DE610 /* SDL_at.c */; };
 		006E9861119550FB001DE610 /* surface.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E984F119550FB001DE610 /* surface.c */; };
 		006E9862119550FB001DE610 /* testsdl.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9851119550FB001DE610 /* testsdl.c */; };
@@ -264,6 +264,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		001E39A51196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSupportRWops_Cocoa.m; sourceTree = "<group>"; };
+		001E39A61196EE6F00A3F5B8 /* TestSupportRWops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSupportRWops.h; sourceTree = "<group>"; };
 		006E982211955059001DE610 /* testsdl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testsdl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		006E982411955059001DE610 /* testsdl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testsdl-Info.plist"; sourceTree = "<group>"; };
 		006E9831119550FB001DE610 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
@@ -286,8 +288,6 @@
 		006E9847119550FB001DE610 /* read */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = read; sourceTree = "<group>"; };
 		006E9848119550FB001DE610 /* rwops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rwops.c; sourceTree = "<group>"; };
 		006E9849119550FB001DE610 /* rwops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rwops.h; sourceTree = "<group>"; };
-		006E984A119550FB001DE610 /* Test_rwopsbundlesupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Test_rwopsbundlesupport.h; sourceTree = "<group>"; };
-		006E984B119550FB001DE610 /* Test_rwopsbundlesupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Test_rwopsbundlesupport.m; sourceTree = "<group>"; };
 		006E984C119550FB001DE610 /* SDL_at.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_at.c; path = ../../test/automated/SDL_at.c; sourceTree = SOURCE_ROOT; };
 		006E984D119550FB001DE610 /* SDL_at.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_at.h; path = ../../test/automated/SDL_at.h; sourceTree = SOURCE_ROOT; };
 		006E984F119550FB001DE610 /* surface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = surface.c; sourceTree = "<group>"; };
@@ -609,11 +609,11 @@
 		006E9846119550FB001DE610 /* rwops */ = {
 			isa = PBXGroup;
 			children = (
+				001E39A51196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m */,
+				001E39A61196EE6F00A3F5B8 /* TestSupportRWops.h */,
 				006E9847119550FB001DE610 /* read */,
 				006E9848119550FB001DE610 /* rwops.c */,
 				006E9849119550FB001DE610 /* rwops.h */,
-				006E984A119550FB001DE610 /* Test_rwopsbundlesupport.h */,
-				006E984B119550FB001DE610 /* Test_rwopsbundlesupport.m */,
 			);
 			name = rwops;
 			path = ../../test/automated/rwops;
@@ -694,10 +694,10 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				006E982F119550E4001DE610 /* TestResources */,
-				006E982E119550D8001DE610 /* AutomatedTests */,
 				FD99B8BC0DD52E5C00FB1D6B /* Public Headers */,
 				FD99B8BD0DD52E6D00FB1D6B /* Library Source */,
+				006E982E119550D8001DE610 /* AutomatedTests */,
+				006E982F119550E4001DE610 /* TestResources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 				006E982411955059001DE610 /* testsdl-Info.plist */,
@@ -1313,10 +1313,10 @@
 				006E985B119550FB001DE610 /* rect.c in Sources */,
 				006E985C119550FB001DE610 /* render.c in Sources */,
 				006E985E119550FB001DE610 /* rwops.c in Sources */,
-				006E985F119550FB001DE610 /* Test_rwopsbundlesupport.m in Sources */,
 				006E9860119550FB001DE610 /* SDL_at.c in Sources */,
 				006E9861119550FB001DE610 /* surface.c in Sources */,
 				006E9862119550FB001DE610 /* testsdl.c in Sources */,
+				001E39A71196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1505,15 +1505,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DEBUGGING_SYMBOLS = full;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
 				ONLY_ACTIVE_ARCH = NO;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.2;
+				SDKROOT = iphoneos3.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1522,13 +1522,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = NO;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1;
 				PREBINDING = NO;
-				SDKROOT = iphoneos3.1.2;
+				SDKROOT = iphoneos3.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1537,7 +1538,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = NO;
@@ -1553,7 +1553,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

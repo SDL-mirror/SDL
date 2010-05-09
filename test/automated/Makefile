@@ -10,6 +10,7 @@ LDFLAGS := `sdl-config --libs`
 SRC         	:= testsdl.c \
 						platform/platform.c \
 						rwops/rwops.c \
+						rwops/TestSupportRWops.c \
 						rect/rect.c \
 						surface/surface.c \
 						render/render.c \
