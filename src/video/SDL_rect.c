@@ -122,8 +122,10 @@ SDL_bool
 SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
                   SDL_Rect * result)
 {
-    int minx, miny;
-    int maxx, maxy;
+    int minx = 0;
+    int miny = 0;
+    int maxx = 0;
+    int maxy = 0;
     int x, y, i;
 
     if (count < 1) {
@@ -222,7 +224,8 @@ SDL_bool
 SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
                          int *Y2)
 {
-    int x, y;
+    int x = 0;
+    int y = 0;
     int x1, y1;
     int x2, y2;
     int rectx1;
