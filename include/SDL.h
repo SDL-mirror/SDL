@@ -37,10 +37,9 @@
  *  level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
  *  and 2D framebuffer across multiple platforms.
  *  
- *  The current version supports Linux, Windows, Windows CE, BeOS, MacOS,
- *  Mac OS X, FreeBSD, NetBSD, OpenBSD, BSD/OS, Solaris, IRIX, and QNX.
- *  The code contains support for AIX, OSF/Tru64, RISC OS, and SymbianOS,
- *  but these are not officially supported.
+ *  The current version supports Windows, Windows CE, Mac OS X, Linux,
+ *  FreeBSD, NetBSD, OpenBSD, BSD/OS, Solaris, and QNX. The code contains
+ *  support for other operating systems but those are not officially supported. 
  *  
  *  SDL is written in C, but works with C++ natively, and has bindings to
  *  several other languages, including Ada, C#, Eiffel, Erlang, Euphoria,
