@@ -88,7 +88,6 @@ typedef struct
  *  \sa SDL_SetWindowTitle()
  *  \sa SDL_ShowWindow()
  */
-struct SDL_Window;
 typedef struct SDL_Window SDL_Window;
 
 /**

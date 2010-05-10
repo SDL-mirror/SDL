@@ -45,11 +45,6 @@
 #include "ddraw.h"
 #endif
 
-#include "wactab/wintab.h"
-#define PACKETDATA ( PK_X | PK_Y | PK_BUTTONS | PK_NORMAL_PRESSURE | PK_CURSOR)
-#define PACKETMODE 0
-#include "wactab/pktdef.h"
-
 #include "SDL_win32events.h"
 #include "SDL_win32gamma.h"
 #include "SDL_win32keyboard.h"
@@ -79,16 +74,6 @@ typedef struct SDL_VideoData
     IDirectDraw *ddraw;
 #endif
 
-/* *INDENT-OFF* */
-    /* Function pointers for the Wacom API */
-    HANDLE wintabDLL;
-    UINT (*WTInfoA) (UINT, UINT, LPVOID);
-    HCTX (*WTOpenA) (HWND, LPLOGCONTEXTA, BOOL);
-    int (*WTPacket) (HCTX, UINT, LPVOID);
-    BOOL (*WTClose) (HCTX);
-/* *INDENT-ON* */
-
-    int keyboard;
     const SDL_scancode *key_layout;
 } SDL_VideoData;
 

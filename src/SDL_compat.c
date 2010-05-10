@@ -277,16 +277,13 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
     case SDL_MOUSEWHEEL:
         {
             Uint8 button;
-            int selected;
             int x, y;
 
             if (event->wheel.y == 0) {
                 break;
             }
 
-            selected = SDL_SelectMouse(event->wheel.which);
             SDL_GetMouseState(&x, &y);
-            SDL_SelectMouse(selected);
 
             if (event->wheel.y > 0) {
                 button = SDL_BUTTON_WHEELUP;
@@ -294,7 +291,6 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
                 button = SDL_BUTTON_WHEELDOWN;
             }
 
-            fake.button.which = event->wheel.which;
             fake.button.button = button;
             fake.button.x = x;
             fake.button.y = y;

@@ -50,7 +50,6 @@ void
 WIN_InitKeyboard(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_Keyboard keyboard;
     int i;
 
     /* Make sure the alpha scancodes are correct.  T isn't usually remapped */
@@ -82,9 +81,7 @@ WIN_InitKeyboard(_THIS)
 
     data->key_layout = win32_scancode_table;
 
-    SDL_zero(keyboard);
-    data->keyboard = SDL_AddKeyboard(&keyboard, -1);
-    WIN_UpdateKeymap(data->keyboard);
+    WIN_UpdateKeymap();
 
     SDL_SetScancodeName(SDL_SCANCODE_APPLICATION, "Menu");
     SDL_SetScancodeName(SDL_SCANCODE_LGUI, "Left Windows");
@@ -92,7 +89,7 @@ WIN_InitKeyboard(_THIS)
 }
 
 void
-WIN_UpdateKeymap(int keyboard)
+WIN_UpdateKeymap()
 {
     int i;
     SDL_scancode scancode;
@@ -117,15 +114,12 @@ WIN_UpdateKeymap(int keyboard)
             keymap[scancode] = (MapVirtualKey(i, MAPVK_VK_TO_CHAR) & 0x7FFF);
         }
     }
-    SDL_SetKeymap(keyboard, 0, keymap, SDL_NUM_SCANCODES);
+    SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
 }
 
 void
 WIN_QuitKeyboard(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
-    SDL_DelKeyboard(data->keyboard);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

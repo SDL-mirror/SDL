@@ -30,9 +30,19 @@
 
 
 /* Global keyboard information */
-static int SDL_num_keyboards;
-static int SDL_current_keyboard;
-static SDL_Keyboard **SDL_keyboards;
+
+typedef struct SDL_Keyboard SDL_Keyboard;
+
+struct SDL_Keyboard
+{
+    /* Data common to all keyboards */
+    SDL_Window *focus;
+    Uint16 modstate;
+    Uint8 keystate[SDL_NUM_SCANCODES];
+    SDLKey keymap[SDL_NUM_SCANCODES];
+};
+
+static SDL_Keyboard SDL_keyboard;
 
 static const SDLKey SDL_default_keymap[SDL_NUM_SCANCODES] = {
     0, 0, 0, 0,
@@ -544,75 +554,15 @@ SDL_KeyboardInit(void)
     return (0);
 }
 
-SDL_Keyboard *
-SDL_GetKeyboard(int index)
-{
-    if (index < 0 || index >= SDL_num_keyboards) {
-        return NULL;
-    }
-    return SDL_keyboards[index];
-}
-
-int
-SDL_AddKeyboard(const SDL_Keyboard * keyboard, int index)
-{
-    SDL_Keyboard **keyboards;
-
-    /* Add the keyboard to the list of keyboards */
-    if (index < 0 || index >= SDL_num_keyboards || SDL_keyboards[index]) {
-        keyboards =
-            (SDL_Keyboard **) SDL_realloc(SDL_keyboards,
-                                          (SDL_num_keyboards +
-                                           1) * sizeof(*keyboards));
-        if (!keyboards) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-
-        SDL_keyboards = keyboards;
-        index = SDL_num_keyboards++;
-    }
-    SDL_keyboards[index] =
-        (SDL_Keyboard *) SDL_malloc(sizeof(*SDL_keyboards[index]));
-    if (!SDL_keyboards[index]) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-    *SDL_keyboards[index] = *keyboard;
-
-    return index;
-}
-
 void
-SDL_DelKeyboard(int index)
+SDL_ResetKeyboard(void)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
-
-    if (!keyboard) {
-        return;
-    }
-
-    if (keyboard->FreeKeyboard) {
-        keyboard->FreeKeyboard(keyboard);
-    }
-    SDL_free(keyboard);
-
-    SDL_keyboards[index] = NULL;
-}
-
-void
-SDL_ResetKeyboard(int index)
-{
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
     SDL_scancode scancode;
-
-    if (!keyboard) {
-        return;
-    }
 
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
-            SDL_SendKeyboardKey(index, SDL_RELEASED, scancode);
+            SDL_SendKeyboardKey(SDL_RELEASED, scancode);
         }
     }
 }
@@ -624,13 +574,9 @@ SDL_GetDefaultKeymap(SDLKey * keymap)
 }
 
 void
-SDL_SetKeymap(int index, int start, SDLKey * keys, int length)
+SDL_SetKeymap(int start, SDLKey * keys, int length)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
-
-    if (!keyboard) {
-        return;
-    }
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
     if (start < 0 || start + length > SDL_NUM_SCANCODES) {
         return;
@@ -645,33 +591,23 @@ SDL_SetScancodeName(SDL_scancode scancode, const char *name)
     SDL_scancode_names[scancode] = name;
 }
 
-void
-SDL_SetKeyboardFocus(int index, SDL_Window * window)
+SDL_Window *
+SDL_GetKeyboardFocus(void)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
-    int i;
-    SDL_bool focus;
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
-    if (!keyboard) {
-        return;
-    }
+    return keyboard->focus;
+}
+
+void
+SDL_SetKeyboardFocus(SDL_Window * window)
+{
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
     /* See if the current window has lost focus */
     if (keyboard->focus && keyboard->focus != window) {
-        focus = SDL_FALSE;
-        for (i = 0; i < SDL_num_keyboards; ++i) {
-            if (i != index) {
-                SDL_Keyboard *check = SDL_GetKeyboard(i);
-                if (check && check->focus == keyboard->focus) {
-                    focus = SDL_TRUE;
-                    break;
-                }
-            }
-        }
-        if (!focus) {
-            SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
-                                0, 0);
-        }
+        SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
+                            0, 0);
     }
 
     keyboard->focus = window;
@@ -687,14 +623,14 @@ SDL_SetKeyboardFocus(int index, SDL_Window * window)
 }
 
 int
-SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
+SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
     Uint16 modstate;
     Uint32 type;
 
-    if (!keyboard || !scancode) {
+    if (!scancode) {
         return 0;
     }
 #if 0
@@ -807,7 +743,6 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
     if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.key.type = type;
-        event.key.which = (Uint8) index;
         event.key.state = state;
         event.key.keysym.scancode = scancode;
         event.key.keysym.sym = keyboard->keymap[scancode];
@@ -820,14 +755,10 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
 }
 
 int
-SDL_SendKeyboardText(int index, const char *text)
+SDL_SendKeyboardText(const char *text)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
-
-    if (!keyboard) {
-        return 0;
-    }
 
     /* Post the event, if desired */
     posted = 0;
@@ -835,7 +766,6 @@ SDL_SendKeyboardText(int index, const char *text)
         SDL_Event event;
         event.text.type = SDL_TEXTINPUT;
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
-        event.text.which = (Uint8) index;
         SDL_strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
@@ -844,14 +774,10 @@ SDL_SendKeyboardText(int index, const char *text)
 }
 
 int
-SDL_SendEditingText(int index, const char *text, int start, int length)
+SDL_SendEditingText(const char *text, int start, int length)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(index);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
-
-    if (!keyboard) {
-        return 0;
-    }
 
     /* Post the event, if desired */
     posted = 0;
@@ -859,7 +785,6 @@ SDL_SendEditingText(int index, const char *text, int start, int length)
         SDL_Event event;
         event.edit.type = SDL_TEXTEDITING;
         event.edit.windowID = keyboard->focus ? keyboard->focus->id : 0;
-        event.text.which = (Uint8) index;
         event.edit.start = start;
         event.edit.length = length;
         SDL_strlcpy(event.edit.text, text, SDL_arraysize(event.edit.text));
@@ -871,46 +796,15 @@ SDL_SendEditingText(int index, const char *text, int start, int length)
 void
 SDL_KeyboardQuit(void)
 {
-    int i;
-
-    for (i = 0; i < SDL_num_keyboards; ++i) {
-        SDL_DelKeyboard(i);
-    }
-    SDL_num_keyboards = 0;
-    SDL_current_keyboard = 0;
-
-    if (SDL_keyboards) {
-        SDL_free(SDL_keyboards);
-        SDL_keyboards = NULL;
-    }
-}
-
-int
-SDL_GetNumKeyboards(void)
-{
-    return SDL_num_keyboards;
-}
-
-int
-SDL_SelectKeyboard(int index)
-{
-    if (index >= 0 && index < SDL_num_keyboards) {
-        SDL_current_keyboard = index;
-    }
-    return SDL_current_keyboard;
 }
 
 Uint8 *
 SDL_GetKeyboardState(int *numkeys)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
     if (numkeys != (int *) 0) {
         *numkeys = SDL_NUM_SCANCODES;
-    }
-
-    if (!keyboard) {
-        return NULL;
     }
     return keyboard->keystate;
 }
@@ -918,45 +812,32 @@ SDL_GetKeyboardState(int *numkeys)
 SDLMod
 SDL_GetModState(void)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
-    if (!keyboard) {
-        return KMOD_NONE;
-    }
     return keyboard->modstate;
 }
 
 void
 SDL_SetModState(SDLMod modstate)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
-    if (!keyboard) {
-        return;
-    }
     keyboard->modstate = modstate;
 }
 
 SDLKey
 SDL_GetKeyFromScancode(SDL_scancode scancode)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
 
-    if (!keyboard) {
-        return SDLK_UNKNOWN;
-    }
     return keyboard->keymap[scancode];
 }
 
 SDL_scancode
 SDL_GetScancodeFromKey(SDLKey key)
 {
-    SDL_Keyboard *keyboard = SDL_GetKeyboard(SDL_current_keyboard);
+    SDL_Keyboard *keyboard = &SDL_keyboard;
     SDL_scancode scancode;
-
-    if (!keyboard) {
-        return SDL_SCANCODE_UNKNOWN;
-    }
 
     for (scancode = SDL_SCANCODE_UNKNOWN; scancode < SDL_NUM_SCANCODES;
          ++scancode) {

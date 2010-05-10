@@ -288,20 +288,16 @@ main(int argc, char *argv[])
             CommonEvent(state, &event, &done);
             switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
-                if (event.button.which == 0) {
-                    mouse_begin_x = event.button.x;
-                    mouse_begin_y = event.button.y;
-                }
+                mouse_begin_x = event.button.x;
+                mouse_begin_y = event.button.y;
                 break;
             case SDL_MOUSEBUTTONUP:
-                if (event.button.which == 0) {
-                    if (event.button.button == 3)
-                        add_line(mouse_begin_x, mouse_begin_y, event.button.x,
-                                 event.button.y);
-                    if (event.button.button == 1)
-                        add_rect(mouse_begin_x, mouse_begin_y, event.button.x,
-                                 event.button.y);
-                }
+                if (event.button.button == 3)
+                    add_line(mouse_begin_x, mouse_begin_y, event.button.x,
+                             event.button.y);
+                if (event.button.button == 1)
+                    add_rect(mouse_begin_x, mouse_begin_y, event.button.x,
+                             event.button.y);
                 break;
             case SDL_KEYDOWN:
                 switch (event.key.keysym.sym) {

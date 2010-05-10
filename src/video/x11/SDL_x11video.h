@@ -67,7 +67,6 @@ typedef struct SDL_VideoData
     int numwindows;
     SDL_WindowData **windowlist;
     int windowlistlength;
-    int keyboard;
     Atom WM_DELETE_WINDOW;
     SDL_scancode key_layout[256];
 } SDL_VideoData;
