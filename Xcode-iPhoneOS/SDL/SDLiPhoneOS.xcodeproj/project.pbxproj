@@ -1285,7 +1285,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "source ~/.bashrc\nsh ../../build-scripts/updaterev.sh";
+			shellScript = "if test -f ~/.bash_profile; then source ~/.bash_profile; fi\nif test -f ~/.bashrc; then source ~/.bashrc; fi\nsh ../../build-scripts/updaterev.sh";
 		};
 		FDB043B20E2689CC00F5B3F9 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
