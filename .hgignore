@@ -14,7 +14,19 @@ build
 build-deps
 VisualC
 VisualCE
-Xcode
+# for Xcode
+*.orig
+*.swp
+*.tmp
+*.rej
+*~
+*.o
+*.mode1*
+*.model*
+*.perspective*
+*.perspective*
+*.pbxuser
+(^|/)build($|/)
 .DS_Store
 sdl.pc
 include/SDL_config.h
