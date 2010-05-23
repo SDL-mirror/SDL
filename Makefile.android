@@ -1,0 +1,51 @@
+# Makefile to build the SDL library
+
+ANDROID_NDK=/home/paul/Projects/gsoc/sdk/android-ndk-r4
+TOOLS_PATH=$(ANDROID_NDK)/build/prebuilt/linux-x86/arm-eabi-4.2.1/bin
+ANDROID_INCLUDES = 	-I$(ANDROID_NDK)/build/platforms/android-4/common/include \
+					-I$(ANDROID_NDK)/build/platforms/android-4/arch-arm/usr/include 
+INCLUDE = -I./include
+CFLAGS  = -g -O2 $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -static
+
+AR	= $(TOOLS_PATH)/arm-eabi-ar
+RANLIB	= $(TOOLS_PATH)/arm-eabi-ranlib
+CC = $(TOOLS_PATH)/arm-eabi-gcc
+
+
+CONFIG_H = include/SDL_config.h
+TARGET  = libSDL.a
+SOURCES = \
+	src/*.c \
+	src/audio/*.c \
+	src/cpuinfo/*.c \
+	src/events/*.c \
+	src/file/*.c \
+	src/joystick/*.c \
+	src/haptic/*.c \
+	src/stdlib/*.c \
+	src/thread/*.c \
+	src/timer/*.c \
+	src/video/*.c \
+	src/power/*.c \
+	src/audio/dummy/*.c \
+	src/video/dummy/*.c \
+	src/joystick/dummy/*.c \
+	src/haptic/dummy/*.c \
+	src/atomic/dummy/*.c \
+	src/thread/generic/*.c \
+	src/timer/dummy/*.c \
+	src/loadso/dummy/*.c \
+
+OBJECTS = $(shell echo $(SOURCES) | sed -e 's,\.c,\.o,g')
+
+all: $(TARGET)
+
+$(TARGET): $(CONFIG_H) $(OBJECTS)
+	$(AR) crv $@ $^
+	$(RANLIB) $@
+
+$(CONFIG_H):
+	cp $(CONFIG_H).default $(CONFIG_H)
+
+clean:
+	rm -f $(TARGET) $(OBJECTS)
