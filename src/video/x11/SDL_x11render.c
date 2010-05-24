@@ -95,6 +95,13 @@ typedef struct
     int scanline_pad;
     Window xwindow;
     Pixmap pixmaps[3];
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    Picture xwindow_pict;
+    XRenderPictFormat* xwindow_pict_fmt;
+    XRenderPictureAttributes xwindow_pict_attr;
+    unsigned int xwindow_pict_attr_valuemask;
+    SDL_bool xrender_available;
+#endif
     int current_pixmap;
     Drawable drawable;
     SDL_PixelFormat format;
@@ -108,6 +115,9 @@ typedef struct
     SDL_SW_YUVTexture *yuv;
     Uint32 format;
     Pixmap pixmap;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    Picture picture;
+#endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
     /* MIT shared memory extension information */
@@ -198,7 +208,22 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->depth = displaydata->depth;
     data->scanline_pad = displaydata->scanline_pad;
     data->xwindow = windowdata->xwindow;
-
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    int event_basep, error_basep;
+    if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
+        data->xrender_available = SDL_TRUE;
+        data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display, data->visual);
+        data->xwindow_pict_attr_valuemask = 0; // FIXME
+        data->xwindow_pict = XRenderCreatePicture(data->display,
+                                                  data->xwindow,
+                                                  data->xwindow_pict_fmt,
+                                                  data->xwindow_pict_attr_valuemask,
+                                                  &data->xwindow_pict_attr);
+    }
+    else {
+        data->xrender_available = SDL_FALSE;
+    }
+#endif
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
     renderer->CreateTexture = X11_CreateTexture;
     renderer->QueryTexturePixels = X11_QueryTexturePixels;
