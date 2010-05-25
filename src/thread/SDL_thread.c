@@ -305,10 +305,4 @@ SDL_GetThreadID(SDL_Thread * thread)
     return id;
 }
 
-void
-SDL_KillThread(SDL_Thread * thread)
-{
-    /* This is a no-op in SDL 1.3 and later. */
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

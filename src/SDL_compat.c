@@ -1750,7 +1750,6 @@ SDL_EnableUNICODE(int enable)
     return previous;
 }
 
-
 int
 SDL_putenv(const char *_var)
 {
