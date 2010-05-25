@@ -43,13 +43,9 @@ typedef struct SDL_Shaped_Window SDL_Shaped_Window;
  *  
  *  \sa SDL_DestroyWindow()
  */
-extern DECLSPEC SDL_Shaped_Window * SDLCALL SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags);
+extern DECLSPEC SDL_Window * SDLCALL SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags);
 
-extern DECLSPEC SDL_Surface * SDLCALL SDL_LockWindowShape(const SDL_Shaped_Window *window);
-extern DECLSPEC void SDLCALL SDL_UnlockWindowShape(const SDL_Shaped_Window *window);
-extern DECLSPEC int SDLCALL SDL_PresentWindowShape(const SDL_Shaped_Window *window);
-
-extern DECLSPEC SDL_Window * SDLCALL SDL_LockShapedWindow(const SDL_Shaped_Window *window);
-extern DECLSPEC void SDLCALL SDL_UnlockShapedWindow(const SDL_Shaped_Window *window);
+extern DECLSPE SDL_bool SDLCALL SDL_WindowIsShaped(const SDL_Window *window);
+extern DECLSPEC int SDLCALL SDL_SelectShapeRenderer(const SDL_Window *window);
 
 extern DECLSPEC void SDLCALL SDL_DestroyShapedWindow(const SDL_Shaped_Window *window);
