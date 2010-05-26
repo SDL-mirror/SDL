@@ -20,6 +20,7 @@ int bstatus;
 
 
 
+
 typedef struct {
   int x,y;
 } Point;
@@ -120,7 +121,7 @@ int main(int argc, char* argv[])
     device = argv[1];
   
   //Open Device
-  if ((fd = open (device, O_RDONLY)) == -1)
+  if ((fd = open (device, O_RDONLY | O_NONBLOCK)) == -1)
     printf ("%s is not a vaild device.\n", device);
   
   //Print Device Name
@@ -189,50 +190,53 @@ int main(int argc, char* argv[])
 	}
 
       //poll for Touch <- Goal: make this a case:      
-      if ((rd = read (fd, ev, size * 64)) < size)
-	perror_exit ("read()");          
+      
+
+      /*if ((rd = read (fd, ev, size * 64)) < size)
+	perror_exit ("read()");          */
       //printf("time: %i\n type: %X\n code: %X\n value: %i\n ",
       //     ev->time,ev->type,ev->code,ev->value);
-      for (i = 0; i < rd / sizeof(struct input_event); i++)
-	switch (ev[i].type)	
-	  {
-	  case EV_ABS:
-	    if(ev[i].code == ABS_X)
-	      tx = ev[i].value;
-	    else if (ev[i].code == ABS_Y)
-	      ty = ev[i].value;
-	    else if (ev[i].code == ABS_MISC)
-	      {	     
-		//printf("Misc:type: %X\n     code: %X\n     value: %i\n ",
-		//      ev[i].type,ev[i].code,ev[i].value);
-	      }
-	    break;
-	  case EV_MSC:
-	    if(ev[i].code == MSC_SERIAL)
-	      curf = ev[i].value;
-	    break;
-	  case EV_SYN:
-	    curf -= 1;
-	    if(tx >= 0)
-	      finger[curf].x = tx;
-	    if(ty >= 0)
-	      finger[curf].y = ty;
-
-	    //printf("Synched: %i tx: %i, ty: %i\n",curf,finger[curf].x,finger[curf].y);
-	    tx = -1;
-	    ty = -1;
-	    break;    
-
-	}
-      //And draw
-      DrawScreen(screen,h);
-      /*
-      for(i=0;i<512;i++) 
-	if(keystat[i]) printf("%i\n",i);
-      printf("Buttons:%i\n",bstatus);
-      */
-    }  
-  SDL_Quit();
-  
+      if((rd = read (fd, ev, size * 64)) >= size)
+	 for (i = 0; i < rd / sizeof(struct input_event); i++)
+	   switch (ev[i].type)	
+	     {
+	     case EV_ABS:
+	       if(ev[i].code == ABS_X)
+		 tx = ev[i].value;
+	       else if (ev[i].code == ABS_Y)
+		 ty = ev[i].value;
+	       else if (ev[i].code == ABS_MISC)
+		 {	     
+		   //printf("Misc:type: %X\n     code: %X\n     value: %i\n ",
+		   //      ev[i].type,ev[i].code,ev[i].value);
+		 }
+	       break;
+	     case EV_MSC:
+	       if(ev[i].code == MSC_SERIAL)
+		 curf = ev[i].value;
+	       break;
+	     case EV_SYN:
+	       curf -= 1;
+	       if(tx >= 0)
+		 finger[curf].x = tx;
+	       if(ty >= 0)
+		 finger[curf].y = ty;
+	       
+	       //printf("Synched: %i tx: %i, ty: %i\n",curf,finger[curf].x,finger[curf].y);
+	       tx = -1;
+	       ty = -1;
+	       break;    
+	       
+	     }
+	 //And draw
+     DrawScreen(screen,h);
+	 /*
+	   for(i=0;i<512;i++) 
+	   if(keystat[i]) printf("%i\n",i);
+	   printf("Buttons:%i\n",bstatus);
+	 */
+     }  
+     SDL_Quit();
+      
   return 0;
 }

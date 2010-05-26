@@ -408,6 +408,10 @@ X11_PumpEvents(_THIS)
     while (X11_Pending(data->display)) {
         X11_DispatchEvent(_this);
     }
+
+
+    /* Process Touch events - TODO When X gets touch support, REMOVE THIS*/
+    
 }
 
 /* This is so wrong it hurts */
