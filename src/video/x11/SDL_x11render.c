@@ -97,6 +97,8 @@ typedef struct
     Pixmap pixmaps[3];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     Picture xwindow_pict;
+    Picture pixmap_picts[3];
+    Picture * drawable_pict;
     XRenderPictFormat* xwindow_pict_fmt;
     XRenderPictureAttributes xwindow_pict_attr;
     unsigned int xwindow_pict_attr_valuemask;
@@ -117,6 +119,9 @@ typedef struct
     Pixmap pixmap;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     Picture picture;
+    XRenderPictFormat* picture_fmt;
+    XRenderPictureAttributes picture_attr;
+    unsigned int picture_attr_valuemask;
 #endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
@@ -213,12 +218,10 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
         data->xrender_available = SDL_TRUE;
         data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display, data->visual);
-        data->xwindow_pict_attr_valuemask = 0; // FIXME
-        data->xwindow_pict = XRenderCreatePicture(data->display,
-                                                  data->xwindow,
-                                                  data->xwindow_pict_fmt,
-                                                  data->xwindow_pict_attr_valuemask,
-                                                  &data->xwindow_pict_attr);
+        data->xwindow_pict_attr.graphics_exposures = False;
+        data->xwindow_pict_attr_valuemask = CPGraphicsExposure;
+        data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
+                                                  data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
     }
     else {
         data->xrender_available = SDL_FALSE;
@@ -272,12 +275,23 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             SDL_SetError("XCreatePixmap() failed");
             return NULL;
         }
+        data->pixmap_picts[i] = 
+            XCreatePicture(data->display, data->pixmap[i], data->xwindow_pict_fmt,
+                           data->xwindow_pict_attr_valuemask, &xwindow_pict_attr);
     }
     if (n > 0) {
         data->drawable = data->pixmaps[0];
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if(data->xrender_available == SDL_TRUE)
+            data->drawable_pict = &(data->pixmap_picts[0]);
+#endif
         data->makedirty = SDL_TRUE;
     } else {
         data->drawable = data->xwindow;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if(data->xrender_available == SDL_TRUE)
+            data->drawable_pict = &(data->xwindow_pict);
+#endif
         data->makedirty = SDL_FALSE;
     }
     data->current_pixmap = 0;
@@ -325,6 +339,9 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
         if (data->pixmaps[i] != None) {
             XFreePixmap(data->display, data->pixmaps[i]);
             data->pixmaps[i] = None;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+            data->pictures[i] = None;
+#endif
         }
     }
     for (i = 0; i < n; ++i) {
@@ -335,9 +352,17 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             SDL_SetError("XCreatePixmap() failed");
             return -1;
         }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->pictures[i] = 
+            XCreatePicture(data->display, data->pixmap[i], data->xwindow_pict_fmt,
+                           data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
+#endif
     }
     if (n > 0) {
         data->drawable = data->pixmaps[0];
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->drawable_pict = &(data->pictures[0]);
+#endif
     }
     data->current_pixmap = 0;
 
@@ -360,7 +385,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     texture->driverdata = data;
-
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
         data->yuv =
             SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
@@ -371,11 +395,21 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     } else {
         /* The image/pixmap depth must be the same as the window or you
            get a BadMatch error when trying to putimage or copyarea.
+           This BadMatch error
          */
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if(renderdata->xrender_available == SDL_False) {
+            if (texture->format != display->current_mode.format) {
+                SDL_SetError("Texture format doesn't match window format");
+                return -1;
+            }
+        }
+#else
         if (texture->format != display->current_mode.format) {
             SDL_SetError("Texture format doesn't match window format");
             return -1;
         }
+#endif
         data->format = texture->format;
     }
     data->pitch = texture->w * SDL_BYTESPERPIXEL(data->format);
@@ -455,6 +489,12 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             SDL_SetError("XCreatePixmap() failed");
             return -1;
         }
+        
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->picture_fmt = 
+            XRenderFindVisualFormat(renderdata->display, 
+        data->picture = 
+            XCreatePicture(renderdata->display, data->pixmap, 
 
         data->image =
             XCreateImage(renderdata->display, renderdata->visual,
