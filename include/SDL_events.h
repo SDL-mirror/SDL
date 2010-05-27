@@ -86,10 +86,18 @@ typedef enum
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
 
+    /*Touch events - is 0x700 the correct place?*/
+    SDL_FINGERDOWN     = 0x700,
+    SDL_FINGERUP,
+    SDL_FINGERMOTION,
+    SDL_TOUCHBUTTONDOWN,
+    SDL_TOUCHBUTTONUP,    
+
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
     SDL_EVENT_COMPAT2,
     SDL_EVENT_COMPAT3,
+
 
     /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
      *  and should be allocated with SDL_RegisterEvents()
@@ -289,6 +297,37 @@ typedef struct SDL_JoyButtonEvent
     Uint8 padding1;
 } SDL_JoyButtonEvent;
 
+
+/**
+ *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ */
+typedef struct SDL_TouchFingerEvent
+{
+    Uint32 type;        /**< ::SDL_FINGERMOTION OR 
+			   SDL_FINGERDOWN OR SDL_FINGERUP*/
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint8 touchId;        /**< The touch device id */
+    Uint8 state;        /**< The current button state */
+    Uint8 fingerId;
+    Uint8 padding1;
+} SDL_TouchFingerEvent;
+
+
+/**
+ *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ */
+typedef struct SDL_TouchButtonEvent
+{
+    Uint32 type;        /**< ::SDL_TOUCHBUTTONUP OR SDL_TOUCHBUTTONDOWN */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint8 touchId;        /**< The touch device index */
+    Uint8 state;        /**< The current button state */
+    Uint8 button;        /**< The button changing state */
+    Uint8 padding1;
+
+} SDL_TouchButtonEvent;
+
+
 /**
  *  \brief The "quit requested" event
  */
@@ -372,6 +411,8 @@ typedef union SDL_Event
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
     SDL_ProximityEvent proximity;   /**< Proximity In or Out event */
+    SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
+    SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
 
     /** Temporarily here for backwards compatibility */
     /*@{*/

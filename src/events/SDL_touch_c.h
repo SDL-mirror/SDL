@@ -25,49 +25,50 @@
 #define _SDL_touch_c_h
 
 typedef struct SDL_Touch SDL_Touch;
+typedef struct SDL_Finger SDL_Finger;
+
+struct SDL_Finger {
+  int id;
+  int x;
+  int y;
+  int z;                      /* for future use */
+  int xdelta;
+  int ydelta;
+  int last_x, last_y;         /* the last reported x and y coordinates */
+  int pressure;
+};
 
 
 struct SDL_Touch
 {
-    /* Warp the touch to (x,y) */
-    void (*WarpTouch) (SDL_Touch * touch, SDL_Window * window, int x,
-                       int y);
+  
+  /* Free the touch when it's time */
+  void (*FreeTouch) (SDL_Touch * touch);
+  
+  /* data common for tablets */
+  int pressure_max;
+  int pressure_min;
+  int tilt;                   /* for future use */
+  int rotation;               /* for future use */
+  
+  int total_ends;
+  int current_end;
+  
+  /* Data common to all touch */
+  int id;
+  SDL_Window *focus;
+  
+  char *name;
+  Uint8 buttonstate;
+  SDL_bool relative_mode;
+  SDL_bool flush_motion;
 
-    /* Free the touch when it's time */
-    void (*FreeTouch) (SDL_Touch * touch);
-
-    /* data common for tablets */
-    int pressure;
-    int pressure_max;
-    int pressure_min;
-    int tilt;                   /* for future use */
-    int rotation;               /* for future use */
-    int total_ends;
-    int current_end;
-
-    /* Data common to all touch */
-    int id;
-    SDL_Window *focus;
-    int which;
-    int x;
-    int y;
-    int z;                      /* for future use */
-    int xdelta;
-    int ydelta;
-    int last_x, last_y;         /* the last reported x and y coordinates */
-    char *name;
-    Uint8 buttonstate;
-    SDL_bool relative_mode;
-    SDL_bool proximity;
-    SDL_bool flush_motion;
-
-    SDL_Cursor *cursors;
-    SDL_Cursor *def_cursor;
-    SDL_Cursor *cur_cursor;
-    SDL_bool cursor_shown;
-
-    void *driverdata;
+  int num_fingers;
+  SDL_Finger** fingers;
+    
+  void *driverdata;
 };
+
 
 /* Initialize the touch subsystem */
 extern int SDL_TouchInit(void);
@@ -84,23 +85,15 @@ extern int SDL_AddTouch(const SDL_Touch * touch, char *name,
 /* Remove a touch at an index, clearing the slot for later */
 extern void SDL_DelTouch(int index);
 
-/* Clear the button state of a touch at an index */
-extern void SDL_ResetTouch(int index);
-
 /* Set the touch focus window */
 extern void SDL_SetTouchFocus(int id, SDL_Window * window);
 
 /* Send a touch motion event for a touch */
-extern int SDL_SendTouchMotion(int id, int relative, int x, int y, int z);
+extern int SDL_SendTouchMotion(int id, int fingerid,
+			       int relative, int x, int y, int z);
 
 /* Send a touch button event for a touch */
 extern int SDL_SendTouchButton(int id, Uint8 state, Uint8 button);
-
-/* Send a touch wheel event for a touch */
-extern int SDL_SendTouchWheel(int id, int x, int y);
-
-/* Send a proximity event for a touch */
-extern int SDL_SendProximity(int id, int x, int y, int type);
 
 /* Shutdown the touch subsystem */
 extern void SDL_TouchQuit(void);
