@@ -20,8 +20,22 @@
     eligottlieb@gmail.com
 */
 
-struct SDL_Shaped_Window;
-typedef struct SDL_Shaped_Window SDL_Shaped_Window;
+#ifndef _SDL_shape_h
+#define _SDL_shape_h
+
+#include "SDL_stdinc.h"
+#include "SDL_pixels.h"
+#include "SDL_rect.h"
+#include "SDL_surface.h"
+#include "SDL_video.h"
+
+#include "begin_code.h"
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
 
 /**
  *  \brief Create a shaped window with the specified position, dimensions, and flags.
@@ -45,7 +59,15 @@ typedef struct SDL_Shaped_Window SDL_Shaped_Window;
  */
 extern DECLSPEC SDL_Window * SDLCALL SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags);
 
-extern DECLSPE SDL_bool SDLCALL SDL_WindowIsShaped(const SDL_Window *window);
+extern DECLSPEC SDL_bool SDLCALL SDL_WindowIsShaped(const SDL_Window *window);
 extern DECLSPEC int SDLCALL SDL_SelectShapeRenderer(const SDL_Window *window);
 
-extern DECLSPEC void SDLCALL SDL_DestroyShapedWindow(const SDL_Shaped_Window *window);
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
+#endif
+#include "close_code.h"
+
+#endif /* _SDL_shape_h */

@@ -19,28 +19,21 @@
     Eli Gottlieb
     eligottlieb@gmail.com
 */
+#include "SDL_config.h"
 
+#include "SDL.h"
+#include "SDL_video.h"
+#include "SDL_sysvideo.h"
 #include "SDL_shape.h"
 
-struct SDL_Shaped_Window {
-	SDL_Window *window;
-	SDL_Surface *shape_mask;
-}
-
-SDL_Shaped_Window * SDLCALL SDL_CreateShapedWindow(const char *title,
-						   unsigned int x,unsigned int y,
-						   unsigned int w,unsigned int h,
-						   Uint32 flags) {
-	//TODO: Fill in stub of SDL_CreatedShapedWindow
+SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
 	return NULL;
 }
 
-int SDLCALL SDL_PresentShape(const SDL_Shaped_Window *window) {
-	//TODO: Fill in stub of SDL_PresentShape
-	return -1;
+SDL_bool SDL_WindowIsShaped(const SDL_Window *window) {
+	return SDL_FALSE;
 }
 
-void SDLCALL SDL_DestroyShapedWindow(const SDL_Shaped_Window *window) {
-	//TODO: Fill in stub of SDL_DestroyShapedWindow
-	return;
+int SDL_SelectShapeRenderer(const SDL_Window *window) {
+	return -1;
 }
