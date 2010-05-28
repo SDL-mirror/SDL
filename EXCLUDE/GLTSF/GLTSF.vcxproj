@@ -81,6 +81,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\App.hpp" />
+    <ClInclude Include="include\TSF.hpp" />
     <ClInclude Include="include\Video_Mode.hpp" />
     <ClInclude Include="include\Window.hpp" />
     <ClInclude Include="include\Window_Listener.hpp" />
@@ -88,6 +89,7 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\TSF.cpp" />
     <ClCompile Include="src\Video_Mode.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
