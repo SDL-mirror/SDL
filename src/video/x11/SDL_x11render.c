@@ -397,7 +397,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     X11_TextureData *data;
     int pitch_alignmask = ((renderdata->scanline_pad / 8) - 1);
 
-
     data = (X11_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
@@ -418,6 +417,8 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
            can be no BadMatch error since Xrender takes care of that.
         */
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        // Assume the texture is supported by Xrender
+        data->xrender_available = TRUE
         if(renderdata->xrender_available == SDL_False) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
