@@ -418,7 +418,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         */
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         // Assume the texture is supported by Xrender
-        data->xrender_available = TRUE
+        data->xrender_available = SDL_TRUE;
         if(renderdata->xrender_available == SDL_False) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
