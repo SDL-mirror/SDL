@@ -28,8 +28,15 @@
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
+#include "../../events/SDL_touch_c.h"
 
 #include "SDL_syswm.h"
+
+#include <stdio.h>
+
+//Touch Input/event* includes
+#include <linux/input.h>
+#include <fcntl.h>
 
 static void
 X11_DispatchEvent(_THIS)
@@ -410,8 +417,65 @@ X11_PumpEvents(_THIS)
     }
 
 
-    /* Process Touch events - TODO When X gets touch support, REMOVE THIS*/
-    
+    /* Process Touch events - TODO When X gets touch support, use that instead*/
+    int i = 0,rd;
+    char * name[256];
+    struct input_event ev[64];
+    int size = sizeof (struct input_event);
+    static int initd = 0; //TODO - HACK!
+    for(i = 0;i < SDL_GetNumTouch();++i) {
+	SDL_Touch* touch = SDL_GetTouchIndex(i);
+	if(!touch) printf("Touch %i/%i DNE\n",i,SDL_GetNumTouch());
+	EventTouchData* data;
+	if(!initd){//data->eventStream <= 0) {
+	    touch->driverdata = SDL_malloc(sizeof(EventTouchData));
+	    data = (EventTouchData*)(touch->driverdata);
+	    printf("Openning device...\n");
+	    data->eventStream = open("/dev/input/wacom-touch", 
+				     O_RDONLY | O_NONBLOCK);
+	    ioctl (data->eventStream, EVIOCGNAME (sizeof (name)), name);
+	    printf ("Reading From : %s\n", name);
+	    initd = 1;
+	}
+	else
+	 data = (EventTouchData*)(touch->driverdata);
+	if(data->eventStream <= 0) 
+	    printf("Error: Couldn't open stream\n");
+	rd = read(data->eventStream, ev, size * 64);
+	//printf("Got %i/%i bytes\n",rd,size);
+	if(rd >= size) {
+	    for (i = 0; i < rd / sizeof(struct input_event); i++) {
+		switch (ev[i].type) {
+		case EV_ABS:
+		    //printf("Got position x: %i!\n",data->x);
+		    if(ev[i].code == ABS_X)
+			data->x = ev[i].value;
+		    else if (ev[i].code == ABS_Y)
+			data->y = ev[i].value;
+		    break;
+		case EV_MSC:
+		    if(ev[i].code == MSC_SERIAL)
+			data->finger = ev[i].value;
+		    break;
+		case EV_SYN:
+		    data->finger -= 1; /*Wacom indexes fingers from 1, 
+					 I index from 0*/		  
+		    if(data->x >= 0 || data->y >= 0)
+			SDL_SendTouchMotion(touch->id,data->finger, 
+					    SDL_FALSE,data->x,data->y,
+					    data->pressure);
+		    
+		    //printf("Synched: %i tx: %i, ty: %i\n",
+		    //	   data->finger,data->x,data->y);
+		    data->x = -1;
+		    data->y = -1;
+		    data->pressure = -1;
+		    
+		    break;		
+		}
+	    }
+	}
+    }
 }
 
 /* This is so wrong it hurts */

@@ -186,6 +186,10 @@ int main(int argc, char* argv[])
 	    case SDL_MOUSEBUTTONUP:
 	      bstatus &= ~(1<<(event.button.button-1));
 	      break;
+	    case SDL_FINGERMOTION:
+	      printf("Holy SH!T\n");
+	      break;
+		     
 	    }
 	}
 

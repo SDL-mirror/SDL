@@ -310,6 +310,8 @@ typedef struct SDL_TouchFingerEvent
     Uint8 state;        /**< The current button state */
     Uint8 fingerId;
     Uint8 padding1;
+    int x;
+    int y;
 } SDL_TouchFingerEvent;
 
 

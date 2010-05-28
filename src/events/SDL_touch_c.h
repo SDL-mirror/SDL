@@ -51,9 +51,6 @@ struct SDL_Touch
   int tilt;                   /* for future use */
   int rotation;               /* for future use */
   
-  int total_ends;
-  int current_end;
-  
   /* Data common to all touch */
   int id;
   SDL_Window *focus;
@@ -73,14 +70,23 @@ struct SDL_Touch
 /* Initialize the touch subsystem */
 extern int SDL_TouchInit(void);
 
-/* Get the touch at an index */
-extern SDL_Touch *SDL_GetTouch(int index);
+/*Get the touch at an index */
+extern SDL_Touch *SDL_GetTouchIndex(int index);
+
+/* Get the touch with id = id */
+extern SDL_Touch *SDL_GetTouch(int id);
+
+/*Get the finger at an index */
+extern SDL_Finger *SDL_GetFingerIndex(SDL_Touch *touch, int index);
+
+/* Get the finger with id = id */
+extern SDL_Finger *SDL_GetFinger(SDL_Touch *touch,int id);
+
 
 /* Add a touch, possibly reattaching at a particular index (or -1),
-   returning the index of the touch, or -1 if there was an error.
- */
-extern int SDL_AddTouch(const SDL_Touch * touch, char *name,
-                        int pressure_max, int pressure_min, int ends);
+   returning the index of the touch, or -1 if there was an error. */
+extern int SDL_AddTouch(const SDL_Touch * touch, char *name);
+                     
 
 /* Remove a touch at an index, clearing the slot for later */
 extern void SDL_DelTouch(int index);
