@@ -31,6 +31,7 @@ typedef struct EventTouchData
 {
     int x,y,pressure,finger; //Temporary Variables until sync
     int eventStream;
+    SDL_bool up;
 } EventTouchData;
 #endif
 

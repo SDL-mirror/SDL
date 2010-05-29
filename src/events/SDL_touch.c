@@ -301,11 +301,12 @@ SDL_DelFinger(SDL_Touch* touch,int fingerid)
 int
 SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressure)
 {
-  int posted;
+    int posted;
     SDL_Touch* touch = SDL_GetTouch(id);
+
     if(down) {
 	SDL_Finger nf;
-	nf.id = id;
+	nf.id = fingerid;
 	nf.x = x;
 	nf.y = y;
 	nf.pressure = pressure;
@@ -324,13 +325,13 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
 	    event.tfinger.y = y;
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
-	    event.tfinger.fingerId = id;
+	    event.tfinger.fingerId = fingerid;
 	    posted = (SDL_PushEvent(&event) > 0);
 	}
 	return posted;
     }
     else {
-	SDL_DelFinger(touch,id);
+	SDL_DelFinger(touch,fingerid);
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERUP) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -338,7 +339,7 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
 	    event.tfinger.touchId = (Uint8) id;
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
-	    event.tfinger.fingerId = id;
+	    event.tfinger.fingerId = fingerid;
 	    posted = (SDL_PushEvent(&event) > 0);
 	}
 	return posted;
@@ -419,7 +420,8 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 	if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
 	    SDL_Event event;
 	    event.tfinger.type = SDL_FINGERMOTION;
-	    event.tfinger.touchId = (Uint8) index;
+	    event.tfinger.touchId = (Uint8) id;
+	    event.tfinger.fingerId = (Uint8) fingerid;
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
 	    event.tfinger.state = touch->buttonstate;

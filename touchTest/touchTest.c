@@ -9,6 +9,8 @@
 #define BPP 4
 #define DEPTH 32
 
+#define MAXFINGERS 3
+
 int mousx,mousy;
 int keystat[512];
 int bstatus;
@@ -19,6 +21,9 @@ int bstatus;
 typedef struct {
   int x,y;
 } Point;
+
+
+Point finger[MAXFINGERS];
 
 void handler (int sig)
 {
@@ -78,6 +83,10 @@ void DrawScreen(SDL_Surface* screen, int h)
     }
   drawCircle(screen,mousx,mousy,30,0xFFFFFF);
   
+  int i;
+  for(i=0;i<MAXFINGERS;i++)
+    if(finger[i].x >= 0 && finger[i].y >= 0)
+      drawCircle(screen,finger[i].x,finger[i].y,20,0xFF6600);
   
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   
@@ -144,14 +153,25 @@ int main(int argc, char* argv[])
 	  case SDL_MOUSEBUTTONUP:
 	    bstatus &= ~(1<<(event.button.button-1));
 	    break;
-	  case SDL_FINGERMOTION:
-	    i = 1;
+	  case SDL_FINGERMOTION:    
 	    
-	    
-	    printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
-		   event.tfinger.x,event.tfinger.y);
-		
+	    //printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
+	    //	   event.tfinger.x,event.tfinger.y);
+	    finger[event.tfinger.fingerId].x = event.tfinger.x;
+	    finger[event.tfinger.fingerId].y = event.tfinger.y;
 	    break;	    
+	  case SDL_FINGERDOWN:
+	    printf("Figner: %i down - x: %i, y: %i\n",event.tfinger.fingerId,
+		   event.tfinger.x,event.tfinger.y);
+	    finger[event.tfinger.fingerId].x = event.tfinger.x;
+	    finger[event.tfinger.fingerId].y = event.tfinger.y;
+	    break;
+	  case SDL_FINGERUP:
+	    printf("Figner: %i up - x: %i, y: %i\n",event.tfinger.fingerId,
+		   event.tfinger.x,event.tfinger.y);
+	    finger[event.tfinger.fingerId].x = -1;
+	    finger[event.tfinger.fingerId].y = -1;
+	    break;
 	  }
       }
     //And draw

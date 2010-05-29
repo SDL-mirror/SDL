@@ -419,7 +419,7 @@ X11_PumpEvents(_THIS)
 
     /* Process Touch events - TODO When X gets touch support, use that instead*/
     int i = 0,rd;
-    char * name[256];
+    char name[256];
     struct input_event ev[64];
     int size = sizeof (struct input_event);
     static int initd = 0; //TODO - HACK!
@@ -431,7 +431,7 @@ X11_PumpEvents(_THIS)
 	    touch->driverdata = SDL_malloc(sizeof(EventTouchData));
 	    data = (EventTouchData*)(touch->driverdata);
 	    printf("Openning device...\n");
-	    data->eventStream = open("/dev/input/wacom-touch", 
+	    data->eventStream = open("/dev/input/wacom", 
 				     O_RDONLY | O_NONBLOCK);
 	    ioctl (data->eventStream, EVIOCGNAME (sizeof (name)), name);
 	    printf ("Reading From : %s\n", name);
@@ -452,24 +452,31 @@ X11_PumpEvents(_THIS)
 			data->x = ev[i].value;
 		    else if (ev[i].code == ABS_Y)
 			data->y = ev[i].value;
+		    else if (ev[i].code == ABS_MISC) {
+			data->up = SDL_TRUE;
+			data->finger = ev[i].value;
+		    }
 		    break;
 		case EV_MSC:
 		    if(ev[i].code == MSC_SERIAL)
 			data->finger = ev[i].value;
 		    break;
 		case EV_SYN:
-		    data->finger -= 1; /*Wacom indexes fingers from 1, 
-					 I index from 0*/		  
 		    if(data->x >= 0 || data->y >= 0)
 			SDL_SendTouchMotion(touch->id,data->finger, 
 					    SDL_FALSE,data->x,data->y,
 					    data->pressure);
-		    
+		    if(data->up) 
+			SDL_SendFingerDown(touch->id,data->finger,
+					   SDL_FALSE,data->x,data->y,
+					   data->pressure);
 		    //printf("Synched: %i tx: %i, ty: %i\n",
 		    //	   data->finger,data->x,data->y);
 		    data->x = -1;
 		    data->y = -1;
 		    data->pressure = -1;
+		    data->finger = 0;
+		    data->up = SDL_FALSE;
 		    
 		    break;		
 		}
