@@ -312,6 +312,7 @@ typedef struct SDL_TouchFingerEvent
     Uint8 padding1;
     int x;
     int y;
+    int pressure;
 } SDL_TouchFingerEvent;
 
 

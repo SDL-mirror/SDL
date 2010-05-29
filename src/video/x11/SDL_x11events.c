@@ -448,14 +448,21 @@ X11_PumpEvents(_THIS)
 		switch (ev[i].type) {
 		case EV_ABS:
 		    //printf("Got position x: %i!\n",data->x);
-		    if(ev[i].code == ABS_X)
-			data->x = ev[i].value;
-		    else if (ev[i].code == ABS_Y)
-			data->y = ev[i].value;
-		    else if (ev[i].code == ABS_MISC) {
-			data->up = SDL_TRUE;
-			data->finger = ev[i].value;
-		    }
+		    switch (ev[i].code) {
+			case ABS_X:
+			    data->x = ev[i].value;
+			    break;
+			case ABS_Y:
+			    data->y = ev[i].value;
+			    break;
+			case ABS_PRESSURE:
+			    data->pressure = ev[i].value;
+			    break;
+			case ABS_MISC:
+			    data->up = SDL_TRUE;
+			    data->finger = ev[i].value;
+			    break;
+			}
 		    break;
 		case EV_MSC:
 		    if(ev[i].code == MSC_SERIAL)

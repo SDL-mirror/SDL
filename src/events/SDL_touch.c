@@ -424,6 +424,7 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 	    event.tfinger.fingerId = (Uint8) fingerid;
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
+	    event.tfinger.pressure = pressure;
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
 	    posted = (SDL_PushEvent(&event) > 0);

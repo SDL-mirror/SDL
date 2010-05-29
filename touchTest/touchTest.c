@@ -22,8 +22,13 @@ typedef struct {
   int x,y;
 } Point;
 
+typedef struct {
+  Point p;
+  int pressure;
+} Finger;
 
-Point finger[MAXFINGERS];
+
+Finger finger[MAXFINGERS];
 
 void handler (int sig)
 {
@@ -56,9 +61,12 @@ void drawCircle(SDL_Surface* screen,int x,int y,int r,int c)
 {
 
   float a;
-  for(a=0;a<2*PI;a+=1.f/(float)r)
+  for(a=0;a<PI/2;a+=1.f/(float)r)
   {
     setpix(screen,(int)(x+r*cos(a)),(int)(y+r*sin(a)),c);
+    setpix(screen,(int)(x-r*cos(a)),(int)(y+r*sin(a)),c);
+    setpix(screen,(int)(x+r*cos(a)),(int)(y-r*sin(a)),c);
+    setpix(screen,(int)(x-r*cos(a)),(int)(y-r*sin(a)),c);
   }
 }
 
@@ -85,8 +93,8 @@ void DrawScreen(SDL_Surface* screen, int h)
   
   int i;
   for(i=0;i<MAXFINGERS;i++)
-    if(finger[i].x >= 0 && finger[i].y >= 0)
-      drawCircle(screen,finger[i].x,finger[i].y,20,0xFF6600);
+    if(finger[i].p.x >= 0 && finger[i].p.y >= 0)
+      drawCircle(screen,finger[i].p.x,finger[i].p.y,20,0xFF6600-finger[i].pressure);
   
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   
@@ -157,20 +165,23 @@ int main(int argc, char* argv[])
 	    
 	    //printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
 	    //	   event.tfinger.x,event.tfinger.y);
-	    finger[event.tfinger.fingerId].x = event.tfinger.x;
-	    finger[event.tfinger.fingerId].y = event.tfinger.y;
+	    finger[event.tfinger.fingerId].p.x = event.tfinger.x;
+	    finger[event.tfinger.fingerId].p.y = event.tfinger.y;
+	    finger[event.tfinger.fingerId].pressure = event.tfinger.pressure;
+	    printf("Finger: %i, pressure: %i\n",event.tfinger.fingerId,
+		   event.tfinger.pressure);
 	    break;	    
 	  case SDL_FINGERDOWN:
 	    printf("Figner: %i down - x: %i, y: %i\n",event.tfinger.fingerId,
 		   event.tfinger.x,event.tfinger.y);
-	    finger[event.tfinger.fingerId].x = event.tfinger.x;
-	    finger[event.tfinger.fingerId].y = event.tfinger.y;
+	    finger[event.tfinger.fingerId].p.x = event.tfinger.x;
+	    finger[event.tfinger.fingerId].p.y = event.tfinger.y;
 	    break;
 	  case SDL_FINGERUP:
 	    printf("Figner: %i up - x: %i, y: %i\n",event.tfinger.fingerId,
 		   event.tfinger.x,event.tfinger.y);
-	    finger[event.tfinger.fingerId].x = -1;
-	    finger[event.tfinger.fingerId].y = -1;
+	    finger[event.tfinger.fingerId].p.x = -1;
+	    finger[event.tfinger.fingerId].p.y = -1;
 	    break;
 	  }
       }
