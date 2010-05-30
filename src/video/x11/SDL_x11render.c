@@ -98,7 +98,7 @@ typedef struct
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     Picture xwindow_pict;
     Picture pixmap_picts[3];
-    Picture * drawable_pict;
+    Picture drawable_pict;
     XRenderPictFormat* xwindow_pict_fmt;
     XRenderPictureAttributes xwindow_pict_attr;
     unsigned int xwindow_pict_attr_valuemask;
@@ -297,14 +297,14 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->drawable = data->pixmaps[0];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->xrender_available == SDL_TRUE)
-            data->drawable_pict = &(data->pixmap_picts[0]);
+            data->drawable_pict = data->pixmap_picts[0];
 #endif
         data->makedirty = SDL_TRUE;
     } else {
         data->drawable = data->xwindow;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->xrender_available == SDL_TRUE)
-            data->drawable_pict = &(data->xwindow_pict);
+            data->drawable_pict = data->xwindow_pict;
 #endif
         data->makedirty = SDL_FALSE;
     }
@@ -380,7 +380,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
     if (n > 0) {
         data->drawable = data->pixmaps[0];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        data->drawable_pict = &(data->pictures[0]);
+        data->drawable_pict = data->pictures[0];
 #endif
     }
     data->current_pixmap = 0;
@@ -994,8 +994,18 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         }
     }
     if (xcount > 0) {
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if(data->xrender_available == SDL_TRUE)
+        {
+            XRenderFillRectangles(data->display, PictOpSrc, data->drawable_pict,
+                                  (XRenderColor)foreground, xrects, xcount);
+        }
+        else
+#endif
+        {
         XFillRectangles(data->display, data->drawable, data->gc,
                         xrects, xcount);
+        }
     }
     SDL_stack_free(xpoints);
 
