@@ -2,6 +2,7 @@
 #define TSF_HPP
 
 #include <msctf.h>
+#include <atlbase.h>
 
 class TSF
 {
@@ -37,8 +38,20 @@ protected:
 		LONG my_Reference_Count;
 	};
 
-private:
+	TSF();
+	~TSF();
 
+	void Initialize();
+	void Finalize();
+
+private:
+	bool my_COM_Initialized;
+
+	CComPtr<ITfThreadMgrEx> my_Thread_Manager;
+	UI_Sink *my_UI_Sink;
+
+	DWORD my_UI_Element_Sink_Cookie;
+	DWORD my_IPPA_Sink_Cookie;
 };
 
 #endif
