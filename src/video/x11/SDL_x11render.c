@@ -1205,9 +1205,19 @@ X11_RenderPresent(SDL_Renderer * renderer)
     if (!(renderer->info.flags & SDL_RENDERER_SINGLEBUFFER)) {
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             const SDL_Rect *rect = &dirty->rect;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+            if(data->xrender_available == SDL_TRUE)
+            {
+                XRenderComposite(data->display, PictOpSrc, data->drawable_pict, None, data->xwindow_pict,
+                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w, rect->h);
+            }
+            else
+#endif
+            {
             XCopyArea(data->display, data->drawable, data->xwindow,
                       data->gc, rect->x, rect->y, rect->w, rect->h,
                       rect->x, rect->y);
+            }
         }
         SDL_ClearDirtyRects(&data->dirty);
     }
@@ -1217,9 +1227,15 @@ X11_RenderPresent(SDL_Renderer * renderer)
     if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
         data->current_pixmap = (data->current_pixmap + 1) % 2;
         data->drawable = data->pixmaps[data->current_pixmap];
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->drawable_pict = data->pixmap_picts[data->current_pixmap];
+#endif
     } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
         data->current_pixmap = (data->current_pixmap + 1) % 3;
         data->drawable = data->pixmaps[data->current_pixmap];
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->drawable_pict = data->pixmap_picts[data->current_pixmap];
+#endif
     }
 }
 
