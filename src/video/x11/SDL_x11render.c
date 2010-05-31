@@ -1001,10 +1001,10 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         if(data->xrender_available == SDL_TRUE)
         {
             XRenderColor xrender_foreground_color;
-            xrender_foreground_color.red = renderer->r;
-            xrender_foreground_color.green = renderer->g;
-            xrender_foreground_color.blue = renderer->b;
-            xrender_foreground_color.alpha = renderer->a;
+            xrender_foreground_color.red = (unsigned short) ((renderer->r / 255.0) * 0xFFFF);
+            xrender_foreground_color.green = (unsigned short) ((renderer->g / 255.0) * 0xFFFF);
+            xrender_foreground_color.blue = (unsigned short) ((renderer->b / 255.0) * 0xFFFF);
+            xrender_foreground_color.alpha = (unsigned short) ((renderer->a / 255.0) * 0xFFFF);
             XRenderFillRectangles(data->display, PictOpSrc, data->drawable_pict,
                                   &xrender_foreground_color, xrects, xcount);
         }
