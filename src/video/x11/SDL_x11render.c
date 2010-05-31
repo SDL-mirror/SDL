@@ -219,7 +219,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
         data->xrender_available = SDL_TRUE;
         data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display, data->visual);
-        if(!xwindow_pict_fmt) {
+        if(!data->xwindow_pict_fmt) {
             data->xrender_available = SDL_FALSE;
         }
         data->xwindow_pict_attr.graphics_exposures = False;
@@ -285,8 +285,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->xrender_available == SDL_TRUE) {
             data->pixmap_picts[i] = 
-                XCreatePicture(data->display, data->pixmap[i], data->xwindow_pict_fmt,
-                               data->xwindow_pict_attr_valuemask, &xwindow_pict_attr);
+                XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
+                               data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
             if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
@@ -354,7 +354,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             XFreePixmap(data->display, data->pixmaps[i]);
             data->pixmaps[i] = None;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-            data->pictures[i] = None;
+            data->pixmap_picts[i] = None;
 #endif
         }
     }
@@ -368,10 +368,10 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->xrender_available == SDL_TRUE) {
-            data->pictures[i] = 
-                XCreatePicture(data->display, data->pixmap[i], data->xwindow_pict_fmt,
+            data->pixmap_picts[i] = 
+                XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
                                data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
-            if(!data->pictures[i]) {
+            if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
         }
@@ -380,7 +380,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
     if (n > 0) {
         data->drawable = data->pixmaps[0];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        data->drawable_pict = data->pictures[0];
+        data->drawable_pict = data->pixmap_picts[0];
 #endif
     }
     data->current_pixmap = 0;
@@ -419,7 +419,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         // Assume the texture is supported by Xrender
         data->xrender_available = SDL_TRUE;
-        if(renderdata->xrender_available == SDL_False) {
+        if(renderdata->xrender_available == SDL_FALSE) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
                 return -1;
@@ -523,21 +523,24 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             x11_fmt_mask =
                 (PictFormatDepth | PictFormatRedMask | PictFormatGreenMask
                 | PictFormatBlueMask);
-            x11_templ_fmt.depth = (data->format).BitsPerPixel;
-            x11_temp_fmt.direct.redMask = (data->format).Rmask;
-            x11_temp_fmt.direct.greenMask = (data->format).Gmask;
-            x11_temp_fmt.direct.blueMask = (data->format).Bmask;
-            x11_temp_fmt.direct.alphaMask = (data->format).Amask;
+            Uint32 Rmask, Gmask, Bmask, Amask;
+            int bpp;
+            SDL_PixelFormatEnumToMasks(data->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
+            x11_templ_fmt.depth = bpp;
+            x11_templ_fmt.direct.redMask = Rmask;
+            x11_templ_fmt.direct.greenMask = Gmask;
+            x11_templ_fmt.direct.blueMask = Bmask;
+            x11_templ_fmt.direct.alphaMask = Amask;
             /* Return one matching XRenderPictFormat */
-            data->pict_fmt =
+            data->picture_fmt =
                 XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 1);
-            if(!data->pict_fmt) {
+            if(!data->picture_fmt) {
                 data->xrender_available = SDL_FALSE;
             }
             data->picture_attr_valuemask = CPGraphicsExposure;
             (data->picture_attr).graphics_exposures = False;
             data->picture =
-                XCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
+                XRenderCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
                                data->picture_attr_valuemask, &(data->picture_attr));
             if(!data->picture) {
                 data->xrender_available = SDL_FALSE;
@@ -997,8 +1000,13 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->xrender_available == SDL_TRUE)
         {
+            XRenderColor xrender_foreground_color;
+            xrender_foreground_color.red = renderer->r;
+            xrender_foreground_color.green = renderer->g;
+            xrender_foreground_color.blue = renderer->b;
+            xrender_foreground_color.alpha = renderer->a;
             XRenderFillRectangles(data->display, PictOpSrc, data->drawable_pict,
-                                  (XRenderColor)foreground, xrects, xcount);
+                                  &xrender_foreground_color, xrects, xcount);
         }
         else
 #endif
