@@ -23,6 +23,7 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
+#include "SDL_eventtouch.h" 
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 
@@ -269,6 +270,7 @@ X11_VideoInit(_THIS)
     }
     X11_InitMouse(_this);
 
+    X11_InitTouch(_this);
     return 0;
 }
 
@@ -289,6 +291,7 @@ X11_VideoQuit(_THIS)
     X11_QuitModes(_this);
     X11_QuitKeyboard(_this);
     X11_QuitMouse(_this);
+    X11_QuitTouch(_this);
 }
 
 SDL_bool

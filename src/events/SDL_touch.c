@@ -36,12 +36,7 @@ static SDL_Touch **SDL_touchPads = NULL;
 int
 SDL_TouchInit(void)
 {
-    SDL_Touch touch;
-    touch.pressure_max = 0;
-    touch.pressure_min = 0;
-    touch.id = 0; //Should be function? 
     
-    SDL_AddTouch(&touch, "Touch1");
     return (0);
 }
 
@@ -138,6 +133,9 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
     SDL_strlcpy(SDL_touchPads[index]->name, name, length + 1);   
 
     SDL_touchPads[index]->num_fingers = 0;
+    SDL_touchPads[index]->max_fingers = 0;
+    SDL_touchPads[index]->fingers = NULL;
+    
     SDL_touchPads[index]->buttonstate = 0;
     SDL_touchPads[index]->relative_mode = SDL_FALSE;
     SDL_touchPads[index]->flush_motion = SDL_FALSE;
@@ -261,16 +259,27 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger* finger)
 	}
 
     /* Add the touch to the list of touch */
-    fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
-					  (touch->num_fingers + 1) * sizeof(*touch));
+    if(touch->num_fingers >= touch->max_fingers){
+      if(fingers == NULL) {
+	touch->max_fingers = 1;
+	fingers = (SDL_Finger **) SDL_malloc(sizeof(finger));
+      }
+      else {
+	fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
+				     (touch->num_fingers + 1) * sizeof(finger));
+	touch->max_fingers = touch->num_fingers+1;
+      }
+
+    }
+
     if (!fingers) {
         SDL_OutOfMemory();
         return -1;
     }
 
     touch->fingers = fingers;
-    index = touch->num_fingers++;
-
+    index = touch->num_fingers;
+    touch->num_fingers++;
     touch->fingers[index] = (SDL_Finger *) SDL_malloc(sizeof(*(touch->fingers[index])));
     if (!touch->fingers[index]) {
         SDL_OutOfMemory();

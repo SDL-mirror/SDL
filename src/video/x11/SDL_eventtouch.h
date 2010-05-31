@@ -35,8 +35,8 @@ typedef struct EventTouchData
 } EventTouchData;
 #endif
 
-//extern void X11_InitMouse(_THIS);
-//extern void X11_QuitMouse(_THIS);
+extern void X11_InitTouch(_THIS);
+extern void X11_QuitTouch(_THIS);
 
 #endif /* _SDL_eventtouch_h */
 

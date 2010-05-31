@@ -61,6 +61,7 @@ struct SDL_Touch
   SDL_bool flush_motion;
 
   int num_fingers;
+  int max_fingers;
   SDL_Finger** fingers;
     
   void *driverdata;

@@ -109,7 +109,6 @@ X11_DispatchEvent(_THIS)
 #endif
         }
         break;
-
         /* Losing mouse coverage? */
     case LeaveNotify:{
 #ifdef DEBUG_XEVENTS
@@ -422,23 +421,16 @@ X11_PumpEvents(_THIS)
     char name[256];
     struct input_event ev[64];
     int size = sizeof (struct input_event);
-    static int initd = 0; //TODO - HACK!
+
     for(i = 0;i < SDL_GetNumTouch();++i) {
 	SDL_Touch* touch = SDL_GetTouchIndex(i);
 	if(!touch) printf("Touch %i/%i DNE\n",i,SDL_GetNumTouch());
 	EventTouchData* data;
-	if(!initd){//data->eventStream <= 0) {
-	    touch->driverdata = SDL_malloc(sizeof(EventTouchData));
-	    data = (EventTouchData*)(touch->driverdata);
-	    printf("Openning device...\n");
-	    data->eventStream = open("/dev/input/wacom", 
-				     O_RDONLY | O_NONBLOCK);
-	    ioctl (data->eventStream, EVIOCGNAME (sizeof (name)), name);
-	    printf ("Reading From : %s\n", name);
-	    initd = 1;
+	data = (EventTouchData*)(touch->driverdata);
+	if(data == NULL) {
+	  printf("No driver data\n");
+	  continue;
 	}
-	else
-	 data = (EventTouchData*)(touch->driverdata);
 	if(data->eventStream <= 0) 
 	    printf("Error: Couldn't open stream\n");
 	rd = read(data->eventStream, ev, size * 64);
@@ -469,6 +461,7 @@ X11_PumpEvents(_THIS)
 			data->finger = ev[i].value;
 		    break;
 		case EV_SYN:
+  		    printf("Id: %i\n",touch->id); 
 		    if(data->x >= 0 || data->y >= 0)
 			SDL_SendTouchMotion(touch->id,data->finger, 
 					    SDL_FALSE,data->x,data->y,

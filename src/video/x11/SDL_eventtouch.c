@@ -1,0 +1,100 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2010 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+#include "SDL_config.h"
+#include "SDL_x11video.h"
+#include "SDL_eventtouch.h"
+#include "../../events/SDL_touch_c.h"
+
+#include <linux/input.h>
+#include <fcntl.h>
+
+void
+X11_InitTouch(_THIS)
+{
+  printf("Initializing touch...\n");
+
+  FILE *fd;
+  fd = fopen("/proc/bus/input/devices","r");
+  
+  char c;
+  int i = 0;
+  char line[256];
+  char tstr[256];
+  int vendor = -1,product = -1,event = -1;
+  while(!feof(fd)) {
+    if(fgets(line,256,fd) <=0) continue;
+    //printf("%s",line);
+    if(line[0] == '\n') {
+      if(vendor == 1386){
+	printf("Wacom... Assuming it is a touch device\n");
+	sprintf(tstr,"/dev/input/event%i",event);
+	printf("At location: %s\n",tstr);
+
+	SDL_Touch touch;
+	touch.pressure_max = 0;
+	touch.pressure_min = 0;
+	touch.id = event; 
+    
+	
+
+	touch.driverdata = SDL_malloc(sizeof(EventTouchData));
+	EventTouchData* data = (EventTouchData*)(touch.driverdata);
+	printf("Opening device...\n");
+	//printf("New Touch - DataPtr: %i\n",data);
+	data->eventStream = open(tstr, 
+				 O_RDONLY | O_NONBLOCK);
+	ioctl (data->eventStream, EVIOCGNAME (sizeof (tstr)), tstr);
+	printf ("Reading From : %s\n", tstr);
+	SDL_AddTouch(&touch, tstr);
+
+      }
+      vendor = -1;
+      product = -1;
+      event = -1;      
+    }
+    else if(line[0] == 'I') {
+      i = 1;
+      while(line[i]) {
+	sscanf(&line[i],"Vendor=%x",&vendor);
+	sscanf(&line[i],"Product=%x",&product);
+	i++;
+      }
+    }
+    else if(line[0] == 'H') {
+      i = 1;
+      while(line[i]) {
+	sscanf(&line[i],"event%d",&event);
+	i++;
+      }
+    }
+  }
+  
+  close(fd);
+}
+
+void
+X11_QuitTouch(_THIS)
+{
+    SDL_TouchQuit();
+}
+
+/* vi: set ts=4 sw=4 expandtab: */
