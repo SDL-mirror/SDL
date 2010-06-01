@@ -133,9 +133,9 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
     SDL_strlcpy(SDL_touchPads[index]->name, name, length + 1);   
 
     SDL_touchPads[index]->num_fingers = 0;
-    SDL_touchPads[index]->max_fingers = 0;
-    SDL_touchPads[index]->fingers = NULL;
-    
+    SDL_touchPads[index]->max_fingers = 1;
+    SDL_touchPads[index]->fingers = (SDL_Finger **) SDL_malloc(sizeof(SDL_Finger*));
+    SDL_touchPads[index]->fingers[0] = NULL;
     SDL_touchPads[index]->buttonstate = 0;
     SDL_touchPads[index]->relative_mode = SDL_FALSE;
     SDL_touchPads[index]->flush_motion = SDL_FALSE;
@@ -253,39 +253,37 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger* finger)
     int index;
     SDL_Finger **fingers;
     size_t length;
-    
+    //printf("Adding Finger...\n");
     if (SDL_GetFingerIndexId(touch,finger->id) != -1) {
         SDL_SetError("Finger ID already in use");
 	}
 
     /* Add the touch to the list of touch */
-    if(touch->num_fingers >= touch->max_fingers){
-      if(fingers == NULL) {
-	touch->max_fingers = 1;
-	fingers = (SDL_Finger **) SDL_malloc(sizeof(finger));
-      }
-      else {
-	fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
-				     (touch->num_fingers + 1) * sizeof(finger));
+    if(touch->num_fingers  >= touch->max_fingers){
+	printf("Making room for it!\n");
+     	fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
+  		               (touch->num_fingers + 1) * sizeof(SDL_Finger *));
 	touch->max_fingers = touch->num_fingers+1;
-      }
-
+	if (!fingers) {
+	    SDL_OutOfMemory();
+	    return -1;
+	} 
+	else {
+	    touch->max_fingers = touch->num_fingers+1;
+	    touch->fingers = fingers;
+	}
     }
 
-    if (!fingers) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-
-    touch->fingers = fingers;
     index = touch->num_fingers;
-    touch->num_fingers++;
-    touch->fingers[index] = (SDL_Finger *) SDL_malloc(sizeof(*(touch->fingers[index])));
+    //printf("Max_Fingers: %i Index: %i\n",touch->max_fingers,index);
+
+    touch->fingers[index] = (SDL_Finger *) SDL_malloc(sizeof(SDL_Finger));
     if (!touch->fingers[index]) {
         SDL_OutOfMemory();
         return -1;
     }
-    *touch->fingers[index] = *finger;    
+    *(touch->fingers[index]) = *finger;
+    touch->num_fingers++;
 
     return index;
 }
@@ -323,6 +321,7 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
 	nf.ydelta = 0;
 	nf.last_x = x;
 	nf.last_y = y;
+	nf.last_pressure = pressure;
 	SDL_AddFinger(touch,&nf);
 
 	posted = 0;
@@ -383,6 +382,7 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 	} else {
 	    if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
 	    if(y < 0) y = finger->last_y; /*The other is marked as -1*/
+	    if(pressure < 0) pressure = finger->last_pressure;
 	    xrel = x - finger->last_x;
 	    yrel = y - finger->last_y;
 	}
@@ -418,8 +418,8 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 	  touch->y = 0;
 	  }
 	*/
-	finger->xdelta += xrel;
-	finger->ydelta += yrel;
+	finger->xdelta = xrel;
+	finger->ydelta = yrel;
 	finger->pressure = pressure;
 	
 	
@@ -440,6 +440,7 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 	}
 	finger->last_x = finger->x;
 	finger->last_y = finger->y;
+	finger->last_pressure = finger->pressure;
 	return posted;
     }
 }

@@ -20,52 +20,11 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+#include "../../include/SDL_touch.h"
 
 #ifndef _SDL_touch_c_h
 #define _SDL_touch_c_h
 
-typedef struct SDL_Touch SDL_Touch;
-typedef struct SDL_Finger SDL_Finger;
-
-struct SDL_Finger {
-  int id;
-  int x;
-  int y;
-  int z;                      /* for future use */
-  int xdelta;
-  int ydelta;
-  int last_x, last_y;         /* the last reported x and y coordinates */
-  int pressure;
-};
-
-
-struct SDL_Touch
-{
-  
-  /* Free the touch when it's time */
-  void (*FreeTouch) (SDL_Touch * touch);
-  
-  /* data common for tablets */
-  int pressure_max;
-  int pressure_min;
-  int tilt;                   /* for future use */
-  int rotation;               /* for future use */
-  
-  /* Data common to all touch */
-  int id;
-  SDL_Window *focus;
-  
-  char *name;
-  Uint8 buttonstate;
-  SDL_bool relative_mode;
-  SDL_bool flush_motion;
-
-  int num_fingers;
-  int max_fingers;
-  SDL_Finger** fingers;
-    
-  void *driverdata;
-};
 
 
 /* Initialize the touch subsystem */

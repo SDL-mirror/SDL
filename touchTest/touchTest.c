@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <math.h>
-#include "../src/events/SDL_touch_c.h" //BAD!!!
+#include <SDL_touch.h>
 
 #define PI 3.1415926535897
 #define WIDTH 640
@@ -19,12 +19,12 @@ int bstatus;
 
 
 typedef struct {
-  int x,y;
+  float x,y;
 } Point;
 
 typedef struct {
   Point p;
-  int pressure;
+  float pressure;
 } Finger;
 
 
@@ -32,7 +32,7 @@ Finger finger[MAXFINGERS];
 
 void handler (int sig)
 {
-  printf ("\nexiting...(%d)\n", sig);
+  printf ("\exiting...(%d)\n", sig);
   exit (0);
 }
 
@@ -61,8 +61,17 @@ void drawCircle(SDL_Surface* screen,int x,int y,int r,int c)
 {
 
   float a;
-  for(a=0;a<PI/2;a+=1.f/(float)r)
+  int tx;
+  for(a=0;a<PI/2;a+=1.f/(float)abs(r))
   {
+    if(r > 0) { //r<0 ==> unfilled circle
+      for(tx=x-r*cos(a);tx<x+r*cos(a);tx++) {
+	setpix(screen,tx,(int)(y+r*sin(a)),c);
+	setpix(screen,tx,(int)(y-r*sin(a)),c);
+      }
+    }
+    
+    //Always Draw Outline
     setpix(screen,(int)(x+r*cos(a)),(int)(y+r*sin(a)),c);
     setpix(screen,(int)(x-r*cos(a)),(int)(y+r*sin(a)),c);
     setpix(screen,(int)(x+r*cos(a)),(int)(y-r*sin(a)),c);
@@ -89,12 +98,17 @@ void DrawScreen(SDL_Surface* screen, int h)
 	  setpix(screen,x,y,((x%255)<<16) + ((y%255)<<8) + (x+y)%255);
         }
     }
-  drawCircle(screen,mousx,mousy,30,0xFFFFFF);
+  drawCircle(screen,mousx,mousy,-30,0xFFFFFF);
   
   int i;
   for(i=0;i<MAXFINGERS;i++)
     if(finger[i].p.x >= 0 && finger[i].p.y >= 0)
-      drawCircle(screen,finger[i].p.x,finger[i].p.y,20,0xFF6600-finger[i].pressure);
+      if(finger[i].pressure > 0)
+	drawCircle(screen,finger[i].p.x*screen->w,finger[i].p.y*screen->h
+		   ,20,0xFF*finger[i].pressure);
+      else
+	drawCircle(screen,finger[i].p.x*screen->w,finger[i].p.y*screen->h
+		   ,20,0xFF);
   
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   
@@ -162,14 +176,28 @@ int main(int argc, char* argv[])
 	    bstatus &= ~(1<<(event.button.button-1));
 	    break;
 	  case SDL_FINGERMOTION:    
-	    
+	    ;
 	    //printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
 	    //	   event.tfinger.x,event.tfinger.y);
-	    finger[event.tfinger.fingerId].p.x = event.tfinger.x;
-	    finger[event.tfinger.fingerId].p.y = event.tfinger.y;
-	    finger[event.tfinger.fingerId].pressure = event.tfinger.pressure;
-	    printf("Finger: %i, pressure: %i\n",event.tfinger.fingerId,
-		   event.tfinger.pressure);
+	    SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
+	    SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
+	    
+	    finger[event.tfinger.fingerId].p.x = ((float)event.tfinger.x)/
+	      inTouch->xres;
+	    finger[event.tfinger.fingerId].p.y = ((float)event.tfinger.y)/
+	      inTouch->yres;
+
+	    finger[event.tfinger.fingerId].pressure = 
+	      ((float)event.tfinger.pressure)/inTouch->pressureres;
+
+	    printf("Finger: %i, Pressure: %f Pressureres: %i\n",
+		   event.tfinger.fingerId,
+		   finger[event.tfinger.fingerId].pressure,
+		   inTouch->pressureres);
+	    //printf("Finger: %i, pressure: %f\n",event.tfinger.fingerId,
+	    //   finger[event.tfinger.fingerId].pressure);
+
+	    
 	    break;	    
 	  case SDL_FINGERDOWN:
 	    printf("Figner: %i down - x: %i, y: %i\n",event.tfinger.fingerId,

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <linux/input.h>
+#include <fcntl.h>
 
 
 int main(int agrc,char **argv)
@@ -22,7 +23,23 @@ int main(int agrc,char **argv)
 	sprintf(tstr,"/dev/input/event%i",event);
 	printf("At location: %s\n",tstr);
 		
+	int inFile = open(tstr,O_RDONLY);
 	
+	unsigned long bits[4];
+	int abs[5];
+	ioctl(inFile,EVIOCGABS(ABS_X),abs);	
+	int minx,maxx,miny,maxy,minp,maxp;
+	minx = abs[1];
+	maxx = abs[2];
+	ioctl(inFile,EVIOCGABS(ABS_Y),abs);	
+	miny = abs[1];
+	maxy = abs[2];
+	ioctl(inFile,EVIOCGABS(ABS_PRESSURE),abs);	
+	minp = abs[1];
+	maxp = abs[2];
+	
+
+	close(inFile);
       }
       vendor = -1;
       product = -1;

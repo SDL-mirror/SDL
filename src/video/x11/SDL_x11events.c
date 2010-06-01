@@ -449,6 +449,7 @@ X11_PumpEvents(_THIS)
 			    break;
 			case ABS_PRESSURE:
 			    data->pressure = ev[i].value;
+			    if(data->pressure < 0) data->pressure = 0;
 			    break;
 			case ABS_MISC:
 			    data->up = SDL_TRUE;
@@ -461,7 +462,7 @@ X11_PumpEvents(_THIS)
 			data->finger = ev[i].value;
 		    break;
 		case EV_SYN:
-  		    printf("Id: %i\n",touch->id); 
+		  //printf("Id: %i\n",touch->id); 
 		    if(data->x >= 0 || data->y >= 0)
 			SDL_SendTouchMotion(touch->id,data->finger, 
 					    SDL_FALSE,data->x,data->y,
