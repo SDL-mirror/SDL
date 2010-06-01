@@ -12,6 +12,7 @@ These are test programs for the SDL library:
 	testcursor	Tests custom mouse cursor
 	testdyngl	Tests dynamically loading OpenGL library
 	testerror	Tests multi-threaded error handling
+	testeyes	Tests shaped windows
 	testfile	Tests RWops layer
 	testgamma	Tests video device gamma ramp
 	testgl		A very simple example of using OpenGL with SDL
