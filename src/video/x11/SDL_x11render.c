@@ -1264,13 +1264,13 @@ X11_RenderPresent(SDL_Renderer * renderer)
             }
         }
         SDL_ClearDirtyRects(&data->dirty);
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+/*#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         // Clear each pixmap after a render
         if(data->xrender_available == SDL_TRUE) {
             XRenderComposite(data->display, PictOpClear, data->drawable_pict, None, data->drawable_pict,
                              0, 0, 0, 0, 0, 0, renderer->window->w, renderer->window->h);
         }
-#endif
+#endif*/
     }
     XSync(data->display, False);
 
