@@ -177,6 +177,7 @@ SDL_X11_SYM(Status,XShmAttach,(Display* a,XShmSegmentInfo* b),(a,b),return)
 SDL_X11_SYM(Status,XShmDetach,(Display* a,XShmSegmentInfo* b),(a,b),return)
 SDL_X11_SYM(Status,XShmPutImage,(Display* a,Drawable b,GC c,XImage* d,int e,int f,int g,int h,unsigned int i,unsigned int j,Bool k),(a,b,c,d,e,f,g,h,i,j,k),return)
 SDL_X11_SYM(XImage*,XShmCreateImage,(Display* a,Visual* b,unsigned int c,int d,char* e,XShmSegmentInfo* f,unsigned int g,unsigned int h),(a,b,c,d,e,f,g,h),return)
+SDL_X11_SYM(Pixmap,XShmCreatePixmap,(Display *a,Drawable b,char* c,XShmSegmentInfo* d, unsigned int e, unsigned int f, unsigned int g),(a,b,c,d,e,f,g),return)
 SDL_X11_SYM(Bool,XShmQueryExtension,(Display* a),(a),return)
 #endif
 
@@ -232,6 +233,16 @@ SDL_X11_SYM(Status,XScreenSaverQueryVersion,(Display *dpy,int *major_versionp,in
 SDL_X11_SYM(void,XScreenSaverSuspend,(Display *dpy,Bool suspend),(dpy,suspend),return)
 #endif
 
+/* XRender support */
+#if SDL_VIDEO_DRIVER_X11_XRENDER
+SDL_X11_MODULE(XRENDER)
+SDL_X11_SYM(Bool,XRenderQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
+SDL_X11_SYM(XRenderPictFormat*,XRenderFindVisualFormat,(Display *dpy,_Xconst Visual *visual),(dpy,visual),return)
+SDL_X11_SYM(XRenderPictFormat*,XRenderFindFormat,(Display *dpy,unsigned long mask,_Xconst XRenderPictFormat* templ,int count),(dpy,mask,templ,count),return)
+SDL_X11_SYM(Picture,XRenderCreatePicture,(Display *dpy,Drawable drawable,_Xconst XRenderPictFormat* format,unsigned long valuemask,_Xconst XRenderPictureAttributes* attributes),(dpy,drawable,format,valuemask,attributes),return)
+SDL_X11_SYM(void,XRenderComposite,(Display *dpy,int op,Picture src,Picture mask,Picture dst,int src_x,int src_y,int mask_x,int mask_y,int dst_x,int dst_y,unsigned int width,unsigned int height),(dpy,op,src,mask,dst,src_x,src_y,mask_x,mask_y,dst_x,dst_y,width,height),return)
+SDL_X11_SYM(void,XRenderFillRectangles,(Display *dpy,int op,Picture dst,_Xconst XRenderColor* color,_Xconst XRectangle* rectangles,int n_rects),(dpy,op,dst,color,rectangles,n_rects),return)
+#endif
 /* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */

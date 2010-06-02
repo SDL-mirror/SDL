@@ -473,7 +473,13 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 XShmCreateImage(renderdata->display, renderdata->visual,
                                 renderdata->depth, ZPixmap, shminfo->shmaddr,
                                 shminfo, texture->w, texture->h);
-            if (!data->image) {
+
+            // This Pixmap is used by Xrender
+            data->pixmap =
+                XShmCreatePixmap(renderdata->display, renderdata->xwindow, shminfo->shmaddr,
+                                 shminfo, texture->w, texture->h, renderdata->depth);
+
+            if (!(data->pixmap && data->image)) {
                 XShmDetach(renderdata->display, shminfo);
                 XSync(renderdata->display, False);
                 shmdt(shminfo->shmaddr);
@@ -486,6 +492,14 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         if (!data->image)
 #endif /* not NO_SHARED_MEMORY */
         {
+            /* This is the case where the server does not have
+               shared memory support and the texture is streaming.
+               It does not make sense to use Xrender here because
+               we would have to copy the data onto a server side
+               pixmap with XPutImage first and only then can we 
+               use Xrender
+            */
+
             data->pixels = SDL_malloc(texture->h * data->pitch);
             if (!data->pixels) {
                 X11_DestroyTexture(renderer, texture);
@@ -505,7 +519,8 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 return -1;
             }
         }
-    } else {
+    } 
+    else {
         data->pixmap =
             XCreatePixmap(renderdata->display, renderdata->xwindow, texture->w,
                           texture->h, renderdata->depth);
@@ -514,53 +529,11 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             SDL_SetError("XCreatePixmap() failed");
             return -1;
         }
-        
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(renderdata->xrender_available) {
-            data->xrender_available = SDL_TRUE;
-            unsigned long x11_fmt_mask; // Format mask
-            XRenderPictFormat x11_templ_fmt; // Format template
-            x11_fmt_mask =
-                (PictFormatDepth | PictFormatRedMask | PictFormatGreenMask
-                | PictFormatBlueMask);
-            Uint32 Rmask, Gmask, Bmask, Amask;
-            int bpp;
-            SDL_PixelFormatEnumToMasks(data->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
-            x11_templ_fmt.depth = bpp;
-            x11_templ_fmt.direct.redMask = Rmask;
-            x11_templ_fmt.direct.greenMask = Gmask;
-            x11_templ_fmt.direct.blueMask = Bmask;
-            x11_templ_fmt.direct.alphaMask = Amask;
-            /* Return one matching XRenderPictFormat */
-            data->picture_fmt =
-                XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 1);
-            if(!data->picture_fmt) {
-                data->xrender_available = SDL_FALSE;
-            }
-            data->picture_attr_valuemask = CPGraphicsExposure;
-            (data->picture_attr).graphics_exposures = False;
-            data->picture =
-                XRenderCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
-                               data->picture_attr_valuemask, &(data->picture_attr));
-            if(!data->picture) {
-                data->xrender_available = SDL_FALSE;
-            }
-        }
-        /* We thought we could render the texture with Xrender but this was
-           not possible for some reason. Now we must ensure that texture  
-           format and window format match to avoid a BadMatch error.
-        */
-        if(data->xrender_available == SDL_FALSE) {
-            if (texture->format != display->current_mode.format) {
-                SDL_SetError("Texture format doesn't match window format");
-                return -1;
-            }
-        }
-#endif
         data->image =
             XCreateImage(renderdata->display, renderdata->visual,
-                         renderdata->depth, ZPixmap, 0, NULL, texture->w,
-                         texture->h, SDL_BYTESPERPIXEL(data->format) * 8,
+                         renderdata->depth, ZPixmap, 0, NULL,
+                         texture->w, texture->h,
+                         SDL_BYTESPERPIXEL(data->format) * 8,
                          data->pitch);
         if (!data->image) {
             X11_DestroyTexture(renderer, texture);
@@ -568,7 +541,48 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             return -1;
         }
     }
-
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if(renderdata->xrender_available && data->pixmap) {
+        data->xrender_available = SDL_TRUE;
+        unsigned long x11_fmt_mask; // Format mask
+        XRenderPictFormat x11_templ_fmt; // Format template
+        x11_fmt_mask =
+            (PictFormatDepth | PictFormatRedMask | PictFormatGreenMask
+            | PictFormatBlueMask);
+        Uint32 Rmask, Gmask, Bmask, Amask;
+        int bpp;
+        SDL_PixelFormatEnumToMasks(data->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
+        x11_templ_fmt.depth = bpp;
+        x11_templ_fmt.direct.redMask = Rmask;
+        x11_templ_fmt.direct.greenMask = Gmask;
+        x11_templ_fmt.direct.blueMask = Bmask;
+        x11_templ_fmt.direct.alphaMask = Amask;
+        /* Return one matching XRenderPictFormat */
+        data->picture_fmt =
+            XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 1);
+        if(!data->picture_fmt) {
+            data->xrender_available = SDL_FALSE;
+        }
+        data->picture_attr_valuemask = CPGraphicsExposure;
+        (data->picture_attr).graphics_exposures = False;
+        data->picture =
+            XRenderCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
+                            data->picture_attr_valuemask, &(data->picture_attr));
+        if(!data->picture) {
+            data->xrender_available = SDL_FALSE;
+        }
+    }
+    /* We thought we could render the texture with Xrender but this was
+        not possible for some reason. Now we must ensure that texture  
+        format and window format match to avoid a BadMatch error.
+    */
+    if(data->xrender_available == SDL_FALSE) {
+        if (texture->format != display->current_mode.format) {
+            SDL_SetError("Texture format doesn't match window format");
+            return -1;
+        }
+    }
+#endif
     return 0;
 }
 
@@ -638,6 +652,7 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
 
         if (data->pixels) {
+            // If we have already allocated memory or were given memory by XShm
             Uint8 *src, *dst;
             int row;
             size_t length;
@@ -652,6 +667,23 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                 src += pitch;
                 dst += data->pitch;
             }
+            /* If this is a static texture we would use Xrender for it
+               but this requires that the server side Pixmap associated
+               with this texture be updated with the data as well and 
+               that the pixmap is not a shared memory pixmap.
+               Hopefully the user will not update static textures so
+               frequently as to cause a slowdown.
+            */
+            if (texture->access == SDL_TEXTUREACCESS_STATIC) {
+#ifndef NO_SHARED_MEMORY
+                if(!data->shminfo.shmaddr)
+#endif
+                {
+                XPutImage(renderdata->display, data->pixmap, renderdata->gc,
+                          data->image, 0, 0, rect->x, rect->y, rect->w, rect->h);
+                }
+            }
+
         } else {
             data->image->width = rect->w;
             data->image->height = rect->h;
@@ -1001,10 +1033,11 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         if(data->xrender_available == SDL_TRUE)
         {
             XRenderColor xrender_foreground_color;
-            xrender_foreground_color.red = (unsigned short) ((renderer->r / 255.0) * 0xFFFF);
-            xrender_foreground_color.green = (unsigned short) ((renderer->g / 255.0) * 0xFFFF);
-            xrender_foreground_color.blue = (unsigned short) ((renderer->b / 255.0) * 0xFFFF);
-            xrender_foreground_color.alpha = (unsigned short) ((renderer->a / 255.0) * 0xFFFF);
+            // Premultiply the color channels as well as modulate them to a 16 bit color space
+            xrender_foreground_color.red = ((unsigned short)renderer->r + 1) * ((unsigned short)renderer->a + 1) - 1;
+            xrender_foreground_color.green = ((unsigned short)renderer->g + 1) * ((unsigned short)renderer->a + 1) - 1;
+            xrender_foreground_color.blue = ((unsigned short)renderer->b + 1) * ((unsigned short)renderer->a + 1) - 1;
+            xrender_foreground_color.alpha = ((unsigned short)renderer->a + 1) * ((unsigned short)renderer->a + 1) - 1;
             XRenderFillRectangles(data->display, PictOpSrc, data->drawable_pict,
                                   &xrender_foreground_color, xrects, xcount);
         }

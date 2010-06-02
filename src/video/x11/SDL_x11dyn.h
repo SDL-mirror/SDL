@@ -53,7 +53,7 @@
 #endif
 
 #if SDL_VIDEO_DRIVER_X11_XRENDER
-#include <X11/extensions/render.h>
+#include <X11/extensions/Xrender.h>
 #endif
 
 /*
