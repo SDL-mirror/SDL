@@ -290,6 +290,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
+            XRenderComposite(data->display, PictOpClear, data->pixmap_picts[i], None, data->pixmap_picts[i],
+                             0, 0, 0, 0, 0, 0, window->w, window->h);
         }
 #endif
     }
@@ -374,6 +376,8 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
+            XRenderComposite(data->display, PictOpClear, data->pixmap_picts[i], None, data->pixmap_picts[i],
+                             0, 0, 0, 0, 0, 0, window->w, window->h);
         }
 #endif
     }
@@ -735,6 +739,13 @@ X11_SetDrawBlendMode(SDL_Renderer * renderer)
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
         return 0;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    case SDL_BLENDMODE_MASK: // Use src pict as mask
+    case SDL_BLENDMODE_ADD: // PictOpAdd
+    case SDL_BLENDMODE_BLEND: // PictOpOver
+    /* FIXME case SDL_BLENDMODE_MOD: */
+#endif
+        return 0;
     default:
         SDL_Unsupported();
         renderer->blendMode = SDL_BLENDMODE_NONE;
@@ -1038,7 +1049,7 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
             xrender_foreground_color.green = ((unsigned short)renderer->g + 1) * ((unsigned short)renderer->a + 1) - 1;
             xrender_foreground_color.blue = ((unsigned short)renderer->b + 1) * ((unsigned short)renderer->a + 1) - 1;
             xrender_foreground_color.alpha = ((unsigned short)renderer->a + 1) * ((unsigned short)renderer->a + 1) - 1;
-            XRenderFillRectangles(data->display, PictOpSrc, data->drawable_pict,
+            XRenderFillRectangles(data->display, PictOpOver, data->drawable_pict,
                                   &xrender_foreground_color, xrects, xcount);
         }
         else
@@ -1241,7 +1252,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
             if(data->xrender_available == SDL_TRUE)
             {
-                XRenderComposite(data->display, PictOpSrc, data->drawable_pict, None, data->xwindow_pict,
+                XRenderComposite(data->display, PictOpOver, data->drawable_pict, None, data->xwindow_pict,
                                  rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w, rect->h);
             }
             else
@@ -1253,6 +1264,13 @@ X11_RenderPresent(SDL_Renderer * renderer)
             }
         }
         SDL_ClearDirtyRects(&data->dirty);
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        // Clear each pixmap after a render
+        if(data->xrender_available == SDL_TRUE) {
+            XRenderComposite(data->display, PictOpClear, data->drawable_pict, None, data->drawable_pict,
+                             0, 0, 0, 0, 0, 0, renderer->window->w, renderer->window->h);
+        }
+#endif
     }
     XSync(data->display, False);
 
