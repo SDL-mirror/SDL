@@ -2534,6 +2534,38 @@ SDL_RenderFillRects(const SDL_Rect ** rects, int count)
     return renderer->RenderFillRects(renderer, rects, count);
 }
 
+int SDL_RenderDrawEllipse(const SDL_Ellipse ellipse) {
+	return SDL_RenderDrawEllipses(&ellipse,1);
+}
+
+int SDL_RenderDrawEllipses(const SDL_Ellipse * ellipse, int count) {
+	return -1;
+}
+
+int SDL_RenderFillEllipse(const SDL_Ellipse ellipse) {
+    return SDL_RenderFillEllipses(&ellipse,1);
+}
+
+int SDL_RenderFillEllipses(const SDL_Ellipse ** ellipse, int count) {
+    return -1;
+}
+
+int SDL_RenderDrawPoly(const SDL_Poly poly) {
+    return SDL_RenderDrawPolys(&poly,1);
+}
+
+int SDL_RenderDrawPolys(const SDL_Poly *poly, int count) {
+    return -1;
+}
+
+int SDL_RenderFillPoly(const SDL_Poly poly) {
+    return SDL_RenderFillPolys(&poly,1);
+}
+
+int SDL_RenderFillPolys(const SDL_Poly *poly, int count) {
+    return -1;
+}
+
 int
 SDL_RenderCopy(SDL_Texture * texture, const SDL_Rect * srcrect,
                const SDL_Rect * dstrect)

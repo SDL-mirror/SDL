@@ -1275,7 +1275,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillEllipse(const SDL_Ellipse ellipse);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderFillEllipses(const SDL_Ellipse ** ellipse, int count);
+extern DECLSPEC int SDLCALL SDL_RenderFillEllipses(const SDL_Ellipse *ellipse, int count);
 
 /**
  *  \brief Draw a polygon on the current rendering target with the drawing color.
@@ -1294,7 +1294,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawPoly(const SDL_Poly poly);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderDrawPolys(const SDL_Poly ** poly, int count);
+extern DECLSPEC int SDLCALL SDL_RenderDrawPolys(const SDL_Poly *poly, int count);
 
 /**
  *  \brief Fill a polygon on the current rendering target with the drawing color.
@@ -1313,8 +1313,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillPoly(const SDL_Poly poly);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderFillPolys(const SDL_Poly ** poly, int count);
-
+extern DECLSPEC int SDLCALL SDL_RenderFillPolys(const SDL_Poly *poly, int count);
 
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
