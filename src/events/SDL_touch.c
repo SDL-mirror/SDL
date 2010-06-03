@@ -27,6 +27,8 @@
 #include "SDL_events_c.h"
 #include "../video/SDL_sysvideo.h"
 
+#include <stdio.h>
+
 
 static int SDL_num_touch = 0;
 static SDL_Touch **SDL_touchPads = NULL;
@@ -99,9 +101,7 @@ int
 SDL_AddTouch(const SDL_Touch * touch, char *name)
 {
     SDL_Touch **touchPads;
-    int selected_touch;
-    int index;
-    size_t length;
+    int index,length;
 
     if (SDL_GetTouchIndexId(touch->id) != -1) {
         SDL_SetError("Touch ID already in use");
@@ -252,7 +252,6 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger* finger)
 {
     int index;
     SDL_Finger **fingers;
-    size_t length;
     //printf("Adding Finger...\n");
     if (SDL_GetFingerIndexId(touch,finger->id) != -1) {
         SDL_SetError("Finger ID already in use");
@@ -260,19 +259,18 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger* finger)
 
     /* Add the touch to the list of touch */
     if(touch->num_fingers  >= touch->max_fingers){
-	printf("Making room for it!\n");
-     	fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
-  		               (touch->num_fingers + 1) * sizeof(SDL_Finger *));
-	touch->max_fingers = touch->num_fingers+1;
-	if (!fingers) {
-	    SDL_OutOfMemory();
-	    return -1;
-	} 
-	else {
-	    touch->max_fingers = touch->num_fingers+1;
-	    touch->fingers = fingers;
+		//printf("Making room for it!\n");
+		fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
+  						   (touch->num_fingers + 1) * sizeof(SDL_Finger *));
+		touch->max_fingers = touch->num_fingers+1;
+		if (!fingers) {
+			SDL_OutOfMemory();
+			return -1;
+		} else {
+			touch->max_fingers = touch->num_fingers+1;
+			touch->fingers = fingers;
+		}
 	}
-    }
 
     index = touch->num_fingers;
     //printf("Max_Fingers: %i Index: %i\n",touch->max_fingers,index);
@@ -295,13 +293,14 @@ SDL_DelFinger(SDL_Touch* touch,int fingerid)
     SDL_Finger* finger = SDL_GetFinger(touch,fingerid);
 
     if (!finger) {
-        return;
+        return -1;
     }
  
 
     SDL_free(finger);
     touch->num_fingers--;
     touch->fingers[index] = touch->fingers[touch->num_fingers];
+	return 0;
 }
 
 
@@ -370,79 +369,80 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
         return 0;
     }
 
-    if(finger == NULL)
-	SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);
-    else {
-	/* the relative motion is calculated regarding the last position */
-	if (relative) {
-	    xrel = x;
-	    yrel = y;
-	    x = (finger->last_x + x);
-	    y = (finger->last_y + y);
+	if(finger == NULL) {
+		SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);
+		return 0;
 	} else {
-	    if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
-	    if(y < 0) y = finger->last_y; /*The other is marked as -1*/
-	    if(pressure < 0) pressure = finger->last_pressure;
-	    xrel = x - finger->last_x;
-	    yrel = y - finger->last_y;
+		/* the relative motion is calculated regarding the last position */
+		if (relative) {
+			xrel = x;
+			yrel = y;
+			x = (finger->last_x + x);
+			y = (finger->last_y + y);
+		} else {
+			if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
+			if(y < 0) y = finger->last_y; /*The other is marked as -1*/
+			if(pressure < 0) pressure = finger->last_pressure;
+			xrel = x - finger->last_x;
+			yrel = y - finger->last_y;
+		}
+		
+		/* Drop events that don't change state */
+		if (!xrel && !yrel) {
+	#if 0
+			printf("Touch event didn't change state - dropped!\n");
+	#endif
+			return 0;
+		}
+		
+		/* Update internal touch coordinates */
+		
+		finger->x = x;
+		finger->y = y;
+		
+		/*Should scale to window? Normalize? Maintain Aspect?*/
+		//SDL_GetWindowSize(touch->focus, &x_max, &y_max);
+		
+		/* make sure that the pointers find themselves inside the windows */
+		/* only check if touch->xmax is set ! */
+		/*
+		  if (x_max && touch->x > x_max) {
+		  touch->x = x_max;
+		  } else if (touch->x < 0) {
+		  touch->x = 0;
+		  }
+		  
+		  if (y_max && touch->y > y_max) {
+		  touch->y = y_max;
+		  } else if (touch->y < 0) {
+		  touch->y = 0;
+		  }
+		*/
+		finger->xdelta = xrel;
+		finger->ydelta = yrel;
+		finger->pressure = pressure;
+		
+		
+		
+		/* Post the event, if desired */
+		posted = 0;
+		if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
+			SDL_Event event;
+			event.tfinger.type = SDL_FINGERMOTION;
+			event.tfinger.touchId = (Uint8) id;
+			event.tfinger.fingerId = (Uint8) fingerid;
+			event.tfinger.x = x;
+			event.tfinger.y = y;
+			event.tfinger.pressure = pressure;
+			event.tfinger.state = touch->buttonstate;
+			event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
+			posted = (SDL_PushEvent(&event) > 0);
+		}
+		finger->last_x = finger->x;
+		finger->last_y = finger->y;
+		finger->last_pressure = finger->pressure;
+		return posted;
 	}
-	
-	/* Drop events that don't change state */
-	if (!xrel && !yrel) {
-#if 0
-	    printf("Touch event didn't change state - dropped!\n");
-#endif
-	    return 0;
-	}
-	
-	/* Update internal touch coordinates */
-	
-	finger->x = x;
-	finger->y = y;
-	
-	/*Should scale to window? Normalize? Maintain Aspect?*/
-	//SDL_GetWindowSize(touch->focus, &x_max, &y_max);
-	
-	/* make sure that the pointers find themselves inside the windows */
-	/* only check if touch->xmax is set ! */
-	/*
-	  if (x_max && touch->x > x_max) {
-	  touch->x = x_max;
-	  } else if (touch->x < 0) {
-	  touch->x = 0;
-	  }
-	  
-	  if (y_max && touch->y > y_max) {
-	  touch->y = y_max;
-	  } else if (touch->y < 0) {
-	  touch->y = 0;
-	  }
-	*/
-	finger->xdelta = xrel;
-	finger->ydelta = yrel;
-	finger->pressure = pressure;
-	
-	
-	
-	/* Post the event, if desired */
-	posted = 0;
-	if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
-	    SDL_Event event;
-	    event.tfinger.type = SDL_FINGERMOTION;
-	    event.tfinger.touchId = (Uint8) id;
-	    event.tfinger.fingerId = (Uint8) fingerid;
-	    event.tfinger.x = x;
-	    event.tfinger.y = y;
-	    event.tfinger.pressure = pressure;
-	    event.tfinger.state = touch->buttonstate;
-	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
-	    posted = (SDL_PushEvent(&event) > 0);
-	}
-	finger->last_x = finger->x;
-	finger->last_y = finger->y;
-	finger->last_pressure = finger->pressure;
-	return posted;
-    }
 }
 int
 SDL_SendTouchButton(int id, Uint8 state, Uint8 button)
@@ -483,7 +483,7 @@ SDL_SendTouchButton(int id, Uint8 state, Uint8 button)
     if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.type = type;
-        event.tbutton.touchId = (Uint8) index;
+        event.tbutton.touchId = (Uint8) touch->id;
         event.tbutton.state = state;
         event.tbutton.button = button;
         event.tbutton.windowID = touch->focus ? touch->focus->id : 0;

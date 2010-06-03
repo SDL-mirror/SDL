@@ -65,7 +65,7 @@ extern int SDL_SendTouchButton(int id, Uint8 state, Uint8 button);
 extern void SDL_TouchQuit(void);
 
 /* Get the index of a touch device */
-extern int SDL_GetTouchIndexId(int id)
+extern int SDL_GetTouchIndexId(int id);
 
 
 
