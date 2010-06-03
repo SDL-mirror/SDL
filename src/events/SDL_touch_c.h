@@ -64,8 +64,11 @@ extern int SDL_SendTouchButton(int id, Uint8 state, Uint8 button);
 /* Shutdown the touch subsystem */
 extern void SDL_TouchQuit(void);
 
-/* FIXME: Where do these functions go in this header? */
-extern void SDL_ChangeEnd(int id, int end);
+/* Get the index of a touch device */
+extern int SDL_GetTouchIndexId(int id)
+
+
+
 
 #endif /* _SDL_touch_c_h */
 
