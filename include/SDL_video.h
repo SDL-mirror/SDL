@@ -32,6 +32,8 @@
 #include "SDL_stdinc.h"
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
+#include "SDL_ellipse.h"
+#include "SDL_poly.h"
 #include "SDL_surface.h"
 
 #include "begin_code.h"
@@ -1236,6 +1238,83 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRect(const SDL_Rect * rect);
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
 extern DECLSPEC int SDLCALL SDL_RenderFillRects(const SDL_Rect ** rect, int count);
+
+/**
+ *  \brief Draw an ellipse on the current rendering target with the drawing color.
+ *
+ *  \param ellipse The destination ellipse.
+ *
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderDrawEllipse(const SDL_Ellipse ellipse);
+
+/**
+ *  \brief Draw some number of ellipses in the current rendering target with the drawing color.
+ *  
+ *  \param ellipse A pointer to an array of destination ellipses.
+ *  \param count The number of ellipses.
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderDrawEllipses(const SDL_Ellipse ** ellipse, int count);
+
+/**
+ *  \brief Fill an ellipse on the current rendering target with the drawing color.
+ *  
+ *  \param ellipse The destination ellipse
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderFillEllipse(const SDL_Ellipse ellipse);
+
+/**
+ *  \brief Fill some number of ellipses in the current rendering target with the drawing color.
+ *  
+ *  \param ellipse A pointer to an array of destination ellipses.
+ *  \param count The number of ellipses.
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderFillEllipses(const SDL_Ellipse ** ellipse, int count);
+
+/**
+ *  \brief Draw a polygon on the current rendering target with the drawing color.
+ *
+ *  \param poly The destination polygon.
+ *
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderDrawPoly(const SDL_Poly poly);
+
+/**
+ *  \brief Draw some number of polygons in the current rendering target with the drawing color.
+ *  
+ *  \param poly A pointer to an array of destination polygons.
+ *  \param count The number of polygons.
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderDrawPolys(const SDL_Poly ** poly, int count);
+
+/**
+ *  \brief Fill a polygon on the current rendering target with the drawing color.
+ *  
+ *  \param poly The destination polygon
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderFillPoly(const SDL_Poly poly);
+
+/**
+ *  \brief Fill some number of polygons in the current rendering target with the drawing color.
+ *  
+ *  \param poly A pointer to an array of destination polygons.
+ *  \param count The number of polygons.
+ *  
+ *  \return 0 on success, or -1 if there is no rendering context current.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderFillPolys(const SDL_Poly ** poly, int count);
+
 
 /**
  *  \brief Copy a portion of the texture to the current rendering target.
