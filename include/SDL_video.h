@@ -1256,7 +1256,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawEllipse(const SDL_Ellipse ellipse);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderDrawEllipses(const SDL_Ellipse ** ellipse, int count);
+extern DECLSPEC int SDLCALL SDL_RenderDrawEllipses(const SDL_Ellipse * ellipse, int count);
 
 /**
  *  \brief Fill an ellipse on the current rendering target with the drawing color.

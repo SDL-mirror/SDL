@@ -68,7 +68,7 @@ typedef struct SDL_Poly {
  *  
  *  \return SDL_TRUE if the polygons are equal, SDL_FALSE otherwise.
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_PolyEquals(const SDL_Poly *A,const SDL_Poly *A);
+extern DECLSPEC SDL_bool SDLCALL SDL_PolyEquals(const SDL_Poly *A,const SDL_Poly *B);
 
 /**
  *  \brief Determine whether two rectangles intersect.

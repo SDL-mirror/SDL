@@ -2546,7 +2546,7 @@ int SDL_RenderFillEllipse(const SDL_Ellipse ellipse) {
     return SDL_RenderFillEllipses(&ellipse,1);
 }
 
-int SDL_RenderFillEllipses(const SDL_Ellipse ** ellipse, int count) {
+int SDL_RenderFillEllipses(const SDL_Ellipse * ellipse, int count) {
     return -1;
 }
 
