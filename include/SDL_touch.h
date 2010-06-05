@@ -41,8 +41,6 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-typedef struct SDL_Touch SDL_Touch;
-typedef struct SDL_Finger SDL_Finger;
 
 struct SDL_Finger {
   int id;
@@ -55,9 +53,11 @@ struct SDL_Finger {
   int pressure;
 };
 
+typedef struct SDL_Touch SDL_Touch;
+typedef struct SDL_Finger SDL_Finger;
 
-struct SDL_Touch
-{
+
+struct SDL_Touch {
   
   /* Free the touch when it's time */
   void (*FreeTouch) (SDL_Touch * touch);
@@ -85,6 +85,7 @@ struct SDL_Touch
     
   void *driverdata;
 };
+
 
 
 /* Function prototypes */

@@ -3,6 +3,8 @@
 #include <math.h>
 #include <SDL_touch.h>
 
+
+
 #define PI 3.1415926535897
 #define WIDTH 640
 #define HEIGHT 480
@@ -32,7 +34,7 @@ Finger finger[MAXFINGERS];
 
 void handler (int sig)
 {
-  printf ("\exiting...(%d)\n", sig);
+  printf ("exiting...(%d)\n", sig);
   exit (0);
 }
 
@@ -81,7 +83,7 @@ void drawCircle(SDL_Surface* screen,int x,int y,int r,int c)
 
 void DrawScreen(SDL_Surface* screen, int h)
 {
-  int x, y, xm,ym,c;
+  int x, y, xm,ym,c,i;
   if(SDL_MUSTLOCK(screen))
     {                                              
       if(SDL_LockSurface(screen) < 0) return;
@@ -98,9 +100,10 @@ void DrawScreen(SDL_Surface* screen, int h)
 	  setpix(screen,x,y,((x%255)<<16) + ((y%255)<<8) + (x+y)%255);
         }
     }
+
   drawCircle(screen,mousx,mousy,-30,0xFFFFFF);
   
-  int i;
+  
   for(i=0;i<MAXFINGERS;i++)
     if(finger[i].p.x >= 0 && finger[i].p.y >= 0)
       if(finger[i].pressure > 0)
@@ -131,8 +134,8 @@ int main(int argc, char* argv[])
 
   memset(keystat,0,512*sizeof(keystat[0]));
   if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
-  
-  if (!(screen = initScreen(WIDTH,HEIGHT)))
+  screen = initScreen(WIDTH,HEIGHT);
+  if (!screen)
     {
       SDL_Quit();
       return 1;
@@ -179,21 +182,22 @@ int main(int argc, char* argv[])
 	    ;
 	    //printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
 	    //	   event.tfinger.x,event.tfinger.y);
-	    SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
-	    SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
-	    
+	    //SDL_Touch *inTouch = SDL_GetTouch(event.tfinger.touchId);
+	    //SDL_Finger *inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
+	    /*
 	    finger[event.tfinger.fingerId].p.x = ((float)event.tfinger.x)/
 	      inTouch->xres;
 	    finger[event.tfinger.fingerId].p.y = ((float)event.tfinger.y)/
 	      inTouch->yres;
 
 	    finger[event.tfinger.fingerId].pressure = 
-	      ((float)event.tfinger.pressure)/inTouch->pressureres;
-
+	      ((float)event.tfinger.pressure)/inTouch->pressureres;*/
+		/*
 	    printf("Finger: %i, Pressure: %f Pressureres: %i\n",
 		   event.tfinger.fingerId,
 		   finger[event.tfinger.fingerId].pressure,
 		   inTouch->pressureres);
+		   */
 	    //printf("Finger: %i, pressure: %f\n",event.tfinger.fingerId,
 	    //   finger[event.tfinger.fingerId].pressure);
 
