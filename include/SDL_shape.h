@@ -62,6 +62,7 @@ extern DECLSPEC SDL_Window * SDLCALL SDL_CreateShapedWindow(const char *title,un
 extern DECLSPEC SDL_bool SDLCALL SDL_WindowIsShaped(const SDL_Window *window);
 extern DECLSPEC int SDLCALL SDL_SelectShapeRenderer(const SDL_Window *window);
 
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
