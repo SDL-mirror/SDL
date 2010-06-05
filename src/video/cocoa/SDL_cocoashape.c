@@ -21,3 +21,5 @@
 */
 
 #include "SDL_shape.h"
+
+/* Functions implementing shaped windows for Cocoa will be implemented when the API is decided on. */
