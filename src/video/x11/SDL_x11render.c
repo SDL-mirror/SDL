@@ -222,10 +222,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         if(!data->xwindow_pict_fmt) {
             data->xrender_available = SDL_FALSE;
         }
-        data->xwindow_pict_attr.graphics_exposures = False;
-        data->xwindow_pict_attr_valuemask = CPGraphicsExposure;
         data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
-                                                  data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
+                                                  0, None);
         if(!data->xwindow_pict) {
             data->xrender_available = SDL_FALSE;
         }
@@ -286,7 +284,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         if(data->xrender_available == SDL_TRUE) {
             data->pixmap_picts[i] = 
                 XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
-                               data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
+                                     0, None);
             if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
@@ -372,7 +370,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
         if(data->xrender_available == SDL_TRUE) {
             data->pixmap_picts[i] = 
                 XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
-                               data->xwindow_pict_attr_valuemask, &data->xwindow_pict_attr);
+                                     0, None);
             if(!data->pixmap_picts[i]) {
                 data->xrender_available = SDL_FALSE;
             }
@@ -769,6 +767,18 @@ renderdrawcolor(SDL_Renderer * renderer, int premult)
         return SDL_MapRGBA(&data->format, r, g, b, a);
 }
 
+static XRenderColor
+xrenderdrawcolor(SDL_Renderer *renderer)
+{
+    // Premultiply the color channels as well as modulate them to a 16 bit color space
+    XRenderColor xrender_color;
+    xrender_color.red = ((unsigned short)renderer->r + 1) * ((unsigned short)renderer->a + 1) - 1;
+    xrender_color.green = ((unsigned short)renderer->g + 1) * ((unsigned short)renderer->a + 1) - 1;
+    xrender_color.blue = ((unsigned short)renderer->b + 1) * ((unsigned short)renderer->a + 1) - 1;
+    xrender_color.alpha = ((unsigned short)renderer->a + 1) * ((unsigned short)renderer->a + 1) - 1;
+    return xrender_color;
+}
+
 static int
 X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                      int count)
@@ -973,32 +983,75 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     clip.w = window->w;
     clip.h = window->h;
 
-    foreground = renderdrawcolor(renderer, 1);
-    XSetForeground(data->display, data->gc, foreground);
-
-    xrect = xrects = SDL_stack_alloc(XRectangle, count);
-    xcount = 0;
-    for (i = 0; i < count; ++i) {
-        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-            continue;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if(data->xrender_available == SDL_TRUE) {
+        XRenderColor xrender_foreground;
+        xrender_foreground = xrenderdrawcolor(renderer);
+        
+        xrects = SDL_stack_alloc(XRectangle, 4*count);
+        xcount = 0;
+        for(i = 0; i < 4*count; i+=4) {
+            if(!SDL_IntersectRect(rects[i], &clip, &rect)) {
+                continue;
+            }
+            
+            xrects[xcount].x = rect.x;
+            xrects[xcount].y = rect.y;
+            xrects[xcount].width = 1;
+            xrects[xcount].height = rect.h;
+            ++xcount;
+            xrects[xcount].x = rect.x;
+            xrects[xcount].y = rect.y+rect.h;
+            xrects[xcount].width = rect.w;
+            xrects[xcount].height = 1;
+            ++xcount;
+            xrects[xcount].x = rect.x+rect.w;
+            xrects[xcount].y = rect.y;
+            xrects[xcount].width = 1;
+            xrects[xcount].height = rect.h;
+            ++xcount;
+            xrects[xcount].x = rect.x;
+            xrects[xcount].y = rect.y;
+            xrects[xcount].width = rect.w;
+            xrects[xcount].height = 1;
+            ++xcount;
+            if(data->makedirty) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
         }
+        XRenderFillRectangles(data->display, PictOpOver, data->drawable_pict,
+                              &xrender_foreground, xrects, xcount);
+    }
+    else
+#endif
+    {
+        foreground = renderdrawcolor(renderer, 1);
+        XSetForeground(data->display, data->gc, foreground);
+    
+        xrect = xrects = SDL_stack_alloc(XRectangle, count);
+        xcount = 0;
+        for (i = 0; i < count; ++i) {
+            if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+                continue;
+            }
 
-        xrect->x = (short)rect.x;
-        xrect->y = (short)rect.y;
-        xrect->width = (unsigned short)rect.w;
-        xrect->height = (unsigned short)rect.h;
-        ++xrect;
-        ++xcount;
-
-        if (data->makedirty) {
-            SDL_AddDirtyRect(&data->dirty, &rect);
+            xrect->x = (short)rect.x;
+            xrect->y = (short)rect.y;
+            xrect->width = (unsigned short)rect.w;
+            xrect->height = (unsigned short)rect.h;
+            ++xrect;
+            ++xcount;
+    
+            if (data->makedirty) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+        }   
+        if (xcount > 0) {
+            XDrawRectangles(data->display, data->drawable, data->gc,
+                            xrects, xcount);
         }
     }
-    if (xcount > 0) {
-        XDrawRectangles(data->display, data->drawable, data->gc,
-                        xrects, xcount);
-    }
-    SDL_stack_free(xpoints);
+    SDL_stack_free(xrects);
 
     return 0;
 }
@@ -1044,11 +1097,7 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         if(data->xrender_available == SDL_TRUE)
         {
             XRenderColor xrender_foreground_color;
-            // Premultiply the color channels as well as modulate them to a 16 bit color space
-            xrender_foreground_color.red = ((unsigned short)renderer->r + 1) * ((unsigned short)renderer->a + 1) - 1;
-            xrender_foreground_color.green = ((unsigned short)renderer->g + 1) * ((unsigned short)renderer->a + 1) - 1;
-            xrender_foreground_color.blue = ((unsigned short)renderer->b + 1) * ((unsigned short)renderer->a + 1) - 1;
-            xrender_foreground_color.alpha = ((unsigned short)renderer->a + 1) * ((unsigned short)renderer->a + 1) - 1;
+            xrender_foreground_color = xrenderdrawcolor(renderer);
             XRenderFillRectangles(data->display, PictOpOver, data->drawable_pict,
                                   &xrender_foreground_color, xrects, xcount);
         }
@@ -1253,7 +1302,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
             if(data->xrender_available == SDL_TRUE)
             {
                 XRenderComposite(data->display, PictOpOver, data->drawable_pict, None, data->xwindow_pict,
-                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w, rect->h);
+                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w+1, rect->h+1);
             }
             else
 #endif
