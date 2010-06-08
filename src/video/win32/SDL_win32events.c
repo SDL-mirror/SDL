@@ -703,7 +703,7 @@ SDL_RegisterApp(char *name, Uint32 style, void *hInst)
     class.hbrBackground = NULL;
     class.hInstance = SDL_Instance;
     class.style = SDL_Appstyle;
-    class.lpfnWndProc = DefWindowProc;
+    class.lpfnWndProc = WIN_WindowProc;
     class.cbWndExtra = 0;
     class.cbClsExtra = 0;
     if (!RegisterClass(&class)) {

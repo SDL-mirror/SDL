@@ -112,7 +112,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 
     /* Set up the window proc function */
     data->wndproc = (WNDPROC) GetWindowLongPtr(hwnd, GWLP_WNDPROC);
-    if (data->wndproc == DefWindowProc) {
+    if (data->wndproc == WIN_WindowProc) {
         data->wndproc = NULL;
     }
     SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR) WIN_WindowProc);
