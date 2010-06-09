@@ -8,6 +8,7 @@
 
 #include "Video_Mode.hpp"
 #include "Window_Listener.hpp"
+#include "TSF.hpp"
 
 class Window
 {
@@ -25,6 +26,8 @@ public:
 
 	void Update();
 	void Display();
+
+	void Clear();
 
 private:
 	static const wchar_t *Window_Class_Name;

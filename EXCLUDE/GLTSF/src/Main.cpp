@@ -3,6 +3,7 @@
 
 int main(int argc, char *argv[])
 {
+	int Result = EXIT_SUCCESS;
 	try
 	{
 		App theApp;
@@ -11,7 +12,13 @@ int main(int argc, char *argv[])
 	catch (const std::exception& e)
 	{
 		printf("Error: %s\n", e.what());
-		return 1;
+		Result = EXIT_FAILURE;
 	}
-	return 0;
+	catch (...)
+	{
+		printf("Unhandled exception\n");
+		Result = EXIT_FAILURE;
+	}
+	system("PAUSE");
+	return Result;
 }

@@ -8,6 +8,7 @@ public:
 
 	virtual void On_Key_Down(int Key){}
 	virtual void On_Key_Up(int Key){}
+	virtual void On_Char(unsigned int Char){}
 };
 
 #endif

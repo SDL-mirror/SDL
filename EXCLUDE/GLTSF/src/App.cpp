@@ -1,20 +1,22 @@
 #include "App.hpp"
+#include "TSF.hpp"
 
 App::App() : my_Done(false)
 {
-
+	TSF::Initialize();
 }
 
 App::~App()
 {
 	Finalize();
+	TSF::Finalize();
 }
 
 void App::Initialize()
 {
 	Finalize();
 
-	my_Window.Initialize(L"GLTSF", Video_Mode(800, 600, 32), false);
+	my_Window.Initialize(L"GLTSF", Video_Mode(Width, Height, Bits_Per_Pixel), Fullscreen);
 	my_Window.Set_Listener(this);
 	my_Window.Show();
 }
@@ -30,6 +32,7 @@ void App::Run()
 	while (!my_Done)
 	{
 		my_Window.Update();
+		my_Window.Clear();
 		my_Window.Display();
 	}
 }
@@ -53,4 +56,9 @@ void App::On_Key_Down(int Key)
 void App::On_Key_Up(int Key)
 {
 
+}
+
+void App::On_Char(unsigned int Char)
+{
+	printf("Char: U+%04X\n", Char);
 }

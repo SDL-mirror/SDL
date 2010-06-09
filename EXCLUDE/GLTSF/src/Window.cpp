@@ -1,4 +1,5 @@
 #include "Window.hpp"
+#include <gl/GL.h>
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -83,7 +84,7 @@ void Window::Create_Window(const std::wstring &Title, const Video_Mode &Mode, bo
 	int Height = my_Video_Mode.Height;
 	ReleaseDC(NULL, Screen_DC);
 
-	DWORD Style = WS_OVERLAPPEDWINDOW;
+	DWORD Style = WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU;
 	if (!my_Fullscreen)
 	{
 		RECT Rect = {0, 0, Width, Height};
@@ -227,6 +228,9 @@ LRESULT Window::Handle_Message(HWND Handle, UINT Message, WPARAM wParam, LPARAM 
 	case WM_KEYUP:
 		Call_Listener(On_Key_Up(wParam));
 		break;
+	case WM_CHAR:
+		Call_Listener(On_Char(wParam));
+		break;
 	default:
 		return DefWindowProcW(Handle, Message, wParam, lParam);
 		break;
@@ -260,4 +264,9 @@ void Window::Display()
 {
 	if (my_Device_Context && my_GL_Context)
 		SwapBuffers(my_Device_Context);
+}
+
+void Window::Clear()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
 }
