@@ -55,7 +55,7 @@ void setpix(SDL_Surface *screen, int x, int y, int col)
 
   colour = SDL_MapRGB( screen->format, (col>>16)&0xFF, (col>>8)&0xFF, col&0xFF);
   
-  pixmem32 = (Uint32*) screen->pixels  + y*screen->pitch/BPP + x;
+  pixmem32 = (Uint32*) screen->pixels  + y*screen->pitch/screen->format->BytesPerPixel + x; //TODO : Check this. May cause crash.
   *pixmem32 = colour;
 }
 
@@ -219,6 +219,7 @@ int main(int argc, char* argv[])
       }
     //And draw
     DrawScreen(screen,h);
+	printf("Things\n");
     /*
       for(i=0;i<512;i++) 
       if(keystat[i]) printf("%i\n",i);

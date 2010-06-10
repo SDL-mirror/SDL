@@ -77,18 +77,21 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="/MACHINE:I386"
+				AdditionalOptions="/MACHINE:I386&#x0D;&#x0A;msvcrt.lib"
 				AdditionalDependencies="msimg32.lib winmm.lib"
 				OutputFile=".\Debug/SDL.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				IgnoreAllDefaultLibraries="true"
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/SDL.pdb"
-				SubSystem="2"
+				SubSystem="0"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
 				ImportLibrary=".\Debug/SDL.lib"
+				Profile="true"
+				CLRThreadAttribute="0"
 				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool

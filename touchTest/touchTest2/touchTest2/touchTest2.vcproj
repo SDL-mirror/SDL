@@ -57,7 +57,8 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalOptions="C:\programs\gsoc10\VisualC\SDL\Debug\SDL.lib&#x0D;&#x0A;C:\programs\gsoc10\VisualC\SDLmain\Debug\SDLmain.lib"
+				AdditionalOptions="C:\programs\gsoc10\VisualC\SDL\Debug\SDL.lib&#x0D;&#x0A;C:\programs\gsoc10\VisualC\SDLmain\Debug\SDLmain.lib&#x0D;&#x0A;msvcrt.lib&#x0D;&#x0A;"
+				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -179,6 +180,14 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\SDL.dll"
+				>
+			</File>
+			<File
+				RelativePath=".\wmmsg.txt"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>
