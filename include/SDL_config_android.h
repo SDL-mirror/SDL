@@ -63,10 +63,14 @@ typedef unsigned int size_t;
 
 #define SDL_TIMER_UNIX 1
 
-#define SDL_VIDEO_DRIVER_DUMMY 1
+#define SDL_VIDEO_DRIVER_ANDROID 1
 
 #define HAVE_STDIO_H 1
 #define HAVE_SYS_TYPES_H 1
+
+#define HAVE_M_PI 1
+
+#define SDL_VIDEO_RENDER_OGL_ES 1
 
 #endif /* _SDL_config_minimal_h */
 

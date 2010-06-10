@@ -5,7 +5,7 @@ TOOLS_PATH=$(ANDROID_NDK)/build/prebuilt/linux-x86/arm-eabi-4.2.1/bin
 ANDROID_INCLUDES = 	-I$(ANDROID_NDK)/build/platforms/android-4/common/include \
 					-I$(ANDROID_NDK)/build/platforms/android-4/arch-arm/usr/include 
 INCLUDE = -I./include
-CFLAGS  = -g -O2 $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -static
+CFLAGS  = -g -O2 $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -DANDROID_NDK -static
 
 AR	= $(TOOLS_PATH)/arm-eabi-ar
 RANLIB	= $(TOOLS_PATH)/arm-eabi-ranlib
@@ -28,7 +28,7 @@ SOURCES = \
 	src/video/*.c \
 	src/power/*.c \
 	src/audio/dummy/*.c \
-	src/video/dummy/*.c \
+	src/video/android/*.c \
 	src/joystick/dummy/*.c \
 	src/haptic/dummy/*.c \
 	src/atomic/dummy/*.c \

@@ -7,9 +7,9 @@ export PATH=$TOOLS_PATH:$PATH
 CC="arm-eabi-gcc"
 
 #cflags
-ACC_C="	-I$ANDROID_NDK/build/platforms/android-4/common/include \
-		-I$ANDROID_NDK/build/platforms/android-4/arch-arm/usr/include \
-		-DANDROID -c"
+ACC_C="	-I$ANDROID_NDK/build/platforms/android-8/common/include \
+		-I$ANDROID_NDK/build/platforms/android-8/arch-arm/usr/include \
+		-DANDROID -DANDROID_NDK -c"
 		
 		
 $CC $CFLAGS $ACC_C $@
