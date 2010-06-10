@@ -37,3 +37,17 @@ SDL_bool SDL_WindowIsShaped(const SDL_Window *window) {
 int SDL_SelectShapeRenderer(const SDL_Window *window) {
 	return -1;
 }
+
+int SDL_SetShapeParameters(SDL_Window *window,SDL_WindowShapeMode shapeMode) {
+	if(window == NULL || !SDL_WindowIsShaped(window))
+		return -2;
+	return -3;
+}
+
+int SDL_GetShapeParameters(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
+	if(shapeMode == NULL)
+		return -1;
+	if(window == NULL || !SDL_WindowIsShaped(window))
+		return -2;
+	return -3;
+}
