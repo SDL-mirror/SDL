@@ -37,6 +37,11 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/** \file SDL_shape.h
+ *
+ * Header file for shaped windows.
+ */
+
 /**
  *  \brief Create a shaped window with the specified position, dimensions, and flags.
  *  
@@ -99,7 +104,9 @@ typedef union {
 
 /** \brief A struct that tags the SDL_WindowShapeParams union with an enum describing the type of its contents. */
 typedef struct SDL_WindowShapeMode {
+	/** \brief The mode of these window-shape parameters. */
 	WindowShapeMode mode;
+	/** \brief Window-shape parameters. */
 	SDL_WindowShapeParams parameters;
 } SDL_WindowShapeMode;
 
