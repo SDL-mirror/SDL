@@ -31,8 +31,8 @@
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_androidvideo.h"
-#include "SDL_androidevents_c.h"
-#include "SDL_androidrender_c.h"
+#include "SDL_androidevents.h"
+#include "SDL_androidrender.h"
 
 #define ANDROID_VID_DRIVER_NAME "Android"
 
