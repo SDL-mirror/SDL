@@ -24,10 +24,11 @@ public:
 	void Show();
 	void Hide();
 
-	void Update();
+	void Handle_Events();
 	void Display();
 
-	void Clear();
+	void Show_Cursor();
+	void Hide_Cursor();
 
 private:
 	static const wchar_t *Window_Class_Name;

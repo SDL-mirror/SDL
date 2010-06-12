@@ -17,6 +17,7 @@ Window::Window() : my_Handle(0),
 Window::~Window()
 {
 	Finalize();
+	Show_Cursor();
 }
 
 void Window::Initialize(const std::wstring &Title, const Video_Mode &Mode, bool Fullscreen)
@@ -219,6 +220,9 @@ LRESULT Window::Handle_Message(HWND Handle, UINT Message, WPARAM wParam, LPARAM 
 {
 	switch (Message)
 	{
+	case WM_SIZE:
+		Call_Listener(On_Resized(LOWORD(lParam), HIWORD(lParam)));
+		break;
 	case WM_CLOSE:
 		Call_Listener(On_Close());
 		break;
@@ -250,7 +254,7 @@ void Window::Hide()
 		ShowWindow(my_Handle, SW_HIDE);
 }
 
-void Window::Update()
+void Window::Handle_Events()
 {
 	MSG Message = {0};
 	while (PeekMessageW(&Message, NULL, 0, 0, PM_REMOVE))
@@ -266,7 +270,12 @@ void Window::Display()
 		SwapBuffers(my_Device_Context);
 }
 
-void Window::Clear()
+void Window::Show_Cursor()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	ShowCursor(TRUE);
+}
+
+void Window::Hide_Cursor()
+{
+	ShowCursor(FALSE);
 }
