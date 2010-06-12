@@ -18,12 +18,16 @@ public:
 	virtual void On_Key_Down(int Key);
 	virtual void On_Key_Up(int Key);
 	virtual void On_Char(unsigned int Char);
+	virtual void On_Resized(unsigned int Width, unsigned int Height);
 
 private:
+	void Update();
+	void Draw();
+
 	static const int Width = 800;
 	static const int Height = 600;
 	static const int Bits_Per_Pixel = 32;
-	static const bool Fullscreen = false;
+	static const bool Fullscreen = true;
 
 	Window my_Window;
 	bool my_Done;
