@@ -256,7 +256,8 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         WIN_SetError("Couldn't create window");
         return -1;
     }
-
+	/*Disable Tablet support, replace with multi-touch.*/
+#if 0 
     /* we're configuring the tablet data. See Wintab reference for more info */
     if (videodata->wintabDLL
         && videodata->WTInfoA(WTI_DEFSYSCTX, 0, &lc) != 0) {
@@ -290,6 +291,9 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         }
         g_hCtx[window->id] = videodata->WTOpenA(hwnd, &lc, TRUE);
     }
+#else 
+	//RegisterTouchWindow(hwnd, 0);
+#endif 
 #ifndef _WIN32_WCE              /* has no RawInput */
     /* we're telling the window, we want it to report raw input events from mice */
     Rid.usUsagePage = 0x01;
