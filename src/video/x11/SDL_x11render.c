@@ -1,4 +1,5 @@
 /*
+
     SDL - Simple DirectMedia Layer
     Copyright (C) 1997-2010 Sam Lantinga
 
@@ -96,13 +97,14 @@ typedef struct
     Window xwindow;
     Pixmap pixmaps[3];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    Pixmap mask;
     Picture xwindow_pict;
     Picture pixmap_picts[3];
     Picture drawable_pict;
+    Picture mask_pict;
     XRenderPictFormat* xwindow_pict_fmt;
-    XRenderPictureAttributes xwindow_pict_attr;
-    unsigned int xwindow_pict_attr_valuemask;
-    SDL_bool xrender_available;
+    GC mask_gc;
+    SDL_bool use_xrender;
 #endif
     int current_pixmap;
     Drawable drawable;
@@ -122,7 +124,7 @@ typedef struct
     XRenderPictFormat* picture_fmt;
     XRenderPictureAttributes picture_attr;
     unsigned int picture_attr_valuemask;
-    SDL_bool xrender_available;
+    SDL_bool use_xrender;
 #endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
@@ -217,20 +219,32 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     int event_basep, error_basep;
     if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
-        data->xrender_available = SDL_TRUE;
+        data->use_xrender = SDL_TRUE;
         data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display, data->visual);
         if(!data->xwindow_pict_fmt) {
-            data->xrender_available = SDL_FALSE;
+            data->use_xrender = SDL_FALSE;
+            goto fallback;
         }
         data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
-                                                  0, None);
+                                                  0, NULL);
         if(!data->xwindow_pict) {
-            data->xrender_available = SDL_FALSE;
+            data->use_xrender = SDL_FALSE;
+            goto fallback;
         }
+        // Create a 1 bit depth mask
+        data->mask = XCreatePixmap(data->display, data->xwindow, window->w, window->h, 1);
+        data->mask_pict = XRenderCreatePicture(data->display, data->mask,
+                                               XRenderFindStandardFormat(data->display, PictStandardA1),
+                                               0, NULL);
+        XGCValues gcv_mask;
+        gcv_mask.foreground = 1;
+        gcv_mask.background = 0;
+        data->mask_gc = XCreateGC(data->display, data->mask, GCBackground | GCForeground, &gcv_mask);
     }
     else {
-        data->xrender_available = SDL_FALSE;
+        data->use_xrender = SDL_FALSE;
     }
+    fallback:
 #endif
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
     renderer->CreateTexture = X11_CreateTexture;
@@ -281,12 +295,12 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             return NULL;
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(data->xrender_available == SDL_TRUE) {
+        if(data->use_xrender == SDL_TRUE) {
             data->pixmap_picts[i] = 
                 XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
                                      0, None);
             if(!data->pixmap_picts[i]) {
-                data->xrender_available = SDL_FALSE;
+                data->use_xrender = SDL_FALSE;
             }
             XRenderComposite(data->display, PictOpClear, data->pixmap_picts[i], None, data->pixmap_picts[i],
                              0, 0, 0, 0, 0, 0, window->w, window->h);
@@ -296,14 +310,14 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (n > 0) {
         data->drawable = data->pixmaps[0];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(data->xrender_available == SDL_TRUE)
+        if(data->use_xrender == SDL_TRUE)
             data->drawable_pict = data->pixmap_picts[0];
 #endif
         data->makedirty = SDL_TRUE;
     } else {
         data->drawable = data->xwindow;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(data->xrender_available == SDL_TRUE)
+        if(data->use_xrender == SDL_TRUE)
             data->drawable_pict = data->xwindow_pict;
 #endif
         data->makedirty = SDL_FALSE;
@@ -367,12 +381,12 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             return -1;
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(data->xrender_available == SDL_TRUE) {
+        if(data->use_xrender == SDL_TRUE) {
             data->pixmap_picts[i] = 
                 XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
                                      0, None);
             if(!data->pixmap_picts[i]) {
-                data->xrender_available = SDL_FALSE;
+                data->use_xrender = SDL_FALSE;
             }
             XRenderComposite(data->display, PictOpClear, data->pixmap_picts[i], None, data->pixmap_picts[i],
                              0, 0, 0, 0, 0, 0, window->w, window->h);
@@ -420,8 +434,8 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         */
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         // Assume the texture is supported by Xrender
-        data->xrender_available = SDL_TRUE;
-        if(renderdata->xrender_available == SDL_FALSE) {
+        data->use_xrender = SDL_TRUE;
+        if(renderdata->use_xrender == SDL_FALSE) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
                 return -1;
@@ -544,8 +558,8 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(renderdata->xrender_available && data->pixmap) {
-        data->xrender_available = SDL_TRUE;
+    if(renderdata->use_xrender && data->pixmap) {
+        data->use_xrender = SDL_TRUE;
         unsigned long x11_fmt_mask; // Format mask
         XRenderPictFormat x11_templ_fmt; // Format template
         x11_fmt_mask =
@@ -563,7 +577,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->picture_fmt =
             XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 1);
         if(!data->picture_fmt) {
-            data->xrender_available = SDL_FALSE;
+            data->use_xrender = SDL_FALSE;
         }
         data->picture_attr_valuemask = CPGraphicsExposure;
         (data->picture_attr).graphics_exposures = False;
@@ -571,14 +585,14 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             XRenderCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
                             data->picture_attr_valuemask, &(data->picture_attr));
         if(!data->picture) {
-            data->xrender_available = SDL_FALSE;
+            data->use_xrender = SDL_FALSE;
         }
     }
     /* We thought we could render the texture with Xrender but this was
         not possible for some reason. Now we must ensure that texture  
         format and window format match to avoid a BadMatch error.
     */
-    if(data->xrender_available == SDL_FALSE) {
+    if(data->use_xrender == SDL_FALSE) {
         if (texture->format != display->current_mode.format) {
             SDL_SetError("Texture format doesn't match window format");
             return -1;
@@ -974,57 +988,56 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
     SDL_Rect clip, rect;
-    unsigned long foreground;
-    XRectangle *xrects, *xrect;
     int i, xcount;
-
+    XRectangle *xrects, *xrect;
+    
     clip.x = 0;
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(data->xrender_available == SDL_TRUE) {
-        XRenderColor xrender_foreground;
-        xrender_foreground = xrenderdrawcolor(renderer);
+    if(data->use_xrender == SDL_TRUE) {
+        XRectangle xclip;
         
-        xrects = SDL_stack_alloc(XRectangle, 4*count);
+        xclip.x = (short)clip.x;
+        xclip.y = (short)clip.y;
+        xclip.width = (unsigned short)clip.w;
+        xclip.height = (unsigned short)clip.h;
+        
+        XRenderColor foreground;
+        foreground = xrenderdrawcolor(renderer);
+        
+        xrect = xrects = SDL_stack_alloc(XRectangle, count);
         xcount = 0;
-        for(i = 0; i < 4*count; i+=4) {
-            if(!SDL_IntersectRect(rects[i], &clip, &rect)) {
-                continue;
-            }
-            
-            xrects[xcount].x = rect.x;
-            xrects[xcount].y = rect.y;
-            xrects[xcount].width = 1;
-            xrects[xcount].height = rect.h;
+        for (i = 0; i < count; ++i) {
+            xrect->x = (short)rects[i]->x;
+            xrect->y = (short)rects[i]->y;
+            xrect->width = (unsigned short)rects[i]->w;
+            xrect->height = (unsigned short)rects[i]->h;
+            ++xrect;
             ++xcount;
-            xrects[xcount].x = rect.x;
-            xrects[xcount].y = rect.y+rect.h;
-            xrects[xcount].width = rect.w;
-            xrects[xcount].height = 1;
-            ++xcount;
-            xrects[xcount].x = rect.x+rect.w;
-            xrects[xcount].y = rect.y;
-            xrects[xcount].width = 1;
-            xrects[xcount].height = rect.h;
-            ++xcount;
-            xrects[xcount].x = rect.x;
-            xrects[xcount].y = rect.y;
-            xrects[xcount].width = rect.w;
-            xrects[xcount].height = 1;
-            ++xcount;
-            if(data->makedirty) {
-                SDL_AddDirtyRect(&data->dirty, &rect);
-            }
         }
-        XRenderFillRectangles(data->display, PictOpOver, data->drawable_pict,
-                              &xrender_foreground, xrects, xcount);
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &clip);
+        }
+        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XDrawRectangles(data->display, data->mask, data->mask_gc, xrects, xcount);
+        Picture fill =
+            XRenderCreateSolidFill(data->display, &foreground);
+        XRenderSetPictureClipRectangles(data->display, data->drawable_pict, 0, 0, &xclip, 1);
+        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderFreePicture(data->display, fill);
+        SDL_stack_free(xrects);
     }
     else
 #endif
     {
+        
+        unsigned long foreground;
+        
         foreground = renderdrawcolor(renderer, 1);
         XSetForeground(data->display, data->gc, foreground);
     
@@ -1062,54 +1075,87 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
     SDL_Rect clip, rect;
-    unsigned long foreground;
-    XRectangle *xrects, *xrect;
-    int i, xcount;
-
+    
     clip.x = 0;
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
 
-    foreground = renderdrawcolor(renderer, 1);
-    XSetForeground(data->display, data->gc, foreground);
+    int i, xcount;
+    XRectangle *xrects, *xrect;
 
     xrect = xrects = SDL_stack_alloc(XRectangle, count);
     xcount = 0;
-    for (i = 0; i < count; ++i) {
-        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-            continue;
-        }
 
-        xrect->x = (short)rect.x;
-        xrect->y = (short)rect.y;
-        xrect->width = (unsigned short)rect.w;
-        xrect->height = (unsigned short)rect.h;
-        ++xrect;
-        ++xcount;
-
-        if (data->makedirty) {
-            SDL_AddDirtyRect(&data->dirty, &rect);
-        }
-    }
-    if (xcount > 0) {
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if(data->xrender_available == SDL_TRUE)
-        {
-            XRenderColor xrender_foreground_color;
-            xrender_foreground_color = xrenderdrawcolor(renderer);
-            XRenderFillRectangles(data->display, PictOpOver, data->drawable_pict,
-                                  &xrender_foreground_color, xrects, xcount);
+    if(data->use_xrender == SDL_TRUE) {
+        XRectangle xclip;
+        
+        xclip.x = (short)clip.x;
+        xclip.y = (short)clip.y;
+        xclip.width = (unsigned short)clip.w;
+        xclip.height = (unsigned short)clip.h;
+
+        XRenderColor foreground;
+
+        foreground = xrenderdrawcolor(renderer);
+       
+        for (i = 0; i < count; ++i) {
+            xrect->x = (short)rects[i]->x;
+            xrect->y = (short)rects[i]->y;
+            xrect->width = (unsigned short)rects[i]->w;
+            xrect->height = (unsigned short)rects[i]->h;
+            ++xrect;
+            ++xcount;
         }
-        else
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &clip);
+        }
+        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XFillRectangles(data->display, data->mask, data->mask_gc,
+                        xrects, xcount);
+        XRenderSetPictureClipRectangles(data->display, data->drawable_pict, 0, 0, &xclip, 1);
+        Picture fill = 
+            XRenderCreateSolidFill(data->display, &foreground);
+        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderFreePicture(data->display, fill);
+        SDL_stack_free(xrects);
+
+    }
+    else
 #endif
-        {
+    {
+        unsigned long foreground;
+        XRectangle *xrects, *xrect;
+
+        foreground = renderdrawcolor(renderer, 1);
+        XSetForeground(data->display, data->gc, foreground);
+
+        xrect = xrects = SDL_stack_alloc(XRectangle, count);
+        xcount = 0;
+        for (i = 0; i < count; ++i) {
+            if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+                continue;
+            }
+
+            xrect->x = (short)rect.x;
+            xrect->y = (short)rect.y;
+            xrect->width = (unsigned short)rect.w;
+            xrect->height = (unsigned short)rect.h;
+            ++xrect;
+            ++xcount;
+
+            if (data->makedirty) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+        }
         XFillRectangles(data->display, data->drawable, data->gc,
                         xrects, xcount);
-        }
+        SDL_stack_free(xrects);
     }
-    SDL_stack_free(xpoints);
-
+      
     return 0;
 }
 
@@ -1299,10 +1345,10 @@ X11_RenderPresent(SDL_Renderer * renderer)
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             const SDL_Rect *rect = &dirty->rect;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-            if(data->xrender_available == SDL_TRUE)
+            if(data->use_xrender == SDL_TRUE)
             {
                 XRenderComposite(data->display, PictOpOver, data->drawable_pict, None, data->xwindow_pict,
-                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w+1, rect->h+1);
+                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w, rect->h);
             }
             else
 #endif
@@ -1313,14 +1359,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
             }
         }
         SDL_ClearDirtyRects(&data->dirty);
-/*#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        // Clear each pixmap after a render
-        if(data->xrender_available == SDL_TRUE) {
-            XRenderComposite(data->display, PictOpClear, data->drawable_pict, None, data->drawable_pict,
-                             0, 0, 0, 0, 0, 0, renderer->window->w, renderer->window->h);
-        }
-#endif*/
-    }
+   }
     XSync(data->display, False);
 
     /* Update the flipping chain, if any */
@@ -1389,10 +1428,35 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
             if (data->pixmaps[i] != None) {
                 XFreePixmap(data->display, data->pixmaps[i]);
             }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+            if (data->pixmap_picts[i] != None) {
+                XRenderFreePicture(data->display, data->pixmap_picts[i]);
+            }
+#endif
         }
         if (data->gc) {
             XFreeGC(data->display, data->gc);
         }
+        if (data->drawable) {
+            XFreePixmap(data->display, data->drawable);
+        }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->mask_gc) {
+            XFreeGC(data->display, data->gc);
+        }
+        if (data->mask_pict) {
+            XRenderFreePicture(data->display, data->mask_pict);
+        }
+        if (data->mask) {
+            XFreePixmap(data->display, data->mask);
+        }
+        if (data->drawable_pict) {
+            XRenderFreePicture(data->display, data->drawable_pict);
+        }
+        if (data->xwindow_pict) {
+            XRenderFreePicture(data->display, data->xwindow_pict);
+        }
+#endif
         SDL_FreeDirtyRects(&data->dirty);
         SDL_free(data);
     }
