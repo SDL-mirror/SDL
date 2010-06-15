@@ -39,10 +39,16 @@ typedef struct {
   int id;
 } Finger;
 
+typedef struct { //dt + s
+  Point d,s; //direction, start
+  int points;
+} Line;
+
 
 Finger finger[MAXFINGERS];
 
 Finger gestureLast[MAXFINGERS];
+Line gestureLine[MAXFINGERS];
 
 void handler (int sig)
 {
@@ -86,6 +92,11 @@ void setpix(SDL_Surface *screen, int x, int y, unsigned int col)
   *pixmem32 = colour;
 }
 
+void drawLine(SDL_Surface *screen,int x0,int y0,int x1,int y1,unsigned int col) {
+  float t;
+  for(t=0;t<1;t+=1.f/SDL_max(abs(x0-x1),abs(y0-y1)))
+    setpix(screen,x1+t*(x0-x1),y1+t*(y0-y1),col);
+}
 void drawCircle(SDL_Surface* screen,int x,int y,int r,unsigned int c)
 {
 
@@ -145,10 +156,13 @@ void DrawScreen(SDL_Surface* screen, int h)
         }
     }
   drawCircle(screen,mousx,mousy,-30,0xFFFFFF);
-  
+  drawLine(screen,0,0,screen->w,screen->h,0xFFFFFF);
   int i;
 //draw Touch History
-  for(i = 0;i < MAXFINGERS;i++) gestureLast[i].id = -1;
+  for(i = 0;i < MAXFINGERS;i++) {
+    gestureLast[i].id = -1;
+    gestureLine[i].points = 0;
+  }
   for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i != eventWrite;i++) {
     SDL_Event event = events[i&(EVENT_BUF_SIZE-1)];
     int age = eventWrite - i - 1;
@@ -164,10 +178,44 @@ void DrawScreen(SDL_Surface* screen, int h)
       for(j = 0;j<MAXFINGERS;j++) {
 	if(gestureLast[j].id == event.tfinger.fingerId) {
 	  if(event.type == SDL_FINGERUP) {
+	    if(gestureLine[j].points > 0)
+	    drawLine(screen,
+		     gestureLine[j].s.x*screen->w,
+		     gestureLine[j].s.y*screen->h,
+		     (gestureLine[j].s.x +50*gestureLine[j].d.x)*screen->w,
+		     (gestureLine[j].s.y +50*gestureLine[j].d.y)*screen->h,
+		     0xFF00);
+
+	    gestureLine[j].points = 0;
 	    gestureLast[j].id = -1;
 	    break;
 	  }
 	  else {
+	    if(gestureLine[j].points == 1) {
+	      gestureLine[j].d.x = x - gestureLine[j].s.x;
+	      gestureLine[j].d.y = y - gestureLine[j].s.y;
+	    }
+
+	    gestureLine[j].s.x = gestureLine[j].s.x*gestureLine[j].points+x;
+	    gestureLine[j].s.y = gestureLine[j].s.y*gestureLine[j].points+y;
+
+	    gestureLine[j].d.x = gestureLine[j].d.x*gestureLine[j].points+
+	      x - gestureLast[j].p.x;
+	    gestureLine[j].d.y = gestureLine[j].d.y*gestureLine[j].points+
+	      y - gestureLast[j].p.y;;
+
+
+	    gestureLine[j].points++;
+	    
+	    gestureLine[j].s.x /= gestureLine[j].points;
+	    gestureLine[j].s.y /= gestureLine[j].points;
+
+	    gestureLine[j].d.x /= gestureLine[j].points;
+	    gestureLine[j].d.y /= gestureLine[j].points;
+
+	    
+	    
+
 	    gestureLast[j].p.x = x;
 	    gestureLast[j].p.y = y;
 	    break;
@@ -185,6 +233,10 @@ void DrawScreen(SDL_Surface* screen, int h)
 	gestureLast[j].id = event.tfinger.fingerId;
 	gestureLast[j].p.x  = x;
 	gestureLast[j].p.y  = y;
+
+	gestureLine[j].s.x = x;
+	gestureLine[j].s.y = y;
+	gestureLine[j].points = 1;
       }
 
       //draw the touch && each centroid:
