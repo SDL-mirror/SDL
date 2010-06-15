@@ -799,7 +799,6 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 {
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    unsigned long foreground;
     XPoint *xpoints, *xpoint;
     int i, xcount;
 
@@ -818,9 +817,6 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
 
-    foreground = renderdrawcolor(renderer, 1);
-    XSetForeground(data->display, data->gc, foreground);
-
     xpoint = xpoints = SDL_stack_alloc(XPoint, count);
     xcount = 0;
     for (i = 0; i < count; ++i) {
@@ -834,9 +830,30 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
         ++xpoint;
         ++xcount;
     }
-    if (xcount > 0) {
-        XDrawPoints(data->display, data->drawable, data->gc, xpoints, xcount,
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (data->use_xrender == SDL_TRUE) {
+        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h); 
+        XDrawPoints(data->display, data->mask, data->mask_gc, xpoints, xcount,
                     CoordModeOrigin);
+        XRenderColor foreground = xrenderdrawcolor(renderer);
+        Picture fill =
+            XRenderCreateSolidFill(data->display, &foreground);
+        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderFreePicture(data->display, fill);
+    }
+    else
+#endif
+    {
+        unsigned long foreground = renderdrawcolor(renderer, 1);
+        XSetForeground(data->display, data->gc, foreground);
+
+
+        if (xcount > 0) {
+            XDrawPoints(data->display, data->drawable, data->gc, xpoints, xcount,
+                        CoordModeOrigin);
+        }
     }
     SDL_stack_free(xpoints);
 
@@ -860,6 +877,22 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
+
+    Pixmap drawable;
+    GC gc;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (data->use_xrender == SDL_TRUE) {
+        drawable = data->mask;
+        gc = data->mask_gc;
+        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+    }
+    else
+#endif
+    {
+        drawable = data->drawable;
+        gc = data->gc;
+    }
 
     foreground = renderdrawcolor(renderer, 1);
     XSetForeground(data->display, data->gc, foreground);
@@ -915,10 +948,10 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                 ++xpoint;
                 ++xcount;
             }
-            XDrawLines(data->display, data->drawable, data->gc,
+            XDrawLines(data->display, drawable, gc,
                        xpoints, xcount, CoordModeOrigin);
             if (xpoints[0].x != x2 || xpoints[0].y != y2) {
-                XDrawPoint(data->display, data->drawable, data->gc, x2, y2);
+                XDrawPoint(data->display, drawable, gc, x2, y2);
             }
             if (data->makedirty) {
                 SDL_Rect rect;
@@ -962,10 +995,10 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     if (xcount > 1) {
         int x2 = xpoint[-1].x;
         int y2 = xpoint[-1].y;
-        XDrawLines(data->display, data->drawable, data->gc, xpoints, xcount,
+        XDrawLines(data->display, drawable, gc, xpoints, xcount,
                    CoordModeOrigin);
         if (xpoints[0].x != x2 || xpoints[0].y != y2) {
-            XDrawPoint(data->display, data->drawable, data->gc, x2, y2);
+            XDrawPoint(data->display, drawable, gc, x2, y2);
         }
         if (data->makedirty) {
             SDL_Rect rect;
@@ -977,6 +1010,15 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
             SDL_AddDirtyRect(&data->dirty, &rect);
         }
     }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if(data->use_xrender == SDL_TRUE) {
+        XRenderColor xrforeground = xrenderdrawcolor(renderer);
+        Picture fill = XRenderCreateSolidFill(data->display, &xrforeground);
+        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderFreePicture(data->display, fill);
+    }
+#endif
     SDL_stack_free(xpoints);
 
     return 0;
