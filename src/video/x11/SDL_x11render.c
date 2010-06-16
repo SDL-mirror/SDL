@@ -122,8 +122,6 @@ typedef struct
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     Picture picture;
     XRenderPictFormat* picture_fmt;
-    XRenderPictureAttributes picture_attr;
-    unsigned int picture_attr_valuemask;
     SDL_bool use_xrender;
 #endif
     XImage *image;
@@ -435,7 +433,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         // Assume the texture is supported by Xrender
         data->use_xrender = SDL_TRUE;
-        if(renderdata->use_xrender == SDL_FALSE) {
+        if (renderdata->use_xrender == SDL_FALSE) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
                 return -1;
@@ -490,12 +488,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                 renderdata->depth, ZPixmap, shminfo->shmaddr,
                                 shminfo, texture->w, texture->h);
 
-            // This Pixmap is used by Xrender
-            data->pixmap =
-                XShmCreatePixmap(renderdata->display, renderdata->xwindow, shminfo->shmaddr,
-                                 shminfo, texture->w, texture->h, renderdata->depth);
-
-            if (!(data->pixmap && data->image)) {
+            if (!data->image) {
                 XShmDetach(renderdata->display, shminfo);
                 XSync(renderdata->display, False);
                 shmdt(shminfo->shmaddr);
@@ -560,37 +553,41 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if(renderdata->use_xrender && data->pixmap) {
         data->use_xrender = SDL_TRUE;
-        unsigned long x11_fmt_mask; // Format mask
+        /*unsigned long x11_fmt_mask; // Format mask
         XRenderPictFormat x11_templ_fmt; // Format template
         x11_fmt_mask =
-            (PictFormatDepth | PictFormatRedMask | PictFormatGreenMask
-            | PictFormatBlueMask);
+            (PictFormatRedMask | PictFormatGreenMask
+            | PictFormatBlueMask | PictFormatAlphaMask);
         Uint32 Rmask, Gmask, Bmask, Amask;
         int bpp;
         SDL_PixelFormatEnumToMasks(data->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
         x11_templ_fmt.depth = bpp;
-        x11_templ_fmt.direct.redMask = Rmask;
-        x11_templ_fmt.direct.greenMask = Gmask;
-        x11_templ_fmt.direct.blueMask = Bmask;
-        x11_templ_fmt.direct.alphaMask = Amask;
-        /* Return one matching XRenderPictFormat */
+        x11_templ_fmt.type = PictTypeDirect;
+        x11_templ_fmt.direct.red = Rmask / 0xff;
+        x11_templ_fmt.direct.green = Gmask / 0xff;
+        x11_templ_fmt.direct.blue = Bmask / 0xff;
+        x11_templ_fmt.direct.alpha = Amask / 0xff;
+        printf("%d %d %d %d\n", Rmask/0xff, Gmask/0xff, Bmask/0xff, Amask/0xff);
+        // Return a matching XRenderPictFormat
         data->picture_fmt =
-            XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 1);
+            XRenderFindFormat(renderdata->display, x11_fmt_mask, &x11_templ_fmt, 0);*/
+        data->picture_fmt =
+            XRenderFindVisualFormat(renderdata->display, renderdata->visual);
         if(!data->picture_fmt) {
+            printf("XRenderFindFormat failed!\n");
             data->use_xrender = SDL_FALSE;
         }
-        data->picture_attr_valuemask = CPGraphicsExposure;
-        (data->picture_attr).graphics_exposures = False;
         data->picture =
-            XRenderCreatePicture(renderdata->display, data->pixmap, data->picture_fmt,
-                            data->picture_attr_valuemask, &(data->picture_attr));
+            XRenderCreatePicture(renderdata->display, data->pixmap,
+                                 data->picture_fmt, 0, NULL);
         if(!data->picture) {
             data->use_xrender = SDL_FALSE;
         }
     }
     /* We thought we could render the texture with Xrender but this was
         not possible for some reason. Now we must ensure that texture  
-        format and window format match to avoid a BadMatch error.
+        format and window format match to avoid a BadMatch error when
+        rendering using the old pipeline.
     */
     if(data->use_xrender == SDL_FALSE) {
         if (texture->format != display->current_mode.format) {
@@ -685,19 +682,13 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
             }
             /* If this is a static texture we would use Xrender for it
                but this requires that the server side Pixmap associated
-               with this texture be updated with the data as well and 
-               that the pixmap is not a shared memory pixmap.
+               with this texture be updated with the data as well.
                Hopefully the user will not update static textures so
                frequently as to cause a slowdown.
             */
             if (texture->access == SDL_TEXTUREACCESS_STATIC) {
-#ifndef NO_SHARED_MEMORY
-                if(!data->shminfo.shmaddr)
-#endif
-                {
                 XPutImage(renderdata->display, data->pixmap, renderdata->gc,
                           data->image, 0, 0, rect->x, rect->y, rect->w, rect->h);
-                }
             }
 
         } else {
@@ -1211,103 +1202,136 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (data->makedirty) {
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
-    if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-#ifndef NO_SHARED_MEMORY
-        if (texturedata->shminfo.shmaddr) {
-            XShmPutImage(data->display, data->drawable, data->gc,
-                         texturedata->image, srcrect->x, srcrect->y,
-                         dstrect->x, dstrect->y, srcrect->w, srcrect->h,
-                         False);
-        } else
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (data->use_xrender && texturedata->use_xrender && texture->access == SDL_TEXTUREACCESS_STATIC) {
+        if(srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
+            XRenderComposite(data->display, PictOpOver, texturedata->picture, None, data->drawable_pict,
+                             srcrect->x, srcrect->y, 0, 0, dstrect->x, dstrect->y, srcrect->w, srcrect->h);
+        } else {
+            Pixmap scaling_pixmap = 
+                XCreatePixmap(data->display, texturedata->pixmap, dstrect->w, dstrect->h,
+                              data->depth);
+            Picture scaling_picture =
+                XRenderCreatePicture(data->display, scaling_pixmap, texturedata->picture_fmt,
+                                     0, NULL);
+            XRenderComposite(data->display, PictOpClear, scaling_picture, None, scaling_picture,
+                             0, 0, 0, 0, 0, 0, dstrect->w, dstrect->h);
+            XRenderComposite(data->display, PictOpSrc, texturedata->picture, None, scaling_picture,
+                             srcrect->x, srcrect->y, 0, 0, 0, 0, srcrect->w, srcrect->h);
+            double xscale = ((double) dstrect->w) / srcrect->w;
+            double yscale = ((double) dstrect->h) / srcrect->h;
+            XTransform xform =
+                {{{XDoubleToFixed(xscale), XDoubleToFixed(0), XDoubleToFixed(0)},
+                  {XDoubleToFixed(0), XDoubleToFixed(yscale), XDoubleToFixed(0)},
+                  {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(xscale * yscale)}}};
+            XRenderSetPictureTransform(data->display, scaling_picture, &xform);
+            XRenderComposite(data->display, PictOpOver, scaling_picture, None, data->drawable_pict,
+                             0, 0, 0, 0, dstrect->x, dstrect->y, dstrect->w, dstrect->h);
+            XRenderFreePicture(data->display, scaling_picture);
+            XFreePixmap(data->display, scaling_pixmap);
+        }
+    }
+    else
 #endif
-        if (texturedata->pixels) {
-            XPutImage(data->display, data->drawable, data->gc,
-                      texturedata->image, srcrect->x, srcrect->y, dstrect->x,
-                      dstrect->y, srcrect->w, srcrect->h);
+    {
+        if (srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
+#ifndef NO_SHARED_MEMORY
+            if (texturedata->shminfo.shmaddr) {
+                XShmPutImage(data->display, data->drawable, data->gc,
+                             texturedata->image, srcrect->x, srcrect->y,
+                             dstrect->x, dstrect->y, srcrect->w, srcrect->h,
+                             False);
+            } else
+#endif
+            if (texturedata->pixels) {
+                XPutImage(data->display, data->drawable, data->gc,
+                          texturedata->image, srcrect->x, srcrect->y, dstrect->x,
+                          dstrect->y, srcrect->w, srcrect->h);
+            } else {
+                XCopyArea(data->display, texturedata->pixmap, data->drawable,
+                          data->gc, srcrect->x, srcrect->y, dstrect->w,
+                          dstrect->h, dstrect->x, dstrect->y);
+            }
+        } else if (texturedata->yuv
+                   || texture->access == SDL_TEXTUREACCESS_STREAMING) {
+            SDL_Surface src, dst;
+            SDL_PixelFormat fmt;
+            SDL_Rect rect;
+            XImage *image = texturedata->scaling_image;
+
+            if (!image) {
+                void *pixels;
+                int pitch;
+
+                pitch = dstrect->w * SDL_BYTESPERPIXEL(texturedata->format);
+                pixels = SDL_malloc(dstrect->h * pitch);
+                if (!pixels) {
+                    SDL_OutOfMemory();
+                    return -1;
+                }
+
+                image =
+                    XCreateImage(data->display, data->visual, data->depth,
+                                 ZPixmap, 0, pixels, dstrect->w, dstrect->h,
+                                 SDL_BYTESPERPIXEL(texturedata->format) * 8,
+                                 pitch);
+                if (!image) {
+                    SDL_SetError("XCreateImage() failed");
+                    return -1;
+                }
+                texturedata->scaling_image = image;
+
+            } else if (image->width != dstrect->w || image->height != dstrect->h
+                       || !image->data) {
+                image->width = dstrect->w;
+                image->height = dstrect->h;
+                image->bytes_per_line =
+                    image->width * SDL_BYTESPERPIXEL(texturedata->format);
+                image->data =
+                    (char *) SDL_realloc(image->data,
+                                         image->height * image->bytes_per_line);
+                if (!image->data) {
+                    SDL_OutOfMemory();
+                    return -1;
+                }
+            }
+
+            /* Set up fake surfaces for SDL_SoftStretch() */
+            SDL_zero(src);
+            src.format = &fmt;
+            src.w = texture->w;
+            src.h = texture->h;
+#ifndef NO_SHARED_MEMORY
+            if (texturedata->shminfo.shmaddr) {
+                src.pixels = texturedata->shminfo.shmaddr;
+            } else
+#endif
+                src.pixels = texturedata->pixels;
+            src.pitch = texturedata->pitch;
+
+            SDL_zero(dst);
+            dst.format = &fmt;
+            dst.w = image->width;
+            dst.h = image->height;
+            dst.pixels = image->data;
+            dst.pitch = image->bytes_per_line;
+
+            fmt.BytesPerPixel = SDL_BYTESPERPIXEL(texturedata->format);
+
+            rect.x = 0;
+            rect.y = 0;
+            rect.w = dstrect->w;
+            rect.h = dstrect->h;
+            if (SDL_SoftStretch(&src, srcrect, &dst, &rect) < 0) {
+                return -1;
+            }
+            XPutImage(data->display, data->drawable, data->gc, image, 0, 0,
+                      dstrect->x, dstrect->y, dstrect->w, dstrect->h);
         } else {
             XCopyArea(data->display, texturedata->pixmap, data->drawable,
-                      data->gc, srcrect->x, srcrect->y, dstrect->w,
-                      dstrect->h, dstrect->x, dstrect->y);
+                      data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
+                      srcrect->x, srcrect->y);
         }
-    } else if (texturedata->yuv
-               || texture->access == SDL_TEXTUREACCESS_STREAMING) {
-        SDL_Surface src, dst;
-        SDL_PixelFormat fmt;
-        SDL_Rect rect;
-        XImage *image = texturedata->scaling_image;
-
-        if (!image) {
-            void *pixels;
-            int pitch;
-
-            pitch = dstrect->w * SDL_BYTESPERPIXEL(texturedata->format);
-            pixels = SDL_malloc(dstrect->h * pitch);
-            if (!pixels) {
-                SDL_OutOfMemory();
-                return -1;
-            }
-
-            image =
-                XCreateImage(data->display, data->visual, data->depth,
-                             ZPixmap, 0, pixels, dstrect->w, dstrect->h,
-                             SDL_BYTESPERPIXEL(texturedata->format) * 8,
-                             pitch);
-            if (!image) {
-                SDL_SetError("XCreateImage() failed");
-                return -1;
-            }
-            texturedata->scaling_image = image;
-
-        } else if (image->width != dstrect->w || image->height != dstrect->h
-                   || !image->data) {
-            image->width = dstrect->w;
-            image->height = dstrect->h;
-            image->bytes_per_line =
-                image->width * SDL_BYTESPERPIXEL(texturedata->format);
-            image->data =
-                (char *) SDL_realloc(image->data,
-                                     image->height * image->bytes_per_line);
-            if (!image->data) {
-                SDL_OutOfMemory();
-                return -1;
-            }
-        }
-
-        /* Set up fake surfaces for SDL_SoftStretch() */
-        SDL_zero(src);
-        src.format = &fmt;
-        src.w = texture->w;
-        src.h = texture->h;
-#ifndef NO_SHARED_MEMORY
-        if (texturedata->shminfo.shmaddr) {
-            src.pixels = texturedata->shminfo.shmaddr;
-        } else
-#endif
-            src.pixels = texturedata->pixels;
-        src.pitch = texturedata->pitch;
-
-        SDL_zero(dst);
-        dst.format = &fmt;
-        dst.w = image->width;
-        dst.h = image->height;
-        dst.pixels = image->data;
-        dst.pitch = image->bytes_per_line;
-
-        fmt.BytesPerPixel = SDL_BYTESPERPIXEL(texturedata->format);
-
-        rect.x = 0;
-        rect.y = 0;
-        rect.w = dstrect->w;
-        rect.h = dstrect->h;
-        if (SDL_SoftStretch(&src, srcrect, &dst, &rect) < 0) {
-            return -1;
-        }
-        XPutImage(data->display, data->drawable, data->gc, image, 0, 0,
-                  dstrect->x, dstrect->y, dstrect->w, dstrect->h);
-    } else {
-        XCopyArea(data->display, texturedata->pixmap, data->drawable,
-                  data->gc, srcrect->x, srcrect->y, dstrect->w, dstrect->h,
-                  srcrect->x, srcrect->y);
     }
     return 0;
 }
