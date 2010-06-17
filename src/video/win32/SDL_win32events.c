@@ -176,23 +176,24 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         returnCode = 0;
         break;
 
-    case WM_MOUSEMOVE:
+	case WM_MOUSEMOVE:
+        SDL_SetMouseFocus(data->window);
         SDL_SendMouseMotion(0, LOWORD(lParam), HIWORD(lParam));
         break;
 
     case WM_LBUTTONDOWN:
+        SDL_SetMouseFocus(data->window);
         SDL_SendMouseButton(SDL_PRESSED, SDL_BUTTON_LEFT);
         break;
 
     case WM_LBUTTONUP:
+        SDL_SetMouseFocus(data->window);
         SDL_SendMouseButton(SDL_RELEASED, SDL_BUTTON_LEFT);
         break;
 
     case WM_MOUSELEAVE:
-        {
-            if (SDL_GetMouseFocus() == data->window) {
-                SDL_SetMouseFocus(NULL);
-            }
+        if (SDL_GetMouseFocus() == data->window) {
+            SDL_SetMouseFocus(NULL);
         }
         returnCode = 0;
         break;
