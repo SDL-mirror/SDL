@@ -36,12 +36,13 @@
 
 #include <android/log.h>
 
+#include <pthread.h>
 
 /*
 These things are in the JNI android support
 */
- 
-
+extern pthread_mutex_t mSDLRenderMutex;
+extern pthread_cond_t mSDLRenderCondition;
 
 /* GL functions */
 int Android_GL_LoadLibrary(_THIS, const char *path){
@@ -67,7 +68,7 @@ int *Android_GL_GetVisual(_THIS, Display * display, int screen){
 
 SDL_GLContext Android_GL_CreateContext(_THIS, SDL_Window * window){
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_CreateContext\n");
-	return NULL; 
+	return 1;
 }
 
 int Android_GL_MakeCurrent(_THIS, SDL_Window * window,
@@ -87,7 +88,14 @@ int Android_GL_GetSwapInterval(_THIS){
 }
 
 void Android_GL_SwapWindow(_THIS, SDL_Window * window){
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_SwapWindow\n");
+
+	pthread_mutex_lock(&mSDLRenderMutex);
+	pthread_cond_wait(&mSDLRenderCondition, &mSDLRenderMutex);
+	pthread_mutex_unlock(&mSDLRenderMutex);
+	
+	
+	//__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_SwapWindow\n");
+
 }
 
 void Android_GL_DeleteContext(_THIS, SDL_GLContext context){
