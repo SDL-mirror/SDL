@@ -322,7 +322,7 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
 	nf.last_y = y;
 	nf.last_pressure = pressure;
 	SDL_AddFinger(touch,&nf);
-
+	//if(x < 0 || y < 0) return 0; //should defer if only a partial input
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERDOWN) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -364,15 +364,14 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
     int xrel;
     int yrel;
     int x_max = 0, y_max = 0;
-
+	
     if (!touch || touch->flush_motion) {
-        return 0;
-    }
-
-	if(finger == NULL) {
-		SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);
 		return 0;
-	} else {
+    }
+    
+    if(finger == NULL) {
+		return SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);	
+    } else {
 		/* the relative motion is calculated regarding the last position */
 		if (relative) {
 			xrel = x;
@@ -389,9 +388,9 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
 		
 		/* Drop events that don't change state */
 		if (!xrel && !yrel) {
-	#if 0
+#if 0
 			printf("Touch event didn't change state - dropped!\n");
-	#endif
+#endif
 			return 0;
 		}
 		
