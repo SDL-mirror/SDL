@@ -14,6 +14,7 @@
 #include <pthread.h>
 
 #include "importgl.h"
+#include "egl.h"
 
 /*******************************************************************************
                                Globals
@@ -31,7 +32,17 @@ static long _getTime(void){
 }
 
 
+/*******************************************************************************
+                               Things used by libsdl
+*******************************************************************************/
+pthread_mutex_t mSDLRenderMutex;
+pthread_cond_t mSDLRenderCondition;
 
+EGLContext mContext;
+EGLDisplay mDisplay;
+EGLSurface mRead;
+EGLSurface mDraw;
+	
 /*******************************************************************************
                       SDL thread
 *******************************************************************************/
@@ -39,7 +50,13 @@ pthread_t mSDLThread = 0;
 
 void* sdlThreadProc(void* args){
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "Thread Entry");
-	return 0;
+
+	if(!eglMakeCurrent(mDisplay, mDraw, mRead, mContext)){
+		__android_log_print(ANDROID_LOG_INFO, "SDL", "Couldn't make current: 0x%x", eglGetError());
+		return NULL;
+	}
+	
+	return (void *)SDL_main();
 }
    
 /*******************************************************************************
@@ -53,6 +70,21 @@ void Java_org_libsdl_android_TestRenderer_nativeInit( JNIEnv*  env )
 	sDemoStopped = 0;
 
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "Entry point");
+
+	pthread_mutex_init(&mSDLRenderMutex, NULL);
+	pthread_cond_init (&mSDLRenderCondition, NULL);
+
+	//Get some egl stuff we need
+	mContext = eglGetCurrentContext();
+	mDisplay = eglGetCurrentDisplay();
+	mRead = eglGetCurrentSurface(EGL_READ);
+	mDraw = eglGetCurrentSurface(EGL_DRAW);
+
+	//We need to abandon our context so SDL can have it
+	if(!eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT)){
+		__android_log_print(ANDROID_LOG_INFO, "SDL", "Couldn't abandon context: 0x%x", eglGetError());
+		return NULL;
+	}
 
 	//Spin up the SDL thread
 	int r = pthread_create(&mSDLThread, NULL, sdlThreadProc, NULL);
@@ -114,5 +146,11 @@ void Java_org_libsdl_android_TestGLSurfaceView_nativePause( JNIEnv*  env )
 void Java_org_libsdl_android_TestRenderer_nativeRender( JNIEnv*  env )
 {    
 	//TODO: Render here
+
+	pthread_mutex_lock(&mSDLRenderMutex);
+	pthread_cond_signal(&mSDLRenderCondition); //wake up the SDL thread
+	pthread_mutex_unlock(&mSDLRenderMutex);
+
+	//__android_log_print(ANDROID_LOG_INFO, "SDL", "Unlocked");
 
 }
