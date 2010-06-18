@@ -28,6 +28,12 @@
 /* General platform specific identifiers */
 #include "SDL_platform.h"
 
+#ifdef __LP64__
+#define SIZEOF_VOIDP 8
+#else
+#define SIZEOF_VOIDP 4
+#endif
+
 #define SDL_HAS_64BIT_TYPE 1
 #define SDL_BYTEORDER 1234
 
