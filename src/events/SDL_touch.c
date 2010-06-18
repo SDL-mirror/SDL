@@ -300,7 +300,7 @@ SDL_DelFinger(SDL_Touch* touch,int fingerid)
     SDL_free(finger);
     touch->num_fingers--;
     touch->fingers[index] = touch->fingers[touch->num_fingers];
-	return 0;
+    return 0;
 }
 
 
@@ -311,18 +311,24 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
     SDL_Touch* touch = SDL_GetTouch(id);
 
     if(down) {
-	SDL_Finger nf;
-	nf.id = fingerid;
-	nf.x = x;
-	nf.y = y;
-	nf.pressure = pressure;
-	nf.xdelta = 0;
-	nf.ydelta = 0;
-	nf.last_x = x;
-	nf.last_y = y;
-	nf.last_pressure = pressure;
-	SDL_AddFinger(touch,&nf);
-	//if(x < 0 || y < 0) return 0; //should defer if only a partial input
+	SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
+	if(finger == NULL) {
+	    SDL_Finger nf;
+	    nf.id = fingerid;
+	    nf.x = x;
+	    nf.y = y;
+	    nf.pressure = pressure;
+	    nf.xdelta = 0;
+	    nf.ydelta = 0;
+	    nf.last_x = x;
+	    nf.last_y = y;
+	    nf.last_pressure = pressure;
+	    nf.down = SDL_FALSE;
+	    SDL_AddFinger(touch,&nf);
+	    finger = &nf;
+	}
+	else if(finger->down) return 0;
+	if(x < 0 || y < 0) return 0; //should defer if only a partial input
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERDOWN) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -335,10 +341,11 @@ SDL_SendFingerDown(int id, int fingerid, SDL_bool down, int x, int y, int pressu
 	    event.tfinger.fingerId = fingerid;
 	    posted = (SDL_PushEvent(&event) > 0);
 	}
+	if(posted) finger->down = SDL_TRUE;
 	return posted;
     }
     else {
-	SDL_DelFinger(touch,fingerid);
+	if(SDL_DelFinger(touch,fingerid) < 0) return 0;
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERUP) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -364,84 +371,84 @@ SDL_SendTouchMotion(int id, int fingerid, int relative,
     int xrel;
     int yrel;
     int x_max = 0, y_max = 0;
-	
+    
     if (!touch || touch->flush_motion) {
-		return 0;
+	return 0;
     }
     
-    if(finger == NULL) {
-		return SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);	
+    if(finger == NULL || !finger->down) {
+	return SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);	
     } else {
-		/* the relative motion is calculated regarding the last position */
-		if (relative) {
-			xrel = x;
-			yrel = y;
-			x = (finger->last_x + x);
-			y = (finger->last_y + y);
-		} else {
-			if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
-			if(y < 0) y = finger->last_y; /*The other is marked as -1*/
-			if(pressure < 0) pressure = finger->last_pressure;
-			xrel = x - finger->last_x;
-			yrel = y - finger->last_y;
-		}
-		
-		/* Drop events that don't change state */
-		if (!xrel && !yrel) {
-#if 0
-			printf("Touch event didn't change state - dropped!\n");
-#endif
-			return 0;
-		}
-		
-		/* Update internal touch coordinates */
-		
-		finger->x = x;
-		finger->y = y;
-		
-		/*Should scale to window? Normalize? Maintain Aspect?*/
-		//SDL_GetWindowSize(touch->focus, &x_max, &y_max);
-		
-		/* make sure that the pointers find themselves inside the windows */
-		/* only check if touch->xmax is set ! */
-		/*
-		  if (x_max && touch->x > x_max) {
-		  touch->x = x_max;
-		  } else if (touch->x < 0) {
-		  touch->x = 0;
-		  }
-		  
-		  if (y_max && touch->y > y_max) {
-		  touch->y = y_max;
-		  } else if (touch->y < 0) {
-		  touch->y = 0;
-		  }
-		*/
-		finger->xdelta = xrel;
-		finger->ydelta = yrel;
-		finger->pressure = pressure;
-		
-		
-		
-		/* Post the event, if desired */
-		posted = 0;
-		if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
-			SDL_Event event;
-			event.tfinger.type = SDL_FINGERMOTION;
-			event.tfinger.touchId = (Uint8) id;
-			event.tfinger.fingerId = (Uint8) fingerid;
-			event.tfinger.x = x;
-			event.tfinger.y = y;
-			event.tfinger.pressure = pressure;
-			event.tfinger.state = touch->buttonstate;
-			event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
-			posted = (SDL_PushEvent(&event) > 0);
-		}
-		finger->last_x = finger->x;
-		finger->last_y = finger->y;
-		finger->last_pressure = finger->pressure;
-		return posted;
+	/* the relative motion is calculated regarding the last position */
+	if (relative) {
+	    xrel = x;
+	    yrel = y;
+	    x = (finger->last_x + x);
+	    y = (finger->last_y + y);
+	} else {
+	    if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
+	    if(y < 0) y = finger->last_y; /*The other is marked as -1*/
+	    if(pressure < 0) pressure = finger->last_pressure;
+	    xrel = x - finger->last_x;
+	    yrel = y - finger->last_y;
 	}
+	
+	/* Drop events that don't change state */
+	if (!xrel && !yrel) {
+#if 0
+	    printf("Touch event didn't change state - dropped!\n");
+#endif
+	    return 0;
+	}
+	
+	/* Update internal touch coordinates */
+	
+	finger->x = x;
+	finger->y = y;
+	
+	/*Should scale to window? Normalize? Maintain Aspect?*/
+	//SDL_GetWindowSize(touch->focus, &x_max, &y_max);
+	
+	/* make sure that the pointers find themselves inside the windows */
+	/* only check if touch->xmax is set ! */
+	/*
+	  if (x_max && touch->x > x_max) {
+	  touch->x = x_max;
+	  } else if (touch->x < 0) {
+	  touch->x = 0;
+	  }
+	  
+	  if (y_max && touch->y > y_max) {
+	  touch->y = y_max;
+	  } else if (touch->y < 0) {
+	  touch->y = 0;
+	  }
+	*/
+	finger->xdelta = xrel;
+	finger->ydelta = yrel;
+	finger->pressure = pressure;
+	
+	
+	
+	/* Post the event, if desired */
+	posted = 0;
+	if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
+	    SDL_Event event;
+	    event.tfinger.type = SDL_FINGERMOTION;
+	    event.tfinger.touchId = (Uint8) id;
+	    event.tfinger.fingerId = (Uint8) fingerid;
+	    event.tfinger.x = x;
+	    event.tfinger.y = y;
+	    event.tfinger.pressure = pressure;
+	    event.tfinger.state = touch->buttonstate;
+	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
+	    posted = (SDL_PushEvent(&event) > 0);
+	}
+	finger->last_x = finger->x;
+	finger->last_y = finger->y;
+	finger->last_pressure = finger->pressure;
+	return posted;
+    }
 }
 int
 SDL_SendTouchButton(int id, Uint8 state, Uint8 button)

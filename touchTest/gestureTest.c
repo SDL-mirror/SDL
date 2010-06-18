@@ -214,11 +214,12 @@ float dollarRecognize(SDL_Surface* screen, DollarPath path,int *bestTempl) {
   int i;
   
   int k;
+  /*
   for(k = 0;k<DOLLARNPOINTS;k++) {
     printf("(%f,%f)\n",points[k].x,
 	   points[k].y);
   }
-
+  */
   drawDollarPath(screen,points,numPoints,-15,0xFF6600);
 
   int bestDiff = 10000;
@@ -367,23 +368,13 @@ void DrawScreen(SDL_Surface* screen, int h)
 
 	    gestureLine[j].points = 0;
 #endif
-	    //ignore last point - probably invalid
-	    dollarPath[j].numPoints--;
-	    
-	    
-	    float dx = dollarPath[j].p[dollarPath[j].numPoints].x - 
-	      dollarPath[j].p[dollarPath[j].numPoints - 1].x;
-	    float dy = dollarPath[j].p[dollarPath[j].numPoints].y - 
-	      dollarPath[j].p[dollarPath[j].numPoints - 1].y;
-	    dollarPath[j].length -= sqrt(dx*dx+dy*dy);
 
 	    if(!keystat[32]){ //spacebar
 	      int bestTempl;
 	      float error = dollarRecognize(screen,dollarPath[j],&bestTempl);
-	      printf("%i\n",bestTempl);
 	      if(bestTempl >= 0){
 		drawDollarPath(screen,dollarTemplate[bestTempl]
-			       ,DOLLARNPOINTS,-15,0x0066FF);\
+			       ,DOLLARNPOINTS,-15,0x0066FF);
 		
 		printf("ERROR: %f\n",error);
 	      }
@@ -475,8 +466,8 @@ void DrawScreen(SDL_Surface* screen, int h)
       if(gestureLast[j].id < 0) continue; //Finger up. Or some error...
       int k;
       for(k = 0; k < MAXFINGERS;k++) {
-
 	if(gestureLast[k].id < 0) continue;
+	//printf("k = %i, id: %i\n",k,gestureLast[k].id);
 	//colors have no alpha, so shouldn't overflow
 	unsigned int c = (colors[gestureLast[j].id%7] + 
 			  colors[gestureLast[k].id%7])/2; 

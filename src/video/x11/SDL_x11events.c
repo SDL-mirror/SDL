@@ -463,14 +463,16 @@ X11_PumpEvents(_THIS)
 		    break;
 		case EV_SYN:
 		  //printf("Id: %i\n",touch->id); 
-		    if(data->x >= 0 || data->y >= 0)
-			SDL_SendTouchMotion(touch->id,data->finger, 
-					    SDL_FALSE,data->x,data->y,
+		  if(data->up) {
+		      SDL_SendFingerDown(touch->id,data->finger,
+			  	       SDL_FALSE,data->x,data->y,
+				       data->pressure);
+		  }
+		  else if(data->x >= 0 || data->y >= 0)
+		      SDL_SendTouchMotion(touch->id,data->finger, 
+					SDL_FALSE,data->x,data->y,
 					    data->pressure);
-		    if(data->up) 
-			SDL_SendFingerDown(touch->id,data->finger,
-					   SDL_FALSE,data->x,data->y,
-					   data->pressure);
+		  
 		    //printf("Synched: %i tx: %i, ty: %i\n",
 		    //	   data->finger,data->x,data->y);
 		    data->x = -1;

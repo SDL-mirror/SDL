@@ -50,6 +50,7 @@ struct SDL_Finger {
   int xdelta;
   int ydelta;
   int last_x, last_y,last_pressure;  /* the last reported coordinates */
+  SDL_bool down;
   int pressure;
 };
 
