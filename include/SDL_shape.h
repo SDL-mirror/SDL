@@ -74,26 +74,6 @@ extern DECLSPEC SDL_Window * SDLCALL SDL_CreateShapedWindow(const char *title,un
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_WindowIsShaped(const SDL_Window *window);
 
-/**
- * \brief Select the shape of a given window as a rendering target.
- *
- * \param window The window whose shape should become the current rendering target.
- *
- * \return 0 on success, -1 if something other than a valid shaped window is passed into \c window.
- *
- * The shape of the window given in \c window is selected as the new render target, and in the default mode (see
- * SDL_WindowShapeParams) the alpha channel of that render target determines which pixels of the window are part of its
- * visible shape and which are not according to a cutoff value.  All normal SDL rendering functions can be used on it,
- * and its own specific parameters can be examined and set with SDL_GetShapeParameters() and SDL_SetShapeParameters().
- * The final shape will be computed and the actual appearance of the window changed only upon a call to
- * SDL_RenderPresent().
- *
- * \sa SDL_GetShapeParameters
- * \sa SDL_SetShapeParameters
- * \sa SDL_RenderPresent
- */
-extern DECLSPEC int SDLCALL SDL_SelectShapeRenderer(const SDL_Window *window);
-
 /** \brief An enum denoting the specific type of contents present in an SDL_WindowShapeParams union. */
 typedef enum {ShapeModeDefault, ShapeModeBinarizeAlpha} WindowShapeMode;
 /** \brief A union containing parameters for shaped windows. */
@@ -111,18 +91,19 @@ typedef struct SDL_WindowShapeMode {
 } SDL_WindowShapeMode;
 
 /**
- * \brief Set the shape parameters of a shaped window.
+ * \brief Set the shape and parameters of a shaped window.
  *
  * \param window The shaped window whose parameters should be set.
- * \param shapeMode The parameters to set for the shaped window.
+ * \param shape A surface encoding the desired shape for the window as a bitmap mask.
+ * \param parameters The parameters to set for the shaped window.
  *
- * \return 0 on success, -1 on invalid parameters in the shapeMode argument, or -2 if the SDL_Window given is not a
- *         shaped window.
+ * \return 0 on success, -1 on invalid an invalid shape argument, or -2 if the SDL_Window* given does not reference
+ *         a valid shaped window.
  *
  * \sa SDL_WindowShapeMode
- * \sa SDL_GetShapeParameters
+ * \sa SDL_GetShapeParameters.
  */
-extern DECLSPEC int SDLCALL SDL_SetShapeParameters(SDL_Window *window,SDL_WindowShapeMode shapeMode);
+extern DECLSPEC int SDLCALL SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode parameters);
 
 /**
  * \brief Set the shape parameters of a shaped window.

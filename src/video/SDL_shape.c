@@ -34,13 +34,11 @@ SDL_bool SDL_WindowIsShaped(const SDL_Window *window) {
 	return SDL_FALSE;
 }
 
-int SDL_SelectShapeRenderer(const SDL_Window *window) {
-	return -1;
-}
-
-int SDL_SetShapeParameters(SDL_Window *window,SDL_WindowShapeMode shapeMode) {
+int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode parameters) {
 	if(window == NULL || !SDL_WindowIsShaped(window))
 		return -2;
+	if(shape == NULL)
+		return -1;
 	return -3;
 }
 
