@@ -482,6 +482,14 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
         if (!shm_error) {
             data->pixels = shminfo->shmaddr;
+            data->pixmap =
+                XCreatePixmap(renderdata->display, renderdata->xwindow, texture->w,
+                              texture->h, renderdata->depth);
+            if (data->pixmap == None) {
+                X11_DestroyTexture(renderer, texture);
+                SDL_SetError("XCreatePixmap() failed");
+                return -1;
+            }
 
             data->image =
                 XShmCreateImage(renderdata->display, renderdata->visual,
@@ -516,6 +524,14 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 return -1;
             }
 
+            data->pixmap =
+                XCreatePixmap(renderdata->display, renderdata->xwindow, texture->w,
+                              texture->h, renderdata->depth);
+            if (data->pixmap == None) {
+                X11_DestroyTexture(renderer, texture);
+                SDL_SetError("XCreatePixmap() failed");
+                return -1;
+            }
             data->image =
                 XCreateImage(renderdata->display, renderdata->visual,
                              renderdata->depth, ZPixmap, 0, data->pixels,
@@ -665,7 +681,6 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
 
         if (data->pixels) {
-            // If we have already allocated memory or were given memory by XShm
             Uint8 *src, *dst;
             int row;
             size_t length;
@@ -680,17 +695,6 @@ X11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                 src += pitch;
                 dst += data->pitch;
             }
-            /* If this is a static texture we would use Xrender for it
-               but this requires that the server side Pixmap associated
-               with this texture be updated with the data as well.
-               Hopefully the user will not update static textures so
-               frequently as to cause a slowdown.
-            */
-            if (texture->access == SDL_TEXTUREACCESS_STATIC) {
-                XPutImage(renderdata->display, data->pixmap, renderdata->gc,
-                          data->image, 0, 0, rect->x, rect->y, rect->w, rect->h);
-            }
-
         } else {
             data->image->width = rect->w;
             data->image->height = rect->h;
@@ -823,15 +827,22 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender == SDL_TRUE) {
+        XRenderColor foreground;
+        
+        foreground = xrenderdrawcolor(renderer);
+
         XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h); 
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
+
         XDrawPoints(data->display, data->mask, data->mask_gc, xpoints, xcount,
                     CoordModeOrigin);
-        XRenderColor foreground = xrenderdrawcolor(renderer);
+
         Picture fill =
             XRenderCreateSolidFill(data->display, &foreground);
+
         XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
+
         XRenderFreePicture(data->display, fill);
     }
     else
@@ -1023,7 +1034,24 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     SDL_Rect clip, rect;
     int i, xcount;
     XRectangle *xrects, *xrect;
-    
+    xrect = xrects = SDL_stack_alloc(XRectangle, count);
+    xcount = 0;
+    for (i = 0; i < count; ++i) {
+        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+            continue;
+        }
+
+        xrect->x = (short)rect.x;
+        xrect->y = (short)rect.y;
+        xrect->width = (unsigned short)rect.w;
+        xrect->height = (unsigned short)rect.h;
+        ++xrect;
+        ++xcount;
+
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+    }
     clip.x = 0;
     clip.y = 0;
     clip.w = window->w;
@@ -1031,67 +1059,26 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if(data->use_xrender == SDL_TRUE) {
-        XRectangle xclip;
-        
-        xclip.x = (short)clip.x;
-        xclip.y = (short)clip.y;
-        xclip.width = (unsigned short)clip.w;
-        xclip.height = (unsigned short)clip.h;
-        
         XRenderColor foreground;
         foreground = xrenderdrawcolor(renderer);
         
-        xrect = xrects = SDL_stack_alloc(XRectangle, count);
-        xcount = 0;
-        for (i = 0; i < count; ++i) {
-            xrect->x = (short)rects[i]->x;
-            xrect->y = (short)rects[i]->y;
-            xrect->width = (unsigned short)rects[i]->w;
-            xrect->height = (unsigned short)rects[i]->h;
-            ++xrect;
-            ++xcount;
-        }
-        if (data->makedirty) {
-            SDL_AddDirtyRect(&data->dirty, &clip);
-        }
         XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
         XDrawRectangles(data->display, data->mask, data->mask_gc, xrects, xcount);
         Picture fill =
             XRenderCreateSolidFill(data->display, &foreground);
-        XRenderSetPictureClipRectangles(data->display, data->drawable_pict, 0, 0, &xclip, 1);
         XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
         XRenderFreePicture(data->display, fill);
-        SDL_stack_free(xrects);
     }
     else
 #endif
     {
-        
         unsigned long foreground;
         
         foreground = renderdrawcolor(renderer, 1);
         XSetForeground(data->display, data->gc, foreground);
     
-        xrect = xrects = SDL_stack_alloc(XRectangle, count);
-        xcount = 0;
-        for (i = 0; i < count; ++i) {
-            if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-                continue;
-            }
-
-            xrect->x = (short)rect.x;
-            xrect->y = (short)rect.y;
-            xrect->width = (unsigned short)rect.w;
-            xrect->height = (unsigned short)rect.h;
-            ++xrect;
-            ++xcount;
-    
-            if (data->makedirty) {
-                SDL_AddDirtyRect(&data->dirty, &rect);
-            }
-        }   
         if (xcount > 0) {
             XDrawRectangles(data->display, data->drawable, data->gc,
                             xrects, xcount);
@@ -1116,79 +1103,55 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 
     int i, xcount;
     XRectangle *xrects, *xrect;
-
     xrect = xrects = SDL_stack_alloc(XRectangle, count);
     xcount = 0;
+    for (i = 0; i < count; ++i) {
+        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+            continue;
+        }
+
+        xrect->x = (short)rect.x;
+        xrect->y = (short)rect.y;
+        xrect->width = (unsigned short)rect.w;
+        xrect->height = (unsigned short)rect.h;
+        ++xrect;
+        ++xcount;
+
+        if (data->makedirty) {
+            SDL_AddDirtyRect(&data->dirty, &rect);
+        }
+    }
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if(data->use_xrender == SDL_TRUE) {
-        XRectangle xclip;
-        
-        xclip.x = (short)clip.x;
-        xclip.y = (short)clip.y;
-        xclip.width = (unsigned short)clip.w;
-        xclip.height = (unsigned short)clip.h;
-
         XRenderColor foreground;
 
         foreground = xrenderdrawcolor(renderer);
-       
-        for (i = 0; i < count; ++i) {
-            xrect->x = (short)rects[i]->x;
-            xrect->y = (short)rects[i]->y;
-            xrect->width = (unsigned short)rects[i]->w;
-            xrect->height = (unsigned short)rects[i]->h;
-            ++xrect;
-            ++xcount;
-        }
-        if (data->makedirty) {
-            SDL_AddDirtyRect(&data->dirty, &clip);
-        }
+         
         XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
         XFillRectangles(data->display, data->mask, data->mask_gc,
                         xrects, xcount);
-        XRenderSetPictureClipRectangles(data->display, data->drawable_pict, 0, 0, &xclip, 1);
         Picture fill = 
             XRenderCreateSolidFill(data->display, &foreground);
         XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
         XRenderFreePicture(data->display, fill);
-        SDL_stack_free(xrects);
-
     }
     else
 #endif
     {
         unsigned long foreground;
-        XRectangle *xrects, *xrect;
-
+        
         foreground = renderdrawcolor(renderer, 1);
         XSetForeground(data->display, data->gc, foreground);
-
-        xrect = xrects = SDL_stack_alloc(XRectangle, count);
-        xcount = 0;
-        for (i = 0; i < count; ++i) {
-            if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-                continue;
-            }
-
-            xrect->x = (short)rect.x;
-            xrect->y = (short)rect.y;
-            xrect->width = (unsigned short)rect.w;
-            xrect->height = (unsigned short)rect.h;
-            ++xrect;
-            ++xcount;
-
-            if (data->makedirty) {
-                SDL_AddDirtyRect(&data->dirty, &rect);
-            }
-        }
+ 
         XFillRectangles(data->display, data->drawable, data->gc,
                         xrects, xcount);
-        SDL_stack_free(xrects);
     }
-      
+
+    SDL_stack_free(xrects);
+
     return 0;
 }
 
@@ -1203,7 +1166,23 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if (data->use_xrender && texturedata->use_xrender && texture->access == SDL_TEXTUREACCESS_STATIC) {
+    if (data->use_xrender && texturedata->use_xrender) {
+        if(texture->access == SDL_TEXTUREACCESS_STREAMING) {
+#ifndef NO_SHARED_MEMORY
+            if(texturedata->shminfo.shmaddr) {
+                XShmPutImage(data->display, texturedata->pixmap, data->gc,
+                             texturedata->image, srcrect->x, srcrect->y,
+                             srcrect->x, srcrect->y, srcrect->w, srcrect->h,
+                             False);
+            }
+            else
+#endif
+            if (texturedata->pixels) {
+                XPutImage(data->display, texturedata->pixmap, data->gc,
+                          texturedata->image, srcrect->x, srcrect->y, dstrect->x,
+                          dstrect->y, srcrect->w, srcrect->h);
+            }
+        }
         if(srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
             XRenderComposite(data->display, PictOpOver, texturedata->picture, None, data->drawable_pict,
                              srcrect->x, srcrect->y, 0, 0, dstrect->x, dstrect->y, srcrect->w, srcrect->h);
