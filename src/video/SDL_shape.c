@@ -30,11 +30,11 @@ SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int
 	return NULL;
 }
 
-SDL_bool SDL_WindowIsShaped(const SDL_Window *window) {
+SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 	return SDL_FALSE;
 }
 
-int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode parameters) {
+int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
 	if(window == NULL || !SDL_WindowIsShaped(window))
 		return -2;
 	if(shape == NULL)
@@ -42,7 +42,7 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 	return -3;
 }
 
-int SDL_GetShapeParameters(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
+int SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
 	if(shapeMode == NULL)
 		return -1;
 	if(window == NULL || !SDL_WindowIsShaped(window))
