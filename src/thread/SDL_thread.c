@@ -38,7 +38,7 @@ static int SDL_numthreads = 0;
 static SDL_Thread **SDL_Threads = NULL;
 static SDL_mutex *thread_lock = NULL;
 
-int
+static int
 SDL_ThreadsInit(void)
 {
     int retval;
@@ -56,7 +56,7 @@ SDL_ThreadsInit(void)
    clean up threads here.  If any threads are still running after this call,
    they will no longer have access to any per-thread data.
  */
-void
+static void
 SDL_ThreadsQuit(void)
 {
     SDL_mutex *mutex;

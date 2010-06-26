@@ -116,7 +116,7 @@ SDL_SetError(const char *fmt, ...)
 /* This function has a bit more overhead than most error functions
    so that it supports internationalization and thread-safe errors.
 */
-char *
+static char *
 SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 {
     SDL_error *error;

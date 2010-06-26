@@ -257,7 +257,7 @@ finalize_audio_entry_points(void)
 
 /* Streaming functions (for when the input and output buffer sizes are different) */
 /* Write [length] bytes from buf into the streamer */
-void
+static void
 SDL_StreamWrite(SDL_AudioStreamer * stream, Uint8 * buf, int length)
 {
     int i;
@@ -269,7 +269,7 @@ SDL_StreamWrite(SDL_AudioStreamer * stream, Uint8 * buf, int length)
 }
 
 /* Read [length] bytes out of the streamer into buf */
-void
+static void
 SDL_StreamRead(SDL_AudioStreamer * stream, Uint8 * buf, int length)
 {
     int i;
@@ -280,14 +280,14 @@ SDL_StreamRead(SDL_AudioStreamer * stream, Uint8 * buf, int length)
     }
 }
 
-int
+static int
 SDL_StreamLength(SDL_AudioStreamer * stream)
 {
     return (stream->write_pos - stream->read_pos) % stream->max_len;
 }
 
 /* Initialize the stream by allocating the buffer and setting the read/write heads to the beginning */
-int
+static int
 SDL_StreamInit(SDL_AudioStreamer * stream, int max_len, Uint8 silence)
 {
     /* First try to allocate the buffer */
@@ -307,7 +307,7 @@ SDL_StreamInit(SDL_AudioStreamer * stream, int max_len, Uint8 silence)
 }
 
 /* Deinitialize the stream simply by freeing the buffer */
-void
+static void
 SDL_StreamDeinit(SDL_AudioStreamer * stream)
 {
     if (stream->buffer != NULL) {

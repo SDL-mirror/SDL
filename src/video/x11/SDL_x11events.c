@@ -296,7 +296,7 @@ X11_DispatchEvent(_THIS)
 }
 
 /* Ack!  XPending() actually performs a blocking read if no events available */
-int
+static int
 X11_Pending(Display * display)
 {
     /* Flush the display connection and look to see if events are queued */

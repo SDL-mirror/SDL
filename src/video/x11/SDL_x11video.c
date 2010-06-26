@@ -292,7 +292,7 @@ X11_VideoQuit(_THIS)
 }
 
 SDL_bool
-X11_UseDirectColorVisuals()
+X11_UseDirectColorVisuals(void)
 {
     /* Once we implement DirectColor colormaps and gamma ramp support...
        return SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ? SDL_FALSE : SDL_TRUE;

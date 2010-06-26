@@ -26,6 +26,7 @@
 #include "SDL_pixels_c.h"
 #include "SDL_rect_c.h"
 #include "SDL_yuv_sw_c.h"
+#include "SDL_renderer_sw.h"
 
 
 /* SDL surface based renderer implementation */

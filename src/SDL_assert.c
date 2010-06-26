@@ -22,6 +22,7 @@
 
 #include "SDL.h"
 #include "SDL_assert.h"
+#include "SDL_assert_c.h"
 #include "video/SDL_sysvideo.h"
 
 #ifdef _WINDOWS

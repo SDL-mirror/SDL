@@ -335,7 +335,7 @@ SDL_GetCPUCount()
 }
 
 /* Oh, such a sweet sweet trick, just not very useful. :) */
-const char *
+static const char *
 SDL_GetCPUType()
 {
     static char SDL_CPUType[48];
