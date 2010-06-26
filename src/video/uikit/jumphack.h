@@ -11,6 +11,6 @@
 
 /* see SDL_uikitevents.m for more info */
 
-extern jmp_buf *jump_env();
+extern jmp_buf *jump_env(void);
 
 #endif
