@@ -102,6 +102,7 @@ typedef struct
     Picture pixmap_picts[3];
     Picture drawable_pict;
     Picture mask_pict;
+    int blend_op;
     XRenderPictFormat* xwindow_pict_fmt;
     GC mask_gc;
     SDL_bool use_xrender;
@@ -743,14 +744,27 @@ X11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 X11_SetDrawBlendMode(SDL_Renderer * renderer)
 {
+    X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
-        return 0;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->blend_op = PictOpSrc;
+        return 0;
     case SDL_BLENDMODE_MASK: // Use src pict as mask
+        data->blend_op = PictOpSrc;
+        return 0;
     case SDL_BLENDMODE_ADD: // PictOpAdd
+        data->blend_op = PictOpAdd;
+        return 0;
     case SDL_BLENDMODE_BLEND: // PictOpOver
+        data->blend_op = PictOpOver;
+        return 0;
     /* FIXME case SDL_BLENDMODE_MOD: */
+    default: // PictOpSrc
+        SDL_Unsupported();
+        renderer->blendMode = SDL_BLENDMODE_NONE;
+        data->blend_op = PictOpSrc;
+        return -1;
 #endif
         return 0;
     default:
@@ -840,8 +854,8 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
         Picture fill =
             XRenderCreateSolidFill(data->display, &foreground);
 
-        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
+                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
 
         XRenderFreePicture(data->display, fill);
     }
@@ -1016,8 +1030,8 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     if(data->use_xrender == SDL_TRUE) {
         XRenderColor xrforeground = xrenderdrawcolor(renderer);
         Picture fill = XRenderCreateSolidFill(data->display, &xrforeground);
-        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
+                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
         XRenderFreePicture(data->display, fill);
     }
 #endif
@@ -1067,8 +1081,8 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         XDrawRectangles(data->display, data->mask, data->mask_gc, xrects, xcount);
         Picture fill =
             XRenderCreateSolidFill(data->display, &foreground);
-        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
+                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
         XRenderFreePicture(data->display, fill);
     }
     else
@@ -1134,8 +1148,8 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
                         xrects, xcount);
         Picture fill = 
             XRenderCreateSolidFill(data->display, &foreground);
-        XRenderComposite(data->display, PictOpOver, fill, data->mask_pict, data->drawable_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
+                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
         XRenderFreePicture(data->display, fill);
     }
     else
@@ -1392,8 +1406,15 @@ X11_RenderPresent(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
             if(data->use_xrender == SDL_TRUE)
             {
-                XRenderComposite(data->display, PictOpOver, data->drawable_pict, None, data->xwindow_pict,
-                                 rect->x, rect->y, 0, 0, rect->x, rect->y, rect->w, rect->h);
+                if(renderer->blendMode == SDL_BLENDMODE_MASK)
+                    XRenderComposite(data->display, data->blend_op, data->drawable_pict,
+                                     data->drawable_pict, data->xwindow_pict, rect->x, rect->y,
+                                     0, 0, rect->x, rect->y, rect->w, rect->h);
+                else
+                    XRenderComposite(data->display, data->blend_op, data->drawable_pict, None,
+                                     data->xwindow_pict, rect->x, rect->y, 0, 0, rect->x, rect->y,
+                                     rect->w, rect->h);
+
             }
             else
 #endif
