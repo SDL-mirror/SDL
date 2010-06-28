@@ -2,7 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
-LOCAL_MODULE := sanangeles
+LOCAL_MODULE := sdltest
 
 SDL := /home/paul/Projects/gsoc/SDL-gsoc2010_android/
 

@@ -16,47 +16,56 @@ import android.graphics.*;
 import java.lang.*;
 
 
-//http://www.mail-archive.com/android-beginners@googlegroups.com/msg01830.html
-
-/*
-In TestActivity::onResume() call SDL_Init
-SDL_GL_CreateContext call SDLSurface::createSDLGLContext()
-SDL_GL_FlipBuffers calls SDLSurface::flip()
-
+/**
+    SDL Activity
 */
+public class SDLActivity extends Activity {
 
+    //Main components
+    private static SDLActivity mSingleton;
+    private static SDLSurface mSurface;
 
+    //Load the .so
+    static {
+        System.loadLibrary("sdltest");
+    }
 
-public class TestActivity extends Activity {
-
+    //Setup
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        //So we can call stuff from static callbacks
+        mSingleton = this;
+
+        //Set up the surface
         mSurface = new SDLSurface(getApplication());
         setContentView(mSurface);
         SurfaceHolder holder = mSurface.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_GPU); 
+
+        
     }
 
+    //Events
     protected void onPause() {
         super.onPause();
     }
 
     protected void onResume() {
         super.onResume();
-
-        //All set up. Start up SDL
-       
-       
     }
 
-    private static SDLSurface mSurface;
 
-    static {
-        System.loadLibrary("sanangeles");
-    }
+
+
+
 
     //C functions we call
     public static native void nativeInit();
+
+
+
+
 
 
     //Java functions called from C
@@ -65,56 +74,88 @@ public class TestActivity extends Activity {
     }
 
     public static void flipBuffers(){
-        mSurface.flipBuffers();
+        mSurface.flipEGL();
     }
+
+
+
+
+
+
+
+    //EGL context creation
+    
 }
 
-class SDLThread implements Runnable{
+/**
+    Simple nativeInit() runnable
+*/
+class SDLRunner implements Runnable{
     public void run(){
-        TestActivity.nativeInit();
+        //Runs SDL_main()
+        SDLActivity.nativeInit();
     }
 }
 
+
+/**
+    SDLSurface. This is what we draw on, so we need to know when it's created
+    in order to do anything useful. 
+
+    Because of this, that's where we set up the SDL thread
+*/
 class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
 
+    //This is what SDL runs in. It invokes SDL_main(), eventually
+    private Thread mSDLThread;    
+    
+    //EGL private objects
     private EGLContext  mEGLContext;
     private EGLSurface  mEGLSurface;
     private EGLDisplay  mEGLDisplay;
 
+    //Startup    
+    public SDLSurface(Context context) {
+        super(context);
+        getHolder().addCallback(this);      
+    }
+
+    //Called when we have a valid drawing surface
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SDL","Surface created"); 
 
-        Thread runner = new Thread(new SDLThread(), "SDLThread"); // (1) Create a new thread.
-		runner.start(); // (2) Start the thread     
-        
+        mSDLThread = new Thread(new SDLRunner(), "SDLThread"); 
+		mSDLThread.start();       
     }
 
+    //Called when we lose the surface
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v("SDL","Surface destroyed");
     }
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-       
+    //Called when the surface is resized
+    public void surfaceChanged(SurfaceHolder holder, int format, 
+                                int width, int height) {
+        Log.v("SDL","Surface resized");
     }
 
+    //unused
+    public void onDraw(Canvas canvas) {}
 
-    boolean initEGL(){
+    
+    //EGL functions
+    public boolean initEGL(){
         Log.v("SDL","Starting up");
 
         try{
 
-            // Get an EGL instance
             EGL10 egl = (EGL10)EGLContext.getEGL();
 
-            // Get to the default display.
             EGLDisplay dpy = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
 
-            // We can now initialize EGL for that display
             int[] version = new int[2];
             egl.eglInitialize(dpy, version);
 
-            // Specify a configuration for our opengl session
-            // and grab the first configuration that matches is
             int[] configSpec = {
                     //EGL10.EGL_DEPTH_SIZE,   16,
                     EGL10.EGL_NONE
@@ -124,21 +165,21 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
             egl.eglChooseConfig(dpy, configSpec, configs, 1, num_config);
             EGLConfig config = configs[0];
 
-            // Create an OpenGL ES context. This must be done only once
             EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, null);
 
-            // Create an EGL surface we can render into.
             EGLSurface surface = egl.eglCreateWindowSurface(dpy, config, this, null);
 
-            // Before we can issue GL commands, we need to make sure
-            // the context is current and bound to a surface.
             egl.eglMakeCurrent(dpy, surface, surface, ctx);
 
             mEGLContext = ctx;
             mEGLDisplay = dpy;
             mEGLSurface = surface;
+            
         }catch(Exception e){
             Log.v("SDL", e + "");
+            for(StackTraceElement s : e.getStackTrace()){
+                Log.v("SDL", s.toString());
+            }
         }
 
         Log.v("SDL","Done making!");
@@ -146,22 +187,8 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
         return true;
     }
 
-    public SDLSurface(Context context) {
-        super(context);
-
-        getHolder().addCallback(this);
-      
-    }
-
-     public void onDraw(Canvas canvas) {
-
-        
-     }
-
-
-    public void flipBuffers(){
-        //Log.v("test","Draw!");
-
+    //EGL buffer flip
+    public void flipEGL(){      
         try{
         
             EGL10 egl = (EGL10)EGLContext.getEGL();
@@ -177,35 +204,13 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
 
             
         }catch(Exception e){
-            Log.v("SDL", e + "");
+            Log.v("SDL", "flipEGL(): " + e);
+
+            for(StackTraceElement s : e.getStackTrace()){
+                Log.v("SDL", s.toString());
+            }
         }
-
     }
-
 }
 
 
-/*
-class TestRenderer implements GLSurfaceView.Renderer {
-    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-        nativeInit();
-    }
-
-    
-
-    public void onSurfaceChanged(GL10 gl, int w, int h) {
-        //gl.glViewport(0, 0, w, h);
-        nativeResize(w, h);
-    }
-
-    public void onDrawFrame(GL10 gl) {
-        nativeRender();
-    }
-
-    private static native void nativeInit();
-    private static native void nativeResize(int w, int h);
-    private static native void nativeRender();
-    private static native void nativeDone();
-
-}
-*/

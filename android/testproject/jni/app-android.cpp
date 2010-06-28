@@ -41,7 +41,7 @@ extern "C" int SDL_main();
                  Functions called by JNI
 *******************************************************************************/	
 
-extern "C" void Java_org_libsdl_android_TestActivity_nativeInit( JNIEnv*  env, jobject obj )
+extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv*  env, jobject obj )
 {    
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: NativeInit");
 
@@ -63,7 +63,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
 
     __android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: OnLoad");
 
-    jclass cls = mEnv->FindClass ("org/libsdl/android/TestActivity"); 
+    jclass cls = mEnv->FindClass ("org/libsdl/android/SDLActivity"); 
     mActivityInstance = cls;
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
