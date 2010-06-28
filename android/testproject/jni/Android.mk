@@ -11,8 +11,8 @@ LOCAL_CFLAGS := -DANDROID_NDK \
                 -I$(SDL)/include
 
 LOCAL_SRC_FILES := \
-    importgl.c \
-    app-android.c \
+    importgl.cpp \
+    app-android.cpp \
     lesson05.c \
 
 LOCAL_LDLIBS := -lGLESv1_CM -ldl -llog -lSDL -lEGL -lgcc -L$(SDL) -L$(SDL)/build-scripts/android_libs/
