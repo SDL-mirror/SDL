@@ -74,16 +74,22 @@ STDMETHODIMP_(ULONG) TSF::TSF_Text_Store::Release()
 	return 0;
 }
 
+#define CHECK_CONDITION(condition, retval, function, line)						\
+	if (!condition)																\
+	{																			\
+		printf("%s:%d: Condition failure: %s\n", function, line, #condition);	\
+	}
+
+#define ENSURE(condition, retval)	CHECK_CONDITION(condition, retval, __FUNCTION__, __LINE__)
+
 STDMETHODIMP TSF::TSF_Text_Store::AdviseSink(REFIID riid, IUnknown *punk, DWORD dwMask)
 {
-	if (!punk || IID_ITextStoreACPSink != riid)
-		return E_INVALIDARG;
+	ENSURE(punk && IID_ITextStoreACP == riid, E_INVALIDARG);
 
 	if (!my_Sink)
 	{
-		punk->QueryInterface(&my_Sink);
-		if (!my_Sink)
-			return E_UNEXPECTED;
+		HRESULT hr = punk->QueryInterface(&my_Sink);
+		ENSURE(SUCCEEDED(hr) && my_Sink, E_UNEXPECTED);
 	}
 	else
 	{
@@ -99,11 +105,8 @@ STDMETHODIMP TSF::TSF_Text_Store::AdviseSink(REFIID riid, IUnknown *punk, DWORD 
 
 STDMETHODIMP TSF::TSF_Text_Store::UnadviseSink(IUnknown *punk)
 {
-	if (!punk)
-		return E_INVALIDARG;
-
-	if (!my_Sink)
-		return CONNECT_E_NOCONNECTION;
+	ENSURE(punk, E_INVALIDARG);
+	ENSURE(my_Sink, CONNECT_E_NOCONNECTION);
 
 	CComPtr<IUnknown> Unknown_1, Unknown_2;
 	punk->QueryInterface(&Unknown_1);
@@ -119,12 +122,8 @@ STDMETHODIMP TSF::TSF_Text_Store::UnadviseSink(IUnknown *punk)
 
 STDMETHODIMP TSF::TSF_Text_Store::RequestLock(DWORD dwLockFlags, HRESULT *phrSession)
 {
-	if (!my_Sink)
-		return E_FAIL;
-
-	if (!phrSession)
-		return E_INVALIDARG;
-
+	ENSURE(my_Sink, E_FAIL);
+	ENSURE(phrSession, E_INVALIDARG);
 	if (my_Lock)
 	{
 		if (TS_LF_READ == (my_Lock & TS_LF_READWRITE)
@@ -157,9 +156,7 @@ STDMETHODIMP TSF::TSF_Text_Store::RequestLock(DWORD dwLockFlags, HRESULT *phrSes
 
 STDMETHODIMP TSF::TSF_Text_Store::GetStatus(TS_STATUS *pdcs)
 {
-	if (!pdcs)
-		return E_INVALIDARG;
-
+	ENSURE(pdcs, E_INVALIDARG);
 	pdcs->dwDynamicFlags = 0;
 	pdcs->dwStaticFlags = TS_SS_NOHIDDENTEXT;
 	return S_OK;
@@ -167,8 +164,7 @@ STDMETHODIMP TSF::TSF_Text_Store::GetStatus(TS_STATUS *pdcs)
 
 STDMETHODIMP TSF::TSF_Text_Store::QueryInsert(LONG acpTestStart, LONG acpTestEnd, ULONG cch, LONG *pacpResultStart, LONG *pacpResultEnd)
 {
-	if (acpTestStart < 0 || acpTestStart > acpTestEnd || !pacpResultStart || !pacpResultEnd)
-		return E_INVALIDARG;
+	ENSURE(0 <= acpTestStart && acpTestStart <= acpTestEnd && pacpResultStart && pacpResultEnd, E_INVALIDARG);
 
 	*pacpResultStart = acpTestStart;
 	*pacpResultEnd = acpTestStart + cch;
@@ -177,16 +173,11 @@ STDMETHODIMP TSF::TSF_Text_Store::QueryInsert(LONG acpTestStart, LONG acpTestEnd
 
 STDMETHODIMP TSF::TSF_Text_Store::GetSelection(ULONG ulIndex, ULONG ulCount, TS_SELECTION_ACP *pSelection, ULONG *pcFetched)
 {
-	if (TS_LF_READ != (my_Lock & TS_LF_READ))
-		return TS_E_NOLOCK;
-
-	if (!ulCount || !pSelection || !pcFetched)
-		return E_INVALIDARG;
+	ENSURE(TS_LF_READ == (my_Lock && TS_LF_READ), TS_E_NOLOCK);
+	ENSURE(ulCount && pSelection && pcFetched, E_INVALIDARG);
 
 	*pcFetched = 0;
-	if (TS_DEFAULT_SELECTION != ulIndex && 0 != ulIndex)
-		return TS_E_NOSELECTION;
-
+	ENSURE(TS_DEFAULT_SELECTION == ulIndex || 0 == ulIndex, TS_E_NOSELECTION);
 	if (my_Composition_View)
 	{
 		*pSelection = my_Composition_Selection;
@@ -195,6 +186,7 @@ STDMETHODIMP TSF::TSF_Text_Store::GetSelection(ULONG ulIndex, ULONG ulCount, TS_
 	{
 		//TODO
 	}
+	*pcFetched = 1;
 	return S_OK;
 }
 
@@ -205,7 +197,18 @@ STDMETHODIMP TSF::TSF_Text_Store::SetSelection(ULONG ulCount, const TS_SELECTION
 
 STDMETHODIMP TSF::TSF_Text_Store::GetText(LONG acpStart, LONG acpEnd, WCHAR *pchPlain, ULONG cchPlainReq, ULONG *pcchPlainRet, TS_RUNINFO *prgRunInfo, ULONG cRunInfoReq, ULONG *pcRunInfoRet, LONG *pacpNext)
 {
-	return E_NOTIMPL;
+	ENSURE(TS_LF_READ == (my_Lock & TS_LF_READ), TS_E_NOLOCK);
+	ENSURE(pcchPlainRet && (pchPlain || prgRunInfo)
+		&& (!cchPlainReq == !pchPlain)
+		&& (!cRunInfoReq == !prgRunInfo), E_INVALIDARG);
+	ENSURE(0 <= acpStart && -1 <= acpEnd
+		&& (-1 == acpEnd || acpStart <= acpEnd), TS_E_INVALIDPOS);
+
+	*pcchPlainRet = 0;
+	if (pchPlain && cchPlainReq) *pchPlain = 0;
+	if (pcRunInfoRet) *pcRunInfoRet = 0;
+	//TODO
+	return S_OK;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::SetText(DWORD dwFlags, LONG acpStart, LONG acpEnd, const WCHAR *pchText, ULONG cch, TS_TEXTCHANGE *pChange)
@@ -215,16 +218,23 @@ STDMETHODIMP TSF::TSF_Text_Store::SetText(DWORD dwFlags, LONG acpStart, LONG acp
 
 STDMETHODIMP TSF::TSF_Text_Store::GetFormattedText(LONG acpStart, LONG acpEnd, IDataObject **ppDataObject)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::GetEmbedded(LONG acpPos, REFGUID rguidService, REFIID riid, IUnknown **ppunk)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::QueryInsertEmbedded(const GUID *pguidService, const FORMATETC *pFormatEtc, BOOL *pfInsertable)
 {
+	if (!pfInsertable)
+		return E_INVALIDARG;
+
+	//Not supported
+	*pfInsertable = FALSE;
 	return E_NOTIMPL;
 }
 
@@ -240,31 +250,37 @@ STDMETHODIMP TSF::TSF_Text_Store::InsertTextAtSelection(DWORD dwFlags, const WCH
 
 STDMETHODIMP TSF::TSF_Text_Store::InsertEmbeddedAtSelection(DWORD dwFlags, IDataObject *pDataObject, LONG *pacpStart, LONG *pacpEnd, TS_TEXTCHANGE *pChange)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::RequestSupportedAttrs(DWORD dwFlags, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::RequestAttrsAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::RequestAttrsTransitioningAtPosition(LONG acpPos, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::FindNextAttrTransition(LONG acpStart, LONG acpHalt, ULONG cFilterAttrs, const TS_ATTRID *paFilterAttrs, DWORD dwFlags, LONG *pacpNext, BOOL *pfFound, LONG *plFoundOffset)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::RetrieveRequestedAttrs(ULONG ulCount, TS_ATTRVAL *paAttrVals, ULONG *pcFetched)
 {
+	//not needed
 	return E_NOTIMPL;
 }
 
@@ -300,8 +316,7 @@ STDMETHODIMP TSF::TSF_Text_Store::GetWnd(TsViewCookie vcView, HWND *phwnd)
 
 STDMETHODIMP TSF::TSF_Text_Store::OnStartComposition(ITfCompositionView *pComposition, BOOL *pfOk)
 {
-	*pfOk = FALSE;
-	return S_OK;
+	return E_NOTIMPL;
 }
 
 STDMETHODIMP TSF::TSF_Text_Store::OnUpdateComposition(ITfCompositionView *pComposition, ITfRange *pRangeNew)
