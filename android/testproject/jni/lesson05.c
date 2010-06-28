@@ -236,7 +236,7 @@ int drawGLScene( GLvoid )
 	
     glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    glClearColorx(0,0,Frames,255);
+    glClearColorx(0,0,0,255);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     glMatrixMode(GL_PROJECTION);
@@ -334,6 +334,8 @@ int drawGLScene( GLvoid )
 	    Frames = 0;
 	}
     }
+
+   
 
     return( TRUE );
 }

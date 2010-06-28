@@ -55,6 +55,7 @@ void* sdlThreadProc(void* args){
 		__android_log_print(ANDROID_LOG_INFO, "SDL", "Couldn't make current: 0x%x", eglGetError());
 		return NULL;
 	}
+
 	
 	return (void *)SDL_main();
 }
@@ -143,14 +144,40 @@ void Java_org_libsdl_android_TestGLSurfaceView_nativePause( JNIEnv*  env )
                      Render the next frame
 *******************************************************************************/
 
+volatile int frames = 0;
+volatile int startSDL = 0;
+
+//eglSwapBuffers(mDisplay, mDraw);
+	
 void Java_org_libsdl_android_TestRenderer_nativeRender( JNIEnv*  env )
 {    
-	//TODO: Render here
+	__android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: BeginRender");
 
-	pthread_mutex_lock(&mSDLRenderMutex);
-	pthread_cond_signal(&mSDLRenderCondition); //wake up the SDL thread
-	pthread_mutex_unlock(&mSDLRenderMutex);
+    //Let the SDL thread do an entire run
+    int lastFrames = frames;
+    startSDL = 1;
 
-	//__android_log_print(ANDROID_LOG_INFO, "SDL", "Unlocked");
+    //wait for it to finish
+    while(lastFrames == frames){
+        ;   
+    }
 
+	__android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: EndRender");
 }
+
+void sdl_render(){
+
+    //When we get here, we've accumulated a full frame
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: BeginRender");
+    
+    frames++;
+
+    while(startSDL == 0){
+        ;
+    }
+    startSDL = 0;
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: EndRender");
+}
+

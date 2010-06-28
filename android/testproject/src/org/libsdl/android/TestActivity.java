@@ -41,6 +41,8 @@ class TestGLSurfaceView extends GLSurfaceView {
         super(context);
         mRenderer = new TestRenderer();
         setRenderer(mRenderer);
+
+        //setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
     public boolean onTouchEvent(final MotionEvent event) {
