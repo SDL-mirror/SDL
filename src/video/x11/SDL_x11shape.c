@@ -20,6 +20,69 @@
     eligottlieb@gmail.com
 */
 
-#include "SDL_shape.h"
+#include <X11/Xos.h>
+#include <X11/IntrinsicP.h>
+#include <X11/StringDefs.h>
+#include <X11/Xmu/Converters.h>
+#include <X11/extensions/shape.h>
+#include "SDL_x11shape.h"
+#include "SDL_x11window.h"
+#include "SDL_x11video.h"
 
-/* Functions implementing shaped-window functionality for X Window System will be implemented when the API is decided. */
+SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
+	SDL_WindowShaper* result = malloc(sizeof(SDL_WindowShaper));
+	result->window = window;
+	result->alphacutoff = 0;
+	result->usershownflag = 0;
+	result->driverdata = malloc(sizeof(SDL_ShapeData));
+	window->shaper = result;
+	int resized_properly = X11ResizeWindowShape(window);
+	assert(resized_properly == 0);
+	return result;
+}
+
+int X11_ResizeWindowShape(SDL_Window* window) {
+	SDL_ShapeData* data = window->shaper->driverdata;
+	assert(data != NULL);
+	
+	unsigned int bitmapsize = window->w / 8;
+	if(window->w % 8 > 0)
+		bitmapsize += 1;
+	bitmapsize *= window->h;
+	if(data->bitmapsize != bitmapsize || data->bitmap == NULL) {
+		data->bitmapsize = bitmapsize;
+		if(data->bitmap != NULL)
+			free(data->bitmap);
+		data->bitmap = malloc(data->bitmapsize);
+		if(data->bitmap == NULL) {
+			SDL_SetError("Could not allocate memory for shaped-window bitmap.");
+			return -1;
+		}
+	}
+	
+	window->shaper->usershownflag = window->flags & SDL_WINDOW_SHOWN;
+	
+	return 0;
+}
+	
+int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
+		return -2;
+	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
+		return -3;
+	SDL_ShapeData *data = shaper->driverdata;
+	assert(data != NULL);
+	
+	/* Assume that shaper->alphacutoff already has a value. */
+	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->bitmap);
+		
+	SDL_WindowData *windowdata = (SDL_WindowData*)(shaper->window->driverdata);
+	Pixmap shapemask = XCreateBitmapFromData(windowdata->videodata->display,windowdata->xwindow,data->bitmap,shaper->window->w,shaper->window->h);
+	
+	XShapeCombineMask(windowdata->videodata->display,windowdata->xwindow, ShapeBounding, 0, 0,shapemask, ShapeSet);
+	XSync(windowdata->videodata->display,False);
+
+	XFreePixmap(windowdata->videodata->display,shapemask);
+	
+	return 0;
+}

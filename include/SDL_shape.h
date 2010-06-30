@@ -114,10 +114,11 @@ extern DECLSPEC int SDLCALL SDL_SetWindowShape(SDL_Window *window,SDL_Surface *s
  * \brief Get the shape parameters of a shaped window.
  *
  * \param window The shaped window whose parameters should be retrieved.
- * \param shapeMode An empty shape-parameters structure to fill.
+ * \param shapeMode An empty shape-mode structure to fill, or NULL to check whether the window has a shape.
  *
- * \return 0 on success, -1 on a null shapeMode, or -2 if the SDL_Window given is not a shaped window, or -3 if the
- *         SDL_Window given is a window that can be shaped but isn't.
+ * \return 0 if the window has a shape and, provided shapeMode was not NULL, shapeMode has been filled with the mode
+ *           data, -1 if the SDL_Window given is not a shaped window, or -2 if the SDL_Window* given is a shapeable
+ *           window currently lacking a shape.
  *
  * \sa SDL_WindowShapeMode
  * \sa SDL_SetWindowShape
