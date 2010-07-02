@@ -20,10 +20,6 @@
     eligottlieb@gmail.com
 */
 
-#include <X11/Xos.h>
-#include <X11/IntrinsicP.h>
-#include <X11/StringDefs.h>
-#include <X11/Xmu/Converters.h>
 #include <X11/extensions/shape.h>
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
