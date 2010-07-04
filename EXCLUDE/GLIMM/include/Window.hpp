@@ -31,6 +31,7 @@ public:
 	void Hide_Cursor();
 
 	HWND Get_Handle();
+	IMM &Get_IMM();
 
 private:
 	static const wchar_t *Window_Class_Name;

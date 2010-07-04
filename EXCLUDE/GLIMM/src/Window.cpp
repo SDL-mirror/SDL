@@ -89,6 +89,11 @@ HWND Window::Get_Handle()
 	return my_Handle;
 }
 
+IMM & Window::Get_IMM()
+{
+	return my_IMM;
+}
+
 void Window::Register_Class()
 {
 	WNDCLASSEXW Window_Class = {0};
@@ -284,6 +289,12 @@ LRESULT Window::Handle_Message(HWND Handle, UINT Message, WPARAM wParam, LPARAM 
 		break;
 	case WM_CHAR:
 		Call_Listener(On_Char(wParam));
+		break;
+	case WM_SETFOCUS:
+			my_IMM.Focus_Gained();
+		break;
+	case WM_KILLFOCUS:
+			my_IMM.Focus_Lost();
 		break;
 	default:
 		return DefWindowProcW(Handle, Message, wParam, lParam);
