@@ -20,7 +20,7 @@ void App::Initialize()
 {
 	Finalize();
 
-	my_Window.Initialize(L"GLTSF", Video_Mode(Width, Height, Bits_Per_Pixel), Fullscreen);
+	my_Window.Initialize(L"GLIMM", Video_Mode(Width, Height, Bits_Per_Pixel), Fullscreen);
 	my_Window.Set_Listener(this);
 	my_Window.Show();
 	my_Window.Hide_Cursor();
@@ -56,6 +56,9 @@ void App::On_Key_Down(int Key)
 	{
 	case VK_ESCAPE:
 		On_Close();
+		break;
+	case VK_TAB:
+		my_Window.Get_IMM().Toggle();
 		break;
 	}
 }
