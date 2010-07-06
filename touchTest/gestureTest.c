@@ -40,6 +40,12 @@ typedef struct {
   int id;
 } Finger;
 
+typedef struct {
+  Finger f;
+  Point cv;
+  float dtheta,dDist;
+} TouchPoint;
+ 
 typedef struct { //dt + s
   Point d,s; //direction, start
   int points;
@@ -53,10 +59,16 @@ typedef struct {
   Point p[EVENT_BUF_SIZE]; //To be safe
 } DollarPath;
 
+typedef struct {
+  float ang,r;
+  Point p;
+} Knob;
+
+Knob knob;
 
 Finger finger[MAXFINGERS];
 
-Finger gestureLast[MAXFINGERS];
+
 DollarPath dollarPath[MAXFINGERS];
 
 #define MAXTEMPLATES 4
@@ -119,22 +131,7 @@ void drawCircle(SDL_Surface* screen,int x,int y,int r,unsigned int c)
 
   float a;
   int tx;
-  /*
-  for(a=0;a<PI/2;a+=1.f/(float)abs(r))
-  {
-    if(r > 0) { //r > 0 ==> filled circle
-      for(tx=x-r*cos(a);tx<x+r*cos(a);tx++) {
-	setpix(screen,tx,(int)(y+r*sin(a)),c);
-	setpix(screen,tx,(int)(y-r*sin(a)),c);
-      }
-    }    else {
-      //Draw Outline
-      setpix(screen,(int)(x+r*cos(a)),(int)(y+r*sin(a)),c);
-      setpix(screen,(int)(x-r*cos(a)),(int)(y+r*sin(a)),c);
-      setpix(screen,(int)(x+r*cos(a)),(int)(y-r*sin(a)),c);
-      setpix(screen,(int)(x-r*cos(a)),(int)(y-r*sin(a)),c);
-    }
-    }*/
+  
   int ty;
   float xr;
   for(ty = -abs(r);ty <= abs(r);ty++) {
@@ -149,6 +146,16 @@ void drawCircle(SDL_Surface* screen,int x,int y,int r,unsigned int c)
       setpix(screen,x+xr-.5,y+ty,c);
     }
   }
+}
+
+void drawKnob(SDL_Surface* screen,Knob k) {
+  printf("Knob: x = %f, y = %f, r = %f, a = %f\n",k.p.x,k.p.y,k.r,k.ang);
+ 
+  drawCircle(screen,k.p.x*screen->w,k.p.y*screen->h,k.r*screen->w,0xFFFFFF);
+  
+  drawCircle(screen,(k.p.x+k.r/2*cos(k.ang))*screen->w,
+  	            (k.p.y+k.r/2*sin(k.ang))*screen->h,k.r/4*screen->w,0);
+  
 }
 
 void drawDollarPath(SDL_Surface* screen,Point* points,int numPoints,
@@ -203,8 +210,13 @@ float bestDollarDifference(Point* points,Point* templ) {
       f2 = dollarDifference(points,templ,x2);
     }
   }
-  return SDL_min(f1,f2);
-  
+  /*
+  if(f1 <= f2)
+    printf("Min angle (x1): %f\n",x1);
+  else if(f1 >  f2)
+    printf("Min angle (x2): %f\n",x2);
+  */
+  return SDL_min(f1,f2);  
 }
 
 float dollarRecognize(SDL_Surface* screen, DollarPath path,int *bestTempl) {
@@ -333,15 +345,20 @@ void DrawScreen(SDL_Surface* screen, int h)
     }
   drawCircle(screen,mousx,mousy,-30,0xFFFFFF);
   drawLine(screen,0,0,screen->w,screen->h,0xFFFFFF);
+
   int i;
 //draw Touch History
+  TouchPoint gestureLast[MAXFINGERS];
+  //printf("------------------Start History------------------\n");
   for(i = 0;i < MAXFINGERS;i++) {
-    gestureLast[i].id = -1;
-#ifdef DRAW_VECTOR_EST
-    gestureLine[i].points = 0;
-#endif
+    gestureLast[i].f.id = -1;
   }
-  for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i != eventWrite;i++) {
+  int numDownFingers = 0;
+  Point centroid;
+  float gdtheta,gdDist;
+
+
+  for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i < eventWrite;i++) {
     SDL_Event event = events[i&(EVENT_BUF_SIZE-1)];
     int age = eventWrite - i - 1;
     if(event.type == SDL_FINGERMOTION || 
@@ -355,28 +372,20 @@ void DrawScreen(SDL_Surface* screen, int h)
       int j,empty = -1;
       
       for(j = 0;j<MAXFINGERS;j++) {
-	if(gestureLast[j].id == event.tfinger.fingerId) {
+	if(gestureLast[j].f.id == event.tfinger.fingerId) {
 	  if(event.type == SDL_FINGERUP) {
-#ifdef DRAW_VECTOR_EST
-	    if(gestureLine[j].points > 0)
-	      drawLine(screen,
-		     gestureLine[j].s.x*screen->w,
-		     gestureLine[j].s.y*screen->h,
-		     (gestureLine[j].s.x +50*gestureLine[j].d.x)*screen->w,
-		     (gestureLine[j].s.y +50*gestureLine[j].d.y)*screen->h,
-		     0xFF00);
-
-	    gestureLine[j].points = 0;
-#endif
-
+	    numDownFingers--;
+	    if(numDownFingers <= 1) {
+	      gdtheta = 0;
+	      gdDist = 0;
+	    }
 	    if(!keystat[32]){ //spacebar
 	      int bestTempl;
 	      float error = dollarRecognize(screen,dollarPath[j],&bestTempl);
 	      if(bestTempl >= 0){
 		drawDollarPath(screen,dollarTemplate[bestTempl]
-			       ,DOLLARNPOINTS,-15,0x0066FF);
-		
-		printf("ERROR: %f\n",error);
+			       ,DOLLARNPOINTS,-15,0x0066FF);		
+		printf("Dollar error: %f\n",error);
 	      }
 	      
 	    }
@@ -384,8 +393,8 @@ void DrawScreen(SDL_Surface* screen, int h)
 	      
 	      dollarNormalize(dollarPath[j],
 			      dollarTemplate[numDollarTemplates]);
-	      int k;
 	      /*
+	      int k;	      
 	      for(k = 0;k<DOLLARNPOINTS;k++) {
 		printf("(%f,%f)\n",dollarTemplate[numDollarTemplates][i].x,
 		       dollarTemplate[numDollarTemplates][i].y);
@@ -393,94 +402,111 @@ void DrawScreen(SDL_Surface* screen, int h)
 	      numDollarTemplates++;	      
 	    }
 
-	    gestureLast[j].id = -1;
+	    gestureLast[j].f.id = -1;
 	    break;
 	  }
 	  else {
-#ifdef DRAW_VECTOR_EST
-	    if(gestureLine[j].points == 1) {
-	      gestureLine[j].d.x = x - gestureLine[j].s.x;
-	      gestureLine[j].d.y = y - gestureLine[j].s.y;
-	    }
-
-	    gestureLine[j].s.x = gestureLine[j].s.x*gestureLine[j].points+x;
-	    gestureLine[j].s.y = gestureLine[j].s.y*gestureLine[j].points+y;
-
-	    gestureLine[j].d.x = gestureLine[j].d.x*gestureLine[j].points+
-	      x - gestureLast[j].p.x;
-	    gestureLine[j].d.y = gestureLine[j].d.y*gestureLine[j].points+
-	      y - gestureLast[j].p.y;;
-
-
-	    gestureLine[j].points++;
-	    
-	    gestureLine[j].s.x /= gestureLine[j].points;
-	    gestureLine[j].s.y /= gestureLine[j].points;
-
-	    gestureLine[j].d.x /= gestureLine[j].points;
-	    gestureLine[j].d.y /= gestureLine[j].points;	    
-#endif
-
 	    dollarPath[j].p[dollarPath[j].numPoints].x = x;
 	    dollarPath[j].p[dollarPath[j].numPoints].y = y;
-	    float dx = (dollarPath[j].p[dollarPath[j].numPoints-1].x-
-		      dollarPath[j].p[dollarPath[j].numPoints  ].x);
-	    float dy = (dollarPath[j].p[dollarPath[j].numPoints-1].y-
-		      dollarPath[j].p[dollarPath[j].numPoints  ].y);
+	    float dx = (dollarPath[j].p[dollarPath[j].numPoints  ].x-
+			dollarPath[j].p[dollarPath[j].numPoints-1].x);
+	    float dy = (dollarPath[j].p[dollarPath[j].numPoints  ].y-
+			dollarPath[j].p[dollarPath[j].numPoints-1].y);
 	    dollarPath[j].length += sqrt(dx*dx + dy*dy);
 
 	    dollarPath[j].numPoints++;
-	    
 
-	    gestureLast[j].p.x = x;
-	    gestureLast[j].p.y = y;
+	    centroid.x = centroid.x + dx/numDownFingers;
+	    centroid.y = centroid.y + dy/numDownFingers;    
+	    if(numDownFingers > 1) {
+	      Point lv; //Vector from centroid to last x,y position
+	      Point v; //Vector from centroid to current x,y position
+	      lv.x = gestureLast[j].cv.x;
+	      lv.y = gestureLast[j].cv.y;
+	      float lDist = sqrt(lv.x*lv.x + lv.y*lv.y);
+	      
+	      v.x = x - centroid.x;
+	      v.y = y - centroid.y;
+	      gestureLast[j].cv = v;
+	      float Dist = sqrt(v.x*v.x+v.y*v.y);
+	      // cos(dTheta) = (v . lv)/(|v| * |lv|)
+	      
+	      lv.x/=lDist;
+	      lv.y/=lDist;
+	      v.x/=Dist;
+	      v.y/=Dist;
+	      float dtheta = atan2(lv.x*v.y - lv.y*v.x,lv.x*v.x + lv.y*v.y);
+	      
+	      float dDist = (lDist - Dist);	      
+	      
+	      gestureLast[j].dDist = dDist;
+	      gestureLast[j].dtheta = dtheta;
+
+	      //gdtheta = gdtheta*.9 + dtheta*.1;
+	      //gdDist  =  gdDist*.9 +  dDist*.1
+	      gdtheta += dtheta;
+	      gdDist += dDist;
+
+	      //printf("thetaSum = %f, distSum = %f\n",gdtheta,gdDist);
+	      //printf("id: %i dTheta = %f, dDist = %f\n",j,dtheta,dDist);
+	    }
+	    else {
+	      gestureLast[j].dDist = 0;
+	      gestureLast[j].dtheta = 0;
+	      gestureLast[j].cv.x = 0;
+	      gestureLast[j].cv.y = 0;
+	    }
+	    gestureLast[j].f.p.x = x;
+	    gestureLast[j].f.p.y = y;
 	    break;
 	    //pressure?
 	  }	  
 	}
-	else if(gestureLast[j].id == -1 && empty == -1) {
+	else if(gestureLast[j].f.id == -1 && empty == -1) {
 	  empty = j;
 	}
       }
       
       if(j >= MAXFINGERS && empty >= 0) {
 	//	printf("Finger Down!!!\n");
-	j = empty; //important that j is the index of the added finger
-	gestureLast[j].id = event.tfinger.fingerId;
-	gestureLast[j].p.x  = x;
-	gestureLast[j].p.y  = y;
-#ifdef DRAW_VECTOR_EST
-	gestureLine[j].s.x = x;
-	gestureLine[j].s.y = y;
-	gestureLine[j].points = 1;
-#endif
-
+	numDownFingers++;
+	centroid.x = (centroid.x*(numDownFingers - 1) + x)/numDownFingers;
+	centroid.y = (centroid.y*(numDownFingers - 1) + y)/numDownFingers;
+	
+	j = empty;
+	gestureLast[j].f.id = event.tfinger.fingerId;
+	gestureLast[j].f.p.x  = x;
+	gestureLast[j].f.p.y  = y;
+	
+	
 	dollarPath[j].length = 0;
 	dollarPath[j].p[0].x = x;
 	dollarPath[j].p[0].y = y;
 	dollarPath[j].numPoints = 1;
       }
-
-      //draw the touch && each centroid:
-
-      if(gestureLast[j].id < 0) continue; //Finger up. Or some error...
-      int k;
-      for(k = 0; k < MAXFINGERS;k++) {
-	if(gestureLast[k].id < 0) continue;
-	//printf("k = %i, id: %i\n",k,gestureLast[k].id);
-	//colors have no alpha, so shouldn't overflow
-	unsigned int c = (colors[gestureLast[j].id%7] + 
-			  colors[gestureLast[k].id%7])/2; 
+      
+      //draw the touch:
+      
+      if(gestureLast[j].f.id < 0) continue; //Finger up. Or some error...
+      
+      unsigned int c = colors[gestureLast[j].f.id%7]; 
+      unsigned int col = 
+	((unsigned int)(c*(.1+.85))) |
+	((unsigned int)((0xFF*(1-((float)age)/EVENT_BUF_SIZE))) & 0xFF)<<24;
+      x = gestureLast[j].f.p.x;
+      y = gestureLast[j].f.p.y;
+      if(event.type == SDL_FINGERMOTION)
+	drawCircle(screen,x*screen->w,y*screen->h,5,col);
+      else if(event.type == SDL_FINGERDOWN)
+	drawCircle(screen,x*screen->w,y*screen->h,-10,col);     
+      
+      //if there is a centroid, draw it
+      if(numDownFingers > 1) {
 	unsigned int col = 
-	  ((unsigned int)(c*(.1+.85))) |
+	  ((unsigned int)(0xFFFFFF)) |
 	  ((unsigned int)((0xFF*(1-((float)age)/EVENT_BUF_SIZE))) & 0xFF)<<24;
-	x = (gestureLast[j].p.x + gestureLast[k].p.x)/2;
-	y = (gestureLast[j].p.y + gestureLast[k].p.y)/2;
-	if(event.type == SDL_FINGERMOTION)
-	  drawCircle(screen,x*screen->w,y*screen->h,5,col);
-	else if(event.type == SDL_FINGERDOWN)
-	  drawCircle(screen,x*screen->w,y*screen->h,-10,col);
-      }      
+	drawCircle(screen,centroid.x*screen->w,centroid.y*screen->h,5,col);
+      }
     }
   }
   
@@ -494,9 +520,13 @@ void DrawScreen(SDL_Surface* screen, int h)
 	drawCircle(screen,finger[i].p.x*screen->w,finger[i].p.y*screen->h
 		   ,20,0xFF);
 
-  
-  keystat[32] = 0;	      
 
+  
+  keystat[32] = 0;
+  
+  if(knob.p.x > 0)
+    drawKnob(screen,knob);
+  
   if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
   
   SDL_Flip(screen);
@@ -515,6 +545,17 @@ int main(int argc, char* argv[])
   
   int keypress = 0;
   int h=0,s=1,i,j;
+
+  //gesture variables
+  int numDownFingers = 0;
+  float gdtheta = 0,gdDist = 0;
+  Point centroid;
+  knob.r = .1;
+  knob.ang = 0;
+  TouchPoint gestureLast[MAXFINGERS];
+  for(i = 0;i < MAXFINGERS;i++)
+    gestureLast[i].f.id = -1;
+
 
   memset(keystat,0,512*sizeof(keystat[0]));
   if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
@@ -585,11 +626,12 @@ int main(int argc, char* argv[])
 	      
 	      finger[i].pressure = 
 		((float)event.tfinger.pressure)/inTouch->pressureres;
-	      
+	      /*
 	      printf("Finger: %i, Pressure: %f Pressureres: %i\n",
 		     event.tfinger.fingerId,
 		     finger[i].pressure,
 		     inTouch->pressureres);
+	      */
 	      //printf("Finger: %i, pressure: %f\n",event.tfinger.fingerId,
 	      //   finger[event.tfinger.fingerId].pressure);
 	    }
@@ -619,16 +661,113 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = -1;
 	    break;
 	  }
-      }
-    //And draw
-    DrawScreen(screen,h);
+      
     
+	if(event.type == SDL_FINGERMOTION || 
+	   event.type == SDL_FINGERDOWN ||
+	   event.type == SDL_FINGERUP) {
+	  SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
+	  //SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
+	  
+	  float x = ((float)event.tfinger.x)/inTouch->xres;
+	  float y = ((float)event.tfinger.y)/inTouch->yres;
+	  int j,empty = -1;
+	  
+	  for(j = 0;j<MAXFINGERS;j++) {
+	    if(gestureLast[j].f.id == event.tfinger.fingerId) {
+	      if(event.type == SDL_FINGERUP) {
+		numDownFingers--;
+		if(numDownFingers <= 1) {
+		  gdtheta = 0;
+		  gdDist = 0;
+		}
+		gestureLast[j].f.id = -1;
+		break;
+	      }
+	      else {	    
+		float dx = x - gestureLast[j].f.p.x;
+		float dy = y - gestureLast[j].f.p.y;
+		centroid.x = centroid.x + dx/numDownFingers;
+		centroid.y = centroid.y + dy/numDownFingers;    
+		if(numDownFingers > 1) {
+		  Point lv; //Vector from centroid to last x,y position
+		  Point v; //Vector from centroid to current x,y position
+		  lv = gestureLast[j].cv;
+		  float lDist = sqrt(lv.x*lv.x + lv.y*lv.y);
+		  printf("lDist = %f\n",lDist);
+		  v.x = x - centroid.x;
+		  v.y = y - centroid.y;
+		  gestureLast[j].cv = v;
+		  float Dist = sqrt(v.x*v.x+v.y*v.y);
+		  // cos(dTheta) = (v . lv)/(|v| * |lv|)
+		  
+		  lv.x/=lDist;
+		  lv.y/=lDist;
+		  v.x/=Dist;
+		  v.y/=Dist;
+		  float dtheta = atan2(lv.x*v.y - lv.y*v.x,lv.x*v.x + lv.y*v.y);
+		  
+		  float dDist = (Dist - lDist);	      
+		  if(lDist == 0) {dDist = 0;dtheta = 0;}
+		  gestureLast[j].dDist = dDist;
+		  gestureLast[j].dtheta = dtheta;
+		  
+		  printf("dDist = %f, dTheta = %f\n",dDist,dtheta);
+		  //gdtheta = gdtheta*.9 + dtheta*.1;
+		  //gdDist  =  gdDist*.9 +  dDist*.1
+		  knob.r += dDist/numDownFingers;
+		  knob.ang += dtheta;
+		  //printf("thetaSum = %f, distSum = %f\n",gdtheta,gdDist);
+		  //printf("id: %i dTheta = %f, dDist = %f\n",j,dtheta,dDist);
+		}
+		else {
+		  gestureLast[j].dDist = 0;
+		  gestureLast[j].dtheta = 0;
+		  gestureLast[j].cv.x = 0;
+		  gestureLast[j].cv.y = 0;
+		}
+		gestureLast[j].f.p.x = x;
+		gestureLast[j].f.p.y = y;
+		break;
+		//pressure?
+	      }	  
+	    }
+	    else if(gestureLast[j].f.id == -1 && empty == -1) {
+	      empty = j;
+	    }
+	  }
+	  
+	  if(j >= MAXFINGERS && empty >= 0) {
+	    printf("Finger Down!!!\n");
+	    numDownFingers++;
+	    centroid.x = (centroid.x*(numDownFingers - 1) + x)/numDownFingers;
+	    centroid.y = (centroid.y*(numDownFingers - 1) + y)/numDownFingers;
+	    
+	    j = empty;
+	    gestureLast[j].f.id = event.tfinger.fingerId;
+	    gestureLast[j].f.p.x  = x;
+	    gestureLast[j].f.p.y  = y;	
+	    gestureLast[j].cv.x = 0;
+	    gestureLast[j].cv.y = 0;
+	  }
+	  
+	  //draw the touch:
+	}
+	//And draw
+	if(numDownFingers > 1)
+	  knob.p = centroid;
+	else
+	  knob.p.x = -1;
+      }
+    DrawScreen(screen,h);
+    //printf("c: (%f,%f)\n",centroid.x,centroid.y);
+    //printf("numDownFingers: %i\n",numDownFingers);
     //for(i=0;i<512;i++) 
     // if(keystat[i]) printf("%i\n",i);
     
     
   }  
   SDL_Quit();
-      
+  
   return 0;
 }
