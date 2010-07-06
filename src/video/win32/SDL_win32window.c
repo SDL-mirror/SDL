@@ -73,9 +73,6 @@ CE_SHFullScreen(HWND hwndRequester, DWORD dwState)
 
 #endif
 
-extern HCTX *g_hCtx;            /* the table of tablet event contexts, each windows has to have it's own tablet context */
-static Uint32 highestId = 0;    /* the highest id of the tablet context */
-
 /* Fake window to help with DirectInput events. */
 HWND SDL_HelperWindow = NULL;
 static WCHAR *SDL_HelperWindowClassName = TEXT("SDLHelperWindowInputCatcher");
@@ -167,9 +164,8 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
         }
     }
     if (GetFocus() == hwnd) {
-        int index = data->videodata->keyboard;
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
-        SDL_SetKeyboardFocus(index, data->window);
+        SDL_SetKeyboardFocus(data->window);
 
         if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
             RECT rect;
@@ -188,11 +184,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
-    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_VideoDisplay *display = window->display;
-    RAWINPUTDEVICE Rid;
-    AXIS TabX, TabY;
-    LOGCONTEXTA lc;
     HWND hwnd;
     HWND top;
     RECT rect;
@@ -258,48 +250,6 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         WIN_SetError("Couldn't create window");
         return -1;
     }
-
-    /* we're configuring the tablet data. See Wintab reference for more info */
-    if (videodata->wintabDLL
-        && videodata->WTInfoA(WTI_DEFSYSCTX, 0, &lc) != 0) {
-        lc.lcPktData = PACKETDATA;
-        lc.lcPktMode = PACKETMODE;
-        lc.lcOptions |= CXO_MESSAGES;
-        lc.lcOptions |= CXO_SYSTEM;
-        lc.lcMoveMask = PACKETDATA;
-        lc.lcBtnDnMask = lc.lcBtnUpMask = PACKETDATA;
-        videodata->WTInfoA(WTI_DEVICES, DVC_X, &TabX);
-        videodata->WTInfoA(WTI_DEVICES, DVC_Y, &TabY);
-        lc.lcInOrgX = 0;
-        lc.lcInOrgY = 0;
-        lc.lcInExtX = TabX.axMax;
-        lc.lcInExtY = TabY.axMax;
-        lc.lcOutOrgX = 0;
-        lc.lcOutOrgY = 0;
-        lc.lcOutExtX = GetSystemMetrics(SM_CXSCREEN);
-        lc.lcOutExtY = -GetSystemMetrics(SM_CYSCREEN);
-        if (window->id > highestId) {
-            HCTX *tmp_hctx;
-            highestId = window->id;
-            tmp_hctx =
-                (HCTX *) SDL_realloc(g_hCtx, (highestId + 1) * sizeof(HCTX));
-            if (!tmp_hctx) {
-                SDL_OutOfMemory();
-                DestroyWindow(hwnd);
-                return -1;
-            }
-            g_hCtx = tmp_hctx;
-        }
-        g_hCtx[window->id] = videodata->WTOpenA(hwnd, &lc, TRUE);
-    }
-#ifndef _WIN32_WCE              /* has no RawInput */
-    /* we're telling the window, we want it to report raw input events from mice */
-    Rid.usUsagePage = 0x01;
-    Rid.usUsage = 0x02;
-    Rid.dwFlags = RIDEV_INPUTSINK;
-    Rid.hwndTarget = hwnd;
-    RegisterRawInputDevices(&Rid, 1, sizeof(Rid));
-#endif
 
     WIN_PumpEvents(_this);
 
@@ -622,15 +572,11 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window)
 void
 WIN_DestroyWindow(_THIS, SDL_Window * window)
 {
-    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
-            if (videodata->wintabDLL) {
-                videodata->WTClose(g_hCtx[window->id]);
-            }
             DestroyWindow(data->hwnd);
         }
         SDL_free(data);

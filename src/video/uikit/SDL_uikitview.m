@@ -47,6 +47,7 @@
 	[self initializeKeyboard];
 #endif	
 
+#if FIXME_MULTITOUCH
 	int i;
 	for (i=0; i<MAX_SIMULTANEOUS_TOUCHES; i++) {
         mice[i].id = i;
@@ -54,6 +55,7 @@
 		SDL_AddMouse(&mice[i], "Mouse", 0, 0, 1);
 	}
 	self.multipleTouchEnabled = YES;
+#endif
 			
 	return self;
 
@@ -64,6 +66,7 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch =(UITouch*)[enumerator nextObject];
 	
+#if FIXME_MULTITOUCH
 	/* associate touches with mice, so long as we have slots */
 	int i;
 	int found = 0;
@@ -104,7 +107,8 @@
 		/* switch back to our old mouse */
 		SDL_SelectMouse(oldMouse);
 		
-	}	
+	}
+#endif
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -112,6 +116,7 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch=nil;
 	
+#if FIXME_MULTITOUCH
 	while(touch = (UITouch *)[enumerator nextObject]) {
 		/* search for the mouse slot associated with this touch */
 		int i, found = NO;
@@ -127,6 +132,7 @@
 			}
 		}
 	}
+#endif
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -143,6 +149,7 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch=nil;
 	
+#if FIXME_MULTITOUCH
 	while(touch = (UITouch *)[enumerator nextObject]) {
 		/* try to find the mouse associated with this touch */
 		int i, found = NO;
@@ -157,6 +164,7 @@
 			}
 		}
 	}
+#endif
 }
 
 /*

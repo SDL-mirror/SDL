@@ -13,7 +13,7 @@ jmp_buf env;
 
 /* returns the jump environment for setting / getting purposes */
 jmp_buf *
-jump_env()
+jump_env(void)
 {
     return &env;
 }

@@ -197,6 +197,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\test\automated\rwops\TestSupportRWops_Generic.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\test\automated\SDL_at.c"
 				>
 			</File>

@@ -279,8 +279,8 @@ int main(int argc, char *argv[])
             }
 
             fprintf(stderr,
-                    "Keyboard %d: scancode 0x%08X = %s, keycode 0x%08X = %s\n",
-                    event.key.which, event.key.keysym.scancode,
+                    "Keyboard: scancode 0x%08X = %s, keycode 0x%08X = %s\n",
+                    event.key.keysym.scancode,
                     SDL_GetScancodeName(event.key.keysym.scancode),
                     event.key.keysym.sym, SDL_GetKeyName(event.key.keysym.sym));
             break;
@@ -290,8 +290,7 @@ int main(int argc, char *argv[])
                 markedRect.w < 0)
                 break;
 
-            fprintf(stderr, "Keyboard %d: text input \"%s\"\n",
-                    event.text.which, event.text.text);
+            fprintf(stderr, "Keyboard: text input \"%s\"\n", event.text.text);
 
             if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
                 strcpy(text + SDL_strlen(text), event.text.text);

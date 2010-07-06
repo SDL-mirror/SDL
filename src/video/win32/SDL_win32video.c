@@ -35,11 +35,6 @@
 static int WIN_VideoInit(_THIS);
 static void WIN_VideoQuit(_THIS);
 
-int total_mice = 0;             /* total mouse count */
-HANDLE *mice = NULL;            /* the handles to the detected mice */
-HCTX *g_hCtx = NULL;            /* handles to tablet contexts */
-int tablet = -1;                /* we're assuming that there is no tablet */
-
 /* WIN32 driver bootstrap functions */
 
 static int
@@ -66,9 +61,6 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
         FreeLibrary(data->ddrawDLL);
     }
 #endif
-    if (data->wintabDLL) {
-        FreeLibrary(data->wintabDLL);
-    }
     SDL_free(device->driverdata);
     SDL_free(device);
 }
@@ -85,8 +77,10 @@ WIN_CreateDevice(int devindex)
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (device) {
         data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    } else {
+        data = NULL;
     }
-    if (!device || !data) {
+    if (!data) {
         SDL_OutOfMemory();
         if (device) {
             SDL_free(device);
@@ -130,32 +124,6 @@ WIN_CreateDevice(int devindex)
         }
     }
 #endif /* SDL_VIDEO_RENDER_DDRAW */
-
-    data->wintabDLL = LoadLibrary(TEXT("WINTAB32.DLL"));
-    if (data->wintabDLL) {
-#define PROCNAME(X) #X
-        data->WTInfoA =
-            (UINT(*)(UINT, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
-                                                         PROCNAME(WTInfoA));
-        data->WTOpenA =
-            (HCTX(*)(HWND, LPLOGCONTEXTA, BOOL)) GetProcAddress(data->
-                                                                wintabDLL,
-                                                                PROCNAME
-                                                                (WTOpenA));
-        data->WTPacket =
-            (int (*)(HCTX, UINT, LPVOID)) GetProcAddress(data->wintabDLL,
-                                                         PROCNAME(WTPacket));
-        data->WTClose =
-            (BOOL(*)(HCTX)) GetProcAddress(data->wintabDLL,
-                                           PROCNAME(WTClose));
-#undef PROCNAME
-
-        if (!data->WTInfoA || !data->WTOpenA || !data->WTPacket
-            || !data->WTClose) {
-            FreeLibrary(data->wintabDLL);
-            data->wintabDLL = NULL;
-        }
-    }
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
@@ -225,7 +193,6 @@ WIN_VideoInit(_THIS)
     GAPI_AddRenderDriver(_this);
 #endif
 
-    g_hCtx = SDL_malloc(sizeof(HCTX));
     WIN_InitKeyboard(_this);
     WIN_InitMouse(_this);
 
@@ -238,7 +205,6 @@ WIN_VideoQuit(_THIS)
     WIN_QuitModes(_this);
     WIN_QuitKeyboard(_this);
     WIN_QuitMouse(_this);
-    SDL_free(g_hCtx);
 }
 
 /* vim: set ts=4 sw=4 expandtab: */

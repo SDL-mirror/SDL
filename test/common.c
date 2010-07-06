@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display %d] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -929,45 +929,44 @@ PrintEvent(SDL_Event * event)
         break;
     case SDL_KEYDOWN:
         fprintf(stderr,
-                "Keyboard %d: key pressed  in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
-                event->key.which, event->key.windowID,
+                "Keyboard: key pressed  in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
+                event->key.windowID,
                 event->key.keysym.scancode,
                 SDL_GetScancodeName(event->key.keysym.scancode),
                 event->key.keysym.sym, SDL_GetKeyName(event->key.keysym.sym));
         break;
     case SDL_KEYUP:
         fprintf(stderr,
-                "Keyboard %d: key released in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
-                event->key.which, event->key.windowID,
+                "Keyboard: key released in window %d: scancode 0x%08X = %s, keycode 0x%08X = %s",
+                event->key.windowID,
                 event->key.keysym.scancode,
                 SDL_GetScancodeName(event->key.keysym.scancode),
                 event->key.keysym.sym, SDL_GetKeyName(event->key.keysym.sym));
         break;
     case SDL_TEXTINPUT:
-        fprintf(stderr, "Keyboard %d: text input \"%s\" in window %d",
-                event->text.which, event->text.text, event->text.windowID);
+        fprintf(stderr, "Keyboard: text input \"%s\" in window %d",
+                event->text.text, event->text.windowID);
         break;
     case SDL_MOUSEMOTION:
-        fprintf(stderr, "Mouse %d: moved to %d,%d (%d,%d) in window %d",
-                event->motion.which, event->motion.x, event->motion.y,
+        fprintf(stderr, "Mouse: moved to %d,%d (%d,%d) in window %d",
+                event->motion.x, event->motion.y,
                 event->motion.xrel, event->motion.yrel,
                 event->motion.windowID);
         break;
     case SDL_MOUSEBUTTONDOWN:
-        fprintf(stderr, "Mouse %d: button %d pressed at %d,%d in window %d",
-                event->button.which, event->button.button, event->button.x,
-                event->button.y, event->button.windowID);
+        fprintf(stderr, "Mouse: button %d pressed at %d,%d in window %d",
+                event->button.button, event->button.x, event->button.y,
+                event->button.windowID);
         break;
     case SDL_MOUSEBUTTONUP:
-        fprintf(stderr, "Mouse %d: button %d released at %d,%d in window %d",
-                event->button.which, event->button.button, event->button.x,
-                event->button.y, event->button.windowID);
+        fprintf(stderr, "Mouse: button %d released at %d,%d in window %d",
+                event->button.button, event->button.x, event->button.y,
+                event->button.windowID);
         break;
     case SDL_MOUSEWHEEL:
         fprintf(stderr,
-                "Mouse %d: wheel scrolled %d in x and %d in y in window %d",
-                event->wheel.which, event->wheel.x, event->wheel.y,
-                event->wheel.windowID);
+                "Mouse: wheel scrolled %d in x and %d in y in window %d",
+                event->wheel.x, event->wheel.y, event->wheel.windowID);
         break;
     case SDL_JOYBALLMOTION:
         fprintf(stderr, "Joystick %d: ball %d moved by %d,%d",

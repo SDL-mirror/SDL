@@ -27,44 +27,17 @@
 #include "SDL_keysym.h"
 #include "SDL_events.h"
 
-typedef struct SDL_Keyboard SDL_Keyboard;
-
-struct SDL_Keyboard
-{
-    /* Free the keyboard when it's time */
-    void (*FreeKeyboard) (SDL_Keyboard * keyboard);
-
-    /* Data common to all keyboards */
-    SDL_Window *focus;
-    Uint16 modstate;
-    Uint8 keystate[SDL_NUM_SCANCODES];
-    SDLKey keymap[SDL_NUM_SCANCODES];
-
-    void *driverdata;
-};
-
 /* Initialize the keyboard subsystem */
 extern int SDL_KeyboardInit(void);
 
-/* Get the keyboard at an index */
-extern SDL_Keyboard *SDL_GetKeyboard(int index);
-
-/* Add a keyboard, possibly reattaching at a particular index (or -1),
-   returning the index of the keyboard, or -1 if there was an error.
- */
-extern int SDL_AddKeyboard(const SDL_Keyboard * keyboard, int index);
-
-/* Remove a keyboard at an index, clearing the slot for later */
-extern void SDL_DelKeyboard(int index);
-
-/* Clear the state of a keyboard at an index */
-extern void SDL_ResetKeyboard(int index);
+/* Clear the state of the keyboard */
+extern void SDL_ResetKeyboard(void);
 
 /* Get the default keymap */
 extern void SDL_GetDefaultKeymap(SDLKey * keymap);
 
-/* Set the mapping of scancode to key codes for this keyboard */
-extern void SDL_SetKeymap(int index, int start, SDLKey * keys, int length);
+/* Set the mapping of scancode to key codes */
+extern void SDL_SetKeymap(int start, SDLKey * keys, int length);
 
 /* Set a platform-dependent key name, overriding the default platform-agnostic
    name. Encoded as UTF-8. The string is not copied, thus the pointer given to
@@ -73,16 +46,16 @@ extern void SDL_SetKeymap(int index, int start, SDLKey * keys, int length);
 extern void SDL_SetScancodeName(SDL_scancode scancode, const char *name);
 
 /* Set the keyboard focus window */
-extern void SDL_SetKeyboardFocus(int index, SDL_Window * window);
+extern void SDL_SetKeyboardFocus(SDL_Window * window);
 
-/* Send a keyboard event for a keyboard at an index */
-extern int SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode);
+/* Send a keyboard key event */
+extern int SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode);
 
-/* Send keyboard text input for a keyboard at an index */
-extern int SDL_SendKeyboardText(int index, const char *text);
+/* Send keyboard text input */
+extern int SDL_SendKeyboardText(const char *text);
 
 /* Send editing text for selected range from start to end */
-extern int SDL_SendEditingText(int index, const char *text, int start, int end);
+extern int SDL_SendEditingText(const char *text, int start, int end);
 
 /* Shutdown the keyboard subsystem */
 extern void SDL_KeyboardQuit(void);

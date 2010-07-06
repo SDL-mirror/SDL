@@ -39,7 +39,7 @@ struct SDL_semaphore
 #else
     HANDLE id;
 #endif
-    Uint32 volatile count;
+    LONG volatile count;
 };
 
 
@@ -143,7 +143,7 @@ SDL_SemValue(SDL_sem * sem)
         SDL_SetError("Passed a NULL sem");
         return 0;
     }
-    return sem->count;
+    return (Uint32)sem->count;
 }
 
 int

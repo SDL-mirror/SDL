@@ -304,7 +304,7 @@ SDL_GetCurrentVideoDriver()
 }
 
 SDL_VideoDevice *
-SDL_GetVideoDevice()
+SDL_GetVideoDevice(void)
 {
     return _this;
 }
@@ -715,16 +715,6 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
     }
 
     return 0;
-}
-
-int
-SDL_SetDisplayMode(const SDL_DisplayMode * mode)
-{
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    return SDL_SetDisplayModeForDisplay(SDL_CurrentDisplay, mode);
 }
 
 int

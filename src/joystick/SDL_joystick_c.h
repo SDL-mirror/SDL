@@ -27,6 +27,10 @@
 /* The number of available joysticks on the system */
 extern Uint8 SDL_numjoysticks;
 
+/* Initialization and shutdown functions */
+extern int SDL_JoystickInit(void);
+extern void SDL_JoystickQuit(void);
+
 /* Internal event queueing functions */
 extern int SDL_PrivateJoystickAxis(SDL_Joystick * joystick,
                                    Uint8 axis, Sint16 value);

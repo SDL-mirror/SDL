@@ -58,12 +58,6 @@
 #define WM_INPUT 0x00ff
 #endif
 
-extern HCTX *g_hCtx;
-extern HANDLE *mice;
-extern int total_mice;
-extern int tablet;
-int pressure = 0;               /* the pressure reported by the tablet */
-
 static WPARAM
 RemapVKEY(WPARAM wParam, LPARAM lParam)
 {
@@ -104,8 +98,6 @@ LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     SDL_WindowData *data;
-    RAWINPUT *raw;
-    PACKET packet;
     LRESULT returnCode = -1;
 
     /* Send a SDL_SYSWMEVENT if the application wants them */
@@ -142,35 +134,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     switch (msg) {
 
-    case WT_PACKET:
-        {
-            /* if we receive such data we need to update the pressure */
-            SDL_VideoData *videodata = data->videodata;
-            if (videodata->wintabDLL
-                && videodata->WTPacket((HCTX) lParam, (UINT) wParam, &packet)) {
-                SDL_ChangeEnd(tablet, (int) packet.pkCursor);
-                pressure = (int) packet.pkNormalPressure;
-            }
-        }
-        break;
-
-    case WT_PROXIMITY:
-        {
-            /* checking where the proximity message showed up */
-            int h_context = LOWORD(lParam);
-            POINT point;
-            GetCursorPos(&point);
-            ScreenToClient(hwnd, &point);
-
-            /* are we in proximity or out of proximity */
-            if (h_context == 0) {
-                SDL_SendProximity(tablet, point.x, point.y, SDL_PROXIMITYOUT);
-            } else {
-                SDL_SendProximity(tablet, point.x, point.y, SDL_PROXIMITYIN);
-            }
-        }
-        break;
-
     case WM_SHOWWINDOW:
         {
             if (wParam) {
@@ -183,13 +146,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_ACTIVATE:
         {
-            int index;
-            SDL_Keyboard *keyboard;
             BOOL minimized;
 
             minimized = HIWORD(wParam);
-            index = data->videodata->keyboard;
-            keyboard = SDL_GetKeyboard(index);
             if (!minimized && (LOWORD(wParam) != WA_INACTIVE)) {
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
                 SDL_SendWindowEvent(data->window,
@@ -200,13 +159,13 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                                         SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                 }
 #endif
-                if (keyboard && keyboard->focus != data->window) {
-                    SDL_SetKeyboardFocus(index, data->window);
+                if (SDL_GetKeyboardFocus() != data->window) {
+                    SDL_SetKeyboardFocus(data->window);
                 }
                 /* FIXME: Update keyboard state */
             } else {
-                if (keyboard && keyboard->focus == data->window) {
-                    SDL_SetKeyboardFocus(index, 0);
+                if (SDL_GetKeyboardFocus() == data->window) {
+                    SDL_SetKeyboardFocus(NULL);
                 }
                 if (minimized) {
                     SDL_SendWindowEvent(data->window,
@@ -217,125 +176,21 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         returnCode = 0;
         break;
 
-/* WinCE has no RawInput, so we use the classic mouse events.
-   In classic Win32 this is done by WM_INPUT
- */
-#ifdef _WIN32_WCE
-    case WM_MOUSEMOVE:
-        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
+	case WM_MOUSEMOVE:
+        SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
 
     case WM_LBUTTONDOWN:
-        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
-        SDL_SendMouseButton(0, SDL_PRESSED, SDL_BUTTON_LEFT);
+        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_LEFT);
         break;
 
     case WM_LBUTTONUP:
-        SDL_SendMouseMotion(0, 0, LOWORD(lParam), HIWORD(lParam), 0);
-        SDL_SendMouseButton(0, SDL_RELEASED, SDL_BUTTON_LEFT);
+        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_LEFT);
         break;
-#else /* _WIN32_WCE */
-
-    case WM_INPUT:             /* mouse events */
-        {
-            LPBYTE lpb;
-            const RAWINPUTHEADER *header;
-            int index = -1;
-            int i;
-            int size = 0;
-            const RAWMOUSE *raw_mouse = NULL;
-            POINT point;
-            USHORT flags;
-            int w, h;
-
-            /* we're collecting raw data to be able to identify the mouse (if there are several) */
-            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
-                            sizeof(RAWINPUTHEADER));
-            lpb = SDL_stack_alloc(BYTE, size);
-            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, lpb, &size,
-                            sizeof(RAWINPUTHEADER));
-            raw = (RAWINPUT *) lpb;
-            header = &raw->header;
-            flags = raw->data.mouse.usButtonFlags;
-
-            /* we're checking which mouse generated the event */
-            for (i = 0; i < total_mice; ++i) {
-                if (mice[i] == header->hDevice) {
-                    index = i;
-                    break;
-                }
-            }
-            if (index < 0) {
-                /* New mouse?  Should we dynamically update mouse list? */
-                returnCode = 0;
-                break;
-            }
-
-            GetCursorPos(&point);
-            ScreenToClient(hwnd, &point);
-
-            SDL_GetWindowSize(data->window, &w, &h);
-            if (point.x >= 0 && point.y >= 0 && point.x < w && point.y < h) {
-                SDL_SetMouseFocus(index, data->window);
-            } else {
-                SDL_SetMouseFocus(index, 0);
-                /* FIXME: Should we be doing anything else here? */
-                break;
-            }
-
-            /* if the message was sent by a tablet we have to send also pressure */
-            if (index == tablet) {
-                SDL_SendMouseMotion(index, 0, point.x, point.y, pressure);
-            } else {
-                SDL_SendMouseMotion(index, 0, point.x, point.y, 0);
-            }
-            /* we're sending mouse buttons messages to check up if sth changed */
-            if (flags & RI_MOUSE_LEFT_BUTTON_DOWN) {
-                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_LEFT);
-            } else if (flags & RI_MOUSE_LEFT_BUTTON_UP) {
-                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_LEFT);
-            }
-            if (flags & RI_MOUSE_MIDDLE_BUTTON_DOWN) {
-                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_MIDDLE);
-            } else if (flags & RI_MOUSE_MIDDLE_BUTTON_UP) {
-                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_MIDDLE);
-            }
-            if (flags & RI_MOUSE_RIGHT_BUTTON_DOWN) {
-                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_RIGHT);
-            } else if (flags & RI_MOUSE_RIGHT_BUTTON_UP) {
-                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_RIGHT);
-            }
-            if (flags & RI_MOUSE_BUTTON_4_DOWN) {
-                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_X1);
-            } else if (flags & RI_MOUSE_BUTTON_4_UP) {
-                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_X1);
-            }
-            if (flags & RI_MOUSE_BUTTON_5_DOWN) {
-                SDL_SendMouseButton(index, SDL_PRESSED, SDL_BUTTON_X2);
-            } else if (flags & RI_MOUSE_BUTTON_5_UP) {
-                SDL_SendMouseButton(index, SDL_RELEASED, SDL_BUTTON_X2);
-            }
-            if (flags & RI_MOUSE_WHEEL) {
-                SDL_SendMouseWheel(index, 0,
-                                   (short) raw->data.mouse.usButtonData);
-            }
-            SDL_stack_free(lpb);
-        }
-        returnCode = 0;
-        break;
-#endif /* _WIN32_WCE */
 
     case WM_MOUSELEAVE:
-        {
-            int i;
-
-            for (i = 0; i < SDL_GetNumMice(); ++i) {
-                SDL_Mouse *mouse = SDL_GetMouse(i);
-
-                if (mouse->focus == data->window) {
-                    SDL_SetMouseFocus(i, 0);
-                }
-            }
+        if (SDL_GetMouseFocus() == data->window) {
+            SDL_SetMouseFocus(NULL);
         }
         returnCode = 0;
         break;
@@ -343,15 +198,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
         {
-            int index;
-
             /* Ignore repeated keys */
             if (lParam & REPEATED_KEYMASK) {
                 returnCode = 0;
                 break;
             }
 
-            index = data->videodata->keyboard;
             wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
@@ -388,7 +240,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 break;
             }
             if (wParam < 256) {
-                SDL_SendKeyboardKey(index, SDL_PRESSED,
+                SDL_SendKeyboardKey(SDL_PRESSED,
                                     data->videodata->key_layout[wParam]);
             }
         }
@@ -398,9 +250,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYUP:
     case WM_KEYUP:
         {
-            int index;
-
-            index = data->videodata->keyboard;
             wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
@@ -441,11 +290,11 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (wParam == VK_SNAPSHOT
                 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
                 SDL_RELEASED) {
-                SDL_SendKeyboardKey(index, SDL_PRESSED,
+                SDL_SendKeyboardKey(SDL_PRESSED,
                                     data->videodata->key_layout[wParam]);
             }
             if (wParam < 256) {
-                SDL_SendKeyboardKey(index, SDL_RELEASED,
+                SDL_SendKeyboardKey(SDL_RELEASED,
                                     data->videodata->key_layout[wParam]);
             }
         }
@@ -470,14 +319,14 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 text[2] = 0x80 | (char) (wParam & 0x3F);
                 text[3] = '\0';
             }
-            SDL_SendKeyboardText(data->videodata->keyboard, text);
+            SDL_SendKeyboardText(text);
         }
         returnCode = 0;
         break;
 
     case WM_INPUTLANGCHANGE:
         {
-            WIN_UpdateKeymap(data->videodata->keyboard);
+            WIN_UpdateKeymap();
         }
         returnCode = 1;
         break;

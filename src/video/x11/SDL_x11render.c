@@ -26,6 +26,7 @@
 #include <limits.h> /* For INT_MIN and INT_MAX */
 
 #include "SDL_x11video.h"
+#include "SDL_x11render.h"
 #include "../SDL_rect_c.h"
 #include "../SDL_pixels_c.h"
 #include "../SDL_yuv_sw_c.h"

@@ -23,12 +23,14 @@
 
 #include <sys/types.h>
 #include <sys/time.h>
+#include <signal.h>
 #include <unistd.h>
 
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
 
+#include "SDL_timer.h"
 #include "SDL_syswm.h"
 
 static void
@@ -93,13 +95,7 @@ X11_DispatchEvent(_THIS)
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
-#if 1
-            /* FIXME: Should we reset data for all mice? */
-            for (i = 0; i < SDL_GetNumMice(); ++i) {
-                SDL_Mouse *mouse = SDL_GetMouse(i);
-                SDL_SetMouseFocus(mouse->id, data->window);
-            }
-#endif
+            SDL_SetMouseFocus(data->window);
         }
         break;
 
@@ -116,13 +112,7 @@ X11_DispatchEvent(_THIS)
                 printf("Mode: NotifyUngrab\n");
 #endif
             if (xevent.xcrossing.detail != NotifyInferior) {
-#if 1
-                /* FIXME: Should we reset data for all mice? */
-	        for (i = 0; i < SDL_GetNumMice(); ++i) {
-		    SDL_Mouse *mouse = SDL_GetMouse(i);
-		    SDL_SetMouseFocus(mouse->id, 0);
-	        }
-#endif
+                SDL_SetMouseFocus(NULL);
             }
         }
         break;
@@ -132,7 +122,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("FocusIn!\n");
 #endif
-            SDL_SetKeyboardFocus(videodata->keyboard, data->window);
+            SDL_SetKeyboardFocus(data->window);
 #ifdef X_HAVE_UTF8_STRING
             if (data->ic) {
                 XSetICFocus(data->ic);
@@ -146,7 +136,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("FocusOut!\n");
 #endif
-            SDL_SetKeyboardFocus(videodata->keyboard, 0);
+            SDL_SetKeyboardFocus(NULL);
 #ifdef X_HAVE_UTF8_STRING
             if (data->ic) {
                 XUnsetICFocus(data->ic);
@@ -185,8 +175,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDL_SendKeyboardKey(videodata->keyboard, SDL_PRESSED,
-                                videodata->key_layout[keycode]);
+            SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
 #if 0
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
@@ -210,7 +199,7 @@ X11_DispatchEvent(_THIS)
             XLookupString(&xevent.xkey, text, sizeof(text), &keysym, NULL);
 #endif
             if (*text) {
-                SDL_SendKeyboardText(videodata->keyboard, text);
+                SDL_SendKeyboardText(text);
             }
         }
         break;
@@ -222,8 +211,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDL_SendKeyboardKey(videodata->keyboard, SDL_RELEASED,
-                                videodata->key_layout[keycode]);
+            SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode]);
         }
         break;
 
@@ -280,79 +268,25 @@ X11_DispatchEvent(_THIS)
         }
         break;
 
+    case MotionNotify:{
+#ifdef DEBUG_MOTION
+            printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
+#endif
+            SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+        }
+        break;
+
+    case ButtonPress:{
+            SDL_SendMouseButton(data->window, SDL_PRESSED, xevent.xbutton.button);
+        }
+        break;
+
+    case ButtonRelease:{
+            SDL_SendMouseButton(data->window, SDL_RELEASED, xevent.xbutton.button);
+        }
+        break;
+
     default:{
-            for (i = 0; i < SDL_GetNumMice(); ++i) {
-                SDL_Mouse *mouse;
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-                X11_MouseData *data;
-#endif
-
-                mouse = SDL_GetMouse(i);
-                if (!mouse->driverdata) {
-                    switch (xevent.type) {
-                    case MotionNotify:
-#ifdef DEBUG_MOTION
-                        printf("X11 motion: %d,%d\n", xevent.xmotion.x,
-                               xevent.xmotion.y);
-#endif
-                        SDL_SendMouseMotion(mouse->id, 0, xevent.xmotion.x,
-                                            xevent.xmotion.y, 0);
-                        break;
-
-                    case ButtonPress:
-                        SDL_SendMouseButton(mouse->id, SDL_PRESSED,
-                                            xevent.xbutton.button);
-                        break;
-
-                    case ButtonRelease:
-                        SDL_SendMouseButton(mouse->id, SDL_RELEASED,
-                                            xevent.xbutton.button);
-                        break;
-                    }
-                    continue;
-                }
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-                data = (X11_MouseData *) mouse->driverdata;
-                if (xevent.type == data->motion) {
-                    XDeviceMotionEvent *move =
-                        (XDeviceMotionEvent *) & xevent;
-#ifdef DEBUG_MOTION
-                    printf("X11 motion: %d,%d\n", move->x, move->y);
-#endif
-                    SDL_SendMouseMotion(move->deviceid, 0, move->x, move->y,
-                                        move->axis_data[2]);
-                    return;
-                }
-                if (xevent.type == data->button_pressed) {
-                    XDeviceButtonPressedEvent *pressed =
-                        (XDeviceButtonPressedEvent *) & xevent;
-                    SDL_SendMouseButton(pressed->deviceid, SDL_PRESSED,
-                                        pressed->button);
-                    return;
-                }
-                if (xevent.type == data->button_released) {
-                    XDeviceButtonReleasedEvent *released =
-                        (XDeviceButtonReleasedEvent *) & xevent;
-                    SDL_SendMouseButton(released->deviceid, SDL_RELEASED,
-                                        released->button);
-                    return;
-                }
-                if (xevent.type == data->proximity_in) {
-                    XProximityNotifyEvent *proximity =
-                        (XProximityNotifyEvent *) & xevent;
-                    SDL_SendProximity(proximity->deviceid, proximity->x,
-                                      proximity->y, SDL_PROXIMITYIN);
-                    return;
-                }
-                if (xevent.type == data->proximity_out) {
-                    XProximityNotifyEvent *proximity =
-                        (XProximityNotifyEvent *) & xevent;
-                    SDL_SendProximity(proximity->deviceid, proximity->x,
-                                      proximity->y, SDL_PROXIMITYOUT);
-                    return;
-                }
-#endif
-            }
 #ifdef DEBUG_XEVENTS
             printf("Unhandled event %d\n", xevent.type);
 #endif
@@ -362,7 +296,7 @@ X11_DispatchEvent(_THIS)
 }
 
 /* Ack!  XPending() actually performs a blocking read if no events available */
-int
+static int
 X11_Pending(Display * display)
 {
     /* Flush the display connection and look to see if events are queued */

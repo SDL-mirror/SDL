@@ -58,4 +58,5 @@ typedef struct SDL_error
 } SDL_error;
 
 #endif /* _SDL_error_c_h */
+
 /* vi: set ts=4 sw=4 expandtab: */

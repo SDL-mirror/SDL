@@ -57,8 +57,6 @@ typedef struct SDL_VideoData
 {
     SInt32 osversion;
     unsigned int modifierFlags;
-    int mouse;
-    int keyboard;
     void *key_layout;
     SDLTranslatorResponder *fieldEdit;
     Uint32 screensaver_activity;
