@@ -203,34 +203,8 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\..\SDLmain\Debug\SDLmain.lib"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\Test\testplatform.c"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
-			<FileConfiguration
-				Name="Release|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					AdditionalIncludeDirectories=""
-					PreprocessorDefinitions=""
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>

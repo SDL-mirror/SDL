@@ -199,14 +199,6 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\..\SDLmain\Debug\SDLmain.lib"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\test\testoverlay2.c"
 			>
 		</File>

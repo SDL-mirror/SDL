@@ -202,14 +202,6 @@
 			RelativePath="..\..\..\test\graywin.c"
 			>
 		</File>
-		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\..\SDLmain\Debug\SDLmain.lib"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

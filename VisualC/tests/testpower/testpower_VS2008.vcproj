@@ -200,24 +200,8 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
-			>
-		</File>
-		<File
-			RelativePath="..\..\SDLmain\Debug\SDLmain.lib"
-			>
-		</File>
-		<File
 			RelativePath="..\..\..\test\testpower.c"
 			>
-			<FileConfiguration
-				Name="Debug|Win32"
-				>
-				<Tool
-					Name="VCCLCompilerTool"
-					PrecompiledHeaderFile=".\Debug/testpower.pch"
-				/>
-			</FileConfiguration>
 		</File>
 	</Files>
 	<Globals>
