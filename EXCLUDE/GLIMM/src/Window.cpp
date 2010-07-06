@@ -31,6 +31,7 @@ void Window::Initialize(const std::wstring &Title, const Video_Mode &Mode, bool 
 	my_Fullscreen = Fullscreen;
 	Register_Class();
 	Create_Window(Title, Mode, Fullscreen);
+	Show();
 	my_IMM.Initialize(my_Handle);
 }
 
@@ -295,6 +296,18 @@ LRESULT Window::Handle_Message(HWND Handle, UINT Message, WPARAM wParam, LPARAM 
 		break;
 	case WM_KILLFOCUS:
 			my_IMM.Focus_Lost();
+		break;
+	case WM_LBUTTONDOWN:
+		Call_Listener(On_Mouse_Button_Down(Mouse_Button_Left));
+		break;
+	case WM_LBUTTONUP:
+		Call_Listener(On_Mouse_Button_Up(Mouse_Button_Left));
+		break;
+	case WM_RBUTTONDOWN:
+		Call_Listener(On_Mouse_Button_Down(Mouse_Button_Right));
+		break;
+	case WM_RBUTTONUP:
+		Call_Listener(On_Mouse_Button_Up(Mouse_Button_Right));
 		break;
 	default:
 		return DefWindowProcW(Handle, Message, wParam, lParam);

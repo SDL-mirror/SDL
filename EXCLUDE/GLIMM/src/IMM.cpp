@@ -6,7 +6,8 @@ IMM::IMM() : my_COM_Initialized(false),
 			 my_Window(0),
 			 my_Context(0),
 			 my_HKL(0),
-			 my_Vertical_Candidates(false)
+			 my_Vertical_Candidates(false),
+			 my_Enabled(false)
 {
 
 }
@@ -28,11 +29,13 @@ void IMM::Initialize(HWND Window)
 		if (SUCCEEDED(CoCreateInstance(CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, IID_ITfThreadMgr, reinterpret_cast<LPVOID *>(&my_Thread_Manager))))
 		{
 			ITfDocumentMgr *Document_Manager = 0;
-			if (FAILED(my_Thread_Manager->AssociateFocus(Window, NULL, &Document_Manager)))
+			if (SUCCEEDED(my_Thread_Manager->AssociateFocus(Window, NULL, &Document_Manager)))
+			{
+				if (Document_Manager)
+					Document_Manager->Release();
+			}
+			else
 				printf("Warning: ITfThreadMgr->AssociateFocus failed\n");
-
-			if (Document_Manager)
-				Document_Manager->Release();
 		}
 		else
 			printf("Warning: Failed to create ITfThreadMgr instance\n");
@@ -40,16 +43,16 @@ void IMM::Initialize(HWND Window)
 	else
 		printf("Warning: Failed to initialize COM\n");
 
-	ImmDisableTextFrameService(-1);
+	ImmDisableTextFrameService((DWORD)-1);
 
 	my_Context = ImmGetContext(my_Window);
-	if (!ImmReleaseContext(my_Window, my_Context))
-		throw std::runtime_error("Error releasing context");
-
+	ImmReleaseContext(my_Window, my_Context);
 	if (!my_Context)
-		throw std::runtime_error("No context");
+		throw std::runtime_error("No context (No IME installed?)");
 
 	Update_Input_Locale();
+	Cancel_Composition();
+	Disable();
 }
 
 void IMM::Finalize()
@@ -102,11 +105,10 @@ LRESULT IMM::Handle_Message(HWND Window, UINT Message, WPARAM wParam, LPARAM lPa
 	switch (Message)
 	{
 	case WM_INPUTLANGCHANGE:
-		Update_Input_Locale();
+		Input_Language_Changed();
 		break;
 	case WM_IME_SETCONTEXT:
 		lParam = 0;
-		return DefWindowProcW(my_Window, Message, wParam, lParam);
 		break;
 	case WM_IME_STARTCOMPOSITION:
 		Ate = true;
@@ -158,8 +160,78 @@ LRESULT IMM::Handle_Message(HWND Window, UINT Message, WPARAM wParam, LPARAM lPa
 		case IMN_CHANGECANDIDATE:
 			Ate = true;
 			break;
+		case IMN_CLOSECANDIDATE:
+			Ate = true;
+			break;
+		default:
+			Ate = true;
+			break;
 		}
 		break;
 	}
 	return 0;
+}
+
+void IMM::Enable()
+{
+	ImmAssociateContext(my_Window, my_Context);
+	Update_Input_Locale();
+	my_Enabled = true;
+	printf("* Enabled\n");
+}
+
+void IMM::Disable()
+{
+	ImmAssociateContext(my_Window, 0);
+	my_Enabled = false;
+	printf("* Disabled\n");
+}
+
+bool IMM::Is_Enabled()
+{
+	return my_Enabled;
+}
+
+void IMM::Toggle()
+{
+	if (my_Enabled)
+		Disable();
+	else
+		Enable();
+}
+
+void IMM::Focus_Gained()
+{
+	if (my_Enabled)
+		Enable();
+}
+
+void IMM::Focus_Lost()
+{
+	bool Enabled = my_Enabled;
+	Cancel_Composition();
+	Disable();
+	my_Enabled = Enabled;
+}
+
+void IMM::Cancel_Composition()
+{
+	HIMC hIMC = ImmGetContext(my_Window);
+	if (!hIMC)
+		return;
+
+	ImmNotifyIME(hIMC, NI_COMPOSITIONSTR, CPS_CANCEL, 0);
+	ImmNotifyIME(hIMC, NI_CLOSECANDIDATE, 0, 0);
+	ImmReleaseContext(my_Window, hIMC);
+}
+
+void IMM::Input_Language_Changed()
+{
+	Update_Input_Locale();
+	HWND hwndImeDef = ImmGetDefaultIMEWnd(my_Window);
+	if (hwndImeDef)
+	{
+		SendMessageA(hwndImeDef, WM_IME_CONTROL, IMC_OPENSTATUSWINDOW, 0);
+		SendMessageA(hwndImeDef, WM_IME_CONTROL, IMC_CLOSESTATUSWINDOW, 0);
+	}
 }
