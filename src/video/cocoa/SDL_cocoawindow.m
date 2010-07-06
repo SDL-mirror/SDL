@@ -171,7 +171,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber];
         break;
     }
-    SDL_SendMouseButton(SDL_PRESSED, button);
+    SDL_SendMouseButton(_data->window, SDL_PRESSED, button);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
@@ -202,7 +202,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber];
         break;
     }
-    SDL_SendMouseButton(SDL_RELEASED, button);
+    SDL_SendMouseButton(_data->window, SDL_RELEASED, button);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
@@ -228,8 +228,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             SDL_SetMouseFocus(NULL);
         }
     } else {
-        SDL_SetMouseFocus(_data->window);
-        SDL_SendMouseMotion(0, (int)point.x, (int)point.y);
+        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
     }
 }
 
@@ -250,7 +249,20 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-    SDL_SendMouseWheel((int)([theEvent deltaX]+0.9f), (int)([theEvent deltaY]+0.9f));
+    float x = [theEvent deltaX];
+    float y = [theEvent deltaY];
+
+    if (x > 0) {
+        x += 0.9f;
+    } else if (x < 0) {
+        x -= 0.9f;
+    }
+    if (y > 0) {
+        y += 0.9f;
+    } else if (y < 0) {
+        y -= 0.9f;
+    }
+    SDL_SendMouseWheel(_data->window, (int)x, (int)y);
 }
 
 @end

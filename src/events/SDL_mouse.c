@@ -112,13 +112,17 @@ SDL_SetMouseFocus(SDL_Window * window)
 }
 
 int
-SDL_SendMouseMotion(int relative, int x, int y)
+SDL_SendMouseMotion(SDL_Window * window, int relative, int x, int y)
 {
     SDL_Mouse *mouse = &SDL_mouse;
     int posted;
     int xrel;
     int yrel;
     int x_max = 0, y_max = 0;
+
+    if (window) {
+        SDL_SetMouseFocus(window);
+    }
 
     /* the relative motion is calculated regarding the system cursor last position */
     if (relative) {
@@ -194,11 +198,15 @@ SDL_SendMouseMotion(int relative, int x, int y)
 }
 
 int
-SDL_SendMouseButton(Uint8 state, Uint8 button)
+SDL_SendMouseButton(SDL_Window * window, Uint8 state, Uint8 button)
 {
     SDL_Mouse *mouse = &SDL_mouse;
     int posted;
     Uint32 type;
+
+    if (window) {
+        SDL_SetMouseFocus(window);
+    }
 
     /* Figure out which event to perform */
     switch (state) {
@@ -239,10 +247,14 @@ SDL_SendMouseButton(Uint8 state, Uint8 button)
 }
 
 int
-SDL_SendMouseWheel(int x, int y)
+SDL_SendMouseWheel(SDL_Window * window, int x, int y)
 {
     SDL_Mouse *mouse = &SDL_mouse;
     int posted;
+
+    if (window) {
+        SDL_SetMouseFocus(window);
+    }
 
     if (!x && !y) {
         return 0;
@@ -304,8 +316,7 @@ SDL_WarpMouseInWindow(SDL_Window * window, int x, int y)
     if (mouse->WarpMouse) {
         mouse->WarpMouse(mouse, window, x, y);
     } else {
-        SDL_SetMouseFocus(window);
-        SDL_SendMouseMotion(0, x, y);
+        SDL_SendMouseMotion(window, 0, x, y);
     }
 }
 
