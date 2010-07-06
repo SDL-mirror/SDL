@@ -841,10 +841,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_stretch_c.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\stdlib\SDL_string.c"
 			>
 		</File>

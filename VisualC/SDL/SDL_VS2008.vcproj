@@ -5,6 +5,9 @@
 	Name="SDL"
 	ProjectGUID="{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
 	RootNamespace="SDL"
+	SccProjectName="Perforce Project"
+	SccLocalPath="..\.."
+	SccProvider="MSSCCI:Perforce SCM"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -993,10 +996,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_stretch.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\SDL_stretch_c.h"
 			>
 		</File>
 		<File
