@@ -133,7 +133,7 @@ static void parse_options( int argc, char *argv[] )
 int main( int argc, char *argv[] )
 {
    int failed;
-   int rev;
+   const char *rev;
    SDL_version ver;
 
    /* Get options. */
@@ -145,7 +145,7 @@ int main( int argc, char *argv[] )
    /* Print some text if verbose. */
    SDL_GetVersion( &ver );
    rev = SDL_GetRevision();
-   SDL_ATprintVerbose( 1, "Running tests with SDL %d.%d.%d revision %d\n",
+   SDL_ATprintVerbose( 1, "Running tests with SDL %d.%d.%d revision %s\n",
          ver.major, ver.minor, ver.patch, rev );
 
    /* Automatic tests. */
