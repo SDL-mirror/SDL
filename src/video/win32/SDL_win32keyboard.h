@@ -31,6 +31,10 @@ extern void WIN_InitKeyboard(_THIS);
 extern void WIN_UpdateKeymap(void);
 extern void WIN_QuitKeyboard(_THIS);
 
+extern void WIN_StartTextInput(_THIS);
+extern void WIN_StopTextInput(_THIS);
+extern void WIN_SetTextInputRect(_THIS, SDL_Rect *rect);
+
 #endif /* _SDL_win32keyboard_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

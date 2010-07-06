@@ -122,4 +122,23 @@ WIN_QuitKeyboard(_THIS)
 {
 }
 
+void
+WIN_StartTextInput(_THIS)
+{
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+
+}
+
+void
+WIN_StopTextInput(_THIS)
+{
+
+}
+
+void
+WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
+{
+
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

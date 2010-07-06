@@ -162,6 +162,9 @@ WIN_CreateDevice(int devindex)
     device->GL_SwapWindow = WIN_GL_SwapWindow;
     device->GL_DeleteContext = WIN_GL_DeleteContext;
 #endif
+    device->StartTextInput = WIN_StartTextInput;
+    device->StopTextInput = WIN_StartTextInput;
+    device->SetTextInputRect = WIN_SetTextInputRect;
 
     device->free = WIN_DeleteDevice;
 
