@@ -36,6 +36,8 @@ jmethodID midCreateGLContext;
 jmethodID midFlipBuffers;
 
 extern "C" int SDL_main();
+extern "C" int Android_OnKeyDown(int keycode);
+extern "C" int Android_OnKeyUp(int keycode);
 
 /*******************************************************************************
                  Functions called by JNI
@@ -75,6 +77,20 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
     }
     
     return JNI_VERSION_1_4;
+}
+
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv*  env, 
+               jobject obj, jint keycode){
+    
+    int r = Android_OnKeyDown(keycode);
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: native key down %d, %d\n", keycode, r);
+}
+
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env, 
+               jobject obj, jint keycode){
+    
+    int r = Android_OnKeyUp(keycode);
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: native key up %d, %d\n", keycode, r);
 }
 
 

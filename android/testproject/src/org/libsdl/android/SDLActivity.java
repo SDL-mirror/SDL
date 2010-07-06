@@ -4,14 +4,14 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.*;
 
-import android.app.Activity;
-import android.content.Context;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-import android.os.Bundle;
-import android.view.MotionEvent;
+import android.app.*;
+import android.content.*;
+import android.view.*;
+import android.os.*;
 import android.util.Log;
 import android.graphics.*;
+import android.text.method.*;
+import android.text.*;
 
 import java.lang.*;
 
@@ -55,13 +55,14 @@ public class SDLActivity extends Activity {
         super.onResume();
     }
 
-
-
+    
 
 
 
     //C functions we call
     public static native void nativeInit();
+    public static native void onNativeKeyDown(int keycode);
+    public static native void onNativeKeyUp(int keycode);
 
 
 
@@ -82,8 +83,7 @@ public class SDLActivity extends Activity {
 
 
 
-
-    //EGL context creation
+    
     
 }
 
@@ -104,7 +104,7 @@ class SDLRunner implements Runnable{
 
     Because of this, that's where we set up the SDL thread
 */
-class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
+class SDLSurface extends SurfaceView implements SurfaceHolder.Callback, View.OnKeyListener  {
 
     //This is what SDL runs in. It invokes SDL_main(), eventually
     private Thread mSDLThread;    
@@ -117,7 +117,12 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
     //Startup    
     public SDLSurface(Context context) {
         super(context);
-        getHolder().addCallback(this);      
+        getHolder().addCallback(this); 
+    
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+        requestFocus();
+        setOnKeyListener(this);      
     }
 
     //Called when we have a valid drawing surface
@@ -175,13 +180,13 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
             mEGLDisplay = dpy;
             mEGLSurface = surface;
             
+            
         }catch(Exception e){
             Log.v("SDL", e + "");
             for(StackTraceElement s : e.getStackTrace()){
                 Log.v("SDL", s.toString());
             }
         }
-
         Log.v("SDL","Done making!");
 
         return true;
@@ -211,6 +216,26 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback{
             }
         }
     }
+
+
+  
+
+    public boolean onKey(View  v, int keyCode, KeyEvent event){
+
+        if(event.getAction() == KeyEvent.ACTION_DOWN){
+            SDLActivity.onNativeKeyDown(keyCode);
+            return true;
+        }
+        
+        else if(event.getAction() == KeyEvent.ACTION_UP){
+            SDLActivity.onNativeKeyUp(keyCode);
+            return true;
+        }
+        
+        return false;
+    }
+
+
 }
 
 

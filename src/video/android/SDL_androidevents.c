@@ -30,6 +30,24 @@
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 
+#include "SDL_androidevents.h"
+
+void Android_InitEvents(){
+
+    SDL_Keyboard keyboard;
+
+    SDL_zero(keyboard);
+    SDL_AddKeyboard(&keyboard, -1);
+
+    SDLKey keymap[SDL_NUM_SCANCODES];
+
+    /* Add default scancode to key mapping */
+    SDL_GetDefaultKeymap(keymap);
+    SDL_SetKeymap(0, 0, keymap, SDL_NUM_SCANCODES);
+
+
+}
+
 void
 Android_PumpEvents(_THIS)
 {
@@ -47,6 +65,16 @@ Android_PumpEvents(_THIS)
         SDL_SendMouseMotion(0, 0, t.px, t.py, 1);       
     }
     */
+}
+
+int
+Android_OnKeyDown(int keycode){
+    return SDL_SendKeyboardKey(0, SDL_PRESSED, (SDL_scancode)keycode);
+}
+
+int
+Android_OnKeyUp(int keycode){
+    return SDL_SendKeyboardKey(0, SDL_RELEASED, (SDL_scancode)keycode);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

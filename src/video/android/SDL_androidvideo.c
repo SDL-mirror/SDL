@@ -132,6 +132,8 @@ Android_VideoInit(_THIS)
     SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
+    Android_InitEvents();
+
     /* We're done! */
     return 0;
 }

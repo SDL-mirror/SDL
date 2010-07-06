@@ -694,8 +694,16 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
     Uint16 modstate;
     Uint32 type;
 
+    if(!keyboard){
+        return 7;
+    }
+
+    if(!scancode){
+        return 8;
+    }
+
     if (!keyboard || !scancode) {
-        return 0;
+        return 1;
     }
 #if 0
     printf("The '%s' key has been %s\n", SDL_GetScancodeName(scancode),
@@ -788,7 +796,7 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
         break;
     default:
         /* Invalid state -- bail */
-        return 0;
+        return 2;
     }
 
     /* Drop events that don't change state */
@@ -796,14 +804,14 @@ SDL_SendKeyboardKey(int index, Uint8 state, SDL_scancode scancode)
 #if 0
         printf("Keyboard event didn't change state - dropped!\n");
 #endif
-        return 0;
+        return 3;
     }
 
     /* Update internal keyboard state */
     keyboard->keystate[scancode] = state;
 
     /* Post the event, if desired */
-    posted = 0;
+    posted = 4;
     if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.key.type = type;

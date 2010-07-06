@@ -37,6 +37,8 @@
 /* This is our SDL surface */
 SDL_Surface *surface;
 
+int rotation = 0;
+
 
 /**************************************
 	gluperspective implementation
@@ -196,9 +198,19 @@ void handleKeyPress( SDL_keysym *keysym )
 	     */
 	    SDL_WM_ToggleFullScreen( surface );
 	    break;
+    case SDLK_LEFT:
+        rotation -= 30;
+        break;
+
+    case SDLK_RIGHT:
+        rotation += 30;
+        break;
+        
 	default:
 	    break;
 	}
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL","Keycode: %d, %d, %d\n", keysym->sym, SDLK_LEFT, SDLK_RIGHT);
 
     return;
 }
@@ -231,6 +243,7 @@ int initGL( GLvoid )
 /* Here goes our drawing code */
 int drawGLScene( GLvoid )
 {
+      
 	static int Frames = 0;
 	static int T0 = 0;
 	
@@ -253,14 +266,14 @@ int drawGLScene( GLvoid )
 	//Draw a triangle
 	//glRotatef(iRot, 0, 1, 0);
 
-	glRotatef( Frames % 360, 0.0f, 1.0f, 0.0f );
+	glRotatef( rotation, 0.0f, 1.0f, 0.0f );
 
 
 	glEnableClientState (GL_VERTEX_ARRAY);
 	glEnableClientState (GL_COLOR_ARRAY);
 	
 	/* Rotate The Triangle On The Y axis ( NEW ) */
-    glRotatef( Frames % 360, 0.0f, 1.0f, 0.0f );
+    //glRotatef( Frames % 360, 0.0f, 1.0f, 0.0f );
 
     /* GLES variant of drawing a triangle */
     const GLfloat triVertices[][9] = {
