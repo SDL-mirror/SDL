@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display %d] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
