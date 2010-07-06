@@ -57,9 +57,6 @@ void App::On_Key_Down(int Key)
 	case VK_ESCAPE:
 		On_Close();
 		break;
-	case VK_TAB:
-		my_Window.Get_IMM().Toggle();
-		break;
 	}
 }
 
@@ -81,6 +78,16 @@ void App::On_Resized(unsigned int Width, unsigned int Height)
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+}
+
+void App::On_Mouse_Button_Down(Mouse_Button Button)
+{
+	switch (Button)
+	{
+	case Mouse_Button_Left:
+		my_Window.Get_IMM().Toggle();
+		break;
+	}
 }
 
 void App::Update()
