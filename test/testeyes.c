@@ -143,7 +143,7 @@ int main(int argc,char** argv) {
 		exit(-3);
 	}
 	
-	SDL_Color bnw_palette[2] = {{0,0,0,0},{255,255,255,255}};
+	SDL_Color bnw_palette[2] = {{0,0,0,255},{255,255,255,255}};
 	SDL_Texture *eyes_texture = SDL_CreateTexture(SDL_PIXELFORMAT_INDEX1LSB,SDL_TEXTUREACCESS_STREAMING,eyes_width,eyes_height);
 	if(eyes_texture == NULL) {
 		SDL_DestroyRenderer(window);
@@ -162,8 +162,11 @@ int main(int argc,char** argv) {
 		memcpy(pixels+pitch*row,eyes_bits+(eyes_width/8)*row,eyes_width/8);
 	SDL_UnlockTexture(eyes_texture);
 	
-	SDL_Texture *mask_texture = SDL_CreateTexture(SDL_PIXELFORMAT_INDEX1LSB,SDL_TEXTUREACCESS_STREAMING,eyesmask_width,eyesmask_height);
-	if(mask_texture == NULL) {
+	int bpp = 0;
+	Uint32 r = 0,g = 0,b = 0,a = 0;
+	SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB4444,&bpp,&r,&g,&b,&a);
+	SDL_Surface *mask = SDL_CreateRGBSurface(0,eyesmask_width,eyesmask_height,bpp,r,g,b,a);
+	if(mask == NULL) {
 		SDL_DestroyTexture(eyes_texture);
 		SDL_DestroyRenderer(window);
 		SDL_DestroyWindow(window);
@@ -171,19 +174,20 @@ int main(int argc,char** argv) {
 		printf("Could not create shape mask texture.\n");
 		exit(-5);
 	}
-	SDL_SetTexturePalette(mask_texture,bnw_palette,0,2);
 	
-	rect.x = rect.y = 0;
-	rect.w = eyesmask_width;
-	rect.h = eyesmask_height;
-	SDL_LockTexture(mask_texture,&rect,1,&pixels,&pitch);
-	for(int row = 0;row<eyesmask_height;row++)
-		memcpy(pixels+pitch*row,eyesmask_bits+(eyesmask_width/8)*row,eyesmask_width/8);
-	SDL_UnlockTexture(mask_texture);
+	if(SDL_MUSTLOCK(mask))
+		SDL_LockSurface(mask);
+	pixels = mask->pixels;
+	for(int y=0;y<eyesmask_height;y++)
+		for(int x=0;x<eyesmask_width;x++) {
+			Uint8 alpha = *(Uint8*)(eyesmask_bits+(eyesmask_width/8)*y+(x/8)) & (1 << (7 - x % 8)) ? 1 : 0;
+			*(Uint16*)(pixels+pitch*y+x*bpp/8) = SDL_MapRGBA(mask->format,0,0,0,alpha);
+		}
+	if(SDL_MUSTLOCK(mask))
+		SDL_UnlockSurface(mask);
 	
-	SDL_SelectShapeRenderer(window);
-	SDL_RenderCopy(mask_texture,&rect,&rect);
-	SDL_RenderPresent();
+	SDL_WindowShapeMode mode = {ShapeModeDefault,1};
+	SDL_SetWindowShape(window,mask,&mode);
 	
 	SDL_Event event;
 	int event_pending = 0;
@@ -203,6 +207,9 @@ int main(int argc,char** argv) {
 		event_pending = SDL_PollEvent(&event);
 	}
 	
+	SDL_FreeSurface(mask);
+	SDL_DestroyTexture(eyes_texture);
+	SDL_DestroyWindow(window);
 	//Call SDL_VideoQuit() before quitting.
 	SDL_VideoQuit();
 }

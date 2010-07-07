@@ -62,6 +62,7 @@ int X11_ResizeWindowShape(SDL_Window* window) {
 }
 	
 int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+	assert(shaper != NULL && shape != NULL);
 	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
 		return -2;
 	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
@@ -69,8 +70,8 @@ int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowSha
 	SDL_ShapeData *data = shaper->driverdata;
 	assert(data != NULL);
 	
-	/* Assume that shaper->alphacutoff already has a value. */
-	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->bitmap);
+	/* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
+	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->bitmap,8,1);
 		
 	SDL_WindowData *windowdata = (SDL_WindowData*)(shaper->window->driverdata);
 	Pixmap shapemask = XCreateBitmapFromData(windowdata->videodata->display,windowdata->xwindow,data->bitmap,shaper->window->w,shaper->window->h);

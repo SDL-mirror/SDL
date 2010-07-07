@@ -45,7 +45,7 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 }
 
 /* REQUIRES that bitmap point to a w-by-h bitmap with 1bpp. */
-void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap) {
+void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
 	int x = 0,y = 0;
@@ -55,7 +55,7 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 			Uint8 alpha = 0;
 			SDL_GetRGBA(*(Uint32*)pixel,shape->format,NULL,NULL,NULL,&alpha);
 			Uint32 bitmap_pixel = y*shape->w + x;
-			bitmap[bitmap_pixel / 8] |= (alpha >= alphacutoff ? 1 : 0) << (8 - (bitmap_pixel % 8));
+			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
 		}
 	if(SDL_MUSTLOCK(shape))
 		SDL_UnlockSurface(shape);
@@ -81,7 +81,7 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 			}
 		}
 	}
-	//TODO: Platform-specific implementations of SetWindowShape.  X11 is in-progress.
+	//TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is in progress.
 	int result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
 	window->shaper->hasshape = SDL_TRUE;
 	if(window->shaper->usershownflag & SDL_WINDOW_SHOWN == SDL_WINDOW_SHOWN) {

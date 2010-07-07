@@ -32,8 +32,6 @@
 #include "SDL_stdinc.h"
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
-#include "SDL_ellipse.h"
-#include "SDL_poly.h"
 #include "SDL_surface.h"
 
 #include "begin_code.h"
