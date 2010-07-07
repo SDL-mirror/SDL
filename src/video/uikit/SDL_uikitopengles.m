@@ -125,7 +125,10 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         UIKit_GL_DeleteContext(_this, view);
         return NULL;
     }
-		
+
+	/* Make this window the current mouse focus for touch input */
+	SDL_SetMouseFocus(window);
+
 	return view;
 }
 

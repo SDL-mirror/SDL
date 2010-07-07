@@ -38,7 +38,7 @@
 #else
 @interface SDL_uikitview : UIView {
 #endif
-	
+
 #if FIXME_MULTITOUCH
 	SDL_Mouse mice[MAX_SIMULTANEOUS_TOUCHES];
 #endif

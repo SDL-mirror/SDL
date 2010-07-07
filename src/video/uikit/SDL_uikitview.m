@@ -64,7 +64,7 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch =(UITouch*)[enumerator nextObject];
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
 #if FIXME_MULTITOUCH
 	/* associate touches with mice, so long as we have slots */
@@ -101,12 +101,21 @@
 		/* re-calibrate relative mouse motion */
 		SDL_GetRelativeMouseState(i, NULL, NULL);
 		
-		/* grab next touch */
-		touch = (UITouch*)[enumerator nextObject]; 
-		
 		/* switch back to our old mouse */
 		SDL_SelectMouse(oldMouse);
 		
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
+	}
+#else
+	if (touch) {
+		CGPoint locationInView = [touch locationInView: self];
+			
+		/* send moved event */
+		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+
+		/* send mouse down event */
+		SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
 	}
 #endif
 }
@@ -114,10 +123,10 @@
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch=nil;
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
 #if FIXME_MULTITOUCH
-	while(touch = (UITouch *)[enumerator nextObject]) {
+	while(touch) {
 		/* search for the mouse slot associated with this touch */
 		int i, found = NO;
 		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
@@ -131,6 +140,14 @@
 				found = YES;
 			}
 		}
+		
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
+	}
+#else
+	if (touch) {
+		/* send mouse up */
+		SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
 	}
 #endif
 }
@@ -147,10 +164,10 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch=nil;
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
 #if FIXME_MULTITOUCH
-	while(touch = (UITouch *)[enumerator nextObject]) {
+	while(touch) {
 		/* try to find the mouse associated with this touch */
 		int i, found = NO;
 		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
@@ -163,6 +180,16 @@
 				found = YES;
 			}
 		}
+		
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
+	}
+#else
+	if (touch) {
+		CGPoint locationInView = [touch locationInView: self];
+
+		/* send moved event */
+		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 	}
 #endif
 }
