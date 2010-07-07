@@ -493,6 +493,10 @@ SDL_PushEvent(SDL_Event * event)
     if (SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0, 0) <= 0) {
         return -1;
     }
+
+    SDL_GestureProcessEvent(event);
+    
+
     return 1;
 }
 

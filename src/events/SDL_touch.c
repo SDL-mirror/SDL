@@ -140,6 +140,9 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
     SDL_touchPads[index]->relative_mode = SDL_FALSE;
     SDL_touchPads[index]->flush_motion = SDL_FALSE;
     
+    //Do I want this here? Probably
+    SDL_GestureAddTouch(SDL_touchPads[index]);
+
     return index;
 }
 

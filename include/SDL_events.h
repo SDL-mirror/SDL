@@ -86,12 +86,16 @@ typedef enum
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
 
-    /*Touch events - is 0x700 the correct place?*/
+    /*Touch events*/
     SDL_FINGERDOWN     = 0x700,
     SDL_FINGERUP,
     SDL_FINGERMOTION,
     SDL_TOUCHBUTTONDOWN,
     SDL_TOUCHBUTTONUP,    
+
+    /*Gesture events*/
+    SDL_DOLLARGESTURE     = 0x800,
+    SDL_MULTIGESTURE,
 
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
@@ -331,6 +335,28 @@ typedef struct SDL_TouchButtonEvent
 } SDL_TouchButtonEvent;
 
 
+
+/**
+ *  \brief Multiple Finger Gesture Event
+ */
+typedef struct SDL_MultiGestureEvent
+{
+    Uint32 type;        /**< ::SDL_MULTIGESTURE */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint8 touchId;        /**< The touch device index */
+    Uint8 padding1;
+    Uint8 padding2;
+    Uint8 padding3;
+    float dTheta;
+    float dDist;
+    float x;  //currently 0...1. Change to screen coords?
+    float y;  
+
+} SDL_MultiGestureEvent;
+
+
+
+
 /**
  *  \brief The "quit requested" event
  */
@@ -416,6 +442,7 @@ typedef union SDL_Event
     SDL_ProximityEvent proximity;   /**< Proximity In or Out event */
     SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
     SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
+    SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data*/
 
     /** Temporarily here for backwards compatibility */
     /*@{*/
