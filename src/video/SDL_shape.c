@@ -62,7 +62,7 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 }
 
 int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-	if(window == NULL || !SDL_WindowIsShaped(window))
+	if(window == NULL || !SDL_IsShapedWindow(window))
 		//The window given was not a shapeable window.
 		return -2;
 	if(shape == NULL)

@@ -20,6 +20,7 @@
     eligottlieb@gmail.com
 */
 
+#include <assert.h>
 #include <X11/extensions/shape.h>
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
