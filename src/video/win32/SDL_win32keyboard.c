@@ -123,9 +123,8 @@ WIN_QuitKeyboard(_THIS)
 }
 
 void
-WIN_StartTextInput(_THIS)
+WIN_StartTextInput(_THIS, SDL_Window *window)
 {
-	SDL_Window *window = SDL_GetKeyboardFocus();
 	HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
 }

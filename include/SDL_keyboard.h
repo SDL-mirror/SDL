@@ -140,7 +140,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDLKey key);
  *  \sa SDL_StopTextInput()
  *  \sa SDL_SetTextInputRect()
  */
-extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
+extern DECLSPEC void SDLCALL SDL_StartTextInput(SDL_Window *window);
 
 /**
  *  \brief Stop receiving any text input events.
