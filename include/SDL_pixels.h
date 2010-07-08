@@ -112,8 +112,7 @@ enum
     SDL_PACKEDLAYOUT_1010102
 };
 
-#define SDL_DEFINE_PIXELFOURCC(A, B, C, D) \
-    ((A) | ((B) << 8) | ((C) << 16) | ((D) << 24))
+#define SDL_DEFINE_PIXELFOURCC(A, B, C, D) SDL_FOURCC(A, B, C, D)
 
 #define SDL_DEFINE_PIXELFORMAT(type, order, layout, bits, bytes) \
     ((1 << 31) | ((type) << 24) | ((order) << 20) | ((layout) << 16) | \
