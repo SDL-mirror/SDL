@@ -23,20 +23,28 @@
 
 #include "SDL_cocoavideo.h"
 
+static NSString *
+GetTextFormat(_THIS)
+{
+#if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
+    return NSStringPboardType;
+#else
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    if (data->osversion >= 0x1060) {
+        return NSPasteboardTypeString;
+    } else {
+        return NSStringPboardType;
+    }
+#endif
+}
 
 int
 Cocoa_SetClipboardText(_THIS, const char *text)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
 	NSPasteboard *pasteboard;
-    NSString *format;
-
-    if (data->osversion >= 0x1060) {
-        format = NSPasteboardTypeString;
-    } else {
-        format = NSStringPboardType;
-    }
+    NSString *format = GetTextFormat(_this);
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -52,18 +60,11 @@ Cocoa_SetClipboardText(_THIS, const char *text)
 char *
 Cocoa_GetClipboardText(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
 	NSPasteboard *pasteboard;
-    NSString *format;
+    NSString *format = GetTextFormat(_this);
     NSString *available;
     char *text;
-
-    if (data->osversion >= 0x1060) {
-        format = NSPasteboardTypeString;
-    } else {
-        format = NSStringPboardType;
-    }
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -92,18 +93,11 @@ Cocoa_GetClipboardText(_THIS)
 SDL_bool
 Cocoa_HasClipboardText(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
 	NSPasteboard *pasteboard;
-    NSString *format;
+    NSString *format = GetTextFormat(_this);
     NSString *available;
     SDL_bool result;
-
-    if (data->osversion >= 0x1060) {
-        format = NSPasteboardTypeString;
-    } else {
-        format = NSStringPboardType;
-    }
 
     pool = [[NSAutoreleasePool alloc] init];
 
