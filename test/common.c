@@ -1050,6 +1050,25 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     case SDL_KEYDOWN:
         switch (event->key.keysym.sym) {
             /* Add hotkeys here */
+        case SDLK_c:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-C copy awesome text! */
+                SDL_SetClipboardText("SDL rocks!\nYou know it!");
+                printf("Copied text to clipboard\n");
+            }
+            break;
+        case SDLK_v:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-V paste awesome text! */
+                char *text = SDL_GetClipboardText();
+                if (*text) {
+                    printf("Clipboard: %s\n", text);
+                } else {
+                    printf("Clipboard is empty\n");
+                }
+                SDL_free(text);
+            }
+            break;
         case SDLK_g:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-G toggle grab */
