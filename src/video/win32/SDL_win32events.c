@@ -585,17 +585,4 @@ SDL_UnregisterApp()
     }
 }
 
-/* Sets an error message based on GetLastError() */
-void
-WIN_SetError(const char *prefix)
-{
-    TCHAR buffer[1024];
-    char *message;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
-                  buffer, SDL_arraysize(buffer), NULL);
-    message = WIN_StringToUTF8(buffer);
-    SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
-    SDL_free(message);
-}
-
 /* vi: set ts=4 sw=4 expandtab: */

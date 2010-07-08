@@ -60,6 +60,7 @@
 #define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "ASCII", (char *)S, (SDL_strlen(S)+1))
 #define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
 #endif
+extern void WIN_SetError(const char *prefix);
 
 /* Private display data */
 

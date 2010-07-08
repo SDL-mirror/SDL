@@ -30,6 +30,9 @@ SDL_SetClipboardText(const char *text)
 {
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
+    if (!text) {
+        text = "";
+    }
     if (_this->SetClipboardText) {
         return _this->SetClipboardText(_this, text);
     } else {

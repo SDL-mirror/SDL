@@ -236,6 +236,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_clipboard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_compat.h"
 				>
 			</File>
@@ -558,6 +562,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_bmp.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_clipboard.c"
 			>
 		</File>
 		<File
@@ -938,6 +946,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\SDL_wave.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32clipboard.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32clipboard.h"
 			>
 		</File>
 		<File

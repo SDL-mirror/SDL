@@ -5,9 +5,6 @@
 	Name="SDL"
 	ProjectGUID="{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
 	RootNamespace="SDL"
-	SccProjectName="Perforce Project"
-	SccLocalPath="..\.."
-	SccProvider="MSSCCI:Perforce SCM"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -386,6 +383,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_clipboard.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_compat.h"
 				>
 			</File>
@@ -716,6 +717,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_bmp.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_clipboard.c"
 			>
 		</File>
 		<File
@@ -1096,6 +1101,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\SDL_wave.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32clipboard.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32clipboard.h"
 			>
 		</File>
 		<File

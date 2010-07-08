@@ -4,9 +4,6 @@
 	Version="9.00"
 	Name="SDLmain"
 	ProjectGUID="{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
-	SccProjectName="Perforce Project"
-	SccLocalPath="..\.."
-	SccProvider="MSSCCI:Perforce SCM"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
