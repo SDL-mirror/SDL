@@ -21,48 +21,13 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_cocoavideo_h
-#define _SDL_cocoavideo_h
+#ifndef _SDL_cocoaclipboard_h
+#define _SDL_cocoaclipboard_h
 
-#include "SDL_opengl.h"
+extern int Cocoa_SetClipboardText(_THIS, const char *text);
+extern char *Cocoa_GetClipboardText(_THIS);
+extern SDL_bool Cocoa_HasClipboardText(_THIS);
 
-#include <ApplicationServices/ApplicationServices.h>
-#include <Cocoa/Cocoa.h>
-
-#include "SDL_keysym.h"
-#include "../SDL_sysvideo.h"
-
-#include "SDL_cocoaclipboard.h"
-#include "SDL_cocoaevents.h"
-#include "SDL_cocoakeyboard.h"
-#include "SDL_cocoamodes.h"
-#include "SDL_cocoamouse.h"
-#include "SDL_cocoaopengl.h"
-#include "SDL_cocoawindow.h"
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
-#if __LP64__
-typedef long NSInteger;
-typedef unsigned long NSUInteger;
-#else
-typedef int NSInteger;
-typedef unsigned int NSUInteger;
-#endif
-#endif
-
-/* Private display data */
-
-@class SDLTranslatorResponder;
-
-typedef struct SDL_VideoData
-{
-    SInt32 osversion;
-    unsigned int modifierFlags;
-    void *key_layout;
-    SDLTranslatorResponder *fieldEdit;
-    Uint32 screensaver_activity;
-} SDL_VideoData;
-
-#endif /* _SDL_cocoavideo_h */
+#endif /* _SDL_cocoaclipboard_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

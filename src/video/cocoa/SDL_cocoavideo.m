@@ -108,6 +108,10 @@ Cocoa_CreateDevice(int devindex)
     device->StopTextInput = Cocoa_StopTextInput;
     device->SetTextInputRect = Cocoa_SetTextInputRect;
 
+    device->SetClipboardText = Cocoa_SetClipboardText;
+    device->GetClipboardText = Cocoa_GetClipboardText;
+    device->HasClipboardText = Cocoa_HasClipboardText;
+
     device->free = Cocoa_DeleteDevice;
 
     return device;
