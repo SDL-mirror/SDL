@@ -22,8 +22,10 @@
 
 #import "SDL_uikitview.h"
 
+#include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
+
 #if SDL_IPHONE_KEYBOARD
-#import "SDL_keyboard_c.h"
 #import "keyinfotable.h"
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitwindow.h"
@@ -33,7 +35,6 @@
 
 - (void)dealloc {
 #if SDL_IPHONE_KEYBOARD
-	SDL_DelKeyboard(0);
 	[textField release];
 #endif
 	[super dealloc];
@@ -225,15 +226,6 @@
 	keyboardVisible = NO;
 	/* add the UITextField (hidden) to our view */
 	[self addSubview: textField];
-	
-	/* create our SDL_Keyboard */
-	SDL_Keyboard keyboard;
-	SDL_zero(keyboard);
-	SDL_AddKeyboard(&keyboard, 0);
-	SDLKey keymap[SDL_NUM_SCANCODES];
-	SDL_GetDefaultKeymap(keymap);
-	SDL_SetKeymap(0, 0, keymap, SDL_NUM_SCANCODES);
-	
 }
 
 /* reveal onscreen virtual keyboard */
@@ -253,8 +245,8 @@
 	
 	if ([string length] == 0) {
 		/* it wants to replace text with nothing, ie a delete */
-		SDL_SendKeyboardKey( 0, SDL_PRESSED, SDL_SCANCODE_DELETE);
-		SDL_SendKeyboardKey( 0, SDL_RELEASED, SDL_SCANCODE_DELETE);
+		SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
+		SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE);
 	}
 	else {
 		/* go through all the characters in the string we've been sent
@@ -280,14 +272,14 @@
 			
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift down */
-				SDL_SendKeyboardKey( 0, SDL_PRESSED, SDL_SCANCODE_LSHIFT);
+				SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT);
 			}
 			/* send a keydown and keyup even for the character */
-			SDL_SendKeyboardKey( 0, SDL_PRESSED, code);
-			SDL_SendKeyboardKey( 0, SDL_RELEASED, code);
+			SDL_SendKeyboardKey(SDL_PRESSED, code);
+			SDL_SendKeyboardKey(SDL_RELEASED, code);
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift back up */
-				SDL_SendKeyboardKey( 0, SDL_RELEASED, SDL_SCANCODE_LSHIFT);
+				SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
 			}			
 		}
 	}
