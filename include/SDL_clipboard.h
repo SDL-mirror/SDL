@@ -30,7 +30,6 @@
 #define _SDL_clipboard_h
 
 #include "SDL_stdinc.h"
-#include "SDL_surface.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -43,14 +42,14 @@ extern "C" {
 /* Function prototypes */
 
 /**
- * \brief Put text into the clipboard
+ * \brief Put UTF-8 text into the clipboard
  *
  * \sa SDL_GetClipboardText()
  */
 extern DECLSPEC int SDLCALL SDL_SetClipboardText(const char *text);
 
 /**
- * \brief Get text from the clipboard, which must be freed with SDL_free()
+ * \brief Get UTF-8 text from the clipboard, which must be freed with SDL_free()
  *
  * \sa SDL_SetClipboardText()
  */
@@ -62,54 +61,6 @@ extern DECLSPEC char * SDLCALL SDL_GetClipboardText();
  * \sa SDL_GetClipboardText()
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasClipboardText();
-
-/**
- * \brief Put an image into the clipboard
- *
- * \sa SDL_GetClipboardImage()
- */
-extern DECLSPEC int SDLCALL SDL_SetClipboardImage(SDL_Surface *image);
-
-/**
- * \brief Get image from the clipboard, which must be freed with SDL_FreeSurface()
- *
- * \sa SDL_SetClipboard()
- */
-extern DECLSPEC SDL_Surface * SDLCALL SDL_GetClipboardImage();
-
-/**
- * \brief Returns whether the clipboard has data in the specified format
- *
- * \sa SDL_GetClipboardImage()
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasClipboardImage();
-
-/**
- * \brief Set the data in the clipboard in the specified format
- *
- * \sa SDL_GetClipboard()
- */
-extern DECLSPEC int SDLCALL SDL_SetClipboard(Uint32 format, void *data, size_t length);
-
-/**
- * \brief Get the data in the clipboard in the specified format, which must be
- *        freed with SDL_free()
- *
- * \sa SDL_SetClipboard()
- */
-extern DECLSPEC int SDLCALL SDL_GetClipboard(Uint32 format, void **data, size_t *length);
-
-/**
- * \brief Returns whether the clipboard has data in the specified format
- *
- * \sa SDL_GetClipboard()
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasClipboardFormat(Uint32 format);
-
-/**
- * \brief Clear any data out of the clipboard, if possible.
- */
-extern DECLSPEC void SDLCALL SDL_ClearClipboard(void);
 
 
 /* Ends C function definitions when using C++ */

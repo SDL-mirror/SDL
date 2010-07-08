@@ -303,6 +303,11 @@ struct SDL_VideoDevice
     void (*StopTextInput) (_THIS);
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
+    /* Clipboard */
+    int (*SetClipboardText) (_THIS, const char *text);
+    char * (*GetClipboardText) (_THIS);
+    SDL_bool (*HasClipboardText) (_THIS);
+
     /* * * */
     /* Data common to all drivers */
     SDL_bool suspend_screensaver;
@@ -312,6 +317,7 @@ struct SDL_VideoDevice
     Uint8 window_magic;
     Uint8 texture_magic;
     Uint32 next_object_id;
+    char * clipboard_text;
 
     /* * * */
     /* Data used by the GL drivers */

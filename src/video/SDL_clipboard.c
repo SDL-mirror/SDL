@@ -24,78 +24,50 @@
 #include "SDL_clipboard.h"
 #include "SDL_sysvideo.h"
 
-/* FOURCC values for text and image clipboard formats */
-#define TEXT_DATA  SDL_FOURCC('T', 'E', 'X', 'T')
-#define IMAGE_DATA SDL_FOURCC('B', 'M', 'P', ' ')
 
 int
 SDL_SetClipboardText(const char *text)
 {
-    return SDL_SetClipboard(TEXT_DATA, text, SDL_strlen(text)+1);
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+
+    if (_this->SetClipboardText) {
+        return _this->SetClipboardText(_this, text);
+    } else {
+        _this->clipboard_text = SDL_strdup(text);
+        return 0;
+    }
 }
 
 char *
 SDL_GetClipboardText()
 {
-    void *data;
-    size_t length;
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
-    if (SDL_GetClipboard(TEXT_DATA, &data, &length) == 0) {
-        return SDL_static_cast(char*, data);
+    if (_this->GetClipboardText) {
+        return _this->GetClipboardText(_this);
     } else {
-        return NULL;
+        const char *text = _this->clipboard_text;
+        if (!text) {
+            text = "";
+        }
+        return SDL_strdup(text);
     }
 }
 
 SDL_bool
 SDL_HasClipboardText()
 {
-    return SDL_HasClipboardFormat(TEXT_DATA);
-}
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
-int
-SDL_SetClipboardImage(SDL_Surface *image)
-{
-    SDL_Unsupported();
-    return -1;
-}
-
-SDL_Surface *
-SDL_GetClipboardImage()
-{
-    SDL_Unsupported();
-    return NULL;
-}
-
-SDL_bool
-SDL_HasClipboardImage()
-{
-    return SDL_FALSE;
-}
-
-int
-SDL_SetClipboard(Uint32 format, void *data, size_t length)
-{
-    SDL_Unsupported();
-    return -1;
-}
-
-int
-SDL_GetClipboard(Uint32 format, void **data, size_t *length)
-{
-    SDL_Unsupported();
-    return -1;
-}
-
-SDL_bool
-SDL_HasClipboardFormat(Uint32 format)
-{
-    return SDL_FALSE;
-}
-
-void
-SDL_ClearClipboard(void)
-{
+    if (_this->HasClipboardText) {
+        return _this->HasClipboardText(_this);
+    } else {
+        if (_this->clipboard_text) {
+            return SDL_TRUE;
+        } else {
+            return SDL_FALSE;
+        }
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
