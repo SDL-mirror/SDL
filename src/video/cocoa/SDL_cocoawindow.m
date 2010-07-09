@@ -128,6 +128,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
 {
     /* We're going to get keyboard events, since we're key. */
     SDL_SetKeyboardFocus(_data->window);
+
+    /* Check to see if someone updated the clipboard */
+    Cocoa_CheckClipboardUpdate(_data->videodata);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification

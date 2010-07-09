@@ -1017,6 +1017,9 @@ PrintEvent(SDL_Event * event)
         fprintf(stderr, "Joystick %d: button %d released",
                 event->jbutton.which, event->jbutton.button);
         break;
+    case SDL_CLIPBOARDUPDATE:
+        fprintf(stderr, "Clipboard updated");
+        break;
     case SDL_QUIT:
         fprintf(stderr, "Quit requested");
         break;

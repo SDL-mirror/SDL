@@ -21,17 +21,11 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_cocoaclipboard_h
-#define _SDL_cocoaclipboard_h
+#ifndef _SDL_clipboardevents_c_h
+#define _SDL_clipboardevents_c_h
 
-/* Forward declaration */
-struct SDL_VideoData;
+extern int SDL_SendClipboardUpdate();
 
-extern int Cocoa_SetClipboardText(_THIS, const char *text);
-extern char *Cocoa_GetClipboardText(_THIS);
-extern SDL_bool Cocoa_HasClipboardText(_THIS);
-extern void Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data);
-
-#endif /* _SDL_cocoaclipboard_h */
+#endif /* _SDL_clipboardevents_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,17 +21,27 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_cocoaclipboard_h
-#define _SDL_cocoaclipboard_h
+/* Clipboard event handling code for SDL */
 
-/* Forward declaration */
-struct SDL_VideoData;
+#include "SDL_events.h"
+#include "SDL_events_c.h"
+#include "SDL_clipboardevents_c.h"
 
-extern int Cocoa_SetClipboardText(_THIS, const char *text);
-extern char *Cocoa_GetClipboardText(_THIS);
-extern SDL_bool Cocoa_HasClipboardText(_THIS);
-extern void Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data);
 
-#endif /* _SDL_cocoaclipboard_h */
+int
+SDL_SendClipboardUpdate()
+{
+    int posted;
+
+    /* Post the event, if desired */
+    posted = 0;
+    if (SDL_GetEventState(SDL_CLIPBOARDUPDATE) == SDL_ENABLE) {
+        SDL_Event event;
+        event.type = SDL_CLIPBOARDUPDATE;
+
+        posted = (SDL_PushEvent(&event) > 0);
+    }
+    return (posted);
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

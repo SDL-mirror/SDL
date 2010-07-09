@@ -60,6 +60,7 @@ typedef struct SDL_VideoData
     unsigned int modifierFlags;
     void *key_layout;
     SDLTranslatorResponder *fieldEdit;
+    NSInteger clipboard_count;
     Uint32 screensaver_activity;
 } SDL_VideoData;
 

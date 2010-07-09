@@ -62,6 +62,8 @@
 		0098A5631195B4D900343137 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5621195B4D900343137 /* OpenGLES.framework */; };
 		0098A5651195B4D900343137 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5641195B4D900343137 /* UIKit.framework */; };
 		0098A5851195B5E200343137 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5841195B5E200343137 /* QuartzCore.framework */; };
+		0420497011E6F03D007E7EC9 /* SDL_clipboardevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */; };
+		0420497111E6F03D007E7EC9 /* SDL_clipboardevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */; };
 		043DD76F10FD8A0000DED673 /* SDL_alphamult.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76B10FD8A0000DED673 /* SDL_alphamult.c */; };
 		043DD77010FD8A0000DED673 /* SDL_alphamult.h in Headers */ = {isa = PBXBuildFile; fileRef = 043DD76C10FD8A0000DED673 /* SDL_alphamult.h */; };
 		043DD77110FD8A0000DED673 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */; };
@@ -311,6 +313,8 @@
 		0098A5621195B4D900343137 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		0098A5641195B4D900343137 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0098A5841195B5E200343137 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_clipboardevents_c.h; sourceTree = "<group>"; };
+		0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboardevents.c; sourceTree = "<group>"; };
 		043DD76B10FD8A0000DED673 /* SDL_alphamult.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_alphamult.c; sourceTree = "<group>"; };
 		043DD76C10FD8A0000DED673 /* SDL_alphamult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_alphamult.h; sourceTree = "<group>"; };
 		043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
@@ -958,6 +962,8 @@
 				FD99B9900DD52EDC00FB1D6B /* scancodes_linux.h */,
 				FD99B9910DD52EDC00FB1D6B /* scancodes_win32.h */,
 				FD99B9920DD52EDC00FB1D6B /* scancodes_xfree86.h */,
+				0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */,
+				0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */,
 				FD99B9930DD52EDC00FB1D6B /* SDL_events.c */,
 				FD99B9940DD52EDC00FB1D6B /* SDL_events_c.h */,
 				FD99B9950DD52EDC00FB1D6B /* SDL_keyboard.c */,
@@ -1184,6 +1190,7 @@
 				006E9888119552DD001DE610 /* SDL_rwopsbundlesupport.h in Headers */,
 				044E5FB511E6069F0076F181 /* SDL_clipboard.h in Headers */,
 				044E5FB611E6069F0076F181 /* SDL_input.h in Headers */,
+				0420497011E6F03D007E7EC9 /* SDL_clipboardevents_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1423,6 +1430,7 @@
 				56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */,
 				006E9889119552DD001DE610 /* SDL_rwopsbundlesupport.m in Sources */,
 				044E5FB811E606EB0076F181 /* SDL_clipboard.c in Sources */,
+				0420497111E6F03D007E7EC9 /* SDL_clipboardevents.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

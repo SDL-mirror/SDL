@@ -90,6 +90,9 @@ typedef enum
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
 
+    /* Clipboard events */
+    SDL_CLIPBOARDUPDATE = 0x700, /**< The clipboard changed */
+
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
     SDL_EVENT_COMPAT2,

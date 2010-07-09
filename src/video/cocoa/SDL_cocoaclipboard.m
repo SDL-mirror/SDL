@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_cocoavideo.h"
+#include "../../events/SDL_clipboardevents_c.h"
 
 static NSString *
 GetTextFormat(_THIS)
@@ -42,6 +43,7 @@ GetTextFormat(_THIS)
 int
 Cocoa_SetClipboardText(_THIS, const char *text)
 {
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
 	NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
@@ -49,7 +51,7 @@ Cocoa_SetClipboardText(_THIS, const char *text)
     pool = [[NSAutoreleasePool alloc] init];
 
     pasteboard = [NSPasteboard generalPasteboard];
-    [pasteboard declareTypes:[NSArray arrayWithObject:format] owner:nil];
+    data->clipboard_count = [pasteboard declareTypes:[NSArray arrayWithObject:format] owner:nil];
     [pasteboard setString:[NSString stringWithUTF8String:text] forType:format];
 
     [pool release];
@@ -112,6 +114,27 @@ Cocoa_HasClipboardText(_THIS)
     [pool release];
 
     return result;
+}
+
+void
+Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data)
+{
+    NSAutoreleasePool *pool;
+	NSPasteboard *pasteboard;
+    NSInteger count;
+
+    pool = [[NSAutoreleasePool alloc] init];
+
+    pasteboard = [NSPasteboard generalPasteboard];
+    count = [pasteboard changeCount];
+    if (count != data->clipboard_count) {
+        if (data->clipboard_count) {
+            SDL_SendClipboardUpdate();
+        }
+        data->clipboard_count = count;
+    }
+
+    [pool release];
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
