@@ -41,18 +41,22 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 	if(window == NULL)
 		return SDL_FALSE;
 	else
-		return window->shaper != NULL;
+		return (SDL_bool)(window->shaper != NULL)
 }
 
 /* REQUIRES that bitmap point to a w-by-h bitmap with 1bpp. */
 void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
+	int x = 0;
+	int y = 0;
+	Uint8 alpha = 0;
+	Uint8* pixel;
+	Uint32 bitmap_pixel;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
-	int x = 0,y = 0;
 	for(x = 0;x<shape->w;x++)
 		for(y = 0;y<shape->h;y++) {
-			void* pixel = shape->pixels + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
-			Uint8 alpha = 0;
+			pixel = shape->pixels + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
+			alpha = 0;
 			SDL_GetRGBA(*(Uint32*)pixel,shape->format,NULL,NULL,NULL,&alpha);
 			Uint32 bitmap_pixel = y*shape->w + x;
 			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
@@ -62,6 +66,7 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 }
 
 int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+	int result;
 	if(window == NULL || !SDL_IsShapedWindow(window))
 		//The window given was not a shapeable window.
 		return -2;
@@ -82,9 +87,9 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 		}
 	}
 	//TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is in progress.
-	int result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
+	result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
 	window->shaper->hasshape = SDL_TRUE;
-	if(window->shaper->usershownflag & SDL_WINDOW_SHOWN == SDL_WINDOW_SHOWN) {
+	if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
 		SDL_ShowWindow(window);
 		window->shaper->usershownflag &= !SDL_WINDOW_SHOWN;
 	}
@@ -92,7 +97,8 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 }
 
 SDL_bool SDL_WindowHasAShape(SDL_Window *window) {
-	assert(window != NULL && SDL_IsShapedWindow(window));
+	if (window == NULL && !SDL_IsShapedWindow(window))
+		return SDL_FALSE;
 	return window->shaper->hasshape;
 }
 

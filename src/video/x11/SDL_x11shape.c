@@ -63,13 +63,13 @@ int X11_ResizeWindowShape(SDL_Window* window) {
 }
 	
 int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-	assert(shaper != NULL && shape != NULL);
+	if(shaper == NULL || shape == NULL || shaper->driverdata == NULL)
+		return -1;
 	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
 		return -2;
 	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
 		return -3;
 	SDL_ShapeData *data = shaper->driverdata;
-	assert(data != NULL);
 	
 	/* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
 	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->bitmap,8,1);
