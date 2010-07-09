@@ -215,38 +215,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->depth = displaydata->depth;
     data->scanline_pad = displaydata->scanline_pad;
     data->xwindow = windowdata->xwindow;
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    int event_basep, error_basep;
-    if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
-        data->use_xrender = SDL_TRUE;
-        data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display, data->visual);
-        if(!data->xwindow_pict_fmt) {
-            data->use_xrender = SDL_FALSE;
-            goto fallback;
-        }
-        data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
-                                                  0, NULL);
-        if(!data->xwindow_pict) {
-            data->use_xrender = SDL_FALSE;
-            goto fallback;
-        }
-        // Create a 1 bit depth mask
-        data->mask = XCreatePixmap(data->display, data->xwindow,
-                                   window->w, window->h, 1);
-        data->mask_pict = XRenderCreatePicture(data->display, data->mask,
-                                               XRenderFindStandardFormat(data->display,
-                                                                         PictStandardA1),
-                                               0, NULL);
-        XGCValues gcv_mask;
-        gcv_mask.foreground = 1;
-        gcv_mask.background = 0;
-        data->mask_gc = XCreateGC(data->display, data->mask, GCBackground | GCForeground, &gcv_mask);
-    }
-    else {
-        data->use_xrender = SDL_FALSE;
-    }
-    fallback:
-#endif
+    
     renderer->DisplayModeChanged = X11_DisplayModeChanged;
     renderer->CreateTexture = X11_CreateTexture;
     renderer->QueryTexturePixels = X11_QueryTexturePixels;
@@ -272,6 +241,43 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    int event_basep, error_basep;
+    if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
+        data->use_xrender = SDL_TRUE;
+        data->xwindow_pict_fmt = XRenderFindStandardFormat(data->display, PictStandardARGB32);
+        if(!data->xwindow_pict_fmt) {
+            data->use_xrender = SDL_FALSE;
+            goto fallback;
+        }
+        data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
+                                                  0, NULL);
+        if(!data->xwindow_pict) {
+            data->use_xrender = SDL_FALSE;
+            goto fallback;
+        }
+        renderer->info.blend_modes |=
+            (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK);
+        // Create a 1 bit depth mask
+        data->mask = XCreatePixmap(data->display, data->xwindow,
+                                   window->w, window->h, 1);
+        data->mask_pict = XRenderCreatePicture(data->display, data->mask,
+                                               XRenderFindStandardFormat(data->display,
+                                                                         PictStandardA1),
+                                               0, NULL);
+        XGCValues gcv_mask;
+        gcv_mask.foreground = 1;
+        gcv_mask.background = 0;
+        data->mask_gc = XCreateGC(data->display, data->mask, GCBackground | GCForeground, &gcv_mask);
+        renderer->blendMode = SDL_BLENDMODE_BLEND;
+        data->blend_op = PictOpOver;
+    }
+    else {
+        data->use_xrender = SDL_FALSE;
+    }
+    fallback:
+#endif
+    
     if (flags & SDL_RENDERER_SINGLEBUFFER) {
         renderer->info.flags |=
             (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY);
@@ -734,26 +740,30 @@ X11_SetDrawBlendMode(SDL_Renderer * renderer)
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        //PictOpSrc
         data->blend_op = PictOpSrc;
-        return 0;
-    case SDL_BLENDMODE_MASK: // Use src pict as mask
-        data->blend_op = PictOpSrc;
-        return 0;
-    case SDL_BLENDMODE_ADD: // PictOpAdd
-        data->blend_op = PictOpAdd;
         return 0;
     case SDL_BLENDMODE_BLEND: // PictOpOver
         data->blend_op = PictOpOver;
+        return 0;
+    case SDL_BLENDMODE_ADD: // PictOpAdd
+        data->blend_op = PictOpAdd;
         return 0;
     /* FIXME case SDL_BLENDMODE_MOD: */
 #endif
         return 0;
     default:
         SDL_Unsupported();
-        renderer->blendMode = SDL_BLENDMODE_NONE;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        data->blend_op = PictOpSrc;
+        if(data->use_xrender) {
+            renderer->blendMode = SDL_BLENDMODE_BLEND;
+            data->blend_op = PictOpOver;
+        }
+        else
 #endif
+        {
+            renderer->blendMode = SDL_BLENDMODE_NONE;
+        }
         return -1;
     }
 }
@@ -779,10 +789,20 @@ xrenderdrawcolor(SDL_Renderer *renderer)
 {
     // Premultiply the color channels as well as modulate them to a 16 bit color space
     XRenderColor xrender_color;
-    xrender_color.red = ((unsigned short)renderer->r + 1) * ((unsigned short)renderer->a + 1) - 1;
-    xrender_color.green = ((unsigned short)renderer->g + 1) * ((unsigned short)renderer->a + 1) - 1;
-    xrender_color.blue = ((unsigned short)renderer->b + 1) * ((unsigned short)renderer->a + 1) - 1;
-    xrender_color.alpha = ((unsigned short)renderer->a + 1) * ((unsigned short)renderer->a + 1) - 1;
+    double alphad;
+    if(renderer->blendMode == SDL_BLENDMODE_NONE)
+        alphad = 1.0;
+    else
+        alphad = (renderer->a) / 255.0;
+
+    xrender_color.alpha = (unsigned short) (alphad * 0xFFFF);
+
+    xrender_color.red =
+        (unsigned short) ((renderer->r / 255.0) * alphad * 0xFFFF);
+    xrender_color.green =
+        (unsigned short) ((renderer->g / 255.0) * alphad * 0xFFFF);
+    xrender_color.blue =
+        (unsigned short) ((renderer->b / 255.0) * alphad * 0xFFFF);
     return xrender_color;
 }
 
@@ -1050,6 +1070,12 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     XRectangle *xrects, *xrect;
     xrect = xrects = SDL_stack_alloc(XRectangle, count);
     xcount = 0;
+    
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = window->w;
+    clip.h = window->h;
+
     for (i = 0; i < count; ++i) {
         if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
             continue;
@@ -1066,11 +1092,7 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
             SDL_AddDirtyRect(&data->dirty, &rect);
         }
     }
-    clip.x = 0;
-    clip.y = 0;
-    clip.w = window->w;
-    clip.h = window->h;
-
+     
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if(data->use_xrender == SDL_TRUE) {
         XRenderColor foreground;
@@ -1151,7 +1173,6 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         unsigned long valuemask;
 
         foreground = xrenderdrawcolor(renderer);
-        attributes.clip_mask = data->mask;
         valuemask = CPClipMask;
         attributes.clip_mask = data->mask;
         
@@ -1424,15 +1445,9 @@ X11_RenderPresent(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
             if(data->use_xrender == SDL_TRUE)
             {
-                if(renderer->blendMode == SDL_BLENDMODE_MASK)
-                    XRenderComposite(data->display, data->blend_op, data->drawable_pict,
-                                     data->drawable_pict, data->xwindow_pict, rect->x, rect->y,
-                                     0, 0, rect->x, rect->y, rect->w, rect->h);
-                else
-                    XRenderComposite(data->display, data->blend_op, data->drawable_pict, None,
-                                     data->xwindow_pict, rect->x, rect->y, 0, 0, rect->x, rect->y,
-                                     rect->w, rect->h);
-
+                XRenderComposite(data->display, PictOpOver, data->drawable_pict, None,
+                                 data->xwindow_pict, rect->x, rect->y, 0, 0, rect->x, rect->y,
+                                 rect->w+1, rect->h+1);
             }
             else
 #endif

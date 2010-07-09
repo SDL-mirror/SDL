@@ -513,6 +513,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     } else {
         y = window->y;
     }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    xattr.background_pixel = 0xFF000000;
+#endif
 
     w = XCreateWindow(data->display,
                       RootWindow(data->display, displaydata->screen), x, y,
