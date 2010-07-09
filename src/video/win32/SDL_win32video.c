@@ -28,7 +28,6 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_win32video.h"
-#include "SDL_win32clipboard.h"
 #include "SDL_d3drender.h"
 #include "SDL_gdirender.h"
 

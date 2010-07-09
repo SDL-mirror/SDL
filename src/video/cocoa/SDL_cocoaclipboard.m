@@ -45,7 +45,7 @@ Cocoa_SetClipboardText(_THIS, const char *text)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     NSAutoreleasePool *pool;
-	NSPasteboard *pasteboard;
+    NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -63,7 +63,7 @@ char *
 Cocoa_GetClipboardText(_THIS)
 {
     NSAutoreleasePool *pool;
-	NSPasteboard *pasteboard;
+    NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
     NSString *available;
     char *text;
@@ -96,7 +96,7 @@ SDL_bool
 Cocoa_HasClipboardText(_THIS)
 {
     NSAutoreleasePool *pool;
-	NSPasteboard *pasteboard;
+    NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
     NSString *available;
     SDL_bool result;
@@ -120,7 +120,7 @@ void
 Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data)
 {
     NSAutoreleasePool *pool;
-	NSPasteboard *pasteboard;
+    NSPasteboard *pasteboard;
     NSInteger count;
 
     pool = [[NSAutoreleasePool alloc] init];

@@ -162,7 +162,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
-                /* FIXME: Update keyboard state */
+                /*
+                 * FIXME: Update keyboard state
+                 */
+                WIN_CheckClipboardUpdate(data->videodata);
             } else {
                 if (SDL_GetKeyboardFocus() == data->window) {
                     SDL_SetKeyboardFocus(NULL);

@@ -45,6 +45,7 @@
 #include "ddraw.h"
 #endif
 
+#include "SDL_win32clipboard.h"
 #include "SDL_win32events.h"
 #include "SDL_win32gamma.h"
 #include "SDL_win32keyboard.h"
@@ -74,6 +75,8 @@ typedef struct SDL_VideoData
     HANDLE ddrawDLL;
     IDirectDraw *ddraw;
 #endif
+
+    DWORD clipboard_count;
 
     const SDL_scancode *key_layout;
 } SDL_VideoData;

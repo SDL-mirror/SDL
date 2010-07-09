@@ -23,6 +23,7 @@
 
 #include "SDL_win32video.h"
 #include "SDL_win32window.h"
+#include "../../events/SDL_clipboardevents_c.h"
 
 
 #ifdef UNICODE
@@ -52,6 +53,7 @@ GetWindowHandle(_THIS)
 int
 WIN_SetClipboardText(_THIS, const char *text)
 {
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int result = 0;
 
     if (OpenClipboard(GetWindowHandle(_this))) {
@@ -93,6 +95,7 @@ WIN_SetClipboardText(_THIS, const char *text)
                 WIN_SetError("Couldn't set clipboard data");
                 result = -1;
             }
+            data->clipboard_count = GetClipboardSequenceNumber();
         }
         SDL_free(tstr);
 
@@ -138,6 +141,20 @@ WIN_HasClipboardText(_THIS)
         return SDL_TRUE;
     } else {
         return SDL_FALSE;
+    }
+}
+
+void
+WIN_CheckClipboardUpdate(struct SDL_VideoData * data)
+{
+    DWORD count;
+
+    count = GetClipboardSequenceNumber();
+    if (count != data->clipboard_count) {
+        if (data->clipboard_count) {
+            SDL_SendClipboardUpdate();
+        }
+        data->clipboard_count = count;
     }
 }
 

@@ -24,9 +24,13 @@
 #ifndef _SDL_win32clipboard_h
 #define _SDL_win32clipboard_h
 
+/* Forward declaration */
+struct SDL_VideoData;
+
 extern int WIN_SetClipboardText(_THIS, const char *text);
 extern char *WIN_GetClipboardText(_THIS);
 extern SDL_bool WIN_HasClipboardText(_THIS);
+extern void WIN_CheckClipboardUpdate(struct SDL_VideoData * data);
 
 #endif /* _SDL_win32clipboard_h */
 

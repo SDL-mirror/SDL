@@ -569,6 +569,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\events\SDL_clipboardevents.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_clipboardevents_c.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\SDL_compat.c"
 			>
 		</File>
