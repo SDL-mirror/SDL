@@ -354,6 +354,22 @@ typedef struct SDL_MultiGestureEvent
 
 } SDL_MultiGestureEvent;
 
+typedef struct SDL_DollarGestureEvent
+{
+    Uint32 type;        /**< ::SDL_DOLLARGESTURE */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint8 touchId;        /**< The touch device index */
+    Uint8 gestureId;
+    Uint8 padding2;
+    Uint8 padding3;
+    float error;
+  /*
+    //TODO: Enable to give location?
+    float x;  //currently 0...1. Change to screen coords?
+    float y;  
+  */
+} SDL_DollarGestureEvent;
+
 
 
 
@@ -443,6 +459,7 @@ typedef union SDL_Event
     SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
     SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
     SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data*/
+    SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data*/
 
     /** Temporarily here for backwards compatibility */
     /*@{*/

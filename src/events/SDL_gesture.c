@@ -30,6 +30,14 @@
 //TODO: Replace with malloc
 #define MAXFINGERS 3
 #define MAXTOUCHES 2
+#define MAXTEMPLATES 4
+#define MAXPATHSIZE 1024
+
+#define DOLLARNPOINTS 64
+#define DOLLARSIZE 256
+
+//PHI = ((sqrt(5)-1)/2)
+#define PHI 0.618033989 
 
 typedef struct {
   float x,y;
@@ -42,10 +50,20 @@ typedef struct {
   int id;
 } Finger;
 
+
+typedef struct {
+  float length;
+  
+  int numPoints;
+  Point p[MAXPATHSIZE];
+} DollarPath;
+
+
 typedef struct {
   Finger f;
   Point cv;
   float dtheta,dDist;
+  DollarPath dollarPath;
 } TouchPoint;
 
 
@@ -55,10 +73,160 @@ typedef struct {
   Point centroid;
   TouchPoint gestureLast[MAXFINGERS];
   int numDownFingers;
+
+  int numDollarTemplates;
+  Point dollarTemplate[MAXTEMPLATES][DOLLARNPOINTS];
 } GestureTouch;
 
 GestureTouch gestureTouch[MAXTOUCHES];
 int numGestureTouches = 0;
+
+float dollarDifference(Point* points,Point* templ,float ang) {
+  //  Point p[DOLLARNPOINTS];
+  float dist = 0;
+  Point p;
+  int i;
+  for(i = 0; i < DOLLARNPOINTS; i++) {
+    p.x = points[i].x * cos(ang) - points[i].y * sin(ang);
+    p.y = points[i].x * sin(ang) + points[i].y * cos(ang);
+    dist += sqrt((p.x-templ[i].x)*(p.x-templ[i].x)+
+		 (p.y-templ[i].y)*(p.y-templ[i].y));
+  }
+  return dist/DOLLARNPOINTS;
+  
+}
+
+float bestDollarDifference(Point* points,Point* templ) {
+  //------------BEGIN DOLLAR BLACKBOX----------------//
+  //-TRANSLATED DIRECTLY FROM PSUDEO-CODE AVAILABLE AT-//
+  //-"http://depts.washington.edu/aimgroup/proj/dollar/"-//
+  float ta = -M_PI/4;
+  float tb = M_PI/4;
+  float dt = M_PI/90;
+  float x1 = PHI*ta + (1-PHI)*tb;
+  float f1 = dollarDifference(points,templ,x1);
+  float x2 = (1-PHI)*ta + PHI*tb;
+  float f2 = dollarDifference(points,templ,x2);
+  while(abs(ta-tb) > dt) {
+    if(f1 < f2) {
+      tb = x2;
+      x2 = x1;
+      f2 = f1;
+      x1 = PHI*ta + (1-PHI)*tb;
+      f1 = dollarDifference(points,templ,x1);
+    }
+    else {
+      ta = x1;
+      x1 = x2;
+      f1 = f2;
+      x2 = (1-PHI)*ta + PHI*tb;
+      f2 = dollarDifference(points,templ,x2);
+    }
+  }
+  /*
+  if(f1 <= f2)
+    printf("Min angle (x1): %f\n",x1);
+  else if(f1 >  f2)
+    printf("Min angle (x2): %f\n",x2);
+  */
+  return SDL_min(f1,f2);  
+}
+
+float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
+
+  Point points[DOLLARNPOINTS];
+  int numPoints = dollarNormalize(path,points);
+  int i;
+ 
+  int bestDiff = 10000;
+  *bestTempl = -1;
+  for(i = 0;i < touch->numDollarTemplates;i++) {
+    int diff = bestDollarDifference(points,touch->dollarTemplate[i]);
+    if(diff < bestDiff) {bestDiff = diff; *bestTempl = i;}
+  }
+  return bestDiff;
+}
+
+//DollarPath contains raw points, plus (possibly) the calculated length
+int dollarNormalize(DollarPath path,Point *points) {
+  int i;
+  //Calculate length if it hasn't already been done
+  if(path.length <= 0) {
+    for(i=1;i<path.numPoints;i++) {
+      float dx = path.p[i  ].x - 
+	         path.p[i-1].x;
+      float dy = path.p[i  ].y - 
+	         path.p[i-1].y;
+      path.length += sqrt(dx*dx+dy*dy);
+    }
+  }
+
+
+  //Resample
+  float interval = path.length/(DOLLARNPOINTS - 1);
+  float dist = 0;
+
+  int numPoints = 0;
+  Point centroid; centroid.x = 0;centroid.y = 0;
+  //printf("(%f,%f)\n",path.p[path.numPoints-1].x,path.p[path.numPoints-1].y);
+  for(i = 1;i < path.numPoints;i++) {
+    float d = sqrt((path.p[i-1].x-path.p[i].x)*(path.p[i-1].x-path.p[i].x)+
+		   (path.p[i-1].y-path.p[i].y)*(path.p[i-1].y-path.p[i].y));
+    //printf("d = %f dist = %f/%f\n",d,dist,interval);
+    while(dist + d > interval) {
+      points[numPoints].x = path.p[i-1].x + 
+	((interval-dist)/d)*(path.p[i].x-path.p[i-1].x);
+      points[numPoints].y = path.p[i-1].y + 
+	((interval-dist)/d)*(path.p[i].y-path.p[i-1].y);
+      centroid.x += points[numPoints].x;
+      centroid.y += points[numPoints].y;
+      numPoints++;
+
+      dist -= interval;
+    }
+    dist += d;
+  }
+  if(numPoints < 1) return 0;
+  centroid.x /= numPoints;
+  centroid.y /= numPoints;
+ 
+  //printf("Centroid (%f,%f)",centroid.x,centroid.y);
+  //Rotate Points so point 0 is left of centroid and solve for the bounding box
+  float xmin,xmax,ymin,ymax;
+  xmin = centroid.x;
+  xmax = centroid.x;
+  ymin = centroid.y;
+  ymax = centroid.y;
+  
+  float ang = atan2(centroid.y - points[0].y,
+		    centroid.x - points[0].x);
+
+  for(i = 0;i<numPoints;i++) {					       
+    float px = points[i].x;
+    float py = points[i].y;
+    points[i].x = (px - centroid.x)*cos(ang) - 
+                  (py - centroid.y)*sin(ang) + centroid.x;
+    points[i].y = (px - centroid.x)*sin(ang) + 
+                  (py - centroid.y)*cos(ang) + centroid.y;
+
+
+    if(points[i].x < xmin) xmin = points[i].x;
+    if(points[i].x > xmax) xmax = points[i].x; 
+    if(points[i].y < ymin) ymin = points[i].y;
+    if(points[i].y > ymax) ymax = points[i].y;
+  }
+
+  //Scale points to DOLLARSIZE, and translate to the origin
+  float w = xmax-xmin;
+  float h = ymax-ymin;
+
+  for(i=0;i<numPoints;i++) {
+    points[i].x = (points[i].x - centroid.x)*DOLLARSIZE/w;
+    points[i].y = (points[i].y - centroid.y)*DOLLARSIZE/h;
+  }  
+  return numPoints;
+}
+
 int SDL_GestureAddTouch(SDL_Touch* touch) { 
   if(numGestureTouches >= MAXTOUCHES) return -1;
   
@@ -68,6 +236,8 @@ int SDL_GestureAddTouch(SDL_Touch* touch) {
 
   gestureTouch[numGestureTouches].res.x = touch->xres;
   gestureTouch[numGestureTouches].id = touch->id;
+
+  gestureTouch[numGestureTouches].numDollarTemplates = 0;
 
   numGestureTouches++;
   return 0;
@@ -93,13 +263,26 @@ int SDL_SendGestureMulti(GestureTouch* touch,float dTheta,float dDist) {
   return SDL_PushEvent(&event) > 0;
 }
 
+int SDL_SendGestureDollar(GestureTouch* touch,int gestureId,float error) {
+  SDL_Event event;
+  event.dgesture.type = SDL_DOLLARGESTURE;
+  event.dgesture.touchId = touch->id;
+  /*
+    //TODO: Add this to give location of gesture?
+  event.mgesture.x = touch->centroid.x;
+  event.mgesture.y = touch->centroid.y;
+  */
+  event.dgesture.gestureId = gestureId;
+  event.dgesture.error = error;  
+  return SDL_PushEvent(&event) > 0;
+}
+
 void SDL_GestureProcessEvent(SDL_Event* event)
 {
   if(event->type == SDL_FINGERMOTION || 
      event->type == SDL_FINGERDOWN ||
      event->type == SDL_FINGERUP) {
     GestureTouch* inTouch = SDL_GetGestureTouch(event->tfinger.touchId);
-
 
     //Shouldn't be possible
     if(inTouch == NULL) return;
@@ -114,12 +297,35 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 
       if(event->type == SDL_FINGERUP) {
 	inTouch->numDownFingers--;
+
+	int bestTempl;
+	float error;
+	error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
+				&bestTempl,inTouch);
+	if(bestTempl >= 0){
+	  //Send Event
+	  int gestureId = 0; //?
+	  SDL_SendGestureDollar(inTouch->id,gestureId,error);
+
+
+	  printf("Dollar error: %f\n",error);
+	}
+
 	inTouch->gestureLast[j] = inTouch->gestureLast[inTouch->numDownFingers];
 	break;
       }
       else {
 	float dx = x - inTouch->gestureLast[j].f.p.x;
 	float dy = y - inTouch->gestureLast[j].f.p.y;
+	DollarPath* path = &inTouch->gestureLast[j].dollarPath;
+	if(path->numPoints < MAXPATHSIZE) {
+	  path->p[path->numPoints].x = x;
+	  path->p[path->numPoints].y = y;
+	  path->length += sqrt(dx*dx + dy*dy);
+	  path->numPoints++;
+	}
+
+
 	inTouch->centroid.x += dx/inTouch->numDownFingers;
 	inTouch->centroid.y += dy/inTouch->numDownFingers;    
 	if(inTouch->numDownFingers > 1) {
@@ -181,6 +387,11 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       inTouch->gestureLast[j].f.p.y  = y;	
       inTouch->gestureLast[j].cv.x = 0;
       inTouch->gestureLast[j].cv.y = 0;
+
+      inTouch->gestureLast[j].dollarPath.length = 0;
+      inTouch->gestureLast[j].dollarPath.p[0].x = x;
+      inTouch->gestureLast[j].dollarPath.p[0].y = y;
+      inTouch->gestureLast[j].dollarPath.numPoints = 1;
     }
   }
 }  
