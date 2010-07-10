@@ -492,6 +492,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             BOOL menu;
 
             /* If we allow resizing, let the resize happen naturally */
+            if(SDL_IsShapedWindow(data->window))
+                SDL_ResizeWindowShape(data->window);
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 returnCode = 0;
                 break;
