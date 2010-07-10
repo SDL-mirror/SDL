@@ -3395,10 +3395,10 @@ SDL_StartTextInput(SDL_Window *window)
 }
 
 void
-SDL_StopTextInput(void)
+SDL_StopTextInput(SDL_Window *window)
 {
     if (_this && _this->StopTextInput) {
-        _this->StopTextInput(_this);
+        _this->StopTextInput(_this, window);
     }
     SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
     SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);

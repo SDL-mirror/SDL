@@ -130,7 +130,7 @@ WIN_StartTextInput(_THIS, SDL_Window *window)
 }
 
 void
-WIN_StopTextInput(_THIS)
+WIN_StopTextInput(_THIS, SDL_Window *window)
 {
 
 }

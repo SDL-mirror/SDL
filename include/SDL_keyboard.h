@@ -147,7 +147,7 @@ extern DECLSPEC void SDLCALL SDL_StartTextInput(SDL_Window *window);
  *  
  *  \sa SDL_StartTextInput()
  */
-extern DECLSPEC void SDLCALL SDL_StopTextInput(void);
+extern DECLSPEC void SDLCALL SDL_StopTextInput(SDL_Window *window);
 
 /**
  *  \brief Set the rectangle used to type Unicode text inputs.

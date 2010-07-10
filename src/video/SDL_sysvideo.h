@@ -300,7 +300,7 @@ struct SDL_VideoDevice
 
     /* Text input */
     void (*StartTextInput) (_THIS, SDL_Window *window);
-    void (*StopTextInput) (_THIS);
+    void (*StopTextInput) (_THIS, SDL_Window *window);
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
     /* * * */

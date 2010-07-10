@@ -1744,7 +1744,7 @@ SDL_EnableUNICODE(int enable)
         break;
     case 0:
         SDL_enabled_UNICODE = 0;
-        SDL_StopTextInput();
+        SDL_StopTextInput(SDL_VideoWindow);
         break;
     }
     return previous;
