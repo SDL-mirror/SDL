@@ -26,6 +26,7 @@
 
 extern void SDL_GestureProcessEvent(SDL_Event* event);
 
+extern int SDL_RecordGesture(int touchId);
 
 #endif /* _SDL_gesture_c_h */
 

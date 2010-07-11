@@ -13,8 +13,7 @@
     Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    License along with this library; if not, write to the Free Software    Founation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
@@ -66,6 +65,10 @@ typedef struct {
   DollarPath dollarPath;
 } TouchPoint;
 
+typedef struct {
+  Point path[DOLLARNPOINTS];
+  unsigned long hash;
+} DollarTemplate;
 
 typedef struct {
   int id;
@@ -75,11 +78,140 @@ typedef struct {
   int numDownFingers;
 
   int numDollarTemplates;
-  Point dollarTemplate[MAXTEMPLATES][DOLLARNPOINTS];
+  DollarTemplate dollarTemplate[MAXTEMPLATES];
+
+  SDL_bool recording;
 } GestureTouch;
 
 GestureTouch gestureTouch[MAXTOUCHES];
 int numGestureTouches = 0;
+SDL_bool recordAll;
+
+int SDL_RecordGesture(int touchId) {
+  int i;
+  if(touchId < 0) recordAll = SDL_TRUE;
+  for(i = 0;i < numGestureTouches; i++) {
+    if((touchId < 0) || (gestureTouch[i].id == touchId)) {
+      gestureTouch[i].recording = SDL_TRUE;
+      if(touchId >= 0)
+	return 1;
+    }      
+  }
+  return (touchId < 0);
+}
+
+unsigned long SDL_HashDollar(Point* points) {
+  unsigned long hash = 5381;
+  int i;
+  for(i = 0;i < DOLLARNPOINTS; i++) { 
+    hash = ((hash<<5) + hash) + points[i].x;
+    hash = ((hash<<5) + hash) + points[i].y;
+  }
+  return hash;
+}
+
+int SaveTemplate(DollarTemplate *templ, FILE *fp) {
+  int i;
+  fprintf(fp,"%lu ",templ->hash);
+  for(i = 0;i < DOLLARNPOINTS;i++) {
+    fprintf(fp,"%i %i ",(int)templ->path[i].x,(int)templ->path[i].y);
+  }
+  fprintf(fp,"\n");
+}
+
+
+int SDL_SaveAllDollarTemplates(FILE *fp) {  
+  int i,j,rtrn = 0;
+  for(i = 0; i < numGestureTouches; i++) {
+    GestureTouch* touch = &gestureTouch[i];
+    for(j = 0;j < touch->numDollarTemplates; j++) {
+	rtrn += SaveTemplate(&touch->dollarTemplate[i],fp);
+    }
+  }
+  return rtrn;  
+}
+
+int SDL_SaveDollarTemplate(unsigned long gestureId, FILE *fp) {
+  int i,j;
+  for(i = 0; i < numGestureTouches; i++) {
+    GestureTouch* touch = &gestureTouch[i];
+    for(j = 0;j < touch->numDollarTemplates; j++) {
+      if(touch->dollarTemplate[i].hash == gestureId) {
+	return SaveTemplate(&touch->dollarTemplate[i],fp);
+      }
+    }
+  }
+}
+
+int SDL_LoadDollarTemplates(int touchId, FILE *fp) {
+  int i,loaded = 0;
+  GestureTouch *touch = NULL;
+  if(touchId >= 0) {
+    for(i = 0;i < numGestureTouches; i++)
+      if(gestureTouch[i].id == touchId)
+	touch = &gestureTouch[i];
+    if(touch == NULL) return -1;
+  }
+
+  while(!feof(fp)) {
+    DollarTemplate templ;
+    fscanf(fp,"%lu ",&templ.hash);
+    for(i = 0;i < DOLLARNPOINTS; i++) {		
+      int x,y;
+      if(fscanf(fp,"%i %i ",&x,&y) != 2) break;
+      templ.path[i].x = x;
+      templ.path[i].y = y;
+    }
+    fscanf(fp,"\n");
+
+    if(touchId >= 0) {
+      if(SDL_AddDollarGesture(touch,templ)) loaded++;
+    }
+    else {
+      for(i = 0;i < numGestureTouches; i++) {
+	if(gestureTouch[i].id == touchId) {
+	  touch = &gestureTouch[i];
+	  SDL_AddDollarGesture(touch,templ);
+	}
+      }
+      loaded++;
+    }
+  }
+
+  return 1; 
+}
+
+
+//path is an already sampled set of points
+//Returns the index of the gesture on success, or -1
+int SDL_AddDollarGesture(GestureTouch* inTouch,Point* path) {
+  if(inTouch == NULL) {
+    if(numGestureTouches == 0) return -1;
+    int i = 0;
+    for(i = 0;i < numGestureTouches; i++) {
+      inTouch = &gestureTouch[i];
+      if(inTouch->numDollarTemplates < MAXTEMPLATES) {
+	DollarTemplate *templ = 
+	  &inTouch->dollarTemplate[inTouch->numDollarTemplates];
+	memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
+	templ->hash = SDL_HashDollar(templ->path);
+	inTouch->numDollarTemplates++;
+      }
+    }
+    return inTouch->numDollarTemplates - 1;
+  }else if(inTouch->numDollarTemplates < MAXTEMPLATES) {
+    DollarTemplate *templ = 
+      &inTouch->dollarTemplate[inTouch->numDollarTemplates];
+    memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
+    templ->hash = SDL_HashDollar(templ->path);
+    inTouch->numDollarTemplates++;
+    return inTouch->numDollarTemplates - 1;
+  }
+  return -1;
+}
+
+
+
 
 float dollarDifference(Point* points,Point* templ,float ang) {
   //  Point p[DOLLARNPOINTS];
@@ -141,7 +273,7 @@ float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
   int bestDiff = 10000;
   *bestTempl = -1;
   for(i = 0;i < touch->numDollarTemplates;i++) {
-    int diff = bestDollarDifference(points,touch->dollarTemplate[i]);
+    int diff = bestDollarDifference(points,touch->dollarTemplate[i].path);
     if(diff < bestDiff) {bestDiff = diff; *bestTempl = i;}
   }
   return bestDiff;
@@ -239,6 +371,8 @@ int SDL_GestureAddTouch(SDL_Touch* touch) {
 
   gestureTouch[numGestureTouches].numDollarTemplates = 0;
 
+  gestureTouch[numGestureTouches].recording = SDL_FALSE;
+
   numGestureTouches++;
   return 0;
 }
@@ -277,6 +411,17 @@ int SDL_SendGestureDollar(GestureTouch* touch,int gestureId,float error) {
   return SDL_PushEvent(&event) > 0;
 }
 
+
+int SDL_SendDollarRecord(GestureTouch* touch,int gestureId) {
+  SDL_Event event;
+  event.dgesture.type = SDL_DOLLARRECORD;
+  event.dgesture.touchId = touch->id;
+  event.dgesture.gestureId = gestureId;
+
+  return SDL_PushEvent(&event) > 0;
+}
+
+
 void SDL_GestureProcessEvent(SDL_Event* event)
 {
   if(event->type == SDL_FINGERMOTION || 
@@ -294,23 +439,44 @@ void SDL_GestureProcessEvent(SDL_Event* event)
     
     for(j = 0;j<inTouch->numDownFingers;j++) {
       if(inTouch->gestureLast[j].f.id != event->tfinger.fingerId) continue;
-
+      //Finger Up
       if(event->type == SDL_FINGERUP) {
 	inTouch->numDownFingers--;
 
-	int bestTempl;
-	float error;
-	error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
-				&bestTempl,inTouch);
-	if(bestTempl >= 0){
-	  //Send Event
-	  int gestureId = 0; //?
-	  SDL_SendGestureDollar(inTouch->id,gestureId,error);
-
-
-	  printf("Dollar error: %f\n",error);
+	if(inTouch->recording) {
+	  inTouch->recording = SDL_FALSE;
+	  Point path[DOLLARNPOINTS];
+	  dollarNormalize(inTouch->gestureLast[j].dollarPath,path);
+	  int index;
+	  if(recordAll) {
+	    index = SDL_AddDollarGesture(NULL,path);
+	    int i;
+	    for(i = 0;i < numGestureTouches; i++)
+	      gestureTouch[i].recording = SDL_FALSE;
+	  }
+	  else {
+	    index = SDL_AddDollarGesture(inTouch,path);
+	  }
+	  
+	  if(index >= 0) {
+	    SDL_SendDollarRecord(inTouch,inTouch->dollarTemplate[index].hash);
+	  }
+	  else {
+	    SDL_SendDollarRecord(inTouch,-1);
+	  }
 	}
-
+	else {	
+	  int bestTempl;
+	  float error;
+	  error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
+				  &bestTempl,inTouch);
+	  if(bestTempl >= 0){
+	    //Send Event
+	    int gestureId = inTouch->dollarTemplate[bestTempl].hash;
+	    SDL_SendGestureDollar(inTouch,gestureId,error);
+	    printf("Dollar error: %f\n",error);
+	  }
+	} 
 	inTouch->gestureLast[j] = inTouch->gestureLast[inTouch->numDownFingers];
 	break;
       }

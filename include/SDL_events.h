@@ -36,6 +36,8 @@
 #include "SDL_mouse.h"
 #include "SDL_joystick.h"
 #include "SDL_quit.h"
+#include "SDL_gesture.h"
+#include "SDL_touch.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -95,6 +97,7 @@ typedef enum
 
     /*Gesture events*/
     SDL_DOLLARGESTURE     = 0x800,
+    SDL_DOLLARRECORD,
     SDL_MULTIGESTURE,
 
     /* Obsolete events */
@@ -359,9 +362,10 @@ typedef struct SDL_DollarGestureEvent
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
     Uint32 windowID;    /**< The window with mouse focus, if any */
     Uint8 touchId;        /**< The touch device index */
-    Uint8 gestureId;
+    Uint8 padding1;
     Uint8 padding2;
     Uint8 padding3;
+    unsigned long gestureId;
     float error;
   /*
     //TODO: Enable to give location?

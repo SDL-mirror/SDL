@@ -21,13 +21,13 @@
 */
 
 /**
- *  \file SDL_touch.h
+ *  \file SDL_gesture.h
  *  
- *  Include file for SDL touch event handling.
+ *  Include file for SDL gesture event handling.
  */
 
-#ifndef _SDL_touch_h
-#define _SDL_touch_h
+#ifndef _SDL_gesture_h
+#define _SDL_gesture_h
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
@@ -42,70 +42,40 @@ extern "C" {
 #endif
 
 
-struct SDL_Finger {
-  int id;
-  int x;
-  int y;
-  int z;                      /* for future use */
-  int xdelta;
-  int ydelta;
-  int last_x, last_y,last_pressure;  /* the last reported coordinates */
-  SDL_bool down;
-  int pressure;
-};
-
-typedef struct SDL_Touch SDL_Touch;
-typedef struct SDL_Finger SDL_Finger;
-
-
-struct SDL_Touch {
-  
-  /* Free the touch when it's time */
-  void (*FreeTouch) (SDL_Touch * touch);
-  
-  /* data common for tablets */
-  int pressure_max, pressure_min;
-  int x_max,x_min;
-  int y_max,y_min;
-  int xres,yres,pressureres;
-  int tilt;                   /* for future use */
-  int rotation;               /* for future use */
-  
-  /* Data common to all touch */
-  int id;
-  SDL_Window *focus;
-  
-  char *name;
-  Uint8 buttonstate;
-  SDL_bool relative_mode;
-  SDL_bool flush_motion;
-
-  int num_fingers;
-  int max_fingers;
-  SDL_Finger** fingers;
-    
-  void *driverdata;
-};
-
-
-
 /* Function prototypes */
 
 /**
- *  \brief Get the touch object at the given id.
+ *  \brief Begin Recording a gesture on the specified touch, or all touches (-1)
  *
  *
  */
-  extern DECLSPEC SDL_Touch* SDLCALL SDL_GetTouch(int id);
-
+  extern DECLSPEC int SDLCALL SDL_RecordGesture(int touchId);
 
 
 /**
- *  \brief Get the finger object of the given touch, at the given id.
+ *  \brief Save all currently loaded Dollar Gesture templates
  *
  *
  */
-  extern DECLSPEC SDL_Finger* SDLCALL SDL_GetFinger(SDL_Touch *touch, int id);
+  extern DECLSPEC int SDLCALL SDL_SaveAllDollarTemplates(FILE *fp);
+
+/**
+ *  \brief Save a currently loaded Dollar Gesture template
+ *
+ *
+ */
+  extern DECLSPEC int 
+  SDLCALL SDL_SaveDollarTemplate(unsigned long gestureId,FILE *fp);
+
+
+/**
+ *  \brief Load Dollar Gesture templates from a file
+ *
+ *
+ */
+  extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(int touchId, FILE *fp);
+
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -115,6 +85,6 @@ struct SDL_Touch {
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_mouse_h */
+#endif /* _SDL_gesture_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
