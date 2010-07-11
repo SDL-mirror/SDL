@@ -33,7 +33,7 @@ SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 	result->usershownflag = 0;
 	result->driverdata = malloc(sizeof(SDL_ShapeData));
 	window->shaper = result;
-	int resized_properly = X11ResizeWindowShape(window);
+	int resized_properly = X11_ResizeWindowShape(window);
 	assert(resized_properly == 0);
 	return result;
 }

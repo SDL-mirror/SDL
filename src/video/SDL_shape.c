@@ -41,7 +41,7 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 	if(window == NULL)
 		return SDL_FALSE;
 	else
-		return (SDL_bool)(window->shaper != NULL)
+		return (SDL_bool)(window->shaper != NULL);
 }
 
 /* REQUIRES that bitmap point to a w-by-h bitmap with 1bpp. */
