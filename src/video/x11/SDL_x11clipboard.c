@@ -27,6 +27,13 @@
 #include "SDL_x11video.h"
 
 
+/* If you don't support UTF-8, you might use XA_STRING here */
+#if 1
+#define TEXT_FORMAT XInternAtom(display, "UTF8_STRING", False)
+#else
+#define TEXT_FORMAT XA_STRING
+#endif
+
 /* Get any application owned window handle for clipboard association */
 static Window
 GetWindow(_THIS)
@@ -58,8 +65,8 @@ X11_SetClipboardText(_THIS, const char *text)
         return -1;
     }
 
-    /* If you don't support UTF-8, you might use XA_STRING here */
-    format = XInternAtom(display, "UTF8_STRING", False);
+    /* Save the selection on the root window */
+    format = TEXT_FORMAT;
     XChangeProperty(display, DefaultRootWindow(display),
         XA_CUT_BUFFER0, format, 8, PropModeReplace,
         (const unsigned char *)text, SDL_strlen(text));
@@ -88,12 +95,9 @@ X11_GetClipboardText(_THIS)
 
     text = NULL;
 
-    /* Get the SDL window that will own the selection */
+    /* Get the window that holds the selection */
     window = GetWindow(_this);
-
-    /* If you don't support UTF-8, you might use XA_STRING here */
-    format = XInternAtom(display, "UTF8_STRING", False);
-
+    format = TEXT_FORMAT;
     owner = XGetSelectionOwner(display, XA_PRIMARY);
     if ((owner == None) || (owner == window)) {
         owner = DefaultRootWindow(display);
