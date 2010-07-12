@@ -1014,8 +1014,14 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 SDL_bool
 X11_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
-    if (info->version.major <= SDL_MAJOR_VERSION) {
-        /* FIXME! */
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+
+    if (info->version.major == SDL_MAJOR_VERSION &&
+        info->version.minor == SDL_MINOR_VERSION) {
+        info->subsystem = SDL_SYSWM_X11;
+        info->info.x11.display = display;
+        info->info.x11.window = data->xwindow;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",

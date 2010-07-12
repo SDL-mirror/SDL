@@ -106,24 +106,6 @@ struct SDL_SysWMinfo
         {
             Display *display;   /**< The X11 display */
             Window window;      /**< The X11 display window */
-            /**
-             *  These locking functions should be called around
-             *  any X11 functions using the display variable.
-             *  They lock the event thread, so should not be
-             *  called around event functions or from event filters.
-             */
-            /*@{*/
-            void (*lock_func) (void);
-            void (*unlock_func) (void);
-            /*@}*/
-
-            /**
-             *  Introduced in SDL 1.0.2.
-             */
-            /*@{*/
-            Window fswindow;    /**< The X11 fullscreen window */
-            Window wmwindow;    /**< The X11 managed input window */
-            /*@}*/
         } x11;
     } info;
 };
