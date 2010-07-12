@@ -35,6 +35,8 @@ extern void WIN_StartTextInput(_THIS, SDL_Window *window);
 extern void WIN_StopTextInput(_THIS, SDL_Window *window);
 extern void WIN_SetTextInputRect(_THIS, SDL_Rect *rect);
 
+extern SDL_bool IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, struct SDL_VideoData *videodata);
+
 #endif /* _SDL_win32keyboard_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

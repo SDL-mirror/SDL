@@ -75,6 +75,16 @@ typedef struct SDL_VideoData
 #endif
 
     const SDL_scancode *key_layout;
+    
+    SDL_bool ime_com_initialized;
+    struct ITfThreadMgr *ime_thread_mgr;
+    SDL_bool ime_initialized;
+    SDL_bool ime_enabled;
+    SDL_bool ime_available;
+    HWND ime_hwnd_main;
+    HWND ime_hwnd_current;
+    HIMC ime_himc;
+
 } SDL_VideoData;
 
 #endif /* _SDL_win32video_h */

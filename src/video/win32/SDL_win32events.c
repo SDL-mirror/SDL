@@ -131,6 +131,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
 
 #endif
+    if (IME_HandleMessage(hwnd, msg, wParam, &lParam, data->videodata))
+        return 0;
 
     switch (msg) {
 
