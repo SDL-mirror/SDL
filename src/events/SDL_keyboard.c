@@ -617,7 +617,7 @@ SDL_SetKeyboardFocus(SDL_Window * window)
                             0, 0);
 
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
-            SDL_StartTextInput(window);
+            SDL_StartTextInput();
         }
     }
 }

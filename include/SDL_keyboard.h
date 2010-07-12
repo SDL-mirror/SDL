@@ -140,14 +140,14 @@ extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDLKey key);
  *  \sa SDL_StopTextInput()
  *  \sa SDL_SetTextInputRect()
  */
-extern DECLSPEC void SDLCALL SDL_StartTextInput(SDL_Window *window);
+extern DECLSPEC void SDLCALL SDL_StartTextInput(void);
 
 /**
  *  \brief Stop receiving any text input events.
  *  
  *  \sa SDL_StartTextInput()
  */
-extern DECLSPEC void SDLCALL SDL_StopTextInput(SDL_Window *window);
+extern DECLSPEC void SDLCALL SDL_StopTextInput(void);
 
 /**
  *  \brief Set the rectangle used to type Unicode text inputs.

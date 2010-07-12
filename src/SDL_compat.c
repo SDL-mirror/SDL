@@ -1740,11 +1740,11 @@ SDL_EnableUNICODE(int enable)
     switch (enable) {
     case 1:
         SDL_enabled_UNICODE = 1;
-        SDL_StartTextInput(SDL_VideoWindow);
+        SDL_StartTextInput();
         break;
     case 0:
         SDL_enabled_UNICODE = 0;
-        SDL_StopTextInput(SDL_VideoWindow);
+        SDL_StopTextInput();
         break;
     }
     return previous;

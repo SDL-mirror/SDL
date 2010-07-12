@@ -141,21 +141,29 @@ WIN_QuitKeyboard(_THIS)
 }
 
 void
-WIN_StartTextInput(_THIS, SDL_Window *window)
+WIN_StartTextInput(_THIS)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
-    IME_Init(videodata, hwnd);
-    IME_Enable(videodata, hwnd);
+    SDL_Window *window = SDL_GetKeyboardFocus();
+    if (window)
+    {
+        HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+        SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+        IME_Init(videodata, hwnd);
+        IME_Enable(videodata, hwnd);
+    }
 }
 
 void
-WIN_StopTextInput(_THIS, SDL_Window *window)
+WIN_StopTextInput(_THIS)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
-    IME_Init(videodata, hwnd);
-    IME_Disable(videodata, hwnd);
+    SDL_Window *window = SDL_GetKeyboardFocus();
+    if (window)
+    {
+        HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+        SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+        IME_Init(videodata, hwnd);
+        IME_Disable(videodata, hwnd);
+    }
 }
 
 void

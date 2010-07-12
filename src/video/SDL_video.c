@@ -3385,20 +3385,20 @@ SDL_GetWindowWMInfo(SDL_Window * window, struct SDL_SysWMinfo *info)
 }
 
 void
-SDL_StartTextInput(SDL_Window *window)
+SDL_StartTextInput(void)
 {
     if (_this && _this->StartTextInput) {
-        _this->StartTextInput(_this, window);
+        _this->StartTextInput(_this);
     }
     SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE);
     SDL_EventState(SDL_TEXTEDITING, SDL_ENABLE);
 }
 
 void
-SDL_StopTextInput(SDL_Window *window)
+SDL_StopTextInput(void)
 {
     if (_this && _this->StopTextInput) {
-        _this->StopTextInput(_this, window);
+        _this->StopTextInput(_this);
     }
     SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
     SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
