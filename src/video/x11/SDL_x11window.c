@@ -289,9 +289,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         Sint32 r, g, b;
 
         /* Is the colormap we need already registered in SDL? */
-        if (colormap =
+        if ((colormap =
             X11_LookupColormap(data->display,
-                               displaydata->screen, visual->visualid)) {
+                               displaydata->screen, visual->visualid))) {
             xattr.colormap = colormap;
 /*             printf("found existing colormap\n"); */
         } else {
