@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
+#include <limits.h>	/* For INT_MAX */
 
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
@@ -32,6 +33,8 @@
 
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
+
+/*#define DEBUG_XEVENTS*/
 
 static void
 X11_DispatchEvent(_THIS)
@@ -283,6 +286,55 @@ X11_DispatchEvent(_THIS)
 
     case ButtonRelease:{
             SDL_SendMouseButton(data->window, SDL_RELEASED, xevent.xbutton.button);
+        }
+        break;
+
+    /* Copy the selection from XA_CUT_BUFFER0 to the requested property */
+    case SelectionRequest: {
+            Display *display = videodata->display;
+            XSelectionRequestEvent *req;
+            XEvent sevent;
+            int seln_format;
+            unsigned long nbytes;
+            unsigned long overflow;
+            unsigned char *seln_data;
+
+            req = &xevent.xselectionrequest;
+#ifdef DEBUG_XEVENTS
+            printf("SelectionRequest (requestor = %ld, target = %ld)\n",
+                req->requestor, req->target);
+#endif
+
+            sevent.xselection.type = SelectionNotify;
+            sevent.xselection.display = req->display;
+            sevent.xselection.selection = req->selection;
+            sevent.xselection.target = None;
+            sevent.xselection.property = None;
+            sevent.xselection.requestor = req->requestor;
+            sevent.xselection.time = req->time;
+            if (XGetWindowProperty(display, DefaultRootWindow(display),
+                    XA_CUT_BUFFER0, 0, INT_MAX/4, False, req->target,
+                    &sevent.xselection.target, &seln_format, &nbytes,
+                    &overflow, &seln_data) == Success) {
+                if (sevent.xselection.target == req->target) {
+                    XChangeProperty(display, req->requestor, req->property,
+                        sevent.xselection.target, seln_format, PropModeReplace,
+                        seln_data, nbytes);
+                    sevent.xselection.property = req->property;
+                }
+                XFree(seln_data);
+            }
+            XSendEvent(display, req->requestor, False, 0, &sevent);
+            XSync(display, False);
+        }
+        break;
+
+    case SelectionNotify: {
+#ifdef DEBUG_XEVENTS
+            printf("SelectionNotify (requestor = %ld, target = %ld)\n",
+                xevent.xselection.requestor, xevent.xselection.target);
+#endif
+            videodata->selection_waiting = SDL_FALSE;
         }
         break;
 

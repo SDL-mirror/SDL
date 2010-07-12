@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#include <unistd.h> /* For getpid() and readlink() */
+
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "../SDL_sysvideo.h"
@@ -224,6 +226,10 @@ X11_CreateDevice(int devindex)
     device->GL_SwapWindow = X11_GLES_SwapWindow;
     device->GL_DeleteContext = X11_GLES_DeleteContext;
 #endif
+
+    device->SetClipboardText = X11_SetClipboardText;
+    device->GetClipboardText = X11_GetClipboardText;
+    device->HasClipboardText = X11_HasClipboardText;
 
     device->free = X11_DeleteDevice;
 

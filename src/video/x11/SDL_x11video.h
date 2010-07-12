@@ -48,6 +48,7 @@
 
 #include "SDL_x11dyn.h"
 
+#include "SDL_x11clipboard.h"
 #include "SDL_x11events.h"
 #include "SDL_x11gamma.h"
 #include "SDL_x11keyboard.h"
@@ -69,6 +70,7 @@ typedef struct SDL_VideoData
     int windowlistlength;
     Atom WM_DELETE_WINDOW;
     SDL_scancode key_layout[256];
+    SDL_bool selection_waiting;
 } SDL_VideoData;
 
 extern SDL_bool X11_UseDirectColorVisuals(void);
