@@ -29,7 +29,7 @@
 
 
 int
-SDL_SendClipboardUpdate()
+SDL_SendClipboardUpdate(void)
 {
     int posted;
 

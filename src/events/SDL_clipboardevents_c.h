@@ -24,7 +24,7 @@
 #ifndef _SDL_clipboardevents_c_h
 #define _SDL_clipboardevents_c_h
 
-extern int SDL_SendClipboardUpdate();
+extern int SDL_SendClipboardUpdate(void);
 
 #endif /* _SDL_clipboardevents_c_h */
 

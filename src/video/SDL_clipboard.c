@@ -42,7 +42,7 @@ SDL_SetClipboardText(const char *text)
 }
 
 char *
-SDL_GetClipboardText()
+SDL_GetClipboardText(void)
 {
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
@@ -58,7 +58,7 @@ SDL_GetClipboardText()
 }
 
 SDL_bool
-SDL_HasClipboardText()
+SDL_HasClipboardText(void)
 {
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
