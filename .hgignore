@@ -78,5 +78,6 @@ test/testime
 test/testatomic
 test/testspriteminimal
 test/testfill
+test/testeyes
 test/*.exe
 test/*.dSYM
