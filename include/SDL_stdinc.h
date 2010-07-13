@@ -470,6 +470,9 @@ extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src,
                                            size_t maxlen);
 #endif
 
+extern DECLSPEC size_t SDLCALL SDL_utf8strlcpy(char *dst, const char *src,
+                                            size_t dst_bytes);
+
 #ifdef HAVE_STRLCAT
 #define SDL_strlcat    strlcat
 #else

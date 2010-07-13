@@ -29,6 +29,21 @@
 #define SDL_isupperhex(X)   (((X) >= 'A') && ((X) <= 'F'))
 #define SDL_islowerhex(X)   (((X) >= 'a') && ((X) <= 'f'))
 
+#define UTF8_IsLeadByte(c) ((c) >= 0xC0 && (c) <= 0xF4)
+#define UTF8_IsTrailingByte(c) ((c) >= 0x80 && (c) <= 0xBF)
+
+int UTF8_TrailingBytes(unsigned char c)
+{
+    if (c >= 0xC0 && c<= 0xDF)
+        return 1;
+    else if (c >= 0xE0 && c <= 0xEF)
+        return 2;
+    else if (c >= 0xF0 && c <= 0xF4)
+        return 3;
+    else
+        return 0;
+}
+
 #if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOL)
 static size_t
 SDL_ScanLong(const char *text, int radix, long *valuep)
@@ -361,6 +376,38 @@ SDL_strlcpy(char *dst, const char *src, size_t maxlen)
     return srclen;
 }
 #endif
+
+size_t SDL_utf8strlcpy(char *dst, const char *src, size_t dst_bytes)
+{
+    size_t src_bytes = SDL_strlen(src);
+    size_t bytes = SDL_min(src_bytes, dst_bytes - 1);
+    int i = 0;
+    char trailing_bytes = 0;
+    if (bytes)
+    {
+        unsigned char c = (unsigned char)src[bytes - 1];
+        if (UTF8_IsLeadByte(c))
+            --bytes;
+        else if (UTF8_IsTrailingByte(c))
+        {
+            for (i = bytes - 1; i != 0; --i)
+            {
+                c = (unsigned char)src[i];
+                trailing_bytes = UTF8_TrailingBytes(c);
+                if (trailing_bytes)
+                {
+                    if (bytes - i != trailing_bytes + 1)
+                        bytes = i;
+
+                    break;
+                }
+            }
+        }
+        SDL_memcpy(dst, src, bytes);
+    }
+    dst[bytes] = '\0';
+    return bytes;
+}
 
 #ifndef HAVE_STRLCAT
 size_t

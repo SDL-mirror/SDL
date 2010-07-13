@@ -766,7 +766,7 @@ SDL_SendKeyboardText(const char *text)
         SDL_Event event;
         event.text.type = SDL_TEXTINPUT;
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
-        SDL_strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
+        SDL_utf8strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
@@ -787,7 +787,7 @@ SDL_SendEditingText(const char *text, int start, int length)
         event.edit.windowID = keyboard->focus ? keyboard->focus->id : 0;
         event.edit.start = start;
         event.edit.length = length;
-        SDL_strlcpy(event.edit.text, text, SDL_arraysize(event.edit.text));
+        SDL_utf8strlcpy(event.edit.text, text, SDL_arraysize(event.edit.text));
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
