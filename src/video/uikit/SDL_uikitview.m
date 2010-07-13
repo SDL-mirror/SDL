@@ -22,8 +22,10 @@
 
 #import "SDL_uikitview.h"
 
+#include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
+
 #if SDL_IPHONE_KEYBOARD
-#import "SDL_keyboard_c.h"
 #import "keyinfotable.h"
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitwindow.h"
@@ -33,7 +35,6 @@
 
 - (void)dealloc {
 #if SDL_IPHONE_KEYBOARD
-	SDL_DelKeyboard(0);
 	[textField release];
 #endif
 	[super dealloc];
@@ -47,6 +48,7 @@
 	[self initializeKeyboard];
 #endif	
 
+#if FIXME_MULTITOUCH
 	int i;
 	for (i=0; i<MAX_SIMULTANEOUS_TOUCHES; i++) {
         mice[i].id = i;
@@ -54,6 +56,27 @@
 		SDL_AddMouse(&mice[i], "Mouse", 0, 0, 1);
 	}
 	self.multipleTouchEnabled = YES;
+#endif
+#if FIXED_MULTITOUCH
+	SDL_Touch touch;
+	touch.id = 0; //TODO: Should be -1?
+
+	//touch.driverdata = SDL_malloc(sizeof(EventTouchData));
+	//EventTouchData* data = (EventTouchData*)(touch.driverdata);
+	
+	touch.x_min = 0;
+	touch.x_max = frame.size.width;
+	touch.xres = touch.x_max - touch.x_min;
+	touch.y_min = 0;
+	touch.y_max = frame.size.height;
+	touch.yres = touch.y_max - touch.y_min;
+	touch.pressure_min = 0;
+	touch.pressure_max = 1;
+	touch.pressureres = touch.pressure_max - touch.pressure_min;
+
+
+	touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");
+#endif
 			
 	return self;
 
@@ -62,8 +85,9 @@
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
 
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch =(UITouch*)[enumerator nextObject];
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
+#if FIXME_MULTITOUCH
 	/* associate touches with mice, so long as we have slots */
 	int i;
 	int found = 0;
@@ -98,21 +122,43 @@
 		/* re-calibrate relative mouse motion */
 		SDL_GetRelativeMouseState(i, NULL, NULL);
 		
-		/* grab next touch */
-		touch = (UITouch*)[enumerator nextObject]; 
-		
 		/* switch back to our old mouse */
 		SDL_SelectMouse(oldMouse);
 		
-	}	
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
+	}
+#else
+	if (touch) {
+		CGPoint locationInView = [touch locationInView: self];
+			
+		/* send moved event */
+		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+
+		/* send mouse down event */
+		SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+	}
+#endif
+
+#if FIXED_MULTITOUCH
+	while(touch) {
+	  CGPoint locationInView = [touch locationInView: self];
+	  SDL_SendFingerDown(touchId,(int)touch,
+			     SDL_TRUE,locationInView.x,locationInView.y,
+			     1);
+
+	  touch = (UITouch*)[enumerator nextObject]; 
+	}
+#endif
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
 	
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch=nil;
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
-	while(touch = (UITouch *)[enumerator nextObject]) {
+#if FIXME_MULTITOUCH
+	while(touch) {
 		/* search for the mouse slot associated with this touch */
 		int i, found = NO;
 		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
@@ -126,7 +172,26 @@
 				found = YES;
 			}
 		}
+		
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
 	}
+#else
+	if (touch) {
+		/* send mouse up */
+		SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+	}
+#endif
+#if FIXED_MULTITOUCH
+	while(touch) {
+	  CGPoint locationInView = [touch locationInView: self];
+	  SDL_SendFingerDown(touchId,(int)touch,
+			     SDL_FALSE,locationInView.x,locationInView.y,
+			     1);
+
+	  touch = (UITouch*)[enumerator nextObject]; 
+	}
+#endif
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -141,9 +206,10 @@
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
 	
 	NSEnumerator *enumerator = [touches objectEnumerator];
-	UITouch *touch=nil;
+	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
-	while(touch = (UITouch *)[enumerator nextObject]) {
+#if FIXME_MULTITOUCH
+	while(touch) {
 		/* try to find the mouse associated with this touch */
 		int i, found = NO;
 		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
@@ -156,7 +222,29 @@
 				found = YES;
 			}
 		}
+		
+		/* grab next touch */
+		touch = (UITouch*)[enumerator nextObject]; 
 	}
+#else
+	if (touch) {
+		CGPoint locationInView = [touch locationInView: self];
+
+		/* send moved event */
+		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+	}
+#endif
+
+#if FIXED_MULTITOUCH
+	while(touch) {
+	  CGPoint locationInView = [touch locationInView: self];
+	  SDL_SendTouchMotion(touchId,(int)touch,
+			     SDL_FALSE,locationInView.x,locationInView.y,
+			     1);
+
+	  touch = (UITouch*)[enumerator nextObject]; 
+	}
+#endif
 }
 
 /*
@@ -190,15 +278,6 @@
 	keyboardVisible = NO;
 	/* add the UITextField (hidden) to our view */
 	[self addSubview: textField];
-	
-	/* create our SDL_Keyboard */
-	SDL_Keyboard keyboard;
-	SDL_zero(keyboard);
-	SDL_AddKeyboard(&keyboard, 0);
-	SDLKey keymap[SDL_NUM_SCANCODES];
-	SDL_GetDefaultKeymap(keymap);
-	SDL_SetKeymap(0, 0, keymap, SDL_NUM_SCANCODES);
-	
 }
 
 /* reveal onscreen virtual keyboard */
@@ -218,8 +297,8 @@
 	
 	if ([string length] == 0) {
 		/* it wants to replace text with nothing, ie a delete */
-		SDL_SendKeyboardKey( 0, SDL_PRESSED, SDL_SCANCODE_DELETE);
-		SDL_SendKeyboardKey( 0, SDL_RELEASED, SDL_SCANCODE_DELETE);
+		SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
+		SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE);
 	}
 	else {
 		/* go through all the characters in the string we've been sent
@@ -245,14 +324,14 @@
 			
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift down */
-				SDL_SendKeyboardKey( 0, SDL_PRESSED, SDL_SCANCODE_LSHIFT);
+				SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT);
 			}
 			/* send a keydown and keyup even for the character */
-			SDL_SendKeyboardKey( 0, SDL_PRESSED, code);
-			SDL_SendKeyboardKey( 0, SDL_RELEASED, code);
+			SDL_SendKeyboardKey(SDL_PRESSED, code);
+			SDL_SendKeyboardKey(SDL_RELEASED, code);
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift back up */
-				SDL_SendKeyboardKey( 0, SDL_RELEASED, SDL_SCANCODE_LSHIFT);
+				SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
 			}			
 		}
 	}
