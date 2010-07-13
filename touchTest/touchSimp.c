@@ -12,7 +12,7 @@
 #define DEPTH 32
 
 
-#define MAX_FINGERS 2
+#define MAX_FINGERS 5
 
 int mousx,mousy;
 int keystat[512];

@@ -91,9 +91,30 @@
 #if FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
-	  SDL_SendFingerDown(touchId,(int)touch,
+
+
+#ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
+	  //FIXME: TODO: Using touch as the fingerId is potentially dangerous
+	  //It is also much more efficient than storing the UITouch pointer
+	  //and comparing it to the incoming event.
+	  SDL_SendFingerDown(touchId,(long)touch,
 			     SDL_TRUE,locationInView.x,locationInView.y,
 			     1);
+#else
+	  int i;
+	  for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
+	    if(finger[i] == NULL) {
+	      finger[i] = touch;
+	      SDL_SendFingerDown(touchId,i,
+				 SDL_TRUE,locationInView.x,locationInView.y,
+				 1);
+	      break;
+	    }
+	  }
+#endif
+	  
+
+	  
 
 	  touch = (UITouch*)[enumerator nextObject]; 
 	}
@@ -113,9 +134,23 @@
 #if FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
-	  SDL_SendFingerDown(touchId,(int)touch,
+	  
+
+#ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
+	  SDL_SendFingerDown(touchId,(long)touch,
 			     SDL_FALSE,locationInView.x,locationInView.y,
 			     1);
+#else
+	  int i;
+	  for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
+	    if(finger[i] == touch) {
+	      SDL_SendFingerDown(touchId,i,
+				 SDL_FALSE,locationInView.x,locationInView.y,
+				 1);
+	      break;
+	    }
+	  }
+#endif
 
 	  touch = (UITouch*)[enumerator nextObject]; 
 	}
@@ -146,9 +181,23 @@
 #if FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
-	  SDL_SendTouchMotion(touchId,(int)touch,
-			     SDL_FALSE,locationInView.x,locationInView.y,
-			     1);
+	  
+
+#ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
+	  SDL_SendTouchMotion(touchId,(long)touch,
+			      SDL_FALSE,locationInView.x,locationInView.y,
+			      1);
+#else
+	  int i;
+	  for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
+	    if(finger[i] == touch) {
+	      SDL_SendTouchMotion(touchId,i,
+				  SDL_FALSE,locationInView.x,locationInView.y,
+				  1);
+	      break;
+	    }
+	  }
+#endif
 
 	  touch = (UITouch*)[enumerator nextObject]; 
 	}

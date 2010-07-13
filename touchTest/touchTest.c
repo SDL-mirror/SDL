@@ -11,7 +11,7 @@
 #define BPP 4
 #define DEPTH 32
 
-#define MAXFINGERS 3
+#define MAXFINGERS 5
 
 int mousx,mousy;
 int keystat[512];

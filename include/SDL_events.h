@@ -105,6 +105,7 @@ typedef enum
     SDL_MULTIGESTURE,
 
     /* Clipboard events */
+
     SDL_CLIPBOARDUPDATE = 0x900, /**< The clipboard changed */
 
     /* Obsolete events */
