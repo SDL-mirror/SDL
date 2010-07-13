@@ -21,13 +21,14 @@
 */
 
 #include <assert.h>
-#include <X11/extensions/shape.h>
+#include "SDL_x11video.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
-#include "SDL_x11video.h"
 
 SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 	SDL_WindowShaper* result = NULL;
+
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
 	if (SDL_X11_HAVE_XSHAPE) {  /* Make sure X server supports it. */
 		result = malloc(sizeof(SDL_WindowShaper));
 		result->window = window;
@@ -38,6 +39,7 @@ SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 		int resized_properly = X11_ResizeWindowShape(window);
 		assert(resized_properly == 0);
 	}
+#endif
 
 	return result;
 }
@@ -69,6 +71,8 @@ int X11_ResizeWindowShape(SDL_Window* window) {
 int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
 	if(shaper == NULL || shape == NULL || shaper->driverdata == NULL)
 		return -1;
+
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
 	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
 		return -2;
 	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
@@ -85,6 +89,7 @@ int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowSha
 	XSync(windowdata->videodata->display,False);
 
 	XFreePixmap(windowdata->videodata->display,shapemask);
-	
+#endif
+
 	return 0;
 }

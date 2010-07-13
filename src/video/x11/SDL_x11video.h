@@ -45,6 +45,9 @@
 #if SDL_VIDEO_DRIVER_X11_SCRNSAVER
 #include <X11/extensions/scrnsaver.h>
 #endif
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
+#include <X11/extensions/shape.h>
+#endif
 
 #include "SDL_x11dyn.h"
 
