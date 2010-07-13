@@ -25,21 +25,15 @@
 
 #include "SDL.h"
 #include "SDL_fatal.h"
-#include "SDL_assert.h"
+#include "SDL_assert_c.h"
+#include "haptic/SDL_haptic_c.h"
+#include "joystick/SDL_joystick_c.h"
 
 #if !SDL_VIDEO_DISABLED
 #include "video/SDL_leaks.h"
 #endif
 
 /* Initialization/Cleanup routines */
-#if !SDL_JOYSTICK_DISABLED
-extern int SDL_JoystickInit(void);
-extern void SDL_JoystickQuit(void);
-#endif
-#if !SDL_HAPTIC_DISABLED
-extern int SDL_HapticInit(void);
-extern int SDL_HapticQuit(void);
-#endif
 #if !SDL_TIMERS_DISABLED
 extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
@@ -50,8 +44,6 @@ extern int SDL_HelperWindowCreate(void);
 extern int SDL_HelperWindowDestroy(void);
 #endif
 
-extern int SDL_AssertionsInit(void);
-extern void SDL_AssertionsQuit(void);
 
 /* The initialized subsystems */
 static Uint32 SDL_initialized = 0;

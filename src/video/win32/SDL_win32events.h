@@ -31,7 +31,6 @@ extern HINSTANCE SDL_Instance;
 extern LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam,
                                        LPARAM lParam);
 extern void WIN_PumpEvents(_THIS);
-extern void WIN_SetError(const char *prefix);
 
 #endif /* _SDL_win32events_h */
 

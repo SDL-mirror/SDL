@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "../SDL_sysvideo.h"
+#include "../SDL_pixels_c.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
 
@@ -34,6 +35,7 @@
 #include "SDL_x11opengles.h"
 #endif
 
+#include "SDL_timer.h"
 #include "SDL_syswm.h"
 
 #define _NET_WM_STATE_REMOVE    0l
@@ -67,7 +69,6 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     int numwindows = videodata->numwindows;
     int windowlistlength = videodata->windowlistlength;
     SDL_WindowData **windowlist = videodata->windowlist;
-    int index;
 
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
@@ -275,8 +276,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (visual->class == PseudoColor) {
         printf("asking for PseudoColor\n");
 
-        Status status;
-        XStandardColormap cmap;
+/*      Status status; */
         XColor *colorcells;
         Colormap colormap;
         Sint32 pix;
@@ -289,9 +289,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         Sint32 r, g, b;
 
         /* Is the colormap we need already registered in SDL? */
-        if (colormap =
+        if ((colormap =
             X11_LookupColormap(data->display,
-                               displaydata->screen, visual->visualid)) {
+                               displaydata->screen, visual->visualid))) {
             xattr.colormap = colormap;
 /*             printf("found existing colormap\n"); */
         } else {
@@ -387,7 +387,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
     } else if (visual->class == DirectColor) {
         Status status;
-        XStandardColormap cmap;
         XColor *colorcells;
         Colormap colormap;
         int i;
@@ -397,9 +396,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         int rshift, gshift, bshift;
 
         /* Is the colormap we need already registered in SDL? */
-        if (colormap =
-            X11_LookupColormap(data->display,
-                               displaydata->screen, visual->visualid)) {
+        if ((colormap =
+             X11_LookupColormap(data->display,
+                                displaydata->screen, visual->visualid))) {
             xattr.colormap = colormap;
 /*             printf("found existing colormap\n"); */
         } else {
@@ -647,7 +646,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     /* Tell KDE to keep fullscreen windows on top */
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         XEvent ev;
-        long mask;
 
         SDL_zero(ev);
         ev.xclient.type = ClientMessage;
@@ -707,32 +705,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       PointerMotionMask | KeyPressMask | KeyReleaseMask |
                       PropertyChangeMask | StructureNotifyMask |
                       KeymapStateMask));
-    }
-#endif
-
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-    /* we're informing the display what extension events we want to receive from it */
-    {
-        int i, j, n = 0;
-        XEventClass xevents[256];
-
-        for (i = 0; i < SDL_GetNumMice(); ++i) {
-            SDL_Mouse *mouse;
-            X11_MouseData *data;
-
-            mouse = SDL_GetMouse(i);
-            data = (X11_MouseData *) mouse->driverdata;
-            if (!data) {
-                continue;
-            }
-
-            for (j = 0; j < data->num_xevents; ++j) {
-                xevents[n++] = data->xevents[j];
-            }
-        }
-        if (n > 0) {
-            XSelectExtensionEvent(data->display, w, xevents, n);
-        }
     }
 #endif
 
@@ -869,8 +841,6 @@ void
 X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
     Display *display = data->videodata->display;
     int x, y;
 
@@ -1044,8 +1014,14 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 SDL_bool
 X11_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
-    if (info->version.major <= SDL_MAJOR_VERSION) {
-        /* FIXME! */
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+
+    if (info->version.major == SDL_MAJOR_VERSION &&
+        info->version.minor == SDL_MINOR_VERSION) {
+        info->subsystem = SDL_SYSWM_X11;
+        info->info.x11.display = display;
+        info->info.x11.window = data->xwindow;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",

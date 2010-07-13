@@ -106,7 +106,6 @@ main(int argc, char *argv[])
             done = 1;
             break;
         case SDL_MOUSEMOTION:
-            SDL_SelectMouse(event.motion.which);        /* select 'mouse' (touch) that moved */
             state = SDL_GetMouseState(&x, &y);  /* get its location */
             SDL_GetRelativeMouseState(&dx, &dy);        /* find how much the mouse moved */
             if (state & SDL_BUTTON_LMASK) {     /* is the mouse (touch) down? */

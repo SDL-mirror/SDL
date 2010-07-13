@@ -26,6 +26,8 @@
 #include "SDL_uikitwindow.h"
 #include "jumphack.h"
 #include "SDL_sysvideo.h"
+#include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
 #include "SDL_loadso.h"
 #include <dlfcn.h>
 
@@ -125,7 +127,11 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         UIKit_GL_DeleteContext(_this, view);
         return NULL;
     }
-		
+
+	/* Make this window the current mouse focus for touch input */
+	SDL_SetMouseFocus(window);
+	SDL_SetKeyboardFocus(window);
+
 	return view;
 }
 

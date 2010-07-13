@@ -77,9 +77,13 @@ typedef enum
     SDL_MOUSEBUTTONUP,          /**< Mouse button released */
     SDL_MOUSEWHEEL,             /**< Mouse wheel motion */
 
-    /* Tablet events */
-    SDL_PROXIMITYIN    = 0x500, /**< Proximity In event */
-    SDL_PROXIMITYOUT,           /**< Proximity Out event */
+    /* Tablet or multiple mice input device events */
+    SDL_INPUTMOTION    = 0x500, /**< Input moved */
+    SDL_INPUTBUTTONDOWN,        /**< Input button pressed */
+    SDL_INPUTBUTTONUP,          /**< Input button released */
+    SDL_INPUTWHEEL,             /**< Input wheel motion */
+    SDL_INPUTPROXIMITYIN,       /**< Input pen entered proximity */
+    SDL_INPUTPROXIMITYOUT,      /**< Input pen left proximity */
 
     /* Joystick events */
     SDL_JOYAXISMOTION  = 0x600, /**< Joystick axis motion */
@@ -88,17 +92,20 @@ typedef enum
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
 
-    /*Touch events*/
-    SDL_FINGERDOWN     = 0x700,
+    /* Touch events */
+    SDL_FINGERDOWN      = 0x700,
     SDL_FINGERUP,
     SDL_FINGERMOTION,
     SDL_TOUCHBUTTONDOWN,
     SDL_TOUCHBUTTONUP,    
 
-    /*Gesture events*/
-    SDL_DOLLARGESTURE     = 0x800,
+    /* Gesture events */
+    SDL_DOLLARGESTURE   = 0x800,
     SDL_DOLLARRECORD,
     SDL_MULTIGESTURE,
+
+    /* Clipboard events */
+    SDL_CLIPBOARDUPDATE = 0x900, /**< The clipboard changed */
 
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
@@ -139,10 +146,10 @@ typedef struct SDL_KeyboardEvent
 {
     Uint32 type;        /**< ::SDL_KEYDOWN or ::SDL_KEYUP */
     Uint32 windowID;    /**< The window with keyboard focus, if any */
-    Uint8 which;        /**< The keyboard device index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
     Uint8 padding2;
+    Uint8 padding3;
     SDL_keysym keysym;  /**< The key that was pressed or released */
 } SDL_KeyboardEvent;
 
@@ -154,7 +161,6 @@ typedef struct SDL_TextEditingEvent
 {
     Uint32 type;                                /**< ::SDL_TEXTEDITING */
     Uint32 windowID;                            /**< The window with keyboard focus, if any */
-    Uint8 which;                                /**< The keyboard device index */
     char text[SDL_TEXTEDITINGEVENT_TEXT_SIZE];  /**< The editing text */
     int start;                                  /**< The start cursor of selected editing text */
     int length;                                 /**< The length of selected editing text */
@@ -169,10 +175,6 @@ typedef struct SDL_TextInputEvent
 {
     Uint32 type;                              /**< ::SDL_TEXTINPUT */
     Uint32 windowID;                          /**< The window with keyboard focus, if any */
-    Uint8 which;                              /**< The keyboard device index */
-    Uint8 padding1;
-    Uint8 padding2;
-    Uint8 padding3;
     char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];  /**< The input text */
 } SDL_TextInputEvent;
 
@@ -183,20 +185,12 @@ typedef struct SDL_MouseMotionEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEMOTION */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    Uint8 which;        /**< The mouse device index */
     Uint8 state;        /**< The current button state */
     Uint8 padding1;
     Uint8 padding2;
+    Uint8 padding3;
     int x;              /**< X coordinate, relative to window */
     int y;              /**< Y coordinate, relative to window */
-    int z;              /**< Z coordinate, for future use */
-    int pressure;       /**< Pressure reported by tablets */
-    int pressure_max;   /**< Maximum value of the pressure reported by the device */
-    int pressure_min;   /**< Minimum value of the pressure reported by the device */
-    int rotation;       /**< For future use */
-    int tilt_x;         /**< For future use */
-    int tilt_y;         /**< For future use */
-    int cursor;         /**< The cursor being used in the event */
     int xrel;           /**< The relative motion in the X direction */
     int yrel;           /**< The relative motion in the Y direction */
 } SDL_MouseMotionEvent;
@@ -208,10 +202,10 @@ typedef struct SDL_MouseButtonEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    Uint8 which;        /**< The mouse device index */
     Uint8 button;       /**< The mouse button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
+    Uint8 padding2;
     int x;              /**< X coordinate, relative to window */
     int y;              /**< Y coordinate, relative to window */
 } SDL_MouseButtonEvent;
@@ -223,29 +217,9 @@ typedef struct SDL_MouseWheelEvent
 {
     Uint32 type;        /**< ::SDL_MOUSEWHEEL */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    Uint8 which;        /**< The mouse device index */
-    Uint8 padding1;
-    Uint8 padding2;
-    Uint8 padding3;
     int x;              /**< The amount scrolled horizontally */
     int y;              /**< The amount scrolled vertically */
 } SDL_MouseWheelEvent;
-
-/**
- * \brief Tablet pen proximity event
- */
-typedef struct SDL_ProximityEvent
-{
-    Uint32 type;        /**< ::SDL_PROXIMITYIN or ::SDL_PROXIMITYOUT */
-    Uint32 windowID;    /**< The associated window */
-    Uint8 which;
-    Uint8 padding1;
-    Uint8 padding2;
-    Uint8 padding3;
-    int cursor;
-    int x;
-    int y;
-} SDL_ProximityEvent;
 
 /**
  *  \brief Joystick axis motion event structure (event.jaxis.*)
@@ -459,7 +433,6 @@ typedef union SDL_Event
     SDL_QuitEvent quit;             /**< Quit request event data */
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
-    SDL_ProximityEvent proximity;   /**< Proximity In or Out event */
     SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
     SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
     SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data*/

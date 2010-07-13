@@ -194,7 +194,7 @@ extern DECLSPEC int SDLCALL SDL_CondBroadcast(SDL_cond * cond);
  *  
  *  \return 0 when it is signaled, or -1 on error.
  */
-extern DECLSPEC int SDLCALL SDL_CondWait(SDL_cond * cond, SDL_mutex * mut);
+extern DECLSPEC int SDLCALL SDL_CondWait(SDL_cond * cond, SDL_mutex * mutex);
 
 /**
  *  Waits for at most \c ms milliseconds, and returns 0 if the condition

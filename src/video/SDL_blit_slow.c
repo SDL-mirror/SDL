@@ -23,6 +23,7 @@
 
 #include "SDL_video.h"
 #include "SDL_blit.h"
+#include "SDL_blit_slow.h"
 
 /* The ONE TRUE BLITTER
  * This puppy has to handle all the unoptimized cases - yes, it's slow.

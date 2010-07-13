@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2010 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -107,6 +107,10 @@ Cocoa_CreateDevice(int devindex)
     device->StartTextInput = Cocoa_StartTextInput;
     device->StopTextInput = Cocoa_StopTextInput;
     device->SetTextInputRect = Cocoa_SetTextInputRect;
+
+    device->SetClipboardText = Cocoa_SetClipboardText;
+    device->GetClipboardText = Cocoa_GetClipboardText;
+    device->HasClipboardText = Cocoa_HasClipboardText;
 
     device->free = Cocoa_DeleteDevice;
 

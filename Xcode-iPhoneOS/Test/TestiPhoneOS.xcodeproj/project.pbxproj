@@ -287,6 +287,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0466EE6F11E565E4000198A4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 006E982211955059001DE610 /* testsdl.app */;
+			remoteInfo = testsdl;
+		};
 		FD1B48B70E3131CA007AB34E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */;
@@ -298,9 +305,7 @@
 
 /* Begin PBXFileReference section */
 		1D6058910D05DD3D006BFB54 /* testwm2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testwm2.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		56ED04F7118A8FCC00A56AA6 /* testpower-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testpower-Info.plist"; sourceTree = "<group>"; };
 		56ED050D118A8FE400A56AA6 /* testpower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testpower.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		56ED050F118A8FE400A56AA6 /* Info copy.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info copy.plist"; sourceTree = "<group>"; };
 		56ED0510118A904200A56AA6 /* testpower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testpower.c; path = ../../test/testpower.c; sourceTree = SOURCE_ROOT; };
 		FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDLiPhoneOS.xcodeproj; path = ../SDL/SDLiPhoneOS.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FDA8A7400E2D0F1600EA573E /* testalpha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testalpha.c; path = ../../test/testalpha.c; sourceTree = SOURCE_ROOT; };
@@ -861,14 +866,11 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				56ED0510118A904200A56AA6 /* testpower.c */,
 				FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */,
 				FDA8AAD60E2D339A00EA573E /* Resources */,
 				FDA8A7C30E2D10FA00EA573E /* Linked Frameworks */,
 				FDA8A73B0E2D0F0400EA573E /* src */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				56ED04F7118A8FCC00A56AA6 /* testpower-Info.plist */,
-				56ED050F118A8FE400A56AA6 /* Info copy.plist */,
 			);
 			name = CustomTemplate;
 			sourceTree = "<group>";
@@ -877,6 +879,7 @@
 			isa = PBXGroup;
 			children = (
 				FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */,
+				0466EE7011E565E4000198A4 /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -910,6 +913,7 @@
 				FDA8A7540E2D0F1600EA573E /* testoverlay2.c */,
 				FDA8A7550E2D0F1600EA573E /* testpalette.c */,
 				FDA8A7560E2D0F1600EA573E /* testplatform.c */,
+				56ED0510118A904200A56AA6 /* testpower.c */,
 				FDA8A7570E2D0F1600EA573E /* testsem.c */,
 				FDA8A7580E2D0F1600EA573E /* testsprite.c */,
 				FDA8A7590E2D0F1600EA573E /* testsprite2.c */,
@@ -1502,6 +1506,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		0466EE7011E565E4000198A4 /* testsdl.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = testsdl.app;
+			remoteRef = 0466EE6F11E565E4000198A4 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -2034,7 +2045,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.2;
 			};
 			name = Debug;
 		};
@@ -2049,7 +2060,7 @@
 				HEADER_SEARCH_PATHS = ../../include;
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
-				SDKROOT = iphoneos2.2.1;
+				SDKROOT = iphoneos3.2;
 			};
 			name = Release;
 		};

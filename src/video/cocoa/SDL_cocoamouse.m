@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2010 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,11 +29,6 @@
 void
 Cocoa_InitMouse(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_Mouse mouse;
-
-    SDL_zero(mouse);
-    data->mouse = SDL_AddMouse(&mouse, "Mouse", 0, 0, 1);
 }
 
 static int
@@ -54,11 +49,10 @@ ConvertMouseButtonToSDL(int button)
 void
 Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_Mouse *mouse = SDL_GetMouse(data->mouse);
     int i;
-    NSPoint point;
+    NSPoint point = { 0, 0 };
     SDL_Window *window;
+    SDL_Window *focus = SDL_GetMouseFocus();
 
     /* See if there are any fullscreen windows that might handle this event */
     window = NULL;
@@ -73,44 +67,37 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
             point = [NSEvent mouseLocation];
             point.x = point.x - bounds.x;
             point.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - point.y - bounds.y;
-            if (point.x < 0 || point.x >= candidate->w ||
-                point.y < 0 || point.y >= candidate->h) {
-                /* The mouse is out of this fullscreen display */
-                if (mouse->focus == candidate) {
-                    SDL_SetMouseFocus(data->mouse, 0);
-                }
-            } else {
+            if ((point.x >= 0 && point.x < candidate->w) &&
+                (point.y >= 0 && point.y < candidate->h)) {
                 /* This is it! */
                 window = candidate;
                 break;
+            } else if (candidate == focus) {
+                SDL_SetMouseFocus(NULL);
             }
         }
     }
+
     if (!window) {
         return;
-    }
-
-    /* Set the focus appropriately */
-    if (mouse->focus != window) {
-        SDL_SetMouseFocus(data->mouse, window);
     }
 
     switch ([event type]) {
     case NSLeftMouseDown:
     case NSOtherMouseDown:
     case NSRightMouseDown:
-        SDL_SendMouseButton(data->mouse, SDL_PRESSED, ConvertMouseButtonToSDL([event buttonNumber]));
+        SDL_SendMouseButton(window, SDL_PRESSED, ConvertMouseButtonToSDL([event buttonNumber]));
         break;
     case NSLeftMouseUp:
     case NSOtherMouseUp:
     case NSRightMouseUp:
-        SDL_SendMouseButton(data->mouse, SDL_RELEASED, ConvertMouseButtonToSDL([event buttonNumber]));
+        SDL_SendMouseButton(window, SDL_RELEASED, ConvertMouseButtonToSDL([event buttonNumber]));
         break;
     case NSLeftMouseDragged:
     case NSRightMouseDragged:
     case NSOtherMouseDragged: /* usually middle mouse dragged */
     case NSMouseMoved:
-        SDL_SendMouseMotion(data->mouse, 0, (int)point.x, (int)point.y, 0);
+        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
         break;
     default: /* just to avoid compiler warnings */
         break;
@@ -120,9 +107,6 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 void
 Cocoa_QuitMouse(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
-    SDL_DelMouse(data->mouse);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

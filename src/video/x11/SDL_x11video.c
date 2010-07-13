@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#include <unistd.h> /* For getpid() and readlink() */
+
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_eventtouch.h" 
@@ -226,6 +228,10 @@ X11_CreateDevice(int devindex)
     device->GL_DeleteContext = X11_GLES_DeleteContext;
 #endif
 
+    device->SetClipboardText = X11_SetClipboardText;
+    device->GetClipboardText = X11_GetClipboardText;
+    device->HasClipboardText = X11_HasClipboardText;
+
     device->free = X11_DeleteDevice;
 
     return device;
@@ -295,7 +301,7 @@ X11_VideoQuit(_THIS)
 }
 
 SDL_bool
-X11_UseDirectColorVisuals()
+X11_UseDirectColorVisuals(void)
 {
     /* Once we implement DirectColor colormaps and gamma ramp support...
        return SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ? SDL_FALSE : SDL_TRUE;

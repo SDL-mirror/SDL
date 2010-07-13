@@ -430,9 +430,7 @@ main(int argc, char *argv[])
                 done = 1;
             }
             if (event.type == SDL_MOUSEBUTTONDOWN) {
-                int which = event.button.which;
                 int x, y;
-                SDL_SelectMouse(which);
                 SDL_GetMouseState(&x, &y);
                 spawnEmitterParticle(x, y);
             }

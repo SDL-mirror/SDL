@@ -160,7 +160,6 @@ WIN_AddDisplay(LPTSTR DeviceName)
 int
 WIN_InitModes(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     DWORD i, j, count;
     DISPLAY_DEVICE device;
 

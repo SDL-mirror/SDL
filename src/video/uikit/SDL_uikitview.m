@@ -48,15 +48,6 @@
 	[self initializeKeyboard];
 #endif	
 
-#if FIXME_MULTITOUCH
-	int i;
-	for (i=0; i<MAX_SIMULTANEOUS_TOUCHES; i++) {
-        mice[i].id = i;
-		mice[i].driverdata = NULL;
-		SDL_AddMouse(&mice[i], "Mouse", 0, 0, 1);
-	}
-	self.multipleTouchEnabled = YES;
-#endif
 #if FIXED_MULTITOUCH
 	SDL_Touch touch;
 	touch.id = 0; //TODO: Should be -1?
@@ -77,7 +68,7 @@
 
 	touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");
 #endif
-			
+
 	return self;
 
 }
@@ -87,48 +78,6 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
-#if FIXME_MULTITOUCH
-	/* associate touches with mice, so long as we have slots */
-	int i;
-	int found = 0;
-	for(i=0; touch && i < MAX_SIMULTANEOUS_TOUCHES; i++) {
-	
-		/* check if this mouse is already tracking a touch */
-		if (mice[i].driverdata != NULL) {
-			continue;
-		}
-		/*	
-			mouse not associated with anything right now,
-			associate the touch with this mouse
-		*/
-		found = 1;
-		
-		/* save old mouse so we can switch back */
-		int oldMouse = SDL_SelectMouse(-1);
-		
-		/* select this slot's mouse */
-		SDL_SelectMouse(i);
-		CGPoint locationInView = [touch locationInView: self];
-		
-		/* set driver data to touch object, we'll use touch object later */
-		mice[i].driverdata = [touch retain];
-		
-		/* send moved event */
-		SDL_SendMouseMotion(i, 0, locationInView.x, locationInView.y, 0);
-		
-		/* send mouse down event */
-		SDL_SendMouseButton(i, SDL_PRESSED, SDL_BUTTON_LEFT);
-		
-		/* re-calibrate relative mouse motion */
-		SDL_GetRelativeMouseState(i, NULL, NULL);
-		
-		/* switch back to our old mouse */
-		SDL_SelectMouse(oldMouse);
-		
-		/* grab next touch */
-		touch = (UITouch*)[enumerator nextObject]; 
-	}
-#else
 	if (touch) {
 		CGPoint locationInView = [touch locationInView: self];
 			
@@ -138,7 +87,6 @@
 		/* send mouse down event */
 		SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
 	}
-#endif
 
 #if FIXED_MULTITOUCH
 	while(touch) {
@@ -157,31 +105,11 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
-#if FIXME_MULTITOUCH
-	while(touch) {
-		/* search for the mouse slot associated with this touch */
-		int i, found = NO;
-		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
-			if (mice[i].driverdata == touch) {
-				/* found the mouse associate with the touch */
-				[(UITouch*)(mice[i].driverdata) release];
-				mice[i].driverdata = NULL;
-				/* send mouse up */
-				SDL_SendMouseButton(i, SDL_RELEASED, SDL_BUTTON_LEFT);
-				/* discontinue search for this touch */
-				found = YES;
-			}
-		}
-		
-		/* grab next touch */
-		touch = (UITouch*)[enumerator nextObject]; 
-	}
-#else
 	if (touch) {
 		/* send mouse up */
 		SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
 	}
-#endif
+
 #if FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
@@ -208,32 +136,12 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
-#if FIXME_MULTITOUCH
-	while(touch) {
-		/* try to find the mouse associated with this touch */
-		int i, found = NO;
-		for (i=0; i<MAX_SIMULTANEOUS_TOUCHES && !found; i++) {
-			if (mice[i].driverdata == touch) {
-				/* found proper mouse */
-				CGPoint locationInView = [touch locationInView: self];
-				/* send moved event */
-				SDL_SendMouseMotion(i, 0, locationInView.x, locationInView.y, 0);
-				/* discontinue search */
-				found = YES;
-			}
-		}
-		
-		/* grab next touch */
-		touch = (UITouch*)[enumerator nextObject]; 
-	}
-#else
 	if (touch) {
 		CGPoint locationInView = [touch locationInView: self];
 
 		/* send moved event */
 		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 	}
-#endif
 
 #if FIXED_MULTITOUCH
 	while(touch) {

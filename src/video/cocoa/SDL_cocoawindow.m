@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2010 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -126,28 +126,24 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
-    int index;
-
     /* We're going to get keyboard events, since we're key. */
-    index = _data->videodata->keyboard;
-    SDL_SetKeyboardFocus(index, _data->window);
+    SDL_SetKeyboardFocus(_data->window);
+
+    /* Check to see if someone updated the clipboard */
+    Cocoa_CheckClipboardUpdate(_data->videodata);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification
 {
-    int index;
-    SDL_Mouse *mouse;
-
     /* Some other window will get mouse events, since we're not key. */
-    index = _data->videodata->mouse;
-    mouse = SDL_GetMouse(index);
-    if (mouse->focus == _data->window) {
-        SDL_SetMouseFocus(index, 0);
+    if (SDL_GetMouseFocus() == _data->window) {
+        SDL_SetMouseFocus(NULL);
     }
 
     /* Some other window will get keyboard events, since we're not key. */
-    index = _data->videodata->keyboard;
-    SDL_SetKeyboardFocus(index, 0);
+    if (SDL_GetKeyboardFocus() == _data->window) {
+        SDL_SetKeyboardFocus(NULL);
+    }
 }
 
 - (void)windowDidHide:(NSNotification *)aNotification
@@ -162,10 +158,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseDown:(NSEvent *)theEvent
 {
-    int index;
     int button;
 
-    index = _data->videodata->mouse;
     switch ([theEvent buttonNumber]) {
     case 0:
         button = SDL_BUTTON_LEFT;
@@ -180,7 +174,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber];
         break;
     }
-    SDL_SendMouseButton(index, SDL_PRESSED, button);
+    SDL_SendMouseButton(_data->window, SDL_PRESSED, button);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
@@ -195,10 +189,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    int index;
     int button;
 
-    index = _data->videodata->mouse;
     switch ([theEvent buttonNumber]) {
     case 0:
         button = SDL_BUTTON_LEFT;
@@ -213,7 +205,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber];
         break;
     }
-    SDL_SendMouseButton(index, SDL_RELEASED, button);
+    SDL_SendMouseButton(_data->window, SDL_RELEASED, button);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
@@ -229,24 +221,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)mouseMoved:(NSEvent *)theEvent
 {
     SDL_Window *window = _data->window;
-    int index;
-    SDL_Mouse *mouse;
     NSPoint point;
 
-    index = _data->videodata->mouse;
-    mouse = SDL_GetMouse(index);
     point = [theEvent locationInWindow];
     point.y = window->h - point.y;
     if ( point.x < 0 || point.x >= window->w ||
          point.y < 0 || point.y >= window->h ) {
-        if (mouse->focus != 0) {
-            SDL_SetMouseFocus(index, 0);
+        if (SDL_GetMouseFocus() == window) {
+            SDL_SetMouseFocus(NULL);
         }
     } else {
-        if (mouse->focus != _data->window) {
-            SDL_SetMouseFocus(index, _data->window);
-        }
-        SDL_SendMouseMotion(index, 0, (int)point.x, (int)point.y, 0);
+        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
     }
 }
 
@@ -267,10 +252,20 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-    int index;
+    float x = [theEvent deltaX];
+    float y = [theEvent deltaY];
 
-    index = _data->videodata->mouse;
-    SDL_SendMouseWheel(index, (int)([theEvent deltaX]+0.9f), (int)([theEvent deltaY]+0.9f));
+    if (x > 0) {
+        x += 0.9f;
+    } else if (x < 0) {
+        x -= 0.9f;
+    }
+    if (y > 0) {
+        y += 0.9f;
+    } else if (y < 0) {
+        y -= 0.9f;
+    }
+    SDL_SendMouseWheel(_data->window, (int)x, (int)y);
 }
 
 @end
@@ -361,9 +356,8 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         window->flags &= ~SDL_WINDOW_MINIMIZED;
     }
     if ([nswindow isKeyWindow]) {
-        int index = data->videodata->keyboard;
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
-        SDL_SetKeyboardFocus(index, data->window);
+        SDL_SetKeyboardFocus(data->window);
 
         if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
             /* FIXME */
@@ -385,8 +379,6 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     NSRect rect;
     SDL_Rect bounds;
     unsigned int style;
-    NSString *title;
-    int status;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
@@ -452,7 +444,6 @@ Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
     NSAutoreleasePool *pool;
     NSWindow *nswindow = (NSWindow *) data;
     NSString *title;
-    int status;
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -625,7 +616,7 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
 SDL_bool
 Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    //NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if (info->version.major <= SDL_MAJOR_VERSION) {
         //info->window = nswindow;

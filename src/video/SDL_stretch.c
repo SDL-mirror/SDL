@@ -151,7 +151,7 @@ generate_rowbytes(int src_w, int dst_w, int bpp)
 #endif /* USE_ASM_STRETCH */
 
 #define DEFINE_COPY_ROW(name, type)			\
-void name(type *src, int src_w, type *dst, int dst_w)	\
+static void name(type *src, int src_w, type *dst, int dst_w)	\
 {							\
 	int i;						\
 	int pos, inc;					\
@@ -175,7 +175,7 @@ DEFINE_COPY_ROW(copy_row4, Uint32)
 /* *INDENT-ON* */
 
 /* The ASM code doesn't handle 24-bpp stretch blits */
-void
+static void
 copy_row3(Uint8 * src, int src_w, Uint8 * dst, int dst_w)
 {
     int i;

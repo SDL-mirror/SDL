@@ -118,7 +118,7 @@ extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenIncrement32(volatile Uint32 * 
  *  
  *  \return The value before it was decremented.
  *  
- *  \param ptr Address of the value to fetch and drement
+ *  \param ptr Address of the value to fetch and decrement
  */
 extern DECLSPEC Uint32 SDLCALL SDL_AtomicFetchThenDecrement32(volatile Uint32 * ptr);
 

@@ -62,11 +62,16 @@
 		0098A5631195B4D900343137 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5621195B4D900343137 /* OpenGLES.framework */; };
 		0098A5651195B4D900343137 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5641195B4D900343137 /* UIKit.framework */; };
 		0098A5851195B5E200343137 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5841195B5E200343137 /* QuartzCore.framework */; };
+		0420497011E6F03D007E7EC9 /* SDL_clipboardevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */; };
+		0420497111E6F03D007E7EC9 /* SDL_clipboardevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */; };
 		043DD76F10FD8A0000DED673 /* SDL_alphamult.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76B10FD8A0000DED673 /* SDL_alphamult.c */; };
 		043DD77010FD8A0000DED673 /* SDL_alphamult.h in Headers */ = {isa = PBXBuildFile; fileRef = 043DD76C10FD8A0000DED673 /* SDL_alphamult.h */; };
 		043DD77110FD8A0000DED673 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */; };
 		043DD77210FD8A0000DED673 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 043DD76E10FD8A0000DED673 /* SDL_drawrect.c */; };
 		04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04461DED0EA76BA3006C462D /* SDL_haptic.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		044E5FB511E6069F0076F181 /* SDL_clipboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 044E5FB311E6069F0076F181 /* SDL_clipboard.h */; };
+		044E5FB611E6069F0076F181 /* SDL_input.h in Headers */ = {isa = PBXBuildFile; fileRef = 044E5FB411E6069F0076F181 /* SDL_input.h */; };
+		044E5FB811E606EB0076F181 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 044E5FB711E606EB0076F181 /* SDL_clipboard.c */; };
 		0463873F0F0B5B7D0041FD65 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387370F0B5B7D0041FD65 /* SDL_blendline.c */; };
 		046387400F0B5B7D0041FD65 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */; };
 		046387410F0B5B7D0041FD65 /* SDL_blendrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 046387390F0B5B7D0041FD65 /* SDL_blendrect.c */; };
@@ -308,11 +313,16 @@
 		0098A5621195B4D900343137 /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		0098A5641195B4D900343137 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		0098A5841195B5E200343137 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_clipboardevents_c.h; sourceTree = "<group>"; };
+		0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboardevents.c; sourceTree = "<group>"; };
 		043DD76B10FD8A0000DED673 /* SDL_alphamult.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_alphamult.c; sourceTree = "<group>"; };
 		043DD76C10FD8A0000DED673 /* SDL_alphamult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_alphamult.h; sourceTree = "<group>"; };
 		043DD76D10FD8A0000DED673 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
 		043DD76E10FD8A0000DED673 /* SDL_drawrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawrect.c; sourceTree = "<group>"; };
 		04461DED0EA76BA3006C462D /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_haptic.h; path = ../../include/SDL_haptic.h; sourceTree = SOURCE_ROOT; };
+		044E5FB311E6069F0076F181 /* SDL_clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_clipboard.h; path = ../../include/SDL_clipboard.h; sourceTree = SOURCE_ROOT; };
+		044E5FB411E6069F0076F181 /* SDL_input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_input.h; path = ../../include/SDL_input.h; sourceTree = SOURCE_ROOT; };
+		044E5FB711E606EB0076F181 /* SDL_clipboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboard.c; sourceTree = "<group>"; };
 		046387370F0B5B7D0041FD65 /* SDL_blendline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendline.c; sourceTree = "<group>"; };
 		046387380F0B5B7D0041FD65 /* SDL_blendpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendpoint.c; sourceTree = "<group>"; };
 		046387390F0B5B7D0041FD65 /* SDL_blendrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendrect.c; sourceTree = "<group>"; };
@@ -826,19 +836,23 @@
 		FD99B8BC0DD52E5C00FB1D6B /* Public Headers */ = {
 			isa = PBXGroup;
 			children = (
-				04F2AF531104ABC300D6DDF7 /* SDL_assert.h */,
-				04B2ECE61025CE4800F9BC5F /* SDL_atomic.h */,
 				FD99B8CC0DD52EB400FB1D6B /* begin_code.h */,
 				FD99B8CD0DD52EB400FB1D6B /* close_code.h */,
+				FD99B8F50DD52EB400FB1D6B /* SDL.h */,
+				04F2AF531104ABC300D6DDF7 /* SDL_assert.h */,
+				04B2ECE61025CE4800F9BC5F /* SDL_atomic.h */,
 				FD99B8CF0DD52EB400FB1D6B /* SDL_audio.h */,
+				044E5FB311E6069F0076F181 /* SDL_clipboard.h */,
 				FD99B8D10DD52EB400FB1D6B /* SDL_compat.h */,
-				04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */,
 				04B2ED061025CF9E00F9BC5F /* SDL_config.h */,
+				04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */,
 				FD99B8DA0DD52EB400FB1D6B /* SDL_copying.h */,
 				FD99B8DB0DD52EB400FB1D6B /* SDL_cpuinfo.h */,
+				FD99B8F60DD52EB400FB1D6B /* SDL_endian.h */,
 				FD99B8DC0DD52EB400FB1D6B /* SDL_error.h */,
 				FD99B8DD0DD52EB400FB1D6B /* SDL_events.h */,
 				04461DED0EA76BA3006C462D /* SDL_haptic.h */,
+				044E5FB411E6069F0076F181 /* SDL_input.h */,
 				FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */,
 				FD99B8DF0DD52EB400FB1D6B /* SDL_keyboard.h */,
 				FD99B8E00DD52EB400FB1D6B /* SDL_keysym.h */,
@@ -865,8 +879,6 @@
 				FD99B8F20DD52EB400FB1D6B /* SDL_types.h */,
 				FD99B8F30DD52EB400FB1D6B /* SDL_version.h */,
 				FD99B8F40DD52EB400FB1D6B /* SDL_video.h */,
-				FD99B8F50DD52EB400FB1D6B /* SDL.h */,
-				FD99B8F60DD52EB400FB1D6B /* SDL_endian.h */,
 			);
 			name = "Public Headers";
 			sourceTree = "<group>";
@@ -950,6 +962,8 @@
 				FD99B9900DD52EDC00FB1D6B /* scancodes_linux.h */,
 				FD99B9910DD52EDC00FB1D6B /* scancodes_win32.h */,
 				FD99B9920DD52EDC00FB1D6B /* scancodes_xfree86.h */,
+				0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */,
+				0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */,
 				FD99B9930DD52EDC00FB1D6B /* SDL_events.c */,
 				FD99B9940DD52EDC00FB1D6B /* SDL_events_c.h */,
 				FD99B9950DD52EDC00FB1D6B /* SDL_keyboard.c */,
@@ -1023,6 +1037,7 @@
 		FDA682420DF2374D00F98A1A /* video */ = {
 			isa = PBXGroup;
 			children = (
+				044E5FB711E606EB0076F181 /* SDL_clipboard.c */,
 				FD689F090E26E5D900F90B21 /* uikit */,
 				FDA685F40DF244C800F98A1A /* dummy */,
 				0495E6850E97408800152DFE /* SDL_glfuncs.h */,
@@ -1173,6 +1188,9 @@
 				043DD77010FD8A0000DED673 /* SDL_alphamult.h in Headers */,
 				04F2AF541104ABC300D6DDF7 /* SDL_assert.h in Headers */,
 				006E9888119552DD001DE610 /* SDL_rwopsbundlesupport.h in Headers */,
+				044E5FB511E6069F0076F181 /* SDL_clipboard.h in Headers */,
+				044E5FB611E6069F0076F181 /* SDL_input.h in Headers */,
+				0420497011E6F03D007E7EC9 /* SDL_clipboardevents_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1411,6 +1429,8 @@
 				56ED04E1118A8EE200A56AA6 /* SDL_power.c in Sources */,
 				56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */,
 				006E9889119552DD001DE610 /* SDL_rwopsbundlesupport.m in Sources */,
+				044E5FB811E606EB0076F181 /* SDL_clipboard.c in Sources */,
+				0420497111E6F03D007E7EC9 /* SDL_clipboardevents.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

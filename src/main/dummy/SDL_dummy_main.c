@@ -12,7 +12,10 @@ main(int argc, char *argv[])
 #else
 /* Nothing to do on this platform */
 int
-SDL_main_stub_symbol()
+SDL_main_stub_symbol(void);
+
+int
+SDL_main_stub_symbol(void)
 {
     return 0;
 }

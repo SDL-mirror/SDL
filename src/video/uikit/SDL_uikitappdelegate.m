@@ -42,11 +42,12 @@ int main(int argc, char **argv) {
 	
 	/* store arguments */
 	forward_argc = argc;
-	forward_argv = (char **)malloc(argc * sizeof(char *));
+	forward_argv = (char **)malloc((argc+1) * sizeof(char *));
 	for (i=0; i<argc; i++) {
 		forward_argv[i] = malloc( (strlen(argv[i])+1) * sizeof(char));
 		strcpy(forward_argv[i], argv[i]);
 	}
+	forward_argv[i] = NULL;
 
 	/* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
 	UIApplicationMain(argc, argv, NULL, @"SDLUIKitDelegate");

@@ -32,6 +32,7 @@
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
 #include "SDL_keysym.h"
+#include "SDL_video.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -55,25 +56,12 @@ typedef struct SDL_keysym
 /* Function prototypes */
 
 /**
- *  \brief Get the number of keyboard input devices available.
- *  
- *  \sa SDL_SelectKeyboard()
+ *  \brief Get the window which currently has keyboard focus.
  */
-extern DECLSPEC int SDLCALL SDL_GetNumKeyboards(void);
+extern DECLSPEC SDL_Window * SDLCALL SDL_GetKeyboardFocus(void);
 
 /**
- *  \brief Set the index of the currently selected keyboard.
- *  
- *  \return The index of the previously selected keyboard.
- *  
- *  \note You can query the currently selected keyboard by passing an index of -1.
- *  
- *  \sa SDL_GetNumKeyboards()
- */
-extern DECLSPEC int SDLCALL SDL_SelectKeyboard(int index);
-
-/**
- *  \brief Get a snapshot of the current state of the selected keyboard.
+ *  \brief Get a snapshot of the current state of the keyboard.
  *  
  *  \param numkeys if non-NULL, receives the length of the returned array.
  *  
@@ -90,20 +78,20 @@ extern DECLSPEC int SDLCALL SDL_SelectKeyboard(int index);
 extern DECLSPEC Uint8 *SDLCALL SDL_GetKeyboardState(int *numkeys);
 
 /**
- *  \brief Get the current key modifier state for the selected keyboard.
+ *  \brief Get the current key modifier state for the keyboard.
  */
 extern DECLSPEC SDLMod SDLCALL SDL_GetModState(void);
 
 /**
- *  \brief Set the current key modifier state for the selected keyboard.
+ *  \brief Set the current key modifier state for the keyboard.
  *  
  *  \note This does not change the keyboard state, only the key modifier flags.
  */
 extern DECLSPEC void SDLCALL SDL_SetModState(SDLMod modstate);
 
 /**
- *  \brief Get the key code corresponding to the given scancode according to the
- *         current keyboard layout.
+ *  \brief Get the key code corresponding to the given scancode according
+ *         to the current keyboard layout.
  *  
  *  See ::SDLKey for details.
  *  

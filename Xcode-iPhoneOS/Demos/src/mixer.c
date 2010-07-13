@@ -124,10 +124,9 @@ handleMouseButtonDown(SDL_Event * event)
 
     int x, y, mouseIndex, i, drumIndex;
 
-    mouseIndex = event->button.which;
+    mouseIndex = 0;
     drumIndex = -1;
 
-    SDL_SelectMouse(mouseIndex);
     SDL_GetMouseState(&x, &y);
     /* check if we hit any of the drum buttons */
     for (i = 0; i < NUM_DRUMS; i++) {
@@ -153,7 +152,7 @@ void
 handleMouseButtonUp(SDL_Event * event)
 {
     int i;
-    int mouseIndex = event->button.which;
+    int mouseIndex = 0;
     /* check if this should cause any of the buttons to become unpressed */
     for (i = 0; i < NUM_DRUMS; i++) {
         if (buttons[i].touchIndex == mouseIndex) {

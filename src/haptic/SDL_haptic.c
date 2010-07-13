@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_syshaptic.h"
+#include "SDL_haptic_c.h"
 #include "../joystick/SDL_joystick_c.h" /* For SDL_PrivateJoystickValid */
 
 

@@ -304,7 +304,7 @@ SDL_GetCurrentVideoDriver()
 }
 
 SDL_VideoDevice *
-SDL_GetVideoDevice()
+SDL_GetVideoDevice(void)
 {
     return _this;
 }
@@ -715,16 +715,6 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
     }
 
     return 0;
-}
-
-int
-SDL_SetDisplayMode(const SDL_DisplayMode * mode)
-{
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    return SDL_SetDisplayModeForDisplay(SDL_CurrentDisplay, mode);
 }
 
 int
@@ -2842,6 +2832,10 @@ SDL_VideoQuit(void)
     if (_this->displays) {
         SDL_free(_this->displays);
         _this->displays = NULL;
+    }
+    if (_this->clipboard_text) {
+        SDL_free(_this->clipboard_text);
+        _this->clipboard_text = NULL;
     }
     _this->free(_this);
     _this = NULL;
