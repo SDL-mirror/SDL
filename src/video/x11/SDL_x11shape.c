@@ -27,14 +27,18 @@
 #include "SDL_x11video.h"
 
 SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
-	SDL_WindowShaper* result = malloc(sizeof(SDL_WindowShaper));
-	result->window = window;
-	result->alphacutoff = 0;
-	result->usershownflag = 0;
-	result->driverdata = malloc(sizeof(SDL_ShapeData));
-	window->shaper = result;
-	int resized_properly = X11_ResizeWindowShape(window);
-	assert(resized_properly == 0);
+	SDL_WindowShaper* result = NULL;
+	if (SDL_X11_HAVE_XSHAPE) {  /* Make sure X server supports it. */
+		result = malloc(sizeof(SDL_WindowShaper));
+		result->window = window;
+		result->alphacutoff = 0;
+		result->usershownflag = 0;
+		result->driverdata = malloc(sizeof(SDL_ShapeData));
+		window->shaper = result;
+		int resized_properly = X11_ResizeWindowShape(window);
+		assert(resized_properly == 0);
+	}
+
 	return result;
 }
 
