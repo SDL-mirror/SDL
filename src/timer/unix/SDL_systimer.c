@@ -31,6 +31,7 @@
 #include <errno.h>
 
 #include "SDL_timer.h"
+#include "../SDL_systimer.h"
 #include "../SDL_timer_c.h"
 
 /* The clock_gettime provides monotonous time, so we should use it if
