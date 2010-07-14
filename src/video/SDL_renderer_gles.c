@@ -822,20 +822,25 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                maybe it'd be a good idea to keep a temp buffer around
                for this purpose rather than allocating it each time
              */
-            temp_buffer = SDL_malloc(rect->w * rect->h * bpp);
-            temp_ptr = temp_buffer;
-            for (i = 0; i < rect->h; i++) {
-                SDL_memcpy(temp_ptr, pixels, rect->w * bpp);
-                temp_ptr += rect->w * bpp;
-                pixels += pitch;
+            if( rect->x == 0 && rect->w * bpp == pitch ) {
+                temp_buffer = pixels; /* Updating whole texture, no need to reformat */
+            } else {
+                temp_buffer = SDL_malloc(rect->w * rect->h * bpp);
+                temp_ptr = temp_buffer;
+                for (i = 0; i < rect->h; i++) {
+                    SDL_memcpy(temp_ptr, pixels, rect->w * bpp);
+                    temp_ptr += rect->w * bpp;
+                    pixels += pitch;
+                }
             }
 
             data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
                                   rect->w, rect->h, texturedata->format,
                                   texturedata->formattype, temp_buffer);
 
-            SDL_free(temp_buffer);
-
+            if( temp_buffer != pixels ) {
+                SDL_free(temp_buffer);
+            }
         }
         SDL_ClearDirtyRects(&texturedata->dirty);
     }
