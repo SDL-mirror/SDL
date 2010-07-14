@@ -24,9 +24,6 @@
 #include "SDL_x11video.h"
 
 /*#define X11MODES_DEBUG*/
-#undef SDL_VIDEO_DRIVER_X11_XINERAMA
-#undef SDL_VIDEO_DRIVER_X11_XRANDR
-#undef SDL_VIDEO_DRIVER_X11_VIDMODE
 
 static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
