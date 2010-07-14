@@ -143,31 +143,47 @@ int main(int argc,char** argv) {
 		exit(-3);
 	}
 	
-	SDL_Color bnw_palette[2] = {{0,0,0,255},{255,255,255,255}};
-	SDL_Texture *eyes_texture = SDL_CreateTexture(SDL_PIXELFORMAT_INDEX1LSB,SDL_TEXTUREACCESS_STREAMING,eyes_width,eyes_height);
-	if(eyes_texture == NULL) {
+	int bpp = 0;
+	Uint32 r = 0,g = 0,b = 0,a = 0;
+	SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB4444,&bpp,&r,&g,&b,&a);
+	SDL_Surface *eyes = SDL_CreateRGBSurface(0,eyes_width,eyes_height,bpp,r,g,b,a);
+	if(eyes == NULL) {
 		SDL_DestroyRenderer(window);
 		SDL_DestroyWindow(window);
 		SDL_VideoQuit();
-		printf("Could not create eyes texture.\n");
+		printf("Could not create eyes surface.\n");
 		exit(-4);
 	}
-	SDL_SetTexturePalette(eyes_texture,bnw_palette,0,2);
 	
 	void *pixels = NULL;
 	int pitch = 0;
 	SDL_Rect rect = {0,0,eyes_width,eyes_height};
-	SDL_LockTexture(eyes_texture,&rect,1,&pixels,&pitch);
-	for(int row = 0;row<eyes_height;row++)
-		memcpy(pixels+pitch*row,eyes_bits+(eyes_width/8)*row,eyes_width/8);
-	SDL_UnlockTexture(eyes_texture);
-	
-	int bpp = 0;
-	Uint32 r = 0,g = 0,b = 0,a = 0;
+	if(SDL_MUSTLOCK(eyes))
+		SDL_LockSurface(eyes);
+	pixels = eyes->pixels;
+	pitch = eyes->pitch;
+	for(int y=0;y<eyes_height;y++)
+		for(int x=0;x<eyes_width;x++) {
+			Uint8 brightness = *(Uint8*)(eyes_bits+(eyes_width/8)*y+(x/8)) & (1 << (7 - x % 8)) ? 255 : 0;
+			*(Uint16*)(pixels+pitch*y+x*16/8) = SDL_MapRGBA(eyes->format,brightness,brightness,brightness,255);
+		}
+	if(SDL_MUSTLOCK(eyes))
+		SDL_UnlockSurface(eyes);
+	SDL_Texture *eyes_texture = SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ARGB4444,eyes);
+	if(eyes_texture == NULL) {
+		SDL_FreeSurface(eyes);
+		SDL_DestroyRenderer(window);
+		SDL_DestroyWindow(window);
+		SDL_VideoQuit();
+		printf("Could not create eyes texture.\n");
+		exit(-5);
+	}
+
 	SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB4444,&bpp,&r,&g,&b,&a);
 	SDL_Surface *mask = SDL_CreateRGBSurface(0,eyesmask_width,eyesmask_height,bpp,r,g,b,a);
 	if(mask == NULL) {
 		SDL_DestroyTexture(eyes_texture);
+		SDL_FreeSurface(eyes);
 		SDL_DestroyRenderer(window);
 		SDL_DestroyWindow(window);
 		SDL_VideoQuit();
@@ -178,6 +194,7 @@ int main(int argc,char** argv) {
 	if(SDL_MUSTLOCK(mask))
 		SDL_LockSurface(mask);
 	pixels = mask->pixels;
+	pitch = mask->pitch;
 	for(int y=0;y<eyesmask_height;y++)
 		for(int x=0;x<eyesmask_width;x++) {
 			Uint8 alpha = *(Uint8*)(eyesmask_bits+(eyesmask_width/8)*y+(x/8)) & (1 << (7 - x % 8)) ? 1 : 0;

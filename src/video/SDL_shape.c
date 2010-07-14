@@ -48,7 +48,7 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
 	int x = 0;
 	int y = 0;
-	Uint8 alpha = 0;
+	Uint8 r = 0,g = 0,b = 0,alpha = 0;
 	Uint8* pixel;
 	Uint32 bitmap_pixel;
 	if(SDL_MUSTLOCK(shape))
@@ -57,7 +57,7 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 		for(y = 0;y<shape->h;y++) {
 			pixel = shape->pixels + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
 			alpha = 0;
-			SDL_GetRGBA(*(Uint32*)pixel,shape->format,NULL,NULL,NULL,&alpha);
+			SDL_GetRGBA(*(Uint32*)pixel,shape->format,&r,&g,&b,&alpha);
 			Uint32 bitmap_pixel = y*shape->w + x;
 			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
 		}
