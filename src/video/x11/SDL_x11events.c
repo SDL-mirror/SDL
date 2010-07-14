@@ -292,51 +292,77 @@ X11_DispatchEvent(_THIS)
 
     case PropertyNotify:{
 #ifdef DEBUG_XEVENTS
+            unsigned char *propdata;
+            int status, real_format;
+            Atom real_type;
+            unsigned long items_read, items_left, i;
+
             char *name = XGetAtomName(display, xevent.xproperty.atom);
-            printf("PropertyNotify (atom = %s)\n", name ? name : "NULL");
             if (name) {
+                printf("PropertyNotify: %s\n", name);
                 XFree(name);
             }
-#endif
-            if (xevent.xproperty.atom == videodata->_NET_WM_STATE) {
-                unsigned char *propdata;
-                int status, real_format;
-                Atom real_type;
-                unsigned long items_read, items_left, i;
 
-#ifdef DEBUG_XEVENTS
-                printf("_NET_WM_STATE: {");
-#endif
-                status = XGetWindowProperty(display, data->xwindow, videodata->_NET_WM_STATE, 0L, 8192L, False, XA_ATOM, &real_type, &real_format, &items_read, &items_left, &propdata);
-                if (status == Success) {
-                    Atom *atoms = (Atom *)propdata;
+            status = XGetWindowProperty(display, data->xwindow, xevent.xproperty.atom, 0L, 8192L, False, AnyPropertyType, &real_type, &real_format, &items_read, &items_left, &propdata);
+            if (status == Success) {
+                if (real_type == XA_INTEGER) {
+                    int *values = (int *)propdata;
+
+                    printf("{");
                     for (i = 0; i < items_read; i++) {
-                        if (atoms[i] == videodata->_NET_WM_STATE_HIDDEN) {
-#ifdef DEBUG_XEVENTS
-                            printf(" _NET_WM_STATE_HIDDEN");
-#endif
+                        printf(" %d", values[i]);
+                    }
+                    printf(" }\n");
+                } else if (real_type == XA_CARDINAL) {
+                    if (real_format == 32) {
+                        Uint32 *values = (Uint32 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
                         }
-                        if (atoms[i] == videodata->_NET_WM_STATE_MAXIMIZED_HORZ) {
-#ifdef DEBUG_XEVENTS
-                            printf(" _NET_WM_STATE_MAXIMIZED_HORZ");
-#endif
+                        printf(" }\n");
+                    } else if (real_format == 16) {
+                        Uint16 *values = (Uint16 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
                         }
-                        if (atoms[i] == videodata->_NET_WM_STATE_MAXIMIZED_VERT) {
-#ifdef DEBUG_XEVENTS
-                            printf(" _NET_WM_STATE_MAXIMIZED_VERT");
-#endif
+                        printf(" }\n");
+                    } else if (real_format == 8) {
+                        Uint8 *values = (Uint8 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
                         }
-                        if (atoms[i] == videodata->_NET_WM_STATE_FULLSCREEN) {
-#ifdef DEBUG_XEVENTS
-                            printf(" _NET_WM_STATE_FULLSCREEN");
-#endif
+                        printf(" }\n");
+                    }
+                } else if (real_type == XA_STRING ||
+                           real_type == videodata->UTF8_STRING) {
+                    printf("{ \"%s\" }\n", propdata);
+                } else if (real_type == XA_ATOM) {
+                    Atom *atoms = (Atom *)propdata;
+
+                    printf("{");
+                    for (i = 0; i < items_read; i++) {
+                        char *name = XGetAtomName(display, atoms[i]);
+                        if (name) {
+                            printf(" %s", name);
+                            XFree(name);
                         }
                     }
+                    printf(" }\n");
+                } else {
+                    char *name = XGetAtomName(display, real_type);
+                    printf("Unknown type: %ld (%s)\n", real_type, name ? name : "UNKNOWN");
+                    if (name) {
+                        XFree(name);
+                    }
                 }
-#ifdef DEBUG_XEVENTS
-                printf(" }\n");
-#endif
             }
+#endif
         }
         break;
 
@@ -355,8 +381,7 @@ X11_DispatchEvent(_THIS)
                 req->requestor, req->target);
 #endif
 
-            sevent.xselection.type = SelectionNotify;
-            sevent.xselection.display = req->display;
+            sevent.xany.type = SelectionNotify;
             sevent.xselection.selection = req->selection;
             sevent.xselection.target = None;
             sevent.xselection.property = None;

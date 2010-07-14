@@ -682,8 +682,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XEvent e;
 
         e.xany.type = ClientMessage;
-        e.xclient.display = data->display;
-        e.xclient.window = w;
         e.xclient.message_type = _NET_WM_STATE;
         e.xclient.format = 32;
         e.xclient.data.l[0] = _NET_WM_STATE_ADD;
@@ -955,8 +953,6 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     XEvent e;
 
     e.xany.type = ClientMessage;
-    e.xclient.display = display;
-    e.xclient.window = data->xwindow;
     e.xclient.message_type = _NET_WM_STATE;
     e.xclient.format = 32;
     e.xclient.data.l[0] =
