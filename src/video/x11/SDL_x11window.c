@@ -42,6 +42,20 @@
 #define _NET_WM_STATE_ADD       1l
 #define _NET_WM_STATE_TOGGLE    2l
 
+static SDL_bool
+X11_WindowIsOldstyleFullscreen(SDL_Window * window)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_VideoData *videodata = (SDL_VideoData *) data->videodata;
+
+    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) && !videodata->net_wm) {
+        return SDL_TRUE;
+    } else {
+        return SDL_FALSE;
+    }
+}
+
 static void
 X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
 {
@@ -128,14 +142,10 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     }
 
     {
-        Atom _NET_WM_STATE =
-            XInternAtom(data->videodata->display, "_NET_WM_STATE", False);
-        Atom _NET_WM_STATE_MAXIMIZED_VERT =
-            XInternAtom(data->videodata->display,
-                        "_NET_WM_STATE_MAXIMIZED_VERT", False);
-        Atom _NET_WM_STATE_MAXIMIZED_HORZ =
-            XInternAtom(data->videodata->display,
-                        "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+        Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
+        Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
+        Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
+        Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
         Atom actualType;
         int actualFormat;
         unsigned long i, numItems, bytesAfter;
@@ -148,19 +158,21 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
                                &propertyValue) == Success) {
             Atom *atoms = (Atom *) propertyValue;
             int maximized = 0;
+            int fullscreen = 0;
 
             for (i = 0; i < numItems; ++i) {
                 if (atoms[i] == _NET_WM_STATE_MAXIMIZED_VERT) {
                     maximized |= 1;
                 } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_HORZ) {
                     maximized |= 2;
+                } else if ( atoms[i] == _NET_WM_STATE_FULLSCREEN) {
+                    fullscreen = 1;
                 }
-                /* Might also want to check the following properties:
-                   _NET_WM_STATE_ABOVE, _NET_WM_STATE_FULLSCREEN
-                 */
             }
             if (maximized == 3) {
                 window->flags |= SDL_WINDOW_MAXIMIZED;
+            }  else if (fullscreen == 1) {
+                window->flags |= SDL_WINDOW_FULLSCREEN;
             }
             XFree(propertyValue);
         }
@@ -179,11 +191,6 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
        window->flags |= SDL_WINDOW_RESIZABLE;
        } else {
        window->flags &= ~SDL_WINDOW_RESIZABLE;
-       }
-       if (style & WS_MAXIMIZE) {
-       window->flags |= SDL_WINDOW_MAXIMIZED;
-       } else {
-       window->flags &= ~SDL_WINDOW_MAXIMIZED;
        }
        if (style & WS_MINIMIZE) {
        window->flags |= SDL_WINDOW_MINIMIZED;
@@ -225,6 +232,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XSizeHints *sizehints;
     XWMHints *wmhints;
     XClassHint *classhints;
+    SDL_bool oldstyle_fullscreen;
+
+    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
+    if ((window->flags & SDL_WINDOW_FULLSCREEN) && !data->net_wm) {
+        oldstyle_fullscreen = SDL_TRUE;
+    } else {
+        oldstyle_fullscreen = SDL_FALSE;
+    }
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -265,7 +280,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         depth = displaydata->depth;
     }
 
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    if (oldstyle_fullscreen) {
         xattr.override_redirect = True;
     } else {
         xattr.override_redirect = False;
@@ -417,7 +432,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             }
 
             /* OK, we got a colormap, now fill it in as best as we can */
-
             colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
             if (NULL == colorcells) {
                 SDL_SetError("out of memory in X11_CreateWindow");
@@ -494,7 +508,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                             visual, AllocNone);
     }
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+    if (oldstyle_fullscreen
         || window->x == SDL_WINDOWPOS_CENTERED) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
@@ -503,7 +517,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     } else {
         x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+    if (oldstyle_fullscreen
         || window->y == SDL_WINDOWPOS_CENTERED) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
@@ -539,12 +553,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     sizehints = XAllocSizeHints();
     if (sizehints) {
         if (!(window->flags & SDL_WINDOW_RESIZABLE)
-            || (window->flags & SDL_WINDOW_FULLSCREEN)) {
+            || oldstyle_fullscreen) {
             sizehints->min_width = sizehints->max_width = window->w;
             sizehints->min_height = sizehints->max_height = window->h;
             sizehints->flags = PMaxSize | PMinSize;
         }
-        if (!(window->flags & SDL_WINDOW_FULLSCREEN)
+        if (!oldstyle_fullscreen
             && window->x != SDL_WINDOWPOS_UNDEFINED
             && window->y != SDL_WINDOWPOS_UNDEFINED) {
             sizehints->x = x;
@@ -555,7 +569,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(sizehints);
     }
 
-    if (window->flags & (SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN)) {
+    if ((window->flags & SDL_WINDOW_BORDERLESS) || oldstyle_fullscreen) {
         SDL_bool set;
         Atom WM_HINTS;
 
@@ -643,23 +657,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
     }
 
-    /* Tell KDE to keep fullscreen windows on top */
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        XEvent ev;
-
-        SDL_zero(ev);
-        ev.xclient.type = ClientMessage;
-        ev.xclient.window = RootWindow(data->display, displaydata->screen);
-        ev.xclient.message_type =
-            XInternAtom(data->display, "KWM_KEEP_ON_TOP", False);
-        ev.xclient.format = 32;
-        ev.xclient.data.l[0] = w;
-        ev.xclient.data.l[1] = CurrentTime;
-        XSendEvent(data->display,
-                   RootWindow(data->display, displaydata->screen), False,
-                   SubstructureRedirectMask, &ev);
-    }
-
     /* Set the input hints so we get keyboard input */
     wmhints = XAllocWMHints();
     if (wmhints) {
@@ -676,6 +673,26 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         classhints->res_class = data->classname;
         XSetClassHint(data->display, w, classhints);
         XFree(classhints);
+    }
+
+    /* FIXME: Why doesn't this work? */
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        Atom _NET_WM_STATE = data->_NET_WM_STATE;
+        Atom _NET_WM_STATE_FULLSCREEN = data->_NET_WM_STATE_FULLSCREEN;
+        XEvent e;
+
+        e.xany.type = ClientMessage;
+        e.xclient.display = data->display;
+        e.xclient.window = w;
+        e.xclient.message_type = _NET_WM_STATE;
+        e.xclient.format = 32;
+        e.xclient.data.l[0] = _NET_WM_STATE_ADD;
+        e.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+        e.xclient.data.l[2] = 0l;
+
+        XSendEvent(data->display,
+                   RootWindow(data->display, displaydata->screen), 0,
+                   SubstructureNotifyMask | SubstructureRedirectMask, &e);
     }
 
     /* Allow the window to be deleted by the window manager */
@@ -716,12 +733,42 @@ X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 {
     Window w = (Window) data;
 
-    /* FIXME: Query the title from the existing window */
+    window->title = X11_GetWindowTitle(_this, w);
 
     if (SetupWindowData(_this, window, w, SDL_FALSE) < 0) {
         return -1;
     }
     return 0;
+}
+
+char *
+X11_GetWindowTitle(_THIS, Window xwindow)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    Display *display = data->display;
+    int status, real_format;
+    Atom real_type;
+    unsigned long items_read, items_left;
+    unsigned char *propdata;
+    char *title = NULL;
+
+    status = XGetWindowProperty(display, xwindow, data->_NET_WM_NAME,
+                0L, 8192L, False, data->UTF8_STRING, &real_type, &real_format,
+                &items_read, &items_left, &propdata);
+    if (status == Success) {
+        title = SDL_strdup(SDL_static_cast(char*, propdata));
+        XFree(propdata);
+    } else {
+        status = XGetWindowProperty(display, xwindow, XA_WM_NAME,
+                    0L, 8192L, False, XA_STRING, &real_type, &real_format,
+                    &items_read, &items_left, &propdata);
+        if (status == Success) {
+            title = SDL_iconv_string("UTF-8", "", SDL_static_cast(char*, propdata), items_read+1);
+        } else {
+            title = SDL_strdup("");
+        }
+    }
+    return title;
 }
 
 void
@@ -735,14 +782,8 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
     const char *icon = NULL;
 
 #ifdef X_HAVE_UTF8_STRING
-    Atom _NET_WM_NAME = 0;
-    Atom _NET_WM_ICON_NAME = 0;
-
-    /* Look up some useful Atoms */
-    if (SDL_X11_HAVE_UTF8) {
-        _NET_WM_NAME = XInternAtom(display, "_NET_WM_NAME", False);
-        _NET_WM_ICON_NAME = XInternAtom(display, "_NET_WM_ICON_NAME", False);
-    }
+    Atom _NET_WM_NAME = data->videodata->_NET_WM_NAME;
+    Atom _NET_WM_ICON_NAME = data->videodata->_NET_WM_ICON_NAME;
 #endif
 
     if (title != NULL) {
@@ -803,7 +844,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
-    Atom _NET_WM_ICON = XInternAtom(display, "_NET_WM_ICON", False);
+    Atom _NET_WM_ICON = data->videodata->_NET_WM_ICON;
 
     if (icon) {
         SDL_PixelFormat format;
@@ -842,16 +883,20 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    SDL_bool oldstyle_fullscreen;
     int x, y;
 
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
+    oldstyle_fullscreen = X11_WindowIsOldstyleFullscreen(window);
+
+    if (oldstyle_fullscreen
         || window->x == SDL_WINDOWPOS_CENTERED) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
     } else {
         x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
+    if (oldstyle_fullscreen
         || window->y == SDL_WINDOWPOS_CENTERED) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
@@ -904,15 +949,14 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) window->display->driverdata;
     Display *display = data->videodata->display;
-    Atom _NET_WM_STATE = XInternAtom(display, "_NET_WM_STATE", False);
-    Atom _NET_WM_STATE_MAXIMIZED_VERT =
-        XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_VERT", False);
-    Atom _NET_WM_STATE_MAXIMIZED_HORZ =
-        XInternAtom(display, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
+    Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
     XEvent e;
 
     e.xany.type = ClientMessage;
-    e.xany.window = data->xwindow;
+    e.xclient.display = display;
+    e.xclient.window = data->xwindow;
     e.xclient.message_type = _NET_WM_STATE;
     e.xclient.format = 32;
     e.xclient.data.l[0] =
@@ -920,7 +964,6 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     e.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
     e.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
     e.xclient.data.l[3] = 0l;
-    e.xclient.data.l[4] = 0l;
 
     XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                SubstructureNotifyMask | SubstructureRedirectMask, &e);
@@ -935,7 +978,12 @@ X11_MaximizeWindow(_THIS, SDL_Window * window)
 void
 X11_MinimizeWindow(_THIS, SDL_Window * window)
 {
-    X11_HideWindow(_this, window);
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) window->display->driverdata;
+    Display *display = data->videodata->display;
+ 
+    XIconifyWindow(display, data->xwindow, displaydata->screen);
 }
 
 void
@@ -950,8 +998,12 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    SDL_bool oldstyle_fullscreen;
 
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
+    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
+    oldstyle_fullscreen = X11_WindowIsOldstyleFullscreen(window);
+
+    if (((window->flags & SDL_WINDOW_INPUT_GRABBED) || oldstyle_fullscreen)
         && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
         /* Try to grab the mouse */
         for (;;) {

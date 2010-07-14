@@ -242,6 +242,43 @@ VideoBootStrap X11_bootstrap = {
 };
 
 
+static void
+X11_CheckWindowManager(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    Display *display = data->display;
+    Atom _NET_SUPPORTING_WM_CHECK;
+    int status, real_format;
+    Atom real_type;
+    unsigned long items_read, items_left;
+    unsigned char *propdata;
+    Window wm_window = 0;
+#ifdef DEBUG_WINDOW_MANAGER
+    char *wm_name;
+#endif
+
+    _NET_SUPPORTING_WM_CHECK = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
+    status = XGetWindowProperty(display, DefaultRootWindow(display), _NET_SUPPORTING_WM_CHECK, 0L, 1L, False, XA_WINDOW, &real_type, &real_format, &items_read, &items_left, &propdata);
+    if (status == Success && items_read) {
+        wm_window = ((Window*)propdata)[0];
+    }
+    XFree(propdata);
+
+    if (!wm_window) {
+#ifdef DEBUG_WINDOW_MANAGER
+        printf("Couldn't get _NET_SUPPORTING_WM_CHECK property\n");
+#endif
+        return;
+    }
+    data->net_wm = SDL_TRUE;
+
+#ifdef DEBUG_WINDOW_MANAGER
+    wm_name = X11_GetWindowTitle(_this, wm_window);
+    printf("Window manager: %s\n", wm_name);
+    SDL_free(wm_name);
+#endif
+}
+
 int
 X11_VideoInit(_THIS)
 {
@@ -259,8 +296,20 @@ X11_VideoInit(_THIS)
 #endif
 
     /* Look up some useful Atoms */
-    data->WM_DELETE_WINDOW =
-        XInternAtom(data->display, "WM_DELETE_WINDOW", False);
+#define GET_ATOM(X) data->X = XInternAtom(data->display, #X, False)
+    GET_ATOM(WM_DELETE_WINDOW);
+    GET_ATOM(_NET_WM_STATE);
+    GET_ATOM(_NET_WM_STATE_HIDDEN);
+    GET_ATOM(_NET_WM_STATE_MAXIMIZED_VERT);
+    GET_ATOM(_NET_WM_STATE_MAXIMIZED_HORZ);
+    GET_ATOM(_NET_WM_STATE_FULLSCREEN);
+    GET_ATOM(_NET_WM_NAME);
+    GET_ATOM(_NET_WM_ICON_NAME);
+    GET_ATOM(_NET_WM_ICON);
+    GET_ATOM(UTF8_STRING);
+
+    /* Detect the window manager */
+    X11_CheckWindowManager(_this);
 
     if (X11_InitModes(_this) < 0) {
         return -1;

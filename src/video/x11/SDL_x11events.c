@@ -34,18 +34,19 @@
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
 
-/*#define DEBUG_XEVENTS*/
+#define DEBUG_XEVENTS
 
 static void
 X11_DispatchEvent(_THIS)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Display *display = videodata->display;
     SDL_WindowData *data;
     XEvent xevent;
     int i;
 
     SDL_zero(xevent);           /* valgrind fix. --ryan. */
-    XNextEvent(videodata->display, &xevent);
+    XNextEvent(display, &xevent);
 
     /* filter events catchs XIM events and sends them to the correct
        handler */
@@ -80,6 +81,7 @@ X11_DispatchEvent(_THIS)
     if (!data) {
         return;
     }
+
 #if 0
     printf("type = %d display = %d window = %d\n",
            xevent.type, xevent.xany.display, xevent.xany.window);
@@ -182,9 +184,8 @@ X11_DispatchEvent(_THIS)
 #if 0
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
-                XDisplayKeycodes(videodata->display, &min_keycode,
-                                 &max_keycode);
-                keysym = XKeycodeToKeysym(videodata->display, keycode, 0);
+                XDisplayKeycodes(display, &min_keycode, &max_keycode);
+                keysym = XKeycodeToKeysym(display, keycode, 0);
                 fprintf(stderr,
                         "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%X (%s).\n",
                         keycode, keycode - min_keycode, keysym,
@@ -289,9 +290,58 @@ X11_DispatchEvent(_THIS)
         }
         break;
 
+    case PropertyNotify:{
+#ifdef DEBUG_XEVENTS
+            char *name = XGetAtomName(display, xevent.xproperty.atom);
+            printf("PropertyNotify (atom = %s)\n", name ? name : "NULL");
+            if (name) {
+                XFree(name);
+            }
+#endif
+            if (xevent.xproperty.atom == videodata->_NET_WM_STATE) {
+                unsigned char *propdata;
+                int status, real_format;
+                Atom real_type;
+                unsigned long items_read, items_left, i;
+
+#ifdef DEBUG_XEVENTS
+                printf("_NET_WM_STATE: {");
+#endif
+                status = XGetWindowProperty(display, data->xwindow, videodata->_NET_WM_STATE, 0L, 8192L, False, XA_ATOM, &real_type, &real_format, &items_read, &items_left, &propdata);
+                if (status == Success) {
+                    Atom *atoms = (Atom *)propdata;
+                    for (i = 0; i < items_read; i++) {
+                        if (atoms[i] == videodata->_NET_WM_STATE_HIDDEN) {
+#ifdef DEBUG_XEVENTS
+                            printf(" _NET_WM_STATE_HIDDEN");
+#endif
+                        }
+                        if (atoms[i] == videodata->_NET_WM_STATE_MAXIMIZED_HORZ) {
+#ifdef DEBUG_XEVENTS
+                            printf(" _NET_WM_STATE_MAXIMIZED_HORZ");
+#endif
+                        }
+                        if (atoms[i] == videodata->_NET_WM_STATE_MAXIMIZED_VERT) {
+#ifdef DEBUG_XEVENTS
+                            printf(" _NET_WM_STATE_MAXIMIZED_VERT");
+#endif
+                        }
+                        if (atoms[i] == videodata->_NET_WM_STATE_FULLSCREEN) {
+#ifdef DEBUG_XEVENTS
+                            printf(" _NET_WM_STATE_FULLSCREEN");
+#endif
+                        }
+                    }
+                }
+#ifdef DEBUG_XEVENTS
+                printf(" }\n");
+#endif
+            }
+        }
+        break;
+
     /* Copy the selection from XA_CUT_BUFFER0 to the requested property */
     case SelectionRequest: {
-            Display *display = videodata->display;
             XSelectionRequestEvent *req;
             XEvent sevent;
             int seln_format;
