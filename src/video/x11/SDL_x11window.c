@@ -224,6 +224,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) window->display->driverdata;
+    Display *display = data->display;
+    int screen = displaydata->screen;
     Visual *visual;
     int depth;
     XSetWindowAttributes xattr;
@@ -233,6 +235,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XWMHints *wmhints;
     XClassHint *classhints;
     SDL_bool oldstyle_fullscreen;
+    Atom _NET_WM_WINDOW_TYPE;
+    Atom _NET_WM_WINDOW_TYPE_NORMAL;
 
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
     if ((window->flags & SDL_WINDOW_FULLSCREEN) && !data->net_wm) {
@@ -253,7 +257,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-        vinfo = X11_GL_GetVisual(_this, data->display, displaydata->screen);
+        vinfo = X11_GL_GetVisual(_this, display, screen);
         if (!vinfo) {
             return -1;
         }
@@ -266,7 +270,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-        vinfo = X11_GLES_GetVisual(_this, data->display, displaydata->screen);
+        vinfo = X11_GLES_GetVisual(_this, display, screen);
         if (!vinfo) {
             return -1;
         }
@@ -305,15 +309,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
         /* Is the colormap we need already registered in SDL? */
         if ((colormap =
-            X11_LookupColormap(data->display,
-                               displaydata->screen, visual->visualid))) {
+            X11_LookupColormap(display, screen, visual->visualid))) {
             xattr.colormap = colormap;
 /*             printf("found existing colormap\n"); */
         } else {
             /* The colormap is not known to SDL so we will create it */
-            colormap = XCreateColormap(data->display,
-                                       RootWindow(data->display,
-                                                  displaydata->screen),
+            colormap = XCreateColormap(display, RootWindow(display, screen),
                                        visual, AllocAll);
 /*             printf("colormap = %x\n", colormap); */
 
@@ -392,11 +393,10 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             }
 
 /*             status = */
-/*                 XStoreColors(data->display, colormap, colorcells, ncolors); */
+/*                 XStoreColors(display, colormap, colorcells, ncolors); */
 
             xattr.colormap = colormap;
-            X11_TrackColormap(data->display, displaydata->screen,
-                              colormap, visual, NULL);
+            X11_TrackColormap(display, screen, colormap, visual, NULL);
 
             SDL_free(colorcells);
         }
@@ -412,15 +412,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
         /* Is the colormap we need already registered in SDL? */
         if ((colormap =
-             X11_LookupColormap(data->display,
-                                displaydata->screen, visual->visualid))) {
+             X11_LookupColormap(display, screen, visual->visualid))) {
             xattr.colormap = colormap;
 /*             printf("found existing colormap\n"); */
         } else {
             /* The colormap is not known to SDL so we will create it */
-            colormap = XCreateColormap(data->display,
-                                       RootWindow(data->display,
-                                                  displaydata->screen),
+            colormap = XCreateColormap(display, RootWindow(display, screen),
                                        visual, AllocAll);
 /*             printf("colormap = %x\n", colormap); */
 
@@ -493,18 +490,16 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             }
 
             status =
-                XStoreColors(data->display, colormap, colorcells, ncolors);
+                XStoreColors(display, colormap, colorcells, ncolors);
 
             xattr.colormap = colormap;
-            X11_TrackColormap(data->display, displaydata->screen,
-                              colormap, visual, colorcells);
+            X11_TrackColormap(display, screen, colormap, visual, colorcells);
 
             SDL_free(colorcells);
         }
     } else {
         xattr.colormap =
-            XCreateColormap(data->display,
-                            RootWindow(data->display, displaydata->screen),
+            XCreateColormap(display, RootWindow(display, screen),
                             visual, AllocNone);
     }
 
@@ -527,8 +522,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         y = window->y;
     }
 
-    w = XCreateWindow(data->display,
-                      RootWindow(data->display, displaydata->screen), x, y,
+    w = XCreateWindow(display, RootWindow(display, screen), x, y,
                       window->w, window->h, 0, depth, InputOutput, visual,
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
@@ -565,7 +559,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             sizehints->y = y;
             sizehints->flags |= USPosition;
         }
-        XSetWMNormalHints(data->display, w, sizehints);
+        XSetWMNormalHints(display, w, sizehints);
         XFree(sizehints);
     }
 
@@ -577,7 +571,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         set = SDL_FALSE;
 
         /* First try to set MWM hints */
-        WM_HINTS = XInternAtom(data->display, "_MOTIF_WM_HINTS", True);
+        WM_HINTS = XInternAtom(display, "_MOTIF_WM_HINTS", True);
         if (WM_HINTS != None) {
             /* Hints used by Motif compliant window managers */
             struct
@@ -590,40 +584,36 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             } MWMHints = {
             (1L << 1), 0, 0, 0, 0};
 
-            XChangeProperty(data->display, w, WM_HINTS, WM_HINTS, 32,
+            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
                             PropModeReplace, (unsigned char *) &MWMHints,
-                            sizeof(MWMHints) / sizeof(long));
+                            sizeof(MWMHints) / 4);
             set = SDL_TRUE;
         }
         /* Now try to set KWM hints */
-        WM_HINTS = XInternAtom(data->display, "KWM_WIN_DECORATION", True);
+        WM_HINTS = XInternAtom(display, "KWM_WIN_DECORATION", True);
         if (WM_HINTS != None) {
             long KWMHints = 0;
 
-            XChangeProperty(data->display, w,
-                            WM_HINTS, WM_HINTS, 32,
+            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
                             PropModeReplace,
                             (unsigned char *) &KWMHints,
-                            sizeof(KWMHints) / sizeof(long));
+                            sizeof(KWMHints) / 4);
             set = SDL_TRUE;
         }
         /* Now try to set GNOME hints */
-        WM_HINTS = XInternAtom(data->display, "_WIN_HINTS", True);
+        WM_HINTS = XInternAtom(display, "_WIN_HINTS", True);
         if (WM_HINTS != None) {
             long GNOMEHints = 0;
 
-            XChangeProperty(data->display, w,
-                            WM_HINTS, WM_HINTS, 32,
+            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
                             PropModeReplace,
                             (unsigned char *) &GNOMEHints,
-                            sizeof(GNOMEHints) / sizeof(long));
+                            sizeof(GNOMEHints) / 4);
             set = SDL_TRUE;
         }
         /* Finally set the transient hints if necessary */
         if (!set) {
-            XSetTransientForHint(data->display, w,
-                                 RootWindow(data->display,
-                                            displaydata->screen));
+            XSetTransientForHint(display, w, RootWindow(display, screen));
         }
     } else {
         SDL_bool set;
@@ -633,27 +623,27 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         set = SDL_FALSE;
 
         /* First try to unset MWM hints */
-        WM_HINTS = XInternAtom(data->display, "_MOTIF_WM_HINTS", True);
+        WM_HINTS = XInternAtom(display, "_MOTIF_WM_HINTS", True);
         if (WM_HINTS != None) {
-            XDeleteProperty(data->display, w, WM_HINTS);
+            XDeleteProperty(display, w, WM_HINTS);
             set = SDL_TRUE;
         }
         /* Now try to unset KWM hints */
-        WM_HINTS = XInternAtom(data->display, "KWM_WIN_DECORATION", True);
+        WM_HINTS = XInternAtom(display, "KWM_WIN_DECORATION", True);
         if (WM_HINTS != None) {
-            XDeleteProperty(data->display, w, WM_HINTS);
+            XDeleteProperty(display, w, WM_HINTS);
             set = SDL_TRUE;
         }
         /* Now try to unset GNOME hints */
-        WM_HINTS = XInternAtom(data->display, "_WIN_HINTS", True);
+        WM_HINTS = XInternAtom(display, "_WIN_HINTS", True);
         if (WM_HINTS != None) {
-            XDeleteProperty(data->display, w, WM_HINTS);
+            XDeleteProperty(display, w, WM_HINTS);
             set = SDL_TRUE;
         }
         /* Finally unset the transient hints if necessary */
         if (!set) {
             /* NOTE: Does this work? */
-            XSetTransientForHint(data->display, w, None);
+            XSetTransientForHint(display, w, None);
         }
     }
 
@@ -662,7 +652,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (wmhints) {
         wmhints->input = True;
         wmhints->flags = InputHint;
-        XSetWMHints(data->display, w, wmhints);
+        XSetWMHints(display, w, wmhints);
         XFree(wmhints);
     }
 
@@ -671,7 +661,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (classhints != NULL) {
         classhints->res_name = data->classname;
         classhints->res_class = data->classname;
-        XSetClassHint(data->display, w, classhints);
+        XSetClassHint(display, w, classhints);
         XFree(classhints);
     }
 
@@ -688,16 +678,22 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         e.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
         e.xclient.data.l[2] = 0l;
 
-        XSendEvent(data->display,
-                   RootWindow(data->display, displaydata->screen), 0,
+        XSendEvent(display, RootWindow(display, screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     }
 
+    /* Let the window manager know we're a "normal" window */
+    _NET_WM_WINDOW_TYPE = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
+    _NET_WM_WINDOW_TYPE_NORMAL = XInternAtom(display, "_NET_WM_WINDOW_TYPE_NORMAL", False);
+    XChangeProperty(display, w, _NET_WM_WINDOW_TYPE, XA_ATOM, 32,
+                    PropModeReplace,
+                    (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
+
     /* Allow the window to be deleted by the window manager */
-    XSetWMProtocols(data->display, w, &data->WM_DELETE_WINDOW, 1);
+    XSetWMProtocols(display, w, &data->WM_DELETE_WINDOW, 1);
 
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
-        XDestroyWindow(data->display, w);
+        XDestroyWindow(display, w);
         return -1;
     }
 #ifdef X_HAVE_UTF8_STRING
@@ -705,7 +701,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         Uint32 fevent = 0;
         pXGetICValues(((SDL_WindowData *) window->driverdata)->ic,
                       XNFilterEvents, &fevent, NULL);
-        XSelectInput(data->display, w,
+        XSelectInput(display, w,
                      (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
                       ExposureMask | ButtonPressMask | ButtonReleaseMask |
                       PointerMotionMask | KeyPressMask | KeyReleaseMask |
@@ -714,7 +710,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 #else
     {
-        XSelectInput(data->display, w,
+        XSelectInput(display, w,
                      (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
                       ExposureMask | ButtonPressMask | ButtonReleaseMask |
                       PointerMotionMask | KeyPressMask | KeyReleaseMask |
