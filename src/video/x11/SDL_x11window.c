@@ -43,10 +43,9 @@
 #define _NET_WM_STATE_TOGGLE    2l
 
 static SDL_bool
-X11_WindowIsOldstyleFullscreen(SDL_Window * window)
+X11_IsWindowOldFullscreen(_THIS, SDL_Window * window)
 {
-    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    SDL_VideoData *videodata = (SDL_VideoData *) data->videodata;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
     if ((window->flags & SDL_WINDOW_FULLSCREEN) && !videodata->net_wm) {
@@ -54,6 +53,37 @@ X11_WindowIsOldstyleFullscreen(SDL_Window * window)
     } else {
         return SDL_FALSE;
     }
+}
+
+static SDL_bool
+X11_IsWindowMapped(_THIS, SDL_Window * window)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    XWindowAttributes attr;
+
+    XGetWindowAttributes(videodata->display, data->xwindow, &attr);
+    if (attr.map_state != IsUnmapped) {
+        return SDL_TRUE;
+    } else {
+        return SDL_FALSE;
+    }
+}
+
+static int
+X11_GetWMStateProperty(_THIS, SDL_Window * window, Atom atoms[3])
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    int count = 0;
+
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        atoms[count++] = data->_NET_WM_STATE_FULLSCREEN;
+    }
+    if (window->flags & SDL_WINDOW_MAXIMIZED) {
+        atoms[count++] = data->_NET_WM_STATE_MAXIMIZED_VERT;
+        atoms[count++] = data->_NET_WM_STATE_MAXIMIZED_HORZ;
+    }
+    return count;
 }
 
 static void
@@ -237,13 +267,11 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     SDL_bool oldstyle_fullscreen;
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
+    int wmstate_count;
+    Atom wmstate_atoms[3];
 
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) && !data->net_wm) {
-        oldstyle_fullscreen = SDL_TRUE;
-    } else {
-        oldstyle_fullscreen = SDL_FALSE;
-    }
+    oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -665,21 +693,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(classhints);
     }
 
-    /* FIXME: Why doesn't this work? */
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        Atom _NET_WM_STATE = data->_NET_WM_STATE;
-        Atom _NET_WM_STATE_FULLSCREEN = data->_NET_WM_STATE_FULLSCREEN;
-        XEvent e;
-
-        e.xany.type = ClientMessage;
-        e.xclient.message_type = _NET_WM_STATE;
-        e.xclient.format = 32;
-        e.xclient.data.l[0] = _NET_WM_STATE_ADD;
-        e.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
-        e.xclient.data.l[2] = 0l;
-
-        XSendEvent(display, RootWindow(display, screen), 0,
-                   SubstructureNotifyMask | SubstructureRedirectMask, &e);
+    /* Set the window manager state */
+    wmstate_count = X11_GetWMStateProperty(_this, window, wmstate_atoms);
+    if (wmstate_count > 0) {
+        XChangeProperty(display, w, data->_NET_WM_STATE, XA_ATOM, 32,
+                        PropModeReplace,
+                        (unsigned char *)wmstate_atoms, wmstate_count);
+    } else {
+        XDeleteProperty(display, w, data->_NET_WM_STATE);
     }
 
     /* Let the window manager know we're a "normal" window */
@@ -881,7 +902,7 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     int x, y;
 
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
-    oldstyle_fullscreen = X11_WindowIsOldstyleFullscreen(window);
+    oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
     if (oldstyle_fullscreen
         || window->x == SDL_WINDOWPOS_CENTERED) {
@@ -946,19 +967,41 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
-    XEvent e;
+    Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
 
-    e.xany.type = ClientMessage;
-    e.xclient.message_type = _NET_WM_STATE;
-    e.xclient.format = 32;
-    e.xclient.data.l[0] =
-        maximized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
-    e.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
-    e.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
-    e.xclient.data.l[3] = 0l;
+    if (X11_IsWindowMapped(_this, window)) {
+        XEvent e;
 
-    XSendEvent(display, RootWindow(display, displaydata->screen), 0,
-               SubstructureNotifyMask | SubstructureRedirectMask, &e);
+        e.xany.type = ClientMessage;
+        e.xclient.message_type = _NET_WM_STATE;
+        e.xclient.format = 32;
+        e.xclient.window = data->xwindow;
+        e.xclient.data.l[0] =
+            maximized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+        e.xclient.data.l[1] = _NET_WM_STATE_MAXIMIZED_VERT;
+        e.xclient.data.l[2] = _NET_WM_STATE_MAXIMIZED_HORZ;
+        e.xclient.data.l[3] = 0l;
+
+        XSendEvent(display, RootWindow(display, displaydata->screen), 0,
+                   SubstructureNotifyMask | SubstructureRedirectMask, &e);
+    } else {
+        int count = 0;
+        Atom atoms[3];
+
+        if (window->flags & SDL_WINDOW_FULLSCREEN) {
+            atoms[count++] = _NET_WM_STATE_FULLSCREEN;
+        }
+        if (maximized) {
+            atoms[count++] = _NET_WM_STATE_MAXIMIZED_VERT;
+            atoms[count++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+        }
+        if (count > 0) {
+            XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
+                            PropModeReplace, (unsigned char *)atoms, count);
+        } else {
+            XDeleteProperty(display, data->xwindow, _NET_WM_STATE);
+        }
+    }
 }
 
 void
@@ -993,7 +1036,7 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
     SDL_bool oldstyle_fullscreen;
 
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
-    oldstyle_fullscreen = X11_WindowIsOldstyleFullscreen(window);
+    oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
     if (((window->flags & SDL_WINDOW_INPUT_GRABBED) || oldstyle_fullscreen)
         && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
