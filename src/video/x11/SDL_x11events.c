@@ -34,7 +34,7 @@
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
 
-#define DEBUG_XEVENTS
+/*#define DEBUG_XEVENTS*/
 
 static void
 X11_DispatchEvent(_THIS)
