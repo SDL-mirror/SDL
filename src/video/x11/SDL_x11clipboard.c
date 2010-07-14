@@ -28,7 +28,7 @@
 
 
 /* If you don't support UTF-8, you might use XA_STRING here */
-#if 1
+#ifdef X_HAVE_UTF8_STRING
 #define TEXT_FORMAT XInternAtom(display, "UTF8_STRING", False)
 #else
 #define TEXT_FORMAT XA_STRING
