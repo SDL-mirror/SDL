@@ -972,6 +972,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
 
+        SDL_zero(e);
         e.xany.type = ClientMessage;
         e.xclient.message_type = _NET_WM_STATE;
         e.xclient.format = 32;

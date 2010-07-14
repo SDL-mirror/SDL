@@ -381,6 +381,7 @@ X11_DispatchEvent(_THIS)
                 req->requestor, req->target);
 #endif
 
+            SDL_zero(sevent);
             sevent.xany.type = SelectionNotify;
             sevent.xselection.selection = req->selection;
             sevent.xselection.target = None;
