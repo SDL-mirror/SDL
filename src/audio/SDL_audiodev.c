@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h> /* For close() */
 
 #include "SDL_stdinc.h"
 #include "SDL_audiodev_c.h"
