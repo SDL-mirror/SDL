@@ -1077,6 +1077,19 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 /* Ctrl-G toggle grab */
             }
             break;
+        case SDLK_m:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-M maximize */
+                /* FIXME: Which window has focus for this keyboard? */
+                for (i = 0; i < state->num_windows; ++i) {
+                    if (SDL_GetWindowFlags(state->windows[i]) & SDL_WINDOW_MAXIMIZED) {
+                        SDL_RestoreWindow(state->windows[i]);
+                    } else {
+                        SDL_MaximizeWindow(state->windows[i]);
+                    }
+                }
+            }
+            break;
         case SDLK_z:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-Z minimize */
