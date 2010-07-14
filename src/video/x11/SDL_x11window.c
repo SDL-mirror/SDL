@@ -513,9 +513,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     } else {
         y = window->y;
     }
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    xattr.background_pixel = 0xFF000000;
-#endif
 
     w = XCreateWindow(data->display,
                       RootWindow(data->display, displaydata->screen), x, y,
@@ -526,6 +523,10 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         SDL_SetError("Couldn't create window");
         return -1;
     }
+/*#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    //XSetWindowBackground(data->display, w, 0xFF000000);
+    //XSetWindowBackgroundPixmap(data->display, w, ParentRelative);
+#endif*/
 #if SDL_VIDEO_DRIVER_PANDORA
     /* Create the GLES window surface */
     _this->gles_data->egl_surface =

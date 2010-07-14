@@ -49,7 +49,7 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
             return 0;
         }
     }
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+/*#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     depth = 32;
     long vinfo_mask;
     XVisualInfo vinfo_templ;
@@ -64,7 +64,7 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
         XFree(vi);
         return 0;
     }
-#endif
+#endif*/
     depth = DefaultDepth(display, screen);
     if ((X11_UseDirectColorVisuals() &&
          XMatchVisualInfo(display, screen, depth, DirectColor, vinfo)) ||

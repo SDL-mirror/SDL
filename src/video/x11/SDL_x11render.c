@@ -123,7 +123,8 @@ typedef struct
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     Picture picture;
     XRenderPictFormat* picture_fmt;
-    SDL_bool use_xrender;
+    int blend_op;
+//    SDL_bool use_xrender;
 #endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
@@ -243,39 +244,46 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     int event_basep, error_basep;
-    if(XRenderQueryExtension(data->display, &event_basep, &error_basep) == True) {
+    if(XRenderQueryExtension(data->display,
+                             &event_basep,
+                             &error_basep) == True) {
         data->use_xrender = SDL_TRUE;
-        data->xwindow_pict_fmt = XRenderFindStandardFormat(data->display, PictStandardARGB32);
-        if(!data->xwindow_pict_fmt) {
-            data->use_xrender = SDL_FALSE;
-            goto fallback;
-        }
-        data->xwindow_pict = XRenderCreatePicture(data->display, data->xwindow, data->xwindow_pict_fmt,
+        data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display,
+                                                         data->visual);
+        data->xwindow_pict = XRenderCreatePicture(data->display,
+                                                  data->xwindow,
+                                                  data->xwindow_pict_fmt,
                                                   0, NULL);
-        if(!data->xwindow_pict) {
-            data->use_xrender = SDL_FALSE;
-            goto fallback;
-        }
+        XRenderComposite(data->display,
+                         PictOpClear,
+                         data->xwindow_pict,
+                         None,
+                         data->xwindow_pict,
+                         0, 0,
+                         0, 0,
+                         0, 0,
+                         window->w, window->h);
         renderer->info.blend_modes |=
             (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK);
         // Create a 1 bit depth mask
         data->mask = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 1);
-        data->mask_pict = XRenderCreatePicture(data->display, data->mask,
-                                               XRenderFindStandardFormat(data->display,
-                                                                         PictStandardA1),
-                                               0, NULL);
+        data->mask_pict =
+            XRenderCreatePicture(data->display, data->mask,
+                                 XRenderFindStandardFormat(data->display,
+                                                           PictStandardA1),
+                                 0, NULL);
         XGCValues gcv_mask;
         gcv_mask.foreground = 1;
         gcv_mask.background = 0;
-        data->mask_gc = XCreateGC(data->display, data->mask, GCBackground | GCForeground, &gcv_mask);
+        data->mask_gc = XCreateGC(data->display, data->mask,
+                                  GCBackground | GCForeground, &gcv_mask);
         renderer->blendMode = SDL_BLENDMODE_BLEND;
         data->blend_op = PictOpOver;
     }
     else {
         data->use_xrender = SDL_FALSE;
     }
-    fallback:
 #endif
     
     if (flags & SDL_RENDERER_SINGLEBUFFER) {
@@ -293,9 +301,21 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         n = 1;
     }
     for (i = 0; i < n; ++i) {
-        data->pixmaps[i] =
-            XCreatePixmap(data->display, data->xwindow, window->w, window->h,
-                          displaydata->depth);
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->use_xrender) {
+            data->pixmaps[i] = XCreatePixmap(data->display,
+                                             data->xwindow,
+                                             window->w,
+                                             window->h,
+                                             32);
+        }
+        else
+#endif
+        {
+            data->pixmaps[i] =
+                XCreatePixmap(data->display, data->xwindow, window->w, window->h,
+                              displaydata->depth);
+        }
         if (data->pixmaps[i] == None) {
             X11_DestroyRenderer(renderer);
             SDL_SetError("XCreatePixmap() failed");
@@ -304,14 +324,21 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->use_xrender == SDL_TRUE) {
             data->pixmap_picts[i] = 
-                XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
+                XRenderCreatePicture(data->display,
+                                     data->pixmaps[i],
+                                     XRenderFindStandardFormat(data->display,
+                                                               PictStandardARGB32),
                                      0, None);
-            if(!data->pixmap_picts[i]) {
-                data->use_xrender = SDL_FALSE;
-            }
-            XRenderComposite(data->display, PictOpClear,
-                             data->pixmap_picts[i], None, data->pixmap_picts[i],
-                             0, 0, 0, 0, 0, 0, window->w, window->h);
+                XRenderComposite(data->display,
+                                 PictOpClear,
+                                 data->pixmap_picts[i],
+                                 None,
+                                 data->pixmap_picts[i],
+                                 0, 0,
+                                 0, 0,
+                                 0, 0,
+                                 window->w, window->h);
+
         }
 #endif
     }
@@ -381,9 +408,22 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
         }
     }
     for (i = 0; i < n; ++i) {
-        data->pixmaps[i] =
-            XCreatePixmap(data->display, data->xwindow, window->w, window->h,
-                          data->depth);
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->use_xrender) {
+            data->pixmaps[i] =
+                XCreatePixmap(data->display,
+                              data->xwindow,
+                              window->w,
+                              window->h,
+                              32);
+        }
+        else
+#endif
+        {
+            data->pixmaps[i] =
+                XCreatePixmap(data->display, data->xwindow, window->w, window->h,
+                              data->depth);
+        }
         if (data->pixmaps[i] == None) {
             SDL_SetError("XCreatePixmap() failed");
             return -1;
@@ -391,15 +431,22 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if(data->use_xrender == SDL_TRUE) {
             data->pixmap_picts[i] = 
-                XRenderCreatePicture(data->display, data->pixmaps[i], data->xwindow_pict_fmt,
+                XRenderCreatePicture(data->display,
+                                     data->pixmaps[i],
+                                     XRenderFindStandardFormat(data->display,
+                                                               PictStandardARGB32),
                                      0, None);
-            if(!data->pixmap_picts[i]) {
-                data->use_xrender = SDL_FALSE;
-            }
-            XRenderComposite(data->display, PictOpClear,
-                             data->pixmap_picts[i], None, data->pixmap_picts[i],
-                             0, 0, 0, 0, 0, 0, window->w, window->h);
-        }
+            XRenderComposite(data->display,
+                             PictOpClear,
+                             data->pixmap_picts[i],
+                             None,
+                             data->pixmap_picts[i],
+                             0, 0,
+                             0, 0,
+                             0, 0,
+                             window->w, window->h);
+
+       }
 #endif
     }
     if (n > 0) {
@@ -442,8 +489,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
            can be no BadMatch error since Xrender takes care of that.
         */
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        // Assume the texture is supported by Xrender
-        data->use_xrender = SDL_TRUE;
         if (renderdata->use_xrender == SDL_FALSE) {
             if (texture->format != display->current_mode.format) {
                 SDL_SetError("Texture format doesn't match window format");
@@ -578,32 +623,22 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(renderdata->use_xrender && data->pixmap) {
-        data->use_xrender = SDL_TRUE;
-        data->picture_fmt =
-        XRenderFindVisualFormat(renderdata->display, renderdata->visual);
-        if(!data->picture_fmt) {
-            printf("XRenderFindFormat failed!\n");
-            data->use_xrender = SDL_FALSE;
-        }
+    if(renderdata->use_xrender) {
+        data->picture_fmt = renderdata->xwindow_pict_fmt;
         data->picture =
             XRenderCreatePicture(renderdata->display, data->pixmap,
                                  data->picture_fmt, 0, NULL);
-        if(!data->picture) {
-            data->use_xrender = SDL_FALSE;
-        }
     }
     /* We thought we could render the texture with Xrender but this was
         not possible for some reason. Now we must ensure that texture  
         format and window format match to avoid a BadMatch error when
         rendering using the old pipeline.
-    */
     if(data->use_xrender == SDL_FALSE) {
         if (texture->format != display->current_mode.format) {
             SDL_SetError("Texture format doesn't match window format");
             return -1;
         }
-    }
+    }*/
 #endif
     return 0;
 }
@@ -626,12 +661,26 @@ X11_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
 static int
 X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+    X11_TextureData *data = (X11_TextureData *) texture->driverdata;
     switch (texture->blendMode) {
     case SDL_BLENDMODE_NONE:
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        data->blend_op = PictOpSrc;
         return 0;
+    case SDL_BLENDMODE_BLEND:
+        data->blend_op = PictOpOver;
+        return 0;
+    case SDL_BLENDMODE_ADD:
+        data->blend_op = PictOpAdd;
+        return 0;
+#endif
     default:
         SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        texture->blendMode = SDL_BLENDMODE_BLEND;
+        data->blend_op = PictOpOver;
+#endif
         return -1;
     }
 }
@@ -795,7 +844,7 @@ xrenderdrawcolor(SDL_Renderer *renderer)
     else
         alphad = (renderer->a) / 255.0;
 
-    xrender_color.alpha = (unsigned short) (alphad * 0xFFFF);
+    xrender_color.alpha = (unsigned short) ((renderer->a / 255.0) * 0xFFFF);
 
     xrender_color.red =
         (unsigned short) ((renderer->r / 255.0) * alphad * 0xFFFF);
@@ -1170,10 +1219,8 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     if(data->use_xrender == SDL_TRUE) {
         XRenderColor foreground;
         XRenderPictureAttributes attributes;
-        unsigned long valuemask;
 
         foreground = xrenderdrawcolor(renderer);
-        valuemask = CPClipMask;
         attributes.clip_mask = data->mask;
         
         XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
@@ -1181,15 +1228,14 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         XFillRectangles(data->display, data->mask, data->mask_gc,
                         xrects, xcount);
 
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-
-        Picture fill = 
-            XRenderCreateSolidFill(data->display, &foreground);
-        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
+        XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
+        Picture fill_pict = XRenderCreateSolidFill(data->display,
+                                                   &foreground);
+        XRenderComposite(data->display, data->blend_op, fill_pict, None,
                          data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
         attributes.clip_mask = None;
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        XRenderFreePicture(data->display, fill);
+        XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
+        XRenderFreePicture(data->display, fill_pict);
     }
     else
 #endif
@@ -1219,7 +1265,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if (data->use_xrender && texturedata->use_xrender) {
+    if (data->use_xrender) {
         if(texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY
             if(texturedata->shminfo.shmaddr) {
@@ -1236,9 +1282,16 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           dstrect->y, srcrect->w, srcrect->h);
             }
         }
+        Picture pict;
+        if(texture->blendMode == SDL_BLENDMODE_NONE)
+            pict = None;
+        else
+            pict = texturedata->picture;
         if(srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-            XRenderComposite(data->display, PictOpOver, texturedata->picture, None, data->drawable_pict,
-                             srcrect->x, srcrect->y, 0, 0, dstrect->x, dstrect->y, srcrect->w, srcrect->h);
+            XRenderComposite(data->display, texturedata->blend_op, texturedata->picture,
+                         pict, data->drawable_pict, srcrect->x, srcrect->y,
+                         srcrect->x, srcrect->y, dstrect->x, dstrect->y,
+                         srcrect->w, srcrect->h);
         } else {
             Pixmap scaling_pixmap = 
                 XCreatePixmap(data->display, texturedata->pixmap, dstrect->w, dstrect->h,
@@ -1248,7 +1301,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                      0, NULL);
             XRenderComposite(data->display, PictOpClear, scaling_picture, None, scaling_picture,
                              0, 0, 0, 0, 0, 0, dstrect->w, dstrect->h);
-            XRenderComposite(data->display, PictOpSrc, texturedata->picture, None, scaling_picture,
+            XRenderComposite(data->display, PictOpSrc, texturedata->picture, pict, scaling_picture,
                              srcrect->x, srcrect->y, 0, 0, 0, 0, srcrect->w, srcrect->h);
             double xscale = ((double) dstrect->w) / srcrect->w;
             double yscale = ((double) dstrect->h) / srcrect->h;
@@ -1257,7 +1310,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                   {XDoubleToFixed(0), XDoubleToFixed(yscale), XDoubleToFixed(0)},
                   {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(xscale * yscale)}}};
             XRenderSetPictureTransform(data->display, scaling_picture, &xform);
-            XRenderComposite(data->display, PictOpOver, scaling_picture, None, data->drawable_pict,
+            XRenderComposite(data->display, texturedata->blend_op, scaling_picture, None, data->drawable_pict,
                              0, 0, 0, 0, dstrect->x, dstrect->y, dstrect->w, dstrect->h);
             XRenderFreePicture(data->display, scaling_picture);
             XFreePixmap(data->display, scaling_pixmap);
@@ -1445,9 +1498,15 @@ X11_RenderPresent(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
             if(data->use_xrender == SDL_TRUE)
             {
-                XRenderComposite(data->display, PictOpOver, data->drawable_pict, None,
-                                 data->xwindow_pict, rect->x, rect->y, 0, 0, rect->x, rect->y,
-                                 rect->w+1, rect->h+1);
+                XRenderComposite(data->display,
+                                 data->blend_op,
+                                 data->drawable_pict,
+                                 None,
+                                 data->xwindow_pict,
+                                 rect->x, rect->y,
+                                 0, 0,
+                                 rect->x, rect->y,
+                                 rect->w, rect->h);
             }
             else
 #endif
@@ -1536,12 +1595,9 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
         if (data->gc) {
             XFreeGC(data->display, data->gc);
         }
-        if (data->drawable) {
-            XFreePixmap(data->display, data->drawable);
-        }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->mask_gc) {
-            XFreeGC(data->display, data->gc);
+            XFreeGC(data->display, data->mask_gc);
         }
         if (data->mask_pict) {
             XRenderFreePicture(data->display, data->mask_pict);
