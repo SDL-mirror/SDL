@@ -24,6 +24,7 @@ typedef struct
     const char *videodriver;
     int display;
     const char *window_title;
+    const char *window_icon;
     Uint32 window_flags;
     int window_x;
     int window_y;
