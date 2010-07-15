@@ -30,11 +30,21 @@
 
 SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
 	SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,SDL_WINDOW_BORDERLESS | flags & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
-	result->shaper = result->display->device->shape_driver.CreateShaper(result);
-	result->shaper->usershownflag = flags & SDL_WINDOW_SHOWN;
-	result->shaper->alphacutoff = 1;
-	result->shaper->hasshape = SDL_FALSE;
-	return result;
+	if(result != NULL) {
+		result->shaper = result->display->device->shape_driver.CreateShaper(result);
+		if(result->shaper != NULL) {
+			result->shaper->usershownflag = flags & SDL_WINDOW_SHOWN;
+			result->shaper->alphacutoff = 1;
+			result->shaper->hasshape = SDL_FALSE;
+			return result;
+		}
+		else {
+			SDL_DestroyWindow(result);
+			return NULL;
+		}
+	}
+	else
+		return NULL;
 }
 
 SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
@@ -55,10 +65,10 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 		SDL_LockSurface(shape);
 	for(x = 0;x<shape->w;x++)
 		for(y = 0;y<shape->h;y++) {
-			pixel = shape->pixels + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
+			pixel = (Uint8 *)(shape->pixels) + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
 			alpha = 0;
 			SDL_GetRGBA(*(Uint32*)pixel,shape->format,&r,&g,&b,&alpha);
-			Uint32 bitmap_pixel = y*shape->w + x;
+			bitmap_pixel = y*shape->w + x;
 			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
 		}
 	if(SDL_MUSTLOCK(shape))
