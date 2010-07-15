@@ -95,6 +95,12 @@
 		04B2ECEE1025CE4800F9BC5F /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ECE81025CE4800F9BC5F /* SDL_revision.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04B2ECFF1025CEB900F9BC5F /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04B2ECF11025CEB900F9BC5F /* SDL_atomic.c */; };
 		04B2ED081025CF9E00F9BC5F /* SDL_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ED061025CF9E00F9BC5F /* SDL_config.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		04BA9D6311EF474A00B60E01 /* SDL_gesture_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BA9D5F11EF474A00B60E01 /* SDL_gesture_c.h */; };
+		04BA9D6411EF474A00B60E01 /* SDL_gesture.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BA9D6011EF474A00B60E01 /* SDL_gesture.c */; };
+		04BA9D6511EF474A00B60E01 /* SDL_touch_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BA9D6111EF474A00B60E01 /* SDL_touch_c.h */; };
+		04BA9D6611EF474A00B60E01 /* SDL_touch.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BA9D6211EF474A00B60E01 /* SDL_touch.c */; };
+		04BA9D7D11EF497E00B60E01 /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BA9D7B11EF497E00B60E01 /* SDL_gesture.h */; };
+		04BA9D7E11EF497E00B60E01 /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BA9D7C11EF497E00B60E01 /* SDL_touch.h */; };
 		04EC8B521025D12900431D42 /* SDL_config_iphoneos.h in Headers */ = {isa = PBXBuildFile; fileRef = 04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */; };
 		04F2AF541104ABC300D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF531104ABC300D6DDF7 /* SDL_assert.h */; };
 		04F2AF561104ABD200D6DDF7 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F2AF551104ABD200D6DDF7 /* SDL_assert.c */; };
@@ -346,6 +352,12 @@
 		04B2ECE81025CE4800F9BC5F /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
 		04B2ECF11025CEB900F9BC5F /* SDL_atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_atomic.c; sourceTree = "<group>"; };
 		04B2ED061025CF9E00F9BC5F /* SDL_config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_config.h; path = ../../include/SDL_config.h; sourceTree = SOURCE_ROOT; };
+		04BA9D5F11EF474A00B60E01 /* SDL_gesture_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gesture_c.h; sourceTree = "<group>"; };
+		04BA9D6011EF474A00B60E01 /* SDL_gesture.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gesture.c; sourceTree = "<group>"; };
+		04BA9D6111EF474A00B60E01 /* SDL_touch_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_touch_c.h; sourceTree = "<group>"; };
+		04BA9D6211EF474A00B60E01 /* SDL_touch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_touch.c; sourceTree = "<group>"; };
+		04BA9D7B11EF497E00B60E01 /* SDL_gesture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_gesture.h; path = ../../include/SDL_gesture.h; sourceTree = SOURCE_ROOT; };
+		04BA9D7C11EF497E00B60E01 /* SDL_touch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_touch.h; path = ../../include/SDL_touch.h; sourceTree = SOURCE_ROOT; };
 		04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_config_iphoneos.h; path = ../../include/SDL_config_iphoneos.h; sourceTree = SOURCE_ROOT; };
 		04F2AF531104ABC300D6DDF7 /* SDL_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert.h; path = ../../include/SDL_assert.h; sourceTree = SOURCE_ROOT; };
 		04F2AF551104ABD200D6DDF7 /* SDL_assert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_assert.c; path = ../../src/SDL_assert.c; sourceTree = SOURCE_ROOT; };
@@ -851,6 +863,7 @@
 				FD99B8F60DD52EB400FB1D6B /* SDL_endian.h */,
 				FD99B8DC0DD52EB400FB1D6B /* SDL_error.h */,
 				FD99B8DD0DD52EB400FB1D6B /* SDL_events.h */,
+				04BA9D7B11EF497E00B60E01 /* SDL_gesture.h */,
 				04461DED0EA76BA3006C462D /* SDL_haptic.h */,
 				044E5FB411E6069F0076F181 /* SDL_input.h */,
 				FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */,
@@ -876,6 +889,7 @@
 				FD99B8EF0DD52EB400FB1D6B /* SDL_syswm.h */,
 				FD99B8F00DD52EB400FB1D6B /* SDL_thread.h */,
 				FD99B8F10DD52EB400FB1D6B /* SDL_timer.h */,
+				04BA9D7C11EF497E00B60E01 /* SDL_touch.h */,
 				FD99B8F20DD52EB400FB1D6B /* SDL_types.h */,
 				FD99B8F30DD52EB400FB1D6B /* SDL_version.h */,
 				FD99B8F40DD52EB400FB1D6B /* SDL_video.h */,
@@ -956,6 +970,10 @@
 		FD99B98C0DD52EDC00FB1D6B /* events */ = {
 			isa = PBXGroup;
 			children = (
+				04BA9D5F11EF474A00B60E01 /* SDL_gesture_c.h */,
+				04BA9D6011EF474A00B60E01 /* SDL_gesture.c */,
+				04BA9D6111EF474A00B60E01 /* SDL_touch_c.h */,
+				04BA9D6211EF474A00B60E01 /* SDL_touch.c */,
 				FD99B98D0DD52EDC00FB1D6B /* blank_cursor.h */,
 				FD99B98E0DD52EDC00FB1D6B /* default_cursor.h */,
 				FD99B98F0DD52EDC00FB1D6B /* scancodes_darwin.h */,
@@ -1191,6 +1209,10 @@
 				044E5FB511E6069F0076F181 /* SDL_clipboard.h in Headers */,
 				044E5FB611E6069F0076F181 /* SDL_input.h in Headers */,
 				0420497011E6F03D007E7EC9 /* SDL_clipboardevents_c.h in Headers */,
+				04BA9D6311EF474A00B60E01 /* SDL_gesture_c.h in Headers */,
+				04BA9D6511EF474A00B60E01 /* SDL_touch_c.h in Headers */,
+				04BA9D7D11EF497E00B60E01 /* SDL_gesture.h in Headers */,
+				04BA9D7E11EF497E00B60E01 /* SDL_touch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1431,6 +1453,8 @@
 				006E9889119552DD001DE610 /* SDL_rwopsbundlesupport.m in Sources */,
 				044E5FB811E606EB0076F181 /* SDL_clipboard.c in Sources */,
 				0420497111E6F03D007E7EC9 /* SDL_clipboardevents.c in Sources */,
+				04BA9D6411EF474A00B60E01 /* SDL_gesture.c in Sources */,
+				04BA9D6611EF474A00B60E01 /* SDL_touch.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
