@@ -110,8 +110,10 @@ unsigned long SDL_HashDollar(Point* points) {
   return hash;
 }
 
-int SaveTemplate(DollarTemplate *templ, SDL_RWops * src) {
+
+static int SaveTemplate(DollarTemplate *templ, SDL_RWops * src) {
   if(src == NULL) return 0;
+
   int i;
   
   //No Longer storing the Hash, rehash on load
@@ -123,6 +125,7 @@ int SaveTemplate(DollarTemplate *templ, SDL_RWops * src) {
     fprintf(fp,"%i %i ",(int)templ->path[i].x,(int)templ->path[i].y);
   }
   fprintf(fp,"\n");
+
   */
   if(SDL_RWwrite(src,templ->path,sizeof(templ->path[0]),DOLLARNPOINTS) != DOLLARNPOINTS) return 0;
   return 1;
@@ -150,6 +153,36 @@ int SDL_SaveDollarTemplate(unsigned long gestureId, SDL_RWops *src) {
       }
     }
   }
+  SDL_SetError("Unknown gestureId");
+  return -1;
+}
+
+//path is an already sampled set of points
+//Returns the index of the gesture on success, or -1
+static int SDL_AddDollarGesture(GestureTouch* inTouch,Point* path) {
+  if(inTouch == NULL) {
+    if(numGestureTouches == 0) return -1;
+    int i = 0;
+    for(i = 0;i < numGestureTouches; i++) {
+      inTouch = &gestureTouch[i];
+      if(inTouch->numDollarTemplates < MAXTEMPLATES) {
+	DollarTemplate *templ = 
+	  &inTouch->dollarTemplate[inTouch->numDollarTemplates];
+	memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
+	templ->hash = SDL_HashDollar(templ->path);
+	inTouch->numDollarTemplates++;
+      }
+    }
+    return inTouch->numDollarTemplates - 1;
+  }else if(inTouch->numDollarTemplates < MAXTEMPLATES) {
+    DollarTemplate *templ = 
+      &inTouch->dollarTemplate[inTouch->numDollarTemplates];
+    memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
+    templ->hash = SDL_HashDollar(templ->path);
+    inTouch->numDollarTemplates++;
+    return inTouch->numDollarTemplates - 1;
+  }
+  return -1;
 }
 
 int SDL_LoadDollarTemplates(int touchId, SDL_RWops *src) {
@@ -195,37 +228,6 @@ int SDL_LoadDollarTemplates(int touchId, SDL_RWops *src) {
 
   return loaded; 
 }
-
-
-//path is an already sampled set of points
-//Returns the index of the gesture on success, or -1
-int SDL_AddDollarGesture(GestureTouch* inTouch,Point* path) {
-  if(inTouch == NULL) {
-    if(numGestureTouches == 0) return -1;
-    int i = 0;
-    for(i = 0;i < numGestureTouches; i++) {
-      inTouch = &gestureTouch[i];
-      if(inTouch->numDollarTemplates < MAXTEMPLATES) {
-	DollarTemplate *templ = 
-	  &inTouch->dollarTemplate[inTouch->numDollarTemplates];
-	memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
-	templ->hash = SDL_HashDollar(templ->path);
-	inTouch->numDollarTemplates++;
-      }
-    }
-    return inTouch->numDollarTemplates - 1;
-  }else if(inTouch->numDollarTemplates < MAXTEMPLATES) {
-    DollarTemplate *templ = 
-      &inTouch->dollarTemplate[inTouch->numDollarTemplates];
-    memcpy(templ->path,path,DOLLARNPOINTS*sizeof(Point));
-    templ->hash = SDL_HashDollar(templ->path);
-    inTouch->numDollarTemplates++;
-    return inTouch->numDollarTemplates - 1;
-  }
-  return -1;
-}
-
-
 
 
 float dollarDifference(Point* points,Point* templ,float ang) {
@@ -277,21 +279,6 @@ float bestDollarDifference(Point* points,Point* templ) {
     printf("Min angle (x2): %f\n",x2);
   */
   return SDL_min(f1,f2);  
-}
-
-float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
-
-  Point points[DOLLARNPOINTS];
-  int numPoints = dollarNormalize(path,points);
-  int i;
- 
-  int bestDiff = 10000;
-  *bestTempl = -1;
-  for(i = 0;i < touch->numDollarTemplates;i++) {
-    int diff = bestDollarDifference(points,touch->dollarTemplate[i].path);
-    if(diff < bestDiff) {bestDiff = diff; *bestTempl = i;}
-  }
-  return bestDiff;
 }
 
 //DollarPath contains raw points, plus (possibly) the calculated length
@@ -372,6 +359,21 @@ int dollarNormalize(DollarPath path,Point *points) {
     points[i].y = (points[i].y - centroid.y)*DOLLARSIZE/h;
   }  
   return numPoints;
+}
+
+float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
+	
+	Point points[DOLLARNPOINTS];
+	int numPoints = dollarNormalize(path,points);
+	int i;
+	
+	int bestDiff = 10000;
+	*bestTempl = -1;
+	for(i = 0;i < touch->numDollarTemplates;i++) {
+		int diff = bestDollarDifference(points,touch->dollarTemplate[i].path);
+		if(diff < bestDiff) {bestDiff = diff; *bestTempl = i;}
+	}
+	return bestDiff;
 }
 
 int SDL_GestureAddTouch(SDL_Touch* touch) { 
