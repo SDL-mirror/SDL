@@ -305,16 +305,21 @@ int main(int argc, char* argv[])
 	      SDL_RecordGesture(-1);
 	    }
 	    else if(event.key.keysym.sym == 115) {
-	      FILE *fp;
-	      fp = fopen("gestureSave","w");
-	      SDL_SaveAllDollarTemplates(fp);
-	      fclose(fp);
+	      SDL_RWops *src;
+	      //fp = fopen("gestureSave","w");
+	      src = SDL_RWFromFile("gestureSave","w");
+	      
+	      printf("Wrote %i templates\n",SDL_SaveAllDollarTemplates(src));
+	      //fclose(fp);
+	      SDL_RWclose(src);
 	    }
 	    else if(event.key.keysym.sym == 108) {
-	      FILE *fp;
-	      fp = fopen("gestureSave","r");
-	      printf("Loaded: %i\n",SDL_LoadDollarTemplates(-1,fp));
-	      fclose(fp);
+	      SDL_RWops *src;
+	      //fp = fopen("gestureSave","r");
+	      src = SDL_RWFromFile("gestureSave","r");
+	      printf("Loaded: %i\n",SDL_LoadDollarTemplates(-1,src));
+	      //fclose(fp);
+	      SDL_RWclose(src);
 	    }
 	    
 	    //keypress = 1;

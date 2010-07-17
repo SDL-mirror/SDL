@@ -57,7 +57,7 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_SaveAllDollarTemplates(FILE *fp);
+  extern DECLSPEC int SDLCALL SDL_SaveAllDollarTemplates(SDL_RWops *src);
 
 /**
  *  \brief Save a currently loaded Dollar Gesture template
@@ -65,7 +65,7 @@ extern "C" {
  *
  */
   extern DECLSPEC int 
-  SDLCALL SDL_SaveDollarTemplate(unsigned long gestureId,FILE *fp);
+  SDLCALL SDL_SaveDollarTemplate(unsigned long gestureId,SDL_RWops *src);
 
 
 /**
@@ -73,7 +73,7 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(int touchId, FILE *fp);
+  extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(int touchId, SDL_RWops *src);
 
 
 

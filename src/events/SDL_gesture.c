@@ -110,40 +110,50 @@ unsigned long SDL_HashDollar(Point* points) {
   return hash;
 }
 
-int SaveTemplate(DollarTemplate *templ, FILE *fp) {
+int SaveTemplate(DollarTemplate *templ, SDL_RWops * src) {
+  if(src == NULL) return 0;
   int i;
-  fprintf(fp,"%lu ",templ->hash);
+  
+  //No Longer storing the Hash, rehash on load
+  //fprintf(fp,"%lu ",templ->hash);
+  //if(SDL_RWops.write(src,&(templ->hash),sizeof(templ->hash),1) != 1) return 0;
+  
+  /*
   for(i = 0;i < DOLLARNPOINTS;i++) {
     fprintf(fp,"%i %i ",(int)templ->path[i].x,(int)templ->path[i].y);
   }
   fprintf(fp,"\n");
+  */
+  if(SDL_RWwrite(src,templ->path,sizeof(templ->path[0]),DOLLARNPOINTS) != DOLLARNPOINTS) return 0;
+  return 1;
 }
 
 
-int SDL_SaveAllDollarTemplates(FILE *fp) {  
+int SDL_SaveAllDollarTemplates(SDL_RWops *src) {  
   int i,j,rtrn = 0;
   for(i = 0; i < numGestureTouches; i++) {
     GestureTouch* touch = &gestureTouch[i];
     for(j = 0;j < touch->numDollarTemplates; j++) {
-	rtrn += SaveTemplate(&touch->dollarTemplate[i],fp);
+	rtrn += SaveTemplate(&touch->dollarTemplate[i],src);
     }
   }
   return rtrn;  
 }
 
-int SDL_SaveDollarTemplate(unsigned long gestureId, FILE *fp) {
+int SDL_SaveDollarTemplate(unsigned long gestureId, SDL_RWops *src) {
   int i,j;
   for(i = 0; i < numGestureTouches; i++) {
     GestureTouch* touch = &gestureTouch[i];
     for(j = 0;j < touch->numDollarTemplates; j++) {
       if(touch->dollarTemplate[i].hash == gestureId) {
-	return SaveTemplate(&touch->dollarTemplate[i],fp);
+	return SaveTemplate(&touch->dollarTemplate[i],src);
       }
     }
   }
 }
 
-int SDL_LoadDollarTemplates(int touchId, FILE *fp) {
+int SDL_LoadDollarTemplates(int touchId, SDL_RWops *src) {
+  if(src == NULL) return 0;
   int i,loaded = 0;
   GestureTouch *touch = NULL;
   if(touchId >= 0) {
@@ -153,9 +163,10 @@ int SDL_LoadDollarTemplates(int touchId, FILE *fp) {
     if(touch == NULL) return -1;
   }
 
-  while(!feof(fp)) {
+  while(1) {
     DollarTemplate templ;
-    fscanf(fp,"%lu ",&templ.hash);
+    //fscanf(fp,"%lu ",&templ.hash);
+    /*
     for(i = 0;i < DOLLARNPOINTS; i++) {		
       int x,y;
       if(fscanf(fp,"%i %i ",&x,&y) != 2) break;
@@ -163,22 +174,26 @@ int SDL_LoadDollarTemplates(int touchId, FILE *fp) {
       templ.path[i].y = y;
     }
     fscanf(fp,"\n");
+    */
+    if(SDL_RWread(src,templ.path,sizeof(templ.path[0]),DOLLARNPOINTS) < DOLLARNPOINTS) break;
 
     if(touchId >= 0) {
-      if(SDL_AddDollarGesture(touch,templ)) loaded++;
+      printf("Adding loaded gesture to 1 touch\n");
+      if(SDL_AddDollarGesture(touch,templ.path)) loaded++;
     }
     else {
+      printf("Adding to: %i touches\n",numGestureTouches);
       for(i = 0;i < numGestureTouches; i++) {
-	if(gestureTouch[i].id == touchId) {
-	  touch = &gestureTouch[i];
-	  SDL_AddDollarGesture(touch,templ);
-	}
+	touch = &gestureTouch[i];
+	printf("Adding loaded gesture to + touches\n");
+	//TODO: What if this fails?
+	SDL_AddDollarGesture(touch,templ.path);	
       }
       loaded++;
     }
   }
 
-  return 1; 
+  return loaded; 
 }
 
 
