@@ -1443,24 +1443,6 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          srcrect->x, srcrect->y, dstrect->x, dstrect->y,
                          srcrect->w, srcrect->h);
         } else {
-            /*Pixmap scaling_pixmap = 
-                XCreatePixmap(data->display, texturedata->pixmap, dstrect->w, dstrect->h,
-                              data->depth);
-            if (!scaling_pixmap) {
-                SDL_SetError("XCreatePixmap() failed");
-                return -1;
-            }
-            Picture scaling_picture =
-                XRenderCreatePicture(data->display, scaling_pixmap, texturedata->picture_fmt,
-                                     0, NULL);
-            if (!scaling_picture) {
-                SDL_SetError("XRenderCreatePicture() failed");
-                return -1;
-            }
-            XRenderComposite(data->display, PictOpClear, scaling_picture, None, scaling_picture,
-                             0, 0, 0, 0, 0, 0, dstrect->w, dstrect->h);
-            XRenderComposite(data->display, PictOpSrc, texturedata->picture, pict, scaling_picture,
-                             srcrect->x, srcrect->y, 0, 0, 0, 0, srcrect->w, srcrect->h);*/
             double xscale = ((double) dstrect->w) / srcrect->w;
             double yscale = ((double) dstrect->h) / srcrect->h;
             XTransform xform = {{
@@ -1479,9 +1461,6 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(1), XDoubleToFixed(0)},
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1)}}};
             XRenderSetPictureTransform(data->display, texturedata->picture, &identity);
-
-            /*XRenderFreePicture(data->display, scaling_picture);
-            XFreePixmap(data->display, scaling_pixmap);*/
         }
     }
     else
