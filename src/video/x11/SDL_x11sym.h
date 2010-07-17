@@ -238,10 +238,14 @@ SDL_X11_SYM(void,XScreenSaverSuspend,(Display *dpy,Bool suspend),(dpy,suspend),r
 SDL_X11_MODULE(XRENDER)
 SDL_X11_SYM(Bool,XRenderQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
 SDL_X11_SYM(XRenderPictFormat*,XRenderFindVisualFormat,(Display *dpy,_Xconst Visual *visual),(dpy,visual),return)
+SDL_X11_SYM(XRenderPictFormat*,XRenderFindStandardFormat,(Display *dpy,int format),(dpy,format),return)
 SDL_X11_SYM(XRenderPictFormat*,XRenderFindFormat,(Display *dpy,unsigned long mask,_Xconst XRenderPictFormat* templ,int count),(dpy,mask,templ,count),return)
 SDL_X11_SYM(Picture,XRenderCreatePicture,(Display *dpy,Drawable drawable,_Xconst XRenderPictFormat* format,unsigned long valuemask,_Xconst XRenderPictureAttributes* attributes),(dpy,drawable,format,valuemask,attributes),return)
+SDL_X11_SYM(void,XRenderFreePicture,(Display *dpy,Picture picture),(dpy,picture),return)
+SDL_X11_SYM(void,XRenderChangePicture,(Display *dpy,Picture picture,unsigned long valuemask,_Xconst XRenderPictureAttributes* attributes),(dpy,picture,valuemask,attributes),return)
 SDL_X11_SYM(void,XRenderComposite,(Display *dpy,int op,Picture src,Picture mask,Picture dst,int src_x,int src_y,int mask_x,int mask_y,int dst_x,int dst_y,unsigned int width,unsigned int height),(dpy,op,src,mask,dst,src_x,src_y,mask_x,mask_y,dst_x,dst_y,width,height),return)
-SDL_X11_SYM(void,XRenderFillRectangles,(Display *dpy,int op,Picture dst,_Xconst XRenderColor* color,_Xconst XRectangle* rectangles,int n_rects),(dpy,op,dst,color,rectangles,n_rects),return)
+SDL_X11_SYM(Picture,XRenderCreateSolidFill,(Display *dpy,const XRenderColor *color),(dpy,color),return)
+SDL_X11_SYM(void,XRenderSetPictureTransform,(Display *dpy,Picture picture,XTransform *transform),(dpy,picture,transform),return)
 #endif
 /* *INDENT-ON* */
 
