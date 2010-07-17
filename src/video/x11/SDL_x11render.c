@@ -1452,7 +1452,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             XRenderSetPictureTransform(data->display, texturedata->picture, &xform);
 
             XRenderComposite(data->display, texturedata->blend_op,
-                             texturedata->picture, None, data->drawable_pict,
+                             texturedata->picture, pict, data->drawable_pict,
                              0, 0, 0, 0, dstrect->x, dstrect->y,
                              dstrect->w, dstrect->h);
             
