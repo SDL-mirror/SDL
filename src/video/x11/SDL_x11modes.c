@@ -23,7 +23,7 @@
 
 #include "SDL_x11video.h"
 
-#define X11MODES_DEBUG
+//#define X11MODES_DEBUG
 #undef SDL_VIDEO_DRIVER_X11_XINERAMA
 #undef SDL_VIDEO_DRIVER_X11_XRANDR
 #undef SDL_VIDEO_DRIVER_X11_VIDMODE
@@ -49,22 +49,6 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
             return 0;
         }
     }
-/*#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    depth = 32;
-    long vinfo_mask;
-    XVisualInfo vinfo_templ;
-    vinfo_mask = (VisualDepthMask | VisualRedMaskMask | VisualGreenMaskMask | VisualBlueMaskMask);
-    vinfo_templ.depth = 32;
-    vinfo_templ.red_mask = 0xFF0000;
-    vinfo_templ.green_mask = 0xFF00;
-    vinfo_templ.blue_mask = 0xFF;
-    vi = XGetVisualInfo(display, vinfo_mask, &vinfo_templ, &nvis);
-    if(vi) {
-        *vinfo = *vi;
-        XFree(vi);
-        return 0;
-    }
-#endif*/
     depth = DefaultDepth(display, screen);
     if ((X11_UseDirectColorVisuals() &&
          XMatchVisualInfo(display, screen, depth, DirectColor, vinfo)) ||
