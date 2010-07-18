@@ -28,6 +28,8 @@ extern void SDL_GestureProcessEvent(SDL_Event* event);
 
 extern int SDL_RecordGesture(int touchId);
 
+extern int SDL_GestureAddTouch(SDL_Touch* touch);
+
 #endif /* _SDL_gesture_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

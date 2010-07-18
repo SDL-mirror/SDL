@@ -38,8 +38,7 @@ static SDL_Touch **SDL_touchPads = NULL;
 int
 SDL_TouchInit(void)
 {
-    
-    return (0);
+  return (0);
 }
 
 SDL_Touch *
