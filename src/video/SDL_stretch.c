@@ -78,7 +78,7 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 
 	int i;
 	int pos, inc;
-	unsigned char *eip;
+	unsigned char *eip, *end;
 	unsigned char load, store;
 
 	/* See if we need to regenerate the copy buffer */
@@ -115,7 +115,8 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 	pos = 0x10000;
 	inc = (src_w << 16) / dst_w;
 	eip = copy_row;
-	for ( i=0; i<dst_w; ++i ) {
+	end = copy_row+sizeof(copy_row);
+	for ( i=0; i<dst_w && eip < end; ++i ) {
 		while ( pos >= 0x10000L ) {
 			if ( bpp == 2 ) {
 				*eip++ = PREFIX16;
@@ -132,8 +133,8 @@ static int generate_rowbytes(int src_w, int dst_w, int bpp)
 	*eip++ = RETURN;
 
 	/* Verify that we didn't overflow (too late!!!) */
-	if ( eip > (copy_row+sizeof(copy_row)) ) {
-		SDL_SetError("Copy buffer overflow");
+	if ( i < dst_w ) {
+		SDL_SetError("Copy buffer too small");
 		return(-1);
 	}
 #ifdef HAVE_MPROTECT
