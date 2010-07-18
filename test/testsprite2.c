@@ -20,7 +20,7 @@ static int current_color = 0;
 static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
-static SDL_BlendMode blendMode = SDL_BLENDMODE_BLEND;
+static SDL_BlendMode blendMode = SDL_BLENDMODE_MASK;
 static SDL_TextureScaleMode scaleMode = SDL_TEXTURESCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
@@ -144,8 +144,8 @@ MoveSprites(SDL_Window * window, SDL_Texture * sprite)
     /* Test points */
     SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderDrawPoint(0, 0);
-    SDL_RenderDrawPoint(window_w/2-1, window_h/2-1);
-    SDL_RenderDrawPoint(window_w/2-1, window_h/2-1);
+    SDL_RenderDrawPoint(window_w-1, 0);
+    SDL_RenderDrawPoint(0, window_h-1);
     SDL_RenderDrawPoint(window_w-1, window_h-1);
 
     /* Test horizontal and vertical lines */
