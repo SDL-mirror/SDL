@@ -59,7 +59,7 @@
 #include <libusbhid.h>
 #endif
 
-#ifdef __FREEBSD__
+#if defined(__FREEBSD__) || defined(__FreeBSD_kernel__)
 #ifndef __DragonFly__
 #include <osreldate.h>
 #endif
@@ -78,7 +78,7 @@
 #define MAX_JOY_JOYS	2
 #define MAX_JOYS	(MAX_UHID_JOYS + MAX_JOY_JOYS)
 
-#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)
+#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063) && false
 struct usb_ctl_report {
 	int	ucr_report;
 	u_char	ucr_data[1024]; /* filled data size will vary */
@@ -148,7 +148,7 @@ static char *joydevnames[MAX_JOYS];
 static int	report_alloc(struct report *, struct report_desc *, int);
 static void	report_free(struct report *);
 
-#if defined(USBHID_UCR_DATA) || (defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063))
+#if defined(USBHID_UCR_DATA) || (defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)) || defined(__FreeBSD_kernel__)
 #define REP_BUF_DATA(rep) ((rep)->buf->ucr_data)
 #else
 #define REP_BUF_DATA(rep) ((rep)->buf->data)
@@ -304,7 +304,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 	rep = &hw->inreport;
-#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)
+#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063) || defined(__FreeBSD_kernel__)
        rep->rid = hid_get_report_id(fd);
        if (rep->rid < 0) {
 #else
@@ -321,7 +321,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick *joy)
 		goto usberr;
 	}
 
-#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_kernel_version >= 500111)
+#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_kernel_version >= 500111) || defined(__FreeBSD_kernel__)
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(hw->repdesc, 1 << hid_input);
@@ -405,7 +405,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	int nbutton, naxe = -1;
 	Sint32 v;
 
-#if defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
+#if defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H || defined(__FreeBSD_kernel__)
 	struct joystick gameport;
  
 	if (joy->hwdata->type == BSDJOY_JOY) {
@@ -460,7 +460,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	if (read(joy->hwdata->fd, REP_BUF_DATA(rep), rep->size) != rep->size) {
 		return;
 	}
-#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_kernel_version >= 500111)
+#if defined(USBHID_NEW) || (defined(__FREEBSD__) && __FreeBSD_kernel_version >= 500111) || defined(__FreeBSD_kernel__)
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input, rep->rid);
 #else
 	hdata = hid_start_parse(joy->hwdata->repdesc, 1 << hid_input);
