@@ -101,7 +101,6 @@ typedef struct
     Picture xwindow_pict;
     Picture pixmap_picts[3];
     Picture drawable_pict;
-    Picture mask_pict;
     int blend_op;
     XRenderPictFormat* xwindow_pict_fmt;
     GC mask_gc;
@@ -182,6 +181,7 @@ X11_AddRenderDriver(_THIS)
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_ARGB8888;
 
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_AddRenderDriver(&_this->displays[i], &X11_RenderDriver);
@@ -197,6 +197,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     X11_RenderData *data;
     XGCValues gcv;
+    gcv.graphics_exposures = False;
     int i, n;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
@@ -291,25 +292,15 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             SDL_SetError("XCreatePixmap() failed");
             return NULL;
         }
-        data->mask_pict =
-            XRenderCreatePicture(data->display, data->mask,
-                                 XRenderFindStandardFormat(data->display,
-                                                           PictStandardA1),
-                                 0, NULL);
-        if (!data->mask_pict) {
-            SDL_SetError("XRenderCreatePicture() failed");
-            return NULL;
-        }
         // Create the GC for the clip mask.
-        XGCValues gcv_mask;
-        gcv_mask.foreground = 1;
-        gcv_mask.background = 0;
         data->mask_gc = XCreateGC(data->display, data->mask,
-                                  GCBackground | GCForeground, &gcv_mask);
+                                  GCGraphicsExposures, &gcv);
         if (!data->mask_gc) {
             SDL_SetError("XCreateGC() failed");
             return NULL;
         }
+        XSetBackground(data->display, data->mask_gc, 0);
+        XSetForeground(data->display, data->mask_gc, 1);
         // Set the default blending mode.
         renderer->blendMode = SDL_BLENDMODE_BLEND;
         data->blend_op = PictOpOver;
@@ -425,6 +416,16 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
     SDL_Window *window = renderer->window;
     int i, n;
 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (data->use_xrender) {
+        XRenderFreePicture(data->display, data->xwindow_pict);
+        data->xwindow_pict_fmt =
+            XRenderFindVisualFormat(data->display, data->visual);
+        data->xwindow_pict =
+            XRenderCreatePicture(data->display, data->xwindow,
+                                 data->xwindow_pict_fmt, 0, NULL);
+    }
+#endif
     if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
         n = 0;
     } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
@@ -439,6 +440,7 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             XFreePixmap(data->display, data->pixmaps[i]);
             data->pixmaps[i] = None;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+            XRenderFreePicture(data->display, data->pixmap_picts[i]);
             data->pixmap_picts[i] = None;
 #endif
         }
@@ -1038,27 +1040,20 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
          */
         attributes.clip_mask = data->mask;
         valuemask = CPClipMask;
-
-        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        
+        XSetForeground(data->display, data->mask_gc, 0);
+        XFillRectangle(data->display, data->mask, data->mask_gc,
+                       0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 1);
 
         XDrawPoints(data->display, data->mask, data->mask_gc, xpoints, xcount,
                     CoordModeOrigin);
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        Picture fill =
-            XRenderCreateSolidFill(data->display, &foreground);
-        if (!fill) {
-            SDL_SetError("XRenderCreateSolidFill() failed");
-            return -1;
-        }
-
-        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
-                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
-
+        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
+                             &foreground, 0, 0, window->w, window->h);*/
         // Reset the clip_mask
         attributes.clip_mask = None;
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        XRenderFreePicture(data->display, fill);
     }
     else
 #endif
@@ -1101,8 +1096,10 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     if (data->use_xrender == SDL_TRUE) {
         drawable = data->mask;
         gc = data->mask_gc;
-        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 0);
+        XFillRectangle(data->display, data->mask, data->mask_gc,
+                       0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 1);
     }
     else
 #endif
@@ -1234,16 +1231,10 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         attributes.clip_mask = data->mask;
         unsigned long valuemask = CPClipMask;
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        Picture fill = XRenderCreateSolidFill(data->display, &xrforeground);
-        if (!fill) {
-            SDL_SetError("XRenderCreateSolidFill() failed");
-            return -1;
-        }
-        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
-                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
+        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
+                             &xrforeground, 0, 0, window->w, window->h);*/
         attributes.clip_mask = None;
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        XRenderFreePicture(data->display, fill);
     }
 #endif
     SDL_stack_free(xpoints);
@@ -1294,21 +1285,17 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         valuemask = CPClipMask;
         attributes.clip_mask = data->mask;
         
-        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 0);
+        XFillRectangle(data->display, data->mask, data->mask_gc,
+                       0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 1);
+
         XDrawRectangles(data->display, data->mask, data->mask_gc, xrects, xcount);
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        Picture fill =
-            XRenderCreateSolidFill(data->display, &foreground);
-        if (!fill) {
-            SDL_SetError("XRenderCreateSolidFill() failed");
-            return -1;
-        }
-        XRenderComposite(data->display, data->blend_op, fill, data->mask_pict,
-                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
+        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
+                             &foreground, 0, 0, window->w, window->h);*/
         attributes.clip_mask = None;
         XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        XRenderFreePicture(data->display, fill);
     }
     else
 #endif
@@ -1369,23 +1356,19 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
         foreground = xrenderdrawcolor(renderer);
         attributes.clip_mask = data->mask;
         
-        XRenderComposite(data->display, PictOpClear, data->mask_pict, None, data->mask_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 0);
+        XFillRectangle(data->display, data->mask, data->mask_gc,
+                       0, 0, window->w, window->h);
+        XSetForeground(data->display, data->mask_gc, 1);
+
         XFillRectangles(data->display, data->mask, data->mask_gc,
                         xrects, xcount);
 
         XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
-        Picture fill = XRenderCreateSolidFill(data->display,
-                                              &foreground);
-        if (!fill) {
-            SDL_SetError("XRenderCreateSolidFill() failed");
-            return -1;
-        }
-        XRenderComposite(data->display, data->blend_op, fill, None,
-                         data->drawable_pict, 0, 0, 0, 0, 0, 0, window->w, window->h);
+        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
+                               &foreground, 0, 0, window->w, window->h);*/
         attributes.clip_mask = None;
         XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
-        XRenderFreePicture(data->display, fill);
     }
     else
 #endif
@@ -1745,9 +1728,6 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->mask_gc) {
             XFreeGC(data->display, data->mask_gc);
-        }
-        if (data->mask_pict) {
-            XRenderFreePicture(data->display, data->mask_pict);
         }
         if (data->mask) {
             XFreePixmap(data->display, data->mask);

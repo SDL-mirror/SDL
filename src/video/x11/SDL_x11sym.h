@@ -151,6 +151,8 @@ SDL_X11_SYM(SDL_X11_XSynchronizeRetType,XSynchronize,(Display* a,Bool b),(a,b),r
 SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,SDL_X11_XESetWireToEventRetType c),(a,b,c),return)
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
 SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
+SDL_X11_SYM(int,XFillRectangle,(Display *dpy,Drawable d,GC gc,int x,int y,unsigned int width,unsigned int height),(dpy,d,gc,x,y,width,height),return)
+SDL_X11_SYM(int,XSetBackground,(Display *dpy,GC gc,unsigned long background),(dpy,gc,background),return)
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
@@ -246,6 +248,7 @@ SDL_X11_SYM(void,XRenderChangePicture,(Display *dpy,Picture picture,unsigned lon
 SDL_X11_SYM(void,XRenderComposite,(Display *dpy,int op,Picture src,Picture mask,Picture dst,int src_x,int src_y,int mask_x,int mask_y,int dst_x,int dst_y,unsigned int width,unsigned int height),(dpy,op,src,mask,dst,src_x,src_y,mask_x,mask_y,dst_x,dst_y,width,height),return)
 SDL_X11_SYM(Picture,XRenderCreateSolidFill,(Display *dpy,const XRenderColor *color),(dpy,color),return)
 SDL_X11_SYM(void,XRenderSetPictureTransform,(Display *dpy,Picture picture,XTransform *transform),(dpy,picture,transform),return)
+SDL_X11_SYM(void,XRenderFillRectangle,(Display *dpy,int op,Picture dst,_Xconst XRenderColor *color,int x,int y,unsigned int width,unsigned int height),(dpy,op,dst,color,x,y,width,height),return)
 #endif
 /* *INDENT-ON* */
 
