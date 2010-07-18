@@ -670,8 +670,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
         /* Finally unset the transient hints if necessary */
         if (!set) {
-            /* NOTE: Does this work? */
-            XSetTransientForHint(display, w, None);
+            XDeleteProperty(display, w, XA_WM_TRANSIENT_FOR);
         }
     }
 
