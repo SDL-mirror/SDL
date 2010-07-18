@@ -373,7 +373,7 @@ static const SDL_scancode xfree86_scancode_table2[] = {
     /* 192 */   SDL_SCANCODE_UNKNOWN,   /* XF86TouchpadToggle */
     /* 193 */   SDL_SCANCODE_UNKNOWN,
     /* 194 */   SDL_SCANCODE_UNKNOWN,
-    /* 195 */   SDLK_MODE,
+    /* 195 */   SDL_SCANCODE_MODE,
     /* 196 */   SDL_SCANCODE_UNKNOWN,
     /* 197 */   SDL_SCANCODE_UNKNOWN,
     /* 198 */   SDL_SCANCODE_UNKNOWN,
