@@ -32,6 +32,8 @@
 #include "../SDL_yuv_sw_c.h"
 #include "SDL_surface.h"
 
+//#define EXPT
+
 /* X11 renderer implementation */
 
 static SDL_Renderer *X11_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -102,9 +104,11 @@ typedef struct
     Pixmap brush;
     Picture brush_pict;
 #ifndef NO_SHARED_MEMORY
+#ifdef EXPT
     XImage *stencil_image;
     SDL_Surface *stencil_surface;
     XShmSegmentInfo stencil_shminfo;
+#endif
 #endif
     Picture xwindow_pict;
     Picture pixmap_picts[3];
@@ -135,7 +139,6 @@ typedef struct
     Picture picture;
     XRenderPictFormat* picture_fmt;
     int blend_op;
-//    SDL_bool use_xrender;
 #endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
@@ -318,6 +321,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                                                            PictStandardARGB32),
                                  CPRepeat, &brush_attr);
 #ifndef NO_SHARED_MEMORY
+#ifdef EXPT
         /* Create a mask image using MIT-SHM */
         data->stencil_image = NULL;
         data->stencil_surface = NULL;
@@ -326,22 +330,10 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             data->stencil_image =
                 XShmCreateImage(data->display, data->visual, 8, ZPixmap,
                                 NULL, shminfo, window->w, window->h);
-            if (!data->stencil_image) {
-                printf("XShmCreateImage() failed");
-                break;
-            } else {
-                printf("image created\n");
-            }
             shminfo->shmid = shmget(IPC_PRIVATE,
                                     data->stencil_image->bytes_per_line *
                                     data->stencil_image->height,
                                     IPC_CREAT|0777);
-            if (!shminfo->shmid) {
-                printf("shmget() failed");
-                break;
-            } else {
-                printf("shmid aquired\n");
-            }
             shminfo->shmaddr = data->stencil_image->data = shmat(shminfo->shmid, 0, 0);
             shminfo->readOnly = False;
             XShmAttach(data->display, shminfo);
@@ -354,14 +346,9 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                                          8,
                                          data->stencil_image->bytes_per_line,
                                          0, 0, 0, 0xFF);
-            if (!data->stencil_surface) {
-                printf("SDL_CreateRGBSurfaceFrom() failed");
-                break;
-            } else {
-                printf("surface created\n");
-            }
             break;
         }
+#endif
 #endif
         // Set the default blending mode.
         renderer->blendMode = SDL_BLENDMODE_BLEND;
@@ -461,7 +448,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* Create the drawing context */
     gcv.graphics_exposures = False;
     data->gc =
-        XCreateGC(data->display, data->xwindow, GCGraphicsExposures, &gcv);
+        XCreateGC(data->display, data->drawable, GCGraphicsExposures, &gcv);
     if (!data->gc) {
         X11_DestroyRenderer(renderer);
         SDL_SetError("XCreateGC() failed");
@@ -1059,35 +1046,40 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
+    if (data->makedirty) {
 
+        /* Get the smallest rectangle that contains everything */
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = window->w;
+        rect.h = window->h;
+        if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
+            /* Nothing to draw */
+            return 0;
+        }
+        SDL_AddDirtyRect(&data->dirty, &rect);
+    }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 #ifndef NO_SHARED_MEMORY
+#ifdef EXPT
     if (data->use_xrender && data->stencil_image && data->stencil_surface) {
-        SDL_FillRect(data->stencil_surface, NULL, 0x00);
+        SDL_FillRect(data->stencil_surface, &rect, 0x00);
 
         SDL_SetClipRect(data->stencil_surface, NULL);
+
         SDL_DrawPoints(data->stencil_surface, points, count, 0xFF);
 
         XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
-                     0, 0, 0, 0, window->w, window->h, False);
+                     rect.x, rect.y, rect.x, rect.y, rect.w, rect.h, False);
+
+        XSync(data->display, False);
     } else
 #endif
 #endif
+#endif
+*/
     {
-        if (data->makedirty) {
-
-            /* Get the smallest rectangle that contains everything */
-            rect.x = 0;
-            rect.y = 0;
-            rect.w = window->w;
-            rect.h = window->h;
-            if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
-                /* Nothing to draw */
-                return 0;
-            }
-            SDL_AddDirtyRect(&data->dirty, &rect);
-        }
-
         xpoint = xpoints = SDL_stack_alloc(XPoint, count);
         xcount = 0;
         for (i = 0; i < count; ++i) {
@@ -1101,17 +1093,19 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
             ++xpoint;
             ++xcount;
         }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
             XSetForeground(data->display, data->stencil_gc, 0x00);
             XFillRectangle(data->display, data->stencil, data->stencil_gc,
-                           0, 0, window->w, window->h);
+                           rect.x, rect.y, rect.w, rect.h);
             XSetForeground(data->display, data->stencil_gc, 0xFF);
             XDrawPoints(data->display, data->stencil, data->stencil_gc, xpoints, xcount,
                         CoordModeOrigin);
         }
-#endif
+#endif*/
     }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderColor foreground;
@@ -1120,10 +1114,11 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                              &foreground, 0, 0, 1, 1);
         XRenderComposite(data->display, data->blend_op, data->brush_pict,
                          data->stencil_pict, data->drawable_pict,
-                         0, 0, 0, 0, 0, 0, window->w, window->h);
+                         rect.x, rect.y, rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
     }
     else
 #endif
+*/
     {
         unsigned long foreground = renderdrawcolor(renderer, 1);
         XSetForeground(data->display, data->gc, foreground);
@@ -1157,22 +1152,30 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 #ifndef NO_SHARED_MEMORY
+#ifdef EXPT
     if (data->use_xrender && data->stencil_image && data->stencil_surface) {
         SDL_FillRect(data->stencil_surface, NULL, 0x00);
 
-        SDL_SetClipRect(data->stencil_surface, NULL);
         SDL_DrawLines(data->stencil_surface, points, count, 0xFF);
+
+        SDL_SetClipRect(data->stencil_surface, NULL);
 
         XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
                      0, 0, 0, 0, window->w, window->h, False);
+
+        XSync(data->display, False);
     } else
 #endif
 #endif
+#endif
+*/
     {
         Pixmap drawable;
         GC gc;
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
             drawable = data->stencil;
@@ -1184,6 +1187,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         }
         else
 #endif
+*/
         {
             drawable = data->drawable;
             gc = data->gc;
@@ -1306,6 +1310,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
             }
         }
     }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderColor xrforeground = xrenderdrawcolor(renderer);
@@ -1316,6 +1321,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
     }
 #endif
+*/
     SDL_stack_free(xpoints);
 
     return 0;
@@ -1336,21 +1342,27 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
-
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 #ifndef NO_SHARED_MEMORY
+#ifdef EXPT
     if (data->use_xrender && data->stencil_image && data->stencil_surface) {
         SDL_FillRect(data->stencil_surface, NULL, 0x00);
 
         SDL_SetClipRect(data->stencil_surface, NULL);
+
         SDL_DrawRects(data->stencil_surface, rects, count, 1);
 
         XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
                      0, 0, 0, 0, window->w, window->h, False);
+
+        XSync(data->display, False);
     }
     else
 #endif
 #endif
+#endif
+*/
     {
 
         for (i = 0; i < count; ++i) {
@@ -1369,6 +1381,7 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
                 SDL_AddDirtyRect(&data->dirty, &rect);
             }
         }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
             XSetForeground(data->display, data->stencil_gc, 0x00);
@@ -1379,7 +1392,9 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
             XDrawRectangles(data->display, data->stencil, data->stencil_gc, xrects, xcount);
         }
 #endif
-    } 
+*/
+    }
+/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderColor foreground;
@@ -1387,13 +1402,13 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 
         XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
                              &foreground, 0, 0, 1, 1);
-
         XRenderComposite(data->display, data->blend_op, data->brush_pict,
                          data->stencil_pict, data->drawable_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
     }
     else
 #endif
+*/
     {
         unsigned long foreground;
         
@@ -1447,8 +1462,15 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     if (data->use_xrender) {
         XRenderColor foreground;
         foreground = xrenderdrawcolor(renderer);
-        XRenderFillRectangles(data->display, data->blend_op, data->drawable_pict,
-                              &foreground, xrects, xcount);
+        if (xcount == 1) {
+            XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
+                                 &foreground, xrects[0].x, xrects[0].y,
+                                 xrects[0].width, xrects[0].height);
+        }
+        else if (xcount > 1) {
+            XRenderFillRectangles(data->display, data->blend_op, data->drawable_pict,
+                                  &foreground, xrects, xcount);
+        }
     }
     else
 #endif
@@ -1705,7 +1727,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
         for (dirty = data->dirty.list; dirty; dirty = dirty->next) {
             const SDL_Rect *rect = &dirty->rect;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-            if(data->use_xrender == SDL_TRUE)
+            if (data->use_xrender)
             {
                 XRenderComposite(data->display,
                                  data->blend_op,
@@ -1726,7 +1748,7 @@ X11_RenderPresent(SDL_Renderer * renderer)
             }
         }
         SDL_ClearDirtyRects(&data->dirty);
-   }
+    }
     XSync(data->display, False);
 
     /* Update the flipping chain, if any */

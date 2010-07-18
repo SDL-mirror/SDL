@@ -144,8 +144,8 @@ MoveSprites(SDL_Window * window, SDL_Texture * sprite)
     /* Test points */
     SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderDrawPoint(0, 0);
-    SDL_RenderDrawPoint(window_w-1, 0);
-    SDL_RenderDrawPoint(0, window_h-1);
+    SDL_RenderDrawPoint(window_w/2-1, window_h/2-1);
+    SDL_RenderDrawPoint(window_w/2-1, window_h/2-1);
     SDL_RenderDrawPoint(window_w-1, window_h-1);
 
     /* Test horizontal and vertical lines */
