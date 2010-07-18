@@ -130,7 +130,7 @@ int main(int argc,char** argv) {
 		exit(-1);
 	}
 	
-	SDL_Window *window = SDL_CreateShapedWindow("Big Brother is watching you.",eyes_x_hot,eyes_y_hot,eyes_width,eyes_height,SDL_WINDOW_RESIZABLE);
+	SDL_Window *window = SDL_CreateShapedWindow("Big Brother is watching you.",eyes_x_hot,eyes_y_hot,eyes_width,eyes_height,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 	if(window == NULL) {
 		SDL_VideoQuit();
 		printf("Could not create shaped window for eyes.\n");
@@ -169,7 +169,7 @@ int main(int argc,char** argv) {
 		}
 	if(SDL_MUSTLOCK(eyes))
 		SDL_UnlockSurface(eyes);
-	SDL_Texture *eyes_texture = SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ARGB4444,eyes);
+	SDL_Texture *eyes_texture = SDL_CreateTextureFromSurface(0,eyes);
 	if(eyes_texture == NULL) {
 		SDL_FreeSurface(eyes);
 		SDL_DestroyRenderer(window);
