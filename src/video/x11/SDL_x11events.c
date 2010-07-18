@@ -34,7 +34,7 @@
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
 
-/*#define DEBUG_XEVENTS*/
+#define DEBUG_XEVENTS
 
 static void
 X11_DispatchEvent(_THIS)
@@ -181,7 +181,7 @@ X11_DispatchEvent(_THIS)
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
             SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
-#if 0
+#if 1
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
                 XDisplayKeycodes(display, &min_keycode, &max_keycode);
