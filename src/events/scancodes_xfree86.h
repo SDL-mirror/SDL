@@ -335,8 +335,6 @@ static const SDL_scancode xfree86_scancode_table2[] = {
     /* 154 */   SDL_SCANCODE_UNKNOWN,   /* XF86RotateWindows */
     /* 155 */   SDL_SCANCODE_MAIL,
     /* 156 */   SDL_SCANCODE_UNKNOWN,   /* XF86Favorites */
-    /* 154 */   SDL_SCANCODE_UNKNOWN,   /* XF86RotateWindows */
-    /* 156 */   SDL_SCANCODE_MAIL,
     /* 157 */   SDL_SCANCODE_COMPUTER,
     /* 158 */   SDL_SCANCODE_AC_BACK,
     /* 159 */   SDL_SCANCODE_AC_FORWARD,
