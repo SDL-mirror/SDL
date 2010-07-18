@@ -745,16 +745,12 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
             esac
         fi
 
-        AC_PATH_PROG(NASM, yasm)
+        AC_PATH_PROG(NASM, nasm)
         echo "%ifidn __OUTPUT_FORMAT__,elf" > unquoted-sections
         echo "section .note.GNU-stack noalloc noexec nowrite progbits" >> unquoted-sections
         echo "%endif" >> unquoted-sections
         CompileNASM unquoted-sections || NASM=""
 
-        if test "x$NASM" = x -o "x$NASM" = x'"$NASM"'; then
-            $as_unset ac_cv_path_NASM
-            AC_PATH_PROG(NASM, nasm)
-        fi
         if test "x$NASM" != x -a "x$NASM" != x'"$NASM"'; then
             AC_DEFINE(SDL_HERMES_BLITTERS)
             SOURCES="$SOURCES $srcdir/src/hermes/*.asm"
