@@ -121,28 +121,29 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     /* Load function pointers */
     handle = _this->gl_config.dll_handle;
     _this->gl_data->glXGetProcAddress =
-        (void *(*)(const GLubyte *)) GL_LoadFunction(handle,
-                                                     "glXGetProcAddressARB");
+        (void *(*)(const GLubyte *))
+            GL_LoadFunction(handle, "glXGetProcAddressARB");
     _this->gl_data->glXChooseVisual =
-        (XVisualInfo * (*)(Display *, int, int *)) GL_LoadFunction(handle,
-                                                                   "glXChooseVisual");
+        (XVisualInfo * (*)(Display *, int, int *))
+            X11_GL_GetProcAddress(_this, "glXChooseVisual");
     _this->gl_data->glXCreateContext =
         (GLXContext(*)(Display *, XVisualInfo *, GLXContext, int))
-        GL_LoadFunction(handle, "glXCreateContext");
+            X11_GL_GetProcAddress(_this, "glXCreateContext");
     _this->gl_data->glXDestroyContext =
-        (void (*)(Display *, GLXContext)) GL_LoadFunction(handle,
-                                                          "glXDestroyContext");
+        (void (*)(Display *, GLXContext))
+            X11_GL_GetProcAddress(_this, "glXDestroyContext");
     _this->gl_data->glXMakeCurrent =
-        (int (*)(Display *, GLXDrawable, GLXContext)) GL_LoadFunction(handle,
-                                                                      "glXMakeCurrent");
+        (int (*)(Display *, GLXDrawable, GLXContext))
+            X11_GL_GetProcAddress(_this, "glXMakeCurrent");
     _this->gl_data->glXSwapBuffers =
-        (void (*)(Display *, GLXDrawable)) GL_LoadFunction(handle,
-                                                           "glXSwapBuffers");
+        (void (*)(Display *, GLXDrawable))
+            X11_GL_GetProcAddress(_this, "glXSwapBuffers");
 
     if (!_this->gl_data->glXChooseVisual ||
         !_this->gl_data->glXCreateContext ||
         !_this->gl_data->glXDestroyContext ||
-        !_this->gl_data->glXMakeCurrent || !_this->gl_data->glXSwapBuffers) {
+        !_this->gl_data->glXMakeCurrent ||
+        !_this->gl_data->glXSwapBuffers) {
         SDL_SetError("Could not retrieve OpenGL functions");
         return -1;
     }
@@ -156,13 +157,10 @@ X11_GL_LoadLibrary(_THIS, const char *path)
 void *
 X11_GL_GetProcAddress(_THIS, const char *proc)
 {
-    void *handle;
-
-    handle = _this->gl_config.dll_handle;
     if (_this->gl_data->glXGetProcAddress) {
         return _this->gl_data->glXGetProcAddress((const GLubyte *) proc);
     }
-    return GL_LoadFunction(handle, proc);
+    return GL_LoadFunction(_this->gl_config.dll_handle, proc);
 }
 
 void
