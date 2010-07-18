@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2010 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -128,6 +128,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
 {
     /* We're going to get keyboard events, since we're key. */
     SDL_SetKeyboardFocus(_data->window);
+
+    /* Check to see if someone updated the clipboard */
+    Cocoa_CheckClipboardUpdate(_data->videodata);
 }
 
 - (void)windowDidResignKey:(NSNotification *)aNotification

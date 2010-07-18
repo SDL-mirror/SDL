@@ -145,12 +145,9 @@ typedef unsigned long uintptr_t;
 #define SDL_POWER_UIKIT 1
 
 /* enable iPhone keyboard support */
-#define SDL_IPHONE_KEYBOARD 0
+#define SDL_IPHONE_KEYBOARD 1
 
-/* Enable emulation of multiple mice through multi-touch */
-#define SDL_IPHONE_MULTIPLE_MICE 1
-
-/* Set max recognized G-force from acceleromter
+/* Set max recognized G-force from accelerometer
    See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
  */
 #define SDL_IPHONE_MAX_GFORCE 5.0

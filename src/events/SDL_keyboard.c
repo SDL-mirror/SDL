@@ -551,6 +551,10 @@ SDL_UCS4ToUTF8(Uint32 ch, char *dst)
 int
 SDL_KeyboardInit(void)
 {
+    SDL_Keyboard *keyboard = &SDL_keyboard;
+
+    /* Set the default keymap */
+    SDL_memcpy(keyboard->keymap, SDL_default_keymap, sizeof(SDL_default_keymap));
     return (0);
 }
 
@@ -759,6 +763,11 @@ SDL_SendKeyboardText(const char *text)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
+
+    /* Don't post text events for unprintable characters */
+    if (*text < ' ') {
+        return 0;
+    }
 
     /* Post the event, if desired */
     posted = 0;

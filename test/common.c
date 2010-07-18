@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -190,6 +190,14 @@ CommonArg(CommonState * state, int index)
             return -1;
         }
         state->window_title = argv[index];
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--icon") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        state->window_icon = argv[index];
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--center") == 0) {
@@ -611,6 +619,30 @@ PrintRenderer(SDL_RendererInfo * info)
     }
 }
 
+static SDL_Surface *
+LoadIcon(const char *file)
+{
+    SDL_Surface *icon;
+
+    /* Load the icon surface */
+    icon = SDL_LoadBMP(file);
+    if (icon == NULL) {
+        fprintf(stderr, "Couldn't load %s: %s\n", file, SDL_GetError());
+        return (NULL);
+    }
+
+    if (icon->format->palette == NULL) {
+        fprintf(stderr, "Icon must have a palette!\n");
+        SDL_FreeSurface(icon);
+        return (NULL);
+    }
+
+    /* Set the colorkey */
+    SDL_SetColorKey(icon, 1, *((Uint8 *) icon->pixels));
+
+    return (icon);
+}
+
 SDL_bool
 CommonInit(CommonState * state)
 {
@@ -791,6 +823,15 @@ CommonInit(CommonState * state)
                         SDL_GetError());
                 return SDL_FALSE;
             }
+
+            if (state->window_icon) {
+                SDL_Surface *icon = LoadIcon(state->window_icon);
+                if (icon) {
+                    SDL_SetWindowIcon(state->windows[i], icon);
+                    SDL_FreeSurface(icon);
+                }
+            }
+
             SDL_ShowWindow(state->windows[i]);
 
             if (!state->skip_renderer
@@ -1017,6 +1058,9 @@ PrintEvent(SDL_Event * event)
         fprintf(stderr, "Joystick %d: button %d released",
                 event->jbutton.which, event->jbutton.button);
         break;
+    case SDL_CLIPBOARDUPDATE:
+        fprintf(stderr, "Clipboard updated");
+        break;
     case SDL_QUIT:
         fprintf(stderr, "Quit requested");
         break;
@@ -1050,9 +1094,41 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     case SDL_KEYDOWN:
         switch (event->key.keysym.sym) {
             /* Add hotkeys here */
+        case SDLK_c:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-C copy awesome text! */
+                SDL_SetClipboardText("SDL rocks!\nYou know it!");
+                printf("Copied text to clipboard\n");
+            }
+            break;
+        case SDLK_v:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-V paste awesome text! */
+                char *text = SDL_GetClipboardText();
+                if (*text) {
+                    printf("Clipboard: %s\n", text);
+                } else {
+                    printf("Clipboard is empty\n");
+                }
+                SDL_free(text);
+            }
+            break;
         case SDLK_g:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-G toggle grab */
+            }
+            break;
+        case SDLK_m:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-M maximize */
+                /* FIXME: Which window has focus for this keyboard? */
+                for (i = 0; i < state->num_windows; ++i) {
+                    if (SDL_GetWindowFlags(state->windows[i]) & SDL_WINDOW_MAXIMIZED) {
+                        SDL_RestoreWindow(state->windows[i]);
+                    } else {
+                        SDL_MaximizeWindow(state->windows[i]);
+                    }
+                }
             }
             break;
         case SDLK_z:

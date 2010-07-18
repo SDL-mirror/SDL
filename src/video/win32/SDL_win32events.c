@@ -164,7 +164,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
-                /* FIXME: Update keyboard state */
+                /*
+                 * FIXME: Update keyboard state
+                 */
+                WIN_CheckClipboardUpdate(data->videodata);
             } else {
                 if (SDL_GetKeyboardFocus() == data->window) {
                     SDL_SetKeyboardFocus(NULL);
@@ -585,19 +588,6 @@ SDL_UnregisterApp()
         SDL_free(SDL_Appname);
         SDL_Appname = NULL;
     }
-}
-
-/* Sets an error message based on GetLastError() */
-void
-WIN_SetError(const char *prefix)
-{
-    TCHAR buffer[1024];
-    char *message;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
-                  buffer, SDL_arraysize(buffer), NULL);
-    message = WIN_StringToUTF8(buffer);
-    SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
-    SDL_free(message);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

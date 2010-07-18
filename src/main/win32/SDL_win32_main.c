@@ -71,6 +71,7 @@ ParseCommandLine(char *cmdline, char **argv)
                 ++argc;
             }
             /* Skip over word */
+            lastp = bufp;
             while (*bufp && (*bufp != '"' || *lastp == '\\')) {
                 lastp = bufp;
                 ++bufp;

@@ -795,7 +795,6 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
     int status;
 
     if (data->renderer->info.flags & SDL_RENDERER_PRESENTCOPY) {

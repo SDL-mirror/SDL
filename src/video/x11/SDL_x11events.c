@@ -25,6 +25,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
+#include <limits.h>	/* For INT_MAX */
 
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
@@ -33,16 +34,19 @@
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
 
+#define DEBUG_XEVENTS
+
 static void
 X11_DispatchEvent(_THIS)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Display *display = videodata->display;
     SDL_WindowData *data;
     XEvent xevent;
     int i;
 
     SDL_zero(xevent);           /* valgrind fix. --ryan. */
-    XNextEvent(videodata->display, &xevent);
+    XNextEvent(display, &xevent);
 
     /* filter events catchs XIM events and sends them to the correct
        handler */
@@ -77,6 +81,7 @@ X11_DispatchEvent(_THIS)
     if (!data) {
         return;
     }
+
 #if 0
     printf("type = %d display = %d window = %d\n",
            xevent.type, xevent.xany.display, xevent.xany.window);
@@ -176,12 +181,11 @@ X11_DispatchEvent(_THIS)
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
             SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
-#if 0
+#if 1
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
-                XDisplayKeycodes(videodata->display, &min_keycode,
-                                 &max_keycode);
-                keysym = XKeycodeToKeysym(videodata->display, keycode, 0);
+                XDisplayKeycodes(display, &min_keycode, &max_keycode);
+                keysym = XKeycodeToKeysym(display, keycode, 0);
                 fprintf(stderr,
                         "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%X (%s).\n",
                         keycode, keycode - min_keycode, keysym,
@@ -283,6 +287,130 @@ X11_DispatchEvent(_THIS)
 
     case ButtonRelease:{
             SDL_SendMouseButton(data->window, SDL_RELEASED, xevent.xbutton.button);
+        }
+        break;
+
+    case PropertyNotify:{
+#ifdef DEBUG_XEVENTS
+            unsigned char *propdata;
+            int status, real_format;
+            Atom real_type;
+            unsigned long items_read, items_left, i;
+
+            char *name = XGetAtomName(display, xevent.xproperty.atom);
+            if (name) {
+                printf("PropertyNotify: %s\n", name);
+                XFree(name);
+            }
+
+            status = XGetWindowProperty(display, data->xwindow, xevent.xproperty.atom, 0L, 8192L, False, AnyPropertyType, &real_type, &real_format, &items_read, &items_left, &propdata);
+            if (status == Success) {
+                if (real_type == XA_INTEGER) {
+                    int *values = (int *)propdata;
+
+                    printf("{");
+                    for (i = 0; i < items_read; i++) {
+                        printf(" %d", values[i]);
+                    }
+                    printf(" }\n");
+                } else if (real_type == XA_CARDINAL) {
+                    if (real_format == 32) {
+                        Uint32 *values = (Uint32 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
+                        }
+                        printf(" }\n");
+                    } else if (real_format == 16) {
+                        Uint16 *values = (Uint16 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
+                        }
+                        printf(" }\n");
+                    } else if (real_format == 8) {
+                        Uint8 *values = (Uint8 *)propdata;
+
+                        printf("{");
+                        for (i = 0; i < items_read; i++) {
+                            printf(" %d", values[i]);
+                        }
+                        printf(" }\n");
+                    }
+                } else if (real_type == XA_STRING ||
+                           real_type == videodata->UTF8_STRING) {
+                    printf("{ \"%s\" }\n", propdata);
+                } else if (real_type == XA_ATOM) {
+                    Atom *atoms = (Atom *)propdata;
+
+                    printf("{");
+                    for (i = 0; i < items_read; i++) {
+                        char *name = XGetAtomName(display, atoms[i]);
+                        if (name) {
+                            printf(" %s", name);
+                            XFree(name);
+                        }
+                    }
+                    printf(" }\n");
+                } else {
+                    char *name = XGetAtomName(display, real_type);
+                    printf("Unknown type: %ld (%s)\n", real_type, name ? name : "UNKNOWN");
+                    if (name) {
+                        XFree(name);
+                    }
+                }
+            }
+#endif
+        }
+        break;
+
+    /* Copy the selection from XA_CUT_BUFFER0 to the requested property */
+    case SelectionRequest: {
+            XSelectionRequestEvent *req;
+            XEvent sevent;
+            int seln_format;
+            unsigned long nbytes;
+            unsigned long overflow;
+            unsigned char *seln_data;
+
+            req = &xevent.xselectionrequest;
+#ifdef DEBUG_XEVENTS
+            printf("SelectionRequest (requestor = %ld, target = %ld)\n",
+                req->requestor, req->target);
+#endif
+
+            SDL_zero(sevent);
+            sevent.xany.type = SelectionNotify;
+            sevent.xselection.selection = req->selection;
+            sevent.xselection.target = None;
+            sevent.xselection.property = None;
+            sevent.xselection.requestor = req->requestor;
+            sevent.xselection.time = req->time;
+            if (XGetWindowProperty(display, DefaultRootWindow(display),
+                    XA_CUT_BUFFER0, 0, INT_MAX/4, False, req->target,
+                    &sevent.xselection.target, &seln_format, &nbytes,
+                    &overflow, &seln_data) == Success) {
+                if (sevent.xselection.target == req->target) {
+                    XChangeProperty(display, req->requestor, req->property,
+                        sevent.xselection.target, seln_format, PropModeReplace,
+                        seln_data, nbytes);
+                    sevent.xselection.property = req->property;
+                }
+                XFree(seln_data);
+            }
+            XSendEvent(display, req->requestor, False, 0, &sevent);
+            XSync(display, False);
+        }
+        break;
+
+    case SelectionNotify: {
+#ifdef DEBUG_XEVENTS
+            printf("SelectionNotify (requestor = %ld, target = %ld)\n",
+                xevent.xselection.requestor, xevent.xselection.target);
+#endif
+            videodata->selection_waiting = SDL_FALSE;
         }
         break;
 

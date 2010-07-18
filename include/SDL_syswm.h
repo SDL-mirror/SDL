@@ -106,24 +106,6 @@ struct SDL_SysWMinfo
         {
             Display *display;   /**< The X11 display */
             Window window;      /**< The X11 display window */
-            /**
-             *  These locking functions should be called around
-             *  any X11 functions using the display variable.
-             *  They lock the event thread, so should not be
-             *  called around event functions or from event filters.
-             */
-            /*@{*/
-            void (*lock_func) (void);
-            void (*unlock_func) (void);
-            /*@}*/
-
-            /**
-             *  Introduced in SDL 1.0.2.
-             */
-            /*@{*/
-            Window fswindow;    /**< The X11 fullscreen window */
-            Window wmwindow;    /**< The X11 managed input window */
-            /*@}*/
         } x11;
     } info;
 };
@@ -231,7 +213,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 /**
  *  \brief This function allows access to driver-dependent window information.
  *  
- *  \param windowID The window about which information is being requested
+ *  \param window The window about which information is being requested
  *  \param info This structure must be initialized with the SDL version, and is 
  *              then filled in with information about the given window.
  *  

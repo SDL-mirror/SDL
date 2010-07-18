@@ -23,10 +23,7 @@
 
 #include "SDL_x11video.h"
 
-//#define X11MODES_DEBUG
-#undef SDL_VIDEO_DRIVER_X11_XINERAMA
-#undef SDL_VIDEO_DRIVER_X11_XRANDR
-#undef SDL_VIDEO_DRIVER_X11_VIDMODE
+/*#define X11MODES_DEBUG*/
 
 static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
@@ -253,6 +250,7 @@ CheckVidMode(Display * display, int *major, int *minor)
     return SDL_TRUE;
 }
 
+static
 Bool SDL_NAME(XF86VidModeGetModeInfo) (Display * dpy, int scr,
                                        SDL_NAME(XF86VidModeModeInfo) * info)
 {
@@ -296,6 +294,7 @@ save_mode(Display * display, SDL_DisplayData * data)
                                       &data->saved_view.y);
 }
 
+/*
 static void
 restore_mode(Display * display, SDL_DisplayData * data)
 {
@@ -313,6 +312,7 @@ restore_mode(Display * display, SDL_DisplayData * data)
                                           data->saved_view.y);
     }
 }
+*/
 #endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
 
 void

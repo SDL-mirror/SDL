@@ -21,17 +21,27 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_win32events_h
-#define _SDL_win32events_h
+/* Clipboard event handling code for SDL */
 
-extern LPTSTR SDL_Appname;
-extern Uint32 SDL_Appstyle;
-extern HINSTANCE SDL_Instance;
+#include "SDL_events.h"
+#include "SDL_events_c.h"
+#include "SDL_clipboardevents_c.h"
 
-extern LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam,
-                                       LPARAM lParam);
-extern void WIN_PumpEvents(_THIS);
 
-#endif /* _SDL_win32events_h */
+int
+SDL_SendClipboardUpdate(void)
+{
+    int posted;
+
+    /* Post the event, if desired */
+    posted = 0;
+    if (SDL_GetEventState(SDL_CLIPBOARDUPDATE) == SDL_ENABLE) {
+        SDL_Event event;
+        event.type = SDL_CLIPBOARDUPDATE;
+
+        posted = (SDL_PushEvent(&event) > 0);
+    }
+    return (posted);
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -254,8 +254,6 @@ SDL_SYS_HapticName(int index)
 static int
 SDL_SYS_HapticOpenFromFD(SDL_Haptic * haptic, int fd)
 {
-    const char *name;
-
     /* Allocate the hwdata */
     haptic->hwdata = (struct haptic_hwdata *)
         SDL_malloc(sizeof(*haptic->hwdata));

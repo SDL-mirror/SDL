@@ -21,17 +21,11 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_win32events_h
-#define _SDL_win32events_h
+#ifndef _SDL_clipboardevents_c_h
+#define _SDL_clipboardevents_c_h
 
-extern LPTSTR SDL_Appname;
-extern Uint32 SDL_Appstyle;
-extern HINSTANCE SDL_Instance;
+extern int SDL_SendClipboardUpdate(void);
 
-extern LRESULT CALLBACK WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam,
-                                       LPARAM lParam);
-extern void WIN_PumpEvents(_THIS);
-
-#endif /* _SDL_win32events_h */
+#endif /* _SDL_clipboardevents_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
