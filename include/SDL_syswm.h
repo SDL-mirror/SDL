@@ -213,7 +213,7 @@ typedef struct SDL_SysWMinfo SDL_SysWMinfo;
 /**
  *  \brief This function allows access to driver-dependent window information.
  *  
- *  \param windowID The window about which information is being requested
+ *  \param window The window about which information is being requested
  *  \param info This structure must be initialized with the SDL version, and is 
  *              then filled in with information about the given window.
  *  
