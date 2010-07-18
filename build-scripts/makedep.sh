@@ -69,7 +69,7 @@ __EOF__
         ;;
         asm) cat >>${output}.new <<__EOF__
 
-	\$(LIBTOOL) --tag=CC --mode=compile \$(auxdir)/strip_fPIC.sh \$(NASM) $src -o \$@
+	\$(LIBTOOL) --tag=CC --mode=compile \$(auxdir)/strip_fPIC.sh \$(NASM) -I\$(srcdir)/src/hermes/ $src -o \$@
 
 __EOF__
         ;;
