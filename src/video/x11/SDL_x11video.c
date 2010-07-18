@@ -877,8 +877,7 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		}
 		/* Finally unset the transient hints if necessary */
 		if ( ! set ) {
-			/* NOTE: Does this work? */
-			XSetTransientForHint(SDL_Display, WMwindow, None);
+			XDeleteProperty(SDL_Display, WMwindow, XA_WM_TRANSIENT_FOR);
 		}
 	}
 }
