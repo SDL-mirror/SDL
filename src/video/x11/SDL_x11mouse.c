@@ -230,6 +230,10 @@ void X11_CheckMouseModeNoLock(_THIS)
 	char *env_override;
 	int enable_relative = 1;
 
+	/* This happens when quiting after an xio error */
+	if ( SDL_Display == NULL )
+	        return;
+
 	/* Allow the user to override the relative mouse mode.
 	   They almost never want to do this, as it seriously affects
 	   applications that rely on continuous relative mouse motion.

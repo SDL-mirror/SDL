@@ -329,7 +329,7 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 {
 	int result;
 
-	if ( this->screen == NULL ) {
+	if ( this->screen == NULL || SDL_Display == NULL ) {
 		return(SDL_GRAB_OFF);
 	}
 	if ( ! SDL_Window ) {
