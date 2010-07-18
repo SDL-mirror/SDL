@@ -764,6 +764,11 @@ SDL_SendKeyboardText(const char *text)
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
 
+    /* Don't post text events for unprintable characters */
+    if (*text < ' ') {
+        return 0;
+    }
+
     /* Post the event, if desired */
     posted = 0;
     if (SDL_GetEventState(SDL_TEXTINPUT) == SDL_ENABLE) {
