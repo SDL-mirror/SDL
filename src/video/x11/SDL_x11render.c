@@ -30,9 +30,6 @@
 #include "../SDL_rect_c.h"
 #include "../SDL_pixels_c.h"
 #include "../SDL_yuv_sw_c.h"
-#include "SDL_surface.h"
-
-//#define EXPT
 
 /* X11 renderer implementation */
 
@@ -103,13 +100,6 @@ typedef struct
     Pixmap stencil;
     Pixmap brush;
     Picture brush_pict;
-#ifndef NO_SHARED_MEMORY
-#ifdef EXPT
-    XImage *stencil_image;
-    SDL_Surface *stencil_surface;
-    XShmSegmentInfo stencil_shminfo;
-#endif
-#endif
     Picture xwindow_pict;
     Picture pixmap_picts[3];
     Picture drawable_pict;
@@ -320,36 +310,6 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                                  XRenderFindStandardFormat(data->display,
                                                            PictStandardARGB32),
                                  CPRepeat, &brush_attr);
-#ifndef NO_SHARED_MEMORY
-#ifdef EXPT
-        /* Create a mask image using MIT-SHM */
-        data->stencil_image = NULL;
-        data->stencil_surface = NULL;
-        XShmSegmentInfo *shminfo = &data->stencil_shminfo;
-        while (SDL_X11_HAVE_SHM) {
-            data->stencil_image =
-                XShmCreateImage(data->display, data->visual, 8, ZPixmap,
-                                NULL, shminfo, window->w, window->h);
-            shminfo->shmid = shmget(IPC_PRIVATE,
-                                    data->stencil_image->bytes_per_line *
-                                    data->stencil_image->height,
-                                    IPC_CREAT|0777);
-            shminfo->shmaddr = data->stencil_image->data = shmat(shminfo->shmid, 0, 0);
-            shminfo->readOnly = False;
-            XShmAttach(data->display, shminfo);
-            XSync(data->display, False);
-            shmctl(shminfo->shmid, IPC_RMID, NULL);
-            data->stencil_surface =
-                SDL_CreateRGBSurfaceFrom(shminfo->shmaddr,
-                                         data->stencil_image->width,
-                                         data->stencil_image->height,
-                                         8,
-                                         data->stencil_image->bytes_per_line,
-                                         0, 0, 0, 0xFF);
-            break;
-        }
-#endif
-#endif
         // Set the default blending mode.
         renderer->blendMode = SDL_BLENDMODE_BLEND;
         data->blend_op = PictOpOver;
@@ -1059,26 +1019,6 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
         }
         SDL_AddDirtyRect(&data->dirty, &rect);
     }
-/*
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-#ifndef NO_SHARED_MEMORY
-#ifdef EXPT
-    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
-        SDL_FillRect(data->stencil_surface, &rect, 0x00);
-
-        SDL_SetClipRect(data->stencil_surface, NULL);
-
-        SDL_DrawPoints(data->stencil_surface, points, count, 0xFF);
-
-        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
-                     rect.x, rect.y, rect.x, rect.y, rect.w, rect.h, False);
-
-        XSync(data->display, False);
-    } else
-#endif
-#endif
-#endif
-*/
     {
         xpoint = xpoints = SDL_stack_alloc(XPoint, count);
         xcount = 0;
@@ -1152,26 +1092,6 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
-/*
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-#ifndef NO_SHARED_MEMORY
-#ifdef EXPT
-    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
-        SDL_FillRect(data->stencil_surface, NULL, 0x00);
-
-        SDL_DrawLines(data->stencil_surface, points, count, 0xFF);
-
-        SDL_SetClipRect(data->stencil_surface, NULL);
-
-        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
-                     0, 0, 0, 0, window->w, window->h, False);
-
-        XSync(data->display, False);
-    } else
-#endif
-#endif
-#endif
-*/
     {
         Pixmap drawable;
         GC gc;
@@ -1342,27 +1262,6 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
-/*
-#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-#ifndef NO_SHARED_MEMORY
-#ifdef EXPT
-    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
-        SDL_FillRect(data->stencil_surface, NULL, 0x00);
-
-        SDL_SetClipRect(data->stencil_surface, NULL);
-
-        SDL_DrawRects(data->stencil_surface, rects, count, 1);
-
-        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
-                     0, 0, 0, 0, window->w, window->h, False);
-
-        XSync(data->display, False);
-    }
-    else
-#endif
-#endif
-#endif
-*/
     {
 
         for (i = 0; i < count; ++i) {
