@@ -865,7 +865,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         SDL_PixelFormat format;
         SDL_Surface *surface;
         int propsize;
-        Uint32 *propdata;
+        long *propdata;
 
         /* Convert the icon to ARGB for modern window managers */
         SDL_InitFormat(&format, 32, 0x00FF0000, 0x0000FF00, 0x000000FF,
@@ -879,10 +879,19 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         propsize = 2 + (icon->w * icon->h);
         propdata = SDL_malloc(propsize * sizeof(Uint32));
         if (propdata) {
+            int x, y;
+            Uint32 *src;
+            long *dst;
+
             propdata[0] = icon->w;
             propdata[1] = icon->h;
-            SDL_memcpy(&propdata[2], surface->pixels,
-                       surface->h * surface->pitch);
+            dst = &propdata[2];
+            for (y = 0; y < icon->h; ++y) {
+                src = (Uint32*)((Uint8*)surface->pixels + y * surface->pitch);
+                for (x = 0; x < icon->w; ++x) {
+                    *dst++ = *src++;
+                }
+            }
             XChangeProperty(display, data->xwindow, _NET_WM_ICON, XA_CARDINAL,
                             32, PropModeReplace, (unsigned char *) propdata,
                             propsize);
