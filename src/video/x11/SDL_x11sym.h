@@ -153,6 +153,7 @@ SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,S
 SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
 SDL_X11_SYM(int,XFillRectangle,(Display *dpy,Drawable d,GC gc,int x,int y,unsigned int width,unsigned int height),(dpy,d,gc,x,y,width,height),return)
 SDL_X11_SYM(int,XSetBackground,(Display *dpy,GC gc,unsigned long background),(dpy,gc,background),return)
+SDL_X11_SYM(Status,XInitImage,(XImage *image),(image),return)
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
@@ -249,6 +250,7 @@ SDL_X11_SYM(void,XRenderComposite,(Display *dpy,int op,Picture src,Picture mask,
 SDL_X11_SYM(Picture,XRenderCreateSolidFill,(Display *dpy,const XRenderColor *color),(dpy,color),return)
 SDL_X11_SYM(void,XRenderSetPictureTransform,(Display *dpy,Picture picture,XTransform *transform),(dpy,picture,transform),return)
 SDL_X11_SYM(void,XRenderFillRectangle,(Display *dpy,int op,Picture dst,_Xconst XRenderColor *color,int x,int y,unsigned int width,unsigned int height),(dpy,op,dst,color,x,y,width,height),return)
+SDL_X11_SYM(void,XRenderFillRectangles,(Display *dpy,int op,Picture dst,_Xconst XRenderColor *color,_Xconst XRectangle *rectangles,int n_rects),(dpy,op,dst,color,rectangles,n_rects),return)
 #endif
 /* *INDENT-ON* */
 

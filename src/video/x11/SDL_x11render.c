@@ -30,6 +30,7 @@
 #include "../SDL_rect_c.h"
 #include "../SDL_pixels_c.h"
 #include "../SDL_yuv_sw_c.h"
+#include "SDL_surface.h"
 
 /* X11 renderer implementation */
 
@@ -97,13 +98,21 @@ typedef struct
     Window xwindow;
     Pixmap pixmaps[3];
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    Pixmap mask;
+    Pixmap stencil;
+    Pixmap brush;
+    Picture brush_pict;
+#ifndef NO_SHARED_MEMORY
+    XImage *stencil_image;
+    SDL_Surface *stencil_surface;
+    XShmSegmentInfo stencil_shminfo;
+#endif
     Picture xwindow_pict;
     Picture pixmap_picts[3];
     Picture drawable_pict;
+    Picture stencil_pict;
     int blend_op;
     XRenderPictFormat* xwindow_pict_fmt;
-    GC mask_gc;
+    GC stencil_gc;
     SDL_bool use_xrender;
 #endif
     int current_pixmap;
@@ -286,21 +295,74 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.blend_modes |=
             (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK);
         // Create a clip mask that is used for rendering primitives.
-        data->mask = XCreatePixmap(data->display, data->xwindow,
-                                   window->w, window->h, 1);
-        if (!data->mask) {
-            SDL_SetError("XCreatePixmap() failed");
-            return NULL;
-        }
+        data->stencil = XCreatePixmap(data->display, data->xwindow,
+                                   window->w, window->h, 8);
+        
         // Create the GC for the clip mask.
-        data->mask_gc = XCreateGC(data->display, data->mask,
+        data->stencil_gc = XCreateGC(data->display, data->stencil,
                                   GCGraphicsExposures, &gcv);
-        if (!data->mask_gc) {
-            SDL_SetError("XCreateGC() failed");
-            return NULL;
+        XSetBackground(data->display, data->stencil_gc, 0x00);
+        XSetForeground(data->display, data->stencil_gc, 0xFF);
+        data->stencil_pict =
+            XRenderCreatePicture(data->display, data->stencil,
+                                 XRenderFindStandardFormat(data->display,
+                                                           PictStandardA8),
+                                 0, NULL);
+        data->brush =
+            XCreatePixmap(data->display, data->xwindow, 1, 1, 32);
+        XRenderPictureAttributes brush_attr;
+        brush_attr.repeat = RepeatNormal;
+        data->brush_pict =
+            XRenderCreatePicture(data->display, data->brush,
+                                 XRenderFindStandardFormat(data->display,
+                                                           PictStandardARGB32),
+                                 CPRepeat, &brush_attr);
+#ifndef NO_SHARED_MEMORY
+        /* Create a mask image using MIT-SHM */
+        data->stencil_image = NULL;
+        data->stencil_surface = NULL;
+        XShmSegmentInfo *shminfo = &data->stencil_shminfo;
+        while (SDL_X11_HAVE_SHM) {
+            data->stencil_image =
+                XShmCreateImage(data->display, data->visual, 8, ZPixmap,
+                                NULL, shminfo, window->w, window->h);
+            if (!data->stencil_image) {
+                printf("XShmCreateImage() failed");
+                break;
+            } else {
+                printf("image created\n");
+            }
+            shminfo->shmid = shmget(IPC_PRIVATE,
+                                    data->stencil_image->bytes_per_line *
+                                    data->stencil_image->height,
+                                    IPC_CREAT|0777);
+            if (!shminfo->shmid) {
+                printf("shmget() failed");
+                break;
+            } else {
+                printf("shmid aquired\n");
+            }
+            shminfo->shmaddr = data->stencil_image->data = shmat(shminfo->shmid, 0, 0);
+            shminfo->readOnly = False;
+            XShmAttach(data->display, shminfo);
+            XSync(data->display, False);
+            shmctl(shminfo->shmid, IPC_RMID, NULL);
+            data->stencil_surface =
+                SDL_CreateRGBSurfaceFrom(shminfo->shmaddr,
+                                         data->stencil_image->width,
+                                         data->stencil_image->height,
+                                         8,
+                                         data->stencil_image->bytes_per_line,
+                                         0, 0, 0, 0xFF);
+            if (!data->stencil_surface) {
+                printf("SDL_CreateRGBSurfaceFrom() failed");
+                break;
+            } else {
+                printf("surface created\n");
+            }
+            break;
         }
-        XSetBackground(data->display, data->mask_gc, 0);
-        XSetForeground(data->display, data->mask_gc, 1);
+#endif
         // Set the default blending mode.
         renderer->blendMode = SDL_BLENDMODE_BLEND;
         data->blend_op = PictOpOver;
@@ -693,14 +755,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         if (!data->image)
 #endif /* not NO_SHARED_MEMORY */
         {
-            /* This is the case where the server does not have
-               shared memory support and the texture is streaming.
-               It does not make sense to use Xrender here because
-               we would have to copy the data onto a server side
-               pixmap with XPutImage first and only then can we 
-               use Xrender
-            */
-
             data->pixels = SDL_malloc(texture->h * data->pitch);
             if (!data->pixels) {
                 X11_DestroyTexture(renderer, texture);
@@ -999,61 +1053,74 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     SDL_Window *window = renderer->window;
     XPoint *xpoints, *xpoint;
     int i, xcount;
+    SDL_Rect clip, rect;
 
-    if (data->makedirty) {
-        SDL_Rect rect;
+    clip.x = 0;
+    clip.y = 0;
+    clip.w = window->w;
+    clip.h = window->h;
 
-        /* Get the smallest rectangle that contains everything */
-        rect.x = 0;
-        rect.y = 0;
-        rect.w = window->w;
-        rect.h = window->h;
-        if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
-            /* Nothing to draw */
-            return 0;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+#ifndef NO_SHARED_MEMORY
+    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
+        SDL_FillRect(data->stencil_surface, NULL, 0x00);
+
+        SDL_SetClipRect(data->stencil_surface, NULL);
+        SDL_DrawPoints(data->stencil_surface, points, count, 0xFF);
+
+        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
+                     0, 0, 0, 0, window->w, window->h, False);
+    } else
+#endif
+#endif
+    {
+        if (data->makedirty) {
+
+            /* Get the smallest rectangle that contains everything */
+            rect.x = 0;
+            rect.y = 0;
+            rect.w = window->w;
+            rect.h = window->h;
+            if (!SDL_EnclosePoints(points, count, &rect, &rect)) {
+                /* Nothing to draw */
+                return 0;
+            }
+            SDL_AddDirtyRect(&data->dirty, &rect);
         }
-        SDL_AddDirtyRect(&data->dirty, &rect);
-    }
 
-    xpoint = xpoints = SDL_stack_alloc(XPoint, count);
-    xcount = 0;
-    for (i = 0; i < count; ++i) {
-        int x = points[i].x;
-        int y = points[i].y;
-        if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
-            continue;
+        xpoint = xpoints = SDL_stack_alloc(XPoint, count);
+        xcount = 0;
+        for (i = 0; i < count; ++i) {
+            int x = points[i].x;
+            int y = points[i].y;
+            if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
+                continue;
+            }
+            xpoint->x = (short)x;
+            xpoint->y = (short)y;
+            ++xpoint;
+            ++xcount;
         }
-        xpoint->x = (short)x;
-        xpoint->y = (short)y;
-        ++xpoint;
-        ++xcount;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->use_xrender) {
+            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XFillRectangle(data->display, data->stencil, data->stencil_gc,
+                           0, 0, window->w, window->h);
+            XSetForeground(data->display, data->stencil_gc, 0xFF);
+            XDrawPoints(data->display, data->stencil, data->stencil_gc, xpoints, xcount,
+                        CoordModeOrigin);
+        }
+#endif
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if (data->use_xrender == SDL_TRUE) {
+    if (data->use_xrender) {
         XRenderColor foreground;
-        XRenderPictureAttributes attributes;
-        unsigned long valuemask;
-        
         foreground = xrenderdrawcolor(renderer);
-        /* Set the clip mask to restrict rendering to
-         * the primitive being drawn
-         */
-        attributes.clip_mask = data->mask;
-        valuemask = CPClipMask;
-        
-        XSetForeground(data->display, data->mask_gc, 0);
-        XFillRectangle(data->display, data->mask, data->mask_gc,
-                       0, 0, window->w, window->h);
-        XSetForeground(data->display, data->mask_gc, 1);
-
-        XDrawPoints(data->display, data->mask, data->mask_gc, xpoints, xcount,
-                    CoordModeOrigin);
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
-                             &foreground, 0, 0, window->w, window->h);*/
-        // Reset the clip_mask
-        attributes.clip_mask = None;
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
+        XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
+                             &foreground, 0, 0, 1, 1);
+        XRenderComposite(data->display, data->blend_op, data->brush_pict,
+                         data->stencil_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
     }
     else
 #endif
@@ -1067,6 +1134,7 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                         CoordModeOrigin);
         }
     }
+
     SDL_stack_free(xpoints);
 
     return 0;
@@ -1089,81 +1157,141 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
-
-    Pixmap drawable;
-    GC gc;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if (data->use_xrender == SDL_TRUE) {
-        drawable = data->mask;
-        gc = data->mask_gc;
-        XSetForeground(data->display, data->mask_gc, 0);
-        XFillRectangle(data->display, data->mask, data->mask_gc,
-                       0, 0, window->w, window->h);
-        XSetForeground(data->display, data->mask_gc, 1);
-    }
-    else
+#ifndef NO_SHARED_MEMORY
+    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
+        SDL_FillRect(data->stencil_surface, NULL, 0x00);
+
+        SDL_SetClipRect(data->stencil_surface, NULL);
+        SDL_DrawLines(data->stencil_surface, points, count, 0xFF);
+
+        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
+                     0, 0, 0, 0, window->w, window->h, False);
+    } else
+#endif
 #endif
     {
-        drawable = data->drawable;
-        gc = data->gc;
-    }
-
-    foreground = renderdrawcolor(renderer, 1);
-    XSetForeground(data->display, data->gc, foreground);
-
-    xpoint = xpoints = SDL_stack_alloc(XPoint, count);
-    xcount = 0;
-    minx = INT_MAX;
-    miny = INT_MAX;
-    maxx = INT_MIN;
-    maxy = INT_MIN;
-    for (i = 0; i < count; ++i) {
-        int x = points[i].x;
-        int y = points[i].y;
-
-        /* If the point is inside the window, add it to the list */
-        if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
-            if (x < minx) {
-                minx = x;
-            } else if (x > maxx) {
-                maxx = x;
-            }
-            if (y < miny) {
-                miny = y;
-            } else if (y > maxy) {
-                maxy = y;
-            }
-            xpoint->x = (short)x;
-            xpoint->y = (short)y;
-            ++xpoint;
-            ++xcount;
-            continue;
+        Pixmap drawable;
+        GC gc;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->use_xrender) {
+            drawable = data->stencil;
+            gc = data->stencil_gc;
+            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XFillRectangle(data->display, data->stencil, data->stencil_gc,
+                           0, 0, window->w, window->h);
+            XSetForeground(data->display, data->stencil_gc, 0xFF);
+        }
+        else
+#endif
+        {
+            drawable = data->drawable;
+            gc = data->gc;
         }
 
-        /* We need to clip the line segments joined by this point */
-        if (xcount > 0) {
-            int x1 = xpoint[-1].x;
-            int y1 = xpoint[-1].y;
-            int x2 = x;
-            int y2 = y;
-            if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
-                if (x2 < minx) {
-                    minx = x2;
-                } else if (x2 > maxx) {
-                    maxx = x2;
+        foreground = renderdrawcolor(renderer, 1);
+        XSetForeground(data->display, data->gc, foreground);
+
+        xpoint = xpoints = SDL_stack_alloc(XPoint, count);
+        xcount = 0;
+        minx = INT_MAX;
+        miny = INT_MAX;
+        maxx = INT_MIN;
+        maxy = INT_MIN;
+        for (i = 0; i < count; ++i) {
+            int x = points[i].x;
+            int y = points[i].y;
+
+            /* If the point is inside the window, add it to the list */
+            if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
+                if (x < minx) {
+                    minx = x;
+                } else if (x > maxx) {
+                    maxx = x;
                 }
-                if (y2 < miny) {
-                    miny = y2;
-                } else if (y2 > maxy) {
-                    maxy = y2;
+                if (y < miny) {
+                    miny = y;
+                } else if (y > maxy) {
+                    maxy = y;
                 }
-                xpoint->x = (short)x2;
-                xpoint->y = (short)y2;
+                xpoint->x = (short)x;
+                xpoint->y = (short)y;
                 ++xpoint;
                 ++xcount;
+                continue;
             }
-            XDrawLines(data->display, drawable, gc,
-                       xpoints, xcount, CoordModeOrigin);
+
+            /* We need to clip the line segments joined by this point */
+            if (xcount > 0) {
+                int x1 = xpoint[-1].x;
+                int y1 = xpoint[-1].y;
+                int x2 = x;
+                int y2 = y;
+                if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
+                    if (x2 < minx) {
+                        minx = x2;
+                    } else if (x2 > maxx) {
+                        maxx = x2;
+                    }
+                    if (y2 < miny) {
+                        miny = y2;
+                    } else if (y2 > maxy) {
+                        maxy = y2;
+                    }
+                    xpoint->x = (short)x2;
+                    xpoint->y = (short)y2;
+                    ++xpoint;
+                    ++xcount;
+                }
+                XDrawLines(data->display, drawable, gc,
+                           xpoints, xcount, CoordModeOrigin);
+                if (xpoints[0].x != x2 || xpoints[0].y != y2) {
+                    XDrawPoint(data->display, drawable, gc, x2, y2);
+                }
+                if (data->makedirty) {
+                    SDL_Rect rect;
+
+                    rect.x = minx;
+                    rect.y = miny;
+                    rect.w = (maxx - minx) + 1;
+                    rect.h = (maxy - miny) + 1;
+                    SDL_AddDirtyRect(&data->dirty, &rect);
+                }
+                xpoint = xpoints;
+                xcount = 0;
+                minx = INT_MAX;
+                miny = INT_MAX;
+                maxx = INT_MIN;
+                maxy = INT_MIN;
+            }
+            if (i < (count-1)) {
+                int x1 = x;
+                int y1 = y;
+                int x2 = points[i+1].x;
+                int y2 = points[i+1].y;
+                if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
+                    if (x1 < minx) {
+                        minx = x1;
+                    } else if (x1 > maxx) {
+                        maxx = x1;
+                    }
+                    if (y1 < miny) {
+                        miny = y1;
+                    } else if (y1 > maxy) {
+                        maxy = y1;
+                    }
+                    xpoint->x = (short)x1;
+                    xpoint->y = (short)y1;
+                    ++xpoint;
+                    ++xcount;
+                }
+            }
+        }
+        if (xcount > 1) {
+            int x2 = xpoint[-1].x;
+            int y2 = xpoint[-1].y;
+            XDrawLines(data->display, drawable, gc, xpoints, xcount,
+                       CoordModeOrigin);
             if (xpoints[0].x != x2 || xpoints[0].y != y2) {
                 XDrawPoint(data->display, drawable, gc, x2, y2);
             }
@@ -1176,65 +1304,16 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                 rect.h = (maxy - miny) + 1;
                 SDL_AddDirtyRect(&data->dirty, &rect);
             }
-            xpoint = xpoints;
-            xcount = 0;
-            minx = INT_MAX;
-            miny = INT_MAX;
-            maxx = INT_MIN;
-            maxy = INT_MIN;
-        }
-        if (i < (count-1)) {
-            int x1 = x;
-            int y1 = y;
-            int x2 = points[i+1].x;
-            int y2 = points[i+1].y;
-            if (SDL_IntersectRectAndLine(&clip, &x1, &y1, &x2, &y2)) {
-                if (x1 < minx) {
-                    minx = x1;
-                } else if (x1 > maxx) {
-                    maxx = x1;
-                }
-                if (y1 < miny) {
-                    miny = y1;
-                } else if (y1 > maxy) {
-                    maxy = y1;
-                }
-                xpoint->x = (short)x1;
-                xpoint->y = (short)y1;
-                ++xpoint;
-                ++xcount;
-            }
-        }
-    }
-    if (xcount > 1) {
-        int x2 = xpoint[-1].x;
-        int y2 = xpoint[-1].y;
-        XDrawLines(data->display, drawable, gc, xpoints, xcount,
-                   CoordModeOrigin);
-        if (xpoints[0].x != x2 || xpoints[0].y != y2) {
-            XDrawPoint(data->display, drawable, gc, x2, y2);
-        }
-        if (data->makedirty) {
-            SDL_Rect rect;
-
-            rect.x = minx;
-            rect.y = miny;
-            rect.w = (maxx - minx) + 1;
-            rect.h = (maxy - miny) + 1;
-            SDL_AddDirtyRect(&data->dirty, &rect);
         }
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(data->use_xrender == SDL_TRUE) {
+    if (data->use_xrender) {
         XRenderColor xrforeground = xrenderdrawcolor(renderer);
-        XRenderPictureAttributes attributes;
-        attributes.clip_mask = data->mask;
-        unsigned long valuemask = CPClipMask;
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
-                             &xrforeground, 0, 0, window->w, window->h);*/
-        attributes.clip_mask = None;
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
+        XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
+                             &xrforeground, 0, 0, 1, 1);
+        XRenderComposite(data->display, data->blend_op, data->brush_pict,
+                         data->stencil_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
     }
 #endif
     SDL_stack_free(xpoints);
@@ -1258,44 +1337,60 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     clip.w = window->w;
     clip.h = window->h;
 
-    for (i = 0; i < count; ++i) {
-        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-            continue;
-        }
-
-        xrect->x = (short)rect.x;
-        xrect->y = (short)rect.y;
-        xrect->width = (unsigned short)rect.w;
-        xrect->height = (unsigned short)rect.h;
-        ++xrect;
-        ++xcount;
-
-        if (data->makedirty) {
-            SDL_AddDirtyRect(&data->dirty, &rect);
-        }
-    }
-     
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(data->use_xrender == SDL_TRUE) {
+#ifndef NO_SHARED_MEMORY
+    if (data->use_xrender && data->stencil_image && data->stencil_surface) {
+        SDL_FillRect(data->stencil_surface, NULL, 0x00);
+
+        SDL_SetClipRect(data->stencil_surface, NULL);
+        SDL_DrawRects(data->stencil_surface, rects, count, 1);
+
+        XShmPutImage(data->display, data->stencil, data->stencil_gc, data->stencil_image,
+                     0, 0, 0, 0, window->w, window->h, False);
+    }
+    else
+#endif
+#endif
+    {
+
+        for (i = 0; i < count; ++i) {
+            if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
+                continue;
+            }
+
+            xrect->x = (short)rect.x;
+            xrect->y = (short)rect.y;
+            xrect->width = (unsigned short)rect.w;
+            xrect->height = (unsigned short)rect.h;
+            ++xrect;
+            ++xcount;
+
+            if (data->makedirty) {
+                SDL_AddDirtyRect(&data->dirty, &rect);
+            }
+        }
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (data->use_xrender) {
+            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XFillRectangle(data->display, data->stencil, data->stencil_gc,
+                           0, 0, window->w, window->h);
+            XSetForeground(data->display, data->stencil_gc, 0xFF);
+
+            XDrawRectangles(data->display, data->stencil, data->stencil_gc, xrects, xcount);
+        }
+#endif
+    } 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (data->use_xrender) {
         XRenderColor foreground;
-        XRenderPictureAttributes attributes;
-        unsigned long valuemask;
-
         foreground = xrenderdrawcolor(renderer);
-        valuemask = CPClipMask;
-        attributes.clip_mask = data->mask;
-        
-        XSetForeground(data->display, data->mask_gc, 0);
-        XFillRectangle(data->display, data->mask, data->mask_gc,
-                       0, 0, window->w, window->h);
-        XSetForeground(data->display, data->mask_gc, 1);
 
-        XDrawRectangles(data->display, data->mask, data->mask_gc, xrects, xcount);
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
-        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
-                             &foreground, 0, 0, window->w, window->h);*/
-        attributes.clip_mask = None;
-        XRenderChangePicture(data->display, data->drawable_pict, valuemask, &attributes);
+        XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
+                             &foreground, 0, 0, 1, 1);
+
+        XRenderComposite(data->display, data->blend_op, data->brush_pict,
+                         data->stencil_pict, data->drawable_pict,
+                         0, 0, 0, 0, 0, 0, window->w, window->h);
     }
     else
 #endif
@@ -1326,7 +1421,7 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     clip.y = 0;
     clip.w = window->w;
     clip.h = window->h;
-
+    
     int i, xcount;
     XRectangle *xrects, *xrect;
     xrect = xrects = SDL_stack_alloc(XRectangle, count);
@@ -1349,26 +1444,11 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     }
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(data->use_xrender == SDL_TRUE) {
+    if (data->use_xrender) {
         XRenderColor foreground;
-        XRenderPictureAttributes attributes;
-
         foreground = xrenderdrawcolor(renderer);
-        attributes.clip_mask = data->mask;
-        
-        XSetForeground(data->display, data->mask_gc, 0);
-        XFillRectangle(data->display, data->mask, data->mask_gc,
-                       0, 0, window->w, window->h);
-        XSetForeground(data->display, data->mask_gc, 1);
-
-        XFillRectangles(data->display, data->mask, data->mask_gc,
-                        xrects, xcount);
-
-        XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
-        /*XRenderFillRectangle(data->display, data->blend_op, data->drawable_pict,
-                               &foreground, 0, 0, window->w, window->h);*/
-        attributes.clip_mask = None;
-        XRenderChangePicture(data->display, data->drawable_pict, CPClipMask, &attributes);
+        XRenderFillRectangles(data->display, data->blend_op, data->drawable_pict,
+                              &foreground, xrects, xcount);
     }
     else
 #endif
@@ -1383,7 +1463,6 @@ X11_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     }
 
     SDL_stack_free(xrects);
-
     return 0;
 }
 
@@ -1726,11 +1805,11 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
             XFreeGC(data->display, data->gc);
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if (data->mask_gc) {
-            XFreeGC(data->display, data->mask_gc);
+        if (data->stencil_gc) {
+            XFreeGC(data->display, data->stencil_gc);
         }
-        if (data->mask) {
-            XFreePixmap(data->display, data->mask);
+        if (data->stencil) {
+            XFreePixmap(data->display, data->stencil);
         }
         if (data->drawable_pict) {
             XRenderFreePicture(data->display, data->drawable_pict);
