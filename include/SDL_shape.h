@@ -42,6 +42,10 @@ extern "C" {
  * Header file for the shaped window API.
  */
 
+#define SDL_NONSHAPEABLE_WINDOW -1
+#define SDL_INVALID_SHAPE_ARGUMENT -2
+#define SDL_WINDOW_LACKS_SHAPE -3
+
 /**
  *  \brief Create a window that can be shaped with the specified position, dimensions, and flags.
  *  
@@ -58,7 +62,7 @@ extern "C" {
  *               ::SDL_WINDOW_MAXIMIZED,  ::SDL_WINDOW_MINIMIZED,
  *		 ::SDL_WINDOW_BORDERLESS is always set, and ::SDL_WINDOW_FULLSCREEN is always unset.
  *  
- *  \return The id of the window created, or zero if window creation failed.
+ *  \return The window created, or NULL if window creation failed.
  *  
  *  \sa SDL_DestroyWindow()
  */
@@ -102,8 +106,8 @@ typedef struct SDL_WindowShapeMode {
  * \param shape A surface encoding the desired shape for the window.
  * \param shapeMode The parameters to set for the shaped window.
  *
- * \return 0 on success, -1 on invalid an invalid shape argument, or -2 if the SDL_Window* given does not reference
- *         a valid shaped window.
+ * \return 0 on success, SDL_INVALID_SHAPE_ARGUMENT on invalid an invalid shape argument, or SDL_NONSHAPEABLE_WINDOW
+ *           if the SDL_Window* given does not reference a valid shaped window.
  *
  * \sa SDL_WindowShapeMode
  * \sa SDL_GetShapedWindowMode.
@@ -117,8 +121,8 @@ extern DECLSPEC int SDLCALL SDL_SetWindowShape(SDL_Window *window,SDL_Surface *s
  * \param shapeMode An empty shape-mode structure to fill, or NULL to check whether the window has a shape.
  *
  * \return 0 if the window has a shape and, provided shapeMode was not NULL, shapeMode has been filled with the mode
- *           data, -1 if the SDL_Window given is not a shaped window, or -2 if the SDL_Window* given is a shapeable
- *           window currently lacking a shape.
+ *           data, SDL_NONSHAPEABLE_WINDOW if the SDL_Window given is not a shaped window, or SDL_WINDOW_LACKS_SHAPE if
+ *           the SDL_Window* given is a shapeable window currently lacking a shape.
  *
  * \sa SDL_WindowShapeMode
  * \sa SDL_SetWindowShape

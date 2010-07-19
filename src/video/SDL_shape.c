@@ -82,10 +82,10 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 	int result;
 	if(window == NULL || !SDL_IsShapedWindow(window))
 		//The window given was not a shapeable window.
-		return -2;
+		return SDL_NONSHAPEABLE_WINDOW;
 	if(shape == NULL)
 		//Invalid shape argument.
-		return -1;
+		return SDL_INVALID_SHAPE_ARGUMENT;
 	
 	if(shapeMode != NULL) {
 		switch(shapeMode->mode) {
@@ -123,7 +123,7 @@ int SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
 				return 0;
 			else
 				//The window given is shapeable but lacks a shape.
-				return -2;
+				return SDL_WINDOW_LACKS_SHAPE;
 		}
 		else {
 			if(window->shaper->alphacutoff != 1) {
@@ -137,5 +137,5 @@ int SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
 	}
 	else
 		//The window given is not a valid shapeable window.
-		return -1;
+		return SDL_NONSHAPEABLE_WINDOW;
 }
