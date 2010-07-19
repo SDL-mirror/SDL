@@ -31,11 +31,6 @@
 #include "../SDL_pixels_c.h"
 #include "../SDL_yuv_sw_c.h"
 
-#include <X11/extensions/Xdamage.h>
-#include <X11/extensions/Xfixes.h>
-
-#define SDL_VIDEO_DRIVER_X11_XDAMAGE
-
 /* X11 renderer implementation */
 
 static SDL_Renderer *X11_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -271,21 +266,23 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
     if (data->use_xrender) {
+        if(SDL_X11_HAVE_XDAMAGE && SDL_X11_HAVE_XFIXES) {
         /* Query XDamage and XFixes */
-        if(XDamageQueryExtension(data->display,
-                                 &event_basep,
-                                 &error_basep) == True && 
-           (XFixesQueryExtension(data->display,
-                                    &event_basep,
-                                    &error_basep) == True)) {
-                int major_version, minor_version;
-                XFixesQueryVersion(data->display,
-                                   &major_version,
-                                   &minor_version);
-                /* Only XFixes v 2 or greater
-                 * Required for XFixesSetPictureClipRegion() */
-                if(major_version >= 2)
-                    data->use_xdamage = SDL_TRUE;
+            if(XDamageQueryExtension(data->display,
+                                     &event_basep,
+                                     &error_basep) == True && 
+               (XFixesQueryExtension(data->display,
+                                        &event_basep,
+                                        &error_basep) == True)) {
+                    int major_version, minor_version;
+                    XFixesQueryVersion(data->display,
+                                       &major_version,
+                                       &minor_version);
+                    /* Only XFixes v 2 or greater
+                     * Required for XFixesSetPictureClipRegion() */
+                    if(major_version >= 2)
+                        data->use_xdamage = SDL_TRUE;
+            }
         }
 #endif
         /* Find the PictFormat from the visual.

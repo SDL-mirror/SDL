@@ -252,6 +252,22 @@ SDL_X11_SYM(void,XRenderSetPictureTransform,(Display *dpy,Picture picture,XTrans
 SDL_X11_SYM(void,XRenderFillRectangle,(Display *dpy,int op,Picture dst,_Xconst XRenderColor *color,int x,int y,unsigned int width,unsigned int height),(dpy,op,dst,color,x,y,width,height),return)
 SDL_X11_SYM(void,XRenderFillRectangles,(Display *dpy,int op,Picture dst,_Xconst XRenderColor *color,_Xconst XRectangle *rectangles,int n_rects),(dpy,op,dst,color,rectangles,n_rects),return)
 #endif
+
+#ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
+SDL_X11_MODULE(XDAMAGE)
+SDL_X11_SYM(Bool,XDamageQueryExtension,(Display *dpy,int *event_base_return,int *error_base_return),(dpy,event_base_return,error_base_return),return)
+SDL_X11_SYM(Damage,XDamageCreate,(Display *dpy,Drawable d,int level),(dpy,d,level),return)
+SDL_X11_SYM(void,XDamageSubtract,(Display *dpy,Damage damage,XserverRegion repair,XserverRegion parts),(dpy,damage,repair,parts),return)
+SDL_X11_SYM(void,XDamageDestroy,(Display *dpy,Damage damage),(dpy,damage),return)
+#endif
+
+#ifdef SDL_VIDEO_DRIVER_X11_XFIXES
+SDL_X11_MODULE(XFIXES)
+SDL_X11_SYM(Bool,XFixesQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
+SDL_X11_SYM(Status,XFixesQueryVersion,(Display *dpy,int *major,int *minor),(dpy,major,minor),return)
+SDL_X11_SYM(void,XFixesSetGCClipRegion,(Display *dpy,GC gc,int clip_x,int clip_y,XserverRegion region),(dpy,gc,clip_x,clip_y,region),return)
+SDL_X11_SYM(void,XFixesSetPictureClipRegion,(Display *dpy,XID picture,int clip_x,int clip_y,XserverRegion region),(dpy,picture,clip_x,clip_y,region),return)
+#endif
 /* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */
