@@ -31,6 +31,9 @@
 #include "../SDL_pixels_c.h"
 #include "../SDL_yuv_sw_c.h"
 
+#include <X11/extensions/Xdamage.h>
+#include <X11/extensions/Xfixes.h>
+
 /* X11 renderer implementation */
 
 static SDL_Renderer *X11_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -108,6 +111,8 @@ typedef struct
     XRenderPictFormat* xwindow_pict_fmt;
     GC stencil_gc;
     SDL_bool use_xrender;
+    Damage stencil_damage;
+    XserverRegion stencil_parts;
 #endif
     int current_pixmap;
     Drawable drawable;
@@ -295,12 +300,18 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->stencil_gc = XCreateGC(data->display, data->stencil,
                                   GCGraphicsExposures, &gcv);
         XSetBackground(data->display, data->stencil_gc, 0x00);
+        XSetForeground(data->display, data->stencil_gc, 0x00);
+        XFillRectangle(data->display, data->stencil, data->stencil_gc,
+                       0, 0, window->w, window->h);
         XSetForeground(data->display, data->stencil_gc, 0xFF);
         data->stencil_pict =
             XRenderCreatePicture(data->display, data->stencil,
                                  XRenderFindStandardFormat(data->display,
                                                            PictStandardA8),
                                  0, NULL);
+        data->stencil_damage =
+            XDamageCreate(data->display, data->stencil, XDamageReportNonEmpty);
+        XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
         data->brush =
             XCreatePixmap(data->display, data->xwindow, 1, 1, 32);
         XRenderPictureAttributes brush_attr;
@@ -1001,6 +1012,8 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     XPoint *xpoints, *xpoint;
     int i, xcount;
     SDL_Rect clip, rect;
+    /*Damage damage;
+    XserverRegion parts;*/
 
     clip.x = 0;
     clip.y = 0;
@@ -1033,32 +1046,39 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
             ++xpoint;
             ++xcount;
         }
-/*
+
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
             XSetForeground(data->display, data->stencil_gc, 0x00);
+            XFixesSetGCClipRegion(data->display, data->stencil_gc, 0, 0, data->stencil_parts);
             XFillRectangle(data->display, data->stencil, data->stencil_gc,
                            rect.x, rect.y, rect.w, rect.h);
+            XFixesSetGCClipRegion(data->display, data->stencil_gc, 0, 0, None);
             XSetForeground(data->display, data->stencil_gc, 0xFF);
+            /*damage =
+                XDamageCreate(data->display, data->stencil, XDamageReportRawRectangles);*/
             XDrawPoints(data->display, data->stencil, data->stencil_gc, xpoints, xcount,
                         CoordModeOrigin);
+            XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
         }
-#endif*/
+#endif
     }
-/*
+
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderColor foreground;
         foreground = xrenderdrawcolor(renderer);
         XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
                              &foreground, 0, 0, 1, 1);
+        XFixesSetPictureClipRegion(data->display, data->drawable_pict, 0, 0, data->stencil_parts);
         XRenderComposite(data->display, data->blend_op, data->brush_pict,
                          data->stencil_pict, data->drawable_pict,
                          rect.x, rect.y, rect.x, rect.y, rect.x, rect.y, rect.w, rect.h);
+        XFixesSetPictureClipRegion(data->display, data->drawable_pict, 0, 0, None);
+        //XDamageDestroy(data->display, damage);
     }
     else
 #endif
-*/
     {
         unsigned long foreground = renderdrawcolor(renderer, 1);
         XSetForeground(data->display, data->gc, foreground);
@@ -1087,6 +1107,8 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     int i, xcount;
     int minx, miny;
     int maxx, maxy;
+    XserverRegion parts;
+    Damage damage;
 
     clip.x = 0;
     clip.y = 0;
@@ -1095,19 +1117,21 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     {
         Pixmap drawable;
         GC gc;
-/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
             drawable = data->stencil;
             gc = data->stencil_gc;
             XSetForeground(data->display, data->stencil_gc, 0x00);
+            XFixesSetGCClipRegion(data->display, data->stencil_gc, 0, 0, data->stencil_parts);
             XFillRectangle(data->display, data->stencil, data->stencil_gc,
                            0, 0, window->w, window->h);
+            XFixesSetGCClipRegion(data->display, data->stencil_gc, 0, 0, None);
             XSetForeground(data->display, data->stencil_gc, 0xFF);
+            /*damage =
+                XDamageCreate(data->display, data->stencil, XDamageReportRawRectangles);*/
         }
         else
 #endif
-*/
         {
             drawable = data->drawable;
             gc = data->gc;
@@ -1230,18 +1254,20 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
             }
         }
     }
-/*
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderColor xrforeground = xrenderdrawcolor(renderer);
         XRenderFillRectangle(data->display, PictOpSrc, data->brush_pict,
                              &xrforeground, 0, 0, 1, 1);
+        XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
+        XFixesSetPictureClipRegion(data->display, data->drawable_pict, 0, 0, data->stencil_parts);
         XRenderComposite(data->display, data->blend_op, data->brush_pict,
                          data->stencil_pict, data->drawable_pict,
                          0, 0, 0, 0, 0, 0, window->w, window->h);
+        XFixesSetPictureClipRegion(data->display, data->drawable_pict, 0, 0, None);
+        //XDamageDestroy(data->display, damage);
     }
 #endif
-*/
     SDL_stack_free(xpoints);
 
     return 0;
