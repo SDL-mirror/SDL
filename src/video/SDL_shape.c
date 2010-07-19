@@ -63,14 +63,17 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 	Uint32 bitmap_pixel;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
-	for(x = 0;x<shape->w;x++)
-		for(y = 0;y<shape->h;y++) {
-			pixel = (Uint8 *)(shape->pixels) + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
+	pixel = (Uint8*)shape->pixels;
+	for(y = 0;y<shape->h;y++) {
+		pixel = (Uint8 *)(shape->pixels) + y * shape->pitch;
+		for(x=0;x<shape->w;x++) {
 			alpha = 0;
 			SDL_GetRGBA(*(Uint32*)pixel,shape->format,&r,&g,&b,&alpha);
 			bitmap_pixel = y*shape->w + x;
 			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+			pixel += shape->format->BytesPerPixel;
 		}
+	}
 	if(SDL_MUSTLOCK(shape))
 		SDL_UnlockSurface(shape);
 }

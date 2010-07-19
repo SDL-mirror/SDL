@@ -12,7 +12,6 @@ These are test programs for the SDL library:
 	testcursor	Tests custom mouse cursor
 	testdyngl	Tests dynamically loading OpenGL library
 	testerror	Tests multi-threaded error handling
-	testeyes	Tests shaped windows
 	testfile	Tests RWops layer
 	testgamma	Tests video device gamma ramp
 	testgl		A very simple example of using OpenGL with SDL
@@ -29,6 +28,7 @@ These are test programs for the SDL library:
 	testpalette	Tests palette color cycling
 	testplatform	Tests types, endianness and cpu capabilities
 	testsem		Tests SDL's semaphore implementation
+	testshape	Tests shaped windows
 	testsprite	Example of fast sprite movement on the screen
 	testsprite2	Improved version of testsprite
 	testtimer	Test the timer facilities
