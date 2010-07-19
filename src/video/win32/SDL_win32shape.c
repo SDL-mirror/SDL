@@ -339,7 +339,7 @@ int Win32_ResizeWindowShape(SDL_Window *window) {
 		}
 	}
 	
-	window->shaper->usershownflag = window->flags & SDL_WINDOW_SHOWN;
+	window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
 	
 	return 0;
 }

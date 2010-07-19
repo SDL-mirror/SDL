@@ -59,19 +59,30 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 	int x = 0;
 	int y = 0;
 	Uint8 r = 0,g = 0,b = 0,alpha = 0;
-	Uint8* pixel;
-	Uint32 bitmap_pixel;
+	Uint8* pixel = NULL;
+	Uint32 bitmap_pixel,pixel_value = 0;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
 	pixel = (Uint8*)shape->pixels;
 	for(y = 0;y<shape->h;y++) {
-		pixel = (Uint8 *)(shape->pixels) + y * shape->pitch;
 		for(x=0;x<shape->w;x++) {
 			alpha = 0;
-			SDL_GetRGBA(*(Uint32*)pixel,shape->format,&r,&g,&b,&alpha);
+			pixel_value = 0;
+			pixel = shape->pixels + y * shape->pitch + x * shape->format->BytesPerPixel;
+			switch(shape->format->BytesPerPixel) {
+				case(1):
+					pixel_value = *(Uint8*)pixel;
+					break;
+				case(2):
+					pixel_value = *(Uint16*)pixel;
+					break;
+				case(4):
+					pixel_value = *(Uint32*)pixel;
+					break;
+			}
+			SDL_GetRGBA(pixel_value,shape->format,&r,&g,&b,&alpha);
 			bitmap_pixel = y*shape->w + x;
 			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
-			pixel += shape->format->BytesPerPixel;
 		}
 	}
 	if(SDL_MUSTLOCK(shape))
@@ -99,7 +110,7 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 			}
 		}
 	}
-	//TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is in progress.
+	//TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is finished.  Debugging is in progress on both.
 	result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
 	window->shaper->hasshape = SDL_TRUE;
 	if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
