@@ -5,6 +5,7 @@
 #include <SDL_pixels.h>
 #include <SDL_video.h>
 #include <SDL_shape.h>
+#include <SDL_keysym.h>
 
 #define SHAPED_WINDOW_X 150
 #define SHAPED_WINDOW_Y 150
@@ -86,7 +87,7 @@ int main(int argc,char** argv) {
 	event_pending = SDL_PollEvent(&event);
 	unsigned int current_picture = 0;
 	SDL_WindowShapeMode mode = {ShapeModeDefault,1};
-	int mouse_down = 0;
+	int button_down = 0;
 	Uint32 format = 0,access = 0;
 	SDL_Rect texture_dimensions = {0,0,0,0};
 	SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
@@ -95,10 +96,13 @@ int main(int argc,char** argv) {
 	while(should_exit == 0) {
 		event_pending = SDL_PollEvent(&event);
 		if(event_pending == 1) {
-			if(event.type == SDL_MOUSEBUTTONDOWN)
-				mouse_down = 1;
-			if(mouse_down && event.type == SDL_MOUSEBUTTONUP) {
-				mouse_down = 0;
+			if(event.type == SDL_KEYDOWN) {
+				button_down = 1;
+				if(event.key.keysym.sym == SDLK_ESCAPE)
+					should_exit = 1;
+			}
+			if(button_down && event.type == SDL_KEYUP) {
+				button_down = 0;
 				current_picture += 1;
 				if(current_picture >= num_pictures)
 					current_picture = 0;
