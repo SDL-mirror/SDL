@@ -6,10 +6,13 @@
 #include <SDL_video.h>
 #include <SDL_shape.h>
 #include <SDL_keysym.h>
+#include <SDL_timer.h>
 
 #define SHAPED_WINDOW_X 150
 #define SHAPED_WINDOW_Y 150
 #define SHAPED_WINDOW_DIMENSION 640
+
+#define TICK_INTERVAL 18
 
 void render(SDL_Window* window,SDL_Texture *texture,SDL_Rect texture_dimensions) {
 	SDL_SelectRenderer(window);
@@ -22,6 +25,16 @@ void render(SDL_Window* window,SDL_Texture *texture,SDL_Rect texture_dimensions)
 	SDL_RenderCopy(texture,&texture_dimensions,&texture_dimensions);
 	
 	SDL_RenderPresent();
+}
+
+static Uint32 next_time;
+
+Uint32 time_left() {
+	Uint32 now = SDL_GetTicks();
+	if(next_time <= now)
+		return 0;
+	else
+		return next_time - now;
 }
 
 int main(int argc,char** argv) {
@@ -106,7 +119,7 @@ int main(int argc,char** argv) {
 	SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
 	SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
 	SDL_SetWindowShape(window,pictures[current_picture],&mode);
-	render(window,textures[current_picture],texture_dimensions);
+	next_time = SDL_GetTicks() + TICK_INTERVAL;
 	while(should_exit == 0) {
 		event_pending = SDL_PollEvent(&event);
 		if(event_pending == 1) {
@@ -123,13 +136,14 @@ int main(int argc,char** argv) {
 				SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
 				SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
 				SDL_SetWindowShape(window,pictures[current_picture],&mode);
-				render(window,textures[current_picture],texture_dimensions);
-				
 			}
 			if(event.type == SDL_QUIT)
 				should_exit = 1;
 			event_pending = 0;
 		}
+		render(window,textures[current_picture],texture_dimensions);
+		SDL_Delay(time_left());
+		next_time += TICK_INTERVAL;
 	}
 	
 	//Free the textures.
