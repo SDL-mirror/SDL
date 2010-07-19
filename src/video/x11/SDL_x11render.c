@@ -176,11 +176,87 @@ UpdateYUVTextureData(SDL_Texture * texture)
                         texture->h, data->pixels, data->pitch);
 }
 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+static SDL_bool
+CheckXRender(Display *display, int *major, int *minor) {
+    const char *env;
+
+    *major = *minor = 0;
+
+    env = SDL_getenv("SDL_VIDEO_X11_XRENDER");
+
+    if (env && !SDL_atoi(env)) {
+        return SDL_FALSE;
+    }
+
+    if (!SDL_X11_HAVE_XRENDER) {
+        return SDL_FALSE;
+    }
+
+    if (!XRenderQueryVersion(display, major, minor)) {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+#endif
+
+#ifdef SDL_VIDEO_DRIVER_X11_XFIXES
+static SDL_bool
+CheckXFixes(Display *display, int *major, int *minor) {
+    const char *env;
+
+    *major = *minor = 0;
+
+    env = SDL_getenv("SDL_VIDEO_X11_XFIXES");
+
+    if (env && !SDL_atoi(env)) {
+        return SDL_FALSE;
+    }
+
+    if (!SDL_X11_HAVE_XFIXES) {
+        return SDL_FALSE;
+    }
+
+    if (!XFixesQueryVersion(display, major, minor)) {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+#endif
+
+#ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
+static SDL_bool
+CheckXDamage(Display *display, int *major, int *minor) {
+    const char *env;
+
+    *major = *minor = 0;
+
+    env = SDL_getenv("SDL_VIDEO_X11_XDAMAGE");
+
+    if (env && !SDL_atoi(env)) {
+        return SDL_FALSE;
+    }
+
+    if (!SDL_X11_HAVE_XDAMAGE) {
+        return SDL_FALSE;
+    }
+
+    if (!XDamageQueryVersion(display, major, minor)) {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+#endif
+
 void
 X11_AddRenderDriver(_THIS)
 {
     SDL_RendererInfo *info = &X11_RenderDriver.info;
     SDL_DisplayMode *mode = &SDL_CurrentDisplay->desktop_mode;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int i;
 
     info->texture_formats[info->num_texture_formats++] = mode->format;
@@ -189,7 +265,13 @@ X11_AddRenderDriver(_THIS)
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
     info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_ARGB8888;
+
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    int major, minor;
+    if (CheckXRender(data->display, &major, &minor)) {
+        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_ARGB8888;
+    }
+#endif
 
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_AddRenderDriver(&_this->displays[i], &X11_RenderDriver);
@@ -255,36 +337,17 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    data->use_xrender = SDL_FALSE;
-    data->use_xdamage = SDL_FALSE;
-    int event_basep, error_basep;
-    if (SDL_X11_HAVE_XRENDER) {
-        /* Query the extension. This is the server runtime check. */
-        if(XRenderQueryExtension(data->display,
-                                 &event_basep, &error_basep) == True)
-            data->use_xrender = SDL_TRUE;
-    }
+    int major, minor;
+    data->use_xrender = CheckXRender(data->display, &major, &minor);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
-    if (data->use_xrender) {
-        if(SDL_X11_HAVE_XDAMAGE && SDL_X11_HAVE_XFIXES) {
-        /* Query XDamage and XFixes */
-            if(XDamageQueryExtension(data->display,
-                                     &event_basep,
-                                     &error_basep) == True && 
-               (XFixesQueryExtension(data->display,
-                                        &event_basep,
-                                        &error_basep) == True)) {
-                    int major_version, minor_version;
-                    XFixesQueryVersion(data->display,
-                                       &major_version,
-                                       &minor_version);
-                    /* Only XFixes v 2 or greater
-                     * Required for XFixesSetPictureClipRegion() */
-                    if(major_version >= 2)
-                        data->use_xdamage = SDL_TRUE;
-            }
+    if (CheckXDamage(data->display, &major, &minor)) {
+        if (CheckXFixes(data->display, &major, &minor)) {
+            if (major >= 2)
+                data->use_xdamage = SDL_TRUE;
         }
+    }
 #endif
+    if (data->use_xrender) {
         /* Find the PictFormat from the visual.
          * Should be an RGB PictFormat most of the time. */
         data->xwindow_pict_fmt = XRenderFindVisualFormat(data->display,

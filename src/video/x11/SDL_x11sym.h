@@ -240,6 +240,7 @@ SDL_X11_SYM(void,XScreenSaverSuspend,(Display *dpy,Bool suspend),(dpy,suspend),r
 #if SDL_VIDEO_DRIVER_X11_XRENDER
 SDL_X11_MODULE(XRENDER)
 SDL_X11_SYM(Bool,XRenderQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
+SDL_X11_SYM(Bool,XRenderQueryVersion,(Display *dpy,int *major,int *minor),(dpy,major,minor),return)
 SDL_X11_SYM(XRenderPictFormat*,XRenderFindVisualFormat,(Display *dpy,_Xconst Visual *visual),(dpy,visual),return)
 SDL_X11_SYM(XRenderPictFormat*,XRenderFindStandardFormat,(Display *dpy,int format),(dpy,format),return)
 SDL_X11_SYM(XRenderPictFormat*,XRenderFindFormat,(Display *dpy,unsigned long mask,_Xconst XRenderPictFormat* templ,int count),(dpy,mask,templ,count),return)
@@ -256,6 +257,7 @@ SDL_X11_SYM(void,XRenderFillRectangles,(Display *dpy,int op,Picture dst,_Xconst 
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
 SDL_X11_MODULE(XDAMAGE)
 SDL_X11_SYM(Bool,XDamageQueryExtension,(Display *dpy,int *event_base_return,int *error_base_return),(dpy,event_base_return,error_base_return),return)
+SDL_X11_SYM(Status,XDamageQueryVersion,(Display *dpy,int *major,int *minor),(dpy,major,minor),return)
 SDL_X11_SYM(Damage,XDamageCreate,(Display *dpy,Drawable d,int level),(dpy,d,level),return)
 SDL_X11_SYM(void,XDamageSubtract,(Display *dpy,Damage damage,XserverRegion repair,XserverRegion parts),(dpy,damage,repair,parts),return)
 SDL_X11_SYM(void,XDamageDestroy,(Display *dpy,Damage damage),(dpy,damage),return)

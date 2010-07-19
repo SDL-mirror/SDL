@@ -38,7 +38,7 @@ extern SDL_error *SDL_GetErrBuf(void);
 
 #define SDL_ERRBUFIZE	1024
 
-#define DEBUG_ERROR
+//#define DEBUG_ERROR
 
 /* Private functions */
 
