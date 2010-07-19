@@ -40,7 +40,9 @@ int main(int argc,char** argv) {
 		}
 		//THIS CONVERSION ROUTINE IS FRAGILE!  It relies in the fact that only certain portions of the format structure must be filled in to use it.
 		SDL_PixelFormat format = {NULL,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-		SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_RGBA8888,&format.BitsPerPixel,&format.Rmask,&format.Gmask,&format.Bmask,&format.Amask);
+		int bpp = 0;
+		SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_RGBA8888,&bpp,&format.Rmask,&format.Gmask,&format.Bmask,&format.Amask);
+		format.BitsPerPixel = bpp;
 		format.BytesPerPixel = format.BitsPerPixel / 8 + (format.BitsPerPixel % 8 > 0 ? 1 : 0);
 		pictures[i] = SDL_ConvertSurface(original,&format,0);
 		//We have no more need of the original now that we have our desired format.
@@ -64,11 +66,11 @@ int main(int argc,char** argv) {
 		int y =0,x = 0;
 		for(y=0;y<pictures[i]->h;y++)
 			for(x=0;x<pictures[i]->w;x++) {
-				Uint32* pixel = pixels+y*pitch+x*pictures[i]->format->BytesPerPixel;
+				Uint32* pixel = pixels + y * pitch + x * pictures[i]->format->BytesPerPixel;
 				Uint8 r = 0,g = 0,b = 0;
 				SDL_GetRGB(*pixel,pictures[i]->format,&r,&g,&b);
-				if(r == g == b == 0x00)
-					*pixel = SDL_MapRGBA(pictures[i]->format,r,g,b,0);
+				//if(r == g == b == 0xff)
+				//	*pixel = SDL_MapRGBA(pictures[i]->format,r,g,b,0);
 			}
 			
 		if(SDL_MUSTLOCK(pictures[i]))
@@ -117,7 +119,7 @@ int main(int argc,char** argv) {
 	}
 	
 	SDL_Event event;
-	int event_pending = 0;
+	int event_pending = 0,should_exit = 0;
 	event_pending = SDL_PollEvent(&event);
 	unsigned int current_picture = 0;
 	SDL_WindowShapeMode mode = {ShapeModeDefault,1};
@@ -127,17 +129,23 @@ int main(int argc,char** argv) {
 	SDL_Rect texture_dimensions = {0,0,0,0};
 	SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
 	SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
-	while(event.type != SDL_QUIT) {
-		if(event.type == SDL_MOUSEBUTTONDOWN)
-			mouse_down = 1;
-		if(mouse_down && event.type == SDL_MOUSEBUTTONUP) {
-			mouse_down = 0;
-			current_picture += 1;
-			if(current_picture >= num_pictures)
-				current_picture = 0;
-			SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
-			SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
-			SDL_SetWindowShape(window,pictures[current_picture],&mode);
+	while(should_exit == 0) {
+		event_pending = SDL_PollEvent(&event);
+		if(event_pending == 1) {
+			if(event.type == SDL_MOUSEBUTTONDOWN)
+				mouse_down = 1;
+			if(mouse_down && event.type == SDL_MOUSEBUTTONUP) {
+				mouse_down = 0;
+				current_picture += 1;
+				if(current_picture >= num_pictures)
+					current_picture = 0;
+				SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
+				SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
+				SDL_SetWindowShape(window,pictures[current_picture],&mode);
+			}
+			if(event.type == SDL_QUIT)
+				should_exit = 1;
+			event_pending = 0;
 		}
 		
 		SDL_SelectRenderer(window);
@@ -150,7 +158,6 @@ int main(int argc,char** argv) {
 		SDL_RenderCopy(textures[current_picture],&texture_dimensions,&texture_dimensions);
 		
 		SDL_RenderPresent();
-		event_pending = SDL_PollEvent(&event);
 	}
 	
 	//Free the textures.
