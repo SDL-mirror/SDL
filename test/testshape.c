@@ -11,6 +11,19 @@
 #define SHAPED_WINDOW_Y 150
 #define SHAPED_WINDOW_DIMENSION 640
 
+void render(SDL_Window* window,SDL_Texture *texture,SDL_Rect texture_dimensions) {
+	SDL_SelectRenderer(window);
+	
+	//Clear render-target to blue.
+	SDL_SetRenderDrawColor(0x00,0x00,0xff,0xff);
+	SDL_RenderClear();
+	
+	//Render the texture.
+	SDL_RenderCopy(texture,&texture_dimensions,&texture_dimensions);
+	
+	SDL_RenderPresent();
+}
+
 int main(int argc,char** argv) {
         if(argc < 2) {
         	printf("SDL_Shape requires at least one bitmap file as argument.\n");
@@ -93,6 +106,7 @@ int main(int argc,char** argv) {
 	SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
 	SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
 	SDL_SetWindowShape(window,pictures[current_picture],&mode);
+	render(window,textures[current_picture],texture_dimensions);
 	while(should_exit == 0) {
 		event_pending = SDL_PollEvent(&event);
 		if(event_pending == 1) {
@@ -109,22 +123,13 @@ int main(int argc,char** argv) {
 				SDL_QueryTexture(textures[current_picture],&format,&access,&texture_dimensions.w,&texture_dimensions.h);
 				SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
 				SDL_SetWindowShape(window,pictures[current_picture],&mode);
+				render(window,textures[current_picture],texture_dimensions);
+				
 			}
 			if(event.type == SDL_QUIT)
 				should_exit = 1;
 			event_pending = 0;
 		}
-		
-		SDL_SelectRenderer(window);
-	
-		//Clear render-target to blue.
-		SDL_SetRenderDrawColor(0x00,0x00,0xff,0xff);
-		SDL_RenderClear();
-		
-		//Render the texture.
-		SDL_RenderCopy(textures[current_picture],&texture_dimensions,&texture_dimensions);
-		
-		SDL_RenderPresent();
 	}
 	
 	//Free the textures.
