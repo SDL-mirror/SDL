@@ -34,7 +34,7 @@
 #include "SDL_timer.h"
 #include "SDL_syswm.h"
 
-#define DEBUG_XEVENTS
+/*#define DEBUG_XEVENTS*/
 
 static void
 X11_DispatchEvent(_THIS)
@@ -187,7 +187,7 @@ X11_DispatchEvent(_THIS)
                 XDisplayKeycodes(display, &min_keycode, &max_keycode);
                 keysym = XKeycodeToKeysym(display, keycode, 0);
                 fprintf(stderr,
-                        "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%X (%s).\n",
+                        "The key you just pressed is not recognized by SDL. To help get this fixed, please report this to the SDL mailing list <sdl@libsdl.org> X11 KeyCode %d (%d), X11 KeySym 0x%lX (%s).\n",
                         keycode, keycode - min_keycode, keysym,
                         XKeysymToString(keysym));
             }
@@ -299,12 +299,12 @@ X11_DispatchEvent(_THIS)
 
             char *name = XGetAtomName(display, xevent.xproperty.atom);
             if (name) {
-                printf("PropertyNotify: %s\n", name);
+                printf("PropertyNotify: %s %s\n", name, (xevent.xproperty.state == PropertyDelete) ? "deleted" : "changed");
                 XFree(name);
             }
 
             status = XGetWindowProperty(display, data->xwindow, xevent.xproperty.atom, 0L, 8192L, False, AnyPropertyType, &real_type, &real_format, &items_read, &items_left, &propdata);
-            if (status == Success) {
+            if (status == Success && items_read > 0) {
                 if (real_type == XA_INTEGER) {
                     int *values = (int *)propdata;
 
