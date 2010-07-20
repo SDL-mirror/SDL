@@ -135,6 +135,7 @@ typedef struct
     Picture picture;
     XRenderPictFormat* picture_fmt;
     int blend_op;
+    const char* filter;
 #endif
     XImage *image;
 #ifndef NO_SHARED_MEMORY
@@ -376,7 +377,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                          window->w, window->h);
         /* Add some blending modes to the list of supported blending modes */
         renderer->info.blend_modes |=
-            (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK);
+            (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK | SDL_BLENDMODE_MOD);
         /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 8);
@@ -924,24 +925,40 @@ static int
 X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     X11_TextureData *data = (X11_TextureData *) texture->driverdata;
+    X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
     switch (texture->blendMode) {
     case SDL_BLENDMODE_NONE:
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        data->blend_op = PictOpSrc;
-        return 0;
+        if (renderdata->use_xrender) {
+            data->blend_op = PictOpSrc;
+            return 0;
+        }
+    case SDL_BLENDMODE_MOD:
+        if (renderdata->use_xrender) {
+            data->blend_op = PictOpSrc;
+            return 0;
+        }
+    case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
-        data->blend_op = PictOpOver;
-        return 0;
+        if (renderdata->use_xrender) {
+            data->blend_op = PictOpOver;
+            return 0;
+        }
     case SDL_BLENDMODE_ADD:
-        data->blend_op = PictOpAdd;
-        return 0;
+        if (renderdata->use_xrender) {
+            data->blend_op = PictOpAdd;
+            return 0;
+        }
 #endif
+        return 0;
     default:
         SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        texture->blendMode = SDL_BLENDMODE_BLEND;
-        data->blend_op = PictOpOver;
+        if (renderdata->use_xrender) {
+            texture->blendMode = SDL_BLENDMODE_BLEND;
+            data->blend_op = PictOpOver;
+        }
 #endif
         return -1;
     }
@@ -951,6 +968,7 @@ static int
 X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     X11_TextureData *data = (X11_TextureData *) texture->driverdata;
+    X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
 
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
@@ -960,10 +978,33 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
         if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
             return 0;
         }
-        /* Fall through to unsupported case */
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (renderdata->use_xrender) {
+            data->filter = FilterFast;
+            return 0;
+        }
+    case SDL_TEXTURESCALEMODE_SLOW:
+        if (renderdata->use_xrender) {
+            data->filter = FilterGood;
+            return 0;
+        }
+    case SDL_TEXTURESCALEMODE_BEST:
+        if (renderdata->use_xrender) {
+            data->filter = FilterBest;
+            return 0;
+        }
+#endif
+    /* Fall through to unsupported case */
     default:
         SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (renderdata->use_xrender) {
+            texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+            data->filter = FilterFast;
+        }
+        else
+#endif
+            texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
         return -1;
     }
     return 0;
@@ -1054,6 +1095,8 @@ X11_SetDrawBlendMode(SDL_Renderer * renderer)
         //PictOpSrc
         data->blend_op = PictOpSrc;
         return 0;
+    case SDL_BLENDMODE_MOD:
+    case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND: // PictOpOver
         data->blend_op = PictOpOver;
         return 0;
@@ -1114,6 +1157,7 @@ xrenderdrawcolor(SDL_Renderer *renderer)
         (unsigned short) ((renderer->g / 255.0) * alphad * 0xFFFF);
     xrender_color.blue =
         (unsigned short) ((renderer->b / 255.0) * alphad * 0xFFFF);
+
     return xrender_color;
 }
 
@@ -1167,7 +1211,7 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
               renderer->blendMode != SDL_BLENDMODE_ADD &&
               renderer->blendMode != SDL_BLENDMODE_MOD))
         {
-            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XSetForeground(data->display, data->stencil_gc, 0x00000000);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
             {
@@ -1279,7 +1323,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
             drawable = data->stencil;
             gc = data->stencil_gc;
 
-            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XSetForeground(data->display, data->stencil_gc, 0x00000000);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
@@ -1492,7 +1536,7 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
               renderer->blendMode != SDL_BLENDMODE_ADD &&
               renderer->blendMode != SDL_BLENDMODE_MOD))
         {
-            XSetForeground(data->display, data->stencil_gc, 0x00);
+            XSetForeground(data->display, data->stencil_gc, 0x00000000);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
@@ -1651,16 +1695,35 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           dstrect->y, srcrect->w, srcrect->h);
             }
         }
-        Picture pict;
-        if(texture->blendMode == SDL_BLENDMODE_NONE)
-            pict = None;
-        else
-            pict = texturedata->picture;
+        Picture src, mask, dst;
+        XRenderPictureAttributes attr;
+        if(texture->blendMode == SDL_BLENDMODE_NONE) {
+            src = texturedata->picture;
+            mask = None;
+            dst = data->drawable_pict;
+        }
+        /*else if (texture->blendMode == SDL_BLENDMODE_MOD) {
+            src = data->drawable_pict;
+            mask = texturedata->picture;
+            dst = data->drawable_pict;
+            attr.alpha_map = mask;
+        }*/
+        else {
+            src = texturedata->picture;
+            mask = texturedata->picture;
+            dst = data->drawable_pict;
+        }
         if(srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-            XRenderComposite(data->display, texturedata->blend_op, texturedata->picture,
-                         pict, data->drawable_pict, srcrect->x, srcrect->y,
-                         srcrect->x, srcrect->y, dstrect->x, dstrect->y,
-                         srcrect->w, srcrect->h);
+            /*if (texture->blendMode == SDL_BLENDMODE_MOD) {
+                attr.component_alpha = True;
+                XRenderChangePicture(data->display, texturedata->picture,
+                                     CPComponentAlpha, &attr);
+                XRenderChangePicture(data->display, src, CPAlphaMap, &attr);
+            }*/
+            XRenderComposite(data->display, texturedata->blend_op, src,
+                            mask, dst, srcrect->x, srcrect->y,
+                            srcrect->x, srcrect->y, dstrect->x, dstrect->y,
+                            srcrect->w, srcrect->h);
         } else {
             double xscale = ((double) dstrect->w) / srcrect->w;
             double yscale = ((double) dstrect->h) / srcrect->h;
@@ -1669,11 +1732,21 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(yscale), XDoubleToFixed(0)},
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(xscale * yscale)}}};
             XRenderSetPictureTransform(data->display, texturedata->picture, &xform);
+            
+            /*if (texture->blendMode == SDL_BLENDMODE_MOD) {
+                attr.component_alpha = True;
+                XRenderChangePicture(data->display, texturedata->picture,
+                                     CPComponentAlpha, &attr);
+                XRenderChangePicture(data->display, src, CPAlphaMap, &attr);
+            }*/
+
+            XRenderSetPictureFilter(data->display, texturedata->picture,
+                                    texturedata->filter, 0, 0);
 
             XRenderComposite(data->display, texturedata->blend_op,
-                             texturedata->picture, pict, data->drawable_pict,
-                             0, 0, 0, 0, dstrect->x, dstrect->y,
-                             dstrect->w, dstrect->h);
+                             src, mask, dst,
+                             srcrect->x, srcrect->y, srcrect->x, srcrect->y,
+                             dstrect->x, dstrect->y, dstrect->w, dstrect->h);
             
             XTransform identity = {{
                     {XDoubleToFixed(1), XDoubleToFixed(0), XDoubleToFixed(0)},
@@ -1681,6 +1754,14 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1)}}};
             XRenderSetPictureTransform(data->display, texturedata->picture, &identity);
         }
+        /*if (renderer->blendMode == SDL_BLENDMODE_MOD) {
+            attr.component_alpha = False;
+            XRenderChangePicture(data->display, texturedata->picture,
+                                 CPComponentAlpha, &attr);
+            attr.alpha_map = None;
+            XRenderChangePicture(data->display, data->drawable_pict,
+                                 CPAlphaMap, &attr);
+        }*/
     }
     else
 #endif
