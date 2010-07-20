@@ -68,7 +68,7 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 		for(x=0;x<shape->w;x++) {
 			alpha = 0;
 			pixel_value = 0;
-			pixel = shape->pixels + y * shape->pitch + x * shape->format->BytesPerPixel;
+			pixel = (Uint8 *)(shape->pixels) + (y*shape->pitch) + (x*shape->format->BytesPerPixel);
 			switch(shape->format->BytesPerPixel) {
 				case(1):
 					pixel_value = *(Uint8*)pixel;
