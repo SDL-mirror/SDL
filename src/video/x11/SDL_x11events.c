@@ -25,7 +25,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <unistd.h>
-#include <limits.h>	/* For INT_MAX */
+#include <limits.h> /* For INT_MAX */
 
 #include "SDL_x11video.h"
 #include "../../events/SDL_events_c.h"
@@ -92,8 +92,8 @@ X11_DispatchEvent(_THIS)
     case EnterNotify:{
 #ifdef DEBUG_XEVENTS
             printf("EnterNotify! (%d,%d,%d)\n", 
-	           xevent.xcrossing.x,
- 	           xevent.xcrossing.y,
+                   xevent.xcrossing.x,
+                   xevent.xcrossing.y,
                    xevent.xcrossing.mode);
             if (xevent.xcrossing.mode == NotifyGrab)
                 printf("Mode: NotifyGrab\n");
@@ -108,15 +108,17 @@ X11_DispatchEvent(_THIS)
     case LeaveNotify:{
 #ifdef DEBUG_XEVENTS
             printf("LeaveNotify! (%d,%d,%d)\n", 
-	           xevent.xcrossing.x,
- 	           xevent.xcrossing.y,
+                   xevent.xcrossing.x,
+                   xevent.xcrossing.y,
                    xevent.xcrossing.mode);
             if (xevent.xcrossing.mode == NotifyGrab)
                 printf("Mode: NotifyGrab\n");
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
-            if (xevent.xcrossing.detail != NotifyInferior) {
+            if (xevent.xcrossing.mode != NotifyGrab &&
+                xevent.xcrossing.mode != NotifyUngrab &&
+                xevent.xcrossing.detail != NotifyInferior) {
                 SDL_SetMouseFocus(NULL);
             }
         }
