@@ -241,6 +241,16 @@ VideoBootStrap X11_bootstrap = {
     X11_Available, X11_CreateDevice
 };
 
+static int (*handler) (Display *, XErrorEvent *) = NULL;
+static int
+X11_CheckWindowManagerErrorHandler(Display * d, XErrorEvent * e)
+{
+    if (e->error_code == BadWindow) {
+        return (0);
+    } else {
+        return (handler(d, e));
+    }
+}
 
 static void
 X11_CheckWindowManager(_THIS)
@@ -257,12 +267,32 @@ X11_CheckWindowManager(_THIS)
     char *wm_name;
 #endif
 
+    /* Set up a handler to gracefully catch errors */
+    XSync(display, False);
+    handler = XSetErrorHandler(X11_CheckWindowManagerErrorHandler);
+
     _NET_SUPPORTING_WM_CHECK = XInternAtom(display, "_NET_SUPPORTING_WM_CHECK", False);
     status = XGetWindowProperty(display, DefaultRootWindow(display), _NET_SUPPORTING_WM_CHECK, 0L, 1L, False, XA_WINDOW, &real_type, &real_format, &items_read, &items_left, &propdata);
     if (status == Success && items_read) {
         wm_window = ((Window*)propdata)[0];
     }
-    XFree(propdata);
+    if (propdata) {
+        XFree(propdata);
+    }
+
+    if (wm_window) {
+        status = XGetWindowProperty(display, wm_window, _NET_SUPPORTING_WM_CHECK, 0L, 1L, False, XA_WINDOW, &real_type, &real_format, &items_read, &items_left, &propdata);
+        if (status != Success || !items_read || wm_window != ((Window*)propdata)[0]) {
+            wm_window = None;
+        }
+        if (propdata) {
+            XFree(propdata);
+        }
+    }
+
+    /* Reset the error handler, we're done checking */
+    XSync(display, False);
+    XSetErrorHandler(handler);
 
     if (!wm_window) {
 #ifdef DEBUG_WINDOW_MANAGER
