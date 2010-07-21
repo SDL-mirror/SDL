@@ -766,7 +766,7 @@ SDL_SendKeyboardText(const char *text)
     int posted;
 
     /* Don't post text events for unprintable characters */
-    if (*text < ' ') {
+    if (*text < ' ' || *text == 127) {
         return 0;
     }
 
