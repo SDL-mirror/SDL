@@ -380,20 +380,20 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
             (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK | SDL_BLENDMODE_MOD);
         /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
-                                   window->w, window->h, 8);
+                                   window->w, window->h, 32);
         
         /* Create the GC for the clip mask. */
         data->stencil_gc = XCreateGC(data->display, data->stencil,
                                   GCGraphicsExposures, &gcv);
-        XSetBackground(data->display, data->stencil_gc, 0x00);
-        XSetForeground(data->display, data->stencil_gc, 0x00);
+        XSetBackground(data->display, data->stencil_gc, 0);
+        XSetForeground(data->display, data->stencil_gc, 0);
         XFillRectangle(data->display, data->stencil, data->stencil_gc,
                        0, 0, window->w, window->h);
-        XSetForeground(data->display, data->stencil_gc, 0xFF);
+        XSetForeground(data->display, data->stencil_gc, 0xFFFFFFFF);
         data->stencil_pict =
             XRenderCreatePicture(data->display, data->stencil,
                                  XRenderFindStandardFormat(data->display,
-                                                           PictStandardA8),
+                                                           PictStandardARGB32),
                                  0, NULL);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
         if (data->use_xdamage) {
@@ -935,7 +935,7 @@ X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
         }
     case SDL_BLENDMODE_MOD:
         if (renderdata->use_xrender) {
-            data->blend_op = PictOpSrc;
+            data->blend_op = PictOpOver;
             return 0;
         }
     case SDL_BLENDMODE_MASK:
@@ -1211,7 +1211,7 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
               renderer->blendMode != SDL_BLENDMODE_ADD &&
               renderer->blendMode != SDL_BLENDMODE_MOD))
         {
-            XSetForeground(data->display, data->stencil_gc, 0x00000000);
+            XSetForeground(data->display, data->stencil_gc, 0);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
             {
@@ -1229,7 +1229,7 @@ X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                 XFixesSetGCClipRegion(data->display, data->stencil_gc, 0, 0, None);
             }
 #endif
-            XSetForeground(data->display, data->stencil_gc, 0xFF);
+            XSetForeground(data->display, data->stencil_gc, 0xFFFFFFFF);
 
             XDrawPoints(data->display, data->stencil, data->stencil_gc, xpoints, xcount,
                         CoordModeOrigin);
@@ -1323,7 +1323,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
             drawable = data->stencil;
             gc = data->stencil_gc;
 
-            XSetForeground(data->display, data->stencil_gc, 0x00000000);
+            XSetForeground(data->display, data->stencil_gc, 0);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
@@ -1336,7 +1336,7 @@ X11_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
                                       0, 0, None);
 #endif
-            XSetForeground(data->display, data->stencil_gc, 0xFF);
+            XSetForeground(data->display, data->stencil_gc, 0xFFFFFFFF);
         }
         else
 #endif
@@ -1536,7 +1536,7 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
               renderer->blendMode != SDL_BLENDMODE_ADD &&
               renderer->blendMode != SDL_BLENDMODE_MOD))
         {
-            XSetForeground(data->display, data->stencil_gc, 0x00000000);
+            XSetForeground(data->display, data->stencil_gc, 0);
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
             if (data->use_xdamage)
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
@@ -1549,7 +1549,7 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
                 XFixesSetGCClipRegion(data->display, data->stencil_gc,
                                       0, 0, None);
 #endif
-            XSetForeground(data->display, data->stencil_gc, 0xFF);
+            XSetForeground(data->display, data->stencil_gc, 0xFFFFFFFF);
 
             XDrawRectangles(data->display, data->stencil, data->stencil_gc, xrects, xcount);
 
@@ -1695,35 +1695,35 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           dstrect->y, srcrect->w, srcrect->h);
             }
         }
-        Picture src, mask, dst;
+        Picture mask;
         XRenderPictureAttributes attr;
+        const SDL_Rect *mrect;
         if(texture->blendMode == SDL_BLENDMODE_NONE) {
-            src = texturedata->picture;
             mask = None;
-            dst = data->drawable_pict;
+            mrect = srcrect;
         }
-        /*else if (texture->blendMode == SDL_BLENDMODE_MOD) {
-            src = data->drawable_pict;
-            mask = texturedata->picture;
-            dst = data->drawable_pict;
-            attr.alpha_map = mask;
-        }*/
+        else if (texture->blendMode == SDL_BLENDMODE_MOD) {
+            mask = data->stencil_pict;
+                        mrect = dstrect;
+        }
         else {
-            src = texturedata->picture;
             mask = texturedata->picture;
-            dst = data->drawable_pict;
+            mrect = srcrect;
         }
         if(srcrect->w == dstrect->w && srcrect->h == dstrect->h) {
-            /*if (texture->blendMode == SDL_BLENDMODE_MOD) {
+            if (texture->blendMode == SDL_BLENDMODE_MOD) {
+                XRenderComposite(data->display, PictOpSrc, data->drawable_pict,
+                             texturedata->picture, data->stencil_pict,
+                             dstrect->x, dstrect->y, srcrect->x, srcrect->y,
+                             dstrect->x, dstrect->y, dstrect->w, dstrect->h);
                 attr.component_alpha = True;
-                XRenderChangePicture(data->display, texturedata->picture,
+                XRenderChangePicture(data->display, data->stencil_pict,
                                      CPComponentAlpha, &attr);
-                XRenderChangePicture(data->display, src, CPAlphaMap, &attr);
-            }*/
-            XRenderComposite(data->display, texturedata->blend_op, src,
-                            mask, dst, srcrect->x, srcrect->y,
-                            srcrect->x, srcrect->y, dstrect->x, dstrect->y,
-                            srcrect->w, srcrect->h);
+            }
+            XRenderComposite(data->display, texturedata->blend_op, texturedata->picture,
+                            mask, data->drawable_pict, srcrect->x, srcrect->y,
+                            mrect->x, mrect->y, dstrect->x, dstrect->y,
+                            dstrect->w, dstrect->h);
         } else {
             double xscale = ((double) dstrect->w) / srcrect->w;
             double yscale = ((double) dstrect->h) / srcrect->h;
@@ -1733,19 +1733,22 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(xscale * yscale)}}};
             XRenderSetPictureTransform(data->display, texturedata->picture, &xform);
             
-            /*if (texture->blendMode == SDL_BLENDMODE_MOD) {
+            if (texture->blendMode == SDL_BLENDMODE_MOD) {
+                XRenderComposite(data->display, PictOpSrc, data->drawable_pict,
+                             texturedata->picture, data->stencil_pict,
+                             dstrect->x, dstrect->y, srcrect->x, srcrect->y,
+                             dstrect->x, dstrect->y, dstrect->w, dstrect->h);
                 attr.component_alpha = True;
-                XRenderChangePicture(data->display, texturedata->picture,
+                XRenderChangePicture(data->display, data->stencil_pict,
                                      CPComponentAlpha, &attr);
-                XRenderChangePicture(data->display, src, CPAlphaMap, &attr);
-            }*/
+            }
 
             XRenderSetPictureFilter(data->display, texturedata->picture,
                                     texturedata->filter, 0, 0);
 
             XRenderComposite(data->display, texturedata->blend_op,
-                             src, mask, dst,
-                             srcrect->x, srcrect->y, srcrect->x, srcrect->y,
+                             texturedata->picture, mask, data->drawable_pict,
+                             srcrect->x, srcrect->y, mrect->x, mrect->y,
                              dstrect->x, dstrect->y, dstrect->w, dstrect->h);
             
             XTransform identity = {{
@@ -1754,14 +1757,11 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1)}}};
             XRenderSetPictureTransform(data->display, texturedata->picture, &identity);
         }
-        /*if (renderer->blendMode == SDL_BLENDMODE_MOD) {
+        if (renderer->blendMode == SDL_BLENDMODE_MOD) {
             attr.component_alpha = False;
-            XRenderChangePicture(data->display, texturedata->picture,
+            XRenderChangePicture(data->display, data->stencil_pict,
                                  CPComponentAlpha, &attr);
-            attr.alpha_map = None;
-            XRenderChangePicture(data->display, data->drawable_pict,
-                                 CPAlphaMap, &attr);
-        }*/
+        }
     }
     else
 #endif
