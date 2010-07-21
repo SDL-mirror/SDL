@@ -271,6 +271,10 @@ X11_AddRenderDriver(_THIS)
     int major, minor;
     if (CheckXRender(data->display, &major, &minor)) {
         info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_ARGB8888;
+        info->blend_modes = (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD |
+                             SDL_BLENDMODE_MOD | SDL_BLENDMODE_MASK);
+        info->scale_modes = (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW |
+                             SDL_TEXTURESCALEMODE_BEST);
     }
 #endif
 
@@ -378,6 +382,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         /* Add some blending modes to the list of supported blending modes */
         renderer->info.blend_modes |=
             (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK | SDL_BLENDMODE_MOD);
+        renderer->info.scale_modes |=
+            (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST);
         /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 32);
