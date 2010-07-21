@@ -554,11 +554,42 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     if (data->use_xrender) {
         XRenderFreePicture(data->display, data->xwindow_pict);
+        
         data->xwindow_pict_fmt =
             XRenderFindVisualFormat(data->display, data->visual);
         data->xwindow_pict =
             XRenderCreatePicture(data->display, data->xwindow,
                                  data->xwindow_pict_fmt, 0, NULL);
+        
+        XRenderComposite(data->display,
+                         PictOpClear,
+                         data->xwindow_pict,
+                         None,
+                         data->xwindow_pict,
+                         0, 0,
+                         0, 0,
+                         0, 0,
+                         window->w, window->h);
+        
+        XFreePixmap(data->display, data->stencil);
+        /* Create a clip mask that is used for rendering primitives. */
+        data->stencil = XCreatePixmap(data->display, data->xwindow,
+                                   window->w, window->h, 32);
+        
+        XRenderFreePicture(data->display, data->stencil_pict);
+        data->stencil_pict =
+            XRenderCreatePicture(data->display, data->stencil,
+                                 XRenderFindStandardFormat(data->display,
+                                                           PictStandardARGB32),
+                                 0, NULL);
+#ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
+        XDamageDestroy(data->display, data->stencil_damage);
+        if (data->use_xdamage) {
+            data->stencil_damage =
+                XDamageCreate(data->display, data->stencil, XDamageReportNonEmpty);
+            XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
+        }
+#endif
     }
 #endif
     if (renderer->info.flags & SDL_RENDERER_SINGLEBUFFER) {
