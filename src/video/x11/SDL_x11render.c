@@ -2041,6 +2041,13 @@ X11_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->pixels = NULL;
     }
 #endif
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    if (renderdata->use_xrender) {
+        if (data->picture) {
+            XRenderFreePicture(renderdata->display, data->picture);
+        }
+    }
+#endif
     if (data->scaling_image) {
         SDL_free(data->scaling_image->data);
         data->scaling_image->data = NULL;
@@ -2065,7 +2072,7 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
                 XFreePixmap(data->display, data->pixmaps[i]);
             }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-            if (data->pixmap_picts[i] != None) {
+            if (data->use_xrender && data->pixmap_picts[i]) {
                 XRenderFreePicture(data->display, data->pixmap_picts[i]);
             }
 #endif
@@ -2074,17 +2081,24 @@ X11_DestroyRenderer(SDL_Renderer * renderer)
             XFreeGC(data->display, data->gc);
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-        if (data->stencil_gc) {
-            XFreeGC(data->display, data->stencil_gc);
-        }
-        if (data->stencil) {
-            XFreePixmap(data->display, data->stencil);
-        }
-        if (data->drawable_pict) {
-            XRenderFreePicture(data->display, data->drawable_pict);
-        }
-        if (data->xwindow_pict) {
-            XRenderFreePicture(data->display, data->xwindow_pict);
+        if (data->use_xrender) {
+            if (data->stencil_gc) {
+                XFreeGC(data->display, data->stencil_gc);
+            }
+            if (data->stencil) {
+                XFreePixmap(data->display, data->stencil);
+            }
+            if (data->stencil_pict) {
+                XRenderFreePicture(data->display, data->stencil_pict);
+            }
+            if (data->xwindow_pict) {
+                XRenderFreePicture(data->display, data->xwindow_pict);
+            }
+#ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
+            if (data->use_xdamage && data->stencil_damage) {
+                XDamageDestroy(data->display, data->stencil_damage);
+            }
+#endif
         }
 #endif
         SDL_FreeDirtyRects(&data->dirty);
