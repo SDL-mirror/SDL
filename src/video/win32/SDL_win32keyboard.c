@@ -101,8 +101,7 @@ WIN_UpdateKeymap()
 
         /* Make sure this scancode is a valid character scancode */
         scancode = win32_scancode_table[i];
-        if (scancode == SDL_SCANCODE_UNKNOWN ||
-            (keymap[scancode] & SDLK_SCANCODE_MASK)) {
+        if (scancode == SDL_SCANCODE_UNKNOWN || keymap[scancode] >= 127) {
             continue;
         }
 

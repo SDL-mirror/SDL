@@ -83,10 +83,14 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
        except they don't have the extended bit (0x1000000) set.
      */
     if (!(lParam & 0x1000000)) {
-        for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
-            if (scancode == keypad_scancodes[i]) {
-                wParam = VK_NUMPAD0 + i;
-                break;
+        if (wParam == VK_DELETE) {
+            wParam = VK_DECIMAL;
+        } else {
+            for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
+                if (scancode == keypad_scancodes[i]) {
+                    wParam = VK_NUMPAD0 + i;
+                    break;
+                }
             }
         }
     }
