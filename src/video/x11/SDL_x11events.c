@@ -182,7 +182,8 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
+            /* FIXME: How do we tell if this was a key repeat? */
+            SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode], SDL_FALSE);
 #if 1
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
@@ -217,7 +218,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode]);
+            SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode], SDL_FALSE);
         }
         break;
 

@@ -201,10 +201,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
         {
-            /* Ignore repeated keys */
+            SDL_bool repeat;
+
             if (lParam & REPEATED_KEYMASK) {
-                returnCode = 0;
-                break;
+                repeat = SDL_TRUE;
+            } else {
+                repeat = SDL_FALSE;
             }
 
             wParam = RemapVKEY(wParam, lParam);
@@ -244,7 +246,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
             if (wParam < 256) {
                 SDL_SendKeyboardKey(SDL_PRESSED,
-                                    data->videodata->key_layout[wParam]);
+                                    data->videodata->key_layout[wParam],
+                                    repeat);
             }
         }
         returnCode = 0;
@@ -294,11 +297,13 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
                 SDL_RELEASED) {
                 SDL_SendKeyboardKey(SDL_PRESSED,
-                                    data->videodata->key_layout[wParam]);
+                                    data->videodata->key_layout[wParam],
+                                    SDL_FALSE);
             }
             if (wParam < 256) {
                 SDL_SendKeyboardKey(SDL_RELEASED,
-                                    data->videodata->key_layout[wParam]);
+                                    data->videodata->key_layout[wParam],
+                                    SDL_FALSE);
             }
         }
         returnCode = 0;

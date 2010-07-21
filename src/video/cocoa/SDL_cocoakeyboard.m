@@ -219,14 +219,14 @@ DoUnsidedModifiers(unsigned short scancode,
         if (oldMask && oldMask != newMask) {        /* modifier up event */
             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
             if (bit == NSAlphaShiftKeyMask) {
-                SDL_SendKeyboardKey(SDL_PRESSED, mapping[i]);
+                SDL_SendKeyboardKey(SDL_PRESSED, mapping[i], SDL_FALSE);
             }
-            SDL_SendKeyboardKey(SDL_RELEASED, mapping[i]);
+            SDL_SendKeyboardKey(SDL_RELEASED, mapping[i], SDL_FALSE);
         } else if (newMask && oldMask != newMask) { /* modifier down event */
-            SDL_SendKeyboardKey(SDL_PRESSED, mapping[i]);
+            SDL_SendKeyboardKey(SDL_PRESSED, mapping[i], SDL_FALSE);
             /* If this was Caps Lock, we need some additional voodoo to make SDL happy */
             if (bit == NSAlphaShiftKeyMask) {
-                SDL_SendKeyboardKey(SDL_RELEASED, mapping[i]);
+                SDL_SendKeyboardKey(SDL_RELEASED, mapping[i], SDL_FALSE);
             }
         }
     }
@@ -251,9 +251,9 @@ HandleNonDeviceModifier(unsigned int device_independent_mask,
     newMask = newMods & device_independent_mask;
     
     if (oldMask && oldMask != newMask) {
-        SDL_SendKeyboardKey(SDL_RELEASED, scancode);
+        SDL_SendKeyboardKey(SDL_RELEASED, scancode, SDL_FALSE);
     } else if (newMask && oldMask != newMask) {
-        SDL_SendKeyboardKey(SDL_PRESSED, scancode);
+        SDL_SendKeyboardKey(SDL_PRESSED, scancode, SDL_FALSE);
     }
 }
 
@@ -278,9 +278,9 @@ HandleModifierOneSide(unsigned int oldMods, unsigned int newMods,
      * find out which it is.
      */
     if (new_dep_mask && old_dep_mask != new_dep_mask) {
-        SDL_SendKeyboardKey(SDL_PRESSED, scancode);
+        SDL_SendKeyboardKey(SDL_PRESSED, scancode, SDL_FALSE);
     } else {
-        SDL_SendKeyboardKey(SDL_RELEASED, scancode);
+        SDL_SendKeyboardKey(SDL_RELEASED, scancode, SDL_FALSE);
     }
 }
 
@@ -351,7 +351,7 @@ ReleaseModifierSide(unsigned int device_independent_mask,
         /* In this case, we can't detect the keyboard, so use the left side 
          * to represent both, and release it. 
          */
-        SDL_SendKeyboardKey(SDL_RELEASED, left_scancode);
+        SDL_SendKeyboardKey(SDL_RELEASED, left_scancode, SDL_FALSE);
         return;
     }
 
@@ -362,10 +362,10 @@ ReleaseModifierSide(unsigned int device_independent_mask,
      * so I hope this doesn't cause other problems.
      */
     if ( left_device_dependent_mask & oldMods ) {
-        SDL_SendKeyboardKey(SDL_RELEASED, left_scancode);
+        SDL_SendKeyboardKey(SDL_RELEASED, left_scancode, SDL_FALSE);
     }
     if ( right_device_dependent_mask & oldMods ) {
-        SDL_SendKeyboardKey(SDL_RELEASED, right_scancode);
+        SDL_SendKeyboardKey(SDL_RELEASED, right_scancode, SDL_FALSE);
     }
 }
 
@@ -382,16 +382,16 @@ HandleCapsLock(unsigned short scancode,
     newMask = newMods & NSAlphaShiftKeyMask;
 
     if (oldMask != newMask) {
-        SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_CAPSLOCK);
-        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_CAPSLOCK);
+        SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_CAPSLOCK, SDL_FALSE);
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_CAPSLOCK, SDL_FALSE);
     }
 
     oldMask = oldMods & NSNumericPadKeyMask;
     newMask = newMods & NSNumericPadKeyMask;
 
     if (oldMask != newMask) {
-        SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR);
-        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR);
+        SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR, SDL_FALSE);
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR, SDL_FALSE);
     }
 }
 
@@ -670,6 +670,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     unsigned short scancode = [event keyCode];
     SDL_scancode code;
+    SDL_bool repeat;
 #if 0
     const char *text;
 #endif
@@ -688,17 +689,18 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
 
     switch ([event type]) {
     case NSKeyDown:
-        if (![event isARepeat]) {
+        repeat = [event isARepeat] ? SDL_TRUE : SDL_FALSE;
+        if (!repeat) {
             /* See if we need to rebuild the keyboard layout */
             UpdateKeymap(data);
-
-            SDL_SendKeyboardKey(SDL_PRESSED, code);
-#if 1
-            if (code == SDL_SCANCODE_UNKNOWN) {
-                fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
-            }
-#endif
         }
+
+        SDL_SendKeyboardKey(SDL_PRESSED, code, repeat);
+#if 1
+        if (code == SDL_SCANCODE_UNKNOWN) {
+            fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
+        }
+#endif
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
             /* FIXME CW 2007-08-16: only send those events to the field editor for which we actually want text events, not e.g. esc or function keys. Arrow keys in particular seem to produce crashes sometimes. */
             [data->fieldEdit interpretKeyEvents:[NSArray arrayWithObject:event]];
@@ -712,7 +714,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         }
         break;
     case NSKeyUp:
-        SDL_SendKeyboardKey(SDL_RELEASED, code);
+        SDL_SendKeyboardKey(SDL_RELEASED, code, SDL_FALSE);
         break;
     case NSFlagsChanged:
         /* FIXME CW 2007-08-14: check if this whole mess that takes up half of this file is really necessary */

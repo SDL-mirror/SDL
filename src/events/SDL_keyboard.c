@@ -566,7 +566,7 @@ SDL_ResetKeyboard(void)
 
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
-            SDL_SendKeyboardKey(SDL_RELEASED, scancode);
+            SDL_SendKeyboardKey(SDL_RELEASED, scancode, SDL_FALSE);
         }
     }
 }
@@ -627,7 +627,7 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 }
 
 int
-SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode)
+SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode, SDL_bool repeat)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
@@ -732,7 +732,7 @@ SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode)
     }
 
     /* Drop events that don't change state */
-    if (keyboard->keystate[scancode] == state) {
+    if (keyboard->keystate[scancode] == state && !repeat) {
 #if 0
         printf("Keyboard event didn't change state - dropped!\n");
 #endif
@@ -748,6 +748,7 @@ SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode)
         SDL_Event event;
         event.key.type = type;
         event.key.state = state;
+        event.key.repeat = repeat ? 1 : 0;
         event.key.keysym.scancode = scancode;
         event.key.keysym.sym = keyboard->keymap[scancode];
         event.key.keysym.mod = modstate;

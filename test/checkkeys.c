@@ -53,7 +53,7 @@ print_modifiers(void)
 }
 
 static void
-PrintKey(SDL_keysym * sym, int pressed)
+PrintKey(SDL_keysym * sym, SDL_bool pressed, SDL_bool repeat)
 {
     /* Print the keycode, name and state */
     if (sym->sym) {
@@ -87,6 +87,9 @@ PrintKey(SDL_keysym * sym, int pressed)
         }
     }
     print_modifiers();
+    if (repeat) {
+        printf(" (repeat)");
+    }
     printf("\n");
 }
 
@@ -134,10 +137,8 @@ main(int argc, char *argv[])
         SDL_WaitEvent(&event);
         switch (event.type) {
         case SDL_KEYDOWN:
-            PrintKey(&event.key.keysym, 1);
-            break;
         case SDL_KEYUP:
-            PrintKey(&event.key.keysym, 0);
+            PrintKey(&event.key.keysym, event.key.state, event.key.repeat);
             break;
         case SDL_TEXTINPUT:
             PrintText(event.text.text);
