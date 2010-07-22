@@ -876,7 +876,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 
         /* Set the _NET_WM_ICON property */
         propsize = 2 + (icon->w * icon->h);
-        propdata = SDL_malloc(propsize * sizeof(Uint32));
+        propdata = SDL_malloc(propsize * sizeof(long));
         if (propdata) {
             int x, y;
             Uint32 *src;
