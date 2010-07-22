@@ -245,8 +245,8 @@
 	
 	if ([string length] == 0) {
 		/* it wants to replace text with nothing, ie a delete */
-		SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE, SDL_FALSE);
-		SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE, SDL_FALSE);
+		SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
+		SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_DELETE);
 	}
 	else {
 		/* go through all the characters in the string we've been sent
@@ -272,14 +272,14 @@
 			
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift down */
-				SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT, SDL_FALSE);
+				SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT);
 			}
 			/* send a keydown and keyup even for the character */
-			SDL_SendKeyboardKey(SDL_PRESSED, code, SDL_FALSE);
-			SDL_SendKeyboardKey(SDL_RELEASED, code, SDL_FALSE);
+			SDL_SendKeyboardKey(SDL_PRESSED, code);
+			SDL_SendKeyboardKey(SDL_RELEASED, code);
 			if (mod & KMOD_SHIFT) {
 				/* If character uses shift, press shift back up */
-				SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT, SDL_FALSE);
+				SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
 			}			
 		}
 	}

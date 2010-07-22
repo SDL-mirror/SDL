@@ -49,7 +49,7 @@ extern void SDL_SetScancodeName(SDL_scancode scancode, const char *name);
 extern void SDL_SetKeyboardFocus(SDL_Window * window);
 
 /* Send a keyboard key event */
-extern int SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode, SDL_bool repeat);
+extern int SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode);
 
 /* Send keyboard text input */
 extern int SDL_SendKeyboardText(const char *text);

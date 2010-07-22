@@ -36,6 +36,24 @@
 
 /*#define DEBUG_XEVENTS*/
 
+/* Check to see if this is a repeated key.
+   (idea shamelessly lifted from GII -- thanks guys! :)
+ */
+static SDL_bool X11_KeyRepeat(Display *display, XEvent *event)
+{
+    XEvent peekevent;
+
+    if (XPending(display)) {
+        XPeekEvent(display, &peekevent);
+        if ((peekevent.type == KeyPress) &&
+            (peekevent.xkey.keycode == event->xkey.keycode) &&
+            ((peekevent.xkey.time-event->xkey.time) < 2)) {
+            return SDL_TRUE;
+        }
+    }
+    return SDL_FALSE;
+}
+
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -176,14 +194,14 @@ X11_DispatchEvent(_THIS)
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
+            SDL_scancode scancode;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
 
 #ifdef DEBUG_XEVENTS
             printf("KeyPress (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            /* FIXME: How do we tell if this was a key repeat? */
-            SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode], SDL_FALSE);
+            SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
 #if 1
             if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
                 int min_keycode, max_keycode;
@@ -218,7 +236,11 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("KeyRelease (X11 keycode = 0x%X)\n", xevent.xkey.keycode);
 #endif
-            SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode], SDL_FALSE);
+            if (X11_KeyRepeat(display, &xevent)) {
+                /* We're about to get a repeated key down, ignore the key up */
+                break;
+            }
+            SDL_SendKeyboardKey(SDL_RELEASED, videodata->key_layout[keycode]);
         }
         break;
 
