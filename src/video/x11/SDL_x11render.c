@@ -1000,10 +1000,6 @@ X11_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
             return 0;
         }
     case SDL_BLENDMODE_MOD:
-        if (renderdata->use_xrender) {
-            data->blend_op = PictOpOver;
-            return 0;
-        }
     case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
         if (renderdata->use_xrender) {
@@ -1765,15 +1761,18 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         Picture mask;
         XRenderPictureAttributes attr;
         const SDL_Rect *mrect;
-        if(texture->blendMode == SDL_BLENDMODE_NONE) {
+        if(texture->blendMode == SDL_BLENDMODE_NONE) 
+        {
             mask = None;
             mrect = srcrect;
         }
-        else if (texture->blendMode == SDL_BLENDMODE_MOD) {
+        else if (texture->blendMode == SDL_BLENDMODE_MOD)
+        {
             mask = data->stencil_pict;
-                        mrect = dstrect;
+            mrect = dstrect;
         }
-        else {
+        else
+        {
             mask = texturedata->picture;
             mrect = srcrect;
         }
