@@ -1582,8 +1582,8 @@ X11_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
 
             xrect->x = (short)rect.x;
             xrect->y = (short)rect.y;
-            xrect->width = (unsigned short)rect.w;
-            xrect->height = (unsigned short)rect.h;
+            xrect->width = (unsigned short)rect.w - 1;
+            xrect->height = (unsigned short)rect.h - 1;
             ++xrect;
             ++xcount;
 
