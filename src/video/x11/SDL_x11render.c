@@ -252,6 +252,28 @@ CheckXDamage(Display *display, int *major, int *minor) {
 }
 #endif
 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+static Uint32
+XRenderPictFormatToSDLPixelFormatEnum(XRenderPictFormat *pict_format) {
+    if (pict_format->type != PictTypeDirect) {
+        SDL_SetError("Indexed pict formats not supported ATM");
+        return 0;
+    }
+    Uint32 Amask, Rmask, Gmask, Bmask;
+    int bpp;
+
+    Rmask = pict_format->direct.redMask << pict_format->direct.red;
+    Gmask = pict_format->direct.greenMask << pict_format->direct.green;
+    Bmask = pict_format->direct.blueMask << pict_format->direct.blue;
+    Amask = pict_format->direct.alphaMask << pict_format->direct.alpha;
+    bpp = pict_format->depth;
+
+    Uint32 format;
+    format = SDL_MasksToPixelFormatEnum(bpp, Rmask, Gmask, Bmask, Amask);
+    return format;
+}
+#endif
+
 void
 X11_AddRenderDriver(_THIS)
 {
@@ -270,7 +292,23 @@ X11_AddRenderDriver(_THIS)
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     int major, minor;
     if (CheckXRender(data->display, &major, &minor)) {
-        info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_ARGB8888;
+        XRenderPictFormat templ;
+        templ.type = PictTypeDirect;
+        XRenderPictFormat *pict_format;
+        Uint32 format;
+        int i = 0;
+        while (info->num_texture_formats < 50) {
+            pict_format =
+                XRenderFindFormat(data->display, PictFormatType, &templ, i++);
+            if (pict_format) {
+                format = XRenderPictFormatToSDLPixelFormatEnum(pict_format);
+                if (format != SDL_PIXELTYPE_UNKNOWN) {
+                    info->texture_formats[info->num_texture_formats++] = format;
+                }
+            }
+            else
+                break;
+        }
         info->blend_modes = (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD |
                              SDL_BLENDMODE_MOD | SDL_BLENDMODE_MASK);
         info->scale_modes = (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW |
@@ -379,11 +417,6 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                          0, 0,
                          0, 0,
                          window->w, window->h);
-        /* Add some blending modes to the list of supported blending modes */
-        renderer->info.blend_modes |=
-            (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MASK | SDL_BLENDMODE_MOD);
-        renderer->info.scale_modes |=
-            (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST);
         /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 32);
@@ -422,7 +455,6 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->blend_op = PictOpOver;
     }
 #endif
-    
     if (flags & SDL_RENDERER_SINGLEBUFFER) {
         renderer->info.flags |=
             (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY);
