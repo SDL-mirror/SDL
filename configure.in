@@ -285,6 +285,8 @@ if test x$have_inttypes != xyes; then
     AC_DEFINE(uintptr_t, unsigned long)
 fi
 
+AC_CHECK_HEADER(Linux/input.h,AC_DEFINE(HAVE_LINUX_INPUT_H))
+
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
 SOURCES="$SOURCES $srcdir/src/audio/*.c"

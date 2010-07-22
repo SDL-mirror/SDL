@@ -37,10 +37,11 @@
 
 #include <stdio.h>
 
+#ifdef HAVE_LINUX_INPUT_H
 //Touch Input/event* includes
 #include <linux/input.h>
 #include <fcntl.h>
-
+#endif
 /*#define DEBUG_XEVENTS*/
 
 static void
@@ -401,7 +402,7 @@ X11_PumpEvents(_THIS)
         X11_DispatchEvent(_this);
     }
 
-
+#ifdef HAVE_LINUX_INPUT_H
     /* Process Touch events - TODO When X gets touch support, use that instead*/
     int i = 0,rd;
     char name[256];
@@ -472,6 +473,7 @@ X11_PumpEvents(_THIS)
 	    }
 	}
     }
+#endif
 }
 
 /* This is so wrong it hurts */

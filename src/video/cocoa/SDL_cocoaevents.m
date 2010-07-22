@@ -217,6 +217,8 @@ Cocoa_PumpEvents(_THIS)
             if (([event modifierFlags] & NSCommandKeyMask) || [event type] == NSFlagsChanged)
                [NSApp sendEvent: event];
             break;
+		case NSBeginTouch:
+			printf("Touch Event Received\n");
         default:
             [NSApp sendEvent:event];
             break;
