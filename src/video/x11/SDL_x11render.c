@@ -824,7 +824,6 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             Uint32 Amask, Rmask, Gmask, Bmask;
             SDL_PixelFormatEnumToMasks(texture->format, &(data->depth),
                                        &Rmask, &Gmask, &Bmask, &Amask);
-            printf("%d %x %x %x %x\n", data->depth, Rmask, Gmask, Bmask, Amask);
             data->visual = PixelFormatEnumToVisual(renderer, texture->format);
         }
         else
