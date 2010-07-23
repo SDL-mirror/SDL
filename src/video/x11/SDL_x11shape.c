@@ -32,7 +32,8 @@ SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 	if (SDL_X11_HAVE_XSHAPE) {  /* Make sure X server supports it. */
 		result = malloc(sizeof(SDL_WindowShaper));
 		result->window = window;
-		result->alphacutoff = 0;
+		result->mode.mode = ShapeModeDefault;
+		result->mode.parameters.binarizationCutoff = 1;
 		result->usershownflag = 0;
 		SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
 		result->driverdata = data;
@@ -65,6 +66,8 @@ int X11_ResizeWindowShape(SDL_Window* window) {
 			return -1;
 		}
 	}
+	else
+		memset(data->bitmap,0,data->bitmapsize);
 	
 	window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
 	
@@ -83,7 +86,7 @@ int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowSha
 	SDL_ShapeData *data = shaper->driverdata;
 	
 	/* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
-	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->bitmap,8,1);
+	SDL_CalculateShapeBitmap(shaper->mode,shape,data->bitmap,8,1);
 		
 	SDL_WindowData *windowdata = (SDL_WindowData*)(shaper->window->driverdata);
 	Pixmap shapemask = XCreateBitmapFromData(windowdata->videodata->display,windowdata->xwindow,data->bitmap,shaper->window->w,shaper->window->h);

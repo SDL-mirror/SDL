@@ -34,7 +34,8 @@ SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int
 		result->shaper = result->display->device->shape_driver.CreateShaper(result);
 		if(result->shaper != NULL) {
 			result->shaper->usershownflag = flags & SDL_WINDOW_SHOWN;
-			result->shaper->alphacutoff = 1;
+			result->shaper->mode.mode = ShapeModeDefault;
+			result->shaper->mode.parameters.binarizationCutoff = 1;
 			result->shaper->hasshape = SDL_FALSE;
 			return result;
 		}
@@ -55,12 +56,13 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 }
 
 /* REQUIRES that bitmap point to a w-by-h bitmap with 1bpp. */
-void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
+void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
 	int x = 0;
 	int y = 0;
 	Uint8 r = 0,g = 0,b = 0,alpha = 0;
 	Uint8* pixel = NULL;
 	Uint32 bitmap_pixel,pixel_value = 0;
+	SDL_Color key;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
 	pixel = (Uint8*)shape->pixels;
@@ -82,7 +84,21 @@ void SDL_CalculateShapeBitmap(Uint8 alphacutoff,SDL_Surface *shape,Uint8* bitmap
 			}
 			SDL_GetRGBA(pixel_value,shape->format,&r,&g,&b,&alpha);
 			bitmap_pixel = y*shape->w + x;
-			bitmap[bitmap_pixel / ppb] |= (alpha >= alphacutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+			switch(mode.mode) {
+				case(ShapeModeDefault):
+					bitmap[bitmap_pixel / ppb] |= (alpha >= 1 ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					break;
+				case(ShapeModeBinarizeAlpha):
+					bitmap[bitmap_pixel / ppb] |= (alpha >= mode.parameters.binarizationCutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					break;
+				case(ShapeModeReverseBinarizeAlpha):
+					bitmap[bitmap_pixel / ppb] |= (alpha <= mode.parameters.binarizationCutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					break;
+				case(ShapeModeColorKey):
+					key = mode.parameters.colorKey;
+					bitmap[bitmap_pixel / ppb] |= (key.r == r && key.g == g && key.b == b ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					break;
+			}
 		}
 	}
 	if(SDL_MUSTLOCK(shape))
@@ -98,18 +114,8 @@ int SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode
 		//Invalid shape argument.
 		return SDL_INVALID_SHAPE_ARGUMENT;
 	
-	if(shapeMode != NULL) {
-		switch(shapeMode->mode) {
-			case ShapeModeDefault: {
-				window->shaper->alphacutoff = 1;
-				break;
-			}
-			case ShapeModeBinarizeAlpha: {
-				window->shaper->alphacutoff = shapeMode->parameters.binarizationCutoff;
-				break;
-			}
-		}
-	}
+	if(shapeMode != NULL)
+		window->shaper->mode = *shapeMode;
 	//TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is finished.  Debugging is in progress on both.
 	result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
 	window->shaper->hasshape = SDL_TRUE;
@@ -137,12 +143,7 @@ int SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
 				return SDL_WINDOW_LACKS_SHAPE;
 		}
 		else {
-			if(window->shaper->alphacutoff != 1) {
-				shapeMode->mode = ShapeModeBinarizeAlpha;
-				shapeMode->parameters.binarizationCutoff = window->shaper->alphacutoff;
-			}
-			else
-				shapeMode->mode = ShapeModeDefault;
+			*shapeMode = window->shaper->mode;
 			return 0;
 		}
 	}

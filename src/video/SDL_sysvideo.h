@@ -144,9 +144,8 @@ struct SDL_WindowShaper
     /* The user's specified SDL_WINDOW_SHOWN flag, for use once the user gives the window a shape. */
     Uint32 usershownflag;
     
-    /* The cutoff value for alpha-channel binarization.  When alpha is greater-than-or-equal-to this value in the shape
-       image, the corresponding pixel of the actual window will be considered part of the window's shape. */
-    Uint8 alphacutoff;
+    /* The parameters for shape calculation. */
+    SDL_WindowShapeMode mode;
     
     /* Has this window been assigned a shape? */
     SDL_bool hasshape;

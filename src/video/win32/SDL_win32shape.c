@@ -26,7 +26,8 @@
 SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window) {
 	SDL_WindowShaper* result = malloc(sizeof(SDL_WindowShaper));
 	result->window = window;
-	result->alphacutoff = 0;
+	result->mode.mode = ShapeModeDefault;
+	result->mode.parameters.binarizationCutoff = 1;
 	result->usershownflag = 0;
 	//Put some driver-data here.
 	window->shaper = result;
@@ -42,7 +43,6 @@ int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
 		return -3;
 	
-	/* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
 	/*
 	 * Start with empty region 
 	 */
@@ -57,7 +57,7 @@ int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	/*
 	 * Transfer binarized mask image into workbuffer 
 	 */
-	SDL_CalculateShapeBitmap(shaper->alphacutoff,shape,data->shapebuffer,1,0xff);
+	SDL_CalculateShapeBitmap(shaper->mode,shape,data->shapebuffer,1,0xff);
 	
 	//Move code over to here from AW_windowShape.c
 	Uint8 *pos1 = data->shapebuffer + width - 1;
@@ -338,6 +338,8 @@ int Win32_ResizeWindowShape(SDL_Window *window) {
 			return -1;
 		}
 	}
+	else
+		memset(data->shapebuffer,0,data->buffersize);
 	
 	window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
 	
