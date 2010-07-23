@@ -96,7 +96,7 @@ void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8*
 					break;
 				case(ShapeModeColorKey):
 					key = mode.parameters.colorKey;
-					bitmap[bitmap_pixel / ppb] |= (key.r == r && key.g == g && key.b == b ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					bitmap[bitmap_pixel / ppb] |= ((key.r == r && key.g == g && key.b == b) ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
 					break;
 			}
 		}
