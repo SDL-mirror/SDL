@@ -129,7 +129,7 @@ DirectFB_CreateDevice(int devindex)
 #endif
 
     device->free = DirectFB_DeleteDevice;
-
+	fprintf(LOG_CHANNEL, "Device setup %p!!\n", device->ShowWindow);
     return device;
   error:
     if (device)
@@ -163,19 +163,20 @@ DirectFB_DeviceInformation(IDirectFB * dfb)
     fprintf(LOG_CHANNEL, "\nBlitting flags:\n");
     for (n = 0; blitting_flags[n].flag; n++) {
         if (desc.blitting_flags & blitting_flags[n].flag)
-            printf("    %s\n", blitting_flags[n].name);
+            fprintf(LOG_CHANNEL, "    %s\n", blitting_flags[n].name);
     }
 
     fprintf(LOG_CHANNEL, "\nDrawing flags:\n");
     for (n = 0; drawing_flags[n].flag; n++) {
         if (desc.drawing_flags & drawing_flags[n].flag)
-            printf("    %s\n", drawing_flags[n].name);
+            fprintf(LOG_CHANNEL, "    %s\n", drawing_flags[n].name);
     }
+
 
     fprintf(LOG_CHANNEL, "\nAcceleration flags:\n");
     for (n = 0; acceleration_mask[n].mask; n++) {
         if (desc.acceleration_mask & acceleration_mask[n].mask)
-            printf("    %s\n", acceleration_mask[n].name);
+            fprintf(LOG_CHANNEL, "    %s\n", acceleration_mask[n].name);
     }
 
 
@@ -208,10 +209,14 @@ DirectFB_VideoInit(_THIS)
             DirectFBSetOption("disable-module", "x11input");
     }
 
-    devdata->use_linux_input = 1;       /* default: on */
+#if USE_MULTI_API
+	devdata->use_linux_input = 1;       /* default: on */
     stemp = SDL_getenv(DFBENV_USE_LINUX_INPUT);
     if (stemp)
         devdata->use_linux_input = atoi(stemp);
+#else
+	devdata->use_linux_input = 0;       /* no way to support this ... */
+#endif
 
     if (!devdata->use_linux_input)
         DirectFBSetOption("disable-module", "linux_input");

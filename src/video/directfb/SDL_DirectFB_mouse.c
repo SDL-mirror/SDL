@@ -26,6 +26,7 @@
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_mouse_c.h"
 
+#if USE_MULTI_API
 static SDL_Cursor *DirectFB_CreateCursor(SDL_Surface * surface,
                                          int hot_x, int hot_y);
 static int DirectFB_ShowCursor(SDL_Cursor * cursor);
@@ -238,5 +239,24 @@ DirectFB_FreeMouse(SDL_Mouse * mouse)
 {
     /* nothing yet */
 }
+
+#else /* USE_MULTI_API */
+
+void
+DirectFB_InitMouse(_THIS)
+{
+    SDL_DFB_DEVICEDATA(_this);
+
+    devdata->num_mice = 1;
+}
+
+void
+DirectFB_QuitMouse(_THIS)
+{
+    SDL_DFB_DEVICEDATA(_this);
+}
+
+
+#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -31,7 +31,14 @@
 
 #include "SDL_mouse.h"
 
-#define DEBUG 0
+
+/* Set below to 1 to compile with (old) multi mice/keyboard api. Code left in
+ * in case we see this again ... 
+ */
+
+#define USE_MULTI_API	(0)
+
+#define DEBUG 1
 #define LOG_CHANNEL 	stdout
 
 #define DFB_VERSIONNUM(X, Y, Z)						\

@@ -26,7 +26,7 @@
 
 #include "SDL_DirectFB_video.h"
 
-#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (dev)->displays[(win)->display].driverdata : NULL)
+#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (win)->display->driverdata : NULL)
 
 typedef struct _DFB_DisplayData DFB_DisplayData;
 struct _DFB_DisplayData

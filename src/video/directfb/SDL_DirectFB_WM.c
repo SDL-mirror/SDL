@@ -210,7 +210,7 @@ DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
     windata->window->MoveTo(windata->window, 0, 0);
     windata->window->Resize(windata->window,
                             display->current_mode.w, display->current_mode.h);
-    SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
 }
 
 void
@@ -226,7 +226,7 @@ DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window)
                             windata->restore.y);
     windata->window->Resize(windata->window, windata->restore.w,
                             windata->restore.h);
-    SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
 }
 
 enum
@@ -304,7 +304,7 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
             case WM_POS_NONE:
                 return 0;
             case WM_POS_CLOSE:
-                SDL_SendWindowEvent(windata->sdl_id, SDL_WINDOWEVENT_CLOSE, 0,
+                SDL_SendWindowEvent(window, SDL_WINDOWEVENT_CLOSE, 0,
                                     0);
                 return 1;
             case WM_POS_MAX:

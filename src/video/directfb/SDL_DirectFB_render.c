@@ -423,7 +423,7 @@ static int
 DirectFB_ActivateRenderer(SDL_Renderer * renderer)
 {
     SDL_DFB_RENDERERDATA(renderer);
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_DFB_WINDOWDATA(window);
 
     if (renddata->size_changed || windata->wm_needs_redraw) {
@@ -445,7 +445,7 @@ static int
 DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_DFB_RENDERERDATA(renderer);
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_VideoDisplay *display = window->display;
     SDL_DFB_DEVICEDATA(display->device);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
@@ -501,7 +501,7 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_VideoDisplay *display = window->display;
     SDL_DFB_DEVICEDATA(display->device);
     DirectFB_TextureData *data;
@@ -950,7 +950,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (texturedata->display) {
         int px, py;
-        SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+        SDL_Window *window = renderer->window;
         SDL_DFB_WINDOWDATA(window);
         SDL_VideoDisplay *display = texturedata->display;
         DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
@@ -1048,7 +1048,7 @@ static void
 DirectFB_RenderPresent(SDL_Renderer * renderer)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
-    SDL_Window *window = SDL_GetWindowFromID(renderer->window);
+    SDL_Window *window = renderer->window;
     SDL_DFB_WINDOWDATA(window);
 
     DFBRectangle sr;

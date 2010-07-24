@@ -140,7 +140,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     windata->window->RaiseToTop(windata->window);
 
     /* remember parent */
-    windata->window = window;
+    windata->sdl_window = window;
 
     /* Add to list ... */
 
