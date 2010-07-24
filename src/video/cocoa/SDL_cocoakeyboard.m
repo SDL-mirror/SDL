@@ -31,6 +31,8 @@
 //#define DEBUG_IME NSLog
 #define DEBUG_IME
 
+#define DEBUG_TOUCH NSLog
+
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
 #endif
@@ -190,6 +192,34 @@
 {
     return [NSArray array];
 }
+
+// Touch Code Begins -----------
+
+- (id)initWithFrame:(CGRect)frame {
+  if (self = [super initWithFrame:frame]) {
+    [self setAcceptsTouchEvents:YES];
+    [self setWantsRestingTouches:YES];
+    DEBUG_TOUCH(@"Initializing Cocoa Touch System....");
+    //DEBUG_TOUCH(@"Accepts Touch events? %@",[self acceptsTouchEvents]);
+  }
+  return self;
+}
+
+- (void)touchesBeganWithEvent:(NSEvent *)event {
+  DEBUG_TOUCH(@"Finger Down");
+}
+- (void)touchesMovedWithEvent:(NSEvent *)event {
+  DEBUG_TOUCH(@"Finger Moved");
+}
+- (void)touchesEndedWithEvent:(NSEvent *)event {
+  DEBUG_TOUCH(@"Finger Up");
+}
+- (void)touchesCancelledWithEvent:(NSEvent *)event {
+  DEBUG_TOUCH(@"Finger Cancelled");
+}
+
+//Touch Code Ends --------------
+
 
 @end
 
