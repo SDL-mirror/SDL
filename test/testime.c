@@ -25,7 +25,7 @@ TTF_Font *font;
 SDL_Rect textRect, markedRect;
 Uint32 lineColor, backColor;
 SDL_Color textColor = { 0, 0, 0 };
-char text[MAX_TEXT_LENGTH], *markedText;
+char text[MAX_TEXT_LENGTH], markedText[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
 
 void usage()
 {
@@ -124,7 +124,7 @@ void InitInput()
 
     text[0] = 0;
     markedRect = textRect;
-    markedText = NULL;
+    markedText[0] = 0;
 
     SDL_StartTextInput();
 }
@@ -178,7 +178,7 @@ void Redraw()
     cursorRect.h = h;
 
     SDL_FillRect(screen, &markedRect, backColor);
-    if (markedText)
+    if (markedText[0])
     {
 #ifdef HAVE_SDL_TTF
         RenderText(screen, font, markedText, markedRect.x, markedRect.y, textColor);
@@ -293,13 +293,13 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Keyboard: text input \"%s\"\n", event.text.text);
 
             if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
-                strcpy(text + SDL_strlen(text), event.text.text);
+                strcat(text, event.text.text);
 
             fprintf(stderr, "text inputed: %s\n", text);
 
             // After text inputed, we can clear up markedText because it
             // is committed
-            markedText = NULL;
+            markedText[0] = 0;
             Redraw();
             break;
 
@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "text editing \"%s\", selected range (%d, %d)\n",
                     event.edit.text, event.edit.start, event.edit.length);
 
-            markedText = event.edit.text;
+            strcpy(markedText, event.edit.text);
             Redraw();
             break;
 
