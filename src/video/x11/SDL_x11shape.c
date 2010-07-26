@@ -25,6 +25,10 @@
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
 
+SDL_Window* X11_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
+	return SDL_CreateWindow(title,x,y,w,h,flags);
+}
+
 SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 	SDL_WindowShaper* result = NULL;
 

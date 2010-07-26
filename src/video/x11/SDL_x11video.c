@@ -203,6 +203,7 @@ X11_CreateDevice(int devindex)
     device->SetWindowGrab = X11_SetWindowGrab;
     device->DestroyWindow = X11_DestroyWindow;
     device->GetWindowWMInfo = X11_GetWindowWMInfo;
+    device->shape_driver.CreateShapedWindow = X11_CreateShapedWindow;
     device->shape_driver.CreateShaper = X11_CreateShaper;
     device->shape_driver.SetWindowShape = X11_SetWindowShape;
     device->shape_driver.ResizeWindowShape = X11_ResizeWindowShape;

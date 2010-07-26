@@ -23,6 +23,10 @@
 #include <windows.h>
 #include "SDL_win32shape.h"
 
+SDL_Window* Win32_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
+	return SDL_CreateWindow(title,x,y,w,h,flags);
+}
+
 SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window) {
 	SDL_WindowShaper* result = malloc(sizeof(SDL_WindowShaper));
 	result->window = window;

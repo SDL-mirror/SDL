@@ -12,7 +12,7 @@
 #define SHAPED_WINDOW_Y 150
 #define SHAPED_WINDOW_DIMENSION 640
 
-#define TICK_INTERVAL 18
+#define TICK_INTERVAL 1000/60
 
 typedef struct LoadedPicture {
 	SDL_Surface *surface;

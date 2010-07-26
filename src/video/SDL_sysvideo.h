@@ -156,6 +156,7 @@ struct SDL_WindowShaper
 /* Define the SDL shape driver structure */
 struct SDL_ShapeDriver
 {
+    SDL_Window *(*CreateShapedWindow)(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags);
     SDL_WindowShaper *(*CreateShaper)(SDL_Window * window);
     int (*SetWindowShape)(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode);
     int (*ResizeWindowShape)(SDL_Window *window);
