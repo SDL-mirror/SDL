@@ -348,7 +348,7 @@ int drawGLScene( GLvoid )
 	}
     }
 
-   
+    rotation++;
 
     return( TRUE );
 }
@@ -463,6 +463,7 @@ int SDL_main( int argc, char **argv )
 			case SDL_QUIT:
 			    /* handle quit requests */
 			    done = TRUE;
+			    __android_log_print(ANDROID_LOG_INFO, "SDL","App is shutting down\n");
 			    break;
 			default:
 			    break;

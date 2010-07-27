@@ -38,22 +38,29 @@ jmethodID midFlipBuffers;
 extern "C" int SDL_main();
 extern "C" int Android_OnKeyDown(int keycode);
 extern "C" int Android_OnKeyUp(int keycode);
+extern "C" int SDL_SendQuit();
+
+//If we're not the active app, don't try to render
+bool bRenderingEnabled = false;
 
 /*******************************************************************************
                  Functions called by JNI
 *******************************************************************************/	
 
-extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv*  env, jobject obj )
-{    
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: NativeInit");
+extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env, 
+                                                                jobject obj ){ 
+                                                                   
+	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
 
 	mEnv = env;
+
+	bRenderingEnabled = true;
 
     SDL_main();
 }
 
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
+extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
+
     JNIEnv* env = NULL;
     jint result = -1;
 
@@ -85,6 +92,7 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv*  env
     int r = Android_OnKeyDown(keycode);
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key down %d, %d\n", keycode, r);
+                        
 }
 
 extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env, 
@@ -93,13 +101,28 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env,
     int r = Android_OnKeyUp(keycode);
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key up %d, %d\n", keycode, r);
+                        
 }
 
 extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv*  env, 
                jobject obj, jint action, jfloat x, jfloat y, jfloat p){
+
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native touch event %d @ %f/%f, pressure %f\n", 
                         action, x, y, p);
+                        
+}
+
+extern "C" void Java_org_libsdl_android_SDLActivity_nativeQuit( JNIEnv*  env, 
+                                                                jobject obj ){    
+
+    //Stop rendering as we're no longer in the foreground
+	bRenderingEnabled = false;
+
+    //Inject a SDL_QUIT event
+    int r = SDL_SendQuit();
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native quit %d", r);        
 }
 
 
@@ -110,17 +133,18 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv*  env,
 extern "C" void sdl_create_context(){
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context()\n");
 
-    mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext ); 
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context() return\n");
+	bRenderingEnabled = true;
 
-   // exit(1);
+    mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext ); 
 }
 
 extern "C" void sdl_render(){
 
-    //When we get here, we've accumulated a full frame
-   //__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_render()");
-    
+    if(!bRenderingEnabled){
+        return;
+    }
+
+    //When we get here, we've accumulated a full frame    
     mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers ); 
 }
 

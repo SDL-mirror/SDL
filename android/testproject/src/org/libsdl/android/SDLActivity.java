@@ -61,11 +61,11 @@ public class SDLActivity extends Activity {
 
     //C functions we call
     public static native void nativeInit();
+    public static native void nativeQuit();
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
     public static native void onNativeTouch(int action, float x, 
                                             float y, float p);
-
 
 
 
@@ -139,6 +139,8 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     //Called when we lose the surface
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v("SDL","Surface destroyed");
+        
+        SDLActivity.nativeQuit();
     }
 
     //Called when the surface is resized
