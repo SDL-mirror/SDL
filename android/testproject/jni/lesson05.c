@@ -425,6 +425,15 @@ int SDL_main( int argc, char **argv )
     /* resize the initial window */
     resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
 
+    /* Load the SDL library */
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        __android_log_print(ANDROID_LOG_INFO, "SDL","Couldn't initialize SDL Audio: %s\n", SDL_GetError());
+        return (1);
+    }else{
+        __android_log_print(ANDROID_LOG_INFO, "SDL","Init audio ok\n");
+    }
+
+
     /* wait for events */ 
     while ( !done )
 	{

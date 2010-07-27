@@ -47,7 +47,7 @@ typedef unsigned int uint32_t;
 typedef unsigned int size_t;
 //typedef unsigned long uintptr_t;
 
-#define SDL_AUDIO_DRIVER_DUMMY	1
+#define SDL_AUDIO_DRIVER_ANDROID	1
 
 #define SDL_CDROM_DISABLED 1
 
