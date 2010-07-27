@@ -320,6 +320,8 @@ SDL_StreamDeinit(SDL_AudioStreamer * stream)
 }
 
 
+#include <android/log.h>
+
 /* The general mixing thread function */
 int SDLCALL
 SDL_RunAudio(void *devicep)

@@ -14,6 +14,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <signal.h>
+
 #include <android/log.h>
 
 
@@ -353,6 +355,89 @@ int drawGLScene( GLvoid )
     return( TRUE );
 }
 
+
+struct
+{
+    SDL_AudioSpec spec;
+    Uint8 *sound;               /* Pointer to wave data */
+    Uint32 soundlen;            /* Length of wave data */
+    int soundpos;               /* Current play position */
+} wave;
+
+void SDLCALL
+fillerup(void *unused, Uint8 * stream, int len)
+{
+    __android_log_print(ANDROID_LOG_INFO, "SDL","FILLERUP\n");
+    
+    Uint8 *waveptr;
+    int waveleft;
+
+    /* Set up the pointers */
+    waveptr = wave.sound + wave.soundpos;
+    waveleft = wave.soundlen - wave.soundpos;
+
+    /* Go! */
+    while (waveleft <= len) {
+        SDL_memcpy(stream, waveptr, waveleft);
+        stream += waveleft;
+        len -= waveleft;
+        waveptr = wave.sound;
+        waveleft = wave.soundlen;
+        wave.soundpos = 0;
+    }
+    SDL_memcpy(stream, waveptr, len);
+    wave.soundpos += len;
+}
+
+void testAudio(){
+
+    const char *file = "/sdcard/sample.wav";
+
+    /* Load the SDL library */
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        __android_log_print(ANDROID_LOG_INFO, "SDL","Couldn't initialize SDL Audio: %s\n", SDL_GetError());
+        return;
+    }else{
+        __android_log_print(ANDROID_LOG_INFO, "SDL","Init audio ok\n");
+    }
+
+    /* Load the wave file into memory */
+    if (SDL_LoadWAV(file, &wave.spec, &wave.sound, &wave.soundlen) == NULL) {
+        __android_log_print(ANDROID_LOG_INFO, "SDL", "Couldn't load %s: %s\n", file, SDL_GetError());
+        return;
+    }
+
+    wave.spec.callback = fillerup;
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL","Loaded: %d\n", wave.soundlen);
+
+
+    /* Initialize fillerup() variables */
+    if (SDL_OpenAudio(&wave.spec, NULL) < 0) {
+        __android_log_print(ANDROID_LOG_INFO, "SDL", "Couldn't open audio: %s\n", SDL_GetError());
+        SDL_FreeWAV(wave.sound);
+        return;
+    }
+
+     __android_log_print(ANDROID_LOG_INFO, "SDL","Using audio driver: %s\n", SDL_GetCurrentAudioDriver());
+
+    /* Let the audio run */
+    SDL_PauseAudio(0);
+
+     __android_log_print(ANDROID_LOG_INFO, "SDL","Playing\n");
+    
+    while (SDL_GetAudioStatus() == SDL_AUDIO_PLAYING){
+         //__android_log_print(ANDROID_LOG_INFO, "SDL","Still playing\n");
+        //SDL_Delay(100);
+    }
+
+     __android_log_print(ANDROID_LOG_INFO, "SDL","Closing down\n");
+
+    /* Clean up on signal */
+    SDL_CloseAudio();
+    SDL_FreeWAV(wave.sound);
+}
+
 int SDL_main( int argc, char **argv )
 {
 
@@ -425,13 +510,8 @@ int SDL_main( int argc, char **argv )
     /* resize the initial window */
     resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
 
-    /* Load the SDL library */
-    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-        __android_log_print(ANDROID_LOG_INFO, "SDL","Couldn't initialize SDL Audio: %s\n", SDL_GetError());
-        return (1);
-    }else{
-        __android_log_print(ANDROID_LOG_INFO, "SDL","Init audio ok\n");
-    }
+
+    testAudio();
 
 
     /* wait for events */ 

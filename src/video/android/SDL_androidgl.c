@@ -41,8 +41,8 @@
 /*
 These things are in the JNI android support
 */
-extern void sdl_create_context();
-extern void sdl_render();
+extern void Android_CreateContext();
+extern void Android_Render();
 
 /* GL functions */
 int Android_GL_LoadLibrary(_THIS, const char *path){
@@ -67,7 +67,7 @@ int *Android_GL_GetVisual(_THIS, Display * display, int screen){
 */
 
 SDL_GLContext Android_GL_CreateContext(_THIS, SDL_Window * window){
-	sdl_create_context();
+	Android_CreateContext();
 	return 1;
 }
 
@@ -88,7 +88,7 @@ int Android_GL_GetSwapInterval(_THIS){
 }
 
 void Android_GL_SwapWindow(_THIS, SDL_Window * window){
-	sdl_render();
+	Android_Render();
 }
 
 void Android_GL_DeleteContext(_THIS, SDL_GLContext context){

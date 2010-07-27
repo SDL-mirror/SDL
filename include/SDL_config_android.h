@@ -121,7 +121,7 @@ typedef unsigned int size_t;
 
 #define SDL_HAPTIC_DISABLED 1
 
-#define SDL_JOYSTICK_DISABLED 1
+#define SDL_JOYSTICK_ANDROID 1
 
 #define SDL_LOADSO_DISABLED 1
 

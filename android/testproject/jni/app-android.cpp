@@ -34,6 +34,7 @@ jclass mActivityInstance;
 //method signatures
 jmethodID midCreateGLContext;
 jmethodID midFlipBuffers;
+jmethodID midEnableFeature;
 
 extern "C" int SDL_main();
 extern "C" int Android_OnKeyDown(int keycode);
@@ -41,9 +42,17 @@ extern "C" int Android_OnKeyUp(int keycode);
 extern "C" void Android_SetScreenResolution(int width, int height);
 extern "C" void Android_OnResize(int width, int height, int format);
 extern "C" int SDL_SendQuit();
+extern "C" void Android_EnableFeature(int featureid, bool enabled);
 
 //If we're not the active app, don't try to render
 bool bRenderingEnabled = false;
+
+//Feature IDs
+static const int FEATURE_SOUND = 1;
+static const int FEATURE_ACCEL = 2;
+
+//Accelerometer data storage
+float fLastAccelerometer[3];
 
 /*******************************************************************************
                  Functions called by JNI
@@ -67,8 +76,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
     mActivityInstance = cls;
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
+    midEnableFeature = mEnv->GetStaticMethodID(cls,"enableFeature","(I, I)V");
 
-    if(!midCreateGLContext || !midFlipBuffers){
+    if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature){
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
     }else{
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Good mids\n");
@@ -84,8 +94,9 @@ extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env,
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
 
 	mEnv = env;
-
 	bRenderingEnabled = true;
+
+	Android_EnableFeature(FEATURE_ACCEL, true);
 
     SDL_main();
 }
@@ -152,12 +163,20 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeResize(
     Android_OnResize(width, height, format);
 }
 
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeAccel(
+                                        JNIEnv*  env, jobject obj,
+                                        jfloat x, jfloat y, jfloat z){
+    fLastAccelerometer[0] = x;
+    fLastAccelerometer[1] = y;
+    fLastAccelerometer[2] = z;   
+}
+
 
 
 /*******************************************************************************
-                 Functions called by SDL
+             Functions called by SDL into Java
 *******************************************************************************/
-extern "C" void sdl_create_context(){
+extern "C" void Android_CreateContext(){
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context()\n");
 
 	bRenderingEnabled = true;
@@ -165,7 +184,7 @@ extern "C" void sdl_create_context(){
     mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext ); 
 }
 
-extern "C" void sdl_render(){
+extern "C" void Android_Render(){
 
     if(!bRenderingEnabled){
         return;
@@ -173,5 +192,11 @@ extern "C" void sdl_render(){
 
     //When we get here, we've accumulated a full frame    
     mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers ); 
+}
+
+extern "C" void Android_EnableFeature(int featureid, bool enabled){
+
+    mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers, 
+                                featureid, (int)enabled); 
 }
 

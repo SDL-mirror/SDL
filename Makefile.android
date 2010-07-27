@@ -30,7 +30,7 @@ SOURCES = \
 	src/power/*.c \
 	src/audio/android/*.c \
 	src/video/android/*.c \
-	src/joystick/dummy/*.c \
+	src/joystick/android/*.c \
 	src/haptic/dummy/*.c \
 	src/atomic/dummy/*.c \
 	src/thread/pthread/*.c \

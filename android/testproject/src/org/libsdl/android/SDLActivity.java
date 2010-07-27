@@ -12,6 +12,7 @@ import android.util.Log;
 import android.graphics.*;
 import android.text.method.*;
 import android.text.*;
+import android.media.*;
 
 import java.lang.*;
 
@@ -24,6 +25,12 @@ public class SDLActivity extends Activity {
     //Main components
     private static SDLActivity mSingleton;
     private static SDLSurface mSurface;
+    
+    private static AudioTrack mAudioTrack;
+
+    //feature IDs. Must match up on the C side as well.
+    private static int FEATURE_SOUND = 1;
+    private static int FEATURE_ACCEL = 2;
 
     //Load the .so
     static {
@@ -41,9 +48,21 @@ public class SDLActivity extends Activity {
         mSurface = new SDLSurface(getApplication());
         setContentView(mSurface);
         SurfaceHolder holder = mSurface.getHolder();
-        holder.setType(SurfaceHolder.SURFACE_TYPE_GPU); 
-
+        holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
         
+    }
+
+    public static boolean initAudio(){        
+
+        //blah. Hardcoded things are bad. FIXME when we have more sound stuff
+        //working properly. 
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                    11025,
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                    AudioFormat.ENCODING_PCM_8BIT,
+                    2048,
+                    AudioTrack.MODE_STREAM);        
+        return true;
     }
 
     //Events
@@ -81,6 +100,32 @@ public class SDLActivity extends Activity {
         mSurface.flipEGL();
     }
 
+    public static void updateAudio(byte [] buf){
+    
+        if(mAudioTrack == null){
+            return;
+        }
+        
+        mAudioTrack.write(buf, 0, buf.length);
+        mAudioTrack.play();
+        
+        Log.v("SDL","Played some audio");
+    }
+
+    public static void enableFeature(int featureid, int enabled){
+         Log.v("SDL","Feature " + featureid + " = " + enabled);
+
+        //Yuck. This is all horribly inelegent. If it gets to more than a few
+        //'features' I'll rip this out and make something nicer, I promise :)
+        if(featureid == FEATURE_SOUND){
+            if(enabled == 1){
+                initAudio();
+            }else{
+                //We don't have one of these yet...
+                //closeAudio(); 
+            }
+        }
+    }
 
 
 
@@ -95,6 +140,8 @@ public class SDLActivity extends Activity {
 */
 class SDLRunner implements Runnable{
     public void run(){
+        //SDLActivity.initAudio();
+        
         //Runs SDL_main()
         SDLActivity.nativeInit();
 
