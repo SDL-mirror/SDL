@@ -105,10 +105,6 @@ static VideoBootStrap *bootstrap[] = {
 
 static SDL_VideoDevice *_this = NULL;
 
-SDL_VideoDisplay* SDL_ThisDisplay() {
-    return SDL_CurrentDisplay;
-}
-
 #define CHECK_WINDOW_MAGIC(window, retval) \
     if (!_this) { \
         SDL_UninitializedVideo(); \

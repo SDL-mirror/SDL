@@ -185,7 +185,6 @@ WIN_CreateDevice(int devindex)
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
     
-    device->shape_driver.CreateShapedWindow = Win32_CreateShapedWindow;
     device->shape_driver.CreateShaper = Win32_CreateShaper;
     device->shape_driver.SetWindowShape = Win32_SetWindowShape;
     device->shape_driver.ResizeWindowShape = Win32_ResizeWindowShape;

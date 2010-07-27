@@ -28,11 +28,8 @@
 #include "SDL_surface.h"
 #include "SDL_shape.h"
 
-extern SDL_VideoDisplay* SDL_ThisDisplay();
-
 SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
-	SDL_VideoDisplay* display = SDL_ThisDisplay();
-	SDL_Window *result = display->device->shape_driver.CreateShapedWindow(title,x,y,w,h,SDL_WINDOW_BORDERLESS | flags & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
+	SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,SDL_WINDOW_BORDERLESS | flags & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
 	if(result != NULL) {
 		result->shaper = result->display->device->shape_driver.CreateShaper(result);
 		if(result->shaper != NULL) {

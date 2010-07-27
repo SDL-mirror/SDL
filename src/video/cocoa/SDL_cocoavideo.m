@@ -92,6 +92,11 @@ Cocoa_CreateDevice(int devindex)
     device->SetWindowGrab = Cocoa_SetWindowGrab;
     device->DestroyWindow = Cocoa_DestroyWindow;
     device->GetWindowWMInfo = Cocoa_GetWindowWMInfo;
+    
+    device->shape_driver.CreateShaper = Cocoa_CreateShaper;
+    device->shape_driver.SetWindowShape = Cocoa_SetWindowShape;
+    device->shape_driver.ResizeWindowShape = Cocoa_ResizeWindowShape;
+    
 #ifdef SDL_VIDEO_OPENGL_CGL
     device->GL_LoadLibrary = Cocoa_GL_LoadLibrary;
     device->GL_GetProcAddress = Cocoa_GL_GetProcAddress;

@@ -21,5 +21,22 @@
 */
 
 #include "SDL_shape.h"
+#include "SDL_cocoashape.h"
 
-/* Functions implementing shaped windows for Cocoa will be implemented when the API is decided on. */
+SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
+	SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
+	[data->nswindow setAlpha:1.0];
+	[data->nswindow setOpaque:YES];
+	SDL_Shaper* result = result = malloc(sizeof(SDL_WindowShaper));
+	result->window = window;
+	result->mode.mode = ShapeModeDefault;
+	result->mode.parameters.binarizationCutoff = 1;
+	result->usershownflag = 0;
+	window->shaper = result;
+	int resized_properly = Cocoa_ResizeWindowShape(window);
+	assert(resized_properly == 0);
+	return result;
+}
+
+extern int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode);
+extern int Cocoa_ResizeWindowShape(SDL_Window *window);
