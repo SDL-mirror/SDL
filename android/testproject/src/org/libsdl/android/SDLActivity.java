@@ -153,6 +153,13 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         Log.v("SDL","Surface destroyed");
         
         SDLActivity.nativeQuit();
+
+        //Now wait for the SDL thread to quit
+        try{
+            mSDLThread.wait();
+        }catch(Exception e){
+            Log.v("SDL","Problem stopping thread: " + e);
+        }
     }
 
     //Called when the surface is resized
