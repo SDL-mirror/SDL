@@ -13,8 +13,8 @@ Eli Gottlieb's checklist for the GSOC shaped windows project.  Dated July 9, 201
 4. Implement the SDL shaped-windows API for Mac OS X using Cocoa.  STATUS: IN PROGRESS
 --> Locate (once more) the API documentation for shaped windows under Cocoa.  STATUS: NEARLY FINISHED.
 --> Design and encode a version of SDL_ShapeData for Cocoa.  STATUS: IN PROGRESS.
---> Write Cocoa_CreateShaper().  STATUS: IN PROGRESS.
---> Write Cocoa_ResizeWindowShape().  STATUS: IN PROGRESS.
+--> Write Cocoa_CreateShaper().  STATUS: MOSTLY DONE, AFAIK.
+--> Write Cocoa_ResizeWindowShape().  STATUS: DONE, AFAIK.
 --> Write Cocoa_SetWindowShape().  STATUS: IN PROGRESS.
 --> If necessary, implement functionality adjunct to SDL_CalculateShapeBitmap() for Cocoa usage.
 5. Use testeyes to debug all implementations. STATUS: SPRINT + 2.
