@@ -28,7 +28,7 @@ SOURCES = \
 	src/timer/*.c \
 	src/video/*.c \
 	src/power/*.c \
-	src/audio/dummy/*.c \
+	src/audio/android/*.c \
 	src/video/android/*.c \
 	src/joystick/dummy/*.c \
 	src/haptic/dummy/*.c \
