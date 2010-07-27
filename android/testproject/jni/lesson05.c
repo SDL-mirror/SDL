@@ -511,7 +511,7 @@ int SDL_main( int argc, char **argv )
     resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 
-    testAudio();
+    //testAudio();
 
 
     /* wait for events */ 

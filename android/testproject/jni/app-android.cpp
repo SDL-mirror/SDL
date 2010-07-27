@@ -48,7 +48,7 @@ extern "C" void Android_EnableFeature(int featureid, bool enabled);
 bool bRenderingEnabled = false;
 
 //Feature IDs
-static const int FEATURE_SOUND = 1;
+static const int FEATURE_AUDIO = 1;
 static const int FEATURE_ACCEL = 2;
 
 //Accelerometer data storage
@@ -76,7 +76,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
     mActivityInstance = cls;
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
-    midEnableFeature = mEnv->GetStaticMethodID(cls,"enableFeature","(I, I)V");
+    midEnableFeature = mEnv->GetStaticMethodID(cls,"enableFeature","(II)V");
 
     if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature){
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
@@ -196,7 +196,7 @@ extern "C" void Android_Render(){
 
 extern "C" void Android_EnableFeature(int featureid, bool enabled){
 
-    mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers, 
+    mEnv->CallStaticVoidMethod(mActivityInstance, midEnableFeature, 
                                 featureid, (int)enabled); 
 }
 

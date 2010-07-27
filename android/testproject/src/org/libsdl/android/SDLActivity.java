@@ -13,6 +13,8 @@ import android.graphics.*;
 import android.text.method.*;
 import android.text.*;
 import android.media.*;
+import android.hardware.*;
+import android.content.*;
 
 import java.lang.*;
 
@@ -25,11 +27,16 @@ public class SDLActivity extends Activity {
     //Main components
     private static SDLActivity mSingleton;
     private static SDLSurface mSurface;
-    
+
+    //Audio
     private static AudioTrack mAudioTrack;
+    private static boolean bAudioIsEnabled;
+
+    //Sensors
+    private static boolean bAccelIsEnabled;
 
     //feature IDs. Must match up on the C side as well.
-    private static int FEATURE_SOUND = 1;
+    private static int FEATURE_AUDIO = 1;
     private static int FEATURE_ACCEL = 2;
 
     //Load the .so
@@ -52,6 +59,7 @@ public class SDLActivity extends Activity {
         
     }
 
+    //Audio
     public static boolean initAudio(){        
 
         //blah. Hardcoded things are bad. FIXME when we have more sound stuff
@@ -61,9 +69,24 @@ public class SDLActivity extends Activity {
                     AudioFormat.CHANNEL_CONFIGURATION_MONO,
                     AudioFormat.ENCODING_PCM_8BIT,
                     2048,
-                    AudioTrack.MODE_STREAM);        
+                    AudioTrack.MODE_STREAM);   
+        bAudioIsEnabled = true;     
         return true;
     }
+
+    //Accel
+    public static boolean initAccel(){
+        mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, true);
+        bAccelIsEnabled = true;
+        return true;
+    }
+    
+    public static boolean closeAccel(){
+        mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, false);
+        bAccelIsEnabled = false;
+        return true;
+    }
+    
 
     //Events
     protected void onPause() {
@@ -87,7 +110,7 @@ public class SDLActivity extends Activity {
     public static native void onNativeTouch(int action, float x, 
                                             float y, float p);
     public static native void onNativeResize(int x, int y, int format);
-
+    public static native void onNativeAccel(float x, float y, float z);
 
 
 
@@ -117,12 +140,20 @@ public class SDLActivity extends Activity {
 
         //Yuck. This is all horribly inelegent. If it gets to more than a few
         //'features' I'll rip this out and make something nicer, I promise :)
-        if(featureid == FEATURE_SOUND){
+        if(featureid == FEATURE_AUDIO){
             if(enabled == 1){
                 initAudio();
             }else{
                 //We don't have one of these yet...
                 //closeAudio(); 
+            }
+        }
+
+        else if(featureid == FEATURE_ACCEL){
+            if(enabled == 1){
+                initAccel();
+            }else{
+                closeAccel();
             }
         }
     }
@@ -157,7 +188,7 @@ class SDLRunner implements Runnable{
     Because of this, that's where we set up the SDL thread
 */
 class SDLSurface extends SurfaceView implements SurfaceHolder.Callback, 
-    View.OnKeyListener, View.OnTouchListener  {
+    View.OnKeyListener, View.OnTouchListener, SensorEventListener  {
 
     //This is what SDL runs in. It invokes SDL_main(), eventually
     private Thread mSDLThread;    
@@ -166,6 +197,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     private EGLContext  mEGLContext;
     private EGLSurface  mEGLSurface;
     private EGLDisplay  mEGLDisplay;
+
+    //Sensors
+    private static SensorManager mSensorManager;
 
     //Startup    
     public SDLSurface(Context context) {
@@ -176,7 +210,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         setFocusableInTouchMode(true);
         requestFocus();
         setOnKeyListener(this); 
-        setOnTouchListener(this);     
+        setOnTouchListener(this);   
+        
+        mSensorManager = (SensorManager)context.getSystemService("sensor");  
     }
 
     //Called when we have a valid drawing surface
@@ -319,6 +355,31 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         //TODO: Anything else we need to pass?        
         SDLActivity.onNativeTouch(action, x, y, p);
         return true;
+    }
+
+    //Sensor events
+    public void enableSensor(int sensortype, boolean enabled){
+        //TODO: This uses getDefaultSensor - what if we have >1 accels?
+        if(enabled){
+            mSensorManager.registerListener(this, 
+                            mSensorManager.getDefaultSensor(sensortype), 
+                            SensorManager.SENSOR_DELAY_GAME, null);
+        }else{
+            mSensorManager.unregisterListener(this, 
+                            mSensorManager.getDefaultSensor(sensortype));
+        }
+    }
+    
+    public void onAccuracyChanged(Sensor sensor, int accuracy){
+        //TODO
+    }
+
+    public void onSensorChanged(SensorEvent event){
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
+            SDLActivity.onNativeAccel(  event.values[0],
+                                        event.values[1],
+                                        event.values[2] );
+        }
     }
 
 
