@@ -27,7 +27,7 @@
 
 /* screen width, height, and bit depth */
 #define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 480
+#define SCREEN_HEIGHT 430
 #define SCREEN_BPP     16
 
 /* Define our booleans */

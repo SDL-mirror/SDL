@@ -38,6 +38,8 @@ jmethodID midFlipBuffers;
 extern "C" int SDL_main();
 extern "C" int Android_OnKeyDown(int keycode);
 extern "C" int Android_OnKeyUp(int keycode);
+extern "C" void Android_SetScreenResolution(int width, int height);
+extern "C" void Android_OnResize(int width, int height, int format);
 extern "C" int SDL_SendQuit();
 
 //If we're not the active app, don't try to render
@@ -47,18 +49,7 @@ bool bRenderingEnabled = false;
                  Functions called by JNI
 *******************************************************************************/	
 
-extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env, 
-                                                                jobject obj ){ 
-                                                                   
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
-
-	mEnv = env;
-
-	bRenderingEnabled = true;
-
-    SDL_main();
-}
-
+//Library init
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
 
     JNIEnv* env = NULL;
@@ -86,7 +77,21 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
     return JNI_VERSION_1_4;
 }
 
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv*  env, 
+//Start up the SDL app
+extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env, 
+                                                                jobject obj ){ 
+                                                                   
+	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
+
+	mEnv = env;
+
+	bRenderingEnabled = true;
+
+    SDL_main();
+}
+
+//Keydown
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv* env, 
                jobject obj, jint keycode){
     
     int r = Android_OnKeyDown(keycode);
@@ -95,7 +100,8 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv*  env
                         
 }
 
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env, 
+//Keyup
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv* env, 
                jobject obj, jint keycode){
     
     int r = Android_OnKeyUp(keycode);
@@ -104,15 +110,19 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env,
                         
 }
 
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv*  env, 
+//Touch
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv* env, 
                jobject obj, jint action, jfloat x, jfloat y, jfloat p){
 
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native touch event %d @ %f/%f, pressure %f\n", 
                         action, x, y, p);
+
+    //TODO: Pass this off to the SDL multitouch stuff
                         
 }
 
+//Quit
 extern "C" void Java_org_libsdl_android_SDLActivity_nativeQuit( JNIEnv*  env, 
                                                                 jobject obj ){    
 
@@ -123,6 +133,23 @@ extern "C" void Java_org_libsdl_android_SDLActivity_nativeQuit( JNIEnv*  env,
     int r = SDL_SendQuit();
 
     __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native quit %d", r);        
+}
+
+//Screen size
+extern "C" void Java_org_libsdl_android_SDLActivity_nativeSetScreenSize(
+                JNIEnv*  env, jobject obj, jint width, jint height){
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL", 
+                        "SDL: Set screen size on init: %d/%d\n", width, height);
+    Android_SetScreenResolution(width, height);
+                        
+}
+
+//Resize
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeResize(
+                                        JNIEnv*  env, jobject obj, jint width, 
+                                        jint height, jint format){
+    Android_OnResize(width, height, format);
 }
 
 

@@ -62,10 +62,12 @@ public class SDLActivity extends Activity {
     //C functions we call
     public static native void nativeInit();
     public static native void nativeQuit();
+    public static native void nativeSetScreenSize(int width, int height);
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
     public static native void onNativeTouch(int action, float x, 
                                             float y, float p);
+    public static native void onNativeResize(int x, int y, int format);
 
 
 
@@ -95,6 +97,8 @@ class SDLRunner implements Runnable{
     public void run(){
         //Runs SDL_main()
         SDLActivity.nativeInit();
+
+        Log.v("SDL","SDL thread terminated");
     }
 }
 
@@ -132,6 +136,14 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SDL","Surface created"); 
 
+        int width = getWidth();
+        int height = getHeight();
+
+        //Set the width and height variables in C before we start SDL so we have
+        //it available on init
+        SDLActivity.nativeSetScreenSize(width, height);
+
+        //Now start up the C app thread
         mSDLThread = new Thread(new SDLRunner(), "SDLThread"); 
 		mSDLThread.start();       
     }
@@ -147,6 +159,8 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceChanged(SurfaceHolder holder, int format, 
                                 int width, int height) {
         Log.v("SDL","Surface resized");
+        
+        SDLActivity.onNativeResize(width, height, format);
     }
 
     //unused

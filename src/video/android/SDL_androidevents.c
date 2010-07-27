@@ -67,6 +67,11 @@ Android_PumpEvents(_THIS)
     */
 }
 
+
+void Android_OnResize(int width, int height, int format){
+
+}
+
 int
 Android_OnKeyDown(int keycode){
     return SDL_SendKeyboardKey(0, SDL_PRESSED, (SDL_scancode)keycode);
