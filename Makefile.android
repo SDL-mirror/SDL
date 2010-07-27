@@ -33,8 +33,8 @@ SOURCES = \
 	src/joystick/dummy/*.c \
 	src/haptic/dummy/*.c \
 	src/atomic/dummy/*.c \
-	src/thread/generic/*.c \
-	src/timer/dummy/*.c \
+	src/thread/pthread/*.c \
+	src/timer/unix/*.c \
 	src/loadso/dummy/*.c \
 
 OBJECTS = $(shell echo $(SOURCES) | sed -e 's,\.c,\.o,g')
