@@ -26,6 +26,10 @@
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/scancodes_darwin.h"
 
+//Touch Code
+#include "../../events/SDL_touch_c.h"
+#include "SDL_cocoatouch.h"
+
 #include <Carbon/Carbon.h>
 
 //#define DEBUG_IME NSLog
@@ -67,6 +71,7 @@
 }
 - (void) doCommandBySelector:(SEL)myselector;
 - (void) setInputRect:(SDL_Rect *) rect;
+- (void) handleTouches:(cocoaTouchType)type WithEvent:(NSEvent*) event;
 @end
 
 @implementation SDLTranslatorResponder
@@ -200,22 +205,71 @@
     [self setAcceptsTouchEvents:YES];
     [self setWantsRestingTouches:YES];
     DEBUG_TOUCH(@"Initializing Cocoa Touch System....");
-    //DEBUG_TOUCH(@"Accepts Touch events? %@",[self acceptsTouchEvents]);
+    
   }
   return self;
 }
 
+//Not an API function
+- (void)handleTouches:(cocoaTouchType)type WithEvent:(NSEvent *)event {
+  NSSet *touches = [event touchesMatchingPhase:NSTouchPhaseBegan inView:self];
+
+  NSEnumerator *enumerator = [touches objectEnumerator];
+  NSTouch *touch = (NSTouch*)[enumerator nextObject];
+  while (touch) {
+    long touchId = (long)[touch device];
+    if(!SDL_GetTouchIndex(touchId)) {
+      if(Cocoa_AddTouch(touch) < 0) continue;
+    } 
+    float x = [touch normalizedPosition].x;
+    float y = [touch normalizedPosition].y;
+    long fingerId = (long)[touch identity];
+    switch (type) {
+    case COCOA_TOUCH_DOWN:
+      SDL_SendFingerDown(touchId,fingerId,
+			 SDL_TRUE,x,y,1);
+      break;
+    case COCOA_TOUCH_UP:
+    case COCOA_TOUCH_CANCELLED:
+      SDL_SendFingerDown(touchId,fingerId,
+			 SDL_FALSE,x,y,1);
+    case COCOA_TOUCH_MOVE:
+      SDL_SendTouchMotion(touchId,fingerId,
+			  SDL_FALSE,x,y,1);
+    }
+    
+    touch = (NSTouch*)[enumerator nextObject];
+  }
+}
+
 - (void)touchesBeganWithEvent:(NSEvent *)event {
   DEBUG_TOUCH(@"Finger Down");
+  
+  [self handleTouches: COCOA_TOUCH_DOWN WithEvent: event];
+
+  //Documentation said to call super, but examples do not
+  //[super touchesBeganWithEvent:event]
 }
 - (void)touchesMovedWithEvent:(NSEvent *)event {
   DEBUG_TOUCH(@"Finger Moved");
+
+  [self handleTouches: COCOA_TOUCH_MOVE WithEvent: event];
+
+  //[super touchesMovedWithEvent:event]
 }
 - (void)touchesEndedWithEvent:(NSEvent *)event {
   DEBUG_TOUCH(@"Finger Up");
+
+  [self handleTouches: COCOA_TOUCH_UP WithEvent: event];
+
+  //[super touchesEndedWithEvent:event]
 }
 - (void)touchesCancelledWithEvent:(NSEvent *)event {
   DEBUG_TOUCH(@"Finger Cancelled");
+
+  [self handleTouches: COCOA_TOUCH_CANCELLED WithEvent: event];
+
+  //[super touchesCancelledWithEvent:event]
 }
 
 //Touch Code Ends --------------
@@ -658,13 +712,14 @@ Cocoa_StartTextInput(_THIS)
      * it to the front most window's content view */
     if (!data->fieldEdit) {
         data->fieldEdit =
-            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];	
+	DEBUG_TOUCH(@"Accepts Touch events? %i",[data->fieldEdit acceptsTouchEvents]);
     }
 
     if (![[data->fieldEdit superview] isEqual: parentView])
     {
         // DEBUG_IME(@"add fieldEdit to window contentView");
-        [data->fieldEdit removeFromSuperview];
+       [data->fieldEdit removeFromSuperview];
         [parentView addSubview: data->fieldEdit];
         [[NSApp keyWindow] makeFirstResponder: data->fieldEdit];
     }
@@ -752,6 +807,29 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         break;
     }
 }
+
+Cocoa_AddTouch(NSTouch* finger) {  
+  SDL_Touch touch;
+  touch.id = (long)[finger device]; 
+  //NSSize size = [finger deviceSize];
+  //touch.driverdata = SDL_malloc(sizeof(EventTouchData));
+  //EventTouchData* data = (EventTouchData*)(touch.driverdata);
+  
+  touch.x_min = 0;
+  touch.x_max = 1;
+  touch.xres = touch.x_max - touch.x_min;
+  touch.y_min = 0;
+  touch.y_max = 1;
+  touch.yres = touch.y_max - touch.y_min;
+  touch.pressure_min = 0;
+  touch.pressure_max = 1;
+  touch.pressureres = touch.pressure_max - touch.pressure_min;
+  
+  
+  return SDL_AddTouch(&touch, ""); 
+
+}
+
 
 void
 Cocoa_QuitKeyboard(_THIS)
