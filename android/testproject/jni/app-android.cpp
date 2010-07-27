@@ -83,14 +83,23 @@ extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv*  env
                jobject obj, jint keycode){
     
     int r = Android_OnKeyDown(keycode);
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: native key down %d, %d\n", keycode, r);
+    __android_log_print(ANDROID_LOG_INFO, "SDL", 
+                        "SDL: native key down %d, %d\n", keycode, r);
 }
 
 extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv*  env, 
                jobject obj, jint keycode){
     
     int r = Android_OnKeyUp(keycode);
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: native key up %d, %d\n", keycode, r);
+    __android_log_print(ANDROID_LOG_INFO, "SDL", 
+                        "SDL: native key up %d, %d\n", keycode, r);
+}
+
+extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv*  env, 
+               jobject obj, jint action, jfloat x, jfloat y, jfloat p){
+    __android_log_print(ANDROID_LOG_INFO, "SDL", 
+                        "SDL: native touch event %d @ %f/%f, pressure %f\n", 
+                        action, x, y, p);
 }
 
 
