@@ -486,6 +486,9 @@ PrintPixelFormat(Uint32 format)
     case SDL_PIXELFORMAT_RGB555:
         fprintf(stderr, "RGB555");
         break;
+    case SDL_PIXELFORMAT_BGR555:
+        fprintf(stderr, "BGR555");
+        break;
     case SDL_PIXELFORMAT_ARGB4444:
         fprintf(stderr, "ARGB4444");
         break;
