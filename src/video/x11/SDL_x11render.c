@@ -184,7 +184,8 @@ UpdateYUVTextureData(SDL_Texture * texture)
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 static SDL_bool
-CheckXRender(Display *display, int *major, int *minor) {
+CheckXRender(Display *display, int *major, int *minor)
+{
     const char *env;
 
     *major = *minor = 0;
@@ -209,7 +210,8 @@ CheckXRender(Display *display, int *major, int *minor) {
 
 #ifdef SDL_VIDEO_DRIVER_X11_XFIXES
 static SDL_bool
-CheckXFixes(Display *display, int *major, int *minor) {
+CheckXFixes(Display *display, int *major, int *minor)
+{
     const char *env;
 
     *major = *minor = 0;
@@ -234,7 +236,8 @@ CheckXFixes(Display *display, int *major, int *minor) {
 
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
 static SDL_bool
-CheckXDamage(Display *display, int *major, int *minor) {
+CheckXDamage(Display *display, int *major, int *minor)
+{
     const char *env;
 
     *major = *minor = 0;
@@ -259,7 +262,8 @@ CheckXDamage(Display *display, int *major, int *minor) {
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 static Uint32
-XRenderPictFormatToSDLPixelFormatEnum(XRenderPictFormat *pict_format) {
+XRenderPictFormatToSDLPixelFormatEnum(XRenderPictFormat *pict_format)
+{
     if (pict_format->type != PictTypeDirect) {
         SDL_SetError("Indexed pict formats not supported ATM");
         return 0;
@@ -716,7 +720,8 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 static void
-SDLMaskToXRenderMask(Uint32 sdl_mask, short *comp, short *compMask) {
+SDLMaskToXRenderMask(Uint32 sdl_mask, short *comp, short *compMask)
+{
     if (sdl_mask == 0) {
         *comp = 0;
         *compMask = 0;
@@ -735,7 +740,8 @@ SDLMaskToXRenderMask(Uint32 sdl_mask, short *comp, short *compMask) {
 }
 
 static XRenderPictFormat*
-PixelFormatEnumToXRenderPictFormat(SDL_Renderer * renderer, Uint32 format) {
+PixelFormatEnumToXRenderPictFormat(SDL_Renderer * renderer, Uint32 format)
+{
     XRenderPictFormat* pict_fmt = NULL;
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
     
@@ -765,9 +771,9 @@ PixelFormatEnumToXRenderPictFormat(SDL_Renderer * renderer, Uint32 format) {
     return pict_fmt;
 }
 
-
 static Visual*
-PixelFormatEnumToVisual(SDL_Renderer * renderer, Uint32 format) {
+PixelFormatEnumToVisual(SDL_Renderer * renderer, Uint32 format)
+{
     X11_RenderData *data = (X11_RenderData *) renderer->driverdata;
 
     if (data->use_xrender) {
@@ -798,7 +804,8 @@ PixelFormatEnumToVisual(SDL_Renderer * renderer, Uint32 format) {
 }
 
 static XRenderColor
-SDLColorToXRenderColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a) {
+SDLColorToXRenderColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
     double rd, gd, bd, ad;
     XRenderColor ret;
     rd = r / 255.0;
