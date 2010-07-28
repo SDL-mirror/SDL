@@ -204,7 +204,7 @@ CheckXRender(Display *display, int *major, int *minor)
         return SDL_FALSE;
     }
 
-    if (major != 0 || minor < 10) {
+    if (*major != 0 || *minor < 10) {
         return SDL_FALSE;
     }
 
@@ -234,7 +234,7 @@ CheckXFixes(Display *display, int *major, int *minor)
         return SDL_FALSE;
     }
 
-    if (major < 2) {
+    if (*major < 2) {
         return SDL_FALSE;
     }
 
