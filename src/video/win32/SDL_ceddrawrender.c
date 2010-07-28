@@ -459,6 +459,8 @@ DDRAW_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     data->ddraw = videodata->ddraw;
 
+    videodata->render = RENDER_DDRAW;
+
     renderer->DisplayModeChanged = DDRAW_DisplayModeChanged;
     renderer->CreateTexture = DDRAW_CreateTexture;
     renderer->QueryTexturePixels = DDRAW_QueryTexturePixels;

@@ -451,6 +451,8 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     data->d3d = videodata->d3d;
 
+    videodata->render = RENDER_D3D;
+
     renderer->DisplayModeChanged = D3D_DisplayModeChanged;
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->QueryTexturePixels = D3D_QueryTexturePixels;

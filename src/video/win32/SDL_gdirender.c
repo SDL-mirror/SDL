@@ -184,6 +184,8 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
+    windowdata->videodata->render = RENDER_GDI;
+
     renderer->DisplayModeChanged = GDI_DisplayModeChanged;
     renderer->CreateTexture = GDI_CreateTexture;
     renderer->QueryTexturePixels = GDI_QueryTexturePixels;
@@ -266,6 +268,34 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->makedirty = SDL_FALSE;
     }
     data->current_hbm = 0;
+
+#ifdef _WIN32_WCE
+    // check size for GDI fullscreen and rotate
+    if((window->flags & SDL_WINDOW_FULLSCREEN) &&
+        GetSystemMetrics(SM_CXSCREEN) != GetSystemMetrics(SM_CYSCREEN) &&
+        ((GetSystemMetrics(SM_CXSCREEN) < GetSystemMetrics(SM_CYSCREEN) && window->w > window->h) ||
+         (GetSystemMetrics(SM_CXSCREEN) > GetSystemMetrics(SM_CYSCREEN) && window->w < window->h)))
+    {
+	int orientation = WINCE_GetDMOrientation();
+	switch(orientation)
+	{
+	    case DMDO_0:   orientation = DMDO_90; break;
+	    case DMDO_270: orientation = DMDO_180; break;
+	    case DMDO_90:  orientation = DMDO_0; break;
+	    case DMDO_180: orientation = DMDO_270; break;
+
+	    default:
+		GDI_DestroyRenderer(renderer);
+		return NULL;
+	}
+
+	if(0 > WINCE_SetDMOrientation(orientation))
+	{
+	    GDI_DestroyRenderer(renderer);
+	    return NULL;
+	}
+    }
+#endif
 
     return renderer;
 }
@@ -416,6 +446,7 @@ GDI_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         WIN_SetError("Couldn't create bitmap");
         return -1;
     }
+
     return 0;
 }
 

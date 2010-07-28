@@ -30,6 +30,7 @@
 #include "SDL_win32video.h"
 #include "SDL_d3drender.h"
 #include "SDL_gdirender.h"
+#include "SDL_gapirender.h"
 
 /* Initialization/Query functions */
 static int WIN_VideoInit(_THIS);
@@ -47,6 +48,7 @@ WIN_SetError(const char *prefix)
     SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
     SDL_free(message);
 }
+
 
 /* WIN32 driver bootstrap functions */
 
@@ -72,6 +74,11 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
     if (data->ddraw) {
         data->ddraw->lpVtbl->Release(data->ddraw);
         FreeLibrary(data->ddrawDLL);
+    }
+#endif
+#ifdef _WIN32_WCE
+    if(data->hAygShell) {
+       FreeLibrary(data->hAygShell);
     }
 #endif
     SDL_free(device->driverdata);
@@ -138,6 +145,15 @@ WIN_CreateDevice(int devindex)
     }
 #endif /* SDL_VIDEO_RENDER_DDRAW */
 
+#ifdef _WIN32_WCE
+    data->hAygShell = LoadLibrary(TEXT("\\windows\\aygshell.dll"));
+    if(0 == data->hAygShell)
+        data->hAygShell = LoadLibrary(TEXT("aygshell.dll"));
+    data->SHFullScreen = (0 != data->hAygShell ?
+        (PFNSHFullScreen) GetProcAddress(data->hAygShell, TEXT("SHFullScreen")) : 0);
+    data->CoordTransform = NULL;
+#endif
+
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
     device->VideoQuit = WIN_VideoQuit;
@@ -186,9 +202,12 @@ WIN_CreateDevice(int devindex)
 }
 
 VideoBootStrap WIN32_bootstrap = {
+#ifdef _WIN32_WCE
+    "wince", "SDL WinCE video driver", WINCE_Available, WIN_CreateDevice
+#else
     "win32", "SDL Win32/64 video driver", WIN_Available, WIN_CreateDevice
+#endif
 };
-
 
 int
 WIN_VideoInit(_THIS)
@@ -207,7 +226,7 @@ WIN_VideoInit(_THIS)
     GDI_AddRenderDriver(_this);
 #endif
 #if SDL_VIDEO_RENDER_GAPI
-    GAPI_AddRenderDriver(_this);
+    WINCE_AddRenderDriver(_this);
 #endif
 
     WIN_InitKeyboard(_this);

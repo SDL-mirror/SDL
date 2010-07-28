@@ -34,44 +34,12 @@
 #include "../../events/SDL_keyboard_c.h"
 
 #include "SDL_win32video.h"
+#include "SDL_win32window.h"
 
 /* This is included after SDL_win32video.h, which includes windows.h */
 #include "SDL_syswm.h"
+#include "SDL_gapirender.h"
 
-
-#define SHFS_SHOWTASKBAR            0x0001
-#define SHFS_HIDETASKBAR            0x0002
-#define SHFS_SHOWSIPBUTTON          0x0004
-#define SHFS_HIDESIPBUTTON          0x0008
-#define SHFS_SHOWSTARTICON          0x0010
-#define SHFS_HIDESTARTICON          0x0020
-
-#ifdef _WIN32_WCE
-// dynamically load aygshell dll because we want SDL to work on HPC and be300
-int aygshell_loaded = 0;
-BOOL(WINAPI * SHFullScreen) (HWND hwndRequester, DWORD dwState) = 0;
-
-
-static BOOL
-CE_SHFullScreen(HWND hwndRequester, DWORD dwState)
-{
-    if (SHFullScreen == 0 && aygshell_loaded == 0) {
-        aygshell_loaded = 0;
-        void *lib = SDL_LoadObject("aygshell.dll");
-        if (lib) {
-            SHFullScreen =
-                (BOOL(WINAPI *) (HWND, DWORD)) SDL_LoadFunction(lib,
-                                                                "SHFullScreen");
-        }
-    }
-
-    if (SHFullScreen) {
-        SHFullScreen(hwndRequester, dwState);
-        //printf("SHFullscreen(%i)\n",dwState);
-    }
-}
-
-#endif
 
 /* Fake window to help with DirectInput events. */
 HWND SDL_HelperWindow = NULL;
@@ -472,32 +440,22 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
 void
 WIN_ShowWindow(_THIS, SDL_Window * window)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-
-    ShowWindow(hwnd, SW_SHOW);
-
 #ifdef _WIN32_WCE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        CE_SHFullScreen(hwnd,
-                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
-                        SHFS_HIDESIPBUTTON);
-    }
+    WINCE_ShowWindow(_this, window, 1);
+#else
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    ShowWindow(hwnd, SW_SHOW);
 #endif
 }
 
 void
 WIN_HideWindow(_THIS, SDL_Window * window)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-
-    ShowWindow(hwnd, SW_HIDE);
-
 #ifdef _WIN32_WCE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        CE_SHFullScreen(hwnd,
-                        SHFS_SHOWSTARTICON | SHFS_SHOWTASKBAR |
-                        SHFS_SHOWSIPBUTTON);
-    }
+    WINCE_ShowWindow(_this, window, 0);
+#else
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    ShowWindow(hwnd, SW_HIDE);
 #endif
 }
 
@@ -513,45 +471,33 @@ WIN_RaiseWindow(_THIS, SDL_Window * window)
         top = HWND_NOTOPMOST;
     }
     SetWindowPos(hwnd, top, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
-
-#ifdef _WIN32_WCE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        CE_SHFullScreen(hwnd,
-                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
-                        SHFS_HIDESIPBUTTON);
-    }
-#endif
 }
 
 void
 WIN_MaximizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-
-    ShowWindow(hwnd, SW_MAXIMIZE);
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
 #ifdef _WIN32_WCE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        CE_SHFullScreen(hwnd,
-                        SHFS_HIDESTARTICON | SHFS_HIDETASKBAR |
-                        SHFS_HIDESIPBUTTON);
-    }
+    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen)
+        videodata->SHFullScreen(hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
 #endif
+
+    ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
 void
 WIN_MinimizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
     ShowWindow(hwnd, SW_MINIMIZE);
 
 #ifdef _WIN32_WCE
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        CE_SHFullScreen(hwnd,
-                        SHFS_SHOWSTARTICON | SHFS_SHOWTASKBAR |
-                        SHFS_SHOWSIPBUTTON);
-    }
+    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen)
+	videodata->SHFullScreen(hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
 #endif
 }
 
@@ -586,6 +532,9 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
+#ifdef _WIN32_WCE
+	WINCE_ShowWindow(_this, window, 0);
+#endif
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
             DestroyWindow(data->hwnd);

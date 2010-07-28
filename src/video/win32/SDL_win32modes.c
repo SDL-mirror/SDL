@@ -203,10 +203,18 @@ WIN_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
 {
     SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->desktop_mode.driverdata;
 
+#ifdef _WIN32_WCE
+    // WINCE: DEVMODE.dmPosition not found, or may be mingw32ce bug
+    rect->x = 0;
+    rect->y = 0;
+    rect->w = display->windows->w;
+    rect->h = display->windows->h;
+#else
     rect->x = (int)data->DeviceMode.dmPosition.x;
     rect->y = (int)data->DeviceMode.dmPosition.y;
     rect->w = data->DeviceMode.dmPelsWidth;
     rect->h = data->DeviceMode.dmPelsHeight;
+#endif
     return 0;
 }
 

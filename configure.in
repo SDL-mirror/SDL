@@ -1917,7 +1917,7 @@ CheckWIN32()
     AC_MSG_CHECKING(Windows CE)
     have_wince=no
     AC_TRY_COMPILE([
-#ifndef _WIN32_WCE
+#if !defined(_WIN32_WCE) && !defined(__MINGW32CE__)
 #error This is not Windows CE
 #endif
     ],[
@@ -2388,6 +2388,12 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/atomic/win32/*.c"
             have_atomic=yes
         fi
+        # Set up dummy files for the joystick for now
+        if test x$enable_joystick = xyes; then
+            AC_DEFINE(SDL_JOYSTICK_DUMMY)
+            SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
+            have_joystick=yes
+        fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
             AC_DEFINE(SDL_THREAD_WIN32)
@@ -2411,10 +2417,20 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up the system libraries we need
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lcoredll -lcommctrl -lmmtimer"
+
+	# mingw32ce library
+	case "$host" in
+    	    *-mingw32ce)
+    		EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lmingwex"
+    		;;
+    	    *)
+        	;;
+	esac
+
         # The Win32 platform requires special setup
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
-        SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
-        SDL_LIBS="-lSDLmain $SDL_LIBS"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
+        EXTRA_LDFLAGS="-lSDLmain $EXTRA_LDFLAGS"
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32

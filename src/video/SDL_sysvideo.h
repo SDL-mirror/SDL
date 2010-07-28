@@ -387,9 +387,6 @@ extern VideoBootStrap PS3_bootstrap;
 #if SDL_VIDEO_DRIVER_SVGALIB
 extern VideoBootStrap SVGALIB_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_GAPI
-extern VideoBootStrap GAPI_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_WIN32
 extern VideoBootStrap WIN32_bootstrap;
 #endif

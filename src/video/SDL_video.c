@@ -67,9 +67,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_SVGALIB
     &SVGALIB_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_GAPI
-    &GAPI_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_WIN32
     &WIN32_bootstrap,
 #endif

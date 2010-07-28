@@ -184,6 +184,22 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
 	case WM_MOUSEMOVE:
+#ifdef _WIN32_WCE
+	/* transform coords for VGA, WVGA... */
+	{
+	    SDL_VideoData *videodata = data->videodata;
+	    if(videodata->CoordTransform &&
+		(videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
+	    {
+		POINT pt;
+		pt.x = LOWORD(lParam);
+		pt.y = HIWORD(lParam);
+		videodata->CoordTransform(data->window, &pt);
+    		SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
+		break;
+	    }
+	}
+#endif
         SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
 

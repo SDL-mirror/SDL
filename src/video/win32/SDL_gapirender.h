@@ -27,7 +27,11 @@
 /* SDL surface based renderer implementation */
 
 #if SDL_VIDEO_RENDER_GAPI
-extern void GAPI_AddRenderDriver(_THIS);
+extern void WINCE_AddRenderDriver(_THIS);
+extern int  WINCE_Available(void);
+extern void WINCE_ShowWindow(_THIS, SDL_Window* window, int visible);
+extern int  WINCE_GetDMOrientation(void);
+extern int  WINCE_SetDMOrientation(int orientation);
 #endif
 
 /* vi: set ts=4 sw=4 expandtab: */
