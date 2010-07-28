@@ -1015,6 +1015,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
         texture->blendMode = SDL_BLENDMODE_NONE;
         data->blend_op = PictOpSrc;
+        data->filter = "fast";
     }
 #endif
     return 0;
