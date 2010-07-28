@@ -1038,7 +1038,7 @@ X11_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
 static int
 X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
     X11_TextureData *data = (X11_TextureData *) texture->driverdata;
     X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
 
@@ -1094,11 +1094,14 @@ X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
         }
 
         return 0;
-    }
-    else {
+    } else {
         SDL_Unsupported();
         return -1;
     }
+#else
+    SDL_Unsupported();
+    return -1;
+#endif
 }
 
 static int
@@ -1314,6 +1317,7 @@ renderdrawcolor(SDL_Renderer * renderer, int premult)
         return SDL_MapRGBA(&data->format, r, g, b, a);
 }
 
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
 static XRenderColor
 xrenderdrawcolor(SDL_Renderer *renderer)
 {
@@ -1328,6 +1332,7 @@ xrenderdrawcolor(SDL_Renderer *renderer)
     }
     return xrender_color;
 }
+#endif
 
 static int
 X11_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
