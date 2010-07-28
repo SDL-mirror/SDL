@@ -26,6 +26,8 @@
 #include "SDL_error.h"
 #include "SDL_error_c.h"
 
+/*#define DEBUG_ERROR*/
+
 /* Routine to get the thread-specific error variable */
 #if SDL_THREADS_DISABLED
 /* !!! FIXME: what does this comment mean? Victim of Search and Replace? */

@@ -189,7 +189,7 @@ typedef struct SDL_RendererInfo
     Uint32 blend_modes;         /**< A mask of supported blend modes */
     Uint32 scale_modes;         /**< A mask of supported scale modes */
     Uint32 num_texture_formats; /**< The number of available texture formats */
-    Uint32 texture_formats[20]; /**< The available texture formats */
+    Uint32 texture_formats[50]; /**< The available texture formats */
     int max_texture_width;      /**< The maximimum texture width */
     int max_texture_height;     /**< The maximimum texture height */
 } SDL_RendererInfo;

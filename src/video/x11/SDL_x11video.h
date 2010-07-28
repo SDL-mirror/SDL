@@ -45,7 +45,15 @@
 #if SDL_VIDEO_DRIVER_X11_SCRNSAVER
 #include <X11/extensions/scrnsaver.h>
 #endif
-
+#if SDL_VIDEO_DRIVER_X11_XRENDER
+#include <X11/extensions/Xrender.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XDAMAGE
+#include <X11/extensions/Xdamage.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XFIXES
+#include <X11/extensions/Xfixes.h>
+#endif
 #include "SDL_x11dyn.h"
 
 #include "SDL_x11clipboard.h"

@@ -52,6 +52,18 @@
 #include <X11/extensions/XInput.h>
 #endif
 
+#if SDL_VIDEO_DRIVER_X11_XRENDER
+#include <X11/extensions/Xrender.h>
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XDAMAGE
+#include <X11/extensions/Xdamage.h>
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XFIXES
+#include <X11/extensions/Xfixes.h>
+#endif
+
 /*
  * When using the "dynamic X11" functionality, we duplicate all the Xlib
  *  symbols that would be referenced by SDL inside of SDL itself.

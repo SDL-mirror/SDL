@@ -1055,6 +1055,8 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     xrandr_lib=[`find_lib "libXrandr.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     xinput_lib=[`find_lib "libXi.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     xss_lib=[`find_lib "libXss.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    xdamage_lib=[`find_lib "libXdamage.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    xfixes_lib=[`find_lib "libXfixes.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     ;;
             esac
 
@@ -1128,16 +1130,13 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
                                 ])
                 if test x$have_xrandr_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xrandr_lib != x ; then
-                        echo "-- dynamic libXrender -> $xrender_lib"
                         echo "-- dynamic libXrandr -> $xrandr_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER, "$xrender_lib")
                         AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR, "$xrandr_lib")
                         definitely_enable_video_x11_xrandr=yes
                     else
-                        AC_CHECK_LIB(Xrender, XRenderQueryExtension, have_xrender_lib=yes)
                         AC_CHECK_LIB(Xrandr, XRRQueryExtension, have_xrandr_lib=yes)
-                        if test x$have_xrender_lib = xyes && test x$have_xrandr_lib = xyes ; then
-                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXrandr -lXrender"
+                        if test x$have_xrandr_lib = xyes ; then
+                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXrandr"
                             definitely_enable_video_x11_xrandr=yes
                         fi
                     fi
@@ -1199,7 +1198,69 @@ AC_HELP_STRING([--enable-video-x11-scrnsaver], [enable X11 screensaver extension
             if test x$definitely_enable_video_x11_scrnsaver = xyes; then
                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_SCRNSAVER)
             fi
-
+            AC_ARG_ENABLE(video-x11-xrender,
+AC_HELP_STRING([--enable-video-x11-xrender], [enable X11 Xrender extension [[default=yes]]]),
+                            , enable_video_x11_xrender=yes)
+            if test x$enable_video_x11_xrender = xyes; then
+                AC_CHECK_HEADER(X11/extensions/Xrender.h,
+                                have_xrender_h_hdr=yes,
+                                have_xrender_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                if test x$have_xrender_h_hdr = xyes; then
+                    if test x$enable_x11_shared = xyes && test x$xrender_lib != x ; then
+                        echo "-- dynamic libXrender -> $xrender_lib"
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRENDER, "$xrender_lib")
+                        definitely_enable_video_x11_xrender=yes
+                    else
+                        AC_CHECK_LIB(Xrender, XRenderQueryExtension, have_xrender_lib=yes)
+                        if test x$have_xrender_lib = xyes ; then
+                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXrender"
+                            definitely_enable_video_x11_xrender=yes
+                        fi
+                    fi
+                fi
+            fi
+            if test x$definitely_enable_video_x11_xrender = xyes; then
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRENDER)
+            fi
+            AC_ARG_ENABLE(video-x11-xdamage-xfixes,
+AC_HELP_STRING([--enable-video-x11-xdamage-xfixes], [enable X11 Xdamage and Xfixes extensions [[default=yes]]]),
+                            , enable_video_x11_xdamage=yes)
+            if test x$enable_video_x11_xdamage = xyes && test x$definitely_enable_video_x11_xrender = xyes ; then
+                AC_CHECK_HEADER(X11/extensions/Xdamage.h,
+                                have_xdamage_h_hdr=yes,
+                                have_xdamage_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                AC_CHECK_HEADER(X11/extensions/Xfixes.h,
+                                have_xfixes_h_hdr=yes,
+                                have_xfixes_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                if test x$have_xdamage_h_hdr = xyes && test x$have_xfixes_h_hdr = xyes ; then
+                    if test x$enable_x11_shared = xyes && test x$xdamage_lib != x && test x$xfixes_lib != x ; then
+                        echo "-- dynamic libXdamage -> $xdamage_lib"
+                        echo "-- dynamic libXfixes -> $xfixes_lib"
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XDAMAGE, "$xdamage_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XFIXES, "$xfixes_lib")
+                        definitely_enable_video_x11_xdamage=yes
+                        definitely_enable_video_x11_xfixes=yes
+                    else
+                        AC_CHECK_LIB(Xdamage, XDamageQueryExtension, have_xdamage_lib=yes)
+                        AC_CHECK_LIB(Xfixes, XFixesQueryExtension, have_xfixes_lib=yes)
+                        if test x$have_xdamage_lib = xyes && test x$have_xfixes_lib = xyes ; then
+                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXdamage -lXfixes"
+                            definitely_enable_video_x11_xdamage=yes
+                            definitely_enable_video_x11_xfixes=yes
+                        fi
+                    fi
+                fi
+            fi
+            if test x$definitely_enable_video_x11_xdamage = xyes && test x$definitely_enable_video_x11_xfixes = xyes ; then
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XDAMAGE)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XFIXES)
+            fi
             AC_ARG_ENABLE(render-x11,
 AC_HELP_STRING([--enable-render-x11], [enable the X11 render driver [[default=yes]]]),
                                 , enable_render_x11=yes)
