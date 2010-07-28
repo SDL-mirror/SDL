@@ -204,6 +204,10 @@ CheckXRender(Display *display, int *major, int *minor)
         return SDL_FALSE;
     }
 
+    if (major != 0 || minor < 10) {
+        return SDL_FALSE;
+    }
+
     return SDL_TRUE;
 }
 #endif
@@ -227,6 +231,10 @@ CheckXFixes(Display *display, int *major, int *minor)
     }
 
     if (!XFixesQueryVersion(display, major, minor)) {
+        return SDL_FALSE;
+    }
+
+    if (major < 2) {
         return SDL_FALSE;
     }
 
@@ -397,8 +405,7 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
     if (CheckXDamage(data->display, &major, &minor)) {
         if (CheckXFixes(data->display, &major, &minor)) {
-            if (major >= 2)
-                data->use_xdamage = SDL_TRUE;
+            data->use_xdamage = SDL_TRUE;
         }
     }
 #endif
