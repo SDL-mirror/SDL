@@ -1038,16 +1038,19 @@ X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
 
         Uint8 r = 0xFF, g = 0xFF, b = 0xFF, a = 0xFF;
 
+        /* Check if alpha modulation is required. */
         if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
             a = texture->a;
         }
 
+        /* Check if color modulation is required. */
         if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
             r = texture->r;
             g = texture->g;
             b = texture->b;
         }
 
+        /* We can save some labour if no modulation is required. */
         if (texture->modMode != SDL_TEXTUREMODULATE_NONE) {
             XRenderColor mod_color =
                 SDLColorToXRenderColor(r, g, b, a);
@@ -1056,6 +1059,8 @@ X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
                                  0, 0, 1, 1);
         }
 
+        /* We can save some labour dealing with component alpha
+         * if color modulation is not required. */
         XRenderPictureAttributes attr;
         if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
             attr.component_alpha = True;
@@ -1063,6 +1068,8 @@ X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
                                  CPComponentAlpha, &attr);
         }
 
+        /* Again none of this is necessary is no modulation
+         * is required. */
         if (texture->modMode != SDL_TEXTUREMODULATE_NONE) {
             XRenderComposite(renderdata->display, PictOpSrc,
                              data->picture, renderdata->brush_pict,
@@ -1070,6 +1077,8 @@ X11_SetTextureRGBAMod(SDL_Renderer * renderer, SDL_Texture * texture)
                              0, 0, 0, 0, 0, 0, texture->w, texture->h);
         }
 
+        /* We only need to reset the component alpha
+         * attribute if color modulation is required. */
         if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) { 
             attr.component_alpha = False;
             XRenderChangePicture(renderdata->display, renderdata->brush_pict,
