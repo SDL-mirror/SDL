@@ -313,7 +313,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             touch.pressureres = touch.pressure_max - touch.pressure_min;
             
             if (SDL_AddTouch(&touch, "") < 0) {
-                return; 
+                continue;
             }
         } 
         float x = [touch normalizedPosition].x;
