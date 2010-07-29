@@ -26,16 +26,10 @@
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/scancodes_darwin.h"
 
-//Touch Code
-#include "../../events/SDL_touch_c.h"
-#include "SDL_cocoatouch.h"
-
 #include <Carbon/Carbon.h>
 
 //#define DEBUG_IME NSLog
 #define DEBUG_IME
-
-#define DEBUG_TOUCH NSLog
 
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
@@ -71,7 +65,6 @@
 }
 - (void) doCommandBySelector:(SEL)myselector;
 - (void) setInputRect:(SDL_Rect *) rect;
-- (void) handleTouches:(cocoaTouchType)type WithEvent:(NSEvent*) event;
 @end
 
 @implementation SDLTranslatorResponder
@@ -197,83 +190,6 @@
 {
     return [NSArray array];
 }
-
-// Touch Code Begins -----------
-
-- (id)initWithFrame:(CGRect)frame {
-  if (self = [super initWithFrame:frame]) {
-    [self setAcceptsTouchEvents:YES];
-    [self setWantsRestingTouches:YES];
-    DEBUG_TOUCH(@"Initializing Cocoa Touch System....");
-    
-  }
-  return self;
-}
-
-//Not an API function
-- (void)handleTouches:(cocoaTouchType)type WithEvent:(NSEvent *)event {
-  NSSet *touches = [event touchesMatchingPhase:NSTouchPhaseBegan inView:self];
-
-  NSEnumerator *enumerator = [touches objectEnumerator];
-  NSTouch *touch = (NSTouch*)[enumerator nextObject];
-  while (touch) {
-    long touchId = (long)[touch device];
-    if(!SDL_GetTouchIndex(touchId)) {
-      if(Cocoa_AddTouch(touch) < 0) continue;
-    } 
-    float x = [touch normalizedPosition].x;
-    float y = [touch normalizedPosition].y;
-    long fingerId = (long)[touch identity];
-    switch (type) {
-    case COCOA_TOUCH_DOWN:
-      SDL_SendFingerDown(touchId,fingerId,
-			 SDL_TRUE,x,y,1);
-      break;
-    case COCOA_TOUCH_UP:
-    case COCOA_TOUCH_CANCELLED:
-      SDL_SendFingerDown(touchId,fingerId,
-			 SDL_FALSE,x,y,1);
-    case COCOA_TOUCH_MOVE:
-      SDL_SendTouchMotion(touchId,fingerId,
-			  SDL_FALSE,x,y,1);
-    }
-    
-    touch = (NSTouch*)[enumerator nextObject];
-  }
-}
-
-- (void)touchesBeganWithEvent:(NSEvent *)event {
-  DEBUG_TOUCH(@"Finger Down");
-  
-  [self handleTouches: COCOA_TOUCH_DOWN WithEvent: event];
-
-  //Documentation said to call super, but examples do not
-  //[super touchesBeganWithEvent:event]
-}
-- (void)touchesMovedWithEvent:(NSEvent *)event {
-  DEBUG_TOUCH(@"Finger Moved");
-
-  [self handleTouches: COCOA_TOUCH_MOVE WithEvent: event];
-
-  //[super touchesMovedWithEvent:event]
-}
-- (void)touchesEndedWithEvent:(NSEvent *)event {
-  DEBUG_TOUCH(@"Finger Up");
-
-  [self handleTouches: COCOA_TOUCH_UP WithEvent: event];
-
-  //[super touchesEndedWithEvent:event]
-}
-- (void)touchesCancelledWithEvent:(NSEvent *)event {
-  DEBUG_TOUCH(@"Finger Cancelled");
-
-  [self handleTouches: COCOA_TOUCH_CANCELLED WithEvent: event];
-
-  //[super touchesCancelledWithEvent:event]
-}
-
-//Touch Code Ends --------------
-
 
 @end
 
@@ -712,14 +628,13 @@ Cocoa_StartTextInput(_THIS)
      * it to the front most window's content view */
     if (!data->fieldEdit) {
         data->fieldEdit =
-            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];	
-	DEBUG_TOUCH(@"Accepts Touch events? %i",[data->fieldEdit acceptsTouchEvents]);
+            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
     }
 
     if (![[data->fieldEdit superview] isEqual: parentView])
     {
         // DEBUG_IME(@"add fieldEdit to window contentView");
-       [data->fieldEdit removeFromSuperview];
+        [data->fieldEdit removeFromSuperview];
         [parentView addSubview: data->fieldEdit];
         [[NSApp keyWindow] makeFirstResponder: data->fieldEdit];
     }
@@ -776,14 +691,14 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         if (![event isARepeat]) {
             /* See if we need to rebuild the keyboard layout */
             UpdateKeymap(data);
-
-            SDL_SendKeyboardKey(SDL_PRESSED, code);
-#if 1
-            if (code == SDL_SCANCODE_UNKNOWN) {
-                fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
-            }
-#endif
         }
+
+        SDL_SendKeyboardKey(SDL_PRESSED, code);
+#if 1
+        if (code == SDL_SCANCODE_UNKNOWN) {
+            fprintf(stderr, "The key you just pressed is not recognized by SDL. To help get this fixed, report this to the SDL mailing list <sdl@libsdl.org> or to Christian Walther <cwalther@gmx.ch>. Mac virtual key code is %d.\n", scancode);
+        }
+#endif
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
             /* FIXME CW 2007-08-16: only send those events to the field editor for which we actually want text events, not e.g. esc or function keys. Arrow keys in particular seem to produce crashes sometimes. */
             [data->fieldEdit interpretKeyEvents:[NSArray arrayWithObject:event]];
@@ -807,29 +722,6 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
         break;
     }
 }
-
-Cocoa_AddTouch(NSTouch* finger) {  
-  SDL_Touch touch;
-  touch.id = (long)[finger device]; 
-  //NSSize size = [finger deviceSize];
-  //touch.driverdata = SDL_malloc(sizeof(EventTouchData));
-  //EventTouchData* data = (EventTouchData*)(touch.driverdata);
-  
-  touch.x_min = 0;
-  touch.x_max = 1;
-  touch.xres = touch.x_max - touch.x_min;
-  touch.y_min = 0;
-  touch.y_max = 1;
-  touch.yres = touch.y_max - touch.y_min;
-  touch.pressure_min = 0;
-  touch.pressure_max = 1;
-  touch.pressureres = touch.pressure_max - touch.pressure_min;
-  
-  
-  return SDL_AddTouch(&touch, ""); 
-
-}
-
 
 void
 Cocoa_QuitKeyboard(_THIS)
