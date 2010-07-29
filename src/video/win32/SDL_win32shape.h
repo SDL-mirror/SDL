@@ -28,13 +28,12 @@
 #include "SDL_video.h"
 #include "SDL_shape.h"
 #include "../SDL_sysvideo.h"
+#include "../SDL_shape_internals.h"
 
 typedef struct {
-	void* shapebuffer;
-	Uint32 buffersize;
+	SDL_ShapeTree *mask_tree;
 } SDL_ShapeData;
 
-extern SDL_Window* Win32_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags);
 extern SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window);
 extern int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode);
 extern int Win32_ResizeWindowShape(SDL_Window *window);
