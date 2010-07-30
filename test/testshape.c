@@ -1,12 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
-#include <SDL_events.h>
-#include <SDL_rect.h>
-#include <SDL_pixels.h>
-#include <SDL_video.h>
-#include <SDL_shape.h>
-#include <SDL_keysym.h>
-#include <SDL_timer.h>
+#include <stdio.h>
+#include "SDL.h"
+#include "SDL_shape.h"
 
 #define SHAPED_WINDOW_X 150
 #define SHAPED_WINDOW_Y 150
@@ -44,7 +40,23 @@ Uint32 time_left() {
 }
 
 int main(int argc,char** argv) {
-        if(argc < 2) {
+	Uint8 num_pictures;
+	LoadedPicture* pictures;
+	int i, j;
+	SDL_PixelFormat* format;
+	Uint32 format_enum;
+	SDL_Window *window;
+	SDL_Color black = {0,0,0,0xff};
+	SDL_Event event;
+	int event_pending = 0;
+	int should_exit = 0;
+	unsigned int current_picture;
+	int button_down;
+	Uint32 pixelFormat;
+	int access;
+	SDL_Rect texture_dimensions;;
+
+	if(argc < 2) {
         	printf("SDL_Shape requires at least one bitmap file as argument.\n");
         	exit(-1);
         }
@@ -54,15 +66,14 @@ int main(int argc,char** argv) {
 		exit(-2);
 	}
 	
-	Uint8 num_pictures = argc - 1;
-	LoadedPicture* pictures = malloc(sizeof(LoadedPicture)*num_pictures);
-	int i = 0;
+	num_pictures = argc - 1;
+	pictures = (LoadedPicture *)malloc(sizeof(LoadedPicture)*num_pictures);
 	for(i=0;i<num_pictures;i++)
 		pictures[i].surface = NULL;
 	for(i=0;i<num_pictures;i++) {
 		pictures[i].surface = SDL_LoadBMP(argv[i+1]);
 		if(pictures[i].surface == NULL) {
-			int j = 0;
+			j = 0;
 			for(j=0;j<num_pictures;j++)
 				if(pictures[j].surface != NULL)
 					SDL_FreeSurface(pictures[j].surface);
@@ -71,20 +82,20 @@ int main(int argc,char** argv) {
 			printf("Could not load surface from named bitmap file.\n");
 			exit(-3);
 		}
-		SDL_PixelFormat* format = pictures[i].surface->format;
-		Uint32 format_enum = SDL_MasksToPixelFormatEnum (format->BitsPerPixel,format->Rmask,format->Gmask, format->Bmask,format->Amask);
+
+		format = pictures[i].surface->format;
+		format_enum = SDL_MasksToPixelFormatEnum (format->BitsPerPixel,format->Rmask,format->Gmask, format->Bmask,format->Amask);
 		if(SDL_ISPIXELFORMAT_ALPHA(format_enum)) {
 			pictures[i].mode.mode = ShapeModeBinarizeAlpha;
 			pictures[i].mode.parameters.binarizationCutoff = 1;
 		}
 		else {
 			pictures[i].mode.mode = ShapeModeColorKey;
-			SDL_Color black = {0,0,0,0xff};
 			pictures[i].mode.parameters.colorKey = black;
 		}
 	}
 	
-	SDL_Window *window = SDL_CreateShapedWindow("SDL_Shape test",SHAPED_WINDOW_X,SHAPED_WINDOW_Y,SHAPED_WINDOW_DIMENSION,SHAPED_WINDOW_DIMENSION,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+	window = SDL_CreateShapedWindow("SDL_Shape test",SHAPED_WINDOW_X,SHAPED_WINDOW_Y,SHAPED_WINDOW_DIMENSION,SHAPED_WINDOW_DIMENSION,SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 	if(window == NULL) {
 		for(i=0;i<num_pictures;i++)
 			SDL_FreeSurface(pictures[i].surface);
@@ -108,7 +119,7 @@ int main(int argc,char** argv) {
 	for(i=0;i<num_pictures;i++) {
 		pictures[i].texture = SDL_CreateTextureFromSurface(0,pictures[i].surface);
 		if(pictures[i].texture == NULL) {
-			int j = 0;
+			j = 0;
 			for(j=0;j<num_pictures;i++)
 				if(pictures[i].texture != NULL)
 					SDL_DestroyTexture(pictures[i].texture);
@@ -123,17 +134,19 @@ int main(int argc,char** argv) {
 		}
 	}
 	
-	SDL_Event event;
-	int event_pending = 0,should_exit = 0;
+	event_pending = 0;
+	should_exit = 0;
 	event_pending = SDL_PollEvent(&event);
-	unsigned int current_picture = 0;
-	SDL_WindowShapeMode mode = {ShapeModeDefault,1};
-	int button_down = 0;
-	Uint32 format = 0,access = 0;
-	SDL_Rect texture_dimensions = {0,0,0,0};
-	SDL_QueryTexture(pictures[current_picture].texture,&format,&access,&texture_dimensions.w,&texture_dimensions.h);
+	current_picture = 0;
+	button_down = 0;
+	format = 0,access = 0;
+	texture_dimensions.h = 0;
+	texture_dimensions.w = 0;
+	texture_dimensions.x = 0;
+	texture_dimensions.y = 0;
+	SDL_QueryTexture(pictures[current_picture].texture,(Uint32 *)&pixelFormat,(int *)&access,&texture_dimensions.w,&texture_dimensions.h);
 	SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
-	SDL_SetWindowShape(window,pictures[current_picture].surface,&mode);
+	SDL_SetWindowShape(window,pictures[current_picture].surface,&pictures[current_picture].mode);
 	next_time = SDL_GetTicks() + TICK_INTERVAL;
 	while(should_exit == 0) {
 		event_pending = SDL_PollEvent(&event);
@@ -148,9 +161,9 @@ int main(int argc,char** argv) {
 				current_picture += 1;
 				if(current_picture >= num_pictures)
 					current_picture = 0;
-				SDL_QueryTexture(pictures[current_picture].texture,&format,&access,&texture_dimensions.w,&texture_dimensions.h);
+				SDL_QueryTexture(pictures[current_picture].texture,(Uint32 *)&pixelFormat,(int *)&access,&texture_dimensions.w,&texture_dimensions.h);
 				SDL_SetWindowSize(window,texture_dimensions.w,texture_dimensions.h);
-				SDL_SetWindowShape(window,pictures[current_picture].surface,&mode);
+				SDL_SetWindowShape(window,pictures[current_picture].surface,&pictures[current_picture].mode);
 			}
 			if(event.type == SDL_QUIT)
 				should_exit = 1;
@@ -172,4 +185,6 @@ int main(int argc,char** argv) {
 	free(pictures);
 	//Call SDL_VideoQuit() before quitting.
 	SDL_VideoQuit();
+
+	return 0;
 }
