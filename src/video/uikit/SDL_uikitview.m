@@ -24,6 +24,7 @@
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
+#include "../../events/SDL_touch_c.h"
 
 #if SDL_IPHONE_KEYBOARD
 #import "keyinfotable.h"
@@ -48,7 +49,7 @@
 	[self initializeKeyboard];
 #endif	
 
-#if FIXED_MULTITOUCH
+#ifdef FIXED_MULTITOUCH
 	SDL_Touch touch;
 	touch.id = 0; //TODO: Should be -1?
 
@@ -78,6 +79,8 @@
 	NSEnumerator *enumerator = [touches objectEnumerator];
 	UITouch *touch = (UITouch*)[enumerator nextObject];
 	
+	//NSLog("Click");
+	
 	if (touch) {
 		CGPoint locationInView = [touch locationInView: self];
 			
@@ -88,7 +91,7 @@
 		SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
 	}
 
-#if FIXED_MULTITOUCH
+#ifdef FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
 
@@ -131,7 +134,7 @@
 		SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
 	}
 
-#if FIXED_MULTITOUCH
+#ifdef FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
 	  
@@ -178,7 +181,7 @@
 		SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 	}
 
-#if FIXED_MULTITOUCH
+#ifdef FIXED_MULTITOUCH
 	while(touch) {
 	  CGPoint locationInView = [touch locationInView: self];
 	  

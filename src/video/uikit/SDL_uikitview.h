@@ -23,6 +23,9 @@
 #include "SDL_stdinc.h"
 #include "SDL_events.h"
 
+#define IPHONE_TOUCH_EFFICIENT_DANGEROUS
+#define FIXED_MULTITOUCH
+
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define MAX_SIMULTANEOUS_TOUCHES 5
 #endif
@@ -34,7 +37,7 @@
 @interface SDL_uikitview : UIView {
 #endif
 
-#if FIXED_MULTITOUCH
+#ifdef FIXED_MULTITOUCH
 	long touchId;
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 	UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];

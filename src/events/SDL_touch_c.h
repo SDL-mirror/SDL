@@ -58,6 +58,10 @@ extern void SDL_SetTouchFocus(long id, SDL_Window * window);
 extern int SDL_SendTouchMotion(long id, long fingerid,
 			       int relative, float x, float y, float z);
 
+/* Send a touch down/up event for a touch */
+extern int SDL_SendFingerDown(long id, long fingerid, SDL_bool down, 
+							  float x, float y, float pressure);
+
 /* Send a touch button event for a touch */
 extern int SDL_SendTouchButton(long id, Uint8 state, Uint8 button);
 
@@ -66,6 +70,9 @@ extern void SDL_TouchQuit(void);
 
 /* Get the index of a touch device */
 extern int SDL_GetTouchIndexId(long id);
+
+/* Print a debug message for a nonexistent touch */
+extern int SDL_TouchNotFoundError(long id);
 
 #endif /* _SDL_touch_c_h */
 

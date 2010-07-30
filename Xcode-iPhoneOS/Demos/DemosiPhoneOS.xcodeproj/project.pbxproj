@@ -109,7 +109,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 006E982211955059001DE610 /* testsdl.app */;
+			remoteGlobalIDString = 006E982211955059001DE610;
 			remoteInfo = testsdl;
 		};
 		FD1B489D0E313154007AB34E /* PBXContainerItemProxy */ = {
