@@ -139,16 +139,16 @@ extern DECLSPEC int SDLCALL SDL_InitSubSystem(Uint32 flags);
 extern DECLSPEC void SDLCALL SDL_QuitSubSystem(Uint32 flags);
 
 /**
- *  This function returns mask of the specified subsystems which have
- *  been initialized.
+ *  This function returns a mask of the specified subsystems which have
+ *  previously been initialized.
  *  
  *  If \c flags is 0, it returns a mask of all initialized subsystems.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_WasInit(Uint32 flags);
 
 /**
- *  This function cleans up all initialized subsystems and unloads the
- *  dynamically linked library.  You should call it upon all exit conditions.
+ *  This function cleans up all initialized subsystems. You should
+ *  call it upon all exit conditions.
  */
 extern DECLSPEC void SDLCALL SDL_Quit(void);
 
