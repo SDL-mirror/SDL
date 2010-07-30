@@ -94,9 +94,15 @@ X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
         (SDL_DisplayData *) window->display->driverdata;
     XWindowAttributes attr;
 
-    XGetWindowAttributes(data->display, RootWindow(data->display,
-                                                   displaydata->screen),
-                         &attr);
+    XGetWindowAttributes(data->display, RootWindow(data->display, displaydata->screen), &attr);
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        /* The bounds when this window is visible is the fullscreen mode */
+        SDL_DisplayMode fullscreen_mode;
+        if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
+            attr.width = fullscreen_mode.w;
+            attr.height = fullscreen_mode.h;
+        }
+    }
     if (w) {
         *w = attr.width;
     }
