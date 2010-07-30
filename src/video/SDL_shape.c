@@ -114,7 +114,7 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 	SDL_bool pixel_transparent = SDL_FALSE;
 	int last_transparent = -1;
 	SDL_Color key;
-	SDL_ShapeTree* result = malloc(sizeof(SDL_ShapeTree));
+	SDL_ShapeTree* result = (SDL_ShapeTree*)SDL_malloc(sizeof(SDL_ShapeTree));
 	SDL_Rect next = {0,0,0,0};
 	for(y=dimensions.y;y<dimensions.h;y++)
 		for(x=dimensions.x;x<dimensions.w;x++) {
@@ -134,17 +134,17 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 			SDL_GetRGBA(pixel_value,mask->format,&r,&g,&b,&a);
 			switch(mode.mode) {
 				case(ShapeModeDefault):
-					pixel_transparent = (a >= 1 ? !invert : invert);
+					pixel_transparent = (SDL_bool)(a >= 1 ? !invert : invert);
 					break;
 				case(ShapeModeBinarizeAlpha):
-					pixel_transparent = (a >= mode.parameters.binarizationCutoff ? !invert : invert);
+					pixel_transparent = (SDL_bool)(a >= mode.parameters.binarizationCutoff ? !invert : invert);
 					break;
 				case(ShapeModeReverseBinarizeAlpha):
-					pixel_transparent = (a <= mode.parameters.binarizationCutoff ? !invert : invert);
+					pixel_transparent = (SDL_bool)(a <= mode.parameters.binarizationCutoff ? !invert : invert);
 					break;
 				case(ShapeModeColorKey):
 					key = mode.parameters.colorKey;
-					pixel_transparent = ((key.r == r && key.g == g && key.b == b) ? !invert : invert);
+					pixel_transparent = (SDL_bool)((key.r == r && key.g == g && key.b == b) ? !invert : invert);
 					break;
 			}
 			if(last_transparent == -1) {
@@ -159,16 +159,16 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 				//These will change from recursion to recursion.
 				next.x = dimensions.x;
 				next.y = dimensions.y;
-				result->data.children.upleft = RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				next.x = dimensions.w / 2 + 1;
 				//Unneeded: next.y = dimensions.y;
-				result->data.children.upright = RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				next.x = dimensions.x;
 				next.y = dimensions.h / 2 + 1;
-				result->data.children.downleft = RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				next.x = dimensions.w / 2 + 1;
 				//Unneeded: next.y = dimensions.h / 2 + 1;
-				result->data.children.downright = RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				return result;
 			}
 		}
@@ -191,10 +191,10 @@ SDL_ShapeTree* SDL_CalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* shap
 
 void SDL_TraverseShapeTree(SDL_ShapeTree *tree,void(*function)(SDL_ShapeTree*,void*),void* closure) {
 	if(tree->kind == QuadShape) {
-		SDL_TraverseShapeTree(tree->data.children.upleft,function,closure);
-		SDL_TraverseShapeTree(tree->data.children.upright,function,closure);
-		SDL_TraverseShapeTree(tree->data.children.downleft,function,closure);
-		SDL_TraverseShapeTree(tree->data.children.downright,function,closure);
+		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.upleft,function,closure);
+		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.upright,function,closure);
+		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.downleft,function,closure);
+		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.downright,function,closure);
 	}
 	else
 		function(tree,closure);
@@ -202,12 +202,12 @@ void SDL_TraverseShapeTree(SDL_ShapeTree *tree,void(*function)(SDL_ShapeTree*,vo
 
 void SDL_FreeShapeTree(SDL_ShapeTree** shapeTree) {
 	if((*shapeTree)->kind == QuadShape) {
-		SDL_FreeShapeTree(&(*shapeTree)->data.children.upleft);
-		SDL_FreeShapeTree(&(*shapeTree)->data.children.upright);
-		SDL_FreeShapeTree(&(*shapeTree)->data.children.downleft);
-		SDL_FreeShapeTree(&(*shapeTree)->data.children.downright);
+		SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.upleft);
+		SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.upright);
+		SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.downleft);
+		SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.downright);
 	}
-	free(*shapeTree);
+	SDL_free(*shapeTree);
 	*shapeTree = NULL;
 }
 

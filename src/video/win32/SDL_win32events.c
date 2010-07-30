@@ -28,6 +28,7 @@
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
+#include "SDL_win32shape.h"
 #include "SDL_syswm.h"
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
@@ -249,10 +250,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int w, h;
 
             /* we're collecting raw data to be able to identify the mouse (if there are several) */
-            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, &size,
+            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, NULL, (PUINT)&size,
                             sizeof(RAWINPUTHEADER));
             lpb = SDL_stack_alloc(BYTE, size);
-            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, lpb, &size,
+            GetRawInputData((HRAWINPUT) lParam, RID_INPUT, lpb, (PUINT)&size,
                             sizeof(RAWINPUTHEADER));
             raw = (RAWINPUT *) lpb;
             header = &raw->header;
@@ -493,7 +494,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             /* If we allow resizing, let the resize happen naturally */
             if(SDL_IsShapedWindow(data->window))
-                SDL_ResizeWindowShape(data->window);
+                Win32_ResizeWindowShape(data->window);
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 returnCode = 0;
                 break;

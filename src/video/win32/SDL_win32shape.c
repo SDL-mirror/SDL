@@ -20,23 +20,27 @@
     eligottlieb@gmail.com
 */
 
-#include <windows.h>
 #include "SDL_win32shape.h"
+#include "SDL_win32video.h"
 
 SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window) {
-	SDL_WindowShaper* result = malloc(sizeof(SDL_WindowShaper));
+	int resized_properly;
+	SDL_WindowShaper* result = (SDL_WindowShaper *)SDL_malloc(sizeof(SDL_WindowShaper));
 	result->window = window;
 	result->mode.mode = ShapeModeDefault;
 	result->mode.parameters.binarizationCutoff = 1;
 	result->usershownflag = 0;
 	//Put some driver-data here.
 	window->shaper = result;
-	int resized_properly = Win32_ResizeWindowShape(window);
-	assert(resized_properly == 0);
+	resized_properly = Win32_ResizeWindowShape(window);
+	if (resized_properly != 0)
+			return NULL;
+
 	return result;
 }
 
-void CombineRectRegions(SDL_ShapeTree* node,HRGN* mask_region) {
+void CombineRectRegions(SDL_ShapeTree* node, void* closure) {
+	HRGN* mask_region = (HRGN *)closure;
 	if(node->kind == OpaqueShape) {
 		HRGN temp_region = CreateRectRgn(node->data.shape.x,node->data.shape.y,node->data.shape.w,node->data.shape.h);
 		CombineRgn(*mask_region,*mask_region,temp_region, RGN_OR);
@@ -45,31 +49,44 @@ void CombineRectRegions(SDL_ShapeTree* node,HRGN* mask_region) {
 }
 
 int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-	assert(shaper != NULL && shape != NULL);
+	SDL_ShapeData *data;
+	HRGN mask_region;
+    SDL_WindowData *windowdata;
+    HWND hwnd;
+
+	if (shaper == NULL || shape == NULL)
+		return SDL_INVALID_SHAPE_ARGUMENT;
 	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)) && shapeMode->mode != ShapeModeColorKey || shape->w != shaper->window->w || shape->h != shaper->window->h)
 		return SDL_INVALID_SHAPE_ARGUMENT;
 	
-	SDL_ShapeData *data = (SDL_ShapeData*)shaper->driverdata;
-	data->mask_tree = SDL_CalculateShapeTree(shapeMode,shape,SDL_FALSE);
+	data = (SDL_ShapeData*)shaper->driverdata;
+	data->mask_tree = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
 	
 	/*
 	 * Start with empty region 
 	 */
-	HRGN mask_region = CreateRectRgn(0, 0, 0, 0);
+	mask_region = CreateRectRgn(0, 0, 0, 0);
 	
 	SDL_TraverseShapeTree(data->mask_tree,&CombineRectRegions,&mask_region);
 	
 	/*
 	 * Set the new region mask for the window 
 	 */
-	SetWindowRgn((SDL_WindowData*)(shaper->window->driverdata)->hwnd, mask_region, TRUE);
+	windowdata=(SDL_WindowData *)(shaper->window->driverdata);
+	hwnd = windowdata->hwnd;
+	SetWindowRgn(hwnd, mask_region, TRUE);
 	
 	return 0;
 }
 
 int Win32_ResizeWindowShape(SDL_Window *window) {
-	SDL_ShapeData* data = window->shaper->driverdata;
-	assert(data != NULL);
+	SDL_ShapeData* data;
+
+	if (window == NULL)
+		return -1;
+	data = (SDL_ShapeData *)window->shaper->driverdata;
+	if (data == NULL)
+		return -1;
 	
 	if(data->mask_tree != NULL)
 		SDL_FreeShapeTree(&data->mask_tree);
