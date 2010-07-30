@@ -28,7 +28,7 @@ int bstatus;
 
 int colors[7] = {0xFF,0xFF00,0xFF0000,0xFFFF00,0x00FFFF,0xFF00FF,0xFFFFFF};
 
-int index2fingerid[MAXFINGERS];
+long index2fingerid[MAXFINGERS];
 int fingersDown;
 
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
 typedef struct {
   Point p;
   float pressure;
-  int id;
+  long id;
 } Finger;
 
 typedef struct {
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
 	    
 	    break;	    
 	  case SDL_FINGERDOWN:
-	    printf("Finger: %i down - x: %i, y: %i\n",event.tfinger.fingerId,
+	    printf("Finger: %li down - x: %f, y: %f\n",event.tfinger.fingerId,
 		   event.tfinger.x,event.tfinger.y);
 
 	    for(i = 0;i<MAXFINGERS;i++) 
@@ -390,7 +390,7 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = event.tfinger.y;
 	    break;
 	  case SDL_FINGERUP:
-	    printf("Figner: %i up - x: %i, y: %i\n",event.tfinger.fingerId,
+	    printf("Figner: %li up - x: %f, y: %f\n",event.tfinger.fingerId,
 	           event.tfinger.x,event.tfinger.y);
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == event.tfinger.fingerId) {

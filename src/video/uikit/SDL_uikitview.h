@@ -35,7 +35,7 @@
 #endif
 
 #if FIXED_MULTITOUCH
-	int touchId;
+	long touchId;
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 	UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
 #endif

@@ -27,7 +27,6 @@
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
 #include "../../events/SDL_windowevents_c.h"
-
 #include "SDL_cocoavideo.h"
 
 static __inline__ void ConvertNSRect(NSRect *r)
@@ -299,7 +298,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     while (touch) {
         long touchId = (long)[touch device];
         if (!SDL_GetTouch(touchId)) {
-	  printf("Adding touch: %i\n",touchId)
+	  printf("Adding touch: %li\n",touchId);
             SDL_Touch touch;
 
             touch.id = touchId;
@@ -316,7 +315,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             if (SDL_AddTouch(&touch, "") < 0) {
                 continue;
             }
-	    printf("Success, added touch: %i\n",touchId)
+	    printf("Success, added touch: %lin",touchId);
         } 
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
