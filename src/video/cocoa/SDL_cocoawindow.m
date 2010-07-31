@@ -304,13 +304,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
             touch.id = touchId;
             touch.x_min = 0;
             touch.x_max = 1;
-            touch.xres = touch.x_max - touch.x_min;
+            touch.native_xres = touch.x_max - touch.x_min;
             touch.y_min = 0;
             touch.y_max = 1;
-            touch.yres = touch.y_max - touch.y_min;
+            touch.native_yres = touch.y_max - touch.y_min;
             touch.pressure_min = 0;
             touch.pressure_max = 1;
-            touch.pressureres = touch.pressure_max - touch.pressure_min;
+            touch.native_pressureres = touch.pressure_max - touch.pressure_min;
             
             if (SDL_AddTouch(&touch, "") < 0) {
                 continue;

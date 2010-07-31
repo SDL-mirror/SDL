@@ -33,6 +33,9 @@
 #include "SDL_error.h"
 #include "SDL_video.h"
 
+#include "SDL_touch.h"
+
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -41,6 +44,7 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+  typedef Uint64 SDL_GestureID;
 
 /* Function prototypes */
 
@@ -49,7 +53,7 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_RecordGesture(int touchId);
+  extern DECLSPEC int SDLCALL SDL_RecordGesture(SDL_TouchID touchId);
 
 
 /**
@@ -65,7 +69,7 @@ extern "C" {
  *
  */
   extern DECLSPEC int 
-  SDLCALL SDL_SaveDollarTemplate(unsigned long gestureId,SDL_RWops *src);
+  SDLCALL SDL_SaveDollarTemplate(SDL_GestureID gestureId,SDL_RWops *src);
 
 
 /**
@@ -73,7 +77,8 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(int touchId, SDL_RWops *src);
+  extern DECLSPEC 
+  int SDLCALL SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src);
 
 
 

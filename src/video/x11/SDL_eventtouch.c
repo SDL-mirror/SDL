@@ -56,9 +56,6 @@ X11_InitTouch(_THIS)
 	touch.pressure_max = 0;
 	touch.pressure_min = 0;
 	touch.id = event; 
-
-	
-
 	
 
 	touch.driverdata = SDL_malloc(sizeof(EventTouchData));
@@ -76,19 +73,17 @@ X11_InitTouch(_THIS)
 	ioctl(data->eventStream,EVIOCGABS(0),abs);	
 	touch.x_min = abs[1];
 	touch.x_max = abs[2];
-	touch.xres = touch.x_max - touch.x_min;
+	touch.native_xres = touch.x_max - touch.x_min;
 	ioctl(data->eventStream,EVIOCGABS(ABS_Y),abs);	
 	touch.y_min = abs[1];
 	touch.y_max = abs[2];
-	touch.yres = touch.y_max - touch.y_min;
+	touch.native_yres = touch.y_max - touch.y_min;
 	ioctl(data->eventStream,EVIOCGABS(ABS_PRESSURE),abs);	
 	touch.pressure_min = abs[1];
 	touch.pressure_max = abs[2];
-	touch.pressureres = touch.pressure_max - touch.pressure_min;
-
+	touch.native_pressureres = touch.pressure_max - touch.pressure_min;
 
 	SDL_AddTouch(&touch, tstr);
-
       }
       vendor = -1;
       product = -1;

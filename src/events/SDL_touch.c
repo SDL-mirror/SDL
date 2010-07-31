@@ -42,7 +42,7 @@ SDL_TouchInit(void)
 }
 
 SDL_Touch *
-SDL_GetTouch(long id)
+SDL_GetTouch(SDL_TouchID id)
 {
     int index = SDL_GetTouchIndexId(id);
     if (index < 0 || index >= SDL_num_touch) {
@@ -61,7 +61,7 @@ SDL_GetTouchIndex(int index)
 }
 
 int
-SDL_GetFingerIndexId(SDL_Touch* touch,long fingerid)
+SDL_GetFingerIndexId(SDL_Touch* touch,SDL_FingerID fingerid)
 {
     int i;
     for(i = 0;i < touch->num_fingers;i++)
@@ -72,7 +72,7 @@ SDL_GetFingerIndexId(SDL_Touch* touch,long fingerid)
 
 
 SDL_Finger *
-SDL_GetFinger(SDL_Touch* touch,long id)
+SDL_GetFinger(SDL_Touch* touch,SDL_FingerID id)
 {
     int index = SDL_GetFingerIndexId(touch,id);
     if(index < 0 || index >= touch->num_fingers)
@@ -82,7 +82,7 @@ SDL_GetFinger(SDL_Touch* touch,long id)
 
 
 int
-SDL_GetTouchIndexId(long id)
+SDL_GetTouchIndexId(SDL_TouchID id)
 {
     int index;
     SDL_Touch *touch;
@@ -139,6 +139,8 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
     SDL_touchPads[index]->relative_mode = SDL_FALSE;
     SDL_touchPads[index]->flush_motion = SDL_FALSE;
     
+    SDL_touchPads[index]->xres = (1<<(16-1));
+    SDL_touchPads[index]->yres = (1<<(16-1));
     //Do I want this here? Probably
     SDL_GestureAddTouch(SDL_touchPads[index]);
 
@@ -146,7 +148,7 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
 }
 
 void
-SDL_DelTouch(long id)
+SDL_DelTouch(SDL_TouchID id)
 {
     int index = SDL_GetTouchIndexId(id);
     SDL_Touch *touch = SDL_GetTouch(id);
@@ -189,7 +191,7 @@ SDL_GetNumTouch(void)
     return SDL_num_touch;
 }
 SDL_Window *
-SDL_GetTouchFocusWindow(long id)
+SDL_GetTouchFocusWindow(SDL_TouchID id)
 {
     SDL_Touch *touch = SDL_GetTouch(id);
 
@@ -200,7 +202,7 @@ SDL_GetTouchFocusWindow(long id)
 }
 
 void
-SDL_SetTouchFocus(long id, SDL_Window * window)
+SDL_SetTouchFocus(SDL_TouchID id, SDL_Window * window)
 {
     int index = SDL_GetTouchIndexId(id);
     SDL_Touch *touch = SDL_GetTouch(id);
@@ -250,12 +252,12 @@ SDL_SetTouchFocus(long id, SDL_Window * window)
 }
 
 int 
-SDL_AddFinger(SDL_Touch* touch,SDL_Finger finger)
+SDL_AddFinger(SDL_Touch* touch,SDL_Finger *finger)
 {
     int index;
     SDL_Finger **fingers;
     //printf("Adding Finger...\n");
-    if (SDL_GetFingerIndexId(touch,finger.id) != -1) {
+    if (SDL_GetFingerIndexId(touch,finger->id) != -1) {
         SDL_SetError("Finger ID already in use");
 	}
 
@@ -282,14 +284,14 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger finger)
         SDL_OutOfMemory();
         return -1;
     }
-    *(touch->fingers[index]) = finger;
+    *(touch->fingers[index]) = *finger;
     touch->num_fingers++;
 
     return index;
 }
 
 int
-SDL_DelFinger(SDL_Touch* touch,long fingerid)
+SDL_DelFinger(SDL_Touch* touch,SDL_FingerID fingerid)
 {
     int index = SDL_GetFingerIndexId(touch,fingerid);
     SDL_Finger* finger = SDL_GetFinger(touch,fingerid);
@@ -307,7 +309,8 @@ SDL_DelFinger(SDL_Touch* touch,long fingerid)
 
 
 int
-SDL_SendFingerDown(long id, long fingerid, SDL_bool down, float x, float y, float pressure)
+SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down, 
+		   float xin, float yin, float pressurein)
 {
     int posted;
     SDL_Touch* touch = SDL_GetTouch(id);
@@ -315,11 +318,15 @@ SDL_SendFingerDown(long id, long fingerid, SDL_bool down, float x, float y, floa
     if(!touch) {
       return SDL_TouchNotFoundError(id);
     }
-
+    //scale to Integer coordinates
+    Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
+    Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
+	Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
     if(down) {
 	SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
+	SDL_Finger nf;
 	if(finger == NULL) {
-	    SDL_Finger nf;
+	    
 	    nf.id = fingerid;
 	    nf.x = x;
 	    nf.y = y;
@@ -330,11 +337,11 @@ SDL_SendFingerDown(long id, long fingerid, SDL_bool down, float x, float y, floa
 	    nf.last_y = y;
 	    nf.last_pressure = pressure;
 	    nf.down = SDL_FALSE;
-	    SDL_AddFinger(touch,nf);
+	    SDL_AddFinger(touch,&nf);
 	    finger = &nf;
 	}
 	else if(finger->down) return 0;
-	if(x < 0 || y < 0) return 0; //should defer if only a partial input
+	if(xin < touch->x_min || yin < touch->y_min) return 0; //should defer if only a partial input
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERDOWN) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -367,8 +374,8 @@ SDL_SendFingerDown(long id, long fingerid, SDL_bool down, float x, float y, floa
 }
 
 int
-SDL_SendTouchMotion(long id, long fingerid, int relative, 
-		    float x, float y, float pressure)
+SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative, 
+		    float xin, float yin, float pressurein)
 {
     int index = SDL_GetTouchIndexId(id);
     SDL_Touch *touch = SDL_GetTouch(id);
@@ -381,6 +388,12 @@ SDL_SendTouchMotion(long id, long fingerid, int relative,
     if (!touch) {
       return SDL_TouchNotFoundError(id);
     }
+
+    //scale to Integer coordinates
+    Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
+    Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
+	Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
+	printf("(%f,%f) --> (%i,%i)",xin,yin,x,y);
     if(touch->flush_motion) {
 	return 0;
     }
@@ -395,9 +408,9 @@ SDL_SendTouchMotion(long id, long fingerid, int relative,
 	    x = (finger->last_x + x);
 	    y = (finger->last_y + y);
 	} else {
-	    if(x < 0) x = finger->last_x; /*If movement is only in one axis,*/
-	    if(y < 0) y = finger->last_y; /*The other is marked as -1*/
-	    if(pressure < 0) pressure = finger->last_pressure;
+	    if(xin < touch->x_min) x = finger->last_x; /*If movement is only in one axis,*/
+	    if(yin < touch->y_min) y = finger->last_y; /*The other is marked as -1*/
+	    if(pressurein < touch->pressure_min) pressure = finger->last_pressure;
 	    xrel = x - finger->last_x;
 	    yrel = y - finger->last_y;
 	}
@@ -448,6 +461,7 @@ SDL_SendTouchMotion(long id, long fingerid, int relative,
 	    event.tfinger.fingerId = fingerid;
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
+		
 	    event.tfinger.pressure = pressure;
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
@@ -460,7 +474,7 @@ SDL_SendTouchMotion(long id, long fingerid, int relative,
     }
 }
 int
-SDL_SendTouchButton(long id, Uint8 state, Uint8 button)
+SDL_SendTouchButton(SDL_TouchID id, Uint8 state, Uint8 button)
 {
     SDL_Touch *touch = SDL_GetTouch(id);
     int posted;
@@ -509,7 +523,7 @@ SDL_SendTouchButton(long id, Uint8 state, Uint8 button)
 }
 
 char *
-SDL_GetTouchName(long id)
+SDL_GetTouchName(SDL_TouchID id)
 {
     SDL_Touch *touch = SDL_GetTouch(id);
     if (!touch) {
@@ -518,7 +532,7 @@ SDL_GetTouchName(long id)
     return touch->name;
 }
 
-int SDL_TouchNotFoundError(long id) {
+int SDL_TouchNotFoundError(SDL_TouchID id) {
   printf("ERROR: Cannot send touch on non-existent device with id: %li make sure SDL_AddTouch has been called\n",id);
   printf("ERROR: There are %i touches installed with Id's:\n",SDL_num_touch);
   int i;

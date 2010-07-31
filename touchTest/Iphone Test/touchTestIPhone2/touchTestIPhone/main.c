@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
 	  case SDL_MOUSEMOTION:
 	    mousx = event.motion.x;
 	    mousy = event.motion.y; 
-	    break;
+	    break;		
 	  case SDL_MOUSEBUTTONDOWN:
 	    bstatus |=  (1<<(event.button.button-1));
 	    break;
@@ -344,7 +344,7 @@ int main(int argc, char* argv[])
 	    break;
 	  case SDL_FINGERMOTION:    
 	    ;
-	    printf("Finger: %li,x: %f, y: %f\n",event.tfinger.fingerId,
+	    printf("Finger: %li,x: %i, y: %i\n",event.tfinger.fingerId,
 	    	   event.tfinger.x,event.tfinger.y);
 	    SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
 	    //SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
@@ -353,10 +353,8 @@ int main(int argc, char* argv[])
 		break;
 	    if(i == MAXFINGERS) break;  
 	    if(inTouch > 0) {
-	      finger[i].p.x = ((float)event.tfinger.x)/
-		inTouch->xres;
-	      finger[i].p.y = ((float)event.tfinger.y)/
-		inTouch->yres;
+	      finger[i].p.x = ((float)event.tfinger.x)/inTouch->xres;
+	      finger[i].p.y = ((float)event.tfinger.y)/inTouch->yres;
 	      
 	      finger[i].pressure = 
 		((float)event.tfinger.pressure)/inTouch->pressureres;
@@ -372,7 +370,7 @@ int main(int argc, char* argv[])
 	    
 	    break;	    
 	  case SDL_FINGERDOWN:
-	    printf("Finger: %li down - x: %f, y: %f\n",event.tfinger.fingerId,
+	    printf("Finger: %li down - x: %i, y: %i\n",event.tfinger.fingerId,
 		   event.tfinger.x,event.tfinger.y);
 
 	    for(i = 0;i<MAXFINGERS;i++) 
@@ -384,7 +382,7 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = event.tfinger.y;
 	    break;
 	  case SDL_FINGERUP:
-	    printf("Figner: %li up - x: %f, y: %f\n",event.tfinger.fingerId,
+	    printf("Figner: %li up - x: %i, y: %i\n",event.tfinger.fingerId,
 	           event.tfinger.x,event.tfinger.y);
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == event.tfinger.fingerId) {

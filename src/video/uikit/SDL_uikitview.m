@@ -58,13 +58,13 @@
 	
 	touch.x_min = 0;
 	touch.x_max = frame.size.width;
-	touch.xres = touch.x_max - touch.x_min;
+	touch.native_xres = touch.x_max - touch.x_min;
 	touch.y_min = 0;
 	touch.y_max = frame.size.height;
-	touch.yres = touch.y_max - touch.y_min;
+	touch.native_yres = touch.y_max - touch.y_min;
 	touch.pressure_min = 0;
 	touch.pressure_max = 1;
-	touch.pressureres = touch.pressure_max - touch.pressure_min;
+	touch.native_pressureres = touch.pressure_max - touch.pressure_min;
 
 
 	touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");

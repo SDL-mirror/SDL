@@ -288,15 +288,15 @@ typedef struct SDL_TouchFingerEvent
     Uint32 type;        /**< ::SDL_FINGERMOTION OR 
 			   SDL_FINGERDOWN OR SDL_FINGERUP*/
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    long touchId;        /**< The touch device id */
-    long fingerId;
+    SDL_TouchID touchId;        /**< The touch device id */
+    SDL_FingerID fingerId;
     Uint8 state;        /**< The current button state */
     Uint8 padding1;
     Uint8 padding2;
     Uint8 padding3;
-    float x;
-    float y;
-    int pressure;
+    Uint16 x;
+    Uint16 y;
+    Uint16 pressure;
 } SDL_TouchFingerEvent;
 
 
@@ -307,7 +307,7 @@ typedef struct SDL_TouchButtonEvent
 {
     Uint32 type;        /**< ::SDL_TOUCHBUTTONUP OR SDL_TOUCHBUTTONDOWN */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    long touchId;        /**< The touch device index */
+    SDL_TouchID touchId;        /**< The touch device index */
     Uint8 state;        /**< The current button state */
     Uint8 button;        /**< The button changing state */
     Uint8 padding1;
@@ -323,7 +323,7 @@ typedef struct SDL_MultiGestureEvent
 {
     Uint32 type;        /**< ::SDL_MULTIGESTURE */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    long touchId;        /**< The touch device index */
+    SDL_TouchID touchId;        /**< The touch device index */
     float dTheta;
     float dDist;
     float x;  //currently 0...1. Change to screen coords?
@@ -335,8 +335,8 @@ typedef struct SDL_DollarGestureEvent
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    long touchId;        /**< The touch device index */
-    unsigned long gestureId;
+    SDL_TouchID touchId;        /**< The touch device index */
+    SDL_GestureID gestureId;
     float error;
   /*
     //TODO: Enable to give location?

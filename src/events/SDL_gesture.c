@@ -46,7 +46,7 @@ typedef struct {
 typedef struct {
   Point p;
   float pressure;
-  int id;
+  SDL_FingerID id;
 } Finger;
 
 
@@ -71,7 +71,7 @@ typedef struct {
 } DollarTemplate;
 
 typedef struct {
-  int id;
+  SDL_GestureID id;
   Point res;
   Point centroid;
   TouchPoint gestureLast[MAXFINGERS];
@@ -87,7 +87,7 @@ GestureTouch gestureTouch[MAXTOUCHES];
 int numGestureTouches = 0;
 SDL_bool recordAll;
 
-int SDL_RecordGesture(int touchId) {
+int SDL_RecordGesture(SDL_TouchID touchId) {
   int i;
   if(touchId < 0) recordAll = SDL_TRUE;
   for(i = 0;i < numGestureTouches; i++) {
@@ -143,7 +143,7 @@ int SDL_SaveAllDollarTemplates(SDL_RWops *src) {
   return rtrn;  
 }
 
-int SDL_SaveDollarTemplate(unsigned long gestureId, SDL_RWops *src) {
+int SDL_SaveDollarTemplate(SDL_GestureID gestureId, SDL_RWops *src) {
   int i,j;
   for(i = 0; i < numGestureTouches; i++) {
     GestureTouch* touch = &gestureTouch[i];
@@ -185,7 +185,7 @@ static int SDL_AddDollarGesture(GestureTouch* inTouch,Point* path) {
   return -1;
 }
 
-int SDL_LoadDollarTemplates(int touchId, SDL_RWops *src) {
+int SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src) {
   if(src == NULL) return 0;
   int i,loaded = 0;
   GestureTouch *touch = NULL;
@@ -394,7 +394,7 @@ int SDL_GestureAddTouch(SDL_Touch* touch) {
   return 0;
 }
 
-GestureTouch * SDL_GetGestureTouch(int id) {
+GestureTouch * SDL_GetGestureTouch(SDL_TouchID id) {
   int i;
   for(i = 0;i < numGestureTouches; i++) {
     //printf("%i ?= %i\n",gestureTouch[i].id,id);
@@ -414,7 +414,8 @@ int SDL_SendGestureMulti(GestureTouch* touch,float dTheta,float dDist) {
   return SDL_PushEvent(&event) > 0;
 }
 
-int SDL_SendGestureDollar(GestureTouch* touch,int gestureId,float error) {
+int SDL_SendGestureDollar(GestureTouch* touch,
+			  SDL_GestureID gestureId,float error) {
   SDL_Event event;
   event.dgesture.type = SDL_DOLLARGESTURE;
   event.dgesture.touchId = touch->id;
@@ -429,7 +430,7 @@ int SDL_SendGestureDollar(GestureTouch* touch,int gestureId,float error) {
 }
 
 
-int SDL_SendDollarRecord(GestureTouch* touch,int gestureId) {
+int SDL_SendDollarRecord(GestureTouch* touch,SDL_GestureID gestureId) {
   SDL_Event event;
   event.dgesture.type = SDL_DOLLARRECORD;
   event.dgesture.touchId = touch->id;
@@ -489,7 +490,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 				  &bestTempl,inTouch);
 	  if(bestTempl >= 0){
 	    //Send Event
-	    int gestureId = inTouch->dollarTemplate[bestTempl].hash;
+	    unsigned long gestureId = inTouch->dollarTemplate[bestTempl].hash;
 	    SDL_SendGestureDollar(inTouch,gestureId,error);
 	    printf("Dollar error: %f\n",error);
 	  }

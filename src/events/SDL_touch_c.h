@@ -34,13 +34,13 @@ extern int SDL_TouchInit(void);
 extern SDL_Touch *SDL_GetTouchIndex(int index);
 
 /* Get the touch with id = id */
-extern SDL_Touch *SDL_GetTouch(long id);
+extern SDL_Touch *SDL_GetTouch(SDL_TouchID id);
 
 /*Get the finger at an index */
 extern SDL_Finger *SDL_GetFingerIndex(SDL_Touch *touch, int index);
 
 /* Get the finger with id = id */
-extern SDL_Finger *SDL_GetFinger(SDL_Touch *touch,long id);
+extern SDL_Finger *SDL_GetFinger(SDL_Touch *touch,SDL_FingerID id);
 
 
 /* Add a touch, possibly reattaching at a particular index (or -1),
@@ -49,30 +49,30 @@ extern int SDL_AddTouch(const SDL_Touch * touch, char *name);
                      
 
 /* Remove a touch at an index, clearing the slot for later */
-extern void SDL_DelTouch(long id);
+extern void SDL_DelTouch(SDL_TouchID id);
 
 /* Set the touch focus window */
-extern void SDL_SetTouchFocus(long id, SDL_Window * window);
+extern void SDL_SetTouchFocus(SDL_TouchID id, SDL_Window * window);
 
 /* Send a touch motion event for a touch */
-extern int SDL_SendTouchMotion(long id, long fingerid,
+extern int SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid,
 			       int relative, float x, float y, float z);
 
 /* Send a touch down/up event for a touch */
-extern int SDL_SendFingerDown(long id, long fingerid, SDL_bool down, 
-							  float x, float y, float pressure);
+extern int SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, 
+			      SDL_bool down, float x, float y, float pressure);
 
 /* Send a touch button event for a touch */
-extern int SDL_SendTouchButton(long id, Uint8 state, Uint8 button);
+extern int SDL_SendTouchButton(SDL_TouchID id, Uint8 state, Uint8 button);
 
 /* Shutdown the touch subsystem */
 extern void SDL_TouchQuit(void);
 
 /* Get the index of a touch device */
-extern int SDL_GetTouchIndexId(long id);
+extern int SDL_GetTouchIndexId(SDL_TouchID id);
 
 /* Print a debug message for a nonexistent touch */
-extern int SDL_TouchNotFoundError(long id);
+extern int SDL_TouchNotFoundError(SDL_TouchID id);
 
 #endif /* _SDL_touch_c_h */
 

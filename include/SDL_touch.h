@@ -42,15 +42,19 @@ extern "C" {
 #endif
 
 
+typedef Uint64 SDL_TouchID;
+typedef Uint64 SDL_FingerID;
+
+
 struct SDL_Finger {
-  long id;
-  float x;
-  float y;
-  float xdelta;
-  float ydelta;
-  float last_x, last_y,last_pressure;  /* the last reported coordinates */
+  SDL_FingerID id;
+  Uint16 x;
+  Uint16 y;
+  Uint16 xdelta;
+  Uint16 ydelta;
+  Uint16 last_x, last_y,last_pressure;  /* the last reported coordinates */
   SDL_bool down;
-  float pressure;
+  Uint16 pressure;
 };
 
 typedef struct SDL_Touch SDL_Touch;
@@ -66,12 +70,13 @@ struct SDL_Touch {
   float pressure_max, pressure_min;
   float x_max,x_min;
   float y_max,y_min;
-  float xres,yres,pressureres;
+  Uint16 xres,yres,pressureres;
+  float native_xres,native_yres,native_pressureres;
   float tilt;                   /* for future use */
   float rotation;               /* for future use */
   
   /* Data common to all touch */
-  long id;
+  SDL_TouchID id;
   SDL_Window *focus;
   
   char *name;
@@ -95,7 +100,7 @@ struct SDL_Touch {
  *
  *
  */
-  extern DECLSPEC SDL_Touch* SDLCALL SDL_GetTouch(long id);
+  extern DECLSPEC SDL_Touch* SDLCALL SDL_GetTouch(SDL_TouchID id);
 
 
 
@@ -104,7 +109,8 @@ struct SDL_Touch {
  *
  *
  */
-  extern DECLSPEC SDL_Finger* SDLCALL SDL_GetFinger(SDL_Touch *touch, long id);
+  extern 
+  DECLSPEC SDL_Finger* SDLCALL SDL_GetFinger(SDL_Touch *touch, SDL_FingerID id);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
