@@ -315,7 +315,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             if (SDL_AddTouch(&touch, "") < 0) {
                 continue;
             }
-	    printf("Success, added touch: %lin",touchId);
+	    printf("Success, added touch: %li\n",touchId);
         } 
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;

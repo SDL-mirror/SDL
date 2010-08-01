@@ -4,6 +4,28 @@
 #include <SDL_touch.h>
 #include <SDL_gesture.h>
 
+/* Make sure we have good macros for printing 32 and 64 bit values */
+#ifndef PRIs32
+#define PRIs32 "d"
+#endif
+#ifndef PRIu32
+#define PRIu32 "u"
+#endif
+#ifndef PRIs64
+#ifdef __WIN32__
+#define PRIs64 "I64"
+#else
+#define PRIs64 "lld"
+#endif
+#endif
+#ifndef PRIu64
+#ifdef __WIN32__
+#define PRIu64 "I64u"
+#else
+#define PRIu64 "llu"
+#endif
+#endif
+
 #define PI 3.1415926535897
 #define PHI ((sqrt(5)-1)/2)
 #define WIDTH 640
@@ -28,7 +50,7 @@ int bstatus;
 
 int colors[7] = {0xFF,0xFF00,0xFF0000,0xFFFF00,0x00FFFF,0xFF00FF,0xFFFFFF};
 
-long index2fingerid[MAXFINGERS];
+SDL_FingerID index2fingerid[MAXFINGERS];
 int fingersDown;
 
 typedef struct {
@@ -38,7 +60,7 @@ typedef struct {
 typedef struct {
   Point p;
   float pressure;
-  long id;
+  SDL_FingerID id;
 } Finger;
 
 typedef struct {
@@ -378,7 +400,7 @@ int main(int argc, char* argv[])
 	    
 	    break;	    
 	  case SDL_FINGERDOWN:
-	    printf("Finger: %li down - x: %f, y: %f\n",event.tfinger.fingerId,
+	    printf("Finger: %"PRIs64" down - x: %i, y: %i\n",event.tfinger.fingerId,
 		   event.tfinger.x,event.tfinger.y);
 
 	    for(i = 0;i<MAXFINGERS;i++) 
@@ -390,7 +412,7 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = event.tfinger.y;
 	    break;
 	  case SDL_FINGERUP:
-	    printf("Figner: %li up - x: %f, y: %f\n",event.tfinger.fingerId,
+	    printf("Finger: %"PRIs64" up - x: %i, y: %i\n",event.tfinger.fingerId,
 	           event.tfinger.x,event.tfinger.y);
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == event.tfinger.fingerId) {
@@ -407,12 +429,12 @@ int main(int argc, char* argv[])
 	    knob.r += event.mgesture.dDist;
 	    break;
 	  case SDL_DOLLARGESTURE:
-	    printf("Gesture %lu performed, error: %f\n",
+	    printf("Gesture %"PRIs64" performed, error: %f\n",
 		   event.dgesture.gestureId,
 		   event.dgesture.error);
 	    break;
 	  case SDL_DOLLARRECORD:
-	    printf("Recorded gesture: %lu\n",event.dgesture.gestureId);
+	    printf("Recorded gesture: %"PRIs64"\n",event.dgesture.gestureId);
 	    break;
 	  }
       }

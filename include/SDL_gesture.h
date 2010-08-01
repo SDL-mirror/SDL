@@ -44,7 +44,7 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-  typedef Uint64 SDL_GestureID;
+typedef Sint64 SDL_GestureID;
 
 /* Function prototypes */
 
@@ -53,7 +53,7 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_RecordGesture(SDL_TouchID touchId);
+extern DECLSPEC int SDLCALL SDL_RecordGesture(SDL_TouchID touchId);
 
 
 /**
@@ -61,15 +61,14 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC int SDLCALL SDL_SaveAllDollarTemplates(SDL_RWops *src);
+extern DECLSPEC int SDLCALL SDL_SaveAllDollarTemplates(SDL_RWops *src);
 
 /**
  *  \brief Save a currently loaded Dollar Gesture template
  *
  *
  */
-  extern DECLSPEC int 
-  SDLCALL SDL_SaveDollarTemplate(SDL_GestureID gestureId,SDL_RWops *src);
+extern DECLSPEC int SDLCALL SDL_SaveDollarTemplate(SDL_GestureID gestureId,SDL_RWops *src);
 
 
 /**
@@ -77,9 +76,7 @@ extern "C" {
  *
  *
  */
-  extern DECLSPEC 
-  int SDLCALL SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src);
-
+extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src);
 
 
 /* Ends C function definitions when using C++ */
