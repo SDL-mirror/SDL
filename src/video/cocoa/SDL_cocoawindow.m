@@ -291,14 +291,28 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
 {
-    NSSet *touches = [event touchesMatchingPhase:NSTouchPhaseBegan inView:nil];
+    NSSet *touches = 0;
+    NSEnumerator *enumerator;
+    NSTouch *touch;
 
-    NSEnumerator *enumerator = [touches objectEnumerator];
-    NSTouch *touch = (NSTouch*)[enumerator nextObject];
+    switch (type) {
+        case COCOA_TOUCH_DOWN:
+            touches = [event touchesMatchingPhase:NSTouchPhaseBegan inView:nil];
+            break;
+        case COCOA_TOUCH_UP:
+        case COCOA_TOUCH_CANCELLED:
+            touches = [event touchesMatchingPhase:NSTouchPhaseEnded inView:nil];
+            break;
+        case COCOA_TOUCH_MOVE:
+            touches = [event touchesMatchingPhase:NSTouchPhaseMoved inView:nil];
+            break;
+    }
+
+    enumerator = [touches objectEnumerator];
+    touch = (NSTouch*)[enumerator nextObject];
     while (touch) {
-        long touchId = (long)[touch device];
+        SDL_TouchID touchId = (SDL_TouchID)[touch device];
         if (!SDL_GetTouch(touchId)) {
-	  printf("Adding touch: %li\n",touchId);
             SDL_Touch touch;
 
             touch.id = touchId;
@@ -313,13 +327,12 @@ static __inline__ void ConvertNSRect(NSRect *r)
             touch.native_pressureres = touch.pressure_max - touch.pressure_min;
             
             if (SDL_AddTouch(&touch, "") < 0) {
-                continue;
+                return;
             }
-	    printf("Success, added touch: %li\n",touchId);
         } 
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
-        long fingerId = (long)[touch identity];
+        SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
         switch (type) {
         case COCOA_TOUCH_DOWN:
             SDL_SendFingerDown(touchId, fingerId, SDL_TRUE, x, y, 1);
