@@ -40,6 +40,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testdraw2", "testdraw2\test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testpower", "testpower\testpower.vcxproj", "{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testshape", "testshape\testshape.vcxproj", "{18BAE08C-319A-46DF-A7F1-1884F5040257}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -126,6 +128,10 @@ Global
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|Win32.Build.0 = Debug|Win32
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.ActiveCfg = Release|Win32
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.Build.0 = Release|Win32
+		{18BAE08C-319A-46DF-A7F1-1884F5040257}.Debug|Win32.ActiveCfg = Debug|Win32
+		{18BAE08C-319A-46DF-A7F1-1884F5040257}.Debug|Win32.Build.0 = Debug|Win32
+		{18BAE08C-319A-46DF-A7F1-1884F5040257}.Release|Win32.ActiveCfg = Release|Win32
+		{18BAE08C-319A-46DF-A7F1-1884F5040257}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
