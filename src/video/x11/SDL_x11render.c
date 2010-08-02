@@ -1021,8 +1021,9 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             return -1;
         }
         texture->blendMode = SDL_BLENDMODE_NONE;
+        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
         data->blend_op = PictOpSrc;
-        data->filter = "fast";
+        data->filter = NULL;
     }
 #endif
     return 0;
@@ -1159,6 +1160,11 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 
     switch (texture->scaleMode) {
     case SDL_TEXTURESCALEMODE_NONE:
+#ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+        if (renderdata->use_xrender) {
+            data->filter = NULL;
+        }
+#endif
         return 0;
     case SDL_TEXTURESCALEMODE_FAST:
         /* We can sort of fake it for streaming textures */
@@ -1186,8 +1192,8 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_Unsupported();
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (renderdata->use_xrender) {
-            texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
-            data->filter = FilterFast;
+            texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+            data->filter = NULL;
         }
         else
 #endif
@@ -1900,7 +1906,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         }
         else
         {
-            mask = texturedata->picture;
+            mask = src;
             mrect = srcrect;
         }
 
@@ -1919,8 +1925,8 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                             mrect->x, mrect->y, dstrect->x, dstrect->y,
                             dstrect->w, dstrect->h);
         } else {
-            double xscale = ((double) dstrect->w) / srcrect->w;
-            double yscale = ((double) dstrect->h) / srcrect->h;
+            double xscale = ((double) srcrect->w) / dstrect->w;
+            double yscale = ((double) srcrect->h) / dstrect->h;
             XTransform xform = {{
                     {XDoubleToFixed(xscale), XDoubleToFixed(0), XDoubleToFixed(0)},
                     {XDoubleToFixed(0), XDoubleToFixed(yscale), XDoubleToFixed(0)},
@@ -1937,8 +1943,10 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                      CPComponentAlpha, &attr);
             }
 
-            XRenderSetPictureFilter(data->display, src,
-                                    texturedata->filter, 0, 0);
+            if (texture->scaleMode != SDL_TEXTURESCALEMODE_NONE) {
+                XRenderSetPictureFilter(data->display, src,
+                                        texturedata->filter, 0, 0);
+            }
 
             XRenderComposite(data->display, texturedata->blend_op,
                              src, mask, data->drawable_pict,
@@ -1951,6 +1959,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                     {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1)}}};
             XRenderSetPictureTransform(data->display, src, &identity);
         }
+
         if (renderer->blendMode == SDL_BLENDMODE_MOD) {
             attr.component_alpha = False;
             XRenderChangePicture(data->display, data->stencil_pict,
