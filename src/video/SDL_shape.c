@@ -131,6 +131,9 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 				case(2):
 					pixel_value = *(Uint16*)pixel;
 					break;
+				case(3):
+					pixel_value = *(Uint32*)pixel & (~mask->format->Amask);
+					break;
 				case(4):
 					pixel_value = *(Uint32*)pixel;
 					break;

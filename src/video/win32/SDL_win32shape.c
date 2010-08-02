@@ -30,6 +30,8 @@ SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window) {
 	result->mode.mode = ShapeModeDefault;
 	result->mode.parameters.binarizationCutoff = 1;
 	result->usershownflag = 0;
+	result->driverdata = (SDL_ShapeData*)SDL_malloc(sizeof(SDL_ShapeData));
+	((SDL_ShapeData*)result->driverdata)->mask_tree = NULL;
 	//Put some driver-data here.
 	window->shaper = result;
 	resized_properly = Win32_ResizeWindowShape(window);
@@ -56,10 +58,12 @@ int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 
 	if (shaper == NULL || shape == NULL)
 		return SDL_INVALID_SHAPE_ARGUMENT;
-	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)) && shapeMode->mode != ShapeModeColorKey || shape->w != shaper->window->w || shape->h != shaper->window->h)
+	if(shape->format->Amask == 0 && shapeMode->mode != ShapeModeColorKey || shape->w != shaper->window->w || shape->h != shaper->window->h)
 		return SDL_INVALID_SHAPE_ARGUMENT;
 	
 	data = (SDL_ShapeData*)shaper->driverdata;
+	if(data->mask_tree != NULL)
+		SDL_FreeShapeTree(&data->mask_tree);
 	data->mask_tree = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
 	
 	/*
