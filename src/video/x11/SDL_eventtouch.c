@@ -24,7 +24,8 @@
 #include "SDL_eventtouch.h"
 #include "../../events/SDL_touch_c.h"
 
-#ifdef HAVE_LINUX_INPUT_H
+
+#ifdef SDL_INPUT_LINUXEV
 #include <linux/input.h>
 #include <fcntl.h>
 #endif
@@ -32,7 +33,7 @@
 void
 X11_InitTouch(_THIS)
 {
-#ifdef HAVE_LINUX_INPUT_H
+#ifdef SDL_INPUT_LINUXEV
   printf("Initializing touch...\n");
 
   FILE *fd;

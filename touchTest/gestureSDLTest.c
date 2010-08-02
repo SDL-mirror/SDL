@@ -131,7 +131,7 @@ void setpix(SDL_Surface *screen, int x, int y, unsigned int col)
   
   memcpy(&colour,pixmem32,screen->format->BytesPerPixel);
 
-  SDL_GetRGB(colour,screen->format,&r,&g,&b); //Always returns 0xFFFFFF?
+  SDL_GetRGB(colour,screen->format,&r,&g,&b);
   //r = 0;g = 0; b = 0;
   a = (col>>24)&0xFF;
   if(a == 0) a = 0xFF; //Hack, to make things easier.
@@ -400,8 +400,7 @@ int main(int argc, char* argv[])
 	    
 	    break;	    
 	  case SDL_FINGERDOWN:
-	    printf("Finger: %"PRIs64" down - x: %i, y: %i\n",event.tfinger.fingerId,
-		   event.tfinger.x,event.tfinger.y);
+	    //printf("Finger: %"PRIs64" down - x: %i, y: %i\n",event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == -1) {
@@ -412,8 +411,7 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = event.tfinger.y;
 	    break;
 	  case SDL_FINGERUP:
-	    printf("Finger: %"PRIs64" up - x: %i, y: %i\n",event.tfinger.fingerId,
-	           event.tfinger.x,event.tfinger.y);
+	    //printf("Finger: %"PRIs64" up - x: %i, y: %i\n",event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == event.tfinger.fingerId) {
 		index2fingerid[i] = -1;
@@ -423,6 +421,11 @@ int main(int argc, char* argv[])
 	    finger[i].p.y = -1;
 	    break;
 	  case SDL_MULTIGESTURE:
+	    printf("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
+		   event.mgesture.x,
+		   event.mgesture.y,
+		   event.mgesture.dTheta,
+		   event.mgesture.dDist);
 	    knob.p.x = event.mgesture.x;
 	    knob.p.y = event.mgesture.y;
 	    knob.ang += event.mgesture.dTheta;

@@ -27,7 +27,7 @@
 #include "SDL_gesture_c.h"
 
 //TODO: Replace with malloc
-#define MAXFINGERS 3
+#define MAXFINGERS 5
 #define MAXTOUCHES 2
 #define MAXTEMPLATES 4
 #define MAXPATHSIZE 1024
@@ -496,6 +496,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 	  }
 	} 
 	inTouch->gestureLast[j] = inTouch->gestureLast[inTouch->numDownFingers];
+	j = -1;
 	break;
       }
       else {

@@ -285,8 +285,6 @@ if test x$have_inttypes != xyes; then
     AC_DEFINE(uintptr_t, unsigned long)
 fi
 
-AC_CHECK_HEADER(Linux/input.h,AC_DEFINE(HAVE_LINUX_INPUT_H))
-
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
 SOURCES="$SOURCES $srcdir/src/audio/*.c"
@@ -1007,6 +1005,8 @@ CheckVisibilityHidden()
 dnl Find the X11 include and library directories
 CheckX11()
 {
+
+
     AC_ARG_ENABLE(video-x11,
 AC_HELP_STRING([--enable-video-x11], [use X11 video driver [[default=yes]]]),
                   , enable_video_x11=yes)

@@ -392,8 +392,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
     //scale to Integer coordinates
     Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
     Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
-	Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
-	printf("(%f,%f) --> (%i,%i)\n",xin,yin,x,y);
+    Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
     if(touch->flush_motion) {
 	return 0;
     }
