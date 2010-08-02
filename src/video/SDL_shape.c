@@ -27,7 +27,7 @@
 #include "SDL_pixels.h"
 #include "SDL_surface.h"
 #include "SDL_shape.h"
-#include "SDL_shape_internals.h"
+#include "../src/video/SDL_shape_internals.h"
 
 SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
 	SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,SDL_WINDOW_BORDERLESS | flags & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
@@ -57,12 +57,12 @@ SDL_bool SDL_IsShapedWindow(const SDL_Window *window) {
 }
 
 /* REQUIRES that bitmap point to a w-by-h bitmap with ppb pixels-per-byte. */
-void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb,Uint8 value) {
+void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitmap,Uint8 ppb) {
 	int x = 0;
 	int y = 0;
 	Uint8 r = 0,g = 0,b = 0,alpha = 0;
 	Uint8* pixel = NULL;
-	Uint32 bitmap_pixel,pixel_value = 0;
+	Uint32 bitmap_pixel,pixel_value = 0,mask_value = 0;
 	SDL_Color key;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
@@ -79,6 +79,9 @@ void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8*
 				case(2):
 					pixel_value = *(Uint16*)pixel;
 					break;
+				case(3):
+					pixel_value = *(Uint32*)pixel & (~shape->format->Amask);
+					break;
 				case(4):
 					pixel_value = *(Uint32*)pixel;
 					break;
@@ -87,19 +90,20 @@ void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8*
 			bitmap_pixel = y*shape->w + x;
 			switch(mode.mode) {
 				case(ShapeModeDefault):
-					bitmap[bitmap_pixel / ppb] |= (alpha >= 1 ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					mask_value = (alpha >= 1 ? 1 : 0);
 					break;
 				case(ShapeModeBinarizeAlpha):
-					bitmap[bitmap_pixel / ppb] |= (alpha >= mode.parameters.binarizationCutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					mask_value = (alpha >= mode.parameters.binarizationCutoff ? 1 : 0);
 					break;
 				case(ShapeModeReverseBinarizeAlpha):
-					bitmap[bitmap_pixel / ppb] |= (alpha <= mode.parameters.binarizationCutoff ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					mask_value = (alpha <= mode.parameters.binarizationCutoff ? 1 : 0);
 					break;
 				case(ShapeModeColorKey):
 					key = mode.parameters.colorKey;
-					bitmap[bitmap_pixel / ppb] |= ((key.r == r && key.g == g && key.b == b) ? value : 0) << ((ppb - 1) - (bitmap_pixel % ppb));
+					mask_value = ((key.r != r && key.g != g && key.b != b) ? 1 : 0);
 					break;
 			}
+			bitmap[bitmap_pixel / ppb] |= mask_value << (7 - ((ppb - 1) - (bitmap_pixel % ppb)));
 		}
 	}
 	if(SDL_MUSTLOCK(shape))

@@ -43,7 +43,7 @@ int main(int argc,char** argv) {
 	Uint8 num_pictures;
 	LoadedPicture* pictures;
 	int i, j;
-	SDL_PixelFormat* format;
+	SDL_PixelFormat* format = NULL;
 	Uint32 format_enum;
 	SDL_Window *window;
 	SDL_Color black = {0,0,0,0xff};
@@ -52,8 +52,8 @@ int main(int argc,char** argv) {
 	int should_exit = 0;
 	unsigned int current_picture;
 	int button_down;
-	Uint32 pixelFormat;
-	int access;
+	Uint32 pixelFormat = 0;
+	int access = 0;
 	SDL_Rect texture_dimensions;;
 
 	if(argc < 2) {
@@ -84,8 +84,7 @@ int main(int argc,char** argv) {
 		}
 
 		format = pictures[i].surface->format;
-		format_enum = SDL_MasksToPixelFormatEnum (format->BitsPerPixel,format->Rmask,format->Gmask, format->Bmask,format->Amask);
-		if(SDL_ISPIXELFORMAT_ALPHA(format_enum)) {
+		if(format->Amask != 0) {
 			pictures[i].mode.mode = ShapeModeBinarizeAlpha;
 			pictures[i].mode.parameters.binarizationCutoff = 1;
 		}
@@ -139,7 +138,6 @@ int main(int argc,char** argv) {
 	event_pending = SDL_PollEvent(&event);
 	current_picture = 0;
 	button_down = 0;
-	format = 0,access = 0;
 	texture_dimensions.h = 0;
 	texture_dimensions.w = 0;
 	texture_dimensions.x = 0;
