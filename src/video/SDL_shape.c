@@ -27,7 +27,7 @@
 #include "SDL_pixels.h"
 #include "SDL_surface.h"
 #include "SDL_shape.h"
-#include "../src/video/SDL_shape_internals.h"
+#include "SDL_shape_internals.h"
 
 SDL_Window* SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
 	SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,SDL_WINDOW_BORDERLESS | flags & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
