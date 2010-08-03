@@ -363,6 +363,33 @@ SDL_wcslen(const wchar_t * string)
 }
 #endif
 
+#ifndef HAVE_WCSLCPY
+size_t
+SDL_wcslcpy(wchar_t *dst, const wchar_t *src, size_t maxlen)
+{
+    size_t srclen = SDL_wcslen(src);
+    if (maxlen > 0) {
+        size_t len = SDL_min(srclen, maxlen - 1);
+        SDL_memcpy(dst, src, len * sizeof(wchar_t));
+        dst[len] = '\0';
+    }
+    return srclen;
+}
+#endif
+
+#ifndef HAVE_WCSLCAT
+size_t
+SDL_wcslcat(wchar_t *dst, const wchar_t *src, size_t maxlen)
+{
+    size_t dstlen = SDL_wcslen(dst);
+    size_t srclen = SDL_wcslen(src);
+    if (dstlen < maxlen) {
+        SDL_wcslcpy(dst + dstlen, src, maxlen - dstlen);
+    }
+    return dstlen + srclen;
+}
+#endif
+
 #ifndef HAVE_STRLCPY
 size_t
 SDL_strlcpy(char *dst, const char *src, size_t maxlen)
