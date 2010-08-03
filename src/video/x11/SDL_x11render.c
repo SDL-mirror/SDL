@@ -1938,7 +1938,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             XTransform xform = {{
                     {XDoubleToFixed(xscale), XDoubleToFixed(0), XDoubleToFixed(0)},
                     {XDoubleToFixed(0), XDoubleToFixed(yscale), XDoubleToFixed(0)},
-                    {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(xscale * yscale)}}};
+                    {XDoubleToFixed(0), XDoubleToFixed(0), XDoubleToFixed(1)}}};
             XRenderSetPictureTransform(data->display, src, &xform);
             
             /* Black magic follows. */
