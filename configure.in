@@ -1039,6 +1039,8 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     xrandr_lib='/usr/X11R6/lib/libXrandr.2.dylib'
                     xinput_lib='/usr/X11R6/lib/libXi.6.dylib'
                     xss_lib='/usr/X11R6/lib/libXss.6.dylib'
+                    xdamage_lib='/usr/X11R6/lib/libXdamage.1.dylib'
+                    xfixes_lib='/usr/X11R6/lib/libXfixes.3.dylib'
                     ;;
                 *-*-osf*)
                     x11_lib='libX11.so'
