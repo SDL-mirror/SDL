@@ -33,6 +33,8 @@
 #define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
 #include <windows.h>
 
+#include <msctf.h>
+
 #if SDL_VIDEO_RENDER_D3D
 //#include <d3d9.h>
 #define D3D_DEBUG_INFO
@@ -53,6 +55,7 @@
 #include "SDL_win32mouse.h"
 #include "SDL_win32opengl.h"
 #include "SDL_win32window.h"
+#include "SDL_events.h"
 
 #ifdef UNICODE
 #define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "UCS-2", (char *)S, (SDL_wcslen(S)+1)*sizeof(WCHAR))
@@ -62,6 +65,37 @@
 #define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
 #endif
 extern void WIN_SetError(const char *prefix);
+
+typedef struct  
+{
+    void **lpVtbl;
+    int refcount;
+    void *data;
+} TSFSink;
+
+// Definition from Win98DDK version of IMM.H
+typedef struct tagINPUTCONTEXT2 {
+    HWND                hWnd;                           
+    BOOL                fOpen;                          
+    POINT               ptStatusWndPos;                 
+    POINT               ptSoftKbdPos;                   
+    DWORD               fdwConversion;                  
+    DWORD               fdwSentence;                    
+    union   {                                           
+        LOGFONTA        A;                              
+        LOGFONTW        W;                              
+    } lfFont;                                           
+    COMPOSITIONFORM     cfCompForm;                     
+    CANDIDATEFORM       cfCandForm[4];                  
+    HIMCC               hCompStr;                       
+    HIMCC               hCandInfo;                      
+    HIMCC               hGuideLine;                     
+    HIMCC               hPrivate;                       
+    DWORD               dwNumMsgBuf;                    
+    HIMCC               hMsgBuf;                        
+    DWORD               fdwInit;                        
+    DWORD               dwReserve[3];                   
+} INPUTCONTEXT2, *PINPUTCONTEXT2, NEAR *NPINPUTCONTEXT2, FAR *LPINPUTCONTEXT2;  
 
 /* Private display data */
 
@@ -80,7 +114,7 @@ typedef struct SDL_VideoData
     DWORD clipboard_count;
 
     SDL_bool ime_com_initialized;
-    struct ITfThreadMgr *ime_thread_mgr;
+    struct ITfThreadMgr *ime_threadmgr;
     SDL_bool ime_initialized;
     SDL_bool ime_enabled;
     SDL_bool ime_available;
@@ -88,6 +122,27 @@ typedef struct SDL_VideoData
     HWND ime_hwnd_current;
     HIMC ime_himc;
 
+    WCHAR ime_composition[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
+    WCHAR ime_readingstring[16];
+    int ime_cursor;
+
+    HKL ime_hkl;
+    HMODULE ime_himm32;
+    UINT (WINAPI *GetReadingString)(HIMC himc, UINT uReadingBufLen, LPWSTR lpwReadingBuf, PINT pnErrorIndex, BOOL *pfIsVertical, PUINT puMaxReadingLen);
+    BOOL (WINAPI *ShowReadingWindow)(HIMC himc, BOOL bShow);
+    LPINPUTCONTEXT2 (WINAPI *ImmLockIMC)(HIMC himc);
+    BOOL (WINAPI *ImmUnlockIMC)(HIMC himc);
+    LPVOID (WINAPI *ImmLockIMCC)(HIMCC himcc);
+    BOOL (WINAPI *ImmUnlockIMCC)(HIMCC himcc);
+
+    SDL_bool ime_uiless;
+    struct ITfThreadMgrEx *ime_threadmgrex;
+    DWORD ime_uielemsinkcookie;
+    DWORD ime_alpnsinkcookie;
+    DWORD ime_openmodesinkcookie;
+    DWORD ime_convmodesinkcookie;
+    TSFSink *ime_uielemsink;
+    TSFSink *ime_ippasink;
 } SDL_VideoData;
 
 #endif /* _SDL_win32video_h */
