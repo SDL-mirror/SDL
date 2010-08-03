@@ -117,17 +117,12 @@ static int SaveTemplate(DollarTemplate *templ, SDL_RWops * src) {
   int i;
   
   //No Longer storing the Hash, rehash on load
-  //fprintf(fp,"%lu ",templ->hash);
   //if(SDL_RWops.write(src,&(templ->hash),sizeof(templ->hash),1) != 1) return 0;
-  
-  /*
-  for(i = 0;i < DOLLARNPOINTS;i++) {
-    fprintf(fp,"%i %i ",(int)templ->path[i].x,(int)templ->path[i].y);
-  }
-  fprintf(fp,"\n");
 
-  */
-  if(SDL_RWwrite(src,templ->path,sizeof(templ->path[0]),DOLLARNPOINTS) != DOLLARNPOINTS) return 0;
+  if(SDL_RWwrite(src,templ->path,
+		 sizeof(templ->path[0]),DOLLARNPOINTS) != DOLLARNPOINTS) 
+    return 0;
+
   return 1;
 }
 
@@ -499,7 +494,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 	j = -1;
 	break;
       }
-      else {
+      else if(event->type == SDL_FINGERMOTION) {
 	float dx = x - inTouch->gestureLast[j].f.p.x;
 	float dy = y - inTouch->gestureLast[j].f.p.y;
 	DollarPath* path = &inTouch->gestureLast[j].dollarPath;

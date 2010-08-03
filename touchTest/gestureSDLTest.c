@@ -240,19 +240,10 @@ void DrawScreen(SDL_Surface* screen, int h)
 	drawCircle(screen,x*screen->w,y*screen->h,5,col);
       else if(event.type == SDL_FINGERDOWN)
 	drawCircle(screen,x*screen->w,y*screen->h,-10,col);     
-      /*      
-      //if there is a centroid, draw it
-      if(numDownFingers > 1) {
-	unsigned int col = 
-	  ((unsigned int)(0xFFFFFF)) |
-	  ((unsigned int)((0xFF*(1-((float)age)/EVENT_BUF_SIZE))) & 0xFF)<<24;
-	drawCircle(screen,centroid.x*screen->w,centroid.y*screen->h,5,col);
-      }
-      */
     }
   }
   
-
+  /*
   for(i=0;i<MAXFINGERS;i++)
     if(finger[i].p.x >= 0 && finger[i].p.y >= 0)
       if(finger[i].pressure > 0)
@@ -261,7 +252,7 @@ void DrawScreen(SDL_Surface* screen, int h)
       else
 	drawCircle(screen,finger[i].p.x*screen->w,finger[i].p.y*screen->h
 		   ,20,0xFF);
-
+  */
 
   
   keystat[32] = 0;
@@ -375,7 +366,7 @@ int main(int argc, char* argv[])
 	    //	   event.tfinger.x,event.tfinger.y);
 	    SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
 	    SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
-
+	    /*
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == event.tfinger.fingerId) 	      
 		break;
@@ -388,6 +379,7 @@ int main(int argc, char* argv[])
 	      
 	      finger[i].pressure = 
 		((float)event.tfinger.pressure)/inTouch->pressureres;
+	    */
 	      /*
 	      printf("Finger: %i, Pressure: %f Pressureres: %i\n",
 		     event.tfinger.fingerId,
@@ -396,12 +388,12 @@ int main(int argc, char* argv[])
 	      */
 	      //printf("Finger: %i, pressure: %f\n",event.tfinger.fingerId,
 	      //   finger[event.tfinger.fingerId].pressure);
-	    }
+	    //}
 	    
 	    break;	    
 	  case SDL_FINGERDOWN:
 	    //printf("Finger: %"PRIs64" down - x: %i, y: %i\n",event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
-
+	    /*
 	    for(i = 0;i<MAXFINGERS;i++) 
 	      if(index2fingerid[i] == -1) {
 		index2fingerid[i] = event.tfinger.fingerId;
@@ -419,6 +411,7 @@ int main(int argc, char* argv[])
 	      }
 	    finger[i].p.x = -1;
 	    finger[i].p.y = -1;
+	    */
 	    break;
 	  case SDL_MULTIGESTURE:
 	    printf("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
