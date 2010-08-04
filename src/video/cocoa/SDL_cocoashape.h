@@ -28,8 +28,7 @@
 #include "SDL_stdinc.h"
 #include "SDL_video.h"
 #include "SDL_shape.h"
-#include "SDL_shape_internals.h"
-#include "../SDL_sysvideo.h"
+#include "../SDL_shape_internals.h"
 
 typedef struct {
 	NSGraphicsContext* context;

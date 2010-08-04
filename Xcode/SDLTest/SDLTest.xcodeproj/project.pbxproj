@@ -609,6 +609,8 @@
 		00794F0B09D238F4003FC8A1 /* sample.bmp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 00794E6109D20839003FC8A1 /* sample.bmp */; };
 		00794F1109D2392B003FC8A1 /* icon.bmp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 00794E5D09D20839003FC8A1 /* icon.bmp */; };
 		00794F8709D2413B003FC8A1 /* sample.bmp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 00794E6109D20839003FC8A1 /* sample.bmp */; };
+		4537749F12091551002F0F45 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
+		453774A5120915E3002F0F45 /* testshape.c in Sources */ = {isa = PBXBuildFile; fileRef = 453774A4120915E3002F0F45 /* testshape.c */; };
 		BEC566B10761D90300A33029 /* checkkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D10FFB30A2C7F000001 /* checkkeys.c */; };
 		BEC566BE0761D90300A33029 /* graywin.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D1BFFB30C237F000001 /* graywin.c */; };
 		BEC566CB0761D90300A33029 /* loopwave.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4872006D84C97F000001 /* loopwave.c */; };
@@ -1178,6 +1180,20 @@
 			remoteGlobalIDString = BECDF6C30761BA81005FE872;
 			remoteInfo = "Devel Extras Package";
 		};
+		4537747F120914AE002F0F45 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 003FA63A093FFD41000C53B3 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 00D8D9EF1195090700638393 /* testsdl.app */;
+			remoteInfo = testsdl;
+		};
+		4537749D1209152D002F0F45 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BEC567F70761D90600A33029 /* sdlcommon */;
+			remoteInfo = sdlcommon;
+		};
 		BEC568300761D90600A33029 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -1551,6 +1567,9 @@
 		092D6D62FFB312AA7F000001 /* testjoystick.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testjoystick.c; path = ../../test/testjoystick.c; sourceTree = SOURCE_ROOT; };
 		092D6D6CFFB313437F000001 /* testkeys.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testkeys.c; path = ../../test/testkeys.c; sourceTree = SOURCE_ROOT; };
 		092D6D75FFB313BB7F000001 /* testlock.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testlock.c; path = ../../test/testlock.c; sourceTree = SOURCE_ROOT; };
+		4537749212091504002F0F45 /* testshape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testshape.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4537749412091505002F0F45 /* testshape-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testshape-Info.plist"; sourceTree = "<group>"; };
+		453774A4120915E3002F0F45 /* testshape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testshape.c; path = ../../test/testshape.c; sourceTree = SOURCE_ROOT; };
 		B207FF2404E1B19600A80002 /* sdlcommon_prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdlcommon_prefix.h; sourceTree = "<group>"; };
 		BEC566B60761D90300A33029 /* checkkeys.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = checkkeys.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC566C30761D90300A33029 /* graywin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = graywin.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1992,6 +2011,14 @@
 				002A872D10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A875210730677007319AE /* Carbon.framework in Frameworks */,
 				001794DB107366A700F5D044 /* libSDL.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4537749012091504002F0F45 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4537749F12091551002F0F45 /* libsdlcommon.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2468,6 +2495,7 @@
 				003FA645093FFD41000C53B3 /* libSDL.a */,
 				003FA649093FFD41000C53B3 /* Standard DMG */,
 				003FA64B093FFD41000C53B3 /* Developer Extras Package */,
+				45377480120914AE002F0F45 /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2495,6 +2523,7 @@
 				002F33A209CA183B00EBEB88 /* Linked Frameworks */,
 				00794E4609D207B4003FC8A1 /* Resources */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				4537749412091505002F0F45 /* testshape-Info.plist */,
 			);
 			comments = "I made these tests link against our \"default\" framework which includes X11 stuff. If you didn't install the X11 headers with Xcode, you might have problems building the SDL.framework (which is a dependency). You can swap the dependencies around to get around this, or you can modify the default SDL.framework target to not include X11 stuff. (Go into its target build options and remove all the Preprocessor macros.)\n\n\n\nWe are sort of in a half-way state at the moment. Going \"all-the-way\" means we copy the SDL.framework inside the app bundle so we can run the test without the step of the user \"installing\" the framework. But there is an oversight/bug in Xcode that doesn't correctly find the location of the framework when in an embedded/nested Xcode project. We could probably try to hack this with a shell script that checks multiple directories for existence, but this is messier and more work than I prefer, so I rather just wait for Apple to fix this. In the meantime...\n\nThe \"All\" target will build the SDL framework from the Xcode project. The other targets do not have this dependency set (for flexibility reasons in case we make changes). If you have not built the framework, you will probably be unable to link. You will either need to build the framework, or you need to add \"-framework SDL\" to the link options and make sure you have the SDL.framework installed somewhere where it can be seen (like /Library/Frameworks...I think we already set this one up.) \n\nTo run though, you should have a copy of the SDL.framework in /Library/Frameworks or ~/Library/Frameworks.\n\n\n\n\ntestgl and testdyngl need -DHAVE_OPENGL\ntestgl needs to link against OpenGL.framework\n\n";
 			name = SDLTest;
@@ -2543,6 +2572,7 @@
 				001798B910743A4900F5D044 /* testpower.c */,
 				001798F910743E9200F5D044 /* testresample.c */,
 				083E487E006D86A17F000001 /* testsem.c */,
+				453774A4120915E3002F0F45 /* testshape.c */,
 				083E487F006D86A17F000001 /* testsprite.c */,
 				0017991910743F5300F5D044 /* testsprite2.c */,
 				083E4880006D86A17F000001 /* testtimer.c */,
@@ -2608,6 +2638,7 @@
 				001798F210743BEC00F5D044 /* testresample.app */,
 				0017991610743F1000F5D044 /* testsprite2.app */,
 				0017993810743FB700F5D044 /* testwm2.app */,
+				4537749212091504002F0F45 /* testshape.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -3421,6 +3452,24 @@
 			productReference = 002F346A09CA204F00EBEB88 /* testplatform.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4537749112091504002F0F45 /* testshape */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4537749A1209150C002F0F45 /* Build configuration list for PBXNativeTarget "testshape" */;
+			buildPhases = (
+				4537748E12091504002F0F45 /* Resources */,
+				4537748F12091504002F0F45 /* Sources */,
+				4537749012091504002F0F45 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4537749E1209152D002F0F45 /* PBXTargetDependency */,
+			);
+			name = testshape;
+			productName = testshape;
+			productReference = 4537749212091504002F0F45 /* testshape.app */;
+			productType = "com.apple.product-type.application";
+		};
 		BEC566AB0761D90300A33029 /* checkkeys */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 001B593808BDB826006539E9 /* Build configuration list for PBXNativeTarget "checkkeys" */;
@@ -3996,6 +4045,7 @@
 				BEC567EA0761D90600A33029 /* torturethread */,
 				BEC567F70761D90600A33029 /* sdlcommon */,
 				002F337009CA14F900EBEB88 /* test */,
+				4537749112091504002F0F45 /* testshape */,
 			);
 		};
 /* End PBXProject section */
@@ -4027,6 +4077,13 @@
 			fileType = "compiled.mach-o.executable";
 			path = "Developer Extras Package";
 			remoteRef = 003FA64A093FFD41000C53B3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		45377480120914AE002F0F45 /* testsdl.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = testsdl.app;
+			remoteRef = 4537747F120914AE002F0F45 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -4187,6 +4244,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		002F345D09CA204F00EBEB88 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4537748E12091504002F0F45 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4558,6 +4622,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				002F347009CA20A600EBEB88 /* testplatform.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4537748F12091504002F0F45 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				453774A5120915E3002F0F45 /* testshape.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5113,6 +5185,11 @@
 			isa = PBXTargetDependency;
 			target = BEC567F70761D90600A33029 /* sdlcommon */;
 			targetProxy = 002F345B09CA204F00EBEB88 /* PBXContainerItemProxy */;
+		};
+		4537749E1209152D002F0F45 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BEC567F70761D90600A33029 /* sdlcommon */;
+			targetProxy = 4537749D1209152D002F0F45 /* PBXContainerItemProxy */;
 		};
 		BEC568310761D90600A33029 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -7643,6 +7720,112 @@
 			};
 			name = Default;
 		};
+		4537749512091509002F0F45 /* Deployment_using_10.4SDK_and_10.6SDK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "testshape-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testshape;
+				RUN_CLANG_STATIC_ANALYZER = YES;
+			};
+			name = Deployment_using_10.4SDK_and_10.6SDK;
+		};
+		4537749612091509002F0F45 /* Development_using_10.4SDK_and_10.6SDK */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "testshape-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testshape;
+			};
+			name = Development_using_10.4SDK_and_10.6SDK;
+		};
+		4537749712091509002F0F45 /* Development_native_only */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "testshape-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testshape;
+			};
+			name = Development_native_only;
+		};
+		4537749812091509002F0F45 /* Deployment_native_only */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "testshape-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testshape;
+			};
+			name = Deployment_native_only;
+		};
+		4537749912091509002F0F45 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "testshape-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = testshape;
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -8242,6 +8425,18 @@
 				002A85C71073008E007319AE /* Development_native_only */,
 				002A85E91073009D007319AE /* Deployment_native_only */,
 				002F346909CA204F00EBEB88 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		4537749A1209150C002F0F45 /* Build configuration list for PBXNativeTarget "testshape" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4537749512091509002F0F45 /* Deployment_using_10.4SDK_and_10.6SDK */,
+				4537749612091509002F0F45 /* Development_using_10.4SDK_and_10.6SDK */,
+				4537749712091509002F0F45 /* Development_native_only */,
+				4537749812091509002F0F45 /* Deployment_native_only */,
+				4537749912091509002F0F45 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
