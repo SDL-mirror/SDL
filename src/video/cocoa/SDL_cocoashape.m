@@ -49,6 +49,23 @@ SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
 	return result;
 }
 
+typedef struct {
+	NSBezierPath* clipPath;
+	SDL_Window* window;
+} SDL_PathConglomeration;
+
+NSRect convert_rect(SDL_Rect rect,SDL_Window* window) {
+	NSRect nsrect = NSMakeRect(rect.x,window->h-(rect.y+rect.h),rect.w,rect.h);
+	return [[((SDL_WindowData*)window->driverdata)->nswindow contentView] convertRectFromBase:nsrect];
+}
+
+void ConglomerateShapeTree(SDL_ShapeTree* tree,SDL_PathConglomeration cong) {
+	if(tree->kind == OpaqueShape) {
+		NSRect rect = convert_rect(tree->data.shape,cong->window);
+		[cong->clipPath appendBezierPathWithRect:rect];
+	}
+}
+
 int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
 	SDL_ShapeData* data = (SDL_ShapeData*)shaper->driverdata;
 	if(data->saved == SDL_TRUE) {
@@ -59,10 +76,17 @@ int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	[data->context saveGraphicsState];
 	data->saved = SDL_TRUE;
 	
-	[[NSColor clearColor] set];
-	NSRectFill([[((SDL_WindowData*)shaper->window->driverdata)->nswindow contentView] frame]);
+	//[[NSColor clearColor] set];
+	//NSRectFill([[((SDL_WindowData*)shaper->window->driverdata)->nswindow contentView] frame]);
 	/* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
            Windoze shape-calculation code: a list of rectangles.  This will work... I think. */
+	NSBezierPath* clipPath = [NSBezierPath bezierPath];
+	
+	SDL_PathConglomeration cong = {clipPath,shaper->window};
+	
+	SDL_TraverseShapeTree(data->shape,&ConglomerateShapeTree,cong);
+	
+	[clipPath addClip];
 }
 
 int Cocoa_ResizeWindowShape(SDL_Window *window) {
