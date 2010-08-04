@@ -59,7 +59,7 @@ NSRect convert_rect(SDL_Rect rect,SDL_Window* window) {
 	return [[((SDL_WindowData*)window->driverdata)->nswindow contentView] convertRectFromBase:nsrect];
 }
 
-void ConglomerateShapeTree(SDL_ShapeTree* tree,SDL_PathConglomeration cong) {
+void ConglomerateShapeTree(SDL_ShapeTree* tree,SDL_PathConglomeration* cong) {
 	if(tree->kind == OpaqueShape) {
 		NSRect rect = convert_rect(tree->data.shape,cong->window);
 		[cong->clipPath appendBezierPathWithRect:rect];
@@ -84,7 +84,7 @@ int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	
 	SDL_PathConglomeration cong = {clipPath,shaper->window};
 	
-	SDL_TraverseShapeTree(data->shape,&ConglomerateShapeTree,cong);
+	SDL_TraverseShapeTree(data->shape,(SDL_TraversalFunction)&ConglomerateShapeTree,(void*)&cong);
 	
 	[clipPath addClip];
 }
