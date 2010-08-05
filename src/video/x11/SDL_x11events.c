@@ -439,8 +439,8 @@ X11_PumpEvents(_THIS)
 			    if(data->pressure < 0) data->pressure = 0;
 			    break;
 			case ABS_MISC:
-			    data->up = SDL_TRUE;
-			    data->finger = ev[i].value;
+			    if(ev[i].value == 0)
+			        data->up = SDL_TRUE;			    
 			    break;
 			}
 		    break;
@@ -453,22 +453,22 @@ X11_PumpEvents(_THIS)
 		  if(data->up) {
 		      SDL_SendFingerDown(touch->id,data->finger,
 			  	       SDL_FALSE,data->x,data->y,
-				       data->pressure);
+				       data->pressure);		    
 		  }
 		  else if(data->x >= 0 || data->y >= 0)
-		      SDL_SendTouchMotion(touch->id,data->finger, 
+		    SDL_SendTouchMotion(touch->id,data->finger, 
 					SDL_FALSE,data->x,data->y,
-					    data->pressure);
+					data->pressure);
 		  
 		    //printf("Synched: %i tx: %i, ty: %i\n",
 		    //	   data->finger,data->x,data->y);
-		    data->x = -1;
-		    data->y = -1;
-		    data->pressure = -1;
-		    data->finger = 0;
-		    data->up = SDL_FALSE;
+		  data->x = -1;
+		  data->y = -1;
+		  data->pressure = -1;
+		  data->finger = 0;
+		  data->up = SDL_FALSE;
 		    
-		    break;		
+		  break;		
 		}
 	    }
 	}

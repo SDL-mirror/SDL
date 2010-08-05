@@ -318,15 +318,17 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
     if(!touch) {
       return SDL_TouchNotFoundError(id);
     }
+
+    
     //scale to Integer coordinates
     Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
     Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
-	Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
+    Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
+    
+    SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
     if(down) {
-	SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
-	SDL_Finger nf;
 	if(finger == NULL) {
-	    
+	    SDL_Finger nf;
 	    nf.id = fingerid;
 	    nf.x = x;
 	    nf.y = y;
@@ -337,8 +339,8 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 	    nf.last_y = y;
 	    nf.last_pressure = pressure;
 	    nf.down = SDL_FALSE;
-	    SDL_AddFinger(touch,&nf);
-	    finger = &nf;
+	    if(SDL_AddFinger(touch,&nf) < 0) return 0;
+	    finger = SDL_GetFinger(touch,fingerid);
 	}
 	else if(finger->down) return 0;
 	if(xin < touch->x_min || yin < touch->y_min) return 0; //should defer if only a partial input
@@ -358,7 +360,7 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 	return posted;
     }
     else {
-	if(SDL_DelFinger(touch,fingerid) < 0) return 0;
+        if(finger == NULL) {printf("Finger not found...\n");return 0;}      
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERUP) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -367,8 +369,15 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
 	    event.tfinger.fingerId = fingerid;
+	    //I don't trust the coordinates passed on fingerUp
+	    event.tfinger.x = finger->x; 
+	    event.tfinger.y = finger->y;
+	    event.tfinger.dx = 0;
+	    event.tfinger.dy = 0;
+
+	    if(SDL_DelFinger(touch,fingerid) < 0) return 0;
 	    posted = (SDL_PushEvent(&event) > 0);
-	}
+	}	
 	return posted;
     }
 }
@@ -381,8 +390,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
     SDL_Touch *touch = SDL_GetTouch(id);
     SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
     int posted;
-    float xrel;
-    float yrel;
+    Sint16 xrel, yrel;
     float x_max = 0, y_max = 0;
     
     if (!touch) {
@@ -398,7 +406,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
     }
     
     if(finger == NULL || !finger->down) {
-	return SDL_SendFingerDown(id,fingerid,SDL_TRUE,x,y,pressure);	
+	return SDL_SendFingerDown(id,fingerid,SDL_TRUE,xin,yin,pressurein);	
     } else {
 	/* the relative motion is calculated regarding the last position */
 	if (relative) {
@@ -412,6 +420,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
 	    if(pressurein < touch->pressure_min) pressure = finger->last_pressure;
 	    xrel = x - finger->last_x;
 	    yrel = y - finger->last_y;
+	    //printf("xrel,yrel (%i,%i)\n",(int)xrel,(int)yrel);
 	}
 	
 	/* Drop events that don't change state */
@@ -460,6 +469,9 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
 	    event.tfinger.fingerId = fingerid;
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
+	    event.tfinger.dx = xrel;
+	    event.tfinger.dy = yrel;
+	    
 		
 	    event.tfinger.pressure = pressure;
 	    event.tfinger.state = touch->buttonstate;

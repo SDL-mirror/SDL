@@ -61,6 +61,14 @@ X11_InitTouch(_THIS)
 
 	touch.driverdata = SDL_malloc(sizeof(EventTouchData));
 	EventTouchData* data = (EventTouchData*)(touch.driverdata);
+
+	data->x = -1;
+	data->y = -1;
+	data->pressure = -1;
+	data->finger = 0;
+	data->up = SDL_FALSE;
+	
+
 	printf("Opening device...\n");
 	//printf("New Touch - DataPtr: %i\n",data);
 	data->eventStream = open(tstr, 

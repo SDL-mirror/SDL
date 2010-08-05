@@ -75,7 +75,7 @@ typedef struct {
   Point res;
   Point centroid;
   TouchPoint gestureLast[MAXFINGERS];
-  int numDownFingers;
+  Uint16 numDownFingers;
 
   int numDollarTemplates;
   DollarTemplate dollarTemplate[MAXTEMPLATES];
@@ -406,6 +406,7 @@ int SDL_SendGestureMulti(GestureTouch* touch,float dTheta,float dDist) {
   event.mgesture.y = touch->centroid.y;
   event.mgesture.dTheta = dTheta;
   event.mgesture.dDist = dDist;  
+  event.mgesture.numFingers = touch->numDownFingers;
   return SDL_PushEvent(&event) > 0;
 }
 
@@ -441,140 +442,161 @@ void SDL_GestureProcessEvent(SDL_Event* event)
      event->type == SDL_FINGERDOWN ||
      event->type == SDL_FINGERUP) {
     GestureTouch* inTouch = SDL_GetGestureTouch(event->tfinger.touchId);
-
+    
     //Shouldn't be possible
     if(inTouch == NULL) return;
     
+    //printf("@ (%i,%i) with res: (%i,%i)\n",(int)event->tfinger.x,
+    //	   (int)event->tfinger.y,
+    //   (int)inTouch->res.x,(int)inTouch->res.y);
+
     
-    float x = ((float)event->tfinger.x)/inTouch->res.x;
-    float y = ((float)event->tfinger.y)/inTouch->res.y;
-    int j,empty = -1;
-    
-    for(j = 0;j<inTouch->numDownFingers;j++) {
-      if(inTouch->gestureLast[j].f.id != event->tfinger.fingerId) continue;
-      //Finger Up
-      if(event->type == SDL_FINGERUP) {
-	inTouch->numDownFingers--;
-
-	if(inTouch->recording) {
-	  inTouch->recording = SDL_FALSE;
-	  Point path[DOLLARNPOINTS];
-	  dollarNormalize(inTouch->gestureLast[j].dollarPath,path);
-	  int index;
-	  if(recordAll) {
-	    index = SDL_AddDollarGesture(NULL,path);
-	    int i;
-	    for(i = 0;i < numGestureTouches; i++)
-	      gestureTouch[i].recording = SDL_FALSE;
-	  }
-	  else {
-	    index = SDL_AddDollarGesture(inTouch,path);
-	  }
-	  
-	  if(index >= 0) {
-	    SDL_SendDollarRecord(inTouch,inTouch->dollarTemplate[index].hash);
-	  }
-	  else {
-	    SDL_SendDollarRecord(inTouch,-1);
-	  }
-	}
-	else {	
-	  int bestTempl;
-	  float error;
-	  error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
-				  &bestTempl,inTouch);
-	  if(bestTempl >= 0){
-	    //Send Event
-	    unsigned long gestureId = inTouch->dollarTemplate[bestTempl].hash;
-	    SDL_SendGestureDollar(inTouch,gestureId,error);
-	    printf("Dollar error: %f\n",error);
-	  }
-	} 
-	inTouch->gestureLast[j] = inTouch->gestureLast[inTouch->numDownFingers];
-	j = -1;
-	break;
-      }
-      else if(event->type == SDL_FINGERMOTION) {
-	float dx = x - inTouch->gestureLast[j].f.p.x;
-	float dy = y - inTouch->gestureLast[j].f.p.y;
-	DollarPath* path = &inTouch->gestureLast[j].dollarPath;
-	if(path->numPoints < MAXPATHSIZE) {
-	  path->p[path->numPoints].x = x;
-	  path->p[path->numPoints].y = y;
-	  path->length += sqrt(dx*dx + dy*dy);
-	  path->numPoints++;
-	}
+    float x = ((float)event->tfinger.x)/(float)inTouch->res.x;
+    float y = ((float)event->tfinger.y)/(float)inTouch->res.y;   
 
 
-	inTouch->centroid.x += dx/inTouch->numDownFingers;
-	inTouch->centroid.y += dy/inTouch->numDownFingers;    
-	if(inTouch->numDownFingers > 1) {
-	  Point lv; //Vector from centroid to last x,y position
-	  Point v; //Vector from centroid to current x,y position
-	  lv = inTouch->gestureLast[j].cv;
-	  float lDist = sqrt(lv.x*lv.x + lv.y*lv.y);
-	  //printf("lDist = %f\n",lDist);
-	  v.x = x - inTouch->centroid.x;
-	  v.y = y - inTouch->centroid.y;
-	  inTouch->gestureLast[j].cv = v;
-	  float Dist = sqrt(v.x*v.x+v.y*v.y);
-	  // cos(dTheta) = (v . lv)/(|v| * |lv|)
-	  
-	  //Normalize Vectors to simplify angle calculation
-	  lv.x/=lDist;
-	  lv.y/=lDist;
-	  v.x/=Dist;
-	  v.y/=Dist;
-	  float dtheta = atan2(lv.x*v.y - lv.y*v.x,lv.x*v.x + lv.y*v.y);
-	  
-	  float dDist = (Dist - lDist);
-	  if(lDist == 0) {dDist = 0;dtheta = 0;} //To avoid impossible values
-	  inTouch->gestureLast[j].dDist = dDist;
-	  inTouch->gestureLast[j].dtheta = dtheta;
-	  
-	  //printf("dDist = %f, dTheta = %f\n",dDist,dtheta);
-	  //gdtheta = gdtheta*.9 + dtheta*.1;
-	  //gdDist  =  gdDist*.9 +  dDist*.1
-	  //knob.r += dDist/numDownFingers;
-	  //knob.ang += dtheta;
-	  //printf("thetaSum = %f, distSum = %f\n",gdtheta,gdDist);
-	  //printf("id: %i dTheta = %f, dDist = %f\n",j,dtheta,dDist);
-	  SDL_SendGestureMulti(inTouch,dtheta,dDist);
+    //Finger Up
+    if(event->type == SDL_FINGERUP) {
+      inTouch->numDownFingers--;
+      
+#ifdef ENABLE_DOLLAR
+      if(inTouch->recording) {
+	inTouch->recording = SDL_FALSE;
+	Point path[DOLLARNPOINTS];
+	dollarNormalize(inTouch->gestureLast[j].dollarPath,path);
+	int index;
+	if(recordAll) {
+	  index = SDL_AddDollarGesture(NULL,path);
+	  int i;
+	  for(i = 0;i < numGestureTouches; i++)
+	    gestureTouch[i].recording = SDL_FALSE;
 	}
 	else {
-	  inTouch->gestureLast[j].dDist = 0;
-	  inTouch->gestureLast[j].dtheta = 0;
-	  inTouch->gestureLast[j].cv.x = 0;
-	  inTouch->gestureLast[j].cv.y = 0;
+	  index = SDL_AddDollarGesture(inTouch,path);
 	}
-	inTouch->gestureLast[j].f.p.x = x;
-	inTouch->gestureLast[j].f.p.y = y;
-	break;
-	//pressure?
-      }      
+	
+	if(index >= 0) {
+	  SDL_SendDollarRecord(inTouch,inTouch->dollarTemplate[index].hash);
+	}
+	else {
+	  SDL_SendDollarRecord(inTouch,-1);
+	}
+      }
+      else {	
+	int bestTempl;
+	float error;
+	error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
+				&bestTempl,inTouch);
+	if(bestTempl >= 0){
+	  //Send Event
+	  unsigned long gestureId = inTouch->dollarTemplate[bestTempl].hash;
+	  SDL_SendGestureDollar(inTouch,gestureId,error);
+	    printf ("%s\n",);("Dollar error: %f\n",error);
+	}
+      }
+#endif 
+      //inTouch->gestureLast[j] = inTouch->gestureLast[inTouch->numDownFingers];
+      if(inTouch->numDownFingers > 0) {
+	inTouch->centroid.x = (inTouch->centroid.x*(inTouch->numDownFingers+1)-
+			       x)/inTouch->numDownFingers;
+	inTouch->centroid.y = (inTouch->centroid.y*(inTouch->numDownFingers+1)-
+			       y)/inTouch->numDownFingers;
+      }
+    }
+    else if(event->type == SDL_FINGERMOTION) {
+      float dx = ((float)event->tfinger.dx)/(float)inTouch->res.x;
+      float dy = ((float)event->tfinger.dy)/(float)inTouch->res.y;
+      //printf("dx,dy: (%f,%f)\n",dx,dy); 
+#ifdef ENABLE_DOLLAR
+      DollarPath* path = &inTouch->gestureLast[j].dollarPath;
+      if(path->numPoints < MAXPATHSIZE) {
+	path->p[path->numPoints].x = x;
+	path->p[path->numPoints].y = y;
+	path->length += sqrt(dx*dx + dy*dy);
+	path->numPoints++;
+      }
+#endif
+      Point lastP;
+      lastP.x = x - dx;
+      lastP.y = y - dy;
+      Point lastCentroid;
+      lastCentroid = inTouch->centroid;
+      
+      inTouch->centroid.x += dx/inTouch->numDownFingers;
+      inTouch->centroid.y += dy/inTouch->numDownFingers;    
+      if(inTouch->numDownFingers > 1) {
+	Point lv; //Vector from centroid to last x,y position
+	Point v; //Vector from centroid to current x,y position
+	//lv = inTouch->gestureLast[j].cv;
+	lv.x = lastP.x - lastCentroid.x;
+	lv.y = lastP.y - lastCentroid.y;
+	float lDist = sqrt(lv.x*lv.x + lv.y*lv.y);
+	//printf("lDist = %f\n",lDist);
+	v.x = x - inTouch->centroid.x;
+	v.y = y - inTouch->centroid.y;
+	//inTouch->gestureLast[j].cv = v;
+	float Dist = sqrt(v.x*v.x+v.y*v.y);
+	// cos(dTheta) = (v . lv)/(|v| * |lv|)
+	
+	//Normalize Vectors to simplify angle calculation
+	lv.x/=lDist;
+	lv.y/=lDist;
+	v.x/=Dist;
+	v.y/=Dist;
+	float dtheta = atan2(lv.x*v.y - lv.y*v.x,lv.x*v.x + lv.y*v.y);
+	
+	float dDist = (Dist - lDist);
+	if(lDist == 0) {dDist = 0;dtheta = 0;} //To avoid impossible values
+	
+	//inTouch->gestureLast[j].dDist = dDist;
+	//inTouch->gestureLast[j].dtheta = dtheta;
+	
+	//printf("dDist = %f, dTheta = %f\n",dDist,dtheta);
+	//gdtheta = gdtheta*.9 + dtheta*.1;
+	//gdDist  =  gdDist*.9 +  dDist*.1
+	//knob.r += dDist/numDownFingers;
+	//knob.ang += dtheta;
+	//printf("thetaSum = %f, distSum = %f\n",gdtheta,gdDist);
+	//printf("id: %i dTheta = %f, dDist = %f\n",j,dtheta,dDist);
+	SDL_SendGestureMulti(inTouch,dtheta,dDist);
+      }
+      else {
+	//inTouch->gestureLast[j].dDist = 0;
+	//inTouch->gestureLast[j].dtheta = 0;
+	//inTouch->gestureLast[j].cv.x = 0;
+	//inTouch->gestureLast[j].cv.y = 0;
+      }
+      //inTouch->gestureLast[j].f.p.x = x;
+      //inTouch->gestureLast[j].f.p.y = y;
+      //break;
+      //pressure?
     }
     
-    if(j == inTouch->numDownFingers) {
-      //printf("Finger Down!!!\n");
+    if(event->type == SDL_FINGERDOWN) {
+
       inTouch->numDownFingers++;
       inTouch->centroid.x = (inTouch->centroid.x*(inTouch->numDownFingers - 1)+ 
 			     x)/inTouch->numDownFingers;
       inTouch->centroid.y = (inTouch->centroid.y*(inTouch->numDownFingers - 1)+
 			     y)/inTouch->numDownFingers;
-      
-      inTouch->gestureLast[j].f.id = event->tfinger.fingerId;
-      inTouch->gestureLast[j].f.p.x  = x;
-      inTouch->gestureLast[j].f.p.y  = y;	
-      inTouch->gestureLast[j].cv.x = 0;
-      inTouch->gestureLast[j].cv.y = 0;
-
+      printf("Finger Down: (%f,%f). Centroid: (%f,%f\n",x,y,
+	     inTouch->centroid.x,inTouch->centroid.y);
+      /*
+	inTouch->gestureLast[j].f.id = event->tfinger.fingerId;
+	inTouch->gestureLast[j].f.p.x  = x;
+	inTouch->gestureLast[j].f.p.y  = y;	
+	inTouch->gestureLast[j].cv.x = 0;
+	inTouch->gestureLast[j].cv.y = 0;
+      */
+#ifdef ENABlE_DOLLAR
       inTouch->gestureLast[j].dollarPath.length = 0;
       inTouch->gestureLast[j].dollarPath.p[0].x = x;
       inTouch->gestureLast[j].dollarPath.p[0].y = y;
       inTouch->gestureLast[j].dollarPath.numPoints = 1;
+#endif
     }
   }
-}  
-  
+}
+
   /* vi: set ts=4 sw=4 expandtab: */
   

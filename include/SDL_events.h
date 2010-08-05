@@ -296,6 +296,8 @@ typedef struct SDL_TouchFingerEvent
     Uint8 padding3;
     Uint16 x;
     Uint16 y;
+    Sint16 dx;
+    Sint16 dy;
     Uint16 pressure;
 } SDL_TouchFingerEvent;
 
@@ -328,7 +330,8 @@ typedef struct SDL_MultiGestureEvent
     float dDist;
     float x;  //currently 0...1. Change to screen coords?
     float y;  
-
+    Uint16 numFingers;
+    Uint16 padding;
 } SDL_MultiGestureEvent;
 
 typedef struct SDL_DollarGestureEvent

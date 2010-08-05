@@ -414,11 +414,14 @@ int main(int argc, char* argv[])
 	    */
 	    break;
 	  case SDL_MULTIGESTURE:
+	    /*
 	    printf("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
 		   event.mgesture.x,
 		   event.mgesture.y,
 		   event.mgesture.dTheta,
 		   event.mgesture.dDist);
+	    printf("MG: numDownTouch = %i\n",event.mgesture.numFingers);
+	    */
 	    knob.p.x = event.mgesture.x;
 	    knob.p.y = event.mgesture.y;
 	    knob.ang += event.mgesture.dTheta;
@@ -435,9 +438,9 @@ int main(int argc, char* argv[])
 	  }
       }
     DrawScreen(screen,h);    
-    for(i = 0; i < 256; i++) 
-      if(keystat[i]) 
-	printf("Key %i down\n",i);
+    //for(i = 0; i < 256; i++) 
+    //  if(keystat[i]) 
+    //  printf("Key %i down\n",i);
   }  
   SDL_Quit();
   
