@@ -29,8 +29,8 @@
 
 SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
 	SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
-	[data->nswindow setAlphaValue:1.0];
-	[data->nswindow setOpaque:YES];
+	[data->nswindow setOpaque:NO];
+	[data->nswindow setBackgroundColor:[NSColor clearColor]];
 	[data->nswindow setStyleMask:NSBorderlessWindowMask];
 	SDL_WindowShaper* result = SDL_malloc(sizeof(SDL_WindowShaper));
 	result->window = window;
@@ -42,6 +42,7 @@ SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
 	SDL_ShapeData* shape_data = SDL_malloc(sizeof(SDL_ShapeData));
 	result->driverdata = shape_data;
 	shape_data->context = [data->nswindow graphicsContext];
+	SDL_assert(shape_data->context != NULL);
 	shape_data->saved = SDL_FALSE;
 	shape_data->shape = NULL;
 	
@@ -70,26 +71,32 @@ void ConglomerateShapeTree(SDL_ShapeTree* tree,SDL_PathConglomeration* cong) {
 
 int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
 	SDL_ShapeData* data = (SDL_ShapeData*)shaper->driverdata;
-	if(data->saved == SDL_TRUE) {
+	/* if(data->saved == SDL_TRUE) {
 		[data->context restoreGraphicsState];
 		data->saved = SDL_FALSE;
-	}
+	}*/
 		
-	[data->context saveGraphicsState];
-	data->saved = SDL_TRUE;
+	/*[data->context saveGraphicsState];
+	data->saved = SDL_TRUE;*/
 	
-	//[[NSColor clearColor] set];
-	//NSRectFill([[((SDL_WindowData*)shaper->window->driverdata)->nswindow contentView] frame]);
-	/* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
-           Windoze shape-calculation code: a list of rectangles.  This will work... I think. */
+	[NSGraphicsContext saveGraphicsState];
+	
+	[NSGraphicsContext setCurrentContext:data->context];
+	SDL_WindowData* window_data = (SDL_WindowData*)shaper->window->driverdata;
+	
 	data->shape = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
-	NSBezierPath* clipPath = [NSBezierPath bezierPath];
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSBezierPath* clipPath = [[NSBezierPath bezierPath] autorelease];
 	
 	SDL_PathConglomeration cong = {clipPath,shaper->window};
 	
 	SDL_TraverseShapeTree(data->shape,(SDL_TraversalFunction)&ConglomerateShapeTree,(void*)&cong);
 	
+	SDL_assert([NSGraphicsContext currentContext] != NULL);
 	[clipPath addClip];
+	
+	[NSGraphicsContext restoreGraphicsState];
+	[pool release];
 }
 
 int Cocoa_ResizeWindowShape(SDL_Window *window) {
