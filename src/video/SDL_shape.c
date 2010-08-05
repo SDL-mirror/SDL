@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL.h"
+#include "SDL_assert.h"
 #include "SDL_video.h"
 #include "SDL_sysvideo.h"
 #include "SDL_pixels.h"
@@ -197,6 +198,7 @@ SDL_ShapeTree* SDL_CalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* shap
 }
 
 void SDL_TraverseShapeTree(SDL_ShapeTree *tree,SDL_TraversalFunction function,void* closure) {
+	SDL_assert(tree != NULL);
 	if(tree->kind == QuadShape) {
 		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.upleft,function,closure);
 		SDL_TraverseShapeTree((SDL_ShapeTree *)tree->data.children.upright,function,closure);

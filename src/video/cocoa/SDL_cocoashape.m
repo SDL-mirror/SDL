@@ -28,7 +28,7 @@
 
 SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
 	SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
-	[data->nswindow setAlpha:1.0];
+	[data->nswindow setAlphaValue:1.0];
 	[data->nswindow setOpaque:YES];
 	[data->nswindow setStyleMask:NSBorderlessWindowMask];
 	SDL_WindowShaper* result = SDL_malloc(sizeof(SDL_WindowShaper));
@@ -45,7 +45,7 @@ SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
 	shape_data->shape = NULL;
 	
 	int resized_properly = Cocoa_ResizeWindowShape(window);
-	assert(resized_properly == 0);
+	SDL_assert(resized_properly == 0);
 	return result;
 }
 
@@ -60,6 +60,7 @@ NSRect convert_rect(SDL_Rect rect,SDL_Window* window) {
 }
 
 void ConglomerateShapeTree(SDL_ShapeTree* tree,SDL_PathConglomeration* cong) {
+	SDL_assert(tree != NULL);
 	if(tree->kind == OpaqueShape) {
 		NSRect rect = convert_rect(tree->data.shape,cong->window);
 		[cong->clipPath appendBezierPathWithRect:rect];
@@ -91,7 +92,7 @@ int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 
 int Cocoa_ResizeWindowShape(SDL_Window *window) {
 	SDL_ShapeData* data = window->shaper->driverdata;
-	assert(data != NULL);
+	SDL_assert(data != NULL);
 	
 	if(data->shape != NULL)
 		SDL_FreeShapeTree(&data->shape);

@@ -20,7 +20,8 @@
     eligottlieb@gmail.com
 */
 
-#include <assert.h>
+#include "SDL_assert.h"
+#include "SDL_malloc.h"
 #include "SDL_x11video.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
@@ -39,13 +40,13 @@ SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 		result->mode.mode = ShapeModeDefault;
 		result->mode.parameters.binarizationCutoff = 1;
 		result->usershownflag = 0;
-		SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
+		SDL_ShapeData* data = SDL_malloc(sizeof(SDL_ShapeData));
 		result->driverdata = data;
 		data->bitmapsize = 0;
 		data->bitmap = NULL;
 		window->shaper = result;
 		int resized_properly = X11_ResizeWindowShape(window);
-		assert(resized_properly == 0);
+		SDL_assert(resized_properly == 0);
 	}
 #endif
 
@@ -54,7 +55,7 @@ SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
 
 int X11_ResizeWindowShape(SDL_Window* window) {
 	SDL_ShapeData* data = window->shaper->driverdata;
-	assert(data != NULL);
+	SDL_assert(data != NULL);
 	
 	unsigned int bitmapsize = window->w / 8;
 	if(window->w % 8 > 0)
