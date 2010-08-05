@@ -21,7 +21,6 @@
 */
 
 #include "SDL_assert.h"
-#include "SDL_malloc.h"
 #include "SDL_x11video.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"

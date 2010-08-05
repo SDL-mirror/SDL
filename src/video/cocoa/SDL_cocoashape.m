@@ -20,6 +20,7 @@
     eligottlieb@gmail.com
 */
 
+#include "SDL_assert.h"
 #include "SDL_stdinc.h"
 #include "SDL_cocoavideo.h"
 #include "SDL_shape.h"
@@ -81,6 +82,7 @@ int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	//NSRectFill([[((SDL_WindowData*)shaper->window->driverdata)->nswindow contentView] frame]);
 	/* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
            Windoze shape-calculation code: a list of rectangles.  This will work... I think. */
+	data->shape = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
 	NSBezierPath* clipPath = [NSBezierPath bezierPath];
 	
 	SDL_PathConglomeration cong = {clipPath,shaper->window};
