@@ -320,18 +320,15 @@ IME_Quit(SDL_VideoData *videodata)
 
     videodata->ime_hwnd_main = 0;
     videodata->ime_himc = 0;
-    if (videodata->ime_himm32)
-    {
+    if (videodata->ime_himm32) {
         FreeLibrary(videodata->ime_himm32);
         videodata->ime_himm32 = 0;
     }
-    if (videodata->ime_threadmgr)
-    {
+    if (videodata->ime_threadmgr) {
         videodata->ime_threadmgr->lpVtbl->Release(videodata->ime_threadmgr);
         videodata->ime_threadmgr = 0;
     }
-    if (videodata->ime_com_initialized)
-    {
+    if (videodata->ime_com_initialized) {
         CoUninitialize();
         videodata->ime_com_initialized = SDL_FALSE;
     }
@@ -354,8 +351,7 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
         return;
 
     videodata->ime_readingstring[0] = 0;
-    if (!osversion.dwOSVersionInfoSize)
-    {
+    if (!osversion.dwOSVersionInfoSize) {
         osversion.dwOSVersionInfoSize = sizeof(osversion);
         GetVersionExA(&osversion);
     }
@@ -367,11 +363,9 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
     if (!himc)
         return;
 
-    if (videodata->GetReadingString)
-    {
+    if (videodata->GetReadingString) {
         len = videodata->GetReadingString(himc, 0, 0, &err, &vertical, &maxuilen);
-        if (len)
-        {
+        if (len) {
             if (len > SDL_arraysize(buffer))
                 len = SDL_arraysize(buffer);
 
@@ -379,8 +373,7 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
         }
         SDL_wcslcpy(videodata->ime_readingstring, s, len);
     }
-    else
-    {
+    else {
         LPINPUTCONTEXT2 lpimc = videodata->ImmLockIMC(himc);
         LPBYTE p = 0;
         s = 0;
@@ -434,9 +427,8 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
             break;
         }
         if (s)
-        {
             SDL_wcslcpy(videodata->ime_readingstring, s, len + 1);
-        }
+
         videodata->ImmUnlockIMCC(lpimc->hPrivate);
         videodata->ImmUnlockIMC(himc);
     }
@@ -447,17 +439,15 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
 static void
 IME_InputLangChanged(SDL_VideoData *videodata)
 {
-    UINT uLang = PRIMLANG();
+    UINT lang = PRIMLANG();
     HWND hwndime = 0;
     IME_UpdateInputLocale(videodata);
     IME_SetupAPI(videodata);
-    if (uLang != PRIMLANG())
-    {
+    if (lang != PRIMLANG()) {
         IME_ClearComposition(videodata);
     }
     hwndime = ImmGetDefaultIMEWnd(videodata->ime_hwnd_current);
-    if (hwndime)
-    {
+    if (hwndime) {
         SendMessageA(hwndime, WM_IME_CONTROL, IMC_OPENSTATUSWINDOW, 0);
         SendMessageA(hwndime, WM_IME_CONTROL, IMC_CLOSESTATUSWINDOW, 0);
     }
@@ -485,8 +475,7 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
 
     hklprev = hkl;
     dwLang = ((DWORD)hkl & 0xffff);
-    if (videodata->ime_uiless && LANG() == LANG_CHT)
-    {
+    if (videodata->ime_uiless && LANG() == LANG_CHT) {
         dwRet[0] = IMEID_CHT_VER_VISTA;
         dwRet[1] = 0;
         return dwRet[0];
@@ -495,40 +484,31 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
         && hkl != CHT_HKL_NEW_CHANG_JIE
         && hkl != CHT_HKL_NEW_QUICK
         && hkl != CHT_HKL_HK_CANTONESE
-        && hkl != CHS_HKL)
-    {
+        && hkl != CHS_HKL) {
         dwRet[0] = dwRet[1] = 0;
         return dwRet[uIndex];
     }
-    if (ImmGetIMEFileNameA(hkl, szTemp, sizeof(szTemp) - 1) <= 0)
-    {
+    if (ImmGetIMEFileNameA(hkl, szTemp, sizeof(szTemp) - 1) <= 0) {
         dwRet[0] = dwRet[1] = 0;
         return dwRet[uIndex];
     }
-    if (!videodata->GetReadingString)
-    {
+    if (!videodata->GetReadingString) {
         #define LCID_INVARIANT MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT)
         if (CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHT_IMEFILENAME1, -1) != 2
             && CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHT_IMEFILENAME2, -1) != 2
             && CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHT_IMEFILENAME3, -1) != 2
             && CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHS_IMEFILENAME1, -1) != 2
-            && CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHS_IMEFILENAME2, -1) != 2
-            )
-        {
+            && CompareStringA(LCID_INVARIANT, NORM_IGNORECASE, szTemp, -1, CHS_IMEFILENAME2, -1) != 2) {
             dwRet[0] = dwRet[1] = 0;
             return dwRet[uIndex];
         }
         #undef LCID_INVARIANT
         dwVerSize = GetFileVersionInfoSizeA(szTemp, &dwVerHandle);
-        if (dwVerSize)
-        {
+        if (dwVerSize) {
             lpVerBuffer = SDL_malloc(dwVerSize);
-            if (lpVerBuffer)
-            {
-                if (GetFileVersionInfoA(szTemp, dwVerHandle, dwVerSize, lpVerBuffer))
-                {
-                    if (VerQueryValueA(lpVerBuffer, "\\", &lpVerData, &cbVerData))
-                    {
+            if (lpVerBuffer) {
+                if (GetFileVersionInfoA(szTemp, dwVerHandle, dwVerSize, lpVerBuffer)) {
+                    if (VerQueryValueA(lpVerBuffer, "\\", &lpVerData, &cbVerData)) {
                         #define pVerFixedInfo   ((VS_FIXEDFILEINFO FAR*)lpVerData)
                         DWORD dwVer = pVerFixedInfo->dwFileVersionMS;
                         dwVer = (dwVer & 0x00ff0000) << 8 | (dwVer & 0x000000ff) << 16;
@@ -545,9 +525,7 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
                             dwLang == LANG_CHS && (
                             dwVer == MAKEIMEVERSION(4, 1) ||
                             dwVer == MAKEIMEVERSION(4, 2) ||
-                            dwVer == MAKEIMEVERSION(5, 3))
-                            )
-                        {
+                            dwVer == MAKEIMEVERSION(5, 3))) {
                             dwRet[0] = dwVer | dwLang;
                             dwRet[1] = pVerFixedInfo->dwFileVersionLS;
                             SDL_free(lpVerBuffer);
@@ -588,11 +566,9 @@ IME_SetupAPI(SDL_VideoData *videodata)
     videodata->ShowReadingWindow = (BOOL (WINAPI *)(HIMC, BOOL))
         GetProcAddress(hime, "ShowReadingWindow");
 
-    if (videodata->ShowReadingWindow)
-    {
+    if (videodata->ShowReadingWindow) {
         HIMC himc = ImmGetContext(videodata->ime_hwnd_current);
-        if (himc)
-        {
+        if (himc) {
             videodata->ShowReadingWindow(himc, FALSE);
             ImmReleaseContext(videodata->ime_hwnd_current, himc);
         }
@@ -615,12 +591,12 @@ IME_SetWindow(SDL_VideoData* videodata, HWND hwnd)
 static void
 IME_UpdateInputLocale(SDL_VideoData *videodata)
 {
-    static HKL hklPrevious = 0;
+    static HKL hklprev = 0;
     videodata->ime_hkl = GetKeyboardLayout(0);
-    if (hklPrevious == videodata->ime_hkl)
+    if (hklprev == videodata->ime_hkl)
         return;
 
-    hklPrevious = videodata->ime_hkl;
+    hklprev = videodata->ime_hkl;
 }
 
 static void
@@ -652,21 +628,20 @@ IME_ClearEditing(SDL_VideoData *videodata)
 static void
 IME_GetCompositionString(SDL_VideoData *videodata, HIMC himc, DWORD string)
 {
-    LONG Length = ImmGetCompositionStringW(himc, string, videodata->ime_composition, sizeof(videodata->ime_composition));
-    if (Length < 0)
-        Length = 0;
+    LONG length = ImmGetCompositionStringW(himc, string, videodata->ime_composition, sizeof(videodata->ime_composition));
+    if (length < 0)
+        length = 0;
 
-    Length /= sizeof(videodata->ime_composition[0]);
+    length /= sizeof(videodata->ime_composition[0]);
     videodata->ime_cursor = LOWORD(ImmGetCompositionStringW(himc, GCS_CURSORPOS, 0, 0));
-    if (videodata->ime_composition[videodata->ime_cursor] == 0x3000)
-    {
+    if (videodata->ime_composition[videodata->ime_cursor] == 0x3000) {
         int i;
-        for (i = videodata->ime_cursor + 1; i < Length; ++i)
+        for (i = videodata->ime_cursor + 1; i < length; ++i)
             videodata->ime_composition[i - 1] = videodata->ime_composition[i];
 
-        --Length;
+        --length;
     }
-    videodata->ime_composition[Length] = 0;
+    videodata->ime_composition[length] = 0;
 }
 
 static void
@@ -686,20 +661,18 @@ static void
 IME_SendEditingEvent(SDL_VideoData *videodata)
 {
     char *s = 0;
-    WCHAR wBuffer[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
-    wBuffer[0] = 0;
-    if (videodata->ime_readingstring[0])
-    {
+    WCHAR buffer[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
+    buffer[0] = 0;
+    if (videodata->ime_readingstring[0]) {
         size_t len = SDL_min(SDL_wcslen(videodata->ime_composition), (size_t)videodata->ime_cursor);
-        SDL_wcslcpy(wBuffer, videodata->ime_composition, len + 1);
-        SDL_wcslcat(wBuffer, videodata->ime_readingstring, sizeof(wBuffer));
-        SDL_wcslcat(wBuffer, &videodata->ime_composition[len], sizeof(wBuffer) - len);
+        SDL_wcslcpy(buffer, videodata->ime_composition, len + 1);
+        SDL_wcslcat(buffer, videodata->ime_readingstring, sizeof(buffer));
+        SDL_wcslcat(buffer, &videodata->ime_composition[len], sizeof(buffer) - len);
     }
-    else
-    {
-        SDL_wcslcpy(wBuffer, videodata->ime_composition, sizeof(videodata->ime_composition));
+    else {
+        SDL_wcslcpy(buffer, videodata->ime_composition, sizeof(videodata->ime_composition));
     }
-    s = WIN_StringToUTF8(wBuffer);
+    s = WIN_StringToUTF8(buffer);
     SDL_SendEditingText(s, videodata->ime_cursor + SDL_wcslen(videodata->ime_readingstring), 0);
     SDL_free(s);
 }
@@ -726,13 +699,11 @@ IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoD
     case WM_IME_COMPOSITION:
         trap = SDL_TRUE;
         himc = ImmGetContext(hwnd);
-        if (*lParam & GCS_RESULTSTR)
-        {
+        if (*lParam & GCS_RESULTSTR) {
             IME_GetCompositionString(videodata, himc, GCS_RESULTSTR);
             IME_SendInputEvent(videodata);
         }
-        if (*lParam & GCS_COMPSTR)
-        {
+        if (*lParam & GCS_COMPSTR) {
             if (!videodata->ime_uiless)
                 videodata->ime_readingstring[0] = 0;
 
@@ -827,8 +798,7 @@ STDMETHODIMP UIElementSink_QueryInterface(TSFSink *sink, REFIID riid, PVOID *ppv
     else if (SDL_IsEqualIID(riid, &IID_ITfUIElementSink))
         *ppv = (ITfUIElementSink *)sink;
 
-    if (*ppv)
-    {
+    if (*ppv) {
         TSFSink_AddRef(sink);
         return S_OK;
     }
@@ -841,8 +811,7 @@ ITfUIElement *UILess_GetUIElement(SDL_VideoData *videodata, DWORD dwUIElementId)
     ITfUIElement *pelem = 0;
     ITfThreadMgrEx *threadmgrex = videodata->ime_threadmgrex;
 
-    if (SUCCEEDED(threadmgrex->lpVtbl->QueryInterface(threadmgrex, &IID_ITfUIElementMgr, (LPVOID *)&puiem)))
-    {
+    if (SUCCEEDED(threadmgrex->lpVtbl->QueryInterface(threadmgrex, &IID_ITfUIElementMgr, (LPVOID *)&puiem))) {
         puiem->lpVtbl->GetUIElement(puiem, dwUIElementId, &pelem);
         puiem->lpVtbl->Release(puiem);
     }
@@ -851,45 +820,35 @@ ITfUIElement *UILess_GetUIElement(SDL_VideoData *videodata, DWORD dwUIElementId)
 
 STDMETHODIMP UIElementSink_BeginUIElement(TSFSink *sink, DWORD dwUIElementId, BOOL *pbShow)
 {
-    ITfUIElement *pElement = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
+    ITfUIElement *element = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
     ITfReadingInformationUIElement *preading = 0;
-    ITfCandidateListUIElement *pcandidates = 0;
     SDL_VideoData *videodata = (SDL_VideoData *)sink->data;
-    if (!pElement)
+    if (!element)
         return E_INVALIDARG;
 
     *pbShow = FALSE;
-    if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading)))
-    {
+    if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading))) {
         BSTR bstr;
-        if (SUCCEEDED(preading->lpVtbl->GetString(preading, &bstr)) && bstr)
-        {
+        if (SUCCEEDED(preading->lpVtbl->GetString(preading, &bstr)) && bstr) {
             WCHAR *s = (WCHAR *)bstr;
             SysFreeString(bstr);
         }
         preading->lpVtbl->Release(preading);
-    }
-    else if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfCandidateListUIElement, (PVOID *)&pcandidates)))
-    {
-        pcandidates->lpVtbl->Release(pcandidates);
     }
     return S_OK;
 }
 
 STDMETHODIMP UIElementSink_UpdateUIElement(TSFSink *sink, DWORD dwUIElementId)
 {
-    ITfUIElement *pElement = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
+    ITfUIElement *element = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
     ITfReadingInformationUIElement *preading = 0;
-    ITfCandidateListUIElement *pcandidates = 0;
     SDL_VideoData *videodata = (SDL_VideoData *)sink->data;
-    if (!pElement)
+    if (!element)
         return E_INVALIDARG;
 
-    if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading)))
-    {
+    if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading))) {
         BSTR bstr;
-        if (SUCCEEDED(preading->lpVtbl->GetString(preading, &bstr)) && bstr)
-        {
+        if (SUCCEEDED(preading->lpVtbl->GetString(preading, &bstr)) && bstr) {
             WCHAR *s = (WCHAR *)bstr;
             SDL_wcslcpy(videodata->ime_readingstring, s, sizeof(videodata->ime_readingstring));
             IME_SendEditingEvent(videodata);
@@ -897,31 +856,21 @@ STDMETHODIMP UIElementSink_UpdateUIElement(TSFSink *sink, DWORD dwUIElementId)
         }
         preading->lpVtbl->Release(preading);
     }
-    else if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfCandidateListUIElement, (PVOID *)&pcandidates)))
-    {
-        pcandidates->lpVtbl->Release(pcandidates);
-    }
     return S_OK;
 }
 
 STDMETHODIMP UIElementSink_EndUIElement(TSFSink *sink, DWORD dwUIElementId)
 {
-    ITfUIElement *pElement = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
+    ITfUIElement *element = UILess_GetUIElement((SDL_VideoData *)sink->data, dwUIElementId);
     ITfReadingInformationUIElement *preading = 0;
-    ITfCandidateListUIElement *pcandidates = 0;
     SDL_VideoData *videodata = (SDL_VideoData *)sink->data;
-    if (!pElement)
+    if (!element)
         return E_INVALIDARG;
 
-    if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading)))
-    {
+    if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfReadingInformationUIElement, (LPVOID *)&preading))) {
         videodata->ime_readingstring[0] = 0;
         IME_SendEditingEvent(videodata);
         preading->lpVtbl->Release(preading);
-    }
-    else if (SUCCEEDED(pElement->lpVtbl->QueryInterface(pElement, &IID_ITfCandidateListUIElement, (PVOID *)&pcandidates)))
-    {
-        pcandidates->lpVtbl->Release(pcandidates);
     }
     return S_OK;
 }
@@ -937,8 +886,7 @@ STDMETHODIMP IPPASink_QueryInterface(TSFSink *sink, REFIID riid, PVOID *ppv)
     else if (SDL_IsEqualIID(riid, &IID_ITfInputProcessorProfileActivationSink))
         *ppv = (ITfInputProcessorProfileActivationSink *)sink;
 
-    if (*ppv)
-    {
+    if (*ppv) {
         TSFSink_AddRef(sink);
         return S_OK;
     }
@@ -976,8 +924,7 @@ UILess_EnableUIUpdates(SDL_VideoData *videodata)
     if (!videodata->ime_threadmgrex || videodata->ime_uielemsinkcookie != TF_INVALID_COOKIE)
         return;
 
-    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source)))
-    {
+    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source))) {
         source->lpVtbl->AdviseSink(source, &IID_ITfUIElementSink, (IUnknown *)videodata->ime_uielemsink, &videodata->ime_uielemsinkcookie);
         source->lpVtbl->Release(source);
     }
@@ -990,8 +937,7 @@ UILess_DisableUIUpdates(SDL_VideoData *videodata)
     if (!videodata->ime_threadmgrex || videodata->ime_uielemsinkcookie == TF_INVALID_COOKIE)
         return;
 
-    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source)))
-    {
+    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source))) {
         source->lpVtbl->UnadviseSink(source, videodata->ime_uielemsinkcookie);
         videodata->ime_uielemsinkcookie = TF_INVALID_COOKIE;
         source->lpVtbl->Release(source);
@@ -1021,12 +967,9 @@ UILess_SetupSinks(SDL_VideoData *videodata)
     videodata->ime_ippasink->refcount = 1;
     videodata->ime_ippasink->data = videodata;
 
-    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source)))
-    {
-        if (SUCCEEDED(source->lpVtbl->AdviseSink(source, &IID_ITfUIElementSink, (IUnknown *)videodata->ime_uielemsink, &videodata->ime_uielemsinkcookie)))
-        {
-            if (SUCCEEDED(source->lpVtbl->AdviseSink(source, &IID_ITfInputProcessorProfileActivationSink, (IUnknown *)videodata->ime_ippasink, &videodata->ime_alpnsinkcookie)))
-            {
+    if (SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source))) {
+        if (SUCCEEDED(source->lpVtbl->AdviseSink(source, &IID_ITfUIElementSink, (IUnknown *)videodata->ime_uielemsink, &videodata->ime_uielemsinkcookie))) {
+            if (SUCCEEDED(source->lpVtbl->AdviseSink(source, &IID_ITfInputProcessorProfileActivationSink, (IUnknown *)videodata->ime_ippasink, &videodata->ime_alpnsinkcookie))) {
                 result = SDL_TRUE;
             }
         }
@@ -1046,12 +989,11 @@ UILess_SetupSinks(SDL_VideoData *videodata)
 static void
 UILess_ReleaseSinks(SDL_VideoData *videodata)
 {
-    ITfSource *Source = 0;
-    if (videodata->ime_threadmgrex && SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, &Source)))
-    {
-        Source->lpVtbl->UnadviseSink(Source, videodata->ime_uielemsinkcookie);
-        Source->lpVtbl->UnadviseSink(Source, videodata->ime_alpnsinkcookie);
-        SAFE_RELEASE(Source);
+    ITfSource *source = 0;
+    if (videodata->ime_threadmgrex && SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, &source))) {
+        source->lpVtbl->UnadviseSink(source, videodata->ime_uielemsinkcookie);
+        source->lpVtbl->UnadviseSink(source, videodata->ime_alpnsinkcookie);
+        SAFE_RELEASE(source);
         videodata->ime_threadmgrex->lpVtbl->Deactivate(videodata->ime_threadmgrex);
         SAFE_RELEASE(videodata->ime_threadmgrex);
         TSFSink_Release(videodata->ime_uielemsink);
