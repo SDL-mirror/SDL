@@ -168,13 +168,13 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 				next.x = dimensions.x;
 				next.y = dimensions.y;
 				result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
-				next.x = dimensions.w / 2 + 1;
+				next.x = dimensions.w / 2;
 				//Unneeded: next.y = dimensions.y;
 				result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				next.x = dimensions.x;
-				next.y = dimensions.h / 2 + 1;
+				next.y = dimensions.h / 2;
 				result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
-				next.x = dimensions.w / 2 + 1;
+				next.x = dimensions.w / 2;
 				//Unneeded: next.y = dimensions.h / 2 + 1;
 				result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
 				return result;
