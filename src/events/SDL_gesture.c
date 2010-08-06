@@ -35,6 +35,8 @@
 #define DOLLARNPOINTS 64
 #define DOLLARSIZE 256
 
+#define ENABLE_DOLLAR
+
 //PHI = ((sqrt(5)-1)/2)
 #define PHI 0.618033989 
 
@@ -57,14 +59,14 @@ typedef struct {
   Point p[MAXPATHSIZE];
 } DollarPath;
 
-
+/*
 typedef struct {
   Finger f;
   Point cv;
   float dtheta,dDist;
   DollarPath dollarPath;
 } TouchPoint;
-
+*/
 typedef struct {
   Point path[DOLLARNPOINTS];
   unsigned long hash;
@@ -74,7 +76,8 @@ typedef struct {
   SDL_GestureID id;
   Point res;
   Point centroid;
-  TouchPoint gestureLast[MAXFINGERS];
+  //TouchPoint gestureLast[MAXFINGERS];
+  DollarPath dollarPath;
   Uint16 numDownFingers;
 
   int numDollarTemplates;
@@ -463,7 +466,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       if(inTouch->recording) {
 	inTouch->recording = SDL_FALSE;
 	Point path[DOLLARNPOINTS];
-	dollarNormalize(inTouch->gestureLast[j].dollarPath,path);
+	dollarNormalize(inTouch->dollarPath,path);
 	int index;
 	if(recordAll) {
 	  index = SDL_AddDollarGesture(NULL,path);
@@ -485,13 +488,13 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       else {	
 	int bestTempl;
 	float error;
-	error = dollarRecognize(inTouch->gestureLast[j].dollarPath,
+	error = dollarRecognize(inTouch->dollarPath,
 				&bestTempl,inTouch);
 	if(bestTempl >= 0){
 	  //Send Event
 	  unsigned long gestureId = inTouch->dollarTemplate[bestTempl].hash;
 	  SDL_SendGestureDollar(inTouch,gestureId,error);
-	    printf ("%s\n",);("Dollar error: %f\n",error);
+	  //printf ("%s\n",);("Dollar error: %f\n",error);
 	}
       }
 #endif 
@@ -508,10 +511,10 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       float dy = ((float)event->tfinger.dy)/(float)inTouch->res.y;
       //printf("dx,dy: (%f,%f)\n",dx,dy); 
 #ifdef ENABLE_DOLLAR
-      DollarPath* path = &inTouch->gestureLast[j].dollarPath;
+      DollarPath* path = &inTouch->dollarPath;
       if(path->numPoints < MAXPATHSIZE) {
-	path->p[path->numPoints].x = x;
-	path->p[path->numPoints].y = y;
+	path->p[path->numPoints].x = inTouch->centroid.x;
+	path->p[path->numPoints].y = inTouch->centroid.y;
 	path->length += sqrt(dx*dx + dy*dy);
 	path->numPoints++;
       }
@@ -588,11 +591,11 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 	inTouch->gestureLast[j].cv.x = 0;
 	inTouch->gestureLast[j].cv.y = 0;
       */
-#ifdef ENABlE_DOLLAR
-      inTouch->gestureLast[j].dollarPath.length = 0;
-      inTouch->gestureLast[j].dollarPath.p[0].x = x;
-      inTouch->gestureLast[j].dollarPath.p[0].y = y;
-      inTouch->gestureLast[j].dollarPath.numPoints = 1;
+#ifdef ENABLE_DOLLAR
+      inTouch->dollarPath.length = 0;
+      inTouch->dollarPath.p[0].x = x;
+      inTouch->dollarPath.p[0].y = y;
+      inTouch->dollarPath.numPoints = 1;
 #endif
     }
   }
