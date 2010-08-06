@@ -86,13 +86,13 @@ int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	
 	data->shape = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSBezierPath* clipPath = [[NSBezierPath bezierPath] autorelease];
+	NSBezierPath* clipPath = [NSBezierPath bezierPath];
 	
 	SDL_PathConglomeration cong = {clipPath,shaper->window};
 	
 	SDL_TraverseShapeTree(data->shape,(SDL_TraversalFunction)&ConglomerateShapeTree,(void*)&cong);
 	
-	SDL_assert([NSGraphicsContext currentContext] != NULL);
+	SDL_assert([NSGraphicsContext currentContext] != Nil);
 	[clipPath addClip];
 	
 	[NSGraphicsContext restoreGraphicsState];
