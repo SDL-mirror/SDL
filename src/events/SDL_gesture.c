@@ -382,7 +382,7 @@ float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
 	
 	Point points[DOLLARNPOINTS];
 	int numPoints = dollarNormalize(path,points);
-	SDL_PrintPath(points);
+	//SDL_PrintPath(points);
 	int i;
 	
 	int bestDiff = 10000;
@@ -487,7 +487,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 	inTouch->recording = SDL_FALSE;
 	Point path[DOLLARNPOINTS];
 	dollarNormalize(inTouch->dollarPath,path);
-	SDL_PrintPath(path);
+	//SDL_PrintPath(path);
 	int index;
 	if(recordAll) {
 	  index = SDL_AddDollarGesture(NULL,path);
