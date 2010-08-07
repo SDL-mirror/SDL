@@ -90,6 +90,15 @@ GestureTouch gestureTouch[MAXTOUCHES];
 int numGestureTouches = 0;
 SDL_bool recordAll;
 
+void SDL_PrintPath(Point *path) {
+  int i;
+  printf("Path:");
+  for(i=0;i<DOLLARNPOINTS;i++) {
+    printf(" (%f,%f)",path[i].x,path[i].y);
+  }
+  printf("\n");
+}
+
 int SDL_RecordGesture(SDL_TouchID touchId) {
   int i;
   if(touchId < 0) recordAll = SDL_TRUE;
@@ -283,6 +292,7 @@ float bestDollarDifference(Point* points,Point* templ) {
 int dollarNormalize(DollarPath path,Point *points) {
   int i;
   //Calculate length if it hasn't already been done
+  printf("length: %f\n",path.length);
   if(path.length <= 0) {
     for(i=1;i<path.numPoints;i++) {
       float dx = path.p[i  ].x - 
@@ -292,14 +302,16 @@ int dollarNormalize(DollarPath path,Point *points) {
       path.length += sqrt(dx*dx+dy*dy);
     }
   }
-
+  printf("New length: %f\n",path.length);
 
   //Resample
   float interval = path.length/(DOLLARNPOINTS - 1);
-  float dist = 0;
+  float dist = interval;
 
   int numPoints = 0;
-  Point centroid; centroid.x = 0;centroid.y = 0;
+  Point centroid; 
+  centroid.x = 0;centroid.y = 0;
+  
   //printf("(%f,%f)\n",path.p[path.numPoints-1].x,path.p[path.numPoints-1].y);
   for(i = 1;i < path.numPoints;i++) {
     float d = sqrt((path.p[i-1].x-path.p[i].x)*(path.p[i-1].x-path.p[i].x)+
@@ -318,7 +330,14 @@ int dollarNormalize(DollarPath path,Point *points) {
     }
     dist += d;
   }
-  if(numPoints < 1) return 0;
+  if(numPoints < DOLLARNPOINTS-1) {
+    printf("ERROR: NumPoints = %i\n",numPoints); 
+    return 0;
+  }
+  //copy the last point
+  points[DOLLARNPOINTS-1] = path.p[path.numPoints-1];
+  numPoints = DOLLARNPOINTS;
+
   centroid.x /= numPoints;
   centroid.y /= numPoints;
  
@@ -363,6 +382,7 @@ float dollarRecognize(DollarPath path,int *bestTempl,GestureTouch* touch) {
 	
 	Point points[DOLLARNPOINTS];
 	int numPoints = dollarNormalize(path,points);
+	SDL_PrintPath(points);
 	int i;
 	
 	int bestDiff = 10000;
@@ -467,6 +487,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 	inTouch->recording = SDL_FALSE;
 	Point path[DOLLARNPOINTS];
 	dollarNormalize(inTouch->dollarPath,path);
+	SDL_PrintPath(path);
 	int index;
 	if(recordAll) {
 	  index = SDL_AddDollarGesture(NULL,path);
@@ -515,7 +536,11 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       if(path->numPoints < MAXPATHSIZE) {
 	path->p[path->numPoints].x = inTouch->centroid.x;
 	path->p[path->numPoints].y = inTouch->centroid.y;
-	path->length += sqrt(dx*dx + dy*dy);
+	float pathDx = 
+	  (path->p[path->numPoints].x-path->p[path->numPoints-1].x);
+	float pathDy = 
+	  (path->p[path->numPoints].y-path->p[path->numPoints-1].y);
+	path->length += sqrt(pathDx*pathDx + pathDy*pathDy);
 	path->numPoints++;
       }
 #endif
@@ -526,7 +551,8 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       lastCentroid = inTouch->centroid;
       
       inTouch->centroid.x += dx/inTouch->numDownFingers;
-      inTouch->centroid.y += dy/inTouch->numDownFingers;    
+      inTouch->centroid.y += dy/inTouch->numDownFingers;
+      //printf("Centrid : (%f,%f)\n",inTouch->centroid.x,inTouch->centroid.y);
       if(inTouch->numDownFingers > 1) {
 	Point lv; //Vector from centroid to last x,y position
 	Point v; //Vector from centroid to current x,y position
