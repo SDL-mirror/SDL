@@ -111,18 +111,18 @@ void SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8*
 		SDL_UnlockSurface(shape);
 }
 
-SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_bool invert,SDL_Rect dimensions) {
+SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rect dimensions) {
 	int x = 0,y = 0;
 	Uint8* pixel = NULL;
 	Uint32 pixel_value = 0;
 	Uint8 r = 0,g = 0,b = 0,a = 0;
-	SDL_bool pixel_transparent = SDL_FALSE;
-	int last_transparent = -1;
+	SDL_bool pixel_opaque = SDL_FALSE;
+	int last_opaque = -1;
 	SDL_Color key;
 	SDL_ShapeTree* result = (SDL_ShapeTree*)SDL_malloc(sizeof(SDL_ShapeTree));
 	SDL_Rect next = {0,0,0,0};
-	for(y=dimensions.y;y<dimensions.h;y++)
-		for(x=dimensions.x;x<dimensions.w;x++) {
+	for(y=dimensions.y;y<dimensions.y + dimensions.h;y++)
+		for(x=dimensions.x;x<dimensions.x + dimensions.w;x++) {
 			pixel_value = 0;
 			pixel = (Uint8 *)(mask->pixels) + (y*mask->pitch) + (x*mask->format->BytesPerPixel);
 			switch(mask->format->BytesPerPixel) {
@@ -142,24 +142,22 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 			SDL_GetRGBA(pixel_value,mask->format,&r,&g,&b,&a);
 			switch(mode.mode) {
 				case(ShapeModeDefault):
-					pixel_transparent = (SDL_bool)(a >= 1 ? !invert : invert);
+					pixel_opaque = (a >= 1 ? SDL_TRUE : SDL_FALSE);
 					break;
 				case(ShapeModeBinarizeAlpha):
-					pixel_transparent = (SDL_bool)(a >= mode.parameters.binarizationCutoff ? !invert : invert);
+					pixel_opaque = (a >= mode.parameters.binarizationCutoff ? SDL_TRUE : SDL_FALSE);
 					break;
 				case(ShapeModeReverseBinarizeAlpha):
-					pixel_transparent = (SDL_bool)(a <= mode.parameters.binarizationCutoff ? !invert : invert);
+					pixel_opaque = (a <= mode.parameters.binarizationCutoff ? SDL_TRUE : SDL_FALSE);
 					break;
 				case(ShapeModeColorKey):
 					key = mode.parameters.colorKey;
-					pixel_transparent = (SDL_bool)((key.r == r && key.g == g && key.b == b) ? !invert : invert);
+					pixel_opaque = ((key.r == r && key.g == g && key.b == b) ? SDL_TRUE : SDL_FALSE);
 					break;
 			}
-			if(last_transparent == -1) {
-				last_transparent = pixel_transparent;
-				break;
-			}
-			if(last_transparent != pixel_transparent) {
+			if(last_opaque == -1)
+				last_opaque = pixel_opaque;
+			if(last_opaque != pixel_opaque) {
 				result->kind = QuadShape;
 				//These will stay the same.
 				next.w = dimensions.w / 2;
@@ -167,31 +165,31 @@ SDL_ShapeTree* RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surfac
 				//These will change from recursion to recursion.
 				next.x = dimensions.x;
 				next.y = dimensions.y;
-				result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
 				next.x = dimensions.w / 2;
 				//Unneeded: next.y = dimensions.y;
-				result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
 				next.x = dimensions.x;
 				next.y = dimensions.h / 2;
-				result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
 				next.x = dimensions.w / 2;
 				//Unneeded: next.y = dimensions.h / 2 + 1;
-				result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,invert,next);
+				result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
 				return result;
 			}
 		}
 	//If we never recursed, all the pixels in this quadrant have the same "value".
-	result->kind = (last_transparent == SDL_FALSE ? OpaqueShape : TransparentShape);
+	result->kind = (last_opaque == SDL_TRUE ? OpaqueShape : TransparentShape);
 	result->data.shape = dimensions;
 	return result;
 }
 
-SDL_ShapeTree* SDL_CalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* shape,SDL_bool invert) {
+SDL_ShapeTree* SDL_CalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* shape) {
 	SDL_Rect dimensions = {0,0,shape->w,shape->h};
 	SDL_ShapeTree* result = NULL;
 	if(SDL_MUSTLOCK(shape))
 		SDL_LockSurface(shape);
-	result = RecursivelyCalculateShapeTree(mode,shape,invert,dimensions);
+	result = RecursivelyCalculateShapeTree(mode,shape,dimensions);
 	if(SDL_MUSTLOCK(shape))
 		SDL_UnlockSurface(shape);
 	return result;

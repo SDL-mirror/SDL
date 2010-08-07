@@ -20,6 +20,7 @@
     eligottlieb@gmail.com
 */
 
+#include "SDL_assert.h"
 #include "SDL_win32shape.h"
 #include "SDL_win32video.h"
 
@@ -43,9 +44,12 @@ SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window) {
 
 void CombineRectRegions(SDL_ShapeTree* node, void* closure) {
 	HRGN* mask_region = (HRGN *)closure;
+	int combined = -1;
 	if(node->kind == OpaqueShape) {
 		HRGN temp_region = CreateRectRgn(node->data.shape.x,node->data.shape.y,node->data.shape.w,node->data.shape.h);
-		CombineRgn(*mask_region,*mask_region,temp_region, RGN_OR);
+		SDL_assert(temp_region != NULL);
+		combined = CombineRgn(*mask_region,*mask_region,temp_region, RGN_OR);
+		SDL_assert(combined == SIMPLEREGION || combined == COMPLEXREGION);
 		DeleteObject(temp_region);
 	}
 }
@@ -64,7 +68,7 @@ int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	data = (SDL_ShapeData*)shaper->driverdata;
 	if(data->mask_tree != NULL)
 		SDL_FreeShapeTree(&data->mask_tree);
-	data->mask_tree = SDL_CalculateShapeTree(*shapeMode,shape,SDL_FALSE);
+	data->mask_tree = SDL_CalculateShapeTree(*shapeMode,shape);
 	
 	/*
 	 * Start with empty region 
@@ -78,7 +82,7 @@ int Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowS
 	 */
 	windowdata=(SDL_WindowData *)(shaper->window->driverdata);
 	hwnd = windowdata->hwnd;
-	SetWindowRgn(hwnd, mask_region, TRUE);
+	SDL_assert(SetWindowRgn(hwnd, mask_region, TRUE) != 0);
 	
 	return 0;
 }
