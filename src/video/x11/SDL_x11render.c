@@ -314,6 +314,8 @@ X11_AddRenderDriver(_THIS)
         XRenderPictFormat *pict_format;
         Uint32 format;
         int i = 0;
+        /* Convert each XRenderPictFormat into appropriate
+         * SDLPixelFormatEnum. */
         while (info->num_texture_formats < 50) {
             pict_format =
                 XRenderFindFormat(data->display, PictFormatType, &templ, i++);
@@ -326,6 +328,7 @@ X11_AddRenderDriver(_THIS)
             else
                 break;
         }
+        /* Update the capabilities of the renderer. */
         info->blend_modes |= (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD |
                              SDL_BLENDMODE_MOD | SDL_BLENDMODE_MASK);
         info->scale_modes |= (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW |
@@ -439,37 +442,67 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
         /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 32);
+        if (!data->stencil) {
+            SDL_SetError("XCreatePixmap() failed.");
+            return NULL;
+        }
         
         /* Create the GC for the clip mask. */
         data->stencil_gc = XCreateGC(data->display, data->stencil,
                                   GCGraphicsExposures, &gcv);
+        /* Set the GC parameters. */
         XSetBackground(data->display, data->stencil_gc, 0);
         XSetForeground(data->display, data->stencil_gc, 0);
         XFillRectangle(data->display, data->stencil, data->stencil_gc,
                        0, 0, window->w, window->h);
         XSetForeground(data->display, data->stencil_gc, 0xFFFFFFFF);
+
+        /* Create an XRender Picture for the clip mask. */
         data->stencil_pict =
             XRenderCreatePicture(data->display, data->stencil,
                                  XRenderFindStandardFormat(data->display,
                                                            PictStandardARGB32),
                                  0, NULL);
+        if (!data->stencil_pict) {
+            SDL_SetError("XRenderCreatePicture() failed.");
+            return NULL;
+        }
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
         if (data->use_xdamage) {
             data->stencil_damage =
                 XDamageCreate(data->display, data->stencil, XDamageReportNonEmpty);
+            if (!data->stencil_damage) {
+                SDL_SetError("XDamageCreate() failed.");
+                return NULL;
+            }
             XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
         }
 #endif
+        /* Create a brush pixmap for the color being
+         * drawn at any given time. */
         data->brush =
             XCreatePixmap(data->display, data->xwindow, 1, 1, 32);
+        if (!data->brush) {
+            SDL_SetError("XCreatePixmap() failed.");
+            return NULL;
+        }
+
+        /* Set some parameters for the brush. */
         XRenderPictureAttributes brush_attr;
         brush_attr.repeat = RepeatNormal;
+        /* Create an XRender Picture for the brush
+         * with the above parameters. */
         data->brush_pict =
             XRenderCreatePicture(data->display, data->brush,
                                  XRenderFindStandardFormat(data->display,
                                                            PictStandardARGB32),
                                  CPRepeat, &brush_attr);
-        // Set the default blending mode.
+        if (!data->brush_pict) {
+            SDL_SetError("XRenderCreatePicture() failed.");
+            return NULL;
+        }
+        // FIXME: Is the following necessary?
+        /* Set the default blending mode. */
         renderer->blendMode = SDL_BLENDMODE_BLEND;
         data->blend_op = PictOpOver;
     }
@@ -513,14 +546,14 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
                 XCreatePixmap(data->display, data->xwindow, window->w, window->h,
                               displaydata->depth);
         }
-        if (data->pixmaps[i] == None) {
+        if (!data->pixmaps[i]) {
             X11_DestroyRenderer(renderer);
             SDL_SetError("XCreatePixmap() failed");
             return NULL;
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (data->use_xrender) {
-            /* Create xrender pictures for each of the pixmaps
+            /* Create XRender pictures for each of the pixmaps
              * and clear the pixmaps. */
             data->pixmap_picts[i] = 
                 XRenderCreatePicture(data->display,
@@ -563,6 +596,8 @@ X11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->current_pixmap = 0;
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
+    /* When using XRender the drawable format
+     * is not the same as the screen format. */
     if (data->use_xrender) {
         bpp = data->drawable_pict_fmt->depth;
         Rmask = ((data->drawable_pict_fmt->direct.redMask)
@@ -614,10 +649,19 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
         
         data->xwindow_pict_fmt =
             XRenderFindVisualFormat(data->display, data->visual);
+        if (!data->xwindow_pict_fmt) {
+            SDL_SetError("XRenderFindVisualFormat() failed.");
+            return -1;
+        }
+
         data->xwindow_pict =
             XRenderCreatePicture(data->display, data->xwindow,
                                  data->xwindow_pict_fmt, 0, NULL);
-        
+        if (!data->xwindow_pict) {
+            SDL_SetError("XRenderCreatePicture() failed.");
+            return -1;
+        }
+
         XRenderComposite(data->display,
                          PictOpClear,
                          data->xwindow_pict,
@@ -629,21 +673,32 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
                          window->w, window->h);
         
         XFreePixmap(data->display, data->stencil);
-        /* Create a clip mask that is used for rendering primitives. */
         data->stencil = XCreatePixmap(data->display, data->xwindow,
                                    window->w, window->h, 32);
-        
+        if (!data->stencil) {
+            SDL_SetError("XCreatePixmap() failed.");
+            return -1;
+        }
+
         XRenderFreePicture(data->display, data->stencil_pict);
         data->stencil_pict =
             XRenderCreatePicture(data->display, data->stencil,
                                  XRenderFindStandardFormat(data->display,
                                                            PictStandardARGB32),
                                  0, NULL);
+        if (!data->stencil_pict) {
+            SDL_SetError("XRenderCreatePicture() failed.");
+            return -1;
+        }
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
         XDamageDestroy(data->display, data->stencil_damage);
         if (data->use_xdamage) {
             data->stencil_damage =
                 XDamageCreate(data->display, data->stencil, XDamageReportNonEmpty);
+            if (!data->stencil_damage) {
+                SDL_SetError("XDamageCreate() failed.");
+                return -1;
+            }
             XDamageSubtract(data->display, data->stencil_damage, None, data->stencil_parts);
         }
 #endif
@@ -1020,6 +1075,8 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             SDL_SetError("XRenderCreatePicture() failed");
             return -1;
         }
+        // FIXME: Is the following required?
+        /* Set the default blending and scaling modes. */
         texture->blendMode = SDL_BLENDMODE_NONE;
         texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
         data->blend_op = PictOpSrc;
