@@ -24,48 +24,51 @@
 #include "SDL_shape.h"
 #include "SDL_cocoashape.h"
 
-SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window) {
-	SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
-	[data->nswindow setAlpha:1.0];
-	[data->nswindow setOpaque:YES];
-	[data->nswindow setStyleMask:NSBorderlessWindowMask];
-	SDL_Shaper* result = result = malloc(sizeof(SDL_WindowShaper));
-	result->window = window;
-	result->mode.mode = ShapeModeDefault;
-	result->mode.parameters.binarizationCutoff = 1;
-	result->usershownflag = 0;
-	window->shaper = result;
-	
-	SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
-	result->driverdata = data;
-	data->context = [data->nswindow graphicsContext];
-	data->saved = SDL_False;
-	data->rects = NULL;
-	data->count = 0;
-	
-	int resized_properly = Cocoa_ResizeWindowShape(window);
-	assert(resized_properly == 0);
-	return result;
+SDL_WindowShaper*
+Cocoa_CreateShaper(SDL_Window* window) {
+    SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
+    [data->nswindow setAlpha:1.0];
+    [data->nswindow setOpaque:YES];
+    [data->nswindow setStyleMask:NSBorderlessWindowMask];
+    SDL_Shaper* result = result = malloc(sizeof(SDL_WindowShaper));
+    result->window = window;
+    result->mode.mode = ShapeModeDefault;
+    result->mode.parameters.binarizationCutoff = 1;
+    result->usershownflag = 0;
+    window->shaper = result;
+    
+    SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
+    result->driverdata = data;
+    data->context = [data->nswindow graphicsContext];
+    data->saved = SDL_False;
+    data->rects = NULL;
+    data->count = 0;
+    
+    int resized_properly = Cocoa_ResizeWindowShape(window);
+    assert(resized_properly == 0);
+    return result;
 }
 
-int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-	SDL_WindowData* data = (SDL_WindowData*)shaper->window->driverdata;
-	if(data->saved == SDL_True) {
-		[data->context restoreGraphicsState];
-		data->saved = SDL_False;
-	}
-		
-	[data->context saveGraphicsState];
-	data->saved = SDL_True;
-	
-	[[NSColor clearColor] set];
-	NSRectFill([[data->nswindow contentView] frame]);
-	/* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
+int
+Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+    SDL_WindowData* data = (SDL_WindowData*)shaper->window->driverdata;
+    if(data->saved == SDL_True) {
+        [data->context restoreGraphicsState];
+        data->saved = SDL_False;
+    }
+        
+    [data->context saveGraphicsState];
+    data->saved = SDL_True;
+    
+    [[NSColor clearColor] set];
+    NSRectFill([[data->nswindow contentView] frame]);
+    /* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
            Windoze shape-calculation code: a list of rectangles.  This will work... I think. */
 }
 
-int Cocoa_ResizeWindowShape(SDL_Window *window) {
-	SDL_ShapeData* data = window->shaper->driverdata;
-	assert(data != NULL);
-	return 0;
+int
+Cocoa_ResizeWindowShape(SDL_Window *window) {
+    SDL_ShapeData* data = window->shaper->driverdata;
+    assert(data != NULL);
+    return 0;
 }

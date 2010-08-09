@@ -25,80 +25,84 @@
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
 
-SDL_Window* X11_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
-	return SDL_CreateWindow(title,x,y,w,h,flags);
+SDL_Window*
+X11_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
+    return SDL_CreateWindow(title,x,y,w,h,flags);
 }
 
-SDL_WindowShaper* X11_CreateShaper(SDL_Window* window) {
-	SDL_WindowShaper* result = NULL;
+SDL_WindowShaper* 
+X11_CreateShaper(SDL_Window* window) {
+    SDL_WindowShaper* result = NULL;
 
 #if SDL_VIDEO_DRIVER_X11_XSHAPE
-	if (SDL_X11_HAVE_XSHAPE) {  /* Make sure X server supports it. */
-		result = malloc(sizeof(SDL_WindowShaper));
-		result->window = window;
-		result->mode.mode = ShapeModeDefault;
-		result->mode.parameters.binarizationCutoff = 1;
-		result->usershownflag = 0;
-		SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
-		result->driverdata = data;
-		data->bitmapsize = 0;
-		data->bitmap = NULL;
-		window->shaper = result;
-		int resized_properly = X11_ResizeWindowShape(window);
-		assert(resized_properly == 0);
-	}
+    if (SDL_X11_HAVE_XSHAPE) {  /* Make sure X server supports it. */
+        result = malloc(sizeof(SDL_WindowShaper));
+        result->window = window;
+        result->mode.mode = ShapeModeDefault;
+        result->mode.parameters.binarizationCutoff = 1;
+        result->usershownflag = 0;
+        SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
+        result->driverdata = data;
+        data->bitmapsize = 0;
+        data->bitmap = NULL;
+        window->shaper = result;
+        int resized_properly = X11_ResizeWindowShape(window);
+        assert(resized_properly == 0);
+    }
 #endif
 
-	return result;
+    return result;
 }
 
-int X11_ResizeWindowShape(SDL_Window* window) {
-	SDL_ShapeData* data = window->shaper->driverdata;
-	assert(data != NULL);
-	
-	unsigned int bitmapsize = window->w / 8;
-	if(window->w % 8 > 0)
-		bitmapsize += 1;
-	bitmapsize *= window->h;
-	if(data->bitmapsize != bitmapsize || data->bitmap == NULL) {
-		data->bitmapsize = bitmapsize;
-		if(data->bitmap != NULL)
-			free(data->bitmap);
-		data->bitmap = malloc(data->bitmapsize);
-		if(data->bitmap == NULL) {
-			SDL_SetError("Could not allocate memory for shaped-window bitmap.");
-			return -1;
-		}
-	}
-	memset(data->bitmap,0,data->bitmapsize);
-	
-	window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
-	
-	return 0;
+int 
+X11_ResizeWindowShape(SDL_Window* window) {
+    SDL_ShapeData* data = window->shaper->driverdata;
+    assert(data != NULL);
+    
+    unsigned int bitmapsize = window->w / 8;
+    if(window->w % 8 > 0)
+        bitmapsize += 1;
+    bitmapsize *= window->h;
+    if(data->bitmapsize != bitmapsize || data->bitmap == NULL) {
+        data->bitmapsize = bitmapsize;
+        if(data->bitmap != NULL)
+            free(data->bitmap);
+        data->bitmap = malloc(data->bitmapsize);
+        if(data->bitmap == NULL) {
+            SDL_SetError("Could not allocate memory for shaped-window bitmap.");
+            return -1;
+        }
+    }
+    memset(data->bitmap,0,data->bitmapsize);
+    
+    window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
+    
+    return 0;
 }
-	
-int X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-	if(shaper == NULL || shape == NULL || shaper->driverdata == NULL)
-		return -1;
+    
+int 
+X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+    if(shaper == NULL || shape == NULL || shaper->driverdata == NULL)
+        return -1;
 
 #if SDL_VIDEO_DRIVER_X11_XSHAPE
-	if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
-		return -2;
-	if(shape->w != shaper->window->w || shape->h != shaper->window->h)
-		return -3;
-	SDL_ShapeData *data = shaper->driverdata;
-	
-	/* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
-	SDL_CalculateShapeBitmap(shaper->mode,shape,data->bitmap,8);
-		
-	SDL_WindowData *windowdata = (SDL_WindowData*)(shaper->window->driverdata);
-	Pixmap shapemask = XCreateBitmapFromData(windowdata->videodata->display,windowdata->xwindow,data->bitmap,shaper->window->w,shaper->window->h);
-	
-	XShapeCombineMask(windowdata->videodata->display,windowdata->xwindow, ShapeBounding, 0, 0,shapemask, ShapeSet);
-	XSync(windowdata->videodata->display,False);
+    if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
+        return -2;
+    if(shape->w != shaper->window->w || shape->h != shaper->window->h)
+        return -3;
+    SDL_ShapeData *data = shaper->driverdata;
+    
+    /* Assume that shaper->alphacutoff already has a value, because SDL_SetWindowShape() should have given it one. */
+    SDL_CalculateShapeBitmap(shaper->mode,shape,data->bitmap,8);
+        
+    SDL_WindowData *windowdata = (SDL_WindowData*)(shaper->window->driverdata);
+    Pixmap shapemask = XCreateBitmapFromData(windowdata->videodata->display,windowdata->xwindow,data->bitmap,shaper->window->w,shaper->window->h);
+    
+    XShapeCombineMask(windowdata->videodata->display,windowdata->xwindow, ShapeBounding, 0, 0,shapemask, ShapeSet);
+    XSync(windowdata->videodata->display,False);
 
-	XFreePixmap(windowdata->videodata->display,shapemask);
+    XFreePixmap(windowdata->videodata->display,shapemask);
 #endif
 
-	return 0;
+    return 0;
 }
