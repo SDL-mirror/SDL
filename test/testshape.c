@@ -44,7 +44,6 @@ int main(int argc,char** argv) {
 	LoadedPicture* pictures;
 	int i, j;
 	SDL_PixelFormat* format = NULL;
-	Uint32 format_enum;
 	SDL_Window *window;
 	SDL_Color black = {0,0,0,0xff};
 	SDL_Event event;

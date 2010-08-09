@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_cocoavideo.h"
+#include "SDL_cocoashape.h"
 #include "SDL_assert.h"
 
 /* Initialization/Query functions */

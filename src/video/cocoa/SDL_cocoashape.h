@@ -20,14 +20,25 @@
     eligottlieb@gmail.com
 */
 
+#include "SDL_config.h"
+
+#ifndef _SDL_cocoashape_h
+#define _SDL_cocoashape_h
+
+#include "SDL_stdinc.h"
+#include "SDL_video.h"
+#include "SDL_shape.h"
+#include "../SDL_shape_internals.h"
+
 typedef struct {
 	NSGraphicsContext* context;
-	SDL_Bool saved;
+	SDL_bool saved;
 	
-	NSRect* rects;
-	Uint32 count;
+	SDL_ShapeTree* shape;
 } SDL_ShapeData;
 
 extern SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window);
 extern int Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode);
 extern int Cocoa_ResizeWindowShape(SDL_Window *window);
+
+#endif
