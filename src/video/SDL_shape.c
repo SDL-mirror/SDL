@@ -226,7 +226,7 @@ SDL_FreeShapeTree(SDL_ShapeTree** shapeTree) {
 }
 
 int
-SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode) {
     int result;
     if(window == NULL || !SDL_IsShapedWindow(window))
         //The window given was not a shapeable window.
@@ -235,9 +235,9 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
         //Invalid shape argument.
         return SDL_INVALID_SHAPE_ARGUMENT;
     
-    if(shapeMode != NULL)
-        window->shaper->mode = *shapeMode;
-    result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
+    if(shape_mode != NULL)
+        window->shaper->mode = *shape_mode;
+    result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
     window->shaper->hasshape = SDL_TRUE;
     if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
         SDL_ShowWindow(window);
@@ -254,9 +254,9 @@ SDL_WindowHasAShape(SDL_Window *window) {
 }
 
 int
-SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
+SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shape_mode) {
     if(window != NULL && SDL_IsShapedWindow(window)) {
-        if(shapeMode == NULL) {
+        if(shape_mode == NULL) {
             if(SDL_WindowHasAShape(window))
                 //The window given has a shape.
                 return 0;
@@ -265,7 +265,7 @@ SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode) {
                 return SDL_WINDOW_LACKS_SHAPE;
         }
         else {
-            *shapeMode = window->shaper->mode;
+            *shape_mode = window->shaper->mode;
             return 0;
         }
     }
