@@ -104,7 +104,7 @@ SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitm
                     break;
                 case(ShapeModeColorKey):
                     key = mode.parameters.colorKey;
-                    mask_value = ((key.r != r && key.g != g && key.b != b) ? 1 : 0);
+                    mask_value = ((key.r != r || key.g != g || key.b != b) ? 1 : 0);
                     break;
             }
             bitmap[bitmap_pixel / ppb] |= mask_value << (7 - ((ppb - 1) - (bitmap_pixel % ppb)));
@@ -237,7 +237,6 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
     
     if(shapeMode != NULL)
         window->shaper->mode = *shapeMode;
-    //TODO: Platform-specific implementations of SetWindowShape.  X11 is finished.  Win32 is finished.  Debugging is in progress on both.
     result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
     window->shaper->hasshape = SDL_TRUE;
     if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {

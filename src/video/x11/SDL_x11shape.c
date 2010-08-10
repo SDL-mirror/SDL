@@ -81,12 +81,12 @@ X11_ResizeWindowShape(SDL_Window* window) {
 }
     
 int
-X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
+X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode) {
     if(shaper == NULL || shape == NULL || shaper->driverdata == NULL)
         return -1;
 
 #if SDL_VIDEO_DRIVER_X11_XSHAPE
-    if(!SDL_ISPIXELFORMAT_ALPHA(SDL_MasksToPixelFormatEnum(shape->format->BitsPerPixel,shape->format->Rmask,shape->format->Gmask,shape->format->Bmask,shape->format->Amask)))
+    if(shape->format->Amask == 0 && SDL_SHAPEMODEALPHA(shape_mode->mode))
         return -2;
     if(shape->w != shaper->window->w || shape->h != shaper->window->h)
         return -3;

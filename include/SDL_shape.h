@@ -89,6 +89,9 @@ typedef enum {
 	/** \brief A color key is applied. */
 	ShapeModeColorKey
 } WindowShapeMode;
+
+#define SDL_SHAPEMODEALPHA(mode) (mode == ShapeModeDefault || mode == ShapeModeBinarizeAlpha || mode == ShapeModeReverseBinarizeAlpha)
+
 /** \brief A union containing parameters for shaped windows. */
 typedef union {
 	/** \brief a cutoff alpha value for binarization of the window shape's alpha channel. */
