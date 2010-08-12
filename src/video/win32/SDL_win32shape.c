@@ -105,11 +105,11 @@ Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShape
     /*
      * Set the new region mask for the window 
      */
-	mask_region = CreatePolyPolygonRgn(polygons,polygonVertexNumbers,num_rects,WINDING);
+    mask_region = CreatePolyPolygonRgn(polygons,polygonVertexNumbers,num_rects,WINDING);
     SetWindowRgn(((SDL_WindowData *)(shaper->window->driverdata))->hwnd, mask_region, TRUE);
 
-	SDL_free(polygons);
-	SDL_free(polygonVertexNumbers);
+    SDL_free(polygons);
+    SDL_free(polygonVertexNumbers);
     
     return 0;
 }

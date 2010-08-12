@@ -240,6 +240,7 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
     result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shapeMode);
     window->shaper->hasshape = SDL_TRUE;
     if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
+        SDL_SetWindowPosition(window,window->x,window->y);
         SDL_ShowWindow(window);
         window->shaper->usershownflag &= !SDL_WINDOW_SHOWN;
     }
