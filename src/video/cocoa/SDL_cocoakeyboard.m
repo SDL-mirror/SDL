@@ -144,6 +144,8 @@
 {
     [_markedText release];
     _markedText = nil;
+
+    SDL_SendEditingText("", 0, 0);
 }
 
 - (NSRect) firstRectForCharacterRange: (NSRange) theRange

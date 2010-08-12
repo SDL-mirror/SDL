@@ -136,11 +136,13 @@ static void RenderText(SDL_Surface *sur,
                         int x, int y,
                         SDL_Color color)
 {
-    SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, text, color);
-    SDL_Rect dest = { x, y, textSur->w, textSur->h };
+    if (text && strlen(text)) {
+        SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, text, color);
+        SDL_Rect dest = { x, y, textSur->w, textSur->h };
 
-    SDL_BlitSurface(textSur, NULL, sur, &dest);
-    SDL_FreeSurface(textSur);
+        SDL_BlitSurface(textSur, NULL, sur, &dest);
+        SDL_FreeSurface(textSur);
+    }
 }
 #endif
 
