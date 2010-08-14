@@ -8,7 +8,7 @@
 #define SHAPED_WINDOW_Y 150
 #define SHAPED_WINDOW_DIMENSION 640
 
-#define TICK_INTERVAL 1000/60
+#define TICK_INTERVAL 1000/10
 
 typedef struct LoadedPicture {
 	SDL_Surface *surface;
@@ -32,11 +32,11 @@ void render(SDL_Window* window,SDL_Texture *texture,SDL_Rect texture_dimensions)
 static Uint32 next_time;
 
 Uint32 time_left() {
-	Uint32 now = SDL_GetTicks();
-	if(next_time <= now)
-		return 0;
+    Uint32 now = SDL_GetTicks();
+    if(next_time <= now)
+        return 0;
 	else
-		return next_time - now;
+        return next_time - now;
 }
 
 int main(int argc,char** argv) {

@@ -112,7 +112,7 @@ typedef struct SDL_WindowShapeMode {
  *
  * \param window The shaped window whose parameters should be set.
  * \param shape A surface encoding the desired shape for the window.
- * \param shapeMode The parameters to set for the shaped window.
+ * \param shape_mode The parameters to set for the shaped window.
  *
  * \return 0 on success, SDL_INVALID_SHAPE_ARGUMENT on invalid an invalid shape argument, or SDL_NONSHAPEABLE_WINDOW
  *           if the SDL_Window* given does not reference a valid shaped window.
@@ -120,22 +120,22 @@ typedef struct SDL_WindowShapeMode {
  * \sa SDL_WindowShapeMode
  * \sa SDL_GetShapedWindowMode.
  */
-extern DECLSPEC int SDLCALL SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode);
+extern DECLSPEC int SDLCALL SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode);
 
 /**
  * \brief Get the shape parameters of a shaped window.
  *
  * \param window The shaped window whose parameters should be retrieved.
- * \param shapeMode An empty shape-mode structure to fill, or NULL to check whether the window has a shape.
+ * \param shape_mode An empty shape-mode structure to fill, or NULL to check whether the window has a shape.
  *
- * \return 0 if the window has a shape and, provided shapeMode was not NULL, shapeMode has been filled with the mode
+ * \return 0 if the window has a shape and, provided shape_mode was not NULL, shape_mode has been filled with the mode
  *           data, SDL_NONSHAPEABLE_WINDOW if the SDL_Window given is not a shaped window, or SDL_WINDOW_LACKS_SHAPE if
  *           the SDL_Window* given is a shapeable window currently lacking a shape.
  *
  * \sa SDL_WindowShapeMode
  * \sa SDL_SetWindowShape
  */
-extern DECLSPEC int SDLCALL SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shapeMode);
+extern DECLSPEC int SDLCALL SDL_GetShapedWindowMode(SDL_Window *window,SDL_WindowShapeMode *shape_mode);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
