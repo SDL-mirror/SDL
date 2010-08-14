@@ -330,9 +330,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
                 return;
             }
         } 
+
+        SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
-        SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
+	/* Make the origin the upper left instead of the lower left */
+	y = 1.0f - y;
+
         switch (type) {
         case COCOA_TOUCH_DOWN:
             SDL_SendFingerDown(touchId, fingerId, SDL_TRUE, x, y, 1);
