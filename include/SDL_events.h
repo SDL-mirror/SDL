@@ -382,12 +382,12 @@ typedef enum
  *  the back of the event queue.
  *  
  *  If \c action is ::SDL_PEEKEVENT, up to \c numevents events at the front
- *  of the event queue, matching \c mask, will be returned and will not
- *  be removed from the queue.
+ *  of the event queue, within the specified minimum and maximum type,
+ *  will be returned and will not be removed from the queue.
  *  
  *  If \c action is ::SDL_GETEVENT, up to \c numevents events at the front 
- *  of the event queue, matching \c mask, will be returned and will be
- *  removed from the queue.
+ *  of the event queue, within the specified minimum and maximum type,
+ *  will be returned and will be removed from the queue.
  *  
  *  \return The number of events actually stored, or -1 if there was an error.
  *  
