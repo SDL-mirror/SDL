@@ -26,6 +26,7 @@ static long _getTime(void){
 }
 
 JNIEnv* mEnv = NULL;
+JNIEnv* mAudioThreadEnv = NULL; //See the note below for why this is necessary
 JavaVM* mVM = NULL;
 
 //Main activity
@@ -35,6 +36,7 @@ jclass mActivityInstance;
 jmethodID midCreateGLContext;
 jmethodID midFlipBuffers;
 jmethodID midEnableFeature;
+jmethodID midUpdateAudio;
 
 extern "C" int SDL_main();
 extern "C" int Android_OnKeyDown(int keycode);
@@ -53,6 +55,7 @@ static const int FEATURE_ACCEL = 2;
 
 //Accelerometer data storage
 float fLastAccelerometer[3];
+
 
 /*******************************************************************************
                  Functions called by JNI
@@ -77,8 +80,10 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
     midEnableFeature = mEnv->GetStaticMethodID(cls,"enableFeature","(II)V");
+    midUpdateAudio = mEnv->GetStaticMethodID(cls,"updateAudio","([B)V");
 
-    if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature){
+    if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature ||
+        !midUpdateAudio){
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
     }else{
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Good mids\n");
@@ -198,5 +203,34 @@ extern "C" void Android_EnableFeature(int featureid, bool enabled){
 
     mEnv->CallStaticVoidMethod(mActivityInstance, midEnableFeature, 
                                 featureid, (int)enabled); 
+}
+
+extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len){
+
+    //Annoyingly we can't just call into Java from any thread. Because the audio
+    //callback is dispatched from the SDL audio thread (that wasn't made from
+    //java, we have to do some magic here to let the JVM know about the thread.
+    //Because everything it touches on the Java side is static anyway, it's 
+    //not a big deal, just annoying.
+    if(!mAudioThreadEnv){
+        __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Need to set up audio thread env\n");
+
+        mJVM->AttachCurrentThread(&mAudioThreadEnv, NULL);
+
+        __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: ok\n");
+    }
+    
+    jbyteArray arr = mAudioThreadEnv->NewByteArray(len);
+
+    //blah. We probably should rework this so we avoid the copy. 
+    mAudioThreadEnv->SetByteArrayRegion(arr, 0, len, (jbyte *)buf);
+    
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: copied\n");
+
+    mAudioThreadEnv->CallStaticVoidMethod(  mActivityInstance, 
+                                            midUpdateAudio, arr );
+
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: invoked\n");
+    
 }
 

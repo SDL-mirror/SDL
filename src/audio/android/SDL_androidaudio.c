@@ -29,13 +29,38 @@
 #include "../SDL_audio_c.h"
 #include "SDL_androidaudio.h"
 
+extern void Android_UpdateAudioBuffer(unsigned char *buf, int len);
+
 #include <android/log.h>
 
 static int
 AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 {
+    SDL_AudioFormat test_format = SDL_FirstAudioFormat(this->spec.format);
+    int valid_datatype = 0;
+    
     //TODO: Sample rates etc
     __android_log_print(ANDROID_LOG_INFO, "SDL", "AndroidAudio Open\n");
+
+    this->hidden = SDL_malloc(sizeof(*(this->hidden)));
+    if (!this->hidden) {
+        SDL_OutOfMemory();
+        return 0;
+    }
+    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
+
+    while ((!valid_datatype) && (test_format)) {
+        this->spec.format = test_format;
+        switch (test_format) {
+        case AUDIO_S8:
+            /*case AUDIO_S16LSB: */
+            valid_datatype = 1;
+            break;
+        default:
+            test_format = SDL_NextAudioFormat();
+            break;
+        }
+    }
     
     return 1;
 }
@@ -45,13 +70,11 @@ AndroidAUD_PlayDevice(_THIS)
 {
     __android_log_print(ANDROID_LOG_INFO, "SDL", "AndroidAudio Play\n");
     
-    
 
     //playGenericSound(this->hidden->mixbuf, this->hidden->mixlen);
     
 #if 0
-//    sound->data = this->hidden->mixbuf;/* pointer to raw audio data */
-//    sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
+
 //    sound->rate = 22050; /* sample rate = 22050Hz */
 //    sound->vol = 127;    /* volume [0..127] for [min..max] */
 //    sound->pan = 64;     /* balance [0..127] for [left..right] */
@@ -64,6 +87,15 @@ AndroidAUD_PlayDevice(_THIS)
 static Uint8 *
 AndroidAUD_GetDeviceBuf(_THIS)
 {
+     //__android_log_print(ANDROID_LOG_INFO, "SDL", "****** get device buf\n");
+
+     
+    //    sound->data = this->hidden->mixbuf;/* pointer to raw audio data */
+//    sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
+
+
+    Android_UpdateAudioBuffer(this->hidden->mixbuf, this->hidden->mixlen);
+    
     return this->hidden->mixbuf;        /* is this right? */
 }
 
@@ -71,12 +103,14 @@ static void
 AndroidAUD_WaitDevice(_THIS)
 {
     /* stub */
+     __android_log_print(ANDROID_LOG_INFO, "SDL", "****** wait device buf\n");
 }
 
 static void
 AndroidAUD_CloseDevice(_THIS)
 {
     /* stub */
+     __android_log_print(ANDROID_LOG_INFO, "SDL", "****** close device buf\n");
 }
 
 static int

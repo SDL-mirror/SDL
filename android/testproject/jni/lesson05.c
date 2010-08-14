@@ -428,7 +428,7 @@ void testAudio(){
     
     while (SDL_GetAudioStatus() == SDL_AUDIO_PLAYING){
          //__android_log_print(ANDROID_LOG_INFO, "SDL","Still playing\n");
-        //SDL_Delay(100);
+        SDL_Delay(100);
     }
 
      __android_log_print(ANDROID_LOG_INFO, "SDL","Closing down\n");
@@ -511,7 +511,7 @@ int SDL_main( int argc, char **argv )
     resizeWindow( SCREEN_WIDTH, SCREEN_HEIGHT );
 
 
-    //testAudio();
+    testAudio();
 
 
     /* wait for events */ 
