@@ -1,0 +1,16 @@
+==============================================================================
+Building the Simple DirectMedia Layer for Android
+==============================================================================
+
+Requirements: Android NDK r4 or later
+
+Instructions:
+1. Edit android/config.cfg to point to the location of the NDK
+2. Run 'make -f Makefile.android'. If all goes well, libsdl.a should be created
+3. Place your application source files in android/testproject/jni
+4. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
+4. Run 'ant' in android/testproject. This compiles the .java and eventually 
+creates a .apk with the C source embedded
+6. 'ant install' will push the apk to the device
+
+
