@@ -40,7 +40,7 @@ X11_CreateShaper(SDL_Window* window) {
         result->window = window;
         result->mode.mode = ShapeModeDefault;
         result->mode.parameters.binarizationCutoff = 1;
-        result->usershownflag = 0;
+        result->userx = result->usery = 0;
         SDL_ShapeData* data = SDL_malloc(sizeof(SDL_ShapeData));
         result->driverdata = data;
         data->bitmapsize = 0;
@@ -75,7 +75,9 @@ X11_ResizeWindowShape(SDL_Window* window) {
     }
     memset(data->bitmap,0,data->bitmapsize);
     
-    window->shaper->usershownflag |= window->flags & SDL_WINDOW_SHOWN;
+    window->shaper->userx = window->x;
+    window->shaper->usery = window->y;
+    SDL_SetWindowPosition(window,-1000,-1000);
     
     return 0;
 }

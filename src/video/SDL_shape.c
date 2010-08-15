@@ -32,11 +32,12 @@
 
 SDL_Window*
 SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
-    SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,flags | SDL_WINDOW_BORDERLESS & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_SHOWN);
+    SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,flags | SDL_WINDOW_BORDERLESS & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_RESIZABLE);
     if(result != NULL) {
         result->shaper = result->display->device->shape_driver.CreateShaper(result);
         if(result->shaper != NULL) {
-            result->shaper->usershownflag = flags & SDL_WINDOW_SHOWN;
+            result->shaper->userx = x;
+            result->shaper->usery = y;
             result->shaper->mode.mode = ShapeModeDefault;
             result->shaper->mode.parameters.binarizationCutoff = 1;
             result->shaper->hasshape = SDL_FALSE;
@@ -239,9 +240,10 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
         window->shaper->mode = *shape_mode;
     result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
     window->shaper->hasshape = SDL_TRUE;
-    if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
-        SDL_ShowWindow(window);
-        window->shaper->usershownflag &= !SDL_WINDOW_SHOWN;
+    if(window->shaper->userx == 0 && window->shaper->usery == 0) {
+        SDL_SetWindowPosition(window,window->shaper->userx,window->shaper->usery);
+        window->shaper->userx = 0;
+        window->shaper->usery = 0;
     }
     return result;
 }

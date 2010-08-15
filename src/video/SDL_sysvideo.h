@@ -141,8 +141,8 @@ struct SDL_WindowShaper
     /* The window associated with the shaper */
     SDL_Window *window;
     
-    /* The user's specified SDL_WINDOW_SHOWN flag, for use once the user gives the window a shape. */
-    Uint32 usershownflag;
+    /* The user's specified coordinates for the window, for once we give it a shape. */
+    Uint32 userx,usery;
     
     /* The parameters for shape calculation. */
     SDL_WindowShapeMode mode;
