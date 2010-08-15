@@ -462,6 +462,8 @@ int SDL_SendGestureDollar(SDL_GestureTouch* touch,
   */
   event.dgesture.gestureId = gestureId;
   event.dgesture.error = error;  
+  //A finger came up to trigger this event.
+  event.dgesture.numFingers = touch->numDownFingers + 1; 
   return SDL_PushEvent(&event) > 0;
 }
 
@@ -471,7 +473,6 @@ int SDL_SendDollarRecord(SDL_GestureTouch* touch,SDL_GestureID gestureId) {
   event.dgesture.type = SDL_DOLLARRECORD;
   event.dgesture.touchId = touch->id;
   event.dgesture.gestureId = gestureId;
-
   return SDL_PushEvent(&event) > 0;
 }
 

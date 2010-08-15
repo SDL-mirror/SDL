@@ -351,6 +351,7 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 	    event.tfinger.touchId = id;
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
+	    event.tfinger.pressure = pressure;
 	    event.tfinger.state = touch->buttonstate;
 	    event.tfinger.windowID = touch->focus ? touch->focus->id : 0;
 	    event.tfinger.fingerId = fingerid;
@@ -470,8 +471,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
 	    event.tfinger.x = x;
 	    event.tfinger.y = y;
 	    event.tfinger.dx = xrel;
-	    event.tfinger.dy = yrel;
-	    
+	    event.tfinger.dy = yrel;	    
 		
 	    event.tfinger.pressure = pressure;
 	    event.tfinger.state = touch->buttonstate;

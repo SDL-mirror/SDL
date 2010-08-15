@@ -34,14 +34,6 @@ Here is a more manual method:
 5.  Delete the contents of main.m and program your app as a regular SDL program instead.  You may replace main.m with your own main.c, but you must tell XCode not to use the project prefix file, as it includes Objective-C code.
 
 ==============================================================================
-Notes -- Touch Input
-==============================================================================
-
-Touch input in SDL for iPhone OS is presently exposed through SDL's mouse input API.  Multi-touch input is reported as multiple mice, with each touch associated with a specific mouse.  This association stays coherent from the time the touch starts to the time a touch ends.
-
-By default, multi-touch is turned ON.  This requires some care, because if you simply respond to mouse events without checking which mouse caused the event, you may end up fetching data from the wrong mouse, ie, from an incorrect or invalid touch.  To turn multi-touch OFF, you can recompile SDL for iPhone with the macro SDL_IPHONE_MULTIPLE_MICE (found in SDL_config_iphoneos.h) set to 0.
-
-==============================================================================
 Notes -- Accelerometer as Joystick
 ==============================================================================
 

@@ -50,11 +50,11 @@ struct SDL_Finger {
   SDL_FingerID id;
   Uint16 x;
   Uint16 y;
+  Uint16 pressure;
   Uint16 xdelta;
   Uint16 ydelta;
   Uint16 last_x, last_y,last_pressure;  /* the last reported coordinates */
   SDL_bool down;
-  Uint16 pressure;
 };
 
 typedef struct SDL_Touch SDL_Touch;

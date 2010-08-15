@@ -340,6 +340,7 @@ typedef struct SDL_DollarGestureEvent
     Uint32 windowID;    /**< The window with mouse focus, if any */
     SDL_TouchID touchId;        /**< The touch device index */
     SDL_GestureID gestureId;
+    Uint32 numFingers;
     float error;
   /*
     //TODO: Enable to give location?
