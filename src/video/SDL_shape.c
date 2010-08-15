@@ -156,7 +156,7 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
                     break;
                 case(ShapeModeColorKey):
                     key = mode.parameters.colorKey;
-                    pixel_opaque = ((key.r == r && key.g == g && key.b == b) ? SDL_TRUE : SDL_FALSE);
+                    pixel_opaque = ((key.r != r || key.g != g || key.b != b) ? SDL_TRUE : SDL_FALSE);
                     break;
             }
             if(last_opaque == -1)
@@ -170,14 +170,14 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
                 next.x = dimensions.x;
                 next.y = dimensions.y;
                 result->data.children.upleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
-                next.x = dimensions.w / 2;
+                next.x += next.w;
                 //Unneeded: next.y = dimensions.y;
                 result->data.children.upright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
                 next.x = dimensions.x;
-                next.y = dimensions.h / 2;
+                next.y += next.h;
                 result->data.children.downleft = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
-                next.x = dimensions.w / 2;
-                //Unneeded: next.y = dimensions.h / 2 + 1;
+                next.x += next.w;
+                //Unneeded: next.y = dimensions.y + dimensions.h /2;
                 result->data.children.downright = (struct SDL_ShapeTree *)RecursivelyCalculateShapeTree(mode,mask,next);
                 return result;
             }
@@ -214,15 +214,15 @@ SDL_TraverseShapeTree(SDL_ShapeTree *tree,SDL_TraversalFunction function,void* c
 }
 
 void
-SDL_FreeShapeTree(SDL_ShapeTree** shapeTree) {
-    if((*shapeTree)->kind == QuadShape) {
-        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.upleft);
-        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.upright);
-        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.downleft);
-        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shapeTree)->data.children.downright);
+SDL_FreeShapeTree(SDL_ShapeTree** shape_tree) {
+    if((*shape_tree)->kind == QuadShape) {
+        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shape_tree)->data.children.upleft);
+        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shape_tree)->data.children.upright);
+        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shape_tree)->data.children.downleft);
+        SDL_FreeShapeTree((SDL_ShapeTree **)&(*shape_tree)->data.children.downright);
     }
-    SDL_free(*shapeTree);
-    *shapeTree = NULL;
+    SDL_free(*shape_tree);
+    *shape_tree = NULL;
 }
 
 int
@@ -240,7 +240,6 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
     result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
     window->shaper->hasshape = SDL_TRUE;
     if((window->shaper->usershownflag & SDL_WINDOW_SHOWN) == SDL_WINDOW_SHOWN) {
-        SDL_SetWindowPosition(window,window->x,window->y);
         SDL_ShowWindow(window);
         window->shaper->usershownflag &= !SDL_WINDOW_SHOWN;
     }

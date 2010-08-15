@@ -21,6 +21,7 @@
 */
 
 #include <stdio.h>
+#include "SDL_assert.h"
 #include "SDL_win32shape.h"
 #include "SDL_win32video.h"
 
@@ -43,47 +44,31 @@ Win32_CreateShaper(SDL_Window * window) {
     return result;
 }
 
-typedef struct {
-	POINT corners[4];
-	void* next;
-} SDL_ShapeRect;
-
 void
 CombineRectRegions(SDL_ShapeTree* node,void* closure) {
 	char debug_str[200];
-    SDL_ShapeRect* rect_list = *((SDL_ShapeRect**)closure);
+    HRGN mask_region = *((HRGN*)closure),temp_region = NULL;
     if(node->kind == OpaqueShape) {
-        SDL_ShapeRect* rect = SDL_malloc(sizeof(SDL_ShapeRect));
-		sprintf_s(&debug_str[0],200,"x: %u y: %u, x+w: %u, y+h: %u\n",
+        //Win32 API regions exclude their outline, so we widen the region by one pixel in each direction to include the real outline.
+        sprintf_s(&debug_str[0],200,"x: %u y: %u, x+w: %u, y+h: %u\n",
                   node->data.shape.x,node->data.shape.y,
 				  node->data.shape.x + node->data.shape.w,node->data.shape.y + node->data.shape.h);
         OutputDebugStringA(debug_str);
 		OutputDebugStringA("Converting SDL_ShapeTree opaque node to Windows rectangle.\n");
-        rect->corners[0].x = node->data.shape.x; rect->corners[0].y = node->data.shape.y;
-        rect->corners[1].x = node->data.shape.x + node->data.shape.w; rect->corners[1].y = node->data.shape.y;
-        rect->corners[2].x = node->data.shape.x + node->data.shape.w; rect->corners[2].y = node->data.shape.y + node->data.shape.h;
-        rect->corners[3].x = node->data.shape.x; rect->corners[3].y = node->data.shape.y + node->data.shape.h;
-        rect->next = *((SDL_ShapeRect**)closure);
-        *((SDL_ShapeRect**)closure) = rect;
-    }
-}
-
-Uint32 num_shape_rects(SDL_ShapeRect* rect) {
-    if(rect == NULL)
-        return 0;
-	else
-		return 1 + num_shape_rects(rect->next);
+        temp_region = CreateRectRgn(node->data.shape.x - 1,node->data.shape.y - 1,node->data.shape.x + node->data.shape.w + 1,node->data.shape.y + node->data.shape.h + 1);
+        if(mask_region != NULL) {
+            CombineRgn(mask_region,mask_region,temp_region,RGN_OR);
+            DeleteObject(temp_region);
+		}
+		else
+            *((HRGN*)closure) = temp_region;
+	}
 }
 
 int
 Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode) {
     SDL_ShapeData *data;
-    HRGN mask_region;
-	SDL_ShapeRect* rects = NULL,*old = NULL;
-	Uint16 num_rects = 0,i = 0;
-	int* polygonVertexNumbers = NULL;
-	POINT* polygons = NULL;
-	char debug_str[200];
+    HRGN mask_region = NULL;
 
     if (shaper == NULL || shape == NULL)
         return SDL_INVALID_SHAPE_ARGUMENT;
@@ -95,33 +80,10 @@ Win32_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShape
         SDL_FreeShapeTree(&data->mask_tree);
     data->mask_tree = SDL_CalculateShapeTree(*shape_mode,shape);
     
-    SDL_TraverseShapeTree(data->mask_tree,&CombineRectRegions,&rects);
-    num_rects = num_shape_rects(rects);
-    polygonVertexNumbers = (int*)SDL_malloc(sizeof(int)*num_rects);
-    for(i=0;i<num_rects;i++)
-        polygonVertexNumbers[i] = 4;
-    polygons = (POINT*)SDL_malloc(sizeof(POINT)*4*num_rects);
-    for(i=0;i<num_rects*4;i++) {
-		polygons[i] = rects->corners[i % 4];
-        if(i % 4 == 3) {
-			sprintf_s(&debug_str[0],200,"x: %u y: %u, x+w: %u, y+h: %u\n",
-                      rects->corners[0].x,rects->corners[0].y,
-                      rects->corners[2].x,rects->corners[2].y);
-            OutputDebugStringA(debug_str);
-            old = rects;
-            rects = rects->next;
-            SDL_free(old);
-		}
-	}
+    SDL_TraverseShapeTree(data->mask_tree,&CombineRectRegions,&mask_region);
+	SDL_assert(mask_region != NULL);
 
-    /*
-     * Set the new region mask for the window 
-     */
-    mask_region = CreatePolyPolygonRgn(polygons,polygonVertexNumbers,num_rects,WINDING);
     SetWindowRgn(((SDL_WindowData *)(shaper->window->driverdata))->hwnd, mask_region, TRUE);
-
-    SDL_free(polygons);
-    SDL_free(polygonVertexNumbers);
     
     return 0;
 }
