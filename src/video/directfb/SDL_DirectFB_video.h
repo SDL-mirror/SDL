@@ -78,49 +78,38 @@
 #define DFBENV_USE_LINUX_INPUT		"SDL_DIRECTFB_LINUX_INPUT"      /* Default: on  */
 #define DFBENV_USE_WM				"SDL_DIRECTFB_WM"       /* Default: off  */
 
-#define SDL_DFB_RELEASE(x) do { if ( (x) != NULL ) { x->Release(x); x = NULL; } } while (0)
+#define SDL_DFB_RELEASE(x) do { if ( (x) != NULL ) { SDL_DFB_CHECK(x->Release(x)); x = NULL; } } while (0)
 #define SDL_DFB_FREE(x) do { if ( (x) != NULL ) { SDL_free(x); x = NULL; } } while (0)
 #define SDL_DFB_UNLOCK(x) do { if ( (x) != NULL ) { x->Unlock(x); } } while (0)
 
 #if DEBUG
-#define SDL_DFB_DEBUG(x...) do { fprintf(LOG_CHANNEL, "%s:", __FUNCTION__); fprintf(LOG_CHANNEL, x); } while (0)
-#define SDL_DFB_DEBUGC(x...) do { fprintf(LOG_CHANNEL, x); } while (0)
-#else
-#define SDL_DFB_DEBUG(x...) do { } while (0)
-#define SDL_DFB_DEBUGC(x...) do { } while (0)
+/* FIXME: do something with DEBUG */
 #endif
 
 #define SDL_DFB_CONTEXT "SDL_DirectFB"
 
-#define SDL_DFB_ERR(x...) 							\
+static inline DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int src_line, const char *src_code) {
+	if (ret != DFB_OK) {
+		fprintf(LOG_CHANNEL, "%s <%d>:\n\t", src_file, src_line );
+		fprintf(LOG_CHANNEL, "\t%s\n", src_code );
+		fprintf(LOG_CHANNEL, "\t%s\n", DirectFBErrorString (ret) );
+		SDL_SetError( src_code, DirectFBErrorString (ret) );
+	}
+	return ret;
+}
+
+#define SDL_DFB_CHECK(x...) sdl_dfb_check( x, __FILE__, __LINE__, #x )
+
+#define SDL_DFB_CHECKERR(x...) if ( sdl_dfb_check( x, __FILE__, __LINE__, #x ) != DFB_OK ) goto error
+
+#define SDL_DFB_DEBUG(x...) 							\
 	do {											\
 		fprintf(LOG_CHANNEL, "%s: %s <%d>:\n\t",			\
 			SDL_DFB_CONTEXT, __FILE__, __LINE__ );	\
-		fprintf(LOG_CHANNEL, x );						\
+        fprintf(LOG_CHANNEL, x ); \
 	} while (0)
 
-#define SDL_DFB_CHECK(x...) \
-     do {                                                                \
-          ret = x;                                                    \
-          if (ret != DFB_OK) {                                        \
-               fprintf(LOG_CHANNEL, "%s <%d>:\n\t", __FILE__, __LINE__ ); 	      \
-               fprintf(LOG_CHANNEL, "\t%s\n", #x ); \
-               fprintf(LOG_CHANNEL, "\t%s\n", DirectFBErrorString (ret) ); \
-               SDL_SetError( #x, DirectFBErrorString (ret) );         \
-          }                                                           \
-     } while (0)
-
-#define SDL_DFB_CHECKERR(x...) \
-     do {                                                                \
-          ret = x;                                                    \
-          if (ret != DFB_OK) {                                        \
-               fprintf(LOG_CHANNEL, "%s <%d>:\n", __FILE__, __LINE__ ); \
-               fprintf(LOG_CHANNEL, "\t%s\n", #x ); \
-               fprintf(LOG_CHANNEL, "\t%s\n", DirectFBErrorString (ret) ); \
-               SDL_SetError( #x, DirectFBErrorString (ret) );         \
-               goto error; 					      \
-          }                                                           \
-     } while (0)
+#define SDL_DFB_ERR(x...) SDL_DFB_DEBUG( x )
 
 #define SDL_DFB_CALLOC(r, n, s) \
      do {                                                                \
@@ -158,9 +147,8 @@ struct _DFB_DeviceData
     int use_linux_input;
     int has_own_wm;
 
-    /* OpenGL */
-    void (*glFinish) (void);
-    void (*glFlush) (void);
+	/* window grab */
+	SDL_Window *grabbed_window;
 
     /* global events */
     IDirectFBEventBuffer *events;

@@ -65,10 +65,26 @@ you need to have the following font installed:
 OPENGL Support
 ==============
 
-As of this writing 20070810 you need to pull Mesa from git and do the following:
+The following instructions will give you *software* opengl. However this
+works at least on all directfb supported platforms.
+
+As of this writing 20100802 you need to pull Mesa from git and do the following:
 
 ------------------------
+git checkout 2c9fdaf7292423c157fc79b5ce43f0f199dd753a
 cd mesa 
+git clone git://anongit.freedesktop.org/git/mesa/mesa
+------------------------
+
+Edit configs/linux-directfb so that the Directories-section looks like
+------------------------
+# Directories
+SRC_DIRS     = mesa glu 
+GLU_DIRS     = sgi
+DRIVER_DIRS  = directfb
+PROGRAM_DIRS = 
+------------------------
+
 make linux-directfb
 make
 
@@ -87,3 +103,4 @@ export LD_LIBRARY_PATH=/usr/local/dfb_GL/lib
 export LD_PRELOAD=/usr/local/dfb_GL/libGL.so.7
 
 ./testgl
+

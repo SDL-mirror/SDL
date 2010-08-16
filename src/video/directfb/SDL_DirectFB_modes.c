@@ -40,112 +40,101 @@ struct modes_callback_t
     SDL_DisplayMode *modelist;
 };
 
-static int
-DFBToSDLPixelFormat(DFBSurfacePixelFormat pixelformat, Uint32 * fmt)
+static const struct {
+    DFBSurfacePixelFormat dfb;
+    Uint32 sdl;
+} pixelformat_tab[] = 
 {
-    switch (pixelformat) {
-    case DSPF_ALUT44:
-        *fmt = SDL_PIXELFORMAT_INDEX4LSB;
-        break;
-    case DSPF_LUT8:
-        *fmt = SDL_PIXELFORMAT_INDEX8;
-        break;
-    case DSPF_RGB332:
-        *fmt = SDL_PIXELFORMAT_RGB332;
-        break;
-    case DSPF_ARGB4444:
-        *fmt = SDL_PIXELFORMAT_ARGB4444;
-        break;
-    case SDL_PIXELFORMAT_ARGB1555:
-        *fmt = SDL_PIXELFORMAT_ARGB1555;
-        break;
-    case DSPF_RGB16:
-        *fmt = SDL_PIXELFORMAT_RGB565;
-        break;
-    case DSPF_RGB24:
-        *fmt = SDL_PIXELFORMAT_RGB24;
-        break;
-    case DSPF_RGB32:
-        *fmt = SDL_PIXELFORMAT_RGB888;
-        break;
-    case DSPF_ARGB:
-        *fmt = SDL_PIXELFORMAT_ARGB8888;
-        break;
-    case DSPF_YV12:
-        *fmt = SDL_PIXELFORMAT_YV12;
-        break;                  /* Planar mode: Y + V + U  (3 planes) */
-    case DSPF_I420:
-        *fmt = SDL_PIXELFORMAT_IYUV;
-        break;                  /* Planar mode: Y + U + V  (3 planes) */
-    case DSPF_YUY2:
-        *fmt = SDL_PIXELFORMAT_YUY2;
-        break;                  /* Packed mode: Y0+U0+Y1+V0 (1 plane) */
-    case DSPF_UYVY:
-        *fmt = SDL_PIXELFORMAT_UYVY;
-        break;                  /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
-    default:
-        return -1;
-    }
-    return 0;
+    { DSPF_LUT8, SDL_PIXELFORMAT_INDEX8 },              /* 8 bit LUT (8 bit color and alpha lookup from palette) */
+    { DSPF_RGB332, SDL_PIXELFORMAT_RGB332 },            /* 8 bit RGB (1 byte, red 3@5, green 3@2, blue 2@0) */
+    { DSPF_ARGB4444, SDL_PIXELFORMAT_ARGB4444 },        /* 16 bit ARGB (2 byte, alpha 4@12, red 4@8, green 4@4, blue 4@0) */
+    { DSPF_ARGB1555, SDL_PIXELFORMAT_ARGB1555 },        /* 16 bit ARGB (2 byte, alpha 1@15, red 5@10, green 5@5, blue 5@0) */
+    { DSPF_RGB16, SDL_PIXELFORMAT_RGB565 },             /* 16 bit RGB (2 byte, red 5@11, green 6@5, blue 5@0) */
+    { DSPF_RGB24, SDL_PIXELFORMAT_RGB24 },              /* 24 bit RGB (3 byte, red 8@16, green 8@8, blue 8@0) */
+    { DSPF_RGB32, SDL_PIXELFORMAT_RGB888 },             /* 24 bit RGB (4 byte, nothing@24, red 8@16, green 8@8, blue 8@0) */
+    { DSPF_ARGB, SDL_PIXELFORMAT_ARGB8888 },            /* 32 bit ARGB (4 byte, alpha 8@24, red 8@16, green 8@8, blue 8@0) */
+    { DSPF_RGB444, SDL_PIXELFORMAT_RGB444 },            /* 16 bit RGB (2 byte, nothing @12, red 4@8, green 4@4, blue 4@0) */
+    { DSPF_YV12, SDL_PIXELFORMAT_YV12 },                /* 12 bit YUV (8 bit Y plane followed by 8 bit quarter size V/U planes) */
+    { DSPF_I420,SDL_PIXELFORMAT_IYUV },                 /* 12 bit YUV (8 bit Y plane followed by 8 bit quarter size U/V planes) */
+    { DSPF_YUY2, SDL_PIXELFORMAT_YUY2 },                /* 16 bit YUV (4 byte/ 2 pixel, macropixel contains CbYCrY [31:0]) */
+    { DSPF_UYVY, SDL_PIXELFORMAT_UYVY },                /* 16 bit YUV (4 byte/ 2 pixel, macropixel contains YCbYCr [31:0]) */
+    { DSPF_RGB555, SDL_PIXELFORMAT_RGB555 },            /* 16 bit RGB (2 byte, nothing @15, red 5@10, green 5@5, blue 5@0) */
+
+#if (DFB_VERSION_ATLEAST(1,2,0))
+    { DSPF_BGR555, SDL_PIXELFORMAT_BGR555 },            /* 16 bit BGR (2 byte, nothing @15, blue 5@10, green 5@5, red 5@0) */
+#else
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_BGR555 },
+#endif
+
+    /* Pfff ... nonmatching formats follow */    
+    
+    { DSPF_ALUT44, SDL_PIXELFORMAT_UNKNOWN },           /* 8 bit ALUT (1 byte, alpha 4@4, color lookup 4@0) */
+ 	{ DSPF_A8, SDL_PIXELFORMAT_UNKNOWN },               /* 	8 bit alpha (1 byte, alpha 8@0), e.g. anti-aliased glyphs */
+ 	{ DSPF_AiRGB, SDL_PIXELFORMAT_UNKNOWN },            /* 	32 bit ARGB (4 byte, inv. alpha 8@24, red 8@16, green 8@8, blue 8@0) */
+ 	{ DSPF_A1, SDL_PIXELFORMAT_UNKNOWN },               /* 	1 bit alpha (1 byte/ 8 pixel, most significant bit used first) */
+ 	{ DSPF_NV12, SDL_PIXELFORMAT_UNKNOWN },             /* 	12 bit YUV (8 bit Y plane followed by one 16 bit quarter size CbCr [15:0] plane) */
+ 	{ DSPF_NV16, SDL_PIXELFORMAT_UNKNOWN },             /* 	16 bit YUV (8 bit Y plane followed by one 16 bit half width CbCr [15:0] plane) */
+ 	{ DSPF_ARGB2554, SDL_PIXELFORMAT_UNKNOWN },         /* 	16 bit ARGB (2 byte, alpha 2@14, red 5@9, green 5@4, blue 4@0) */
+ 	{ DSPF_NV21, SDL_PIXELFORMAT_UNKNOWN },             /* 	12 bit YUV (8 bit Y plane followed by one 16 bit quarter size CrCb [15:0] plane) */
+ 	{ DSPF_AYUV, SDL_PIXELFORMAT_UNKNOWN },             /* 	32 bit AYUV (4 byte, alpha 8@24, Y 8@16, Cb 8@8, Cr 8@0) */
+ 	{ DSPF_A4, SDL_PIXELFORMAT_UNKNOWN },               /* 	4 bit alpha (1 byte/ 2 pixel, more significant nibble used first) */
+ 	{ DSPF_ARGB1666, SDL_PIXELFORMAT_UNKNOWN },         /* 	1 bit alpha (3 byte/ alpha 1@18, red 6@16, green 6@6, blue 6@0) */
+ 	{ DSPF_ARGB6666, SDL_PIXELFORMAT_UNKNOWN },         /* 	6 bit alpha (3 byte/ alpha 6@18, red 6@16, green 6@6, blue 6@0) */
+ 	{ DSPF_RGB18, SDL_PIXELFORMAT_UNKNOWN },            /* 	6 bit RGB (3 byte/ red 6@16, green 6@6, blue 6@0) */
+ 	{ DSPF_LUT2, SDL_PIXELFORMAT_UNKNOWN },             /* 	2 bit LUT (1 byte/ 4 pixel, 2 bit color and alpha lookup from palette) */
+
+#if (DFB_VERSION_ATLEAST(1,3,0))
+ 	{ DSPF_RGBA4444, SDL_PIXELFORMAT_UNKNOWN },         /* 16 bit RGBA (2 byte, red 4@12, green 4@8, blue 4@4, alpha 4@0) */
+#endif
+
+#if (DFB_VERSION_ATLEAST(1,4,0))
+ 	{ DSPF_RGBA5551, SDL_PIXELFORMAT_UNKNOWN },         /* 	16 bit RGBA (2 byte, red 5@11, green 5@6, blue 5@1, alpha 1@0) */
+ 	{ DSPF_YUV444P, SDL_PIXELFORMAT_UNKNOWN },          /* 	24 bit full YUV planar (8 bit Y plane followed by an 8 bit Cb and an 8 bit Cr plane) */
+ 	{ DSPF_ARGB8565, SDL_PIXELFORMAT_UNKNOWN },         /* 	24 bit ARGB (3 byte, alpha 8@16, red 5@11, green 6@5, blue 5@0) */
+ 	{ DSPF_AVYU, SDL_PIXELFORMAT_UNKNOWN },             /* 	32 bit AVYU 4:4:4 (4 byte, alpha 8@24, Cr 8@16, Y 8@8, Cb 8@0) */
+ 	{ DSPF_VYU, SDL_PIXELFORMAT_UNKNOWN },              /* 	24 bit VYU 4:4:4 (3 byte, Cr 8@16, Y 8@8, Cb 8@0)  */
+#endif
+ 	
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_INDEX1LSB },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_INDEX1MSB },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_INDEX4LSB }, 
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_INDEX4MSB },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_BGR24 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_BGR888 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_RGBA8888 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_ABGR8888 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_BGRA8888 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_ARGB2101010 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_ABGR4444 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_ABGR1555 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_BGR565 },
+    { DSPF_UNKNOWN, SDL_PIXELFORMAT_YVYU },                        /**< Packed mode: Y0+V0+Y1+U0 (1 pla	*/
+};
+
+static Uint32
+DFBToSDLPixelFormat(DFBSurfacePixelFormat pixelformat)
+{
+    int i;
+    
+    for (i=0; pixelformat_tab[i].dfb != DSPF_UNKNOWN; i++)
+        if (pixelformat_tab[i].dfb == pixelformat)
+        {
+            return pixelformat_tab[i].sdl;
+        }
+    return SDL_PIXELFORMAT_UNKNOWN;
 }
 
 static DFBSurfacePixelFormat
 SDLToDFBPixelFormat(Uint32 format)
 {
-    switch (format) {
-    case SDL_PIXELFORMAT_INDEX4LSB:
-        return DSPF_ALUT44;
-    case SDL_PIXELFORMAT_INDEX8:
-        return DSPF_LUT8;
-    case SDL_PIXELFORMAT_RGB332:
-        return DSPF_RGB332;
-    case SDL_PIXELFORMAT_RGB555:
-        return DSPF_ARGB1555;
-    case SDL_PIXELFORMAT_ARGB4444:
-        return DSPF_ARGB4444;
-    case SDL_PIXELFORMAT_ARGB1555:
-        return DSPF_ARGB1555;
-    case SDL_PIXELFORMAT_RGB565:
-        return DSPF_RGB16;
-    case SDL_PIXELFORMAT_RGB24:
-        return DSPF_RGB24;
-    case SDL_PIXELFORMAT_RGB888:
-        return DSPF_RGB32;
-    case SDL_PIXELFORMAT_ARGB8888:
-        return DSPF_ARGB;
-    case SDL_PIXELFORMAT_YV12:
-        return DSPF_YV12;       /* Planar mode: Y + V + U  (3 planes) */
-    case SDL_PIXELFORMAT_IYUV:
-        return DSPF_I420;       /* Planar mode: Y + U + V  (3 planes) */
-    case SDL_PIXELFORMAT_YUY2:
-        return DSPF_YUY2;       /* Packed mode: Y0+U0+Y1+V0 (1 plane) */
-    case SDL_PIXELFORMAT_UYVY:
-        return DSPF_UYVY;       /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
-    case SDL_PIXELFORMAT_YVYU:
-        return DSPF_UNKNOWN;    /* Packed mode: Y0+V0+Y1+U0 (1 plane) */
-    case SDL_PIXELFORMAT_INDEX1LSB:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_INDEX1MSB:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_INDEX4MSB:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_RGB444:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_BGR24:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_BGR888:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_RGBA8888:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_ABGR8888:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_BGRA8888:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_ARGB2101010:
-        return DSPF_UNKNOWN;
-    default:
-        return DSPF_UNKNOWN;
-    }
+    int i;
+    
+    for (i=0; pixelformat_tab[i].dfb != DSPF_UNKNOWN; i++)
+        if (pixelformat_tab[i].sdl == format)
+        {
+            return pixelformat_tab[i].dfb;
+        }
+    return  DSPF_UNKNOWN;
 }
 
 static DFBEnumerationResult
@@ -164,7 +153,6 @@ EnumModesCallback(int width, int height, int bpp, void *data)
         modedata->modelist[modedata->nummodes++] = mode;
     }
 
-    SDL_DFB_DEBUG("w %d h %d bpp %d\n", width, height, bpp);
     return DFENUM_OK;
 }
 
@@ -202,7 +190,6 @@ CheckSetDisplayMode(_THIS, SDL_VideoDisplay * display, DFB_DisplayData * data, S
     SDL_DFB_DEVICEDATA(_this);
     DFBDisplayLayerConfig config;
     DFBDisplayLayerConfigFlags failed;
-    int ret;
 
     SDL_DFB_CHECKERR(data->layer->SetCooperativeLevel(data->layer,
                                                       DLSCL_ADMINISTRATIVE));
@@ -221,7 +208,7 @@ CheckSetDisplayMode(_THIS, SDL_VideoDisplay * display, DFB_DisplayData * data, S
     if (failed == 0)
         SDL_AddDisplayMode(display, mode);
     else
-        SDL_DFB_DEBUG("Mode %d x %d not available: %x\n", mode->w,
+        SDL_DFB_ERR("Mode %d x %d not available: %x\n", mode->w,
                       mode->h, failed);
 
     return;
@@ -295,19 +282,21 @@ DirectFB_InitModes(_THIS)
             dlc.pixelformat = DSPF_ARGB;
             dlc.options = DLOP_ALPHACHANNEL;
 
-            ret = layer->SetConfiguration(layer, &dlc);
-            if (ret) {
+            ret = SDL_DFB_CHECK(layer->SetConfiguration(layer, &dlc));
+            if (ret != DFB_OK) {
                 /* try AiRGB if the previous failed */
                 dlc.pixelformat = DSPF_AiRGB;
-                ret = layer->SetConfiguration(layer, &dlc);
+                SDL_DFB_CHECKERR(layer->SetConfiguration(layer, &dlc));
             }
         }
 
         /* Query layer configuration to determine the current mode and pixelformat */
         dlc.flags = DLCONF_ALL;
-        layer->GetConfiguration(layer, &dlc);
+        SDL_DFB_CHECKERR(layer->GetConfiguration(layer, &dlc));
 
-        if (DFBToSDLPixelFormat(dlc.pixelformat, &mode.format) != 0) {
+        mode.format = DFBToSDLPixelFormat(dlc.pixelformat);
+        
+        if (mode.format == SDL_PIXELFORMAT_UNKNOWN) {
             SDL_DFB_ERR("Unknown dfb pixelformat %x !\n", dlc.pixelformat);
             goto error;
         }
@@ -363,7 +352,6 @@ DirectFB_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
     SDL_DisplayMode mode;
     struct modes_callback_t data;
     int i;
-    int ret;
 
     data.nummodes = 0;
     /* Enumerate the available fullscreen modes */
@@ -403,7 +391,6 @@ DirectFB_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mod
     DFB_DisplayData *data = (DFB_DisplayData *) display->driverdata;
     DFBDisplayLayerConfig config, rconfig;
     DFBDisplayLayerConfigFlags fail = 0;
-    DFBResult ret;
 
     SDL_DFB_CHECKERR(data->layer->SetCooperativeLevel(data->layer,
                                                       DLSCL_ADMINISTRATIVE));
@@ -469,7 +456,6 @@ DirectFB_QuitModes(_THIS)
 {
     //DFB_DeviceData *devdata = (DFB_DeviceData *) _this->driverdata;
     SDL_DisplayMode tmode;
-    DFBResult ret;
     int i;
 
     for (i = 0; i < _this->num_displays; ++i) {

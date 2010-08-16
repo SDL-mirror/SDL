@@ -253,7 +253,7 @@ DirectFB_InitMouse(_THIS)
 void
 DirectFB_QuitMouse(_THIS)
 {
-    SDL_DFB_DEVICEDATA(_this);
+    //SDL_DFB_DEVICEDATA(_this);
 }
 
 

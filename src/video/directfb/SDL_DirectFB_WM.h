@@ -41,10 +41,10 @@ struct _DFB_Theme
     DFBColor max_color;
 };
 
-extern void DirectFB_WM_AdjustWindowLayout(SDL_Window * window);
+extern void DirectFB_WM_AdjustWindowLayout(SDL_Window * window, int flags, int w, int h);
 extern void DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window);
 extern void DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window);
-extern void DirectFB_WM_RedrawLayout(SDL_Window * window);
+extern void DirectFB_WM_RedrawLayout(_THIS, SDL_Window * window);
 
 extern int DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window,
                                     DFBWindowEvent * evt);

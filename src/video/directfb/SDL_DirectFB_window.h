@@ -34,7 +34,6 @@ struct _DFB_WindowData
     IDirectFBSurface *surface;
     IDirectFBSurface *window_surface;   /* only used with has_own_wm */
     IDirectFBWindow *window;
-    DirectFB_GLContext *gl_context;
     IDirectFBEventBuffer *eventbuffer;
     SDL_Window *sdl_window;
     DFB_WindowData *next;
@@ -46,6 +45,7 @@ struct _DFB_WindowData
     int is_managed;
     int wm_needs_redraw;
     IDirectFBSurface *icon;
+    IDirectFBFont *font;
     DFB_Theme theme;
 };
 
@@ -69,7 +69,7 @@ extern void DirectFB_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
                                          struct SDL_SysWMinfo *info);
 
-extern void DirectFB_AdjustWindowSurface(SDL_Window * window);
+//extern void DirectFB_AdjustWindowSurface(_THIS, SDL_Window * window);
 
 #endif /* _SDL_directfb_window_h */
 

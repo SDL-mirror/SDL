@@ -32,6 +32,9 @@ struct _DirectFB_GLContext
 {
     IDirectFBGL *context;
     DirectFB_GLContext *next;
+    
+    SDL_Window *sdl_window;
+    int is_locked;
 };
 
 /* OpenGL functions */
@@ -47,6 +50,10 @@ extern int DirectFB_GL_SetSwapInterval(_THIS, int interval);
 extern int DirectFB_GL_GetSwapInterval(_THIS);
 extern void DirectFB_GL_SwapWindow(_THIS, SDL_Window * window);
 extern void DirectFB_GL_DeleteContext(_THIS, SDL_GLContext context);
+
+extern void DirectFB_GL_FreeWindowContexts(_THIS, SDL_Window * window);
+extern void DirectFB_GL_ReAllocWindowContexts(_THIS, SDL_Window * window);
+extern void DirectFB_GL_DestroyWindowContexts(_THIS, SDL_Window * window);
 
 #endif /* SDL_DIRECTFB_OPENGL */
 

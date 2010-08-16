@@ -209,14 +209,11 @@ DirectFB_VideoInit(_THIS)
             DirectFBSetOption("disable-module", "x11input");
     }
 
-#if USE_MULTI_API
-	devdata->use_linux_input = 1;       /* default: on */
+	/* FIXME: Reenable as default once multi kbd/mouse interface is sorted out */
+	devdata->use_linux_input = 0;       /* default: on */
     stemp = SDL_getenv(DFBENV_USE_LINUX_INPUT);
     if (stemp)
         devdata->use_linux_input = atoi(stemp);
-#else
-	devdata->use_linux_input = 0;       /* no way to support this ... */
-#endif
 
     if (!devdata->use_linux_input)
         DirectFBSetOption("disable-module", "linux_input");
@@ -253,6 +250,7 @@ DirectFB_VideoInit(_THIS)
 
     devdata->dfb = dfb;
     devdata->firstwin = NULL;
+    devdata->grabbed_window = NULL;
 
     _this->driverdata = devdata;
 

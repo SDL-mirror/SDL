@@ -31,7 +31,8 @@
 #define DFB_SYM(ret, name, args, al, func) ret (*name) args;
 static struct _SDL_DirectFB_Symbols
 {
-    DFB_SYMS const unsigned int *directfb_major_version;
+    DFB_SYMS 
+    const unsigned int *directfb_major_version;
     const unsigned int *directfb_minor_version;
     const unsigned int *directfb_micro_version;
 } SDL_DirectFB_Symbols;

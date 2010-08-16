@@ -27,6 +27,8 @@
 
 #include "SDL_DirectFB_video.h"
 
+#include "../../events/SDL_windowevents_c.h"
+
 #define COLOR_EXPAND(col) col.r, col.g, col.b, col.a
 
 static DFB_Theme theme_std = {
@@ -52,7 +54,7 @@ static DFB_Theme theme_none = {
 };
 
 static void
-DrTriangle(IDirectFBSurface * s, int down, int x, int y, int w)
+DrawTriangle(IDirectFBSurface * s, int down, int x, int y, int w)
 {
     int x1, x2, x3;
     int y1, y2, y3;
@@ -76,7 +78,33 @@ DrTriangle(IDirectFBSurface * s, int down, int x, int y, int w)
 }
 
 static void
-DrCaption(IDirectFBSurface * s, int x, int y, char *text)
+LoadFont(_THIS, SDL_Window * window)
+{
+    SDL_DFB_DEVICEDATA(_this);
+    SDL_DFB_WINDOWDATA(window);
+
+	if (windata->font != NULL) {
+		SDL_DFB_RELEASE(windata->font);
+	    windata->font = NULL;
+	    SDL_DFB_CHECK(windata->window_surface->SetFont(windata->window_surface, windata->font));
+	}
+	
+	if (windata->theme.font != NULL)
+	{
+        DFBFontDescription fdesc;
+
+		SDL_zero(fdesc);
+	    fdesc.flags = DFDESC_HEIGHT;
+	    fdesc.height = windata->theme.font_size;
+	    SDL_DFB_CHECK(devdata->
+	                  dfb->CreateFont(devdata->dfb, windata->theme.font,
+	                                  &fdesc, &windata->font));
+	    SDL_DFB_CHECK(windata->window_surface->SetFont(windata->window_surface, windata->font));
+	}
+}
+
+static void
+DrawCraption(_THIS, IDirectFBSurface * s, int x, int y, char *text)
 {
     DFBSurfaceTextFlags flags;
 
@@ -86,7 +114,7 @@ DrCaption(IDirectFBSurface * s, int x, int y, char *text)
 }
 
 void
-DirectFB_WM_RedrawLayout(SDL_Window * window)
+DirectFB_WM_RedrawLayout(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
     IDirectFBSurface *s = windata->window_surface;
@@ -99,6 +127,7 @@ DirectFB_WM_RedrawLayout(SDL_Window * window)
     if (!windata->is_managed || (window->flags & SDL_WINDOW_FULLSCREEN))
         return;
 
+	LoadFont(_this, window);
     //s->SetDrawingFlags(s, DSDRAW_BLEND);
     s->SetColor(s, COLOR_EXPAND(t->frame_color));
     /* top */
@@ -122,16 +151,16 @@ DirectFB_WM_RedrawLayout(SDL_Window * window)
     x = windata->size.w - t->right_size - w + d;
     y = t->top_size + d;
     s->SetColor(s, COLOR_EXPAND(t->close_color));
-    DrTriangle(s, 1, x, y, w - 2 * d);
+    DrawTriangle(s, 1, x, y, w - 2 * d);
     /* Max Button */
     s->SetColor(s, COLOR_EXPAND(t->max_color));
-    DrTriangle(s, window->flags & SDL_WINDOW_MAXIMIZED ? 1 : 0, x - w,
+    DrawTriangle(s, window->flags & SDL_WINDOW_MAXIMIZED ? 1 : 0, x - w,
                y, w - 2 * d);
 
     /* Caption */
     if (window->title) {
-        s->SetColor(s, COLOR_EXPAND(t->font_color));
-        DrCaption(s, (x - w) / 2, t->top_size + d, window->title);
+	    s->SetColor(s, COLOR_EXPAND(t->font_color));
+        DrawCraption(_this, s, (x - w) / 2, t->top_size + d, window->title);
     }
     /* Icon */
     if (windata->icon) {
@@ -152,26 +181,25 @@ DFBResult
 DirectFB_WM_GetClientSize(_THIS, SDL_Window * window, int *cw, int *ch)
 {
     SDL_DFB_WINDOWDATA(window);
-    DFBResult ret;
 
-    ret = windata->window->GetSize(windata->window, cw, ch);
+    SDL_DFB_CHECK(windata->window->GetSize(windata->window, cw, ch));
     *cw -= windata->theme.left_size + windata->theme.right_size;
     *ch -=
         windata->theme.top_size + windata->theme.caption_size +
         windata->theme.bottom_size;
-    return ret;
+    return DFB_OK;
 }
 
 void
-DirectFB_WM_AdjustWindowLayout(SDL_Window * window)
+DirectFB_WM_AdjustWindowLayout(SDL_Window * window, int flags, int w, int h)
 {
     SDL_DFB_WINDOWDATA(window);
 
     if (!windata->is_managed)
         windata->theme = theme_none;
-    else if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    else if (flags & SDL_WINDOW_FULLSCREEN) {
         windata->theme = theme_none;
-    } else if (window->flags & SDL_WINDOW_MAXIMIZED) {
+    } else if (flags & SDL_WINDOW_MAXIMIZED) {
         windata->theme = theme_std;
         windata->theme.left_size = 0;
         windata->theme.right_size = 0;
@@ -183,12 +211,12 @@ DirectFB_WM_AdjustWindowLayout(SDL_Window * window)
 
     windata->client.x = windata->theme.left_size;
     windata->client.y = windata->theme.top_size + windata->theme.caption_size;
-    windata->client.w = window->w;
-    windata->client.h = window->h;
+    windata->client.w = w;
+    windata->client.h = h;
     windata->size.w =
-        window->w + windata->theme.left_size + windata->theme.right_size;
+        w + windata->theme.left_size + windata->theme.right_size;
     windata->size.h =
-        window->h + windata->theme.top_size +
+        h + windata->theme.top_size +
         windata->theme.caption_size + windata->theme.bottom_size;
 }
 
@@ -198,19 +226,16 @@ DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
     SDL_VideoDisplay *display = window->display;
 
-    windata->window->GetPosition(windata->window,
-                                 &windata->restore.x, &windata->restore.y);
-    windata->window->GetSize(windata->window, &windata->restore.w,
-                             &windata->restore.h);
+    SDL_DFB_CHECK(windata->window->GetPosition(windata->window,
+                                 &windata->restore.x, &windata->restore.y));
+    SDL_DFB_CHECK(windata->window->GetSize(windata->window, &windata->restore.w,
+                             &windata->restore.h));
 
-    /* Do this already here */
-    window->flags |= SDL_WINDOW_MAXIMIZED;
-    DirectFB_WM_AdjustWindowLayout(window);
+    DirectFB_WM_AdjustWindowLayout(window, window->flags | SDL_WINDOW_MAXIMIZED, display->current_mode.w, display->current_mode.h) ;
 
-    windata->window->MoveTo(windata->window, 0, 0);
-    windata->window->Resize(windata->window,
-                            display->current_mode.w, display->current_mode.h);
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
+    SDL_DFB_CHECK(windata->window->MoveTo(windata->window, 0, 0));
+    SDL_DFB_CHECK(windata->window->Resize(windata->window,
+                            display->current_mode.w, display->current_mode.h));
 }
 
 void
@@ -218,15 +243,13 @@ DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
 
-    /* Do this already here */
-    //window->flags &= ~(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED);
+    DirectFB_WM_AdjustWindowLayout(window, window->flags & ~(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED), 
+    	windata->restore.w, windata->restore.h);
 
-    DirectFB_WM_AdjustWindowLayout(window);
-    windata->window->MoveTo(windata->window, windata->restore.x,
-                            windata->restore.y);
-    windata->window->Resize(windata->window, windata->restore.w,
-                            windata->restore.h);
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    SDL_DFB_CHECK(windata->window->Resize(windata->window, windata->restore.w,
+                            windata->restore.h));
+    SDL_DFB_CHECK(windata->window->MoveTo(windata->window, windata->restore.x,
+                            windata->restore.y));
 }
 
 enum
@@ -291,7 +314,9 @@ static int wm_lasty;
 int
 DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
 {
+    SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
+	DFB_WindowData *gwindata = ((devdata->grabbed_window) ? (DFB_WindowData *) ((devdata->grabbed_window)->driverdata) : NULL);
 
     if (!windata->is_managed)
         return 0;
@@ -304,19 +329,26 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
             case WM_POS_NONE:
                 return 0;
             case WM_POS_CLOSE:
+		        wm_grab = WM_POS_NONE;
                 SDL_SendWindowEvent(window, SDL_WINDOWEVENT_CLOSE, 0,
                                     0);
                 return 1;
             case WM_POS_MAX:
+		        wm_grab = WM_POS_NONE;
                 if (window->flags & SDL_WINDOW_MAXIMIZED) {
-                    DirectFB_WM_RestoreWindow(_this, window);
+                	SDL_RestoreWindow(window);
                 } else {
-                    DirectFB_WM_MaximizeWindow(_this, window);
+                    SDL_MaximizeWindow(window);
                 }
                 return 1;
+            case WM_POS_CAPTION:
+                DirectFB_RaiseWindow(_this, window);
+                /* fall through */
             default:
                 wm_grab = pos;
-                windata->window->GrabPointer(windata->window);
+                if (gwindata != NULL)
+	                SDL_DFB_CHECK(gwindata->window->UngrabPointer(gwindata->window));
+                SDL_DFB_CHECK(windata->window->GrabPointer(windata->window));
                 wm_lastx = evt->cx;
                 wm_lasty = evt->cy;
             }
@@ -333,20 +365,22 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
             int cw, ch;
 
             if (wm_grab & WM_POS_CAPTION)
-                windata->window->Move(windata->window, dx, dy);
-            if (wm_grab & WM_POS_RIGHT) {
-                windata->window->GetSize(windata->window, &cw, &ch);
-                windata->window->Resize(windata->window, cw + dx, ch);
-            }
-            if (wm_grab & WM_POS_BOTTOM) {
-                windata->window->GetSize(windata->window, &cw, &ch);
-                windata->window->Resize(windata->window, cw, ch + dy);
+                SDL_DFB_CHECK(windata->window->Move(windata->window, dx, dy));
+	        if (wm_grab & (WM_POS_RIGHT | WM_POS_BOTTOM)) {
+	            if ((wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_BOTTOM)
+	            	dx = 0;
+	            else if ((wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_RIGHT)
+	            	dy = 0;
+                SDL_DFB_CHECK(windata->window->GetSize(windata->window, &cw, &ch));
+                SDL_DFB_CHECK(windata->window->Resize(windata->window, cw + dx, ch + dy));
             }
             wm_lastx = evt->cx;
             wm_lasty = evt->cy;
             return 1;
         }
-        windata->window->UngrabPointer(windata->window);
+        SDL_DFB_CHECK(windata->window->UngrabPointer(windata->window));
+        if (gwindata != NULL)
+            SDL_DFB_CHECK(gwindata->window->GrabPointer(gwindata->window));
         wm_grab = WM_POS_NONE;
         break;
     case DWET_KEYDOWN:

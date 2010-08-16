@@ -24,9 +24,14 @@
 #include "SDL_syswm.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
+#include "../../video/SDL_pixels_c.h"
 
 #include "SDL_DirectFB_video.h"
+#if SDL_DIRECTFB_OPENGL
+#include "SDL_DirectFB_opengl.h"
+#endif
 
+static void DirectFB_AdjustWindowSurface(_THIS, SDL_Window * window);
 
 int
 DirectFB_CreateWindow(_THIS, SDL_Window * window)
@@ -36,8 +41,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     DFB_WindowData *windata = NULL;
     DFBWindowOptions wopts;
     DFBWindowDescription desc;
-    IDirectFBFont *font;
-    int ret, x, y;
+    int x, y;
 
     SDL_DFB_CALLOC(window->driverdata, 1, sizeof(DFB_WindowData));
     windata = (DFB_WindowData *) window->driverdata;
@@ -69,7 +73,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
         y = 0;
     }
 
-    DirectFB_WM_AdjustWindowLayout(window);
+    DirectFB_WM_AdjustWindowLayout(window, window->flags, window->w, window->h);
 
     /* Create Window */
     desc.flags =
@@ -87,7 +91,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
                                                    &windata->window));
 
     /* Set Options */
-    windata->window->GetOptions(windata->window, &wopts);
+    SDL_DFB_CHECK(windata->window->GetOptions(windata->window, &wopts));
 
     if (window->flags & SDL_WINDOW_RESIZABLE)
         wopts |= DWOP_SCALE;
@@ -96,9 +100,9 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         wopts |= DWOP_KEEP_POSITION | DWOP_KEEP_STACKING | DWOP_KEEP_SIZE;
-        windata->window->SetStackingClass(windata->window, DWSC_UPPER);
+        SDL_DFB_CHECK(windata->window->SetStackingClass(windata->window, DWSC_UPPER));
     }
-    windata->window->SetOptions(windata->window, wopts);
+    SDL_DFB_CHECK(windata->window->SetOptions(windata->window, wopts));
 
     /* See what we got */
     SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize
@@ -112,7 +116,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
                      GetSubSurface(windata->window_surface, &windata->client,
                                    &windata->surface));
 
-    windata->window->SetOpacity(windata->window, 0xFF);
+    SDL_DFB_CHECK(windata->window->SetOpacity(windata->window, 0xFF));
 
     /* Create Eventbuffer */
     SDL_DFB_CHECKERR(windata->window->CreateEventBuffer(windata->window,
@@ -123,21 +127,10 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 
     /* Create a font */
     /* FIXME: once during Video_Init */
-    if (windata->is_managed) {
-        DFBFontDescription fdesc;
-
-        fdesc.flags = DFDESC_HEIGHT;
-        fdesc.height = windata->theme.font_size;
-        font = NULL;
-        SDL_DFB_CHECK(devdata->
-                      dfb->CreateFont(devdata->dfb, windata->theme.font,
-                                      &fdesc, &font));
-        windata->window_surface->SetFont(windata->window_surface, font);
-        SDL_DFB_RELEASE(font);
-    }
+    windata->font = NULL;
 
     /* Make it the top most window. */
-    windata->window->RaiseToTop(windata->window);
+    SDL_DFB_CHECK(windata->window->RaiseToTop(windata->window));
 
     /* remember parent */
     windata->sdl_window = window;
@@ -149,7 +142,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     devdata->firstwin = windata;
 
     /* Draw Frame */
-    DirectFB_WM_RedrawLayout(window);
+    DirectFB_WM_RedrawLayout(_this, window);
 
     return 0;
   error:
@@ -172,6 +165,7 @@ DirectFB_SetWindowTitle(_THIS, SDL_Window * window)
 
     if (windata->is_managed) {
         windata->wm_needs_redraw = 1;
+        DirectFB_WM_RedrawLayout(_this, window);
     } else
         SDL_Unsupported();
 }
@@ -182,7 +176,6 @@ DirectFB_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
     SDL_Surface *surface = NULL;
-    DFBResult ret;
 
     if (icon) {
         SDL_PixelFormat format;
@@ -216,7 +209,7 @@ DirectFB_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
             memcpy((char *) dest + i * pitch,
                    (char *) p + i * surface->pitch, 4 * surface->w);
 
-        windata->icon->Unlock(windata->icon);
+        SDL_DFB_CHECK(windata->icon->Unlock(windata->icon));
         SDL_FreeSurface(surface);
     } else {
         SDL_DFB_RELEASE(windata->icon);
@@ -249,16 +242,15 @@ DirectFB_SetWindowPosition(_THIS, SDL_Window * window)
         x = 0;
         y = 0;
     }
-    DirectFB_WM_AdjustWindowLayout(window);
-    windata->window->MoveTo(windata->window, x, y);
+    DirectFB_WM_AdjustWindowLayout(window, window->flags, window->w, window->h);
+    SDL_DFB_CHECK(windata->window->MoveTo(windata->window, x, y));
 }
 
 void
 DirectFB_SetWindowSize(_THIS, SDL_Window * window)
 {
-    SDL_DFB_DEVICEDATA(_this);
+    //SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
-    int ret;
 
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         int cw;
@@ -272,23 +264,23 @@ DirectFB_SetWindowSize(_THIS, SDL_Window * window)
 
         if (cw != window->w || ch != window->h) {
 
-            DirectFB_WM_AdjustWindowLayout(window);
+		    DirectFB_WM_AdjustWindowLayout(window, window->flags, window->w, window->h);
             SDL_DFB_CHECKERR(windata->window->Resize(windata->window,
                                                      windata->size.w,
                                                      windata->size.h));
         }
 
+        SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize
+                     (_this, window, &window->w, &window->h));
+        DirectFB_AdjustWindowSurface(_this, window);
+
         SDL_DFB_CHECKERR(windata->window->EnableEvents(windata->window,
                                                        DWET_ALL));
 
-        SDL_DFB_CHECKERR(DirectFB_WM_GetClientSize
-                         (_this, window, &window->w, &window->h));
-
-        SDL_OnWindowResized(window);
     }
     return;
   error:
-    windata->window->EnableEvents(windata->window, DWET_ALL);
+    SDL_DFB_CHECK(windata->window->EnableEvents(windata->window, DWET_ALL));
     return;
 }
 
@@ -297,7 +289,7 @@ DirectFB_ShowWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
 
-    windata->window->SetOpacity(windata->window, windata->opacity);
+    SDL_DFB_CHECK(windata->window->SetOpacity(windata->window, windata->opacity));
 
 }
 
@@ -306,8 +298,8 @@ DirectFB_HideWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
 
-    windata->window->GetOpacity(windata->window, &windata->opacity);
-    windata->window->SetOpacity(windata->window, 0);
+    SDL_DFB_CHECK(windata->window->GetOpacity(windata->window, &windata->opacity));
+    SDL_DFB_CHECK(windata->window->SetOpacity(windata->window, 0));
 }
 
 void
@@ -315,8 +307,8 @@ DirectFB_RaiseWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
 
-    windata->window->RaiseToTop(windata->window);
-    windata->window->RequestFocus(windata->window);
+    SDL_DFB_CHECK(windata->window->RaiseToTop(windata->window));
+    SDL_DFB_CHECK(windata->window->RequestFocus(windata->window));
 }
 
 void
@@ -352,14 +344,23 @@ DirectFB_RestoreWindow(_THIS, SDL_Window * window)
 void
 DirectFB_SetWindowGrab(_THIS, SDL_Window * window)
 {
+    SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
+    DFB_WindowData *gwindata = ((devdata->grabbed_window) ? (DFB_WindowData *) ((devdata->grabbed_window)->driverdata) : NULL);
 
     if ((window->flags & SDL_WINDOW_INPUT_GRABBED)) {
-        windata->window->GrabPointer(windata->window);
-        windata->window->GrabKeyboard(windata->window);
+        if (gwindata != NULL)
+        {
+		    SDL_DFB_CHECK(gwindata->window->UngrabPointer(gwindata->window));
+		    SDL_DFB_CHECK(gwindata->window->UngrabKeyboard(gwindata->window));
+        }
+        SDL_DFB_CHECK(windata->window->GrabPointer(windata->window));
+        SDL_DFB_CHECK(windata->window->GrabKeyboard(windata->window));
+        devdata->grabbed_window = window;
     } else {
-        windata->window->UngrabPointer(windata->window);
-        windata->window->UngrabKeyboard(windata->window);
+        SDL_DFB_CHECK(windata->window->UngrabPointer(windata->window));
+        SDL_DFB_CHECK(windata->window->UngrabKeyboard(windata->window));
+        devdata->grabbed_window = NULL;
     }
 }
 
@@ -370,14 +371,19 @@ DirectFB_DestroyWindow(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
     DFB_WindowData *p;
 
-    SDL_DFB_DEBUG("Trace\n");
-
     /* Some cleanups */
-    windata->window->UngrabPointer(windata->window);
-    windata->window->UngrabKeyboard(windata->window);
+    SDL_DFB_CHECK(windata->window->UngrabPointer(windata->window));
+    SDL_DFB_CHECK(windata->window->UngrabKeyboard(windata->window));
 
-    windata->window_surface->SetFont(windata->window_surface, NULL);
-    SDL_DFB_RELEASE(windata->icon);
+#if SDL_DIRECTFB_OPENGL
+	DirectFB_GL_DestroyWindowContexts(_this, window);
+#endif
+
+    SDL_DFB_CHECK(windata->window_surface->SetFont(windata->window_surface, NULL));
+    SDL_DFB_CHECK(windata->surface->ReleaseSource(windata->surface));
+    SDL_DFB_CHECK(windata->window_surface->ReleaseSource(windata->window_surface));
+  	SDL_DFB_RELEASE(windata->icon);
+    SDL_DFB_RELEASE(windata->font);
     SDL_DFB_RELEASE(windata->eventbuffer);
     SDL_DFB_RELEASE(windata->surface);
     SDL_DFB_RELEASE(windata->window_surface);
@@ -405,15 +411,14 @@ DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
     return SDL_FALSE;
 }
 
-void
-DirectFB_AdjustWindowSurface(SDL_Window * window)
+static void
+DirectFB_AdjustWindowSurface(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
     int adjust = windata->wm_needs_redraw;
     int cw, ch;
-    int ret;
 
-    DirectFB_WM_AdjustWindowLayout(window);
+    DirectFB_WM_AdjustWindowLayout(window, window->flags, window->w, window->h);
 
     SDL_DFB_CHECKERR(windata->
                      window_surface->GetSize(windata->window_surface, &cw,
@@ -423,6 +428,10 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
     }
 
     if (adjust) {
+#if SDL_DIRECTFB_OPENGL
+		DirectFB_GL_FreeWindowContexts(_this, window);
+#endif
+
 #if DFB_VERSION_ATLEAST(1,2,1)
         SDL_DFB_CHECKERR(windata->window->ResizeSurface(windata->window,
                                                         windata->size.w,
@@ -446,8 +455,12 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
                          GetSubSurface(windata->window_surface,
                                        &windata->client, &windata->surface));
 #endif
-        DirectFB_WM_RedrawLayout(window);
-    }
+        DirectFB_WM_RedrawLayout(_this, window);
+        
+#if SDL_DIRECTFB_OPENGL
+		DirectFB_GL_ReAllocWindowContexts(_this, window);
+#endif
+   }
   error:
     return;
 }
