@@ -85,7 +85,7 @@ int main(int argc,char** argv) {
 		format = pictures[i].surface->format;
 		if(format->Amask != 0) {
 			pictures[i].mode.mode = ShapeModeBinarizeAlpha;
-			pictures[i].mode.parameters.binarizationCutoff = 1;
+			pictures[i].mode.parameters.binarizationCutoff = 255;
 		}
 		else {
 			pictures[i].mode.mode = ShapeModeColorKey;
