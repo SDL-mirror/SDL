@@ -32,7 +32,7 @@
 
 SDL_Window*
 SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
-    SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,flags | SDL_WINDOW_BORDERLESS & !SDL_WINDOW_FULLSCREEN & !SDL_WINDOW_RESIZABLE);
+    SDL_Window *result = SDL_CreateWindow(title,x,y,w,h,flags | SDL_WINDOW_BORDERLESS & ~SDL_WINDOW_FULLSCREEN & ~SDL_WINDOW_RESIZABLE);
     if(result != NULL) {
         result->shaper = result->display->device->shape_driver.CreateShaper(result);
         if(result->shaper != NULL) {
@@ -126,7 +126,7 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
     SDL_Color key;
     SDL_ShapeTree* result = (SDL_ShapeTree*)SDL_malloc(sizeof(SDL_ShapeTree));
     SDL_Rect next = {0,0,0,0};
-    for(y=dimensions.y;y<dimensions.y + dimensions.h;y++)
+    for(y=dimensions.y;y<dimensions.y + dimensions.h;y++) {
         for(x=dimensions.x;x<dimensions.x + dimensions.w;x++) {
             pixel_value = 0;
             pixel = (Uint8 *)(mask->pixels) + (y*mask->pitch) + (x*mask->format->BytesPerPixel);
@@ -183,6 +183,7 @@ RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rec
                 return result;
             }
         }
+    }
     //If we never recursed, all the pixels in this quadrant have the same "value".
     result->kind = (last_opaque == SDL_TRUE ? OpaqueShape : TransparentShape);
     result->data.shape = dimensions;
@@ -240,7 +241,7 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
         window->shaper->mode = *shape_mode;
     result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
     window->shaper->hasshape = SDL_TRUE;
-    if(window->shaper->userx == 0 && window->shaper->usery == 0) {
+    if(window->shaper->userx != 0 && window->shaper->usery != 0) {
         SDL_SetWindowPosition(window,window->shaper->userx,window->shaper->usery);
         window->shaper->userx = 0;
         window->shaper->usery = 0;

@@ -50,11 +50,10 @@ CombineRectRegions(SDL_ShapeTree* node,void* closure) {
     HRGN mask_region = *((HRGN*)closure),temp_region = NULL;
     if(node->kind == OpaqueShape) {
         //Win32 API regions exclude their outline, so we widen the region by one pixel in each direction to include the real outline.
-        sprintf_s(&debug_str[0],200,"x: %u y: %u, x+w: %u, y+h: %u\n",
+        /* sprintf_s(&debug_str[0],200,"x: %u y: %u, x+w: %u, y+h: %u\n",
                   node->data.shape.x,node->data.shape.y,
-				  node->data.shape.x + node->data.shape.w,node->data.shape.y + node->data.shape.h);
-        OutputDebugStringA(debug_str);
-		OutputDebugStringA("Converting SDL_ShapeTree opaque node to Windows rectangle.\n");
+                  node->data.shape.x + node->data.shape.w,node->data.shape.y + node->data.shape.h);*/
+        //OutputDebugStringA(debug_str);
         temp_region = CreateRectRgn(node->data.shape.x - 1,node->data.shape.y - 1,node->data.shape.x + node->data.shape.w + 1,node->data.shape.y + node->data.shape.h + 1);
         if(mask_region != NULL) {
             CombineRgn(mask_region,mask_region,temp_region,RGN_OR);
@@ -100,10 +99,11 @@ Win32_ResizeWindowShape(SDL_Window *window) {
     
     if(data->mask_tree != NULL)
         SDL_FreeShapeTree(&data->mask_tree);
-    
-    window->shaper->userx = window->x;
-    window->shaper->usery = window->y;
-    SDL_SetWindowPosition(window,-1000,-1000);
+    if(window->shaper->hasshape == SDL_TRUE) {
+        window->shaper->userx = window->x;
+        window->shaper->usery = window->y;
+        SDL_SetWindowPosition(window,-1000,-1000);
+	}
     
     return 0;
 }
