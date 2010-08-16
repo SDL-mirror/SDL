@@ -23,47 +23,72 @@
 #include "SDL_cocoavideo.h"
 #include "SDL_shape.h"
 #include "SDL_cocoashape.h"
+#include "../src/video/SDL_sysvideo.h"
 
 SDL_WindowShaper*
 Cocoa_CreateShaper(SDL_Window* window) {
-    SDL_WindowData* data = (SDL_WindowData*)window->driverdata;
-    [data->nswindow setAlpha:1.0];
-    [data->nswindow setOpaque:YES];
-    [data->nswindow setStyleMask:NSBorderlessWindowMask];
-    SDL_Shaper* result = result = malloc(sizeof(SDL_WindowShaper));
+    SDL_WindowData* windata = (SDL_WindowData*)window->driverdata;
+    [windata->nswindow setOpaque:NO];
+    [windata->nswindow setStyleMask:NSBorderlessWindowMask];
+    SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));
     result->window = window;
     result->mode.mode = ShapeModeDefault;
     result->mode.parameters.binarizationCutoff = 1;
-    result->usershownflag = 0;
+    result->userx = result->usery = 0;
     window->shaper = result;
     
     SDL_ShapeData* data = malloc(sizeof(SDL_ShapeData));
     result->driverdata = data;
-    data->context = [data->nswindow graphicsContext];
-    data->saved = SDL_False;
-    data->rects = NULL;
-    data->count = 0;
+    data->context = [windata->nswindow graphicsContext];
+    data->saved = SDL_FALSE;
+    data->shape = NULL;
     
     int resized_properly = Cocoa_ResizeWindowShape(window);
     assert(resized_properly == 0);
     return result;
 }
 
+typedef struct {
+    NSView* view;
+    NSBezierPath* path;
+} SDL_CocoaClosure;
+
+void
+ConvertRects(SDL_ShapeTree* tree,void* closure) {
+    SDL_CocoaClosure* data = (SDL_CocoaClosure*)closure;
+    if(tree->kind == OpaqueShape) {
+        NSRect rect = NSMakeRect(tree->data.shape.x,tree->data.shape.y,tree->data.shape.w,tree->data.shape.h);
+        [data->path appendBezierPathWithRect:[data->view convertRect:rect toView:nil]];
+    }
+}
+
 int
-Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shapeMode) {
-    SDL_WindowData* data = (SDL_WindowData*)shaper->window->driverdata;
-    if(data->saved == SDL_True) {
+Cocoa_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode) {
+    SDL_ShapeData* data = (SDL_ShapeData*)shaper->driverdata;
+	SDL_WindowData* windata = (SDL_WindowData*)shaper->window->driverdata;
+	SDL_CocoaClosure closure;
+	NSAutoreleasePool *pool = NULL;
+    if(data->saved == SDL_TRUE) {
         [data->context restoreGraphicsState];
-        data->saved = SDL_False;
+        data->saved = SDL_FALSE;
     }
         
-    [data->context saveGraphicsState];
-    data->saved = SDL_True;
+    //[data->context saveGraphicsState];
+    //data->saved = SDL_TRUE;
     
     [[NSColor clearColor] set];
-    NSRectFill([[data->nswindow contentView] frame]);
+    NSRectFill([[windata->nswindow contentView] frame]);
     /* TODO: It looks like Cocoa can set a clipping path based on a list of rectangles.  That's what we get from the
            Windoze shape-calculation code: a list of rectangles.  This will work... I think. */
+    data->shape = SDL_CalculateShapeTree(*shape_mode,shape);
+	
+	pool = [[NSAutoreleasePool alloc] init];
+    closure.view = [windata->nswindow contentView];
+    closure.path = [[NSBezierPath bezierPath] autorelease];
+    SDL_TraverseShapeTree(data->shape,&ConvertRects,&closure);
+    [NSGraphicsContext setCurrentContext:data->context];
+    [closure.path setClip];
+    [pool drain];
 }
 
 int

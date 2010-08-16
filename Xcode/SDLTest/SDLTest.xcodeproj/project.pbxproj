@@ -1184,14 +1184,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 003FA63A093FFD41000C53B3 /* SDL.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 00D8D9EF1195090700638393 /* testsdl.app */;
+			remoteGlobalIDString = 00D8D9EF1195090700638393;
 			remoteInfo = testsdl;
 		};
 		4537749D1209152D002F0F45 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = BEC567F70761D90600A33029 /* sdlcommon */;
+			remoteGlobalIDString = BEC567F70761D90600A33029;
 			remoteInfo = sdlcommon;
 		};
 		BEC568300761D90600A33029 /* PBXContainerItemProxy */ = {
