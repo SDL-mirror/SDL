@@ -40,7 +40,7 @@ Win32_CreateShaper(SDL_Window * window) {
     resized_properly = Win32_ResizeWindowShape(window);
     if (resized_properly != 0)
             return NULL;
-
+    
     return result;
 }
 

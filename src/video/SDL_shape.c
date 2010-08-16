@@ -33,11 +33,7 @@
 SDL_Window*
 SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {
     SDL_Window *result = NULL;
-    flags |= SDL_WINDOW_BORDERLESS;
-    flags &= (~SDL_WINDOW_RESIZABLE);
-    flags &= (~SDL_WINDOW_FULLSCREEN);
-    //flags &= (~SDL_WINDOW_SHOWN);
-    result = SDL_CreateWindow(title,x,y,w,h,flags | SDL_WINDOW_BORDERLESS & ~SDL_WINDOW_FULLSCREEN & ~SDL_WINDOW_RESIZABLE);
+    result = SDL_CreateWindow(title,x,y,w,h,(flags | SDL_WINDOW_BORDERLESS) & (~SDL_WINDOW_FULLSCREEN) & (~SDL_WINDOW_RESIZABLE) /*& (~SDL_WINDOW_SHOWN)*/);
     if(result != NULL) {
         result->shaper = result->display->device->shape_driver.CreateShaper(result);
         if(result->shaper != NULL) {
