@@ -49,7 +49,7 @@ CombineRectRegions(SDL_ShapeTree* node,void* closure) {
     HRGN mask_region = *((HRGN*)closure),temp_region = NULL;
     if(node->kind == OpaqueShape) {
         //Win32 API regions exclude their outline, so we widen the region by one pixel in each direction to include the real outline.
-        temp_region = CreateRectRgn(node->data.shape.x - 1,node->data.shape.y - 1,node->data.shape.x + node->data.shape.w,node->data.shape.y + node->data.shape.h);
+        temp_region = CreateRectRgn(node->data.shape.x,node->data.shape.y,node->data.shape.x + node->data.shape.w + 1,node->data.shape.y + node->data.shape.h + 1);
         if(mask_region != NULL) {
             CombineRgn(mask_region,mask_region,temp_region,RGN_OR);
             DeleteObject(temp_region);
