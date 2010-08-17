@@ -1,20 +1,18 @@
 /*******************************************************************************
-                               Headers
+ This file links the Java side of Android with libsdl
 *******************************************************************************/
 #include <jni.h>
 #include <sys/time.h>
 #include <time.h>
 #include <android/log.h>
 #include <stdint.h>
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
 #include <pthread.h>
 
-//#include "importgl.h"
-//#include "egl.h"
+#define DEBUG
+
 
 /*******************************************************************************
                                Globals
@@ -75,7 +73,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
 
     __android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: OnLoad");
 
-    jclass cls = mEnv->FindClass ("org/libsdl/android/SDLActivity"); 
+    jclass cls = mEnv->FindClass ("org/libsdl/app/SDLActivity"); 
     mActivityInstance = cls;
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
@@ -86,14 +84,16 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
         !midUpdateAudio){
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
     }else{
+#ifdef DEBUG
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Good mids\n");
+#endif
     }
     
     return JNI_VERSION_1_4;
 }
 
 //Start up the SDL app
-extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env, 
+extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit( JNIEnv* env, 
                                                                 jobject obj ){ 
                                                                    
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
@@ -107,39 +107,45 @@ extern "C" void Java_org_libsdl_android_SDLActivity_nativeInit( JNIEnv* env,
 }
 
 //Keydown
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyDown(JNIEnv* env, 
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyDown(JNIEnv* env, 
                jobject obj, jint keycode){
     
     int r = Android_OnKeyDown(keycode);
+#ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key down %d, %d\n", keycode, r);
+#endif
                         
 }
 
 //Keyup
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeKeyUp(JNIEnv* env, 
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyUp(JNIEnv* env, 
                jobject obj, jint keycode){
     
     int r = Android_OnKeyUp(keycode);
+#ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key up %d, %d\n", keycode, r);
+#endif
                         
 }
 
 //Touch
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeTouch(JNIEnv* env, 
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(JNIEnv* env, 
                jobject obj, jint action, jfloat x, jfloat y, jfloat p){
 
+#ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native touch event %d @ %f/%f, pressure %f\n", 
                         action, x, y, p);
+#endif
 
     //TODO: Pass this off to the SDL multitouch stuff
                         
 }
 
 //Quit
-extern "C" void Java_org_libsdl_android_SDLActivity_nativeQuit( JNIEnv*  env, 
+extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit( JNIEnv*  env, 
                                                                 jobject obj ){    
 
     //Stop rendering as we're no longer in the foreground
@@ -152,7 +158,7 @@ extern "C" void Java_org_libsdl_android_SDLActivity_nativeQuit( JNIEnv*  env,
 }
 
 //Screen size
-extern "C" void Java_org_libsdl_android_SDLActivity_nativeSetScreenSize(
+extern "C" void Java_org_libsdl_app_SDLActivity_nativeSetScreenSize(
                 JNIEnv*  env, jobject obj, jint width, jint height){
 
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
@@ -162,13 +168,13 @@ extern "C" void Java_org_libsdl_android_SDLActivity_nativeSetScreenSize(
 }
 
 //Resize
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeResize(
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
                                         JNIEnv*  env, jobject obj, jint width, 
                                         jint height, jint format){
     Android_OnResize(width, height, format);
 }
 
-extern "C" void Java_org_libsdl_android_SDLActivity_onNativeAccel(
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
                                         JNIEnv*  env, jobject obj,
                                         jfloat x, jfloat y, jfloat z){
     fLastAccelerometer[0] = x;
@@ -215,7 +221,7 @@ extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len){
     if(!mAudioThreadEnv){
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Need to set up audio thread env\n");
 
-        mJVM->AttachCurrentThread(&mAudioThreadEnv, NULL);
+        mVM->AttachCurrentThread(&mAudioThreadEnv, NULL);
 
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: ok\n");
     }
