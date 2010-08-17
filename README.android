@@ -1,16 +1,45 @@
-==============================================================================
+================================================================================
 Simple DirectMedia Layer for Android
-==============================================================================
+================================================================================
 
 Requirements: Android NDK r4 or later
+
+================================================================================
+ How the port works
+================================================================================
+
+- Android applications are Java-based, optionally with parts written in C
+- As SDL apps are C-based, we use a small Java shim that uses JNI to talk to 
+the SDL library
+- This means that your application C code must be placed inside an android 
+Java project, along with some C support code that communicates with Java
+- This eventually produces a standard Android .apk package
+
+
+
+
+
+
+================================================================================
+ Building an app
+================================================================================
 
 Instructions:
 1. Edit android/config.cfg to point to the location of the NDK
 2. Run 'make -f Makefile.android'. If all goes well, libsdl.a should be created
-3. Place your application source files in android/testproject/jni
-4. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
-4. Run 'ant' in android/testproject. This compiles the .java and eventually 
+3. Place your application source files in android/project/jni
+4. Edit the Android.mk to include your source files
+5. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
+6. Run 'ant' in android/testproject. This compiles the .java and eventually 
 creates a .apk with the C source embedded
-6. 'ant install' will push the apk to the device or emulator (if connected)
+7. 'ant install' will push the apk to the device or emulator (if connected)
 
 
+
+
+================================================================================
+ Known issues
+================================================================================
+
+- SDL audio (although it's mostly written, just not working properly yet)
+- TODO. I'm sure there's a bunch more stuff I haven't thought of 
