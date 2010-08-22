@@ -97,6 +97,9 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_PANDORA
     &PND_bootstrap,
 #endif
+#if SDL_VIDEO_DRIVER_ANDROID
+    &Android_bootstrap,
+#endif
     NULL
 };
 
