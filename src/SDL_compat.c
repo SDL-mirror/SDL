@@ -639,29 +639,18 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 
     /* If we're in OpenGL mode, just create a stub surface and we're done! */
     if (flags & SDL_OPENGL) {
-        
-       printf("1\n");
-    
         SDL_VideoContext = SDL_GL_CreateContext(SDL_VideoWindow);
         if (!SDL_VideoContext) {
             return NULL;
         }
-
-        
-    printf("2\n");
-    
         if (SDL_GL_MakeCurrent(SDL_VideoWindow, SDL_VideoContext) < 0) {
             return NULL;
         }
-        
-    printf("3\n");
         SDL_VideoSurface =
             SDL_CreateRGBSurfaceFrom(NULL, width, height, bpp, 0, 0, 0, 0, 0);
         if (!SDL_VideoSurface) {
             return NULL;
         }
-        
-    printf("4\n");
         SDL_VideoSurface->flags |= surface_flags;
         SDL_PublicSurface = SDL_VideoSurface;
         return SDL_PublicSurface;
