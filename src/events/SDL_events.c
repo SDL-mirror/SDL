@@ -254,6 +254,7 @@ SDL_StartEventLoop(Uint32 flags)
     retcode = 0;
     retcode += SDL_KeyboardInit();
     retcode += SDL_MouseInit();
+    retcode += SDL_TouchInit();
     retcode += SDL_QuitInit();
     if (retcode < 0) {
         /* We don't expect them to fail, but... */
@@ -492,6 +493,10 @@ SDL_PushEvent(SDL_Event * event)
     if (SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0, 0) <= 0) {
         return -1;
     }
+
+    SDL_GestureProcessEvent(event);
+    
+
     return 1;
 }
 

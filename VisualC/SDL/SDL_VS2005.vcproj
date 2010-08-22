@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
+<<<<<<< local
 	Version="8.00"
+=======
+	Version="9.00"
+>>>>>>> other
 	Name="SDL"
 	ProjectGUID="{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
 	RootNamespace="SDL"
+<<<<<<< local
+=======
+	TargetFrameworkVersion="131072"
+>>>>>>> other
 	>
 	<Platforms>
 		<Platform
@@ -76,16 +84,36 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+<<<<<<< local
 				AdditionalOptions="/MACHINE:I386"
+=======
+				AdditionalOptions="/MACHINE:I386&#x0D;&#x0A;msvcrt.lib"
+>>>>>>> other
 				AdditionalDependencies="msimg32.lib winmm.lib"
 				OutputFile=".\Debug/SDL.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+<<<<<<< local
 				IgnoreAllDefaultLibraries="true"
+=======
+				IgnoreAllDefaultLibraries="false"
+				IgnoreDefaultLibraryNames=""
+>>>>>>> other
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/SDL.pdb"
+<<<<<<< local
 				SubSystem="2"
+=======
+				SubSystem="0"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+>>>>>>> other
 				ImportLibrary=".\Debug/SDL.lib"
+<<<<<<< local
+=======
+				Profile="true"
+				CLRThreadAttribute="0"
+>>>>>>> other
 				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool
@@ -107,9 +135,12 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+<<<<<<< local
 				Name="VCWebDeploymentTool"
 			/>
 			<Tool
+=======
+>>>>>>> other
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -185,6 +216,11 @@
 				IgnoreAllDefaultLibraries="true"
 				ProgramDatabaseFile=".\Release/SDL.pdb"
 				SubSystem="2"
+<<<<<<< local
+=======
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+>>>>>>> other
 				ImportLibrary=".\Release/SDL.lib"
 			/>
 			<Tool
@@ -206,9 +242,12 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+<<<<<<< local
 				Name="VCWebDeploymentTool"
 			/>
 			<Tool
+=======
+>>>>>>> other
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -941,6 +980,17 @@
 			>
 		</File>
 		<File
+<<<<<<< local
+=======
+			RelativePath="..\..\src\events\SDL_touch.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_touch_c.h"
+			>
+		</File>
+		<File
+>>>>>>> other
 			RelativePath="..\..\src\video\SDL_video.c"
 			>
 		</File>

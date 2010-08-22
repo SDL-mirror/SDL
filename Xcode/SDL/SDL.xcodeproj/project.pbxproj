@@ -476,6 +476,16 @@
 		04F2AF671104AC0800D6DDF7 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F2AF651104AC0800D6DDF7 /* SDL_assert.c */; };
 		04F2AF691104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04F2AF6A1104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; };
+		8CB0A76C11F6A84800CBA2DE /* SDL_x11clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 8CB0A76A11F6A84800CBA2DE /* SDL_x11clipboard.c */; };
+		8CB0A76D11F6A84800CBA2DE /* SDL_x11clipboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A76B11F6A84800CBA2DE /* SDL_x11clipboard.h */; };
+		8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */; };
+		8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */; };
+		8CB0A77E11F6A8E700CBA2DE /* SDL_gesture_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77A11F6A8E700CBA2DE /* SDL_gesture_c.h */; };
+		8CB0A77F11F6A8E700CBA2DE /* SDL_gesture.c in Sources */ = {isa = PBXBuildFile; fileRef = 8CB0A77B11F6A8E700CBA2DE /* SDL_gesture.c */; };
+		8CB0A78011F6A8E700CBA2DE /* SDL_touch_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77C11F6A8E700CBA2DE /* SDL_touch_c.h */; };
+		8CB0A78111F6A8E700CBA2DE /* SDL_touch.c in Sources */ = {isa = PBXBuildFile; fileRef = 8CB0A77D11F6A8E700CBA2DE /* SDL_touch.c */; };
+		8CB0A78711F6A90B00CBA2DE /* SDL_eventtouch.c in Sources */ = {isa = PBXBuildFile; fileRef = 8CB0A78511F6A90B00CBA2DE /* SDL_eventtouch.c */; };
+		8CB0A78811F6A90B00CBA2DE /* SDL_eventtouch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A78611F6A90B00CBA2DE /* SDL_eventtouch.h */; };
 		BECDF62E0761BA81005FE872 /* SDL_audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538330006D78D67F000001 /* SDL_audio.c */; };
 		BECDF62F0761BA81005FE872 /* SDL_audiocvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538331006D78D67F000001 /* SDL_audiocvt.c */; };
 		BECDF6300761BA81005FE872 /* SDL_audiodev.c in Sources */ = {isa = PBXBuildFile; fileRef = 01538332006D78D67F000001 /* SDL_audiodev.c */; };
@@ -864,6 +874,17 @@
 		0C5AF5FD01191D2B7F000001 /* SDL_version.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_version.h; path = ../../include/SDL_version.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5FE01191D2B7F000001 /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_video.h; path = ../../include/SDL_video.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5FF01191D2B7F000001 /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL.h; path = ../../include/SDL.h; sourceTree = SOURCE_ROOT; };
+		8C93F0EA11F803710014F54D /* gestureSDLTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "gestureSDLTest-Info.plist"; sourceTree = "<group>"; };
+		8CB0A76A11F6A84800CBA2DE /* SDL_x11clipboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11clipboard.c; sourceTree = "<group>"; };
+		8CB0A76B11F6A84800CBA2DE /* SDL_x11clipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_x11clipboard.h; sourceTree = "<group>"; };
+		8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_gesture.h; path = ../../include/SDL_gesture.h; sourceTree = SOURCE_ROOT; };
+		8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_touch.h; path = ../../include/SDL_touch.h; sourceTree = SOURCE_ROOT; };
+		8CB0A77A11F6A8E700CBA2DE /* SDL_gesture_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gesture_c.h; sourceTree = "<group>"; };
+		8CB0A77B11F6A8E700CBA2DE /* SDL_gesture.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gesture.c; sourceTree = "<group>"; };
+		8CB0A77C11F6A8E700CBA2DE /* SDL_touch_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_touch_c.h; sourceTree = "<group>"; };
+		8CB0A77D11F6A8E700CBA2DE /* SDL_touch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_touch.c; sourceTree = "<group>"; };
+		8CB0A78511F6A90B00CBA2DE /* SDL_eventtouch.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_eventtouch.c; sourceTree = "<group>"; };
+		8CB0A78611F6A90B00CBA2DE /* SDL_eventtouch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_eventtouch.h; sourceTree = "<group>"; };
 		B24DA50405A88D52006B9F1C /* SDL_cpuinfo.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = SDL_cpuinfo.c; sourceTree = "<group>"; };
 		B29A290D04E5B28700A80002 /* SDL_loadso.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_loadso.h; path = ../../include/SDL_loadso.h; sourceTree = "<group>"; };
 		B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = SOURCE_ROOT; };
@@ -1108,6 +1129,10 @@
 		00CFA719106B498B00758660 /* x11 */ = {
 			isa = PBXGroup;
 			children = (
+				8CB0A78511F6A90B00CBA2DE /* SDL_eventtouch.c */,
+				8CB0A78611F6A90B00CBA2DE /* SDL_eventtouch.h */,
+				8CB0A76A11F6A84800CBA2DE /* SDL_x11clipboard.c */,
+				8CB0A76B11F6A84800CBA2DE /* SDL_x11clipboard.h */,
 				00CFA71A106B498B00758660 /* imKStoUCS.c */,
 				00CFA71B106B498B00758660 /* imKStoUCS.h */,
 				00CFA71C106B498B00758660 /* SDL_x11dyn.c */,
@@ -1353,6 +1378,10 @@
 		01538367006D79147F000001 /* events */ = {
 			isa = PBXGroup;
 			children = (
+				8CB0A77A11F6A8E700CBA2DE /* SDL_gesture_c.h */,
+				8CB0A77B11F6A8E700CBA2DE /* SDL_gesture.c */,
+				8CB0A77C11F6A8E700CBA2DE /* SDL_touch_c.h */,
+				8CB0A77D11F6A8E700CBA2DE /* SDL_touch.c */,
 				0420497411E6F052007E7EC9 /* blank_cursor.h */,
 				0420497511E6F052007E7EC9 /* default_cursor.h */,
 				0420497611E6F052007E7EC9 /* scancodes_darwin.h */,
@@ -1470,6 +1499,8 @@
 		0153844A006D81B07F000001 /* Public Headers */ = {
 			isa = PBXGroup;
 			children = (
+				8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */,
+				8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */,
 				0C5AF5E501191D2B7F000001 /* begin_code.h */,
 				0C5AF5E601191D2B7F000001 /* close_code.h */,
 				0C5AF5FF01191D2B7F000001 /* SDL.h */,
@@ -1561,6 +1592,7 @@
 				BECDF66B0761BA81005FE872 /* Info-Framework.plist */,
 				BEC562FE0761C0E800A33029 /* Linked Frameworks */,
 				00D8D9F11195090700638393 /* testsdl-Info.plist */,
+				8C93F0EA11F803710014F54D /* gestureSDLTest-Info.plist */,
 			);
 			comments = "To build Universal Binaries, we have experimented with a variety of different options.\nThe complication is that we must retain compatibility with at least 10.2. \nThe Universal Binary defaults only work for > 10.3.9\n\nSo far, we have found:\ngcc 4.0.0 with Xcode 2.1 always links against libgcc_s. gcc 4.0.1 from Xcode 2.2 fixes this problem.\n\nBut gcc 4.0 will not work with < 10.3.9 because we continue to get an undefined symbol to _fprintf$LDBL128.\nSo we must use gcc 3.3 on PPC to accomplish 10.2 support. (But 4.0 is required for i386.)\n\nSetting the deployment target to 10.4 will disable prebinding, so for PPC, we set it less than 10.4 to preserve prebinding for legacy support.\n\nSetting the PPC SDKROOT to /Developers/SDKs/MacOSX10.2.8.sdk will link to 63.0.0 libSystem.B.dylib. Leaving it at current or 10.4u links to 88.1.2. However, as long as we are using gcc 3.3, it doesn't seem to matter as testing has demonstrated both will run. We have decided not to invoke the 10.2.8 SDK because it is not a default installed component with Xcode which will probably cause most people problems. However, rather than deleting the SDKROOT_ppc entry entirely, we have mapped it to 10.4u in case we decide we need to change this setting.\n\nTo use Altivec or SSE, we needed architecture specific flags:\nOTHER_CFLAGS_ppc\nOTHER_CFLAGS_i386\nOTHER_CFLAGS=$(OTHER_CFLAGS_($CURRENT_ARCH))\n\nThe general OTHER_CFLAGS needed to be manually mapped to architecture specific options because Xcode didn't do this automatically for us.\n\n\n";
 			name = SDLFramework;
@@ -1805,6 +1837,12 @@
 				0420497D11E6F052007E7EC9 /* scancodes_linux.h in Headers */,
 				0420497E11E6F052007E7EC9 /* scancodes_win32.h in Headers */,
 				0420497F11E6F052007E7EC9 /* scancodes_xfree86.h in Headers */,
+				8CB0A76D11F6A84800CBA2DE /* SDL_x11clipboard.h in Headers */,
+				8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */,
+				8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */,
+				8CB0A77E11F6A8E700CBA2DE /* SDL_gesture_c.h in Headers */,
+				8CB0A78011F6A8E700CBA2DE /* SDL_touch_c.h in Headers */,
+				8CB0A78811F6A90B00CBA2DE /* SDL_eventtouch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2277,6 +2315,10 @@
 				04DEA57511E6009000386CAC /* SDL_clipboard.c in Sources */,
 				04DEA57A11E600A600386CAC /* SDL_cocoaclipboard.m in Sources */,
 				0420496211E6EFD3007E7EC9 /* SDL_clipboardevents.c in Sources */,
+				8CB0A76C11F6A84800CBA2DE /* SDL_x11clipboard.c in Sources */,
+				8CB0A77F11F6A8E700CBA2DE /* SDL_gesture.c in Sources */,
+				8CB0A78111F6A8E700CBA2DE /* SDL_touch.c in Sources */,
+				8CB0A78711F6A90B00CBA2DE /* SDL_eventtouch.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

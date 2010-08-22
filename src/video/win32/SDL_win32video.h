@@ -32,7 +32,14 @@
 #define UNICODE
 #endif
 #undef WINVER
-#define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
+//#define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
+#define WINVER 0x601  /* Need 0x600 (_WIN32_WINNT_WIN7) for WM_Touch */
+#if (_WIN32_WINNT < 0x601)
+#undef _WIN32_WINNT
+#define _WIN32_WINNT 0x601
+#endif
+
+
 #include <windows.h>
 
 #if SDL_VIDEO_RENDER_D3D

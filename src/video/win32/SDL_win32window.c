@@ -218,6 +218,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         WIN_SetError("Couldn't create window");
         return -1;
     }
+	//RegisterTouchWindow(hwnd, 0);
 
     WIN_PumpEvents(_this);
 

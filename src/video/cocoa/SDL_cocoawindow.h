@@ -64,6 +64,20 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) rightMouseDragged:(NSEvent *) theEvent;
 -(void) otherMouseDragged:(NSEvent *) theEvent;
 -(void) scrollWheel:(NSEvent *) theEvent;
+-(void) touchesBeganWithEvent:(NSEvent *) theEvent;
+-(void) touchesMovedWithEvent:(NSEvent *) theEvent;
+-(void) touchesEndedWithEvent:(NSEvent *) theEvent;
+-(void) touchesCancelledWithEvent:(NSEvent *) theEvent;
+
+/* Touch event handling */
+typedef enum {
+    COCOA_TOUCH_DOWN,
+    COCOA_TOUCH_UP,
+    COCOA_TOUCH_MOVE,
+    COCOA_TOUCH_CANCELLED
+} cocoaTouchType;
+-(void) handleTouches:(cocoaTouchType)type withEvent:(NSEvent*) event;
+
 @end
 /* *INDENT-ON* */
 

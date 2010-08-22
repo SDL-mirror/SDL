@@ -44,7 +44,7 @@ EMBEDSPU = @EMBEDSPU@
 
 DIST = acinclude autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iPhoneOS
 
-HDRS = SDL.h SDL_assert.h SDL_atomic.h SDL_audio.h SDL_clipboard.h SDL_compat.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_haptic.h SDL_input.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_opengles.h SDL_pixels.h SDL_platform.h SDL_power.h SDL_quit.h SDL_rect.h SDL_revision.h SDL_rwops.h SDL_scancode.h SDL_stdinc.h SDL_surface.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
+HDRS = SDL.h SDL_assert.h SDL_atomic.h SDL_audio.h SDL_clipboard.h SDL_compat.h SDL_cpuinfo.h SDL_endian.h SDL_error.h SDL_events.h SDL_gesture.h SDL_haptic.h SDL_input.h SDL_joystick.h SDL_keyboard.h SDL_keysym.h SDL_loadso.h SDL_main.h SDL_mouse.h SDL_mutex.h SDL_name.h SDL_opengl.h SDL_opengles.h SDL_pixels.h SDL_platform.h SDL_power.h SDL_quit.h SDL_rect.h SDL_revision.h SDL_rwops.h SDL_scancode.h SDL_stdinc.h SDL_surface.h SDL_syswm.h SDL_thread.h SDL_timer.h SDL_touch.h SDL_types.h SDL_version.h SDL_video.h begin_code.h close_code.h
 
 LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@

@@ -7,7 +7,7 @@ EXE	= @EXE@
 CFLAGS  = @CFLAGS@
 LIBS	= @LIBS@
 
-TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testalpha$(EXE) testatomic$(EXE) testaudioinfo$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcursor$(EXE) testdraw2$(EXE) testdyngles$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testfill$(EXE) testgamma$(EXE) testgl2$(EXE) testgles$(EXE) testgl$(EXE) testhaptic$(EXE) testhread$(EXE) testiconv$(EXE) testime$(EXE) testintersections$(EXE) testjoystick$(EXE) testkeys$(EXE) testloadso$(EXE) testlock$(EXE) testmultiaudio$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testpower$(EXE) testresample$(EXE) testsem$(EXE) testsprite2$(EXE) testsprite$(EXE) testspriteminimal$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm2$(EXE) testwm$(EXE) threadwin$(EXE) torturethread$(EXE)
+TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testalpha$(EXE) testatomic$(EXE) testaudioinfo$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcursor$(EXE) testdraw2$(EXE) testdyngles$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testfill$(EXE) testgamma$(EXE) testgl2$(EXE) testgles$(EXE) testgl$(EXE) testhaptic$(EXE) testhread$(EXE) testiconv$(EXE) testime$(EXE) testintersections$(EXE) testjoystick$(EXE) testkeys$(EXE) testloadso$(EXE) testlock$(EXE) testmultiaudio$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testpalette$(EXE) testplatform$(EXE) testpower$(EXE) testresample$(EXE) testsem$(EXE) testsprite2$(EXE) testsprite$(EXE) testspriteminimal$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm2$(EXE) testwm$(EXE) threadwin$(EXE) torturethread$(EXE) testgesture$(EXE)
 
 all: Makefile $(TARGETS)
 
@@ -150,6 +150,9 @@ testhaptic$(EXE): $(srcdir)/testhaptic.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testatomic$(EXE): $(srcdir)/testatomic.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
+testgesture$(EXE): $(srcdir)/testgesture.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
  
 testime$(EXE): $(srcdir)/testime.c

@@ -36,6 +36,8 @@
 #include "SDL_mouse.h"
 #include "SDL_joystick.h"
 #include "SDL_quit.h"
+#include "SDL_gesture.h"
+#include "SDL_touch.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -90,13 +92,27 @@ typedef enum
     SDL_JOYBUTTONDOWN,          /**< Joystick button pressed */
     SDL_JOYBUTTONUP,            /**< Joystick button released */
 
+    /* Touch events */
+    SDL_FINGERDOWN      = 0x700,
+    SDL_FINGERUP,
+    SDL_FINGERMOTION,
+    SDL_TOUCHBUTTONDOWN,
+    SDL_TOUCHBUTTONUP,    
+
+    /* Gesture events */
+    SDL_DOLLARGESTURE   = 0x800,
+    SDL_DOLLARRECORD,
+    SDL_MULTIGESTURE,
+
     /* Clipboard events */
-    SDL_CLIPBOARDUPDATE = 0x700, /**< The clipboard changed */
+
+    SDL_CLIPBOARDUPDATE = 0x900, /**< The clipboard changed */
 
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
     SDL_EVENT_COMPAT2,
     SDL_EVENT_COMPAT3,
+
 
     /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
      *  and should be allocated with SDL_RegisterEvents()
@@ -263,6 +279,79 @@ typedef struct SDL_JoyButtonEvent
     Uint8 padding1;
 } SDL_JoyButtonEvent;
 
+
+/**
+ *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ */
+typedef struct SDL_TouchFingerEvent
+{
+    Uint32 type;        /**< ::SDL_FINGERMOTION OR 
+			   SDL_FINGERDOWN OR SDL_FINGERUP*/
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    SDL_TouchID touchId;        /**< The touch device id */
+    SDL_FingerID fingerId;
+    Uint8 state;        /**< The current button state */
+    Uint8 padding1;
+    Uint8 padding2;
+    Uint8 padding3;
+    Uint16 x;
+    Uint16 y;
+    Sint16 dx;
+    Sint16 dy;
+    Uint16 pressure;
+} SDL_TouchFingerEvent;
+
+
+/**
+ *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ */
+typedef struct SDL_TouchButtonEvent
+{
+    Uint32 type;        /**< ::SDL_TOUCHBUTTONUP OR SDL_TOUCHBUTTONDOWN */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    SDL_TouchID touchId;        /**< The touch device index */
+    Uint8 state;        /**< The current button state */
+    Uint8 button;        /**< The button changing state */
+    Uint8 padding1;
+    Uint8 padding2;
+} SDL_TouchButtonEvent;
+
+
+
+/**
+ *  \brief Multiple Finger Gesture Event
+ */
+typedef struct SDL_MultiGestureEvent
+{
+    Uint32 type;        /**< ::SDL_MULTIGESTURE */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    SDL_TouchID touchId;        /**< The touch device index */
+    float dTheta;
+    float dDist;
+    float x;  //currently 0...1. Change to screen coords?
+    float y;  
+    Uint16 numFingers;
+    Uint16 padding;
+} SDL_MultiGestureEvent;
+
+typedef struct SDL_DollarGestureEvent
+{
+    Uint32 type;        /**< ::SDL_DOLLARGESTURE */
+    Uint32 windowID;    /**< The window with mouse focus, if any */
+    SDL_TouchID touchId;        /**< The touch device index */
+    SDL_GestureID gestureId;
+    Uint32 numFingers;
+    float error;
+  /*
+    //TODO: Enable to give location?
+    float x;  //currently 0...1. Change to screen coords?
+    float y;  
+  */
+} SDL_DollarGestureEvent;
+
+
+
+
 /**
  *  \brief The "quit requested" event
  */
@@ -345,6 +434,10 @@ typedef union SDL_Event
     SDL_QuitEvent quit;             /**< Quit request event data */
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
+    SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
+    SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
+    SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data*/
+    SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data*/
 
     /** Temporarily here for backwards compatibility */
     /*@{*/

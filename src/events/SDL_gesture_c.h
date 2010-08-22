@@ -21,31 +21,15 @@
 */
 #include "SDL_config.h"
 
-/* Useful functions and variables from SDL_events.c */
-#include "SDL_events.h"
-#include "SDL_thread.h"
-#include "SDL_mouse_c.h"
-#include "SDL_keyboard_c.h"
-#include "SDL_touch_c.h"
-#include "SDL_windowevents_c.h"
-#include "SDL_gesture_c.h"
-/* Start and stop the event processing loop */
-extern int SDL_StartEventLoop(Uint32 flags);
-extern void SDL_StopEventLoop(void);
-extern void SDL_QuitInterrupt(void);
+#ifndef _SDL_gesture_c_h
+#define _SDL_gesture_c_h
 
-extern void SDL_Lock_EventThread(void);
-extern void SDL_Unlock_EventThread(void);
-extern SDL_threadID SDL_EventThreadID(void);
+extern void SDL_GestureProcessEvent(SDL_Event* event);
 
-extern int SDL_SendSysWMEvent(SDL_SysWMmsg * message);
+extern int SDL_RecordGesture(SDL_TouchID touchId);
 
-extern int SDL_QuitInit(void);
-extern int SDL_SendQuit(void);
-extern void SDL_QuitQuit(void);
+extern int SDL_GestureAddTouch(SDL_Touch* touch);
 
-/* The event filter function */
-extern SDL_EventFilter SDL_EventOK;
-extern void *SDL_EventOKParam;
+#endif /* _SDL_gesture_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

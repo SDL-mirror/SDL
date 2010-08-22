@@ -192,6 +192,9 @@ Cocoa_PumpEvents(_THIS)
         if ( event == nil ) {
             break;
         }
+		
+	//printf("Type: %i, Subtype: %i\n",[event type],[event subtype]);
+		
         switch ([event type]) {
         case NSLeftMouseDown:
         case NSOtherMouseDown:
@@ -203,6 +206,7 @@ Cocoa_PumpEvents(_THIS)
         case NSRightMouseDragged:
         case NSOtherMouseDragged: /* usually middle mouse dragged */
         case NSMouseMoved:
+	  printf("Mouse Type: %i, Subtype: %i\n",[event type],[event subtype]);
             Cocoa_HandleMouseEvent(_this, event);
             /* Pass through to NSApp to make sure everything stays in sync */
             [NSApp sendEvent:event];
@@ -217,6 +221,8 @@ Cocoa_PumpEvents(_THIS)
             if (([event modifierFlags] & NSCommandKeyMask) || [event type] == NSFlagsChanged)
                [NSApp sendEvent: event];
             break;
+	case NSTabletPoint:
+	  printf("Tablet Event Received\n");
         default:
             [NSApp sendEvent:event];
             break;

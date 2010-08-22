@@ -13,8 +13,7 @@
     Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    License along with this library; if not, write to the Free Software    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
@@ -24,10 +23,11 @@
 #include "SDL_stdinc.h"
 #include "SDL_events.h"
 
-#if SDL_IPHONE_MULTIPLE_MICE
+#define IPHONE_TOUCH_EFFICIENT_DANGEROUS
+#define FIXED_MULTITOUCH
+
+#ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define MAX_SIMULTANEOUS_TOUCHES 5
-#else
-#define MAX_SIMULTANEOUS_TOUCHES 1
 #endif
 
 /* *INDENT-OFF* */
@@ -37,8 +37,11 @@
 @interface SDL_uikitview : UIView {
 #endif
 
-#if FIXME_MULTITOUCH
-	SDL_Mouse mice[MAX_SIMULTANEOUS_TOUCHES];
+#ifdef FIXED_MULTITOUCH
+	long touchId;
+#ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
+	UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
+#endif
 #endif
 
 #if SDL_IPHONE_KEYBOARD

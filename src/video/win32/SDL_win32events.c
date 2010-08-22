@@ -20,9 +20,9 @@
     slouken@libsdl.org
 */
 
-#if (_WIN32_WINNT < 0x0501)
+#if (_WIN32_WINNT < 0x601)
 #undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x601
 #endif
 
 #include "SDL_config.h"
@@ -32,11 +32,14 @@
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
 
-/*#define WMMSG_DEBUG*/
+
+
+#define WMMSG_DEBUG
 #ifdef WMMSG_DEBUG
-#include <stdio.h>
+#include <stdio.h>	
 #include "wmmsg.h"
 #endif
+//#include <stdio.h>
 
 /* Masks for processing the windows KEYDOWN and KEYUP messages */
 #define REPEATED_KEYMASK    (1<<30)
@@ -121,9 +124,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if (!data) {
         return CallWindowProc(DefWindowProc, hwnd, msg, wParam, lParam);
     }
+
 #ifdef WMMSG_DEBUG
-    {
-        FILE *log = fopen("wmmsg.txt", "a");
+    {		
+        FILE *log = fopen("wmmsg.txt", "a");		
         fprintf(log, "Received windows message: %p ", hwnd);
         if (msg > MAX_WMMSG) {
             fprintf(log, "%d", msg);
@@ -509,7 +513,39 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         returnCode = 0;
         break;
-    }
+	case WM_TOUCH:
+		{
+			//printf("Got Touch Event!\n");
+    
+			FILE *log = fopen("wmmsg.txt", "a");
+			fprintf(log, "Received Touch Message: %p ", hwnd);
+			if (msg > MAX_WMMSG) {
+				fprintf(log, "%d", msg);
+			} else {
+				fprintf(log, "%s", wmtab[msg]);
+			}
+			fprintf(log, "WM_TOUCH = %d -- 0x%X, 0x%X\n",msg, wParam, lParam);
+			fclose(log);
+    
+		}
+		break;
+	case WM_GESTURE:
+		{
+			//printf("Got Touch Event!\n");
+    
+			FILE *log = fopen("wmmsg.txt", "a");
+			fprintf(log, "Received Gesture Message: %p ", hwnd);
+			if (msg > MAX_WMMSG) {
+				fprintf(log, "%d", msg);
+			} else {
+				fprintf(log, "%s", wmtab[msg]);
+			}
+			fprintf(log, "WM_GESTURE = %d -- 0x%X, 0x%X\n",msg, wParam, lParam);
+			fclose(log);
+    
+		}
+		break;		
+	}
 
     /* If there's a window proc, assume it's going to handle messages */
     if (data->wndproc) {

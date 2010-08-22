@@ -25,8 +25,8 @@
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
+#include "../../events/SDL_touch_c.h"
 #include "../../events/SDL_windowevents_c.h"
-
 #include "SDL_cocoavideo.h"
 
 static __inline__ void ConvertNSRect(NSRect *r)
@@ -60,6 +60,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [center addObserver:self selector:@selector(windowDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
 
     [_data->nswindow setAcceptsMouseMovedEvents:YES];
+    [[_data->nswindow contentView] setAcceptsTouchEvents:YES];
 }
 
 - (void)close
@@ -266,6 +267,91 @@ static __inline__ void ConvertNSRect(NSRect *r)
         y -= 0.9f;
     }
     SDL_SendMouseWheel(_data->window, (int)x, (int)y);
+}
+
+- (void)touchesBeganWithEvent:(NSEvent *) theEvent
+{
+    [self handleTouches:COCOA_TOUCH_DOWN withEvent:theEvent];
+}
+
+- (void)touchesMovedWithEvent:(NSEvent *) theEvent
+{
+    [self handleTouches:COCOA_TOUCH_MOVE withEvent:theEvent];
+}
+
+- (void)touchesEndedWithEvent:(NSEvent *) theEvent
+{
+    [self handleTouches:COCOA_TOUCH_UP withEvent:theEvent];
+}
+
+- (void)touchesCancelledWithEvent:(NSEvent *) theEvent
+{
+    [self handleTouches:COCOA_TOUCH_CANCELLED withEvent:theEvent];
+}
+
+- (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
+{
+    NSSet *touches = 0;
+    NSEnumerator *enumerator;
+    NSTouch *touch;
+
+    switch (type) {
+        case COCOA_TOUCH_DOWN:
+            touches = [event touchesMatchingPhase:NSTouchPhaseBegan inView:nil];
+            break;
+        case COCOA_TOUCH_UP:
+        case COCOA_TOUCH_CANCELLED:
+            touches = [event touchesMatchingPhase:NSTouchPhaseEnded inView:nil];
+            break;
+        case COCOA_TOUCH_MOVE:
+            touches = [event touchesMatchingPhase:NSTouchPhaseMoved inView:nil];
+            break;
+    }
+
+    enumerator = [touches objectEnumerator];
+    touch = (NSTouch*)[enumerator nextObject];
+    while (touch) {
+        SDL_TouchID touchId = (SDL_TouchID)[touch device];
+        if (!SDL_GetTouch(touchId)) {
+            SDL_Touch touch;
+
+            touch.id = touchId;
+            touch.x_min = 0;
+            touch.x_max = 1;
+            touch.native_xres = touch.x_max - touch.x_min;
+            touch.y_min = 0;
+            touch.y_max = 1;
+            touch.native_yres = touch.y_max - touch.y_min;
+            touch.pressure_min = 0;
+            touch.pressure_max = 1;
+            touch.native_pressureres = touch.pressure_max - touch.pressure_min;
+            
+            if (SDL_AddTouch(&touch, "") < 0) {
+                return;
+            }
+        } 
+
+        SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
+        float x = [touch normalizedPosition].x;
+        float y = [touch normalizedPosition].y;
+	/* Make the origin the upper left instead of the lower left */
+	y = 1.0f - y;
+
+        switch (type) {
+        case COCOA_TOUCH_DOWN:
+            SDL_SendFingerDown(touchId, fingerId, SDL_TRUE, x, y, 1);
+            break;
+        case COCOA_TOUCH_UP:
+        case COCOA_TOUCH_CANCELLED:
+            SDL_SendFingerDown(touchId, fingerId, SDL_FALSE, x, y, 1);
+            break;
+        case COCOA_TOUCH_MOVE:
+            SDL_SendTouchMotion(touchId, fingerId, SDL_FALSE, x, y, 1);
+            break;
+        }
+        
+        touch = (NSTouch*)[enumerator nextObject];
+    }
 }
 
 @end
