@@ -31,6 +31,7 @@
 
 #include "SDL_x11video.h"
 #include "SDL_x11render.h"
+#include "SDL_x11shape.h"
 
 #if SDL_VIDEO_DRIVER_PANDORA
 #include "SDL_x11opengles.h"
@@ -205,6 +206,9 @@ X11_CreateDevice(int devindex)
     device->SetWindowGrab = X11_SetWindowGrab;
     device->DestroyWindow = X11_DestroyWindow;
     device->GetWindowWMInfo = X11_GetWindowWMInfo;
+    device->shape_driver.CreateShaper = X11_CreateShaper;
+    device->shape_driver.SetWindowShape = X11_SetWindowShape;
+    device->shape_driver.ResizeWindowShape = X11_ResizeWindowShape;
 #ifdef SDL_VIDEO_OPENGL_GLX
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;

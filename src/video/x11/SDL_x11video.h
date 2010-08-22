@@ -54,6 +54,10 @@
 #if SDL_VIDEO_DRIVER_X11_XFIXES
 #include <X11/extensions/Xfixes.h>
 #endif
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
+#include <X11/extensions/shape.h>
+#endif
+
 #include "SDL_x11dyn.h"
 
 #include "SDL_x11clipboard.h"

@@ -29,6 +29,7 @@
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
 #include "SDL_x11gamma.h"
+#include "SDL_x11shape.h"
 #include "../Xext/extensions/StdCmap.h"
 
 #ifdef SDL_VIDEO_DRIVER_PANDORA
@@ -941,6 +942,8 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
+    if(SDL_IsShapedWindow(window))
+        X11_ResizeWindowShape(window);
     XResizeWindow(display, data->xwindow, window->w, window->h);
 }
 

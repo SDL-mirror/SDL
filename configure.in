@@ -1122,6 +1122,19 @@ AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [[def
                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINERAMA)
                 SOURCES="$SOURCES $srcdir/src/video/Xext/Xinerama/*.c"
             fi
+            AC_ARG_ENABLE(video-x11-xshape,
+AC_HELP_STRING([--enable-video-x11-xshape], [enable X11 XShape support [[default=yes]]]),
+                            , enable_video_x11_xshape=yes)
+            if test x$enable_video_x11_xshape = xyes; then
+                AC_CHECK_HEADER(X11/extensions/shape.h,
+                                have_shape_h_hdr=yes,
+                                have_shape_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                if test x$have_shape_h_hdr = xyes; then
+                    AC_DEFINE(SDL_VIDEO_DRIVER_X11_XSHAPE)
+                fi
+            fi
             AC_ARG_ENABLE(video-x11-xrandr,
 AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for fullscreen [[default=yes]]]),
                             , enable_video_x11_xrandr=yes)

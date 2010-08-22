@@ -39,6 +39,7 @@ SDL_X11_SYM(int,XClearWindow,(Display* a,Window b),(a,b),return)
 SDL_X11_SYM(int,XCloseDisplay,(Display* a),(a),return)
 SDL_X11_SYM(int,XConvertSelection,(Display* a,Atom b,Atom c,Atom d,Window e,Time f),(a,b,c,d,e,f),return)
 SDL_X11_SYM(int,XCopyArea,(Display* a,Drawable b,Drawable c,GC d,int e,int f,unsigned int g,unsigned int h,int i,int j),(a,b,c,d,e,f,g,h,i,j),return)
+SDL_X11_SYM(Pixmap,XCreateBitmapFromData,(Display *dpy,Drawable d,_Xconst char *data,unsigned int width,unsigned int height),(dpy,d,data,width,height),return)
 SDL_X11_SYM(Colormap,XCreateColormap,(Display* a,Window b,Visual* c,int d),(a,b,c,d),return)
 SDL_X11_SYM(Cursor,XCreatePixmapCursor,(Display* a,Pixmap b,Pixmap c,XColor* d,XColor* e,unsigned int f,unsigned int g),(a,b,c,d,e,f,g),return)
 SDL_X11_SYM(GC,XCreateGC,(Display* a,Drawable b,unsigned long c,XGCValues* d),(a,b,c,d),return)
@@ -277,6 +278,12 @@ SDL_X11_SYM(Status,XFixesQueryVersion,(Display *dpy,int *major,int *minor),(dpy,
 SDL_X11_SYM(void,XFixesSetGCClipRegion,(Display *dpy,GC gc,int clip_x,int clip_y,XserverRegion region),(dpy,gc,clip_x,clip_y,region),return)
 SDL_X11_SYM(void,XFixesSetPictureClipRegion,(Display *dpy,XID picture,int clip_x,int clip_y,XserverRegion region),(dpy,picture,clip_x,clip_y,region),return)
 #endif
+
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
+SDL_X11_MODULE(XSHAPE)
+SDL_X11_SYM(void,XShapeCombineMask,(Display *dpy,Window dest,int dest_kind,int x_off,int y_off,Pixmap src,int op),(dpy,dest,dest_kind,x_off,y_off,src,op),)
+#endif
+
 /* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */

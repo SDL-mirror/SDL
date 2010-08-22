@@ -26,11 +26,14 @@
 
 #include "SDL_mouse.h"
 #include "SDL_keysym.h"
+#include "SDL_shape.h"
 
 /* The SDL video driver */
 
 typedef struct SDL_Renderer SDL_Renderer;
 typedef struct SDL_RenderDriver SDL_RenderDriver;
+typedef struct SDL_WindowShaper SDL_WindowShaper;
+typedef struct SDL_ShapeDriver SDL_ShapeDriver;
 typedef struct SDL_VideoDisplay SDL_VideoDisplay;
 typedef struct SDL_VideoDevice SDL_VideoDevice;
 
@@ -97,10 +100,6 @@ struct SDL_Renderer
                             int count);
     int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
                             int count);
-    int (*RenderDrawEllipse) (SDL_Renderer * renderer, int x, int y,
-                              int w, int h);
-    int (*RenderFillEllipse) (SDL_Renderer * renderer, int x, int y,
-                              int w, int h);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -136,6 +135,32 @@ struct SDL_RenderDriver
     SDL_RendererInfo info;
 };
 
+/* Define the SDL window-shaper structure */
+struct SDL_WindowShaper
+{   
+    /* The window associated with the shaper */
+    SDL_Window *window;
+    
+    /* The user's specified coordinates for the window, for once we give it a shape. */
+    Uint32 userx,usery;
+    
+    /* The parameters for shape calculation. */
+    SDL_WindowShapeMode mode;
+    
+    /* Has this window been assigned a shape? */
+    SDL_bool hasshape;
+    
+    void *driverdata;
+};
+
+/* Define the SDL shape driver structure */
+struct SDL_ShapeDriver
+{
+    SDL_WindowShaper *(*CreateShaper)(SDL_Window * window);
+    int (*SetWindowShape)(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMode *shape_mode);
+    int (*ResizeWindowShape)(SDL_Window *window);
+};
+
 /* Define the SDL window structure, corresponding to toplevel windows */
 struct SDL_Window
 {
@@ -150,6 +175,8 @@ struct SDL_Window
     SDL_Renderer *renderer;
 
     SDL_DisplayMode fullscreen_mode;
+    
+    SDL_WindowShaper *shaper;
 
     void *userdata;
     void *driverdata;
@@ -270,6 +297,12 @@ struct SDL_VideoDevice
     void (*RestoreWindow) (_THIS, SDL_Window * window);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
+    
+    /* * * */
+    /*
+     * Shaped-window functions
+     */
+    SDL_ShapeDriver shape_driver;
 
     /* Get some platform dependent window information */
       SDL_bool(*GetWindowWMInfo) (_THIS, SDL_Window * window,

@@ -28,6 +28,7 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_win32video.h"
+#include "SDL_win32shape.h"
 #include "SDL_d3drender.h"
 #include "SDL_gdirender.h"
 #include "SDL_gapirender.h"
@@ -180,6 +181,11 @@ WIN_CreateDevice(int devindex)
     device->SetWindowGrab = WIN_SetWindowGrab;
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
+    
+    device->shape_driver.CreateShaper = Win32_CreateShaper;
+    device->shape_driver.SetWindowShape = Win32_SetWindowShape;
+    device->shape_driver.ResizeWindowShape = Win32_ResizeWindowShape;
+    
 #ifdef SDL_VIDEO_OPENGL_WGL
     device->GL_LoadLibrary = WIN_GL_LoadLibrary;
     device->GL_GetProcAddress = WIN_GL_GetProcAddress;

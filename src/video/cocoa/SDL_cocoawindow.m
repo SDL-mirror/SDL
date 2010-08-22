@@ -28,6 +28,7 @@
 #include "../../events/SDL_touch_c.h"
 #include "../../events/SDL_windowevents_c.h"
 #include "SDL_cocoavideo.h"
+#include "SDL_cocoashape.h"
 
 static __inline__ void ConvertNSRect(NSRect *r)
 {
@@ -112,6 +113,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
     w = (int)rect.size.width;
     h = (int)rect.size.height;
+    Cocoa_ResizeWindowShape(_data->window);
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 

@@ -28,6 +28,7 @@
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
+#include "SDL_win32shape.h"
 #include "SDL_syswm.h"
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
@@ -364,6 +365,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             BOOL menu;
 
             /* If we allow resizing, let the resize happen naturally */
+            if(SDL_IsShapedWindow(data->window))
+                Win32_ResizeWindowShape(data->window);
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 returnCode = 0;
                 break;
