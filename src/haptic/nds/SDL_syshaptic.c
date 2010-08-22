@@ -43,35 +43,35 @@ typedef struct
 } NDS_HapticData;
 
 
-void
+void
 NDS_EZF_OpenNorWrite() 
 {
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0E20000] = 0x1500;
-    GBA_BUS[0x0FE0000] = 0x1500;
-} void
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0E20000] = 0x1500;
+    GBA_BUS[0x0FE0000] = 0x1500;
+} void
 
 NDS_EZF_CloseNorWrite() 
 {
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0E20000] = 0xD200;
-    GBA_BUS[0x0FE0000] = 0x1500;
-}
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0E20000] = 0xD200;
+    GBA_BUS[0x0FE0000] = 0x1500;
+}
 
 void
 NDS_EZF_ChipReset()
 {
-    GBA_BUS[0x0000] = 0x00F0;
-    GBA_BUS[0x1000] = 0x00F0;
-} uint32 NDS_EZF_IsPresent() 
+    GBA_BUS[0x0000] = 0x00F0;
+    GBA_BUS[0x1000] = 0x00F0;
+} uint32 NDS_EZF_IsPresent() 
 {
-    vuint16 id1, id2;
+    vuint16 id1, id2;
 
     NDS_EZF_OpenNorWrite();
 
@@ -81,35 +81,35 @@ NDS_EZF_ChipReset()
     GBA_BUS[0x1555] = 0x00AA;
     GBA_BUS[0x12AA] = 0x0055;
     GBA_BUS[0x1555] = 0x0090;
-    id1 = GBA_BUS[0x0001];
-    id2 = GBA_BUS[0x1001];
-    if ((id1 != 0x227E) || (id2 != 0x227E)) {
+    id1 = GBA_BUS[0x0001];
+    id2 = GBA_BUS[0x1001];
+    if ((id1 != 0x227E) || (id2 != 0x227E)) {
         NDS_EZF_CloseNorWrite();
-        return 0;
+        return 0;
     }
-    id1 = GBA_BUS[0x000E];
-    id2 = GBA_BUS[0x100E];
+    id1 = GBA_BUS[0x000E];
+    id2 = GBA_BUS[0x100E];
 
     NDS_EZF_CloseNorWrite();
-    if (id1 == 0x2218 && id2 == 0x2218) {
-        return 1;
+    if (id1 == 0x2218 && id2 == 0x2218) {
+        return 1;
     }
-    return 0;
-}
-void
+    return 0;
+}
+void
 NDS_EZF_SetShake(u8 pos) 
 {
     u16 data = ((pos % 3) | 0x00F0);
-    GBA_BUS[0x0FF0000] = 0xD200;
-    GBA_BUS[0x0000000] = 0x1500;
-    GBA_BUS[0x0010000] = 0xD200;
-    GBA_BUS[0x0020000] = 0x1500;
-    GBA_BUS[0x0F10000] = data;
-    GBA_BUS[0x0FE0000] = 0x1500;
+    GBA_BUS[0x0FF0000] = 0xD200;
+    GBA_BUS[0x0000000] = 0x1500;
+    GBA_BUS[0x0010000] = 0xD200;
+    GBA_BUS[0x0020000] = 0x1500;
+    GBA_BUS[0x0F10000] = data;
+    GBA_BUS[0x0FE0000] = 0x1500;
 
     GBA_BUS[0] = 0x0000;        /* write any value for vibration. */
     GBA_BUS[0] = 0x0002;
-}
+}
 
 static int
 SDL_SYS_LogicError(void)
