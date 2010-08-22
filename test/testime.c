@@ -136,7 +136,7 @@ static void RenderText(SDL_Surface *sur,
                         int x, int y,
                         SDL_Color color)
 {
-    if (text && strlen(text)) {
+    if (text && *text) {
         SDL_Surface *textSur = TTF_RenderUTF8_Blended(font, text, color);
         SDL_Rect dest = { x, y, textSur->w, textSur->h };
 
@@ -154,7 +154,7 @@ void Redraw()
     SDL_FillRect(screen, &textRect, backColor);
 
 #ifdef HAVE_SDL_TTF
-    if (strlen(text))
+    if (*text)
     {
         RenderText(screen, font, text, textRect.x, textRect.y, textColor);
         TTF_SizeUTF8(font, text, &w, &h);
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
             fprintf(stderr, "Keyboard: text input \"%s\"\n", event.text.text);
 
             if (SDL_strlen(text) + SDL_strlen(event.text.text) < sizeof(text))
-                strcpy(text + SDL_strlen(text), event.text.text);
+                SDL_strlcpy(text + SDL_strlen(text), event.text.text, sizeof(text));
 
             fprintf(stderr, "text inputed: %s\n", text);
 
