@@ -191,6 +191,9 @@ WIN_CreateDevice(int devindex)
     device->GL_SwapWindow = WIN_GL_SwapWindow;
     device->GL_DeleteContext = WIN_GL_DeleteContext;
 #endif
+    device->StartTextInput = WIN_StartTextInput;
+    device->StopTextInput = WIN_StopTextInput;
+    device->SetTextInputRect = WIN_SetTextInputRect;
 
     device->SetClipboardText = WIN_SetClipboardText;
     device->GetClipboardText = WIN_GetClipboardText;

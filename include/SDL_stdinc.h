@@ -472,12 +472,28 @@ extern DECLSPEC size_t SDLCALL SDL_strlen(const char *string);
 extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t * string);
 #endif
 
+#ifdef HAVE_WCSLCPY
+#define SDL_wcslcpy      wcslcpy
+#else
+extern DECLSPEC size_t SDLCALL SDL_wcslcpy(wchar_t *dst, const wchar_t *src, size_t maxlen);
+#endif
+
+#ifdef HAVE_WCSLCAT
+#define SDL_wcslcat      wcslcat
+#else
+extern DECLSPEC size_t SDLCALL SDL_wcslcat(wchar_t *dst, const wchar_t *src, size_t maxlen);
+#endif
+
+
 #ifdef HAVE_STRLCPY
 #define SDL_strlcpy     strlcpy
 #else
 extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src,
                                            size_t maxlen);
 #endif
+
+extern DECLSPEC size_t SDLCALL SDL_utf8strlcpy(char *dst, const char *src,
+                                            size_t dst_bytes);
 
 #ifdef HAVE_STRLCAT
 #define SDL_strlcat    strlcat
