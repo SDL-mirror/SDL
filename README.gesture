@@ -36,7 +36,7 @@ Saving:
 -------
 To save a template, call SDL_SaveDollarTemplate(gestureId, src) where gestureId is the id of the gesture you want to save, and src is an SDL_RWops pointer to the file where the gesture will be stored.
 
-To save all currently loaded templatesm, call SDL_SaveAllDollarTemplates(src) where source is an SDL_RWops pointer to the file where the gesture will be stored.
+To save all currently loaded templates, call SDL_SaveAllDollarTemplates(src) where source is an SDL_RWops pointer to the file where the gesture will be stored.
 
 Both functions return the number of gestures sucessfully saved.
 
