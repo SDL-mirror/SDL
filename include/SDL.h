@@ -121,8 +121,7 @@ extern "C" {
 /*@}*/
 
 /**
- *  This function loads the SDL dynamically linked library and initializes 
- *  the subsystems specified by \c flags (and those satisfying dependencies).
+ *  This function initializes  the subsystems specified by \c flags
  *  Unless the ::SDL_INIT_NOPARACHUTE flag is set, it will install cleanup
  *  signal handlers for some commonly ignored fatal signals (like SIGSEGV).
  */
