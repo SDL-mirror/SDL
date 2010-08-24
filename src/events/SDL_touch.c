@@ -313,6 +313,11 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 		   float xin, float yin, float pressurein)
 {
     int posted;
+	Uint16 x;
+	Uint16 y;
+	Uint16 pressure;
+	SDL_Finger *finger;
+
     SDL_Touch* touch = SDL_GetTouch(id);
 
     if(!touch) {
@@ -321,11 +326,11 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 
     
     //scale to Integer coordinates
-    Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
-    Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
-    Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
+    x = (Uint16)((xin+touch->x_min)*(touch->xres)/(touch->native_xres));
+    y = (Uint16)((yin+touch->y_min)*(touch->yres)/(touch->native_yres));
+    pressure = (Uint16)((yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres));
     
-    SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
+    finger = SDL_GetFinger(touch,fingerid);
     if(down) {
 	if(finger == NULL) {
 	    SDL_Finger nf;
@@ -393,15 +398,18 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
     int posted;
     Sint16 xrel, yrel;
     float x_max = 0, y_max = 0;
+	Uint16 x;
+	Uint16 y;
+	Uint16 pressure;
     
     if (!touch) {
       return SDL_TouchNotFoundError(id);
     }
 
     //scale to Integer coordinates
-    Uint16 x = (xin+touch->x_min)*(touch->xres)/(touch->native_xres);
-    Uint16 y = (yin+touch->y_min)*(touch->yres)/(touch->native_yres);
-    Uint16 pressure = (yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres);
+    x = (Uint16)((xin+touch->x_min)*(touch->xres)/(touch->native_xres));
+    y = (Uint16)((yin+touch->y_min)*(touch->yres)/(touch->native_yres));
+    pressure = (Uint16)((yin+touch->pressure_min)*(touch->pressureres)/(touch->native_pressureres));
     if(touch->flush_motion) {
 	return 0;
     }
@@ -544,9 +552,9 @@ SDL_GetTouchName(SDL_TouchID id)
 }
 
 int SDL_TouchNotFoundError(SDL_TouchID id) {
+  int i;
   printf("ERROR: Cannot send touch on non-existent device with id: %li make sure SDL_AddTouch has been called\n",id);
   printf("ERROR: There are %i touches installed with Id's:\n",SDL_num_touch);
-  int i;
   for(i=0;i < SDL_num_touch;i++) {
     printf("ERROR: %li\n",SDL_touchPads[i]->id);
   }

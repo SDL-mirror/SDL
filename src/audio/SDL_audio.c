@@ -29,7 +29,7 @@
 #include "SDL_audiomem.h"
 #include "SDL_sysaudio.h"
 
-#define _THIS    SDL_AudioDevice *this
+#define _THIS SDL_AudioDevice *_this
 
 static SDL_AudioDriver current_audio;
 static SDL_AudioDevice *open_devices[16];
@@ -321,8 +321,9 @@ SDL_StreamDeinit(SDL_AudioStreamer * stream)
     }
 }
 
-
+#if defined(ANDROID)
 #include <android/log.h>
+#endif
 
 /* The general mixing thread function */
 int SDLCALL
@@ -891,7 +892,7 @@ open_audio_device(const char *devname, int iscapture,
     device->opened = 1;
 
     /* Allocate a fake audio memory buffer */
-    device->fake_stream = SDL_AllocAudioMem(device->spec.size);
+    device->fake_stream = (Uint8 *)SDL_AllocAudioMem(device->spec.size);
     if (device->fake_stream == NULL) {
         close_audio_device(device);
         SDL_OutOfMemory();

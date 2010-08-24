@@ -110,7 +110,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>msvcrt.lib;msimg32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msvcrt.lib;msimg32.lib;version.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(IntDir)SDL.dll</OutputFile>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -274,6 +274,9 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\events\blank_cursor.h" />
     <ClInclude Include="..\..\src\events\default_cursor.h" />
     <ClInclude Include="..\..\src\audio\windx5\directx.h" />
+    <ClInclude Include="..\..\src\events\SDL_clipboardevents_c.h" />
+    <ClInclude Include="..\..\src\events\SDL_gesture_c.h" />
+    <ClInclude Include="..\..\src\events\SDL_touch_c.h" />
     <ClInclude Include="..\..\src\libm\math.h" />
     <ClInclude Include="..\..\src\libm\math_private.h" />
     <ClInclude Include="..\..\src\video\mmx.h" />
@@ -326,6 +329,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\timer\SDL_timer_c.h" />
     <ClInclude Include="..\..\src\video\win32\SDL_vkeys.h" />
     <ClInclude Include="..\..\src\audio\SDL_wave.h" />
+    <ClInclude Include="..\..\src\video\win32\SDL_win32clipboard.h" />
     <ClInclude Include="..\..\src\video\win32\SDL_win32events.h" />
     <ClInclude Include="..\..\src\video\win32\SDL_win32gamma.h" />
     <ClInclude Include="..\..\src\video\win32\SDL_win32keyboard.h" />
@@ -340,6 +344,9 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\video\win32\wmmsg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\events\SDL_clipboardevents.c" />
+    <ClCompile Include="..\..\src\events\SDL_gesture.c" />
+    <ClCompile Include="..\..\src\events\SDL_touch.c" />
     <ClCompile Include="..\..\src\libm\e_log.c" />
     <ClCompile Include="..\..\src\libm\e_pow.c" />
     <ClCompile Include="..\..\src\libm\e_rem_pio2.c" />
@@ -431,6 +438,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\timer\SDL_timer.c" />
     <ClCompile Include="..\..\src\video\SDL_video.c" />
     <ClCompile Include="..\..\src\audio\SDL_wave.c" />
+    <ClCompile Include="..\..\src\video\win32\SDL_win32clipboard.c" />
     <ClCompile Include="..\..\src\video\win32\SDL_win32events.c" />
     <ClCompile Include="..\..\src\video\win32\SDL_win32gamma.c" />
     <ClCompile Include="..\..\src\video\win32\SDL_win32keyboard.c" />
