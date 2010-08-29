@@ -1098,7 +1098,7 @@ SDL_SetWindowTitle(SDL_Window * window, const char *title)
     if (window->title) {
         SDL_free(window->title);
     }
-    if (title) {
+    if (title && *title) {
         window->title = SDL_strdup(title);
     } else {
         window->title = NULL;
@@ -1114,7 +1114,7 @@ SDL_GetWindowTitle(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, NULL);
 
-    return window->title;
+    return window->title ? window->title : "";
 }
 
 void
