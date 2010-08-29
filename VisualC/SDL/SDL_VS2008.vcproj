@@ -76,7 +76,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="msimg32.lib winmm.lib"
+				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
@@ -249,7 +249,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="msimg32.lib winmm.lib"
+				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
@@ -840,6 +840,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\events\SDL_gesture.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_gesture_c.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\stdlib\SDL_getenv.c"
 			>
 		</File>
@@ -1004,6 +1012,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\SDL_shape.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\SDL_shape_internals.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\stdlib\SDL_stdlib.c"
 			>
 		</File>
@@ -1096,6 +1112,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\events\SDL_touch.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_touch_c.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_video.c"
 			>
 		</File>
@@ -1165,6 +1189,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\win32\SDL_win32opengl.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32shape.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\win32\SDL_win32shape.h"
 			>
 		</File>
 		<File

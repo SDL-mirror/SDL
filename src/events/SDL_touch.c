@@ -366,7 +366,10 @@ SDL_SendFingerDown(SDL_TouchID id, SDL_FingerID fingerid, SDL_bool down,
 	return posted;
     }
     else {
-        if(finger == NULL) {printf("Finger not found...\n");return 0;}      
+        if(finger == NULL) {
+            SDL_SetError("Finger not found.");
+            return 0;
+        }      
 	posted = 0;
 	if (SDL_GetEventState(SDL_FINGERUP) == SDL_ENABLE) {
 	    SDL_Event event;
@@ -552,12 +555,14 @@ SDL_GetTouchName(SDL_TouchID id)
 }
 
 int SDL_TouchNotFoundError(SDL_TouchID id) {
-  int i;
-  printf("ERROR: Cannot send touch on non-existent device with id: %li make sure SDL_AddTouch has been called\n",id);
+  //int i;
+  SDL_SetError("ERROR: Cannot send touch on non-existent device with id: %li make sure SDL_AddTouch has been called\n",id);
+#if 0
   printf("ERROR: There are %i touches installed with Id's:\n",SDL_num_touch);
   for(i=0;i < SDL_num_touch;i++) {
     printf("ERROR: %li\n",SDL_touchPads[i]->id);
   }
+#endif
   return 0;
 }
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,11 +20,6 @@
     slouken@libsdl.org
 */
 
-#if (_WIN32_WINNT < 0x601)
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x601
-#endif
-
 #include "SDL_config.h"
 
 #include "SDL_win32video.h"
@@ -35,12 +30,11 @@
 
 
 
-#define WMMSG_DEBUG
+/*#define WMMSG_DEBUG*/
 #ifdef WMMSG_DEBUG
 #include <stdio.h>	
 #include "wmmsg.h"
 #endif
-//#include <stdio.h>
 
 /* Masks for processing the windows KEYDOWN and KEYUP messages */
 #define REPEATED_KEYMASK    (1<<30)
@@ -60,6 +54,12 @@
 #endif
 #ifndef WM_INPUT
 #define WM_INPUT 0x00ff
+#endif
+#ifndef WM_GESTURE
+#define WM_GESTURE 0x0119
+#endif
+#ifndef WM_TOUCH
+#define WM_TOUCH 0x0240
 #endif
 
 static WPARAM
@@ -138,8 +138,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         fprintf(log, " -- 0x%X, 0x%X\n", wParam, lParam);
         fclose(log);
     }
-
 #endif
+
     if (IME_HandleMessage(hwnd, msg, wParam, &lParam, data->videodata))
         return 0;
 
@@ -522,6 +522,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			//printf("Got Touch Event!\n");
     
+#ifdef WMMSG_DEBUG
 			FILE *log = fopen("wmmsg.txt", "a");
 			fprintf(log, "Received Touch Message: %p ", hwnd);
 			if (msg > MAX_WMMSG) {
@@ -531,6 +532,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			fprintf(log, "WM_TOUCH = %d -- 0x%X, 0x%X\n",msg, wParam, lParam);
 			fclose(log);
+#endif
     
 		}
 		break;
@@ -538,6 +540,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
 			//printf("Got Touch Event!\n");
     
+#ifdef WMMSG_DEBUG
 			FILE *log = fopen("wmmsg.txt", "a");
 			fprintf(log, "Received Gesture Message: %p ", hwnd);
 			if (msg > MAX_WMMSG) {
@@ -547,7 +550,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			}
 			fprintf(log, "WM_GESTURE = %d -- 0x%X, 0x%X\n",msg, wParam, lParam);
 			fclose(log);
-    
+#endif
 		}
 		break;		
 	}

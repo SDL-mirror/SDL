@@ -39,6 +39,12 @@ __declspec(selectany) int _fltused = 1;
 
 #else
 
+void
+__declspec(naked)
+_chkstk()
+{
+}
+
 /* Float to long */
 void
 __declspec(naked)

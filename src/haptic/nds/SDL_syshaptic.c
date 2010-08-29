@@ -52,8 +52,9 @@ NDS_EZF_OpenNorWrite()
     GBA_BUS[0x0020000] = 0x1500;
     GBA_BUS[0x0E20000] = 0x1500;
     GBA_BUS[0x0FE0000] = 0x1500;
-} void
+}
 
+void
 NDS_EZF_CloseNorWrite() 
 {
     GBA_BUS[0x0FF0000] = 0xD200;
