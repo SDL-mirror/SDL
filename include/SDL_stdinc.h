@@ -694,6 +694,12 @@ extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen,
 #define M_PI    3.14159265358979323846264338327950288   /* pi */
 #endif
 
+#ifdef HAVE_ATAN2
+#define SDL_atan2       atan2
+#else
+extern DECLSPEC double SDLCALL SDL_atan2(double y, double x);
+#endif
+
 #ifdef HAVE_CEIL
 #define SDL_ceil        ceil
 #else

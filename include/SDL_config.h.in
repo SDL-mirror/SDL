@@ -136,6 +136,7 @@
 #undef HAVE_SNPRINTF
 #undef HAVE_VSNPRINTF
 #undef HAVE_M_PI
+#undef HAVE_ATAN2
 #undef HAVE_CEIL
 #undef HAVE_COPYSIGN
 #undef HAVE_COS
