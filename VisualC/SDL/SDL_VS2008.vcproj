@@ -540,6 +540,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\libm\e_atan2.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\libm\e_log.c"
 			>
 		</File>
@@ -577,6 +581,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\mmx.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\libm\s_atan.c"
 			>
 		</File>
 		<File
