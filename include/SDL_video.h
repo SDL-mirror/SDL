@@ -606,7 +606,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Window * window,
                                                SDL_Surface * icon);
 
 /**
- *  \brief Associate an arbitrary pointer with the window.
+ *  \brief Associate an arbitrary pointer with a window.
  *  
  *  \sa SDL_GetWindowData()
  */
