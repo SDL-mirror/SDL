@@ -1112,7 +1112,7 @@ SDL_SetWindowTitle(SDL_Window * window, const char *title)
 const char *
 SDL_GetWindowTitle(SDL_Window * window)
 {
-    CHECK_WINDOW_MAGIC(window, NULL);
+    CHECK_WINDOW_MAGIC(window, "");
 
     return window->title ? window->title : "";
 }
