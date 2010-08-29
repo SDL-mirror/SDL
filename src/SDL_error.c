@@ -198,12 +198,12 @@ SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 }
 
 /* Available for backwards compatibility */
-char *
+const char *
 SDL_GetError(void)
 {
     static char errmsg[SDL_ERRBUFIZE];
 
-    return ((char *) SDL_GetErrorMsg(errmsg, SDL_ERRBUFIZE));
+    return SDL_GetErrorMsg(errmsg, SDL_ERRBUFIZE);
 }
 
 void
