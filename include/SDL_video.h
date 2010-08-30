@@ -1311,7 +1311,7 @@ extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_Texture * texture);
 extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_Window * window);
 
 /**
- *  \brief Returns whether the screensaver is currently enabled (default off).
+ *  \brief Returns whether the screensaver is currently enabled (default on).
  *  
  *  \sa SDL_EnableScreenSaver()
  *  \sa SDL_DisableScreenSaver()
