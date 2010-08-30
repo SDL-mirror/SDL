@@ -1164,7 +1164,7 @@ extern DECLSPEC int SDLCALL SDL_RenderClear(void);
 extern DECLSPEC int SDLCALL SDL_RenderDrawPoint(int x, int y);
 
 /**
- *  \brief Draw some number of points on the current rendering target.
+ *  \brief Draw multiple points on the current rendering target.
  *  
  *  \param points The points to draw
  *  \param count The number of points to draw
