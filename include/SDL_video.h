@@ -1227,7 +1227,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRects(const SDL_Rect ** rects, int cou
 extern DECLSPEC int SDLCALL SDL_RenderFillRect(const SDL_Rect * rect);
 
 /**
- *  \brief Fill some number of rectangles in the current rendering target with the drawing color.
+ *  \brief Fill some number of rectangles on the current rendering target with the drawing color.
  *  
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
