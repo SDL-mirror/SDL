@@ -1214,7 +1214,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRect(const SDL_Rect * rect);
  *  
  *  \return 0 on success, or -1 if there is no rendering context current.
  */
-extern DECLSPEC int SDLCALL SDL_RenderDrawRects(const SDL_Rect ** rect, int count);
+extern DECLSPEC int SDLCALL SDL_RenderDrawRects(const SDL_Rect ** rects, int count);
 
 /**
  *  \brief Fill a rectangle on the current rendering target with the drawing color.
