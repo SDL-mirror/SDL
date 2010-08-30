@@ -1198,7 +1198,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLines(const SDL_Point * points,
                                                 int count);
 
 /**
- *  \brief Draw a rectangle on the current rendering target with the drawing color.
+ *  \brief Draw a rectangle on the current rendering target.
  *  
  *  \param rect A pointer to the destination rectangle, or NULL to outline the entire rendering target.
  *  
@@ -1207,7 +1207,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawLines(const SDL_Point * points,
 extern DECLSPEC int SDLCALL SDL_RenderDrawRect(const SDL_Rect * rect);
 
 /**
- *  \brief Draw some number of rectangles in the current rendering target with the drawing color.
+ *  \brief Draw some number of rectangles on the current rendering target.
  *  
  *  \param rects A pointer to an array of destination rectangles.
  *  \param count The number of rectangles.
