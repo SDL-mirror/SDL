@@ -110,7 +110,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>msvcrt.lib;msimg32.lib;version.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msvcrt.lib;msimg32.lib;version.lib;winmm.lib;imm32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(IntDir)SDL.dll</OutputFile>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
