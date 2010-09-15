@@ -568,7 +568,7 @@ extern DECLSPEC SDL_Window * SDLCALL SDL_CreateWindow(const char *title,
 extern DECLSPEC SDL_Window * SDLCALL SDL_CreateWindowFrom(const void *data);
 
 /**
- *  \brief Get the numeric ID of the window, for logging purposes.
+ *  \brief Get the numeric ID of a window, for logging purposes.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_GetWindowID(SDL_Window * window);
 
@@ -583,7 +583,7 @@ extern DECLSPEC SDL_Window * SDLCALL SDL_GetWindowFromID(Uint32 id);
 extern DECLSPEC Uint32 SDLCALL SDL_GetWindowFlags(SDL_Window * window);
 
 /**
- *  \brief Set the title of the window, in UTF-8 format.
+ *  \brief Set the title of a window, in UTF-8 format.
  *  
  *  \sa SDL_GetWindowTitle()
  */
@@ -591,16 +591,16 @@ extern DECLSPEC void SDLCALL SDL_SetWindowTitle(SDL_Window * window,
                                                 const char *title);
 
 /**
- *  \brief Get the title of the window, in UTF-8 format.
+ *  \brief Get the title of a window, in UTF-8 format.
  *  
  *  \sa SDL_SetWindowTitle()
  */
 extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_Window * window);
 
 /**
- *  \brief Set the icon of the window.
+ *  \brief Set the icon of a window.
  *  
- *  \param icon The icon for the window.
+ *  \param icon The icon for a window.
  */
 extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Window * window,
                                                SDL_Surface * icon);
@@ -614,14 +614,14 @@ extern DECLSPEC void SDLCALL SDL_SetWindowData(SDL_Window * window,
                                                void *userdata);
 
 /**
- *  \brief Retrieve the data pointer associated with the window.
+ *  \brief Retrieve the data pointer associated with a window.
  *  
  *  \sa SDL_SetWindowData()
  */
 extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_Window * window);
 
 /**
- *  \brief Set the position of the window.
+ *  \brief Set the position of a window.
  *  
  *  \param window The window to reposition.
  *  \param x        The x coordinate of the window, ::SDL_WINDOWPOS_CENTERED, or
@@ -637,7 +637,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowPosition(SDL_Window * window,
                                                    int x, int y);
 
 /**
- *  \brief Get the position of the window.
+ *  \brief Get the position of a window.
  *  
  *  \sa SDL_SetWindowPosition()
  */
@@ -645,7 +645,7 @@ extern DECLSPEC void SDLCALL SDL_GetWindowPosition(SDL_Window * window,
                                                    int *x, int *y);
 
 /**
- *  \brief Set the size of the window's client area.
+ *  \brief Set the size of a window's client area.
  *  
  *  \note You can't change the size of a fullscreen window, it automatically
  *        matches the size of the display mode.
@@ -656,7 +656,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
                                                int h);
 
 /**
- *  \brief Get the size of the window's client area.
+ *  \brief Get the size of a window's client area.
  *  
  *  \sa SDL_SetWindowSize()
  */
@@ -664,33 +664,33 @@ extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
 
 /**
- *  \brief Show the window.
+ *  \brief Show a window.
  *  
  *  \sa SDL_HideWindow()
  */
 extern DECLSPEC void SDLCALL SDL_ShowWindow(SDL_Window * window);
 
 /**
- *  \brief Hide the window.
+ *  \brief Hide a window.
  *  
  *  \sa SDL_ShowWindow()
  */
 extern DECLSPEC void SDLCALL SDL_HideWindow(SDL_Window * window);
 
 /**
- *  \brief Raise the window above other windows and set the input focus.
+ *  \brief Raise a window above other windows and set the input focus.
  */
 extern DECLSPEC void SDLCALL SDL_RaiseWindow(SDL_Window * window);
 
 /**
- *  \brief Make the window as large as possible.
+ *  \brief Make a window as large as possible.
  *  
  *  \sa SDL_RestoreWindow()
  */
 extern DECLSPEC void SDLCALL SDL_MaximizeWindow(SDL_Window * window);
 
 /**
- *  \brief Minimize the window to an iconic representation.
+ *  \brief Minimize a window to an iconic representation.
  *  
  *  \sa SDL_RestoreWindow()
  */
@@ -705,7 +705,7 @@ extern DECLSPEC void SDLCALL SDL_MinimizeWindow(SDL_Window * window);
 extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_Window * window);
 
 /**
- *  \brief Set the window's fullscreen state.
+ *  \brief Set a window's fullscreen state.
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
  *  
@@ -716,7 +716,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
                                                     int fullscreen);
 
 /**
- *  \brief Set the window's input grab mode.
+ *  \brief Set a window's input grab mode.
  *  
  *  \param mode This is 1 to grab input, and 0 to release input.
  *  
@@ -726,7 +726,7 @@ extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_Window * window,
                                                int mode);
 
 /**
- *  \brief Get the window's input grab mode.
+ *  \brief Get a window's input grab mode.
  *  
  *  \return This returns 1 if input is grabbed, and 0 otherwise.
  *  
@@ -1430,7 +1430,7 @@ extern DECLSPEC int SDLCALL SDL_GL_SetSwapInterval(int interval);
 extern DECLSPEC int SDLCALL SDL_GL_GetSwapInterval(void);
 
 /**
- * \brief Swap the OpenGL buffers for the window, if double-buffering is 
+ * \brief Swap the OpenGL buffers for a window, if double-buffering is 
  *        supported.
  */
 extern DECLSPEC void SDLCALL SDL_GL_SwapWindow(SDL_Window * window);
