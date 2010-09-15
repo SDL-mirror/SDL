@@ -612,6 +612,11 @@ SDL_SetKeyboardFocus(SDL_Window * window)
     if (keyboard->focus && keyboard->focus != window) {
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
                             0, 0);
+
+        //Ensures IME compositions are committed
+        if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
+            SDL_GetVideoDevice()->StopTextInput(SDL_GetVideoDevice());
+        }
     }
 
     keyboard->focus = window;
