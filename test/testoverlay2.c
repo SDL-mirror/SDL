@@ -144,19 +144,19 @@ RGBtoYUV(Uint8 * rgb, int *yuv, int monochrome, int luminance)
 {
     if (monochrome) {
 #if 1                           /* these are the two formulas that I found on the FourCC site... */
-        yuv[0] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
+        yuv[0] = (int)(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
         yuv[1] = 128;
         yuv[2] = 128;
 #else
-        yuv[0] = (0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
+        yuv[0] = (int)(0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
         yuv[1] = 128;
         yuv[2] = 128;
 #endif
     } else {
 #if 1                           /* these are the two formulas that I found on the FourCC site... */
-        yuv[0] = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2];
-        yuv[1] = (rgb[2] - yuv[0]) * 0.565 + 128;
-        yuv[2] = (rgb[0] - yuv[0]) * 0.713 + 128;
+        yuv[0] = (int)(0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]);
+        yuv[1] = (int)((rgb[2] - yuv[0]) * 0.565 + 128);
+        yuv[2] = (int)((rgb[0] - yuv[0]) * 0.713 + 128);
 #else
         yuv[0] = (0.257 * rgb[0]) + (0.504 * rgb[1]) + (0.098 * rgb[2]) + 16;
         yuv[1] = 128 - (0.148 * rgb[0]) - (0.291 * rgb[1]) + (0.439 * rgb[2]);
@@ -606,7 +606,7 @@ main(int argc, char **argv)
         }
 
         if ((!paused) || (resized)) {
-            if (((SDL_GetTicks() - lastftick) > fpsdelay) || (resized)) {
+            if (((SDL_GetTicks() - lastftick) > (Uint32)fpsdelay) || (resized)) {
                 lastftick = SDL_GetTicks();
 
                 switch (overlay_format) {

@@ -1,6 +1,9 @@
 
 /* sanity tests on SDL_rwops.c (usefull for alternative implementations of stdio rwops) */
 
+// quiet win32 compiler warnings
+#define _CRT_NONSTDC_NO_WARNINGS
+
 #include <stdlib.h>
 
 #ifndef _MSC_VER

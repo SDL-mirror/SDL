@@ -339,7 +339,7 @@ SDL_RunAudio(void *devicep)
 
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;
-    int istream_len;
+    int istream_len = 0;
 
     /* Perform any thread setup */
     device->threadid = SDL_ThreadID();

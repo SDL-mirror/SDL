@@ -100,7 +100,7 @@ MoveSprites(SDL_Surface * screen, Uint32 background)
             Uint32 color = SDL_MapRGB(screen->format, 255, 0, 0);
             SDL_Rect r;
             r.x =
-                (sin((float) t * 2 * 3.1459) + 1.0) / 2.0 * (screen->w - 20);
+                (int)((sin((float) t * 2 * 3.1459) + 1.0) / 2.0 * (screen->w - 20));
             r.y = 0;
             r.w = 20;
             r.h = screen->h;
@@ -141,7 +141,7 @@ FastestFlags(Uint32 flags, int width, int height, int bpp)
         /* Direct hardware blitting without double-buffering
            causes really bad flickering.
          */
-        if (info->video_mem * 1024 > (height * width * bpp / 8)) {
+        if (info->video_mem * 1024 > (Uint32)(height * width * bpp / 8)) {
             flags |= SDL_DOUBLEBUF;
         } else {
             flags &= ~SDL_HWSURFACE;
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
     sprite_rects += numsprites;
     sprite_w = sprite->w;
     sprite_h = sprite->h;
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     for (i = 0; i < numsprites; ++i) {
         positions[i].x = rand() % (screen->w - sprite_w);
         positions[i].y = rand() % (screen->h - sprite_h);

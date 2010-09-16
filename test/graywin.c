@@ -25,7 +25,7 @@ DrawBox(SDL_Surface * screen, int X, int Y, int width, int height)
 
     /* Seed the random number generator */
     if (seeded == 0) {
-        srand(time(NULL));
+        srand((unsigned int)time(NULL));
         seeded = 1;
     }
 

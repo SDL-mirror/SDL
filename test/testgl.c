@@ -654,7 +654,7 @@ RunGLTest(int argc, char *argv[],
             fprintf(stderr, "testgl: OpenGL error: %d\n", gl_error);
         }
 
-        sdl_error = SDL_GetError();
+        sdl_error = (char *)SDL_GetError();
 
         if (sdl_error[0] != '\0') {
             fprintf(stderr, "testgl: SDL error '%s'\n", sdl_error);

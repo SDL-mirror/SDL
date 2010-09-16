@@ -315,7 +315,7 @@ main(int argc, char *argv[])
         fprintf(stderr, "Out of memory!\n");
         quit(2);
     }
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     if (scaleMode != SDL_TEXTURESCALEMODE_NONE) {
         sprite_w += sprite_w / 2;
         sprite_h += sprite_h / 2;
@@ -368,6 +368,7 @@ main(int argc, char *argv[])
         printf("%2.2f frames per second\n", fps);
     }
     quit(0);
+	return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
