@@ -347,6 +347,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\events\SDL_clipboardevents.c" />
     <ClCompile Include="..\..\src\events\SDL_gesture.c" />
     <ClCompile Include="..\..\src\events\SDL_touch.c" />
+    <ClCompile Include="..\..\src\libm\e_atan2.c" />
     <ClCompile Include="..\..\src\libm\e_log.c" />
     <ClCompile Include="..\..\src\libm\e_pow.c" />
     <ClCompile Include="..\..\src\libm\e_rem_pio2.c" />
@@ -354,6 +355,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\libm\k_cos.c" />
     <ClCompile Include="..\..\src\libm\k_rem_pio2.c" />
     <ClCompile Include="..\..\src\libm\k_sin.c" />
+    <ClCompile Include="..\..\src\libm\s_atan.c" />
     <ClCompile Include="..\..\src\libm\s_copysign.c" />
     <ClCompile Include="..\..\src\libm\s_cos.c" />
     <ClCompile Include="..\..\src\libm\s_fabs.c" />

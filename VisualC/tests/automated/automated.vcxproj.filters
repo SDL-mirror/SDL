@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\..\test\automated\testsdl.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\test\automated\rwops\TestSupportRWops_Generic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\test\automated\audio\audio.h">
