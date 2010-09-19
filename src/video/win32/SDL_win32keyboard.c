@@ -190,7 +190,7 @@ WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
 
 #ifdef __GNUC__
 #undef DEFINE_GUID
-#define DEFINE_GUID(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) const GUID n GUID_SECT = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
+#define DEFINE_GUID(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) static const GUID n = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
 DEFINE_GUID(IID_ITfInputProcessorProfileActivationSink,        0x71C6E74E,0x0F28,0x11D8,0xA8,0x2A,0x00,0x06,0x5B,0x84,0x43,0x5C);
 DEFINE_GUID(IID_ITfUIElementSink,                              0xEA1EA136,0x19DF,0x11D7,0xA6,0xD2,0x00,0x06,0x5B,0x84,0x43,0x5C);
 DEFINE_GUID(GUID_TFCAT_TIP_KEYBOARD,                           0x34745C63,0xB2F0,0x4784,0x8B,0x67,0x5E,0x12,0xC8,0x70,0x1A,0x31);

@@ -2566,7 +2566,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             if test x$have_dinput = xyes; then
                 AC_DEFINE(SDL_JOYSTICK_DINPUT)
                 SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_dxjoystick.c"
-                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldinput8 -ldxguid -ldxerr8 -lole32"
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldinput8 -ldxguid -ldxerr8"
             else
                 AC_DEFINE(SDL_JOYSTICK_WINMM)
                 SOURCES="$SOURCES $srcdir/src/joystick/win32/SDL_mmjoystick.c"
@@ -2610,7 +2610,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # SDL 1.3 is unicode, and unicows emulates this on Windows 98/ME
         # You can get this here: http://libunicows.sourceforge.net/
         #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lmsimg32 -lwinmm"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lmsimg32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid"
         # The Win32 platform requires special setup
         VERSION_SOURCES="$srcdir/src/main/win32/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"

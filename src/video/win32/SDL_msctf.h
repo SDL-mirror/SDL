@@ -1,43 +1,30 @@
 #ifndef _SDL_msctf_h
 #define _SDL_msctf_h
 
-#define CONST_VTBL
-#include <basetyps.h>
 #include <unknwn.h>
-
-EXTERN_C const IID IID_ITfInputProcessorProfileActivationSink;
-EXTERN_C const IID IID_ITfUIElementSink;
-EXTERN_C const IID IID_ITfSource;
-EXTERN_C const IID IID_ITfUIElementMgr;
-EXTERN_C const IID IID_ITfReadingInformationUIElement;
-EXTERN_C const IID IID_ITfThreadMgr;
-EXTERN_C const IID IID_ITfThreadMgrEx;
-
-EXTERN_C const CLSID CLSID_TF_ThreadMgr;
-EXTERN_C const GUID GUID_TFCAT_TIP_KEYBOARD;
 
 #define     TF_INVALID_COOKIE               (0xffffffff)
 #define     TF_IPSINK_FLAG_ACTIVE           0x0001
 #define     TF_TMAE_UIELEMENTENABLEDONLY    0x00000004
 
-typedef _COM_interface ITfThreadMgr ITfThreadMgr;
-typedef _COM_interface ITfDocumentMgr ITfDocumentMgr;
-typedef _COM_interface ITfClientId ITfClientId;
+typedef struct ITfThreadMgr ITfThreadMgr;
+typedef struct ITfDocumentMgr ITfDocumentMgr;
+typedef struct ITfClientId ITfClientId;
 
-typedef _COM_interface IEnumTfDocumentMgrs IEnumTfDocumentMgrs;
-typedef _COM_interface IEnumTfFunctionProviders IEnumTfFunctionProviders;
-typedef _COM_interface ITfFunctionProvider ITfFunctionProvider;
-typedef _COM_interface ITfCompartmentMgr ITfCompartmentMgr;
-typedef _COM_interface ITfContext ITfContext;
-typedef _COM_interface IEnumTfContexts IEnumTfContexts;
-typedef _COM_interface ITfUIElementSink ITfUIElementSink;
-typedef _COM_interface ITfUIElement ITfUIElement;
-typedef _COM_interface ITfUIElementMgr ITfUIElementMgr;
-typedef _COM_interface IEnumTfUIElements IEnumTfUIElements;
-typedef _COM_interface ITfThreadMgrEx ITfThreadMgrEx;
-typedef _COM_interface ITfReadingInformationUIElement ITfReadingInformationUIElement;
-typedef _COM_interface ITfInputProcessorProfileActivationSink ITfInputProcessorProfileActivationSink;
-typedef _COM_interface ITfSource ITfSource;
+typedef struct IEnumTfDocumentMgrs IEnumTfDocumentMgrs;
+typedef struct IEnumTfFunctionProviders IEnumTfFunctionProviders;
+typedef struct ITfFunctionProvider ITfFunctionProvider;
+typedef struct ITfCompartmentMgr ITfCompartmentMgr;
+typedef struct ITfContext ITfContext;
+typedef struct IEnumTfContexts IEnumTfContexts;
+typedef struct ITfUIElementSink ITfUIElementSink;
+typedef struct ITfUIElement ITfUIElement;
+typedef struct ITfUIElementMgr ITfUIElementMgr;
+typedef struct IEnumTfUIElements IEnumTfUIElements;
+typedef struct ITfThreadMgrEx ITfThreadMgrEx;
+typedef struct ITfReadingInformationUIElement ITfReadingInformationUIElement;
+typedef struct ITfInputProcessorProfileActivationSink ITfInputProcessorProfileActivationSink;
+typedef struct ITfSource ITfSource;
 
 typedef DWORD TfClientId;
 typedef DWORD TfEditCookie;
@@ -60,9 +47,9 @@ typedef struct ITfThreadMgrVtbl
     HRESULT (STDMETHODCALLTYPE *GetGlobalCompartment)(ITfThreadMgr *, ITfCompartmentMgr **);
 } ITfThreadMgrVtbl;
 
-_COM_interface ITfThreadMgr
+struct ITfThreadMgr
 {
-    CONST_VTBL struct ITfThreadMgrVtbl *lpVtbl;
+    const struct ITfThreadMgrVtbl *lpVtbl;
 };
 
 typedef struct ITfThreadMgrExVtbl
@@ -85,9 +72,9 @@ typedef struct ITfThreadMgrExVtbl
     HRESULT (STDMETHODCALLTYPE *GetActiveFlags)(ITfThreadMgrEx *, DWORD *);
 } ITfThreadMgrExVtbl;
 
-_COM_interface ITfThreadMgrEx
+struct ITfThreadMgrEx
 {
-    CONST_VTBL struct ITfThreadMgrExVtbl *lpVtbl;
+    const struct ITfThreadMgrExVtbl *lpVtbl;
 };
 
 typedef struct ITfDocumentMgrVtbl
@@ -103,9 +90,9 @@ typedef struct ITfDocumentMgrVtbl
     HRESULT (STDMETHODCALLTYPE *EnumContexts)(ITfDocumentMgr *, IEnumTfContexts **);
 } ITfDocumentMgrVtbl;
 
-_COM_interface ITfDocumentMgr
+struct ITfDocumentMgr
 {
-    CONST_VTBL struct ITfDocumentMgrVtbl *lpVtbl;
+    const struct ITfDocumentMgrVtbl *lpVtbl;
 };
 
 typedef struct ITfUIElementSinkVtbl
@@ -118,9 +105,9 @@ typedef struct ITfUIElementSinkVtbl
     HRESULT (STDMETHODCALLTYPE *EndUIElement)(ITfUIElementSink *, DWORD);
 } ITfUIElementSinkVtbl;
 
-_COM_interface ITfUIElementSink
+struct ITfUIElementSink
 {
-    CONST_VTBL struct ITfUIElementSinkVtbl *lpVtbl;
+    const struct ITfUIElementSinkVtbl *lpVtbl;
 };
 
 typedef struct ITfUIElementMgrVtbl
@@ -135,9 +122,9 @@ typedef struct ITfUIElementMgrVtbl
     HRESULT (STDMETHODCALLTYPE *EnumUIElements)(ITfUIElementMgr *, IEnumTfUIElements **);
 } ITfUIElementMgrVtbl;
 
-_COM_interface ITfUIElementMgr
+struct ITfUIElementMgr
 {
-    CONST_VTBL struct ITfUIElementMgrVtbl *lpVtbl;
+    const struct ITfUIElementMgrVtbl *lpVtbl;
 };
 
 typedef struct ITfReadingInformationUIElementVtbl
@@ -157,9 +144,9 @@ typedef struct ITfReadingInformationUIElementVtbl
     HRESULT (STDMETHODCALLTYPE *IsVerticalOrderPreferred)(ITfReadingInformationUIElement *, BOOL *);
 } ITfReadingInformationUIElementVtbl;
 
-_COM_interface ITfReadingInformationUIElement
+struct ITfReadingInformationUIElement
 {
-    CONST_VTBL struct ITfReadingInformationUIElementVtbl *lpVtbl;
+    const struct ITfReadingInformationUIElementVtbl *lpVtbl;
 };
 
 typedef struct ITfUIElementVtbl
@@ -173,9 +160,9 @@ typedef struct ITfUIElementVtbl
     HRESULT (STDMETHODCALLTYPE *IsShown)(ITfUIElement *, BOOL *);
 } ITfUIElementVtbl;
 
-_COM_interface ITfUIElement
+struct ITfUIElement
 {
-    CONST_VTBL struct ITfUIElementVtbl *lpVtbl;
+    const struct ITfUIElementVtbl *lpVtbl;
 };
 
 typedef struct ITfInputProcessorProfileActivationSinkVtbl
@@ -187,9 +174,9 @@ typedef struct ITfInputProcessorProfileActivationSinkVtbl
 
 } ITfInputProcessorProfileActivationSinkVtbl;
 
-_COM_interface ITfInputProcessorProfileActivationSink
+struct ITfInputProcessorProfileActivationSink
 {
-    CONST_VTBL struct ITfInputProcessorProfileActivationSinkVtbl *lpVtbl;
+    const struct ITfInputProcessorProfileActivationSinkVtbl *lpVtbl;
 };
 
 typedef struct ITfSourceVtbl
@@ -201,9 +188,9 @@ typedef struct ITfSourceVtbl
     HRESULT (STDMETHODCALLTYPE *UnadviseSink)(ITfSource *, DWORD);
 } ITfSourceVtbl;
 
-_COM_interface ITfSource
+struct ITfSource
 {
-    CONST_VTBL struct ITfSourceVtbl *lpVtbl;
+    const struct ITfSourceVtbl *lpVtbl;
 };
 
 #endif /* _SDL_msctf_h */
