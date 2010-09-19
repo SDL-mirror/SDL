@@ -36,7 +36,12 @@
 
 #include <windows.h>
 
+#ifndef __GNUC__
 #include <msctf.h>
+#else
+#include "SDL_msctf.h"
+#endif
+
 #include <imm.h>
 
 #if SDL_VIDEO_RENDER_D3D

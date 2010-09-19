@@ -188,6 +188,20 @@ WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
 
 }
 
+#ifdef __GNUC__
+#undef DEFINE_GUID
+#define DEFINE_GUID(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) const GUID n GUID_SECT = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
+DEFINE_GUID(IID_ITfInputProcessorProfileActivationSink,        0x71C6E74E,0x0F28,0x11D8,0xA8,0x2A,0x00,0x06,0x5B,0x84,0x43,0x5C);
+DEFINE_GUID(IID_ITfUIElementSink,                              0xEA1EA136,0x19DF,0x11D7,0xA6,0xD2,0x00,0x06,0x5B,0x84,0x43,0x5C);
+DEFINE_GUID(GUID_TFCAT_TIP_KEYBOARD,                           0x34745C63,0xB2F0,0x4784,0x8B,0x67,0x5E,0x12,0xC8,0x70,0x1A,0x31);
+DEFINE_GUID(IID_ITfSource,                                     0x4EA48A35,0x60AE,0x446F,0x8F,0xD6,0xE6,0xA8,0xD8,0x24,0x59,0xF7);
+DEFINE_GUID(IID_ITfUIElementMgr,                               0xEA1EA135,0x19DF,0x11D7,0xA6,0xD2,0x00,0x06,0x5B,0x84,0x43,0x5C);
+DEFINE_GUID(IID_ITfReadingInformationUIElement,                0xEA1EA139,0x19DF,0x11D7,0xA6,0xD2,0x00,0x06,0x5B,0x84,0x43,0x5C);
+DEFINE_GUID(IID_ITfThreadMgr,                                  0xAA80E801,0x2021,0x11D2,0x93,0xE0,0x00,0x60,0xB0,0x67,0xB8,0x6E);
+DEFINE_GUID(CLSID_TF_ThreadMgr,                                0x529A9E6B,0x6587,0x4F23,0xAB,0x9E,0x9C,0x7D,0x68,0x3E,0x3C,0x50);
+DEFINE_GUID(IID_ITfThreadMgrEx,                                0x3E90ADE3,0x7594,0x4CB0,0xBB,0x58,0x69,0x62,0x8F,0x5F,0x45,0x8C);
+#endif
+
 #define LANG_CHT MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL)
 #define LANG_CHS MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED)
 
@@ -246,7 +260,7 @@ IME_Init(SDL_VideoData *videodata, HWND hwnd)
     videodata->ime_hwnd_main = hwnd;
     if (SUCCEEDED(CoInitializeEx(NULL, COINIT_APARTMENTTHREADED))) {
         videodata->ime_com_initialized = SDL_TRUE;
-        CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgr, &videodata->ime_threadmgr);
+        CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgr, (LPVOID *)&videodata->ime_threadmgr);
     }
     videodata->ime_initialized = SDL_TRUE;
     videodata->ime_himm32 = LoadLibraryA("imm32.dll");
@@ -301,7 +315,7 @@ IME_Disable(SDL_VideoData *videodata, HWND hwnd)
 
     IME_ClearComposition(videodata);
     if (videodata->ime_hwnd_current == videodata->ime_hwnd_main)
-        ImmAssociateContext(videodata->ime_hwnd_current, NULL);
+        ImmAssociateContext(videodata->ime_hwnd_current, (HIMC)0);
 
     videodata->ime_enabled = SDL_FALSE;
     UILess_DisableUIUpdates(videodata);
@@ -342,7 +356,7 @@ IME_GetReadingString(SDL_VideoData *videodata, HWND hwnd)
     WCHAR buffer[16];
     WCHAR *s = buffer;
     DWORD len = 0;
-    DWORD err = 0;
+    INT err = 0;
     BOOL vertical = FALSE;
     UINT maxuilen = 0;
     static OSVERSIONINFOA osversion = {0};
@@ -949,7 +963,7 @@ UILess_SetupSinks(SDL_VideoData *videodata)
     TfClientId clientid = 0;
     SDL_bool result = SDL_FALSE;
     ITfSource *source = 0;
-    if (FAILED(CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgrEx, &videodata->ime_threadmgrex)))
+    if (FAILED(CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgrEx, (LPVOID *)&videodata->ime_threadmgrex)))
         return SDL_FALSE;
 
     if (FAILED(videodata->ime_threadmgrex->lpVtbl->ActivateEx(videodata->ime_threadmgrex, &clientid, TF_TMAE_UIELEMENTENABLEDONLY)))
@@ -989,7 +1003,7 @@ static void
 UILess_ReleaseSinks(SDL_VideoData *videodata)
 {
     ITfSource *source = 0;
-    if (videodata->ime_threadmgrex && SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, &source))) {
+    if (videodata->ime_threadmgrex && SUCCEEDED(videodata->ime_threadmgrex->lpVtbl->QueryInterface(videodata->ime_threadmgrex, &IID_ITfSource, (LPVOID *)&source))) {
         source->lpVtbl->UnadviseSink(source, videodata->ime_uielemsinkcookie);
         source->lpVtbl->UnadviseSink(source, videodata->ime_alpnsinkcookie);
         SAFE_RELEASE(source);
