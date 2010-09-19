@@ -613,9 +613,12 @@ SDL_SetKeyboardFocus(SDL_Window * window)
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
                             0, 0);
 
-        //Ensures IME compositions are committed
+        /* Ensures IME compositions are committed */
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
-            SDL_GetVideoDevice()->StopTextInput(SDL_GetVideoDevice());
+            SDL_VideoDevice *video = SDL_GetVideoDevice();
+            if (video && video->StopTextInput) {
+                video->StopTextInput(video);
+            }
         }
     }
 
@@ -626,7 +629,10 @@ SDL_SetKeyboardFocus(SDL_Window * window)
                             0, 0);
 
         if (SDL_EventState(SDL_TEXTINPUT, SDL_QUERY)) {
-            SDL_StartTextInput();
+            SDL_VideoDevice *video = SDL_GetVideoDevice();
+            if (video && video->StartTextInput) {
+                video->StartTextInput(video);
+            }
         }
     }
 }
