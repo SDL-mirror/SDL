@@ -37,6 +37,7 @@
 #include <windows.h>
 
 #include <msctf.h>
+#include <imm.h>
 
 #if SDL_VIDEO_RENDER_D3D
 //#include <d3d9.h>
@@ -81,29 +82,29 @@ typedef struct
     void *data;
 } TSFSink;
 
-// Definition from Win98DDK version of IMM.H
+/* Definition from Win98DDK version of IMM.H */
 typedef struct tagINPUTCONTEXT2 {
-    HWND                hWnd;                           
-    BOOL                fOpen;                          
-    POINT               ptStatusWndPos;                 
-    POINT               ptSoftKbdPos;                   
-    DWORD               fdwConversion;                  
-    DWORD               fdwSentence;                    
-    union   {                                           
-        LOGFONTA        A;                              
-        LOGFONTW        W;                              
-    } lfFont;                                           
-    COMPOSITIONFORM     cfCompForm;                     
-    CANDIDATEFORM       cfCandForm[4];                  
-    HIMCC               hCompStr;                       
-    HIMCC               hCandInfo;                      
-    HIMCC               hGuideLine;                     
-    HIMCC               hPrivate;                       
-    DWORD               dwNumMsgBuf;                    
-    HIMCC               hMsgBuf;                        
-    DWORD               fdwInit;                        
-    DWORD               dwReserve[3];                   
-} INPUTCONTEXT2, *PINPUTCONTEXT2, NEAR *NPINPUTCONTEXT2, FAR *LPINPUTCONTEXT2;  
+    HWND                hWnd;
+    BOOL                fOpen;
+    POINT               ptStatusWndPos;
+    POINT               ptSoftKbdPos;
+    DWORD               fdwConversion;
+    DWORD               fdwSentence;
+    union   {
+        LOGFONTA        A;
+        LOGFONTW        W;
+    } lfFont;
+    COMPOSITIONFORM     cfCompForm;
+    CANDIDATEFORM       cfCandForm[4];
+    HIMCC               hCompStr;
+    HIMCC               hCandInfo;
+    HIMCC               hGuideLine;
+    HIMCC               hPrivate;
+    DWORD               dwNumMsgBuf;
+    HIMCC               hMsgBuf;
+    DWORD               fdwInit;
+    DWORD               dwReserve[3];
+} INPUTCONTEXT2, *PINPUTCONTEXT2, NEAR *NPINPUTCONTEXT2, FAR *LPINPUTCONTEXT2;
 
 /* Private display data */
 
