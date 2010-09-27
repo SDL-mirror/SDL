@@ -90,7 +90,7 @@ X11_DispatchEvent(_THIS)
 
         SDL_VERSION(&wmmsg.version);
         wmmsg.subsystem = SDL_SYSWM_X11;
-        wmmsg.event.xevent = xevent;
+        wmmsg.msg.x11.event = xevent;
         SDL_SendSysWMEvent(&wmmsg);
     }
 

@@ -704,10 +704,11 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
 SDL_bool
 Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
-    //NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if (info->version.major <= SDL_MAJOR_VERSION) {
-        //info->window = nswindow;
+        info->subsystem = SDL_SYSWM_COCOA;
+        info->info.cocoa.window = nswindow;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",

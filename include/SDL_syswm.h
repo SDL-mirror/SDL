@@ -54,8 +54,12 @@ extern "C" {
 struct SDL_SysWMinfo;
 #else
 
+#if defined(SDL_VIDEO_DRIVER_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#endif
+
 /* This is the structure for custom window manager events */
-#if defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_DIRECTFB)
 #if defined(SDL_VIDEO_DRIVER_X11)
 #if defined(__APPLE__) && defined(__MACH__)
 /* conflicts with Quickdraw.h */
@@ -75,21 +79,29 @@ struct SDL_SysWMinfo;
 #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
 #include <directfb/directfb.h>
 #endif
+
+#if defined(SDL_VIDEO_DRIVER_COCOA)
+#ifdef __OBJC__
+#include <Cocoa/Cocoa.h>
+#else
+typedef struct _NSWindow NSWindow;
+#endif
+#endif
+
 /** 
- *  These are the various supported subsystems under UNIX.
+ *  These are the various supported windowing subsystems
  */
 typedef enum
 {
-#if defined(SDL_VIDEO_DRIVER_X11)
+    SDL_SYSWM_UNKNOWN,
+    SDL_SYSWM_WINDOWS,
     SDL_SYSWM_X11,
-#endif
-#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
     SDL_SYSWM_DIRECTFB,
-#endif
+    SDL_SYSWM_COCOA,
 } SDL_SYSWM_TYPE;
 
 /**
- *  The UNIX custom event structure.
+ *  The custom event structure.
  */
 struct SDL_SysWMmsg
 {
@@ -97,17 +109,35 @@ struct SDL_SysWMmsg
     SDL_SYSWM_TYPE subsystem;
     union
     {
+#if defined(SDL_VIDEO_DRIVER_WIN32)
+        struct {
+            HWND hwnd;                  /**< The window for the message */
+            UINT msg;                   /**< The type of message */
+            WPARAM wParam;              /**< WORD message parameter */
+            LPARAM lParam;              /**< LONG message parameter */
+        } win;
+#endif
 #if defined(SDL_VIDEO_DRIVER_X11)
-        XEvent xevent;
+        struct {
+            XEvent event;
+        } x11;
 #endif
 #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
-        DFBEvent dfb_event;
+        struct {
+            DFBEvent event;
+        } dfb;
 #endif
-    } event;
+#if defined(SDL_VIDEO_DRIVER_COCOA)
+        struct
+        {
+            /* No Cocoa window events yet */
+        } cocoa;
+#endif
+    } msg;
 };
 
 /**
- *  The UNIX custom window manager information structure.
+ *  The custom window manager information structure.
  *
  *  When this structure is returned, it holds information about which
  *  low level system it is using, and will be one of SDL_SYSWM_TYPE.
@@ -118,11 +148,17 @@ struct SDL_SysWMinfo
     SDL_SYSWM_TYPE subsystem;
     union
     {
+#if defined(SDL_VIDEO_DRIVER_WIN32)
+        struct
+        {
+            HWND window;                /**< The Win32 display window */
+        } win;
+#endif
 #if defined(SDL_VIDEO_DRIVER_X11)
         struct
         {
-            Display *display;   /**< The X11 display */
-            Window window;      /**< The X11 display window */
+            Display *display;           /**< The X11 display */
+            Window window;              /**< The X11 display window */
         } x11;
 #endif
 #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
@@ -131,105 +167,16 @@ struct SDL_SysWMinfo
         	IDirectFB *dfb;   			/**< The directfb main interface */
         	IDirectFBWindow *window;    /**< The directfb window handle */
         	IDirectFBSurface *surface;  /**< The directfb client surface */
-        } directfb;
+        } dfb;
+#endif
+#if defined(SDL_VIDEO_DRIVER_COCOA)
+        struct
+        {
+            NSWindow *window;
+        } cocoa;
 #endif
     } info;
 };
-
-#elif defined(SDL_VIDEO_DRIVER_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-/**
- *  The windows custom event structure.
- */
-struct SDL_SysWMmsg
-{
-    SDL_version version;
-    HWND hwnd;                  /**< The window for the message */
-    UINT msg;                   /**< The type of message */
-    WPARAM wParam;              /**< WORD message parameter */
-    LPARAM lParam;              /**< LONG message parameter */
-};
-
-/**
- *  The windows custom window manager information structure.
- */
-struct SDL_SysWMinfo
-{
-    SDL_version version;
-    HWND window;                /**< The Win32 display window */
-};
-
-#elif defined(SDL_VIDEO_DRIVER_RISCOS)
-
-/**
- *  RISC OS custom event structure.
- */
-struct SDL_SysWMmsg
-{
-    SDL_version version;
-    int eventCode;              /**< The window for the message */
-    int pollBlock[64];
-};
-
-/**
- *  The RISC OS custom window manager information structure.
- */
-struct SDL_SysWMinfo
-{
-    SDL_version version;
-    int wimpVersion;            /**< Wimp version running under */
-    int taskHandle;             /**< The RISC OS task handle */
-    int window;                 /**< The RISC OS display window */
-};
-
-#elif defined(SDL_VIDEO_DRIVER_PHOTON) || defined(SDL_VIDEO_DRIVER_QNXGF)
-#include <sys/neutrino.h>
-#if defined(SDL_VIDEO_OPENGL_ES)
-#include <gf/gf.h>
-#endif /* SDL_VIDEO_OPENGL_ES */
-#include <Ph.h>
-
-/**
- * The QNX custom event structure.
- */
-struct SDL_SysWMmsg
-{
-    SDL_version version;
-    int data;
-};
-
-/**
- *  The QNX Photon custom window manager information structure.
- */
-struct SDL_SysWMinfo
-{
-    SDL_version version;
-    int data;
-};
-
-#else
-
-/**
- *  The generic custom event structure.
- */
-struct SDL_SysWMmsg
-{
-    SDL_version version;
-    int data;
-};
-
-/**
- *  The generic custom window manager information structure.
- */
-struct SDL_SysWMinfo
-{
-    SDL_version version;
-    int data;
-};
-
-#endif /* video driver type */
 
 #endif /* SDL_PROTOTYPES_ONLY */
 

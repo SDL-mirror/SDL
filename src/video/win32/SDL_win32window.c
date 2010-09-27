@@ -551,7 +551,8 @@ WIN_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     if (info->version.major <= SDL_MAJOR_VERSION) {
-        info->window = hwnd;
+        info->subsystem = SDL_SYSWM_WINDOWS;
+        info->info.win.window = hwnd;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",
