@@ -1467,7 +1467,7 @@ SDL_DestroyWindow(SDL_Window * window)
         SDL_GL_UnloadLibrary();
     }
 
-	/* Now invalidate magic */
+    /* Now invalidate magic */
     window->magic = NULL;
 
     /* Unlink the window from the list */
