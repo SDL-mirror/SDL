@@ -691,8 +691,8 @@ X11_DisplayModeChanged(SDL_Renderer * renderer)
             return -1;
         }
 #ifdef SDL_VIDEO_DRIVER_X11_XDAMAGE
-        XDamageDestroy(data->display, data->stencil_damage);
         if (data->use_xdamage) {
+            XDamageDestroy(data->display, data->stencil_damage);
             data->stencil_damage =
                 XDamageCreate(data->display, data->stencil, XDamageReportNonEmpty);
             if (!data->stencil_damage) {
