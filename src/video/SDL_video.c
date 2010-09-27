@@ -1447,7 +1447,6 @@ SDL_DestroyWindow(SDL_Window * window)
     SDL_VideoDisplay *display;
 
     CHECK_WINDOW_MAGIC(window, );
-    window->magic = NULL;
 
     if (window->title) {
         SDL_free(window->title);
@@ -1465,6 +1464,9 @@ SDL_DestroyWindow(SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         SDL_GL_UnloadLibrary();
     }
+
+	/* Now invalidate magic */
+    window->magic = NULL;
 
     /* Unlink the window from the list */
     display = window->display;
