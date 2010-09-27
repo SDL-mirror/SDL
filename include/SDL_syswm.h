@@ -55,6 +55,7 @@ struct SDL_SysWMinfo;
 #else
 
 /* This is the structure for custom window manager events */
+#if defined(SDL_VIDEO_DRIVER_X11) || defined(SDL_VIDEO_DRIVER_DIRECTFB)
 #if defined(SDL_VIDEO_DRIVER_X11)
 #if defined(__APPLE__) && defined(__MACH__)
 /* conflicts with Quickdraw.h */
@@ -69,12 +70,22 @@ struct SDL_SysWMinfo;
 #undef Cursor
 #endif
 
+#endif /* defined(SDL_VIDEO_DRIVER_X11) */
+
+#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+#include <directfb/directfb.h>
+#endif
 /** 
  *  These are the various supported subsystems under UNIX.
  */
 typedef enum
 {
-    SDL_SYSWM_X11
+#if defined(SDL_VIDEO_DRIVER_X11)
+    SDL_SYSWM_X11,
+#endif
+#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+    SDL_SYSWM_DIRECTFB,
+#endif
 } SDL_SYSWM_TYPE;
 
 /**
@@ -86,7 +97,12 @@ struct SDL_SysWMmsg
     SDL_SYSWM_TYPE subsystem;
     union
     {
+#if defined(SDL_VIDEO_DRIVER_X11)
         XEvent xevent;
+#endif
+#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+        DFBEvent dfb_event;
+#endif
     } event;
 };
 
@@ -102,11 +118,21 @@ struct SDL_SysWMinfo
     SDL_SYSWM_TYPE subsystem;
     union
     {
+#if defined(SDL_VIDEO_DRIVER_X11)
         struct
         {
             Display *display;   /**< The X11 display */
             Window window;      /**< The X11 display window */
         } x11;
+#endif
+#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+        struct
+        {
+        	IDirectFB *dfb;   			/**< The directfb main interface */
+        	IDirectFBWindow *window;    /**< The directfb window handle */
+        	IDirectFBSurface *surface;  /**< The directfb client surface */
+        } directfb;
+#endif
     } info;
 };
 
