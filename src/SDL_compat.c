@@ -321,7 +321,10 @@ SDL_VideoPaletteChanged(void *userdata, SDL_Palette * palette)
     }
     if (userdata == SDL_VideoSurface) {
         if (SDL_SetDisplayPalette(palette->colors, 0, palette->ncolors) < 0) {
-            return -1;
+        	/* The display surface not necessarily needs to have a palette.
+        	 * Just do nothing here and try to set the texture palette.
+        	 */
+            //return -1;
         }
         if (SDL_SetTexturePalette
             (SDL_VideoTexture, palette->colors, 0, palette->ncolors) < 0) {
