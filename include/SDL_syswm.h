@@ -151,28 +151,28 @@ struct SDL_SysWMinfo
 #if defined(SDL_VIDEO_DRIVER_WIN32)
         struct
         {
-            HWND window;                /**< The Win32 display window */
+            HWND window;                /**< The window handle */
         } win;
 #endif
 #if defined(SDL_VIDEO_DRIVER_X11)
         struct
         {
             Display *display;           /**< The X11 display */
-            Window window;              /**< The X11 display window */
+            Window window;              /**< The X11 window */
         } x11;
 #endif
 #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
         struct
         {
-        	IDirectFB *dfb;   			/**< The directfb main interface */
-        	IDirectFBWindow *window;    /**< The directfb window handle */
-        	IDirectFBSurface *surface;  /**< The directfb client surface */
+            IDirectFB *dfb;             /**< The directfb main interface */
+            IDirectFBWindow *window;    /**< The directfb window handle */
+            IDirectFBSurface *surface;  /**< The directfb client surface */
         } dfb;
 #endif
 #if defined(SDL_VIDEO_DRIVER_COCOA)
         struct
         {
-            NSWindow *window;
+            NSWindow *window;           /* The Cocoa window */
         } cocoa;
 #endif
     } /*info*/;
