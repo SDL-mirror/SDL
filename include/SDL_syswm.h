@@ -133,7 +133,7 @@ struct SDL_SysWMmsg
             /* No Cocoa window events yet */
         } cocoa;
 #endif
-    } msg;
+    } /*msg*/;
 };
 
 /**
@@ -175,7 +175,7 @@ struct SDL_SysWMinfo
             NSWindow *window;
         } cocoa;
 #endif
-    } info;
+    } /*info*/;
 };
 
 #endif /* SDL_PROTOTYPES_ONLY */

@@ -1125,8 +1125,8 @@ X11_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
     if (info->version.major == SDL_MAJOR_VERSION &&
         info->version.minor == SDL_MINOR_VERSION) {
         info->subsystem = SDL_SYSWM_X11;
-        info->info.x11.display = display;
-        info->info.x11.window = data->xwindow;
+        info->x11.display = display;
+        info->x11.window = data->xwindow;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",
