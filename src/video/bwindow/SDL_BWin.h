@@ -103,8 +103,8 @@ class SDL_BWin:public BDirectWindow
         keymap[B_F10_KEY] = SDLK_F10;
         keymap[B_F11_KEY] = SDLK_F11;
         keymap[B_F12_KEY] = SDLK_F12;
-        keymap[B_PRINT_KEY] = SDLK_PRINT;
-        keymap[B_SCROLL_KEY] = SDLK_SCROLLOCK;
+        keymap[B_PRINT_KEY] = SDLK_PRINTSCREEN;
+        keymap[B_SCROLL_KEY] = SDLK_SCROLLLOCK;
         keymap[B_PAUSE_KEY] = SDLK_PAUSE;
         keymap[0x11] = SDLK_BACKQUOTE;
         keymap[0x12] = SDLK_1;
@@ -123,7 +123,7 @@ class SDL_BWin:public BDirectWindow
         keymap[0x1f] = SDLK_INSERT;
         keymap[0x20] = SDLK_HOME;
         keymap[0x21] = SDLK_PAGEUP;
-        keymap[0x22] = SDLK_NUMLOCK;
+        keymap[0x22] = SDLK_NUMLOCKCLEAR;
         keymap[0x23] = SDLK_KP_DIVIDE;
         keymap[0x24] = SDLK_KP_MULTIPLY;
         keymap[0x25] = SDLK_KP_MINUS;
@@ -144,9 +144,9 @@ class SDL_BWin:public BDirectWindow
         keymap[0x34] = SDLK_DELETE;
         keymap[0x35] = SDLK_END;
         keymap[0x36] = SDLK_PAGEDOWN;
-        keymap[0x37] = SDLK_KP7;
-        keymap[0x38] = SDLK_KP8;
-        keymap[0x39] = SDLK_KP9;
+        keymap[0x37] = SDLK_KP_7;
+        keymap[0x38] = SDLK_KP_8;
+        keymap[0x39] = SDLK_KP_9;
         keymap[0x3a] = SDLK_KP_PLUS;
         keymap[0x3b] = SDLK_CAPSLOCK;
         keymap[0x3c] = SDLK_a;
@@ -161,9 +161,9 @@ class SDL_BWin:public BDirectWindow
         keymap[0x45] = SDLK_SEMICOLON;
         keymap[0x46] = SDLK_QUOTE;
         keymap[0x47] = SDLK_RETURN;
-        keymap[0x48] = SDLK_KP4;
-        keymap[0x49] = SDLK_KP5;
-        keymap[0x4a] = SDLK_KP6;
+        keymap[0x48] = SDLK_KP_4;
+        keymap[0x49] = SDLK_KP_5;
+        keymap[0x4a] = SDLK_KP_6;
         keymap[0x4b] = SDLK_LSHIFT;
         keymap[0x4c] = SDLK_z;
         keymap[0x4d] = SDLK_x;
@@ -177,9 +177,9 @@ class SDL_BWin:public BDirectWindow
         keymap[0x55] = SDLK_SLASH;
         keymap[0x56] = SDLK_RSHIFT;
         keymap[0x57] = SDLK_UP;
-        keymap[0x58] = SDLK_KP1;
-        keymap[0x59] = SDLK_KP2;
-        keymap[0x5a] = SDLK_KP3;
+        keymap[0x58] = SDLK_KP_1;
+        keymap[0x59] = SDLK_KP_2;
+        keymap[0x5a] = SDLK_KP_3;
         keymap[0x5b] = SDLK_KP_ENTER;
         keymap[0x5c] = SDLK_LCTRL;
         keymap[0x5d] = SDLK_LALT;
@@ -189,12 +189,12 @@ class SDL_BWin:public BDirectWindow
         keymap[0x61] = SDLK_LEFT;
         keymap[0x62] = SDLK_DOWN;
         keymap[0x63] = SDLK_RIGHT;
-        keymap[0x64] = SDLK_KP0;
+        keymap[0x64] = SDLK_KP_0;
         keymap[0x65] = SDLK_KP_PERIOD;
-        keymap[0x66] = SDLK_LMETA;
-        keymap[0x67] = SDLK_RMETA;
+        keymap[0x66] = SDLK_LGUI;
+        keymap[0x67] = SDLK_RGUI;
         keymap[0x68] = SDLK_MENU;
-        keymap[0x69] = SDLK_EURO;
+        keymap[0x69] = SDLK_2; //SDLK_EURO;
         keymap[0x6a] = SDLK_KP_EQUALS;
         keymap[0x6b] = SDLK_POWER;
     }
