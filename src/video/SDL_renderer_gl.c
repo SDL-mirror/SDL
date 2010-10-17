@@ -1181,6 +1181,8 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         }
         data->glEnd();
     } else {
+        int x1, y1, x2, y2;
+
         data->glBegin(GL_LINE_STRIP);
         for (i = 0; i < count; ++i) {
             data->glVertex2f(0.5f + points[i].x, 0.5f + points[i].y);
@@ -1200,10 +1202,10 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         data->glVertex2f(0.5f + points[count-1].x, 0.5f + points[count-1].y);
 #else
         /* Linux seems to leave the right-most or bottom-most point open */
-        int x1 = points[0].x;
-        int y1 = points[0].y;
-        int x2 = points[count-1].x;
-        int y2 = points[count-1].y;
+        x1 = points[0].x;
+        y1 = points[0].y;
+        x2 = points[count-1].x;
+        y2 = points[count-1].y;
 
         if (x1 > x2) {
             data->glVertex2f(0.5f + x1, 0.5f + y1);
