@@ -23,7 +23,7 @@
 #include "SDL_cocoavideo.h"
 #include "SDL_shape.h"
 #include "SDL_cocoashape.h"
-#include "../src/video/SDL_sysvideo.h"
+#include "../SDL_sysvideo.h"
 
 SDL_WindowShaper*
 Cocoa_CreateShaper(SDL_Window* window) {
