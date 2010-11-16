@@ -18,6 +18,7 @@
 #define _MATH_PRIVATE_H_
 
 /*#include <endian.h>*/
+#include "SDL_endian.h"
 #include <sys/types.h>
 
 #define attribute_hidden
@@ -46,8 +47,7 @@ typedef unsigned int u_int32_t;
  * For VFP, floats words follow the memory system mode.
  */
 
-#if (__BYTE_ORDER == __BIG_ENDIAN) || \
-    (!defined(__VFP_FP__) && (defined(__arm__) || defined(__thumb__)))
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
 
 typedef union
 {
