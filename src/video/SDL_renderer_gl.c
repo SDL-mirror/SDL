@@ -1181,7 +1181,10 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         }
         data->glEnd();
     } else {
+#if defined(__APPLE__) || defined(__WIN32__)
+#else
         int x1, y1, x2, y2;
+#endif
 
         data->glBegin(GL_LINE_STRIP);
         for (i = 0; i < count; ++i) {

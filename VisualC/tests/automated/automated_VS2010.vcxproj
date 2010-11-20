@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
+    <ProjectName>automated</ProjectName>  
     <ProjectGuid>{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}</ProjectGuid>
     <RootNamespace>automated</RootNamespace>
     <Keyword>Win32Proj</Keyword>
