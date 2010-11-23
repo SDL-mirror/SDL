@@ -22,6 +22,7 @@ typedef struct ITfUIElement ITfUIElement;
 typedef struct ITfUIElementMgr ITfUIElementMgr;
 typedef struct IEnumTfUIElements IEnumTfUIElements;
 typedef struct ITfThreadMgrEx ITfThreadMgrEx;
+typedef struct ITfCandidateListUIElement ITfCandidateListUIElement;
 typedef struct ITfReadingInformationUIElement ITfReadingInformationUIElement;
 typedef struct ITfInputProcessorProfileActivationSink ITfInputProcessorProfileActivationSink;
 typedef struct ITfSource ITfSource;
@@ -125,6 +126,30 @@ typedef struct ITfUIElementMgrVtbl
 struct ITfUIElementMgr
 {
     const struct ITfUIElementMgrVtbl *lpVtbl;
+};
+
+typedef struct ITfCandidateListUIElementVtbl
+{
+    HRESULT (STDMETHODCALLTYPE *QueryInterface)(ITfCandidateListUIElement *, REFIID, void **);
+    ULONG (STDMETHODCALLTYPE *AddRef)(ITfCandidateListUIElement *);
+    ULONG (STDMETHODCALLTYPE *Release)(ITfCandidateListUIElement *);
+    HRESULT (STDMETHODCALLTYPE *GetDescription)(ITfCandidateListUIElement *, BSTR *);
+    HRESULT (STDMETHODCALLTYPE *GetGUID)(ITfCandidateListUIElement *, GUID *);
+    HRESULT (STDMETHODCALLTYPE *Show)(ITfCandidateListUIElement *, BOOL);
+    HRESULT (STDMETHODCALLTYPE *IsShown)(ITfCandidateListUIElement *, BOOL *);
+    HRESULT (STDMETHODCALLTYPE *GetUpdatedFlags)(ITfCandidateListUIElement *, DWORD *);
+    HRESULT (STDMETHODCALLTYPE *GetDocumentMgr)(ITfCandidateListUIElement *, ITfDocumentMgr **);
+    HRESULT (STDMETHODCALLTYPE *GetCount)(ITfCandidateListUIElement *, UINT *);
+    HRESULT (STDMETHODCALLTYPE *GetSelection)(ITfCandidateListUIElement *, UINT *);
+    HRESULT (STDMETHODCALLTYPE *GetString)(ITfCandidateListUIElement *, UINT, BSTR *);
+    HRESULT (STDMETHODCALLTYPE *GetPageIndex)(ITfCandidateListUIElement *, UINT *, UINT, UINT *);
+    HRESULT (STDMETHODCALLTYPE *SetPageIndex)(ITfCandidateListUIElement *, UINT *, UINT);
+    HRESULT (STDMETHODCALLTYPE *GetCurrentPage)(ITfCandidateListUIElement *, UINT *);
+} ITfCandidateListUIElementVtbl;
+
+struct ITfCandidateListUIElement
+{
+    const struct ITfCandidateListUIElementVtbl *lpVtbl;
 };
 
 typedef struct ITfReadingInformationUIElementVtbl
