@@ -34,6 +34,11 @@
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
 
+#if SDL_VIDEO_DRIVER_WIN32
+#include "win32/SDL_win32video.h"
+extern void IME_Present(SDL_VideoData *videodata);
+#endif
+
 #if SDL_VIDEO_OPENGL_ES
 #include "SDL_opengles.h"
 #endif /* SDL_VIDEO_OPENGL_ES */
@@ -2687,6 +2692,9 @@ SDL_RenderPresent(void)
     if (!renderer || !renderer->RenderPresent) {
         return;
     }
+#if SDL_VIDEO_DRIVER_WIN32
+    IME_Present((SDL_VideoData *)_this->driverdata);
+#endif
     renderer->RenderPresent(renderer);
 }
 
