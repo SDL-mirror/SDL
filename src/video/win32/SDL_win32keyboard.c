@@ -630,8 +630,7 @@ IME_UpdateInputLocale(SDL_VideoData *videodata)
         return;
 
     hklprev = videodata->ime_hkl;
-    switch (PRIMLANG())
-    {
+    switch (PRIMLANG()) {
     case LANG_CHINESE:
         videodata->ime_candvertical = SDL_TRUE;
         if (SUBLANG() == SUBLANG_CHINESE_SIMPLIFIED)
@@ -738,52 +737,43 @@ IME_GetCandidateList(HIMC himc, SDL_VideoData *videodata)
 {
     LPCANDIDATELIST cand_list = 0;
     DWORD size = ImmGetCandidateListW(himc, 0, 0, 0);
-    if (size)
-    {
+    if (size) {
         cand_list = (LPCANDIDATELIST)SDL_malloc(size);
-        if (cand_list)
-        {
+        if (cand_list) {
             size = ImmGetCandidateListW(himc, 0, cand_list, size);
-            if (size)
-            {
+            if (size) {
                 int i = 0;
                 int j = 0;
                 int page_start = 0;
                 videodata->ime_candsel = cand_list->dwSelection;
                 videodata->ime_candcount = cand_list->dwCount;
 
-                if (LANG() == LANG_CHS && IME_GetId(videodata, 0))
-                {
+                if (LANG() == LANG_CHS && IME_GetId(videodata, 0)) {
                     const UINT maxcandchar = 18;
                     UINT i = 0;
                     UINT cchars = 0;
 
-                    for (; i < videodata->ime_candcount; ++i)
-                    {
+                    for (; i < videodata->ime_candcount; ++i) {
                         UINT len = SDL_wcslen((LPWSTR)((DWORD)cand_list + cand_list->dwOffset[i])) + 1;
-                        if (len + cchars > maxcandchar)
-                        {
+                        if (len + cchars > maxcandchar) {
                             if (i > cand_list->dwSelection)
                                 break;
 
                             page_start = i;
                             cchars = len;
                         }
-                        else
-                        {
+                        else {
                             cchars += len;
                         }
                     }
                     videodata->ime_candpgsize = i - page_start;
                 }
-                else
-                {
+                else {
                     videodata->ime_candpgsize = SDL_min(cand_list->dwPageSize, MAX_CANDLIST);
                     page_start = (cand_list->dwSelection / videodata->ime_candpgsize) * videodata->ime_candpgsize;
                 }
                 SDL_memset(&videodata->ime_candidates, 0, sizeof(videodata->ime_candidates));
-                for (i = page_start, j = 0; (DWORD)i < cand_list->dwCount && j < (int)videodata->ime_candpgsize; i++, j++)
-                {
+                for (i = page_start, j = 0; (DWORD)i < cand_list->dwCount && j < (int)videodata->ime_candpgsize; i++, j++) {
                     LPCWSTR candidate = (LPCWSTR)((DWORD)cand_list + cand_list->dwOffset[i]);
                     IME_AddCandidate(videodata, j, candidate);
                 }
@@ -822,8 +812,7 @@ IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoD
     if (!videodata->ime_initialized || !videodata->ime_available || !videodata->ime_enabled)
         return SDL_FALSE;
 
-    switch (msg)
-    {
+    switch (msg) {
     case WM_INPUTLANGCHANGE:
         IME_InputLangChanged(videodata);
         break;
@@ -856,8 +845,7 @@ IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoD
         SDL_SendEditingText("", 0, 0);
         break;
     case WM_IME_NOTIFY:
-        switch (wParam)
-        {
+        switch (wParam) {
         case IMN_SETCONVERSIONMODE:
         case IMN_SETOPENSTATUS:
             IME_UpdateInputLocale(videodata);
@@ -946,11 +934,9 @@ UILess_GetCandidateList(SDL_VideoData *videodata, ITfCandidateListUIElement *pca
     IME_ShowCandidateList(videodata);
 
     pcandlist->lpVtbl->GetPageIndex(pcandlist, 0, 0, &pgcount);
-    if (pgcount > 0)
-    {
+    if (pgcount > 0) {
         UINT *idxlist = SDL_malloc(sizeof(UINT) * pgcount);
-        if (idxlist)
-        {
+        if (idxlist) {
             pcandlist->lpVtbl->GetPageIndex(pcandlist, idxlist, pgcount, &pgcount);
             pgstart = idxlist[page];
             if (page < pgcount - 1)
@@ -965,13 +951,10 @@ UILess_GetCandidateList(SDL_VideoData *videodata, ITfCandidateListUIElement *pca
     videodata->ime_candsel = videodata->ime_candsel - pgstart;
 
     SDL_memset(videodata->ime_candidates, 0, sizeof(videodata->ime_candidates));
-    for (i = pgstart, j = 0; (DWORD)i < count && j < videodata->ime_candpgsize; i++, j++)
-    {
+    for (i = pgstart, j = 0; (DWORD)i < count && j < videodata->ime_candpgsize; i++, j++) {
         BSTR bstr;
-        if (SUCCEEDED(pcandlist->lpVtbl->GetString(pcandlist, i, &bstr)))
-        {
-            if (bstr)
-            {
+        if (SUCCEEDED(pcandlist->lpVtbl->GetString(pcandlist, i, &bstr))) {
+            if (bstr) {
                 IME_AddCandidate(videodata, j, bstr);
                 SysFreeString(bstr);
             }
@@ -989,8 +972,7 @@ STDMETHODIMP_(ULONG) TSFSink_AddRef(TSFSink *sink)
 STDMETHODIMP_(ULONG)TSFSink_Release(TSFSink *sink)
 {
     --sink->refcount;
-    if (sink->refcount == 0)
-    {
+    if (sink->refcount == 0) {
         SDL_free(sink);
         return 0;
     }
@@ -1242,8 +1224,7 @@ StartDrawToBitmap(HDC hdc, HBITMAP *hhbm, int width, int height)
     BITMAPINFO info = {0};
     BITMAPINFOHEADER *infoHeader = &info.bmiHeader;
     BYTE *bits = NULL;
-    if (hhbm)
-    {
+    if (hhbm) {
         infoHeader->biSize = sizeof(BITMAPINFOHEADER);
         infoHeader->biWidth = width;
         infoHeader->biHeight = -1 * SDL_abs(height);
@@ -1260,8 +1241,7 @@ StartDrawToBitmap(HDC hdc, HBITMAP *hhbm, int width, int height)
 static void
 StopDrawToBitmap(HDC hdc, HBITMAP *hhbm)
 {
-    if (hhbm && *hhbm)
-    {
+    if (hhbm && *hhbm) {
         DeleteObject(*hhbm);
         *hhbm = NULL;
     }
@@ -1276,24 +1256,21 @@ BitmapToTexture(HBITMAP hbm, BYTE *bits, int width, int height, SDL_Texture **te
     if (GetObject(hbm, sizeof(bm), &bm) == 0)
         return;
 
-    if (bits && texture)
-    {
+    if (bits && texture) {
         /*
             For transparency:
 
             const Uint8 alpha = 130;
             unsigned long *p = (unsigned long *)bits;
             unsigned long *end = (unsigned long *)(bits + (bm.bmWidthBytes * bm.bmHeight));
-            while (p < end)
-            {
+            while (p < end) {
                 *p = RGB(GetRValue(*p), GetGValue(*p), GetBValue(*p)) | (alpha << 24);
                 ++p;
             }
             surface = SDL_CreateRGBSurfaceFrom(bits, width, height, bm.bmBitsPixel, bm.bmWidthBytes, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
         */
         surface = SDL_CreateRGBSurfaceFrom(bits, width, height, bm.bmBitsPixel, bm.bmWidthBytes, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
-        if (surface)
-        {
+        if (surface) {
             *texture = SDL_CreateTextureFromSurface(0, surface);
             SDL_FreeSurface(surface);
         }
@@ -1316,8 +1293,7 @@ DrawRect(HDC hdc, int left, int top, int right, int bottom, int pensize)
 static void
 DestroyTexture(SDL_Texture **texture)
 {
-    if (texture && *texture)
-    {
+    if (texture && *texture) {
         SDL_DestroyTexture(*texture);
         *texture = NULL;
     }
@@ -1348,8 +1324,7 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
     top = videodata->ime_rect.y + videodata->ime_rect.h;
     right = left + size.cx;
     bottom = top + size.cy;
-    if (right >= winw)
-    {
+    if (right >= winw) {
         left -= right - winw;
         right = winw;
     }
@@ -1357,14 +1332,12 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
         ok = SDL_TRUE;
 
     /* Top */
-    if (!ok)
-    {
+    if (!ok) {
         left = videodata->ime_rect.x;
         top = videodata->ime_rect.y - size.cy;
         right = left + size.cx;
         bottom = videodata->ime_rect.y;
-        if (right >= winw)
-        {
+        if (right >= winw) {
             left -= right - winw;
             right = winw;
         }
@@ -1373,8 +1346,7 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
     }
 
     /* Right */
-    if (!ok)
-    {
+    if (!ok) {
         left = videodata->ime_rect.x + size.cx;
         top = 0;
         right = left + size.cx;
@@ -1384,8 +1356,7 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
     }
 
     /* Left */
-    if (!ok)
-    {
+    if (!ok) {
         left = videodata->ime_rect.x - size.cx;
         top = 0;
         right = videodata->ime_rect.x;
@@ -1395,8 +1366,7 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
     }
 
     /* Window too small, show at (0,0) */
-    if (!ok)
-    {
+    if (!ok) {
         left = 0;
         top = 0;
         right = size.cx;
@@ -1446,8 +1416,7 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
     SetBkMode(hdc, TRANSPARENT);
     SelectObject(hdc, font);
 
-    for (i = 0; i < candcount; ++i)
-    {
+    for (i = 0; i < candcount; ++i) {
         const WCHAR *s = videodata->ime_candidates[i];
         if (!*s)
             break;
@@ -1490,8 +1459,7 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
     SetTextColor(hdc, candtextcolor);
     SetBkMode(hdc, TRANSPARENT);
 
-    for (i = 0; i < candcount; ++i)
-    {
+    for (i = 0; i < candcount; ++i) {
         const WCHAR *s = videodata->ime_candidates[i];
         int left, top, right, bottom;
         if (!*s)
@@ -1507,20 +1475,17 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
             SDL_swap(size.cx, size.cy);
 
         bottom = top + maxcandsize.cy + (candpadding * 2) + (candborder * 2);
-        if (!vertical)
-        {
+        if (!vertical) {
             SDL_swap(left, top);
             SDL_swap(right, bottom);
         }
 
-        if (i == videodata->ime_candsel)
-        {
+        if (i == videodata->ime_candsel) {
             SelectObject(hdc, selpen);
             SelectObject(hdc, selbrush);
             SetTextColor(hdc, seltextcolor);
         }
-        else
-        {
+        else {
             SelectObject(hdc, candpen);
             SelectObject(hdc, candbrush);
             SetTextColor(hdc, candtextcolor);
