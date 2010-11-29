@@ -1382,8 +1382,9 @@ IME_PositionCandidateList(SDL_VideoData *videodata, SIZE size)
 static void
 IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
 {
-    int i = 0;
+    int i, j;
     SIZE size = {0};
+    SIZE candsizes[MAX_CANDLIST];
     SIZE maxcandsize = {0};
     HBITMAP hbm = NULL;
     BYTE *bits = NULL;
@@ -1404,6 +1405,7 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
     const COLORREF selbordercolor = RGB(0x84, 0xAC, 0xDD);
     const COLORREF selfillcolor = RGB(0xD2, 0xE6, 0xFF);
     const COLORREF seltextcolor = RGB(0, 0, 0);
+    const int horzcandspacing = 5;
 
     HPEN listpen = listborder != 0 ? CreatePen(PS_SOLID, listborder, listbordercolor) : (HPEN)GetStockObject(NULL_PEN);
     HBRUSH listbrush = CreateSolidBrush(listfillcolor);
@@ -1421,32 +1423,51 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
         if (!*s)
             break;
 
-        GetTextExtentPoint32W(hdc, s, SDL_wcslen(s), &size);
-        maxcandsize.cx = SDL_max(maxcandsize.cx, size.cx);
-        maxcandsize.cy = SDL_max(maxcandsize.cy, size.cy);
+        GetTextExtentPoint32W(hdc, s, SDL_wcslen(s), &candsizes[i]);
+        maxcandsize.cx = SDL_max(maxcandsize.cx, candsizes[i].cx);
+        maxcandsize.cy = SDL_max(maxcandsize.cy, candsizes[i].cy);
 
     }
-    if (!vertical)
-        SDL_swap(maxcandsize.cx, maxcandsize.cy);
+    if (vertical) {
+        size.cx =
+            (listborder * 2) +
+            (listpadding * 2) +
+            (candmargin * 2) +
+            (candborder * 2) +
+            (candpadding * 2) +
+            (maxcandsize.cx)
+            ;
+        size.cy =
+            (listborder * 2) +
+            (listpadding * 2) +
+            ((candcount + 1) * candmargin) +
+            (candcount * candborder * 2) +
+            (candcount * candpadding * 2) +
+            (candcount * maxcandsize.cy)
+            ;
+    }
+    else {
+        size.cx =
+            (listborder * 2) +
+            (listpadding * 2) +
+            ((candcount + 1) * candmargin) +
+            (candcount * candborder * 2) +
+            (candcount * candpadding * 2) +
+            ((candcount - 1) * horzcandspacing);
+        ;
 
-    size.cx =
-        (listborder * 2) +
-        (listpadding * 2) +
-        (candmargin * 2) +
-        (candborder * 2) +
-        (candpadding * 2) +
-        (maxcandsize.cx)
-        ;
-    size.cy =
-        (listborder * 2) +
-        (listpadding * 2) +
-        ((candcount + 1) * candmargin) +
-        (candcount * candborder * 2) +
-        (candcount * candpadding * 2) +
-        (candcount * maxcandsize.cy)
-        ;
-    if (!vertical)
-        SDL_swap(size.cx, size.cy);
+        for (i = 0; i < candcount; ++i)
+            size.cx += candsizes[i].cx;
+
+        size.cy =
+            (listborder * 2) +
+            (listpadding * 2) +
+            (candmargin * 2) +
+            (candborder * 2) +
+            (candpadding * 2) +
+            (maxcandsize.cy)
+            ;
+    }
 
     bits = StartDrawToBitmap(hdc, &hbm, size.cx, size.cy);
 
@@ -1465,19 +1486,21 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
         if (!*s)
             break;
 
-        left = listborder + listpadding + candmargin;
-        top = listborder + listpadding + (i * candborder * 2) + (i * candpadding * 2) + ((i + 1) * candmargin) + (i * maxcandsize.cy);
-        if (!vertical)
-            SDL_swap(size.cx, size.cy);
+        if (vertical) {
+            left = listborder + listpadding + candmargin;
+            top = listborder + listpadding + (i * candborder * 2) + (i * candpadding * 2) + ((i + 1) * candmargin) + (i * maxcandsize.cy);
+            right = size.cx - listborder - listpadding - candmargin;
+            bottom = top + maxcandsize.cy + (candpadding * 2) + (candborder * 2);
+        }
+        else {
+            left = listborder + listpadding + (i * candborder * 2) + (i * candpadding * 2) + ((i + 1) * candmargin) + (i * horzcandspacing);
 
-        right = size.cx - listborder - listpadding - candmargin;
-        if (!vertical)
-            SDL_swap(size.cx, size.cy);
+            for (j = 0; j < i; ++j)
+                left += candsizes[j].cx;
 
-        bottom = top + maxcandsize.cy + (candpadding * 2) + (candborder * 2);
-        if (!vertical) {
-            SDL_swap(left, top);
-            SDL_swap(right, bottom);
+            top = listborder + listpadding + candmargin;
+            right = left + candsizes[i].cx + (candpadding * 2) + (candborder * 2);
+            bottom = size.cy - listborder - listpadding - candmargin;
         }
 
         if (i == videodata->ime_candsel) {
