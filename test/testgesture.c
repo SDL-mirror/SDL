@@ -62,7 +62,7 @@ Knob knob;
 
 void handler (int sig)
 {
-  printf ("\exiting...(%d)\n", sig);
+  printf ("exiting...(%d)\n", sig);
   exit (0);
 }
 
@@ -72,93 +72,96 @@ void perror_exit (char *error)
   handler (9);
 }
 
-void setpix(SDL_Surface *screen, int x, int y, unsigned int col)
+void setpix(SDL_Surface *screen, float _x, float _y, unsigned int col)
 {
   Uint32 *pixmem32;
   Uint32 colour;
+  Uint8 r,g,b;
+  int x = (int)_x;
+  int y = (int)_y;
+  float a;
   
-  if((unsigned)x > screen->w) return;
-  if((unsigned)y > screen->h) return;
+  if(x > screen->w) return;
+  if(y > screen->h) return;
 
   pixmem32 = (Uint32*) screen->pixels  + y*screen->pitch/BPP + x;
   
-  Uint8 r,g,b;
-  float a;
-  
-  memcpy(&colour,pixmem32,screen->format->BytesPerPixel);
+  SDL_memcpy(&colour,pixmem32,screen->format->BytesPerPixel);
 
   SDL_GetRGB(colour,screen->format,&r,&g,&b);
   //r = 0;g = 0; b = 0;
-  a = (col>>24)&0xFF;
+  a = (float)((col>>24)&0xFF);
   if(a == 0) a = 0xFF; //Hack, to make things easier.
   a /= 0xFF;
-  r = r*(1-a) + ((col>>16)&0xFF)*(a);
-  g = g*(1-a) + ((col>> 8)&0xFF)*(a);
-  b = b*(1-a) + ((col>> 0)&0xFF)*(a);
+  r = (Uint8)(r*(1-a) + ((col>>16)&0xFF)*(a));
+  g = (Uint8)(g*(1-a) + ((col>> 8)&0xFF)*(a));
+  b = (Uint8)(b*(1-a) + ((col>> 0)&0xFF)*(a));
   colour = SDL_MapRGB( screen->format,r, g, b);
   
 
   *pixmem32 = colour;
 }
 
-void drawLine(SDL_Surface *screen,int x0,int y0,int x1,int y1,unsigned int col) {
+void drawLine(SDL_Surface *screen,float x0,float y0,float x1,float y1,unsigned int col) {
   float t;
-  for(t=0;t<1;t+=1.f/SDL_max(abs(x0-x1),abs(y0-y1)))
+  for(t=0;t<1;t+=(float)(1.f/SDL_max(SDL_fabs(x0-x1),SDL_fabs(y0-y1))))
     setpix(screen,x1+t*(x0-x1),y1+t*(y0-y1),col);
 }
 
-void drawCircle(SDL_Surface* screen,int x,int y,int r,unsigned int c)
+void drawCircle(SDL_Surface* screen,float x,float y,float r,unsigned int c)
 {
-  int tx,ty;
+  float tx,ty;
   float xr;
-  for(ty = -abs(r);ty <= abs(r);ty++) {
-    xr = sqrt(r*r - ty*ty);
+  for(ty = (float)-SDL_fabs(r);ty <= (float)SDL_fabs((int)r);ty++) {
+    xr = (float)sqrt(r*r - ty*ty);
     if(r > 0) { //r > 0 ==> filled circle
-      for(tx=-xr+.5;tx<=xr-.5;tx++) {
+      for(tx=-xr+.5f;tx<=xr-.5;tx++) {
 	setpix(screen,x+tx,y+ty,c);
       }
     }
     else {
-      setpix(screen,x-xr+.5,y+ty,c);
-      setpix(screen,x+xr-.5,y+ty,c);
+      setpix(screen,x-xr+.5f,y+ty,c);
+      setpix(screen,x+xr-.5f,y+ty,c);
     }
   }
 }
 
 void drawKnob(SDL_Surface* screen,Knob k) {
   drawCircle(screen,k.p.x*screen->w,k.p.y*screen->h,k.r*screen->w,0xFFFFFF);  
-  drawCircle(screen,(k.p.x+k.r/2*cos(k.ang))*screen->w,
-  	            (k.p.y+k.r/2*sin(k.ang))*screen->h,k.r/4*screen->w,0);
+  drawCircle(screen,(k.p.x+k.r/2*cosf(k.ang))*screen->w,
+  	            (k.p.y+k.r/2*sinf(k.ang))*screen->h,k.r/4*screen->w,0);
 }
 
 void DrawScreen(SDL_Surface* screen)
 {
-  int x, y;
+  int x, y, i;
   if(SDL_MUSTLOCK(screen))
     {                                              
       if(SDL_LockSurface(screen) < 0) return;
     }
   for(y = 0;y < screen->h;y++)
     for(x = 0;x < screen->w;x++)
-	setpix(screen,x,y,((x%255)<<16) + ((y%255)<<8) + (x+y)%255);
+	setpix(screen,(float)x,(float)y,((x%255)<<16) + ((y%255)<<8) + (x+y)%255);
 
-  int i;
   //draw Touch History
   for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i < eventWrite;i++) {
     SDL_Event event = events[i&(EVENT_BUF_SIZE-1)];
     int age = eventWrite - i - 1;
+	float x, y;
+	unsigned int c, col;
+
     if(event.type == SDL_FINGERMOTION || 
        event.type == SDL_FINGERDOWN ||
        event.type == SDL_FINGERUP) {
       SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
       if(inTouch == NULL) continue;
 
-      float x = ((float)event.tfinger.x)/inTouch->xres;
-      float y = ((float)event.tfinger.y)/inTouch->yres;      
+      x = ((float)event.tfinger.x)/inTouch->xres;
+      y = ((float)event.tfinger.y)/inTouch->yres;      
       
       //draw the touch:      
-      unsigned int c = colors[event.tfinger.touchId%7]; 
-      unsigned int col = 
+      c = colors[event.tfinger.touchId%7]; 
+      col = 
 	((unsigned int)(c*(.1+.85))) |
 	((unsigned int)((0xFF*(1-((float)age)/EVENT_BUF_SIZE))) & 0xFF)<<24;
 
@@ -186,14 +189,12 @@ int main(int argc, char* argv[])
 {  
   SDL_Surface *screen;
   SDL_Event event;
-
-  //gesture variables
-  knob.r = .1;
-  knob.ang = 0;
-
-  
   SDL_bool quitting = SDL_FALSE;
   SDL_RWops *src;
+
+  //gesture variables
+  knob.r = .1f;
+  knob.ang = 0;
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
   
@@ -244,14 +245,15 @@ int main(int argc, char* argv[])
 		return 1;
 	      }
 	    break;
-	  case SDL_FINGERMOTION:    
-	    ;
+	  case SDL_FINGERMOTION:
 #if VERBOSE
 	    printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
 	    	   event.tfinger.x,event.tfinger.y);
 #endif
-	    SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
-	    SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
+		{
+			SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
+			SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
+		}
 	    break;	    
 	  case SDL_FINGERDOWN:
 #if VERBOSE

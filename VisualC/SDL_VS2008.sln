@@ -138,7 +138,26 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testshape", "tests\testshap
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testgesture", "tests\testgesture\testgesture_VS2008.vcproj", "{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
+		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 2
+		SccProjectUniqueName0 = SDL\\SDL_VS2008.vcproj
+		SccProjectName0 = Perforce\u0020Project
+		SccLocalPath0 = ..
+		SccProvider0 = MSSCCI:Perforce\u0020SCM
+		SccProjectFilePathRelativizedFromConnection0 = VisualC\\SDL\\
+		SccProjectUniqueName1 = SDLmain\\SDLmain_VS2008.vcproj
+		SccProjectName1 = Perforce\u0020Project
+		SccLocalPath1 = ..
+		SccProvider1 = MSSCCI:Perforce\u0020SCM
+		SccProjectFilePathRelativizedFromConnection1 = VisualC\\SDLmain\\
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
@@ -370,6 +389,15 @@ Global
 		{31A3E4E1-AAE9-4EF3-9B23-18D0924BE4D2}.Release|Win32.ActiveCfg = Release|Win32
 		{31A3E4E1-AAE9-4EF3-9B23-18D0924BE4D2}.Release|Win32.Build.0 = Release|Win32
 		{31A3E4E1-AAE9-4EF3-9B23-18D0924BE4D2}.Release|x64.ActiveCfg = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Debug|Win32.ActiveCfg = Debug|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Debug|Win32.Build.0 = Debug|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Debug|x64.ActiveCfg = Debug|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release_NoSTDIO|Win32.ActiveCfg = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release_NoSTDIO|Win32.Build.0 = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release_NoSTDIO|x64.ActiveCfg = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release|Win32.ActiveCfg = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release|Win32.Build.0 = Release|Win32
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -397,5 +425,6 @@ Global
 		{0FFD1A21-11DB-492C-A989-E4F195B0C441} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
 		{6AF0724B-BAC1-4C9D-AFBF-F63B4A2FB8FB} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
 		{31A3E4E1-AAE9-4EF3-9B23-18D0924BE4D2} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
+		{79CEE57E-1BC3-4FF6-90B3-9E39763CDAFF} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
 	EndGlobalSection
 EndGlobal
