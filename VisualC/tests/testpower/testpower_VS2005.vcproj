@@ -41,7 +41,7 @@
 				MkTypLibCompatible="true"
 				SuppressStartupBanner="true"
 				TargetEnvironment="1"
-				TypeLibraryName=".\Debug/testwm.tlb"
+				TypeLibraryName=".\Debug/testpower.tlb"
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
@@ -50,7 +50,7 @@
 				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/testwm.pch"
+				PrecompiledHeaderFile=".\Debug/testpower.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
@@ -73,7 +73,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				OutputFile=".\Debug/testwm.exe"
+				OutputFile=".\Debug/testpower.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				GenerateDebugInformation="true"
