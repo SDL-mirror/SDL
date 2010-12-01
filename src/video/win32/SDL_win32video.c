@@ -82,6 +82,10 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
        FreeLibrary(data->hAygShell);
     }
 #endif
+	if (data->userDLL) {
+		FreeLibrary(data->userDLL);
+	}
+
     SDL_free(device->driverdata);
     SDL_free(device);
 }
@@ -154,6 +158,13 @@ WIN_CreateDevice(int devindex)
         (PFNSHFullScreen) GetProcAddress(data->hAygShell, TEXT("SHFullScreen")) : 0);
     data->CoordTransform = NULL;
 #endif
+
+	data->userDLL = LoadLibrary(TEXT("USER32.DLL"));
+	if (data->userDLL) {
+		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) GetProcAddress(data->userDLL, "CloseTouchInputHandle");
+		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) GetProcAddress(data->userDLL, "GetTouchInputInfo");
+		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) GetProcAddress(data->userDLL, "RegisterTouchWindow");
+	}
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;

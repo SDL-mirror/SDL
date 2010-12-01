@@ -80,6 +80,32 @@ extern void WIN_SetError(const char *prefix);
 
 enum { RENDER_NONE, RENDER_D3D, RENDER_DDRAW, RENDER_GDI, RENDER_GAPI, RENDER_RAW };
 
+#if WINVER < 0x0601
+/* Touch input definitions */
+#define TWF_FINETOUCH	1
+#define TWF_WANTPALM	2
+
+#define TOUCHEVENTF_MOVE 0x0001
+#define TOUCHEVENTF_DOWN 0x0002
+#define TOUCHEVENTF_UP   0x0004
+
+DECLARE_HANDLE(HTOUCHINPUT);
+
+typedef struct _TOUCHINPUT {
+	LONG      x;
+	LONG      y;
+	HANDLE    hSource;
+	DWORD     dwID;
+	DWORD     dwFlags;
+	DWORD     dwMask;
+	DWORD     dwTime;
+	ULONG_PTR dwExtraInfo;
+	DWORD     cxContact;
+	DWORD     cyContact;
+} TOUCHINPUT, *PTOUCHINPUT;
+
+#endif /* WINVER < 0x0601 */
+
 typedef BOOL  (*PFNSHFullScreen)(HWND, DWORD);
 typedef void  (*PFCoordTransform)(SDL_Window*, POINT*);
 
@@ -135,7 +161,13 @@ typedef struct SDL_VideoData
 #endif
 
     const SDL_scancode *key_layout;
-    DWORD clipboard_count;
+	DWORD clipboard_count;
+
+	/* Touch input functions */
+	HANDLE userDLL;
+	BOOL (WINAPI *CloseTouchInputHandle)( HTOUCHINPUT );
+	BOOL (WINAPI *GetTouchInputInfo)( HTOUCHINPUT, UINT, PTOUCHINPUT, int );
+	BOOL (WINAPI *RegisterTouchWindow)( HWND, ULONG );
 
     SDL_bool ime_com_initialized;
     struct ITfThreadMgr *ime_threadmgr;
