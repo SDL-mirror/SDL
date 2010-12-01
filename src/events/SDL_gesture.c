@@ -294,7 +294,7 @@ float bestDollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ) {
 }
 
 //DollarPath contains raw points, plus (possibly) the calculated length
-int dollarNormalize(SDL_DollarPath path,SDL_FloatPoint *points) {
+int dollarNormalize(const SDL_DollarPath *path,SDL_FloatPoint *points) {
   int i;
   float interval;
   float dist;
@@ -303,34 +303,35 @@ int dollarNormalize(SDL_DollarPath path,SDL_FloatPoint *points) {
   float xmin,xmax,ymin,ymax;
   float ang;
   float w,h;
+  float length = path->length;
 
   //Calculate length if it hasn't already been done
-  if(path.length <= 0) {
-    for(i=1;i<path.numPoints;i++) {
-      float dx = path.p[i  ].x - 
-                 path.p[i-1].x;
-      float dy = path.p[i  ].y - 
-                 path.p[i-1].y;
-      path.length += (float)(SDL_sqrt(dx*dx+dy*dy));
+  if(length <= 0) {
+    for(i=1;i<path->numPoints;i++) {
+      float dx = path->p[i  ].x - 
+                 path->p[i-1].x;
+      float dy = path->p[i  ].y - 
+                 path->p[i-1].y;
+      length += (float)(SDL_sqrt(dx*dx+dy*dy));
     }
   }
 
   //Resample
-  interval = path.length/(DOLLARNPOINTS - 1);
+  interval = length/(DOLLARNPOINTS - 1);
   dist = interval;
 
   centroid.x = 0;centroid.y = 0;
   
-  //printf("(%f,%f)\n",path.p[path.numPoints-1].x,path.p[path.numPoints-1].y);
-  for(i = 1;i < path.numPoints;i++) {
-    float d = (float)(SDL_sqrt((path.p[i-1].x-path.p[i].x)*(path.p[i-1].x-path.p[i].x)+
-                             (path.p[i-1].y-path.p[i].y)*(path.p[i-1].y-path.p[i].y)));
+  //printf("(%f,%f)\n",path->p[path->numPoints-1].x,path->p[path->numPoints-1].y);
+  for(i = 1;i < path->numPoints;i++) {
+    float d = (float)(SDL_sqrt((path->p[i-1].x-path->p[i].x)*(path->p[i-1].x-path->p[i].x)+
+                             (path->p[i-1].y-path->p[i].y)*(path->p[i-1].y-path->p[i].y)));
     //printf("d = %f dist = %f/%f\n",d,dist,interval);
     while(dist + d > interval) {
-      points[numPoints].x = path.p[i-1].x + 
-        ((interval-dist)/d)*(path.p[i].x-path.p[i-1].x);
-      points[numPoints].y = path.p[i-1].y + 
-        ((interval-dist)/d)*(path.p[i].y-path.p[i-1].y);
+      points[numPoints].x = path->p[i-1].x + 
+        ((interval-dist)/d)*(path->p[i].x-path->p[i-1].x);
+      points[numPoints].y = path->p[i-1].y + 
+        ((interval-dist)/d)*(path->p[i].y-path->p[i-1].y);
       centroid.x += points[numPoints].x;
       centroid.y += points[numPoints].y;
       numPoints++;
@@ -344,7 +345,7 @@ int dollarNormalize(SDL_DollarPath path,SDL_FloatPoint *points) {
     return 0;
   }
   //copy the last point
-  points[DOLLARNPOINTS-1] = path.p[path.numPoints-1];
+  points[DOLLARNPOINTS-1] = path->p[path->numPoints-1];
   numPoints = DOLLARNPOINTS;
 
   centroid.x /= numPoints;
@@ -386,7 +387,7 @@ int dollarNormalize(SDL_DollarPath path,SDL_FloatPoint *points) {
   return numPoints;
 }
 
-float dollarRecognize(SDL_DollarPath path,int *bestTempl,SDL_GestureTouch* touch) {
+float dollarRecognize(const SDL_DollarPath *path,int *bestTempl,SDL_GestureTouch* touch) {
         
         SDL_FloatPoint points[DOLLARNPOINTS];
         int numPoints = dollarNormalize(path,points);
@@ -528,7 +529,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
 #ifdef ENABLE_DOLLAR
       if(inTouch->recording) {
         inTouch->recording = SDL_FALSE;        
-        dollarNormalize(inTouch->dollarPath,path);
+        dollarNormalize(&inTouch->dollarPath,path);
         //PrintPath(path);
         if(recordAll) {
           index = SDL_AddDollarGesture(NULL,path);
@@ -549,7 +550,7 @@ void SDL_GestureProcessEvent(SDL_Event* event)
       else {        
         int bestTempl;
         float error;
-        error = dollarRecognize(inTouch->dollarPath,
+        error = dollarRecognize(&inTouch->dollarPath,
                                 &bestTempl,inTouch);
         if(bestTempl >= 0){
           //Send Event
