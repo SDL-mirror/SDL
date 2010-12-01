@@ -81,8 +81,8 @@ void setpix(SDL_Surface *screen, float _x, float _y, unsigned int col)
   int y = (int)_y;
   float a;
   
-  if(x > screen->w) return;
-  if(y > screen->h) return;
+  if(x < 0 || x > screen->w) return;
+  if(y < 0 || y > screen->h) return;
 
   pixmem32 = (Uint32*) screen->pixels  + y*screen->pitch/BPP + x;
   
