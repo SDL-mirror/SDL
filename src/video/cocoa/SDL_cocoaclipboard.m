@@ -27,9 +27,7 @@
 static NSString *
 GetTextFormat(_THIS)
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1060
-    return NSStringPboardType;
-#else
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     if (data->osversion >= 0x1060) {
@@ -37,6 +35,8 @@ GetTextFormat(_THIS)
     } else {
         return NSStringPboardType;
     }
+#else
+    return NSStringPboardType;
 #endif
 }
 

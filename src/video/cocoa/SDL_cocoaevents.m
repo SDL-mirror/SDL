@@ -36,11 +36,9 @@
 #endif
 
 /* setAppleMenu disappeared from the headers in 10.4 */
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_4
 @interface NSApplication(NSAppleMenu)
 - (void)setAppleMenu:(NSMenu *)menu;
 @end
-#endif
 
 @implementation NSApplication(SDL)
 - (void)setRunning

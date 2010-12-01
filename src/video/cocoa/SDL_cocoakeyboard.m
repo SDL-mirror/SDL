@@ -171,7 +171,11 @@
 }
 
 /* Needs long instead of NSInteger for compilation on Mac OS X 10.4 */
+#if MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_5
 - (long) conversationIdentifier
+#else
+- (NSInteger) conversationIdentifier
+#endif
 {
     return (long) self;
 }
@@ -478,7 +482,7 @@ HandleModifiers(_THIS, unsigned short scancode, unsigned int modifierFlags)
 static void
 UpdateKeymap(SDL_VideoData *data)
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     TISInputSourceRef key_layout;
 #else
     KeyboardLayoutRef key_layout;
@@ -489,7 +493,7 @@ UpdateKeymap(SDL_VideoData *data)
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     /* See if the keymap needs to be updated */
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     key_layout = TISCopyCurrentKeyboardLayoutInputSource();
 #else
     KLGetCurrentKeyboardLayout(&key_layout);
@@ -502,7 +506,7 @@ UpdateKeymap(SDL_VideoData *data)
     SDL_GetDefaultKeymap(keymap);
 
     /* Try Unicode data first (preferred as of Mac OS X 10.5) */
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
     CFDataRef uchrDataRef = TISGetInputSourceProperty(key_layout, kTISPropertyUnicodeKeyLayoutData);
     if (uchrDataRef)
         chr_data = CFDataGetBytePtr(uchrDataRef);
@@ -544,7 +548,7 @@ UpdateKeymap(SDL_VideoData *data)
         return;
     }
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5
 cleanup:
     CFRelease(key_layout);
 #else

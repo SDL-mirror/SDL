@@ -36,16 +36,6 @@
 
 #define DEFAULT_OPENGL  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
 
-/* This is implemented in Mac OS X 10.3 and above */
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_3
-@implementation NSOpenGLContext(CGLContextAccess)
-- (CGLContextObj)CGLContextObj;
-{
-    return _contextAuxiliary;
-}
-@end
-#endif /* < 10.3 */
-
 int
 Cocoa_GL_LoadLibrary(_THIS, const char *path)
 {
@@ -180,7 +170,7 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     #endif
 
     {
-        long cache_max = 64;
+        GLint cache_max = 64;
         CGLContextObj ctx = [context CGLContextObj];
         CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
         CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);

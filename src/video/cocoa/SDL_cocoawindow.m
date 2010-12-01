@@ -61,7 +61,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [center addObserver:self selector:@selector(windowDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
 
     [_data->nswindow setAcceptsMouseMovedEvents:YES];
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
     [[_data->nswindow contentView] setAcceptsTouchEvents:YES];
+#endif
 }
 
 - (void)close
@@ -293,6 +295,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
 {
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
     NSSet *touches = 0;
     NSEnumerator *enumerator;
     NSTouch *touch;
@@ -354,6 +357,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         
         touch = (NSTouch*)[enumerator nextObject];
     }
+#endif /* MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6 */
 }
 
 @end

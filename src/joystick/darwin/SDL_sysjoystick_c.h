@@ -24,11 +24,7 @@
 #ifndef SDL_JOYSTICK_IOKIT_H
 
 
-#if MAC_OS_X_VERSION_MIN_REQUIRED == 1030
-#include "10.3.9-FIX/IOHIDLib.h"
-#else
 #include <IOKit/hid/IOHIDLib.h>
-#endif
 #include <IOKit/hid/IOHIDKeys.h>
 
 

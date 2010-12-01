@@ -40,7 +40,7 @@
 #include "SDL_cocoaopengl.h"
 #include "SDL_cocoawindow.h"
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_4
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
 #if __LP64__
 typedef long NSInteger;
 typedef unsigned long NSUInteger;

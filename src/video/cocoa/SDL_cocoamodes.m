@@ -23,7 +23,7 @@
 
 #include "SDL_cocoavideo.h"
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
 /* 
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
@@ -290,7 +290,7 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 
     [[NSApp mainWindow] makeKeyAndOrderFront: nil];
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
     /* 
         There is a bug in Cocoa where NSScreen doesn't synchronize
         with CGDirectDisplay, so the main screen's frame is wrong.

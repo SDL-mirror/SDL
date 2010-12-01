@@ -24,7 +24,7 @@
 #include <CoreAudio/CoreAudio.h>
 #include <CoreServices/CoreServices.h>
 #include <AudioUnit/AudioUnit.h>
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
