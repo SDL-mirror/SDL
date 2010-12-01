@@ -25,13 +25,13 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "SDL_eventtouch.h" 
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 
 #include "SDL_x11video.h"
 #include "SDL_x11render.h"
 #include "SDL_x11shape.h"
+#include "SDL_x11touch.h" 
 
 #if SDL_VIDEO_DRIVER_PANDORA
 #include "SDL_x11opengles.h"

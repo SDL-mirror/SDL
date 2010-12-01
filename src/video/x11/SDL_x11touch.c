@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 #include "SDL_x11video.h"
-#include "SDL_eventtouch.h"
+#include "SDL_x11touch.h"
 #include "../../events/SDL_touch_c.h"
 
 
