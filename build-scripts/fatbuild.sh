@@ -16,6 +16,18 @@ fi
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 
+# They changed this from "darwin9" to "darwin10" in Xcode 3.2 (Snow Leopard).
+GCCUSRPATH_PPC=`ls -d $SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin*/4.0.1`
+if [ ! -d "$GCCUSRPATH_PPC" ]; then
+    echo "Couldn't find any GCC usr path for 32-bit ppc"
+    exit 1
+fi
+GCCUSRPATH_PPC64=`ls -d $SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/powerpc-apple-darwin*/4.0.1`
+if [ ! -d "$GCCUSRPATH_PPC64" ]; then
+    echo "Couldn't find any GCC usr path for 64-bit ppc"
+    exit 1
+fi
+
 # PowerPC 32-bit configure flags (10.4 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
 CONFIG_PPC="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
@@ -28,13 +40,13 @@ CFLAGS_PPC="-mmacosx-version-min=10.4"
 CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
 -nostdinc \
 -F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--I$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1/include \
+-I$GCCUSRPATH_PPC/include \
 -isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
 
 # PowerPC 32-bit linker flags
 LFLAGS_PPC="-arch ppc -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
 -F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--L$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1 \
+-L$GCCUSRPATH_PPC \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
 
 # PowerPC 64-bit configure flags (10.5 runtime compatibility)
@@ -49,13 +61,13 @@ CFLAGS_PPC64="-mmacosx-version-min=10.5"
 CPPFLAGS_PPC64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
 -nostdinc \
 -F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--I$SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1/include \
+-I$GCCUSRPATH_PPC64/include \
 -isystem $SDK_PATH/MacOSX10.5.sdk/usr/include"
 
 # PowerPC 64-bit linker flags
 LFLAGS_PPC64="-arch ppc64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
 -F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--L$SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/powerpc-apple-darwin10/4.0.1/ppc64 \
+-L$GCCUSRPATH_PPC64/ppc64 \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.5.sdk"
 
 # Intel 32-bit configure flags (10.4 runtime compatibility)
@@ -63,18 +75,15 @@ LFLAGS_PPC64="-arch ppc64 -Wl,-headerpad_max_install_names -mmacosx-version-min=
 CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
-# Intel 32-bit configure flags (10.4 runtime compatibility)
-# We dynamically load X11, so using the system X11 headers is fine.
-CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
---x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
-
-# They changed this to "darwin10" in Xcode 3.2 (Snow Leopard).
-GCCUSRPATH_X86="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin9/4.0.1"
+# They changed this from "darwin9" to "darwin10" in Xcode 3.2 (Snow Leopard).
+GCCUSRPATH_X86=`ls -d $SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin*/4.0.1`
 if [ ! -d "$GCCUSRPATH_X86" ]; then
-    GCCUSRPATH_X86="$SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1"
+    echo "Couldn't find any GCC usr path for 32-bit x86"
+    exit 1
 fi
-if [ ! -d "$GCCUSRPATH_X86" ]; then
-    echo "Couldn't find any GCC usr path for x86"
+GCCUSRPATH_X64=`ls -d $SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin*/4.0.1`
+if [ ! -d "$GCCUSRPATH_X64" ]; then
+    echo "Couldn't find any GCC usr path for 64-bit x86"
     exit 1
 fi
 
@@ -106,13 +115,13 @@ CFLAGS_X64="-mmacosx-version-min=10.5"
 CPPFLAGS_X64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
 -nostdinc \
 -F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--I$SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1/include \
+-I$GCCUSRPATH_X64/include \
 -isystem $SDK_PATH/MacOSX10.5.sdk/usr/include"
 
 # Intel 64-bit linker flags
 LFLAGS_X64="-arch x86_64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
 -F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--L$SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin10/4.0.1/x86_64 \
+-L$GCCUSRPATH_X64/x86_64 \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.5.sdk"
 
 #
