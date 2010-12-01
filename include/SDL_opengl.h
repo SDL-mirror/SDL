@@ -38,6 +38,10 @@
 #endif
 #include <windows.h>
 #endif
+#ifdef __glext_h_
+/* Someone has already included glext.h */
+#define NO_SDL_GLEXT
+#endif
 #ifndef NO_SDL_GLEXT
 #define __glext_h_              /* Don't let gl.h include glext.h */
 #endif
