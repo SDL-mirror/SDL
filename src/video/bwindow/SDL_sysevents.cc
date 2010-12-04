@@ -386,9 +386,9 @@ void SDL_BWin::DirectConnected(direct_buffer_info *info) {
 		case B_DIRECT_MODIFY:
 			{
 				int32 width = info->window_bounds.right -
-					info->window_bounds.left + 1;
+					info->window_bounds.left;
 				int32 height = info->window_bounds.bottom -
-					info->window_bounds.top + 1;
+					info->window_bounds.top;
 				SDL_PrivateResize(width, height);
 				break;
 			}
