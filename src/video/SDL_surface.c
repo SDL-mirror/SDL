@@ -438,7 +438,7 @@ SDL_GetSurfaceAlphaMod(SDL_Surface * surface, Uint8 * alpha)
 }
 
 int
-SDL_SetSurfaceBlendMode(SDL_Surface * surface, int blendMode)
+SDL_SetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode blendMode)
 {
     int flags, status;
 
@@ -486,7 +486,7 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, int blendMode)
 }
 
 int
-SDL_GetSurfaceBlendMode(SDL_Surface * surface, int *blendMode)
+SDL_GetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode *blendMode)
 {
     if (!surface) {
         return -1;
@@ -519,7 +519,7 @@ SDL_GetSurfaceBlendMode(SDL_Surface * surface, int *blendMode)
 }
 
 int
-SDL_SetSurfaceScaleMode(SDL_Surface * surface, int scaleMode)
+SDL_SetSurfaceScaleMode(SDL_Surface * surface, SDL_ScaleMode scaleMode)
 {
     int flags, status;
 
@@ -531,13 +531,13 @@ SDL_SetSurfaceScaleMode(SDL_Surface * surface, int scaleMode)
     flags = surface->map->info.flags;
     surface->map->info.flags &= ~(SDL_COPY_NEAREST);
     switch (scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_SCALEMODE_NONE:
         break;
-    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_SCALEMODE_FAST:
         surface->map->info.flags |= SDL_COPY_NEAREST;
         break;
-    case SDL_TEXTURESCALEMODE_SLOW:
-    case SDL_TEXTURESCALEMODE_BEST:
+    case SDL_SCALEMODE_SLOW:
+    case SDL_SCALEMODE_BEST:
         SDL_Unsupported();
         surface->map->info.flags |= SDL_COPY_NEAREST;
         status = -1;
@@ -555,7 +555,7 @@ SDL_SetSurfaceScaleMode(SDL_Surface * surface, int scaleMode)
 }
 
 int
-SDL_GetSurfaceScaleMode(SDL_Surface * surface, int *scaleMode)
+SDL_GetSurfaceScaleMode(SDL_Surface * surface, SDL_ScaleMode *scaleMode)
 {
     if (!surface) {
         return -1;
@@ -567,10 +567,10 @@ SDL_GetSurfaceScaleMode(SDL_Surface * surface, int *scaleMode)
 
     switch (surface->map->info.flags & SDL_COPY_NEAREST) {
     case SDL_COPY_NEAREST:
-        *scaleMode = SDL_TEXTURESCALEMODE_FAST;
+        *scaleMode = SDL_SCALEMODE_FAST;
         break;
     default:
-        *scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        *scaleMode = SDL_SCALEMODE_NONE;
         break;
     }
     return 0;

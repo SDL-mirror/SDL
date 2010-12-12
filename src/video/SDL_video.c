@@ -1959,8 +1959,8 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
 
     {
         Uint8 r, g, b, a;
-        int blendMode;
-        int scaleMode;
+        SDL_BlendMode blendMode;
+        SDL_ScaleMode scaleMode;
 
         SDL_GetSurfaceColorMod(surface, &r, &g, &b);
         SDL_SetTextureColorMod(texture, r, g, b);
@@ -2129,7 +2129,7 @@ SDL_GetTextureAlphaMod(SDL_Texture * texture, Uint8 * alpha)
 }
 
 int
-SDL_SetTextureBlendMode(SDL_Texture * texture, int blendMode)
+SDL_SetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode blendMode)
 {
     SDL_Renderer *renderer;
 
@@ -2145,7 +2145,7 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, int blendMode)
 }
 
 int
-SDL_GetTextureBlendMode(SDL_Texture * texture, int *blendMode)
+SDL_GetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode *blendMode)
 {
     CHECK_TEXTURE_MAGIC(texture, -1);
 
@@ -2156,7 +2156,7 @@ SDL_GetTextureBlendMode(SDL_Texture * texture, int *blendMode)
 }
 
 int
-SDL_SetTextureScaleMode(SDL_Texture * texture, int scaleMode)
+SDL_SetTextureScaleMode(SDL_Texture * texture, SDL_ScaleMode scaleMode)
 {
     SDL_Renderer *renderer;
 
@@ -2172,7 +2172,7 @@ SDL_SetTextureScaleMode(SDL_Texture * texture, int scaleMode)
 }
 
 int
-SDL_GetTextureScaleMode(SDL_Texture * texture, int *scaleMode)
+SDL_GetTextureScaleMode(SDL_Texture * texture, SDL_ScaleMode *scaleMode)
 {
     CHECK_TEXTURE_MAGIC(texture, -1);
 
@@ -2315,7 +2315,7 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 }
 
 int
-SDL_SetRenderDrawBlendMode(int blendMode)
+SDL_SetRenderDrawBlendMode(SDL_BlendMode blendMode)
 {
     SDL_Renderer *renderer;
 
@@ -2332,7 +2332,7 @@ SDL_SetRenderDrawBlendMode(int blendMode)
 }
 
 int
-SDL_GetRenderDrawBlendMode(int *blendMode)
+SDL_GetRenderDrawBlendMode(SDL_BlendMode *blendMode)
 {
     SDL_Renderer *renderer;
 
@@ -2354,7 +2354,7 @@ SDL_RenderClear()
         return -1;
     }
     if (!renderer->RenderClear) {
-        int blendMode = renderer->blendMode;
+        SDL_BlendMode blendMode = renderer->blendMode;
         int status;
 
         if (blendMode >= SDL_BLENDMODE_BLEND) {

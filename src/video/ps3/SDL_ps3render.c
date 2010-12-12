@@ -79,7 +79,7 @@ SDL_RenderDriver SDL_PS3_RenderDriver = {
      (SDL_BLENDMODE_NONE),
      /* We use bilinear scaling on the SPE for YV12 & IYUV
       * (width and height % 8 = 0) */
-     (SDL_TEXTURESCALEMODE_SLOW)
+     (SDL_SCALEMODE_SLOW)
      }
 };
 

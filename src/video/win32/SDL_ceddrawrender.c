@@ -85,7 +85,7 @@ SDL_RenderDriver DDRAW_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE),
      (SDL_BLENDMODE_NONE),
-     (SDL_TEXTURESCALEMODE_NONE),
+     (SDL_SCALEMODE_NONE),
      0,
      {0},
      0,
@@ -666,10 +666,10 @@ static int
 DDRAW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_SCALEMODE_NONE:
     default:
         SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
     return 0;

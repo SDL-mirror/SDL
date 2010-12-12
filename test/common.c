@@ -437,16 +437,16 @@ static void
 PrintScaleMode(Uint32 flag)
 {
     switch (flag) {
-    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_SCALEMODE_NONE:
         fprintf(stderr, "None");
         break;
-    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_SCALEMODE_FAST:
         fprintf(stderr, "Fast");
         break;
-    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_SCALEMODE_SLOW:
         fprintf(stderr, "Slow");
         break;
-    case SDL_TEXTURESCALEMODE_BEST:
+    case SDL_SCALEMODE_BEST:
         fprintf(stderr, "Best");
         break;
     default:

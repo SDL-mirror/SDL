@@ -26,7 +26,7 @@
 
 int
 SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
-              int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+              SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect full_rect;
     SDL_Point points[5];
@@ -60,7 +60,7 @@ SDL_BlendRect(SDL_Surface * dst, const SDL_Rect * rect,
 
 int
 SDL_BlendRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
-               int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+               SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     int i;
 

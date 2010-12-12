@@ -26,7 +26,7 @@
 
 static int
 SDL_BlendFillRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect,
-                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                         SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -49,7 +49,7 @@ SDL_BlendFillRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect,
 
 static int
 SDL_BlendFillRect_RGB565(SDL_Surface * dst, const SDL_Rect * rect,
-                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                         SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -72,7 +72,7 @@ SDL_BlendFillRect_RGB565(SDL_Surface * dst, const SDL_Rect * rect,
 
 static int
 SDL_BlendFillRect_RGB888(SDL_Surface * dst, const SDL_Rect * rect,
-                         int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                         SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -95,7 +95,7 @@ SDL_BlendFillRect_RGB888(SDL_Surface * dst, const SDL_Rect * rect,
 
 static int
 SDL_BlendFillRect_ARGB8888(SDL_Surface * dst, const SDL_Rect * rect,
-                           int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                           SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     unsigned inva = 0xff - a;
 
@@ -118,7 +118,7 @@ SDL_BlendFillRect_ARGB8888(SDL_Surface * dst, const SDL_Rect * rect,
 
 static int
 SDL_BlendFillRect_RGB(SDL_Surface * dst, const SDL_Rect * rect,
-                      int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                      SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_PixelFormat *fmt = dst->format;
     unsigned inva = 0xff - a;
@@ -164,7 +164,7 @@ SDL_BlendFillRect_RGB(SDL_Surface * dst, const SDL_Rect * rect,
 
 static int
 SDL_BlendFillRect_RGBA(SDL_Surface * dst, const SDL_Rect * rect,
-                       int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                       SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_PixelFormat *fmt = dst->format;
     unsigned inva = 0xff - a;
@@ -194,7 +194,7 @@ SDL_BlendFillRect_RGBA(SDL_Surface * dst, const SDL_Rect * rect,
 
 int
 SDL_BlendFillRect(SDL_Surface * dst, const SDL_Rect * rect,
-                  int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                  SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect clipped;
 
@@ -263,12 +263,12 @@ SDL_BlendFillRect(SDL_Surface * dst, const SDL_Rect * rect,
 
 int
 SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
-                   int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+                   SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     SDL_Rect clipped;
     int i;
     int (*func)(SDL_Surface * dst, const SDL_Rect * rect,
-                int blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a) = NULL;
+                SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a) = NULL;
     int status = 0;
 
     if (!dst) {

@@ -83,7 +83,7 @@ SDL_RenderDriver X11_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      SDL_TEXTUREMODULATE_NONE,
      SDL_BLENDMODE_NONE,
-     SDL_TEXTURESCALEMODE_NONE,
+     SDL_SCALEMODE_NONE,
      0,
      {0},
      0,
@@ -331,8 +331,8 @@ X11_AddRenderDriver(_THIS)
         /* Update the capabilities of the renderer. */
         info->blend_modes |= (SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD |
                              SDL_BLENDMODE_MOD | SDL_BLENDMODE_MASK);
-        info->scale_modes |= (SDL_TEXTURESCALEMODE_FAST | SDL_TEXTURESCALEMODE_SLOW |
-                             SDL_TEXTURESCALEMODE_BEST);
+        info->scale_modes |= (SDL_SCALEMODE_FAST | SDL_SCALEMODE_SLOW |
+                             SDL_SCALEMODE_BEST);
         info->mod_modes |= (SDL_TEXTUREMODULATE_COLOR | SDL_TEXTUREMODULATE_ALPHA);
     }
 #endif
@@ -1078,7 +1078,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         // FIXME: Is the following required?
         /* Set the default blending and scaling modes. */
         texture->blendMode = SDL_BLENDMODE_NONE;
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        texture->scaleMode = SDL_SCALEMODE_NONE;
         data->blend_op = PictOpSrc;
         data->filter = NULL;
     }
@@ -1216,14 +1216,14 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
     X11_RenderData *renderdata = (X11_RenderData *) renderer->driverdata;
 
     switch (texture->scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
+    case SDL_SCALEMODE_NONE:
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (renderdata->use_xrender) {
             data->filter = NULL;
         }
 #endif
         return 0;
-    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_SCALEMODE_FAST:
         /* We can sort of fake it for streaming textures */
         if (data->yuv || texture->access == SDL_TEXTUREACCESS_STREAMING) {
             return 0;
@@ -1233,12 +1233,12 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
             data->filter = FilterFast;
             return 0;
         }
-    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_SCALEMODE_SLOW:
         if (renderdata->use_xrender) {
             data->filter = FilterGood;
             return 0;
         }
-    case SDL_TEXTURESCALEMODE_BEST:
+    case SDL_SCALEMODE_BEST:
         if (renderdata->use_xrender) {
             data->filter = FilterBest;
             return 0;
@@ -1249,12 +1249,12 @@ X11_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
         SDL_Unsupported();
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
         if (renderdata->use_xrender) {
-            texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+            texture->scaleMode = SDL_SCALEMODE_NONE;
             data->filter = NULL;
         }
         else
 #endif
-            texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+            texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
     return 0;
@@ -2012,7 +2012,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
             }
 
             /* Set the picture filter only if a scaling mode is set. */
-            if (texture->scaleMode != SDL_TEXTURESCALEMODE_NONE) {
+            if (texture->scaleMode != SDL_SCALEMODE_NONE) {
                 XRenderSetPictureFilter(data->display, src,
                                         texturedata->filter, 0, 0);
             }

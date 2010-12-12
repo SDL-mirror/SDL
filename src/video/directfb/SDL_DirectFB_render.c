@@ -104,8 +104,8 @@ SDL_RenderDriver DirectFB_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND |
       SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST |
-      SDL_TEXTURESCALEMODE_SLOW | SDL_TEXTURESCALEMODE_BEST),
+     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST |
+      SDL_SCALEMODE_SLOW | SDL_SCALEMODE_BEST),
      14,
      {
       SDL_PIXELFORMAT_INDEX4LSB,
@@ -711,21 +711,21 @@ DirectFB_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
     DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
 
     switch (texture->scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
-    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_SCALEMODE_NONE:
+    case SDL_SCALEMODE_FAST:
         data->render_options = DSRO_NONE;
         break;
-    case SDL_TEXTURESCALEMODE_SLOW:
+    case SDL_SCALEMODE_SLOW:
         data->render_options = DSRO_SMOOTH_UPSCALE | DSRO_SMOOTH_DOWNSCALE;
         break;
-    case SDL_TEXTURESCALEMODE_BEST:
+    case SDL_SCALEMODE_BEST:
         data->render_options =
             DSRO_SMOOTH_UPSCALE | DSRO_SMOOTH_DOWNSCALE | DSRO_ANTIALIAS;
         break;
     default:
         SDL_Unsupported();
         data->render_options = DSRO_NONE;
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
 #endif

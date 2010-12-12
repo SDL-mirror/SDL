@@ -21,7 +21,7 @@ static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_MASK;
-static SDL_TextureScaleMode scaleMode = SDL_TEXTURESCALEMODE_NONE;
+static SDL_ScaleMode scaleMode = SDL_SCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -256,16 +256,16 @@ main(int argc, char *argv[])
             } else if (SDL_strcasecmp(argv[i], "--scale") == 0) {
                 if (argv[i + 1]) {
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_NONE;
+                        scaleMode = SDL_SCALEMODE_NONE;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "fast") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_FAST;
+                        scaleMode = SDL_SCALEMODE_FAST;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "slow") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+                        scaleMode = SDL_SCALEMODE_SLOW;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "best") == 0) {
-                        scaleMode = SDL_TEXTURESCALEMODE_BEST;
+                        scaleMode = SDL_SCALEMODE_BEST;
                         consumed = 2;
                     }
                 }
@@ -316,7 +316,7 @@ main(int argc, char *argv[])
         quit(2);
     }
     srand((unsigned int)time(NULL));
-    if (scaleMode != SDL_TEXTURESCALEMODE_NONE) {
+    if (scaleMode != SDL_SCALEMODE_NONE) {
         sprite_w += sprite_w / 2;
         sprite_h += sprite_h / 2;
     }

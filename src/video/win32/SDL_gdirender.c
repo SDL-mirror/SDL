@@ -90,7 +90,7 @@ SDL_RenderDriver GDI_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK),
-     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_FAST),
+     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST),
      14,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -580,17 +580,17 @@ static int
 GDI_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->scaleMode) {
-    case SDL_TEXTURESCALEMODE_NONE:
-    case SDL_TEXTURESCALEMODE_FAST:
+    case SDL_SCALEMODE_NONE:
+    case SDL_SCALEMODE_FAST:
         return 0;
-    case SDL_TEXTURESCALEMODE_SLOW:
-    case SDL_TEXTURESCALEMODE_BEST:
+    case SDL_SCALEMODE_SLOW:
+    case SDL_SCALEMODE_BEST:
         SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+        texture->scaleMode = SDL_SCALEMODE_FAST;
         return -1;
     default:
         SDL_Unsupported();
-        texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+        texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
     return 0;

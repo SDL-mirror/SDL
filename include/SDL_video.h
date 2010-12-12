@@ -32,6 +32,8 @@
 #include "SDL_stdinc.h"
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
+#include "SDL_blendmode.h"
+#include "SDL_scalemode.h"
 #include "SDL_surface.h"
 
 #include "begin_code.h"
@@ -212,38 +214,6 @@ typedef enum
     SDL_TEXTUREMODULATE_COLOR = 0x00000001,    /**< srcC = srcC * color */
     SDL_TEXTUREMODULATE_ALPHA = 0x00000002     /**< srcA = srcA * alpha */
 } SDL_TextureModulate;
-
-/**
- *  \brief The blend mode used in SDL_RenderCopy() and drawing operations.
- */
-typedef enum
-{
-    SDL_BLENDMODE_NONE = 0x00000000,     /**< No blending */
-    SDL_BLENDMODE_MASK = 0x00000001,     /**< dst = A ? src : dst 
-                                              (alpha is mask) */
-    
-    SDL_BLENDMODE_BLEND = 0x00000002,    /**< dst = (src * A) + (dst * (1-A)) */
-    SDL_BLENDMODE_ADD = 0x00000004,      /**< dst = (src * A) + dst */
-    SDL_BLENDMODE_MOD = 0x00000008       /**< dst = src * dst */
-} SDL_BlendMode;
-
-/**
- *  \brief The texture scale mode used in SDL_RenderCopy().
- */
-typedef enum
-{
-    SDL_TEXTURESCALEMODE_NONE = 0x00000000,     /**< No scaling, rectangles must
-                                                     match dimensions */
-    
-    SDL_TEXTURESCALEMODE_FAST = 0x00000001,     /**< Point sampling or 
-                                                     equivalent algorithm */
-    
-    SDL_TEXTURESCALEMODE_SLOW = 0x00000002,     /**< Linear filtering or 
-                                                     equivalent algorithm */
-    
-    SDL_TEXTURESCALEMODE_BEST = 0x00000004      /**< Bicubic filtering or 
-                                                     equivalent algorithm */
-} SDL_TextureScaleMode;
 
 /**
  *  \brief An efficient driver-specific representation of pixel data
@@ -986,7 +956,7 @@ extern DECLSPEC int SDLCALL SDL_GetTextureAlphaMod(SDL_Texture * texture,
  *  \sa SDL_GetTextureBlendMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_Texture * texture,
-                                                    int blendMode);
+                                                    SDL_BlendMode blendMode);
 
 /**
  *  \brief Get the blend mode used for texture copy operations.
@@ -999,13 +969,13 @@ extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_Texture * texture,
  *  \sa SDL_SetTextureBlendMode()
  */
 extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_Texture * texture,
-                                                    int *blendMode);
+                                                    SDL_BlendMode *blendMode);
 
 /**
  *  \brief Set the scale mode used for texture copy operations.
  *  
  *  \param texture The texture to update.
- *  \param scaleMode ::SDL_TextureScaleMode to use for texture scaling.
+ *  \param scaleMode ::SDL_ScaleMode to use for texture scaling.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or the scale mode is
  *          not supported.
@@ -1016,7 +986,7 @@ extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_Texture * texture,
  *  \sa SDL_GetTextureScaleMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_Texture * texture,
-                                                    int scaleMode);
+                                                    SDL_ScaleMode scaleMode);
 
 /**
  *  \brief Get the scale mode used for texture copy operations.
@@ -1029,7 +999,7 @@ extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_Texture * texture,
  *  \sa SDL_SetTextureScaleMode()
  */
 extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_Texture * texture,
-                                                    int *scaleMode);
+                                                    SDL_ScaleMode *scaleMode);
 
 /**
  *  \brief Update the given texture rectangle with new pixel data.
@@ -1135,7 +1105,7 @@ extern DECLSPEC int SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b,
  *  
  *  \sa SDL_GetRenderDrawBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(int blendMode);
+extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(SDL_BlendMode blendMode);
 
 /**
  *  \brief Get the blend mode used for drawing operations.
@@ -1146,7 +1116,7 @@ extern DECLSPEC int SDLCALL SDL_SetRenderDrawBlendMode(int blendMode);
  *  
  *  \sa SDL_SetRenderDrawBlendMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(int *blendMode);
+extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(SDL_BlendMode *blendMode);
 
 /**
  *  \brief Clear the current rendering target with the drawing color

@@ -104,8 +104,7 @@ SDL_RenderDriver photon_renderdriver = {
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND |
       SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_SLOW |
-      SDL_TEXTURESCALEMODE_FAST),
+     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_SLOW | SDL_SCALEMODE_FAST),
      10,
      {SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -254,17 +253,17 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     /* Set current scale blitting capabilities */
     if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_OFFSCREEN)
     {
-       renderer->info.scale_modes=SDL_TEXTURESCALEMODE_NONE | SDL_TEXTURESCALEMODE_SLOW;
+       renderer->info.scale_modes=SDL_SCALEMODE_NONE | SDL_SCALEMODE_SLOW;
        if ((didata->mode_2dcaps & SDL_VIDEO_PHOTON_CAP_SCALED_BLIT)==SDL_VIDEO_PHOTON_CAP_SCALED_BLIT)
        {
           /* This video mode supports hardware scaling */
-          renderer->info.scale_modes|=SDL_TEXTURESCALEMODE_FAST;
+          renderer->info.scale_modes|=SDL_SCALEMODE_FAST;
        }
     }
     else
     {
        /* PhImage blit functions do not support scaling */
-       renderer->info.scale_modes=SDL_TEXTURESCALEMODE_NONE;
+       renderer->info.scale_modes=SDL_SCALEMODE_NONE;
     }
 
     return renderer;
@@ -984,39 +983,39 @@ photon_settexturescalemode(SDL_Renderer * renderer, SDL_Texture * texture)
 
    switch (texture->scaleMode)
    {
-      case SDL_TEXTURESCALEMODE_NONE:
+      case SDL_SCALEMODE_NONE:
            return 0;
-      case SDL_TEXTURESCALEMODE_FAST:
-           if ((renderer->info.scale_modes & SDL_TEXTURESCALEMODE_FAST)==SDL_TEXTURESCALEMODE_FAST)
+      case SDL_SCALEMODE_FAST:
+           if ((renderer->info.scale_modes & SDL_SCALEMODE_FAST)==SDL_SCALEMODE_FAST)
            {
               return 0;
            }
            else
            {
               SDL_Unsupported();
-              texture->scaleMode = SDL_TEXTURESCALEMODE_FAST;
+              texture->scaleMode = SDL_SCALEMODE_FAST;
               return -1;
            }
            break;
-      case SDL_TEXTURESCALEMODE_SLOW:
-           if ((renderer->info.scale_modes & SDL_TEXTURESCALEMODE_SLOW)==SDL_TEXTURESCALEMODE_SLOW)
+      case SDL_SCALEMODE_SLOW:
+           if ((renderer->info.scale_modes & SDL_SCALEMODE_SLOW)==SDL_SCALEMODE_SLOW)
            {
               return 0;
            }
            else
            {
               SDL_Unsupported();
-              texture->scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+              texture->scaleMode = SDL_SCALEMODE_SLOW;
               return -1;
            }
            break;
-      case SDL_TEXTURESCALEMODE_BEST:
+      case SDL_SCALEMODE_BEST:
            SDL_Unsupported();
-           texture->scaleMode = SDL_TEXTURESCALEMODE_SLOW;
+           texture->scaleMode = SDL_SCALEMODE_SLOW;
            return -1;
       default:
            SDL_Unsupported();
-           texture->scaleMode = SDL_TEXTURESCALEMODE_NONE;
+           texture->scaleMode = SDL_SCALEMODE_NONE;
            return -1;
    }
 

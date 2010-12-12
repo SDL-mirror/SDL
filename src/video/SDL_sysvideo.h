@@ -46,8 +46,8 @@ struct SDL_Texture
     int w;                      /**< The width of the texture */
     int h;                      /**< The height of the texture */
     int modMode;                /**< The texture modulation mode */
-    int blendMode;              /**< The texture blend mode */
-    int scaleMode;              /**< The texture scale mode */
+    SDL_BlendMode blendMode;    /**< The texture blend mode */
+    SDL_ScaleMode scaleMode;    /**< The texture scale mode */
     Uint8 r, g, b, a;           /**< Texture modulation values */
 
     SDL_Renderer *renderer;
@@ -121,7 +121,7 @@ struct SDL_Renderer
     SDL_Texture *textures;
 
     Uint8 r, g, b, a;                   /**< Color for drawing operations values */
-    int blendMode;                      /**< The drawing blend mode */
+    SDL_BlendMode blendMode;            /**< The drawing blend mode */
 
     void *driverdata;
 };
