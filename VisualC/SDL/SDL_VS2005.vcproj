@@ -2,9 +2,11 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8.00"
+
 	Name="SDL"
 	ProjectGUID="{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
 	RootNamespace="SDL"
+
 	>
 	<Platforms>
 		<Platform
@@ -77,14 +79,18 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
+
 				AdditionalDependencies="msimg32.lib winmm.lib"
 				OutputFile=".\Debug/SDL.dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
+
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/SDL.pdb"
+
 				SubSystem="2"
+
 				ImportLibrary=".\Debug/SDL.lib"
 				CLRUnmanagedCodeCheck="false"
 			/>
@@ -107,9 +113,10 @@
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
+
 				Name="VCWebDeploymentTool"
 			/>
-			<Tool
+			<Tool                           
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -185,6 +192,7 @@
 				IgnoreAllDefaultLibraries="true"
 				ProgramDatabaseFile=".\Release/SDL.pdb"
 				SubSystem="2"
+
 				ImportLibrary=".\Release/SDL.lib"
 			/>
 			<Tool
@@ -938,6 +946,15 @@
 		</File>
 		<File
 			RelativePath="..\..\src\timer\SDL_timer_c.h"
+			>
+		</File>
+		<File
+
+			RelativePath="..\..\src\events\SDL_touch.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_touch_c.h"
 			>
 		</File>
 		<File
