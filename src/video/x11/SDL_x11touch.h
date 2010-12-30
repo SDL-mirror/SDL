@@ -26,7 +26,7 @@
 
 
 //What should this be?
-#if SDL_VIDEO_DRIVER_X11_XINPUT
+#ifdef SDL_INPUT_LINUXEV
 typedef struct EventTouchData
 {
     int x,y,pressure,finger; //Temporary Variables until sync
