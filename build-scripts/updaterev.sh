@@ -7,7 +7,7 @@ srcdir=..
 header=$srcdir/include/SDL_revision.h
 
 rev=`sh showrev.sh`
-if [ "$rev" != "" ]; then
+if [ "$rev" != "" -a "$rev" != "hg-0:baadf00d" ]; then
     echo "#define SDL_REVISION \"$rev\"" >$header.new
     if diff $header $header.new >/dev/null 2>&1; then
         rm $header.new
