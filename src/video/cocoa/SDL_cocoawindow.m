@@ -117,7 +117,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
     NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
     w = (int)rect.size.width;
     h = (int)rect.size.height;
-    Cocoa_ResizeWindowShape(_data->window);
+    if (SDL_IsShapedWindow(_data->window))
+        Cocoa_ResizeWindowShape(_data->window);
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
