@@ -32,20 +32,13 @@
 
 #include "SDL_androidevents.h"
 
-void Android_InitEvents(){
-
-    SDL_Keyboard keyboard;
-
-    SDL_zero(keyboard);
-    SDL_AddKeyboard(&keyboard, -1);
-
+void Android_InitEvents()
+{
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     /* Add default scancode to key mapping */
     SDL_GetDefaultKeymap(keymap);
-    SDL_SetKeymap(0, 0, keymap, SDL_NUM_SCANCODES);
-
-
+    SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
 }
 
 void
@@ -74,12 +67,12 @@ void Android_OnResize(int width, int height, int format){
 
 int
 Android_OnKeyDown(int keycode){
-    return SDL_SendKeyboardKey(0, SDL_PRESSED, (SDL_scancode)keycode);
+    return SDL_SendKeyboardKey(SDL_PRESSED, (SDL_scancode)keycode);
 }
 
 int
 Android_OnKeyUp(int keycode){
-    return SDL_SendKeyboardKey(0, SDL_RELEASED, (SDL_scancode)keycode);
+    return SDL_SendKeyboardKey(SDL_RELEASED, (SDL_scancode)keycode);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
