@@ -1010,8 +1010,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                 return -1;
             }
         }
-    } 
-    else {
+    } else {
         data->image =
             XCreateImage(renderdata->display, data->visual,
                          data->depth, ZPixmap, 0, NULL,
@@ -1036,7 +1035,7 @@ X11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     data->pitch = data->image->bytes_per_line;
 
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if(renderdata->use_xrender) {
+    if(renderdata->use_xrender && !data->yuv) {
         gcv.graphics_exposures = False;
         data->gc =
             XCreateGC(renderdata->display, data->pixmap, GCGraphicsExposures, &gcv);
@@ -1922,7 +1921,7 @@ X11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_AddDirtyRect(&data->dirty, dstrect);
     }
 #ifdef SDL_VIDEO_DRIVER_X11_XRENDER
-    if (data->use_xrender) {
+    if (data->use_xrender && !texturedata->yuv) {
         if(texture->access == SDL_TEXTUREACCESS_STREAMING) {
 #ifndef NO_SHARED_MEMORY
             if(texturedata->shminfo.shmaddr) {
