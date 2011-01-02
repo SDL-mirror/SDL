@@ -311,7 +311,7 @@ FilterEvents(void *userdata, SDL_Event * event)
             HotKey_Iconify();
         }
         if ((event->key.keysym.sym == SDLK_RETURN) &&
-            (event->key.keysym.mod & KMOD_ALT)) {
+            (event->key.keysym.mod & (KMOD_ALT|KMOD_META))) {
             HotKey_ToggleFullScreen();
         }
         return (0);
