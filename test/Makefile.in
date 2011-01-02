@@ -156,7 +156,7 @@ testatomic$(EXE): $(srcdir)/testatomic.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testgesture$(EXE): $(srcdir)/testgesture.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
  
 testime$(EXE): $(srcdir)/testime.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
