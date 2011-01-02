@@ -2826,6 +2826,12 @@ if test x$have_loadso != xyes; then
     fi
     SOURCES="$SOURCES $srcdir/src/loadso/dummy/*.c"
 fi
+if test x$have_atomic != xyes; then
+    if test x$enable_atomic = xyes; then
+        AC_DEFINE(SDL_ATOMIC_DISABLED)
+    fi
+    SOURCES="$SOURCES $srcdir/src/atomic/dummy/*.c"
+fi
 if test x$SDLMAIN_SOURCES = x; then
     SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
 fi

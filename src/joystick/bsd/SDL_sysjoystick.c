@@ -59,7 +59,7 @@
 #include <libusbhid.h>
 #endif
 
-#ifdef defined(__FREEBSD__) || defined(__FreeBSD_kernel__)
+#if defined(__FREEBSD__) || defined(__FreeBSD_kernel__)
 #ifndef __DragonFly__
 #include <osreldate.h>
 #endif
