@@ -55,6 +55,8 @@ typedef unsigned int uint32_t;
 #define HAVE_SIGNAL_H	1
 
 /* C library functions */
+#define HAVE_ATAN	1
+#define HAVE_ATAN2	1
 #define HAVE_MALLOC	1
 #define HAVE_CALLOC	1
 #define HAVE_REALLOC	1
