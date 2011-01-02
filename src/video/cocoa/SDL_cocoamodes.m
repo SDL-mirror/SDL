@@ -248,27 +248,29 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode->driverdata;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
     CGError result;
-    
+
     /* Fade to black to hide resolution-switching flicker */
     if (CGAcquireDisplayFadeReservation(5, &fade_token) == kCGErrorSuccess) {
         CGDisplayFade(fade_token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0.0, 0.0, 0.0, TRUE);
     }
 
-    /* Put up the blanking window (a window above all other windows) */
-    result = CGDisplayCapture(displaydata->display);
-    if (result != kCGErrorSuccess) {
-        CG_SetError("CGDisplayCapture()", result);
-        goto ERR_NO_CAPTURE;
-    }
-
     if (data == display->desktop_mode.driverdata) {
         /* Restoring desktop mode */
+        CGDisplaySwitchToMode(displaydata->display, data->moderef);
+
         CGDisplayRelease(displaydata->display);
 
         if (CGDisplayIsMain(displaydata->display)) {
             ShowMenuBar();
         }
     } else {
+        /* Put up the blanking window (a window above all other windows) */
+        result = CGDisplayCapture(displaydata->display);
+        if (result != kCGErrorSuccess) {
+            CG_SetError("CGDisplayCapture()", result);
+            goto ERR_NO_CAPTURE;
+        }
+
         /* Do the physical switch */
         result = CGDisplaySwitchToMode(displaydata->display, data->moderef);
         if (result != kCGErrorSuccess) {
@@ -326,7 +328,6 @@ Cocoa_QuitModes(_THIS)
             Cocoa_SetDisplayMode(_this, display, &display->desktop_mode);
         }
     }
-    CGReleaseAllDisplays();
     ShowMenuBar();
 }
 
