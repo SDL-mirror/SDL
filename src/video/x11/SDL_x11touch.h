@@ -21,8 +21,8 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_eventtouch_h
-#define _SDL_eventtouch_h
+#ifndef _SDL_x11touch_h
+#define _SDL_x11touch_h
 
 
 //What should this be?
@@ -38,6 +38,6 @@ typedef struct EventTouchData
 extern void X11_InitTouch(_THIS);
 extern void X11_QuitTouch(_THIS);
 
-#endif /* _SDL_eventtouch_h */
+#endif /* _SDL_x11touch_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
