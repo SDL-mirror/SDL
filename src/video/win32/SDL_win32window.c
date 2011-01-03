@@ -145,7 +145,9 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     }
 
 	/* Enable multi-touch */
-	videodata->RegisterTouchWindow(hwnd, (TWF_FINETOUCH|TWF_WANTPALM));
+    if (videodata->RegisterTouchWindow) {
+        videodata->RegisterTouchWindow(hwnd, (TWF_FINETOUCH|TWF_WANTPALM));
+    }
 
     /* All done! */
     window->driverdata = data;
@@ -641,6 +643,5 @@ SDL_HelperWindowDestroy(void)
         SDL_HelperWindowClass = 0;
     }
 }
-
 
 /* vi: set ts=4 sw=4 expandtab: */
