@@ -36,7 +36,7 @@ jmethodID midFlipBuffers;
 jmethodID midEnableFeature;
 jmethodID midUpdateAudio;
 
-extern "C" int SDL_main();
+extern "C" int SDL_main(int argc, char *argv[]);
 extern "C" int Android_OnKeyDown(int keycode);
 extern "C" int Android_OnKeyUp(int keycode);
 extern "C" void Android_SetScreenResolution(int width, int height);
@@ -103,7 +103,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit( JNIEnv* env,
 
 	Android_EnableFeature(FEATURE_ACCEL, true);
 
-    SDL_main();
+    SDL_main(0, 0);
 }
 
 //Keydown
