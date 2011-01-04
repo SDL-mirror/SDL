@@ -1,8 +1,8 @@
 # Makefile to build the SDL library
 
-include ./android/config.cfg #get ANDROID_NDK
+include ./android/config.cfg #get ANDROID_NDK, ANDROID_NDK_HOST
 
-TOOLS_PATH=$(ANDROID_NDK)/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/bin
+TOOLS_PATH=$(ANDROID_NDK)/toolchains/arm-eabi-4.4.0/prebuilt/$(ANDROID_NDK_HOST)/bin
 ANDROID_INCLUDES = -I$(ANDROID_NDK)/platforms/android-4/arch-arm/usr/include 
 INCLUDE = -I./include
 CFLAGS  = -g -O2 -fno-short-enums $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -DANDROID_NDK -static

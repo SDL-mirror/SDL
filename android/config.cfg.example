@@ -1,0 +1,4 @@
+# This file sets up paths needed to find the NDK build tools.
+# Edit it appropriately for your configuration and save it as "config.cfg".
+ANDROID_NDK := </absolute/path/to/android/ndk>
+ANDROID_NDK_HOST := <host-os> # "linux-x86" for linux, "darwin-x86" for mac
