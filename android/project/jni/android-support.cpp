@@ -103,7 +103,10 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit( JNIEnv* env,
 
 	Android_EnableFeature(FEATURE_ACCEL, true);
 
-    SDL_main(0, 0);
+    char *argv[2];
+    argv[0] = strdup("SDL_app");
+    argv[1] = NULL;
+    SDL_main(1, argv);
 }
 
 //Keydown
