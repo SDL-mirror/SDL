@@ -585,7 +585,7 @@ extern DECLSPEC int SDLCALL SDL_BlendFillRects
  *  rectangle validation and clipping before passing it to SDL_LowerBlit()
  */
 extern DECLSPEC int SDLCALL SDL_UpperBlit
-    (SDL_Surface * src, SDL_Rect * srcrect,
+    (SDL_Surface * src, const SDL_Rect * srcrect,
      SDL_Surface * dst, SDL_Rect * dstrect);
 
 /**

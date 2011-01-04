@@ -640,7 +640,7 @@ SDL_LowerBlit(SDL_Surface * src, SDL_Rect * srcrect,
 
 
 int
-SDL_UpperBlit(SDL_Surface * src, SDL_Rect * srcrect,
+SDL_UpperBlit(SDL_Surface * src, const SDL_Rect * srcrect,
               SDL_Surface * dst, SDL_Rect * dstrect)
 {
     SDL_Rect fulldst;
