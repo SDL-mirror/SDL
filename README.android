@@ -30,7 +30,8 @@ Instructions:
 3. Place your application source files in android/project/jni
 4. Edit the Android.mk to include your source files
 5. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
-6. Run 'ant' in android/testproject. This compiles the .java and eventually 
+6. Edit project/local.properties to point to the SDK directory
+6. Run 'ant debug' in android/project. This compiles the .java and eventually 
 creates a .apk with the C source embedded
 7. 'ant install' will push the apk to the device or emulator (if connected)
 
