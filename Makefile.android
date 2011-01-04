@@ -5,7 +5,7 @@ include ./android/config.cfg #get ANDROID_NDK
 TOOLS_PATH=$(ANDROID_NDK)/toolchains/arm-eabi-4.4.0/prebuilt/darwin-x86/bin
 ANDROID_INCLUDES = -I$(ANDROID_NDK)/platforms/android-4/arch-arm/usr/include 
 INCLUDE = -I./include
-CFLAGS  = -g -O2 $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -DANDROID_NDK -static
+CFLAGS  = -g -O2 -fno-short-enums $(INCLUDE) $(ANDROID_INCLUDES) -DANDROID -DANDROID_NDK -static
 
 AR	= $(TOOLS_PATH)/arm-eabi-ar
 RANLIB	= $(TOOLS_PATH)/arm-eabi-ranlib
