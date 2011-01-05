@@ -5,7 +5,7 @@
 
 #include "common.h"
 
-#ifdef __IPHONEOS__
+#if defined(__IPHONEOS__) || defined(__ANDROID__)
 #define HAVE_OPENGLES
 #endif
 
