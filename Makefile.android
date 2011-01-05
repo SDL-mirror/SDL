@@ -28,6 +28,7 @@ SOURCES = \
 	src/video/*.c \
 	src/power/*.c \
 	src/audio/android/*.c \
+	src/audio/dummy/*.c \
 	src/video/android/*.c \
 	src/joystick/android/*.c \
 	src/haptic/dummy/*.c \

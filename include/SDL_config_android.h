@@ -55,8 +55,6 @@ typedef unsigned int uint32_t;
 #define HAVE_SIGNAL_H	1
 
 /* C library functions */
-#define HAVE_ATAN	1
-#define HAVE_ATAN2	1
 #define HAVE_MALLOC	1
 #define HAVE_CALLOC	1
 #define HAVE_REALLOC	1
@@ -95,6 +93,9 @@ typedef unsigned int uint32_t;
 #define HAVE_SSCANF	1
 #define HAVE_SNPRINTF	1
 #define HAVE_VSNPRINTF	1
+#define HAVE_M_PI	1
+#define HAVE_ATAN	1
+#define HAVE_ATAN2	1
 #define HAVE_CEIL	1
 #define HAVE_COPYSIGN	1
 #define HAVE_COS	1
@@ -117,15 +118,16 @@ typedef unsigned int uint32_t;
 typedef unsigned int size_t;
 //typedef unsigned long uintptr_t;
 
+/* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_ANDROID	1
+#define SDL_AUDIO_DRIVER_DUMMY	1
 
-#define SDL_CDROM_DISABLED 1
+/* Enable various input drivers */
+#define SDL_JOYSTICK_ANDROID	1
+#define SDL_HAPTIC_DUMMY	1
 
-#define SDL_HAPTIC_DISABLED 1
-
-#define SDL_JOYSTICK_ANDROID 1
-
-#define SDL_LOADSO_DISABLED 1
+/* Enable various shared object loading systems */
+#define SDL_LOADSO_DUMMY	1
 
 /* Enable various threading systems */
 #define SDL_THREAD_PTHREAD	1
@@ -134,14 +136,11 @@ typedef unsigned int size_t;
 /* Enable various timer systems */
 #define SDL_TIMER_UNIX	1
 
+/* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_ANDROID 1
 
-#define HAVE_STDIO_H 1
-#define HAVE_SYS_TYPES_H 1
-
-#define HAVE_M_PI 1
-
-#define SDL_VIDEO_RENDER_OGL_ES 1
+/* Enable OpenGL ES */
+#define SDL_VIDEO_OPENGL_ES	1
+#define SDL_VIDEO_RENDER_OGL_ES	1
 
 #endif /* _SDL_config_minimal_h */
-

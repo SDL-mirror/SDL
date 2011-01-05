@@ -32,7 +32,6 @@
 
 #include "SDL_androidvideo.h"
 #include "SDL_androidevents.h"
-#include "SDL_androidrender.h"
 
 #define ANDROID_VID_DRIVER_NAME "Android"
 
@@ -133,7 +132,6 @@ Android_VideoInit(_THIS)
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
-    SDL_AddRenderDriver(&_this->displays[0], &Android_RenderDriver);
 
     SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
