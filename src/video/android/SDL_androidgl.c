@@ -32,7 +32,6 @@
 
 #include "SDL_androidvideo.h"
 #include "SDL_androidevents.h"
-#include "SDL_androidrender.h"
 
 #include <android/log.h>
 
@@ -73,7 +72,7 @@ SDL_GLContext Android_GL_CreateContext(_THIS, SDL_Window * window){
 
 int Android_GL_MakeCurrent(_THIS, SDL_Window * window,
                               SDL_GLContext context){
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_MakeCurrent\n");
+	//__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_MakeCurrent\n");
 	return 0;
 }
 
