@@ -118,7 +118,8 @@ SDL_RenderDriver GL_ES_RenderDriver = {
       SDL_PIXELFORMAT_ABGR4444,
       SDL_PIXELFORMAT_ABGR1555,
       SDL_PIXELFORMAT_BGR565,
-      SDL_PIXELFORMAT_BGR24,
+      SDL_PIXELFORMAT_RGB24,
+      SDL_PIXELFORMAT_BGR888,
       SDL_PIXELFORMAT_ABGR8888},
      0,
      0}
@@ -380,11 +381,12 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum result;
 
     switch (texture->format) {
-    case SDL_PIXELFORMAT_BGR24:
+    case SDL_PIXELFORMAT_RGB24:
         internalFormat = GL_RGB;
         format = GL_RGB;
         type = GL_UNSIGNED_BYTE;
         break;
+    case SDL_PIXELFORMAT_BGR888:
     case SDL_PIXELFORMAT_ABGR8888:
         internalFormat = GL_RGBA;
         format = GL_RGBA;

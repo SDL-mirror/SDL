@@ -124,7 +124,7 @@ Android_VideoInit(_THIS)
     SDL_DisplayMode mode;
 
     /* Use a fake 32-bpp desktop mode */
-    mode.format = SDL_PIXELFORMAT_RGB888;
+    mode.format = SDL_PIXELFORMAT_BGR888;
     mode.w = iScreenWidth;
     mode.h = iScreenHeight;
     mode.refresh_rate = 0;
