@@ -2,8 +2,13 @@
 Simple DirectMedia Layer for Android
 ================================================================================
 
-Requirements: Android SDK and Android NDK r4 or later
-http://developer.android.com/
+Requirements:
+
+Android SDK
+http://developer.android.com/sdk/index.html
+
+Android NDK r4 or later
+http://developer.android.com/sdk/ndk/index.html
 
 ================================================================================
  How the port works
@@ -22,7 +27,7 @@ Java project, along with some C support code that communicates with Java
 ================================================================================
 
 Instructions:
-1. Copy the android-project directory wherever you want your Android project to go
+1. Copy the android-project directory wherever you want to keep your projects and rename it to the name of your project.
 2. Move this SDL directory into the <project>/jni directory
 3. Place your application source files in the <project>/jni/src directory
 4. Edit <project>/jni/src/Android.mk to include your source files
@@ -35,16 +40,54 @@ If you want to use the Eclipse IDE, skip to the Eclipse section below.
 creates a .apk with the native code embedded
 8. 'ant install' will push the apk to the device or emulator (if connected)
 
+Here's an explanation of the files in the Android project, so you can customize them:
+
+android-project/
+	AndroidManifest.xml	- package manifest, do not modify
+	build.properties	- empty
+	build.xml		- build description file, used by ant
+	default.properties	- holds the ABI for the application, currently android-4 which corresponds to the Android 1.6 system image
+	local.properties	- holds the SDK path, you should change this to the path to your SDK
+	jni/			- directory holding native code and Android.mk
+	jni/Android.mk		- Android makefile that includes all subdirectories
+	jni/SDL/		- directory holding the SDL library files
+	jni/SDL/Android.mk	- Android makefile for creating the SDL shared library
+	jni/src/		- directory holding your application source
+	jni/src/Android.mk	- Android makefile that you should customize to include your source code and any library references
+	res/			- directory holding resources for your application
+	res/drawable-*		- directories holding icons for different phone hardware
+	res/layout/main.xml	- place holder for the main screen layout, overridden by the SDL video output
+	res/values/strings.xml	- strings used in your application, including the application name shown on the phone.
+	src/org/libsdl/app/SDLActivity.java	- the Java class handling the initialization and binding to SDL.  Be very careful changing this, as the SDL library relies on this implementation.
+
+
+================================================================================
+ Additional documentation
+================================================================================
+
+The documentation in the NDK docs directory is very helpful in understanding the build process and how to work with native code on the Android platform.
+
+The best place to start is with docs/OVERVIEW.TXT
+
 
 ================================================================================
  Using Eclipse
 ================================================================================
 
-NEED CONTENT
+First make sure that you've installed Eclipse and the Android extensions as described here:
+	http://developer.android.com/sdk/eclipse-adt.html
+
+Once you've copied the SDL android project and customized it, you can create an Eclipse project from it:
+ * File -> New -> Other
+ * Select the Android -> Android Project wizard and click Next
+ * Enter the name you'd like your project to have
+ * Select "Create project from existing source" and browse for your project directory
+ * Make sure the Build Target is set to Android 1.6
+ * Click Finish
 
 
 ================================================================================
- Loading files
+ Loading files and resources
 ================================================================================
 
 NEED CONTENT
@@ -54,7 +97,20 @@ NEED CONTENT
  Troubleshooting
 ================================================================================
 
-NEED CONTENT
+You can create and run an emulator from the Eclipse IDE:
+ * Window -> Android SDK and AVD Manager
+
+You can see if adb can see any devices with the following command:
+	adb devices
+
+You can see the output of log messages on the default device with:
+	adb logcat
+
+You can push files to the device with:
+	adb push local_file remote_path_and_file
+
+You can push files to the SD Card at /sdcard, for example:
+	adb push moose.dat /sdcard/moose.dat
 
 
 ================================================================================
