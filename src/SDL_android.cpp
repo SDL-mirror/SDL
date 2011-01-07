@@ -1,31 +1,39 @@
+/*
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2010 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
+*/
+#include "SDL_config.h"
+
 /*******************************************************************************
  This file links the Java side of Android with libsdl
 *******************************************************************************/
 #include <jni.h>
-#include <sys/time.h>
-#include <time.h>
 #include <android/log.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <pthread.h>
-
-#define DEBUG
 
 
 /*******************************************************************************
                                Globals
 *******************************************************************************/
-static long _getTime(void){
-	struct timeval  now;
-	gettimeofday(&now, NULL);
-	return (long)(now.tv_sec*1000 + now.tv_usec/1000);
-}
-
+JavaVM* mVM = NULL;
 JNIEnv* mEnv = NULL;
 JNIEnv* mAudioThreadEnv = NULL; //See the note below for why this is necessary
-JavaVM* mVM = NULL;
 
 //Main activity
 jclass mActivityInstance;
@@ -36,7 +44,6 @@ jmethodID midFlipBuffers;
 jmethodID midEnableFeature;
 jmethodID midUpdateAudio;
 
-extern "C" int SDL_main(int argc, char *argv[]);
 extern "C" int Android_OnKeyDown(int keycode);
 extern "C" int Android_OnKeyUp(int keycode);
 extern "C" void Android_SetScreenResolution(int width, int height);
@@ -57,21 +64,22 @@ float fLastAccelerometer[3];
 
 /*******************************************************************************
                  Functions called by JNI
-*******************************************************************************/	
+*******************************************************************************/
 
-//Library init
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
+// Library init
+extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
+{
+    mVM = vm;
 
-    JNIEnv* env = NULL;
-    jint result = -1;
+    return JNI_VERSION_1_4;
+}
 
-    if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
-        return result;
-    }
-
+// Called before SDL_main() to initialize JNI bindings
+extern "C" void SDL_Android_Init(JNIEnv* env)
+{
     mEnv = env;
 
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "JNI: OnLoad");
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL_Android_Init()");
 
     jclass cls = mEnv->FindClass ("org/libsdl/app/SDLActivity"); 
     mActivityInstance = cls;
@@ -81,62 +89,41 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved){
     midUpdateAudio = mEnv->GetStaticMethodID(cls,"updateAudio","([B)V");
 
     if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature ||
-        !midUpdateAudio){
+        !midUpdateAudio) {
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
-    }else{
+    } else {
 #ifdef DEBUG
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Good mids\n");
 #endif
     }
-    
-    return JNI_VERSION_1_4;
 }
 
-//Start up the SDL app
-extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit( JNIEnv* env, 
-                                                                jobject obj ){ 
-                                                                   
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native Init");
-
-	mEnv = env;
-	bRenderingEnabled = true;
-
-	Android_EnableFeature(FEATURE_ACCEL, true);
-
-    char *argv[2];
-    argv[0] = strdup("SDL_app");
-    argv[1] = NULL;
-    SDL_main(1, argv);
-}
-
-//Keydown
+// Keydown
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyDown(JNIEnv* env, 
-               jobject obj, jint keycode){
-    
+               jobject obj, jint keycode)
+{
     int r = Android_OnKeyDown(keycode);
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key down %d, %d\n", keycode, r);
 #endif
-                        
 }
 
-//Keyup
+// Keyup
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyUp(JNIEnv* env, 
-               jobject obj, jint keycode){
-    
+               jobject obj, jint keycode)
+{
     int r = Android_OnKeyUp(keycode);
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native key up %d, %d\n", keycode, r);
 #endif
-                        
 }
 
-//Touch
+// Touch
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(JNIEnv* env, 
-               jobject obj, jint action, jfloat x, jfloat y, jfloat p){
-
+               jobject obj, jint action, jfloat x, jfloat y, jfloat p)
+{
 #ifdef DEBUG
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: native touch event %d @ %f/%f, pressure %f\n", 
@@ -144,42 +131,40 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(JNIEnv* env,
 #endif
 
     //TODO: Pass this off to the SDL multitouch stuff
-                        
 }
 
-//Quit
+// Quit
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit( JNIEnv*  env, 
-                                                                jobject obj ){    
+                                                                jobject obj )
+{    
+    // Stop rendering as we're no longer in the foreground
+    bRenderingEnabled = false;
 
-    //Stop rendering as we're no longer in the foreground
-	bRenderingEnabled = false;
-
-    //Inject a SDL_QUIT event
-    int r = SDL_SendQuit();
-
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Native quit %d", r);        
+    // Inject a SDL_QUIT event
+    SDL_SendQuit();
 }
 
-//Screen size
+// Screen size
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeSetScreenSize(
-                JNIEnv*  env, jobject obj, jint width, jint height){
-
+                JNIEnv*  env, jobject obj, jint width, jint height)
+{
     __android_log_print(ANDROID_LOG_INFO, "SDL", 
                         "SDL: Set screen size on init: %d/%d\n", width, height);
     Android_SetScreenResolution(width, height);
-                        
 }
 
-//Resize
+// Resize
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
                                         JNIEnv*  env, jobject obj, jint width, 
-                                        jint height, jint format){
+                                        jint height, jint format)
+{
     Android_OnResize(width, height, format);
 }
 
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
                                         JNIEnv*  env, jobject obj,
-                                        jfloat x, jfloat y, jfloat z){
+                                        jfloat x, jfloat y, jfloat z)
+{
     fLastAccelerometer[0] = x;
     fLastAccelerometer[1] = y;
     fLastAccelerometer[2] = z;   
@@ -190,38 +175,39 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
-extern "C" void Android_CreateContext(){
-	__android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context()\n");
+extern "C" void Android_CreateContext()
+{
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context()\n");
 
-	bRenderingEnabled = true;
+    bRenderingEnabled = true;
 
     mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext ); 
 }
 
-extern "C" void Android_Render(){
-
-    if(!bRenderingEnabled){
+extern "C" void Android_Render()
+{
+    if (!bRenderingEnabled) {
         return;
     }
 
-    //When we get here, we've accumulated a full frame    
-    mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers ); 
+    // When we get here, we've accumulated a full frame    
+    mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers); 
 }
 
-extern "C" void Android_EnableFeature(int featureid, bool enabled){
-
+extern "C" void Android_EnableFeature(int featureid, bool enabled)
+{
     mEnv->CallStaticVoidMethod(mActivityInstance, midEnableFeature, 
                                 featureid, (int)enabled); 
 }
 
-extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len){
-
+extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len)
+{
     //Annoyingly we can't just call into Java from any thread. Because the audio
     //callback is dispatched from the SDL audio thread (that wasn't made from
     //java, we have to do some magic here to let the JVM know about the thread.
     //Because everything it touches on the Java side is static anyway, it's 
     //not a big deal, just annoying.
-    if(!mAudioThreadEnv){
+    if(!mAudioThreadEnv) {
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Need to set up audio thread env\n");
 
         mVM->AttachCurrentThread(&mAudioThreadEnv, NULL);

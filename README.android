@@ -2,7 +2,8 @@
 Simple DirectMedia Layer for Android
 ================================================================================
 
-Requirements: Android NDK r4 or later
+Requirements: Android SDK and Android NDK r4 or later
+http://developer.android.com/
 
 ================================================================================
  How the port works
@@ -16,26 +17,44 @@ Java project, along with some C support code that communicates with Java
 - This eventually produces a standard Android .apk package
 
 
-
-
-
-
 ================================================================================
  Building an app
 ================================================================================
 
 Instructions:
-1. Edit android/config.cfg to point to the location of the NDK
-2. Run 'make -f Makefile.android'. If all goes well, libsdl.a should be created
-3. Place your application source files in android/project/jni
-4. Edit the Android.mk to include your source files
+1. Copy the android-project directory wherever you want your Android project to go
+2. Move this SDL directory into the <project>/jni directory
+3. Place your application source files in the <project>/jni/src directory
+4. Edit <project>/jni/src/Android.mk to include your source files
 5. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
-6. Edit project/local.properties to point to the SDK directory
-6. Run 'ant debug' in android/project. This compiles the .java and eventually 
-creates a .apk with the C source embedded
-7. 'ant install' will push the apk to the device or emulator (if connected)
+
+If you want to use the Eclipse IDE, skip to the Eclipse section below.
+
+6. Edit <project>/local.properties to point to the Android SDK directory
+7. Run 'ant debug' in android/project. This compiles the .java and eventually 
+creates a .apk with the native code embedded
+8. 'ant install' will push the apk to the device or emulator (if connected)
 
 
+================================================================================
+ Using Eclipse
+================================================================================
+
+NEED CONTENT
+
+
+================================================================================
+ Loading files
+================================================================================
+
+NEED CONTENT
+
+
+================================================================================
+ Troubleshooting
+================================================================================
+
+NEED CONTENT
 
 
 ================================================================================
