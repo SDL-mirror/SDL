@@ -595,7 +595,7 @@ SDL_SetClipRect(SDL_Surface * surface, const SDL_Rect * rect)
     /* Set the clipping rectangle */
     if (!rect) {
         surface->clip_rect = full_rect;
-        return 1;
+        return SDL_TRUE;
     }
     return SDL_IntersectRect(rect, &full_rect, &surface->clip_rect);
 }
