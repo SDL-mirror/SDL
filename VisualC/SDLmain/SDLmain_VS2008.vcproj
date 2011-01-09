@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="SDLmain"
 	ProjectGUID="{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
+	RootNamespace="SDLmain"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -51,7 +52,6 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -67,7 +67,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release\SDLmain.lib"
+				OutputFile="$(IntDir)\SDLmain.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -119,8 +119,6 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/SDLmain.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -137,6 +135,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="$(IntDir)\SDLmain.lib"
+				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -188,7 +187,6 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -204,7 +202,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Release_NOSTDIO\SDLmain.lib"
+				OutputFile="$(IntDir)\SDLmain.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -256,8 +254,6 @@
 				StringPooling="true"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release_NOSTDIO/SDLmain.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				CompileAs="0"
@@ -274,6 +270,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="$(IntDir)\SDLmain.lib"
+				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -323,7 +320,6 @@
 				AdditionalIncludeDirectories="..\..\include,..\..\include\SDL"
 				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="1"
@@ -340,7 +336,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\Debug\SDLmain.lib"
+				OutputFile="$(IntDir)\SDLmain.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -390,8 +386,6 @@
 				AdditionalIncludeDirectories="..\..\include,..\..\include\SDL"
 				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS"
 				RuntimeLibrary="2"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Debug/SDLmain.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="1"
@@ -409,6 +403,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile="$(IntDir)\SDLmain.lib"
+				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCALinkTool"

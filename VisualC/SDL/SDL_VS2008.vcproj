@@ -56,7 +56,6 @@
 				PreprocessorDefinitions="_DEBUG;_WINDOWS;_WIN32_WINNT=0x0400;__MMX__;__3dNOW__;__SSE__;__SSE2__"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -78,10 +77,10 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
+				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
-				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -141,10 +140,11 @@
 				PreprocessorDefinitions="_DEBUG;_WINDOWS;_WIN32_WINNT=0x0400;__SSE__;__SSE2__"
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
+				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -159,13 +159,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="msimg32.lib winmm.lib"
+				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
+				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="17"
-				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -230,7 +230,6 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
@@ -251,6 +250,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
+				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
 			/>
@@ -315,9 +315,10 @@
 				RuntimeLibrary="2"
 				BufferSecurityCheck="false"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="0"
 				WarningLevel="3"
+				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -332,10 +333,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="msimg32.lib winmm.lib"
+				AdditionalDependencies="msimg32.lib winmm.lib imm32.lib version.lib"
 				OutputFile="$(IntDir)\SDL.dll"
+				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
