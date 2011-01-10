@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "SDL_events.h"
-#include "SDL_video.h"
+#include "SDL.h"
 
 #define WINDOW_WIDTH    640
 #define WINDOW_HEIGHT   480
