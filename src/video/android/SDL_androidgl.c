@@ -21,17 +21,11 @@
 */
 #include "SDL_config.h"
 
-/* Android SDL video driver implementation
-*/
+/* Android SDL video driver implementation */
 
 #include "SDL_video.h"
-#include "SDL_mouse.h"
-#include "../SDL_sysvideo.h"
-#include "../SDL_pixels_c.h"
-#include "../../events/SDL_events_c.h"
 
 #include "SDL_androidvideo.h"
-#include "SDL_androidevents.h"
 
 #include <android/log.h>
 
@@ -57,13 +51,6 @@ void *Android_GL_GetProcAddress(_THIS, const char *proc){
 void Android_GL_UnloadLibrary(_THIS){
 	__android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_UnloadLibrary\n");
 }
-
-/*
-int *Android_GL_GetVisual(_THIS, Display * display, int screen){
-	__android_log_print(ANDROID_LOG_INFO, "SDL","[STUB] GL_GetVisual\n");
-	return 0;
-}
-*/
 
 SDL_GLContext Android_GL_CreateContext(_THIS, SDL_Window * window){
 	Android_CreateContext();

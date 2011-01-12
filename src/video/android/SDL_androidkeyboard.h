@@ -21,12 +21,10 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_androidevents.h"
+#include "SDL_androidvideo.h"
 
-void
-Android_PumpEvents(_THIS)
-{
-    /* No polling necessary */
-}
+extern void Android_InitKeyboard();
+extern int Android_OnKeyDown(int keycode);
+extern int Android_OnKeyUp(int keycode);
 
 /* vi: set ts=4 sw=4 expandtab: */

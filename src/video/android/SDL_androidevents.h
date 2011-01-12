@@ -24,6 +24,5 @@
 #include "SDL_androidvideo.h"
 
 extern void Android_PumpEvents(_THIS);
-extern void Android_InitEvents();
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -32,12 +32,12 @@
 
 #include "SDL_androidvideo.h"
 #include "SDL_androidevents.h"
+#include "SDL_androidkeyboard.h"
 
 #define ANDROID_VID_DRIVER_NAME "Android"
 
 /* Initialization/Query functions */
 static int Android_VideoInit(_THIS);
-static int Android_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 static void Android_VideoQuit(_THIS);
 
 /* GL functions (SDL_androidgl.c) */
@@ -93,9 +93,8 @@ Android_CreateDevice(int devindex)
     /* Set the function pointers */
     device->VideoInit = Android_VideoInit;
     device->VideoQuit = Android_VideoQuit;
-    device->SetDisplayMode = Android_SetDisplayMode;
     device->PumpEvents = Android_PumpEvents;
-   
+
     device->free = Android_DeleteDevice;
 
     /* GL pointers */
@@ -136,15 +135,9 @@ Android_VideoInit(_THIS)
     SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
-    Android_InitEvents();
+    Android_InitKeyboard();
 
     /* We're done! */
-    return 0;
-}
-
-static int
-Android_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
-{
     return 0;
 }
 
@@ -158,7 +151,6 @@ void Android_SetScreenResolution(int width, int height){
     iScreenWidth = width;
     iScreenHeight = height;   
 }
-
 
 
 /* vi: set ts=4 sw=4 expandtab: */

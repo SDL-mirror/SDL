@@ -21,12 +21,32 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_androidevents.h"
+#include "../../events/SDL_events_c.h"
 
-void
-Android_PumpEvents(_THIS)
+#include "SDL_androidkeyboard.h"
+
+
+void Android_InitKeyboard()
 {
-    /* No polling necessary */
+    SDLKey keymap[SDL_NUM_SCANCODES];
+
+    /* Add default scancode to key mapping */
+    SDL_GetDefaultKeymap(keymap);
+    SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
+}
+
+int
+Android_OnKeyDown(int keycode)
+{
+    /* FIXME: Need conversion from Android keycode to SDL scancode */
+    return SDL_SendKeyboardKey(SDL_PRESSED, (SDL_scancode)keycode);
+}
+
+int
+Android_OnKeyUp(int keycode)
+{
+    /* FIXME: Need conversion from Android keycode to SDL scancode */
+    return SDL_SendKeyboardKey(SDL_RELEASED, (SDL_scancode)keycode);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

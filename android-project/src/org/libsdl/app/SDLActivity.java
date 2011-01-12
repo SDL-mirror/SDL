@@ -158,12 +158,6 @@ public class SDLActivity extends Activity {
             }
         }
     }
-
-
-
-
-
-    
     
 }
 
