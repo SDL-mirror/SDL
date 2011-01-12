@@ -885,9 +885,9 @@ extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_Texture * texture,
  *  \brief Set an additional color value used in render copy operations.
  *  
  *  \param texture The texture to update.
- *  \param r       The red source color value multiplied into copy operations.
- *  \param g       The green source color value multiplied into copy operations.
- *  \param b       The blue source color value multiplied into copy operations.
+ *  \param r       The red color value multiplied into copy operations.
+ *  \param g       The green color value multiplied into copy operations.
+ *  \param b       The blue color value multiplied into copy operations.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or color modulation 
  *          is not supported.
@@ -902,9 +902,9 @@ extern DECLSPEC int SDLCALL SDL_SetTextureColorMod(SDL_Texture * texture,
  *  \brief Get the additional color value used in render copy operations.
  *  
  *  \param texture The texture to query.
- *  \param r         A pointer filled in with the source red color value.
- *  \param g         A pointer filled in with the source green color value.
- *  \param b         A pointer filled in with the source blue color value.
+ *  \param r         A pointer filled in with the current red color value.
+ *  \param g         A pointer filled in with the current green color value.
+ *  \param b         A pointer filled in with the current blue color value.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  *  
@@ -918,7 +918,7 @@ extern DECLSPEC int SDLCALL SDL_GetTextureColorMod(SDL_Texture * texture,
  *  \brief Set an additional alpha value used in render copy operations.
  *  
  *  \param texture The texture to update.
- *  \param alpha     The source alpha value multiplied into copy operations.
+ *  \param alpha     The alpha value multiplied into copy operations.
  *  
  *  \return 0 on success, or -1 if the texture is not valid or alpha modulation 
  *          is not supported.
@@ -932,7 +932,7 @@ extern DECLSPEC int SDLCALL SDL_SetTextureAlphaMod(SDL_Texture * texture,
  *  \brief Get the additional alpha value used in render copy operations.
  *  
  *  \param texture The texture to query.
- *  \param alpha     A pointer filled in with the source alpha value.
+ *  \param alpha     A pointer filled in with the current alpha value.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
  *  

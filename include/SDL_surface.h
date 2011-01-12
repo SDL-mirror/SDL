@@ -161,9 +161,9 @@ extern DECLSPEC int SDLCALL SDL_LockSurface(SDL_Surface * surface);
 extern DECLSPEC void SDLCALL SDL_UnlockSurface(SDL_Surface * surface);
 
 /**
- *  Load a surface from a seekable SDL data source (memory or file).
+ *  Load a surface from a seekable SDL data stream (memory or file).
  *  
- *  If \c freesrc is non-zero, the source will be closed after being read.
+ *  If \c freesrc is non-zero, the stream will be closed after being read.
  *  
  *  The new surface should be freed with SDL_FreeSurface().
  *  
@@ -180,9 +180,9 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_LoadBMP_RW(SDL_RWops * src,
 #define SDL_LoadBMP(file)	SDL_LoadBMP_RW(SDL_RWFromFile(file, "rb"), 1)
 
 /**
- *  Save a surface to a seekable SDL data source (memory or file).
+ *  Save a surface to a seekable SDL data stream (memory or file).
  *  
- *  If \c freedst is non-zero, the source will be closed after being written.
+ *  If \c freedst is non-zero, the stream will be closed after being written.
  *  
  *  \return 0 if successful or -1 if there was an error.
  */
@@ -237,9 +237,9 @@ extern DECLSPEC int SDLCALL SDL_GetColorKey(SDL_Surface * surface,
  *  \brief Set an additional color value used in blit operations.
  *  
  *  \param surface The surface to update.
- *  \param r The red source color value multiplied into blit operations.
- *  \param g The green source color value multiplied into blit operations.
- *  \param b The blue source color value multiplied into blit operations.
+ *  \param r The red color value multiplied into blit operations.
+ *  \param g The green color value multiplied into blit operations.
+ *  \param b The blue color value multiplied into blit operations.
  *  
  *  \return 0 on success, or -1 if the surface is not valid.
  *  
@@ -253,9 +253,9 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceColorMod(SDL_Surface * surface,
  *  \brief Get the additional color value used in blit operations.
  *  
  *  \param surface The surface to query.
- *  \param r A pointer filled in with the source red color value.
- *  \param g A pointer filled in with the source green color value.
- *  \param b A pointer filled in with the source blue color value.
+ *  \param r A pointer filled in with the current red color value.
+ *  \param g A pointer filled in with the current green color value.
+ *  \param b A pointer filled in with the current blue color value.
  *  
  *  \return 0 on success, or -1 if the surface is not valid.
  *  
@@ -269,7 +269,7 @@ extern DECLSPEC int SDLCALL SDL_GetSurfaceColorMod(SDL_Surface * surface,
  *  \brief Set an additional alpha value used in blit operations.
  *  
  *  \param surface The surface to update.
- *  \param alpha The source alpha value multiplied into blit operations.
+ *  \param alpha The alpha value multiplied into blit operations.
  *  
  *  \return 0 on success, or -1 if the surface is not valid.
  *  
@@ -282,7 +282,7 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceAlphaMod(SDL_Surface * surface,
  *  \brief Get the additional alpha value used in blit operations.
  *  
  *  \param surface The surface to query.
- *  \param alpha A pointer filled in with the source alpha value.
+ *  \param alpha A pointer filled in with the current alpha value.
  *  
  *  \return 0 on success, or -1 if the surface is not valid.
  *  
