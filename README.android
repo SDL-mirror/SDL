@@ -152,6 +152,9 @@ You can add logging to your code to help show what's happening:
 
 	__android_log_print(ANDROID_LOG_INFO, "foo", "Something happened! x = %d", x);
 
+If you need to build without optimization turned on, you can create a file called "Application.mk" in the jni directory, with the following line in it:
+APP_OPTIM := debug
+
 
 ================================================================================
  Known issues
