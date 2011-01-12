@@ -89,7 +89,7 @@ public class SDLActivity extends Activity {
     }
     
 
-    //Events
+    // Events
     protected void onPause() {
         super.onPause();
     }
@@ -98,14 +98,10 @@ public class SDLActivity extends Activity {
         super.onResume();
     }
 
-    
 
-
-
-    //C functions we call
+    // C functions we call
     public static native void nativeInit();
     public static native void nativeQuit();
-    public static native void nativeSetScreenSize(int width, int height);
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
     public static native void onNativeTouch(int action, float x, 
@@ -114,17 +110,16 @@ public class SDLActivity extends Activity {
     public static native void onNativeAccel(float x, float y, float z);
 
 
-
     //Java functions called from C
-    private static void createGLContext(){
+    private static void createGLContext() {
         mSurface.initEGL();
     }
 
-    public static void flipBuffers(){
+    public static void flipBuffers() {
         mSurface.flipEGL();
     }
 
-    public static void updateAudio(byte [] buf){
+    public static void updateAudio(byte [] buf) {
     
         if(mAudioTrack == null){
             return;
@@ -136,7 +131,7 @@ public class SDLActivity extends Activity {
         Log.v("SDL","Played some audio");
     }
 
-    public static void enableFeature(int featureid, int enabled){
+    public static void enableFeature(int featureid, int enabled) {
          Log.v("SDL","Feature " + featureid + " = " + enabled);
 
         //Yuck. This is all horribly inelegent. If it gets to more than a few
@@ -164,11 +159,9 @@ public class SDLActivity extends Activity {
 /**
     Simple nativeInit() runnable
 */
-class SDLRunner implements Runnable{
-    public void run(){
-        //SDLActivity.initAudio();
-        
-        //Runs SDL_main()
+class SDLMain implements Runnable {
+    public void run() {
+        // Runs SDL_main()
         SDLActivity.nativeInit();
 
         Log.v("SDL","SDL thread terminated");
@@ -185,18 +178,18 @@ class SDLRunner implements Runnable{
 class SDLSurface extends SurfaceView implements SurfaceHolder.Callback, 
     View.OnKeyListener, View.OnTouchListener, SensorEventListener  {
 
-    //This is what SDL runs in. It invokes SDL_main(), eventually
+    // This is what SDL runs in. It invokes SDL_main(), eventually
     private Thread mSDLThread;    
     
-    //EGL private objects
+    // EGL private objects
     private EGLContext  mEGLContext;
     private EGLSurface  mEGLSurface;
     private EGLDisplay  mEGLDisplay;
 
-    //Sensors
+    // Sensors
     private static SensorManager mSensorManager;
 
-    //Startup    
+    // Startup    
     public SDLSurface(Context context) {
         super(context);
         getHolder().addCallback(this); 
@@ -206,57 +199,94 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         requestFocus();
         setOnKeyListener(this); 
         setOnTouchListener(this);   
-        
+
         mSensorManager = (SensorManager)context.getSystemService("sensor");  
     }
 
-    //Called when we have a valid drawing surface
+    // Called when we have a valid drawing surface
     public void surfaceCreated(SurfaceHolder holder) {
-        Log.v("SDL","Surface created"); 
-
-        int width = getWidth();
-        int height = getHeight();
-
-        //Set the width and height variables in C before we start SDL so we have
-        //it available on init
-        SDLActivity.nativeSetScreenSize(width, height);
-
-        //Now start up the C app thread
-        mSDLThread = new Thread(new SDLRunner(), "SDLThread"); 
-		mSDLThread.start();       
     }
 
-    //Called when we lose the surface
+    // Called when we lose the surface
     public void surfaceDestroyed(SurfaceHolder holder) {
-        Log.v("SDL","Surface destroyed");
-        
+
+        // Send a quit message to the application
         SDLActivity.nativeQuit();
 
-        //Now wait for the SDL thread to quit
-        try{
-            mSDLThread.wait();
-        }catch(Exception e){
-            Log.v("SDL","Problem stopping thread: " + e);
+        // Now wait for the SDL thread to quit
+        if (mSDLThread != null) {
+            try {
+                mSDLThread.wait();
+            } catch(Exception e) {
+                Log.v("SDL","Problem stopping thread: " + e);
+            }
         }
     }
 
-    //Called when the surface is resized
-    public void surfaceChanged(SurfaceHolder holder, int format, 
-                                int width, int height) {
+    // Called when the surface is resized
+    public void surfaceChanged(SurfaceHolder holder,
+                               int format, int width, int height) {
         Log.v("SDL","Surface resized");
-        
+
+        int sdlFormat = 0;
+        switch (format) {
+        case PixelFormat.A_8:
+            Log.v("SDL","pixel format A_8");
+            break;
+        case PixelFormat.LA_88:
+            Log.v("SDL","pixel format LA_88");
+            break;
+        case PixelFormat.L_8:
+            Log.v("SDL","pixel format L_8");
+            break;
+        case PixelFormat.RGBA_4444:
+            Log.v("SDL","pixel format RGBA_4444");
+            sdlFormat = 0x85421002; // Doesn't have an SDL constant...
+            break;
+        case PixelFormat.RGBA_5551:
+            Log.v("SDL","pixel format RGBA_5551");
+            sdlFormat = 0x85441002; // Doesn't have an SDL constant...
+            break;
+        case PixelFormat.RGBA_8888:
+            Log.v("SDL","pixel format RGBA_8888");
+            sdlFormat = 0x86462004; // SDL_PIXELFORMAT_RGBA8888
+            break;
+        case PixelFormat.RGBX_8888:
+            Log.v("SDL","pixel format RGBX_8888");
+            sdlFormat = 0x86262004; // SDL_PIXELFORMAT_RGBX8888
+            break;
+        case PixelFormat.RGB_332:
+            Log.v("SDL","pixel format RGB_332");
+            sdlFormat = 0x84110801; // SDL_PIXELFORMAT_RGB332
+            break;
+        case PixelFormat.RGB_565:
+            Log.v("SDL","pixel format RGB_565");
+            sdlFormat = 0x85151002; // SDL_PIXELFORMAT_RGB565
+            break;
+        case PixelFormat.RGB_888:
+            Log.v("SDL","pixel format RGB_888");
+            // Not sure this is right, maybe SDL_PIXELFORMAT_RGB24 instead?
+            sdlFormat = 0x86161804; // SDL_PIXELFORMAT_RGB888
+            break;
+        }
         SDLActivity.onNativeResize(width, height, format);
+
+        // Now start up the C app thread
+        if (mSDLThread == null) {
+            mSDLThread = new Thread(new SDLMain(), "SDLThread"); 
+            mSDLThread.start();       
+        }
     }
 
     //unused
     public void onDraw(Canvas canvas) {}
 
-    
-    //EGL functions
-    public boolean initEGL(){
-        Log.v("SDL","Starting up");
 
-        try{
+    // EGL functions
+    public boolean initEGL() {
+        Log.v("SDL", "Starting up");
+
+        try {
 
             EGL10 egl = (EGL10)EGLContext.getEGL();
 
@@ -283,23 +313,20 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             mEGLContext = ctx;
             mEGLDisplay = dpy;
             mEGLSurface = surface;
-            
-            
-        }catch(Exception e){
+
+        } catch(Exception e) {
             Log.v("SDL", e + "");
             for(StackTraceElement s : e.getStackTrace()){
                 Log.v("SDL", s.toString());
             }
         }
-        Log.v("SDL","Done making!");
 
         return true;
     }
 
-    //EGL buffer flip
-    public void flipEGL(){      
-        try{
-        
+    // EGL buffer flip
+    public void flipEGL() {
+        try {
             EGL10 egl = (EGL10)EGLContext.getEGL();
             GL10 gl = (GL10)mEGLContext.getGL();
 
@@ -312,26 +339,22 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             egl.eglSwapBuffers(mEGLDisplay, mEGLSurface);
 
             
-        }catch(Exception e){
+        } catch(Exception e) {
             Log.v("SDL", "flipEGL(): " + e);
-
             for(StackTraceElement s : e.getStackTrace()){
                 Log.v("SDL", s.toString());
             }
         }
     }
 
-
-  
-    //Key events
+    // Key events
     public boolean onKey(View  v, int keyCode, KeyEvent event){
 
-        if(event.getAction() == KeyEvent.ACTION_DOWN){
+        if (event.getAction() == KeyEvent.ACTION_DOWN) {
             SDLActivity.onNativeKeyDown(keyCode);
             return true;
         }
-        
-        else if(event.getAction() == KeyEvent.ACTION_UP){
+        else if (event.getAction() == KeyEvent.ACTION_UP) {
             SDLActivity.onNativeKeyUp(keyCode);
             return true;
         }
@@ -339,8 +362,8 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         return false;
     }
 
-    //Touch events
-    public boolean onTouch(View v, MotionEvent event){
+    // Touch events
+    public boolean onTouch(View v, MotionEvent event) {
     
         int action = event.getAction();
         float x = event.getX();
@@ -352,32 +375,30 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         return true;
     }
 
-    //Sensor events
-    public void enableSensor(int sensortype, boolean enabled){
+    // Sensor events
+    public void enableSensor(int sensortype, boolean enabled) {
         //TODO: This uses getDefaultSensor - what if we have >1 accels?
-        if(enabled){
+        if (enabled) {
             mSensorManager.registerListener(this, 
                             mSensorManager.getDefaultSensor(sensortype), 
                             SensorManager.SENSOR_DELAY_GAME, null);
-        }else{
+        } else {
             mSensorManager.unregisterListener(this, 
                             mSensorManager.getDefaultSensor(sensortype));
         }
     }
     
-    public void onAccuracyChanged(Sensor sensor, int accuracy){
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
         //TODO
     }
 
-    public void onSensorChanged(SensorEvent event){
-        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER){
-            SDLActivity.onNativeAccel(  event.values[0],
-                                        event.values[1],
-                                        event.values[2] );
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            SDLActivity.onNativeAccel(event.values[0],
+                                      event.values[1],
+                                      event.values[2]);
         }
     }
 
-
 }
-
 

@@ -24,6 +24,7 @@
 extern "C" {
 #include "events/SDL_events_c.h"
 #include "video/android/SDL_androidkeyboard.h"
+#include "video/android/SDL_androidvideo.h"
 }
 
 /*******************************************************************************
@@ -48,9 +49,6 @@ jmethodID midCreateGLContext;
 jmethodID midFlipBuffers;
 jmethodID midEnableFeature;
 jmethodID midUpdateAudio;
-
-extern "C" void Android_SetScreenResolution(int width, int height);
-extern "C" int SDL_SendQuit();
 
 //If we're not the active app, don't try to render
 bool bRenderingEnabled = false;
@@ -145,21 +143,12 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit( JNIEnv*  env,
     SDL_SendQuit();
 }
 
-// Screen size
-extern "C" void Java_org_libsdl_app_SDLActivity_nativeSetScreenSize(
-                JNIEnv*  env, jobject obj, jint width, jint height)
-{
-    __android_log_print(ANDROID_LOG_INFO, "SDL", 
-                        "SDL: Set screen size on init: %d/%d\n", width, height);
-    Android_SetScreenResolution(width, height);
-}
-
 // Resize
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
                                         JNIEnv*  env, jobject obj, jint width, 
                                         jint height, jint format)
 {
-    /* FIXME: What is the relationship between this and the window? */
+    Android_SetScreenResolution(width, height, format);
 }
 
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
@@ -229,3 +218,5 @@ extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len)
     __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: invoked\n");
     
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

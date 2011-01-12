@@ -26,6 +26,9 @@
 
 #include "../SDL_sysvideo.h"
 
-#endif /* _SDL_ndsvideo_h */
+/* Called by the JNI layer when the screen changes size or format */
+extern void Android_SetScreenResolution(int width, int height, Uint32 format);
+
+#endif /* _SDL_androidvideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -56,10 +56,11 @@ extern void Android_GL_DeleteContext(_THIS, SDL_GLContext context);
 /* Android driver bootstrap functions */
 
 
-//These are filled in with real values in Android_SetScreenResolution on 
-//init (before SDL_Main())
-static int iScreenWidth = 320;
-static int iScreenHeight = 240;
+// These are filled in with real values in Android_SetScreenResolution on 
+// init (before SDL_main())
+static Uint32 iScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
+static int iScreenWidth = 0;
+static int iScreenHeight = 0;
 
 
 static int
@@ -122,8 +123,7 @@ Android_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
 
-    /* Use a fake 32-bpp desktop mode */
-    mode.format = SDL_PIXELFORMAT_BGR888;
+    mode.format = iScreenFormat;
     mode.w = iScreenWidth;
     mode.h = iScreenHeight;
     mode.refresh_rate = 0;
@@ -146,11 +146,12 @@ Android_VideoQuit(_THIS)
 {
 }
 
-
-void Android_SetScreenResolution(int width, int height){
+void
+Android_SetScreenResolution(int width, int height, Uint32 format)
+{
     iScreenWidth = width;
     iScreenHeight = height;   
+    iScreenFormat = format;
 }
-
 
 /* vi: set ts=4 sw=4 expandtab: */
