@@ -115,9 +115,9 @@ SDL_RenderDriver GL_ES_RenderDriver = {
      (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST | SDL_SCALEMODE_SLOW), 5,
      {
       /* OpenGL ES 1.x supported formats list */
-      SDL_PIXELFORMAT_ABGR4444,
-      SDL_PIXELFORMAT_ABGR1555,
-      SDL_PIXELFORMAT_BGR565,
+      SDL_PIXELFORMAT_RGBA4444,
+      SDL_PIXELFORMAT_RGBA5551,
+      SDL_PIXELFORMAT_RGB565,
       SDL_PIXELFORMAT_RGB24,
       SDL_PIXELFORMAT_BGR888,
       SDL_PIXELFORMAT_ABGR8888},
@@ -392,17 +392,17 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PIXELFORMAT_BGR565:
+    case SDL_PIXELFORMAT_RGB565:
         internalFormat = GL_RGB;
         format = GL_RGB;
         type = GL_UNSIGNED_SHORT_5_6_5;
         break;
-    case SDL_PIXELFORMAT_ABGR1555:
+    case SDL_PIXELFORMAT_RGBA5551:
         internalFormat = GL_RGBA;
         format = GL_RGBA;
         type = GL_UNSIGNED_SHORT_5_5_5_1;
         break;
-    case SDL_PIXELFORMAT_ABGR4444:
+    case SDL_PIXELFORMAT_RGBA4444:
         internalFormat = GL_RGBA;
         format = GL_RGBA;
         type = GL_UNSIGNED_SHORT_4_4_4_4;
