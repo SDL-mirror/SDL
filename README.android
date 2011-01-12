@@ -123,6 +123,35 @@ You can push files to the device with:
 You can push files to the SD Card at /sdcard, for example:
 	adb push moose.dat /sdcard/moose.dat
 
+You can see the complete command line that ndk-build is using by passing V=1 on the command line:
+	ndk-build V=1
+
+If your application crashes in native code, you can use addr2line to convert the addresses in the stack trace to lines in your code.
+
+For example, if your crash looks like this:
+I/DEBUG   (   31): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 400085d0
+I/DEBUG   (   31):  r0 00000000  r1 00001000  r2 00000003  r3 400085d4
+I/DEBUG   (   31):  r4 400085d0  r5 40008000  r6 afd41504  r7 436c6a7c
+I/DEBUG   (   31):  r8 436c6b30  r9 435c6fb0  10 435c6f9c  fp 4168d82c
+I/DEBUG   (   31):  ip 8346aff0  sp 436c6a60  lr afd1c8ff  pc afd1c902  cpsr 60000030
+I/DEBUG   (   31):          #00  pc 0001c902  /system/lib/libc.so
+I/DEBUG   (   31):          #01  pc 0001ccf6  /system/lib/libc.so
+I/DEBUG   (   31):          #02  pc 000014bc  /data/data/org.libsdl.app/lib/libmain.so
+I/DEBUG   (   31):          #03  pc 00001506  /data/data/org.libsdl.app/lib/libmain.so
+
+You can see that there's a crash in the C library being called from the main code.  I run addr2line with the debug version of my code:
+	arm-eabi-addr2line -C -f -e obj/local/armeabi/libmain.so
+and then paste in the number after "pc" in the call stack, from the line that I care about:
+000014bc
+
+I get output from addr2line showing that it's in the quit function, in testspriteminimal.c, on line 23.
+
+You can add logging to your code to help show what's happening:
+
+#include <android/log.h>
+
+	__android_log_print(ANDROID_LOG_INFO, "foo", "Something happened! x = %d", x);
+
 
 ================================================================================
  Known issues
