@@ -1046,11 +1046,19 @@ SDL_GetCurrentRenderer(SDL_bool create)
         return NULL;
     }
     if (!SDL_CurrentRenderer) {
+        SDL_Window *window = NULL;
+
         if (!create) {
             SDL_SetError("Use SDL_CreateRenderer() to create a renderer");
             return NULL;
         }
-        if (SDL_CreateRenderer(0, -1, 0) < 0) {
+
+        /* Get the first window on the first display */
+        if (_this->num_displays > 0) {
+            window = _this->displays[0].windows;
+        }
+
+        if (SDL_CreateRenderer(window, -1, 0) < 0) {
             return NULL;
         }
     }
