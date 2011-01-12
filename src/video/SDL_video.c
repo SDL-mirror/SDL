@@ -1988,8 +1988,13 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
         SDL_GetSurfaceAlphaMod(surface, &a);
         SDL_SetTextureAlphaMod(texture, a);
 
-        SDL_GetSurfaceBlendMode(surface, &blendMode);
-        SDL_SetTextureBlendMode(texture, blendMode);
+        if (surface->map->info.flags & SDL_COPY_COLORKEY) {
+            /* We converted to a texture with alpha format */
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
+        } else {
+            SDL_GetSurfaceBlendMode(surface, &blendMode);
+            SDL_SetTextureBlendMode(texture, blendMode);
+        }
 
         SDL_GetSurfaceScaleMode(surface, &scaleMode);
         SDL_SetTextureScaleMode(texture, scaleMode);
