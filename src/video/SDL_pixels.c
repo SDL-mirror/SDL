@@ -265,6 +265,12 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         break;
     case 16:
         switch (Rmask) {
+        case 0xF000:
+            return SDL_PIXELFORMAT_RGBA4444;
+        case 0x0F00:
+            return SDL_PIXELFORMAT_ARGB4444;
+        case 0x00F0:
+            return SDL_PIXELFORMAT_BGRA4444;
         case 0x000F:
             return SDL_PIXELFORMAT_ABGR4444;
         case 0x001F:
@@ -272,12 +278,13 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
                 return SDL_PIXELFORMAT_BGR565;
             }
             return SDL_PIXELFORMAT_ABGR1555;
-        case 0x0F00:
-            return SDL_PIXELFORMAT_ARGB4444;
         case 0x7C00:
             return SDL_PIXELFORMAT_ARGB1555;
         case 0xF800:
-            return SDL_PIXELFORMAT_RGB565;
+            if (Gmask == 0x07E0) {
+                return SDL_PIXELFORMAT_RGB565;
+            }
+            return SDL_PIXELFORMAT_RGBA5551;
         }
         break;
     case 24:
