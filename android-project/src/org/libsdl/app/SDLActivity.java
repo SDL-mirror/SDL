@@ -24,35 +24,35 @@ import java.lang.*;
 */
 public class SDLActivity extends Activity {
 
-    //Main components
+    // Main components
     private static SDLActivity mSingleton;
     private static SDLSurface mSurface;
 
-    //Audio
+    // Audio
     private static AudioTrack mAudioTrack;
     private static boolean bAudioIsEnabled;
 
-    //Sensors
+    // Sensors
     private static boolean bAccelIsEnabled;
 
-    //feature IDs. Must match up on the C side as well.
+    // feature IDs. Must match up on the C side as well.
     private static int FEATURE_AUDIO = 1;
     private static int FEATURE_ACCEL = 2;
 
-    //Load the .so
+    // Load the .so
     static {
         System.loadLibrary("SDL");
         System.loadLibrary("main");
     }
 
-    //Setup
+    // Setup
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        //So we can call stuff from static callbacks
+        // So we can call stuff from static callbacks
         mSingleton = this;
 
-        //Set up the surface
+        // Set up the surface
         mSurface = new SDLSurface(getApplication());
         setContentView(mSurface);
         SurfaceHolder holder = mSurface.getHolder();
@@ -60,11 +60,11 @@ public class SDLActivity extends Activity {
         
     }
 
-    //Audio
+    // Audio
     public static boolean initAudio(){        
 
-        //blah. Hardcoded things are bad. FIXME when we have more sound stuff
-        //working properly. 
+        // blah. Hardcoded things are bad. FIXME when we have more sound stuff
+        // working properly. 
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                     11025,
                     AudioFormat.CHANNEL_CONFIGURATION_MONO,
@@ -75,7 +75,7 @@ public class SDLActivity extends Activity {
         return true;
     }
 
-    //Accel
+    // Accel
     public static boolean initAccel(){
         mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, true);
         bAccelIsEnabled = true;
@@ -110,7 +110,7 @@ public class SDLActivity extends Activity {
     public static native void onNativeAccel(float x, float y, float z);
 
 
-    //Java functions called from C
+    // Java functions called from C
     private static void createGLContext() {
         mSurface.initEGL();
     }
@@ -134,13 +134,13 @@ public class SDLActivity extends Activity {
     public static void enableFeature(int featureid, int enabled) {
          Log.v("SDL","Feature " + featureid + " = " + enabled);
 
-        //Yuck. This is all horribly inelegent. If it gets to more than a few
-        //'features' I'll rip this out and make something nicer, I promise :)
+        // Yuck. This is all horribly inelegent. If it gets to more than a few
+        // 'features' I'll rip this out and make something nicer, I promise :)
         if(featureid == FEATURE_AUDIO){
             if(enabled == 1){
                 initAudio();
             }else{
-                //We don't have one of these yet...
+                // We don't have one of these yet...
                 //closeAudio(); 
             }
         }
@@ -241,11 +241,11 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             break;
         case PixelFormat.RGBA_4444:
             Log.v("SDL","pixel format RGBA_4444");
-            sdlFormat = 0x85421002; // Doesn't have an SDL constant...
+            sdlFormat = 0x85421002; // SDL_PIXELFORMAT_RGBA4444
             break;
         case PixelFormat.RGBA_5551:
             Log.v("SDL","pixel format RGBA_5551");
-            sdlFormat = 0x85441002; // Doesn't have an SDL constant...
+            sdlFormat = 0x85441002; // SDL_PIXELFORMAT_RGBA5551
             break;
         case PixelFormat.RGBA_8888:
             Log.v("SDL","pixel format RGBA_8888");
@@ -278,7 +278,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
-    //unused
+    // unused
     public void onDraw(Canvas canvas) {}
 
 
@@ -332,7 +332,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
             egl.eglWaitNative(EGL10.EGL_NATIVE_RENDERABLE, null);
 
-            //drawing here
+            // drawing here
 
             egl.eglWaitGL();
 
@@ -370,14 +370,14 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         float y = event.getY();
         float p = event.getPressure();
 
-        //TODO: Anything else we need to pass?        
+        // TODO: Anything else we need to pass?        
         SDLActivity.onNativeTouch(action, x, y, p);
         return true;
     }
 
     // Sensor events
     public void enableSensor(int sensortype, boolean enabled) {
-        //TODO: This uses getDefaultSensor - what if we have >1 accels?
+        // TODO: This uses getDefaultSensor - what if we have >1 accels?
         if (enabled) {
             mSensorManager.registerListener(this, 
                             mSensorManager.getDefaultSensor(sensortype), 
@@ -389,7 +389,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
     
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        //TODO
+        // TODO
     }
 
     public void onSensorChanged(SensorEvent event) {

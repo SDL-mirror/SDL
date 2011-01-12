@@ -138,6 +138,7 @@ enum
 #define SDL_ISPIXELFORMAT_FOURCC(format)    \
     ((format) && !((format) & 0x80000000))
 
+/* Note: If you modify this list, update SDL_GetPixelFormatName() */
 enum
 {
     SDL_PIXELFORMAT_UNKNOWN,
@@ -170,15 +171,27 @@ enum
     SDL_PIXELFORMAT_ARGB4444 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ARGB,
                                SDL_PACKEDLAYOUT_4444, 16, 2),
+    SDL_PIXELFORMAT_RGBA4444 =
+        SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_RGBA,
+                               SDL_PACKEDLAYOUT_4444, 16, 2),
     SDL_PIXELFORMAT_ABGR4444 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ABGR,
+                               SDL_PACKEDLAYOUT_4444, 16, 2),
+    SDL_PIXELFORMAT_BGRA4444 =
+        SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_BGRA,
                                SDL_PACKEDLAYOUT_4444, 16, 2),
     SDL_PIXELFORMAT_ARGB1555 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ARGB,
                                SDL_PACKEDLAYOUT_1555, 16, 2),
+    SDL_PIXELFORMAT_RGBA5551 =
+        SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_RGBA,
+                               SDL_PACKEDLAYOUT_5551, 16, 2),
     SDL_PIXELFORMAT_ABGR1555 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_ABGR,
                                SDL_PACKEDLAYOUT_1555, 16, 2),
+    SDL_PIXELFORMAT_BGRA5551 =
+        SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_BGRA,
+                               SDL_PACKEDLAYOUT_5551, 16, 2),
     SDL_PIXELFORMAT_RGB565 =
         SDL_DEFINE_PIXELFORMAT(SDL_PIXELTYPE_PACKED16, SDL_PACKEDORDER_XRGB,
                                SDL_PACKEDLAYOUT_565, 16, 2),
@@ -268,6 +281,11 @@ typedef struct SDL_PixelFormat
     Uint32 Bmask;
     Uint32 Amask;
 } SDL_PixelFormat;
+
+/**
+ * \brief Get the human readable name of a pixel format
+ */
+extern DECLSPEC const char* SDLCALL SDL_GetPixelFormatName(Uint32 format);
 
 /**
  *  \brief Convert one of the enumerated pixel formats to a bpp and RGBA masks.
