@@ -436,8 +436,8 @@ typedef union SDL_Event
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
     SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
     SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
-    SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data*/
-    SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data*/
+    SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data */
+    SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data */
 
     /** Temporarily here for backwards compatibility */
     /*@{*/
