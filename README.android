@@ -123,6 +123,10 @@ You can push files to the device with:
 You can push files to the SD Card at /sdcard, for example:
 	adb push moose.dat /sdcard/moose.dat
 
+You can do a clean build with the following commands:
+	ndk-build clean
+	ndk-build
+
 You can see the complete command line that ndk-build is using by passing V=1 on the command line:
 	ndk-build V=1
 
