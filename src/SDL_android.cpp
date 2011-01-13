@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#include "SDL_android.h"
+
 extern "C" {
 #include "events/SDL_events_c.h"
 #include "video/android/SDL_androidkeyboard.h"
@@ -47,11 +49,7 @@ jclass mActivityInstance;
 //method signatures
 jmethodID midCreateGLContext;
 jmethodID midFlipBuffers;
-jmethodID midEnableFeature;
 jmethodID midUpdateAudio;
-
-//If we're not the active app, don't try to render
-bool bRenderingEnabled = false;
 
 //Feature IDs
 static const int FEATURE_AUDIO = 1;
@@ -84,11 +82,9 @@ extern "C" void SDL_Android_Init(JNIEnv* env)
     mActivityInstance = cls;
     midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
     midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
-    midEnableFeature = mEnv->GetStaticMethodID(cls,"enableFeature","(II)V");
     midUpdateAudio = mEnv->GetStaticMethodID(cls,"updateAudio","([B)V");
 
-    if(!midCreateGLContext || !midFlipBuffers || !midEnableFeature ||
-        !midUpdateAudio) {
+    if(!midCreateGLContext || !midFlipBuffers || !midUpdateAudio) {
         __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: Bad mids\n");
     } else {
 #ifdef DEBUG
@@ -136,9 +132,6 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(JNIEnv* env,
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit( JNIEnv*  env, 
                                                                 jobject obj )
 {    
-    // Stop rendering as we're no longer in the foreground
-    bRenderingEnabled = false;
-
     // Inject a SDL_QUIT event
     SDL_SendQuit();
 }
@@ -165,32 +158,17 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
-extern "C" void Android_CreateContext()
+extern "C" void Android_JNI_CreateContext()
 {
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL: sdl_create_context()\n");
-
-    bRenderingEnabled = true;
-
-    mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext ); 
+    mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext); 
 }
 
-extern "C" void Android_Render()
+extern "C" void Android_JNI_SwapWindow()
 {
-    if (!bRenderingEnabled) {
-        return;
-    }
-
-    // When we get here, we've accumulated a full frame    
     mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers); 
 }
 
-extern "C" void Android_EnableFeature(int featureid, bool enabled)
-{
-    mEnv->CallStaticVoidMethod(mActivityInstance, midEnableFeature, 
-                                featureid, (int)enabled); 
-}
-
-extern "C" void Android_UpdateAudioBuffer(unsigned char *buf, int len)
+extern "C" void Android_JNI_UpdateAudioBuffer(unsigned char *buf, int len)
 {
     //Annoyingly we can't just call into Java from any thread. Because the audio
     //callback is dispatched from the SDL audio thread (that wasn't made from

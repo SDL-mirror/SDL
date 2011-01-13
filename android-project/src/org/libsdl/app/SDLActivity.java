@@ -30,14 +30,6 @@ public class SDLActivity extends Activity {
 
     // Audio
     private static AudioTrack mAudioTrack;
-    private static boolean bAudioIsEnabled;
-
-    // Sensors
-    private static boolean bAccelIsEnabled;
-
-    // feature IDs. Must match up on the C side as well.
-    private static int FEATURE_AUDIO = 1;
-    private static int FEATURE_ACCEL = 2;
 
     // Load the .so
     static {
@@ -47,6 +39,7 @@ public class SDLActivity extends Activity {
 
     // Setup
     protected void onCreate(Bundle savedInstanceState) {
+        //Log.v("SDL", "onCreate()");
         super.onCreate(savedInstanceState);
         
         // So we can call stuff from static callbacks
@@ -57,44 +50,16 @@ public class SDLActivity extends Activity {
         setContentView(mSurface);
         SurfaceHolder holder = mSurface.getHolder();
         holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
-        
     }
-
-    // Audio
-    public static boolean initAudio(){        
-
-        // blah. Hardcoded things are bad. FIXME when we have more sound stuff
-        // working properly. 
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                    11025,
-                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
-                    AudioFormat.ENCODING_PCM_8BIT,
-                    2048,
-                    AudioTrack.MODE_STREAM);   
-        bAudioIsEnabled = true;     
-        return true;
-    }
-
-    // Accel
-    public static boolean initAccel(){
-        mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, true);
-        bAccelIsEnabled = true;
-        return true;
-    }
-    
-    public static boolean closeAccel(){
-        mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, false);
-        bAccelIsEnabled = false;
-        return true;
-    }
-    
 
     // Events
     protected void onPause() {
+        //Log.v("SDL", "onPause()");
         super.onPause();
     }
 
     protected void onResume() {
+        //Log.v("SDL", "onResume()");
         super.onResume();
     }
 
@@ -121,39 +86,23 @@ public class SDLActivity extends Activity {
 
     public static void updateAudio(byte [] buf) {
     
-        if(mAudioTrack == null){
-            return;
+        if(mAudioTrack == null) {
+            // Hardcoded things are bad. FIXME when we have more sound stuff
+            // working properly. 
+            mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                        11025,
+                        AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                        AudioFormat.ENCODING_PCM_8BIT,
+                        2048,
+                        AudioTrack.MODE_STREAM);   
         }
-        
+
         mAudioTrack.write(buf, 0, buf.length);
         mAudioTrack.play();
         
-        Log.v("SDL","Played some audio");
+        Log.v("SDL", "Played some audio");
     }
 
-    public static void enableFeature(int featureid, int enabled) {
-         Log.v("SDL","Feature " + featureid + " = " + enabled);
-
-        // Yuck. This is all horribly inelegent. If it gets to more than a few
-        // 'features' I'll rip this out and make something nicer, I promise :)
-        if(featureid == FEATURE_AUDIO){
-            if(enabled == 1){
-                initAudio();
-            }else{
-                // We don't have one of these yet...
-                //closeAudio(); 
-            }
-        }
-
-        else if(featureid == FEATURE_ACCEL){
-            if(enabled == 1){
-                initAccel();
-            }else{
-                closeAccel();
-            }
-        }
-    }
-    
 }
 
 /**
@@ -164,7 +113,7 @@ class SDLMain implements Runnable {
         // Runs SDL_main()
         SDLActivity.nativeInit();
 
-        Log.v("SDL","SDL thread terminated");
+        //Log.v("SDL", "SDL thread terminated");
     }
 }
 
@@ -205,66 +154,77 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
     // Called when we have a valid drawing surface
     public void surfaceCreated(SurfaceHolder holder) {
+        //Log.v("SDL", "surfaceCreated()");
+
+        enableSensor(Sensor.TYPE_ACCELEROMETER, true);
     }
 
     // Called when we lose the surface
     public void surfaceDestroyed(SurfaceHolder holder) {
+        //Log.v("SDL", "surfaceDestroyed()");
 
         // Send a quit message to the application
         SDLActivity.nativeQuit();
 
         // Now wait for the SDL thread to quit
         if (mSDLThread != null) {
-            try {
-                mSDLThread.wait();
-            } catch(Exception e) {
-                Log.v("SDL","Problem stopping thread: " + e);
-            }
+            //synchronized (mSDLThread) {
+                try {
+                    mSDLThread.join();
+                } catch(Exception e) {
+                    Log.v("SDL", "Problem stopping thread: " + e);
+                }
+            //}
+            mSDLThread = null;
+
+            //Log.v("SDL", "Finished waiting for SDL thread");
         }
+
+        enableSensor(Sensor.TYPE_ACCELEROMETER, false);
     }
 
     // Called when the surface is resized
     public void surfaceChanged(SurfaceHolder holder,
                                int format, int width, int height) {
-        Log.v("SDL","Surface resized");
+        //Log.v("SDL", "surfaceChanged()");
 
         int sdlFormat = 0;
         switch (format) {
         case PixelFormat.A_8:
-            Log.v("SDL","pixel format A_8");
+            Log.v("SDL", "pixel format A_8");
             break;
         case PixelFormat.LA_88:
-            Log.v("SDL","pixel format LA_88");
+            Log.v("SDL", "pixel format LA_88");
             break;
         case PixelFormat.L_8:
-            Log.v("SDL","pixel format L_8");
+            Log.v("SDL", "pixel format L_8");
             break;
         case PixelFormat.RGBA_4444:
-            Log.v("SDL","pixel format RGBA_4444");
+            Log.v("SDL", "pixel format RGBA_4444");
             sdlFormat = 0x85421002; // SDL_PIXELFORMAT_RGBA4444
             break;
         case PixelFormat.RGBA_5551:
-            Log.v("SDL","pixel format RGBA_5551");
+            Log.v("SDL", "pixel format RGBA_5551");
             sdlFormat = 0x85441002; // SDL_PIXELFORMAT_RGBA5551
             break;
         case PixelFormat.RGBA_8888:
-            Log.v("SDL","pixel format RGBA_8888");
+            Log.v("SDL", "pixel format RGBA_8888");
             sdlFormat = 0x86462004; // SDL_PIXELFORMAT_RGBA8888
             break;
         case PixelFormat.RGBX_8888:
-            Log.v("SDL","pixel format RGBX_8888");
+            Log.v("SDL", "pixel format RGBX_8888");
             sdlFormat = 0x86262004; // SDL_PIXELFORMAT_RGBX8888
             break;
         case PixelFormat.RGB_332:
-            Log.v("SDL","pixel format RGB_332");
+            Log.v("SDL", "pixel format RGB_332");
             sdlFormat = 0x84110801; // SDL_PIXELFORMAT_RGB332
             break;
         case PixelFormat.RGB_565:
-            Log.v("SDL","pixel format RGB_565");
+            Log.v("SDL", "pixel format RGB_565");
             sdlFormat = 0x85151002; // SDL_PIXELFORMAT_RGB565
             break;
         case PixelFormat.RGB_888:
-            Log.v("SDL","pixel format RGB_888");
+            Log.v("SDL", "pixel format RGB_888");
             // Not sure this is right, maybe SDL_PIXELFORMAT_RGB24 instead?
             sdlFormat = 0x86161804; // SDL_PIXELFORMAT_RGB888
             break;
@@ -316,7 +276,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
         } catch(Exception e) {
             Log.v("SDL", e + "");
-            for(StackTraceElement s : e.getStackTrace()){
+            for(StackTraceElement s : e.getStackTrace()) {
                 Log.v("SDL", s.toString());
             }
         }
@@ -328,7 +288,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public void flipEGL() {
         try {
             EGL10 egl = (EGL10)EGLContext.getEGL();
-            GL10 gl = (GL10)mEGLContext.getGL();
 
             egl.eglWaitNative(EGL10.EGL_NATIVE_RENDERABLE, null);
 
@@ -341,20 +300,22 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             
         } catch(Exception e) {
             Log.v("SDL", "flipEGL(): " + e);
-            for(StackTraceElement s : e.getStackTrace()){
+            for(StackTraceElement s : e.getStackTrace()) {
                 Log.v("SDL", s.toString());
             }
         }
     }
 
     // Key events
-    public boolean onKey(View  v, int keyCode, KeyEvent event){
+    public boolean onKey(View  v, int keyCode, KeyEvent event) {
 
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
+            //Log.v("SDL", "key down: " + keyCode);
             SDLActivity.onNativeKeyDown(keyCode);
             return true;
         }
         else if (event.getAction() == KeyEvent.ACTION_UP) {
+            //Log.v("SDL", "key up: " + keyCode);
             SDLActivity.onNativeKeyUp(keyCode);
             return true;
         }

@@ -28,8 +28,7 @@
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "SDL_androidaudio.h"
-
-extern void Android_UpdateAudioBuffer(unsigned char *buf, int len);
+#include "../../SDL_android.h"
 
 #include <android/log.h>
 
@@ -94,7 +93,7 @@ AndroidAUD_GetDeviceBuf(_THIS)
 //    sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
 
 
-    Android_UpdateAudioBuffer(this->hidden->mixbuf, this->hidden->mixlen);
+    Android_JNI_UpdateAudioBuffer(this->hidden->mixbuf, this->hidden->mixlen);
     
     return this->hidden->mixbuf;        /* is this right? */
 }
