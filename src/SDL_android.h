@@ -34,8 +34,8 @@ void Android_JNI_SwapWindow();
 
 // Audio support
 int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
-void* Android_JNI_PinAudioBuffer();
-void Android_JNI_WriteAudioBufferAndUnpin();
+void* Android_JNI_GetAudioBuffer();
+void Android_JNI_WriteAudioBuffer();
 void Android_JNI_CloseAudioDevice();
 
 /* Ends C function definitions when using C++ */

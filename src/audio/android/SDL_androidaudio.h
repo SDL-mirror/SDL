@@ -31,9 +31,6 @@
 
 struct SDL_PrivateAudioData
 {
-    /* The file descriptor for the audio device */
-    Uint8 *mixbuf;
-    Uint32 mixlen;
 };
 
 #endif /* _SDL_androidaudio_h */

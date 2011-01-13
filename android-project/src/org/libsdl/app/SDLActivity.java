@@ -139,7 +139,7 @@ public class SDLActivity extends Activity {
                 i += result;
             } else if (result == 0) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                 } catch(InterruptedException e) {
                     // Nom nom
                 }
@@ -157,7 +157,7 @@ public class SDLActivity extends Activity {
                 i += result;
             } else if (result == 0) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(1);
                 } catch(InterruptedException e) {
                     // Nom nom
                 }
@@ -168,6 +168,23 @@ public class SDLActivity extends Activity {
         }
     }
 
+    public static void audioQuit() {
+        if (mAudioThread != null) {
+            try {
+                mAudioThread.join();
+            } catch(Exception e) {
+                Log.v("SDL", "Problem stopping audio thread: " + e);
+            }
+            mAudioThread = null;
+
+            Log.v("SDL", "Finished waiting for audio thread");
+        }
+
+        if (mAudioTrack != null) {
+            mAudioTrack.stop();
+            mAudioTrack = null;
+        }
+    }
 }
 
 /**
@@ -233,13 +250,11 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
         // Now wait for the SDL thread to quit
         if (mSDLThread != null) {
-            //synchronized (mSDLThread) {
-                try {
-                    mSDLThread.join();
-                } catch(Exception e) {
-                    Log.v("SDL", "Problem stopping thread: " + e);
-                }
-            //}
+            try {
+                mSDLThread.join();
+            } catch(Exception e) {
+                Log.v("SDL", "Problem stopping thread: " + e);
+            }
             mSDLThread = null;
 
             //Log.v("SDL", "Finished waiting for SDL thread");

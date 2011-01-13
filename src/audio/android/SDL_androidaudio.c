@@ -103,26 +103,19 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 static void
 AndroidAUD_PlayDevice(_THIS)
 {
-    Android_JNI_WriteAudioBufferAndUnpin();
-    this->hidden->mixbuf = NULL;
+    Android_JNI_WriteAudioBuffer();
 }
 
 static Uint8 *
 AndroidAUD_GetDeviceBuf(_THIS)
 {
-	if (this->hidden->mixbuf == NULL) {
-		this->hidden->mixbuf = Android_JNI_PinAudioBuffer();
-	}
-    return this->hidden->mixbuf;
+    return Android_JNI_GetAudioBuffer();
 }
 
 static void
 AndroidAUD_CloseDevice(_THIS)
 {
     if (this->hidden != NULL) {
-    	if (this->hidden->mixbuf != NULL) {
-    		Android_JNI_WriteAudioBufferAndUnpin();
-    	}
     	SDL_free(this->hidden);
     	this->hidden = NULL;
     }
