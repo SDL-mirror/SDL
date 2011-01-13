@@ -188,7 +188,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
                                int format, int width, int height) {
         //Log.v("SDL", "surfaceChanged()");
 
-        int sdlFormat = 0;
+        int sdlFormat = 0x85151002; // SDL_PIXELFORMAT_RGB565 by default
         switch (format) {
         case PixelFormat.A_8:
             Log.v("SDL", "pixel format A_8");
@@ -227,6 +227,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             Log.v("SDL", "pixel format RGB_888");
             // Not sure this is right, maybe SDL_PIXELFORMAT_RGB24 instead?
             sdlFormat = 0x86161804; // SDL_PIXELFORMAT_RGB888
+            break;
+        default:
+            Log.v("SDL", "pixel format unknown " + format);
             break;
         }
         SDLActivity.onNativeResize(width, height, sdlFormat);
@@ -310,12 +313,12 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public boolean onKey(View  v, int keyCode, KeyEvent event) {
 
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            //Log.v("SDL", "key down: " + keyCode);
+            Log.v("SDL", "key down: " + keyCode);
             SDLActivity.onNativeKeyDown(keyCode);
             return true;
         }
         else if (event.getAction() == KeyEvent.ACTION_UP) {
-            //Log.v("SDL", "key up: " + keyCode);
+            Log.v("SDL", "key up: " + keyCode);
             SDLActivity.onNativeKeyUp(keyCode);
             return true;
         }
