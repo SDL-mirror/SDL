@@ -33,6 +33,7 @@
 #include "SDL_androidvideo.h"
 #include "SDL_androidevents.h"
 #include "SDL_androidkeyboard.h"
+#include "SDL_androidwindow.h"
 
 #define ANDROID_VID_DRIVER_NAME "Android"
 
@@ -58,9 +59,9 @@ extern void Android_GL_DeleteContext(_THIS, SDL_GLContext context);
 
 // These are filled in with real values in Android_SetScreenResolution on 
 // init (before SDL_main())
-static Uint32 iScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
-static int iScreenWidth = 0;
-static int iScreenHeight = 0;
+int Android_ScreenWidth = 0;
+int Android_ScreenHeight = 0;
+Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
 
 
 static int
@@ -96,6 +97,10 @@ Android_CreateDevice(int devindex)
     device->VideoQuit = Android_VideoQuit;
     device->PumpEvents = Android_PumpEvents;
 
+    device->CreateWindow = Android_CreateWindow;
+    device->SetWindowTitle = Android_SetWindowTitle;
+    device->DestroyWindow = Android_DestroyWindow;
+
     device->free = Android_DeleteDevice;
 
     /* GL pointers */
@@ -123,9 +128,9 @@ Android_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
 
-    mode.format = iScreenFormat;
-    mode.w = iScreenWidth;
-    mode.h = iScreenHeight;
+    mode.format = Android_ScreenFormat;
+    mode.w = Android_ScreenWidth;
+    mode.h = Android_ScreenHeight;
     mode.refresh_rate = 0;
     mode.driverdata = NULL;
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
@@ -146,12 +151,13 @@ Android_VideoQuit(_THIS)
 {
 }
 
+/* This function gets called before VideoInit() */
 void
 Android_SetScreenResolution(int width, int height, Uint32 format)
 {
-    iScreenWidth = width;
-    iScreenHeight = height;   
-    iScreenFormat = format;
+    Android_ScreenWidth = width;
+    Android_ScreenHeight = height;   
+    Android_ScreenFormat = format;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

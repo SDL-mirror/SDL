@@ -67,6 +67,25 @@ public class SDLActivity extends Activity {
         super.onResume();
     }
 
+    // Messages from the SDLMain thread
+    static int COMMAND_CHANGE_TITLE = 1;
+
+    // Handler for the messages
+    Handler commandHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            if (msg.arg1 == COMMAND_CHANGE_TITLE) {
+                setTitle((String)msg.obj);
+            }
+        }
+    };
+
+    // Send a message from the SDLMain thread
+    void sendCommand(int command, Object data) {
+        Message msg = commandHandler.obtainMessage();
+        msg.arg1 = command;
+        msg.obj = data;
+        commandHandler.sendMessage(msg);
+    }
 
     // C functions we call
     public static native void nativeInit();
@@ -81,12 +100,18 @@ public class SDLActivity extends Activity {
 
 
     // Java functions called from C
-    private static void createGLContext() {
+
+    public static void createGLContext() {
         mSurface.initEGL();
     }
 
     public static void flipBuffers() {
         mSurface.flipEGL();
+    }
+
+    public static void setActivityTitle(String title) {
+        // Called from SDLMain() thread and can't directly affect the view
+        mSingleton.sendCommand(COMMAND_CHANGE_TITLE, title);
     }
 
     // Audio
@@ -177,7 +202,7 @@ public class SDLActivity extends Activity {
             }
             mAudioThread = null;
 
-            Log.v("SDL", "Finished waiting for audio thread");
+            //Log.v("SDL", "Finished waiting for audio thread");
         }
 
         if (mAudioTrack != null) {

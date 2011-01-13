@@ -42,12 +42,11 @@ extern void Android_RunAudioThread();
 /*******************************************************************************
                                Globals
 *******************************************************************************/
-static JavaVM* mVM = NULL;
 static JNIEnv* mEnv = NULL;
 static JNIEnv* mAudioEnv = NULL;
 
 // Main activity
-static jclass mActivityInstance;
+static jclass mActivityClass;
 
 // method signatures
 static jmethodID midCreateGLContext;
@@ -68,26 +67,29 @@ float fLastAccelerometer[3];
 // Library init
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
-    mVM = vm;
-
     return JNI_VERSION_1_4;
 }
 
 // Called before SDL_main() to initialize JNI bindings
-extern "C" void SDL_Android_Init(JNIEnv* env)
+extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls)
 {
-    mEnv = env;
-
     __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL_Android_Init()");
 
-    jclass cls = mEnv->FindClass ("org/libsdl/app/SDLActivity"); 
-    mActivityInstance = cls;
-    midCreateGLContext = mEnv->GetStaticMethodID(cls,"createGLContext","()V");
-    midFlipBuffers = mEnv->GetStaticMethodID(cls,"flipBuffers","()V");
-    midAudioInit = mEnv->GetStaticMethodID(cls, "audioInit", "(IZZI)Ljava/lang/Object;");
-    midAudioWriteShortBuffer = mEnv->GetStaticMethodID(cls, "audioWriteShortBuffer", "([S)V");
-    midAudioWriteByteBuffer = mEnv->GetStaticMethodID(cls, "audioWriteByteBuffer", "([B)V");
-    midAudioQuit = mEnv->GetStaticMethodID(cls, "audioQuit", "()V");
+    mEnv = env;
+    mActivityClass = cls;
+
+    midCreateGLContext = mEnv->GetStaticMethodID(mActivityClass,
+                                "createGLContext","()V");
+    midFlipBuffers = mEnv->GetStaticMethodID(mActivityClass,
+                                "flipBuffers","()V");
+    midAudioInit = mEnv->GetStaticMethodID(mActivityClass, 
+                                "audioInit", "(IZZI)Ljava/lang/Object;");
+    midAudioWriteShortBuffer = mEnv->GetStaticMethodID(mActivityClass,
+                                "audioWriteShortBuffer", "([S)V");
+    midAudioWriteByteBuffer = mEnv->GetStaticMethodID(mActivityClass,
+                                "audioWriteByteBuffer", "([B)V");
+    midAudioQuit = mEnv->GetStaticMethodID(mActivityClass,
+                                "audioQuit", "()V");
 
     if(!midCreateGLContext || !midFlipBuffers || !midAudioInit ||
        !midAudioWriteShortBuffer || !midAudioWriteByteBuffer || !midAudioQuit) {
@@ -97,7 +99,7 @@ extern "C" void SDL_Android_Init(JNIEnv* env)
 
 // Resize
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
-                                    JNIEnv* env, jobject obj,
+                                    JNIEnv* env, jclass jcls,
                                     jint width, jint height, jint format)
 {
     Android_SetScreenResolution(width, height, format);
@@ -105,21 +107,21 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
 
 // Keydown
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyDown(
-                                    JNIEnv* env, jobject obj, jint keycode)
+                                    JNIEnv* env, jclass jcls, jint keycode)
 {
     Android_OnKeyDown(keycode);
 }
 
 // Keyup
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeKeyUp(
-                                    JNIEnv* env, jobject obj, jint keycode)
+                                    JNIEnv* env, jclass jcls, jint keycode)
 {
     Android_OnKeyUp(keycode);
 }
 
 // Touch
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(
-                                    JNIEnv* env, jobject obj,
+                                    JNIEnv* env, jclass jcls,
                                     jint action, jfloat x, jfloat y, jfloat p)
 {
 #ifdef DEBUG
@@ -133,7 +135,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(
 
 // Accelerometer
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
-                                    JNIEnv* env, jobject obj,
+                                    JNIEnv* env, jclass jcls,
                                     jfloat x, jfloat y, jfloat z)
 {
     fLastAccelerometer[0] = x;
@@ -143,16 +145,18 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
 
 // Quit
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit(
-                                    JNIEnv* env, jobject obj)
+                                    JNIEnv* env, jclass cls)
 {    
     // Inject a SDL_QUIT event
     SDL_SendQuit();
 }
 
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
-                                    JNIEnv* env)
+                                    JNIEnv* env, jclass cls)
 {
-    mVM->AttachCurrentThread(&mAudioEnv, NULL);
+    /* This is the audio thread, with a different environment */
+    mAudioEnv = env;
+
     Android_RunAudioThread();
 }
 
@@ -162,12 +166,22 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
 *******************************************************************************/
 extern "C" void Android_JNI_CreateContext()
 {
-    mEnv->CallStaticVoidMethod(mActivityInstance, midCreateGLContext); 
+    mEnv->CallStaticVoidMethod(mActivityClass, midCreateGLContext); 
 }
 
 extern "C" void Android_JNI_SwapWindow()
 {
-    mEnv->CallStaticVoidMethod(mActivityInstance, midFlipBuffers); 
+    mEnv->CallStaticVoidMethod(mActivityClass, midFlipBuffers); 
+}
+
+extern "C" void Android_JNI_SetActivityTitle(const char *title)
+{
+    jmethodID mid;
+
+    mid = mEnv->GetStaticMethodID(mActivityClass,"setActivityTitle","(Ljava/lang/String;)V");
+    if (mid) {
+        mEnv->CallStaticVoidMethod(mActivityClass, mid, mEnv->NewStringUTF(title));
+    }
 }
 
 //
@@ -186,7 +200,7 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
     audioBuffer16Bit = is16Bit;
     audioBufferStereo = channelCount > 1;
 
-    audioBuffer = mEnv->CallStaticObjectMethod(mActivityInstance, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
+    audioBuffer = mEnv->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
 
     if (audioBuffer == NULL) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "SDL audio: didn't get back a good audio buffer!");
@@ -218,10 +232,10 @@ extern "C" void Android_JNI_WriteAudioBuffer()
 {
     if (audioBuffer16Bit) {
         mAudioEnv->ReleaseShortArrayElements((jshortArray)audioBuffer, (jshort *)audioBufferPinned, JNI_COMMIT);
-        mAudioEnv->CallStaticVoidMethod(mActivityInstance, midAudioWriteShortBuffer, (jshortArray)audioBuffer);
+        mAudioEnv->CallStaticVoidMethod(mActivityClass, midAudioWriteShortBuffer, (jshortArray)audioBuffer);
     } else {
         mAudioEnv->ReleaseByteArrayElements((jbyteArray)audioBuffer, (jbyte *)audioBufferPinned, JNI_COMMIT);
-        mAudioEnv->CallStaticVoidMethod(mActivityInstance, midAudioWriteByteBuffer, (jbyteArray)audioBuffer);
+        mAudioEnv->CallStaticVoidMethod(mActivityClass, midAudioWriteByteBuffer, (jbyteArray)audioBuffer);
     }
 
     /* JNI_COMMIT means the changes are committed to the VM but the buffer remains pinned */
@@ -229,7 +243,7 @@ extern "C" void Android_JNI_WriteAudioBuffer()
 
 extern "C" void Android_JNI_CloseAudioDevice()
 {
-    mEnv->CallStaticVoidMethod(mActivityInstance, midAudioQuit); 
+    mEnv->CallStaticVoidMethod(mActivityClass, midAudioQuit); 
 
     if (audioBuffer) {
         mEnv->DeleteGlobalRef(audioBuffer);

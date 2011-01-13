@@ -21,20 +21,32 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_androidvideo_h
-#define _SDL_androidvideo_h
-
 #include "../SDL_sysvideo.h"
 
-/* Called by the JNI layer when the screen changes size or format */
-extern void Android_SetScreenResolution(int width, int height, Uint32 format);
+#include "SDL_androidvideo.h"
+#include "SDL_androidwindow.h"
 
-/* Private display data */
+int
+Android_CreateWindow(_THIS, SDL_Window * window)
+{
+    /* Adjust the window data to match the screen */
+    window->x = 0;
+    window->y = 0;
+    window->w = Android_ScreenWidth;
+    window->h = Android_ScreenHeight;
 
-extern int Android_ScreenWidth;
-extern int Android_ScreenHeight;
-extern Uint32 Android_ScreenFormat;
+    return 0;
+}
 
-#endif /* _SDL_androidvideo_h */
+void
+Android_SetWindowTitle(_THIS, SDL_Window * window)
+{
+    Android_JNI_SetActivityTitle(window->title);
+}
+
+void
+Android_DestroyWindow(_THIS, SDL_Window * window)
+{
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

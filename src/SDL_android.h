@@ -31,6 +31,7 @@ extern "C" {
 /* Interface from the SDL library into the Android Java activity */
 void Android_JNI_CreateContext();
 void Android_JNI_SwapWindow();
+void Android_JNI_SetActivityTitle(const char *title);
 
 // Audio support
 int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
