@@ -211,14 +211,11 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
 
 extern "C" void * Android_JNI_GetAudioBuffer()
 {
-    //jboolean isCopy = JNI_FALSE;
-    //audioBufferPinned = mAudioEnv->GetPrimitiveArrayCritical((jarray)audioBuffer, &isCopy);
     return audioBufferPinned;
 }
 
 extern "C" void Android_JNI_WriteAudioBuffer()
 {
-    //mAudioEnv->ReleasePrimitiveArrayCritical((jarray)audioBuffer, audioBufferPinned, 0);
     if (audioBuffer16Bit) {
         mAudioEnv->ReleaseShortArrayElements((jshortArray)audioBuffer, (jshort *)audioBufferPinned, JNI_COMMIT);
         mAudioEnv->CallStaticVoidMethod(mActivityInstance, midAudioWriteShortBuffer, (jshortArray)audioBuffer);
@@ -234,8 +231,11 @@ extern "C" void Android_JNI_CloseAudioDevice()
 {
     mEnv->CallStaticVoidMethod(mActivityInstance, midAudioQuit); 
 
-    mEnv->DeleteGlobalRef(audioBuffer);
-    audioBuffer = NULL;
+    if (audioBuffer) {
+        mEnv->DeleteGlobalRef(audioBuffer);
+        audioBuffer = NULL;
+        audioBufferPinned = NULL;
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
