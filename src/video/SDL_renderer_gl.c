@@ -760,7 +760,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (!convert_format(renderdata, texture->format, &internalFormat,
                         &format, &type)) {
-        SDL_SetError("Unsupported texture format");
+        SDL_SetError("Texture format %s not supported by OpenGL",
+                     SDL_GetPixelFormatName(texture->format));
         return -1;
     }
     if (texture->format == SDL_PIXELFORMAT_UYVY &&

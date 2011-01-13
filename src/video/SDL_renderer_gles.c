@@ -408,7 +408,8 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_SHORT_4_4_4_4;
         break;
     default:
-        SDL_SetError("Unsupported by OpenGL ES texture format");
+        SDL_SetError("Texture format %s not supported by OpenGL ES",
+                     SDL_GetPixelFormatName(texture->format));
         return -1;
     }
 
