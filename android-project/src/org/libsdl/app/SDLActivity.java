@@ -269,7 +269,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             sdlFormat = 0x86161804; // SDL_PIXELFORMAT_RGB888
             break;
         }
-        SDLActivity.onNativeResize(width, height, format);
+        SDLActivity.onNativeResize(width, height, sdlFormat);
 
         // Now start up the C app thread
         if (mSDLThread == null) {
