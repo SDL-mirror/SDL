@@ -32,10 +32,9 @@
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
+#include "../../SDL_android.h"
 
-extern float fLastAccelerometer[3];
-
-const char *accelerometerName = "Android accelerometer";
+static const char *accelerometerName = "Android accelerometer";
 
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
@@ -47,17 +46,19 @@ SDL_SYS_JoystickInit(void)
 {
     SDL_numjoysticks = 1;
     
-return (1);
+    return (1);
 }
 
 /* Function to get the device-dependent name of a joystick */
 const char *
 SDL_SYS_JoystickName(int index)
 {
-    if (!index)
+    if (index == 0) {
         return accelerometerName;
-    SDL_SetError("No joystick available with that index");
-    return (NULL);
+    } else {
+        SDL_SetError("No joystick available with that index");
+        return (NULL);
+    }
 }
 
 /* Function to open a joystick for use.
@@ -82,12 +83,16 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
  * but instead should call SDL_PrivateJoystick*() to deliver events
  * and update joystick device state.
  */
-    void
+void
 SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 {
-    int i=0; 
-    for(i=0;i<3;i++){
-        SDL_PrivateJoystickAxis(joystick, i, fLastAccelerometer[i]);
+    int i;
+    float values[3];
+
+    Android_JNI_GetAccelerometerValues(values);
+
+    for ( i = 0; i < 3; i++ ) {
+        SDL_PrivateJoystickAxis(joystick, i, values[i]);
     }
 }
 
@@ -104,3 +109,5 @@ SDL_SYS_JoystickQuit(void)
 }
 
 #endif /* SDL_JOYSTICK_NDS */
+
+/* vi: set ts=4 sw=4 expandtab: */

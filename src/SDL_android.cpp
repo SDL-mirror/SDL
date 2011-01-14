@@ -57,7 +57,7 @@ static jmethodID midAudioWriteByteBuffer;
 static jmethodID midAudioQuit;
 
 // Accelerometer data storage
-float fLastAccelerometer[3];
+static float fLastAccelerometer[3];
 
 
 /*******************************************************************************
@@ -181,6 +181,14 @@ extern "C" void Android_JNI_SetActivityTitle(const char *title)
     mid = mEnv->GetStaticMethodID(mActivityClass,"setActivityTitle","(Ljava/lang/String;)V");
     if (mid) {
         mEnv->CallStaticVoidMethod(mActivityClass, mid, mEnv->NewStringUTF(title));
+    }
+}
+
+extern "C" void Android_JNI_GetAccelerometerValues(float values[3])
+{
+    int i;
+    for (i = 0; i < 3; ++i) {
+        values[i] = fLastAccelerometer[i];
     }
 }
 

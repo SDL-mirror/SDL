@@ -29,15 +29,16 @@ extern "C" {
 #endif
 
 /* Interface from the SDL library into the Android Java activity */
-void Android_JNI_CreateContext();
-void Android_JNI_SwapWindow();
-void Android_JNI_SetActivityTitle(const char *title);
+extern void Android_JNI_CreateContext();
+extern void Android_JNI_SwapWindow();
+extern void Android_JNI_SetActivityTitle(const char *title);
+extern void Android_JNI_GetAccelerometerValues(float values[3]);
 
 // Audio support
-int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
-void* Android_JNI_GetAudioBuffer();
-void Android_JNI_WriteAudioBuffer();
-void Android_JNI_CloseAudioDevice();
+extern int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
+extern void* Android_JNI_GetAudioBuffer();
+extern void Android_JNI_WriteAudioBuffer();
+extern void Android_JNI_CloseAudioDevice();
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
