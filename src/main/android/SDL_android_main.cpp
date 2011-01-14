@@ -23,8 +23,14 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass c
     SDL_Android_Init(env, cls);
 
     /* Run the application code! */
+    int status;
     char *argv[2];
     argv[0] = strdup("SDL_app");
     argv[1] = NULL;
-    SDL_main(1, argv);
+    status = SDL_main(1, argv);
+
+    /* We exit here for consistency with other platforms. */
+    exit(status);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */
