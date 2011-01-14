@@ -26,6 +26,7 @@
 extern "C" {
 #include "events/SDL_events_c.h"
 #include "video/android/SDL_androidkeyboard.h"
+#include "video/android/SDL_androidtouch.h"
 #include "video/android/SDL_androidvideo.h"
 
 /* Impelemented in audio/android/SDL_androidaudio.c */
@@ -124,13 +125,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(
                                     JNIEnv* env, jclass jcls,
                                     jint action, jfloat x, jfloat y, jfloat p)
 {
-#ifdef DEBUG
-    __android_log_print(ANDROID_LOG_INFO, "SDL", 
-                        "SDL: native touch event %d @ %f/%f, pressure %f\n", 
-                        action, x, y, p);
-#endif
-
-    //TODO: Pass this off to the SDL multitouch stuff
+    Android_OnTouch(action, x, y, p);
 }
 
 // Accelerometer

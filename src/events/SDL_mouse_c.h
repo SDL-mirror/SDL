@@ -26,7 +26,7 @@
 
 struct SDL_Cursor
 {
-    SDL_Cursor *next;
+    struct SDL_Cursor *next;
     void *driverdata;
 };
 

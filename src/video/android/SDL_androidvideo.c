@@ -29,6 +29,7 @@
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
+#include "../../events/SDL_windowevents_c.h"
 
 #include "SDL_androidvideo.h"
 #include "SDL_androidevents.h"
@@ -63,6 +64,8 @@ int Android_ScreenWidth = 0;
 int Android_ScreenHeight = 0;
 Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
 
+/* Currently only one window */
+SDL_Window *Android_Window = NULL;
 
 static int
 Android_Available(void)
@@ -158,6 +161,10 @@ Android_SetScreenResolution(int width, int height, Uint32 format)
     Android_ScreenWidth = width;
     Android_ScreenHeight = height;   
     Android_ScreenFormat = format;
+
+    if (Android_Window) {
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_RESIZED, width, height);
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,41 +21,8 @@
 */
 #include "SDL_config.h"
 
-#include "../SDL_sysvideo.h"
-
 #include "SDL_androidvideo.h"
-#include "SDL_androidwindow.h"
 
-int
-Android_CreateWindow(_THIS, SDL_Window * window)
-{
-    if (Android_Window) {
-        SDL_SetError("Android only supports one window");
-        return -1;
-    }
-    Android_Window = window;
-
-    /* Adjust the window data to match the screen */
-    window->x = 0;
-    window->y = 0;
-    window->w = Android_ScreenWidth;
-    window->h = Android_ScreenHeight;
-
-    return 0;
-}
-
-void
-Android_SetWindowTitle(_THIS, SDL_Window * window)
-{
-    Android_JNI_SetActivityTitle(window->title);
-}
-
-void
-Android_DestroyWindow(_THIS, SDL_Window * window)
-{
-    if (window == Android_Window) {
-        Android_Window = NULL;
-    }
-}
+extern void Android_OnTouch(int action, float x, float y, float p);
 
 /* vi: set ts=4 sw=4 expandtab: */

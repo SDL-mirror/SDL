@@ -21,40 +21,39 @@
 */
 #include "SDL_config.h"
 
-#include "../SDL_sysvideo.h"
+#include <android/log.h>
 
-#include "SDL_androidvideo.h"
-#include "SDL_androidwindow.h"
+#include "SDL_events.h"
+#include "../../events/SDL_mouse_c.h"
 
-int
-Android_CreateWindow(_THIS, SDL_Window * window)
+#include "SDL_androidtouch.h"
+
+
+#define ACTION_DOWN 0
+#define ACTION_UP 1
+#define ACTION_MOVE 2
+#define ACTION_CANCEL 3
+#define ACTION_OUTSIDE 4
+
+void Android_OnTouch(int action, float x, float y, float p)
 {
-    if (Android_Window) {
-        SDL_SetError("Android only supports one window");
-        return -1;
+    if (!Android_Window) {
+        return;
     }
-    Android_Window = window;
 
-    /* Adjust the window data to match the screen */
-    window->x = 0;
-    window->y = 0;
-    window->w = Android_ScreenWidth;
-    window->h = Android_ScreenHeight;
-
-    return 0;
-}
-
-void
-Android_SetWindowTitle(_THIS, SDL_Window * window)
-{
-    Android_JNI_SetActivityTitle(window->title);
-}
-
-void
-Android_DestroyWindow(_THIS, SDL_Window * window)
-{
-    if (window == Android_Window) {
-        Android_Window = NULL;
+    if ((action != ACTION_CANCEL) && (action != ACTION_OUTSIDE)) {
+        SDL_SetMouseFocus(Android_Window);
+        SDL_SendMouseMotion(Android_Window, 0, (int)x, (int)y);
+        switch(action) {
+        case ACTION_DOWN:
+            SDL_SendMouseButton(Android_Window, SDL_PRESSED, SDL_BUTTON_LEFT);
+            break;
+        case ACTION_UP:
+            SDL_SendMouseButton(Android_Window, SDL_RELEASED, SDL_BUTTON_LEFT);
+            break;
+        }
+    } else {
+        SDL_SetMouseFocus(NULL);
     }
 }
 

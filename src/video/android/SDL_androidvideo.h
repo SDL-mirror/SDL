@@ -34,6 +34,7 @@ extern void Android_SetScreenResolution(int width, int height, Uint32 format);
 extern int Android_ScreenWidth;
 extern int Android_ScreenHeight;
 extern Uint32 Android_ScreenFormat;
+extern SDL_Window *Android_Window;
 
 #endif /* _SDL_androidvideo_h */
 
