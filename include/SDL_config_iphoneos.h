@@ -93,6 +93,9 @@ typedef unsigned long uintptr_t;
 #define HAVE_SSCANF	1
 #define HAVE_SNPRINTF	1
 #define HAVE_VSNPRINTF	1
+#define HAVE_M_PI	1
+#define HAVE_ATAN	1
+#define HAVE_ATAN2	1
 #define HAVE_CEIL	1
 #define HAVE_COPYSIGN	1
 #define HAVE_COS	1
