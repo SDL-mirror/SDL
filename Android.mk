@@ -16,6 +16,8 @@ LOCAL_SRC_FILES := src/SDL_android.cpp \
 	$(subst $(LOCAL_PATH)/,, \
 	$(wildcard $(LOCAL_PATH)/src/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/audio/*.c) \
+	$(LOCAL_PATH)/src/atomic/SDL_atomic.c \
+	$(LOCAL_PATH)/src/atomic/SDL_spinlock.c.arm \
 	$(wildcard $(LOCAL_PATH)/src/cpuinfo/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/events/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/file/*.c) \
@@ -31,7 +33,6 @@ LOCAL_SRC_FILES := src/SDL_android.cpp \
 	$(wildcard $(LOCAL_PATH)/src/video/android/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/joystick/android/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/haptic/dummy/*.c) \
-	$(wildcard $(LOCAL_PATH)/src/atomic/dummy/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/thread/pthread/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/timer/unix/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/loadso/dlopen/*.c))

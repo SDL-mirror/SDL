@@ -365,7 +365,8 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\SDL.c" />
     <ClCompile Include="..\..\src\video\SDL_alphamult.c" />
     <ClCompile Include="..\..\src\SDL_assert.c" />
-    <ClCompile Include="..\..\src\atomic\win32\SDL_atomic.c" />
+    <ClCompile Include="..\..\src\atomic\SDL_atomic.c" />
+    <ClCompile Include="..\..\src\atomic\SDL_spinlock.c" />
     <ClCompile Include="..\..\src\audio\SDL_audio.c" />
     <ClCompile Include="..\..\src\audio\SDL_audiocvt.c" />
     <ClCompile Include="..\..\src\audio\SDL_audiodev.c" />

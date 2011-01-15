@@ -644,7 +644,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\atomic\win32\SDL_atomic.c"
+			RelativePath="..\..\src\atomic\SDL_atomic.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\atomic\SDL_spinlock.c"
 			>
 		</File>
 		<File

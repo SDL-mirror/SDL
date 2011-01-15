@@ -288,6 +288,7 @@ fi
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
 SOURCES="$SOURCES $srcdir/src/audio/*.c"
+SOURCES="$SOURCES $srcdir/src/atomic/*.c"
 SOURCES="$SOURCES $srcdir/src/cpuinfo/*.c"
 SOURCES="$SOURCES $srcdir/src/events/*.c"
 SOURCES="$SOURCES $srcdir/src/file/*.c"
@@ -2303,16 +2304,6 @@ case "$host" in
             ;;
           esac
         fi
-        # Set up files for the atomic operations library
-        if test x$enable_atomic = xyes; then
-          case $ARCH in
-            linux)
-                AC_DEFINE(SDL_ATOMIC_LINUX)
-                SOURCES="$SOURCES $srcdir/src/atomic/linux/*.c"
-                have_atomic=yes
-            ;;
-          esac
-        fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
           case $ARCH in
@@ -2395,12 +2386,6 @@ case "$host" in
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
-        # Setup files for the atomic operations
-        if test x$enable_atomic = xyes; then
-                AC_DEFINE(SDL_ATOMIC_QNX)
-                SOURCES="$SOURCES $srcdir/src/atomic/qnx/*.c"
-                have_atomic=yes
-        fi
         # Set up dummy files for the joystick for now
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_DUMMY)
@@ -2459,12 +2444,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
                 SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
             fi
             have_audio=yes
-        fi
-        # Set up files for the atomic operations library
-        if test x$enable_atomic = xyes; then
-            AC_DEFINE(SDL_ATOMIC_WIN32)
-            SOURCES="$SOURCES $srcdir/src/atomic/win32/*.c"
-            have_atomic=yes
         fi
         # Set up dummy files for the joystick for now
         if test x$enable_joystick = xyes; then
@@ -2554,12 +2533,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
                 SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
             fi
             have_audio=yes
-        fi
-        # Set up files for the atomic operations library
-        if test x$enable_atomic = xyes; then
-            AC_DEFINE(SDL_ATOMIC_WIN32)
-            SOURCES="$SOURCES $srcdir/src/atomic/win32/*.c"
-            have_atomic=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
@@ -2715,12 +2688,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
             have_audio=yes
         fi
-        # Set up files for the atomic operations library
-        if test x$enable_atomic = xyes; then
-            AC_DEFINE(SDL_ATOMIC_MACOSX)
-            SOURCES="$SOURCES $srcdir/src/atomic/macosx/*.c"
-            have_atomic=yes
-        fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
             AC_DEFINE(SDL_JOYSTICK_IOKIT)
@@ -2825,12 +2792,6 @@ if test x$have_loadso != xyes; then
         AC_DEFINE(SDL_LOADSO_DISABLED)
     fi
     SOURCES="$SOURCES $srcdir/src/loadso/dummy/*.c"
-fi
-if test x$have_atomic != xyes; then
-    if test x$enable_atomic = xyes; then
-        AC_DEFINE(SDL_ATOMIC_DISABLED)
-    fi
-    SOURCES="$SOURCES $srcdir/src/atomic/dummy/*.c"
 fi
 if test x$SDLMAIN_SOURCES = x; then
     SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
