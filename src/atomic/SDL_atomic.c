@@ -23,6 +23,12 @@
 
 #include "SDL_atomic.h"
 
+/* Note that we undefine the atomic operations here, in case they are
+   defined as compiler intrinsics while building SDL but the library user
+   doesn't have that compiler.  That way we always have a working set of
+   atomic operations built into the library.
+*/
+ 
 /* 
   If any of the operations are not provided then we must emulate some
   of them. That means we need a nice implementation of spin locks
@@ -51,20 +57,20 @@ static SDL_SpinLock locks[32];
 static __inline__ void
 enterLock(void *a)
 {
-   uintptr_t index = ((((uintptr_t)a) >> 3) & 0x1f);
+    uintptr_t index = ((((uintptr_t)a) >> 3) & 0x1f);
 
-   SDL_AtomicLock(&locks[index]);
+    SDL_AtomicLock(&locks[index]);
 }
 
 static __inline__ void
 leaveLock(void *a)
 {
-   uintptr_t index = ((((uintptr_t)a) >> 3) & 0x1f);
+    uintptr_t index = ((((uintptr_t)a) >> 3) & 0x1f);
 
-   SDL_AtomicUnlock(&locks[index]);
+    SDL_AtomicUnlock(&locks[index]);
 }
 
-#ifndef SDL_AtomicSet
+#undef SDL_AtomicSet
 int
 SDL_AtomicSet(SDL_atomic_t *a, int value)
 {
@@ -77,9 +83,8 @@ SDL_AtomicSet(SDL_atomic_t *a, int value)
 
     return oldvalue;
 }
-#endif
 
-#ifndef SDL_AtomicGet
+#undef SDL_AtomicGet
 int
 SDL_AtomicGet(SDL_atomic_t *a)
 {
@@ -88,9 +93,8 @@ SDL_AtomicGet(SDL_atomic_t *a)
     */
     return a->value;
 }
-#endif
 
-#ifndef SDL_AtomicAdd
+#undef SDL_AtomicAdd
 int
 SDL_AtomicAdd(SDL_atomic_t *a, int value)
 {
@@ -103,53 +107,48 @@ SDL_AtomicAdd(SDL_atomic_t *a, int value)
 
     return oldvalue;
 }
-#endif
 
-#ifndef SDL_AtomicIncRef
+#undef SDL_AtomicIncRef
 void
 SDL_AtomicIncRef(SDL_atomic_t *a)
 {
     SDL_AtomicAdd(a, 1);
 }
-#endif
 
-#ifndef SDL_AtomicDecRef
+#undef SDL_AtomicDecRef
 SDL_bool
 SDL_AtomicDecRef(SDL_atomic_t *a)
 {
     return SDL_AtomicAdd(a, -1) == 1;
 }
-#endif
 
-#ifndef SDL_AtomicCAS
-int
+#undef SDL_AtomicCAS
+SDL_bool
 SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval)
 {
-    int prevval;
+    SDL_bool retval = SDL_FALSE;
 
     enterLock(a);
-    prevval = a->value;
-    if (prevval == oldval) {
+    if (a->value == oldval) {
         a->value = newval;
+        retval = SDL_TRUE;
     }
     leaveLock(a);
 
-    return prevval;
+    return retval;
 }
-#endif
 
-#ifndef SDL_AtomicSetPtr
+#undef SDL_AtomicSetPtr
 void
 SDL_AtomicSetPtr(void** a, void* value)
 {
     void *prevval;
     do {
         prevval = *a;
-    } while (SDL_AtomicCASPtr(a, prevval, value) != prevval);
+    } while (!SDL_AtomicCASPtr(a, prevval, value));
 }
-#endif
 
-#ifndef SDL_AtomicGetPtr
+#undef SDL_AtomicGetPtr
 void*
 SDL_AtomicGetPtr(void** a)
 {
@@ -158,22 +157,20 @@ SDL_AtomicGetPtr(void** a)
     */
     return *a;
 }
-#endif
 
-#ifndef SDL_AtomicCASPtr
-void* SDL_AtomicCASPtr(void **a, void *oldval, void *newval)
+#undef SDL_AtomicCASPtr
+SDL_bool SDL_AtomicCASPtr(void **a, void *oldval, void *newval)
 {
-    void *prevval;
+    SDL_bool retval = SDL_FALSE;
 
     enterLock(a);
-    prevval = *a;
     if (*a == oldval) {
         *a = newval;
+        retval = SDL_TRUE;
     }
     leaveLock(a);
 
-    return prevval;
+    return retval;
 }
-#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

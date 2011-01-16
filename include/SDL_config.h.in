@@ -58,6 +58,7 @@
 
 #undef SIZEOF_VOIDP
 #undef SDL_HAS_64BIT_TYPE
+#undef HAVE_GCC_ATOMICS
 
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC

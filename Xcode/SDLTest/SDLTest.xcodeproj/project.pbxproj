@@ -3985,7 +3985,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 001B5A0C08BDB826006539E9 /* Build configuration list for PBXProject "SDLTest" */;
 			compatibilityVersion = "Xcode 3.0";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* SDLTest */;
 			projectDirPath = "";
 			projectReferences = (

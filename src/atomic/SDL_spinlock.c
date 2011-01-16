@@ -44,24 +44,22 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 #elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
-#elif defined(__GNUC__)
-#if defined(__arm__)
-#ifdef __ARM_ARCH_5__
+#elif defined(HAVE_GCC_ATOMICS)
+    return (__sync_lock_test_and_set(lock, 1) == 0);
+
+#elif defined(__GNUC__) && defined(__arm__) && defined(__ARM_ARCH_5__)
     int result;
     __asm__ __volatile__ (
         "swp %0, %1, [%2]\n"
         : "=&r,&r" (result) : "r,0" (1), "r,r" (lock) : "memory");
     return (result == 0);
-#else
+
+#elif defined(__GNUC__) && defined(__arm__)
     int result;
     __asm__ __volatile__ (
         "ldrex %0, [%2]\nteq   %0, #0\nstrexeq %0, %1, [%2]"
         : "=&r" (result) : "r" (1), "r" (lock) : "cc", "memory");
     return (result == 0);
-#endif
-#else
-    return (__sync_lock_test_and_set(lock, 1) == 0);
-#endif
 
 #else
     /* Need CPU instructions for spinlock here! */
@@ -81,19 +79,8 @@ SDL_AtomicLock(SDL_SpinLock *lock)
 void
 SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
-#if defined(__WIN32__)
+    /* Assuming atomic assignment operation and full memory barrier in lock */
     *lock = 0;
-
-#elif defined(__MACOSX__)
-    *lock = 0;
-
-#elif defined(__GNUC__) && !defined(__arm__)
-    __sync_lock_release(lock);
-
-#else
-    /* Assuming memory barrier in lock and integral assignment operation */
-    *lock = 0;
-#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
