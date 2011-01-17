@@ -27,7 +27,7 @@
 #include "video/SDL_sysvideo.h"
 
 #ifdef _WINDOWS
-#define WIN32_LEAN_AND_MEAN 1
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else  /* fprintf, _exit(), etc. */
 #include <stdio.h>
