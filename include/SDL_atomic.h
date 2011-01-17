@@ -115,10 +115,10 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 #if defined(__WIN32__)
 #include <intrin.h>
 
-#define SDL_AtomicSet(a, v)     _InterlockedExchange(&(a)->value, (v))
+#define SDL_AtomicSet(a, v)     _InterlockedExchange((long*)&(a)->value, (v))
 #define SDL_AtomicGet(a)        ((a)->value)
-#define SDL_AtomicAdd(a, v)     _InterlockedExchangeAdd(&(a)->value, (v))
-#define SDL_AtomicCAS(a, oldval, newval) (_InterlockedCompareExchange(&(a)->value, (newval), (oldval)) == (oldval))
+#define SDL_AtomicAdd(a, v)     _InterlockedExchangeAdd((long*)&(a)->value, (v))
+#define SDL_AtomicCAS(a, oldval, newval) (_InterlockedCompareExchange((long*)&(a)->value, (newval), (oldval)) == (oldval))
 #define SDL_AtomicSetPtr(a, v)  (void)_InterlockedExchangePointer((a), (v))
 #define SDL_AtomicGetPtr(a)     (*(a))
 #if _M_IX86
