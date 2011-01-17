@@ -317,9 +317,8 @@ typedef struct SDL_TouchButtonEvent
 } SDL_TouchButtonEvent;
 
 
-
 /**
- *  \brief Multiple Finger Gesture Event
+ *  \brief Multiple Finger Gesture Event (event.mgesture.*)
  */
 typedef struct SDL_MultiGestureEvent
 {
@@ -334,7 +333,7 @@ typedef struct SDL_MultiGestureEvent
     Uint16 padding;
 } SDL_MultiGestureEvent;
 
-typedef struct SDL_DollarGestureEvent
+typedef struct SDL_DollarGestureEvent (event.dgesture.*)
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
     Uint32 windowID;    /**< The window with mouse focus, if any */
@@ -350,8 +349,6 @@ typedef struct SDL_DollarGestureEvent
 } SDL_DollarGestureEvent;
 
 
-
-
 /**
  *  \brief The "quit requested" event
  */
@@ -359,6 +356,7 @@ typedef struct SDL_QuitEvent
 {
     Uint32 type;        /**< ::SDL_QUIT */
 } SDL_QuitEvent;
+
 
 /**
  *  \brief A user-defined event type (event.user.*)
@@ -371,6 +369,7 @@ typedef struct SDL_UserEvent
     void *data1;        /**< User defined data pointer */
     void *data2;        /**< User defined data pointer */
 } SDL_UserEvent;
+
 
 struct SDL_SysWMmsg;
 typedef struct SDL_SysWMmsg SDL_SysWMmsg;
