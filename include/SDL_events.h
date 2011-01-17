@@ -333,7 +333,8 @@ typedef struct SDL_MultiGestureEvent
     Uint16 padding;
 } SDL_MultiGestureEvent;
 
-typedef struct SDL_DollarGestureEvent (event.dgesture.*)
+/* (event.dgesture.*) */
+typedef struct SDL_DollarGestureEvent
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
     Uint32 windowID;    /**< The window with mouse focus, if any */
