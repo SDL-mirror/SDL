@@ -25,8 +25,7 @@
 #include "SDL_timer.h"
 
 #if defined(__WIN32__)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <intrin.h>
 
 #elif defined(__MACOSX__)
 #include <libkern/OSAtomic.h>
@@ -39,7 +38,8 @@ SDL_bool
 SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
 #if defined(__WIN32__)
-    return (InterlockedExchange(lock, 1) == 0);
+    SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
+    return (_InterlockedExchange((long*)lock, 1) == 0);
 
 #elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
