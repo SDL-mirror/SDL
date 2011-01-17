@@ -168,7 +168,7 @@ static int render_hasBlendModes (void)
 {
    int fail;
    int ret;
-   int mode;
+   SDL_BlendMode mode;
 
    fail = 0;
 
