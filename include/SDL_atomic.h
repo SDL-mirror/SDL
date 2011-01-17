@@ -107,14 +107,16 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 
 /*@}*//*SDL AtomicLock*/
 
-/* Platform specific optimized versions of the atomic functions */
-#if defined(__WIN32__) && defined(_INC_WINDOWS)
+/* Platform specific optimized versions of the atomic functions,
+ * you can disable these by defining SDL_DISABLE_ATOMIC_INLINE
+ */
+#ifndef SDL_DISABLE_ATOMIC_INLINE
+
+#if defined(__WIN32__)
 /* Don't include windows.h, since it may hose code that isn't expecting it,
    but if someone has already included it, this is fair game... */
-#if 0
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#endif
 
 #define SDL_AtomicSet(a, v)     InterlockedExchange(&(a)->value, v)
 #define SDL_AtomicGet(a)        ((a)->value)
@@ -168,6 +170,9 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 #define SDL_AtomicCASPtr(a, oldval, newval) __sync_bool_compare_and_swap(a, oldval, newval)
 
 #endif
+
+#endif /* !SDL_DISABLE_ATOMIC_INLINE */
+
 
 /**
  * \brief A type representing an atomic integer value.  It is a struct

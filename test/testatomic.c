@@ -1,5 +1,7 @@
 #include <stdio.h>
+
 #include "SDL.h"
+#include "SDL_atomic.h"
 #include "SDL_assert.h"
 
 /*
