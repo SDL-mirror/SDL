@@ -30,6 +30,7 @@ void RunBasicTest()
     int value;
     SDL_SpinLock lock = 0;
 
+    SDL_atomic_t v;
     SDL_bool tfret = SDL_FALSE;
 
     printf("\nspin lock---------------------------------------\n\n");
@@ -40,33 +41,31 @@ void RunBasicTest()
     printf("AtomicUnlock                 lock=%d\n", lock);
 
     printf("\natomic -----------------------------------------\n\n");
-
-    SDL_atomic_t v;
      
     SDL_AtomicSet(&v, 0);
     tfret = SDL_AtomicSet(&v, 10) == 0;
-    printf("AtomicSet(10)        tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicSet(10)        tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
     tfret = SDL_AtomicAdd(&v, 10) == 10;
-    printf("AtomicAdd(10)        tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicAdd(10)        tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
 
     SDL_AtomicSet(&v, 0);
     SDL_AtomicIncRef(&v);
     tfret = (SDL_AtomicGet(&v) == 1);
-    printf("AtomicIncRef()       tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicIncRef()       tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
     SDL_AtomicIncRef(&v);
     tfret = (SDL_AtomicGet(&v) == 2);
-    printf("AtomicIncRef()       tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicIncRef()       tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
     tfret = (SDL_AtomicDecRef(&v) == SDL_FALSE);
-    printf("AtomicDecRef()       tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicDecRef()       tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
     tfret = (SDL_AtomicDecRef(&v) == SDL_TRUE);
-    printf("AtomicDecRef()       tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicDecRef()       tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
 
     SDL_AtomicSet(&v, 10);
     tfret = (SDL_AtomicCAS(&v, 0, 20) == SDL_FALSE);
-    printf("AtomicCAS()          tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicCAS()          tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
     value = SDL_AtomicGet(&v);
     tfret = (SDL_AtomicCAS(&v, value, 20) == SDL_TRUE);
-    printf("AtomicCAS()          tfret=%s val=%"PRIu32"\n", tf(tfret), SDL_AtomicGet(&v));
+    printf("AtomicCAS()          tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
 }
 
 /* Atomic operation test, adapted from code by Michael Davidsaver at:
