@@ -113,18 +113,19 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
 #if defined(__WIN32__)
-/* Don't include windows.h, since it may hose code that isn't expecting it,
-   but if someone has already included it, this is fair game... */
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <intrin.h>
 
-#define SDL_AtomicSet(a, v)     InterlockedExchange(&(a)->value, v)
+#define SDL_AtomicSet(a, v)     _InterlockedExchange(&(a)->value, (v))
 #define SDL_AtomicGet(a)        ((a)->value)
-#define SDL_AtomicAdd(a, v)     InterlockedAdd(&(a)->value, v)
-#define SDL_AtomicCAS(a, oldval, newval) (InterlockedCompareExchange(&(a)->value, newval, oldval) == (oldval))
-#define SDL_AtomicSetPtr(a, v)  InterlockedExchangePointer(a, v)
+#define SDL_AtomicAdd(a, v)     _InterlockedExchangeAdd(&(a)->value, (v))
+#define SDL_AtomicCAS(a, oldval, newval) (_InterlockedCompareExchange(&(a)->value, (newval), (oldval)) == (oldval))
+#define SDL_AtomicSetPtr(a, v)  (void)_InterlockedExchangePointer((a), (v))
 #define SDL_AtomicGetPtr(a)     (*(a))
-#define SDL_AtomicCASPtr(a, oldval, newval) (InterlockedCompareExchangePointer(a, newval, oldval) == (oldval))
+#if _M_IX86
+#define SDL_AtomicCASPtr(a, oldval, newval) (_InterlockedCompareExchange((long*)(a), (long)(newval), (long)(oldval)) == (long)(oldval))
+#else
+#define SDL_AtomicCASPtr(a, oldval, newval) (_InterlockedCompareExchangePointer((a), (newval), (oldval)) == (oldval))
+#endif
 
 #elif defined(__MACOSX__)
 #include <libkern/OSAtomic.h>
