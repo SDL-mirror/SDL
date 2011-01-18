@@ -112,7 +112,7 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
  */
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
-#if defined(__WIN32__)
+#if defined(_MSC_VER)
 #include <intrin.h>
 
 #define SDL_AtomicSet(a, v)     _InterlockedExchange((long*)&(a)->value, (v))
