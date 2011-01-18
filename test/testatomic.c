@@ -68,9 +68,13 @@ void RunBasicTest()
     printf("AtomicCAS()          tfret=%s val=%d\n", tf(tfret), SDL_AtomicGet(&v));
 }
 
-/* Atomic operation test, adapted from code by Michael Davidsaver at:
-    http://bazaar.launchpad.net/~mdavidsaver/epics-base/atomic/revision/12105#src/libCom/test/epicsAtomicTest.c
-*/
+/**************************************************************************/
+/* Atomic operation test
+ * Adapted with permission from code by Michael Davidsaver at:
+ *  http://bazaar.launchpad.net/~mdavidsaver/epics-base/atomic/revision/12105#src/libCom/test/epicsAtomicTest.c
+ * Original copyright 2010 Brookhaven Science Associates as operator of Brookhaven National Lab
+ * http://www.aps.anl.gov/epics/license/open.php
+ */
 
 /* Tests semantics of atomic operations.  Also a stress test
  * to see if they are really atomic.
@@ -223,6 +227,9 @@ void RunEpicTest()
     SDL_assert(v==Expect);
     SDL_assert(bad!=Expect);
 }
+
+/* End atomic operation test */
+/**************************************************************************/
 
 int
 main(int argc, char *argv[])
