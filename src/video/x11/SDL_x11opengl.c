@@ -64,6 +64,15 @@
 #define GLX_CONTEXT_FLAGS_ARB              0x2094
 #define GLX_CONTEXT_DEBUG_BIT_ARB          0x0001
 #define GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
+
+/* Typedef for the GL 3.0 context creation function */
+typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
+                                                        GLXFBConfig config,
+                                                        GLXContext
+                                                        share_context,
+                                                        Bool direct,
+                                                        const int
+                                                        *attrib_list);
 #endif
 
 #define OPENGL_REQUIRS_DLOPEN
@@ -80,16 +89,6 @@
 
 static void X11_GL_InitExtensions(_THIS);
 
-/* Typedef for the GL 3.0 context creation function */
-#ifndef GLX_ARB_create_context
-typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
-                                                        GLXFBConfig config,
-                                                        GLXContext
-                                                        share_context,
-                                                        Bool direct,
-                                                        const int
-                                                        *attrib_list);
-#endif /* GLX_ARB_create_context */
 
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
