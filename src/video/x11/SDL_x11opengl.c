@@ -81,6 +81,7 @@
 static void X11_GL_InitExtensions(_THIS);
 
 /* Typedef for the GL 3.0 context creation function */
+#ifndef GLX_ARB_create_context
 typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
                                                         GLXFBConfig config,
                                                         GLXContext
@@ -88,6 +89,7 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
                                                         Bool direct,
                                                         const int
                                                         *attrib_list);
+#endif /* GLX_ARB_create_context */
 
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
