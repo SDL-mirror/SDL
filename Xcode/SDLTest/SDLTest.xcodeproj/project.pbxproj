@@ -38,7 +38,6 @@
 				001799741074403E00F5D044 /* PBXTargetDependency */,
 				001799761074403E00F5D044 /* PBXTargetDependency */,
 				001799781074403E00F5D044 /* PBXTargetDependency */,
-				0017997A1074403E00F5D044 /* PBXTargetDependency */,
 				0017997C1074403E00F5D044 /* PBXTargetDependency */,
 				0017997E1074403E00F5D044 /* PBXTargetDependency */,
 				001799801074403E00F5D044 /* PBXTargetDependency */,
@@ -190,18 +189,6 @@
 		001797C8107433C600F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
 		001797C9107433C600F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
 		001797D41074343E00F5D044 /* testloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 001797D31074343E00F5D044 /* testloadso.c */; };
-		001797DF107434A800F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
-		001797E0107434A800F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
-		001797E1107434A800F5D044 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863B10730545007319AE /* CoreAudio.framework */; };
-		001797E2107434A800F5D044 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863C10730545007319AE /* ForceFeedback.framework */; };
-		001797E3107434A800F5D044 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863D10730545007319AE /* IOKit.framework */; };
-		001797E4107434A800F5D044 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A869F10730593007319AE /* AudioToolbox.framework */; };
-		001797E5107434A800F5D044 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86A010730593007319AE /* CoreFoundation.framework */; };
-		001797E6107434A800F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
-		001797E7107434A800F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
-		001797E8107434A800F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001797E9107434A800F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001797F41074351600F5D044 /* testmmousetablet.c in Sources */ = {isa = PBXBuildFile; fileRef = 001797F31074351600F5D044 /* testmmousetablet.c */; };
 		001798011074355200F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		001798021074355200F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
 		001798031074355200F5D044 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863B10730545007319AE /* CoreAudio.framework */; };
@@ -718,13 +705,6 @@
 			remoteGlobalIDString = BEC567F70761D90600A33029;
 			remoteInfo = "libsdlmain.a (Upgraded)";
 		};
-		001797DA107434A800F5D044 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BEC567F70761D90600A33029;
-			remoteInfo = "libsdlmain.a (Upgraded)";
-		};
 		001797FC1074355200F5D044 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -948,13 +928,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = BEC5674A0761D90400A33029;
 			remoteInfo = testlock;
-		};
-		001799791074403E00F5D044 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 001797D8107434A800F5D044;
-			remoteInfo = testmousetablet;
 		};
 		0017997B1074403E00F5D044 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -1495,7 +1468,6 @@
 		001797B31074339C00F5D044 /* testintersections.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testintersections.c; path = ../../test/testintersections.c; sourceTree = SOURCE_ROOT; };
 		001797D0107433C600F5D044 /* testloadso.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testloadso.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		001797D31074343E00F5D044 /* testloadso.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testloadso.c; path = ../../test/testloadso.c; sourceTree = SOURCE_ROOT; };
-		001797F0107434A800F5D044 /* testmousetablet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testmousetablet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		001797F31074351600F5D044 /* testmmousetablet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testmmousetablet.c; path = ../../test/testmmousetablet.c; sourceTree = SOURCE_ROOT; };
 		001798121074355200F5D044 /* testmultiaudio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testmultiaudio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		001798151074359B00F5D044 /* testmultiaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testmultiaudio.c; path = ../../test/testmultiaudio.c; sourceTree = SOURCE_ROOT; };
@@ -1741,24 +1713,6 @@
 				001797C7107433C600F5D044 /* AudioUnit.framework in Frameworks */,
 				001797C8107433C600F5D044 /* Carbon.framework in Frameworks */,
 				001797C9107433C600F5D044 /* libSDL.a in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		001797DE107434A800F5D044 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				001797DF107434A800F5D044 /* libsdlcommon.a in Frameworks */,
-				001797E0107434A800F5D044 /* Cocoa.framework in Frameworks */,
-				001797E1107434A800F5D044 /* CoreAudio.framework in Frameworks */,
-				001797E2107434A800F5D044 /* ForceFeedback.framework in Frameworks */,
-				001797E3107434A800F5D044 /* IOKit.framework in Frameworks */,
-				001797E4107434A800F5D044 /* AudioToolbox.framework in Frameworks */,
-				001797E5107434A800F5D044 /* CoreFoundation.framework in Frameworks */,
-				001797E6107434A800F5D044 /* OpenGL.framework in Frameworks */,
-				001797E7107434A800F5D044 /* AudioUnit.framework in Frameworks */,
-				001797E8107434A800F5D044 /* Carbon.framework in Frameworks */,
-				001797E9107434A800F5D044 /* libSDL.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2630,7 +2584,6 @@
 				0017978E107432AE00F5D044 /* testime.app */,
 				001797AE1074334C00F5D044 /* testintersections.app */,
 				001797D0107433C600F5D044 /* testloadso.app */,
-				001797F0107434A800F5D044 /* testmousetablet.app */,
 				001798121074355200F5D044 /* testmultiaudio.app */,
 				0017983C1074369600F5D044 /* testnativecocoa.app */,
 				001798941074392D00F5D044 /* testnativex11.app */,
@@ -2696,13 +2649,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		001797BB107433C600F5D044 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		001797DB107434A800F5D044 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3147,26 +3093,6 @@
 			productInstallPath = "$(USER_APPS_DIR)";
 			productName = testalpha;
 			productReference = 001797D0107433C600F5D044 /* testloadso.app */;
-			productType = "com.apple.product-type.application";
-		};
-		001797D8107434A800F5D044 /* testmousetablet */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 001797EA107434A800F5D044 /* Build configuration list for PBXNativeTarget "testmousetablet" */;
-			buildPhases = (
-				001797DB107434A800F5D044 /* Headers */,
-				001797DC107434A800F5D044 /* Resources */,
-				001797DD107434A800F5D044 /* Sources */,
-				001797DE107434A800F5D044 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				001797D9107434A800F5D044 /* PBXTargetDependency */,
-			);
-			name = testmousetablet;
-			productInstallPath = "$(USER_APPS_DIR)";
-			productName = testalpha;
-			productReference = 001797F0107434A800F5D044 /* testmousetablet.app */;
 			productType = "com.apple.product-type.application";
 		};
 		001797FA1074355200F5D044 /* testmultiaudio */ = {
@@ -4029,7 +3955,6 @@
 				BEC5673D0761D90400A33029 /* testkeys */,
 				001797B8107433C600F5D044 /* testloadso */,
 				BEC5674A0761D90400A33029 /* testlock */,
-				001797D8107434A800F5D044 /* testmousetablet */,
 				001797FA1074355200F5D044 /* testmultiaudio */,
 				001798241074369600F5D044 /* testnativecocoa */,
 				001798781074392D00F5D044 /* testnativex11 */,
@@ -4146,13 +4071,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		001797BC107433C600F5D044 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		001797DC107434A800F5D044 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4506,14 +4424,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				001797D41074343E00F5D044 /* testloadso.c in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		001797DD107434A800F5D044 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				001797F41074351600F5D044 /* testmmousetablet.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4883,11 +4793,6 @@
 			target = BEC567F70761D90600A33029 /* sdlcommon */;
 			targetProxy = 001797BA107433C600F5D044 /* PBXContainerItemProxy */;
 		};
-		001797D9107434A800F5D044 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BEC567F70761D90600A33029 /* sdlcommon */;
-			targetProxy = 001797DA107434A800F5D044 /* PBXContainerItemProxy */;
-		};
 		001797FB1074355200F5D044 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BEC567F70761D90600A33029 /* sdlcommon */;
@@ -5047,11 +4952,6 @@
 			isa = PBXTargetDependency;
 			target = BEC5674A0761D90400A33029 /* testlock */;
 			targetProxy = 001799771074403E00F5D044 /* PBXContainerItemProxy */;
-		};
-		0017997A1074403E00F5D044 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 001797D8107434A800F5D044 /* testmousetablet */;
-			targetProxy = 001799791074403E00F5D044 /* PBXContainerItemProxy */;
 		};
 		0017997C1074403E00F5D044 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -5682,51 +5582,6 @@
 			buildSettings = {
 				INFOPLIST_FILE = "Info-testloadso.plist";
 				PRODUCT_NAME = testloadso;
-				WRAPPER_EXTENSION = app;
-			};
-			name = Default;
-		};
-		001797EB107434A800F5D044 /* Deployment_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-testmousetablet.plist";
-				PRODUCT_NAME = testmousetablet;
-				WRAPPER_EXTENSION = app;
-			};
-			name = Deployment_using_10.4SDK_and_10.6SDK;
-		};
-		001797EC107434A800F5D044 /* Development_using_10.4SDK_and_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-testmousetablet.plist";
-				PRODUCT_NAME = testmousetablet;
-				WRAPPER_EXTENSION = app;
-			};
-			name = Development_using_10.4SDK_and_10.6SDK;
-		};
-		001797ED107434A800F5D044 /* Development_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-testmousetablet.plist";
-				PRODUCT_NAME = testmousetablet;
-				WRAPPER_EXTENSION = app;
-			};
-			name = Development_native_only;
-		};
-		001797EE107434A800F5D044 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-testmousetablet.plist";
-				PRODUCT_NAME = testmousetablet;
-				WRAPPER_EXTENSION = app;
-			};
-			name = Deployment_native_only;
-		};
-		001797EF107434A800F5D044 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "Info-testmousetablet.plist";
-				PRODUCT_NAME = testmousetablet;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Default;
@@ -7928,18 +7783,6 @@
 				001797CD107433C600F5D044 /* Development_native_only */,
 				001797CE107433C600F5D044 /* Deployment_native_only */,
 				001797CF107433C600F5D044 /* Default */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
-		};
-		001797EA107434A800F5D044 /* Build configuration list for PBXNativeTarget "testmousetablet" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				001797EB107434A800F5D044 /* Deployment_using_10.4SDK_and_10.6SDK */,
-				001797EC107434A800F5D044 /* Development_using_10.4SDK_and_10.6SDK */,
-				001797ED107434A800F5D044 /* Development_native_only */,
-				001797EE107434A800F5D044 /* Deployment_native_only */,
-				001797EF107434A800F5D044 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;
