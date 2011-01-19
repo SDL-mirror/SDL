@@ -235,6 +235,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\include\SDL_assert.h" />
     <ClInclude Include="..\..\include\SDL_atomic.h" />
     <ClInclude Include="..\..\include\SDL_audio.h" />
+    <ClInclude Include="..\..\include\SDL_clipboard.h" />
     <ClInclude Include="..\..\include\SDL_compat.h" />
     <ClInclude Include="..\..\include\SDL_config.h" />
     <ClInclude Include="..\..\include\SDL_config_win32.h" />
@@ -386,6 +387,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\video\SDL_bmp.c" />
     <ClCompile Include="..\..\src\SDL_compat.c" />
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
+    <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
     <ClCompile Include="..\..\src\video\SDL_shape.c" />
     <ClCompile Include="..\..\src\video\win32\SDL_d3drender.c" />
     <ClCompile Include="..\..\src\audio\windib\SDL_dibaudio.c" />
