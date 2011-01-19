@@ -48,6 +48,7 @@ AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
 dnl AC_CANONICAL_HOST
+AX_GCC_ARCHFLAG([no])
 
 dnl Check for tools
 AC_PROG_LIBTOOL
