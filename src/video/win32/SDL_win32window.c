@@ -19,14 +19,6 @@
     Sam Lantinga
     slouken@libsdl.org
 */
-
-/* we need to define it, so that raw input is included */
-
-#if (_WIN32_WINNT < 0x0501)
-#undef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
-#endif
-
 #include "SDL_config.h"
 
 #include "../SDL_sysvideo.h"
