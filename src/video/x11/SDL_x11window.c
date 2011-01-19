@@ -746,6 +746,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 #endif
 
+    XFlush(display);
+
     return 0;
 }
 
@@ -858,6 +860,7 @@ X11_SetWindowTitle(_THIS, SDL_Window * window)
         }
 #endif
     }
+    XFlush(display);
 }
 
 void
@@ -906,6 +909,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     } else {
         XDeleteProperty(display, data->xwindow, _NET_WM_ICON);
     }
+    XFlush(display);
 }
 
 void
@@ -934,6 +938,7 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
         y = window->y;
     }
     XMoveWindow(display, data->xwindow, x, y);
+    XFlush(display);
 }
 
 void
@@ -945,6 +950,7 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     if (SDL_IsShapedWindow(window))
         X11_ResizeWindowShape(window);
     XResizeWindow(display, data->xwindow, window->w, window->h);
+    XFlush(display);
 }
 
 void
@@ -954,6 +960,7 @@ X11_ShowWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
 
     XMapRaised(display, data->xwindow);
+    XFlush(display);
 }
 
 void
@@ -963,6 +970,7 @@ X11_HideWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
 
     XUnmapWindow(display, data->xwindow);
+    XFlush(display);
 }
 
 void
@@ -972,6 +980,7 @@ X11_RaiseWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
 
     XRaiseWindow(display, data->xwindow);
+    XFlush(display);
 }
 
 static void
@@ -1020,6 +1029,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
             XDeleteProperty(display, data->xwindow, _NET_WM_STATE);
         }
     }
+    XFlush(display);
 }
 
 void
@@ -1037,6 +1047,7 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
  
     XIconifyWindow(display, data->xwindow, displaydata->screen);
+    XFlush(display);
 }
 
 void
@@ -1111,6 +1122,7 @@ X11_DestroyWindow(_THIS, SDL_Window * window)
 #endif
         if (data->created) {
             XDestroyWindow(display, data->xwindow);
+            XFlush(display);
         }
         SDL_free(data);
     }
