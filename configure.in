@@ -240,7 +240,7 @@ if test x$enable_libc = xyes; then
     AC_CHECK_LIB(m, pow, [LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
     AC_CHECK_FUNCS(atan atan2 ceil copysign cos cosf fabs floor log pow scalbn sin sinf sqrt)
 
-    AC_CHECK_LIB(iconv, libiconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
+    AC_CHECK_LIB(iconv, iconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
     AC_CHECK_FUNCS(iconv)
 fi
 
