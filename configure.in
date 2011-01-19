@@ -48,7 +48,6 @@ AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
 dnl AC_CANONICAL_HOST
-AX_GCC_ARCHFLAG([no])
 
 dnl Check for tools
 AC_PROG_LIBTOOL
@@ -84,6 +83,9 @@ case "$host" in
         BASE_LDFLAGS=""
         ;;
 esac
+# Uncomment the following line if you want to force SDL and applications
+# built with it to be compiled for a particular architecture.
+#AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
 BUILD_CFLAGS="$CFLAGS $CPPFLAGS"
 # The default optimization for SDL 1.3 is -O3 (Bug #31)
 if test x$orig_CFLAGS = x; then
