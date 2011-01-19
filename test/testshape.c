@@ -56,9 +56,9 @@ int main(int argc,char** argv) {
 	SDL_Rect texture_dimensions;;
 
 	if(argc < 2) {
-        	printf("SDL_Shape requires at least one bitmap file as argument.\n");
-        	exit(-1);
-        }
+    	printf("SDL_Shape requires at least one bitmap file as argument.\n");
+    	exit(-1);
+    }
 	
 	if(SDL_VideoInit(NULL,0) == -1) {
 		printf("Could not initialize SDL video.\n");
