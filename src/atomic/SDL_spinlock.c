@@ -24,20 +24,12 @@
 #include "SDL_atomic.h"
 #include "SDL_timer.h"
 
-#if defined(__WIN32__)
-#include <intrin.h>
-
-#elif defined(__MACOSX__)
-#include <libkern/OSAtomic.h>
-
-#endif
-
 
 /* This function is where all the magic happens... */
 SDL_bool
 SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
-#if defined(__WIN32__)
+#if defined(_MSC_VER)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
     return (_InterlockedExchange((long*)lock, 1) == 0);
 
