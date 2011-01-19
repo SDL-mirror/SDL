@@ -45,7 +45,7 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="2"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -197,10 +197,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\test\automated\rwops\TestSupportRWops_Generic.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\test\automated\SDL_at.c"
 				>
 			</File>
@@ -210,6 +206,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\test\automated\testsdl.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\test\automated\rwops\TestSupportRWops_Generic.c"
 				>
 			</File>
 		</Filter>

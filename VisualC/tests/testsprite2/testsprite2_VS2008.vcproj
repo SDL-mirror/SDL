@@ -104,7 +104,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL and data files"
-				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp"
+				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -141,7 +141,7 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\..\include"
 				PreprocessorDefinitions="WIN32,_DEBUG,_WINDOWS"
-				RuntimeLibrary="2"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Debug/testsprite2.pch"
 				AssemblerListingLocation=".\Debug/"
@@ -196,7 +196,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL and data files"
-				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp"
+				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\icon.bmp $(ProjectDir)\icon.bmp&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
