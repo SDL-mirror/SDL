@@ -2679,12 +2679,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         EXTRA_CFLAGS="$EXTRA_CFLAGS -DTARGET_API_MAC_CARBON"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -DTARGET_API_MAC_OSX"
 
-        # HACK: Reset EXTRA_LDFLAGS; the only thing it contains at this point
-        # is -lm which is not needed under Mac OS X. But for some reasons it
-        # also tends to contain spurious -L switches, which we don't want to
-        # use here or in sdl-config. Hence we reset it.
-        EXTRA_LDFLAGS=""
-
         CheckVisibilityHidden
         CheckDummyVideo
         CheckDiskAudio
