@@ -85,6 +85,12 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Debug/testplatform.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy SDL</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -126,6 +132,12 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <OutputFile>.\Release/testplatform.bsc</OutputFile>
     </Bscmake>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy SDL</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Library Include="..\..\Sdl\Debug\SDL.lib" />

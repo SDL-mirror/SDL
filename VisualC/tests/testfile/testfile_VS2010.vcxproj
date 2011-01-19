@@ -81,6 +81,12 @@
       <ProgramDatabaseFile>.\Debug/testfile.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy SDL</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Midl>
@@ -118,6 +124,12 @@
       <ProgramDatabaseFile>.\Release/testfile.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
+    <PostBuildEvent>
+      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy SDL</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Library Include="..\..\Sdl\Debug\SDL.lib" />
