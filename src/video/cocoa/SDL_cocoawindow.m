@@ -232,6 +232,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
     SDL_Window *window = _data->window;
     NSPoint point;
 
+    if (window->flags & SDL_WINDOW_FULLSCREEN)
+        return;
+
     point = [theEvent locationInWindow];
     point.y = window->h - point.y;
     if ( point.x < 0 || point.x >= window->w ||
