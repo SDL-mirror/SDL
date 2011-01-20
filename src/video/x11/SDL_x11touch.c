@@ -34,8 +34,6 @@ void
 X11_InitTouch(_THIS)
 {
 #ifdef SDL_INPUT_LINUXEV
-  printf("Initializing touch...\n");
-
   FILE *fd;
   fd = fopen("/proc/bus/input/devices","r");
   
@@ -46,12 +44,11 @@ X11_InitTouch(_THIS)
   int vendor = -1,product = -1,event = -1;
   while(!feof(fd)) {
     if(fgets(line,256,fd) <=0) continue;
-    //printf("%s",line);
     if(line[0] == '\n') {
       if(vendor == 1386){
-	printf("Wacom... Assuming it is a touch device\n");
-	sprintf(tstr,"/dev/input/event%i",event);
-	printf("At location: %s\n",tstr);
+	/*printf("Wacom... Assuming it is a touch device\n");*/
+	/*sprintf(tstr,"/dev/input/event%i",event);*/
+	/*printf("At location: %s\n",tstr);*/
 
 	SDL_Touch touch;
 	touch.pressure_max = 0;
@@ -69,14 +66,9 @@ X11_InitTouch(_THIS)
 	data->up = SDL_FALSE;
 	
 
-	printf("Opening device...\n");
-	//printf("New Touch - DataPtr: %i\n",data);
 	data->eventStream = open(tstr, 
 				 O_RDONLY | O_NONBLOCK);
 	ioctl (data->eventStream, EVIOCGNAME (sizeof (tstr)), tstr);
-	printf ("Reading From : %s\n", tstr);
-
-
 
 	int abs[5];
 	ioctl(data->eventStream,EVIOCGABS(0),abs);	
