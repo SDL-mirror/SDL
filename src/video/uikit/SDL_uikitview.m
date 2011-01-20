@@ -35,9 +35,6 @@
 @implementation SDL_uikitview
 
 - (void)dealloc {
-#if SDL_IPHONE_KEYBOARD
-	[textField release];
-#endif
 	[super dealloc];
 }
 
@@ -220,7 +217,7 @@
 /* Set ourselves up as a UITextFieldDelegate */
 - (void)initializeKeyboard {
 		
-	textField = [[[UITextField alloc] initWithFrame: CGRectZero] autorelease];
+	textField = [[UITextField alloc] initWithFrame: CGRectZero];
 	textField.delegate = self;
 	/* placeholder so there is something to delete! */
 	textField.text = @" ";	
@@ -238,6 +235,7 @@
 	keyboardVisible = NO;
 	/* add the UITextField (hidden) to our view */
 	[self addSubview: textField];
+	[textField release];
 }
 
 /* reveal onscreen virtual keyboard */
