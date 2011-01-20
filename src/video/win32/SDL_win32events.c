@@ -218,6 +218,40 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_LEFT);
         break;
 
+    case WM_RBUTTONDOWN:
+        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_RIGHT);
+        break;
+
+    case WM_RBUTTONUP:
+        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_RIGHT);
+        break;
+
+    case WM_MBUTTONDOWN:
+        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_MIDDLE);
+        break;
+
+    case WM_MBUTTONUP:
+        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_MIDDLE);
+        break;
+
+    case WM_XBUTTONDOWN:
+        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_X1 + GET_XBUTTON_WPARAM(wParam) - 1);
+        returnCode = TRUE;
+        break;
+
+    case WM_XBUTTONUP:
+        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_X1 + GET_XBUTTON_WPARAM(wParam) - 1);
+        returnCode = TRUE;
+        break;
+
+    case WM_MOUSEWHEEL:
+        {
+            int motion = (short) HIWORD(wParam);
+
+            SDL_SendMouseWheel(data->window, 0, motion);
+            break;
+        }
+
     case WM_MOUSELEAVE:
         if (SDL_GetMouseFocus() == data->window) {
             SDL_SetMouseFocus(NULL);
