@@ -65,9 +65,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_DIRECTFB
     &DirectFB_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_PS3
-    &PS3_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_WIN32
     &WIN32_bootstrap,
 #endif
