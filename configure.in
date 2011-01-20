@@ -1573,7 +1573,6 @@ CheckOpenGLX11()
         AC_TRY_COMPILE([
          #include <GL/gl.h>
          #include <GL/glx.h>
-         #include <GL/glu.h>
         ],[
         ],[
         video_opengl=yes

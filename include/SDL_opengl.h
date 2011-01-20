@@ -47,11 +47,9 @@
 #endif
 #if defined(__MACOSX__)
 #include <OpenGL/gl.h>          /* Header File For The OpenGL Library */
-#include <OpenGL/glu.h>         /* Header File For The GLU Library */
 #define __X_GL_H
 #else
 #include <GL/gl.h>              /* Header File For The OpenGL Library */
-#include <GL/glu.h>             /* Header File For The GLU Library */
 #endif
 #ifndef NO_SDL_GLEXT
 #undef __glext_h_
