@@ -29,6 +29,7 @@
 #include "../../events/SDL_windowevents_c.h"
 #include "SDL_cocoavideo.h"
 #include "SDL_cocoashape.h"
+#include "SDL_cocoamouse.h"
 
 static __inline__ void ConvertNSRect(NSRect *r)
 {
@@ -260,20 +261,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-    float x = [theEvent deltaX];
-    float y = [theEvent deltaY];
-
-    if (x > 0) {
-        x += 0.9f;
-    } else if (x < 0) {
-        x -= 0.9f;
-    }
-    if (y > 0) {
-        y += 0.9f;
-    } else if (y < 0) {
-        y -= 0.9f;
-    }
-    SDL_SendMouseWheel(_data->window, (int)x, (int)y);
+    Cocoa_HandleMouseWheel(_data->window, theEvent);
 }
 
 - (void)touchesBeganWithEvent:(NSEvent *) theEvent

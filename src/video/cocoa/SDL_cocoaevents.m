@@ -201,6 +201,7 @@ Cocoa_PumpEvents(_THIS)
         case NSLeftMouseDragged:
         case NSRightMouseDragged:
         case NSOtherMouseDragged: /* usually middle mouse dragged */
+        case NSScrollWheel:
         case NSMouseMoved:
             Cocoa_HandleMouseEvent(_this, event);
             /* Pass through to NSApp to make sure everything stays in sync */

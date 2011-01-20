@@ -93,6 +93,9 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
     case NSRightMouseUp:
         SDL_SendMouseButton(window, SDL_RELEASED, ConvertMouseButtonToSDL([event buttonNumber]));
         break;
+    case NSScrollWheel:
+        Cocoa_HandleMouseWheel(window, event);
+        break;
     case NSLeftMouseDragged:
     case NSRightMouseDragged:
     case NSOtherMouseDragged: /* usually middle mouse dragged */
@@ -107,6 +110,25 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 void
 Cocoa_QuitMouse(_THIS)
 {
+}
+
+void
+Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent *event)
+{
+    float x = [event deltaX];
+    float y = [event deltaY];
+
+    if (x > 0) {
+        x += 0.9f;
+    } else if (x < 0) {
+        x -= 0.9f;
+    }
+    if (y > 0) {
+        y += 0.9f;
+    } else if (y < 0) {
+        y -= 0.9f;
+    }
+    SDL_SendMouseWheel(window, (int)x, (int)y);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
