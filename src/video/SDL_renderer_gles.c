@@ -557,13 +557,36 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
     GLenum result;
+    int bpp = SDL_BYTESPERPIXEL(texture->format);
+    void * temp_buffer;
+    void * temp_ptr;
+    int i;
 
     renderdata->glGetError();
     renderdata->glEnable(data->type);
     SetupTextureUpdate(renderdata, texture, pitch);
+
+    if( rect->w * bpp == pitch ) {
+         temp_buffer = (void *)pixels; /* No need to reformat */
+    } else {
+         /* Reformatting of mem area required */
+         temp_buffer = SDL_malloc(rect->w * rect->h * bpp);
+         temp_ptr = temp_buffer;
+         for (i = 0; i < rect->h; i++) {
+             SDL_memcpy(temp_ptr, pixels, rect->w * bpp);
+             temp_ptr += rect->w * bpp;
+             pixels += pitch;
+         }
+    }
+
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
-                                pixels);
+                                temp_buffer);
+
+    if( temp_buffer != pixels ) {
+        SDL_free(temp_buffer);
+    }
+
     renderdata->glDisable(data->type);
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
