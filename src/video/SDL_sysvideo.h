@@ -408,9 +408,6 @@ extern VideoBootStrap COCOA_bootstrap;
 #if SDL_VIDEO_DRIVER_X11
 extern VideoBootStrap X11_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_FBCON
-extern VideoBootStrap FBCON_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_DIRECTFB
 extern VideoBootStrap DirectFB_bootstrap;
 #endif
