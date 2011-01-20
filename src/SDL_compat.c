@@ -155,11 +155,21 @@ SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags)
     modes = NULL;
     for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
         SDL_DisplayMode mode;
+        int bpp;
+
         SDL_GetDisplayMode(i, &mode);
         if (!mode.w || !mode.h) {
             return (SDL_Rect **) (-1);
         }
-        if (SDL_BITSPERPIXEL(mode.format) != format->BitsPerPixel) {
+        
+        /* Copied from src/video/SDL_pixels.c:SDL_PixelFormatEnumToMasks */
+        if (SDL_BYTESPERPIXEL(mode.format) <= 2) {
+            bpp = SDL_BITSPERPIXEL(mode.format);
+        } else {
+            bpp = SDL_BYTESPERPIXEL(mode.format) * 8;
+        }
+
+        if (bpp != format->BitsPerPixel) {
             continue;
         }
         if (nmodes > 0 && modes[nmodes - 1]->w == mode.w
