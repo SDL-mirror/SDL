@@ -414,9 +414,6 @@ extern VideoBootStrap DirectFB_bootstrap;
 #if SDL_VIDEO_DRIVER_PS3
 extern VideoBootStrap PS3_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_SVGALIB
-extern VideoBootStrap SVGALIB_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_WIN32
 extern VideoBootStrap WIN32_bootstrap;
 #endif

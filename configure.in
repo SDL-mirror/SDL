@@ -1586,36 +1586,6 @@ CheckPS3()
   fi
 }
 
-dnl Find the SVGAlib includes and libraries
-CheckSVGA()
-{
-    AC_ARG_ENABLE(video-svga,
-AC_HELP_STRING([--enable-video-svga], [use SVGAlib video driver [[default=no]]]),
-                  , enable_video_svga=no)
-    if test x$enable_video = xyes -a x$enable_video_svga = xyes; then
-        AC_MSG_CHECKING(for SVGAlib (1.4.0+) support)
-        video_svga=no
-        AC_TRY_COMPILE([
-         #include <vga.h>
-         #include <vgamouse.h>
-         #include <vgakeyboard.h>
-        ],[
-         if ( SCANCODE_RIGHTWIN && SCANCODE_LEFTWIN ) {
-             exit(0);
-         }
-        ],[
-        video_svga=yes
-        ])
-        AC_MSG_RESULT($video_svga)
-        if test x$video_svga = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_SVGALIB)
-            SOURCES="$SOURCES $srcdir/src/video/svga/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lvga"
-            have_video=yes
-        fi
-    fi
-}
-
 dnl rcg04172001 Set up the Null video driver.
 CheckDummyVideo()
 {
@@ -2276,7 +2246,6 @@ case "$host" in
         CheckDirectFB
         CheckFusionSound
         CheckPS3
-        CheckSVGA
         CheckOpenGLX11
         CheckInputEvents
         CheckTslib
