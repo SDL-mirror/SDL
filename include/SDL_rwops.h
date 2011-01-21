@@ -83,7 +83,7 @@ typedef struct SDL_RWops
     Uint32 type;
     union
     {
-#ifdef __WIN32__
+#ifdef __WINDOWS__
         struct
         {
             SDL_bool append;
@@ -94,7 +94,7 @@ typedef struct SDL_RWops
                 size_t size;
                 size_t left;
             } buffer;
-        } win32io;
+        } windowsio;
 #endif
 #ifdef HAVE_STDIO_H
         struct

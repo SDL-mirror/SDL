@@ -29,7 +29,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Making sure basic SDL headers are in place..."
-				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_win32.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_win32.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
+				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_windows.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_windows.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -164,7 +164,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Making sure basic SDL headers are in place..."
-				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_win32.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_win32.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
+				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_windows.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_windows.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -299,7 +299,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Making sure basic SDL headers are in place..."
-				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_win32.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_win32.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
+				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_windows.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_windows.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -425,7 +425,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Src\Main\Win32\SDL_win32_main.c"
+			RelativePath="..\..\src\main\windows\SDL_windows_main.c"
 			>
 		</File>
 	</Files>

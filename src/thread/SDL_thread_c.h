@@ -35,8 +35,8 @@
 #include "pthread/SDL_systhread_c.h"
 #elif SDL_THREAD_SPROC
 #include "irix/SDL_systhread_c.h"
-#elif SDL_THREAD_WIN32
-#include "win32/SDL_systhread_c.h"
+#elif SDL_THREAD_WINDOWS
+#include "windows/SDL_systhread_c.h"
 #elif SDL_THREAD_NDS
 #include "nds/SDL_systhread_c.h"
 #else

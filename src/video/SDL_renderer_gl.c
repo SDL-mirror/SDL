@@ -1181,7 +1181,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         }
         data->glEnd();
     } else {
-#if defined(__APPLE__) || defined(__WIN32__)
+#if defined(__APPLE__) || defined(__WINDOWS__)
 #else
         int x1, y1, x2, y2;
 #endif
@@ -1200,7 +1200,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
          * least it would be pixel perfect.
          */
         data->glBegin(GL_POINTS);
-#if defined(__APPLE__) || defined(__WIN32__)
+#if defined(__APPLE__) || defined(__WINDOWS__)
         /* Mac OS X and Windows seem to always leave the second point open */
         data->glVertex2f(0.5f + points[count-1].x, 0.5f + points[count-1].y);
 #else

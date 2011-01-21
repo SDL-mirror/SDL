@@ -89,7 +89,7 @@
 #undef HAVE_REALLOC
 #undef HAVE_FREE
 #undef HAVE_ALLOCA
-#ifndef _WIN32 /* Don't use C runtime versions of these on Windows */
+#ifndef __WINDOWS__ /* Don't use C runtime versions of these on Windows */
 #undef HAVE_GETENV
 #undef HAVE_SETENV
 #undef HAVE_PUTENV
@@ -235,7 +235,7 @@
 #undef SDL_LOADSO_DLOPEN
 #undef SDL_LOADSO_DUMMY
 #undef SDL_LOADSO_LDG
-#undef SDL_LOADSO_WIN32
+#undef SDL_LOADSO_WINDOWS
 
 /* Enable various threading systems */
 #undef SDL_THREAD_BEOS
@@ -244,7 +244,7 @@
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP
 #undef SDL_THREAD_SPROC
-#undef SDL_THREAD_WIN32
+#undef SDL_THREAD_WINDOWS
 
 /* Enable various timer systems */
 #undef SDL_TIMER_BEOS
@@ -252,7 +252,7 @@
 #undef SDL_TIMER_NDS
 #undef SDL_TIMER_RISCOS
 #undef SDL_TIMER_UNIX
-#undef SDL_TIMER_WIN32
+#undef SDL_TIMER_WINDOWS
 #undef SDL_TIMER_WINCE
 
 /* Enable various video drivers */
@@ -265,7 +265,7 @@
 #undef SDL_VIDEO_DRIVER_PHOTON
 #undef SDL_VIDEO_DRIVER_QNXGF
 #undef SDL_VIDEO_DRIVER_RISCOS
-#undef SDL_VIDEO_DRIVER_WIN32
+#undef SDL_VIDEO_DRIVER_WINDOWS
 #undef SDL_VIDEO_DRIVER_X11
 #undef SDL_VIDEO_DRIVER_X11_DYNAMIC
 #undef SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT

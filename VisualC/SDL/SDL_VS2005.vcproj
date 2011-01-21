@@ -29,7 +29,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Making sure basic SDL headers are in place..."
-				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_win32.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_win32.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
+				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_windows.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_windows.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -207,7 +207,7 @@
 			<Tool
 				Name="VCPreBuildEventTool"
 				Description="Making sure basic SDL headers are in place..."
-				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_win32.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_win32.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
+				CommandLine="if exist &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot; goto SDLCONFIGOKAY&#x0D;&#x0A;echo Copying SDL_config_windows.h to SDL_config.h...&#x0D;&#x0A;copy &quot;$(ProjectDir)\..\..\include\SDL_config_windows.h&quot; &quot;$(ProjectDir)\..\..\include\SDL_config.h&quot;&#x0D;&#x0A;:SDLCONFIGOKAY&#x0D;&#x0A;&#x0D;&#x0A;if exist &quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot; goto SDLREVISIONOKAY&#x0D;&#x0A;echo Creating stub SDL_revision.h file...&#x0D;&#x0A;echo #define SDL_REVISION 0 &gt;&quot;$(ProjectDir)\..\..\include\SDL_revision.h&quot;&#x0D;&#x0A;:SDLREVISIONOKAY&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -411,7 +411,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\SDL_config_win32.h"
+				RelativePath="..\..\include\SDL_config_windows.h"
 				>
 			</File>
 			<File
@@ -768,11 +768,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_d3drender.c"
+			RelativePath="..\..\src\video\windows\SDL_d3drender.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_d3drender.h"
+			RelativePath="..\..\src\video\windows\SDL_d3drender.h"
 			>
 		</File>
 		<File
@@ -824,7 +824,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\joystick\win32\SDL_dxjoystick.c"
+			RelativePath="..\..\src\joystick\windows\SDL_dxjoystick.c"
 			>
 		</File>
 		<File
@@ -860,11 +860,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_gdirender.c"
+			RelativePath="..\..\src\video\windows\SDL_gdirender.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_gdirender.h"
+			RelativePath="..\..\src\video\windows\SDL_gdirender.h"
 			>
 		</File>
 		<File
@@ -948,7 +948,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\joystick\win32\SDL_mmjoystick.c"
+			RelativePath="..\..\src\joystick\windows\SDL_mmjoystick.c"
 			>
 		</File>
 		<File
@@ -1072,7 +1072,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\haptic\win32\SDL_syshaptic.c"
+			RelativePath="..\..\src\haptic\windows\SDL_syshaptic.c"
 			>
 		</File>
 		<File
@@ -1084,11 +1084,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\loadso\win32\SDL_sysloadso.c"
+			RelativePath="..\..\src\loadso\windows\SDL_sysloadso.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\thread\win32\SDL_sysmutex.c"
+			RelativePath="..\..\src\thread\windows\SDL_sysmutex.c"
 			>
 		</File>
 		<File
@@ -1096,11 +1096,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\thread\win32\SDL_syssem.c"
+			RelativePath="..\..\src\thread\windows\SDL_syssem.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\thread\win32\SDL_systhread.c"
+			RelativePath="..\..\src\thread\windows\SDL_systhread.c"
 			>
 		</File>
 		<File
@@ -1108,11 +1108,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\thread\win32\SDL_systhread_c.h"
+			RelativePath="..\..\src\thread\windows\SDL_systhread_c.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\timer\win32\SDL_systimer.c"
+			RelativePath="..\..\src\timer\windows\SDL_systimer.c"
 			>
 		</File>
 		<File
@@ -1152,7 +1152,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_vkeys.h"
+			RelativePath="..\..\src\video\windows\SDL_vkeys.h"
 			>
 		</File>
 		<File
@@ -1164,83 +1164,83 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32clipboard.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsclipboard.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32clipboard.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsclipboard.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32events.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsevents.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32events.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsevents.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32gamma.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsgamma.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32gamma.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsgamma.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32keyboard.c"
+			RelativePath="..\..\src\video\windows\SDL_windowskeyboard.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32keyboard.h"
+			RelativePath="..\..\src\video\windows\SDL_windowskeyboard.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32modes.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsmodes.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32modes.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsmodes.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32mouse.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsmouse.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32mouse.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsmouse.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32opengl.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsopengl.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32opengl.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsopengl.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32shape.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsshape.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32shape.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsshape.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32video.c"
+			RelativePath="..\..\src\video\windows\SDL_windowsvideo.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32video.h"
+			RelativePath="..\..\src\video\windows\SDL_windowsvideo.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32window.c"
+			RelativePath="..\..\src\video\windows\SDL_windowswindow.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\SDL_win32window.h"
+			RelativePath="..\..\src\video\windows\SDL_windowswindow.h"
 			>
 		</File>
 		<File
@@ -1264,7 +1264,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\win32\wmmsg.h"
+			RelativePath="..\..\src\video\windows\wmmsg.h"
 			>
 		</File>
 	</Files>

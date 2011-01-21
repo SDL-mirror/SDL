@@ -2,7 +2,7 @@
 * Customizations for specific platforms should go in alternative files.
 */
 
-// quiet win32 compiler warnings
+// quiet windows compiler warnings
 #define _CRT_SECURE_NO_WARNINGS
 
 #include <stdio.h>

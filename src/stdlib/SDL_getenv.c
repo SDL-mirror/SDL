@@ -25,7 +25,7 @@
 
 #ifndef HAVE_GETENV
 
-#if defined(__WIN32__) && !defined(_WIN32_WCE)
+#if defined(__WINDOWS__) && !defined(_WIN32_WCE)
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -163,7 +163,7 @@ SDL_getenv(const char *name)
     return value;
 }
 
-#endif /* __WIN32__ */
+#endif /* __WINDOWS__ */
 
 #endif /* !HAVE_GETENV */
 

@@ -971,7 +971,7 @@ open_audio_device(const char *devname, int iscapture,
     if (!current_audio.impl.ProvidesOwnCallbackThread) {
         /* Start the audio thread */
 /* !!! FIXME: this is nasty. */
-#if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
+#if (defined(__WINDOWS__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
         device->thread = SDL_CreateThread(SDL_RunAudio, device, NULL, NULL);
 #else

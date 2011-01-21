@@ -31,7 +31,7 @@
 
 #include "SDL_config.h"
 
-#ifdef __WIN32__
+#ifdef __WINDOWS__
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
 #define NOMINMAX                /* Don't defined min() and max() */

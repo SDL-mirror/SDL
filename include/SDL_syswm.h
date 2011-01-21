@@ -54,7 +54,7 @@ extern "C" {
 struct SDL_SysWMinfo;
 #else
 
-#if defined(SDL_VIDEO_DRIVER_WIN32)
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -118,7 +118,7 @@ struct SDL_SysWMmsg
     SDL_SYSWM_TYPE subsystem;
     union
     {
-#if defined(SDL_VIDEO_DRIVER_WIN32)
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
         struct {
             HWND hwnd;                  /**< The window for the message */
             UINT msg;                   /**< The type of message */
@@ -163,7 +163,7 @@ struct SDL_SysWMinfo
     SDL_SYSWM_TYPE subsystem;
     union
     {
-#if defined(SDL_VIDEO_DRIVER_WIN32)
+#if defined(SDL_VIDEO_DRIVER_WINDOWS)
         struct
         {
             HWND window;                /**< The window handle */

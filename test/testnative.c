@@ -10,8 +10,8 @@
 #define MAX_SPEED 	1
 
 static NativeWindowFactory *factories[] = {
-#ifdef TEST_NATIVE_WIN32
-    &Win32WindowFactory,
+#ifdef TEST_NATIVE_WINDOWS
+    &WindowsWindowFactory,
 #endif
 #ifdef TEST_NATIVE_X11
     &X11WindowFactory,

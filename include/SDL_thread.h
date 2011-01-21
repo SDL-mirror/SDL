@@ -55,7 +55,7 @@ typedef unsigned long SDL_threadID;
  */
 typedef int (SDLCALL * SDL_ThreadFunction) (void *data);
 
-#if defined(__WIN32__) && !defined(HAVE_LIBC)
+#if defined(__WINDOWS__) && !defined(HAVE_LIBC)
 /**
  *  \file SDL_thread.h
  *  

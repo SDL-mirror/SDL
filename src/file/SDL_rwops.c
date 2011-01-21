@@ -37,7 +37,7 @@
 #include <fat.h>
 #endif /* __NDS__ */
 
-#ifdef __WIN32__
+#ifdef __WINDOWS__
 
 /* Functions to read/write Win32 API file pointers */
 /* Will not use it on WinCE because stdio is buffered, it means
@@ -54,7 +54,7 @@
 #define READAHEAD_BUFFER_SIZE	1024
 
 static int SDLCALL
-win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
+windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
 {
 #ifndef _WIN32_WCE
     UINT old_error_mode;
@@ -67,10 +67,10 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     if (!context)
         return -1;              /* failed (invalid call) */
 
-    context->hidden.win32io.h = INVALID_HANDLE_VALUE;   /* mark this as unusable */
-    context->hidden.win32io.buffer.data = NULL;
-    context->hidden.win32io.buffer.size = 0;
-    context->hidden.win32io.buffer.left = 0;
+    context->hidden.windowsio.h = INVALID_HANDLE_VALUE;   /* mark this as unusable */
+    context->hidden.windowsio.buffer.data = NULL;
+    context->hidden.windowsio.buffer.size = 0;
+    context->hidden.windowsio.buffer.left = 0;
 
     /* "r" = reading, file must exist */
     /* "w" = writing, truncate existing, file may not exist */
@@ -90,9 +90,9 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
     if (!r_right && !w_right)   /* inconsistent mode */
         return -1;              /* failed (invalid call) */
 
-    context->hidden.win32io.buffer.data =
+    context->hidden.windowsio.buffer.data =
         (char *) SDL_malloc(READAHEAD_BUFFER_SIZE);
-    if (!context->hidden.win32io.buffer.data) {
+    if (!context->hidden.windowsio.buffer.data) {
         SDL_OutOfMemory();
         return -1;
     }
@@ -104,8 +104,8 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
         if (MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) ==
             0) {
             SDL_stack_free(filenameW);
-            SDL_free(context->hidden.win32io.buffer.data);
-            context->hidden.win32io.buffer.data = NULL;
+            SDL_free(context->hidden.windowsio.buffer.data);
+            context->hidden.windowsio.buffer.data = NULL;
             SDL_SetError("Unable to convert filename to Unicode");
             return -1;
         }
@@ -130,51 +130,51 @@ win32_file_open(SDL_RWops * context, const char *filename, const char *mode)
 #endif /* _WIN32_WCE */
 
     if (h == INVALID_HANDLE_VALUE) {
-        SDL_free(context->hidden.win32io.buffer.data);
-        context->hidden.win32io.buffer.data = NULL;
+        SDL_free(context->hidden.windowsio.buffer.data);
+        context->hidden.windowsio.buffer.data = NULL;
         SDL_SetError("Couldn't open %s", filename);
         return -2;              /* failed (CreateFile) */
     }
-    context->hidden.win32io.h = h;
-    context->hidden.win32io.append = a_mode ? SDL_TRUE : SDL_FALSE;
+    context->hidden.windowsio.h = h;
+    context->hidden.windowsio.append = a_mode ? SDL_TRUE : SDL_FALSE;
 
     return 0;                   /* ok */
 }
 
 static long SDLCALL
-win32_file_seek(SDL_RWops * context, long offset, int whence)
+windows_file_seek(SDL_RWops * context, long offset, int whence)
 {
-    DWORD win32whence;
+    DWORD windowswhence;
     long file_pos;
 
-    if (!context || context->hidden.win32io.h == INVALID_HANDLE_VALUE) {
-        SDL_SetError("win32_file_seek: invalid context/file not opened");
+    if (!context || context->hidden.windowsio.h == INVALID_HANDLE_VALUE) {
+        SDL_SetError("windows_file_seek: invalid context/file not opened");
         return -1;
     }
 
     /* FIXME: We may be able to satisfy the seek within buffered data */
-    if (whence == RW_SEEK_CUR && context->hidden.win32io.buffer.left) {
-        offset -= (long)context->hidden.win32io.buffer.left;
+    if (whence == RW_SEEK_CUR && context->hidden.windowsio.buffer.left) {
+        offset -= (long)context->hidden.windowsio.buffer.left;
     }
-    context->hidden.win32io.buffer.left = 0;
+    context->hidden.windowsio.buffer.left = 0;
 
     switch (whence) {
     case RW_SEEK_SET:
-        win32whence = FILE_BEGIN;
+        windowswhence = FILE_BEGIN;
         break;
     case RW_SEEK_CUR:
-        win32whence = FILE_CURRENT;
+        windowswhence = FILE_CURRENT;
         break;
     case RW_SEEK_END:
-        win32whence = FILE_END;
+        windowswhence = FILE_END;
         break;
     default:
-        SDL_SetError("win32_file_seek: Unknown value for 'whence'");
+        SDL_SetError("windows_file_seek: Unknown value for 'whence'");
         return -1;
     }
 
     file_pos =
-        SetFilePointer(context->hidden.win32io.h, offset, NULL, win32whence);
+        SetFilePointer(context->hidden.windowsio.h, offset, NULL, windowswhence);
 
     if (file_pos != INVALID_SET_FILE_POINTER)
         return file_pos;        /* success */
@@ -184,7 +184,7 @@ win32_file_seek(SDL_RWops * context, long offset, int whence)
 }
 
 static size_t SDLCALL
-win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
+windows_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 {
     size_t total_need;
     size_t total_read = 0;
@@ -193,18 +193,18 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 
     total_need = size * maxnum;
 
-    if (!context || context->hidden.win32io.h == INVALID_HANDLE_VALUE
+    if (!context || context->hidden.windowsio.h == INVALID_HANDLE_VALUE
         || !total_need)
         return 0;
 
-    if (context->hidden.win32io.buffer.left > 0) {
-        void *data = (char *) context->hidden.win32io.buffer.data +
-            context->hidden.win32io.buffer.size -
-            context->hidden.win32io.buffer.left;
+    if (context->hidden.windowsio.buffer.left > 0) {
+        void *data = (char *) context->hidden.windowsio.buffer.data +
+            context->hidden.windowsio.buffer.size -
+            context->hidden.windowsio.buffer.left;
         read_ahead =
-            SDL_min(total_need, context->hidden.win32io.buffer.left);
+            SDL_min(total_need, context->hidden.windowsio.buffer.left);
         SDL_memcpy(ptr, data, read_ahead);
-        context->hidden.win32io.buffer.left -= read_ahead;
+        context->hidden.windowsio.buffer.left -= read_ahead;
 
         if (read_ahead == total_need) {
             return maxnum;
@@ -216,19 +216,19 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 
     if (total_need < READAHEAD_BUFFER_SIZE) {
         if (!ReadFile
-            (context->hidden.win32io.h, context->hidden.win32io.buffer.data,
+            (context->hidden.windowsio.h, context->hidden.windowsio.buffer.data,
              READAHEAD_BUFFER_SIZE, &byte_read, NULL)) {
             SDL_Error(SDL_EFREAD);
             return 0;
         }
         read_ahead = SDL_min(total_need, (int) byte_read);
-        SDL_memcpy(ptr, context->hidden.win32io.buffer.data, read_ahead);
-        context->hidden.win32io.buffer.size = byte_read;
-        context->hidden.win32io.buffer.left = byte_read - read_ahead;
+        SDL_memcpy(ptr, context->hidden.windowsio.buffer.data, read_ahead);
+        context->hidden.windowsio.buffer.size = byte_read;
+        context->hidden.windowsio.buffer.left = byte_read - read_ahead;
         total_read += read_ahead;
     } else {
         if (!ReadFile
-            (context->hidden.win32io.h, ptr, (DWORD)total_need, &byte_read, NULL)) {
+            (context->hidden.windowsio.h, ptr, (DWORD)total_need, &byte_read, NULL)) {
             SDL_Error(SDL_EFREAD);
             return 0;
         }
@@ -238,7 +238,7 @@ win32_file_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 }
 
 static size_t SDLCALL
-win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
+windows_file_write(SDL_RWops * context, const void *ptr, size_t size,
                  size_t num)
 {
 
@@ -248,20 +248,20 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
 
     total_bytes = size * num;
 
-    if (!context || context->hidden.win32io.h == INVALID_HANDLE_VALUE
+    if (!context || context->hidden.windowsio.h == INVALID_HANDLE_VALUE
         || total_bytes <= 0 || !size)
         return 0;
 
-    if (context->hidden.win32io.buffer.left) {
-        SetFilePointer(context->hidden.win32io.h,
-                       -(LONG)context->hidden.win32io.buffer.left, NULL,
+    if (context->hidden.windowsio.buffer.left) {
+        SetFilePointer(context->hidden.windowsio.h,
+                       -(LONG)context->hidden.windowsio.buffer.left, NULL,
                        FILE_CURRENT);
-        context->hidden.win32io.buffer.left = 0;
+        context->hidden.windowsio.buffer.left = 0;
     }
 
     /* if in append mode, we must go to the EOF before write */
-    if (context->hidden.win32io.append) {
-        if (SetFilePointer(context->hidden.win32io.h, 0L, NULL, FILE_END) ==
+    if (context->hidden.windowsio.append) {
+        if (SetFilePointer(context->hidden.windowsio.h, 0L, NULL, FILE_END) ==
             INVALID_SET_FILE_POINTER) {
             SDL_Error(SDL_EFWRITE);
             return 0;
@@ -269,7 +269,7 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
     }
 
     if (!WriteFile
-        (context->hidden.win32io.h, ptr, (DWORD)total_bytes, &byte_written, NULL)) {
+        (context->hidden.windowsio.h, ptr, (DWORD)total_bytes, &byte_written, NULL)) {
         SDL_Error(SDL_EFWRITE);
         return 0;
     }
@@ -279,23 +279,23 @@ win32_file_write(SDL_RWops * context, const void *ptr, size_t size,
 }
 
 static int SDLCALL
-win32_file_close(SDL_RWops * context)
+windows_file_close(SDL_RWops * context)
 {
 
     if (context) {
-        if (context->hidden.win32io.h != INVALID_HANDLE_VALUE) {
-            CloseHandle(context->hidden.win32io.h);
-            context->hidden.win32io.h = INVALID_HANDLE_VALUE;   /* to be sure */
+        if (context->hidden.windowsio.h != INVALID_HANDLE_VALUE) {
+            CloseHandle(context->hidden.windowsio.h);
+            context->hidden.windowsio.h = INVALID_HANDLE_VALUE;   /* to be sure */
         }
-        if (context->hidden.win32io.buffer.data) {
-            SDL_free(context->hidden.win32io.buffer.data);
-            context->hidden.win32io.buffer.data = NULL;
+        if (context->hidden.windowsio.buffer.data) {
+            SDL_free(context->hidden.windowsio.buffer.data);
+            context->hidden.windowsio.buffer.data = NULL;
         }
         SDL_FreeRW(context);
     }
     return (0);
 }
-#endif /* __WIN32__ */
+#endif /* __WINDOWS__ */
 
 #ifdef HAVE_STDIO_H
 
@@ -449,18 +449,18 @@ SDL_RWFromFile(const char *file, const char *mode)
         SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
         return NULL;
     }
-#if defined(__WIN32__)
+#if defined(__WINDOWS__)
     rwops = SDL_AllocRW();
     if (!rwops)
         return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */
-    if (win32_file_open(rwops, file, mode) < 0) {
+    if (windows_file_open(rwops, file, mode) < 0) {
         SDL_FreeRW(rwops);
         return NULL;
     }
-    rwops->seek = win32_file_seek;
-    rwops->read = win32_file_read;
-    rwops->write = win32_file_write;
-    rwops->close = win32_file_close;
+    rwops->seek = windows_file_seek;
+    rwops->read = windows_file_read;
+    rwops->write = windows_file_write;
+    rwops->close = windows_file_close;
 
 #elif HAVE_STDIO_H
 	#ifdef __APPLE__

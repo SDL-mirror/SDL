@@ -15,9 +15,9 @@ typedef struct
     void (*DestroyNativeWindow) (void *window);
 } NativeWindowFactory;
 
-#ifdef SDL_VIDEO_DRIVER_WIN32
-#define TEST_NATIVE_WIN32
-extern NativeWindowFactory Win32WindowFactory;
+#ifdef SDL_VIDEO_DRIVER_WINDOWS
+#define TEST_NATIVE_WINDOWS
+extern NativeWindowFactory WindowsWindowFactory;
 #endif
 
 #ifdef SDL_VIDEO_DRIVER_X11

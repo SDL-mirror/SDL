@@ -75,8 +75,8 @@
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_win32.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_win32.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+echo Copying SDL_config_windows.h to SDL_config.h...
+copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 :SDLCONFIGOKAY
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
@@ -155,8 +155,8 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_win32.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_win32.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+echo Copying SDL_config_windows.h to SDL_config.h...
+copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 :SDLCONFIGOKAY
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
@@ -238,7 +238,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\include\SDL_clipboard.h" />
     <ClInclude Include="..\..\include\SDL_compat.h" />
     <ClInclude Include="..\..\include\SDL_config.h" />
-    <ClInclude Include="..\..\include\SDL_config_win32.h" />
+    <ClInclude Include="..\..\include\SDL_config_windows.h" />
     <ClInclude Include="..\..\include\SDL_copying.h" />
     <ClInclude Include="..\..\include\SDL_cpuinfo.h" />
     <ClInclude Include="..\..\include\SDL_endian.h" />
@@ -290,7 +290,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\video\SDL_blit_copy.h" />
     <ClInclude Include="..\..\src\video\SDL_blit_slow.h" />
     <ClInclude Include="..\..\src\video\SDL_shape_internals.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_d3drender.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_d3drender.h" />
     <ClInclude Include="..\..\src\audio\windib\SDL_dibaudio.h" />
     <ClInclude Include="..\..\src\audio\disk\SDL_diskaudio.h" />
     <ClInclude Include="..\..\src\video\SDL_draw.h" />
@@ -299,7 +299,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\SDL_error_c.h" />
     <ClInclude Include="..\..\src\events\SDL_events_c.h" />
     <ClInclude Include="..\..\src\SDL_fatal.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_gdirender.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_gdirender.h" />
     <ClInclude Include="..\..\src\video\SDL_glesfuncs.h" />
     <ClInclude Include="..\..\src\video\SDL_glfuncs.h" />
     <ClInclude Include="..\..\src\joystick\SDL_joystick_c.h" />
@@ -323,26 +323,26 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\haptic\SDL_syshaptic.h" />
     <ClInclude Include="..\..\src\joystick\SDL_sysjoystick.h" />
     <ClInclude Include="..\..\src\thread\SDL_systhread.h" />
-    <ClInclude Include="..\..\src\thread\win32\SDL_systhread_c.h" />
+    <ClInclude Include="..\..\src\thread\windows\SDL_systhread_c.h" />
     <ClInclude Include="..\..\src\timer\SDL_systimer.h" />
     <ClInclude Include="..\..\src\video\SDL_sysvideo.h" />
     <ClInclude Include="..\..\src\thread\SDL_thread_c.h" />
     <ClInclude Include="..\..\src\timer\SDL_timer_c.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_vkeys.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_vkeys.h" />
     <ClInclude Include="..\..\src\audio\SDL_wave.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32clipboard.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32events.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32gamma.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32keyboard.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32modes.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32mouse.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32opengl.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32shape.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32video.h" />
-    <ClInclude Include="..\..\src\video\win32\SDL_win32window.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsclipboard.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsevents.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsgamma.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowskeyboard.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsmodes.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsmouse.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsopengl.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsshape.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsvideo.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowswindow.h" />
     <ClInclude Include="..\..\src\events\SDL_windowevents_c.h" />
     <ClInclude Include="..\..\src\video\SDL_yuv_sw_c.h" />
-    <ClInclude Include="..\..\src\video\win32\wmmsg.h" />
+    <ClInclude Include="..\..\src\video\windows\wmmsg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\events\SDL_clipboardevents.c" />
@@ -389,7 +389,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
     <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
     <ClCompile Include="..\..\src\video\SDL_shape.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_d3drender.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_d3drender.c" />
     <ClCompile Include="..\..\src\audio\windib\SDL_dibaudio.c" />
     <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
     <ClCompile Include="..\..\src\video\SDL_drawline.c" />
@@ -397,13 +397,13 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\video\SDL_drawrect.c" />
     <ClCompile Include="..\..\src\audio\dummy\SDL_dummyaudio.c" />
     <ClCompile Include="..\..\src\audio\windx5\SDL_dx5audio.c" />
-    <ClCompile Include="..\..\src\joystick\win32\SDL_dxjoystick.c" />
+    <ClCompile Include="..\..\src\joystick\windows\SDL_dxjoystick.c" />
     <ClCompile Include="..\..\src\SDL_error.c" />
     <ClCompile Include="..\..\src\events\SDL_events.c" />
     <ClCompile Include="..\..\src\SDL_fatal.c" />
     <ClCompile Include="..\..\src\video\SDL_fillrect.c" />
     <ClCompile Include="..\..\src\video\SDL_gamma.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_gdirender.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_gdirender.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_getenv.c" />
     <ClCompile Include="..\..\src\haptic\SDL_haptic.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_iconv.c" />
@@ -414,7 +414,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\audio\SDL_mixer_m68k.c" />
     <ClCompile Include="..\..\src\audio\SDL_mixer_MMX.c" />
     <ClCompile Include="..\..\src\audio\SDL_mixer_MMX_VC.c" />
-    <ClCompile Include="..\..\src\joystick\win32\SDL_mmjoystick.c" />
+    <ClCompile Include="..\..\src\joystick\windows\SDL_mmjoystick.c" />
     <ClCompile Include="..\..\src\events\SDL_mouse.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullevents.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullrender.c" />
@@ -432,27 +432,27 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClCompile Include="..\..\src\video\SDL_stretch.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_string.c" />
     <ClCompile Include="..\..\src\video\SDL_surface.c" />
-    <ClCompile Include="..\..\src\haptic\win32\SDL_syshaptic.c" />
-    <ClCompile Include="..\..\src\loadso\win32\SDL_sysloadso.c" />
-    <ClCompile Include="..\..\src\thread\win32\SDL_sysmutex.c" />
+    <ClCompile Include="..\..\src\haptic\windows\SDL_syshaptic.c" />
+    <ClCompile Include="..\..\src\loadso\windows\SDL_sysloadso.c" />
+    <ClCompile Include="..\..\src\thread\windows\SDL_sysmutex.c" />
     <ClCompile Include="..\..\src\power\windows\SDL_syspower.c" />
-    <ClCompile Include="..\..\src\thread\win32\SDL_syssem.c" />
-    <ClCompile Include="..\..\src\thread\win32\SDL_systhread.c" />
-    <ClCompile Include="..\..\src\timer\win32\SDL_systimer.c" />
+    <ClCompile Include="..\..\src\thread\windows\SDL_syssem.c" />
+    <ClCompile Include="..\..\src\thread\windows\SDL_systhread.c" />
+    <ClCompile Include="..\..\src\timer\windows\SDL_systimer.c" />
     <ClCompile Include="..\..\src\thread\SDL_thread.c" />
     <ClCompile Include="..\..\src\timer\SDL_timer.c" />
     <ClCompile Include="..\..\src\video\SDL_video.c" />
     <ClCompile Include="..\..\src\audio\SDL_wave.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32clipboard.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32events.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32gamma.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32keyboard.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32modes.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32mouse.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32opengl.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32shape.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32video.c" />
-    <ClCompile Include="..\..\src\video\win32\SDL_win32window.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsclipboard.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsevents.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsgamma.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowskeyboard.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsmodes.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsmouse.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsopengl.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsshape.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsvideo.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowswindow.c" />
     <ClCompile Include="..\..\src\events\SDL_windowevents.c" />
     <ClCompile Include="..\..\src\video\SDL_yuv_mmx.c" />
     <ClCompile Include="..\..\src\video\SDL_yuv_sw.c" />

@@ -64,6 +64,12 @@ extern "C" {
  */
 /*@{*/
 
+/* Platform */
+#ifdef __WINDOWS__
+#undef __WIN32__
+#define __WIN32__   1
+#endif
+
 /**
  *  \name Surface flags
  */

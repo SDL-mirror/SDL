@@ -29,7 +29,7 @@
 #define MUST_THREAD_EVENTS
 #endif
 
-#ifdef __WIN32__                /* Win32 doesn't allow a separate event thread */
+#ifdef __WINDOWS__              /* Windows doesn't allow a separate event thread */
 #define CANT_THREAD_EVENTS
 #endif
 

@@ -102,8 +102,8 @@
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_win32.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_win32.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+echo Copying SDL_config_windows.h to SDL_config.h...
+copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 :SDLCONFIGOKAY
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
@@ -155,8 +155,8 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_win32.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_win32.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+echo Copying SDL_config_windows.h to SDL_config.h...
+copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 :SDLCONFIGOKAY
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
@@ -208,8 +208,8 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_win32.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_win32.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+echo Copying SDL_config_windows.h to SDL_config.h...
+copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 :SDLCONFIGOKAY
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
@@ -256,7 +256,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Src\Main\Win32\SDL_win32_main.c" />
+    <ClCompile Include="..\..\src\main\windows\SDL_windows_main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

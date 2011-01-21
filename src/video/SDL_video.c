@@ -34,8 +34,8 @@
 #include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
 
-#if SDL_VIDEO_DRIVER_WIN32
-#include "win32/SDL_win32video.h"
+#if SDL_VIDEO_DRIVER_WINDOWS
+#include "windows/SDL_windowsvideo.h"
 extern void IME_Present(SDL_VideoData *videodata);
 #endif
 
@@ -65,8 +65,8 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_DIRECTFB
     &DirectFB_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_WIN32
-    &WIN32_bootstrap,
+#if SDL_VIDEO_DRIVER_WINDOWS
+    &WINDOWS_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_BWINDOW
     &BWINDOW_bootstrap,
@@ -2708,7 +2708,7 @@ SDL_RenderPresent(void)
     if (!renderer || !renderer->RenderPresent) {
         return;
     }
-#if SDL_VIDEO_DRIVER_WIN32
+#if SDL_VIDEO_DRIVER_WINDOWS
     IME_Present((SDL_VideoData *)_this->driverdata);
 #endif
     renderer->RenderPresent(renderer);
