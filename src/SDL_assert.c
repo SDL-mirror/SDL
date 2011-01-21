@@ -26,7 +26,7 @@
 #include "SDL_assert_c.h"
 #include "video/SDL_sysvideo.h"
 
-#ifdef _WINDOWS
+#ifdef __WINDOWS__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #else  /* fprintf, _exit(), etc. */
@@ -57,7 +57,7 @@ debug_print(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 static void
 debug_print(const char *fmt, ...)
 {
-#ifdef _WINDOWS
+#ifdef __WINDOWS__
     /* Format into a buffer for OutputDebugStringA(). */
     char buf[1024];
     char *startptr;
@@ -99,7 +99,7 @@ debug_print(const char *fmt, ...)
 }
 
 
-#ifdef _WINDOWS
+#ifdef __WINDOWS__
 static SDL_assert_state SDL_Windows_AssertChoice = SDL_ASSERTION_ABORT;
 static const SDL_assert_data *SDL_Windows_AssertData = NULL;
 
@@ -248,7 +248,7 @@ static void SDL_GenerateAssertionReport(void)
 
 static void SDL_ExitProcess(int exitcode)
 {
-#ifdef _WINDOWS
+#ifdef __WINDOWS__
     ExitProcess(42);
 #else
     _exit(42);
@@ -311,7 +311,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 
     /* platform-specific UI... */
 
-#ifdef _WINDOWS
+#ifdef __WINDOWS__
     state = SDL_PromptAssertion_windows(data);
 
 #elif __MACOSX__
