@@ -108,11 +108,6 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 }
 
 void
-Cocoa_QuitMouse(_THIS)
-{
-}
-
-void
 Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent *event)
 {
     float x = [event deltaX];
@@ -129,6 +124,11 @@ Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent *event)
         y -= 0.9f;
     }
     SDL_SendMouseWheel(window, (int)x, (int)y);
+}
+
+void
+Cocoa_QuitMouse(_THIS)
+{
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
