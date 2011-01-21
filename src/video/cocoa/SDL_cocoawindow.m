@@ -180,7 +180,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = SDL_BUTTON_MIDDLE;
         break;
     default:
-        button = [theEvent buttonNumber];
+        button = [theEvent buttonNumber] + 1;
         break;
     }
     SDL_SendMouseButton(_data->window, SDL_PRESSED, button);
@@ -211,7 +211,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = SDL_BUTTON_MIDDLE;
         break;
     default:
-        button = [theEvent buttonNumber];
+        button = [theEvent buttonNumber] + 1;
         break;
     }
     SDL_SendMouseButton(_data->window, SDL_RELEASED, button);
