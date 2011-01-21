@@ -115,11 +115,6 @@ update-revision:
 
 .PHONY: all update-revision install install-bin install-hdrs install-lib install-data uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data clean distclean dist $(OBJECTS:.lo=.d)
 
--include $(OBJECTS:.lo=.d)
-@DEPENDS@
-@VERSION_DEPENDS@
-@SDLMAIN_DEPENDS@
-
 $(objects)/$(TARGET): $(OBJECTS) $(VERSION_OBJECTS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(VERSION_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
 
