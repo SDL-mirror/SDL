@@ -43,7 +43,7 @@ ConvertMouseButtonToSDL(int button)
         case 2:
             return(SDL_BUTTON_MIDDLE); /* 2 */
     }
-    return button;
+    return button+1;
 }
 
 void
