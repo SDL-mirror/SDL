@@ -88,6 +88,14 @@ typedef struct _NSWindow NSWindow;
 #endif
 #endif
 
+#if defined(SDL_VIDEO_DRIVER_UIKIT)
+#ifdef __OBJC__
+#include <UIKit/UIKit.h>
+#else
+typedef struct _UIWindow UIWindow;
+#endif
+#endif
+
 /** 
  *  These are the various supported windowing subsystems
  */
@@ -98,6 +106,7 @@ typedef enum
     SDL_SYSWM_X11,
     SDL_SYSWM_DIRECTFB,
     SDL_SYSWM_COCOA,
+    SDL_SYSWM_UIKIT,
 } SDL_SYSWM_TYPE;
 
 /**
@@ -133,7 +142,13 @@ struct SDL_SysWMmsg
             /* No Cocoa window events yet */
         } cocoa;
 #endif
-    } /*msg*/;
+#if defined(SDL_VIDEO_DRIVER_UIKIT)
+        struct
+        {
+            /* No UIKit window events yet */
+        } uikit;
+#endif
+    } msg;
 };
 
 /**
@@ -175,7 +190,13 @@ struct SDL_SysWMinfo
             NSWindow *window;           /* The Cocoa window */
         } cocoa;
 #endif
-    } /*info*/;
+#if defined(SDL_VIDEO_DRIVER_UIKIT)
+        struct
+        {
+            UIWindow *window;           /* The UIKit window */
+        } uikit;
+#endif
+    } info;
 };
 
 #endif /* SDL_PROTOTYPES_ONLY */

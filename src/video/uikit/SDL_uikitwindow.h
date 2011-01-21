@@ -31,6 +31,8 @@ typedef struct SDL_WindowData SDL_WindowData;
 
 extern int UIKit_CreateWindow(_THIS, SDL_Window * window);
 extern void UIKit_DestroyWindow(_THIS, SDL_Window * window);
+extern SDL_bool UIKit_GetWindowWMInfo(_THIS, SDL_Window * window,
+                                      struct SDL_SysWMinfo * info);
 
 @class UIWindow;
 

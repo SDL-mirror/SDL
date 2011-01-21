@@ -87,6 +87,7 @@ UIKit_CreateDevice(int devindex)
     device->PumpEvents = UIKit_PumpEvents;
 	device->CreateWindow = UIKit_CreateWindow;
 	device->DestroyWindow = UIKit_DestroyWindow;
+    device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
 	
 	
 	/* OpenGL (ES) functions */

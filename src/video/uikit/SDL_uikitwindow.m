@@ -21,6 +21,7 @@
 */
 #include "SDL_config.h"
 
+#include "SDL_syswm.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_assert.h"
@@ -36,7 +37,6 @@
 #import "SDL_uikitopenglview.h"
 #import "SDL_renderer_sw.h"
 
-#include <UIKit/UIKit.h>
 #include <Foundation/Foundation.h>
 
 static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created)
@@ -85,7 +85,8 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     
 }
 
-int UIKit_CreateWindow(_THIS, SDL_Window *window) {
+int
+UIKit_CreateWindow(_THIS, SDL_Window *window) {
         
     SDL_VideoDisplay *display = window->display;
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
@@ -154,12 +155,29 @@ int UIKit_CreateWindow(_THIS, SDL_Window *window) {
     
 }
 
-void UIKit_DestroyWindow(_THIS, SDL_Window * window) {
+void
+UIKit_DestroyWindow(_THIS, SDL_Window * window) {
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     if (data) {
         [data->uiwindow release];
         SDL_free(data);
         window->driverdata = NULL;
+    }
+}
+
+SDL_bool
+UIKit_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
+{
+    UIWindow *uiwindow = ((SDL_WindowData *) window->driverdata)->uiwindow;
+
+    if (info->version.major <= SDL_MAJOR_VERSION) {
+        info->subsystem = SDL_SYSWM_UIKIT;
+        info->info.uikit.window = uiwindow;
+        return SDL_TRUE;
+    } else {
+        SDL_SetError("Application not compiled with SDL %d.%d\n",
+                     SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+        return SDL_FALSE;
     }
 }
 

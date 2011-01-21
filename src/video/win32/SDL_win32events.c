@@ -113,10 +113,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         SDL_VERSION(&wmmsg.version);
         wmmsg.subsystem = SDL_SYSWM_WINDOWS;
-        wmmsg.win.hwnd = hwnd;
-        wmmsg.win.msg = msg;
-        wmmsg.win.wParam = wParam;
-        wmmsg.win.lParam = lParam;
+        wmmsg.msg.win.hwnd = hwnd;
+        wmmsg.msg.win.msg = msg;
+        wmmsg.msg.win.wParam = wParam;
+        wmmsg.msg.win.lParam = lParam;
         SDL_SendSysWMEvent(&wmmsg);
     }
 
