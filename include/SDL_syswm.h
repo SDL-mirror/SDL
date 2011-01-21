@@ -125,28 +125,27 @@ struct SDL_SysWMmsg
             WPARAM wParam;              /**< WORD message parameter */
             LPARAM lParam;              /**< LONG message parameter */
         } win;
-#endif
-#if defined(SDL_VIDEO_DRIVER_X11)
+#elif defined(SDL_VIDEO_DRIVER_X11)
         struct {
             XEvent event;
         } x11;
-#endif
-#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+#elif defined(SDL_VIDEO_DRIVER_DIRECTFB)
         struct {
             DFBEvent event;
         } dfb;
-#endif
-#if defined(SDL_VIDEO_DRIVER_COCOA)
+#elif defined(SDL_VIDEO_DRIVER_COCOA)
         struct
         {
             /* No Cocoa window events yet */
         } cocoa;
-#endif
-#if defined(SDL_VIDEO_DRIVER_UIKIT)
+#elif defined(SDL_VIDEO_DRIVER_UIKIT)
         struct
         {
             /* No UIKit window events yet */
         } uikit;
+else
+        /* Can't have an empty union */
+        int dummy;
 #endif
     } msg;
 };
@@ -168,33 +167,32 @@ struct SDL_SysWMinfo
         {
             HWND window;                /**< The window handle */
         } win;
-#endif
-#if defined(SDL_VIDEO_DRIVER_X11)
+#elif defined(SDL_VIDEO_DRIVER_X11)
         struct
         {
             Display *display;           /**< The X11 display */
             Window window;              /**< The X11 window */
         } x11;
-#endif
-#if defined(SDL_VIDEO_DRIVER_DIRECTFB)
+#elif defined(SDL_VIDEO_DRIVER_DIRECTFB)
         struct
         {
             IDirectFB *dfb;             /**< The directfb main interface */
             IDirectFBWindow *window;    /**< The directfb window handle */
             IDirectFBSurface *surface;  /**< The directfb client surface */
         } dfb;
-#endif
-#if defined(SDL_VIDEO_DRIVER_COCOA)
+#elif defined(SDL_VIDEO_DRIVER_COCOA)
         struct
         {
             NSWindow *window;           /* The Cocoa window */
         } cocoa;
-#endif
-#if defined(SDL_VIDEO_DRIVER_UIKIT)
+#elif defined(SDL_VIDEO_DRIVER_UIKIT)
         struct
         {
             UIWindow *window;           /* The UIKit window */
         } uikit;
+#else
+        /* Can't have an empty union */
+        int dummy;
 #endif
     } info;
 };
