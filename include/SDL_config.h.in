@@ -59,6 +59,7 @@
 #undef SIZEOF_VOIDP
 #undef SDL_HAS_64BIT_TYPE
 #undef HAVE_GCC_ATOMICS
+#undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET
 
 /* Comment this if you want to build without any C library requirements */
 #undef HAVE_LIBC
