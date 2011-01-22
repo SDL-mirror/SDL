@@ -113,56 +113,67 @@ SDL_ThreadedTimerCheck(void)
     SDL_bool removed;
 
     SDL_mutexP(SDL_timer_mutex);
-    list_changed = SDL_FALSE;
-    now = SDL_GetTicks();
-    for (prev = NULL, t = SDL_timers; t; t = next) {
-        removed = SDL_FALSE;
-        ms = t->interval - SDL_TIMESLICE;
-        next = t->next;
-        if ((int) (now - t->last_alarm) > (int) ms) {
-            struct _SDL_TimerID timer;
 
-            if ((now - t->last_alarm) < t->interval) {
-                t->last_alarm += t->interval;
-            } else {
-                t->last_alarm = now;
-            }
-#ifdef DEBUG_TIMERS
-            printf("Executing timer %p (thread = %lu)\n", t, SDL_ThreadID());
-#endif
-            timer = *t;
-            SDL_mutexV(SDL_timer_mutex);
-            ms = timer.cb(timer.interval, timer.param);
-            SDL_mutexP(SDL_timer_mutex);
-            if (list_changed) {
-                /* Abort, list of timers modified */
-                /* FIXME: what if ms was changed? */
-                break;
-            }
-            if (ms != t->interval) {
-                if (ms) {
-                    t->interval = ROUND_RESOLUTION(ms);
+    now = SDL_GetTicks();
+    do {
+        list_changed = SDL_FALSE;
+        for (prev = NULL, t = SDL_timers; t; t = next) {
+            removed = SDL_FALSE;
+            ms = t->interval - SDL_TIMESLICE;
+            next = t->next;
+            if ((int) (now - t->last_alarm) > (int) ms) {
+                struct _SDL_TimerID timer;
+
+                if ((now - t->last_alarm) < t->interval) {
+                    t->last_alarm += t->interval;
                 } else {
-                    /* Remove timer from the list */
+                    t->last_alarm = now;
+                }
 #ifdef DEBUG_TIMERS
-                    printf("SDL: Removing timer %p\n", t);
+                printf("Executing timer %p (thread = %lu)\n",
+                       t, SDL_ThreadID());
 #endif
-                    if (prev) {
-                        prev->next = next;
-                    } else {
-                        SDL_timers = next;
+                timer = *t;
+                SDL_mutexV(SDL_timer_mutex);
+                ms = timer.cb(timer.interval, timer.param);
+                SDL_mutexP(SDL_timer_mutex);
+                if (list_changed) {
+                    next = t->next;
+                    for (prev = SDL_timers; prev; prev = prev->next) {
+                        if (prev->next == t)
+                            break;
                     }
-                    SDL_free(t);
-                    --SDL_timer_running;
-                    removed = SDL_TRUE;
+                }
+                if (ms != t->interval) {
+                    if (ms) {
+                        t->interval = ROUND_RESOLUTION(ms);
+                    } else {
+                        /* Remove timer from the list */
+#ifdef DEBUG_TIMERS
+                        printf("SDL: Removing timer %p\n", t);
+#endif
+                        if (prev) {
+                            prev->next = next;
+                        } else {
+                            SDL_timers = next;
+                        }
+                        SDL_free(t);
+                        --SDL_timer_running;
+                        removed = SDL_TRUE;
+                    }
+                }
+                if (list_changed) {
+                    /* Abort, list of timers modified */
+                    break;
                 }
             }
+            /* Don't update prev if the timer has disappeared */
+            if (!removed) {
+                prev = t;
+            }
         }
-        /* Don't update prev if the timer has disappeared */
-        if (!removed) {
-            prev = t;
-        }
-    }
+    } while (list_changed);
+
     SDL_mutexV(SDL_timer_mutex);
 }
 
