@@ -56,6 +56,13 @@
 
 #include "begin_code.h"
 
+/* Need to do this here because intrin.h has C++ code in it */
+/* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+#include <intrin.h>
+#define HAVE_MSC_ATOMICS
+#endif
+
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
@@ -112,8 +119,7 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
  */
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
-#if defined(_MSC_VER)
-#include <intrin.h>
+#if defined(HAVE_MSC_ATOMICS)
 
 #define SDL_AtomicSet(a, v)     _InterlockedExchange((long*)&(a)->value, (v))
 #define SDL_AtomicGet(a)        ((a)->value)

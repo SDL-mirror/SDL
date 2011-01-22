@@ -24,6 +24,10 @@
 #include "SDL_atomic.h"
 #include "SDL_timer.h"
 
+/* Don't do the check for Visual Studio 2005, it's safe here */
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
 
 /* This function is where all the magic happens... */
 SDL_bool
