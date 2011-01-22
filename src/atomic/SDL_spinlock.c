@@ -36,7 +36,7 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 #elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
-#elif defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+#elif defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
 #elif defined(__GNUC__) && defined(__arm__) && defined(__ARM_ARCH_5__)

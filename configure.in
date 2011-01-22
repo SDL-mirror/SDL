@@ -311,18 +311,18 @@ if test x$enable_gcc_atomics = xyes; then
 
     if test x$have_gcc_atomics = xyes; then
         AC_DEFINE(HAVE_GCC_ATOMICS)
-    fi
-
-    # See if we have the minimum operation needed for GCC atomics
-    AC_TRY_LINK([
-    ],[
-    int a;
-    __sync_lock_test_and_set(&a, 1);
-    ],[
-    have_gcc_sync_lock_test_and_set=yes
-    ])
-    if test x$have_gcc_sync_lock_test_and_set = xyes; then
-        AC_DEFINE(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+    else
+        # See if we have the minimum operation needed for GCC atomics
+        AC_TRY_LINK([
+        ],[
+        int a;
+        __sync_lock_test_and_set(&a, 1);
+        ],[
+        have_gcc_sync_lock_test_and_set=yes
+        ])
+        if test x$have_gcc_sync_lock_test_and_set = xyes; then
+            AC_DEFINE(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+        fi
     fi
 fi
 
