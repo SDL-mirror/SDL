@@ -408,7 +408,7 @@ size_t SDL_utf8strlcpy(char *dst, const char *src, size_t dst_bytes)
 {
     size_t src_bytes = SDL_strlen(src);
     size_t bytes = SDL_min(src_bytes, dst_bytes - 1);
-    int i = 0;
+    size_t i = 0;
     char trailing_bytes = 0;
     if (bytes)
     {

@@ -100,7 +100,8 @@ int
 SDL_AddTouch(const SDL_Touch * touch, char *name)
 {
     SDL_Touch **touchPads;
-    int index,length;
+    int index;
+    size_t length;
 
     if (SDL_GetTouchIndexId(touch->id) != -1) {
         SDL_SetError("Touch ID already in use");
