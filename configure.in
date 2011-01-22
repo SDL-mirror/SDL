@@ -309,7 +309,7 @@ if test x$enable_gcc_atomics = xyes; then
     ])
     AC_MSG_RESULT($have_gcc_atomics)
 
-    if test x$have_gcc_mmd_mt = xyes; then
+    if test x$have_gcc_atomics = xyes; then
         AC_DEFINE(HAVE_GCC_ATOMICS)
     fi
 fi
