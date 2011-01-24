@@ -479,8 +479,21 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 						mouse_pressed = 0;
 					}
 				}
+				if ( mouse_relative ) {
+				/*	RJR: March 28, 2000
+					report internal mouse position if in relative mode */
+					x = 0; y = 0;
+				} else {
+					x = (Sint16)LOWORD(lParam);
+					y = (Sint16)HIWORD(lParam);
+#ifdef _WIN32_WCE
+					if (SDL_VideoSurface)
+						GapiTransform(this->hidden->userOrientation,
+this->hidden->hiresFix, &x, &y);
+#endif
+				}
 				posted = SDL_PrivateMouseButton(
-							state, button, 0, 0);
+							state, button, x, y);
 
 				/*
 				 * MSDN says:
