@@ -304,38 +304,6 @@ PULSEAUDIO_CloseDevice(_THIS)
 }
 
 
-/* !!! FIXME: this could probably be expanded. */
-/* Try to get the name of the program */
-static char *
-get_progname(void)
-{
-#ifdef __LINUX__
-    char *progname = NULL;
-    FILE *fp;
-    static char temp[BUFSIZ];
-
-    SDL_snprintf(temp, SDL_arraysize(temp), "/proc/%d/cmdline", getpid());
-    fp = fopen(temp, "r");
-    if (fp != NULL) {
-        if (fgets(temp, sizeof(temp) - 1, fp)) {
-            progname = SDL_strrchr(temp, '/');
-            if (progname == NULL) {
-                progname = temp;
-            } else {
-                progname = progname + 1;
-            }
-        }
-        fclose(fp);
-    }
-    return(progname);
-#elif defined(__NetBSD__)
-    return getprogname();
-#else
-    return("unknown");
-#endif
-}
-
-
 static int
 PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 {
@@ -438,7 +406,7 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     h->mainloop_api = PULSEAUDIO_pa_mainloop_get_api(h->mainloop);
-    h->context = PULSEAUDIO_pa_context_new(h->mainloop_api, get_progname());
+    h->context = PULSEAUDIO_pa_context_new(h->mainloop_api, NULL);
     if (!h->context) {
         PULSEAUDIO_CloseDevice(this);
         SDL_SetError("pa_context_new() failed");
