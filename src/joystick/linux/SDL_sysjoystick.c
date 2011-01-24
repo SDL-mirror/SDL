@@ -701,25 +701,26 @@ EV_ConfigJoystick(SDL_Joystick * joystick, int fd)
                 continue;
             }
             if (test_bit(i, absbit)) {
-                int values[6];
+                struct input_absinfo absinfo;
 
                 if (ioctl(fd, EVIOCGABS(i), values) < 0)
                     continue;
 #ifdef DEBUG_INPUT_EVENTS
                 printf("Joystick has absolute axis: %x\n", i);
                 printf("Values = { %d, %d, %d, %d, %d }\n",
-                       values[0], values[1], values[2], values[3], values[4]);
+                       absinfo.value, absinfo.minimum, absinfo.maximum,
+                       absinfo.fuzz, absinfo.flat);
 #endif /* DEBUG_INPUT_EVENTS */
                 joystick->hwdata->abs_map[i] = joystick->naxes;
-                if (values[1] == values[2]) {
+                if (absinfo.minimum == absinfo.maximum) {
                     joystick->hwdata->abs_correct[i].used = 0;
                 } else {
                     joystick->hwdata->abs_correct[i].used = 1;
                     joystick->hwdata->abs_correct[i].coef[0] =
-                        (values[2] + values[1]) / 2 - values[4];
+                        (absinfo.maximum + absinfo.minimum) / 2 - absinfo.flat;
                     joystick->hwdata->abs_correct[i].coef[1] =
-                        (values[2] + values[1]) / 2 + values[4];
-                    t = ((values[2] - values[1]) / 2 - 2 * values[4]);
+                        (absinfo.maximum + absinfo.minimum) / 2 + absinfo.flat;
+                    t = ((absinfo.maximum - absinfo.minimum) / 2 - 2 * absinfo.flat);
                     if (t != 0) {
                         joystick->hwdata->abs_correct[i].coef[2] =
                             (1 << 29) / t;
