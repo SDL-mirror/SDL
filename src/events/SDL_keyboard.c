@@ -562,7 +562,7 @@ void
 SDL_ResetKeyboard(void)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
-    SDL_scancode scancode;
+    SDL_ScanCode scancode;
 
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
@@ -590,7 +590,7 @@ SDL_SetKeymap(int start, SDLKey * keys, int length)
 }
 
 void
-SDL_SetScancodeName(SDL_scancode scancode, const char *name)
+SDL_SetScancodeName(SDL_ScanCode scancode, const char *name)
 {
     SDL_scancode_names[scancode] = name;
 }
@@ -638,7 +638,7 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 }
 
 int
-SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode)
+SDL_SendKeyboardKey(Uint8 state, SDL_ScanCode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
@@ -849,18 +849,18 @@ SDL_SetModState(SDLMod modstate)
 }
 
 SDLKey
-SDL_GetKeyFromScancode(SDL_scancode scancode)
+SDL_GetKeyFromScancode(SDL_ScanCode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
     return keyboard->keymap[scancode];
 }
 
-SDL_scancode
+SDL_ScanCode
 SDL_GetScancodeFromKey(SDLKey key)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
-    SDL_scancode scancode;
+    SDL_ScanCode scancode;
 
     for (scancode = SDL_SCANCODE_UNKNOWN; scancode < SDL_NUM_SCANCODES;
          ++scancode) {
@@ -872,7 +872,7 @@ SDL_GetScancodeFromKey(SDLKey key)
 }
 
 const char *
-SDL_GetScancodeName(SDL_scancode scancode)
+SDL_GetScancodeName(SDL_ScanCode scancode)
 {
     const char *name = SDL_scancode_names[scancode];
 
@@ -890,7 +890,7 @@ SDL_GetKeyName(SDLKey key)
 
     if (key & SDLK_SCANCODE_MASK) {
         return
-            SDL_GetScancodeName((SDL_scancode) (key & ~SDLK_SCANCODE_MASK));
+            SDL_GetScancodeName((SDL_ScanCode) (key & ~SDLK_SCANCODE_MASK));
     }
 
     switch (key) {

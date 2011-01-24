@@ -2488,7 +2488,7 @@ photon_pumpevents(_THIS)
                 case Ph_EV_KEY:
                     {
                         PhKeyEvent_t *keyevent = NULL;
-                        SDL_scancode scancode = SDL_SCANCODE_UNKNOWN;
+                        SDL_ScanCode scancode = SDL_SCANCODE_UNKNOWN;
                         SDL_bool pressed = SDL_FALSE;
 
                         keyevent = PhGetData(event);

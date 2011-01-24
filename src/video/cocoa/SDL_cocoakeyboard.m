@@ -246,7 +246,7 @@ static void
 HandleNonDeviceModifier(unsigned int device_independent_mask,
                         unsigned int oldMods,
                         unsigned int newMods,
-                        SDL_scancode scancode)
+                        SDL_ScanCode scancode)
 {
     unsigned int oldMask, newMask;
     
@@ -268,7 +268,7 @@ HandleNonDeviceModifier(unsigned int device_independent_mask,
  */
 static void
 HandleModifierOneSide(unsigned int oldMods, unsigned int newMods,
-                      SDL_scancode scancode, 
+                      SDL_ScanCode scancode, 
                       unsigned int sided_device_dependent_mask)
 {
     unsigned int old_dep_mask, new_dep_mask;
@@ -297,8 +297,8 @@ HandleModifierOneSide(unsigned int oldMods, unsigned int newMods,
 static void
 HandleModifierSide(int device_independent_mask, 
                    unsigned int oldMods, unsigned int newMods, 
-                   SDL_scancode left_scancode, 
-                   SDL_scancode right_scancode,
+                   SDL_ScanCode left_scancode, 
+                   SDL_ScanCode right_scancode,
                    unsigned int left_device_dependent_mask, 
                    unsigned int right_device_dependent_mask)
 {
@@ -341,8 +341,8 @@ HandleModifierSide(int device_independent_mask,
 static void
 ReleaseModifierSide(unsigned int device_independent_mask, 
                     unsigned int oldMods, unsigned int newMods,
-                    SDL_scancode left_scancode, 
-                    SDL_scancode right_scancode,
+                    SDL_ScanCode left_scancode, 
+                    SDL_ScanCode right_scancode,
                     unsigned int left_device_dependent_mask, 
                     unsigned int right_device_dependent_mask)
 {
@@ -409,13 +409,13 @@ DoSidedModifiers(unsigned short scancode,
                  unsigned int oldMods, unsigned int newMods)
 {
 	/* Set up arrays for the key syms for the left and right side. */
-    const SDL_scancode left_mapping[]  = {
+    const SDL_ScanCode left_mapping[]  = {
         SDL_SCANCODE_LSHIFT,
         SDL_SCANCODE_LCTRL,
         SDL_SCANCODE_LALT,
         SDL_SCANCODE_LGUI
     };
-    const SDL_scancode right_mapping[] = {
+    const SDL_ScanCode right_mapping[] = {
         SDL_SCANCODE_RSHIFT,
         SDL_SCANCODE_RCTRL,
         SDL_SCANCODE_RALT,
@@ -489,7 +489,7 @@ UpdateKeymap(SDL_VideoData *data)
 #endif
     const void *chr_data;
     int i;
-    SDL_scancode scancode;
+    SDL_ScanCode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     /* See if the keymap needs to be updated */
@@ -675,7 +675,7 @@ Cocoa_HandleKeyEvent(_THIS, NSEvent *event)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     unsigned short scancode = [event keyCode];
-    SDL_scancode code;
+    SDL_ScanCode code;
 #if 0
     const char *text;
 #endif

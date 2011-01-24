@@ -56,11 +56,11 @@ struct _cb_data
 static SDLKey oskeymap[256];
 
 
-static SDL_keysym *DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt,
-                                         SDL_keysym * keysym);
-static SDL_keysym *DirectFB_TranslateKeyInputEvent(_THIS, int index,
+static SDL_KeySym *DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt,
+                                         SDL_KeySym * keysym);
+static SDL_KeySym *DirectFB_TranslateKeyInputEvent(_THIS, int index,
                                                    DFBInputEvent * evt,
-                                                   SDL_keysym * keysym);
+                                                   SDL_KeySym * keysym);
 
 static void DirectFB_InitOSKeymap(_THIS, SDLKey * keypmap, int numkeys);
 static int DirectFB_TranslateButton(DFBInputDeviceButtonIdentifier button);
@@ -168,7 +168,7 @@ ProcessWindowEvent(_THIS, DFB_WindowData * p, Uint32 flags,
                    DFBWindowEvent * evt)
 {
     SDL_DFB_DEVICEDATA(_this);
-    SDL_keysym keysym;
+    SDL_KeySym keysym;
     char text[5];
 
     if (evt->clazz == DFEC_WINDOW) {
@@ -300,7 +300,7 @@ static void
 ProcessInputEvent(_THIS, DFBInputEvent * ievt)
 {
     SDL_DFB_DEVICEDATA(_this);
-    SDL_keysym keysym;
+    SDL_KeySym keysym;
     int kbd_idx;
     char text[5];
 
@@ -549,8 +549,8 @@ DirectFB_InitOSKeymap(_THIS, SDLKey * keymap, int numkeys)
 
 }
 
-static SDL_keysym *
-DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_keysym * keysym)
+static SDL_KeySym *
+DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_KeySym * keysym)
 {
     SDL_DFB_DEVICEDATA(_this);
 
@@ -577,9 +577,9 @@ DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_keysym * keysym)
     return keysym;
 }
 
-static SDL_keysym *
+static SDL_KeySym *
 DirectFB_TranslateKeyInputEvent(_THIS, int index, DFBInputEvent * evt,
-                                SDL_keysym * keysym)
+                                SDL_KeySym * keysym)
 {
     SDL_DFB_DEVICEDATA(_this);
 
@@ -719,7 +719,7 @@ DirectFB_PumpEvents(_THIS)
 
     while (devdata->eventbuffer->GetEvent(devdata->eventbuffer,
                                           DFB_EVENT(&evt)) == DFB_OK) {
-        SDL_keysym keysym;
+        SDL_KeySym keysym;
         DFBInputDeviceModifierMask mod;
 
         if (evt.clazz = DFEC_INPUT) {

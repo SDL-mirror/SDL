@@ -223,6 +223,9 @@ struct SDL_SysWMinfo;
  */
 /*@{*/
 
+#define SDL_keysym		SDL_KeySym
+#define SDL_scancode	SDL_ScanCode
+
 /** 
  *  \name Renamed keys
  *

@@ -509,7 +509,7 @@ class SDL_BWin:public BDirectWindow
 
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
-                    SDL_keysym keysym;
+                    SDL_KeySym keysym;
                     keysym.scancode = key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];
@@ -543,7 +543,7 @@ class SDL_BWin:public BDirectWindow
                 int32 modifiers;
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
-                    SDL_keysym keysym;
+                    SDL_KeySym keysym;
                     keysym.scancode = key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];

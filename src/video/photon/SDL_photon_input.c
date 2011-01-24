@@ -460,10 +460,10 @@ photon_freemouse(SDL_Mouse * mouse)
     return;
 }
 
-SDL_scancode
+SDL_ScanCode
 photon_to_sdl_keymap(uint32_t key)
 {
-    SDL_scancode scancode = SDL_SCANCODE_UNKNOWN;
+    SDL_ScanCode scancode = SDL_SCANCODE_UNKNOWN;
 
     switch (key & 0x0000007F) {
     case PHOTON_SCANCODE_ESCAPE:

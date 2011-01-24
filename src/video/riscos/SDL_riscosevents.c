@@ -69,7 +69,7 @@ static SDLKey RO_keymap[SDLK_LAST];
 
 static char RO_pressed[ROKEYBD_ARRAYSIZE];
 
-static SDL_keysym *TranslateKey(int intkey, SDL_keysym * keysym, int pressed);
+static SDL_KeySym *TranslateKey(int intkey, SDL_KeySym * keysym, int pressed);
 
 void RISCOS_PollMouse(_THIS);
 void RISCOS_PollKeyboard();
@@ -366,7 +366,7 @@ RISCOS_PollKeyboard()
     int which_key = ROKEY_LEFT_SHIFT;
     int j;
     int min_key, max_key;
-    SDL_keysym key;
+    SDL_KeySym key;
 
     /* Scan the keyboard to see what is pressed */
     while (which_key <= ROKEY_LAST_KEY) {
@@ -428,8 +428,8 @@ RISCOS_PollKeyboard()
     }
 }
 
-static SDL_keysym *
-TranslateKey(int intkey, SDL_keysym * keysym, int pressed)
+static SDL_KeySym *
+TranslateKey(int intkey, SDL_KeySym * keysym, int pressed)
 {
     /* Set the keysym information */
     keysym->scancode = (unsigned char) intkey;

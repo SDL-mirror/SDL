@@ -45,13 +45,13 @@ extern "C" {
 /**
  *  \brief The SDL keysym structure, used in key events.
  */
-typedef struct SDL_keysym
+typedef struct SDL_KeySym
 {
-    SDL_scancode scancode;      /**< SDL physical key code - see ::SDL_scancode for details */
+    SDL_ScanCode scancode;      /**< SDL physical key code - see ::SDL_ScanCode for details */
     SDLKey sym;                 /**< SDL virtual key code - see ::SDLKey for details */
     Uint16 mod;                 /**< current key modifiers */
     Uint32 unicode;             /**< \deprecated use SDL_TextInputEvent instead */
-} SDL_keysym;
+} SDL_KeySym;
 
 /* Function prototypes */
 
@@ -65,7 +65,7 @@ extern DECLSPEC SDL_Window * SDLCALL SDL_GetKeyboardFocus(void);
  *  
  *  \param numkeys if non-NULL, receives the length of the returned array.
  *  
- *  \return An array of key states. Indexes into this array are obtained by using ::SDL_scancode values.
+ *  \return An array of key states. Indexes into this array are obtained by using ::SDL_ScanCode values.
  *  
  *  \b Example:
  *  \code
@@ -97,17 +97,17 @@ extern DECLSPEC void SDLCALL SDL_SetModState(SDLMod modstate);
  *  
  *  \sa SDL_GetKeyName()
  */
-extern DECLSPEC SDLKey SDLCALL SDL_GetKeyFromScancode(SDL_scancode scancode);
+extern DECLSPEC SDLKey SDLCALL SDL_GetKeyFromScancode(SDL_ScanCode scancode);
 
 /**
  *  \brief Get the scancode corresponding to the given key code according to the
  *         current keyboard layout.
  *  
- *  See ::SDL_scancode for details.
+ *  See ::SDL_ScanCode for details.
  *  
  *  \sa SDL_GetScancodeName()
  */
-extern DECLSPEC SDL_scancode SDLCALL SDL_GetScancodeFromKey(SDLKey key);
+extern DECLSPEC SDL_ScanCode SDLCALL SDL_GetScancodeFromKey(SDLKey key);
 
 /**
  *  \brief Get a human-readable name for a scancode.
@@ -117,9 +117,9 @@ extern DECLSPEC SDL_scancode SDLCALL SDL_GetScancodeFromKey(SDLKey key);
  *          copy it.  If the scancode doesn't have a name, this function returns
  *          an empty string ("").
  *
- *  \sa SDL_scancode
+ *  \sa SDL_ScanCode
  */
-extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_scancode
+extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_ScanCode
                                                         scancode);
 
 /**

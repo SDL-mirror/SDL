@@ -145,7 +145,7 @@ void
 WIN_UpdateKeymap()
 {
     int i;
-    SDL_scancode scancode;
+    SDL_ScanCode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     SDL_GetDefaultKeymap(keymap);

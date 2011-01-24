@@ -96,7 +96,7 @@ typedef struct SDL_VideoData
     Atom _NET_WM_ICON;
     Atom UTF8_STRING;
 
-    SDL_scancode key_layout[256];
+    SDL_ScanCode key_layout[256];
     SDL_bool selection_waiting;
 } SDL_VideoData;
 

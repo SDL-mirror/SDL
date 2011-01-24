@@ -43,13 +43,13 @@ extern void SDL_SetKeymap(int start, SDLKey * keys, int length);
    name. Encoded as UTF-8. The string is not copied, thus the pointer given to
    this function must stay valid forever (or at least until the call to
    VideoQuit()). */
-extern void SDL_SetScancodeName(SDL_scancode scancode, const char *name);
+extern void SDL_SetScancodeName(SDL_ScanCode scancode, const char *name);
 
 /* Set the keyboard focus window */
 extern void SDL_SetKeyboardFocus(SDL_Window * window);
 
 /* Send a keyboard key event */
-extern int SDL_SendKeyboardKey(Uint8 state, SDL_scancode scancode);
+extern int SDL_SendKeyboardKey(Uint8 state, SDL_ScanCode scancode);
 
 /* Send keyboard text input */
 extern int SDL_SendKeyboardText(const char *text);

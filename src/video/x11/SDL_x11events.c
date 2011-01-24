@@ -202,7 +202,7 @@ X11_DispatchEvent(_THIS)
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
-            SDL_scancode scancode;
+            SDL_ScanCode scancode;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
 

@@ -160,7 +160,7 @@ typedef struct SDL_VideoData
     PFCoordTransform CoordTransform;
 #endif
 
-    const SDL_scancode *key_layout;
+    const SDL_ScanCode *key_layout;
 	DWORD clipboard_count;
 
 	/* Touch input functions */
