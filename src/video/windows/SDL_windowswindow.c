@@ -32,6 +32,10 @@
 #include "SDL_syswm.h"
 #include "SDL_gapirender.h"
 
+/* Windows CE compatibility */
+#ifndef SWP_NOCOPYBITS
+#define SWP_NOCOPYBITS 0
+#endif
 
 /* Fake window to help with DirectInput events. */
 HWND SDL_HelperWindow = NULL;
@@ -68,13 +72,21 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     }
 
     /* Set up the window proc function */
+#ifdef GWLP_WNDPROC
     data->wndproc = (WNDPROC) GetWindowLongPtr(hwnd, GWLP_WNDPROC);
     if (data->wndproc == WIN_WindowProc) {
         data->wndproc = NULL;
-    }
-    else {
+    } else {
         SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR) WIN_WindowProc);
     }
+#else
+    data->wndproc = (WNDPROC) GetWindowLong(hwnd, GWL_WNDPROC);
+    if (data->wndproc == WIN_WindowProc) {
+        data->wndproc = NULL;
+    } else {
+        SetWindowLong(hwnd, GWL_WNDPROC, (LONG_PTR) WIN_WindowProc);
+    }
+#endif
 
     /* Fill in the SDL window with the window data */
     {
@@ -112,14 +124,20 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
         } else {
             window->flags &= ~SDL_WINDOW_RESIZABLE;
         }
+#ifdef WS_MAXIMIZE
         if (style & WS_MAXIMIZE) {
             window->flags |= SDL_WINDOW_MAXIMIZED;
-        } else {
+        } else
+#endif
+        {
             window->flags &= ~SDL_WINDOW_MAXIMIZED;
         }
+#ifdef WS_MINIMIZE
         if (style & WS_MINIMIZE) {
             window->flags |= SDL_WINDOW_MINIMIZED;
-        } else {
+        } else
+#endif
+        {
             window->flags &= ~SDL_WINDOW_MINIMIZED;
         }
     }

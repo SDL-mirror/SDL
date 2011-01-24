@@ -58,7 +58,7 @@
 
 /* Need to do this here because intrin.h has C++ code in it */
 /* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500)
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(_WIN32_WCE)
 #include <intrin.h>
 #define HAVE_MSC_ATOMICS
 #endif

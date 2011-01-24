@@ -38,7 +38,7 @@
 #include <signal.h>
 #include <setjmp.h>
 #endif
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -319,7 +319,7 @@ SDL_GetCPUCount()
             sysctlbyname("hw.ncpu", &SDL_CPUCount, &size, NULL, 0);
         }
 #endif
-#ifdef __WINDOWS__
+#ifdef __WIN32__
         if (SDL_CPUCount <= 0) {
             SYSTEM_INFO info;
             GetSystemInfo(&info);

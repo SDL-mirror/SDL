@@ -39,7 +39,7 @@ struct SDL_semaphore
 #else
     HANDLE id;
 #endif
-    LONG volatile count;
+    LONG count;
 };
 
 

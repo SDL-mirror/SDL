@@ -37,7 +37,7 @@
 #include <fat.h>
 #endif /* __NDS__ */
 
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 
 /* Functions to read/write Win32 API file pointers */
 /* Will not use it on WinCE because stdio is buffered, it means
@@ -295,7 +295,7 @@ windows_file_close(SDL_RWops * context)
     }
     return (0);
 }
-#endif /* __WINDOWS__ */
+#endif /* __WIN32__ */
 
 #ifdef HAVE_STDIO_H
 
@@ -449,7 +449,7 @@ SDL_RWFromFile(const char *file, const char *mode)
         SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
         return NULL;
     }
-#if defined(__WINDOWS__)
+#if defined(__WIN32__)
     rwops = SDL_AllocRW();
     if (!rwops)
         return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */

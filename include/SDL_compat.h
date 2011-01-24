@@ -65,7 +65,7 @@ extern "C" {
 /*@{*/
 
 /* Platform */
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #undef __WIN32__
 #define __WIN32__   1
 #endif

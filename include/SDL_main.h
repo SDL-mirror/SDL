@@ -31,7 +31,7 @@
  *  Redefine main() on some platforms so that it is called by SDL.
  */
 
-#if defined(__WINDOWS__) || \
+#if defined(__WIN32__) || \
     (defined(__MWERKS__) && !defined(__BEOS__)) || \
     defined(__SYMBIAN32__) || defined(__IPHONEOS__) || \
     defined(__ANDROID__)
@@ -66,7 +66,7 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 
 
 /* From the SDL library code -- needed for registering the app on Win32 */
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 
 #include "begin_code.h"
 #ifdef __cplusplus

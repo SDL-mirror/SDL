@@ -26,8 +26,13 @@
 
 /* Don't do the check for Visual Studio 2005, it's safe here */
 #if defined(_MSC_VER)
+#ifdef _WIN32_WCE
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
 #include <intrin.h>
 #endif
+#endif /* _MSC_VER */
 
 /* This function is where all the magic happens... */
 SDL_bool

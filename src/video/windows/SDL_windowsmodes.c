@@ -23,13 +23,19 @@
 
 #include "SDL_windowsvideo.h"
 
+/* Windows CE compatibility */
+#ifndef CDS_FULLSCREEN
+#define CDS_FULLSCREEN 0
+#endif
 
 static SDL_bool
 WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
 {
     SDL_DisplayModeData *data;
     DEVMODE devmode;
+#ifndef _WIN32_WCE
     HDC hdc;
+#endif
 
     devmode.dmSize = sizeof(devmode);
     devmode.dmDriverExtra = 0;

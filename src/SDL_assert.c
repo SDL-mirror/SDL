@@ -26,9 +26,19 @@
 #include "SDL_assert_c.h"
 #include "video/SDL_sysvideo.h"
 
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+
+#ifndef WS_OVERLAPPEDWINDOW
+#define WS_OVERLAPPEDWINDOW 0
+#endif
+
+#ifdef UNICODE
+#define WIN_UTF8ToString(S) (WCHAR *)SDL_iconv_string("UCS-2", "UTF-8", (char *)S, SDL_strlen(S)+1)
+#else
+#define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
+#endif
 #else  /* fprintf, _exit(), etc. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,11 +67,12 @@ debug_print(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 static void
 debug_print(const char *fmt, ...)
 {
-#ifdef __WINDOWS__
+#ifdef __WIN32__
     /* Format into a buffer for OutputDebugStringA(). */
     char buf[1024];
     char *startptr;
     char *ptr;
+    LPTSTR tstr;
     int len;
     va_list ap;
     va_start(ap, fmt);
@@ -78,15 +89,19 @@ debug_print(const char *fmt, ...)
     for (ptr = startptr; *ptr; ptr++) {
         if (*ptr == '\n') {
             *ptr = '\0';
-            OutputDebugStringA(startptr);
-            OutputDebugStringA("\r\n");
+            tstr = WIN_UTF8ToString(startptr);
+            OutputDebugString(tstr);
+            SDL_free(tstr);
+            OutputDebugString(TEXT("\r\n"));
             startptr = ptr+1;
         }
     }
 
     /* catch that last piece if it didn't have a newline... */
     if (startptr != ptr) {
-        OutputDebugStringA(startptr);
+        tstr = WIN_UTF8ToString(startptr);
+        OutputDebugString(tstr);
+        SDL_free(tstr);
     }
 #else
     /* Unix has it easy. Just dump it to stderr. */
@@ -99,7 +114,7 @@ debug_print(const char *fmt, ...)
 }
 
 
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 static SDL_assert_state SDL_Windows_AssertChoice = SDL_ASSERTION_ABORT;
 static const SDL_assert_data *SDL_Windows_AssertData = NULL;
 
@@ -113,6 +128,7 @@ SDL_Assertion_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             /* !!! FIXME: all this code stinks. */
             const SDL_assert_data *data = SDL_Windows_AssertData;
             char buf[1024];
+            LPTSTR tstr;
             const int w = 100;
             const int h = 25;
             const int gap = 10;
@@ -121,14 +137,14 @@ SDL_Assertion_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int len;
             int i;
             static const struct { 
-                const char *name;
+                LPCTSTR name;
                 SDL_assert_state state;
             } buttons[] = {
-                {"Abort", SDL_ASSERTION_ABORT },
-                {"Break", SDL_ASSERTION_BREAK },
-                {"Retry", SDL_ASSERTION_RETRY },
-                {"Ignore", SDL_ASSERTION_IGNORE },
-                {"Always Ignore", SDL_ASSERTION_ALWAYS_IGNORE },
+                {TEXT("Abort"), SDL_ASSERTION_ABORT },
+                {TEXT("Break"), SDL_ASSERTION_BREAK },
+                {TEXT("Retry"), SDL_ASSERTION_RETRY },
+                {TEXT("Ignore"), SDL_ASSERTION_IGNORE },
+                {TEXT("Always Ignore"), SDL_ASSERTION_ALWAYS_IGNORE },
             };
 
             len = (int) SDL_snprintf(buf, sizeof (buf), 
@@ -140,14 +156,16 @@ SDL_Assertion_WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 buf[sizeof (buf) - 1] = '\0';
             }
 
-            CreateWindowA("STATIC", buf,
+            tstr = WIN_UTF8ToString(buf);
+            CreateWindow(TEXT("STATIC"), tstr,
                          WS_VISIBLE | WS_CHILD | SS_LEFT,
                          x, y, 550, 100,
                          hwnd, (HMENU) 1, NULL, NULL);
+            SDL_free(tstr);
             y += 110;
 
             for (i = 0; i < (sizeof (buttons) / sizeof (buttons[0])); i++) {
-                CreateWindowA("BUTTON", buttons[i].name,
+                CreateWindow(TEXT("BUTTON"), buttons[i].name,
                          WS_VISIBLE | WS_CHILD,
                          x, y, w, h,
                          hwnd, (HMENU) buttons[i].state, NULL, NULL);
@@ -248,7 +266,7 @@ static void SDL_GenerateAssertionReport(void)
 
 static void SDL_ExitProcess(int exitcode)
 {
-#ifdef __WINDOWS__
+#ifdef __WIN32__
     ExitProcess(42);
 #else
     _exit(42);
@@ -311,7 +329,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 
     /* platform-specific UI... */
 
-#ifdef __WINDOWS__
+#ifdef __WIN32__
     state = SDL_PromptAssertion_windows(data);
 
 #elif __MACOSX__

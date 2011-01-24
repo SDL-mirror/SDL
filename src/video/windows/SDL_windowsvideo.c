@@ -161,9 +161,9 @@ WIN_CreateDevice(int devindex)
 
 	data->userDLL = LoadLibrary(TEXT("USER32.DLL"));
 	if (data->userDLL) {
-		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) GetProcAddress(data->userDLL, "CloseTouchInputHandle");
-		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) GetProcAddress(data->userDLL, "GetTouchInputInfo");
-		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) GetProcAddress(data->userDLL, "RegisterTouchWindow");
+		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) GetProcAddress(data->userDLL, TEXT("CloseTouchInputHandle"));
+		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) GetProcAddress(data->userDLL, TEXT("GetTouchInputInfo"));
+		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) GetProcAddress(data->userDLL, TEXT("RegisterTouchWindow"));
 	}
 
     /* Set the function pointers */
@@ -222,11 +222,7 @@ WIN_CreateDevice(int devindex)
 }
 
 VideoBootStrap WINDOWS_bootstrap = {
-#ifdef _WIN32_WCE
-    "wince", "SDL WinCE video driver", WINCE_Available, WIN_CreateDevice
-#else
-    "windows", "SDL Win32/64 video driver", WIN_Available, WIN_CreateDevice
-#endif
+    "windows", "SDL Windows video driver", WIN_Available, WIN_CreateDevice
 };
 
 int

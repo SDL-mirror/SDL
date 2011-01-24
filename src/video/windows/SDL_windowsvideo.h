@@ -36,7 +36,7 @@
 
 #include <windows.h>
 
-#ifndef __GNUC__
+#if defined(_MSC_VER) && !defined(_WIN32_WCE)
 #include <msctf.h>
 #else
 #include "SDL_msctf.h"

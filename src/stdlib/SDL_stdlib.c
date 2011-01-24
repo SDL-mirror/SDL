@@ -35,9 +35,7 @@
 __declspec(selectany) int _fltused = 1;
 #endif
 
-#ifdef _WIN64
-
-#else
+#ifdef _M_IX86
 
 void
 __declspec(naked)

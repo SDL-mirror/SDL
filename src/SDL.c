@@ -39,7 +39,7 @@ extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
 extern void SDL_TimerQuit(void);
 #endif
-#if defined(__WINDOWS__)
+#if defined(__WIN32__)
 extern int SDL_HelperWindowCreate(void);
 extern int SDL_HelperWindowDestroy(void);
 #endif
@@ -147,7 +147,7 @@ SDL_Init(Uint32 flags)
     /* Clear the error message */
     SDL_ClearError();
 
-#if defined(__WINDOWS__)
+#if defined(__WIN32__)
     if (SDL_HelperWindowCreate() < 0) {
         return -1;
     }
@@ -220,7 +220,7 @@ SDL_Quit(void)
     fflush(stdout);
 #endif
 
-#if defined(__WINDOWS__)
+#if defined(__WIN32__)
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
@@ -312,7 +312,7 @@ SDL_GetPlatform()
     return "RISC OS";
 #elif __SOLARIS__
     return "Solaris";
-#elif __WINDOWS__
+#elif __WIN32__
 #ifdef _WIN32_WCE
     return "Windows CE";
 #else
@@ -325,7 +325,7 @@ SDL_GetPlatform()
 #endif
 }
 
-#if defined(__WINDOWS__)
+#if defined(__WIN32__)
 
 #if !defined(HAVE_LIBC) || (defined(__WATCOMC__) && defined(BUILD_DLL))
 /* Need to include DllMain() on Watcom C for some reason.. */
@@ -347,6 +347,6 @@ _DllMainCRTStartup(HANDLE hModule,
 }
 #endif /* building DLL with Watcom C */
 
-#endif /* __WINDOWS__ */
+#endif /* __WIN32__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

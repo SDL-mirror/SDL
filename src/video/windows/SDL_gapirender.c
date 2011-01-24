@@ -92,19 +92,19 @@ typedef struct
 //#define DM_DISPLAYORIENTATION 0x00800000L
 //#endif
 
-#define FORMAT_565		1
-#define FORMAT_555		2
-#define FORMAT_OTHER		3
+#define FORMAT_565                1
+#define FORMAT_555                2
+#define FORMAT_OTHER                3
 
-#define GETRAWFRAMEBUFFER	0x00020001
-#define GETGXINFO		0x00020000
+#define GETRAWFRAMEBUFFER        0x00020001
+#define GETGXINFO                0x00020000
 
-#define kfPalette		0x10
-#define kfDirect		0x20
-#define kfDirect555		0x40
-#define kfDirect565		0x80
+#define kfPalette                0x10
+#define kfDirect                0x20
+#define kfDirect555                0x40
+#define kfDirect565                0x80
 
-#define GX_FULLSCREEN		0x01
+#define GX_FULLSCREEN                0x01
 
 enum ScreenOrientation { ORIENTATION_UNKNOWN = -1, ORIENTATION_UP = DMDO_0, ORIENTATION_DOWN = DMDO_180, ORIENTATION_LEFT = DMDO_270, ORIENTATION_RIGHT = DMDO_90 };
 enum ScreenGeometry { GEOMETRY_UNKNOWN, GEOMETRY_PORTRAIT, GEOMETRY_LANDSCAPE, GEOMETRY_SQUARE };
@@ -123,15 +123,15 @@ typedef struct
 // private display data
 typedef struct
 {
-    unsigned char* pixels;	// video memory
-    int format;			// video format
-    FrameBufferInfo fb;		// framebuffer geometry
-    GapiInfo* gapi;		// GAPI module
+    unsigned char* pixels;        // video memory
+    int format;                        // video format
+    FrameBufferInfo fb;                // framebuffer geometry
+    GapiInfo* gapi;                // GAPI module
     int userOrientation;
     int systemOrientation;
     int hardwareGeometry;
-    int flags;			// fb flags
-    float scale;		// scale pointer position
+    int flags;                        // fb flags
+    float scale;                // scale pointer position
     int debug;
 
 } WINCE_RenderData;
@@ -147,110 +147,111 @@ typedef struct
 
 
 // system func
-SDL_Renderer*	WINCE_CreateRenderer(SDL_Window* window, Uint32 flags);
-void		WINCE_DestroyRenderer(SDL_Renderer* renderer);
+SDL_Renderer*        WINCE_CreateRenderer(SDL_Window* window, Uint32 flags);
+void                WINCE_DestroyRenderer(SDL_Renderer* renderer);
 
-int		WINCE_CreateTexture(SDL_Renderer* renderer, SDL_Texture* texture);
-void		WINCE_DestroyTexture(SDL_Renderer* renderer, SDL_Texture* texture);
-int		WINCE_QueryTexturePixels(SDL_Renderer* renderer, SDL_Texture* texture, void** pixels, int* pitch);
-int		WINCE_UpdateTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, const void* pixels, int pitch);
-int		WINCE_LockTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, int dirty, void** pixels, int* pitch);
-void		WINCE_UnlockTexture(SDL_Renderer* renderer, SDL_Texture* texture);
+int                WINCE_CreateTexture(SDL_Renderer* renderer, SDL_Texture* texture);
+void                WINCE_DestroyTexture(SDL_Renderer* renderer, SDL_Texture* texture);
+int                WINCE_QueryTexturePixels(SDL_Renderer* renderer, SDL_Texture* texture, void** pixels, int* pitch);
+int                WINCE_UpdateTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, const void* pixels, int pitch);
+int                WINCE_LockTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* rect, int dirty, void** pixels, int* pitch);
+void                WINCE_UnlockTexture(SDL_Renderer* renderer, SDL_Texture* texture);
 
-int		WINCE_Available(void);
-void		WINCE_SetupOrientation(WINCE_RenderData* data, int width, int height);
+int                WINCE_Available(void);
+void                WINCE_SetupOrientation(WINCE_RenderData* data, int width, int height);
 
-int		WINCE_RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srect, const SDL_Rect* drect);
-void		WINCE_ShowWindow(_THIS, SDL_Window* window, int visible);
+int                WINCE_RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rect* srect, const SDL_Rect* drect);
+void                WINCE_ShowWindow(_THIS, SDL_Window* window, int visible);
 
-void		WINCE_RenderPresent(SDL_Renderer* renderer);
-int		WINCE_RenderDrawPoints(SDL_Renderer* renderer, const SDL_Point* points, int count);
-int		WINCE_RenderDrawLines(SDL_Renderer* renderer, const SDL_Point* points, int count);
-int		WINCE_RenderDrawRects(SDL_Renderer* renderer, const SDL_Rect ** rects, int count);
-int		WINCE_RenderFillRects(SDL_Renderer* renderer, const SDL_Rect** rects, int count);
+void                WINCE_RenderPresent(SDL_Renderer* renderer);
+int                WINCE_RenderDrawPoints(SDL_Renderer* renderer, const SDL_Point* points, int count);
+int                WINCE_RenderDrawLines(SDL_Renderer* renderer, const SDL_Point* points, int count);
+int                WINCE_RenderDrawRects(SDL_Renderer* renderer, const SDL_Rect ** rects, int count);
+int                WINCE_RenderFillRects(SDL_Renderer* renderer, const SDL_Rect** rects, int count);
 
-void		WINCE_PointerCoordinateTransform(SDL_Window* window, POINT* pt);
-void		WINCE_DumpVideoInfo(WINCE_RenderData* data);
-void		WINCE_PortraitTransform(WINCE_RenderData* data, int width, int height);
-void		WINCE_LandscapeTransform(WINCE_RenderData* data, int width, int height);
-void		WINCE_SquareTransform(WINCE_RenderData* data, int width, int height);
-int		WINCE_FixedGeometry(FrameBufferInfo* fb, int bpp, int debug);
-int		WINCE_GetDMOrientation(void);
-int		WINCE_SetDMOrientation(int orientation);
-void		WINCE_UpdateYUVTextureData(SDL_Texture* texture);
+void                WINCE_PointerCoordinateTransform(SDL_Window* window, POINT* pt);
+void                WINCE_DumpVideoInfo(WINCE_RenderData* data);
+void                WINCE_PortraitTransform(WINCE_RenderData* data, int width, int height);
+void                WINCE_LandscapeTransform(WINCE_RenderData* data, int width, int height);
+void                WINCE_SquareTransform(WINCE_RenderData* data, int width, int height);
+int                WINCE_FixedGeometry(FrameBufferInfo* fb, int bpp, int debug);
+int                WINCE_GetDMOrientation(void);
+int                WINCE_SetDMOrientation(int orientation);
+void                WINCE_UpdateYUVTextureData(SDL_Texture* texture);
 
 // gapi engine specific
-int		GAPI_Init(WINCE_RenderData* data, HWND hwnd);
-void		GAPI_Quit(WINCE_RenderData* data);
+int                GAPI_Init(WINCE_RenderData* data, HWND hwnd);
+void                GAPI_Quit(WINCE_RenderData* data);
 
 // raw engine specific
-int		RAW_Init(WINCE_RenderData* data);
-void		RAW_Quit(WINCE_RenderData* data);
+int                RAW_Init(WINCE_RenderData* data);
+void                RAW_Quit(WINCE_RenderData* data);
 
 // tools
-void		FrameBufferRotate(FrameBufferInfo* src, int orientation);
-int		GetFrameBufferOrientation(const FrameBufferInfo* src);
-void		PointerRotate(POINT* pt, const FrameBufferInfo* fb, int orientation);
-void		FrameBufferInitialize(FrameBufferInfo* fb);
-void		FrameBufferDumpInfo(const FrameBufferInfo* fb, const char*);
-const		char* GetOrientationName(int orientation);
-void		UpdateLine16to16(const FrameBufferInfo* fb, const Uint16* src, Uint16* dst, Uint16 width);
+void                FrameBufferRotate(FrameBufferInfo* src, int orientation);
+int                GetFrameBufferOrientation(const FrameBufferInfo* src);
+void                PointerRotate(POINT* pt, const FrameBufferInfo* fb, int orientation);
+void                FrameBufferInitialize(FrameBufferInfo* fb);
+void                FrameBufferDumpInfo(const FrameBufferInfo* fb, const char*);
+const                char* GetOrientationName(int orientation);
+void                UpdateLine16to16(const FrameBufferInfo* fb, const Uint16* src, Uint16* dst, Uint16 width);
 
 // stdlib
-inline int	__abs(int x){ return x < 0 ? -x : x; };
-inline void	__swap(int* a, int* b){ int t = *a; *a = *b; *b = t; };
+static __inline__ int        __abs(int x){ return x < 0 ? -x : x; };
+static __inline__ void        __swap(int* a, int* b){ int t = *a; *a = *b; *b = t; };
 
-#define GAPI_RENDER_NAME	"gapi"
-#define RAW_RENDER_NAME		"raw"
+#define GAPI_RENDER_NAME        "gapi"
+#define RAW_RENDER_NAME                "raw"
 //
 SDL_RenderDriver GAPI_RenderDriver = {
     WINCE_CreateRenderer,
     {
-	GAPI_RENDER_NAME,
-	(SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
-	(SDL_TEXTUREMODULATE_NONE),
-	(SDL_BLENDMODE_NONE),
-	(SDL_SCALEMODE_NONE),
-	7,
-	{
-	    SDL_PIXELFORMAT_RGB555,
-	    SDL_PIXELFORMAT_RGB565,
-	    SDL_PIXELFORMAT_YV12,
-	    SDL_PIXELFORMAT_IYUV,
-	    SDL_PIXELFORMAT_YUY2,
-	    SDL_PIXELFORMAT_UYVY,
-	    SDL_PIXELFORMAT_YVYU
-	},
-	0,
-	0
+        GAPI_RENDER_NAME,
+        (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
+        (SDL_TEXTUREMODULATE_NONE),
+        (SDL_BLENDMODE_NONE),
+        (SDL_SCALEMODE_NONE),
+        7,
+        {
+            SDL_PIXELFORMAT_RGB555,
+            SDL_PIXELFORMAT_RGB565,
+            SDL_PIXELFORMAT_YV12,
+            SDL_PIXELFORMAT_IYUV,
+            SDL_PIXELFORMAT_YUY2,
+            SDL_PIXELFORMAT_UYVY,
+            SDL_PIXELFORMAT_YVYU
+        },
+        0,
+        0
     }
 };
 
 SDL_RenderDriver RAW_RenderDriver = {
     WINCE_CreateRenderer,
     {
-	RAW_RENDER_NAME,
-	(SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
-	(SDL_TEXTUREMODULATE_NONE),
-	(SDL_BLENDMODE_NONE),
-	(SDL_SCALEMODE_NONE),
-	7,
-	{
-	    SDL_PIXELFORMAT_RGB555,
-	    SDL_PIXELFORMAT_RGB565,
-	    SDL_PIXELFORMAT_YV12,
-	    SDL_PIXELFORMAT_IYUV,
-	    SDL_PIXELFORMAT_YUY2,
-	    SDL_PIXELFORMAT_UYVY,
-	    SDL_PIXELFORMAT_YVYU
-	},
-	0,
-	0
+        RAW_RENDER_NAME,
+        (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
+        (SDL_TEXTUREMODULATE_NONE),
+        (SDL_BLENDMODE_NONE),
+        (SDL_SCALEMODE_NONE),
+        7,
+        {
+            SDL_PIXELFORMAT_RGB555,
+            SDL_PIXELFORMAT_RGB565,
+            SDL_PIXELFORMAT_YV12,
+            SDL_PIXELFORMAT_IYUV,
+            SDL_PIXELFORMAT_YUY2,
+            SDL_PIXELFORMAT_UYVY,
+            SDL_PIXELFORMAT_YVYU
+        },
+        0,
+        0
     }
 };
 
 int WINCE_Available(void)
 {
+    HMODULE render_gapi;
     const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
 
     // raw check
@@ -260,13 +261,13 @@ int WINCE_Available(void)
     ReleaseDC(NULL, hdc);
 
     if(render_raw != 0 && rfbi.cxPixels != 0 && rfbi.cyPixels != 0 &&
-        rfbi.pFramePointer != 0 && rfbi.cxStride != 0 && rfbi.cyStride != 0)
-	    render_raw = 1;
+       rfbi.pFramePointer != 0 && rfbi.cxStride != 0 && rfbi.cyStride != 0)
+        render_raw = 1;
 
     if(preferably && 0 == SDL_strcasecmp(preferably, RAW_RENDER_NAME)) return 0 != render_raw;
 
     // gapi check
-    HMODULE render_gapi = LoadLibrary(TEXT("\\Windows\\gx.dll"));
+    render_gapi = LoadLibrary(TEXT("\\Windows\\gx.dll"));
     if(0 == render_gapi)
         render_gapi = LoadLibrary(TEXT("gx.dll"));
     FreeLibrary(render_gapi);
@@ -290,8 +291,8 @@ void WINCE_AddRenderDriver(_THIS)
     ReleaseDC(NULL, hdc);
 
     if(render_raw != 0 && rfbi.cxPixels != 0 && rfbi.cyPixels != 0 &&
-    	rfbi.pFramePointer != 0 && rfbi.cxStride != 0 && rfbi.cyStride != 0)
-	    render_raw = 1;
+            rfbi.pFramePointer != 0 && rfbi.cxStride != 0 && rfbi.cyStride != 0)
+            render_raw = 1;
 
     // gapi check
     render_gapi = LoadLibrary(TEXT("\\Windows\\gx.dll"));
@@ -299,25 +300,25 @@ void WINCE_AddRenderDriver(_THIS)
         render_gapi = LoadLibrary(TEXT("gx.dll"));
 
     if(render_gapi)
-	FreeLibrary(render_gapi);
+        FreeLibrary(render_gapi);
 
     for(ii = 0; ii < _this->num_displays; ++ii)
     {
-	if(preferably)
-	{
-	    if(0 == SDL_strcasecmp(preferably, RAW_RENDER_NAME) && render_raw)
-    		SDL_AddRenderDriver(&_this->displays[ii], &RAW_RenderDriver);
-	    else
-	    if(0 == SDL_strcasecmp(preferably, GAPI_RENDER_NAME) && render_gapi)
-    		SDL_AddRenderDriver(&_this->displays[ii], &GAPI_RenderDriver);
-	}
-	else
-	{
-	    if(render_raw)
-    		SDL_AddRenderDriver(&_this->displays[ii], &RAW_RenderDriver);
-	    if(render_gapi)
-    		SDL_AddRenderDriver(&_this->displays[ii], &GAPI_RenderDriver);
-	}
+        if(preferably)
+        {
+            if(0 == SDL_strcasecmp(preferably, RAW_RENDER_NAME) && render_raw)
+                SDL_AddRenderDriver(&_this->displays[ii], &RAW_RenderDriver);
+            else
+            if(0 == SDL_strcasecmp(preferably, GAPI_RENDER_NAME) && render_gapi)
+                SDL_AddRenderDriver(&_this->displays[ii], &GAPI_RenderDriver);
+        }
+        else
+        {
+            if(render_raw)
+                SDL_AddRenderDriver(&_this->displays[ii], &RAW_RenderDriver);
+            if(render_gapi)
+                SDL_AddRenderDriver(&_this->displays[ii], &GAPI_RenderDriver);
+        }
     }
 }
 
@@ -332,7 +333,7 @@ SDL_Renderer* WINCE_CreateRenderer(SDL_Window* window, Uint32 flags)
     Uint32 Rmask, Gmask, Bmask, Amask;
 
     if(!(window->flags & SDL_WINDOW_FULLSCREEN))
-	window->flags |= SDL_WINDOW_FULLSCREEN;
+        window->flags |= SDL_WINDOW_FULLSCREEN;
 
     if(!SDL_PixelFormatEnumToMasks(displayMode->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask))
     {
@@ -342,13 +343,13 @@ SDL_Renderer* WINCE_CreateRenderer(SDL_Window* window, Uint32 flags)
 
     switch(window->fullscreen_mode.format)
     {
-	case SDL_PIXELFORMAT_RGB555:
-	case SDL_PIXELFORMAT_RGB565:
-	    break;
+        case SDL_PIXELFORMAT_RGB555:
+        case SDL_PIXELFORMAT_RGB565:
+            break;
 
-	default:
-    	    SDL_SetError("Support only 16 or 15 bpp");
-	    return NULL;
+        default:
+            SDL_SetError("Support only 16 or 15 bpp");
+            return NULL;
     }
 
     renderer = (SDL_Renderer*) SDL_calloc(1, sizeof(SDL_Renderer));
@@ -375,9 +376,9 @@ SDL_Renderer* WINCE_CreateRenderer(SDL_Window* window, Uint32 flags)
 
 
     // set debug
-    data->debug	= SDL_getenv("DEBUG_VIDEO_GAPI") || SDL_getenv("GAPI_RENDERER_DEBUG") ? 1 : 0;
+    data->debug        = SDL_getenv("DEBUG_VIDEO_GAPI") || SDL_getenv("GAPI_RENDERER_DEBUG") ? 1 : 0;
 #if defined(DEBUG_VIDEO_GAPI) || defined(GAPI_RENDERER_DEBUG)
-    data->debug	= 1;
+    data->debug        = 1;
 #endif
 
     windowdata->videodata->render = data->gapi ? RENDER_GAPI : RENDER_RAW;
@@ -418,10 +419,10 @@ void WINCE_DestroyRenderer(SDL_Renderer* renderer)
 
     if(renderdata)
     {
-	if(renderdata->gapi)
-    	    GAPI_Quit(renderdata);
-	else
-	    RAW_Quit(renderdata);
+        if(renderdata->gapi)
+            GAPI_Quit(renderdata);
+        else
+            RAW_Quit(renderdata);
 
         SDL_free(renderdata);
     }
@@ -448,20 +449,21 @@ int WINCE_CreateTexture(SDL_Renderer* renderer, SDL_Texture* texture)
 
     if(SDL_ISPIXELFORMAT_FOURCC(texture->format))
     {
-	texturedata->yuv = SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
+        SDL_Window* window = renderer->window;
+        SDL_VideoDisplay* display = window->display;
+
+        texturedata->yuv = SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
         if(NULL == texturedata->yuv)
-	{
-    	    SDL_OutOfMemory();
+        {
+            SDL_OutOfMemory();
             return -1;
         }
-	SDL_Window* window = renderer->window;
-	SDL_VideoDisplay* display = window->display;
-	texturedata->format = display->current_mode.format;
+        texturedata->format = display->current_mode.format;
     }
     else
     {
-	texturedata->yuv = NULL;
-	texturedata->format = texture->format;
+        texturedata->yuv = NULL;
+        texturedata->format = texture->format;
     }
 
     texture->driverdata = texturedata;
@@ -475,10 +477,10 @@ void WINCE_DestroyTexture(SDL_Renderer* renderer, SDL_Texture* texture)
 
     if(texturedata)
     {
-	if(texturedata->yuv) SDL_SW_DestroyYUVTexture(texturedata->yuv);
-	if(texturedata->pixels) SDL_free(texturedata->pixels);
-	SDL_free(texturedata);
-	texture->driverdata = NULL;
+        if(texturedata->yuv) SDL_SW_DestroyYUVTexture(texturedata->yuv);
+        if(texturedata->pixels) SDL_free(texturedata->pixels);
+        SDL_free(texturedata);
+        texture->driverdata = NULL;
     }
 }
 
@@ -509,19 +511,19 @@ int WINCE_UpdateTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_
 
     if(0 < rect->w && 0 < rect->h)
     {
-	const unsigned char *src = ((const unsigned char*) pixels);
-	unsigned char *dst = ((unsigned char*) texturedata->pixels) +
-				rect->y * texturedata->pitch +
-				rect->x * SDL_BYTESPERPIXEL(texture->format);
+        const unsigned char *src = ((const unsigned char*) pixels);
+        unsigned char *dst = ((unsigned char*) texturedata->pixels) +
+                                rect->y * texturedata->pitch +
+                                rect->x * SDL_BYTESPERPIXEL(texture->format);
         int length = rect->w * SDL_BYTESPERPIXEL(texture->format);
-	int height = rect->h;
+        int height = rect->h;
 
-	while(height--)
-	{
-	    SDL_memcpy(dst, src, length);
-	    dst += texturedata->pitch;
-	    src += pitch;
-	}
+        while(height--)
+        {
+            SDL_memcpy(dst, src, length);
+            dst += texturedata->pitch;
+            src += pitch;
+        }
     }
 
     return 0;
@@ -535,9 +537,10 @@ int WINCE_LockTexture(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Re
         return SDL_SW_LockYUVTexture(texturedata->yuv, rect, dirty, pixels, pitch);
 
     *pixels = (void *) ((unsigned char*) texturedata->pixels +
-		    rect->y * texturedata->pitch +
-		    rect->x * SDL_BYTESPERPIXEL(texture->format));
+                    rect->y * texturedata->pitch +
+                    rect->x * SDL_BYTESPERPIXEL(texture->format));
     *pitch = texturedata->pitch;
+    return 0;
 }
 
 void WINCE_UnlockTexture(SDL_Renderer* renderer, SDL_Texture* texture)
@@ -547,7 +550,7 @@ void WINCE_UnlockTexture(SDL_Renderer* renderer, SDL_Texture* texture)
     if(texturedata->yuv)
     {
         SDL_SW_UnlockYUVTexture(texturedata->yuv);
-	WINCE_UpdateYUVTextureData(texture);
+        WINCE_UpdateYUVTextureData(texture);
     }
 }
 
@@ -555,41 +558,43 @@ int WINCE_RenderCopy(SDL_Renderer* renderer, SDL_Texture* texture, const SDL_Rec
 {
     WINCE_RenderData* dstdata = (WINCE_RenderData*) renderer->driverdata;
     WINCE_TextureData* srcdata = (WINCE_TextureData*) texture->driverdata;
+    const unsigned char *src;
+    unsigned char *dst;
 
     if((dstdata->flags & FB_SUSPENDED) ||
-       0 >= srect->w || 0 >= srect->h) return;
+       0 >= srect->w || 0 >= srect->h) return 0;
 
     // lock gapi
     if(dstdata->gapi) dstdata->gapi->GXBeginDraw();
 
-    const unsigned char *src = ((const unsigned char*) srcdata->pixels);
-    unsigned char *dst = dstdata->pixels + (dstdata->flags & FB_SKIP_OFFSET ? 0 : dstdata->fb.offset) +
-				drect->y * dstdata->fb.ypitch +
-				drect->x * dstdata->fb.xpitch;
+    src = ((const unsigned char*) srcdata->pixels);
+    dst = dstdata->pixels + (dstdata->flags & FB_SKIP_OFFSET ? 0 : dstdata->fb.offset) +
+                                drect->y * dstdata->fb.ypitch +
+                                drect->x * dstdata->fb.xpitch;
     if(srcdata->yuv)
     {
-	return SDL_SW_CopyYUVToRGB(srcdata->yuv,
+        return SDL_SW_CopyYUVToRGB(srcdata->yuv,
                                    srect, srcdata->format,
                                    drect->w, drect->h, dst,
                                    dstdata->fb.ypitch);
     }
     else
     {
-	int height = drect->h;
-	int length = drect->w * SDL_BYTESPERPIXEL(texture->format); // in bytes
+        int height = drect->h;
+        int length = drect->w * SDL_BYTESPERPIXEL(texture->format); // in bytes
 
-	while(height--)
-	{
-	    switch(SDL_BYTESPERPIXEL(texture->format))
-	    {
-		case 2: UpdateLine16to16(&dstdata->fb, (Uint16*) src, (Uint16*) dst, length >> 1); break;
+        while(height--)
+        {
+            switch(SDL_BYTESPERPIXEL(texture->format))
+            {
+                case 2: UpdateLine16to16(&dstdata->fb, (Uint16*) src, (Uint16*) dst, length >> 1); break;
 
-		default: break;
-	    }
+                default: break;
+            }
 
-	    dst += dstdata->fb.ypitch;
-	    src += srcdata->pitch;
-	}
+            dst += dstdata->fb.ypitch;
+            src += srcdata->pitch;
+        }
     }
 
     // unlock gapi
@@ -630,8 +635,8 @@ int WINCE_RenderFillRects(SDL_Renderer* renderer, const SDL_Rect** rects, int co
 
 void WINCE_SetupOrientation(WINCE_RenderData* data, int width, int height)
 {
-    const float maxW1 = GetSystemMetrics(SM_CXSCREEN) > GetSystemMetrics(SM_CYSCREEN) ? GetSystemMetrics(SM_CXSCREEN) : GetSystemMetrics(SM_CYSCREEN);
-    const float maxW2 = data->fb.width > data->fb.height ? data->fb.width : data->fb.height;
+    const float maxW1 = (float)(GetSystemMetrics(SM_CXSCREEN) > GetSystemMetrics(SM_CYSCREEN) ? GetSystemMetrics(SM_CXSCREEN) : GetSystemMetrics(SM_CYSCREEN));
+    const float maxW2 = (float)(data->fb.width > data->fb.height ? data->fb.width : data->fb.height);
 
     // scale define
     data->scale = maxW2 / maxW1;
@@ -643,31 +648,31 @@ void WINCE_SetupOrientation(WINCE_RenderData* data, int width, int height)
     data->userOrientation = ORIENTATION_UP;
     data->systemOrientation = WINCE_GetDMOrientation();
     data->hardwareGeometry = data->fb.width == data->fb.height ? GEOMETRY_SQUARE :
-				(data->fb.width < data->fb.height ? GEOMETRY_PORTRAIT : GEOMETRY_LANDSCAPE);
+                                (data->fb.width < data->fb.height ? GEOMETRY_PORTRAIT : GEOMETRY_LANDSCAPE);
 
     if(data->debug)
-	WINCE_DumpVideoInfo(data);
+        WINCE_DumpVideoInfo(data);
 
     if(data->systemOrientation == ORIENTATION_UNKNOWN)
-	data->systemOrientation == ORIENTATION_UP;
+        data->systemOrientation = ORIENTATION_UP;
 
     data->userOrientation = ORIENTATION_UP;
 
     switch(data->hardwareGeometry)
     {
-	case GEOMETRY_PORTRAIT:  WINCE_PortraitTransform(data, width, height); break;
-	case GEOMETRY_LANDSCAPE: WINCE_LandscapeTransform(data, width, height); break;
-	case GEOMETRY_SQUARE:    WINCE_SquareTransform(data, width, height); break;
-	default: break;
+        case GEOMETRY_PORTRAIT:  WINCE_PortraitTransform(data, width, height); break;
+        case GEOMETRY_LANDSCAPE: WINCE_LandscapeTransform(data, width, height); break;
+        case GEOMETRY_SQUARE:    WINCE_SquareTransform(data, width, height); break;
+        default: break;
     }
 
     // debug
     if(data->debug)
     {
-	printf("\n");
-	printf("user video width:          %d\n", width);
-	printf("user video height:         %d\n", height);
-	FrameBufferDumpInfo(&data->fb, "user");
+        printf("\n");
+        printf("user video width:          %d\n", width);
+        printf("user video height:         %d\n", height);
+        FrameBufferDumpInfo(&data->fb, "user");
     }
 }
 
@@ -705,42 +710,42 @@ void WINCE_ShowWindow(_THIS, SDL_Window* window, int visible)
 
     if(visible)
     {
-	if(window->flags & SDL_WINDOW_FULLSCREEN)
-	{
-	    if(videodata->SHFullScreen)
-		videodata->SHFullScreen(windowdata->hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
-	    ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_HIDE);
-	}
+        if(window->flags & SDL_WINDOW_FULLSCREEN)
+        {
+            if(videodata->SHFullScreen)
+                videodata->SHFullScreen(windowdata->hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
+            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_HIDE);
+        }
 
-	ShowWindow(windowdata->hwnd, SW_SHOW);
+        ShowWindow(windowdata->hwnd, SW_SHOW);
         SetForegroundWindow(windowdata->hwnd);
 
-	if(renderer &&
-	    (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
-	{
-	    WINCE_RenderData* renderdata = (WINCE_RenderData*) renderer->driverdata;
-	    renderdata->flags &= ~FB_SUSPENDED;
-	    if(renderdata->gapi) renderdata->gapi->GXResume();
-	}
+        if(renderer &&
+            (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
+        {
+            WINCE_RenderData* renderdata = (WINCE_RenderData*) renderer->driverdata;
+            renderdata->flags &= ~FB_SUSPENDED;
+            if(renderdata->gapi) renderdata->gapi->GXResume();
+        }
     }
     else
     {
-	if(renderer &&
-	    (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
-	{
-	    WINCE_RenderData* renderdata = (WINCE_RenderData*) renderer->driverdata;
-	    if(renderdata->gapi) renderdata->gapi->GXSuspend();
-	    renderdata->flags |= FB_SUSPENDED;
-	}
+        if(renderer &&
+            (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
+        {
+            WINCE_RenderData* renderdata = (WINCE_RenderData*) renderer->driverdata;
+            if(renderdata->gapi) renderdata->gapi->GXSuspend();
+            renderdata->flags |= FB_SUSPENDED;
+        }
 
-	ShowWindow(windowdata->hwnd, SW_HIDE);
+        ShowWindow(windowdata->hwnd, SW_HIDE);
 
-	if(window->flags & SDL_WINDOW_FULLSCREEN)
-	{
-	    if(videodata->SHFullScreen)
-		videodata->SHFullScreen(windowdata->hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
-	    ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_SHOW);
-	}
+        if(window->flags & SDL_WINDOW_FULLSCREEN)
+        {
+            if(videodata->SHFullScreen)
+                videodata->SHFullScreen(windowdata->hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
+            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_SHOW);
+        }
     }
 }
 
@@ -749,8 +754,8 @@ void WINCE_PointerCoordinateTransform(SDL_Window* window, POINT* pt)
 {
     WINCE_RenderData* data = (WINCE_RenderData*) window->renderer->driverdata;
 
-    pt->x *= data->scale;
-    pt->y *= data->scale;
+    pt->x = (LONG)(pt->x * data->scale);
+    pt->y = (LONG)(pt->y * data->scale);
 
     PointerRotate(pt, &data->fb, data->userOrientation);
 }
@@ -758,44 +763,45 @@ void WINCE_PointerCoordinateTransform(SDL_Window* window, POINT* pt)
 void WINCE_PortraitTransform(WINCE_RenderData* data, int width, int height)
 {
     if(data->systemOrientation != ORIENTATION_UP)
-	FrameBufferRotate(&data->fb, data->systemOrientation);
+        FrameBufferRotate(&data->fb, data->systemOrientation);
 
-    if(data->fb.width != width || data->fb.height != height)
-    switch(data->systemOrientation)
-    {
-	case ORIENTATION_UP:
-	case ORIENTATION_LEFT: data->userOrientation = ORIENTATION_RIGHT; break;
-	case ORIENTATION_RIGHT:
-	case ORIENTATION_DOWN: data->userOrientation = ORIENTATION_LEFT; break;
-	default: break;
+    if(data->fb.width != width || data->fb.height != height) {
+        switch(data->systemOrientation)
+        {
+            case ORIENTATION_UP:
+            case ORIENTATION_LEFT: data->userOrientation = ORIENTATION_RIGHT; break;
+            case ORIENTATION_RIGHT:
+            case ORIENTATION_DOWN: data->userOrientation = ORIENTATION_LEFT; break;
+            default: break;
+        }
     }
 
     if(data->userOrientation != ORIENTATION_UP)
-	FrameBufferRotate(&data->fb, data->userOrientation);
+        FrameBufferRotate(&data->fb, data->userOrientation);
 }
 
 void WINCE_LandscapeTransform(WINCE_RenderData* data, int width, int height)
 {
     switch(data->systemOrientation)
     {
-	case ORIENTATION_UP:  FrameBufferRotate(&data->fb, ORIENTATION_LEFT); break;
-	case ORIENTATION_LEFT:FrameBufferRotate(&data->fb, ORIENTATION_DOWN); break;
-	case ORIENTATION_DOWN:FrameBufferRotate(&data->fb, ORIENTATION_RIGHT); break;
-	default: break;
+        case ORIENTATION_UP:  FrameBufferRotate(&data->fb, ORIENTATION_LEFT); break;
+        case ORIENTATION_LEFT:FrameBufferRotate(&data->fb, ORIENTATION_DOWN); break;
+        case ORIENTATION_DOWN:FrameBufferRotate(&data->fb, ORIENTATION_RIGHT); break;
+        default: break;
     }
 
     if(data->fb.width != width || data->fb.height != height)
     switch(data->systemOrientation)
     {
-	case ORIENTATION_UP:
-	case ORIENTATION_LEFT: data->userOrientation = ORIENTATION_RIGHT; break;
-	case ORIENTATION_RIGHT:
-	case ORIENTATION_DOWN: data->userOrientation = ORIENTATION_LEFT; break;
-	default: break;
+        case ORIENTATION_UP:
+        case ORIENTATION_LEFT: data->userOrientation = ORIENTATION_RIGHT; break;
+        case ORIENTATION_RIGHT:
+        case ORIENTATION_DOWN: data->userOrientation = ORIENTATION_LEFT; break;
+        default: break;
     }
 
     if(data->userOrientation != ORIENTATION_UP)
-	FrameBufferRotate(&data->fb, data->userOrientation);
+        FrameBufferRotate(&data->fb, data->userOrientation);
 }
 
 void WINCE_SquareTransform(WINCE_RenderData* data, int width, int height)
@@ -807,43 +813,43 @@ int WINCE_FixedGeometry(FrameBufferInfo* fb, int bpp, int debug)
 {
     // check square
     if(GetSystemMetrics(SM_CXSCREEN) == GetSystemMetrics(SM_CYSCREEN) &&
-	fb->width != fb->height)
+        fb->width != fb->height)
     {
-	if(fb->width < fb->height)
-	    fb->height = fb->width;
-	else
-	if(fb->height < fb->width)
-	    fb->width = fb->height;
+        if(fb->width < fb->height)
+            fb->height = fb->width;
+        else
+        if(fb->height < fb->width)
+            fb->width = fb->height;
     }
 
     // check width
     if(__abs(fb->xpitch) == bpp &&
-	fb->width  != __abs(fb->ypitch) / bpp)
+        fb->width  != __abs(fb->ypitch) / bpp)
     {
-	if(fb->height == __abs(fb->ypitch) / bpp)
-    	{
-	    __swap(&fb->width, &fb->height);
+        if(fb->height == __abs(fb->ypitch) / bpp)
+            {
+            __swap(&fb->width, &fb->height);
 
-	    if(debug)
-		printf("WINCE_FixedGeometry: width: %d, height: %d\n", fb->width, fb->height);
-	}
-	else
-	    return -1;
+            if(debug)
+                printf("WINCE_FixedGeometry: width: %d, height: %d\n", fb->width, fb->height);
+        }
+        else
+            return -1;
     }
     else
     // check height
     if(__abs(fb->ypitch) == bpp &&
-	fb->height != __abs(fb->xpitch) / bpp)
+        fb->height != __abs(fb->xpitch) / bpp)
     {
-	if(fb->width  == __abs(fb->xpitch) / bpp)
-    	{
-	    __swap(&fb->width, &fb->height);
+        if(fb->width  == __abs(fb->xpitch) / bpp)
+            {
+            __swap(&fb->width, &fb->height);
 
-	    if(debug)
-		printf("WINCE_FixedGeometry: width: %d, height: %d\n", fb->width, fb->height);
-	}
-	else
-	    return -1;
+            if(debug)
+                printf("WINCE_FixedGeometry: width: %d, height: %d\n", fb->width, fb->height);
+        }
+        else
+            return -1;
     }
 
     return 0;
@@ -865,8 +871,12 @@ int GAPI_Init(WINCE_RenderData* data, HWND hwnd)
 {
     if(NULL == data->gapi)
     {
-	const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
-	if(preferably && 0 != SDL_strcasecmp(preferably, GAPI_RENDER_NAME)) return 0;
+        struct GXDisplayProperties gxProperties;
+        GXDeviceInfo gxInfo = { 0 };
+        HDC hdc;
+        int enable, result;
+        const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
+        if(preferably && 0 != SDL_strcasecmp(preferably, GAPI_RENDER_NAME)) return 0;
 
         data->gapi = (GapiInfo *) SDL_calloc(1, sizeof(GapiInfo));
         if(NULL == data->gapi)
@@ -875,116 +885,116 @@ int GAPI_Init(WINCE_RenderData* data, HWND hwnd)
             return 0;
         }
 
-	data->gapi->hGapiLib = LoadLibrary(TEXT("\\Windows\\gx.dll"));
-	if(0 == data->gapi->hGapiLib)
-	{
-	    data->gapi->hGapiLib = LoadLibrary(TEXT("gx.dll"));
-	    if(0 == data->gapi->hGapiLib) return 0;
-	}
+        data->gapi->hGapiLib = LoadLibrary(TEXT("\\Windows\\gx.dll"));
+        if(0 == data->gapi->hGapiLib)
+        {
+            data->gapi->hGapiLib = LoadLibrary(TEXT("gx.dll"));
+            if(0 == data->gapi->hGapiLib) return 0;
+        }
 
-	// load gapi library
+        // load gapi library
 #define LINK(type,name,import) name=(PFN##type)GetProcAddress(data->gapi->hGapiLib,TEXT(import))
-	LINK(GXOpenDisplay,         data->gapi->GXOpenDisplay,         "?GXOpenDisplay@@YAHPAUHWND__@@K@Z");
-	LINK(GXCloseDisplay,        data->gapi->GXCloseDisplay,        "?GXCloseDisplay@@YAHXZ");
-	LINK(GXBeginDraw,           data->gapi->GXBeginDraw,           "?GXBeginDraw@@YAPAXXZ");
-	LINK(GXEndDraw,             data->gapi->GXEndDraw,             "?GXEndDraw@@YAHXZ");
-	LINK(GXGetDisplayProperties,data->gapi->GXGetDisplayProperties,"?GXGetDisplayProperties@@YA?AUGXDisplayProperties@@XZ");
-	LINK(GXSuspend,             data->gapi->GXSuspend,             "?GXSuspend@@YAHXZ");
-	LINK(GXResume,              data->gapi->GXResume,              "?GXResume@@YAHXZ");
+        LINK(GXOpenDisplay,         data->gapi->GXOpenDisplay,         "?GXOpenDisplay@@YAHPAUHWND__@@K@Z");
+        LINK(GXCloseDisplay,        data->gapi->GXCloseDisplay,        "?GXCloseDisplay@@YAHXZ");
+        LINK(GXBeginDraw,           data->gapi->GXBeginDraw,           "?GXBeginDraw@@YAPAXXZ");
+        LINK(GXEndDraw,             data->gapi->GXEndDraw,             "?GXEndDraw@@YAHXZ");
+        LINK(GXGetDisplayProperties,data->gapi->GXGetDisplayProperties,"?GXGetDisplayProperties@@YA?AUGXDisplayProperties@@XZ");
+        LINK(GXSuspend,             data->gapi->GXSuspend,             "?GXSuspend@@YAHXZ");
+        LINK(GXResume,              data->gapi->GXResume,              "?GXResume@@YAHXZ");
 #undef LINK
 
-	int enable = data->gapi->GXGetDisplayProperties && data->gapi->GXCloseDisplay && data->gapi->GXOpenDisplay &&
-	    data->gapi->GXBeginDraw && data->gapi->GXEndDraw && data->gapi->GXSuspend && data->gapi->GXResume;
+        enable = data->gapi->GXGetDisplayProperties && data->gapi->GXCloseDisplay && data->gapi->GXOpenDisplay &&
+            data->gapi->GXBeginDraw && data->gapi->GXEndDraw && data->gapi->GXSuspend && data->gapi->GXResume;
 
-	if(!enable)
-	{
-	    SDL_SetError("GAPI_Init: error gx.dll: internal error");
-	    GAPI_Quit(data);
-	    return 0;
-	}
+        if(!enable)
+        {
+            SDL_SetError("GAPI_Init: error gx.dll: internal error");
+            GAPI_Quit(data);
+            return 0;
+        }
 
-	if(0 == data->gapi->GXOpenDisplay(hwnd, GX_FULLSCREEN))
-	{
-	    SDL_SetError("GAPI_Init: couldn't initialize GAPI");
-	    GAPI_Quit(data);
-	    return 0;
-	}
+        if(0 == data->gapi->GXOpenDisplay(hwnd, GX_FULLSCREEN))
+        {
+            SDL_SetError("GAPI_Init: couldn't initialize GAPI");
+            GAPI_Quit(data);
+            return 0;
+        }
 
-	struct GXDisplayProperties gxProperties = data->gapi->GXGetDisplayProperties();
+        gxProperties = data->gapi->GXGetDisplayProperties();
 
-	// fill FrameBufferInfo
-	data->fb.xpitch = gxProperties.cbxPitch;
-	data->fb.ypitch = gxProperties.cbyPitch;
-	data->fb.width  = gxProperties.cxWidth;
-	data->fb.height = gxProperties.cyHeight;
-	data->fb.offset = 0;
+        // fill FrameBufferInfo
+        data->fb.xpitch = gxProperties.cbxPitch;
+        data->fb.ypitch = gxProperties.cbyPitch;
+        data->fb.width  = gxProperties.cxWidth;
+        data->fb.height = gxProperties.cyHeight;
+        data->fb.offset = 0;
 
         if((gxProperties.ffFormat & kfDirect565) || 16 == gxProperties.cBPP)
-	    data->format = SDL_PIXELFORMAT_RGB565;
-	else
-	if((gxProperties.ffFormat & kfDirect555) || 15 == gxProperties.cBPP)
-	    data->format = SDL_PIXELFORMAT_RGB555;
-	else
-	    data->format = 0;
+            data->format = SDL_PIXELFORMAT_RGB565;
+        else
+        if((gxProperties.ffFormat & kfDirect555) || 15 == gxProperties.cBPP)
+            data->format = SDL_PIXELFORMAT_RGB555;
+        else
+            data->format = 0;
 
-	// get pixels
-	GXDeviceInfo gxInfo = { 0 };
-	HDC hdc = GetDC(NULL);
+        // get pixels
+        hdc = GetDC(NULL);
 
-	gxInfo.Version = 100;
-	int result = ExtEscape(hdc, GETGXINFO, 0, NULL, sizeof(gxInfo), (char *) &gxInfo);
-	ReleaseDC(NULL, hdc);
+        gxInfo.Version = 100;
+        result = ExtEscape(hdc, GETGXINFO, 0, NULL, sizeof(gxInfo), (char *) &gxInfo);
+        ReleaseDC(NULL, hdc);
 
-	if(result > 0)
-	{
-	    // more debug
-	    if(data->debug)
-	    {
-		printf("GXDeviceInfo.pvFrameBuffer:    %p\n", gxInfo.pvFrameBuffer);
-    		printf("GXDeviceInfo.cxWidth:          %d\n", gxInfo.cxWidth);
-    		printf("GXDeviceInfo.cyHeight:         %d\n", gxInfo.cyHeight);
-    		printf("GXDeviceInfo.cbStride:         %d\n", gxInfo.cbStride);
-    		printf("GXDeviceInfo.cBPP:             %d\n", gxInfo.cBPP);
-    		printf("GXDeviceInfo.ffFormat:        0x%x\n", gxInfo.ffFormat);
+        if(result > 0)
+        {
+            // more debug
+            if(data->debug)
+            {
+                int i;
 
-    		printf("GXDeviceInfo.unk:\n");
-		int ii; for(ii = 0; ii <  sizeof(gxInfo.unknown); ++ii)
-		printf("0x%02hhX,", gxInfo.unknown[ii]);
-		printf("\n");
-	    }
+                printf("GXDeviceInfo.pvFrameBuffer:    %p\n", gxInfo.pvFrameBuffer);
+                printf("GXDeviceInfo.cxWidth:          %d\n", gxInfo.cxWidth);
+                printf("GXDeviceInfo.cyHeight:         %d\n", gxInfo.cyHeight);
+                printf("GXDeviceInfo.cbStride:         %d\n", gxInfo.cbStride);
+                printf("GXDeviceInfo.cBPP:             %d\n", gxInfo.cBPP);
+                printf("GXDeviceInfo.ffFormat:        0x%x\n", gxInfo.ffFormat);
 
-    	    if(gxInfo.ffFormat && gxInfo.ffFormat != gxProperties.ffFormat)
-	    {
-		if((gxInfo.ffFormat & kfDirect565) || 16 == gxInfo.cBPP)
-		    data->format = SDL_PIXELFORMAT_RGB565;
-		else
-		if((gxInfo.ffFormat & kfDirect555) || 15 == gxInfo.cBPP)
-		    data->format = SDL_PIXELFORMAT_RGB555;
-	    }
+                printf("GXDeviceInfo.unk:\n");
+                for(i = 0; i <  sizeof(gxInfo.unknown); ++i)
+                    printf("0x%02hhX,", gxInfo.unknown[i]);
+                printf("\n");
+            }
 
-    	    data->pixels = gxInfo.pvFrameBuffer;
+                if(gxInfo.ffFormat && gxInfo.ffFormat != gxProperties.ffFormat) {
+                    if((gxInfo.ffFormat & kfDirect565) || 16 == gxInfo.cBPP)
+                        data->format = SDL_PIXELFORMAT_RGB565;
+                    else
+                    if((gxInfo.ffFormat & kfDirect555) || 15 == gxInfo.cBPP)
+                        data->format = SDL_PIXELFORMAT_RGB555;
+                }
+
+                data->pixels = gxInfo.pvFrameBuffer;
         }
-	else
-	{
-	    data->flags |= FB_SKIP_OFFSET;
-	    data->pixels = data->gapi->GXBeginDraw();
-	    data->gapi->GXEndDraw();
+        else
+        {
+            data->flags |= FB_SKIP_OFFSET;
+            data->pixels = data->gapi->GXBeginDraw();
+            data->gapi->GXEndDraw();
 
-	    if(data->debug)
-	    {
-		printf("GAPI_Init\n");
-		printf("use GXBeginDraw:               %p\n", data->pixels);
-		printf("use skip offset\n");
-	    }
-	}
+            if(data->debug)
+            {
+                printf("GAPI_Init\n");
+                printf("use GXBeginDraw:               %p\n", data->pixels);
+                printf("use skip offset\n");
+            }
+        }
 
-	if(0 == data->format ||
-	    0 > WINCE_FixedGeometry(&data->fb, SDL_BYTESPERPIXEL(data->format), data->debug))
-	{
-	    SDL_SetError("GAPI_Init: unknown hardware");
-	    GAPI_Quit(data);
-	    return 0;
-	}
+        if(0 == data->format ||
+            0 > WINCE_FixedGeometry(&data->fb, SDL_BYTESPERPIXEL(data->format), data->debug))
+        {
+            SDL_SetError("GAPI_Init: unknown hardware");
+            GAPI_Quit(data);
+            return 0;
+        }
     }
 
     return data->gapi && data->pixels ? 1 : 0;
@@ -994,28 +1004,30 @@ void GAPI_Quit(WINCE_RenderData* data)
 {
     if(data->gapi)
     {
-	if(data->gapi->GXCloseDisplay) data->gapi->GXCloseDisplay(); 
-	if(data->gapi->hGapiLib)  FreeLibrary(data->gapi->hGapiLib);
+        if(data->gapi->GXCloseDisplay) data->gapi->GXCloseDisplay(); 
+        if(data->gapi->hGapiLib)  FreeLibrary(data->gapi->hGapiLib);
 
-	SDL_free(data->gapi);
+        SDL_free(data->gapi);
         data->gapi = NULL;
     }
 }
 
 int RAW_Init(WINCE_RenderData* data)
 {
+    RawFrameBufferInfo rfbi = { 0 };
+    HDC hdc;
+    int result;
     const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
     if(preferably && 0 != SDL_strcasecmp(preferably, RAW_RENDER_NAME)) return 0;
 
-    RawFrameBufferInfo rfbi = { 0 };
-    HDC hdc = GetDC(NULL);
-    int result = ExtEscape(hdc, GETRAWFRAMEBUFFER, 0, NULL, sizeof(RawFrameBufferInfo), (char *) &rfbi);
+    hdc = GetDC(NULL);
+    result = ExtEscape(hdc, GETRAWFRAMEBUFFER, 0, NULL, sizeof(RawFrameBufferInfo), (char *) &rfbi);
     ReleaseDC(NULL, hdc);
 
     //disable
     if(result == 0 || rfbi.pFramePointer == 0 ||
-    	rfbi.cxPixels == 0 || rfbi.cyPixels == 0 ||
-	rfbi.cxStride == 0 || rfbi.cyStride == 0) return 0;
+            rfbi.cxPixels == 0 || rfbi.cyPixels == 0 ||
+        rfbi.cxStride == 0 || rfbi.cyStride == 0) return 0;
 
     data->flags     = FB_RAW_MODE;
 
@@ -1029,19 +1041,19 @@ int RAW_Init(WINCE_RenderData* data)
     data->fb.offset = 0;
 
     if((FORMAT_565 & rfbi.wFormat) || 16 == rfbi.wBPP)
-	data->format = SDL_PIXELFORMAT_RGB565;
+        data->format = SDL_PIXELFORMAT_RGB565;
     else
     if((FORMAT_555 & rfbi.wFormat) || 15 == rfbi.wBPP)
-	data->format = SDL_PIXELFORMAT_RGB555;
+        data->format = SDL_PIXELFORMAT_RGB555;
     else
-	data->format = 0;
+        data->format = 0;
 
     if(0 == data->format ||
-	0 > WINCE_FixedGeometry(&data->fb, SDL_BYTESPERPIXEL(data->format), data->debug))
+        0 > WINCE_FixedGeometry(&data->fb, SDL_BYTESPERPIXEL(data->format), data->debug))
     {
-	SDL_SetError("RAW_Init: unknown hardware");
-	RAW_Quit(data);
-	return 0;
+        SDL_SetError("RAW_Init: unknown hardware");
+        RAW_Quit(data);
+        return 0;
     }
 
     data->pixels = rfbi.pFramePointer;
@@ -1060,50 +1072,50 @@ void FrameBufferInitialize(FrameBufferInfo* fb)
     // set correct start offset
     switch(orientation)
     {
-	case ORIENTATION_UP:
-	    fb->offset = 0;
-	    break;
+        case ORIENTATION_UP:
+            fb->offset = 0;
+            break;
 
-	case ORIENTATION_LEFT:
-	    fb->offset = __abs(fb->ypitch * (fb->height - 1));
-	    break;
+        case ORIENTATION_LEFT:
+            fb->offset = __abs(fb->ypitch * (fb->height - 1));
+            break;
 
-	case ORIENTATION_RIGHT:
-	    fb->offset = __abs(fb->xpitch * (fb->width - 1));
-	    break;
+        case ORIENTATION_RIGHT:
+            fb->offset = __abs(fb->xpitch * (fb->width - 1));
+            break;
 
-	case ORIENTATION_DOWN:
-	    fb->offset = __abs(fb->xpitch * (fb->width - 1) +
-				fb->ypitch * (fb->height - 1));
-	    break;
+        case ORIENTATION_DOWN:
+            fb->offset = __abs(fb->xpitch * (fb->width - 1) +
+                                fb->ypitch * (fb->height - 1));
+            break;
 
-	default: break;
+        default: break;
     }
 
     //if(orientation != ORIENTATION_UP)
     switch(orientation)
     {
-	case ORIENTATION_LEFT: FrameBufferRotate(fb, ORIENTATION_RIGHT); break;
-	case ORIENTATION_RIGHT:FrameBufferRotate(fb, ORIENTATION_LEFT); break;
-	case ORIENTATION_DOWN: FrameBufferRotate(fb, ORIENTATION_DOWN); break;
+        case ORIENTATION_LEFT: FrameBufferRotate(fb, ORIENTATION_RIGHT); break;
+        case ORIENTATION_RIGHT:FrameBufferRotate(fb, ORIENTATION_LEFT); break;
+        case ORIENTATION_DOWN: FrameBufferRotate(fb, ORIENTATION_DOWN); break;
 
-	default: break;
+        default: break;
     }
 }
 
 int GetFrameBufferOrientation(const FrameBufferInfo* src)
 {
     if(src->xpitch > 0 && src->ypitch > 0)
-	return ORIENTATION_UP;
+        return ORIENTATION_UP;
     else
     if(src->xpitch > 0 && src->ypitch < 0)
-	return ORIENTATION_LEFT;
+        return ORIENTATION_LEFT;
     else
     if(src->xpitch < 0 && src->ypitch > 0)
-	return ORIENTATION_RIGHT;
+        return ORIENTATION_RIGHT;
     else
     if(src->xpitch < 0 && src->ypitch < 0)
-	return ORIENTATION_DOWN;
+        return ORIENTATION_DOWN;
 
     return ORIENTATION_UNKNOWN;
 }
@@ -1117,28 +1129,28 @@ void FrameBufferRotate(FrameBufferInfo* dst, int orientation)
     switch(orientation)
     {
         case ORIENTATION_LEFT:
-	    dst->width  = src.height;
-	    dst->height = src.width;
-	    dst->xpitch = src.ypitch;
-	    dst->ypitch = -src.xpitch;
-	    dst->offset = src.offset + src.xpitch * (src.width - 1);
-	    break;
+            dst->width  = src.height;
+            dst->height = src.width;
+            dst->xpitch = src.ypitch;
+            dst->ypitch = -src.xpitch;
+            dst->offset = src.offset + src.xpitch * (src.width - 1);
+            break;
 
         case ORIENTATION_RIGHT:
-	    dst->width  = src.height;
-	    dst->height = src.width;
-	    dst->xpitch = -src.ypitch;
-	    dst->ypitch = src.xpitch;
-	    dst->offset = src.offset + src.ypitch * (src.height - 1);
-	    break;
+            dst->width  = src.height;
+            dst->height = src.width;
+            dst->xpitch = -src.ypitch;
+            dst->ypitch = src.xpitch;
+            dst->offset = src.offset + src.ypitch * (src.height - 1);
+            break;
 
         case ORIENTATION_DOWN:
-	    FrameBufferRotate(dst, ORIENTATION_LEFT);
-	    FrameBufferRotate(dst, ORIENTATION_LEFT);
-	    break;
+            FrameBufferRotate(dst, ORIENTATION_LEFT);
+            FrameBufferRotate(dst, ORIENTATION_LEFT);
+            break;
 
         default:
-	    break;
+            break;
     }
 }
 
@@ -1146,31 +1158,31 @@ void PointerRotate(POINT* pt, const FrameBufferInfo* fb, int orientation)
 {
     switch(orientation)
     {
-	case ORIENTATION_UP:
-	    break;
+        case ORIENTATION_UP:
+            break;
 
-	case ORIENTATION_LEFT:
-	{
-	    int temp = pt->y;
-	    pt->y = fb->height - pt->x;
-	    pt->x = temp;
-	}
-	    break;
+        case ORIENTATION_LEFT:
+        {
+            int temp = pt->y;
+            pt->y = fb->height - pt->x;
+            pt->x = temp;
+        }
+            break;
 
-	case ORIENTATION_RIGHT:
-	{
-	    int temp = pt->x;
-	    pt->x = fb->width - pt->y;
-	    pt->y = temp;
-	}
-	    break;
+        case ORIENTATION_RIGHT:
+        {
+            int temp = pt->x;
+            pt->x = fb->width - pt->y;
+            pt->y = temp;
+        }
+            break;
 
-	case ORIENTATION_DOWN:
-	    pt->x = fb->width  - pt->x;
-	    pt->y = fb->height - pt->y;
-	    break;
+        case ORIENTATION_DOWN:
+            pt->x = fb->width  - pt->x;
+            pt->y = fb->height - pt->y;
+            break;
 
-	default: break;
+        default: break;
     }
 }
 
@@ -1196,14 +1208,14 @@ int WINCE_GetDMOrientation(void)
 
     // DMDO_0, DMDO_90, DMDO_180, DMDO_270
     if(DISP_CHANGE_BADMODE != ChangeDisplaySettingsEx(NULL, &sDevMode, 0, CDS_TEST, NULL))
-	switch(sDevMode.dmDisplayOrientation)
-	{
-	    case DMDO_0:	return DMDO_0;
-	    case DMDO_90:	return DMDO_90;
-	    case DMDO_180:	return DMDO_180;
-	    case DMDO_270:	return DMDO_270;
-	    default: break;
-	}
+        switch(sDevMode.dmDisplayOrientation)
+        {
+            case DMDO_0:        return DMDO_0;
+            case DMDO_90:        return DMDO_90;
+            case DMDO_180:        return DMDO_180;
+            case DMDO_270:        return DMDO_270;
+            default: break;
+        }
 
     SDL_SetError("WINCE_GetDMOrientation: ChangeDisplaySettingsEx return BADMODE");
     return -1;
@@ -1217,15 +1229,15 @@ int WINCE_SetDMOrientation(int orientation)
 
     switch(orientation)
     {
-	case DMDO_0:	sDevMode.dmDisplayOrientation = DMDO_0;   break;
-	case DMDO_90:	sDevMode.dmDisplayOrientation = DMDO_90;  break;
-	case DMDO_180:	sDevMode.dmDisplayOrientation = DMDO_180; break;
-	case DMDO_270:	sDevMode.dmDisplayOrientation = DMDO_270; break;
-	default: return 0;
+        case DMDO_0:        sDevMode.dmDisplayOrientation = DMDO_0;   break;
+        case DMDO_90:        sDevMode.dmDisplayOrientation = DMDO_90;  break;
+        case DMDO_180:        sDevMode.dmDisplayOrientation = DMDO_180; break;
+        case DMDO_270:        sDevMode.dmDisplayOrientation = DMDO_270; break;
+        default: return 0;
     }
 
     if(DISP_CHANGE_BADMODE != ChangeDisplaySettingsEx(NULL, &sDevMode, 0, CDS_RESET, NULL))
-	return 1;
+        return 1;
 
     SDL_SetError("WINCE_SetDMOrientation: ChangeDisplaySettingsEx return BADMODE");
     return -1;
@@ -1233,13 +1245,15 @@ int WINCE_SetDMOrientation(int orientation)
 
 void FrameBufferDumpInfo(const FrameBufferInfo* fb, const char* name)
 {
+    int orientation;
+
     printf("%s fb.width:       %d\n", name, fb->width);
     printf("%s fb.height:      %d\n", name, fb->height);
     printf("%s fb.xpitch:      %d\n", name, fb->xpitch);
     printf("%s fb.ypitch:      %d\n", name, fb->ypitch);
     printf("%s fb.offset:      %d\n", name, fb->offset);
 
-    int orientation = GetFrameBufferOrientation(fb);
+    orientation = GetFrameBufferOrientation(fb);
     printf("%s fb.orientation: %d, %s\n", name, orientation, GetOrientationName(orientation));
 }
 
@@ -1247,34 +1261,34 @@ void UpdateLine16to16(const FrameBufferInfo* fb, const Uint16* src, Uint16* dst,
 {
     if(2 == fb->xpitch)
     {
-	switch(width)
-	{
-	    case 1:
-		*dst = *src;
-		break;
+        switch(width)
+        {
+            case 1:
+                *dst = *src;
+                break;
 
-	    case 2:
-		*((Uint32*) dst) = *((Uint32*) src);
-		break;
+            case 2:
+                *((Uint32*) dst) = *((Uint32*) src);
+                break;
 
-	    default:
-		SDL_memcpy(dst, src, width * 2);
-		break;
-	}
+            default:
+                SDL_memcpy(dst, src, width * 2);
+                break;
+        }
     }
     else
     if(-2 == fb->xpitch)
     {
-	while(width--)
-	    *dst-- = *src++;
+        while(width--)
+            *dst-- = *src++;
     }
     else
     {
-	while(width--)
-	{
-	    *dst = *src++;
-	    dst += fb->xpitch / 2;
-	}
+        while(width--)
+        {
+            *dst = *src++;
+            dst += fb->xpitch / 2;
+        }
     }
 }
 

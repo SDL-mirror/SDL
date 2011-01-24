@@ -50,7 +50,7 @@ on the assertion line and not in some random guts of SDL, and so each
 assert can have unique static variables associated with it.
 */
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && !defined(_WIN32_WCE)
 #include <intrin.h>
     #define SDL_TriggerBreakpoint() __debugbreak()
 #elif (defined(__GNUC__) && ((__i386__) || (__x86_64__)))

@@ -192,20 +192,20 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_MOUSEMOVE:
 #ifdef _WIN32_WCE
-	/* transform coords for VGA, WVGA... */
-	{
-	    SDL_VideoData *videodata = data->videodata;
-	    if(videodata->CoordTransform &&
-		(videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
-	    {
-		POINT pt;
-		pt.x = LOWORD(lParam);
-		pt.y = HIWORD(lParam);
-		videodata->CoordTransform(data->window, &pt);
-    		SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
-		break;
-	    }
-	}
+        /* transform coords for VGA, WVGA... */
+        {
+            SDL_VideoData *videodata = data->videodata;
+            if(videodata->CoordTransform &&
+                (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
+            {
+                POINT pt;
+                pt.x = LOWORD(lParam);
+                pt.y = HIWORD(lParam);
+                videodata->CoordTransform(data->window, &pt);
+                    SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
+                break;
+            }
+        }
 #endif
         SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
@@ -252,12 +252,15 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             break;
         }
 
+#ifdef WM_MOUSELEAVE
+    /* FIXME: Do we need the SDL 1.2 hack to generate WM_MOUSELEAVE now? */
     case WM_MOUSELEAVE:
         if (SDL_GetMouseFocus() == data->window) {
             SDL_SetMouseFocus(NULL);
         }
         returnCode = 0;
         break;
+#endif /* WM_MOUSELEAVE */
 
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
@@ -382,13 +385,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         returnCode = 0;
         break;
 
+#ifdef WM_INPUTLANGCHANGE
     case WM_INPUTLANGCHANGE:
         {
             WIN_UpdateKeymap();
         }
         returnCode = 1;
         break;
+#endif /* WM_INPUTLANGCHANGE */
 
+#ifdef WM_GETMINMAXINFO
     case WM_GETMINMAXINFO:
         {
             MINMAXINFO *info;
@@ -447,6 +453,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         returnCode = 0;
         break;
+#endif /* WM_GETMINMAXINFO */
 
     case WM_WINDOWPOSCHANGED:
         {
@@ -534,6 +541,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         return (1);
 
+#if defined(SC_SCREENSAVE) || defined(SC_MONITORPOWER)
     case WM_SYSCOMMAND:
         {
             /* Don't start the screensaver or blank the monitor in fullscreen apps */
@@ -545,6 +553,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
+#endif /* System has screensaver support */
 
     case WM_CLOSE:
         {
@@ -656,7 +665,9 @@ SDL_RegisterApp(char *name, Uint32 style, void *hInst)
     }
     if (!name && !SDL_Appname) {
         name = "SDL_app";
+#if defined(CS_BYTEALIGNCLIENT) || defined(CS_OWNDC)
         SDL_Appstyle = (CS_BYTEALIGNCLIENT | CS_OWNDC);
+#endif
         SDL_Instance = hInst ? hInst : GetModuleHandle(NULL);
     }
 

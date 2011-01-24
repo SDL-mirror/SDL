@@ -61,7 +61,7 @@ SDL_LoadObject(const char *sofile)
     SDL_free(sofile_t);
     SDL_free(errbuf_t);
 
-#else /*if defined(__WINDOWS__) */
+#else /*if defined(__WIN32__) */
     char errbuf[512];
 
     handle = (void *) LoadLibrary(sofile);

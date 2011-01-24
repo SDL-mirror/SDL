@@ -20,8 +20,8 @@
     slouken@libsdl.org
 */
 
-#ifndef _SDL_config_windows2_h
-#define _SDL_config_windows2_h
+#ifndef _SDL_config_windows_h
+#define _SDL_config_windows_h
 
 #include "SDL_platform.h"
 
@@ -178,7 +178,11 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_WINDOWS	1
 
+#ifdef _WIN32_WCE
+#define SDL_VIDEO_RENDER_GAPI	1
+#else
 #define SDL_VIDEO_RENDER_D3D	1
+#endif
 #define SDL_VIDEO_RENDER_GDI	1
 
 /* Enable OpenGL support */
@@ -196,4 +200,4 @@ typedef unsigned int uintptr_t;
 #define SDL_ASSEMBLY_ROUTINES	1
 #endif
 
-#endif /* _SDL_config_windows2_h */
+#endif /* _SDL_config_windows_h */

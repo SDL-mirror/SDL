@@ -21,6 +21,10 @@
 */
 #include "SDL_config.h"
 
+#ifdef _WIN32_WCE
+#define SDL_DISABLE_WINDOWS_IME
+#endif
+
 #include "SDL_windowsvideo.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -29,10 +33,12 @@
 #include <imm.h>
 #include <oleauto.h>
 
+#ifndef SDL_DISABLE_WINDOWS_IME
 static void IME_Init(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Enable(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Disable(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Quit(SDL_VideoData *videodata);
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 
 #ifndef MAPVK_VK_TO_VSC
 #define MAPVK_VK_TO_VSC     0
@@ -172,12 +178,15 @@ WIN_UpdateKeymap()
 void
 WIN_QuitKeyboard(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     IME_Quit((SDL_VideoData *)_this->driverdata);
+#endif
 }
 
 void
 WIN_StartTextInput(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     SDL_Window *window = SDL_GetKeyboardFocus();
     if (window) {
         HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
@@ -186,11 +195,13 @@ WIN_StartTextInput(_THIS)
         IME_Init(videodata, hwnd);
         IME_Enable(videodata, hwnd);
     }
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 }
 
 void
 WIN_StopTextInput(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     SDL_Window *window = SDL_GetKeyboardFocus();
     if (window) {
         HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
@@ -198,6 +209,7 @@ WIN_StopTextInput(_THIS)
         IME_Init(videodata, hwnd);
         IME_Disable(videodata, hwnd);
     }
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 }
 
 void
@@ -206,6 +218,21 @@ WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
     SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
     videodata->ime_rect = *rect;
 }
+
+#ifdef SDL_DISABLE_WINDOWS_IME
+
+
+SDL_bool
+IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoData *videodata)
+{
+    return SDL_FALSE;
+}
+
+void IME_Present(SDL_VideoData *videodata)
+{
+}
+
+#else
 
 #ifdef __GNUC__
 #undef DEFINE_GUID
@@ -1551,5 +1578,7 @@ void IME_Present(SDL_VideoData *videodata)
 
     SDL_RenderCopy(videodata->ime_candtex, NULL, &videodata->ime_candlistrect);
 }
+
+#endif /* SDL_DISABLE_WINDOWS_IME */
 
 /* vi: set ts=4 sw=4 expandtab: */
