@@ -2446,6 +2446,10 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckWINDOWS
         CheckWINDOWSGL
         CheckDIRECTX
+
+        # Set up the core platform files
+        SOURCES="$SOURCES $srcdir/src/core/windows/*.c"
+
         # Set up files for the video library
         if test x$enable_video = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS)
