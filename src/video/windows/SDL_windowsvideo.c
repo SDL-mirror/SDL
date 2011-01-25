@@ -197,7 +197,7 @@ WIN_CreateDevice(int devindex)
     device->shape_driver.SetWindowShape = Win32_SetWindowShape;
     device->shape_driver.ResizeWindowShape = Win32_ResizeWindowShape;
     
-#ifdef SDL_VIDEO_OPENGL_WGL
+#if SDL_VIDEO_OPENGL_WGL
     device->GL_LoadLibrary = WIN_GL_LoadLibrary;
     device->GL_GetProcAddress = WIN_GL_GetProcAddress;
     device->GL_UnloadLibrary = WIN_GL_UnloadLibrary;

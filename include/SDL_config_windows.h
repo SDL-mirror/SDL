@@ -179,17 +179,29 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_DRIVER_WINDOWS	1
 
 #ifdef _WIN32_WCE
+#ifndef SDL_VIDEO_RENDER_GAPI
 #define SDL_VIDEO_RENDER_GAPI	1
+#endif
 #else
+#ifndef SDL_VIDEO_RENDER_D3D
 #define SDL_VIDEO_RENDER_D3D	1
 #endif
+#endif
+#ifndef SDL_VIDEO_RENDER_GDI
 #define SDL_VIDEO_RENDER_GDI	1
+#endif
 
 /* Enable OpenGL support */
 #ifndef _WIN32_WCE
+#ifndef SDL_VIDEO_OPENGL
 #define SDL_VIDEO_OPENGL	1
+#endif
+#ifndef SDL_VIDEO_OPENGL_WGL
 #define SDL_VIDEO_OPENGL_WGL	1
+#endif
+#ifndef SDL_VIDEO_RENDER_OGL
 #define SDL_VIDEO_RENDER_OGL	1
+#endif
 #endif
 
 /* Enable system power support */
