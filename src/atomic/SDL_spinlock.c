@@ -25,7 +25,9 @@
 #include "SDL_timer.h"
 
 /* Don't do the check for Visual Studio 2005, it's safe here */
+#ifdef __WIN32__
 #include "../core/windows/SDL_windows.h"
+#endif
 
 /* This function is where all the magic happens... */
 SDL_bool
