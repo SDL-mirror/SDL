@@ -23,8 +23,7 @@
 
 /* Allow access to a raw mixing buffer */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 #include <mmsystem.h>
 
 #include "SDL_timer.h"
@@ -67,21 +66,14 @@ SetMMerror(char *function, MMRESULT code)
 {
     size_t len;
     char errbuf[MAXERRORLENGTH];
-#ifdef _WIN32_WCE
     wchar_t werrbuf[MAXERRORLENGTH];
-#endif
 
     SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: ", function);
     len = SDL_strlen(errbuf);
 
-#ifdef _WIN32_WCE
-    /* UNICODE version */
     waveOutGetErrorText(code, werrbuf, MAXERRORLENGTH - len);
     WideCharToMultiByte(CP_ACP, 0, werrbuf, -1, errbuf + len,
                         MAXERRORLENGTH - len, NULL, NULL);
-#else
-    waveOutGetErrorText(code, errbuf + len, (UINT) (MAXERRORLENGTH - len));
-#endif
 
     SDL_SetError("%s", errbuf);
 }

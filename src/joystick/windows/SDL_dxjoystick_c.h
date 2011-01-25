@@ -33,8 +33,7 @@
  * with polled devices, and it's fine to call IDirectInputDevice2_GetDeviceData and
  * let it return 0 events. */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #define DIRECTINPUT_VERSION 0x0700      /* Need version 7 for force feedback. */
 #include <dinput.h>

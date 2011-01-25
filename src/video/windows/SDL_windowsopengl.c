@@ -101,7 +101,7 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         !_this->gl_data->wglDeleteContext ||
         !_this->gl_data->wglMakeCurrent) {
         SDL_SetError("Could not retrieve OpenGL functions");
-        FreeLibrary(handle);
+        SDL_UnloadObject(handle);
         return -1;
     }
 

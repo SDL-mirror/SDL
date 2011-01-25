@@ -312,15 +312,15 @@ IME_Init(SDL_VideoData *videodata, HWND hwnd)
         CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgr, (LPVOID *)&videodata->ime_threadmgr);
     }
     videodata->ime_initialized = SDL_TRUE;
-    videodata->ime_himm32 = LoadLibraryA("imm32.dll");
+    videodata->ime_himm32 = SDL_LoadObject("imm32.dll");
     if (!videodata->ime_himm32) {
         videodata->ime_available = SDL_FALSE;
         return;
     }
-    videodata->ImmLockIMC = (LPINPUTCONTEXT2 (WINAPI *)(HIMC))GetProcAddress(videodata->ime_himm32, "ImmLockIMC");
-    videodata->ImmUnlockIMC = (BOOL (WINAPI *)(HIMC))GetProcAddress(videodata->ime_himm32, "ImmUnlockIMC");
-    videodata->ImmLockIMCC = (LPVOID (WINAPI *)(HIMCC))GetProcAddress(videodata->ime_himm32, "ImmLockIMCC");
-    videodata->ImmUnlockIMCC = (BOOL (WINAPI *)(HIMCC))GetProcAddress(videodata->ime_himm32, "ImmUnlockIMCC");
+    videodata->ImmLockIMC = (LPINPUTCONTEXT2 (WINAPI *)(HIMC))SDL_LoadFunction(videodata->ime_himm32, "ImmLockIMC");
+    videodata->ImmUnlockIMC = (BOOL (WINAPI *)(HIMC))SDL_LoadFunction(videodata->ime_himm32, "ImmUnlockIMC");
+    videodata->ImmLockIMCC = (LPVOID (WINAPI *)(HIMCC))SDL_LoadFunction(videodata->ime_himm32, "ImmLockIMCC");
+    videodata->ImmUnlockIMCC = (BOOL (WINAPI *)(HIMCC))SDL_LoadFunction(videodata->ime_himm32, "ImmUnlockIMCC");
 
     IME_SetWindow(videodata, hwnd);
     videodata->ime_himc = ImmGetContext(hwnd);
@@ -383,7 +383,7 @@ IME_Quit(SDL_VideoData *videodata)
     videodata->ime_hwnd_main = 0;
     videodata->ime_himc = 0;
     if (videodata->ime_himm32) {
-        FreeLibrary(videodata->ime_himm32);
+        SDL_UnloadObject(videodata->ime_himm32);
         videodata->ime_himm32 = 0;
     }
     if (videodata->ime_threadmgr) {
@@ -606,7 +606,7 @@ static void
 IME_SetupAPI(SDL_VideoData *videodata)
 {
     char ime_file[MAX_PATH + 1];
-    HMODULE hime = 0;
+    void* hime = 0;
     HKL hkl = 0;
     videodata->GetReadingString = 0;
     videodata->ShowReadingWindow = 0;
@@ -617,14 +617,14 @@ IME_SetupAPI(SDL_VideoData *videodata)
     if (ImmGetIMEFileNameA(hkl, ime_file, sizeof(ime_file) - 1) <= 0)
         return;
 
-    hime = LoadLibraryA(ime_file);
+    hime = SDL_LoadObject(ime_file);
     if (!hime)
         return;
 
     videodata->GetReadingString = (UINT (WINAPI *)(HIMC, UINT, LPWSTR, PINT, BOOL*, PUINT))
-        GetProcAddress(hime, "GetReadingString");
+        SDL_LoadFunction(hime, "GetReadingString");
     videodata->ShowReadingWindow = (BOOL (WINAPI *)(HIMC, BOOL))
-        GetProcAddress(hime, "ShowReadingWindow");
+        SDL_LoadFunction(hime, "ShowReadingWindow");
 
     if (videodata->ShowReadingWindow) {
         HIMC himc = ImmGetContext(videodata->ime_hwnd_current);

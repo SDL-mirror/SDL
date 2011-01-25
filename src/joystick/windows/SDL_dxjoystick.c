@@ -63,6 +63,7 @@ extern HRESULT(WINAPI * DInputCreate) (HINSTANCE hinst, DWORD dwVersion,
                                        LPDIRECTINPUT * ppDI,
                                        LPUNKNOWN punkOuter);
 static DIDEVICEINSTANCE SYS_Joystick[MAX_JOYSTICKS];    /* array to hold joystick ID values */
+static char *SYS_JoystickNames[MAX_JOYSTICKS];
 static int SYS_NumJoysticks;
 static HINSTANCE DInputDLL = NULL;
 
@@ -326,6 +327,7 @@ EnumJoysticksCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
 {
     SDL_memcpy(&SYS_Joystick[SYS_NumJoysticks], pdidInstance,
                sizeof(DIDEVICEINSTANCE));
+    SYS_JoystickNames[SYS_NumJoysticks] = WIN_StringToUTF8(pdidInstance->tszProductName);
     SYS_NumJoysticks++;
 
     if (SYS_NumJoysticks >= MAX_JOYSTICKS)
@@ -338,8 +340,7 @@ EnumJoysticksCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
 const char *
 SDL_SYS_JoystickName(int index)
 {
-        /***-> test for invalid index ? */
-    return (SYS_Joystick[index].tszProductName);
+    return SYS_JoystickNames[index];
 }
 
 /* Function to open a joystick for use.
@@ -793,6 +794,15 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 void
 SDL_SYS_JoystickQuit(void)
 {
+    int i;
+
+    for (i = 0; i < SDL_arraysize(SYS_JoystickNames); ++i) {
+        if (SYS_JoystickNames[i]) {
+            SDL_free(SYS_JoystickNames[i]);
+            SYS_JoystickNames[i] = NULL;
+        }
+    }
+
     IDirectInput_Release(dinput);
     dinput = NULL;
 }

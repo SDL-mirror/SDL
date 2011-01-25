@@ -78,7 +78,7 @@ typedef int   (*PFNGXResume)();
 typedef struct
 {
     // gx.dll
-    HMODULE                   hGapiLib;
+    void*                     hGapiLib;
     PFNGXOpenDisplay          GXOpenDisplay;
     PFNGXCloseDisplay         GXCloseDisplay;
     PFNGXBeginDraw            GXBeginDraw;
@@ -251,7 +251,7 @@ SDL_RenderDriver RAW_RenderDriver = {
 
 int WINCE_Available(void)
 {
-    HMODULE render_gapi;
+    void* render_gapi;
     const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
 
     // raw check
@@ -267,10 +267,10 @@ int WINCE_Available(void)
     if(preferably && 0 == SDL_strcasecmp(preferably, RAW_RENDER_NAME)) return 0 != render_raw;
 
     // gapi check
-    render_gapi = LoadLibrary(TEXT("\\Windows\\gx.dll"));
+    render_gapi = SDL_LoadObject("\\Windows\\gx.dll");
     if(0 == render_gapi)
-        render_gapi = LoadLibrary(TEXT("gx.dll"));
-    FreeLibrary(render_gapi);
+        render_gapi = SDL_LoadObject("gx.dll");
+    SDL_UnloadObject(render_gapi);
 
     if(preferably && 0 == SDL_strcasecmp(preferably, GAPI_RENDER_NAME)) return 0 != render_gapi;
 
@@ -280,7 +280,7 @@ int WINCE_Available(void)
 void WINCE_AddRenderDriver(_THIS)
 {
     HDC hdc;
-    HMODULE render_gapi;
+    void* render_gapi;
     int render_raw, ii;
     const char* preferably = SDL_getenv("SDL_VIDEO_RENDERER");
 
@@ -295,12 +295,12 @@ void WINCE_AddRenderDriver(_THIS)
             render_raw = 1;
 
     // gapi check
-    render_gapi = LoadLibrary(TEXT("\\Windows\\gx.dll"));
+    render_gapi = SDL_LoadObject("\\Windows\\gx.dll");
     if(0 == render_gapi)
-        render_gapi = LoadLibrary(TEXT("gx.dll"));
+        render_gapi = SDL_LoadObject("gx.dll");
 
     if(render_gapi)
-        FreeLibrary(render_gapi);
+        SDL_UnloadObject(render_gapi);
 
     for(ii = 0; ii < _this->num_displays; ++ii)
     {
@@ -885,15 +885,15 @@ int GAPI_Init(WINCE_RenderData* data, HWND hwnd)
             return 0;
         }
 
-        data->gapi->hGapiLib = LoadLibrary(TEXT("\\Windows\\gx.dll"));
+        data->gapi->hGapiLib = SDL_LoadObject("\\Windows\\gx.dll");
         if(0 == data->gapi->hGapiLib)
         {
-            data->gapi->hGapiLib = LoadLibrary(TEXT("gx.dll"));
+            data->gapi->hGapiLib = SDL_LoadObject("gx.dll");
             if(0 == data->gapi->hGapiLib) return 0;
         }
 
         // load gapi library
-#define LINK(type,name,import) name=(PFN##type)GetProcAddress(data->gapi->hGapiLib,TEXT(import))
+#define LINK(type,name,import) name=(PFN##type)SDL_LoadFunction(data->gapi->hGapiLib,import)
         LINK(GXOpenDisplay,         data->gapi->GXOpenDisplay,         "?GXOpenDisplay@@YAHPAUHWND__@@K@Z");
         LINK(GXCloseDisplay,        data->gapi->GXCloseDisplay,        "?GXCloseDisplay@@YAHXZ");
         LINK(GXBeginDraw,           data->gapi->GXBeginDraw,           "?GXBeginDraw@@YAPAXXZ");
@@ -1005,7 +1005,7 @@ void GAPI_Quit(WINCE_RenderData* data)
     if(data->gapi)
     {
         if(data->gapi->GXCloseDisplay) data->gapi->GXCloseDisplay(); 
-        if(data->gapi->hGapiLib)  FreeLibrary(data->gapi->hGapiLib);
+        if(data->gapi->hGapiLib)  SDL_UnloadObject(data->gapi->hGapiLib);
 
         SDL_free(data->gapi);
         data->gapi = NULL;

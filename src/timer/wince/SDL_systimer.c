@@ -23,8 +23,7 @@
 
 #ifdef SDL_TIMER_WINCE
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 #include <mmsystem.h>
 
 #include "SDL_thread.h"

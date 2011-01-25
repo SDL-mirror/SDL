@@ -1054,6 +1054,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\core\windows\SDL_windows.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\video\windows\SDL_windowsclipboard.c"
 				>
 			</File>
@@ -1356,6 +1360,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\events\SDL_windowevents_c.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\core\windows\SDL_windows.h"
 				>
 			</File>
 			<File

@@ -37,19 +37,6 @@
 static int WIN_VideoInit(_THIS);
 static void WIN_VideoQuit(_THIS);
 
-/* Sets an error message based on GetLastError() */
-void
-WIN_SetError(const char *prefix)
-{
-    TCHAR buffer[1024];
-    char *message;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
-                  buffer, SDL_arraysize(buffer), NULL);
-    message = WIN_StringToUTF8(buffer);
-    SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
-    SDL_free(message);
-}
-
 
 /* Windows driver bootstrap functions */
 
@@ -68,22 +55,22 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
 #if SDL_VIDEO_RENDER_D3D
     if (data->d3d) {
         IDirect3D9_Release(data->d3d);
-        FreeLibrary(data->d3dDLL);
+        SDL_UnloadObject(data->d3dDLL);
     }
 #endif
 #if SDL_VIDEO_RENDER_DDRAW
     if (data->ddraw) {
         data->ddraw->lpVtbl->Release(data->ddraw);
-        FreeLibrary(data->ddrawDLL);
+        SDL_UnloadObject(data->ddrawDLL);
     }
 #endif
 #ifdef _WIN32_WCE
     if(data->hAygShell) {
-       FreeLibrary(data->hAygShell);
+       SDL_UnloadObject(data->hAygShell);
     }
 #endif
 	if (data->userDLL) {
-		FreeLibrary(data->userDLL);
+		SDL_UnloadObject(data->userDLL);
 	}
 
     SDL_free(device->driverdata);
@@ -115,24 +102,24 @@ WIN_CreateDevice(int devindex)
     device->driverdata = data;
 
 #if SDL_VIDEO_RENDER_D3D
-    data->d3dDLL = LoadLibrary(TEXT("D3D9.DLL"));
+    data->d3dDLL = SDL_LoadObject("D3D9.DLL");
     if (data->d3dDLL) {
         IDirect3D9 *(WINAPI * D3DCreate) (UINT SDKVersion);
 
         D3DCreate =
-            (IDirect3D9 * (WINAPI *) (UINT)) GetProcAddress(data->d3dDLL,
+            (IDirect3D9 * (WINAPI *) (UINT)) SDL_LoadFunction(data->d3dDLL,
                                                             "Direct3DCreate9");
         if (D3DCreate) {
             data->d3d = D3DCreate(D3D_SDK_VERSION);
         }
         if (!data->d3d) {
-            FreeLibrary(data->d3dDLL);
+            SDL_UnloadObject(data->d3dDLL);
             data->d3dDLL = NULL;
         }
     }
 #endif /* SDL_VIDEO_RENDER_D3D */
 #if SDL_VIDEO_RENDER_DDRAW
-    data->ddrawDLL = LoadLibrary(TEXT("ddraw.dll"));
+    data->ddrawDLL = SDL_LoadObject("ddraw.dll");
     if (data->ddrawDLL) {
         IDirectDraw *(WINAPI * DDCreate) (GUID FAR * lpGUID,
                                           LPDIRECTDRAW FAR * lplpDD,
@@ -141,9 +128,9 @@ WIN_CreateDevice(int devindex)
         DDCreate =
             (IDirectDraw *
              (WINAPI *) (GUID FAR *, LPDIRECTDRAW FAR *, IUnknown FAR *))
-            GetProcAddress(data->ddrawDLL, TEXT("DirectDrawCreate"));
+            SDL_LoadFunction(data->ddrawDLL, "DirectDrawCreate");
         if (!DDCreate || DDCreate(NULL, &data->ddraw, NULL) != DD_OK) {
-            FreeLibrary(data->ddrawDLL);
+            SDL_UnloadObject(data->ddrawDLL);
             data->ddrawDLL = NULL;
             data->ddraw = NULL;
         }
@@ -151,19 +138,19 @@ WIN_CreateDevice(int devindex)
 #endif /* SDL_VIDEO_RENDER_DDRAW */
 
 #ifdef _WIN32_WCE
-    data->hAygShell = LoadLibrary(TEXT("\\windows\\aygshell.dll"));
+    data->hAygShell = SDL_LoadObject("\\windows\\aygshell.dll");
     if(0 == data->hAygShell)
-        data->hAygShell = LoadLibrary(TEXT("aygshell.dll"));
+        data->hAygShell = SDL_LoadObject("aygshell.dll");
     data->SHFullScreen = (0 != data->hAygShell ?
-        (PFNSHFullScreen) GetProcAddress(data->hAygShell, TEXT("SHFullScreen")) : 0);
+        (PFNSHFullScreen) SDL_LoadFunction(data->hAygShell, "SHFullScreen") : 0);
     data->CoordTransform = NULL;
 #endif
 
-	data->userDLL = LoadLibrary(TEXT("USER32.DLL"));
+	data->userDLL = SDL_LoadObject("USER32.DLL");
 	if (data->userDLL) {
-		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) GetProcAddress(data->userDLL, TEXT("CloseTouchInputHandle"));
-		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) GetProcAddress(data->userDLL, TEXT("GetTouchInputInfo"));
-		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) GetProcAddress(data->userDLL, TEXT("RegisterTouchWindow"));
+		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) SDL_LoadFunction(data->userDLL, "CloseTouchInputHandle");
+		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) SDL_LoadFunction(data->userDLL, "GetTouchInputInfo");
+		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) SDL_LoadFunction(data->userDLL, "RegisterTouchWindow");
 	}
 
     /* Set the function pointers */

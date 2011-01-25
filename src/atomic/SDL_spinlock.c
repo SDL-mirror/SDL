@@ -25,14 +25,7 @@
 #include "SDL_timer.h"
 
 /* Don't do the check for Visual Studio 2005, it's safe here */
-#if defined(_MSC_VER)
-#ifdef _WIN32_WCE
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#else
-#include <intrin.h>
-#endif
-#endif /* _MSC_VER */
+#include "../core/windows/SDL_windows.h"
 
 /* This function is where all the magic happens... */
 SDL_bool
@@ -40,7 +33,7 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
 #if defined(_MSC_VER)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
-    return (_InterlockedExchange((long*)lock, 1) == 0);
+    return (InterlockedExchange((long*)lock, 1) == 0);
 
 #elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);

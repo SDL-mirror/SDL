@@ -27,7 +27,7 @@
 #include "../SDL_audio_c.h"
 #include "SDL_androidaudio.h"
 
-#include "../../SDL_android.h"
+#include "../../core/android/SDL_android.h"
 
 #include <android/log.h>
 

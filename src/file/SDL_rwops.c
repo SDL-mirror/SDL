@@ -44,8 +44,7 @@
    faster, and all stdio functions anyway are embedded in coredll.dll - 
    the main wince dll*/
 
-#define WINDOWS_LEAN_AND_MEAN
-#include <windows.h>
+#include "../core/windows/SDL_windows.h"
 
 #ifndef INVALID_SET_FILE_POINTER
 #define INVALID_SET_FILE_POINTER 0xFFFFFFFF
@@ -98,34 +97,28 @@ windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
     }
 #ifdef _WIN32_WCE
     {
-        size_t size = SDL_strlen(filename) + 1;
-        wchar_t *filenameW = SDL_stack_alloc(wchar_t, size);
-
-        if (MultiByteToWideChar(CP_UTF8, 0, filename, -1, filenameW, size) ==
-            0) {
-            SDL_stack_free(filenameW);
-            SDL_free(context->hidden.windowsio.buffer.data);
-            context->hidden.windowsio.buffer.data = NULL;
-            SDL_SetError("Unable to convert filename to Unicode");
-            return -1;
-        }
-        h = CreateFile(filenameW, (w_right | r_right),
+        LPTSTR tstr = WIN_UTF8ToString(filename);
+        h = CreateFile(tstr, (w_right | r_right),
                        (w_right) ? 0 : FILE_SHARE_READ, NULL,
                        (must_exist | truncate | a_mode),
                        FILE_ATTRIBUTE_NORMAL, NULL);
-        SDL_stack_free(filenameW);
+        SDL_free(tstr);
     }
 #else
     /* Do not open a dialog box if failure */
     old_error_mode =
         SetErrorMode(SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS);
 
-    h = CreateFile(filename, (w_right | r_right),
-                   (w_right) ? 0 : FILE_SHARE_READ, NULL,
-                   (must_exist | truncate | a_mode), FILE_ATTRIBUTE_NORMAL,
-                   NULL);
+    {
+        LPTSTR tstr = WIN_UTF8ToString(filename);
+        h = CreateFile(tstr, (w_right | r_right),
+                       (w_right) ? 0 : FILE_SHARE_READ, NULL,
+                       (must_exist | truncate | a_mode),
+                       FILE_ATTRIBUTE_NORMAL, NULL);
+        SDL_free(tstr);
+    }
 
-    /* restore old behaviour */
+    /* restore old behavior */
     SetErrorMode(old_error_mode);
 #endif /* _WIN32_WCE */
 

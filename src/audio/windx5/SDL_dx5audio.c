@@ -24,6 +24,7 @@
 /* Allow access to a raw mixing buffer */
 
 #include "SDL_timer.h"
+#include "SDL_loadso.h"
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "SDL_dx5audio.h"
@@ -38,19 +39,19 @@
 #endif
 
 /* DirectX function pointers for audio */
-static HINSTANCE DSoundDLL = NULL;
+static void* DSoundDLL = NULL;
 static HRESULT(WINAPI * DSoundCreate) (LPGUID, LPDIRECTSOUND *, LPUNKNOWN) =
     NULL;
 
 static void
 DSOUND_Unload(void)
 {
-    if (DSoundDLL != NULL) {
-        FreeLibrary(DSoundDLL);
-    }
-
     DSoundCreate = NULL;
-    DSoundDLL = NULL;
+
+    if (DSoundDLL != NULL) {
+        SDL_UnloadObject(DSoundDLL);
+        DSoundDLL = NULL;
+    }
 }
 
 
@@ -61,17 +62,16 @@ DSOUND_Load(void)
 
     DSOUND_Unload();
 
-    DSoundDLL = LoadLibrary(TEXT("DSOUND.DLL"));
+    DSoundDLL = SDL_LoadObject("DSOUND.DLL");
     if (DSoundDLL == NULL) {
         SDL_SetError("DirectSound: failed to load DSOUND.DLL");
     } else {
         /* Now make sure we have DirectX 5 or better... */
         /*  (DirectSoundCaptureCreate was added in DX5) */
-        if (!GetProcAddress(DSoundDLL, TEXT("DirectSoundCaptureCreate"))) {
+        if (!SDL_LoadFunction(DSoundDLL, "DirectSoundCaptureCreate")) {
             SDL_SetError("DirectSound: System doesn't appear to have DX5.");
         } else {
-            DSoundCreate = (void *) GetProcAddress(DSoundDLL,
-                                                   TEXT("DirectSoundCreate"));
+            DSoundCreate = SDL_LoadFunction(DSoundDLL, "DirectSoundCreate");
         }
 
         if (!DSoundCreate) {

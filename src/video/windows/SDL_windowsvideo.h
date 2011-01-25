@@ -26,15 +26,7 @@
 
 #include "../SDL_sysvideo.h"
 
-#define WIN32_LEAN_AND_MEAN
-#define STRICT
-#ifndef UNICODE
-#define UNICODE
-#endif
-#undef WINVER
-#define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
-
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #if defined(_MSC_VER) && !defined(_WIN32_WCE)
 #include <msctf.h>
@@ -68,15 +60,8 @@
 #include "SDL_windowsopengl.h"
 #include "SDL_windowswindow.h"
 #include "SDL_events.h"
+#include "SDL_loadso.h"
 
-#ifdef UNICODE
-#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "UCS-2", (char *)S, (SDL_wcslen(S)+1)*sizeof(WCHAR))
-#define WIN_UTF8ToString(S) (WCHAR *)SDL_iconv_string("UCS-2", "UTF-8", (char *)S, SDL_strlen(S)+1)
-#else
-#define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "ASCII", (char *)S, (SDL_strlen(S)+1))
-#define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
-#endif
-extern void WIN_SetError(const char *prefix);
 
 enum { RENDER_NONE, RENDER_D3D, RENDER_DDRAW, RENDER_GDI, RENDER_GAPI, RENDER_RAW };
 
@@ -147,15 +132,15 @@ typedef struct SDL_VideoData
     int render;
 
 #if SDL_VIDEO_RENDER_D3D
-    HANDLE d3dDLL;
+    void* d3dDLL;
     IDirect3D9 *d3d;
 #endif
 #if SDL_VIDEO_RENDER_DDRAW
-    HANDLE ddrawDLL;
+    void* ddrawDLL;
     IDirectDraw *ddraw;
 #endif
 #ifdef _WIN32_WCE
-    HMODULE hAygShell;
+    void* hAygShell;
     PFNSHFullScreen SHFullScreen;
     PFCoordTransform CoordTransform;
 #endif
@@ -164,7 +149,7 @@ typedef struct SDL_VideoData
 	DWORD clipboard_count;
 
 	/* Touch input functions */
-	HANDLE userDLL;
+	void* userDLL;
 	BOOL (WINAPI *CloseTouchInputHandle)( HTOUCHINPUT );
 	BOOL (WINAPI *GetTouchInputInfo)( HTOUCHINPUT, UINT, PTOUCHINPUT, int );
 	BOOL (WINAPI *RegisterTouchWindow)( HWND, ULONG );
@@ -199,7 +184,7 @@ typedef struct SDL_VideoData
     int ime_winheight;
 
     HKL ime_hkl;
-    HMODULE ime_himm32;
+    void* ime_himm32;
     UINT (WINAPI *GetReadingString)(HIMC himc, UINT uReadingBufLen, LPWSTR lpwReadingBuf, PINT pnErrorIndex, BOOL *pfIsVertical, PUINT puMaxReadingLen);
     BOOL (WINAPI *ShowReadingWindow)(HIMC himc, BOOL bShow);
     LPINPUTCONTEXT2 (WINAPI *ImmLockIMC)(HIMC himc);

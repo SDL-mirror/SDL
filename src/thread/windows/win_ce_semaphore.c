@@ -28,8 +28,7 @@
       and it is not clear how to handle a mixture of WCE semaphores and normal
       events and mutexes. */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #include "win_ce_semaphore.h"
 

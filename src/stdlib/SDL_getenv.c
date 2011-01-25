@@ -27,8 +27,7 @@
 
 #if defined(__WIN32__) && !defined(_WIN32_WCE)
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../core/windows/SDL_windows.h"
 
 /* Note this isn't thread-safe! */
 
@@ -41,12 +40,12 @@ SDL_setenv(const char *name, const char *value, int overwrite)
 {
     if (!overwrite) {
         char ch = 0;
-        const size_t len = GetEnvironmentVariable(name, &ch, sizeof (ch));
+        const size_t len = GetEnvironmentVariableA(name, &ch, sizeof (ch));
         if (len > 0) {
             return 0;  /* asked not to overwrite existing value. */
         }
     }
-    if (!SetEnvironmentVariable(name, *value ? value : NULL)) {
+    if (!SetEnvironmentVariableA(name, *value ? value : NULL)) {
         return -1;
     }
     return 0;
@@ -59,7 +58,7 @@ SDL_getenv(const char *name)
     size_t bufferlen;
 
     bufferlen =
-        GetEnvironmentVariable(name, SDL_envmem, (DWORD) SDL_envmemlen);
+        GetEnvironmentVariableA(name, SDL_envmem, (DWORD) SDL_envmemlen);
     if (bufferlen == 0) {
         return NULL;
     }
@@ -70,7 +69,7 @@ SDL_getenv(const char *name)
         }
         SDL_envmem = newmem;
         SDL_envmemlen = bufferlen;
-        GetEnvironmentVariable(name, SDL_envmem, (DWORD) SDL_envmemlen);
+        GetEnvironmentVariableA(name, SDL_envmem, (DWORD) SDL_envmemlen);
     }
     return SDL_envmem;
 }

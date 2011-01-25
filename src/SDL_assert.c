@@ -27,17 +27,10 @@
 #include "video/SDL_sysvideo.h"
 
 #ifdef __WIN32__
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "core/windows/SDL_windows.h"
 
 #ifndef WS_OVERLAPPEDWINDOW
 #define WS_OVERLAPPEDWINDOW 0
-#endif
-
-#ifdef UNICODE
-#define WIN_UTF8ToString(S) (WCHAR *)SDL_iconv_string("UCS-2", "UTF-8", (char *)S, SDL_strlen(S)+1)
-#else
-#define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)S, SDL_strlen(S)+1)
 #endif
 #else  /* fprintf, _exit(), etc. */
 #include <stdio.h>

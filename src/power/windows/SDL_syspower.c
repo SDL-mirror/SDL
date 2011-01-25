@@ -24,8 +24,7 @@
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_WINDOWS
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #include "SDL_power.h"
 
