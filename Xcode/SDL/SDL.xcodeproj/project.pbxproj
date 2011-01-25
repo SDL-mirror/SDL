@@ -2292,7 +2292,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# The underlying scripts require calling hg to get revision info.\n# Since hg may not be in the standard Xcode path, I am sourcing .bashrc\n# But I don't know what to do if people are using other shells.\nif test -f ~/.bash_profile; then source ~/.bash_profile; fi\nif test -f ~/.bashrc; then source ~/.bashrc; fi\nsh ../../build-scripts/updaterev.sh\n";
+			shellScript = "# The official HG installer puts the binary in /usr/local/bin, so add that\n# to Xcode's path and see if the hg executable is found. Otherwise, source\n# the user's bash settings file as a last resort.\nPATH=$PATH:/usr/local/bin\nif ! which -s hg ; then\n    if test -f ~/.bash_profile; then source ~/.bash_profile; fi\nfi\nsh ../../build-scripts/updaterev.sh\n";
 		};
 		0083103E1072EA5700A531F1 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
