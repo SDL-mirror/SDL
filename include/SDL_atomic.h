@@ -127,7 +127,7 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
 #define SDL_CompilerBarrier()   _ReadWriteBarrier()
-#elif __GNUC__
+#elif defined(__GNUC__)
 #define SDL_CompilerBarrier()   __asm__ __volatile__ ("" : : : "memory")
 #else
 #define SDL_CompilerBarrier()   \
@@ -139,7 +139,7 @@ void _ReadWriteBarrier(void);
  */
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
-#if HAVE_MSC_ATOMICS
+#ifdef HAVE_MSC_ATOMICS
 
 #define SDL_AtomicSet(a, v)     _InterlockedExchange((long*)&(a)->value, (v))
 #define SDL_AtomicAdd(a, v)     _InterlockedExchangeAdd((long*)&(a)->value, (v))
@@ -151,7 +151,7 @@ void _ReadWriteBarrier(void);
 #define SDL_AtomicCASPtr(a, oldval, newval) (_InterlockedCompareExchangePointer((a), (newval), (oldval)) == (oldval))
 #endif
 
-#elif __MACOSX__
+#elif defined(__MACOSX__)
 #include <libkern/OSAtomic.h>
 
 #define SDL_AtomicCAS(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((oldval), (newval), &(a)->value)
@@ -161,7 +161,7 @@ void _ReadWriteBarrier(void);
 #define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap64Barrier((int64_t)(oldval), (int64_t)(newval), (int64_t*)(a))
 #endif
 
-#elif HAVE_GCC_ATOMICS
+#elif defined(HAVE_GCC_ATOMICS)
 
 #define SDL_AtomicSet(a, v)     __sync_lock_test_and_set(&(a)->value, v)
 #define SDL_AtomicAdd(a, v)     __sync_fetch_and_add(&(a)->value, v)
@@ -183,31 +183,43 @@ typedef struct { int value; } SDL_atomic_t;
 #endif
 
 /**
+ * \brief Set an atomic variable to a new value if it is currently an old value.
+ *
+ * \return SDL_TRUE if the atomic variable was set, SDL_FALSE otherwise.
+ *
+ * \note If you don't know what this function is for, you shouldn't use it!
+*/
+#ifndef SDL_AtomicCAS
+#define SDL_AtomicCAS SDL_AtomicCAS_
+#endif
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval);
+
+/**
  * \brief Set an atomic variable to a value.
  *
  * \return The previous value of the atomic variable.
  */
 #ifndef SDL_AtomicSet
-#define SDL_AtomicSet(a, v) \
-({                              \
-    int _value;                 \
-    do {                        \
-        _value = (a)->value;    \
-    } while (!SDL_AtomicCAS(a, _value, (v))); \
-    _value;                     \
-})
+static __inline__ int SDL_AtomicSet(SDL_atomic_t *a, int v)
+{
+    int value;
+    do {
+        value = a->value;
+    } while (!SDL_AtomicCAS(a, value, v));
+    return value;
+}
 #endif
 
 /**
  * \brief Get the value of an atomic variable
  */
 #ifndef SDL_AtomicGet
-#define SDL_AtomicGet(a)        \
-({                              \
-    int _value = (a)->value;    \
-    SDL_CompilerBarrier();      \
-    _value;                     \
-})
+static __inline__ int SDL_AtomicGet(SDL_atomic_t *a)
+{
+    int value = a->value;
+    SDL_CompilerBarrier();
+    return value;
+}
 #endif
 
 /**
@@ -218,14 +230,14 @@ typedef struct { int value; } SDL_atomic_t;
  * \note This same style can be used for any number operation
  */
 #ifndef SDL_AtomicAdd
-#define SDL_AtomicAdd(a, v)     \
-({                              \
-    int _value;                 \
-    do {                        \
-        _value = (a)->value;    \
-    } while (!SDL_AtomicCAS(a, _value, (_value + (v)))); \
-    _value;                     \
-})
+static __inline__ int SDL_AtomicAdd(SDL_atomic_t *a, int v)
+{
+    int value;
+    do {
+        value = a->value;
+    } while (!SDL_AtomicCAS(a, value, (value + v)));
+    return value;
+}
 #endif
 
 /**
@@ -246,46 +258,6 @@ typedef struct { int value; } SDL_atomic_t;
 #endif
 
 /**
- * \brief Set an atomic variable to a new value if it is currently an old value.
- *
- * \return SDL_TRUE if the atomic variable was set, SDL_FALSE otherwise.
- *
- * \note If you don't know what this function is for, you shouldn't use it!
-*/
-#ifndef SDL_AtomicCAS
-#define SDL_AtomicCAS SDL_AtomicCAS_
-#endif
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval);
-
-/**
- * \brief Set a pointer to a value atomically.
- *
- * \return The previous value of the pointer.
- */
-#ifndef SDL_AtomicSetPtr
-#define SDL_AtomicSetPtr(a, v)  \
-({                              \
-    void* _value;               \
-    do {                        \
-        _value = *(a);          \
-    } while (!SDL_AtomicCASPtr(a, _value, (v))); \
-    _value;                     \
-})
-#endif
-
-/**
- * \brief Get the value of a pointer atomically.
- */
-#ifndef SDL_AtomicGetPtr
-#define SDL_AtomicGetPtr(a)     \
-({                              \
-    void* _value = *(a);        \
-    SDL_CompilerBarrier();      \
-    _value;                     \
-})
-#endif
-
-/**
  * \brief Set a pointer to a new value if it is currently an old value.
  *
  * \return SDL_TRUE if the pointer was set, SDL_FALSE otherwise.
@@ -296,6 +268,35 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int
 #define SDL_AtomicCASPtr SDL_AtomicCASPtr_
 #endif
 extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr_(void **a, void *oldval, void *newval);
+
+/**
+ * \brief Set a pointer to a value atomically.
+ *
+ * \return The previous value of the pointer.
+ */
+#ifndef SDL_AtomicSetPtr
+static __inline__ void* SDL_AtomicSetPtr(void* *a, void* v)
+{
+    void* value;
+    do {
+        value = *a;
+    } while (!SDL_AtomicCASPtr(a, value, v));
+    return value;
+}
+#endif
+
+/**
+ * \brief Get the value of a pointer atomically.
+ */
+#ifndef SDL_AtomicGetPtr
+static __inline__ void* SDL_AtomicGetPtr(void* *a)
+{
+    void* value = *a;
+    SDL_CompilerBarrier();
+    return value;
+}
+#endif
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

@@ -37,20 +37,20 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
     return (InterlockedExchange((long*)lock, 1) == 0);
 
-#elif __MACOSX__
+#elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
 #elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
-#elif __GNUC__ && __arm__ && __ARM_ARCH_5__
+#elif defined(__GNUC__) && defined(__arm__) && defined(__ARM_ARCH_5__)
     int result;
     __asm__ __volatile__ (
         "swp %0, %1, [%2]\n"
         : "=&r,&r" (result) : "r,0" (1), "r,r" (lock) : "memory");
     return (result == 0);
 
-#elif __GNUC__ && __arm__
+#elif defined(__GNUC__) && defined(__arm__)
     int result;
     __asm__ __volatile__ (
         "ldrex %0, [%2]\nteq   %0, #0\nstrexeq %0, %1, [%2]"
