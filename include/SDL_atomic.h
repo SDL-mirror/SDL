@@ -44,6 +44,9 @@
  * subtle issues that can arise here:
  * http://msdn.microsoft.com/en-us/library/ee418650%28v=vs.85%29.aspx
  *
+ * There's also lots of good information here:
+ * http://www.1024cores.net/home/lock-free-algorithms
+ *
  * These operations may or may not actually be implemented using
  * processor specific atomic operations. When possible they are
  * implemented as true processor specific atomic operations. When that
