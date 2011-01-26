@@ -70,61 +70,8 @@ leaveLock(void *a)
     SDL_AtomicUnlock(&locks[index]);
 }
 
-#undef SDL_AtomicSet
-int
-SDL_AtomicSet(SDL_atomic_t *a, int value)
-{
-    int oldvalue;
-
-    enterLock(a);
-    oldvalue = a->value;
-    a->value = value;
-    leaveLock(a);
-
-    return oldvalue;
-}
-
-#undef SDL_AtomicGet
-int
-SDL_AtomicGet(SDL_atomic_t *a)
-{
-    /* Assuming integral reads on this platform, we're safe here since the
-       functions that set the variable have the necessary memory barriers.
-    */
-    return a->value;
-}
-
-#undef SDL_AtomicAdd
-int
-SDL_AtomicAdd(SDL_atomic_t *a, int value)
-{
-    int oldvalue;
-
-    enterLock(a);
-    oldvalue = a->value;
-    a->value += value;
-    leaveLock(a);
-
-    return oldvalue;
-}
-
-#undef SDL_AtomicIncRef
-void
-SDL_AtomicIncRef(SDL_atomic_t *a)
-{
-    SDL_AtomicAdd(a, 1);
-}
-
-#undef SDL_AtomicDecRef
 SDL_bool
-SDL_AtomicDecRef(SDL_atomic_t *a)
-{
-    return SDL_AtomicAdd(a, -1) == 1;
-}
-
-#undef SDL_AtomicCAS
-SDL_bool
-SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval)
+SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval)
 {
     SDL_bool retval = SDL_FALSE;
 
@@ -138,28 +85,8 @@ SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval)
     return retval;
 }
 
-#undef SDL_AtomicSetPtr
-void
-SDL_AtomicSetPtr(void** a, void* value)
-{
-    void *prevval;
-    do {
-        prevval = *a;
-    } while (!SDL_AtomicCASPtr(a, prevval, value));
-}
-
-#undef SDL_AtomicGetPtr
-void*
-SDL_AtomicGetPtr(void** a)
-{
-    /* Assuming integral reads on this platform, we're safe here since the
-       functions that set the pointer have the necessary memory barriers.
-    */
-    return *a;
-}
-
-#undef SDL_AtomicCASPtr
-SDL_bool SDL_AtomicCASPtr(void **a, void *oldval, void *newval)
+SDL_bool
+SDL_AtomicCASPtr_(void **a, void *oldval, void *newval)
 {
     SDL_bool retval = SDL_FALSE;
 

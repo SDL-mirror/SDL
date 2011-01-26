@@ -37,20 +37,20 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
     return (InterlockedExchange((long*)lock, 1) == 0);
 
-#elif defined(__MACOSX__)
+#elif __MACOSX__
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
-#elif defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+#elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
-#elif defined(__GNUC__) && defined(__arm__) && defined(__ARM_ARCH_5__)
+#elif __GNUC__ && __arm__ && __ARM_ARCH_5__
     int result;
     __asm__ __volatile__ (
         "swp %0, %1, [%2]\n"
         : "=&r,&r" (result) : "r,0" (1), "r,r" (lock) : "memory");
     return (result == 0);
 
-#elif defined(__GNUC__) && defined(__arm__)
+#elif __GNUC__ && __arm__
     int result;
     __asm__ __volatile__ (
         "ldrex %0, [%2]\nteq   %0, #0\nstrexeq %0, %1, [%2]"
@@ -75,8 +75,16 @@ SDL_AtomicLock(SDL_SpinLock *lock)
 void
 SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
-    /* Assuming atomic assignment operation and full memory barrier in lock */
+#if defined(_MSC_VER)
+    _ReadWriteBarrier();
     *lock = 0;
+
+#elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
+    __sync_lock_release(lock);
+
+#else
+    *lock = 0;
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

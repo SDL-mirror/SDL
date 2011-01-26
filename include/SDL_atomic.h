@@ -38,8 +38,13 @@
  *  SDL_AtomicDecRef()
  * 
  * Seriously, here be dragons!
+ * ^^^^^^^^^^^^^^^^^^^^^^^^^^^
  *
- * These operations may, or may not, actually be implemented using
+ * You can find out a little more about lockless programming and the 
+ * subtle issues that can arise here:
+ * http://msdn.microsoft.com/en-us/library/ee418650%28v=vs.85%29.aspx
+ *
+ * These operations may or may not actually be implemented using
  * processor specific atomic operations. When possible they are
  * implemented as true processor specific atomic operations. When that
  * is not possible the are implemented using locks that *do* use the
@@ -114,66 +119,54 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 
 /*@}*//*SDL AtomicLock*/
 
+
+/* The compiler barrier prevents the compiler from reordering
+   reads and writes to globally visible variables across the call.
+*/
+#ifdef _MSC_VER
+void _ReadWriteBarrier(void);
+#pragma intrinsic(_ReadWriteBarrier)
+#define SDL_CompilerBarrier()   _ReadWriteBarrier()
+#elif __GNUC__
+#define SDL_CompilerBarrier()   __asm__ __volatile__ ("" : : : "memory")
+#else
+#define SDL_CompilerBarrier()   \
+({ SDL_SpinLock _tmp = 0; SDL_AtomicLock(&_tmp); SDL_AtomicUnlock(&_tmp); })
+#endif
+
 /* Platform specific optimized versions of the atomic functions,
  * you can disable these by defining SDL_DISABLE_ATOMIC_INLINE
  */
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
-#if defined(HAVE_MSC_ATOMICS)
+#if HAVE_MSC_ATOMICS
 
 #define SDL_AtomicSet(a, v)     _InterlockedExchange((long*)&(a)->value, (v))
-#define SDL_AtomicGet(a)        ((a)->value)
 #define SDL_AtomicAdd(a, v)     _InterlockedExchangeAdd((long*)&(a)->value, (v))
 #define SDL_AtomicCAS(a, oldval, newval) (_InterlockedCompareExchange((long*)&(a)->value, (newval), (oldval)) == (oldval))
-#define SDL_AtomicSetPtr(a, v)  (void)_InterlockedExchangePointer((a), (v))
-#define SDL_AtomicGetPtr(a)     (*(a))
+#define SDL_AtomicSetPtr(a, v)  _InterlockedExchangePointer((a), (v))
 #if _M_IX86
 #define SDL_AtomicCASPtr(a, oldval, newval) (_InterlockedCompareExchange((long*)(a), (long)(newval), (long)(oldval)) == (long)(oldval))
 #else
 #define SDL_AtomicCASPtr(a, oldval, newval) (_InterlockedCompareExchangePointer((a), (newval), (oldval)) == (oldval))
 #endif
 
-#elif defined(__MACOSX__)
+#elif __MACOSX__
 #include <libkern/OSAtomic.h>
 
-#define SDL_AtomicSet(a, v) \
-({                          \
-    int oldvalue;           \
-                            \
-    do {                    \
-        oldvalue = (a)->value; \
-    } while (!OSAtomicCompareAndSwap32Barrier(oldvalue, v, &(a)->value)); \
-                            \
-    oldvalue;               \
-})
-#define SDL_AtomicGet(a)        ((a)->value)
-#define SDL_AtomicAdd(a, v) \
-({                          \
-    int oldvalue;           \
-                            \
-    do {                    \
-        oldvalue = (a)->value; \
-    } while (!OSAtomicCompareAndSwap32Barrier(oldvalue, oldvalue+v, &(a)->value)); \
-                            \
-    oldvalue;               \
-})
-#define SDL_AtomicCAS(a, oldval, newval) OSAtomicCompareAndSwap32Barrier(oldval, newval, &(a)->value)
-#define SDL_AtomicSetPtr(a, v)  (*(a) = v, OSMemoryBarrier())
-#define SDL_AtomicGetPtr(a)     (*(a))
+#define SDL_AtomicCAS(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((oldval), (newval), &(a)->value)
 #if SIZEOF_VOIDP == 4
 #define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((int32_t)(oldval), (int32_t)(newval), (int32_t*)(a))
 #elif SIZEOF_VOIDP == 8
 #define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap64Barrier((int64_t)(oldval), (int64_t)(newval), (int64_t*)(a))
 #endif
 
-#elif defined(HAVE_GCC_ATOMICS)
+#elif HAVE_GCC_ATOMICS
 
 #define SDL_AtomicSet(a, v)     __sync_lock_test_and_set(&(a)->value, v)
-#define SDL_AtomicGet(a)        ((a)->value)
 #define SDL_AtomicAdd(a, v)     __sync_fetch_and_add(&(a)->value, v)
+#define SDL_AtomicSetPtr(a, v)  __sync_lock_test_and_set(a, v)
 #define SDL_AtomicCAS(a, oldval, newval) __sync_bool_compare_and_swap(&(a)->value, oldval, newval)
-#define SDL_AtomicSetPtr(a, v)  (*(a) = v, __sync_synchronize())
-#define SDL_AtomicGetPtr(a)     (*(a))
 #define SDL_AtomicCASPtr(a, oldval, newval) __sync_bool_compare_and_swap(a, oldval, newval)
 
 #endif
@@ -195,40 +188,61 @@ typedef struct { int value; } SDL_atomic_t;
  * \return The previous value of the atomic variable.
  */
 #ifndef SDL_AtomicSet
-extern DECLSPEC int SDLCALL SDL_AtomicSet(SDL_atomic_t *a, int value);
+#define SDL_AtomicSet(a, v) \
+({                              \
+    int _value;                 \
+    do {                        \
+        _value = (a)->value;    \
+    } while (!SDL_AtomicCAS(a, _value, (v))); \
+    _value;                     \
+})
 #endif
 
 /**
  * \brief Get the value of an atomic variable
  */
 #ifndef SDL_AtomicGet
-extern DECLSPEC int SDLCALL SDL_AtomicGet(SDL_atomic_t *a);
+#define SDL_AtomicGet(a)        \
+({                              \
+    int _value = (a)->value;    \
+    SDL_CompilerBarrier();      \
+    _value;                     \
+})
 #endif
 
 /**
- * \brief  Add to an atomic variable.
+ * \brief Add to an atomic variable.
  *
  * \return The previous value of the atomic variable.
+ *
+ * \note This same style can be used for any number operation
  */
 #ifndef SDL_AtomicAdd
-extern DECLSPEC int SDLCALL SDL_AtomicAdd(SDL_atomic_t *a, int value);
+#define SDL_AtomicAdd(a, v)     \
+({                              \
+    int _value;                 \
+    do {                        \
+        _value = (a)->value;    \
+    } while (!SDL_AtomicCAS(a, _value, (_value + (v)))); \
+    _value;                     \
+})
 #endif
 
 /**
  * \brief Increment an atomic variable used as a reference count.
  */
 #ifndef SDL_AtomicIncRef
-extern DECLSPEC void SDLCALL SDL_AtomicIncRef(SDL_atomic_t *a);
+#define SDL_AtomicIncRef(a)    SDL_AtomicAdd(a, 1)
 #endif
 
 /**
  * \brief Decrement an atomic variable used as a reference count.
  *
- * \return SDL_TRUE if the variable has reached zero after decrementing,
+ * \return SDL_TRUE if the variable reached zero after decrementing,
  *         SDL_FALSE otherwise
  */
 #ifndef SDL_AtomicDecRef
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicDecRef(SDL_atomic_t *a);
+#define SDL_AtomicDecRef(a)    (SDL_AtomicAdd(a, -1) == 1)
 #endif
 
 /**
@@ -239,21 +253,36 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicDecRef(SDL_atomic_t *a);
  * \note If you don't know what this function is for, you shouldn't use it!
 */
 #ifndef SDL_AtomicCAS
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval);
+#define SDL_AtomicCAS SDL_AtomicCAS_
 #endif
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval);
 
 /**
  * \brief Set a pointer to a value atomically.
+ *
+ * \return The previous value of the pointer.
  */
 #ifndef SDL_AtomicSetPtr
-extern DECLSPEC void SDLCALL SDL_AtomicSetPtr(void** a, void* value);
+#define SDL_AtomicSetPtr(a, v)  \
+({                              \
+    void* _value;               \
+    do {                        \
+        _value = *(a);          \
+    } while (!SDL_AtomicCASPtr(a, _value, (v))); \
+    _value;                     \
+})
 #endif
 
 /**
  * \brief Get the value of a pointer atomically.
  */
 #ifndef SDL_AtomicGetPtr
-extern DECLSPEC void* SDLCALL SDL_AtomicGetPtr(void** a);
+#define SDL_AtomicGetPtr(a)     \
+({                              \
+    void* _value = *(a);        \
+    SDL_CompilerBarrier();      \
+    _value;                     \
+})
 #endif
 
 /**
@@ -264,8 +293,9 @@ extern DECLSPEC void* SDLCALL SDL_AtomicGetPtr(void** a);
  * \note If you don't know what this function is for, you shouldn't use it!
 */
 #ifndef SDL_AtomicCASPtr
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr(void **a, void *oldval, void *newval);
+#define SDL_AtomicCASPtr SDL_AtomicCASPtr_
 #endif
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr_(void **a, void *oldval, void *newval);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

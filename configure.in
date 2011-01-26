@@ -301,6 +301,7 @@ if test x$enable_gcc_atomics = xyes; then
     int a;
     void *x, *y, *z;
     __sync_lock_test_and_set(&a, 4);
+    __sync_lock_test_and_set(&x, y);
     __sync_fetch_and_add(&a, 1);
     __sync_bool_compare_and_swap(&a, 5, 10);
     __sync_bool_compare_and_swap(&x, y, z);
@@ -317,6 +318,7 @@ if test x$enable_gcc_atomics = xyes; then
         ],[
         int a;
         __sync_lock_test_and_set(&a, 1);
+        __sync_lock_release(&a);
         ],[
         have_gcc_sync_lock_test_and_set=yes
         ])
