@@ -65,7 +65,7 @@
 /* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(_WIN32_WCE)
 #include <intrin.h>
-#define HAVE_MSC_ATOMICS
+#define HAVE_MSC_ATOMICS 1
 #endif
 
 /* Set up for C function definitions, even when using C++ */
