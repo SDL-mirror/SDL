@@ -278,7 +278,7 @@ typedef struct
     char cache_pad4[CACHELINE-sizeof(SDL_SpinLock)-2*sizeof(SDL_atomic_t)];
 #endif
 
-    SDL_bool active;
+    volatile SDL_bool active;
 
     /* Only needed for the mutex test */
     SDL_mutex *mutex;
