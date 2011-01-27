@@ -39,6 +39,29 @@ killed(int sig)
     alive = 0;
 }
 
+static void
+TestWaitTimeout(void)
+{
+    Uint32 start_ticks;
+    Uint32 end_ticks;
+    Uint32 duration;
+
+    sem = SDL_CreateSemaphore(0);
+    printf("Waiting 2 seconds on semaphore\n");
+
+    start_ticks = SDL_GetTicks();
+    SDL_SemWaitTimeout(sem, 2000);
+    end_ticks = SDL_GetTicks();
+
+    duration = end_ticks - start_ticks;
+
+    /* Accept a little offset in the effective wait */
+    if (duration > 1900 && duration < 2050)
+        printf("Wait done.\n");
+    else
+        fprintf(stderr, "Wait took %d milliseconds\n", duration);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -81,6 +104,9 @@ main(int argc, char **argv)
     printf("Finished waiting for threads\n");
 
     SDL_DestroySemaphore(sem);
+
+    TestWaitTimeout();
+
     SDL_Quit();
     return (0);
 }

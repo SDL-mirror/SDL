@@ -21,6 +21,7 @@
 */
 #include "SDL_config.h"
 
+#include <errno.h>
 #include <pthread.h>
 #include <semaphore.h>
 
@@ -102,6 +103,8 @@ int
 SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
 {
     int retval;
+    struct timeval now;
+    struct timespec ts_timeout;
 
     if (!sem) {
         SDL_SetError("Passed a NULL semaphore");
@@ -116,16 +119,34 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
         return SDL_SemWait(sem);
     }
 
-    /* Ack!  We have to busy wait... */
-    /* FIXME: Use sem_timedwait()? */
-    timeout += SDL_GetTicks();
+    /* Setup the timeout. sem_timedwait doesn't wait for
+    * a lapse of time, but until we reach a certain time.
+    * This time is now plus the timeout.
+    */
+    gettimeofday(&now, NULL);
+
+    /* Add our timeout to current time */
+    now.tv_usec += (timeout % 1000) * 1000;
+    now.tv_sec += timeout / 1000;
+
+    /* Wrap the second if needed */
+    if ( now.tv_usec >= 1000000 ) {
+        now.tv_usec -= 1000000;
+        now.tv_sec ++;
+    }
+
+    /* Convert to timespec */
+    ts_timeout.tv_sec = now.tv_sec;
+    ts_timeout.tv_nsec = now.tv_usec * 1000;
+
+    /* Wait. */
     do {
-        retval = SDL_SemTryWait(sem);
-        if (retval == 0) {
-            break;
-        }
-        SDL_Delay(1);
-    } while (SDL_GetTicks() < timeout);
+        retval = sem_timedwait(&sem->sem, &ts_timeout);
+    } while (retval < 0 && errno == EINTR);
+
+    if (retval < 0) {
+        SDL_SetError("sem_timedwait() failed");
+    }
 
     return retval;
 }
