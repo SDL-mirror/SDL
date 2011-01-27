@@ -526,7 +526,6 @@ static int FIFO_Reader(void* _data)
     ReaderData *data = (ReaderData *)_data;
     SDL_EventQueue *queue = data->queue;
     SDL_Event event;
-    int index;
 
     if (data->lock_free) {
         for ( ; ; ) {

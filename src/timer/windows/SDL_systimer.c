@@ -24,6 +24,7 @@
 #ifdef SDL_TIMER_WINDOWS
 
 #include "../../core/windows/SDL_windows.h"
+#include <mmsystem.h>
 
 #include "SDL_timer.h"
 
