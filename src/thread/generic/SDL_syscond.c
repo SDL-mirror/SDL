@@ -145,18 +145,19 @@ SDL_CondBroadcast(SDL_cond * cond)
 Typical use:
 
 Thread A:
-	SDL_LockMutex(lock);
-	while ( ! condition ) {
-		SDL_CondWait(cond);
-	}
-	SDL_UnlockMutex(lock);
+    SDL_LockMutex(lock);
+    while ( ! condition ) {
+        SDL_CondWait(cond, lock);
+    }
+    SDL_UnlockMutex(lock);
 
 Thread B:
-	SDL_LockMutex(lock);
-	...
-	condition = true;
-	...
-	SDL_UnlockMutex(lock);
+    SDL_LockMutex(lock);
+    ...
+    condition = true;
+    ...
+    SDL_CondSignal(cond);
+    SDL_UnlockMutex(lock);
  */
 int
 SDL_CondWaitTimeout(SDL_cond * cond, SDL_mutex * mutex, Uint32 ms)
