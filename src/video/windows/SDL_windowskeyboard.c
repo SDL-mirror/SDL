@@ -534,7 +534,7 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
         return dwRet[uIndex];
 
     hklprev = hkl;
-    dwLang = ((DWORD)hkl & 0xffff);
+    dwLang = ((DWORD_PTR)hkl & 0xffff);
     if (videodata->ime_uiless && LANG() == LANG_CHT) {
         dwRet[0] = IMEID_CHT_VER_VISTA;
         dwRet[1] = 0;
@@ -781,7 +781,7 @@ IME_GetCandidateList(HIMC himc, SDL_VideoData *videodata)
                     UINT cchars = 0;
 
                     for (; i < videodata->ime_candcount; ++i) {
-                        UINT len = SDL_wcslen((LPWSTR)((DWORD)cand_list + cand_list->dwOffset[i])) + 1;
+                        UINT len = SDL_wcslen((LPWSTR)((DWORD_PTR)cand_list + cand_list->dwOffset[i])) + 1;
                         if (len + cchars > maxcandchar) {
                             if (i > cand_list->dwSelection)
                                 break;
@@ -801,7 +801,7 @@ IME_GetCandidateList(HIMC himc, SDL_VideoData *videodata)
                 }
                 SDL_memset(&videodata->ime_candidates, 0, sizeof(videodata->ime_candidates));
                 for (i = page_start, j = 0; (DWORD)i < cand_list->dwCount && j < (int)videodata->ime_candpgsize; i++, j++) {
-                    LPCWSTR candidate = (LPCWSTR)((DWORD)cand_list + cand_list->dwOffset[i]);
+                    LPCWSTR candidate = (LPCWSTR)((DWORD_PTR)cand_list + cand_list->dwOffset[i]);
                     IME_AddCandidate(videodata, j, candidate);
                 }
                 if (PRIMLANG() == LANG_KOREAN || (PRIMLANG() == LANG_CHT && !IME_GetId(videodata, 0)))
