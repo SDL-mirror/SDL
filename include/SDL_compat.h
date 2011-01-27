@@ -344,6 +344,13 @@ typedef SDL_Window* SDL_WindowID;
 #define SDL_RenderFill(X)  (X) ? SDL_RenderFillRect(X) : SDL_RenderClear()
 #define SDL_KillThread(X)
 
+/* The timeslice and timer resolution are no longer relevant */
+#define SDL_TIMESLICE		10
+#define TIMER_RESOLUTION	10
+
+typedef Uint32 (SDLCALL * SDL_OldTimerCallback) (Uint32 interval);
+extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_OldTimerCallback callback);
+
 extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 
 /*@}*//*Compatibility*/

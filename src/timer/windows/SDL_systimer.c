@@ -24,10 +24,8 @@
 #ifdef SDL_TIMER_WINDOWS
 
 #include "../../core/windows/SDL_windows.h"
-#include <mmsystem.h>
 
 #include "SDL_timer.h"
-#include "../SDL_timer_c.h"
 
 #ifdef _WIN32_WCE
 #error This is WinCE. Please use src/timer/wince/SDL_systimer.c instead.
@@ -104,60 +102,6 @@ void
 SDL_Delay(Uint32 ms)
 {
     Sleep(ms);
-}
-
-/* Data to handle a single periodic alarm */
-static UINT timerID = 0;
-
-static void CALLBACK
-HandleAlarm(UINT uID, UINT uMsg, DWORD_PTR dwUser,
-            DWORD_PTR dw1, DWORD_PTR dw2)
-{
-    SDL_ThreadedTimerCheck();
-}
-
-
-int
-SDL_SYS_TimerInit(void)
-{
-    MMRESULT result;
-
-    /* Set timer resolution */
-    result = timeBeginPeriod(TIMER_RESOLUTION);
-    if (result != TIMERR_NOERROR) {
-        SDL_SetError("Warning: Can't set %d ms timer resolution",
-                     TIMER_RESOLUTION);
-    }
-    /* Allow 10 ms of drift so we don't chew on CPU */
-    timerID =
-        timeSetEvent(TIMER_RESOLUTION, 1, HandleAlarm, 0, TIME_PERIODIC);
-    if (!timerID) {
-        SDL_SetError("timeSetEvent() failed");
-        return (-1);
-    }
-    return (SDL_SetTimerThreaded(1));
-}
-
-void
-SDL_SYS_TimerQuit(void)
-{
-    if (timerID) {
-        timeKillEvent(timerID);
-    }
-    timeEndPeriod(TIMER_RESOLUTION);
-}
-
-int
-SDL_SYS_StartTimer(void)
-{
-    SDL_SetError("Internal logic error: Win32 uses threaded timer");
-    return (-1);
-}
-
-void
-SDL_SYS_StopTimer(void)
-{
-    return;
 }
 
 #endif /* SDL_TIMER_WINDOWS */

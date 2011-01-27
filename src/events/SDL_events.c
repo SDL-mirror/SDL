@@ -123,9 +123,6 @@ SDL_GobbleEvents(void *unused)
 
         /* Give up the CPU for the rest of our timeslice */
         SDL_EventLock.safe = 1;
-        if (SDL_timer_running) {
-            SDL_ThreadedTimerCheck();
-        }
         SDL_Delay(1);
 
         /* Check for event locking.
@@ -140,7 +137,6 @@ SDL_GobbleEvents(void *unused)
         SDL_EventLock.safe = 0;
         SDL_mutexV(SDL_EventLock.lock);
     }
-    SDL_SetTimerThreaded(0);
     event_thread = 0;
     return (0);
 }
@@ -168,8 +164,6 @@ SDL_StartEventThread(Uint32 flags)
         }
         SDL_EventLock.safe = 0;
 
-        /* The event thread will handle timers too */
-        SDL_SetTimerThreaded(2);
 #if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
         SDL_EventThread =

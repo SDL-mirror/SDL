@@ -1760,6 +1760,31 @@ SDL_EnableUNICODE(int enable)
     return previous;
 }
 
+static Uint32
+SDL_SetTimerCallback(Uint32 interval, void* param)
+{
+    return ((SDL_OldTimerCallback)param)(interval);
+}
+
+int
+SDL_SetTimer(Uint32 interval, SDL_OldTimerCallback callback)
+{
+    static SDL_TimerID compat_timer;
+
+    if (compat_timer) {
+        SDL_RemoveTimer(compat_timer);
+        compat_timer = 0;
+    }
+
+    if (interval && callback) {
+        compat_timer = SDL_AddTimer(interval, SDL_SetTimerCallback, callback);
+        if (!compat_timer) {
+            return -1;
+        }
+    }
+    return 0;
+}
+
 int
 SDL_putenv(const char *_var)
 {
