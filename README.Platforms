@@ -1,0 +1,34 @@
+
+This is a list of the platforms SDL supports, and who maintains them.
+
+Officially supported platforms
+==============================
+(code compiles, and thoroughly tested for release)
+==============================
+Windows XP
+Windows Vista
+Windows 7
+Mac OS X 10.4+
+Linux 2.6+
+iOS 3.2+
+Android 1.6+
+
+Unofficially supported platforms
+================================
+(code compiles, but not thoroughly tested)
+================================
+Windows CE
+FreeBSD
+NetBSD
+OpenBSD
+Solaris
+
+Platforms supported by volunteers
+=================================
+
+Platforms that need maintainers
+===============================
+Nintendo DS
+Pandora
+QNX
+Haiku
