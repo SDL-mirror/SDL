@@ -2668,32 +2668,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
         fi
         ;;
-    *-riscos)
-        ARCH=riscos
-        CheckOSS
-        CheckPTHREAD
-        # Set up files for the video library
-        if test x$enable_video = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/video/riscos/*.c"
-            SOURCES="$SOURCES $srcdir/src/video/riscos/*.S"
-            have_video=yes
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/joystick/riscos/*.c"
-            have_joystick=yes
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/timer/riscos/*.c"
-            have_timers=yes
-        fi
-        # The RISC OS platform requires special setup.
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ljpeg -ltiff -lpng -lz"
-        ;;
     *)
         AC_MSG_ERROR([
 *** Unsupported host:  Please add to configure.in
