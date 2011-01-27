@@ -2712,10 +2712,10 @@ if test x$SDLMAIN_SOURCES = x; then
 fi
 
 OBJECTS=`echo $SOURCES`
-DEPENDS=`echo $SOURCES`
+DEPENDS=`echo $SOURCES | tr ' ' '\n'`
 for EXT in asm cc m c S; do
     OBJECTS=`echo "$OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.'$EXT',$(objects)/\1.lo,g'`
-    DEPENDS=`echo "$DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.$EXT,\\\\
+    DEPENDS=`echo "$DEPENDS" | sed "s,^\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.$EXT\\$,\\\\
 \\$(objects)/\\2.lo: \\1/\\2.$EXT\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 done
