@@ -79,7 +79,7 @@ copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
+echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
 :SDLREVISIONOKAY
 </Command>
     </PreBuildEvent>
@@ -157,7 +157,7 @@ copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
+echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
 :SDLREVISIONOKAY
 </Command>
     </PreBuildEvent>
