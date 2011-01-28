@@ -140,7 +140,7 @@ TestCPUInfo(SDL_bool verbose)
 {
     if (verbose) {
         printf("CPU count: %d\n", SDL_GetCPUCount());
-	printf("CPU cache line size: %d\n", SDL_GetCPUCacheLineCount());
+	printf("CPU cache line size: %d\n", SDL_GetCPUCacheLineSize());
         printf("RDTSC %s\n", SDL_HasRDTSC()? "detected" : "not detected");
         printf("MMX %s\n", SDL_HasMMX()? "detected" : "not detected");
         printf("MMX Ext %s\n", SDL_HasMMXExt()? "detected" : "not detected");
@@ -169,7 +169,6 @@ TestAssertions(SDL_bool verbose)
     SDL_assert_release(5 < 4);
     SDL_assert_release(0 && "This is a test");
 #endif
-    SDL_assert_release(0 && "This is a test");
 
     return (0);
 }
