@@ -32,9 +32,10 @@ render(void)
     r = randomInt(50, 255);
     g = randomInt(50, 255);
     b = randomInt(50, 255);
+    SDL_SetRenderDrawColor(r, g, b, 255);
 
     /*  Fill the rectangle in the color */
-    SDL_RenderFill(r, g, b, 255, &rect);
+    SDL_RenderFillRect(&rect);
 
     /* update screen */
     SDL_RenderPresent();
@@ -69,7 +70,7 @@ main(int argc, char *argv[])
     }
 
     /* Fill screen with black */
-    SDL_RenderFill(0, 0, 0, 0, NULL);
+    SDL_RenderClear();
 
     /* Enter render loop, waiting for user to quit */
     done = 0;
