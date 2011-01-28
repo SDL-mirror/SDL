@@ -24,6 +24,7 @@
 #include "SDL_timer.h"
 #include "SDL_timer_c.h"
 #include "SDL_atomic.h"
+#include "SDL_cpuinfo.h"
 #include "SDL_thread.h"
 
 /* #define DEBUG_TIMERS */
@@ -46,9 +47,6 @@ typedef struct _SDL_TimerMap
     struct _SDL_TimerMap *next;
 } SDL_TimerMap;
 
-/* A reasonable guess */
-#define CACHELINE_SIZE  128
-
 /* The timers are kept in a sorted list */
 typedef struct {
     /* Data used by the main thread */
@@ -58,7 +56,7 @@ typedef struct {
     SDL_mutex *timermap_lock;
 
     /* Padding to separate cache lines between threads */
-    char pad[CACHELINE_SIZE];
+    char cache_pad[SDL_CACHELINE_SIZE];
 
     /* Data used to communicate with the timer thread */
     SDL_SpinLock lock;

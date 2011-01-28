@@ -337,9 +337,40 @@ SDL_GetCPUCount()
 static const char *
 SDL_GetCPUType()
 {
-    static char SDL_CPUType[48];
+    static char SDL_CPUType[13];
 
     if (!SDL_CPUType[0]) {
+        int i = 0;
+        int a, b, c, d;
+
+        if (CPU_haveCPUID()) {
+            cpuid(0x00000000, a, b, c, d);
+            SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
+            SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
+            SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
+            SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
+            SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+            SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+            SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+            SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+            SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
+            SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
+            SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
+            SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
+        }
+        if (!SDL_CPUType[0]) {
+            SDL_strlcpy(SDL_CPUType, "Unknown", sizeof(SDL_CPUType));
+        }
+    }
+    return SDL_CPUType;
+}
+
+static const char *
+SDL_GetCPUName()
+{
+    static char SDL_CPUName[48];
+
+    if (!SDL_CPUName[0]) {
         int i = 0;
         int a, b, c, d;
 
@@ -347,63 +378,84 @@ SDL_GetCPUType()
             cpuid(0x80000000, a, b, c, d);
             if (a >= 0x80000004) {
                 cpuid(0x80000002, a, b, c, d);
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
                 cpuid(0x80000003, a, b, c, d);
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
                 cpuid(0x80000004, a, b, c, d);
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(a & 0xff); a >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(b & 0xff); b >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(c & 0xff); c >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
-                SDL_CPUType[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(a & 0xff); a >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(b & 0xff); b >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(c & 0xff); c >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
+                SDL_CPUName[i++] = (char)(d & 0xff); d >>= 8;
             }
         }
-        if (!SDL_CPUType[0]) {
-            SDL_strlcpy(SDL_CPUType, "Unknown", sizeof(SDL_CPUType));
+        if (!SDL_CPUName[0]) {
+            SDL_strlcpy(SDL_CPUName, "Unknown", sizeof(SDL_CPUName));
         }
     }
-    return SDL_CPUType;
+    return SDL_CPUName;
+}
+
+static int
+SDL_GetCPUCacheLineSize()
+{
+    const char *cpuType = SDL_GetCPUType();
+
+    if (SDL_strcmp(cpuType, "GenuineIntel") == 0) {
+        int a, b, c, d;
+
+        cpuid(0x00000001, a, b, c, d);
+        return (((b >> 8) & 0xff) * 8);
+    } else if (SDL_strcmp(cpuType, "AuthenticAMD") == 0) {
+        int a, b, c, d;
+
+        cpuid(0x80000005, a, b, c, d);
+        return (c & 0xff);
+    } else {
+        /* Just make a guess here... */
+        return SDL_CACHELINE_SIZE;
+    }
 }
 
 static Uint32 SDL_CPUFeatures = 0xFFFFFFFF;
@@ -521,7 +573,9 @@ int
 main()
 {
     printf("CPU count: %d\n", SDL_GetCPUCount());
-    printf("CPU name: %s\n", SDL_GetCPUType());
+    printf("CPU type: %s\n", SDL_GetCPUType());
+    printf("CPU name: %s\n", SDL_GetCPUName());
+    printf("CacheLine size: %d\n", SDL_GetCPUCacheLineSize());
     printf("RDTSC: %d\n", SDL_HasRDTSC());
     printf("MMX: %d\n", SDL_HasMMX());
     printf("MMXExt: %d\n", SDL_HasMMXExt());

@@ -39,6 +39,11 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/* This is a guess for the cacheline size used for padding, and is correct
+ * for most x86 processors at this point.
+ */
+#define SDL_CACHELINE_SIZE  64
+
 /**
  *  This function returns the number of CPU cores available.
  */

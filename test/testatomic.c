@@ -243,9 +243,6 @@ void RunEpicTest()
 #define NUM_WRITERS 4
 #define EVENTS_PER_WRITER   1000000
 
-/* A decent guess for the size of a cache line on this architecture */
-#define CACHELINE   64
-
 /* The number of entries must be a power of 2 */
 #define MAX_ENTRIES 256
 #define WRAP_MASK   (MAX_ENTRIES-1)
@@ -260,22 +257,22 @@ typedef struct
 {
     SDL_EventQueueEntry entries[MAX_ENTRIES];
 
-    char cache_pad1[CACHELINE-((sizeof(SDL_EventQueueEntry)*MAX_ENTRIES)%CACHELINE)];
+    char cache_pad1[SDL_CACHELINE_SIZE-((sizeof(SDL_EventQueueEntry)*MAX_ENTRIES)%SDL_CACHELINE_SIZE)];
 
     SDL_atomic_t enqueue_pos;
 
-    char cache_pad2[CACHELINE-sizeof(SDL_atomic_t)];
+    char cache_pad2[SDL_CACHELINE_SIZE-sizeof(SDL_atomic_t)];
 
     SDL_atomic_t dequeue_pos;
 
-    char cache_pad3[CACHELINE-sizeof(SDL_atomic_t)];
+    char cache_pad3[SDL_CACHELINE_SIZE-sizeof(SDL_atomic_t)];
 
 #ifdef TEST_SPINLOCK_FIFO
     SDL_SpinLock lock;
     SDL_atomic_t rwcount;
     SDL_atomic_t watcher;
 
-    char cache_pad4[CACHELINE-sizeof(SDL_SpinLock)-2*sizeof(SDL_atomic_t)];
+    char cache_pad4[SDL_CACHELINE_SIZE-sizeof(SDL_SpinLock)-2*sizeof(SDL_atomic_t)];
 #endif
 
     volatile SDL_bool active;
@@ -470,10 +467,10 @@ typedef struct
 {
     SDL_EventQueue *queue;
     int index;
-    char padding1[CACHELINE-(sizeof(SDL_EventQueue*)+sizeof(int))%CACHELINE];
+    char padding1[SDL_CACHELINE_SIZE-(sizeof(SDL_EventQueue*)+sizeof(int))%SDL_CACHELINE_SIZE];
     int waits;
     SDL_bool lock_free;
-    char padding2[CACHELINE-sizeof(int)-sizeof(SDL_bool)];
+    char padding2[SDL_CACHELINE_SIZE-sizeof(int)-sizeof(SDL_bool)];
 } WriterData;
 
 typedef struct
@@ -482,7 +479,7 @@ typedef struct
     int counters[NUM_WRITERS];
     int waits;
     SDL_bool lock_free;
-    char padding[CACHELINE-(sizeof(SDL_EventQueue*)+sizeof(int)*NUM_WRITERS+sizeof(int)+sizeof(SDL_bool))%CACHELINE];
+    char padding[SDL_CACHELINE_SIZE-(sizeof(SDL_EventQueue*)+sizeof(int)*NUM_WRITERS+sizeof(int)+sizeof(SDL_bool))%SDL_CACHELINE_SIZE];
 } ReaderData;
 
 static int FIFO_Writer(void* _data)
