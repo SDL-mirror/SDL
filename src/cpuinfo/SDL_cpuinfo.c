@@ -304,7 +304,7 @@ CPU_haveAltiVec(void)
 static int SDL_CPUCount = 0;
 
 int
-SDL_GetCPUCount()
+SDL_GetCPUCount(void)
 {
     if (!SDL_CPUCount) {
 #if defined(HAVE_SYSCONF) && defined(_SC_NPROCESSORS_ONLN)
@@ -335,7 +335,7 @@ SDL_GetCPUCount()
 
 /* Oh, such a sweet sweet trick, just not very useful. :) */
 static const char *
-SDL_GetCPUType()
+SDL_GetCPUType(void)
 {
     static char SDL_CPUType[13];
 
@@ -366,7 +366,7 @@ SDL_GetCPUType()
 }
 
 static const char *
-SDL_GetCPUName()
+SDL_GetCPUName(void)
 {
     static char SDL_CPUName[48];
 
@@ -437,8 +437,8 @@ SDL_GetCPUName()
     return SDL_CPUName;
 }
 
-static int
-SDL_GetCPUCacheLineSize()
+int
+SDL_GetCPUCacheLineSize(void)
 {
     const char *cpuType = SDL_GetCPUType();
 

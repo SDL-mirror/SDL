@@ -52,6 +52,14 @@ extern "C" {
 extern DECLSPEC int SDLCALL SDL_GetCPUCount(void);
 
 /**
+ *  This function returns the L1 cache line size of the CPU
+ *
+ *  This is useful for determining multi-threaded structure padding
+ *  or SIMD prefetch sizes.
+ */
+extern DECLSPEC int SDLCALL SDL_GetCPUCacheLineSize(void);
+
+/**
  *  This function returns true if the CPU has the RDTSC instruction.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC(void);
