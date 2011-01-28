@@ -39,10 +39,12 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* This is a guess for the cacheline size used for padding, and is correct
- * for most x86 processors at this point.
+/* This is a guess for the cacheline size used for padding.
+ * Most x86 processors have a 64 byte cache line.
+ * The 64-bit PowerPC processors have a 128 byte cache line.
+ * We'll use the larger value to be generally safe.
  */
-#define SDL_CACHELINE_SIZE  64
+#define SDL_CACHELINE_SIZE  128
 
 /**
  *  This function returns the number of CPU cores available.
