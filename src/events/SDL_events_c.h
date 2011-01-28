@@ -29,14 +29,11 @@
 #include "SDL_touch_c.h"
 #include "SDL_windowevents_c.h"
 #include "SDL_gesture_c.h"
+
 /* Start and stop the event processing loop */
-extern int SDL_StartEventLoop(Uint32 flags);
+extern int SDL_StartEventLoop(void);
 extern void SDL_StopEventLoop(void);
 extern void SDL_QuitInterrupt(void);
-
-extern void SDL_Lock_EventThread(void);
-extern void SDL_Unlock_EventThread(void);
-extern SDL_threadID SDL_EventThreadID(void);
 
 extern int SDL_SendSysWMEvent(SDL_SysWMmsg * message);
 

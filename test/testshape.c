@@ -60,7 +60,7 @@ int main(int argc,char** argv) {
     	exit(-1);
     }
 	
-	if(SDL_VideoInit(NULL,0) == -1) {
+	if(SDL_VideoInit(NULL) == -1) {
 		printf("Could not initialize SDL video.\n");
 		exit(-2);
 	}

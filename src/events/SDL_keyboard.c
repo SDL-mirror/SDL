@@ -26,7 +26,7 @@
 #include "SDL_timer.h"
 #include "SDL_events.h"
 #include "SDL_events_c.h"
-#include "SDL_sysevents.h"
+#include "../video/SDL_sysvideo.h"
 
 
 /* Global keyboard information */

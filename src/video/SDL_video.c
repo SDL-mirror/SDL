@@ -31,7 +31,6 @@
 #include "SDL_renderer_gl.h"
 #include "SDL_renderer_gles.h"
 #include "SDL_renderer_sw.h"
-#include "../events/SDL_sysevents.h"
 #include "../events/SDL_events_c.h"
 
 #if SDL_VIDEO_DRIVER_WINDOWS
@@ -172,7 +171,7 @@ SDL_GetVideoDriver(int index)
  * Initialize the video and event subsystems -- determine native pixel format
  */
 int
-SDL_VideoInit(const char *driver_name, Uint32 flags)
+SDL_VideoInit(const char *driver_name)
 {
     SDL_VideoDevice *video;
     int index;
@@ -183,18 +182,12 @@ SDL_VideoInit(const char *driver_name, Uint32 flags)
         SDL_VideoQuit();
     }
 
-    /* Toggle the event thread flags, based on OS requirements */
-#if defined(MUST_THREAD_EVENTS)
-    flags |= SDL_INIT_EVENTTHREAD;
-#elif defined(CANT_THREAD_EVENTS)
-    if ((flags & SDL_INIT_EVENTTHREAD) == SDL_INIT_EVENTTHREAD) {
-        SDL_SetError("OS doesn't support threaded events");
-        return -1;
-    }
-#endif
-
     /* Start the event loop */
-    if (SDL_StartEventLoop(flags) < 0) {
+    if (SDL_StartEventLoop() < 0 ||
+        SDL_KeyboardInit() < 0 ||
+        SDL_MouseInit() < 0 ||
+        SDL_TouchInit() < 0 ||
+        SDL_QuitInit() < 0) {
         return -1;
     }
 
@@ -887,7 +880,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 
     if (!_this) {
         /* Initialize the video system if needed */
-        if (SDL_VideoInit(NULL, 0) < 0) {
+        if (SDL_VideoInit(NULL) < 0) {
             return NULL;
         }
     }
@@ -2807,8 +2800,13 @@ SDL_VideoQuit(void)
     if (!_this) {
         return;
     }
+
     /* Halt event processing before doing anything else */
+    SDL_QuitQuit();
+    SDL_MouseQuit();
+    SDL_KeyboardQuit();
     SDL_StopEventLoop();
+
     SDL_EnableScreenSaver();
 
     /* Clean up the system video */

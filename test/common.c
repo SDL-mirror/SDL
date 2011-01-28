@@ -616,7 +616,7 @@ CommonInit(CommonState * state)
                 fprintf(stderr, "\n");
             }
         }
-        if (SDL_VideoInit(state->videodriver, 0) < 0) {
+        if (SDL_VideoInit(state->videodriver) < 0) {
             fprintf(stderr, "Couldn't initialize video driver: %s\n",
                     SDL_GetError());
             return SDL_FALSE;

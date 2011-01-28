@@ -30,12 +30,6 @@
 #include "../events/SDL_events_c.h"
 #endif
 
-/* This is used for Quake III Arena */
-#if SDL_EVENTS_DISABLED
-#define SDL_Lock_EventThread()
-#define SDL_Unlock_EventThread()
-#endif
-
 Uint8 SDL_numjoysticks = 0;
 SDL_Joystick **SDL_joysticks = NULL;
 static SDL_Joystick *default_joystick = NULL;
@@ -165,11 +159,9 @@ SDL_JoystickOpen(int device_index)
 
     /* Add joystick to list */
     ++joystick->ref_count;
-    SDL_Lock_EventThread();
     for (i = 0; SDL_joysticks[i]; ++i)
         /* Skip to next joystick */ ;
     SDL_joysticks[i] = joystick;
-    SDL_Unlock_EventThread();
 
     return (joystick);
 }
@@ -379,9 +371,6 @@ SDL_JoystickClose(SDL_Joystick * joystick)
         return;
     }
 
-    /* Lock the event queue - prevent joystick polling */
-    SDL_Lock_EventThread();
-
     if (joystick == default_joystick) {
         default_joystick = NULL;
     }
@@ -395,9 +384,6 @@ SDL_JoystickClose(SDL_Joystick * joystick)
             break;
         }
     }
-
-    /* Let the event thread keep running */
-    SDL_Unlock_EventThread();
 
     /* Free the data associated with this joystick */
     if (joystick->axes) {
@@ -419,9 +405,7 @@ void
 SDL_JoystickQuit(void)
 {
     /* Stop the event polling */
-    SDL_Lock_EventThread();
     SDL_numjoysticks = 0;
-    SDL_Unlock_EventThread();
 
     /* Quit the joystick setup */
     SDL_SYS_JoystickQuit();
