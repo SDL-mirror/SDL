@@ -74,10 +74,8 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_windows.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-:SDLCONFIGOKAY
+      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
+copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
@@ -154,10 +152,8 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_windows.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-:SDLCONFIGOKAY
+      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
+copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
