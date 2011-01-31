@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXAggregateTarget section */
@@ -19,17 +19,29 @@
 			name = "Generate Header Files";
 			productName = "Generate Header Files";
 		};
-		FDB043B30E2689CC00F5B3F9 /* Template */ = {
+		00B4F47112F696830084EC00 /* BuildUniversalSimulatorDevicelibSDL */ = {
 			isa = PBXAggregateTarget;
-			buildConfigurationList = FDB043C20E268A0D00F5B3F9 /* Build configuration list for PBXAggregateTarget "Template" */;
+			buildConfigurationList = 00B4F47412F696B30084EC00 /* Build configuration list for PBXAggregateTarget "BuildUniversalSimulatorDevicelibSDL" */;
 			buildPhases = (
-				FDB043B20E2689CC00F5B3F9 /* ShellScript */,
+				00B4F47012F696830084EC00 /* ShellScript */,
 			);
 			dependencies = (
-				FDB043BA0E2689E000F5B3F9 /* PBXTargetDependency */,
 			);
-			name = Template;
-			productName = package;
+			name = BuildUniversalSimulatorDevicelibSDL;
+			productName = "Build Universal Simulator/Device libSDL";
+		};
+		00B4F48B12F6A69C0084EC00 /* PrepareXcodeProjectTemplate */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 00B4F48E12F6A6BA0084EC00 /* Build configuration list for PBXAggregateTarget "PrepareXcodeProjectTemplate" */;
+			buildPhases = (
+				00B4F48A12F6A69C0084EC00 /* ShellScript */,
+			);
+			dependencies = (
+				00B4F4B112F6A9F00084EC00 /* PBXTargetDependency */,
+				00B4F49712F6A7B00084EC00 /* PBXTargetDependency */,
+			);
+			name = PrepareXcodeProjectTemplate;
+			productName = PrepareXcodeProjectTemplate;
 		};
 /* End PBXAggregateTarget section */
 
@@ -55,7 +67,7 @@
 		006E98701195513D001DE610 /* utf8.txt in Resources */ = {isa = PBXBuildFile; fileRef = 006E98691195513D001DE610 /* utf8.txt */; };
 		006E9888119552DD001DE610 /* SDL_rwopsbundlesupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 006E9886119552DD001DE610 /* SDL_rwopsbundlesupport.h */; };
 		006E9889119552DD001DE610 /* SDL_rwopsbundlesupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 006E9887119552DD001DE610 /* SDL_rwopsbundlesupport.m */; };
-		006E988C119552FC001DE610 /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD6526630DE8FCCB002AD96B /* libSDLiPhoneOS.a */; };
+		006E988C119552FC001DE610 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD6526630DE8FCCB002AD96B /* libSDL.a */; };
 		0098A55B1195B4D900343137 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A55A1195B4D900343137 /* AudioToolbox.framework */; };
 		0098A55F1195B4D900343137 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A55E1195B4D900343137 /* CoreAudio.framework */; };
 		0098A5611195B4D900343137 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0098A5601195B4D900343137 /* CoreGraphics.framework */; };
@@ -255,12 +267,19 @@
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = StaticLibiPhoneOS;
 		};
-		FDB043B90E2689E000F5B3F9 /* PBXContainerItemProxy */ = {
+		00B4F49612F6A7B00084EC00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
-			remoteInfo = StaticLibiPhoneOS;
+			remoteGlobalIDString = 00B4F47112F696830084EC00 /* BuildUniversalSimulatorDevicelibSDL */;
+			remoteInfo = BuildUniversalSimulatorDevicelibSDL;
+		};
+		00B4F4B012F6A9F00084EC00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0064653F107E3D7400183915 /* Generate Header Files */;
+			remoteInfo = "Generate Header Files";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -382,7 +401,7 @@
 		FD5F9D1E0E0E08B3008E885B /* SDL_joystick.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_joystick.c; sourceTree = "<group>"; };
 		FD5F9D1F0E0E08B3008E885B /* SDL_joystick_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_joystick_c.h; sourceTree = "<group>"; };
 		FD5F9D200E0E08B3008E885B /* SDL_sysjoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysjoystick.h; sourceTree = "<group>"; };
-		FD6526630DE8FCCB002AD96B /* libSDLiPhoneOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDLiPhoneOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD6526630DE8FCCB002AD96B /* libSDL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD689EF90E26E57800F90B21 /* SDL_coreaudio_iphone.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_coreaudio_iphone.c; sourceTree = "<group>"; };
 		FD689EFA0E26E57800F90B21 /* SDL_coreaudio_iphone.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_coreaudio_iphone.h; sourceTree = "<group>"; };
 		FD689F000E26E5B600F90B21 /* SDL_sysjoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_sysjoystick.m; sourceTree = "<group>"; };
@@ -535,7 +554,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				006E988C119552FC001DE610 /* libSDLiPhoneOS.a in Frameworks */,
+				006E988C119552FC001DE610 /* libSDL.a in Frameworks */,
 				0098A55B1195B4D900343137 /* AudioToolbox.framework in Frameworks */,
 				0098A55F1195B4D900343137 /* CoreAudio.framework in Frameworks */,
 				0098A5611195B4D900343137 /* CoreGraphics.framework in Frameworks */,
@@ -708,7 +727,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD6526630DE8FCCB002AD96B /* libSDLiPhoneOS.a */,
+				FD6526630DE8FCCB002AD96B /* libSDL.a */,
 				006E982211955059001DE610 /* testsdl.app */,
 			);
 			name = Products;
@@ -1245,9 +1264,9 @@
 			productReference = 006E982211955059001DE610 /* testsdl.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FD6526620DE8FCCB002AD96B /* StaticLibiPhoneOS */ = {
+		FD6526620DE8FCCB002AD96B /* libSDL */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FD6526990DE8FD14002AD96B /* Build configuration list for PBXNativeTarget "StaticLibiPhoneOS" */;
+			buildConfigurationList = FD6526990DE8FD14002AD96B /* Build configuration list for PBXNativeTarget "libSDL" */;
 			buildPhases = (
 				FD65265F0DE8FCCB002AD96B /* Headers */,
 				FD6526600DE8FCCB002AD96B /* Sources */,
@@ -1257,9 +1276,9 @@
 			dependencies = (
 				00646548107E3DE800183915 /* PBXTargetDependency */,
 			);
-			name = StaticLibiPhoneOS;
+			name = libSDL;
 			productName = iPhoneSDLStaticLib;
-			productReference = FD6526630DE8FCCB002AD96B /* libSDLiPhoneOS.a */;
+			productReference = FD6526630DE8FCCB002AD96B /* libSDL.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -1268,7 +1287,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SDLiPhoneOS" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -1281,10 +1300,11 @@
 			projectDirPath = "";
 			projectRoot = ../..;
 			targets = (
-				FD6526620DE8FCCB002AD96B /* StaticLibiPhoneOS */,
+				FD6526620DE8FCCB002AD96B /* libSDL */,
 				0064653F107E3D7400183915 /* Generate Header Files */,
-				FDB043B30E2689CC00F5B3F9 /* Template */,
 				006E982111955059001DE610 /* testsdl */,
+				00B4F47112F696830084EC00 /* BuildUniversalSimulatorDevicelibSDL */,
+				00B4F48B12F6A69C0084EC00 /* PrepareXcodeProjectTemplate */,
 			);
 		};
 /* End PBXProject section */
@@ -1341,9 +1361,25 @@
 			shellPath = /bin/sh;
 			shellScript = "if test -f ~/.bash_profile; then source ~/.bash_profile; fi\nif test -f ~/.bashrc; then source ~/.bashrc; fi\nsh ../../build-scripts/updaterev.sh";
 		};
-		FDB043B20E2689CC00F5B3F9 /* ShellScript */ = {
+		00B4F47012F696830084EC00 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 12;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SYMROOT)/$(CONFIGURATION)-iphonesimulator/libSDL.a",
+				"$(SYMROOT)/$(CONFIGURATION)-iphoneos/libSDL.a",
+			);
+			outputPaths = (
+				"$(SYMROOT)/libSDL.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Build the simulator binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphonesimulator\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphonesimulator\n\n# Build the device binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphoneos\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphoneos\n\n# create a simulator/device fat binary from the 2 separate builds\nlipo $SYMROOT/$CONFIGURATION-iphonesimulator/libSDL.a $SYMROOT/$CONFIGURATION-iphoneos/libSDL.a -output $SYMROOT/libSDL.a -create\n\necho \"Created Universal Simulator/Device binary at $SYMROOT/libSDL.a\"\n\n\nexit 0\n";
+		};
+		00B4F48A12F6A69C0084EC00 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
@@ -1352,7 +1388,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\n\ntemp=$BUILD_DIR/$BUILD_STYLE-template\ndest=\"/Developer/Platforms/iPhoneOS.platform/Developer/Library/XCode/Project Templates/SDL\"\ntemplate_dir_name=\"SDL Application\"\n\nrsync_flags=\"--exclude *.svn --links -r\"\n\n# mkdir -p $dest\nmkdir -p $temp\nmkdir -p \"$temp/$template_dir_name/lib/\"\nmkdir -p \"$temp/$template_dir_name/include\"\n\n#copy template\nrsync $rsync_flags \"../template/$template_dir_name\" $temp/\n\n#copy iPhone OS library\nrsync $rsync_flags -r $BUILD_DIR/$BUILD_STYLE-iphoneos/libSDLiPhoneOS.a \"$temp/$template_dir_name/lib/\"\n\n#copy iPhone Simulator Lib\nrsync $rsync_flags -r $BUILD_DIR/$BUILD_STYLE-iphonesimulator/libSDLSimulator.a \"$temp/$template_dir_name/lib/\"\n\n#copy headers\nrsync $rsync_flags ../../include/ \"$temp/$template_dir_name/include\"\n\n#install (nah, don't install)\n# cp -fr \"$temp/$template_dir_name\" \"$dest\"";
+			shellScript = "# clean up the framework, remove headers, extra files\n\ntemp=$BUILD_DIR/$BUILD_STYLE-template\n# Wrong! 1. Can't assume location of Xcode directory (use xcode-select)\n# 2. Project templates should go in Application Support directories anyway.\ntemplate_dir_name=\"SDL iOS Application\"\n# dest=\"$(HOME)/Library/Application Support/Developer/Shared/Xcode/Project Templates/SDL/SDL iOS Application\"\nrsync_flags=\"--exclude *.svn --links -r\"\n\n# mkdir -p $dest\nmkdir -p $temp\nmkdir -p \"$temp/$template_dir_name/SDL/lib/\"\nmkdir -p \"$temp/$template_dir_name/SDL/include\"\n\n# copy template\nrsync $rsync_flags \"../template/$template_dir_name\" $temp/\n\n# copy Universal libSDL.a\nrsync $rsync_flags -r $SYMROOT/libSDL.a \"$temp/$template_dir_name/SDL/lib/\"\n\n# copy headers\nrsync $rsync_flags ../../include/ \"$temp/$template_dir_name/SDL/include\"\n\n#install (nah, don't install)\n# cp -fr \"$temp/$template_dir_name\" \"$dest\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1483,13 +1519,18 @@
 		};
 		006E982B11955065001DE610 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = FD6526620DE8FCCB002AD96B /* StaticLibiPhoneOS */;
+			target = FD6526620DE8FCCB002AD96B /* libSDL */;
 			targetProxy = 006E982A11955065001DE610 /* PBXContainerItemProxy */;
 		};
-		FDB043BA0E2689E000F5B3F9 /* PBXTargetDependency */ = {
+		00B4F49712F6A7B00084EC00 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = FD6526620DE8FCCB002AD96B /* StaticLibiPhoneOS */;
-			targetProxy = FDB043B90E2689E000F5B3F9 /* PBXContainerItemProxy */;
+			target = 00B4F47112F696830084EC00 /* BuildUniversalSimulatorDevicelibSDL */;
+			targetProxy = 00B4F49612F6A7B00084EC00 /* PBXContainerItemProxy */;
+		};
+		00B4F4B112F6A9F00084EC00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0064653F107E3D7400183915 /* Generate Header Files */;
+			targetProxy = 00B4F4B012F6A9F00084EC00 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1560,10 +1601,53 @@
 			};
 			name = Release;
 		};
+		00B4F47212F696830084EC00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = BuildUniversalSimulatorDevicelibSDL;
+			};
+			name = Debug;
+		};
+		00B4F47312F696830084EC00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = BuildUniversalSimulatorDevicelibSDL;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		00B4F48C12F6A69C0084EC00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = PrepareXcodeProjectTemplate;
+			};
+			name = Debug;
+		};
+		00B4F48D12F6A69C0084EC00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				PRODUCT_NAME = PrepareXcodeProjectTemplate;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_DEBUGGING_SYMBOLS = full;
@@ -1581,7 +1665,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_UNIVERSAL_IPHONE_OS)";
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1597,13 +1681,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = NO;
 				DEPLOYMENT_LOCATION = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PREBINDING = NO;
-				PRODUCT_NAME = SDLiPhoneOS;
+				PRODUCT_NAME = SDL;
 				SKIP_INSTALL = YES;
 			};
 			name = Debug;
@@ -1612,31 +1695,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEPLOYMENT_LOCATION = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				PREBINDING = NO;
-				PRODUCT_NAME = SDLiPhoneOS;
+				PRODUCT_NAME = SDL;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		FDB043B40E2689CC00F5B3F9 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "";
-				PRODUCT_NAME = Template;
-			};
-			name = Debug;
-		};
-		FDB043B50E2689CC00F5B3F9 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "";
-				PRODUCT_NAME = Template;
 			};
 			name = Release;
 		};
@@ -1661,6 +1727,24 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		00B4F47412F696B30084EC00 /* Build configuration list for PBXAggregateTarget "BuildUniversalSimulatorDevicelibSDL" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00B4F47212F696830084EC00 /* Debug */,
+				00B4F47312F696830084EC00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		00B4F48E12F6A6BA0084EC00 /* Build configuration list for PBXAggregateTarget "PrepareXcodeProjectTemplate" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				00B4F48C12F6A69C0084EC00 /* Debug */,
+				00B4F48D12F6A69C0084EC00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SDLiPhoneOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1670,20 +1754,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FD6526990DE8FD14002AD96B /* Build configuration list for PBXNativeTarget "StaticLibiPhoneOS" */ = {
+		FD6526990DE8FD14002AD96B /* Build configuration list for PBXNativeTarget "libSDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FD6526640DE8FCCB002AD96B /* Debug */,
 				FD6526650DE8FCCB002AD96B /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		FDB043C20E268A0D00F5B3F9 /* Build configuration list for PBXAggregateTarget "Template" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				FDB043B40E2689CC00F5B3F9 /* Debug */,
-				FDB043B50E2689CC00F5B3F9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
