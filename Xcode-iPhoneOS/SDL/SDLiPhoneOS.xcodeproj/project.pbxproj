@@ -271,14 +271,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 00B4F47112F696830084EC00 /* BuildUniversalSimulatorDevicelibSDL */;
+			remoteGlobalIDString = 00B4F47112F696830084EC00;
 			remoteInfo = BuildUniversalSimulatorDevicelibSDL;
 		};
 		00B4F4B012F6A9F00084EC00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 0064653F107E3D7400183915 /* Generate Header Files */;
+			remoteGlobalIDString = 0064653F107E3D7400183915;
 			remoteInfo = "Generate Header Files";
 		};
 /* End PBXContainerItemProxy section */
