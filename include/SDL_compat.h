@@ -328,7 +328,6 @@ extern DECLSPEC int SDLCALL SDL_EnableKeyRepeat(int delay, int interval);
 extern DECLSPEC void SDLCALL SDL_GetKeyRepeat(int *delay, int *interval);
 extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
-typedef SDL_Texture* SDL_TextureID;
 typedef SDL_Window* SDL_WindowID;
 
 #define SDL_RenderPoint SDL_RenderDrawPoint

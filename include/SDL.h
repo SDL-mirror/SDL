@@ -86,6 +86,7 @@
 #include "SDL_loadso.h"
 #include "SDL_mutex.h"
 #include "SDL_power.h"
+#include "SDL_render.h"
 #include "SDL_rwops.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"

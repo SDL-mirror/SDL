@@ -26,6 +26,7 @@
 
 #include "SDL_mouse.h"
 #include "SDL_keysym.h"
+#include "SDL_render.h"
 #include "SDL_shape.h"
 
 /* The SDL video driver */
