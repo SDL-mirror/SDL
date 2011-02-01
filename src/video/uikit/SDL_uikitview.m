@@ -428,5 +428,6 @@ int SDL_iPhoneKeyboardToggle(SDL_Window * window) {
     return -1;
 }
 
-
 #endif /* SDL_IPHONE_KEYBOARD */
+
+/* vi: set ts=4 sw=4 expandtab: */

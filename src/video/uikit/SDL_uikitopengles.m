@@ -143,4 +143,4 @@ void UIKit_GL_DeleteContext(_THIS, SDL_GLContext context)
     [view removeFromSuperview];
 }
 
-
+/* vi: set ts=4 sw=4 expandtab: */
