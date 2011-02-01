@@ -51,10 +51,6 @@ static int DirectFB_GetTexturePalette(SDL_Renderer * renderer,
                                       SDL_Texture * texture,
                                       SDL_Color * colors,
                                       int firstcolor, int ncolors);
-static int DirectFB_SetTextureAlphaMod(SDL_Renderer * renderer,
-                                       SDL_Texture * texture);
-static int DirectFB_SetTextureColorMod(SDL_Renderer * renderer,
-                                       SDL_Texture * texture);
 static int DirectFB_UpdateTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture,
                                   const SDL_Rect * rect,
@@ -68,7 +64,6 @@ static void DirectFB_UnlockTexture(SDL_Renderer * renderer,
 static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture, int numrects,
                                   const SDL_Rect * rects);
-static int DirectFB_SetDrawBlendMode(SDL_Renderer * renderer);
 static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
@@ -96,8 +91,6 @@ SDL_RenderDriver DirectFB_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      14,
      {
       SDL_PIXELFORMAT_INDEX4LSB,
@@ -275,16 +268,12 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = DirectFB_QueryTexturePixels;
     renderer->SetTexturePalette = DirectFB_SetTexturePalette;
     renderer->GetTexturePalette = DirectFB_GetTexturePalette;
-    renderer->SetTextureAlphaMod = DirectFB_SetTextureAlphaMod;
-    renderer->SetTextureColorMod = DirectFB_SetTextureColorMod;
     renderer->UpdateTexture = DirectFB_UpdateTexture;
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
     renderer->DirtyTexture = DirectFB_DirtyTexture;
     renderer->RenderDrawPoints = DirectFB_RenderDrawPoints;
     renderer->RenderDrawLines = DirectFB_RenderDrawLines;
-    /* SetDrawColor - no needed */
-    renderer->SetDrawBlendMode = DirectFB_SetDrawBlendMode;
     renderer->RenderFillRects = DirectFB_RenderFillRects;
     renderer->RenderDrawRects = DirectFB_RenderDrawRects;
     /* RenderDrawEllipse - no reference implementation yet */
@@ -633,18 +622,6 @@ DirectFB_GetTexturePalette(SDL_Renderer * renderer,
     }
   error:
     return -1;
-}
-
-static int
-DirectFB_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
-}
-
-static int
-DirectFB_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
 }
 
 static int

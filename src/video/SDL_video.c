@@ -2074,7 +2074,11 @@ SDL_SetTextureColorMod(SDL_Texture * texture, Uint8 r, Uint8 g, Uint8 b)
     texture->r = r;
     texture->g = g;
     texture->b = b;
-    return renderer->SetTextureColorMod(renderer, texture);
+    if (renderer->SetTextureColorMod) {
+        return renderer->SetTextureColorMod(renderer, texture);
+    } else {
+        return 0;
+    }
 }
 
 int
@@ -2116,7 +2120,11 @@ SDL_SetTextureAlphaMod(SDL_Texture * texture, Uint8 alpha)
         texture->modMode &= ~SDL_TEXTUREMODULATE_ALPHA;
     }
     texture->a = alpha;
-    return renderer->SetTextureAlphaMod(renderer, texture);
+    if (renderer->SetTextureAlphaMod) {
+        return renderer->SetTextureAlphaMod(renderer, texture);
+    } else {
+        return 0;
+    }
 }
 
 int
@@ -2143,7 +2151,11 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode blendMode)
         return -1;
     }
     texture->blendMode = blendMode;
-    return renderer->SetTextureBlendMode(renderer, texture);
+    if (renderer->SetTextureBlendMode) {
+        return renderer->SetTextureBlendMode(renderer, texture);
+    } else {
+        return 0;
+    }
 }
 
 int
@@ -2258,11 +2270,7 @@ SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
     renderer->g = g;
     renderer->b = b;
     renderer->a = a;
-    if (renderer->SetDrawColor) {
-        return renderer->SetDrawColor(renderer);
-    } else {
-        return 0;
-    }
+    return 0;
 }
 
 int
@@ -2299,11 +2307,7 @@ SDL_SetRenderDrawBlendMode(SDL_BlendMode blendMode)
         return -1;
     }
     renderer->blendMode = blendMode;
-    if (renderer->SetDrawBlendMode) {
-        return renderer->SetDrawBlendMode(renderer);
-    } else {
-        return 0;
-    }
+    return 0;
 }
 
 int

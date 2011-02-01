@@ -54,12 +54,6 @@ static int photon_settexturepalette(SDL_Renderer * renderer,
 static int photon_gettexturepalette(SDL_Renderer * renderer,
                                     SDL_Texture * texture, SDL_Color * colors,
                                     int firstcolor, int ncolors);
-static int photon_settexturecolormod(SDL_Renderer * renderer,
-                                     SDL_Texture * texture);
-static int photon_settexturealphamod(SDL_Renderer * renderer,
-                                     SDL_Texture * texture);
-static int photon_settexturescalemode(SDL_Renderer * renderer,
-                                      SDL_Texture * texture);
 static int photon_updatetexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture, const SDL_Rect * rect,
                                 const void *pixels, int pitch);
@@ -71,7 +65,6 @@ static void photon_unlocktexture(SDL_Renderer * renderer,
 static void photon_dirtytexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture, int numrects,
                                 const SDL_Rect * rects);
-static int photon_setdrawcolor(SDL_Renderer * renderer);
 static int photon_renderpoint(SDL_Renderer * renderer, int x, int y);
 static int photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2,
                              int y2);
@@ -98,7 +91,6 @@ SDL_RenderDriver photon_renderdriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
      10,
      {SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -144,13 +136,10 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = photon_querytexturepixels;
     renderer->SetTexturePalette = photon_settexturepalette;
     renderer->GetTexturePalette = photon_gettexturepalette;
-    renderer->SetTextureAlphaMod = photon_settexturealphamod;
-    renderer->SetTextureColorMod = photon_settexturecolormod;
     renderer->UpdateTexture = photon_updatetexture;
     renderer->LockTexture = photon_locktexture;
     renderer->UnlockTexture = photon_unlocktexture;
     renderer->DirtyTexture = photon_dirtytexture;
-    renderer->SetDrawColor = photon_setdrawcolor;
     renderer->RenderPoint = photon_renderpoint;
     renderer->RenderLine = photon_renderline;
     renderer->RenderFill = photon_renderfill;
@@ -872,35 +861,6 @@ photon_gettexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static int
-photon_settexturecolormod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-   SDL_Unsupported();
-   return -1;
-}
-
-static int
-photon_settexturealphamod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-
-    /* Check, if it is not initialized */
-    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-    {
-       SDL_SetError("Photon: can't set texture blend mode for OpenGL ES window");
-       return -1;
-    }
-
-    /* Check if current renderer instance supports alpha modulation */
-    if ((renderer->info.mod_modes & SDL_TEXTUREMODULATE_ALPHA)!=SDL_TEXTUREMODULATE_ALPHA)
-    {
-       SDL_Unsupported();
-       return -1;
-    }
-
-    return 0;
-}
-
-static int
 photon_updatetexture(SDL_Renderer * renderer, SDL_Texture * texture,
                      const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -1022,33 +982,6 @@ photon_dirtytexture(SDL_Renderer * renderer, SDL_Texture * texture,
        SDL_SetError("Photon: can't update dirty texture for OpenGL ES window");
        return;
    }
-}
-
-static int
-photon_setdrawcolor(SDL_Renderer * renderer)
-{
-   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-
-   /* Check, if it is not initialized */
-   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-   {
-       SDL_SetError("Photon: can't set draw color for OpenGL ES window");
-       return -1;
-   }
-
-   switch (rdata->surfaces_type)
-   {
-       case SDL_PHOTON_SURFTYPE_OFFSCREEN:
-       case SDL_PHOTON_SURFTYPE_PHIMAGE:
-            PgSetFillColorCx(rdata->gc, PgRGB(renderer->r, renderer->g, renderer->b));
-            PgSetStrokeColorCx(rdata->gc, PgRGB(renderer->r, renderer->g, renderer->b));
-            break;
-       case SDL_PHOTON_SURFTYPE_UNKNOWN:
-       default:
-            break;
-   }
-
-   return 0;
 }
 
 static int

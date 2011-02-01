@@ -101,12 +101,6 @@ static int D3D_SetTexturePalette(SDL_Renderer * renderer,
 static int D3D_GetTexturePalette(SDL_Renderer * renderer,
                                  SDL_Texture * texture, SDL_Color * colors,
                                  int firstcolor, int ncolors);
-static int D3D_SetTextureColorMod(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
-static int D3D_SetTextureAlphaMod(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
-static int D3D_SetTextureBlendMode(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -144,8 +138,6 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
       SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      0,
      {0},
      0,
@@ -451,9 +443,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = D3D_QueryTexturePixels;
     renderer->SetTexturePalette = D3D_SetTexturePalette;
     renderer->GetTexturePalette = D3D_GetTexturePalette;
-    renderer->SetTextureColorMod = D3D_SetTextureColorMod;
-    renderer->SetTextureAlphaMod = D3D_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = D3D_SetTextureBlendMode;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
@@ -724,18 +713,6 @@ D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
-    return 0;
-}
-
-static int
-D3D_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
-}
-
-static int
-D3D_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
     return 0;
 }
 

@@ -67,10 +67,6 @@ static int GLES_SetTexturePalette(SDL_Renderer * renderer,
 static int GLES_GetTexturePalette(SDL_Renderer * renderer,
                                   SDL_Texture * texture, SDL_Color * colors,
                                   int firstcolor, int ncolors);
-static int GLES_SetTextureColorMod(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
-static int GLES_SetTextureAlphaMod(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
 static int GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * rect, const void *pixels,
                               int pitch);
@@ -104,8 +100,6 @@ SDL_RenderDriver GL_ES_RenderDriver = {
      "opengl_es",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_RGBA4444,
@@ -231,8 +225,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = GLES_QueryTexturePixels;
     renderer->SetTexturePalette = GLES_SetTexturePalette;
     renderer->GetTexturePalette = GLES_GetTexturePalette;
-    renderer->SetTextureColorMod = GLES_SetTextureColorMod;
-    renderer->SetTextureAlphaMod = GLES_SetTextureAlphaMod;
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
@@ -494,18 +486,6 @@ SetupTextureUpdate(GLES_RenderData * renderdata, SDL_Texture * texture,
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-}
-
-static int
-GLES_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
-}
-
-static int
-GLES_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
 }
 
 static int

@@ -49,6 +49,8 @@ static int SW_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int SW_SetTextureAlphaMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
+static int SW_SetTextureBlendMode(SDL_Renderer * renderer,
+                                  SDL_Texture * texture);
 static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -82,8 +84,6 @@ SDL_RenderDriver SW_RenderDriver = {
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      14,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -172,12 +172,12 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
     renderer->GetTexturePalette = SW_GetTexturePalette;
     renderer->SetTextureColorMod = SW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
     renderer->DestroyTexture = SW_DestroyTexture;
 
-    renderer->info.mod_modes = SW_RenderDriver.info.mod_modes;
     renderer->info.num_texture_formats =
         SW_RenderDriver.info.num_texture_formats;
     SDL_memcpy(renderer->info.texture_formats,

@@ -79,10 +79,6 @@ static int GL_SetTexturePalette(SDL_Renderer * renderer,
 static int GL_GetTexturePalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture, SDL_Color * colors,
                                 int firstcolor, int ncolors);
-static int GL_SetTextureColorMod(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-static int GL_SetTextureAlphaMod(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
 static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -118,8 +114,6 @@ SDL_RenderDriver GL_RenderDriver = {
      "opengl",
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      15,
      {
       SDL_PIXELFORMAT_INDEX1LSB,
@@ -291,8 +285,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = GL_QueryTexturePixels;
     renderer->SetTexturePalette = GL_SetTexturePalette;
     renderer->GetTexturePalette = GL_GetTexturePalette;
-    renderer->SetTextureColorMod = GL_SetTextureColorMod;
-    renderer->SetTextureAlphaMod = GL_SetTextureAlphaMod;
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
@@ -945,18 +937,6 @@ SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
                               (pitch / bytes_per_pixel(texture->format)) /
                               ((GL_TextureData *) texture->driverdata)->
                               HACK_RYAN_FIXME);
-}
-
-static int
-GL_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
-}
-
-static int
-GL_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return 0;
 }
 
 static int

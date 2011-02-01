@@ -86,8 +86,6 @@ struct SDL_Renderer
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     void (*DirtyTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           int numrects, const SDL_Rect * rects);
-    int (*SetDrawColor) (SDL_Renderer * renderer);
-    int (*SetDrawBlendMode) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
                              int count);

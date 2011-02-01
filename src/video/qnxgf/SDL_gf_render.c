@@ -48,12 +48,6 @@ static int gf_settexturepalette(SDL_Renderer * renderer,
 static int gf_gettexturepalette(SDL_Renderer * renderer,
                                 SDL_Texture * texture, SDL_Color * colors,
                                 int firstcolor, int ncolors);
-static int gf_settexturecolormod(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-static int gf_settexturealphamod(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-static int gf_settexturescalemode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int gf_updatetexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -81,8 +75,6 @@ SDL_RenderDriver gf_renderdriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
-     (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
-      SDL_TEXTUREMODULATE_ALPHA),
      13,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -141,8 +133,6 @@ gf_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->QueryTexturePixels = gf_querytexturepixels;
     renderer->SetTexturePalette = gf_settexturepalette;
     renderer->GetTexturePalette = gf_gettexturepalette;
-    renderer->SetTextureAlphaMod = gf_settexturealphamod;
-    renderer->SetTextureColorMod = gf_settexturecolormod;
     renderer->UpdateTexture = gf_updatetexture;
     renderer->LockTexture = gf_locktexture;
     renderer->UnlockTexture = gf_unlocktexture;
@@ -324,16 +314,6 @@ gf_settexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
 static int
 gf_gettexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
                      SDL_Color * colors, int firstcolor, int ncolors)
-{
-}
-
-static int
-gf_settexturecolormod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-}
-
-static int
-gf_settexturealphamod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
 }
 
