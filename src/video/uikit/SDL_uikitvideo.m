@@ -56,7 +56,7 @@ BOOL SDL_UIKit_supports_multiple_displays = NO;
 static int
 UIKit_Available(void)
 {
-	return (1);
+    return (1);
 }
 
 static void UIKit_DeleteDevice(SDL_VideoDevice * device)
@@ -85,22 +85,22 @@ UIKit_CreateDevice(int devindex)
     device->GetDisplayModes = UIKit_GetDisplayModes;
     device->SetDisplayMode = UIKit_SetDisplayMode;
     device->PumpEvents = UIKit_PumpEvents;
-	device->CreateWindow = UIKit_CreateWindow;
-	device->DestroyWindow = UIKit_DestroyWindow;
+    device->CreateWindow = UIKit_CreateWindow;
+    device->DestroyWindow = UIKit_DestroyWindow;
     device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
-	
-	
-	/* OpenGL (ES) functions */
-	device->GL_MakeCurrent		= UIKit_GL_MakeCurrent;
-	device->GL_SwapWindow		= UIKit_GL_SwapWindow;
-	device->GL_CreateContext	= UIKit_GL_CreateContext;
-	device->GL_DeleteContext    = UIKit_GL_DeleteContext;
-	device->GL_GetProcAddress   = UIKit_GL_GetProcAddress;
-	device->GL_LoadLibrary	    = UIKit_GL_LoadLibrary;
-	device->free = UIKit_DeleteDevice;
+    
+    
+    /* OpenGL (ES) functions */
+    device->GL_MakeCurrent        = UIKit_GL_MakeCurrent;
+    device->GL_SwapWindow        = UIKit_GL_SwapWindow;
+    device->GL_CreateContext    = UIKit_GL_CreateContext;
+    device->GL_DeleteContext    = UIKit_GL_DeleteContext;
+    device->GL_GetProcAddress   = UIKit_GL_GetProcAddress;
+    device->GL_LoadLibrary        = UIKit_GL_LoadLibrary;
+    device->free = UIKit_DeleteDevice;
 
-	device->gl_config.accelerated = 1;
-	
+    device->gl_config.accelerated = 1;
+
     return device;
 }
 

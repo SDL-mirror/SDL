@@ -37,69 +37,68 @@ static char **forward_argv;
 
 int main(int argc, char **argv) {
 
-	int i;
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	/* store arguments */
-	forward_argc = argc;
-	forward_argv = (char **)malloc((argc+1) * sizeof(char *));
-	for (i=0; i<argc; i++) {
-		forward_argv[i] = malloc( (strlen(argv[i])+1) * sizeof(char));
-		strcpy(forward_argv[i], argv[i]);
-	}
-	forward_argv[i] = NULL;
+    int i;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    
+    /* store arguments */
+    forward_argc = argc;
+    forward_argv = (char **)malloc((argc+1) * sizeof(char *));
+    for (i=0; i<argc; i++) {
+        forward_argv[i] = malloc( (strlen(argv[i])+1) * sizeof(char));
+        strcpy(forward_argv[i], argv[i]);
+    }
+    forward_argv[i] = NULL;
 
-	/* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
-	UIApplicationMain(argc, argv, NULL, @"SDLUIKitDelegate");
-	
-	[pool release];
-	
+    /* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
+    UIApplicationMain(argc, argv, NULL, @"SDLUIKitDelegate");
+    
+    [pool release];
+    
 }
 
 @implementation SDLUIKitDelegate
 
 /* convenience method */
 +(SDLUIKitDelegate *)sharedAppDelegate {
-	/* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
-	return (SDLUIKitDelegate *)[[UIApplication sharedApplication] delegate];
+    /* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
+    return (SDLUIKitDelegate *)[[UIApplication sharedApplication] delegate];
 }
 
 - (id)init {
-	self = [super init];
-	return self;
+    self = [super init];
+    return self;
 }
 
 - (void)postFinishLaunch {
 
-	/* run the user's application, passing argc and argv */
-	int exit_status = SDL_main(forward_argc, forward_argv);
-	
-	/* free the memory we used to hold copies of argc and argv */
-	int i;
-	for (i=0; i<forward_argc; i++) {
-		free(forward_argv[i]);
-	}
-	free(forward_argv);	
-		
-	/* exit, passing the return status from the user's application */
-	exit(exit_status);
+    /* run the user's application, passing argc and argv */
+    int exit_status = SDL_main(forward_argc, forward_argv);
+    
+    /* free the memory we used to hold copies of argc and argv */
+    int i;
+    for (i=0; i<forward_argc; i++) {
+        free(forward_argv[i]);
+    }
+    free(forward_argv);    
+        
+    /* exit, passing the return status from the user's application */
+    exit(exit_status);
 }
 
 - (void)applicationDidFinishLaunching:(UIApplication *)application {
-			
-	/* Set working directory to resource path */
-	[[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
-	
-	[self performSelector:@selector(postFinishLaunch) withObject:nil
+            
+    /* Set working directory to resource path */
+    [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
+    
+    [self performSelector:@selector(postFinishLaunch) withObject:nil
 afterDelay:0.0];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-	
-	SDL_SendQuit();
-	 /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
-	longjmp(*(jump_env()), 1);
-	
+    
+    SDL_SendQuit();
+     /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
+    longjmp(*(jump_env()), 1);
 }
 
 - (void) applicationWillResignActive:(UIApplication*)application

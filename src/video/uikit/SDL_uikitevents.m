@@ -32,25 +32,24 @@
 void
 UIKit_PumpEvents(_THIS)
 {
-	/* 
-		When the user presses the 'home' button on the iPod
-		the application exits -- immediatly.
-	 
-		Unlike in Mac OS X, it appears there is no way to cancel the termination.
-	 
-		This doesn't give the SDL user's application time to respond to an SDL_Quit event.
-		So what we do is that in the UIApplicationDelegate class (SDLUIApplicationDelegate),
-		when the delegate receives the ApplicationWillTerminate message, we execute
-		a longjmp statement to get back here, preventing an immediate exit.
-	 */	
-	if (setjmp(*jump_env()) == 0) {
-		/* if we're setting the jump, rather than jumping back */
-		SInt32 result;
-		do {
-			result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
-		} while(result == kCFRunLoopRunHandledSource);
-	}
-
+    /* 
+        When the user presses the 'home' button on the iPod
+        the application exits -- immediatly.
+     
+        Unlike in Mac OS X, it appears there is no way to cancel the termination.
+     
+        This doesn't give the SDL user's application time to respond to an SDL_Quit event.
+        So what we do is that in the UIApplicationDelegate class (SDLUIApplicationDelegate),
+        when the delegate receives the ApplicationWillTerminate message, we execute
+        a longjmp statement to get back here, preventing an immediate exit.
+     */    
+    if (setjmp(*jump_env()) == 0) {
+        /* if we're setting the jump, rather than jumping back */
+        SInt32 result;
+        do {
+            result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
+        } while(result == kCFRunLoopRunHandledSource);
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
