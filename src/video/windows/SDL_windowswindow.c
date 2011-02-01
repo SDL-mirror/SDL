@@ -30,7 +30,6 @@
 
 /* This is included after SDL_windowsvideo.h, which includes windows.h */
 #include "SDL_syswm.h"
-#include "SDL_gapirender.h"
 
 /* Windows CE compatibility */
 #ifndef SWP_NOCOPYBITS

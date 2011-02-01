@@ -45,12 +45,6 @@
 #include "d3d9.h"
 #endif
 
-#if SDL_VIDEO_RENDER_DDRAW
-/* WIN32_LEAN_AND_MEAN was defined, so we have to include this by hand */
-#include <objbase.h>
-#include "ddraw.h"
-#endif
-
 #include "SDL_windowsclipboard.h"
 #include "SDL_windowsevents.h"
 #include "SDL_windowsgamma.h"
@@ -63,7 +57,7 @@
 #include "SDL_loadso.h"
 
 
-enum { RENDER_NONE, RENDER_D3D, RENDER_DDRAW, RENDER_GDI, RENDER_GAPI, RENDER_RAW };
+enum { RENDER_NONE, RENDER_D3D };
 
 #if WINVER < 0x0601
 /* Touch input definitions */
@@ -134,10 +128,6 @@ typedef struct SDL_VideoData
 #if SDL_VIDEO_RENDER_D3D
     void* d3dDLL;
     IDirect3D9 *d3d;
-#endif
-#if SDL_VIDEO_RENDER_DDRAW
-    void* ddrawDLL;
-    IDirectDraw *ddraw;
 #endif
 #ifdef _WIN32_WCE
     void* hAygShell;

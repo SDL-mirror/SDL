@@ -178,11 +178,7 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_DRIVER_DUMMY	1
 #define SDL_VIDEO_DRIVER_WINDOWS	1
 
-#ifdef _WIN32_WCE
-#ifndef SDL_VIDEO_RENDER_GAPI
-#define SDL_VIDEO_RENDER_GAPI	1
-#endif
-#else
+#ifndef _WIN32_WCE
 #ifndef SDL_VIDEO_RENDER_D3D
 #define SDL_VIDEO_RENDER_D3D	1
 #endif

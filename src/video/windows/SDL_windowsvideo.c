@@ -30,7 +30,6 @@
 #include "SDL_windowsvideo.h"
 #include "SDL_windowsshape.h"
 #include "SDL_d3drender.h"
-#include "SDL_gapirender.h"
 
 /* Initialization/Query functions */
 static int WIN_VideoInit(_THIS);
@@ -55,12 +54,6 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
     if (data->d3d) {
         IDirect3D9_Release(data->d3d);
         SDL_UnloadObject(data->d3dDLL);
-    }
-#endif
-#if SDL_VIDEO_RENDER_DDRAW
-    if (data->ddraw) {
-        data->ddraw->lpVtbl->Release(data->ddraw);
-        SDL_UnloadObject(data->ddrawDLL);
     }
 #endif
 #ifdef _WIN32_WCE
@@ -99,42 +92,6 @@ WIN_CreateDevice(int devindex)
         return NULL;
     }
     device->driverdata = data;
-
-#if SDL_VIDEO_RENDER_D3D
-    data->d3dDLL = SDL_LoadObject("D3D9.DLL");
-    if (data->d3dDLL) {
-        IDirect3D9 *(WINAPI * D3DCreate) (UINT SDKVersion);
-
-        D3DCreate =
-            (IDirect3D9 * (WINAPI *) (UINT)) SDL_LoadFunction(data->d3dDLL,
-                                                            "Direct3DCreate9");
-        if (D3DCreate) {
-            data->d3d = D3DCreate(D3D_SDK_VERSION);
-        }
-        if (!data->d3d) {
-            SDL_UnloadObject(data->d3dDLL);
-            data->d3dDLL = NULL;
-        }
-    }
-#endif /* SDL_VIDEO_RENDER_D3D */
-#if SDL_VIDEO_RENDER_DDRAW
-    data->ddrawDLL = SDL_LoadObject("ddraw.dll");
-    if (data->ddrawDLL) {
-        IDirectDraw *(WINAPI * DDCreate) (GUID FAR * lpGUID,
-                                          LPDIRECTDRAW FAR * lplpDD,
-                                          IUnknown FAR * pUnkOuter);
-
-        DDCreate =
-            (IDirectDraw *
-             (WINAPI *) (GUID FAR *, LPDIRECTDRAW FAR *, IUnknown FAR *))
-            SDL_LoadFunction(data->ddrawDLL, "DirectDrawCreate");
-        if (!DDCreate || DDCreate(NULL, &data->ddraw, NULL) != DD_OK) {
-            SDL_UnloadObject(data->ddrawDLL);
-            data->ddrawDLL = NULL;
-            data->ddraw = NULL;
-        }
-    }
-#endif /* SDL_VIDEO_RENDER_DDRAW */
 
 #ifdef _WIN32_WCE
     data->hAygShell = SDL_LoadObject("\\windows\\aygshell.dll");
@@ -220,12 +177,6 @@ WIN_VideoInit(_THIS)
 
 #if SDL_VIDEO_RENDER_D3D
     D3D_AddRenderDriver(_this);
-#endif
-#if SDL_VIDEO_RENDER_DDRAW
-    DDRAW_AddRenderDriver(_this);
-#endif
-#if SDL_VIDEO_RENDER_GAPI
-    WINCE_AddRenderDriver(_this);
 #endif
 
     WIN_InitKeyboard(_this);

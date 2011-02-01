@@ -195,14 +195,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         /* transform coords for VGA, WVGA... */
         {
             SDL_VideoData *videodata = data->videodata;
-            if(videodata->CoordTransform &&
-                (videodata->render == RENDER_GAPI || videodata->render == RENDER_RAW))
-            {
+            if(videodata->CoordTransform) {
                 POINT pt;
                 pt.x = LOWORD(lParam);
                 pt.y = HIWORD(lParam);
                 videodata->CoordTransform(data->window, &pt);
-                    SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
+                SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
                 break;
             }
         }
