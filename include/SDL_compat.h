@@ -65,7 +65,7 @@ extern "C" {
 /*@{*/
 
 /* Platform */
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #undef __WIN32__
 #define __WIN32__   1
 #endif
@@ -223,6 +223,9 @@ struct SDL_SysWMinfo;
  */
 /*@{*/
 
+#define SDL_keysym		SDL_KeySym
+#define SDL_scancode	SDL_ScanCode
+
 /** 
  *  \name Renamed keys
  *
@@ -340,6 +343,13 @@ typedef SDL_Window* SDL_WindowID;
 #define SDL_RenderLine SDL_RenderDrawLine
 #define SDL_RenderFill(X)  (X) ? SDL_RenderFillRect(X) : SDL_RenderClear()
 #define SDL_KillThread(X)
+
+/* The timeslice and timer resolution are no longer relevant */
+#define SDL_TIMESLICE		10
+#define TIMER_RESOLUTION	10
+
+typedef Uint32 (SDLCALL * SDL_OldTimerCallback) (Uint32 interval);
+extern DECLSPEC int SDLCALL SDL_SetTimer(Uint32 interval, SDL_OldTimerCallback callback);
 
 extern DECLSPEC int SDLCALL SDL_putenv(const char *variable);
 

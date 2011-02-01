@@ -74,14 +74,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_windows.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-:SDLCONFIGOKAY
+      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
+copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
+echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
 :SDLREVISIONOKAY
 </Command>
     </PreBuildEvent>
@@ -154,14 +152,12 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>if exist "$(ProjectDir)\..\..\include\SDL_config.h" goto SDLCONFIGOKAY
-echo Copying SDL_config_windows.h to SDL_config.h...
-copy "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-:SDLCONFIGOKAY
+      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
+copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
+echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
 :SDLREVISIONOKAY
 </Command>
     </PreBuildEvent>
@@ -272,6 +268,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\include\SDL_types.h" />
     <ClInclude Include="..\..\include\SDL_version.h" />
     <ClInclude Include="..\..\include\SDL_video.h" />
+    <ClInclude Include="..\..\src\core\windows\SDL_windows.h" />
     <ClInclude Include="..\..\src\events\blank_cursor.h" />
     <ClInclude Include="..\..\src\events\default_cursor.h" />
     <ClInclude Include="..\..\src\audio\windx5\directx.h" />
@@ -345,6 +342,7 @@ echo #define SDL_REVISION 0 &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
     <ClInclude Include="..\..\src\video\windows\wmmsg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\core\windows\SDL_windows.c" />
     <ClCompile Include="..\..\src\events\SDL_clipboardevents.c" />
     <ClCompile Include="..\..\src\events\SDL_gesture.c" />
     <ClCompile Include="..\..\src\events\SDL_touch.c" />

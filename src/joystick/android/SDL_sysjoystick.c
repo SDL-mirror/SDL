@@ -32,7 +32,7 @@
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
-#include "../../SDL_android.h"
+#include "../../core/android/SDL_android.h"
 
 static const char *accelerometerName = "Android accelerometer";
 

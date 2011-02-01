@@ -21,9 +21,13 @@
 */
 #include "SDL_config.h"
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#ifndef _SDL_systhread_c_h
+#define _SDL_systhread_c_h
+
+#include "../../core/windows/SDL_windows.h"
 
 typedef HANDLE SYS_ThreadHandle;
+
+#endif /* _SDL_systhread_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

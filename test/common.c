@@ -616,7 +616,7 @@ CommonInit(CommonState * state)
                 fprintf(stderr, "\n");
             }
         }
-        if (SDL_VideoInit(state->videodriver, 0) < 0) {
+        if (SDL_VideoInit(state->videodriver) < 0) {
             fprintf(stderr, "Couldn't initialize video driver: %s\n",
                     SDL_GetError());
             return SDL_FALSE;
@@ -1038,7 +1038,12 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
         case SDL_WINDOWEVENT_CLOSE:
-            *done = 1;
+			{
+				SDL_Window *pWindow = SDL_GetWindowFromID(event->window.windowID);
+				if ( pWindow ) {
+					SDL_DestroyWindow( pWindow );
+				}
+			}
             break;
         }
         break;

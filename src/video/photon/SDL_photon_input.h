@@ -45,6 +45,6 @@ int32_t photon_delinputdevices(_THIS);
 #define SDL_PHOTON_MOUSE_COLOR_WHITE 0xFFFFFFFF
 #define SDL_PHOTON_MOUSE_COLOR_TRANS 0x00000000
 
-SDL_scancode photon_to_sdl_keymap(uint32_t key);
+SDL_ScanCode photon_to_sdl_keymap(uint32_t key);
 
 #endif /* __SDL_GF_INPUT_H__ */

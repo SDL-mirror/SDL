@@ -53,7 +53,7 @@ print_modifiers(void)
 }
 
 static void
-PrintKey(SDL_keysym * sym, SDL_bool pressed, SDL_bool repeat)
+PrintKey(SDL_KeySym * sym, SDL_bool pressed, SDL_bool repeat)
 {
     /* Print the keycode, name and state */
     if (sym->sym) {

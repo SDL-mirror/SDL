@@ -25,14 +25,10 @@
 
 #include <stdio.h>
 #include <sys/time.h>
-#include <signal.h>
 #include <unistd.h>
-#include <string.h>
 #include <errno.h>
 
 #include "SDL_timer.h"
-#include "../SDL_systimer.h"
-#include "../SDL_timer_c.h"
 
 /* The clock_gettime provides monotonous time, so we should use it if
    it's available. The clock_gettime function is behind ifdef
@@ -41,10 +37,6 @@
 */
 #if HAVE_NANOSLEEP || HAVE_CLOCK_GETTIME
 #include <time.h>
-#endif
-
-#if SDL_THREADS_DISABLED
-#define USE_ITIMER
 #endif
 
 /* The first ticks value of the application */
@@ -131,118 +123,6 @@ SDL_Delay(Uint32 ms)
     } while (was_error && (errno == EINTR));
 }
 
-#ifdef USE_ITIMER
-
-static void
-HandleAlarm(int sig)
-{
-    Uint32 ms;
-
-    if (SDL_alarm_callback) {
-        ms = (*SDL_alarm_callback) (SDL_alarm_interval);
-        if (ms != SDL_alarm_interval) {
-            SDL_SetTimer(ms, SDL_alarm_callback);
-        }
-    }
-}
-
-int
-SDL_SYS_TimerInit(void)
-{
-    struct sigaction action;
-
-    /* Set the alarm handler (Linux specific) */
-    SDL_memset(&action, 0, sizeof(action));
-    action.sa_handler = HandleAlarm;
-    action.sa_flags = SA_RESTART;
-    sigemptyset(&action.sa_mask);
-    sigaction(SIGALRM, &action, NULL);
-    return (0);
-}
-
-void
-SDL_SYS_TimerQuit(void)
-{
-    SDL_SetTimer(0, NULL);
-}
-
-int
-SDL_SYS_StartTimer(void)
-{
-    struct itimerval timer;
-
-    timer.it_value.tv_sec = (SDL_alarm_interval / 1000);
-    timer.it_value.tv_usec = (SDL_alarm_interval % 1000) * 1000;
-    timer.it_interval.tv_sec = (SDL_alarm_interval / 1000);
-    timer.it_interval.tv_usec = (SDL_alarm_interval % 1000) * 1000;
-    setitimer(ITIMER_REAL, &timer, NULL);
-    return (0);
-}
-
-void
-SDL_SYS_StopTimer(void)
-{
-    struct itimerval timer;
-
-    SDL_memset(&timer, 0, (sizeof timer));
-    setitimer(ITIMER_REAL, &timer, NULL);
-}
-
-#else /* USE_ITIMER */
-
-#include "SDL_thread.h"
-
-/* Data to handle a single periodic alarm */
-static int timer_alive = 0;
-static SDL_Thread *timer = NULL;
-
-static int
-RunTimer(void *unused)
-{
-    while (timer_alive) {
-        if (SDL_timer_running) {
-            SDL_ThreadedTimerCheck();
-        }
-        SDL_Delay(1);
-    }
-    return (0);
-}
-
-/* This is only called if the event thread is not running */
-int
-SDL_SYS_TimerInit(void)
-{
-    timer_alive = 1;
-    timer = SDL_CreateThread(RunTimer, NULL);
-    if (timer == NULL)
-        return (-1);
-    return (SDL_SetTimerThreaded(1));
-}
-
-void
-SDL_SYS_TimerQuit(void)
-{
-    timer_alive = 0;
-    if (timer) {
-        SDL_WaitThread(timer, NULL);
-        timer = NULL;
-    }
-}
-
-int
-SDL_SYS_StartTimer(void)
-{
-    SDL_SetError("Internal logic error: Linux uses threaded timer");
-    return (-1);
-}
-
-void
-SDL_SYS_StopTimer(void)
-{
-    return;
-}
-
-#endif /* USE_ITIMER */
-
 #endif /* SDL_TIMER_UNIX */
+
 /* vi: set ts=4 sw=4 expandtab: */

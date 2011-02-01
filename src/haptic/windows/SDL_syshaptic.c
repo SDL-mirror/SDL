@@ -39,6 +39,7 @@
 static struct
 {
     DIDEVICEINSTANCE instance;
+    char *name;
     SDL_Haptic *haptic;
     DIDEVCAPS capabilities;
 } SDL_hapticlist[MAX_HAPTICS];
@@ -220,6 +221,9 @@ EnumHapticsCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
         return DIENUM_CONTINUE;
     }
 
+    /* Copy the name */
+    SDL_hapticlist[SDL_numhaptics].name = WIN_StringToUTF8(SDL_hapticlist[SDL_numhaptics].instance.tszProductName);
+
     /* Close up device and count it. */
     IDirectInputDevice_Release(device);
     SDL_numhaptics++;
@@ -238,7 +242,7 @@ EnumHapticsCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
 const char *
 SDL_SYS_HapticName(int index)
 {
-    return SDL_hapticlist[index].instance.tszProductName;
+    return SDL_hapticlist[index].name;
 }
 
 
@@ -630,6 +634,15 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 void
 SDL_SYS_HapticQuit(void)
 {
+    int i;
+
+    for (i = 0; i < SDL_arraysize(SDL_hapticlist); ++i) {
+        if (SDL_hapticlist[i].name) {
+            SDL_free(SDL_hapticlist[i].name);
+            SDL_hapticlist[i].name = NULL;
+        }
+    }
+
     IDirectInput_Release(dinput);
     dinput = NULL;
 }

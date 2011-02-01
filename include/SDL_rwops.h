@@ -83,7 +83,7 @@ typedef struct SDL_RWops
     Uint32 type;
     union
     {
-#ifdef __WINDOWS__
+#ifdef __WIN32__
         struct
         {
             SDL_bool append;

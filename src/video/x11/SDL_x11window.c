@@ -288,7 +288,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 */
 #endif
-#ifdef SDL_VIDEO_OPENGL_GLX
+#if SDL_VIDEO_OPENGL_GLX
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 

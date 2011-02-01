@@ -24,19 +24,27 @@
 #ifndef SDL_POWER_DISABLED
 #ifdef SDL_POWER_WINDOWS
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #include "SDL_power.h"
 
 SDL_bool
 SDL_GetPowerInfo_Windows(SDL_PowerState * state, int *seconds, int *percent)
 {
+#ifdef _WIN32_WCE
+    SYSTEM_POWER_STATUS_EX status;
+#else
     SYSTEM_POWER_STATUS status;
+#endif
     SDL_bool need_details = SDL_FALSE;
 
     /* This API should exist back to Win95 and Windows CE. */
-    if (!GetSystemPowerStatus(&status)) {
+#ifdef _WIN32_WCE
+    if (!GetSystemPowerStatusEx(&status, FALSE))
+#else
+    if (!GetSystemPowerStatus(&status))
+#endif
+    {
         /* !!! FIXME: push GetLastError() into SDL_GetError() */
         *state = SDL_POWERSTATE_UNKNOWN;
     } else if (status.BatteryFlag == 0xFF) {    /* unknown state */

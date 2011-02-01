@@ -23,8 +23,7 @@
 
 /* Semaphore functions using the Win32 API */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 
 #include "SDL_thread.h"
 #if defined(_WIN32_WCE) && (_WIN32_WCE < 300)
@@ -39,7 +38,7 @@ struct SDL_semaphore
 #else
     HANDLE id;
 #endif
-    LONG volatile count;
+    LONG count;
 };
 
 

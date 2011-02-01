@@ -27,14 +27,14 @@
 
 /*
 	This file is used by the keyboard code in SDL_uikitview.m to convert between characters
-	passed in from the iPhone's virtual keyboard, and tuples of SDL_scancodes and SDL_keymods.
+	passed in from the iPhone's virtual keyboard, and tuples of SDL_ScanCodes and SDL_keymods.
 	For example unicharToUIKeyInfoTable['a'] would give you the scan code and keymod for lower
 	case a.
 */
 
 typedef struct
 {
-    SDL_scancode code;
+    SDL_ScanCode code;
     Uint16 mod;
 } UIKitKeyInfo;
 

@@ -301,6 +301,7 @@ if test x$enable_gcc_atomics = xyes; then
     int a;
     void *x, *y, *z;
     __sync_lock_test_and_set(&a, 4);
+    __sync_lock_test_and_set(&x, y);
     __sync_fetch_and_add(&a, 1);
     __sync_bool_compare_and_swap(&a, 5, 10);
     __sync_bool_compare_and_swap(&x, y, z);
@@ -317,6 +318,7 @@ if test x$enable_gcc_atomics = xyes; then
         ],[
         int a;
         __sync_lock_test_and_set(&a, 1);
+        __sync_lock_release(&a);
         ],[
         have_gcc_sync_lock_test_and_set=yes
         ])
@@ -2446,6 +2448,10 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckWINDOWS
         CheckWINDOWSGL
         CheckDIRECTX
+
+        # Set up the core platform files
+        SOURCES="$SOURCES $srcdir/src/core/windows/*.c"
+
         # Set up files for the video library
         if test x$enable_video = xyes; then
             AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS)
@@ -2662,32 +2668,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio -Wl,-framework,AudioToolbox -Wl,-framework,AudioUnit"
         fi
         ;;
-    *-riscos)
-        ARCH=riscos
-        CheckOSS
-        CheckPTHREAD
-        # Set up files for the video library
-        if test x$enable_video = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/video/riscos/*.c"
-            SOURCES="$SOURCES $srcdir/src/video/riscos/*.S"
-            have_video=yes
-        fi
-        # Set up files for the joystick library
-        if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/joystick/riscos/*.c"
-            have_joystick=yes
-        fi
-        # Set up files for the timer library
-        if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_RISCOS)
-            SOURCES="$SOURCES $srcdir/src/timer/riscos/*.c"
-            have_timers=yes
-        fi
-        # The RISC OS platform requires special setup.
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ljpeg -ltiff -lpng -lz"
-        ;;
     *)
         AC_MSG_ERROR([
 *** Unsupported host:  Please add to configure.in
@@ -2732,10 +2712,10 @@ if test x$SDLMAIN_SOURCES = x; then
 fi
 
 OBJECTS=`echo $SOURCES`
-DEPENDS=`echo $SOURCES`
+DEPENDS=`echo $SOURCES | tr ' ' '\n'`
 for EXT in asm cc m c S; do
     OBJECTS=`echo "$OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.'$EXT',$(objects)/\1.lo,g'`
-    DEPENDS=`echo "$DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.$EXT,\\\\
+    DEPENDS=`echo "$DEPENDS" | sed "s,^\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.$EXT\\$,\\\\
 \\$(objects)/\\2.lo: \\1/\\2.$EXT\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 done

@@ -25,8 +25,7 @@
 
 /* Win32 MultiMedia Joystick driver, contributed by Andrei de A. Formiga */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include "../../core/windows/SDL_windows.h"
 #include <mmsystem.h>
 #include <regstr.h>
 

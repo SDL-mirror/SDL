@@ -39,10 +39,25 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/* This is a guess for the cacheline size used for padding.
+ * Most x86 processors have a 64 byte cache line.
+ * The 64-bit PowerPC processors have a 128 byte cache line.
+ * We'll use the larger value to be generally safe.
+ */
+#define SDL_CACHELINE_SIZE  128
+
 /**
  *  This function returns the number of CPU cores available.
  */
 extern DECLSPEC int SDLCALL SDL_GetCPUCount(void);
+
+/**
+ *  This function returns the L1 cache line size of the CPU
+ *
+ *  This is useful for determining multi-threaded structure padding
+ *  or SIMD prefetch sizes.
+ */
+extern DECLSPEC int SDLCALL SDL_GetCPUCacheLineSize(void);
 
 /**
  *  This function returns true if the CPU has the RDTSC instruction.

@@ -148,13 +148,23 @@
 #define SDL_VIDEO_DRIVER_X11_XV 1
 #define SDL_VIDEO_DRIVER_X11_XSHAPE 1
 
+#ifndef SDL_VIDEO_RENDER_OGL
 #define SDL_VIDEO_RENDER_OGL	1
+#endif
+#ifndef SDL_VIDEO_RENDER_X11
 #define SDL_VIDEO_RENDER_X11	1
+#endif
 
 /* Enable OpenGL support */
+#ifndef SDL_VIDEO_OPENGL
 #define SDL_VIDEO_OPENGL	1
+#endif
+#ifndef SDL_VIDEO_OPENGL_CGL
 #define SDL_VIDEO_OPENGL_CGL	1
+#endif
+#ifndef SDL_VIDEO_OPENGL_GLX
 #define SDL_VIDEO_OPENGL_GLX	1
+#endif
 
 /* Enable system power support */
 #define SDL_POWER_MACOSX 1

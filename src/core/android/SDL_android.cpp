@@ -24,10 +24,10 @@
 #include "SDL_android.h"
 
 extern "C" {
-#include "events/SDL_events_c.h"
-#include "video/android/SDL_androidkeyboard.h"
-#include "video/android/SDL_androidtouch.h"
-#include "video/android/SDL_androidvideo.h"
+#include "../../events/SDL_events_c.h"
+#include "../../video/android/SDL_androidkeyboard.h"
+#include "../../video/android/SDL_androidtouch.h"
+#include "../../video/android/SDL_androidvideo.h"
 
 /* Impelemented in audio/android/SDL_androidaudio.c */
 extern void Android_RunAudioThread();

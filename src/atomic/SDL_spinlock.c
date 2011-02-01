@@ -25,8 +25,8 @@
 #include "SDL_timer.h"
 
 /* Don't do the check for Visual Studio 2005, it's safe here */
-#if defined(_MSC_VER)
-#include <intrin.h>
+#ifdef __WIN32__
+#include "../core/windows/SDL_windows.h"
 #endif
 
 /* This function is where all the magic happens... */
@@ -35,12 +35,12 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
 #if defined(_MSC_VER)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
-    return (_InterlockedExchange((long*)lock, 1) == 0);
+    return (InterlockedExchange((long*)lock, 1) == 0);
 
 #elif defined(__MACOSX__)
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
-#elif defined(HAVE_GCC_ATOMICS) || defined(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+#elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
 #elif defined(__GNUC__) && defined(__arm__) && defined(__ARM_ARCH_5__)
@@ -75,8 +75,16 @@ SDL_AtomicLock(SDL_SpinLock *lock)
 void
 SDL_AtomicUnlock(SDL_SpinLock *lock)
 {
-    /* Assuming atomic assignment operation and full memory barrier in lock */
+#if defined(_MSC_VER)
+    _ReadWriteBarrier();
     *lock = 0;
+
+#elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
+    __sync_lock_release(lock);
+
+#else
+    *lock = 0;
+#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

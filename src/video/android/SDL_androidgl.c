@@ -26,7 +26,7 @@
 #include "SDL_video.h"
 
 #include "SDL_androidvideo.h"
-#include "../../SDL_android.h"
+#include "../../core/android/SDL_android.h"
 
 #include <android/log.h>
 

@@ -19,14 +19,14 @@
 #define PRIu32 "u"
 #endif
 #ifndef PRIs64
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #define PRIs64 "I64"
 #else
 #define PRIs64 "lld"
 #endif
 #endif
 #ifndef PRIu64
-#ifdef __WINDOWS__
+#ifdef __WIN32__
 #define PRIu64 "I64u"
 #else
 #define PRIu64 "llu"

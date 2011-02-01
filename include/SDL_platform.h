@@ -125,8 +125,8 @@
 #define __SOLARIS__	1
 #endif
 #if defined(WIN32) || defined(_WIN32)
-#undef __WINDOWS__
-#define __WINDOWS__	1
+#undef __WIN32__
+#define __WIN32__	1
 #endif
 
 #if defined(__NDS__)

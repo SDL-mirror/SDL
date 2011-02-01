@@ -397,15 +397,16 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
                     float xin, float yin, float pressurein)
 {
     int index = SDL_GetTouchIndexId(id);
-    SDL_Touch *touch = SDL_GetTouch(id);
-    SDL_Finger *finger = SDL_GetFinger(touch,fingerid);
+    SDL_Touch *touch;
+    SDL_Finger *finger;
     int posted;
     Sint16 xrel, yrel;
     float x_max = 0, y_max = 0;
-        Uint16 x;
-        Uint16 y;
-        Uint16 pressure;
+    Uint16 x;
+    Uint16 y;
+    Uint16 pressure;
     
+    touch = SDL_GetTouch(id);
     if (!touch) {
       return SDL_TouchNotFoundError(id);
     }
@@ -418,6 +419,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
         return 0;
     }
     
+    finger = SDL_GetFinger(touch,fingerid);
     if(finger == NULL || !finger->down) {
         return SDL_SendFingerDown(id,fingerid,SDL_TRUE,xin,yin,pressurein);        
     } else {
@@ -496,14 +498,16 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
         return posted;
     }
 }
+
 int
 SDL_SendTouchButton(SDL_TouchID id, Uint8 state, Uint8 button)
 {
-    SDL_Touch *touch = SDL_GetTouch(id);
+    SDL_Touch *touch;
     int posted;
     Uint32 type;
 
     
+    touch = SDL_GetTouch(id);
     if (!touch) {
       return SDL_TouchNotFoundError(id);
     }

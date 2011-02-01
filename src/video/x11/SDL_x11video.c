@@ -209,7 +209,7 @@ X11_CreateDevice(int devindex)
     device->shape_driver.CreateShaper = X11_CreateShaper;
     device->shape_driver.SetWindowShape = X11_SetWindowShape;
     device->shape_driver.ResizeWindowShape = X11_ResizeWindowShape;
-#ifdef SDL_VIDEO_OPENGL_GLX
+#if SDL_VIDEO_OPENGL_GLX
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;
     device->GL_UnloadLibrary = X11_GL_UnloadLibrary;

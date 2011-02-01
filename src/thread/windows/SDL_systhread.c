@@ -23,12 +23,10 @@
 
 /* Win32 thread management routines for SDL */
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
+#include "SDL_systhread_c.h"
 
 #ifndef SDL_PASSED_BEGINTHREAD_ENDTHREAD
 #ifndef _WIN32_WCE

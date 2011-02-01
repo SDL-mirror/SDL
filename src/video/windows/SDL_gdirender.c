@@ -167,8 +167,10 @@ GDI_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
     GDI_RenderData *data;
+#ifndef NO_GETDIBBITS
     int bmi_size;
     HBITMAP hbm;
+#endif
     int i, n;
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));

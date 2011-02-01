@@ -21,6 +21,10 @@
 */
 #include "SDL_config.h"
 
+#ifdef _WIN32_WCE
+#define SDL_DISABLE_WINDOWS_IME
+#endif
+
 #include "SDL_windowsvideo.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -29,10 +33,12 @@
 #include <imm.h>
 #include <oleauto.h>
 
+#ifndef SDL_DISABLE_WINDOWS_IME
 static void IME_Init(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Enable(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Disable(SDL_VideoData *videodata, HWND hwnd);
 static void IME_Quit(SDL_VideoData *videodata);
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 
 #ifndef MAPVK_VK_TO_VSC
 #define MAPVK_VK_TO_VSC     0
@@ -145,7 +151,7 @@ void
 WIN_UpdateKeymap()
 {
     int i;
-    SDL_scancode scancode;
+    SDL_ScanCode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     SDL_GetDefaultKeymap(keymap);
@@ -172,12 +178,15 @@ WIN_UpdateKeymap()
 void
 WIN_QuitKeyboard(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     IME_Quit((SDL_VideoData *)_this->driverdata);
+#endif
 }
 
 void
 WIN_StartTextInput(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     SDL_Window *window = SDL_GetKeyboardFocus();
     if (window) {
         HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
@@ -186,11 +195,13 @@ WIN_StartTextInput(_THIS)
         IME_Init(videodata, hwnd);
         IME_Enable(videodata, hwnd);
     }
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 }
 
 void
 WIN_StopTextInput(_THIS)
 {
+#ifndef SDL_DISABLE_WINDOWS_IME
     SDL_Window *window = SDL_GetKeyboardFocus();
     if (window) {
         HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
@@ -198,6 +209,7 @@ WIN_StopTextInput(_THIS)
         IME_Init(videodata, hwnd);
         IME_Disable(videodata, hwnd);
     }
+#endif /* !SDL_DISABLE_WINDOWS_IME */
 }
 
 void
@@ -206,6 +218,21 @@ WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
     SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
     videodata->ime_rect = *rect;
 }
+
+#ifdef SDL_DISABLE_WINDOWS_IME
+
+
+SDL_bool
+IME_HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM *lParam, SDL_VideoData *videodata)
+{
+    return SDL_FALSE;
+}
+
+void IME_Present(SDL_VideoData *videodata)
+{
+}
+
+#else
 
 #ifdef __GNUC__
 #undef DEFINE_GUID
@@ -285,15 +312,15 @@ IME_Init(SDL_VideoData *videodata, HWND hwnd)
         CoCreateInstance(&CLSID_TF_ThreadMgr, NULL, CLSCTX_INPROC_SERVER, &IID_ITfThreadMgr, (LPVOID *)&videodata->ime_threadmgr);
     }
     videodata->ime_initialized = SDL_TRUE;
-    videodata->ime_himm32 = LoadLibraryA("imm32.dll");
+    videodata->ime_himm32 = SDL_LoadObject("imm32.dll");
     if (!videodata->ime_himm32) {
         videodata->ime_available = SDL_FALSE;
         return;
     }
-    videodata->ImmLockIMC = (LPINPUTCONTEXT2 (WINAPI *)(HIMC))GetProcAddress(videodata->ime_himm32, "ImmLockIMC");
-    videodata->ImmUnlockIMC = (BOOL (WINAPI *)(HIMC))GetProcAddress(videodata->ime_himm32, "ImmUnlockIMC");
-    videodata->ImmLockIMCC = (LPVOID (WINAPI *)(HIMCC))GetProcAddress(videodata->ime_himm32, "ImmLockIMCC");
-    videodata->ImmUnlockIMCC = (BOOL (WINAPI *)(HIMCC))GetProcAddress(videodata->ime_himm32, "ImmUnlockIMCC");
+    videodata->ImmLockIMC = (LPINPUTCONTEXT2 (WINAPI *)(HIMC))SDL_LoadFunction(videodata->ime_himm32, "ImmLockIMC");
+    videodata->ImmUnlockIMC = (BOOL (WINAPI *)(HIMC))SDL_LoadFunction(videodata->ime_himm32, "ImmUnlockIMC");
+    videodata->ImmLockIMCC = (LPVOID (WINAPI *)(HIMCC))SDL_LoadFunction(videodata->ime_himm32, "ImmLockIMCC");
+    videodata->ImmUnlockIMCC = (BOOL (WINAPI *)(HIMCC))SDL_LoadFunction(videodata->ime_himm32, "ImmUnlockIMCC");
 
     IME_SetWindow(videodata, hwnd);
     videodata->ime_himc = ImmGetContext(hwnd);
@@ -356,7 +383,7 @@ IME_Quit(SDL_VideoData *videodata)
     videodata->ime_hwnd_main = 0;
     videodata->ime_himc = 0;
     if (videodata->ime_himm32) {
-        FreeLibrary(videodata->ime_himm32);
+        SDL_UnloadObject(videodata->ime_himm32);
         videodata->ime_himm32 = 0;
     }
     if (videodata->ime_threadmgr) {
@@ -507,7 +534,7 @@ IME_GetId(SDL_VideoData *videodata, UINT uIndex)
         return dwRet[uIndex];
 
     hklprev = hkl;
-    dwLang = ((DWORD)hkl & 0xffff);
+    dwLang = ((DWORD_PTR)hkl & 0xffff);
     if (videodata->ime_uiless && LANG() == LANG_CHT) {
         dwRet[0] = IMEID_CHT_VER_VISTA;
         dwRet[1] = 0;
@@ -579,7 +606,7 @@ static void
 IME_SetupAPI(SDL_VideoData *videodata)
 {
     char ime_file[MAX_PATH + 1];
-    HMODULE hime = 0;
+    void* hime = 0;
     HKL hkl = 0;
     videodata->GetReadingString = 0;
     videodata->ShowReadingWindow = 0;
@@ -590,14 +617,14 @@ IME_SetupAPI(SDL_VideoData *videodata)
     if (ImmGetIMEFileNameA(hkl, ime_file, sizeof(ime_file) - 1) <= 0)
         return;
 
-    hime = LoadLibraryA(ime_file);
+    hime = SDL_LoadObject(ime_file);
     if (!hime)
         return;
 
     videodata->GetReadingString = (UINT (WINAPI *)(HIMC, UINT, LPWSTR, PINT, BOOL*, PUINT))
-        GetProcAddress(hime, "GetReadingString");
+        SDL_LoadFunction(hime, "GetReadingString");
     videodata->ShowReadingWindow = (BOOL (WINAPI *)(HIMC, BOOL))
-        GetProcAddress(hime, "ShowReadingWindow");
+        SDL_LoadFunction(hime, "ShowReadingWindow");
 
     if (videodata->ShowReadingWindow) {
         HIMC himc = ImmGetContext(videodata->ime_hwnd_current);
@@ -754,7 +781,7 @@ IME_GetCandidateList(HIMC himc, SDL_VideoData *videodata)
                     UINT cchars = 0;
 
                     for (; i < videodata->ime_candcount; ++i) {
-                        UINT len = SDL_wcslen((LPWSTR)((DWORD)cand_list + cand_list->dwOffset[i])) + 1;
+                        UINT len = SDL_wcslen((LPWSTR)((DWORD_PTR)cand_list + cand_list->dwOffset[i])) + 1;
                         if (len + cchars > maxcandchar) {
                             if (i > cand_list->dwSelection)
                                 break;
@@ -774,7 +801,7 @@ IME_GetCandidateList(HIMC himc, SDL_VideoData *videodata)
                 }
                 SDL_memset(&videodata->ime_candidates, 0, sizeof(videodata->ime_candidates));
                 for (i = page_start, j = 0; (DWORD)i < cand_list->dwCount && j < (int)videodata->ime_candpgsize; i++, j++) {
-                    LPCWSTR candidate = (LPCWSTR)((DWORD)cand_list + cand_list->dwOffset[i]);
+                    LPCWSTR candidate = (LPCWSTR)((DWORD_PTR)cand_list + cand_list->dwOffset[i]);
                     IME_AddCandidate(videodata, j, candidate);
                 }
                 if (PRIMLANG() == LANG_KOREAN || (PRIMLANG() == LANG_CHT && !IME_GetId(videodata, 0)))
@@ -1551,5 +1578,7 @@ void IME_Present(SDL_VideoData *videodata)
 
     SDL_RenderCopy(videodata->ime_candtex, NULL, &videodata->ime_candlistrect);
 }
+
+#endif /* SDL_DISABLE_WINDOWS_IME */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -278,8 +278,6 @@ extern DECLSPEC const char *SDLCALL SDL_GetVideoDriver(int index);
  *  \param driver_name Initialize a specific driver by name, or NULL for the 
  *                     default video driver.
  *  
- *  \param flags FIXME: Still needed?
- *  
  *  \return 0 on success, -1 on error
  *  
  *  This function initializes the video subsystem; setting up a connection
@@ -288,8 +286,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetVideoDriver(int index);
  *  
  *  \sa SDL_VideoQuit()
  */
-extern DECLSPEC int SDLCALL SDL_VideoInit(const char *driver_name,
-                                          Uint32 flags);
+extern DECLSPEC int SDLCALL SDL_VideoInit(const char *driver_name);
 
 /**
  *  \brief Shuts down the video subsystem.
