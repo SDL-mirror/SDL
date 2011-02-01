@@ -151,33 +151,12 @@ typedef enum
  */
 typedef enum
 {
-    SDL_RENDERER_SINGLEBUFFER = 0x00000001,     /**< Render directly to the 
-                                                     window, if possible */
-    
-    SDL_RENDERER_PRESENTCOPY = 0x00000002,      /**< Present uses a copy from 
-                                                     back buffer to the front 
-                                                     buffer */
-    
-    SDL_RENDERER_PRESENTFLIP2 = 0x00000004,     /**< Present uses a flip, 
-                                                     swapping back buffer and 
-                                                     front buffer */
-    
-    SDL_RENDERER_PRESENTFLIP3 = 0x00000008,     /**< Present uses a flip, 
-                                                     rotating between two back 
-                                                     buffers and a front buffer
-                                                 */
-    
-    SDL_RENDERER_PRESENTDISCARD = 0x00000010,   /**< Present leaves the contents
-                                                     of the backbuffer undefined
-                                                 */
-    
     SDL_RENDERER_PRESENTVSYNC = 0x00000020,     /**< Present is synchronized 
                                                      with the refresh rate */
     
     SDL_RENDERER_ACCELERATED = 0x00000040       /**< The renderer uses hardware 
                                                      acceleration */
-    
-    } SDL_RendererFlags;
+} SDL_RendererFlags;
 
 /**
  *  \brief Information on the capabilities of a render driver or context.

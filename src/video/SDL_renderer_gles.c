@@ -98,8 +98,7 @@ SDL_RenderDriver GL_ES_RenderDriver = {
     GLES_CreateRenderer,
     {
      "opengl_es",
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
-      SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_RGBA4444,
@@ -241,8 +240,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window;
     renderer->driverdata = data;
 
-    renderer->info.flags =
-        (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED);
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
 #if defined(__QNXNTO__)
 #if _NTO_VERSION<=641

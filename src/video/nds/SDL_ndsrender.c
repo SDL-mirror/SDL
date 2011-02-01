@@ -71,7 +71,7 @@ static void NDS_DestroyRenderer(SDL_Renderer * renderer);
 SDL_RenderDriver NDS_RenderDriver = {
     NDS_CreateRenderer,
     {"nds",                     /* char* name */
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),  /* u32 flags */
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),  /* u32 flags */
      3,                         /* u32 num_texture_formats */
      {
       SDL_PIXELFORMAT_INDEX8,

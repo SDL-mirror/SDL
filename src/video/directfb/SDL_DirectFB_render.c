@@ -87,10 +87,7 @@ SDL_RenderDriver DirectFB_RenderDriver = {
     DirectFB_CreateRenderer,
     {
      "directfb",
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
-      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
-      SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
-      SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      14,
      {
       SDL_PIXELFORMAT_INDEX4LSB,
@@ -256,7 +253,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_VideoDisplay *display = window->display;
     SDL_Renderer *renderer = NULL;
     DirectFB_RenderData *data = NULL;
-    DFBSurfaceCapabilities scaps;
     char *p;
 
     SDL_DFB_CALLOC(renderer, 1, sizeof(*renderer));
@@ -288,8 +284,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window;      /* SDL window */
     renderer->driverdata = data;
 
-    renderer->info.flags =
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
     data->window = window;
 
@@ -300,15 +295,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     } else
         data->flipflags |= DSFLIP_ONSYNC;
-
-    SDL_DFB_CHECKERR(windata->surface->
-                     GetCapabilities(windata->surface, &scaps));
-    if (scaps & DSCAPS_DOUBLE)
-        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
-    else if (scaps & DSCAPS_TRIPLE)
-        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
-    else
-        renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
 
     data->isyuvdirect = 0;      /* default is off! */
     p = SDL_getenv(DFBENV_USE_YUV_DIRECT);

@@ -59,16 +59,13 @@ SDL_RenderDriver SDL_DUMMY_RenderDriver = {
     SDL_DUMMY_CreateRenderer,
     {
      "dummy",
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
-      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
-      SDL_RENDERER_PRESENTDISCARD),
+     (0),
      }
 };
 
 typedef struct
 {
-    int current_screen;
-    SDL_Surface *screens[3];
+    SDL_Surface *screen;
 } SDL_DUMMY_RenderData;
 
 SDL_Renderer *
@@ -78,7 +75,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     SDL_DUMMY_RenderData *data;
-    int i, n;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
 
@@ -117,27 +113,14 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->driverdata = data;
     Setup_SoftwareRenderer(renderer);
 
-    if (flags & SDL_RENDERER_PRESENTFLIP2) {
-        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
-        n = 2;
-    } else if (flags & SDL_RENDERER_PRESENTFLIP3) {
-        renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
-        n = 3;
-    } else {
-        renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
-        n = 1;
+    data->screen =
+        SDL_CreateRGBSurface(0, window->w, window->h, bpp, Rmask, Gmask,
+                             Bmask, Amask);
+    if (!data->screen) {
+        SDL_DUMMY_DestroyRenderer(renderer);
+        return NULL;
     }
-    for (i = 0; i < n; ++i) {
-        data->screens[i] =
-            SDL_CreateRGBSurface(0, window->w, window->h, bpp, Rmask, Gmask,
-                                 Bmask, Amask);
-        if (!data->screens[i]) {
-            SDL_DUMMY_DestroyRenderer(renderer);
-            return NULL;
-        }
-        SDL_SetSurfacePalette(data->screens[i], display->palette);
-    }
-    data->current_screen = 0;
+    SDL_SetSurfacePalette(data->screen, display->palette);
 
     return renderer;
 }
@@ -148,7 +131,7 @@ SDL_DUMMY_RenderDrawPoints(SDL_Renderer * renderer,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *target = data->screens[data->current_screen];
+    SDL_Surface *target = data->screen;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
@@ -169,7 +152,7 @@ SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *target = data->screens[data->current_screen];
+    SDL_Surface *target = data->screen;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
@@ -190,7 +173,7 @@ SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *target = data->screens[data->current_screen];
+    SDL_Surface *target = data->screen;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
@@ -212,7 +195,7 @@ SDL_DUMMY_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
 {
     SDL_DUMMY_RenderData *data =
         (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *target = data->screens[data->current_screen];
+    SDL_Surface *target = data->screen;
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
@@ -238,7 +221,7 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_VideoDisplay *display = window->display;
 
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        SDL_Surface *target = data->screens[data->current_screen];
+        SDL_Surface *target = data->screen;
         void *pixels =
             (Uint8 *) target->pixels + dstrect->y * target->pitch +
             dstrect->x * target->format->BytesPerPixel;
@@ -248,7 +231,7 @@ SDL_DUMMY_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                    target->pitch);
     } else {
         SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-        SDL_Surface *target = data->screens[data->current_screen];
+        SDL_Surface *target = data->screen;
         SDL_Rect real_srcrect = *srcrect;
         SDL_Rect real_dstrect = *dstrect;
 
@@ -264,7 +247,7 @@ SDL_DUMMY_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
     SDL_VideoDisplay *display = window->display;
-    SDL_Surface *screen = data->screens[data->current_screen];
+    SDL_Surface *screen = data->screen;
     Uint32 screen_format = display->current_mode.format;
     Uint8 *screen_pixels = (Uint8 *) screen->pixels +
                             rect->y * screen->pitch +
@@ -284,7 +267,7 @@ SDL_DUMMY_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
     SDL_VideoDisplay *display = window->display;
-    SDL_Surface *screen = data->screens[data->current_screen];
+    SDL_Surface *screen = data->screen;
     Uint32 screen_format = display->current_mode.format;
     Uint8 *screen_pixels = (Uint8 *) screen->pixels +
                             rect->y * screen->pitch +
@@ -308,14 +291,7 @@ SDL_DUMMY_RenderPresent(SDL_Renderer * renderer)
         char file[128];
         SDL_snprintf(file, sizeof(file), "SDL_window%d-%8.8d.bmp",
                      renderer->window->id, ++frame_number);
-        SDL_SaveBMP(data->screens[data->current_screen], file);
-    }
-
-    /* Update the flipping chain, if any */
-    if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP2) {
-        data->current_screen = (data->current_screen + 1) % 2;
-    } else if (renderer->info.flags & SDL_RENDERER_PRESENTFLIP3) {
-        data->current_screen = (data->current_screen + 1) % 3;
+        SDL_SaveBMP(data->screen, file);
     }
 }
 
@@ -327,10 +303,8 @@ SDL_DUMMY_DestroyRenderer(SDL_Renderer * renderer)
     int i;
 
     if (data) {
-        for (i = 0; i < SDL_arraysize(data->screens); ++i) {
-            if (data->screens[i]) {
-                SDL_FreeSurface(data->screens[i]);
-            }
+        if (data->screen) {
+            SDL_FreeSurface(data->screen);
         }
         SDL_free(data);
     }

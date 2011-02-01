@@ -667,9 +667,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a renderer for the window */
-    if (SDL_CreateRenderer
-        (SDL_VideoWindow, -1,
-         SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD) < 0) {
+    if (SDL_CreateRenderer(SDL_VideoWindow, -1, 0) < 0) {
         return NULL;
     }
     SDL_GetRendererInfo(&SDL_VideoRendererInfo);
@@ -861,6 +859,7 @@ void
 SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
 {
     int i;
+    SDL_Rect rect;
 
     if (screen == SDL_ShadowSurface) {
         for (i = 0; i < numrects; ++i) {
@@ -887,18 +886,11 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
                 SDL_UpdateTexture(SDL_VideoTexture, rect, pixels, pitch);
             }
         }
-        if (SDL_VideoRendererInfo.flags & SDL_RENDERER_PRESENTCOPY) {
-            for (i = 0; i < numrects; ++i) {
-                SDL_RenderCopy(SDL_VideoTexture, &rects[i], &rects[i]);
-            }
-        } else {
-            SDL_Rect rect;
-            rect.x = 0;
-            rect.y = 0;
-            rect.w = screen->w;
-            rect.h = screen->h;
-            SDL_RenderCopy(SDL_VideoTexture, &rect, &rect);
-        }
+        rect.x = 0;
+        rect.y = 0;
+        rect.w = screen->w;
+        rect.h = screen->h;
+        SDL_RenderCopy(SDL_VideoTexture, &rect, &rect);
         SDL_RenderPresent();
     }
 }

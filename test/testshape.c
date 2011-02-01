@@ -102,7 +102,7 @@ int main(int argc,char** argv) {
 		printf("Could not create shaped window for SDL_Shape.\n");
 		exit(-4);
 	}
-	if(SDL_CreateRenderer(window,-1,SDL_RENDERER_PRESENTFLIP2) == -1) {
+	if(SDL_CreateRenderer(window,-1,0) == -1) {
 		SDL_DestroyWindow(window);
 		for(i=0;i<num_pictures;i++)
 			SDL_FreeSurface(pictures[i].surface);

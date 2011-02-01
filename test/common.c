@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab] [--double] [--triple]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -211,14 +211,6 @@ CommonArg(CommonState * state, int index)
         state->render_flags |= SDL_RENDERER_PRESENTVSYNC;
         return 1;
     }
-    if (SDL_strcasecmp(argv[index], "--double") == 0) {
-        state->render_flags |= SDL_RENDERER_PRESENTFLIP2;
-        return 1;
-    }
-    if (SDL_strcasecmp(argv[index], "--triple") == 0) {
-        state->render_flags |= SDL_RENDERER_PRESENTFLIP3;
-        return 1;
-    }
     if (SDL_strcasecmp(argv[index], "--noframe") == 0) {
         state->window_flags |= SDL_WINDOW_BORDERLESS;
         return 1;
@@ -329,21 +321,6 @@ static void
 PrintRendererFlag(Uint32 flag)
 {
     switch (flag) {
-    case SDL_RENDERER_SINGLEBUFFER:
-        fprintf(stderr, "SingleBuffer");
-        break;
-    case SDL_RENDERER_PRESENTCOPY:
-        fprintf(stderr, "PresentCopy");
-        break;
-    case SDL_RENDERER_PRESENTFLIP2:
-        fprintf(stderr, "PresentFlip2");
-        break;
-    case SDL_RENDERER_PRESENTFLIP3:
-        fprintf(stderr, "PresentFlip3");
-        break;
-    case SDL_RENDERER_PRESENTDISCARD:
-        fprintf(stderr, "PresentDiscard");
-        break;
     case SDL_RENDERER_PRESENTVSYNC:
         fprintf(stderr, "PresentVSync");
         break;

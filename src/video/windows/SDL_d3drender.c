@@ -134,10 +134,7 @@ SDL_RenderDriver D3D_RenderDriver = {
     D3D_CreateRenderer,
     {
      "d3d",
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTCOPY |
-      SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
-      SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC |
-      SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      0,
      {0},
      0,
@@ -472,19 +469,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     } else {
         pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
-    if (flags & SDL_RENDERER_PRESENTFLIP2) {
-        pparams.BackBufferCount = 2;
-        pparams.SwapEffect = D3DSWAPEFFECT_FLIP;
-    } else if (flags & SDL_RENDERER_PRESENTFLIP3) {
-        pparams.BackBufferCount = 3;
-        pparams.SwapEffect = D3DSWAPEFFECT_FLIP;
-    } else if (flags & SDL_RENDERER_PRESENTCOPY) {
-        pparams.BackBufferCount = 1;
-        pparams.SwapEffect = D3DSWAPEFFECT_COPY;
-    } else {
-        pparams.BackBufferCount = 1;
-        pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-    }
+    pparams.BackBufferCount = 1;
+    pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
+
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
@@ -534,24 +521,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
     IDirect3DSwapChain9_Release(chain);
-    switch (pparams.SwapEffect) {
-    case D3DSWAPEFFECT_COPY:
-        renderer->info.flags |= SDL_RENDERER_PRESENTCOPY;
-        break;
-    case D3DSWAPEFFECT_FLIP:
-        switch (pparams.BackBufferCount) {
-        case 2:
-            renderer->info.flags |= SDL_RENDERER_PRESENTFLIP2;
-            break;
-        case 3:
-            renderer->info.flags |= SDL_RENDERER_PRESENTFLIP3;
-            break;
-        }
-        break;
-    case D3DSWAPEFFECT_DISCARD:
-        renderer->info.flags |= SDL_RENDERER_PRESENTDISCARD;
-        break;
-    }
     if (pparams.PresentationInterval == D3DPRESENT_INTERVAL_ONE) {
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }

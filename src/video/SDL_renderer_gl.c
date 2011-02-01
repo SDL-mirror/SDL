@@ -112,8 +112,7 @@ SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
     {
      "opengl",
-     (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD |
-      SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      15,
      {
       SDL_PIXELFORMAT_INDEX1LSB,
@@ -252,7 +251,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GL_RenderData *data;
     GLint value;
-    int doublebuffer;
 
     /* Render directly to the window, unless we're compositing */
 #ifndef __MACOSX__
@@ -304,8 +302,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window;
     renderer->driverdata = data;
 
-    renderer->info.flags =
-        (SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED);
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
     if (GL_LoadFunctions(data) < 0) {
         GL_DestroyRenderer(renderer);
@@ -335,12 +332,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     if (SDL_GL_GetSwapInterval() > 0) {
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
-    }
-
-    if (SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doublebuffer) == 0) {
-        if (!doublebuffer) {
-            renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
-        }
     }
 
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
