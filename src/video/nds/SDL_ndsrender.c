@@ -54,8 +54,6 @@ static int NDS_SetTextureColorMod(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
 static int NDS_SetTextureAlphaMod(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
-static int NDS_SetTextureBlendMode(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
 static int NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -79,7 +77,6 @@ SDL_RenderDriver NDS_RenderDriver = {
     {"nds",                     /* char* name */
      (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),  /* u32 flags */
      (SDL_TEXTUREMODULATE_NONE),        /* u32 mod_modes */
-     (SDL_BLENDMODE_MASK),      /* u32 blend_modes */
      3,                         /* u32 num_texture_formats */
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -180,14 +177,12 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = NDS_GetTexturePalette;
     renderer->SetTextureColorMod = NDS_SetTextureColorMod;
     renderer->SetTextureAlphaMod = NDS_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = NDS_SetTextureBlendMode;
     renderer->UpdateTexture = NDS_UpdateTexture;
     renderer->LockTexture = NDS_LockTexture;
     renderer->UnlockTexture = NDS_UnlockTexture;
     renderer->DestroyTexture = NDS_DestroyTexture;
 
     renderer->info.mod_modes = NDS_RenderDriver.info.mod_modes;
-    renderer->info.blend_modes = NDS_RenderDriver.info.blend_modes;
     renderer->info.num_texture_formats =
         NDS_RenderDriver.info.num_texture_formats;
     SDL_memcpy(renderer->info.texture_formats,
@@ -571,13 +566,6 @@ NDS_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 
 static int
 NDS_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    /* stub! */
-    return 0;
-}
-
-static int
-NDS_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     /* stub! */
     return 0;

@@ -480,13 +480,6 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
             surface_compare( testsur, &img_blendNone, 0 )==0 ))
       return;
 
-   /* Test Mask. */
-   if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_MASK ))
-      return;
-   if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_MASK).",
-            surface_compare( testsur, &img_blendMask, 0 )==0 ))
-      return;
-
    /* Test Blend. */
    if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_BLEND ))
       return;
@@ -499,13 +492,6 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
       return;
    if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_ADD).",
             surface_compare( testsur, &img_blendAdd, 0 )==0 ))
-      return;
-
-   /* Test Mod. */
-   if (surface_testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD ))
-      return;
-   if (SDL_ATassert( "Blitting blending output not the same (using SDL_BLENDMODE_MOD).",
-            surface_compare( testsur, &img_blendMod, 0 )==0 ))
       return;
 
    /* Clear surface. */
@@ -530,10 +516,10 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
 
          /* Crazy blending mode magic. */
          mode = (i/4*j/4) % 4;
-         if (mode==0) mode = SDL_BLENDMODE_MASK;
+         if (mode==0) mode = SDL_BLENDMODE_NONE;
          else if (mode==1) mode = SDL_BLENDMODE_BLEND;
          else if (mode==2) mode = SDL_BLENDMODE_ADD;
-         else if (mode==3) mode = SDL_BLENDMODE_MOD;
+         else if (mode==3) mode = SDL_BLENDMODE_NONE;
          ret = SDL_SetSurfaceBlendMode( face, mode );
          if (SDL_ATassert( "SDL_SetSurfaceBlendMode", ret == 0))
             return;

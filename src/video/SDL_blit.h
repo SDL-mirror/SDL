@@ -52,10 +52,8 @@
 /* SDL blit copy flags */
 #define SDL_COPY_MODULATE_COLOR     0x00000001
 #define SDL_COPY_MODULATE_ALPHA     0x00000002
-#define SDL_COPY_MASK               0x00000010
-#define SDL_COPY_BLEND              0x00000020
-#define SDL_COPY_ADD                0x00000040
-#define SDL_COPY_MOD                0x00000080
+#define SDL_COPY_BLEND              0x00000010
+#define SDL_COPY_ADD                0x00000020
 #define SDL_COPY_COLORKEY           0x00000100
 #define SDL_COPY_NEAREST            0x00000200
 #define SDL_COPY_RLE_DESIRED        0x00001000

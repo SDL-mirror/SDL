@@ -231,17 +231,11 @@ main(int argc, char *argv[])
                     if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
                         blendMode = SDL_BLENDMODE_NONE;
                         consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "mask") == 0) {
-                        blendMode = SDL_BLENDMODE_MASK;
-                        consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "blend") == 0) {
                         blendMode = SDL_BLENDMODE_BLEND;
                         consumed = 2;
                     } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
                         blendMode = SDL_BLENDMODE_ADD;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
-                        blendMode = SDL_BLENDMODE_MOD;
                         consumed = 2;
                     }
                 }
@@ -258,7 +252,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
+                    "Usage: %s %s [--blend none|blend|add] [--cyclecolor] [--cyclealpha]\n",
                     argv[0], CommonUsage(state));
             return 1;
         }

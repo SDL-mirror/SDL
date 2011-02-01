@@ -55,8 +55,6 @@ static int DirectFB_SetTextureAlphaMod(SDL_Renderer * renderer,
                                        SDL_Texture * texture);
 static int DirectFB_SetTextureColorMod(SDL_Renderer * renderer,
                                        SDL_Texture * texture);
-static int DirectFB_SetTextureBlendMode(SDL_Renderer * renderer,
-                                        SDL_Texture * texture);
 static int DirectFB_UpdateTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture,
                                   const SDL_Rect * rect,
@@ -100,8 +98,6 @@ SDL_RenderDriver DirectFB_RenderDriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND |
-      SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      14,
      {
       SDL_PIXELFORMAT_INDEX4LSB,
@@ -194,12 +190,6 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
             SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_ONE));
             SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_ZERO));
             break;
-        case SDL_BLENDMODE_MASK:
-            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
-            data->drawFlags = DSDRAW_BLEND;
-            SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_SRCALPHA));
-            SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_INVSRCALPHA));
-            break;
         case SDL_BLENDMODE_BLEND:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
@@ -217,12 +207,6 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
             else
                 SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_ONE));
             SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_ONE));
-            break;
-        case SDL_BLENDMODE_MOD:
-            data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
-            data->drawFlags = DSDRAW_BLEND;
-            SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_DESTCOLOR));
-            SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_ZERO));
             break;
         }
         data->lastBlendMode = blendMode;
@@ -293,7 +277,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = DirectFB_GetTexturePalette;
     renderer->SetTextureAlphaMod = DirectFB_SetTextureAlphaMod;
     renderer->SetTextureColorMod = DirectFB_SetTextureColorMod;
-    renderer->SetTextureBlendMode = DirectFB_SetTextureBlendMode;
     renderer->UpdateTexture = DirectFB_UpdateTexture;
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
@@ -665,40 +648,6 @@ DirectFB_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->blendMode) {
-    case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
-    case SDL_BLENDMODE_BLEND:
-    case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
-DirectFB_SetDrawBlendMode(SDL_Renderer * renderer)
-{
-    switch (renderer->blendMode) {
-    case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
-    case SDL_BLENDMODE_BLEND:
-    case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
-        return 0;
-    default:
-        SDL_Unsupported();
-        renderer->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
 DirectFB_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
 #if (DFB_VERSION_ATLEAST(1,2,0))
@@ -852,11 +801,9 @@ PrepareDraw(SDL_Renderer * renderer)
 
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
         break;
     case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
         r = ((int) r * (int) a) / 255;
         g = ((int) g * (int) a) / 255;
         b = ((int) b * (int) a) / 255;

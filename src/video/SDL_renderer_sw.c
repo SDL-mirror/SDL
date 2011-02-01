@@ -49,8 +49,6 @@ static int SW_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int SW_SetTextureAlphaMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
-static int SW_SetTextureBlendMode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -86,8 +84,6 @@ SDL_RenderDriver SW_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_PRESENTVSYNC),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      14,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -176,14 +172,12 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
     renderer->GetTexturePalette = SW_GetTexturePalette;
     renderer->SetTextureColorMod = SW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
     renderer->DestroyTexture = SW_DestroyTexture;
 
     renderer->info.mod_modes = SW_RenderDriver.info.mod_modes;
-    renderer->info.blend_modes = SW_RenderDriver.info.blend_modes;
     renderer->info.num_texture_formats =
         SW_RenderDriver.info.num_texture_formats;
     SDL_memcpy(renderer->info.texture_formats,
@@ -564,8 +558,7 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     data->surface.clip_rect.h = data->surface.h = rect.h;
 
     /* Draw the points! */
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(data->surface.format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
@@ -629,8 +622,7 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     data->surface.clip_rect.h = data->surface.h = rect.h;
 
     /* Draw the points! */
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(data->surface.format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
@@ -678,8 +670,7 @@ SW_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     clip.w = texture->w;
     clip.h = texture->h;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         color = SDL_MapRGBA(data->surface.format,
                             renderer->r, renderer->g, renderer->b,
                             renderer->a);
@@ -705,8 +696,7 @@ SW_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         data->surface.clip_rect.w = data->surface.w = rect.w;
         data->surface.clip_rect.h = data->surface.h = rect.h;
 
-        if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-            renderer->blendMode == SDL_BLENDMODE_MASK) {
+        if (renderer->blendMode == SDL_BLENDMODE_NONE) {
             status = SDL_DrawRect(&data->surface, NULL, color);
         } else {
             status = SDL_BlendRect(&data->surface, NULL,
@@ -736,8 +726,7 @@ SW_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     clip.w = texture->w;
     clip.h = texture->h;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         color = SDL_MapRGBA(data->surface.format,
                             renderer->r, renderer->g, renderer->b,
                             renderer->a);
@@ -762,8 +751,7 @@ SW_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         data->surface.clip_rect.w = data->surface.w = rect.w;
         data->surface.clip_rect.h = data->surface.h = rect.h;
 
-        if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-            renderer->blendMode == SDL_BLENDMODE_MASK) {
+        if (renderer->blendMode == SDL_BLENDMODE_NONE) {
             status = SDL_FillRect(&data->surface, NULL, color);
         } else {
             status = SDL_BlendFillRect(&data->surface, NULL,

@@ -58,8 +58,6 @@ static int photon_settexturecolormod(SDL_Renderer * renderer,
                                      SDL_Texture * texture);
 static int photon_settexturealphamod(SDL_Renderer * renderer,
                                      SDL_Texture * texture);
-static int photon_settextureblendmode(SDL_Renderer * renderer,
-                                      SDL_Texture * texture);
 static int photon_settexturescalemode(SDL_Renderer * renderer,
                                       SDL_Texture * texture);
 static int photon_updatetexture(SDL_Renderer * renderer,
@@ -74,7 +72,6 @@ static void photon_dirtytexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture, int numrects,
                                 const SDL_Rect * rects);
 static int photon_setdrawcolor(SDL_Renderer * renderer);
-static int photon_setdrawblendmode(SDL_Renderer * renderer);
 static int photon_renderpoint(SDL_Renderer * renderer, int x, int y);
 static int photon_renderline(SDL_Renderer * renderer, int x1, int y1, int x2,
                              int y2);
@@ -102,8 +99,6 @@ SDL_RenderDriver photon_renderdriver = {
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND |
-      SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      10,
      {SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
@@ -151,13 +146,11 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = photon_gettexturepalette;
     renderer->SetTextureAlphaMod = photon_settexturealphamod;
     renderer->SetTextureColorMod = photon_settexturecolormod;
-    renderer->SetTextureBlendMode = photon_settextureblendmode;
     renderer->UpdateTexture = photon_updatetexture;
     renderer->LockTexture = photon_locktexture;
     renderer->UnlockTexture = photon_unlocktexture;
     renderer->DirtyTexture = photon_dirtytexture;
     renderer->SetDrawColor = photon_setdrawcolor;
-    renderer->SetDrawBlendMode = photon_setdrawblendmode;
     renderer->RenderPoint = photon_renderpoint;
     renderer->RenderLine = photon_renderline;
     renderer->RenderFill = photon_renderfill;
@@ -580,14 +573,6 @@ int _photon_set_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t gl
    /* Switch on requested graphics context modifiers */
    switch (blendmode)
    {
-      case SDL_BLENDMODE_MASK:
-           /* Enable and set chroma key */
-           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
-           {
-              PgSetChromaCx(rdata->gc, PgRGB(255, 255, 255), Pg_CHROMA_SRC_MATCH | Pg_CHROMA_NODRAW);
-              PgChromaOnCx(rdata->gc);
-           }
-           break;
       case SDL_BLENDMODE_BLEND:
            /* Enable and set chroma key and alpha blending */
            if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
@@ -608,11 +593,6 @@ int _photon_set_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t gl
            PgSetAlphaCx(rdata->gc, Pg_ALPHA_OP_SRC_GLOBAL | Pg_BLEND_SRC_As | Pg_BLEND_DST_1, NULL, NULL, globalalpha, 0);
            PgAlphaOnCx(rdata->gc);
            break;
-      case SDL_BLENDMODE_MOD:
-           /* Enable and set alpha blending */
-           PgSetAlphaCx(rdata->gc, Pg_BLEND_SRC_0 | Pg_BLEND_DST_S, NULL, NULL, 0, 0);
-           PgAlphaOnCx(rdata->gc);
-           break;
       case SDL_BLENDMODE_NONE:
            /* Do nothing */
            break;
@@ -630,13 +610,6 @@ int _photon_reset_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t 
    /* Switch off graphics context modifiers */
    switch (blendmode)
    {
-      case SDL_BLENDMODE_MASK:
-           /* Disable chroma key */
-           if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
-           {
-              PgChromaOffCx(rdata->gc);
-           }
-           break;
       case SDL_BLENDMODE_BLEND:
            /* Disable chroma key and alpha blending */
            if (blendsource==SDL_PHOTON_TEXTURE_BLEND)
@@ -651,10 +624,6 @@ int _photon_reset_blending(SDL_Renderer* renderer, uint32_t blendmode, uint32_t 
            {
               PgChromaOffCx(rdata->gc);
            }
-           PgAlphaOffCx(rdata->gc);
-           break;
-      case SDL_BLENDMODE_MOD:
-           /* Disable chroma key and alpha blending */
            PgAlphaOffCx(rdata->gc);
            break;
       case SDL_BLENDMODE_NONE:
@@ -932,33 +901,6 @@ photon_settexturealphamod(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-photon_settextureblendmode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-
-    /* Check, if it is not initialized */
-    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-    {
-       SDL_SetError("Photon: can't set texture blend mode for OpenGL ES window");
-       return -1;
-    }
-
-    switch (texture->blendMode)
-    {
-        case SDL_BLENDMODE_NONE:
-        case SDL_BLENDMODE_MASK:
-        case SDL_BLENDMODE_BLEND:
-        case SDL_BLENDMODE_ADD:
-        case SDL_BLENDMODE_MOD:
-             return 0;
-        default:
-             SDL_Unsupported();
-             texture->blendMode = SDL_BLENDMODE_NONE;
-             return -1;
-    }
-}
-
-static int
 photon_updatetexture(SDL_Renderer * renderer, SDL_Texture * texture,
                      const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -1107,35 +1049,6 @@ photon_setdrawcolor(SDL_Renderer * renderer)
    }
 
    return 0;
-}
-
-static int
-photon_setdrawblendmode(SDL_Renderer * renderer)
-{
-    SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-
-    /* Check, if it is not initialized */
-    if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-    {
-       SDL_SetError("Photon: can't set texture blend mode for OpenGL ES window");
-       return -1;
-    }
-
-    switch (renderer->blendMode)
-    {
-        case SDL_BLENDMODE_NONE:
-        case SDL_BLENDMODE_MASK:
-        case SDL_BLENDMODE_BLEND:
-        case SDL_BLENDMODE_ADD:
-        case SDL_BLENDMODE_MOD:
-             return 0;
-        default:
-             SDL_Unsupported();
-             renderer->blendMode = SDL_BLENDMODE_NONE;
-             return -1;
-    }
-
-    return 0;
 }
 
 static int

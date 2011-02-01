@@ -71,8 +71,6 @@ static int GLES_SetTextureColorMod(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
 static int GLES_SetTextureAlphaMod(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
-static int GLES_SetTextureBlendMode(SDL_Renderer * renderer,
-                                    SDL_Texture * texture);
 static int GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * rect, const void *pixels,
                               int pitch);
@@ -108,8 +106,6 @@ SDL_RenderDriver GL_ES_RenderDriver = {
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_RGBA4444,
@@ -237,7 +233,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = GLES_GetTexturePalette;
     renderer->SetTextureColorMod = GLES_SetTextureColorMod;
     renderer->SetTextureAlphaMod = GLES_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = GLES_SetTextureBlendMode;
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
@@ -514,23 +509,6 @@ GLES_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GLES_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->blendMode) {
-    case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
-    case SDL_BLENDMODE_BLEND:
-    case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
 GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                    const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -612,7 +590,7 @@ GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 
 static void
-GLES_SetBlendMode(GLES_RenderData * data, int blendMode, int isprimitive)
+GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
 {
     if (blendMode != data->blendMode) {
         switch (blendMode) {
@@ -620,15 +598,6 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode, int isprimitive)
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             data->glDisable(GL_BLEND);
             break;
-        case SDL_BLENDMODE_MASK:
-            if (isprimitive) {
-                data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                data->glDisable(GL_BLEND);
-                /* The same as SDL_BLENDMODE_NONE */
-                blendMode = SDL_BLENDMODE_NONE;
-                break;
-            }
-            /* fall through */
         case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
@@ -638,11 +607,6 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode, int isprimitive)
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            break;
-        case SDL_BLENDMODE_MOD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
         }
         data->blendMode = blendMode;
@@ -657,7 +621,7 @@ GLES_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     GLshort *vertices;
 
-    GLES_SetBlendMode(data, renderer->blendMode, 1);
+    GLES_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -684,7 +648,7 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     GLshort *vertices;
 
-    GLES_SetBlendMode(data, renderer->blendMode, 1);
+    GLES_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -717,7 +681,7 @@ GLES_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
 
-    GLES_SetBlendMode(data, renderer->blendMode, 1);
+    GLES_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -754,7 +718,7 @@ GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
 
-    GLES_SetBlendMode(data, renderer->blendMode, 1);
+    GLES_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -853,7 +817,7 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    GLES_SetBlendMode(data, texture->blendMode, 0);
+    GLES_SetBlendMode(data, texture->blendMode);
 
     if (data->GL_OES_draw_texture_supported && data->useDrawTexture) {
         /* this code is a little funny because the viewport is upside down vs SDL's coordinate system */

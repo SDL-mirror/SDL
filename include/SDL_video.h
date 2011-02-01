@@ -187,7 +187,6 @@ typedef struct SDL_RendererInfo
     const char *name;           /**< The name of the renderer */
     Uint32 flags;               /**< Supported ::SDL_RendererFlags */
     Uint32 mod_modes;           /**< A mask of supported channel modulation */
-    Uint32 blend_modes;         /**< A mask of supported blend modes */
     Uint32 num_texture_formats; /**< The number of available texture formats */
     Uint32 texture_formats[50]; /**< The available texture formats */
     int max_texture_width;      /**< The maximimum texture width */

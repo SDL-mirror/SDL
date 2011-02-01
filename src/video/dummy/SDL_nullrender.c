@@ -150,8 +150,7 @@ SDL_DUMMY_RenderDrawPoints(SDL_Renderer * renderer,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
@@ -172,8 +171,7 @@ SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
@@ -194,8 +192,7 @@ SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
@@ -217,8 +214,7 @@ SDL_DUMMY_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         (SDL_DUMMY_RenderData *) renderer->driverdata;
     SDL_Surface *target = data->screens[data->current_screen];
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE ||
-        renderer->blendMode == SDL_BLENDMODE_MASK) {
+    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(target->format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);

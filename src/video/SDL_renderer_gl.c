@@ -83,8 +83,6 @@ static int GL_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int GL_SetTextureAlphaMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
-static int GL_SetTextureBlendMode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -122,8 +120,6 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      15,
      {
       SDL_PIXELFORMAT_INDEX1LSB,
@@ -175,7 +171,6 @@ typedef struct
     PFNGLPROGRAMSTRINGARBPROC glProgramStringARB;
 
     /* (optional) fragment programs */
-    GLuint fragment_program_mask;
     GLuint fragment_program_UYVY;
 } GL_RenderData;
 
@@ -298,7 +293,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = GL_GetTexturePalette;
     renderer->SetTextureColorMod = GL_SetTextureColorMod;
     renderer->SetTextureAlphaMod = GL_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = GL_SetTextureBlendMode;
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
@@ -544,18 +538,6 @@ compile_shader(GL_RenderData * data, GLenum shader_type, const char *_code)
     return program;
 }
 
-
-/*
- * Fragment program that implements mask semantics
- */
-static const char *fragment_program_mask_source_code = "!!ARBfp1.0\n"
-"OUTPUT output = result.color;\n"
-"TEMP value;\n"
-"TEX value, fragment.texcoord[0], texture[0], %TEXTURETARGET%;\n"
-"MUL value, fragment.color, value;\n"
-"SGE value.a, value.a, 0.001;\n"
-"MOV output, value;\n"
-"END";
 
 /*
  * Fragment program that renders from UYVY textures.
@@ -978,23 +960,6 @@ GL_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GL_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->blendMode) {
-    case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
-    case SDL_BLENDMODE_BLEND:
-    case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
 GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -1054,25 +1019,13 @@ GL_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
 }
 
 static void
-GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
+GL_SetBlendMode(GL_RenderData * data, int blendMode)
 {
     if (blendMode != data->blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
             data->glDisable(GL_BLEND);
-            break;
-        case SDL_BLENDMODE_MASK:
-            if (isprimitive) {
-                /* The same as SDL_BLENDMODE_NONE */
-                blendMode = SDL_BLENDMODE_NONE;
-                data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                data->glDisable(GL_BLEND);
-            } else {
-                data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-                data->glEnable(GL_BLEND);
-                data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
             break;
         case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1083,11 +1036,6 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode, int isprimitive)
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            break;
-        case SDL_BLENDMODE_MOD:
-            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
         }
         data->blendMode = blendMode;
@@ -1116,7 +1064,7 @@ GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1139,7 +1087,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1207,7 +1155,7 @@ GL_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i, x, y;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1245,7 +1193,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_SetBlendMode(data, renderer->blendMode, 1);
+    GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -1267,7 +1215,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
-    GLuint shader = 0;
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
 
@@ -1319,28 +1266,12 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
-    GL_SetBlendMode(data, texture->blendMode, 0);
+    GL_SetBlendMode(data, texture->blendMode);
 
-    /* Set up the shader for the copy, we have a special one for MASK */
-    shader = texturedata->shader;
-    if (texture->blendMode == SDL_BLENDMODE_MASK && !shader) {
-        if (data->fragment_program_mask == 0) {
-            data->fragment_program_mask =
-                compile_shader(data, GL_FRAGMENT_PROGRAM_ARB,
-                               fragment_program_mask_source_code);
-            if (data->fragment_program_mask == 0) {
-                /* That's okay, we'll just miss some of the blend semantics */
-                data->fragment_program_mask = ~0;
-            }
-        }
-        if (data->fragment_program_mask != ~0) {
-            shader = data->fragment_program_mask;
-        }
-    }
-
-    if (shader) {
+    /* Set up the shader for the copy, if any */
+    if (texturedata->shader) {
         data->glEnable(GL_FRAGMENT_PROGRAM_ARB);
-        data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, shader);
+        data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, texturedata->shader);
     }
 
     data->glBegin(GL_TRIANGLE_STRIP);
@@ -1354,7 +1285,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glVertex2f((GLfloat) maxx, (GLfloat) maxy);
     data->glEnd();
 
-    if (shader) {
+    if (texturedata->shader) {
         data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
     }
 
@@ -1494,11 +1425,6 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
             if (data->GL_ARB_fragment_program_supported) {
                 data->glDisable(GL_FRAGMENT_PROGRAM_ARB);
                 data->glBindProgramARB(GL_FRAGMENT_PROGRAM_ARB, 0);
-                if (data->fragment_program_mask &&
-                    data->fragment_program_mask != ~0) {
-                    data->glDeleteProgramsARB(1,
-                                              &data->fragment_program_mask);
-                }
                 if (data->fragment_program_UYVY &&
                     data->fragment_program_UYVY != ~0) {
                     data->glDeleteProgramsARB(1,

@@ -448,22 +448,15 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode blendMode)
 
     status = 0;
     flags = surface->map->info.flags;
-    surface->map->info.flags &=
-        ~(SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD);
+    surface->map->info.flags &= ~(SDL_COPY_BLEND | SDL_COPY_ADD);
     switch (blendMode) {
     case SDL_BLENDMODE_NONE:
-        break;
-    case SDL_BLENDMODE_MASK:
-        surface->map->info.flags |= SDL_COPY_MASK;
         break;
     case SDL_BLENDMODE_BLEND:
         surface->map->info.flags |= SDL_COPY_BLEND;
         break;
     case SDL_BLENDMODE_ADD:
         surface->map->info.flags |= SDL_COPY_ADD;
-        break;
-    case SDL_BLENDMODE_MOD:
-        surface->map->info.flags |= SDL_COPY_MOD;
         break;
     default:
         SDL_Unsupported();
@@ -496,20 +489,12 @@ SDL_GetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode *blendMode)
         return 0;
     }
 
-    switch (surface->map->
-            info.flags & (SDL_COPY_MASK | SDL_COPY_BLEND | SDL_COPY_ADD |
-                          SDL_COPY_MOD)) {
-    case SDL_COPY_MASK:
-        *blendMode = SDL_BLENDMODE_MASK;
-        break;
+    switch (surface->map->info.flags & (SDL_COPY_BLEND | SDL_COPY_ADD)) {
     case SDL_COPY_BLEND:
         *blendMode = SDL_BLENDMODE_BLEND;
         break;
     case SDL_COPY_ADD:
         *blendMode = SDL_BLENDMODE_ADD;
-        break;
-    case SDL_COPY_MOD:
-        *blendMode = SDL_BLENDMODE_MOD;
         break;
     default:
         *blendMode = SDL_BLENDMODE_NONE;

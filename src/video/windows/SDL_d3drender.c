@@ -146,8 +146,6 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      0,
      {0},
      0,
@@ -160,7 +158,6 @@ typedef struct
     IDirect3DDevice9 *device;
     UINT adapter;
     D3DPRESENT_PARAMETERS pparams;
-    LPDIRECT3DPIXELSHADER9 ps_mask;
     SDL_bool beginScene;
 } D3D_RenderData;
 
@@ -603,45 +600,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
                                           D3DTOP_DISABLE);
 
-    {
-#ifdef ASSEMBLE_SHADER
-        const char *shader_text =
-"ps_1_1\n"
-"def c0, 0, 0, 0, 0.496\n"
-"def c1, 0, 0, 0, 1\n"
-"def c2, 0, 0, 0, -1\n"
-"tex t0\n"
-"mul r1, t0, v0\n"
-"add r0, r1, c0\n"
-"cnd r0, r0.a, c1, c2\n"
-"add r0, r0, r1\n";
-        LPD3DXBUFFER pCode;         // buffer with the assembled shader code
-        LPD3DXBUFFER pErrorMsgs;    // buffer with error messages
-        LPDWORD shader_data;
-        DWORD   shader_size;
-        result = D3DXAssembleShader( shader_text, SDL_strlen(shader_text), NULL, NULL, 0, &pCode, &pErrorMsgs );
-        if (FAILED(result)) {
-            D3D_SetError("D3DXAssembleShader()", result);
-        }
-        shader_data = (DWORD*)pCode->lpVtbl->GetBufferPointer(pCode);
-        shader_size = pCode->lpVtbl->GetBufferSize(pCode);
-#else
-        const DWORD shader_data[] = {
-            0xffff0101,0x00000051,0xa00f0000,0x00000000,0x00000000,0x00000000,
-            0x3efdf3b6,0x00000051,0xa00f0001,0x00000000,0x00000000,0x00000000,
-            0x3f800000,0x00000051,0xa00f0002,0x00000000,0x00000000,0x00000000,
-            0xbf800000,0x00000042,0xb00f0000,0x00000005,0x800f0001,0xb0e40000,
-            0x90e40000,0x00000002,0x800f0000,0x80e40001,0xa0e40000,0x00000050,
-            0x800f0000,0x80ff0000,0xa0e40001,0xa0e40002,0x00000002,0x800f0000,
-            0x80e40000,0x80e40001,0x0000ffff
-        };
-#endif
-        result = IDirect3DDevice9_CreatePixelShader(data->device, shader_data, &data->ps_mask);
-        if (FAILED(result)) {
-            D3D_SetError("CreatePixelShader()", result);
-        }
-    }
-
     return renderer;
 }
 
@@ -779,23 +737,6 @@ static int
 D3D_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     return 0;
-}
-
-static int
-D3D_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->blendMode) {
-    case SDL_BLENDMODE_NONE:
-    case SDL_BLENDMODE_MASK:
-    case SDL_BLENDMODE_BLEND:
-    case SDL_BLENDMODE_ADD:
-    case SDL_BLENDMODE_MOD:
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
 }
 
 static int
@@ -975,7 +916,6 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         FALSE);
         break;
-    case SDL_BLENDMODE_MASK:
     case SDL_BLENDMODE_BLEND:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
                                         TRUE);
@@ -991,14 +931,6 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
                                         D3DBLEND_SRCALPHA);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_ONE);
-        break;
-    case SDL_BLENDMODE_MOD:
-        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
-                                        TRUE);
-        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
-                                        D3DBLEND_ZERO);
-        IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
-                                        D3DBLEND_SRCCOLOR);
         break;
     }
 }
@@ -1315,10 +1247,6 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].v = maxv;
 
     D3D_SetBlendMode(data, texture->blendMode);
-
-    if (texture->blendMode == SDL_BLENDMODE_MASK) {
-        shader = data->ps_mask;
-    }
 
     IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
                                      D3DTEXF_LINEAR);

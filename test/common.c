@@ -357,31 +357,6 @@ PrintRendererFlag(Uint32 flag)
 }
 
 static void
-PrintBlendMode(Uint32 flag)
-{
-    switch (flag) {
-    case SDL_BLENDMODE_NONE:
-        fprintf(stderr, "None");
-        break;
-    case SDL_BLENDMODE_MASK:
-        fprintf(stderr, "Mask");
-        break;
-    case SDL_BLENDMODE_BLEND:
-        fprintf(stderr, "Blend");
-        break;
-    case SDL_BLENDMODE_ADD:
-        fprintf(stderr, "Add");
-        break;
-    case SDL_BLENDMODE_MOD:
-        fprintf(stderr, "Mod");
-        break;
-    default:
-        fprintf(stderr, "0x%8.8x", flag);
-        break;
-    }
-}
-
-static void
 PrintPixelFormat(Uint32 format)
 {
     switch (format) {
@@ -498,21 +473,6 @@ PrintRenderer(SDL_RendererInfo * info)
                 fprintf(stderr, " | ");
             }
             PrintRendererFlag(flag);
-            ++count;
-        }
-    }
-    fprintf(stderr, ")\n");
-
-    fprintf(stderr, "    Blend: 0x%8.8X", info->blend_modes);
-    fprintf(stderr, " (");
-    count = 0;
-    for (i = 0; i < sizeof(info->blend_modes) * 8; ++i) {
-        Uint32 flag = (1 << i);
-        if (info->blend_modes & flag) {
-            if (count > 0) {
-                fprintf(stderr, " | ");
-            }
-            PrintBlendMode(flag);
             ++count;
         }
     }

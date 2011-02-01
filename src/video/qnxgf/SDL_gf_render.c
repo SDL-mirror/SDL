@@ -52,8 +52,6 @@ static int gf_settexturecolormod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int gf_settexturealphamod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
-static int gf_settextureblendmode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int gf_settexturescalemode(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
 static int gf_updatetexture(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -85,8 +83,6 @@ SDL_RenderDriver gf_renderdriver = {
       SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE | SDL_TEXTUREMODULATE_COLOR |
       SDL_TEXTUREMODULATE_ALPHA),
-     (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
-      SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
      13,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -147,7 +143,6 @@ gf_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->GetTexturePalette = gf_gettexturepalette;
     renderer->SetTextureAlphaMod = gf_settexturealphamod;
     renderer->SetTextureColorMod = gf_settexturecolormod;
-    renderer->SetTextureBlendMode = gf_settextureblendmode;
     renderer->UpdateTexture = gf_updatetexture;
     renderer->LockTexture = gf_locktexture;
     renderer->UnlockTexture = gf_unlocktexture;
@@ -339,16 +334,6 @@ gf_settexturecolormod(SDL_Renderer * renderer, SDL_Texture * texture)
 
 static int
 gf_settexturealphamod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-}
-
-static int
-gf_settextureblendmode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-}
-
-static int
-gf_settexturescalemode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
 }
 
