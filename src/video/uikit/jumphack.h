@@ -14,3 +14,5 @@
 extern jmp_buf *jump_env(void);
 
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

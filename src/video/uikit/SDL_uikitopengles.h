@@ -36,3 +36,5 @@ extern void *UIKit_GL_GetProcAddress(_THIS, const char *proc);
 extern int UIKit_GL_LoadLibrary(_THIS, const char *path);
 
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

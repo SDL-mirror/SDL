@@ -38,17 +38,17 @@
 #endif
 
 #ifdef FIXED_MULTITOUCH
-	long touchId;
+    long touchId;
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-	UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
+    UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
 #endif
 #endif
 
 #if SDL_IPHONE_KEYBOARD
-	UITextField *textField;
-	BOOL keyboardVisible;
-#endif	
-	
+    UITextField *textField;
+    BOOL keyboardVisible;
+#endif    
+    
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
@@ -63,3 +63,5 @@
 
 @end
 /* *INDENT-ON* */
+
+/* vi: set ts=4 sw=4 expandtab: */

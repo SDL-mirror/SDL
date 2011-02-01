@@ -29,3 +29,5 @@ extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 
 #endif
+
+/* vi: set ts=4 sw=4 expandtab: */

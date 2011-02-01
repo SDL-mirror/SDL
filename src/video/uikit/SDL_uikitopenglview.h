@@ -63,3 +63,5 @@
 
 @end
 /* *INDENT-ON* */
+
+/* vi: set ts=4 sw=4 expandtab: */
