@@ -151,9 +151,6 @@
 #ifndef SDL_VIDEO_RENDER_OGL
 #define SDL_VIDEO_RENDER_OGL	1
 #endif
-#ifndef SDL_VIDEO_RENDER_X11
-#define SDL_VIDEO_RENDER_X11	1
-#endif
 
 /* Enable OpenGL support */
 #ifndef SDL_VIDEO_OPENGL

@@ -350,10 +350,6 @@ X11_VideoInit(_THIS)
         return -1;
     }
 
-#if SDL_VIDEO_RENDER_X11
-    X11_AddRenderDriver(_this);
-#endif
-
     if (X11_InitKeyboard(_this) != 0) {
         return -1;
     }

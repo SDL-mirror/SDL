@@ -187,9 +187,6 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_RENDER_D3D	1
 #endif
 #endif
-#ifndef SDL_VIDEO_RENDER_GDI
-#define SDL_VIDEO_RENDER_GDI	1
-#endif
 
 /* Enable OpenGL support */
 #ifndef _WIN32_WCE

@@ -225,9 +225,6 @@ WIN_VideoInit(_THIS)
 #if SDL_VIDEO_RENDER_DDRAW
     DDRAW_AddRenderDriver(_this);
 #endif
-#if SDL_VIDEO_RENDER_GDI
-    GDI_AddRenderDriver(_this);
-#endif
 #if SDL_VIDEO_RENDER_GAPI
     WINCE_AddRenderDriver(_this);
 #endif

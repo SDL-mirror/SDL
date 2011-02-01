@@ -856,14 +856,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\windows\SDL_gdirender.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\windows\SDL_gdirender.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\events\SDL_gesture.c"
 			>
 		</File>
