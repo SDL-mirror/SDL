@@ -1961,7 +1961,6 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     {
         Uint8 r, g, b, a;
         SDL_BlendMode blendMode;
-        SDL_ScaleMode scaleMode;
 
         SDL_GetSurfaceColorMod(surface, &r, &g, &b);
         SDL_SetTextureColorMod(texture, r, g, b);
@@ -1976,9 +1975,6 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
             SDL_GetSurfaceBlendMode(surface, &blendMode);
             SDL_SetTextureBlendMode(texture, blendMode);
         }
-
-        SDL_GetSurfaceScaleMode(surface, &scaleMode);
-        SDL_SetTextureScaleMode(texture, scaleMode);
     }
 
     if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
@@ -2157,33 +2153,6 @@ SDL_GetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode *blendMode)
 
     if (blendMode) {
         *blendMode = texture->blendMode;
-    }
-    return 0;
-}
-
-int
-SDL_SetTextureScaleMode(SDL_Texture * texture, SDL_ScaleMode scaleMode)
-{
-    SDL_Renderer *renderer;
-
-    CHECK_TEXTURE_MAGIC(texture, -1);
-
-    renderer = texture->renderer;
-    if (!renderer->SetTextureScaleMode) {
-        SDL_Unsupported();
-        return -1;
-    }
-    texture->scaleMode = scaleMode;
-    return renderer->SetTextureScaleMode(renderer, texture);
-}
-
-int
-SDL_GetTextureScaleMode(SDL_Texture * texture, SDL_ScaleMode *scaleMode)
-{
-    CHECK_TEXTURE_MAGIC(texture, -1);
-
-    if (scaleMode) {
-        *scaleMode = texture->scaleMode;
     }
     return 0;
 }

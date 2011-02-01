@@ -210,7 +210,6 @@ SDL_RenderDriver GAPI_RenderDriver = {
         (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
         (SDL_TEXTUREMODULATE_NONE),
         (SDL_BLENDMODE_NONE),
-        (SDL_SCALEMODE_NONE),
         7,
         {
             SDL_PIXELFORMAT_RGB555,
@@ -233,7 +232,6 @@ SDL_RenderDriver RAW_RenderDriver = {
         (SDL_RENDERER_SINGLEBUFFER | SDL_RENDERER_PRESENTDISCARD),
         (SDL_TEXTUREMODULATE_NONE),
         (SDL_BLENDMODE_NONE),
-        (SDL_SCALEMODE_NONE),
         7,
         {
             SDL_PIXELFORMAT_RGB555,

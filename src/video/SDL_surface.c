@@ -518,64 +518,6 @@ SDL_GetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode *blendMode)
     return 0;
 }
 
-int
-SDL_SetSurfaceScaleMode(SDL_Surface * surface, SDL_ScaleMode scaleMode)
-{
-    int flags, status;
-
-    if (!surface) {
-        return -1;
-    }
-
-    status = 0;
-    flags = surface->map->info.flags;
-    surface->map->info.flags &= ~(SDL_COPY_NEAREST);
-    switch (scaleMode) {
-    case SDL_SCALEMODE_NONE:
-        break;
-    case SDL_SCALEMODE_FAST:
-        surface->map->info.flags |= SDL_COPY_NEAREST;
-        break;
-    case SDL_SCALEMODE_SLOW:
-    case SDL_SCALEMODE_BEST:
-        SDL_Unsupported();
-        surface->map->info.flags |= SDL_COPY_NEAREST;
-        status = -1;
-        break;
-    default:
-        SDL_Unsupported();
-        status = -1;
-        break;
-    }
-
-    if (surface->map->info.flags != flags) {
-        SDL_InvalidateMap(surface->map);
-    }
-    return status;
-}
-
-int
-SDL_GetSurfaceScaleMode(SDL_Surface * surface, SDL_ScaleMode *scaleMode)
-{
-    if (!surface) {
-        return -1;
-    }
-
-    if (!scaleMode) {
-        return 0;
-    }
-
-    switch (surface->map->info.flags & SDL_COPY_NEAREST) {
-    case SDL_COPY_NEAREST:
-        *scaleMode = SDL_SCALEMODE_FAST;
-        break;
-    default:
-        *scaleMode = SDL_SCALEMODE_NONE;
-        break;
-    }
-    return 0;
-}
-
 SDL_bool
 SDL_SetClipRect(SDL_Surface * surface, const SDL_Rect * rect)
 {

@@ -21,7 +21,6 @@ static SDL_Rect *positions;
 static SDL_Rect *velocities;
 static int sprite_w, sprite_h;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_MASK;
-static SDL_ScaleMode scaleMode = SDL_SCALEMODE_NONE;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -89,7 +88,6 @@ LoadSprite(char *file)
             return (-1);
         }
         SDL_SetTextureBlendMode(sprites[i], blendMode);
-        SDL_SetTextureScaleMode(sprites[i], scaleMode);
     }
     SDL_FreeSurface(temp);
 
@@ -253,22 +251,6 @@ main(int argc, char *argv[])
                         consumed = 2;
                     }
                 }
-            } else if (SDL_strcasecmp(argv[i], "--scale") == 0) {
-                if (argv[i + 1]) {
-                    if (SDL_strcasecmp(argv[i + 1], "none") == 0) {
-                        scaleMode = SDL_SCALEMODE_NONE;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "fast") == 0) {
-                        scaleMode = SDL_SCALEMODE_FAST;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "slow") == 0) {
-                        scaleMode = SDL_SCALEMODE_SLOW;
-                        consumed = 2;
-                    } else if (SDL_strcasecmp(argv[i + 1], "best") == 0) {
-                        scaleMode = SDL_SCALEMODE_BEST;
-                        consumed = 2;
-                    }
-                }
             } else if (SDL_strcasecmp(argv[i], "--cyclecolor") == 0) {
                 cycle_color = SDL_TRUE;
                 consumed = 1;
@@ -282,7 +264,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--scale none|fast|slow|best] [--cyclecolor] [--cyclealpha]\n",
+                    "Usage: %s %s [--blend none|mask|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
                     argv[0], CommonUsage(state));
             quit(1);
         }
@@ -316,10 +298,6 @@ main(int argc, char *argv[])
         quit(2);
     }
     srand((unsigned int)time(NULL));
-    if (scaleMode != SDL_SCALEMODE_NONE) {
-        sprite_w += sprite_w / 2;
-        sprite_h += sprite_h / 2;
-    }
     for (i = 0; i < num_sprites; ++i) {
         positions[i].x = rand() % (state->window_w - sprite_w);
         positions[i].y = rand() % (state->window_h - sprite_h);

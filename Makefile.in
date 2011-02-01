@@ -71,7 +71,6 @@ HDRS = \
 	SDL_rect.h \
 	SDL_revision.h \
 	SDL_rwops.h \
-	SDL_scalemode.h \
 	SDL_scancode.h \
 	SDL_shape.h \
 	SDL_stdinc.h \

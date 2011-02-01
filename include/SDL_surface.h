@@ -33,7 +33,6 @@
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
 #include "SDL_blendmode.h"
-#include "SDL_scalemode.h"
 #include "SDL_rwops.h"
 
 #include "begin_code.h"
@@ -316,37 +315,6 @@ extern DECLSPEC int SDLCALL SDL_SetSurfaceBlendMode(SDL_Surface * surface,
  */
 extern DECLSPEC int SDLCALL SDL_GetSurfaceBlendMode(SDL_Surface * surface,
                                                     SDL_BlendMode *blendMode);
-
-/**
- *  \brief Set the scale mode used for blit operations.
- *  
- *  \param surface   The surface to update.
- *  \param scaleMode ::SDL_ScaleMode to use for blit scaling.
- *  
- *  \return 0 on success, or -1 if the surface is not valid or the scale mode is
- *          not supported.
- *  
- *  \note If the scale mode is not supported, the closest supported mode is 
- *        chosen.  Currently only ::SDL_TEXTURESCALEMODE_FAST is supported on 
- *        surfaces.
- *  
- *  \sa SDL_GetSurfaceScaleMode()
- */
-extern DECLSPEC int SDLCALL SDL_SetSurfaceScaleMode(SDL_Surface * surface,
-                                                    SDL_ScaleMode scaleMode);
-
-/**
- *  \brief Get the scale mode used for blit operations.
- *  
- *  \param surface   The surface to query.
- *  \param scaleMode A pointer filled in with the current scale mode.
- *  
- *  \return 0 on success, or -1 if the surface is not valid.
- *  
- *  \sa SDL_SetSurfaceScaleMode()
- */
-extern DECLSPEC int SDLCALL SDL_GetSurfaceScaleMode(SDL_Surface * surface,
-                                                    SDL_ScaleMode *scaleMode);
 
 /**
  *  Sets the clipping rectangle for the destination surface in a blit.

@@ -73,8 +73,6 @@ static int GLES_SetTextureAlphaMod(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
 static int GLES_SetTextureBlendMode(SDL_Renderer * renderer,
                                     SDL_Texture * texture);
-static int GLES_SetTextureScaleMode(SDL_Renderer * renderer,
-                                    SDL_Texture * texture);
 static int GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * rect, const void *pixels,
                               int pitch);
@@ -112,7 +110,6 @@ SDL_RenderDriver GL_ES_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST | SDL_SCALEMODE_SLOW), 6,
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_RGBA4444,
@@ -241,7 +238,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureColorMod = GLES_SetTextureColorMod;
     renderer->SetTextureAlphaMod = GLES_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = GLES_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = GLES_SetTextureScaleMode;
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
@@ -449,9 +445,9 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     data->formattype = type;
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                GL_NEAREST);
+                                GL_LINEAR);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                GL_NEAREST);
+                                GL_LINEAR);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -530,25 +526,6 @@ GLES_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
     default:
         SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
-GLES_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    case SDL_SCALEMODE_FAST:
-    case SDL_SCALEMODE_SLOW:
-        return 0;
-    case SDL_SCALEMODE_BEST:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_SLOW;
-        return -1;
-    default:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
 }
@@ -877,23 +854,6 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     GLES_SetBlendMode(data, texture->blendMode, 0);
-
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    case SDL_SCALEMODE_FAST:
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                              GL_NEAREST);
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                              GL_NEAREST);
-        break;
-    case SDL_SCALEMODE_SLOW:
-    case SDL_SCALEMODE_BEST:
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                              GL_LINEAR);
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                              GL_LINEAR);
-        break;
-    }
 
     if (data->GL_OES_draw_texture_supported && data->useDrawTexture) {
         /* this code is a little funny because the viewport is upside down vs SDL's coordinate system */

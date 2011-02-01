@@ -87,7 +87,6 @@ SDL_RenderDriver gf_renderdriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_SLOW),
      13,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -149,7 +148,6 @@ gf_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureAlphaMod = gf_settexturealphamod;
     renderer->SetTextureColorMod = gf_settexturecolormod;
     renderer->SetTextureBlendMode = gf_settextureblendmode;
-    renderer->SetTextureScaleMode = gf_settexturescalemode;
     renderer->UpdateTexture = gf_updatetexture;
     renderer->LockTexture = gf_locktexture;
     renderer->UnlockTexture = gf_unlocktexture;

@@ -51,8 +51,6 @@ static int SW_SetTextureAlphaMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int SW_SetTextureBlendMode(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
-static int SW_SetTextureScaleMode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -90,7 +88,6 @@ SDL_RenderDriver SW_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST),
      14,
      {
       SDL_PIXELFORMAT_INDEX8,
@@ -180,7 +177,6 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
     renderer->SetTextureColorMod = SW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = SW_SetTextureScaleMode;
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
@@ -188,7 +184,6 @@ Setup_SoftwareRenderer(SDL_Renderer * renderer)
 
     renderer->info.mod_modes = SW_RenderDriver.info.mod_modes;
     renderer->info.blend_modes = SW_RenderDriver.info.blend_modes;
-    renderer->info.scale_modes = SW_RenderDriver.info.scale_modes;
     renderer->info.num_texture_formats =
         SW_RenderDriver.info.num_texture_formats;
     SDL_memcpy(renderer->info.texture_formats,
@@ -396,7 +391,6 @@ SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                texture->b);
         SDL_SetSurfaceAlphaMod(texture->driverdata, texture->a);
         SDL_SetSurfaceBlendMode(texture->driverdata, texture->blendMode);
-        SDL_SetSurfaceScaleMode(texture->driverdata, texture->scaleMode);
 
         if (texture->access == SDL_TEXTUREACCESS_STATIC) {
             SDL_SetSurfaceRLE(texture->driverdata, 1);
@@ -477,13 +471,6 @@ SW_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
     return SDL_SetSurfaceBlendMode(surface, texture->blendMode);
-}
-
-static int
-SW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-    return SDL_SetSurfaceScaleMode(surface, texture->scaleMode);
 }
 
 static int

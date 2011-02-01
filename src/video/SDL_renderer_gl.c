@@ -85,8 +85,6 @@ static int GL_SetTextureAlphaMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int GL_SetTextureBlendMode(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
-static int GL_SetTextureScaleMode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,
                             int pitch);
@@ -126,7 +124,6 @@ SDL_RenderDriver GL_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST | SDL_SCALEMODE_SLOW),
      15,
      {
       SDL_PIXELFORMAT_INDEX1LSB,
@@ -159,7 +156,6 @@ typedef struct
     SDL_bool GL_MESA_ycbcr_texture_supported;
     SDL_bool GL_ARB_fragment_program_supported;
     int blendMode;
-    int scaleMode;
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
@@ -303,7 +299,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureColorMod = GL_SetTextureColorMod;
     renderer->SetTextureAlphaMod = GL_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = GL_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = GL_SetTextureScaleMode;
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
@@ -422,7 +417,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     /* Set up parameters for rendering */
     data->blendMode = -1;
-    data->scaleMode = -1;
     data->glDisable(GL_DEPTH_TEST);
     data->glDisable(GL_CULL_FACE);
     /* This ended up causing video discrepancies between OpenGL and Direct3D */
@@ -842,9 +836,9 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                GL_NEAREST);
+                                GL_LINEAR);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                GL_NEAREST);
+                                GL_LINEAR);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -996,25 +990,6 @@ GL_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
     default:
         SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
-    }
-}
-
-static int
-GL_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    case SDL_SCALEMODE_FAST:
-    case SDL_SCALEMODE_SLOW:
-        return 0;
-    case SDL_SCALEMODE_BEST:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_SLOW;
-        return -1;
-    default:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_NONE;
         return -1;
     }
 }
@@ -1361,26 +1336,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         if (data->fragment_program_mask != ~0) {
             shader = data->fragment_program_mask;
         }
-    }
-
-    if (texture->scaleMode != data->scaleMode) {
-        switch (texture->scaleMode) {
-        case SDL_SCALEMODE_NONE:
-        case SDL_SCALEMODE_FAST:
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                                  GL_NEAREST);
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                                  GL_NEAREST);
-            break;
-        case SDL_SCALEMODE_SLOW:
-        case SDL_SCALEMODE_BEST:
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                                  GL_LINEAR);
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                                  GL_LINEAR);
-            break;
-        }
-        data->scaleMode = texture->scaleMode;
     }
 
     if (shader) {

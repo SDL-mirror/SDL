@@ -107,8 +107,6 @@ static int D3D_SetTextureAlphaMod(SDL_Renderer * renderer,
                                   SDL_Texture * texture);
 static int D3D_SetTextureBlendMode(SDL_Renderer * renderer,
                                    SDL_Texture * texture);
-static int D3D_SetTextureScaleMode(SDL_Renderer * renderer,
-                                   SDL_Texture * texture);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -150,8 +148,6 @@ SDL_RenderDriver D3D_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK |
       SDL_BLENDMODE_BLEND | SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST |
-      SDL_SCALEMODE_SLOW | SDL_SCALEMODE_BEST),
      0,
      {0},
      0,
@@ -461,7 +457,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureColorMod = D3D_SetTextureColorMod;
     renderer->SetTextureAlphaMod = D3D_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = D3D_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = D3D_SetTextureScaleMode;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
@@ -801,23 +796,6 @@ D3D_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
         texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
-}
-
-static int
-D3D_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    case SDL_SCALEMODE_FAST:
-    case SDL_SCALEMODE_SLOW:
-    case SDL_SCALEMODE_BEST:
-        return 0;
-    default:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_NONE;
-        return -1;
-    }
-    return 0;
 }
 
 static int
@@ -1342,27 +1320,10 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         shader = data->ps_mask;
     }
 
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    case SDL_SCALEMODE_FAST:
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
-                                         D3DTEXF_POINT);
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
-                                         D3DTEXF_POINT);
-        break;
-    case SDL_SCALEMODE_SLOW:
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
-                                         D3DTEXF_LINEAR);
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
-                                         D3DTEXF_LINEAR);
-        break;
-    case SDL_SCALEMODE_BEST:
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
-                                         D3DTEXF_GAUSSIANQUAD);
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
-                                         D3DTEXF_GAUSSIANQUAD);
-        break;
-    }
+    IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
+                                     D3DTEXF_LINEAR);
+    IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
+                                     D3DTEXF_LINEAR);
 
     result =
         IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)

@@ -57,8 +57,6 @@ static int DirectFB_SetTextureColorMod(SDL_Renderer * renderer,
                                        SDL_Texture * texture);
 static int DirectFB_SetTextureBlendMode(SDL_Renderer * renderer,
                                         SDL_Texture * texture);
-static int DirectFB_SetTextureScaleMode(SDL_Renderer * renderer,
-                                        SDL_Texture * texture);
 static int DirectFB_UpdateTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture,
                                   const SDL_Rect * rect,
@@ -104,8 +102,6 @@ SDL_RenderDriver DirectFB_RenderDriver = {
       SDL_TEXTUREMODULATE_ALPHA),
      (SDL_BLENDMODE_NONE | SDL_BLENDMODE_MASK | SDL_BLENDMODE_BLEND |
       SDL_BLENDMODE_ADD | SDL_BLENDMODE_MOD),
-     (SDL_SCALEMODE_NONE | SDL_SCALEMODE_FAST |
-      SDL_SCALEMODE_SLOW | SDL_SCALEMODE_BEST),
      14,
      {
       SDL_PIXELFORMAT_INDEX4LSB,
@@ -298,7 +294,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureAlphaMod = DirectFB_SetTextureAlphaMod;
     renderer->SetTextureColorMod = DirectFB_SetTextureColorMod;
     renderer->SetTextureBlendMode = DirectFB_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = DirectFB_SetTextureScaleMode;
     renderer->UpdateTexture = DirectFB_UpdateTexture;
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;

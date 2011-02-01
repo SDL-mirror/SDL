@@ -30,7 +30,6 @@
 #include "SDL_windowsvideo.h"
 #include "SDL_windowsshape.h"
 #include "SDL_d3drender.h"
-#include "SDL_gdirender.h"
 #include "SDL_gapirender.h"
 
 /* Initialization/Query functions */

@@ -382,28 +382,6 @@ PrintBlendMode(Uint32 flag)
 }
 
 static void
-PrintScaleMode(Uint32 flag)
-{
-    switch (flag) {
-    case SDL_SCALEMODE_NONE:
-        fprintf(stderr, "None");
-        break;
-    case SDL_SCALEMODE_FAST:
-        fprintf(stderr, "Fast");
-        break;
-    case SDL_SCALEMODE_SLOW:
-        fprintf(stderr, "Slow");
-        break;
-    case SDL_SCALEMODE_BEST:
-        fprintf(stderr, "Best");
-        break;
-    default:
-        fprintf(stderr, "0x%8.8x", flag);
-        break;
-    }
-}
-
-static void
 PrintPixelFormat(Uint32 format)
 {
     switch (format) {
@@ -535,21 +513,6 @@ PrintRenderer(SDL_RendererInfo * info)
                 fprintf(stderr, " | ");
             }
             PrintBlendMode(flag);
-            ++count;
-        }
-    }
-    fprintf(stderr, ")\n");
-
-    fprintf(stderr, "    Scale: 0x%8.8X", info->scale_modes);
-    fprintf(stderr, " (");
-    count = 0;
-    for (i = 0; i < sizeof(info->scale_modes) * 8; ++i) {
-        Uint32 flag = (1 << i);
-        if (info->scale_modes & flag) {
-            if (count > 0) {
-                fprintf(stderr, " | ");
-            }
-            PrintScaleMode(flag);
             ++count;
         }
     }

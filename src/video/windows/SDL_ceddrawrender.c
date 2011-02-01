@@ -51,8 +51,6 @@ static int DDRAW_SetTextureAlphaMod(SDL_Renderer * renderer,
                                     SDL_Texture * texture);
 static int DDRAW_SetTextureBlendMode(SDL_Renderer * renderer,
                                      SDL_Texture * texture);
-static int DDRAW_SetTextureScaleMode(SDL_Renderer * renderer,
-                                     SDL_Texture * texture);
 static int DDRAW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                const SDL_Rect * rect, const void *pixels,
                                int pitch);
@@ -85,7 +83,6 @@ SDL_RenderDriver DDRAW_RenderDriver = {
       SDL_RENDERER_PRESENTDISCARD | SDL_RENDERER_ACCELERATED),
      (SDL_TEXTUREMODULATE_NONE),
      (SDL_BLENDMODE_NONE),
-     (SDL_SCALEMODE_NONE),
      0,
      {0},
      0,
@@ -468,7 +465,6 @@ DDRAW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->SetTextureColorMod = DDRAW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = DDRAW_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = DDRAW_SetTextureBlendMode;
-    renderer->SetTextureScaleMode = DDRAW_SetTextureScaleMode;
     renderer->UpdateTexture = DDRAW_UpdateTexture;
     renderer->LockTexture = DDRAW_LockTexture;
     renderer->UnlockTexture = DDRAW_UnlockTexture;
@@ -660,19 +656,6 @@ DDRAW_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
         texture->blendMode = SDL_BLENDMODE_NONE;
         return -1;
     }
-}
-
-static int
-DDRAW_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    switch (texture->scaleMode) {
-    case SDL_SCALEMODE_NONE:
-    default:
-        SDL_Unsupported();
-        texture->scaleMode = SDL_SCALEMODE_NONE;
-        return -1;
-    }
-    return 0;
 }
 
 static int

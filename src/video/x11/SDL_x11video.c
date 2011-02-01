@@ -29,7 +29,6 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_x11video.h"
-#include "SDL_x11render.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11touch.h" 
 

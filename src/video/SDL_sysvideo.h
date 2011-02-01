@@ -47,7 +47,6 @@ struct SDL_Texture
     int h;                      /**< The height of the texture */
     int modMode;                /**< The texture modulation mode */
     SDL_BlendMode blendMode;    /**< The texture blend mode */
-    SDL_ScaleMode scaleMode;    /**< The texture scale mode */
     Uint8 r, g, b, a;           /**< Texture modulation values */
 
     SDL_Renderer *renderer;
@@ -77,8 +76,6 @@ struct SDL_Renderer
     int (*SetTextureAlphaMod) (SDL_Renderer * renderer,
                                SDL_Texture * texture);
     int (*SetTextureBlendMode) (SDL_Renderer * renderer,
-                                SDL_Texture * texture);
-    int (*SetTextureScaleMode) (SDL_Renderer * renderer,
                                 SDL_Texture * texture);
     int (*UpdateTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, const void *pixels,

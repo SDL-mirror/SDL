@@ -33,7 +33,6 @@
 #include "SDL_pixels.h"
 #include "SDL_rect.h"
 #include "SDL_blendmode.h"
-#include "SDL_scalemode.h"
 #include "SDL_surface.h"
 
 #include "begin_code.h"
@@ -189,7 +188,6 @@ typedef struct SDL_RendererInfo
     Uint32 flags;               /**< Supported ::SDL_RendererFlags */
     Uint32 mod_modes;           /**< A mask of supported channel modulation */
     Uint32 blend_modes;         /**< A mask of supported blend modes */
-    Uint32 scale_modes;         /**< A mask of supported scale modes */
     Uint32 num_texture_formats; /**< The number of available texture formats */
     Uint32 texture_formats[50]; /**< The available texture formats */
     int max_texture_width;      /**< The maximimum texture width */
@@ -967,36 +965,6 @@ extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_Texture * texture,
  */
 extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_Texture * texture,
                                                     SDL_BlendMode *blendMode);
-
-/**
- *  \brief Set the scale mode used for texture copy operations.
- *  
- *  \param texture The texture to update.
- *  \param scaleMode ::SDL_ScaleMode to use for texture scaling.
- *  
- *  \return 0 on success, or -1 if the texture is not valid or the scale mode is
- *          not supported.
- *  
- *  \note If the scale mode is not supported, the closest supported mode is
- *        chosen.
- *  
- *  \sa SDL_GetTextureScaleMode()
- */
-extern DECLSPEC int SDLCALL SDL_SetTextureScaleMode(SDL_Texture * texture,
-                                                    SDL_ScaleMode scaleMode);
-
-/**
- *  \brief Get the scale mode used for texture copy operations.
- *  
- *  \param texture The texture to query.
- *  \param scaleMode A pointer filled in with the current scale mode.
- *  
- *  \return 0 on success, or -1 if the texture is not valid.
- *  
- *  \sa SDL_SetTextureScaleMode()
- */
-extern DECLSPEC int SDLCALL SDL_GetTextureScaleMode(SDL_Texture * texture,
-                                                    SDL_ScaleMode *scaleMode);
 
 /**
  *  \brief Update the given texture rectangle with new pixel data.
