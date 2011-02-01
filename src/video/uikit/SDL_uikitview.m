@@ -298,6 +298,7 @@
 
 /* Terminates the editing session */
 - (BOOL)textFieldShouldReturn:(UITextField*)_textField {
+    SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RETURN);
     [self hideKeyboard];
     return YES;
 }
