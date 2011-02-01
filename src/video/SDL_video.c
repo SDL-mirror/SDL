@@ -2062,10 +2062,6 @@ SDL_SetTextureColorMod(SDL_Texture * texture, Uint8 r, Uint8 g, Uint8 b)
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     renderer = texture->renderer;
-    if (!renderer->SetTextureColorMod) {
-        SDL_Unsupported();
-        return -1;
-    }
     if (r < 255 || g < 255 || b < 255) {
         texture->modMode |= SDL_TEXTUREMODULATE_COLOR;
     } else {
@@ -2110,10 +2106,6 @@ SDL_SetTextureAlphaMod(SDL_Texture * texture, Uint8 alpha)
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     renderer = texture->renderer;
-    if (!renderer->SetTextureAlphaMod) {
-        SDL_Unsupported();
-        return -1;
-    }
     if (alpha < 255) {
         texture->modMode |= SDL_TEXTUREMODULATE_ALPHA;
     } else {
@@ -2146,10 +2138,6 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode blendMode)
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     renderer = texture->renderer;
-    if (!renderer->SetTextureBlendMode) {
-        SDL_Unsupported();
-        return -1;
-    }
     texture->blendMode = blendMode;
     if (renderer->SetTextureBlendMode) {
         return renderer->SetTextureBlendMode(renderer, texture);
