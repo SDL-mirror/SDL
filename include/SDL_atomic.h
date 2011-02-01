@@ -123,9 +123,10 @@ extern DECLSPEC void SDLCALL SDL_AtomicUnlock(SDL_SpinLock *lock);
 /*@}*//*SDL AtomicLock*/
 
 
-/* The compiler barrier prevents the compiler from reordering
-   reads and writes to globally visible variables across the call.
-*/
+/**
+ * The compiler barrier prevents the compiler from reordering
+ * reads and writes to globally visible variables across the call.
+ */
 #ifdef _MSC_VER
 void _ReadWriteBarrier(void);
 #pragma intrinsic(_ReadWriteBarrier)
