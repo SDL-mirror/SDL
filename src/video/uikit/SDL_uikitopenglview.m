@@ -116,6 +116,10 @@
             return NO;
         }
         /* end create buffers */
+
+        /* Use the main screen scale (for retina display support) */
+        if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+            self.contentScaleFactor = [UIScreen mainScreen].scale;
     }
     return self;
 }
