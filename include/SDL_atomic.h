@@ -271,7 +271,7 @@ static __inline__ int SDL_AtomicAdd(SDL_atomic_t *a, int v)
 #ifndef SDL_AtomicCASPtr
 #define SDL_AtomicCASPtr SDL_AtomicCASPtr_
 #endif
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr_(void **a, void *oldval, void *newval);
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr_(void* *a, void *oldval, void *newval);
 
 /**
  * \brief Set a pointer to a value atomically.
