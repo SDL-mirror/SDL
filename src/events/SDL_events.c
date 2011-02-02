@@ -38,6 +38,14 @@
 SDL_EventFilter SDL_EventOK = NULL;
 void *SDL_EventOKParam;
 
+typedef struct SDL_EventWatcher {
+    SDL_EventFilter callback;
+    void *userdata;
+    struct SDL_EventWatcher *next;
+} SDL_EventWatcher;
+
+static SDL_EventWatcher *SDL_event_watchers = NULL;
+
 typedef struct {
     Uint32 bits[8];
 } SDL_DisabledEventBlock;
@@ -95,6 +103,12 @@ SDL_StopEventLoop(void)
             SDL_free(SDL_disabled_events[i]);
             SDL_disabled_events[i] = NULL;
         }
+    }
+
+    while (SDL_event_watchers) {
+        SDL_EventWatcher *tmp = SDL_event_watchers;
+        SDL_event_watchers = tmp->next;
+        SDL_free(tmp);
     }
 }
 
@@ -340,9 +354,16 @@ SDL_WaitEventTimeout(SDL_Event * event, int timeout)
 int
 SDL_PushEvent(SDL_Event * event)
 {
+    SDL_EventWatcher *curr;
+
     if (SDL_EventOK && !SDL_EventOK(SDL_EventOKParam, event)) {
         return 0;
     }
+
+    for (curr = SDL_event_watchers; curr; curr = curr->next) {
+        curr->callback(curr->userdata, event);
+    }
+
     if (SDL_PeepEvents(event, 1, SDL_ADDEVENT, 0, 0) <= 0) {
         return -1;
     }
@@ -374,6 +395,43 @@ SDL_GetEventFilter(SDL_EventFilter * filter, void **userdata)
         *userdata = SDL_EventOKParam;
     }
     return SDL_EventOK ? SDL_TRUE : SDL_FALSE;
+}
+
+/* FIXME: This is not thread-safe yet */
+void
+SDL_AddEventWatch(SDL_EventFilter filter, void *userdata)
+{
+    SDL_EventWatcher *watcher;
+
+    watcher = (SDL_EventWatcher *)SDL_malloc(sizeof(*watcher));
+    if (!watcher) {
+        /* Uh oh... */
+        return;
+    }
+    watcher->callback = filter;
+    watcher->userdata = userdata;
+    watcher->next = SDL_event_watchers;
+    SDL_event_watchers = watcher;
+}
+
+/* FIXME: This is not thread-safe yet */
+void
+SDL_DelEventWatch(SDL_EventFilter filter, void *userdata)
+{
+    SDL_EventWatcher *prev = NULL;
+    SDL_EventWatcher *curr;
+
+    for (curr = SDL_event_watchers; curr; prev = curr, curr = curr->next) {
+        if (curr->callback == filter && curr->userdata == userdata) {
+            if (prev) {
+                prev->next = curr->next;
+            } else {
+                SDL_event_watchers = curr->next;
+            }
+            SDL_free(curr);
+            break;
+        }
+    }
 }
 
 void

@@ -581,6 +581,18 @@ extern DECLSPEC SDL_bool SDLCALL SDL_GetEventFilter(SDL_EventFilter * filter,
                                                     void **userdata);
 
 /**
+ *  Add a function which is called when an event is added to the queue.
+ */
+extern DECLSPEC void SDLCALL SDL_AddEventWatch(SDL_EventFilter filter,
+                                               void *userdata);
+
+/**
+ *  Remove an event watch function added with SDL_AddEventWatch()
+ */
+extern DECLSPEC void SDLCALL SDL_DelEventWatch(SDL_EventFilter filter,
+                                               void *userdata);
+
+/**
  *  Run the filter function on the current event queue, removing any
  *  events for which the filter returns 0.
  */
