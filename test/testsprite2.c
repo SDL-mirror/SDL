@@ -6,8 +6,8 @@
 
 #include "common.h"
 
-#define NUM_SPRITES	100
-#define MAX_SPEED 	1
+#define NUM_SPRITES    100
+#define MAX_SPEED     1
 
 static CommonState *state;
 static int num_sprites;
@@ -76,12 +76,12 @@ LoadSprite(char *file)
 
     /* Create textures from the image */
     for (i = 0; i < state->num_windows; ++i) {
-        SDL_SelectRenderer(state->windows[i]);
-        sprites[i] = SDL_CreateTextureFromSurface(0, temp);
+        SDL_Renderer *renderer = state->renderers[i];
+        sprites[i] = SDL_CreateTextureFromSurface(renderer, 0, temp);
         if (!sprites[i]) {
-		SDL_SetColorKey(temp, 0, 0);
-		sprites[i] = SDL_CreateTextureFromSurface(0, temp);
-	}
+            SDL_SetColorKey(temp, 0, 0);
+            sprites[i] = SDL_CreateTextureFromSurface(renderer, 0, temp);
+        }
         if (!sprites[i]) {
             fprintf(stderr, "Couldn't create texture: %s\n", SDL_GetError());
             SDL_FreeSurface(temp);
@@ -96,14 +96,12 @@ LoadSprite(char *file)
 }
 
 void
-MoveSprites(SDL_Window * window, SDL_Texture * sprite)
+MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
 {
     int i, n;
     int window_w, window_h;
     SDL_Rect temp;
     SDL_Rect *position, *velocity;
-
-    SDL_SelectRenderer(window);
 
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
@@ -136,55 +134,55 @@ MoveSprites(SDL_Window * window, SDL_Texture * sprite)
     }
 
     /* Draw a gray background */
-    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-    SDL_RenderClear();
+    SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+    SDL_RenderClear(renderer);
 
     /* Test points */
-    SDL_SetRenderDrawColor(0xFF, 0x00, 0x00, 0xFF);
-    SDL_RenderDrawPoint(0, 0);
-    SDL_RenderDrawPoint(window_w-1, 0);
-    SDL_RenderDrawPoint(0, window_h-1);
-    SDL_RenderDrawPoint(window_w-1, window_h-1);
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+    SDL_RenderDrawPoint(renderer, 0, 0);
+    SDL_RenderDrawPoint(renderer, window_w-1, 0);
+    SDL_RenderDrawPoint(renderer, 0, window_h-1);
+    SDL_RenderDrawPoint(renderer, window_w-1, window_h-1);
 
     /* Test horizontal and vertical lines */
-    SDL_SetRenderDrawColor(0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderDrawLine(1, 0, window_w-2, 0);
-    SDL_RenderDrawLine(1, window_h-1, window_w-2, window_h-1);
-    SDL_RenderDrawLine(0, 1, 0, window_h-2);
-    SDL_RenderDrawLine(window_w-1, 1, window_w-1, window_h-2);
+    SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+    SDL_RenderDrawLine(renderer, 1, 0, window_w-2, 0);
+    SDL_RenderDrawLine(renderer, 1, window_h-1, window_w-2, window_h-1);
+    SDL_RenderDrawLine(renderer, 0, 1, 0, window_h-2);
+    SDL_RenderDrawLine(renderer, window_w-1, 1, window_w-1, window_h-2);
 
     /* Test fill and copy */
-    SDL_SetRenderDrawColor(0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
     temp.x = 1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFillRect(&temp);
-    SDL_RenderCopy(sprite, NULL, &temp);
+    SDL_RenderFillRect(renderer, &temp);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFillRect(&temp);
-    SDL_RenderCopy(sprite, NULL, &temp);
+    SDL_RenderFillRect(renderer, &temp);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
     temp.x = 1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFillRect(&temp);
-    SDL_RenderCopy(sprite, NULL, &temp);
+    SDL_RenderFillRect(renderer, &temp);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
     temp.x = window_w-sprite_w-1;
     temp.y = window_h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
-    SDL_RenderFillRect(&temp);
-    SDL_RenderCopy(sprite, NULL, &temp);
+    SDL_RenderFillRect(renderer, &temp);
+    SDL_RenderCopy(renderer, sprite, NULL, &temp);
 
     /* Test diagonal lines */
-    SDL_SetRenderDrawColor(0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderDrawLine(sprite_w, sprite_h,
+    SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
+    SDL_RenderDrawLine(renderer, sprite_w, sprite_h,
                        window_w-sprite_w-2, window_h-sprite_h-2);
-    SDL_RenderDrawLine(window_w-sprite_w-2, sprite_h,
+    SDL_RenderDrawLine(renderer, window_w-sprite_w-2, sprite_h,
                        sprite_w, window_h-sprite_h-2);
 
     /* Move the sprite, bounce at the wall, and draw */
@@ -204,11 +202,11 @@ MoveSprites(SDL_Window * window, SDL_Texture * sprite)
         }
 
         /* Blit the sprite onto the screen */
-        SDL_RenderCopy(sprite, NULL, position);
+        SDL_RenderCopy(renderer, sprite, NULL, position);
     }
 
     /* Update the screen! */
-    SDL_RenderPresent();
+    SDL_RenderPresent(renderer);
 }
 
 int
@@ -276,9 +274,9 @@ main(int argc, char *argv[])
         quit(2);
     }
     for (i = 0; i < state->num_windows; ++i) {
-        SDL_SelectRenderer(state->windows[i]);
-        SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderClear();
+        SDL_Renderer *renderer = state->renderers[i];
+        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderClear(renderer);
     }
     if (LoadSprite("icon.bmp") < 0) {
         quit(2);
@@ -314,22 +312,9 @@ main(int argc, char *argv[])
         ++frames;
         while (SDL_PollEvent(&event)) {
             CommonEvent(state, &event, &done);
-            switch (event.type) {
-            case SDL_WINDOWEVENT:
-                switch (event.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(SDL_GetWindowFromID(event.window.windowID));
-                    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderClear();
-                    break;
-                }
-                break;
-            default:
-                break;
-            }
         }
         for (i = 0; i < state->num_windows; ++i) {
-            MoveSprites(state->windows[i], sprites[i]);
+            MoveSprites(state->windows[i], state->renderers[i], sprites[i]);
         }
     }
 
@@ -340,7 +325,7 @@ main(int argc, char *argv[])
         printf("%2.2f frames per second\n", fps);
     }
     quit(0);
-	return 0;
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

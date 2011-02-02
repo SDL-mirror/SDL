@@ -20,7 +20,7 @@ static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
 void
-DrawPoints(SDL_Window * window)
+DrawPoints(SDL_Window * window, SDL_Renderer * renderer)
 {
     int i;
     int x, y;
@@ -29,7 +29,6 @@ DrawPoints(SDL_Window * window)
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
 
-    SDL_SetRenderDrawBlendMode(blendMode);
     for (i = 0; i < num_objects * 4; ++i) {
         /* Cycle the color and alpha, if desired */
         if (cycle_color) {
@@ -54,14 +53,13 @@ DrawPoints(SDL_Window * window)
                 cycle_direction = -cycle_direction;
             }
         }
-        SDL_SetRenderDrawColor(255, (Uint8) current_color,
+        SDL_SetRenderDrawColor(renderer, 255, (Uint8) current_color,
                                (Uint8) current_color, (Uint8) current_alpha);
 
         x = rand() % window_w;
         y = rand() % window_h;
-        SDL_RenderDrawPoint(x, y);
+        SDL_RenderDrawPoint(renderer, x, y);
     }
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
 
 #define MAX_LINES 16
@@ -86,7 +84,7 @@ add_line(int x1, int y1, int x2, int y2)
 
 
 void
-DrawLines(SDL_Window * window)
+DrawLines(SDL_Window * window, SDL_Renderer * renderer)
 {
     int i;
     int x1, y1, x2, y2;
@@ -95,20 +93,18 @@ DrawLines(SDL_Window * window)
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
 
-    SDL_SetRenderDrawBlendMode(blendMode);
     for (i = 0; i < num_lines; ++i) {
-        SDL_SetRenderDrawColor(255, 255, 255, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
         if (i == -1) {
-            SDL_RenderDrawLine(0, 0, window_w - 1, window_h - 1);
-            SDL_RenderDrawLine(0, window_h - 1, window_w - 1, 0);
-            SDL_RenderDrawLine(0, window_h / 2, window_w - 1, window_h / 2);
-            SDL_RenderDrawLine(window_w / 2, 0, window_w / 2, window_h - 1);
+            SDL_RenderDrawLine(renderer, 0, 0, window_w - 1, window_h - 1);
+            SDL_RenderDrawLine(renderer, 0, window_h - 1, window_w - 1, 0);
+            SDL_RenderDrawLine(renderer, 0, window_h / 2, window_w - 1, window_h / 2);
+            SDL_RenderDrawLine(renderer, window_w / 2, 0, window_w / 2, window_h - 1);
         } else {
-            SDL_RenderDrawLine(lines[i].x, lines[i].y, lines[i].w, lines[i].h);
+            SDL_RenderDrawLine(renderer, lines[i].x, lines[i].y, lines[i].w, lines[i].h);
         }
     }
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
 
 #define MAX_RECTS 16
@@ -139,7 +135,7 @@ add_rect(int x1, int y1, int x2, int y2)
 }
 
 static void
-DrawRects(SDL_Window * window)
+DrawRects(SDL_Window * window, SDL_Renderer * renderer)
 {
     int i;
     int window_w, window_h;
@@ -147,23 +143,19 @@ DrawRects(SDL_Window * window)
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
 
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
     for (i = 0; i < num_rects; ++i) {
-        SDL_SetRenderDrawColor(255, 127, 0, 255);
-        SDL_RenderFillRect(&rects[i]);
+        SDL_SetRenderDrawColor(renderer, 255, 127, 0, 255);
+        SDL_RenderFillRect(renderer, &rects[i]);
     }
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
 
 static void
-DrawRectLineIntersections(SDL_Window * window)
+DrawRectLineIntersections(SDL_Window * window, SDL_Renderer * renderer)
 {
     int i, j, window_w, window_h;
 
     /* Query the sizes */
     SDL_GetWindowSize(window, &window_w, &window_h);
-
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 
     for (i = 0; i < num_rects; i++)
         for (j = 0; j < num_lines; j++) {
@@ -177,31 +169,25 @@ DrawRectLineIntersections(SDL_Window * window)
             y2 = lines[j].h;
 
             if (SDL_IntersectRectAndLine(&r, &x1, &y1, &x2, &y2)) {
-                SDL_SetRenderDrawColor(0, 255, 55, 255);
-                SDL_RenderDrawLine(x1, y1, x2, y2);
+                SDL_SetRenderDrawColor(renderer, 0, 255, 55, 255);
+                SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
             }
         }
-
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
 
 static void
-DrawRectRectIntersections(SDL_Window * window)
+DrawRectRectIntersections(SDL_Window * window, SDL_Renderer * renderer)
 {
     int i, j;
-
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 
     for (i = 0; i < num_rects; i++)
         for (j = i + 1; j < num_rects; j++) {
             SDL_Rect r;
             if (SDL_IntersectRect(&rects[i], &rects[j], &r)) {
-                SDL_SetRenderDrawColor(255, 200, 0, 255);
-                SDL_RenderFillRect(&r);
+                SDL_SetRenderDrawColor(renderer, 255, 200, 0, 255);
+                SDL_RenderFillRect(renderer, &r);
             }
         }
-
-    SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
 }
 
 int
@@ -264,9 +250,10 @@ main(int argc, char *argv[])
 
     /* Create the windows and initialize the renderers */
     for (i = 0; i < state->num_windows; ++i) {
-        SDL_SelectRenderer(state->windows[i]);
-        SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-        SDL_RenderClear();
+        SDL_Renderer *renderer = state->renderers[i];
+        SDL_SetRenderDrawBlendMode(renderer, blendMode);
+        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderClear(renderer);
     }
 
     srand(time(NULL));
@@ -311,31 +298,22 @@ main(int argc, char *argv[])
                     break;
                 }
                 break;
-            case SDL_WINDOWEVENT:
-                switch (event.window.event) {
-                case SDL_WINDOWEVENT_EXPOSED:
-                    SDL_SelectRenderer(SDL_GetWindowFromID(event.window.windowID));
-                    SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-                    SDL_RenderClear();
-                    break;
-                }
-                break;
             default:
                 break;
             }
         }
         for (i = 0; i < state->num_windows; ++i) {
-            SDL_SelectRenderer(state->windows[i]);
-            SDL_SetRenderDrawColor(0xA0, 0xA0, 0xA0, 0xFF);
-            SDL_RenderClear();
+            SDL_Renderer *renderer = state->renderers[i];
+            SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+            SDL_RenderClear(renderer);
 
-            DrawRects(state->windows[i]);
-            DrawPoints(state->windows[i]);
-            DrawRectRectIntersections(state->windows[i]);
-            DrawLines(state->windows[i]);
-            DrawRectLineIntersections(state->windows[i]);
+            DrawRects(state->windows[i], renderer);
+            DrawPoints(state->windows[i], renderer);
+            DrawRectRectIntersections(state->windows[i], renderer);
+            DrawLines(state->windows[i], renderer);
+            DrawRectLineIntersections(state->windows[i], renderer);
 
-            SDL_RenderPresent();
+            SDL_RenderPresent(renderer);
         }
     }
 

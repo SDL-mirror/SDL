@@ -646,7 +646,10 @@ CommonInit(CommonState * state)
         state->windows =
             (SDL_Window **) SDL_malloc(state->num_windows *
                                         sizeof(*state->windows));
-        if (!state->windows) {
+        state->renderers =
+            (SDL_Renderer **) SDL_malloc(state->num_windows *
+                                        sizeof(*state->renderers));
+        if (!state->windows || !state->renderers) {
             fprintf(stderr, "Out of memory!\n");
             return SDL_FALSE;
         }
@@ -685,6 +688,8 @@ CommonInit(CommonState * state)
 
             SDL_ShowWindow(state->windows[i]);
 
+            state->renderers[i] = NULL;
+
             if (!state->skip_renderer
                 && (state->renderdriver
                     || !(state->window_flags & SDL_WINDOW_OPENGL))) {
@@ -707,8 +712,9 @@ CommonInit(CommonState * state)
                         return SDL_FALSE;
                     }
                 }
-                if (SDL_CreateRenderer
-                    (state->windows[i], m, state->render_flags) < 0) {
+                state->renderers[i] = SDL_CreateRenderer(state->windows[i],
+                                            m, state->render_flags);
+                if (!state->renderers[i]) {
                     fprintf(stderr, "Couldn't create renderer: %s\n",
                             SDL_GetError());
                     return SDL_FALSE;
@@ -717,12 +723,11 @@ CommonInit(CommonState * state)
                     SDL_RendererInfo info;
 
                     fprintf(stderr, "Current renderer:\n");
-                    SDL_GetRendererInfo(&info);
+                    SDL_GetRendererInfo(state->renderers[i], &info);
                     PrintRenderer(&info);
                 }
             }
         }
-        SDL_SelectRenderer(state->windows[0]);
     }
 
     if (state->flags & SDL_INIT_AUDIO) {
@@ -1012,14 +1017,24 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
 void
 CommonQuit(CommonState * state)
 {
+    int i;
+
+    if (state->windows) {
+        SDL_free(state->windows);
+    }
+    if (state->renderers) {
+        for (i = 0; i < state->num_windows; ++i) {
+            if (state->renderers[i]) {
+                SDL_DestroyRenderer(state->renderers[i]);
+            }
+        }
+        SDL_free(state->renderers);
+    }
     if (state->flags & SDL_INIT_VIDEO) {
         SDL_VideoQuit();
     }
     if (state->flags & SDL_INIT_AUDIO) {
         SDL_AudioQuit();
-    }
-    if (state->windows) {
-        SDL_free(state->windows);
     }
     SDL_free(state);
 }

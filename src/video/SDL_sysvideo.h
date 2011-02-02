@@ -24,6 +24,7 @@
 #ifndef _SDL_sysvideo_h
 #define _SDL_sysvideo_h
 
+#include "SDL_events.h"
 #include "SDL_mouse.h"
 #include "SDL_keysym.h"
 #include "SDL_render.h"
@@ -31,7 +32,6 @@
 
 /* The SDL video driver */
 
-typedef struct SDL_Renderer SDL_Renderer;
 typedef struct SDL_RenderDriver SDL_RenderDriver;
 typedef struct SDL_WindowShaper SDL_WindowShaper;
 typedef struct SDL_ShapeDriver SDL_ShapeDriver;
@@ -61,8 +61,9 @@ struct SDL_Texture
 /* Define the SDL renderer structure */
 struct SDL_Renderer
 {
-    int (*ActivateRenderer) (SDL_Renderer * renderer);
-    int (*DisplayModeChanged) (SDL_Renderer * renderer);
+    const void *magic;
+
+    void (*WindowEvent) (SDL_Renderer * renderer, const SDL_WindowEvent *event);
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*QueryTexturePixels) (SDL_Renderer * renderer, SDL_Texture * texture,
                                void **pixels, int *pitch);
@@ -168,7 +169,6 @@ struct SDL_Window
     Uint32 flags;
 
     SDL_VideoDisplay *display;
-    SDL_Renderer *renderer;
 
     SDL_DisplayMode fullscreen_mode;
     
@@ -207,8 +207,6 @@ struct SDL_VideoDisplay
 
     SDL_Window *windows;
     SDL_Window *fullscreen_window;
-
-    SDL_Renderer *current_renderer;
 
     SDL_VideoDevice *device;
 
@@ -344,6 +342,7 @@ struct SDL_VideoDevice
     SDL_VideoDisplay *displays;
     int current_display;
     Uint8 window_magic;
+    Uint8 renderer_magic;
     Uint8 texture_magic;
     Uint32 next_object_id;
     char * clipboard_text;
@@ -439,7 +438,6 @@ extern VideoBootStrap Android_bootstrap;
 #endif
 
 #define SDL_CurrentDisplay	(&_this->displays[_this->current_display])
-#define SDL_CurrentRenderer	(SDL_CurrentDisplay->current_renderer)
 
 extern SDL_VideoDevice *SDL_GetVideoDevice(void);
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
@@ -461,7 +459,6 @@ extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 extern void SDL_OnWindowShown(SDL_Window * window);
 extern void SDL_OnWindowHidden(SDL_Window * window);
-extern void SDL_OnWindowResized(SDL_Window * window);
 extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);

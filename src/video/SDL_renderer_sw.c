@@ -32,8 +32,8 @@
 /* SDL surface based renderer implementation */
 
 static SDL_Renderer *SW_CreateRenderer(SDL_Window * window, Uint32 flags);
-static int SW_ActivateRenderer(SDL_Renderer * renderer);
-static int SW_DisplayModeChanged(SDL_Renderer * renderer);
+static void SW_WindowEvent(SDL_Renderer * renderer,
+                           const SDL_WindowEvent *event);
 static int SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_QueryTexturePixels(SDL_Renderer * renderer,
                                  SDL_Texture * texture, void **pixels,
@@ -212,8 +212,7 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         SDL_OutOfMemory();
         return NULL;
     }
-    renderer->ActivateRenderer = SW_ActivateRenderer;
-    renderer->DisplayModeChanged = SW_DisplayModeChanged;
+    renderer->WindowEvent = SW_WindowEvent;
 
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -287,47 +286,34 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
-static int
+static SDL_Texture *
 SW_ActivateRenderer(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    int i, n;
 
-    if (data->renderer && data->renderer->ActivateRenderer) {
-        if (data->renderer->ActivateRenderer(data->renderer) < 0) {
-            return -1;
-        }
-    }
     if (data->updateSize) {
         /* Recreate the textures for the new window size */
         if (data->texture) {
             DestroyTexture(data->renderer, data->texture);
-            data->texture = 0;
         }
         data->texture = CreateTexture(data->renderer, data->format,
                                       window->w, window->h);
-        if (!data->texture) {
-            return -1;
+        if (data->texture) {
+            data->updateSize = SDL_FALSE;
         }
-        data->updateSize = SDL_FALSE;
     }
-    return 0;
+    return data->texture;
 }
 
-static int
-SW_DisplayModeChanged(SDL_Renderer * renderer)
+static void
+SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
-    if (data->renderer && data->renderer->DisplayModeChanged) {
-        if (data->renderer->DisplayModeChanged(data->renderer) < 0) {
-            return -1;
-        }
+    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+        data->updateSize = SDL_TRUE;
     }
-    /* Rebind the context to the window area */
-    data->updateSize = SDL_TRUE;
-    return SW_ActivateRenderer(renderer);
 }
 
 static int
@@ -496,11 +482,15 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                     int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = data->texture;
+    SDL_Texture *texture = SW_ActivateRenderer(renderer);
     SDL_Rect rect;
     int i;
     int x, y;
     int status = 0;
+
+    if (!texture) {
+        return -1;
+    }
 
     /* Get the smallest rectangle that contains everything */
     rect.x = 0;
@@ -555,11 +545,15 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                    int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = data->texture;
+    SDL_Texture *texture = SW_ActivateRenderer(renderer);
     SDL_Rect clip, rect;
     int i;
     int x1, y1, x2, y2;
     int status = 0;
+
+    if (!texture) {
+        return -1;
+    }
 
     /* Get the smallest rectangle that contains everything */
     clip.x = 0;
@@ -619,11 +613,15 @@ SW_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
                    int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = data->texture;
+    SDL_Texture *texture = SW_ActivateRenderer(renderer);
     SDL_Rect clip, rect;
     Uint32 color = 0;
     int i;
     int status = 0;
+
+    if (!texture) {
+        return -1;
+    }
 
     clip.x = 0;
     clip.y = 0;
@@ -671,11 +669,15 @@ SW_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
                    int count)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = data->texture;
+    SDL_Texture *texture = SW_ActivateRenderer(renderer);
     SDL_Rect clip, rect;
     Uint32 color = 0;
     int i;
     int status = 0;
+
+    if (!texture) {
+        return -1;
+    }
 
     clip.x = 0;
     clip.y = 0;
@@ -724,6 +726,10 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     int status;
 
+    if (!SW_ActivateRenderer(renderer)) {
+        return -1;
+    }
+
     if (data->renderer->LockTexture(data->renderer, data->texture,
                                     dstrect, 1, &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
@@ -760,6 +766,10 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
+    if (!SW_ActivateRenderer(renderer)) {
+        return -1;
+    }
+
     if (data->renderer->LockTexture(data->renderer, data->texture,
                                     rect, 0, &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
@@ -780,6 +790,10 @@ SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
+    if (!SW_ActivateRenderer(renderer)) {
+        return -1;
+    }
+
     if (data->renderer->LockTexture(data->renderer, data->texture,
                                     rect, 1, &data->surface.pixels,
                                     &data->surface.pitch) < 0) {
@@ -797,8 +811,12 @@ static void
 SW_RenderPresent(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = data->texture;
+    SDL_Texture *texture = SW_ActivateRenderer(renderer);
     SDL_Rect rect;
+
+    if (!texture) {
+        return;
+    }
 
     /* Send the data to the display */
     rect.x = 0;

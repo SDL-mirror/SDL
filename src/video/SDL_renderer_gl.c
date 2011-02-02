@@ -66,8 +66,8 @@ bytes_per_pixel(const Uint32 format)
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GL_CreateRenderer(SDL_Window * window, Uint32 flags);
-static int GL_ActivateRenderer(SDL_Renderer * renderer);
-static int GL_DisplayModeChanged(SDL_Renderer * renderer);
+static void GL_WindowEvent(SDL_Renderer * renderer,
+                           const SDL_WindowEvent *event);
 static int GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_QueryTexturePixels(SDL_Renderer * renderer,
                                  SDL_Texture * texture, void **pixels,
@@ -277,8 +277,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    renderer->ActivateRenderer = GL_ActivateRenderer;
-    renderer->DisplayModeChanged = GL_DisplayModeChanged;
+    renderer->WindowEvent = GL_WindowEvent;
     renderer->CreateTexture = GL_CreateTexture;
     renderer->QueryTexturePixels = GL_QueryTexturePixels;
     renderer->SetTexturePalette = GL_SetTexturePalette;
@@ -408,14 +407,19 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
+static SDL_GLContext SDL_CurrentContext = NULL;
+
 static int
 GL_ActivateRenderer(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
 
-    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
-        return -1;
+    if (SDL_CurrentContext != data->context) {
+        if (SDL_GL_MakeCurrent(window, data->context) < 0) {
+            return -1;
+        }
+        SDL_CurrentContext = data->context;
     }
     if (data->updateSize) {
         data->glMatrixMode(GL_PROJECTION);
@@ -430,14 +434,16 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
     return 0;
 }
 
-static int
-GL_DisplayModeChanged(SDL_Renderer * renderer)
+static void
+GL_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    /* Rebind the context to the window area and update matrices */
-    data->updateSize = SDL_TRUE;
-    return GL_ActivateRenderer(renderer);
+    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+        /* Rebind the context to the window area and update matrices */
+        SDL_CurrentContext = NULL;
+        data->updateSize = SDL_TRUE;
+    }
 }
 
 static __inline__ int
@@ -717,6 +723,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLuint shader = 0;
     GLenum result;
 
+    GL_ActivateRenderer(renderer);
+
     if (!convert_format(renderdata, texture->format, &internalFormat,
                         &format, &type)) {
         SDL_SetError("Texture format %s not supported by OpenGL",
@@ -874,6 +882,8 @@ GL_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
     Uint8 *palette;
 
+    GL_ActivateRenderer(renderer);
+
     if (!data->palette) {
         SDL_SetError("Texture doesn't have a palette");
         return -1;
@@ -937,6 +947,8 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
     GLenum result;
+
+    GL_ActivateRenderer(renderer);
 
     renderdata->glGetError();
     SetupTextureUpdate(renderdata, texture, pitch);
@@ -1018,6 +1030,8 @@ GL_RenderClear(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
+    GL_ActivateRenderer(renderer);
+
     data->glClearColor((GLfloat) renderer->r * inv255f,
                        (GLfloat) renderer->g * inv255f,
                        (GLfloat) renderer->b * inv255f,
@@ -1034,6 +1048,8 @@ GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
+
+    GL_ActivateRenderer(renderer);
 
     GL_SetBlendMode(data, renderer->blendMode);
 
@@ -1057,6 +1073,8 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
+
+    GL_ActivateRenderer(renderer);
 
     GL_SetBlendMode(data, renderer->blendMode);
 
@@ -1126,6 +1144,8 @@ GL_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i, x, y;
 
+    GL_ActivateRenderer(renderer);
+
     GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
@@ -1164,6 +1184,8 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
+    GL_ActivateRenderer(renderer);
+
     GL_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
@@ -1188,6 +1210,8 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
+
+    GL_ActivateRenderer(renderer);
 
     if (texturedata->dirty.list) {
         SDL_DirtyRect *dirty;
@@ -1276,6 +1300,8 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     Uint8 *src, *dst, *tmp;
     int length, rows;
 
+    GL_ActivateRenderer(renderer);
+
     if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
         /* FIXME: Do a temp copy to a format that is supported */
         SDL_SetError("Unsupported pixel format");
@@ -1323,6 +1349,8 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     Uint8 *src, *dst, *tmp;
     int length, rows;
 
+    GL_ActivateRenderer(renderer);
+
     if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
         /* FIXME: Do a temp copy to a format that is supported */
         SDL_SetError("Unsupported pixel format");
@@ -1360,6 +1388,8 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 static void
 GL_RenderPresent(SDL_Renderer * renderer)
 {
+    GL_ActivateRenderer(renderer);
+
     SDL_GL_SwapWindow(renderer->window);
 }
 
@@ -1368,6 +1398,8 @@ GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+
+    GL_ActivateRenderer(renderer);
 
     if (!data) {
         return;

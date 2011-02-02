@@ -31,7 +31,7 @@
 #include "video/SDL_yuv_sw_c.h"
 
 static SDL_Window *SDL_VideoWindow = NULL;
-static SDL_RendererInfo SDL_VideoRendererInfo;
+static SDL_Renderer *SDL_VideoRenderer = NULL;
 static SDL_Texture *SDL_VideoTexture = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
@@ -467,7 +467,8 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
     /* Destroy the screen texture and recreate it */
     SDL_QueryTexture(SDL_VideoTexture, &format, &access, &w, &h);
     SDL_DestroyTexture(SDL_VideoTexture);
-    SDL_VideoTexture = SDL_CreateTexture(format, access, width, height);
+    SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, format,
+                                         access, width, height);
     if (!SDL_VideoTexture) {
         return -1;
     }
@@ -667,20 +668,20 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a renderer for the window */
-    if (SDL_CreateRenderer(SDL_VideoWindow, -1, 0) < 0) {
+    SDL_VideoRenderer = SDL_CreateRenderer(SDL_VideoWindow, -1, 0);
+    if (!SDL_VideoRenderer) {
         return NULL;
     }
-    SDL_GetRendererInfo(&SDL_VideoRendererInfo);
 
     /* Create a texture for the screen surface */
-    SDL_VideoTexture =
-        SDL_CreateTexture(desired_format, SDL_TEXTUREACCESS_STREAMING, width,
-                          height);
+    SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, desired_format,
+                                         SDL_TEXTUREACCESS_STREAMING,
+                                         width, height);
 
     if (!SDL_VideoTexture) {
-        SDL_VideoTexture =
-            SDL_CreateTexture(desktop_format,
-                              SDL_TEXTUREACCESS_STREAMING, width, height);
+        SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, desktop_format,
+                                             SDL_TEXTUREACCESS_STREAMING,
+                                             width, height);
     }
     if (!SDL_VideoTexture) {
         return NULL;
@@ -890,8 +891,8 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         rect.y = 0;
         rect.w = screen->w;
         rect.h = screen->h;
-        SDL_RenderCopy(SDL_VideoTexture, &rect, &rect);
-        SDL_RenderPresent();
+        SDL_RenderCopy(SDL_VideoRenderer, SDL_VideoTexture, &rect, &rect);
+        SDL_RenderPresent(SDL_VideoRenderer);
     }
 }
 
@@ -1584,7 +1585,8 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     }
 
     overlay->hwdata->texture =
-        SDL_CreateTexture(texture_format, SDL_TEXTUREACCESS_STREAMING, w, h);
+        SDL_CreateTexture(SDL_VideoRenderer, texture_format,
+                          SDL_TEXTUREACCESS_STREAMING, w, h);
     if (overlay->hwdata->texture) {
         overlay->hwdata->sw = NULL;
     } else {
@@ -1600,7 +1602,7 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
         SDL_GetCurrentDisplayMode(&current_mode);
         texture_format = current_mode.format;
         overlay->hwdata->texture =
-            SDL_CreateTexture(texture_format,
+            SDL_CreateTexture(SDL_VideoRenderer, texture_format,
                               SDL_TEXTUREACCESS_STREAMING, w, h);
     }
     if (!overlay->hwdata->texture) {
@@ -1688,10 +1690,10 @@ SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
         SDL_SetError("Passed a NULL overlay or dstrect");
         return -1;
     }
-    if (SDL_RenderCopy(overlay->hwdata->texture, NULL, dstrect) < 0) {
+    if (SDL_RenderCopy(SDL_VideoRenderer, overlay->hwdata->texture, NULL, dstrect) < 0) {
         return -1;
     }
-    SDL_RenderPresent();
+    SDL_RenderPresent(SDL_VideoRenderer);
     return 0;
 }
 

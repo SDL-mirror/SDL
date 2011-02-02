@@ -54,8 +54,8 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GLES_CreateRenderer(SDL_Window * window, Uint32 flags);
-static int GLES_ActivateRenderer(SDL_Renderer * renderer);
-static int GLES_DisplayModeChanged(SDL_Renderer * renderer);
+static void GLES_WindowEvent(SDL_Renderer * renderer,
+                             const SDL_WindowEvent *event);
 static int GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GLES_QueryTexturePixels(SDL_Renderer * renderer,
                                    SDL_Texture * texture, void **pixels,
@@ -218,8 +218,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    renderer->ActivateRenderer = GLES_ActivateRenderer;
-    renderer->DisplayModeChanged = GLES_DisplayModeChanged;
+    renderer->WindowEvent = GLES_WindowEvent;
     renderer->CreateTexture = GLES_CreateTexture;
     renderer->QueryTexturePixels = GLES_QueryTexturePixels;
     renderer->SetTexturePalette = GLES_SetTexturePalette;
@@ -311,6 +310,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     return renderer;
 }
 
+static SDL_GLContext SDL_CurrentContext = NULL;
+
 static int
 GLES_ActivateRenderer(SDL_Renderer * renderer)
 {
@@ -318,8 +319,11 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
 
-    if (SDL_GL_MakeCurrent(window, data->context) < 0) {
-        return -1;
+    if (SDL_CurrentContext != data->context) {
+        if (SDL_GL_MakeCurrent(window, data->context) < 0) {
+            return -1;
+        }
+        SDL_CurrentContext = data->context;
     }
     if (data->updateSize) {
         data->glMatrixMode(GL_PROJECTION);
@@ -334,13 +338,16 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
     return 0;
 }
 
-static int
-GLES_DisplayModeChanged(SDL_Renderer * renderer)
+static void
+GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    data->updateSize = SDL_TRUE;
-    return 0;
+    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+        /* Rebind the context to the window area and update matrices */
+        SDL_CurrentContext = NULL;
+        data->updateSize = SDL_TRUE;
+    }
 }
 
 static __inline__ int
@@ -363,6 +370,8 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum format, type;
     int texture_w, texture_h;
     GLenum result;
+
+    GLES_ActivateRenderer(renderer);
 
     switch (texture->format) {
     case SDL_PIXELFORMAT_RGB24:
@@ -498,6 +507,8 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     void * temp_ptr;
     int i;
 
+    GLES_ActivateRenderer(renderer);
+
     renderdata->glGetError();
     renderdata->glEnable(data->type);
     SetupTextureUpdate(renderdata, texture, pitch);
@@ -599,6 +610,8 @@ GLES_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     GLshort *vertices;
 
+    GLES_ActivateRenderer(renderer);
+
     GLES_SetBlendMode(data, renderer->blendMode);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
@@ -625,6 +638,8 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
     GLshort *vertices;
+
+    GLES_ActivateRenderer(renderer);
 
     GLES_SetBlendMode(data, renderer->blendMode);
 
@@ -658,6 +673,8 @@ GLES_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
+
+    GLES_ActivateRenderer(renderer);
 
     GLES_SetBlendMode(data, renderer->blendMode);
 
@@ -695,6 +712,8 @@ GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
+
+    GLES_ActivateRenderer(renderer);
 
     GLES_SetBlendMode(data, renderer->blendMode);
 
@@ -738,6 +757,8 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     int i;
     void *temp_buffer;          /* used for reformatting dirty rect pixels */
     void *temp_ptr;
+
+    GLES_ActivateRenderer(renderer);
 
     data->glEnable(GL_TEXTURE_2D);
 
@@ -859,6 +880,8 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 GLES_RenderPresent(SDL_Renderer * renderer)
 {
+    GLES_ActivateRenderer(renderer);
+
     SDL_GL_SwapWindow(renderer->window);
 }
 
@@ -866,6 +889,8 @@ static void
 GLES_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
+
+    GLES_ActivateRenderer(renderer);
 
     if (!data) {
         return;

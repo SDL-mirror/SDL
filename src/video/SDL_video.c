@@ -109,6 +109,12 @@ static SDL_VideoDevice *_this = NULL;
         return retval; \
     }
 
+#define CHECK_RENDERER_MAGIC(renderer, retval) \
+    if (!renderer || renderer->magic != &_this->renderer_magic) { \
+        SDL_SetError("Invalid renderer"); \
+        return retval; \
+    }
+
 #define CHECK_TEXTURE_MAGIC(texture, retval) \
     if (!_this) { \
         SDL_UninitializedVideo(); \
@@ -1023,33 +1029,6 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     return 0;
 }
 
-static __inline__ SDL_Renderer *
-SDL_GetCurrentRenderer(SDL_bool create)
-{
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return NULL;
-    }
-    if (!SDL_CurrentRenderer) {
-        SDL_Window *window = NULL;
-
-        if (!create) {
-            SDL_SetError("Use SDL_CreateRenderer() to create a renderer");
-            return NULL;
-        }
-
-        /* Get the first window on the first display */
-        if (_this->num_displays > 0) {
-            window = _this->displays[0].windows;
-        }
-
-        if (SDL_CreateRenderer(window, -1, 0) < 0) {
-            return NULL;
-        }
-    }
-    return SDL_CurrentRenderer;
-}
-
 Uint32
 SDL_GetWindowID(SDL_Window * window)
 {
@@ -1184,7 +1163,7 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
     if (_this->SetWindowSize) {
         _this->SetWindowSize(_this, window);
     }
-    SDL_OnWindowResized(window);
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
 void
@@ -1367,16 +1346,6 @@ SDL_OnWindowHidden(SDL_Window * window)
 }
 
 void
-SDL_OnWindowResized(SDL_Window * window)
-{
-    SDL_Renderer *renderer = window->renderer;
-
-    if (renderer && renderer->DisplayModeChanged) {
-        renderer->DisplayModeChanged(renderer);
-    }
-}
-
-void
 SDL_OnWindowMinimized(SDL_Window * window)
 {
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
@@ -1451,9 +1420,6 @@ SDL_DestroyWindow(SDL_Window * window)
     if (window->title) {
         SDL_free(window->title);
     }
-    if (window->renderer) {
-        SDL_DestroyRenderer(window);
-    }
 
     /* Restore video mode, etc. */
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
@@ -1523,13 +1489,26 @@ SDL_GetRenderDriverInfo(int index, SDL_RendererInfo * info)
     return 0;
 }
 
-int
+static int
+SDL_RendererEventWatch(void *userdata, SDL_Event *event)
+{
+    SDL_Renderer *renderer = (SDL_Renderer *)userdata;
+
+    if (event->type == SDL_WINDOWEVENT && renderer->WindowEvent) {
+        SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
+        if (window == renderer->window) {
+            renderer->WindowEvent(renderer, &event->window);
+        }
+    }
+    return 0;
+}
+
+SDL_Renderer *
 SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 {
-    CHECK_WINDOW_MAGIC(window, -1);
+    SDL_Renderer *renderer = NULL;
 
-    /* Free any existing renderer */
-    SDL_DestroyRenderer(window);
+    CHECK_WINDOW_MAGIC(window, NULL);
 
     if (index < 0) {
         char *override = SDL_getenv("SDL_VIDEO_RENDERER");
@@ -1552,7 +1531,7 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 
                 if (SDL_strcasecmp(override, driver->info.name) == 0) {
                     /* Create a new renderer instance */
-                    window->renderer = driver->CreateRenderer(window, flags);
+                    renderer = driver->CreateRenderer(window, flags);
                     break;
                 }
             }
@@ -1563,8 +1542,8 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 
                 if ((driver->info.flags & flags) == flags) {
                     /* Create a new renderer instance */
-                    window->renderer = driver->CreateRenderer(window, flags);
-                    if (window->renderer) {
+                    renderer = driver->CreateRenderer(window, flags);
+                    if (renderer) {
                         /* Yay, we got one! */
                         break;
                     }
@@ -1573,74 +1552,42 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         }
         if (index == n) {
             SDL_SetError("Couldn't find matching render driver");
-            return -1;
+            return NULL;
         }
     } else {
         if (index >= SDL_GetNumRenderDrivers()) {
             SDL_SetError("index must be -1 or in the range of 0 - %d",
                          SDL_GetNumRenderDrivers() - 1);
-            return -1;
+            return NULL;
         }
         /* Create a new renderer instance */
-        window->renderer = SDL_CurrentDisplay->render_drivers[index].CreateRenderer(window, flags);
+        renderer = SDL_CurrentDisplay->render_drivers[index].CreateRenderer(window, flags);
     }
 
-    if (window->renderer == NULL) {
-        /* Assuming renderer set its error */
-        return -1;
+    if (renderer) {
+        renderer->magic = &_this->renderer_magic;
+
+        SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
     }
-
-    SDL_SelectRenderer(window);
-
-    return 0;
+    return renderer;
 }
 
 int
-SDL_SelectRenderer(SDL_Window * window)
+SDL_GetRendererInfo(SDL_Renderer * renderer, SDL_RendererInfo * info)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    CHECK_WINDOW_MAGIC(window, -1);
-
-    renderer = window->renderer;
-    if (!renderer) {
-        SDL_SetError("Use SDL_CreateRenderer() to create a renderer");
-        return -1;
-    }
-    if (renderer->ActivateRenderer) {
-        if (renderer->ActivateRenderer(renderer) < 0) {
-            return -1;
-        }
-    }
-    SDL_CurrentDisplay->current_renderer = renderer;
-    return 0;
-}
-
-int
-SDL_GetRendererInfo(SDL_RendererInfo * info)
-{
-    SDL_Renderer *renderer = SDL_GetCurrentRenderer(SDL_FALSE);
-    if (!renderer) {
-        return -1;
-    }
     *info = renderer->info;
     return 0;
 }
 
 SDL_Texture *
-SDL_CreateTexture(Uint32 format, int access, int w, int h)
+SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int h)
 {
-    SDL_Renderer *renderer;
     SDL_Texture *texture;
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return 0;
-    }
-    if (!renderer->CreateTexture) {
-        SDL_Unsupported();
-        return 0;
-    }
+    CHECK_RENDERER_MAGIC(renderer, NULL);
+
     if (w <= 0 || h <= 0) {
         SDL_SetError("Texture dimensions can't be 0");
         return 0;
@@ -1674,25 +1621,21 @@ SDL_CreateTexture(Uint32 format, int access, int w, int h)
 }
 
 SDL_Texture *
-SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
+SDL_CreateTextureFromSurface(SDL_Renderer * renderer, Uint32 format, SDL_Surface * surface)
 {
     SDL_Texture *texture;
     Uint32 requested_format = format;
     SDL_PixelFormat *fmt;
-    SDL_Renderer *renderer;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
 
+    CHECK_RENDERER_MAGIC(renderer, NULL);
+
     if (!surface) {
         SDL_SetError("SDL_CreateTextureFromSurface() passed NULL surface");
-        return 0;
+        return NULL;
     }
     fmt = surface->format;
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return 0;
-    }
 
     if (format) {
         if (!SDL_PixelFormatEnumToMasks
@@ -1902,15 +1845,14 @@ SDL_CreateTextureFromSurface(Uint32 format, SDL_Surface * surface)
     }
 
     texture =
-        SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
-                          surface->h);
+        SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STATIC,
+                          surface->w, surface->h);
     if (!texture && !requested_format) {
         SDL_DisplayMode desktop_mode;
         SDL_GetDesktopDisplayMode(&desktop_mode);
         format = desktop_mode.format;
-        texture =
-            SDL_CreateTexture(format, SDL_TEXTUREACCESS_STATIC, surface->w,
-                              surface->h);
+        texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STATIC,
+                                    surface->w, surface->h);
     }
     if (!texture) {
         return 0;
@@ -2246,14 +2188,11 @@ SDL_DirtyTexture(SDL_Texture * texture, int numrects,
 }
 
 int
-SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+SDL_SetRenderDrawColor(SDL_Renderer * renderer,
+                       Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
     renderer->r = r;
     renderer->g = g;
     renderer->b = b;
@@ -2262,14 +2201,11 @@ SDL_SetRenderDrawColor(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 }
 
 int
-SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
+SDL_GetRenderDrawColor(SDL_Renderer * renderer,
+                       Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
     if (r) {
         *r = renderer->r;
     }
@@ -2286,52 +2222,40 @@ SDL_GetRenderDrawColor(Uint8 * r, Uint8 * g, Uint8 * b, Uint8 * a)
 }
 
 int
-SDL_SetRenderDrawBlendMode(SDL_BlendMode blendMode)
+SDL_SetRenderDrawBlendMode(SDL_Renderer * renderer, SDL_BlendMode blendMode)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
     renderer->blendMode = blendMode;
     return 0;
 }
 
 int
-SDL_GetRenderDrawBlendMode(SDL_BlendMode *blendMode)
+SDL_GetRenderDrawBlendMode(SDL_Renderer * renderer, SDL_BlendMode *blendMode)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
     *blendMode = renderer->blendMode;
     return 0;
 }
 
 int
-SDL_RenderClear()
+SDL_RenderClear(SDL_Renderer * renderer)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
     if (!renderer->RenderClear) {
         SDL_BlendMode blendMode = renderer->blendMode;
         int status;
 
         if (blendMode >= SDL_BLENDMODE_BLEND) {
-            SDL_SetRenderDrawBlendMode(SDL_BLENDMODE_NONE);
+            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
         }
 
-        status = SDL_RenderFillRect(NULL);
+        status = SDL_RenderFillRect(renderer, NULL);
 
         if (blendMode >= SDL_BLENDMODE_BLEND) {
-            SDL_SetRenderDrawBlendMode(blendMode);
+            SDL_SetRenderDrawBlendMode(renderer, blendMode);
         }
         return status;
     }
@@ -2339,31 +2263,23 @@ SDL_RenderClear()
 }
 
 int
-SDL_RenderDrawPoint(int x, int y)
+SDL_RenderDrawPoint(SDL_Renderer * renderer, int x, int y)
 {
     SDL_Point point;
 
     point.x = x;
     point.y = y;
-    return SDL_RenderDrawPoints(&point, 1);
+    return SDL_RenderDrawPoints(renderer, &point, 1);
 }
 
 int
-SDL_RenderDrawPoints(const SDL_Point * points, int count)
+SDL_RenderDrawPoints(SDL_Renderer * renderer,
+                     const SDL_Point * points, int count)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
         SDL_SetError("SDL_RenderDrawPoints(): Passed NULL points");
-        return -1;
-    }
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderDrawPoints) {
-        SDL_Unsupported();
         return -1;
     }
     if (count < 1) {
@@ -2373,7 +2289,7 @@ SDL_RenderDrawPoints(const SDL_Point * points, int count)
 }
 
 int
-SDL_RenderDrawLine(int x1, int y1, int x2, int y2)
+SDL_RenderDrawLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
 {
     SDL_Point points[2];
 
@@ -2381,25 +2297,17 @@ SDL_RenderDrawLine(int x1, int y1, int x2, int y2)
     points[0].y = y1;
     points[1].x = x2;
     points[1].y = y2;
-    return SDL_RenderDrawLines(points, 2);
+    return SDL_RenderDrawLines(renderer, points, 2);
 }
 
 int
-SDL_RenderDrawLines(const SDL_Point * points, int count)
+SDL_RenderDrawLines(SDL_Renderer * renderer,
+                    const SDL_Point * points, int count)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
         SDL_SetError("SDL_RenderDrawLines(): Passed NULL points");
-        return -1;
-    }
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderDrawLines) {
-        SDL_Unsupported();
         return -1;
     }
     if (count < 2) {
@@ -2409,33 +2317,27 @@ SDL_RenderDrawLines(const SDL_Point * points, int count)
 }
 
 int
-SDL_RenderDrawRect(const SDL_Rect * rect)
+SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    return SDL_RenderDrawRects(&rect, 1);
+    return SDL_RenderDrawRects(renderer, &rect, 1);
 }
 
 int
-SDL_RenderDrawRects(const SDL_Rect ** rects, int count)
+SDL_RenderDrawRects(SDL_Renderer * renderer,
+                    const SDL_Rect ** rects, int count)
 {
-    SDL_Renderer *renderer;
     int i;
+
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
         SDL_SetError("SDL_RenderDrawRects(): Passed NULL rects");
         return -1;
     }
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderDrawRects) {
-        SDL_Unsupported();
-        return -1;
-    }
     if (count < 1) {
         return 0;
     }
+
     /* Check for NULL rect, which means fill entire window */
     for (i = 0; i < count; ++i) {
         if (rects[i] == NULL) {
@@ -2455,33 +2357,27 @@ SDL_RenderDrawRects(const SDL_Rect ** rects, int count)
 }
 
 int
-SDL_RenderFillRect(const SDL_Rect * rect)
+SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    return SDL_RenderFillRects(&rect, 1);
+    return SDL_RenderFillRects(renderer, &rect, 1);
 }
 
 int
-SDL_RenderFillRects(const SDL_Rect ** rects, int count)
+SDL_RenderFillRects(SDL_Renderer * renderer,
+                    const SDL_Rect ** rects, int count)
 {
-    SDL_Renderer *renderer;
     int i;
+
+    CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
         SDL_SetError("SDL_RenderFillRects(): Passed NULL rects");
         return -1;
     }
-
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (!renderer->RenderFillRects) {
-        SDL_Unsupported();
-        return -1;
-    }
     if (count < 1) {
         return 0;
     }
+
     /* Check for NULL rect, which means fill entire window */
     for (i = 0; i < count; ++i) {
         if (rects[i] == NULL) {
@@ -2501,26 +2397,18 @@ SDL_RenderFillRects(const SDL_Rect ** rects, int count)
 }
 
 int
-SDL_RenderCopy(SDL_Texture * texture, const SDL_Rect * srcrect,
-               const SDL_Rect * dstrect)
+SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+               const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
-    SDL_Renderer *renderer;
     SDL_Window *window;
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
 
+    CHECK_RENDERER_MAGIC(renderer, -1);
     CHECK_TEXTURE_MAGIC(texture, -1);
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
-    if (texture->renderer != renderer) {
+    if (renderer != texture->renderer) {
         SDL_SetError("Texture was not created with this renderer");
-        return -1;
-    }
-    if (!renderer->RenderCopy) {
-        SDL_Unsupported();
         return -1;
     }
     window = renderer->window;
@@ -2563,17 +2451,14 @@ SDL_RenderCopy(SDL_Texture * texture, const SDL_Rect * srcrect,
 }
 
 int
-SDL_RenderReadPixels(const SDL_Rect * rect, Uint32 format,
-                     void * pixels, int pitch)
+SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                     Uint32 format, void * pixels, int pitch)
 {
-    SDL_Renderer *renderer;
     SDL_Window *window;
     SDL_Rect real_rect;
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
     if (!renderer->RenderReadPixels) {
         SDL_Unsupported();
         return -1;
@@ -2607,17 +2492,14 @@ SDL_RenderReadPixels(const SDL_Rect * rect, Uint32 format,
 }
 
 int
-SDL_RenderWritePixels(const SDL_Rect * rect, Uint32 format,
-                      const void * pixels, int pitch)
+SDL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                      Uint32 format, const void * pixels, int pitch)
 {
-    SDL_Renderer *renderer;
     SDL_Window *window;
     SDL_Rect real_rect;
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer) {
-        return -1;
-    }
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
     if (!renderer->RenderWritePixels) {
         SDL_Unsupported();
         return -1;
@@ -2651,14 +2533,10 @@ SDL_RenderWritePixels(const SDL_Rect * rect, Uint32 format,
 }
 
 void
-SDL_RenderPresent(void)
+SDL_RenderPresent(SDL_Renderer * renderer)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, );
 
-    renderer = SDL_GetCurrentRenderer(SDL_TRUE);
-    if (!renderer || !renderer->RenderPresent) {
-        return;
-    }
 #if SDL_VIDEO_DRIVER_WINDOWS
     IME_Present((SDL_VideoData *)_this->driverdata);
 #endif
@@ -2688,30 +2566,22 @@ SDL_DestroyTexture(SDL_Texture * texture)
 }
 
 void
-SDL_DestroyRenderer(SDL_Window * window)
+SDL_DestroyRenderer(SDL_Renderer * renderer)
 {
-    SDL_Renderer *renderer;
+    CHECK_RENDERER_MAGIC(renderer, );
 
-    CHECK_WINDOW_MAGIC(window, );
-
-    renderer = window->renderer;
-    if (!renderer) {
-        return;
-    }
+    SDL_DelEventWatch(SDL_RendererEventWatch, renderer);
 
     /* Free existing textures for this renderer */
     while (renderer->textures) {
         SDL_DestroyTexture(renderer->textures);
     }
 
+    /* It's no longer magical... */
+    renderer->magic = NULL;
+
     /* Free the renderer instance */
     renderer->DestroyRenderer(renderer);
-
-    /* Clear references */
-    window->renderer = NULL;
-    if (SDL_CurrentDisplay->current_renderer == renderer) {
-        SDL_CurrentDisplay->current_renderer = NULL;
-    }
 }
 
 SDL_bool
