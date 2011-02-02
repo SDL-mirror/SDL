@@ -134,6 +134,10 @@ X11_InitModes(_THIS)
         }
 
         mode.format = X11_GetPixelFormatFromVisualInfo(data->display, &vinfo);
+        if (SDL_ISPIXELFORMAT_INDEXED(mode.format)) {
+            /* We don't support palettized modes now */
+            continue;
+        }
         mode.w = DisplayWidth(data->display, screen);
         mode.h = DisplayHeight(data->display, screen);
         mode.refresh_rate = 0;

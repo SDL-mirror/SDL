@@ -118,8 +118,6 @@ int qnxgf_videoinit(_THIS);
 void qnxgf_videoquit(_THIS);
 void qnxgf_getdisplaymodes(_THIS);
 int qnxgf_setdisplaymode(_THIS, SDL_DisplayMode * mode);
-int qnxgf_setdisplaypalette(_THIS, SDL_Palette * palette);
-int qnxgf_getdisplaypalette(_THIS, SDL_Palette * palette);
 int qnxgf_setdisplaygammaramp(_THIS, Uint16 * ramp);
 int qnxgf_getdisplaygammaramp(_THIS, Uint16 * ramp);
 int qnxgf_createwindow(_THIS, SDL_Window * window);

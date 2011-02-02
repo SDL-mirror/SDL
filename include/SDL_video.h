@@ -356,25 +356,6 @@ extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_Window * window,
                                                      SDL_DisplayMode * mode);
 
 /**
- *  \brief Set the palette entries for indexed display modes.
- *  
- *  \return 0 on success, or -1 if the display mode isn't palettized or the 
- *          colors couldn't be set.
- */
-extern DECLSPEC int SDLCALL SDL_SetDisplayPalette(const SDL_Color * colors,
-                                                  int firstcolor,
-                                                  int ncolors);
-
-/**
- *  \brief Gets the palette entries for indexed display modes.
- *  
- *  \return 0 on success, or -1 if the display mode isn't palettized
- */
-extern DECLSPEC int SDLCALL SDL_GetDisplayPalette(SDL_Color * colors,
-                                                  int firstcolor,
-                                                  int ncolors);
-
-/**
  *  \brief Set the gamma correction for each of the color channels on the 
  *         currently selected display.
  *  

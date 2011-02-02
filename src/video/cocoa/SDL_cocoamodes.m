@@ -117,8 +117,8 @@ GetDisplayMode(CFDictionaryRef moderef, SDL_DisplayMode *mode)
     mode->format = SDL_PIXELFORMAT_UNKNOWN;
     switch (bpp) {
     case 8:
-        mode->format = SDL_PIXELFORMAT_INDEX8;
-        break;
+        /* We don't support palettized modes now */
+        return SDL_FALSE;
     case 16:
         mode->format = SDL_PIXELFORMAT_ARGB1555;
         break;

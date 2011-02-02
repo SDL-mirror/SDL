@@ -132,8 +132,6 @@ int photon_videoinit(_THIS);
 void photon_videoquit(_THIS);
 void photon_getdisplaymodes(_THIS);
 int photon_setdisplaymode(_THIS, SDL_DisplayMode * mode);
-int photon_setdisplaypalette(_THIS, SDL_Palette * palette);
-int photon_getdisplaypalette(_THIS, SDL_Palette * palette);
 int photon_setdisplaygammaramp(_THIS, Uint16 * ramp);
 int photon_getdisplaygammaramp(_THIS, Uint16 * ramp);
 int photon_createwindow(_THIS, SDL_Window * window);

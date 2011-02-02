@@ -67,12 +67,6 @@ struct SDL_Renderer
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*QueryTexturePixels) (SDL_Renderer * renderer, SDL_Texture * texture,
                                void **pixels, int *pitch);
-    int (*SetTexturePalette) (SDL_Renderer * renderer, SDL_Texture * texture,
-                              const SDL_Color * colors, int firstcolor,
-                              int ncolors);
-    int (*GetTexturePalette) (SDL_Renderer * renderer, SDL_Texture * texture,
-                              SDL_Color * colors, int firstcolor,
-                              int ncolors);
     int (*SetTextureColorMod) (SDL_Renderer * renderer,
                                SDL_Texture * texture);
     int (*SetTextureAlphaMod) (SDL_Renderer * renderer,
@@ -195,7 +189,6 @@ struct SDL_VideoDisplay
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
     SDL_bool updating_fullscreen;
-    SDL_Palette *palette;
 
     Uint16 *gamma;
     Uint16 *saved_gamma;        /* (just offset into gamma) */
@@ -258,12 +251,6 @@ struct SDL_VideoDevice
      * associated with them.
      */
     int (*SetDisplayMode) (_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-
-    /* Set the color entries of the display palette */
-    int (*SetDisplayPalette) (_THIS, SDL_VideoDisplay * display, SDL_Palette * palette);
-
-    /* Get the color entries of the display palette */
-    int (*GetDisplayPalette) (_THIS, SDL_VideoDisplay * display, SDL_Palette * palette);
 
     /* Set the gamma ramp */
     int (*SetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
@@ -447,8 +434,6 @@ extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_D
 extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
 extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
-extern int SDL_SetPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors);
-extern int SDL_GetPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors);
 extern int SDL_SetGammaRampForDisplay(SDL_VideoDisplay * display, const Uint16 * red, const Uint16 * green, const Uint16 * blue);
 extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, Uint16 * green, Uint16 * blue);
 extern void SDL_AddRenderDriver(SDL_VideoDisplay *display, const SDL_RenderDriver * driver);

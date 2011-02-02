@@ -284,8 +284,6 @@ qnxgf_create(int devindex)
     device->VideoQuit = qnxgf_videoquit;
     device->GetDisplayModes = qnxgf_getdisplaymodes;
     device->SetDisplayMode = qnxgf_setdisplaymode;
-    device->SetDisplayPalette = qnxgf_setdisplaypalette;
-    device->GetDisplayPalette = qnxgf_getdisplaypalette;
     device->SetDisplayGammaRamp = qnxgf_setdisplaygammaramp;
     device->GetDisplayGammaRamp = qnxgf_getdisplaygammaramp;
     device->CreateWindow = qnxgf_createwindow;
@@ -919,30 +917,6 @@ qnxgf_setdisplaymode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     gf_layer_enable(didata->layer);
 
     return 0;
-}
-
-int
-qnxgf_setdisplaypalette(_THIS, SDL_VideoDisplay * display, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
-
-    /* QNX GF doesn't have support for global palette changing, but we */
-    /* could store it for usage in future */
-
-    SDL_Unsupported();
-    return -1;
-}
-
-int
-qnxgf_getdisplaypalette(_THIS, SDL_VideoDisplay * display, SDL_Palette * palette)
-{
-    SDL_DisplayData *didata = (SDL_DisplayData *) display->driverdata;
-
-    /* We can't provide current palette settings and looks like SDL          */
-    /* do not call this function also, in such case this function returns -1 */
-
-    SDL_Unsupported();
-    return -1;
 }
 
 int

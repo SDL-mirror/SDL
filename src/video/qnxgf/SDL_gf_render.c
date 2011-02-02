@@ -75,9 +75,8 @@ SDL_RenderDriver gf_renderdriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
-     13,
+     12,
      {
-      SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
       SDL_PIXELFORMAT_RGB565,
       SDL_PIXELFORMAT_RGB888,
@@ -131,8 +130,6 @@ gf_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = gf_activaterenderer;
     renderer->CreateTexture = gf_createtexture;
     renderer->QueryTexturePixels = gf_querytexturepixels;
-    renderer->SetTexturePalette = gf_settexturepalette;
-    renderer->GetTexturePalette = gf_gettexturepalette;
     renderer->UpdateTexture = gf_updatetexture;
     renderer->LockTexture = gf_locktexture;
     renderer->UnlockTexture = gf_unlocktexture;
@@ -302,18 +299,6 @@ gf_createtexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 gf_querytexturepixels(SDL_Renderer * renderer, SDL_Texture * texture,
                       void **pixels, int *pitch)
-{
-}
-
-static int
-gf_settexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                     const SDL_Color * colors, int firstcolor, int ncolors)
-{
-}
-
-static int
-gf_gettexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                     SDL_Color * colors, int firstcolor, int ncolors)
 {
 }
 

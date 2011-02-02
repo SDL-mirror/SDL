@@ -117,7 +117,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
         SDL_DUMMY_DestroyRenderer(renderer);
         return NULL;
     }
-    SDL_SetSurfacePalette(data->screen, display->palette);
 
     return renderer;
 }

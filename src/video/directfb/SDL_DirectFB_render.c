@@ -43,14 +43,6 @@ static int DirectFB_CreateTexture(SDL_Renderer * renderer,
 static int DirectFB_QueryTexturePixels(SDL_Renderer * renderer,
                                        SDL_Texture * texture,
                                        void **pixels, int *pitch);
-static int DirectFB_SetTexturePalette(SDL_Renderer * renderer,
-                                      SDL_Texture * texture,
-                                      const SDL_Color * colors,
-                                      int firstcolor, int ncolors);
-static int DirectFB_GetTexturePalette(SDL_Renderer * renderer,
-                                      SDL_Texture * texture,
-                                      SDL_Color * colors,
-                                      int firstcolor, int ncolors);
 static int DirectFB_UpdateTexture(SDL_Renderer * renderer,
                                   SDL_Texture * texture,
                                   const SDL_Rect * rect,
@@ -86,10 +78,8 @@ SDL_RenderDriver DirectFB_RenderDriver = {
     {
      "directfb",
      (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
-     14,
+     12,
      {
-      SDL_PIXELFORMAT_INDEX4LSB,
-      SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB332,
       SDL_PIXELFORMAT_RGB555,
       SDL_PIXELFORMAT_RGB565,
@@ -123,7 +113,6 @@ typedef struct
     Uint32 format;
     void *pixels;
     int pitch;
-    IDirectFBPalette *palette;
     SDL_VideoDisplay *display;
     SDL_DirtyRectList dirty;
 #if (DFB_VERSION_ATLEAST(1,2,0))
@@ -148,7 +137,6 @@ TextureHasAlpha(DirectFB_TextureData * data)
     if (!data)
         return 0;
     switch (data->format) {
-    case SDL_PIXELFORMAT_INDEX4LSB:
     case SDL_PIXELFORMAT_ARGB4444:
     case SDL_PIXELFORMAT_ARGB1555:
     case SDL_PIXELFORMAT_ARGB8888:
@@ -211,39 +199,6 @@ DirectFB_AddRenderDriver(_THIS)
     }
 }
 
-static int
-DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
-{
-#if USE_DISPLAY_PALETTE
-    DirectFB_RenderData *data = (DirectFB_RenderData *) userdata;
-    SDL_DFB_WINDOWSURFACE(data->window);
-    IDirectFBPalette *surfpal;
-
-    int i;
-    int ncolors;
-    DFBColor entries[256];
-
-    SDL_DFB_CHECKERR(destsurf->GetPalette(destsurf, &surfpal));
-
-    /* FIXME: number of colors */
-    ncolors = (palette->ncolors < 256 ? palette->ncolors : 256);
-
-    for (i = 0; i < ncolors; ++i) {
-        entries[i].r = palette->colors[i].r;
-        entries[i].g = palette->colors[i].g;
-        entries[i].b = palette->colors[i].b;
-        entries[i].a = palette->colors[i].unused;
-    }
-    SDL_DFB_CHECKERR(surfpal->SetEntries(surfpal, entries, ncolors, 0));
-    return 0;
-  error:
-#else
-    SDL_Unsupported();
-#endif
-    return -1;
-}
-
-
 SDL_Renderer *
 DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -260,8 +215,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = DirectFB_ActivateRenderer;
     renderer->CreateTexture = DirectFB_CreateTexture;
     renderer->QueryTexturePixels = DirectFB_QueryTexturePixels;
-    renderer->SetTexturePalette = DirectFB_SetTexturePalette;
-    renderer->GetTexturePalette = DirectFB_GetTexturePalette;
     renderer->UpdateTexture = DirectFB_UpdateTexture;
     renderer->LockTexture = DirectFB_LockTexture;
     renderer->UnlockTexture = DirectFB_UnlockTexture;
@@ -298,11 +251,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (p)
         data->isyuvdirect = atoi(p);
 
-    /* Set up a palette watch on the display palette */
-    if (display->palette) {
-        SDL_AddPaletteWatch(display->palette, DisplayPaletteChanged, data);
-    }
-
     return renderer;
 
   error:
@@ -315,10 +263,6 @@ static DFBSurfacePixelFormat
 SDLToDFBPixelFormat(Uint32 format)
 {
     switch (format) {
-    case SDL_PIXELFORMAT_INDEX4LSB:
-        return DSPF_ALUT44;
-    case SDL_PIXELFORMAT_INDEX8:
-        return DSPF_LUT8;
     case SDL_PIXELFORMAT_RGB332:
         return DSPF_RGB332;
     case SDL_PIXELFORMAT_RGB555:
@@ -345,12 +289,6 @@ SDLToDFBPixelFormat(Uint32 format)
         return DSPF_UYVY;       /* Packed mode: U0+Y0+V0+Y1 (1 plane) */
     case SDL_PIXELFORMAT_YVYU:
         return DSPF_UNKNOWN;    /* Packed mode: Y0+V0+Y1+U0 (1 plane) */
-    case SDL_PIXELFORMAT_INDEX1LSB:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_INDEX1MSB:
-        return DSPF_UNKNOWN;
-    case SDL_PIXELFORMAT_INDEX4MSB:
-        return DSPF_UNKNOWN;
 #if (DFB_VERSION_ATLEAST(1,2,0))
     case SDL_PIXELFORMAT_RGB444:
         return DSPF_RGB444;
@@ -499,12 +437,6 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         /* Create the surface */
         SDL_DFB_CHECKERR(devdata->dfb->CreateSurface(devdata->dfb, &dsc,
                                                      &data->surface));
-        if (SDL_ISPIXELFORMAT_INDEXED(data->format)
-            && !SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-            SDL_DFB_CHECKERR(data->surface->GetPalette(data->surface,
-                                                       &data->palette));
-        }
-
     }
 #if (DFB_VERSION_ATLEAST(1,2,0))
     data->render_options = DSRO_NONE;
@@ -543,68 +475,6 @@ DirectFB_QueryTexturePixels(SDL_Renderer * renderer,
         *pitch = texturedata->pitch;
     }
     return 0;
-}
-
-static int
-DirectFB_SetTexturePalette(SDL_Renderer * renderer,
-                           SDL_Texture * texture,
-                           const SDL_Color * colors, int firstcolor,
-                           int ncolors)
-{
-    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
- 
-    if (SDL_ISPIXELFORMAT_INDEXED(data->format)
-        && !SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-        DFBColor entries[256];
-        int i;
-
-        for (i = 0; i < ncolors; ++i) {
-            entries[i].r = colors[i].r;
-            entries[i].g = colors[i].g;
-            entries[i].b = colors[i].b;
-            entries[i].a = 0xFF;
-        }
-        SDL_DFB_CHECKERR(data->
-                         palette->SetEntries(data->palette, entries, ncolors,
-                                             firstcolor));
-        return 0;
-    } else {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
-    }
-  error:
-    return -1;
-}
-
-static int
-DirectFB_GetTexturePalette(SDL_Renderer * renderer,
-                           SDL_Texture * texture, SDL_Color * colors,
-                           int firstcolor, int ncolors)
-{
-    DirectFB_TextureData *data = (DirectFB_TextureData *) texture->driverdata;
-
-    if (SDL_ISPIXELFORMAT_INDEXED(data->format)
-        && !SDL_ISPIXELFORMAT_FOURCC(data->format)) {
-        DFBColor entries[256];
-        int i;
-
-        SDL_DFB_CHECKERR(data->
-                         palette->GetEntries(data->palette, entries, ncolors,
-                                             firstcolor));
-
-        for (i = 0; i < ncolors; ++i) {
-            colors[i].r = entries[i].r;
-            colors[i].g = entries[i].g;
-            colors[i].b = entries[i].b;
-            colors->unused = SDL_ALPHA_OPAQUE;
-        }
-        return 0;
-    } else {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
-    }
-  error:
-    return -1;
 }
 
 static int

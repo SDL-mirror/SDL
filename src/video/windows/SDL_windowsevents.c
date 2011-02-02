@@ -501,25 +501,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         break;
 
-        /* We are about to get palette focus! */
-    case WM_QUERYNEWPALETTE:
-        {
-            /*
-                WIN_RealizePalette(current_video);
-                returnCode = TRUE;
-             */
-        }
-        break;
-
-        /* Another application changed the palette */
-    case WM_PALETTECHANGED:
-        {
-            /*
-               WIN_PaletteChanged(current_video, (HWND) wParam);
-             */
-        }
-        break;
-
         /* We were occluded, refresh our display */
     case WM_PAINT:
         {

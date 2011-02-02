@@ -645,7 +645,6 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
 {
     SDL_DisplayMode display_mode;
     SDL_DisplayMode current_mode;
-    int ncolors;
 
     if (mode) {
         display_mode = *mode;
@@ -689,29 +688,6 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
         return -1;
     }
     display->current_mode = display_mode;
-
-    /* Set up a palette, if necessary */
-    if (SDL_ISPIXELFORMAT_INDEXED(display_mode.format)) {
-        ncolors = (1 << SDL_BITSPERPIXEL(display_mode.format));
-    } else {
-        ncolors = 0;
-    }
-    if ((!ncolors && display->palette) || (ncolors && !display->palette)
-        || (ncolors && ncolors != display->palette->ncolors)) {
-        if (display->palette) {
-            SDL_FreePalette(display->palette);
-            display->palette = NULL;
-        }
-        if (ncolors) {
-            display->palette = SDL_AllocPalette(ncolors);
-            if (!display->palette) {
-                return -1;
-            }
-            SDL_DitherColors(display->palette->colors,
-                             SDL_BITSPERPIXEL(display_mode.format));
-        }
-    }
-
     return 0;
 }
 
@@ -811,66 +787,6 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
     /* Nope, restore the desktop mode */
     SDL_SetDisplayModeForDisplay(display, NULL);
     display->fullscreen_window = NULL;
-}
-
-int
-SDL_SetPaletteForDisplay(SDL_VideoDisplay * display, const SDL_Color * colors, int firstcolor, int ncolors)
-{
-    SDL_Palette *palette;
-    int status = 0;
-
-    palette = display->palette;
-    if (!palette) {
-        SDL_SetError("Display mode does not have a palette");
-        return -1;
-    }
-    status = SDL_SetPaletteColors(palette, colors, firstcolor, ncolors);
-
-    if (_this->SetDisplayPalette) {
-        if (_this->SetDisplayPalette(_this, display, palette) < 0) {
-            status = -1;
-        }
-    }
-    return status;
-}
-
-int
-SDL_SetDisplayPalette(const SDL_Color * colors, int firstcolor, int ncolors)
-{
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    return SDL_SetPaletteForDisplay(SDL_CurrentDisplay, colors, firstcolor, ncolors);
-}
-
-int
-SDL_GetPaletteForDisplay(SDL_VideoDisplay * display, SDL_Color * colors, int firstcolor, int ncolors)
-{
-    SDL_Palette *palette;
-
-    palette = display->palette;
-    if (!palette || !palette->ncolors) {
-        SDL_SetError("Display mode does not have a palette");
-        return -1;
-    }
-    if (firstcolor < 0 || (firstcolor + ncolors) > palette->ncolors) {
-        SDL_SetError("Palette indices are out of range");
-        return -1;
-    }
-    SDL_memcpy(colors, &palette->colors[firstcolor],
-               ncolors * sizeof(*colors));
-    return 0;
-}
-
-int
-SDL_GetDisplayPalette(SDL_Color * colors, int firstcolor, int ncolors)
-{
-    if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
-    }
-    return SDL_GetPaletteForDisplay(SDL_CurrentDisplay, colors, firstcolor, ncolors);
 }
 
 SDL_Window *
@@ -1674,12 +1590,7 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, Uint32 format, SDL_Surface
                 SDL_PIXELFORMAT_BGRA4444,
                 SDL_PIXELFORMAT_RGB444,
                 SDL_PIXELFORMAT_ARGB2101010,
-                SDL_PIXELFORMAT_INDEX8,
-                SDL_PIXELFORMAT_INDEX4LSB,
-                SDL_PIXELFORMAT_INDEX4MSB,
                 SDL_PIXELFORMAT_RGB332,
-                SDL_PIXELFORMAT_INDEX1LSB,
-                SDL_PIXELFORMAT_INDEX1MSB,
                 SDL_PIXELFORMAT_UNKNOWN
             };
 
@@ -1874,25 +1785,10 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, Uint32 format, SDL_Surface
 
         /* Set up a destination surface for the texture update */
         SDL_InitFormat(&dst_fmt, bpp, Rmask, Gmask, Bmask, Amask);
-        if (SDL_ISPIXELFORMAT_INDEXED(format)) {
-            dst_fmt.palette =
-                SDL_AllocPalette((1 << SDL_BITSPERPIXEL(format)));
-            if (dst_fmt.palette) {
-                /*
-                 * FIXME: Should we try to copy
-                 * fmt->palette?
-                 */
-                SDL_DitherColors(dst_fmt.palette->colors,
-                                 SDL_BITSPERPIXEL(format));
-            }
-        }
         dst = SDL_ConvertSurface(surface, &dst_fmt, 0);
         if (dst) {
             SDL_UpdateTexture(texture, NULL, dst->pixels, dst->pitch);
             SDL_FreeSurface(dst);
-        }
-        if (dst_fmt.palette) {
-            SDL_FreePalette(dst_fmt.palette);
         }
         if (!dst) {
             SDL_DestroyTexture(texture);
@@ -1917,11 +1813,6 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, Uint32 format, SDL_Surface
             SDL_GetSurfaceBlendMode(surface, &blendMode);
             SDL_SetTextureBlendMode(texture, blendMode);
         }
-    }
-
-    if (SDL_ISPIXELFORMAT_INDEXED(format) && fmt->palette) {
-        SDL_SetTexturePalette(texture, fmt->palette->colors, 0,
-                              fmt->palette->ncolors);
     }
     return texture;
 }
@@ -1960,40 +1851,6 @@ SDL_QueryTexturePixels(SDL_Texture * texture, void **pixels, int *pitch)
         return -1;
     }
     return renderer->QueryTexturePixels(renderer, texture, pixels, pitch);
-}
-
-int
-SDL_SetTexturePalette(SDL_Texture * texture, const SDL_Color * colors,
-                      int firstcolor, int ncolors)
-{
-    SDL_Renderer *renderer;
-
-    CHECK_TEXTURE_MAGIC(texture, -1);
-
-    renderer = texture->renderer;
-    if (!renderer->SetTexturePalette) {
-        SDL_Unsupported();
-        return -1;
-    }
-    return renderer->SetTexturePalette(renderer, texture, colors, firstcolor,
-                                       ncolors);
-}
-
-int
-SDL_GetTexturePalette(SDL_Texture * texture, SDL_Color * colors,
-                      int firstcolor, int ncolors)
-{
-    SDL_Renderer *renderer;
-
-    CHECK_TEXTURE_MAGIC(texture, -1);
-
-    renderer = texture->renderer;
-    if (!renderer->GetTexturePalette) {
-        SDL_Unsupported();
-        return -1;
-    }
-    return renderer->GetTexturePalette(renderer, texture, colors, firstcolor,
-                                       ncolors);
 }
 
 int
@@ -2686,10 +2543,6 @@ SDL_VideoQuit(void)
         if (display->desktop_mode.driverdata) {
             SDL_free(display->desktop_mode.driverdata);
             display->desktop_mode.driverdata = NULL;
-        }
-        if (display->palette) {
-            SDL_FreePalette(display->palette);
-            display->palette = NULL;
         }
         if (display->gamma) {
             SDL_free(display->gamma);

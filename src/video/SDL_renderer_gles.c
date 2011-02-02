@@ -60,13 +60,6 @@ static int GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GLES_QueryTexturePixels(SDL_Renderer * renderer,
                                    SDL_Texture * texture, void **pixels,
                                    int *pitch);
-static int GLES_SetTexturePalette(SDL_Renderer * renderer,
-                                  SDL_Texture * texture,
-                                  const SDL_Color * colors, int firstcolor,
-                                  int ncolors);
-static int GLES_GetTexturePalette(SDL_Renderer * renderer,
-                                  SDL_Texture * texture, SDL_Color * colors,
-                                  int firstcolor, int ncolors);
 static int GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * rect, const void *pixels,
                               int pitch);
@@ -219,8 +212,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->WindowEvent = GLES_WindowEvent;
     renderer->CreateTexture = GLES_CreateTexture;
     renderer->QueryTexturePixels = GLES_QueryTexturePixels;
-    renderer->SetTexturePalette = GLES_SetTexturePalette;
-    renderer->GetTexturePalette = GLES_GetTexturePalette;
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
@@ -465,22 +456,6 @@ GLES_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
     *pixels = data->pixels;
     *pitch = data->pitch;
     return 0;
-}
-
-static int
-GLES_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                       const SDL_Color * colors, int firstcolor, int ncolors)
-{
-    SDL_SetError("OpenGL ES does not support paletted textures");
-    return -1;
-}
-
-static int
-GLES_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                       SDL_Color * colors, int firstcolor, int ncolors)
-{
-    SDL_SetError("OpenGL ES does not support paletted textures");
-    return -1;
 }
 
 static void

@@ -94,13 +94,6 @@ static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_QueryTexturePixels(SDL_Renderer * renderer,
                                   SDL_Texture * texture, void **pixels,
                                   int *pitch);
-static int D3D_SetTexturePalette(SDL_Renderer * renderer,
-                                 SDL_Texture * texture,
-                                 const SDL_Color * colors, int firstcolor,
-                                 int ncolors);
-static int D3D_GetTexturePalette(SDL_Renderer * renderer,
-                                 SDL_Texture * texture, SDL_Color * colors,
-                                 int firstcolor, int ncolors);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -362,7 +355,6 @@ D3D_AddRenderDriver(_THIS)
     if (data->d3d) {
         int i, j;
         int formats[] = {
-            SDL_PIXELFORMAT_INDEX8,
             SDL_PIXELFORMAT_RGB332,
             SDL_PIXELFORMAT_RGB444,
             SDL_PIXELFORMAT_RGB555,
@@ -436,8 +428,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DisplayModeChanged = D3D_DisplayModeChanged;
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->QueryTexturePixels = D3D_QueryTexturePixels;
-    renderer->SetTexturePalette = D3D_SetTexturePalette;
-    renderer->GetTexturePalette = D3D_GetTexturePalette;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
@@ -661,25 +651,6 @@ D3D_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
         /* D3D textures don't have their pixels hanging out */
         return -1;
     }
-}
-
-static int
-D3D_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                      const SDL_Color * colors, int firstcolor, int ncolors)
-{
-    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
-    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-
-    return 0;
-}
-
-static int
-D3D_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                      SDL_Color * colors, int firstcolor, int ncolors)
-{
-    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-
-    return 0;
 }
 
 static int

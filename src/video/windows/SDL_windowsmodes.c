@@ -131,6 +131,10 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
             }
         }
     }
+    if (SDL_ISPIXELFORMAT_INDEXED(mode->format)) {
+        /* We don't support palettized modes now */
+        return SDL_FALSE;
+    }
     return SDL_TRUE;
 }
 

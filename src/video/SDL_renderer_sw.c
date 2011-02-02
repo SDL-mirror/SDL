@@ -38,13 +38,6 @@ static int SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_QueryTexturePixels(SDL_Renderer * renderer,
                                  SDL_Texture * texture, void **pixels,
                                  int *pitch);
-static int SW_SetTexturePalette(SDL_Renderer * renderer,
-                                SDL_Texture * texture,
-                                const SDL_Color * colors, int firstcolor,
-                                int ncolors);
-static int SW_GetTexturePalette(SDL_Renderer * renderer,
-                                SDL_Texture * texture, SDL_Color * colors,
-                                int firstcolor, int ncolors);
 static int SW_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int SW_SetTextureAlphaMod(SDL_Renderer * renderer,
@@ -80,9 +73,8 @@ SDL_RenderDriver SW_RenderDriver = {
     {
      "software",
      (SDL_RENDERER_PRESENTVSYNC),
-     14,
+     13,
      {
-      SDL_PIXELFORMAT_INDEX8,
       SDL_PIXELFORMAT_RGB555,
       SDL_PIXELFORMAT_RGB565,
       SDL_PIXELFORMAT_RGB888,
@@ -141,26 +133,11 @@ DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_free(texture);
 }
 
-static int
-DisplayPaletteChanged(void *userdata, SDL_Palette * palette)
-{
-    SW_RenderData *data = (SW_RenderData *) userdata;
-
-    if (data->renderer->SetTexturePalette) {
-        data->renderer->SetTexturePalette(data->renderer, data->texture,
-                                          palette->colors, 0,
-                                          palette->ncolors);
-    }
-    return 0;
-}
-
 void
 Setup_SoftwareRenderer(SDL_Renderer * renderer)
 {
     renderer->CreateTexture = SW_CreateTexture;
     renderer->QueryTexturePixels = SW_QueryTexturePixels;
-    renderer->SetTexturePalette = SW_SetTexturePalette;
-    renderer->GetTexturePalette = SW_GetTexturePalette;
     renderer->SetTextureColorMod = SW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
     renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
@@ -273,12 +250,6 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         SW_DestroyRenderer(renderer);
         return NULL;
     }
-    SDL_SetSurfacePalette(&data->surface, display->palette);
-
-    /* Set up a palette watch on the display palette */
-    if (display->palette) {
-        SDL_AddPaletteWatch(display->palette, DisplayPaletteChanged, data);
-    }
 
     return renderer;
 }
@@ -361,37 +332,6 @@ SW_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
 
         *pixels = surface->pixels;
         *pitch = surface->pitch;
-        return 0;
-    }
-}
-
-static int
-SW_SetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                     const SDL_Color * colors, int firstcolor, int ncolors)
-{
-    if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
-    } else {
-        SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-
-        return SDL_SetPaletteColors(surface->format->palette, colors,
-                                    firstcolor, ncolors);
-    }
-}
-
-static int
-SW_GetTexturePalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                     SDL_Color * colors, int firstcolor, int ncolors)
-{
-    if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
-    } else {
-        SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-
-        SDL_memcpy(colors, &surface->format->palette->colors[firstcolor],
-                   ncolors * sizeof(*colors));
         return 0;
     }
 }
@@ -793,12 +733,7 @@ SW_DestroyRenderer(SDL_Renderer * renderer)
             DestroyTexture(data->renderer, data->texture);
         }
         if (data->surface.format) {
-            SDL_SetSurfacePalette(&data->surface, NULL);
             SDL_FreeFormat(data->surface.format);
-        }
-        if (display->palette) {
-            SDL_DelPaletteWatch(display->palette, DisplayPaletteChanged,
-                                data);
         }
         if (data->renderer) {
             data->renderer->DestroyRenderer(data->renderer);

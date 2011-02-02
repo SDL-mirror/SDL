@@ -320,27 +320,6 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
     return 1;
 }
 
-static int
-SDL_VideoPaletteChanged(void *userdata, SDL_Palette * palette)
-{
-    if (userdata == SDL_ShadowSurface) {
-        /* If the shadow palette changed, make the changes visible */
-        if (!SDL_VideoSurface->format->palette) {
-            SDL_UpdateRect(SDL_ShadowSurface, 0, 0, 0, 0);
-        }
-    }
-    if (userdata == SDL_VideoSurface) {
-        /* The display may not have a palette, but always set texture palette */
-        SDL_SetDisplayPalette(palette->colors, 0, palette->ncolors);
-
-        if (SDL_SetTexturePalette
-            (SDL_VideoTexture, palette->colors, 0, palette->ncolors) < 0) {
-            return -1;
-        }
-    }
-    return 0;
-}
-
 static void
 GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
 {
@@ -543,8 +522,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_ShadowSurface = NULL;
     }
     if (SDL_VideoSurface) {
-        SDL_DelPaletteWatch(SDL_VideoSurface->format->palette,
-                            SDL_VideoPaletteChanged, NULL);
         SDL_FreeSurface(SDL_VideoSurface);
         SDL_VideoSurface = NULL;
     }
@@ -694,18 +671,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
     SDL_VideoSurface->flags |= surface_flags;
 
-    /* Set a default screen palette */
-    if (SDL_VideoSurface->format->palette) {
-        SDL_VideoSurface->flags |= SDL_HWPALETTE;
-        SDL_DitherColors(SDL_VideoSurface->format->palette->colors,
-                         SDL_VideoSurface->format->BitsPerPixel);
-        SDL_AddPaletteWatch(SDL_VideoSurface->format->palette,
-                            SDL_VideoPaletteChanged, SDL_VideoSurface);
-        SDL_SetPaletteColors(SDL_VideoSurface->format->palette,
-                             SDL_VideoSurface->format->palette->colors, 0,
-                             SDL_VideoSurface->format->palette->ncolors);
-    }
-
     /* Create a shadow surface if necessary */
     if ((bpp != SDL_VideoSurface->format->BitsPerPixel)
         && !(flags & SDL_ANYFORMAT)) {
@@ -719,15 +684,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         /* 8-bit SDL_ShadowSurface surfaces report that they have exclusive palette */
         if (SDL_ShadowSurface->format->palette) {
             SDL_ShadowSurface->flags |= SDL_HWPALETTE;
-            if (SDL_VideoSurface->format->palette) {
-                SDL_SetSurfacePalette(SDL_ShadowSurface,
-                                      SDL_VideoSurface->format->palette);
-            } else {
-                SDL_DitherColors(SDL_ShadowSurface->format->palette->colors,
-                                 SDL_ShadowSurface->format->BitsPerPixel);
-            }
-            SDL_AddPaletteWatch(SDL_ShadowSurface->format->palette,
-                                SDL_VideoPaletteChanged, SDL_ShadowSurface);
+            SDL_DitherColors(SDL_ShadowSurface->format->palette->colors,
+                             SDL_ShadowSurface->format->BitsPerPixel);
         }
     }
     SDL_PublicSurface =

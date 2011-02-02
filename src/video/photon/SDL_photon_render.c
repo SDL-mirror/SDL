@@ -91,9 +91,8 @@ SDL_RenderDriver photon_renderdriver = {
       SDL_RENDERER_PRESENTFLIP2 | SDL_RENDERER_PRESENTFLIP3 |
       SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_PRESENTDISCARD |
       SDL_RENDERER_ACCELERATED),
-     10,
-     {SDL_PIXELFORMAT_INDEX8,
-      SDL_PIXELFORMAT_RGB555,
+     9,
+     {SDL_PIXELFORMAT_RGB555,
       SDL_PIXELFORMAT_RGB565,
       SDL_PIXELFORMAT_RGB24,
       SDL_PIXELFORMAT_RGB888,
@@ -134,8 +133,6 @@ photon_createrenderer(SDL_Window * window, Uint32 flags)
     renderer->ActivateRenderer = photon_activaterenderer;
     renderer->CreateTexture = photon_createtexture;
     renderer->QueryTexturePixels = photon_querytexturepixels;
-    renderer->SetTexturePalette = photon_settexturepalette;
-    renderer->GetTexturePalette = photon_gettexturepalette;
     renderer->UpdateTexture = photon_updatetexture;
     renderer->LockTexture = photon_locktexture;
     renderer->UnlockTexture = photon_unlocktexture;
@@ -809,55 +806,6 @@ photon_querytexturepixels(SDL_Renderer * renderer, SDL_Texture * texture,
    }
 
    return 0;
-}
-
-static int
-photon_settexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Color * colors, int firstcolor,
-                         int ncolors)
-{
-   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
-
-   /* Check, if it is not initialized */
-   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-   {
-      SDL_SetError("Photon: can't set texture palette for OpenGL ES window");
-      return -1;
-   }
-
-   if (texture->format!=SDL_PIXELFORMAT_INDEX8)
-   {
-      SDL_SetError("Photon: can't set palette for non-paletted texture");
-      return -1;
-   }
-
-   SDL_Unsupported();
-   return -1;
-}
-
-static int
-photon_gettexturepalette(SDL_Renderer * renderer, SDL_Texture * texture,
-                         SDL_Color * colors, int firstcolor, int ncolors)
-{
-   SDL_RenderData *rdata = (SDL_RenderData *) renderer->driverdata;
-   SDL_TextureData* tdata=(SDL_TextureData*)texture->driverdata;
-
-   /* Check, if it is not initialized */
-   if (rdata->surfaces_type==SDL_PHOTON_SURFTYPE_UNKNOWN)
-   {
-      SDL_SetError("Photon: can't return texture palette for OpenGL ES window");
-      return -1;
-   }
-
-   if (texture->format!=SDL_PIXELFORMAT_INDEX8)
-   {
-      SDL_SetError("Photon: can't return palette for non-paletted texture");
-      return -1;
-   }
-
-   SDL_Unsupported();
-   return -1;
 }
 
 static int

@@ -220,38 +220,6 @@ extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_Texture * texture,
                                                    void **pixels, int *pitch);
 
 /**
- *  \brief Set the color palette of an indexed texture.
- *  
- *  \param texture  The texture to update.
- *  \param colors     The array of RGB color data.
- *  \param firstcolor The first index to update.
- *  \param ncolors    The number of palette entries to fill with the color data.
- *  
- *  \return 0 on success, or -1 if the texture is not valid or not an indexed 
- *          texture.
- */
-extern DECLSPEC int SDLCALL SDL_SetTexturePalette(SDL_Texture * texture,
-                                                  const SDL_Color * colors,
-                                                  int firstcolor,
-                                                  int ncolors);
-
-/**
- *  \brief Get the color palette from an indexed texture if it has one.
- *  
- *  \param texture  The texture to update.
- *  \param colors     The array to fill with RGB color data.
- *  \param firstcolor The first index to retrieve.
- *  \param ncolors    The number of palette entries to retrieve.
- *  
- *  \return 0 on success, or -1 if the texture is not valid or not an indexed 
- *          texture.
- */
-extern DECLSPEC int SDLCALL SDL_GetTexturePalette(SDL_Texture * texture,
-                                                  SDL_Color * colors,
-                                                  int firstcolor,
-                                                  int ncolors);
-
-/**
  *  \brief Set an additional color value used in render copy operations.
  *  
  *  \param texture The texture to update.

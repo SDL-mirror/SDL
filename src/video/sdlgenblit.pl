@@ -9,7 +9,6 @@ use strict;
 my %file;
 
 # The formats potentially supported by this script:
-# SDL_PIXELFORMAT_INDEX8
 # SDL_PIXELFORMAT_RGB332
 # SDL_PIXELFORMAT_RGB444
 # SDL_PIXELFORMAT_RGB555
