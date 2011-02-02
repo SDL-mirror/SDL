@@ -9,14 +9,14 @@ LDFLAGS := `sdl-config --libs`
 
 SRC         	:= testsdl.c \
 						platform/platform.c \
-						rwops/rwops.c \
-						rwops/TestSupportRWops.c \
 						rect/rect.c \
 						surface/surface.c \
 						render/render.c \
 						audio/audio.c
 COMMON_SRC     := SDL_at.c common/common.c
 COMMON_INCLUDE := SDL_at.h
+
+RWOPS_SRC      := rwops/rwops.c rwops/TestSupportRWops_Generic.c
 
 TESTS_ALL := testsdl \
 	platform/platform \
@@ -35,14 +35,14 @@ all: $(TESTS_ALL)
 test: all
 	@./testsdl
 
-testsdl: $(SRC) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRC) $(COMMON_SRC)
+testsdl: $(SRC) $(RWOPS_SRC) $(COMMON_SRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(SRC) $(RWOPS_SRC) $(COMMON_SRC)
 
 platform/platform: platform/platform.c $(COMMON_INCLUDE) $(COMMON_SRC)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ platform/platform.c $(COMMON_SRC) -DTEST_STANDALONE
 
-rwops/rwops: rwops/rwops.c $(COMMON_INCLUDE) $(COMMON_SRC)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rwops/rwops.c $(COMMON_SRC) -DTEST_STANDALONE
+rwops/rwops: $(RWOPS_SRC) $(COMMON_INCLUDE) $(COMMON_SRC)
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $(RWOPS_SRC) $(COMMON_SRC) -DTEST_STANDALONE
 
 rect/rect: rect/rect.c $(COMMON_INCLUDE) $(COMMON_SRC)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ rect/rect.c $(COMMON_SRC) -DTEST_STANDALONE

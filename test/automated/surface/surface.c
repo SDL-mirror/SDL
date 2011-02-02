@@ -205,19 +205,12 @@ static void surface_testPrimitivesBlend( SDL_Surface *testsur )
    ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_BLEND, 10, 240, 10, 100 );
    if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
       return;
-   rect.x = 25;
-   rect.y = 25;
-   rect.w = 25;
-   rect.h = 25;
-   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_MOD, 10, 10, 240, 125 );
-   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
-      return;
 
    /* Draw blended lines, lines for everyone. */
    for (i=0; i<testsur->w; i+=2)  {
       ret = SDL_BlendLine( testsur, 0, 0, i, 59,
             (((i/2)%3)==0) ? SDL_BLENDMODE_BLEND :
-               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_MOD,
+               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
             60+2*i, 240-2*i, 50, 3*i );
       if (SDL_ATassert( "SDL_BlendLine", ret == 0))
          return;
@@ -225,7 +218,7 @@ static void surface_testPrimitivesBlend( SDL_Surface *testsur )
    for (i=0; i<testsur->h; i+=2)  {
       ret = SDL_BlendLine( testsur, 0, 0, 79, i,
             (((i/2)%3)==0) ? SDL_BLENDMODE_BLEND :
-               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_MOD,
+               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
             60+2*i, 240-2*i, 50, 3*i );
       if (SDL_ATassert( "SDL_BlendLine", ret == 0))
          return;
@@ -236,7 +229,7 @@ static void surface_testPrimitivesBlend( SDL_Surface *testsur )
       for (i=0; i<testsur->w; i+=3) {
       ret = SDL_BlendPoint( testsur, i, j,
             ((((i+j)/3)%3)==0) ? SDL_BLENDMODE_BLEND :
-               ((((i+j)/3)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_MOD,
+               ((((i+j)/3)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
             j*4, i*3, j*4, i*3 );
       if (SDL_ATassert( "SDL_BlendPoint", ret == 0))
          return;
