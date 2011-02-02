@@ -10,11 +10,7 @@
 #endif
 
 #define DEFAULT_PTSIZE  30
-#ifdef __QNXNTO__
-    #define DEFAULT_FONT    "/usr/photon/font_repository/tt0003m_.ttf"
-#else
-    #define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
-#endif
+#define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
 #define MAX_TEXT_LENGTH 256
 
 SDL_Surface *screen;

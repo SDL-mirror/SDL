@@ -397,29 +397,20 @@ extern VideoBootStrap WINDOWS_bootstrap;
 #if SDL_VIDEO_DRIVER_BWINDOW
 extern VideoBootStrap BWINDOW_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_PHOTON
-extern VideoBootStrap photon_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_QNXGF
-extern VideoBootStrap qnxgf_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_EPOC
-extern VideoBootStrap EPOC_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_UIKIT
-extern VideoBootStrap UIKIT_bootstrap;
-#endif
-#if SDL_VIDEO_DRIVER_DUMMY
-extern VideoBootStrap DUMMY_bootstrap;
+#if SDL_VIDEO_DRIVER_PANDORA
+extern VideoBootStrap PND_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_NDS
 extern VideoBootStrap NDS_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_PANDORA
-extern VideoBootStrap PND_bootstrap;
+#if SDL_VIDEO_DRIVER_UIKIT
+extern VideoBootStrap UIKIT_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_ANDROID
 extern VideoBootStrap Android_bootstrap;
+#endif
+#if SDL_VIDEO_DRIVER_DUMMY
+extern VideoBootStrap DUMMY_bootstrap;
 #endif
 
 #define SDL_CurrentDisplay	(&_this->displays[_this->current_display])

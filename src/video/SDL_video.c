@@ -70,14 +70,8 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_BWINDOW
     &BWINDOW_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_PHOTON
-    &photon_bootstrap,
-#endif
-#if SDL_VIDEO_DRIVER_QNXGF
-    &qnxgf_bootstrap,
-#endif
-#if SDL_VIDEO_DRIVER_EPOC
-    &EPOC_bootstrap,
+#if SDL_VIDEO_DRIVER_PANDORA
+    &PND_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_NDS
     &NDS_bootstrap,
@@ -85,14 +79,11 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_UIKIT
     &UIKIT_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_DUMMY
-    &DUMMY_bootstrap,
-#endif
-#if SDL_VIDEO_DRIVER_PANDORA
-    &PND_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_ANDROID
     &Android_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_DUMMY
+    &DUMMY_bootstrap,
 #endif
     NULL
 };

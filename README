@@ -13,7 +13,7 @@ level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
 and 2D framebuffer across multiple platforms.
 
 The current version supports Windows, Windows CE, Mac OS X, Linux, FreeBSD,
-NetBSD, OpenBSD, BSD/OS, Solaris, QNX, iOS, and Android. The code contains
+NetBSD, OpenBSD, BSD/OS, Solaris, iOS, and Android. The code contains
 support for other operating systems but those are not officially supported.
 
 SDL is written in C, but works with C++ natively, and has bindings to
