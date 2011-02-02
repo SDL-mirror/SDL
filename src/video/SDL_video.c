@@ -2319,7 +2319,33 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
 int
 SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    return SDL_RenderDrawRects(renderer, &rect, 1);
+    SDL_Rect full_rect;
+    SDL_Point points[5];
+
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
+    /* If 'rect' == NULL, then outline the whole surface */
+    if (!rect) {
+        SDL_Window *window = renderer->window;
+
+        full_rect.x = 0;
+        full_rect.y = 0;
+        full_rect.w = window->w;
+        full_rect.h = window->h;
+        rect = &full_rect;
+    }
+
+    points[0].x = rect->x;
+    points[0].y = rect->y;
+    points[1].x = rect->x+rect->w-1;
+    points[1].y = rect->y;
+    points[2].x = rect->x+rect->w-1;
+    points[2].y = rect->y+rect->h-1;
+    points[3].x = rect->x;
+    points[3].y = rect->y+rect->h-1;
+    points[4].x = rect->x;
+    points[4].y = rect->y;
+    return SDL_RenderDrawLines(renderer, points, 5);
 }
 
 int
@@ -2340,20 +2366,11 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
 
     /* Check for NULL rect, which means fill entire window */
     for (i = 0; i < count; ++i) {
-        if (rects[i] == NULL) {
-            SDL_Window *window = renderer->window;
-            SDL_Rect full_rect;
-            const SDL_Rect *rect;
-
-            full_rect.x = 0;
-            full_rect.y = 0;
-            full_rect.w = window->w;
-            full_rect.h = window->h;
-            rect = &full_rect;
-            return renderer->RenderDrawRects(renderer, &rect, 1);
+        if (SDL_RenderDrawRect(renderer, rects[i]) < 0) {
+            return -1;
         }
     }
-    return renderer->RenderDrawRects(renderer, rects, count);
+    return 0;
 }
 
 int

@@ -93,8 +93,6 @@ static int GL_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int GL_RenderDrawLines(SDL_Renderer * renderer,
                               const SDL_Point * points, int count);
-static int GL_RenderDrawRects(SDL_Renderer * renderer,
-                              const SDL_Rect ** rects, int count);
 static int GL_RenderFillRects(SDL_Renderer * renderer,
                               const SDL_Rect ** rects, int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -289,7 +287,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
     renderer->RenderDrawLines = GL_RenderDrawLines;
-    renderer->RenderDrawRects = GL_RenderDrawRects;
     renderer->RenderFillRects = GL_RenderFillRects;
     renderer->RenderCopy = GL_RenderCopy;
     renderer->RenderReadPixels = GL_RenderReadPixels;
@@ -1134,46 +1131,6 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 #endif
         data->glEnd();
     }
-
-    return 0;
-}
-
-static int
-GL_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    int i, x, y;
-
-    GL_ActivateRenderer(renderer);
-
-    GL_SetBlendMode(data, renderer->blendMode);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
-
-    data->glBegin(GL_LINE_LOOP);
-    for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = rects[i];
-
-        x = rect->x;
-        y = rect->y;
-        data->glVertex2f(0.5f + x, 0.5f + y);
-
-        x = rect->x+rect->w-1;
-        y = rect->y;
-        data->glVertex2f(0.5f + x, 0.5f + y);
-
-        x = rect->x+rect->w-1;
-        y = rect->y+rect->h-1;
-        data->glVertex2f(0.5f + x, 0.5f + y);
-
-        x = rect->x;
-        y = rect->y+rect->h-1;
-        data->glVertex2f(0.5f + x, 0.5f + y);
-    }
-    data->glEnd();
 
     return 0;
 }

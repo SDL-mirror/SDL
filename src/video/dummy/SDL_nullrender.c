@@ -35,8 +35,6 @@ static int SDL_DUMMY_RenderDrawPoints(SDL_Renderer * renderer,
                                       const SDL_Point * points, int count);
 static int SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
                                      const SDL_Point * points, int count);
-static int SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer,
-                                     const SDL_Rect ** rects, int count);
 static int SDL_DUMMY_RenderFillRects(SDL_Renderer * renderer,
                                      const SDL_Rect ** rects, int count);
 static int SDL_DUMMY_RenderCopy(SDL_Renderer * renderer,
@@ -100,7 +98,6 @@ SDL_DUMMY_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->RenderDrawPoints = SDL_DUMMY_RenderDrawPoints;
     renderer->RenderDrawLines = SDL_DUMMY_RenderDrawLines;
-    renderer->RenderDrawRects = SDL_DUMMY_RenderDrawRects;
     renderer->RenderFillRects = SDL_DUMMY_RenderFillRects;
     renderer->RenderCopy = SDL_DUMMY_RenderCopy;
     renderer->RenderReadPixels = SDL_DUMMY_RenderReadPixels;
@@ -162,28 +159,6 @@ SDL_DUMMY_RenderDrawLines(SDL_Renderer * renderer,
         return SDL_DrawLines(target, points, count, color);
     } else {
         return SDL_BlendLines(target, points, count, renderer->blendMode,
-                              renderer->r, renderer->g, renderer->b,
-                              renderer->a);
-    }
-}
-
-static int
-SDL_DUMMY_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                          int count)
-{
-    SDL_DUMMY_RenderData *data =
-        (SDL_DUMMY_RenderData *) renderer->driverdata;
-    SDL_Surface *target = data->screen;
-
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-        Uint32 color = SDL_MapRGBA(target->format,
-                                   renderer->r, renderer->g, renderer->b,
-                                   renderer->a);
-
-        return SDL_DrawRects(target, rects, count, color);
-    } else {
-        return SDL_BlendRects(target, rects, count,
-                              renderer->blendMode,
                               renderer->r, renderer->g, renderer->b,
                               renderer->a);
     }

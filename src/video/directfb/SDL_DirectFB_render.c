@@ -68,8 +68,6 @@ static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
-static int DirectFB_RenderDrawRects(SDL_Renderer * renderer,
-		const SDL_Rect ** rects, int count);
 static int DirectFB_RenderFillRects(SDL_Renderer * renderer,
 		const SDL_Rect ** rects, int count);
 static int DirectFB_RenderCopy(SDL_Renderer * renderer,
@@ -271,7 +269,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderDrawPoints = DirectFB_RenderDrawPoints;
     renderer->RenderDrawLines = DirectFB_RenderDrawLines;
     renderer->RenderFillRects = DirectFB_RenderFillRects;
-    renderer->RenderDrawRects = DirectFB_RenderDrawRects;
     /* RenderDrawEllipse - no reference implementation yet */
     /* RenderFillEllipse - no reference implementation yet */
     renderer->RenderCopy = DirectFB_RenderCopy;
@@ -810,24 +807,6 @@ static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
 
     for (i=0; i < count - 1; i++)
     	SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, points[i].x, points[i].y, points[i+1].x, points[i+1].y));
-
-    return 0;
-  error:
-    return -1;
-}
-
-static int
-DirectFB_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
-{
-    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
-    SDL_DFB_WINDOWSURFACE(data->window);
-    int i;
-
-    PrepareDraw(renderer);
-
-    for (i=0; i<count; i++)
-    	SDL_DFB_CHECKERR(destsurf->DrawRectangle(destsurf, rects[i]->x, rects[i]->y,
-    			rects[i]->w, rects[i]->h));
 
     return 0;
   error:

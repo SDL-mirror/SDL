@@ -93,8 +93,6 @@ struct SDL_Renderer
                              int count);
     int (*RenderDrawLines) (SDL_Renderer * renderer, const SDL_Point * points,
                             int count);
-    int (*RenderDrawRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
-                            int count);
     int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
                             int count);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,

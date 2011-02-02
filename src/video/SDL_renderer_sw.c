@@ -62,8 +62,6 @@ static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int SW_RenderDrawLines(SDL_Renderer * renderer,
                               const SDL_Point * points, int count);
-static int SW_RenderDrawRects(SDL_Renderer * renderer,
-                              const SDL_Rect ** rects, int count);
 static int SW_RenderFillRects(SDL_Renderer * renderer,
                               const SDL_Rect ** rects, int count);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -216,7 +214,6 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
-    renderer->RenderDrawRects = SW_RenderDrawRects;
     renderer->RenderFillRects = SW_RenderFillRects;
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderReadPixels = SW_RenderReadPixels;
@@ -605,62 +602,6 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 
     data->renderer->UnlockTexture(data->renderer, texture);
 
-    return status;
-}
-
-static int
-SW_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                   int count)
-{
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Texture *texture = SW_ActivateRenderer(renderer);
-    SDL_Rect clip, rect;
-    Uint32 color = 0;
-    int i;
-    int status = 0;
-
-    if (!texture) {
-        return -1;
-    }
-
-    clip.x = 0;
-    clip.y = 0;
-    clip.w = texture->w;
-    clip.h = texture->h;
-
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-        color = SDL_MapRGBA(data->surface.format,
-                            renderer->r, renderer->g, renderer->b,
-                            renderer->a);
-    }
-
-    for (i = 0; i < count; ++i) {
-        /* FIXME: We don't want to draw clipped edges */
-        if (!SDL_IntersectRect(rects[i], &clip, &rect)) {
-            /* Nothing to draw */
-            continue;
-        }
-
-        if (data->renderer->LockTexture(data->renderer, texture, &rect, 1,
-                                        &data->surface.pixels,
-                                        &data->surface.pitch) < 0) {
-            return -1;
-        }
-
-        data->surface.clip_rect.w = data->surface.w = rect.w;
-        data->surface.clip_rect.h = data->surface.h = rect.h;
-
-        if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-            status = SDL_DrawRect(&data->surface, NULL, color);
-        } else {
-            status = SDL_BlendRect(&data->surface, NULL,
-                                   renderer->blendMode,
-                                   renderer->r, renderer->g, renderer->b,
-                                   renderer->a);
-        }
-
-        data->renderer->UnlockTexture(data->renderer, texture);
-    }
     return status;
 }
 
