@@ -23,8 +23,17 @@
 
 #if SDL_VIDEO_RENDER_D3D
 
-#include "SDL_windowsvideo.h"
-#include "../SDL_yuv_sw_c.h"
+#include "../../core/windows/SDL_windows.h"
+
+#include "SDL_loadso.h"
+#include "SDL_syswm.h"
+#include "../SDL_sysrender.h"
+#include "../../video/SDL_yuv_sw_c.h"
+
+#if SDL_VIDEO_RENDER_D3D
+#define D3D_DEBUG_INFO
+#include <d3d9.h>
+#endif
 
 #ifdef ASSEMBLE_SHADER
 ///////////////////////////////////////////////////////////////////////////
@@ -89,7 +98,6 @@ HRESULT WINAPI
 #endif
 
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
-static int D3D_DisplayModeChanged(SDL_Renderer * renderer);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_QueryTexturePixels(SDL_Renderer * renderer,
                                   SDL_Texture * texture, void **pixels,
@@ -134,6 +142,7 @@ SDL_RenderDriver D3D_RenderDriver = {
 
 typedef struct
 {
+    void* d3dDLL;
     IDirect3D9 *d3d;
     IDirect3DDevice9 *device;
     UINT adapter;
@@ -272,47 +281,19 @@ PixelFormatToD3DFMT(Uint32 format)
     }
 }
 
-static UINT D3D_FindAdapter(IDirect3D9 * d3d, SDL_VideoDisplay * display)
-{
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
-    UINT adapter, count;
-
-    count = IDirect3D9_GetAdapterCount(d3d);
-    for (adapter = 0; adapter < count; ++adapter) {
-        HRESULT result;
-        D3DADAPTER_IDENTIFIER9 info;
-        char *name;
-
-        result = IDirect3D9_GetAdapterIdentifier(d3d, adapter, 0, &info);
-        if (FAILED(result)) {
-            continue;
-        }
-        name = WIN_StringToUTF8(displaydata->DeviceName);
-        if (SDL_strcmp(name, info.DeviceName) == 0) {
-            SDL_free(name);
-            return adapter;
-        }
-        SDL_free(name);
-    }
-
-    /* This should never happen, but just in case... */
-    return D3DADAPTER_DEFAULT;
-}
-
 static SDL_bool
 D3D_IsTextureFormatAvailable(IDirect3D9 * d3d, UINT adapter,
-                             Uint32 display_format,
-                             Uint32 texture_format)
+                             D3DFORMAT display_format,
+                             D3DFORMAT texture_format)
 {
     HRESULT result;
 
     result = IDirect3D9_CheckDeviceFormat(d3d, adapter,
                                           D3DDEVTYPE_HAL,
-                                          PixelFormatToD3DFMT(display_format),
+                                          display_format,
                                           0,
                                           D3DRTYPE_TEXTURE,
-                                          PixelFormatToD3DFMT
-                                          (texture_format));
+                                          texture_format);
     return FAILED(result) ? SDL_FALSE : SDL_TRUE;
 }
 
@@ -346,64 +327,42 @@ UpdateYUVTextureData(SDL_Texture * texture)
     IDirect3DTexture9_UnlockRect(data->texture, 0);
 }
 
-void
-D3D_AddRenderDriver(_THIS)
+static void
+D3D_AddTextureFormats(D3D_RenderData *data, SDL_RendererInfo *info)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_RendererInfo *info = &D3D_RenderDriver.info;
+    int i;
+    int formats[] = {
+        SDL_PIXELFORMAT_RGB332,
+        SDL_PIXELFORMAT_RGB444,
+        SDL_PIXELFORMAT_RGB555,
+        SDL_PIXELFORMAT_ARGB4444,
+        SDL_PIXELFORMAT_ARGB1555,
+        SDL_PIXELFORMAT_RGB565,
+        SDL_PIXELFORMAT_RGB888,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_ARGB2101010,
+    };
 
-    if (data->d3d) {
-        int i, j;
-        int formats[] = {
-            SDL_PIXELFORMAT_RGB332,
-            SDL_PIXELFORMAT_RGB444,
-            SDL_PIXELFORMAT_RGB555,
-            SDL_PIXELFORMAT_ARGB4444,
-            SDL_PIXELFORMAT_ARGB1555,
-            SDL_PIXELFORMAT_RGB565,
-            SDL_PIXELFORMAT_RGB888,
-            SDL_PIXELFORMAT_ARGB8888,
-            SDL_PIXELFORMAT_ARGB2101010,
-        };
-
-        for (i = 0; i < _this->num_displays; ++i) {
-            SDL_VideoDisplay *display = &_this->displays[i];
-            SDL_DisplayMode *mode = &display->desktop_mode;
-            UINT adapter = D3D_FindAdapter(data->d3d, display);
-
-            /* Get the matching D3D adapter for this display */
-            info->num_texture_formats = 0;
-            for (j = 0; j < SDL_arraysize(formats); ++j) {
-                if (D3D_IsTextureFormatAvailable
-                    (data->d3d, adapter, mode->format, formats[j])) {
-                    info->texture_formats[info->num_texture_formats++] =
-                        formats[j];
-                }
-            }
-            info->texture_formats[info->num_texture_formats++] =
-                SDL_PIXELFORMAT_YV12;
-            info->texture_formats[info->num_texture_formats++] =
-                SDL_PIXELFORMAT_IYUV;
-            info->texture_formats[info->num_texture_formats++] =
-                SDL_PIXELFORMAT_YUY2;
-            info->texture_formats[info->num_texture_formats++] =
-                SDL_PIXELFORMAT_UYVY;
-            info->texture_formats[info->num_texture_formats++] =
-                SDL_PIXELFORMAT_YVYU;
-
-            SDL_AddRenderDriver(display, &D3D_RenderDriver);
+    info->num_texture_formats = 0;
+    for (i = 0; i < SDL_arraysize(formats); ++i) {
+        if (D3D_IsTextureFormatAvailable
+            (data->d3d, data->adapter, data->pparams.BackBufferFormat, PixelFormatToD3DFMT(formats[i]))) {
+            info->texture_formats[info->num_texture_formats++] = formats[i];
         }
     }
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
+    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
 }
 
 SDL_Renderer *
 D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = window->display;
-    SDL_VideoData *videodata = (SDL_VideoData *) display->device->driverdata;
-    SDL_WindowData *windowdata = (SDL_WindowData *) window->driverdata;
     SDL_Renderer *renderer;
     D3D_RenderData *data;
+    SDL_SysWMinfo windowinfo;
     HRESULT result;
     D3DPRESENT_PARAMETERS pparams;
     IDirect3DSwapChain9 *chain;
@@ -417,15 +376,33 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     data = (D3D_RenderData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        D3D_DestroyRenderer(renderer);
+        SDL_free(renderer);
         SDL_OutOfMemory();
         return NULL;
     }
-    data->d3d = videodata->d3d;
 
-    videodata->render = RENDER_D3D;
+    data->d3dDLL = SDL_LoadObject("D3D9.DLL");
+    if (data->d3dDLL) {
+        IDirect3D9 *(WINAPI * D3DCreate) (UINT SDKVersion);
 
-    renderer->DisplayModeChanged = D3D_DisplayModeChanged;
+        D3DCreate =
+            (IDirect3D9 * (WINAPI *) (UINT)) SDL_LoadFunction(data->d3dDLL,
+                                                            "Direct3DCreate9");
+        if (D3DCreate) {
+            data->d3d = D3DCreate(D3D_SDK_VERSION);
+        }
+        if (!data->d3d) {
+            SDL_UnloadObject(data->d3dDLL);
+            data->d3dDLL = NULL;
+        }
+    }
+    if (!data->d3d) {
+        SDL_free(renderer);
+        SDL_free(data);
+        SDL_SetError("Unable to create Direct3D interface");
+        return NULL;
+    }
+
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->QueryTexturePixels = D3D_QueryTexturePixels;
     renderer->UpdateTexture = D3D_UpdateTexture;
@@ -447,7 +424,11 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
+    SDL_VERSION(&windowinfo.version);
+    SDL_GetWindowWMInfo(window, &windowinfo);
+
     SDL_zero(pparams);
+    pparams.hDeviceWindow = windowinfo.info.win.window;
     pparams.BackBufferWidth = window->w;
     pparams.BackBufferHeight = window->h;
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
@@ -473,13 +454,13 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         pparams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
     }
 
-    data->adapter = D3D_FindAdapter(videodata->d3d, display);
-    IDirect3D9_GetDeviceCaps(videodata->d3d, data->adapter,
-                             D3DDEVTYPE_HAL, &caps);
+    /* FIXME: Which adapter? */
+    data->adapter = D3DADAPTER_DEFAULT;
+    IDirect3D9_GetDeviceCaps(data->d3d, data->adapter, D3DDEVTYPE_HAL, &caps);
 
-    result = IDirect3D9_CreateDevice(videodata->d3d, data->adapter,
+    result = IDirect3D9_CreateDevice(data->d3d, data->adapter,
                                      D3DDEVTYPE_HAL,
-                                     windowdata->hwnd,
+                                     pparams.hDeviceWindow,
                                      (caps.
                                       DevCaps &
                                       D3DDEVCAPS_HWTRANSFORMANDLIGHT) ?
@@ -512,6 +493,8 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
     data->pparams = pparams;
+
+    D3D_AddTextureFormats(data, &renderer->info);
 
     IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
     renderer->info.max_texture_width = caps.MaxTextureWidth;
@@ -573,6 +556,8 @@ D3D_Reset(SDL_Renderer * renderer)
     return 0;
 }
 
+/* FIXME: This needs to be called... when? */
+#if 0
 static int
 D3D_DisplayModeChanged(SDL_Renderer * renderer)
 {
@@ -590,14 +575,14 @@ D3D_DisplayModeChanged(SDL_Renderer * renderer)
     }
     return D3D_Reset(renderer);
 }
+#endif
 
 static int
 D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
-    Uint32 display_format = display->current_mode.format;
+    D3DFORMAT display_format = renderdata->pparams.BackBufferFormat;
     D3D_TextureData *data;
     HRESULT result;
 
@@ -612,16 +597,16 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (SDL_ISPIXELFORMAT_FOURCC(texture->format) &&
         (texture->format != SDL_PIXELFORMAT_YUY2 ||
          !D3D_IsTextureFormatAvailable(renderdata->d3d, renderdata->adapter,
-                                       display_format, texture->format))
+                                       display_format, PixelFormatToD3DFMT(texture->format)))
         && (texture->format != SDL_PIXELFORMAT_YVYU
             || !D3D_IsTextureFormatAvailable(renderdata->d3d, renderdata->adapter,
-                                             display_format, texture->format))) {
+                                             display_format, PixelFormatToD3DFMT(texture->format)))) {
         data->yuv =
             SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
         if (!data->yuv) {
             return -1;
         }
-        data->format = display->current_mode.format;
+        data->format = SDL_GetWindowPixelFormat(window);
     } else {
         data->format = texture->format;
     }
@@ -1260,6 +1245,10 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
     if (data) {
         if (data->device) {
             IDirect3DDevice9_Release(data->device);
+        }
+        if (data->d3d) {
+            IDirect3D9_Release(data->d3d);
+            SDL_UnloadObject(data->d3dDLL);
         }
         SDL_free(data);
     }

@@ -70,6 +70,25 @@ typedef struct SDL_Rect
 } SDL_Rect;
 
 /**
+ *  \brief A structure used to track dirty rectangles
+ *  
+ *  \sa SDL_AddDirtyRect
+ *  \sa SDL_ClearDirtyRects
+ *  \sa SDL_FreeDirtyRects
+ */
+typedef struct SDL_DirtyRect
+{
+    SDL_Rect rect;
+    struct SDL_DirtyRect *next;
+} SDL_DirtyRect;
+
+typedef struct SDL_DirtyRectList
+{
+    SDL_DirtyRect *list;
+    SDL_DirtyRect *free;
+} SDL_DirtyRectList;
+
+/**
  *  \brief Returns true if the rectangle has no area.
  */
 #define SDL_RectEmpty(X)    (((X)->w <= 0) || ((X)->h <= 0))
@@ -123,6 +142,22 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
                                                           rect, int *X1,
                                                           int *Y1, int *X2,
                                                           int *Y2);
+
+/**
+ *  \brief Add a rectangle to a dirty rectangle list
+ */
+extern DECLSPEC void SDLCALL SDL_AddDirtyRect(SDL_DirtyRectList * list, const SDL_Rect * rect);
+
+/**
+ *  \brief Remove all rectangles associated with a dirty rectangle list
+ */
+extern DECLSPEC void SDLCALL SDL_ClearDirtyRects(SDL_DirtyRectList * list);
+
+/**
+ *  \brief Free memory associated with a dirty rectangle list
+ */
+extern DECLSPEC void SDLCALL SDL_FreeDirtyRects(SDL_DirtyRectList * list);
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

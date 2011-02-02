@@ -116,7 +116,6 @@ WIN_InitKeyboard(_THIS)
     data->ime_candlistindexbase = 0;
     data->ime_candvertical = SDL_TRUE;
 
-    data->ime_candtex = NULL;
     data->ime_dirty = SDL_FALSE;
     SDL_memset(&data->ime_rect, 0, sizeof(data->ime_rect));
     SDL_memset(&data->ime_candlistrect, 0, sizeof(data->ime_candlistrect));
@@ -1274,36 +1273,6 @@ StopDrawToBitmap(HDC hdc, HBITMAP *hhbm)
     }
 }
 
-static void
-BitmapToTexture(HBITMAP hbm, BYTE *bits, int width, int height, SDL_Texture **texture)
-{
-    SDL_Surface *surface = NULL;
-    BITMAP bm = {0};
-
-    if (GetObject(hbm, sizeof(bm), &bm) == 0)
-        return;
-
-    if (bits && texture) {
-        /*
-            For transparency:
-
-            const Uint8 alpha = 130;
-            unsigned long *p = (unsigned long *)bits;
-            unsigned long *end = (unsigned long *)(bits + (bm.bmWidthBytes * bm.bmHeight));
-            while (p < end) {
-                *p = RGB(GetRValue(*p), GetGValue(*p), GetBValue(*p)) | (alpha << 24);
-                ++p;
-            }
-            surface = SDL_CreateRGBSurfaceFrom(bits, width, height, bm.bmBitsPixel, bm.bmWidthBytes, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000);
-        */
-        surface = SDL_CreateRGBSurfaceFrom(bits, width, height, bm.bmBitsPixel, bm.bmWidthBytes, 0x00ff0000, 0x0000ff00, 0x000000ff, 0);
-        if (surface) {
-            *texture = SDL_CreateTextureFromSurface(0, surface);
-            SDL_FreeSurface(surface);
-        }
-    }
-}
-
 /* This draws only within the specified area and fills the entire region. */
 static void
 DrawRect(HDC hdc, int left, int top, int right, int bottom, int pensize)
@@ -1318,18 +1287,8 @@ DrawRect(HDC hdc, int left, int top, int right, int bottom, int pensize)
 }
 
 static void
-DestroyTexture(SDL_Texture **texture)
-{
-    if (texture && *texture) {
-        SDL_DestroyTexture(*texture);
-        *texture = NULL;
-    }
-}
-
-static void
 IME_DestroyTextures(SDL_VideoData *videodata)
 {
-    DestroyTexture(&videodata->ime_candtex);
 }
 
 #define SDL_swap(a,b) { \
@@ -1544,7 +1503,6 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
         DrawRect(hdc, left, top, right, bottom, candborder);
         ExtTextOutW(hdc, left + candborder + candpadding, top + candborder + candpadding, 0, NULL, s, SDL_wcslen(s), NULL);
     }
-    BitmapToTexture(hbm, bits, size.cx, size.cy, &videodata->ime_candtex);
     StopDrawToBitmap(hdc, &hbm);
 
     DeleteObject(listpen);
@@ -1576,7 +1534,7 @@ void IME_Present(SDL_VideoData *videodata)
     if (videodata->ime_dirty)
         IME_Render(videodata);
 
-    SDL_RenderCopy(videodata->ime_candtex, NULL, &videodata->ime_candlistrect);
+    // FIXME: Need to show the IME bitmap
 }
 
 #endif /* SDL_DISABLE_WINDOWS_IME */

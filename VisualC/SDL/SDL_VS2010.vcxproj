@@ -75,7 +75,7 @@
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>echo Copying SDL_config_windows.h to SDL_config.h...
-copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+xcopy /d /q /y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
@@ -153,7 +153,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <PreBuildEvent>
       <Message>Making sure basic SDL headers are in place...</Message>
       <Command>echo Copying SDL_config_windows.h to SDL_config.h...
-copy /Y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
+xcopy /d /q /y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
 
 if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
 echo Creating stub SDL_revision.h file...
@@ -231,6 +231,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\include\SDL_assert.h" />
     <ClInclude Include="..\..\include\SDL_atomic.h" />
     <ClInclude Include="..\..\include\SDL_audio.h" />
+    <ClInclude Include="..\..\include\SDL_blendmode.h" />
     <ClInclude Include="..\..\include\SDL_clipboard.h" />
     <ClInclude Include="..\..\include\SDL_compat.h" />
     <ClInclude Include="..\..\include\SDL_config.h" />
@@ -240,7 +241,9 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\include\SDL_endian.h" />
     <ClInclude Include="..\..\include\SDL_error.h" />
     <ClInclude Include="..\..\include\SDL_events.h" />
+    <ClInclude Include="..\..\include\SDL_gesture.h" />
     <ClInclude Include="..\..\include\SDL_haptic.h" />
+    <ClInclude Include="..\..\include\SDL_input.h" />
     <ClInclude Include="..\..\include\SDL_joystick.h" />
     <ClInclude Include="..\..\include\SDL_keyboard.h" />
     <ClInclude Include="..\..\include\SDL_keysym.h" />
@@ -256,6 +259,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\include\SDL_power.h" />
     <ClInclude Include="..\..\include\SDL_quit.h" />
     <ClInclude Include="..\..\include\SDL_rect.h" />
+    <ClInclude Include="..\..\include\SDL_render.h" />
     <ClInclude Include="..\..\include\SDL_revision.h" />
     <ClInclude Include="..\..\include\SDL_rwops.h" />
     <ClInclude Include="..\..\include\SDL_scancode.h" />
@@ -265,6 +269,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\include\SDL_syswm.h" />
     <ClInclude Include="..\..\include\SDL_thread.h" />
     <ClInclude Include="..\..\include\SDL_timer.h" />
+    <ClInclude Include="..\..\include\SDL_touch.h" />
     <ClInclude Include="..\..\include\SDL_types.h" />
     <ClInclude Include="..\..\include\SDL_version.h" />
     <ClInclude Include="..\..\include\SDL_video.h" />
@@ -277,6 +282,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\events\SDL_touch_c.h" />
     <ClInclude Include="..\..\src\libm\math.h" />
     <ClInclude Include="..\..\src\libm\math_private.h" />
+    <ClInclude Include="..\..\src\render\SDL_sysrender.h" />
     <ClInclude Include="..\..\src\video\mmx.h" />
     <ClInclude Include="..\..\src\video\SDL_alphamult.h" />
     <ClInclude Include="..\..\src\audio\SDL_audio_c.h" />
@@ -287,7 +293,6 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\video\SDL_blit_copy.h" />
     <ClInclude Include="..\..\src\video\SDL_blit_slow.h" />
     <ClInclude Include="..\..\src\video\SDL_shape_internals.h" />
-    <ClInclude Include="..\..\src\video\windows\SDL_d3drender.h" />
     <ClInclude Include="..\..\src\audio\windib\SDL_dibaudio.h" />
     <ClInclude Include="..\..\src\audio\disk\SDL_diskaudio.h" />
     <ClInclude Include="..\..\src\video\SDL_draw.h" />
@@ -306,12 +311,9 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\audio\SDL_mixer_MMX_VC.h" />
     <ClInclude Include="..\..\src\events\SDL_mouse_c.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullevents_c.h" />
-    <ClInclude Include="..\..\src\video\dummy\SDL_nullrender_c.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullvideo.h" />
     <ClInclude Include="..\..\src\video\SDL_pixels_c.h" />
     <ClInclude Include="..\..\src\video\SDL_rect_c.h" />
-    <ClInclude Include="..\..\src\video\SDL_renderer_gl.h" />
-    <ClInclude Include="..\..\src\video\SDL_renderer_sw.h" />
     <ClInclude Include="..\..\src\video\SDL_RLEaccel_c.h" />
     <ClInclude Include="..\..\src\video\SDL_stretch_c.h" />
     <ClInclude Include="..\..\src\audio\SDL_sysaudio.h" />
@@ -360,6 +362,10 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\libm\s_floor.c" />
     <ClCompile Include="..\..\src\libm\s_scalbn.c" />
     <ClCompile Include="..\..\src\libm\s_sin.c" />
+    <ClCompile Include="..\..\src\render\direct3d\SDL_d3drender.c" />
+    <ClCompile Include="..\..\src\render\opengl\SDL_renderer_gl.c" />
+    <ClCompile Include="..\..\src\render\SDL_render.c" />
+    <ClCompile Include="..\..\src\render\software\SDL_renderer_sw.c" />
     <ClCompile Include="..\..\src\SDL.c" />
     <ClCompile Include="..\..\src\video\SDL_alphamult.c" />
     <ClCompile Include="..\..\src\SDL_assert.c" />
@@ -386,7 +392,6 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
     <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
     <ClCompile Include="..\..\src\video\SDL_shape.c" />
-    <ClCompile Include="..\..\src\video\windows\SDL_d3drender.c" />
     <ClCompile Include="..\..\src\audio\windib\SDL_dibaudio.c" />
     <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
     <ClCompile Include="..\..\src\video\SDL_drawline.c" />
@@ -413,15 +418,12 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\joystick\windows\SDL_mmjoystick.c" />
     <ClCompile Include="..\..\src\events\SDL_mouse.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullevents.c" />
-    <ClCompile Include="..\..\src\video\dummy\SDL_nullrender.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullvideo.c" />
     <ClCompile Include="..\..\src\video\SDL_pixels.c" />
     <ClCompile Include="..\..\src\power\SDL_power.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_qsort.c" />
     <ClCompile Include="..\..\src\events\SDL_quit.c" />
     <ClCompile Include="..\..\src\video\SDL_rect.c" />
-    <ClCompile Include="..\..\src\video\SDL_renderer_gl.c" />
-    <ClCompile Include="..\..\src\video\SDL_renderer_sw.c" />
     <ClCompile Include="..\..\src\video\SDL_RLEaccel.c" />
     <ClCompile Include="..\..\src\file\SDL_rwops.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_stdlib.c" />

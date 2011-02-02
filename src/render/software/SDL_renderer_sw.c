@@ -21,12 +21,9 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_video.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_rect_c.h"
-#include "SDL_yuv_sw_c.h"
-#include "SDL_renderer_sw.h"
+#include "../SDL_sysrender.h"
+#include "../../video/SDL_pixels_c.h"
+#include "../../video/SDL_yuv_sw_c.h"
 
 
 /* SDL surface based renderer implementation */
@@ -133,44 +130,21 @@ DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_free(texture);
 }
 
-void
-Setup_SoftwareRenderer(SDL_Renderer * renderer)
-{
-    renderer->CreateTexture = SW_CreateTexture;
-    renderer->QueryTexturePixels = SW_QueryTexturePixels;
-    renderer->SetTextureColorMod = SW_SetTextureColorMod;
-    renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
-    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
-    renderer->UpdateTexture = SW_UpdateTexture;
-    renderer->LockTexture = SW_LockTexture;
-    renderer->UnlockTexture = SW_UnlockTexture;
-    renderer->DestroyTexture = SW_DestroyTexture;
-
-    renderer->info.num_texture_formats =
-        SW_RenderDriver.info.num_texture_formats;
-    SDL_memcpy(renderer->info.texture_formats,
-               SW_RenderDriver.info.texture_formats,
-               sizeof(renderer->info.texture_formats));;
-    renderer->info.max_texture_width = SW_RenderDriver.info.max_texture_width;
-    renderer->info.max_texture_height =
-        SW_RenderDriver.info.max_texture_height;
-}
-
 SDL_Renderer *
 SW_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = window->display;
-    SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     SW_RenderData *data;
-    int i, n;
+    int i;
+    Uint32 format;
     int bpp;
     Uint32 Rmask, Gmask, Bmask, Amask;
     Uint32 renderer_flags;
     const char *desired_driver;
 
+    format = SDL_GetWindowPixelFormat(window);
     if (!SDL_PixelFormatEnumToMasks
-        (displayMode->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        (format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
         SDL_SetError("Unknown display format");
         return NULL;
     }
@@ -188,7 +162,15 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
     renderer->WindowEvent = SW_WindowEvent;
-
+    renderer->CreateTexture = SW_CreateTexture;
+    renderer->QueryTexturePixels = SW_QueryTexturePixels;
+    renderer->SetTextureColorMod = SW_SetTextureColorMod;
+    renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
+    renderer->SetTextureBlendMode = SW_SetTextureBlendMode;
+    renderer->UpdateTexture = SW_UpdateTexture;
+    renderer->LockTexture = SW_LockTexture;
+    renderer->UnlockTexture = SW_UnlockTexture;
+    renderer->DestroyTexture = SW_DestroyTexture;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
     renderer->RenderFillRects = SW_RenderFillRects;
@@ -197,14 +179,12 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderWritePixels = SW_RenderWritePixels;
     renderer->RenderPresent = SW_RenderPresent;
     renderer->DestroyRenderer = SW_DestroyRenderer;
-    renderer->info.name = SW_RenderDriver.info.name;
+    renderer->info = SW_RenderDriver.info;
     renderer->info.flags = 0;
     renderer->window = window;
     renderer->driverdata = data;
-    Setup_SoftwareRenderer(renderer);
 
-    n = 1;
-    data->format = displayMode->format;
+    data->format = format;
 
     /* Find a render driver that we can use to display data */
     renderer_flags = 0;
@@ -212,21 +192,22 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer_flags |= SDL_RENDERER_PRESENTVSYNC;
     }
     desired_driver = SDL_getenv("SDL_VIDEO_RENDERER_SWDRIVER");
-    for (i = 0; i < display->num_render_drivers; ++i) {
-        SDL_RenderDriver *driver = &display->render_drivers[i];
-        if (driver->info.name == SW_RenderDriver.info.name) {
+    for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
+        SDL_RendererInfo info;
+        SDL_GetRenderDriverInfo(i, &info);
+        if (SDL_strcmp(info.name, SW_RenderDriver.info.name) == 0) {
             continue;
         }
         if (desired_driver
-            && SDL_strcasecmp(desired_driver, driver->info.name) != 0) {
+            && SDL_strcasecmp(desired_driver, info.name) != 0) {
             continue;
         }
-        data->renderer = driver->CreateRenderer(window, renderer_flags);
+        data->renderer = SDL_CreateRenderer(window, i, renderer_flags);
         if (data->renderer) {
             break;
         }
     }
-    if (i == display->num_render_drivers) {
+    if (i == SDL_GetNumRenderDrivers()) {
         SW_DestroyRenderer(renderer);
         SDL_SetError("Couldn't find display render driver");
         return NULL;
@@ -725,8 +706,6 @@ SW_DestroyRenderer(SDL_Renderer * renderer)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
-    int i;
 
     if (data) {
         if (data->texture) {

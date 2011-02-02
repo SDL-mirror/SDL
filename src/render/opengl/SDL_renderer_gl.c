@@ -23,12 +23,8 @@
 
 #if SDL_VIDEO_RENDER_OGL
 
-#include "SDL_video.h"
 #include "SDL_opengl.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_rect_c.h"
-#include "SDL_yuv_sw_c.h"
+#include "../SDL_sysrender.h"
 
 #ifdef __MACOSX__
 #include <OpenGL/OpenGL.h>
@@ -62,6 +58,8 @@ bytes_per_pixel(const Uint32 format)
     }
 }
 
+/* Used to re-create the window with OpenGL capability */
+extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 static const float inv255f = 1.0f / 255.0f;
 
@@ -136,7 +134,7 @@ typedef struct
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
-#include "SDL_glfuncs.h"
+#include "../../video/SDL_glfuncs.h"
 #undef SDL_PROC
 
     void (*glTextureRangeAPPLE) (GLenum target, GLsizei length,
@@ -224,7 +222,7 @@ GL_LoadFunctions(GL_RenderData * data)
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
 
-#include "SDL_glfuncs.h"
+#include "../../video/SDL_glfuncs.h"
 #undef SDL_PROC
     return 0;
 }
@@ -235,15 +233,11 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GL_RenderData *data;
     GLint value;
+    Uint32 window_flags;
 
-    /* Render directly to the window, unless we're compositing */
-#ifndef __MACOSX__
-    if (flags & SDL_RENDERER_SINGLEBUFFER) {
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 0);
-    }
-#endif
-    if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        if (SDL_RecreateWindow(window, window->flags | SDL_WINDOW_OPENGL) < 0) {
+    window_flags = SDL_GetWindowFlags(window);
+    if (!(window_flags & SDL_WINDOW_OPENGL)) {
+        if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
             return NULL;
         }
     }
@@ -388,13 +382,15 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
         SDL_CurrentContext = data->context;
     }
     if (data->updateSize) {
+        int w, h;
+
+        SDL_GetWindowSize(window, &w, &h);
         data->glMatrixMode(GL_PROJECTION);
         data->glLoadIdentity();
         data->glMatrixMode(GL_MODELVIEW);
         data->glLoadIdentity();
-        data->glViewport(0, 0, window->w, window->h);
-        data->glOrtho(0.0, (GLdouble) window->w,
-                      (GLdouble) window->h, 0.0, 0.0, 1.0);
+        data->glViewport(0, 0, w, h);
+        data->glOrtho(0.0, (GLdouble) w, (GLdouble) h, 0.0, 0.0, 1.0);
         data->updateSize = SDL_FALSE;
     }
     return 0;
@@ -1145,7 +1141,7 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     GLint internalFormat;
     GLenum format, type;
     Uint8 *src, *dst, *tmp;
-    int length, rows;
+    int w, h, length, rows;
 
     GL_ActivateRenderer(renderer);
 
@@ -1155,11 +1151,13 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         return -1;
     }
 
+    SDL_GetWindowSize(window, &w, &h);
+
     data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
     data->glPixelStorei(GL_PACK_ROW_LENGTH,
                         (pitch / bytes_per_pixel(pixel_format)));
 
-    data->glReadPixels(rect->x, (window->h-rect->y)-rect->h, rect->w, rect->h,
+    data->glReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
                        format, type, pixels);
 
     /* Flip the rows to be top-down */
@@ -1189,7 +1187,7 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     GLint internalFormat;
     GLenum format, type;
     Uint8 *src, *dst, *tmp;
-    int length, rows;
+    int w, h, length, rows;
 
     GL_ActivateRenderer(renderer);
 
@@ -1198,6 +1196,8 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         SDL_SetError("Unsupported pixel format");
         return -1;
     }
+
+    SDL_GetWindowSize(window, &w, &h);
 
     data->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     data->glPixelStorei(GL_UNPACK_ROW_LENGTH,
@@ -1215,7 +1215,7 @@ GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         src -= pitch;
     }
 
-    data->glRasterPos2i(rect->x, (window->h-rect->y));
+    data->glRasterPos2i(rect->x, (h-rect->y));
     data->glDrawPixels(rect->w, rect->h, format, type, tmp);
     SDL_stack_free(tmp);
 

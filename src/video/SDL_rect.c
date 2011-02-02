@@ -21,8 +21,7 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_video.h"
-#include "SDL_rect_c.h"
+#include "SDL_rect.h"
 
 SDL_bool
 SDL_HasIntersection(const SDL_Rect * A, const SDL_Rect * B)

@@ -26,7 +26,6 @@
 
 #include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_render.h"
-#include "../SDL_rect_c.h"
 #include "../SDL_yuv_sw_c.h"
 
 /* the following is not yet tested ... */

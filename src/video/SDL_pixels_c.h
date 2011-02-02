@@ -47,4 +47,5 @@ extern void SDL_DitherColors(SDL_Color * colors, int bpp);
 extern Uint8 SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b);
 extern void SDL_ApplyGamma(Uint16 * gamma, SDL_Color * colors,
                            SDL_Color * output, int ncolors);
+
 /* vi: set ts=4 sw=4 expandtab: */

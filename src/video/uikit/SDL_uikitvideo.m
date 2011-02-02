@@ -35,9 +35,6 @@
 #include "SDL_uikitwindow.h"
 #include "SDL_uikitopengles.h"
 
-#include "SDL_renderer_sw.h"
-#include "SDL_renderer_gles.h"
-
 #include "SDL_assert.h"
 
 #define UIKITVID_DRIVER_NAME "uikit"

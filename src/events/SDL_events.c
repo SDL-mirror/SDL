@@ -116,8 +116,6 @@ SDL_StopEventLoop(void)
 int
 SDL_StartEventLoop(void)
 {
-    int retcode;
-
     /* Clean out the event queue */
     SDL_EventQ.lock = NULL;
     SDL_StopEventLoop();

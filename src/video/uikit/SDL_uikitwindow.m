@@ -35,7 +35,6 @@
 #import "SDL_uikitappdelegate.h"
 
 #import "SDL_uikitopenglview.h"
-#import "SDL_renderer_sw.h"
 
 #include <Foundation/Foundation.h>
 

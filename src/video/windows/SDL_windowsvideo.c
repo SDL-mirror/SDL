@@ -29,7 +29,6 @@
 
 #include "SDL_windowsvideo.h"
 #include "SDL_windowsshape.h"
-#include "SDL_d3drender.h"
 
 /* Initialization/Query functions */
 static int WIN_VideoInit(_THIS);
@@ -50,12 +49,6 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
     SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
 
     SDL_UnregisterApp();
-#if SDL_VIDEO_RENDER_D3D
-    if (data->d3d) {
-        IDirect3D9_Release(data->d3d);
-        SDL_UnloadObject(data->d3dDLL);
-    }
-#endif
 #ifdef _WIN32_WCE
     if(data->hAygShell) {
        SDL_UnloadObject(data->hAygShell);
@@ -174,10 +167,6 @@ WIN_VideoInit(_THIS)
     if (WIN_InitModes(_this) < 0) {
         return -1;
     }
-
-#if SDL_VIDEO_RENDER_D3D
-    D3D_AddRenderDriver(_this);
-#endif
 
     WIN_InitKeyboard(_this);
     WIN_InitMouse(_this);

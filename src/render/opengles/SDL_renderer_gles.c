@@ -23,12 +23,8 @@
 
 #if SDL_VIDEO_RENDER_OGL_ES
 
-#include "SDL_video.h"
 #include "SDL_opengles.h"
-#include "SDL_sysvideo.h"
-#include "SDL_pixels_c.h"
-#include "SDL_rect_c.h"
-#include "SDL_yuv_sw_c.h"
+#include "../SDL_sysrender.h"
 
 #if defined(SDL_VIDEO_DRIVER_PANDORA)
 
@@ -43,6 +39,9 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 #endif /* PANDORA */
 
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
+
+/* Used to re-create the window with OpenGL capability */
+extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 static const float inv255f = 1.0f / 255.0f;
 
@@ -83,6 +82,7 @@ SDL_RenderDriver GL_ES_RenderDriver = {
     {
      "opengl_es",
      (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     6,
      {
       /* OpenGL ES 1.x supported formats list */
       SDL_PIXELFORMAT_RGBA4444,
@@ -181,10 +181,11 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GLES_RenderData *data;
     GLint value;
-    int doublebuffer;
+    Uint32 window_flags;
 
-    if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        if (SDL_RecreateWindow(window, window->flags | SDL_WINDOW_OPENGL) < 0) {
+    window_flags = SDL_GetWindowFlags(window);
+    if (!(window_flags & SDL_WINDOW_OPENGL)) {
+        if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
             return NULL;
         }
     }
@@ -246,11 +247,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
-    if (SDL_GL_GetAttribute(SDL_GL_DOUBLEBUFFER, &doublebuffer) == 0) {
-        if (!doublebuffer) {
-            renderer->info.flags |= SDL_RENDERER_SINGLEBUFFER;
-        }
-    }
 #if SDL_VIDEO_DRIVER_PANDORA
     data->GL_OES_draw_texture_supported = SDL_FALSE;
     data->useDrawTexture = SDL_FALSE;
@@ -297,13 +293,15 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
         SDL_CurrentContext = data->context;
     }
     if (data->updateSize) {
+        int w, h;
+
+        SDL_GetWindowSize(window, &w, &h);
         data->glMatrixMode(GL_PROJECTION);
         data->glLoadIdentity();
         data->glMatrixMode(GL_MODELVIEW);
         data->glLoadIdentity();
-        data->glViewport(0, 0, window->w, window->h);
-        data->glOrthof(0.0, (GLfloat) window->w, (GLfloat) window->h, 0.0,
-                       0.0, 1.0);
+        data->glViewport(0, 0, w, h);
+        data->glOrthof(0.0, (GLfloat) w, (GLfloat) h, 0.0, 0.0, 1.0);
         data->updateSize = SDL_FALSE;
     }
     return 0;
@@ -736,16 +734,19 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (data->GL_OES_draw_texture_supported && data->useDrawTexture) {
         /* this code is a little funny because the viewport is upside down vs SDL's coordinate system */
-        SDL_Window *window = renderer->window;
         GLint cropRect[4];
+        int w, h;
+        SDL_Window *window = renderer->window;
+
+        SDL_GetWindowSize(window, &w, &h);
         cropRect[0] = srcrect->x;
         cropRect[1] = srcrect->y + srcrect->h;
         cropRect[2] = srcrect->w;
         cropRect[3] = -srcrect->h;
         data->glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES,
                                cropRect);
-        data->glDrawTexiOES(dstrect->x, window->h - dstrect->y - dstrect->h,
-                            0, dstrect->w, dstrect->h);
+        data->glDrawTexiOES(dstrect->x, h - dstrect->y - dstrect->h, 0,
+                            dstrect->w, dstrect->h);
     } else {
 
         minx = dstrect->x;

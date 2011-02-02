@@ -356,6 +356,11 @@ extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_Window * window,
                                                      SDL_DisplayMode * mode);
 
 /**
+ *  \brief Get the pixel format associated with the window.
+ */
+extern DECLSPEC Uint32 SDLCALL SDL_GetWindowPixelFormat(SDL_Window * window);
+
+/**
  *  \brief Set the gamma correction for each of the color channels on the 
  *         currently selected display.
  *  
