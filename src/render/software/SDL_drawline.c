@@ -23,6 +23,7 @@
 
 #include "SDL_draw.h"
 #include "SDL_drawline.h"
+#include "SDL_drawpoint.h"
 
 
 static void

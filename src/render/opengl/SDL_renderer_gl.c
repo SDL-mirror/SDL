@@ -209,7 +209,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
     renderer->info = GL_RenderDriver.info;
-    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;

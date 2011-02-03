@@ -608,6 +608,40 @@ extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
                                                     int fullscreen);
 
 /**
+ *  \brief Get an SDL surface associated with the window.
+ *
+ *  \return A surface in the optimal format for the window, or NULL on error.
+ *
+ *  \note You may not combine this with 3D or the rendering API on this window.
+ *
+ *  \sa SDL_UpdateWindowSurface()
+ *  \sa SDL_UpdateWindowSurfaceRects()
+ */
+extern DECLSPEC SDL_Surface * SDLCALL SDL_GetWindowSurface(SDL_Window * window);
+
+/**
+ *  \brief Copy the window surface to the screen.
+ *
+ *  \return 0 on success, or -1 on error.
+ *
+ *  \sa SDL_GetWindowSurface()
+ *  \sa SDL_UpdateWindowSurfaceRects()
+ */
+extern DECLSPEC int SDLCALL SDL_UpdateWindowSurface(SDL_Window * window);
+
+/**
+ *  \brief Copy a number of rectangles on the window surface to the screen.
+ *
+ *  \return 0 on success, or -1 on error.
+ *
+ *  \sa SDL_GetWindowSurface()
+ *  \sa SDL_UpdateWindowSurfaceRect()
+ */
+extern DECLSPEC int SDLCALL SDL_UpdateWindowSurfaceRects(SDL_Window * window,
+                                                         int numrects,
+                                                         SDL_Rect * rects);
+
+/**
  *  \brief Set a window's input grab mode.
  *  
  *  \param mode This is 1 to grab input, and 0 to release input.

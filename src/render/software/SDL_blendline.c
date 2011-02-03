@@ -23,6 +23,7 @@
 
 #include "SDL_draw.h"
 #include "SDL_blendline.h"
+#include "SDL_blendpoint.h"
 
 
 static void

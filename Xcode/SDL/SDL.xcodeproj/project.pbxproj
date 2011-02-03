@@ -252,12 +252,6 @@
 		04BD011812E6671800899322 /* SDL_nullevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFEE912E6671800899322 /* SDL_nullevents_c.h */; };
 		04BD011B12E6671800899322 /* SDL_nullvideo.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFEEC12E6671800899322 /* SDL_nullvideo.c */; };
 		04BD011C12E6671800899322 /* SDL_nullvideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFEED12E6671800899322 /* SDL_nullvideo.h */; };
-		04BD016F12E6671800899322 /* SDL_alphamult.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4812E6671800899322 /* SDL_alphamult.c */; };
-		04BD017012E6671800899322 /* SDL_alphamult.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF4912E6671800899322 /* SDL_alphamult.h */; };
-		04BD017112E6671800899322 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4A12E6671800899322 /* SDL_blendfillrect.c */; };
-		04BD017212E6671800899322 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4B12E6671800899322 /* SDL_blendline.c */; };
-		04BD017312E6671800899322 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4C12E6671800899322 /* SDL_blendpoint.c */; };
-		04BD017412E6671800899322 /* SDL_blendrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4D12E6671800899322 /* SDL_blendrect.c */; };
 		04BD017512E6671800899322 /* SDL_blit.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4E12E6671800899322 /* SDL_blit.c */; };
 		04BD017612E6671800899322 /* SDL_blit.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF4F12E6671800899322 /* SDL_blit.h */; };
 		04BD017712E6671800899322 /* SDL_blit_0.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5012E6671800899322 /* SDL_blit_0.c */; };
@@ -272,10 +266,6 @@
 		04BD018012E6671800899322 /* SDL_blit_slow.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF5912E6671800899322 /* SDL_blit_slow.h */; };
 		04BD018112E6671800899322 /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5A12E6671800899322 /* SDL_bmp.c */; };
 		04BD018212E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
-		04BD018312E6671800899322 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF5C12E6671800899322 /* SDL_draw.h */; };
-		04BD018412E6671800899322 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5D12E6671800899322 /* SDL_drawline.c */; };
-		04BD018512E6671800899322 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5E12E6671800899322 /* SDL_drawpoint.c */; };
-		04BD018612E6671800899322 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5F12E6671800899322 /* SDL_drawrect.c */; };
 		04BD018712E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
 		04BD018812E6671800899322 /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6112E6671800899322 /* SDL_gamma.c */; };
 		04BD018912E6671800899322 /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6212E6671800899322 /* SDL_glesfuncs.h */; };
@@ -461,12 +451,6 @@
 		04BD033212E6671800899322 /* SDL_nullevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFEE912E6671800899322 /* SDL_nullevents_c.h */; };
 		04BD033512E6671800899322 /* SDL_nullvideo.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFEEC12E6671800899322 /* SDL_nullvideo.c */; };
 		04BD033612E6671800899322 /* SDL_nullvideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFEED12E6671800899322 /* SDL_nullvideo.h */; };
-		04BD038912E6671800899322 /* SDL_alphamult.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4812E6671800899322 /* SDL_alphamult.c */; };
-		04BD038A12E6671800899322 /* SDL_alphamult.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF4912E6671800899322 /* SDL_alphamult.h */; };
-		04BD038B12E6671800899322 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4A12E6671800899322 /* SDL_blendfillrect.c */; };
-		04BD038C12E6671800899322 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4B12E6671800899322 /* SDL_blendline.c */; };
-		04BD038D12E6671800899322 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4C12E6671800899322 /* SDL_blendpoint.c */; };
-		04BD038E12E6671800899322 /* SDL_blendrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4D12E6671800899322 /* SDL_blendrect.c */; };
 		04BD038F12E6671800899322 /* SDL_blit.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF4E12E6671800899322 /* SDL_blit.c */; };
 		04BD039012E6671800899322 /* SDL_blit.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF4F12E6671800899322 /* SDL_blit.h */; };
 		04BD039112E6671800899322 /* SDL_blit_0.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5012E6671800899322 /* SDL_blit_0.c */; };
@@ -481,10 +465,6 @@
 		04BD039A12E6671800899322 /* SDL_blit_slow.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF5912E6671800899322 /* SDL_blit_slow.h */; };
 		04BD039B12E6671800899322 /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5A12E6671800899322 /* SDL_bmp.c */; };
 		04BD039C12E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
-		04BD039D12E6671800899322 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF5C12E6671800899322 /* SDL_draw.h */; };
-		04BD039E12E6671800899322 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5D12E6671800899322 /* SDL_drawline.c */; };
-		04BD039F12E6671800899322 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5E12E6671800899322 /* SDL_drawpoint.c */; };
-		04BD03A012E6671800899322 /* SDL_drawrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5F12E6671800899322 /* SDL_drawrect.c */; };
 		04BD03A112E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
 		04BD03A212E6671800899322 /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6112E6671800899322 /* SDL_gamma.c */; };
 		04BD03A312E6671800899322 /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6212E6671800899322 /* SDL_glesfuncs.h */; };
@@ -564,6 +544,34 @@
 		04DEA57311E6006A00386CAC /* SDL_input.h in Headers */ = {isa = PBXBuildFile; fileRef = 04DEA56F11E6006A00386CAC /* SDL_input.h */; };
 		04F2AF691104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04F2AF6A1104AC4500D6DDF7 /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F2AF681104AC4500D6DDF7 /* SDL_assert.h */; };
+		04F7803912FB748500FC43C0 /* SDL_nullframebuffer_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7803712FB748500FC43C0 /* SDL_nullframebuffer_c.h */; };
+		04F7803A12FB748500FC43C0 /* SDL_nullframebuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803812FB748500FC43C0 /* SDL_nullframebuffer.c */; };
+		04F7803B12FB748500FC43C0 /* SDL_nullframebuffer_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7803712FB748500FC43C0 /* SDL_nullframebuffer_c.h */; };
+		04F7803C12FB748500FC43C0 /* SDL_nullframebuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803812FB748500FC43C0 /* SDL_nullframebuffer.c */; };
+		04F7804912FB74A200FC43C0 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803D12FB74A200FC43C0 /* SDL_blendfillrect.c */; };
+		04F7804A12FB74A200FC43C0 /* SDL_blendfillrect.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7803E12FB74A200FC43C0 /* SDL_blendfillrect.h */; };
+		04F7804B12FB74A200FC43C0 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803F12FB74A200FC43C0 /* SDL_blendline.c */; };
+		04F7804C12FB74A200FC43C0 /* SDL_blendline.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804012FB74A200FC43C0 /* SDL_blendline.h */; };
+		04F7804D12FB74A200FC43C0 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804112FB74A200FC43C0 /* SDL_blendpoint.c */; };
+		04F7804E12FB74A200FC43C0 /* SDL_blendpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804212FB74A200FC43C0 /* SDL_blendpoint.h */; };
+		04F7804F12FB74A200FC43C0 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804312FB74A200FC43C0 /* SDL_draw.h */; };
+		04F7805012FB74A200FC43C0 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804412FB74A200FC43C0 /* SDL_drawline.c */; };
+		04F7805112FB74A200FC43C0 /* SDL_drawline.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804512FB74A200FC43C0 /* SDL_drawline.h */; };
+		04F7805212FB74A200FC43C0 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804612FB74A200FC43C0 /* SDL_drawpoint.c */; };
+		04F7805312FB74A200FC43C0 /* SDL_drawpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */; };
+		04F7805412FB74A200FC43C0 /* SDL_renderer_sw_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804812FB74A200FC43C0 /* SDL_renderer_sw_c.h */; };
+		04F7805512FB74A200FC43C0 /* SDL_blendfillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803D12FB74A200FC43C0 /* SDL_blendfillrect.c */; };
+		04F7805612FB74A200FC43C0 /* SDL_blendfillrect.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7803E12FB74A200FC43C0 /* SDL_blendfillrect.h */; };
+		04F7805712FB74A200FC43C0 /* SDL_blendline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7803F12FB74A200FC43C0 /* SDL_blendline.c */; };
+		04F7805812FB74A200FC43C0 /* SDL_blendline.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804012FB74A200FC43C0 /* SDL_blendline.h */; };
+		04F7805912FB74A200FC43C0 /* SDL_blendpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804112FB74A200FC43C0 /* SDL_blendpoint.c */; };
+		04F7805A12FB74A200FC43C0 /* SDL_blendpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804212FB74A200FC43C0 /* SDL_blendpoint.h */; };
+		04F7805B12FB74A200FC43C0 /* SDL_draw.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804312FB74A200FC43C0 /* SDL_draw.h */; };
+		04F7805C12FB74A200FC43C0 /* SDL_drawline.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804412FB74A200FC43C0 /* SDL_drawline.c */; };
+		04F7805D12FB74A200FC43C0 /* SDL_drawline.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804512FB74A200FC43C0 /* SDL_drawline.h */; };
+		04F7805E12FB74A200FC43C0 /* SDL_drawpoint.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7804612FB74A200FC43C0 /* SDL_drawpoint.c */; };
+		04F7805F12FB74A200FC43C0 /* SDL_drawpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */; };
+		04F7806012FB74A200FC43C0 /* SDL_renderer_sw_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804812FB74A200FC43C0 /* SDL_renderer_sw_c.h */; };
 		453773821207C518002F0F45 /* SDL_shape.h in Headers */ = {isa = PBXBuildFile; fileRef = 453773811207C518002F0F45 /* SDL_shape.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -818,12 +826,6 @@
 		04BDFEE912E6671800899322 /* SDL_nullevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_nullevents_c.h; sourceTree = "<group>"; };
 		04BDFEEC12E6671800899322 /* SDL_nullvideo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_nullvideo.c; sourceTree = "<group>"; };
 		04BDFEED12E6671800899322 /* SDL_nullvideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_nullvideo.h; sourceTree = "<group>"; };
-		04BDFF4812E6671800899322 /* SDL_alphamult.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_alphamult.c; sourceTree = "<group>"; };
-		04BDFF4912E6671800899322 /* SDL_alphamult.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_alphamult.h; sourceTree = "<group>"; };
-		04BDFF4A12E6671800899322 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
-		04BDFF4B12E6671800899322 /* SDL_blendline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendline.c; sourceTree = "<group>"; };
-		04BDFF4C12E6671800899322 /* SDL_blendpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendpoint.c; sourceTree = "<group>"; };
-		04BDFF4D12E6671800899322 /* SDL_blendrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendrect.c; sourceTree = "<group>"; };
 		04BDFF4E12E6671800899322 /* SDL_blit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit.c; sourceTree = "<group>"; };
 		04BDFF4F12E6671800899322 /* SDL_blit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blit.h; sourceTree = "<group>"; };
 		04BDFF5012E6671800899322 /* SDL_blit_0.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit_0.c; sourceTree = "<group>"; };
@@ -838,10 +840,6 @@
 		04BDFF5912E6671800899322 /* SDL_blit_slow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blit_slow.h; sourceTree = "<group>"; };
 		04BDFF5A12E6671800899322 /* SDL_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_bmp.c; sourceTree = "<group>"; };
 		04BDFF5B12E6671800899322 /* SDL_clipboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboard.c; sourceTree = "<group>"; };
-		04BDFF5C12E6671800899322 /* SDL_draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_draw.h; sourceTree = "<group>"; };
-		04BDFF5D12E6671800899322 /* SDL_drawline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawline.c; sourceTree = "<group>"; };
-		04BDFF5E12E6671800899322 /* SDL_drawpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawpoint.c; sourceTree = "<group>"; };
-		04BDFF5F12E6671800899322 /* SDL_drawrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawrect.c; sourceTree = "<group>"; };
 		04BDFF6012E6671800899322 /* SDL_fillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fillrect.c; sourceTree = "<group>"; };
 		04BDFF6112E6671800899322 /* SDL_gamma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gamma.c; sourceTree = "<group>"; };
 		04BDFF6212E6671800899322 /* SDL_glesfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glesfuncs.h; sourceTree = "<group>"; };
@@ -918,6 +916,20 @@
 		04BDFFFA12E6671800899322 /* XF86VMode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = XF86VMode.c; sourceTree = "<group>"; };
 		04DEA56F11E6006A00386CAC /* SDL_input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_input.h; path = ../../include/SDL_input.h; sourceTree = SOURCE_ROOT; };
 		04F2AF681104AC4500D6DDF7 /* SDL_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert.h; path = ../../include/SDL_assert.h; sourceTree = SOURCE_ROOT; };
+		04F7803712FB748500FC43C0 /* SDL_nullframebuffer_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_nullframebuffer_c.h; sourceTree = "<group>"; };
+		04F7803812FB748500FC43C0 /* SDL_nullframebuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_nullframebuffer.c; sourceTree = "<group>"; };
+		04F7803D12FB74A200FC43C0 /* SDL_blendfillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendfillrect.c; sourceTree = "<group>"; };
+		04F7803E12FB74A200FC43C0 /* SDL_blendfillrect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blendfillrect.h; sourceTree = "<group>"; };
+		04F7803F12FB74A200FC43C0 /* SDL_blendline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendline.c; sourceTree = "<group>"; };
+		04F7804012FB74A200FC43C0 /* SDL_blendline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blendline.h; sourceTree = "<group>"; };
+		04F7804112FB74A200FC43C0 /* SDL_blendpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blendpoint.c; sourceTree = "<group>"; };
+		04F7804212FB74A200FC43C0 /* SDL_blendpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_blendpoint.h; sourceTree = "<group>"; };
+		04F7804312FB74A200FC43C0 /* SDL_draw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_draw.h; sourceTree = "<group>"; };
+		04F7804412FB74A200FC43C0 /* SDL_drawline.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawline.c; sourceTree = "<group>"; };
+		04F7804512FB74A200FC43C0 /* SDL_drawline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_drawline.h; sourceTree = "<group>"; };
+		04F7804612FB74A200FC43C0 /* SDL_drawpoint.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_drawpoint.c; sourceTree = "<group>"; };
+		04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_drawpoint.h; sourceTree = "<group>"; };
+		04F7804812FB74A200FC43C0 /* SDL_renderer_sw_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_renderer_sw_c.h; sourceTree = "<group>"; };
 		0C5AF5E501191D2B7F000001 /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = begin_code.h; path = ../../include/begin_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E601191D2B7F000001 /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = close_code.h; path = ../../include/close_code.h; sourceTree = SOURCE_ROOT; };
 		0C5AF5E801191D2B7F000001 /* SDL_audio.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_audio.h; path = ../../include/SDL_audio.h; sourceTree = SOURCE_ROOT; };
@@ -1210,6 +1222,18 @@
 		041B2CA012FA0D680087D585 /* software */ = {
 			isa = PBXGroup;
 			children = (
+				04F7803D12FB74A200FC43C0 /* SDL_blendfillrect.c */,
+				04F7803E12FB74A200FC43C0 /* SDL_blendfillrect.h */,
+				04F7803F12FB74A200FC43C0 /* SDL_blendline.c */,
+				04F7804012FB74A200FC43C0 /* SDL_blendline.h */,
+				04F7804112FB74A200FC43C0 /* SDL_blendpoint.c */,
+				04F7804212FB74A200FC43C0 /* SDL_blendpoint.h */,
+				04F7804312FB74A200FC43C0 /* SDL_draw.h */,
+				04F7804412FB74A200FC43C0 /* SDL_drawline.c */,
+				04F7804512FB74A200FC43C0 /* SDL_drawline.h */,
+				04F7804612FB74A200FC43C0 /* SDL_drawpoint.c */,
+				04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */,
+				04F7804812FB74A200FC43C0 /* SDL_renderer_sw_c.h */,
 				041B2CA112FA0D680087D585 /* SDL_renderer_sw.c */,
 			);
 			path = software;
@@ -1487,12 +1511,6 @@
 				04BDFEE712E6671800899322 /* dummy */,
 				04BDFFB712E6671800899322 /* x11 */,
 				04BDFFD712E6671800899322 /* Xext */,
-				04BDFF4812E6671800899322 /* SDL_alphamult.c */,
-				04BDFF4912E6671800899322 /* SDL_alphamult.h */,
-				04BDFF4A12E6671800899322 /* SDL_blendfillrect.c */,
-				04BDFF4B12E6671800899322 /* SDL_blendline.c */,
-				04BDFF4C12E6671800899322 /* SDL_blendpoint.c */,
-				04BDFF4D12E6671800899322 /* SDL_blendrect.c */,
 				04BDFF4E12E6671800899322 /* SDL_blit.c */,
 				04BDFF4F12E6671800899322 /* SDL_blit.h */,
 				04BDFF5012E6671800899322 /* SDL_blit_0.c */,
@@ -1507,10 +1525,6 @@
 				04BDFF5912E6671800899322 /* SDL_blit_slow.h */,
 				04BDFF5A12E6671800899322 /* SDL_bmp.c */,
 				04BDFF5B12E6671800899322 /* SDL_clipboard.c */,
-				04BDFF5C12E6671800899322 /* SDL_draw.h */,
-				04BDFF5D12E6671800899322 /* SDL_drawline.c */,
-				04BDFF5E12E6671800899322 /* SDL_drawpoint.c */,
-				04BDFF5F12E6671800899322 /* SDL_drawrect.c */,
 				04BDFF6012E6671800899322 /* SDL_fillrect.c */,
 				04BDFF6112E6671800899322 /* SDL_gamma.c */,
 				04BDFF6212E6671800899322 /* SDL_glesfuncs.h */,
@@ -1562,6 +1576,8 @@
 			children = (
 				04BDFEE812E6671800899322 /* SDL_nullevents.c */,
 				04BDFEE912E6671800899322 /* SDL_nullevents_c.h */,
+				04F7803712FB748500FC43C0 /* SDL_nullframebuffer_c.h */,
+				04F7803812FB748500FC43C0 /* SDL_nullframebuffer.c */,
 				04BDFEEC12E6671800899322 /* SDL_nullvideo.c */,
 				04BDFEED12E6671800899322 /* SDL_nullvideo.h */,
 			);
@@ -1893,12 +1909,10 @@
 				04BD010312E6671800899322 /* SDL_cocoawindow.h in Headers */,
 				04BD011812E6671800899322 /* SDL_nullevents_c.h in Headers */,
 				04BD011C12E6671800899322 /* SDL_nullvideo.h in Headers */,
-				04BD017012E6671800899322 /* SDL_alphamult.h in Headers */,
 				04BD017612E6671800899322 /* SDL_blit.h in Headers */,
 				04BD017B12E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD017D12E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD018012E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD018312E6671800899322 /* SDL_draw.h in Headers */,
 				04BD018912E6671800899322 /* SDL_glesfuncs.h in Headers */,
 				04BD018A12E6671800899322 /* SDL_glfuncs.h in Headers */,
 				04BD018B12E6671800899322 /* SDL_leaks.h in Headers */,
@@ -1942,6 +1956,14 @@
 				041B2CA612FA0D680087D585 /* SDL_sysrender.h in Headers */,
 				04409B9112FA97ED00FB9AA8 /* mmx.h in Headers */,
 				04409B9312FA97ED00FB9AA8 /* SDL_yuv_sw_c.h in Headers */,
+				04F7803912FB748500FC43C0 /* SDL_nullframebuffer_c.h in Headers */,
+				04F7804A12FB74A200FC43C0 /* SDL_blendfillrect.h in Headers */,
+				04F7804C12FB74A200FC43C0 /* SDL_blendline.h in Headers */,
+				04F7804E12FB74A200FC43C0 /* SDL_blendpoint.h in Headers */,
+				04F7804F12FB74A200FC43C0 /* SDL_draw.h in Headers */,
+				04F7805112FB74A200FC43C0 /* SDL_drawline.h in Headers */,
+				04F7805312FB74A200FC43C0 /* SDL_drawpoint.h in Headers */,
+				04F7805412FB74A200FC43C0 /* SDL_renderer_sw_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2016,12 +2038,10 @@
 				04BD031D12E6671800899322 /* SDL_cocoawindow.h in Headers */,
 				04BD033212E6671800899322 /* SDL_nullevents_c.h in Headers */,
 				04BD033612E6671800899322 /* SDL_nullvideo.h in Headers */,
-				04BD038A12E6671800899322 /* SDL_alphamult.h in Headers */,
 				04BD039012E6671800899322 /* SDL_blit.h in Headers */,
 				04BD039512E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD039712E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD039A12E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD039D12E6671800899322 /* SDL_draw.h in Headers */,
 				04BD03A312E6671800899322 /* SDL_glesfuncs.h in Headers */,
 				04BD03A412E6671800899322 /* SDL_glfuncs.h in Headers */,
 				04BD03A512E6671800899322 /* SDL_leaks.h in Headers */,
@@ -2065,6 +2085,14 @@
 				041B2CAC12FA0D680087D585 /* SDL_sysrender.h in Headers */,
 				04409B9512FA97ED00FB9AA8 /* mmx.h in Headers */,
 				04409B9712FA97ED00FB9AA8 /* SDL_yuv_sw_c.h in Headers */,
+				04F7803B12FB748500FC43C0 /* SDL_nullframebuffer_c.h in Headers */,
+				04F7805612FB74A200FC43C0 /* SDL_blendfillrect.h in Headers */,
+				04F7805812FB74A200FC43C0 /* SDL_blendline.h in Headers */,
+				04F7805A12FB74A200FC43C0 /* SDL_blendpoint.h in Headers */,
+				04F7805B12FB74A200FC43C0 /* SDL_draw.h in Headers */,
+				04F7805D12FB74A200FC43C0 /* SDL_drawline.h in Headers */,
+				04F7805F12FB74A200FC43C0 /* SDL_drawpoint.h in Headers */,
+				04F7806012FB74A200FC43C0 /* SDL_renderer_sw_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2385,11 +2413,6 @@
 				04BD010412E6671800899322 /* SDL_cocoawindow.m in Sources */,
 				04BD011712E6671800899322 /* SDL_nullevents.c in Sources */,
 				04BD011B12E6671800899322 /* SDL_nullvideo.c in Sources */,
-				04BD016F12E6671800899322 /* SDL_alphamult.c in Sources */,
-				04BD017112E6671800899322 /* SDL_blendfillrect.c in Sources */,
-				04BD017212E6671800899322 /* SDL_blendline.c in Sources */,
-				04BD017312E6671800899322 /* SDL_blendpoint.c in Sources */,
-				04BD017412E6671800899322 /* SDL_blendrect.c in Sources */,
 				04BD017512E6671800899322 /* SDL_blit.c in Sources */,
 				04BD017712E6671800899322 /* SDL_blit_0.c in Sources */,
 				04BD017812E6671800899322 /* SDL_blit_1.c in Sources */,
@@ -2400,9 +2423,6 @@
 				04BD017F12E6671800899322 /* SDL_blit_slow.c in Sources */,
 				04BD018112E6671800899322 /* SDL_bmp.c in Sources */,
 				04BD018212E6671800899322 /* SDL_clipboard.c in Sources */,
-				04BD018412E6671800899322 /* SDL_drawline.c in Sources */,
-				04BD018512E6671800899322 /* SDL_drawpoint.c in Sources */,
-				04BD018612E6671800899322 /* SDL_drawrect.c in Sources */,
 				04BD018712E6671800899322 /* SDL_fillrect.c in Sources */,
 				04BD018812E6671800899322 /* SDL_gamma.c in Sources */,
 				04BD018C12E6671800899322 /* SDL_pixels.c in Sources */,
@@ -2443,6 +2463,12 @@
 				041B2CA712FA0D680087D585 /* SDL_renderer_sw.c in Sources */,
 				04409B9212FA97ED00FB9AA8 /* SDL_yuv_mmx.c in Sources */,
 				04409B9412FA97ED00FB9AA8 /* SDL_yuv_sw.c in Sources */,
+				04F7803A12FB748500FC43C0 /* SDL_nullframebuffer.c in Sources */,
+				04F7804912FB74A200FC43C0 /* SDL_blendfillrect.c in Sources */,
+				04F7804B12FB74A200FC43C0 /* SDL_blendline.c in Sources */,
+				04F7804D12FB74A200FC43C0 /* SDL_blendpoint.c in Sources */,
+				04F7805012FB74A200FC43C0 /* SDL_drawline.c in Sources */,
+				04F7805212FB74A200FC43C0 /* SDL_drawpoint.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2512,11 +2538,6 @@
 				04BD031E12E6671800899322 /* SDL_cocoawindow.m in Sources */,
 				04BD033112E6671800899322 /* SDL_nullevents.c in Sources */,
 				04BD033512E6671800899322 /* SDL_nullvideo.c in Sources */,
-				04BD038912E6671800899322 /* SDL_alphamult.c in Sources */,
-				04BD038B12E6671800899322 /* SDL_blendfillrect.c in Sources */,
-				04BD038C12E6671800899322 /* SDL_blendline.c in Sources */,
-				04BD038D12E6671800899322 /* SDL_blendpoint.c in Sources */,
-				04BD038E12E6671800899322 /* SDL_blendrect.c in Sources */,
 				04BD038F12E6671800899322 /* SDL_blit.c in Sources */,
 				04BD039112E6671800899322 /* SDL_blit_0.c in Sources */,
 				04BD039212E6671800899322 /* SDL_blit_1.c in Sources */,
@@ -2527,9 +2548,6 @@
 				04BD039912E6671800899322 /* SDL_blit_slow.c in Sources */,
 				04BD039B12E6671800899322 /* SDL_bmp.c in Sources */,
 				04BD039C12E6671800899322 /* SDL_clipboard.c in Sources */,
-				04BD039E12E6671800899322 /* SDL_drawline.c in Sources */,
-				04BD039F12E6671800899322 /* SDL_drawpoint.c in Sources */,
-				04BD03A012E6671800899322 /* SDL_drawrect.c in Sources */,
 				04BD03A112E6671800899322 /* SDL_fillrect.c in Sources */,
 				04BD03A212E6671800899322 /* SDL_gamma.c in Sources */,
 				04BD03A612E6671800899322 /* SDL_pixels.c in Sources */,
@@ -2570,6 +2588,12 @@
 				041B2CAD12FA0D680087D585 /* SDL_renderer_sw.c in Sources */,
 				04409B9612FA97ED00FB9AA8 /* SDL_yuv_mmx.c in Sources */,
 				04409B9812FA97ED00FB9AA8 /* SDL_yuv_sw.c in Sources */,
+				04F7803C12FB748500FC43C0 /* SDL_nullframebuffer.c in Sources */,
+				04F7805512FB74A200FC43C0 /* SDL_blendfillrect.c in Sources */,
+				04F7805712FB74A200FC43C0 /* SDL_blendline.c in Sources */,
+				04F7805912FB74A200FC43C0 /* SDL_blendpoint.c in Sources */,
+				04F7805C12FB74A200FC43C0 /* SDL_drawline.c in Sources */,
+				04F7805E12FB74A200FC43C0 /* SDL_drawpoint.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

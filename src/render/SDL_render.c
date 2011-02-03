@@ -26,6 +26,7 @@
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "../video/SDL_pixels_c.h"
+#include "software/SDL_renderer_sw_c.h"
 
 
 #define CHECK_RENDERER_MAGIC(renderer, retval) \
@@ -137,10 +138,17 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 
     if (renderer) {
         renderer->magic = &renderer_magic;
+        renderer->window = window;
 
         SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
     }
     return renderer;
+}
+
+SDL_Renderer *
+SDL_CreateSoftwareRenderer(SDL_Surface * surface)
+{
+    return SW_CreateRendererForSurface(surface);
 }
 
 int

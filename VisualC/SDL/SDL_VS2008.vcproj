@@ -643,14 +643,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_alphamult.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\SDL_alphamult.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\SDL_assert.c"
 			>
 		</File>
@@ -687,19 +679,27 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_blendfillrect.c"
+			RelativePath="..\..\src\render\software\SDL_blendfillrect.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_blendline.c"
+			RelativePath="..\..\src\render\software\SDL_blendfillrect.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_blendpoint.c"
+			RelativePath="..\..\src\render\software\SDL_blendline.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_blendrect.c"
+			RelativePath="..\..\src\render\software\SDL_blendline.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\software\SDL_blendpoint.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\software\SDL_blendpoint.h"
 			>
 		</File>
 		<File
@@ -795,19 +795,27 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\render\software\SDL_draw.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_draw.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_drawline.c"
+			RelativePath="..\..\src\render\software\SDL_drawline.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_drawpoint.c"
+			RelativePath="..\..\src\render\software\SDL_drawline.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_drawrect.c"
+			RelativePath="..\..\src\render\software\SDL_drawpoint.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\software\SDL_drawpoint.h"
 			>
 		</File>
 		<File
@@ -963,6 +971,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\dummy\SDL_nullframebuffer.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\dummy\SDL_nullframebuffer_c.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\dummy\SDL_nullvideo.c"
 			>
 		</File>
@@ -1008,6 +1024,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\render\software\SDL_renderer_sw.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\software\SDL_renderer_sw_c.h"
 			>
 		</File>
 		<File

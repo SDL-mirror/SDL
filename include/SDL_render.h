@@ -154,11 +154,24 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
  *  
  *  \return A valid rendering context or NULL if there was an error.
  *  
+ *  \sa SDL_CreateSoftwareRenderer()
  *  \sa SDL_GetRendererInfo()
  *  \sa SDL_DestroyRenderer()
  */
 extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateRenderer(SDL_Window * window,
                                                int index, Uint32 flags);
+
+/**
+ *  \brief Create a 2D software rendering context for a surface.
+ *  
+ *  \param surface The surface where rendering is done.
+ *  
+ *  \return A valid rendering context or NULL if there was an error.
+ *  
+ *  \sa SDL_CreateRenderer()
+ *  \sa SDL_DestroyRenderer()
+ */
+extern DECLSPEC SDL_Renderer * SDLCALL SDL_CreateSoftwareRenderer(SDL_Surface * surface);
 
 /**
  *  \brief Get information about a rendering context.

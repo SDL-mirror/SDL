@@ -202,7 +202,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
     renderer->info = GL_ES_RenderDriver.info;
-    renderer->window = window;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;

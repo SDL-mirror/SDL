@@ -80,6 +80,8 @@ struct SDL_Window
 
     SDL_DisplayMode fullscreen_mode;
     
+    SDL_Surface *surface;
+
     SDL_WindowShaper *shaper;
 
     SDL_WindowUserData *data;
@@ -190,7 +192,10 @@ struct SDL_VideoDevice
     void (*RestoreWindow) (_THIS, SDL_Window * window);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
-    
+    int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
+    int (*UpdateWindowFramebuffer) (_THIS, SDL_Window * window, int numrects, SDL_Rect * rects);
+    void (*DestroyWindowFramebuffer) (_THIS, SDL_Window * window);
+
     /* * * */
     /*
      * Shaped-window functions
@@ -344,6 +349,7 @@ extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 extern void SDL_OnWindowShown(SDL_Window * window);
 extern void SDL_OnWindowHidden(SDL_Window * window);
+extern void SDL_OnWindowResized(SDL_Window * window);
 extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);

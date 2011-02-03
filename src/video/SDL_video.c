@@ -95,6 +95,130 @@ static SDL_VideoDevice *_this = NULL;
 /* Various local functions */
 static void SDL_UpdateWindowGrab(SDL_Window * window);
 
+/* Support for framebuffer emulation using an accelerated renderer */
+
+#define SDL_WINDOWTEXTUREDATA   "_SDL_WindowTextureData"
+
+typedef struct {
+    SDL_Renderer *renderer;
+    SDL_Texture *texture;
+    void *pixels;
+    int pitch;
+} SDL_WindowTextureData;
+
+static int
+SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
+{
+    SDL_WindowTextureData *data;
+    SDL_Renderer *renderer;
+    SDL_RendererInfo info;
+    Uint32 i;
+
+    data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
+    if (!data) {
+        data = (SDL_WindowTextureData *)SDL_calloc(1, sizeof(*data));
+        if (!data) {
+            SDL_OutOfMemory();
+            return -1;
+        }
+        SDL_SetWindowData(window, SDL_WINDOWTEXTUREDATA, data);
+    }
+
+    renderer = data->renderer;
+    if (!renderer) {
+        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if (!renderer) {
+            return -1;
+        }
+        data->renderer = renderer;
+    }
+
+    /* Free any old texture and pixel data */
+    if (data->texture) {
+        SDL_DestroyTexture(data->texture);
+        data->texture = NULL;
+    }
+    if (data->pixels) {
+        SDL_free(data->pixels);
+        data->pixels = NULL;
+    }
+
+    if (SDL_GetRendererInfo(renderer, &info) < 0) {
+        return -1;
+    }
+
+    /* Find the first format without an alpha channel */
+    *format = info.texture_formats[0];
+    for (i = 0; i < info.num_texture_formats; ++i) {
+        if (!SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i])) {
+            *format = info.texture_formats[i];
+            break;
+        }
+    }
+
+    data->texture = SDL_CreateTexture(renderer, *format,
+                                      SDL_TEXTUREACCESS_STREAMING,
+                                      window->w, window->h);
+    if (!data->texture) {
+        return -1;
+    }
+
+    /* Create framebuffer data */
+    data->pitch = (((window->w * SDL_BYTESPERPIXEL(*format)) + 3) & ~3);
+    data->pixels = SDL_malloc(window->h * data->pitch);
+    if (!data->pixels) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    *pixels = data->pixels;
+    *pitch = data->pitch;
+    return 0;
+}
+
+static int
+SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rects)
+{
+    SDL_WindowTextureData *data;
+
+    data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
+    if (!data || !data->texture) {
+        SDL_SetError("No window texture data");
+        return -1;
+    }
+
+    if (SDL_UpdateTexture(data->texture, NULL, data->pixels, data->pitch) < 0) {
+        return -1;
+    }
+    if (SDL_RenderCopy(data->renderer, data->texture, NULL, NULL) < 0) {
+        return -1;
+    }
+    SDL_RenderPresent(data->renderer);
+    return 0;
+}
+
+static void
+SDL_DestroyWindowTexture(_THIS, SDL_Window * window)
+{
+    SDL_WindowTextureData *data;
+
+    data = SDL_SetWindowData(window, SDL_WINDOWTEXTUREDATA, NULL);
+    if (!data) {
+        return;
+    }
+    if (data->texture) {
+        SDL_DestroyTexture(data->texture);
+    }
+    if (data->renderer) {
+        SDL_DestroyRenderer(data->renderer);
+    }
+    if (data->pixels) {
+        SDL_free(data->pixels);
+    }
+    SDL_free(data);
+}
+
+
 static int
 cmpmodes(const void *A, const void *B)
 {
@@ -228,11 +352,19 @@ SDL_VideoInit(const char *driver_name)
         SDL_VideoQuit();
         return -1;
     }
+
     /* Make sure some displays were added */
     if (_this->num_displays == 0) {
         SDL_SetError("The video driver did not add any displays");
         SDL_VideoQuit();
         return (-1);
+    }
+
+    /* Add the renderer framebuffer emulation if needed */
+    if (!_this->CreateWindowFramebuffer) {
+        _this->CreateWindowFramebuffer = SDL_CreateWindowTexture;
+        _this->UpdateWindowFramebuffer = SDL_UpdateWindowTexture;
+        _this->DestroyWindowFramebuffer = SDL_DestroyWindowTexture;
     }
 
     /* We're ready to go! */
@@ -1216,6 +1348,69 @@ SDL_SetWindowFullscreen(SDL_Window * window, int fullscreen)
     return 0;
 }
 
+static SDL_Surface *
+SDL_CreateWindowFramebuffer(SDL_Window * window)
+{
+    Uint32 format;
+    void *pixels;
+    int pitch;
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+
+    if (!_this->CreateWindowFramebuffer || !_this->UpdateWindowFramebuffer) {
+        return NULL;
+    }
+
+    if (_this->CreateWindowFramebuffer(_this, window, &format, &pixels, &pitch) < 0) {
+        return NULL;
+    }
+
+    if (!SDL_PixelFormatEnumToMasks(format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        return NULL;
+    }
+
+    return SDL_CreateRGBSurfaceFrom(pixels, window->w, window->h, bpp, pitch, Rmask, Gmask, Bmask, Amask);
+}
+
+SDL_Surface *
+SDL_GetWindowSurface(SDL_Window * window)
+{
+    CHECK_WINDOW_MAGIC(window, NULL);
+
+    if (!window->surface) {
+        window->surface = SDL_CreateWindowFramebuffer(window);
+    }
+    return window->surface;
+}
+
+int
+SDL_UpdateWindowSurface(SDL_Window * window)
+{
+    SDL_Rect full_rect;
+
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    full_rect.x = 0;
+    full_rect.y = 0;
+    full_rect.w = window->w;
+    full_rect.h = window->h;
+    return SDL_UpdateWindowSurfaceRects(window, 1, &full_rect);
+}
+
+int
+SDL_UpdateWindowSurfaceRects(SDL_Window * window,
+                             int numrects, SDL_Rect * rects)
+{
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!window->surface) {
+        SDL_SetError("Window surface is invalid, please call SDL_GetWindowSurface() to get a new surface");
+        return -1;
+    }
+
+    return _this->UpdateWindowFramebuffer(_this, window, numrects, rects);
+}
+
 void
 SDL_SetWindowGrab(SDL_Window * window, int mode)
 {
@@ -1259,6 +1454,15 @@ void
 SDL_OnWindowHidden(SDL_Window * window)
 {
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
+}
+
+void
+SDL_OnWindowResized(SDL_Window * window)
+{
+    if (window->surface) {
+        SDL_FreeSurface(window->surface);
+        window->surface = NULL;
+    }
 }
 
 void
@@ -1336,6 +1540,9 @@ SDL_DestroyWindow(SDL_Window * window)
     /* Restore video mode, etc. */
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 
+    if (_this->DestroyWindowFramebuffer) {
+        _this->DestroyWindowFramebuffer(_this, window);
+    }
     if (_this->DestroyWindow) {
         _this->DestroyWindow(_this, window);
     }
