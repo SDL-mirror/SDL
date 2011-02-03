@@ -97,7 +97,7 @@ typedef struct
 
     /* OpenGL ES functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
-#include "SDL_glesfuncs.h"
+#include "../../video/SDL_glesfuncs.h"
 #undef SDL_PROC
 
 } GLES_RenderData;
@@ -154,7 +154,7 @@ GLES_LoadFunctions(GLES_RenderData * data)
 
 #define SDL_PROC(ret,func,params) \
     data->func = func;
-#include "SDL_glesfuncs.h"
+#include "../../video/SDL_glesfuncs.h"
 #undef SDL_PROC
 
     return 0;
