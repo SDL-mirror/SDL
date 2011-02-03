@@ -172,19 +172,16 @@ extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTexture(SDL_Renderer * renderer,
 /**
  *  \brief Create a texture from an existing surface.
  *  
- *  \param format The format of the texture, or 0 to pick an appropriate format.
  *  \param surface The surface containing pixel data used to fill the texture.
  *  
- *  \return The created texture is returned, or 0 if no rendering context was 
- *          active,  the format was unsupported, or the surface width or height 
- *          were out of range.
+ *  \return The created texture is returned, or 0 on error.
  *  
  *  \note The surface is not modified or freed by this function.
  *  
  *  \sa SDL_QueryTexture()
  *  \sa SDL_DestroyTexture()
  */
-extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTextureFromSurface(SDL_Renderer * renderer, Uint32 format, SDL_Surface * surface);
+extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface);
 
 /**
  *  \brief Query the attributes of a texture

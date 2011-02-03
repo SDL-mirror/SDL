@@ -118,7 +118,7 @@ int main(int argc,char** argv)
     for(i=0;i<num_pictures;i++)
         pictures[i].texture = NULL;
     for(i=0;i<num_pictures;i++) {
-        pictures[i].texture = SDL_CreateTextureFromSurface(renderer,0,pictures[i].surface);
+        pictures[i].texture = SDL_CreateTextureFromSurface(renderer,pictures[i].surface);
         if(pictures[i].texture == NULL) {
             j = 0;
             for(j=0;j<num_pictures;i++)
