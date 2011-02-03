@@ -53,8 +53,6 @@ static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 format, void * pixels, int pitch);
-static int SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                                Uint32 format, const void * pixels, int pitch);
 static void SW_RenderPresent(SDL_Renderer * renderer);
 static void SW_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void SW_DestroyRenderer(SDL_Renderer * renderer);
@@ -166,7 +164,6 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderFillRects = SW_RenderFillRects;
     renderer->RenderCopy = SW_RenderCopy;
     renderer->RenderReadPixels = SW_RenderReadPixels;
-    renderer->RenderWritePixels = SW_RenderWritePixels;
     renderer->RenderPresent = SW_RenderPresent;
     renderer->DestroyRenderer = SW_DestroyRenderer;
     renderer->info = SW_RenderDriver.info;
@@ -587,29 +584,6 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     SDL_ConvertPixels(rect->w, rect->h,
                       data->format, data->surface.pixels, data->surface.pitch,
                       format, pixels, pitch);
-
-    data->renderer->UnlockTexture(data->renderer, data->texture);
-    return 0;
-}
-
-static int
-SW_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                     Uint32 format, const void * pixels, int pitch)
-{
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-
-    if (!SW_ActivateRenderer(renderer)) {
-        return -1;
-    }
-
-    if (data->renderer->LockTexture(data->renderer, data->texture, rect,
-                                    &data->surface.pixels,
-                                    &data->surface.pitch) < 0) {
-        return -1;
-    }
-
-    SDL_ConvertPixels(rect->w, rect->h, format, pixels, pitch,
-                      data->format, data->surface.pixels, data->surface.pitch);
 
     data->renderer->UnlockTexture(data->renderer, data->texture);
     return 0;

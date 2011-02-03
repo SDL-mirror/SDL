@@ -63,8 +63,6 @@ static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 pixel_format, void * pixels, int pitch);
-static int GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                                Uint32 pixel_format, const void * pixels, int pitch);
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -207,7 +205,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderFillRects = GL_RenderFillRects;
     renderer->RenderCopy = GL_RenderCopy;
     renderer->RenderReadPixels = GL_RenderReadPixels;
-    renderer->RenderWritePixels = GL_RenderWritePixels;
     renderer->RenderPresent = GL_RenderPresent;
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
@@ -771,50 +768,6 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         dst += pitch;
         src -= pitch;
     }
-    SDL_stack_free(tmp);
-
-    return 0;
-}
-
-static int
-GL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                     Uint32 pixel_format, const void * pixels, int pitch)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-    GLint internalFormat;
-    GLenum format, type;
-    Uint8 *src, *dst, *tmp;
-    int w, h, length, rows;
-
-    GL_ActivateRenderer(renderer);
-
-    if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
-        /* FIXME: Do a temp copy to a format that is supported */
-        SDL_SetError("Unsupported pixel format");
-        return -1;
-    }
-
-    SDL_GetWindowSize(window, &w, &h);
-
-    data->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    data->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                        (pitch / SDL_BYTESPERPIXEL(pixel_format)));
-
-    /* Flip the rows to be bottom-up */
-    length = rect->h * rect->w * pitch;
-    tmp = SDL_stack_alloc(Uint8, length);
-    src = (Uint8*)pixels + (rect->h-1)*pitch;
-    dst = (Uint8*)tmp;
-    rows = rect->h;
-    while (rows--) {
-        SDL_memcpy(dst, src, pitch);
-        dst += pitch;
-        src -= pitch;
-    }
-
-    data->glRasterPos2i(rect->x, (h-rect->y));
-    data->glDrawPixels(rect->w, rect->h, format, type, tmp);
     SDL_stack_free(tmp);
 
     return 0;

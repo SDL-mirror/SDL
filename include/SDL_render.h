@@ -527,26 +527,6 @@ extern DECLSPEC int SDLCALL SDL_RenderReadPixels(SDL_Renderer * renderer,
                                                  void *pixels, int pitch);
 
 /**
- *  \brief Write pixels to the current rendering target.
- *  
- *  \param rect   A pointer to the rectangle to write, or NULL for the entire 
- *                render target.
- *  \param format The format of the pixel data, or 0 to use the format
- *                of the rendering target
- *  \param pixels A pointer to the pixel data to write.
- *  \param pitch  The pitch of the pixels parameter.
- *  
- *  \return 0 on success, or -1 if pixel writing is not supported.
- *  
- *  \warning This is a very slow operation, and should not be used frequently.
- */
-extern DECLSPEC int SDLCALL SDL_RenderWritePixels(SDL_Renderer * renderer,
-                                                  const SDL_Rect * rect,
-                                                  Uint32 format,
-                                                  const void *pixels,
-                                                  int pitch);
-
-/**
  *  \brief Update the screen with rendering performed.
  */
 extern DECLSPEC void SDLCALL SDL_RenderPresent(SDL_Renderer * renderer);

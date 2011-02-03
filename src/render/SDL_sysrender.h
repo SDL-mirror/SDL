@@ -89,8 +89,6 @@ struct SDL_Renderer
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
                              Uint32 format, void * pixels, int pitch);
-    int (*RenderWritePixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
-                              Uint32 format, const void * pixels, int pitch);
     void (*RenderPresent) (SDL_Renderer * renderer);
     void (*DestroyTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
 

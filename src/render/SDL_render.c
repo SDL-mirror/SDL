@@ -1212,45 +1212,6 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                       format, pixels, pitch);
 }
 
-int
-SDL_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                      Uint32 format, const void * pixels, int pitch)
-{
-    SDL_Window *window;
-    SDL_Rect real_rect;
-
-    CHECK_RENDERER_MAGIC(renderer, -1);
-
-    if (!renderer->RenderWritePixels) {
-        SDL_Unsupported();
-        return -1;
-    }
-    window = renderer->window;
-
-    if (!format) {
-        format = SDL_GetWindowPixelFormat(window);
-    }
-
-    real_rect.x = 0;
-    real_rect.y = 0;
-    SDL_GetWindowSize(window, &real_rect.w, &real_rect.h);
-    if (rect) {
-        if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
-            return 0;
-        }
-        if (real_rect.y > rect->y) {
-            pixels = (const Uint8 *)pixels + pitch * (real_rect.y - rect->y);
-        }
-        if (real_rect.x > rect->x) {
-            int bpp = SDL_BYTESPERPIXEL(SDL_GetWindowPixelFormat(window));
-            pixels = (const Uint8 *)pixels + bpp * (real_rect.x - rect->x);
-        }
-    }
-
-    return renderer->RenderWritePixels(renderer, &real_rect,
-                                       format, pixels, pitch);
-}
-
 void
 SDL_RenderPresent(SDL_Renderer * renderer)
 {
