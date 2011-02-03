@@ -470,9 +470,10 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     int window_x = SDL_WINDOWPOS_UNDEFINED;
     int window_y = SDL_WINDOWPOS_UNDEFINED;
     Uint32 window_flags;
-    Uint32 desktop_format;
-    Uint32 desired_format;
     Uint32 surface_flags;
+    Uint32 i;
+    SDL_RendererInfo info;
+    Uint32 desired_format;
 
     if (!SDL_GetVideoDevice()) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
@@ -489,6 +490,9 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
     if (height == 0) {
         height = desktop_mode.h;
+    }
+    if (bpp == 0) {
+        bpp = SDL_BITSPERPIXEL(desktop_mode.format);
     }
 
     /* See if we can simply resize the existing window and surface */
@@ -559,53 +563,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         surface_flags |= SDL_NOFRAME;
     }
 
-    /* Set up the desired display mode */
-    desktop_format = desktop_mode.format;
-    if (desktop_format && ((flags & SDL_ANYFORMAT)
-                           || (bpp == SDL_BITSPERPIXEL(desktop_format)))) {
-        desired_format = desktop_format;
-    } else {
-        switch (bpp) {
-        case 0:
-            if (desktop_format) {
-                desired_format = desktop_format;
-            } else {
-                desired_format = SDL_PIXELFORMAT_RGB888;
-            }
-            bpp = SDL_BITSPERPIXEL(desired_format);
-            break;
-        case 8:
-            desired_format = SDL_PIXELFORMAT_INDEX8;
-            break;
-        case 15:
-            desired_format = SDL_PIXELFORMAT_RGB555;
-            break;
-        case 16:
-            desired_format = SDL_PIXELFORMAT_RGB565;
-            break;
-        case 24:
-            desired_format = SDL_PIXELFORMAT_RGB24;
-            break;
-        case 32:
-            desired_format = SDL_PIXELFORMAT_RGB888;
-            break;
-        default:
-            SDL_SetError("Unsupported bpp in SDL_SetVideoMode()");
-            return NULL;
-        }
-    }
-
-    /* Set up the desired display mode */
-    if (flags & SDL_FULLSCREEN) {
-        SDL_DisplayMode mode;
-
-        SDL_zero(mode);
-        mode.format = desired_format;
-        if (SDL_SetWindowDisplayMode(SDL_VideoWindow, &mode) < 0) {
-            return NULL;
-        }
-    }
-
     /* If we're in OpenGL mode, just create a stub surface and we're done! */
     if (flags & SDL_OPENGL) {
         SDL_VideoContext = SDL_GL_CreateContext(SDL_VideoWindow);
@@ -632,15 +589,17 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create a texture for the screen surface */
+    SDL_GetRendererInfo(SDL_VideoRenderer, &info);
+    desired_format = info.texture_formats[0];
+    for (i = 0; i < info.num_texture_formats; ++i) {
+        if (!SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i])) {
+            desired_format = info.texture_formats[i];
+            break;
+        }
+    }
     SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, desired_format,
                                          SDL_TEXTUREACCESS_STREAMING,
                                          width, height);
-
-    if (!SDL_VideoTexture) {
-        SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, desktop_format,
-                                             SDL_TEXTUREACCESS_STREAMING,
-                                             width, height);
-    }
     if (!SDL_VideoTexture) {
         return NULL;
     }
