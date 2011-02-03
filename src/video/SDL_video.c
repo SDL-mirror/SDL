@@ -982,20 +982,60 @@ SDL_SetWindowIcon(SDL_Window * window, SDL_Surface * icon)
     }
 }
 
-void
-SDL_SetWindowData(SDL_Window * window, void *userdata)
+void*
+SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
 {
-    CHECK_WINDOW_MAGIC(window, );
+    SDL_WindowUserData *prev, *data;
 
-    window->userdata = userdata;
+    CHECK_WINDOW_MAGIC(window, NULL);
+
+    /* See if the named data already exists */
+    prev = NULL;
+    for (data = window->data; data; prev = data, data = data->next) {
+        if (SDL_strcmp(data->name, name) == 0) {
+            void *last_value = data->data;
+
+            if (userdata) {
+                /* Set the new value */
+                data->data = userdata;
+            } else {
+                /* Delete this value */
+                if (prev) {
+                    prev->next = data->next;
+                } else {
+                    window->data = data->next;
+                }
+                SDL_free(data->name);
+                SDL_free(data);
+            }
+            return last_value;
+        }
+    }
+
+    /* Add new data to the window */
+    if (userdata) {
+        data = (SDL_WindowUserData *)SDL_malloc(sizeof(*data));
+        data->name = SDL_strdup(name);
+        data->data = userdata;
+        data->next = window->data;
+        window->data = data;
+    }
+    return NULL;
 }
 
 void *
-SDL_GetWindowData(SDL_Window * window)
+SDL_GetWindowData(SDL_Window * window, const char *name)
 {
+    SDL_WindowUserData *data;
+
     CHECK_WINDOW_MAGIC(window, NULL);
 
-    return window->userdata;
+    for (data = window->data; data; data = data->next) {
+        if (SDL_strcmp(data->name, name) == 0) {
+            return data->data;
+        }
+    }
+    return NULL;
 }
 
 void
@@ -1293,10 +1333,6 @@ SDL_DestroyWindow(SDL_Window * window)
 
     CHECK_WINDOW_MAGIC(window, );
 
-    if (window->title) {
-        SDL_free(window->title);
-    }
-
     /* Restore video mode, etc. */
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 
@@ -1309,6 +1345,18 @@ SDL_DestroyWindow(SDL_Window * window)
 
     /* Now invalidate magic */
     window->magic = NULL;
+
+    /* Free memory associated with the window */
+    if (window->title) {
+        SDL_free(window->title);
+    }
+    while (window->data) {
+        SDL_WindowUserData *data = window->data;
+
+        window->data = data->next;
+        SDL_free(data->name);
+        SDL_free(data);
+    }
 
     /* Unlink the window from the list */
     display = window->display;

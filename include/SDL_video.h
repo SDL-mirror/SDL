@@ -483,24 +483,39 @@ extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Window * window,
                                                SDL_Surface * icon);
 
 /**
- *  \brief Associate an arbitrary pointer with a window.
+ *  \brief Associate an arbitrary named pointer with a window.
  *  
+ *  \param window   The window to associate with the pointer.
+ *  \param name     The name of the pointer.
+ *  \param userdata The associated pointer.
+ *
+ *  \return The previous value associated with 'name'
+ *
+ *  \note The name is case-sensitive.
+ *
  *  \sa SDL_GetWindowData()
  */
-extern DECLSPEC void SDLCALL SDL_SetWindowData(SDL_Window * window,
-                                               void *userdata);
+extern DECLSPEC void* SDLCALL SDL_SetWindowData(SDL_Window * window,
+                                                const char *name,
+                                                void *userdata);
 
 /**
  *  \brief Retrieve the data pointer associated with a window.
  *  
+ *  \param window   The window to query.
+ *  \param name     The name of the pointer.
+ *
+ *  \return The value associated with 'name'
+ *  
  *  \sa SDL_SetWindowData()
  */
-extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_Window * window);
+extern DECLSPEC void *SDLCALL SDL_GetWindowData(SDL_Window * window,
+                                                const char *name);
 
 /**
  *  \brief Set the position of a window.
  *  
- *  \param window The window to reposition.
+ *  \param window   The window to reposition.
  *  \param x        The x coordinate of the window, ::SDL_WINDOWPOS_CENTERED, or
                     ::SDL_WINDOWPOS_UNDEFINED.
  *  \param y        The y coordinate of the window, ::SDL_WINDOWPOS_CENTERED, or

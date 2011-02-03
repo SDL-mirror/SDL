@@ -59,6 +59,13 @@ struct SDL_ShapeDriver
     int (*ResizeWindowShape)(SDL_Window *window);
 };
 
+typedef struct SDL_WindowUserData
+{
+    char *name;
+    void *data;
+    struct SDL_WindowUserData *next;
+} SDL_WindowUserData;
+
 /* Define the SDL window structure, corresponding to toplevel windows */
 struct SDL_Window
 {
@@ -75,7 +82,8 @@ struct SDL_Window
     
     SDL_WindowShaper *shaper;
 
-    void *userdata;
+    SDL_WindowUserData *data;
+
     void *driverdata;
 
     SDL_Window *prev;
