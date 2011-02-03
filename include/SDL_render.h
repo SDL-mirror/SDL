@@ -61,7 +61,7 @@ typedef struct SDL_RendererInfo
     const char *name;           /**< The name of the renderer */
     Uint32 flags;               /**< Supported ::SDL_RendererFlags */
     Uint32 num_texture_formats; /**< The number of available texture formats */
-    Uint32 texture_formats[50]; /**< The available texture formats */
+    Uint32 texture_formats[16]; /**< The available texture formats */
     int max_texture_width;      /**< The maximimum texture width */
     int max_texture_height;     /**< The maximimum texture height */
 } SDL_RendererInfo;
@@ -204,22 +204,6 @@ extern DECLSPEC int SDLCALL SDL_QueryTexture(SDL_Texture * texture,
                                              int *w, int *h);
 
 /**
- *  \brief Query the pixels of a texture, if the texture does not need to be 
- *         locked for pixel access.
- *  
- *  \param texture A texture to be queried, which was created with 
- *                   ::SDL_TEXTUREACCESS_STREAMING.
- *  \param pixels    A pointer filled with a pointer to the pixels for the 
- *                   texture.
- *  \param pitch     A pointer filled in with the pitch of the pixel data.
- *  
- *  \return 0 on success, or -1 if the texture is not valid, or must be locked 
- *          for pixel access.
- */
-extern DECLSPEC int SDLCALL SDL_QueryTexturePixels(SDL_Texture * texture,
-                                                   void **pixels, int *pitch);
-
-/**
  *  \brief Set an additional color value used in render copy operations.
  *  
  *  \param texture The texture to update.
@@ -299,7 +283,7 @@ extern DECLSPEC int SDLCALL SDL_SetTextureBlendMode(SDL_Texture * texture,
 /**
  *  \brief Get the blend mode used for texture copy operations.
  *  
- *  \param texture The texture to query.
+ *  \param texture   The texture to query.
  *  \param blendMode A pointer filled in with the current blend mode.
  *  
  *  \return 0 on success, or -1 if the texture is not valid.
@@ -312,7 +296,7 @@ extern DECLSPEC int SDLCALL SDL_GetTextureBlendMode(SDL_Texture * texture,
 /**
  *  \brief Update the given texture rectangle with new pixel data.
  *  
- *  \param texture The texture to update
+ *  \param texture   The texture to update
  *  \param rect      A pointer to the rectangle of pixels to update, or NULL to 
  *                   update the entire texture.
  *  \param pixels    The raw pixel data.
@@ -329,49 +313,28 @@ extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_Texture * texture,
 /**
  *  \brief Lock a portion of the texture for pixel access.
  *  
- *  \param texture The texture to lock for access, which was created with 
+ *  \param texture   The texture to lock for access, which was created with 
  *                   ::SDL_TEXTUREACCESS_STREAMING.
  *  \param rect      A pointer to the rectangle to lock for access. If the rect 
  *                   is NULL, the entire texture will be locked.
- *  \param markDirty If this is nonzero, the locked area will be marked dirty 
- *                   when the texture is unlocked.
  *  \param pixels    This is filled in with a pointer to the locked pixels, 
  *                   appropriately offset by the locked area.
  *  \param pitch     This is filled in with the pitch of the locked pixels.
  *  
- *  \return 0 on success, or -1 if the texture is not valid or was created with 
- *          ::SDL_TEXTUREACCESS_STATIC.
+ *  \return 0 on success, or -1 if the texture is not valid or was not created with ::SDL_TEXTUREACCESS_STREAMING.
  *  
- *  \sa SDL_DirtyTexture()
  *  \sa SDL_UnlockTexture()
  */
 extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
                                             const SDL_Rect * rect,
-                                            int markDirty, void **pixels,
-                                            int *pitch);
+                                            void **pixels, int *pitch);
 
 /**
- *  \brief Unlock a texture, uploading the changes to renderer memory, if needed.
+ *  \brief Unlock a texture, uploading the changes to video memory, if needed.
  *  
  *  \sa SDL_LockTexture()
- *  \sa SDL_DirtyTexture()
  */
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
-
-/**
- *  \brief Mark the specified rectangles of the texture as dirty.
- *  
- *  \param texture The texture to mark dirty, which was created with 
- *                   ::SDL_TEXTUREACCESS_STREAMING.
- *  \param numrects  The number of rectangles pointed to by rects.
- *  \param rects     The pointer to an array of dirty rectangles.
- *  
- *  \sa SDL_LockTexture()
- *  \sa SDL_UnlockTexture()
- */
-extern DECLSPEC void SDLCALL SDL_DirtyTexture(SDL_Texture * texture,
-                                              int numrects,
-                                              const SDL_Rect * rects);
 
 /**
  *  \brief Set the color used for drawing operations (Fill and Line).

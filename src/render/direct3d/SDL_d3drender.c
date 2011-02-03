@@ -28,7 +28,6 @@
 #include "SDL_loadso.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysrender.h"
-#include "../../video/SDL_yuv_sw_c.h"
 
 #if SDL_VIDEO_RENDER_D3D
 #define D3D_DEBUG_INFO
@@ -89,7 +88,8 @@ HRESULT WINAPI
 
 /* Direct3D renderer implementation */
 
-#if 1                           /* This takes more memory but you won't lose your texture data */
+#if 1
+/* This takes more memory but you won't lose your texture data */
 #define D3DPOOL_SDL    D3DPOOL_MANAGED
 #define SDL_MEMORY_POOL_MANAGED
 #else
@@ -99,18 +99,12 @@ HRESULT WINAPI
 
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int D3D_QueryTexturePixels(SDL_Renderer * renderer,
-                                  SDL_Texture * texture, void **pixels,
-                                  int *pitch);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
 static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                           const SDL_Rect * rect, int markDirty,
-                           void **pixels, int *pitch);
+                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                             int numrects, const SDL_Rect * rects);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int D3D_RenderDrawLines(SDL_Renderer * renderer,
@@ -134,8 +128,8 @@ SDL_RenderDriver D3D_RenderDriver = {
     {
      "d3d",
      (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
-     0,
-     {0},
+     1,
+     {SDL_PIXELFORMAT_ARGB8888},
      0,
      0}
 };
@@ -152,7 +146,6 @@ typedef struct
 
 typedef struct
 {
-    SDL_SW_YUVTexture *yuv;
     Uint32 format;
     IDirect3DTexture9 *texture;
 } D3D_TextureData;
@@ -248,113 +241,30 @@ static D3DFORMAT
 PixelFormatToD3DFMT(Uint32 format)
 {
     switch (format) {
-    case SDL_PIXELFORMAT_INDEX8:
-        return D3DFMT_P8;
-    case SDL_PIXELFORMAT_RGB332:
-        return D3DFMT_R3G3B2;
-    case SDL_PIXELFORMAT_RGB444:
-        return D3DFMT_X4R4G4B4;
-    case SDL_PIXELFORMAT_RGB555:
-        return D3DFMT_X1R5G5B5;
-    case SDL_PIXELFORMAT_ARGB4444:
-        return D3DFMT_A4R4G4B4;
-    case SDL_PIXELFORMAT_ARGB1555:
-        return D3DFMT_A1R5G5B5;
     case SDL_PIXELFORMAT_RGB565:
         return D3DFMT_R5G6B5;
     case SDL_PIXELFORMAT_RGB888:
         return D3DFMT_X8R8G8B8;
     case SDL_PIXELFORMAT_ARGB8888:
         return D3DFMT_A8R8G8B8;
-    case SDL_PIXELFORMAT_ARGB2101010:
-        return D3DFMT_A2R10G10B10;
-    case SDL_PIXELFORMAT_YV12:
-        return MAKEFOURCC('Y','V','1','2');
-    case SDL_PIXELFORMAT_IYUV:
-        return MAKEFOURCC('I','4','2','0');
-    case SDL_PIXELFORMAT_UYVY:
-        return D3DFMT_UYVY;
-    case SDL_PIXELFORMAT_YUY2:
-        return D3DFMT_YUY2;
     default:
         return D3DFMT_UNKNOWN;
     }
 }
 
-static SDL_bool
-D3D_IsTextureFormatAvailable(IDirect3D9 * d3d, UINT adapter,
-                             D3DFORMAT display_format,
-                             D3DFORMAT texture_format)
+static Uint32
+D3DFMTToPixelFormat(D3DFORMAT format)
 {
-    HRESULT result;
-
-    result = IDirect3D9_CheckDeviceFormat(d3d, adapter,
-                                          D3DDEVTYPE_HAL,
-                                          display_format,
-                                          0,
-                                          D3DRTYPE_TEXTURE,
-                                          texture_format);
-    return FAILED(result) ? SDL_FALSE : SDL_TRUE;
-}
-
-static void
-UpdateYUVTextureData(SDL_Texture * texture)
-{
-    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-    SDL_Rect rect;
-    RECT d3drect;
-    D3DLOCKED_RECT locked;
-    HRESULT result;
-
-    d3drect.left = 0;
-    d3drect.right = texture->w;
-    d3drect.top = 0;
-    d3drect.bottom = texture->h;
-
-    result =
-        IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
-    if (FAILED(result)) {
-        return;
+    switch (format) {
+    case D3DFMT_R5G6B5:
+        return SDL_PIXELFORMAT_RGB565;
+    case D3DFMT_X8R8G8B8:
+        return SDL_PIXELFORMAT_RGB888;
+    case D3DFMT_A8R8G8B8:
+        return SDL_PIXELFORMAT_ARGB8888;
+    default:
+        return SDL_PIXELFORMAT_UNKNOWN;
     }
-
-    rect.x = 0;
-    rect.y = 0;
-    rect.w = texture->w;
-    rect.h = texture->h;
-    SDL_SW_CopyYUVToRGB(data->yuv, &rect, data->format, texture->w,
-                        texture->h, locked.pBits, locked.Pitch);
-
-    IDirect3DTexture9_UnlockRect(data->texture, 0);
-}
-
-static void
-D3D_AddTextureFormats(D3D_RenderData *data, SDL_RendererInfo *info)
-{
-    int i;
-    int formats[] = {
-        SDL_PIXELFORMAT_RGB332,
-        SDL_PIXELFORMAT_RGB444,
-        SDL_PIXELFORMAT_RGB555,
-        SDL_PIXELFORMAT_ARGB4444,
-        SDL_PIXELFORMAT_ARGB1555,
-        SDL_PIXELFORMAT_RGB565,
-        SDL_PIXELFORMAT_RGB888,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_PIXELFORMAT_ARGB2101010,
-    };
-
-    info->num_texture_formats = 0;
-    for (i = 0; i < SDL_arraysize(formats); ++i) {
-        if (D3D_IsTextureFormatAvailable
-            (data->d3d, data->adapter, data->pparams.BackBufferFormat, PixelFormatToD3DFMT(formats[i]))) {
-            info->texture_formats[info->num_texture_formats++] = formats[i];
-        }
-    }
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YV12;
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YUY2;
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_UYVY;
-    info->texture_formats[info->num_texture_formats++] = SDL_PIXELFORMAT_YVYU;
 }
 
 SDL_Renderer *
@@ -367,6 +277,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     D3DPRESENT_PARAMETERS pparams;
     IDirect3DSwapChain9 *chain;
     D3DCAPS9 caps;
+    Uint32 window_flags;
+    int w, h;
+    SDL_DisplayMode fullscreen_mode;
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -404,11 +317,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     renderer->CreateTexture = D3D_CreateTexture;
-    renderer->QueryTexturePixels = D3D_QueryTexturePixels;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
-    renderer->DirtyTexture = D3D_DirtyTexture;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
     renderer->RenderDrawLines = D3D_RenderDrawLines;
     renderer->RenderFillRects = D3D_RenderFillRects;
@@ -427,23 +338,27 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_VERSION(&windowinfo.version);
     SDL_GetWindowWMInfo(window, &windowinfo);
 
+    window_flags = SDL_GetWindowFlags(window);
+    SDL_GetWindowSize(window, &w, &h);
+    SDL_GetWindowDisplayMode(window, &fullscreen_mode);
+
     SDL_zero(pparams);
     pparams.hDeviceWindow = windowinfo.info.win.window;
-    pparams.BackBufferWidth = window->w;
-    pparams.BackBufferHeight = window->h;
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    pparams.BackBufferWidth = w;
+    pparams.BackBufferHeight = h;
+    if (window_flags & SDL_WINDOW_FULLSCREEN) {
         pparams.BackBufferFormat =
-            PixelFormatToD3DFMT(window->fullscreen_mode.format);
+            PixelFormatToD3DFMT(fullscreen_mode.format);
     } else {
         pparams.BackBufferFormat = D3DFMT_UNKNOWN;
     }
     pparams.BackBufferCount = 1;
     pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    if (window_flags & SDL_WINDOW_FULLSCREEN) {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
-            window->fullscreen_mode.refresh_rate;
+            fullscreen_mode.refresh_rate;
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
@@ -493,8 +408,6 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
     data->pparams = pparams;
-
-    D3D_AddTextureFormats(data, &renderer->info);
 
     IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
     renderer->info.max_texture_width = caps.MaxTextureWidth;
@@ -594,22 +507,7 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = data;
 
-    if (SDL_ISPIXELFORMAT_FOURCC(texture->format) &&
-        (texture->format != SDL_PIXELFORMAT_YUY2 ||
-         !D3D_IsTextureFormatAvailable(renderdata->d3d, renderdata->adapter,
-                                       display_format, PixelFormatToD3DFMT(texture->format)))
-        && (texture->format != SDL_PIXELFORMAT_YVYU
-            || !D3D_IsTextureFormatAvailable(renderdata->d3d, renderdata->adapter,
-                                             display_format, PixelFormatToD3DFMT(texture->format)))) {
-        data->yuv =
-            SDL_SW_CreateYUVTexture(texture->format, texture->w, texture->h);
-        if (!data->yuv) {
-            return -1;
-        }
-        data->format = SDL_GetWindowPixelFormat(window);
-    } else {
-        data->format = texture->format;
-    }
+    data->format = texture->format;
 
     result =
         IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
@@ -625,153 +523,118 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-D3D_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
-                       void **pixels, int *pitch)
-{
-    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-
-    if (data->yuv) {
-        return SDL_SW_QueryYUVTexturePixels(data->yuv, pixels, pitch);
-    } else {
-        /* D3D textures don't have their pixels hanging out */
-        return -1;
-    }
-}
-
-static int
 D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
     D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
 
-    if (data->yuv) {
-        if (SDL_SW_UpdateYUVTexture(data->yuv, rect, pixels, pitch) < 0) {
-            return -1;
-        }
-        UpdateYUVTextureData(texture);
-        return 0;
-    } else {
 #ifdef SDL_MEMORY_POOL_DEFAULT
-        IDirect3DTexture9 *temp;
-        RECT d3drect;
-        D3DLOCKED_RECT locked;
-        const Uint8 *src;
-        Uint8 *dst;
-        int row, length;
-        HRESULT result;
+    IDirect3DTexture9 *temp;
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    const Uint8 *src;
+    Uint8 *dst;
+    int row, length;
+    HRESULT result;
 
-        result =
-            IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
-                                           texture->h, 1, 0,
-                                           PixelFormatToD3DFMT(texture->
-                                                               format),
-                                           D3DPOOL_SYSTEMMEM, &temp, NULL);
-        if (FAILED(result)) {
-            D3D_SetError("CreateTexture()", result);
-            return -1;
-        }
+    result =
+        IDirect3DDevice9_CreateTexture(renderdata->device, texture->w,
+                                       texture->h, 1, 0,
+                                       PixelFormatToD3DFMT(texture-> format),
+                                       D3DPOOL_SYSTEMMEM, &temp, NULL);
+    if (FAILED(result)) {
+        D3D_SetError("CreateTexture()", result);
+        return -1;
+    }
 
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
 
-        result = IDirect3DTexture9_LockRect(temp, 0, &locked, &d3drect, 0);
-        if (FAILED(result)) {
-            IDirect3DTexture9_Release(temp);
-            D3D_SetError("LockRect()", result);
-            return -1;
-        }
-
-        src = pixels;
-        dst = locked.pBits;
-        length = rect->w * SDL_BYTESPERPIXEL(texture->format);
-        for (row = 0; row < rect->h; ++row) {
-            SDL_memcpy(dst, src, length);
-            src += pitch;
-            dst += locked.Pitch;
-        }
-        IDirect3DTexture9_UnlockRect(temp, 0);
-
-        result =
-            IDirect3DDevice9_UpdateTexture(renderdata->device,
-                                           (IDirect3DBaseTexture9 *) temp,
-                                           (IDirect3DBaseTexture9 *)
-                                           data->texture);
+    result = IDirect3DTexture9_LockRect(temp, 0, &locked, &d3drect, 0);
+    if (FAILED(result)) {
         IDirect3DTexture9_Release(temp);
-        if (FAILED(result)) {
-            D3D_SetError("UpdateTexture()", result);
-            return -1;
-        }
+        D3D_SetError("LockRect()", result);
+        return -1;
+    }
+
+    src = pixels;
+    dst = locked.pBits;
+    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
+    for (row = 0; row < rect->h; ++row) {
+        SDL_memcpy(dst, src, length);
+        src += pitch;
+        dst += locked.Pitch;
+    }
+    IDirect3DTexture9_UnlockRect(temp, 0);
+
+    result =
+        IDirect3DDevice9_UpdateTexture(renderdata->device,
+                                       (IDirect3DBaseTexture9 *) temp,
+                                       (IDirect3DBaseTexture9 *)
+                                       data->texture);
+    IDirect3DTexture9_Release(temp);
+    if (FAILED(result)) {
+        D3D_SetError("UpdateTexture()", result);
+        return -1;
+    }
 #else
-        RECT d3drect;
-        D3DLOCKED_RECT locked;
-        const Uint8 *src;
-        Uint8 *dst;
-        int row, length;
-        HRESULT result;
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    const Uint8 *src;
+    Uint8 *dst;
+    int row, length;
+    HRESULT result;
 
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
 
-        result =
-            IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect,
-                                       0);
-        if (FAILED(result)) {
-            D3D_SetError("LockRect()", result);
-            return -1;
-        }
+    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+    if (FAILED(result)) {
+        D3D_SetError("LockRect()", result);
+        return -1;
+    }
 
-        src = pixels;
-        dst = locked.pBits;
-        length = rect->w * SDL_BYTESPERPIXEL(texture->format);
-        for (row = 0; row < rect->h; ++row) {
-            SDL_memcpy(dst, src, length);
-            src += pitch;
-            dst += locked.Pitch;
-        }
-        IDirect3DTexture9_UnlockRect(data->texture, 0);
+    src = pixels;
+    dst = locked.pBits;
+    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
+    for (row = 0; row < rect->h; ++row) {
+        SDL_memcpy(dst, src, length);
+        src += pitch;
+        dst += locked.Pitch;
+    }
+    IDirect3DTexture9_UnlockRect(data->texture, 0);
 #endif // SDL_MEMORY_POOL_DEFAULT
 
-        return 0;
-    }
+    return 0;
 }
 
 static int
 D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                const SDL_Rect * rect, int markDirty, void **pixels,
-                int *pitch)
+                const SDL_Rect * rect, void **pixels, int *pitch)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    HRESULT result;
 
-    if (data->yuv) {
-        return SDL_SW_LockYUVTexture(data->yuv, rect, markDirty, pixels,
-                                     pitch);
-    } else {
-        RECT d3drect;
-        D3DLOCKED_RECT locked;
-        HRESULT result;
+    d3drect.left = rect->x;
+    d3drect.right = rect->x + rect->w;
+    d3drect.top = rect->y;
+    d3drect.bottom = rect->y + rect->h;
 
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
-
-        result =
-            IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect,
-                                       markDirty ? 0 :
-                                       D3DLOCK_NO_DIRTY_UPDATE);
-        if (FAILED(result)) {
-            D3D_SetError("LockRect()", result);
-            return -1;
-        }
-        *pixels = locked.pBits;
-        *pitch = locked.Pitch;
-        return 0;
+    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+    if (FAILED(result)) {
+        D3D_SetError("LockRect()", result);
+        return -1;
     }
+    *pixels = locked.pBits;
+    *pitch = locked.Pitch;
+    return 0;
 }
 
 static void
@@ -779,32 +642,7 @@ D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
-    if (data->yuv) {
-        SDL_SW_UnlockYUVTexture(data->yuv);
-        UpdateYUVTextureData(texture);
-    } else {
-        IDirect3DTexture9_UnlockRect(data->texture, 0);
-    }
-}
-
-static void
-D3D_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture, int numrects,
-                 const SDL_Rect * rects)
-{
-    D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-    RECT d3drect;
-    int i;
-
-    for (i = 0; i < numrects; ++i) {
-        const SDL_Rect *rect = &rects[i];
-
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
-
-        IDirect3DTexture9_AddDirtyRect(data->texture, &d3drect);
-    }
+    IDirect3DTexture9_UnlockRect(data->texture, 0);
 }
 
 static void
@@ -1123,8 +961,6 @@ D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
     D3DSURFACE_DESC desc;
     LPDIRECT3DSURFACE9 backBuffer;
     LPDIRECT3DSURFACE9 surface;
@@ -1174,7 +1010,7 @@ D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     }
 
     SDL_ConvertPixels(rect->w, rect->h,
-                      display->current_mode.format, locked.pBits, locked.Pitch,
+                      D3DFMTToPixelFormat(desc.Format), locked.pBits, locked.Pitch,
                       format, pixels, pitch);
 
     IDirect3DSurface9_UnlockRect(surface);
@@ -1226,9 +1062,6 @@ D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (!data) {
         return;
-    }
-    if (data->yuv) {
-        SDL_SW_DestroyYUVTexture(data->yuv);
     }
     if (data->texture) {
         IDirect3DTexture9_Release(data->texture);

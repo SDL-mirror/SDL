@@ -26,6 +26,7 @@
 
 #include "SDL_render.h"
 #include "SDL_events.h"
+#include "SDL_yuv_sw_c.h"
 
 /* The SDL 2D rendering system */
 
@@ -45,6 +46,13 @@ struct SDL_Texture
 
     SDL_Renderer *renderer;
 
+    /* Support for formats not supported directly by the renderer */
+    SDL_Texture *native;
+    SDL_SW_YUVTexture *yuv;
+    void *pixels;
+    int pitch;
+    SDL_Rect locked_rect;
+
     void *driverdata;           /**< Driver specific texture representation */
 
     SDL_Texture *prev;
@@ -58,8 +66,6 @@ struct SDL_Renderer
 
     void (*WindowEvent) (SDL_Renderer * renderer, const SDL_WindowEvent *event);
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
-    int (*QueryTexturePixels) (SDL_Renderer * renderer, SDL_Texture * texture,
-                               void **pixels, int *pitch);
     int (*SetTextureColorMod) (SDL_Renderer * renderer,
                                SDL_Texture * texture);
     int (*SetTextureAlphaMod) (SDL_Renderer * renderer,
@@ -70,11 +76,8 @@ struct SDL_Renderer
                           const SDL_Rect * rect, const void *pixels,
                           int pitch);
     int (*LockTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
-                        const SDL_Rect * rect, int markDirty, void **pixels,
-                        int *pitch);
+                        const SDL_Rect * rect, void **pixels, int *pitch);
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
-    void (*DirtyTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
-                          int numrects, const SDL_Rect * rects);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
                              int count);

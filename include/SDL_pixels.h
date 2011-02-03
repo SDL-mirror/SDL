@@ -122,18 +122,26 @@ enum
 #define SDL_PIXELORDER(X)	(((X) >> 20) & 0x0F)
 #define SDL_PIXELLAYOUT(X)	(((X) >> 16) & 0x0F)
 #define SDL_BITSPERPIXEL(X)	(((X) >> 8) & 0xFF)
-#define SDL_BYTESPERPIXEL(X)	(((X) >> 0) & 0xFF)
+#define SDL_BYTESPERPIXEL(X) \
+    (SDL_ISPIXELFORMAT_FOURCC(X) ? \
+        ((((X) == SDL_PIXELFORMAT_YV12) || \
+          ((X) == SDL_PIXELFORMAT_IYUV) || \
+          ((X) == SDL_PIXELFORMAT_YUY2) || \
+          ((X) == SDL_PIXELFORMAT_UYVY) || \
+          ((X) == SDL_PIXELFORMAT_YVYU)) ? 2 : 1) : (((X) >> 0) & 0xFF))
 
 #define SDL_ISPIXELFORMAT_INDEXED(format)   \
-    ((SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX1) || \
-     (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX4) || \
-     (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX8))
+    (!SDL_ISPIXELFORMAT_FOURCC(format) && \
+     ((SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX1) || \
+      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX4) || \
+      (SDL_PIXELTYPE(format) == SDL_PIXELTYPE_INDEX8)))
 
 #define SDL_ISPIXELFORMAT_ALPHA(format)   \
-    ((SDL_PIXELORDER(format) == SDL_PACKEDORDER_ARGB) || \
-     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_RGBA) || \
-     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_ABGR) || \
-     (SDL_PIXELORDER(format) == SDL_PACKEDORDER_BGRA))
+    (!SDL_ISPIXELFORMAT_FOURCC(format) && \
+     ((SDL_PIXELORDER(format) == SDL_PACKEDORDER_ARGB) || \
+      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_RGBA) || \
+      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_ABGR) || \
+      (SDL_PIXELORDER(format) == SDL_PACKEDORDER_BGRA)))
 
 #define SDL_ISPIXELFORMAT_FOURCC(format)    \
     ((format) && !((format) & 0x80000000))

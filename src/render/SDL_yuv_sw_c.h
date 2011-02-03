@@ -22,7 +22,6 @@
 #include "SDL_config.h"
 
 #include "SDL_video.h"
-#include "SDL_sysvideo.h"
 
 /* This is the software implementation of the YUV texture support */
 
@@ -60,7 +59,7 @@ int SDL_SW_QueryYUVTexturePixels(SDL_SW_YUVTexture * swdata, void **pixels,
 int SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
                             const void *pixels, int pitch);
 int SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
-                          int markDirty, void **pixels, int *pitch);
+                          void **pixels, int *pitch);
 void SDL_SW_UnlockYUVTexture(SDL_SW_YUVTexture * swdata);
 int SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
                         Uint32 target_format, int w, int h, void *pixels,

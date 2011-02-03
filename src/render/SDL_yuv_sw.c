@@ -1155,7 +1155,7 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
 
 int
 SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
-                      int markDirty, void **pixels, int *pitch)
+                      void **pixels, int *pitch)
 {
     switch (swdata->format) {
     case SDL_PIXELFORMAT_YV12:

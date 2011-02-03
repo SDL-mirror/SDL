@@ -49,19 +49,13 @@ static SDL_Renderer *GLES_CreateRenderer(SDL_Window * window, Uint32 flags);
 static void GLES_WindowEvent(SDL_Renderer * renderer,
                              const SDL_WindowEvent *event);
 static int GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int GLES_QueryTexturePixels(SDL_Renderer * renderer,
-                                   SDL_Texture * texture, void **pixels,
-                                   int *pitch);
 static int GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                               const SDL_Rect * rect, const void *pixels,
                               int pitch);
 static int GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                            const SDL_Rect * rect, int markDirty,
-                            void **pixels, int *pitch);
+                            const SDL_Rect * rect, void **pixels, int *pitch);
 static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
-static void GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                              int numrects, const SDL_Rect * rects);
 static int GLES_RenderDrawPoints(SDL_Renderer * renderer,
                                  const SDL_Point * points, int count);
 static int GLES_RenderDrawLines(SDL_Renderer * renderer,
@@ -82,15 +76,8 @@ SDL_RenderDriver GL_ES_RenderDriver = {
     {
      "opengl_es",
      (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
-     6,
-     {
-      /* OpenGL ES 1.x supported formats list */
-      SDL_PIXELFORMAT_RGBA4444,
-      SDL_PIXELFORMAT_RGBA5551,
-      SDL_PIXELFORMAT_RGB565,
-      SDL_PIXELFORMAT_RGB24,
-      SDL_PIXELFORMAT_BGR888,
-      SDL_PIXELFORMAT_ABGR8888},
+     1,
+     {SDL_PIXELFORMAT_ABGR8888},
      0,
      0}
 };
@@ -125,7 +112,6 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
-    SDL_DirtyRectList dirty;
 } GLES_TextureData;
 
 static void
@@ -205,11 +191,9 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->WindowEvent = GLES_WindowEvent;
     renderer->CreateTexture = GLES_CreateTexture;
-    renderer->QueryTexturePixels = GLES_QueryTexturePixels;
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
-    renderer->DirtyTexture = GLES_DirtyTexture;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
     renderer->RenderDrawLines = GLES_RenderDrawLines;
     renderer->RenderFillRects = GLES_RenderFillRects;
@@ -343,31 +327,10 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLES_ActivateRenderer(renderer);
 
     switch (texture->format) {
-    case SDL_PIXELFORMAT_RGB24:
-        internalFormat = GL_RGB;
-        format = GL_RGB;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_BGR888:
     case SDL_PIXELFORMAT_ABGR8888:
         internalFormat = GL_RGBA;
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_RGB565:
-        internalFormat = GL_RGB;
-        format = GL_RGB;
-        type = GL_UNSIGNED_SHORT_5_6_5;
-        break;
-    case SDL_PIXELFORMAT_RGBA5551:
-        internalFormat = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_5_5_5_1;
-        break;
-    case SDL_PIXELFORMAT_RGBA4444:
-        internalFormat = GL_RGBA;
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
         break;
     default:
         SDL_SetError("Texture format %s not supported by OpenGL ES",
@@ -428,23 +391,10 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     return 0;
 }
 
-static int
-GLES_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
-                        void **pixels, int *pitch)
-{
-    GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
-
-    *pixels = data->pixels;
-    *pitch = data->pitch;
-    return 0;
-}
-
 static void
 SetupTextureUpdate(GLES_RenderData * renderdata, SDL_Texture * texture,
                    int pitch)
 {
-    GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
-    renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
@@ -463,8 +413,9 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GLES_ActivateRenderer(renderer);
 
     renderdata->glGetError();
-    renderdata->glEnable(data->type);
     SetupTextureUpdate(renderdata, texture, pitch);
+    renderdata->glEnable(data->type);
+    renderdata->glBindTexture(data->type, data->texture);
 
     if( rect->w * bpp == pitch ) {
          temp_buffer = (void *)pixels; /* No need to reformat */
@@ -498,14 +449,9 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                 const SDL_Rect * rect, int markDirty, void **pixels,
-                 int *pitch)
+                 const SDL_Rect * rect, void **pixels, int *pitch)
 {
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
-
-    if (markDirty) {
-        SDL_AddDirtyRect(&data->dirty, rect);
-    }
 
     *pixels =
         (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
@@ -517,18 +463,18 @@ GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 GLES_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-}
-
-static void
-GLES_DirtyTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                  int numrects, const SDL_Rect * rects)
-{
+    GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
-    int i;
 
-    for (i = 0; i < numrects; ++i) {
-        SDL_AddDirtyRect(&data->dirty, &rects[i]);
-    }
+    GLES_ActivateRenderer(renderer);
+
+    SetupTextureUpdate(renderdata, texture, data->pitch);
+    renderdata->glEnable(data->type);
+    renderdata->glBindTexture(data->type, data->texture);
+    renderdata->glTexSubImage2D(data->type, 0, 0, 0, texture->w,
+                                texture->h, data->format, data->formattype,
+                                data->pixels);
+    renderdata->glDisable(data->type);
 }
 
 static void
@@ -676,49 +622,6 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glEnable(GL_TEXTURE_2D);
 
-    if (texturedata->dirty.list) {
-        SDL_DirtyRect *dirty;
-        void *pixels;
-        int bpp = SDL_BYTESPERPIXEL(texture->format);
-        int pitch = texturedata->pitch;
-
-        SetupTextureUpdate(data, texture, pitch);
-
-        data->glBindTexture(texturedata->type, texturedata->texture);
-        for (dirty = texturedata->dirty.list; dirty; dirty = dirty->next) {
-            SDL_Rect *rect = &dirty->rect;
-            pixels =
-                (void *) ((Uint8 *) texturedata->pixels + rect->y * pitch +
-                          rect->x * bpp);
-            /*      There is no GL_UNPACK_ROW_LENGTH in OpenGLES 
-               we must do this reformatting ourselves(!)
-
-               maybe it'd be a good idea to keep a temp buffer around
-               for this purpose rather than allocating it each time
-             */
-            if( rect->x == 0 && rect->w * bpp == pitch ) {
-                temp_buffer = pixels; /* Updating whole texture, no need to reformat */
-            } else {
-                temp_buffer = SDL_malloc(rect->w * rect->h * bpp);
-                temp_ptr = temp_buffer;
-                for (i = 0; i < rect->h; i++) {
-                    SDL_memcpy(temp_ptr, pixels, rect->w * bpp);
-                    temp_ptr += rect->w * bpp;
-                    pixels += pitch;
-                }
-            }
-
-            data->glTexSubImage2D(texturedata->type, 0, rect->x, rect->y,
-                                  rect->w, rect->h, texturedata->format,
-                                  texturedata->formattype, temp_buffer);
-
-            if( temp_buffer != pixels ) {
-                SDL_free(temp_buffer);
-            }
-        }
-        SDL_ClearDirtyRects(&texturedata->dirty);
-    }
-
     data->glBindTexture(texturedata->type, texturedata->texture);
 
     if (texture->modMode) {
@@ -818,7 +721,6 @@ GLES_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (data->pixels) {
         SDL_free(data->pixels);
     }
-    SDL_FreeDirtyRects(&data->dirty);
     SDL_free(data);
     texture->driverdata = NULL;
 }

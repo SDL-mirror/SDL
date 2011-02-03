@@ -282,8 +282,9 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\events\SDL_touch_c.h" />
     <ClInclude Include="..\..\src\libm\math.h" />
     <ClInclude Include="..\..\src\libm\math_private.h" />
+    <ClInclude Include="..\..\src\render\mmx.h" />
     <ClInclude Include="..\..\src\render\SDL_sysrender.h" />
-    <ClInclude Include="..\..\src\video\mmx.h" />
+    <ClInclude Include="..\..\src\render\SDL_yuv_sw_c.h" />
     <ClInclude Include="..\..\src\video\SDL_alphamult.h" />
     <ClInclude Include="..\..\src\audio\SDL_audio_c.h" />
     <ClInclude Include="..\..\src\audio\SDL_audiodev_c.h" />
@@ -339,7 +340,6 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\video\windows\SDL_windowsvideo.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowswindow.h" />
     <ClInclude Include="..\..\src\events\SDL_windowevents_c.h" />
-    <ClInclude Include="..\..\src\video\SDL_yuv_sw_c.h" />
     <ClInclude Include="..\..\src\video\windows\wmmsg.h" />
   </ItemGroup>
   <ItemGroup>
@@ -365,6 +365,8 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\render\direct3d\SDL_d3drender.c" />
     <ClCompile Include="..\..\src\render\opengl\SDL_renderer_gl.c" />
     <ClCompile Include="..\..\src\render\SDL_render.c" />
+    <ClCompile Include="..\..\src\render\SDL_yuv_mmx.c" />
+    <ClCompile Include="..\..\src\render\SDL_yuv_sw.c" />
     <ClCompile Include="..\..\src\render\software\SDL_renderer_sw.c" />
     <ClCompile Include="..\..\src\SDL.c" />
     <ClCompile Include="..\..\src\video\SDL_alphamult.c" />
@@ -452,8 +454,6 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\video\windows\SDL_windowsvideo.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowswindow.c" />
     <ClCompile Include="..\..\src\events\SDL_windowevents.c" />
-    <ClCompile Include="..\..\src\video\SDL_yuv_mmx.c" />
-    <ClCompile Include="..\..\src\video\SDL_yuv_sw.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

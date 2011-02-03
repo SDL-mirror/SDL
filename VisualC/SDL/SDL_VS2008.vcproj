@@ -607,7 +607,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\mmx.h"
+			RelativePath="..\..\src\render\mmx.h"
 			>
 		</File>
 		<File
@@ -1251,15 +1251,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_yuv_mmx.c"
+			RelativePath="..\..\src\render\SDL_yuv_mmx.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_yuv_sw.c"
+			RelativePath="..\..\src\render\SDL_yuv_sw.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_yuv_sw_c.h"
+			RelativePath="..\..\src\render\SDL_yuv_sw_c.h"
 			>
 		</File>
 		<File
