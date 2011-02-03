@@ -38,7 +38,6 @@ static int render_hasTexColor (void);
 static int render_hasTexAlpha (void);
 static int render_clearScreen (void);
 /* Testcases. */
-static int render_testReadWrite (void);
 static int render_testPrimitives (void);
 static int render_testPrimitivesBlend (void);
 static int render_testBlit (void);
@@ -230,7 +229,7 @@ static SDL_Texture * render_loadTestFace (void)
          );
    if (face == NULL)
       return 0;
-   tface = SDL_CreateTextureFromSurface(renderer, 0, face );
+   tface = SDL_CreateTextureFromSurface(renderer, face);
    SDL_FreeSurface(face);
 
    return tface;
@@ -341,31 +340,6 @@ static int render_clearScreen (void)
    if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
       return -1;
    */
-
-   return 0;
-}
-
-
-/**
- * @brief Test reading and writing framebuffer
- */
-static int render_testReadWrite (void)
-{
-   int ret;
-   SDL_Rect rect;
-
-   /* Write pixels. */
-   rect.x = 0;
-   rect.y = 0;
-   rect.w = 80;
-   rect.h = 60;
-   ret = SDL_RenderWritePixels(renderer, &rect, SDL_PIXELFORMAT_RGB24, img_primitives.pixel_data, img_primitives.width*img_primitives.bytes_per_pixel );
-   if (SDL_ATassert( "SDL_RenderWritePixels", ret==0) )
-      return 1;
-
-   /* See if it's the same. */
-   if (render_compare( "Read/write output not the same.", &img_primitives, ALLOWABLE_ERROR_OPAQUE ))
-      return -1;
 
    return 0;
 }
@@ -927,9 +901,6 @@ int render_runTests (void)
       SDL_ATprintVerbose( 1, "      Texture Alpha Mod supported\n" );
 
    /* Software surface blitting. */
-   ret = render_testReadWrite();
-   if (ret)
-      return -1;
    ret = render_testPrimitives();
    if (ret)
       return -1;
