@@ -26,8 +26,6 @@
  */
 /* Testcases. */
 static void surface_testLoad( SDL_Surface *testsur );
-static void surface_testPrimitives( SDL_Surface *testsur );
-static void surface_testPrimitivesBlend( SDL_Surface *testsur );
 static void surface_testBlit( SDL_Surface *testsur );
 static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, int mode );
 static void surface_testBlitBlend( SDL_Surface *testsur );
@@ -79,167 +77,6 @@ static void surface_testLoad( SDL_Surface *testsur )
    /* Clean up. */
    SDL_FreeSurface( rface );
    SDL_FreeSurface( face );
-
-   SDL_ATend();
-}
-
-
-/**
- * @brief Tests the SDL primitives for rendering.
- */
-static void surface_testPrimitives( SDL_Surface *testsur )
-{
-   int ret;
-   int x, y;
-   SDL_Rect rect;
-
-   SDL_ATbegin( "Primitives Test" );
-
-   /* Clear surface. */
-   ret = SDL_FillRect( testsur, NULL,
-         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
-   if (SDL_ATassert( "SDL_FillRect", ret == 0))
-      return;
-
-   /* Draw a rectangle. */
-   rect.x = 40;
-   rect.y = 0;
-   rect.w = 40;
-   rect.h = 80;
-   ret = SDL_FillRect( testsur, &rect,
-         SDL_MapRGB( testsur->format, 13, 73, 200 ) );
-   if (SDL_ATassert( "SDL_FillRect", ret == 0))
-      return;
-
-   /* Draw a rectangle. */
-   rect.x = 10;
-   rect.y = 10;
-   rect.w = 60;
-   rect.h = 40;
-   ret = SDL_FillRect( testsur, &rect,
-         SDL_MapRGB( testsur->format, 200, 0, 100 ) );
-   if (SDL_ATassert( "SDL_FillRect", ret == 0))
-      return;
-
-   /* Draw some points like so:
-    * X.X.X.X..
-    * .X.X.X.X.
-    * X.X.X.X.. */
-   for (y=0; y<3; y++) {
-      x = y % 2;
-      for (; x<80; x+=2) {
-         ret = SDL_DrawPoint( testsur, x, y,
-               SDL_MapRGB( testsur->format, x*y, x*y/2, x*y/3 ) );
-         if (SDL_ATassert( "SDL_DrawPoint", ret == 0))
-            return;
-      }
-   }
-
-   /* Draw some lines. */
-   ret = SDL_DrawLine( testsur, 0, 30, 80, 30,
-         SDL_MapRGB( testsur->format, 0, 255, 0 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-   ret = SDL_DrawLine( testsur, 40, 30, 40, 60,
-         SDL_MapRGB( testsur->format, 55, 55, 5 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-   ret = SDL_DrawLine( testsur, 0, 0, 29, 29,
-         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-   ret = SDL_DrawLine( testsur, 29, 30, 0, 59,
-         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-   ret = SDL_DrawLine( testsur, 79, 0, 50, 29,
-         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-   ret = SDL_DrawLine( testsur, 79, 59, 50, 30,
-         SDL_MapRGB( testsur->format, 5, 105, 105 ) );
-   if (SDL_ATassert( "SDL_DrawLine", ret == 0))
-      return;
-
-   /* See if it's the same. */
-   if (SDL_ATassert( "Primitives output not the same.",
-            surface_compare( testsur, &img_primitives, 0 )==0 ))
-      return;
-
-   SDL_ATend();
-}
-
-
-/**
- * @brief Tests the SDL primitives with alpha for rendering.
- */
-static void surface_testPrimitivesBlend( SDL_Surface *testsur )
-{
-   int ret;
-   int i, j;
-   SDL_Rect rect;
-
-   SDL_ATbegin( "Primitives Blend Test" );
-
-   /* Clear surface. */
-   ret = SDL_FillRect( testsur, NULL,
-         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
-   if (SDL_ATassert( "SDL_FillRect", ret == 0))
-      return;
-
-   /* Create some rectangles for each blend mode. */
-   ret = SDL_BlendFillRect( testsur, NULL, SDL_BLENDMODE_NONE, 255, 255, 255, 0 );
-   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
-      return;
-   rect.x = 10;
-   rect.y = 25;
-   rect.w = 40;
-   rect.h = 25;
-   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_ADD, 240, 10, 10, 75 );
-   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
-      return;
-   rect.x = 30;
-   rect.y = 40;
-   rect.w = 45;
-   rect.h = 15;
-   ret = SDL_BlendFillRect( testsur, &rect, SDL_BLENDMODE_BLEND, 10, 240, 10, 100 );
-   if (SDL_ATassert( "SDL_BlendFillRect", ret == 0))
-      return;
-
-   /* Draw blended lines, lines for everyone. */
-   for (i=0; i<testsur->w; i+=2)  {
-      ret = SDL_BlendLine( testsur, 0, 0, i, 59,
-            (((i/2)%3)==0) ? SDL_BLENDMODE_BLEND :
-               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
-            60+2*i, 240-2*i, 50, 3*i );
-      if (SDL_ATassert( "SDL_BlendLine", ret == 0))
-         return;
-   }
-   for (i=0; i<testsur->h; i+=2)  {
-      ret = SDL_BlendLine( testsur, 0, 0, 79, i,
-            (((i/2)%3)==0) ? SDL_BLENDMODE_BLEND :
-               (((i/2)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
-            60+2*i, 240-2*i, 50, 3*i );
-      if (SDL_ATassert( "SDL_BlendLine", ret == 0))
-         return;
-   }
-
-   /* Draw points. */
-   for (j=0; j<testsur->h; j+=3) {
-      for (i=0; i<testsur->w; i+=3) {
-      ret = SDL_BlendPoint( testsur, i, j,
-            ((((i+j)/3)%3)==0) ? SDL_BLENDMODE_BLEND :
-               ((((i+j)/3)%3)==1) ? SDL_BLENDMODE_ADD : SDL_BLENDMODE_NONE,
-            j*4, i*3, j*4, i*3 );
-      if (SDL_ATassert( "SDL_BlendPoint", ret == 0))
-         return;
-      }
-   }
-
-   /* See if it's the same. */
-   if (SDL_ATassert( "Primitives output not the same.",
-            surface_compare( testsur, &img_blend, 0 )==0 ))
-      return;
 
    SDL_ATend();
 }
@@ -546,8 +383,6 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
 void surface_runTests( SDL_Surface *testsur )
 {
    /* Software surface blitting. */
-   surface_testPrimitives( testsur );
-   surface_testPrimitivesBlend( testsur );
    surface_testBlit( testsur );
    surface_testBlitBlend( testsur );
 }

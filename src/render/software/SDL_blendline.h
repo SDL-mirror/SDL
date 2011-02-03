@@ -21,40 +21,8 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_blit.h"
-#include "SDL_alphamult.h"
 
-/* Functions to pre-multiply the alpha channel into the color channels */
-
-#define DEFINE_PREMULTIPLY_FUNC(fmt) \
-void \
-SDL_PreMultiplyAlpha##fmt(int w, int h, Uint32 *pixels, int pitch) \
-{ \
-    pitch /= 4; \
-    while (h--) { \
-        int n; \
-        Uint32 *row = pixels; \
-        Uint32 pixel; \
-        unsigned r, g, b, a; \
- \
-        for (n = w; n--; ) { \
-            pixel = *row; \
-            RGBA_FROM_##fmt(pixel, r, g, b, a); \
-            r = (r * a) / 255; \
-            g = (g * a) / 255; \
-            b = (b * a) / 255; \
-            fmt##_FROM_RGBA(*row, r, g, b, a); \
-            ++row; \
-        } \
-        pixels += pitch; \
-    } \
-}
-
-/* *INDENT-OFF* */
-DEFINE_PREMULTIPLY_FUNC(ARGB8888)
-DEFINE_PREMULTIPLY_FUNC(RGBA8888)
-DEFINE_PREMULTIPLY_FUNC(ABGR8888)
-DEFINE_PREMULTIPLY_FUNC(BGRA8888)
-/* *INDENT-ON* */
+extern int SDL_BlendLine(SDL_Surface * dst, int x1, int y1, int x2, int y2, SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
+extern int SDL_BlendLines(SDL_Surface * dst, const SDL_Point * points, int count, SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a);
 
 /* vi: set ts=4 sw=4 expandtab: */

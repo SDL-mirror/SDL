@@ -22,6 +22,8 @@
 #include "SDL_config.h"
 
 #include "SDL_draw.h"
+#include "SDL_drawline.h"
+
 
 static void
 SDL_DrawLine1(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,

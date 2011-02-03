@@ -22,6 +22,8 @@
 #include "SDL_config.h"
 
 #include "SDL_draw.h"
+#include "SDL_blendpoint.h"
+
 
 static int
 SDL_BlendPoint_RGB555(SDL_Surface * dst, int x, int y, SDL_BlendMode blendMode, Uint8 r,

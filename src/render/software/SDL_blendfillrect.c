@@ -21,8 +21,9 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_video.h"
 #include "SDL_draw.h"
+#include "SDL_blendfillrect.h"
+
 
 static int
 SDL_BlendFillRect_RGB555(SDL_Surface * dst, const SDL_Rect * rect,

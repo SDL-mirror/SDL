@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_blit.h"
+#include "../../video/SDL_blit.h"
 
 /* This code assumes that r, g, b, a are the source color,
  * and in the blend and add case, the RGB values are premultiplied by a.

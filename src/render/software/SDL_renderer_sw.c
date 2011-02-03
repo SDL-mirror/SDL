@@ -24,6 +24,13 @@
 #include "../SDL_sysrender.h"
 #include "../../video/SDL_pixels_c.h"
 
+#include "SDL_draw.h"
+#include "SDL_blendfillrect.h"
+#include "SDL_blendline.h"
+#include "SDL_blendpoint.h"
+#include "SDL_drawline.h"
+#include "SDL_drawpoint.h"
+
 
 /* SDL surface based renderer implementation */
 
