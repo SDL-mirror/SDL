@@ -23,7 +23,9 @@
 
 #include "SDL_windowsvideo.h"
 
+#ifndef _WIN32_WCE
 #define HAVE_GETDIBITS
+#endif
 
 int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {

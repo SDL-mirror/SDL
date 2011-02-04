@@ -738,10 +738,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_alphamult.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\SDL_assert.c"
 				>
 			</File>
@@ -766,19 +762,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_blendfillrect.c"
+				RelativePath="..\..\src\render\software\SDL_blendfillrect.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_blendline.c"
+				RelativePath="..\..\src\render\software\SDL_blendline.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_blendpoint.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\SDL_blendrect.c"
+				RelativePath="..\..\src\render\software\SDL_blendpoint.c"
 				>
 			</File>
 			<File
@@ -818,10 +810,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\windows\SDL_ceddrawrender.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\video\SDL_clipboard.c"
 				>
 			</File>
@@ -838,10 +826,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\windows\SDL_d3drender.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\audio\windib\SDL_dibaudio.c"
 				>
 			</File>
@@ -850,15 +834,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_drawline.c"
+				RelativePath="..\..\src\render\software\SDL_drawline.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_drawpoint.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\SDL_drawrect.c"
+				RelativePath="..\..\src\render\software\SDL_drawpoint.c"
 				>
 			</File>
 			<File
@@ -883,14 +863,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\video\SDL_gamma.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_gapirender.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_gdirender.c"
 				>
 			</File>
 			<File
@@ -934,7 +906,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\dummy\SDL_nullrender.c"
+				RelativePath="..\..\src\video\dummy\SDL_nullframebuffer.c"
 				>
 			</File>
 			<File
@@ -962,7 +934,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_renderer_sw.c"
+				RelativePath="..\..\src\render\SDL_render.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_renderer_sw.c"
 				>
 			</File>
 			<File
@@ -1066,6 +1042,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\video\windows\SDL_windowsgamma.c"
 				>
 			</File>
@@ -1098,11 +1078,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_yuv_mmx.c"
+				RelativePath="..\..\src\render\SDL_yuv_mmx.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_yuv_sw.c"
+				RelativePath="..\..\src\render\SDL_yuv_sw.c"
 				>
 			</File>
 			<File
@@ -1131,7 +1111,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\mmx.h"
+				RelativePath="..\..\src\render\mmx.h"
 				>
 			</File>
 			<File
@@ -1151,10 +1131,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_alphamult.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\SDL_assert_c.h"
 				>
 			</File>
@@ -1168,6 +1144,18 @@
 			</File>
 			<File
 				RelativePath="..\..\src\audio\SDL_audiomem.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_blendfillrect.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_blendline.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_blendpoint.h"
 				>
 			</File>
 			<File
@@ -1187,15 +1175,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\windows\SDL_ceddrawrender.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\events\SDL_clipboardevents_c.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_d3drender.h"
 				>
 			</File>
 			<File
@@ -1207,7 +1187,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_draw.h"
+				RelativePath="..\..\src\render\software\SDL_draw.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_drawline.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_drawpoint.h"
 				>
 			</File>
 			<File
@@ -1224,18 +1212,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\SDL_fatal.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_gapirender.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_gapirender_c.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_gdirender.h"
 				>
 			</File>
 			<File
@@ -1279,7 +1255,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\dummy\SDL_nullrender_c.h"
+				RelativePath="..\..\src\video\dummy\SDL_nullframebuffer_c.h"
 				>
 			</File>
 			<File
@@ -1295,7 +1271,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_renderer_sw.h"
+				RelativePath="..\..\src\render\software\SDL_renderer_sw_c.h"
 				>
 			</File>
 			<File
@@ -1320,6 +1296,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\joystick\SDL_sysjoystick.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\SDL_sysrender.h"
 				>
 			</File>
 			<File
@@ -1375,6 +1355,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\video\windows\SDL_windowsgamma.h"
 				>
 			</File>
@@ -1407,7 +1391,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_yuv_sw_c.h"
+				RelativePath="..\..\src\render\SDL_yuv_sw_c.h"
 				>
 			</File>
 			<File

@@ -454,6 +454,36 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
     SetWindowPos(hwnd, top, 0, 0, w, h, (SWP_NOCOPYBITS | SWP_NOMOVE));
 }
 
+#ifdef _WIN32_WCE
+void WINCE_ShowWindow(_THIS, SDL_Window* window, int visible)
+{
+    SDL_WindowData* windowdata = (SDL_WindowData*) window->driverdata;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+
+    if(visible) {
+        if(window->flags & SDL_WINDOW_FULLSCREEN) {
+            if(videodata->SHFullScreen)
+                videodata->SHFullScreen(windowdata->hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
+
+            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_HIDE);
+        }
+
+        ShowWindow(windowdata->hwnd, SW_SHOW);
+        SetForegroundWindow(windowdata->hwnd);
+    } else {
+        ShowWindow(windowdata->hwnd, SW_HIDE);
+
+        if(window->flags & SDL_WINDOW_FULLSCREEN) {
+            if(videodata->SHFullScreen)
+                videodata->SHFullScreen(windowdata->hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
+
+            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_SHOW);
+
+        }
+    }
+}
+#endif /* _WIN32_WCE */
+
 void
 WIN_ShowWindow(_THIS, SDL_Window * window)
 {
