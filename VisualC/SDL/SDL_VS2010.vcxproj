@@ -337,6 +337,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\audio\SDL_wave.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsclipboard.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsevents.h" />
+    <ClInclude Include="..\..\src\video\windows\SDL_windowsframebuffer.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsgamma.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowskeyboard.h" />
     <ClInclude Include="..\..\src\video\windows\SDL_windowsmodes.h" />
@@ -449,6 +450,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\audio\SDL_wave.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsclipboard.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsevents.c" />
+    <ClCompile Include="..\..\src\video\windows\SDL_windowsframebuffer.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsgamma.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowskeyboard.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowsmodes.c" />
