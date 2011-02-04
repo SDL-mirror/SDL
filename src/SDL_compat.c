@@ -28,10 +28,10 @@
 
 #include "video/SDL_sysvideo.h"
 #include "video/SDL_pixels_c.h"
+#include "render/SDL_yuv_sw_c.h"
+
 
 static SDL_Window *SDL_VideoWindow = NULL;
-static SDL_Renderer *SDL_VideoRenderer = NULL;
-static SDL_Texture *SDL_VideoTexture = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
@@ -41,18 +41,22 @@ static char *wm_title = NULL;
 static SDL_Surface *SDL_VideoIcon;
 static int SDL_enabled_UNICODE = 0;
 
-char *
+const char *
 SDL_AudioDriverName(char *namebuf, int maxlen)
 {
     const char *name = SDL_GetCurrentAudioDriver();
     if (name) {
-        SDL_strlcpy(namebuf, name, maxlen);
-        return namebuf;
+        if (namebuf) {
+            SDL_strlcpy(namebuf, name, maxlen);
+            return namebuf;
+        } else {
+            return name;
+        }
     }
     return NULL;
 }
 
-char *
+const char *
 SDL_VideoDriverName(char *namebuf, int maxlen)
 {
     const char *name = SDL_GetCurrentVideoDriver();
@@ -344,27 +348,6 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
     }
 }
 
-static SDL_Surface *
-CreateVideoSurface(SDL_Texture * texture)
-{
-    Uint32 format;
-    int w, h;
-    int bpp;
-    Uint32 Rmask, Gmask, Bmask, Amask;
-
-    if (SDL_QueryTexture(texture, &format, NULL, &w, &h) < 0) {
-        return NULL;
-    }
-
-    if (!SDL_PixelFormatEnumToMasks
-        (format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown texture format");
-        return NULL;
-    }
-
-    return SDL_CreateRGBSurface(0, w, h, bpp, Rmask, Gmask, Bmask, Amask);
-}
-
 static void
 ClearVideoSurface()
 {
@@ -434,22 +417,10 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Destroy the screen texture and recreate it */
-    SDL_QueryTexture(SDL_VideoTexture, &format, &access, &w, &h);
-    SDL_DestroyTexture(SDL_VideoTexture);
-    SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, format,
-                                         access, width, height);
-    if (!SDL_VideoTexture) {
+    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_VideoSurface) {
         return -1;
     }
-
-    SDL_VideoSurface->w = width;
-    SDL_VideoSurface->h = height;
-    SDL_CalculatePitch(SDL_VideoSurface);
-    SDL_VideoSurface->pixels =
-        SDL_realloc(SDL_VideoSurface->pixels,
-                    SDL_VideoSurface->h * SDL_VideoSurface->pitch);
-    SDL_SetClipRect(SDL_VideoSurface, NULL);
-    SDL_InvalidateMap(SDL_VideoSurface->map);
 
     if (SDL_ShadowSurface) {
         SDL_ShadowSurface->w = width;
@@ -460,6 +431,8 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
                         SDL_ShadowSurface->h * SDL_ShadowSurface->pitch);
         SDL_SetClipRect(SDL_ShadowSurface, NULL);
         SDL_InvalidateMap(SDL_ShadowSurface->map);
+    } else {
+        SDL_PublicSurface = SDL_VideoSurface;
     }
 
     ClearVideoSurface();
@@ -476,8 +449,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     Uint32 window_flags;
     Uint32 surface_flags;
     Uint32 i;
-    SDL_RendererInfo info;
-    Uint32 desired_format;
 
     if (!SDL_GetVideoDevice()) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
@@ -586,30 +557,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         return SDL_PublicSurface;
     }
 
-    /* Create a renderer for the window */
-    SDL_VideoRenderer = SDL_CreateRenderer(SDL_VideoWindow, -1, 0);
-    if (!SDL_VideoRenderer) {
-        return NULL;
-    }
-
-    /* Create a texture for the screen surface */
-    SDL_GetRendererInfo(SDL_VideoRenderer, &info);
-    desired_format = info.texture_formats[0];
-    for (i = 0; i < info.num_texture_formats; ++i) {
-        if (!SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i])) {
-            desired_format = info.texture_formats[i];
-            break;
-        }
-    }
-    SDL_VideoTexture = SDL_CreateTexture(SDL_VideoRenderer, desired_format,
-                                         SDL_TEXTUREACCESS_STREAMING,
-                                         width, height);
-    if (!SDL_VideoTexture) {
-        return NULL;
-    }
-
     /* Create the screen surface */
-    SDL_VideoSurface = CreateVideoSurface(SDL_VideoTexture);
+    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
     if (!SDL_VideoSurface) {
         return NULL;
     }
@@ -774,22 +723,7 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         screen = SDL_VideoSurface;
     }
     if (screen == SDL_VideoSurface) {
-        /* The surface memory needs to be copied to texture */
-        int pitch = screen->pitch;
-        int psize = screen->format->BytesPerPixel;
-        for (i = 0; i < numrects; ++i) {
-            const SDL_Rect *rect = &rects[i];
-            void *pixels =
-                (Uint8 *) screen->pixels + rect->y * pitch +
-                rect->x * psize;
-            SDL_UpdateTexture(SDL_VideoTexture, rect, pixels, pitch);
-        }
-        rect.x = 0;
-        rect.y = 0;
-        rect.w = screen->w;
-        rect.h = screen->h;
-        SDL_RenderCopy(SDL_VideoRenderer, SDL_VideoTexture, &rect, &rect);
-        SDL_RenderPresent(SDL_VideoRenderer);
+        SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, rects);
     }
 }
 
@@ -1395,11 +1329,9 @@ SDL_ResetCursor(void)
 
 struct private_yuvhwdata
 {
-    Uint16 pitches[3];
-    Uint8 *planes[3];
-
-    SDL_Texture *texture;
-    Uint32 texture_format;
+    SDL_SW_YUVTexture *texture;
+    SDL_Surface *display;
+    Uint32 display_format;
 };
 
 SDL_Overlay *
@@ -1407,6 +1339,7 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
 {
     SDL_Overlay *overlay;
     Uint32 texture_format;
+    SDL_SW_YUVTexture *texture;
 
     if ((display->flags & SDL_OPENGL) == SDL_OPENGL) {
         SDL_SetError("YUV overlays are not supported in OpenGL mode");
@@ -1454,6 +1387,16 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
         return NULL;
     }
 
+    texture = SDL_SW_CreateYUVTexture(texture_format, w, h);
+    if (!texture) {
+        SDL_free(overlay->hwdata);
+        SDL_free(overlay);
+        return NULL;
+    }
+    overlay->hwdata->texture = texture;
+    overlay->hwdata->display = NULL;
+    overlay->hwdata->display_format = SDL_PIXELFORMAT_UNKNOWN;
+
     overlay->format = format;
     overlay->w = w;
     overlay->h = h;
@@ -1462,31 +1405,8 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
     } else {
         overlay->planes = 1;
     }
-    overlay->pitches = overlay->hwdata->pitches;
-    overlay->pixels = overlay->hwdata->planes;
-
-    switch (format) {
-    case SDL_YV12_OVERLAY:
-    case SDL_IYUV_OVERLAY:
-        overlay->pitches[0] = overlay->w;
-        overlay->pitches[1] = overlay->w / 2;
-        overlay->pitches[2] = overlay->w / 2;
-        break;
-    case SDL_YUY2_OVERLAY:
-    case SDL_UYVY_OVERLAY:
-    case SDL_YVYU_OVERLAY:
-        overlay->pitches[0] = overlay->w * 2;
-        break;
-    }
-
-    overlay->hwdata->texture =
-        SDL_CreateTexture(SDL_VideoRenderer, texture_format,
-                          SDL_TEXTUREACCESS_STREAMING, w, h);
-    if (!overlay->hwdata->texture) {
-        SDL_FreeYUVOverlay(overlay);
-        return NULL;
-    }
-    overlay->hwdata->texture_format = texture_format;
+    overlay->pitches = texture->pitches;
+    overlay->pixels = texture->planes;
 
     return overlay;
 }
@@ -1494,6 +1414,7 @@ SDL_CreateYUVOverlay(int w, int h, Uint32 format, SDL_Surface * display)
 int
 SDL_LockYUVOverlay(SDL_Overlay * overlay)
 {
+    SDL_Rect rect;
     void *pixels;
     int pitch;
 
@@ -1501,9 +1422,16 @@ SDL_LockYUVOverlay(SDL_Overlay * overlay)
         SDL_SetError("Passed a NULL overlay");
         return -1;
     }
-    if (SDL_LockTexture(overlay->hwdata->texture, NULL, &pixels, &pitch) < 0) {
+
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = overlay->w;
+    rect.h = overlay->h;
+
+    if (SDL_SW_LockYUVTexture(overlay->hwdata->texture, &rect, &pixels, &pitch) < 0) {
         return -1;
     }
+
     overlay->pixels[0] = (Uint8 *) pixels;
     overlay->pitches[0] = pitch;
     switch (overlay->format) {
@@ -1530,20 +1458,54 @@ SDL_UnlockYUVOverlay(SDL_Overlay * overlay)
     if (!overlay) {
         return;
     }
-    SDL_UnlockTexture(overlay->hwdata->texture);
+
+    SDL_SW_UnlockYUVTexture(overlay->hwdata->texture);
 }
 
 int
 SDL_DisplayYUVOverlay(SDL_Overlay * overlay, SDL_Rect * dstrect)
 {
+    SDL_Surface *display;
+    SDL_Rect src_rect;
+    SDL_Rect dst_rect;
+    void *pixels;
+
     if (!overlay || !dstrect) {
         SDL_SetError("Passed a NULL overlay or dstrect");
         return -1;
     }
-    if (SDL_RenderCopy(SDL_VideoRenderer, overlay->hwdata->texture, NULL, dstrect) < 0) {
+
+    display = overlay->hwdata->display;
+    if (display != SDL_VideoSurface) {
+        overlay->hwdata->display = display = SDL_VideoSurface;
+        overlay->hwdata->display_format = SDL_MasksToPixelFormatEnum(
+                                                display->format->BitsPerPixel,
+                                                display->format->Rmask,
+                                                display->format->Gmask,
+                                                display->format->Bmask,
+                                                display->format->Amask);
+    }
+
+    src_rect.x = 0;
+    src_rect.y = 0;
+    src_rect.w = overlay->w;
+    src_rect.h = overlay->h;
+
+    if (!SDL_IntersectRect(&display->clip_rect, dstrect, &dst_rect)) {
+        return 0;
+    }
+     
+    pixels = (void *)((Uint8 *)display->pixels +
+                        dst_rect.y * display->pitch +
+                        dst_rect.x * display->format->BytesPerPixel);
+
+    if (SDL_SW_CopyYUVToRGB(overlay->hwdata->texture, &src_rect,
+                            overlay->hwdata->display_format,
+                            dst_rect.w, dst_rect.h,
+                            pixels, display->pitch) < 0) {
         return -1;
     }
-    SDL_RenderPresent(SDL_VideoRenderer);
+    SDL_UpdateWindowSurface(SDL_VideoWindow);
     return 0;
 }
 
@@ -1555,7 +1517,7 @@ SDL_FreeYUVOverlay(SDL_Overlay * overlay)
     }
     if (overlay->hwdata) {
         if (overlay->hwdata->texture) {
-            SDL_DestroyTexture(overlay->hwdata->texture);
+            SDL_SW_DestroyYUVTexture(overlay->hwdata->texture);
         }
         SDL_free(overlay->hwdata);
     }

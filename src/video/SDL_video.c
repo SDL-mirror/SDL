@@ -1391,6 +1391,9 @@ SDL_GetWindowSurface(SDL_Window * window)
 
     if (!window->surface) {
         window->surface = SDL_CreateWindowFramebuffer(window);
+        if (window->surface) {
+            window->surface->refcount = 0x7FFFFFF;
+        }
     }
     return window->surface;
 }
@@ -1472,6 +1475,7 @@ void
 SDL_OnWindowResized(SDL_Window * window)
 {
     if (window->surface) {
+        window->surface->refcount = 0;
         SDL_FreeSurface(window->surface);
         window->surface = NULL;
     }
@@ -1552,6 +1556,10 @@ SDL_DestroyWindow(SDL_Window * window)
     /* Restore video mode, etc. */
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 
+    if (window->surface) {
+        window->surface->refcount = 0;
+        SDL_FreeSurface(window->surface);
+    }
     if (_this->DestroyWindowFramebuffer) {
         _this->DestroyWindowFramebuffer(_this, window);
     }
