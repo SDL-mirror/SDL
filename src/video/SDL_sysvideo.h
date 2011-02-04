@@ -81,6 +81,7 @@ struct SDL_Window
     SDL_DisplayMode fullscreen_mode;
     
     SDL_Surface *surface;
+    SDL_bool surface_valid;
 
     SDL_WindowShaper *shaper;
 
