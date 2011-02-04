@@ -38,6 +38,8 @@ typedef struct
     SDL_Window *window;
     HWND hwnd;
     HDC hdc;
+    HDC mdc;
+    HBITMAP hbm;
     WNDPROC wndproc;
     SDL_bool created;
     int mouse_pressed;

@@ -28,6 +28,7 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_windowsvideo.h"
+#include "SDL_windowsframebuffer.h"
 #include "SDL_windowsshape.h"
 
 /* Initialization/Query functions */
@@ -128,6 +129,9 @@ WIN_CreateDevice(int devindex)
     device->SetWindowGrab = WIN_SetWindowGrab;
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
+    device->CreateWindowFramebuffer = WIN_CreateWindowFramebuffer;
+    device->UpdateWindowFramebuffer = WIN_UpdateWindowFramebuffer;
+    device->DestroyWindowFramebuffer = WIN_DestroyWindowFramebuffer;
     
     device->shape_driver.CreateShaper = Win32_CreateShaper;
     device->shape_driver.SetWindowShape = Win32_SetWindowShape;
