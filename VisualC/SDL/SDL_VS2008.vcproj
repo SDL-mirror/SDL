@@ -799,10 +799,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_draw.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\render\software\SDL_drawline.c"
 			>
 		</File>
@@ -1204,6 +1200,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\windows\SDL_windowsevents.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.h"
 			>
 		</File>
 		<File
