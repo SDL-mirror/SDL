@@ -104,6 +104,7 @@ typedef struct {
     SDL_Texture *texture;
     void *pixels;
     int pitch;
+    int bytes_per_pixel;
 } SDL_WindowTextureData;
 
 static int
@@ -176,7 +177,8 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
     }
 
     /* Create framebuffer data */
-    data->pitch = (((window->w * SDL_BYTESPERPIXEL(*format)) + 3) & ~3);
+    data->bytes_per_pixel = SDL_BYTESPERPIXEL(*format);
+    data->pitch = (((window->w * data->bytes_per_pixel) + 3) & ~3);
     data->pixels = SDL_malloc(window->h * data->pitch);
     if (!data->pixels) {
         SDL_OutOfMemory();
@@ -192,6 +194,12 @@ static int
 SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rects)
 {
     SDL_WindowTextureData *data;
+#ifdef UPDATE_TEXTURE_SUBRECTS
+    void *src, *dst;
+    int src_pitch;
+    int dst_pitch;
+    int i, row, length;
+#endif
 
     data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
     if (!data || !data->texture) {
@@ -199,12 +207,33 @@ SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rec
         return -1;
     }
 
+#ifdef UPDATE_TEXTURE_SUBRECTS
+    src_pitch = data->pitch;
+    for (i = 0; i < numrects; ++i) {
+        src = (void *)((Uint8 *)data->pixels +
+                        rects[i].y * src_pitch +
+                        rects[i].x * data->bytes_per_pixel);
+        if (SDL_LockTexture(data->texture, &rects[i], &dst, &dst_pitch) < 0) {
+            return -1;
+        }
+        length = rects[i].w * data->bytes_per_pixel;
+        for (row = rects[i].h; row--; ) {
+            SDL_memcpy(dst, src, length);
+            src = (Uint8*)src + src_pitch;
+            dst = (Uint8*)dst + dst_pitch;
+        }
+        SDL_UnlockTexture(data->texture);
+    }
+#else
     if (SDL_UpdateTexture(data->texture, NULL, data->pixels, data->pitch) < 0) {
         return -1;
     }
+#endif
+
     if (SDL_RenderCopy(data->renderer, data->texture, NULL, NULL) < 0) {
         return -1;
     }
+
     SDL_RenderPresent(data->renderer);
     return 0;
 }
@@ -1389,9 +1418,14 @@ SDL_GetWindowSurface(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, NULL);
 
-    if (!window->surface) {
+    if (!window->surface_valid) {
+        if (window->surface) {
+            window->surface->refcount = 0;
+            SDL_FreeSurface(window->surface);
+        }
         window->surface = SDL_CreateWindowFramebuffer(window);
         if (window->surface) {
+            window->surface_valid = SDL_TRUE;
             window->surface->refcount = 0x7FFFFFF;
         }
     }
@@ -1418,7 +1452,7 @@ SDL_UpdateWindowSurfaceRects(SDL_Window * window,
 {
     CHECK_WINDOW_MAGIC(window, -1);
 
-    if (!window->surface) {
+    if (!window->surface_valid) {
         SDL_SetError("Window surface is invalid, please call SDL_GetWindowSurface() to get a new surface");
         return -1;
     }
@@ -1474,11 +1508,7 @@ SDL_OnWindowHidden(SDL_Window * window)
 void
 SDL_OnWindowResized(SDL_Window * window)
 {
-    if (window->surface) {
-        window->surface->refcount = 0;
-        SDL_FreeSurface(window->surface);
-        window->surface = NULL;
-    }
+    window->surface_valid = SDL_FALSE;
 }
 
 void
