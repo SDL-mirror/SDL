@@ -126,7 +126,19 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
 
     renderer = data->renderer;
     if (!renderer) {
-        renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        SDL_RendererInfo info;
+        int i;
+
+        /* We need to make sure we don't get a software renderer */
+        for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
+            SDL_GetRenderDriverInfo(i, &info);
+            if (SDL_strcmp(info.name, "software") != 0) {
+                renderer = SDL_CreateRenderer(window, i, 0);
+                if (renderer) {
+                    break;
+                }
+            }
+        }
         if (!renderer) {
             return -1;
         }
