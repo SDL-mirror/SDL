@@ -57,8 +57,12 @@ SDL_VideoDriverName(char *namebuf, int maxlen)
 {
     const char *name = SDL_GetCurrentVideoDriver();
     if (name) {
-        SDL_strlcpy(namebuf, name, maxlen);
-        return namebuf;
+        if (namebuf) {
+            SDL_strlcpy(namebuf, name, maxlen);
+            return namebuf;
+        } else {
+            return name;
+        }
     }
     return NULL;
 }
