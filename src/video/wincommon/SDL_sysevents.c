@@ -419,6 +419,7 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			if ( SDL_VideoSurface && ! DINPUT() ) {
 				WORD xbuttonval = 0;
 				Uint8 button, state;
+                int x, y;
 
 				/* DJM:
 				   We want the SDL window to take focus so that
