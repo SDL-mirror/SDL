@@ -385,8 +385,6 @@ static int
 SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
 {
     int w, h;
-    Uint32 format;
-    int access;
 
     /* We can't resize something we don't have... */
     if (!SDL_VideoWindow) {
@@ -448,7 +446,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     int window_y = SDL_WINDOWPOS_UNDEFINED;
     Uint32 window_flags;
     Uint32 surface_flags;
-    Uint32 i;
 
     if (!SDL_GetVideoDevice()) {
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
@@ -711,7 +708,6 @@ void
 SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
 {
     int i;
-    SDL_Rect rect;
 
     if (screen == SDL_ShadowSurface) {
         for (i = 0; i < numrects; ++i) {
