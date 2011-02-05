@@ -190,10 +190,10 @@ static int render_hasBlendModes (void)
    ret = (mode != SDL_BLENDMODE_ADD);
    if (!render_isSupported(ret))
       fail = 1;
-   ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_MOD );
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MOD );
    if (!render_isSupported(ret))
       fail = 1;
-   ret = SDL_GetRenderDrawBlendMode( &mode );
+   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
    if (!render_isSupported(ret))
       fail = 1;
    ret = (mode != SDL_BLENDMODE_MOD);
