@@ -23,6 +23,7 @@
 
 /* The SDL 2D rendering system */
 
+#include "SDL_hints.h"
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "../video/SDL_pixels_c.h"
@@ -94,21 +95,32 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 {
     SDL_Renderer *renderer = NULL;
     int n = SDL_GetNumRenderDrivers();
+    const char *hint;
+
+    hint = SDL_GetHint(SDL_HINT_RENDER_VSYNC);
+    if (hint) {
+        if (*hint == '0') {
+            flags &= ~SDL_RENDERER_PRESENTVSYNC;
+        } else {
+            flags |= SDL_RENDERER_PRESENTVSYNC;
+        }
+    }
 
     if (index < 0) {
-        char *override = SDL_getenv("SDL_VIDEO_RENDERER");
-
-        if (override) {
+        hint = SDL_GetHint(SDL_HINT_RENDER_DRIVER);
+        if (hint) {
             for (index = 0; index < n; ++index) {
                 const SDL_RenderDriver *driver = render_drivers[index];
 
-                if (SDL_strcasecmp(override, driver->info.name) == 0) {
+                if (SDL_strcasecmp(hint, driver->info.name) == 0) {
                     /* Create a new renderer instance */
                     renderer = driver->CreateRenderer(window, flags);
                     break;
                 }
             }
-        } else {
+        }
+
+        if (!renderer) {
             for (index = 0; index < n; ++index) {
                 const SDL_RenderDriver *driver = render_drivers[index];
 

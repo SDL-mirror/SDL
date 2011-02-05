@@ -67,6 +67,32 @@ extern "C" {
  */
 #define SDL_HINT_FRAMEBUFFER_ACCELERATION   "SDL_FRAMEBUFFER_ACCELERATION"
 
+/**
+ *  \brief  A variable specifying which render driver to use.
+ *
+ *  If the application doesn't pick a specific renderer to use, this variable
+ *  specifies the name of the preferred renderer.  If the preferred renderer
+ *  can't be initialized, the normal default renderer is used.
+ *
+ *  This variable is case insensitive and can be set to the following values:
+ *    "direct3d"
+ *    "opengl"
+ *    "opengles"
+ *    "software"
+ */
+#define SDL_HINT_RENDER_DRIVER              "SDL_RENDER_DRIVER"
+
+/**
+ *  \brief  A variable controlling whether updates to the SDL 1.2 screen surface should be synchronized with the vertical refresh, to avoid tearing.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Disable vsync
+ *    "1"       - Enable vsync
+ *
+ *  By default SDL does not sync screen surface updates with vertical refresh.
+ */
+#define SDL_HINT_RENDER_VSYNC               "SDL_RENDER_VSYNC"
+
 
 /**
  *  \brief  An enumeration of hint priorities
