@@ -459,7 +459,7 @@ SDL_SetTextureBlendMode(SDL_Texture * texture, SDL_BlendMode blendMode)
     renderer = texture->renderer;
     texture->blendMode = blendMode;
     if (texture->native) {
-        return SDL_SetTextureBlendMode(texture, blendMode);
+        return SDL_SetTextureBlendMode(texture->native, blendMode);
     } else if (renderer->SetTextureBlendMode) {
         return renderer->SetTextureBlendMode(renderer, texture);
     } else {
