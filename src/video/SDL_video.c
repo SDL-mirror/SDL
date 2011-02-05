@@ -107,6 +107,80 @@ typedef struct {
     int bytes_per_pixel;
 } SDL_WindowTextureData;
 
+static SDL_bool
+ShouldUseTextureFramebuffer()
+{
+    const char *hint;
+
+    /* If there's no native framebuffer support then there's no option */
+    if (!_this->CreateWindowFramebuffer) {
+        return SDL_TRUE;
+    }
+
+    /* See if the user or application wants a specific behavior */
+    hint = SDL_GetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION);
+    if (hint) {
+        if (*hint == '0') {
+            return SDL_FALSE;
+        } else {
+            return SDL_TRUE;
+        }
+    }
+
+    /* Each platform has different performance characteristics */
+#if defined(__WIN32__)
+    /* GDI BitBlt() is way faster than Direct3D dynamic textures right now.
+     */
+    return SDL_FALSE;
+
+#elif defined(__MACOSX__)
+    /* Mac OS X uses OpenGL as the native fast path */
+    return SDL_TRUE;
+
+#elif defined(__LINUX__)
+    /* Properly configured OpenGL drivers are faster than MIT-SHM */
+#if SDL_VIDEO_OPENGL
+    /* Ugh, find a way to cache this value! */
+    {
+        SDL_Window *window;
+        SDL_GLContext context;
+        SDL_bool hasAcceleratedOpenGL = SDL_FALSE;
+
+        window = SDL_CreateWindow("OpenGL test", -32, -32, 32, 32, SDL_WINDOW_OPENGL);
+        if (window) {
+            context = SDL_GL_CreateContext(window);
+            if (context) {
+                const GLubyte *(APIENTRY * glGetStringFunc) (GLenum);
+                const char *vendor = NULL;
+
+                glGetStringFunc = SDL_GL_GetProcAddress("glGetString");
+                if (glGetStringFunc) {
+                    vendor = (const char *) glGetStringFunc(GL_VENDOR);
+                }
+                /* Add more vendors here at will... */
+                if (vendor &&
+                    (SDL_strstr(vendor, "ATI Technologies") ||
+                     SDL_strstr(vendor, "NVIDIA"))) {
+                    hasAcceleratedOpenGL = SDL_TRUE;
+                }
+                SDL_GL_DeleteContext(context);
+            }
+            SDL_DestroyWindow(window);
+        }
+        return hasAcceleratedOpenGL;
+    }
+#else
+    return SDL_FALSE;
+#endif
+
+#else
+    /* Play it safe, assume that if there is a framebuffer driver that it's
+       optimized for the current platform.
+    */
+    return SDL_FALSE;
+#endif
+}
+
 static int
 SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {
@@ -401,8 +475,8 @@ SDL_VideoInit(const char *driver_name)
         return (-1);
     }
 
-    /* Add the renderer framebuffer emulation if needed */
-    if (!_this->CreateWindowFramebuffer) {
+    /* Add the renderer framebuffer emulation if desired */
+    if (ShouldUseTextureFramebuffer()) {
         _this->CreateWindowFramebuffer = SDL_CreateWindowTexture;
         _this->UpdateWindowFramebuffer = SDL_UpdateWindowTexture;
         _this->DestroyWindowFramebuffer = SDL_DestroyWindowTexture;
