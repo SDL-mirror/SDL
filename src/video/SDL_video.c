@@ -203,14 +203,28 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
     if (!renderer) {
         SDL_RendererInfo info;
         int i;
+        const char *hint = SDL_GetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION);
 
-        /* We need to make sure we don't get a software renderer */
-        for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
-            SDL_GetRenderDriverInfo(i, &info);
-            if (SDL_strcmp(info.name, "software") != 0) {
-                renderer = SDL_CreateRenderer(window, i, 0);
-                if (renderer) {
+        /* Check to see if there's a specific driver requested */
+        if (hint && *hint != '0' && *hint != '1' &&
+            SDL_strcasecmp(hint, "software") != 0) {
+            for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
+                SDL_GetRenderDriverInfo(i, &info);
+                if (SDL_strcasecmp(info.name, hint) == 0) {
+                    renderer = SDL_CreateRenderer(window, i, 0);
                     break;
+                }
+            }
+        }
+
+        if (!renderer) {
+            for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
+                SDL_GetRenderDriverInfo(i, &info);
+                if (SDL_strcmp(info.name, "software") != 0) {
+                    renderer = SDL_CreateRenderer(window, i, 0);
+                    if (renderer) {
+                        break;
+                    }
                 }
             }
         }
