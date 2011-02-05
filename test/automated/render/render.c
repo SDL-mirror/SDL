@@ -190,6 +190,15 @@ static int render_hasBlendModes (void)
    ret = (mode != SDL_BLENDMODE_ADD);
    if (!render_isSupported(ret))
       fail = 1;
+   ret = SDL_SetRenderDrawBlendMode( SDL_BLENDMODE_MOD );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawBlendMode( &mode );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = (mode != SDL_BLENDMODE_MOD);
+   if (!render_isSupported(ret))
+      fail = 1;
    ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE );
    if (!render_isSupported(ret))
       fail = 1;
@@ -829,6 +838,13 @@ static int render_testBlitBlend (void)
             &img_blendAdd, ALLOWABLE_ERROR_BLENDED ))
       return -1;
 
+   /* Test Mod. */
+   if (render_testBlitBlendMode( tface, SDL_BLENDMODE_MOD ))
+      return -1;
+   if (render_compare( "Blit blending output not the same (using SDL_BLENDMODE_MOD).",
+            &img_blendMod, ALLOWABLE_ERROR_BLENDED ))
+      return -1;
+
    /* Clear surface. */
    if (render_clearScreen())
       return -1;
@@ -852,7 +868,7 @@ static int render_testBlitBlend (void)
          if (mode==0) mode = SDL_BLENDMODE_NONE;
          else if (mode==1) mode = SDL_BLENDMODE_BLEND;
          else if (mode==2) mode = SDL_BLENDMODE_ADD;
-         else if (mode==3) mode = SDL_BLENDMODE_NONE;
+         else if (mode==3) mode = SDL_BLENDMODE_MOD;
          ret = SDL_SetTextureBlendMode( tface, mode );
          if (SDL_ATassert( "SDL_SetTextureBlendMode", ret == 0))
             return -1;

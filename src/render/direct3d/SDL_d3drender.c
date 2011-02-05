@@ -625,6 +625,14 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_ONE);
         break;
+    case SDL_BLENDMODE_MOD:
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
+                                        TRUE);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLEND,
+                                        D3DBLEND_ZERO);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
+                                        D3DBLEND_SRCCOLOR);
+        break;
     }
 }
 

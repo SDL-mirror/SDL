@@ -495,6 +495,11 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
             data->glEnable(GL_BLEND);
             data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            break;
         }
         data->blendMode = blendMode;
     }

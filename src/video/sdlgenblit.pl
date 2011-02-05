@@ -237,7 +237,7 @@ __EOF__
                     ${s}B = (${s}B * ${s}A) / 255;
                 }
             }
-            switch (flags & (SDL_COPY_BLEND|SDL_COPY_ADD)) {
+            switch (flags & (SDL_COPY_BLEND|SDL_COPY_ADD|SDL_COPY_MOD)) {
             case SDL_COPY_BLEND:
                 ${d}R = ${s}R + ((255 - ${s}A) * ${d}R) / 255;
                 ${d}G = ${s}G + ((255 - ${s}A) * ${d}G) / 255;
@@ -247,6 +247,11 @@ __EOF__
                 ${d}R = ${s}R + ${d}R; if (${d}R > 255) ${d}R = 255;
                 ${d}G = ${s}G + ${d}G; if (${d}G > 255) ${d}G = 255;
                 ${d}B = ${s}B + ${d}B; if (${d}B > 255) ${d}B = 255;
+                break;
+            case SDL_COPY_MOD:
+                ${d}R = (${s}R * ${d}R) / 255;
+                ${d}G = (${s}G * ${d}G) / 255;
+                ${d}B = (${s}B * ${d}B) / 255;
                 break;
             }
 __EOF__
@@ -397,7 +402,7 @@ __EOF__
                                 }
                             }
                             if ( $blend ) {
-                                $flag = "SDL_COPY_BLEND | SDL_COPY_ADD";
+                                $flag = "SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD";
                                 if ( $flags eq "" ) {
                                     $flags = $flag;
                                 } else {

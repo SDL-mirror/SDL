@@ -45,6 +45,7 @@ typedef enum
     SDL_BLENDMODE_NONE = 0x00000000,     /**< No blending */
     SDL_BLENDMODE_BLEND = 0x00000001,    /**< dst = (src * A) + (dst * (1-A)) */
     SDL_BLENDMODE_ADD = 0x00000002,      /**< dst = (src * A) + dst */
+    SDL_BLENDMODE_MOD = 0x00000004       /**< dst = src * dst */
 } SDL_BlendMode;
 
 /* Ends C function definitions when using C++ */

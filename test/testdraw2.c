@@ -190,6 +190,9 @@ main(int argc, char *argv[])
                     } else if (SDL_strcasecmp(argv[i + 1], "add") == 0) {
                         blendMode = SDL_BLENDMODE_ADD;
                         consumed = 2;
+                    } else if (SDL_strcasecmp(argv[i + 1], "mod") == 0) {
+                        blendMode = SDL_BLENDMODE_MOD;
+                        consumed = 2;
                     }
                 }
             } else if (SDL_strcasecmp(argv[i], "--cyclecolor") == 0) {
@@ -205,7 +208,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--blend none|blend|add] [--cyclecolor] [--cyclealpha]\n",
+                    "Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
                     argv[0], CommonUsage(state));
             return 1;
         }

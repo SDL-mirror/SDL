@@ -181,7 +181,9 @@ SDL_ChooseBlitFunc(Uint32 src_format, Uint32 dst_format, int flags,
         }
 
         /* Check blend flags */
-        flagcheck = (flags & (SDL_COPY_BLEND | SDL_COPY_ADD));
+        flagcheck =
+            (flags &
+             (SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD));
         if ((flagcheck & entries[i].flags) != flagcheck) {
             continue;
         }
