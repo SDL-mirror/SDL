@@ -53,6 +53,7 @@ HDRS = \
 	SDL_events.h \
 	SDL_gesture.h \
 	SDL_haptic.h \
+	SDL_hints.h \
 	SDL_input.h \
 	SDL_joystick.h \
 	SDL_keyboard.h \

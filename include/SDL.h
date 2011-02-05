@@ -79,6 +79,7 @@
 #include "SDL_endian.h"
 #include "SDL_error.h"
 #include "SDL_events.h"
+#include "SDL_hints.h"
 #include "SDL_loadso.h"
 #include "SDL_mutex.h"
 #include "SDL_power.h"

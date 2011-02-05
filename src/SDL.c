@@ -246,6 +246,7 @@ SDL_Quit(void)
     /* Uninstall any parachute signal handlers */
     SDL_UninstallParachute();
 
+    SDL_ClearHints();
     SDL_AssertionsQuit();
 
 #ifdef DEBUG_BUILD
