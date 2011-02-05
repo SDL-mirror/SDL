@@ -57,7 +57,23 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
     return -1;
 }
 
-static Uint32
+int
+X11_GetVisualInfoFromVisual(Display * display, Visual * visual, XVisualInfo * vinfo)
+{
+    XVisualInfo *vi;
+    int nvis;
+
+    vinfo->visualid = XVisualIDFromVisual(visual);
+    vi = XGetVisualInfo(display, VisualIDMask, vinfo, &nvis);
+    if (vi) {
+        *vinfo = *vi;
+        XFree(vi);
+        return 0;
+    }
+    return -1;
+}
+
+Uint32
 X11_GetPixelFormatFromVisualInfo(Display * display, XVisualInfo * vinfo)
 {
     if (vinfo->class == DirectColor || vinfo->class == TrueColor) {

@@ -59,6 +59,12 @@ extern void X11_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
 extern int X11_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void X11_QuitModes(_THIS);
 
+/* Some utility functions for working with visuals */
+extern int X11_GetVisualInfoFromVisual(Display * display, Visual * visual,
+                                       XVisualInfo * vinfo);
+extern Uint32 X11_GetPixelFormatFromVisualInfo(Display * display,
+                                               XVisualInfo * vinfo);
+
 #endif /* _SDL_x11modes_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

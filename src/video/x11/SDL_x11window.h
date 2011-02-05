@@ -28,6 +28,14 @@ typedef struct
 {
     SDL_Window *window;
     Window xwindow;
+    Visual *visual;
+#ifndef NO_SHARED_MEMORY
+    /* MIT shared memory extension information */
+    SDL_bool use_mitshm;
+    XShmSegmentInfo shminfo;
+#endif
+    XImage *ximage;
+    GC gc;
     XIC ic;
     SDL_bool created;
     struct SDL_VideoData *videodata;

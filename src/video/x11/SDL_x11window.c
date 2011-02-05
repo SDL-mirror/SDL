@@ -176,6 +176,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         } else {
             window->flags &= ~SDL_WINDOW_SHOWN;
         }
+        data->visual = attrib.visual;
     }
 
     {

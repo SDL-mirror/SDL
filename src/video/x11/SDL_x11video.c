@@ -29,6 +29,7 @@
 #include "../SDL_pixels_c.h"
 
 #include "SDL_x11video.h"
+#include "SDL_x11framebuffer.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11touch.h" 
 
@@ -204,10 +205,15 @@ X11_CreateDevice(int devindex)
     device->RestoreWindow = X11_RestoreWindow;
     device->SetWindowGrab = X11_SetWindowGrab;
     device->DestroyWindow = X11_DestroyWindow;
+    device->CreateWindowFramebuffer = X11_CreateWindowFramebuffer;
+    device->UpdateWindowFramebuffer = X11_UpdateWindowFramebuffer;
+    device->DestroyWindowFramebuffer = X11_DestroyWindowFramebuffer;
     device->GetWindowWMInfo = X11_GetWindowWMInfo;
+
     device->shape_driver.CreateShaper = X11_CreateShaper;
     device->shape_driver.SetWindowShape = X11_SetWindowShape;
     device->shape_driver.ResizeWindowShape = X11_ResizeWindowShape;
+
 #if SDL_VIDEO_OPENGL_GLX
     device->GL_LoadLibrary = X11_GL_LoadLibrary;
     device->GL_GetProcAddress = X11_GL_GetProcAddress;
