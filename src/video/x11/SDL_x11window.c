@@ -30,7 +30,6 @@
 #include "SDL_x11mouse.h"
 #include "SDL_x11gamma.h"
 #include "SDL_x11shape.h"
-#include "../Xext/extensions/StdCmap.h"
 
 #ifdef SDL_VIDEO_DRIVER_PANDORA
 #include "SDL_x11opengles.h"
