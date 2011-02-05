@@ -256,11 +256,11 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         }
         break;
     case 15:
-        switch (Rmask) {
-        case 0x001F:
-            return SDL_PIXELFORMAT_BGR555;
-        case 0x7C00:
+        if (Rmask == 0x7C00 && Bmask == 0x001F) {
             return SDL_PIXELFORMAT_RGB555;
+        }
+        if (Rmask == 0x001F && Bmask == 0x7C00) {
+            return SDL_PIXELFORMAT_BGR555;
         }
         break;
     case 16:
@@ -273,18 +273,24 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             return SDL_PIXELFORMAT_BGRA4444;
         case 0x000F:
             return SDL_PIXELFORMAT_ABGR4444;
-        case 0x001F:
-            if (Gmask == 0x07E0) {
-                return SDL_PIXELFORMAT_BGR565;
-            }
-            return SDL_PIXELFORMAT_ABGR1555;
-        case 0x7C00:
-            return SDL_PIXELFORMAT_ARGB1555;
         case 0xF800:
-            if (Gmask == 0x07E0) {
+            if (Bmask == 0x001F) {
                 return SDL_PIXELFORMAT_RGB565;
             }
-            return SDL_PIXELFORMAT_RGBA5551;
+            break;
+        case 0x7C00:
+            if (Bmask == 0x001F) {
+                return SDL_PIXELFORMAT_RGB555;
+            }
+            break;
+        case 0x001F:
+            if (Bmask == 0xF800) {
+                return SDL_PIXELFORMAT_BGR565;
+            }
+            if (Bmask == 0x7C00) {
+                return SDL_PIXELFORMAT_BGR555;
+            }
+            break;
         }
         break;
     case 24:

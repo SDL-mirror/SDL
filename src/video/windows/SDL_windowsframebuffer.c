@@ -60,22 +60,12 @@ int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, voi
 
     *format = SDL_PIXELFORMAT_UNKNOWN;
     if (info->bmiHeader.biCompression == BI_BITFIELDS) {
+        int bpp;
         Uint32 *masks;
 
+        bpp = info->bmiHeader.biPlanes * info->bmiHeader.biBitCount;
         masks = (Uint32*)((Uint8*)info + info->bmiHeader.biSize);
-        if (masks[0] == 0x00FF0000 && masks[2] == 0x000000FF) {
-            *format = SDL_PIXELFORMAT_RGB888;
-        } else if (masks[0] == 0x000000FF && masks[2] == 0x00FF0000) {
-            *format = SDL_PIXELFORMAT_BGR888;
-        } else if (masks[0] == 0xF800 && masks[2] == 0x001F) {
-            *format = SDL_PIXELFORMAT_RGB565;
-        } else if (masks[0] == 0x001F && masks[2] == 0xF800) {
-            *format = SDL_PIXELFORMAT_BGR565;
-        } else if (masks[0] == 0x7C00 && masks[2] == 0x001F) {
-            *format = SDL_PIXELFORMAT_RGB555;
-        } else if (masks[0] == 0x001F && masks[2] == 0x7C00) {
-            *format = SDL_PIXELFORMAT_BGR555;
-        }
+        *format = SDL_MasksToPixelFormatEnum(bpp, masks[0], masks[1], masks[2], 0);
     }
     if (*format == SDL_PIXELFORMAT_UNKNOWN)
 #endif
