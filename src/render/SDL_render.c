@@ -27,7 +27,7 @@
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "../video/SDL_pixels_c.h"
-#include "software/SDL_renderer_sw_c.h"
+#include "software/SDL_render_sw_c.h"
 
 
 #define CHECK_RENDERER_MAGIC(renderer, retval) \
