@@ -115,7 +115,7 @@ static void D3D_DestroyRenderer(SDL_Renderer * renderer);
 SDL_RenderDriver D3D_RenderDriver = {
     D3D_CreateRenderer,
     {
-     "d3d",
+     "direct3d",
      (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
      1,
      {SDL_PIXELFORMAT_ARGB8888},
