@@ -46,40 +46,8 @@ SDL_RenderDriver GLES2_RenderDriver = {
     {
         "opengles2",
         (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
-#if GLES2_ASSUME_BGRA
-        11,
-        {
-            SDL_PIXELFORMAT_ABGR8888,
-            SDL_PIXELFORMAT_ABGR4444,
-            SDL_PIXELFORMAT_ABGR1555,
-            SDL_PIXELFORMAT_BGR565,
-            SDL_PIXELFORMAT_BGR24,
-            SDL_PIXELFORMAT_ARGB8888,
-            SDL_PIXELFORMAT_ARGB4444,
-            SDL_PIXELFORMAT_ARGB1555,
-            SDL_PIXELFORMAT_RGB565,
-            SDL_PIXELFORMAT_RGB24
-        },
-#elif GLES2_ASSUME_BGRA8888
-        7,
-        {
-            SDL_PIXELFORMAT_ABGR8888,
-            SDL_PIXELFORMAT_ABGR4444,
-            SDL_PIXELFORMAT_ABGR1555,
-            SDL_PIXELFORMAT_BGR565,
-            SDL_PIXELFORMAT_BGR24,
-            SDL_PIXELFORMAT_ARGB8888
-        },
-#else
-        6,
-        {
-            SDL_PIXELFORMAT_ABGR8888,
-            SDL_PIXELFORMAT_ABGR4444,
-            SDL_PIXELFORMAT_ABGR1555,
-            SDL_PIXELFORMAT_BGR565,
-            SDL_PIXELFORMAT_BGR24
-        },
-#endif
+        1,
+        {SDL_PIXELFORMAT_ABGR8888},
         0,
         0
     }
@@ -248,9 +216,6 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
  * Texture APIs                                                                                  *
  *************************************************************************************************/
 
-#define GL_BGR_EXT  0x80E0
-#define GL_BGRA_EXT 0x80E1
-
 static int GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture);
 static void GLES2_DestroyTexture(SDL_Renderer *renderer, SDL_Texture *texture);
 static int GLES2_LockTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *rect,
@@ -272,50 +237,10 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     /* Determine the corresponding GLES texture format params */
     switch (texture->format)
     {
-    case SDL_PIXELFORMAT_BGR24:
-        format = GL_RGB;
-        type = GL_UNSIGNED_BYTE;
-        break;
     case SDL_PIXELFORMAT_ABGR8888:
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
-    case SDL_PIXELFORMAT_BGR565:
-        format = GL_RGB;
-        type = GL_UNSIGNED_SHORT_5_6_5;
-        break;
-    case SDL_PIXELFORMAT_ABGR1555:
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_5_5_5_1;
-        break;
-    case SDL_PIXELFORMAT_ABGR4444:
-        format = GL_RGBA;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        break;
-#if GLES2_ASSUME_BGRA || GLES2_ASSUME_BGRA8888
-    case SDL_PIXELFORMAT_ARGB8888:
-        format = GL_BGRA_EXT;
-        type = GL_UNSIGNED_BYTE;
-        break;
-#endif /* GLES2_ASSUME_BGRA || GLES2_ASSUME_BGRA8888 */
-#if GLES2_ASSUME_BGRA
-    case SDL_PIXELFORMAT_RGB24:
-        format = GL_BGR_EXT;
-        type = GL_UNSIGNED_BYTE;
-        break;
-    case SDL_PIXELFORMAT_RGB565:
-        format = GL_BGR_EXT;
-        type = GL_UNSIGNED_SHORT_5_6_5;
-        break;
-    case SDL_PIXELFORMAT_ARGB1555:
-        format = GL_BGRA_EXT;
-        type = GL_UNSIGNED_SHORT_5_5_5_1;
-        break;
-    case SDL_PIXELFORMAT_ARGB4444:
-        format = GL_BGRA_EXT;
-        type = GL_UNSIGNED_SHORT_4_4_4_4;
-        break;
-#endif /* GLES2_ASSUME_BGRA */
     default:
         SDL_SetError("Texture format not supported");
         return -1;
@@ -1180,6 +1105,20 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
         SDL_free(renderer);
         SDL_free(rdata);
         return NULL;
+    }
+    if (SDL_GL_MakeCurrent(window, rdata->context) < 0) {
+        SDL_free(renderer);
+        SDL_free(rdata);
+        return NULL;
+    }
+
+    if (flags & SDL_RENDERER_PRESENTVSYNC) {
+        SDL_GL_SetSwapInterval(1);
+    } else {
+        SDL_GL_SetSwapInterval(0);
+    }
+    if (SDL_GL_GetSwapInterval() > 0) {
+        renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
     /* Determine supported shader formats */
