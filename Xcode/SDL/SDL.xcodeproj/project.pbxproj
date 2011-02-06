@@ -121,6 +121,8 @@
 		00D8DA281195093100638393 /* SDL_at.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA151195093100638393 /* SDL_at.c */; };
 		00D8DA291195093100638393 /* surface.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA181195093100638393 /* surface.c */; };
 		00D8DA2A1195093100638393 /* testsdl.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA1A1195093100638393 /* testsdl.c */; };
+		04043BBB12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */; };
+		04043BBC12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */; };
 		041B2C9512FA0D2A0087D585 /* SDL_render.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2C9412FA0D2A0087D585 /* SDL_render.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		041B2C9612FA0D2A0087D585 /* SDL_render.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2C9412FA0D2A0087D585 /* SDL_render.h */; };
 		041B2CA512FA0D680087D585 /* SDL_render.c in Sources */ = {isa = PBXBuildFile; fileRef = 041B2C9E12FA0D680087D585 /* SDL_render.c */; };
@@ -278,8 +280,6 @@
 		04BD018212E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
 		04BD018712E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
 		04BD018812E6671800899322 /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6112E6671800899322 /* SDL_gamma.c */; };
-		04BD018912E6671800899322 /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6212E6671800899322 /* SDL_glesfuncs.h */; };
-		04BD018A12E6671800899322 /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6312E6671800899322 /* SDL_glfuncs.h */; };
 		04BD018B12E6671800899322 /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6412E6671800899322 /* SDL_leaks.h */; };
 		04BD018C12E6671800899322 /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6512E6671800899322 /* SDL_pixels.c */; };
 		04BD018D12E6671800899322 /* SDL_pixels_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6612E6671800899322 /* SDL_pixels_c.h */; };
@@ -468,8 +468,6 @@
 		04BD039C12E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
 		04BD03A112E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
 		04BD03A212E6671800899322 /* SDL_gamma.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6112E6671800899322 /* SDL_gamma.c */; };
-		04BD03A312E6671800899322 /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6212E6671800899322 /* SDL_glesfuncs.h */; };
-		04BD03A412E6671800899322 /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6312E6671800899322 /* SDL_glfuncs.h */; };
 		04BD03A512E6671800899322 /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6412E6671800899322 /* SDL_leaks.h */; };
 		04BD03A612E6671800899322 /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6512E6671800899322 /* SDL_pixels.c */; };
 		04BD03A712E6671800899322 /* SDL_pixels_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6612E6671800899322 /* SDL_pixels_c.h */; };
@@ -694,6 +692,7 @@
 		00D8DA191195093100638393 /* surface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surface.h; sourceTree = "<group>"; };
 		00D8DA1A1195093100638393 /* testsdl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testsdl.c; path = ../../test/automated/testsdl.c; sourceTree = SOURCE_ROOT; };
 		00F5D79E0990CA0D0051C449 /* UniversalBinaryNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = UniversalBinaryNotes.rtf; sourceTree = "<group>"; };
+		04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		041B2C9412FA0D2A0087D585 /* SDL_render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_render.h; path = ../../include/SDL_render.h; sourceTree = SOURCE_ROOT; };
 		041B2C9E12FA0D680087D585 /* SDL_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render.c; sourceTree = "<group>"; };
 		041B2C9F12FA0D680087D585 /* SDL_sysrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysrender.h; sourceTree = "<group>"; };
@@ -837,8 +836,6 @@
 		04BDFF5B12E6671800899322 /* SDL_clipboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboard.c; sourceTree = "<group>"; };
 		04BDFF6012E6671800899322 /* SDL_fillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fillrect.c; sourceTree = "<group>"; };
 		04BDFF6112E6671800899322 /* SDL_gamma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gamma.c; sourceTree = "<group>"; };
-		04BDFF6212E6671800899322 /* SDL_glesfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glesfuncs.h; sourceTree = "<group>"; };
-		04BDFF6312E6671800899322 /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		04BDFF6412E6671800899322 /* SDL_leaks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_leaks.h; sourceTree = "<group>"; };
 		04BDFF6512E6671800899322 /* SDL_pixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_pixels.c; sourceTree = "<group>"; };
 		04BDFF6612E6671800899322 /* SDL_pixels_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_pixels_c.h; sourceTree = "<group>"; };
@@ -1200,6 +1197,7 @@
 		041B2C9A12FA0D680087D585 /* opengl */ = {
 			isa = PBXGroup;
 			children = (
+				04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */,
 				0442EC1712FE1BBA004C9285 /* SDL_render_gl.c */,
 			);
 			path = opengl;
@@ -1513,8 +1511,6 @@
 				04BDFF5B12E6671800899322 /* SDL_clipboard.c */,
 				04BDFF6012E6671800899322 /* SDL_fillrect.c */,
 				04BDFF6112E6671800899322 /* SDL_gamma.c */,
-				04BDFF6212E6671800899322 /* SDL_glesfuncs.h */,
-				04BDFF6312E6671800899322 /* SDL_glfuncs.h */,
 				04BDFF6412E6671800899322 /* SDL_leaks.h */,
 				04BDFF6512E6671800899322 /* SDL_pixels.c */,
 				04BDFF6612E6671800899322 /* SDL_pixels_c.h */,
@@ -1885,8 +1881,6 @@
 				04BD017B12E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD017D12E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD018012E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD018912E6671800899322 /* SDL_glesfuncs.h in Headers */,
-				04BD018A12E6671800899322 /* SDL_glfuncs.h in Headers */,
 				04BD018B12E6671800899322 /* SDL_leaks.h in Headers */,
 				04BD018D12E6671800899322 /* SDL_pixels_c.h in Headers */,
 				04BD019712E6671800899322 /* SDL_RLEaccel_c.h in Headers */,
@@ -1937,6 +1931,7 @@
 				0442EC1312FE1B79004C9285 /* SDL_hints.h in Headers */,
 				0442EC1C12FE1BCB004C9285 /* SDL_render_sw_c.h in Headers */,
 				0442EC5B12FE1C60004C9285 /* SDL_x11framebuffer.h in Headers */,
+				04043BBB12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2015,8 +2010,6 @@
 				04BD039512E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD039712E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD039A12E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD03A312E6671800899322 /* SDL_glesfuncs.h in Headers */,
-				04BD03A412E6671800899322 /* SDL_glfuncs.h in Headers */,
 				04BD03A512E6671800899322 /* SDL_leaks.h in Headers */,
 				04BD03A712E6671800899322 /* SDL_pixels_c.h in Headers */,
 				04BD03B112E6671800899322 /* SDL_RLEaccel_c.h in Headers */,
@@ -2067,6 +2060,7 @@
 				0442EC1412FE1B79004C9285 /* SDL_hints.h in Headers */,
 				0442EC1E12FE1BCB004C9285 /* SDL_render_sw_c.h in Headers */,
 				0442EC5D12FE1C60004C9285 /* SDL_x11framebuffer.h in Headers */,
+				04043BBC12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
