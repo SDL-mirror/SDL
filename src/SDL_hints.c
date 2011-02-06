@@ -38,7 +38,8 @@ static SDL_Hint *SDL_hints;
 
 
 SDL_bool
-SDL_SetHint(const char *name, const char *value, SDL_HintPriority priority)
+SDL_SetHintWithPriority(const char *name, const char *value,
+                        SDL_HintPriority priority)
 {
     const char *env;
     SDL_Hint *prev, *hint;
@@ -78,6 +79,12 @@ SDL_SetHint(const char *name, const char *value, SDL_HintPriority priority)
     hint->next = SDL_hints;
     SDL_hints = hint;
     return SDL_TRUE;
+}
+
+SDL_bool
+SDL_SetHint(const char *name, const char *value)
+{
+    return SDL_SetHintWithPriority(name, value, SDL_HINT_NORMAL);
 }
 
 const char *

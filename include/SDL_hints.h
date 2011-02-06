@@ -106,7 +106,7 @@ typedef enum
 
 
 /**
- *  \brief Set a hint
+ *  \brief Set a hint with a specific priority
  *
  *  The priority controls the behavior when setting a hint that already
  *  has a value.  Hints will replace existing hints of their priority and
@@ -114,9 +114,18 @@ typedef enum
  * 
  *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
  */
+extern DECLSPEC SDL_bool SDLCALL SDL_SetHintWithPriority(const char *name,
+                                                         const char *value,
+                                                         SDL_HintPriority priority);
+
+/**
+ *  \brief Set a hint with normal priority
+ * 
+ *  \return SDL_TRUE if the hint was set, SDL_FALSE otherwise
+ */
 extern DECLSPEC SDL_bool SDLCALL SDL_SetHint(const char *name,
-                                             const char *value,
-                                             SDL_HintPriority priority);
+                                             const char *value);
+
 
 /**
  *  \brief Get a hint
