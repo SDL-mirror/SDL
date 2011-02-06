@@ -2064,9 +2064,6 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     *value = 0;
 
     switch (attr) {
-    case SDL_GL_RETAINED_BACKING:
-        *value = _this->gl_config.retained_backing;
-        return 0;
     case SDL_GL_RED_SIZE:
         attrib = GL_RED_BITS;
         break;
