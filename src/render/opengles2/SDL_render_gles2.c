@@ -608,7 +608,7 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
     entry->id = glCreateShader(instance->type);
     if (instance->format == (GLenum)-1)
     {
-        glShaderSource(entry->id, 1, (const char **)&instance->data, &instance->length);
+        glShaderSource(entry->id, 1, (const char **)&instance->data, NULL);
         glCompileShader(entry->id);
         glGetShaderiv(entry->id, GL_COMPILE_STATUS, &compileSuccessful);
     }
@@ -619,7 +619,22 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
     }
     if (glGetError() != GL_NO_ERROR || !compileSuccessful)
     {
-        SDL_SetError("Failed to load the specified shader");
+        char *info = NULL;
+        int length;
+
+        glGetShaderiv(entry->id, GL_INFO_LOG_LENGTH, &length);
+        if (length > 0) {
+            info = SDL_stack_alloc(char, length);
+            if (info) {
+                glGetShaderInfoLog(entry->id, length, &length, info);
+            }
+        }
+        if (info) {
+            SDL_SetError("Failed to load the shader: %s", info);
+            SDL_stack_free(info);
+        } else {
+            SDL_SetError("Failed to load the shader");
+        }
         glDeleteShader(entry->id);
         SDL_free(entry);
         return NULL;
