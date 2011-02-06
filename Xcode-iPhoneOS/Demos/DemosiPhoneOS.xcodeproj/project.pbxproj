@@ -748,7 +748,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"";
+				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
 				PREBINDING = NO;
@@ -767,7 +767,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
-				LIBRARY_SEARCH_PATHS = "\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"";
+				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
 				PREBINDING = NO;
 				PRELINK_LIBS = "";

@@ -173,9 +173,6 @@ drawParticles()
     /* draw our particles! */
     glDrawArrays(GL_POINTS, 0, num_active_particles);
 
-    /* update screen */
-    SDL_RenderPresent();
-
 }
 
 /*
@@ -437,6 +434,7 @@ main(int argc, char *argv[])
         }
         stepParticles();
         drawParticles();
+		SDL_GL_SwapWindow(window);
         endFrame = SDL_GetTicks();
 
         /* figure out how much time we have left, and then sleep */

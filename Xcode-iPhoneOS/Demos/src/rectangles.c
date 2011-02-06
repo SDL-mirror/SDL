@@ -9,7 +9,7 @@
 #include "common.h"
 
 void
-render(void)
+render(SDL_Renderer *renderer)
 {
 
     Uint8 r, g, b;
@@ -26,11 +26,11 @@ render(void)
     b = randomInt(50, 255);
 
     /*  Fill the rectangle in the color */
-    SDL_SetRenderDrawColor(r, g, b, 255);
-    SDL_RenderFill(&rect);
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
+    SDL_RenderFillRect(renderer, &rect);
 
     /* update screen */
-    SDL_RenderPresent();
+    SDL_RenderPresent(renderer);
 
 }
 
@@ -39,6 +39,7 @@ main(int argc, char *argv[])
 {
 
     SDL_Window *window;
+	SDL_Renderer *renderer;
     int done;
     SDL_Event event;
 
@@ -57,13 +58,14 @@ main(int argc, char *argv[])
     if (window == 0) {
         fatalError("Could not initialize Window");
     }
-    if (SDL_CreateRenderer(window, -1, 0) != 0) {
+    renderer = SDL_CreateRenderer(window, -1, 0);
+	if (!renderer) {
         fatalError("Could not create renderer");
     }
 
     /* Fill screen with black */
-    SDL_SetRenderDrawColor(0, 0, 0, 255);
-    SDL_RenderFill(NULL);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
     /* Enter render loop, waiting for user to quit */
     done = 0;
@@ -73,7 +75,7 @@ main(int argc, char *argv[])
                 done = 1;
             }
         }
-        render();
+        render(renderer);
         SDL_Delay(1);
     }
 

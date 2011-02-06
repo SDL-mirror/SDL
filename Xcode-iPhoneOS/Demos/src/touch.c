@@ -18,7 +18,7 @@ static SDL_Texture *brush = 0;       /* texture for the brush */
 	this is accomplished by drawing several blots spaced PIXELS_PER_ITERATION apart
 */
 void
-drawLine(float startx, float starty, float dx, float dy)
+drawLine(SDL_Renderer *renderer, float startx, float starty, float dx, float dy)
 {
 
     float distance = sqrt(dx * dx + dy * dy);   /* length of line segment (pythagoras) */
@@ -43,7 +43,7 @@ drawLine(float startx, float starty, float dx, float dy)
         x += dx_prime;
         y += dy_prime;
         /* draw brush blot */
-        SDL_RenderCopy(brush, NULL, &dstRect);
+        SDL_RenderCopy(renderer, brush, NULL, &dstRect);
     }
 }
 
@@ -51,7 +51,7 @@ drawLine(float startx, float starty, float dx, float dy)
 	loads the brush texture
 */
 void
-initializeTexture()
+initializeTexture(SDL_Renderer *renderer)
 {
     SDL_Surface *bmp_surface;
     bmp_surface = SDL_LoadBMP("stroke.bmp");
@@ -59,7 +59,7 @@ initializeTexture()
         fatalError("could not load stroke.bmp");
     }
     brush =
-        SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ABGR8888, bmp_surface);
+        SDL_CreateTextureFromSurface(renderer, bmp_surface);
     SDL_FreeSurface(bmp_surface);
     if (brush == 0) {
         fatalError("could not create brush texture");
@@ -78,6 +78,7 @@ main(int argc, char *argv[])
     Uint8 state;                /* mouse (touch) state */
     SDL_Event event;
     SDL_Window *window;         /* main window */
+	SDL_Renderer *renderer;
     int done;                   /* does user want to quit? */
 
     /* initialize SDL */
@@ -89,15 +90,15 @@ main(int argc, char *argv[])
     window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(window, 0, 0);
+    renderer = SDL_CreateRenderer(window, 0, 0);
 
     /*load brush texture */
-    initializeTexture();
+    initializeTexture(renderer);
 
     /* fill canvass initially with all black */
-    SDL_SetRenderDrawColor(0, 0, 0, 255);
-    SDL_RenderFill(NULL);
-    SDL_RenderPresent();
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear();
+    SDL_RenderPresent(renderer);
 
     done = 0;
     while (!done && SDL_WaitEvent(&event)) {
@@ -109,8 +110,8 @@ main(int argc, char *argv[])
             state = SDL_GetMouseState(&x, &y);  /* get its location */
             SDL_GetRelativeMouseState(&dx, &dy);        /* find how much the mouse moved */
             if (state & SDL_BUTTON_LMASK) {     /* is the mouse (touch) down? */
-                drawLine(x - dx, y - dy, dx, dy);       /* draw line segment */
-                SDL_RenderPresent();
+                drawLine(renderer, x - dx, y - dy, dx, dy);       /* draw line segment */
+                SDL_RenderPresent(renderer);
             }
             break;
         }

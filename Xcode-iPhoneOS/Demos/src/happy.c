@@ -36,7 +36,7 @@ initializeHappyFaces()
 }
 
 void
-render(void)
+render(SDL_Renderer *renderer)
 {
 
     int i;
@@ -58,8 +58,8 @@ render(void)
     dstRect.h = HAPPY_FACE_SIZE;
 
     /* fill background in with black */
-    SDL_SetRenderDrawColor(0, 0, 0, 255);
-    SDL_RenderFill(NULL);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
 
     /*
        loop through all the happy faces:
@@ -86,10 +86,10 @@ render(void)
         }
         dstRect.x = faces[i].x;
         dstRect.y = faces[i].y;
-        SDL_RenderCopy(texture, &srcRect, &dstRect);
+        SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
     }
     /* update screen */
-    SDL_RenderPresent();
+    SDL_RenderPresent(renderer);
 
 }
 
@@ -97,13 +97,9 @@ render(void)
 	loads the happyface graphic into a texture
 */
 void
-initializeTexture()
+initializeTexture(SDL_Renderer *renderer)
 {
     SDL_Surface *bmp_surface;
-    SDL_Surface *bmp_surface_rgba;
-    int format = SDL_PIXELFORMAT_ABGR8888;      /* desired texture format */
-    Uint32 Rmask, Gmask, Bmask, Amask;  /* masks for desired format */
-    int bpp;                    /* bits per pixel for desired format */
     /* load the bmp */
     bmp_surface = SDL_LoadBMP("icon.bmp");
     if (bmp_surface == NULL) {
@@ -112,26 +108,15 @@ initializeTexture()
     /* set white to transparent on the happyface */
     SDL_SetColorKey(bmp_surface, 1,
                     SDL_MapRGB(bmp_surface->format, 255, 255, 255));
-    SDL_PixelFormatEnumToMasks(format, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
-    /*
-       create a new RGBA surface and blit the bmp to it
-       this is an extra step, but it seems to be necessary
-       is this a bug?
-     */
-    bmp_surface_rgba =
-        SDL_CreateRGBSurface(0, bmp_surface->w, bmp_surface->h, bpp, Rmask,
-                             Gmask, Bmask, Amask);
-    SDL_BlitSurface(bmp_surface, NULL, bmp_surface_rgba, NULL);
 
     /* convert RGBA surface to texture */
-    texture = SDL_CreateTextureFromSurface(format, bmp_surface_rgba);
+    texture = SDL_CreateTextureFromSurface(renderer, bmp_surface);
     if (texture == 0) {
         fatalError("could not create texture");
     }
     SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 
     /* free up allocated memory */
-    SDL_FreeSurface(bmp_surface_rgba);
     SDL_FreeSurface(bmp_surface);
 }
 
@@ -140,6 +125,7 @@ main(int argc, char *argv[])
 {
 
     SDL_Window *window;
+	SDL_Renderer *renderer;
     Uint32 startFrame;
     Uint32 endFrame;
     Uint32 delay;
@@ -153,9 +139,11 @@ main(int argc, char *argv[])
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
 
-    SDL_CreateRenderer(window, -1, 0);
+    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
+	
+    renderer = SDL_CreateRenderer(window, -1, 0);
 
-    initializeTexture();
+    initializeTexture(renderer);
     initializeHappyFaces();
 
     /* main loop */
@@ -168,7 +156,7 @@ main(int argc, char *argv[])
                 done = 1;
             }
         }
-        render();
+        render(renderer);
         endFrame = SDL_GetTicks();
 
         /* figure out how much time we have left, and then sleep */

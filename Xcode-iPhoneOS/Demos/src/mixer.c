@@ -33,7 +33,6 @@ static struct sound drums[NUM_DRUMS];
 void handleMouseButtonDown(SDL_Event * event);
 void handleMouseButtonUp(SDL_Event * event);
 int playSound(struct sound *);
-void render(void);
 void initializeButtons();
 void audioCallback(void *userdata, Uint8 * stream, int len);
 void loadSound(const char *file, struct sound *s);
@@ -163,20 +162,20 @@ handleMouseButtonUp(SDL_Event * event)
 
 /* draws buttons to screen */
 void
-render(void)
+render(SDL_Renderer *renderer)
 {
     int i;
-    SDL_SetRenderDrawColor(50, 50, 50, 255);
-    SDL_RenderFill(NULL);       /* draw background (gray) */
+    SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
+    SDL_RenderClear(renderer);       /* draw background (gray) */
     /* draw the drum buttons */
     for (i = 0; i < NUM_DRUMS; i++) {
         SDL_Color color =
             buttons[i].isPressed ? buttons[i].downColor : buttons[i].upColor;
-        SDL_SetRenderDrawColor(color.r, color.g, color.b, color.unused);
-        SDL_RenderFill(&buttons[i].rect);
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.unused);
+        SDL_RenderFillRect(renderer, &buttons[i].rect);
     }
     /* update the screen */
-    SDL_RenderPresent();
+    SDL_RenderPresent(renderer);
 }
 
 /*
@@ -274,6 +273,7 @@ main(int argc, char *argv[])
 
     int done;                   /* has user tried to quit ? */
     SDL_Window *window;         /* main window */
+	SDL_Renderer *renderer;
     SDL_Event event;
     Uint32 startFrame;          /* holds when frame started processing */
     Uint32 endFrame;            /* holds when frame ended processing */
@@ -285,7 +285,7 @@ main(int argc, char *argv[])
     window =
         SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                          SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(window, 0, 0);
+    renderer = SDL_CreateRenderer(window, 0, 0);
 
     /* initialize the mixer */
     SDL_memset(&mixer, 0, sizeof(mixer));
@@ -328,7 +328,7 @@ main(int argc, char *argv[])
                 break;
             }
         }
-        render();               /* draw buttons */
+        render(renderer);               /* draw buttons */
         endFrame = SDL_GetTicks();
 
         /* figure out how much time we have left, and then sleep */
