@@ -558,16 +558,17 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
     }
     
     /* Find a matching shader instance that's supported on this hardware */
-    for (i = 0; i < shader->instance_count; ++i)
+    for (i = 0; i < shader->instance_count && !instance; ++i)
     {
-        for (j = 0; j < rdata->shader_format_count; ++j)
+        for (j = 0; j < rdata->shader_format_count && !instance; ++j)
         {
             if (!shader->instances)
+                continue;
+            if (!shader->instances[i])
                 continue;
             if (shader->instances[i]->format != rdata->shader_formats[j])
                 continue;
             instance = shader->instances[i];
-            break;
         }
     }
     if (!instance)
