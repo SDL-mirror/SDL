@@ -2163,6 +2163,21 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
             *value = (_this->gl_config.accelerated != 0);
             return 0;
         }
+    case SDL_GL_RETAINED_BACKING:
+        {
+            *value = _this->gl_config.retained_backing;
+            return 0;
+        }
+    case SDL_GL_CONTEXT_MAJOR_VERSION:
+        {
+            *value = _this->gl_config.major_version;
+            return 0;
+        }
+    case SDL_GL_CONTEXT_MINOR_VERSION:
+        {
+            *value = _this->gl_config.minor_version;
+            return 0;
+        }
     default:
         SDL_SetError("Unknown OpenGL attribute");
         return -1;
