@@ -330,9 +330,6 @@ extern DECLSPEC int SDLCALL SDL_EnableUNICODE(int enable);
 
 typedef SDL_Window* SDL_WindowID;
 
-#define SDL_RenderPoint SDL_RenderDrawPoint
-#define SDL_RenderLine SDL_RenderDrawLine
-#define SDL_RenderFill(X)  (X) ? SDL_RenderFillRect(X) : SDL_RenderClear()
 #define SDL_KillThread(X)
 
 /* The timeslice and timer resolution are no longer relevant */
