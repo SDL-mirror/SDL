@@ -116,7 +116,7 @@ SDL_RenderDriver D3D_RenderDriver = {
     D3D_CreateRenderer,
     {
      "direct3d",
-     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
      1,
      {SDL_PIXELFORMAT_ARGB8888},
      0,

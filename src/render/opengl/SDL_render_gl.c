@@ -34,7 +34,7 @@
 /* OpenGL renderer implementation */
 
 /* Details on optimizing the texture path on Mac OS X:
-   http://developer.apple.com/documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_texturedata/chapter_10_section_2.html
+   http://developer.apple.com/library/mac/#documentation/GraphicsImaging/Conceptual/OpenGL-MacProgGuide/opengl_texturedata/opengl_texturedata.html
 */
 
 /* Used to re-create the window with OpenGL capability */
@@ -72,7 +72,7 @@ SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
     {
      "opengl",
-     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
      1,
      {SDL_PIXELFORMAT_ARGB8888},
      0,
@@ -331,7 +331,6 @@ convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
                GLint* internalFormat, GLenum* format, GLenum* type)
 {
     switch (pixel_format) {
-    case SDL_PIXELFORMAT_RGB888:
     case SDL_PIXELFORMAT_ARGB8888:
         *internalFormat = GL_RGBA8;
         *format = GL_BGRA;

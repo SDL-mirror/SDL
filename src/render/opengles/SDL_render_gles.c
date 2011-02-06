@@ -74,8 +74,8 @@ static void GLES_DestroyRenderer(SDL_Renderer * renderer);
 SDL_RenderDriver GLES_RenderDriver = {
     GLES_CreateRenderer,
     {
-     "opengl_es",
-     (SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED),
+     "opengles",
+     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
      1,
      {SDL_PIXELFORMAT_ABGR8888},
      0,
@@ -331,8 +331,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_BYTE;
         break;
     default:
-        SDL_SetError("Texture format %s not supported by OpenGL ES",
-                     SDL_GetPixelFormatName(texture->format));
+        SDL_SetError("Texture format not supported");
         return -1;
     }
 
