@@ -18,14 +18,13 @@
 
     Sam Lantinga
     slouken@libsdl.org
-*/
-#include "SDL_config.h"
 
-//#include "SDL_syswm.h"
-//#include "../SDL_sysvideo.h"
-//#include "../../events/SDL_keyboard_c.h"
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
+*/
 
 #include "SDL_DirectFB_video.h"
+#include "SDL_DirectFB_window.h"
 
 #include "../../events/SDL_windowevents_c.h"
 
@@ -127,6 +126,11 @@ DirectFB_WM_RedrawLayout(_THIS, SDL_Window * window)
     if (!windata->is_managed || (window->flags & SDL_WINDOW_FULLSCREEN))
         return;
 
+    SDL_DFB_CHECK(s->SetSrcBlendFunction(s, DSBF_ONE));
+    SDL_DFB_CHECK(s->SetDstBlendFunction(s, DSBF_ZERO));
+    SDL_DFB_CHECK(s->SetDrawingFlags(s, DSDRAW_NOFX));
+    SDL_DFB_CHECK(s->SetBlittingFlags(s, DSBLIT_NOFX));
+
 	LoadFont(_this, window);
     //s->SetDrawingFlags(s, DSDRAW_BLEND);
     s->SetColor(s, COLOR_EXPAND(t->frame_color));
@@ -181,8 +185,10 @@ DFBResult
 DirectFB_WM_GetClientSize(_THIS, SDL_Window * window, int *cw, int *ch)
 {
     SDL_DFB_WINDOWDATA(window);
+	IDirectFBWindow *dfbwin = windata->dfbwin;
 
-    SDL_DFB_CHECK(windata->window->GetSize(windata->window, cw, ch));
+    SDL_DFB_CHECK(dfbwin->GetSize(dfbwin, cw, ch));
+    dfbwin->GetSize(dfbwin, cw, ch);
     *cw -= windata->theme.left_size + windata->theme.right_size;
     *ch -=
         windata->theme.top_size + windata->theme.caption_size +
@@ -197,6 +203,9 @@ DirectFB_WM_AdjustWindowLayout(SDL_Window * window, int flags, int w, int h)
 
     if (!windata->is_managed)
         windata->theme = theme_none;
+    else if (flags & SDL_WINDOW_BORDERLESS)
+    	//desc.caps |= DWCAPS_NODECORATION;)
+    	windata->theme = theme_none;
     else if (flags & SDL_WINDOW_FULLSCREEN) {
         windata->theme = theme_none;
     } else if (flags & SDL_WINDOW_MAXIMIZED) {
@@ -220,37 +229,6 @@ DirectFB_WM_AdjustWindowLayout(SDL_Window * window, int flags, int w, int h)
         windata->theme.caption_size + windata->theme.bottom_size;
 }
 
-void
-DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window)
-{
-    SDL_DFB_WINDOWDATA(window);
-    SDL_VideoDisplay *display = window->display;
-
-    SDL_DFB_CHECK(windata->window->GetPosition(windata->window,
-                                 &windata->restore.x, &windata->restore.y));
-    SDL_DFB_CHECK(windata->window->GetSize(windata->window, &windata->restore.w,
-                             &windata->restore.h));
-
-    DirectFB_WM_AdjustWindowLayout(window, window->flags | SDL_WINDOW_MAXIMIZED, display->current_mode.w, display->current_mode.h) ;
-
-    SDL_DFB_CHECK(windata->window->MoveTo(windata->window, 0, 0));
-    SDL_DFB_CHECK(windata->window->Resize(windata->window,
-                            display->current_mode.w, display->current_mode.h));
-}
-
-void
-DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window)
-{
-    SDL_DFB_WINDOWDATA(window);
-
-    DirectFB_WM_AdjustWindowLayout(window, window->flags & ~(SDL_WINDOW_MAXIMIZED | SDL_WINDOW_MINIMIZED), 
-    	windata->restore.w, windata->restore.h);
-
-    SDL_DFB_CHECK(windata->window->Resize(windata->window, windata->restore.w,
-                            windata->restore.h));
-    SDL_DFB_CHECK(windata->window->MoveTo(windata->window, windata->restore.x,
-                            windata->restore.y));
-}
 
 enum
 {
@@ -307,19 +285,19 @@ WMPos(DFB_WindowData * p, int x, int y)
     return pos;
 }
 
-static int wm_grab;
-static int wm_lastx;
-static int wm_lasty;
-
 int
 DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
 {
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);
 	DFB_WindowData *gwindata = ((devdata->grabbed_window) ? (DFB_WindowData *) ((devdata->grabbed_window)->driverdata) : NULL);
+	IDirectFBWindow *dfbwin = windata->dfbwin;
+    DFBWindowOptions wopts;
 
     if (!windata->is_managed)
         return 0;
+
+    SDL_DFB_CHECK(dfbwin->GetOptions(dfbwin, &wopts));
 
     switch (evt->type) {
     case DWET_BUTTONDOWN:
@@ -329,59 +307,99 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
             case WM_POS_NONE:
                 return 0;
             case WM_POS_CLOSE:
-		        wm_grab = WM_POS_NONE;
+		        windata->wm_grab = WM_POS_NONE;
                 SDL_SendWindowEvent(window, SDL_WINDOWEVENT_CLOSE, 0,
                                     0);
                 return 1;
             case WM_POS_MAX:
-		        wm_grab = WM_POS_NONE;
-                if (window->flags & SDL_WINDOW_MAXIMIZED) {
-                	SDL_RestoreWindow(window);
-                } else {
-                    SDL_MaximizeWindow(window);
-                }
+		        windata->wm_grab = WM_POS_NONE;
+				if (window->flags & SDL_WINDOW_MAXIMIZED) {
+					SDL_RestoreWindow(window);
+				} else {
+					SDL_MaximizeWindow(window);
+				}
                 return 1;
             case WM_POS_CAPTION:
-                DirectFB_RaiseWindow(_this, window);
+            	if (!(wopts & DWOP_KEEP_STACKING)) {
+	                DirectFB_RaiseWindow(_this, window);
+	            }
+            	if (window->flags & SDL_WINDOW_MAXIMIZED)
+            		return 1;
                 /* fall through */
             default:
-                wm_grab = pos;
+                windata->wm_grab = pos;
                 if (gwindata != NULL)
-	                SDL_DFB_CHECK(gwindata->window->UngrabPointer(gwindata->window));
-                SDL_DFB_CHECK(windata->window->GrabPointer(windata->window));
-                wm_lastx = evt->cx;
-                wm_lasty = evt->cy;
+	                SDL_DFB_CHECK(gwindata->dfbwin->UngrabPointer(gwindata->dfbwin));
+                SDL_DFB_CHECK(dfbwin->GrabPointer(dfbwin));
+                windata->wm_lastx = evt->cx;
+                windata->wm_lasty = evt->cy;
             }
         }
         return 1;
     case DWET_BUTTONUP:
-        break;
-    case DWET_MOTION:
-        if (!wm_grab)
+        if (!windata->wm_grab)
             return 0;
-        if (evt->buttons & DIBM_LEFT) {
-            int dx = evt->cx - wm_lastx;
-            int dy = evt->cy - wm_lasty;
-            int cw, ch;
+        if (!(evt->buttons & DIBM_LEFT)) {
+            if (windata->wm_grab & (WM_POS_RIGHT | WM_POS_BOTTOM)) {
+                int dx = evt->cx - windata->wm_lastx;
+                int dy = evt->cy - windata->wm_lasty;
 
-            if (wm_grab & WM_POS_CAPTION)
-                SDL_DFB_CHECK(windata->window->Move(windata->window, dx, dy));
-	        if (wm_grab & (WM_POS_RIGHT | WM_POS_BOTTOM)) {
-	            if ((wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_BOTTOM)
-	            	dx = 0;
-	            else if ((wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_RIGHT)
-	            	dy = 0;
-                SDL_DFB_CHECK(windata->window->GetSize(windata->window, &cw, &ch));
-                SDL_DFB_CHECK(windata->window->Resize(windata->window, cw + dx, ch + dy));
+            	if (!(wopts & DWOP_KEEP_SIZE)) {
+                    int cw, ch;
+			        if ((windata->wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_BOTTOM)
+			        	dx = 0;
+			        else if ((windata->wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_RIGHT)
+			        	dy = 0;
+		            SDL_DFB_CHECK(dfbwin->GetSize(dfbwin, &cw, &ch));
+
+		            /* necessary to trigger an event - ugly*/
+					SDL_DFB_CHECK(dfbwin->DisableEvents(dfbwin, DWET_ALL));
+		            SDL_DFB_CHECK(dfbwin->Resize(dfbwin, cw + dx + 1, ch + dy));
+					SDL_DFB_CHECK(dfbwin->EnableEvents(dfbwin, DWET_ALL));
+
+		            SDL_DFB_CHECK(dfbwin->Resize(dfbwin, cw + dx, ch + dy));
+            	}
             }
-            wm_lastx = evt->cx;
-            wm_lasty = evt->cy;
+            SDL_DFB_CHECK(dfbwin->UngrabPointer(dfbwin));
+            if (gwindata != NULL)
+                SDL_DFB_CHECK(gwindata->dfbwin->GrabPointer(gwindata->dfbwin));
+            windata->wm_grab = WM_POS_NONE;
             return 1;
         }
-        SDL_DFB_CHECK(windata->window->UngrabPointer(windata->window));
-        if (gwindata != NULL)
-            SDL_DFB_CHECK(gwindata->window->GrabPointer(gwindata->window));
-        wm_grab = WM_POS_NONE;
+        break;
+    case DWET_MOTION:
+        if (!windata->wm_grab)
+            return 0;
+        if (evt->buttons & DIBM_LEFT) {
+        	int dx = evt->cx - windata->wm_lastx;
+            int dy = evt->cy - windata->wm_lasty;
+
+            if (windata->wm_grab & WM_POS_CAPTION) {
+            	if (!(wopts & DWOP_KEEP_POSITION))
+	                SDL_DFB_CHECK(dfbwin->Move(dfbwin, dx, dy));
+            }
+            if (windata->wm_grab & (WM_POS_RIGHT | WM_POS_BOTTOM)) {
+				if (!(wopts & DWOP_KEEP_SIZE)) {
+					int cw, ch;
+
+					/* Make sure all events are disabled for this operation ! */
+					SDL_DFB_CHECK(dfbwin->DisableEvents(dfbwin, DWET_ALL));
+
+					if ((windata->wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_BOTTOM)
+						dx = 0;
+					else if ((windata->wm_grab & (WM_POS_BOTTOM | WM_POS_RIGHT)) == WM_POS_RIGHT)
+						dy = 0;
+
+					SDL_DFB_CHECK(dfbwin->GetSize(dfbwin, &cw, &ch));
+					SDL_DFB_CHECK(dfbwin->Resize(dfbwin, cw + dx, ch + dy));
+
+					SDL_DFB_CHECK(dfbwin->EnableEvents(dfbwin, DWET_ALL));
+				}
+            }
+			windata->wm_lastx = evt->cx;
+			windata->wm_lasty = evt->cy;
+			return 1;
+        }
         break;
     case DWET_KEYDOWN:
         break;
@@ -392,3 +410,4 @@ DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window, DFBWindowEvent * evt)
     }
     return 0;
 }
+

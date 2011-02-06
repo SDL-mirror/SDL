@@ -18,7 +18,11 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
+
 #include "SDL_config.h"
 
 #include "SDL_DirectFB_video.h"
@@ -41,6 +45,7 @@ static struct _SDL_DirectFB_Symbols
 #define DFB_SYM(ret, name, args, al, func) ret name args { func SDL_DirectFB_Symbols.name al  ; }
 DFB_SYMS
 #undef DFB_SYM
+
 static void *handle = NULL;
 
 int
@@ -55,7 +60,7 @@ SDL_DirectFB_LoadLibrary(void)
 #define DFB_SYM(ret, name, args, al, func) if (!(SDL_DirectFB_Symbols.name = SDL_LoadFunction(handle, # name))) retval = 0;
             DFB_SYMS
 #undef DFB_SYM
-                if (!
+            if (!
                     (SDL_DirectFB_Symbols.directfb_major_version =
                      SDL_LoadFunction(handle, "directfb_major_version")))
                 retval = 0;

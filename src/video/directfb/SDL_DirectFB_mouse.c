@@ -18,7 +18,11 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
+
 #include "SDL_config.h"
 
 #include "SDL_DirectFB_video.h"
@@ -123,8 +127,8 @@ DirectFB_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     Uint32 *p;
     int pitch, i;
 
-    SDL_DFB_CALLOC(cursor, 1, sizeof(*cursor));
-    SDL_DFB_CALLOC(curdata, 1, sizeof(*curdata));
+    SDL_DFB_ALLOC_CLEAR(cursor, 1, sizeof(*cursor));
+    SDL_DFB_ALLOC_CLEAR(curdata, 1, sizeof(*curdata));
 
     dsc.flags =
         DSDESC_WIDTH | DSDESC_HEIGHT | DSDESC_PIXELFORMAT | DSDESC_CAPS;
@@ -175,7 +179,7 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
 
             if (cursor)
                 SDL_DFB_CHECKERR(windata->window->
-                                 SetCursorShape(windata->window,
+                                 SetCursorShape(windata->dfbwin,
                                                 curdata->surf, curdata->hotx,
                                                 curdata->hoty));
 
@@ -224,7 +228,7 @@ DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y)
     DFBResult ret;
     int cx, cy;
 
-    SDL_DFB_CHECKERR(windata->window->GetPosition(windata->window, &cx, &cy));
+    SDL_DFB_CHECKERR(windata->dfbwin->GetPosition(windata->dfbwin, &cx, &cy));
     SDL_DFB_CHECKERR(dispdata->layer->WarpCursor(dispdata->layer,
                                                  cx + x + windata->client.x,
                                                  cy + y + windata->client.y));
@@ -253,7 +257,6 @@ DirectFB_InitMouse(_THIS)
 void
 DirectFB_QuitMouse(_THIS)
 {
-    //SDL_DFB_DEVICEDATA(_this);
 }
 
 

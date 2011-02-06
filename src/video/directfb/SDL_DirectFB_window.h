@@ -18,12 +18,15 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
 
 #ifndef _SDL_directfb_window_h
 #define _SDL_directfb_window_h
 
+#include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_WM.h"
 
 #define SDL_DFB_WINDOWDATA(win)  DFB_WindowData *windata = ((win) ? (DFB_WindowData *) ((win)->driverdata) : NULL)
@@ -31,22 +34,28 @@
 typedef struct _DFB_WindowData DFB_WindowData;
 struct _DFB_WindowData
 {
-    IDirectFBSurface *surface;
-    IDirectFBSurface *window_surface;   /* only used with has_own_wm */
-    IDirectFBWindow *window;
-    IDirectFBEventBuffer *eventbuffer;
-    SDL_Window *sdl_window;
-    DFB_WindowData *next;
-    Uint8 opacity;
-    DFBRectangle client;
-    DFBDimension size;
+    IDirectFBSurface 		*window_surface;	/* window surface */
+    IDirectFBSurface 		*surface;			/* client drawing surface */
+    IDirectFBWindow 		*dfbwin;
+    IDirectFBEventBuffer 	*eventbuffer;
+    //SDL_Window 				*sdlwin;
+    SDL_Window	 			*next;
+    Uint8 					opacity;
+    DFBRectangle 			client;
+    DFBDimension 			size;
+    DFBRectangle 			restore;
+
     /* WM extras */
-    DFBRectangle restore;
-    int is_managed;
-    int wm_needs_redraw;
-    IDirectFBSurface *icon;
-    IDirectFBFont *font;
-    DFB_Theme theme;
+    int 					is_managed;
+    int 					wm_needs_redraw;
+    IDirectFBSurface 		*icon;
+    IDirectFBFont 			*font;
+    DFB_Theme 				theme;
+
+    /* WM moving and sizing */
+    int 					wm_grab;
+    int 					wm_lastx;
+    int 					wm_lasty;
 };
 
 extern int DirectFB_CreateWindow(_THIS, SDL_Window * window);
@@ -69,7 +78,7 @@ extern void DirectFB_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
                                          struct SDL_SysWMinfo *info);
 
-//extern void DirectFB_AdjustWindowSurface(_THIS, SDL_Window * window);
+extern void DirectFB_AdjustWindowSurface(SDL_Window * window);
 
 #endif /* _SDL_directfb_window_h */
 

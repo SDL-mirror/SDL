@@ -1312,8 +1312,7 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
         video_directfb=no
 
         DIRECTFB_REQUIRED_VERSION=1.0.0
-
-        AC_PATH_PROG(DIRECTFBCONFIG, directfb-config, no)
+        AC_PATH_PROGS(DIRECTFBCONFIG, directfb-config, no, [$prefix/bin:$PATH])
         if test x$DIRECTFBCONFIG = xno; then
             AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
             if test x$PKG_CONFIG != xno; then
@@ -1353,13 +1352,15 @@ AC_HELP_STRING([--enable-directfb-shared], [dynamically load directfb support [[
                               , enable_directfb_shared=yes)
 
             AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB)
+            AC_DEFINE(SDL_VIDEO_RENDER_DIRECTFB)
             SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $DIRECTFB_CFLAGS"
 
             AC_MSG_CHECKING(for directfb dynamic loading support)
             directfb_shared=no
-            directfb_lib=[`find_lib "libdirectfb.so.*" "$DIRECTFB_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
-
+            directfb_lib=[`find_lib "libdirectfb.so.*" "$DIRECTFB_LIBS"`]
+            # | sed 's/.*\/\(.*\)/\1/; q'`]
+AC_MSG_WARN("directfb $directfb_lib")
             if test x$have_loadso != xyes && \
                test x$enable_directfb_shared = xyes; then
                 AC_MSG_WARN([You must have SDL_LoadObject() support for dynamic directfb loading])

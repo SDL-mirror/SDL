@@ -13,15 +13,25 @@
     Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with _this library; if not, write to the Free Software
+    License along with this library; if not, write to the Free Software
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
 
 #include "SDL_DirectFB_video.h"
+
+#if SDL_DIRECTFB_OPENGL
+#include "SDL_DirectFB_opengl.h"
+#include "SDL_DirectFB_window.h"
+
+#include <directfbgl.h>
+#include "SDL_loadso.h"
+#endif
 
 #if SDL_DIRECTFB_OPENGL
 
@@ -177,7 +187,7 @@ DirectFB_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_DFB_WINDOWDATA(window);
     DirectFB_GLContext *context;
 
-    SDL_DFB_CALLOC(context, 1, sizeof(DirectFB_GLContext));
+    SDL_DFB_ALLOC_CLEAR(context, sizeof(DirectFB_GLContext));
 
     SDL_DFB_CHECKERR(windata->surface->GetGL(windata->surface,
                                              &context->context));

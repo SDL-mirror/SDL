@@ -18,13 +18,19 @@
 
     Sam Lantinga
     slouken@libsdl.org
-*/
-#include "SDL_config.h"
 
-#include "SDL_DirectFB_video.h"
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
+*/
+
+#ifndef _SDL_DirectFB_events_h
+#define _SDL_DirectFB_events_h
+
+#include "../SDL_sysvideo.h"
 
 /* Functions to be exported */
 extern void DirectFB_InitKeyboard(_THIS);
 extern void DirectFB_QuitKeyboard(_THIS);
 extern void DirectFB_PumpEventsWindow(_THIS);
-extern SDLKey DirectFB_GetLayoutKey(_THIS, SDLKey physicalKey);
+
+#endif

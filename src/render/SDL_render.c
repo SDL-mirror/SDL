@@ -53,6 +53,9 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_OGL_ES
     &GL_ES_RenderDriver,
 #endif
+#if SDL_VIDEO_RENDER_DIRECTFB
+    &DirectFB_RenderDriver,
+#endif
     &SW_RenderDriver
 };
 static char renderer_magic;

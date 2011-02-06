@@ -18,19 +18,24 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
 
 #ifndef _SDL_DirectFB_mouse_h
 #define _SDL_DirectFB_mouse_h
 
-typedef struct _DFB_CursorData DFB_CursorData;
+#include <directfb.h>
 
+#include "../SDL_sysvideo.h"
+
+typedef struct _DFB_CursorData DFB_CursorData;
 struct _DFB_CursorData
 {
     IDirectFBSurface *surf;
-    int hotx;
-    int hoty;
+    int 			hotx;
+    int 			hoty;
 };
 
 #define SDL_DFB_CURSORDATA(curs)  DFB_CursorData *curdata = (DFB_CursorData *) ((curs) ? (curs)->driverdata : NULL)

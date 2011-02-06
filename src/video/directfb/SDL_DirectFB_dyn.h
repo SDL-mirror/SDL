@@ -18,6 +18,9 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
 
 #ifndef _SDL_DirectFB_dyn_h
@@ -33,7 +36,6 @@
 	DFB_SYM(DFBResult, DirectFBCreate, (IDirectFB **interface), (interface), return) \
 	DFB_SYM(const char *, DirectFBCheckVersion, (unsigned int required_major, unsigned int required_minor, unsigned int required_micro), \
 				(required_major, required_minor, required_micro), return)
-// #define SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC "/usr/lib/libdirectfb-1.2.so.0"
 
 int SDL_DirectFB_LoadLibrary(void);
 void SDL_DirectFB_UnLoadLibrary(void);

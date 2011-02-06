@@ -18,23 +18,29 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
+
 
 #ifndef _SDL_directfb_opengl_h
 #define _SDL_directfb_opengl_h
 
+#include "SDL_DirectFB_video.h"
+
 #if SDL_DIRECTFB_OPENGL
+
 #include "SDL_opengl.h"
 
 typedef struct _DirectFB_GLContext DirectFB_GLContext;
 struct _DirectFB_GLContext
 {
-    IDirectFBGL *context;
-    DirectFB_GLContext *next;
+    IDirectFBGL 		*context;
+    DirectFB_GLContext 	*next;
     
-    SDL_Window *sdl_window;
-    int is_locked;
+    SDL_Window 			*sdl_window;
+    int 				is_locked;
 };
 
 /* OpenGL functions */

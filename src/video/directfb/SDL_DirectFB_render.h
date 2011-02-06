@@ -18,13 +18,12 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
+
 
 /* SDL surface based renderer implementation */
-
-#define SDL_DFB_RENDERERDATA(rend) DirectFB_RenderData *renddata = ((rend) ? (DirectFB_RenderData *) (rend)->driverdata : NULL)
-
-extern void DirectFB_AddRenderDriver(_THIS);
 
 /* vi: set ts=4 sw=4 expandtab: */

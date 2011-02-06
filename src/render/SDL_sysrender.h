@@ -127,6 +127,9 @@ extern SDL_RenderDriver GL_RenderDriver;
 #if SDL_VIDEO_RENDER_OGL_ES
 extern SDL_RenderDriver GL_ES_RenderDriver;
 #endif
+#if SDL_VIDEO_RENDER_DIRECTFB
+extern SDL_RenderDriver DirectFB_RenderDriver;
+#endif
 extern SDL_RenderDriver SW_RenderDriver;
 
 #endif /* _SDL_sysrender_h */

@@ -18,32 +18,36 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
 
 #ifndef _SDL_directfb_modes_h
 #define _SDL_directfb_modes_h
 
-#include "SDL_DirectFB_video.h"
+#include <directfb.h>
 
-#define SDL_DFB_DISPLAYDATA(dev, win)  DFB_DisplayData *dispdata = ((win && dev) ? (DFB_DisplayData *) (win)->display->driverdata : NULL)
+#include "../SDL_sysvideo.h"
+
+#define SDL_DFB_DISPLAYDATA(win)  DFB_DisplayData *dispdata = ((win) ? (DFB_DisplayData *) (win)->display->driverdata : NULL)
 
 typedef struct _DFB_DisplayData DFB_DisplayData;
 struct _DFB_DisplayData
 {
-    IDirectFBDisplayLayer *layer;
-    DFBSurfacePixelFormat pixelformat;
+    IDirectFBDisplayLayer 	*layer;
+    DFBSurfacePixelFormat 	pixelformat;
     /* FIXME: support for multiple video layer. 
      * However, I do not know any card supporting 
      * more than one
      */
-    DFBDisplayLayerID vidID;
-    IDirectFBDisplayLayer *vidlayer;
+    DFBDisplayLayerID 		vidID;
+    IDirectFBDisplayLayer 	*vidlayer;
 
-    int vidIDinuse;
+    int 					vidIDinuse;
 
-    int cw;
-    int ch;
+    int 					cw;
+    int 					ch;
 };
 
 
@@ -51,6 +55,8 @@ extern void DirectFB_InitModes(_THIS);
 extern void DirectFB_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
 extern int DirectFB_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void DirectFB_QuitModes(_THIS);
+
+extern void DirectFB_SetContext(_THIS, SDL_Window *window);
 
 #endif /* _SDL_directfb_modes_h */
 

@@ -18,11 +18,15 @@
 
     Sam Lantinga
     slouken@libsdl.org
+
+    SDL1.3 DirectFB driver by couriersud@arcor.de
+	
 */
-#include "SDL_config.h"
 
 #ifndef _SDL_directfb_wm_h
 #define _SDL_directfb_wm_h
+
+#include "SDL_DirectFB_video.h"
 
 typedef struct _DFB_Theme DFB_Theme;
 struct _DFB_Theme
@@ -42,8 +46,6 @@ struct _DFB_Theme
 };
 
 extern void DirectFB_WM_AdjustWindowLayout(SDL_Window * window, int flags, int w, int h);
-extern void DirectFB_WM_MaximizeWindow(_THIS, SDL_Window * window);
-extern void DirectFB_WM_RestoreWindow(_THIS, SDL_Window * window);
 extern void DirectFB_WM_RedrawLayout(_THIS, SDL_Window * window);
 
 extern int DirectFB_WM_ProcessEvent(_THIS, SDL_Window * window,

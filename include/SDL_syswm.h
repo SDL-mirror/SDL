@@ -77,7 +77,7 @@ struct SDL_SysWMinfo;
 #endif /* defined(SDL_VIDEO_DRIVER_X11) */
 
 #if defined(SDL_VIDEO_DRIVER_DIRECTFB)
-#include <directfb/directfb.h>
+#include <directfb.h>
 #endif
 
 #if defined(SDL_VIDEO_DRIVER_COCOA)
