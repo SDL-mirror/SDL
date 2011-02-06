@@ -124,11 +124,11 @@ extern SDL_RenderDriver D3D_RenderDriver;
 #if SDL_VIDEO_RENDER_OGL
 extern SDL_RenderDriver GL_RenderDriver;
 #endif
-#if SDL_VIDEO_RENDER_OGL_ES
-extern SDL_RenderDriver GLES_RenderDriver;
-#endif
 #if SDL_VIDEO_RENDER_OGL_ES2
 extern SDL_RenderDriver GLES2_RenderDriver;
+#endif
+#if SDL_VIDEO_RENDER_OGL_ES
+extern SDL_RenderDriver GLES_RenderDriver;
 #endif
 #if SDL_VIDEO_RENDER_DIRECTFB
 extern SDL_RenderDriver DirectFB_RenderDriver;

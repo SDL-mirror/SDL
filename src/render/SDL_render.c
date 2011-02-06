@@ -50,11 +50,11 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_OGL
     &GL_RenderDriver,
 #endif
-#if SDL_VIDEO_RENDER_OGL_ES
-    &GLES_RenderDriver,
-#endif
 #if SDL_VIDEO_RENDER_OGL_ES2
     &GLES2_RenderDriver,
+#endif
+#if SDL_VIDEO_RENDER_OGL_ES
+    &GLES_RenderDriver,
 #endif
 #if SDL_VIDEO_RENDER_DIRECTFB
     &DirectFB_RenderDriver,

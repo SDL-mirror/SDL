@@ -185,24 +185,29 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
     GLES2_ProgramCacheEntry *entry;
     GLES2_ProgramCacheEntry *next;
 
-    GLES2_ActivateRenderer(renderer);
-
     /* Deallocate everything */
-    entry = rdata->program_cache.head;
-    while (entry)
-    {
-        glDeleteShader(entry->vertex_shader->id);
-        glDeleteShader(entry->fragment_shader->id);
-        SDL_free(entry->vertex_shader);
-        SDL_free(entry->fragment_shader);
-        glDeleteProgram(entry->id);
-        next = entry->next;
-        SDL_free(entry);
-        entry = next;
+    if (rdata) {
+        GLES2_ActivateRenderer(renderer);
+
+        entry = rdata->program_cache.head;
+        while (entry) {
+            glDeleteShader(entry->vertex_shader->id);
+            glDeleteShader(entry->fragment_shader->id);
+            SDL_free(entry->vertex_shader);
+            SDL_free(entry->fragment_shader);
+            glDeleteProgram(entry->id);
+            next = entry->next;
+            SDL_free(entry);
+            entry = next;
+        }
+        if (rdata->context) {
+            SDL_GL_DeleteContext(rdata->context);
+        }
+        if (rdata->shader_formats) {
+            SDL_free(rdata->shader_formats);
+        }
+        SDL_free(rdata);
     }
-    SDL_GL_DeleteContext(rdata->context);
-    SDL_free(rdata->shader_formats);
-    SDL_free(renderer->driverdata);
     SDL_free(renderer);
 }
 
@@ -1081,12 +1086,15 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 
     /* Create the renderer struct */
     renderer = (SDL_Renderer *)SDL_calloc(1, sizeof(SDL_Renderer));
-    rdata = (GLES2_DriverContext *)SDL_calloc(1, sizeof(GLES2_DriverContext));
-    if (!renderer)
-    {
+    if (!renderer) {
         SDL_OutOfMemory();
-        SDL_free(renderer);
-        SDL_free(rdata);
+        return NULL;
+    }
+
+    rdata = (GLES2_DriverContext *)SDL_calloc(1, sizeof(GLES2_DriverContext));
+    if (!rdata) {
+        GLES2_DestroyRenderer(renderer);
+        SDL_OutOfMemory();
         return NULL;
     }
     renderer->info = GLES2_RenderDriver.info;
@@ -1095,17 +1103,18 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
-    /* Create the GL context */
+    /* Create an OpenGL ES 2.0 context */
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
     rdata->context = SDL_GL_CreateContext(window);
     if (!rdata->context)
     {
-        SDL_free(renderer);
-        SDL_free(rdata);
+        GLES2_DestroyRenderer(renderer);
         return NULL;
     }
     if (SDL_GL_MakeCurrent(window, rdata->context) < 0) {
-        SDL_free(renderer);
-        SDL_free(rdata);
+        GLES2_DestroyRenderer(renderer);
         return NULL;
     }
 
@@ -1132,9 +1141,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     rdata->shader_formats = (GLenum *)SDL_calloc(nFormats, sizeof(GLenum));
     if (!rdata->shader_formats)
     {
+        GLES2_DestroyRenderer(renderer);
         SDL_OutOfMemory();
-        SDL_free(renderer);
-        SDL_free(rdata);
         return NULL;
     }
     rdata->shader_format_count = nFormats;
@@ -1144,10 +1152,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     glGetIntegerv(GL_SHADER_BINARY_FORMATS, (GLint *)rdata->shader_formats);
     if (glGetError() != GL_NO_ERROR)
     {
+        GLES2_DestroyRenderer(renderer);
         SDL_SetError("Failed to query supported shader formats");
-        SDL_free(renderer);
-        SDL_free(rdata->shader_formats);
-        SDL_free(rdata);
         return NULL;
     }
     if (hasCompiler)

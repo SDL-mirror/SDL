@@ -113,7 +113,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     gBits: _this->gl_config.green_size \
                                     bBits: _this->gl_config.blue_size \
                                     aBits: _this->gl_config.alpha_size \
-                                    depthBits: _this->gl_config.depth_size];
+                                    depthBits: _this->gl_config.depth_size \
+                                    majorVersion: _this->gl_config.major_version];
     
     data->view = view;
     

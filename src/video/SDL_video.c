@@ -30,13 +30,17 @@
 #include "SDL_pixels_c.h"
 #include "../events/SDL_events_c.h"
 
+#if SDL_VIDEO_OPENGL
+#include "SDL_opengl.h"
+#endif /* SDL_VIDEO_OPENGL */
+
 #if SDL_VIDEO_OPENGL_ES
 #include "SDL_opengles.h"
 #endif /* SDL_VIDEO_OPENGL_ES */
 
-#if SDL_VIDEO_OPENGL
-#include "SDL_opengl.h"
-#endif /* SDL_VIDEO_OPENGL */
+#if SDL_VIDEO_OPENGL_ES2
+#include "SDL_opengles2.h"
+#endif /* SDL_VIDEO_OPENGL_ES2 */
 
 #include "SDL_syswm.h"
 
@@ -481,8 +485,16 @@ SDL_VideoInit(const char *driver_name)
     _this->gl_config.multisamplesamples = 0;
     _this->gl_config.retained_backing = 1;
     _this->gl_config.accelerated = -1;  /* accelerated or not, both are fine */
+#if SDL_VIDEO_OPENGL
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 1;
+#elif SDL_VIDEO_OPENGL_ES2
+    _this->gl_config.major_version = 2;
+    _this->gl_config.minor_version = 0;
+#elif SDL_VIDEO_OPENGL_ES
+    _this->gl_config.major_version = 1;
+    _this->gl_config.minor_version = 1;
+#endif
 
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
@@ -1897,7 +1909,7 @@ SDL_GL_UnloadLibrary(void)
 SDL_bool
 SDL_GL_ExtensionSupported(const char *extension)
 {
-#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     const GLubyte *(APIENTRY * glGetStringFunc) (GLenum);
     const char *extensions;
     const char *start;
@@ -1951,7 +1963,7 @@ SDL_GL_ExtensionSupported(const char *extension)
 int
 SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 {
-#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     int retval;
 
     if (!_this) {
@@ -2032,7 +2044,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 int
 SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 {
-#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
     GLenum(APIENTRY * glGetErrorFunc) (void);
     GLenum attrib = 0;
@@ -2068,7 +2080,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         attrib = GL_ALPHA_BITS;
         break;
     case SDL_GL_DOUBLEBUFFER:
-#ifndef SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL
         attrib = GL_DOUBLEBUFFER;
         break;
 #else
@@ -2084,7 +2096,7 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_STENCIL_SIZE:
         attrib = GL_STENCIL_BITS;
         break;
-#ifndef SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL
     case SDL_GL_ACCUM_RED_SIZE:
         attrib = GL_ACCUM_RED_BITS;
         break;
@@ -2111,14 +2123,14 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         return 0;
 #endif
     case SDL_GL_MULTISAMPLEBUFFERS:
-#ifndef SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL
         attrib = GL_SAMPLE_BUFFERS_ARB;
 #else
         attrib = GL_SAMPLE_BUFFERS;
 #endif
         break;
     case SDL_GL_MULTISAMPLESAMPLES:
-#ifndef SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL
         attrib = GL_SAMPLES_ARB;
 #else
         attrib = GL_SAMPLES;

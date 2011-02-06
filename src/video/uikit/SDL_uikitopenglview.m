@@ -47,6 +47,7 @@
       bBits:(int)bBits \
       aBits:(int)aBits \
       depthBits:(int)depthBits \
+      majorVersion:(int)majorVersion \
 {
     NSString *colorFormat=nil;
     GLuint depthBufferFormat;
@@ -86,8 +87,11 @@
         eaglLayer.drawableProperties = [NSDictionary dictionaryWithObjectsAndKeys:
                                         [NSNumber numberWithBool: retained], kEAGLDrawablePropertyRetainedBacking, colorFormat, kEAGLDrawablePropertyColorFormat, nil];
         
-        context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1];
-        
+        if (majorVersion > 1) {
+            context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES2];
+        } else {
+            context = [[EAGLContext alloc] initWithAPI: kEAGLRenderingAPIOpenGLES1];
+        }
         if (!context || ![EAGLContext setCurrentContext:context]) {
             [self release];
             return nil;

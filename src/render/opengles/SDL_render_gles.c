@@ -184,6 +184,9 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
     data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
         GLES_DestroyRenderer(renderer);
