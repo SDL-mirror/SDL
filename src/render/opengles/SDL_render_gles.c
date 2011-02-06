@@ -71,7 +71,7 @@ static void GLES_DestroyTexture(SDL_Renderer * renderer,
 static void GLES_DestroyRenderer(SDL_Renderer * renderer);
 
 
-SDL_RenderDriver GL_ES_RenderDriver = {
+SDL_RenderDriver GLES_RenderDriver = {
     GLES_CreateRenderer,
     {
      "opengl_es",
@@ -201,7 +201,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderPresent = GLES_RenderPresent;
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
-    renderer->info = GL_ES_RenderDriver.info;
+    renderer->info = GLES_RenderDriver.info;
     renderer->driverdata = data;
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -265,7 +265,6 @@ static SDL_GLContext SDL_CurrentContext = NULL;
 static int
 GLES_ActivateRenderer(SDL_Renderer * renderer)
 {
-
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
 
@@ -390,13 +389,6 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     return 0;
 }
 
-static void
-SetupTextureUpdate(GLES_RenderData * renderdata, SDL_Texture * texture,
-                   int pitch)
-{
-    renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-}
-
 static int
 GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                    const SDL_Rect * rect, const void *pixels, int pitch)
@@ -412,7 +404,7 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GLES_ActivateRenderer(renderer);
 
     renderdata->glGetError();
-    SetupTextureUpdate(renderdata, texture, pitch);
+    renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
 
@@ -467,7 +459,7 @@ GLES_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     GLES_ActivateRenderer(renderer);
 
-    SetupTextureUpdate(renderdata, texture, data->pitch);
+    renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexSubImage2D(data->type, 0, 0, 0, texture->w,
