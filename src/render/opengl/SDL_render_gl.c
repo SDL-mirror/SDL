@@ -88,7 +88,7 @@ typedef struct
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
-#include "../../video/SDL_glfuncs.h"
+#include "SDL_glfuncs.h"
 #undef SDL_PROC
 
     void (*glTextureRangeAPPLE) (GLenum target, GLsizei length,
@@ -161,7 +161,7 @@ GL_LoadFunctions(GL_RenderData * data)
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
 
-#include "../../video/SDL_glfuncs.h"
+#include "SDL_glfuncs.h"
 #undef SDL_PROC
     return 0;
 }
@@ -213,11 +213,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
-    if (GL_LoadFunctions(data) < 0) {
-        GL_DestroyRenderer(renderer);
-        return NULL;
-    }
-
     data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
         GL_DestroyRenderer(renderer);
@@ -227,6 +222,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         GL_DestroyRenderer(renderer);
         return NULL;
     }
+
+    if (GL_LoadFunctions(data) < 0) {
+        GL_DestroyRenderer(renderer);
+        return NULL;
+    }
+
 #ifdef __MACOSX__
     /* Enable multi-threaded rendering */
     /* Disabled until Ryan finishes his VBO/PBO code...

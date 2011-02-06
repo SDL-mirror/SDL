@@ -25,13 +25,7 @@
 
 #if SDL_VIDEO_RENDER_OGL_ES2
 
-#ifdef __IPHONEOS__
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#else
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#endif
+#include "SDL_opengles2.h"
 #include "../SDL_sysrender.h"
 #include "SDL_shaders_gles2.h"
 
@@ -1097,6 +1091,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->info = GLES2_RenderDriver.info;
     renderer->window = window;
     renderer->driverdata = rdata;
+
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
     /* Create the GL context */
     rdata->context = SDL_GL_CreateContext(window);

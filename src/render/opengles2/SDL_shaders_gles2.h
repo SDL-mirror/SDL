@@ -28,12 +28,6 @@
 #ifndef SDL_shaderdata_h_
 #define SDL_shaderdata_h_
 
-#ifdef __IPHONEOS__
-#include <OpenGLES/ES2/gl.h>
-#else
-#include <GLES2/gl2.h>
-#endif
-
 typedef struct GLES2_ShaderInstance
 {
     GLenum type;

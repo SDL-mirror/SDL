@@ -65,6 +65,7 @@
 		0402A85812FE70C600CECEE3 /* SDL_render_gles2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0402A85512FE70C600CECEE3 /* SDL_render_gles2.c */; };
 		0402A85912FE70C600CECEE3 /* SDL_shaders_gles2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0402A85612FE70C600CECEE3 /* SDL_shaders_gles2.c */; };
 		0402A85A12FE70C600CECEE3 /* SDL_shaders_gles2.h in Headers */ = {isa = PBXBuildFile; fileRef = 0402A85712FE70C600CECEE3 /* SDL_shaders_gles2.h */; };
+		04043B8D12FEA9350076DB1F /* SDL_opengles2.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043B8C12FEA9350076DB1F /* SDL_opengles2.h */; };
 		041B2CD912FA0E9E0087D585 /* SDL_render.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2CD812FA0E9E0087D585 /* SDL_render.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		041B2CF112FA0F680087D585 /* SDL_render.c in Sources */ = {isa = PBXBuildFile; fileRef = 041B2CEA12FA0F680087D585 /* SDL_render.c */; };
 		041B2CF212FA0F680087D585 /* SDL_sysrender.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2CEB12FA0F680087D585 /* SDL_sysrender.h */; };
@@ -89,8 +90,6 @@
 		047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 047677B90EA76A31008ABAF1 /* SDL_haptic.c */; };
 		047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */ = {isa = PBXBuildFile; fileRef = 047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */; };
 		047AF1B30EA98D6C00811173 /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */; };
-		0495E68A0E97408800152DFE /* SDL_glesfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6840E97408800152DFE /* SDL_glesfuncs.h */; };
-		0495E68B0E97408800152DFE /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 0495E6850E97408800152DFE /* SDL_glfuncs.h */; };
 		04B2ECEC1025CE4800F9BC5F /* SDL_atomic.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ECE61025CE4800F9BC5F /* SDL_atomic.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04B2ECED1025CE4800F9BC5F /* SDL_power.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ECE71025CE4800F9BC5F /* SDL_power.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		04B2ECEE1025CE4800F9BC5F /* SDL_revision.h in Headers */ = {isa = PBXBuildFile; fileRef = 04B2ECE81025CE4800F9BC5F /* SDL_revision.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -330,6 +329,7 @@
 		0402A85512FE70C600CECEE3 /* SDL_render_gles2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render_gles2.c; sourceTree = "<group>"; };
 		0402A85612FE70C600CECEE3 /* SDL_shaders_gles2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_shaders_gles2.c; sourceTree = "<group>"; };
 		0402A85712FE70C600CECEE3 /* SDL_shaders_gles2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_shaders_gles2.h; sourceTree = "<group>"; };
+		04043B8C12FEA9350076DB1F /* SDL_opengles2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_opengles2.h; path = ../../include/SDL_opengles2.h; sourceTree = SOURCE_ROOT; };
 		041B2CD812FA0E9E0087D585 /* SDL_render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_render.h; path = ../../include/SDL_render.h; sourceTree = SOURCE_ROOT; };
 		041B2CEA12FA0F680087D585 /* SDL_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render.c; sourceTree = "<group>"; };
 		041B2CEB12FA0F680087D585 /* SDL_sysrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysrender.h; sourceTree = "<group>"; };
@@ -354,8 +354,6 @@
 		047677B90EA76A31008ABAF1 /* SDL_haptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_haptic.c; path = ../../src/haptic/SDL_haptic.c; sourceTree = SOURCE_ROOT; };
 		047677BA0EA76A31008ABAF1 /* SDL_syshaptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_syshaptic.h; path = ../../src/haptic/SDL_syshaptic.h; sourceTree = SOURCE_ROOT; };
 		047AF1B20EA98D6C00811173 /* SDL_sysloadso.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_sysloadso.c; sourceTree = "<group>"; };
-		0495E6840E97408800152DFE /* SDL_glesfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glesfuncs.h; sourceTree = "<group>"; };
-		0495E6850E97408800152DFE /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		04B2ECE61025CE4800F9BC5F /* SDL_atomic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_atomic.h; path = ../../include/SDL_atomic.h; sourceTree = SOURCE_ROOT; };
 		04B2ECE71025CE4800F9BC5F /* SDL_power.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_power.h; path = ../../include/SDL_power.h; sourceTree = SOURCE_ROOT; };
 		04B2ECE81025CE4800F9BC5F /* SDL_revision.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_revision.h; path = ../../include/SDL_revision.h; sourceTree = SOURCE_ROOT; };
@@ -941,6 +939,7 @@
 				FD99B8E50DD52EB400FB1D6B /* SDL_name.h */,
 				FD99B8E60DD52EB400FB1D6B /* SDL_opengl.h */,
 				FD8BD7AB0E27DCA400B52CD5 /* SDL_opengles.h */,
+				04043B8C12FEA9350076DB1F /* SDL_opengles2.h */,
 				FD99B8E70DD52EB400FB1D6B /* SDL_pixels.h */,
 				FD99B8E80DD52EB400FB1D6B /* SDL_platform.h */,
 				04B2ECE71025CE4800F9BC5F /* SDL_power.h */,
@@ -1124,8 +1123,6 @@
 			children = (
 				FD689F090E26E5D900F90B21 /* uikit */,
 				FDA685F40DF244C800F98A1A /* dummy */,
-				0495E6850E97408800152DFE /* SDL_glfuncs.h */,
-				0495E6840E97408800152DFE /* SDL_glesfuncs.h */,
 				FDA683000DF2374E00F98A1A /* SDL_blit.c */,
 				FDA683010DF2374E00F98A1A /* SDL_blit.h */,
 				FDA683020DF2374E00F98A1A /* SDL_blit_0.c */,
@@ -1232,8 +1229,6 @@
 				FD8BD7AC0E27DCA400B52CD5 /* SDL_opengles.h in Headers */,
 				FDC656490E560DF800311C8E /* jumphack.h in Headers */,
 				FD24846D0E5655AE0021E198 /* SDL_uikitkeyboard.h in Headers */,
-				0495E68A0E97408800152DFE /* SDL_glesfuncs.h in Headers */,
-				0495E68B0E97408800152DFE /* SDL_glfuncs.h in Headers */,
 				047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
 				04461DEE0EA76BA3006C462D /* SDL_haptic.h in Headers */,
 				046387420F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */,
@@ -1267,6 +1262,7 @@
 				0442EC4B12FE1BFF004C9285 /* SDL_hints.h in Headers */,
 				0442EC5012FE1C1E004C9285 /* SDL_render_sw_c.h in Headers */,
 				0402A85A12FE70C600CECEE3 /* SDL_shaders_gles2.h in Headers */,
+				04043B8D12FEA9350076DB1F /* SDL_opengles2.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

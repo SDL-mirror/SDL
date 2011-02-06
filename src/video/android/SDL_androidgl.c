@@ -56,7 +56,7 @@ SDL_GLContext
 Android_GL_CreateContext(_THIS, SDL_Window * window)
 {
     Android_JNI_CreateContext();
-    return 1;
+    return (SDL_GLContext)1;
 }
 
 int

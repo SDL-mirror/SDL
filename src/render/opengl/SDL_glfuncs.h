@@ -3,6 +3,7 @@
    change it's entry from SDL_PROC_UNUSED to SDL_PROC and rebuild.
 */
 #define SDL_PROC_UNUSED(ret,func,params)
+
 SDL_PROC_UNUSED(void, glAccum, (GLenum, GLfloat))
 SDL_PROC_UNUSED(void, glAlphaFunc, (GLenum, GLclampf))
 SDL_PROC_UNUSED(GLboolean, glAreTexturesResident,
