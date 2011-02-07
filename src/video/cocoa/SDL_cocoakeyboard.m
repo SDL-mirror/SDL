@@ -490,7 +490,7 @@ UpdateKeymap(SDL_VideoData *data)
     const void *chr_data;
     int i;
     SDL_Scancode scancode;
-    SDL_Key keymap[SDL_NUM_SCANCODES];
+    SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
     /* See if the keymap needs to be updated */
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_5

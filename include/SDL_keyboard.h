@@ -48,7 +48,7 @@ extern "C" {
 typedef struct SDL_Keysym
 {
     SDL_Scancode scancode;      /**< SDL physical key code - see ::SDL_Scancode for details */
-    SDL_Key sym;                /**< SDL virtual key code - see ::SDL_Key for details */
+    SDL_Keycode sym;            /**< SDL virtual key code - see ::SDL_Keycode for details */
     Uint16 mod;                 /**< current key modifiers */
     Uint32 unicode;             /**< \deprecated use SDL_TextInputEvent instead */
 } SDL_Keysym;
@@ -80,24 +80,24 @@ extern DECLSPEC Uint8 *SDLCALL SDL_GetKeyboardState(int *numkeys);
 /**
  *  \brief Get the current key modifier state for the keyboard.
  */
-extern DECLSPEC SDL_Mod SDLCALL SDL_GetModState(void);
+extern DECLSPEC SDL_Keymod SDLCALL SDL_GetModState(void);
 
 /**
  *  \brief Set the current key modifier state for the keyboard.
  *  
  *  \note This does not change the keyboard state, only the key modifier flags.
  */
-extern DECLSPEC void SDLCALL SDL_SetModState(SDL_Mod modstate);
+extern DECLSPEC void SDLCALL SDL_SetModState(SDL_Keymod modstate);
 
 /**
  *  \brief Get the key code corresponding to the given scancode according
  *         to the current keyboard layout.
  *  
- *  See ::SDL_Key for details.
+ *  See ::SDL_Keycode for details.
  *  
  *  \sa SDL_GetKeyName()
  */
-extern DECLSPEC SDL_Key SDLCALL SDL_GetKeyFromScancode(SDL_Scancode scancode);
+extern DECLSPEC SDL_Keycode SDLCALL SDL_GetKeyFromScancode(SDL_Scancode scancode);
 
 /**
  *  \brief Get the scancode corresponding to the given key code according to the
@@ -107,7 +107,7 @@ extern DECLSPEC SDL_Key SDLCALL SDL_GetKeyFromScancode(SDL_Scancode scancode);
  *  
  *  \sa SDL_GetScancodeName()
  */
-extern DECLSPEC SDL_Scancode SDLCALL SDL_GetScancodeFromKey(SDL_Key key);
+extern DECLSPEC SDL_Scancode SDLCALL SDL_GetScancodeFromKey(SDL_Keycode key);
 
 /**
  *  \brief Get a human-readable name for a scancode.
@@ -132,7 +132,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_Scancode
  *  
  *  \sa SDL_Key
  */
-extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDL_Key key);
+extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDL_Keycode key);
 
 /**
  *  \brief Start accepting Unicode text input events.
