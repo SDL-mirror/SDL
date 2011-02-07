@@ -389,35 +389,13 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
                     tdata->pixel_format,
                     tdata->pixel_type,
                     src);
+    SDL_free(blob);
+
     if (glGetError() != GL_NO_ERROR)
     {
         SDL_SetError("Failed to update texture");
         return -1;
     }
-
-    /* Update the (streaming) texture buffer, in one pass if possible */
-    if (tdata->pixel_data)
-    {
-        dest = (Uint8 *)tdata->pixel_data +
-               (tdata->pitch * rect->y) +
-               (SDL_BYTESPERPIXEL(texture->format) * rect->x);
-        if (rect->w == texture->w)
-        {
-            SDL_memcpy(dest, src, srcPitch * rect->h);
-        }
-        else
-        {
-            for (y = 0; y < rect->h; ++y)
-            {
-                SDL_memcpy(dest, src, srcPitch);
-                src += srcPitch;
-                dest += tdata->pitch;
-            }
-        }
-    }
-
-    /* Clean up and return */
-    SDL_free(blob);
     return 0;
 }
 

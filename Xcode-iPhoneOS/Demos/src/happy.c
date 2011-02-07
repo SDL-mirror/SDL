@@ -164,7 +164,7 @@ main(int argc, char *argv[])
         } else if (delay > MILLESECONDS_PER_FRAME) {
             delay = MILLESECONDS_PER_FRAME;
         }
-        //SDL_Delay(delay);
+        SDL_Delay(delay);
     }
 
     /* cleanup */
