@@ -139,8 +139,6 @@ main(int argc, char *argv[])
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
 
-    //SDL_SetHint(SDL_HINT_RENDER_DRIVER, "opengles2");
-	
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     initializeTexture(renderer);
@@ -166,7 +164,7 @@ main(int argc, char *argv[])
         } else if (delay > MILLESECONDS_PER_FRAME) {
             delay = MILLESECONDS_PER_FRAME;
         }
-        SDL_Delay(delay);
+        //SDL_Delay(delay);
     }
 
     /* cleanup */

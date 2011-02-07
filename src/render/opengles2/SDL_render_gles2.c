@@ -786,7 +786,6 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
 static int GLES2_RenderClear(SDL_Renderer *renderer);
 static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count);
 static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count);
-static int GLES2_RenderDrawRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count);
 static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count);
 static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
                             const SDL_Rect *dstrect);
@@ -1174,6 +1173,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     if (hasCompiler)
         rdata->shader_formats[nFormats - 1] = (GLenum)-1;
 #endif /* ZUNE_HD */
+	
+    rdata->updateSize = SDL_TRUE;
 
     /* Populate the function pointers for the module */
     renderer->WindowEvent         = &GLES2_WindowEvent;
