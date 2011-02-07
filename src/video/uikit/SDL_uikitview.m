@@ -267,10 +267,10 @@
             unichar c = [string characterAtIndex: i];
             
             Uint16 mod = 0;
-            SDL_ScanCode code;
+            SDL_Scancode code;
             
             if (c < 127) {
-                /* figure out the SDL_ScanCode and SDL_keymod for this unichar */
+                /* figure out the SDL_Scancode and SDL_keymod for this unichar */
                 code = unicharToUIKeyInfoTable[c].code;
                 mod  = unicharToUIKeyInfoTable[c].mod;
             }

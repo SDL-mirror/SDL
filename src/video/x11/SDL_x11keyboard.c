@@ -134,7 +134,7 @@ static const struct {
 
 static const struct
 {
-    const SDL_ScanCode const *table;
+    const SDL_Scancode const *table;
     int table_size;
 } scancode_set[] = {
     { darwin_scancode_table, SDL_arraysize(darwin_scancode_table) },
@@ -175,7 +175,7 @@ X11_InitKeyboard(_THIS)
     int i, j;
     int min_keycode, max_keycode;
     struct {
-        SDL_ScanCode scancode;
+        SDL_Scancode scancode;
         KeySym keysym;
         int value;
     } fingerprint[] = {
@@ -215,7 +215,7 @@ X11_InitKeyboard(_THIS)
             printf("Using scancode set %d, min_keycode = %d, max_keycode = %d, table_size = %d\n", i, min_keycode, max_keycode, scancode_set[i].table_size);
 #endif
             SDL_memcpy(&data->key_layout[min_keycode], scancode_set[i].table,
-                       sizeof(SDL_ScanCode) * scancode_set[i].table_size);
+                       sizeof(SDL_Scancode) * scancode_set[i].table_size);
             fingerprint_detected = SDL_TRUE;
             break;
         }
@@ -239,7 +239,7 @@ X11_InitKeyboard(_THIS)
                 key = X11_KeyCodeToSDLKey(data->display, i);
                 for (j = 0; j < SDL_arraysize(keymap); ++j) {
                     if (keymap[j] == key) {
-                        data->key_layout[i] = (SDL_ScanCode) j;
+                        data->key_layout[i] = (SDL_Scancode) j;
                         break;
                     }
                 }
@@ -264,7 +264,7 @@ X11_UpdateKeymap(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int i;
-    SDL_ScanCode scancode;
+    SDL_Scancode scancode;
     SDLKey keymap[SDL_NUM_SCANCODES];
 
     SDL_zero(keymap);

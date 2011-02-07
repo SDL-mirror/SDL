@@ -37,7 +37,7 @@ void Android_InitKeyboard()
     SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
 }
 
-static SDL_ScanCode Android_Keycodes[] = {
+static SDL_Scancode Android_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_UNKNOWN */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_SOFT_LEFT */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_SOFT_RIGHT */
@@ -151,10 +151,10 @@ static SDL_ScanCode Android_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_BUTTON_MODE */
 };
 
-static SDL_ScanCode
+static SDL_Scancode
 TranslateKeycode(int keycode)
 {
-    SDL_ScanCode scancode = SDL_SCANCODE_UNKNOWN;
+    SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
 
     if (keycode < SDL_arraysize(Android_Keycodes)) {
         scancode = Android_Keycodes[keycode];

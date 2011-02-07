@@ -26,7 +26,7 @@
    - Linux kernel source input.h
 */
 /* *INDENT-OFF* */
-static SDL_ScanCode const linux_scancode_table[] = {
+static SDL_Scancode const linux_scancode_table[] = {
     /*  0 */    SDL_SCANCODE_UNKNOWN,
     /*  1 */    SDL_SCANCODE_ESCAPE,
     /*  2 */    SDL_SCANCODE_1,

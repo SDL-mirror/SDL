@@ -26,7 +26,7 @@
    - atKeyNames.h from XFree86 source code
 */
 /* *INDENT-OFF* */
-static const SDL_ScanCode xfree86_scancode_table[] = {
+static const SDL_Scancode xfree86_scancode_table[] = {
     /*  0 */    SDL_SCANCODE_UNKNOWN,
     /*  1 */    SDL_SCANCODE_ESCAPE,
     /*  2 */    SDL_SCANCODE_1,
@@ -177,7 +177,7 @@ static const SDL_ScanCode xfree86_scancode_table[] = {
 };
 
 /* for wireless usb keyboard (manufacturer TRUST) without numpad. */
-static const SDL_ScanCode xfree86_scancode_table2[] = {
+static const SDL_Scancode xfree86_scancode_table2[] = {
     /*  0 */    SDL_SCANCODE_UNKNOWN,
     /*  1 */    SDL_SCANCODE_ESCAPE,
     /*  2 */    SDL_SCANCODE_1,

@@ -142,7 +142,7 @@ static inline DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int s
 typedef struct _DFB_KeyboardData DFB_KeyboardData;
 struct _DFB_KeyboardData
 {
-	const SDL_ScanCode	*map;		/* keyboard scancode map */
+	const SDL_Scancode	*map;		/* keyboard scancode map */
 	int				map_size;	/* size of map */
 	int				map_adjust; /* index adjust */
     int 			is_generic; /* generic keyboard */

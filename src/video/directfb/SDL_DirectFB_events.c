@@ -61,15 +61,15 @@ struct _cb_data
 };
 
 /* The translation tables from a DirectFB keycode to a SDL keysym */
-static SDL_ScanCode oskeymap[256];
+static SDL_Scancode oskeymap[256];
 
 
-static SDL_KeySym *DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt,
-                                         SDL_KeySym * keysym);
-static SDL_KeySym *DirectFB_TranslateKeyInputEvent(_THIS, DFBInputEvent * evt,
-                                                   SDL_KeySym * keysym);
+static SDL_Keysym *DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt,
+                                         SDL_Keysym * keysym);
+static SDL_Keysym *DirectFB_TranslateKeyInputEvent(_THIS, DFBInputEvent * evt,
+                                                   SDL_Keysym * keysym);
 
-static void DirectFB_InitOSKeymap(_THIS, SDL_ScanCode * keypmap, int numkeys);
+static void DirectFB_InitOSKeymap(_THIS, SDL_Scancode * keypmap, int numkeys);
 static int DirectFB_TranslateButton(DFBInputDeviceButtonIdentifier button);
 
 static void UnicodeToUtf8( Uint16 w , char *utf8buf)
@@ -176,7 +176,7 @@ ProcessWindowEvent(_THIS, SDL_Window *sdlwin, DFBWindowEvent * evt)
 {
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(sdlwin);
-    SDL_KeySym keysym;
+    SDL_Keysym keysym;
     char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
     if (evt->clazz == DFEC_WINDOW) {
@@ -308,7 +308,7 @@ static void
 ProcessInputEvent(_THIS, DFBInputEvent * ievt)
 {
     SDL_DFB_DEVICEDATA(_this);
-    SDL_KeySym keysym;
+    SDL_Keysym keysym;
     int kbd_idx;
     char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
@@ -448,7 +448,7 @@ DirectFB_PumpEventsWindow(_THIS)
 }
 
 void
-DirectFB_InitOSKeymap(_THIS, SDL_ScanCode * keymap, int numkeys)
+DirectFB_InitOSKeymap(_THIS, SDL_Scancode * keymap, int numkeys)
 {
     int i;
 
@@ -575,8 +575,8 @@ DirectFB_InitOSKeymap(_THIS, SDL_ScanCode * keymap, int numkeys)
 
 }
 
-static SDL_KeySym *
-DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_KeySym * keysym)
+static SDL_Keysym *
+DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_Keysym * keysym)
 {
     SDL_DFB_DEVICEDATA(_this);
     int kbd_idx = 0; /* Window events lag the device source KbdIndex(_this, evt->device_id); */
@@ -605,9 +605,9 @@ DirectFB_TranslateKey(_THIS, DFBWindowEvent * evt, SDL_KeySym * keysym)
     return keysym;
 }
 
-static SDL_KeySym *
+static SDL_Keysym *
 DirectFB_TranslateKeyInputEvent(_THIS, DFBInputEvent * evt,
-                                SDL_KeySym * keysym)
+                                SDL_Keysym * keysym)
 {
     SDL_DFB_DEVICEDATA(_this);
     int kbd_idx = KbdIndex(_this, evt->device_id);

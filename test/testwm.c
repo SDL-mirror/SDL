@@ -210,7 +210,7 @@ print_modifiers(void)
         printf(" MODE");
 }
 
-static void PrintKey(const SDL_KeySym *sym, int pressed)
+static void PrintKey(const SDL_Keysym *sym, int pressed)
 {
     /* Print the keycode, name and state */
     if ( sym->sym ) {
