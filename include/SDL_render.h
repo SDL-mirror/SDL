@@ -192,6 +192,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_Renderer * renderer,
  *          of range.
  *  
  *  \sa SDL_QueryTexture()
+ *  \sa SDL_UpdateTexture()
  *  \sa SDL_DestroyTexture()
  */
 extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTexture(SDL_Renderer * renderer,                                                        Uint32 format,
