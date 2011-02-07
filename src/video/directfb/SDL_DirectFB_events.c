@@ -659,7 +659,7 @@ EnumKeyboards(DFBInputDeviceID device_id,
 #if USE_MULTI_API
     SDL_Keyboard keyboard;
 #endif
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Key keymap[SDL_NUM_SCANCODES];
 
 	if (!cb->sys_kbd) {
 		if (cb->sys_ids) {

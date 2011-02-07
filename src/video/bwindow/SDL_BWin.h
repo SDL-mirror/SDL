@@ -586,7 +586,7 @@ class SDL_BWin:public BDirectWindow
     bool inhibit_resize;
 
     int32 last_buttons;
-    SDLKey keymap[128];
+    SDL_Key keymap[128];
 };
 
 #endif /* _SDL_BWin_h */

@@ -34,10 +34,10 @@ extern int SDL_KeyboardInit(void);
 extern void SDL_ResetKeyboard(void);
 
 /* Get the default keymap */
-extern void SDL_GetDefaultKeymap(SDLKey * keymap);
+extern void SDL_GetDefaultKeymap(SDL_Key * keymap);
 
 /* Set the mapping of scancode to key codes */
-extern void SDL_SetKeymap(int start, SDLKey * keys, int length);
+extern void SDL_SetKeymap(int start, SDL_Key * keys, int length);
 
 /* Set a platform-dependent key name, overriding the default platform-agnostic
    name. Encoded as UTF-8. The string is not copied, thus the pointer given to

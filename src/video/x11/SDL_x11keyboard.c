@@ -34,7 +34,7 @@
 /* *INDENT-OFF* */
 static const struct {
     KeySym keysym;
-    SDLKey sdlkey;
+    SDL_Key sdlkey;
 } KeySymToSDLKey[] = {
     { XK_Return, SDLK_RETURN },
     { XK_Escape, SDLK_ESCAPE },
@@ -143,7 +143,7 @@ static const struct
 };
 /* *INDENT-OFF* */
 
-static SDLKey
+static SDL_Key
 X11_KeyCodeToSDLKey(Display *display, KeyCode keycode)
 {
     KeySym keysym;
@@ -157,7 +157,7 @@ X11_KeyCodeToSDLKey(Display *display, KeyCode keycode)
 
     ucs4 = X11_KeySymToUcs4(keysym);
     if (ucs4) {
-        return (SDLKey) ucs4;
+        return (SDL_Key) ucs4;
     }
 
     for (i = 0; i < SDL_arraysize(KeySymToSDLKey); ++i) {
@@ -222,7 +222,7 @@ X11_InitKeyboard(_THIS)
     }
 
     if (!fingerprint_detected) {
-        SDLKey keymap[SDL_NUM_SCANCODES];
+        SDL_Key keymap[SDL_NUM_SCANCODES];
 
         printf
             ("Keyboard layout unknown, please send the following to the SDL mailing list (sdl@libsdl.org):\n");
@@ -233,7 +233,7 @@ X11_InitKeyboard(_THIS)
             KeySym sym;
             sym = XKeycodeToKeysym(data->display, i, 0);
             if (sym != NoSymbol) {
-                SDLKey key;
+                SDL_Key key;
                 printf("code = %d, sym = 0x%X (%s) ", i - min_keycode,
                        (unsigned int) sym, XKeysymToString(sym));
                 key = X11_KeyCodeToSDLKey(data->display, i);
@@ -265,7 +265,7 @@ X11_UpdateKeymap(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int i;
     SDL_Scancode scancode;
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Key keymap[SDL_NUM_SCANCODES];
 
     SDL_zero(keymap);
 

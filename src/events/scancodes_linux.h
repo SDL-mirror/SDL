@@ -21,7 +21,7 @@
 */
 #include "../../include/SDL_scancode.h"
 
-/* Linux virtual key code to SDLKey mapping table
+/* Linux virtual key code to SDL_Key mapping table
    Sources:
    - Linux kernel source input.h
 */

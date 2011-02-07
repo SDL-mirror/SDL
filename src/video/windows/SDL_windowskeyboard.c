@@ -151,7 +151,7 @@ WIN_UpdateKeymap()
 {
     int i;
     SDL_Scancode scancode;
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Key keymap[SDL_NUM_SCANCODES];
 
     SDL_GetDefaultKeymap(keymap);
 

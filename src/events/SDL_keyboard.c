@@ -39,12 +39,12 @@ struct SDL_Keyboard
     SDL_Window *focus;
     Uint16 modstate;
     Uint8 keystate[SDL_NUM_SCANCODES];
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Key keymap[SDL_NUM_SCANCODES];
 };
 
 static SDL_Keyboard SDL_keyboard;
 
-static const SDLKey SDL_default_keymap[SDL_NUM_SCANCODES] = {
+static const SDL_Key SDL_default_keymap[SDL_NUM_SCANCODES] = {
     0, 0, 0, 0,
     'a',
     'b',
@@ -572,13 +572,13 @@ SDL_ResetKeyboard(void)
 }
 
 void
-SDL_GetDefaultKeymap(SDLKey * keymap)
+SDL_GetDefaultKeymap(SDL_Key * keymap)
 {
     SDL_memcpy(keymap, SDL_default_keymap, sizeof(SDL_default_keymap));
 }
 
 void
-SDL_SetKeymap(int start, SDLKey * keys, int length)
+SDL_SetKeymap(int start, SDL_Key * keys, int length)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
@@ -832,7 +832,7 @@ SDL_GetKeyboardState(int *numkeys)
     return keyboard->keystate;
 }
 
-SDLMod
+SDL_Mod
 SDL_GetModState(void)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
@@ -841,14 +841,14 @@ SDL_GetModState(void)
 }
 
 void
-SDL_SetModState(SDLMod modstate)
+SDL_SetModState(SDL_Mod modstate)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
     keyboard->modstate = modstate;
 }
 
-SDLKey
+SDL_Key
 SDL_GetKeyFromScancode(SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
@@ -857,7 +857,7 @@ SDL_GetKeyFromScancode(SDL_Scancode scancode)
 }
 
 SDL_Scancode
-SDL_GetScancodeFromKey(SDLKey key)
+SDL_GetScancodeFromKey(SDL_Key key)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     SDL_Scancode scancode;
@@ -883,7 +883,7 @@ SDL_GetScancodeName(SDL_Scancode scancode)
 }
 
 const char *
-SDL_GetKeyName(SDLKey key)
+SDL_GetKeyName(SDL_Key key)
 {
     static char name[8];
     char *end;
