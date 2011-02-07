@@ -488,12 +488,12 @@ SDL_VideoInit(const char *driver_name)
 #if SDL_VIDEO_OPENGL
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 1;
-#elif SDL_VIDEO_OPENGL_ES2
-    _this->gl_config.major_version = 2;
-    _this->gl_config.minor_version = 0;
 #elif SDL_VIDEO_OPENGL_ES
     _this->gl_config.major_version = 1;
     _this->gl_config.minor_version = 1;
+#elif SDL_VIDEO_OPENGL_ES2
+    _this->gl_config.major_version = 2;
+    _this->gl_config.minor_version = 0;
 #endif
 
     /* Initialize the video subsystem */
