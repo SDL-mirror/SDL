@@ -61,7 +61,6 @@
 		006E986A1195513D001DE610 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E98631195513D001DE610 /* icon.bmp */; };
 		006E986B1195513D001DE610 /* moose.dat in Resources */ = {isa = PBXBuildFile; fileRef = 006E98641195513D001DE610 /* moose.dat */; };
 		006E986C1195513D001DE610 /* picture.xbm in Resources */ = {isa = PBXBuildFile; fileRef = 006E98651195513D001DE610 /* picture.xbm */; };
-		006E986D1195513D001DE610 /* sail.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E98661195513D001DE610 /* sail.bmp */; };
 		006E986E1195513D001DE610 /* sample.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E98671195513D001DE610 /* sample.bmp */; };
 		006E986F1195513D001DE610 /* sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 006E98681195513D001DE610 /* sample.wav */; };
 		006E98701195513D001DE610 /* utf8.txt in Resources */ = {isa = PBXBuildFile; fileRef = 006E98691195513D001DE610 /* utf8.txt */; };
@@ -333,7 +332,6 @@
 		006E98631195513D001DE610 /* icon.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = icon.bmp; path = ../../test/icon.bmp; sourceTree = SOURCE_ROOT; };
 		006E98641195513D001DE610 /* moose.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = moose.dat; path = ../../test/moose.dat; sourceTree = SOURCE_ROOT; };
 		006E98651195513D001DE610 /* picture.xbm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = picture.xbm; path = ../../test/picture.xbm; sourceTree = SOURCE_ROOT; };
-		006E98661195513D001DE610 /* sail.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = sail.bmp; path = ../../test/sail.bmp; sourceTree = SOURCE_ROOT; };
 		006E98671195513D001DE610 /* sample.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = sample.bmp; path = ../../test/sample.bmp; sourceTree = SOURCE_ROOT; };
 		006E98681195513D001DE610 /* sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = sample.wav; path = ../../test/sample.wav; sourceTree = SOURCE_ROOT; };
 		006E98691195513D001DE610 /* utf8.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = utf8.txt; path = ../../test/utf8.txt; sourceTree = SOURCE_ROOT; };
@@ -596,7 +594,6 @@
 				006E98631195513D001DE610 /* icon.bmp */,
 				006E98641195513D001DE610 /* moose.dat */,
 				006E98651195513D001DE610 /* picture.xbm */,
-				006E98661195513D001DE610 /* sail.bmp */,
 				006E98671195513D001DE610 /* sample.bmp */,
 				006E98681195513D001DE610 /* sample.wav */,
 				006E98691195513D001DE610 /* utf8.txt */,
@@ -1361,7 +1358,6 @@
 				006E986A1195513D001DE610 /* icon.bmp in Resources */,
 				006E986B1195513D001DE610 /* moose.dat in Resources */,
 				006E986C1195513D001DE610 /* picture.xbm in Resources */,
-				006E986D1195513D001DE610 /* sail.bmp in Resources */,
 				006E986E1195513D001DE610 /* sample.bmp in Resources */,
 				006E986F1195513D001DE610 /* sample.wav in Resources */,
 				006E98701195513D001DE610 /* utf8.txt in Resources */,
