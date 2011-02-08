@@ -20,6 +20,7 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+#include "SDL_stdinc.h"
 
 #include "SDL_android.h"
 
@@ -80,7 +81,7 @@ extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls)
     mActivityClass = cls;
 
     midCreateGLContext = mEnv->GetStaticMethodID(mActivityClass,
-                                "createGLContext","()V");
+                                "createGLContext","(II)Z");
     midFlipBuffers = mEnv->GetStaticMethodID(mActivityClass,
                                 "flipBuffers","()V");
     midAudioInit = mEnv->GetStaticMethodID(mActivityClass, 
@@ -159,9 +160,13 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
-extern "C" void Android_JNI_CreateContext()
+extern "C" SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion)
 {
-    mEnv->CallStaticVoidMethod(mActivityClass, midCreateGLContext); 
+    if (mEnv->CallStaticBooleanMethod(mActivityClass, midCreateGLContext, majorVersion, minorVersion)) {
+        return SDL_TRUE;
+    } else {
+        return SDL_FALSE;
+    }
 }
 
 extern "C" void Android_JNI_SwapWindow()

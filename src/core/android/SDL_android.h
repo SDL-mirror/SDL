@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 /* Interface from the SDL library into the Android Java activity */
-extern void Android_JNI_CreateContext();
+extern SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion);
 extern void Android_JNI_SwapWindow();
 extern void Android_JNI_SetActivityTitle(const char *title);
 extern void Android_JNI_GetAccelerometerValues(float values[3]);
