@@ -106,6 +106,7 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
+    SDL_Rect locked_rect;
 } GL_TextureData;
 
 
@@ -448,15 +449,6 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     return 0;
 }
 
-static void
-SetupTextureUpdate(GL_RenderData * renderdata, SDL_Texture * texture,
-                   int pitch)
-{
-    renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
-                              (pitch / SDL_BYTESPERPIXEL(texture->format)));
-}
-
 static int
 GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
@@ -468,7 +460,9 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_ActivateRenderer(renderer);
 
     renderdata->glGetError();
-    SetupTextureUpdate(renderdata, texture, pitch);
+    renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                              (pitch / SDL_BYTESPERPIXEL(texture->format)));
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
@@ -489,7 +483,8 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
 
-    *pixels =
+    data->locked_rect = *rect;
+    *pixels = 
         (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
                   rect->x * SDL_BYTESPERPIXEL(texture->format));
     *pitch = data->pitch;
@@ -499,17 +494,15 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
+    const SDL_Rect *rect;
+    void *pixels;
 
-    GL_ActivateRenderer(renderer);
-
-    SetupTextureUpdate(renderdata, texture, data->pitch);
-    renderdata->glEnable(data->type);
-    renderdata->glBindTexture(data->type, data->texture);
-    renderdata->glTexSubImage2D(data->type, 0, 0, 0, texture->w, texture->h,
-                                data->format, data->formattype, data->pixels);
-    renderdata->glDisable(data->type);
+    rect = &data->locked_rect;
+    pixels = 
+        (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
+                  rect->x * SDL_BYTESPERPIXEL(texture->format));
+    GL_UpdateTexture(renderer, texture, rect, pixels, data->pitch);
 }
 
 static void

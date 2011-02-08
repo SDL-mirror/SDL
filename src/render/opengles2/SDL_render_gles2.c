@@ -343,14 +343,14 @@ static void
 GLES2_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 {
     GLES2_TextureData *tdata = (GLES2_TextureData *)texture->driverdata;
+    SDL_Rect rect;
 
-    GLES2_ActivateRenderer(renderer);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(tdata->texture_type, tdata->texture);
-    glTexSubImage2D(tdata->texture_type, 0, 0, 0, texture->w, texture->h,
-                    tdata->pixel_format, tdata->pixel_type, tdata->pixel_data);
+    /* We do whole texture updates, at least for now */
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = texture->w;
+    rect.h = texture->h;
+    GLES2_UpdateTexture(renderer, texture, &rect, tdata->pixel_data, tdata->pitch);
 }
 
 static int
@@ -361,7 +361,6 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     Uint8 *blob = NULL;
     Uint8 *src;
     int srcPitch;
-    Uint8 *dest;
     int y;
 
     GLES2_ActivateRenderer(renderer);
@@ -405,7 +404,9 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
                     tdata->pixel_format,
                     tdata->pixel_type,
                     src);
-    SDL_free(blob);
+    if (blob) {
+        SDL_free(blob);
+    }
 
     if (glGetError() != GL_NO_ERROR)
     {
