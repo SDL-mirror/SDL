@@ -422,6 +422,12 @@ AC_HELP_STRING([--enable-cpuinfo], [Enable the cpuinfo subsystem [[default=yes]]
 if test x$enable_cpuinfo != xyes; then
     AC_DEFINE(SDL_CPUINFO_DISABLED)
 fi
+AC_ARG_ENABLE(atomic,
+AC_HELP_STRING([--enable-atomic], [Enable the atomic operations [[default=yes]]]),
+              , enable_atomic=yes)
+if test x$enable_atomic != xyes; then
+    AC_DEFINE(SDL_ATOMIC_DISABLED)
+fi
 AC_ARG_ENABLE(assembly,
 AC_HELP_STRING([--enable-assembly], [Enable assembly routines [[default=yes]]]),
               , enable_assembly=yes)

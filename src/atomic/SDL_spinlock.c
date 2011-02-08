@@ -22,6 +22,7 @@
 #include "SDL_stdinc.h"
 
 #include "SDL_atomic.h"
+#include "SDL_mutex.h"
 #include "SDL_timer.h"
 
 /* Don't do the check for Visual Studio 2005, it's safe here */
@@ -33,7 +34,25 @@
 SDL_bool
 SDL_AtomicTryLock(SDL_SpinLock *lock)
 {
-#if defined(_MSC_VER)
+#if SDL_ATOMIC_DISABLED
+    /* Terrible terrible damage */
+    static SDL_mutex *_spinlock_mutex;
+
+    if (!_spinlock_mutex) {
+        /* Race condition on first lock... */
+        _spinlock_mutex = SDL_CreateMutex();
+    }
+    SDL_mutexP(_spinlock_mutex);
+    if (*lock == 0) {
+        *lock = 1;
+        SDL_mutexV(_spinlock_mutex);
+        return SDL_TRUE;
+    } else {
+        SDL_mutexV(_spinlock_mutex);
+        return SDL_FALSE;
+    }
+
+#elif defined(_MSC_VER)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
     return (InterlockedExchange((long*)lock, 1) == 0);
 

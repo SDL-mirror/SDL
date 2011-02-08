@@ -171,6 +171,7 @@
 #undef SDL_DEFAULT_ASSERT_LEVEL
 
 /* Allow disabling of core subsystems */
+#undef SDL_ATOMIC_DISABLED
 #undef SDL_AUDIO_DISABLED
 #undef SDL_CPUINFO_DISABLED
 #undef SDL_EVENTS_DISABLED
