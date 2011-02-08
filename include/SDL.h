@@ -81,6 +81,7 @@
 #include "SDL_events.h"
 #include "SDL_hints.h"
 #include "SDL_loadso.h"
+#include "SDL_log.h"
 #include "SDL_mutex.h"
 #include "SDL_power.h"
 #include "SDL_render.h"

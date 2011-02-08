@@ -48,7 +48,7 @@ extern DECLSPEC void SDLCALL SDL_ClearError(void);
  *  \name Internal error functions
  *  
  *  \internal 
- *  Private error message function - used internally.
+ *  Private error reporting function - used internally.
  */
 /*@{*/
 #define SDL_OutOfMemory()	SDL_Error(SDL_ENOMEM)

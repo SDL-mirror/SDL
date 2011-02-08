@@ -24,6 +24,7 @@
 /* The SDL 2D rendering system */
 
 #include "SDL_hints.h"
+#include "SDL_log.h"
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "../video/SDL_pixels_c.h"
@@ -159,6 +160,9 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->window = window;
 
         SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_RENDER,
+                    "Created renderer: %s", renderer->info.name);
     }
     return renderer;
 }

@@ -249,6 +249,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\include\SDL_keyboard.h" />
     <ClInclude Include="..\..\include\SDL_keysym.h" />
     <ClInclude Include="..\..\include\SDL_loadso.h" />
+    <ClInclude Include="..\..\include\SDL_log.h" />
     <ClInclude Include="..\..\include\SDL_main.h" />
     <ClInclude Include="..\..\include\SDL_mouse.h" />
     <ClInclude Include="..\..\include\SDL_mutex.h" />
@@ -390,6 +391,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\audio\SDL_audiodev.c" />
     <ClCompile Include="..\..\src\audio\SDL_audiotypecvt.c" />
     <ClCompile Include="..\..\src\SDL_hints.c" />
+    <ClCompile Include="..\..\src\SDL_log.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullframebuffer.c" />
     <ClCompile Include="..\..\src\video\SDL_blit.c" />
     <ClCompile Include="..\..\src\video\SDL_blit_0.c" />

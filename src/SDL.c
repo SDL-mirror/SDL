@@ -215,22 +215,12 @@ void
 SDL_Quit(void)
 {
     /* Quit all subsystems */
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : Enter! Calling QuitSubSystem()\n");
-    fflush(stdout);
-#endif
-
 #if defined(__WIN32__)
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 
 #ifdef CHECK_LEAKS
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : CHECK_LEAKS\n");
-    fflush(stdout);
-#endif
-
     /* !!! FIXME: make this an assertion. */
     /* Print the number of surfaces not freed */
     if (surfaces_allocated != 0) {
@@ -238,22 +228,13 @@ SDL_Quit(void)
                 surfaces_allocated);
     }
 #endif
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : SDL_UninstallParachute()\n");
-    fflush(stdout);
-#endif
 
     /* Uninstall any parachute signal handlers */
     SDL_UninstallParachute();
 
     SDL_ClearHints();
     SDL_AssertionsQuit();
-
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : Returning!\n");
-    fflush(stdout);
-#endif
-
+    SDL_LogResetPriorities();
 }
 
 /* Get the library version number */

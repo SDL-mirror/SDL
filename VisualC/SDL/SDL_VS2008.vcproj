@@ -458,6 +458,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_log.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_main.h"
 				>
 			</File>
@@ -916,6 +920,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\SDL_leaks.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\SDL_log.c"
 			>
 		</File>
 		<File
