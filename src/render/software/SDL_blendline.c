@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if !SDL_RENDER_DISABLED
+
 #include "SDL_draw.h"
 #include "SDL_blendline.h"
 #include "SDL_blendpoint.h"
@@ -778,5 +780,7 @@ SDL_BlendLines(SDL_Surface * dst, const SDL_Point * points, int count,
     }
     return 0;
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

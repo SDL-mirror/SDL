@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if !SDL_RENDER_DISABLED
+
 #include "SDL_draw.h"
 #include "SDL_blendfillrect.h"
 
@@ -344,5 +346,7 @@ SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
     }
     return status;
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -362,6 +362,12 @@ AC_HELP_STRING([--enable-video], [Enable the video subsystem [[default=yes]]]),
 if test x$enable_video != xyes; then
     AC_DEFINE(SDL_VIDEO_DISABLED)
 fi
+AC_ARG_ENABLE(render,
+AC_HELP_STRING([--enable-render], [Enable the render subsystem [[default=yes]]]),
+              , enable_render=yes)
+if test x$enable_render != xyes; then
+    AC_DEFINE(SDL_RENDER_DISABLED)
+fi
 AC_ARG_ENABLE(events,
 AC_HELP_STRING([--enable-events], [Enable the events subsystem [[default=yes]]]),
               , enable_events=yes)

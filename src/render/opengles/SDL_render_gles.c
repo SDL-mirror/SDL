@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_OGL_ES
+#if SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED
 
 #include "SDL_opengles.h"
 #include "../SDL_sysrender.h"
@@ -728,6 +728,6 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL_ES */
+#endif /* SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

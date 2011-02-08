@@ -21,7 +21,8 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_D3D
+#if SDL_VIDEO_RENDER_D3D && !SDL_RENDER_DISABLED
+
 
 #include "../../core/windows/SDL_windows.h"
 
@@ -1066,6 +1067,6 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_RENDER_D3D */
+#endif /* SDL_VIDEO_RENDER_D3D && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

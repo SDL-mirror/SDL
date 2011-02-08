@@ -119,6 +119,8 @@ struct SDL_RenderDriver
     SDL_RendererInfo info;
 };
 
+#if !SDL_RENDER_DISABLED
+
 #if SDL_VIDEO_RENDER_D3D
 extern SDL_RenderDriver D3D_RenderDriver;
 #endif
@@ -135,6 +137,8 @@ extern SDL_RenderDriver GLES_RenderDriver;
 extern SDL_RenderDriver DirectFB_RenderDriver;
 #endif
 extern SDL_RenderDriver SW_RenderDriver;
+
+#endif /* !SDL_RENDER_DISABLED */
 
 #endif /* _SDL_sysrender_h */
 

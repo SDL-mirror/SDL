@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if !SDL_RENDER_DISABLED
+
 #include "../SDL_sysrender.h"
 #include "../../video/SDL_pixels_c.h"
 
@@ -427,5 +429,7 @@ SW_DestroyRenderer(SDL_Renderer * renderer)
     }
     SDL_free(renderer);
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

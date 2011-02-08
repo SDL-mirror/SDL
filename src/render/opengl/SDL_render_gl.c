@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_OGL
+#if SDL_VIDEO_RENDER_OGL && !SDL_RENDER_DISABLED
 
 #include "SDL_opengl.h"
 #include "../SDL_sysrender.h"
@@ -841,6 +841,6 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL */
+#endif /* SDL_VIDEO_RENDER_OGL && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if !SDL_RENDER_DISABLED
+
 #include "SDL_draw.h"
 #include "SDL_drawpoint.h"
 
@@ -113,5 +115,7 @@ SDL_DrawPoints(SDL_Surface * dst, const SDL_Point * points, int count,
     }
     return 0;
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

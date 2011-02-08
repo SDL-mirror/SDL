@@ -23,7 +23,7 @@
 
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_OGL_ES2
+#if SDL_VIDEO_RENDER_OGL_ES2 && !SDL_RENDER_DISABLED
 
 #include "SDL_opengles2.h"
 #include "../SDL_sysrender.h"
@@ -1201,6 +1201,6 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     return renderer;
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL_ES2 */
+#endif /* SDL_VIDEO_RENDER_OGL_ES2 && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

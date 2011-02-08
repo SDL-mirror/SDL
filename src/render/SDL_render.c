@@ -45,6 +45,7 @@
 
 
 static const SDL_RenderDriver *render_drivers[] = {
+#if !SDL_RENDER_DISABLED
 #if SDL_VIDEO_RENDER_D3D
     &D3D_RenderDriver,
 #endif
@@ -61,6 +62,7 @@ static const SDL_RenderDriver *render_drivers[] = {
     &DirectFB_RenderDriver,
 #endif
     &SW_RenderDriver
+#endif /* !SDL_RENDER_DISABLED */
 };
 static char renderer_magic;
 static char texture_magic;
@@ -170,7 +172,12 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 SDL_Renderer *
 SDL_CreateSoftwareRenderer(SDL_Surface * surface)
 {
+#if !SDL_RENDER_DISABLED
     return SW_CreateRendererForSurface(surface);
+#else
+    SDL_SetError("SDL not built with rendering support");
+    return NULL;
+#endif /* !SDL_RENDER_DISABLED */
 }
 
 int
