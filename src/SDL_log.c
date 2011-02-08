@@ -233,7 +233,7 @@ GetCategoryPrefix(int category)
 void
 SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list ap)
 {
-    char message[SDL_MAX_LOG_MESSAGE];
+    char *message;
 
     /* Make sure we don't exceed array bounds */
     if (priority < 0 || priority >= SDL_NUM_LOG_PRIORITIES) {
@@ -245,17 +245,26 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
         return;
     }
 
-    SDL_vsnprintf(message, SDL_arraysize(message), fmt, ap);
+    message = SDL_stack_alloc(char, SDL_MAX_LOG_MESSAGE);
+    if (!message) {
+        return;
+    }
+    SDL_vsnprintf(message, SDL_MAX_LOG_MESSAGE, fmt, ap);
 
 #if defined(__WIN32__)
+    /* Way too many allocations here, urgh */
     {
-        char output[32+SDL_MAX_LOG_MESSAGE];
+        char *output;
+        size_t length;
         LPTSTR tstr;
 
-        SDL_snprintf(output, SDL_arraysize(output), "%s: %s", SDL_priority_prefixes[priority], message);
+        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1;
+        output = SDL_stack_alloc(char, length);
+        SDL_snprintf(output, length, "%s: %s", SDL_priority_prefixes[priority], message);
         tstr = WIN_UTF8ToString(output);
         OutputDebugString(tstr);
         SDL_free(tstr);
+        SDL_stack_free(output);
     }
 #elif defined(__ANDROID__)
     {
@@ -268,6 +277,7 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
 #if HAVE_STDIO_H
     fprintf(stderr, "%s: %s\n", SDL_priority_prefixes[priority], message);
 #endif
+    SDL_stack_free(message);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
