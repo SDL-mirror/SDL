@@ -133,10 +133,10 @@ typedef struct GLES2_DriverContext
  * Renderer state APIs                                                                           *
  *************************************************************************************************/
 
+static int GLES2_ActivateRenderer(SDL_Renderer *renderer);
 static void GLES2_WindowEvent(SDL_Renderer * renderer,
                               const SDL_WindowEvent *event);
-static int GLES2_ActivateRenderer(SDL_Renderer *renderer);
-static int GLES2_DisplayModeChanged(SDL_Renderer *renderer);
+static void GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static void GLES2_DestroyRenderer(SDL_Renderer *renderer);
 
 static SDL_GLContext SDL_CurrentContext = NULL;
@@ -175,6 +175,22 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
         rdata->updateSize = SDL_TRUE;
+    }
+}
+
+static void
+GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    GLES2_ActivateRenderer(renderer);
+
+    if (rect) {
+        int w, h;
+
+        SDL_GetWindowSize(renderer->window, &w, &h);
+        glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
     }
 }
 
@@ -761,6 +777,8 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
  * Rendering functions                                                                           *
  *************************************************************************************************/
 
+static const float inv255f = 1.0f / 255.0f;
+
 static int GLES2_RenderClear(SDL_Renderer *renderer);
 static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count);
 static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count);
@@ -772,10 +790,10 @@ static void GLES2_RenderPresent(SDL_Renderer *renderer);
 static int
 GLES2_RenderClear(SDL_Renderer *renderer)
 {
-    float r = (float)renderer->r / 255.0f;
-    float g = (float)renderer->g / 255.0f;
-    float b = (float)renderer->b / 255.0f;
-    float a = (float)renderer->a / 255.0f;
+    float r = (float)renderer->r * inv255f;
+    float g = (float)renderer->g * inv255f;
+    float b = (float)renderer->b * inv255f;
+    float a = (float)renderer->a * inv255f;
 
     GLES2_ActivateRenderer(renderer);
 
@@ -832,10 +850,10 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -886,10 +904,10 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -940,10 +958,10 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count)
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -1014,10 +1032,10 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
     glUniform4f(locModulation,
-                texture->r / 255.0f,
-                texture->g / 255.0f,
-                texture->b / 255.0f,
-                alpha / 255.0f);
+                texture->r * inv255f,
+                texture->g * inv255f,
+                texture->b * inv255f,
+                alpha * inv255f);
 
     /* Emit the textured quad */
     glEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
@@ -1065,6 +1083,9 @@ GLES2_RenderPresent(SDL_Renderer *renderer)
  *************************************************************************************************/
 
 #define GL_NVIDIA_PLATFORM_BINARY_NV 0x890B
+
+/* Used to re-create the window with OpenGL capability */
+extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 static SDL_Renderer *
 GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
@@ -1168,6 +1189,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->UpdateTexture       = &GLES2_UpdateTexture;
     renderer->LockTexture         = &GLES2_LockTexture;
     renderer->UnlockTexture       = &GLES2_UnlockTexture;
+    renderer->SetClipRect         = &GLES2_SetClipRect;
     renderer->RenderClear         = &GLES2_RenderClear;
     renderer->RenderDrawPoints    = &GLES2_RenderDrawPoints;
     renderer->RenderDrawLines     = &GLES2_RenderDrawLines;

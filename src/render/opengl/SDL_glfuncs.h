@@ -337,8 +337,7 @@ SDL_PROC_UNUSED(void, glRotatef,
                 (GLfloat angle, GLfloat x, GLfloat y, GLfloat z))
 SDL_PROC_UNUSED(void, glScaled, (GLdouble x, GLdouble y, GLdouble z))
 SDL_PROC_UNUSED(void, glScalef, (GLfloat x, GLfloat y, GLfloat z))
-SDL_PROC_UNUSED(void, glScissor,
-                (GLint x, GLint y, GLsizei width, GLsizei height))
+SDL_PROC(void, glScissor, (GLint x, GLint y, GLsizei width, GLsizei height))
 SDL_PROC_UNUSED(void, glSelectBuffer, (GLsizei size, GLuint * buffer))
 SDL_PROC_UNUSED(void, glShadeModel, (GLenum mode))
 SDL_PROC_UNUSED(void, glStencilFunc, (GLenum func, GLint ref, GLuint mask))

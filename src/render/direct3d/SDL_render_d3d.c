@@ -96,6 +96,7 @@ static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static void D3D_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int D3D_RenderDrawLines(SDL_Renderer * renderer,
@@ -308,6 +309,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
+    renderer->SetClipRect = D3D_SetClipRect;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
     renderer->RenderDrawLines = D3D_RenderDrawLines;
     renderer->RenderFillRects = D3D_RenderFillRects;
@@ -599,6 +601,27 @@ D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
     IDirect3DTexture9_UnlockRect(data->texture, 0);
+}
+
+static void
+D3D_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+
+    if (rect) {
+        RECT d3drect;
+
+        d3drect.left = rect->x;
+        d3drect.right = rect->x + rect->w;
+        d3drect.top = rect->y;
+        d3drect.bottom = rect->y + rect->h;
+        IDirect3DDevice9_SetScissorRect(data->device, &d3drect);
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE,
+                                        TRUE);
+    } else {
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE,
+                                        FALSE);
+    }
 }
 
 static void

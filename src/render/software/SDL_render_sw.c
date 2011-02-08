@@ -50,6 +50,7 @@ static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static void SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int SW_RenderDrawLines(SDL_Renderer * renderer,
@@ -125,6 +126,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
+    renderer->SetClipRect = SW_SetClipRect;
     renderer->DestroyTexture = SW_DestroyTexture;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -264,6 +266,17 @@ SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+}
+
+static void
+SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    SDL_Surface *surface = SW_ActivateRenderer(renderer);
+
+    if (!surface) {
+        return;
+    }
+    SDL_SetClipRect(surface, rect);
 }
 
 static int

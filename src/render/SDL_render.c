@@ -725,6 +725,14 @@ SDL_UnlockTexture(SDL_Texture * texture)
     }
 }
 
+void
+SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    CHECK_RENDERER_MAGIC(renderer, );
+
+    renderer->SetClipRect(renderer, rect);
+}
+
 int
 SDL_SetRenderDrawColor(SDL_Renderer * renderer,
                        Uint8 r, Uint8 g, Uint8 b, Uint8 a)

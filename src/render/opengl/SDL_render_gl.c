@@ -52,6 +52,7 @@ static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static void GL_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
@@ -199,6 +200,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
+    renderer->SetClipRect = GL_SetClipRect;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
     renderer->RenderDrawLines = GL_RenderDrawLines;
@@ -508,6 +510,24 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     renderdata->glTexSubImage2D(data->type, 0, 0, 0, texture->w, texture->h,
                                 data->format, data->formattype, data->pixels);
     renderdata->glDisable(data->type);
+}
+
+static void
+GL_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    GL_ActivateRenderer(renderer);
+
+    if (rect) {
+        int w, h;
+
+        SDL_GetWindowSize(renderer->window, &w, &h);
+        data->glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
+        data->glEnable(GL_SCISSOR_TEST);
+    } else {
+        data->glDisable(GL_SCISSOR_TEST);
+    }
 }
 
 static void

@@ -364,6 +364,18 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 
 /**
+ *  \brief Set the clipping rectangle for rendering on the current target
+ *
+ *  \param rect The rectangle to clip rendering to, or NULL to disable clipping.
+ *
+ *  The contents of the window are not defined after calling
+ *  SDL_RenderPresent(), so you should clear the clip rectangle and draw
+ *  over the entire window each frame.
+ */
+extern DECLSPEC void SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer,
+                                                   const SDL_Rect * rect);
+
+/**
  *  \brief Set the color used for drawing operations (Fill and Line).
  *  
  *  \param r The red value used to draw on the rendering target.
