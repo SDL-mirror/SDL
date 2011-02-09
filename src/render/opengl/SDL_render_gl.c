@@ -282,7 +282,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     /* Check for shader support */
-    //data->shaders = GL_CreateShaderContext();
+    data->shaders = GL_CreateShaderContext();
 
 #if 0
     /* We support YV12 textures using 3 textures and a shader */

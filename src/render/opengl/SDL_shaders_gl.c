@@ -183,7 +183,7 @@ CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
         SDL_snprintf(tex_name, SDL_arraysize(tex_name), "tex%d", i);
         location = ctx->glGetUniformLocationARB(data->program, tex_name);
         if (location >= 0) {
-            ctx->glUniform1iARB(location, 1);
+            ctx->glUniform1iARB(location, i);
         }
     }
     ctx->glUseProgramObjectARB(0);
