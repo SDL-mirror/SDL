@@ -297,11 +297,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->glDisable(GL_CULL_FACE);
     /* This ended up causing video discrepancies between OpenGL and Direct3D */
     /*data->glEnable(GL_LINE_SMOOTH);*/
-    if (data->GL_ARB_texture_rectangle_supported) {
-        data->glEnable(GL_TEXTURE_RECTANGLE_ARB);
-    } else {
-        data->glEnable(GL_TEXTURE_2D);
-    }
     data->updateSize = SDL_TRUE;
 
     return renderer;

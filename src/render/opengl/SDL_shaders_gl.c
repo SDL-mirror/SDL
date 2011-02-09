@@ -56,10 +56,16 @@ struct GL_ShaderContext
     PFNGLUNIFORM1FARBPROC glUniform1fARB;
     PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
+    SDL_bool GL_ARB_texture_rectangle_supported;
+
     GL_Shader current_shader;
     GL_ShaderData shaders[NUM_SHADERS];
 };
 
+/*
+ * NOTE: Always use sampler2D, etc here. We'll #define them to the
+ *  texture_rectangle versions if we choose to use that extension.
+ */
 static const char *shader_source[NUM_SHADERS][2] =
 {
     /* SHADER_NONE */
@@ -73,7 +79,7 @@ varying vec4 v_color; \
  \
 void main() \
 { \
-    gl_Position = ftransform(); \
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \
     v_color = gl_Color; \
 } \
 ",
@@ -97,7 +103,7 @@ varying vec2 v_texCoord; \
  \
 void main() \
 { \
-    gl_Position = ftransform(); \
+    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \
     v_color = gl_Color; \
     v_texCoord = vec2(gl_MultiTexCoord0); \
 } \
@@ -117,11 +123,15 @@ void main() \
 };
 
 static SDL_bool
-CompileShader(GL_ShaderContext *ctx, GLenum shader, const char *source)
+CompileShader(GL_ShaderContext *ctx, GLenum shader, const char *defines, const char *source)
 {
     GLint status;
+    const char *sources[2];
 
-    ctx->glShaderSourceARB(shader, 1, &source, NULL);
+    sources[0] = defines;
+    sources[1] = source;
+
+    ctx->glShaderSourceARB(shader, SDL_arraysize(sources), sources, NULL);
     ctx->glCompileShaderARB(shader);
     ctx->glGetObjectParameterivARB(shader, GL_OBJECT_COMPILE_STATUS_ARB, &status);
     if (status == 0) {
@@ -146,7 +156,8 @@ static SDL_bool
 CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
 {
     const int num_tmus_bound = 4;
-    GLint status;
+    const char *vert_defines = "";
+    const char *frag_defines = "";
     int i;
     GLint location;
 
@@ -156,18 +167,25 @@ CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
 
     ctx->glGetError();
 
+    /* Make sure we use the correct sampler type for our texture type */
+    if (ctx->GL_ARB_texture_rectangle_supported) {
+        frag_defines = 
+"#define sampler2D sampler2DRect\n"
+"#define texture2D texture2DRect\n";
+    }
+
     /* Create one program object to rule them all */
     data->program = ctx->glCreateProgramObjectARB();
 
     /* Create the vertex shader */
     data->vert_shader = ctx->glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
-    if (!CompileShader(ctx, data->vert_shader, shader_source[index][0])) {
+    if (!CompileShader(ctx, data->vert_shader, vert_defines, shader_source[index][0])) {
         return SDL_FALSE;
     }
 
     /* Create the fragment shader */
     data->frag_shader = ctx->glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    if (!CompileShader(ctx, data->frag_shader, shader_source[index][1])) {
+    if (!CompileShader(ctx, data->frag_shader, frag_defines, shader_source[index][1])) {
         return SDL_FALSE;
     }
 
@@ -213,6 +231,11 @@ GL_CreateShaderContext()
     ctx = (GL_ShaderContext *)SDL_calloc(1, sizeof(*ctx));
     if (!ctx) {
         return NULL;
+    }
+
+    if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
+        || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
+        ctx->GL_ARB_texture_rectangle_supported = SDL_TRUE;
     }
 
     /* Check for shader support */
