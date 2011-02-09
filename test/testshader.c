@@ -181,9 +181,11 @@ static SDL_bool CompileShaderProgram(ShaderData *data)
 
 static void DestroyShaderProgram(ShaderData *data)
 {
-    glDeleteObjectARB(data->vert_shader);
-    glDeleteObjectARB(data->frag_shader);
-    glDeleteObjectARB(data->program);
+    if (shaders_supported) {
+        glDeleteObjectARB(data->vert_shader);
+        glDeleteObjectARB(data->frag_shader);
+        glDeleteObjectARB(data->program);
+    }
 }
 
 static SDL_bool InitShaders()
@@ -481,3 +483,5 @@ main(int argc, char *argv[])
 }
 
 #endif /* HAVE_OPENGL */
+
+/* vi: set ts=4 sw=4 expandtab: */
