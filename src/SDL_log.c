@@ -45,11 +45,19 @@ typedef struct SDL_LogLevel
     struct SDL_LogLevel *next;
 } SDL_LogLevel;
 
+/* The default log output function */
+static void SDL_LogOutput(void *userdata,
+                          int category, SDL_LogPriority priority,
+                          const char *message);
+
 static SDL_LogLevel *SDL_loglevels;
 static SDL_LogPriority SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
 static SDL_LogPriority SDL_default_priority = DEFAULT_PRIORITY;
+static SDL_LogOutputFunction SDL_log_function = SDL_LogOutput;
+static void *SDL_log_userdata = NULL;
 
 static const char *SDL_priority_prefixes[SDL_NUM_LOG_PRIORITIES] = {
+    NULL,
     "VERBOSE",
     "DEBUG",
     "INFO",
@@ -235,6 +243,11 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
 {
     char *message;
 
+    /* Nothing to do if we don't have an output function */
+    if (!SDL_log_function) {
+        return;
+    }
+
     /* Make sure we don't exceed array bounds */
     if (priority < 0 || priority >= SDL_NUM_LOG_PRIORITIES) {
         return;
@@ -250,7 +263,14 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
         return;
     }
     SDL_vsnprintf(message, SDL_MAX_LOG_MESSAGE, fmt, ap);
+    SDL_log_function(SDL_log_userdata, category, priority, message);
+    SDL_stack_free(message);
+}
 
+static void
+SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
+              const char *message)
+{
 #if defined(__WIN32__)
     /* Way too many allocations here, urgh */
     {
@@ -277,7 +297,24 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
 #if HAVE_STDIO_H
     fprintf(stderr, "%s: %s\n", SDL_priority_prefixes[priority], message);
 #endif
-    SDL_stack_free(message);
+}
+
+void
+SDL_LogGetOutputFunction(SDL_LogOutputFunction *callback, void **userdata)
+{
+    if (callback) {
+        *callback = SDL_log_function;
+    }
+    if (userdata) {
+        *userdata = SDL_log_userdata;
+    }
+}
+
+void
+SDL_LogSetOutputFunction(SDL_LogOutputFunction callback, void *userdata)
+{
+    SDL_log_function = callback;
+    SDL_log_userdata = userdata;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

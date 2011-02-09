@@ -177,6 +177,22 @@ extern DECLSPEC void SDLCALL SDL_LogMessageV(int category,
                                              SDL_LogPriority priority,
                                              const char *fmt, va_list ap);
 
+/**
+ *  \brief The prototype for the log output function
+ */
+typedef void (*SDL_LogOutputFunction)(void *userdata, int category, SDL_LogPriority priority, const char *message);
+
+/**
+ *  \brief Get the current log output function.
+ */
+extern DECLSPEC void SDLCALL SDL_LogGetOutputFunction(SDL_LogOutputFunction *callback, void **userdata);
+
+/**
+ *  \brief This function allows you to replace the default log output
+ *         function with one of your own.
+ */
+extern DECLSPEC void SDLCALL SDL_LogSetOutputFunction(SDL_LogOutputFunction callback, void *userdata);
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
