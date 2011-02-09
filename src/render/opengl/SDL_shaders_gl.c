@@ -31,6 +31,8 @@
 
 /* OpenGL shader implementation */
 
+/*#define DEBUG_SHADERS*/
+
 typedef struct
 {
     GLenum program;
@@ -74,51 +76,43 @@ static const char *shader_source[NUM_SHADERS][2] =
     /* SHADER_SOLID */
     {
         /* vertex shader */
-        " \
-varying vec4 v_color; \
- \
-void main() \
-{ \
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \
-    v_color = gl_Color; \
-} \
-",
+"varying vec4 v_color;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+"    v_color = gl_Color;\n"
+"}",
         /* fragment shader */
-        " \
-varying vec4 v_color; \
- \
-void main() \
-{ \
-    gl_FragColor = v_color; \
-} \
-"
+"varying vec4 v_color;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = v_color;\n"
+"}"
     },
 
     /* SHADER_RGB */
     {
         /* vertex shader */
-        " \
-varying vec4 v_color; \
-varying vec2 v_texCoord; \
- \
-void main() \
-{ \
-    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; \
-    v_color = gl_Color; \
-    v_texCoord = vec2(gl_MultiTexCoord0); \
-} \
-",
+"varying vec4 v_color;\n"
+"varying vec2 v_texCoord;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+"    v_color = gl_Color;\n"
+"    v_texCoord = vec2(gl_MultiTexCoord0);\n"
+"}",
         /* fragment shader */
-        " \
-varying vec4 v_color; \
-varying vec2 v_texCoord; \
-uniform sampler2D tex0; \
- \
-void main() \
-{ \
-    gl_FragColor = texture2D(tex0, v_texCoord) * v_color; \
-} \
-"
+"varying vec4 v_color;\n"
+"varying vec2 v_texCoord;\n"
+"uniform sampler2D tex0;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = texture2D(tex0, v_texCoord) * v_color;\n"
+"}"
     },
 };
 
@@ -142,8 +136,11 @@ CompileShader(GL_ShaderContext *ctx, GLenum shader, const char *defines, const c
         info = SDL_stack_alloc(char, length+1);
         ctx->glGetInfoLogARB(shader, length, NULL, info);
         SDL_LogError(SDL_LOG_CATEGORY_RENDER,
-            "Failed to compile shader:\n%s\n%s", source, info);
-fprintf(stderr, "Failed to compile shader:\n%s\n%s", source, info);
+            "Failed to compile shader:\n%s%s\n%s", defines, source, info);
+#ifdef DEBUG_SHADERS
+        fprintf(stderr,
+            "Failed to compile shader:\n%s%s\n%s", defines, source, info);
+#endif
         SDL_stack_free(info);
 
         return SDL_FALSE;
