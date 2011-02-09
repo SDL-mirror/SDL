@@ -274,7 +274,7 @@ GL_CreateShaderContext()
     }
 
     if (!shaders_supported) {
-        GL_DestroyShaderContext(ctx);
+        SDL_free(ctx);
         return NULL;
     }
 
