@@ -25,6 +25,7 @@
 
 #include "SDL_opengl.h"
 #include "../SDL_sysrender.h"
+#include "SDL_shaders_gl.h"
 
 #ifdef __MACOSX__
 #include <OpenGL/OpenGL.h>
@@ -94,6 +95,15 @@ typedef struct
 
     void (*glTextureRangeAPPLE) (GLenum target, GLsizei length,
                                  const GLvoid * pointer);
+
+    /* Multitexture support */
+    SDL_bool GL_ARB_multitexture_supported;
+    PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
+    int num_texture_units;
+
+    /* Shader support */
+    GL_ShaderContext *shaders;
+
 } GL_RenderData;
 
 typedef struct
@@ -261,6 +271,25 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
             (void (*)(GLenum, GLsizei, const GLvoid *))
             SDL_GL_GetProcAddress("glTextureRangeAPPLE");
     }
+
+    /* Check for multitexture support */
+    if (SDL_GL_ExtensionSupported("GL_ARB_multitexture")) {
+        data->glActiveTextureARB = (PFNGLACTIVETEXTUREARBPROC) SDL_GL_GetProcAddress("glActiveTextureARB");
+        if (data->glActiveTextureARB) {
+            data->GL_ARB_multitexture_supported = SDL_TRUE;
+            data->glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &data->num_texture_units);
+        }
+    }
+
+    /* Check for shader support */
+    //data->shaders = GL_CreateShaderContext();
+
+#if 0
+    /* We support YV12 textures using 3 textures and a shader */
+    if (data->shaders && data->num_texture_units >= 3) {
+        renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_YV12;
+    }
+#endif
 
     /* Set up parameters for rendering */
     data->blendMode = -1;
@@ -579,6 +608,7 @@ GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     GL_ActivateRenderer(renderer);
 
     GL_SetBlendMode(data, renderer->blendMode);
+    GL_SelectShader(data->shaders, SHADER_SOLID);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -604,6 +634,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     GL_ActivateRenderer(renderer);
 
     GL_SetBlendMode(data, renderer->blendMode);
+    GL_SelectShader(data->shaders, SHADER_SOLID);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -674,6 +705,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
     GL_ActivateRenderer(renderer);
 
     GL_SetBlendMode(data, renderer->blendMode);
+    GL_SelectShader(data->shaders, SHADER_SOLID);
 
     data->glColor4f((GLfloat) renderer->r * inv255f,
                     (GLfloat) renderer->g * inv255f,
@@ -727,6 +759,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     GL_SetBlendMode(data, texture->blendMode);
+    GL_SelectShader(data->shaders, SHADER_RGB);
 
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
