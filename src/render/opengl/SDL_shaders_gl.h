@@ -27,7 +27,7 @@ typedef enum {
     SHADER_NONE,
     SHADER_SOLID,
     SHADER_RGB,
-    //SHADER_YV12,
+    SHADER_YV12,
     NUM_SHADERS
 } GL_Shader;
 

@@ -114,6 +114,58 @@ static const char *shader_source[NUM_SHADERS][2] =
 "    gl_FragColor = texture2D(tex0, v_texCoord) * v_color;\n"
 "}"
     },
+
+    /* SHADER_YV12 */
+    {
+        /* vertex shader */
+"varying vec4 v_color;\n"
+"varying vec2 v_texCoord;\n"
+"\n"
+"void main()\n"
+"{\n"
+"    gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;\n"
+"    v_color = gl_Color;\n"
+"    v_texCoord = vec2(gl_MultiTexCoord0);\n"
+"}",
+        /* fragment shader */
+"varying vec4 v_color;\n"
+"varying vec2 v_texCoord;\n"
+"uniform sampler2D tex0; // Y \n"
+"uniform sampler2D tex1; // U \n"
+"uniform sampler2D tex2; // V \n"
+"\n"
+"// YUV offset \n"
+"const vec3 offset = vec3(-0.0625, -0.5, -0.5);\n"
+"\n"
+"// RGB coefficients \n"
+"const vec3 Rcoeff = vec3(1.164,  0.000,  1.596);\n"
+"const vec3 Gcoeff = vec3(1.164, -0.391, -0.813);\n"
+"const vec3 Bcoeff = vec3(1.164,  2.018,  0.000);\n"
+"\n"
+"void main()\n"
+"{\n"
+"    vec2 tcoord;\n"
+"    vec3 yuv, rgb;\n"
+"\n"
+"    // Get the Y value \n"
+"    tcoord = v_texCoord;\n"
+"    yuv.x = texture2D(tex0, tcoord).r;\n"
+"\n"
+"    // Get the U and V values \n"
+"    tcoord *= 0.5;\n"
+"    yuv.y = texture2D(tex1, tcoord).r;\n"
+"    yuv.z = texture2D(tex2, tcoord).r;\n"
+"\n"
+"    // Do the color transform \n"
+"    yuv += offset;\n"
+"    rgb.r = dot(yuv, Rcoeff);\n"
+"    rgb.g = dot(yuv, Gcoeff);\n"
+"    rgb.b = dot(yuv, Bcoeff);\n"
+"\n"
+"    // That was easy. :) \n"
+"    gl_FragColor = vec4(rgb, 1.0) * v_color;\n"
+"}"
+    },
 };
 
 static SDL_bool
@@ -209,10 +261,6 @@ CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
 static void
 DestroyShaderProgram(GL_ShaderContext *ctx, GL_ShaderData *data)
 {
-    if (index == SHADER_NONE) {
-        return;
-    }
-
     ctx->glDeleteObjectARB(data->vert_shader);
     ctx->glDeleteObjectARB(data->frag_shader);
     ctx->glDeleteObjectARB(data->program);
@@ -281,7 +329,6 @@ GL_CreateShaderContext()
     /* Compile all the shaders */
     for (i = 0; i < NUM_SHADERS; ++i) {
         if (!CompileShaderProgram(ctx, i, &ctx->shaders[i])) {
-fprintf(stderr, "Unable to compile shader!\n");
             GL_DestroyShaderContext(ctx);
             return NULL;
         }

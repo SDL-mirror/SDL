@@ -1055,6 +1055,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\render\opengl\SDL_shaders_gl.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\opengl\SDL_shaders_gl.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\SDL_shape.c"
 			>
 		</File>

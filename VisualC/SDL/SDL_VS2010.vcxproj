@@ -285,6 +285,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\libm\math.h" />
     <ClInclude Include="..\..\src\libm\math_private.h" />
     <ClInclude Include="..\..\src\render\mmx.h" />
+    <ClInclude Include="..\..\src\render\opengl\SDL_shaders_gl.h" />
     <ClInclude Include="..\..\src\render\SDL_sysrender.h" />
     <ClInclude Include="..\..\src\render\SDL_yuv_sw_c.h" />
     <ClInclude Include="..\..\src\audio\SDL_audio_c.h" />
@@ -373,6 +374,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClCompile Include="..\..\src\libm\s_sin.c" />
     <ClCompile Include="..\..\src\render\direct3d\SDL_render_d3d.c" />
     <ClCompile Include="..\..\src\render\opengl\SDL_render_gl.c" />
+    <ClCompile Include="..\..\src\render\opengl\SDL_shaders_gl.c" />
     <ClCompile Include="..\..\src\render\SDL_render.c" />
     <ClCompile Include="..\..\src\render\SDL_yuv_mmx.c" />
     <ClCompile Include="..\..\src\render\SDL_yuv_sw.c" />
