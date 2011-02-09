@@ -77,10 +77,25 @@ extern "C" {
  *  This variable is case insensitive and can be set to the following values:
  *    "direct3d"
  *    "opengl"
+ *    "opengles2"
  *    "opengles"
  *    "software"
+ *
+ *  The default varies by platform, but it's the first one in the list that
+ *  is available on the current platform.
  */
 #define SDL_HINT_RENDER_DRIVER              "SDL_RENDER_DRIVER"
+
+/**
+ *  \brief  A variable controlling whether the OpenGL render driver uses shaders if they are available.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Disable shaders
+ *    "1"       - Enable shaders
+ *
+ *  By default shaders are used if OpenGL supports them.
+ */
+#define SDL_HINT_RENDER_OPENGL_SHADERS      "SDL_RENDER_OPENGL_SHADERS"
 
 /**
  *  \brief  A variable controlling whether updates to the SDL 1.2 screen surface should be synchronized with the vertical refresh, to avoid tearing.

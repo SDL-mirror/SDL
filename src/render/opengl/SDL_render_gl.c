@@ -23,6 +23,8 @@
 
 #if SDL_VIDEO_RENDER_OGL && !SDL_RENDER_DISABLED
 
+#include "SDL_hints.h"
+#include "SDL_log.h"
 #include "SDL_opengl.h"
 #include "../SDL_sysrender.h"
 #include "SDL_shaders_gl.h"
@@ -183,6 +185,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_Renderer *renderer;
     GL_RenderData *data;
+    const char *hint;
     GLint value;
     Uint32 window_flags;
 
@@ -282,7 +285,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     /* Check for shader support */
-    data->shaders = GL_CreateShaderContext();
+    hint = SDL_GetHint(SDL_HINT_RENDER_OPENGL_SHADERS);
+    if (!hint || *hint != '0') {
+        data->shaders = GL_CreateShaderContext();
+    }
+    SDL_LogInfo(SDL_LOG_CATEGORY_RENDER, "OpenGL shaders: %s",
+                data->shaders ? "ENABLED" : "DISABLED");
 
 #if 0
     /* We support YV12 textures using 3 textures and a shader */
