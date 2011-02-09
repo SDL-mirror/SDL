@@ -43,6 +43,7 @@ TARGETS = \
 	testplatform$(EXE) \
 	testpower$(EXE) \
 	testresample$(EXE) \
+	testscale$(EXE) \
 	testsem$(EXE) \
 	testshader$(EXE) \
 	testshape$(EXE) \
@@ -152,6 +153,9 @@ testoverlay$(EXE): $(srcdir)/testoverlay.c
 
 testplatform$(EXE): $(srcdir)/testplatform.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
+testscale$(EXE): $(srcdir)/testscale.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testscale.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 testsem$(EXE): $(srcdir)/testsem.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
