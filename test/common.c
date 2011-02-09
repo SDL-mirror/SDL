@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -105,6 +105,41 @@ CommonArg(CommonState * state, int index)
         }
         if (SDL_strcasecmp(argv[index], "event") == 0) {
             state->verbose |= VERBOSE_EVENT;
+            return 2;
+        }
+        return -1;
+    }
+    if (SDL_strcasecmp(argv[index], "--log") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        if (SDL_strcasecmp(argv[index], "all") == 0) {
+            SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "error") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "system") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "audio") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_AUDIO, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "video") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "render") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "input") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_INPUT, SDL_LOG_PRIORITY_VERBOSE);
             return 2;
         }
         return -1;
