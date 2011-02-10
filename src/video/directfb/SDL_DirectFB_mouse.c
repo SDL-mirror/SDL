@@ -170,7 +170,7 @@ DirectFB_ShowCursor(SDL_Cursor * cursor)
     if (!window)
         return -1;
     else {
-        SDL_VideoDisplay *display = window->display;
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
 
         if (display) {
             DFB_DisplayData *dispdata =
@@ -222,7 +222,7 @@ DirectFB_FreeCursor(SDL_Cursor * cursor)
 static void
 DirectFB_WarpMouse(SDL_Mouse * mouse, SDL_Window * window, int x, int y)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
     DFB_WindowData *windata = (DFB_WindowData *) window->driverdata;
     DFBResult ret;

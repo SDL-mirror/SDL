@@ -135,7 +135,7 @@ DirectFB_SetContext(_THIS, SDL_Window *window)
      *        This has simply no effect.
      */
 
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
 
 	/* FIXME: should we handle the error */

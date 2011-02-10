@@ -90,7 +90,7 @@ X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     XWindowAttributes attr;
 
     XGetWindowAttributes(data->display, RootWindow(data->display, displaydata->screen), &attr);
@@ -259,7 +259,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->display;
     int screen = displaydata->screen;
     Visual *visual;
@@ -328,19 +328,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     xattr.colormap = XCreateColormap(display, RootWindow(display, screen), visual, AllocNone);
 
     if (oldstyle_fullscreen
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         x = 0;
     } else {
         x = window->x;
     }
     if (oldstyle_fullscreen
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         y = 0;
     } else {
         y = window->y;
@@ -377,8 +377,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             sizehints->flags = PMaxSize | PMinSize;
         }
         if (!oldstyle_fullscreen
-            && window->x != SDL_WINDOWPOS_UNDEFINED
-            && window->y != SDL_WINDOWPOS_UNDEFINED) {
+            && !SDL_WINDOWPOS_ISUNDEFINED(window->x)
+            && !SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
             sizehints->x = x;
             sizehints->y = y;
             sizehints->flags |= USPosition;
@@ -713,14 +713,14 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
     if (oldstyle_fullscreen
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
     } else {
         x = window->x;
     }
     if (oldstyle_fullscreen
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
     } else {
@@ -777,7 +777,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
@@ -832,7 +832,7 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
  
     XIconifyWindow(display, data->xwindow, displaydata->screen);

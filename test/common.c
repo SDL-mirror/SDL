@@ -1015,12 +1015,14 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_m:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-M maximize */
-                /* FIXME: Which window has focus for this keyboard? */
                 for (i = 0; i < state->num_windows; ++i) {
-                    if (SDL_GetWindowFlags(state->windows[i]) & SDL_WINDOW_MAXIMIZED) {
-                        SDL_RestoreWindow(state->windows[i]);
-                    } else {
-                        SDL_MaximizeWindow(state->windows[i]);
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        if (flags & SDL_WINDOW_MAXIMIZED) {
+                            SDL_RestoreWindow(state->windows[i]);
+                        } else {
+                            SDL_MaximizeWindow(state->windows[i]);
+                        }
                     }
                 }
             }
@@ -1028,9 +1030,26 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_z:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-Z minimize */
-                /* FIXME: Which window has focus for this keyboard? */
                 for (i = 0; i < state->num_windows; ++i) {
-                    SDL_MinimizeWindow(state->windows[i]);
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        SDL_MinimizeWindow(state->windows[i]);
+                    }
+                }
+            }
+            break;
+        case SDLK_RETURN:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-Enter toggle fullscreen */
+                for (i = 0; i < state->num_windows; ++i) {
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        if (flags & SDL_WINDOW_FULLSCREEN) {
+                            SDL_SetWindowFullscreen(state->windows[i], SDL_FALSE);
+                        } else {
+                            SDL_SetWindowFullscreen(state->windows[i], SDL_TRUE);
+                        }
+                    }
                 }
             }
             break;

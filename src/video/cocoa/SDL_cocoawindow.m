@@ -403,8 +403,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 {
     NSAutoreleasePool *pool;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = window->display;
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -416,7 +414,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     data->window = window;
     data->nswindow = nswindow;
     data->created = created;
-    data->display = displaydata->display;
     data->videodata = videodata;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -438,9 +435,8 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         [contentView release];
 
         ConvertNSRect(&rect);
-        Cocoa_GetDisplayBounds(_this, display, &bounds);
-        window->x = (int)rect.origin.x - bounds.x;
-        window->y = (int)rect.origin.y - bounds.y;
+        window->x = (int)rect.origin.x;
+        window->y = (int)rect.origin.y;
         window->w = (int)rect.size.width;
         window->h = (int)rect.size.height;
     }
@@ -493,27 +489,27 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
     SDL_Rect bounds;
     unsigned int style;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         rect.origin.x = bounds.x;
     } else {
-        rect.origin.x = bounds.x + window->x;
+        rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         rect.origin.y = bounds.y;
     } else {
-        rect.origin.y = bounds.y + window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
@@ -599,22 +595,22 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
     SDL_Rect bounds;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
     } else {
-        rect.origin.x = bounds.x + window->x;
+        rect.origin.x = window->x;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
     } else {
-        rect.origin.y = bounds.y + window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;

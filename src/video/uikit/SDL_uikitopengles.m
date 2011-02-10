@@ -103,7 +103,7 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
 {
     SDL_uikitopenglview *view;
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    UIScreen *uiscreen = (UIScreen *) window->display->driverdata;
+    UIScreen *uiscreen = (UIScreen *) SDL_GetDisplayForWindow(window)->driverdata;
     UIWindow *uiwindow = data->uiwindow;
 
     /* construct our view, passing in SDL's OpenGL configuration data */

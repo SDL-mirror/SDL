@@ -38,15 +38,11 @@
 static Window
 GetWindow(_THIS)
 {
-    SDL_VideoDisplay *display;
     SDL_Window *window;
 
-    display = _this->displays;
-    if (display) {
-        window = display->windows;
-        if (window) {
-            return ((SDL_WindowData *) window->driverdata)->xwindow;
-        }
+    window = _this->windows;
+    if (window) {
+        return ((SDL_WindowData *) window->driverdata)->xwindow;
     }
     return None;
 }

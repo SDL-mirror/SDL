@@ -76,8 +76,6 @@ struct SDL_Window
     int w, h;
     Uint32 flags;
 
-    SDL_VideoDisplay *display;
-
     SDL_DisplayMode fullscreen_mode;
     
     SDL_Surface *surface;
@@ -110,7 +108,6 @@ struct SDL_VideoDisplay
     SDL_DisplayMode current_mode;
     SDL_bool updating_fullscreen;
 
-    SDL_Window *windows;
     SDL_Window *fullscreen_window;
 
     SDL_VideoDevice *device;
@@ -153,8 +150,7 @@ struct SDL_VideoDevice
     int (*GetDisplayBounds) (_THIS, SDL_VideoDisplay * display, SDL_Rect * rect);
 
     /*
-     * Get a list of the available display modes. e.g.
-     * SDL_AddDisplayMode(_this->current_display, mode)
+     * Get a list of the available display modes for a display.
      */
     void (*GetDisplayModes) (_THIS, SDL_VideoDisplay * display);
 
@@ -236,7 +232,7 @@ struct SDL_VideoDevice
     SDL_bool suspend_screensaver;
     int num_displays;
     SDL_VideoDisplay *displays;
-    int current_display;
+    SDL_Window *windows;
     Uint8 window_magic;
     Uint32 next_object_id;
     char * clipboard_text;
@@ -326,6 +322,7 @@ extern SDL_VideoDevice *SDL_GetVideoDevice(void);
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
 extern int SDL_AddVideoDisplay(const SDL_VideoDisplay * display);
 extern SDL_bool SDL_AddDisplayMode(SDL_VideoDisplay *display, const SDL_DisplayMode * mode);
+extern SDL_VideoDisplay *SDL_GetDisplayForWindow(SDL_Window *window);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 

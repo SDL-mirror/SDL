@@ -35,7 +35,7 @@ SDL_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned 
     SDL_Window *result = NULL;
     result = SDL_CreateWindow(title,-1000,-1000,w,h,(flags | SDL_WINDOW_BORDERLESS) & (~SDL_WINDOW_FULLSCREEN) & (~SDL_WINDOW_RESIZABLE) /*& (~SDL_WINDOW_SHOWN)*/);
     if(result != NULL) {
-        result->shaper = result->display->device->shape_driver.CreateShaper(result);
+        result->shaper = SDL_GetVideoDevice()->shape_driver.CreateShaper(result);
         if(result->shaper != NULL) {
             result->shaper->userx = x;
             result->shaper->usery = y;
@@ -240,7 +240,7 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
     
     if(shape_mode != NULL)
         window->shaper->mode = *shape_mode;
-    result = window->display->device->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
+    result = SDL_GetVideoDevice()->shape_driver.SetWindowShape(window->shaper,shape,shape_mode);
     window->shaper->hasshape = SDL_TRUE;
     if(window->shaper->userx != 0 && window->shaper->usery != 0) {
         SDL_SetWindowPosition(window,window->shaper->userx,window->shaper->usery);

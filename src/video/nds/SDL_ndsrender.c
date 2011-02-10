@@ -107,7 +107,7 @@ typedef struct
 SDL_Renderer *
 NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayMode *displayMode = &display->current_mode;
     SDL_Renderer *renderer;
     NDS_RenderData *data;
@@ -462,7 +462,7 @@ NDS_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     int Bpp = SDL_BYTESPERPIXEL(texture->format);
 
     if (txdat->type == NDSTX_BG) {
@@ -487,7 +487,7 @@ NDS_RenderPresent(SDL_Renderer * renderer)
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
 
     /* update sprites */
 //    NDS_OAM_Update(&(data->oam_copy), data->sub);

@@ -62,17 +62,17 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 		bshaped = 1;
 	
     /* Fill the window description. */
-    if (window->x == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = (dispdata->cw - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         x = 0;
     } else {
         x = window->x;
     }
     
-    if (window->y == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = (dispdata->ch - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         y = 0;
     } else {
         y = window->y;
@@ -264,17 +264,17 @@ DirectFB_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_DFB_DISPLAYDATA(window);
     int x, y;
 
-    if (window->x == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = (dispdata->cw - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         x = 0;
     } else {
         x = window->x;
     }
     
-    if (window->y == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = (dispdata->ch - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         y = 0;
     } else {
         y = window->y;
@@ -358,7 +358,7 @@ void
 DirectFB_MaximizeWindow(_THIS, SDL_Window * window)
 {
     SDL_DFB_WINDOWDATA(window);
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     DFBWindowOptions wopts;
 
     SDL_DFB_CHECK(windata->dfbwin->GetPosition(windata->dfbwin,
@@ -526,7 +526,7 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
 
     if (adjust) {
 #if SDL_DIRECTFB_OPENGL
-		DirectFB_GL_FreeWindowContexts(window->display->device, window);
+		DirectFB_GL_FreeWindowContexts(SDL_GetVideoDevice(), window);
 #endif
 
 #if (DFB_VERSION_ATLEAST(1,2,1))
@@ -552,10 +552,10 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
                          GetSubSurface(windata->window_surface,
                                        &windata->client, &windata->surface));
 #endif
-        DirectFB_WM_RedrawLayout(window->display->device, window);
+        DirectFB_WM_RedrawLayout(SDL_GetVideoDevice(), window);
         
 #if SDL_DIRECTFB_OPENGL
-		DirectFB_GL_ReAllocWindowContexts(window->display->device, window);
+		DirectFB_GL_ReAllocWindowContexts(SDL_GetVideoDevice(), window);
 #endif
    }
   error:

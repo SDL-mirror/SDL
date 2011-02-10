@@ -40,7 +40,7 @@
 
 static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
     SDL_WindowData *data;
         
@@ -85,9 +85,9 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
 }
 
 int
-UIKit_CreateWindow(_THIS, SDL_Window *window) {
-        
-    SDL_VideoDisplay *display = window->display;
+UIKit_CreateWindow(_THIS, SDL_Window *window)
+{
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
 
     // SDL currently puts this window at the start of display's linked list. We rely on this.

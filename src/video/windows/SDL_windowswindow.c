@@ -46,7 +46,7 @@ static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -93,10 +93,8 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
         point.x = 0;
         point.y = 0;
         if (ClientToScreen(hwnd, &point)) {
-            SDL_Rect bounds;
-            WIN_GetDisplayBounds(_this, display, &bounds);
-            window->x = point.x - bounds.x;
-            window->y = point.y - bounds.y;
+            window->x = point.x;
+            window->y = point.y;
         }
     }
     {
@@ -166,7 +164,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     HWND hwnd;
     RECT rect;
     SDL_Rect bounds;
@@ -203,28 +201,28 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         }
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = bounds.x + (bounds.w - w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         if (bounds.x == 0) {
             x = CW_USEDEFAULT;
         } else {
             x = bounds.x;
         }
     } else {
-        x = bounds.x + window->x + rect.left;
+        x = window->x + rect.left;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = bounds.y + (bounds.h - h) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         if (bounds.x == 0) {
             y = CW_USEDEFAULT;
         } else {
             y = bounds.y;
         }
     } else {
-        y = bounds.y + window->y + rect.top;
+        y = window->y + rect.top;
     }
 
     hwnd =
@@ -366,7 +364,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
     SDL_Rect bounds;
@@ -406,16 +404,16 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
         }
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = bounds.x + (bounds.w - w) / 2;
     } else {
-        x = bounds.x + window->x + rect.left;
+        x = window->x + rect.left;
     }
     if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = bounds.y + (bounds.h - h) / 2;
     } else {
-        y = bounds.y + window->y + rect.top;
+        y = window->y + rect.top;
     }
 
     SetWindowPos(hwnd, top, x, y, 0, 0, (SWP_NOCOPYBITS | SWP_NOSIZE));

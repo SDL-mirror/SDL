@@ -301,7 +301,7 @@ SDL_Renderer *
 DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_DFB_WINDOWDATA(window);
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_Renderer *renderer = NULL;
     DirectFB_RenderData *data = NULL;
     DFBSurfaceCapabilities scaps;
@@ -409,7 +409,7 @@ DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     //SDL_DFB_RENDERERDATA(renderer);
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DFB_DEVICEDATA(display->device);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
     DirectFB_TextureData *data = texture->driverdata;
@@ -465,7 +465,7 @@ static int
 DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DFB_DEVICEDATA(display->device);
     DirectFB_TextureData *data;
     DFBSurfaceDescription dsc;
@@ -1129,7 +1129,7 @@ static void
 DirectFB_DestroyRenderer(SDL_Renderer * renderer)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
-    SDL_VideoDisplay *display = renderer->window->display;
+    SDL_VideoDisplay *display = renderer->SDL_GetDisplayForWindow(window);
 
 #if 0
     if (display->palette) {
