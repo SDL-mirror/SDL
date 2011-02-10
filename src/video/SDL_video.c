@@ -1339,13 +1339,20 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 void
 SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 {
-    CHECK_WINDOW_MAGIC(window, );
-
-    if (x) {
-        *x = window->x;
-    }
-    if (y) {
-        *y = window->y;
+    if (_this && window && window->magic == &_this->window_magic) {
+        if (x) {
+            *x = window->x;
+        }
+        if (y) {
+            *y = window->y;
+        }
+    } else {
+        if (x) {
+            *x = 0;
+        }
+        if (y) {
+            *y = 0;
+        }
     }
 }
 
@@ -1366,7 +1373,7 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
 void
 SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
 {
-    if (window) {
+    if (_this && window && window->magic == &_this->window_magic) {
         if (w) {
             *w = window->w;
         }
