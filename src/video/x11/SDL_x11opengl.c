@@ -220,7 +220,7 @@ static void
 X11_GL_InitExtensions(_THIS)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
-    int screen = ((SDL_DisplayData *) SDL_CurrentDisplay->driverdata)->screen;
+    int screen = DefaultScreen(display);
     XVisualInfo *vinfo;
     XSetWindowAttributes xattr;
     Window w;

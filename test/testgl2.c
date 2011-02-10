@@ -234,7 +234,7 @@ main(int argc, char *argv[])
         SDL_GL_SetSwapInterval(0);
     }
 
-    SDL_GetCurrentDisplayMode(&mode);
+    SDL_GetCurrentDisplayMode(0, &mode);
     printf("Screen BPP: %d\n", SDL_BITSPERPIXEL(mode.format));
     printf("\n");
     printf("Vendor     : %s\n", glGetString(GL_VENDOR));

@@ -322,18 +322,10 @@ extern VideoBootStrap Android_bootstrap;
 extern VideoBootStrap DUMMY_bootstrap;
 #endif
 
-#define SDL_CurrentDisplay	(&_this->displays[_this->current_display])
-
 extern SDL_VideoDevice *SDL_GetVideoDevice(void);
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
 extern int SDL_AddVideoDisplay(const SDL_VideoDisplay * display);
 extern SDL_bool SDL_AddDisplayMode(SDL_VideoDisplay *display, const SDL_DisplayMode * mode);
-extern int SDL_GetNumDisplayModesForDisplay(SDL_VideoDisplay * display);
-extern int SDL_GetDisplayModeForDisplay(SDL_VideoDisplay * display, int index, SDL_DisplayMode * mode);
-extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
-extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 

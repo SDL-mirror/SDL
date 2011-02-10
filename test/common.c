@@ -594,9 +594,8 @@ CommonInit(CommonState * state)
             fprintf(stderr, "Number of displays: %d\n", n);
             for (i = 0; i < n; ++i) {
                 fprintf(stderr, "Display %d:\n", i);
-                SDL_SelectVideoDisplay(i);
 
-                SDL_GetDesktopDisplayMode(&mode);
+                SDL_GetDesktopDisplayMode(i, &mode);
                 SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
                                            &Bmask, &Amask);
                 fprintf(stderr,
@@ -612,13 +611,13 @@ CommonInit(CommonState * state)
                 }
 
                 /* Print available fullscreen video modes */
-                m = SDL_GetNumDisplayModes();
+                m = SDL_GetNumDisplayModes(i);
                 if (m == 0) {
                     fprintf(stderr, "No available fullscreen video modes\n");
                 } else {
                     fprintf(stderr, "  Fullscreen video modes:\n");
                     for (j = 0; j < m; ++j) {
-                        SDL_GetDisplayMode(j, &mode);
+                        SDL_GetDisplayMode(i, j, &mode);
                         SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
                                                    &Gmask, &Bmask, &Amask);
                         fprintf(stderr,
@@ -642,7 +641,6 @@ CommonInit(CommonState * state)
             }
         }
 
-        SDL_SelectVideoDisplay(state->display);
         if (state->verbose & VERBOSE_RENDER) {
             SDL_RendererInfo info;
 

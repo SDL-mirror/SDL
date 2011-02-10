@@ -236,7 +236,6 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
  *  \brief Returns the number of available video displays.
  *  
  *  \sa SDL_GetDisplayBounds()
- *  \sa SDL_SelectVideoDisplay()
  */
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
 
@@ -248,34 +247,14 @@ extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
  *  
  *  \sa SDL_GetNumVideoDisplays()
  */
-extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int index, SDL_Rect * rect);
+extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect);
 
 /**
- *  \brief Set the index of the currently selected display.
- *  
- *  \return 0 on success, or -1 if the index is out of range.
- *  
- *  \sa SDL_GetNumVideoDisplays()
- *  \sa SDL_GetCurrentVideoDisplay()
- */
-extern DECLSPEC int SDLCALL SDL_SelectVideoDisplay(int index);
-
-/**
- *  \brief Get the index of the currently selected display.
- *  
- *  \return The index of the currently selected display.
- *  
- *  \sa SDL_GetNumVideoDisplays()
- *  \sa SDL_SelectVideoDisplay()
- */
-extern DECLSPEC int SDLCALL SDL_GetCurrentVideoDisplay(void);
-
-/**
- *  \brief Returns the number of available display modes for the current display.
+ *  \brief Returns the number of available display modes.
  *  
  *  \sa SDL_GetDisplayMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
+extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(int displayIndex);
 
 /**
  *  \brief Fill in information about a specific display mode.
@@ -288,19 +267,18 @@ extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
  *  
  *  \sa SDL_GetNumDisplayModes()
  */
-extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int index,
+extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int displayIndex, int modeIndex,
                                                SDL_DisplayMode * mode);
 
 /**
- *  \brief Fill in information about the desktop display mode for the current 
- *         display.
+ *  \brief Fill in information about the desktop display mode.
  */
-extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode);
+extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(int displayIndex, SDL_DisplayMode * mode);
 
 /**
  *  \brief Fill in information about the current display mode.
  */
-extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
+extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(int displayIndex, SDL_DisplayMode * mode);
 
 
 /**
@@ -323,16 +301,13 @@ extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
  *  \sa SDL_GetNumDisplayModes()
  *  \sa SDL_GetDisplayMode()
  */
-extern DECLSPEC SDL_DisplayMode *SDLCALL SDL_GetClosestDisplayMode(const
-                                                                   SDL_DisplayMode
-                                                                   * mode,
-                                                                   SDL_DisplayMode
-                                                                   * closest);
+extern DECLSPEC SDL_DisplayMode * SDLCALL SDL_GetClosestDisplayMode(int displayIndex, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
 
 /**
- *  \brief Set the display mode used when a fullscreen window is visible
- *         on the currently selected display.  By default the window's
- *         dimensions and the desktop format and refresh rate are used.
+ *  \brief Set the display mode used when a fullscreen window is visible.
+ *
+ *  By default the window's dimensions and the desktop format and refresh rate
+ *  are used.
  *  
  *  \param mode The mode to use, or NULL for the default mode.
  *  
@@ -347,7 +322,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_Window * window,
 
 /**
  *  \brief Fill in information about the display mode used when a fullscreen
- *         window is visible on the currently selected display.
+ *         window is visible.
  *
  *  \sa SDL_SetWindowDisplayMode()
  *  \sa SDL_SetWindowFullscreen()
