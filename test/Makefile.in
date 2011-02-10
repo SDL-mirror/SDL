@@ -23,7 +23,6 @@ TARGETS = \
 	testerror$(EXE) \
 	testfile$(EXE) \
 	testfill$(EXE) \
-	testgamma$(EXE) \
 	testgesture$(EXE) \
 	testgl$(EXE) \
 	testgl2$(EXE) \

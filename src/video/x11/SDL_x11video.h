@@ -55,7 +55,6 @@
 
 #include "SDL_x11clipboard.h"
 #include "SDL_x11events.h"
-#include "SDL_x11gamma.h"
 #include "SDL_x11keyboard.h"
 #include "SDL_x11modes.h"
 #include "SDL_x11mouse.h"
@@ -92,8 +91,6 @@ typedef struct SDL_VideoData
     SDL_Scancode key_layout[256];
     SDL_bool selection_waiting;
 } SDL_VideoData;
-
-extern SDL_bool X11_UseDirectColorVisuals(void);
 
 #endif /* _SDL_x11video_h */
 

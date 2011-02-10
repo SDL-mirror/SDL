@@ -27,7 +27,6 @@
 
 #include "SDL_DirectFB_events.h"
 /*
- * #include "SDL_DirectFB_gamma.h"
  * #include "SDL_DirectFB_keyboard.h"
  */
 #include "SDL_DirectFB_modes.h"

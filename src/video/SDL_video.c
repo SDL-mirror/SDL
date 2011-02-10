@@ -1644,9 +1644,6 @@ SDL_OnWindowFocusGained(SDL_Window * window)
 {
     SDL_VideoDisplay *display = window->display;
 
-    if (display->gamma && _this->SetDisplayGammaRamp) {
-        _this->SetDisplayGammaRamp(_this, display, display->gamma);
-    }
     if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
         && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
@@ -1664,9 +1661,6 @@ SDL_OnWindowFocusLost(SDL_Window * window)
         SDL_MinimizeWindow(window);
     }
 
-    if (display->gamma && _this->SetDisplayGammaRamp) {
-        _this->SetDisplayGammaRamp(_this, display, display->saved_gamma);
-    }
     if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
         && _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
@@ -1824,10 +1818,6 @@ SDL_VideoQuit(void)
         if (display->desktop_mode.driverdata) {
             SDL_free(display->desktop_mode.driverdata);
             display->desktop_mode.driverdata = NULL;
-        }
-        if (display->gamma) {
-            SDL_free(display->gamma);
-            display->gamma = NULL;
         }
         if (display->driverdata) {
             SDL_free(display->driverdata);

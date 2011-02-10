@@ -70,8 +70,6 @@ int PND_videoinit(_THIS);
 void PND_videoquit(_THIS);
 void PND_getdisplaymodes(_THIS, SDL_VideoDisplay * display);
 int PND_setdisplaymode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-int PND_setdisplaygammaramp(_THIS, Uint16 * ramp);
-int PND_getdisplaygammaramp(_THIS, Uint16 * ramp);
 int PND_createwindow(_THIS, SDL_Window * window);
 int PND_createwindowfrom(_THIS, SDL_Window * window, const void *data);
 void PND_setwindowtitle(_THIS, SDL_Window * window);

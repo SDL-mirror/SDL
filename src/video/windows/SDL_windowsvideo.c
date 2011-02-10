@@ -109,8 +109,6 @@ WIN_CreateDevice(int devindex)
     device->GetDisplayBounds = WIN_GetDisplayBounds;
     device->GetDisplayModes = WIN_GetDisplayModes;
     device->SetDisplayMode = WIN_SetDisplayMode;
-    device->SetDisplayGammaRamp = WIN_SetDisplayGammaRamp;
-    device->GetDisplayGammaRamp = WIN_GetDisplayGammaRamp;
     device->PumpEvents = WIN_PumpEvents;
 
 #undef CreateWindow

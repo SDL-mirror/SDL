@@ -1526,6 +1526,26 @@ SDL_GL_SwapBuffers(void)
     SDL_GL_SwapWindow(SDL_VideoWindow);
 }
 
+int
+SDL_SetGamma(float red, float green, float blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
+int
+SDL_SetGammaRamp(const Uint16 * red, const Uint16 * green, const Uint16 * blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
+int
+SDL_GetGammaRamp(Uint16 * red, Uint16 * green, Uint16 * blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
 
 int
 SDL_EnableKeyRepeat(int delay, int interval)

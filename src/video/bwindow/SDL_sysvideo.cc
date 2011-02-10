@@ -129,7 +129,6 @@ extern "C"
         device->UnlockHWSurface = BE_UnlockHWSurface;
         device->FlipHWSurface = NULL;
         device->FreeHWSurface = BE_FreeHWSurface;
-        /* Gamma support */
 #if SDL_VIDEO_OPENGL
         /* OpenGL support */
         device->GL_LoadLibrary = BE_GL_LoadLibrary;

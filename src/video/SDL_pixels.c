@@ -764,20 +764,6 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
     }
 }
 
-/* Apply gamma to a set of colors - this is easy. :) */
-void
-SDL_ApplyGamma(Uint16 * gamma, SDL_Color * colors, SDL_Color * output,
-               int ncolors)
-{
-    int i;
-
-    for (i = 0; i < ncolors; ++i) {
-        output[i].r = gamma[0 * 256 + colors[i].r] >> 8;
-        output[i].g = gamma[1 * 256 + colors[i].g] >> 8;
-        output[i].b = gamma[2 * 256 + colors[i].b] >> 8;
-    }
-}
-
 /* Map from Palette to Palette */
 static Uint8 *
 Map1to1(SDL_Palette * src, SDL_Palette * dst, int *identical)

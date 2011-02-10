@@ -110,9 +110,6 @@ struct SDL_VideoDisplay
     SDL_DisplayMode current_mode;
     SDL_bool updating_fullscreen;
 
-    Uint16 *gamma;
-    Uint16 *saved_gamma;        /* (just offset into gamma) */
-
     SDL_Window *windows;
     SDL_Window *fullscreen_window;
 
@@ -168,12 +165,6 @@ struct SDL_VideoDevice
      * associated with them.
      */
     int (*SetDisplayMode) (_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-
-    /* Set the gamma ramp */
-    int (*SetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
-
-    /* Get the gamma ramp */
-    int (*GetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
     /* * * */
     /*
@@ -343,8 +334,6 @@ extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_D
 extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
 extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
-extern int SDL_SetGammaRampForDisplay(SDL_VideoDisplay * display, const Uint16 * red, const Uint16 * green, const Uint16 * blue);
-extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, Uint16 * green, Uint16 * blue);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 

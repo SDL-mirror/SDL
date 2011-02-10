@@ -361,55 +361,6 @@ extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_Window * window,
 extern DECLSPEC Uint32 SDLCALL SDL_GetWindowPixelFormat(SDL_Window * window);
 
 /**
- *  \brief Set the gamma correction for each of the color channels on the 
- *         currently selected display.
- *  
- *  \return 0 on success, or -1 if setting the gamma isn't supported.
- *  
- *  \sa SDL_SetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_SetGamma(float red, float green, float blue);
-
-/**
- *  \brief Set the gamma ramp for the currently selected display.
- *  
- *  \param red The translation table for the red channel, or NULL.
- *  \param green The translation table for the green channel, or NULL.
- *  \param blue The translation table for the blue channel, or NULL.
- *  
- *  \return 0 on success, or -1 if gamma ramps are unsupported.
- *  
- *  Set the gamma translation table for the red, green, and blue channels
- *  of the video hardware.  Each table is an array of 256 16-bit quantities,
- *  representing a mapping between the input and output for that channel.
- *  The input is the index into the array, and the output is the 16-bit
- *  gamma value at that index, scaled to the output color precision.
- *  
- *  \sa SDL_GetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_SetGammaRamp(const Uint16 * red,
-                                             const Uint16 * green,
-                                             const Uint16 * blue);
-
-/**
- *  \brief Get the gamma ramp for the currently selected display.
- *  
- *  \param red   A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the red channel, or NULL.
- *  \param green A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the green channel, or NULL.
- *  \param blue  A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the blue channel, or NULL.
- *   
- *  \return 0 on success, or -1 if gamma ramps are unsupported.
- *  
- *  \sa SDL_SetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_GetGammaRamp(Uint16 * red, Uint16 * green,
-                                             Uint16 * blue);
-
-
-/**
  *  \brief Create a window with the specified position, dimensions, and flags.
  *  
  *  \param title The title of the window, in UTF-8 encoding.
