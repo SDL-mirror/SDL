@@ -32,36 +32,17 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
-#if defined(__MACOSX__) && (defined(__ppc__) || defined(__ppc64__))
-#include <sys/sysctl.h>         /* For AltiVec check */
-#elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
-#include <signal.h>
-#include <setjmp.h>
-#endif
 #ifdef __WIN32__
 #include "../core/windows/SDL_windows.h"
 #endif
 
 #define CPU_HAS_RDTSC   0x00000001
 #define CPU_HAS_MMX     0x00000002
-#define CPU_HAS_MMXEXT  0x00000004
-#define CPU_HAS_3DNOW   0x00000010
-#define CPU_HAS_3DNOWEXT 0x00000020
-#define CPU_HAS_SSE     0x00000040
-#define CPU_HAS_SSE2    0x00000080
-#define CPU_HAS_ALTIVEC 0x00000100
+#define CPU_HAS_SSE     0x00000010
+#define CPU_HAS_SSE2    0x00000020
+#define CPU_HAS_SSE3    0x00000040
+#define CPU_HAS_SSE4    0x00000080
 
-#if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP && !__MACOSX__
-/* This is the brute force way of detecting instruction sets...
-   the idea is borrowed from the libmpeg2 library - thanks!
- */
-static jmp_buf jmpbuf;
-static void
-illegal_instruction(int sig)
-{
-    longjmp(jmpbuf, 1);
-}
-#endif /* HAVE_SETJMP */
 
 static __inline__ int
 CPU_haveCPUID(void)
@@ -202,20 +183,6 @@ CPU_getCPUIDFeatures(void)
 }
 
 static __inline__ int
-CPU_getCPUIDFeaturesExt(void)
-{
-    int features = 0;
-    int a, b, c, d;
-
-    cpuid(0x80000000, a, b, c, d);
-    if (a >= 0x80000001) {
-        cpuid(0x80000001, a, b, c, d);
-        features = d;
-    }
-    return features;
-}
-
-static __inline__ int
 CPU_haveRDTSC(void)
 {
     if (CPU_haveCPUID()) {
@@ -229,33 +196,6 @@ CPU_haveMMX(void)
 {
     if (CPU_haveCPUID()) {
         return (CPU_getCPUIDFeatures() & 0x00800000);
-    }
-    return 0;
-}
-
-static __inline__ int
-CPU_haveMMXExt(void)
-{
-    if (CPU_haveCPUID()) {
-        return (CPU_getCPUIDFeaturesExt() & 0x00400000);
-    }
-    return 0;
-}
-
-static __inline__ int
-CPU_have3DNow(void)
-{
-    if (CPU_haveCPUID()) {
-        return (CPU_getCPUIDFeaturesExt() & 0x80000000);
-    }
-    return 0;
-}
-
-static __inline__ int
-CPU_have3DNowExt(void)
-{
-    if (CPU_haveCPUID()) {
-        return (CPU_getCPUIDFeaturesExt() & 0x40000000);
     }
     return 0;
 }
@@ -279,26 +219,33 @@ CPU_haveSSE2(void)
 }
 
 static __inline__ int
-CPU_haveAltiVec(void)
+CPU_haveSSE3(void)
 {
-    volatile int altivec = 0;
-#if defined(__MACOSX__) && (defined(__ppc__) || defined(__ppc64__))
-    int selectors[2] = { CTL_HW, HW_VECTORUNIT };
-    int hasVectorUnit = 0;
-    size_t length = sizeof(hasVectorUnit);
-    int error = sysctl(selectors, 2, &hasVectorUnit, &length, NULL, 0);
-    if (0 == error)
-        altivec = (hasVectorUnit != 0);
-#elif SDL_ALTIVEC_BLITTERS && HAVE_SETJMP
-    void (*handler) (int sig);
-    handler = signal(SIGILL, illegal_instruction);
-    if (setjmp(jmpbuf) == 0) {
-        asm volatile ("mtspr 256, %0\n\t" "vand %%v0, %%v0, %%v0"::"r" (-1));
-        altivec = 1;
+    if (CPU_haveCPUID()) {
+        int a, b, c, d;
+
+        cpuid(0, a, b, c, d);
+        if (a >= 1) {
+            cpuid(1, a, b, c, d);
+            return (c & 0x00000001);
+        }
     }
-    signal(SIGILL, handler);
-#endif
-    return altivec;
+    return 0;
+}
+
+static __inline__ int
+CPU_haveSSE4(void)
+{
+    if (CPU_haveCPUID()) {
+        int a, b, c, d;
+
+        cpuid(0, a, b, c, d);
+        if (a >= 1) {
+            cpuid(1, a, b, c, d);
+            return (c & 0x00000100);
+        }
+    }
+    return 0;
 }
 
 static int SDL_CPUCount = 0;
@@ -471,23 +418,17 @@ SDL_GetCPUFeatures(void)
         if (CPU_haveMMX()) {
             SDL_CPUFeatures |= CPU_HAS_MMX;
         }
-        if (CPU_haveMMXExt()) {
-            SDL_CPUFeatures |= CPU_HAS_MMXEXT;
-        }
-        if (CPU_have3DNow()) {
-            SDL_CPUFeatures |= CPU_HAS_3DNOW;
-        }
-        if (CPU_have3DNowExt()) {
-            SDL_CPUFeatures |= CPU_HAS_3DNOWEXT;
-        }
         if (CPU_haveSSE()) {
             SDL_CPUFeatures |= CPU_HAS_SSE;
         }
         if (CPU_haveSSE2()) {
             SDL_CPUFeatures |= CPU_HAS_SSE2;
         }
-        if (CPU_haveAltiVec()) {
-            SDL_CPUFeatures |= CPU_HAS_ALTIVEC;
+        if (CPU_haveSSE3()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE3;
+        }
+        if (CPU_haveSSE4()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE4;
         }
     }
     return SDL_CPUFeatures;
@@ -512,33 +453,6 @@ SDL_HasMMX(void)
 }
 
 SDL_bool
-SDL_HasMMXExt(void)
-{
-    if (SDL_GetCPUFeatures() & CPU_HAS_MMXEXT) {
-        return SDL_TRUE;
-    }
-    return SDL_FALSE;
-}
-
-SDL_bool
-SDL_Has3DNow(void)
-{
-    if (SDL_GetCPUFeatures() & CPU_HAS_3DNOW) {
-        return SDL_TRUE;
-    }
-    return SDL_FALSE;
-}
-
-SDL_bool
-SDL_Has3DNowExt(void)
-{
-    if (SDL_GetCPUFeatures() & CPU_HAS_3DNOWEXT) {
-        return SDL_TRUE;
-    }
-    return SDL_FALSE;
-}
-
-SDL_bool
 SDL_HasSSE(void)
 {
     if (SDL_GetCPUFeatures() & CPU_HAS_SSE) {
@@ -557,9 +471,18 @@ SDL_HasSSE2(void)
 }
 
 SDL_bool
-SDL_HasAltiVec(void)
+SDL_HasSSE3(void)
 {
-    if (SDL_GetCPUFeatures() & CPU_HAS_ALTIVEC) {
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE3) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
+SDL_bool
+SDL_HasSSE4(void)
+{
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE4) {
         return SDL_TRUE;
     }
     return SDL_FALSE;
@@ -578,12 +501,10 @@ main()
     printf("CacheLine size: %d\n", SDL_GetCPUCacheLineSize());
     printf("RDTSC: %d\n", SDL_HasRDTSC());
     printf("MMX: %d\n", SDL_HasMMX());
-    printf("MMXExt: %d\n", SDL_HasMMXExt());
-    printf("3DNow: %d\n", SDL_Has3DNow());
-    printf("3DNowExt: %d\n", SDL_Has3DNowExt());
     printf("SSE: %d\n", SDL_HasSSE());
     printf("SSE2: %d\n", SDL_HasSSE2());
-    printf("AltiVec: %d\n", SDL_HasAltiVec());
+    printf("SSE3: %d\n", SDL_HasSSE3());
+    printf("SSE4: %d\n", SDL_HasSSE4());
     return 0;
 }
 
