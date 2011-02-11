@@ -491,7 +491,7 @@ main(int argc, char **argv)
     }
 
     MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, MOOSEPIC_W, MOOSEPIC_H);
-    if (!renderer) {
+    if (!MooseTexture) {
         fprintf(stderr, "Couldn't set create texture: %s\n", SDL_GetError());
         free(RawMooseData);
         quit(5);
