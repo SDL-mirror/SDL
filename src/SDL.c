@@ -29,10 +29,6 @@
 #include "haptic/SDL_haptic_c.h"
 #include "joystick/SDL_joystick_c.h"
 
-#if !SDL_VIDEO_DISABLED
-#include "video/SDL_leaks.h"
-#endif
-
 /* Initialization/Cleanup routines */
 #if !SDL_TIMERS_DISABLED
 extern void SDL_StartTicks(void);
@@ -49,9 +45,6 @@ extern int SDL_HelperWindowDestroy(void);
 static Uint32 SDL_initialized = 0;
 static Uint32 ticks_started = 0;
 
-#ifdef CHECK_LEAKS
-int surfaces_allocated = 0;
-#endif
 
 int
 SDL_InitSubSystem(Uint32 flags)
@@ -219,15 +212,6 @@ SDL_Quit(void)
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-
-#ifdef CHECK_LEAKS
-    /* !!! FIXME: make this an assertion. */
-    /* Print the number of surfaces not freed */
-    if (surfaces_allocated != 0) {
-        fprintf(stderr, "SDL Warning: %d SDL surfaces extant\n",
-                surfaces_allocated);
-    }
-#endif
 
     /* Uninstall any parachute signal handlers */
     SDL_UninstallParachute();
