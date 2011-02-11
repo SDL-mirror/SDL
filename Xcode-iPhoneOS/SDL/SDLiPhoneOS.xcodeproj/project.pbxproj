@@ -226,7 +226,6 @@
 		FDA684560DF2374E00F98A1A /* SDL_blit_N.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683090DF2374E00F98A1A /* SDL_blit_N.c */; };
 		FDA684570DF2374E00F98A1A /* SDL_blit_slow.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */; };
 		FDA684580DF2374E00F98A1A /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */; };
-		FDA6845B0DF2374E00F98A1A /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */; };
 		FDA6845C0DF2374E00F98A1A /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */; };
 		FDA6845D0DF2374E00F98A1A /* SDL_pixels_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA683100DF2374E00F98A1A /* SDL_pixels_c.h */; };
 		FDA6845E0DF2374E00F98A1A /* SDL_rect.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA683110DF2374E00F98A1A /* SDL_rect.c */; };
@@ -518,7 +517,6 @@
 		FDA683090DF2374E00F98A1A /* SDL_blit_N.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit_N.c; sourceTree = "<group>"; };
 		FDA6830A0DF2374E00F98A1A /* SDL_blit_slow.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_blit_slow.c; sourceTree = "<group>"; };
 		FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_bmp.c; sourceTree = "<group>"; };
-		FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_leaks.h; sourceTree = "<group>"; };
 		FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_pixels.c; sourceTree = "<group>"; };
 		FDA683100DF2374E00F98A1A /* SDL_pixels_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_pixels_c.h; sourceTree = "<group>"; };
 		FDA683110DF2374E00F98A1A /* SDL_rect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rect.c; sourceTree = "<group>"; };
@@ -1142,7 +1140,6 @@
 				FDA6830B0DF2374E00F98A1A /* SDL_bmp.c */,
 				044E5FB711E606EB0076F181 /* SDL_clipboard.c */,
 				0463873E0F0B5B7D0041FD65 /* SDL_fillrect.c */,
-				FDA6830E0DF2374E00F98A1A /* SDL_leaks.h */,
 				FDA6830F0DF2374E00F98A1A /* SDL_pixels.c */,
 				FDA683100DF2374E00F98A1A /* SDL_pixels_c.h */,
 				FDA683110DF2374E00F98A1A /* SDL_rect.c */,
@@ -1213,7 +1210,6 @@
 				FDA6844E0DF2374E00F98A1A /* SDL_blit.h in Headers */,
 				FDA684530DF2374E00F98A1A /* SDL_blit_auto.h in Headers */,
 				FDA684550DF2374E00F98A1A /* SDL_blit_copy.h in Headers */,
-				FDA6845B0DF2374E00F98A1A /* SDL_leaks.h in Headers */,
 				FDA6845D0DF2374E00F98A1A /* SDL_pixels_c.h in Headers */,
 				FDA684630DF2374E00F98A1A /* SDL_RLEaccel_c.h in Headers */,
 				FDA684670DF2374E00F98A1A /* SDL_sysvideo.h in Headers */,

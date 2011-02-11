@@ -315,7 +315,6 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     <ClInclude Include="..\..\src\video\SDL_glfuncs.h" />
     <ClInclude Include="..\..\src\joystick\SDL_joystick_c.h" />
     <ClInclude Include="..\..\src\events\SDL_keyboard_c.h" />
-    <ClInclude Include="..\..\src\video\SDL_leaks.h" />
     <ClInclude Include="..\..\src\audio\SDL_mixer_m68k.h" />
     <ClInclude Include="..\..\src\audio\SDL_mixer_MMX.h" />
     <ClInclude Include="..\..\src\audio\SDL_mixer_MMX_VC.h" />

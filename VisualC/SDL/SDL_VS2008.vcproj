@@ -915,10 +915,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_leaks.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\SDL_log.c"
 			>
 		</File>

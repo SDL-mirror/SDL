@@ -145,9 +145,6 @@ SDL_CreateRGBSurface(Uint32 flags,
 
     /* The surface is ready to go */
     surface->refcount = 1;
-#ifdef CHECK_LEAKS
-    ++surfaces_allocated;
-#endif
     return surface;
 }
 
@@ -931,9 +928,6 @@ SDL_FreeSurface(SDL_Surface * surface)
         SDL_free(surface->pixels);
     }
     SDL_free(surface);
-#ifdef CHECK_LEAKS
-    --surfaces_allocated;
-#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

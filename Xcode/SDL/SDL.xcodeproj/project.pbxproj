@@ -287,7 +287,6 @@
 		04BD018112E6671800899322 /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5A12E6671800899322 /* SDL_bmp.c */; };
 		04BD018212E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
 		04BD018712E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
-		04BD018B12E6671800899322 /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6412E6671800899322 /* SDL_leaks.h */; };
 		04BD018C12E6671800899322 /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6512E6671800899322 /* SDL_pixels.c */; };
 		04BD018D12E6671800899322 /* SDL_pixels_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6612E6671800899322 /* SDL_pixels_c.h */; };
 		04BD018E12E6671800899322 /* SDL_rect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6712E6671800899322 /* SDL_rect.c */; };
@@ -472,7 +471,6 @@
 		04BD039B12E6671800899322 /* SDL_bmp.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5A12E6671800899322 /* SDL_bmp.c */; };
 		04BD039C12E6671800899322 /* SDL_clipboard.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF5B12E6671800899322 /* SDL_clipboard.c */; };
 		04BD03A112E6671800899322 /* SDL_fillrect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6012E6671800899322 /* SDL_fillrect.c */; };
-		04BD03A512E6671800899322 /* SDL_leaks.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6412E6671800899322 /* SDL_leaks.h */; };
 		04BD03A612E6671800899322 /* SDL_pixels.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6512E6671800899322 /* SDL_pixels.c */; };
 		04BD03A712E6671800899322 /* SDL_pixels_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFF6612E6671800899322 /* SDL_pixels_c.h */; };
 		04BD03A812E6671800899322 /* SDL_rect.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFF6712E6671800899322 /* SDL_rect.c */; };
@@ -841,7 +839,6 @@
 		04BDFF5A12E6671800899322 /* SDL_bmp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_bmp.c; sourceTree = "<group>"; };
 		04BDFF5B12E6671800899322 /* SDL_clipboard.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_clipboard.c; sourceTree = "<group>"; };
 		04BDFF6012E6671800899322 /* SDL_fillrect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_fillrect.c; sourceTree = "<group>"; };
-		04BDFF6412E6671800899322 /* SDL_leaks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_leaks.h; sourceTree = "<group>"; };
 		04BDFF6512E6671800899322 /* SDL_pixels.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_pixels.c; sourceTree = "<group>"; };
 		04BDFF6612E6671800899322 /* SDL_pixels_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_pixels_c.h; sourceTree = "<group>"; };
 		04BDFF6712E6671800899322 /* SDL_rect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rect.c; sourceTree = "<group>"; };
@@ -1516,7 +1513,6 @@
 				04BDFF5A12E6671800899322 /* SDL_bmp.c */,
 				04BDFF5B12E6671800899322 /* SDL_clipboard.c */,
 				04BDFF6012E6671800899322 /* SDL_fillrect.c */,
-				04BDFF6412E6671800899322 /* SDL_leaks.h */,
 				04BDFF6512E6671800899322 /* SDL_pixels.c */,
 				04BDFF6612E6671800899322 /* SDL_pixels_c.h */,
 				04BDFF6712E6671800899322 /* SDL_rect.c */,
@@ -1885,7 +1881,6 @@
 				04BD017B12E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD017D12E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD018012E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD018B12E6671800899322 /* SDL_leaks.h in Headers */,
 				04BD018D12E6671800899322 /* SDL_pixels_c.h in Headers */,
 				04BD019712E6671800899322 /* SDL_RLEaccel_c.h in Headers */,
 				04BD019912E6671800899322 /* SDL_shape_internals.h in Headers */,
@@ -2015,7 +2010,6 @@
 				04BD039512E6671800899322 /* SDL_blit_auto.h in Headers */,
 				04BD039712E6671800899322 /* SDL_blit_copy.h in Headers */,
 				04BD039A12E6671800899322 /* SDL_blit_slow.h in Headers */,
-				04BD03A512E6671800899322 /* SDL_leaks.h in Headers */,
 				04BD03A712E6671800899322 /* SDL_pixels_c.h in Headers */,
 				04BD03B112E6671800899322 /* SDL_RLEaccel_c.h in Headers */,
 				04BD03B312E6671800899322 /* SDL_shape_internals.h in Headers */,
