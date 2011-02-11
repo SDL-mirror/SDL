@@ -110,14 +110,10 @@ afterDelay:0.0];
     if (!_this) {
         return;
     }
-
-    int i;
-    for (i = 0; i < _this->num_displays; i++) {
-        const SDL_VideoDisplay *display = &_this->displays[i];
-        SDL_Window *window;
-        for (window = display->windows; window != nil; window = window->next) {
-            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
-        }
+	
+	SDL_Window *window;
+    for (window = _this->windows; window != nil; window = window->next) {
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
 }
 
@@ -130,14 +126,10 @@ afterDelay:0.0];
     if (!_this) {
         return;
     }
-
-    int i;
-    for (i = 0; i < _this->num_displays; i++) {
-        const SDL_VideoDisplay *display = &_this->displays[i];
-        SDL_Window *window;
-        for (window = display->windows; window != nil; window = window->next) {
-            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
-        }
+	
+	SDL_Window *window;
+    for (window = _this->windows; window != nil; window = window->next) {
+		SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }
 

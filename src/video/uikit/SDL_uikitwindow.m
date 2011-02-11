@@ -90,7 +90,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
 
     // SDL currently puts this window at the start of display's linked list. We rely on this.
-    SDL_assert(display->windows == window);
+    SDL_assert(_this->windows == window);
 
     /* We currently only handle a single window per display on iPhone */
     if (window->next != NULL) {
