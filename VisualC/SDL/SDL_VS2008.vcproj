@@ -867,10 +867,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_gamma.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\events\SDL_gesture.c"
 			>
 		</File>
@@ -1232,14 +1228,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\windows\SDL_windowsgamma.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\windows\SDL_windowsgamma.h"
 			>
 		</File>
 		<File

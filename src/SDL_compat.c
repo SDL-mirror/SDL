@@ -79,7 +79,7 @@ GetVideoDisplay()
         variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
     }
     if ( variable ) {
-        SDL_atoi(variable);
+        return SDL_atoi(variable);
     } else {
         return 0;
     }

@@ -1004,7 +1004,6 @@ Uint32
 SDL_GetWindowPixelFormat(SDL_Window * window)
 {
     SDL_VideoDisplay *display;
-    SDL_DisplayMode *displayMode;
 
     CHECK_WINDOW_MAGIC(window, SDL_PIXELFORMAT_UNKNOWN);
 
@@ -1097,7 +1096,6 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
                                   SDL_WINDOW_BORDERLESS |
                                   SDL_WINDOW_RESIZABLE |
                                   SDL_WINDOW_INPUT_GRABBED);
-    SDL_VideoDisplay *display;
     SDL_Window *window;
 
     if (!_this) {
@@ -1269,7 +1267,6 @@ SDL_Window *
 SDL_GetWindowFromID(Uint32 id)
 {
     SDL_Window *window;
-    int i;
 
     if (!_this) {
         return NULL;
