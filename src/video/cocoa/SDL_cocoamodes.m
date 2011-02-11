@@ -258,14 +258,23 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         /* Restoring desktop mode */
         CGDisplaySwitchToMode(displaydata->display, data->moderef);
 
-        CGDisplayRelease(displaydata->display);
+        if (CGDisplayIsMain(displaydata->display)) {
+            CGReleaseAllDisplays();
+        } else {
+            CGDisplayRelease(displaydata->display);
+        }
 
         if (CGDisplayIsMain(displaydata->display)) {
             ShowMenuBar();
         }
     } else {
         /* Put up the blanking window (a window above all other windows) */
-        result = CGDisplayCapture(displaydata->display);
+        if (CGDisplayIsMain(displaydata->display)) {
+            /* If we don't capture all displays, Cocoa tries to rearrange windows... *sigh* */
+            result = CGCaptureAllDisplays();
+        } else {
+            result = CGDisplayCapture(displaydata->display);
+        }
         if (result != kCGErrorSuccess) {
             CG_SetError("CGDisplayCapture()", result);
             goto ERR_NO_CAPTURE;
