@@ -450,10 +450,10 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         [contentView release];
 
         ConvertNSRect(&rect);
-        window->x = (int)rect.origin.x;
-        window->y = (int)rect.origin.y;
-        window->w = (int)rect.size.width;
-        window->h = (int)rect.size.height;
+        window->fullscreen.x = window->windowed.x = window->x = (int)rect.origin.x;
+        window->fullscreen.y = window->windowed.y = window->y = (int)rect.origin.y;
+        window->fullscreen.w = window->windowed.w = window->w = (int)rect.size.width;
+        window->fullscreen.h = window->windowed.h = window->h = (int)rect.size.height;
     }
     if ([nswindow isVisible]) {
         window->flags |= SDL_WINDOW_SHOWN;
