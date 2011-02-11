@@ -64,7 +64,6 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     window->driverdata = data;
     
     window->flags &= ~SDL_WINDOW_RESIZABLE;        /* window is NEVER resizeable */
-    window->flags |= SDL_WINDOW_OPENGL;            /* window is always OpenGL */
     window->flags |= SDL_WINDOW_FULLSCREEN;        /* window is always fullscreen */
     window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iPod touch, always shown */
     window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    

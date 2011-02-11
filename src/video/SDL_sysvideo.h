@@ -72,6 +72,20 @@ struct SDL_Window
     const void *magic;
     Uint32 id;
     char *title;
+
+    /* The fullscreen values */
+    struct {
+        int x, y;
+        int w, h;
+    } fullscreen;
+
+    /* The windowed values */
+    struct {
+        int x, y;
+        int w, h;
+    } windowed;
+
+    /* The public values */
     int x, y;
     int w, h;
     Uint32 flags;
@@ -106,7 +120,6 @@ struct SDL_VideoDisplay
     SDL_DisplayMode *display_modes;
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
-    SDL_bool updating_fullscreen;
 
     SDL_Window *fullscreen_window;
 
@@ -178,6 +191,8 @@ struct SDL_VideoDevice
     void (*MaximizeWindow) (_THIS, SDL_Window * window);
     void (*MinimizeWindow) (_THIS, SDL_Window * window);
     void (*RestoreWindow) (_THIS, SDL_Window * window);
+    void (*PrepWindowFullscreen) (_THIS, SDL_Window * window);
+    void (*SetWindowFullscreen) (_THIS, SDL_Window * window);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);

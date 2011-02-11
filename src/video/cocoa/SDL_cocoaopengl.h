@@ -26,6 +26,9 @@
 
 #if SDL_VIDEO_OPENGL_CGL
 
+/* Define this if you want to be able to toggle fullscreen mode seamlessly */
+#define FULLSCREEN_TOGGLEABLE
+
 struct SDL_GLDriverData
 {
     int initialized;

@@ -81,9 +81,11 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 
     pool = [[NSAutoreleasePool alloc] init];
 
+#ifndef FULLSCREEN_TOGGLEABLE
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         attr[i++] = NSOpenGLPFAFullScreen;
     }
+#endif
 
     attr[i++] = NSOpenGLPFAColorSize;
     attr[i++] = SDL_BYTESPERPIXEL(display->current_mode.format)*8;
@@ -199,9 +201,12 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
+#ifndef FULLSCREEN_TOGGLEABLE
         if (window->flags & SDL_WINDOW_FULLSCREEN) {
             [nscontext setFullScreen];
-        } else {
+        } else
+#endif
+        {
             [nscontext setView:[windowdata->nswindow contentView]];
             [nscontext update];
         }

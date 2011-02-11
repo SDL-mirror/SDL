@@ -1085,26 +1085,15 @@ GLES2_RenderPresent(SDL_Renderer *renderer)
 
 #define GL_NVIDIA_PLATFORM_BINARY_NV 0x890B
 
-/* Used to re-create the window with OpenGL capability */
-extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
-
 static SDL_Renderer *
 GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 {
     SDL_Renderer *renderer;
     GLES2_DriverContext *rdata;
-    Uint32 window_flags;
     GLint nFormats;
 #ifndef ZUNE_HD
     GLboolean hasCompiler;
 #endif
-
-    window_flags = SDL_GetWindowFlags(window);
-    if (!(window_flags & SDL_WINDOW_OPENGL)) {
-        if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
-            return NULL;
-        }
-    }
 
     /* Create the renderer struct */
     renderer = (SDL_Renderer *)SDL_calloc(1, sizeof(SDL_Renderer));

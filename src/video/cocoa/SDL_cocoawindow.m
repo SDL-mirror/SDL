@@ -398,6 +398,22 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 @end
 
+static unsigned int
+GetStyleMask(SDL_Window * window)
+{
+    unsigned int style;
+
+    if (window->flags & SDL_WINDOW_BORDERLESS) {
+        style = NSBorderlessWindowMask;
+    } else {
+        style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
+    }
+    if (window->flags & SDL_WINDOW_RESIZABLE) {
+        style |= NSResizableWindowMask;
+    }
+    return style;
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
 {
@@ -406,7 +422,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     SDL_WindowData *data;
 
     /* Allocate the window data */
-    data = (SDL_WindowData *) SDL_malloc(sizeof(*data));
+    data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
@@ -424,7 +440,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 
     /* Fill in the SDL window with the window data */
     {
-        SDL_Rect bounds;
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
         NSView *contentView = [[SDLView alloc] initWithFrame: rect
                                                     listener: data->listener];
@@ -495,16 +510,14 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     unsigned int style;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
     } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         rect.origin.x = bounds.x;
     } else {
         rect.origin.x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
     } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         rect.origin.y = bounds.y;
@@ -515,14 +528,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     rect.size.height = window->h;
     ConvertNSRect(&rect);
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
-        style = NSBorderlessWindowMask;
-    } else {
-        style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
-    }
-    if (window->flags & SDL_WINDOW_RESIZABLE) {
-        style |= NSResizableWindowMask;
-    }
+    style = GetStyleMask(window);
 
     /* Figure out which screen to place this window */
     NSArray *screens = [NSScreen screens];
@@ -600,14 +606,12 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_Rect bounds;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
     } else {
         rect.origin.x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
     } else {
         rect.origin.y = window->y;
@@ -696,6 +700,56 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
     } else if ([nswindow isZoomed]) {
         [nswindow zoom:nil];
     }
+    [pool release];
+}
+
+void
+Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    NSWindow *nswindow = data->nswindow;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    NSRect rect;
+    unsigned int style;
+
+    if (FULLSCREEN_VISIBLE(window)) {
+        SDL_Rect bounds;
+
+        Cocoa_GetDisplayBounds(_this, display, &bounds);
+        rect.origin.x = bounds.x;
+        rect.origin.y = bounds.y;
+        rect.size.width = bounds.w;
+        rect.size.height = bounds.h;
+        ConvertNSRect(&rect);
+
+        style = NSBorderlessWindowMask;
+    } else {
+        rect.origin.x = window->windowed.x;
+        rect.origin.y = window->windowed.y;
+        rect.size.width = window->windowed.w;
+        rect.size.height = window->windowed.h;
+        /* FIXME: This calculation is wrong, we're changing the origin */
+        ConvertNSRect(&rect);
+
+        style = GetStyleMask(window);
+    }
+
+    [nswindow setStyleMask:style];
+    [nswindow setContentSize:rect.size];
+    rect = [nswindow frameRectForContentRect:rect];
+    [nswindow setFrameOrigin:rect.origin];
+
+#ifdef FULLSCREEN_TOGGLEABLE
+    if (FULLSCREEN_VISIBLE(window)) {
+        /* OpenGL is rendering to the window, so make it visible! */
+        [nswindow setLevel:CGShieldingWindowLevel()];
+    } else {
+        [nswindow setLevel:kCGNormalWindowLevel];
+    }
+#endif
+    [nswindow makeKeyAndOrderFront:nil];
+
     [pool release];
 }
 

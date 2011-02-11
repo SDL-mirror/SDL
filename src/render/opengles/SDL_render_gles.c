@@ -40,9 +40,6 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
-/* Used to re-create the window with OpenGL capability */
-extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
-
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GLES_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -146,14 +143,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GLES_RenderData *data;
     GLint value;
-    Uint32 window_flags;
-
-    window_flags = SDL_GetWindowFlags(window);
-    if (!(window_flags & SDL_WINDOW_OPENGL)) {
-        if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
-            return NULL;
-        }
-    }
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {

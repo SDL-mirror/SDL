@@ -299,19 +299,6 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         CGReleaseDisplayFadeReservation(fade_token);
     }
 
-    [[NSApp mainWindow] makeKeyAndOrderFront: nil];
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-    /* 
-        There is a bug in Cocoa where NSScreen doesn't synchronize
-        with CGDirectDisplay, so the main screen's frame is wrong.
-        As a result, coordinate translation produces incorrect results.
-        We can hack around this bug by setting the screen rect
-        ourselves. This hack should be removed if/when the bug is fixed.
-    */
-    [[NSScreen mainScreen] setFrame:NSMakeRect(0,0,mode->w,mode->h)]; 
-#endif
-
     return 0;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */

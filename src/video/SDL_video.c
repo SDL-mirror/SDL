@@ -600,21 +600,21 @@ SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect)
         SDL_VideoDisplay *display = &_this->displays[displayIndex];
 
         if (_this->GetDisplayBounds) {
-            if (_this->GetDisplayBounds(_this, display, rect) < 0) {
-                return -1;
+            if (_this->GetDisplayBounds(_this, display, rect) == 0) {
+                return 0;
             }
-        } else {
-            /* Assume that the displays are left to right */
-            if (displayIndex == 0) {
-                rect->x = 0;
-                rect->y = 0;
-            } else {
-                SDL_GetDisplayBounds(displayIndex-1, rect);
-                rect->x += rect->w;
-            }
-            rect->w = display->desktop_mode.w;
-            rect->h = display->desktop_mode.h;
         }
+
+        /* Assume that the displays are left to right */
+        if (displayIndex == 0) {
+            rect->x = 0;
+            rect->y = 0;
+        } else {
+            SDL_GetDisplayBounds(displayIndex-1, rect);
+            rect->x += rect->w;
+        }
+        rect->w = display->desktop_mode.w;
+        rect->h = display->desktop_mode.h;
     }
     return 0;
 }
@@ -1016,13 +1016,12 @@ static void
 SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    SDL_Window *other;
 
-    /* See if we're already processing a window */
-    if (display->updating_fullscreen) {
+    /* See if anything changed */
+    if ((display->fullscreen_window == window) == attempt) {
         return;
     }
-
-    display->updating_fullscreen = SDL_TRUE;
 
     /* See if we even want to do anything here */
     if ((window->flags & SDL_WINDOW_FULLSCREEN) &&
@@ -1042,29 +1041,52 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
 
     if (FULLSCREEN_VISIBLE(window)) {
         /* Hide any other fullscreen windows */
-        if (display->fullscreen_window != window) {
+        if (display->fullscreen_window &&
+            display->fullscreen_window != window) {
             SDL_MinimizeWindow(display->fullscreen_window);
         }
     }
 
-    display->updating_fullscreen = SDL_FALSE;
-
     /* See if there are any fullscreen windows */
-    for (window = _this->windows; window; window = window->next) {
-        if (FULLSCREEN_VISIBLE(window) &&
-            SDL_GetDisplayForWindow(window) == display) {
+    for (other = _this->windows; other; other = other->next) {
+        if (FULLSCREEN_VISIBLE(other) &&
+            SDL_GetDisplayForWindow(other) == display) {
             SDL_DisplayMode fullscreen_mode;
-            if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
+            if (SDL_GetWindowDisplayMode(other, &fullscreen_mode) == 0) {
+                if (_this->PrepWindowFullscreen) {
+                    _this->PrepWindowFullscreen(_this, other);
+                }
+
                 SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
-                display->fullscreen_window = window;
+
+                if (_this->SetWindowFullscreen) {
+                    _this->SetWindowFullscreen(_this, other);
+                }
+                display->fullscreen_window = other;
+
+                /* Generate a mode change events here */
+                SDL_SendWindowEvent(other, SDL_WINDOWEVENT_RESIZED,
+                                    fullscreen_mode.w, fullscreen_mode.h);
                 return;
             }
         }
     }
 
     /* Nope, restore the desktop mode */
+    if (_this->PrepWindowFullscreen) {
+        _this->PrepWindowFullscreen(_this, window);
+    }
+
     SDL_SetDisplayModeForDisplay(display, NULL);
+
+    if (_this->SetWindowFullscreen) {
+        _this->SetWindowFullscreen(_this, window);
+    }
     display->fullscreen_window = NULL;
+
+    /* Generate a mode change events here */
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED,
+                        window->windowed.w, window->windowed.h);
 }
 
 SDL_Window *
@@ -1084,6 +1106,11 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
             return NULL;
         }
     }
+
+    /* Some platforms have OpenGL enabled by default */
+#if (SDL_VIDEO_OPENGL && __MACOSX__) || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    flags |= SDL_WINDOW_OPENGL;
+#endif
     if (flags & SDL_WINDOW_OPENGL) {
         if (!_this->GL_CreateContext) {
             SDL_SetError("No OpenGL support in video driver");
@@ -1169,13 +1196,6 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
         SDL_SetError("No OpenGL support in video driver");
         return -1;
     }
-    if ((window->flags & SDL_WINDOW_OPENGL) != (flags & SDL_WINDOW_OPENGL)) {
-        if (flags & SDL_WINDOW_OPENGL) {
-            SDL_GL_LoadLibrary(NULL);
-        } else {
-            SDL_GL_UnloadLibrary();
-        }
-    }
 
     if (window->flags & SDL_WINDOW_FOREIGN) {
         /* Can't destroy and re-create foreign windows, hrm */
@@ -1184,8 +1204,27 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
         flags &= ~SDL_WINDOW_FOREIGN;
     }
 
+    /* Restore video mode, etc. */
+    SDL_UpdateFullscreenMode(window, SDL_FALSE);
+
+    /* Tear down the old native window */
+    if (window->surface) {
+        window->surface->refcount = 0;
+        SDL_FreeSurface(window->surface);
+    }
+    if (_this->DestroyWindowFramebuffer) {
+        _this->DestroyWindowFramebuffer(_this, window);
+    }
     if (_this->DestroyWindow && !(flags & SDL_WINDOW_FOREIGN)) {
         _this->DestroyWindow(_this, window);
+    }
+
+    if ((window->flags & SDL_WINDOW_OPENGL) != (flags & SDL_WINDOW_OPENGL)) {
+        if (flags & SDL_WINDOW_OPENGL) {
+            SDL_GL_LoadLibrary(NULL);
+        } else {
+            SDL_GL_UnloadLibrary();
+        }
     }
 
     window->title = NULL;
@@ -1396,13 +1435,13 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window, );
 
-    window->w = w;
-    window->h = h;
-
-    if (_this->SetWindowSize) {
-        _this->SetWindowSize(_this, window);
+    /* FIXME: Should this change fullscreen modes? */
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        if (_this->SetWindowSize) {
+            _this->SetWindowSize(_this, window);
+        }
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, w, h);
     }
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
 void
