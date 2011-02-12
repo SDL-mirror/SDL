@@ -553,8 +553,12 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                 rect->h, data->format, data->formattype,
                                 pixels);
     if (data->yuv) {
+        const void *top;
+
+        renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH, (pitch / 2));
+
         /* Skip to the top of the next texture */
-        const void *top = (const void*)((const Uint8*)pixels + (texture->h-rect->y) * pitch - rect->x);
+        top = (const void*)((const Uint8*)pixels + (texture->h-rect->y) * pitch - rect->x);
 
         /* Skip to the correct offset into the next texture */
         pixels = (const void*)((const Uint8*)top + (rect->y / 2) * pitch + rect->x / 2);
