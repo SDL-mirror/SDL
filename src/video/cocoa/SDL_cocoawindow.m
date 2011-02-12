@@ -333,8 +333,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
         SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
-	/* Make the origin the upper left instead of the lower left */
-	y = 1.0f - y;
+        /* Make the origin the upper left instead of the lower left */
+        y = 1.0f - y;
 
         switch (type) {
         case COCOA_TOUCH_DOWN:
@@ -450,10 +450,10 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         [contentView release];
 
         ConvertNSRect(&rect);
-        window->fullscreen.x = window->windowed.x = window->x = (int)rect.origin.x;
-        window->fullscreen.y = window->windowed.y = window->y = (int)rect.origin.y;
-        window->fullscreen.w = window->windowed.w = window->w = (int)rect.size.width;
-        window->fullscreen.h = window->windowed.h = window->h = (int)rect.size.height;
+        window->x = (int)rect.origin.x;
+        window->y = (int)rect.origin.y;
+        window->w = (int)rect.size.width;
+        window->h = (int)rect.size.height;
     }
     if ([nswindow isVisible]) {
         window->flags |= SDL_WINDOW_SHOWN;
@@ -709,11 +709,10 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = data->nswindow;
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
-    unsigned int style;
 
     if (FULLSCREEN_VISIBLE(window)) {
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
         SDL_Rect bounds;
 
         Cocoa_GetDisplayBounds(_this, display, &bounds);
@@ -723,22 +722,15 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
         rect.size.height = bounds.h;
         ConvertNSRect(&rect);
 
-        style = NSBorderlessWindowMask;
+        [nswindow setStyleMask:NSBorderlessWindowMask];
+        [nswindow setContentSize:rect.size];
+        [nswindow setFrameOrigin:rect.origin];
     } else {
-        rect.origin.x = window->windowed.x;
-        rect.origin.y = window->windowed.y;
-        rect.size.width = window->windowed.w;
-        rect.size.height = window->windowed.h;
-        /* FIXME: This calculation is wrong, we're changing the origin */
-        ConvertNSRect(&rect);
+        [nswindow setStyleMask:GetStyleMask(window)];
 
-        style = GetStyleMask(window);
+        // This doesn't seem to do anything...
+        //[nswindow setFrameOrigin:origin];
     }
-
-    [nswindow setStyleMask:style];
-    [nswindow setContentSize:rect.size];
-    rect = [nswindow frameRectForContentRect:rect];
-    [nswindow setFrameOrigin:rect.origin];
 
 #ifdef FULLSCREEN_TOGGLEABLE
     if (FULLSCREEN_VISIBLE(window)) {

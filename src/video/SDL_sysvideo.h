@@ -72,20 +72,6 @@ struct SDL_Window
     const void *magic;
     Uint32 id;
     char *title;
-
-    /* The fullscreen values */
-    struct {
-        int x, y;
-        int w, h;
-    } fullscreen;
-
-    /* The windowed values */
-    struct {
-        int x, y;
-        int w, h;
-    } windowed;
-
-    /* The public values */
     int x, y;
     int w, h;
     Uint32 flags;

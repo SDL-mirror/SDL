@@ -1082,10 +1082,6 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
         _this->SetWindowFullscreen(_this, window);
     }
     display->fullscreen_window = NULL;
-
-    /* Generate a mode change events here */
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED,
-                        window->windowed.w, window->windowed.h);
 }
 
 SDL_Window *

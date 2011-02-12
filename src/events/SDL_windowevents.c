@@ -86,43 +86,19 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
             SDL_WINDOWPOS_ISUNDEFINED(data2)) {
             return 0;
         }
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            window->fullscreen.x = data1;
-            window->fullscreen.y = data1;
-        } else {
-            window->windowed.x = data1;
-            window->windowed.y = data1;
-        }
         if (data1 == window->x && data2 == window->y) {
             return 0;
         }
         window->x = data1;
         window->y = data2;
-
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            /* Do we really want to do this? */
-            return 0;
-        }
         break;
     case SDL_WINDOWEVENT_RESIZED:
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            window->fullscreen.w = data1;
-            window->fullscreen.h = data1;
-        } else {
-            window->windowed.w = data1;
-            window->windowed.h = data1;
-        }
         if (data1 == window->w && data2 == window->h) {
             return 0;
         }
         window->w = data1;
         window->h = data2;
         SDL_OnWindowResized(window);
-
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            /* Do we really want to do this? */
-            return 0;
-        }
         break;
     case SDL_WINDOWEVENT_MINIMIZED:
         if (window->flags & SDL_WINDOW_MINIMIZED) {
