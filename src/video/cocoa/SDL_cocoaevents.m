@@ -40,13 +40,6 @@
 - (void)setAppleMenu:(NSMenu *)menu;
 @end
 
-@implementation NSApplication(SDL)
-- (void)setRunning
-{
-    _running = 1;
-}
-@end
-
 @interface SDLAppDelegate : NSObject
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
 @end
@@ -164,7 +157,6 @@ Cocoa_RegisterApp(void)
     if ([NSApp delegate] == nil) {
         [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
     }
-    [NSApp setRunning];
     [pool release];
 }
 
@@ -185,7 +177,7 @@ Cocoa_PumpEvents(_THIS)
     }
 
     pool = [[NSAutoreleasePool alloc] init];
-    while ([NSApp isRunning]) {
+    for ( ; ; ) {
         NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES ];
         if ( event == nil ) {
             break;
