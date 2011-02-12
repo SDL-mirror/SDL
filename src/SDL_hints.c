@@ -105,7 +105,7 @@ SDL_GetHint(const char *name)
     return env;
 }
 
-void SDL_ClearHints()
+void SDL_ClearHints(void)
 {
     SDL_Hint *hint;
 
