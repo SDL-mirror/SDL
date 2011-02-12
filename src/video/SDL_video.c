@@ -274,7 +274,8 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
     /* Find the first format without an alpha channel */
     *format = info.texture_formats[0];
     for (i = 0; i < info.num_texture_formats; ++i) {
-        if (!SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i])) {
+        if (!SDL_ISPIXELFORMAT_FOURCC(info.texture_formats[i]) &&
+            !SDL_ISPIXELFORMAT_ALPHA(info.texture_formats[i])) {
             *format = info.texture_formats[i];
             break;
         }

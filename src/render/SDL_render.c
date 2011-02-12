@@ -206,12 +206,22 @@ static Uint32
 GetClosestSupportedFormat(SDL_Renderer * renderer, Uint32 format)
 {
     Uint32 i;
-    SDL_bool hasAlpha = SDL_ISPIXELFORMAT_ALPHA(format);
 
-    /* We just want to match the first format that has the same channels */
-    for (i = 0; i < renderer->info.num_texture_formats; ++i) {
-        if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
-            return renderer->info.texture_formats[i];
+    if (SDL_ISPIXELFORMAT_FOURCC(format)) {
+        /* Look for an exact match */
+        for (i = 0; i < renderer->info.num_texture_formats; ++i) {
+            if (renderer->info.texture_formats[i] == format) {
+                return renderer->info.texture_formats[i];
+            }
+        }
+    } else {
+        SDL_bool hasAlpha = SDL_ISPIXELFORMAT_ALPHA(format);
+
+        /* We just want to match the first format that has the same channels */
+        for (i = 0; i < renderer->info.num_texture_formats; ++i) {
+            if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
+                return renderer->info.texture_formats[i];
+            }
         }
     }
     return renderer->info.texture_formats[0];
@@ -313,7 +323,8 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
     }
     format = renderer->info.texture_formats[0];
     for (i = 0; i < renderer->info.num_texture_formats; ++i) {
-        if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == needAlpha) {
+        if (!SDL_ISPIXELFORMAT_FOURCC(renderer->info.texture_formats[i]) &&
+            SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == needAlpha) {
             format = renderer->info.texture_formats[i];
             break;
         }
