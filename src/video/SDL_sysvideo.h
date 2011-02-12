@@ -114,6 +114,9 @@ struct SDL_VideoDisplay
     void *driverdata;
 };
 
+/* Forward declaration */
+struct SDL_SysWMinfo;
+
 /* Define the SDL video driver structure */
 #define _THIS	SDL_VideoDevice *_this
 
