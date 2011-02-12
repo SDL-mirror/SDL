@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
     Copyright (C) 2010 itsnotabigtruck.
 
     This library is free software; you can redistribute it and/or
