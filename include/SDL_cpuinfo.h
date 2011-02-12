@@ -85,9 +85,14 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE2(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE3(void);
 
 /**
- *  This function returns true if the CPU has SSE4 features.
+ *  This function returns true if the CPU has SSE4.1 features.
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE4(void);
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE41(void);
+
+/**
+ *  This function returns true if the CPU has SSE4.2 features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE42(void);
 
 
 /* Ends C function definitions when using C++ */

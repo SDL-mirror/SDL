@@ -146,7 +146,8 @@ TestCPUInfo(SDL_bool verbose)
         printf("SSE %s\n", SDL_HasSSE()? "detected" : "not detected");
         printf("SSE2 %s\n", SDL_HasSSE2()? "detected" : "not detected");
         printf("SSE3 %s\n", SDL_HasSSE3()? "detected" : "not detected");
-        printf("SSE4 %s\n", SDL_HasSSE4()? "detected" : "not detected");
+        printf("SSE4.1 %s\n", SDL_HasSSE41()? "detected" : "not detected");
+        printf("SSE4.2 %s\n", SDL_HasSSE42()? "detected" : "not detected");
     }
     return (0);
 }

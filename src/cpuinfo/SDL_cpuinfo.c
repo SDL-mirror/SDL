@@ -41,7 +41,8 @@
 #define CPU_HAS_SSE     0x00000010
 #define CPU_HAS_SSE2    0x00000020
 #define CPU_HAS_SSE3    0x00000040
-#define CPU_HAS_SSE4    0x00000080
+#define CPU_HAS_SSE41   0x00000080
+#define CPU_HAS_SSE42   0x00000100
 
 
 static __inline__ int
@@ -234,15 +235,30 @@ CPU_haveSSE3(void)
 }
 
 static __inline__ int
-CPU_haveSSE4(void)
+CPU_haveSSE41(void)
 {
     if (CPU_haveCPUID()) {
         int a, b, c, d;
 
-        cpuid(0, a, b, c, d);
+        cpuid(1, a, b, c, d);
         if (a >= 1) {
             cpuid(1, a, b, c, d);
-            return (c & 0x00000100);
+            return (c & 0x00080000);
+        }
+    }
+    return 0;
+}
+
+static __inline__ int
+CPU_haveSSE42(void)
+{
+    if (CPU_haveCPUID()) {
+        int a, b, c, d;
+
+        cpuid(1, a, b, c, d);
+        if (a >= 1) {
+            cpuid(1, a, b, c, d);
+            return (c & 0x00100000);
         }
     }
     return 0;
@@ -427,8 +443,11 @@ SDL_GetCPUFeatures(void)
         if (CPU_haveSSE3()) {
             SDL_CPUFeatures |= CPU_HAS_SSE3;
         }
-        if (CPU_haveSSE4()) {
-            SDL_CPUFeatures |= CPU_HAS_SSE4;
+        if (CPU_haveSSE41()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE41;
+        }
+        if (CPU_haveSSE42()) {
+            SDL_CPUFeatures |= CPU_HAS_SSE42;
         }
     }
     return SDL_CPUFeatures;
@@ -480,9 +499,18 @@ SDL_HasSSE3(void)
 }
 
 SDL_bool
-SDL_HasSSE4(void)
+SDL_HasSSE41(void)
 {
-    if (SDL_GetCPUFeatures() & CPU_HAS_SSE4) {
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE41) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
+SDL_bool
+SDL_HasSSE42(void)
+{
+    if (SDL_GetCPUFeatures() & CPU_HAS_SSE42) {
         return SDL_TRUE;
     }
     return SDL_FALSE;
@@ -504,7 +532,8 @@ main()
     printf("SSE: %d\n", SDL_HasSSE());
     printf("SSE2: %d\n", SDL_HasSSE2());
     printf("SSE3: %d\n", SDL_HasSSE3());
-    printf("SSE4: %d\n", SDL_HasSSE4());
+    printf("SSE4.1: %d\n", SDL_HasSSE41());
+    printf("SSE4.2: %d\n", SDL_HasSSE42());
     return 0;
 }
 
