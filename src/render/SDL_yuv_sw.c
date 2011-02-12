@@ -1127,7 +1127,8 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
                 ("YV12 and IYUV textures only support full surface updates");
             return -1;
         }
-        SDL_memcpy(swdata->pixels, pixels, swdata->h * swdata->w * 2);
+        SDL_memcpy(swdata->pixels, pixels,
+                   (swdata->h * swdata->w) + (swdata->h * swdata->w) / 2);
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:
