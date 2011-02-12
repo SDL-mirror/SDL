@@ -46,6 +46,8 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 #endif
 #endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
+#define SIZEOF_VOIDP 4
+
 #define SDL_HAS_64BIT_TYPE	1
 
 /* Useful headers */
@@ -113,9 +115,12 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_NDS	1
-/*#define SDL_VIDEO_DRIVER_DUMMY	1 TODO: uncomment this later*/
+#define SDL_VIDEO_RENDER_NDS	1
 
 /* Enable system power support */
 #define SDL_POWER_NINTENDODS 1
+
+/* Enable haptic support */
+#define SDL_HAPTIC_NDS 1
 
 #endif /* _SDL_config_nintendods_h */

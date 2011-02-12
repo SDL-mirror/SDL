@@ -38,6 +38,8 @@
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
+#include "SDL_render.h"
+#include "../../render/SDL_sysrender.h"
 
 #include "SDL_ndsvideo.h"
 #include "SDL_ndsevents_c.h"
@@ -47,7 +49,8 @@
 
 /* Initialization/Query functions */
 static int NDS_VideoInit(_THIS);
-static int NDS_SetDisplayMode(_THIS, SDL_DisplayMode * mode);
+static int NDS_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
+							  SDL_DisplayMode *mode);
 static void NDS_VideoQuit(_THIS);
 
 
@@ -73,10 +76,7 @@ NDS_CreateDevice(int devindex)
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
         SDL_OutOfMemory();
-        if (device) {
-            SDL_free(device);
-        }
-        return (0);
+        return NULL;
     }
 
     /* Set the function pointers */
@@ -101,7 +101,6 @@ int
 NDS_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
-    int i;
 
     /* simple 256x192x16x60 for now */
     mode.w = 256;
@@ -113,21 +112,19 @@ NDS_VideoInit(_THIS)
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
-    SDL_AddRenderDriver(&_this->displays[0], &NDS_RenderDriver);
 
     SDL_zero(mode);
-    SDL_AddDisplayMode(0, &mode);
+	SDL_AddDisplayMode(&_this->displays[0], &mode);
 
-    powerON(POWER_ALL_2D);
-    irqInit();
+    powerOn(POWER_ALL_2D);
     irqEnable(IRQ_VBLANK);
-    NDS_SetDisplayMode(_this, &mode);
+    NDS_SetDisplayMode(_this, &_this->displays[0], &mode);
 
     return 0;
 }
 
 static int
-NDS_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
+NDS_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     /* right now this function is just hard-coded for 256x192 ABGR1555 */
     videoSetMode(MODE_5_2D | DISPLAY_BG2_ACTIVE | DISPLAY_BG3_ACTIVE | DISPLAY_BG_EXT_PALETTE | DISPLAY_SPR_1D_LAYOUT | DISPLAY_SPR_1D_BMP | DISPLAY_SPR_1D_BMP_SIZE_256 |      /* (try 128 if 256 is trouble.) */
@@ -141,7 +138,7 @@ NDS_SetDisplayMode(_THIS, SDL_DisplayMode * mode)
     vramSetBankC(VRAM_C_SUB_BG_0x06200000);
     vramSetBankD(VRAM_D_MAIN_BG_0x06040000);    /* not a typo. vram d can't sub */
     vramSetBankE(VRAM_E_MAIN_SPRITE);
-    vramSetBankF(VRAM_F_OBJ_EXT_PALETTE);
+    vramSetBankF(VRAM_F_SPRITE_EXT_PALETTE);
     vramSetBankG(VRAM_G_BG_EXT_PALETTE);
     vramSetBankH(VRAM_H_SUB_BG_EXT_PALETTE);
     vramSetBankI(VRAM_I_SUB_SPRITE);

@@ -28,7 +28,7 @@
 
 #include "SDL_timer.h"
 
-
+/* Will wrap afetr 49 days. Shouldn't be an issue. */
 static volatile Uint32 timer_ticks;
 
 static void
@@ -42,10 +42,8 @@ SDL_StartTicks(void)
 {
     timer_ticks = 0;
 
-    TIMER_CR(3) = TIMER_DIV_1024 | TIMER_IRQ_REQ;
-    TIMER_DATA(3) = TIMER_FREQ_1024(1000);
-    irqSet(IRQ_TIMER3, NDS_TimerInterrupt);
-    irqEnable(IRQ_TIMER3);
+	/* Set timer 2 to fire every ms. */
+	timerStart(2, ClockDivider_1024, TIMER_FREQ_1024(1000), NDS_TimerInterrupt);
 }
 
 Uint32
@@ -58,7 +56,7 @@ void
 SDL_Delay(Uint32 ms)
 {
     Uint32 start = SDL_GetTicks();
-    while (timer_alive) {
+    while (1) {
         if ((SDL_GetTicks() - start) >= ms)
             break;
     }

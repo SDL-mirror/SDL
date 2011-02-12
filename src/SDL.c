@@ -266,6 +266,8 @@ SDL_GetPlatform()
     return "Mac OS X";
 #elif __NETBSD__
     return "NetBSD";
+#elif __NDS__
+    return "Nintendo DS";
 #elif __OPENBSD__
     return "OpenBSD";
 #elif __OS2__

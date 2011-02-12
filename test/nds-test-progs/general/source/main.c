@@ -82,7 +82,7 @@ main(void)
                     rect.h -= 6;
                 }
                 printf("button %d pressed at %d ticks\n",
-                       event.jbutton.which, SDL_GetTicks());
+                       event.jbutton.button, SDL_GetTicks());
                 break;
             case SDL_QUIT:
                 SDL_Quit();

@@ -31,8 +31,8 @@
 
 #include "SDL_video.h"
 #include "../SDL_sysvideo.h"
-#include "../SDL_yuv_sw_c.h"
-#include "../SDL_renderer_sw.h"
+#include "SDL_render.h"
+#include "../../render/SDL_sysrender.h"
 
 /* SDL NDS renderer implementation */
 
@@ -40,9 +40,11 @@ static SDL_Renderer *NDS_CreateRenderer(SDL_Window * window, Uint32 flags);
 static int NDS_ActivateRenderer(SDL_Renderer * renderer);
 static int NDS_DisplayModeChanged(SDL_Renderer * renderer);
 static int NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+#if 0
 static int NDS_QueryTexturePixels(SDL_Renderer * renderer,
                                   SDL_Texture * texture, void **pixels,
                                   int *pitch);
+#endif
 static int NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
@@ -50,8 +52,8 @@ static int NDS_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, int markDirty,
                            void **pixels, int *pitch);
 static void NDS_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int NDS_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g,
-                          Uint8 b, Uint8 a, const SDL_Rect * rect);
+static int NDS_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+							   int count);
 static int NDS_RenderCopy(SDL_Renderer * renderer,
                           SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
@@ -149,7 +151,7 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
     SDL_zerop(data);
 
-    renderer->RenderFill = NDS_RenderFill;
+    renderer->RenderFillRects = NDS_RenderFillRects;
     renderer->RenderCopy = NDS_RenderCopy;
     renderer->RenderPresent = NDS_RenderPresent;
     renderer->DestroyRenderer = NDS_DestroyRenderer;
@@ -158,7 +160,7 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->window = window;
     renderer->driverdata = data;
     renderer->CreateTexture = NDS_CreateTexture;
-    renderer->QueryTexturePixels = NDS_QueryTexturePixels;
+//  renderer->QueryTexturePixels = NDS_QueryTexturePixels;
     renderer->UpdateTexture = NDS_UpdateTexture;
     renderer->LockTexture = NDS_LockTexture;
     renderer->UnlockTexture = NDS_UnlockTexture;
@@ -341,7 +343,7 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 		bgUpdate(bg3);
 */
             txdat->type = NDSTX_BG;
-            txdat->pitch = (texture->w) * (bpp / 8);
+            txdat->pitch = (texture->w) * ((bpp+1) / 8);
             txdat->bpp = bpp;
             txdat->rotate = 0;
             txdat->scale.x = 0x100;
@@ -354,7 +356,7 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             bgSetRotateScale(txdat->hw_index, txdat->rotate, txdat->scale.x,
                              txdat->scale.y);
             bgSetScroll(txdat->hw_index, txdat->scroll.x, txdat->scroll.y);
-            bgUpdate(txdat->hw_index);
+            bgUpdate();
 
             data->bg_taken[whichbg] = 1;
             /*txdat->size = txdat->dim.pitch * texture->h; */
@@ -372,6 +374,7 @@ NDS_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     return 0;
 }
 
+#if 0
 static int
 NDS_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
                        void **pixels, int *pitch)
@@ -381,6 +384,7 @@ NDS_QueryTexturePixels(SDL_Renderer * renderer, SDL_Texture * texture,
     *pitch = txdat->pitch;
     return 0;
 }
+#endif
 
 static int
 NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -433,16 +437,13 @@ NDS_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-NDS_RenderFill(SDL_Renderer * renderer, Uint8 r, Uint8 g, Uint8 b,
-               Uint8 a, const SDL_Rect * rect)
+NDS_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+					int count)
 {
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
-    SDL_Rect real_rect = *rect;
-    u16 color;
-    int i, j;
 
     printf("NDS_RenderFill: stub\n");
-    color = RGB8(r, g, b);      /* macro in libnds that makes an ARGB1555 pixel */
+
     /* TODO: make a single-color sprite and stretch it.
        calculate the "HDX" width modifier of the sprite by:
        let S be the actual sprite's width (like, 32 pixels for example)
