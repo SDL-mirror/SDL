@@ -519,7 +519,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
         surface_flags |= SDL_FULLSCREEN;
     }
-    if (window_flags & SDL_WINDOW_OPENGL) {
+    if ((window_flags & SDL_WINDOW_OPENGL) && (flags & SDL_OPENGL)) {
         surface_flags |= SDL_OPENGL;
     }
     if (window_flags & SDL_WINDOW_RESIZABLE) {
