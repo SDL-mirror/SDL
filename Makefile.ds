@@ -39,7 +39,6 @@ src/SDL_error.c \
 src/SDL_fatal.c \
 src/SDL_hints.c \
 src/SDL_log.c \
-src/atomic/nds/SDL_atomic.c \
 src/atomic/SDL_atomic.c \
 src/audio/SDL_audio.c \
 src/audio/SDL_audiocvt.c \
