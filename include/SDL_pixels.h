@@ -124,9 +124,7 @@ enum
 #define SDL_BITSPERPIXEL(X)	(((X) >> 8) & 0xFF)
 #define SDL_BYTESPERPIXEL(X) \
     (SDL_ISPIXELFORMAT_FOURCC(X) ? \
-        ((((X) == SDL_PIXELFORMAT_YV12) || \
-          ((X) == SDL_PIXELFORMAT_IYUV) || \
-          ((X) == SDL_PIXELFORMAT_YUY2) || \
+        ((((X) == SDL_PIXELFORMAT_YUY2) || \
           ((X) == SDL_PIXELFORMAT_UYVY) || \
           ((X) == SDL_PIXELFORMAT_YVYU)) ? 2 : 1) : (((X) >> 0) & 0xFF))
 

@@ -360,7 +360,7 @@ main(int argc, char **argv)
     int fps = 12;
     int fpsdelay;
     int nodelay = 0;
-    int overlay_format = SDL_YUY2_OVERLAY;
+    Uint32 pixel_format = SDL_PIXELFORMAT_YV12;
     int scale = 5;
     SDL_bool done = SDL_FALSE;
 
@@ -397,15 +397,15 @@ main(int argc, char **argv)
         } else if (strcmp(argv[1], "-format") == 0) {
             if (argv[2]) {
                 if (!strcmp(argv[2], "YV12"))
-                    overlay_format = SDL_YV12_OVERLAY;
+                    pixel_format = SDL_PIXELFORMAT_YV12;
                 else if (!strcmp(argv[2], "IYUV"))
-                    overlay_format = SDL_IYUV_OVERLAY;
+                    pixel_format = SDL_PIXELFORMAT_IYUV;
                 else if (!strcmp(argv[2], "YUY2"))
-                    overlay_format = SDL_YUY2_OVERLAY;
+                    pixel_format = SDL_PIXELFORMAT_YUY2;
                 else if (!strcmp(argv[2], "UYVY"))
-                    overlay_format = SDL_UYVY_OVERLAY;
+                    pixel_format = SDL_PIXELFORMAT_UYVY;
                 else if (!strcmp(argv[2], "YVYU"))
-                    overlay_format = SDL_YVYU_OVERLAY;
+                    pixel_format = SDL_PIXELFORMAT_YVYU;
                 else {
                     fprintf(stderr,
                             "The -format option %s is not recognized, see help for info.\n",
@@ -490,7 +490,7 @@ main(int argc, char **argv)
         quit(4);
     }
 
-    MooseTexture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_YV12, SDL_TEXTUREACCESS_STREAMING, MOOSEPIC_W, MOOSEPIC_H);
+    MooseTexture = SDL_CreateTexture(renderer, pixel_format, SDL_TEXTUREACCESS_STREAMING, MOOSEPIC_W, MOOSEPIC_H);
     if (!MooseTexture) {
         fprintf(stderr, "Couldn't set create texture: %s\n", SDL_GetError());
         free(RawMooseData);
@@ -569,7 +569,7 @@ main(int argc, char **argv)
         if (!paused) {
             i = (i + 1) % MOOSEFRAMES_COUNT;
 
-            SDL_UpdateTexture(MooseTexture, NULL, MooseFrame[i], MOOSEPIC_W*2);
+            SDL_UpdateTexture(MooseTexture, NULL, MooseFrame[i], MOOSEPIC_W*SDL_BYTESPERPIXEL(pixel_format));
         }
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, MooseTexture, NULL, &displayrect);
