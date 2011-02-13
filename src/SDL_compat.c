@@ -32,6 +32,7 @@
 
 
 static SDL_Window *SDL_VideoWindow = NULL;
+static SDL_Surface *SDL_WindowSurface = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
@@ -410,9 +411,9 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
         return 0;
     }
 
-    /* Destroy the screen texture and recreate it */
-    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
-    if (!SDL_VideoSurface) {
+    /* Get the surface for the window */
+    SDL_WindowSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_WindowSurface) {
         return -1;
     }
 
@@ -549,8 +550,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create the screen surface */
-    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
-    if (!SDL_VideoSurface) {
+    SDL_WindowSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_WindowSurface) {
         return NULL;
     }
     SDL_VideoSurface->flags |= surface_flags;

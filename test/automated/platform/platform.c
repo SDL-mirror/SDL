@@ -159,13 +159,11 @@ int test_platform (void)
    SDL_ATprintVerbose( 1, "Available extensions:\n" );
    SDL_ATprintVerbose( 1, "   RDTSC %s\n", SDL_HasRDTSC()? "detected" : "not detected" );
    SDL_ATprintVerbose( 1, "   MMX %s\n", SDL_HasMMX()? "detected" : "not detected" );
-   SDL_ATprintVerbose( 1, "   MMX Ext %s\n", SDL_HasMMXExt()? "detected" : "not detected" );
-   SDL_ATprintVerbose( 1, "   3DNow %s\n", SDL_Has3DNow()? "detected" : "not detected" );
-   SDL_ATprintVerbose( 1, "   3DNow Ext %s\n",
-         SDL_Has3DNowExt()? "detected" : "not detected" );
    SDL_ATprintVerbose( 1, "   SSE %s\n", SDL_HasSSE()? "detected" : "not detected" );
    SDL_ATprintVerbose( 1, "   SSE2 %s\n", SDL_HasSSE2()? "detected" : "not detected" );
-   SDL_ATprintVerbose( 1, "   AltiVec %s\n", SDL_HasAltiVec()? "detected" : "not detected" );
+   SDL_ATprintVerbose( 1, "   SSE3 %s\n", SDL_HasSSE3()? "detected" : "not detected" );
+   SDL_ATprintVerbose( 1, "   SSE4.1 %s\n", SDL_HasSSE41()? "detected" : "not detected" );
+   SDL_ATprintVerbose( 1, "   SSE4.2 %s\n", SDL_HasSSE42()? "detected" : "not detected" );
 
    plat_testTypes();
    plat_testEndian();
