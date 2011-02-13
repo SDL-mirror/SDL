@@ -538,7 +538,7 @@ main(int argc, char **argv)
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     displayrect.w = window_w = event.window.data1;
-                    displayrect.w = window_h = event.window.data2;
+                    displayrect.h = window_h = event.window.data2;
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
