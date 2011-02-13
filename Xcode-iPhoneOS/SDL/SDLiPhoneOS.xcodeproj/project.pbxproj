@@ -1414,11 +1414,11 @@
 				"$(SYMROOT)/$(CONFIGURATION)-iphoneos/libSDL.a",
 			);
 			outputPaths = (
-				"$(SYMROOT)/libSDL.a",
+				"$(SYMROOT)/$CONFIGURATION-Universal/libSDL.a",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Build the simulator binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphonesimulator\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphonesimulator\n\n# Build the device binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphoneos\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphoneos\n\n# create a simulator/device fat binary from the 2 separate builds\nlipo $SYMROOT/$CONFIGURATION-iphonesimulator/libSDL.a $SYMROOT/$CONFIGURATION-iphoneos/libSDL.a -output $SYMROOT/libSDL.a -create\n\necho \"Created Universal Simulator/Device binary at $SYMROOT/libSDL.a\"\n\n\nexit 0\n";
+			shellScript = "# Build the simulator binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphonesimulator\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphonesimulator\n\n# Build the device binary\n# xcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration Release -sdk iphoneos\nxcodebuild -project SDLiPhoneOS.xcodeproj -target libSDL -configuration $CONFIGURATION -sdk iphoneos\n\n# create a simulator/device fat binary from the 2 separate builds\nlipo $SYMROOT/$CONFIGURATION-iphonesimulator/libSDL.a $SYMROOT/$CONFIGURATION-iphoneos/libSDL.a -output $SYMROOT/$CONFIGURATION-Universal/libSDL.a -create\n\necho \"Created Universal Simulator/Device binary at $SYMROOT/$CONFIGURATION-Universal/libSDL.a\"\n\n\nexit 0\n";
 		};
 		00B4F48A12F6A69C0084EC00 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1426,12 +1426,13 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SYMROOT)/$CONFIGURATION-Universal/libSDL.a",
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\n\ntemp=$BUILD_DIR/$BUILD_STYLE-template\n# Wrong! 1. Can't assume location of Xcode directory (use xcode-select)\n# 2. Project templates should go in Application Support directories anyway.\ntemplate_dir_name=\"SDL iOS Application\"\n# dest=\"$(HOME)/Library/Application Support/Developer/Shared/Xcode/Project Templates/SDL/SDL iOS Application\"\nrsync_flags=\"--exclude *.svn --links -r\"\n\n# mkdir -p $dest\nmkdir -p $temp\nmkdir -p \"$temp/$template_dir_name/SDL/lib/\"\nmkdir -p \"$temp/$template_dir_name/SDL/include\"\n\n# copy template\nrsync $rsync_flags \"../template/$template_dir_name\" $temp/\n\n# copy Universal libSDL.a\nrsync $rsync_flags -r $SYMROOT/libSDL.a \"$temp/$template_dir_name/SDL/lib/\"\n\n# copy headers\nrsync $rsync_flags ../../include/ \"$temp/$template_dir_name/SDL/include\"\n\n#install (nah, don't install)\n# cp -fr \"$temp/$template_dir_name\" \"$dest\"";
+			shellScript = "# clean up the framework, remove headers, extra files\n\ntemp=$BUILD_DIR/$BUILD_STYLE-template\n# Wrong! 1. Can't assume location of Xcode directory (use xcode-select)\n# 2. Project templates should go in Application Support directories anyway.\ntemplate_dir_name=\"SDL iOS Application\"\n# dest=\"$(HOME)/Library/Application Support/Developer/Shared/Xcode/Project Templates/SDL/SDL iOS Application\"\nrsync_flags=\"--exclude *.svn --links -r\"\n\n# mkdir -p $dest\nmkdir -p $temp\nmkdir -p \"$temp/$template_dir_name/SDL/lib/\"\nmkdir -p \"$temp/$template_dir_name/SDL/include\"\n\n# copy template\nrsync $rsync_flags \"../template/$template_dir_name\" $temp/\n\n# copy Universal libSDL.a\nrsync $rsync_flags -r $SYMROOT/$CONFIGURATION-Universal/libSDL.a \"$temp/$template_dir_name/SDL/lib/\"\n\n# copy headers\nrsync $rsync_flags ../../include/ \"$temp/$template_dir_name/SDL/include\"\n\n#install (nah, don't install)\n# cp -fr \"$temp/$template_dir_name\" \"$dest\"";
 		};
 /* End PBXShellScriptBuildPhase section */
 
