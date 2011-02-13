@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -141,6 +141,9 @@ void _ReadWriteBarrier(void);
 /* Platform specific optimized versions of the atomic functions,
  * you can disable these by defining SDL_DISABLE_ATOMIC_INLINE
  */
+#if SDL_ATOMIC_DISABLED
+#define SDL_DISABLE_ATOMIC_INLINE
+#endif
 #ifndef SDL_DISABLE_ATOMIC_INLINE
 
 #ifdef HAVE_MSC_ATOMICS

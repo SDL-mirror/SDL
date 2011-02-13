@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -433,22 +433,6 @@ extern DECLSPEC int SDLCALL SDL_FillRects
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
         source colour key.
     \endverbatim
- *  
- *  If either of the surfaces were in video memory, and the blit returns -2,
- *  the video memory was lost, so it should be reloaded with artwork and 
- *  re-blitted:
- *  @code
- *  while ( SDL_BlitSurface(image, imgrect, screen, dstrect) == -2 ) {
- *      while ( SDL_LockSurface(image) < 0 )
- *          Sleep(10);
- *      -- Write image pixels to image->pixels --
- *      SDL_UnlockSurface(image);
- *  }
- *  @endcode
- *  
- *  This happens under DirectX 5.0 when the system switches away from your
- *  fullscreen application.  The lock will also fail until you have access
- *  to the video memory again.
  *  
  *  You should call SDL_BlitSurface() unless you know exactly how SDL
  *  blitting works internally and how to use the other blit functions.

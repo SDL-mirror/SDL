@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -135,7 +135,7 @@ DirectFB_SetContext(_THIS, SDL_Window *window)
      *        This has simply no effect.
      */
 
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
 
 	/* FIXME: should we handle the error */

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -168,8 +168,5 @@
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES	1
-#ifdef __ppc__
-#define SDL_ALTIVEC_BLITTERS	1
-#endif
 
 #endif /* _SDL_config_macosx_h */

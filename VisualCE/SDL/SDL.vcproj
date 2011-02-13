@@ -862,10 +862,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\video\SDL_gamma.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\events\SDL_gesture.c"
 				>
 			</File>
@@ -878,6 +874,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\SDL_hints.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\stdlib\SDL_iconv.c"
 				>
 			</File>
@@ -887,6 +887,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\events\SDL_keyboard.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\SDL_log.c"
 				>
 			</File>
 			<File
@@ -938,7 +942,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\render\software\SDL_renderer_sw.c"
+				RelativePath="..\..\src\render\software\SDL_render_sw.c"
 				>
 			</File>
 			<File
@@ -1043,10 +1047,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_windowsgamma.c"
 				>
 			</File>
 			<File
@@ -1231,7 +1231,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_hints.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SDL_input.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SDL_joystick.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\joystick\SDL_joystick_c.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SDL_keyboard.h"
 				>
 			</File>
 			<File
@@ -1239,7 +1255,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_keysym.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\video\SDL_leaks.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SDL_loadso.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\include\SDL_log.h"
 				>
 			</File>
 			<File
@@ -1268,6 +1296,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\video\SDL_rect_c.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\render\software\SDL_render_sw_c.h"
 				>
 			</File>
 			<File
@@ -1356,10 +1388,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\video\windows\SDL_windowsgamma.h"
 				>
 			</File>
 			<File

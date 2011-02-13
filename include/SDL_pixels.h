@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -124,9 +124,7 @@ enum
 #define SDL_BITSPERPIXEL(X)	(((X) >> 8) & 0xFF)
 #define SDL_BYTESPERPIXEL(X) \
     (SDL_ISPIXELFORMAT_FOURCC(X) ? \
-        ((((X) == SDL_PIXELFORMAT_YV12) || \
-          ((X) == SDL_PIXELFORMAT_IYUV) || \
-          ((X) == SDL_PIXELFORMAT_YUY2) || \
+        ((((X) == SDL_PIXELFORMAT_YUY2) || \
           ((X) == SDL_PIXELFORMAT_UYVY) || \
           ((X) == SDL_PIXELFORMAT_YVYU)) ? 2 : 1) : (((X) >> 0) & 0xFF))
 

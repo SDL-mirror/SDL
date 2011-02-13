@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,22 +34,22 @@ extern int SDL_KeyboardInit(void);
 extern void SDL_ResetKeyboard(void);
 
 /* Get the default keymap */
-extern void SDL_GetDefaultKeymap(SDLKey * keymap);
+extern void SDL_GetDefaultKeymap(SDL_Keycode * keymap);
 
 /* Set the mapping of scancode to key codes */
-extern void SDL_SetKeymap(int start, SDLKey * keys, int length);
+extern void SDL_SetKeymap(int start, SDL_Keycode * keys, int length);
 
 /* Set a platform-dependent key name, overriding the default platform-agnostic
    name. Encoded as UTF-8. The string is not copied, thus the pointer given to
    this function must stay valid forever (or at least until the call to
    VideoQuit()). */
-extern void SDL_SetScancodeName(SDL_ScanCode scancode, const char *name);
+extern void SDL_SetScancodeName(SDL_Scancode scancode, const char *name);
 
 /* Set the keyboard focus window */
 extern void SDL_SetKeyboardFocus(SDL_Window * window);
 
 /* Send a keyboard key event */
-extern int SDL_SendKeyboardKey(Uint8 state, SDL_ScanCode scancode);
+extern int SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode);
 
 /* Send keyboard text input */
 extern int SDL_SendKeyboardText(const char *text);

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,6 @@
 
 #include "SDL_x11clipboard.h"
 #include "SDL_x11events.h"
-#include "SDL_x11gamma.h"
 #include "SDL_x11keyboard.h"
 #include "SDL_x11modes.h"
 #include "SDL_x11mouse.h"
@@ -89,11 +88,9 @@ typedef struct SDL_VideoData
     Atom _NET_WM_ICON;
     Atom UTF8_STRING;
 
-    SDL_ScanCode key_layout[256];
+    SDL_Scancode key_layout[256];
     SDL_bool selection_waiting;
 } SDL_VideoData;
-
-extern SDL_bool X11_UseDirectColorVisuals(void);
 
 #endif /* _SDL_x11video_h */
 

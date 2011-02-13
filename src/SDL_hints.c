@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -105,7 +105,7 @@ SDL_GetHint(const char *name)
     return env;
 }
 
-void SDL_ClearHints()
+void SDL_ClearHints(void)
 {
     SDL_Hint *hint;
 

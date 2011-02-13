@@ -13,24 +13,29 @@
     Lesser General Public License for more details.
 
     You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    License along with this library; if not, write to the Free Software    Founation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
     Sam Lantinga
     slouken@libsdl.org
 */
+
 #include "SDL_config.h"
 
-#ifndef _SDL_x11gamma_h
-#define _SDL_x11gamma_h
+/* No supported under the NDS because of math operations. */
 
-extern Colormap X11_LookupColormap(Display * display, int scrNum,
-                                   VisualID vid);
-extern void X11_TrackColormap(Display * display, int scrNum,
-                              Colormap colormap,
-                              Visual * visual, XColor * ramp);
+#include "SDL_events.h"
+#include "SDL_events_c.h"
+#include "SDL_gesture_c.h"
 
-extern int X11_SetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
-extern int X11_GetDisplayGammaRamp(_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
+int SDL_GestureAddTouch(SDL_Touch* touch)
+{  
+	return 0;
+}
 
-#endif
+void SDL_GestureProcessEvent(SDL_Event* event)
+{
+	return;
+}
+
+/* vi: set ts=4 sw=4 expandtab: */
+  

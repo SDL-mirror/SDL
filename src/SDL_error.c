@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -23,14 +23,10 @@
 
 /* Simple error handling in SDL */
 
-#ifdef __ANDROID__
-#include <android/log.h>
-#endif
-
+#include "SDL_log.h"
 #include "SDL_error.h"
 #include "SDL_error_c.h"
 
-/*#define DEBUG_ERROR*/
 
 /* Routine to get the thread-specific error variable */
 #if SDL_THREADS_DISABLED
@@ -113,12 +109,7 @@ SDL_SetError(const char *fmt, ...)
     va_end(ap);
 
     /* If we are in debug mode, print out an error message */
-#ifdef DEBUG_ERROR
-    fprintf(stderr, "SDL_SetError: %s\n", SDL_GetError());
-#ifdef __ANDROID__
-    __android_log_print(ANDROID_LOG_INFO, "SDL", "ERROR: %s", SDL_GetError());
-#endif
-#endif /* DEBUG_ERROR */
+    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
 }
 
 /* This function has a bit more overhead than most error functions

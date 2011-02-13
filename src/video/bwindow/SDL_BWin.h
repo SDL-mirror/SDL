@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -509,7 +509,7 @@ class SDL_BWin:public BDirectWindow
 
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
-                    SDL_KeySym keysym;
+                    SDL_Keysym keysym;
                     keysym.scancode = key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];
@@ -543,7 +543,7 @@ class SDL_BWin:public BDirectWindow
                 int32 modifiers;
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
-                    SDL_KeySym keysym;
+                    SDL_Keysym keysym;
                     keysym.scancode = key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];
@@ -586,7 +586,7 @@ class SDL_BWin:public BDirectWindow
     bool inhibit_resize;
 
     int32 last_buttons;
-    SDLKey keymap[128];
+    SDL_Keycode keymap[128];
 };
 
 #endif /* _SDL_BWin_h */

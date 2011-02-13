@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,15 +38,11 @@
 static Window
 GetWindow(_THIS)
 {
-    SDL_VideoDisplay *display;
     SDL_Window *window;
 
-    display = _this->displays;
-    if (display) {
-        window = display->windows;
-        if (window) {
-            return ((SDL_WindowData *) window->driverdata)->xwindow;
-        }
+    window = _this->windows;
+    if (window) {
+        return ((SDL_WindowData *) window->driverdata)->xwindow;
     }
     return None;
 }

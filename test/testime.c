@@ -122,12 +122,9 @@ void InitVideo(int argc, char *argv[])
 
     if (fullscreen)
     {
-        SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(&mode);
-
-        width = mode.w;
-        height = mode.h;
-        fprintf(stderr, "%dx%d\n", width, height);
+        /* Use the desktop mode */
+        width = 0;
+        height = 0;
         flags |= SDL_FULLSCREEN;
     }
 
@@ -375,3 +372,5 @@ int main(int argc, char *argv[])
     CleanupVideo();
     return 0;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

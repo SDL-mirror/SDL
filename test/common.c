@@ -6,7 +6,7 @@
 #include "common.h"
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -109,12 +109,51 @@ CommonArg(CommonState * state, int index)
         }
         return -1;
     }
+    if (SDL_strcasecmp(argv[index], "--log") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        if (SDL_strcasecmp(argv[index], "all") == 0) {
+            SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "error") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_ERROR, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "system") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_SYSTEM, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "audio") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_AUDIO, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "video") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_VIDEO, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "render") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_RENDER, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        if (SDL_strcasecmp(argv[index], "input") == 0) {
+            SDL_LogSetPriority(SDL_LOG_CATEGORY_INPUT, SDL_LOG_PRIORITY_VERBOSE);
+            return 2;
+        }
+        return -1;
+    }
     if (SDL_strcasecmp(argv[index], "--display") == 0) {
         ++index;
         if (!argv[index]) {
             return -1;
         }
         state->display = SDL_atoi(argv[index]);
+        if (SDL_WINDOWPOS_ISUNDEFINED(state->window_x)) {
+            state->window_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(state->display);
+            state->window_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(state->display);
+        }
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--fullscreen") == 0) {
@@ -559,9 +598,8 @@ CommonInit(CommonState * state)
             fprintf(stderr, "Number of displays: %d\n", n);
             for (i = 0; i < n; ++i) {
                 fprintf(stderr, "Display %d:\n", i);
-                SDL_SelectVideoDisplay(i);
 
-                SDL_GetDesktopDisplayMode(&mode);
+                SDL_GetDesktopDisplayMode(i, &mode);
                 SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask,
                                            &Bmask, &Amask);
                 fprintf(stderr,
@@ -577,13 +615,13 @@ CommonInit(CommonState * state)
                 }
 
                 /* Print available fullscreen video modes */
-                m = SDL_GetNumDisplayModes();
+                m = SDL_GetNumDisplayModes(i);
                 if (m == 0) {
                     fprintf(stderr, "No available fullscreen video modes\n");
                 } else {
                     fprintf(stderr, "  Fullscreen video modes:\n");
                     for (j = 0; j < m; ++j) {
-                        SDL_GetDisplayMode(j, &mode);
+                        SDL_GetDisplayMode(i, j, &mode);
                         SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask,
                                                    &Gmask, &Bmask, &Amask);
                         fprintf(stderr,
@@ -607,7 +645,6 @@ CommonInit(CommonState * state)
             }
         }
 
-        SDL_SelectVideoDisplay(state->display);
         if (state->verbose & VERBOSE_RENDER) {
             SDL_RendererInfo info;
 
@@ -982,12 +1019,14 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_m:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-M maximize */
-                /* FIXME: Which window has focus for this keyboard? */
                 for (i = 0; i < state->num_windows; ++i) {
-                    if (SDL_GetWindowFlags(state->windows[i]) & SDL_WINDOW_MAXIMIZED) {
-                        SDL_RestoreWindow(state->windows[i]);
-                    } else {
-                        SDL_MaximizeWindow(state->windows[i]);
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        if (flags & SDL_WINDOW_MAXIMIZED) {
+                            SDL_RestoreWindow(state->windows[i]);
+                        } else {
+                            SDL_MaximizeWindow(state->windows[i]);
+                        }
                     }
                 }
             }
@@ -995,9 +1034,26 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_z:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-Z minimize */
-                /* FIXME: Which window has focus for this keyboard? */
                 for (i = 0; i < state->num_windows; ++i) {
-                    SDL_MinimizeWindow(state->windows[i]);
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        SDL_MinimizeWindow(state->windows[i]);
+                    }
+                }
+            }
+            break;
+        case SDLK_RETURN:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-Enter toggle fullscreen */
+                for (i = 0; i < state->num_windows; ++i) {
+                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
+                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+                        if (flags & SDL_WINDOW_FULLSCREEN) {
+                            SDL_SetWindowFullscreen(state->windows[i], SDL_FALSE);
+                        } else {
+                            SDL_SetWindowFullscreen(state->windows[i], SDL_TRUE);
+                        }
+                    }
                 }
             }
             break;

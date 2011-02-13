@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -81,6 +81,7 @@
 #include "SDL_events.h"
 #include "SDL_hints.h"
 #include "SDL_loadso.h"
+#include "SDL_log.h"
 #include "SDL_mutex.h"
 #include "SDL_power.h"
 #include "SDL_render.h"

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -38,13 +38,6 @@
 /* setAppleMenu disappeared from the headers in 10.4 */
 @interface NSApplication(NSAppleMenu)
 - (void)setAppleMenu:(NSMenu *)menu;
-@end
-
-@implementation NSApplication(SDL)
-- (void)setRunning
-{
-    _running = 1;
-}
 @end
 
 @interface SDLAppDelegate : NSObject
@@ -164,7 +157,6 @@ Cocoa_RegisterApp(void)
     if ([NSApp delegate] == nil) {
         [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
     }
-    [NSApp setRunning];
     [pool release];
 }
 
@@ -185,7 +177,7 @@ Cocoa_PumpEvents(_THIS)
     }
 
     pool = [[NSAutoreleasePool alloc] init];
-    while ([NSApp isRunning]) {
+    for ( ; ; ) {
         NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES ];
         if ( event == nil ) {
             break;

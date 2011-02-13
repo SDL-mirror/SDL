@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,9 @@
 #define _SDL_cocoaopengl_h
 
 #if SDL_VIDEO_OPENGL_CGL
+
+/* Define this if you want to be able to toggle fullscreen mode seamlessly */
+#define FULLSCREEN_TOGGLEABLE
 
 struct SDL_GLDriverData
 {

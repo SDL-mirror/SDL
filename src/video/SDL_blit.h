@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -34,9 +34,6 @@
 #ifdef __MMX__
 #include <mmintrin.h>
 #endif
-#ifdef __3dNOW__
-#include <mm3dnow.h>
-#endif
 #ifdef __SSE__
 #include <xmmintrin.h>
 #endif
@@ -65,11 +62,8 @@
 /* SDL blit CPU flags */
 #define SDL_CPU_ANY                 0x00000000
 #define SDL_CPU_MMX                 0x00000001
-#define SDL_CPU_3DNOW               0x00000002
 #define SDL_CPU_SSE                 0x00000004
 #define SDL_CPU_SSE2                0x00000008
-#define SDL_CPU_ALTIVEC_PREFETCH    0x00000010
-#define SDL_CPU_ALTIVEC_NOPREFETCH  0x00000020
 
 typedef struct
 {

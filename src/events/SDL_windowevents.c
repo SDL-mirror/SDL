@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -82,14 +82,9 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
         SDL_OnWindowHidden(window);
         break;
     case SDL_WINDOWEVENT_MOVED:
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        if (SDL_WINDOWPOS_ISUNDEFINED(data1) ||
+            SDL_WINDOWPOS_ISUNDEFINED(data2)) {
             return 0;
-        }
-        if (data1 == SDL_WINDOWPOS_UNDEFINED) {
-            data1 = window->x;
-        }
-        if (data2 == SDL_WINDOWPOS_UNDEFINED) {
-            data2 = window->y;
         }
         if (data1 == window->x && data2 == window->y) {
             return 0;
@@ -98,9 +93,6 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
         window->y = data2;
         break;
     case SDL_WINDOWEVENT_RESIZED:
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            return 0;
-        }
         if (data1 == window->w && data2 == window->h) {
             return 0;
         }

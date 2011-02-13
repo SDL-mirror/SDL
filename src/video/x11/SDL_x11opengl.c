@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -220,7 +220,7 @@ static void
 X11_GL_InitExtensions(_THIS)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
-    int screen = ((SDL_DisplayData *) SDL_CurrentDisplay->driverdata)->screen;
+    int screen = DefaultScreen(display);
     XVisualInfo *vinfo;
     XSetWindowAttributes xattr;
     Window w;
@@ -365,22 +365,9 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
                                                       GLX_SLOW_VISUAL_EXT;
     }
 
-#ifdef GLX_DIRECT_COLOR         /* Try for a DirectColor visual for gamma support */
-    if (X11_UseDirectColorVisuals()) {
-        attribs[i++] = GLX_X_VISUAL_TYPE;
-        attribs[i++] = GLX_DIRECT_COLOR;
-    }
-#endif
-
     attribs[i++] = None;
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
-#ifdef GLX_DIRECT_COLOR
-    if (!vinfo && X11_UseDirectColorVisuals()) {        /* No DirectColor visual?  Try again.. */
-        attribs[i - 3] = None;
-        vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
-    }
-#endif
     if (!vinfo) {
         SDL_SetError("Couldn't find matching GLX visual");
     }
@@ -393,7 +380,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
     int screen =
-        ((SDL_DisplayData *) window->display->driverdata)->screen;
+        ((SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata)->screen;
     XWindowAttributes xattr;
     XVisualInfo v, *vinfo;
     int n;

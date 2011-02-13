@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,14 +27,14 @@
 
 /*
     This file is used by the keyboard code in SDL_uikitview.m to convert between characters
-    passed in from the iPhone's virtual keyboard, and tuples of SDL_ScanCodes and SDL_keymods.
+    passed in from the iPhone's virtual keyboard, and tuples of SDL_Scancode and SDL_keymods.
     For example unicharToUIKeyInfoTable['a'] would give you the scan code and keymod for lower
     case a.
 */
 
 typedef struct
 {
-    SDL_ScanCode code;
+    SDL_Scancode code;
     Uint16 mod;
 } UIKitKeyInfo;
 

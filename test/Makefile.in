@@ -7,7 +7,57 @@ EXE	= @EXE@
 CFLAGS  = @CFLAGS@
 LIBS	= @LIBS@
 
-TARGETS = checkkeys$(EXE) graywin$(EXE) loopwave$(EXE) testalpha$(EXE) testatomic$(EXE) testaudioinfo$(EXE) testbitmap$(EXE) testblitspeed$(EXE) testcursor$(EXE) testdraw2$(EXE) testdyngles$(EXE) testdyngl$(EXE) testerror$(EXE) testfile$(EXE) testfill$(EXE) testgamma$(EXE) testgl2$(EXE) testgles$(EXE) testgl$(EXE) testhaptic$(EXE) testhread$(EXE) testiconv$(EXE) testime$(EXE) testintersections$(EXE) testjoystick$(EXE) testkeys$(EXE) testloadso$(EXE) testlock$(EXE) testmultiaudio$(EXE) testoverlay2$(EXE) testoverlay$(EXE) testplatform$(EXE) testpower$(EXE) testresample$(EXE) testsem$(EXE) testshape$(EXE) testsprite2$(EXE) testsprite$(EXE) testspriteminimal$(EXE) testtimer$(EXE) testver$(EXE) testvidinfo$(EXE) testwin$(EXE) testwm2$(EXE) testwm$(EXE) threadwin$(EXE) torturethread$(EXE) testgesture$(EXE)
+TARGETS = \
+	checkkeys$(EXE) \
+	graywin$(EXE) \
+	loopwave$(EXE) \
+	testalpha$(EXE) \
+	testatomic$(EXE) \
+	testaudioinfo$(EXE) \
+	testbitmap$(EXE) \
+	testblitspeed$(EXE) \
+	testcursor$(EXE) \
+	testdraw2$(EXE) \
+	testdyngl$(EXE) \
+	testdyngles$(EXE) \
+	testerror$(EXE) \
+	testfile$(EXE) \
+	testfill$(EXE) \
+	testgesture$(EXE) \
+	testgl$(EXE) \
+	testgl2$(EXE) \
+	testgles$(EXE) \
+	testhaptic$(EXE) \
+	testhread$(EXE) \
+	testiconv$(EXE) \
+	testime$(EXE) \
+	testintersections$(EXE) \
+	testjoystick$(EXE) \
+	testkeys$(EXE) \
+	testloadso$(EXE) \
+	testlock$(EXE) \
+	testmultiaudio$(EXE) \
+	testoverlay$(EXE) \
+	testoverlay2$(EXE) \
+	testplatform$(EXE) \
+	testpower$(EXE) \
+	testresample$(EXE) \
+	testscale$(EXE) \
+	testsem$(EXE) \
+	testshader$(EXE) \
+	testshape$(EXE) \
+	testsprite$(EXE) \
+	testsprite2$(EXE) \
+	testspriteminimal$(EXE) \
+	teststreaming$(EXE) \
+	testtimer$(EXE) \
+	testver$(EXE) \
+	testvidinfo$(EXE) \
+	testwin$(EXE) \
+	testwm$(EXE) \
+	testwm2$(EXE) \
+	threadwin$(EXE) \
+	torturethread$(EXE) \
 
 all: Makefile $(TARGETS)
 
@@ -32,11 +82,11 @@ testaudioinfo$(EXE): $(srcdir)/testaudioinfo.c
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testpower$(EXE): $(srcdir)/testpower.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
 testalpha$(EXE): $(srcdir)/testalpha.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
+
+testatomic$(EXE): $(srcdir)/testatomic.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testbitmap$(EXE): $(srcdir)/testbitmap.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
@@ -68,9 +118,9 @@ testfile$(EXE): $(srcdir)/testfile.c
 testfill$(EXE): $(srcdir)/testfill.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testgamma$(EXE): $(srcdir)/testgamma.c
+testgesture$(EXE): $(srcdir)/testgesture.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
-
+ 
 testgl$(EXE): $(srcdir)/testgl.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
@@ -80,16 +130,25 @@ testgl2$(EXE): $(srcdir)/testgl2.c $(srcdir)/common.c
 testgles$(EXE): $(srcdir)/testgles.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testgles.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
+testhaptic$(EXE): $(srcdir)/testhaptic.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
 testhread$(EXE): $(srcdir)/testhread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testiconv$(EXE): $(srcdir)/testiconv.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testime$(EXE): $(srcdir)/testime.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
+
 testjoystick$(EXE): $(srcdir)/testjoystick.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testkeys$(EXE): $(srcdir)/testkeys.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
+testloadso$(EXE): $(srcdir)/testloadso.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testlock$(EXE): $(srcdir)/testlock.c
@@ -104,20 +163,32 @@ testoverlay$(EXE): $(srcdir)/testoverlay.c
 testplatform$(EXE): $(srcdir)/testplatform.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testpower$(EXE): $(srcdir)/testpower.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
+testscale$(EXE): $(srcdir)/testscale.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testscale.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
+
 testsem$(EXE): $(srcdir)/testsem.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testshader$(EXE): $(srcdir)/testshader.c
+	$(CC) -o $@ $(srcdir)/testshader.c $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
+
 testshape$(EXE): $(srcdir)/testshape.c
 	$(CC) -o $@ $? -std=c99 $(CFLAGS) $(LIBS)
-
-testspriteminimal$(EXE): $(srcdir)/testspriteminimal.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
 
 testsprite$(EXE): $(srcdir)/testsprite.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
 
 testsprite2$(EXE): $(srcdir)/testsprite2.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testsprite2.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @MATHLIB@
+
+testspriteminimal$(EXE): $(srcdir)/testspriteminimal.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
+
+teststreaming$(EXE): $(srcdir)/teststreaming.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
 
 testtimer$(EXE): $(srcdir)/testtimer.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
@@ -142,21 +213,6 @@ threadwin$(EXE): $(srcdir)/threadwin.c
 
 torturethread$(EXE): $(srcdir)/torturethread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testloadso$(EXE): $(srcdir)/testloadso.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testhaptic$(EXE): $(srcdir)/testhaptic.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testatomic$(EXE): $(srcdir)/testatomic.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
-
-testgesture$(EXE): $(srcdir)/testgesture.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
- 
-testime$(EXE): $(srcdir)/testime.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
 
 clean:
 	rm -f $(TARGETS)

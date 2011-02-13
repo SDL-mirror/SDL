@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -45,8 +45,7 @@ NDS_PumpEvents(_THIS)
     }
     if (keysHeld() & KEY_TOUCH) {
         touchPosition t = touchReadXY();
-        SDL_SendMouseMotion(0, 0, t.px, t.py, 1);       /* last arg is pressure,
-                                                           hardcoded 1 for now */
+        SDL_SendMouseMotion(0, 0, t.px, t.py);
     }
 }
 

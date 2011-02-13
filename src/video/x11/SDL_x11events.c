@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -202,7 +202,7 @@ X11_DispatchEvent(_THIS)
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
-            SDL_ScanCode scancode;
+            SDL_Scancode scancode;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
 

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+
+#if !SDL_RENDER_DISABLED
 
 #include "SDL_draw.h"
 #include "SDL_blendpoint.h"
@@ -342,5 +344,7 @@ SDL_BlendPoints(SDL_Surface * dst, const SDL_Point * points, int count,
     }
     return status;
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

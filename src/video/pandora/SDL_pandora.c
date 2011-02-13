@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -417,7 +417,7 @@ PND_gl_createcontext(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     EGLBoolean status;
     int32_t gfstatus;
     EGLint configs;
@@ -816,7 +816,7 @@ PND_gl_swapwindow(_THIS, SDL_Window * window)
     SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *wdata = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *didata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
 
 
     if (phdata->egl_initialized != SDL_TRUE) {

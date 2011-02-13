@@ -900,10 +900,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_leaks.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\stdlib\SDL_malloc.c"
 			>
 		</File>

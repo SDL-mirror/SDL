@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -258,14 +258,23 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         /* Restoring desktop mode */
         CGDisplaySwitchToMode(displaydata->display, data->moderef);
 
-        CGDisplayRelease(displaydata->display);
+        if (CGDisplayIsMain(displaydata->display)) {
+            CGReleaseAllDisplays();
+        } else {
+            CGDisplayRelease(displaydata->display);
+        }
 
         if (CGDisplayIsMain(displaydata->display)) {
             ShowMenuBar();
         }
     } else {
         /* Put up the blanking window (a window above all other windows) */
-        result = CGDisplayCapture(displaydata->display);
+        if (CGDisplayIsMain(displaydata->display)) {
+            /* If we don't capture all displays, Cocoa tries to rearrange windows... *sigh* */
+            result = CGCaptureAllDisplays();
+        } else {
+            result = CGDisplayCapture(displaydata->display);
+        }
         if (result != kCGErrorSuccess) {
             CG_SetError("CGDisplayCapture()", result);
             goto ERR_NO_CAPTURE;
@@ -289,19 +298,6 @@ Cocoa_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         CGDisplayFade(fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
         CGReleaseDisplayFadeReservation(fade_token);
     }
-
-    [[NSApp mainWindow] makeKeyAndOrderFront: nil];
-
-#if MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_5
-    /* 
-        There is a bug in Cocoa where NSScreen doesn't synchronize
-        with CGDirectDisplay, so the main screen's frame is wrong.
-        As a result, coordinate translation produces incorrect results.
-        We can hack around this bug by setting the screen rect
-        ourselves. This hack should be removed if/when the bug is fixed.
-    */
-    [[NSScreen mainScreen] setFrame:NSMakeRect(0,0,mode->w,mode->h)]; 
-#endif
 
     return 0;
 

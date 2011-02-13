@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 /* Interface from the SDL library into the Android Java activity */
-extern void Android_JNI_CreateContext();
+extern SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion);
 extern void Android_JNI_SwapWindow();
 extern void Android_JNI_SetActivityTitle(const char *title);
 extern void Android_JNI_GetAccelerometerValues(float values[3]);

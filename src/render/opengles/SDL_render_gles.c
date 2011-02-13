@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,7 +21,7 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_OGL_ES
+#if SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED
 
 #include "SDL_opengles.h"
 #include "../SDL_sysrender.h"
@@ -40,9 +40,6 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
-/* Used to re-create the window with OpenGL capability */
-extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
-
 static const float inv255f = 1.0f / 255.0f;
 
 static SDL_Renderer *GLES_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -56,6 +53,7 @@ static int GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, void **pixels, int *pitch);
 static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
+static void GLES_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int GLES_RenderDrawPoints(SDL_Renderer * renderer,
                                  const SDL_Point * points, int count);
 static int GLES_RenderDrawLines(SDL_Renderer * renderer,
@@ -145,14 +143,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer;
     GLES_RenderData *data;
     GLint value;
-    Uint32 window_flags;
-
-    window_flags = SDL_GetWindowFlags(window);
-    if (!(window_flags & SDL_WINDOW_OPENGL)) {
-        if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
-            return NULL;
-        }
-    }
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -172,6 +162,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
+    renderer->SetClipRect = GLES_SetClipRect;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
     renderer->RenderDrawLines = GLES_RenderDrawLines;
     renderer->RenderFillRects = GLES_RenderFillRects;
@@ -291,7 +282,6 @@ power_of_2(int input)
 static int
 GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data;
     GLint internalFormat;
     GLenum format, type;
@@ -368,46 +358,60 @@ static int
 GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                    const SDL_Rect * rect, const void *pixels, int pitch)
 {
-    GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
-    GLenum result;
-    int bpp = SDL_BYTESPERPIXEL(texture->format);
-    void * temp_buffer;
-    void * temp_ptr;
-    int i;
+    Uint8 *blob = NULL;
+    Uint8 *src;
+    int srcPitch;
+    int y;
 
     GLES_ActivateRenderer(renderer);
 
+    /* Bail out if we're supposed to update an empty rectangle */
+    if (rect->w <= 0 || rect->h <= 0)
+        return 0;
+
+    /* Reformat the texture data into a tightly packed array */
+    srcPitch = rect->w * SDL_BYTESPERPIXEL(texture->format);
+    src = (Uint8 *)pixels;
+    if (pitch != srcPitch)
+    {
+        blob = (Uint8 *)SDL_malloc(srcPitch * rect->h);
+        if (!blob)
+        {
+            SDL_OutOfMemory();
+            return -1;
+        }
+        src = blob;
+        for (y = 0; y < rect->h; ++y)
+        {
+            SDL_memcpy(src, pixels, srcPitch);
+            src += srcPitch;
+            pixels = (Uint8 *)pixels + pitch;
+        }
+        src = blob;
+    }
+
+    /* Create a texture subimage with the supplied data */
     glGetError();
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glEnable(data->type);
     glBindTexture(data->type, data->texture);
-
-    if( rect->w * bpp == pitch ) {
-         temp_buffer = (void *)pixels; /* No need to reformat */
-    } else {
-         /* Reformatting of mem area required */
-         temp_buffer = SDL_malloc(rect->w * rect->h * bpp);
-         temp_ptr = temp_buffer;
-         for (i = 0; i < rect->h; i++) {
-             SDL_memcpy(temp_ptr, pixels, rect->w * bpp);
-             temp_ptr += rect->w * bpp;
-             pixels += pitch;
-         }
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    glTexSubImage2D(data->type,
+                    0,
+                    rect->x,
+                    rect->y,
+                    rect->w,
+                    rect->h,
+                    data->format,
+                    data->formattype,
+                    src);
+    if (blob) {
+        SDL_free(blob);
     }
 
-    glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
-                                rect->h, data->format, data->formattype,
-                                temp_buffer);
-
-    if( temp_buffer != pixels ) {
-        SDL_free(temp_buffer);
-    }
-
-    glDisable(data->type);
-    result = glGetError();
-    if (result != GL_NO_ERROR) {
-        GLES_SetError("glTexSubImage2D()", result);
+    if (glGetError() != GL_NO_ERROR)
+    {
+        SDL_SetError("Failed to update texture");
         return -1;
     }
     return 0;
@@ -429,18 +433,31 @@ GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 GLES_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    GLES_RenderData *renderdata = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *data = (GLES_TextureData *) texture->driverdata;
+    SDL_Rect rect;
 
+    /* We do whole texture updates, at least for now */
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = texture->w;
+    rect.h = texture->h;
+    GLES_UpdateTexture(renderer, texture, &rect, data->pixels, data->pitch);
+}
+
+static void
+GLES_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
     GLES_ActivateRenderer(renderer);
 
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glEnable(data->type);
-    glBindTexture(data->type, data->texture);
-    glTexSubImage2D(data->type, 0, 0, 0, texture->w,
-                                texture->h, data->format, data->formattype,
-                                data->pixels);
-    glDisable(data->type);
+    if (rect) {
+        int w, h;
+
+        SDL_GetWindowSize(renderer->window, &w, &h);
+        glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
+    }
 }
 
 static void
@@ -710,6 +727,6 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL_ES */
+#endif /* SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

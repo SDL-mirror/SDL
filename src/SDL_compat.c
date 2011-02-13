@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -71,15 +71,17 @@ SDL_VideoDriverName(char *namebuf, int maxlen)
     return NULL;
 }
 
-static void
-SelectVideoDisplay()
+static int
+GetVideoDisplay()
 {
     const char *variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_DISPLAY");
     if ( !variable ) {
         variable = SDL_getenv("SDL_VIDEO_FULLSCREEN_HEAD");
     }
     if ( variable ) {
-        SDL_SelectVideoDisplay(SDL_atoi(variable));
+        return SDL_atoi(variable);
+    } else {
+        return 0;
     }
 }
 
@@ -89,10 +91,8 @@ SDL_GetVideoInfo(void)
     static SDL_VideoInfo info;
     SDL_DisplayMode mode;
 
-    SelectVideoDisplay();
-
     /* Memory leak, compatibility code, who cares? */
-    if (!info.vfmt && SDL_GetDesktopDisplayMode(&mode) == 0) {
+    if (!info.vfmt && SDL_GetDesktopDisplayMode(GetVideoDisplay(), &mode) == 0) {
         int bpp;
         Uint32 Rmask, Gmask, Bmask, Amask;
 
@@ -114,17 +114,15 @@ SDL_VideoModeOK(int width, int height, int bpp, Uint32 flags)
         return 0;
     }
 
-    SelectVideoDisplay();
-
     if (!(flags & SDL_FULLSCREEN)) {
         SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(&mode);
+        SDL_GetDesktopDisplayMode(GetVideoDisplay(), &mode);
         return SDL_BITSPERPIXEL(mode.format);
     }
 
-    for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
+    for (i = 0; i < SDL_GetNumDisplayModes(GetVideoDisplay()); ++i) {
         SDL_DisplayMode mode;
-        SDL_GetDisplayMode(i, &mode);
+        SDL_GetDisplayMode(GetVideoDisplay(), i, &mode);
         if (!mode.w || !mode.h || (width == mode.w && height == mode.h)) {
             if (!mode.format) {
                 return bpp;
@@ -147,8 +145,6 @@ SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags)
         return NULL;
     }
 
-    SelectVideoDisplay();
-
     if (!(flags & SDL_FULLSCREEN)) {
         return (SDL_Rect **) (-1);
     }
@@ -160,11 +156,11 @@ SDL_ListModes(const SDL_PixelFormat * format, Uint32 flags)
     /* Memory leak, but this is a compatibility function, who cares? */
     nmodes = 0;
     modes = NULL;
-    for (i = 0; i < SDL_GetNumDisplayModes(); ++i) {
+    for (i = 0; i < SDL_GetNumDisplayModes(GetVideoDisplay()); ++i) {
         SDL_DisplayMode mode;
         int bpp;
 
-        SDL_GetDisplayMode(i, &mode);
+        SDL_GetDisplayMode(GetVideoDisplay(), i, &mode);
         if (!mode.w || !mode.h) {
             return (SDL_Rect **) (-1);
         }
@@ -342,7 +338,7 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
     }
     if (center) {
         SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(&mode);
+        SDL_GetDesktopDisplayMode(GetVideoDisplay(), &mode);
         *x = (mode.w - w) / 2;
         *y = (mode.h - h) / 2;
     }
@@ -453,9 +449,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         }
     }
 
-    SelectVideoDisplay();
-
-    SDL_GetDesktopDisplayMode(&desktop_mode);
+    SDL_GetDesktopDisplayMode(GetVideoDisplay(), &desktop_mode);
 
     if (width == 0) {
         width = desktop_mode.w;
@@ -525,7 +519,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
         surface_flags |= SDL_FULLSCREEN;
     }
-    if (window_flags & SDL_WINDOW_OPENGL) {
+    if ((window_flags & SDL_WINDOW_OPENGL) && (flags & SDL_OPENGL)) {
         surface_flags |= SDL_OPENGL;
     }
     if (window_flags & SDL_WINDOW_RESIZABLE) {
@@ -1526,6 +1520,26 @@ SDL_GL_SwapBuffers(void)
     SDL_GL_SwapWindow(SDL_VideoWindow);
 }
 
+int
+SDL_SetGamma(float red, float green, float blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
+int
+SDL_SetGammaRamp(const Uint16 * red, const Uint16 * green, const Uint16 * blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
+int
+SDL_GetGammaRamp(Uint16 * red, Uint16 * green, Uint16 * blue)
+{
+    SDL_Unsupported();
+    return -1;
+}
 
 int
 SDL_EnableKeyRepeat(int delay, int interval)

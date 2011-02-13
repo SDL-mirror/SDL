@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -76,8 +76,6 @@ struct SDL_Window
     int w, h;
     Uint32 flags;
 
-    SDL_VideoDisplay *display;
-
     SDL_DisplayMode fullscreen_mode;
     
     SDL_Surface *surface;
@@ -108,18 +106,16 @@ struct SDL_VideoDisplay
     SDL_DisplayMode *display_modes;
     SDL_DisplayMode desktop_mode;
     SDL_DisplayMode current_mode;
-    SDL_bool updating_fullscreen;
 
-    Uint16 *gamma;
-    Uint16 *saved_gamma;        /* (just offset into gamma) */
-
-    SDL_Window *windows;
     SDL_Window *fullscreen_window;
 
     SDL_VideoDevice *device;
 
     void *driverdata;
 };
+
+/* Forward declaration */
+struct SDL_SysWMinfo;
 
 /* Define the SDL video driver structure */
 #define _THIS	SDL_VideoDevice *_this
@@ -156,8 +152,7 @@ struct SDL_VideoDevice
     int (*GetDisplayBounds) (_THIS, SDL_VideoDisplay * display, SDL_Rect * rect);
 
     /*
-     * Get a list of the available display modes. e.g.
-     * SDL_AddDisplayMode(_this->current_display, mode)
+     * Get a list of the available display modes for a display.
      */
     void (*GetDisplayModes) (_THIS, SDL_VideoDisplay * display);
 
@@ -168,12 +163,6 @@ struct SDL_VideoDevice
      * associated with them.
      */
     int (*SetDisplayMode) (_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-
-    /* Set the gamma ramp */
-    int (*SetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
-
-    /* Get the gamma ramp */
-    int (*GetDisplayGammaRamp) (_THIS, SDL_VideoDisplay * display, Uint16 * ramp);
 
     /* * * */
     /*
@@ -191,6 +180,8 @@ struct SDL_VideoDevice
     void (*MaximizeWindow) (_THIS, SDL_Window * window);
     void (*MinimizeWindow) (_THIS, SDL_Window * window);
     void (*RestoreWindow) (_THIS, SDL_Window * window);
+    void (*PrepWindowFullscreen) (_THIS, SDL_Window * window);
+    void (*SetWindowFullscreen) (_THIS, SDL_Window * window);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
@@ -245,7 +236,7 @@ struct SDL_VideoDevice
     SDL_bool suspend_screensaver;
     int num_displays;
     SDL_VideoDisplay *displays;
-    int current_display;
+    SDL_Window *windows;
     Uint8 window_magic;
     Uint32 next_object_id;
     char * clipboard_text;
@@ -331,20 +322,11 @@ extern VideoBootStrap Android_bootstrap;
 extern VideoBootStrap DUMMY_bootstrap;
 #endif
 
-#define SDL_CurrentDisplay	(&_this->displays[_this->current_display])
-
 extern SDL_VideoDevice *SDL_GetVideoDevice(void);
 extern int SDL_AddBasicVideoDisplay(const SDL_DisplayMode * desktop_mode);
 extern int SDL_AddVideoDisplay(const SDL_VideoDisplay * display);
 extern SDL_bool SDL_AddDisplayMode(SDL_VideoDisplay *display, const SDL_DisplayMode * mode);
-extern int SDL_GetNumDisplayModesForDisplay(SDL_VideoDisplay * display);
-extern int SDL_GetDisplayModeForDisplay(SDL_VideoDisplay * display, int index, SDL_DisplayMode * mode);
-extern int SDL_GetDesktopDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-extern int SDL_GetCurrentDisplayModeForDisplay(SDL_VideoDisplay * display, SDL_DisplayMode * mode);
-extern SDL_DisplayMode * SDL_GetClosestDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
-extern int SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode * mode);
-extern int SDL_SetGammaRampForDisplay(SDL_VideoDisplay * display, const Uint16 * red, const Uint16 * green, const Uint16 * blue);
-extern int SDL_GetGammaRampForDisplay(SDL_VideoDisplay * display, Uint16 * red, Uint16 * green, Uint16 * blue);
+extern SDL_VideoDisplay *SDL_GetDisplayForWindow(SDL_Window *window);
 
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 

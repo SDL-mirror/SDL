@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -150,8 +150,8 @@ void
 WIN_UpdateKeymap()
 {
     int i;
-    SDL_ScanCode scancode;
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Scancode scancode;
+    SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
     SDL_GetDefaultKeymap(keymap);
 

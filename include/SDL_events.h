@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -151,7 +151,7 @@ typedef struct SDL_KeyboardEvent
     Uint8 repeat;       /**< Non-zero if this is a key repeat */
     Uint8 padding2;
     Uint8 padding3;
-    SDL_KeySym keysym;  /**< The key that was pressed or released */
+    SDL_Keysym keysym;  /**< The key that was pressed or released */
 } SDL_KeyboardEvent;
 
 #define SDL_TEXTEDITINGEVENT_TEXT_SIZE (32)

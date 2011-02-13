@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -86,7 +86,6 @@ struct SDL_WindowData
     SDL_Window *window;
     NSWindow *nswindow;
     SDL_bool created;
-    CGDirectDisplayID display;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
 };
@@ -103,6 +102,7 @@ extern void Cocoa_RaiseWindow(_THIS, SDL_Window * window);
 extern void Cocoa_MaximizeWindow(_THIS, SDL_Window * window);
 extern void Cocoa_MinimizeWindow(_THIS, SDL_Window * window);
 extern void Cocoa_RestoreWindow(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window);
 extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window);
 extern void Cocoa_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window,

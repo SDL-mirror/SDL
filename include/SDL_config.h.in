@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -82,7 +82,6 @@
 #undef HAVE_MATH_H
 #undef HAVE_ICONV_H
 #undef HAVE_SIGNAL_H
-#undef HAVE_ALTIVEC_H
 
 /* C library functions */
 #undef HAVE_MALLOC
@@ -171,6 +170,7 @@
 #undef SDL_DEFAULT_ASSERT_LEVEL
 
 /* Allow disabling of core subsystems */
+#undef SDL_ATOMIC_DISABLED
 #undef SDL_AUDIO_DISABLED
 #undef SDL_CPUINFO_DISABLED
 #undef SDL_EVENTS_DISABLED
@@ -178,6 +178,7 @@
 #undef SDL_JOYSTICK_DISABLED
 #undef SDL_HAPTIC_DISABLED
 #undef SDL_LOADSO_DISABLED
+#undef SDL_RENDER_DISABLED
 #undef SDL_THREADS_DISABLED
 #undef SDL_TIMERS_DISABLED
 #undef SDL_VIDEO_DISABLED
@@ -301,6 +302,5 @@
 
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES
-#undef SDL_ALTIVEC_BLITTERS
 
 #endif /* _SDL_config_h */

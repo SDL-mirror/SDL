@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -1127,7 +1127,8 @@ SDL_SW_UpdateYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
                 ("YV12 and IYUV textures only support full surface updates");
             return -1;
         }
-        SDL_memcpy(swdata->pixels, pixels, swdata->h * swdata->w * 2);
+        SDL_memcpy(swdata->pixels, pixels,
+                   (swdata->h * swdata->w) + (swdata->h * swdata->w) / 2);
         break;
     case SDL_PIXELFORMAT_YUY2:
     case SDL_PIXELFORMAT_UYVY:

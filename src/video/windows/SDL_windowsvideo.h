@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -41,7 +41,6 @@
 
 #include "SDL_windowsclipboard.h"
 #include "SDL_windowsevents.h"
-#include "SDL_windowsgamma.h"
 #include "SDL_windowskeyboard.h"
 #include "SDL_windowsmodes.h"
 #include "SDL_windowsmouse.h"
@@ -123,7 +122,7 @@ typedef struct SDL_VideoData
     PFCoordTransform CoordTransform;
 #endif
 
-    const SDL_ScanCode *key_layout;
+    const SDL_Scancode *key_layout;
 	DWORD clipboard_count;
 
 	/* Touch input functions */

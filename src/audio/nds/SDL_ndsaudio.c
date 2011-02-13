@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -57,11 +57,13 @@ NDSAUD_OpenDevice(_THIS, const char *devname, int iscapture)
         }
     }
 
+#if 0
     /* set the generic sound parameters */
     setGenericSound(22050,      /* sample rate */
                     127,        /* volume */
                     64,         /* panning/balance */
                     0);         /* sound format */
+#endif
 
     return 1;
 }
@@ -69,13 +71,9 @@ NDSAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 static void
 NDSAUD_PlayDevice(_THIS)
 {
-    TransferSoundData *sound = SDL_malloc(sizeof(TransferSoundData));
-    if (!sound) {
-        SDL_OutOfMemory();
-    }
-
-    playGenericSound(this->hidden->mixbuf, this->hidden->mixlen);
 #if 0
+    playGenericSound(this->hidden->mixbuf, this->hidden->mixlen);
+
 //    sound->data = this->hidden->mixbuf;/* pointer to raw audio data */
 //    sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
 //    sound->rate = 22050; /* sample rate = 22050Hz */

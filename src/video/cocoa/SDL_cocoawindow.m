@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -333,8 +333,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
         SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
-	/* Make the origin the upper left instead of the lower left */
-	y = 1.0f - y;
+        /* Make the origin the upper left instead of the lower left */
+        y = 1.0f - y;
 
         switch (type) {
         case COCOA_TOUCH_DOWN:
@@ -398,17 +398,31 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 @end
 
+static unsigned int
+GetStyleMask(SDL_Window * window)
+{
+    unsigned int style;
+
+    if (window->flags & SDL_WINDOW_BORDERLESS) {
+        style = NSBorderlessWindowMask;
+    } else {
+        style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
+    }
+    if (window->flags & SDL_WINDOW_RESIZABLE) {
+        style |= NSResizableWindowMask;
+    }
+    return style;
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
 {
     NSAutoreleasePool *pool;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = window->display;
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_WindowData *data;
 
     /* Allocate the window data */
-    data = (SDL_WindowData *) SDL_malloc(sizeof(*data));
+    data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
         SDL_OutOfMemory();
         return -1;
@@ -416,7 +430,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     data->window = window;
     data->nswindow = nswindow;
     data->created = created;
-    data->display = displaydata->display;
     data->videodata = videodata;
 
     pool = [[NSAutoreleasePool alloc] init];
@@ -427,7 +440,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 
     /* Fill in the SDL window with the window data */
     {
-        SDL_Rect bounds;
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
         NSView *contentView = [[SDLView alloc] initWithFrame: rect
                                                     listener: data->listener];
@@ -438,9 +450,8 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         [contentView release];
 
         ConvertNSRect(&rect);
-        Cocoa_GetDisplayBounds(_this, display, &bounds);
-        window->x = (int)rect.origin.x - bounds.x;
-        window->y = (int)rect.origin.y - bounds.y;
+        window->x = (int)rect.origin.x;
+        window->y = (int)rect.origin.y;
         window->w = (int)rect.size.width;
         window->h = (int)rect.size.height;
     }
@@ -493,40 +504,31 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
     SDL_Rect bounds;
     unsigned int style;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         rect.origin.x = bounds.x;
     } else {
-        rect.origin.x = bounds.x + window->x;
+        rect.origin.x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         rect.origin.y = bounds.y;
     } else {
-        rect.origin.y = bounds.y + window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
     ConvertNSRect(&rect);
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
-        style = NSBorderlessWindowMask;
-    } else {
-        style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
-    }
-    if (window->flags & SDL_WINDOW_RESIZABLE) {
-        style |= NSResizableWindowMask;
-    }
+    style = GetStyleMask(window);
 
     /* Figure out which screen to place this window */
     NSArray *screens = [NSScreen screens];
@@ -599,22 +601,20 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
     SDL_Rect bounds;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
     } else {
-        rect.origin.x = bounds.x + window->x;
+        rect.origin.x = window->x;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
     } else {
-        rect.origin.y = bounds.y + window->y;
+        rect.origin.y = window->y;
     }
     rect.size.width = window->w;
     rect.size.height = window->h;
@@ -700,6 +700,48 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
     } else if ([nswindow isZoomed]) {
         [nswindow zoom:nil];
     }
+    [pool release];
+}
+
+void
+Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    NSWindow *nswindow = data->nswindow;
+    NSRect rect;
+
+    if (FULLSCREEN_VISIBLE(window)) {
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+        SDL_Rect bounds;
+
+        Cocoa_GetDisplayBounds(_this, display, &bounds);
+        rect.origin.x = bounds.x;
+        rect.origin.y = bounds.y;
+        rect.size.width = bounds.w;
+        rect.size.height = bounds.h;
+        ConvertNSRect(&rect);
+
+        [nswindow setStyleMask:NSBorderlessWindowMask];
+        [nswindow setContentSize:rect.size];
+        [nswindow setFrameOrigin:rect.origin];
+    } else {
+        [nswindow setStyleMask:GetStyleMask(window)];
+
+        // This doesn't seem to do anything...
+        //[nswindow setFrameOrigin:origin];
+    }
+
+#ifdef FULLSCREEN_TOGGLEABLE
+    if (FULLSCREEN_VISIBLE(window)) {
+        /* OpenGL is rendering to the window, so make it visible! */
+        [nswindow setLevel:CGShieldingWindowLevel()];
+    } else {
+        [nswindow setLevel:kCGNormalWindowLevel];
+    }
+#endif
+    [nswindow makeKeyAndOrderFront:nil];
+
     [pool release];
 }
 

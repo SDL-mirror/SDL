@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -78,6 +78,7 @@ struct SDL_Renderer
     int (*LockTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                         const SDL_Rect * rect, void **pixels, int *pitch);
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
+    void (*SetClipRect) (SDL_Renderer * renderer, const SDL_Rect *rect);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
                              int count);
@@ -118,6 +119,8 @@ struct SDL_RenderDriver
     SDL_RendererInfo info;
 };
 
+#if !SDL_RENDER_DISABLED
+
 #if SDL_VIDEO_RENDER_D3D
 extern SDL_RenderDriver D3D_RenderDriver;
 #endif
@@ -133,7 +136,12 @@ extern SDL_RenderDriver GLES_RenderDriver;
 #if SDL_VIDEO_RENDER_DIRECTFB
 extern SDL_RenderDriver DirectFB_RenderDriver;
 #endif
+#ifdef SDL_VIDEO_RENDER_NDS
+extern SDL_RenderDriver NDS_RenderDriver;
+#endif
 extern SDL_RenderDriver SW_RenderDriver;
+
+#endif /* !SDL_RENDER_DISABLED */
 
 #endif /* _SDL_sysrender_h */
 

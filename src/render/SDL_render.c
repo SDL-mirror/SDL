@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,7 @@
 /* The SDL 2D rendering system */
 
 #include "SDL_hints.h"
+#include "SDL_log.h"
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
 #include "../video/SDL_pixels_c.h"
@@ -44,6 +45,7 @@
 
 
 static const SDL_RenderDriver *render_drivers[] = {
+#if !SDL_RENDER_DISABLED
 #if SDL_VIDEO_RENDER_D3D
     &D3D_RenderDriver,
 #endif
@@ -59,7 +61,11 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_DIRECTFB
     &DirectFB_RenderDriver,
 #endif
+#if SDL_VIDEO_RENDER_NDS
+	&NDS_RenderDriver,
+#endif
     &SW_RenderDriver
+#endif /* !SDL_RENDER_DISABLED */
 };
 static char renderer_magic;
 static char texture_magic;
@@ -159,6 +165,9 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->window = window;
 
         SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
+
+        SDL_LogInfo(SDL_LOG_CATEGORY_RENDER,
+                    "Created renderer: %s", renderer->info.name);
     }
     return renderer;
 }
@@ -166,7 +175,12 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 SDL_Renderer *
 SDL_CreateSoftwareRenderer(SDL_Surface * surface)
 {
+#if !SDL_RENDER_DISABLED
     return SW_CreateRendererForSurface(surface);
+#else
+    SDL_SetError("SDL not built with rendering support");
+    return NULL;
+#endif /* !SDL_RENDER_DISABLED */
 }
 
 int
@@ -195,12 +209,22 @@ static Uint32
 GetClosestSupportedFormat(SDL_Renderer * renderer, Uint32 format)
 {
     Uint32 i;
-    SDL_bool hasAlpha = SDL_ISPIXELFORMAT_ALPHA(format);
 
-    /* We just want to match the first format that has the same channels */
-    for (i = 0; i < renderer->info.num_texture_formats; ++i) {
-        if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
-            return renderer->info.texture_formats[i];
+    if (SDL_ISPIXELFORMAT_FOURCC(format)) {
+        /* Look for an exact match */
+        for (i = 0; i < renderer->info.num_texture_formats; ++i) {
+            if (renderer->info.texture_formats[i] == format) {
+                return renderer->info.texture_formats[i];
+            }
+        }
+    } else {
+        SDL_bool hasAlpha = SDL_ISPIXELFORMAT_ALPHA(format);
+
+        /* We just want to match the first format that has the same channels */
+        for (i = 0; i < renderer->info.num_texture_formats; ++i) {
+            if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
+                return renderer->info.texture_formats[i];
+            }
         }
     }
     return renderer->info.texture_formats[0];
@@ -302,7 +326,8 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
     }
     format = renderer->info.texture_formats[0];
     for (i = 0; i < renderer->info.num_texture_formats; ++i) {
-        if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == needAlpha) {
+        if (!SDL_ISPIXELFORMAT_FOURCC(renderer->info.texture_formats[i]) &&
+            SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == needAlpha) {
             format = renderer->info.texture_formats[i];
             break;
         }
@@ -719,6 +744,14 @@ SDL_UnlockTexture(SDL_Texture * texture)
         renderer = texture->renderer;
         renderer->UnlockTexture(renderer, texture);
     }
+}
+
+void
+SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    CHECK_RENDERER_MAGIC(renderer, );
+
+    renderer->SetClipRect(renderer, rect);
 }
 
 int

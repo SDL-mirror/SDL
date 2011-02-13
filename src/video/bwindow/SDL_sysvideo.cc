@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -129,7 +129,6 @@ extern "C"
         device->UnlockHWSurface = BE_UnlockHWSurface;
         device->FlipHWSurface = NULL;
         device->FreeHWSurface = BE_FreeHWSurface;
-        /* Gamma support */
 #if SDL_VIDEO_OPENGL
         /* OpenGL support */
         device->GL_LoadLibrary = BE_GL_LoadLibrary;

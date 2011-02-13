@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@
 
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
-#include "SDL_x11gamma.h"
 #include "SDL_x11shape.h"
 
 #ifdef SDL_VIDEO_DRIVER_PANDORA
@@ -91,7 +90,7 @@ X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     XWindowAttributes attr;
 
     XGetWindowAttributes(data->display, RootWindow(data->display, displaydata->screen), &attr);
@@ -260,7 +259,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->display;
     int screen = displaydata->screen;
     Visual *visual;
@@ -326,232 +325,22 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
-
-    if (visual->class == PseudoColor) {
-        printf("asking for PseudoColor\n");
-
-/*      Status status; */
-        XColor *colorcells;
-        Colormap colormap;
-        Sint32 pix;
-        Sint32 ncolors;
-        Sint32 nbits;
-        Sint32 rmax, gmax, bmax;
-        Sint32 rwidth, gwidth, bwidth;
-        Sint32 rmask, gmask, bmask;
-        Sint32 rshift, gshift, bshift;
-        Sint32 r, g, b;
-
-        /* Is the colormap we need already registered in SDL? */
-        if ((colormap =
-            X11_LookupColormap(display, screen, visual->visualid))) {
-            xattr.colormap = colormap;
-/*             printf("found existing colormap\n"); */
-        } else {
-            /* The colormap is not known to SDL so we will create it */
-            colormap = XCreateColormap(display, RootWindow(display, screen),
-                                       visual, AllocAll);
-/*             printf("colormap = %x\n", colormap); */
-
-            /* If we can't create a colormap, then we must die */
-            if (!colormap) {
-                SDL_SetError
-                    ("Couldn't create window: Could not create writable colormap");
-                return -1;
-            }
-
-            /* OK, we got a colormap, now fill it in as best as we can */
-
-            colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
-            if (NULL == colorcells) {
-                SDL_SetError("out of memory in X11_CreateWindow");
-                return -1;
-            }
-
-            ncolors = visual->map_entries;
-            nbits = visual->bits_per_rgb;
-
-/* 	    printf("ncolors = %d nbits = %d\n", ncolors, nbits); */
-
-            /* what if ncolors != (1 << nbits)? That can happen on a
-               true PseudoColor display.  I'm assuming that we will
-               always have ncolors == (1 << nbits) */
-
-            /* I'm making a lot of assumptions here. */
-
-            /* Compute the width of each field. If there is one extra
-               bit, give it to green. If there are two extra bits give
-               them to red and greed.  We can get extra bits when the
-               number of bits per pixel is not a multiple of 3. For
-               example when we have 16 bits per pixel and need a 5/6/5
-               layout for the RGB fields */
-
-            rwidth = (nbits / 3) + (((nbits % 3) == 2) ? 1 : 0);
-            gwidth = (nbits / 3) + (((nbits % 3) >= 1) ? 1 : 0);
-            bwidth = (nbits / 3);
-
-            rshift = gwidth + bwidth;
-            gshift = bwidth;
-            bshift = 0;
-
-            rmax = 1 << rwidth;
-            gmax = 1 << gwidth;
-            bmax = 1 << bwidth;
-
-            rmask = rmax - 1;
-            gmask = gmax - 1;
-            bmask = bmax - 1;
-
-/*             printf("red   mask = %4x shift = %4d width = %d\n", rmask, rshift, rwidth); */
-/*             printf("green mask = %4x shift = %4d width = %d\n", gmask, gshift, gwidth); */
-/*             printf("blue  mask = %4x shift = %4d width = %d\n", bmask, bshift, bwidth); */
-
-            /* build the color table pixel values */
-            pix = 0;
-            for (r = 0; r < rmax; r++) {
-                for (g = 0; g < gmax; g++) {
-                    for (b = 0; b < bmax; b++) {
-                        colorcells[pix].pixel =
-                            (r << rshift) | (g << gshift) | (b << bshift);
-                        colorcells[pix].red = (0xffff * r) / rmask;
-                        colorcells[pix].green = (0xffff * g) / gmask;
-                        colorcells[pix].blue = (0xffff * b) / bmask;
-/* 		  printf("%4x:%4x [%4x %4x %4x]\n",  */
-/* 			 pix,  */
-/* 			 colorcells[pix].pixel, */
-/* 			 colorcells[pix].red, */
-/* 			 colorcells[pix].green, */
-/* 			 colorcells[pix].blue); */
-                        pix++;
-                    }
-                }
-            }
-
-/*             status = */
-/*                 XStoreColors(display, colormap, colorcells, ncolors); */
-
-            xattr.colormap = colormap;
-            X11_TrackColormap(display, screen, colormap, visual, NULL);
-
-            SDL_free(colorcells);
-        }
-    } else if (visual->class == DirectColor) {
-        Status status;
-        XColor *colorcells;
-        Colormap colormap;
-        int i;
-        int ncolors;
-        int rmax, gmax, bmax;
-        int rmask, gmask, bmask;
-        int rshift, gshift, bshift;
-
-        /* Is the colormap we need already registered in SDL? */
-        if ((colormap =
-             X11_LookupColormap(display, screen, visual->visualid))) {
-            xattr.colormap = colormap;
-/*             printf("found existing colormap\n"); */
-        } else {
-            /* The colormap is not known to SDL so we will create it */
-            colormap = XCreateColormap(display, RootWindow(display, screen),
-                                       visual, AllocAll);
-/*             printf("colormap = %x\n", colormap); */
-
-            /* If we can't create a colormap, then we must die */
-            if (!colormap) {
-                SDL_SetError
-                    ("Couldn't create window: Could not create writable colormap");
-                return -1;
-            }
-
-            /* OK, we got a colormap, now fill it in as best as we can */
-            colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
-            if (NULL == colorcells) {
-                SDL_SetError("out of memory in X11_CreateWindow");
-                return -1;
-            }
-            ncolors = visual->map_entries;
-            rmax = 0xffff;
-            gmax = 0xffff;
-            bmax = 0xffff;
-
-            rshift = 0;
-            rmask = visual->red_mask;
-            while (0 == (rmask & 1)) {
-                rshift++;
-                rmask >>= 1;
-            }
-
-/*             printf("rmask = %4x rshift = %4d\n", rmask, rshift); */
-
-            gshift = 0;
-            gmask = visual->green_mask;
-            while (0 == (gmask & 1)) {
-                gshift++;
-                gmask >>= 1;
-            }
-
-/*             printf("gmask = %4x gshift = %4d\n", gmask, gshift); */
-
-            bshift = 0;
-            bmask = visual->blue_mask;
-            while (0 == (bmask & 1)) {
-                bshift++;
-                bmask >>= 1;
-            }
-
-/*             printf("bmask = %4x bshift = %4d\n", bmask, bshift); */
-
-            /* build the color table pixel values */
-            for (i = 0; i < ncolors; i++) {
-                Uint32 red = (rmax * i) / (ncolors - 1);
-                Uint32 green = (gmax * i) / (ncolors - 1);
-                Uint32 blue = (bmax * i) / (ncolors - 1);
-
-                Uint32 rbits = (rmask * i) / (ncolors - 1);
-                Uint32 gbits = (gmask * i) / (ncolors - 1);
-                Uint32 bbits = (bmask * i) / (ncolors - 1);
-
-                Uint32 pix =
-                    (rbits << rshift) | (gbits << gshift) | (bbits << bshift);
-
-                colorcells[i].pixel = pix;
-
-                colorcells[i].red = red;
-                colorcells[i].green = green;
-                colorcells[i].blue = blue;
-
-                colorcells[i].flags = DoRed | DoGreen | DoBlue;
-/* 		printf("%2d:%4x [%4x %4x %4x]\n", i, pix, red, green, blue); */
-            }
-
-            status =
-                XStoreColors(display, colormap, colorcells, ncolors);
-
-            xattr.colormap = colormap;
-            X11_TrackColormap(display, screen, colormap, visual, colorcells);
-
-            SDL_free(colorcells);
-        }
-    } else {
-        xattr.colormap =
-            XCreateColormap(display, RootWindow(display, screen),
-                            visual, AllocNone);
-    }
+    xattr.colormap = XCreateColormap(display, RootWindow(display, screen), visual, AllocNone);
 
     if (oldstyle_fullscreen
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
-    } else if (window->x == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         x = 0;
     } else {
         x = window->x;
     }
     if (oldstyle_fullscreen
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
-    } else if (window->y == SDL_WINDOWPOS_UNDEFINED) {
+    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
         y = 0;
     } else {
         y = window->y;
@@ -588,8 +377,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
             sizehints->flags = PMaxSize | PMinSize;
         }
         if (!oldstyle_fullscreen
-            && window->x != SDL_WINDOWPOS_UNDEFINED
-            && window->y != SDL_WINDOWPOS_UNDEFINED) {
+            && !SDL_WINDOWPOS_ISUNDEFINED(window->x)
+            && !SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
             sizehints->x = x;
             sizehints->y = y;
             sizehints->flags |= USPosition;
@@ -924,14 +713,14 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
     oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
     if (oldstyle_fullscreen
-        || window->x == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
         X11_GetDisplaySize(_this, window, &x, NULL);
         x = (x - window->w) / 2;
     } else {
         x = window->x;
     }
     if (oldstyle_fullscreen
-        || window->y == SDL_WINDOWPOS_CENTERED) {
+        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
         X11_GetDisplaySize(_this, window, NULL, &y);
         y = (y - window->h) / 2;
     } else {
@@ -988,7 +777,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
@@ -1043,7 +832,7 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) window->display->driverdata;
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
  
     XIconifyWindow(display, data->xwindow, displaydata->screen);

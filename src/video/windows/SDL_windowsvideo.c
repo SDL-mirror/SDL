@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -109,8 +109,6 @@ WIN_CreateDevice(int devindex)
     device->GetDisplayBounds = WIN_GetDisplayBounds;
     device->GetDisplayModes = WIN_GetDisplayModes;
     device->SetDisplayMode = WIN_SetDisplayMode;
-    device->SetDisplayGammaRamp = WIN_SetDisplayGammaRamp;
-    device->GetDisplayGammaRamp = WIN_GetDisplayGammaRamp;
     device->PumpEvents = WIN_PumpEvents;
 
 #undef CreateWindow

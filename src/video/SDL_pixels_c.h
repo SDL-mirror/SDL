@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -45,7 +45,5 @@ extern void SDL_FreeBlitMap(SDL_BlitMap * map);
 extern int SDL_CalculatePitch(SDL_Surface * surface);
 extern void SDL_DitherColors(SDL_Color * colors, int bpp);
 extern Uint8 SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b);
-extern void SDL_ApplyGamma(Uint16 * gamma, SDL_Color * colors,
-                           SDL_Color * output, int ncolors);
 
 /* vi: set ts=4 sw=4 expandtab: */

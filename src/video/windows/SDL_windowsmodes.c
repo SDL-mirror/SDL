@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -217,8 +217,8 @@ WIN_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
     // WINCE: DEVMODE.dmPosition not found, or may be mingw32ce bug
     rect->x = 0;
     rect->y = 0;
-    rect->w = display->windows->w;
-    rect->h = display->windows->h;
+    rect->w = _this->windows->w;
+    rect->h = _this->windows->h;
 #else
     rect->x = (int)data->DeviceMode.dmPosition.x;
     rect->y = (int)data->DeviceMode.dmPosition.y;

@@ -11,7 +11,7 @@
 int
 main(int argc, char *argv[])
 {
-    SDL_ScanCode scancode;
+    SDL_Scancode scancode;
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());

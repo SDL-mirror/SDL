@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,6 @@
 #include "SDL_blit.h"
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
-#include "SDL_leaks.h"
 
 
 /* Public routines */
@@ -145,9 +144,6 @@ SDL_CreateRGBSurface(Uint32 flags,
 
     /* The surface is ready to go */
     surface->refcount = 1;
-#ifdef CHECK_LEAKS
-    ++surfaces_allocated;
-#endif
     return surface;
 }
 
@@ -931,9 +927,6 @@ SDL_FreeSurface(SDL_Surface * surface)
         SDL_free(surface->pixels);
     }
     SDL_free(surface);
-#ifdef CHECK_LEAKS
-    --surfaces_allocated;
-#endif
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

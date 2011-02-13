@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,12 +21,12 @@
 */
 #include "../../include/SDL_scancode.h"
 
-/* Linux virtual key code to SDLKey mapping table
+/* Linux virtual key code to SDL_Keycode mapping table
    Sources:
    - Linux kernel source input.h
 */
 /* *INDENT-OFF* */
-static SDL_ScanCode const linux_scancode_table[] = {
+static SDL_Scancode const linux_scancode_table[] = {
     /*  0 */    SDL_SCANCODE_UNKNOWN,
     /*  1 */    SDL_SCANCODE_ESCAPE,
     /*  2 */    SDL_SCANCODE_1,

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -29,10 +29,6 @@
 #include "haptic/SDL_haptic_c.h"
 #include "joystick/SDL_joystick_c.h"
 
-#if !SDL_VIDEO_DISABLED
-#include "video/SDL_leaks.h"
-#endif
-
 /* Initialization/Cleanup routines */
 #if !SDL_TIMERS_DISABLED
 extern void SDL_StartTicks(void);
@@ -49,9 +45,6 @@ extern int SDL_HelperWindowDestroy(void);
 static Uint32 SDL_initialized = 0;
 static Uint32 ticks_started = 0;
 
-#ifdef CHECK_LEAKS
-int surfaces_allocated = 0;
-#endif
 
 int
 SDL_InitSubSystem(Uint32 flags)
@@ -215,45 +208,17 @@ void
 SDL_Quit(void)
 {
     /* Quit all subsystems */
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : Enter! Calling QuitSubSystem()\n");
-    fflush(stdout);
-#endif
-
 #if defined(__WIN32__)
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-
-#ifdef CHECK_LEAKS
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : CHECK_LEAKS\n");
-    fflush(stdout);
-#endif
-
-    /* !!! FIXME: make this an assertion. */
-    /* Print the number of surfaces not freed */
-    if (surfaces_allocated != 0) {
-        fprintf(stderr, "SDL Warning: %d SDL surfaces extant\n",
-                surfaces_allocated);
-    }
-#endif
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : SDL_UninstallParachute()\n");
-    fflush(stdout);
-#endif
 
     /* Uninstall any parachute signal handlers */
     SDL_UninstallParachute();
 
     SDL_ClearHints();
     SDL_AssertionsQuit();
-
-#ifdef DEBUG_BUILD
-    printf("[SDL_Quit] : Returning!\n");
-    fflush(stdout);
-#endif
-
+    SDL_LogResetPriorities();
 }
 
 /* Get the library version number */
@@ -301,6 +266,8 @@ SDL_GetPlatform()
     return "Mac OS X";
 #elif __NETBSD__
     return "NetBSD";
+#elif __NDS__
+    return "Nintendo DS";
 #elif __OPENBSD__
     return "OpenBSD";
 #elif __OS2__

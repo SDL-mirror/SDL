@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -30,14 +30,14 @@
 
 void Android_InitKeyboard()
 {
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
     /* Add default scancode to key mapping */
     SDL_GetDefaultKeymap(keymap);
     SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
 }
 
-static SDL_ScanCode Android_Keycodes[] = {
+static SDL_Scancode Android_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_UNKNOWN */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_SOFT_LEFT */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_SOFT_RIGHT */
@@ -151,10 +151,10 @@ static SDL_ScanCode Android_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_BUTTON_MODE */
 };
 
-static SDL_ScanCode
+static SDL_Scancode
 TranslateKeycode(int keycode)
 {
-    SDL_ScanCode scancode = SDL_SCANCODE_UNKNOWN;
+    SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
 
     if (keycode < SDL_arraysize(Android_Keycodes)) {
         scancode = Android_Keycodes[keycode];

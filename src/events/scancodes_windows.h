@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -26,7 +26,7 @@
    - msdn.microsoft.com
 */
 /* *INDENT-OFF* */
-static const SDL_ScanCode windows_scancode_table[] = {
+static const SDL_Scancode windows_scancode_table[] = {
     /*  0, 0x00 */      SDL_SCANCODE_UNKNOWN,
     /*  1, 0x01 */      SDL_SCANCODE_UNKNOWN,
     /*  2, 0x02 */      SDL_SCANCODE_UNKNOWN,

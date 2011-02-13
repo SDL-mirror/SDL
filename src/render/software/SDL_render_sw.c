@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+
+#if !SDL_RENDER_DISABLED
 
 #include "../SDL_sysrender.h"
 #include "../../video/SDL_pixels_c.h"
@@ -50,6 +52,7 @@ static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static void SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int SW_RenderDrawLines(SDL_Renderer * renderer,
@@ -125,6 +128,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
+    renderer->SetClipRect = SW_SetClipRect;
     renderer->DestroyTexture = SW_DestroyTexture;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -264,6 +268,17 @@ SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void
 SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+}
+
+static void
+SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    SDL_Surface *surface = SW_ActivateRenderer(renderer);
+
+    if (!surface) {
+        return;
+    }
+    SDL_SetClipRect(surface, rect);
 }
 
 static int
@@ -414,5 +429,7 @@ SW_DestroyRenderer(SDL_Renderer * renderer)
     }
     SDL_free(renderer);
 }
+
+#endif /* !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

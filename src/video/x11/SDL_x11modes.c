@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -47,9 +47,7 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
     }
 
     depth = DefaultDepth(display, screen);
-    if ((X11_UseDirectColorVisuals() &&
-         XMatchVisualInfo(display, screen, depth, DirectColor, vinfo)) ||
-        XMatchVisualInfo(display, screen, depth, TrueColor, vinfo) ||
+    if (XMatchVisualInfo(display, screen, depth, TrueColor, vinfo) ||
         XMatchVisualInfo(display, screen, depth, PseudoColor, vinfo) ||
         XMatchVisualInfo(display, screen, depth, StaticColor, vinfo)) {
         return 0;

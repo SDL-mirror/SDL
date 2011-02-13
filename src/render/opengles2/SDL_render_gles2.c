@@ -1,29 +1,28 @@
 /*
     SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2011 Sam Lantinga
     Copyright (C) 2010 itsnotabigtruck.
 
-    Permission is hereby granted, free of charge, to any person obtaining a
-    copy of this software and associated documentation files (the "Software"),
-    to deal in the Software without restriction, including without limitation
-    the rights to use, copy, modify, merge, publish, distribute, sublicense,
-    and/or sell copies of the Software, and to permit persons to whom the
-    Software is furnished to do so, subject to the following conditions:
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-    DEALINGS IN THE SOFTWARE.
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
 */
-
 #include "SDL_config.h"
 
-#if SDL_VIDEO_RENDER_OGL_ES2
+#if SDL_VIDEO_RENDER_OGL_ES2 && !SDL_RENDER_DISABLED
 
 #include "SDL_opengles2.h"
 #include "../SDL_sysrender.h"
@@ -133,10 +132,10 @@ typedef struct GLES2_DriverContext
  * Renderer state APIs                                                                           *
  *************************************************************************************************/
 
+static int GLES2_ActivateRenderer(SDL_Renderer *renderer);
 static void GLES2_WindowEvent(SDL_Renderer * renderer,
                               const SDL_WindowEvent *event);
-static int GLES2_ActivateRenderer(SDL_Renderer *renderer);
-static int GLES2_DisplayModeChanged(SDL_Renderer *renderer);
+static void GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
 static void GLES2_DestroyRenderer(SDL_Renderer *renderer);
 
 static SDL_GLContext SDL_CurrentContext = NULL;
@@ -175,6 +174,22 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
         rdata->updateSize = SDL_TRUE;
+    }
+}
+
+static void
+GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    GLES2_ActivateRenderer(renderer);
+
+    if (rect) {
+        int w, h;
+
+        SDL_GetWindowSize(renderer->window, &w, &h);
+        glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
+        glEnable(GL_SCISSOR_TEST);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
     }
 }
 
@@ -327,14 +342,14 @@ static void
 GLES2_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 {
     GLES2_TextureData *tdata = (GLES2_TextureData *)texture->driverdata;
+    SDL_Rect rect;
 
-    GLES2_ActivateRenderer(renderer);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(tdata->texture_type, tdata->texture);
-    glTexSubImage2D(tdata->texture_type, 0, 0, 0, texture->w, texture->h,
-                    tdata->pixel_format, tdata->pixel_type, tdata->pixel_data);
+    /* We do whole texture updates, at least for now */
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = texture->w;
+    rect.h = texture->h;
+    GLES2_UpdateTexture(renderer, texture, &rect, tdata->pixel_data, tdata->pitch);
 }
 
 static int
@@ -345,7 +360,6 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     Uint8 *blob = NULL;
     Uint8 *src;
     int srcPitch;
-    Uint8 *dest;
     int y;
 
     GLES2_ActivateRenderer(renderer);
@@ -389,7 +403,9 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
                     tdata->pixel_format,
                     tdata->pixel_type,
                     src);
-    SDL_free(blob);
+    if (blob) {
+        SDL_free(blob);
+    }
 
     if (glGetError() != GL_NO_ERROR)
     {
@@ -761,6 +777,8 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
  * Rendering functions                                                                           *
  *************************************************************************************************/
 
+static const float inv255f = 1.0f / 255.0f;
+
 static int GLES2_RenderClear(SDL_Renderer *renderer);
 static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count);
 static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count);
@@ -772,10 +790,10 @@ static void GLES2_RenderPresent(SDL_Renderer *renderer);
 static int
 GLES2_RenderClear(SDL_Renderer *renderer)
 {
-    float r = (float)renderer->r / 255.0f;
-    float g = (float)renderer->g / 255.0f;
-    float b = (float)renderer->b / 255.0f;
-    float a = (float)renderer->a / 255.0f;
+    float r = (float)renderer->r * inv255f;
+    float g = (float)renderer->g * inv255f;
+    float b = (float)renderer->b * inv255f;
+    float a = (float)renderer->a * inv255f;
 
     GLES2_ActivateRenderer(renderer);
 
@@ -832,10 +850,10 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -886,10 +904,10 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -940,10 +958,10 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count)
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
     glGetError();
     glUniform4f(locColor,
-                renderer->r / 255.0f,
-                renderer->g / 255.0f,
-                renderer->b / 255.0f,
-                alpha / 255.0f);
+                renderer->r * inv255f,
+                renderer->g * inv255f,
+                renderer->b * inv255f,
+                alpha * inv255f);
 
     /* Configure the correct blend mode */
     GLES2_SetBlendMode(blendMode);
@@ -1014,10 +1032,10 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
     glUniform4f(locModulation,
-                texture->r / 255.0f,
-                texture->g / 255.0f,
-                texture->b / 255.0f,
-                alpha / 255.0f);
+                texture->r * inv255f,
+                texture->g * inv255f,
+                texture->b * inv255f,
+                alpha * inv255f);
 
     /* Emit the textured quad */
     glEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
@@ -1160,6 +1178,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->UpdateTexture       = &GLES2_UpdateTexture;
     renderer->LockTexture         = &GLES2_LockTexture;
     renderer->UnlockTexture       = &GLES2_UnlockTexture;
+    renderer->SetClipRect         = &GLES2_SetClipRect;
     renderer->RenderClear         = &GLES2_RenderClear;
     renderer->RenderDrawPoints    = &GLES2_RenderDrawPoints;
     renderer->RenderDrawLines     = &GLES2_RenderDrawLines;
@@ -1171,6 +1190,6 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     return renderer;
 }
 
-#endif /* SDL_VIDEO_RENDER_OGL_ES2 */
+#endif /* SDL_VIDEO_RENDER_OGL_ES2 && !SDL_RENDER_DISABLED */
 
 /* vi: set ts=4 sw=4 expandtab: */

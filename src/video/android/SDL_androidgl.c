@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -55,7 +55,11 @@ Android_GL_UnloadLibrary(_THIS)
 SDL_GLContext
 Android_GL_CreateContext(_THIS, SDL_Window * window)
 {
-    Android_JNI_CreateContext();
+    if (!Android_JNI_CreateContext(_this->gl_config.major_version,
+                                   _this->gl_config.minor_version)) {
+        SDL_SetError("Couldn't create OpenGL context - see Android log for details");
+        return NULL;
+    }
     return (SDL_GLContext)1;
 }
 
@@ -91,3 +95,5 @@ Android_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_DeleteContext\n");
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

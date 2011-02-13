@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -39,12 +39,12 @@ struct SDL_Keyboard
     SDL_Window *focus;
     Uint16 modstate;
     Uint8 keystate[SDL_NUM_SCANCODES];
-    SDLKey keymap[SDL_NUM_SCANCODES];
+    SDL_Keycode keymap[SDL_NUM_SCANCODES];
 };
 
 static SDL_Keyboard SDL_keyboard;
 
-static const SDLKey SDL_default_keymap[SDL_NUM_SCANCODES] = {
+static const SDL_Keycode SDL_default_keymap[SDL_NUM_SCANCODES] = {
     0, 0, 0, 0,
     'a',
     'b',
@@ -562,7 +562,7 @@ void
 SDL_ResetKeyboard(void)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
-    SDL_ScanCode scancode;
+    SDL_Scancode scancode;
 
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
@@ -572,13 +572,13 @@ SDL_ResetKeyboard(void)
 }
 
 void
-SDL_GetDefaultKeymap(SDLKey * keymap)
+SDL_GetDefaultKeymap(SDL_Keycode * keymap)
 {
     SDL_memcpy(keymap, SDL_default_keymap, sizeof(SDL_default_keymap));
 }
 
 void
-SDL_SetKeymap(int start, SDLKey * keys, int length)
+SDL_SetKeymap(int start, SDL_Keycode * keys, int length)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
@@ -590,7 +590,7 @@ SDL_SetKeymap(int start, SDLKey * keys, int length)
 }
 
 void
-SDL_SetScancodeName(SDL_ScanCode scancode, const char *name)
+SDL_SetScancodeName(SDL_Scancode scancode, const char *name)
 {
     SDL_scancode_names[scancode] = name;
 }
@@ -638,7 +638,7 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 }
 
 int
-SDL_SendKeyboardKey(Uint8 state, SDL_ScanCode scancode)
+SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
     int posted;
@@ -832,7 +832,7 @@ SDL_GetKeyboardState(int *numkeys)
     return keyboard->keystate;
 }
 
-SDLMod
+SDL_Keymod
 SDL_GetModState(void)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
@@ -841,26 +841,26 @@ SDL_GetModState(void)
 }
 
 void
-SDL_SetModState(SDLMod modstate)
+SDL_SetModState(SDL_Keymod modstate)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
     keyboard->modstate = modstate;
 }
 
-SDLKey
-SDL_GetKeyFromScancode(SDL_ScanCode scancode)
+SDL_Keycode
+SDL_GetKeyFromScancode(SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
     return keyboard->keymap[scancode];
 }
 
-SDL_ScanCode
-SDL_GetScancodeFromKey(SDLKey key)
+SDL_Scancode
+SDL_GetScancodeFromKey(SDL_Keycode key)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
-    SDL_ScanCode scancode;
+    SDL_Scancode scancode;
 
     for (scancode = SDL_SCANCODE_UNKNOWN; scancode < SDL_NUM_SCANCODES;
          ++scancode) {
@@ -872,7 +872,7 @@ SDL_GetScancodeFromKey(SDLKey key)
 }
 
 const char *
-SDL_GetScancodeName(SDL_ScanCode scancode)
+SDL_GetScancodeName(SDL_Scancode scancode)
 {
     const char *name = SDL_scancode_names[scancode];
 
@@ -883,14 +883,14 @@ SDL_GetScancodeName(SDL_ScanCode scancode)
 }
 
 const char *
-SDL_GetKeyName(SDLKey key)
+SDL_GetKeyName(SDL_Keycode key)
 {
     static char name[8];
     char *end;
 
     if (key & SDLK_SCANCODE_MASK) {
         return
-            SDL_GetScancodeName((SDL_ScanCode) (key & ~SDLK_SCANCODE_MASK));
+            SDL_GetScancodeName((SDL_Scancode) (key & ~SDLK_SCANCODE_MASK));
     }
 
     switch (key) {

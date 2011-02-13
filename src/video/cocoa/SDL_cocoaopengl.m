@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -72,7 +72,7 @@ SDL_GLContext
 Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool;
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *displaydata = (SDL_DisplayData *)display->driverdata;
     NSOpenGLPixelFormatAttribute attr[32];
     NSOpenGLPixelFormat *fmt;
@@ -81,9 +81,11 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
 
     pool = [[NSAutoreleasePool alloc] init];
 
+#ifndef FULLSCREEN_TOGGLEABLE
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         attr[i++] = NSOpenGLPFAFullScreen;
     }
+#endif
 
     attr[i++] = NSOpenGLPFAColorSize;
     attr[i++] = SDL_BYTESPERPIXEL(display->current_mode.format)*8;
@@ -199,9 +201,12 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
+#ifndef FULLSCREEN_TOGGLEABLE
         if (window->flags & SDL_WINDOW_FULLSCREEN) {
             [nscontext setFullScreen];
-        } else {
+        } else
+#endif
+        {
             [nscontext setView:[windowdata->nswindow contentView]];
             [nscontext update];
         }

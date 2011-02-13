@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,11 @@ Android_CreateWindow(_THIS, SDL_Window * window)
     window->y = 0;
     window->w = Android_ScreenWidth;
     window->h = Android_ScreenHeight;
+
+    window->flags &= ~SDL_WINDOW_RESIZABLE;     /* window is NEVER resizeable */
+    window->flags |= SDL_WINDOW_FULLSCREEN;     /* window is always fullscreen */
+    window->flags |= SDL_WINDOW_SHOWN;          /* only one window on Android */
+    window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    
 
     return 0;
 }

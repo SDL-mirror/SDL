@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@
 
 static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created)
 {
-    SDL_VideoDisplay *display = window->display;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
     SDL_WindowData *data;
         
@@ -64,7 +64,6 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     window->driverdata = data;
     
     window->flags &= ~SDL_WINDOW_RESIZABLE;        /* window is NEVER resizeable */
-    window->flags |= SDL_WINDOW_OPENGL;            /* window is always OpenGL */
     window->flags |= SDL_WINDOW_FULLSCREEN;        /* window is always fullscreen */
     window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iPod touch, always shown */
     window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    
@@ -85,13 +84,13 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
 }
 
 int
-UIKit_CreateWindow(_THIS, SDL_Window *window) {
-        
-    SDL_VideoDisplay *display = window->display;
+UIKit_CreateWindow(_THIS, SDL_Window *window)
+{
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
 
     // SDL currently puts this window at the start of display's linked list. We rely on this.
-    SDL_assert(display->windows == window);
+    SDL_assert(_this->windows == window);
 
     /* We currently only handle a single window per display on iPhone */
     if (window->next != NULL) {

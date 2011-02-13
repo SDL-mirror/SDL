@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -113,12 +113,20 @@ typedef enum
 /**
  *  \brief Used to indicate that you don't care what the window position is.
  */
-#define SDL_WINDOWPOS_UNDEFINED 0x7FFFFFF
+#define SDL_WINDOWPOS_UNDEFINED_MASK    0x1FFF0000
+#define SDL_WINDOWPOS_UNDEFINED_DISPLAY(X)  (SDL_WINDOWPOS_UNDEFINED_MASK|(X))
+#define SDL_WINDOWPOS_UNDEFINED         SDL_WINDOWPOS_UNDEFINED_DISPLAY(0)
+#define SDL_WINDOWPOS_ISUNDEFINED(X)    \
+            (((X)&0xFFFF0000) == SDL_WINDOWPOS_UNDEFINED_MASK)
 
 /**
  *  \brief Used to indicate that the window position should be centered.
  */
-#define SDL_WINDOWPOS_CENTERED  0x7FFFFFE
+#define SDL_WINDOWPOS_CENTERED_MASK    0x2FFF0000
+#define SDL_WINDOWPOS_CENTERED_DISPLAY(X)  (SDL_WINDOWPOS_CENTERED_MASK|(X))
+#define SDL_WINDOWPOS_CENTERED         SDL_WINDOWPOS_CENTERED_DISPLAY(0)
+#define SDL_WINDOWPOS_ISCENTERED(X)    \
+            (((X)&0xFFFF0000) == SDL_WINDOWPOS_CENTERED_MASK)
 
 /**
  *  \brief Event subtype for window events
@@ -236,7 +244,6 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
  *  \brief Returns the number of available video displays.
  *  
  *  \sa SDL_GetDisplayBounds()
- *  \sa SDL_SelectVideoDisplay()
  */
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
 
@@ -248,34 +255,14 @@ extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
  *  
  *  \sa SDL_GetNumVideoDisplays()
  */
-extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int index, SDL_Rect * rect);
+extern DECLSPEC int SDLCALL SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect);
 
 /**
- *  \brief Set the index of the currently selected display.
- *  
- *  \return 0 on success, or -1 if the index is out of range.
- *  
- *  \sa SDL_GetNumVideoDisplays()
- *  \sa SDL_GetCurrentVideoDisplay()
- */
-extern DECLSPEC int SDLCALL SDL_SelectVideoDisplay(int index);
-
-/**
- *  \brief Get the index of the currently selected display.
- *  
- *  \return The index of the currently selected display.
- *  
- *  \sa SDL_GetNumVideoDisplays()
- *  \sa SDL_SelectVideoDisplay()
- */
-extern DECLSPEC int SDLCALL SDL_GetCurrentVideoDisplay(void);
-
-/**
- *  \brief Returns the number of available display modes for the current display.
+ *  \brief Returns the number of available display modes.
  *  
  *  \sa SDL_GetDisplayMode()
  */
-extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
+extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(int displayIndex);
 
 /**
  *  \brief Fill in information about a specific display mode.
@@ -288,19 +275,18 @@ extern DECLSPEC int SDLCALL SDL_GetNumDisplayModes(void);
  *  
  *  \sa SDL_GetNumDisplayModes()
  */
-extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int index,
+extern DECLSPEC int SDLCALL SDL_GetDisplayMode(int displayIndex, int modeIndex,
                                                SDL_DisplayMode * mode);
 
 /**
- *  \brief Fill in information about the desktop display mode for the current 
- *         display.
+ *  \brief Fill in information about the desktop display mode.
  */
-extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(SDL_DisplayMode * mode);
+extern DECLSPEC int SDLCALL SDL_GetDesktopDisplayMode(int displayIndex, SDL_DisplayMode * mode);
 
 /**
  *  \brief Fill in information about the current display mode.
  */
-extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
+extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(int displayIndex, SDL_DisplayMode * mode);
 
 
 /**
@@ -323,16 +309,21 @@ extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(SDL_DisplayMode * mode);
  *  \sa SDL_GetNumDisplayModes()
  *  \sa SDL_GetDisplayMode()
  */
-extern DECLSPEC SDL_DisplayMode *SDLCALL SDL_GetClosestDisplayMode(const
-                                                                   SDL_DisplayMode
-                                                                   * mode,
-                                                                   SDL_DisplayMode
-                                                                   * closest);
+extern DECLSPEC SDL_DisplayMode * SDLCALL SDL_GetClosestDisplayMode(int displayIndex, const SDL_DisplayMode * mode, SDL_DisplayMode * closest);
 
 /**
- *  \brief Set the display mode used when a fullscreen window is visible
- *         on the currently selected display.  By default the window's
- *         dimensions and the desktop format and refresh rate are used.
+ *  \brief Get the display index associated with a window.
+ *  
+ *  \return the display index of the display containing the center of the
+ *          window, or -1 on error.
+ */
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplay(SDL_Window * window);
+
+/**
+ *  \brief Set the display mode used when a fullscreen window is visible.
+ *
+ *  By default the window's dimensions and the desktop format and refresh rate
+ *  are used.
  *  
  *  \param mode The mode to use, or NULL for the default mode.
  *  
@@ -347,7 +338,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowDisplayMode(SDL_Window * window,
 
 /**
  *  \brief Fill in information about the display mode used when a fullscreen
- *         window is visible on the currently selected display.
+ *         window is visible.
  *
  *  \sa SDL_SetWindowDisplayMode()
  *  \sa SDL_SetWindowFullscreen()
@@ -359,55 +350,6 @@ extern DECLSPEC int SDLCALL SDL_GetWindowDisplayMode(SDL_Window * window,
  *  \brief Get the pixel format associated with the window.
  */
 extern DECLSPEC Uint32 SDLCALL SDL_GetWindowPixelFormat(SDL_Window * window);
-
-/**
- *  \brief Set the gamma correction for each of the color channels on the 
- *         currently selected display.
- *  
- *  \return 0 on success, or -1 if setting the gamma isn't supported.
- *  
- *  \sa SDL_SetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_SetGamma(float red, float green, float blue);
-
-/**
- *  \brief Set the gamma ramp for the currently selected display.
- *  
- *  \param red The translation table for the red channel, or NULL.
- *  \param green The translation table for the green channel, or NULL.
- *  \param blue The translation table for the blue channel, or NULL.
- *  
- *  \return 0 on success, or -1 if gamma ramps are unsupported.
- *  
- *  Set the gamma translation table for the red, green, and blue channels
- *  of the video hardware.  Each table is an array of 256 16-bit quantities,
- *  representing a mapping between the input and output for that channel.
- *  The input is the index into the array, and the output is the 16-bit
- *  gamma value at that index, scaled to the output color precision.
- *  
- *  \sa SDL_GetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_SetGammaRamp(const Uint16 * red,
-                                             const Uint16 * green,
-                                             const Uint16 * blue);
-
-/**
- *  \brief Get the gamma ramp for the currently selected display.
- *  
- *  \param red   A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the red channel, or NULL.
- *  \param green A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the green channel, or NULL.
- *  \param blue  A pointer to a 256 element array of 16-bit quantities to hold 
- *               the translation table for the blue channel, or NULL.
- *   
- *  \return 0 on success, or -1 if gamma ramps are unsupported.
- *  
- *  \sa SDL_SetGammaRamp()
- */
-extern DECLSPEC int SDLCALL SDL_GetGammaRamp(Uint16 * red, Uint16 * green,
-                                             Uint16 * blue);
-
 
 /**
  *  \brief Create a window with the specified position, dimensions, and flags.
@@ -605,7 +547,7 @@ extern DECLSPEC void SDLCALL SDL_RestoreWindow(SDL_Window * window);
  *  \sa SDL_GetWindowDisplayMode()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
-                                                    int fullscreen);
+                                                    SDL_bool fullscreen);
 
 /**
  *  \brief Get an SDL surface associated with the window.
@@ -659,16 +601,6 @@ extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_Window * window,
  *  \sa SDL_SetWindowGrab()
  */
 extern DECLSPEC int SDLCALL SDL_GetWindowGrab(SDL_Window * window);
-
-/**
- *  \brief Get driver specific information about a window.
- *  
- *  \note Include SDL_syswm.h for the declaration of SDL_SysWMinfo.
- */
-struct SDL_SysWMinfo;
-extern DECLSPEC SDL_bool SDLCALL SDL_GetWindowWMInfo(SDL_Window * window,
-                                                     struct SDL_SysWMinfo
-                                                     *info);
 
 /**
  *  \brief Destroy a window.

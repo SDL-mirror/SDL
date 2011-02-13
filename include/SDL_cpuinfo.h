@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -70,21 +70,6 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_HasMMX(void);
 
 /**
- *  This function returns true if the CPU has MMX Ext.\ features.
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasMMXExt(void);
-
-/**
- *  This function returns true if the CPU has 3DNow!\ features.
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNow(void);
-
-/**
- *  This function returns true if the CPU has 3DNow!\ Ext.\ features.
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNowExt(void);
-
-/**
  *  This function returns true if the CPU has SSE features.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE(void);
@@ -95,9 +80,20 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE2(void);
 
 /**
- *  This function returns true if the CPU has AltiVec features.
+ *  This function returns true if the CPU has SSE3 features.
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasAltiVec(void);
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE3(void);
+
+/**
+ *  This function returns true if the CPU has SSE4.1 features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE41(void);
+
+/**
+ *  This function returns true if the CPU has SSE4.2 features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE42(void);
+
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

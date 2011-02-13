@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -90,6 +90,7 @@ Cocoa_CreateDevice(int devindex)
     device->MaximizeWindow = Cocoa_MaximizeWindow;
     device->MinimizeWindow = Cocoa_MinimizeWindow;
     device->RestoreWindow = Cocoa_RestoreWindow;
+    device->SetWindowFullscreen = Cocoa_SetWindowFullscreen;
     device->SetWindowGrab = Cocoa_SetWindowGrab;
     device->DestroyWindow = Cocoa_DestroyWindow;
     device->GetWindowWMInfo = Cocoa_GetWindowWMInfo;

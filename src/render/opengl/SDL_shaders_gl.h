@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,20 @@
 */
 #include "SDL_config.h"
 
-/* Define this if you want surface leak detection code enabled */
-/*#define CHECK_LEAKS*/
+/* OpenGL shader implementation */
 
-/* Global variables used to check leaks in code using SDL */
+typedef enum {
+    SHADER_NONE,
+    SHADER_SOLID,
+    SHADER_RGB,
+    SHADER_YV12,
+    NUM_SHADERS
+} GL_Shader;
 
-#ifdef CHECK_LEAKS
-extern int surfaces_allocated;
-#endif
+typedef struct GL_ShaderContext GL_ShaderContext;
+
+extern GL_ShaderContext * GL_CreateShaderContext();
+extern void GL_SelectShader(GL_ShaderContext *ctx, GL_Shader shader);
+extern void GL_DestroyShaderContext(GL_ShaderContext *ctx);
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -142,7 +142,7 @@ static inline DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int s
 typedef struct _DFB_KeyboardData DFB_KeyboardData;
 struct _DFB_KeyboardData
 {
-	const SDL_ScanCode	*map;		/* keyboard scancode map */
+	const SDL_Scancode	*map;		/* keyboard scancode map */
 	int				map_size;	/* size of map */
 	int				map_adjust; /* index adjust */
     int 			is_generic; /* generic keyboard */

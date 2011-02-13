@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -192,6 +192,7 @@ extern DECLSPEC int SDLCALL SDL_GetRendererInfo(SDL_Renderer * renderer,
  *          of range.
  *  
  *  \sa SDL_QueryTexture()
+ *  \sa SDL_UpdateTexture()
  *  \sa SDL_DestroyTexture()
  */
 extern DECLSPEC SDL_Texture * SDLCALL SDL_CreateTexture(SDL_Renderer * renderer,                                                        Uint32 format,
@@ -361,6 +362,18 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
  *  \sa SDL_LockTexture()
  */
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
+
+/**
+ *  \brief Set the clipping rectangle for rendering on the current target
+ *
+ *  \param rect The rectangle to clip rendering to, or NULL to disable clipping.
+ *
+ *  The contents of the window are not defined after calling
+ *  SDL_RenderPresent(), so you should clear the clip rectangle and draw
+ *  over the entire window each frame.
+ */
+extern DECLSPEC void SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer,
+                                                   const SDL_Rect * rect);
 
 /**
  *  \brief Set the color used for drawing operations (Fill and Line).

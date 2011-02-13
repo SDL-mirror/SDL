@@ -49,6 +49,19 @@ main(int argc, char *argv[])
         /* Check for events */
         while (SDL_PollEvent(&event)) {
             CommonEvent(state, &event, &done);
+
+            if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_MOVED) {
+                    SDL_Window *window = SDL_GetWindowFromID(event.window.windowID);
+                    if (window) {
+                        printf("Window %d moved to %d,%d (display %d)\n",
+                            event.window.windowID,
+                            event.window.data1,
+                            event.window.data2,
+                            SDL_GetWindowDisplay(window));
+                    }
+                }
+            }
         }
     }
     quit(0);

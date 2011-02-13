@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -761,20 +761,6 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
         *g = format->palette->colors[pixel].g;
         *b = format->palette->colors[pixel].b;
         *a = SDL_ALPHA_OPAQUE;
-    }
-}
-
-/* Apply gamma to a set of colors - this is easy. :) */
-void
-SDL_ApplyGamma(Uint16 * gamma, SDL_Color * colors, SDL_Color * output,
-               int ncolors)
-{
-    int i;
-
-    for (i = 0; i < ncolors; ++i) {
-        output[i].r = gamma[0 * 256 + colors[i].r] >> 8;
-        output[i].g = gamma[1 * 256 + colors[i].g] >> 8;
-        output[i].b = gamma[2 * 256 + colors[i].b] >> 8;
     }
 }
 

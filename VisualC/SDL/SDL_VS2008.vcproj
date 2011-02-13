@@ -458,6 +458,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_log.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_main.h"
 				>
 			</File>
@@ -863,10 +867,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_gamma.c"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\events\SDL_gesture.c"
 			>
 		</File>
@@ -915,7 +915,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\SDL_leaks.h"
+			RelativePath="..\..\src\SDL_log.c"
 			>
 		</File>
 		<File
@@ -1044,6 +1044,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\file\SDL_rwops.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\opengl\SDL_shaders_gl.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\opengl\SDL_shaders_gl.h"
 			>
 		</File>
 		<File
@@ -1216,14 +1224,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\windows\SDL_windowsframebuffer.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\windows\SDL_windowsgamma.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\video\windows\SDL_windowsgamma.h"
 			>
 		</File>
 		<File

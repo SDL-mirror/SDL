@@ -1,6 +1,6 @@
 /*
     SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2010 Sam Lantinga
+    Copyright (C) 1997-2011 Sam Lantinga
 
     This library is free software; you can redistribute it and/or
     modify it under the terms of the GNU Lesser General Public
@@ -186,8 +186,6 @@ X11_CreateDevice(int devindex)
     device->VideoQuit = X11_VideoQuit;
     device->GetDisplayModes = X11_GetDisplayModes;
     device->SetDisplayMode = X11_SetDisplayMode;
-    device->SetDisplayGammaRamp = X11_SetDisplayGammaRamp;
-    device->GetDisplayGammaRamp = X11_GetDisplayGammaRamp;
     device->SuspendScreenSaver = X11_SuspendScreenSaver;
     device->PumpEvents = X11_PumpEvents;
 
@@ -382,15 +380,6 @@ X11_VideoQuit(_THIS)
     X11_QuitKeyboard(_this);
     X11_QuitMouse(_this);
     X11_QuitTouch(_this);
-}
-
-SDL_bool
-X11_UseDirectColorVisuals(void)
-{
-    /* Once we implement DirectColor colormaps and gamma ramp support...
-       return SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ? SDL_FALSE : SDL_TRUE;
-     */
-    return SDL_FALSE;
 }
 
 /* vim: set ts=4 sw=4 expandtab: */

@@ -1,23 +1,23 @@
 /*
- SDL - Simple DirectMedia Layer
- Copyright (C) 1997-2009 Sam Lantinga
- 
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2.1 of the License, or (at your option) any later version.
- 
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- Lesser General Public License for more details.
- 
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- 
- Sam Lantinga
- slouken@libsdl.org
+    SDL - Simple DirectMedia Layer
+    Copyright (C) 1997-2011 Sam Lantinga
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+
+    Sam Lantinga
+    slouken@libsdl.org
 */
 
 #import "../SDL_sysvideo.h"
@@ -110,14 +110,10 @@ afterDelay:0.0];
     if (!_this) {
         return;
     }
-
-    int i;
-    for (i = 0; i < _this->num_displays; i++) {
-        const SDL_VideoDisplay *display = &_this->displays[i];
-        SDL_Window *window;
-        for (window = display->windows; window != nil; window = window->next) {
-            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
-        }
+	
+	SDL_Window *window;
+    for (window = _this->windows; window != nil; window = window->next) {
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
 }
 
@@ -130,14 +126,10 @@ afterDelay:0.0];
     if (!_this) {
         return;
     }
-
-    int i;
-    for (i = 0; i < _this->num_displays; i++) {
-        const SDL_VideoDisplay *display = &_this->displays[i];
-        SDL_Window *window;
-        for (window = display->windows; window != nil; window = window->next) {
-            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
-        }
+	
+	SDL_Window *window;
+    for (window = _this->windows; window != nil; window = window->next) {
+		SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }
 

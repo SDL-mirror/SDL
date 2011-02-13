@@ -26,21 +26,21 @@
 #include "SDL_haptic.h"
 #include "../SDL_syshaptic.h"
 #include "SDL_joystick.h"
-#include <nds/arm9/rumble.h>
 #include <nds/memory.h>
+#include <nds/arm9/rumble.h>
 
 #define MAX_HAPTICS  1
 /* right now only the ezf3in1 (and maybe official rumble pak) are supported
    and there can only be one of those in at a time (in GBA slot.) */
 
-SDL_Haptic *nds_haptic = NULL;
+static SDL_Haptic *nds_haptic = NULL;
 
-typedef struct
+struct haptic_hwdata
 {
     enum
     { NONE, OFFICIAL, EZF3IN1 } type;
     int pos;
-} NDS_HapticData;
+};
 
 
 void
@@ -165,7 +165,7 @@ SDL_SYS_HapticOpen(SDL_Haptic * haptic)
         return -1;
     }
 
-    haptic->hwdata = SDL_malloc(sizeof(NDS_HapticData));
+    haptic->hwdata = SDL_malloc(sizeof(struct haptic_hwdata));
     if (!haptic->hwdata) {
         SDL_OutOfMemory();
         return -1;
