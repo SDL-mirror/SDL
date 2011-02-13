@@ -208,12 +208,12 @@ static int
 SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {
     SDL_WindowTextureData *data;
-    SDL_Renderer *renderer = NULL;
     SDL_RendererInfo info;
     Uint32 i;
 
     data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
     if (!data) {
+        SDL_Renderer *renderer = NULL;
         SDL_RendererInfo info;
         int i;
         const char *hint = SDL_GetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION);
@@ -267,7 +267,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
         data->pixels = NULL;
     }
 
-    if (SDL_GetRendererInfo(renderer, &info) < 0) {
+    if (SDL_GetRendererInfo(data->renderer, &info) < 0) {
         return -1;
     }
 
@@ -281,7 +281,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
         }
     }
 
-    data->texture = SDL_CreateTexture(renderer, *format,
+    data->texture = SDL_CreateTexture(data->renderer, *format,
                                       SDL_TEXTUREACCESS_STREAMING,
                                       window->w, window->h);
     if (!data->texture) {
