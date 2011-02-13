@@ -221,18 +221,8 @@ SDL_CalculateBlit(SDL_Surface * surface)
         blit = SDL_CalculateBlitN(surface);
     }
     if (blit == NULL) {
-        Uint32 src_format =
-            SDL_MasksToPixelFormatEnum(surface->format->BitsPerPixel,
-                                       surface->format->Rmask,
-                                       surface->format->Gmask,
-                                       surface->format->Bmask,
-                                       surface->format->Amask);
-        Uint32 dst_format =
-            SDL_MasksToPixelFormatEnum(dst->format->BitsPerPixel,
-                                       dst->format->Rmask,
-                                       dst->format->Gmask,
-                                       dst->format->Bmask,
-                                       dst->format->Amask);
+        Uint32 src_format = surface->format->format;
+        Uint32 dst_format = dst->format->format;
 
         blit =
             SDL_ChooseBlitFunc(src_format, dst_format, map->info.flags,

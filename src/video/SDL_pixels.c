@@ -30,12 +30,6 @@
 #include "SDL_pixels_c.h"
 #include "SDL_RLEaccel_c.h"
 
-struct SDL_PaletteWatch
-{
-    SDL_PaletteChangedFunc callback;
-    void *userdata;
-    struct SDL_PaletteWatch *next;
-};
 
 /* Helper functions */
 
@@ -256,6 +250,9 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         }
         break;
     case 15:
+        if (Rmask == 0) {
+            return SDL_PIXELFORMAT_RGB555;
+        }
         if (Rmask == 0x7C00 && Bmask == 0x001F) {
             return SDL_PIXELFORMAT_RGB555;
         }
@@ -265,6 +262,8 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         break;
     case 16:
         switch (Rmask) {
+        case 0:
+            return SDL_PIXELFORMAT_RGB565;
         case 0xF000:
             return SDL_PIXELFORMAT_RGBA4444;
         case 0x0F00:
@@ -295,6 +294,7 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
         break;
     case 24:
         switch (Rmask) {
+        case 0:
         case 0x00FF0000:
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
             return SDL_PIXELFORMAT_RGB24;
@@ -307,10 +307,6 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
 #else
             return SDL_PIXELFORMAT_RGB24;
 #endif
-        case 0x00000000:
-            /* FIXME: At this point we can't distinguish */
-            /* if this format is RGB24 or BGR24          */
-            return SDL_PIXELFORMAT_RGB24;
         }
     case 32:
         switch (Rmask) {
@@ -319,6 +315,7 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
                 return SDL_PIXELFORMAT_RGBA8888;
             }
             break;
+        case 0:
         case 0x00FF0000:
             if (Amask == 0xFF000000) {
                 return SDL_PIXELFORMAT_ARGB8888;
@@ -345,154 +342,58 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
     return SDL_PIXELFORMAT_UNKNOWN;
 }
 
+static SDL_PixelFormat *formats;
 
-SDL_Palette *
-SDL_AllocPalette(int ncolors)
-{
-    SDL_Palette *palette;
-
-    palette = (SDL_Palette *) SDL_malloc(sizeof(*palette));
-    if (!palette) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-    palette->colors =
-        (SDL_Color *) SDL_malloc(ncolors * sizeof(*palette->colors));
-    if (!palette->colors) {
-        SDL_free(palette);
-        return NULL;
-    }
-    palette->ncolors = ncolors;
-    palette->watch = NULL;
-    palette->refcount = 1;
-
-    SDL_memset(palette->colors, 0xFF, ncolors * sizeof(*palette->colors));
-
-    return palette;
-}
-
-int
-SDL_AddPaletteWatch(SDL_Palette * palette, SDL_PaletteChangedFunc callback,
-                    void *userdata)
-{
-    SDL_PaletteWatch *watch;
-
-    if (!palette) {
-        return -1;
-    }
-
-    watch = (SDL_PaletteWatch *) SDL_malloc(sizeof(*watch));
-    if (!watch) {
-        SDL_OutOfMemory();
-        return -1;
-    }
-
-    watch->callback = callback;
-    watch->userdata = userdata;
-    watch->next = palette->watch;
-    palette->watch = watch;
-    ++palette->refcount;
-    return 0;
-}
-
-void
-SDL_DelPaletteWatch(SDL_Palette * palette, SDL_PaletteChangedFunc callback,
-                    void *userdata)
-{
-    SDL_PaletteWatch *prev, *watch;
-
-    if (!palette) {
-        return;
-    }
-
-    for (prev = NULL, watch = palette->watch; watch;
-         prev = watch, watch = watch->next) {
-        if (watch->callback == callback && watch->userdata == userdata) {
-            if (prev) {
-                prev->next = watch->next;
-            } else {
-                palette->watch = watch->next;
-            }
-            SDL_free(watch);
-            SDL_FreePalette(palette);
-            return;
-        }
-    }
-}
-
-int
-SDL_SetPaletteColors(SDL_Palette * palette, const SDL_Color * colors,
-                     int firstcolor, int ncolors)
-{
-    SDL_PaletteWatch *watch;
-    int status = 0;
-
-    /* Verify the parameters */
-    if (!palette) {
-        return -1;
-    }
-    if (ncolors > (palette->ncolors - firstcolor)) {
-        ncolors = (palette->ncolors - firstcolor);
-        status = -1;
-    }
-
-    if (colors != (palette->colors + firstcolor)) {
-        SDL_memcpy(palette->colors + firstcolor, colors,
-                   ncolors * sizeof(*colors));
-    }
-
-    for (watch = palette->watch; watch; watch = watch->next) {
-        if (watch->callback(watch->userdata, palette) < 0) {
-            status = -1;
-        }
-    }
-
-    return status;
-}
-
-void
-SDL_FreePalette(SDL_Palette * palette)
-{
-    if (!palette) {
-        return;
-    }
-    if (--palette->refcount > 0) {
-        return;
-    }
-    if (palette->colors) {
-        SDL_free(palette->colors);
-    }
-    SDL_free(palette);
-}
-
-/*
- * Allocate a pixel format structure and fill it according to the given info.
- */
 SDL_PixelFormat *
-SDL_AllocFormat(int bpp,
-                Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
+SDL_AllocFormat(Uint32 pixel_format)
 {
     SDL_PixelFormat *format;
 
-    /* Allocate an empty pixel format structure */
+    if (SDL_ISPIXELFORMAT_FOURCC(pixel_format)) {
+        SDL_SetError("FOURCC pixel formats are not supported");
+        return NULL;
+    }
+
+    /* Look it up in our list of previously allocated formats */
+    for (format = formats; format; format = format->next) {
+        if (pixel_format == format->format) {
+            ++format->refcount;
+            return format;
+        }
+    }
+
+    /* Allocate an empty pixel format structure, and initialize it */
     format = SDL_malloc(sizeof(*format));
     if (format == NULL) {
         SDL_OutOfMemory();
         return (NULL);
     }
+    SDL_InitFormat(format, pixel_format);
 
-    /* Set up the format */
-    return SDL_InitFormat(format, bpp, Rmask, Gmask, Bmask, Amask);
+    if (!SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
+        /* Cache the RGB formats */
+        format->next = formats;
+        formats = format;
+    }
+    return format;
 }
 
-SDL_PixelFormat *
-SDL_InitFormat(SDL_PixelFormat * format, int bpp, Uint32 Rmask, Uint32 Gmask,
-               Uint32 Bmask, Uint32 Amask)
+int
+SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
 {
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
     Uint32 mask;
+
+    if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
+                                    &Rmask, &Gmask, &Bmask, &Amask)) {
+        SDL_SetError("Unknown pixel format");
+        return -1;
+    }
 
     /* Set up the format */
     SDL_zerop(format);
+    format->format = pixel_format;
     format->BitsPerPixel = bpp;
     format->BytesPerPixel = (bpp + 7) / 8;
     if (Rmask || Bmask || Gmask) {      /* Packed pixels with custom mask */
@@ -561,35 +462,135 @@ SDL_InitFormat(SDL_PixelFormat * format, int bpp, Uint32 Rmask, Uint32 Gmask,
         format->Amask = 0;
     }
     format->palette = NULL;
+    format->refcount = 1;
+    format->next = NULL;
 
-    return format;
+    return 0;
 }
 
-/*
- * Change any previous mappings from/to the new surface format
- */
 void
-SDL_FormatChanged(SDL_Surface * surface)
+SDL_FreeFormat(SDL_PixelFormat *format)
 {
-    static int format_version = 0;
-    ++format_version;
-    if (format_version < 0) {   /* It wrapped... */
-        format_version = 1;
-    }
-    surface->format_version = format_version;
-    SDL_InvalidateMap(surface->map);
-}
+    SDL_PixelFormat *prev;
 
-/*
- * Free a previously allocated format structure
- */
-void
-SDL_FreeFormat(SDL_PixelFormat * format)
-{
     if (!format) {
         return;
     }
+    if (--format->refcount > 0) {
+        return;
+    }
+
+    /* Remove this format from our list */
+    if (format == formats) {
+        formats = format->next;
+    } else if (formats) {
+        for (prev = formats; prev->next; prev = prev->next) {
+            if (prev->next == format) {
+                prev->next = format->next;
+                break;
+            }
+        }
+    }
+
+    if (format->palette) {
+        SDL_FreePalette(format->palette);
+    }
     SDL_free(format);
+}
+
+SDL_Palette *
+SDL_AllocPalette(int ncolors)
+{
+    SDL_Palette *palette;
+
+    palette = (SDL_Palette *) SDL_malloc(sizeof(*palette));
+    if (!palette) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    palette->colors =
+        (SDL_Color *) SDL_malloc(ncolors * sizeof(*palette->colors));
+    if (!palette->colors) {
+        SDL_free(palette);
+        return NULL;
+    }
+    palette->ncolors = ncolors;
+    palette->version = 1;
+    palette->refcount = 1;
+
+    SDL_memset(palette->colors, 0xFF, ncolors * sizeof(*palette->colors));
+
+    return palette;
+}
+
+int
+SDL_SetPixelFormatPalette(SDL_PixelFormat * format, SDL_Palette *palette)
+{
+    if (!format) {
+        SDL_SetError("SDL_SetPixelFormatPalette() passed NULL format");
+        return -1;
+    }
+
+    if (palette && palette->ncolors != (1 << format->BitsPerPixel)) {
+        SDL_SetError("SDL_SetPixelFormatPalette() passed a palette that doesn't match the format");
+        return -1;
+    }
+
+    if (format->palette == palette) {
+        return 0;
+    }
+
+    if (format->palette) {
+        SDL_FreePalette(format->palette);
+    }
+
+    format->palette = palette;
+
+    if (format->palette) {
+        ++format->palette->refcount;
+    }
+}
+
+int
+SDL_SetPaletteColors(SDL_Palette * palette, const SDL_Color * colors,
+                     int firstcolor, int ncolors)
+{
+    int status = 0;
+
+    /* Verify the parameters */
+    if (!palette) {
+        return -1;
+    }
+    if (ncolors > (palette->ncolors - firstcolor)) {
+        ncolors = (palette->ncolors - firstcolor);
+        status = -1;
+    }
+
+    if (colors != (palette->colors + firstcolor)) {
+        SDL_memcpy(palette->colors + firstcolor, colors,
+                   ncolors * sizeof(*colors));
+    }
+    ++palette->version;
+    if (!palette->version) {
+        palette->version = 1;
+    }
+
+    return status;
+}
+
+void
+SDL_FreePalette(SDL_Palette * palette)
+{
+    if (!palette) {
+        return;
+    }
+    if (--palette->refcount > 0) {
+        return;
+    }
+    if (palette->colors) {
+        SDL_free(palette->colors);
+    }
+    SDL_free(palette);
 }
 
 /*
@@ -868,7 +869,7 @@ SDL_InvalidateMap(SDL_BlitMap * map)
         return;
     }
     map->dst = NULL;
-    map->format_version = (unsigned int) -1;
+    map->palette_version = 0;
     if (map->info.table) {
         SDL_free(map->info.table);
         map->info.table = NULL;
@@ -893,10 +894,8 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
     map->identity = 0;
     srcfmt = src->format;
     dstfmt = dst->format;
-    switch (srcfmt->BytesPerPixel) {
-    case 1:
-        switch (dstfmt->BytesPerPixel) {
-        case 1:
+    if (SDL_ISPIXELFORMAT_INDEXED(srcfmt->format)) {
+        if (SDL_ISPIXELFORMAT_INDEXED(dstfmt->format)) {
             /* Palette --> Palette */
             map->info.table =
                 Map1to1(srcfmt->palette, dstfmt->palette, &map->identity);
@@ -907,9 +906,7 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
             }
             if (srcfmt->BitsPerPixel != dstfmt->BitsPerPixel)
                 map->identity = 0;
-            break;
-
-        default:
+        } else {
             /* Palette --> BitField */
             map->info.table =
                 Map1toN(srcfmt, src->map->info.r, src->map->info.g,
@@ -917,12 +914,9 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
             if (map->info.table == NULL) {
                 return (-1);
             }
-            break;
         }
-        break;
-    default:
-        switch (dstfmt->BytesPerPixel) {
-        case 1:
+    } else {
+        if (SDL_ISPIXELFORMAT_INDEXED(dstfmt->format)) {
             /* BitField --> Palette */
             map->info.table = MapNto1(srcfmt, dstfmt, &map->identity);
             if (!map->identity) {
@@ -931,18 +925,21 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
                 }
             }
             map->identity = 0;  /* Don't optimize to copy */
-            break;
-        default:
+        } else {
             /* BitField --> BitField */
-            if (FORMAT_EQUAL(srcfmt, dstfmt))
+            if (srcfmt == dstfmt) {
                 map->identity = 1;
-            break;
+            }
         }
-        break;
     }
 
     map->dst = dst;
-    map->format_version = dst->format_version;
+
+    if (dstfmt->palette) {
+        map->palette_version = dstfmt->palette->version;
+    } else {
+        map->palette_version = 0;
+    }
 
     /* Choose your blitters wisely */
     return (SDL_CalculateBlit(src));

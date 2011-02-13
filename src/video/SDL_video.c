@@ -208,7 +208,7 @@ static int
 SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {
     SDL_WindowTextureData *data;
-    SDL_Renderer *renderer;
+    SDL_Renderer *renderer = NULL;
     SDL_RendererInfo info;
     Uint32 i;
 
@@ -1204,7 +1204,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 
     /* Tear down the old native window */
     if (window->surface) {
-        window->surface->refcount = 0;
+        window->surface->flags &= ~SDL_DONTFREE;
         SDL_FreeSurface(window->surface);
     }
     if (_this->DestroyWindowFramebuffer) {
@@ -1622,13 +1622,13 @@ SDL_GetWindowSurface(SDL_Window * window)
 
     if (!window->surface_valid) {
         if (window->surface) {
-            window->surface->refcount = 0;
+            window->surface->flags &= ~SDL_DONTFREE;
             SDL_FreeSurface(window->surface);
         }
         window->surface = SDL_CreateWindowFramebuffer(window);
         if (window->surface) {
             window->surface_valid = SDL_TRUE;
-            window->surface->refcount = 0x7FFFFFF;
+            window->surface->flags |= SDL_DONTFREE;
         }
     }
     return window->surface;
@@ -1778,7 +1778,7 @@ SDL_DestroyWindow(SDL_Window * window)
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 
     if (window->surface) {
-        window->surface->refcount = 0;
+        window->surface->flags &= ~SDL_DONTFREE;
         SDL_FreeSurface(window->surface);
     }
     if (_this->DestroyWindowFramebuffer) {

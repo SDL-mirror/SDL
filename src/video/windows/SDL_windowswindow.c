@@ -332,8 +332,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         SDL_WriteLE32(dst, 0);
 
         /* Convert the icon to a 32-bit surface with alpha channel */
-        SDL_InitFormat(&format, 32,
-                       0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+        SDL_InitFormat(&format, SDL_PIXELFORMAT_ARGB8888);
         surface = SDL_ConvertSurface(icon, &format, 0);
         if (surface) {
             /* Write the pixels upside down into the bitmap buffer */

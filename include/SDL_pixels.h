@@ -253,24 +253,20 @@ typedef struct SDL_Color
 } SDL_Color;
 #define SDL_Colour SDL_Color
 
-typedef struct SDL_Palette SDL_Palette;
-typedef int (*SDL_PaletteChangedFunc) (void *userdata, SDL_Palette * palette);
-typedef struct SDL_PaletteWatch SDL_PaletteWatch;
-
-struct SDL_Palette
+typedef struct SDL_Palette
 {
     int ncolors;
     SDL_Color *colors;
-
+    Uint32 version;
     int refcount;
-    SDL_PaletteWatch *watch;
-};
+} SDL_Palette;
 
 /**
  *  \note Everything in the pixel format structure is read-only.
  */
 typedef struct SDL_PixelFormat
 {
+    Uint32 format;
     SDL_Palette *palette;
     Uint8 BitsPerPixel;
     Uint8 BytesPerPixel;
@@ -286,6 +282,8 @@ typedef struct SDL_PixelFormat
     Uint32 Gmask;
     Uint32 Bmask;
     Uint32 Amask;
+    int refcount;
+    struct SDL_PixelFormat *next;
 } SDL_PixelFormat;
 
 /**
@@ -322,6 +320,16 @@ extern DECLSPEC Uint32 SDLCALL SDL_MasksToPixelFormatEnum(int bpp,
                                                           Uint32 Amask);
 
 /**
+ *  \brief Create an SDL_PixelFormat structure from a pixel format enum.
+ */
+extern DECLSPEC SDL_PixelFormat * SDLCALL SDL_AllocFormat(Uint32 pixel_format);
+
+/**
+ *  \brief Free an SDL_PixelFormat structure.
+ */
+extern DECLSPEC void SDLCALL SDL_FreeFormat(SDL_PixelFormat *format);
+
+/**
  *  \brief Create a palette structure with the specified number of color 
  *         entries.
  *  
@@ -334,23 +342,10 @@ extern DECLSPEC Uint32 SDLCALL SDL_MasksToPixelFormatEnum(int bpp,
 extern DECLSPEC SDL_Palette *SDLCALL SDL_AllocPalette(int ncolors);
 
 /**
- *  \brief Add a callback function which is called when the palette changes.
- *  
- *  \sa SDL_DelPaletteWatch()
+ *  \brief Set the palette for a pixel format structure.
  */
-extern DECLSPEC int SDLCALL SDL_AddPaletteWatch(SDL_Palette * palette,
-                                                SDL_PaletteChangedFunc
-                                                callback, void *userdata);
-
-/**
- *  \brief Remove a callback function previously added with 
- *         SDL_AddPaletteWatch().
- *  
- *  \sa SDL_AddPaletteWatch()
- */
-extern DECLSPEC void SDLCALL SDL_DelPaletteWatch(SDL_Palette * palette,
-                                                 SDL_PaletteChangedFunc
-                                                 callback, void *userdata);
+extern DECLSPEC int SDLCALL SDL_SetPixelFormatPalette(SDL_PixelFormat * format,
+                                                      SDL_Palette *palette);
 
 /**
  *  \brief Set a range of colors in a palette.

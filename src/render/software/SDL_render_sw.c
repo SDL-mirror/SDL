@@ -24,7 +24,6 @@
 #if !SDL_RENDER_DISABLED
 
 #include "../SDL_sysrender.h"
-#include "../../video/SDL_pixels_c.h"
 
 #include "SDL_draw.h"
 #include "SDL_blendfillrect.h"

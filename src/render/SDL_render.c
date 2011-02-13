@@ -27,7 +27,6 @@
 #include "SDL_log.h"
 #include "SDL_render.h"
 #include "SDL_sysrender.h"
-#include "../video/SDL_pixels_c.h"
 #include "software/SDL_render_sw_c.h"
 
 
@@ -306,8 +305,6 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
     SDL_bool needAlpha;
     Uint32 i;
     Uint32 format;
-    int bpp;
-    Uint32 Rmask, Gmask, Bmask, Amask;
     SDL_Texture *texture;
 
     CHECK_RENDERER_MAGIC(renderer, NULL);
@@ -333,20 +330,13 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
         }
     }
 
-    if (!SDL_PixelFormatEnumToMasks(format, &bpp,
-                                    &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown pixel format");
-        return NULL;
-    }
-
     texture = SDL_CreateTexture(renderer, format, SDL_TEXTUREACCESS_STATIC,
                                 surface->w, surface->h);
     if (!texture) {
         return NULL;
     }
 
-    if (bpp == fmt->BitsPerPixel && Rmask == fmt->Rmask && Gmask == fmt->Gmask
-        && Bmask == fmt->Bmask && Amask == fmt->Amask) {
+    if (format == surface->format->format) {
         if (SDL_MUSTLOCK(surface)) {
             SDL_LockSurface(surface);
             SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
@@ -359,7 +349,7 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
         SDL_Surface *temp = NULL;
 
         /* Set up a destination surface for the texture update */
-        SDL_InitFormat(&dst_fmt, bpp, Rmask, Gmask, Bmask, Amask);
+        SDL_InitFormat(&dst_fmt, format);
         temp = SDL_ConvertSurface(surface, &dst_fmt, 0);
         if (temp) {
             SDL_UpdateTexture(texture, NULL, temp->pixels, temp->pitch);

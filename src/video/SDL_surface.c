@@ -39,9 +39,17 @@ SDL_CreateRGBSurface(Uint32 flags,
                      Uint32 Rmask, Uint32 Gmask, Uint32 Bmask, Uint32 Amask)
 {
     SDL_Surface *surface;
+    Uint32 format;
 
     /* The flags are no longer used, make the compiler happy */
     (void)flags;
+
+    /* Get the pixel format */
+    format = SDL_MasksToPixelFormatEnum(depth, Rmask, Gmask, Bmask, Amask);
+    if (format == SDL_PIXELFORMAT_UNKNOWN) {
+        SDL_SetError("Unknown pixel format");
+        return NULL;
+    }
 
     /* Allocate the surface */
     surface = (SDL_Surface *) SDL_calloc(1, sizeof(*surface));
@@ -50,7 +58,7 @@ SDL_CreateRGBSurface(Uint32 flags,
         return NULL;
     }
 
-    surface->format = SDL_AllocFormat(depth, Rmask, Gmask, Bmask, Amask);
+    surface->format = SDL_AllocFormat(format);
     if (!surface->format) {
         SDL_FreeSurface(surface);
         return NULL;
@@ -60,7 +68,7 @@ SDL_CreateRGBSurface(Uint32 flags,
     surface->pitch = SDL_CalculatePitch(surface);
     SDL_SetClipRect(surface, NULL);
 
-    if (surface->format->BitsPerPixel <= 8) {
+    if (SDL_ISPIXELFORMAT_INDEXED(surface->format->format)) {
         SDL_Palette *palette =
             SDL_AllocPalette((1 << surface->format->BitsPerPixel));
         if (!palette) {
@@ -135,7 +143,6 @@ SDL_CreateRGBSurface(Uint32 flags,
         SDL_FreeSurface(surface);
         return NULL;
     }
-    SDL_FormatChanged(surface);
 
     /* By default surface with an alpha mask are set up for blending */
     if (Amask) {
@@ -171,46 +178,14 @@ SDL_CreateRGBSurfaceFrom(void *pixels,
     return surface;
 }
 
-static int
-SDL_SurfacePaletteChanged(void *userdata, SDL_Palette * palette)
-{
-    SDL_Surface *surface = (SDL_Surface *) userdata;
-
-    SDL_FormatChanged(surface);
-
-    return 0;
-}
-
 int
 SDL_SetSurfacePalette(SDL_Surface * surface, SDL_Palette * palette)
 {
-    if (!surface || !surface->format) {
+    if (!surface) {
         SDL_SetError("SDL_SetSurfacePalette() passed a NULL surface");
         return -1;
     }
-
-    if (palette && palette->ncolors != (1 << surface->format->BitsPerPixel)) {
-        SDL_SetError
-            ("SDL_SetSurfacePalette() passed a palette that doesn't match the surface format");
-        return -1;
-    }
-
-    if (surface->format->palette == palette) {
-        return 0;
-    }
-
-    if (surface->format->palette) {
-        SDL_DelPaletteWatch(surface->format->palette,
-                            SDL_SurfacePaletteChanged, surface);
-    }
-
-    surface->format->palette = palette;
-
-    if (surface->format->palette) {
-        SDL_AddPaletteWatch(surface->format->palette,
-                            SDL_SurfacePaletteChanged, surface);
-    }
-    return 0;
+    return SDL_SetPixelFormatPalette(surface->format, palette);
 }
 
 int
@@ -556,7 +531,8 @@ SDL_LowerBlit(SDL_Surface * src, SDL_Rect * srcrect,
 {
     /* Check to make sure the blit mapping is valid */
     if ((src->map->dst != dst) ||
-        (src->map->dst->format_version != src->map->format_version)) {
+        (dst->format->palette &&
+         src->map->palette_version != dst->format->palette->version)) {
         if (SDL_MapSurface(src, dst) < 0) {
             return (-1);
         }
@@ -801,21 +777,17 @@ SDL_CreateSurfaceOnStack(int width, int height, Uint32 pixel_format,
                          void * pixels, int pitch, SDL_Surface * surface, 
                          SDL_PixelFormat * format, SDL_BlitMap * blitmap)
 {
-    int bpp;
-    Uint32 Rmask, Gmask, Bmask, Amask;
-
-    if (!SDL_PixelFormatEnumToMasks(pixel_format,
-                                    &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+    if (SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
+        SDL_SetError("Indexed pixel formats not supported");
         return SDL_FALSE;
     }
-    if (bpp <= 8) {
-        SDL_SetError("Indexed pixel formats not supported");
+    if (SDL_InitFormat(format, pixel_format) < 0) {
         return SDL_FALSE;
     }
 
     SDL_zerop(surface);
     surface->flags = SDL_PREALLOC;
-    surface->format = SDL_InitFormat(format, bpp, Rmask, Gmask, Bmask, Amask);
+    surface->format = format;
     surface->pixels = pixels;
     surface->w = width;
     surface->h = height;
@@ -830,7 +802,6 @@ SDL_CreateSurfaceOnStack(int width, int height, Uint32 pixel_format,
     blitmap->info.b = 0xFF;
     blitmap->info.a = 0xFF;
     surface->map = blitmap;
-    SDL_FormatChanged(surface);
 
     /* The surface is ready to go */
     surface->refcount = 1;
@@ -903,6 +874,9 @@ void
 SDL_FreeSurface(SDL_Surface * surface)
 {
     if (surface == NULL) {
+        return;
+    }
+    if (surface->flags & SDL_DONTFREE) {
         return;
     }
     if (--surface->refcount > 0) {

@@ -105,7 +105,7 @@ typedef struct SDL_BlitMap
 
     /* the version count matches the destination; mismatch indicates
        an invalid mapping */
-    unsigned int format_version;
+    Uint32 palette_version;
 } SDL_BlitMap;
 
 /* Functions found in SDL_blit.c */
@@ -128,10 +128,6 @@ extern SDL_BlitFunc SDL_CalculateBlitA(SDL_Surface * surface);
 #else
 #define DECLARE_ALIGNED(t,v,a)  t v
 #endif
-
-#define FORMAT_EQUAL(A, B)						\
-    ((A)->BitsPerPixel == (B)->BitsPerPixel				\
-     && ((A)->Rmask == (B)->Rmask) && ((A)->Amask == (B)->Amask))
 
 /* Load pixel of the specified format from a buffer and get its R-G-B values */
 /* FIXME: rescale values to 0..255 here? */

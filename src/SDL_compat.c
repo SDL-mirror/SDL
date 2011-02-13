@@ -93,12 +93,7 @@ SDL_GetVideoInfo(void)
 
     /* Memory leak, compatibility code, who cares? */
     if (!info.vfmt && SDL_GetDesktopDisplayMode(GetVideoDisplay(), &mode) == 0) {
-        int bpp;
-        Uint32 Rmask, Gmask, Bmask, Amask;
-
-        SDL_PixelFormatEnumToMasks(mode.format, &bpp, &Rmask, &Gmask, &Bmask,
-                                   &Amask);
-        info.vfmt = SDL_AllocFormat(bpp, Rmask, Gmask, Bmask, Amask);
+        info.vfmt = SDL_AllocFormat(mode.format);
         info.current_w = mode.w;
         info.current_h = mode.h;
     }
@@ -383,7 +378,7 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
     int w, h;
 
     /* We can't resize something we don't have... */
-    if (!SDL_VideoWindow) {
+    if (!SDL_VideoSurface) {
         return -1;
     }
 
@@ -394,6 +389,9 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
 
     /* I don't think there's any change we can gracefully make in flags */
     if (flags != SDL_VideoFlags) {
+        return -1;
+    }
+    if (bpp != SDL_VideoSurface->format->BitsPerPixel) {
         return -1;
     }
 
@@ -469,6 +467,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     /* Destroy existing window */
     SDL_PublicSurface = NULL;
     if (SDL_ShadowSurface) {
+        SDL_ShadowSurface->flags &= ~SDL_DONTFREE;
         SDL_FreeSurface(SDL_ShadowSurface);
         SDL_ShadowSurface = NULL;
     }
@@ -564,6 +563,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             return NULL;
         }
         SDL_ShadowSurface->flags |= surface_flags;
+        SDL_ShadowSurface->flags |= SDL_DONTFREE;
 
         /* 8-bit SDL_ShadowSurface surfaces report that they have exclusive palette */
         if (SDL_ShadowSurface->format->palette) {
@@ -670,7 +670,13 @@ SDL_DisplayFormatAlpha(SDL_Surface * surface)
            optimised alpha format is written, add the converter here */
         break;
     }
-    format = SDL_AllocFormat(32, rmask, gmask, bmask, amask);
+    format = SDL_AllocFormat(SDL_MasksToPixelFormatEnum(32, rmask,
+                                                            gmask,
+                                                            bmask,
+                                                            amask));
+    if (!format) {
+        return NULL;
+    }
     converted = SDL_ConvertSurface(surface, format, SDL_RLEACCEL);
     SDL_FreeFormat(format);
     return converted;

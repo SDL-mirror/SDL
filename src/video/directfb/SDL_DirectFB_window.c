@@ -220,8 +220,7 @@ DirectFB_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         int pitch, i;
 
         /* Convert the icon to ARGB for modern window managers */
-        SDL_InitFormat(&format, 32, 0x00FF0000, 0x0000FF00, 0x000000FF,
-                       0xFF000000);
+        SDL_InitFormat(&format, SDL_PIXELFORMAT_ARGB8888);
         surface = SDL_ConvertSurface(icon, &format, 0);
         if (!surface) {
             return;
