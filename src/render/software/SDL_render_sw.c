@@ -173,7 +173,7 @@ SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
-    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         data->updateSize = SDL_TRUE;
     }
 }

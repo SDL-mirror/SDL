@@ -261,7 +261,7 @@ GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
         data->updateSize = SDL_TRUE;
