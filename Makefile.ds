@@ -40,6 +40,7 @@ src/SDL_fatal.c \
 src/SDL_hints.c \
 src/SDL_log.c \
 src/atomic/SDL_atomic.c \
+src/atomic/SDL_spinlock.c \
 src/audio/SDL_audio.c \
 src/audio/SDL_audiocvt.c \
 src/audio/SDL_audiodev.c \
@@ -117,6 +118,10 @@ test/nds-test-progs/sprite2/sprite2.nds \
 
 
 all: $(TARGET) install nds_test
+
+# That file must be compiled in arm mode, not thumb mode.
+src/atomic/SDL_spinlock.o: src/atomic/SDL_spinlock.c
+	$(CC) $(CFLAGS) -mno-thumb -o $@ -c $^
 
 $(TARGET): copy_config \
 	$(OBJS)

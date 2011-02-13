@@ -35,17 +35,36 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
-#include "../SDL_sysvideo.h"
-#include "../SDL_pixels_c.h"
-#include "../../events/SDL_events_c.h"
+#include "SDL_sysvideo.h"
+#include "SDL_pixels_c.h"
+#include "SDL_events_c.h"
 #include "SDL_render.h"
-#include "../../render/SDL_sysrender.h"
-
 #include "SDL_ndsvideo.h"
 #include "SDL_ndsevents_c.h"
-#include "SDL_ndsrender_c.h"
 
 #define NDSVID_DRIVER_NAME "nds"
+
+/* Per Window information. */
+struct NDS_WindowData {
+    int hw_index;               /* index of sprite in OAM or bg from libnds */
+	int bg;						/* which bg is that attached to (2 or 3) */
+    int pitch, bpp;             /* useful information about the texture */
+    struct {
+        int x, y;
+    } scale;                    /* x/y stretch (24.8 fixed point) */
+    struct {
+        int x, y;
+    } scroll;                   /* x/y offset */
+    int rotate;                 /* -32768 to 32767, texture rotation */
+    u16 *vram_pixels;           /* where the pixel data is stored (a pointer into VRAM) */
+};
+
+/* Per device information. */
+struct NDS_DeviceData {
+	int has_bg2;				/* backgroud 2 has been attached */
+	int has_bg3;				/* backgroud 3 has been attached */
+    int sub;
+};
 
 /* Initialization/Query functions */
 static int NDS_VideoInit(_THIS);
@@ -61,6 +80,110 @@ NDS_Available(void)
     return (1);                 /* always here */
 }
 
+static int NDS_CreateWindowFramebuffer(_THIS, SDL_Window * window,
+									   Uint32 * format, void ** pixels,
+									   int *pitch)
+{
+	struct NDS_DeviceData *data = _this->driverdata;
+	struct NDS_WindowData *wdata;
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+	int whichbg = -1;
+
+	*format = SDL_PIXELFORMAT_BGR555;
+
+    if (!SDL_PixelFormatEnumToMasks
+        (*format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
+        SDL_SetError("Unknown texture format");
+        return -1;
+    }
+
+	if (!data->has_bg2)
+		whichbg = 2;
+	else if (!data->has_bg3)
+		whichbg = 3;
+	else {
+		SDL_SetError("Out of NDS backgrounds.");
+		return -1;
+	}
+
+	wdata = SDL_calloc(1, sizeof(struct NDS_WindowData));
+	if (!wdata) {
+		SDL_OutOfMemory();
+		return -1;
+	}
+
+	if (!data->sub) {
+		if (bpp == 8) {
+			wdata->hw_index =
+				bgInit(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0, 0);
+		} else {
+			wdata->hw_index =
+				bgInit(whichbg, BgType_Bmp16, BgSize_B16_256x256, 0,
+					   0);
+		}
+	} else {
+		if (bpp == 8) {
+			wdata->hw_index =
+				bgInitSub(whichbg, BgType_Bmp8, BgSize_B8_256x256, 0,
+						  0);
+		} else {
+			wdata->hw_index =
+				bgInitSub(whichbg, BgType_Bmp16, BgSize_B16_256x256,
+						  0, 0);
+		}
+	}
+
+	wdata->bg = whichbg;
+	wdata->pitch = (window->w) * ((bpp+1) / 8);
+	wdata->bpp = bpp;
+	wdata->rotate = 0;
+	wdata->scale.x = 0x100;
+	wdata->scale.y = 0x100;
+	wdata->scroll.x = 0;
+	wdata->scroll.y = 0;
+	wdata->vram_pixels = (u16 *) bgGetGfxPtr(wdata->hw_index);
+
+	bgSetCenter(wdata->hw_index, 0, 0);
+	bgSetRotateScale(wdata->hw_index, wdata->rotate, wdata->scale.x,
+					 wdata->scale.y);
+	bgSetScroll(wdata->hw_index, wdata->scroll.x, wdata->scroll.y);
+	bgUpdate();
+
+	*pixels = wdata->vram_pixels;
+	*pitch = wdata->pitch;
+
+	if (!data->has_bg2)
+		data->has_bg2 = 1;
+	else 
+		data->has_bg3 = 1;
+
+	window->driverdata = wdata;
+
+	return 0;
+}
+
+static int NDS_UpdateWindowFramebuffer(_THIS, SDL_Window * window, int numrects,
+									   SDL_Rect * rects)
+{
+	/* Nothing to do because writes are done directly into the
+	 * framebuffer. */
+    return 0;
+}
+
+static void NDS_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
+{
+	struct NDS_DeviceData *data = _this->driverdata;
+    struct NDS_WindowData *wdata = window->driverdata;
+
+	if (wdata->bg == 2)
+		data->has_bg2 = 0;
+	else
+		data->has_bg3 = 0;
+
+    SDL_free(wdata);
+}
+
 static void
 NDS_DeleteDevice(SDL_VideoDevice * device)
 {
@@ -73,8 +196,15 @@ NDS_CreateDevice(int devindex)
     SDL_VideoDevice *device;
 
     /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+    device = SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+
+	device->driverdata = SDL_calloc(1, sizeof(SDL_VideoDevice));
+    if (!device) {
+		SDL_free(device);
         SDL_OutOfMemory();
         return NULL;
     }
@@ -84,6 +214,9 @@ NDS_CreateDevice(int devindex)
     device->VideoQuit = NDS_VideoQuit;
     device->SetDisplayMode = NDS_SetDisplayMode;
     device->PumpEvents = NDS_PumpEvents;
+	device->CreateWindowFramebuffer = NDS_CreateWindowFramebuffer;
+	device->UpdateWindowFramebuffer = NDS_UpdateWindowFramebuffer;
+	device->DestroyWindowFramebuffer = NDS_DestroyWindowFramebuffer;
 
     device->num_displays = 2;   /* DS = dual screens */
 
