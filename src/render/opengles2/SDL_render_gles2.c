@@ -170,7 +170,7 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
 
-    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
         rdata->updateSize = SDL_TRUE;

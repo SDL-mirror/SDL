@@ -1431,10 +1431,15 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
 
     /* FIXME: Should this change fullscreen modes? */
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        window->w = w;
+        window->h = h;
         if (_this->SetWindowSize) {
             _this->SetWindowSize(_this, window);
         }
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED, w, h);
+        if (window->w == w && window->h == h) {
+            /* We didn't get a SDL_WINDOWEVENT_RESIZED event (by design) */
+            SDL_OnWindowResized(window);
+        }
     }
 }
 
@@ -1706,6 +1711,7 @@ void
 SDL_OnWindowResized(SDL_Window * window)
 {
     window->surface_valid = SDL_FALSE;
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_SIZE_CHANGED, window->w, window->h);
 }
 
 void

@@ -35,7 +35,8 @@ RemovePendingSizeEvents(void * userdata, SDL_Event *event)
     SDL_Event *new_event = (SDL_Event *)userdata;
 
     if (event->type == SDL_WINDOWEVENT &&
-        event->window.event == SDL_WINDOWEVENT_RESIZED &&
+        (event->window.event == SDL_WINDOWEVENT_RESIZED ||
+         event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) &&
         event->window.windowID == new_event->window.windowID) {
         /* We're about to post a new size event, drop the old one */
         return 0;

@@ -140,7 +140,8 @@ typedef enum
                                          redrawn */
     SDL_WINDOWEVENT_MOVED,          /**< Window has been moved to data1, data2 
                                      */
-    SDL_WINDOWEVENT_RESIZED,        /**< Window size changed to data1xdata2 */
+    SDL_WINDOWEVENT_RESIZED,        /**< Window has been resized to data1xdata2 */
+    SDL_WINDOWEVENT_SIZE_CHANGED,   /**< The window size has changed, either as a result of an API call or through the system or user changing the window size. */
     SDL_WINDOWEVENT_MINIMIZED,      /**< Window has been minimized */
     SDL_WINDOWEVENT_MAXIMIZED,      /**< Window has been maximized */
     SDL_WINDOWEVENT_RESTORED,       /**< Window has been restored to normal size
