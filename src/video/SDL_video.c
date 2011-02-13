@@ -214,16 +214,6 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
 
     data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
     if (!data) {
-        data = (SDL_WindowTextureData *)SDL_calloc(1, sizeof(*data));
-        if (!data) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-        SDL_SetWindowData(window, SDL_WINDOWTEXTUREDATA, data);
-    }
-
-    renderer = data->renderer;
-    if (!renderer) {
         SDL_RendererInfo info;
         int i;
         const char *hint = SDL_GetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION);
@@ -254,6 +244,16 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
         if (!renderer) {
             return -1;
         }
+
+        /* Create the data after we successfully create the renderer (bug #1116) */
+        data = (SDL_WindowTextureData *)SDL_calloc(1, sizeof(*data));
+        if (!data) {
+            SDL_DestroyRenderer(renderer);
+            SDL_OutOfMemory();
+            return -1;
+        }
+        SDL_SetWindowData(window, SDL_WINDOWTEXTUREDATA, data);
+
         data->renderer = renderer;
     }
 
