@@ -89,9 +89,6 @@ typedef struct SDL_Surface
     /** info for fast blit mapping to other surfaces */
     struct SDL_BlitMap *map;    /**< Private */
 
-    /** format version, bumped at every change to invalidate blit maps */
-    int format_version;         /**< Private */
-
     /** Reference count -- used when freeing surface */
     int refcount;               /**< Read-mostly */
 } SDL_Surface;
