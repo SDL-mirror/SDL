@@ -270,7 +270,12 @@ SDL_FlushEvents(Uint32 minType, Uint32 maxType)
     }
 
     /* Make sure the events are current */
+#if 0
+    /* Actually, we can't do this since we might be flushing while processing
+       a resize event, and calling this might trigger further resize events.
+    */
     SDL_PumpEvents();
+#endif
 
     /* Lock the event queue */
     if (SDL_mutexP(SDL_EventQ.lock) == 0) {
