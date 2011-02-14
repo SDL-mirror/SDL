@@ -32,11 +32,13 @@
 
 
 static SDL_Window *SDL_VideoWindow = NULL;
+static SDL_Surface *SDL_WindowSurface = NULL;
 static SDL_Surface *SDL_VideoSurface = NULL;
 static SDL_Surface *SDL_ShadowSurface = NULL;
 static SDL_Surface *SDL_PublicSurface = NULL;
 static SDL_GLContext *SDL_VideoContext = NULL;
 static Uint32 SDL_VideoFlags = 0;
+static SDL_Rect SDL_VideoViewport;
 static char *wm_title = NULL;
 static SDL_Surface *SDL_VideoIcon;
 static int SDL_enabled_UNICODE = 0;
@@ -211,10 +213,15 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             break;
         case SDL_WINDOWEVENT_RESIZED:
             SDL_FlushEvent(SDL_VIDEORESIZE);
-            fake.type = SDL_VIDEORESIZE;
-            fake.resize.w = event->window.data1;
-            fake.resize.h = event->window.data2;
-            SDL_PushEvent(&fake);
+            /* We don't want to expose that the window width and height will
+               be different if we don't get the desired fullscreen mode.
+            */
+            if (SDL_VideoWindow && !(SDL_GetWindowFlags(SDL_VideoWindow) & SDL_WINDOW_FULLSCREEN)) {
+                fake.type = SDL_VIDEORESIZE;
+                fake.resize.w = event->window.data1;
+                fake.resize.h = event->window.data2;
+                SDL_PushEvent(&fake);
+            }
             break;
         case SDL_WINDOWEVENT_MINIMIZED:
             fake.type = SDL_ACTIVEEVENT;
@@ -282,6 +289,19 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
             //printf("TEXTINPUT: '%s'\n", event->text.text);
             break;
         }
+    case SDL_MOUSEMOTION:
+        {
+            event->motion.x -= SDL_VideoViewport.x;
+            event->motion.y -= SDL_VideoViewport.y;
+            break;
+        }
+    case SDL_MOUSEBUTTONDOWN:
+    case SDL_MOUSEBUTTONUP:
+        {
+            event->button.x -= SDL_VideoViewport.x;
+            event->button.y -= SDL_VideoViewport.y;
+            break;
+        }
     case SDL_MOUSEWHEEL:
         {
             Uint8 button;
@@ -321,6 +341,7 @@ SDL_CompatEventFilter(void *userdata, SDL_Event * event)
 static void
 GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
 {
+    int display = GetVideoDisplay();
     const char *window = SDL_getenv("SDL_VIDEO_WINDOW_POS");
     const char *center = SDL_getenv("SDL_VIDEO_CENTERED");
     if (window) {
@@ -332,22 +353,20 @@ GetEnvironmentWindowPosition(int w, int h, int *x, int *y)
         }
     }
     if (center) {
-        SDL_DisplayMode mode;
-        SDL_GetDesktopDisplayMode(GetVideoDisplay(), &mode);
-        *x = (mode.w - w) / 2;
-        *y = (mode.h - h) / 2;
+        *x = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
+        *y = SDL_WINDOWPOS_CENTERED_DISPLAY(display);
     }
 }
 
 static void
 ClearVideoSurface()
 {
-    Uint32 black;
-
-    /* Clear the surface for display */
-    black = SDL_MapRGB(SDL_PublicSurface->format, 0, 0, 0);
-    SDL_FillRect(SDL_PublicSurface, NULL, black);
-    SDL_UpdateRect(SDL_PublicSurface, 0, 0, 0, 0);
+    if (SDL_ShadowSurface) {
+        SDL_FillRect(SDL_ShadowSurface, NULL,
+            SDL_MapRGB(SDL_ShadowSurface->format, 0, 0, 0));
+    }
+    SDL_FillRect(SDL_WindowSurface, NULL, 0);
+    SDL_UpdateWindowSurface(SDL_VideoWindow);
 }
 
 static void
@@ -408,11 +427,18 @@ SDL_ResizeVideoMode(int width, int height, int bpp, Uint32 flags)
         return 0;
     }
 
-    /* Destroy the screen texture and recreate it */
-    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
-    if (!SDL_VideoSurface) {
+    SDL_WindowSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_WindowSurface) {
         return -1;
     }
+    if (SDL_VideoSurface->format != SDL_WindowSurface->format) {
+        return -1;
+    }
+    SDL_VideoSurface->w = width;
+    SDL_VideoSurface->h = height;
+    SDL_VideoSurface->pixels = SDL_WindowSurface->pixels;
+    SDL_VideoSurface->pitch = SDL_WindowSurface->pitch;
+    SDL_SetClipRect(SDL_VideoSurface, NULL);
 
     if (SDL_ShadowSurface) {
         SDL_ShadowSurface->w = width;
@@ -436,8 +462,11 @@ SDL_Surface *
 SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
 {
     SDL_DisplayMode desktop_mode;
-    int window_x = SDL_WINDOWPOS_UNDEFINED;
-    int window_y = SDL_WINDOWPOS_UNDEFINED;
+    int display = GetVideoDisplay();
+    int window_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
+    int window_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(display);
+    int window_w;
+    int window_h;
     Uint32 window_flags;
     Uint32 surface_flags;
 
@@ -447,7 +476,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         }
     }
 
-    SDL_GetDesktopDisplayMode(GetVideoDisplay(), &desktop_mode);
+    SDL_GetDesktopDisplayMode(display, &desktop_mode);
 
     if (width == 0) {
         width = desktop_mode.w;
@@ -472,6 +501,7 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         SDL_ShadowSurface = NULL;
     }
     if (SDL_VideoSurface) {
+        SDL_VideoSurface->flags &= ~SDL_DONTFREE;
         SDL_FreeSurface(SDL_VideoSurface);
         SDL_VideoSurface = NULL;
     }
@@ -548,11 +578,31 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
 
     /* Create the screen surface */
-    SDL_VideoSurface = SDL_GetWindowSurface(SDL_VideoWindow);
-    if (!SDL_VideoSurface) {
+    SDL_WindowSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_WindowSurface) {
         return NULL;
     }
+
+    /* Center the public surface in the window surface */
+    SDL_GetWindowSize(SDL_VideoWindow, &window_w, &window_h);
+    SDL_VideoViewport.x = (window_w - width)/2;
+    SDL_VideoViewport.y = (window_h - height)/2;
+    SDL_VideoViewport.w = width;
+    SDL_VideoViewport.h = height;
+
+    SDL_VideoSurface = SDL_CreateRGBSurfaceFrom(NULL, 0, 0, 32, 0, 0, 0, 0, 0);
     SDL_VideoSurface->flags |= surface_flags;
+    SDL_VideoSurface->flags |= SDL_DONTFREE;
+    SDL_FreeFormat(SDL_VideoSurface->format);
+    SDL_VideoSurface->format = SDL_WindowSurface->format;
+    SDL_VideoSurface->format->refcount++;
+    SDL_VideoSurface->w = width;
+    SDL_VideoSurface->h = height;
+    SDL_VideoSurface->pitch = SDL_WindowSurface->pitch;
+    SDL_VideoSurface->pixels = (void *)((Uint8 *)SDL_WindowSurface->pixels +
+        SDL_VideoViewport.y * SDL_VideoSurface->pitch +
+        SDL_VideoViewport.x  * SDL_VideoSurface->format->BytesPerPixel);
+    SDL_SetClipRect(SDL_VideoSurface, NULL);
 
     /* Create a shadow surface if necessary */
     if ((bpp != SDL_VideoSurface->format->BitsPerPixel)
@@ -571,6 +621,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
             SDL_DitherColors(SDL_ShadowSurface->format->palette->colors,
                              SDL_ShadowSurface->format->BitsPerPixel);
         }
+        SDL_FillRect(SDL_ShadowSurface, NULL,
+            SDL_MapRGB(SDL_ShadowSurface->format, 0, 0, 0));
     }
     SDL_PublicSurface =
         (SDL_ShadowSurface ? SDL_ShadowSurface : SDL_VideoSurface);
@@ -719,7 +771,25 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
         screen = SDL_VideoSurface;
     }
     if (screen == SDL_VideoSurface) {
-        SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, rects);
+        if (SDL_VideoViewport.x || SDL_VideoViewport.y) {
+            SDL_Rect *stackrects = SDL_stack_alloc(SDL_Rect, numrects);
+            SDL_Rect *stackrect;
+            const SDL_Rect *rect;
+            
+            /* Offset all the rectangles before updating */
+            for (i = 0; i < numrects; ++i) {
+                rect = &rects[i];
+                stackrect = &stackrects[i];
+                stackrect->x = SDL_VideoViewport.x + rect->x;
+                stackrect->y = SDL_VideoViewport.y + rect->y;
+                stackrect->w = rect->w;
+                stackrect->h = rect->h;
+            }
+            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, stackrects);
+            SDL_stack_free(stackrects);
+        } else {
+            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, rects);
+        }
     }
 }
 

@@ -23,6 +23,7 @@
 
 #include "SDL_rect.h"
 
+
 SDL_bool
 SDL_HasIntersection(const SDL_Rect * A, const SDL_Rect * B)
 {
@@ -337,6 +338,44 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
     *X2 = x2;
     *Y2 = y2;
     return SDL_TRUE;
+}
+
+SDL_bool
+SDL_GetSpanEnclosingRect(int width, int height,
+                         int numrects, SDL_Rect * rects, SDL_Rect *span)
+{
+    int i;
+    int span_y1, span_y2;
+    int rect_y1, rect_y2;
+
+    /* Initialize to empty rect */
+    span_y1 = height;
+    span_y2 = 0;
+
+    for (i = 0; i < numrects; ++i) {
+        rect_y1 = rects[i].y;
+        rect_y2 = rect_y1 + rects[i].h;
+
+        /* Clip out of bounds rectangles, and expand span rect */
+        if (rect_y1 < 0) {
+            span_y1 = 0;
+        } else if (rect_y1 < span_y1) {
+            span_y1 = rect_y1;
+        }
+        if (rect_y2 > height) {
+            span_y2 = height;
+        } else if (rect_y2 > span_y2) {
+            span_y2 = rect_y2;
+        }
+    }
+    if (span_y2 > span_y1) {
+        span->x = 0;
+        span->y = span_y1;
+        span->w = width;
+        span->h = (span_y2 - span_y1);
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -28,6 +28,7 @@
 #include "SDL_sysvideo.h"
 #include "SDL_blit.h"
 #include "SDL_pixels_c.h"
+#include "SDL_rect_c.h"
 #include "../events/SDL_events_c.h"
 
 #if SDL_VIDEO_OPENGL
@@ -306,12 +307,8 @@ static int
 SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rects)
 {
     SDL_WindowTextureData *data;
-#ifdef UPDATE_TEXTURE_SUBRECTS
-    void *src, *dst;
-    int src_pitch;
-    int dst_pitch;
-    int i, row, length;
-#endif
+    SDL_Rect rect;
+    void *src;
 
     data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
     if (!data || !data->texture) {
@@ -319,34 +316,21 @@ SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rec
         return -1;
     }
 
-#ifdef UPDATE_TEXTURE_SUBRECTS
-    src_pitch = data->pitch;
-    for (i = 0; i < numrects; ++i) {
+    /* Update a single rect that contains subrects for best DMA performance */
+    if (SDL_GetSpanEnclosingRect(window->w, window->h, numrects, rects, &rect)) {
         src = (void *)((Uint8 *)data->pixels +
-                        rects[i].y * src_pitch +
-                        rects[i].x * data->bytes_per_pixel);
-        if (SDL_LockTexture(data->texture, &rects[i], &dst, &dst_pitch) < 0) {
+                        rect.y * data->pitch +
+                        rect.x * data->bytes_per_pixel);
+        if (SDL_UpdateTexture(data->texture, &rect, src, data->pitch) < 0) {
             return -1;
         }
-        length = rects[i].w * data->bytes_per_pixel;
-        for (row = rects[i].h; row--; ) {
-            SDL_memcpy(dst, src, length);
-            src = (Uint8*)src + src_pitch;
-            dst = (Uint8*)dst + dst_pitch;
+
+        if (SDL_RenderCopy(data->renderer, data->texture, NULL, NULL) < 0) {
+            return -1;
         }
-        SDL_UnlockTexture(data->texture);
-    }
-#else
-    if (SDL_UpdateTexture(data->texture, NULL, data->pixels, data->pitch) < 0) {
-        return -1;
-    }
-#endif
 
-    if (SDL_RenderCopy(data->renderer, data->texture, NULL, NULL) < 0) {
-        return -1;
+        SDL_RenderPresent(data->renderer);
     }
-
-    SDL_RenderPresent(data->renderer);
     return 0;
 }
 
