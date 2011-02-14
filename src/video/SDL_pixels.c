@@ -549,6 +549,8 @@ SDL_SetPixelFormatPalette(SDL_PixelFormat * format, SDL_Palette *palette)
     if (format->palette) {
         ++format->palette->refcount;
     }
+
+    return 0;
 }
 
 int

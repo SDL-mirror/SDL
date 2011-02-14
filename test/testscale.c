@@ -83,7 +83,6 @@ void
 Draw(DrawState *s)
 {
     int w, h;
-    SDL_Rect rect;
 
     SDL_GetWindowSize(s->window, &w, &h);
 
@@ -177,7 +176,7 @@ main(int argc, char *argv[])
         printf("%2.2f frames per second\n", fps);
     }
 
-    SDL_stack_free(drawstate);
+    SDL_stack_free(drawstates);
 
     quit(0);
     return 0;
