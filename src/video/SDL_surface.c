@@ -640,6 +640,51 @@ SDL_UpperBlit(SDL_Surface * src, const SDL_Rect * srcrect,
 }
 
 /*
+ * Scale and blit a surface 
+*/
+int
+SDL_BlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
+               SDL_Surface * dst, const SDL_Rect * dstrect)
+{
+    /* Save off the original dst width, height */
+    int dstW = dstrect->w;
+    int dstH = dstrect->h;
+    SDL_Rect final_dst = *dstrect;
+    SDL_Rect final_src = *srcrect;
+
+    /* Clip the dst surface to the dstrect */
+    SDL_SetClipRect( dst, &final_dst );
+
+    /* If the dest was clipped to a zero sized rect then exit */
+    if ( dst->clip_rect.w <= 0 || dst->clip_rect.h <= 0 ) {
+        return -1;
+    }
+
+    /* Did the dst width change? */
+    if ( dstW != dst->clip_rect.w ) {
+        /* scale the src width appropriately */
+        final_src.w = final_src.w * dst->clip_rect.w / dstW;
+    }
+
+    /* Did the dst height change? */
+    if ( dstH != dst->clip_rect.h ) {
+        /* scale the src width appropriately */
+        final_src.h = final_src.h * dst->clip_rect.h / dstH;
+    }
+
+    /* Clip the src surface to the srcrect */
+    SDL_SetClipRect( src, &final_src );
+
+    src->map->info.flags |= SDL_COPY_NEAREST;
+
+    if ( src->format->format == dst->format->format && !SDL_ISPIXELFORMAT_INDEXED(src->format->format) ) {
+        return SDL_SoftStretch( src, &final_src, dst, &final_dst );
+    } else {
+        return SDL_LowerBlit( src, &final_src, dst, &final_dst );
+    }
+}
+
+/*
  * Lock a surface to directly access the pixels
  */
 int

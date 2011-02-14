@@ -364,7 +364,12 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (!surface) {
         return -1;
     }
-    return SDL_BlitSurface(src, srcrect, surface, &final_rect);
+
+    if ( srcrect->w == final_rect.w && srcrect->h == final_rect.h ) {
+        return SDL_BlitSurface(src, srcrect, surface, &final_rect);
+    } else {
+        return SDL_BlitScaled(src, srcrect, surface, &final_rect);
+    }
 }
 
 static int
