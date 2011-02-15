@@ -163,8 +163,8 @@ static int NDS_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	return 0;
 }
 
-static int NDS_UpdateWindowFramebuffer(_THIS, SDL_Window * window, int numrects,
-									   SDL_Rect * rects)
+static int NDS_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
+									   SDL_Rect * rects, int numrects)
 {
 	/* Nothing to do because writes are done directly into the
 	 * framebuffer. */

@@ -89,10 +89,25 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
 {
     SDL_Renderer *renderer = (SDL_Renderer *)userdata;
 
-    if (event->type == SDL_WINDOWEVENT && renderer->WindowEvent) {
+    if (event->type == SDL_WINDOWEVENT) {
         SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
         if (window == renderer->window) {
-            renderer->WindowEvent(renderer, &event->window);
+            if (renderer->WindowEvent) {
+                renderer->WindowEvent(renderer, &event->window);
+            }
+
+            if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+                /* Try to keep the previous viewport centered */
+                int w, h;
+                SDL_Rect viewport;
+
+                SDL_GetWindowSize(window, &w, &h);
+                viewport.x = (w - renderer->viewport.w) / 2;
+                viewport.y = (h - renderer->viewport.h) / 2;
+                viewport.w = renderer->viewport.w;
+                viewport.h = renderer->viewport.h;
+                SDL_RenderSetViewport(renderer, &viewport);
+            }
         }
     }
     return 0;
@@ -160,6 +175,8 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->magic = &renderer_magic;
         renderer->window = window;
 
+        SDL_RenderSetViewport(renderer, NULL);
+
         SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
 
         SDL_LogInfo(SDL_LOG_CATEGORY_RENDER,
@@ -172,7 +189,16 @@ SDL_Renderer *
 SDL_CreateSoftwareRenderer(SDL_Surface * surface)
 {
 #if !SDL_RENDER_DISABLED
-    return SW_CreateRendererForSurface(surface);
+    SDL_Renderer *renderer;
+
+    renderer = SW_CreateRendererForSurface(surface);
+
+    if (renderer) {
+        renderer->magic = &renderer_magic;
+
+        SDL_RenderSetViewport(renderer, NULL);
+    }
+    return renderer;
 #else
     SDL_SetError("SDL not built with rendering support");
     return NULL;
@@ -342,12 +368,13 @@ SDL_CreateTextureFromSurface(SDL_Renderer * renderer, SDL_Surface * surface)
             SDL_UpdateTexture(texture, NULL, surface->pixels, surface->pitch);
         }
     } else {
-        SDL_PixelFormat dst_fmt;
+        SDL_PixelFormat *dst_fmt;
         SDL_Surface *temp = NULL;
 
         /* Set up a destination surface for the texture update */
-        SDL_InitFormat(&dst_fmt, format);
-        temp = SDL_ConvertSurface(surface, &dst_fmt, 0);
+        dst_fmt = SDL_AllocFormat(format);
+        temp = SDL_ConvertSurface(surface, dst_fmt, 0);
+        SDL_FreeFormat(dst_fmt);
         if (temp) {
             SDL_UpdateTexture(texture, NULL, temp->pixels, temp->pitch);
             SDL_FreeSurface(temp);
@@ -733,12 +760,34 @@ SDL_UnlockTexture(SDL_Texture * texture)
     }
 }
 
+int
+SDL_RenderSetViewport(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
+    if (rect) {
+        renderer->viewport = *rect;
+    } else {
+        renderer->viewport.x = 0;
+        renderer->viewport.y = 0;
+        if (renderer->window) {
+            SDL_GetWindowSize(renderer->window,
+                              &renderer->viewport.w, &renderer->viewport.h);
+        } else {
+            /* This will be filled in by UpdateViewport() */
+            renderer->viewport.w = 0;
+            renderer->viewport.h = 0;
+        }
+    }
+    return renderer->UpdateViewport(renderer);
+}
+
 void
-SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+SDL_RenderGetViewport(SDL_Renderer * renderer, SDL_Rect * rect)
 {
     CHECK_RENDERER_MAGIC(renderer, );
 
-    renderer->SetClipRect(renderer, rect);
+    *rect = renderer->viewport;
 }
 
 int
@@ -884,7 +933,8 @@ SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 
         full_rect.x = 0;
         full_rect.y = 0;
-        SDL_GetWindowSize(window, &full_rect.w, &full_rect.h);
+        full_rect.w = renderer->viewport.w;
+        full_rect.h = renderer->viewport.h;
         rect = &full_rect;
     }
 
@@ -903,7 +953,7 @@ SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 
 int
 SDL_RenderDrawRects(SDL_Renderer * renderer,
-                    const SDL_Rect ** rects, int count)
+                    const SDL_Rect * rects, int count)
 {
     int i;
 
@@ -917,9 +967,8 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
         return 0;
     }
 
-    /* Check for NULL rect, which means fill entire window */
     for (i = 0; i < count; ++i) {
-        if (SDL_RenderDrawRect(renderer, rects[i]) < 0) {
+        if (SDL_RenderDrawRect(renderer, &rects[i]) < 0) {
             return -1;
         }
     }
@@ -929,15 +978,13 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
 int
 SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    return SDL_RenderFillRects(renderer, &rect, 1);
+    return SDL_RenderFillRects(renderer, rect, 1);
 }
 
 int
 SDL_RenderFillRects(SDL_Renderer * renderer,
-                    const SDL_Rect ** rects, int count)
+                    const SDL_Rect * rects, int count)
 {
-    int i;
-
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
@@ -946,21 +993,6 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
     }
     if (count < 1) {
         return 0;
-    }
-
-    /* Check for NULL rect, which means fill entire window */
-    for (i = 0; i < count; ++i) {
-        if (rects[i] == NULL) {
-            SDL_Window *window = renderer->window;
-            SDL_Rect full_rect;
-            const SDL_Rect *rect;
-
-            full_rect.x = 0;
-            full_rect.y = 0;
-            SDL_GetWindowSize(window, &full_rect.w, &full_rect.h);
-            rect = &full_rect;
-            return renderer->RenderFillRects(renderer, &rect, 1);
-        }
     }
     return renderer->RenderFillRects(renderer, rects, count);
 }
@@ -994,7 +1026,8 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     real_dstrect.x = 0;
     real_dstrect.y = 0;
-    SDL_GetWindowSize(window, &real_dstrect.w, &real_dstrect.h);
+    real_dstrect.w = renderer->viewport.w;
+    real_dstrect.h = renderer->viewport.h;
     if (dstrect) {
         if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
             return 0;
@@ -1043,7 +1076,8 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     real_rect.x = 0;
     real_rect.y = 0;
-    SDL_GetWindowSize(window, &real_rect.w, &real_rect.h);
+    real_rect.w = renderer->viewport.w;
+    real_rect.h = renderer->viewport.h;
     if (rect) {
         if (!SDL_IntersectRect(rect, &real_rect, &real_rect)) {
             return 0;

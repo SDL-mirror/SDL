@@ -364,16 +364,23 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 
 /**
- *  \brief Set the clipping rectangle for rendering on the current target
+ *  \brief Set the drawing area for rendering on the current target.
  *
- *  \param rect The rectangle to clip rendering to, or NULL to disable clipping.
+ *  \param rect The rectangle representing the drawing area, or NULL to set the viewport to the entire target.
  *
- *  The contents of the window are not defined after calling
- *  SDL_RenderPresent(), so you should clear the clip rectangle and draw
- *  over the entire window each frame.
+ *  The x,y of the viewport rect represents the origin for rendering.
+ *
+ *  \note When the window is resized, the current viewport is automatically
+ *        centered within the new window size.
  */
-extern DECLSPEC void SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer,
-                                                   const SDL_Rect * rect);
+extern DECLSPEC int SDLCALL SDL_RenderSetViewport(SDL_Renderer * renderer,
+                                                  const SDL_Rect * rect);
+
+/**
+ *  \brief Get the drawing area for the current target.
+ */
+extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
+                                                   SDL_Rect * rect);
 
 /**
  *  \brief Set the color used for drawing operations (Fill and Line).
@@ -434,6 +441,8 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(SDL_Renderer * renderer,
 
 /**
  *  \brief Clear the current rendering target with the drawing color
+ *
+ *  This function clears the entire rendering target, ignoring the viewport.
  */
 extern DECLSPEC int SDLCALL SDL_RenderClear(SDL_Renderer * renderer);
 
@@ -504,7 +513,7 @@ extern DECLSPEC int SDLCALL SDL_RenderDrawRect(SDL_Renderer * renderer,
  *  \return 0 on success, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_RenderDrawRects(SDL_Renderer * renderer,
-                                                const SDL_Rect ** rects,
+                                                const SDL_Rect * rects,
                                                 int count);
 
 /**
@@ -527,7 +536,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRect(SDL_Renderer * renderer,
  *  \return 0 on success, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_RenderFillRects(SDL_Renderer * renderer,
-                                                const SDL_Rect ** rect,
+                                                const SDL_Rect * rect,
                                                 int count);
 
 /**

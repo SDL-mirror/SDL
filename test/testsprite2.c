@@ -92,15 +92,14 @@ LoadSprite(char *file)
 }
 
 void
-MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
+MoveSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 {
     int i, n;
-    int window_w, window_h;
-    SDL_Rect temp;
+    SDL_Rect viewport, temp;
     SDL_Rect *position, *velocity;
 
     /* Query the sizes */
-    SDL_GetWindowSize(window, &window_w, &window_h);
+    SDL_RenderGetViewport(renderer, &viewport);
 
     /* Cycle the color and alpha, if desired */
     if (cycle_color) {
@@ -136,16 +135,16 @@ MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
     /* Test points */
     SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
     SDL_RenderDrawPoint(renderer, 0, 0);
-    SDL_RenderDrawPoint(renderer, window_w-1, 0);
-    SDL_RenderDrawPoint(renderer, 0, window_h-1);
-    SDL_RenderDrawPoint(renderer, window_w-1, window_h-1);
+    SDL_RenderDrawPoint(renderer, viewport.w-1, 0);
+    SDL_RenderDrawPoint(renderer, 0, viewport.h-1);
+    SDL_RenderDrawPoint(renderer, viewport.w-1, viewport.h-1);
 
     /* Test horizontal and vertical lines */
     SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
-    SDL_RenderDrawLine(renderer, 1, 0, window_w-2, 0);
-    SDL_RenderDrawLine(renderer, 1, window_h-1, window_w-2, window_h-1);
-    SDL_RenderDrawLine(renderer, 0, 1, 0, window_h-2);
-    SDL_RenderDrawLine(renderer, window_w-1, 1, window_w-1, window_h-2);
+    SDL_RenderDrawLine(renderer, 1, 0, viewport.w-2, 0);
+    SDL_RenderDrawLine(renderer, 1, viewport.h-1, viewport.w-2, viewport.h-1);
+    SDL_RenderDrawLine(renderer, 0, 1, 0, viewport.h-2);
+    SDL_RenderDrawLine(renderer, viewport.w-1, 1, viewport.w-1, viewport.h-2);
 
     /* Test fill and copy */
     SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -155,20 +154,20 @@ MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
     temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
     SDL_RenderCopy(renderer, sprite, NULL, &temp);
-    temp.x = window_w-sprite_w-1;
+    temp.x = viewport.w-sprite_w-1;
     temp.y = 1;
     temp.w = sprite_w;
     temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
     SDL_RenderCopy(renderer, sprite, NULL, &temp);
     temp.x = 1;
-    temp.y = window_h-sprite_h-1;
+    temp.y = viewport.h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
     SDL_RenderCopy(renderer, sprite, NULL, &temp);
-    temp.x = window_w-sprite_w-1;
-    temp.y = window_h-sprite_h-1;
+    temp.x = viewport.w-sprite_w-1;
+    temp.y = viewport.h-sprite_h-1;
     temp.w = sprite_w;
     temp.h = sprite_h;
     SDL_RenderFillRect(renderer, &temp);
@@ -177,9 +176,9 @@ MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
     /* Test diagonal lines */
     SDL_SetRenderDrawColor(renderer, 0x00, 0xFF, 0x00, 0xFF);
     SDL_RenderDrawLine(renderer, sprite_w, sprite_h,
-                       window_w-sprite_w-2, window_h-sprite_h-2);
-    SDL_RenderDrawLine(renderer, window_w-sprite_w-2, sprite_h,
-                       sprite_w, window_h-sprite_h-2);
+                       viewport.w-sprite_w-2, viewport.h-sprite_h-2);
+    SDL_RenderDrawLine(renderer, viewport.w-sprite_w-2, sprite_h,
+                       sprite_w, viewport.h-sprite_h-2);
 
     /* Move the sprite, bounce at the wall, and draw */
     n = 0;
@@ -187,12 +186,12 @@ MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
         position = &positions[i];
         velocity = &velocities[i];
         position->x += velocity->x;
-        if ((position->x < 0) || (position->x >= (window_w - sprite_w))) {
+        if ((position->x < 0) || (position->x >= (viewport.w - sprite_w))) {
             velocity->x = -velocity->x;
             position->x += velocity->x;
         }
         position->y += velocity->y;
-        if ((position->y < 0) || (position->y >= (window_h - sprite_h))) {
+        if ((position->y < 0) || (position->y >= (viewport.h - sprite_h))) {
             velocity->y = -velocity->y;
             position->y += velocity->y;
         }
@@ -313,7 +312,7 @@ main(int argc, char *argv[])
             CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
-            MoveSprites(state->windows[i], state->renderers[i], sprites[i]);
+            MoveSprites(state->renderers[i], sprites[i]);
         }
     }
 

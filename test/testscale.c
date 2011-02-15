@@ -82,9 +82,9 @@ LoadTexture(SDL_Renderer *renderer, char *file, SDL_bool transparent)
 void
 Draw(DrawState *s)
 {
-    int w, h;
+    SDL_Rect viewport;
 
-    SDL_GetWindowSize(s->window, &w, &h);
+    SDL_RenderGetViewport(s->renderer, &viewport);
 
     /* Draw the background */
     SDL_RenderCopy(s->renderer, s->background, NULL, NULL);
@@ -93,7 +93,7 @@ Draw(DrawState *s)
     s->sprite_rect.w += s->scale_direction;
     s->sprite_rect.h += s->scale_direction;
     if (s->scale_direction > 0) {
-        if (s->sprite_rect.w >= w || s->sprite_rect.h >= h) {
+        if (s->sprite_rect.w >= viewport.w || s->sprite_rect.h >= viewport.h) {
             s->scale_direction = -1;
         }
     } else {
@@ -101,8 +101,8 @@ Draw(DrawState *s)
             s->scale_direction = 1;
         }
     }
-    s->sprite_rect.x = (w - s->sprite_rect.w) / 2;
-    s->sprite_rect.y = (h - s->sprite_rect.h) / 2;
+    s->sprite_rect.x = (viewport.w - s->sprite_rect.w) / 2;
+    s->sprite_rect.y = (viewport.h - s->sprite_rect.h) / 2;
 
     SDL_RenderCopy(s->renderer, s->sprite, NULL, &s->sprite_rect);
 

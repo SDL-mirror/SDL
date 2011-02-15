@@ -90,6 +90,8 @@ HRESULT WINAPI
 /* Direct3D renderer implementation */
 
 static SDL_Renderer *D3D_CreateRenderer(SDL_Window * window, Uint32 flags);
+static void D3D_WindowEvent(SDL_Renderer * renderer,
+                            const SDL_WindowEvent *event);
 static int D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
@@ -97,13 +99,14 @@ static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void D3D_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int D3D_UpdateViewport(SDL_Renderer * renderer);
+static int D3D_RenderClear(SDL_Renderer * renderer);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int D3D_RenderDrawLines(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int D3D_RenderFillRects(SDL_Renderer * renderer,
-                               const SDL_Rect ** rects, int count);
+                               const SDL_Rect * rects, int count);
 static int D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int D3D_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -132,6 +135,7 @@ typedef struct
     IDirect3DDevice9 *device;
     UINT adapter;
     D3DPRESENT_PARAMETERS pparams;
+    SDL_bool updateSize;
     SDL_bool beginScene;
 } D3D_RenderData;
 
@@ -143,7 +147,6 @@ typedef struct
 typedef struct
 {
     float x, y, z;
-    float rhw;
     DWORD color;
     float u, v;
 } Vertex;
@@ -257,6 +260,74 @@ D3DFMTToPixelFormat(D3DFORMAT format)
     }
 }
 
+static int
+D3D_Reset(SDL_Renderer * renderer)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    HRESULT result;
+
+    result = IDirect3DDevice9_Reset(data->device, &data->pparams);
+    if (FAILED(result)) {
+        if (result == D3DERR_DEVICELOST) {
+            /* Don't worry about it, we'll reset later... */
+            return 0;
+        } else {
+            D3D_SetError("Reset()", result);
+            return -1;
+        }
+    }
+    IDirect3DDevice9_SetVertexShader(data->device, NULL);
+    IDirect3DDevice9_SetFVF(data->device,
+                            D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
+                                    D3DCULL_NONE);
+    IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    return 0;
+}
+
+static int
+D3D_ActivateRenderer(SDL_Renderer * renderer)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    HRESULT result;
+
+    if (data->updateSize) {
+        SDL_Window *window = renderer->window;
+        int w, h;
+
+        SDL_GetWindowSize(window, &w, &h);
+        data->pparams.BackBufferWidth = w;
+        data->pparams.BackBufferHeight = h;
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN) {
+            data->pparams.BackBufferFormat =
+                PixelFormatToD3DFMT(SDL_GetWindowPixelFormat(window));
+        } else {
+            data->pparams.BackBufferFormat = D3DFMT_UNKNOWN;
+        }
+        if (D3D_Reset(renderer) < 0) {
+            return -1;
+        }
+        D3D_UpdateViewport(renderer);
+
+        data->updateSize = SDL_FALSE;
+    }
+    if (data->beginScene) {
+        result = IDirect3DDevice9_BeginScene(data->device);
+        if (result == D3DERR_DEVICELOST) {
+            if (D3D_Reset(renderer) < 0) {
+                return -1;
+            }
+            result = IDirect3DDevice9_BeginScene(data->device);
+        }
+        if (FAILED(result)) {
+            D3D_SetError("BeginScene()", result);
+            return -1;
+        }
+        data->beginScene = SDL_FALSE;
+    }
+    return 0;
+}
+
 SDL_Renderer *
 D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -270,6 +341,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     Uint32 window_flags;
     int w, h;
     SDL_DisplayMode fullscreen_mode;
+    D3DMATRIX matrix;
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -306,11 +378,13 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
+    renderer->WindowEvent = D3D_WindowEvent;
     renderer->CreateTexture = D3D_CreateTexture;
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
-    renderer->SetClipRect = D3D_SetClipRect;
+    renderer->UpdateViewport = D3D_UpdateViewport;
+    renderer->RenderClear = D3D_RenderClear;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
     renderer->RenderDrawLines = D3D_RenderDrawLines;
     renderer->RenderFillRects = D3D_RenderFillRects;
@@ -405,7 +479,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
     IDirect3DDevice9_SetFVF(data->device,
-                            D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
+                            D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_ZENABLE, D3DZB_FALSE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
@@ -430,54 +504,38 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
                                           D3DTOP_DISABLE);
 
+    /* Set an identity world and view matrix */
+    matrix.m[0][0] = 1.0f;
+    matrix.m[0][1] = 0.0f;
+    matrix.m[0][2] = 0.0f;
+    matrix.m[0][3] = 0.0f;
+    matrix.m[1][0] = 0.0f;
+    matrix.m[1][1] = 1.0f;
+    matrix.m[1][2] = 0.0f;
+    matrix.m[1][3] = 0.0f;
+    matrix.m[2][0] = 0.0f;
+    matrix.m[2][1] = 0.0f;
+    matrix.m[2][2] = 1.0f;
+    matrix.m[2][3] = 0.0f;
+    matrix.m[3][0] = 0.0f;
+    matrix.m[3][1] = 0.0f;
+    matrix.m[3][2] = 0.0f;
+    matrix.m[3][3] = 1.0f;
+    IDirect3DDevice9_SetTransform(data->device, D3DTS_WORLD, &matrix);
+    IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, &matrix);
+
     return renderer;
 }
 
-static int
-D3D_Reset(SDL_Renderer * renderer)
+static void
+D3D_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    HRESULT result;
 
-    result = IDirect3DDevice9_Reset(data->device, &data->pparams);
-    if (FAILED(result)) {
-        if (result == D3DERR_DEVICELOST) {
-            /* Don't worry about it, we'll reset later... */
-            return 0;
-        } else {
-            D3D_SetError("Reset()", result);
-            return -1;
-        }
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+        data->updateSize = SDL_TRUE;
     }
-    IDirect3DDevice9_SetVertexShader(data->device, NULL);
-    IDirect3DDevice9_SetFVF(data->device,
-                            D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-    IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
-                                    D3DCULL_NONE);
-    IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
-    return 0;
 }
-
-/* FIXME: This needs to be called... when? */
-#if 0
-static int
-D3D_DisplayModeChanged(SDL_Renderer * renderer)
-{
-    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-    SDL_VideoDisplay *display = window->display;
-
-    data->pparams.BackBufferWidth = window->w;
-    data->pparams.BackBufferHeight = window->h;
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        data->pparams.BackBufferFormat =
-            PixelFormatToD3DFMT(window->fullscreen_mode.format);
-    } else {
-        data->pparams.BackBufferFormat = D3DFMT_UNKNOWN;
-    }
-    return D3D_Reset(renderer);
-}
-#endif
 
 static int
 D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
@@ -604,25 +662,83 @@ D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     IDirect3DTexture9_UnlockRect(data->texture, 0);
 }
 
-static void
-D3D_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+static int
+D3D_UpdateViewport(SDL_Renderer * renderer)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3DVIEWPORT9 viewport;
+    D3DMATRIX matrix;
 
-    if (rect) {
-        RECT d3drect;
+    /* Set the viewport */
+    viewport.X = renderer->viewport.x;
+    viewport.Y = renderer->viewport.y;
+    viewport.Width = renderer->viewport.w;
+    viewport.Height = renderer->viewport.h;
+    viewport.MinZ = 0.0f;
+    viewport.MaxZ = 1.0f;
+    IDirect3DDevice9_SetViewport(data->device, &viewport);
 
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
-        IDirect3DDevice9_SetScissorRect(data->device, &d3drect);
-        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE,
-                                        TRUE);
-    } else {
-        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE,
-                                        FALSE);
+    /* Set an orthographic projection matrix */
+    matrix.m[0][0] = 2.0f / renderer->viewport.w;
+    matrix.m[0][1] = 0.0f;
+    matrix.m[0][2] = 0.0f;
+    matrix.m[0][3] = 0.0f;
+    matrix.m[1][0] = 0.0f;
+    matrix.m[1][1] = -2.0f / renderer->viewport.h;
+    matrix.m[1][2] = 0.0f;
+    matrix.m[1][3] = 0.0f;
+    matrix.m[2][0] = 0.0f;
+    matrix.m[2][1] = 0.0f;
+    matrix.m[2][2] = 1.0f;
+    matrix.m[2][3] = 0.0f;
+    matrix.m[3][0] = -1.0f;
+    matrix.m[3][1] = 1.0f;
+    matrix.m[3][2] = 0.0f;
+    matrix.m[3][3] = 1.0f;
+    IDirect3DDevice9_SetTransform(data->device, D3DTS_PROJECTION, &matrix);
+
+    return 0;
+}
+
+static int
+D3D_RenderClear(SDL_Renderer * renderer)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3DVIEWPORT9 viewport;
+    DWORD color;
+    HRESULT result;
+
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
     }
+
+    /* Clear is defined to clear the entire render target */
+    viewport.X = 0;
+    viewport.Y = 0;
+    viewport.Width = data->pparams.BackBufferWidth;
+    viewport.Height = data->pparams.BackBufferHeight;
+    viewport.MinZ = 0.0f;
+    viewport.MaxZ = 1.0f;
+    IDirect3DDevice9_SetViewport(data->device, &viewport);
+
+    color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
+
+    result = IDirect3DDevice9_Clear(data->device, 0, NULL, D3DCLEAR_TARGET, color, 0.0f, 0);
+
+    /* Reset the viewport */
+    viewport.X = renderer->viewport.x;
+    viewport.Y = renderer->viewport.y;
+    viewport.Width = renderer->viewport.w;
+    viewport.Height = renderer->viewport.h;
+    viewport.MinZ = 0.0f;
+    viewport.MaxZ = 1.0f;
+    IDirect3DDevice9_SetViewport(data->device, &viewport);
+
+    if (FAILED(result)) {
+        D3D_SetError("Clear()", result);
+        return -1;
+    }
+    return 0;
 }
 
 static void
@@ -670,9 +786,8 @@ D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     HRESULT result;
 
-    if (data->beginScene) {
-        IDirect3DDevice9_BeginScene(data->device);
-        data->beginScene = SDL_FALSE;
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
     }
 
     D3D_SetBlendMode(data, renderer->blendMode);
@@ -692,7 +807,6 @@ D3D_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
         vertices[i].x = (float) points[i].x;
         vertices[i].y = (float) points[i].y;
         vertices[i].z = 0.0f;
-        vertices[i].rhw = 1.0f;
         vertices[i].color = color;
         vertices[i].u = 0.0f;
         vertices[i].v = 0.0f;
@@ -718,9 +832,8 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     HRESULT result;
 
-    if (data->beginScene) {
-        IDirect3DDevice9_BeginScene(data->device);
-        data->beginScene = SDL_FALSE;
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
     }
 
     D3D_SetBlendMode(data, renderer->blendMode);
@@ -740,7 +853,6 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         vertices[i].x = (float) points[i].x;
         vertices[i].y = (float) points[i].y;
         vertices[i].z = 0.0f;
-        vertices[i].rhw = 1.0f;
         vertices[i].color = color;
         vertices[i].u = 0.0f;
         vertices[i].v = 0.0f;
@@ -766,7 +878,7 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
                     int count)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
@@ -776,9 +888,8 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     Vertex vertices[4];
     HRESULT result;
 
-    if (data->beginScene) {
-        IDirect3DDevice9_BeginScene(data->device);
-        data->beginScene = SDL_FALSE;
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
     }
 
     D3D_SetBlendMode(data, renderer->blendMode);
@@ -794,7 +905,7 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = rects[i];
+        const SDL_Rect *rect = &rects[i];
 
         minx = (float) rect->x;
         miny = (float) rect->y;
@@ -804,7 +915,6 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         vertices[0].x = minx;
         vertices[0].y = miny;
         vertices[0].z = 0.0f;
-        vertices[0].rhw = 1.0f;
         vertices[0].color = color;
         vertices[0].u = 0.0f;
         vertices[0].v = 0.0f;
@@ -812,7 +922,6 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         vertices[1].x = maxx;
         vertices[1].y = miny;
         vertices[1].z = 0.0f;
-        vertices[1].rhw = 1.0f;
         vertices[1].color = color;
         vertices[1].u = 0.0f;
         vertices[1].v = 0.0f;
@@ -820,7 +929,6 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         vertices[2].x = maxx;
         vertices[2].y = maxy;
         vertices[2].z = 0.0f;
-        vertices[2].rhw = 1.0f;
         vertices[2].color = color;
         vertices[2].u = 0.0f;
         vertices[2].v = 0.0f;
@@ -828,7 +936,6 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
         vertices[3].x = minx;
         vertices[3].y = maxy;
         vertices[3].z = 0.0f;
-        vertices[3].rhw = 1.0f;
         vertices[3].color = color;
         vertices[3].u = 0.0f;
         vertices[3].v = 0.0f;
@@ -857,9 +964,8 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     Vertex vertices[4];
     HRESULT result;
 
-    if (data->beginScene) {
-        IDirect3DDevice9_BeginScene(data->device);
-        data->beginScene = SDL_FALSE;
+    if (D3D_ActivateRenderer(renderer) < 0) {
+        return -1;
     }
 
     minx = (float) dstrect->x - 0.5f;
@@ -877,7 +983,6 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[0].x = minx;
     vertices[0].y = miny;
     vertices[0].z = 0.0f;
-    vertices[0].rhw = 1.0f;
     vertices[0].color = color;
     vertices[0].u = minu;
     vertices[0].v = minv;
@@ -885,7 +990,6 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[1].x = maxx;
     vertices[1].y = miny;
     vertices[1].z = 0.0f;
-    vertices[1].rhw = 1.0f;
     vertices[1].color = color;
     vertices[1].u = maxu;
     vertices[1].v = minv;
@@ -893,7 +997,6 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[2].x = maxx;
     vertices[2].y = maxy;
     vertices[2].z = 0.0f;
-    vertices[2].rhw = 1.0f;
     vertices[2].color = color;
     vertices[2].u = maxu;
     vertices[2].v = maxv;
@@ -901,7 +1004,6 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     vertices[3].x = minx;
     vertices[3].y = maxy;
     vertices[3].z = 0.0f;
-    vertices[3].rhw = 1.0f;
     vertices[3].color = color;
     vertices[3].u = minu;
     vertices[3].v = maxv;

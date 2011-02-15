@@ -19,14 +19,14 @@ static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
 
 void
-DrawPoints(SDL_Window * window, SDL_Renderer * renderer)
+DrawPoints(SDL_Renderer * renderer)
 {
     int i;
     int x, y;
-    int window_w, window_h;
+    SDL_Rect viewport;
 
     /* Query the sizes */
-    SDL_GetWindowSize(window, &window_w, &window_h);
+    SDL_RenderGetViewport(renderer, &viewport);
 
     for (i = 0; i < num_objects * 4; ++i) {
         /* Cycle the color and alpha, if desired */
@@ -55,21 +55,21 @@ DrawPoints(SDL_Window * window, SDL_Renderer * renderer)
         SDL_SetRenderDrawColor(renderer, 255, (Uint8) current_color,
                                (Uint8) current_color, (Uint8) current_alpha);
 
-        x = rand() % window_w;
-        y = rand() % window_h;
+        x = rand() % viewport.w;
+        y = rand() % viewport.h;
         SDL_RenderDrawPoint(renderer, x, y);
     }
 }
 
 void
-DrawLines(SDL_Window * window, SDL_Renderer * renderer)
+DrawLines(SDL_Renderer * renderer)
 {
     int i;
     int x1, y1, x2, y2;
-    int window_w, window_h;
+    SDL_Rect viewport;
 
     /* Query the sizes */
-    SDL_GetWindowSize(window, &window_w, &window_h);
+    SDL_RenderGetViewport(renderer, &viewport);
 
     for (i = 0; i < num_objects; ++i) {
         /* Cycle the color and alpha, if desired */
@@ -99,29 +99,29 @@ DrawLines(SDL_Window * window, SDL_Renderer * renderer)
                                (Uint8) current_color, (Uint8) current_alpha);
 
         if (i == 0) {
-            SDL_RenderDrawLine(renderer, 0, 0, window_w - 1, window_h - 1);
-            SDL_RenderDrawLine(renderer, 0, window_h - 1, window_w - 1, 0);
-            SDL_RenderDrawLine(renderer, 0, window_h / 2, window_w - 1, window_h / 2);
-            SDL_RenderDrawLine(renderer, window_w / 2, 0, window_w / 2, window_h - 1);
+            SDL_RenderDrawLine(renderer, 0, 0, viewport.w - 1, viewport.h - 1);
+            SDL_RenderDrawLine(renderer, 0, viewport.h - 1, viewport.w - 1, 0);
+            SDL_RenderDrawLine(renderer, 0, viewport.h / 2, viewport.w - 1, viewport.h / 2);
+            SDL_RenderDrawLine(renderer, viewport.w / 2, 0, viewport.w / 2, viewport.h - 1);
         } else {
-            x1 = (rand() % (window_w*2)) - window_w;
-            x2 = (rand() % (window_w*2)) - window_w;
-            y1 = (rand() % (window_h*2)) - window_h;
-            y2 = (rand() % (window_h*2)) - window_h;
+            x1 = (rand() % (viewport.w*2)) - viewport.w;
+            x2 = (rand() % (viewport.w*2)) - viewport.w;
+            y1 = (rand() % (viewport.h*2)) - viewport.h;
+            y2 = (rand() % (viewport.h*2)) - viewport.h;
             SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
         }
     }
 }
 
 void
-DrawRects(SDL_Window * window, SDL_Renderer * renderer)
+DrawRects(SDL_Renderer * renderer)
 {
     int i;
     SDL_Rect rect;
-    int window_w, window_h;
+    SDL_Rect viewport;
 
     /* Query the sizes */
-    SDL_GetWindowSize(window, &window_w, &window_h);
+    SDL_RenderGetViewport(renderer, &viewport);
 
     for (i = 0; i < num_objects / 4; ++i) {
         /* Cycle the color and alpha, if desired */
@@ -150,10 +150,10 @@ DrawRects(SDL_Window * window, SDL_Renderer * renderer)
         SDL_SetRenderDrawColor(renderer, 255, (Uint8) current_color,
                                (Uint8) current_color, (Uint8) current_alpha);
 
-        rect.w = rand() % (window_h / 2);
-        rect.h = rand() % (window_h / 2);
-        rect.x = (rand() % (window_w*2) - window_w) - (rect.w / 2);
-        rect.y = (rand() % (window_h*2) - window_h) - (rect.h / 2);
+        rect.w = rand() % (viewport.h / 2);
+        rect.h = rand() % (viewport.h / 2);
+        rect.x = (rand() % (viewport.w*2) - viewport.w) - (rect.w / 2);
+        rect.y = (rand() % (viewport.h*2) - viewport.h) - (rect.h / 2);
         SDL_RenderFillRect(renderer, &rect);
     }
 }
@@ -243,9 +243,9 @@ main(int argc, char *argv[])
             SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
             SDL_RenderClear(renderer);
 
-            DrawRects(state->windows[i], renderer);
-            DrawLines(state->windows[i], renderer);
-            DrawPoints(state->windows[i], renderer);
+            DrawRects(renderer);
+            DrawLines(renderer);
+            DrawPoints(renderer);
 
             SDL_RenderPresent(renderer);
         }

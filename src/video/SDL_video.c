@@ -300,11 +300,15 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
 
     *pixels = data->pixels;
     *pitch = data->pitch;
+
+    /* Make sure we're not double-scaling the viewport */
+    SDL_RenderSetViewport(data->renderer, NULL);
+
     return 0;
 }
 
 static int
-SDL_UpdateWindowTexture(_THIS, SDL_Window * window, int numrects, SDL_Rect * rects)
+SDL_UpdateWindowTexture(_THIS, SDL_Window * window, SDL_Rect * rects, int numrects)
 {
     SDL_WindowTextureData *data;
     SDL_Rect rect;
@@ -1629,12 +1633,12 @@ SDL_UpdateWindowSurface(SDL_Window * window)
     full_rect.y = 0;
     full_rect.w = window->w;
     full_rect.h = window->h;
-    return SDL_UpdateWindowSurfaceRects(window, 1, &full_rect);
+    return SDL_UpdateWindowSurfaceRects(window, &full_rect, 1);
 }
 
 int
-SDL_UpdateWindowSurfaceRects(SDL_Window * window,
-                             int numrects, SDL_Rect * rects)
+SDL_UpdateWindowSurfaceRects(SDL_Window * window, SDL_Rect * rects,
+                             int numrects)
 {
     CHECK_WINDOW_MAGIC(window, -1);
 
@@ -1643,7 +1647,7 @@ SDL_UpdateWindowSurfaceRects(SDL_Window * window,
         return -1;
     }
 
-    return _this->UpdateWindowFramebuffer(_this, window, numrects, rects);
+    return _this->UpdateWindowFramebuffer(_this, window, rects, numrects);
 }
 
 void

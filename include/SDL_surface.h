@@ -374,7 +374,7 @@ extern DECLSPEC int SDLCALL SDL_ConvertPixels(int width, int height,
 extern DECLSPEC int SDLCALL SDL_FillRect
     (SDL_Surface * dst, const SDL_Rect * rect, Uint32 color);
 extern DECLSPEC int SDLCALL SDL_FillRects
-    (SDL_Surface * dst, const SDL_Rect ** rects, int count, Uint32 color);
+    (SDL_Surface * dst, const SDL_Rect * rects, int count, Uint32 color);
 
 /**
  *  Performs a fast blit from the source surface to the destination surface.

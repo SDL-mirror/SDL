@@ -265,10 +265,10 @@ SDL_BlendFillRect(SDL_Surface * dst, const SDL_Rect * rect,
 }
 
 int
-SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
+SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect * rects, int count,
                    SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    SDL_Rect clipped;
+    SDL_Rect rect;
     int i;
     int (*func)(SDL_Surface * dst, const SDL_Rect * rect,
                 SDL_BlendMode blendMode, Uint8 r, Uint8 g, Uint8 b, Uint8 a) = NULL;
@@ -329,20 +329,11 @@ SDL_BlendFillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
     }
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect * rect = rects[i];
-
-        /* If 'rect' == NULL, then fill the whole surface */
-        if (rect) {
-            /* Perform clipping */
-            if (!SDL_IntersectRect(rect, &dst->clip_rect, &clipped)) {
-                continue;
-            }
-            rect = &clipped;
-        } else {
-            rect = &dst->clip_rect;
+        /* Perform clipping */
+        if (!SDL_IntersectRect(&rects[i], &dst->clip_rect, &rect)) {
+            continue;
         }
-
-        status = func(dst, rect, blendMode, r, g, b, a);
+        status = func(dst, &rect, blendMode, r, g, b, a);
     }
     return status;
 }

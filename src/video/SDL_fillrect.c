@@ -417,14 +417,19 @@ SDL_FillRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
 }
 
 int
-SDL_FillRects(SDL_Surface * dst, const SDL_Rect ** rects, int count,
+SDL_FillRects(SDL_Surface * dst, const SDL_Rect * rects, int count,
               Uint32 color)
 {
     int i;
     int status = 0;
 
+    if (!rects) {
+        SDL_SetError("SDL_FillRects() passed NULL rects");
+        return -1;
+    }
+
     for (i = 0; i < count; ++i) {
-        status = SDL_FillRect(dst, rects[i], color);
+        status += SDL_FillRect(dst, &rects[i], color);
     }
     return status;
 }

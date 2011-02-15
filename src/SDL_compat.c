@@ -785,10 +785,10 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
                 stackrect->w = rect->w;
                 stackrect->h = rect->h;
             }
-            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, stackrects);
+            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, stackrects, numrects);
             SDL_stack_free(stackrects);
         } else {
-            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, numrects, rects);
+            SDL_UpdateWindowSurfaceRects(SDL_VideoWindow, rects, numrects);
         }
     }
 }

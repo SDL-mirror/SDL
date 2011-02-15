@@ -51,13 +51,14 @@ static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int SW_UpdateViewport(SDL_Renderer * renderer);
+static int SW_RenderClear(SDL_Renderer * renderer);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int SW_RenderDrawLines(SDL_Renderer * renderer,
                               const SDL_Point * points, int count);
 static int SW_RenderFillRects(SDL_Renderer * renderer,
-                              const SDL_Rect ** rects, int count);
+                              const SDL_Rect * rects, int count);
 static int SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -89,10 +90,22 @@ SDL_RenderDriver SW_RenderDriver = {
 
 typedef struct
 {
-    SDL_bool updateSize;
     SDL_Surface *surface;
 } SW_RenderData;
 
+
+static SDL_Surface *
+SW_ActivateRenderer(SDL_Renderer * renderer)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+
+    if (!data->surface) {
+        data->surface = SDL_GetWindowSurface(renderer->window);
+
+        SW_UpdateViewport(renderer);
+    }
+    return data->surface;
+}
 
 SDL_Renderer *
 SW_CreateRendererForSurface(SDL_Surface * surface)
@@ -127,8 +140,9 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
-    renderer->SetClipRect = SW_SetClipRect;
+    renderer->UpdateViewport = SW_UpdateViewport;
     renderer->DestroyTexture = SW_DestroyTexture;
+    renderer->RenderClear = SW_RenderClear;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
     renderer->RenderFillRects = SW_RenderFillRects;
@@ -138,6 +152,8 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->DestroyRenderer = SW_DestroyRenderer;
     renderer->info = SW_RenderDriver.info;
     renderer->driverdata = data;
+
+    SW_ActivateRenderer(renderer);
 
     return renderer;
 }
@@ -154,26 +170,13 @@ SW_CreateRenderer(SDL_Window * window, Uint32 flags)
     return SW_CreateRendererForSurface(surface);
 }
 
-static SDL_Surface *
-SW_ActivateRenderer(SDL_Renderer * renderer)
-{
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-
-    if (data->updateSize) {
-        data->surface = SDL_GetWindowSurface(window);
-        data->updateSize = SDL_FALSE;
-    }
-    return data->surface;
-}
-
 static void
 SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-        data->updateSize = SDL_TRUE;
+        data->surface = NULL;
     }
 }
 
@@ -269,15 +272,46 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
 }
 
-static void
-SW_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+static int
+SW_UpdateViewport(SDL_Renderer * renderer)
 {
-    SDL_Surface *surface = SW_ActivateRenderer(renderer);
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Surface *surface = data->surface;
 
     if (!surface) {
-        return;
+        /* We'll update the viewport after we recreate the surface */
+        return 0;
     }
-    SDL_SetClipRect(surface, rect);
+
+    if (!renderer->viewport.w && !renderer->viewport.h) {
+        /* There may be no window, so update the viewport directly */
+        renderer->viewport.w = surface->w;
+        renderer->viewport.h = surface->h;
+    }
+    //SDL_SetClipRect(data->surface, &renderer->viewport);
+    return 0;
+}
+
+static int
+SW_RenderClear(SDL_Renderer * renderer)
+{
+    SDL_Surface *surface = SW_ActivateRenderer(renderer);
+    Uint32 color;
+    SDL_Rect clip_rect;
+
+    if (!surface) {
+        return -1;
+    }
+
+    color = SDL_MapRGBA(surface->format,
+                        renderer->r, renderer->g, renderer->b, renderer->a);
+
+    /* By definition the clear ignores the clip rect */
+    clip_rect = surface->clip_rect;
+    SDL_SetClipRect(surface, NULL);
+    SDL_FillRect(surface, NULL, color);
+    SDL_SetClipRect(surface, &clip_rect);
+    return 0;
 }
 
 static int
@@ -285,9 +319,24 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                     int count)
 {
     SDL_Surface *surface = SW_ActivateRenderer(renderer);
+    SDL_Point *temp = NULL;
+    int status;
 
     if (!surface) {
         return -1;
+    }
+
+    if (renderer->viewport.x || renderer->viewport.y) {
+        int i;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
+
+        temp = SDL_stack_alloc(SDL_Point, count);
+        for (i = 0; i < count; ++i) {
+            temp[i].x = x + points[i].x;
+            temp[i].y = y + points[i].x;
+        }
+        points = temp;
     }
 
     /* Draw the points! */
@@ -296,13 +345,18 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
 
-        return SDL_DrawPoints(surface, points, count, color);
+        status = SDL_DrawPoints(surface, points, count, color);
     } else {
-        return SDL_BlendPoints(surface, points, count,
-                               renderer->blendMode,
-                               renderer->r, renderer->g, renderer->b,
-                               renderer->a);
+        status = SDL_BlendPoints(surface, points, count,
+                                renderer->blendMode,
+                                renderer->r, renderer->g, renderer->b,
+                                renderer->a);
     }
+
+    if (temp) {
+        SDL_stack_free(temp);
+    }
+    return status;
 }
 
 static int
@@ -310,9 +364,24 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                    int count)
 {
     SDL_Surface *surface = SW_ActivateRenderer(renderer);
+    SDL_Point *temp = NULL;
+    int status;
 
     if (!surface) {
         return -1;
+    }
+
+    if (renderer->viewport.x || renderer->viewport.y) {
+        int i;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
+
+        temp = SDL_stack_alloc(SDL_Point, count);
+        for (i = 0; i < count; ++i) {
+            temp[i].x = x + points[i].x;
+            temp[i].y = y + points[i].y;
+        }
+        points = temp;
     }
 
     /* Draw the lines! */
@@ -321,36 +390,62 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
 
-        return SDL_DrawLines(surface, points, count, color);
+        status = SDL_DrawLines(surface, points, count, color);
     } else {
-        return SDL_BlendLines(surface, points, count,
-                              renderer->blendMode,
-                              renderer->r, renderer->g, renderer->b,
-                              renderer->a);
+        status = SDL_BlendLines(surface, points, count,
+                                renderer->blendMode,
+                                renderer->r, renderer->g, renderer->b,
+                                renderer->a);
     }
+
+    if (temp) {
+        SDL_stack_free(temp);
+    }
+    return status;
 }
 
 static int
-SW_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
-                   int count)
+SW_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
 {
     SDL_Surface *surface = SW_ActivateRenderer(renderer);
+    SDL_Rect *temp = NULL;
+    int status;
 
     if (!surface) {
         return -1;
+    }
+
+    if (renderer->viewport.x || renderer->viewport.y) {
+        int i;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
+
+        temp = SDL_stack_alloc(SDL_Rect, count);
+        for (i = 0; i < count; ++i) {
+            temp[i].x = x + rects[i].x;
+            temp[i].y = y + rects[i].y;
+            temp[i].w = rects[i].w;
+            temp[i].h = rects[i].h;
+        }
+        rects = temp;
     }
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
         Uint32 color = SDL_MapRGBA(surface->format,
                                    renderer->r, renderer->g, renderer->b,
                                    renderer->a);
-        return SDL_FillRects(surface, rects, count, color);
+        status = SDL_FillRects(surface, rects, count, color);
     } else {
-        return SDL_BlendFillRects(surface, rects, count,
-                                     renderer->blendMode,
-                                     renderer->r, renderer->g, renderer->b,
-                                     renderer->a);
+        status = SDL_BlendFillRects(surface, rects, count,
+                                    renderer->blendMode,
+                                    renderer->r, renderer->g, renderer->b,
+                                    renderer->a);
     }
+
+    if (temp) {
+        SDL_stack_free(temp);
+    }
+    return status;
 }
 
 static int
@@ -365,6 +460,10 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         return -1;
     }
 
+    if (renderer->viewport.x || renderer->viewport.y) {
+        final_rect.x += renderer->viewport.x;
+        final_rect.y += renderer->viewport.y;
+    }
     if ( srcrect->w == final_rect.w && srcrect->h == final_rect.h ) {
         return SDL_BlitSurface(src, srcrect, surface, &final_rect);
     } else {
@@ -379,9 +478,18 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     SDL_Surface *surface = SW_ActivateRenderer(renderer);
     Uint32 src_format;
     void *src_pixels;
+    SDL_Rect final_rect;
 
     if (!surface) {
         return -1;
+    }
+
+    if (renderer->viewport.x || renderer->viewport.y) {
+        final_rect.x = renderer->viewport.x + rect->x;
+        final_rect.y = renderer->viewport.y + rect->y;
+        final_rect.w = rect->w;
+        final_rect.h = rect->h;
+        rect = &final_rect;
     }
 
     if (rect->x < 0 || rect->x+rect->w > surface->w ||
@@ -390,11 +498,7 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         return -1;
     }
 
-    src_format = SDL_MasksToPixelFormatEnum(
-                    surface->format->BitsPerPixel,
-                    surface->format->Rmask, surface->format->Gmask,
-                    surface->format->Bmask, surface->format->Amask);
-
+    src_format = surface->format->format;
     src_pixels = (void*)((Uint8 *) surface->pixels +
                     rect->y * surface->pitch +
                     rect->x * surface->format->BytesPerPixel);

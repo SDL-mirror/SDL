@@ -123,7 +123,6 @@ typedef struct GLES2_DriverContext
     GLES2_ShaderCache shader_cache;
     GLES2_ProgramCache program_cache;
     GLES2_ProgramCacheEntry *current_program;
-	SDL_bool updateSize;
 } GLES2_DriverContext;
 
 #define GLES2_MAX_CACHED_PROGRAMS 8
@@ -135,7 +134,7 @@ typedef struct GLES2_DriverContext
 static int GLES2_ActivateRenderer(SDL_Renderer *renderer);
 static void GLES2_WindowEvent(SDL_Renderer * renderer,
                               const SDL_WindowEvent *event);
-static void GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GLES2_UpdateViewport(SDL_Renderer * renderer);
 static void GLES2_DestroyRenderer(SDL_Renderer *renderer);
 
 static SDL_GLContext SDL_CurrentContext = NULL;
@@ -144,23 +143,17 @@ static int
 GLES2_ActivateRenderer(SDL_Renderer * renderer)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    SDL_Window *window = renderer->window;
 
     if (SDL_CurrentContext != rdata->context) {
         /* Null out the current program to ensure we set it again */
         rdata->current_program = NULL;
 
-        if (SDL_GL_MakeCurrent(window, rdata->context) < 0) {
+        if (SDL_GL_MakeCurrent(renderer->window, rdata->context) < 0) {
             return -1;
         }
         SDL_CurrentContext = rdata->context;
-    }
-    if (rdata->updateSize) {
-        int w, h;
 
-        SDL_GetWindowSize(window, &w, &h);
-        glViewport(0, 0, w, h);
-        rdata->updateSize = SDL_FALSE;
+        GLES2_UpdateViewport(renderer);
     }
     return 0;
 }
@@ -173,24 +166,22 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
-        rdata->updateSize = SDL_TRUE;
     }
 }
 
-static void
-GLES2_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+static int
+GLES2_UpdateViewport(SDL_Renderer * renderer)
 {
-    GLES2_ActivateRenderer(renderer);
+    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
 
-    if (rect) {
-        int w, h;
-
-        SDL_GetWindowSize(renderer->window, &w, &h);
-        glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
-        glEnable(GL_SCISSOR_TEST);
-    } else {
-        glDisable(GL_SCISSOR_TEST);
+    if (SDL_CurrentContext != rdata->context) {
+        /* We'll update the viewport after we rebind the context */
+        return 0;
     }
+
+    glViewport(renderer->viewport.x, renderer->viewport.y,
+               renderer->viewport.w, renderer->viewport.h);
+    return 0;
 }
 
 static void
@@ -735,21 +726,16 @@ static int
 GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    SDL_Window *window = renderer->window;
-    int w, h;
     GLfloat projection[4][4];
     GLuint locProjection;
 
-    /* Get the window width and height */
-    SDL_GetWindowSize(window, &w, &h);
-
     /* Prepare an orthographic projection */
-    projection[0][0] = 2.0f / w;
+    projection[0][0] = 2.0f / renderer->viewport.w;
     projection[0][1] = 0.0f;
     projection[0][2] = 0.0f;
     projection[0][3] = 0.0f;
     projection[1][0] = 0.0f;
-    projection[1][1] = -2.0f / h;
+    projection[1][1] = -2.0f / renderer->viewport.h;
     projection[1][2] = 0.0f;
     projection[1][3] = 0.0f;
     projection[2][0] = 0.0f;
@@ -782,7 +768,7 @@ static const float inv255f = 1.0f / 255.0f;
 static int GLES2_RenderClear(SDL_Renderer *renderer);
 static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count);
 static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count);
-static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count);
+static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count);
 static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
                             const SDL_Rect *dstrect);
 static void GLES2_RenderPresent(SDL_Renderer *renderer);
@@ -936,7 +922,7 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
 }
 
 static int
-GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count)
+GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat vertices[8];
@@ -968,12 +954,13 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect **rects, int count)
 
     /* Emit a line loop for each rectangle */
     glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
-    for (idx = 0; idx < count; ++idx)
-    {
-        GLfloat xMin = (GLfloat)rects[idx]->x;
-        GLfloat xMax = (GLfloat)(rects[idx]->x + rects[idx]->w);
-        GLfloat yMin = (GLfloat)rects[idx]->y;
-        GLfloat yMax = (GLfloat)(rects[idx]->y + rects[idx]->h);
+    for (idx = 0; idx < count; ++idx) {
+        const SDL_Rect *rect = &rects[idx];
+
+        GLfloat xMin = (GLfloat)rect->x;
+        GLfloat xMax = (GLfloat)(rect->x + rect->w);
+        GLfloat yMin = (GLfloat)rect->y;
+        GLfloat yMax = (GLfloat)(rect->y + rect->h);
 
         vertices[0] = xMin;
         vertices[1] = yMin;
@@ -1108,10 +1095,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
         return NULL;
     }
     renderer->info = GLES2_RenderDriver.info;
-    renderer->window = window;
-    renderer->driverdata = rdata;
-
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
+    renderer->driverdata = rdata;
 
     /* Create an OpenGL ES 2.0 context */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
@@ -1169,8 +1154,6 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     if (hasCompiler)
         rdata->shader_formats[nFormats - 1] = (GLenum)-1;
 #endif /* ZUNE_HD */
-	
-    rdata->updateSize = SDL_TRUE;
 
     /* Populate the function pointers for the module */
     renderer->WindowEvent         = &GLES2_WindowEvent;
@@ -1178,7 +1161,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->UpdateTexture       = &GLES2_UpdateTexture;
     renderer->LockTexture         = &GLES2_LockTexture;
     renderer->UnlockTexture       = &GLES2_UnlockTexture;
-    renderer->SetClipRect         = &GLES2_SetClipRect;
+    renderer->UpdateViewport      = &GLES2_UpdateViewport;
     renderer->RenderClear         = &GLES2_RenderClear;
     renderer->RenderDrawPoints    = &GLES2_RenderDrawPoints;
     renderer->RenderDrawLines     = &GLES2_RenderDrawLines;

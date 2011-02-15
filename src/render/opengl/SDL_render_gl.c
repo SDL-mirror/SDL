@@ -55,14 +55,14 @@ static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static void GL_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GL_UpdateViewport(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_Point * points, int count);
 static int GL_RenderDrawLines(SDL_Renderer * renderer,
                               const SDL_Point * points, int count);
 static int GL_RenderFillRects(SDL_Renderer * renderer,
-                              const SDL_Rect ** rects, int count);
+                              const SDL_Rect * rects, int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -86,7 +86,6 @@ SDL_RenderDriver GL_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
-    SDL_bool updateSize;
     SDL_bool GL_ARB_texture_rectangle_supported;
     int blendMode;
 
@@ -185,6 +184,24 @@ GL_LoadFunctions(GL_RenderData * data)
     return 0;
 }
 
+static SDL_GLContext SDL_CurrentContext = NULL;
+
+static int
+GL_ActivateRenderer(SDL_Renderer * renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    if (SDL_CurrentContext != data->context) {
+        if (SDL_GL_MakeCurrent(renderer->window, data->context) < 0) {
+            return -1;
+        }
+        SDL_CurrentContext = data->context;
+
+        GL_UpdateViewport(renderer);
+    }
+    return 0;
+}
+
 SDL_Renderer *
 GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -219,7 +236,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
-    renderer->SetClipRect = GL_SetClipRect;
+    renderer->UpdateViewport = GL_UpdateViewport;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
     renderer->RenderDrawLines = GL_RenderDrawLines;
@@ -230,9 +247,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
     renderer->info = GL_RenderDriver.info;
-    renderer->driverdata = data;
-
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
+    renderer->driverdata = data;
 
     data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
@@ -309,38 +325,10 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->glDisable(GL_CULL_FACE);
     /* This ended up causing video discrepancies between OpenGL and Direct3D */
     /*data->glEnable(GL_LINE_SMOOTH);*/
-    data->updateSize = SDL_TRUE;
+    data->glMatrixMode(GL_MODELVIEW);
+    data->glLoadIdentity();
 
     return renderer;
-}
-
-static SDL_GLContext SDL_CurrentContext = NULL;
-
-static int
-GL_ActivateRenderer(SDL_Renderer * renderer)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-
-    if (SDL_CurrentContext != data->context) {
-        if (SDL_GL_MakeCurrent(window, data->context) < 0) {
-            return -1;
-        }
-        SDL_CurrentContext = data->context;
-    }
-    if (data->updateSize) {
-        int w, h;
-
-        SDL_GetWindowSize(window, &w, &h);
-        data->glMatrixMode(GL_PROJECTION);
-        data->glLoadIdentity();
-        data->glMatrixMode(GL_MODELVIEW);
-        data->glLoadIdentity();
-        data->glViewport(0, 0, w, h);
-        data->glOrtho(0.0, (GLdouble) w, (GLdouble) h, 0.0, 0.0, 1.0);
-        data->updateSize = SDL_FALSE;
-    }
-    return 0;
 }
 
 static void
@@ -351,7 +339,6 @@ GL_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
-        data->updateSize = SDL_TRUE;
     }
 }
 
@@ -622,22 +609,26 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GL_UpdateTexture(renderer, texture, rect, pixels, data->pitch);
 }
 
-static void
-GL_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+static int
+GL_UpdateViewport(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    GL_ActivateRenderer(renderer);
-
-    if (rect) {
-        int w, h;
-
-        SDL_GetWindowSize(renderer->window, &w, &h);
-        data->glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
-        data->glEnable(GL_SCISSOR_TEST);
-    } else {
-        data->glDisable(GL_SCISSOR_TEST);
+    if (SDL_CurrentContext != data->context) {
+        /* We'll update the viewport after we rebind the context */
+        return 0;
     }
+
+    data->glViewport(renderer->viewport.x, renderer->viewport.y,
+                     renderer->viewport.w, renderer->viewport.h);
+
+    data->glMatrixMode(GL_PROJECTION);
+    data->glLoadIdentity();
+    data->glOrtho((GLdouble) 0,
+                  (GLdouble) renderer->viewport.w,
+                  (GLdouble) renderer->viewport.h,
+                  (GLdouble) 0, 0.0, 1.0);
+    return 0;
 }
 
 static void
@@ -785,7 +776,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
+GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
@@ -801,7 +792,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int count)
                     (GLfloat) renderer->a * inv255f);
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = rects[i];
+        const SDL_Rect *rect = &rects[i];
 
         data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
     }

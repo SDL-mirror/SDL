@@ -581,8 +581,8 @@ extern DECLSPEC int SDLCALL SDL_UpdateWindowSurface(SDL_Window * window);
  *  \sa SDL_UpdateWindowSurfaceRect()
  */
 extern DECLSPEC int SDLCALL SDL_UpdateWindowSurfaceRects(SDL_Window * window,
-                                                         int numrects,
-                                                         SDL_Rect * rects);
+                                                         SDL_Rect * rects,
+                                                         int numrects);
 
 /**
  *  \brief Set a window's input grab mode.

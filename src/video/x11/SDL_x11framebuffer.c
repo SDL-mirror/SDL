@@ -147,8 +147,8 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
 }
 
 int
-X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
-                            int numrects, SDL_Rect * rects)
+X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects,
+                            int numrects)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;

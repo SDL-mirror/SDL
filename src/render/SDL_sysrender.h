@@ -78,13 +78,13 @@ struct SDL_Renderer
     int (*LockTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                         const SDL_Rect * rect, void **pixels, int *pitch);
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
-    void (*SetClipRect) (SDL_Renderer * renderer, const SDL_Rect *rect);
+    int (*UpdateViewport) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
                              int count);
     int (*RenderDrawLines) (SDL_Renderer * renderer, const SDL_Point * points,
                             int count);
-    int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect ** rects,
+    int (*RenderFillRects) (SDL_Renderer * renderer, const SDL_Rect * rects,
                             int count);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
@@ -100,6 +100,9 @@ struct SDL_Renderer
 
     /* The window associated with the renderer */
     SDL_Window *window;
+
+    /* The drawable area within the window */
+    SDL_Rect viewport;
 
     /* The list of textures */
     SDL_Texture *textures;

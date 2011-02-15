@@ -53,13 +53,13 @@ static int GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, void **pixels, int *pitch);
 static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
-static void GLES_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect);
+static int GLES_UpdateViewport(SDL_Renderer * renderer);
 static int GLES_RenderDrawPoints(SDL_Renderer * renderer,
                                  const SDL_Point * points, int count);
 static int GLES_RenderDrawLines(SDL_Renderer * renderer,
                                 const SDL_Point * points, int count);
 static int GLES_RenderFillRects(SDL_Renderer * renderer,
-                                const SDL_Rect ** rects, int count);
+                                const SDL_Rect * rects, int count);
 static int GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * srcrect,
                            const SDL_Rect * dstrect);
@@ -83,7 +83,6 @@ SDL_RenderDriver GLES_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
-    SDL_bool updateSize;
     int blendMode;
 
     SDL_bool useDrawTexture;
@@ -136,6 +135,24 @@ GLES_SetError(const char *prefix, GLenum result)
     SDL_SetError("%s: %s", prefix, error);
 }
 
+static SDL_GLContext SDL_CurrentContext = NULL;
+
+static int
+GLES_ActivateRenderer(SDL_Renderer * renderer)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+
+    if (SDL_CurrentContext != data->context) {
+        if (SDL_GL_MakeCurrent(renderer->window, data->context) < 0) {
+            return -1;
+        }
+        SDL_CurrentContext = data->context;
+
+        GLES_UpdateViewport(renderer);
+    }
+    return 0;
+}
+
 SDL_Renderer *
 GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
@@ -162,7 +179,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
-    renderer->SetClipRect = GLES_SetClipRect;
+    renderer->UpdateViewport = GLES_UpdateViewport;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
     renderer->RenderDrawLines = GLES_RenderDrawLines;
     renderer->RenderFillRects = GLES_RenderFillRects;
@@ -171,9 +188,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
     renderer->info = GLES_RenderDriver.info;
-    renderer->driverdata = data;
-
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
+    renderer->driverdata = data;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -219,41 +235,13 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->blendMode = -1;
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
-    data->updateSize = SDL_TRUE;
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
     return renderer;
-}
-
-static SDL_GLContext SDL_CurrentContext = NULL;
-
-static int
-GLES_ActivateRenderer(SDL_Renderer * renderer)
-{
-    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
-    SDL_Window *window = renderer->window;
-
-    if (SDL_CurrentContext != data->context) {
-        if (SDL_GL_MakeCurrent(window, data->context) < 0) {
-            return -1;
-        }
-        SDL_CurrentContext = data->context;
-    }
-    if (data->updateSize) {
-        int w, h;
-
-        SDL_GetWindowSize(window, &w, &h);
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-        glViewport(0, 0, w, h);
-        glOrthof(0.0, (GLfloat) w, (GLfloat) h, 0.0, 0.0, 1.0);
-        data->updateSize = SDL_FALSE;
-    }
-    return 0;
 }
 
 static void
@@ -264,7 +252,6 @@ GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
-        data->updateSize = SDL_TRUE;
     }
 }
 
@@ -444,20 +431,26 @@ GLES_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLES_UpdateTexture(renderer, texture, &rect, data->pixels, data->pitch);
 }
 
-static void
-GLES_SetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+static int
+GLES_UpdateViewport(SDL_Renderer * renderer)
 {
-    GLES_ActivateRenderer(renderer);
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
 
-    if (rect) {
-        int w, h;
-
-        SDL_GetWindowSize(renderer->window, &w, &h);
-        glScissor(rect->x, (h-(rect->y+rect->h)), rect->w, rect->h);
-        glEnable(GL_SCISSOR_TEST);
-    } else {
-        glDisable(GL_SCISSOR_TEST);
+    if (SDL_CurrentContext != data->context) {
+        /* We'll update the viewport after we rebind the context */
+        return 0;
     }
+
+    glViewport(renderer->viewport.x, renderer->viewport.y,
+               renderer->viewport.w, renderer->viewport.h);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof((GLfloat) 0,
+			 (GLfloat) renderer->viewport.w,
+             (GLfloat) renderer->viewport.h,
+             (GLfloat) 0, 0.0, 1.0);
+    return 0;
 }
 
 static void
@@ -555,7 +548,7 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
+GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
                      int count)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
@@ -571,7 +564,7 @@ GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect ** rects,
                     (GLfloat) renderer->a * inv255f);
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = rects[i];
+        const SDL_Rect *rect = &rects[i];
         GLshort minx = rect->x;
         GLshort maxx = rect->x + rect->w;
         GLshort miny = rect->y;
