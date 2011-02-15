@@ -244,7 +244,8 @@ GetClosestSupportedFormat(SDL_Renderer * renderer, Uint32 format)
 
         /* We just want to match the first format that has the same channels */
         for (i = 0; i < renderer->info.num_texture_formats; ++i) {
-            if (SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
+            if (!SDL_ISPIXELFORMAT_FOURCC(renderer->info.texture_formats[i]) &&
+                SDL_ISPIXELFORMAT_ALPHA(renderer->info.texture_formats[i]) == hasAlpha) {
                 return renderer->info.texture_formats[i];
             }
         }
