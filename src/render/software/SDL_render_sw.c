@@ -288,7 +288,7 @@ SW_UpdateViewport(SDL_Renderer * renderer)
         renderer->viewport.w = surface->w;
         renderer->viewport.h = surface->h;
     }
-    //SDL_SetClipRect(data->surface, &renderer->viewport);
+    SDL_SetClipRect(data->surface, &renderer->viewport);
     return 0;
 }
 
