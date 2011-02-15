@@ -704,7 +704,6 @@ static int
 D3D_RenderClear(SDL_Renderer * renderer)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    D3DVIEWPORT9 viewport;
     DWORD color;
     HRESULT result;
 
@@ -712,27 +711,36 @@ D3D_RenderClear(SDL_Renderer * renderer)
         return -1;
     }
 
-    /* Clear is defined to clear the entire render target */
-    viewport.X = 0;
-    viewport.Y = 0;
-    viewport.Width = data->pparams.BackBufferWidth;
-    viewport.Height = data->pparams.BackBufferHeight;
-    viewport.MinZ = 0.0f;
-    viewport.MaxZ = 1.0f;
-    IDirect3DDevice9_SetViewport(data->device, &viewport);
-
     color = D3DCOLOR_ARGB(renderer->a, renderer->r, renderer->g, renderer->b);
 
-    result = IDirect3DDevice9_Clear(data->device, 0, NULL, D3DCLEAR_TARGET, color, 0.0f, 0);
+    /* Don't reset the viewport if we don't have to! */
+    if (!renderer->viewport.x && !renderer->viewport.y &&
+        renderer->viewport.w == data->pparams.BackBufferWidth &&
+        renderer->viewport.h == data->pparams.BackBufferHeight) {
+        result = IDirect3DDevice9_Clear(data->device, 0, NULL, D3DCLEAR_TARGET, color, 0.0f, 0);
+    } else {
+        D3DVIEWPORT9 viewport;
 
-    /* Reset the viewport */
-    viewport.X = renderer->viewport.x;
-    viewport.Y = renderer->viewport.y;
-    viewport.Width = renderer->viewport.w;
-    viewport.Height = renderer->viewport.h;
-    viewport.MinZ = 0.0f;
-    viewport.MaxZ = 1.0f;
-    IDirect3DDevice9_SetViewport(data->device, &viewport);
+        /* Clear is defined to clear the entire render target */
+        viewport.X = 0;
+        viewport.Y = 0;
+        viewport.Width = data->pparams.BackBufferWidth;
+        viewport.Height = data->pparams.BackBufferHeight;
+        viewport.MinZ = 0.0f;
+        viewport.MaxZ = 1.0f;
+        IDirect3DDevice9_SetViewport(data->device, &viewport);
+
+        result = IDirect3DDevice9_Clear(data->device, 0, NULL, D3DCLEAR_TARGET, color, 0.0f, 0);
+
+        /* Reset the viewport */
+        viewport.X = renderer->viewport.x;
+        viewport.Y = renderer->viewport.y;
+        viewport.Width = renderer->viewport.w;
+        viewport.Height = renderer->viewport.h;
+        viewport.MinZ = 0.0f;
+        viewport.MaxZ = 1.0f;
+        IDirect3DDevice9_SetViewport(data->device, &viewport);
+    }
 
     if (FAILED(result)) {
         D3D_SetError("Clear()", result);
