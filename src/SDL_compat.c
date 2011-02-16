@@ -847,14 +847,14 @@ SDL_WM_ToggleFullScreen(SDL_Surface * surface)
     }
 
     /* Copy the old bits out */
-    length = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
-    pixels = SDL_malloc(SDL_VideoSurface->h * length);
+    length = SDL_PublicSurface->w * SDL_PublicSurface->format->BytesPerPixel;
+    pixels = SDL_malloc(SDL_PublicSurface->h * length);
     if (pixels) {
-        src = (Uint8*)SDL_VideoSurface->pixels;
+        src = (Uint8*)SDL_PublicSurface->pixels;
         dst = (Uint8*)pixels;
-        for (row = 0; row < SDL_VideoSurface->h; ++row) {
+        for (row = 0; row < SDL_PublicSurface->h; ++row) {
             SDL_memcpy(dst, src, length);
-            src += SDL_VideoSurface->pitch;
+            src += SDL_PublicSurface->pitch;
             dst += length;
         }
     }
@@ -894,8 +894,8 @@ SDL_WM_ToggleFullScreen(SDL_Surface * surface)
                 SDL_VideoSurface->flags &= ~SDL_DONTFREE;
                 SDL_FreeSurface(SDL_VideoSurface);
                 SDL_free(SDL_ShadowSurface->pixels);
-                SDL_ShadowSurface->flags |= SDL_PREALLOC;
                 SDL_VideoSurface = SDL_ShadowSurface;
+                SDL_VideoSurface->flags |= SDL_PREALLOC;
                 SDL_ShadowSurface = NULL;
             } else {
                 /* No problem, just change the video surface format */
@@ -907,9 +907,18 @@ SDL_WM_ToggleFullScreen(SDL_Surface * surface)
         } else {
             /* We can make the video surface the shadow surface */
             SDL_ShadowSurface = SDL_VideoSurface;
+            SDL_ShadowSurface->pitch = SDL_CalculatePitch(SDL_ShadowSurface);
+            SDL_ShadowSurface->pixels = SDL_malloc(SDL_ShadowSurface->h * SDL_ShadowSurface->pitch);
+            if (!SDL_ShadowSurface->pixels) {
+                /* Uh oh, we're hosed */
+                SDL_ShadowSurface = NULL;
+                return 0;
+            }
+            SDL_ShadowSurface->flags &= ~SDL_PREALLOC;
 
             SDL_VideoSurface = SDL_CreateRGBSurfaceFrom(NULL, 0, 0, 32, 0, 0, 0, 0, 0);
             SDL_VideoSurface->flags = SDL_ShadowSurface->flags;
+            SDL_VideoSurface->flags |= SDL_PREALLOC;
             SDL_FreeFormat(SDL_VideoSurface->format);
             SDL_VideoSurface->format = SDL_WindowSurface->format;
             SDL_VideoSurface->format->refcount++;
@@ -928,13 +937,13 @@ SDL_WM_ToggleFullScreen(SDL_Surface * surface)
     /* Copy the old bits back */
     if (pixels) {
         src = (Uint8*)pixels;
-        dst = (Uint8*)SDL_VideoSurface->pixels;
-        for (row = 0; row < SDL_VideoSurface->h; ++row) {
+        dst = (Uint8*)SDL_PublicSurface->pixels;
+        for (row = 0; row < SDL_PublicSurface->h; ++row) {
             SDL_memcpy(dst, src, length);
             src += length;
-            dst += SDL_VideoSurface->pitch;
+            dst += SDL_PublicSurface->pitch;
         }
-        SDL_Flip(SDL_VideoSurface);
+        SDL_Flip(SDL_PublicSurface);
         SDL_free(pixels);
     }
 
