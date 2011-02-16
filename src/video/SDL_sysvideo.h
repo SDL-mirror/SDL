@@ -180,7 +180,6 @@ struct SDL_VideoDevice
     void (*MaximizeWindow) (_THIS, SDL_Window * window);
     void (*MinimizeWindow) (_THIS, SDL_Window * window);
     void (*RestoreWindow) (_THIS, SDL_Window * window);
-    void (*PrepWindowFullscreen) (_THIS, SDL_Window * window);
     void (*SetWindowFullscreen) (_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);

@@ -1025,36 +1025,40 @@ SDL_UpdateFullscreenMode(SDL_Window * window)
             SDL_GetDisplayForWindow(other) == display) {
             SDL_DisplayMode fullscreen_mode;
             if (SDL_GetWindowDisplayMode(other, &fullscreen_mode) == 0) {
-                if (_this->PrepWindowFullscreen) {
-                    _this->PrepWindowFullscreen(_this, other);
+                SDL_bool resized = SDL_TRUE;
+
+                if (other->w == fullscreen_mode.w && other->h == fullscreen_mode.h) {
+                    resized = SDL_FALSE;
                 }
 
                 SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
-
                 if (_this->SetWindowFullscreen) {
                     _this->SetWindowFullscreen(_this, other, display, SDL_TRUE);
                 }
                 display->fullscreen_window = other;
 
-                /* Generate a mode change events here */
-                SDL_SendWindowEvent(other, SDL_WINDOWEVENT_RESIZED,
-                                    fullscreen_mode.w, fullscreen_mode.h);
+                /* Generate a mode change event here */
+                if (resized) {
+                    SDL_SendWindowEvent(other, SDL_WINDOWEVENT_RESIZED,
+                                        fullscreen_mode.w, fullscreen_mode.h);
+                } else {
+                    SDL_OnWindowResized(other);
+                }
                 return;
             }
         }
     }
 
     /* Nope, restore the desktop mode */
-    if (_this->PrepWindowFullscreen) {
-        _this->PrepWindowFullscreen(_this, window);
-    }
-
     SDL_SetDisplayModeForDisplay(display, NULL);
 
     if (_this->SetWindowFullscreen) {
         _this->SetWindowFullscreen(_this, window, display, SDL_FALSE);
     }
     display->fullscreen_window = NULL;
+
+    /* Generate a mode change event here */
+    SDL_OnWindowResized(window);
 }
 
 SDL_Window *
