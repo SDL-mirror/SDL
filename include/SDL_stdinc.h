@@ -352,8 +352,8 @@ do {						\
 #endif
 
 /* We can count on memcpy existing on Mac OS X and being well-tuned. */
-#if defined(__MACH__) && defined(__APPLE__)
-#define SDL_memcpy(dst, src, len) memcpy(dst, src, len)
+#if defined(__MACOSX__)
+#define SDL_memcpy      memcpy
 #elif defined(__GNUC__) && defined(i386)
 #define SDL_memcpy(dst, src, len)					  \
 do {									  \
@@ -385,8 +385,8 @@ extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src,
 #endif
 
 /* We can count on memcpy existing on Mac OS X and being well-tuned. */
-#if defined(__MACH__) && defined(__APPLE__)
-#define SDL_memcpy4(dst, src, len) memcpy(dst, src, (len)*4)
+#if defined(__MACOSX__)
+#define SDL_memcpy4(dst, src, len)	SDL_memcpy((dst), (src), (len) << 2)
 #elif defined(__GNUC__) && defined(i386)
 #define SDL_memcpy4(dst, src, len)				\
 do {								\
@@ -400,54 +400,14 @@ do {								\
 } while(0)
 #endif
 #ifndef SDL_memcpy4
-#define SDL_memcpy4(dst, src, len)	SDL_memcpy(dst, src, (len) << 2)
-#endif
-
-#if defined(__GNUC__) && defined(i386)
-#define SDL_revcpy(dst, src, len)			\
-do {							\
-	int u0, u1, u2;					\
-	char *dstp = SDL_static_cast(char *, dst);			\
-	char *srcp = SDL_static_cast(char *, src);			\
-	int n = (len);					\
-	if ( n >= 4 ) {					\
-	__asm__ __volatile__ (				\
-		"std\n\t"				\
-		"rep ; movsl\n\t"			\
-		"cld\n\t"				\
-		: "=&c" (u0), "=&D" (u1), "=&S" (u2)	\
-		: "0" (n >> 2),				\
-		  "1" (dstp+(n-4)), "2" (srcp+(n-4))	\
-		: "memory" );				\
-	}						\
-	switch (n & 3) {				\
-		case 3: dstp[2] = srcp[2];		\
-		case 2: dstp[1] = srcp[1];		\
-		case 1: dstp[0] = srcp[0];		\
-			break;				\
-		default:				\
-			break;				\
-	}						\
-} while(0)
-#endif
-#ifndef SDL_revcpy
-extern DECLSPEC void *SDLCALL SDL_revcpy(void *dst, const void *src,
-                                         size_t len);
+#define SDL_memcpy4(dst, src, len)	SDL_memcpy((dst), (src), (len) << 2)
 #endif
 
 #ifdef HAVE_MEMMOVE
 #define SDL_memmove     memmove
-#elif defined(HAVE_BCOPY)
-#define SDL_memmove(d, s, n)	bcopy((s), (d), (n))
 #else
-#define SDL_memmove(dst, src, len)			\
-do {							\
-	if ( dst < src ) {				\
-		SDL_memcpy(dst, src, len);		\
-	} else {					\
-		SDL_revcpy(dst, src, len);		\
-	}						\
-} while(0)
+extern DECLSPEC void *SDLCALL SDL_memmove(void *dst, const void *src,
+                                          size_t len);
 #endif
 
 #ifdef HAVE_MEMCMP

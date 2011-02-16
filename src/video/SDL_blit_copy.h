@@ -21,6 +21,5 @@
 */
 
 void SDL_BlitCopy(SDL_BlitInfo * info);
-void SDL_BlitCopyOverlap(SDL_BlitInfo * info);
 
 /* vi: set ts=4 sw=4 expandtab: */

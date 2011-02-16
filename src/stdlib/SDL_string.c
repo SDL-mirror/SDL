@@ -265,31 +265,27 @@ void *
 SDL_memset(void *dst, int c, size_t len)
 {
     size_t left = (len % 4);
-    if (len >= 4) {
-        Uint32 value = 0;
-        Uint32 *dstp = (Uint32 *) dst;
-        int i;
-        for (i = 0; i < 4; ++i) {
-            value <<= 8;
-            value |= c;
-        }
-        len /= 4;
-        while (len--) {
-            *dstp++ = value;
-        }
+    Uint32 *dstp4;
+    Uint8 *dstp1;
+    Uint32 value4 = (c | (c << 8) | (c << 16) | (c << 24));
+    Uint8 value1 = (Uint8) c;
+
+    dstp4 = (Uint32 *) dst;
+    len /= 4;
+    while (len--) {
+        *dstp4++ = value4;
     }
-    if (left > 0) {
-        Uint8 value = (Uint8) c;
-        Uint8 *dstp = (Uint8 *) dst;
-        switch (left) {
-        case 3:
-            *dstp++ = value;
-        case 2:
-            *dstp++ = value;
-        case 1:
-            *dstp++ = value;
-        }
+
+    dstp1 = (Uint8 *) dstp4;
+    switch (left) {
+    case 3:
+        *dstp1++ = value1;
+    case 2:
+        *dstp1++ = value1;
+    case 1:
+        *dstp1++ = value1;
     }
+
     return dst;
 }
 #endif
@@ -298,25 +294,49 @@ SDL_memset(void *dst, int c, size_t len)
 void *
 SDL_memcpy(void *dst, const void *src, size_t len)
 {
-    char *srcp = (char *) src;
-    char *dstp = (char *) dst;
+    size_t left = (len % 4);
+    Uint32 *srcp4, *dstp4;
+    Uint8 *srcp1, *dstp1;
+
+    srcp4 = (Uint32 *) src;
+    dstp4 = (Uint32 *) dst;
+    len /= 4;
     while (len--) {
-        *dstp++ = *srcp++;
+        *dstp4++ = *srcp4++;
     }
+
+    srcp1 = (Uint8 *) srcp4;
+    dstp1 = (Uint8 *) dstp4;
+    switch (left) {
+    case 3:
+        *dstp1++ = *srcp1++;
+    case 2:
+        *dstp1++ = *srcp1++;
+    case 1:
+        *dstp1++ = *srcp1++;
+    }
+
     return dst;
 }
 #endif
 
-#ifndef SDL_revcpy
+#ifndef SDL_memmove
 void *
-SDL_revcpy(void *dst, const void *src, size_t len)
+SDL_memmove(void *dst, const void *src, size_t len)
 {
     char *srcp = (char *) src;
     char *dstp = (char *) dst;
-    srcp += len - 1;
-    dstp += len - 1;
-    while (len--) {
-        *dstp-- = *srcp--;
+
+    if (src < dst) {
+        srcp += len - 1;
+        dstp += len - 1;
+        while (len--) {
+            *dstp-- = *srcp--;
+        }
+    } else {
+        while (len--) {
+            *dstp++ = *srcp++;
+        }
     }
     return dst;
 }

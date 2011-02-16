@@ -205,12 +205,7 @@ SDL_CalculateBlit(SDL_Surface * surface)
 
     /* Choose a standard blit function */
     if (map->identity && !(map->info.flags & ~SDL_COPY_RLE_DESIRED)) {
-        /* Handle overlapping blits on the same surface */
-        if (surface == dst) {
-            blit = SDL_BlitCopyOverlap;
-        } else {
-            blit = SDL_BlitCopy;
-        }
+        blit = SDL_BlitCopy;
     } else if (surface->format->BitsPerPixel < 8) {
         blit = SDL_CalculateBlit0(surface);
     } else if (surface->format->BytesPerPixel == 1) {

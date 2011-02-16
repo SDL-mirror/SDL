@@ -96,6 +96,7 @@ SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
 void
 SDL_BlitCopy(SDL_BlitInfo * info)
 {
+    SDL_bool overlap;
     Uint8 *src, *dst;
     int w, h;
     int srcskip, dstskip;
@@ -106,6 +107,21 @@ SDL_BlitCopy(SDL_BlitInfo * info)
     dst = info->dst;
     srcskip = info->src_pitch;
     dstskip = info->dst_pitch;
+
+    /* Properly handle overlapping blits */
+    if (src < dst) {
+        overlap = (dst < (src + h*srcskip));
+    } else {
+        overlap = (src < (dst + h*dstskip));
+    }
+    if (overlap) {
+        while (h--) {
+            SDL_memmove(dst, src, w);
+            src += srcskip;
+            dst += dstskip;
+        }
+        return;
+    }
 
 #ifdef __SSE__
     if (SDL_HasSSE() &&
@@ -138,31 +154,6 @@ SDL_BlitCopy(SDL_BlitInfo * info)
         SDL_memcpy(dst, src, w);
         src += srcskip;
         dst += dstskip;
-    }
-}
-
-void
-SDL_BlitCopyOverlap(SDL_BlitInfo * info)
-{
-    Uint8 *src, *dst;
-    int w, h;
-    int skip;
-
-    w = info->dst_w * info->dst_fmt->BytesPerPixel;
-    h = info->dst_h;
-    src = info->src;
-    dst = info->dst;
-    skip = info->src_pitch;
-    if ((dst < src) || (dst >= (src + h * skip))) {
-        SDL_BlitCopy(info);
-    } else {
-        src += ((h - 1) * skip);
-        dst += ((h - 1) * skip);
-        while (h--) {
-            SDL_revcpy(dst, src, w);
-            src -= skip;
-            dst -= skip;
-        }
     }
 }
 
