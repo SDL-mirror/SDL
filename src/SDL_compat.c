@@ -834,6 +834,32 @@ SDL_WM_IconifyWindow(void)
 int
 SDL_WM_ToggleFullScreen(SDL_Surface * surface)
 {
+    int length;
+    void *pixels;
+    Uint8 *src, *dst;
+    int row;
+    int window_w;
+    int window_h;
+
+    if (!SDL_PublicSurface) {
+        SDL_SetError("SDL_SetVideoMode() hasn't been called");
+        return 0;
+    }
+
+    /* Copy the old bits out */
+    length = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
+    pixels = SDL_malloc(SDL_VideoSurface->h * length);
+    if (pixels) {
+        src = (Uint8*)SDL_VideoSurface->pixels;
+        dst = (Uint8*)pixels;
+        for (row = 0; row < SDL_VideoSurface->h; ++row) {
+            SDL_memcpy(dst, src, length);
+            src += SDL_VideoSurface->pitch;
+            dst += length;
+        }
+    }
+
+    /* Do the physical mode switch */
     if (SDL_GetWindowFlags(SDL_VideoWindow) & SDL_WINDOW_FULLSCREEN) {
         if (SDL_SetWindowFullscreen(SDL_VideoWindow, 0) < 0) {
             return 0;
@@ -845,6 +871,74 @@ SDL_WM_ToggleFullScreen(SDL_Surface * surface)
         }
         SDL_PublicSurface->flags |= SDL_FULLSCREEN;
     }
+
+    /* Recreate the screen surface */
+    SDL_WindowSurface = SDL_GetWindowSurface(SDL_VideoWindow);
+    if (!SDL_WindowSurface) {
+        /* We're totally hosed... */
+        return 0;
+    }
+
+    /* Center the public surface in the window surface */
+    SDL_GetWindowSize(SDL_VideoWindow, &window_w, &window_h);
+    SDL_VideoViewport.x = (window_w - SDL_VideoSurface->w)/2;
+    SDL_VideoViewport.y = (window_h - SDL_VideoSurface->h)/2;
+    SDL_VideoViewport.w = SDL_VideoSurface->w;
+    SDL_VideoViewport.h = SDL_VideoSurface->h;
+
+    /* Do some shuffling behind the application's back if format changes */
+    if (SDL_VideoSurface->format->format != SDL_WindowSurface->format->format) {
+        if (SDL_ShadowSurface) {
+            if (SDL_ShadowSurface->format->format == SDL_WindowSurface->format->format) {
+                /* Whee!  We don't need a shadow surface anymore! */
+                SDL_VideoSurface->flags &= ~SDL_DONTFREE;
+                SDL_FreeSurface(SDL_VideoSurface);
+                SDL_free(SDL_ShadowSurface->pixels);
+                SDL_ShadowSurface->flags |= SDL_PREALLOC;
+                SDL_VideoSurface = SDL_ShadowSurface;
+                SDL_ShadowSurface = NULL;
+            } else {
+                /* No problem, just change the video surface format */
+                SDL_FreeFormat(SDL_VideoSurface->format);
+                SDL_VideoSurface->format = SDL_WindowSurface->format;
+                SDL_VideoSurface->format->refcount++;
+                SDL_InvalidateMap(SDL_ShadowSurface->map);
+            }
+        } else {
+            /* We can make the video surface the shadow surface */
+            SDL_ShadowSurface = SDL_VideoSurface;
+
+            SDL_VideoSurface = SDL_CreateRGBSurfaceFrom(NULL, 0, 0, 32, 0, 0, 0, 0, 0);
+            SDL_VideoSurface->flags = SDL_ShadowSurface->flags;
+            SDL_FreeFormat(SDL_VideoSurface->format);
+            SDL_VideoSurface->format = SDL_WindowSurface->format;
+            SDL_VideoSurface->format->refcount++;
+            SDL_VideoSurface->w = SDL_ShadowSurface->w;
+            SDL_VideoSurface->h = SDL_ShadowSurface->h;
+        }
+    }
+
+    /* Update the video surface */
+    SDL_VideoSurface->pitch = SDL_WindowSurface->pitch;
+    SDL_VideoSurface->pixels = (void *)((Uint8 *)SDL_WindowSurface->pixels +
+        SDL_VideoViewport.y * SDL_VideoSurface->pitch +
+        SDL_VideoViewport.x  * SDL_VideoSurface->format->BytesPerPixel);
+    SDL_SetClipRect(SDL_VideoSurface, NULL);
+
+    /* Copy the old bits back */
+    if (pixels) {
+        src = (Uint8*)pixels;
+        dst = (Uint8*)SDL_VideoSurface->pixels;
+        for (row = 0; row < SDL_VideoSurface->h; ++row) {
+            SDL_memcpy(dst, src, length);
+            src += length;
+            dst += SDL_VideoSurface->pitch;
+        }
+        SDL_Flip(SDL_VideoSurface);
+        SDL_free(pixels);
+    }
+
+    /* We're done! */
     return 1;
 }
 
