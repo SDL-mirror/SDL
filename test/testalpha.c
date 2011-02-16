@@ -514,6 +514,9 @@ main(int argc, char *argv[])
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     done = 1;
                 }
+                if (event.key.keysym.sym == SDLK_RETURN) {
+                    SDL_WM_ToggleFullScreen(screen);
+                }
                 break;
             case SDL_QUIT:
                 done = 1;
