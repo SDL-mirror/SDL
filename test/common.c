@@ -154,6 +154,10 @@ CommonArg(CommonState * state, int index)
             state->window_x = SDL_WINDOWPOS_UNDEFINED_DISPLAY(state->display);
             state->window_y = SDL_WINDOWPOS_UNDEFINED_DISPLAY(state->display);
         }
+        if (SDL_WINDOWPOS_ISCENTERED(state->window_x)) {
+            state->window_x = SDL_WINDOWPOS_CENTERED_DISPLAY(state->display);
+            state->window_y = SDL_WINDOWPOS_CENTERED_DISPLAY(state->display);
+        }
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--fullscreen") == 0) {
