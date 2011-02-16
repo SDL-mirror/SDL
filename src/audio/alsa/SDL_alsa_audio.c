@@ -85,11 +85,11 @@ static int (*ALSA_snd_pcm_sw_params_set_start_threshold)
 static int (*ALSA_snd_pcm_sw_params) (snd_pcm_t *, snd_pcm_sw_params_t *);
 static int (*ALSA_snd_pcm_nonblock) (snd_pcm_t *, int);
 static int (*ALSA_snd_pcm_wait)(snd_pcm_t *, int);
-#define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
-#define snd_pcm_sw_params_sizeof ALSA_snd_pcm_sw_params_sizeof
 
 
 #ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
+#define snd_pcm_sw_params_sizeof ALSA_snd_pcm_sw_params_sizeof
 
 static const char *alsa_library = SDL_AUDIO_DRIVER_ALSA_DYNAMIC;
 static void *alsa_handle = NULL;
