@@ -543,6 +543,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
     SDL_SetWindowIcon(SDL_VideoWindow, SDL_VideoIcon);
 
+    SetupScreenSaver(flags);
+
     window_flags = SDL_GetWindowFlags(SDL_VideoWindow);
     surface_flags = 0;
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
@@ -630,8 +632,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         (SDL_ShadowSurface ? SDL_ShadowSurface : SDL_VideoSurface);
 
     ClearVideoSurface();
-
-    SetupScreenSaver(flags);
 
     /* We're finally done! */
     return SDL_PublicSurface;
