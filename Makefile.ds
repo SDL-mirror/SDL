@@ -25,7 +25,7 @@ TARGET = libSDL.a
 CFLAGS	=	-mthumb -mthumb-interwork \
 		-march=armv5te -mtune=arm946e-s \
 		-O2 -Wall -Wwrite-strings -Wpointer-arith  \
-		-DARM9 -D__NDS__ -I$(DEVKITPRO)/libnds/include -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1
+		-DARM9 -D__NDS__ -I$(DEVKITPRO)/libnds/include -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1 -Iinclude
 
 #src/audio/disk/SDL_diskaudio.c \
 #src/audio/dummy/SDL_dummyaudio.c \
@@ -122,8 +122,7 @@ all: $(TARGET) install nds_test
 src/atomic/SDL_spinlock.o: src/atomic/SDL_spinlock.c
 	$(CC) $(CFLAGS) -mno-thumb -o $@ -c $^
 
-$(TARGET): copy_config \
-	$(OBJS)
+$(TARGET): copy_config $(OBJS)
 	$(AR) rc $(TARGET) $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
 

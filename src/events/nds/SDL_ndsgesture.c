@@ -24,8 +24,8 @@
 /* No supported under the NDS because of math operations. */
 
 #include "SDL_events.h"
-#include "SDL_events_c.h"
-#include "SDL_gesture_c.h"
+#include "../SDL_events_c.h"
+#include "../SDL_gesture_c.h"
 
 int SDL_GestureAddTouch(SDL_Touch* touch)
 {  
