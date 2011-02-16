@@ -413,21 +413,31 @@ SDL_SYS_JoystickInit(void)
 
     numjoysticks = 0;
 
-    /* First see if the user specified a joystick to use */
+    /* First see if the user specified one or more joysticks to use */
     if (SDL_getenv("SDL_JOYSTICK_DEVICE") != NULL) {
-        SDL_strlcpy(path, SDL_getenv("SDL_JOYSTICK_DEVICE"), sizeof(path));
-        if (stat(path, &sb) == 0) {
-            fd = open(path, O_RDONLY, 0);
-            if (fd >= 0) {
-                /* Assume the user knows what they're doing. */
-                SDL_joylist[numjoysticks].fname = SDL_strdup(path);
-                if (SDL_joylist[numjoysticks].fname) {
-                    dev_nums[numjoysticks] = sb.st_rdev;
-                    ++numjoysticks;
-                }
-                close(fd);
+        char *envcopy, *envpath, *delim;
+        envcopy = SDL_strdup(SDL_getenv("SDL_JOYSTICK_DEVICE"));
+        envpath = envcopy;
+        while (envpath != NULL) {
+            delim = SDL_strchr(envpath, ':');
+            if (delim != NULL) {
+                *delim++ = '\0';
             }
+            if (stat(envpath, &sb) == 0) {
+                fd = open(envpath, O_RDONLY, 0);
+                if (fd >= 0) {
+                    /* Assume the user knows what they're doing. */
+                    SDL_joylist[numjoysticks].fname = SDL_strdup(envpath);
+                    if (SDL_joylist[numjoysticks].fname) {
+                        dev_nums[numjoysticks] = sb.st_rdev;
+                        ++numjoysticks;
+                    }
+                    close(fd);
+                }
+            }
+            envpath = delim;
         }
+        SDL_free(envcopy);
     }
 
     for (i = 0; i < SDL_arraysize(joydev_pattern); ++i) {
