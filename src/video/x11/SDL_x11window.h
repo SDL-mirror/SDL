@@ -54,6 +54,7 @@ extern void X11_RaiseWindow(_THIS, SDL_Window * window);
 extern void X11_MaximizeWindow(_THIS, SDL_Window * window);
 extern void X11_MinimizeWindow(_THIS, SDL_Window * window);
 extern void X11_RestoreWindow(_THIS, SDL_Window * window);
+extern void X11_SetWindowFullscreen(_THIS, SDL_Window * window);
 extern void X11_SetWindowGrab(_THIS, SDL_Window * window);
 extern void X11_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool X11_GetWindowWMInfo(_THIS, SDL_Window * window,

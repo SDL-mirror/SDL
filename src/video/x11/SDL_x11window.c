@@ -772,7 +772,7 @@ X11_RaiseWindow(_THIS, SDL_Window * window)
 }
 
 static void
-X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
+SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
@@ -823,7 +823,7 @@ X11_SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
 void
 X11_MaximizeWindow(_THIS, SDL_Window * window)
 {
-    X11_SetWindowMaximized(_this, window, SDL_TRUE);
+    SetWindowMaximized(_this, window, SDL_TRUE);
 }
 
 void
@@ -841,8 +841,66 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
 void
 X11_RestoreWindow(_THIS, SDL_Window * window)
 {
-    X11_SetWindowMaximized(_this, window, SDL_FALSE);
+    SetWindowMaximized(_this, window, SDL_FALSE);
     X11_ShowWindow(_this, window);
+}
+
+static void
+SetWindowFullscreen(_THIS, SDL_Window * window, SDL_bool fullscreen)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
+    Display *display = data->videodata->display;
+    Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
+    Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
+    Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
+
+    if (X11_IsWindowMapped(_this, window)) {
+        XEvent e;
+
+        SDL_zero(e);
+        e.xany.type = ClientMessage;
+        e.xclient.message_type = _NET_WM_STATE;
+        e.xclient.format = 32;
+        e.xclient.window = data->xwindow;
+        e.xclient.data.l[0] =
+            fullscreen ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE;
+        e.xclient.data.l[1] = _NET_WM_STATE_FULLSCREEN;
+        e.xclient.data.l[3] = 0l;
+
+        XSendEvent(display, RootWindow(display, displaydata->screen), 0,
+                   SubstructureNotifyMask | SubstructureRedirectMask, &e);
+    } else {
+        int count = 0;
+        Atom atoms[3];
+
+        if (fullscreen) {
+            atoms[count++] = _NET_WM_STATE_FULLSCREEN;
+        }
+        if (window->flags & SDL_WINDOW_MAXIMIZED) {
+            atoms[count++] = _NET_WM_STATE_MAXIMIZED_VERT;
+            atoms[count++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+        }
+        if (count > 0) {
+            XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
+                            PropModeReplace, (unsigned char *)atoms, count);
+        } else {
+            XDeleteProperty(display, data->xwindow, _NET_WM_STATE);
+        }
+    }
+    XFlush(display);
+}
+
+void
+X11_SetWindowFullscreen(_THIS, SDL_Window * window)
+{
+    if (FULLSCREEN_VISIBLE(window)) {
+        SetWindowFullscreen(_this, window, SDL_TRUE);
+    } else {
+        SetWindowFullscreen(_this, window, SDL_FALSE);
+    }
 }
 
 void
