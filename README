@@ -18,7 +18,7 @@ support for other operating systems but those are not officially supported.
 
 SDL is written in C, but works with C++ natively, and has bindings to
 several other languages, including Ada, C#, Eiffel, Erlang, Euphoria,
-Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
+Go, Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
 Pike, Pliant, Python, Ruby, and Smalltalk.
 
 This library is distributed under GNU LGPL version 2, which can be
