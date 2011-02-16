@@ -93,7 +93,7 @@ LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
 LT_LDFLAGS  = -no-undefined -rpath $(DESTDIR)$(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
-all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
+all: $(srcdir)/configure Makefile update-revision $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 
 $(srcdir)/configure: $(srcdir)/configure.in
 	@echo "Warning, configure.in is out of date"
@@ -109,7 +109,7 @@ $(objects):
 	$(SHELL) $(auxdir)/mkinstalldirs $@
 
 # To make sure parallel builds will not fail
-$(srcdir)/include/SDL_revision.h: update-revision
+include/SDL_revision.h: update-revision
 
 update-revision:
 	$(SHELL) $(auxdir)/updaterev.sh
@@ -127,7 +127,7 @@ install: all install-bin install-hdrs install-lib install-data
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 sdl-config $(DESTDIR)$(bindir)/sdl-config
-install-hdrs: $(srcdir)/include/SDL_revision.h
+install-hdrs: include/SDL_revision.h
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(includedir)/SDL
 	for file in $(HDRS); do \
 	    $(INSTALL) -m 644 $(srcdir)/include/$$file $(DESTDIR)$(includedir)/SDL/$$file; \
