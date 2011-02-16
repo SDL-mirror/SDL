@@ -131,10 +131,6 @@ WIN_GetDisplayMode(LPCTSTR deviceName, DWORD index, SDL_DisplayMode * mode)
             }
         }
     }
-    if (SDL_ISPIXELFORMAT_INDEXED(mode->format)) {
-        /* We don't support palettized modes now */
-        return SDL_FALSE;
-    }
     return SDL_TRUE;
 }
 
@@ -170,35 +166,58 @@ WIN_AddDisplay(LPTSTR DeviceName)
 int
 WIN_InitModes(_THIS)
 {
+    int pass;
     DWORD i, j, count;
     DISPLAY_DEVICE device;
 
     device.cb = sizeof(device);
-    for (i = 0;; ++i) {
-        TCHAR DeviceName[32];
 
-        if (!EnumDisplayDevices(NULL, i, &device, 0)) {
-            break;
-        }
-        if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
-            continue;
-        }
-        SDL_memcpy(DeviceName, device.DeviceName, sizeof(DeviceName));
-#ifdef DEBUG_MODES
-        printf("Device: %s\n", WIN_StringToUTF8(DeviceName));
-#endif
-        count = 0;
-        for (j = 0;; ++j) {
-            if (!EnumDisplayDevices(DeviceName, j, &device, 0)) {
+    /* Get the primary display in the first pass */
+    for (pass = 0; pass < 2; ++pass) {
+        for (i = 0; ; ++i) {
+            TCHAR DeviceName[32];
+
+            if (!EnumDisplayDevices(NULL, i, &device, 0)) {
                 break;
             }
             if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
                 continue;
             }
-            count += WIN_AddDisplay(device.DeviceName);
-        }
-        if (count == 0) {
-            WIN_AddDisplay(DeviceName);
+            if (pass == 0) {
+                if (!(device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)) {
+                    continue;
+                }
+            } else {
+                if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+                    continue;
+                }
+            }
+            SDL_memcpy(DeviceName, device.DeviceName, sizeof(DeviceName));
+#ifdef DEBUG_MODES
+            printf("Device: %s\n", WIN_StringToUTF8(DeviceName));
+#endif
+            count = 0;
+            for (j = 0; ; ++j) {
+                if (!EnumDisplayDevices(DeviceName, j, &device, 0)) {
+                    break;
+                }
+                if (!(device.StateFlags & DISPLAY_DEVICE_ATTACHED_TO_DESKTOP)) {
+                    continue;
+                }
+                if (pass == 0) {
+                    if (!(device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE)) {
+                        continue;
+                    }
+                } else {
+                    if (device.StateFlags & DISPLAY_DEVICE_PRIMARY_DEVICE) {
+                        continue;
+                    }
+                }
+                count += WIN_AddDisplay(device.DeviceName);
+            }
+            if (count == 0) {
+                WIN_AddDisplay(DeviceName);
+            }
         }
     }
     if (_this->num_displays == 0) {
@@ -211,7 +230,7 @@ WIN_InitModes(_THIS)
 int
 WIN_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
 {
-    SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->desktop_mode.driverdata;
+    SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->current_mode.driverdata;
 
 #ifdef _WIN32_WCE
     // WINCE: DEVMODE.dmPosition not found, or may be mingw32ce bug
@@ -239,6 +258,10 @@ WIN_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         if (!WIN_GetDisplayMode(data->DeviceName, i, &mode)) {
             break;
         }
+        if (SDL_ISPIXELFORMAT_INDEXED(mode.format)) {
+            /* We don't support palettized modes now */
+            continue;
+        }
         if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
             if (!SDL_AddDisplayMode(display, &mode)) {
                 SDL_free(mode.driverdata);
@@ -265,9 +288,7 @@ WIN_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     status =
         ChangeDisplaySettingsEx(displaydata->DeviceName, &data->DeviceMode,
                                 NULL, CDS_FULLSCREEN, NULL);
-    if (status == DISP_CHANGE_SUCCESSFUL) {
-        return 0;
-    } else {
+    if (status != DISP_CHANGE_SUCCESSFUL) {
         const char *reason = "Unknown reason";
         switch (status) {
         case DISP_CHANGE_BADFLAGS:
@@ -286,12 +307,14 @@ WIN_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         SDL_SetError("ChangeDisplaySettingsEx() failed: %s", reason);
         return -1;
     }
+    EnumDisplaySettings(displaydata->DeviceName, ENUM_CURRENT_SETTINGS, &data->DeviceMode);
+    return 0;
 }
 
 void
 WIN_QuitModes(_THIS)
 {
-    ChangeDisplaySettingsEx(NULL, NULL, NULL, 0, NULL);
+    /* All fullscreen windows should have restored modes by now */
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

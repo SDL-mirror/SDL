@@ -42,6 +42,33 @@ static WCHAR *SDL_HelperWindowClassName = TEXT("SDLHelperWindowInputCatcher");
 static WCHAR *SDL_HelperWindowName = TEXT("SDLHelperWindowInputMsgWindow");
 static ATOM SDL_HelperWindowClass = 0;
 
+#define STYLE_BASIC         (WS_CLIPSIBLINGS | WS_CLIPCHILDREN)
+#define STYLE_FULLSCREEN    (WS_POPUP)
+#define STYLE_BORDERLESS    (WS_POPUP)
+#define STYLE_NORMAL        (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX)
+#define STYLE_RESIZABLE     (WS_THICKFRAME | WS_MAXIMIZEBOX)
+#define STYLE_MASK          (STYLE_FULLSCREEN | STYLE_BORDERLESS | STYLE_NORMAL | STYLE_RESIZABLE)
+
+static DWORD
+GetWindowStyle(SDL_Window * window)
+{
+    DWORD style = 0;
+
+	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        style |= STYLE_FULLSCREEN;
+	} else {
+		if (window->flags & SDL_WINDOW_BORDERLESS) {
+            style |= STYLE_BORDERLESS;
+		} else {
+            style |= STYLE_NORMAL;
+		}
+		if (window->flags & SDL_WINDOW_RESIZABLE) {
+            style |= STYLE_RESIZABLE;
+		}
+	}
+    return style;
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
@@ -168,19 +195,11 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     HWND hwnd;
     RECT rect;
     SDL_Rect bounds;
-    DWORD style = (WS_CLIPSIBLINGS | WS_CLIPCHILDREN);
+    DWORD style = STYLE_BASIC;
     int x, y;
     int w, h;
-
-    if (window->flags & (SDL_WINDOW_BORDERLESS | SDL_WINDOW_FULLSCREEN)) {
-        style |= WS_POPUP;
-    } else {
-        style |= (WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX);
-    }
-    if ((window->flags & SDL_WINDOW_RESIZABLE)
-        && !(window->flags & SDL_WINDOW_FULLSCREEN)) {
-        style |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
-    }
+    
+    style |= GetWindowStyle(window);
 
     /* Figure out what the window area will be */
     rect.left = 0;
@@ -192,16 +211,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     h = (rect.bottom - rect.top);
 
     WIN_GetDisplayBounds(_this, display, &bounds);
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        /* The bounds when this window is visible is the fullscreen mode */
-        SDL_DisplayMode fullscreen_mode;
-        if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
-            bounds.w = fullscreen_mode.w;
-            bounds.h = fullscreen_mode.h;
-        }
-    }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = bounds.x + (bounds.w - w) / 2;
     } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         if (bounds.x == 0) {
@@ -212,8 +222,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     } else {
         x = window->x + rect.left;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = bounds.y + (bounds.h - h) / 2;
     } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
         if (bounds.x == 0) {
@@ -232,7 +241,6 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         WIN_SetError("Couldn't create window");
         return -1;
     }
-	//RegisterTouchWindow(hwnd, 0);
 
     WIN_PumpEvents(_this);
 
@@ -394,22 +402,12 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     h = (rect.bottom - rect.top);
 
     WIN_GetDisplayBounds(_this, display, &bounds);
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        /* The bounds when this window is visible is the fullscreen mode */
-        SDL_DisplayMode fullscreen_mode;
-        if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
-            bounds.w = fullscreen_mode.w;
-            bounds.h = fullscreen_mode.h;
-        }
-    }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
         x = bounds.x + (bounds.w - w) / 2;
     } else {
         x = window->x + rect.left;
     }
-    if ((window->flags & SDL_WINDOW_FULLSCREEN)
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
+    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
         y = bounds.y + (bounds.h - h) / 2;
     } else {
         y = window->y + rect.top;
@@ -541,7 +539,7 @@ WIN_MinimizeWindow(_THIS, SDL_Window * window)
 
 #ifdef _WIN32_WCE
     if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen)
-	videodata->SHFullScreen(hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
+        videodata->SHFullScreen(hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
 #endif
 }
 
@@ -551,6 +549,59 @@ WIN_RestoreWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
     ShowWindow(hwnd, SW_RESTORE);
+}
+
+void
+WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    HWND hwnd = data->hwnd;
+    RECT rect;
+    SDL_Rect bounds;
+    DWORD style;
+    HWND top;
+    BOOL menu;
+    int x, y;
+    int w, h;
+
+    if (fullscreen) {
+        top = HWND_TOPMOST;
+    } else {
+        top = HWND_NOTOPMOST;
+    }
+    style = GetWindowLong(hwnd, GWL_STYLE);
+    style &= ~STYLE_MASK;
+    style |= GetWindowStyle(window);
+
+    WIN_GetDisplayBounds(_this, display, &bounds);
+
+    if (fullscreen) {
+        /* Save the windowed position */
+        data->windowed_x = window->x;
+        data->windowed_y = window->y;
+
+        x = bounds.x;
+        y = bounds.y;
+        w = bounds.w;
+        h = bounds.h;
+    } else {
+        rect.left = 0;
+        rect.top = 0;
+        rect.right = window->w;
+        rect.bottom = window->h;
+#ifdef _WIN32_WCE
+        menu = FALSE;
+#else
+        menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+#endif
+        AdjustWindowRectEx(&rect, style, menu, 0);
+        w = (rect.right - rect.left);
+        h = (rect.bottom - rect.top);
+        x = data->windowed_x + rect.left;
+        y = data->windowed_y + rect.top;
+    }
+    SetWindowLong(hwnd, GWL_STYLE, style);
+    SetWindowPos(hwnd, top, x, y, w, h, SWP_NOCOPYBITS);
 }
 
 void

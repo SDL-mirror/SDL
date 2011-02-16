@@ -1001,31 +1001,10 @@ SDL_GetWindowPixelFormat(SDL_Window * window)
 }
 
 static void
-SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
+SDL_UpdateFullscreenMode(SDL_Window * window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_Window *other;
-
-    /* See if anything changed */
-    if ((display->fullscreen_window == window) == attempt) {
-        return;
-    }
-
-    /* See if we even want to do anything here */
-    if ((window->flags & SDL_WINDOW_FULLSCREEN) &&
-        (window->flags & SDL_WINDOW_SHOWN)) {
-        if (attempt) {
-            /* We just gained some state, try to gain all states */
-            if (window->flags & SDL_WINDOW_MINIMIZED) {
-                SDL_RestoreWindow(window);
-            } else {
-                SDL_RaiseWindow(window);
-            }
-        } else {
-            /* We just lost some state, try to release all states */
-            SDL_MinimizeWindow(window);
-        }
-    }
 
     if (FULLSCREEN_VISIBLE(window)) {
         /* Hide any other fullscreen windows */
@@ -1033,6 +1012,11 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
             display->fullscreen_window != window) {
             SDL_MinimizeWindow(display->fullscreen_window);
         }
+    }
+
+    /* See if anything needs to be done now */
+    if ((display->fullscreen_window == window) == FULLSCREEN_VISIBLE(window)) {
+        return;
     }
 
     /* See if there are any fullscreen windows */
@@ -1048,7 +1032,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
                 SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
 
                 if (_this->SetWindowFullscreen) {
-                    _this->SetWindowFullscreen(_this, other);
+                    _this->SetWindowFullscreen(_this, other, display, SDL_TRUE);
                 }
                 display->fullscreen_window = other;
 
@@ -1068,7 +1052,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool attempt)
     SDL_SetDisplayModeForDisplay(display, NULL);
 
     if (_this->SetWindowFullscreen) {
-        _this->SetWindowFullscreen(_this, window);
+        _this->SetWindowFullscreen(_this, window, display, SDL_FALSE);
     }
     display->fullscreen_window = NULL;
 }
@@ -1188,7 +1172,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     }
 
     /* Restore video mode, etc. */
-    SDL_UpdateFullscreenMode(window, SDL_FALSE);
+    SDL_HideWindow(window);
 
     /* Tear down the old native window */
     if (window->surface) {
@@ -1373,10 +1357,10 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 {
     CHECK_WINDOW_MAGIC(window, );
 
-    if (x != SDL_WINDOWPOS_UNDEFINED) {
+    if (!SDL_WINDOWPOS_ISUNDEFINED(x)) {
         window->x = x;
     }
-    if (y != SDL_WINDOWPOS_UNDEFINED) {
+    if (!SDL_WINDOWPOS_ISUNDEFINED(y)) {
         window->y = y;
     }
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
@@ -1569,13 +1553,11 @@ SDL_SetWindowFullscreen(SDL_Window * window, SDL_bool fullscreen)
     }
     if (fullscreen) {
         window->flags |= SDL_WINDOW_FULLSCREEN;
-
-        SDL_UpdateFullscreenMode(window, SDL_TRUE);
     } else {
         window->flags &= ~SDL_WINDOW_FULLSCREEN;
-
-        SDL_UpdateFullscreenMode(window, SDL_FALSE);
     }
+    SDL_UpdateFullscreenMode(window);
+
     return 0;
 }
 
@@ -1686,13 +1668,13 @@ void
 SDL_OnWindowShown(SDL_Window * window)
 {
     SDL_RaiseWindow(window);
-    SDL_UpdateFullscreenMode(window, SDL_TRUE);
+    SDL_UpdateFullscreenMode(window);
 }
 
 void
 SDL_OnWindowHidden(SDL_Window * window)
 {
-    SDL_UpdateFullscreenMode(window, SDL_FALSE);
+    SDL_UpdateFullscreenMode(window);
 }
 
 void
@@ -1705,14 +1687,14 @@ SDL_OnWindowResized(SDL_Window * window)
 void
 SDL_OnWindowMinimized(SDL_Window * window)
 {
-    SDL_UpdateFullscreenMode(window, SDL_FALSE);
+    SDL_UpdateFullscreenMode(window);
 }
 
 void
 SDL_OnWindowRestored(SDL_Window * window)
 {
     SDL_RaiseWindow(window);
-    SDL_UpdateFullscreenMode(window, SDL_TRUE);
+    SDL_UpdateFullscreenMode(window);
 }
 
 void
@@ -1763,7 +1745,7 @@ SDL_DestroyWindow(SDL_Window * window)
     CHECK_WINDOW_MAGIC(window, );
 
     /* Restore video mode, etc. */
-    SDL_UpdateFullscreenMode(window, SDL_FALSE);
+    SDL_HideWindow(window);
 
     if (window->surface) {
         window->surface->flags &= ~SDL_DONTFREE;

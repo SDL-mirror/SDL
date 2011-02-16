@@ -102,7 +102,7 @@ extern void Cocoa_RaiseWindow(_THIS, SDL_Window * window);
 extern void Cocoa_MaximizeWindow(_THIS, SDL_Window * window);
 extern void Cocoa_MinimizeWindow(_THIS, SDL_Window * window);
 extern void Cocoa_RestoreWindow(_THIS, SDL_Window * window);
-extern void Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window);
 extern void Cocoa_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window,

@@ -43,6 +43,8 @@ typedef struct
     WNDPROC wndproc;
     SDL_bool created;
     int mouse_pressed;
+    int windowed_x;
+    int windowed_y;
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
 
@@ -58,6 +60,7 @@ extern void WIN_RaiseWindow(_THIS, SDL_Window * window);
 extern void WIN_MaximizeWindow(_THIS, SDL_Window * window);
 extern void WIN_MinimizeWindow(_THIS, SDL_Window * window);
 extern void WIN_RestoreWindow(_THIS, SDL_Window * window);
+extern void WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern void WIN_SetWindowGrab(_THIS, SDL_Window * window);
 extern void WIN_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool WIN_GetWindowWMInfo(_THIS, SDL_Window * window,

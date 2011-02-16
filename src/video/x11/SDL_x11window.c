@@ -845,12 +845,11 @@ X11_RestoreWindow(_THIS, SDL_Window * window)
     X11_ShowWindow(_this, window);
 }
 
-static void
-SetWindowFullscreen(_THIS, SDL_Window * window, SDL_bool fullscreen)
+void
+X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * _display, SDL_bool fullscreen)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) _display->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
@@ -891,16 +890,6 @@ SetWindowFullscreen(_THIS, SDL_Window * window, SDL_bool fullscreen)
         }
     }
     XFlush(display);
-}
-
-void
-X11_SetWindowFullscreen(_THIS, SDL_Window * window)
-{
-    if (FULLSCREEN_VISIBLE(window)) {
-        SetWindowFullscreen(_this, window, SDL_TRUE);
-    } else {
-        SetWindowFullscreen(_this, window, SDL_FALSE);
-    }
 }
 
 void

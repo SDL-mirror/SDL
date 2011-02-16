@@ -399,18 +399,22 @@ static __inline__ void ConvertNSRect(NSRect *r)
 @end
 
 static unsigned int
-GetStyleMask(SDL_Window * window)
+GetWindowStyle(SDL_Window * window)
 {
     unsigned int style;
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
+	if (window->flags & SDL_WINDOW_FULLSCREEN) {
         style = NSBorderlessWindowMask;
-    } else {
-        style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
-    }
-    if (window->flags & SDL_WINDOW_RESIZABLE) {
-        style |= NSResizableWindowMask;
-    }
+	} else {
+		if (window->flags & SDL_WINDOW_BORDERLESS) {
+			style = NSBorderlessWindowMask;
+		} else {
+			style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
+		}
+		if (window->flags & SDL_WINDOW_RESIZABLE) {
+			style |= NSResizableWindowMask;
+		}
+	}
     return style;
 }
 
@@ -528,7 +532,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     rect.size.height = window->h;
     ConvertNSRect(&rect);
 
-    style = GetStyleMask(window);
+    style = GetWindowStyle(window);
 
     /* Figure out which screen to place this window */
     NSArray *screens = [NSScreen screens];
@@ -704,15 +708,14 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
 }
 
 void
-Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
+Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = data->nswindow;
     NSRect rect;
 
-    if (FULLSCREEN_VISIBLE(window)) {
-        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    if (fullscreen) {
         SDL_Rect bounds;
 
         Cocoa_GetDisplayBounds(_this, display, &bounds);
@@ -726,14 +729,14 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window)
         [nswindow setContentSize:rect.size];
         [nswindow setFrameOrigin:rect.origin];
     } else {
-        [nswindow setStyleMask:GetStyleMask(window)];
+        [nswindow setStyleMask:GetWindowStyle(window)];
 
         // This doesn't seem to do anything...
         //[nswindow setFrameOrigin:origin];
     }
 
 #ifdef FULLSCREEN_TOGGLEABLE
-    if (FULLSCREEN_VISIBLE(window)) {
+    if (fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
         [nswindow setLevel:CGShieldingWindowLevel()];
     } else {

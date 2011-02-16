@@ -124,6 +124,7 @@ WIN_CreateDevice(int devindex)
     device->MaximizeWindow = WIN_MaximizeWindow;
     device->MinimizeWindow = WIN_MinimizeWindow;
     device->RestoreWindow = WIN_RestoreWindow;
+    device->SetWindowFullscreen = WIN_SetWindowFullscreen;
     device->SetWindowGrab = WIN_SetWindowGrab;
     device->DestroyWindow = WIN_DestroyWindow;
     device->GetWindowWMInfo = WIN_GetWindowWMInfo;
