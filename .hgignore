@@ -8,6 +8,7 @@ sdl-config
 SDL.spec
 SDL.qpg
 build
+
 # for Xcode
 *.orig
 *.swp
@@ -22,6 +23,14 @@ build
 *.pbxuser
 (^|/)build($|/)
 .DS_Store
+
+# for Visual C++
+Debug
+Release
+*.user
+*.ncb
+*.suo
+
 sdl.pc
 test/autom4te*
 test/config.cache
@@ -46,7 +55,6 @@ test/testerror
 test/testeyes
 test/testfile
 test/testfill
-test/testgamma
 test/testgesture
 test/testgl
 test/testgl2
@@ -68,10 +76,14 @@ test/testpalette
 test/testplatform
 test/testpower
 test/testresample
+test/testscale
 test/testsem
+test/testshader
+test/testshape
 test/testsprite
 test/testsprite2
 test/testspriteminimal
+test/teststreaming
 test/testtimer
 test/testver
 test/testvidinfo
