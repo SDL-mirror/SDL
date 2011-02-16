@@ -72,17 +72,7 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <PreBuildEvent>
-      <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
-xcopy /d /q /y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-
-if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
-echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
-:SDLREVISIONOKAY
-</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>
@@ -150,17 +140,7 @@ echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_r
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PreBuildEvent>
-      <Message>Making sure basic SDL headers are in place...</Message>
-      <Command>echo Copying SDL_config_windows.h to SDL_config.h...
-xcopy /d /q /y "$(ProjectDir)\..\..\include\SDL_config_windows.h" "$(ProjectDir)\..\..\include\SDL_config.h"
-
-if exist "$(ProjectDir)\..\..\include\SDL_revision.h" goto SDLREVISIONOKAY
-echo Creating stub SDL_revision.h file...
-echo #define SDL_REVISION "hg-0:baadf00d" &gt;"$(ProjectDir)\..\..\include\SDL_revision.h"
-:SDLREVISIONOKAY
-</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MkTypLibCompatible>true</MkTypLibCompatible>

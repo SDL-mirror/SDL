@@ -122,7 +122,7 @@ all: $(TARGET) install nds_test
 src/atomic/SDL_spinlock.o: src/atomic/SDL_spinlock.c
 	$(CC) $(CFLAGS) -mno-thumb -o $@ -c $^
 
-$(TARGET): copy_config $(OBJS)
+$(TARGET): $(OBJS)
 	$(AR) rc $(TARGET) $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
 
@@ -136,9 +136,5 @@ nds_test:
 #	$(MAKE) -C test/nds-test-progs/sprite
 #	$(MAKE) -C test/nds-test-progs/sprite2
 
-copy_config:
-	@cp include/SDL_config.h.default include/SDL_config.h
-
 clean:
-	rm -f include/SDL_config.h $(OBJS)
-
+	rm -f $(OBJS)

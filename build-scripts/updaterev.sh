@@ -2,9 +2,10 @@
 #
 # Generate a header file with the current source revision
 
+outdir=`pwd`
 cd `dirname $0`
 srcdir=..
-header=$srcdir/include/SDL_revision.h
+header=$outdir/include/SDL_revision.h
 
 rev=`sh showrev.sh`
 if [ "$rev" != "" -a "$rev" != "hg-0:baadf00d" ]; then

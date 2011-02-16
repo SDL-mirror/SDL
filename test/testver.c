@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #include "SDL.h"
+#include "SDL_revision.h"
 
 int
 main(int argc, char *argv[])
