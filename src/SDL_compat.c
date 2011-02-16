@@ -558,6 +558,8 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
         surface_flags |= SDL_NOFRAME;
     }
 
+    SDL_VideoFlags = flags;
+
     /* If we're in OpenGL mode, just create a stub surface and we're done! */
     if (flags & SDL_OPENGL) {
         SDL_VideoContext = SDL_GL_CreateContext(SDL_VideoWindow);
@@ -626,8 +628,6 @@ SDL_SetVideoMode(int width, int height, int bpp, Uint32 flags)
     }
     SDL_PublicSurface =
         (SDL_ShadowSurface ? SDL_ShadowSurface : SDL_VideoSurface);
-
-    SDL_VideoFlags = flags;
 
     ClearVideoSurface();
 
