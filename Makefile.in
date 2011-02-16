@@ -127,7 +127,7 @@ install: all install-bin install-hdrs install-lib install-data
 install-bin:
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(bindir)
 	$(INSTALL) -m 755 sdl-config $(DESTDIR)$(bindir)/sdl-config
-install-hdrs:
+install-hdrs: $(srcdir)/include/SDL_revision.h
 	$(SHELL) $(auxdir)/mkinstalldirs $(DESTDIR)$(includedir)/SDL
 	for file in $(HDRS); do \
 	    $(INSTALL) -m 644 $(srcdir)/include/$$file $(DESTDIR)$(includedir)/SDL/$$file; \
