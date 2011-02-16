@@ -1255,7 +1255,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\SDL_keysym.h"
+				RelativePath="..\..\include\SDL_keycode.h"
 				>
 			</File>
 			<File

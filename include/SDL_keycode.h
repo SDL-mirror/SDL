@@ -21,13 +21,13 @@
 */
 
 /**
- *  \file SDL_keysym.h
+ *  \file SDL_keycode.h
  *  
  *  Defines constants which identify keyboard keys and modifiers.
  */
 
-#ifndef _SDL_keysym_h
-#define _SDL_keysym_h
+#ifndef _SDL_keycode_h
+#define _SDL_keycode_h
 
 #include "SDL_stdinc.h"
 #include "SDL_scancode.h"
@@ -337,6 +337,6 @@ typedef enum
 #define KMOD_ALT	(KMOD_LALT|KMOD_RALT)
 #define KMOD_GUI	(KMOD_LGUI|KMOD_RGUI)
 
-#endif /* _SDL_keysym_h */
+#endif /* _SDL_keycode_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -24,7 +24,7 @@
 #ifndef _SDL_keyboard_c_h
 #define _SDL_keyboard_c_h
 
-#include "SDL_keysym.h"
+#include "SDL_keycode.h"
 #include "SDL_events.h"
 
 /* Initialize the keyboard subsystem */

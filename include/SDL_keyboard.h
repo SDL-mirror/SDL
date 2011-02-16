@@ -31,7 +31,7 @@
 
 #include "SDL_stdinc.h"
 #include "SDL_error.h"
-#include "SDL_keysym.h"
+#include "SDL_keycode.h"
 #include "SDL_video.h"
 
 #include "begin_code.h"

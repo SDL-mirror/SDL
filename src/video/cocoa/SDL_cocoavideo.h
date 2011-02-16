@@ -29,7 +29,7 @@
 #include <ApplicationServices/ApplicationServices.h>
 #include <Cocoa/Cocoa.h>
 
-#include "SDL_keysym.h"
+#include "SDL_keycode.h"
 #include "../SDL_sysvideo.h"
 
 #include "SDL_cocoaclipboard.h"

@@ -64,6 +64,7 @@
 		0402A85912FE70C600CECEE3 /* SDL_shaders_gles2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0402A85612FE70C600CECEE3 /* SDL_shaders_gles2.c */; };
 		0402A85A12FE70C600CECEE3 /* SDL_shaders_gles2.h in Headers */ = {isa = PBXBuildFile; fileRef = 0402A85712FE70C600CECEE3 /* SDL_shaders_gles2.h */; };
 		04043B8D12FEA9350076DB1F /* SDL_opengles2.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043B8C12FEA9350076DB1F /* SDL_opengles2.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		0417A516130C988500578583 /* SDL_keycode.h in Headers */ = {isa = PBXBuildFile; fileRef = 0417A515130C988500578583 /* SDL_keycode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		041B2CD912FA0E9E0087D585 /* SDL_render.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2CD812FA0E9E0087D585 /* SDL_render.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		041B2CF112FA0F680087D585 /* SDL_render.c in Sources */ = {isa = PBXBuildFile; fileRef = 041B2CEA12FA0F680087D585 /* SDL_render.c */; };
 		041B2CF212FA0F680087D585 /* SDL_sysrender.h in Headers */ = {isa = PBXBuildFile; fileRef = 041B2CEB12FA0F680087D585 /* SDL_sysrender.h */; };
@@ -134,7 +135,6 @@
 		FD3F496C0DEA5B2100C5B771 /* SDL_events.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DD0DD52EB400FB1D6B /* SDL_events.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F496D0DEA5B2100C5B771 /* SDL_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F496E0DEA5B2100C5B771 /* SDL_keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DF0DD52EB400FB1D6B /* SDL_keyboard.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FD3F496F0DEA5B2100C5B771 /* SDL_keysym.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8E00DD52EB400FB1D6B /* SDL_keysym.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F49700DEA5B2100C5B771 /* SDL_loadso.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8E10DD52EB400FB1D6B /* SDL_loadso.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F49710DEA5B2100C5B771 /* SDL_main.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8E20DD52EB400FB1D6B /* SDL_main.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F49720DEA5B2100C5B771 /* SDL_mouse.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8E30DD52EB400FB1D6B /* SDL_mouse.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -321,6 +321,7 @@
 		0402A85612FE70C600CECEE3 /* SDL_shaders_gles2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_shaders_gles2.c; sourceTree = "<group>"; };
 		0402A85712FE70C600CECEE3 /* SDL_shaders_gles2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_shaders_gles2.h; sourceTree = "<group>"; };
 		04043B8C12FEA9350076DB1F /* SDL_opengles2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_opengles2.h; path = ../../include/SDL_opengles2.h; sourceTree = SOURCE_ROOT; };
+		0417A515130C988500578583 /* SDL_keycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_keycode.h; path = ../../include/SDL_keycode.h; sourceTree = SOURCE_ROOT; };
 		041B2CD812FA0E9E0087D585 /* SDL_render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_render.h; path = ../../include/SDL_render.h; sourceTree = SOURCE_ROOT; };
 		041B2CEA12FA0F680087D585 /* SDL_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render.c; sourceTree = "<group>"; };
 		041B2CEB12FA0F680087D585 /* SDL_sysrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysrender.h; sourceTree = "<group>"; };
@@ -422,7 +423,6 @@
 		FD99B8DD0DD52EB400FB1D6B /* SDL_events.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_events.h; path = ../../include/SDL_events.h; sourceTree = "<group>"; };
 		FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_joystick.h; path = ../../include/SDL_joystick.h; sourceTree = "<group>"; };
 		FD99B8DF0DD52EB400FB1D6B /* SDL_keyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_keyboard.h; path = ../../include/SDL_keyboard.h; sourceTree = "<group>"; };
-		FD99B8E00DD52EB400FB1D6B /* SDL_keysym.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_keysym.h; path = ../../include/SDL_keysym.h; sourceTree = "<group>"; };
 		FD99B8E10DD52EB400FB1D6B /* SDL_loadso.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_loadso.h; path = ../../include/SDL_loadso.h; sourceTree = "<group>"; };
 		FD99B8E20DD52EB400FB1D6B /* SDL_main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_main.h; path = ../../include/SDL_main.h; sourceTree = "<group>"; };
 		FD99B8E30DD52EB400FB1D6B /* SDL_mouse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_mouse.h; path = ../../include/SDL_mouse.h; sourceTree = "<group>"; };
@@ -922,7 +922,7 @@
 				044E5FB411E6069F0076F181 /* SDL_input.h */,
 				FD99B8DE0DD52EB400FB1D6B /* SDL_joystick.h */,
 				FD99B8DF0DD52EB400FB1D6B /* SDL_keyboard.h */,
-				FD99B8E00DD52EB400FB1D6B /* SDL_keysym.h */,
+				0417A515130C988500578583 /* SDL_keycode.h */,
 				FD99B8E10DD52EB400FB1D6B /* SDL_loadso.h */,
 				04BAC0981300C0F70055DE28 /* SDL_log.h */,
 				FD99B8E20DD52EB400FB1D6B /* SDL_main.h */,
@@ -1176,7 +1176,6 @@
 				FD3F496C0DEA5B2100C5B771 /* SDL_events.h in Headers */,
 				FD3F496D0DEA5B2100C5B771 /* SDL_joystick.h in Headers */,
 				FD3F496E0DEA5B2100C5B771 /* SDL_keyboard.h in Headers */,
-				FD3F496F0DEA5B2100C5B771 /* SDL_keysym.h in Headers */,
 				FD3F49700DEA5B2100C5B771 /* SDL_loadso.h in Headers */,
 				FD3F49710DEA5B2100C5B771 /* SDL_main.h in Headers */,
 				FD3F49720DEA5B2100C5B771 /* SDL_mouse.h in Headers */,
@@ -1256,6 +1255,7 @@
 				04043B8D12FEA9350076DB1F /* SDL_opengles2.h in Headers */,
 				04BAC0991300C0F70055DE28 /* SDL_log.h in Headers */,
 				04BAC09C1300C1290055DE28 /* SDL_assert_c.h in Headers */,
+				0417A516130C988500578583 /* SDL_keycode.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

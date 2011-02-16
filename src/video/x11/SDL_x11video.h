@@ -24,7 +24,7 @@
 #ifndef _SDL_x11video_h
 #define _SDL_x11video_h
 
-#include "SDL_keysym.h"
+#include "SDL_keycode.h"
 
 #include "../SDL_sysvideo.h"
 
