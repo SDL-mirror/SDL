@@ -92,7 +92,7 @@ enum
            ...
        };
      */
-    SDL_LOG_CATEGORY_CUSTOM,
+    SDL_LOG_CATEGORY_CUSTOM
 };
 
 /**
