@@ -476,7 +476,6 @@ Blit1toNAlphaKey(SDL_BlitInfo * info)
     int srcskip = info->src_skip;
     Uint8 *dst = info->dst;
     int dstskip = info->dst_skip;
-    SDL_PixelFormat *srcfmt = info->src_fmt;
     SDL_PixelFormat *dstfmt = info->dst_fmt;
     const SDL_Color *srcpal = info->src_fmt->palette->colors;
     Uint32 ckey = info->colorkey;

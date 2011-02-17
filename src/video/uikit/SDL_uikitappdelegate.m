@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
     UIApplicationMain(argc, argv, NULL, @"SDLUIKitDelegate");
     
     [pool release];
-    
+    return 0;
 }
 
 @implementation SDLUIKitDelegate

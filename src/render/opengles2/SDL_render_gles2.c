@@ -161,8 +161,6 @@ GLES2_ActivateRenderer(SDL_Renderer * renderer)
 static void
 GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
-    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
@@ -232,7 +230,6 @@ static int GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, con
 static int
 GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 {
-    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLES2_TextureData *tdata;
     GLenum format;
     GLenum type;
@@ -995,7 +992,6 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     GLfloat texCoords[8];
     GLuint locTexture;
     GLuint locModulation;
-    GLuint locColorTable;
 
     GLES2_ActivateRenderer(renderer);
 

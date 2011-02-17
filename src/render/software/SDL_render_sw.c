@@ -511,7 +511,6 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 static void
 SW_RenderPresent(SDL_Renderer * renderer)
 {
-    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
 
     if (window) {

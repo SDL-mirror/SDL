@@ -401,7 +401,6 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative,
     SDL_Finger *finger;
     int posted;
     Sint16 xrel, yrel;
-    float x_max = 0, y_max = 0;
     Uint16 x;
     Uint16 y;
     Uint16 pressure;
