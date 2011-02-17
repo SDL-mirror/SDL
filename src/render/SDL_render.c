@@ -848,21 +848,6 @@ SDL_RenderClear(SDL_Renderer * renderer)
 {
     CHECK_RENDERER_MAGIC(renderer, -1);
 
-    if (!renderer->RenderClear) {
-        SDL_BlendMode blendMode = renderer->blendMode;
-        int status;
-
-        if (blendMode >= SDL_BLENDMODE_BLEND) {
-            SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
-        }
-
-        status = SDL_RenderFillRect(renderer, NULL);
-
-        if (blendMode >= SDL_BLENDMODE_BLEND) {
-            SDL_SetRenderDrawBlendMode(renderer, blendMode);
-        }
-        return status;
-    }
     return renderer->RenderClear(renderer);
 }
 

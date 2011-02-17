@@ -54,6 +54,7 @@ static int GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
 static int GLES_UpdateViewport(SDL_Renderer * renderer);
+static int GLES_RenderClear(SDL_Renderer * renderer);
 static int GLES_RenderDrawPoints(SDL_Renderer * renderer,
                                  const SDL_Point * points, int count);
 static int GLES_RenderDrawLines(SDL_Renderer * renderer,
@@ -180,6 +181,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
     renderer->UpdateViewport = GLES_UpdateViewport;
+    renderer->RenderClear = GLES_RenderClear;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
     renderer->RenderDrawLines = GLES_RenderDrawLines;
     renderer->RenderFillRects = GLES_RenderFillRects;
@@ -448,6 +450,21 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
 			 (GLfloat) renderer->viewport.w,
              (GLfloat) renderer->viewport.h,
              (GLfloat) 0, 0.0, 1.0);
+    return 0;
+}
+
+static int
+GLES_RenderClear(SDL_Renderer * renderer)
+{
+    GLES_ActivateRenderer(renderer);
+
+    glClearColor((GLfloat) renderer->r * inv255f,
+                 (GLfloat) renderer->g * inv255f,
+                 (GLfloat) renderer->b * inv255f,
+                 (GLfloat) renderer->a * inv255f);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
     return 0;
 }
 

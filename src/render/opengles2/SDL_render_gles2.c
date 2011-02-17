@@ -770,19 +770,19 @@ static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const 
                             const SDL_Rect *dstrect);
 static void GLES2_RenderPresent(SDL_Renderer *renderer);
 
-static int
-GLES2_RenderClear(SDL_Renderer *renderer)
-{
-    float r = (float)renderer->r * inv255f;
-    float g = (float)renderer->g * inv255f;
-    float b = (float)renderer->b * inv255f;
-    float a = (float)renderer->a * inv255f;
 
+static int
+GLES2_RenderClear(SDL_Renderer * renderer)
+{
     GLES2_ActivateRenderer(renderer);
 
-    /* Clear the backbuffer with the selected color */
-    glClearColor(r, g, b, a);
+    glClearColor((GLfloat) renderer->r * inv255f,
+                 (GLfloat) renderer->g * inv255f,
+                 (GLfloat) renderer->b * inv255f,
+                 (GLfloat) renderer->a * inv255f);
+
     glClear(GL_COLOR_BUFFER_BIT);
+
     return 0;
 }
 
