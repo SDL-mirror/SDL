@@ -30,8 +30,8 @@
 #ifndef UNICODE
 #define UNICODE 1
 #endif
-#undef WINVER
-#define WINVER  0x500           /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
+#undef _WIN32_WINNT
+#define _WIN32_WINNT  0x500   /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices() */
 
 #include <windows.h>
 

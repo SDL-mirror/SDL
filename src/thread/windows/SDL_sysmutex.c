@@ -38,29 +38,17 @@ SDL_mutex *
 SDL_CreateMutex(void)
 {
     SDL_mutex *mutex;
-    static DWORD (WINAPI*pf_SetCriticalSectionSpinCount)(LPCRITICAL_SECTION, DWORD) = NULL;
-    static HMODULE kernel32 = NULL;
-
-    /* One time logic - detect WinNT */
-    if(kernel32 == NULL) {
-        kernel32 = GetModuleHandleA("kernel32.dll");
-		if(kernel32) {
-            /* Attempt to resolve symbol -- Win9x gets NULL */
-            pf_SetCriticalSectionSpinCount = (DWORD (WINAPI*)(LPCRITICAL_SECTION, DWORD))GetProcAddress(kernel32, "SetCriticalSectionSpinCount");
-        }
-		else
-			kernel32 = (HMODULE)0x01; /* don't try to init again */
-	}
-
 
     /* Allocate mutex memory */
     mutex = (SDL_mutex *) SDL_malloc(sizeof(*mutex));
     if (mutex) {
         /* Initialize */
+#ifdef _WIN32_WCE
         InitializeCriticalSection(&mutex->cs);
-
+#else
         /* On SMP systems, a non-zero spin count generally helps performance */
-        if(pf_SetCriticalSectionSpinCount) pf_SetCriticalSectionSpinCount(&mutex->cs, 2000);
+        InitializeCriticalSectionAndSpinCount(&mutex->cs, 2000);
+#endif
     } else {
         SDL_OutOfMemory();
     }
