@@ -239,7 +239,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     glLoadIdentity();
 
     glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     
     return renderer;
 }
@@ -247,8 +247,6 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 static void
 GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
-    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
-
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
@@ -595,13 +593,11 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     int minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
-    int i;
-    void *temp_buffer;          /* used for reformatting dirty rect pixels */
-    void *temp_ptr;
 
     GLES_ActivateRenderer(renderer);
 
     glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glBindTexture(texturedata->type, texturedata->texture);
 
@@ -672,7 +668,8 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-
+	
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
 
     return 0;
