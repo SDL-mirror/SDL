@@ -63,9 +63,10 @@ extern "C" {
  */
 typedef enum
 {
-    SDL_RENDERER_ACCELERATED = 0x00000001,      /**< The renderer uses hardware 
+    SDL_RENDERER_SOFTWARE = 0x00000001,         /**< The renderer is a software fallback */ 
+    SDL_RENDERER_ACCELERATED = 0x00000002,      /**< The renderer uses hardware 
                                                      acceleration */
-    SDL_RENDERER_PRESENTVSYNC = 0x00000002      /**< Present is synchronized 
+    SDL_RENDERER_PRESENTVSYNC = 0x00000004      /**< Present is synchronized 
                                                      with the refresh rate */
 } SDL_RendererFlags;
 

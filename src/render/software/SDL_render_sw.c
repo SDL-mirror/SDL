@@ -72,7 +72,7 @@ SDL_RenderDriver SW_RenderDriver = {
     SW_CreateRenderer,
     {
      "software",
-     0,
+     SDL_RENDERER_SOFTWARE,
      8,
      {
       SDL_PIXELFORMAT_RGB555,
