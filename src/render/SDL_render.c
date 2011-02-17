@@ -930,8 +930,6 @@ SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 
     /* If 'rect' == NULL, then outline the whole surface */
     if (!rect) {
-        SDL_Window *window = renderer->window;
-
         full_rect.x = 0;
         full_rect.y = 0;
         full_rect.w = renderer->viewport.w;
@@ -979,6 +977,18 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
 int
 SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
+    SDL_Rect full_rect;
+	
+    CHECK_RENDERER_MAGIC(renderer, -1);
+	
+    /* If 'rect' == NULL, then outline the whole surface */
+    if (!rect) {
+        full_rect.x = 0;
+        full_rect.y = 0;
+        full_rect.w = renderer->viewport.w;
+        full_rect.h = renderer->viewport.h;
+        rect = &full_rect;
+    }
     return SDL_RenderFillRects(renderer, rect, 1);
 }
 
