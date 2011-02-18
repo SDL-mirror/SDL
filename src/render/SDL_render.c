@@ -312,7 +312,7 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
         } else if (access == SDL_TEXTUREACCESS_STREAMING) {
             /* The pitch is 4 byte aligned */
             texture->pitch = (((w * SDL_BYTESPERPIXEL(format)) + 3) & ~3);
-            texture->pixels = SDL_malloc(texture->pitch * h);
+            texture->pixels = SDL_calloc(1, texture->pitch * h);
             if (!texture->pixels) {
                 SDL_DestroyTexture(texture);
                 return NULL;
