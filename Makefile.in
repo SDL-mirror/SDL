@@ -111,7 +111,7 @@ $(objects):
 update-revision:
 	$(SHELL) $(auxdir)/updaterev.sh
 
-.PHONY: all install install-bin install-hdrs install-lib install-data uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data clean distclean dist $(OBJECTS:.lo=.d)
+.PHONY: all update-revision install install-bin install-hdrs install-lib install-data uninstall uninstall-bin uninstall-hdrs uninstall-lib uninstall-data clean distclean dist $(OBJECTS:.lo=.d)
 
 $(objects)/$(TARGET): $(OBJECTS) $(VERSION_OBJECTS)
 	$(LIBTOOL) --mode=link $(CC) -o $@ $(OBJECTS) $(VERSION_OBJECTS) $(LDFLAGS) $(EXTRA_LDFLAGS) $(LT_LDFLAGS)
