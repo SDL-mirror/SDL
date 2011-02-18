@@ -57,7 +57,7 @@ HDRS = \
 	SDL_input.h \
 	SDL_joystick.h \
 	SDL_keyboard.h \
-	SDL_keysym.h \
+	SDL_keycode.h \
 	SDL_loadso.h \
 	SDL_log.h \
 	SDL_main.h \
