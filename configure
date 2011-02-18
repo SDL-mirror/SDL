@@ -28350,7 +28350,6 @@ for EXT in asm cc m c S; do
 \\$(objects)/\\2.lo: \\1/\\2.$EXT\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 done
-DEPENDS=`echo "$DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 VERSION_OBJECTS=`echo $VERSION_SOURCES`
 VERSION_DEPENDS=`echo $VERSION_SOURCES`
@@ -28358,7 +28357,6 @@ VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[^ ]*/\([^ ]*\)\.rc,$(objects)
 VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed "s,\\([^ ]*\\)/\\([^ ]*\\)\\.rc,\\\\
 \\$(objects)/\\2.o: \\1/\\2.rc\\\\
 	\\$(WINDRES) \\$< \\$@,g"`
-VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
@@ -28366,7 +28364,6 @@ SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[^ ]*/\([^ ]*\)\.c,$(objects)/
 SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([^ ]*\\)/\\([^ ]*\\)\\.c,\\\\
 \\$(objects)/\\2.o: \\1/\\2.c\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
-SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 # Set runtime shared library paths as needed
 
@@ -28425,9 +28422,19 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile sdl-config SDL.spec sdl.pc"
+cat >Makefile.rules <<__EOF__
 
-ac_config_commands="$ac_config_commands default"
+# Build rules for objects
+-include \$(OBJECTS:.lo=.d)
+
+# Special dependency for SDL.c, since it depends on SDL_revision.h
+$srcdir/src/SDL.c: update-revision
+$DEPENDS
+$VERSION_DEPENDS
+$SDLMAIN_DEPENDS
+__EOF__
+
+ac_config_files="$ac_config_files Makefile:Makefile.in:Makefile.rules sdl-config SDL.spec sdl.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -29334,11 +29341,6 @@ fi
 
 
 
-DEPENDS="$DEPENDS"
-VERSION_DEPENDS="$VERSION_DEPENDS"
-SDLMAIN_DEPENDS="$SDLMAIN_DEPENDS"
-
-
 _ACEOF
 
 cat >>$CONFIG_STATUS <<\_ACEOF
@@ -29349,11 +29351,10 @@ do
   case $ac_config_target in
     "include/SDL_config.h") CONFIG_HEADERS="$CONFIG_HEADERS include/SDL_config.h" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
-    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile:Makefile.in:Makefile.rules" ;;
     "sdl-config") CONFIG_FILES="$CONFIG_FILES sdl-config" ;;
     "SDL.spec") CONFIG_FILES="$CONFIG_FILES SDL.spec" ;;
     "sdl.pc") CONFIG_FILES="$CONFIG_FILES sdl.pc" ;;
-    "default") CONFIG_COMMANDS="$CONFIG_COMMANDS default" ;;
 
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
@@ -30797,15 +30798,6 @@ compiler_lib_search_path=$lt_compiler_lib_search_path_CXX
 # ### END LIBTOOL TAG CONFIG: CXX
 _LT_EOF
 
- ;;
-    "default":C) cat >>Makefile <<__EOF__
-
-# Build rules for objects
--include \$(OBJECTS:.lo=.d)
-$DEPENDS
-$VERSION_DEPENDS
-$SDLMAIN_DEPENDS
-__EOF__
  ;;
 
   esac

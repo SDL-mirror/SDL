@@ -2354,7 +2354,6 @@ for EXT in asm cc m c S; do
 \\$(objects)/\\2.lo: \\1/\\2.$EXT\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 done
-DEPENDS=`echo "$DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 VERSION_OBJECTS=`echo $VERSION_SOURCES`
 VERSION_DEPENDS=`echo $VERSION_SOURCES`
@@ -2362,7 +2361,6 @@ VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(obje
 VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.rc,\\\\
 \\$(objects)/\\2.o: \\1/\\2.rc\\\\
 	\\$(WINDRES) \\$< \\$@,g"`
-VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
@@ -2370,7 +2368,6 @@ SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objec
 SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.c,\\\\
 \\$(objects)/\\2.o: \\1/\\2.c\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
-SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed 's,\\$,\\\\$,g'`
 
 # Set runtime shared library paths as needed
 
@@ -2431,21 +2428,19 @@ AC_SUBST(BUILD_LDFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
 AC_SUBST(WINDRES)
 
-AC_CONFIG_FILES([
-    Makefile sdl-config SDL.spec sdl.pc
-])
-AC_CONFIG_COMMANDS([default],
-                   [cat >>Makefile <<__EOF__
+cat >Makefile.rules <<__EOF__
 
 # Build rules for objects
 -include \$(OBJECTS:.lo=.d)
+
+# Special dependency for SDL.c, since it depends on SDL_revision.h
+$srcdir/src/SDL.c: update-revision
 $DEPENDS
 $VERSION_DEPENDS
 $SDLMAIN_DEPENDS
-__EOF__ 
-], [
-DEPENDS="$DEPENDS"
-VERSION_DEPENDS="$VERSION_DEPENDS"
-SDLMAIN_DEPENDS="$SDLMAIN_DEPENDS"
+__EOF__
+
+AC_CONFIG_FILES([
+    Makefile:Makefile.in:Makefile.rules sdl-config SDL.spec sdl.pc
 ])
 AC_OUTPUT
