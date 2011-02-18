@@ -26,7 +26,7 @@
 #include "SDL_platform.h"
 
 /**
- *  \file SDL_config.h.default
+ *  \file SDL_config.h
  *
  *  SDL_config.h for any platform that doesn't build using the configure system.
  */
