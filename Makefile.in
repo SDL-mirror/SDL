@@ -167,7 +167,7 @@ clean:
 	if test -f test/Makefile; then (cd test; $(MAKE) $@); fi
 
 distclean: clean
-	rm -f Makefile include/SDL_config.h include/SDL_revision.h sdl-config
+	rm -f Makefile sdl-config
 	rm -f SDL.qpg
 	rm -f config.status config.cache config.log libtool
 	rm -rf $(srcdir)/autom4te*
