@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testoverlay2"
 	ProjectGUID="{B51E0D74-F0A2-45A2-BD2A-8B7D95B8204A}"
+	RootNamespace="testoverlay2"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

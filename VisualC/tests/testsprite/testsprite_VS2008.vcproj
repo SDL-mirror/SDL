@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testsprite"
 	ProjectGUID="{5D0930C0-7C91-4ECE-9014-7B7DDE9502E5}"
+	RootNamespace="testsprite"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

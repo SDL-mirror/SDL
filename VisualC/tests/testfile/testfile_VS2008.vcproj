@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testfile"
 	ProjectGUID="{CAE4F1D0-314F-4B10-805B-0EFD670133A0}"
+	RootNamespace="testfile"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="graywin"
 	ProjectGUID="{0BCCA0BF-073E-439E-BCE0-C9353C177487}"
+	RootNamespace="graywin"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

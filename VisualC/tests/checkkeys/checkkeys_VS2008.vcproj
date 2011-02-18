@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="checkkeys"
 	ProjectGUID="{26828762-C95D-4637-9CB1-7F0979523813}"
+	RootNamespace="checkkeys"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

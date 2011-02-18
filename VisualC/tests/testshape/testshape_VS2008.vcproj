@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testshape"
 	ProjectGUID="{31A3E4E1-AAE9-4EF3-9B23-18D0924BE4D2}"
+	RootNamespace="testshape"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

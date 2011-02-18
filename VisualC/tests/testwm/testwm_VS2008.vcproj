@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testwm"
 	ProjectGUID="{6AF0724B-BAC1-4C9D-AFBF-F63B4A2FB8FB}"
+	RootNamespace="testwm"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

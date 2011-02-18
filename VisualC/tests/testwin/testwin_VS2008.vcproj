@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testwin"
 	ProjectGUID="{0FFD1A21-11DB-492C-A989-E4F195B0C441}"
+	RootNamespace="testwin"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

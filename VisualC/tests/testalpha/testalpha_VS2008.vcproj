@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testalpha"
 	ProjectGUID="{7814D54B-65D3-4677-AD77-E0B980B4FA2D}"
+	RootNamespace="testalpha"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

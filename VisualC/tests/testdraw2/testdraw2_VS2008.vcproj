@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testdraw2"
 	ProjectGUID="{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}"
+	RootNamespace="testdraw2"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

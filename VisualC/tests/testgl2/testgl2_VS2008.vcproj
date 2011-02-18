@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testgl2"
 	ProjectGUID="{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}"
+	RootNamespace="testgl2"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

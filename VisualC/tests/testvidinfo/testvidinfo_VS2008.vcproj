@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testvidinfo"
 	ProjectGUID="{575FD095-EDAB-4BD4-B733-CD4A874F6FB0}"
+	RootNamespace="testvidinfo"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

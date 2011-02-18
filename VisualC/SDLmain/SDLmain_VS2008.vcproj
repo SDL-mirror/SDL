@@ -252,7 +252,7 @@
 				RuntimeLibrary="3"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="4"
 				CompileAs="0"
 			/>
 			<Tool
@@ -318,7 +318,7 @@
 				RuntimeLibrary="2"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
-				DebugInformationFormat="1"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool

@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="loopwave"
 	ProjectGUID="{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}"
+	RootNamespace="loopwave"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

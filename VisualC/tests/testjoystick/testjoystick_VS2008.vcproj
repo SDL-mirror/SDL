@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testjoystick"
 	ProjectGUID="{55812185-D13C-4022-9C81-32E0F4A08304}"
+	RootNamespace="testjoystick"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>

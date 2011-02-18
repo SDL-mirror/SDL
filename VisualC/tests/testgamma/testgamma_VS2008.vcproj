@@ -4,6 +4,7 @@
 	Version="9.00"
 	Name="testgamma"
 	ProjectGUID="{D974A0DF-3E2E-445C-A2EB-E899E9B582CB}"
+	RootNamespace="testgamma"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
