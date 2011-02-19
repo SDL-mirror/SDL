@@ -100,7 +100,7 @@ typedef struct
     /* Multitexture support */
     SDL_bool GL_ARB_multitexture_supported;
     PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
-    int num_texture_units;
+    GLint num_texture_units;
 
     /* Shader support */
     GL_ShaderContext *shaders;
