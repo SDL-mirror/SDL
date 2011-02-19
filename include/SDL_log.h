@@ -144,6 +144,11 @@ extern DECLSPEC void SDLCALL SDL_Log(const char *fmt, ...);
 extern DECLSPEC void SDLCALL SDL_LogVerbose(int category, const char *fmt, ...);
 
 /**
+ *  \brief Log a message with SDL_LOG_PRIORITY_DEBUG
+ */
+extern DECLSPEC void SDLCALL SDL_LogDebug(int category, const char *fmt, ...);
+
+/**
  *  \brief Log a message with SDL_LOG_PRIORITY_INFO
  */
 extern DECLSPEC void SDLCALL SDL_LogInfo(int category, const char *fmt, ...);

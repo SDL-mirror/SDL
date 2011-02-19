@@ -175,6 +175,16 @@ SDL_LogVerbose(int category, const char *fmt, ...)
 }
 
 void
+SDL_LogDebug(int category, const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+    SDL_LogMessageV(category, SDL_LOG_PRIORITY_DEBUG, fmt, ap);
+    va_end(ap);
+}
+
+void
 SDL_LogInfo(int category, const char *fmt, ...)
 {
     va_list ap;
