@@ -236,60 +236,107 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
 {
     switch (bpp) {
     case 8:
-        switch (Rmask) {
-        case 0:
+        if (Rmask == 0) {
             return SDL_PIXELFORMAT_INDEX8;
-        case 0xE0:
-            return SDL_PIXELFORMAT_RGB332;
+        }
+        if (Rmask == 0xE0 &&
+            Gmask == 0x1C &&
+            Bmask == 0x03 &&
+            Amask == 0x00) {
+            return SDL_PIXELFORMAT_RGB332
         }
         break;
     case 12:
-        switch (Rmask) {
-        case 0x0F00:
-            return SDL_PIXELFORMAT_RGB444;
+        if (Rmask == 0) {
+            return SDL_PIXELFORMAT_RGB444
+        }
+        if (Rmask == 0x0F00 &&
+            Gmask == 0x00F0 &&
+            Bmask == 0x000F &&
+            Amask == 0x0000) {
+            return SDL_PIXELFORMAT_RGB444
         }
         break;
     case 15:
         if (Rmask == 0) {
             return SDL_PIXELFORMAT_RGB555;
         }
-        if (Rmask == 0x7C00 && Bmask == 0x001F) {
-            return SDL_PIXELFORMAT_RGB555;
-        }
-        if (Rmask == 0x001F && Bmask == 0x7C00) {
-            return SDL_PIXELFORMAT_BGR555;
-        }
-        break;
+        /* Fall through to 16-bit checks */
     case 16:
-        switch (Rmask) {
-        case 0:
+        if (Rmask == 0) {
             return SDL_PIXELFORMAT_RGB565;
-        case 0xF000:
-            return SDL_PIXELFORMAT_RGBA4444;
-        case 0x0F00:
-            return SDL_PIXELFORMAT_ARGB4444;
-        case 0x00F0:
-            return SDL_PIXELFORMAT_BGRA4444;
-        case 0x000F:
-            return SDL_PIXELFORMAT_ABGR4444;
-        case 0xF800:
-            if (Bmask == 0x001F) {
-                return SDL_PIXELFORMAT_RGB565;
-            }
-            break;
-        case 0x7C00:
-            if (Bmask == 0x001F) {
-                return SDL_PIXELFORMAT_RGB555;
-            }
-            break;
-        case 0x001F:
-            if (Bmask == 0xF800) {
-                return SDL_PIXELFORMAT_BGR565;
-            }
-            if (Bmask == 0x7C00) {
-                return SDL_PIXELFORMAT_BGR555;
-            }
-            break;
+        }
+        if (Rmask == 0x7C00 &&
+            Gmask == 0x03E0 &&
+            Bmask == 0x001F &&
+            Amask == 0x0000) {
+            return SDL_PIXELFORMAT_RGB555
+        }
+        if (Rmask == 0x001F &&
+            Gmask == 0x03E0 &&
+            Bmask == 0x7C00 &&
+            Amask == 0x0000) {
+            return SDL_PIXELFORMAT_BGR555
+        }
+        if (Rmask == 0x0F00 &&
+            Gmask == 0x00F0 &&
+            Bmask == 0x000F &&
+            Amask == 0xF000) {
+            return SDL_PIXELFORMAT_ARGB4444
+        }
+        if (Rmask == 0xF000 &&
+            Gmask == 0x0F00 &&
+            Bmask == 0x00F0 &&
+            Amask == 0x000F) {
+            return SDL_PIXELFORMAT_RGBA4444
+        }
+        if (Rmask == 0x000F &&
+            Gmask == 0x00F0 &&
+            Bmask == 0x0F00 &&
+            Amask == 0xF000) {
+            return SDL_PIXELFORMAT_ABGR4444
+        }
+        if (Rmask == 0x00F0 &&
+            Gmask == 0x0F00 &&
+            Bmask == 0xF000 &&
+            Amask == 0x000F) {
+            return SDL_PIXELFORMAT_BGRA4444
+        }
+        if (Rmask == 0x7C00 &&
+            Gmask == 0x03E0 &&
+            Bmask == 0x001F &&
+            Amask == 0x8000) {
+            return SDL_PIXELFORMAT_ARGB1555
+        }
+        if (Rmask == 0xF800 &&
+            Gmask == 0x07C0 &&
+            Bmask == 0x003E &&
+            Amask == 0x0001) {
+            return SDL_PIXELFORMAT_RGBA5551
+        }
+        if (Rmask == 0x001F &&
+            Gmask == 0x03E0 &&
+            Bmask == 0x7C00 &&
+            Amask == 0x8000) {
+            return SDL_PIXELFORMAT_ABGR1555
+        }
+        if (Rmask == 0x003E &&
+            Gmask == 0x07C0 &&
+            Bmask == 0xF800 &&
+            Amask == 0x0001) {
+            return SDL_PIXELFORMAT_BGRA5551
+        }
+        if (Rmask == 0xF800 &&
+            Gmask == 0x07E0 &&
+            Bmask == 0x001F &&
+            Amask == 0x0000) {
+            return SDL_PIXELFORMAT_RGB565
+        }
+        if (Rmask == 0x001F &&
+            Gmask == 0x07E0 &&
+            Bmask == 0xF800 &&
+            Amask == 0x0000) {
+            return SDL_PIXELFORMAT_BGR565
         }
         break;
     case 24:
@@ -309,34 +356,50 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
 #endif
         }
     case 32:
-        switch (Rmask) {
-        case 0xFF000000:
-            if (Amask == 0x000000FF) {
-                return SDL_PIXELFORMAT_RGBA8888;
-            }
-            break;
-        case 0:
-        case 0x00FF0000:
-            if (Amask == 0xFF000000) {
-                return SDL_PIXELFORMAT_ARGB8888;
-            } else {
-                return SDL_PIXELFORMAT_RGB888;
-            }
-            break;
-        case 0x0000FF00:
-            if (Amask == 0x000000FF) {
-                return SDL_PIXELFORMAT_BGRA8888;
-            }
-            break;
-        case 0x000000FF:
-            if (Amask == 0xFF000000) {
-                return SDL_PIXELFORMAT_ABGR8888;
-            } else {
-                return SDL_PIXELFORMAT_BGR888;
-            }
-            break;
-        case 0x3FF00000:
-            return SDL_PIXELFORMAT_ARGB2101010;
+        if (Rmask == 0) {
+            return SDL_PIXELFORMAT_RGB888;
+        }
+        if (Rmask == 0x00FF0000 &&
+            Gmask == 0x0000FF00 &&
+            Bmask == 0x000000FF &&
+            Amask == 0x00000000) {
+            return SDL_PIXELFORMAT_RGB888
+        }
+        if (Rmask == 0x000000FF &&
+            Gmask == 0x0000FF00 &&
+            Bmask == 0x00FF0000 &&
+            Amask == 0x00000000) {
+            return SDL_PIXELFORMAT_BGR888
+        }
+        if (Rmask == 0x00FF0000 &&
+            Gmask == 0x0000FF00 &&
+            Bmask == 0x000000FF &&
+            Amask == 0xFF000000) {
+            return SDL_PIXELFORMAT_ARGB8888
+        }
+        if (Rmask == 0xFF000000 &&
+            Gmask == 0x00FF0000 &&
+            Bmask == 0x0000FF00 &&
+            Amask == 0x000000FF) {
+            return SDL_PIXELFORMAT_RGBA8888
+        }
+        if (Rmask == 0x000000FF &&
+            Gmask == 0x0000FF00 &&
+            Bmask == 0x00FF0000 &&
+            Amask == 0xFF000000) {
+            return SDL_PIXELFORMAT_ABGR8888
+        }
+        if (Rmask == 0x0000FF00 &&
+            Gmask == 0x00FF0000 &&
+            Bmask == 0xFF000000 &&
+            Amask == 0x000000FF) {
+            return SDL_PIXELFORMAT_BGRA8888
+        }
+        if (Rmask == 0x3FF00000 &&
+            Gmask == 0x000FFC00 &&
+            Bmask == 0x000003FF &&
+            Amask == 0xC0000000) {
+            return SDL_PIXELFORMAT_ARGB2101010
         }
     }
     return SDL_PIXELFORMAT_UNKNOWN;
