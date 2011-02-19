@@ -1018,19 +1018,22 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_g:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-G toggle grab */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    SDL_SetWindowGrab(window, !SDL_GetWindowGrab(window));
+                }
             }
             break;
         case SDLK_m:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-M maximize */
-                for (i = 0; i < state->num_windows; ++i) {
-                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
-                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
-                        if (flags & SDL_WINDOW_MAXIMIZED) {
-                            SDL_RestoreWindow(state->windows[i]);
-                        } else {
-                            SDL_MaximizeWindow(state->windows[i]);
-                        }
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    Uint32 flags = SDL_GetWindowFlags(window);
+                    if (flags & SDL_WINDOW_MAXIMIZED) {
+                        SDL_RestoreWindow(window);
+                    } else {
+                        SDL_MaximizeWindow(window);
                     }
                 }
             }
@@ -1038,25 +1041,22 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         case SDLK_z:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-Z minimize */
-                for (i = 0; i < state->num_windows; ++i) {
-                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
-                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
-                        SDL_MinimizeWindow(state->windows[i]);
-                    }
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    SDL_MinimizeWindow(window);
                 }
             }
             break;
         case SDLK_RETURN:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-Enter toggle fullscreen */
-                for (i = 0; i < state->num_windows; ++i) {
-                    Uint32 flags = SDL_GetWindowFlags(state->windows[i]);
-                    if (flags & SDL_WINDOW_INPUT_FOCUS) {
-                        if (flags & SDL_WINDOW_FULLSCREEN) {
-                            SDL_SetWindowFullscreen(state->windows[i], SDL_FALSE);
-                        } else {
-                            SDL_SetWindowFullscreen(state->windows[i], SDL_TRUE);
-                        }
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    Uint32 flags = SDL_GetWindowFlags(window);
+                    if (flags & SDL_WINDOW_FULLSCREEN) {
+                        SDL_SetWindowFullscreen(window, SDL_FALSE);
+                    } else {
+                        SDL_SetWindowFullscreen(window, SDL_TRUE);
                     }
                 }
             }
