@@ -72,6 +72,7 @@
 
 #include "SDL_main.h"
 #include "SDL_stdinc.h"
+#include "SDL_assert.h"
 #include "SDL_atomic.h"
 #include "SDL_audio.h"
 #include "SDL_clipboard.h"
