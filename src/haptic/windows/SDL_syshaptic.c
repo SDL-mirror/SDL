@@ -576,7 +576,26 @@ SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 int
 SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    int ret;
+    int i, ret;
+    HRESULT idret;
+    DIDEVICEINSTANCE joy_instance;
+
+    /* Since it comes from a joystick we have to try to match it with a haptic device on our haptic list. */
+    for (i=0; i<SDL_numhaptics; i++) {
+        idret = IDirectInputDevice2_GetDeviceInfo(joystick->hwdata->InputDevice,
+              &joy_instance);
+        if (FAILED(idret)) {
+            return -1;
+        }
+        if (DI_GUIDIsSame(&SDL_hapticlist[i].instance.guidInstance,
+                          &joy_instance.guidInstance)) {
+            haptic->index = i;
+            break;
+        }
+    }
+    if (i >= SDL_numhaptics) {
+        return -1;
+    }
 
     /* Allocate the hwdata */
     haptic->hwdata = (struct haptic_hwdata *)

@@ -534,6 +534,18 @@ SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 int
 SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
+    int i;
+    for (i=0; i<SDL_numhaptics; i++) {
+       if (IOObjectIsEqualTo((io_object_t) SDL_hapticlist[i].dev,
+                             joystick->hwdata->ffservice)) {
+           haptic->index = i;
+           break;
+       }
+    }
+    if (i >= SDL_numhaptics) {
+       return -1;
+    }
+
     return SDL_SYS_HapticOpenFromService(haptic, joystick->hwdata->ffservice);
 }
 
