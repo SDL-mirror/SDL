@@ -23,6 +23,7 @@ extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 void cleanup(void);
 void drawBlank(int x, int y);
 
+static SDL_Renderer *renderer;
 static int numChars = 0;        /* number of characters we've typed so far */
 static SDL_bool lastCharWasColon = 0;   /* we use this to detect sequences such as :) */
 static SDL_Color bg_color = { 50, 50, 100, 255 };       /* color of background */
@@ -157,7 +158,7 @@ drawIndex(int index)
         { GLYPH_SIZE_IMAGE * index, 0, GLYPH_SIZE_IMAGE, GLYPH_SIZE_IMAGE };
     SDL_Rect dstRect = { x, y, GLYPH_SIZE_SCREEN, GLYPH_SIZE_SCREEN };
     drawBlank(x, y);
-    SDL_RenderCopy(texture, &srcRect, &dstRect);
+    SDL_RenderCopy(renderer, texture, &srcRect, &dstRect);
 }
 
 /*  draws the cursor icon at the current end position of the text */
@@ -174,9 +175,9 @@ void
 drawBlank(int x, int y)
 {
     SDL_Rect rect = { x, y, GLYPH_SIZE_SCREEN, GLYPH_SIZE_SCREEN };
-    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b,
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b,
                            bg_color.unused);
-    SDL_RenderFill(&rect);
+    SDL_RenderFillRect(renderer, &rect);
 }
 
 /* moves backwards one character, erasing the last one put down */
@@ -219,7 +220,7 @@ loadFont(void)
         SDL_BlitSurface(surface, NULL, converted, NULL);
         /* create our texture */
         texture =
-            SDL_CreateTextureFromSurface(SDL_PIXELFORMAT_ABGR8888, converted);
+            SDL_CreateTextureFromSurface(renderer, converted);
         if (texture == 0) {
             printf("texture creation failed: %s\n", SDL_GetError());
         } else {
@@ -248,16 +249,16 @@ main(int argc, char *argv[])
     /* create window */
     window = SDL_CreateWindow("iPhone keyboard test", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     /* create renderer */
-    SDL_CreateRenderer(window, 0, 0);
+    renderer = SDL_CreateRenderer(window, -1, 0);
 
     /* load up our font */
     loadFont();
 
     /* draw the background, we'll just paint over it */
-    SDL_SetRenderDrawColor(bg_color.r, bg_color.g, bg_color.b,
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b,
                            bg_color.unused);
-    SDL_RenderFill(NULL);
-    SDL_RenderPresent();
+    SDL_RenderFillRect(renderer, NULL);
+    SDL_RenderPresent(renderer);
 
     int done = 0;
     /* loop till we get SDL_Quit */
@@ -293,7 +294,7 @@ main(int argc, char *argv[])
             }
             /* check if the key was a colon */
             /* draw our updates to the screen */
-            SDL_RenderPresent();
+            SDL_RenderPresent(renderer);
             break;
 #ifdef __IPHONEOS__
         case SDL_MOUSEBUTTONUP:
