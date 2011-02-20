@@ -87,7 +87,12 @@ typedef struct
 {
     SDL_GLContext context;
     SDL_bool GL_ARB_texture_rectangle_supported;
-    int blendMode;
+    struct {
+        GL_Shader shader;
+        Uint32 color;
+        int blendMode;
+        GLenum scaleMode;
+    } current;
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
@@ -117,6 +122,7 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
+    int scaleMode;
     SDL_Rect locked_rect;
 
     /* YV12 texture support */
@@ -200,6 +206,32 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
         GL_UpdateViewport(renderer);
     }
     return 0;
+}
+
+/* This is called if we need to invalidate all of the SDL OpenGL state */
+static void
+GL_ResetState(SDL_Renderer *renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    if (SDL_CurrentContext == data->context) {
+        GL_UpdateViewport(renderer);
+    } else {
+        GL_ActivateRenderer(renderer);
+    }
+
+    data->current.shader = SHADER_NONE;
+    data->current.color = 0;
+    data->current.blendMode = -1;
+    data->current.scaleMode = 0;
+
+    data->glDisable(GL_DEPTH_TEST);
+    data->glDisable(GL_CULL_FACE);
+    /* This ended up causing video discrepancies between OpenGL and Direct3D */
+    /*data->glEnable(GL_LINE_SMOOTH);*/
+
+    data->glMatrixMode(GL_MODELVIEW);
+    data->glLoadIdentity();
 }
 
 SDL_Renderer *
@@ -320,13 +352,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     /* Set up parameters for rendering */
-    data->blendMode = -1;
-    data->glDisable(GL_DEPTH_TEST);
-    data->glDisable(GL_CULL_FACE);
-    /* This ended up causing video discrepancies between OpenGL and Direct3D */
-    /*data->glEnable(GL_LINE_SMOOTH);*/
-    data->glMatrixMode(GL_MODELVIEW);
-    data->glLoadIdentity();
+    GL_ResetState(renderer);
 
     return renderer;
 }
@@ -437,12 +463,9 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     data->format = format;
     data->formattype = type;
+    data->scaleMode = GL_LINEAR;
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                GL_LINEAR);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                GL_LINEAR);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -492,10 +515,6 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glEnable(data->type);
 
         renderdata->glBindTexture(data->type, data->utexture);
-        renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                    GL_LINEAR);
-        renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                    GL_LINEAR);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                     GL_CLAMP_TO_EDGE);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -504,10 +523,6 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                  texture_h/2, 0, format, type, NULL);
 
         renderdata->glBindTexture(data->type, data->vtexture);
-        renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                    GL_LINEAR);
-        renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                    GL_LINEAR);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                     GL_CLAMP_TO_EDGE);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -632,9 +647,32 @@ GL_UpdateViewport(SDL_Renderer * renderer)
 }
 
 static void
+GL_SetShader(GL_RenderData * data, GL_Shader shader)
+{
+    if (data->shaders && shader != data->current.shader) {
+        GL_SelectShader(data->shaders, shader);
+        data->current.shader = shader;
+    }
+}
+
+static void
+GL_SetColor(GL_RenderData * data, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
+{
+    Uint32 color = ((a << 24) | (r << 16) | (g << 8) | b);
+
+    if (color != data->current.color) {
+        data->glColor4f((GLfloat) r * inv255f,
+                        (GLfloat) g * inv255f,
+                        (GLfloat) b * inv255f,
+                        (GLfloat) a * inv255f);
+        data->current.color = color;
+    }
+}
+
+static void
 GL_SetBlendMode(GL_RenderData * data, int blendMode)
 {
-    if (blendMode != data->blendMode) {
+    if (blendMode != data->current.blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -656,8 +694,25 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode)
             data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
         }
-        data->blendMode = blendMode;
+        data->current.blendMode = blendMode;
     }
+}
+
+static void
+GL_SetDrawingState(SDL_Renderer * renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    GL_ActivateRenderer(renderer);
+
+    GL_SetColor(data, (GLfloat) renderer->r,
+                      (GLfloat) renderer->g,
+                      (GLfloat) renderer->b,
+                      (GLfloat) renderer->a);
+
+    GL_SetBlendMode(data, renderer->blendMode);
+
+    GL_SetShader(data, SHADER_SOLID);
 }
 
 static int
@@ -684,15 +739,7 @@ GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_ActivateRenderer(renderer);
-
-    GL_SetBlendMode(data, renderer->blendMode);
-    GL_SelectShader(data->shaders, SHADER_SOLID);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GL_SetDrawingState(renderer);
 
     data->glBegin(GL_POINTS);
     for (i = 0; i < count; ++i) {
@@ -710,15 +757,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_ActivateRenderer(renderer);
-
-    GL_SetBlendMode(data, renderer->blendMode);
-    GL_SelectShader(data->shaders, SHADER_SOLID);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GL_SetDrawingState(renderer);
 
     if (count > 2 && 
         points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
@@ -781,15 +820,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
 
-    GL_ActivateRenderer(renderer);
-
-    GL_SetBlendMode(data, renderer->blendMode);
-    GL_SelectShader(data->shaders, SHADER_SOLID);
-
-    data->glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GL_SetDrawingState(renderer);
 
     for (i = 0; i < count; ++i) {
         const SDL_Rect *rect = &rects[i];
@@ -811,6 +842,52 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     GL_ActivateRenderer(renderer);
 
+    data->glEnable(texturedata->type);
+    if (texturedata->yuv) {
+        data->glActiveTextureARB(GL_TEXTURE2_ARB);
+        data->glBindTexture(texturedata->type, texturedata->vtexture);
+        if (texturedata->scaleMode != data->current.scaleMode) {
+            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
+                                  texturedata->scaleMode);
+            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
+                                  texturedata->scaleMode);
+        }
+
+        data->glActiveTextureARB(GL_TEXTURE1_ARB);
+        data->glBindTexture(texturedata->type, texturedata->utexture);
+        if (texturedata->scaleMode != data->current.scaleMode) {
+            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
+                                  texturedata->scaleMode);
+            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
+                                  texturedata->scaleMode);
+        }
+
+        data->glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+    data->glBindTexture(texturedata->type, texturedata->texture);
+
+    if (texturedata->scaleMode != data->current.scaleMode) {
+        data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
+                              texturedata->scaleMode);
+        data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
+                              texturedata->scaleMode);
+        data->current.scaleMode = texturedata->scaleMode;
+    }
+
+    if (texture->modMode) {
+        GL_SetColor(data, texture->r, texture->g, texture->b, texture->a);
+    } else {
+        GL_SetColor(data, 255, 255, 255, 255);
+    }
+
+    GL_SetBlendMode(data, texture->blendMode);
+
+    if (texturedata->yuv) {
+        GL_SetShader(data, SHADER_YV12);
+    } else {
+        GL_SetShader(data, SHADER_RGB);
+    }
+
     minx = dstrect->x;
     miny = dstrect->y;
     maxx = dstrect->x + dstrect->w;
@@ -824,32 +901,6 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     minv *= texturedata->texh;
     maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
     maxv *= texturedata->texh;
-
-    data->glEnable(texturedata->type);
-    if (texturedata->yuv) {
-        data->glActiveTextureARB(GL_TEXTURE2_ARB);
-        data->glBindTexture(texturedata->type, texturedata->vtexture);
-        data->glActiveTextureARB(GL_TEXTURE1_ARB);
-        data->glBindTexture(texturedata->type, texturedata->utexture);
-        data->glActiveTextureARB(GL_TEXTURE0_ARB);
-    }
-    data->glBindTexture(texturedata->type, texturedata->texture);
-
-    if (texture->modMode) {
-        data->glColor4f((GLfloat) texture->r * inv255f,
-                        (GLfloat) texture->g * inv255f,
-                        (GLfloat) texture->b * inv255f,
-                        (GLfloat) texture->a * inv255f);
-    } else {
-        data->glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
-    GL_SetBlendMode(data, texture->blendMode);
-    if (texturedata->yuv) {
-        GL_SelectShader(data->shaders, SHADER_YV12);
-    } else {
-        GL_SelectShader(data->shaders, SHADER_RGB);
-    }
 
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);

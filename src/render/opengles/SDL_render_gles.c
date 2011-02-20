@@ -84,7 +84,12 @@ SDL_RenderDriver GLES_RenderDriver = {
 typedef struct
 {
     SDL_GLContext context;
-    int blendMode;
+    struct {
+        Uint32 color;
+        int blendMode;
+        GLenum scaleMode;
+        SDL_bool tex_coords;
+    } current;
 
     SDL_bool useDrawTexture;
     SDL_bool GL_OES_draw_texture_supported;
@@ -100,6 +105,7 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
+    GLenum scaleMode;
 } GLES_TextureData;
 
 static void
@@ -152,6 +158,33 @@ GLES_ActivateRenderer(SDL_Renderer * renderer)
         GLES_UpdateViewport(renderer);
     }
     return 0;
+}
+
+/* This is called if we need to invalidate all of the SDL OpenGL state */
+static void
+GLES_ResetState(SDL_Renderer *renderer)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+
+    if (SDL_CurrentContext == data->context) {
+        GLES_UpdateViewport(renderer);
+    } else {
+        GLES_ActivateRenderer(renderer);
+    }
+
+    data->current.color = 0;
+    data->current.blendMode = -1;
+    data->current.scaleMode = 0;
+    data->current.tex_coords = SDL_FALSE;
+
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 SDL_Renderer *
@@ -234,15 +267,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.max_texture_height = value;
 
     /* Set up parameters for rendering */
-    data->blendMode = -1;
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_CULL_FACE);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    GLES_ResetState(renderer);
 
-    glEnableClientState(GL_VERTEX_ARRAY);
-    //glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    
     return renderer;
 }
 
@@ -319,15 +345,10 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     data->format = format;
     data->formattype = type;
+    data->scaleMode = GL_LINEAR;
     glBindTexture(data->type, data->texture);
-    glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
-                                GL_LINEAR);
-    glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
-                                GL_LINEAR);
-    glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
-                                GL_CLAMP_TO_EDGE);
-    glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
-                                GL_CLAMP_TO_EDGE);
+    glTexParameteri(data->type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(data->type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glTexImage2D(data->type, 0, internalFormat, texture_w,
                              texture_h, 0, format, type, NULL);
@@ -453,25 +474,24 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
     return 0;
 }
 
-static int
-GLES_RenderClear(SDL_Renderer * renderer)
+static void
+GLES_SetColor(GLES_RenderData * data, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
-    GLES_ActivateRenderer(renderer);
+    Uint32 color = ((a << 24) | (r << 16) | (g << 8) | b);
 
-    glClearColor((GLfloat) renderer->r * inv255f,
-                 (GLfloat) renderer->g * inv255f,
-                 (GLfloat) renderer->b * inv255f,
-                 (GLfloat) renderer->a * inv255f);
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    return 0;
+    if (color != data->current.color) {
+        glColor4f((GLfloat) r * inv255f,
+                        (GLfloat) g * inv255f,
+                        (GLfloat) b * inv255f,
+                        (GLfloat) a * inv255f);
+        data->current.color = color;
+    }
 }
 
 static void
 GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
 {
-    if (blendMode != data->blendMode) {
+    if (blendMode != data->current.blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
             glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -493,8 +513,53 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
             glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             break;
         }
-        data->blendMode = blendMode;
+        data->current.blendMode = blendMode;
     }
+}
+
+static void
+GLES_SetTexCoords(GLES_RenderData * data, SDL_bool enabled)
+{
+    if (enabled != data->current.tex_coords) {
+        if (enabled) {
+            glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        } else {
+            glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        }
+        data->current.tex_coords = enabled;
+    }
+}
+
+static void
+GLES_SetDrawingState(SDL_Renderer * renderer)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+
+    GLES_ActivateRenderer(renderer);
+
+    GLES_SetColor(data, (GLfloat) renderer->r,
+                        (GLfloat) renderer->g,
+                        (GLfloat) renderer->b,
+                        (GLfloat) renderer->a);
+
+    GLES_SetBlendMode(data, renderer->blendMode);
+
+    GLES_SetTexCoords(data, SDL_FALSE);
+}
+
+static int
+GLES_RenderClear(SDL_Renderer * renderer)
+{
+    GLES_ActivateRenderer(renderer);
+
+    glClearColor((GLfloat) renderer->r * inv255f,
+                 (GLfloat) renderer->g * inv255f,
+                 (GLfloat) renderer->b * inv255f,
+                 (GLfloat) renderer->a * inv255f);
+
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    return 0;
 }
 
 static int
@@ -505,14 +570,7 @@ GLES_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     GLshort *vertices;
 
-    GLES_ActivateRenderer(renderer);
-
-    GLES_SetBlendMode(data, renderer->blendMode);
-
-    glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GLES_SetDrawingState(renderer);
 
     vertices = SDL_stack_alloc(GLshort, count*2);
     for (i = 0; i < count; ++i) {
@@ -534,14 +592,7 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
     int i;
     GLshort *vertices;
 
-    GLES_ActivateRenderer(renderer);
-
-    GLES_SetBlendMode(data, renderer->blendMode);
-
-    glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GLES_SetDrawingState(renderer);
 
     vertices = SDL_stack_alloc(GLshort, count*2);
     for (i = 0; i < count; ++i) {
@@ -569,14 +620,7 @@ GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
 
-    GLES_ActivateRenderer(renderer);
-
-    GLES_SetBlendMode(data, renderer->blendMode);
-
-    glColor4f((GLfloat) renderer->r * inv255f,
-                    (GLfloat) renderer->g * inv255f,
-                    (GLfloat) renderer->b * inv255f,
-                    (GLfloat) renderer->a * inv255f);
+    GLES_SetDrawingState(renderer);
 
     for (i = 0; i < count; ++i) {
         const SDL_Rect *rect = &rects[i];
@@ -614,20 +658,26 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     GLES_ActivateRenderer(renderer);
 
     glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glBindTexture(texturedata->type, texturedata->texture);
 
+    if (texturedata->scaleMode != data->current.scaleMode) {
+        glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
+                        texturedata->scaleMode);
+        glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
+                        texturedata->scaleMode);
+        data->current.scaleMode = texturedata->scaleMode;
+    }
+
     if (texture->modMode) {
-        glColor4f((GLfloat) texture->r * inv255f,
-                        (GLfloat) texture->g * inv255f,
-                        (GLfloat) texture->b * inv255f,
-                        (GLfloat) texture->a * inv255f);
+        GLES_SetColor(data, texture->r, texture->g, texture->b, texture->a);
     } else {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GLES_SetColor(data, 255, 255, 255, 255);
     }
 
     GLES_SetBlendMode(data, texture->blendMode);
+
+    GLES_SetTexCoords(data, SDL_TRUE);
 
     if (data->GL_OES_draw_texture_supported && data->useDrawTexture) {
         /* this code is a little funny because the viewport is upside down vs SDL's coordinate system */
@@ -685,8 +735,6 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-	
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
 
     return 0;

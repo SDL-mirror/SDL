@@ -60,7 +60,6 @@ struct GL_ShaderContext
 
     SDL_bool GL_ARB_texture_rectangle_supported;
 
-    GL_Shader current_shader;
     GL_ShaderData shaders[NUM_SHADERS];
 };
 
@@ -341,18 +340,7 @@ GL_CreateShaderContext()
 void
 GL_SelectShader(GL_ShaderContext *ctx, GL_Shader shader)
 {
-    /* Nothing to do if there's no shader support */
-    if (!ctx) {
-        return;
-    }
-
-    /* Nothing to do if there's no shader change */
-    if (shader == ctx->current_shader) {
-        return;
-    }
-
     ctx->glUseProgramObjectARB(ctx->shaders[shader].program);
-    ctx->current_shader = shader;
 }
 
 void

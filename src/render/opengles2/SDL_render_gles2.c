@@ -58,6 +58,7 @@ typedef struct GLES2_TextureData
     GLenum pixel_type;
     void *pixel_data;
     size_t pitch;
+    GLenum scaleMode;
 } GLES2_TextureData;
 
 typedef struct GLES2_ShaderCacheEntry
@@ -118,6 +119,12 @@ typedef enum
 typedef struct GLES2_DriverContext
 {
     SDL_GLContext *context;
+    struct {
+        int blendMode;
+        GLenum scaleMode;
+        SDL_bool tex_coords;
+    } current;
+
     int shader_format_count;
     GLenum *shader_formats;
     GLES2_ShaderCache shader_cache;
@@ -259,6 +266,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     tdata->texture_type = GL_TEXTURE_2D;
     tdata->pixel_format = format;
     tdata->pixel_type = type;
+    tdata->scaleMode = GL_LINEAR;
 
     /* Allocate a blob for image data */
     if (texture->access == SDL_TEXTUREACCESS_STREAMING)
@@ -787,43 +795,58 @@ GLES2_RenderClear(SDL_Renderer * renderer)
 }
 
 static void
-GLES2_SetBlendMode(int blendMode)
+GLES2_SetBlendMode(GLES2_DriverContext *rdata, int blendMode)
 {
-    switch (blendMode)
-    {
-    case SDL_BLENDMODE_NONE:
-    default:
-        glDisable(GL_BLEND);
-        break;
-    case SDL_BLENDMODE_BLEND:
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        break;
-    case SDL_BLENDMODE_ADD:
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        break;
-    case SDL_BLENDMODE_MOD:
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        break;
+    if (blendMode != rdata->current.blendMode) {
+        switch (blendMode) {
+        default:
+        case SDL_BLENDMODE_NONE:
+            glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_BLEND:
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            break;
+        case SDL_BLENDMODE_MOD:
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            break;
+        }
+        rdata->current.blendMode = blendMode;
+    }
+}
+
+static void
+GLES2_SetTexCoords(GLES2_DriverContext * rdata, SDL_bool enabled)
+{
+    if (enabled != rdata->current.tex_coords) {
+        if (enabled) {
+            glEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+        } else {
+            glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+        }
+        rdata->current.tex_coords = enabled;
     }
 }
 
 static int
-GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count)
+GLES2_SetDrawingState(SDL_Renderer * renderer)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    GLfloat *vertices;
-    SDL_BlendMode blendMode;
-    int alpha;
+    int blendMode = renderer->blendMode;
     GLuint locColor;
-    int idx;
+
+    glGetError();
 
     GLES2_ActivateRenderer(renderer);
 
-    blendMode = renderer->blendMode;
-    alpha = renderer->a;
+    GLES2_SetBlendMode(rdata, blendMode);
+
+    GLES2_SetTexCoords(rdata, SDL_FALSE);
 
     /* Activate an appropriate shader and set the projection matrix */
     if (GLES2_SelectProgram(renderer, GLES2_IMAGESOURCE_SOLID, blendMode) < 0)
@@ -831,15 +854,24 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
 
     /* Select the color to draw with */
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
-    glGetError();
     glUniform4f(locColor,
                 renderer->r * inv255f,
                 renderer->g * inv255f,
                 renderer->b * inv255f,
-                alpha * inv255f);
+                renderer->a * inv255f);
+    return 0;
+}
 
-    /* Configure the correct blend mode */
-    GLES2_SetBlendMode(blendMode);
+static int
+GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count)
+{
+    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
+    GLfloat *vertices;
+    int idx;
+
+    if (GLES2_SetDrawingState(renderer) < 0) {
+        return -1;
+    }
 
     /* Emit the specified vertices as points */
     vertices = SDL_stack_alloc(GLfloat, count * 2);
@@ -851,10 +883,9 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
     }
-    glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
+    glGetError();
     glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     glDrawArrays(GL_POINTS, 0, count);
-    glDisableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
     SDL_stack_free(vertices);
     if (glGetError() != GL_NO_ERROR)
     {
@@ -869,31 +900,11 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat *vertices;
-    SDL_BlendMode blendMode;
-    int alpha;
-    GLuint locColor;
     int idx;
 
-    GLES2_ActivateRenderer(renderer);
-
-    blendMode = renderer->blendMode;
-    alpha = renderer->a;
-
-    /* Activate an appropriate shader and set the projection matrix */
-    if (GLES2_SelectProgram(renderer, GLES2_IMAGESOURCE_SOLID, blendMode) < 0)
+    if (GLES2_SetDrawingState(renderer) < 0) {
         return -1;
-
-    /* Select the color to draw with */
-    locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
-    glGetError();
-    glUniform4f(locColor,
-                renderer->r * inv255f,
-                renderer->g * inv255f,
-                renderer->b * inv255f,
-                alpha * inv255f);
-
-    /* Configure the correct blend mode */
-    GLES2_SetBlendMode(blendMode);
+    }
 
     /* Emit a line strip including the specified vertices */
     vertices = SDL_stack_alloc(GLfloat, count * 2);
@@ -905,10 +916,9 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
     }
-    glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
+    glGetError();
     glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     glDrawArrays(GL_LINE_STRIP, 0, count);
-    glDisableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
     SDL_stack_free(vertices);
     if (glGetError() != GL_NO_ERROR)
     {
@@ -923,34 +933,14 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat vertices[8];
-    SDL_BlendMode blendMode;
-    int alpha;
-    GLuint locColor;
     int idx;
 
-    GLES2_ActivateRenderer(renderer);
-
-    blendMode = renderer->blendMode;
-    alpha = renderer->a;
-
-    /* Activate an appropriate shader and set the projection matrix */
-    if (GLES2_SelectProgram(renderer, GLES2_IMAGESOURCE_SOLID, blendMode) < 0)
+    if (GLES2_SetDrawingState(renderer) < 0) {
         return -1;
-
-    /* Select the color to draw with */
-    locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
-    glGetError();
-    glUniform4f(locColor,
-                renderer->r * inv255f,
-                renderer->g * inv255f,
-                renderer->b * inv255f,
-                alpha * inv255f);
-
-    /* Configure the correct blend mode */
-    GLES2_SetBlendMode(blendMode);
+    }
 
     /* Emit a line loop for each rectangle */
-    glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
+    glGetError();
     for (idx = 0; idx < count; ++idx) {
         const SDL_Rect *rect = &rects[idx];
 
@@ -970,7 +960,6 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
         glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-    glDisableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
     if (glGetError() != GL_NO_ERROR)
     {
         SDL_SetError("Failed to render lines");
@@ -987,7 +976,6 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     GLES2_TextureData *tdata = (GLES2_TextureData *)texture->driverdata;
     GLES2_ImageSource sourceType;
     SDL_BlendMode blendMode;
-    int alpha;
     GLfloat vertices[8];
     GLfloat texCoords[8];
     GLuint locTexture;
@@ -997,7 +985,6 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
 
     /* Activate an appropriate shader and set the projection matrix */
     blendMode = texture->blendMode;
-    alpha = texture->a;
     sourceType = GLES2_IMAGESOURCE_TEXTURE;
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
         return -1;
@@ -1009,8 +996,13 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     glBindTexture(tdata->texture_type, tdata->texture);
     glUniform1i(locTexture, 0);
 
-    /* Configure texture blending */
-    GLES2_SetBlendMode(blendMode);
+    if (tdata->scaleMode != rdata->current.scaleMode) {
+        glTexParameteri(tdata->texture_type, GL_TEXTURE_MIN_FILTER,
+                        tdata->scaleMode);
+        glTexParameteri(tdata->texture_type, GL_TEXTURE_MAG_FILTER,
+                        tdata->scaleMode);
+        rdata->current.scaleMode = tdata->scaleMode;
+    }
 
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
@@ -1018,11 +1010,14 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
                 texture->r * inv255f,
                 texture->g * inv255f,
                 texture->b * inv255f,
-                alpha * inv255f);
+                texture->a * inv255f);
+
+    /* Configure texture blending */
+    GLES2_SetBlendMode(rdata, blendMode);
+
+    GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    glEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
-    glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
     vertices[0] = (GLfloat)dstrect->x;
     vertices[1] = (GLfloat)dstrect->y;
     vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
@@ -1042,8 +1037,6 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     texCoords[7] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
     glVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glDisableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
-    glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
     if (glGetError() != GL_NO_ERROR)
     {
         SDL_SetError("Failed to render texture");
@@ -1066,6 +1059,25 @@ GLES2_RenderPresent(SDL_Renderer *renderer)
  *************************************************************************************************/
 
 #define GL_NVIDIA_PLATFORM_BINARY_NV 0x890B
+
+static void
+GLES2_ResetState(SDL_Renderer *renderer)
+{
+    GLES2_DriverContext *rdata = (GLES2_DriverContext *) renderer->driverdata;
+
+    if (SDL_CurrentContext == rdata->context) {
+        GLES2_UpdateViewport(renderer);
+    } else {
+        GLES2_ActivateRenderer(renderer);
+    }
+
+    rdata->current.blendMode = -1;
+    rdata->current.scaleMode = 0;
+    rdata->current.tex_coords = SDL_FALSE;
+
+    glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
+    glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+}
 
 static SDL_Renderer *
 GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
@@ -1166,6 +1178,9 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->RenderPresent       = &GLES2_RenderPresent;
     renderer->DestroyTexture      = &GLES2_DestroyTexture;
     renderer->DestroyRenderer     = &GLES2_DestroyRenderer;
+
+    GLES2_ResetState(renderer);
+
     return renderer;
 }
 
