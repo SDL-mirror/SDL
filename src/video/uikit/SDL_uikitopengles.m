@@ -40,7 +40,7 @@ UIKit_GL_GetProcAddress(_THIS, const char *proc)
        -Looking for the path to the OpenGL Library seems not to work in the iPhone Simulator.
        -We don't know that the path won't change in the future.
     */
-    return SDL_LoadFunction(RTLD_DEFAULT, proc);
+    return dlsym(RTLD_DEFAULT, proc);
 }
 
 /*

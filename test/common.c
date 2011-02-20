@@ -53,8 +53,6 @@ CommonCreateState(char **argv, Uint32 flags)
     state->gl_multisamplesamples = 0;
     state->gl_retained_backing = 1;
     state->gl_accelerated = -1;
-    state->gl_major_version = 2;
-    state->gl_minor_version = 1;
 
     return state;
 }
@@ -590,8 +588,10 @@ CommonInit(CommonState * state)
                                 state->gl_accelerated);
         }
         SDL_GL_SetAttribute(SDL_GL_RETAINED_BACKING, state->gl_retained_backing);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
+        if (state->gl_major_version) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
+        }
 
         if (state->verbose & VERBOSE_MODES) {
             SDL_DisplayMode mode;
@@ -712,6 +712,7 @@ CommonInit(CommonState * state)
                         SDL_GetError());
                 return SDL_FALSE;
             }
+            SDL_GetWindowSize(state->windows[i], &state->window_w, &state->window_h);
 
             if (SDL_SetWindowDisplayMode(state->windows[i], &fullscreen_mode) < 0) {
                 fprintf(stderr, "Can't set up fullscreen display mode: %s\n",
