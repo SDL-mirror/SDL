@@ -725,11 +725,15 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         rect.size.height = bounds.h;
         ConvertNSRect(&rect);
 
-        [nswindow setStyleMask:NSBorderlessWindowMask];
-        [nswindow setContentSize:rect.size];
+        if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
+            [nswindow performSelector: @selector(setStyleMask:) withObject: (id)NSBorderlessWindowMask];
+        }
         [nswindow setFrameOrigin:rect.origin];
+        [nswindow setContentSize:rect.size];
     } else {
-        [nswindow setStyleMask:GetWindowStyle(window)];
+        if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
+            [nswindow performSelector: @selector(setStyleMask:) withObject: (id)GetWindowStyle(window)];
+        }
 
         // This doesn't seem to do anything...
         //[nswindow setFrameOrigin:origin];
