@@ -709,7 +709,7 @@ SDL_HapticStopAll(SDL_Haptic * haptic)
     return SDL_SYS_HapticStopAll(haptic);
 }
 
-static int
+static void
 SDL_HapticRumbleCreate(SDL_HapticEffect * efx)
 {
    SDL_memset(efx, 0, sizeof(SDL_HapticEffect));
