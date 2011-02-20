@@ -243,18 +243,18 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             Gmask == 0x1C &&
             Bmask == 0x03 &&
             Amask == 0x00) {
-            return SDL_PIXELFORMAT_RGB332
+            return SDL_PIXELFORMAT_RGB332;
         }
         break;
     case 12:
         if (Rmask == 0) {
-            return SDL_PIXELFORMAT_RGB444
+            return SDL_PIXELFORMAT_RGB444;
         }
         if (Rmask == 0x0F00 &&
             Gmask == 0x00F0 &&
             Bmask == 0x000F &&
             Amask == 0x0000) {
-            return SDL_PIXELFORMAT_RGB444
+            return SDL_PIXELFORMAT_RGB444;
         }
         break;
     case 15:
@@ -270,73 +270,73 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             Gmask == 0x03E0 &&
             Bmask == 0x001F &&
             Amask == 0x0000) {
-            return SDL_PIXELFORMAT_RGB555
+            return SDL_PIXELFORMAT_RGB555;
         }
         if (Rmask == 0x001F &&
             Gmask == 0x03E0 &&
             Bmask == 0x7C00 &&
             Amask == 0x0000) {
-            return SDL_PIXELFORMAT_BGR555
+            return SDL_PIXELFORMAT_BGR555;
         }
         if (Rmask == 0x0F00 &&
             Gmask == 0x00F0 &&
             Bmask == 0x000F &&
             Amask == 0xF000) {
-            return SDL_PIXELFORMAT_ARGB4444
+            return SDL_PIXELFORMAT_ARGB4444;
         }
         if (Rmask == 0xF000 &&
             Gmask == 0x0F00 &&
             Bmask == 0x00F0 &&
             Amask == 0x000F) {
-            return SDL_PIXELFORMAT_RGBA4444
+            return SDL_PIXELFORMAT_RGBA4444;
         }
         if (Rmask == 0x000F &&
             Gmask == 0x00F0 &&
             Bmask == 0x0F00 &&
             Amask == 0xF000) {
-            return SDL_PIXELFORMAT_ABGR4444
+            return SDL_PIXELFORMAT_ABGR4444;
         }
         if (Rmask == 0x00F0 &&
             Gmask == 0x0F00 &&
             Bmask == 0xF000 &&
             Amask == 0x000F) {
-            return SDL_PIXELFORMAT_BGRA4444
+            return SDL_PIXELFORMAT_BGRA4444;
         }
         if (Rmask == 0x7C00 &&
             Gmask == 0x03E0 &&
             Bmask == 0x001F &&
             Amask == 0x8000) {
-            return SDL_PIXELFORMAT_ARGB1555
+            return SDL_PIXELFORMAT_ARGB1555;
         }
         if (Rmask == 0xF800 &&
             Gmask == 0x07C0 &&
             Bmask == 0x003E &&
             Amask == 0x0001) {
-            return SDL_PIXELFORMAT_RGBA5551
+            return SDL_PIXELFORMAT_RGBA5551;
         }
         if (Rmask == 0x001F &&
             Gmask == 0x03E0 &&
             Bmask == 0x7C00 &&
             Amask == 0x8000) {
-            return SDL_PIXELFORMAT_ABGR1555
+            return SDL_PIXELFORMAT_ABGR1555;
         }
         if (Rmask == 0x003E &&
             Gmask == 0x07C0 &&
             Bmask == 0xF800 &&
             Amask == 0x0001) {
-            return SDL_PIXELFORMAT_BGRA5551
+            return SDL_PIXELFORMAT_BGRA5551;
         }
         if (Rmask == 0xF800 &&
             Gmask == 0x07E0 &&
             Bmask == 0x001F &&
             Amask == 0x0000) {
-            return SDL_PIXELFORMAT_RGB565
+            return SDL_PIXELFORMAT_RGB565;
         }
         if (Rmask == 0x001F &&
             Gmask == 0x07E0 &&
             Bmask == 0xF800 &&
             Amask == 0x0000) {
-            return SDL_PIXELFORMAT_BGR565
+            return SDL_PIXELFORMAT_BGR565;
         }
         break;
     case 24:
@@ -363,43 +363,43 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             Gmask == 0x0000FF00 &&
             Bmask == 0x000000FF &&
             Amask == 0x00000000) {
-            return SDL_PIXELFORMAT_RGB888
+            return SDL_PIXELFORMAT_RGB888;
         }
         if (Rmask == 0x000000FF &&
             Gmask == 0x0000FF00 &&
             Bmask == 0x00FF0000 &&
             Amask == 0x00000000) {
-            return SDL_PIXELFORMAT_BGR888
+            return SDL_PIXELFORMAT_BGR888;
         }
         if (Rmask == 0x00FF0000 &&
             Gmask == 0x0000FF00 &&
             Bmask == 0x000000FF &&
             Amask == 0xFF000000) {
-            return SDL_PIXELFORMAT_ARGB8888
+            return SDL_PIXELFORMAT_ARGB8888;
         }
         if (Rmask == 0xFF000000 &&
             Gmask == 0x00FF0000 &&
             Bmask == 0x0000FF00 &&
             Amask == 0x000000FF) {
-            return SDL_PIXELFORMAT_RGBA8888
+            return SDL_PIXELFORMAT_RGBA8888;
         }
         if (Rmask == 0x000000FF &&
             Gmask == 0x0000FF00 &&
             Bmask == 0x00FF0000 &&
             Amask == 0xFF000000) {
-            return SDL_PIXELFORMAT_ABGR8888
+            return SDL_PIXELFORMAT_ABGR8888;
         }
         if (Rmask == 0x0000FF00 &&
             Gmask == 0x00FF0000 &&
             Bmask == 0xFF000000 &&
             Amask == 0x000000FF) {
-            return SDL_PIXELFORMAT_BGRA8888
+            return SDL_PIXELFORMAT_BGRA8888;
         }
         if (Rmask == 0x3FF00000 &&
             Gmask == 0x000FFC00 &&
             Bmask == 0x000003FF &&
             Amask == 0xC0000000) {
-            return SDL_PIXELFORMAT_ARGB2101010
+            return SDL_PIXELFORMAT_ARGB2101010;
         }
     }
     return SDL_PIXELFORMAT_UNKNOWN;
