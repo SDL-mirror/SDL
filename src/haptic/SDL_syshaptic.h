@@ -52,6 +52,9 @@ struct _SDL_Haptic
 
     struct haptic_hwdata *hwdata;       /* Driver dependent */
     int ref_count;              /* Count for multiple opens */
+
+    int rumble_id;              /* ID of rumble effect for simple rumble API. */
+    SDL_HapticEffect rumble_effect; /* Rumble effect. */
 };
 
 /* 

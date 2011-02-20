@@ -143,6 +143,7 @@ SDL_HapticOpen(int device_index)
 
     /* Initialize the haptic device */
     SDL_memset(haptic, 0, (sizeof *haptic));
+    haptic->rumble_id = -1;
     haptic->index = device_index;
     if (SDL_SYS_HapticOpen(haptic) < 0) {
         SDL_free(haptic);
@@ -292,6 +293,7 @@ SDL_HapticOpenFromJoystick(SDL_Joystick * joystick)
 
     /* Initialize the haptic device */
     SDL_memset(haptic, 0, sizeof(SDL_Haptic));
+    haptic->rumble_id = -1;
     if (SDL_SYS_HapticOpenFromJoystick(haptic, joystick) < 0) {
         SDL_free(haptic);
         return NULL;
@@ -706,3 +708,110 @@ SDL_HapticStopAll(SDL_Haptic * haptic)
 
     return SDL_SYS_HapticStopAll(haptic);
 }
+
+static int
+SDL_HapticRumbleCreate(SDL_HapticEffect * efx)
+{
+   SDL_memset(efx, 0, sizeof(SDL_HapticEffect));
+   efx->type = SDL_HAPTIC_SINE;
+   efx->periodic.period = 1000;
+   efx->periodic.magnitude = 0x4000;
+   efx->periodic.length = 5000;
+   efx->periodic.attack_length = 0;
+   efx->periodic.fade_length = 0;
+}
+
+/*
+ * Checks to see if rumble is supported.
+ */
+int
+SDL_HapticRumbleSupported(SDL_Haptic * haptic)
+{
+    SDL_HapticEffect efx;
+
+    if (!ValidHaptic(haptic)) {
+        return -1;
+    }
+
+    SDL_HapticRumbleCreate(&efx);
+    return SDL_HapticEffectSupported(haptic, &efx);
+}
+
+/*
+ * Initializes the haptic device for simple rumble playback.
+ */
+int
+SDL_HapticRumbleInit(SDL_Haptic * haptic)
+{
+    if (!ValidHaptic(haptic)) {
+        return -1;
+    }
+
+    /* Already allocated. */
+    if (haptic->rumble_id >= 0) {
+        return 0;
+    }
+
+    /* Copy over. */
+    SDL_HapticRumbleCreate(&haptic->rumble_effect);
+    haptic->rumble_id = SDL_HapticNewEffect(haptic, &haptic->rumble_effect);
+    if (haptic->rumble_id >= 0) {
+        return 0;
+    }
+    return -1;
+}
+
+/*
+ * Runs simple rumble on a haptic device
+ */
+int
+SDL_HapticRumblePlay(SDL_Haptic * haptic, float strength, Uint32 length)
+{
+    int ret;
+    SDL_HapticPeriodic *efx;
+
+    if (!ValidHaptic(haptic)) {
+        return -1;
+    }
+
+    if (haptic->rumble_id < 0) {
+        SDL_SetError("Haptic: Rumble effect not initialized on haptic device");
+        return -1;
+    }
+
+    /* Clamp strength. */
+    if (strength > 1.0f) {
+        strength = 1.0f;
+    }
+    else if (strength < 0.0f) {
+        strength = 0.0f;
+    }
+
+    /* New effect. */
+    efx = &haptic->rumble_effect.periodic;
+    efx->magnitude = (Sint16)(32767.0f*strength);
+    efx->length = length;
+    ret = SDL_HapticUpdateEffect(haptic, haptic->rumble_id, &haptic->rumble_effect);
+
+    return SDL_HapticRunEffect(haptic, haptic->rumble_id, 1);
+}
+
+/*
+ * Stops the simple rumble on a haptic device.
+ */
+int
+SDL_HapticRumbleStop(SDL_Haptic * haptic)
+{
+    if (!ValidHaptic(haptic)) {
+        return -1;
+    }
+
+    if (haptic->rumble_id < 0) {
+        SDL_SetError("Haptic: Rumble effect not initialized on haptic device");
+        return -1;
+    }
+
+    return SDL_HapticStopEffect(haptic, haptic->rumble_id);
+}
+
+
