@@ -236,6 +236,13 @@ SDL_GetRevision(void)
     return SDL_REVISION;
 }
 
+/* Get the library source revision number */
+int
+SDL_GetRevisionNumber(void)
+{
+    return SDL_REVISION_NUMBER;
+}
+
 /* Get the name of the platform */
 const char *
 SDL_GetPlatform()
