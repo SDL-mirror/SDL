@@ -109,49 +109,49 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F3696130CD87600FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F3698130CD87F00FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369A130CD88800FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369C130CD89000FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369E130CD89800FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F36A0130CD8A000FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = FD6526620DE8FCCB002AD96B /* libSDL */;
+			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		04AB757011E563D200BE9753 /* PBXContainerItemProxy */ = {
@@ -846,6 +846,7 @@
 				LIBRARY_SEARCH_PATHS = "";
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				PRELINK_LIBS = "";
 				SDKROOT = iphoneos;
@@ -866,6 +867,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 3.2;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				PRELINK_LIBS = "";
 				SDKROOT = iphoneos;
@@ -888,12 +890,6 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Happy;
 				SDKROOT = iphoneos;
@@ -914,12 +910,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Happy;
@@ -944,12 +934,6 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Accel;
 				SDKROOT = iphoneos;
@@ -971,12 +955,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Accel;
@@ -1002,12 +980,6 @@
 					"\\\\\\\"$(SRCROOT)\\\\\\\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Keyboard;
 				SDKROOT = iphoneos;
@@ -1030,12 +1002,6 @@
 					"$(inherited)",
 					"\\\\\\\"$(SRCROOT)\\\\\\\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Fireworks;
@@ -1060,12 +1026,6 @@
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Touch;
 				SDKROOT = iphoneos;
@@ -1087,12 +1047,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Touch;
@@ -1118,12 +1072,6 @@
 					"\\\"$(SRCROOT)\\\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Fireworks;
 				SDKROOT = iphoneos;
@@ -1146,12 +1094,6 @@
 					"$(inherited)",
 					"\\\"$(SRCROOT)\\\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Fireworks;
@@ -1177,12 +1119,6 @@
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
 				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
-				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Mixer;
 				SDKROOT = iphoneos;
@@ -1205,12 +1141,6 @@
 					"$(inherited)",
 					"\"$(SRCROOT)\"",
 					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					UIKit,
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Mixer;
