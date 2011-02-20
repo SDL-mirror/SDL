@@ -537,6 +537,7 @@ main(int argc, char **argv)
             switch (event.type) {
             case SDL_WINDOWEVENT:
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    SDL_RenderSetViewport(renderer, NULL);
                     displayrect.w = window_w = event.window.data1;
                     displayrect.h = window_h = event.window.data2;
                 }
