@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		56ED04FE118A8FE400A56AA6 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
-		56ED0502118A8FE400A56AA6 /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
+		56ED0502118A8FE400A56AA6 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
 		56ED0503118A8FE400A56AA6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
 		56ED0504118A8FE400A56AA6 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
 		56ED0505118A8FE400A56AA6 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
@@ -119,33 +119,33 @@
 		FDAAC62A0E2D5960001DB1D8 /* testgles.c in Sources */ = {isa = PBXBuildFile; fileRef = FDAAC6290E2D5960001DB1D8 /* testgles.c */; };
 		FDAAC6390E2D59BE001DB1D8 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
 		FDAAC7780E2D7024001DB1D8 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7840E2D0F1F00EA573E /* common.c */; };
-		FDBDE54B0E31338A006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE56B0E3133F5006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5780E313425006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE57C0E313445006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5810E313465006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5850E313495006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5890E3134B8006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE58C0E3134F3006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5920E313531006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE59B0E31356A006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE59F0E31358D006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5A10E313594006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5A90E3135C0006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5AE0E3135E6006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5B60E3135FE006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5BC0E31364D006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5C20E313663006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5C40E3136DA006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5C60E3136F1006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5C80E313702006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5CA0E313712006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5CC0E31372B006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5CE0E31373E006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5D00E31375B006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5D20E31376B006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDBDE5D40E313789006BAC0B /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
-		FDC42FF40F0D866D009C87E1 /* libSDLiPhoneOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */; };
+		FDBDE54B0E31338A006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE56B0E3133F5006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5780E313425006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE57C0E313445006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5810E313465006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5850E313495006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5890E3134B8006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE58C0E3134F3006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5920E313531006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE59B0E31356A006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE59F0E31358D006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5A10E313594006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5A90E3135C0006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5AE0E3135E6006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5B60E3135FE006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5BC0E31364D006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5C20E313663006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5C40E3136DA006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5C60E3136F1006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5C80E313702006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5CA0E313712006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5CC0E31372B006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5CE0E31373E006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5D00E31375B006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5D20E31376B006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDBDE5D40E313789006BAC0B /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		FDC42FF40F0D866D009C87E1 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
 		FDC42FF60F0D866D009C87E1 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
 		FDC42FF70F0D866D009C87E1 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
 		FDC42FF80F0D866D009C87E1 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
@@ -394,7 +394,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5810E313465006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5810E313465006BAC0B /* libSDL.a in Frameworks */,
 				FDA8A89F0E2D111A00EA573E /* AudioToolbox.framework in Frameworks */,
 				FDA8A8A00E2D111A00EA573E /* QuartzCore.framework in Frameworks */,
 				FDA8A8A10E2D111A00EA573E /* OpenGLES.framework in Frameworks */,
@@ -409,7 +409,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				56ED0502118A8FE400A56AA6 /* libSDLiPhoneOS.a in Frameworks */,
+				56ED0502118A8FE400A56AA6 /* libSDL.a in Frameworks */,
 				56ED0503118A8FE400A56AA6 /* AudioToolbox.framework in Frameworks */,
 				56ED0504118A8FE400A56AA6 /* QuartzCore.framework in Frameworks */,
 				56ED0505118A8FE400A56AA6 /* OpenGLES.framework in Frameworks */,
@@ -424,7 +424,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE54B0E31338A006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE54B0E31338A006BAC0B /* libSDL.a in Frameworks */,
 				FDA8A9250E2D1C0B00EA573E /* AudioToolbox.framework in Frameworks */,
 				FDA8A9260E2D1C0B00EA573E /* QuartzCore.framework in Frameworks */,
 				FDA8A9270E2D1C0B00EA573E /* OpenGLES.framework in Frameworks */,
@@ -439,7 +439,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5850E313495006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5850E313495006BAC0B /* libSDL.a in Frameworks */,
 				FDA8AAB10E2D330F00EA573E /* AudioToolbox.framework in Frameworks */,
 				FDA8AAB20E2D330F00EA573E /* QuartzCore.framework in Frameworks */,
 				FDA8AAB30E2D330F00EA573E /* OpenGLES.framework in Frameworks */,
@@ -454,7 +454,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5890E3134B8006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5890E3134B8006BAC0B /* libSDL.a in Frameworks */,
 				FDA8AB1C0E2D386600EA573E /* AudioToolbox.framework in Frameworks */,
 				FDA8AB1D0E2D386600EA573E /* QuartzCore.framework in Frameworks */,
 				FDA8AB1E0E2D386600EA573E /* OpenGLES.framework in Frameworks */,
@@ -469,7 +469,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE58C0E3134F3006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE58C0E3134F3006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC3C30E2D47E6001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC3C40E2D47E6001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC3C50E2D47E6001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -484,7 +484,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE56B0E3133F5006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE56B0E3133F5006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC4370E2D4961001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC4380E2D4961001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC4390E2D4961001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -499,7 +499,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5920E313531006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5920E313531006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC45B0E2D4C27001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC45C0E2D4C27001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC45D0E2D4C27001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -514,7 +514,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5780E313425006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5780E313425006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC50B0E2D4FEB001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC50C0E2D4FEB001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC50D0E2D4FEB001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -529,7 +529,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE59B0E31356A006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE59B0E31356A006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC5910E2D5429001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC5920E2D5429001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC5930E2D5429001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -544,7 +544,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE59F0E31358D006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE59F0E31358D006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC5BF0E2D55B5001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC5C00E2D55B5001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC5C10E2D55B5001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -559,7 +559,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5A10E313594006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5A10E313594006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC5F00E2D5843001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC5F10E2D5843001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC5F20E2D5843001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -574,7 +574,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE57C0E313445006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE57C0E313445006BAC0B /* libSDL.a in Frameworks */,
 				FDAAC61C0E2D5914001DB1D8 /* AudioToolbox.framework in Frameworks */,
 				FDAAC61D0E2D5914001DB1D8 /* QuartzCore.framework in Frameworks */,
 				FDAAC61E0E2D5914001DB1D8 /* OpenGLES.framework in Frameworks */,
@@ -589,7 +589,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDC42FF40F0D866D009C87E1 /* libSDLiPhoneOS.a in Frameworks */,
+				FDC42FF40F0D866D009C87E1 /* libSDL.a in Frameworks */,
 				FDC42FF60F0D866D009C87E1 /* AudioToolbox.framework in Frameworks */,
 				FDC42FF70F0D866D009C87E1 /* QuartzCore.framework in Frameworks */,
 				FDC42FF80F0D866D009C87E1 /* OpenGLES.framework in Frameworks */,
@@ -604,7 +604,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5A90E3135C0006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5A90E3135C0006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C1000E2E4F4B00B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C1010E2E4F4B00B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C1020E2E4F4B00B7A85F /* OpenGLES.framework in Frameworks */,
@@ -619,7 +619,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5AE0E3135E6006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5AE0E3135E6006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C1770E2E52C000B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C1780E2E52C000B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C1790E2E52C000B7A85F /* OpenGLES.framework in Frameworks */,
@@ -634,7 +634,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5B60E3135FE006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5B60E3135FE006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C19B0E2E534F00B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C19C0E2E534F00B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C19D0E2E534F00B7A85F /* OpenGLES.framework in Frameworks */,
@@ -649,7 +649,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5BC0E31364D006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5BC0E31364D006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C4540E2E773800B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C4550E2E773800B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C4560E2E773800B7A85F /* OpenGLES.framework in Frameworks */,
@@ -664,7 +664,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5C20E313663006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5C20E313663006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C4720E2E77D700B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C4730E2E77D700B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C4740E2E77D700B7A85F /* OpenGLES.framework in Frameworks */,
@@ -679,7 +679,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5C40E3136DA006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5C40E3136DA006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C4AD0E2E79C300B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C4AE0E2E79C300B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C4AF0E2E79C300B7A85F /* OpenGLES.framework in Frameworks */,
@@ -694,7 +694,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5C60E3136F1006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5C60E3136F1006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C5010E2E7F4800B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C5020E2E7F4800B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C5030E2E7F4800B7A85F /* OpenGLES.framework in Frameworks */,
@@ -709,7 +709,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5C80E313702006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5C80E313702006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C51F0E2E807600B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C5200E2E807600B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C5210E2E807600B7A85F /* OpenGLES.framework in Frameworks */,
@@ -724,7 +724,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5CA0E313712006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5CA0E313712006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C5440E2E80E400B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C5450E2E80E400B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C5460E2E80E400B7A85F /* OpenGLES.framework in Frameworks */,
@@ -739,7 +739,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5CC0E31372B006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5CC0E31372B006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C57D0E2E8C7400B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C57E0E2E8C7400B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C57F0E2E8C7400B7A85F /* OpenGLES.framework in Frameworks */,
@@ -754,7 +754,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5CE0E31373E006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5CE0E31373E006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C5BB0E2E8CFC00B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C5BC0E2E8CFC00B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C5BD0E2E8CFC00B7A85F /* OpenGLES.framework in Frameworks */,
@@ -769,7 +769,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5D00E31375B006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5D00E31375B006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C5D70E2E8E0300B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C5D80E2E8E0300B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C5D90E2E8E0300B7A85F /* OpenGLES.framework in Frameworks */,
@@ -784,7 +784,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5D20E31376B006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5D20E31376B006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C61D0E2E8F0600B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C61E0E2E8F0600B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C61F0E2E8F0600B7A85F /* OpenGLES.framework in Frameworks */,
@@ -813,7 +813,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBDE5D40E313789006BAC0B /* libSDLiPhoneOS.a in Frameworks */,
+				FDBDE5D40E313789006BAC0B /* libSDL.a in Frameworks */,
 				FDD2C6EA0E2E959E00B7A85F /* AudioToolbox.framework in Frameworks */,
 				FDD2C6EB0E2E959E00B7A85F /* QuartzCore.framework in Frameworks */,
 				FDD2C6EC0E2E959E00B7A85F /* OpenGLES.framework in Frameworks */,
@@ -878,7 +878,7 @@
 		FD1B48AD0E3131CA007AB34E /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */,
+				FD1B48B80E3131CA007AB34E /* libSDL.a */,
 				0466EE7011E565E4000198A4 /* testsdl.app */,
 			);
 			name = Products;
@@ -1520,10 +1520,10 @@
 			remoteRef = 0466EE6F11E565E4000198A4 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		FD1B48B80E3131CA007AB34E /* libSDLiPhoneOS.a */ = {
+		FD1B48B80E3131CA007AB34E /* libSDL.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libSDLiPhoneOS.a;
+			path = libSDL.a;
 			remoteRef = FD1B48B70E3131CA007AB34E /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -2049,7 +2049,9 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
@@ -2065,6 +2067,8 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
+				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				OTHER_LDFLAGS = "-ObjC";
 				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
