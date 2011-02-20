@@ -45,6 +45,7 @@ struct particle
 } particles[MAX_PARTICLES];     /* this array holds all our particles */
 
 static int num_active_particles;        /* how many members of the particle array are actually being drawn / animated? */
+static int screen_w, screen_h;
 
 /* function declarations */
 void spawnTrailFromEmitter(struct particle *emitter);
@@ -82,11 +83,11 @@ stepParticles(void)
         /* is the particle actually active, or is it marked for deletion? */
         if (curr->isActive) {
             /* is the particle off the screen? */
-            if (curr->y > SCREEN_HEIGHT)
+            if (curr->y > screen_h)
                 curr->isActive = 0;
             else if (curr->y < 0)
                 curr->isActive = 0;
-            if (curr->x > SCREEN_WIDTH)
+            if (curr->x > screen_w)
                 curr->isActive = 0;
             else if (curr->x < 0)
                 curr->isActive = 0;
@@ -290,12 +291,12 @@ spawnEmitterParticle(GLfloat x, GLfloat y)
         break;
     }
     p->color[3] = 255;
-    /* set position to (x, SCREEN_HEIGHT) */
+    /* set position to (x, screen_h) */
     p->x = x;
-    p->y = SCREEN_HEIGHT;
+    p->y = screen_h;
     /* set velocity so that terminal point is (x,y) */
     p->xvel = 0;
-    p->yvel = -sqrt(2 * ACCEL * (SCREEN_HEIGHT - y));
+    p->yvel = -sqrt(2 * ACCEL * (screen_h - y));
     /* set other attributes */
     p->size = 10;
     p->type = emitter;
@@ -361,6 +362,8 @@ int
 main(int argc, char *argv[])
 {
     SDL_Window *window;         /* main window */
+    SDL_GLContext context;
+    int w, h;
     Uint32 startFrame;          /* time frame began to process */
     Uint32 endFrame;            /* time frame ended processing */
     Uint32 delay;               /* time to pause waiting to draw next frame */
@@ -388,7 +391,7 @@ main(int argc, char *argv[])
     window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                                 SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
                                 SDL_WINDOW_BORDERLESS);
-    SDL_CreateRenderer(window, 0, 0);
+    context = SDL_GL_CreateContext(window);
 
     /* load the particle texture */
     initializeTexture();
@@ -400,6 +403,22 @@ main(int argc, char *argv[])
         SDL_GL_ExtensionSupported("GL_OES_point_size_array");
 
     /* set up some OpenGL state */
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    SDL_GetWindowSize(window, &screen_w, &screen_h);
+    glViewport(0, 0, screen_w, screen_h);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrthof((GLfloat) 0,
+             (GLfloat) screen_w,
+             (GLfloat) screen_h,
+             (GLfloat) 0, 0.0, 1.0);
+
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -434,7 +453,7 @@ main(int argc, char *argv[])
         }
         stepParticles();
         drawParticles();
-		SDL_GL_SwapWindow(window);
+        SDL_GL_SwapWindow(window);
         endFrame = SDL_GetTicks();
 
         /* figure out how much time we have left, and then sleep */
