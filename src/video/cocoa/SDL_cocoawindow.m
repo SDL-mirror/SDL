@@ -48,13 +48,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     center = [NSNotificationCenter defaultCenter];
 
-    [center addObserver:self selector:@selector(windowDisExpose:) name:NSWindowDidExposeNotification object:window];
-    [center addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:window];
-    [center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:window];
-    [center addObserver:self selector:@selector(windowDidMiniaturize:) name:NSWindowDidMiniaturizeNotification object:window];
-    [center addObserver:self selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification object:window];
-    [center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:window];
-    [center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:window];
+    if ([window delegate] != nil) {
+        [center addObserver:self selector:@selector(windowDidExpose:) name:NSWindowDidExposeNotification object:window];
+        [center addObserver:self selector:@selector(windowDidMove:) name:NSWindowDidMoveNotification object:window];
+        [center addObserver:self selector:@selector(windowDidResize:) name:NSWindowDidResizeNotification object:window];
+        [center addObserver:self selector:@selector(windowDidMiniaturize:) name:NSWindowDidMiniaturizeNotification object:window];
+        [center addObserver:self selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification object:window];
+        [center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:window];
+        [center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:window];
+    } else {
+        [window setDelegate:self];
+    }
     [center addObserver:self selector:@selector(windowDidHide:) name:NSApplicationDidHideNotification object:NSApp];
     [center addObserver:self selector:@selector(windowDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
 
@@ -76,18 +80,26 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     center = [NSNotificationCenter defaultCenter];
 
-    [center removeObserver:self name:NSWindowDidExposeNotification object:window];
-    [center removeObserver:self name:NSWindowDidMoveNotification object:window];
-    [center removeObserver:self name:NSWindowDidResizeNotification object:window];
-    [center removeObserver:self name:NSWindowDidMiniaturizeNotification object:window];
-    [center removeObserver:self name:NSWindowDidDeminiaturizeNotification object:window];
-    [center removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
-    [center removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+    if ([window delegate] != self) {
+        [center removeObserver:self name:NSWindowDidExposeNotification object:window];
+        [center removeObserver:self name:NSWindowDidMoveNotification object:window];
+        [center removeObserver:self name:NSWindowDidResizeNotification object:window];
+        [center removeObserver:self name:NSWindowDidMiniaturizeNotification object:window];
+        [center removeObserver:self name:NSWindowDidDeminiaturizeNotification object:window];
+        [center removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
+        [center removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+    } else {
+        [window setDelegate:nil];
+    }
     [center removeObserver:self name:NSApplicationDidHideNotification object:NSApp];
     [center removeObserver:self name:NSApplicationDidUnhideNotification object:NSApp];
 
-    [window setNextResponder:nil];
-    [view setNextResponder:nil];
+    if ([window nextResponder] == self) {
+        [window setNextResponder:nil];
+    }
+    if ([view nextResponder] == self) {
+        [view setNextResponder:nil];
+    }
 }
 
 - (BOOL)windowShouldClose:(id)sender
