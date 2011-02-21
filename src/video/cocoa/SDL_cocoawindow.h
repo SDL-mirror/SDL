@@ -29,11 +29,7 @@
 typedef struct SDL_WindowData SDL_WindowData;
 
 /* *INDENT-OFF* */
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
-@interface Cocoa_WindowListener : NSResponder <NSWindowDelegate> {
-#else
 @interface Cocoa_WindowListener : NSResponder {
-#endif		
     SDL_WindowData *_data;
 }
 
@@ -59,6 +55,8 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) mouseUp:(NSEvent *) theEvent;
 -(void) rightMouseUp:(NSEvent *) theEvent;
 -(void) otherMouseUp:(NSEvent *) theEvent;
+-(void) mouseEntered:(NSEvent *)theEvent;
+-(void) mouseExited:(NSEvent *)theEvent;
 -(void) mouseMoved:(NSEvent *) theEvent;
 -(void) mouseDragged:(NSEvent *) theEvent;
 -(void) rightMouseDragged:(NSEvent *) theEvent;

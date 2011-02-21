@@ -24,14 +24,53 @@
 #ifndef _SDL_mouse_c_h
 #define _SDL_mouse_c_h
 
+#include "SDL_mouse.h"
+
 struct SDL_Cursor
 {
     struct SDL_Cursor *next;
     void *driverdata;
 };
 
+typedef struct
+{
+    /* Create a cursor from a surface */
+    SDL_Cursor *(*CreateCursor) (SDL_Surface * surface, int hot_x, int hot_y);
+
+    /* Show the specified cursor, or hide if cursor is NULL */
+    int (*ShowCursor) (SDL_Cursor * cursor);
+
+    /* This is called when a mouse motion event occurs */
+    void (*MoveCursor) (SDL_Cursor * cursor);
+
+    /* Free a window manager cursor */
+    void (*FreeCursor) (SDL_Cursor * cursor);
+
+    /* Warp the mouse to (x,y) */
+    void (*WarpMouse) (SDL_Window * window, int x, int y);
+
+    /* Data common to all mice */
+    SDL_Window *focus;
+    int x;
+    int y;
+    int xdelta;
+    int ydelta;
+    int last_x, last_y;         /* the last reported x and y coordinates */
+    Uint8 buttonstate;
+    SDL_bool relative_mode;
+
+    SDL_Cursor *cursors;
+    SDL_Cursor *def_cursor;
+    SDL_Cursor *cur_cursor;
+    SDL_bool cursor_shown;
+} SDL_Mouse;
+
+
 /* Initialize the mouse subsystem */
 extern int SDL_MouseInit(void);
+
+/* Get the mouse state structure */
+SDL_Mouse *SDL_GetMouse(void);
 
 /* Clear the mouse state */
 extern void SDL_ResetMouse(void);
