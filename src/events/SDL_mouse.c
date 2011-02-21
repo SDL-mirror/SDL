@@ -153,18 +153,22 @@ SDL_SendMouseMotion(SDL_Window * window, int relative, int x, int y)
     }
 
     SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
+    --x_max;
+    --y_max;
 
     /* make sure that the pointers find themselves inside the windows */
     /* only check if mouse->xmax is set ! */
-    if (x_max && mouse->x > x_max) {
+    if (mouse->x > x_max) {
         mouse->x = x_max;
-    } else if (mouse->x < 0) {
+    }
+    if (mouse->x < 0) {
         mouse->x = 0;
     }
 
-    if (y_max && mouse->y > y_max) {
+    if (mouse->y > y_max) {
         mouse->y = y_max;
-    } else if (mouse->y < 0) {
+    }
+    if (mouse->y < 0) {
         mouse->y = 0;
     }
 
