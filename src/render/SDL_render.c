@@ -999,7 +999,6 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     SDL_Window *window;
     SDL_Rect real_srcrect;
-    SDL_Rect clip_dstrect;
     SDL_Rect real_dstrect;
 
     CHECK_RENDERER_MAGIC(renderer, -1);
@@ -1011,16 +1010,6 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
     window = renderer->window;
 
-    if (dstrect) {
-        clip_dstrect = *dstrect;
-    } else {
-        clip_dstrect.x = 0;
-        clip_dstrect.y = 0;
-        clip_dstrect.w = renderer->viewport.w;
-        clip_dstrect.h = renderer->viewport.h;
-    }
-    dstrect = &clip_dstrect;
-
     real_srcrect.x = 0;
     real_srcrect.y = 0;
     real_srcrect.w = texture->w;
@@ -1029,40 +1018,29 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         if (!SDL_IntersectRect(srcrect, &real_srcrect, &real_srcrect)) {
             return 0;
         }
-        /* Clip dstrect by the same amount as srcrect was clipped */
-        if (srcrect->w != real_srcrect.w) {
-            int deltax = (real_srcrect.x - srcrect->x);
-            int deltaw = (real_srcrect.w - srcrect->w);
-            clip_dstrect.x += (deltax * clip_dstrect.w) / srcrect->w;
-            clip_dstrect.w += (deltaw * clip_dstrect.w) / srcrect->w;
-        }
-        if (srcrect->h != real_srcrect.h) {
-            int deltay = (real_srcrect.y - srcrect->y);
-            int deltah = (real_srcrect.h - srcrect->h);
-            clip_dstrect.y += (deltay * clip_dstrect.h) / srcrect->h;
-            clip_dstrect.h += (deltah * clip_dstrect.h) / srcrect->h;
-        }
     }
 
     real_dstrect.x = 0;
     real_dstrect.y = 0;
     real_dstrect.w = renderer->viewport.w;
     real_dstrect.h = renderer->viewport.h;
-    if (!SDL_IntersectRect(&clip_dstrect, &real_dstrect, &real_dstrect)) {
-        return 0;
-    }
-    /* Clip srcrect by the same amount as dstrect was clipped */
-    if (dstrect->w != real_dstrect.w) {
-        int deltax = (real_dstrect.x - dstrect->x);
-        int deltaw = (real_dstrect.w - dstrect->w);
-        real_srcrect.x += (deltax * real_srcrect.w) / dstrect->w;
-        real_srcrect.w += (deltaw * real_srcrect.w) / dstrect->w;
-    }
-    if (dstrect->h != real_dstrect.h) {
-        int deltay = (real_dstrect.y - dstrect->y);
-        int deltah = (real_dstrect.h - dstrect->h);
-        real_srcrect.y += (deltay * real_srcrect.h) / dstrect->h;
-        real_srcrect.h += (deltah * real_srcrect.h) / dstrect->h;
+    if (dstrect) {
+        if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
+            return 0;
+        }
+        /* Clip srcrect by the same amount as dstrect was clipped */
+        if (dstrect->w != real_dstrect.w) {
+            int deltax = (real_dstrect.x - dstrect->x);
+            int deltaw = (real_dstrect.w - dstrect->w);
+            real_srcrect.x += (deltax * real_srcrect.w) / dstrect->w;
+            real_srcrect.w += (deltaw * real_srcrect.w) / dstrect->w;
+        }
+        if (dstrect->h != real_dstrect.h) {
+            int deltay = (real_dstrect.y - dstrect->y);
+            int deltah = (real_dstrect.h - dstrect->h);
+            real_srcrect.y += (deltay * real_srcrect.h) / dstrect->h;
+            real_srcrect.h += (deltah * real_srcrect.h) / dstrect->h;
+        }
     }
 
     if (texture->native) {
