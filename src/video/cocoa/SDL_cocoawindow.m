@@ -135,8 +135,20 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
+    SDL_Window *window = _data->window;
+
     /* We're going to get keyboard events, since we're key. */
-    SDL_SetKeyboardFocus(_data->window);
+    SDL_SetKeyboardFocus(window);
+
+    /* If we just gained focus we need the updated mouse position */
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        NSPoint point;
+        point = [NSEvent mouseLocation];
+        point = [_data->nswindow convertScreenToBase:point];
+        point = [[_data->nswindow contentView] convertPoint:point fromView:nil];
+        point.y = window->h - point.y;
+        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
+    }
 
     /* Check to see if someone updated the clipboard */
     Cocoa_CheckClipboardUpdate(_data->videodata);
