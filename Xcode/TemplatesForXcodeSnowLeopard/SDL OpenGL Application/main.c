@@ -75,12 +75,12 @@ static void createSurface (int fullscreen)
     // Create window
     gScreen = SDL_SetVideoMode (640, 480, 0, flags);
     if (gScreen == NULL) {
-		
+        
         fprintf (stderr, "Couldn't set 640x480 OpenGL video mode: %s\n",
                  SDL_GetError());
-		SDL_Quit();
-		exit(2);
-	}
+        SDL_Quit();
+        exit(2);
+    }
 }
 
 static void initGL ()
@@ -100,29 +100,29 @@ static void mainLoop ()
     SDL_Event event;
     int done = 0;
     int fps = 24;
-	int delay = 1000/fps;
+    int delay = 1000/fps;
     int thenTicks = -1;
     int nowTicks;
     
     while ( !done ) {
 
-		/* Check for events */
-		while ( SDL_PollEvent (&event) ) {
-			switch (event.type) {
+        /* Check for events */
+        while ( SDL_PollEvent (&event) ) {
+            switch (event.type) {
 
-				case SDL_MOUSEMOTION:
-					break;
-				case SDL_MOUSEBUTTONDOWN:
-					break;
-				case SDL_KEYDOWN:
-					/* Any keypress quits the app... */
-				case SDL_QUIT:
-					done = 1;
-					break;
-				default:
-					break;
-			}
-		}
+                case SDL_MOUSEMOTION:
+                    break;
+                case SDL_MOUSEBUTTONDOWN:
+                    break;
+                case SDL_KEYDOWN:
+                    /* Any keypress quits the app... */
+                case SDL_QUIT:
+                    done = 1;
+                    break;
+                default:
+                    break;
+            }
+        }
     
         // Draw at 24 hz
         //     This approach is not normally recommended - it is better to
@@ -144,18 +144,18 @@ static void mainLoop ()
         }
 
         SDL_Delay (delay);
-	}
+    }
 }
 
 int main(int argc, char *argv[])
 {
-	// Init SDL video subsystem
-	if ( SDL_Init (SDL_INIT_VIDEO) < 0 ) {
-		
+    // Init SDL video subsystem
+    if ( SDL_Init (SDL_INIT_VIDEO) < 0 ) {
+        
         fprintf(stderr, "Couldn't initialize SDL: %s\n",
-			SDL_GetError());
-		exit(1);
-	}
+            SDL_GetError());
+        exit(1);
+    }
 
     // Set GL context attributes
     initAttributes ();
@@ -173,7 +173,7 @@ int main(int argc, char *argv[])
     mainLoop ();
     
     // Cleanup
-	SDL_Quit();
-	
+    SDL_Quit();
+
     return 0;
 }

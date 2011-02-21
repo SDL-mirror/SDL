@@ -17,10 +17,15 @@ randomInt(int min, int max)
 }
 
 void
-render(void)
+render(SDL_Renderer *renderer)
 {
 
     Uint8 r, g, b;
+
+    /* Clear the screen */
+    SDL_SetRenderDrawColor(0, 0, 0, 255);
+    SDL_SetRenderClear(renderer);
+
     /*  Come up with a random rectangle */
     SDL_Rect rect;
     rect.w = randomInt(64, 128);
@@ -32,45 +37,47 @@ render(void)
     r = randomInt(50, 255);
     g = randomInt(50, 255);
     b = randomInt(50, 255);
-    SDL_SetRenderDrawColor(r, g, b, 255);
+    SDL_SetRenderDrawColor(renderer, r, g, b, 255);
 
     /*  Fill the rectangle in the color */
-    SDL_RenderFillRect(&rect);
+    SDL_RenderFillRect(renderer, &rect);
 
     /* update screen */
-    SDL_RenderPresent();
-
+    SDL_RenderPresent(renderer);
 }
 
 int
 main(int argc, char *argv[])
 {
 
-    SDL_WindowID windowID;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
     int done;
     SDL_Event event;
 
     /* initialize SDL */
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         printf("Could not initialize SDL\n");
+        return 1;
     }
 
     /* seed random number generator */
     srand(time(NULL));
 
     /* create window and renderer */
-    windowID =
+    window =
         SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-    if (windowID == 0) {
+    if (!window) {
         printf("Could not initialize Window\n");
-    }
-    if (SDL_CreateRenderer(windowID, -1, 0) != 0) {
-        printf("Could not create renderer\n");
+        return 1;
     }
 
-    /* Fill screen with black */
-    SDL_RenderClear();
+    renderer = SDL_CreateRenderer(window, -1, 0);
+    if (renderer) {
+        printf("Could not create renderer\n");
+        return 1;
+    }
 
     /* Enter render loop, waiting for user to quit */
     done = 0;
@@ -80,7 +87,7 @@ main(int argc, char *argv[])
                 done = 1;
             }
         }
-        render();
+        render(renderer);
         SDL_Delay(1);
     }
 
