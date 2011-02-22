@@ -255,15 +255,12 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     SDL_SetMouseFocus(_data->window);
 
-    if (!mouse->cursor_shown) {
-        [NSCursor hide];
-    }
+    SDL_SetCursor(NULL);
 }
 
 - (void)mouseExited:(NSEvent *)theEvent
 {
     SDL_Window *window = _data->window;
-    SDL_Mouse *mouse = SDL_GetMouse();
 
     if (SDL_GetMouseFocus() == window) {
         if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
@@ -281,11 +278,10 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         } else {
             SDL_SetMouseFocus(NULL);
-        }
-    }
 
-    if (!mouse->cursor_shown) {
-        [NSCursor unhide];
+            [[NSCursor arrowCursor] set];
+            [NSCursor unhide];
+        }
     }
 }
 
