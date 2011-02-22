@@ -1544,7 +1544,6 @@ SDL_MaximizeWindow(SDL_Window * window)
     if (_this->MaximizeWindow) {
         _this->MaximizeWindow(_this, window);
     }
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
 }
 
 void
@@ -1559,7 +1558,6 @@ SDL_MinimizeWindow(SDL_Window * window)
     if (_this->MinimizeWindow) {
         _this->MinimizeWindow(_this, window);
     }
-    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
 }
 
 void
