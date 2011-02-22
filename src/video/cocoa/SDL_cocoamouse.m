@@ -92,6 +92,9 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
 
     if (SDL_GetMouseFocus()) {
         if (cursor) {
+            NSCursor *nscursor = (NSCursor *)cursor->driverdata;
+
+            [nscursor set];
             [NSCursor unhide];
         } else {
             [NSCursor hide];
