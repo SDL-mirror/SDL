@@ -705,10 +705,10 @@ GL_SetDrawingState(SDL_Renderer * renderer)
 
     GL_ActivateRenderer(renderer);
 
-    GL_SetColor(data, (GLfloat) renderer->r,
-                      (GLfloat) renderer->g,
-                      (GLfloat) renderer->b,
-                      (GLfloat) renderer->a);
+    GL_SetColor(data, renderer->r,
+                      renderer->g,
+                      renderer->b,
+                      renderer->a);
 
     GL_SetBlendMode(data, renderer->blendMode);
 
