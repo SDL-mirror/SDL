@@ -516,7 +516,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     {
         unsigned int style = [nswindow styleMask];
 
-        if ((style & ~NSResizableWindowMask) == NSBorderlessWindowMask) {
+        if (style == NSBorderlessWindowMask) {
             window->flags |= SDL_WINDOW_BORDERLESS;
         } else {
             window->flags &= ~SDL_WINDOW_BORDERLESS;
@@ -527,7 +527,8 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
             window->flags &= ~SDL_WINDOW_RESIZABLE;
         }
     }
-    if ([nswindow isZoomed]) {
+    /* isZoomed always returns true if the window is not resizable */
+    if ((window->flags & SDL_WINDOW_RESIZABLE) && [nswindow isZoomed]) {
         window->flags |= SDL_WINDOW_MAXIMIZED;
     } else {
         window->flags &= ~SDL_WINDOW_MAXIMIZED;
@@ -540,10 +541,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     if ([nswindow isKeyWindow]) {
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
         SDL_SetKeyboardFocus(data->window);
-
-        if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
-            /* FIXME */
-        }
     }
 
     /* All done! */
@@ -563,20 +560,8 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     unsigned int style;
 
     Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
-        rect.origin.x = bounds.x;
-    } else {
-        rect.origin.x = window->x;
-    }
-    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
-        rect.origin.y = bounds.y;
-    } else {
-        rect.origin.y = window->y;
-    }
+    rect.origin.x = window->x;
+    rect.origin.y = window->y;
     rect.size.width = window->w;
     rect.size.height = window->h;
     ConvertNSRect(&rect);
@@ -763,7 +748,7 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
 
     if ([nswindow isMiniaturized]) {
         [nswindow deminiaturize:nil];
-    } else if ([nswindow isZoomed]) {
+    } else if ((window->flags & SDL_WINDOW_RESIZABLE) && [nswindow isZoomed]) {
         [nswindow zoom:nil];
     }
     [pool release];

@@ -581,6 +581,21 @@ SDL_GetNumVideoDisplays(void)
 }
 
 int
+SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
+{
+    int displayIndex;
+
+    for (displayIndex = 0; displayIndex < _this->num_displays; ++displayIndex) {
+        if (display == &_this->displays[displayIndex]) {
+            return displayIndex;
+        }
+    }
+
+    /* Couldn't find the display, just use index 0 */
+    return 0;
+}
+
+int
 SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect)
 {
     CHECK_DISPLAY_INDEX(displayIndex, -1);
@@ -1066,14 +1081,32 @@ SDL_UpdateFullscreenMode(SDL_Window * window)
     SDL_OnWindowResized(window);
 }
 
+#define CREATE_FLAGS \
+    (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE)
+
+static void
+SDL_FinishWindowCreation(SDL_Window *window, Uint32 flags)
+{
+    if (flags & SDL_WINDOW_MAXIMIZED) {
+        SDL_MaximizeWindow(window);
+    }
+    if (flags & SDL_WINDOW_MINIMIZED) {
+        SDL_MinimizeWindow(window);
+    }
+    if (flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_SetWindowFullscreen(window, SDL_TRUE);
+    }
+    if (flags & SDL_WINDOW_INPUT_GRABBED) {
+        SDL_SetWindowGrab(window, SDL_TRUE);
+    }
+    if (!(flags & SDL_WINDOW_HIDDEN)) {
+        SDL_ShowWindow(window);
+    }
+}
+
 SDL_Window *
 SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 {
-    const Uint32 allowed_flags = (SDL_WINDOW_FULLSCREEN |
-                                  SDL_WINDOW_OPENGL |
-                                  SDL_WINDOW_BORDERLESS |
-                                  SDL_WINDOW_RESIZABLE |
-                                  SDL_WINDOW_INPUT_GRABBED);
     SDL_Window *window;
 
     if (!_this) {
@@ -1101,7 +1134,22 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window->y = y;
     window->w = w;
     window->h = h;
-    window->flags = (flags & allowed_flags);
+    if (SDL_WINDOWPOS_ISUNDEFINED(x) || SDL_WINDOWPOS_ISUNDEFINED(y) ||
+        SDL_WINDOWPOS_ISCENTERED(x) || SDL_WINDOWPOS_ISCENTERED(y)) {
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+        int displayIndex;
+        SDL_Rect bounds;
+
+        displayIndex = SDL_GetIndexOfDisplay(display);
+        SDL_GetDisplayBounds(displayIndex, &bounds);
+        if (SDL_WINDOWPOS_ISUNDEFINED(x) || SDL_WINDOWPOS_ISCENTERED(y)) {
+            window->x = bounds.x + (bounds.w - w) / 2;
+        }
+        if (SDL_WINDOWPOS_ISUNDEFINED(y) || SDL_WINDOWPOS_ISCENTERED(y)) {
+            window->y = bounds.y + (bounds.h - h) / 2;
+        }
+    }
+    window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
     window->next = _this->windows;
     if (_this->windows) {
         _this->windows->prev = window;
@@ -1116,16 +1164,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     if (title) {
         SDL_SetWindowTitle(window, title);
     }
-    if (flags & SDL_WINDOW_MAXIMIZED) {
-        SDL_MaximizeWindow(window);
-    }
-    if (flags & SDL_WINDOW_MINIMIZED) {
-        SDL_MinimizeWindow(window);
-    }
-    if (flags & SDL_WINDOW_SHOWN) {
-        SDL_ShowWindow(window);
-    }
-    SDL_UpdateWindowGrab(window);
+    SDL_FinishWindowCreation(window, flags);
 
     return window;
 }
@@ -1160,12 +1199,6 @@ SDL_CreateWindowFrom(const void *data)
 int
 SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 {
-    const Uint32 allowed_flags = (SDL_WINDOW_FULLSCREEN |
-                                  SDL_WINDOW_OPENGL |
-                                  SDL_WINDOW_BORDERLESS |
-                                  SDL_WINDOW_RESIZABLE |
-                                  SDL_WINDOW_INPUT_GRABBED |
-                                  SDL_WINDOW_FOREIGN);
     char *title = window->title;
 
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
@@ -1204,7 +1237,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     }
 
     window->title = NULL;
-    window->flags = (flags & allowed_flags);
+    window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
 
     if (_this->CreateWindow && !(flags & SDL_WINDOW_FOREIGN)) {
         if (_this->CreateWindow(_this, window) < 0) {
@@ -1219,16 +1252,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
         SDL_SetWindowTitle(window, title);
         SDL_free(title);
     }
-    if (flags & SDL_WINDOW_MAXIMIZED) {
-        SDL_MaximizeWindow(window);
-    }
-    if (flags & SDL_WINDOW_MINIMIZED) {
-        SDL_MinimizeWindow(window);
-    }
-    if (flags & SDL_WINDOW_SHOWN) {
-        SDL_ShowWindow(window);
-    }
-    SDL_UpdateWindowGrab(window);
+    SDL_FinishWindowCreation(window, flags);
 
     return 0;
 }
