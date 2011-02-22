@@ -792,7 +792,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         [nswindow setContentSize:rect.size];
     } else {
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
-            [nswindow performSelector: @selector(setStyleMask:) withObject: (id)GetWindowStyle(window)];
+            [nswindow performSelector: @selector(setStyleMask:) withObject: (id)(uintptr_t)GetWindowStyle(window)];
         }
 
         // This doesn't seem to do anything...
