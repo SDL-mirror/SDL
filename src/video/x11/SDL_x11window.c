@@ -265,19 +265,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Visual *visual;
     int depth;
     XSetWindowAttributes xattr;
-    int x, y;
     Window w;
     XSizeHints *sizehints;
     XWMHints *wmhints;
     XClassHint *classhints;
-    SDL_bool oldstyle_fullscreen;
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     int wmstate_count;
     Atom wmstate_atoms[3];
-
-    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
-    oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -318,36 +313,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         depth = displaydata->depth;
     }
 
-    if (oldstyle_fullscreen) {
-        xattr.override_redirect = True;
-    } else {
-        xattr.override_redirect = False;
-    }
+    xattr.override_redirect = False;
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
     xattr.colormap = XCreateColormap(display, RootWindow(display, screen), visual, AllocNone);
 
-    if (oldstyle_fullscreen
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        X11_GetDisplaySize(_this, window, &x, NULL);
-        x = (x - window->w) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
-        x = 0;
-    } else {
-        x = window->x;
-    }
-    if (oldstyle_fullscreen
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        X11_GetDisplaySize(_this, window, NULL, &y);
-        y = (y - window->h) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
-        y = 0;
-    } else {
-        y = window->y;
-    }
-
-    w = XCreateWindow(display, RootWindow(display, screen), x, y,
-                      window->w, window->h, 0, depth, InputOutput, visual,
+    w = XCreateWindow(display, RootWindow(display, screen),
+                      window->x, window->y, window->w, window->h,
+                      0, depth, InputOutput, visual,
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
     if (!w) {
@@ -370,24 +343,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
     sizehints = XAllocSizeHints();
     if (sizehints) {
-        if (!(window->flags & SDL_WINDOW_RESIZABLE)
-            || oldstyle_fullscreen) {
+        if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
             sizehints->min_width = sizehints->max_width = window->w;
             sizehints->min_height = sizehints->max_height = window->h;
             sizehints->flags = PMaxSize | PMinSize;
         }
-        if (!oldstyle_fullscreen
-            && !SDL_WINDOWPOS_ISUNDEFINED(window->x)
-            && !SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
-            sizehints->x = x;
-            sizehints->y = y;
-            sizehints->flags |= USPosition;
-        }
+        sizehints->x = window->x;
+        sizehints->y = window->y;
+        sizehints->flags |= USPosition;
         XSetWMNormalHints(display, w, sizehints);
         XFree(sizehints);
     }
 
-    if ((window->flags & SDL_WINDOW_BORDERLESS) || oldstyle_fullscreen) {
+    if (window->flags & SDL_WINDOW_BORDERLESS) {
         SDL_bool set;
         Atom WM_HINTS;
 
@@ -512,6 +480,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XDestroyWindow(display, w);
         return -1;
     }
+
 #ifdef X_HAVE_UTF8_STRING
     {
         Uint32 fevent = 0;
