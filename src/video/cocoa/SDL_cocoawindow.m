@@ -436,7 +436,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
 }
 @end
 
-@interface SDLView : NSView { }
+@interface SDLView : NSView
+/* The default implementation doesn't pass rightMouseDown to responder chain */
+- (void)rightMouseDown:(NSEvent *)theEvent;
 @end
 
 @implementation SDLView
@@ -598,7 +600,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
             rect.origin.y -= screenRect.origin.y;
         }
     }
-    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:FALSE screen:screen];
+    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:YES screen:screen];
 
     [pool release];
 
