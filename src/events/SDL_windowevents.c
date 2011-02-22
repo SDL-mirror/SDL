@@ -72,6 +72,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
         if (window->flags & SDL_WINDOW_SHOWN) {
             return 0;
         }
+        window->flags &= ~SDL_WINDOW_HIDDEN;
         window->flags |= SDL_WINDOW_SHOWN;
         SDL_OnWindowShown(window);
         break;
@@ -80,6 +81,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
             return 0;
         }
         window->flags &= ~SDL_WINDOW_SHOWN;
+        window->flags |= SDL_WINDOW_HIDDEN;
         SDL_OnWindowHidden(window);
         break;
     case SDL_WINDOWEVENT_MOVED:
