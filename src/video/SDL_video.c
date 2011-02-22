@@ -1300,6 +1300,10 @@ SDL_SetWindowIcon(SDL_Window * window, SDL_Surface * icon)
 {
     CHECK_WINDOW_MAGIC(window, );
 
+    if (!icon) {
+        return;
+    }
+
     if (_this->SetWindowIcon) {
         _this->SetWindowIcon(_this, window, icon);
     }

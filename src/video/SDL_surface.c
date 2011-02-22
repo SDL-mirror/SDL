@@ -814,6 +814,21 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
     return (convert);
 }
 
+SDL_Surface *
+SDL_ConvertSurfaceFormat(SDL_Surface * surface, Uint32 pixel_format,
+                         Uint32 flags)
+{
+    SDL_PixelFormat *fmt;
+    SDL_Surface *convert;
+
+    fmt = SDL_AllocFormat(pixel_format);
+    if (fmt) {
+        convert = SDL_ConvertSurface(surface, fmt, flags);
+        SDL_FreeFormat(fmt);
+    }
+    return convert;
+}
+
 /*
  * Create a surface on the stack for quick blit operations
  */

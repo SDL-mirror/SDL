@@ -637,6 +637,19 @@ Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
 }
 
 void
+Cocoa_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSImage *nsimage = Cocoa_CreateImage(icon);
+
+    if (nsimage) {
+        [NSApp setApplicationIconImage:nsimage];
+    }
+
+    [pool release];
+}
+
+void
 Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

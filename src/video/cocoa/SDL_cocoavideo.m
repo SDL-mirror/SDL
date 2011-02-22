@@ -21,6 +21,7 @@
 */
 #include "SDL_config.h"
 
+#include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
 #include "SDL_cocoashape.h"
 #include "SDL_assert.h"
@@ -82,6 +83,7 @@ Cocoa_CreateDevice(int devindex)
     device->CreateWindow = Cocoa_CreateWindow;
     device->CreateWindowFrom = Cocoa_CreateWindowFrom;
     device->SetWindowTitle = Cocoa_SetWindowTitle;
+    device->SetWindowIcon = Cocoa_SetWindowIcon;
     device->SetWindowPosition = Cocoa_SetWindowPosition;
     device->SetWindowSize = Cocoa_SetWindowSize;
     device->ShowWindow = Cocoa_ShowWindow;
@@ -147,6 +149,62 @@ Cocoa_VideoQuit(_THIS)
     Cocoa_QuitMouse(_this);
 }
 
+/* This function assumes that it's called from within an autorelease pool */
+NSImage *
+Cocoa_CreateImage(SDL_Surface * surface)
+{
+    SDL_Surface *converted;
+    NSBitmapImageRep *imgrep;
+    Uint8 *pixels;
+    int i;
+    NSImage *img;
+
+    converted = SDL_ConvertSurfaceFormat(surface, 
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+                                         SDL_PIXELFORMAT_RGBA8888,
+#else
+                                         SDL_PIXELFORMAT_ABGR8888,
+#endif
+                                         0);
+    if (!converted) {
+        return nil;
+    }
+
+    imgrep = [[[NSBitmapImageRep alloc] initWithBitmapDataPlanes: NULL
+                    pixelsWide: converted->w
+                    pixelsHigh: converted->h
+                    bitsPerSample: 8
+                    samplesPerPixel: 4
+                    hasAlpha: YES
+                    isPlanar: NO
+                    colorSpaceName: NSDeviceRGBColorSpace
+                    bytesPerRow: converted->pitch
+                    bitsPerPixel: converted->format->BitsPerPixel] autorelease];
+    if (imgrep == nil) {
+        SDL_FreeSurface(converted);
+        return nil;
+    }
+
+    /* Copy the pixels */
+    pixels = [imgrep bitmapData];
+    SDL_memcpy(pixels, converted->pixels, converted->h * converted->pitch);
+    SDL_FreeSurface(converted);
+
+    /* Premultiply the alpha channel */
+    for (i = (converted->h * converted->w); i--; ) {
+        Uint8 alpha = pixels[3];
+        pixels[0] = (Uint8)(((Uint16)pixels[0] * alpha) / 255);
+        pixels[1] = (Uint8)(((Uint16)pixels[1] * alpha) / 255);
+        pixels[2] = (Uint8)(((Uint16)pixels[2] * alpha) / 255);
+        pixels += 4;
+    }
+
+    img = [[[NSImage alloc] initWithSize: NSMakeSize(surface->w, surface->h)] autorelease];
+    if (img != nil) {
+        [img addRepresentation: imgrep];
+    }
+    return img;
+}
 
 /*
  * Mac OS X assertion support.

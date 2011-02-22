@@ -351,6 +351,8 @@ extern DECLSPEC void SDLCALL SDL_GetClipRect(SDL_Surface * surface,
  */
 extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurface
     (SDL_Surface * src, SDL_PixelFormat * fmt, Uint32 flags);
+extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurfaceFormat
+    (SDL_Surface * src, Uint32 pixel_format, Uint32 flags);
 
 /**
  * \brief Copy a block of pixels of one format to another format

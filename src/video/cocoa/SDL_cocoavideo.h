@@ -64,6 +64,9 @@ typedef struct SDL_VideoData
     Uint32 screensaver_activity;
 } SDL_VideoData;
 
+/* Utility functions */
+NSImage * Cocoa_CreateImage(SDL_Surface * surface);
+
 #endif /* _SDL_cocoavideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
