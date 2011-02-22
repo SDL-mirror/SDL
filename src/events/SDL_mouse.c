@@ -37,6 +37,10 @@ static SDL_Mouse SDL_mouse;
 int
 SDL_MouseInit(void)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+
+    mouse->cursor_shown = SDL_TRUE;
+
     return (0);
 }
 
@@ -44,12 +48,6 @@ SDL_Mouse *
 SDL_GetMouse(void)
 {
     return &SDL_mouse;
-}
-
-void
-SDL_ResetMouse(void)
-{
-    /* FIXME */
 }
 
 SDL_Window *

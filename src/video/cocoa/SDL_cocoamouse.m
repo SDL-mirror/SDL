@@ -26,9 +26,106 @@
 
 #include "../../events/SDL_mouse_c.h"
 
+
+static SDL_Cursor *
+Cocoa_CreateDefaultCursor()
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSCursor *nscursor;
+    SDL_Cursor *cursor = NULL;
+
+    nscursor = [NSCursor arrowCursor];
+
+    if (nscursor) {
+        cursor = SDL_calloc(1, sizeof(*cursor));
+        if (cursor) {
+            cursor->driverdata = nscursor;
+            [nscursor retain];
+        }
+    }
+
+    [pool release];
+
+    return cursor;
+}
+
+static SDL_Cursor *
+Cocoa_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSImage *nsimage;
+    NSCursor *nscursor = NULL;
+    SDL_Cursor *cursor = NULL;
+
+    nsimage = Cocoa_CreateImage(surface);
+    if (nsimage) {
+        nscursor = [[NSCursor alloc] initWithImage: nsimage hotSpot: NSMakePoint(hot_x, hot_y)];
+    }
+
+    if (nscursor) {
+        cursor = SDL_calloc(1, sizeof(*cursor));
+        if (cursor) {
+            cursor->driverdata = nscursor;
+        }
+    }
+
+    [pool release];
+
+    return cursor;
+}
+
+static void
+Cocoa_FreeCursor(SDL_Cursor * cursor)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSCursor *nscursor = (NSCursor *)cursor->driverdata;
+
+    [nscursor release];
+
+    [pool release];
+}
+
+static int
+Cocoa_ShowCursor(SDL_Cursor * cursor)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    if (SDL_GetMouseFocus()) {
+        if (cursor) {
+            [NSCursor unhide];
+        } else {
+            [NSCursor hide];
+        }
+    }
+
+    [pool release];
+
+    return 0;
+}
+
+static void
+Cocoa_WarpMouse(SDL_Window * window, int x, int y)
+{
+    CGPoint point;
+
+    point.x = (CGFloat)window->x + x;
+    point.y = (CGFloat)window->y + y;
+    CGWarpMouseCursorPosition(point);
+}
+
 void
 Cocoa_InitMouse(_THIS)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+    SDL_Cursor *cursor;
+
+    mouse->CreateCursor = Cocoa_CreateCursor;
+    mouse->ShowCursor = Cocoa_ShowCursor;
+    mouse->WarpMouse = Cocoa_WarpMouse;
+    mouse->FreeCursor = Cocoa_FreeCursor;
+
+    cursor = Cocoa_CreateDefaultCursor();
+    mouse->cursors = mouse->cur_cursor = cursor;
 }
 
 static int
