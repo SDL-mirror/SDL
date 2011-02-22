@@ -170,7 +170,7 @@ ShouldUseTextureFramebuffer()
         SDL_GLContext context;
         SDL_bool hasAcceleratedOpenGL = SDL_FALSE;
 
-        window = SDL_CreateWindow("OpenGL test", -32, -32, 32, 32, SDL_WINDOW_OPENGL);
+        window = SDL_CreateWindow("OpenGL test", -32, -32, 32, 32, SDL_WINDOW_OPENGL|SDL_WINDOW_HIDDEN);
         if (window) {
             context = SDL_GL_CreateContext(window);
             if (context) {
