@@ -91,6 +91,10 @@ CreateApplicationMenus(void)
 
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
+    [appleMenu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@""];
+
+    [appleMenu addItem:[NSMenuItem separatorItem]];
+
     title = [@"Hide " stringByAppendingString:appName];
     [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@/*"h"*/""];
 
