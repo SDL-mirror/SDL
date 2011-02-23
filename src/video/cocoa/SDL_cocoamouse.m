@@ -111,8 +111,8 @@ Cocoa_WarpMouse(SDL_Window * window, int x, int y)
 {
     CGPoint point;
 
-    point.x = (CGFloat)window->x + x;
-    point.y = (CGFloat)window->y + y;
+    point.x = (float)window->x + x;
+    point.y = (float)window->y + y;
     CGWarpMouseCursorPosition(point);
 }
 
