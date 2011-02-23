@@ -42,6 +42,14 @@
 #elif defined(__MINGW64_VERSION_MAJOR)
 #include <intrin.h>
 #else
+#ifdef __ALTIVEC__
+#if HAVE_ALTIVEC_H && !defined(__APPLE_ALTIVEC__)
+#include <altivec.h>
+#undef vector
+#undef pixel
+#undef bool
+#endif
+#endif
 #ifdef __MMX__
 #include <mmintrin.h>
 #endif
@@ -53,9 +61,6 @@
 #endif
 #ifdef __SSE2__
 #include <emmintrin.h>
-#endif
-#ifdef HAVE_ALTIVEC_H
-#include <altivec.h>
 #endif
 #endif
 
