@@ -31,6 +31,34 @@
 
 #include "SDL_stdinc.h"
 
+/* Need to do this here because intrin.h has C++ code in it */
+/* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
+#if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(_WIN32_WCE)
+#include <intrin.h>
+#define __MMX__
+#define __3dNOW__
+#define __SSE__
+#define __SSE2__
+#elif defined(__MINGW64_VERSION_MAJOR)
+#include <intrin.h>
+#else
+#ifdef __MMX__
+#include <mmintrin.h>
+#endif
+#ifdef __3dNOW__
+#include <mm3dnow.h>
+#endif
+#ifdef __SSE__
+#include <xmmintrin.h>
+#endif
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+#ifdef HAVE_ALTIVEC_H
+#include <altivec.h>
+#endif
+#endif
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
@@ -65,9 +93,19 @@ extern DECLSPEC int SDLCALL SDL_GetCPUCacheLineSize(void);
 extern DECLSPEC SDL_bool SDLCALL SDL_HasRDTSC(void);
 
 /**
+ *  This function returns true if the CPU has AltiVec features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasAltiVec(void);
+
+/**
  *  This function returns true if the CPU has MMX features.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasMMX(void);
+
+/**
+ *  This function returns true if the CPU has 3DNow! features.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_Has3DNow(void);
 
 /**
  *  This function returns true if the CPU has SSE features.

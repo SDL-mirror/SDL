@@ -24,24 +24,6 @@
 #ifndef _SDL_blit_h
 #define _SDL_blit_h
 
-#ifdef __MINGW32__
-#include <_mingw.h>
-#endif
-
-#if defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR)
-#include <intrin.h>
-#else
-#ifdef __MMX__
-#include <mmintrin.h>
-#endif
-#ifdef __SSE__
-#include <xmmintrin.h>
-#endif
-#ifdef __SSE2__
-#include <emmintrin.h>
-#endif
-#endif
-
 #include "SDL_cpuinfo.h"
 #include "SDL_endian.h"
 #include "SDL_surface.h"
@@ -62,8 +44,11 @@
 /* SDL blit CPU flags */
 #define SDL_CPU_ANY                 0x00000000
 #define SDL_CPU_MMX                 0x00000001
+#define SDL_CPU_3DNOW               0x00000002
 #define SDL_CPU_SSE                 0x00000004
 #define SDL_CPU_SSE2                0x00000008
+#define SDL_CPU_ALTIVEC_PREFETCH    0x00000010
+#define SDL_CPU_ALTIVEC_NOPREFETCH  0x00000020
 
 typedef struct
 {

@@ -140,9 +140,11 @@ TestCPUInfo(SDL_bool verbose)
 {
     if (verbose) {
         printf("CPU count: %d\n", SDL_GetCPUCount());
-	printf("CPU cache line size: %d\n", SDL_GetCPUCacheLineSize());
+        printf("CPU cache line size: %d\n", SDL_GetCPUCacheLineSize());
         printf("RDTSC %s\n", SDL_HasRDTSC()? "detected" : "not detected");
+        printf("AltiVec %s\n", SDL_HasAltiVec()? "detected" : "not detected");
         printf("MMX %s\n", SDL_HasMMX()? "detected" : "not detected");
+        printf("3DNow! %s\n", SDL_Has3DNow()? "detected" : "not detected");
         printf("SSE %s\n", SDL_HasSSE()? "detected" : "not detected");
         printf("SSE2 %s\n", SDL_HasSSE2()? "detected" : "not detected");
         printf("SSE3 %s\n", SDL_HasSSE3()? "detected" : "not detected");

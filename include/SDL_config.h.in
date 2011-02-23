@@ -34,7 +34,7 @@
 
 /* Make sure that this isn't included by Visual C++ */
 #ifdef _MSC_VER
-#error You should copy include/SDL_config.h.default to include/SDL_config.h
+#error You should run hg revert SDL_config.h 
 #endif
 
 /* C language features */
@@ -82,6 +82,7 @@
 #undef HAVE_MATH_H
 #undef HAVE_ICONV_H
 #undef HAVE_SIGNAL_H
+#undef HAVE_ALTIVEC_H
 
 /* C library functions */
 #undef HAVE_MALLOC
@@ -302,5 +303,6 @@
 
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES
+#undef SDL_ALTIVEC_BLITTERS
 
 #endif /* _SDL_config_h */

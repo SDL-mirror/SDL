@@ -1514,8 +1514,10 @@ Optional Features:
   --enable-ssemath        Allow GCC to use SSE floating point math
                           [default=no]
   --enable-mmx            use MMX assembly routines [default=yes]
+  --enable-3dnow          use MMX assembly routines [default=yes]
   --enable-sse            use SSE assembly routines [default=yes]
   --enable-sse2           use SSE2 assembly routines [default=no]
+  --enable-altivec        use Altivec assembly routines [default=yes]
   --enable-oss            support the OSS audio API [default=yes]
   --enable-alsa           support the ALSA audio API [default=yes]
   --disable-alsatest      Do not try to compile and run a test Alsa program
@@ -3768,13 +3770,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:3771: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:3773: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3774: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:3776: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3777: output\"" >&5)
+  (eval echo "\"\$as_me:3779: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5001,7 +5003,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5004 "configure"' > conftest.$ac_ext
+  echo '#line 5006 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7162,11 +7164,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7165: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7167: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7169: \$? = $ac_status" >&5
+   echo "$as_me:7171: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7501,11 +7503,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7504: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7506: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7508: \$? = $ac_status" >&5
+   echo "$as_me:7510: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7606,11 +7608,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7609: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7611: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7613: \$? = $ac_status" >&5
+   echo "$as_me:7615: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7661,11 +7663,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7664: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7666: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7668: \$? = $ac_status" >&5
+   echo "$as_me:7670: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10419,7 +10421,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10422 "configure"
+#line 10424 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10515,7 +10517,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10518 "configure"
+#line 10520 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14197,11 +14199,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14200: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14202: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14204: \$? = $ac_status" >&5
+   echo "$as_me:14206: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14296,11 +14298,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14299: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14301: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14303: \$? = $ac_status" >&5
+   echo "$as_me:14305: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14348,11 +14350,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14351: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14353: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14355: \$? = $ac_status" >&5
+   echo "$as_me:14357: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20693,6 +20695,79 @@ echo "${ECHO_T}$have_gcc_mmx" >&6; }
         fi
     fi
 
+    # Check whether --enable-3dnow was given.
+if test "${enable_3dnow+set}" = set; then
+  enableval=$enable_3dnow;
+else
+  enable_3dnow=yes
+fi
+
+    if test x$enable_3dnow = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_3dnow=no
+        { echo "$as_me:$LINENO: checking for GCC -m3dnow option" >&5
+echo $ECHO_N "checking for GCC -m3dnow option... $ECHO_C" >&6; }
+        amd3dnow_CFLAGS="-m3dnow"
+        CFLAGS="$save_CFLAGS $amd3dnow_CFLAGS"
+
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        #include <mm3dnow.h>
+        #ifndef __3dNOW__
+        #error Assembler CPP flag not enabled
+        #endif
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+        have_gcc_3dnow=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { echo "$as_me:$LINENO: result: $have_gcc_3dnow" >&5
+echo "${ECHO_T}$have_gcc_3dnow" >&6; }
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_3dnow = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $amd3dnow_CFLAGS"
+        fi
+    fi
+
     # Check whether --enable-sse was given.
 if test "${enable_sse+set}" = set; then
   enableval=$enable_sse;
@@ -20854,6 +20929,260 @@ echo "${ECHO_T}$have_gcc_sse2" >&6; }
 
         if test x$have_gcc_sse2 = xyes; then
             EXTRA_CFLAGS="$EXTRA_CFLAGS $sse2_CFLAGS"
+        fi
+    fi
+
+    # Check whether --enable-altivec was given.
+if test "${enable_altivec+set}" = set; then
+  enableval=$enable_altivec;
+else
+  enable_altivec=yes
+fi
+
+    if test x$enable_altivec = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_altivec=no
+        have_altivec_h_hdr=no
+        altivec_CFLAGS="-maltivec"
+        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+
+        { echo "$as_me:$LINENO: checking for Altivec with GCC altivec.h and -maltivec option" >&5
+echo $ECHO_N "checking for Altivec with GCC altivec.h and -maltivec option... $ECHO_C" >&6; }
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        #include <altivec.h>
+        vector unsigned int vzero() {
+            return vec_splat_u32(0);
+        }
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+        have_gcc_altivec=yes
+        have_altivec_h_hdr=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
+echo "${ECHO_T}$have_gcc_altivec" >&6; }
+
+        if test x$have_gcc_altivec = xno; then
+            { echo "$as_me:$LINENO: checking for Altivec with GCC -maltivec option" >&5
+echo $ECHO_N "checking for Altivec with GCC -maltivec option... $ECHO_C" >&6; }
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+            vector unsigned int vzero() {
+                return vec_splat_u32(0);
+            }
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            have_gcc_altivec=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+            { echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
+echo "${ECHO_T}$have_gcc_altivec" >&6; }
+        fi
+
+        if test x$have_gcc_altivec = xno; then
+            { echo "$as_me:$LINENO: checking for Altivec with GCC altivec.h and -faltivec option" >&5
+echo $ECHO_N "checking for Altivec with GCC altivec.h and -faltivec option... $ECHO_C" >&6; }
+            altivec_CFLAGS="-faltivec"
+            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+            #include <altivec.h>
+            vector unsigned int vzero() {
+                return vec_splat_u32(0);
+            }
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            have_gcc_altivec=yes
+            have_altivec_h_hdr=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+            { echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
+echo "${ECHO_T}$have_gcc_altivec" >&6; }
+        fi
+
+        if test x$have_gcc_altivec = xno; then
+            { echo "$as_me:$LINENO: checking for Altivec with GCC -faltivec option" >&5
+echo $ECHO_N "checking for Altivec with GCC -faltivec option... $ECHO_C" >&6; }
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+            vector unsigned int vzero() {
+                return vec_splat_u32(0);
+            }
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            have_gcc_altivec=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+            { echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
+echo "${ECHO_T}$have_gcc_altivec" >&6; }
+        fi
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_altivec = xyes; then
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_ALTIVEC_BLITTERS 1
+_ACEOF
+
+            if test x$have_altivec_h_hdr = xyes; then
+              cat >>confdefs.h <<\_ACEOF
+#define HAVE_ALTIVEC_H 1
+_ACEOF
+
+            fi
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
         fi
     fi
 fi
