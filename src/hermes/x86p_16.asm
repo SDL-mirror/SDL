@@ -485,6 +485,6 @@ _ConvertX86p16_8RGB332:
 .L7 pop ebp
     retn
 
-%ifidn __OUTPUT_FORMAT__,elf
+%ifidn __OUTPUT_FORMAT__,elf32
 section .note.GNU-stack noalloc noexec nowrite progbits
 %endif

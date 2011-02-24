@@ -740,13 +740,13 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
                   NASMFLAGS="-f macho"
                   ;;
               *)
-                  NASMFLAGS="-f elf"
+                  NASMFLAGS="-f elf32"
                   ;;
             esac
         fi
 
         AC_PATH_PROG(NASM, nasm)
-        echo "%ifidn __OUTPUT_FORMAT__,elf" > unquoted-sections
+        echo "%ifidn __OUTPUT_FORMAT__,elf32" > unquoted-sections
         echo "section .note.GNU-stack noalloc noexec nowrite progbits" >> unquoted-sections
         echo "%endif" >> unquoted-sections
         CompileNASM unquoted-sections || NASM=""
