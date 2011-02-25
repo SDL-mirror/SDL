@@ -786,6 +786,11 @@ static void X11_SetSizeHints(_THIS, int w, int h, Uint32 flags)
 		/* Center it, if desired */
 		if ( X11_WindowPosition(this, &hints->x, &hints->y, w, h) ) {
 			hints->flags |= USPosition;
+
+			/* Hints must be set before moving the window, otherwise an
+			   unwanted ConfigureNotify event will be issued */
+			XSetWMNormalHints(SDL_Display, WMwindow, hints);
+
 			XMoveWindow(SDL_Display, WMwindow, hints->x, hints->y);
 
 			/* Flush the resize event so we don't catch it later */
