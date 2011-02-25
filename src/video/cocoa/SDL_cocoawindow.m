@@ -66,7 +66,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [window setAcceptsMouseMovedEvents:YES];
 
     [view setNextResponder:self];
-    [view addTrackingRect:[view visibleRect] owner:self userData:nil assumeInside:NO];
 #if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
     [view setAcceptsTouchEvents:YES];
 #endif
@@ -152,12 +151,20 @@ static __inline__ void ConvertNSRect(NSRect *r)
     SDL_SetKeyboardFocus(window);
 
     /* If we just gained focus we need the updated mouse position */
-    if (SDL_GetMouseFocus() == window) {
+    {
         NSPoint point;
-        point = [NSEvent mouseLocation];
-        point = [_data->nswindow convertScreenToBase:point];
-        point.y = window->h - point.y;
-        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
+        int x, y;
+
+        point = [_data->nswindow mouseLocationOutsideOfEventStream];
+        x = (int)point.x;
+        y = (int)(window->h - point.y);
+
+        if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
+            if (SDL_GetMouseFocus() != window) {
+                [self mouseEntered:nil];
+            }
+            SDL_SendMouseMotion(window, 0, x, y);
+        }
     }
 
     /* Check to see if someone updated the clipboard */
@@ -288,6 +295,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)mouseMoved:(NSEvent *)theEvent
 {
     SDL_Window *window = _data->window;
+    NSPoint point;
+    int x, y;
 
 #ifdef RELATIVE_MOTION
     if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
@@ -295,13 +304,19 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 #endif
 
-    if (SDL_GetMouseFocus() == window) {
-        NSPoint point;
+    point = [theEvent locationInWindow];
+    x = (int)point.x;
+    y = (int)(window->h - point.y);
 
-        point = [theEvent locationInWindow];
-        point.y = window->h - point.y;
-
-        SDL_SendMouseMotion(window, 0, (int)point.x, (int)point.y);
+    if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
+        if (SDL_GetMouseFocus() == window) {
+            [self mouseExited:theEvent];
+        }
+    } else {
+        if (SDL_GetMouseFocus() != window) {
+            [self mouseEntered:theEvent];
+        }
+        SDL_SendMouseMotion(window, 0, x, y);
     }
 }
 
