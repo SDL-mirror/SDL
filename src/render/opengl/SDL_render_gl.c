@@ -99,9 +99,6 @@ typedef struct
 #include "SDL_glfuncs.h"
 #undef SDL_PROC
 
-    void (*glTextureRangeAPPLE) (GLenum target, GLsizei length,
-                                 const GLvoid * pointer);
-
     /* Multitexture support */
     SDL_bool GL_ARB_multitexture_supported;
     PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
@@ -322,11 +319,6 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
         data->GL_ARB_texture_rectangle_supported = SDL_TRUE;
     }
-    if (SDL_GL_ExtensionSupported("GL_APPLE_texture_range")) {
-        data->glTextureRangeAPPLE =
-            (void (*)(GLenum, GLsizei, const GLvoid *))
-            SDL_GL_GetProcAddress("glTextureRangeAPPLE");
-    }
 
     /* Check for multitexture support */
     if (SDL_GL_ExtensionSupported("GL_ARB_multitexture")) {
@@ -488,10 +480,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                     GL_STORAGE_CACHED_APPLE);
     }
     if (texture->access == SDL_TEXTUREACCESS_STREAMING
-        && texture->format == SDL_PIXELFORMAT_ARGB8888) {
+        && texture->format == SDL_PIXELFORMAT_ARGB8888
+        && (texture->w % 8) == 0) {
         renderdata->glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_TRUE);
+        renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
+                          (data->pitch / SDL_BYTESPERPIXEL(texture->format)));
         renderdata->glTexImage2D(data->type, 0, internalFormat, texture_w,
                                  texture_h, 0, format, type, data->pixels);
+        renderdata->glPixelStorei(GL_UNPACK_CLIENT_STORAGE_APPLE, GL_FALSE);
     }
     else
 #endif
@@ -546,11 +543,11 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_ActivateRenderer(renderer);
 
     renderdata->glGetError();
+    renderdata->glEnable(data->type);
+    renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH,
                               (pitch / SDL_BYTESPERPIXEL(texture->format)));
-    renderdata->glEnable(data->type);
-    renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexSubImage2D(data->type, 0, rect->x, rect->y, rect->w,
                                 rect->h, data->format, data->formattype,
                                 pixels);
