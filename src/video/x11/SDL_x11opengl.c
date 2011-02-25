@@ -284,14 +284,13 @@ X11_GL_InitExtensions(_THIS)
     X11_PumpEvents(_this);
 }
 
-XVisualInfo *
-X11_GL_GetVisual(_THIS, Display * display, int screen)
+int 
+X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int size)
 {
-    XVisualInfo *vinfo;
-
-    /* 64 seems nice. */
-    int attribs[64];
     int i = 0;
+
+    /* assert buffer is large enough to hold all SDL attributes. */ 
+    /* assert(size >= 32);*/
 
     /* Setup our GLX attributes according to the gl_config. */
     attribs[i++] = GLX_RGBA;
@@ -366,6 +365,18 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
     }
 
     attribs[i++] = None;
+ 
+    return i;
+}
+
+XVisualInfo *
+X11_GL_GetVisual(_THIS, Display * display, int screen)
+{
+    XVisualInfo *vinfo;
+
+    /* 64 seems nice. */
+    int attribs[64];
+    int i = X11_GL_GetAttributes(_this,display,screen,attribs,64);
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
     if (!vinfo) {
@@ -422,6 +433,8 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                     SDL_SetError("GL 3.x is not supported");
                     context = temp_context;
                 } else {
+                    int glxAttribs[64];
+
                     /* Create a GL 3.x context */
                     GLXFBConfig *framebuffer_config = NULL;
                     int fbcount = 0;
@@ -436,10 +449,12 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                              int *)) _this->gl_data->
                         glXGetProcAddress((GLubyte *) "glXChooseFBConfig");
 
+                    X11_GL_GetAttributes(_this,display,screen,glxAttribs,64);
+
                     if (!glXChooseFBConfig
                         || !(framebuffer_config =
                              glXChooseFBConfig(display,
-                                               DefaultScreen(display), NULL,
+                                               DefaultScreen(display), glxAttribs,
                                                &fbcount))) {
                         SDL_SetError
                             ("No good framebuffers found. GL 3.x disabled");
