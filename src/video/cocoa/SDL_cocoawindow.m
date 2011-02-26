@@ -787,6 +787,24 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
     [pool release];
 }
 
+static NSWindow *
+Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
+{
+    if (!data->created) {
+        /* Don't mess with other people's windows... */
+        return nswindow;
+    }
+
+    [data->listener close];
+    data->nswindow = [[SDLWindow alloc] initWithContentRect:[[nswindow contentView] frame] styleMask:style backing:NSBackingStoreBuffered defer:YES screen:[nswindow screen]];
+    [data->nswindow setContentView:[nswindow contentView]];
+    [data->listener listen:data];
+
+    [nswindow close];
+
+    return data->nswindow;
+}
+
 void
 Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
@@ -807,6 +825,8 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
 
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
             [nswindow performSelector: @selector(setStyleMask:) withObject: (id)NSBorderlessWindowMask];
+        } else {
+            nswindow = Cocoa_RebuildWindow(data, nswindow, NSBorderlessWindowMask);
         }
     } else {
         rect.origin.x = window->windowed.x;
@@ -817,6 +837,8 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
 
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
             [nswindow performSelector: @selector(setStyleMask:) withObject: (id)(uintptr_t)GetWindowStyle(window)];
+        } else {
+            nswindow = Cocoa_RebuildWindow(data, nswindow, GetWindowStyle(window));
         }
     }
 
