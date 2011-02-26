@@ -823,6 +823,12 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         rect.size.height = bounds.h;
         ConvertNSRect(&rect);
 
+        /* Hack to fix origin on Mac OS X 10.4 */
+        NSRect screenRect = [[nswindow screen] frame];
+        if (screenRect.size.height >= 1.0f) {
+            rect.origin.y += (screenRect.size.height - rect.size.height);
+        }
+
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
             [nswindow performSelector: @selector(setStyleMask:) withObject: (id)NSBorderlessWindowMask];
         } else {
