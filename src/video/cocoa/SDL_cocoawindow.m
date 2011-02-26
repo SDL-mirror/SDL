@@ -825,6 +825,11 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     [nswindow setContentSize:rect.size];
     s_moveHack = SDL_GetTicks();
 
+    /* When the window style changes the title is cleared */
+    if (!fullscreen) {
+        Cocoa_SetWindowTitle(_this, window);
+    }
+
 #ifdef FULLSCREEN_TOGGLEABLE
     if (fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
