@@ -1087,6 +1087,11 @@ SDL_UpdateFullscreenMode(SDL_Window * window)
 static void
 SDL_FinishWindowCreation(SDL_Window *window, Uint32 flags)
 {
+    window->windowed.x = window->x;
+    window->windowed.y = window->y;
+    window->windowed.w = window->w;
+    window->windowed.h = window->h;
+
     if (flags & SDL_WINDOW_MAXIMIZED) {
         SDL_MaximizeWindow(window);
     }

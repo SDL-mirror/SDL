@@ -76,6 +76,9 @@ struct SDL_Window
     int w, h;
     Uint32 flags;
 
+    /* Stored position and size for windowed mode */
+    SDL_Rect windowed;
+
     SDL_DisplayMode fullscreen_mode;
     
     SDL_Surface *surface;

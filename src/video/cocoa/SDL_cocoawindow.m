@@ -22,6 +22,7 @@
 #include "SDL_config.h"
 
 #include "SDL_syswm.h"
+#include "SDL_timer.h"  /* For SDL_GetTicks() */
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -30,6 +31,9 @@
 #include "SDL_cocoavideo.h"
 #include "SDL_cocoashape.h"
 #include "SDL_cocoamouse.h"
+
+
+static Uint32 s_moveHack;
 
 static __inline__ void ConvertNSRect(NSRect *r)
 {
@@ -115,11 +119,29 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidMove:(NSNotification *)aNotification
 {
     int x, y;
-    NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
+    SDL_Window *window = _data->window;
+    NSWindow *nswindow = _data->nswindow;
+    NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
     ConvertNSRect(&rect);
+
+    if (s_moveHack) {
+        SDL_bool blockMove = ((SDL_GetTicks() - s_moveHack) < 500);
+
+        s_moveHack = 0;
+
+        if (blockMove) {
+            /* Cocoa is adjusting the window in response to a mode change */
+            rect.origin.x = window->x;
+            rect.origin.y = window->y;
+            ConvertNSRect(&rect);
+            [nswindow setFrameOrigin:rect.origin];
+            return;
+        }
+    }
+
     x = (int)rect.origin.x;
     y = (int)rect.origin.y;
-    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MOVED, x, y);
+    SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
 - (void)windowDidResize:(NSNotification *)aNotification
@@ -786,16 +808,22 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
             [nswindow performSelector: @selector(setStyleMask:) withObject: (id)NSBorderlessWindowMask];
         }
-        [nswindow setFrameOrigin:rect.origin];
-        [nswindow setContentSize:rect.size];
     } else {
+        rect.origin.x = window->windowed.x;
+        rect.origin.y = window->windowed.y;
+        rect.size.width = window->windowed.w;
+        rect.size.height = window->windowed.h;
+        ConvertNSRect(&rect);
+
         if ([nswindow respondsToSelector: @selector(setStyleMask:)]) {
             [nswindow performSelector: @selector(setStyleMask:) withObject: (id)(uintptr_t)GetWindowStyle(window)];
         }
-
-        // This doesn't seem to do anything...
-        //[nswindow setFrameOrigin:origin];
     }
+
+    s_moveHack = 0;
+    [nswindow setFrameOrigin:rect.origin];
+    [nswindow setContentSize:rect.size];
+    s_moveHack = SDL_GetTicks();
 
 #ifdef FULLSCREEN_TOGGLEABLE
     if (fullscreen) {

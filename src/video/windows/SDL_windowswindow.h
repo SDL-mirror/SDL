@@ -43,8 +43,6 @@ typedef struct
     WNDPROC wndproc;
     SDL_bool created;
     int mouse_pressed;
-    int windowed_x;
-    int windowed_y;
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
 

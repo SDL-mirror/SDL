@@ -553,10 +553,6 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     WIN_GetDisplayBounds(_this, display, &bounds);
 
     if (fullscreen) {
-        /* Save the windowed position */
-        data->windowed_x = window->x;
-        data->windowed_y = window->y;
-
         x = bounds.x;
         y = bounds.y;
         w = bounds.w;
@@ -564,8 +560,8 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     } else {
         rect.left = 0;
         rect.top = 0;
-        rect.right = window->w;
-        rect.bottom = window->h;
+        rect.right = window->windowed.w;
+        rect.bottom = window->windowed.h;
 #ifdef _WIN32_WCE
         menu = FALSE;
 #else
@@ -574,8 +570,8 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
         AdjustWindowRectEx(&rect, style, menu, 0);
         w = (rect.right - rect.left);
         h = (rect.bottom - rect.top);
-        x = data->windowed_x + rect.left;
-        y = data->windowed_y + rect.top;
+        x = window->windowed.x + rect.left;
+        y = window->windowed.y + rect.top;
     }
     SetWindowLong(hwnd, GWL_STYLE, style);
     SetWindowPos(hwnd, top, x, y, w, h, SWP_NOCOPYBITS);
