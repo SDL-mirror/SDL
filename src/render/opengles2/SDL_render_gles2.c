@@ -272,7 +272,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     if (texture->access == SDL_TEXTUREACCESS_STREAMING)
     {
         tdata->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
-        tdata->pixel_data = SDL_malloc(tdata->pitch * texture->h);
+        tdata->pixel_data = SDL_calloc(1, tdata->pitch * texture->h);
         if (!tdata->pixel_data)
         {
             SDL_OutOfMemory();

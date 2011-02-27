@@ -427,7 +427,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
             /* Need to add size for the U and V planes */
             size += (2 * (texture->h * data->pitch) / 4);
         }
-        data->pixels = SDL_malloc(size);
+        data->pixels = SDL_calloc(1, size);
         if (!data->pixels) {
             SDL_OutOfMemory();
             SDL_free(data);
