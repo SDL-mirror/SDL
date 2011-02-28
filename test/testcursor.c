@@ -147,7 +147,7 @@ main(int argc, char *argv[])
 {
     SDL_Surface *screen;
     SDL_bool quit = SDL_FALSE, first_time = SDL_TRUE;
-    SDL_Cursor *cursor[3];
+    SDL_Cursor *cursor[4];
     int current;
 
     /* Load the SDL library */
@@ -189,6 +189,7 @@ main(int argc, char *argv[])
         SDL_Quit();
         return (1);
     }
+    cursor[3] = SDL_GetCursor();
 
     current = 0;
     SDL_SetCursor(cursor[current]);
@@ -198,7 +199,7 @@ main(int argc, char *argv[])
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
-                current = (current + 1) % 3;
+                current = (current + 1) % SDL_arraysize(cursor);
                 SDL_SetCursor(cursor[current]);
                 break;
             case SDL_KEYDOWN:
@@ -222,3 +223,5 @@ main(int argc, char *argv[])
     SDL_Quit();
     return (0);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

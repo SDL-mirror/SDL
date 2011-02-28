@@ -72,6 +72,9 @@ extern int SDL_MouseInit(void);
 /* Get the mouse state structure */
 SDL_Mouse *SDL_GetMouse(void);
 
+/* Set the default mouse cursor */
+extern void SDL_SetDefaultCursor(SDL_Cursor * cursor);
+
 /* Set the mouse focus window */
 extern void SDL_SetMouseFocus(SDL_Window * window);
 

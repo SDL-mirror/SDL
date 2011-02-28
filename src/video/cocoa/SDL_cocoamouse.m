@@ -120,15 +120,13 @@ void
 Cocoa_InitMouse(_THIS)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
-    SDL_Cursor *cursor;
 
     mouse->CreateCursor = Cocoa_CreateCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
     mouse->WarpMouse = Cocoa_WarpMouse;
     mouse->FreeCursor = Cocoa_FreeCursor;
 
-    cursor = Cocoa_CreateDefaultCursor();
-    mouse->cursors = mouse->cur_cursor = cursor;
+    SDL_SetDefaultCursor(Cocoa_CreateDefaultCursor());
 }
 
 static int

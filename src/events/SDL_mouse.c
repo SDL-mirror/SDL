@@ -44,6 +44,17 @@ SDL_MouseInit(void)
     return (0);
 }
 
+void
+SDL_SetDefaultCursor(SDL_Cursor * cursor)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+
+    mouse->def_cursor = cursor;
+    if (!mouse->cur_cursor) {
+        SDL_SetCursor(cursor);
+    }
+}
+
 SDL_Mouse *
 SDL_GetMouse(void)
 {
@@ -397,15 +408,17 @@ SDL_SetCursor(SDL_Cursor * cursor)
     /* Set the new cursor */
     if (cursor) {
         /* Make sure the cursor is still valid for this mouse */
-        SDL_Cursor *found;
-        for (found = mouse->cursors; found; found = found->next) {
-            if (found == cursor) {
-                break;
+        if (cursor != mouse->def_cursor) {
+            SDL_Cursor *found;
+            for (found = mouse->cursors; found; found = found->next) {
+                if (found == cursor) {
+                    break;
+                }
             }
-        }
-        if (!found) {
-            SDL_SetError("Cursor not associated with the current mouse");
-            return;
+            if (!found) {
+                SDL_SetError("Cursor not associated with the current mouse");
+                return;
+            }
         }
         mouse->cur_cursor = cursor;
     } else {
