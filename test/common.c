@@ -810,6 +810,11 @@ CommonInit(CommonState * state)
 static void
 PrintEvent(SDL_Event * event)
 {
+    if (event->type == SDL_MOUSEMOTION) {
+        /* Mouse motion is really spammy */
+        return;
+    }
+
     fprintf(stderr, "SDL EVENT: ");
     switch (event->type) {
     case SDL_WINDOWEVENT:

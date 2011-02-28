@@ -63,8 +63,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
     } else {
         [window setDelegate:self];
     }
-    [center addObserver:self selector:@selector(windowDidHide:) name:NSApplicationDidHideNotification object:NSApp];
-    [center addObserver:self selector:@selector(windowDidUnhide:) name:NSApplicationDidUnhideNotification object:NSApp];
 
     [window setNextResponder:self];
     [window setAcceptsMouseMovedEvents:YES];
@@ -94,8 +92,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
     } else {
         [window setDelegate:nil];
     }
-    [center removeObserver:self name:NSApplicationDidHideNotification object:NSApp];
-    [center removeObserver:self name:NSApplicationDidUnhideNotification object:NSApp];
 
     if ([window nextResponder] == self) {
         [window setNextResponder:nil];
@@ -204,16 +200,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
     if (SDL_GetKeyboardFocus() == _data->window) {
         SDL_SetKeyboardFocus(NULL);
     }
-}
-
-- (void)windowDidHide:(NSNotification *)aNotification
-{
-    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
-}
-
-- (void)windowDidUnhide:(NSNotification *)aNotification
-{
-    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

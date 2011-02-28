@@ -49,8 +49,6 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) windowDidDeminiaturize:(NSNotification *) aNotification;
 -(void) windowDidBecomeKey:(NSNotification *) aNotification;
 -(void) windowDidResignKey:(NSNotification *) aNotification;
--(void) windowDidHide:(NSNotification *) aNotification;
--(void) windowDidUnhide:(NSNotification *) aNotification;
 
 /* Window event handling */
 -(void) mouseDown:(NSEvent *) theEvent;
