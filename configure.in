@@ -758,30 +758,6 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
     fi
 }
 
-dnl Check whether we want to use IRIX 6.5+ native audio or not
-CheckDMEDIA()
-{
-    if test x$enable_audio = xyes; then
-        AC_MSG_CHECKING(for dmedia audio support)
-        have_dmedia=no
-        AC_TRY_COMPILE([
-          #include <dmedia/audio.h>
-        ],[
-          ALport audio_port;
-        ],[
-        have_dmedia=yes
-        ])
-        AC_MSG_RESULT($have_dmedia)
-        # Set up files for the audio library
-        if test x$have_dmedia = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_DMEDIA)
-            SOURCES="$SOURCES $srcdir/src/audio/dmedia/*.c"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -laudio"
-            have_audio=yes
-        fi
-    fi
-}
-
 dnl Check whether we want to use Tru64 UNIX native audio or not
 CheckMME()
 {
@@ -973,12 +949,6 @@ AC_HELP_STRING([--enable-nas], [support the NAS audio API [[default=yes]]]),
             NAS_CFLAGS="-I/usr/X11R6/include/"
             NAS_LIBS="-L/usr/X11R6/lib -laudio -lXt"
 
-        dnl On IRIX, the NAS includes are in a different directory,
-        dnl and libnas must be explicitly linked in
-
-        elif test -r /usr/freeware/include/nas/audiolib.h; then
-            have_nas=yes
-            NAS_LIBS="-lnas -lXt"
         fi
 
         AC_MSG_RESULT($have_nas)
@@ -1103,10 +1073,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     xvidmode_lib='/usr/X11R6/lib/libXxf86vm.1.dylib'
                     ;;
                 *-*-osf*)
-                    x11_lib='libX11.so'
-                    x11ext_lib='libXext.so'
-                    ;;
-                *-*-irix*) # IRIX 6.5 requires that we use /usr/lib32
                     x11_lib='libX11.so'
                     x11ext_lib='libXext.so'
                     ;;
@@ -1645,10 +1611,6 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             pthread_cflags="-D_REENTRANT -Kthread"
             pthread_lib=""
             ;;
-        *-*-irix*)
-            pthread_cflags="-D_SGI_MP_SOURCE"
-            pthread_lib="-lpthread"
-            ;;
         *-*-aix*)
             pthread_cflags="-D_REENTRANT -mthreads"
             pthread_lib="-lpthread"
@@ -2024,7 +1986,7 @@ AC_HELP_STRING([--enable-rpath], [use an rpath when linking SDL [[default=yes]]]
 
 dnl Set up the configuration based on the host platform!
 case "$host" in
-    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-irix*|*-*-aix*|*-*-osf*|*-*-minix*)
+    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-aix*|*-*-osf*|*-*-minix*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-uclinux*)       ARCH=linux ;;
@@ -2040,7 +2002,6 @@ case "$host" in
             *-*-sysv5*)         ARCH=sysv5 ;;
             *-*-solaris*)       ARCH=solaris ;;
             *-*-hpux*)          ARCH=hpux ;;
-            *-*-irix*)          ARCH=irix ;;
             *-*-aix*)           ARCH=aix ;;
             *-*-osf*)           ARCH=osf ;;
             *-*-minix*)         ARCH=minix ;;
@@ -2051,7 +2012,6 @@ case "$host" in
         CheckDummyAudio
         CheckDLOPEN
         CheckOSS
-        CheckDMEDIA
         CheckMME
         CheckALSA
         CheckPulseAudio
@@ -2120,14 +2080,6 @@ case "$host" in
                    have_power=yes
                ;;
              esac
-        fi
-        # Set up files for the thread library
-        if test x$enable_threads = xyes -a x$use_pthreads != xyes -a x$use_pth != xyes -a x$ARCH = xirix; then
-            AC_DEFINE(SDL_THREAD_SPROC)
-            SOURCES="$SOURCES $srcdir/src/thread/irix/*.c"
-            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_sysmutex.c"
-            SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
-            have_threads=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
@@ -2508,7 +2460,7 @@ SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.
 # Set runtime shared library paths as needed
 
 if test "x$enable_rpath" = "xyes"; then
-  if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = irix -o $ARCH = linux -o $ARCH = netbsd; then
+  if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = linux -o $ARCH = netbsd; then
     SDL_RLD_FLAGS="-Wl,-rpath,\${libdir}"
   fi
   if test $ARCH = solaris; then
