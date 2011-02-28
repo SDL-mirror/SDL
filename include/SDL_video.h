@@ -588,21 +588,21 @@ extern DECLSPEC int SDLCALL SDL_UpdateWindowSurfaceRects(SDL_Window * window,
 /**
  *  \brief Set a window's input grab mode.
  *  
- *  \param mode This is 1 to grab input, and 0 to release input.
+ *  \param grabbed This is SDL_TRUE to grab input, and SDL_FALSE to release input.
  *  
  *  \sa SDL_GetWindowGrab()
  */
 extern DECLSPEC void SDLCALL SDL_SetWindowGrab(SDL_Window * window,
-                                               int mode);
+                                               SDL_bool grabbed);
 
 /**
  *  \brief Get a window's input grab mode.
  *  
- *  \return This returns 1 if input is grabbed, and 0 otherwise.
+ *  \return This returns SDL_TRUE if input is grabbed, and SDL_FALSE otherwise.
  *  
  *  \sa SDL_SetWindowGrab()
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowGrab(SDL_Window * window);
+extern DECLSPEC SDL_bool SDLCALL SDL_GetWindowGrab(SDL_Window * window);
 
 /**
  *  \brief Destroy a window.

@@ -108,9 +108,6 @@ static SDL_VideoDevice *_this = NULL;
         return retval; \
     }
 
-/* Various local functions */
-static void SDL_UpdateWindowGrab(SDL_Window * window);
-
 /* Support for framebuffer emulation using an accelerated renderer */
 
 #define SDL_WINDOWTEXTUREDATA   "_SDL_WindowTextureData"
@@ -1672,22 +1669,6 @@ SDL_UpdateWindowSurfaceRects(SDL_Window * window, SDL_Rect * rects,
     return _this->UpdateWindowFramebuffer(_this, window, rects, numrects);
 }
 
-void
-SDL_SetWindowGrab(SDL_Window * window, int mode)
-{
-    CHECK_WINDOW_MAGIC(window, );
-
-    if ((!!mode == !!(window->flags & SDL_WINDOW_INPUT_GRABBED))) {
-        return;
-    }
-    if (mode) {
-        window->flags |= SDL_WINDOW_INPUT_GRABBED;
-    } else {
-        window->flags &= ~SDL_WINDOW_INPUT_GRABBED;
-    }
-    SDL_UpdateWindowGrab(window);
-}
-
 static void
 SDL_UpdateWindowGrab(SDL_Window * window)
 {
@@ -1696,7 +1677,23 @@ SDL_UpdateWindowGrab(SDL_Window * window)
     }
 }
 
-int
+void
+SDL_SetWindowGrab(SDL_Window * window, SDL_bool grabbed)
+{
+    CHECK_WINDOW_MAGIC(window, );
+
+    if ((!!grabbed == !!(window->flags & SDL_WINDOW_INPUT_GRABBED))) {
+        return;
+    }
+    if (grabbed) {
+        window->flags |= SDL_WINDOW_INPUT_GRABBED;
+    } else {
+        window->flags &= ~SDL_WINDOW_INPUT_GRABBED;
+    }
+    SDL_UpdateWindowGrab(window);
+}
+
+SDL_bool
 SDL_GetWindowGrab(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, 0);
