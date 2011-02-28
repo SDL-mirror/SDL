@@ -116,6 +116,23 @@ Cocoa_WarpMouse(SDL_Window * window, int x, int y)
     CGWarpMouseCursorPosition(point);
 }
 
+static int
+Cocoa_SetRelativeMouseMode(SDL_bool enabled)
+{
+    CGError result;
+
+    if (enabled) {
+        result = CGAssociateMouseAndMouseCursorPosition(NO);
+    } else {
+        result = CGAssociateMouseAndMouseCursorPosition(YES);
+    }
+    if (result != kCGErrorSuccess) {
+        SDL_SetError("CGAssociateMouseAndMouseCursorPosition() failed");
+        return -1;
+    }
+    return 0;
+}
+
 void
 Cocoa_InitMouse(_THIS)
 {
@@ -123,8 +140,9 @@ Cocoa_InitMouse(_THIS)
 
     mouse->CreateCursor = Cocoa_CreateCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
-    mouse->WarpMouse = Cocoa_WarpMouse;
     mouse->FreeCursor = Cocoa_FreeCursor;
+    mouse->WarpMouse = Cocoa_WarpMouse;
+    mouse->SetRelativeMouseMode = Cocoa_SetRelativeMouseMode;
 
     SDL_SetDefaultCursor(Cocoa_CreateDefaultCursor());
 }
@@ -147,7 +165,13 @@ ConvertMouseButtonToSDL(int button)
 void
 Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 {
-    /* We're correctly using views even in fullscreen mode now */
+    SDL_Mouse *mouse = SDL_GetMouse();
+
+    if (mouse->relative_mode && [event type] == NSMouseMoved) {
+        float x = [event deltaX];
+        float y = [event deltaY];
+        SDL_SendMouseMotion(mouse->focus, 1, (int)x, (int)y);
+    }
 }
 
 void

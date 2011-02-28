@@ -812,7 +812,7 @@ PrintEvent(SDL_Event * event)
 {
     if (event->type == SDL_MOUSEMOTION) {
         /* Mouse motion is really spammy */
-        return;
+        //return;
     }
 
     fprintf(stderr, "SDL EVENT: ");
@@ -1042,6 +1042,12 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                         SDL_MaximizeWindow(window);
                     }
                 }
+            }
+            break;
+        case SDLK_r:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-R toggle mouse relative mode */
+                SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
             }
             break;
         case SDLK_z:

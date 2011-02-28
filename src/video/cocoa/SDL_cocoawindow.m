@@ -302,15 +302,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseMoved:(NSEvent *)theEvent
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
     SDL_Window *window = _data->window;
     NSPoint point;
     int x, y;
 
-#ifdef RELATIVE_MOTION
-    if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
+    if (mouse->relative_mode) {
         return;
     }
-#endif
 
     point = [theEvent locationInWindow];
     x = (int)point.x;
@@ -861,19 +860,6 @@ NSPoint origin;
 void
 Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
 {
-#ifdef RELATIVE_MOTION
-    /* FIXME: work in progress
-        You set relative mode by using the following code in conjunction with
-        CGDisplayHideCursor(kCGDirectMainDisplay) and
-        CGDisplayShowCursor(kCGDirectMainDisplay)
-    */
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
-        CGAssociateMouseAndMouseCursorPosition(NO);
-    } else {
-        CGAssociateMouseAndMouseCursorPosition(YES);
-    }
-#else
     /* Move the cursor to the nearest point in the window */
     if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
         (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
@@ -885,7 +871,6 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
         cgpoint.y = window->y + y;
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
-#endif
 }
 
 void

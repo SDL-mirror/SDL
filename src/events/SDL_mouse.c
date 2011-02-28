@@ -308,8 +308,18 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
-    /* Flush pending mouse motion */
-    SDL_FlushEvent(SDL_MOUSEMOTION);
+    if (enabled == mouse->relative_mode) {
+        return 0;
+    }
+
+    if (!mouse->SetRelativeMouseMode) {
+        SDL_Unsupported();
+        return -1;
+    }
+
+    if (mouse->SetRelativeMouseMode(enabled) < 0) {
+        return -1;
+    }
 
     /* Set the relative mode */
     mouse->relative_mode = enabled;
@@ -318,6 +328,9 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
         /* Restore the expected mouse position */
         SDL_WarpMouseInWindow(mouse->focus, mouse->x, mouse->y);
     }
+
+    /* Flush pending mouse motion */
+    SDL_FlushEvent(SDL_MOUSEMOTION);
 
     /* Update cursor visibility */
     SDL_SetCursor(NULL);
