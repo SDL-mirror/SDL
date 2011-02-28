@@ -45,9 +45,7 @@
 #ifdef __ALTIVEC__
 #if HAVE_ALTIVEC_H && !defined(__APPLE_ALTIVEC__)
 #include <altivec.h>
-#undef vector
 #undef pixel
-#undef bool
 #endif
 #endif
 #ifdef __MMX__
