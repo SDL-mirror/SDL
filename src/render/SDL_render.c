@@ -260,6 +260,9 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
 
     CHECK_RENDERER_MAGIC(renderer, NULL);
 
+    if (!format) {
+        format = renderer->info.texture_formats[0];
+    }
     if (SDL_ISPIXELFORMAT_INDEXED(format)) {
         SDL_SetError("Palettized textures are not supported");
         return NULL;
