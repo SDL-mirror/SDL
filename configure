@@ -21628,87 +21628,6 @@ _ACEOF
     fi
 }
 
-CheckMME()
-{
-        case $ARCH in
-        osf)
-            ;;
-        *)
-            return
-            ;;
-    esac
-    if test x$enable_audio = xyes; then
-        { echo "$as_me:$LINENO: checking for MME audio support" >&5
-echo $ECHO_N "checking for MME audio support... $ECHO_C" >&6; }
-        MME_CFLAGS="-I/usr/include/mme"
-        MME_LIBS="-lmme"
-        have_mme=no
-        save_CFLAGS="$CFLAGS"
-        CFLAGS="$CFLAGS $MME_CFLAGS"
-        cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-          #include <mme_api.h>
-
-int
-main ()
-{
-
-          HWAVEOUT sound;
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-
-        have_mme=yes
-
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-        CFLAGS="$save_CFLAGS"
-        { echo "$as_me:$LINENO: result: $have_mme" >&5
-echo "${ECHO_T}$have_mme" >&6; }
-        # Set up files for the audio library
-        if test x$have_mme = xyes; then
-            cat >>confdefs.h <<\_ACEOF
-#define SDL_AUDIO_DRIVER_MMEAUDIO 1
-_ACEOF
-
-            SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
-            EXTRA_CFLAGS="$EXTRA_CFLAGS $MME_CFLAGS"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS $MME_LIBS"
-            have_audio=yes
-        fi
-    fi
-}
-
 CheckESD()
 {
     # Check whether --enable-esd was given.
@@ -24020,10 +23939,6 @@ fi
                     xss_lib='/usr/X11R6/lib/libXss.1.dylib'
                     xvidmode_lib='/usr/X11R6/lib/libXxf86vm.1.dylib'
                     ;;
-                *-*-osf*)
-                    x11_lib='libX11.so'
-                    x11ext_lib='libXext.so'
-                    ;;
                 *)
                     x11_lib=`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`
                     x11ext_lib=`find_lib "libXext.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`
@@ -25765,14 +25680,6 @@ fi
         *-*-hpux11*)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-L/usr/lib -lpthread"
-            ;;
-        *-*-osf*)
-            pthread_cflags="-D_REENTRANT"
-            if test x$ac_cv_c_compiler_gnu = xyes; then
-                pthread_lib="-lpthread -lrt"
-            else
-                pthread_lib="-lpthread -lexc -lrt"
-            fi
             ;;
         *)
             pthread_cflags="-D_REENTRANT"
@@ -28242,7 +28149,7 @@ fi
 }
 
 case "$host" in
-    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-aix*|*-*-osf*|*-*-minix*)
+    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-aix*|*-*-minix*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-uclinux*)       ARCH=linux ;;
@@ -28259,7 +28166,6 @@ case "$host" in
             *-*-solaris*)       ARCH=solaris ;;
             *-*-hpux*)          ARCH=hpux ;;
             *-*-aix*)           ARCH=aix ;;
-            *-*-osf*)           ARCH=osf ;;
             *-*-minix*)         ARCH=minix ;;
         esac
         CheckVisibilityHidden
@@ -28268,7 +28174,6 @@ case "$host" in
         CheckDummyAudio
         CheckDLOPEN
         CheckOSS
-        CheckMME
         CheckALSA
         CheckPulseAudio
         CheckARTSC

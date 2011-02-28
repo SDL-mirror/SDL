@@ -758,44 +758,6 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
     fi
 }
 
-dnl Check whether we want to use Tru64 UNIX native audio or not
-CheckMME()
-{
-    dnl Make sure we are running on an Tru64 UNIX
-    case $ARCH in
-        osf)
-            ;;
-        *)
-            return
-            ;;
-    esac
-    if test x$enable_audio = xyes; then
-        AC_MSG_CHECKING(for MME audio support)
-        MME_CFLAGS="-I/usr/include/mme"
-        MME_LIBS="-lmme"
-        have_mme=no
-        save_CFLAGS="$CFLAGS"
-        CFLAGS="$CFLAGS $MME_CFLAGS"
-        AC_TRY_COMPILE([
-          #include <mme_api.h>
-        ],[
-          HWAVEOUT sound;
-        ],[
-        have_mme=yes
-        ])
-        CFLAGS="$save_CFLAGS"
-        AC_MSG_RESULT($have_mme)
-        # Set up files for the audio library
-        if test x$have_mme = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_MMEAUDIO)
-            SOURCES="$SOURCES $srcdir/src/audio/mme/*.c"
-            EXTRA_CFLAGS="$EXTRA_CFLAGS $MME_CFLAGS"
-            EXTRA_LDFLAGS="$EXTRA_LDFLAGS $MME_LIBS"
-            have_audio=yes
-        fi
-    fi
-}
-
 dnl Find the ESD includes and libraries
 CheckESD()
 {
@@ -1071,10 +1033,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                     xrender_lib='/usr/X11R6/lib/libXrender.1.dylib'
                     xss_lib='/usr/X11R6/lib/libXss.1.dylib'
                     xvidmode_lib='/usr/X11R6/lib/libXxf86vm.1.dylib'
-                    ;;
-                *-*-osf*)
-                    x11_lib='libX11.so'
-                    x11ext_lib='libXext.so'
                     ;;
                 *)
                     x11_lib=[`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
@@ -1619,14 +1577,6 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-L/usr/lib -lpthread"
             ;;
-        *-*-osf*)
-            pthread_cflags="-D_REENTRANT"
-            if test x$ac_cv_prog_gcc = xyes; then
-                pthread_lib="-lpthread -lrt"
-            else
-                pthread_lib="-lpthread -lexc -lrt"
-            fi
-            ;;
         *)
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-lpthread"
@@ -1986,7 +1936,7 @@ AC_HELP_STRING([--enable-rpath], [use an rpath when linking SDL [[default=yes]]]
 
 dnl Set up the configuration based on the host platform!
 case "$host" in
-    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-aix*|*-*-osf*|*-*-minix*)
+    *-*-linux*|*-*-uclinux*|*-*-gnu*|*-*-k*bsd*-gnu|*-*-bsdi*|*-*-freebsd*|*-*-dragonfly*|*-*-netbsd*|*-*-openbsd*|*-*-sysv5*|*-*-solaris*|*-*-hpux*|*-*-aix*|*-*-minix*)
         case "$host" in
             *-*-linux*)         ARCH=linux ;;
             *-*-uclinux*)       ARCH=linux ;;
@@ -2003,7 +1953,6 @@ case "$host" in
             *-*-solaris*)       ARCH=solaris ;;
             *-*-hpux*)          ARCH=hpux ;;
             *-*-aix*)           ARCH=aix ;;
-            *-*-osf*)           ARCH=osf ;;
             *-*-minix*)         ARCH=minix ;;
         esac
         CheckVisibilityHidden
@@ -2012,7 +1961,6 @@ case "$host" in
         CheckDummyAudio
         CheckDLOPEN
         CheckOSS
-        CheckMME
         CheckALSA
         CheckPulseAudio
         CheckARTSC
