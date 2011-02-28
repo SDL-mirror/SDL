@@ -123,7 +123,6 @@ SDL_X11_SYM(unsigned long,_XSetLastRequestRead,(Display* a,xGenericReply* b),(a,
 SDL_X11_SYM(SDL_X11_XSynchronizeRetType,XSynchronize,(Display* a,Bool b),(a,b),return)
 SDL_X11_SYM(SDL_X11_XESetWireToEventRetType,XESetWireToEvent,(Display* a,int b,SDL_X11_XESetWireToEventRetType c),(a,b,c),return)
 SDL_X11_SYM(SDL_X11_XESetEventToWireRetType,XESetEventToWire,(Display* a,int b,SDL_X11_XESetEventToWireRetType c),(a,b,c),return)
-SDL_X11_SYM(XExtensionErrorHandler,XSetExtensionErrorHandler,(XExtensionErrorHandler a),(a),return)
 
 #if NeedWidePrototypes
 SDL_X11_SYM(KeySym,XKeycodeToKeysym,(Display* a,unsigned int b,int c),(a,b,c),return)
@@ -175,17 +174,12 @@ SDL_X11_SYM(int,ipAllocateData,(ChannelPtr a,IPCard b,IPDataPtr * c),(a,b,c),ret
 SDL_X11_SYM(int,ipUnallocateAndSendData,(ChannelPtr a,IPCard b),(a,b),return)
 #endif
 
-/* Xrandr support. */
-#if SDL_VIDEO_DRIVER_X11_XRANDR
-SDL_X11_MODULE(XRANDR)
-SDL_X11_SYM(Status,XRRQueryVersion,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
-SDL_X11_SYM(XRRScreenConfiguration *,XRRGetScreenInfo,(Display *dpy,Drawable draw),(dpy,draw),return)
-SDL_X11_SYM(SizeID,XRRConfigCurrentConfiguration,(XRRScreenConfiguration *config,Rotation *rotation),(config,rotation),return)
-SDL_X11_SYM(short,XRRConfigCurrentRate,(XRRScreenConfiguration *config),(config),return)
-SDL_X11_SYM(short *,XRRConfigRates,(XRRScreenConfiguration *config,int sizeID,int *nrates),(config,sizeID,nrates),return)
-SDL_X11_SYM(XRRScreenSize *,XRRConfigSizes,(XRRScreenConfiguration *config,int *nsizes),(config,nsizes),return)
-SDL_X11_SYM(Status,XRRSetScreenConfigAndRate,(Display *dpy,XRRScreenConfiguration *config,Drawable draw,int size_index,Rotation rotation,short rate,Time timestamp),(dpy,config,draw,size_index,rotation,rate,timestamp),return)
-SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
+/* Xinerama support */
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+SDL_X11_MODULE(XINERAMA)
+SDL_X11_SYM(Bool,XineramaIsActive,(Display *a),(a),)
+SDL_X11_SYM(Bool,XineramaQueryExtension,(Display *a,int *b,int *c),(a,b,c),)
+SDL_X11_SYM(XineramaScreenInfo*,XineramaQueryScreens,(Display *a, int *b),(a,b),)
 #endif
 
 /* XInput support for multiple mice, tablets, etc. */
@@ -198,8 +192,21 @@ SDL_X11_SYM(XDevice*,XOpenDevice,(Display *a,XID b),(a,b),return)
 SDL_X11_SYM(int,XCloseDevice,(Display* a,XDevice* b),(a,b),return)
 #endif
 
+/* XRandR support */
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+SDL_X11_MODULE(XRANDR)
+SDL_X11_SYM(Status,XRRQueryVersion,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
+SDL_X11_SYM(XRRScreenConfiguration *,XRRGetScreenInfo,(Display *dpy,Drawable draw),(dpy,draw),return)
+SDL_X11_SYM(SizeID,XRRConfigCurrentConfiguration,(XRRScreenConfiguration *config,Rotation *rotation),(config,rotation),return)
+SDL_X11_SYM(short,XRRConfigCurrentRate,(XRRScreenConfiguration *config),(config),return)
+SDL_X11_SYM(short *,XRRConfigRates,(XRRScreenConfiguration *config,int sizeID,int *nrates),(config,sizeID,nrates),return)
+SDL_X11_SYM(XRRScreenSize *,XRRConfigSizes,(XRRScreenConfiguration *config,int *nsizes),(config,nsizes),return)
+SDL_X11_SYM(Status,XRRSetScreenConfigAndRate,(Display *dpy,XRRScreenConfiguration *config,Drawable draw,int size_index,Rotation rotation,short rate,Time timestamp),(dpy,config,draw,size_index,rotation,rate,timestamp),return)
+SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
+#endif
+
 /* MIT-SCREEN-SAVER support */
-#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+#if SDL_VIDEO_DRIVER_X11_XSCRNSAVER
 SDL_X11_MODULE(XSS)
 SDL_X11_SYM(Bool,XScreenSaverQueryExtension,(Display *dpy,int *event_base,int *error_base),(dpy,event_base,error_base),return)
 SDL_X11_SYM(Status,XScreenSaverQueryVersion,(Display *dpy,int *major_versionp,int *minor_versionp),(dpy,major_versionp,minor_versionp),return)
@@ -209,6 +216,16 @@ SDL_X11_SYM(void,XScreenSaverSuspend,(Display *dpy,Bool suspend),(dpy,suspend),r
 #if SDL_VIDEO_DRIVER_X11_XSHAPE
 SDL_X11_MODULE(XSHAPE)
 SDL_X11_SYM(void,XShapeCombineMask,(Display *dpy,Window dest,int dest_kind,int x_off,int y_off,Pixmap src,int op),(dpy,dest,dest_kind,x_off,y_off,src,op),)
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+SDL_X11_MODULE(XVIDMODE)
+SDL_X11_SYM(Bool,XF86VidModeGetAllModeLines,(Display *a,int b,int *c,XF86VidModeModeInfo ***d),(a,b,c,d),)
+SDL_X11_SYM(Bool,XF86VidModeGetModeLine,(Display *a,int b,int *c,XF86VidModeModeLine *d),(a,b,c,d),)
+SDL_X11_SYM(Bool,XF86VidModeGetViewPort,(Display *a,int b,int *c,int *d),(a,b,c,d),)
+SDL_X11_SYM(Bool,XF86VidModeQueryExtension,(Display *a,int *b,int *c),(a,b,c),)
+SDL_X11_SYM(Bool,XF86VidModeQueryVersion,(Display *a,int *b,int *c),(a,b,c),)
+SDL_X11_SYM(Bool,XF86VidModeSwitchToMode,(Display *a,int b,XF86VidModeModeInfo *c),(a,b,c),)
 #endif
 
 /* *INDENT-ON* */

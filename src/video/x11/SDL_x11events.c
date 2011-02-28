@@ -609,7 +609,7 @@ gnome_screensaver_enable()
 void
 X11_SuspendScreenSaver(_THIS)
 {
-#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+#if SDL_VIDEO_DRIVER_X11_XSCRNSAVER
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
     int dummy;
     int major_version, minor_version;

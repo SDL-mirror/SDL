@@ -33,22 +33,22 @@
 #include <X11/Xatom.h>
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
-#include "../Xext/extensions/Xinerama.h"
-#endif
-#if SDL_VIDEO_DRIVER_X11_XRANDR
-#include <X11/extensions/Xrandr.h>
-#endif
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
-#include "../Xext/extensions/xf86vmode.h"
+#include <X11/extensions/Xinerama.h>
 #endif
 #if SDL_VIDEO_DRIVER_X11_XINPUT
 #include <X11/extensions/XInput.h>
 #endif
-#if SDL_VIDEO_DRIVER_X11_SCRNSAVER
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+#include <X11/extensions/Xrandr.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XSCRNSAVER
 #include <X11/extensions/scrnsaver.h>
 #endif
 #if SDL_VIDEO_DRIVER_X11_XSHAPE
 #include <X11/extensions/shape.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+#include <X11/extensions/xf86vmode.h>
 #endif
 
 #include "SDL_x11dyn.h"

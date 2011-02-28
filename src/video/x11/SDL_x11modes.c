@@ -208,9 +208,13 @@ CheckXinerama(Display * display, int *major, int *minor)
         return SDL_FALSE;
     }
 
+    if (!SDL_X11_HAVE_XINERAMA) {
+        return SDL_FALSE;
+    }
+
     /* Query the extension version */
-    if (!SDL_NAME(XineramaQueryExtension) (display, major, minor) ||
-        !SDL_NAME(XineramaIsActive) (display)) {
+    if (!XineramaQueryExtension(display, major, minor) ||
+        !XineramaIsActive(display)) {
         return SDL_FALSE;
     }
     return SDL_TRUE;
@@ -244,7 +248,7 @@ CheckXRandR(Display * display, int *major, int *minor)
 }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
 static SDL_bool
 CheckVidMode(Display * display, int *major, int *minor)
 {
@@ -254,30 +258,34 @@ CheckVidMode(Display * display, int *major, int *minor)
     *major = *minor = 0;
 
     /* Allow environment override */
-    env = getenv("SDL_VIDEO_X11_VIDMODE");
+    env = getenv("SDL_VIDEO_X11_XVIDMODE");
     if (env && !SDL_atoi(env)) {
+        return SDL_FALSE;
+    }
+
+    if (!SDL_X11_HAVE_XVIDMODE) {
         return SDL_FALSE;
     }
 
     /* Query the extension version */
     vm_error = -1;
-    if (!SDL_NAME(XF86VidModeQueryExtension) (display, &vm_event, &vm_error)
-        || !SDL_NAME(XF86VidModeQueryVersion) (display, major, minor)) {
+    if (!XF86VidModeQueryExtension(display, &vm_event, &vm_error)
+        || !XF86VidModeQueryVersion(display, major, minor)) {
         return SDL_FALSE;
     }
     return SDL_TRUE;
 }
 
 static
-Bool SDL_NAME(XF86VidModeGetModeInfo) (Display * dpy, int scr,
-                                       SDL_NAME(XF86VidModeModeInfo) * info)
+Bool XF86VidModeGetModeInfo(Display * dpy, int scr,
+                                       XF86VidModeModeInfo* info)
 {
     Bool retval;
     int dotclock;
-    SDL_NAME(XF86VidModeModeLine) l;
+    XF86VidModeModeLine l;
     SDL_zerop(info);
     SDL_zero(l);
-    retval = SDL_NAME(XF86VidModeGetModeLine) (dpy, scr, &dotclock, &l);
+    retval = XF86VidModeGetModeLine(dpy, scr, &dotclock, &l);
     info->dotclock = dotclock;
     info->hdisplay = l.hdisplay;
     info->hsyncstart = l.hsyncstart;
@@ -295,7 +303,7 @@ Bool SDL_NAME(XF86VidModeGetModeInfo) (Display * dpy, int scr,
 }
 
 static int
-calculate_rate(SDL_NAME(XF86VidModeModeInfo) * info)
+calculate_rate(XF86VidModeModeInfo * info)
 {
     return (info->htotal
             && info->vtotal) ? (1000 * info->dotclock / (info->htotal *
@@ -305,33 +313,32 @@ calculate_rate(SDL_NAME(XF86VidModeModeInfo) * info)
 static void
 save_mode(Display * display, SDL_DisplayData * data)
 {
-    SDL_NAME(XF86VidModeGetModeInfo) (display, data->screen,
-                                      &data->saved_mode);
-    SDL_NAME(XF86VidModeGetViewPort) (display, data->screen,
-                                      &data->saved_view.x,
-                                      &data->saved_view.y);
+    XF86VidModeGetModeInfo(display, data->screen,
+                                    &data->saved_mode);
+    XF86VidModeGetViewPort(display, data->screen,
+                                    &data->saved_view.x,
+                                    &data->saved_view.y);
 }
 
 /*
 static void
 restore_mode(Display * display, SDL_DisplayData * data)
 {
-    SDL_NAME(XF86VidModeModeInfo) mode;
+    XF86VidModeModeInfo mode;
 
-    if (SDL_NAME(XF86VidModeGetModeInfo) (display, data->screen, &mode)) {
+    if (XF86VidModeGetModeInfo(display, data->screen, &mode)) {
         if (SDL_memcmp(&mode, &data->saved_mode, sizeof(mode)) != 0) {
-            SDL_NAME(XF86VidModeSwitchToMode) (display, data->screen,
-                                               &data->saved_mode);
+            XF86VidModeSwitchToMode(display, data->screen, &data->saved_mode);
         }
     }
     if ((data->saved_view.x != 0) || (data->saved_view.y != 0)) {
-        SDL_NAME(XF86VidModeSetViewPort) (display, data->screen,
-                                          data->saved_view.x,
-                                          data->saved_view.y);
+        XF86VidModeSetViewPort(display, data->screen,
+                                        data->saved_view.x,
+                                        data->saved_view.y);
     }
 }
 */
-#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
+#endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
 void
 X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
@@ -341,7 +348,7 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     int xinerama_major, xinerama_minor;
     int screens;
-    SDL_NAME(XineramaScreenInfo) * xinerama;
+    XineramaScreenInfo * xinerama;
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
     int xrandr_major, xrandr_minor;
@@ -349,10 +356,10 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
     XRRScreenSize *sizes;
     short *rates;
 #endif
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
     int vm_major, vm_minor;
     int nmodes;
-    SDL_NAME(XF86VidModeModeInfo) ** modes;
+    XF86VidModeModeInfo ** modes;
 #endif
     int screen_w;
     int screen_h;
@@ -379,7 +386,7 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 #ifdef X11MODES_DEBUG
         printf("X11 detected Xinerama:\n");
 #endif
-        xinerama = SDL_NAME(XineramaQueryScreens) (display, &screens);
+        xinerama = XineramaQueryScreens(display, &screens);
         if (xinerama) {
             int i;
             for (i = 0; i < screens; i++) {
@@ -462,15 +469,14 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
     /* XVidMode */
     if (!data->use_xrandr &&
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
         (!data->use_xinerama || data->xinerama_info.screen_number == 0) &&
 #endif
         CheckVidMode(display, &vm_major, &vm_minor) &&
-        SDL_NAME(XF86VidModeGetAllModeLines) (display, data->screen, &nmodes,
-                                              &modes)) {
+        XF86VidModeGetAllModeLines(display, data->screen, &nmodes, &modes)) {
         int i;
 
 #ifdef X11MODES_DEBUG
@@ -492,7 +498,7 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
         data->use_vidmode = vm_major * 100 + vm_minor;
         save_mode(display, data);
     }
-#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
+#endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
     if (!data->use_xrandr && !data->use_vidmode) {
         mode.w = screen_w;
@@ -545,18 +551,18 @@ get_real_resolution(Display * display, SDL_DisplayData * data, int *w, int *h,
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
     if (data->use_vidmode) {
-        SDL_NAME(XF86VidModeModeInfo) mode;
+        XF86VidModeModeInfo mode;
 
-        if (SDL_NAME(XF86VidModeGetModeInfo) (display, data->screen, &mode)) {
+        if (XF86VidModeGetModeInfo(display, data->screen, &mode)) {
             *w = mode.hdisplay;
             *h = mode.vdisplay;
             *rate = calculate_rate(&mode);
             return;
         }
     }
-#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
+#endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     if (data->use_xinerama) {
@@ -642,14 +648,13 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
     if (data->use_vidmode) {
-        SDL_NAME(XF86VidModeModeInfo) ** modes;
+        XF86VidModeModeInfo ** modes;
         int i, nmodes;
         int best;
 
-        if (SDL_NAME(XF86VidModeGetAllModeLines)
-            (display, data->screen, &nmodes, &modes)) {
+        if (XF86VidModeGetAllModeLines(display, data->screen, &nmodes, &modes)) {
             best = -1;
             for (i = 0; i < nmodes; ++i) {
                 if (modes[i]->hdisplay < w || modes[i]->vdisplay < h) {
@@ -684,14 +689,13 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
                        modes[best]->hdisplay, modes[best]->vdisplay,
                        calculate_rate(modes[best]));
 #endif
-                SDL_NAME(XF86VidModeSwitchToMode) (display, data->screen,
-                                                   modes[best]);
+                XF86VidModeSwitchToMode(display, data->screen, modes[best]);
             }
             XFree(modes);
         }
         return;
     }
-#endif /* SDL_VIDEO_DRIVER_X11_VIDMODE */
+#endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 }
 
 int

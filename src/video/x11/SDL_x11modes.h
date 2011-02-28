@@ -36,7 +36,7 @@ typedef struct
     int use_vidmode;
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
-      SDL_NAME(XineramaScreenInfo) xinerama_info;
+    XineramaScreenInfo xinerama_info;
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
     XRRScreenConfiguration *screen_config;
@@ -44,8 +44,8 @@ typedef struct
     Rotation saved_rotation;
     short saved_rate;
 #endif
-#if SDL_VIDEO_DRIVER_X11_VIDMODE
-      SDL_NAME(XF86VidModeModeInfo) saved_mode;
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+    XF86VidModeModeInfo saved_mode;
     struct
     {
         int x, y;

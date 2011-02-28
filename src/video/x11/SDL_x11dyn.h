@@ -35,8 +35,8 @@
 #endif
 
 #include <X11/Xproto.h>
-#include "../Xext/extensions/Xext.h"
-#include "../Xext/extensions/extutil.h"
+#include <X11/extensions/Xext.h>
+#include <X11/extensions/extutil.h>
 
 #ifndef NO_SHARED_MEMORY
 #include <sys/ipc.h>
@@ -44,12 +44,23 @@
 #include <X11/extensions/XShm.h>
 #endif
 
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+#include <X11/extensions/Xinerama.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XINPUT
+#include <X11/extensions/XInput.h>
+#endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>
 #endif
-
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-#include <X11/extensions/XInput.h>
+#if SDL_VIDEO_DRIVER_X11_XSCRNSAVER
+#include <X11/extensions/scrnsaver.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XSHAPE
+#include <X11/extensions/shape.h>
+#endif
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+#include <X11/extensions/xf86vmode.h>
 #endif
 
 /*
