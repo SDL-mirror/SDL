@@ -23,7 +23,7 @@ render(SDL_Renderer *renderer)
     Uint8 r, g, b;
 
     /* Clear the screen */
-    SDL_SetRenderDrawColor(0, 0, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_SetRenderClear(renderer);
 
     /*  Come up with a random rectangle */
