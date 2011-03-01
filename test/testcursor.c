@@ -137,7 +137,7 @@ create_arrow_cursor()
             }
         }
     }
-    sscanf(arrow[4 + row], "%d,%d", &hot_x, &hot_y);
+    SDL_sscanf(arrow[4 + row], "%d,%d", &hot_x, &hot_y);
     return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
 }
 
