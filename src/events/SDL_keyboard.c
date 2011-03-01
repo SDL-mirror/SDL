@@ -790,7 +790,6 @@ SDL_SendKeyboardText(const char *text)
         event.text.type = SDL_TEXTINPUT;
         event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         SDL_utf8strlcpy(event.text.text, text, SDL_arraysize(event.text.text));
-        event.text.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
     return (posted);
