@@ -65,7 +65,7 @@ typedef struct SDL_VideoData
 } SDL_VideoData;
 
 /* Utility functions */
-NSImage * Cocoa_CreateImage(SDL_Surface * surface);
+extern NSImage * Cocoa_CreateImage(SDL_Surface * surface);
 
 #endif /* _SDL_cocoavideo_h */
 
