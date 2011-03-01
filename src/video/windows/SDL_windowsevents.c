@@ -490,12 +490,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             hittest = LOWORD(lParam);
             if (hittest == HTCLIENT) {
-                /* FIXME: Implement the cursor API */
-                static HCURSOR cursor;
-                if (!cursor) {
-                    cursor = LoadCursor(NULL, IDC_ARROW);
-                }
-                SetCursor(cursor);
+                SetCursor(SDL_cursor);
                 returnCode = TRUE;
             }
         }
