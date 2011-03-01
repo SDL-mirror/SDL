@@ -582,8 +582,8 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN))
-        && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
+        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
         RECT rect;
         GetClientRect(hwnd, &rect);
         ClientToScreen(hwnd, (LPPOINT) & rect);
