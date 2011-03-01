@@ -81,6 +81,7 @@ Cocoa_FreeCursor(SDL_Cursor * cursor)
     NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
     [nscursor release];
+    SDL_free(cursor);
 
     [pool release];
 }
