@@ -314,26 +314,6 @@
 		04BD01F712E6671800899322 /* SDL_x11video.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD412E6671800899322 /* SDL_x11video.h */; };
 		04BD01F812E6671800899322 /* SDL_x11window.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFD512E6671800899322 /* SDL_x11window.c */; };
 		04BD01F912E6671800899322 /* SDL_x11window.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD612E6671800899322 /* SDL_x11window.h */; };
-		04BD01FA12E6671800899322 /* extutil.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD912E6671800899322 /* extutil.h */; };
-		04BD01FB12E6671800899322 /* panoramiXext.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDA12E6671800899322 /* panoramiXext.h */; };
-		04BD01FC12E6671800899322 /* panoramiXproto.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDB12E6671800899322 /* panoramiXproto.h */; };
-		04BD01FE12E6671800899322 /* Xext.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDD12E6671800899322 /* Xext.h */; };
-		04BD01FF12E6671800899322 /* xf86dga.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDE12E6671800899322 /* xf86dga.h */; };
-		04BD020012E6671800899322 /* xf86dga1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDF12E6671800899322 /* xf86dga1.h */; };
-		04BD020112E6671800899322 /* xf86dga1str.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE012E6671800899322 /* xf86dga1str.h */; };
-		04BD020212E6671800899322 /* xf86dgastr.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE112E6671800899322 /* xf86dgastr.h */; };
-		04BD020312E6671800899322 /* xf86vmode.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE212E6671800899322 /* xf86vmode.h */; };
-		04BD020412E6671800899322 /* xf86vmstr.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE312E6671800899322 /* xf86vmstr.h */; };
-		04BD020512E6671800899322 /* Xinerama.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE412E6671800899322 /* Xinerama.h */; };
-		04BD020612E6671800899322 /* Xv.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE512E6671800899322 /* Xv.h */; };
-		04BD020712E6671800899322 /* Xvlib.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE612E6671800899322 /* Xvlib.h */; };
-		04BD020812E6671800899322 /* Xvproto.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE712E6671800899322 /* Xvproto.h */; };
-		04BD020912E6671800899322 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 04BDFFE812E6671800899322 /* README */; };
-		04BD020A12E6671800899322 /* Xinerama.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFEA12E6671800899322 /* Xinerama.c */; };
-		04BD020B12E6671800899322 /* xme.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFEC12E6671800899322 /* xme.c */; };
-		04BD021412E6671800899322 /* Xv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFF712E6671800899322 /* Xv.c */; };
-		04BD021512E6671800899322 /* Xvlibint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFF812E6671800899322 /* Xvlibint.h */; };
-		04BD021612E6671800899322 /* XF86VMode.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFFA12E6671800899322 /* XF86VMode.c */; };
 		04BD021712E6671800899322 /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFD7412E6671700899322 /* SDL_atomic.c */; };
 		04BD021812E6671800899322 /* SDL_spinlock.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFD7512E6671700899322 /* SDL_spinlock.c */; };
 		04BD022412E6671800899322 /* SDL_diskaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFD8812E6671700899322 /* SDL_diskaudio.c */; };
@@ -498,25 +478,6 @@
 		04BD040F12E6671800899322 /* SDL_x11video.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD412E6671800899322 /* SDL_x11video.h */; };
 		04BD041012E6671800899322 /* SDL_x11window.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFD512E6671800899322 /* SDL_x11window.c */; };
 		04BD041112E6671800899322 /* SDL_x11window.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD612E6671800899322 /* SDL_x11window.h */; };
-		04BD041212E6671800899322 /* extutil.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFD912E6671800899322 /* extutil.h */; };
-		04BD041312E6671800899322 /* panoramiXext.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDA12E6671800899322 /* panoramiXext.h */; };
-		04BD041412E6671800899322 /* panoramiXproto.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDB12E6671800899322 /* panoramiXproto.h */; };
-		04BD041612E6671800899322 /* Xext.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDD12E6671800899322 /* Xext.h */; };
-		04BD041712E6671800899322 /* xf86dga.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDE12E6671800899322 /* xf86dga.h */; };
-		04BD041812E6671800899322 /* xf86dga1.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFDF12E6671800899322 /* xf86dga1.h */; };
-		04BD041912E6671800899322 /* xf86dga1str.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE012E6671800899322 /* xf86dga1str.h */; };
-		04BD041A12E6671800899322 /* xf86dgastr.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE112E6671800899322 /* xf86dgastr.h */; };
-		04BD041B12E6671800899322 /* xf86vmode.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE212E6671800899322 /* xf86vmode.h */; };
-		04BD041C12E6671800899322 /* xf86vmstr.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE312E6671800899322 /* xf86vmstr.h */; };
-		04BD041D12E6671800899322 /* Xinerama.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE412E6671800899322 /* Xinerama.h */; };
-		04BD041E12E6671800899322 /* Xv.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE512E6671800899322 /* Xv.h */; };
-		04BD041F12E6671800899322 /* Xvlib.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE612E6671800899322 /* Xvlib.h */; };
-		04BD042012E6671800899322 /* Xvproto.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFE712E6671800899322 /* Xvproto.h */; };
-		04BD042112E6671800899322 /* Xinerama.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFEA12E6671800899322 /* Xinerama.c */; };
-		04BD042212E6671800899322 /* xme.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFEC12E6671800899322 /* xme.c */; };
-		04BD042B12E6671800899322 /* Xv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFF712E6671800899322 /* Xv.c */; };
-		04BD042C12E6671800899322 /* Xvlibint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFFF812E6671800899322 /* Xvlibint.h */; };
-		04BD042D12E6671800899322 /* XF86VMode.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFFFA12E6671800899322 /* XF86VMode.c */; };
 		04BDFFFB12E6671800899322 /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFD7412E6671700899322 /* SDL_atomic.c */; };
 		04BDFFFC12E6671800899322 /* SDL_spinlock.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFD7512E6671700899322 /* SDL_spinlock.c */; };
 		04DEA57111E6006A00386CAC /* SDL_input.h in Headers */ = {isa = PBXBuildFile; fileRef = 04DEA56F11E6006A00386CAC /* SDL_input.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -853,26 +814,6 @@
 		04BDFFD412E6671800899322 /* SDL_x11video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_x11video.h; sourceTree = "<group>"; };
 		04BDFFD512E6671800899322 /* SDL_x11window.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11window.c; sourceTree = "<group>"; };
 		04BDFFD612E6671800899322 /* SDL_x11window.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_x11window.h; sourceTree = "<group>"; };
-		04BDFFD912E6671800899322 /* extutil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = extutil.h; sourceTree = "<group>"; };
-		04BDFFDA12E6671800899322 /* panoramiXext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = panoramiXext.h; sourceTree = "<group>"; };
-		04BDFFDB12E6671800899322 /* panoramiXproto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = panoramiXproto.h; sourceTree = "<group>"; };
-		04BDFFDD12E6671800899322 /* Xext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xext.h; sourceTree = "<group>"; };
-		04BDFFDE12E6671800899322 /* xf86dga.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86dga.h; sourceTree = "<group>"; };
-		04BDFFDF12E6671800899322 /* xf86dga1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86dga1.h; sourceTree = "<group>"; };
-		04BDFFE012E6671800899322 /* xf86dga1str.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86dga1str.h; sourceTree = "<group>"; };
-		04BDFFE112E6671800899322 /* xf86dgastr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86dgastr.h; sourceTree = "<group>"; };
-		04BDFFE212E6671800899322 /* xf86vmode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86vmode.h; sourceTree = "<group>"; };
-		04BDFFE312E6671800899322 /* xf86vmstr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xf86vmstr.h; sourceTree = "<group>"; };
-		04BDFFE412E6671800899322 /* Xinerama.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xinerama.h; sourceTree = "<group>"; };
-		04BDFFE512E6671800899322 /* Xv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xv.h; sourceTree = "<group>"; };
-		04BDFFE612E6671800899322 /* Xvlib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xvlib.h; sourceTree = "<group>"; };
-		04BDFFE712E6671800899322 /* Xvproto.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xvproto.h; sourceTree = "<group>"; };
-		04BDFFE812E6671800899322 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		04BDFFEA12E6671800899322 /* Xinerama.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Xinerama.c; sourceTree = "<group>"; };
-		04BDFFEC12E6671800899322 /* xme.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = xme.c; sourceTree = "<group>"; };
-		04BDFFF712E6671800899322 /* Xv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = Xv.c; sourceTree = "<group>"; };
-		04BDFFF812E6671800899322 /* Xvlibint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Xvlibint.h; sourceTree = "<group>"; };
-		04BDFFFA12E6671800899322 /* XF86VMode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = XF86VMode.c; sourceTree = "<group>"; };
 		04DEA56F11E6006A00386CAC /* SDL_input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_input.h; path = ../../include/SDL_input.h; sourceTree = SOURCE_ROOT; };
 		04F2AF681104AC4500D6DDF7 /* SDL_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert.h; path = ../../include/SDL_assert.h; sourceTree = SOURCE_ROOT; };
 		04F7803712FB748500FC43C0 /* SDL_nullframebuffer_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_nullframebuffer_c.h; sourceTree = "<group>"; };
@@ -1472,7 +1413,6 @@
 				04BDFEC112E6671800899322 /* cocoa */,
 				04BDFEE712E6671800899322 /* dummy */,
 				04BDFFB712E6671800899322 /* x11 */,
-				04BDFFD712E6671800899322 /* Xext */,
 				04BDFF4E12E6671800899322 /* SDL_blit.c */,
 				04BDFF4F12E6671800899322 /* SDL_blit.h */,
 				04BDFF5012E6671800899322 /* SDL_blit_0.c */,
@@ -1576,73 +1516,6 @@
 				04BDFFD612E6671800899322 /* SDL_x11window.h */,
 			);
 			path = x11;
-			sourceTree = "<group>";
-		};
-		04BDFFD712E6671800899322 /* Xext */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFD812E6671800899322 /* extensions */,
-				04BDFFE812E6671800899322 /* README */,
-				04BDFFE912E6671800899322 /* Xinerama */,
-				04BDFFEB12E6671800899322 /* XME */,
-				04BDFFF612E6671800899322 /* Xv */,
-				04BDFFF912E6671800899322 /* Xxf86vm */,
-			);
-			path = Xext;
-			sourceTree = "<group>";
-		};
-		04BDFFD812E6671800899322 /* extensions */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFD912E6671800899322 /* extutil.h */,
-				04BDFFDA12E6671800899322 /* panoramiXext.h */,
-				04BDFFDB12E6671800899322 /* panoramiXproto.h */,
-				04BDFFDD12E6671800899322 /* Xext.h */,
-				04BDFFDE12E6671800899322 /* xf86dga.h */,
-				04BDFFDF12E6671800899322 /* xf86dga1.h */,
-				04BDFFE012E6671800899322 /* xf86dga1str.h */,
-				04BDFFE112E6671800899322 /* xf86dgastr.h */,
-				04BDFFE212E6671800899322 /* xf86vmode.h */,
-				04BDFFE312E6671800899322 /* xf86vmstr.h */,
-				04BDFFE412E6671800899322 /* Xinerama.h */,
-				04BDFFE512E6671800899322 /* Xv.h */,
-				04BDFFE612E6671800899322 /* Xvlib.h */,
-				04BDFFE712E6671800899322 /* Xvproto.h */,
-			);
-			path = extensions;
-			sourceTree = "<group>";
-		};
-		04BDFFE912E6671800899322 /* Xinerama */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFEA12E6671800899322 /* Xinerama.c */,
-			);
-			path = Xinerama;
-			sourceTree = "<group>";
-		};
-		04BDFFEB12E6671800899322 /* XME */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFEC12E6671800899322 /* xme.c */,
-			);
-			path = XME;
-			sourceTree = "<group>";
-		};
-		04BDFFF612E6671800899322 /* Xv */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFF712E6671800899322 /* Xv.c */,
-				04BDFFF812E6671800899322 /* Xvlibint.h */,
-			);
-			path = Xv;
-			sourceTree = "<group>";
-		};
-		04BDFFF912E6671800899322 /* Xxf86vm */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFFFA12E6671800899322 /* XF86VMode.c */,
-			);
-			path = Xxf86vm;
 			sourceTree = "<group>";
 		};
 		0867D691FE84028FC02AAC07 /* SDLFramework */ = {
@@ -1873,21 +1746,6 @@
 				04BD01F512E6671800899322 /* SDL_x11touch.h in Headers */,
 				04BD01F712E6671800899322 /* SDL_x11video.h in Headers */,
 				04BD01F912E6671800899322 /* SDL_x11window.h in Headers */,
-				04BD01FA12E6671800899322 /* extutil.h in Headers */,
-				04BD01FB12E6671800899322 /* panoramiXext.h in Headers */,
-				04BD01FC12E6671800899322 /* panoramiXproto.h in Headers */,
-				04BD01FE12E6671800899322 /* Xext.h in Headers */,
-				04BD01FF12E6671800899322 /* xf86dga.h in Headers */,
-				04BD020012E6671800899322 /* xf86dga1.h in Headers */,
-				04BD020112E6671800899322 /* xf86dga1str.h in Headers */,
-				04BD020212E6671800899322 /* xf86dgastr.h in Headers */,
-				04BD020312E6671800899322 /* xf86vmode.h in Headers */,
-				04BD020412E6671800899322 /* xf86vmstr.h in Headers */,
-				04BD020512E6671800899322 /* Xinerama.h in Headers */,
-				04BD020612E6671800899322 /* Xv.h in Headers */,
-				04BD020712E6671800899322 /* Xvlib.h in Headers */,
-				04BD020812E6671800899322 /* Xvproto.h in Headers */,
-				04BD021512E6671800899322 /* Xvlibint.h in Headers */,
 				0469A10B12EE4BF100B846D6 /* SDL_blendmode.h in Headers */,
 				041B2C9512FA0D2A0087D585 /* SDL_render.h in Headers */,
 				041B2CA612FA0D680087D585 /* SDL_sysrender.h in Headers */,
@@ -2003,21 +1861,6 @@
 				04BD040D12E6671800899322 /* SDL_x11touch.h in Headers */,
 				04BD040F12E6671800899322 /* SDL_x11video.h in Headers */,
 				04BD041112E6671800899322 /* SDL_x11window.h in Headers */,
-				04BD041212E6671800899322 /* extutil.h in Headers */,
-				04BD041312E6671800899322 /* panoramiXext.h in Headers */,
-				04BD041412E6671800899322 /* panoramiXproto.h in Headers */,
-				04BD041612E6671800899322 /* Xext.h in Headers */,
-				04BD041712E6671800899322 /* xf86dga.h in Headers */,
-				04BD041812E6671800899322 /* xf86dga1.h in Headers */,
-				04BD041912E6671800899322 /* xf86dga1str.h in Headers */,
-				04BD041A12E6671800899322 /* xf86dgastr.h in Headers */,
-				04BD041B12E6671800899322 /* xf86vmode.h in Headers */,
-				04BD041C12E6671800899322 /* xf86vmstr.h in Headers */,
-				04BD041D12E6671800899322 /* Xinerama.h in Headers */,
-				04BD041E12E6671800899322 /* Xv.h in Headers */,
-				04BD041F12E6671800899322 /* Xvlib.h in Headers */,
-				04BD042012E6671800899322 /* Xvproto.h in Headers */,
-				04BD042C12E6671800899322 /* Xvlibint.h in Headers */,
 				0469A10D12EE4BF100B846D6 /* SDL_blendmode.h in Headers */,
 				041B2C9612FA0D2A0087D585 /* SDL_render.h in Headers */,
 				041B2CAC12FA0D680087D585 /* SDL_sysrender.h in Headers */,
@@ -2186,7 +2029,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				04BD020912E6671800899322 /* README in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2352,10 +2194,6 @@
 				04BD01F412E6671800899322 /* SDL_x11touch.c in Sources */,
 				04BD01F612E6671800899322 /* SDL_x11video.c in Sources */,
 				04BD01F812E6671800899322 /* SDL_x11window.c in Sources */,
-				04BD020A12E6671800899322 /* Xinerama.c in Sources */,
-				04BD020B12E6671800899322 /* xme.c in Sources */,
-				04BD021412E6671800899322 /* Xv.c in Sources */,
-				04BD021612E6671800899322 /* XF86VMode.c in Sources */,
 				041B2CA512FA0D680087D585 /* SDL_render.c in Sources */,
 				04409B9212FA97ED00FB9AA8 /* SDL_yuv_mmx.c in Sources */,
 				04409B9412FA97ED00FB9AA8 /* SDL_yuv_sw.c in Sources */,
@@ -2471,10 +2309,6 @@
 				04BD040C12E6671800899322 /* SDL_x11touch.c in Sources */,
 				04BD040E12E6671800899322 /* SDL_x11video.c in Sources */,
 				04BD041012E6671800899322 /* SDL_x11window.c in Sources */,
-				04BD042112E6671800899322 /* Xinerama.c in Sources */,
-				04BD042212E6671800899322 /* xme.c in Sources */,
-				04BD042B12E6671800899322 /* Xv.c in Sources */,
-				04BD042D12E6671800899322 /* XF86VMode.c in Sources */,
 				041B2CAB12FA0D680087D585 /* SDL_render.c in Sources */,
 				04409B9612FA97ED00FB9AA8 /* SDL_yuv_mmx.c in Sources */,
 				04409B9812FA97ED00FB9AA8 /* SDL_yuv_sw.c in Sources */,
