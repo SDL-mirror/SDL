@@ -19,14 +19,15 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_RENDER_NDS
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <nds.h>
 
 #include <gl2d.h>
-
-#include "SDL_config.h"
 
 #include "SDL_video.h"
 #include "../../video/SDL_sysvideo.h"
@@ -360,5 +361,7 @@ SDL_RenderDriver NDS_RenderDriver = {
 		.max_texture_height = 512,
      }
 };
+
+#endif /* SDL_VIDEO_RENDER_NDS */
 
 /* vi: set ts=4 sw=4 expandtab: */
