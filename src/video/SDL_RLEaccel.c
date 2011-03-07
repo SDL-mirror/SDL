@@ -610,17 +610,19 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
 typedef struct
 {
     Uint8 BytesPerPixel;
-    Uint8 Rloss;
-    Uint8 Gloss;
-    Uint8 Bloss;
-    Uint8 Rshift;
-    Uint8 Gshift;
-    Uint8 Bshift;
-    Uint8 Ashift;
+    Uint8 padding[3];
     Uint32 Rmask;
     Uint32 Gmask;
     Uint32 Bmask;
     Uint32 Amask;
+    Uint8 Rloss;
+    Uint8 Gloss;
+    Uint8 Bloss;
+    Uint8 Aloss;
+    Uint8 Rshift;
+    Uint8 Gshift;
+    Uint8 Bshift;
+    Uint8 Ashift;
 } RLEDestFormat;
 
 /* blit a pixel-alpha RLE surface clipped at the right and/or left edges */
@@ -1097,17 +1099,18 @@ RLEAlphaSurface(SDL_Surface * surface)
         /* save the destination format so we can undo the encoding later */
         RLEDestFormat *r = (RLEDestFormat *) rlebuf;
         r->BytesPerPixel = df->BytesPerPixel;
-        r->Rloss = df->Rloss;
-        r->Gloss = df->Gloss;
-        r->Bloss = df->Bloss;
-        r->Rshift = df->Rshift;
-        r->Gshift = df->Gshift;
-        r->Bshift = df->Bshift;
-        r->Ashift = df->Ashift;
         r->Rmask = df->Rmask;
         r->Gmask = df->Gmask;
         r->Bmask = df->Bmask;
         r->Amask = df->Amask;
+        r->Rloss = df->Rloss;
+        r->Gloss = df->Gloss;
+        r->Bloss = df->Bloss;
+        r->Aloss = df->Aloss;
+        r->Rshift = df->Rshift;
+        r->Gshift = df->Gshift;
+        r->Bshift = df->Bshift;
+        r->Ashift = df->Ashift;
     }
     dst = rlebuf + sizeof(RLEDestFormat);
 
