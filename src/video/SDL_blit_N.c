@@ -2123,7 +2123,6 @@ BlitNtoNCopyAlpha(SDL_BlitInfo * info)
     int dstbpp = dstfmt->BytesPerPixel;
     int c;
 
-    /* FIXME: should map alpha to [0..255] correctly! */
     while (height--) {
         for (c = width; c; --c) {
             Uint32 Pixel;
@@ -2305,7 +2304,6 @@ BlitNtoNKeyCopyAlpha(SDL_BlitInfo * info)
     dstbpp = dstfmt->BytesPerPixel;
     ckey &= rgbmask;
 
-    /* FIXME: should map alpha to [0..255] correctly! */
     while (height--) {
 		/* *INDENT-OFF* */
 		DUFFS_LOOP(

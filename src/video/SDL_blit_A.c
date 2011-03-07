@@ -97,7 +97,6 @@ BlitNto1PixelAlpha(SDL_BlitInfo * info)
     SDL_PixelFormat *dstfmt = info->dst_fmt;
     int srcbpp = srcfmt->BytesPerPixel;
 
-    /* FIXME: fix alpha bit field expansion here too? */
     while (height--) {
 	    /* *INDENT-OFF* */
 	    DUFFS_LOOP4(
@@ -2082,11 +2081,6 @@ BlitNtoNPixelAlpha(SDL_BlitInfo * info)
     srcbpp = srcfmt->BytesPerPixel;
     dstbpp = dstfmt->BytesPerPixel;
 
-    /* FIXME: for 8bpp source alpha, this doesn't get opaque values
-       quite right. for <8bpp source alpha, it gets them very wrong
-       (check all macros!)
-       It is unclear whether there is a good general solution that doesn't
-       need a branch (or a divide). */
     while (height--) {
 	    /* *INDENT-OFF* */
 	    DUFFS_LOOP4(

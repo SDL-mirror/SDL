@@ -28,6 +28,9 @@
 #include "SDL_endian.h"
 #include "SDL_surface.h"
 
+/* Table to do pixel byte expansion */
+extern Uint8* SDL_expand_byte[9];
+
 /* SDL blit copy flags */
 #define SDL_COPY_MODULATE_COLOR     0x00000001
 #define SDL_COPY_MODULATE_ALPHA     0x00000002
@@ -114,35 +117,24 @@ extern SDL_BlitFunc SDL_CalculateBlitA(SDL_Surface * surface);
 #define DECLARE_ALIGNED(t,v,a)  t v
 #endif
 
-/* The Nintendo surfaces are special. Bit 15 is the transparency
- * bit. It must be set for the pixel to be displayed. By setting that
- * value to 0 for other platforms, their compiler should optimize it
- * out. */
-#ifdef __NDS__
-#define NDS_BIT15 0x8000
-#else
-#define NDS_BIT15 0
-#endif
-
 /* Load pixel of the specified format from a buffer and get its R-G-B values */
-/* FIXME: rescale values to 0..255 here? */
 #define RGB_FROM_PIXEL(Pixel, fmt, r, g, b)				\
 {									\
-	r = (((Pixel&fmt->Rmask)>>fmt->Rshift)<<fmt->Rloss); 		\
-	g = (((Pixel&fmt->Gmask)>>fmt->Gshift)<<fmt->Gloss); 		\
-	b = (((Pixel&fmt->Bmask)>>fmt->Bshift)<<fmt->Bloss); 		\
+	r = SDL_expand_byte[fmt->Rloss][((Pixel&fmt->Rmask)>>fmt->Rshift)]; \
+	g = SDL_expand_byte[fmt->Gloss][((Pixel&fmt->Gmask)>>fmt->Gshift)]; \
+	b = SDL_expand_byte[fmt->Bloss][((Pixel&fmt->Bmask)>>fmt->Bshift)]; \
 }
 #define RGB_FROM_RGB565(Pixel, r, g, b)					\
 {									\
-	r = (((Pixel&0xF800)>>11)<<3);		 			\
-	g = (((Pixel&0x07E0)>>5)<<2); 					\
-	b = ((Pixel&0x001F)<<3); 					\
+	r = SDL_expand_byte[3][((Pixel&0xF800)>>11)];		 			\
+	g = SDL_expand_byte[2][((Pixel&0x07E0)>>5)]; 					\
+	b = SDL_expand_byte[3][(Pixel&0x001F)]; 					\
 }
 #define RGB_FROM_RGB555(Pixel, r, g, b)					\
 {									\
-	r = (((Pixel&0x7C00)>>10)<<3);		 			\
-	g = (((Pixel&0x03E0)>>5)<<3); 					\
-	b = ((Pixel&0x001F)<<3); 					\
+	r = SDL_expand_byte[3][((Pixel&0x7C00)>>10)];		 			\
+	g = SDL_expand_byte[3][((Pixel&0x03E0)>>5)]; 					\
+	b = SDL_expand_byte[3][(Pixel&0x001F)]; 					\
 }
 #define RGB_FROM_RGB888(Pixel, r, g, b)					\
 {									\
@@ -217,7 +209,8 @@ do {									   \
 {									\
 	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
 		((g>>fmt->Gloss)<<fmt->Gshift)|				\
-		((b>>fmt->Bloss)<<fmt->Bshift);				\
+		((b>>fmt->Bloss)<<fmt->Bshift)|
+        fmt->Amask;				\
 }
 #define RGB565_FROM_RGB(Pixel, r, g, b)					\
 {									\
@@ -254,7 +247,7 @@ do {									   \
 			Uint16 Pixel;					\
 									\
 			PIXEL_FROM_RGB(Pixel, fmt, r, g, b);		\
-			*((Uint16 *)(buf)) = Pixel | NDS_BIT15;		\
+			*((Uint16 *)(buf)) = Pixel;		\
 		}							\
 		break;							\
 									\
@@ -284,10 +277,10 @@ do {									   \
 /* FIXME: Should we rescale alpha into 0..255 here? */
 #define RGBA_FROM_PIXEL(Pixel, fmt, r, g, b, a)				\
 {									\
-	r = ((Pixel&fmt->Rmask)>>fmt->Rshift)<<fmt->Rloss; 		\
-	g = ((Pixel&fmt->Gmask)>>fmt->Gshift)<<fmt->Gloss; 		\
-	b = ((Pixel&fmt->Bmask)>>fmt->Bshift)<<fmt->Bloss; 		\
-	a = ((Pixel&fmt->Amask)>>fmt->Ashift)<<fmt->Aloss;	 	\
+	r = SDL_expand_byte[fmt->Rloss][((Pixel&fmt->Rmask)>>fmt->Rshift)]; \
+	g = SDL_expand_byte[fmt->Gloss][((Pixel&fmt->Gmask)>>fmt->Gshift)]; \
+	b = SDL_expand_byte[fmt->Bloss][((Pixel&fmt->Bmask)>>fmt->Bshift)]; \
+	a = SDL_expand_byte[fmt->Aloss][((Pixel&fmt->Amask)>>fmt->Ashift)]; \
 }
 #define RGBA_FROM_8888(Pixel, fmt, r, g, b, a)	\
 {						\
@@ -375,7 +368,7 @@ do {									   \
 			Uint16 Pixel;					\
 									\
 			PIXEL_FROM_RGBA(Pixel, fmt, r, g, b, a);	\
-			*((Uint16 *)(buf)) = Pixel | NDS_BIT15;		\
+			*((Uint16 *)(buf)) = Pixel;		\
 		}							\
 		break;							\
 									\
