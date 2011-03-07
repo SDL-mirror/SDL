@@ -209,7 +209,7 @@ do {									   \
 {									\
 	Pixel = ((r>>fmt->Rloss)<<fmt->Rshift)|				\
 		((g>>fmt->Gloss)<<fmt->Gshift)|				\
-		((b>>fmt->Bloss)<<fmt->Bshift)|
+		((b>>fmt->Bloss)<<fmt->Bshift)| \
         fmt->Amask;				\
 }
 #define RGB565_FROM_RGB(Pixel, r, g, b)					\
