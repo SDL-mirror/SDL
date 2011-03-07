@@ -444,22 +444,36 @@ SDL_AllocFormat(Uint32 pixel_format)
 int
 SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
 {
-    int bpp;
-    Uint32 Rmask, Gmask, Bmask, Amask;
-    Uint32 mask;
-
-    if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
-                                    &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown pixel format");
-        return -1;
-    }
-
     /* Set up the format */
     SDL_zerop(format);
     format->format = pixel_format;
-    format->BitsPerPixel = bpp;
-    format->BytesPerPixel = (bpp + 7) / 8;
-    if (Rmask || Bmask || Gmask) {      /* Packed pixels with custom mask */
+    format->BitsPerPixel = SDL_BITSPERPIXEL(pixel_format);
+    format->BytesPerPixel = SDL_BYTESPERPIXEL(pixel_format);
+    if (SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
+        /* Palettized formats have no mask info */
+        format->Rloss = 8;
+        format->Gloss = 8;
+        format->Bloss = 8;
+        format->Aloss = 8;
+        format->Rshift = 0;
+        format->Gshift = 0;
+        format->Bshift = 0;
+        format->Ashift = 0;
+        format->Rmask = 0;
+        format->Gmask = 0;
+        format->Bmask = 0;
+        format->Amask = 0;
+    } else {
+        int bpp;
+        Uint32 Rmask, Gmask, Bmask, Amask;
+        Uint32 mask;
+
+        if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
+                                        &Rmask, &Gmask, &Bmask, &Amask)) {
+            SDL_SetError("Unknown pixel format");
+            return -1;
+        }
+
         format->Rshift = 0;
         format->Rloss = 8;
         if (Rmask) {
@@ -496,33 +510,6 @@ SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
         format->Gmask = Gmask;
         format->Bmask = Bmask;
         format->Amask = Amask;
-    } else if (bpp > 8) {       /* Packed pixels with standard mask */
-        /* R-G-B */
-        if (bpp > 24)
-            bpp = 24;
-        format->Rloss = 8 - (bpp / 3);
-        format->Gloss = 8 - (bpp / 3) - (bpp % 3);
-        format->Bloss = 8 - (bpp / 3);
-        format->Rshift = ((bpp / 3) + (bpp % 3)) + (bpp / 3);
-        format->Gshift = (bpp / 3);
-        format->Bshift = 0;
-        format->Rmask = ((0xFF >> format->Rloss) << format->Rshift);
-        format->Gmask = ((0xFF >> format->Gloss) << format->Gshift);
-        format->Bmask = ((0xFF >> format->Bloss) << format->Bshift);
-    } else {
-        /* Palettized formats have no mask info */
-        format->Rloss = 8;
-        format->Gloss = 8;
-        format->Bloss = 8;
-        format->Aloss = 8;
-        format->Rshift = 0;
-        format->Gshift = 0;
-        format->Bshift = 0;
-        format->Ashift = 0;
-        format->Rmask = 0;
-        format->Gmask = 0;
-        format->Bmask = 0;
-        format->Amask = 0;
     }
     format->palette = NULL;
     format->refcount = 1;
