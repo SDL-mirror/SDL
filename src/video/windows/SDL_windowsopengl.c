@@ -409,8 +409,6 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
 
     *iAttr++ = WGL_DRAW_TO_WINDOW_ARB;
     *iAttr++ = GL_TRUE;
-    *iAttr++ = WGL_ACCELERATION_ARB;
-    *iAttr++ = WGL_FULL_ACCELERATION_ARB;
     *iAttr++ = WGL_RED_BITS_ARB;
     *iAttr++ = _this->gl_config.red_size;
     *iAttr++ = WGL_GREEN_BITS_ARB;
@@ -469,12 +467,9 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         *iAttr++ = _this->gl_config.multisamplesamples;
     }
 
-    if (_this->gl_config.accelerated >= 0) {
-        *iAttr++ = WGL_ACCELERATION_ARB;
-        *iAttr++ =
-            (_this->gl_config.accelerated ? WGL_GENERIC_ACCELERATION_ARB :
-             WGL_NO_ACCELERATION_ARB);
-    }
+    *iAttr++ = WGL_ACCELERATION_ARB;
+    *iAttr++ = (_this->gl_config.accelerated ? WGL_FULL_ACCELERATION_ARB :
+                                               WGL_NO_ACCELERATION_ARB);
 
     *iAttr = 0;
 
