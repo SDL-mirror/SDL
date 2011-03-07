@@ -768,9 +768,13 @@ SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat * format, Uint8 * r, Uint8 * g,
         v = (pixel & format->Bmask) >> format->Bshift;
         *b = (v << format->Bloss) + (v >> (8 - (format->Bloss << 1)));
     } else {
-        *r = format->palette->colors[pixel].r;
-        *g = format->palette->colors[pixel].g;
-        *b = format->palette->colors[pixel].b;
+        if (pixel < format->palette->ncolors) {
+            *r = format->palette->colors[pixel].r;
+            *g = format->palette->colors[pixel].g;
+            *b = format->palette->colors[pixel].b;
+        } else {
+            *r = *g = *b = 0;
+        }
     }
 }
 
@@ -802,10 +806,14 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
             *a = SDL_ALPHA_OPAQUE;
         }
     } else {
-        *r = format->palette->colors[pixel].r;
-        *g = format->palette->colors[pixel].g;
-        *b = format->palette->colors[pixel].b;
-        *a = SDL_ALPHA_OPAQUE;
+        if (pixel < format->palette->ncolors) {
+            *r = format->palette->colors[pixel].r;
+            *g = format->palette->colors[pixel].g;
+            *b = format->palette->colors[pixel].b;
+            *a = SDL_ALPHA_OPAQUE;
+        } else {
+            *r = *g = *b = *a = 0;
+        }
     }
 }
 
