@@ -270,6 +270,11 @@ typedef struct SDL_PixelFormat
     SDL_Palette *palette;
     Uint8 BitsPerPixel;
     Uint8 BytesPerPixel;
+    Uint8 padding[2];
+    Uint32 Rmask;
+    Uint32 Gmask;
+    Uint32 Bmask;
+    Uint32 Amask;
     Uint8 Rloss;
     Uint8 Gloss;
     Uint8 Bloss;
@@ -278,10 +283,6 @@ typedef struct SDL_PixelFormat
     Uint8 Gshift;
     Uint8 Bshift;
     Uint8 Ashift;
-    Uint32 Rmask;
-    Uint32 Gmask;
-    Uint32 Bmask;
-    Uint32 Amask;
     int refcount;
     struct SDL_PixelFormat *next;
 } SDL_PixelFormat;
