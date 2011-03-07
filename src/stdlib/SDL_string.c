@@ -865,8 +865,8 @@ SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen)
         ++str2;
         --maxlen;
     }
-    a = SDL_tolower(*str1);
-    b = SDL_tolower(*str2);
+    a = SDL_tolower((unsigned char) *str1);
+    b = SDL_tolower((unsigned char) *str2);
     return (int) ((unsigned char) a - (unsigned char) b);
 }
 #endif
