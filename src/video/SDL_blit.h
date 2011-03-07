@@ -172,7 +172,7 @@ do {									   \
 		break;							   \
 									   \
 		default:						   \
-		        Pixel; /* stop gcc complaints */		   \
+		        Pixel = 0; /* stop gcc complaints */		   \
 		break;							   \
 	}								   \
 } while (0)
@@ -186,6 +186,7 @@ do {									   \
 		break;							   \
 									   \
 		case 3:	{						   \
+            Pixel = 0;                  \
                         if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
 			        r = *((buf)+fmt->Rshift/8);		   \
 				g = *((buf)+fmt->Gshift/8);		   \
@@ -204,7 +205,9 @@ do {									   \
 		break;							   \
 									   \
 		default:						   \
-		        Pixel; /* stop gcc complaints */		   \
+                /* stop gcc complaints */		   \
+		        Pixel = 0;              \
+                r = g = b = 0;          \
 		break;							   \
 	}								   \
 } while (0)
@@ -277,43 +280,6 @@ do {									   \
 		break;							\
 	}								\
 }
-#define ASSEMBLE_RGB_AMASK(buf, bpp, fmt, r, g, b, Amask)		\
-{									\
-	switch (bpp) {							\
-		case 2: {						\
-			Uint16 *bufp;					\
-			Uint16 Pixel;					\
-									\
-			bufp = (Uint16 *)buf;				\
-			PIXEL_FROM_RGB(Pixel, fmt, r, g, b);		\
-			*bufp = Pixel | (*bufp & Amask);		\
-		}							\
-		break;							\
-									\
-		case 3: {						\
-                        if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		\
-			        *((buf)+fmt->Rshift/8) = r;		\
-				*((buf)+fmt->Gshift/8) = g;		\
-				*((buf)+fmt->Bshift/8) = b;		\
-			} else {					\
-			        *((buf)+2-fmt->Rshift/8) = r;		\
-				*((buf)+2-fmt->Gshift/8) = g;		\
-				*((buf)+2-fmt->Bshift/8) = b;		\
-			}						\
-		}							\
-		break;							\
-									\
-		case 4: {						\
-			Uint32 *bufp;					\
-			Uint32 Pixel;					\
-									\
-			bufp = (Uint32 *)buf;				\
-			PIXEL_FROM_RGB(Pixel, fmt, r, g, b);		\
-			*bufp = Pixel | (*bufp & Amask);		\
-		}							\
-		break;							\
-	}								\
-}
 
 /* FIXME: Should we rescale alpha into 0..255 here? */
 #define RGBA_FROM_PIXEL(Pixel, fmt, r, g, b, a)				\
@@ -367,6 +333,7 @@ do {									   \
 		break;							   \
 									   \
 		case 3:	{						   \
+            Pixel = 0; \
                         if (SDL_BYTEORDER == SDL_LIL_ENDIAN) {		   \
 			        r = *((buf)+fmt->Rshift/8);		   \
 				g = *((buf)+fmt->Gshift/8);		   \
@@ -386,7 +353,9 @@ do {									   \
 		break;							   \
 									   \
 		default:						   \
-		        Pixel; /* stop gcc complaints */		   \
+                /* stop gcc complaints */		   \
+		        Pixel = 0;              \
+                r = g = b = a = 0;      \
 		break;							   \
 	}								   \
 } while (0)

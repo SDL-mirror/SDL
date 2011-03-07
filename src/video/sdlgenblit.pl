@@ -274,8 +274,12 @@ sub output_copyfunc
     output_copyfuncname("static void", $src, $dst, $modulate, $blend, $scale, 1, "\n");
     print FILE <<__EOF__;
 {
+__EOF__
+    if ( $modulate || $blend ) {
+        print FILE <<__EOF__;
     const int flags = info->flags;
 __EOF__
+    }
     if ( $modulate ) {
         print FILE <<__EOF__;
     const Uint32 modulateR = info->r;
@@ -309,7 +313,7 @@ __EOF__
     incx = (info->src_w << 16) / info->dst_w;
 
     while (info->dst_h--) {
-        $format_type{$src} *src;
+        $format_type{$src} *src = 0;
         $format_type{$dst} *dst = ($format_type{$dst} *)info->dst;
         int n = info->dst_w;
         srcx = -1;
