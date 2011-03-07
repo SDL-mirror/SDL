@@ -396,7 +396,6 @@ int
 SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid, int relative, 
                     float xin, float yin, float pressurein)
 {
-    int index = SDL_GetTouchIndexId(id);
     SDL_Touch *touch;
     SDL_Finger *finger;
     int posted;
