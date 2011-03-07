@@ -5,7 +5,7 @@ Simple DirectMedia Layer for Nintendo DS
 -Requirements-
 * The devkitpro SDK available at http://devkitpro.org.
   Read the information at http://devkitpro.org/wiki/Getting_Started/devkitARM
-  The necessary packages are devkitARM, libnds and default arm7.
+  The necessary packages are devkitARM, libnds, libfat and default arm7.
 * The hardware renderer is using the libgl2d abstraction library that can be found at:
     http://rel.phatcode.net/junk.php?id=117
   Build it, and install the library and the header where SDL can find them (ie. in
