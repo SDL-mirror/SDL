@@ -816,7 +816,7 @@ SDL_GetRGB(Uint32 pixel, const SDL_PixelFormat * format, Uint8 * r, Uint8 * g,
         v = (pixel & format->Bmask) >> format->Bshift;
         *b = SDL_expand_byte[format->Bloss][v];
     } else {
-        if (pixel < format->palette->ncolors) {
+        if (pixel < (unsigned)format->palette->ncolors) {
             *r = format->palette->colors[pixel].r;
             *g = format->palette->colors[pixel].g;
             *b = format->palette->colors[pixel].b;
@@ -841,7 +841,7 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
         v = (pixel & format->Amask) >> format->Ashift;
         *a = SDL_expand_byte[format->Aloss][v];
     } else {
-        if (pixel < format->palette->ncolors) {
+        if (pixel < (unsigned)format->palette->ncolors) {
             *r = format->palette->colors[pixel].r;
             *g = format->palette->colors[pixel].g;
             *b = format->palette->colors[pixel].b;
