@@ -1,140 +1,236 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
 
-#LibSDL 1.3 porting and enhancements by Darren Alton (lifning)
-#LibSDL 1.2.9 DS porting by Troy Davis(GPF)
-
-ifeq ($(strip $(DEVKITPRO)),)
-$(error "Please set DEVKITPRO in your environment (available from http://www.devkitpro.org). export DEVKITPRO=<path to>devkitPro")
-endif
 ifeq ($(strip $(DEVKITARM)),)
-DEVKITARM = $(DEVKITPRO)/devkitARM
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
 endif
-PATH := $(PATH):$(DEVKITARM)/bin
 
-CC = arm-eabi-gcc
-AR = arm-eabi-ar
-RANLIB = arm-eabi-ranlib
+include $(DEVKITARM)/ds_rules
 
-#ifdef GL
-#DEFS += -DSDL_VIDEO_OPENGL=1
-#TARGET = libSDL_gl.a
-#else
-TARGET = libSDL.a
-#endif
+#---------------------------------------------------------------------------------
+# TARGET is the name of the output
+# BUILD is the directory where object files & intermediate files will be placed
+# SOURCES is a list of directories containing source code
+# DATA is a list of directories containing data files
+# INCLUDES is a list of directories containing header files
+#---------------------------------------------------------------------------------
+TARGET		:=	$(shell basename $(CURDIR))
+BUILD		:=	src
+SOURCES		:=	source
+DATA		:=	data
+INCLUDES	:=	include
 
-#CFLAGS=$(DEFS) -Iinclude
-CFLAGS	=	-mthumb -mthumb-interwork \
+#---------------------------------------------------------------------------------
+# options for code generation
+#---------------------------------------------------------------------------------
+ARCH	:=	-mthumb -mthumb-interwork \
+		-D__NDS__ -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" \
+		 -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1  
+
+CFLAGS	:=	-g -Wall -O2\
 		-march=armv5te -mtune=arm946e-s \
-		-O2 -Wall -Wwrite-strings -Wpointer-arith  \
-		-DARM9 -D__NDS__ -I$(DEVKITPRO)/libnds/include -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1 -Iinclude
+		-fomit-frame-pointer -ffast-math \
+		$(ARCH)
 
-#src/audio/disk/SDL_diskaudio.c \
-#src/audio/dummy/SDL_dummyaudio.c \
+CFLAGS	+=	$(INCLUDE) -DARM9
+CXXFLAGS	:= $(CFLAGS) -fno-rtti -fno-exceptions
 
-SRCS = \
-src/SDL.c \
-src/SDL_assert.c \
-src/SDL_compat.c \
-src/SDL_error.c \
-src/SDL_fatal.c \
-src/SDL_hints.c \
-src/SDL_log.c \
-src/atomic/SDL_atomic.c \
-src/atomic/SDL_spinlock.c \
-src/audio/SDL_audio.c \
-src/audio/SDL_audiocvt.c \
-src/audio/SDL_audiodev.c \
-src/audio/SDL_audiotypecvt.c \
-src/audio/SDL_mixer.c \
-src/audio/SDL_mixer_MMX.c \
-src/audio/SDL_mixer_MMX_VC.c \
-src/audio/SDL_mixer_m68k.c \
-src/audio/SDL_wave.c \
-src/audio/nds/SDL_ndsaudio.c \
-src/cpuinfo/SDL_cpuinfo.c \
-src/events/SDL_events.c \
-src/events/SDL_keyboard.c \
-src/events/SDL_mouse.c \
-src/events/SDL_quit.c \
-src/events/SDL_touch.c \
-src/events/SDL_windowevents.c \
-src/events/nds/SDL_ndsgesture.c \
-src/file/SDL_rwops.c \
-src/haptic/SDL_haptic.c \
-src/haptic/nds/SDL_syshaptic.c \
-src/joystick/SDL_joystick.c \
-src/joystick/nds/SDL_sysjoystick.c \
-src/power/SDL_power.c \
-src/power/nds/SDL_syspower.c \
-src/render/SDL_render.c \
-src/render/SDL_yuv_sw.c \
-src/render/software/SDL_render_sw.c \
-src/render/software/SDL_blendpoint.c \
-src/render/software/SDL_drawline.c \
-src/render/software/SDL_blendline.c \
-src/render/software/SDL_blendfillrect.c \
-src/render/software/SDL_drawpoint.c \
-src/stdlib/SDL_getenv.c \
-src/stdlib/SDL_iconv.c \
-src/stdlib/SDL_malloc.c \
-src/stdlib/SDL_qsort.c \
-src/stdlib/SDL_stdlib.c \
-src/stdlib/SDL_string.c \
-src/thread/SDL_thread.c \
-src/thread/nds/SDL_syscond.c \
-src/thread/nds/SDL_sysmutex.c \
-src/thread/nds/SDL_syssem.c \
-src/thread/nds/SDL_systhread.c \
-src/timer/SDL_timer.c \
-src/timer/nds/SDL_systimer.c \
-src/video/SDL_RLEaccel.c \
-src/video/SDL_blit.c \
-src/video/SDL_blit_0.c \
-src/video/SDL_blit_1.c \
-src/video/SDL_blit_A.c \
-src/video/SDL_blit_N.c \
-src/video/SDL_blit_auto.c \
-src/video/SDL_blit_copy.c \
-src/video/SDL_blit_slow.c \
-src/video/SDL_bmp.c \
-src/video/SDL_fillrect.c \
-src/video/SDL_pixels.c \
-src/video/SDL_rect.c \
-src/video/SDL_stretch.c \
-src/video/SDL_surface.c \
-src/video/SDL_video.c \
-src/video/dummy/SDL_nullevents.c \
-src/video/dummy/SDL_nullvideo.c \
-src/video/nds/SDL_ndsevents.c \
-src/video/nds/SDL_ndsrender.c \
-src/video/nds/SDL_ndsvideo.c \
+ASFLAGS	:=	-g $(ARCH) -march=armv5te -mtune=arm946e-s
+LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -Wl,-Map,$(notdir $*.map)
 
-OBJS = $(SRCS:.c=.o)
+# Set to 0 to use a framer buffer, or 1 to use the hardware
+# renderer. Alas, both cannot be used at the same time for lack of
+# display/texture memory.
+USE_HW_RENDERER := 1
 
-TEST = \
-test/nds-test-progs/general/general.nds \
-test/nds-test-progs/sprite/sprite.nds \
-test/nds-test-progs/sprite2/sprite2.nds \
+ifeq ($(USE_HW_RENDERER),1)
+CFLAGS += -DUSE_HW_RENDERER
+else
+endif
+
+#---------------------------------------------------------------------------------
+# list of directories containing libraries, this must be the top level containing
+# include and lib
+#---------------------------------------------------------------------------------
+LIBDIRS	:=	$(LIBNDS)
+
+#---------------------------------------------------------------------------------
+# no real need to edit anything past this point unless you need to add additional
+# rules for different file extensions
+#---------------------------------------------------------------------------------
+ifneq ($(BUILD),$(notdir $(CURDIR)))
+#---------------------------------------------------------------------------------
+
+export OUTPUT	:=	$(CURDIR)/lib/lib$(TARGET).a
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
+			$(foreach dir,$(DATA),$(CURDIR)/$(dir))
+
+export DEPSDIR	:=	$(CURDIR)/$(BUILD)
+
+CFILES		:=	\
+			SDL.c \
+			SDL_assert.c \
+			SDL_compat.c \
+			SDL_error.c \
+			SDL_fatal.c \
+			SDL_hints.c \
+			SDL_log.c \
+			atomic/SDL_atomic.c \
+			atomic/SDL_spinlock.arm.c \
+			audio/SDL_audio.c \
+			audio/SDL_audiocvt.c \
+			audio/SDL_audiodev.c \
+			audio/SDL_audiotypecvt.c \
+			audio/SDL_mixer.c \
+			audio/SDL_mixer_MMX.c \
+			audio/SDL_mixer_MMX_VC.c \
+			audio/SDL_mixer_m68k.c \
+			audio/SDL_wave.c \
+			audio/nds/SDL_ndsaudio.c \
+			cpuinfo/SDL_cpuinfo.c \
+			events/SDL_events.c \
+			events/SDL_keyboard.c \
+			events/SDL_mouse.c \
+			events/SDL_quit.c \
+			events/SDL_touch.c \
+			events/SDL_windowevents.c \
+			events/nds/SDL_ndsgesture.c \
+			file/SDL_rwops.c \
+			haptic/SDL_haptic.c \
+			haptic/nds/SDL_syshaptic.c \
+			joystick/SDL_joystick.c \
+			joystick/nds/SDL_sysjoystick.c \
+			power/SDL_power.c \
+			power/nds/SDL_syspower.c \
+			render/SDL_render.c \
+			render/SDL_yuv_sw.c \
+			render/software/SDL_blendfillrect.c \
+			render/software/SDL_blendline.c \
+			render/software/SDL_blendpoint.c \
+			render/software/SDL_drawline.c \
+			render/software/SDL_drawpoint.c \
+			render/software/SDL_render_sw.c \
+			stdlib/SDL_getenv.c \
+			stdlib/SDL_iconv.c \
+			stdlib/SDL_malloc.c \
+			stdlib/SDL_qsort.c \
+			stdlib/SDL_stdlib.c \
+			stdlib/SDL_string.c \
+			thread/SDL_thread.c \
+			thread/nds/SDL_syscond.c \
+			thread/nds/SDL_sysmutex.c \
+			thread/nds/SDL_syssem.c \
+			thread/nds/SDL_systhread.c \
+			timer/SDL_timer.c \
+			timer/nds/SDL_systimer.c \
+			video/SDL_RLEaccel.c \
+			video/SDL_blit.c \
+			video/SDL_blit_0.c \
+			video/SDL_blit_1.c \
+			video/SDL_blit_A.c \
+			video/SDL_blit_N.c \
+			video/SDL_blit_auto.c \
+			video/SDL_blit_copy.c \
+			video/SDL_blit_slow.c \
+			video/SDL_bmp.c \
+			video/SDL_clipboard.c \
+			video/SDL_fillrect.c \
+			video/SDL_pixels.c \
+			video/SDL_rect.c \
+			video/SDL_stretch.c \
+			video/SDL_surface.c \
+			video/SDL_video.c \
+			video/nds/SDL_ndsevents.c \
+			video/nds/SDL_ndsvideo.c
 
 
-all: $(TARGET) install nds_test
+ifeq ($(USE_HW_RENDERER),1)
+# Ideally we should be able to not include the SW renderer at set
+# SDL_NO_COMPAT. However that breaks the build.
+CFILES +=	render/nds/SDL_ndsrender.c
+else
+endif
 
-# That file must be compiled in arm mode, not thumb mode.
-src/atomic/SDL_spinlock.o: src/atomic/SDL_spinlock.c
-	$(CC) $(CFLAGS) -mno-thumb -o $@ -c $^
+#CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+#SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+#BINFILES	:=	$(foreach dir,$(DATA),$(notdir $(wildcard $(dir)/*.*)))
 
-$(TARGET): $(OBJS)
-	$(AR) rc $(TARGET) $(OBJS)
-	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
+#---------------------------------------------------------------------------------
+# use CXX for linking C++ projects, CC for standard C
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(CPPFILES)),)
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CC)
+#---------------------------------------------------------------------------------
+else
+#---------------------------------------------------------------------------------
+	export LD	:=	$(CXX)
+#---------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------
 
-install: $(TARGET)
-	@cp libSDL.a $(DEVKITPRO)/libnds/lib/
+export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
+			$(CPPFILES:.cpp=.o) $(CFILES:.c=.o) $(SFILES:.s=.o)
+
+export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
+			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
+			-I$(CURDIR)/$(BUILD)
+
+.PHONY: $(BUILD) clean all
+
+#---------------------------------------------------------------------------------
+all: arm_only $(BUILD) install nds_test
+
+lib:
+	@[ -d $@ ] || mkdir -p $@
+
+$(BUILD): lib
+	@[ -d $@ ] || mkdir -p $@
+	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.ds -s
+
+install: $(BUILD)
+	@cp $(OUTPUT) $(DEVKITPRO)/libnds/lib/
 	@mkdir -p $(DEVKITPRO)/libnds/include/SDL/
 	@cp include/*.h $(DEVKITPRO)/libnds/include/SDL/
 
 nds_test:
-	$(MAKE) -C test/nds-test-progs/general
-#	$(MAKE) -C test/nds-test-progs/sprite
-#	$(MAKE) -C test/nds-test-progs/sprite2
+	$(MAKE) -C test/nds-test-progs
 
+tags:
+	etags $(SRCS)
+
+# This file must be compiled with the ARM instruction set, not
+# thumb. Use devkitpro way of doing things.
+arm_only: src/atomic/SDL_spinlock.arm.c
+src/atomic/SDL_spinlock.arm.c: src/atomic/SDL_spinlock.c
+	@cp $< $@
+
+#---------------------------------------------------------------------------------
 clean:
-	rm -f $(OBJS)
+	@echo clean ...
+	@cd src; rm -fr $(OFILES) $(OFILES:.o=.d) lib
+
+#---------------------------------------------------------------------------------
+else
+
+DEPENDS	:=	$(OFILES:.o=.d)
+
+#---------------------------------------------------------------------------------
+# main targets
+#---------------------------------------------------------------------------------
+$(OUTPUT)	:	$(OFILES)
+
+#---------------------------------------------------------------------------------
+%.bin.o	:	%.bin
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
+
+
+-include $(DEPENDS)
+
+#---------------------------------------------------------------------------------------
+endif
+#---------------------------------------------------------------------------------------

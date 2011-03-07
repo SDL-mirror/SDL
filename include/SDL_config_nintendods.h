@@ -115,12 +115,18 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_NDS	1
+#ifdef USE_HW_RENDERER
 #define SDL_VIDEO_RENDER_NDS	1
+#else
+#define SDL_VIDEO_RENDER_NDS	0
+#endif
 
 /* Enable system power support */
 #define SDL_POWER_NINTENDODS 1
 
 /* Enable haptic support */
 #define SDL_HAPTIC_NDS 1
+
+#define SDL_BYTEORDER   SDL_LIL_ENDIAN
 
 #endif /* _SDL_config_nintendods_h */

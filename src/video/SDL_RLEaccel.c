@@ -891,6 +891,9 @@ copy_opaque_16(void *dst, Uint32 * src, int n,
         unsigned r, g, b;
         RGB_FROM_PIXEL(*src, sfmt, r, g, b);
         PIXEL_FROM_RGB(*d, dfmt, r, g, b);
+#ifdef __NDS__
+		*d |= NDS_BIT15;
+#endif
         src++;
         d++;
     }
@@ -948,7 +951,7 @@ copy_transl_555(void *dst, Uint32 * src, int n,
         Uint16 pix;
         RGBA_FROM_8888(*src, sfmt, r, g, b, a);
         PIXEL_FROM_RGB(pix, dfmt, r, g, b);
-        *d = ((pix & 0x3e0) << 16) | (pix & 0xfc1f) | ((a << 2) & 0x3e0);
+        *d = ((pix & 0x3e0) << 16) | (pix & 0xfc1f) | ((a << 2) & 0x3e0) | NDS_BIT15;
         src++;
         d++;
     }

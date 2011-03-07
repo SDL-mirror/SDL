@@ -114,6 +114,16 @@ extern SDL_BlitFunc SDL_CalculateBlitA(SDL_Surface * surface);
 #define DECLARE_ALIGNED(t,v,a)  t v
 #endif
 
+/* The Nintendo surfaces are special. Bit 15 is the transparency
+ * bit. It must be set for the pixel to be displayed. By setting that
+ * value to 0 for other platforms, their compiler should optimize it
+ * out. */
+#ifdef __NDS__
+#define NDS_BIT15 0x8000
+#else
+#define NDS_BIT15 0
+#endif
+
 /* Load pixel of the specified format from a buffer and get its R-G-B values */
 /* FIXME: rescale values to 0..255 here? */
 #define RGB_FROM_PIXEL(Pixel, fmt, r, g, b)				\
@@ -241,7 +251,7 @@ do {									   \
 			Uint16 Pixel;					\
 									\
 			PIXEL_FROM_RGB(Pixel, fmt, r, g, b);		\
-			*((Uint16 *)(buf)) = Pixel;			\
+			*((Uint16 *)(buf)) = Pixel | NDS_BIT15;		\
 		}							\
 		break;							\
 									\
@@ -396,7 +406,7 @@ do {									   \
 			Uint16 Pixel;					\
 									\
 			PIXEL_FROM_RGBA(Pixel, fmt, r, g, b, a);	\
-			*((Uint16 *)(buf)) = Pixel;			\
+			*((Uint16 *)(buf)) = Pixel | NDS_BIT15;		\
 		}							\
 		break;							\
 									\

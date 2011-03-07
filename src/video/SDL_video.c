@@ -1131,6 +1131,10 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 #if (SDL_VIDEO_OPENGL && __MACOSX__) || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     flags |= SDL_WINDOW_OPENGL;
 #endif
+#ifdef __NDS__
+	/* Always for Nintendo DS. */
+	flags |= SDL_WINDOW_FULLSCREEN;
+#endif
     if (flags & SDL_WINDOW_OPENGL) {
         if (!_this->GL_CreateContext) {
             SDL_SetError("No OpenGL support in video driver");
