@@ -47,6 +47,8 @@
 #endif    
 
 #ifdef FIXED_MULTITOUCH
+    self.multipleTouchEnabled = YES;
+
     SDL_Touch touch;
     touch.id = 0; //TODO: Should be -1?
 
