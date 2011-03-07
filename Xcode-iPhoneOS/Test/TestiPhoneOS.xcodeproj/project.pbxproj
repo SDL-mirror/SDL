@@ -315,7 +315,6 @@
 		FDA8A7520E2D0F1600EA573E /* testmultiaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testmultiaudio.c; path = ../../test/testmultiaudio.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7530E2D0F1600EA573E /* testoverlay.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testoverlay.c; path = ../../test/testoverlay.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7540E2D0F1600EA573E /* testoverlay2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testoverlay2.c; path = ../../test/testoverlay2.c; sourceTree = SOURCE_ROOT; };
-		FDA8A7550E2D0F1600EA573E /* testpalette.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testpalette.c; path = ../../test/testpalette.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7560E2D0F1600EA573E /* testplatform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testplatform.c; path = ../../test/testplatform.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7570E2D0F1600EA573E /* testsem.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testsem.c; path = ../../test/testsem.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7580E2D0F1600EA573E /* testsprite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testsprite.c; path = ../../test/testsprite.c; sourceTree = SOURCE_ROOT; };
@@ -883,7 +882,6 @@
 				FDA8A7520E2D0F1600EA573E /* testmultiaudio.c */,
 				FDA8A7530E2D0F1600EA573E /* testoverlay.c */,
 				FDA8A7540E2D0F1600EA573E /* testoverlay2.c */,
-				FDA8A7550E2D0F1600EA573E /* testpalette.c */,
 				FDA8A7560E2D0F1600EA573E /* testplatform.c */,
 				56ED0510118A904200A56AA6 /* testpower.c */,
 				FDA8A7570E2D0F1600EA573E /* testsem.c */,
