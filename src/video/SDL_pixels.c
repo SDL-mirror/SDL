@@ -83,6 +83,12 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
 {
     Uint32 masks[4];
 
+    /* This function doesn't work with FourCC pixel formats */
+    if (SDL_ISPIXELFORMAT_FOURCC(format)) {
+        SDL_SetError("Unknown pixel format");
+        return SDL_FALSE;
+    }
+ 
     /* Initialize the values here */
     if (SDL_BYTESPERPIXEL(format) <= 2) {
         *bpp = SDL_BITSPERPIXEL(format);
@@ -444,73 +450,62 @@ SDL_AllocFormat(Uint32 pixel_format)
 int
 SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
 {
+    int bpp;
+    Uint32 Rmask, Gmask, Bmask, Amask;
+    Uint32 mask;
+
+    if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
+                                    &Rmask, &Gmask, &Bmask, &Amask)) {
+        SDL_SetError("Unknown pixel format");
+        return -1;
+    }
+
     /* Set up the format */
     SDL_zerop(format);
     format->format = pixel_format;
-    format->BitsPerPixel = SDL_BITSPERPIXEL(pixel_format);
-    format->BytesPerPixel = SDL_BYTESPERPIXEL(pixel_format);
-    if (SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
-        /* Palettized formats have no mask info */
-        format->Rloss = 8;
-        format->Gloss = 8;
-        format->Bloss = 8;
-        format->Aloss = 8;
-        format->Rshift = 0;
-        format->Gshift = 0;
-        format->Bshift = 0;
-        format->Ashift = 0;
-        format->Rmask = 0;
-        format->Gmask = 0;
-        format->Bmask = 0;
-        format->Amask = 0;
-    } else {
-        int bpp;
-        Uint32 Rmask, Gmask, Bmask, Amask;
-        Uint32 mask;
+    format->BitsPerPixel = bpp;
+    format->BytesPerPixel = (bpp + 7) / 8;
 
-        if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
-                                        &Rmask, &Gmask, &Bmask, &Amask)) {
-            SDL_SetError("Unknown pixel format");
-            return -1;
-        }
-
-        format->Rshift = 0;
-        format->Rloss = 8;
-        if (Rmask) {
-            for (mask = Rmask; !(mask & 0x01); mask >>= 1)
-                ++format->Rshift;
-            for (; (mask & 0x01); mask >>= 1)
-                --format->Rloss;
-        }
-        format->Gshift = 0;
-        format->Gloss = 8;
-        if (Gmask) {
-            for (mask = Gmask; !(mask & 0x01); mask >>= 1)
-                ++format->Gshift;
-            for (; (mask & 0x01); mask >>= 1)
-                --format->Gloss;
-        }
-        format->Bshift = 0;
-        format->Bloss = 8;
-        if (Bmask) {
-            for (mask = Bmask; !(mask & 0x01); mask >>= 1)
-                ++format->Bshift;
-            for (; (mask & 0x01); mask >>= 1)
-                --format->Bloss;
-        }
-        format->Ashift = 0;
-        format->Aloss = 8;
-        if (Amask) {
-            for (mask = Amask; !(mask & 0x01); mask >>= 1)
-                ++format->Ashift;
-            for (; (mask & 0x01); mask >>= 1)
-                --format->Aloss;
-        }
-        format->Rmask = Rmask;
-        format->Gmask = Gmask;
-        format->Bmask = Bmask;
-        format->Amask = Amask;
+    format->Rmask = Rmask;
+    format->Rshift = 0;
+    format->Rloss = 8;
+    if (Rmask) {
+        for (mask = Rmask; !(mask & 0x01); mask >>= 1)
+            ++format->Rshift;
+        for (; (mask & 0x01); mask >>= 1)
+            --format->Rloss;
     }
+
+    format->Gmask = Gmask;
+    format->Gshift = 0;
+    format->Gloss = 8;
+    if (Gmask) {
+        for (mask = Gmask; !(mask & 0x01); mask >>= 1)
+            ++format->Gshift;
+        for (; (mask & 0x01); mask >>= 1)
+            --format->Gloss;
+    }
+
+    format->Bmask = Bmask;
+    format->Bshift = 0;
+    format->Bloss = 8;
+    if (Bmask) {
+        for (mask = Bmask; !(mask & 0x01); mask >>= 1)
+            ++format->Bshift;
+        for (; (mask & 0x01); mask >>= 1)
+            --format->Bloss;
+    }
+
+    format->Amask = Amask;
+    format->Ashift = 0;
+    format->Aloss = 8;
+    if (Amask) {
+        for (mask = Amask; !(mask & 0x01); mask >>= 1)
+            ++format->Ashift;
+        for (; (mask & 0x01); mask >>= 1)
+            --format->Aloss;
+    }
+
     format->palette = NULL;
     format->refcount = 1;
     format->next = NULL;
