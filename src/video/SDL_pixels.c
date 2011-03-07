@@ -85,7 +85,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
 
     /* This function doesn't work with FourCC pixel formats */
     if (SDL_ISPIXELFORMAT_FOURCC(format)) {
-        SDL_SetError("Unknown pixel format");
+        SDL_SetError("FOURCC pixel formats are not supported");
         return SDL_FALSE;
     }
  
@@ -418,11 +418,6 @@ SDL_AllocFormat(Uint32 pixel_format)
 {
     SDL_PixelFormat *format;
 
-    if (SDL_ISPIXELFORMAT_FOURCC(pixel_format)) {
-        SDL_SetError("FOURCC pixel formats are not supported");
-        return NULL;
-    }
-
     /* Look it up in our list of previously allocated formats */
     for (format = formats; format; format = format->next) {
         if (pixel_format == format->format) {
@@ -435,9 +430,12 @@ SDL_AllocFormat(Uint32 pixel_format)
     format = SDL_malloc(sizeof(*format));
     if (format == NULL) {
         SDL_OutOfMemory();
-        return (NULL);
+        return NULL;
     }
-    SDL_InitFormat(format, pixel_format);
+    if (SDL_InitFormat(format, pixel_format) < 0) {
+        SDL_free(format);
+        return NULL;
+    }
 
     if (!SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {
         /* Cache the RGB formats */
@@ -456,7 +454,6 @@ SDL_InitFormat(SDL_PixelFormat * format, Uint32 pixel_format)
 
     if (!SDL_PixelFormatEnumToMasks(pixel_format, &bpp,
                                     &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown pixel format");
         return -1;
     }
 
