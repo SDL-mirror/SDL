@@ -242,9 +242,11 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
 {
     switch (bpp) {
     case 1:
+        /* SDL defaults to MSB ordering */
+        return SDL_PIXELFORMAT_INDEX1MSB;
     case 4:
-        /* Can't tell if this is LSB or MSB bitmap ordering... */
-        break;
+        /* SDL defaults to MSB ordering */
+        return SDL_PIXELFORMAT_INDEX4MSB;
     case 8:
         if (Rmask == 0) {
             return SDL_PIXELFORMAT_INDEX8;

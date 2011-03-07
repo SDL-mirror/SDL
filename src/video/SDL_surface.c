@@ -75,44 +75,7 @@ SDL_CreateRGBSurface(Uint32 flags,
             SDL_FreeSurface(surface);
             return NULL;
         }
-        if (Rmask || Bmask || Gmask) {
-            const SDL_PixelFormat *format = surface->format;
-
-            /* create palette according to masks */
-            int i;
-            int Rm = 0, Gm = 0, Bm = 0;
-            int Rw = 0, Gw = 0, Bw = 0;
-
-            if (Rmask) {
-                Rw = 8 - format->Rloss;
-                for (i = format->Rloss; i > 0; i -= Rw)
-                    Rm |= 1 << i;
-            }
-            if (Gmask) {
-                Gw = 8 - format->Gloss;
-                for (i = format->Gloss; i > 0; i -= Gw)
-                    Gm |= 1 << i;
-            }
-            if (Bmask) {
-                Bw = 8 - format->Bloss;
-                for (i = format->Bloss; i > 0; i -= Bw)
-                    Bm |= 1 << i;
-            }
-            for (i = 0; i < palette->ncolors; ++i) {
-                int r, g, b;
-                r = (i & Rmask) >> format->Rshift;
-                r = (r << format->Rloss) | ((r * Rm) >> Rw);
-                palette->colors[i].r = r;
-
-                g = (i & Gmask) >> format->Gshift;
-                g = (g << format->Gloss) | ((g * Gm) >> Gw);
-                palette->colors[i].g = g;
-
-                b = (i & Bmask) >> format->Bshift;
-                b = (b << format->Bloss) | ((b * Bm) >> Bw);
-                palette->colors[i].b = b;
-            }
-        } else if (palette->ncolors == 2) {
+        if (palette->ncolors == 2) {
             /* Create a black and white bitmap palette */
             palette->colors[0].r = 0xFF;
             palette->colors[0].g = 0xFF;
