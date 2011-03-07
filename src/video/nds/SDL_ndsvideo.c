@@ -21,12 +21,7 @@
 */
 #include "SDL_config.h"
 
-/* SDL Nintendo DS video driver implementation
- * based on dummy driver:
- *  Initial work by Ryan C. Gordon (icculus@icculus.org). A good portion
- *  of this was cut-and-pasted from Stephane Peter's work in the AAlib
- *  SDL video driver.  Renamed to "DUMMY" by Sam Lantinga.
- */
+/* SDL Nintendo DS video driver implementation */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -375,12 +370,13 @@ static SDL_VideoDevice *NDS_CreateDevice(int devindex)
     device->VideoQuit = NDS_VideoQuit;
 	device->GetDisplayModes = NDS_GetDisplayModes;
     device->SetDisplayMode = NDS_SetDisplayMode;
-    device->PumpEvents = NDS_PumpEvents;
+    device->CreateWindow = NDS_CreateWindow;
 #ifndef USE_HW_RENDERER
 	device->CreateWindowFramebuffer = NDS_CreateWindowFramebuffer;
 	device->UpdateWindowFramebuffer = NDS_UpdateWindowFramebuffer;
 	device->DestroyWindowFramebuffer = NDS_DestroyWindowFramebuffer;
 #endif
+    device->PumpEvents = NDS_PumpEvents;
     device->free = NDS_DeleteDevice;
 
 	/* Set the debug output. Use only for under an emulator. Will crash the DS. */

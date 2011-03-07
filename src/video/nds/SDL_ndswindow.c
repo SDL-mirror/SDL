@@ -21,40 +21,14 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_ndsvideo_h
-#define _SDL_ndsvideo_h
-
-#include "../SDL_sysvideo.h"
-
-#include "SDL_ndswindow.h"
-
-#define SCREEN_GAP 92			/* line-equivalent gap between the 2 screens  */
-
-/* Per Window information. */
-struct NDS_WindowData {
-	struct {
-		int bg_id;
-		void *vram_pixels;           /* where the pixel data is stored (a pointer into VRAM) */
-		void *pixels;				 /* area in user frame buffer */
-		int length;
-	} main, sub;
-
-    int pitch, bpp;             /* useful information about the texture */
-    struct {
-        int x, y;
-    } scale;                    /* x/y stretch (24.8 fixed point) */
-
-    struct {
-        int x, y;
-    } scroll;                   /* x/y offset */
-    int rotate;                 /* -32768 to 32767, texture rotation */
-
-	/* user frame buffer - todo: better way to do double buffering */
-	void *pixels;
-	int pixels_length;
-};
+#include "SDL_ndsvideo.h"
 
 
-#endif /* _SDL_ndsvideo_h */
+int NDS_CreateWindow(_THIS, SDL_Window * window)
+{
+    /* Nintendo DS windows are always fullscreen */
+    window->flags |= SDL_WINDOW_FULLSCREEN;
+    return 0;
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

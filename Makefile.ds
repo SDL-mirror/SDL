@@ -106,6 +106,7 @@ CFILES		:=	\
 			power/nds/SDL_syspower.c \
 			render/SDL_render.c \
 			render/SDL_yuv_sw.c \
+			render/nds/SDL_ndsrender.c \
 			render/software/SDL_blendfillrect.c \
 			render/software/SDL_blendline.c \
 			render/software/SDL_blendpoint.c \
@@ -143,15 +144,9 @@ CFILES		:=	\
 			video/SDL_surface.c \
 			video/SDL_video.c \
 			video/nds/SDL_ndsevents.c \
-			video/nds/SDL_ndsvideo.c
+			video/nds/SDL_ndsvideo.c \
+			video/nds/SDL_ndswindow.c
 
-
-ifeq ($(USE_HW_RENDERER),1)
-# Ideally we should be able to not include the SW renderer at set
-# SDL_NO_COMPAT. However that breaks the build.
-CFILES +=	render/nds/SDL_ndsrender.c
-else
-endif
 
 #CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
 #SFILES		:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.s)))
