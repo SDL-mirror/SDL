@@ -35,8 +35,10 @@
 /* Visual Studio 2005 has a bug where intrin.h conflicts with winnt.h */
 #if defined(_MSC_VER) && (_MSC_VER >= 1500) && !defined(_WIN32_WCE)
 #include <intrin.h>
+#ifndef _WIN64
 #define __MMX__
 #define __3dNOW__
+#endif
 #define __SSE__
 #define __SSE2__
 #elif defined(__MINGW64_VERSION_MAJOR)
