@@ -11,7 +11,6 @@
 #include "SDL_touch.h"
 #include "SDL_gesture.h"
 
-
 /* Make sure we have good macros for printing 32 and 64 bit values */
 #ifndef PRIs32
 #define PRIs32 "d"
@@ -43,7 +42,7 @@
 #define EVENT_BUF_SIZE 256
 
 
-#define VERBOSE SDL_FALSE
+#define VERBOSE 0
 
 static SDL_Window *window;
 static SDL_Event events[EVENT_BUF_SIZE];
@@ -65,7 +64,7 @@ static Knob knob;
 
 void handler (int sig)
 {
-  printf ("exiting...(%d)\n", sig);
+  SDL_Log ("exiting...(%d)\n", sig);
   exit (0);
 }
 
@@ -234,12 +233,12 @@ int main(int argc, char* argv[])
 		break;
 	      case SDLK_s:
 		src = SDL_RWFromFile("gestureSave","w");
-		printf("Wrote %i templates\n",SDL_SaveAllDollarTemplates(src));
+		SDL_Log("Wrote %i templates\n",SDL_SaveAllDollarTemplates(src));
 		SDL_RWclose(src);
 		break;
 	      case SDLK_l:
 		src = SDL_RWFromFile("gestureSave","r");
-		printf("Loaded: %i\n",SDL_LoadDollarTemplates(-1,src));
+		SDL_Log("Loaded: %i\n",SDL_LoadDollarTemplates(-1,src));
 		SDL_RWclose(src);
 		break;
 	      case SDLK_ESCAPE:
@@ -258,7 +257,7 @@ int main(int argc, char* argv[])
 	    break;
 	  case SDL_FINGERMOTION:
 #if VERBOSE
-	    printf("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
+	    SDL_Log("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
 	    	   event.tfinger.x,event.tfinger.y);
 #endif
 		{
@@ -268,24 +267,24 @@ int main(int argc, char* argv[])
 	    break;	    
 	  case SDL_FINGERDOWN:
 #if VERBOSE
-	    printf("Finger: %"PRIs64" down - x: %i, y: %i\n",
+	    SDL_Log("Finger: %"PRIs64" down - x: %i, y: %i\n",
 		   event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 #endif
 	    break;
 	  case SDL_FINGERUP:
 #if VERBOSE
-	    printf("Finger: %"PRIs64" up - x: %i, y: %i\n",
+	    SDL_Log("Finger: %"PRIs64" up - x: %i, y: %i\n",
 	    	   event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 #endif
 	    break;
 	  case SDL_MULTIGESTURE:
 #if VERBOSE	    
-	    printf("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
+	    SDL_Log("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
 		   event.mgesture.x,
 		   event.mgesture.y,
 		   event.mgesture.dTheta,
 		   event.mgesture.dDist);
-	    printf("MG: numDownTouch = %i\n",event.mgesture.numFingers);
+	    SDL_Log("MG: numDownTouch = %i\n",event.mgesture.numFingers);
 #endif
 	    knob.p.x = event.mgesture.x;
 	    knob.p.y = event.mgesture.y;
@@ -293,12 +292,12 @@ int main(int argc, char* argv[])
 	    knob.r += event.mgesture.dDist;
 	    break;
 	  case SDL_DOLLARGESTURE:
-	    printf("Gesture %"PRIs64" performed, error: %f\n",
+	    SDL_Log("Gesture %"PRIs64" performed, error: %f\n",
 		   event.dgesture.gestureId,
 		   event.dgesture.error);
 	    break;
 	  case SDL_DOLLARRECORD:
-	    printf("Recorded gesture: %"PRIs64"\n",event.dgesture.gestureId);
+	    SDL_Log("Recorded gesture: %"PRIs64"\n",event.dgesture.gestureId);
 	    break;
 	  }
       }
