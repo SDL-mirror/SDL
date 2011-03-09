@@ -45,12 +45,12 @@
 
 #define VERBOSE SDL_FALSE
 
-SDL_Window *window;
-SDL_Event events[EVENT_BUF_SIZE];
-int eventWrite;
+static SDL_Window *window;
+static SDL_Event events[EVENT_BUF_SIZE];
+static int eventWrite;
 
 
-int colors[7] = {0xFF,0xFF00,0xFF0000,0xFFFF00,0x00FFFF,0xFF00FF,0xFFFFFF};
+static int colors[7] = {0xFF,0xFF00,0xFF0000,0xFFFF00,0x00FFFF,0xFF00FF,0xFFFFFF};
 
 typedef struct {
   float x,y;
@@ -61,7 +61,7 @@ typedef struct {
   Point p;
 } Knob;
 
-Knob knob;
+static Knob knob;
 
 void handler (int sig)
 {
