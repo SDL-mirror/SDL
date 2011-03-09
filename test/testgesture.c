@@ -5,10 +5,11 @@
  */
 
 #include <stdio.h>
-#include <SDL.h>
 #include <math.h>
-#include <SDL_touch.h>
-#include <SDL_gesture.h>
+
+#include "SDL.h"
+#include "SDL_touch.h"
+#include "SDL_gesture.h"
 
 
 /* Make sure we have good macros for printing 32 and 64 bit values */
@@ -44,8 +45,10 @@
 
 #define VERBOSE SDL_FALSE
 
+SDL_Window *window;
 SDL_Event events[EVENT_BUF_SIZE];
 int eventWrite;
+
 
 int colors[7] = {0xFF,0xFF00,0xFF0000,0xFFFF00,0x00FFFF,0xFF00FF,0xFFFFFF};
 
@@ -134,14 +137,15 @@ void drawKnob(SDL_Surface* screen,Knob k) {
 
 void DrawScreen(SDL_Surface* screen)
 {
-  int x, y, i;
-  if(SDL_MUSTLOCK(screen))
-    {                                              
-      if(SDL_LockSurface(screen) < 0) return;
-    }
+  int i;
+#if 1
+  SDL_FillRect(screen, NULL, 0);
+#else
+  int x, y;
   for(y = 0;y < screen->h;y++)
     for(x = 0;x < screen->w;x++)
 	setpix(screen,(float)x,(float)y,((x%255)<<16) + ((y%255)<<8) + (x+y)%255);
+#endif
 
   //draw Touch History
   for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i < eventWrite;i++) {
@@ -175,14 +179,20 @@ void DrawScreen(SDL_Surface* screen)
   if(knob.p.x > 0)
     drawKnob(screen,knob);
   
-  if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-  SDL_Flip(screen);
+  SDL_UpdateWindowSurface(window);
 }
 
 SDL_Surface* initScreen(int width,int height)
 {
-  return SDL_SetVideoMode(width, height, DEPTH,
-			  SDL_HWSURFACE | SDL_RESIZABLE);
+  if (!window) {
+    window = SDL_CreateWindow("Gesture Test",
+                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE);
+  }
+  if (!window) {
+    return NULL;
+  }
+  return SDL_GetWindowSurface(window);
 }
 
 int main(int argc, char* argv[])
@@ -237,13 +247,14 @@ int main(int argc, char* argv[])
 		break;
 	    }
 	    break;
-	  case SDL_VIDEORESIZE:
-	    if (!(screen = initScreen(event.resize.w,
-				      event.resize.h)))
+	  case SDL_WINDOWEVENT:
+            if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+	      if (!(screen = initScreen(0, 0)))
 	      {
 		SDL_Quit();
 		return 1;
 	      }
+            }
 	    break;
 	  case SDL_FINGERMOTION:
 #if VERBOSE
