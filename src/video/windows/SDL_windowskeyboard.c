@@ -1247,10 +1247,11 @@ UILess_ReleaseSinks(SDL_VideoData *videodata)
 static void *
 StartDrawToBitmap(HDC hdc, HBITMAP *hhbm, int width, int height)
 {
-    BITMAPINFO info = {0};
+    BITMAPINFO info;
     BITMAPINFOHEADER *infoHeader = &info.bmiHeader;
     BYTE *bits = NULL;
     if (hhbm) {
+        SDL_zero(info);
         infoHeader->biSize = sizeof(BITMAPINFOHEADER);
         infoHeader->biWidth = width;
         infoHeader->biHeight = -1 * SDL_abs(height);

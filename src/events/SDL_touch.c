@@ -123,7 +123,7 @@ SDL_AddTouch(const SDL_Touch * touch, char *name)
         SDL_OutOfMemory();
         return -1;
     }
-    *SDL_touchPads[index] = *touch;
+    SDL_memcpy(SDL_touchPads[index], touch, sizeof(*touch));
 
     /* we're setting the touch properties */
     length = 0;
