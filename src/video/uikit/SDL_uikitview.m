@@ -77,9 +77,7 @@
 
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
-    
-    //NSLog("Click");
-    
+
     if (touch) {
         CGPoint locationInView = [touch locationInView: self];
             
@@ -114,9 +112,6 @@
         }
       }
 #endif
-      
-
-      
 
       touch = (UITouch*)[enumerator nextObject]; 
     }
@@ -149,6 +144,7 @@
           SDL_SendFingerDown(touchId,i,
                  SDL_FALSE,locationInView.x,locationInView.y,
                  1);
+          finger[i] = NULL;
           break;
         }
       }
