@@ -64,7 +64,7 @@ static Knob knob;
 
 void handler (int sig)
 {
-  SDL_Log ("exiting...(%d)\n", sig);
+  SDL_Log ("exiting...(%d)", sig);
   exit (0);
 }
 
@@ -147,30 +147,28 @@ void DrawScreen(SDL_Surface* screen)
 #endif
 
   //draw Touch History
-  for(i = SDL_max(0,eventWrite - EVENT_BUF_SIZE);i < eventWrite;i++) {
-    SDL_Event event = events[i&(EVENT_BUF_SIZE-1)];
-    int age = eventWrite - i - 1;
+  for(i = eventWrite; i < eventWrite+EVENT_BUF_SIZE; ++i) {
+    const SDL_Event *event = &events[i&(EVENT_BUF_SIZE-1)];
+    float age = (float)(i - eventWrite) / EVENT_BUF_SIZE;
 	float x, y;
 	unsigned int c, col;
 
-    if(event.type == SDL_FINGERMOTION || 
-       event.type == SDL_FINGERDOWN ||
-       event.type == SDL_FINGERUP) {
-      SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
+    if(event->type == SDL_FINGERMOTION || 
+       event->type == SDL_FINGERDOWN ||
+       event->type == SDL_FINGERUP) {
+      SDL_Touch* inTouch = SDL_GetTouch(event->tfinger.touchId);
       if(inTouch == NULL) continue;
 
-      x = ((float)event.tfinger.x)/inTouch->xres;
-      y = ((float)event.tfinger.y)/inTouch->yres;      
+      x = ((float)event->tfinger.x)/inTouch->xres;
+      y = ((float)event->tfinger.y)/inTouch->yres;      
       
       //draw the touch:      
-      c = colors[event.tfinger.touchId%7]; 
-      col = 
-	((unsigned int)(c*(.1+.85))) |
-	((unsigned int)((0xFF*(1-((float)age)/EVENT_BUF_SIZE))) & 0xFF)<<24;
+      c = colors[event->tfinger.fingerId%7]; 
+      col = ((unsigned int)(c*(.1+.85))) | (unsigned int)(0xFF*age)<<24;
 
-      if(event.type == SDL_FINGERMOTION)
+      if(event->type == SDL_FINGERMOTION)
 	drawCircle(screen,x*screen->w,y*screen->h,5,col);
-      else if(event.type == SDL_FINGERDOWN)
+      else if(event->type == SDL_FINGERDOWN)
 	drawCircle(screen,x*screen->w,y*screen->h,-10,col);     
     }
   }
@@ -233,12 +231,12 @@ int main(int argc, char* argv[])
 		break;
 	      case SDLK_s:
 		src = SDL_RWFromFile("gestureSave","w");
-		SDL_Log("Wrote %i templates\n",SDL_SaveAllDollarTemplates(src));
+		SDL_Log("Wrote %i templates",SDL_SaveAllDollarTemplates(src));
 		SDL_RWclose(src);
 		break;
 	      case SDLK_l:
 		src = SDL_RWFromFile("gestureSave","r");
-		SDL_Log("Loaded: %i\n",SDL_LoadDollarTemplates(-1,src));
+		SDL_Log("Loaded: %i",SDL_LoadDollarTemplates(-1,src));
 		SDL_RWclose(src);
 		break;
 	      case SDLK_ESCAPE:
@@ -257,7 +255,7 @@ int main(int argc, char* argv[])
 	    break;
 	  case SDL_FINGERMOTION:
 #if VERBOSE
-	    SDL_Log("Finger: %i,x: %i, y: %i\n",event.tfinger.fingerId,
+	    SDL_Log("Finger: %i,x: %i, y: %i",event.tfinger.fingerId,
 	    	   event.tfinger.x,event.tfinger.y);
 #endif
 		{
@@ -267,24 +265,24 @@ int main(int argc, char* argv[])
 	    break;	    
 	  case SDL_FINGERDOWN:
 #if VERBOSE
-	    SDL_Log("Finger: %"PRIs64" down - x: %i, y: %i\n",
+	    SDL_Log("Finger: %"PRIs64" down - x: %i, y: %i",
 		   event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 #endif
 	    break;
 	  case SDL_FINGERUP:
 #if VERBOSE
-	    SDL_Log("Finger: %"PRIs64" up - x: %i, y: %i\n",
+	    SDL_Log("Finger: %"PRIs64" up - x: %i, y: %i",
 	    	   event.tfinger.fingerId,event.tfinger.x,event.tfinger.y);
 #endif
 	    break;
 	  case SDL_MULTIGESTURE:
 #if VERBOSE	    
-	    SDL_Log("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f\n",
+	    SDL_Log("Multi Gesture: x = %f, y = %f, dAng = %f, dR = %f",
 		   event.mgesture.x,
 		   event.mgesture.y,
 		   event.mgesture.dTheta,
 		   event.mgesture.dDist);
-	    SDL_Log("MG: numDownTouch = %i\n",event.mgesture.numFingers);
+	    SDL_Log("MG: numDownTouch = %i",event.mgesture.numFingers);
 #endif
 	    knob.p.x = event.mgesture.x;
 	    knob.p.y = event.mgesture.y;
@@ -292,12 +290,12 @@ int main(int argc, char* argv[])
 	    knob.r += event.mgesture.dDist;
 	    break;
 	  case SDL_DOLLARGESTURE:
-	    SDL_Log("Gesture %"PRIs64" performed, error: %f\n",
+	    SDL_Log("Gesture %"PRIs64" performed, error: %f",
 		   event.dgesture.gestureId,
 		   event.dgesture.error);
 	    break;
 	  case SDL_DOLLARRECORD:
-	    SDL_Log("Recorded gesture: %"PRIs64"\n",event.dgesture.gestureId);
+	    SDL_Log("Recorded gesture: %"PRIs64"",event.dgesture.gestureId);
 	    break;
 	  }
       }
