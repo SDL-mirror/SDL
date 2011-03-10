@@ -290,6 +290,7 @@
                 SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
             }            
         }
+        SDL_SendKeyboardText([string UTF8String]);
     }
     return NO; /* don't allow the edit! (keep placeholder text there) */
 }

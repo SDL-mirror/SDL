@@ -17,6 +17,15 @@
 		046CEF8113254F23007AD51D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
 		046CEF8213254F23007AD51D /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
 		046CEF8A13254F63007AD51D /* testgesture.c in Sources */ = {isa = PBXBuildFile; fileRef = 046CEF8913254F63007AD51D /* testgesture.c */; };
+		047A63E213285C3200CD7973 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		047A63E313285C3200CD7973 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
+		047A63E413285C3200CD7973 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
+		047A63E513285C3200CD7973 /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
+		047A63E613285C3200CD7973 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89B0E2D111A00EA573E /* CoreGraphics.framework */; };
+		047A63E713285C3200CD7973 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
+		047A63E813285C3200CD7973 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
+		047A63E913285C3200CD7973 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
+		047A63F113285CD100CD7973 /* checkkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = 047A63F013285CD100CD7973 /* checkkeys.c */; };
 		56ED04FE118A8FE400A56AA6 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
 		56ED0502118A8FE400A56AA6 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
 		56ED0503118A8FE400A56AA6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
@@ -306,6 +315,8 @@
 /* Begin PBXFileReference section */
 		046CEF8613254F23007AD51D /* testgesture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testgesture.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		046CEF8913254F63007AD51D /* testgesture.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgesture.c; path = ../../test/testgesture.c; sourceTree = SOURCE_ROOT; };
+		047A63ED13285C3200CD7973 /* checkkeys.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = checkkeys.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		047A63F013285CD100CD7973 /* checkkeys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = checkkeys.c; path = ../../test/checkkeys.c; sourceTree = SOURCE_ROOT; };
 		1D6058910D05DD3D006BFB54 /* testwm2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testwm2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ED050D118A8FE400A56AA6 /* testpower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testpower.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ED0510118A904200A56AA6 /* testpower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testpower.c; path = ../../test/testpower.c; sourceTree = SOURCE_ROOT; };
@@ -342,7 +353,6 @@
 		FDA8A7840E2D0F1F00EA573E /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = common.c; path = ../../test/common.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7850E2D0F1F00EA573E /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = common.h; path = ../../test/common.h; sourceTree = SOURCE_ROOT; };
 		FDA8A7870E2D0F2700EA573E /* graywin.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = graywin.c; path = ../../test/graywin.c; sourceTree = SOURCE_ROOT; };
-		FDA8A7890E2D0F2E00EA573E /* checkkeys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = checkkeys.c; path = ../../test/checkkeys.c; sourceTree = SOURCE_ROOT; };
 		FDA8A78B0E2D0F3D00EA573E /* loopwave.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = loopwave.c; path = ../../test/loopwave.c; sourceTree = SOURCE_ROOT; };
 		FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		FDA8A8990E2D111A00EA573E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -401,6 +411,21 @@
 				046CEF8013254F23007AD51D /* UIKit.framework in Frameworks */,
 				046CEF8113254F23007AD51D /* Foundation.framework in Frameworks */,
 				046CEF8213254F23007AD51D /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		047A63E113285C3200CD7973 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				047A63E213285C3200CD7973 /* libSDL.a in Frameworks */,
+				047A63E313285C3200CD7973 /* AudioToolbox.framework in Frameworks */,
+				047A63E413285C3200CD7973 /* QuartzCore.framework in Frameworks */,
+				047A63E513285C3200CD7973 /* OpenGLES.framework in Frameworks */,
+				047A63E613285C3200CD7973 /* CoreGraphics.framework in Frameworks */,
+				047A63E713285C3200CD7973 /* UIKit.framework in Frameworks */,
+				047A63E813285C3200CD7973 /* Foundation.framework in Frameworks */,
+				047A63E913285C3200CD7973 /* CoreAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -858,6 +883,7 @@
 				FDC430000F0D866D009C87E1 /* torturethread.app */,
 				56ED050D118A8FE400A56AA6 /* testpower.app */,
 				046CEF8613254F23007AD51D /* testgesture.app */,
+				047A63ED13285C3200CD7973 /* checkkeys.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -888,9 +914,9 @@
 			children = (
 				FDA8A7840E2D0F1F00EA573E /* common.c */,
 				FDA8A7850E2D0F1F00EA573E /* common.h */,
+				047A63F013285CD100CD7973 /* checkkeys.c */,
 				FDA8A7870E2D0F2700EA573E /* graywin.c */,
 				FDA8A78B0E2D0F3D00EA573E /* loopwave.c */,
-				FDA8A7890E2D0F2E00EA573E /* checkkeys.c */,
 				FDA8A7400E2D0F1600EA573E /* testalpha.c */,
 				FDA8A7410E2D0F1600EA573E /* testaudioinfo.c */,
 				FDA8A7420E2D0F1600EA573E /* testbitmap.c */,
@@ -974,6 +1000,23 @@
 			name = testgesture;
 			productName = TestiPhoneOS;
 			productReference = 046CEF8613254F23007AD51D /* testgesture.app */;
+			productType = "com.apple.product-type.application";
+		};
+		047A63DD13285C3200CD7973 /* checkkeys */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 047A63EA13285C3200CD7973 /* Build configuration list for PBXNativeTarget "checkkeys" */;
+			buildPhases = (
+				047A63DE13285C3200CD7973 /* Resources */,
+				047A63DF13285C3200CD7973 /* Sources */,
+				047A63E113285C3200CD7973 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = checkkeys;
+			productName = TestiPhoneOS;
+			productReference = 047A63ED13285C3200CD7973 /* checkkeys.app */;
 			productType = "com.apple.product-type.application";
 		};
 		1D6058900D05DD3D006BFB54 /* testwm2 */ = {
@@ -1477,6 +1520,7 @@
 			);
 			projectRoot = "";
 			targets = (
+				047A63DD13285C3200CD7973 /* checkkeys */,
 				FDA8A91D0E2D1C0B00EA573E /* graywin */,
 				FDAAC4300E2D4961001DB1D8 /* testbitmap */,
 				FDAAC5040E2D4FEB001DB1D8 /* testdyngles */,
@@ -1533,6 +1577,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				046CEF7713254F23007AD51D /* icon.bmp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		047A63DE13285C3200CD7973 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1752,6 +1803,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				046CEF8A13254F63007AD51D /* testgesture.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		047A63DF13285C3200CD7973 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				047A63F113285CD100CD7973 /* checkkeys.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2009,6 +2068,32 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgesture;
+			};
+			name = Release;
+		};
+		047A63EB13285C3200CD7973 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = checkkeys;
+			};
+			name = Debug;
+		};
+		047A63EC13285C3200CD7973 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = checkkeys;
 			};
 			name = Release;
 		};
@@ -2783,6 +2868,15 @@
 			buildConfigurations = (
 				046CEF8413254F23007AD51D /* Debug */,
 				046CEF8513254F23007AD51D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		047A63EA13285C3200CD7973 /* Build configuration list for PBXNativeTarget "checkkeys" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				047A63EB13285C3200CD7973 /* Debug */,
+				047A63EC13285C3200CD7973 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
