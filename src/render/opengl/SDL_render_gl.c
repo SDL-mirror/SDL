@@ -921,44 +921,56 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     SDL_Window *window = renderer->window;
+    Uint32 temp_format = SDL_PIXELFORMAT_ARGB8888;
+    void *temp_pixels;
+    int temp_pitch;
     GLint internalFormat;
     GLenum format, type;
     Uint8 *src, *dst, *tmp;
     int w, h, length, rows;
+    int status;
 
     GL_ActivateRenderer(renderer);
 
-    if (!convert_format(data, pixel_format, &internalFormat, &format, &type)) {
-        /* FIXME: Do a temp copy to a format that is supported */
-        SDL_SetError("Unsupported pixel format");
+    temp_pitch = rect->w * SDL_BYTESPERPIXEL(temp_format);
+    temp_pixels = SDL_malloc(rect->h * temp_pitch);
+    if (!temp_pixels) {
+        SDL_OutOfMemory();
         return -1;
     }
+
+    convert_format(data, temp_format, &internalFormat, &format, &type);
 
     SDL_GetWindowSize(window, &w, &h);
 
     data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
     data->glPixelStorei(GL_PACK_ROW_LENGTH,
-                        (pitch / SDL_BYTESPERPIXEL(pixel_format)));
+                        (temp_pitch / SDL_BYTESPERPIXEL(temp_format)));
 
     data->glReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
-                       format, type, pixels);
+                       format, type, temp_pixels);
 
     /* Flip the rows to be top-down */
-    length = rect->w * SDL_BYTESPERPIXEL(pixel_format);
-    src = (Uint8*)pixels + (rect->h-1)*pitch;
-    dst = (Uint8*)pixels;
+    length = rect->w * SDL_BYTESPERPIXEL(temp_format);
+    src = (Uint8*)temp_pixels + (rect->h-1)*temp_pitch;
+    dst = (Uint8*)temp_pixels;
     tmp = SDL_stack_alloc(Uint8, length);
     rows = rect->h / 2;
     while (rows--) {
         SDL_memcpy(tmp, dst, length);
         SDL_memcpy(dst, src, length);
         SDL_memcpy(src, tmp, length);
-        dst += pitch;
-        src -= pitch;
+        dst += temp_pitch;
+        src -= temp_pitch;
     }
     SDL_stack_free(tmp);
 
-    return 0;
+    status = SDL_ConvertPixels(rect->w, rect->h,
+                               temp_format, temp_pixels, temp_pitch,
+                               pixel_format, pixels, pitch);
+    SDL_free(temp_pixels);
+
+    return status;
 }
 
 static void
