@@ -977,6 +977,41 @@ PrintEvent(SDL_Event * event)
     fprintf(stderr, "\n");
 }
 
+static void
+ScreenShot(SDL_Renderer *renderer)
+{
+    SDL_Rect viewport;
+    SDL_Surface *surface;
+
+    if (!renderer) {
+        return;
+    }
+
+    SDL_RenderGetViewport(renderer, &viewport);
+    surface = SDL_CreateRGBSurface(0, viewport.w, viewport.h, 24,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN
+                    0x00FF0000, 0x0000FF00, 0x000000FF,
+#else
+                    0x000000FF, 0x0000FF00, 0x00FF0000,
+#endif
+                    0x00000000);
+    if (!surface) {
+        fprintf(stderr, "Couldn't create surface: %s\n", SDL_GetError());
+        return;
+    }
+
+    if (SDL_RenderReadPixels(renderer, NULL, surface->format->format,
+                             surface->pixels, surface->pitch) < 0) {
+        fprintf(stderr, "Couldn't read screen: %s\n", SDL_GetError());
+        return;
+    }
+
+    if (SDL_SaveBMP(surface, "screenshot.bmp") < 0) {
+        fprintf(stderr, "Couldn't save screenshot.bmp: %s\n", SDL_GetError());
+        return;
+    }
+}
+
 void
 CommonEvent(CommonState * state, SDL_Event * event, int *done)
 {
@@ -991,9 +1026,9 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
         switch (event->window.event) {
         case SDL_WINDOWEVENT_CLOSE:
 			{
-				SDL_Window *pWindow = SDL_GetWindowFromID(event->window.windowID);
-				if ( pWindow ) {
-					SDL_DestroyWindow( pWindow );
+                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
+                if (window) {
+					SDL_DestroyWindow(window);
 				}
 			}
             break;
@@ -1002,6 +1037,17 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     case SDL_KEYDOWN:
         switch (event->key.keysym.sym) {
             /* Add hotkeys here */
+        case SDLK_PRINTSCREEN: {
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    for (i = 0; i < state->num_windows; ++i) {
+                        if (window == state->windows[i]) {
+                            ScreenShot(state->renderers[i]);
+                        }
+                    }
+                }
+            }
+            break;
         case SDLK_c:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-C copy awesome text! */
