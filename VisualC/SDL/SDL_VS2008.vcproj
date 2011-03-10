@@ -617,6 +617,10 @@
 			>
 		</File>
 		<File
+			RelativePath=".\resource.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\libm\s_atan.c"
 			>
 		</File>
@@ -1290,6 +1294,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\render\SDL_yuv_sw_c.h"
+			>
+		</File>
+		<File
+			RelativePath=".\Version.rc"
 			>
 		</File>
 		<File

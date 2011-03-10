@@ -329,6 +329,7 @@
     <ClInclude Include="..\..\src\video\windows\SDL_windowswindow.h" />
     <ClInclude Include="..\..\src\events\SDL_windowevents_c.h" />
     <ClInclude Include="..\..\src\video\windows\wmmsg.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\windows\SDL_windows.c" />
@@ -442,6 +443,9 @@
     <ClCompile Include="..\..\src\video\windows\SDL_windowsvideo.c" />
     <ClCompile Include="..\..\src\video\windows\SDL_windowswindow.c" />
     <ClCompile Include="..\..\src\events\SDL_windowevents.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
