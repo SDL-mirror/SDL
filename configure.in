@@ -1023,10 +1023,11 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                           , enable_x11_shared=maybe)
 
             case "$host" in
-                *-*-darwin*) # Latest Mac OS X actually ships with Xrandr/Xrender libs...
+                *-*-darwin*)
                     x11_symbols_private=yes
                     x11_lib='/usr/X11R6/lib/libX11.6.dylib'
                     x11ext_lib='/usr/X11R6/lib/libXext.6.dylib'
+                    xcursor_lib='/usr/X11R6/lib/libXcursor.1.dylib'
                     xinerama_lib='/usr/X11R6/lib/libXinerama.1.dylib'
                     xinput_lib='/usr/X11R6/lib/libXi.6.dylib'
                     xrandr_lib='/usr/X11R6/lib/libXrandr.2.dylib'
@@ -1037,6 +1038,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                 *)
                     x11_lib=[`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     x11ext_lib=[`find_lib "libXext.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
+                    xcursor_lib=[`find_lib "libXcursor.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     xinerama_lib=[`find_lib "libXinerama.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     xinput_lib=[`find_lib "libXi.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
                     xrandr_lib=[`find_lib "libXrandr.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
@@ -1082,6 +1084,33 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             fi
             have_video=yes
 
+            AC_ARG_ENABLE(video-x11-xcursor,
+AC_HELP_STRING([--enable-video-x11-xcursor], [enable X11 Xcursor support [[default=yes]]]),
+                            , enable_video_x11_xcursor=yes)
+            if test x$enable_video_x11_xcursor = xyes; then
+                definitely_enable_video_x11_xcursor=no
+                AC_CHECK_HEADER(X11/Xcursor/Xcursor.h,
+                                have_xcursor_h_hdr=yes,
+                                have_xcursor_h_hdr=no,
+                                [#include <X11/Xlib.h>
+                                ])
+                if test x$have_xcursor_h_hdr = xyes; then
+                    if test x$enable_x11_shared = xyes && test x$xcursor_lib != x ; then
+                        echo "-- dynamic libXcursor -> $xcursor_lib"
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR, "$xcursor_lib")
+                        definitely_enable_video_x11_xcursor=yes
+                    else
+                        AC_CHECK_LIB(Xcursor, XcursorImageCreate, have_xcursor_lib=yes)
+                        if test x$have_xcursor_lib = xyes ; then
+                            EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lXcursor"
+                            definitely_enable_video_x11_xcursor=yes
+                        fi
+                    fi
+                fi
+            fi
+            if test x$definitely_enable_video_x11_xcursor = xyes; then
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XCURSOR)
+            fi
             AC_ARG_ENABLE(video-x11-xinerama,
 AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [[default=yes]]]),
                             , enable_video_x11_xinerama=yes)

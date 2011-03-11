@@ -32,6 +32,9 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
+#if SDL_VIDEO_DRIVER_X11_XCURSOR
+#include <X11/Xcursor/Xcursor.h>
+#endif
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif

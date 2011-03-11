@@ -20,6 +20,8 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+
+#include "SDL_assert.h"
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
 #include "../../events/SDL_mouse_c.h"
@@ -81,6 +83,35 @@ X11_CreateDefaultCursor()
     return cursor;
 }
 
+#if SDL_VIDEO_DRIVER_X11_XCURSOR
+static Cursor
+X11_CreateXCursorCursor(SDL_Surface * surface, int hot_x, int hot_y)
+{
+    Display *display = GetDisplay();
+    Cursor cursor = None;
+    XcursorImage *image;
+
+    image = XcursorImageCreate(surface->w, surface->h);
+    if (!image) {
+        SDL_OutOfMemory();
+        return None;
+    }
+    image->xhot = hot_x;
+    image->yhot = hot_y;
+    image->delay = 0;
+
+    SDL_assert(surface->format->format == SDL_PIXELFORMAT_ARGB8888);
+    SDL_assert(surface->pitch == surface->w * 4);
+    SDL_memcpy(image->pixels, surface->pixels, surface->h * surface->pitch);
+
+    cursor = XcursorImageLoadCursor(display, image);
+
+    XcursorImageDestroy(image);
+
+    return cursor;
+}
+#endif /* SDL_VIDEO_DRIVER_X11_XCURSOR */
+
 static Cursor
 X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
@@ -100,6 +131,9 @@ X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
         SDL_OutOfMemory();
         return None;
     }
+
+    /* Code below assumes ARGB pixel format */
+    SDL_assert(surface->format->format == SDL_PIXELFORMAT_ARGB8888);
 
     rfg = gfg = bfg = rbg = gbg = bbg = fgBits = 0;
     for (y = 0; y < surface->h; ++y) {
@@ -162,7 +196,17 @@ X11_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 
     cursor = SDL_calloc(1, sizeof(*cursor));
     if (cursor) {
-        cursor->driverdata = (void*)X11_CreatePixmapCursor(surface, hot_x, hot_y);
+        Cursor x11_cursor = None;
+
+#if SDL_VIDEO_DRIVER_X11_XCURSOR
+        if (SDL_X11_HAVE_XCURSOR) {
+            x11_cursor = X11_CreateXCursorCursor(surface, hot_x, hot_y);
+        }
+#endif
+        if (x11_cursor == None) {
+            x11_cursor = X11_CreatePixmapCursor(surface, hot_x, hot_y);
+        }
+        cursor->driverdata = (void*)x11_cursor;
     } else {
         SDL_OutOfMemory();
     }

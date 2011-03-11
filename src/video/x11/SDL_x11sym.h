@@ -175,6 +175,14 @@ SDL_X11_SYM(int,ipAllocateData,(ChannelPtr a,IPCard b,IPDataPtr * c),(a,b,c),ret
 SDL_X11_SYM(int,ipUnallocateAndSendData,(ChannelPtr a,IPCard b),(a,b),return)
 #endif
 
+/* XCursor support */
+#if SDL_VIDEO_DRIVER_X11_XCURSOR
+SDL_X11_MODULE(XCURSOR)
+SDL_X11_SYM(XcursorImage*,XcursorImageCreate,(int a,int b),(a,b),)
+SDL_X11_SYM(void,XcursorImageDestroy,(XcursorImage *a),(a),)
+SDL_X11_SYM(Cursor,XcursorImageLoadCursor,(Display *a,const XcursorImage *b),(a,b),)
+#endif
+
 /* Xinerama support */
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 SDL_X11_MODULE(XINERAMA)
