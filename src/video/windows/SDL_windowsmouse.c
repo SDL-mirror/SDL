@@ -22,6 +22,7 @@
 
 #include "SDL_config.h"
 
+#include "SDL_assert.h"
 #include "SDL_windowsvideo.h"
 
 #include "../../events/SDL_mouse_c.h"
@@ -49,7 +50,6 @@ static SDL_Cursor *
 WIN_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
     SDL_Cursor *cursor;
-    SDL_Surface *cvt;
     HICON hicon;
     HDC hdc;
     BITMAPV4HEADER bmh;
@@ -77,12 +77,9 @@ WIN_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     ii.hbmMask = CreateBitmap(surface->w, surface->h, 1, 1, NULL);
     ReleaseDC(NULL, hdc);
 
-    cvt = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
-    if (!cvt) {
-        return NULL;
-    }
-    SDL_memcpy(pixels, cvt->pixels, cvt->h * cvt->pitch);
-    SDL_FreeSurface(cvt);
+    SDL_assert(surface->format->format == SDL_PIXELFORMAT_ARGB8888);
+    SDL_assert(surface->pitch == surface->w * 4);
+    SDL_memcpy(pixels, surface->pixels, surface->h * surface->pitch);
 
     hicon = CreateIconIndirect(&ii);
 
