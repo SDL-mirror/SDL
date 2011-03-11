@@ -47,7 +47,9 @@ get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
     }
 
     depth = DefaultDepth(display, screen);
-    if (XMatchVisualInfo(display, screen, depth, TrueColor, vinfo) ||
+    if ((X11_UseDirectColorVisuals() &&
+         XMatchVisualInfo(display, screen, depth, DirectColor, vinfo)) ||
+        XMatchVisualInfo(display, screen, depth, TrueColor, vinfo) ||
         XMatchVisualInfo(display, screen, depth, PseudoColor, vinfo) ||
         XMatchVisualInfo(display, screen, depth, StaticColor, vinfo)) {
         return 0;

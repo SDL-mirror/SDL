@@ -81,6 +81,10 @@ struct SDL_Window
 
     SDL_DisplayMode fullscreen_mode;
     
+    float brightness;
+    Uint16 *gamma;
+    Uint16 *saved_gamma;        /* (just offset into gamma) */
+
     SDL_Surface *surface;
     SDL_bool surface_valid;
 
@@ -184,6 +188,8 @@ struct SDL_VideoDevice
     void (*MinimizeWindow) (_THIS, SDL_Window * window);
     void (*RestoreWindow) (_THIS, SDL_Window * window);
     void (*SetWindowFullscreen) (_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
+    int (*SetWindowGammaRamp) (_THIS, SDL_Window * window, const Uint16 * ramp);
+    int (*GetWindowGammaRamp) (_THIS, SDL_Window * window, Uint16 * ramp);
     void (*SetWindowGrab) (_THIS, SDL_Window * window);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);

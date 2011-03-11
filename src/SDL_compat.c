@@ -1702,22 +1702,34 @@ SDL_GL_SwapBuffers(void)
 int
 SDL_SetGamma(float red, float green, float blue)
 {
-    SDL_Unsupported();
-    return -1;
+    Uint16 red_ramp[256];
+    Uint16 green_ramp[256];
+    Uint16 blue_ramp[256];
+
+    SDL_CalculateGammaRamp(red, red_ramp);
+    if (green == red) {
+        SDL_memcpy(green_ramp, red_ramp, sizeof(red_ramp));
+    } else {
+        SDL_CalculateGammaRamp(green, green_ramp);
+    }
+    if (blue == red) {
+        SDL_memcpy(blue_ramp, red_ramp, sizeof(red_ramp));
+    } else {
+        SDL_CalculateGammaRamp(blue, blue_ramp);
+    }
+    return SDL_SetWindowGammaRamp(SDL_VideoWindow, red_ramp, green_ramp, blue_ramp);
 }
 
 int
 SDL_SetGammaRamp(const Uint16 * red, const Uint16 * green, const Uint16 * blue)
 {
-    SDL_Unsupported();
-    return -1;
+    return SDL_SetWindowGammaRamp(SDL_VideoWindow, red, green, blue);
 }
 
 int
 SDL_GetGammaRamp(Uint16 * red, Uint16 * green, Uint16 * blue)
 {
-    SDL_Unsupported();
-    return -1;
+    return SDL_GetWindowGammaRamp(SDL_VideoWindow, red, green, blue);
 }
 
 int

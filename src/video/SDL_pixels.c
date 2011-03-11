@@ -1041,4 +1041,36 @@ SDL_FreeBlitMap(SDL_BlitMap * map)
     }
 }
 
+void
+SDL_CalculateGammaRamp(float gamma, Uint16 * ramp)
+{
+    int i;
+
+    /* 0.0 gamma is all black */
+    if (gamma <= 0.0f) {
+        for (i = 0; i < 256; ++i) {
+            ramp[i] = 0;
+        }
+        return;
+    } else if (gamma == 1.0f) {
+        /* 1.0 gamma is identity */
+        for (i = 0; i < 256; ++i) {
+            ramp[i] = (i << 8) | i;
+        }
+        return;
+    } else {
+        /* Calculate a real gamma ramp */
+        int value;
+        gamma = 1.0f / gamma;
+        for (i = 0; i < 256; ++i) {
+            value =
+                (int) (SDL_pow((double) i / 256.0, gamma) * 65535.0 + 0.5);
+            if (value > 65535) {
+                value = 65535;
+            }
+            ramp[i] = (Uint16) value;
+        }
+    }
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

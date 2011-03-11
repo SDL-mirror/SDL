@@ -103,8 +103,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy SDL"
-				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll"
+				Description="Copy SDL and data files"
+				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\sample.bmp $(ProjectDir)\sample.bmp"
 			/>
 		</Configuration>
 		<Configuration
@@ -195,8 +195,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy SDL"
-				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll"
+				Description="Copy SDL and data files"
+				CommandLine="copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll&#x0D;&#x0A;copy $(SolutionDir)\..\test\sample.bmp $(ProjectDir)\sample.bmp"
 			/>
 		</Configuration>
 	</Configurations>

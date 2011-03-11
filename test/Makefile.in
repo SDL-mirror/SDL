@@ -23,6 +23,7 @@ TARGETS = \
 	testerror$(EXE) \
 	testfile$(EXE) \
 	testfill$(EXE) \
+	testgamma$(EXE) \
 	testgesture$(EXE) \
 	testgl$(EXE) \
 	testgl2$(EXE) \
@@ -119,6 +120,9 @@ testfile$(EXE): $(srcdir)/testfile.c
 testfill$(EXE): $(srcdir)/testfill.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testgamma$(EXE): $(srcdir)/testgamma.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+ 
 testgesture$(EXE): $(srcdir)/testgesture.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @MATHLIB@
  

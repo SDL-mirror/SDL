@@ -92,6 +92,8 @@ typedef struct SDL_VideoData
     SDL_bool selection_waiting;
 } SDL_VideoData;
 
+extern SDL_bool X11_UseDirectColorVisuals(void);
+
 #endif /* _SDL_x11video_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

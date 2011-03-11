@@ -571,6 +571,54 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     SetWindowPos(hwnd, top, x, y, w, h, SWP_NOCOPYBITS);
 }
 
+int
+WIN_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
+{
+#ifdef _WIN32_WCE
+    SDL_Unsupported();
+    return -1;
+#else
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
+    HDC hdc;
+    BOOL succeeded = FALSE;
+
+    hdc = CreateDC(data->DeviceName, NULL, NULL, NULL);
+    if (hdc) {
+        succeeded = SetDeviceGammaRamp(hdc, (LPVOID)ramp);
+        if (!succeeded) {
+            WIN_SetError("SetDeviceGammaRamp()");
+        }
+        DeleteDC(hdc);
+    }
+    return succeeded ? 0 : -1;
+#endif
+}
+
+int
+WIN_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
+{
+#ifdef _WIN32_WCE
+    SDL_Unsupported();
+    return -1;
+#else
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
+    HDC hdc;
+    BOOL succeeded = FALSE;
+
+    hdc = CreateDC(data->DeviceName, NULL, NULL, NULL);
+    if (hdc) {
+        succeeded = GetDeviceGammaRamp(hdc, (LPVOID)ramp);
+        if (!succeeded) {
+            WIN_SetError("GetDeviceGammaRamp()");
+        }
+        DeleteDC(hdc);
+    }
+    return succeeded ? 0 : -1;
+#endif
+}
+
 void
 WIN_SetWindowGrab(_THIS, SDL_Window * window)
 {

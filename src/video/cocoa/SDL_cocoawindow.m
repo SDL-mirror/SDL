@@ -856,7 +856,58 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     [pool release];
 }
 
-NSPoint origin;
+int
+Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
+{
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    CGDirectDisplayID display_id = ((SDL_DisplayData *)display->driverdata)->display;
+    const uint32_t tableSize = 256;
+    CGGammaValue redTable[tableSize];
+    CGGammaValue greenTable[tableSize];
+    CGGammaValue blueTable[tableSize];
+    uint32_t i;
+    float inv65535 = 1.0f / 65535.0f;
+
+    /* Extract gamma values into separate tables, convert to floats between 0.0 and 1.0 */
+    for (i = 0; i < 256; i++) {
+        redTable[i] = ramp[0*256+i] * inv65535;
+        greenTable[i] = ramp[1*256+i] * inv65535;
+        blueTable[i] = ramp[2*256+i] * inv65535;
+    }
+
+    if (CGSetDisplayTransferByTable(display_id, tableSize,
+                                    redTable, greenTable, blueTable) != CGDisplayNoErr) {
+        SDL_SetError("CGSetDisplayTransferByTable()");
+        return -1;
+    }
+    return 0;
+}
+
+int
+Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
+{
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    CGDirectDisplayID display_id = ((SDL_DisplayData *)display->driverdata)->display;
+    const uint32_t tableSize = 256;
+    CGGammaValue redTable[tableSize];
+    CGGammaValue greenTable[tableSize];
+    CGGammaValue blueTable[tableSize];
+    uint32_t i, tableCopied;
+
+    if (CGGetDisplayTransferByTable(display_id, tableSize,
+                                    redTable, greenTable, blueTable, &tableCopied) != CGDisplayNoErr) {
+        SDL_SetError("CGGetDisplayTransferByTable()");
+        return -1;
+    }
+
+    for (i = 0; i < tableCopied; i++) {
+        ramp[0*256+i] = (Uint16)(redTable[i] * 65535.0f);
+        ramp[1*256+i] = (Uint16)(greenTable[i] * 65535.0f);
+        ramp[2*256+i] = (Uint16)(blueTable[i] * 65535.0f);
+    }
+    return 0;
+}
+
 void
 Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
 {

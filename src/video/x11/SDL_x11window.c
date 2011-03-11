@@ -175,6 +175,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
             window->flags &= ~SDL_WINDOW_SHOWN;
         }
         data->visual = attrib.visual;
+        data->colormap = attrib.colormap;
     }
 
     {
@@ -316,7 +317,88 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     xattr.override_redirect = False;
     xattr.background_pixel = 0;
     xattr.border_pixel = 0;
-    xattr.colormap = XCreateColormap(display, RootWindow(display, screen), visual, AllocNone);
+
+    if (visual->class == DirectColor) {
+        Status status;
+        XColor *colorcells;
+        int i;
+        int ncolors;
+        int rmax, gmax, bmax;
+        int rmask, gmask, bmask;
+        int rshift, gshift, bshift;
+
+        xattr.colormap =
+            XCreateColormap(display, RootWindow(display, screen),
+                            visual, AllocAll);
+
+        /* If we can't create a colormap, then we must die */
+        if (!xattr.colormap) {
+            SDL_SetError("Could not create writable colormap");
+            return -1;
+        }
+
+        /* OK, we got a colormap, now fill it in as best as we can */
+        colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
+        if (!colorcells) {
+            SDL_OutOfMemory();
+            return -1;
+        }
+        ncolors = visual->map_entries;
+        rmax = 0xffff;
+        gmax = 0xffff;
+        bmax = 0xffff;
+
+        rshift = 0;
+        rmask = visual->red_mask;
+        while (0 == (rmask & 1)) {
+            rshift++;
+            rmask >>= 1;
+        }
+
+        gshift = 0;
+        gmask = visual->green_mask;
+        while (0 == (gmask & 1)) {
+            gshift++;
+            gmask >>= 1;
+        }
+
+        bshift = 0;
+        bmask = visual->blue_mask;
+        while (0 == (bmask & 1)) {
+            bshift++;
+            bmask >>= 1;
+        }
+
+        /* build the color table pixel values */
+        for (i = 0; i < ncolors; i++) {
+            Uint32 red = (rmax * i) / (ncolors - 1);
+            Uint32 green = (gmax * i) / (ncolors - 1);
+            Uint32 blue = (bmax * i) / (ncolors - 1);
+
+            Uint32 rbits = (rmask * i) / (ncolors - 1);
+            Uint32 gbits = (gmask * i) / (ncolors - 1);
+            Uint32 bbits = (bmask * i) / (ncolors - 1);
+
+            Uint32 pix =
+                (rbits << rshift) | (gbits << gshift) | (bbits << bshift);
+
+            colorcells[i].pixel = pix;
+
+            colorcells[i].red = red;
+            colorcells[i].green = green;
+            colorcells[i].blue = blue;
+
+            colorcells[i].flags = DoRed | DoGreen | DoBlue;
+        }
+
+        XStoreColors(display, xattr.colormap, colorcells, ncolors);
+
+        SDL_free(colorcells);
+    } else {
+        xattr.colormap =
+            XCreateColormap(display, RootWindow(display, screen),
+                            visual, AllocNone);
+    }
 
     w = XCreateWindow(display, RootWindow(display, screen),
                       window->x, window->y, window->w, window->h,
@@ -859,6 +941,75 @@ X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * _display,
         }
     }
     XFlush(display);
+}
+
+int
+X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+    Visual *visual = data->visual;
+    Colormap colormap = data->colormap;
+    XColor *colorcells;
+    int ncolors;
+    int rmask, gmask, bmask;
+    int rshift, gshift, bshift;
+    int i, j;
+
+    if (visual->class != DirectColor) {
+        SDL_SetError("Window doesn't have DirectColor visual");
+        return -1;
+    }
+
+    ncolors = visual->map_entries;
+    colorcells = SDL_malloc(ncolors * sizeof(XColor));
+    if (!colorcells) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    rshift = 0;
+    rmask = visual->red_mask;
+    while (0 == (rmask & 1)) {
+        rshift++;
+        rmask >>= 1;
+    }
+
+    gshift = 0;
+    gmask = visual->green_mask;
+    while (0 == (gmask & 1)) {
+        gshift++;
+        gmask >>= 1;
+    }
+
+    bshift = 0;
+    bmask = visual->blue_mask;
+    while (0 == (bmask & 1)) {
+        bshift++;
+        bmask >>= 1;
+    }
+
+    /* build the color table pixel values */
+    for (i = 0; i < ncolors; i++) {
+        Uint32 rbits = (rmask * i) / (ncolors - 1);
+        Uint32 gbits = (gmask * i) / (ncolors - 1);
+        Uint32 bbits = (bmask * i) / (ncolors - 1);
+        Uint32 pix = (rbits << rshift) | (gbits << gshift) | (bbits << bshift);
+
+        colorcells[i].pixel = pix;
+
+        colorcells[i].red = ramp[(0 * 256) + i];
+        colorcells[i].green = ramp[(1 * 256) + i];
+        colorcells[i].blue = ramp[(2 * 256) + i];
+
+        colorcells[i].flags = DoRed | DoGreen | DoBlue;
+    }
+
+    XStoreColors(display, colormap, colorcells, ncolors);
+    XFlush(display);
+    SDL_free(colorcells);
+
+    return 0;
 }
 
 void
