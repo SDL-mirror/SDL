@@ -360,24 +360,15 @@ SDL_CreateCursor(const Uint8 * data, const Uint8 * mask,
     const Uint32 white = 0xFFFFFFFF;
     const Uint32 transparent = 0x00000000;
 
-    if (!mouse->CreateCursor) {
-        SDL_SetError("Cursors are not currently supported");
-        return NULL;
-    }
-
-    /* Sanity check the hot spot */
-    if ((hot_x < 0) || (hot_y < 0) || (hot_x >= w) || (hot_y >= h)) {
-        SDL_SetError("Cursor hot spot doesn't lie within cursor");
-        return NULL;
-    }
-
     /* Make sure the width is a multiple of 8 */
     w = ((w + 7) & ~7);
 
     /* Create the surface from a bitmap */
-    surface =
-        SDL_CreateRGBSurface(0, w, h, 32, 0x00FF0000, 0x0000FF00, 0x000000FF,
-                             0xFF000000);
+    surface = SDL_CreateRGBSurface(0, w, h, 32,
+                                   0x00FF0000,
+                                   0x0000FF00,
+                                   0x000000FF,
+                                   0xFF000000);
     if (!surface) {
         return NULL;
     }
@@ -398,13 +389,54 @@ SDL_CreateCursor(const Uint8 * data, const Uint8 * mask,
         }
     }
 
+    cursor = SDL_CreateColorCursor(surface, hot_x, hot_y);
+
+    SDL_FreeSurface(surface);
+
+    return cursor;
+}
+
+SDL_Cursor *
+SDL_CreateColorCursor(SDL_Surface *surface, int hot_x, int hot_y)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+    SDL_Surface *temp = NULL;
+    SDL_Cursor *cursor;
+
+    if (!surface) {
+        SDL_SetError("Passed NULL cursor surface");
+        return NULL;
+    }
+
+    if (!mouse->CreateCursor) {
+        SDL_SetError("Cursors are not currently supported");
+        return NULL;
+    }
+
+    /* Sanity check the hot spot */
+    if ((hot_x < 0) || (hot_y < 0) ||
+        (hot_x >= surface->w) || (hot_y >= surface->h)) {
+        SDL_SetError("Cursor hot spot doesn't lie within cursor");
+        return NULL;
+    }
+
+    if (surface->format->format != SDL_PIXELFORMAT_ARGB8888) {
+        temp = SDL_ConvertSurfaceFormat(surface, SDL_PIXELFORMAT_ARGB8888, 0);
+        if (!temp) {
+            return NULL;
+        }
+        surface = temp;
+    }
+
     cursor = mouse->CreateCursor(surface, hot_x, hot_y);
     if (cursor) {
         cursor->next = mouse->cursors;
         mouse->cursors = cursor;
     }
 
-    SDL_FreeSurface(surface);
+    if (temp) {
+        SDL_FreeSurface(temp);
+    }
 
     return cursor;
 }

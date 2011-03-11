@@ -147,6 +147,15 @@ extern DECLSPEC SDL_Cursor *SDLCALL SDL_CreateCursor(const Uint8 * data,
                                                      int hot_y);
 
 /**
+ *  \brief Create a color cursor.
+ *  
+ *  \sa SDL_FreeCursor()
+ */
+extern DECLSPEC SDL_Cursor *SDLCALL SDL_CreateColorCursor(SDL_Surface *surface,
+                                                          int hot_x,
+                                                          int hot_y);
+
+/**
  *  \brief Set the active cursor.
  */
 extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor * cursor);

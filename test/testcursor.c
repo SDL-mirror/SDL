@@ -141,13 +141,34 @@ create_arrow_cursor()
     return SDL_CreateCursor(data, mask, 32, 32, hot_x, hot_y);
 }
 
+SDL_Surface *
+LoadSprite(char *file)
+{
+    SDL_Surface *sprite;
+
+    /* Load the sprite image */
+    sprite = SDL_LoadBMP(file);
+    if (sprite == NULL) {
+        fprintf(stderr, "Couldn't load %s: %s", file, SDL_GetError());
+        return NULL;
+    }
+
+    /* Set transparent pixel as the pixel at (0,0) */
+    if (sprite->format->palette) {
+        SDL_SetColorKey(sprite, (SDL_SRCCOLORKEY | SDL_RLEACCEL),
+                        *(Uint8 *) sprite->pixels);
+    }
+
+    /* We're ready to roll. :) */
+    return sprite;
+}
 
 int
 main(int argc, char *argv[])
 {
     SDL_Surface *screen;
     SDL_bool quit = SDL_FALSE, first_time = SDL_TRUE;
-    SDL_Cursor *cursor[4];
+    SDL_Cursor *cursor[5];
     int current;
 
     /* Load the SDL library */
@@ -189,9 +210,10 @@ main(int argc, char *argv[])
         SDL_Quit();
         return (1);
     }
-    cursor[3] = SDL_GetCursor();
+    cursor[3] = SDL_CreateColorCursor(LoadSprite("icon.bmp"), 0, 0);
+    cursor[4] = SDL_GetCursor();
 
-    current = 0;
+    current = SDL_arraysize(cursor)-1;
     SDL_SetCursor(cursor[current]);
 
     while (!quit) {
@@ -216,9 +238,9 @@ main(int argc, char *argv[])
         SDL_Delay(1);
     }
 
-    SDL_FreeCursor(cursor[0]);
-    SDL_FreeCursor(cursor[1]);
-    SDL_FreeCursor(cursor[2]);
+    for (current = 0; current < SDL_arraysize(cursor); ++current) {
+        SDL_FreeCursor(cursor[current]);
+    }
 
     SDL_Quit();
     return (0);
