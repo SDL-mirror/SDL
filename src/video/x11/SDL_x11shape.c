@@ -19,6 +19,9 @@
     Eli Gottlieb
     eligottlieb@gmail.com
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_X11
 
 #include "SDL_assert.h"
 #include "SDL_x11video.h"
@@ -108,3 +111,6 @@ X11_SetWindowShape(SDL_WindowShaper *shaper,SDL_Surface *shape,SDL_WindowShapeMo
 
     return 0;
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
+

@@ -174,10 +174,7 @@ SDL_COMPILE_TIME_ASSERT(uint16, sizeof(Uint16) == 2);
 SDL_COMPILE_TIME_ASSERT(sint16, sizeof(Sint16) == 2);
 SDL_COMPILE_TIME_ASSERT(uint32, sizeof(Uint32) == 4);
 SDL_COMPILE_TIME_ASSERT(sint32, sizeof(Sint32) == 4);
-#if !defined(__NINTENDODS__) && !defined(__ANDROID__)
-/* TODO: figure out why the following happens:
- include/SDL_stdinc.h:150: error: size of array 'SDL_dummy_uint64' is negative
- include/SDL_stdinc.h:151: error: size of array 'SDL_dummy_sint64' is negative */
+#ifdef SDL_HAS_64BIT_TYPE
 SDL_COMPILE_TIME_ASSERT(uint64, sizeof(Uint64) == 8);
 SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 #endif

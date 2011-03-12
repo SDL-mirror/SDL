@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #define DEBUG_DYNAMIC_X11 0
 
 #include "SDL_x11dyn.h"
@@ -205,5 +207,7 @@ SDL_X11_LoadSymbols(void)
 
     return rc;
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

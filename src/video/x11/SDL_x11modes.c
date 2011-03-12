@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_x11video.h"
 
 /*#define X11MODES_DEBUG*/
@@ -714,5 +716,7 @@ void
 X11_QuitModes(_THIS)
 {
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_x11video.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -286,5 +288,7 @@ void
 X11_QuitKeyboard(_THIS)
 {
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_assert.h"
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
@@ -292,5 +294,7 @@ X11_QuitMouse(_THIS)
 {
     X11_DestroyEmptyCursor();
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include <limits.h> /* For INT_MAX */
 
 #include "SDL_events.h"
@@ -148,5 +150,7 @@ X11_HasClipboardText(_THIS)
 
     return retval;
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

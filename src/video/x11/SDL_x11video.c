@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include <unistd.h> /* For getpid() and readlink() */
 
 #include "SDL_video.h"
@@ -389,5 +391,7 @@ X11_UseDirectColorVisuals(void)
 {
     return SDL_getenv("SDL_VIDEO_X11_NODIRECTCOLOR") ? SDL_FALSE : SDL_TRUE;
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vim: set ts=4 sw=4 expandtab: */

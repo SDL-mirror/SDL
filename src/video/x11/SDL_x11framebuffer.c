@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_x11video.h"
 #include "SDL_x11framebuffer.h"
 
@@ -210,5 +212,7 @@ X11_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
         data->gc = NULL;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

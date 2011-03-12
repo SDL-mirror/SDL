@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_X11
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <signal.h>
@@ -636,5 +638,7 @@ X11_SuspendScreenSaver(_THIS)
     }
 #endif
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

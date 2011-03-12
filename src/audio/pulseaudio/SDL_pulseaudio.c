@@ -26,8 +26,9 @@
    was the cleanest way to move it to 1.3. The 1.2 target was written by
    Stéphan Kochen: stephan .a.t. kochen.nl
 */
-
 #include "SDL_config.h"
+
+#if SDL_AUDIO_DRIVER_PULSEAUDIO
 
 /* Allow access to a raw mixing buffer */
 
@@ -504,5 +505,7 @@ PULSEAUDIO_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap PULSEAUDIO_bootstrap = {
     PULSEAUDIO_DRIVER_NAME, "PulseAudio", PULSEAUDIO_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_PULSEAUDIO */
 
 /* vi: set ts=4 sw=4 expandtab: */

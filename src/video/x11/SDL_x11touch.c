@@ -20,6 +20,9 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_x11video.h"
 #include "SDL_x11touch.h"
 #include "../../events/SDL_touch_c.h"
@@ -116,5 +119,7 @@ X11_QuitTouch(_THIS)
 {
     SDL_TouchQuit();
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */
