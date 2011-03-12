@@ -1018,6 +1018,17 @@ SDL_GetWindowPixelFormat(SDL_Window * window)
 }
 
 static void
+SDL_RestoreMousePosition(SDL_Window *window)
+{
+    int x, y;
+
+    if (window == SDL_GetMouseFocus()) {
+        SDL_GetMouseState(&x, &y);
+        SDL_WarpMouseInWindow(window, x, y);
+    }
+}
+
+static void
 SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
@@ -1070,6 +1081,8 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
                 } else {
                     SDL_OnWindowResized(other);
                 }
+
+                SDL_RestoreMousePosition(other);
                 return;
             }
         }
@@ -1085,6 +1098,9 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
 
     /* Generate a mode change event here */
     SDL_OnWindowResized(window);
+
+    /* Restore the cursor position */
+    SDL_RestoreMousePosition(window);
 }
 
 #define CREATE_FLAGS \
