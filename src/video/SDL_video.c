@@ -1413,6 +1413,20 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
     if (!SDL_WINDOWPOS_ISUNDEFINED(y)) {
         window->y = y;
     }
+    if (SDL_WINDOWPOS_ISCENTERED(x) || SDL_WINDOWPOS_ISCENTERED(y)) {
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+        int displayIndex;
+        SDL_Rect bounds;
+
+        displayIndex = SDL_GetIndexOfDisplay(display);
+        SDL_GetDisplayBounds(displayIndex, &bounds);
+        if (SDL_WINDOWPOS_ISCENTERED(x)) {
+            window->x = bounds.x + (bounds.w - window->w) / 2;
+        }
+        if (SDL_WINDOWPOS_ISCENTERED(y)) {
+            window->y = bounds.y + (bounds.h - window->h) / 2;
+        }
+    }
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         if (_this->SetWindowPosition) {
             _this->SetWindowPosition(_this, window);

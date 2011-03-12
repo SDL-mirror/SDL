@@ -670,26 +670,20 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
-    SDL_Rect bounds;
+    Uint32 moveHack;
 
-    Cocoa_GetDisplayBounds(_this, display, &bounds);
-    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        rect.origin.x = bounds.x + (bounds.w - window->w) / 2;
-    } else {
-        rect.origin.x = window->x;
-    }
-    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        rect.origin.y = bounds.y + (bounds.h - window->h) / 2;
-    } else {
-        rect.origin.y = window->y;
-    }
+    rect.origin.x = window->x;
+    rect.origin.y = window->y;
     rect.size.width = window->w;
     rect.size.height = window->h;
     ConvertNSRect(&rect);
-    rect = [nswindow frameRectForContentRect:rect];
+
+    moveHack = s_moveHack;
+    s_moveHack = 0;
     [nswindow setFrameOrigin:rect.origin];
+    s_moveHack = moveHack;
+
     [pool release];
 }
 

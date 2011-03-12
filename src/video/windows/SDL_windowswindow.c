@@ -371,18 +371,8 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     AdjustWindowRectEx(&rect, style, menu, 0);
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
-
-    WIN_GetDisplayBounds(_this, display, &bounds);
-    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        x = bounds.x + (bounds.w - w) / 2;
-    } else {
-        x = window->x + rect.left;
-    }
-    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        y = bounds.y + (bounds.h - h) / 2;
-    } else {
-        y = window->y + rect.top;
-    }
+    x = window->x + rect.left;
+    y = window->y + rect.top;
 
     SetWindowPos(hwnd, top, x, y, 0, 0, (SWP_NOCOPYBITS | SWP_NOSIZE));
 }

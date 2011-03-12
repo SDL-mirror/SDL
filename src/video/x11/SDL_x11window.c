@@ -756,27 +756,9 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
-    SDL_bool oldstyle_fullscreen;
     int x, y;
 
-    /* ICCCM2.0-compliant window managers can handle fullscreen windows */
-    oldstyle_fullscreen = X11_IsWindowOldFullscreen(_this, window);
-
-    if (oldstyle_fullscreen
-        || SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        X11_GetDisplaySize(_this, window, &x, NULL);
-        x = (x - window->w) / 2;
-    } else {
-        x = window->x;
-    }
-    if (oldstyle_fullscreen
-        || SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        X11_GetDisplaySize(_this, window, NULL, &y);
-        y = (y - window->h) / 2;
-    } else {
-        y = window->y;
-    }
-    XMoveWindow(display, data->xwindow, x, y);
+    XMoveWindow(display, data->xwindow, window->x, window->y);
     XFlush(display);
 }
 
