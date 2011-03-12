@@ -168,7 +168,11 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
-    if (mouse->relative_mode && [event type] == NSMouseMoved) {
+    if (mouse->relative_mode &&
+        ([event type] == NSMouseMoved ||
+         [event type] == NSLeftMouseDragged ||
+         [event type] == NSRightMouseDragged ||
+         [event type] == NSOtherMouseDragged)) {
         float x = [event deltaX];
         float y = [event deltaY];
         SDL_SendMouseMotion(mouse->focus, 1, (int)x, (int)y);
