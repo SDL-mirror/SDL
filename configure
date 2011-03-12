@@ -15474,7 +15474,11 @@ done
 
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
-    # We want to include the generated SDL_config.h first
+    # Remove SDL_config.h from the source directory, since it's the
+    # default one, and we want to include the one that we generate.
+    if test -f $srcdir/include/SDL_config.h; then
+        rm $srcdir/include/SDL_config.h
+    fi
     INCLUDE="-Iinclude $INCLUDE"
 fi
 case "$host" in
