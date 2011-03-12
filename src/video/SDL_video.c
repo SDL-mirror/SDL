@@ -1885,7 +1885,7 @@ SDL_OnWindowFocusGained(SDL_Window * window)
         _this->SetWindowGammaRamp(_this, window, window->gamma);
     }
 
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN) &&
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN)) &&
         _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
@@ -1898,7 +1898,7 @@ SDL_OnWindowFocusLost(SDL_Window * window)
         _this->SetWindowGammaRamp(_this, window, window->saved_gamma);
     }
 
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN) &&
+    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN)) &&
         _this->SetWindowGrab) {
         _this->SetWindowGrab(_this, window);
     }
