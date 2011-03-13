@@ -24,6 +24,7 @@
 
 #if SDL_VIDEO_RENDER_OGL_ES2 && !SDL_RENDER_DISABLED
 
+#include "SDL_hints.h"
 #include "SDL_opengles2.h"
 #include "../SDL_sysrender.h"
 #include "SDL_shaders_gles2.h"
@@ -234,6 +235,18 @@ static void GLES2_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture);
 static int GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *rect,
                                const void *pixels, int pitch);
 
+static GLenum
+GetScaleQuality(void)
+{
+    const char *hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
+
+    if (!hint || *hint == '0' || SDL_strcasecmp(hint, "nearest") == 0) {
+        return GL_NEAREST;
+    } else {
+        return GL_LINEAR;
+    }
+}
+
 static int
 GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 {
@@ -266,7 +279,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     tdata->texture_type = GL_TEXTURE_2D;
     tdata->pixel_format = format;
     tdata->pixel_type = type;
-    tdata->scaleMode = GL_LINEAR;
+    tdata->scaleMode = GetScaleQuality();
 
     /* Allocate a blob for image data */
     if (texture->access == SDL_TEXTUREACCESS_STREAMING)
@@ -286,8 +299,6 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     glGenTextures(1, &tdata->texture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(tdata->texture_type, tdata->texture);
-    glTexParameteri(tdata->texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(tdata->texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(tdata->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);

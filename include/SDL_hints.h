@@ -98,6 +98,18 @@ extern "C" {
 #define SDL_HINT_RENDER_OPENGL_SHADERS      "SDL_RENDER_OPENGL_SHADERS"
 
 /**
+ *  \brief  A variable controlling the scaling quality
+ *
+ *  This variable can be set to the following values:
+ *    "0" or "nearest" - Nearest pixel sampling
+ *    "1" or "linear"  - Linear filtering (supported by OpenGL and Direct3D)
+ *    "2" or "best"    - Anisotropic filtering (supported by Direct3D)
+ *
+ *  By default nearest pixel sampling is used
+ */
+#define SDL_HINT_RENDER_SCALE_QUALITY       "SDL_RENDER_SCALE_QUALITY"
+
+/**
  *  \brief  A variable controlling whether updates to the SDL 1.2 screen surface should be synchronized with the vertical refresh, to avoid tearing.
  *
  *  This variable can be set to the following values:

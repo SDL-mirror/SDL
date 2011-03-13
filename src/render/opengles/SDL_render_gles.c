@@ -23,6 +23,7 @@
 
 #if SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED
 
+#include "SDL_hints.h"
 #include "SDL_opengles.h"
 #include "../SDL_sysrender.h"
 
@@ -292,6 +293,18 @@ power_of_2(int input)
     return value;
 }
 
+static GLenum
+GetScaleQuality(void)
+{
+    const char *hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
+
+    if (!hint || *hint == '0' || SDL_strcasecmp(hint, "nearest") == 0) {
+        return GL_NEAREST;
+    } else {
+        return GL_LINEAR;
+    }
+}
+
 static int
 GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
@@ -345,7 +358,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     data->format = format;
     data->formattype = type;
-    data->scaleMode = GL_LINEAR;
+    data->scaleMode = GetScaleQuality();
     glBindTexture(data->type, data->texture);
     glTexParameteri(data->type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(data->type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
