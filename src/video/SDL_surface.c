@@ -602,12 +602,101 @@ SDL_UpperBlit(SDL_Surface * src, const SDL_Rect * srcrect,
     return 0;
 }
 
-/*
- * Scale and blit a surface 
-*/
 int
-SDL_BlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
-               SDL_Surface * dst, const SDL_Rect * dstrect)
+SDL_UpperBlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
+              SDL_Surface * dst, SDL_Rect * dstrect)
+{
+    SDL_Rect final_src, final_dst, fulldst;
+
+    /* Make sure the surfaces aren't locked */
+    if (!src || !dst) {
+        SDL_SetError("SDL_UpperBlitScaled: passed a NULL surface");
+        return (-1);
+    }
+    if (src->locked || dst->locked) {
+        SDL_SetError("Surfaces must not be locked during blit");
+        return (-1);
+    }
+
+    /* If the destination rectangle is NULL, use the entire dest surface */
+    if (dstrect == NULL) {
+        fulldst.x = fulldst.y = 0;
+        dstrect = &fulldst;
+    }
+
+    /* clip the source rectangle to the source surface */
+    if (srcrect) {
+        int maxw, maxh;
+
+        final_src.x = srcrect->x;
+        final_src.w = srcrect->w;
+        if (final_src.x < 0) {
+            final_src.w += final_src.x;
+            final_src.x = 0;
+        }
+        maxw = src->w - final_src.x;
+        if (maxw < final_src.w)
+            final_src.w = maxw;
+
+        final_src.y = srcrect->y;
+        final_src.h = srcrect->h;
+        if (final_src.y < 0) {
+            final_src.h += final_src.y;
+            final_src.y = 0;
+        }
+        maxh = src->h - final_src.y;
+        if (maxh < final_src.h)
+            final_src.h = maxh;
+
+    } else {
+        final_src.x = final_src.y = 0;
+        final_src.w = src->w;
+        final_src.h = src->h;
+    }
+
+    /* clip the destination rectangle against the clip rectangle */
+    if (dstrect) {
+        int maxw, maxh;
+
+        final_dst.x = dstrect->x;
+        final_dst.w = dstrect->w;
+        if (final_dst.x < 0) {
+            final_dst.w += final_dst.x;
+            final_dst.x = 0;
+        }
+        maxw = dst->w - final_dst.x;
+        if (maxw < final_dst.w)
+            final_dst.w = maxw;
+
+        final_dst.y = dstrect->y;
+        final_dst.h = dstrect->h;
+        if (final_dst.y < 0) {
+            final_dst.h += final_dst.y;
+            final_dst.y = 0;
+        }
+        maxh = dst->h - final_dst.y;
+        if (maxh < final_dst.h)
+            final_dst.h = maxh;
+    } else {
+        final_dst.x = final_dst.y = 0;
+        final_dst.w = dst->w;
+        final_dst.h = dst->h;
+    }
+
+    if (final_dst.w > 0 && final_dst.h > 0) {
+        return SDL_LowerBlitScaled(src, &final_src, dst, &final_dst);
+    }
+
+    return 0;
+}
+
+/**
+ *  This is a semi-private blit function and it performs low-level surface
+ *  scaled blitting only.
+ */
+int
+SDL_LowerBlitScaled(SDL_Surface * src, SDL_Rect * srcrect,
+                SDL_Surface * dst, SDL_Rect * dstrect)
 {
     /* Save off the original dst width, height */
     int dstW = dstrect->w;
@@ -617,11 +706,6 @@ SDL_BlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
 
     /* Clip the dst surface to the dstrect */
     SDL_SetClipRect( dst, &final_dst );
-
-    /* If the dest was clipped to a zero sized rect then exit */
-    if ( dst->clip_rect.w <= 0 || dst->clip_rect.h <= 0 ) {
-        return -1;
-    }
 
     /* Did the dst width change? */
     if ( dstW != dst->clip_rect.w ) {
