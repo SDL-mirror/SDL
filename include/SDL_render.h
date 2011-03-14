@@ -538,7 +538,7 @@ extern DECLSPEC int SDLCALL SDL_RenderFillRect(SDL_Renderer * renderer,
  *  \return 0 on success, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_RenderFillRects(SDL_Renderer * renderer,
-                                                const SDL_Rect * rect,
+                                                const SDL_Rect * rects,
                                                 int count);
 
 /**
