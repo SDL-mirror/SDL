@@ -763,8 +763,8 @@ SDL_UpdateRects(SDL_Surface * screen, int numrects, SDL_Rect * rects)
 
     if (screen == SDL_ShadowSurface) {
         for (i = 0; i < numrects; ++i) {
-            SDL_LowerBlit(SDL_ShadowSurface, &rects[i], SDL_VideoSurface,
-                          &rects[i]);
+            SDL_BlitSurface(SDL_ShadowSurface, &rects[i], SDL_VideoSurface,
+                            &rects[i]);
         }
 
         /* Fall through to video surface update */
