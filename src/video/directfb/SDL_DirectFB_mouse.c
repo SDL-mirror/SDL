@@ -372,15 +372,13 @@ DirectFB_InitMouse(_THIS)
     SDL_DFB_DEVICEDATA(_this);
 
     SDL_Mouse *mouse = SDL_GetMouse();
-    SDL_Cursor *cursor;
 
     mouse->CreateCursor = DirectFB_CreateCursor;
     mouse->ShowCursor = DirectFB_ShowCursor;
     mouse->WarpMouse = DirectFB_WarpMouse;
     mouse->FreeCursor = DirectFB_FreeCursor;
 
-    cursor = DirectFB_CreateDefaultCursor();
-    mouse->cursors = mouse->cur_cursor = cursor;
+    SDL_SetDefaultCursor(DirectFB_CreateDefaultCursor());
 
     devdata->num_mice = 1;
 }
