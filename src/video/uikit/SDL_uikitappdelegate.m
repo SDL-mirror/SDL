@@ -85,13 +85,15 @@ int main(int argc, char **argv) {
     exit(exit_status);
 }
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application {
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
             
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
     
     [self performSelector:@selector(postFinishLaunch) withObject:nil
 afterDelay:0.0];
+
+    return YES;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
