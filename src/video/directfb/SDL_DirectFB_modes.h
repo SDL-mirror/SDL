@@ -30,7 +30,7 @@
 
 #include "../SDL_sysvideo.h"
 
-#define SDL_DFB_DISPLAYDATA(win)  DFB_DisplayData *dispdata = ((win) ? (DFB_DisplayData *) (win)->display->driverdata : NULL)
+#define SDL_DFB_DISPLAYDATA(win)  DFB_DisplayData *dispdata = ((win) ? (DFB_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata : NULL)
 
 typedef struct _DFB_DisplayData DFB_DisplayData;
 struct _DFB_DisplayData

@@ -78,6 +78,10 @@ extern void DirectFB_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
                                          struct SDL_SysWMinfo *info);
 
+extern int DirectFB_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
+extern int DirectFB_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
+
+
 extern void DirectFB_AdjustWindowSurface(SDL_Window * window);
 
 #endif /* _SDL_directfb_window_h */

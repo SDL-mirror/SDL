@@ -133,6 +133,10 @@ DirectFB_CreateDevice(int devindex)
     device->DestroyWindow = DirectFB_DestroyWindow;
     device->GetWindowWMInfo = DirectFB_GetWindowWMInfo;
 
+    /* Not supported by DFB, for completeness */
+    device->SetWindowGammaRamp = DirectFB_SetWindowGammaRamp;
+    device->GetWindowGammaRamp = DirectFB_GetWindowGammaRamp;
+
 #if SDL_DIRECTFB_OPENGL
     device->GL_LoadLibrary = DirectFB_GL_LoadLibrary;
     device->GL_GetProcAddress = DirectFB_GL_GetProcAddress;
@@ -168,34 +172,34 @@ DirectFB_DeviceInformation(IDirectFB * dfb)
 
     dfb->GetDeviceDescription(dfb, &desc);
 
-    SDL_DFB_LOG( "DirectFB Device Information\n");
-    SDL_DFB_LOG( "===========================\n");
-    SDL_DFB_LOG( "Name:           %s\n", desc.name);
-    SDL_DFB_LOG( "Vendor:         %s\n", desc.vendor);
-    SDL_DFB_LOG( "Driver Name:    %s\n", desc.driver.name);
-    SDL_DFB_LOG( "Driver Vendor:  %s\n", desc.driver.vendor);
-    SDL_DFB_LOG( "Driver Version: %d.%d\n", desc.driver.major,
+    SDL_DFB_LOG( "DirectFB Device Information");
+    SDL_DFB_LOG( "===========================");
+    SDL_DFB_LOG( "Name:           %s", desc.name);
+    SDL_DFB_LOG( "Vendor:         %s", desc.vendor);
+    SDL_DFB_LOG( "Driver Name:    %s", desc.driver.name);
+    SDL_DFB_LOG( "Driver Vendor:  %s", desc.driver.vendor);
+    SDL_DFB_LOG( "Driver Version: %d.%d", desc.driver.major,
             desc.driver.minor);
 
-    SDL_DFB_LOG( "\nVideo memoory:  %d\n", desc.video_memory);
+    SDL_DFB_LOG( "Video memoory:  %d", desc.video_memory);
 
-    SDL_DFB_LOG( "\nBlitting flags:\n");
+    SDL_DFB_LOG( "Blitting flags:");
     for (n = 0; blitting_flags[n].flag; n++) {
         if (desc.blitting_flags & blitting_flags[n].flag)
-            SDL_DFB_LOG( "    %s\n", blitting_flags[n].name);
+            SDL_DFB_LOG( "    %s", blitting_flags[n].name);
     }
 
-    SDL_DFB_LOG( "\nDrawing flags:\n");
+    SDL_DFB_LOG( "Drawing flags:");
     for (n = 0; drawing_flags[n].flag; n++) {
         if (desc.drawing_flags & drawing_flags[n].flag)
-            SDL_DFB_LOG( "    %s\n", drawing_flags[n].name);
+            SDL_DFB_LOG( "    %s", drawing_flags[n].name);
     }
 
 
-    SDL_DFB_LOG( "\nAcceleration flags:\n");
+    SDL_DFB_LOG( "Acceleration flags:");
     for (n = 0; acceleration_mask[n].mask; n++) {
         if (desc.acceleration_mask & acceleration_mask[n].mask)
-            SDL_DFB_LOG( "    %s\n", acceleration_mask[n].name);
+            SDL_DFB_LOG( "    %s", acceleration_mask[n].name);
     }
 
 

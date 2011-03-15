@@ -45,7 +45,9 @@
 	(DFB_COMPILEDVERSION >= DFB_VERSIONNUM(X, Y, Z))
 
 #if (DFB_VERSION_ATLEAST(1,0,0))
+#ifdef SDL_VIDEO_OPENGL
 #define SDL_DIRECTFB_OPENGL 1
+#endif
 #else
 #error "SDL_DIRECTFB: Please compile against libdirectfb version >= 1.0.0"
 #endif
@@ -93,7 +95,7 @@
 
 #define SDL_DFB_LOG(x...) 							\
 	do {											\
-		fprintf(LOG_CHANNEL, SDL_DFB_CONTEXT);		\
+		fprintf(LOG_CHANNEL, "%s: ", SDL_DFB_CONTEXT);		\
         fprintf(LOG_CHANNEL, x ); 					\
 		fprintf(LOG_CHANNEL, "\n");					\
 	} while (0)

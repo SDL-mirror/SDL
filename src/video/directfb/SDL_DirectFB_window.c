@@ -489,6 +489,20 @@ DirectFB_GetWindowWMInfo(_THIS, SDL_Window * window,
     }
 }
 
+int
+DirectFB_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
+int
+DirectFB_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
+{
+    SDL_Unsupported();
+    return -1;
+}
+
 void
 DirectFB_AdjustWindowSurface(SDL_Window * window)
 {

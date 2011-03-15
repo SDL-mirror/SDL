@@ -26,6 +26,7 @@
 #include "SDL_DirectFB_video.h"
 
 #if SDL_DIRECTFB_OPENGL
+
 #include "SDL_DirectFB_opengl.h"
 #include "SDL_DirectFB_window.h"
 

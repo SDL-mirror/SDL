@@ -386,11 +386,11 @@ DirectFB_QuitModes(_THIS)
         SDL_VideoDisplay *display = &_this->displays[i];
         DFB_DisplayData *dispdata = (DFB_DisplayData *) display->driverdata;
 
-        SDL_GetDesktopDisplayModeForDisplay(display, &tmode);
+        SDL_GetDesktopDisplayMode(i, &tmode);
         tmode.format = SDL_PIXELFORMAT_UNKNOWN;
         DirectFB_SetDisplayMode(_this, display, &tmode);
 
-        SDL_GetDesktopDisplayModeForDisplay(display, &tmode);
+        SDL_GetDesktopDisplayMode(i, &tmode);
         DirectFB_SetDisplayMode(_this, display, &tmode);
 
         if (dispdata->layer) {
