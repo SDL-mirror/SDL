@@ -36,7 +36,8 @@ VERSION_OBJECTS = @VERSION_OBJECTS@
 SDLMAIN_TARGET = libSDLmain.a
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-DIST = acinclude Android.mk autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iPhoneOS
+SRC_DIST = acinclude Android.mk autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iPhoneOS
+GEN_DIST = SDL.spec
 
 HDRS = \
 	SDL.h \
@@ -184,7 +185,8 @@ distclean: clean
 
 dist $(distfile):
 	$(SHELL) $(auxdir)/mkinstalldirs $(distdir)
-	tar cf - $(DIST) | (cd $(distdir); tar xf -)
+	(cd $(srcdir); tar cf - $(SRC_DIST)) | (cd $(distdir); tar xf -)
+	tar cf - $(GEN_DIST) | (cd $(distdir); tar xf -)
 	find $(distdir) \( \
 	    -name '*~' -o \
 	    -name '*.bak' -o \
