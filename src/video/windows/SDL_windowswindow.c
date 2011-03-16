@@ -345,6 +345,7 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
+    SDL_Rect bounds;
     DWORD style;
     HWND top;
     BOOL menu;
