@@ -82,7 +82,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -125,7 +125,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy $(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll $(TargetDir)\SDL.dll</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
