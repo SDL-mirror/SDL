@@ -62,26 +62,8 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 		bshaped = 1;
 	
     /* Fill the window description. */
-    if (SDL_WINDOWPOS_ISCENTERED(window->x)) {
-        x = (dispdata->cw - window->w) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
-        x = 0;
-    } else {
-        x = window->x;
-    }
-    
-    if (SDL_WINDOWPOS_ISCENTERED(window->y)) {
-        y = (dispdata->ch - window->h) / 2;
-    } else if (SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
-        y = 0;
-    } else {
-        y = window->y;
-    }
-    
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        x = 0;
-        y = 0;
-    }
+    x = window->x;
+    y = window->y;
 
     DirectFB_WM_AdjustWindowLayout(window, window->flags, window->w, window->h);
 
