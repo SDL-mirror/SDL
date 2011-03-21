@@ -792,6 +792,11 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     NSWindow *nswindow = data->nswindow;
     NSRect rect;
 
+    /* The view responder chain gets messed with during setStyleMask */
+    if ([[nswindow contentView] nextResponder] == data->listener) {
+        [[nswindow contentView] setNextResponder:nil];
+    }
+
     if (fullscreen) {
         SDL_Rect bounds;
 
@@ -825,6 +830,11 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         } else {
             nswindow = Cocoa_RebuildWindow(data, nswindow, GetWindowStyle(window));
         }
+    }
+
+    /* The view responder chain gets messed with during setStyleMask */
+    if ([[nswindow contentView] nextResponder] != data->listener) {
+        [[nswindow contentView] setNextResponder:data->listener];
     }
 
     s_moveHack = 0;
