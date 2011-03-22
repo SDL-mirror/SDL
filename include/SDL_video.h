@@ -638,7 +638,7 @@ extern DECLSPEC float SDLCALL SDL_GetWindowBrightness(SDL_Window * window);
  *  The input is the index into the array, and the output is the 16-bit
  *  gamma value at that index, scaled to the output color precision.
  *
- *  \sa SDL_SetWindowGammaRamp()
+ *  \sa SDL_GetWindowGammaRamp()
  */
 extern DECLSPEC int SDLCALL SDL_SetWindowGammaRamp(SDL_Window * window,
                                                    const Uint16 * red,
