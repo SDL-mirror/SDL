@@ -88,7 +88,6 @@ typedef struct
     struct {
         Uint32 color;
         int blendMode;
-        GLenum scaleMode;
         SDL_bool tex_coords;
     } current;
 
@@ -106,7 +105,6 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
-    GLenum scaleMode;
 } GLES_TextureData;
 
 static void
@@ -175,7 +173,6 @@ GLES_ResetState(SDL_Renderer *renderer)
 
     data->current.color = 0;
     data->current.blendMode = -1;
-    data->current.scaleMode = 0;
     data->current.tex_coords = SDL_FALSE;
 
     glDisable(GL_DEPTH_TEST);
@@ -312,6 +309,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLint internalFormat;
     GLenum format, type;
     int texture_w, texture_h;
+    GLenum scaleMode;
     GLenum result;
 
     GLES_ActivateRenderer(renderer);
@@ -358,8 +356,10 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     data->format = format;
     data->formattype = type;
-    data->scaleMode = GetScaleQuality();
+    scaleMode = GetScaleQuality();
     glBindTexture(data->type, data->texture);
+    glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER, scaleMode);
+    glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER, scaleMode);
     glTexParameteri(data->type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(data->type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -673,14 +673,6 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     glEnable(GL_TEXTURE_2D);
 
     glBindTexture(texturedata->type, texturedata->texture);
-
-    if (texturedata->scaleMode != data->current.scaleMode) {
-        glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                        texturedata->scaleMode);
-        glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                        texturedata->scaleMode);
-        data->current.scaleMode = texturedata->scaleMode;
-    }
 
     if (texture->modMode) {
         GLES_SetColor(data, texture->r, texture->g, texture->b, texture->a);

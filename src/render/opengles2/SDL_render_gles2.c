@@ -59,7 +59,6 @@ typedef struct GLES2_TextureData
     GLenum pixel_type;
     void *pixel_data;
     size_t pitch;
-    GLenum scaleMode;
 } GLES2_TextureData;
 
 typedef struct GLES2_ShaderCacheEntry
@@ -122,7 +121,6 @@ typedef struct GLES2_DriverContext
     SDL_GLContext *context;
     struct {
         int blendMode;
-        GLenum scaleMode;
         SDL_bool tex_coords;
     } current;
 
@@ -253,6 +251,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     GLES2_TextureData *tdata;
     GLenum format;
     GLenum type;
+    GLenum scaleMode;
 
     GLES2_ActivateRenderer(renderer);
 
@@ -279,7 +278,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     tdata->texture_type = GL_TEXTURE_2D;
     tdata->pixel_format = format;
     tdata->pixel_type = type;
-    tdata->scaleMode = GetScaleQuality();
+    scaleMode = GetScaleQuality();
 
     /* Allocate a blob for image data */
     if (texture->access == SDL_TEXTUREACCESS_STREAMING)
@@ -299,6 +298,8 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     glGenTextures(1, &tdata->texture);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(tdata->texture_type, tdata->texture);
+    glTexParameteri(tdata->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
+    glTexParameteri(tdata->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
     glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(tdata->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);
@@ -1007,14 +1008,6 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     glBindTexture(tdata->texture_type, tdata->texture);
     glUniform1i(locTexture, 0);
 
-    if (tdata->scaleMode != rdata->current.scaleMode) {
-        glTexParameteri(tdata->texture_type, GL_TEXTURE_MIN_FILTER,
-                        tdata->scaleMode);
-        glTexParameteri(tdata->texture_type, GL_TEXTURE_MAG_FILTER,
-                        tdata->scaleMode);
-        rdata->current.scaleMode = tdata->scaleMode;
-    }
-
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
     glUniform4f(locModulation,
@@ -1083,7 +1076,6 @@ GLES2_ResetState(SDL_Renderer *renderer)
     }
 
     rdata->current.blendMode = -1;
-    rdata->current.scaleMode = 0;
     rdata->current.tex_coords = SDL_FALSE;
 
     glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);

@@ -91,7 +91,6 @@ typedef struct
         GL_Shader shader;
         Uint32 color;
         int blendMode;
-        GLenum scaleMode;
     } current;
 
     /* OpenGL functions */
@@ -119,7 +118,6 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
-    int scaleMode;
     SDL_Rect locked_rect;
 
     /* YV12 texture support */
@@ -220,7 +218,6 @@ GL_ResetState(SDL_Renderer *renderer)
     data->current.shader = SHADER_NONE;
     data->current.color = 0;
     data->current.blendMode = -1;
-    data->current.scaleMode = 0;
 
     data->glDisable(GL_DEPTH_TEST);
     data->glDisable(GL_CULL_FACE);
@@ -413,6 +410,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLint internalFormat;
     GLenum format, type;
     int texture_w, texture_h;
+    GLenum scaleMode;
     GLenum result;
 
     GL_ActivateRenderer(renderer);
@@ -467,9 +465,11 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     data->format = format;
     data->formattype = type;
-    data->scaleMode = GetScaleQuality();
+    scaleMode = GetScaleQuality();
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER, scaleMode);
+    renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER, scaleMode);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                 GL_CLAMP_TO_EDGE);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -524,6 +524,10 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glEnable(data->type);
 
         renderdata->glBindTexture(data->type, data->utexture);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
+                                    scaleMode);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
+                                    scaleMode);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                     GL_CLAMP_TO_EDGE);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -532,6 +536,10 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                  texture_h/2, 0, format, type, NULL);
 
         renderdata->glBindTexture(data->type, data->vtexture);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER,
+                                    scaleMode);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER,
+                                    scaleMode);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
                                     GL_CLAMP_TO_EDGE);
         renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
@@ -855,33 +863,13 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (texturedata->yuv) {
         data->glActiveTextureARB(GL_TEXTURE2_ARB);
         data->glBindTexture(texturedata->type, texturedata->vtexture);
-        if (texturedata->scaleMode != data->current.scaleMode) {
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                                  texturedata->scaleMode);
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                                  texturedata->scaleMode);
-        }
 
         data->glActiveTextureARB(GL_TEXTURE1_ARB);
         data->glBindTexture(texturedata->type, texturedata->utexture);
-        if (texturedata->scaleMode != data->current.scaleMode) {
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                                  texturedata->scaleMode);
-            data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                                  texturedata->scaleMode);
-        }
 
         data->glActiveTextureARB(GL_TEXTURE0_ARB);
     }
     data->glBindTexture(texturedata->type, texturedata->texture);
-
-    if (texturedata->scaleMode != data->current.scaleMode) {
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MIN_FILTER,
-                              texturedata->scaleMode);
-        data->glTexParameteri(texturedata->type, GL_TEXTURE_MAG_FILTER,
-                              texturedata->scaleMode);
-        data->current.scaleMode = texturedata->scaleMode;
-    }
 
     if (texture->modMode) {
         GL_SetColor(data, texture->r, texture->g, texture->b, texture->a);
