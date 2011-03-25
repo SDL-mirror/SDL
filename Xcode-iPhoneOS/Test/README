@@ -3,7 +3,7 @@ TestiPhoneOS.xcodeproj contains targets to compile many of the SDL test programs
 testalpha:
 	Program crashes.  Problem appears to effect Mac OS X as well.
 
-testhread:
+testthread:
 	SIGTERM kills the process immediately without executing the 'kill' function.  The posix standard says this shouldn't happen.  Apple seems intent on having iPhone apps exit promptly when the user requests it, so maybe that's why(?)
 
 testlock:

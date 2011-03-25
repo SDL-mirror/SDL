@@ -606,7 +606,7 @@
 		BEC567010761D90300A33029 /* testerror.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4878006D85357F000001 /* testerror.c */; };
 		BEC5670E0761D90400A33029 /* testgamma.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E487A006D85477F000001 /* testgamma.c */; };
 		BEC5671C0761D90400A33029 /* testgl.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D4EFFB311087F000001 /* testgl.c */; };
-		BEC567290761D90400A33029 /* testhread.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D58FFB311A97F000001 /* testhread.c */; };
+		BEC567290761D90400A33029 /* testthread.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D58FFB311A97F000001 /* testthread.c */; };
 		BEC567360761D90400A33029 /* testjoystick.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D62FFB312AA7F000001 /* testjoystick.c */; };
 		BEC567430761D90400A33029 /* testkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D6CFFB313437F000001 /* testkeys.c */; };
 		BEC567500761D90400A33029 /* testlock.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D75FFB313BB7F000001 /* testlock.c */; };
@@ -1535,7 +1535,7 @@
 		092D6D1BFFB30C237F000001 /* graywin.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = graywin.c; path = ../../test/graywin.c; sourceTree = SOURCE_ROOT; };
 		092D6D25FFB30D1A7F000001 /* testbitmap.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testbitmap.c; path = ../../test/testbitmap.c; sourceTree = SOURCE_ROOT; };
 		092D6D4EFFB311087F000001 /* testgl.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testgl.c; path = ../../test/testgl.c; sourceTree = SOURCE_ROOT; };
-		092D6D58FFB311A97F000001 /* testhread.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testhread.c; path = ../../test/testhread.c; sourceTree = SOURCE_ROOT; };
+		092D6D58FFB311A97F000001 /* testthread.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testthread.c; path = ../../test/testthread.c; sourceTree = SOURCE_ROOT; };
 		092D6D62FFB312AA7F000001 /* testjoystick.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testjoystick.c; path = ../../test/testjoystick.c; sourceTree = SOURCE_ROOT; };
 		092D6D6CFFB313437F000001 /* testkeys.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testkeys.c; path = ../../test/testkeys.c; sourceTree = SOURCE_ROOT; };
 		092D6D75FFB313BB7F000001 /* testlock.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = testlock.c; path = ../../test/testlock.c; sourceTree = SOURCE_ROOT; };
@@ -2505,7 +2505,7 @@
 				092D6D4EFFB311087F000001 /* testgl.c */,
 				0017972710742FB900F5D044 /* testgl2.c */,
 				0017974E1074315700F5D044 /* testhaptic.c */,
-				092D6D58FFB311A97F000001 /* testhread.c */,
+				092D6D58FFB311A97F000001 /* testthread.c */,
 				002F343609CA1F6F00EBEB88 /* testiconv.c */,
 				00179791107432FA00F5D044 /* testime.c */,
 				001797B31074339C00F5D044 /* testintersections.c */,
@@ -4626,7 +4626,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BEC567290761D90400A33029 /* testhread.c in Sources */,
+				BEC567290761D90400A33029 /* testthread.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -180,7 +180,7 @@
 		FDD2C1040E2E4F4B00B7A85F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
 		FDD2C1050E2E4F4B00B7A85F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
 		FDD2C1060E2E4F4B00B7A85F /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
-		FDD2C10D0E2E4F6900B7A85F /* testhread.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A74C0E2D0F1600EA573E /* testhread.c */; };
+		FDD2C10D0E2E4F6900B7A85F /* testthread.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A74C0E2D0F1600EA573E /* testthread.c */; };
 		FDD2C1770E2E52C000B7A85F /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
 		FDD2C1780E2E52C000B7A85F /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
 		FDD2C1790E2E52C000B7A85F /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
@@ -329,7 +329,7 @@
 		FDA8A7470E2D0F1600EA573E /* testerror.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testerror.c; path = ../../test/testerror.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7480E2D0F1600EA573E /* testfile.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testfile.c; path = ../../test/testfile.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7490E2D0F1600EA573E /* testgamma.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgamma.c; path = ../../test/testgamma.c; sourceTree = SOURCE_ROOT; };
-		FDA8A74C0E2D0F1600EA573E /* testhread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testhread.c; path = ../../test/testhread.c; sourceTree = SOURCE_ROOT; };
+		FDA8A74C0E2D0F1600EA573E /* testthread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testthread.c; path = ../../test/testthread.c; sourceTree = SOURCE_ROOT; };
 		FDA8A74D0E2D0F1600EA573E /* testiconv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testiconv.c; path = ../../test/testiconv.c; sourceTree = SOURCE_ROOT; };
 		FDA8A74E0E2D0F1600EA573E /* testjoystick.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testjoystick.c; path = ../../test/testjoystick.c; sourceTree = SOURCE_ROOT; };
 		FDA8A74F0E2D0F1600EA573E /* testkeys.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testkeys.c; path = ../../test/testkeys.c; sourceTree = SOURCE_ROOT; };
@@ -381,7 +381,7 @@
 		FDAAC6290E2D5960001DB1D8 /* testgles.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgles.c; path = ../../test/testgles.c; sourceTree = SOURCE_ROOT; };
 		FDC430000F0D866D009C87E1 /* torturethread.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = torturethread.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDC430090F0D86BF009C87E1 /* testdraw2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testdraw2.c; path = ../../test/testdraw2.c; sourceTree = SOURCE_ROOT; };
-		FDD2C10A0E2E4F4B00B7A85F /* testhread.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testhread.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDD2C10A0E2E4F4B00B7A85F /* testthread.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testthread.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDD2C1810E2E52C000B7A85F /* testiconv.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testiconv.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDD2C18A0E2E52FE00B7A85F /* utf8.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = utf8.txt; path = ../../test/utf8.txt; sourceTree = SOURCE_ROOT; };
 		FDD2C1A50E2E534F00B7A85F /* testjoystick.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testjoystick.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -866,7 +866,7 @@
 				FDAAC5C90E2D55B5001DB1D8 /* testfile.app */,
 				FDAAC5FA0E2D5843001DB1D8 /* testgamma.app */,
 				FDAAC6260E2D5914001DB1D8 /* testgles.app */,
-				FDD2C10A0E2E4F4B00B7A85F /* testhread.app */,
+				FDD2C10A0E2E4F4B00B7A85F /* testthread.app */,
 				FDD2C1810E2E52C000B7A85F /* testiconv.app */,
 				FDD2C1A50E2E534F00B7A85F /* testjoystick.app */,
 				FDD2C45E0E2E773800B7A85F /* testkeys.app */,
@@ -928,7 +928,7 @@
 				FDA8A7490E2D0F1600EA573E /* testgamma.c */,
 				046CEF8913254F63007AD51D /* testgesture.c */,
 				FDAAC6290E2D5960001DB1D8 /* testgles.c */,
-				FDA8A74C0E2D0F1600EA573E /* testhread.c */,
+				FDA8A74C0E2D0F1600EA573E /* testthread.c */,
 				FDA8A74D0E2D0F1600EA573E /* testiconv.c */,
 				FDA8A74E0E2D0F1600EA573E /* testjoystick.c */,
 				FDA8A74F0E2D0F1600EA573E /* testkeys.c */,
@@ -1257,9 +1257,9 @@
 			productReference = FDC430000F0D866D009C87E1 /* torturethread.app */;
 			productType = "com.apple.product-type.application";
 		};
-		FDD2C0F90E2E4F4B00B7A85F /* testhread */ = {
+		FDD2C0F90E2E4F4B00B7A85F /* testthread */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = FDD2C1070E2E4F4B00B7A85F /* Build configuration list for PBXNativeTarget "testhread" */;
+			buildConfigurationList = FDD2C1070E2E4F4B00B7A85F /* Build configuration list for PBXNativeTarget "testthread" */;
 			buildPhases = (
 				FDD2C0FA0E2E4F4B00B7A85F /* Resources */,
 				FDD2C0FB0E2E4F4B00B7A85F /* Sources */,
@@ -1269,9 +1269,9 @@
 			);
 			dependencies = (
 			);
-			name = testhread;
+			name = testthread;
 			productName = TestiPhoneOS;
-			productReference = FDD2C10A0E2E4F4B00B7A85F /* testhread.app */;
+			productReference = FDD2C10A0E2E4F4B00B7A85F /* testthread.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FDD2C1700E2E52C000B7A85F /* testiconv */ = {
@@ -1535,7 +1535,7 @@
 				FDAAC5B80E2D55B5001DB1D8 /* testfile */,
 				FDAAC5E90E2D5843001DB1D8 /* testgamma */,
 				046CEF7513254F23007AD51D /* testgesture */,
-				FDD2C0F90E2E4F4B00B7A85F /* testhread */,
+				FDD2C0F90E2E4F4B00B7A85F /* testthread */,
 				FDD2C1700E2E52C000B7A85F /* testiconv */,
 				FDD2C1930E2E534F00B7A85F /* testjoystick */,
 				FDD2C44D0E2E773800B7A85F /* testkeys */,
@@ -1933,7 +1933,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDD2C10D0E2E4F6900B7A85F /* testhread.c in Sources */,
+				FDD2C10D0E2E4F6900B7A85F /* testthread.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2506,7 +2506,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = testhread;
+				PRODUCT_NAME = testthread;
 			};
 			name = Debug;
 		};
@@ -2518,7 +2518,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				PRODUCT_NAME = testhread;
+				PRODUCT_NAME = testthread;
 			};
 			name = Release;
 		};
@@ -3016,7 +3016,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		FDD2C1070E2E4F4B00B7A85F /* Build configuration list for PBXNativeTarget "testhread" */ = {
+		FDD2C1070E2E4F4B00B7A85F /* Build configuration list for PBXNativeTarget "testthread" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FDD2C1080E2E4F4B00B7A85F /* Debug */,

@@ -29,8 +29,8 @@ TARGETS = \
 	testgl2$(EXE) \
 	testgles$(EXE) \
 	testhaptic$(EXE) \
-   testrumble$(EXE) \
-	testhread$(EXE) \
+	testrumble$(EXE) \
+	testthread$(EXE) \
 	testiconv$(EXE) \
 	testime$(EXE) \
 	testintersections$(EXE) \
@@ -141,7 +141,7 @@ testhaptic$(EXE): $(srcdir)/testhaptic.c
 testrumble$(EXE): $(srcdir)/testrumble.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testhread$(EXE): $(srcdir)/testhread.c
+testthread$(EXE): $(srcdir)/testthread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testiconv$(EXE): $(srcdir)/testiconv.c
