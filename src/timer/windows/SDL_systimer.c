@@ -99,6 +99,28 @@ SDL_GetTicks(void)
     return (ticks);
 }
 
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+    LARGE_INTEGER counter;
+
+    if (!QueryPerformanceCounter(&counter)) {
+        return SDL_GetTicks();
+    }
+    return counter.QuadPart;
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+    LARGE_INTEGER frequency;
+
+    if (!QueryPerformanceFrequency(&frequency)) {
+        return 1000;
+    }
+    return frequency.QuadPart;
+}
+
 void
 SDL_Delay(Uint32 ms)
 {

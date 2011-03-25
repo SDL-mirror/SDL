@@ -42,6 +42,18 @@ SDL_GetTicks(void)
     return ((system_time() - start) / 1000);
 }
 
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+    return system_time();
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+    return 1000000;
+}
+
 void
 SDL_Delay(Uint32 ms)
 {

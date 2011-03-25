@@ -64,6 +64,7 @@ SDL_GetTicks(void)
 #if HAVE_CLOCK_GETTIME
     Uint32 ticks;
     struct timespec now;
+
     clock_gettime(CLOCK_MONOTONIC, &now);
     ticks =
         (now.tv_sec - start.tv_sec) * 1000 + (now.tv_nsec -
@@ -72,11 +73,46 @@ SDL_GetTicks(void)
 #else
     Uint32 ticks;
     struct timeval now;
+
     gettimeofday(&now, NULL);
     ticks =
         (now.tv_sec - start.tv_sec) * 1000 + (now.tv_usec -
                                               start.tv_usec) / 1000;
     return (ticks);
+#endif
+}
+
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+#if HAVE_CLOCK_GETTIME
+    Uint64 ticks;
+    struct timespec now;
+
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    ticks = now.tv_sec;
+    ticks *= 1000000000;
+    ticks += now.tv_nsec;
+    return (ticks);
+#else
+    Uint64 ticks;
+    struct timeval now;
+
+    gettimeofday(&now, NULL);
+    ticks = now.tv_sec;
+    ticks *= 1000000;
+    ticks += now.tv_usec;
+    return (ticks);
+#endif
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+#if HAVE_CLOCK_GETTIME
+    return 1000000000;
+#else
+    return 1000000;
 #endif
 }
 

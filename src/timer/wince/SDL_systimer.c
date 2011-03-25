@@ -87,6 +87,18 @@ SDL_GetTicks()
     return ((Uint32) wce_rel_ticks());
 }
 
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+    return SDL_GetTicks();
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+    return 1000;
+}
+
 /* Give up approx. givem milliseconds to the OS. */
 void
 SDL_Delay(Uint32 ms)

@@ -29,8 +29,9 @@ callback(Uint32 interval, void *param)
 int
 main(int argc, char *argv[])
 {
-    int desired;
+    int i, desired;
     SDL_TimerID t1, t2, t3;
+    Uint64 start, now;
 
     if (SDL_Init(SDL_INIT_TIMER) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
@@ -85,6 +86,15 @@ main(int argc, char *argv[])
     SDL_RemoveTimer(t2);
     SDL_RemoveTimer(t3);
 
+    start = SDL_GetPerformanceCounter();
+    for (i = 0; i < 1000000; ++i) {
+        ticktock(0);
+    }
+    now = SDL_GetPerformanceCounter();
+    printf("1 million iterations of ticktock took %f ms\n", (double)((now - start)*1000) / SDL_GetPerformanceFrequency());
+
     SDL_Quit();
     return (0);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */
