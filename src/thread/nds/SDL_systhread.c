@@ -56,8 +56,16 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     return;
 }
 
+int
+SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    return (0);
+}
+
 void
 SDL_SYS_KillThread(SDL_Thread * thread)
 {
     return;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

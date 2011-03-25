@@ -45,6 +45,12 @@ SDL_ThreadID(void)
     return (0);
 }
 
+int
+SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    return (0);
+}
+
 void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {

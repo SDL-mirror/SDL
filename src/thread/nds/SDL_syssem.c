@@ -226,3 +226,5 @@ SDL_SemPost(SDL_sem * sem)
 }
 
 #endif /* DISABLE_THREADS */
+
+/* vi: set ts=4 sw=4 expandtab: */

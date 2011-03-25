@@ -281,19 +281,6 @@ SDL_CreateThread(int (SDLCALL * fn) (void *), void *data)
     return (thread);
 }
 
-void
-SDL_WaitThread(SDL_Thread * thread, int *status)
-{
-    if (thread) {
-        SDL_SYS_WaitThread(thread);
-        if (status) {
-            *status = thread->status;
-        }
-        SDL_DelThread(thread);
-        SDL_free(thread);
-    }
-}
-
 SDL_threadID
 SDL_GetThreadID(SDL_Thread * thread)
 {
@@ -305,6 +292,29 @@ SDL_GetThreadID(SDL_Thread * thread)
         id = SDL_ThreadID();
     }
     return id;
+}
+
+int
+SDL_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    if (!thread) {
+        SDL_SetError("SDL_SetThreadPriority() passed NULL thread");
+        return -1;
+    }
+    return SDL_SYS_SetThreadPriority(thread, priority);
+}
+
+void
+SDL_WaitThread(SDL_Thread * thread, int *status)
+{
+    if (thread) {
+        SDL_SYS_WaitThread(thread);
+        if (status) {
+            *status = thread->status;
+        }
+        SDL_DelThread(thread);
+        SDL_free(thread);
+    }
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

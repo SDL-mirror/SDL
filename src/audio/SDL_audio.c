@@ -974,6 +974,7 @@ open_audio_device(const char *devname, int iscapture,
             SDL_SetError("Couldn't create audio thread");
             return 0;
         }
+        SDL_SetThreadPriority(device->thread, SDL_THREAD_PRIORITY_HIGH);
     }
 
     return id + 1;

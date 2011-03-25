@@ -91,6 +91,33 @@ SDL_ThreadID(void)
     return ((SDL_threadID) pthread_self());
 }
 
+int
+SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    struct sched_param sched;
+    int policy;
+
+    if (pthread_getschedparam(thread->handle, &policy, &sched) < 0) {
+        SDL_SetError("pthread_getschedparam() failed");
+        return -1;
+    }
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        sched.sched_priority = sched_get_priority_min(policy);
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        sched.sched_priority = sched_get_priority_max(policy);
+    } else {
+        int min_priority = sched_get_priority_min(policy);
+        int max_priority = sched_get_priority_max(policy);
+        int priority = (min_priority + (max_priority - min_priority) / 2);
+        sched.sched_priority = priority;
+    }
+    if (pthread_setschedparam(thread->handle, policy, &sched) < 0) {
+        SDL_SetError("pthread_setschedparam() failed");
+        return -1;
+    }
+    return 0;
+}
+
 void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {

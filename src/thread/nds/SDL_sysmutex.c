@@ -140,3 +140,5 @@ SDL_mutexV(SDL_mutex * mutex)
     return 0;
 #endif /* DISABLE_THREADS */
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

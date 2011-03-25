@@ -90,6 +90,20 @@ SDL_ThreadID(void)
     return ((SDL_threadID) find_thread(NULL));
 }
 
+int
+SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    int32 new_priority = B_NORMAL_PRIORITY;
+
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        new_priority = B_LOW_PRIORITY;
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        new_priority = B_URGENT_DISPLAY_PRIORITY;
+    }
+    set_thread_priority(thread->handle, new_priority);
+    return 0;
+}
+
 void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {

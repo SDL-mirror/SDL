@@ -50,6 +50,16 @@ typedef struct SDL_Thread SDL_Thread;
 /* The SDL thread ID */
 typedef unsigned long SDL_threadID;
 
+/* The SDL thread priority
+ *
+ * Note: On many systems you require special privileges to set high priority.
+ */
+typedef enum {
+    SDL_THREAD_PRIORITY_LOW,
+    SDL_THREAD_PRIORITY_NORMAL,
+    SDL_THREAD_PRIORITY_HIGH
+} SDL_ThreadPriority;
+
 /* The function passed to SDL_CreateThread()
    It is passed a void* user context parameter and returns an int.
  */
@@ -145,6 +155,11 @@ extern DECLSPEC SDL_threadID SDLCALL SDL_ThreadID(void);
  *  Equivalent to SDL_ThreadID() if the specified thread is NULL.
  */
 extern DECLSPEC SDL_threadID SDLCALL SDL_GetThreadID(SDL_Thread * thread);
+
+/**
+ *  Set the thread priority
+ */
+extern DECLSPEC int SDLCALL SDL_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority);
 
 /**
  *  Wait for a thread to finish.

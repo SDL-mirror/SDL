@@ -155,6 +155,25 @@ SDL_ThreadID(void)
     return ((SDL_threadID) GetCurrentThreadId());
 }
 
+int
+SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+{
+    BOOL result;
+
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_LOWEST);
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_HIGHEST);
+    } else {
+        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_NORMAL);
+    }
+    if (!result) {
+        WIN_SetError("SetThreadPriority()");
+        return -1;
+    }
+    return 0;
+}
+
 void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {
