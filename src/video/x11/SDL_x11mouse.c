@@ -180,9 +180,11 @@ X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
     else bg.red = bg.green = bg.blue = 0;
 
     data_pixmap = XCreateBitmapFromData(display, DefaultRootWindow(display),
-                                        data_bits, surface->w, surface->h);
+                                        (char*)data_bits,
+                                        surface->w, surface->h);
     mask_pixmap = XCreateBitmapFromData(display, DefaultRootWindow(display),
-                                        mask_bits, surface->w, surface->h);
+                                        (char*)mask_bits,
+                                        surface->w, surface->h);
     cursor = XCreatePixmapCursor(display, data_pixmap, mask_pixmap,
                                  &fg, &bg, hot_x, hot_y);
 	XFreePixmap(display, data_pixmap);
