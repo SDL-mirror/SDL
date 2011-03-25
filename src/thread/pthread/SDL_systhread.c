@@ -23,7 +23,7 @@
 
 #include <pthread.h>
 #include <signal.h>
-#ifdef linux
+#ifdef __LINUX__
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <sys/syscall.h>
@@ -100,7 +100,7 @@ SDL_ThreadID(void)
 int
 SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
-#ifdef linux
+#ifdef __LINUX__
     int value;
 
     if (priority == SDL_THREAD_PRIORITY_LOW) {
