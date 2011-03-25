@@ -24,7 +24,7 @@ render(SDL_Renderer *renderer)
 
     /* Clear the screen */
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_SetRenderClear(renderer);
+    SDL_RenderClear(renderer);
 
     /*  Come up with a random rectangle */
     SDL_Rect rect;
@@ -74,7 +74,7 @@ main(int argc, char *argv[])
     }
 
     renderer = SDL_CreateRenderer(window, -1, 0);
-    if (renderer) {
+    if (!renderer) {
         printf("Could not create renderer\n");
         return 1;
     }
