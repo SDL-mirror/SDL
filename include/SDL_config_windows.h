@@ -76,7 +76,6 @@ typedef unsigned int uintptr_t;
 #else
 # define SIZEOF_VOIDP 4
 #endif
-#define SDL_HAS_64BIT_TYPE	1
 
 /* Enabled for SDL 1.2 (binary compatibility) */
 //#define HAVE_LIBC     1

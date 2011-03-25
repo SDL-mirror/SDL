@@ -48,8 +48,6 @@ typedef unsigned __PTRDIFF_TYPE__ uintptr_t;
 
 #define SIZEOF_VOIDP 4
 
-#define SDL_HAS_64BIT_TYPE	1
-
 /* Useful headers */
 #define HAVE_SYS_TYPES_H	1
 #define HAVE_STDIO_H	1

@@ -40,18 +40,12 @@ TestTypes(SDL_bool verbose)
                    (unsigned int)sizeof(Uint32));
         ++error;
     }
-#ifdef SDL_HAS_64BIT_TYPE
     if (badsize(sizeof(Uint64), 8)) {
         if (verbose)
             printf("sizeof(Uint64) != 8, instead = %u\n",
                    (unsigned int)sizeof(Uint64));
         ++error;
     }
-#else
-    if (verbose) {
-        printf("WARNING: No 64-bit datatype on this platform\n");
-    }
-#endif
     if (verbose && !error)
         printf("All data types are the expected size.\n");
 
@@ -68,15 +62,14 @@ TestEndian(SDL_bool verbose)
     Uint16 swapped16 = 0xABCD;
     Uint32 value32 = 0xEFBEADDE;
     Uint32 swapped32 = 0xDEADBEEF;
-#ifdef SDL_HAS_64BIT_TYPE
     Uint64 value64, swapped64;
+
     value64 = 0xEFBEADDE;
     value64 <<= 32;
     value64 |= 0xCDAB3412;
     swapped64 = 0x1234ABCD;
     swapped64 <<= 32;
     swapped64 |= 0xDEADBEEF;
-#endif
 
     if (verbose) {
         printf("Detected a %s endian machine.\n",
@@ -114,7 +107,6 @@ TestEndian(SDL_bool verbose)
         }
         ++error;
     }
-#ifdef SDL_HAS_64BIT_TYPE
     if (verbose) {
 #ifdef _MSC_VER
         printf("Value 64 = 0x%I64X, swapped = 0x%I64X\n", value64,
@@ -130,7 +122,6 @@ TestEndian(SDL_bool verbose)
         }
         ++error;
     }
-#endif
     return (error ? 1 : 0);
 }
 

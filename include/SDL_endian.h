@@ -153,7 +153,6 @@ SDL_Swap32(Uint32 x)
 }
 #endif
 
-#ifdef SDL_HAS_64BIT_TYPE
 #if defined(__GNUC__) && defined(__i386__)
 static __inline__ Uint64
 SDL_Swap64(Uint64 x)
@@ -195,14 +194,6 @@ SDL_Swap64(Uint64 x)
     return (x);
 }
 #endif
-#else
-/**
- *  This is mainly to keep compilers from complaining in SDL code.
- *  If there is no real 64-bit datatype, then compilers will complain about
- *  the fake 64-bit datatype that SDL provides when it compiles user code.
- */
-#define SDL_Swap64(X)	(X)
-#endif /* SDL_HAS_64BIT_TYPE */
 
 
 static __inline__ float

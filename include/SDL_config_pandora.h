@@ -34,7 +34,6 @@
 #define SIZEOF_VOIDP 4
 #endif
 
-#define SDL_HAS_64BIT_TYPE 1
 #define SDL_BYTEORDER 1234
 
 #define HAVE_ALLOCA_H 1

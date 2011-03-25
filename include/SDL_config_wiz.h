@@ -28,12 +28,6 @@
 /* General platform specific identifiers */
 #include "SDL_platform.h"
 
-/* Make sure that this isn't included by Visual C++ */
-#ifdef _MSC_VER
-#error You should copy include/SDL_config.h.default to include/SDL_config.h
-#endif
-
-#define SDL_HAS_64BIT_TYPE 1
 #define SDL_BYTEORDER 1234
 
 #define HAVE_ALLOCA_H 1

@@ -198,13 +198,6 @@ if test x$enable_libc = xyes; then
 
     dnl Check for typedefs, structures, etc.
     AC_TYPE_SIZE_T
-    if test x$ac_cv_header_inttypes_h = xyes -o x$ac_cv_header_stdint_h = xyes; then
-        AC_CHECK_TYPE(int64_t)
-        if test x$ac_cv_type_int64_t = xyes; then
-            AC_DEFINE(SDL_HAS_64BIT_TYPE)
-        fi
-        have_inttypes=yes
-    fi
 
     dnl Check for defines
     AC_CHECK_DEFINE(M_PI, math.h)
@@ -245,48 +238,6 @@ if test x$enable_libc = xyes; then
 fi
 
 AC_CHECK_SIZEOF(void*)
-if test x$have_inttypes != xyes; then
-    AC_CHECK_SIZEOF(char, 1)
-    AC_CHECK_SIZEOF(short, 2)
-    AC_CHECK_SIZEOF(int, 4)
-    AC_CHECK_SIZEOF(long, 4)
-    AC_CHECK_SIZEOF(long long, 8)
-    if test x$ac_cv_sizeof_char = x1; then
-        AC_DEFINE(int8_t, signed char)
-        AC_DEFINE(uint8_t, unsigned char)
-    fi
-    if test x$ac_cv_sizeof_short = x2; then
-        AC_DEFINE(int16_t, signed short)
-        AC_DEFINE(uint16_t, unsigned short)
-    else
-        if test x$ac_cv_sizeof_int = x2; then
-            AC_DEFINE(int16_t, signed int)
-            AC_DEFINE(uint16_t, unsigned int)
-        fi
-    fi
-    if test x$ac_cv_sizeof_int = x4; then
-        AC_DEFINE(int32_t, signed int)
-        AC_DEFINE(uint32_t, unsigned int)
-    else
-        if test x$ac_cv_sizeof_long = x4; then
-            AC_DEFINE(int32_t, signed long)
-            AC_DEFINE(uint32_t, unsigned long)
-        fi
-    fi
-    if test x$ac_cv_sizeof_long = x8; then
-        AC_DEFINE(int64_t, signed long)
-        AC_DEFINE(uint64_t, unsigned long)
-        AC_DEFINE(SDL_HAS_64BIT_TYPE)
-    else
-        if test x$ac_cv_sizeof_long_long = x8; then
-            AC_DEFINE(int64_t, signed long long)
-            AC_DEFINE(uint64_t, unsigned long long)
-            AC_DEFINE(SDL_HAS_64BIT_TYPE)
-        fi
-    fi
-    AC_DEFINE(size_t, unsigned int)
-    AC_DEFINE(uintptr_t, unsigned long)
-fi
 
 dnl See whether we can use gcc atomic operations on this architecture
 AC_ARG_ENABLE(gcc-atomics,

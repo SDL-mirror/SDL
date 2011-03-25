@@ -149,7 +149,6 @@ SDL_ScanUintPtrT(const char *text, int radix, uintptr_t * valuep)
 }
 #endif
 
-#ifdef SDL_HAS_64BIT_TYPE
 #if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOLL)
 static size_t
 SDL_ScanLongLong(const char *text, int radix, Sint64 * valuep)
@@ -222,7 +221,6 @@ SDL_ScanUnsignedLongLong(const char *text, int radix, Uint64 * valuep)
     return (text - textstart);
 }
 #endif
-#endif /* SDL_HAS_64BIT_TYPE */
 
 #if !defined(HAVE_SSCANF) || !defined(HAVE_STRTOD)
 static size_t
@@ -679,8 +677,6 @@ SDL_strtoul(const char *string, char **endp, int base)
 }
 #endif
 
-#ifdef SDL_HAS_64BIT_TYPE
-
 #ifndef HAVE__I64TOA
 char *
 SDL_lltoa(Sint64 value, char *string, int radix)
@@ -780,8 +776,6 @@ SDL_strtoull(const char *string, char **endp, int base)
     return value;
 }
 #endif
-
-#endif /* SDL_HAS_64BIT_TYPE */
 
 #ifndef HAVE_STRTOD
 double
@@ -976,7 +970,6 @@ SDL_sscanf(const char *text, const char *fmt, ...)
                     }
                     /* Fall through to %d handling */
                 case 'd':
-#ifdef SDL_HAS_64BIT_TYPE
                     if (inttype == DO_LONGLONG) {
                         Sint64 value;
                         text += SDL_ScanLongLong(text, radix, &value);
@@ -985,9 +978,7 @@ SDL_sscanf(const char *text, const char *fmt, ...)
                             *valuep = value;
                             ++retval;
                         }
-                    } else
-#endif /* SDL_HAS_64BIT_TYPE */
-                    {
+                    } else {
                         long value;
                         text += SDL_ScanLong(text, radix, &value);
                         if (!suppress) {
@@ -1031,7 +1022,6 @@ SDL_sscanf(const char *text, const char *fmt, ...)
                     }
                     /* Fall through to unsigned handling */
                 case 'u':
-#ifdef SDL_HAS_64BIT_TYPE
                     if (inttype == DO_LONGLONG) {
                         Uint64 value;
                         text += SDL_ScanUnsignedLongLong(text, radix, &value);
@@ -1040,9 +1030,7 @@ SDL_sscanf(const char *text, const char *fmt, ...)
                             *valuep = value;
                             ++retval;
                         }
-                    } else
-#endif /* SDL_HAS_64BIT_TYPE */
-                    {
+                    } else {
                         unsigned long value;
                         text += SDL_ScanUnsignedLong(text, radix, &value);
                         if (!suppress) {
@@ -1194,7 +1182,6 @@ SDL_PrintUnsignedLong(char *text, unsigned long value, int radix,
     return size;
 }
 
-#ifdef SDL_HAS_64BIT_TYPE
 static size_t
 SDL_PrintLongLong(char *text, Sint64 value, int radix, size_t maxlen)
 {
@@ -1226,7 +1213,7 @@ SDL_PrintUnsignedLongLong(char *text, Uint64 value, int radix, size_t maxlen)
 
     return size;
 }
-#endif /* SDL_HAS_64BIT_TYPE */
+
 static size_t
 SDL_PrintFloat(char *text, double arg, size_t maxlen)
 {
@@ -1343,16 +1330,10 @@ SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
                                           radix, maxlen);
                         break;
                     case DO_LONGLONG:
-#ifdef SDL_HAS_64BIT_TYPE
                         len =
                             SDL_PrintLongLong(text,
                                               va_arg(ap, Sint64),
                                               radix, maxlen);
-#else
-                        len =
-                            SDL_PrintLong(text, va_arg(ap, long),
-                                          radix, maxlen);
-#endif
                         break;
                     }
                     done = SDL_TRUE;
@@ -1392,20 +1373,11 @@ SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
                                                   radix, maxlen);
                         break;
                     case DO_LONGLONG:
-#ifdef SDL_HAS_64BIT_TYPE
                         len =
                             SDL_PrintUnsignedLongLong(text,
                                                       va_arg(ap,
                                                              Uint64),
                                                       radix, maxlen);
-#else
-                        len =
-                            SDL_PrintUnsignedLong(text,
-                                                  va_arg(ap,
-                                                         unsigned
-                                                         long),
-                                                  radix, maxlen);
-#endif
                         break;
                     }
                     if (do_lowercase) {

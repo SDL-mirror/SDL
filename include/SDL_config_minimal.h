@@ -47,7 +47,6 @@ typedef unsigned long long uint64_t;
 typedef unsigned long uintptr_t;
 #endif /* !_STDINT_H_ && !HAVE_STDINT_H */
 
-#define SDL_HAS_64BIT_TYPE
 #ifdef __GNUC__
 #define HAVE_GCC_SYNC_LOCK_TEST_AND_SET 1
 #endif
