@@ -111,6 +111,9 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
         value = 0;
     }
     if (setpriority(PRIO_PROCESS, syscall(SYS_gettid), value) < 0) {
+        /* Note that this fails if you're trying to set high priority
+           and you don't have root permission. BUT DON'T RUN AS ROOT!
+         */
         SDL_SetError("setpriority() failed");
         return -1;
     }
