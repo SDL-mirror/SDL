@@ -43,8 +43,8 @@ extern int SDL_SYS_CreateThread(SDL_Thread * thread, void *args);
 /* This function does any necessary setup in the child thread */
 extern void SDL_SYS_SetupThread(void);
 
-/* This function sets thread priority */
-extern int SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority);
+/* This function sets the current thread priority */
+extern int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority);
 
 /* This function waits for the thread to finish and frees any data
    allocated by SDL_SYS_CreateThread()

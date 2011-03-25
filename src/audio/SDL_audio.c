@@ -329,6 +329,9 @@ SDL_RunAudio(void *devicep)
     int silence;
     Uint32 delay;
 
+    /* The audio mixing is always a high priority thread */
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
+
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;
     int istream_len = 0;
@@ -974,7 +977,6 @@ open_audio_device(const char *devname, int iscapture,
             SDL_SetError("Couldn't create audio thread");
             return 0;
         }
-        SDL_SetThreadPriority(device->thread, SDL_THREAD_PRIORITY_HIGH);
     }
 
     return id + 1;

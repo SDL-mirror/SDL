@@ -156,18 +156,18 @@ SDL_ThreadID(void)
 }
 
 int
-SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
-    BOOL result;
+    int value;
 
     if (priority == SDL_THREAD_PRIORITY_LOW) {
-        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_LOWEST);
+        value = THREAD_PRIORITY_LOWEST;
     } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
-        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_HIGHEST);
+        value = THREAD_PRIORITY_HIGHEST;
     } else {
-        result = SetThreadPriority(thread->handle, THREAD_PRIORITY_NORMAL);
+        value = THREAD_PRIORITY_NORMAL;
     }
-    if (!result) {
+    if (!SetThreadPriority(GetCurrentThread(), value)) {
         WIN_SetError("SetThreadPriority()");
         return -1;
     }

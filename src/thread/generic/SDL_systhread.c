@@ -46,7 +46,7 @@ SDL_ThreadID(void)
 }
 
 int
-SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
     return (0);
 }

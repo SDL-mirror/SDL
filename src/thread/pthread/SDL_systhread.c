@@ -23,6 +23,11 @@
 
 #include <pthread.h>
 #include <signal.h>
+#ifdef linux
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <sys/syscall.h>
+#endif
 
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
@@ -33,6 +38,7 @@ static const int sig_list[] = {
     SIGHUP, SIGINT, SIGQUIT, SIGPIPE, SIGALRM, SIGTERM, SIGCHLD, SIGWINCH,
     SIGVTALRM, SIGPROF, 0
 };
+
 
 static void *
 RunThread(void *data)
@@ -92,12 +98,29 @@ SDL_ThreadID(void)
 }
 
 int
-SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
+#ifdef linux
+    int value;
+
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        value = 19;
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        value = -20;
+    } else {
+        value = 0;
+    }
+    if (setpriority(PRIO_PROCESS, syscall(SYS_gettid), value) < 0) {
+        SDL_SetError("setpriority() failed");
+        return -1;
+    }
+    return 0;
+#else
     struct sched_param sched;
     int policy;
+    pthread_t thread = pthread_self();
 
-    if (pthread_getschedparam(thread->handle, &policy, &sched) < 0) {
+    if (pthread_getschedparam(thread, &policy, &sched) < 0) {
         SDL_SetError("pthread_getschedparam() failed");
         return -1;
     }
@@ -108,14 +131,14 @@ SDL_SYS_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
     } else {
         int min_priority = sched_get_priority_min(policy);
         int max_priority = sched_get_priority_max(policy);
-        int priority = (min_priority + (max_priority - min_priority) / 2);
-        sched.sched_priority = priority;
+        sched.sched_priority = (min_priority + (max_priority - min_priority) / 2);
     }
-    if (pthread_setschedparam(thread->handle, policy, &sched) < 0) {
+    if (pthread_setschedparam(thread, policy, &sched) < 0) {
         SDL_SetError("pthread_setschedparam() failed");
         return -1;
     }
     return 0;
+#endif /* linux */
 }
 
 void

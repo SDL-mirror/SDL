@@ -157,9 +157,9 @@ extern DECLSPEC SDL_threadID SDLCALL SDL_ThreadID(void);
 extern DECLSPEC SDL_threadID SDLCALL SDL_GetThreadID(SDL_Thread * thread);
 
 /**
- *  Set the thread priority
+ *  Set the priority for the current thread
  */
-extern DECLSPEC int SDLCALL SDL_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority);
+extern DECLSPEC int SDLCALL SDL_SetThreadPriority(SDL_ThreadPriority priority);
 
 /**
  *  Wait for a thread to finish.

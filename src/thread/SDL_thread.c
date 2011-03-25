@@ -295,13 +295,9 @@ SDL_GetThreadID(SDL_Thread * thread)
 }
 
 int
-SDL_SetThreadPriority(SDL_Thread * thread, SDL_ThreadPriority priority)
+SDL_SetThreadPriority(SDL_ThreadPriority priority)
 {
-    if (!thread) {
-        SDL_SetError("SDL_SetThreadPriority() passed NULL thread");
-        return -1;
-    }
-    return SDL_SYS_SetThreadPriority(thread, priority);
+    return SDL_SYS_SetThreadPriority(priority);
 }
 
 void
