@@ -63,22 +63,37 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     
     window->driverdata = data;
     
-    window->flags &= ~SDL_WINDOW_RESIZABLE;        /* window is NEVER resizeable */
     window->flags |= SDL_WINDOW_FULLSCREEN;        /* window is always fullscreen */
     window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iPod touch, always shown */
-    window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    
 
     // SDL_WINDOW_BORDERLESS controls whether status bar is hidden.
     // This is only set if the window is on the main screen. Other screens
     //  just force the window to have the borderless flag.
-    if ([UIScreen mainScreen] == uiscreen) {
+    if ([UIScreen mainScreen] != uiscreen) {
+        window->flags &= ~SDL_WINDOW_RESIZABLE;  // window is NEVER resizeable
+        window->flags &= ~SDL_WINDOW_INPUT_FOCUS;  // never has input focus
+    } else {
+        window->flags |= SDL_WINDOW_INPUT_FOCUS;  // always has input focus
+
         if (window->flags & SDL_WINDOW_BORDERLESS) {
             [UIApplication sharedApplication].statusBarHidden = YES;
         } else {
             [UIApplication sharedApplication].statusBarHidden = NO;
         }
+
+        // Rotate the view if we have to, but only on the main screen
+        //  (presumably, an external display doesn't report orientation).
+        const CGSize uisize = [[uiscreen currentMode] size];
+        if ( ((window->w > window->h) && (uisize.width < uisize.height)) ||
+             ((window->w < window->h) && (uisize.width > uisize.height)) ) {
+            // !!! FIXME: flip orientation.
+        }
+
+        if (window->flags & SDL_WINDOW_RESIZABLE) {
+            // !!! FIXME: register for orientation change alerts.
+        }
     }
-    
+
     return 0;
     
 }

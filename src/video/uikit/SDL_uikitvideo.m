@@ -119,6 +119,32 @@ The main screen should list a AxB mode for portrait orientation, and then
 
 */
 
+static CGSize
+UIKit_ForcePortrait(const CGSize size)
+{
+    CGSize retval;
+    if (size.width < size.height) { // portrait
+        retval = size;
+    } else {  // landscape
+        retval.width = size.height;
+        retval.height = size.width;
+    }
+    return retval;
+}
+
+static CGSize
+UIKit_ForceLandscape(const CGSize size)
+{
+    CGSize retval;
+    if (size.width > size.height) { // landscape
+        retval = size;
+    } else {  // portrait
+        retval.width = size.height;
+        retval.height = size.width;
+    }
+    return retval;
+}
+
 static void
 UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
@@ -136,22 +162,42 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         mode.refresh_rate = 0;
         mode.driverdata = NULL;
         SDL_AddDisplayMode(display, &mode);
+        mode.w = (int) rect.size.height;  // swap the orientation, add again.
+        mode.h = (int) rect.size.width;
+        SDL_AddDisplayMode(display, &mode);
         return;
     }
 
+    const int ismain = (uiscreen == [UIScreen mainScreen]);
     const NSArray *modes = [uiscreen availableModes];
     const NSUInteger mode_count = [modes count];
     NSUInteger i;
     for (i = 0; i < mode_count; i++) {
         UIScreenMode *uimode = (UIScreenMode *) [modes objectAtIndex:i];
-        const CGSize size = [uimode size];
+        CGSize size = [uimode size];
         mode.format = SDL_PIXELFORMAT_ABGR8888;
-        mode.w = (int) size.width;
-        mode.h = (int) size.height;
         mode.refresh_rate = 0;
         mode.driverdata = uimode;
-        [uimode retain];
-        SDL_AddDisplayMode(display, &mode);
+        mode.w = (int) size.width;
+        mode.h = (int) size.height;
+        if (SDL_AddDisplayMode(display, &mode))
+            [uimode retain];
+
+        if (ismain) {
+            // Add the mode twice, flipped to portrait and landscape.
+            //  SDL_AddDisplayMode() will ignore duplicates.
+            size = UIKit_ForcePortrait([uimode size]);
+            mode.w = (int) size.width;
+            mode.h = (int) size.height;
+            if (SDL_AddDisplayMode(display, &mode))
+                [uimode retain];
+
+            size = UIKit_ForceLandscape(size);
+            mode.w = (int) size.width;
+            mode.h = (int) size.height;
+            if (SDL_AddDisplayMode(display, &mode))
+                [uimode retain];
+        }
     }
 }
 
