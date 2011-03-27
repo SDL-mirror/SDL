@@ -4,8 +4,13 @@
 #define SDL_NO_COMPAT
 #include "SDL.h"
 
+#ifdef __NDS__
+#define DEFAULT_WINDOW_WIDTH  256
+#define DEFAULT_WINDOW_HEIGHT (2*192)
+#else
 #define DEFAULT_WINDOW_WIDTH  640
 #define DEFAULT_WINDOW_HEIGHT 480
+#endif
 
 #define VERBOSE_VIDEO   0x00000001
 #define VERBOSE_MODES   0x00000002
