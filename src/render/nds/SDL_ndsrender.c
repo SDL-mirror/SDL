@@ -131,7 +131,7 @@ NDS_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     SDL_free(txdat);
 }
 
-/* size is no more than 1024. */
+/* size is no more than 512. */
 static int get_gltexture_size(unsigned int size)
 {
 	if (size > 256)
@@ -155,12 +155,10 @@ static int NDS_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     NDS_TextureData *txdat = (NDS_TextureData *) texture->driverdata;
 
-	SDL_Log("enter %s\n", __func__);
-
 	glLoadTileSet(txdat->image,
 				  rect->w, rect->h,
 				  rect->w, rect->h,
-				  GL_RGBA,
+				  texture->format == SDL_PIXELFORMAT_ABGR1555 ? GL_RGBA : GL_RGB,
 				  get_gltexture_size(rect->w),
 				  get_gltexture_size(rect->h),
 				  TEXGEN_OFF, 0, NULL,
@@ -185,7 +183,24 @@ static void NDS_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 
 static int NDS_RenderClear(SDL_Renderer *renderer)
 {
+    glClearColor(renderer->r >> 3,
+                 renderer->g >> 3,
+                 renderer->b >> 3,
+                 renderer->a >> 3);
+
+	return 0;
+}
+
+static void NDS_RenderPresent(SDL_Renderer * renderer)
+{
     NDS_RenderData *data = (NDS_RenderData *) renderer->driverdata;
+	static int frame =0;
+
+	glEnd2D();
+		
+	glFlush(0);
+
+	swiWaitForVBlank();
 
 	/* wait for capture unit to be ready */
 	while(REG_DISPCAPCNT & DCAP_ENABLE);
@@ -205,22 +220,6 @@ static int NDS_RenderClear(SDL_Renderer *renderer)
 	}
 
 	glBegin2D();
-
-    glClearColor(renderer->r >> 3,
-                 renderer->g >> 3,
-                 renderer->b >> 3,
-                 renderer->a >> 3);
-
-	return 0;
-}
-
-static void NDS_RenderPresent(SDL_Renderer * renderer)
-{
-//	SDL_Log("enter %s\n", __func__);
-
-	glEnd2D();
-		
-	glFlush( 0 );
 }
 
 static int NDS_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points,
@@ -323,14 +322,8 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
 
-    renderer->info.name = NDS_RenderDriver.info.name;
-    renderer->info.flags = 0;
-    renderer->info.num_texture_formats = NDS_RenderDriver.info.num_texture_formats;
-    SDL_memcpy(renderer->info.texture_formats,
-			   NDS_RenderDriver.info.texture_formats,
-               sizeof(renderer->info.texture_formats));
-    renderer->info.max_texture_width = NDS_RenderDriver.info.max_texture_width;
-    renderer->info.max_texture_height = NDS_RenderDriver.info.max_texture_height;
+    renderer->info = NDS_RenderDriver.info;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
 
 	renderer->UpdateViewport = NDS_UpdateViewport;
     renderer->CreateTexture = NDS_CreateTexture;
@@ -345,6 +338,8 @@ NDS_CreateRenderer(SDL_Window * window, Uint32 flags)
 	renderer->RenderDrawLines = NDS_RenderDrawLines;
 	renderer->RenderFillRects = NDS_RenderFillRects;
 
+	renderer->driverdata = data;
+
     return renderer;
 }
 
@@ -353,7 +348,7 @@ SDL_RenderDriver NDS_RenderDriver = {
     .info = {
 		.name = "nds",
 		.flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC,
-		.num_texture_formats = 1,
+		.num_texture_formats = 2,
 		.texture_formats = { [0] = SDL_PIXELFORMAT_ABGR1555,
 							 [1] = SDL_PIXELFORMAT_BGR555,
 		},

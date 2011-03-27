@@ -17,7 +17,7 @@ include $(DEVKITARM)/ds_rules
 #---------------------------------------------------------------------------------
 TARGET		:=	$(shell basename $(CURDIR))
 BUILD		:=	src
-SOURCES		:=	source
+SOURCES		:=	src
 DATA		:=	data
 INCLUDES	:=	include
 
@@ -53,7 +53,7 @@ endif
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS)
+LIBDIRS	:=	$(LIBNDS) $(PORTLIBS)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -171,7 +171,8 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
 
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD)
+			-I$(CURDIR)/$(BUILD) \
+			-I$(PORTLIBS)/include/SDL
 
 .PHONY: $(BUILD) clean all
 
@@ -186,15 +187,15 @@ $(BUILD): lib
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile.ds -s
 
 install: $(BUILD)
-	@cp $(OUTPUT) $(DEVKITPRO)/libnds/lib/
-	@mkdir -p $(DEVKITPRO)/libnds/include/SDL/
-	@cp include/*.h $(DEVKITPRO)/libnds/include/SDL/
+	@mkdir -p $(PORTLIBS)/include/SDL/
+	@rsync -a $(OUTPUT) $(PORTLIBS)/lib/
+	@rsync -a include/*.h $(PORTLIBS)/include/SDL/
 
 nds_test:
-	$(MAKE) -C test/nds-test-progs
+	$(MAKE) -C test/nds-test-progs -s
 
 tags:
-	etags $(SRCS)
+	cd $(SOURCES); etags $(CFILES)
 
 # This file must be compiled with the ARM instruction set, not
 # thumb. Use devkitpro way of doing things.
@@ -206,6 +207,8 @@ src/atomic/SDL_spinlock.arm.c: src/atomic/SDL_spinlock.c
 clean:
 	@echo clean ...
 	@cd src; rm -fr $(OFILES) $(OFILES:.o=.d) lib
+	@rm -f $(OUTPUT)
+	@make -C test/nds-test-progs -s clean
 
 #---------------------------------------------------------------------------------
 else

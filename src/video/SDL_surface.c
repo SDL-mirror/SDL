@@ -866,7 +866,7 @@ SDL_ConvertSurfaceFormat(SDL_Surface * surface, Uint32 pixel_format,
                          Uint32 flags)
 {
     SDL_PixelFormat *fmt;
-    SDL_Surface *convert;
+    SDL_Surface *convert = NULL;
 
     fmt = SDL_AllocFormat(pixel_format);
     if (fmt) {

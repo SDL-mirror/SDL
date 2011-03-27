@@ -249,6 +249,8 @@ static int NDS_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode 
 {
 	display->driverdata = mode->driverdata;
 
+    powerOn(POWER_ALL_2D);
+
 #ifdef USE_HW_RENDERER
 
 	videoSetMode(MODE_5_3D);
@@ -256,16 +258,12 @@ static int NDS_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode 
 
 	/* initialize gl2d */
 	glScreen2D();
+	glBegin2D();
 	
-    vramSetBankA(VRAM_A_TEXTURE);
+	vramSetBankA(VRAM_A_TEXTURE);
 	vramSetBankB(VRAM_B_TEXTURE );
-    vramSetBankC(VRAM_C_SUB_BG_0x06200000);
+	vramSetBankC(VRAM_C_SUB_BG_0x06200000);
 	vramSetBankE(VRAM_E_TEX_PALETTE);
-
-    powerOn(POWER_ALL_2D);
-
-    irqInit();
-    irqEnable(IRQ_VBLANK);
 
     // sub sprites hold the bottom image when 3D directed to top
     initSubSprites();
@@ -279,15 +277,10 @@ static int NDS_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode 
 	videoSetMode(MODE_5_2D);
 	videoSetModeSub(MODE_5_2D);
 
-    vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
+	vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
 	vramSetBankB(VRAM_B_TEXTURE );
-    vramSetBankC(VRAM_C_SUB_BG_0x06200000);
+	vramSetBankC(VRAM_C_SUB_BG_0x06200000);
 	vramSetBankE(VRAM_E_TEX_PALETTE);
-
-    powerOn(POWER_ALL_2D);
-
-    irqInit();
-    irqEnable(IRQ_VBLANK);
 
 #endif
 
@@ -311,7 +304,7 @@ static int NDS_VideoInit(_THIS)
 
 	SDL_zero(mode);
 
-    mode.format = SDL_PIXELFORMAT_UNKNOWN; // shoud be SDL_PIXELFORMAT_ABGR1555;
+    mode.format = SDL_PIXELFORMAT_UNKNOWN; // should be SDL_PIXELFORMAT_ABGR1555;
     mode.w = SCREEN_WIDTH;
     mode.h = 2*SCREEN_HEIGHT+SCREEN_GAP;
     mode.refresh_rate = 60;
@@ -379,8 +372,8 @@ static SDL_VideoDevice *NDS_CreateDevice(int devindex)
     device->PumpEvents = NDS_PumpEvents;
     device->free = NDS_DeleteDevice;
 
-	/* Set the debug output. Use only for under an emulator. Will crash the DS. */
-#if 1
+	/* Set the debug output. Use only under an emulator. Will crash the DS. */
+#if 0
 	SDL_LogSetOutputFunction(NDS_DebugOutput, NULL);
 #endif
 
@@ -391,5 +384,15 @@ VideoBootStrap NDS_bootstrap = {
     NDSVID_DRIVER_NAME, "SDL NDS video driver",
     NDS_Available, NDS_CreateDevice
 };
+
+double SDLCALL SDL_pow(double x, double y)
+{
+	static int once = 1;
+	if (once) {
+		SDL_Log("SDL_pow called but not supported on this platform");
+		once = 0;
+	}
+	return 0;
+}
 
 /* vi: set ts=4 sw=4 expandtab: */

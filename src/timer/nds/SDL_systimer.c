@@ -28,7 +28,7 @@
 
 #include "SDL_timer.h"
 
-/* Will wrap afetr 49 days. Shouldn't be an issue. */
+/* Will wrap after 49 days. Shouldn't be an issue. */
 static volatile Uint32 timer_ticks;
 
 static void

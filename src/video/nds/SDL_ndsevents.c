@@ -44,7 +44,9 @@ NDS_PumpEvents(_THIS)
         SDL_SendMouseButton(0, SDL_RELEASED, 0);
     }
     if (keysHeld() & KEY_TOUCH) {
-        touchPosition t = touchReadXY();
+		touchPosition t;
+
+		touchRead(&t);
         SDL_SendMouseMotion(0, 0, t.px, t.py);
     }
 }
