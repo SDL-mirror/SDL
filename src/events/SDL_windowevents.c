@@ -171,7 +171,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
 
         /* Fixes queue overflow with resize events that aren't processed */
         if (windowevent == SDL_WINDOWEVENT_RESIZED ||
-            windowevent == SDL_WINDOWEVENT_SIZE_CHANGED) &&
+            windowevent == SDL_WINDOWEVENT_SIZE_CHANGED) {
             SDL_FilterEvents(RemovePendingSizeEvents, &event);
         }
         if (windowevent == SDL_WINDOWEVENT_MOVED) {
