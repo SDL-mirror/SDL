@@ -40,6 +40,7 @@ struct SDL_WindowData
 {
     UIWindow *uiwindow;
     SDL_uikitopenglview *view;
+    SDL_uikitviewcontroller *viewcontroller;
 };
 
 

@@ -219,6 +219,9 @@ main(int argc, char *argv[])
     if (!state) {
         return 1;
     }
+
+    state->window_flags |= SDL_WINDOW_RESIZABLE;
+
     for (i = 1; i < argc;) {
         int consumed;
 

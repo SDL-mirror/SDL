@@ -117,13 +117,15 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     majorVersion: _this->gl_config.major_version];
     
     data->view = view;
-    
+    view->viewcontroller = data->viewcontroller;
+    if (view->viewcontroller != nil) {
+        [view->viewcontroller setView:view];
+        [view->viewcontroller retain];
+    }
+
     /* add the view to our window */
     [uiwindow addSubview: view ];
-    
-    /* Don't worry, the window retained the view */
-    [view release];
-    
+
     if ( UIKit_GL_MakeCurrent(_this, window, view) < 0 ) {
         UIKit_GL_DeleteContext(_this, view);
         return NULL;
@@ -140,8 +142,12 @@ void UIKit_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     /* the delegate has retained the view, this will release him */
     SDL_uikitopenglview *view = (SDL_uikitopenglview *)context;
-    /* this will also delete it */
+    if (view->viewcontroller) {
+        [view->viewcontroller setView:nil];
+        [view->viewcontroller release];
+    }
     [view removeFromSuperview];
+    [view release];
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

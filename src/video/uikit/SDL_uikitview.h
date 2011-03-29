@@ -30,6 +30,16 @@
 #define MAX_SIMULTANEOUS_TOUCHES 5
 #endif
 
+@interface SDL_uikitviewcontroller : UIViewController {
+@private
+    SDL_Window *window;
+}
+- (id)initWithSDLWindow:(SDL_Window *)_window;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
+- (void)loadView;
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration;
+@end
+
 /* *INDENT-OFF* */
 #if SDL_IPHONE_KEYBOARD
 @interface SDL_uikitview : UIView<UITextFieldDelegate> {
@@ -48,7 +58,9 @@
     UITextField *textField;
     BOOL keyboardVisible;
 #endif    
-    
+
+@public
+    SDL_uikitviewcontroller *viewcontroller;
 }
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;

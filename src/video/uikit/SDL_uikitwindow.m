@@ -38,6 +38,58 @@
 
 #include <Foundation/Foundation.h>
 
+@implementation SDL_uikitviewcontroller
+
+- (id)initWithSDLWindow:(SDL_Window *)_window {
+    [self init];
+    self->window = _window;
+    return self;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient {
+    return YES;
+}
+
+- (void)loadView  {
+    // do nothing.
+}
+
+// Send a resized event when the orientation changes.
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+    SDL_WindowData *data = self->window->driverdata;
+    UIWindow *uiwindow = data->uiwindow;
+    CGRect frame = [uiwindow frame];
+    const CGSize size = frame.size;
+    int w, h;
+
+    switch (toInterfaceOrientation) {
+        case UIInterfaceOrientationPortrait:
+        case UIInterfaceOrientationPortraitUpsideDown:
+            w = (size.width < size.height) ? size.width : size.height;
+            h = (size.width > size.height) ? size.width : size.height;
+            break;
+
+        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
+            w = (size.width > size.height) ? size.width : size.height;
+            h = (size.width < size.height) ? size.width : size.height;
+            break;
+
+        default:
+            SDL_assert(0 && "Unexpected interface orientation!");
+            return;
+    }
+    self->window->w = w;
+    self->window->h = h;
+    frame.size.width = w;
+    frame.size.height = h;
+    SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
+}
+
+@end
+
+
+
 static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bool created)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
@@ -51,6 +103,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         return -1;
     }
     data->uiwindow = uiwindow;
+    data->viewcontroller = nil;
     data->view = nil;
 
     /* Fill in the SDL window with the window data */
@@ -62,9 +115,11 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     }
     
     window->driverdata = data;
-    
+
+    // !!! FIXME: should we force this? Shouldn't specifying FULLSCREEN
+    // !!! FIXME:  imply BORDERLESS?
     window->flags |= SDL_WINDOW_FULLSCREEN;        /* window is always fullscreen */
-    window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iPod touch, always shown */
+    window->flags |= SDL_WINDOW_SHOWN;            /* only one window on iOS, always shown */
 
     // SDL_WINDOW_BORDERLESS controls whether status bar is hidden.
     // This is only set if the window is on the main screen. Other screens
@@ -72,6 +127,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     if ([UIScreen mainScreen] != uiscreen) {
         window->flags &= ~SDL_WINDOW_RESIZABLE;  // window is NEVER resizeable
         window->flags &= ~SDL_WINDOW_INPUT_FOCUS;  // never has input focus
+        window->flags |= SDL_WINDOW_BORDERLESS;  // never has a status bar.
     } else {
         window->flags |= SDL_WINDOW_INPUT_FOCUS;  // always has input focus
 
@@ -81,21 +137,34 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
             [UIApplication sharedApplication].statusBarHidden = NO;
         }
 
-        // Rotate the view if we have to, but only on the main screen
-        //  (presumably, an external display doesn't report orientation).
         const CGSize uisize = [[uiscreen currentMode] size];
-        if ( ((window->w > window->h) && (uisize.width < uisize.height)) ||
-             ((window->w < window->h) && (uisize.width > uisize.height)) ) {
-            // !!! FIXME: flip orientation.
-        }
+        const UIDeviceOrientation o = [[UIDevice currentDevice] orientation];
+        const BOOL landscape = (o == UIDeviceOrientationLandscapeLeft) ||
+                                   (o == UIDeviceOrientationLandscapeRight);
+        const BOOL rotate = ( ((window->w > window->h) && (!landscape)) ||
+                              ((window->w < window->h) && (landscape)) );
 
         if (window->flags & SDL_WINDOW_RESIZABLE) {
-            // !!! FIXME: register for orientation change alerts.
+            // The View Controller will handle rotating the view when the
+            //  device orientation changes. We expose these as resize events.
+            SDL_uikitviewcontroller *controller;
+            controller = [SDL_uikitviewcontroller alloc];
+            data->viewcontroller = [controller initWithSDLWindow:window];
+            [data->viewcontroller setTitle:@"SDL App"];  // !!! FIXME: hook up SDL_SetWindowTitle()
+            // !!! FIXME: if (rotate), force a "resize" right at the start
+        } else {
+            // Rotate the view if we have to, but only on the main screen
+            //  (presumably, an external display doesn't report orientation).
+            if (rotate) {
+                #define D2R(x) (M_PI * (x) / 180.0)   // degrees to radians.
+                [uiwindow setTransform:CGAffineTransformIdentity];
+                [uiwindow setTransform:CGAffineTransformMakeRotation(D2R(90))];
+                #undef D2R
+            }
         }
     }
 
     return 0;
-    
 }
 
 int
@@ -107,7 +176,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     // SDL currently puts this window at the start of display's linked list. We rely on this.
     SDL_assert(_this->windows == window);
 
-    /* We currently only handle a single window per display on iPhone */
+    /* We currently only handle a single window per display on iOS */
     if (window->next != NULL) {
         SDL_SetError("Only one window allowed per display.");
         return -1;
@@ -172,6 +241,7 @@ void
 UIKit_DestroyWindow(_THIS, SDL_Window * window) {
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     if (data) {
+        [data->viewcontroller release];
         [data->uiwindow release];
         SDL_free(data);
         window->driverdata = NULL;

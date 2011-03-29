@@ -121,9 +121,12 @@
         }
         /* end create buffers */
 
+        // !!! FIXME: use the screen this is on!
         /* Use the main screen scale (for retina display support) */
         if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
             self.contentScaleFactor = [UIScreen mainScreen].scale;
+
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     }
     return self;
 }
