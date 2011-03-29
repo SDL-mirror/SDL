@@ -79,8 +79,6 @@
             SDL_assert(0 && "Unexpected interface orientation!");
             return;
     }
-    self->window->w = w;
-    self->window->h = h;
     frame.size.width = w;
     frame.size.height = h;
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
