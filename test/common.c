@@ -1040,6 +1040,24 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
 				}
 			}
             break;
+
+        case SDL_WINDOWEVENT_RESIZED:
+            {
+                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
+                if (!window) {
+                    break;
+                }
+
+                for (i = 0; i < state->num_windows; ++i) {
+                    if (state->windows[i] == window) {
+                        if (state->renderers[i]) {
+                            SDL_RenderSetViewport(state->renderers[i], NULL);
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
         }
         break;
     case SDL_KEYDOWN:
