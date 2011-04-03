@@ -132,6 +132,7 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     }
 
     /* Make this window the current mouse focus for touch input */
+    /* !!! FIXME: only do this if this is the primary screen. */
     SDL_SetMouseFocus(window);
     SDL_SetKeyboardFocus(window);
 

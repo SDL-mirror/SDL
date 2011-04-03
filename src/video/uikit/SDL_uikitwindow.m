@@ -55,7 +55,8 @@
 }
 
 // Send a resized event when the orientation changes.
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
     CGRect frame = [uiwindow frame];
@@ -79,8 +80,11 @@
             SDL_assert(0 && "Unexpected interface orientation!");
             return;
     }
+
     frame.size.width = w;
     frame.size.height = h;
+    [uiwindow setFrame:frame];
+    [data->view updateFrame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 

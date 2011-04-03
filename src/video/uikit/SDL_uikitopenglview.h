@@ -45,7 +45,9 @@
     
     /* OpenGL name for the depth buffer that is attached to viewFramebuffer, if it exists (0 if it does not exist) */
     GLuint depthRenderbuffer;
-    
+
+    /* format of depthRenderbuffer */
+    GLenum depthBufferFormat;
 }
 
 @property (nonatomic, retain, readonly) EAGLContext *context;
@@ -61,6 +63,8 @@
     aBits:(int)aBits \
     depthBits:(int)depthBits \
     majorVersion:(int)majorVersion;
+
+- (void)updateFrame;
 
 @end
 /* *INDENT-ON* */

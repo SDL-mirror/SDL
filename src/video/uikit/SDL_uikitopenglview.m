@@ -50,7 +50,6 @@
       majorVersion:(int)majorVersion \
 {
     NSString *colorFormat=nil;
-    GLuint depthBufferFormat;
     BOOL useDepthBuffer;
     
     if (rBits == 8 && gBits == 8 && bBits == 8) {
@@ -62,6 +61,8 @@
         colorFormat = kEAGLColorFormatRGB565;
     }
     
+    depthBufferFormat = 0;
+
     if (depthBits == 24) {
         useDepthBuffer = YES;
         depthBufferFormat = GL_DEPTH_COMPONENT24_OES;
@@ -108,7 +109,7 @@
         
         glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
         glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
-        
+
         if (useDepthBuffer) {
             glGenRenderbuffersOES(1, &depthRenderbuffer);
             glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
@@ -126,9 +127,34 @@
         if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
             self.contentScaleFactor = [UIScreen mainScreen].scale;
 
-        self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        self.autoresizingMask = 0;  // don't allow autoresize, since we need to do some magic in -(void)updateFrame.
     }
     return self;
+}
+
+- (void)updateFrame {
+    glBindFramebufferOES(GL_FRAMEBUFFER_OES, viewFramebuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, 0);
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, 0);
+    glDeleteRenderbuffersOES(1, &viewRenderbuffer);
+
+    glGenRenderbuffersOES(1, &viewRenderbuffer);
+    glBindRenderbufferOES(GL_RENDERBUFFER_OES, viewRenderbuffer);
+    [context renderbufferStorage:GL_RENDERBUFFER_OES fromDrawable:(CAEAGLLayer*)self.layer];
+    glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, viewRenderbuffer);  
+
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_WIDTH_OES, &backingWidth);
+    glGetRenderbufferParameterivOES(GL_RENDERBUFFER_OES, GL_RENDERBUFFER_HEIGHT_OES, &backingHeight);
+
+    if (depthRenderbuffer != 0) {
+        glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
+        glRenderbufferStorageOES(GL_RENDERBUFFER_OES, depthBufferFormat, backingWidth, backingHeight);
+    }
+    
+    // !!! FIXME: use the screen this is on!
+    /* Use the main screen scale (for retina display support) */
+    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+        self.contentScaleFactor = [UIScreen mainScreen].scale;
 }
 
 - (void)setCurrentContext {

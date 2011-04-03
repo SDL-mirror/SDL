@@ -37,7 +37,7 @@
 - (id)initWithSDLWindow:(SDL_Window *)_window;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
 - (void)loadView;
-- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration;
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
 @end
 
 /* *INDENT-OFF* */
