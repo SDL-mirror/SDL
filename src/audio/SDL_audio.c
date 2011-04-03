@@ -328,13 +328,12 @@ SDL_RunAudio(void *devicep)
     void (SDLCALL * fill) (void *userdata, Uint8 * stream, int len);
     int silence;
     Uint32 delay;
-
-    /* The audio mixing is always a high priority thread */
-    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
-
     /* For streaming when the buffer sizes don't match up */
     Uint8 *istream;
     int istream_len = 0;
+
+    /* The audio mixing is always a high priority thread */
+    SDL_SetThreadPriority(SDL_THREAD_PRIORITY_HIGH);
 
     /* Perform any thread setup */
     device->threadid = SDL_ThreadID();
