@@ -30,6 +30,8 @@
 #include "software/SDL_render_sw_c.h"
 
 
+#define SDL_WINDOWRENDERDATA    "_SDL_WindowRenderData"
+
 #define CHECK_RENDERER_MAGIC(renderer, retval) \
     if (!renderer || renderer->magic != &renderer_magic) { \
         SDL_SetError("Invalid renderer"); \
@@ -123,6 +125,16 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
     int n = SDL_GetNumRenderDrivers();
     const char *hint;
 
+    if (!window) {
+        SDL_SetError("Invalid window");
+        return NULL;
+    }
+
+    if (SDL_GetRenderer(window)) {
+        SDL_SetError("Renderer already associated with window");
+        return NULL;
+    }
+
     hint = SDL_GetHint(SDL_HINT_RENDER_VSYNC);
     if (hint) {
         if (*hint == '0') {
@@ -178,6 +190,8 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->magic = &renderer_magic;
         renderer->window = window;
 
+        SDL_SetWindowData(window, SDL_WINDOWRENDERDATA, renderer);
+
         SDL_RenderSetViewport(renderer, NULL);
 
         SDL_AddEventWatch(SDL_RendererEventWatch, renderer);
@@ -206,6 +220,12 @@ SDL_CreateSoftwareRenderer(SDL_Surface * surface)
     SDL_SetError("SDL not built with rendering support");
     return NULL;
 #endif /* !SDL_RENDER_DISABLED */
+}
+
+SDL_Renderer *
+SDL_GetRenderer(SDL_Window * window)
+{
+    return (SDL_Renderer *)SDL_GetWindowData(window, SDL_WINDOWRENDERDATA);
 }
 
 int
@@ -1148,6 +1168,8 @@ SDL_DestroyRenderer(SDL_Renderer * renderer)
     while (renderer->textures) {
         SDL_DestroyTexture(renderer->textures);
     }
+
+    SDL_SetWindowData(renderer->window, SDL_WINDOWRENDERDATA, NULL);
 
     /* It's no longer magical... */
     renderer->magic = NULL;
