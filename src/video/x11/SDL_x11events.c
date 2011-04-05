@@ -65,6 +65,37 @@ static SDL_bool X11_KeyRepeat(Display *display, XEvent *event)
     return SDL_FALSE;
 }
 
+static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
+{
+    XEvent peekevent;
+    if (XPending(display)) {
+        /* according to the xlib docs, no specific mouse wheel events exist.
+           however, mouse wheel events trigger a button press and a button release
+           immediately. thus, checking if the same button was released at the same
+           time as it was pressed, should be an adequate hack to derive a mouse 
+           wheel event. */
+        XPeekEvent(display,&peekevent);
+        if ((peekevent.type           == ButtonRelease) &&
+            (peekevent.xbutton.button == event->xbutton.button) &&
+            (peekevent.xbutton.time   == event->xbutton.time)) {
+
+            /* by default, X11 only knows 5 buttons. on most 3 button + wheel mouse,
+               Button4 maps to wheel up, Button5 maps to wheel down. */
+            if (event->xbutton.button == Button4) {
+                *ticks = 1;
+            }
+            else {
+                *ticks = -1;
+            }
+
+            /* remove the following release event, as this is now a wheel event */
+            XNextEvent(display,&peekevent);
+            return SDL_TRUE;
+        }
+    }
+    return SDL_FALSE;
+}
+
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -316,7 +347,13 @@ X11_DispatchEvent(_THIS)
         break;
 
     case ButtonPress:{
-            SDL_SendMouseButton(data->window, SDL_PRESSED, xevent.xbutton.button);
+            int ticks = 0;
+            if (X11_IsWheelEvent(display,&xevent,&ticks) == SDL_TRUE) {
+                SDL_SendMouseWheel(data->window, 0, ticks);
+            }
+            else {
+                SDL_SendMouseButton(data->window, SDL_PRESSED, xevent.xbutton.button);
+            }
         }
         break;
 
