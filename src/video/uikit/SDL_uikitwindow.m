@@ -41,13 +41,35 @@
 @implementation SDL_uikitviewcontroller
 
 - (id)initWithSDLWindow:(SDL_Window *)_window {
-    [self init];
+    if ((self = [self init]) == nil) {
+        return nil;
+    }
     self->window = _window;
     return self;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient {
-    return YES;
+    if (self->window->flags & SDL_WINDOW_RESIZABLE) {
+        return YES;  // any orientation is okay.
+    }
+
+    // If not resizable, allow device to orient to other matching sizes
+    //  (that is, let the user turn the device upside down...same screen
+    //   dimensions, but it lets the user place the device where it's most
+    //   comfortable in relation to its physical buttons, headphone jack, etc).
+    switch (orient) {
+        case UIInterfaceOrientationLandscapeLeft:
+        case UIInterfaceOrientationLandscapeRight:
+            return (self->window->w >= self->window->h);
+
+        case UIInterfaceOrientationPortrait:
+        case UIInterfaceOrientationPortraitUpsideDown:
+            return (self->window->h >= self->window->w);
+
+        default: break;
+    }
+
+    return NO;  // Nothing else is acceptable.
 }
 
 - (void)loadView  {
@@ -56,10 +78,16 @@
 
 // Send a resized event when the orientation changes.
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+    if ((self->window->flags & SDL_WINDOW_RESIZABLE) == 0) {
+        return;   // don't care, we're just flipping over in this case.
+    }
+
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
-    CGRect frame = [uiwindow frame];
+    UIScreen *uiscreen = [uiwindow screen];
+    const int noborder = self->window->flags & SDL_WINDOW_BORDERLESS;
+    CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
     const CGSize size = frame.size;
     int w, h;
 
@@ -83,6 +111,9 @@
 
     frame.size.width = w;
     frame.size.height = h;
+    frame.origin.x = 0;
+    frame.origin.y = 0;
+
     [uiwindow setFrame:frame];
     [data->view updateFrame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
@@ -139,31 +170,20 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
             [UIApplication sharedApplication].statusBarHidden = NO;
         }
 
-        const CGSize uisize = [[uiscreen currentMode] size];
         const UIDeviceOrientation o = [[UIDevice currentDevice] orientation];
         const BOOL landscape = (o == UIDeviceOrientationLandscapeLeft) ||
                                    (o == UIDeviceOrientationLandscapeRight);
         const BOOL rotate = ( ((window->w > window->h) && (!landscape)) ||
                               ((window->w < window->h) && (landscape)) );
 
-        if (window->flags & SDL_WINDOW_RESIZABLE) {
-            // The View Controller will handle rotating the view when the
-            //  device orientation changes. We expose these as resize events.
-            SDL_uikitviewcontroller *controller;
-            controller = [SDL_uikitviewcontroller alloc];
-            data->viewcontroller = [controller initWithSDLWindow:window];
-            [data->viewcontroller setTitle:@"SDL App"];  // !!! FIXME: hook up SDL_SetWindowTitle()
-            // !!! FIXME: if (rotate), force a "resize" right at the start
-        } else {
-            // Rotate the view if we have to, but only on the main screen
-            //  (presumably, an external display doesn't report orientation).
-            if (rotate) {
-                #define D2R(x) (M_PI * (x) / 180.0)   // degrees to radians.
-                [uiwindow setTransform:CGAffineTransformIdentity];
-                [uiwindow setTransform:CGAffineTransformMakeRotation(D2R(90))];
-                #undef D2R
-            }
-        }
+        // The View Controller will handle rotating the view when the
+        //  device orientation changes. This will trigger resize events, if
+        //  appropriate.
+        SDL_uikitviewcontroller *controller;
+        controller = [SDL_uikitviewcontroller alloc];
+        data->viewcontroller = [controller initWithSDLWindow:window];
+        [data->viewcontroller setTitle:@"SDL App"];  // !!! FIXME: hook up SDL_SetWindowTitle()
+        // !!! FIXME: if (rotate), force a "resize" right at the start
     }
 
     return 0;
@@ -174,6 +194,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
 {
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
+    const BOOL external = ([UIScreen mainScreen] != uiscreen);
 
     // SDL currently puts this window at the start of display's linked list. We rely on this.
     SDL_assert(_this->windows == window);
@@ -187,7 +208,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     // Non-mainscreen windows must be force to borderless, as there's no
     //  status bar there, and we want to get the right dimensions later in
     //  this function.
-    if ([UIScreen mainScreen] != uiscreen) {
+    if (external) {
         window->flags |= SDL_WINDOW_BORDERLESS;
     }
 
@@ -225,8 +246,12 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
         uiwindow = [uiwindow initWithFrame:[uiscreen bounds]];
     else
         uiwindow = [uiwindow initWithFrame:[uiscreen applicationFrame]];
-
-    if (SDL_UIKit_supports_multiple_displays) {
+    
+    // put the window on an external display if appropriate. This implicitly
+    //  does [uiwindow setframe:[uiscreen bounds]], so don't do it on the
+    //  main display, where we land by default, as that would eat the
+    //  status bar real estate.
+    if (external) {
         [uiwindow setScreen:uiscreen];
     }
 
