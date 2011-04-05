@@ -772,7 +772,22 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
 
     if (SDL_IsShapedWindow(window))
         X11_ResizeWindowShape(window);
-    XResizeWindow(display, data->xwindow, window->w, window->h);
+    if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
+         /* Apparently, if the X11 Window is set to a 'non-resizable' window, you cannot resize it using the XResizeWindow, thus
+            we must set the size hints to adjust the window size.*/
+         XSizeHints *sizehints = XAllocSizeHints();
+         long userhints;
+
+         XGetWMNormalHints(display, data->xwindow, sizehints, &userhints);
+
+         sizehints->min_width = sizehints->max_height = window->w;
+         sizehints->min_height = sizehints->max_height = window->h;
+
+         XSetWMNormalHints(display, data->xwindow, sizehints);
+
+         XFree(sizehints);
+    } else
+        XResizeWindow(display, data->xwindow, window->w, window->h);
     XFlush(display);
 }
 
