@@ -28,6 +28,7 @@
 }
 
 +(SDLUIKitDelegate *)sharedAppDelegate;
++(NSString *)getAppDelegateClassName;
 
 @end
 /* *INDENT-ON* */

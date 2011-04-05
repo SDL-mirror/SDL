@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
     forward_argv[i] = NULL;
 
     /* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
-    UIApplicationMain(argc, argv, NULL, @"SDLUIKitDelegate");
+    UIApplicationMain(argc, argv, NULL, [SDLUIKitDelegate getAppDelegateClassName]);
     
     [pool release];
     return 0;
@@ -62,6 +62,12 @@ int main(int argc, char **argv) {
 +(SDLUIKitDelegate *)sharedAppDelegate {
     /* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
     return (SDLUIKitDelegate *)[[UIApplication sharedApplication] delegate];
+}
+
++(NSString *)getAppDelegateClassName {
+    /* subclassing notice: when you subclass this appdelegate, make sure to add a category to override
+       this method and return the actual name of the delegate */
+    return @"SDLUIKitDelegate";
 }
 
 - (id)init {
@@ -90,8 +96,7 @@ int main(int argc, char **argv) {
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
     
-    [self performSelector:@selector(postFinishLaunch) withObject:nil
-afterDelay:0.0];
+    [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 
     return YES;
 }
@@ -113,7 +118,7 @@ afterDelay:0.0];
         return;
     }
 	
-	SDL_Window *window;
+    SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
