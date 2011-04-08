@@ -295,9 +295,6 @@
     <ClInclude Include="..\..\src\video\SDL_glfuncs.h" />
     <ClInclude Include="..\..\src\joystick\SDL_joystick_c.h" />
     <ClInclude Include="..\..\src\events\SDL_keyboard_c.h" />
-    <ClInclude Include="..\..\src\audio\SDL_mixer_m68k.h" />
-    <ClInclude Include="..\..\src\audio\SDL_mixer_MMX.h" />
-    <ClInclude Include="..\..\src\audio\SDL_mixer_MMX_VC.h" />
     <ClInclude Include="..\..\src\events\SDL_mouse_c.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullevents_c.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullvideo.h" />
@@ -403,9 +400,6 @@
     <ClCompile Include="..\..\src\events\SDL_keyboard.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_malloc.c" />
     <ClCompile Include="..\..\src\audio\SDL_mixer.c" />
-    <ClCompile Include="..\..\src\audio\SDL_mixer_m68k.c" />
-    <ClCompile Include="..\..\src\audio\SDL_mixer_MMX.c" />
-    <ClCompile Include="..\..\src\audio\SDL_mixer_MMX_VC.c" />
     <ClCompile Include="..\..\src\joystick\windows\SDL_mmjoystick.c" />
     <ClCompile Include="..\..\src\events\SDL_mouse.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullevents.c" />

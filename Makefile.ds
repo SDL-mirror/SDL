@@ -84,9 +84,6 @@ CFILES		:=	\
 			audio/SDL_audiodev.c \
 			audio/SDL_audiotypecvt.c \
 			audio/SDL_mixer.c \
-			audio/SDL_mixer_MMX.c \
-			audio/SDL_mixer_MMX_VC.c \
-			audio/SDL_mixer_m68k.c \
 			audio/SDL_wave.c \
 			audio/nds/SDL_ndsaudio.c \
 			cpuinfo/SDL_cpuinfo.c \

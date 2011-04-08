@@ -20730,9 +20730,6 @@ SOURCE=..\..\src\audio\SDL_mixer.c
 !IF  "$(CFG)" == "SDL - Win32 (WCE MIPSII_FP) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20753,9 +20750,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII_FP) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20776,9 +20770,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20799,9 +20790,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20824,9 +20812,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20847,9 +20832,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20880,18 +20862,12 @@ DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_thread.h"\
 	"..\..\include\SDL_timer.h"\
 	"..\..\include\SDL_types.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20912,9 +20888,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20935,9 +20908,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE emulator) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20958,9 +20928,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE emulator) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -20989,9 +20956,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4I) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21012,9 +20976,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4I) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21035,9 +20996,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV_FP) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21058,9 +21016,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV_FP) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21081,9 +21036,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21112,9 +21064,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21145,9 +21094,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21168,9 +21114,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21189,9 +21132,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4T) Release"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21212,9 +21152,6 @@ NODEP_CPP_SDL_MI=\
 !ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4T) Debug"
 
 DEP_CPP_SDL_MI=\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21237,9 +21174,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21277,9 +21211,6 @@ DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_stdinc.h"\
 	"..\..\include\SDL_thread.h"\
 	"..\..\include\SDL_timer.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 
@@ -21305,9 +21236,6 @@ DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_stdinc.h"\
 	"..\..\include\SDL_thread.h"\
 	"..\..\include\SDL_timer.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 
@@ -21333,9 +21261,6 @@ DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_stdinc.h"\
 	"..\..\include\SDL_thread.h"\
 	"..\..\include\SDL_timer.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21347,9 +21272,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21370,9 +21292,6 @@ NODEP_CPP_SDL_MI=\
 DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_cpuinfo.h"\
 	"..\..\include\SDL_thread.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
 	
 NODEP_CPP_SDL_MI=\
@@ -21403,487 +21322,7 @@ DEP_CPP_SDL_MI=\
 	"..\..\include\SDL_thread.h"\
 	"..\..\include\SDL_timer.h"\
 	"..\..\include\SDL_types.h"\
-	"..\..\src\audio\SDL_mixer_m68k.h"\
-	"..\..\src\audio\SDL_mixer_MMX.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
 	"..\..\src\audio\SDL_sysaudio.h"\
-	
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\audio\SDL_mixer_MMX_VC.c
-
-!IF  "$(CFG)" == "SDL - Win32 (WCE MIPSII_FP) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII_FP) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSII) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE SH4) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE SH4) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE SH3) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE emulator) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE emulator) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4I) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4I) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV_FP) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPSIV_FP) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPS16) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPS16) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4T) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARMV4T) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config.h"\
-	"..\include\SDL_config_amiga.h"\
-	"..\include\SDL_config_dreamcast.h"\
-	"..\include\SDL_config_macos.h"\
-	"..\include\SDL_config_macosx.h"\
-	"..\include\SDL_config_os2.h"\
-	"..\include\SDL_config_win32.h"\
-	"..\include\SDL_config_wince.h"\
-	"..\include\SDL_platform.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE x86) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE x86) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARM) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE ARM) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPS) Debug"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE MIPS) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
-	
-
-!ELSEIF  "$(CFG)" == "SDL - Win32 (WCE SH3) Release"
-
-DEP_CPP_SDL_MIX=\
-	"..\..\include\SDL_config.h"\
-	"..\..\include\SDL_config_amiga.h"\
-	"..\..\include\SDL_config_dreamcast.h"\
-	"..\..\include\SDL_config_macos.h"\
-	"..\..\include\SDL_config_macosx.h"\
-	"..\..\include\SDL_config_os2.h"\
-	"..\..\include\SDL_config_win32.h"\
-	"..\..\include\SDL_platform.h"\
-	"..\..\src\audio\SDL_mixer_MMX_VC.h"\
-	
-NODEP_CPP_SDL_MIX=\
-	"..\include\SDL_config_wince.h"\
 	
 
 !ENDIF 
@@ -41880,18 +41319,6 @@ SOURCE=..\..\include\SDL_main.h
 # Begin Source File
 
 SOURCE=..\..\src\video\SDL_memops.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\audio\SDL_mixer_m68k.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\audio\SDL_mixer_MMX.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\src\audio\SDL_mixer_MMX_VC.h
 # End Source File
 # Begin Source File
 

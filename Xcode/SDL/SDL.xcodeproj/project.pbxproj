@@ -166,12 +166,6 @@
 		04BD002B12E6671800899322 /* SDL_audiomem.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDB912E6671700899322 /* SDL_audiomem.h */; };
 		04BD002C12E6671800899322 /* SDL_audiotypecvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBA12E6671700899322 /* SDL_audiotypecvt.c */; };
 		04BD002D12E6671800899322 /* SDL_mixer.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBB12E6671700899322 /* SDL_mixer.c */; };
-		04BD002E12E6671800899322 /* SDL_mixer_m68k.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBC12E6671700899322 /* SDL_mixer_m68k.c */; };
-		04BD002F12E6671800899322 /* SDL_mixer_m68k.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDBD12E6671700899322 /* SDL_mixer_m68k.h */; };
-		04BD003012E6671800899322 /* SDL_mixer_MMX.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBE12E6671700899322 /* SDL_mixer_MMX.c */; };
-		04BD003112E6671800899322 /* SDL_mixer_MMX.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDBF12E6671700899322 /* SDL_mixer_MMX.h */; };
-		04BD003212E6671800899322 /* SDL_mixer_MMX_VC.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDC012E6671700899322 /* SDL_mixer_MMX_VC.c */; };
-		04BD003312E6671800899322 /* SDL_mixer_MMX_VC.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC112E6671700899322 /* SDL_mixer_MMX_VC.h */; };
 		04BD003412E6671800899322 /* SDL_sysaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC212E6671700899322 /* SDL_sysaudio.h */; };
 		04BD003512E6671800899322 /* SDL_wave.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDC312E6671700899322 /* SDL_wave.c */; };
 		04BD003612E6671800899322 /* SDL_wave.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC412E6671700899322 /* SDL_wave.h */; };
@@ -330,12 +324,6 @@
 		04BD024712E6671800899322 /* SDL_audiomem.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDB912E6671700899322 /* SDL_audiomem.h */; };
 		04BD024812E6671800899322 /* SDL_audiotypecvt.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBA12E6671700899322 /* SDL_audiotypecvt.c */; };
 		04BD024912E6671800899322 /* SDL_mixer.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBB12E6671700899322 /* SDL_mixer.c */; };
-		04BD024A12E6671800899322 /* SDL_mixer_m68k.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBC12E6671700899322 /* SDL_mixer_m68k.c */; };
-		04BD024B12E6671800899322 /* SDL_mixer_m68k.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDBD12E6671700899322 /* SDL_mixer_m68k.h */; };
-		04BD024C12E6671800899322 /* SDL_mixer_MMX.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDBE12E6671700899322 /* SDL_mixer_MMX.c */; };
-		04BD024D12E6671800899322 /* SDL_mixer_MMX.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDBF12E6671700899322 /* SDL_mixer_MMX.h */; };
-		04BD024E12E6671800899322 /* SDL_mixer_MMX_VC.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDC012E6671700899322 /* SDL_mixer_MMX_VC.c */; };
-		04BD024F12E6671800899322 /* SDL_mixer_MMX_VC.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC112E6671700899322 /* SDL_mixer_MMX_VC.h */; };
 		04BD025012E6671800899322 /* SDL_sysaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC212E6671700899322 /* SDL_sysaudio.h */; };
 		04BD025112E6671800899322 /* SDL_wave.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFDC312E6671700899322 /* SDL_wave.c */; };
 		04BD025212E6671800899322 /* SDL_wave.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFDC412E6671700899322 /* SDL_wave.h */; };
@@ -666,12 +654,6 @@
 		04BDFDB912E6671700899322 /* SDL_audiomem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_audiomem.h; sourceTree = "<group>"; };
 		04BDFDBA12E6671700899322 /* SDL_audiotypecvt.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_audiotypecvt.c; sourceTree = "<group>"; };
 		04BDFDBB12E6671700899322 /* SDL_mixer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_mixer.c; sourceTree = "<group>"; };
-		04BDFDBC12E6671700899322 /* SDL_mixer_m68k.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_mixer_m68k.c; sourceTree = "<group>"; };
-		04BDFDBD12E6671700899322 /* SDL_mixer_m68k.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_mixer_m68k.h; sourceTree = "<group>"; };
-		04BDFDBE12E6671700899322 /* SDL_mixer_MMX.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_mixer_MMX.c; sourceTree = "<group>"; };
-		04BDFDBF12E6671700899322 /* SDL_mixer_MMX.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_mixer_MMX.h; sourceTree = "<group>"; };
-		04BDFDC012E6671700899322 /* SDL_mixer_MMX_VC.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_mixer_MMX_VC.c; sourceTree = "<group>"; };
-		04BDFDC112E6671700899322 /* SDL_mixer_MMX_VC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_mixer_MMX_VC.h; sourceTree = "<group>"; };
 		04BDFDC212E6671700899322 /* SDL_sysaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysaudio.h; sourceTree = "<group>"; };
 		04BDFDC312E6671700899322 /* SDL_wave.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_wave.c; sourceTree = "<group>"; };
 		04BDFDC412E6671700899322 /* SDL_wave.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_wave.h; sourceTree = "<group>"; };
@@ -1166,12 +1148,6 @@
 				04BDFDB912E6671700899322 /* SDL_audiomem.h */,
 				04BDFDBA12E6671700899322 /* SDL_audiotypecvt.c */,
 				04BDFDBB12E6671700899322 /* SDL_mixer.c */,
-				04BDFDBC12E6671700899322 /* SDL_mixer_m68k.c */,
-				04BDFDBD12E6671700899322 /* SDL_mixer_m68k.h */,
-				04BDFDBE12E6671700899322 /* SDL_mixer_MMX.c */,
-				04BDFDBF12E6671700899322 /* SDL_mixer_MMX.h */,
-				04BDFDC012E6671700899322 /* SDL_mixer_MMX_VC.c */,
-				04BDFDC112E6671700899322 /* SDL_mixer_MMX_VC.h */,
 				04BDFDC212E6671700899322 /* SDL_sysaudio.h */,
 				04BDFDC312E6671700899322 /* SDL_wave.c */,
 				04BDFDC412E6671700899322 /* SDL_wave.h */,
@@ -1681,9 +1657,6 @@
 				04BD002712E6671800899322 /* SDL_audio_c.h in Headers */,
 				04BD002A12E6671800899322 /* SDL_audiodev_c.h in Headers */,
 				04BD002B12E6671800899322 /* SDL_audiomem.h in Headers */,
-				04BD002F12E6671800899322 /* SDL_mixer_m68k.h in Headers */,
-				04BD003112E6671800899322 /* SDL_mixer_MMX.h in Headers */,
-				04BD003312E6671800899322 /* SDL_mixer_MMX_VC.h in Headers */,
 				04BD003412E6671800899322 /* SDL_sysaudio.h in Headers */,
 				04BD003612E6671800899322 /* SDL_wave.h in Headers */,
 				04BD004212E6671800899322 /* blank_cursor.h in Headers */,
@@ -1796,9 +1769,6 @@
 				04BD024312E6671800899322 /* SDL_audio_c.h in Headers */,
 				04BD024612E6671800899322 /* SDL_audiodev_c.h in Headers */,
 				04BD024712E6671800899322 /* SDL_audiomem.h in Headers */,
-				04BD024B12E6671800899322 /* SDL_mixer_m68k.h in Headers */,
-				04BD024D12E6671800899322 /* SDL_mixer_MMX.h in Headers */,
-				04BD024F12E6671800899322 /* SDL_mixer_MMX_VC.h in Headers */,
 				04BD025012E6671800899322 /* SDL_sysaudio.h in Headers */,
 				04BD025212E6671800899322 /* SDL_wave.h in Headers */,
 				04BD025D12E6671800899322 /* blank_cursor.h in Headers */,
@@ -2111,9 +2081,6 @@
 				04BD002912E6671800899322 /* SDL_audiodev.c in Sources */,
 				04BD002C12E6671800899322 /* SDL_audiotypecvt.c in Sources */,
 				04BD002D12E6671800899322 /* SDL_mixer.c in Sources */,
-				04BD002E12E6671800899322 /* SDL_mixer_m68k.c in Sources */,
-				04BD003012E6671800899322 /* SDL_mixer_MMX.c in Sources */,
-				04BD003212E6671800899322 /* SDL_mixer_MMX_VC.c in Sources */,
 				04BD003512E6671800899322 /* SDL_wave.c in Sources */,
 				04BD004112E6671800899322 /* SDL_cpuinfo.c in Sources */,
 				04BD004812E6671800899322 /* SDL_clipboardevents.c in Sources */,
@@ -2226,9 +2193,6 @@
 				04BD024512E6671800899322 /* SDL_audiodev.c in Sources */,
 				04BD024812E6671800899322 /* SDL_audiotypecvt.c in Sources */,
 				04BD024912E6671800899322 /* SDL_mixer.c in Sources */,
-				04BD024A12E6671800899322 /* SDL_mixer_m68k.c in Sources */,
-				04BD024C12E6671800899322 /* SDL_mixer_MMX.c in Sources */,
-				04BD024E12E6671800899322 /* SDL_mixer_MMX_VC.c in Sources */,
 				04BD025112E6671800899322 /* SDL_wave.c in Sources */,
 				04BD025C12E6671800899322 /* SDL_cpuinfo.c in Sources */,
 				04BD026312E6671800899322 /* SDL_clipboardevents.c in Sources */,

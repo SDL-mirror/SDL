@@ -929,30 +929,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\SDL_mixer_m68k.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\SDL_mixer_m68k.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\SDL_mixer_MMX.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\SDL_mixer_MMX.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\SDL_mixer_MMX_VC.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\SDL_mixer_MMX_VC.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\joystick\windows\SDL_mmjoystick.c"
 			>
 		</File>
