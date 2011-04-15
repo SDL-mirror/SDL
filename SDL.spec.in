@@ -4,7 +4,7 @@ Version: @SDL_VERSION@
 Release: 1
 Source: http://www.libsdl.org/release/%{name}-%{version}.tar.gz
 URL: http://www.libsdl.org/
-License: LGPL
+License: zlib
 Group: System Environment/Libraries
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Prefix: %{_prefix}
