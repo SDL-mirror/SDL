@@ -169,7 +169,7 @@ extern DECLSPEC SDL_assert_state SDLCALL SDL_ReportAssertion(SDL_assert_data *,
 
 
 typedef SDL_assert_state (SDLCALL *SDL_AssertionHandler)(
-                                    const SDL_assert_data *, void *userdata);
+                                 const SDL_assert_data* data, void* userdata);
 
 /**
  *  \brief Set an application-defined assertion handler.
