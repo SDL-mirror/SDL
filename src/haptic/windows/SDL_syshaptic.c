@@ -549,6 +549,8 @@ SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
     HRESULT ret;
     DIDEVICEINSTANCE hap_instance, joy_instance;
+    hap_instance.dwSize = sizeof(DIDEVICEINSTANCE);
+    joy_instance.dwSize = sizeof(DIDEVICEINSTANCE);
 
     /* Get the device instances. */
     ret = IDirectInputDevice2_GetDeviceInfo(haptic->hwdata->device,
@@ -578,6 +580,7 @@ SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
     int i, ret;
     HRESULT idret;
     DIDEVICEINSTANCE joy_instance;
+    joy_instance.dwSize = sizeof(DIDEVICEINSTANCE);
 
     /* Since it comes from a joystick we have to try to match it with a haptic device on our haptic list. */
     for (i=0; i<SDL_numhaptics; i++) {
