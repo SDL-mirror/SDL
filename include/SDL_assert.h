@@ -205,7 +205,7 @@ extern DECLSPEC void SDLCALL SDL_SetAssertionHandler(
  *
  *  <code>
  *  const SDL_assert_data *item = SDL_GetAssertionReport();
- *  while (item->condition) {
+ *  while (item) {
  *      printf("'%s', %s (%s:%d), triggered %u times, always ignore: %s.\n",
  *             item->condition, item->function, item->filename,
  *             item->linenum, item->trigger_count,
@@ -214,8 +214,7 @@ extern DECLSPEC void SDLCALL SDL_SetAssertionHandler(
  *  }
  *  </code>
  *
- *  \return List of all assertions. This never returns NULL,
- *          even if there are no items.
+ *  \return List of all assertions.
  *  \sa SDL_ResetAssertionReport
  */
 extern DECLSPEC const SDL_assert_data * SDLCALL SDL_GetAssertionReport(void);

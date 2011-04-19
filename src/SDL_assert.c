@@ -44,8 +44,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata);
  * We keep all triggered assertions in a singly-linked list so we can
  *  generate a report later.
  */
-static SDL_assert_data assertion_list_terminator = { 0, 0, 0, 0, 0, 0, 0 };
-static SDL_assert_data *triggered_assertions = &assertion_list_terminator;
+static SDL_assert_data *triggered_assertions = NULL;
 
 static SDL_mutex *assertion_mutex = NULL;
 static SDL_AssertionHandler assertion_handler = SDL_PromptAssertion;
@@ -217,7 +216,8 @@ static void SDL_AddAssertionToReport(SDL_assert_data *data)
 {
     /* (data) is always a static struct defined with the assert macros, so
        we don't have to worry about copying or allocating them. */
-    if (data->next == NULL) {  /* not yet added? */
+    data->trigger_count++;
+    if (data->trigger_count == 1) {  /* not yet added? */
         data->next = triggered_assertions;
         triggered_assertions = data;
     }
@@ -226,19 +226,14 @@ static void SDL_AddAssertionToReport(SDL_assert_data *data)
 
 static void SDL_GenerateAssertionReport(void)
 {
-    const SDL_assert_data *item;
+    const SDL_assert_data *item = triggered_assertions;
 
     /* only do this if the app hasn't assigned an assertion handler. */
-    if (assertion_handler != SDL_PromptAssertion)
-        return;
-
-    item = SDL_GetAssertionReport();
-    if (item->condition)
-    {
+    if ((item != NULL) && (assertion_handler != SDL_PromptAssertion)) {
         debug_print("\n\nSDL assertion report.\n");
         debug_print("All SDL assertions between last init/quit:\n\n");
 
-        while (item->condition) {
+        while (item != NULL) {
             debug_print(
                 "'%s'\n"
                 "    * %s (%s:%d)\n"
@@ -398,8 +393,6 @@ SDL_ReportAssertion(SDL_assert_data *data, const char *func, const char *file,
 
     SDL_AddAssertionToReport(data);
 
-    data->trigger_count++;
-
     assertion_running++;
     if (assertion_running > 1) {   /* assert during assert! Abort. */
         if (assertion_running == 2) {
@@ -472,16 +465,16 @@ const SDL_assert_data *SDL_GetAssertionReport(void)
 
 void SDL_ResetAssertionReport(void)
 {
-    SDL_assert_data *item = triggered_assertions;
     SDL_assert_data *next = NULL;
-    for (item = triggered_assertions; item->condition; item = next) {
+    SDL_assert_data *item;
+    for (item = triggered_assertions; item != NULL; item = next) {
         next = (SDL_assert_data *) item->next;
         item->always_ignore = SDL_FALSE;
         item->trigger_count = 0;
         item->next = NULL;
     }
 
-    triggered_assertions = &assertion_list_terminator;
+    triggered_assertions = NULL;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
