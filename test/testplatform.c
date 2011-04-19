@@ -172,6 +172,16 @@ TestAssertions(SDL_bool verbose)
     SDL_assert_release(0 && "This is a test");
 #endif
 
+    {
+        const SDL_assert_data *item = SDL_GetAssertionReport();
+        while (item) {
+            printf("'%s', %s (%s:%d), triggered %u times, always ignore: %s.\n",
+                item->condition, item->function, item->filename,
+                item->linenum, item->trigger_count,
+                item->always_ignore ? "yes" : "no");
+            item = item->next;
+        }
+    }
     return (0);
 }
 
