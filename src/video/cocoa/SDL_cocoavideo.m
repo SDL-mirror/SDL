@@ -20,6 +20,7 @@
 */
 #include "SDL_config.h"
 
+#include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
 #include "SDL_cocoashape.h"
@@ -217,6 +218,14 @@ Cocoa_CreateImage(SDL_Surface * surface)
 SDL_assert_state
 SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
 {
+    const int initialized = (SDL_WasInit(SDL_INIT_VIDEO) != 0);
+    if (!initialized) {
+        if (SDL_InitSubSystem(SDL_INIT_VIDEO) == -1) {
+            fprintf(stderr, "Assertion failed AND couldn't init video mode!\n");
+            return SDL_ASSERTION_BREAK;  /* oh well, crash hard. */
+        }
+    }
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     NSString *msg = [NSString stringWithFormat:
@@ -242,6 +251,11 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
     [alert addButtonWithTitle:@"Always Ignore"];
     const NSInteger clicked = [alert runModal];
     [pool release];
+
+    if (!initialized) {
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    }
+
     return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
 }
 
