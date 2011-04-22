@@ -551,9 +551,12 @@ extern DECLSPEC int SDLCALL SDL_SetWindowFullscreen(SDL_Window * window,
                                                     SDL_bool fullscreen);
 
 /**
- *  \brief Get an SDL surface associated with the window.
+ *  \brief Get the SDL surface associated with the window.
  *
- *  \return A surface in the optimal format for the window, or NULL on error.
+ *  \return The window's framebuffer surface, or NULL on error. 
+ *
+ *  A new surface will be created with the optimal format for the window,
+ *  if necessary. This surface will be freed when the window is destroyed.
  *
  *  \note You may not combine this with 3D or the rendering API on this window.
  *
