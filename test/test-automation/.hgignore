@@ -1,0 +1,23 @@
+syntax: glob
+
+.DS_Store
+
+autom4te*
+configure
+config.h
+config.cache
+config.log
+config.status
+Makefile
+runner
+*.o
+*.so
+
+*.dSYM
+
+# for vim
+*.swp
+
+# for Eclipse
+.project
+.cproject
