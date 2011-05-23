@@ -25,13 +25,16 @@ all: runner $(ALL_TESTS)
 runner: $(SRC)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $+
 
+asserts.o: asserts.c
+	$(CC) $(CFLAGS) -c $+ -o $@
+
 tests: $(ALL_TESTS)
 
-libtest.so: test.o
+libtest.so: test.o asserts.o
 	$(CC) -shared -wl,-soname,$@ -o $@ $(LDFLAGS) $+
 
-test.o: $(TEST_SRC)
-	$(CC) -fPIC $(CFLAGS) -c $+ -o $@
+test.o: $(TEST_SRC) 
+	$(CC) -fPIC $(CFLAGS) -c $+ -o $@ 
 
 Makefile: Makefile.in config.status
 	$(SHELL) /config.status $@

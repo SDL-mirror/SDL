@@ -18,37 +18,12 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _TEST_C
-#define _TEST_C
-
-#include <stdio.h>
+#ifndef _ASSERTS_H
+#define _ASSERTS_H
 
 #include <SDL/SDL.h>
 
-#include "asserts.h"
 
-const char *names[] = {"hello", "hello2", "hello3"};
-
-const char **suite() {
-	return names;
-}
-
-void hello(void *arg){
-	const char *revision = SDL_GetRevision();
-
-	printf("Revision is %s\n", revision);
-	assertEquals(3, 5);
-}
-
-void hello2(void *arg) {
-	char *msg = "eello";
-	msg[0] = 'H';
-}
-
-void hello3(void *arg) {
-	printf("hello\n");
-
-	assertEquals(3, 3);
-}
+void assertEquals(Uint32 expected, Uint32 actual);
 
 #endif
