@@ -13,12 +13,12 @@ srcdir = @srcdir@
 
 SRC	=  runner.c
 
-TEST_SRC = test.c 
+TEST_SRC = test.c
 TEST_OBJ = test.o
 
 ALL_TESTS = libtest.so
 
-.PHONY: all clean
+.PHONY: all clean distclean
 
 all: runner $(ALL_TESTS)
 
@@ -28,7 +28,7 @@ runner: $(SRC)
 tests: $(ALL_TESTS)
 
 libtest.so: test.o
-	$(CC) -shared -wl,-soname,$@ -o $@ $+
+	$(CC) -shared -wl,-soname,$@ -o $@ $(LDFLAGS) $+
 
 test.o: $(TEST_SRC)
 	$(CC) -fPIC $(CFLAGS) -c $+ -o $@
@@ -48,5 +48,3 @@ distclean: clean
 	rm -f configure configure.scan
 	rm -f autoscan.log
 	rm -Rf autom4te* *.dSYM
-
-	
