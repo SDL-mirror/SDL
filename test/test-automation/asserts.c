@@ -18,11 +18,19 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ASSERTS_H
-#define _ASSERTS_H
+#ifndef _ASSERTS_C
+#define _ASSERTS_C
 
-#include <SDL/SDL.h>
+#include "asserts.h"
 
-void assertEquals(Uint32 expected, Uint32 actual);
+#include <stdlib.h>
+
+void
+assertEquals(Uint32 expected, Uint32 actual)
+{
+	if(expected != actual) {
+		exit(1);
+	}
+}
 
 #endif

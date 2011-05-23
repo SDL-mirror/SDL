@@ -21,3 +21,4 @@ runner
 # for Eclipse
 .project
 .cproject
+.settings
