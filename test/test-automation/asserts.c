@@ -26,10 +26,13 @@
 #include <stdlib.h>
 
 void
-assertEquals(Uint32 expected, Uint32 actual)
+assertEquals(char *message, Uint32 expected, Uint32 actual)
 {
 	if(expected != actual) {
-		exit(1);
+		printf("===============================\n");
+		printf("Assert failed: %s\n", message);
+		printf("Expected %d, got %d\n", expected, actual);
+		printf("===============================\n");
 	}
 }
 

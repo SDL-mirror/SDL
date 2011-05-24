@@ -37,7 +37,7 @@ void hello(void *arg){
 	const char *revision = SDL_GetRevision();
 
 	printf("Revision is %s\n", revision);
-	assertEquals(3, 5);
+	assertEquals("will fail", 3, 5);
 }
 
 void hello2(void *arg) {
@@ -48,7 +48,7 @@ void hello2(void *arg) {
 void hello3(void *arg) {
 	printf("hello\n");
 
-	assertEquals(3, 3);
+	assertEquals("passes", 3, 3);
 }
 
 #endif

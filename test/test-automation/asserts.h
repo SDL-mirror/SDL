@@ -23,6 +23,6 @@
 
 #include <SDL/SDL.h>
 
-void assertEquals(Uint32 expected, Uint32 actual);
+void assertEquals(char *message, Uint32 expected, Uint32 actual);
 
 #endif
