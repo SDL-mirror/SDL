@@ -36,7 +36,12 @@ int main(int argc, char *argv[]) {
 
 	const Uint32 startTicks = SDL_GetTicks();
 
+#if defined(linux) || defined( __linux)
+	char *libName = "tests/libtest.so";
+#else 
 	char *libName = "tests/libtest.0.dylib";
+#endif
+
 	void *library = SDL_LoadObject(libName);
 	if(library == NULL) {
 		printf("Loading %s failed\n", libName);
