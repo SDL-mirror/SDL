@@ -18,22 +18,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ASSERTS_C
-#define _ASSERTS_C
+#ifndef _SDL_TEST_H
+#define _SDL_TEST_H
 
-#include "asserts.h"
+#include <SDL/SDL.h>
 
-#include <stdlib.h>
+void TestInit();
+void TestQuit();
 
-void
-assertEquals(char *message, Uint32 expected, Uint32 actual)
-{
-	if(expected != actual) {
-		printf("===============================\n");
-		printf("Assert failed: %s\n", message);
-		printf("Expected %d, got %d\n", expected, actual);
-		printf("===============================\n");
-	}
-}
+void AssertEquals(char *message, Uint32 expected, Uint32 actual);
 
 #endif

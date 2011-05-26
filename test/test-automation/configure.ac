@@ -26,6 +26,9 @@ AC_CHECK_HEADERS([stdlib.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
+# without this debugging information will be stripped (at least on OS X)
+CFLAGS="-g"
+
 # Checks for library functions.
 AC_FUNC_FORK
 

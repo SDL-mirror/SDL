@@ -25,30 +25,42 @@
 
 #include <SDL/SDL.h>
 
-#include "asserts.h"
+#include "SDL_test.h"
 
-const char *names[] = {"hello", "hello2", "hello3"};
+char *names[] = {"hello", "hello2", "hello3", NULL};
 
-const char **suite() {
+char **queryTestNames() {
 	return names;
 }
 
 void hello(void *arg){
+	TestInit();
+
 	const char *revision = SDL_GetRevision();
 
 	printf("Revision is %s\n", revision);
-	assertEquals("will fail", 3, 5);
+	AssertEquals("will fail", 3, 5);
+
+	TestQuit();
 }
 
 void hello2(void *arg) {
+	TestInit();
+
+	// why this isn't segfaulting?
 	char *msg = "eello";
 	msg[0] = 'H';
+
+	TestQuit();
 }
 
 void hello3(void *arg) {
-	printf("hello\n");
+	TestInit();
+	printf("hello3\n");
 
-	assertEquals("passes", 3, 3);
+	AssertEquals("passes", 3, 3);
+
+	TestQuit();
 }
 
 #endif
