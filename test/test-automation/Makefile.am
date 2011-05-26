@@ -9,6 +9,7 @@ runner_LDFLAGS = `sdl-config --libs`
 
 install: install-tests
 install-tests:
-	cp -f tests/.libs/*.dylib tests/
+	-cp -f tests/.libs/*.dylib tests/ 2> /dev/null
+	-cp -f tests/.libs/*.so tests/ 2> /dev/null
 
 

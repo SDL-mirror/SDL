@@ -24,10 +24,10 @@
 #include <SDL/SDL.h>
 
 typedef struct TestCaseReference {
-	int enabled;       /* Set to TEST_ENABLED or TEST_DISABLED */
-	long requirements;  /* Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
 	char *name;         /* "Func2Stress" */
 	char *description;  /* "This test beats the crap out of func2()" */
+	int enabled;       /* Set to TEST_ENABLED or TEST_DISABLED */
+	long requirements;  /* Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
 } TestCaseReference;
 
 void TestInit();

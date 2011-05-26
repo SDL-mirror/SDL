@@ -91,8 +91,6 @@ int main(int argc, char *argv[]) {
 	// print: Testing againts SDL version fuu (rev: bar)
 
 	int failureCount = 0, passCount = 0;
-	char *testname = NULL;
-	int counter = 0;
 
 	char *libName = "libtest";
 
@@ -100,15 +98,19 @@ int main(int argc, char *argv[]) {
 
 	void *library = LoadLibrary();
 	TestCaseReference **tests = QueryTestCases(library);
-	if(tests == NULL) {
-		printf("It's null\n");
-	} else {
-		printf("It's NOT null\n");
-	}
-	printf("%s name\n", tests[1]->name);
 
+	TestCaseReference *reference = NULL;
+	int counter = 0;
 
-	for(testname = tests[counter]; testname; testname = tests[++counter]) {
+	printf("DEBUG: Starting to run test\n");
+	fflush(stdout);
+
+	for(reference = tests[counter]; reference; reference = tests[++counter]) {
+		// segfaults immediately  after trying to access name -> out of bounds
+		// all the values of reference is garbage.
+		char *testname = reference->name;
+		//char *testname = reference; // for some reason this works
+
 		printf("Running %s (in %s):\n", testname, libName);
 
 		int childpid = fork();

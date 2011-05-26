@@ -27,13 +27,6 @@
 
 #include "SDL_test.h"
 
-/*
-TestCaseReference references[] =  {
-		{.name = "hello", .description = "desc", .enabled = 1, .requirements = 0 }
-};
-*/
-
-
 TestCaseReference *references[] =  {
 		{"hello", "description", 1, 0},
 		{"hello2", "description", 1, 0},
