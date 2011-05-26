@@ -43,12 +43,13 @@ void
 AssertEquals(char *message, Uint32 expected, Uint32 actual)
 {
 	if(expected != actual) {
-		printf("\n===============================\n");
+		printf("===============================\n");
 		printf("Assert failed: %s\n", message);
 		printf("Expected %d, got %d\n", expected, actual);
 		printf("===============================\n");
 		_testReturnValue = 1;
 	}
 }
+
 
 #endif

@@ -27,10 +27,22 @@
 
 #include "SDL_test.h"
 
-char *names[] = {"hello", "hello2", "hello3", NULL};
+/*
+TestCaseReference references[] =  {
+		{.name = "hello", .description = "desc", .enabled = 1, .requirements = 0 }
+};
+*/
 
-char **queryTestNames() {
-	return names;
+
+TestCaseReference *references[] =  {
+		{"hello", "description", 1, 0},
+		{"hello2", "description", 1, 0},
+		NULL
+};
+
+
+TestCaseReference **QueryTestCaseReferences() {
+	return references;
 }
 
 void hello(void *arg){

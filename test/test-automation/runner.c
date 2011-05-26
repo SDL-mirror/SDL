@@ -43,18 +43,18 @@ void *LoadLibrary() {
 	return library;
 }
 
-char **QueryTestCases(void *library) {
-	char **(*suite)(void);
+TestCaseReference **QueryTestCases(void *library) {
+	TestCaseReference **(*suite)(void);
 
-	suite = (char **(*)(void)) SDL_LoadFunction(library, "queryTestNames");
+	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestCaseReferences");
 	if(suite == NULL) {
-		printf("Quering test names failed, suite == NULL\n");
+		printf("Loading QueryTestCaseReferences() failed.\n");
 		printf("%s\n", SDL_GetError());
 	}
 
-	char **tests = suite();
+	TestCaseReference **tests = suite();
 	if(tests == NULL) {
-		printf("Failed to load test cases. tests == NULL\n");
+		printf("Failed to load test references.\n");
 		printf("%s\n", SDL_GetError());
 	}
 
@@ -99,7 +99,14 @@ int main(int argc, char *argv[]) {
 	const Uint32 startTicks = SDL_GetTicks();
 
 	void *library = LoadLibrary();
-	char **tests = QueryTestCases(library);
+	TestCaseReference **tests = QueryTestCases(library);
+	if(tests == NULL) {
+		printf("It's null\n");
+	} else {
+		printf("It's NOT null\n");
+	}
+	printf("%s name\n", tests[1]->name);
+
 
 	for(testname = tests[counter]; testname; testname = tests[++counter]) {
 		printf("Running %s (in %s):\n", testname, libName);
