@@ -106,11 +106,7 @@ int main(int argc, char *argv[]) {
 	fflush(stdout);
 
 	for(reference = tests[counter]; reference; reference = tests[++counter]) {
-		// segfaults immediately  after trying to access name -> out of bounds
-		// all the values of reference is garbage.
 		char *testname = reference->name;
-		//char *testname = reference; // for some reason this works
-
 		printf("Running %s (in %s):\n", testname, libName);
 
 		int childpid = fork();

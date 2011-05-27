@@ -27,15 +27,21 @@
 
 #include "SDL_test.h"
 
-TestCaseReference *references[] =  {
-		{"hello", "description", 1, 0},
-		{"hello2", "description", 1, 0},
-		NULL
+/* Test cases */
+static const TestCaseReference test1 = 
+		(TestCaseReference){ "hello", "description", 1, 0 };
+
+static const TestCaseReference test2 = 
+		(TestCaseReference){ "hello2", "description", 1, 0 };
+
+/* Test suite */
+extern const TestCaseReference *testSuite[] =  {
+	&test1, &test2, NULL
 };
 
 
 TestCaseReference **QueryTestCaseReferences() {
-	return references;
+	return (TestCaseReference **)testSuite;
 }
 
 void hello(void *arg){

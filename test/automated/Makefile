@@ -1,7 +1,7 @@
 
 
-CFLAGS  := -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
-LDFLAGS := `sdl-config --libs`
+CFLAGS  := -W -Wall -Wextra -g `sdl-config --prefix=/usr/local --cflags` -DSDL_NO_COMPAT
+LDFLAGS := `sdl-config --prefix=/usr/local --libs`
 
 # If it doesn't pick up defaults
 #CFLAGS  := -D_GNU_SOURCE=1 -D_REENTRANT -I/usr/local/include/SDL
