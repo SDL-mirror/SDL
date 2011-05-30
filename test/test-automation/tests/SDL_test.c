@@ -25,16 +25,17 @@
 
 #include <stdlib.h>
 
+/*! \brief return value of test case. Non-zero value means that the test failed */
 static int _testReturnValue;
 
 void
-TestInit()
+TestCaseInit()
 {
 	_testReturnValue = 0;
 }
 
 void
-TestQuit()
+TestCaseQuit()
 {
 	exit(_testReturnValue);
 }

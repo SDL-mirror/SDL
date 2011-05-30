@@ -23,15 +23,34 @@
 
 #include <SDL/SDL.h>
 
+// \todo Should these be consts?
+#define TEST_ENABLED  1
+#define TEST_DISABLED 0
+
+
+/*!
+ * Holds information about a test case
+ */
 typedef struct TestCaseReference {
-	char *name;         /* "Func2Stress" */
-	char *description;  /* "This test beats the crap out of func2()" */
-	int enabled;       /* Set to TEST_ENABLED or TEST_DISABLED */
-	long requirements;  /* Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
+	char *name;         /*!< "Func2Stress" */
+	char *description;  /*!< "This test beats the crap out of func2()" */
+	int enabled;       /*!< Set to TEST_ENABLED or TEST_DISABLED */
+	long requirements;  /*!< Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
 } TestCaseReference;
 
-void TestInit();
-void TestQuit();
+/*! \fn TestCaseInit
+ *  Initialized the test case. Must be called at
+ *  the beginning of every test case, before doing
+ *  anything else.
+ */
+void TestCaseInit();
+
+/*! \fn TestCaseQuit
+ *  Deinitializes and exits the test case
+ *
+ */
+void TestCaseQuit();
+
 
 void AssertEquals(char *message, Uint32 expected, Uint32 actual);
 

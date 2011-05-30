@@ -27,7 +27,12 @@
 
 #include "tests/SDL_test.h"
 
-void *LoadLibrary() {
+/*!
+ * Loads test suite which is implemented as dynamic library.
+ *
+ * \return Loaded test suite
+ */
+void *LoadTestSuite() {
 #if defined(linux) || defined( __linux)
 	char *libName = "tests/libtest.so";
 #else
@@ -43,10 +48,16 @@ void *LoadLibrary() {
 	return library;
 }
 
+/*!
+ * Loads the test case references from the given test suite.
+
+ * \param library Previously loaded dynamic library AKA test suite
+ * \return Loaded TestCaseReferences
+ */
 TestCaseReference **QueryTestCases(void *library) {
 	TestCaseReference **(*suite)(void);
 
-	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestCaseReferences");
+	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
 	if(suite == NULL) {
 		printf("Loading QueryTestCaseReferences() failed.\n");
 		printf("%s\n", SDL_GetError());
@@ -61,6 +72,21 @@ TestCaseReference **QueryTestCases(void *library) {
 	return tests;
 }
 
+/*
+ *
+ */
+
+/*!
+ * Success or failure of test case is determined by
+ * it's return value. If test case succeeds, it'll
+ * return 0, if not it will return a positive integer.
+ *
+ * The function checks the return value and returns value
+ * based on it. If the test is aborted due to a signal
+ * function warn about it.
+ *
+ * \return 1 if test case succeeded, 0 otherwise
+ */
 int HandleTestReturnValue(int stat_lock) {
 	if(WIFEXITED(stat_lock)) {
 		int returnValue = WEXITSTATUS(stat_lock);
@@ -71,13 +97,8 @@ int HandleTestReturnValue(int stat_lock) {
 	} else if(WIFSIGNALED(stat_lock)) {
 		int signal = WTERMSIG(stat_lock);
 		printf("FAILURE: test was aborted due to signal nro %d\n", signal);
-		//errorMsg =
-		//errorMsg = SDL_malloc(256 * sizeof(char));
-		//sprintf(errorMsg, "was aborted due to signal nro %d", signal);
 
 	} else if(WIFSTOPPED(stat_lock)) {
-		//int signal = WSTOPSIG(stat_lock);
-		//printf("%d: %d was stopped by signal nro %d\n", pid, child, signal);
 	}
 
 	return 0;
@@ -86,7 +107,7 @@ int HandleTestReturnValue(int stat_lock) {
 
 int main(int argc, char *argv[]) {
 
-	// Handle command line arguments
+	//! \todo Handle command line arguments
 
 	// print: Testing againts SDL version fuu (rev: bar)
 
@@ -96,58 +117,59 @@ int main(int argc, char *argv[]) {
 
 	const Uint32 startTicks = SDL_GetTicks();
 
-	void *library = LoadLibrary();
-	TestCaseReference **tests = QueryTestCases(library);
+	void *suite = LoadTestSuite();
+	TestCaseReference **tests = QueryTestCases(suite);
 
 	TestCaseReference *reference = NULL;
 	int counter = 0;
 
-	printf("DEBUG: Starting to run test\n");
-	fflush(stdout);
-
 	for(reference = tests[counter]; reference; reference = tests[++counter]) {
-		char *testname = reference->name;
-		printf("Running %s (in %s):\n", testname, libName);
-
-		int childpid = fork();
-		if(childpid == 0) {
-			void (*test)(void *arg);
-
-			test = (void (*)(void *)) SDL_LoadFunction(library, testname);
-			if(test == NULL) {
-				printf("Loading test failed, tests == NULL\n");
-				printf("%s\n", SDL_GetError());
-			} else {
-				test(0x0);
-			}
-			return 0; // exit the child if the test didn't exit
+		if(reference->enabled == TEST_DISABLED) {
+			printf("Test %s (in %s) disabled. Omitting...\n", reference->name, libName);
 		} else {
-			int stat_lock = -1;
-			int child = wait(&stat_lock);
+			char *testname = reference->name;
 
-			int passed = -1;
+			printf("Running %s (in %s):\n", testname, libName);
 
-			passed = HandleTestReturnValue(stat_lock);
+			int childpid = fork();
+			if(childpid == 0) {
+				void (*test)(void *arg);
 
-			if(passed) {
-				passCount++;
-				printf("%s (in %s): ok\n", testname, libName);
+				test = (void (*)(void *)) SDL_LoadFunction(suite, testname);
+				if(test == NULL) {
+					printf("Loading test failed, tests == NULL\n");
+					printf("%s\n", SDL_GetError());
+				} else {
+					test(0x0);
+				}
+				return 0; // exit the child if the test didn't exit
 			} else {
-				failureCount++;
-				printf("%s (in %s): failed\n", testname, libName);
+				int stat_lock = -1;
+				int child = wait(&stat_lock);
+
+				int passed = -1;
+
+				passed = HandleTestReturnValue(stat_lock);
+
+				if(passed) {
+					passCount++;
+					printf("%s (in %s): ok\n", testname, libName);
+				} else {
+					failureCount++;
+					printf("%s (in %s): failed\n", testname, libName);
+				}
 			}
 		}
 
 		printf("\n");
 	}
 	
-	SDL_UnloadObject(library);
+	SDL_UnloadObject(suite);
 
 	const Uint32 endTicks = SDL_GetTicks();
 
 	printf("Ran %d tests in %0.3f seconds.\n", (passCount + failureCount), (endTicks-startTicks)/1000.0f);
 
-	printf("all tests executed\n");
 	printf("%d tests passed\n", passCount);
 	printf("%d tests failed\n", failureCount);
 

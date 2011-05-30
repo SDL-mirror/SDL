@@ -28,50 +28,56 @@
 #include "SDL_test.h"
 
 /* Test cases */
-static const TestCaseReference test1 = 
-		(TestCaseReference){ "hello", "description", 1, 0 };
+static const TestCaseReference test1 =
+		(TestCaseReference){ "hello", "description", TEST_ENABLED, 0 };
 
-static const TestCaseReference test2 = 
-		(TestCaseReference){ "hello2", "description", 1, 0 };
+static const TestCaseReference test2 =
+		(TestCaseReference){ "hello2", "description", TEST_DISABLED, 0 };
+
+static const TestCaseReference test3 =
+		(TestCaseReference){ "hello3", "description", TEST_ENABLED, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, NULL
+	&test1, &test2, &test3, NULL
 };
 
 
-TestCaseReference **QueryTestCaseReferences() {
+TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
-void hello(void *arg){
-	TestInit();
+/* Test case functions */
+void hello(void *arg)
+{
+	TestCaseInit();
 
 	const char *revision = SDL_GetRevision();
 
 	printf("Revision is %s\n", revision);
 	AssertEquals("will fail", 3, 5);
 
-	TestQuit();
+	TestCaseQuit();
 }
 
-void hello2(void *arg) {
-	TestInit();
+void hello2(void *arg)
+{
+	TestCaseInit();
 
-	// why this isn't segfaulting?
 	char *msg = "eello";
 	msg[0] = 'H';
 
-	TestQuit();
+	TestCaseQuit();
 }
 
-void hello3(void *arg) {
-	TestInit();
+void hello3(void *arg)
+{
+	TestCaseInit();
 	printf("hello3\n");
 
 	AssertEquals("passes", 3, 3);
 
-	TestQuit();
+	TestCaseQuit();
 }
 
 #endif
