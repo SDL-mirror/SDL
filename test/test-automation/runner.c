@@ -25,7 +25,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "tests/SDL_test.h"
+#include "SDL_test.h"
 
 //!< Function pointer to a test case function
 typedef int (*TestCase)(void *arg);

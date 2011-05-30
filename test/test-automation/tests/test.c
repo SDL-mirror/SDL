@@ -25,7 +25,7 @@
 
 #include <SDL/SDL.h>
 
-#include "SDL_test.h"
+#include "../SDL_test.h"
 
 /* Test cases */
 static const TestCaseReference test1 =
