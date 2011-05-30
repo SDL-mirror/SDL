@@ -35,7 +35,9 @@ typedef int (*TestCase)(void *arg);
  *
  * \return Loaded test suite
  */
-void *LoadTestSuite() {
+void *
+LoadTestSuite()
+{
 #if defined(linux) || defined( __linux)
 	char *libName = "tests/libtest.so";
 #else
@@ -57,7 +59,9 @@ void *LoadTestSuite() {
  * \param library Previously loaded dynamic library AKA test suite
  * \return Loaded TestCaseReferences
  */
-TestCaseReference **QueryTestCases(void *library) {
+TestCaseReference **
+QueryTestCases(void *library)
+{
 	TestCaseReference **(*suite)(void);
 
 	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
@@ -78,12 +82,14 @@ TestCaseReference **QueryTestCases(void *library) {
 /*!
  * Loads test case from a test suite
  *
- * \param Test suite
- * \testName Name of the test that is going to be loaded
+ * \param suite a test suite
+ * \param testName Name of the test that is going to be loaded
  *
  * \return loaded test
  */
-TestCase LoadTestCase(void *suite, char *testName) {
+TestCase
+LoadTestCase(void *suite, char *testName)
+{
 	TestCase test = (int (*)(void *)) SDL_LoadFunction(suite, testName);
 	if(test == NULL) {
 		printf("Loading test failed, tests == NULL\n");
@@ -92,7 +98,6 @@ TestCase LoadTestCase(void *suite, char *testName) {
 
 	return test;
 }
-
 
 
 /*!
@@ -105,8 +110,10 @@ TestCase LoadTestCase(void *suite, char *testName) {
  *
  * \return 0 if test case succeeded, 1 otherwise
  */
-int HandleTestReturnValue(int stat_lock) {
-	//! \todo rename to: HandleChildReturn Value
+int
+HandleTestReturnValue(int stat_lock)
+{
+	//! \todo rename to: HandleChildProcessReturnValue?
 	int returnValue = -1;
 
 	if(WIFEXITED(stat_lock)) {
@@ -122,7 +129,7 @@ int HandleTestReturnValue(int stat_lock) {
 }
 
 //!< Flag for executing tests in-process
-int execute_inproc = 0;
+static int execute_inproc = 0;
 
 /*!
  * Parse command line arguments
@@ -145,7 +152,7 @@ main(int argc, char *argv[])
 {
 	ParseOptions(argc, argv);
 
-	// print: Testing againts SDL version fuu (rev: bar) if verbose == true
+	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
 	int failureCount = 0, passCount = 0;
 
