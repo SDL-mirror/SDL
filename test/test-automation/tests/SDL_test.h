@@ -48,8 +48,9 @@ void TestCaseInit();
 /*! \fn TestCaseQuit
  *  Deinitializes and exits the test case
  *
+ * \return 0 if test succeeded, otherwise 1
  */
-void TestCaseQuit();
+int TestCaseQuit();
 
 
 void AssertEquals(char *message, Uint32 expected, Uint32 actual);

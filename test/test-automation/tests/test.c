@@ -32,7 +32,7 @@ static const TestCaseReference test1 =
 		(TestCaseReference){ "hello", "description", TEST_ENABLED, 0 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "hello2", "description", TEST_DISABLED, 0 };
+		(TestCaseReference){ "hello2", "description", TEST_ENABLED, 0 };
 
 static const TestCaseReference test3 =
 		(TestCaseReference){ "hello3", "description", TEST_ENABLED, 0 };
@@ -48,7 +48,7 @@ TestCaseReference **QueryTestSuite() {
 }
 
 /* Test case functions */
-void hello(void *arg)
+int hello(void *arg)
 {
 	TestCaseInit();
 
@@ -57,27 +57,27 @@ void hello(void *arg)
 	printf("Revision is %s\n", revision);
 	AssertEquals("will fail", 3, 5);
 
-	TestCaseQuit();
+	return TestCaseQuit();
 }
 
-void hello2(void *arg)
+int hello2(void *arg)
 {
 	TestCaseInit();
 
 	char *msg = "eello";
-	msg[0] = 'H';
+	//msg[0] = 'H';
 
-	TestCaseQuit();
+	return TestCaseQuit();
 }
 
-void hello3(void *arg)
+int hello3(void *arg)
 {
 	TestCaseInit();
 	printf("hello3\n");
 
 	AssertEquals("passes", 3, 3);
 
-	TestCaseQuit();
+	return TestCaseQuit();
 }
 
 #endif

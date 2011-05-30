@@ -23,8 +23,6 @@
 
 #include "SDL_test.h"
 
-#include <stdlib.h>
-
 /*! \brief return value of test case. Non-zero value means that the test failed */
 static int _testReturnValue;
 
@@ -34,10 +32,10 @@ TestCaseInit()
 	_testReturnValue = 0;
 }
 
-void
+int
 TestCaseQuit()
 {
-	exit(_testReturnValue);
+	return _testReturnValue;
 }
 
 void
