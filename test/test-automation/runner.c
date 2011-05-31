@@ -33,7 +33,7 @@ typedef int (*TestCase)(void *arg);
 /*!
  * Loads test suite which is implemented as dynamic library.
  *
- * \return Loaded test suite
+ * \return Pointer to loaded test suite, or NULL if library could not be loaded
  */
 void *
 LoadTestSuite()
@@ -46,8 +46,8 @@ LoadTestSuite()
 
 	void *library = SDL_LoadObject(libName);
 	if(library == NULL) {
-		printf("Loading %s failed\n", libName);
-		printf("%s\n", SDL_GetError());
+		fprintf(stderr, "Loading %s failed\n", libName);
+		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
 	return library;
@@ -57,7 +57,7 @@ LoadTestSuite()
  * Loads the test case references from the given test suite.
 
  * \param library Previously loaded dynamic library AKA test suite
- * \return Loaded TestCaseReferences
+ * \return Pointer to array of TestCaseReferences or NULL if function failed
  */
 TestCaseReference **
 QueryTestCases(void *library)
@@ -66,14 +66,14 @@ QueryTestCases(void *library)
 
 	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
 	if(suite == NULL) {
-		printf("Loading QueryTestCaseReferences() failed.\n");
-		printf("%s\n", SDL_GetError());
+		fprintf(stderr, "Loading QueryTestCaseReferences() failed.\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
 	TestCaseReference **tests = suite();
 	if(tests == NULL) {
-		printf("Failed to load test references.\n");
-		printf("%s\n", SDL_GetError());
+		fprintf(stderr, "Failed to load test references.\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
 	return tests;
@@ -85,15 +85,15 @@ QueryTestCases(void *library)
  * \param suite a test suite
  * \param testName Name of the test that is going to be loaded
  *
- * \return loaded test
+ * \return Function Pointer (TestCase) to loaded test case, NULL if function failed
  */
 TestCase
 LoadTestCase(void *suite, char *testName)
 {
 	TestCase test = (int (*)(void *)) SDL_LoadFunction(suite, testName);
 	if(test == NULL) {
-		printf("Loading test failed, tests == NULL\n");
-		printf("%s\n", SDL_GetError());
+		fprintf(stderr, "Loading test failed, tests == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
 	return test;
@@ -120,9 +120,8 @@ HandleTestReturnValue(int stat_lock)
 		returnValue = WEXITSTATUS(stat_lock);
 	} else if(WIFSIGNALED(stat_lock)) {
 		int signal = WTERMSIG(stat_lock);
-		printf("FAILURE: test was aborted due to signal nro %d\n", signal);
+		fprintf(stderr, "FAILURE: test was aborted due to signal no %d\n", signal);
 		returnValue = 1;
-	} else if(WIFSTOPPED(stat_lock)) {
 	}
 
 	return returnValue;
@@ -147,6 +146,12 @@ ParseOptions(int argc, char *argv[])
    }
 }
 
+/*!
+ * Entry point for test runner
+ *
+ * \param argc Count of command line arguments
+ * \param argv Array of commond lines arguments
+ */
 int
 main(int argc, char *argv[])
 {
