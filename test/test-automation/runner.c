@@ -30,23 +30,43 @@
 //!< Function pointer to a test case function
 typedef int (*TestCase)(void *arg);
 
+//!< Flag for executing tests in-process
+static int execute_inproc = 0;
+
 /*!
- * Loads test suite which is implemented as dynamic library.
+ * Returns the name for the dynamic library
+ * which implements the test suite.
  *
- * \return Pointer to loaded test suite, or NULL if library could not be loaded
+ * (in the future: scans the test/ directory and
+ * returns the names of the dynamic libraries
+ * implementing the test suites)
+ *
+ * \return Name of the dummy test suite
  */
-void *
-LoadTestSuite()
-{
+char *
+ScanForTestSuites() {
 #if defined(linux) || defined( __linux)
 	char *libName = "tests/libtest.so";
 #else
 	char *libName = "tests/libtest.dylib";
 #endif
+	return libName;
+}
 
-	void *library = SDL_LoadObject(libName);
+
+/*!
+ * Loads test suite which is implemented as dynamic library.
+ *
+ * \param test0,330
+ *
+ * \return Pointer to loaded test suite, or NULL if library could not be loaded
+ */
+void *
+LoadTestSuite(char *testSuiteName)
+{
+	void *library = SDL_LoadObject(testSuiteName);
 	if(library == NULL) {
-		fprintf(stderr, "Loading %s failed\n", libName);
+		fprintf(stderr, "Loading %s failed\n", testSuiteName);
 		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
@@ -127,11 +147,11 @@ HandleTestReturnValue(int stat_lock)
 	return returnValue;
 }
 
-//!< Flag for executing tests in-process
-static int execute_inproc = 0;
-
 /*!
  * Parse command line arguments
+ *
+ * \param argc Count of command line arguments
+ * \param argv Array of commond lines arguments
  */
 void
 ParseOptions(int argc, char *argv[])
@@ -140,9 +160,17 @@ ParseOptions(int argc, char *argv[])
 
    for (i = 1; i < argc; ++i) {
       const char *arg = argv[i];
-      if (SDL_strcmp(arg, "--in-proc") == 0) {
+      if(SDL_strcmp(arg, "--in-proc") == 0) {
          execute_inproc = 1;
       }
+      else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
+    	  printf("Usage: ./runner [--in-proc] [--help]\n");
+    	  printf("Options:\n");
+    	  printf(" --in-proc        Executes tests in-process\n");
+    	  printf(" --help           Print this help.:\n");
+    	  exit(0);
+      }
+      // \todo print error for unknown option
    }
 }
 
@@ -161,11 +189,10 @@ main(int argc, char *argv[])
 
 	int failureCount = 0, passCount = 0;
 
-	char *libName = "libtest";
-
 	const Uint32 startTicks = SDL_GetTicks();
 
-	void *suite = LoadTestSuite();
+	char *testSuiteName = ScanForTestSuites();
+	void *suite = LoadTestSuite(testSuiteName);
 	TestCaseReference **tests = QueryTestCases(suite);
 
 	TestCaseReference *reference = NULL;
@@ -173,11 +200,11 @@ main(int argc, char *argv[])
 
 	for(reference = tests[counter]; reference; reference = tests[++counter]) {
 		if(reference->enabled == TEST_DISABLED) {
-			printf("Test %s (in %s) disabled. Omitting...\n", reference->name, libName);
+			printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
 		} else {
 			char *testname = reference->name;
 
-			printf("Running %s (in %s):\n", testname, libName);
+			printf("Running %s (in %s):\n", testname, testSuiteName);
 
 			int retVal = 1;
 			if(execute_inproc) {
@@ -198,10 +225,10 @@ main(int argc, char *argv[])
 
 			if(retVal) {
 				failureCount++;
-				printf("%s (in %s): FAILED\n", testname, libName);
+				printf("%s (in %s): FAILED\n", testname, testSuiteName);
 			} else {
 				passCount++;
-				printf("%s (in %s): ok\n", testname, libName);
+				printf("%s (in %s): ok\n", testname, testSuiteName);
 			}
 		}
 
