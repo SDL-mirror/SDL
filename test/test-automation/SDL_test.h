@@ -53,6 +53,8 @@ void TestCaseInit();
 int TestCaseQuit();
 
 
-void AssertEquals(char *message, Uint32 expected, Uint32 actual);
+void AssertEquals(Uint32 expected, Uint32 actual, char *message, ...);
+
+void AssertTrue(int condition, char *message, ...);
 
 #endif

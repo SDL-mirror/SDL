@@ -55,7 +55,7 @@ int hello(void *arg)
 	const char *revision = SDL_GetRevision();
 
 	printf("Revision is %s\n", revision);
-	AssertEquals("will fail", 3, 5);
+	AssertEquals(3, 5, "fails");
 
 	return TestCaseQuit();
 }
@@ -75,7 +75,7 @@ int hello3(void *arg)
 	TestCaseInit();
 	printf("hello3\n");
 
-	AssertEquals("passes", 3, 3);
+	AssertEquals(3, 3, "passes");
 
 	return TestCaseQuit();
 }

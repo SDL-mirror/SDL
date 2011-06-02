@@ -48,7 +48,7 @@ ScanForTestSuites() {
 #if defined(linux) || defined( __linux)
 	char *libName = "tests/libtest.so";
 #else
-	char *libName = "tests/libtest.dylib";
+	char *libName = "tests/libtestrect.dylib";
 #endif
 	return libName;
 }
