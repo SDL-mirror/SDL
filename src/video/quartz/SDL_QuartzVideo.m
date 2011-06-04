@@ -1194,7 +1194,6 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
         CGContextDrawImage (cgc, rectangle, image);
         CGImageRelease(image);
         CGContextFlush (cgc);
-        CGContextRelease (cgc);
     }
 }
 
