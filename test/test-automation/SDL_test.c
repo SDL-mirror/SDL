@@ -56,15 +56,6 @@ _TestCaseQuit()
 	return _testReturnValue;
 }
 
-
-/*!
- *  Assert function. Tests if the expected value equals the actual value, then
- *  the test assert succeeds, otherwise it fails and warns about it.
- *
- * \param expected Value user expects to have
- * \param actual The actual value of tested variable
- * \param message Message that will be printed if assert fails
- */
 void
 AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
 {
@@ -83,14 +74,6 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
    }
 }
 
-/*!
- *  Assert function. Tests if the given condition is true. True in
- *  this case means non-zero value. If the condition is true, the
- *  assert passes, otherwise it fails.
- *
- * \param condition Condition which will be evaluated
- * \param message Message that will be printed if assert fails
- */
 void
 AssertTrue(int condition, char *message, ...)
 {

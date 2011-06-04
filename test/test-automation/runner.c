@@ -37,6 +37,15 @@ typedef int  (*TestCaseQuit)(void);
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
 
+
+//!< Temporary array to hold test suite names
+#if defined(linux) || defined( __linux)
+	char *testSuites[] = { "tests/libtest.so", "tests/libtestrect.so", NULL};
+#else
+	char *testSuites[] = { "tests/libtest.dylib", "tests/libtestrect.dylib", NULL};
+#endif
+
+
 /*!
  * Returns the name for the dynamic library
  * which implements the test suite.
@@ -45,16 +54,11 @@ static int execute_inproc = 0;
  * returns the names of the dynamic libraries
  * implementing the test suites)
  *
- * \return Name of the dummy test suite
+ * \return Array of test suite names
  */
-char *
+char **
 ScanForTestSuites() {
-#if defined(linux) || defined( __linux)
-	char *libName = "tests/libtest.so";
-#else
-	char *libName = "tests/libtest.dylib";
-#endif
-	return libName;
+	return testSuites;
 }
 
 
@@ -190,6 +194,49 @@ HandleTestReturnValue(int stat_lock)
 }
 
 /*!
+ * Executes a test case. Loads the test, executes it and
+ * returns the tests return value to the caller.
+ *
+ * \param suite The suite from which the test will be loaded
+ * \param testReference TestCaseReference of the test under execution
+ * \return The return value of the test. Zero means success, non-zero failure.
+ */
+int
+ExecuteTest(void *suite, TestCaseReference *testReference) {
+	char *testname = testReference->name;
+
+	TestCaseInit testCaseInit = LoadTestCaseInit(suite);
+	TestCaseQuit testCaseQuit = LoadTestCaseQuit(suite);
+	TestCase test = (TestCase) LoadTestCase(suite, testname);
+
+	int retVal = 1;
+	if(execute_inproc) {
+		testCaseInit();
+
+		test(0x0);
+
+		retVal = testCaseQuit();
+	} else {
+		int childpid = fork();
+		if(childpid == 0) {
+			testCaseInit();
+
+			test(0x0);
+
+			exit(testCaseQuit());
+		} else {
+			int stat_lock = -1;
+			int child = wait(&stat_lock);
+
+			retVal = HandleTestReturnValue(stat_lock);
+		}
+	}
+
+	return retVal;
+}
+
+
+/*!
  * Prints usage information
  */
 void printUsage() {
@@ -243,65 +290,43 @@ main(int argc, char *argv[])
 
 	const Uint32 startTicks = SDL_GetTicks();
 
-	char *testSuiteName = ScanForTestSuites();
-	void *suite = LoadTestSuite(testSuiteName);
-	TestCaseReference **tests = QueryTestCases(suite);
+	char **testSuiteNames = ScanForTestSuites();
 
-	TestCaseReference *reference = NULL;
-	int counter = 0;
+	char *testSuiteName = NULL;
+	int suiteCounter = 0;
+	for(testSuiteName = testSuiteNames[suiteCounter]; testSuiteName; testSuiteName = testSuiteNames[++suiteCounter]) {
+		void *suite = LoadTestSuite(testSuiteName);
+		TestCaseReference **tests = QueryTestCases(suite);
 
-	for(reference = tests[counter]; reference; reference = tests[++counter]) {
-		if(reference->enabled == TEST_DISABLED) {
-			printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
-		} else {
-			char *testname = reference->name;
+		TestCaseReference *reference = NULL;
+		int counter = 0;
 
-			printf("Running %s (in %s):\n", testname, testSuiteName);
-
-			TestCaseInit testCaseInit = LoadTestCaseInit(suite);
-			TestCaseQuit testCaseQuit = LoadTestCaseQuit(suite);
-			TestCase test = (TestCase) LoadTestCase(suite, testname);
-
-			int retVal = 1;
-			if(execute_inproc) {
-				testCaseInit();
-
-				test(0x0);
-
-				retVal = testCaseQuit();
+		for(reference = tests[counter]; reference; reference = tests[++counter]) {
+			if(reference->enabled == TEST_DISABLED) {
+				printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
 			} else {
-				int childpid = fork();
-				if(childpid == 0) {
-					testCaseInit();
+				printf("Executing %s (in %s):\n", reference->name, testSuiteName);
 
-					test(0x0);
+				int retVal = ExecuteTest(suite, reference);
 
-					return testCaseQuit();
+				if(retVal) {
+					failureCount++;
+					if(retVal == 2) {
+						printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
+					} else {
+						printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
+					}
 				} else {
-					int stat_lock = -1;
-					int child = wait(&stat_lock);
-
-					retVal = HandleTestReturnValue(stat_lock);
+					passCount++;
+					printf("%s (in %s): ok\n", reference->name, testSuiteName);
 				}
 			}
 
-			if(retVal) {
-				failureCount++;
-				if(retVal == 2) {
-					printf("%s (in %s): FAILED -> No asserts\n", testname, testSuiteName);
-				} else {
-					printf("%s (in %s): FAILED\n", testname, testSuiteName);
-				}
-			} else {
-				passCount++;
-				printf("%s (in %s): ok\n", testname, testSuiteName);
-			}
+			printf("\n");
 		}
 
-		printf("\n");
+		SDL_UnloadObject(suite);
 	}
-	
-	SDL_UnloadObject(suite);
 
 	const Uint32 endTicks = SDL_GetTicks();
 
