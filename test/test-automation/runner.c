@@ -61,7 +61,7 @@ ScanForTestSuites() {
 /*!
  * Loads test suite which is implemented as dynamic library.
  *
- * \param test0,330
+ * \param testSuiteName Name of the test suite which will be loaded
  *
  * \return Pointer to loaded test suite, or NULL if library could not be loaded
  */
