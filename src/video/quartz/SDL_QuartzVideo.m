@@ -1249,6 +1249,16 @@ static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color
 
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface)
 {
+    /*
+     * Always get latest bitmap address and rowbytes for the screen surface;
+     *  they can change dynamically (user has multiple monitors, etc).
+     */
+    if (surface == SDL_VideoSurface) {
+        surface->pixels = (void*) CGDisplayBaseAddress (kCGDirectMainDisplay);
+        surface->pitch  = CGDisplayBytesPerRow (kCGDirectMainDisplay);
+        return (surface->pixels != NULL);
+    }
+
     return 1;
 }
 
