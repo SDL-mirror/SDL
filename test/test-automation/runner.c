@@ -52,7 +52,7 @@ ScanForTestSuites() {
 #if defined(linux) || defined( __linux)
 	char *libName = "tests/libtest.so";
 #else
-	char *libName = "tests/libtestrect.dylib";
+	char *libName = "tests/libtest.dylib";
 #endif
 	return libName;
 }
@@ -287,7 +287,11 @@ main(int argc, char *argv[])
 
 			if(retVal) {
 				failureCount++;
-				printf("%s (in %s): FAILED\n", testname, testSuiteName);
+				if(retVal == 2) {
+					printf("%s (in %s): FAILED -> No asserts\n", testname, testSuiteName);
+				} else {
+					printf("%s (in %s): FAILED\n", testname, testSuiteName);
+				}
 			} else {
 				passCount++;
 				printf("%s (in %s): ok\n", testname, testSuiteName);

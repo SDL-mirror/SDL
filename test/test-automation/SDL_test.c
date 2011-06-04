@@ -47,7 +47,11 @@ int
 _TestCaseQuit()
 {
 	//! \todo make the test fail, if it does not contain any asserts
-	printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);fflush(stdout);
+	printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
+	if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
+		_testReturnValue = 2;
+	}
+
 	return _testReturnValue;
 }
 
@@ -61,7 +65,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       va_start( args, message );
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
-      printf("Assert Equals failed: expected %d, got %d; %s\n", expected, actual, buf); fflush(stdout);
+      printf("Assert Equals failed: expected %d, got %d; %s\n", expected, actual, buf);
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
