@@ -5,7 +5,7 @@ SUBDIRS = tests testrect
 bin_PROGRAMS = runner
 runner_SOURCES = runner.c SDL_test.c
 runner_CLAGS = -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
-runner_LDFLAGS = `sdl-config --libs`
+runner_LDFLAGS = `sdl-config --libs` 
 
 install: install-tests
 install-tests:

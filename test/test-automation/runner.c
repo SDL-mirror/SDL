@@ -28,7 +28,11 @@
 #include "SDL_test.h"
 
 //!< Function pointer to a test case function
-typedef int (*TestCase)(void *arg);
+typedef void (*TestCase)(void *arg);
+//!< Function pointer to a test case init function
+typedef void (*TestCaseInit)(void);
+//!< Function pointer to a test case quit function
+typedef int  (*TestCaseQuit)(void);
 
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
@@ -99,6 +103,7 @@ QueryTestCases(void *library)
 	return tests;
 }
 
+
 /*!
  * Loads test case from a test suite
  *
@@ -110,7 +115,7 @@ QueryTestCases(void *library)
 TestCase
 LoadTestCase(void *suite, char *testName)
 {
-	TestCase test = (int (*)(void *)) SDL_LoadFunction(suite, testName);
+	TestCase test = (TestCase) SDL_LoadFunction(suite, testName);
 	if(test == NULL) {
 		fprintf(stderr, "Loading test failed, tests == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
@@ -119,6 +124,43 @@ LoadTestCase(void *suite, char *testName)
 	return test;
 }
 
+/*!
+ * Loads function that initialises the test case from the
+ * given test suite.
+ *
+ * \param suite Used test suite
+ *
+ * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
+ */
+TestCaseInit
+LoadTestCaseInit(void *suite) {
+	TestCaseInit testCaseInit = (TestCaseInit) SDL_LoadFunction(suite, "_TestCaseInit");
+	if(testCaseInit == NULL) {
+		fprintf(stderr, "Loading TestCaseInit function failed, testCaseInit == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	return testCaseInit;
+}
+
+/*!
+ * Loads function that deinitialises the executed test case from the
+ * given test suite.
+ *
+ * \param suite Used test suite
+ *
+ * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
+ */
+TestCaseQuit
+LoadTestCaseQuit(void *suite) {
+	TestCaseQuit testCaseQuit = (TestCaseQuit) SDL_LoadFunction(suite, "_TestCaseQuit");
+	if(testCaseQuit == NULL) {
+		fprintf(stderr, "Loading TestCaseQuit function failed, testCaseQuit == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	return testCaseQuit;
+}
 
 /*!
  * If using out-of-proc execution of tests. This function
@@ -148,6 +190,16 @@ HandleTestReturnValue(int stat_lock)
 }
 
 /*!
+ * Prints usage information
+ */
+void printUsage() {
+	  printf("Usage: ./runner [--in-proc] [--help]\n");
+	  printf("Options:\n");
+	  printf(" --in-proc        Executes tests in-process\n");
+	  printf(" --help           Print this help\n");
+}
+
+/*!
  * Parse command line arguments
  *
  * \param argc Count of command line arguments
@@ -164,13 +216,13 @@ ParseOptions(int argc, char *argv[])
          execute_inproc = 1;
       }
       else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
-    	  printf("Usage: ./runner [--in-proc] [--help]\n");
-    	  printf("Options:\n");
-    	  printf(" --in-proc        Executes tests in-process\n");
-    	  printf(" --help           Print this help.:\n");
+    	  printUsage();
+    	  exit(0);
+      } else {
+    	  printf("runner: unknown command '%s'\n", arg);
+    	  printUsage();
     	  exit(0);
       }
-      // \todo print error for unknown option
    }
 }
 
@@ -206,15 +258,25 @@ main(int argc, char *argv[])
 
 			printf("Running %s (in %s):\n", testname, testSuiteName);
 
+			TestCaseInit testCaseInit = LoadTestCaseInit(suite);
+			TestCaseQuit testCaseQuit = LoadTestCaseQuit(suite);
+			TestCase test = (TestCase) LoadTestCase(suite, testname);
+
 			int retVal = 1;
 			if(execute_inproc) {
-				TestCase test = (TestCase) LoadTestCase(suite, testname);
-				retVal = test(0x0);
+				testCaseInit();
+
+				test(0x0);
+
+				retVal = testCaseQuit();
 			} else {
 				int childpid = fork();
 				if(childpid == 0) {
-					TestCase test = (TestCase) LoadTestCase(suite, testname);
-					return test(0x0);
+					testCaseInit();
+
+					test(0x0);
+
+					return testCaseQuit();
 				} else {
 					int stat_lock = -1;
 					int child = wait(&stat_lock);

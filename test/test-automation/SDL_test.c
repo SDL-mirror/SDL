@@ -27,13 +27,16 @@
 #include "SDL_test.h"
 
 /*! \brief return value of test case. Non-zero value means that the test failed */
-static int _testReturnValue;
+int _testReturnValue;
 
-static int _testAssertsFailed;
-static int _testAssertsPassed;
+/*! \brief counts the failed asserts */
+int _testAssertsFailed;
+
+/*! \brief counts the passed asserts */
+int _testAssertsPassed;
 
 void
-TestCaseInit()
+_TestCaseInit()
 {
 	_testReturnValue = 0;
 	_testAssertsFailed = 0;
@@ -41,13 +44,14 @@ TestCaseInit()
 }
 
 int
-TestCaseQuit()
+_TestCaseQuit()
 {
-        printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
+	//! \todo make the test fail, if it does not contain any asserts
+	printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);fflush(stdout);
 	return _testReturnValue;
 }
 
-void 
+void
 AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
 {
    va_list args;
@@ -57,7 +61,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       va_start( args, message );
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
-      printf("Assert Equals failed: expected %d, got %d; %s\n", expected, actual, buf);
+      printf("Assert Equals failed: expected %d, got %d; %s\n", expected, actual, buf); fflush(stdout);
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
@@ -65,7 +69,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
    }
 }
 
-void 
+void
 AssertTrue(int condition, char *message, ...)
 {
    va_list args;

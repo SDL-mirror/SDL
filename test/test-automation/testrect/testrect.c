@@ -21,8 +21,8 @@ TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
-/**
- * @brief Tests SDL_IntersectRectAndLine()
+/*!
+ * \brief Tests SDL_IntersectRectAndLine()
  */
 int rect_testIntersectRectAndLine (void *arg)
 {
@@ -30,8 +30,6 @@ int rect_testIntersectRectAndLine (void *arg)
     int x1, y1;
     int x2, y2;
     SDL_bool clipped;
-
-    TestCaseInit();
 
     x1 = -10;
     y1 = 0;
@@ -132,6 +130,4 @@ int rect_testIntersectRectAndLine (void *arg)
                    x1 == 0 && y1 == 31 && x2 == 31 && y2 == 0,
         "diagonal line to upper right was incorrectly clipped: %d,%d - %d,%d",
         x1, y1, x2, y2);
-
-    return TestCaseQuit();
 }

@@ -48,36 +48,25 @@ TestCaseReference **QueryTestSuite() {
 }
 
 /* Test case functions */
-int hello(void *arg)
+void hello(void *arg)
 {
-	TestCaseInit();
-
 	const char *revision = SDL_GetRevision();
 
 	printf("Revision is %s\n", revision);
-	AssertEquals(3, 5, "fails");
 
-	return TestCaseQuit();
+	AssertEquals(3, 5, "fails");
 }
 
-int hello2(void *arg)
+void hello2(void *arg)
 {
-	TestCaseInit();
-
 	char *msg = "eello";
 	//msg[0] = 'H';
-
-	return TestCaseQuit();
+	AssertTrue(0, "fails");
 }
 
-int hello3(void *arg)
+void hello3(void *arg)
 {
-	TestCaseInit();
-	printf("hello3\n");
-
-	AssertEquals(3, 3, "passes");
-
-	return TestCaseQuit();
+	AssertTrue(1, "passes");
 }
 
 #endif
