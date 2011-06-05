@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
+
 #include <sys/types.h>
 
 #include "SDL_test.h"
@@ -37,6 +39,17 @@ typedef int  (*TestCaseQuit)(void);
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
 
+//!< Flag for executing only test with selected name
+static int only_selected_test  = 0;
+//!< Flag for executing only the selected test suite
+static int only_selected_suite = 0;
+
+//<! Size of the test and suite name buffers
+#define NAME_BUFFER_SIZE 256
+//!< Name of the selected test
+char selected_test_name[NAME_BUFFER_SIZE];
+//!< Name of the selected suite
+char selected_suite_name[NAME_BUFFER_SIZE];
 
 //!< Temporary array to hold test suite names
 #if defined(linux) || defined( __linux)
@@ -80,6 +93,7 @@ LoadTestSuite(char *testSuiteName)
 
 	return library;
 }
+
 
 /*!
  * Loads the test case references from the given test suite.
@@ -128,6 +142,7 @@ LoadTestCase(void *suite, char *testName)
 	return test;
 }
 
+
 /*!
  * Loads function that initialises the test case from the
  * given test suite.
@@ -147,6 +162,7 @@ LoadTestCaseInit(void *suite) {
 	return testCaseInit;
 }
 
+
 /*!
  * Loads function that deinitialises the executed test case from the
  * given test suite.
@@ -165,6 +181,7 @@ LoadTestCaseQuit(void *suite) {
 
 	return testCaseQuit;
 }
+
 
 /*!
  * If using out-of-proc execution of tests. This function
@@ -193,6 +210,7 @@ HandleTestReturnValue(int stat_lock)
 	return returnValue;
 }
 
+
 /*!
  * Executes a test case. Loads the test, executes it and
  * returns the tests return value to the caller.
@@ -203,11 +221,9 @@ HandleTestReturnValue(int stat_lock)
  */
 int
 ExecuteTest(void *suite, TestCaseReference *testReference) {
-	char *testname = testReference->name;
-
 	TestCaseInit testCaseInit = LoadTestCaseInit(suite);
 	TestCaseQuit testCaseQuit = LoadTestCaseQuit(suite);
-	TestCase test = (TestCase) LoadTestCase(suite, testname);
+	TestCase test = (TestCase) LoadTestCase(suite, testReference->name);
 
 	int retVal = 1;
 	if(execute_inproc) {
@@ -246,6 +262,7 @@ void printUsage() {
 	  printf(" --help           Print this help\n");
 }
 
+
 /*!
  * Parse command line arguments
  *
@@ -265,13 +282,29 @@ ParseOptions(int argc, char *argv[])
       else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
     	  printUsage();
     	  exit(0);
-      } else {
+      }
+      else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
+    	  only_selected_test = 1;
+    	  char *testName = argv[++i]; //!< \todo fixme what if i == argc? segfault?
+
+    	  memset(selected_test_name, 0, NAME_BUFFER_SIZE); // unnecessary?
+    	  strcpy(selected_test_name, testName);
+      }
+      else if(SDL_strcmp(arg, "--suite") == 0 || SDL_strcmp(arg, "-s") == 0) {
+    	  only_selected_suite = 1;
+    	  char *suiteName = argv[++i]; //!< \todo fixme what if i == argc? segfault?
+
+    	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE); // unnecessary?
+    	  strcpy(selected_suite_name, suiteName);
+      }
+      else {
     	  printf("runner: unknown command '%s'\n", arg);
     	  printUsage();
     	  exit(0);
       }
    }
 }
+
 
 /*!
  * Entry point for test runner
@@ -295,13 +328,34 @@ main(int argc, char *argv[])
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 	for(testSuiteName = testSuiteNames[suiteCounter]; testSuiteName; testSuiteName = testSuiteNames[++suiteCounter]) {
+
+		if(only_selected_suite)	{
+			// extract the suite name. Rips the tests/ and file suffix from the suite name
+			char buffer[32];
+			int len = strlen(testSuiteName);
+			int copy = len - 6 - 6;
+			memcpy(buffer, testSuiteName + 6, copy);
+			//printf("%s\n", buffer);
+			//char *name = strndup(testSuiteName[5], 32);
+
+			if(SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) != 0) {
+				continue;
+			}
+		}
+
 		void *suite = LoadTestSuite(testSuiteName);
 		TestCaseReference **tests = QueryTestCases(suite);
 
 		TestCaseReference *reference = NULL;
 		int counter = 0;
-
 		for(reference = tests[counter]; reference; reference = tests[++counter]) {
+
+			if(only_selected_test) {
+				if(SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
+					continue;
+				}
+			}
+
 			if(reference->enabled == TEST_DISABLED) {
 				printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
 			} else {
