@@ -315,8 +315,6 @@ ParseOptions(int argc, char *argv[])
 
     	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_suite_name, suiteName);
-
-    	  printf("%s\n", selected_suite_name);
       }
       else {
     	  printf("runner: unknown command '%s'\n", arg);
@@ -324,6 +322,44 @@ ParseOptions(int argc, char *argv[])
     	  exit(0);
       }
    }
+}
+
+
+/*!
+ * Tests if the given test suite is selected for execution.
+ * If only_selected_suite flag is zero, then all the suites are
+ * automatically selected. If the flags is non-zero, only the suite
+ * which matches the selected suite is selected.
+ *
+ * \param testSuiteName Name of the test suite
+ *
+ * \return 1 if given suite is selected, otherwise 0
+ */
+int
+SuiteIsSelected(char *testSuiteName) {
+	int retVal = 1;
+
+	if(only_selected_suite)	{
+		// extract the suite name. Rips the tests/ and file suffix from the suite name
+		char buffer[NAME_BUFFER_SIZE];
+		int len = strlen(testSuiteName);
+
+//! \todo Fix this, it's rather horrible way to do it
+#define DIR_NAME_LENGTH 6
+#if defined(linux) || defined( __linux)
+#define FILE_EXT_LENGTH 3
+#else
+#define FILE_EXT_LENGTH 6
+#endif
+		int length = len - DIR_NAME_LENGTH - FILE_EXT_LENGTH;
+
+		memset(buffer, 0, NAME_BUFFER_SIZE);
+		memcpy(buffer, testSuiteName + 6, length);
+
+		retVal = SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) == 0;
+	}
+
+	return retVal;
 }
 
 
@@ -349,27 +385,9 @@ main(int argc, char *argv[])
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 	for(testSuiteName = testSuiteNames[suiteCounter]; testSuiteName; testSuiteName = testSuiteNames[++suiteCounter]) {
-
-		if(only_selected_suite)	{
-			// extract the suite name. Rips the tests/ and file suffix from the suite name
-			char buffer[NAME_BUFFER_SIZE];
-			int len = strlen(testSuiteName);
-
-//! \todo Fix this, it's rather horrible way to do it
-#define DIR_NAME_LENGTH 6
-#if defined(linux) || defined( __linux)
-#define FILE_EXT_LENGTH 3
-#else
-#define FILE_EXT_LENGTH 6
-#endif
-			int length = len - DIR_NAME_LENGTH - FILE_EXT_LENGTH;
-
-			memset(buffer, 0, NAME_BUFFER_SIZE);
-			memcpy(buffer, testSuiteName + 6, length);
-
-			if(SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) != 0) {
-				continue;
-			}
+		// if the current suite isn't selected, go to next suite
+		if(SuiteIsSelected(testSuiteName) == 0) {
+			continue;
 		}
 
 		void *suite = LoadTestSuite(testSuiteName);
@@ -378,11 +396,8 @@ main(int argc, char *argv[])
 		TestCaseReference *reference = NULL;
 		int counter = 0;
 		for(reference = tests[counter]; reference; reference = tests[++counter]) {
-
-			if(only_selected_test) {
-				if(SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
-					continue;
-				}
+			if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
+				continue;
 			}
 
 			if(reference->enabled == TEST_DISABLED) {
