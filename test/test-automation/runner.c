@@ -256,10 +256,13 @@ ExecuteTest(void *suite, TestCaseReference *testReference) {
  * Prints usage information
  */
 void printUsage() {
-	  printf("Usage: ./runner [--in-proc] [--help]\n");
+	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST] [--help]\n");
 	  printf("Options:\n");
-	  printf(" --in-proc        Executes tests in-process\n");
-	  printf(" --help           Print this help\n");
+	  printf("    --in-proc        Executes tests in-process\n");
+	  printf(" -t --test TEST      Executes only tests with given name\n");
+	  printf(" -s --suite SUITE    Executes only the given test suite\n");
+
+	  printf(" -h --help           Print this help\n");
 }
 
 
@@ -285,17 +288,35 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
-    	  char *testName = argv[++i]; //!< \todo fixme what if i == argc? segfault?
+    	  char *testName = NULL;
 
-    	  memset(selected_test_name, 0, NAME_BUFFER_SIZE); // unnecessary?
+    	  if( (i + 1) < argc)  {
+    		  testName = argv[++i];
+    	  }  else {
+    		  printf("runner: test name is missing\n");
+    		  printUsage();
+    		  exit(1);
+    	  }
+
+    	  memset(selected_test_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_test_name, testName);
       }
       else if(SDL_strcmp(arg, "--suite") == 0 || SDL_strcmp(arg, "-s") == 0) {
     	  only_selected_suite = 1;
-    	  char *suiteName = argv[++i]; //!< \todo fixme what if i == argc? segfault?
 
-    	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE); // unnecessary?
+    	  char *suiteName = NULL;
+    	  if( (i + 1) < argc)  {
+    		  suiteName = argv[++i];
+    	  }  else {
+    		  printf("runner: suite name is missing\n");
+    		  printUsage();
+    		  exit(1);
+    	  }
+
+    	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_suite_name, suiteName);
+
+    	  printf("%s\n", selected_suite_name);
       }
       else {
     	  printf("runner: unknown command '%s'\n", arg);
@@ -331,12 +352,20 @@ main(int argc, char *argv[])
 
 		if(only_selected_suite)	{
 			// extract the suite name. Rips the tests/ and file suffix from the suite name
-			char buffer[32];
+			char buffer[NAME_BUFFER_SIZE];
 			int len = strlen(testSuiteName);
-			int copy = len - 6 - 6;
-			memcpy(buffer, testSuiteName + 6, copy);
-			//printf("%s\n", buffer);
-			//char *name = strndup(testSuiteName[5], 32);
+
+//! \todo Fix this, it's rather horrible way to do it
+#define DIR_NAME_LENGTH 6
+#if defined(linux) || defined( __linux)
+#define FILE_EXT_LENGTH 3
+#else
+#define FILE_EXT_LENGTH 6
+#endif
+			int length = len - DIR_NAME_LENGTH - FILE_EXT_LENGTH;
+
+			memset(buffer, 0, NAME_BUFFER_SIZE);
+			memcpy(buffer, testSuiteName + 6, length);
 
 			if(SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) != 0) {
 				continue;
