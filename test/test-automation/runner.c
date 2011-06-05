@@ -354,7 +354,7 @@ SuiteIsSelected(char *testSuiteName) {
 		int length = len - DIR_NAME_LENGTH - FILE_EXT_LENGTH;
 
 		memset(buffer, 0, NAME_BUFFER_SIZE);
-		memcpy(buffer, testSuiteName + 6, length);
+		memcpy(buffer, testSuiteName + DIR_NAME_LENGTH, length);
 
 		retVal = SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) == 0;
 	}
