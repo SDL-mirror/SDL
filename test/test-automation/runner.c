@@ -255,7 +255,8 @@ ExecuteTest(void *suite, TestCaseReference *testReference) {
 /*!
  * Prints usage information
  */
-void printUsage() {
+void
+printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST] [--help]\n");
 	  printf("Options:\n");
 	  printf("    --in-proc        Executes tests in-process\n");
@@ -344,17 +345,16 @@ SuiteIsSelected(char *testSuiteName) {
 		char buffer[NAME_BUFFER_SIZE];
 		int len = strlen(testSuiteName);
 
-//! \todo Fix this, it's rather horrible way to do it
-#define DIR_NAME_LENGTH 6
+		const int dirNameLength = 6;
 #if defined(linux) || defined( __linux)
-#define FILE_EXT_LENGTH 3
+		const int fileExtLength = 3;
 #else
-#define FILE_EXT_LENGTH 6
+		const int fileExtLength = 6;
 #endif
-		int length = len - DIR_NAME_LENGTH - FILE_EXT_LENGTH;
+		int length = len - dirNameLength - fileExtLength;
 
 		memset(buffer, 0, NAME_BUFFER_SIZE);
-		memcpy(buffer, testSuiteName + DIR_NAME_LENGTH, length);
+		memcpy(buffer, testSuiteName + dirNameLength, length);
 
 		retVal = SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) == 0;
 	}
@@ -377,53 +377,50 @@ main(int argc, char *argv[])
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
 	int failureCount = 0, passCount = 0;
-
-	const Uint32 startTicks = SDL_GetTicks();
-
-	char **testSuiteNames = ScanForTestSuites();
-
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
+
+	const Uint32 startTicks = SDL_GetTicks();
+	char **testSuiteNames = ScanForTestSuites();
+
 	for(testSuiteName = testSuiteNames[suiteCounter]; testSuiteName; testSuiteName = testSuiteNames[++suiteCounter]) {
 		// if the current suite isn't selected, go to next suite
-		if(SuiteIsSelected(testSuiteName) == 0) {
-			continue;
-		}
+		if(SuiteIsSelected(testSuiteName)) {
+			void *suite = LoadTestSuite(testSuiteName);
+			TestCaseReference **tests = QueryTestCases(suite);
 
-		void *suite = LoadTestSuite(testSuiteName);
-		TestCaseReference **tests = QueryTestCases(suite);
-
-		TestCaseReference *reference = NULL;
-		int counter = 0;
-		for(reference = tests[counter]; reference; reference = tests[++counter]) {
-			if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
-				continue;
-			}
-
-			if(reference->enabled == TEST_DISABLED) {
-				printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
-			} else {
-				printf("Executing %s (in %s):\n", reference->name, testSuiteName);
-
-				int retVal = ExecuteTest(suite, reference);
-
-				if(retVal) {
-					failureCount++;
-					if(retVal == 2) {
-						printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
-					} else {
-						printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
-					}
-				} else {
-					passCount++;
-					printf("%s (in %s): ok\n", reference->name, testSuiteName);
+			TestCaseReference *reference = NULL;
+			int counter = 0;
+			for(reference = tests[counter]; reference; reference = tests[++counter]) {
+				if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
+					continue;
 				}
+
+				if(reference->enabled == TEST_DISABLED) {
+					printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
+				} else {
+					printf("Executing %s (in %s):\n", reference->name, testSuiteName);
+
+					int retVal = ExecuteTest(suite, reference);
+
+					if(retVal) {
+						failureCount++;
+						if(retVal == 2) {
+							printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
+						} else {
+							printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
+						}
+					} else {
+						passCount++;
+						printf("%s (in %s): ok\n", reference->name, testSuiteName);
+					}
+				}
+
+				printf("\n");
 			}
 
-			printf("\n");
+			SDL_UnloadObject(suite);
 		}
-
-		SDL_UnloadObject(suite);
 	}
 
 	const Uint32 endTicks = SDL_GetTicks();
