@@ -33,7 +33,8 @@ CFLAGS="-g"
 AC_FUNC_FORK
 
 AC_CONFIG_FILES([Makefile
-				 tests/Makefile testrect/Makefile])
+				 testdummy/Makefile 
+				 testrect/Makefile])
 AC_OUTPUT
 
 echo ""

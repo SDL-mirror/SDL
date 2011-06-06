@@ -18,6 +18,12 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+/*! \file
+ * Dummy test suite for test runner. This can be used as a base for
+ * writing new tests. Dummy suite also works as reference to using
+ * various asserts and (possible) other utilities.
+ */
+
 #ifndef _TEST_C
 #define _TEST_C
 
@@ -29,13 +35,13 @@
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "hello", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "hello2", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "hello3", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
@@ -48,7 +54,7 @@ TestCaseReference **QueryTestSuite() {
 }
 
 /* Test case functions */
-void hello(void *arg)
+void dummycase1(void *arg)
 {
 	const char *revision = SDL_GetRevision();
 
@@ -57,14 +63,14 @@ void hello(void *arg)
 	AssertEquals(3, 5, "fails");
 }
 
-void hello2(void *arg)
+void dummycase2(void *arg)
 {
 	char *msg = "eello";
 	//msg[0] = 'H';
 	AssertTrue(0, "fails");
 }
 
-void hello3(void *arg)
+void dummycase3(void *arg)
 {
 	AssertTrue(1, "passes");
 }

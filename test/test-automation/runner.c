@@ -53,9 +53,9 @@ char selected_suite_name[NAME_BUFFER_SIZE];
 
 //!< Temporary array to hold test suite names
 #if defined(linux) || defined( __linux)
-	char *testSuites[] = { "tests/libtest.so", "tests/libtestrect.so", NULL};
+	char *testSuites[] = { "tests/libtestdummy.so", "tests/libtestrect.so", NULL};
 #else
-	char *testSuites[] = { "tests/libtest.dylib", "tests/libtestrect.dylib", NULL};
+	char *testSuites[] = { "tests/libtestdummy.dylib", "tests/libtestrect.dylib", NULL};
 #endif
 
 
@@ -340,7 +340,7 @@ SuiteIsSelected(char *testSuiteName) {
 	int retVal = 1;
 
 	if(only_selected_suite)	{
-		// extract the suite name. Rips the tests/ and file suffix from the suite name
+		// extract the suite name. Rips the tests/ and file extension from the suite name
 		char buffer[NAME_BUFFER_SIZE];
 		int len = strlen(testSuiteName);
 

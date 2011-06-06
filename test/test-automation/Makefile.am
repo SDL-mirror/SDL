@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 
-SUBDIRS = tests testrect
+SUBDIRS = testdummy testrect
 
 bin_PROGRAMS = runner
 runner_SOURCES = runner.c SDL_test.c
@@ -9,12 +9,13 @@ runner_LDFLAGS = `sdl-config --libs`
 
 install: install-tests
 install-tests:
-	-cp -f tests/.libs/*.dylib tests/ 2> /dev/null
-	-cp -f tests/.libs/*.so tests/ 2> /dev/null
+	-mkdir tests
+	-cp -f testdummy/.libs/*.dylib tests/ 2> /dev/null
+	-cp -f testdummy/.libs/*.so tests/ 2> /dev/null
 	-cp -f testrect/.libs/*.dylib tests/ 2> /dev/null
 	-cp -f testrect/.libs/*.so tests/ 2> /dev/null
 
 distclean-local:
-	-rm -Rf docs/
+	-rm -Rf tests/ docs/
 
 
