@@ -33,7 +33,9 @@
 
 #include "../SDL_test.h"
 
-/* Test cases */
+// \todo add some helpful commenting for possible test writers?
+
+/* Test case references */
 static const TestCaseReference test1 =
 		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0 };
 
