@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <dirent.h>
 
 #include <sys/types.h>
 
@@ -45,33 +46,78 @@ static int only_selected_test  = 0;
 static int only_selected_suite = 0;
 
 //<! Size of the test and suite name buffers
-#define NAME_BUFFER_SIZE 256
+#define NAME_BUFFER_SIZE 1024
 //!< Name of the selected test
 char selected_test_name[NAME_BUFFER_SIZE];
 //!< Name of the selected suite
 char selected_suite_name[NAME_BUFFER_SIZE];
 
-//!< Temporary array to hold test suite names
-#if defined(linux) || defined( __linux)
-	char *testSuites[] = { "tests/libtestdummy.so", "tests/libtestrect.so", NULL};
-#else
-	char *testSuites[] = { "tests/libtestdummy.dylib", "tests/libtestrect.dylib", NULL};
-#endif
-
 
 /*!
- * Returns the name for the dynamic library
- * which implements the test suite.
- *
- * (in the future: scans the test/ directory and
- * returns the names of the dynamic libraries
- * implementing the test suites)
- *
- * \return Array of test suite names
+ * Holds information about test suite. Implemented as
+ * linked list. \todo write better doc
  */
-char **
-ScanForTestSuites() {
-	return testSuites;
+typedef struct TestSuiteReference {
+	char *name; //<! test suite name
+	struct TestSuiteReference *next; //!< Pointer to next item in the list
+} TestSuiteReference;
+
+static TestSuiteReference *suites = NULL;
+
+/*!
+ * Scans the tests/ directory and returns the names
+ * of the dynamic libraries implementing the test suites.
+ * Note: currently function assumes that test suites names
+ * are in following format: libtestsuite.dylib or libtestsuite.so.
+ *
+ * \return Pointer to TestSuiteReference which holds all the info about suites
+ */
+TestSuiteReference *
+ScanForTestSuites(/*char *directoryName*/) {
+	typedef struct dirent Entry;
+	DIR *directory = opendir("tests/");
+
+	TestSuiteReference *suites = NULL;
+
+	Entry *entry = NULL;
+	if(directory) {
+		while(entry = readdir(directory)) {
+			if(entry->d_namlen > 2) { // discards . and ..
+				const int bufferSize = 1024;
+				char buffer[bufferSize];
+				memset(buffer, 0, bufferSize);
+
+				strcat(buffer, "tests/"); // \todo convert to define or something
+
+				char *name = strtok(entry->d_name, ".");
+				char *extension = strtok(NULL, ".");
+				if(strcmp(extension, "dylib") == 0 || strcmp(extension, "so") == 0) {
+					strcat(buffer, name);
+					strcat(buffer, ".");
+					strcat(buffer, extension);
+
+					TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
+					memset(reference, 0, sizeof(TestSuiteReference));
+
+					int length = strlen(buffer) + 1; // + 1 for '\0'?
+					reference->name = SDL_malloc(length * sizeof(char));
+
+					strcpy(reference->name, buffer);
+					reference->next = suites;
+
+					suites = reference;
+
+					// printf("Reference added to: %s\n", buffer)
+				}
+			}
+		}
+
+		closedir(directory);
+	} else {
+		perror("Couldn't open directory: tests/");
+	}
+
+	return suites;
 }
 
 
@@ -381,9 +427,12 @@ main(int argc, char *argv[])
 	int suiteCounter = 0;
 
 	const Uint32 startTicks = SDL_GetTicks();
-	char **testSuiteNames = ScanForTestSuites();
+	TestSuiteReference *suites = ScanForTestSuites();
 
-	for(testSuiteName = testSuiteNames[suiteCounter]; testSuiteName; testSuiteName = testSuiteNames[++suiteCounter]) {
+	TestSuiteReference *suiteReference = NULL;
+	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
+		char *testSuiteName = suiteReference->name;
+
 		// if the current suite isn't selected, go to next suite
 		if(SuiteIsSelected(testSuiteName)) {
 			void *suite = LoadTestSuite(testSuiteName);
