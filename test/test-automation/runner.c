@@ -45,13 +45,16 @@ static int only_selected_test  = 0;
 //!< Flag for executing only the selected test suite
 static int only_selected_suite = 0;
 
-//<! Size of the test and suite name buffers
+//!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
 //!< Name of the selected test
 char selected_test_name[NAME_BUFFER_SIZE];
 //!< Name of the selected suite
 char selected_suite_name[NAME_BUFFER_SIZE];
 
+
+//! Default directory of the test suites
+#define DEFAULT_TEST_DIRECTORY "tests/"
 
 /*!
  * Holds information about test suite. Implemented as
@@ -62,20 +65,25 @@ typedef struct TestSuiteReference {
 	struct TestSuiteReference *next; //!< Pointer to next item in the list
 } TestSuiteReference;
 
-static TestSuiteReference *suites = NULL;
 
 /*!
  * Scans the tests/ directory and returns the names
  * of the dynamic libraries implementing the test suites.
+ *
  * Note: currently function assumes that test suites names
  * are in following format: libtestsuite.dylib or libtestsuite.so.
+ *
+ * Note: if only_selected_suite flags is non-zero, only the selected
+ * test will be loaded.
+ *
+ * \param directoryName Name of the directory which will be scanned
  *
  * \return Pointer to TestSuiteReference which holds all the info about suites
  */
 TestSuiteReference *
-ScanForTestSuites(/*char *directoryName*/) {
+ScanForTestSuites(char *directoryName, char *extension) {
 	typedef struct dirent Entry;
-	DIR *directory = opendir("tests/");
+	DIR *directory = opendir(directoryName);
 
 	TestSuiteReference *suites = NULL;
 
@@ -83,19 +91,25 @@ ScanForTestSuites(/*char *directoryName*/) {
 	if(directory) {
 		while(entry = readdir(directory)) {
 			if(entry->d_namlen > 2) { // discards . and ..
-				const int bufferSize = 1024;
-				char buffer[bufferSize];
-				memset(buffer, 0, bufferSize);
-
-				strcat(buffer, "tests/"); // \todo convert to define or something
+				char buffer[NAME_BUFFER_SIZE];
+				memset(buffer, 0, NAME_BUFFER_SIZE);
 
 				char *name = strtok(entry->d_name, ".");
-				char *extension = strtok(NULL, ".");
-				if(strcmp(extension, "dylib") == 0 || strcmp(extension, "so") == 0) {
+				char *ext = strtok(NULL, ".");
+
+				// filter out all other suites but the selected test suite
+				int ok = 1;
+				if(only_selected_suite) {
+					ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
+				}
+
+				if(ok && SDL_strcmp(ext, extension)  == 0) {
+					strcat(buffer, directoryName);
 					strcat(buffer, name);
 					strcat(buffer, ".");
-					strcat(buffer, extension);
+					strcat(buffer, ext);
 
+					// create tes suite reference
 					TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
 					memset(reference, 0, sizeof(TestSuiteReference));
 
@@ -103,11 +117,12 @@ ScanForTestSuites(/*char *directoryName*/) {
 					reference->name = SDL_malloc(length * sizeof(char));
 
 					strcpy(reference->name, buffer);
+
 					reference->next = suites;
 
 					suites = reference;
 
-					// printf("Reference added to: %s\n", buffer)
+					printf("Reference added to: %s\n", buffer);
 				}
 			}
 		}
@@ -373,43 +388,6 @@ ParseOptions(int argc, char *argv[])
 
 
 /*!
- * Tests if the given test suite is selected for execution.
- * If only_selected_suite flag is zero, then all the suites are
- * automatically selected. If the flags is non-zero, only the suite
- * which matches the selected suite is selected.
- *
- * \param testSuiteName Name of the test suite
- *
- * \return 1 if given suite is selected, otherwise 0
- */
-int
-SuiteIsSelected(char *testSuiteName) {
-	int retVal = 1;
-
-	if(only_selected_suite)	{
-		// extract the suite name. Rips the tests/ and file extension from the suite name
-		char buffer[NAME_BUFFER_SIZE];
-		int len = strlen(testSuiteName);
-
-		const int dirNameLength = 6;
-#if defined(linux) || defined( __linux)
-		const int fileExtLength = 3;
-#else
-		const int fileExtLength = 6;
-#endif
-		int length = len - dirNameLength - fileExtLength;
-
-		memset(buffer, 0, NAME_BUFFER_SIZE);
-		memcpy(buffer, testSuiteName + dirNameLength, length);
-
-		retVal = SDL_strncmp(selected_suite_name, buffer, NAME_BUFFER_SIZE) == 0;
-	}
-
-	return retVal;
-}
-
-
-/*!
  * Entry point for test runner
  *
  * \param argc Count of command line arguments
@@ -426,50 +404,58 @@ main(int argc, char *argv[])
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 
+#if defined(linux) || defined( __linux)
+	char *extension = "so";
+#else
+	char *extension = "dylib";
+#endif
+
 	const Uint32 startTicks = SDL_GetTicks();
-	TestSuiteReference *suites = ScanForTestSuites();
+	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
+
+	// load the suites
+	// load tests and filter them
+	// end result: list of tests to run
 
 	TestSuiteReference *suiteReference = NULL;
 	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
 		char *testSuiteName = suiteReference->name;
 
 		// if the current suite isn't selected, go to next suite
-		if(SuiteIsSelected(testSuiteName)) {
-			void *suite = LoadTestSuite(testSuiteName);
-			TestCaseReference **tests = QueryTestCases(suite);
+		void *suite = LoadTestSuite(testSuiteName);
+		TestCaseReference **tests = QueryTestCases(suite);
 
-			TestCaseReference *reference = NULL;
-			int counter = 0;
-			for(reference = tests[counter]; reference; reference = tests[++counter]) {
-				if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
-					continue;
-				}
-
-				if(reference->enabled == TEST_DISABLED) {
-					printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
-				} else {
-					printf("Executing %s (in %s):\n", reference->name, testSuiteName);
-
-					int retVal = ExecuteTest(suite, reference);
-
-					if(retVal) {
-						failureCount++;
-						if(retVal == 2) {
-							printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
-						} else {
-							printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
-						}
-					} else {
-						passCount++;
-						printf("%s (in %s): ok\n", reference->name, testSuiteName);
-					}
-				}
-
-				printf("\n");
+		TestCaseReference *reference = NULL;
+		int counter = 0;
+		for(reference = tests[counter]; reference; reference = tests[++counter]) {
+			if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
+				continue;
 			}
 
-			SDL_UnloadObject(suite);
+			if(reference->enabled == TEST_DISABLED) {
+				printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
+			} else {
+				printf("Executing %s (in %s):\n", reference->name, testSuiteName);
+
+				int retVal = ExecuteTest(suite, reference);
+
+				if(retVal) {
+					failureCount++;
+					if(retVal == 2) {
+						printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
+					} else {
+						printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
+					}
+				} else {
+					passCount++;
+					printf("%s (in %s): ok\n", reference->name, testSuiteName);
+				}
+			}
+
+			printf("\n");
 		}
+
+		SDL_UnloadObject(suite);
 	}
 
 	const Uint32 endTicks = SDL_GetTicks();
