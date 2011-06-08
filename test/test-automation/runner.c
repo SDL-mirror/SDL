@@ -479,5 +479,15 @@ main(int argc, char *argv[])
 	printf("%d tests passed\n", passCount);
 	printf("%d tests failed\n", failureCount);
 
+	// Deallocate the memory used by test suites
+	TestSuiteReference *ref = suites;
+	while(ref) {
+		SDL_free(ref->name);
+
+		TestSuiteReference *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
 	return 0;
 }
