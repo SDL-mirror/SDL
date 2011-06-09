@@ -111,6 +111,7 @@ TestCaseReference **QueryTestCaseReferences(void *library);
  * test will be loaded.
  *
  * \param directoryName Name of the directory which will be scanned
+ * \param extension What file extension is used with dynamic objects
  *
  * \return Pointer to TestSuiteReference which holds all the info about suites
  */
@@ -177,7 +178,7 @@ ScanForTestSuites(char *directoryName, char *extension)
  * during the process. Function will only return the
  * test cases which aren't filtered out.
  *
- * \param suite previously loaded test suites
+ * \param suites previously loaded test suites
  *
  * \return Test cases that survived filtering process.
  */
@@ -472,8 +473,7 @@ HandleChildProcessReturnValue(int stat_lock)
  * Executes a test case. Loads the test, executes it and
  * returns the tests return value to the caller.
  *
- * \param suite The suite from which the test will be loaded
- * \param testReference TestCaseReference of the test under execution
+ * \param testItem The test case that will be executed
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
@@ -510,14 +510,16 @@ ExecuteTest(TestCase *testItem) {
  */
 void
 printUsage() {
-	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST] [--help]\n");
+	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
+	  printf("                [--name-contains SUBSTR] [--help]\n");
 	  printf("Options:\n");
-	  printf("     --in-proc                           Executes tests in-process\n");
-	  printf(" -t  --test TEST                         Executes only tests with given name\n");
-	  printf(" -ts --test-name-contains SUBSTRING      Executes only tests which test name has the given substring\n");
-	  printf(" -s  --suite SUITE    Executes only the given test suite\n");
+	  printf("     --in-proc                Executes tests in-process\n");
+	  printf(" -t  --test TEST              Executes only tests with given name\n");
+	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
+	  printf("                              substring in test name\n");
+	  printf(" -s  --suite SUITE            Executes only the given test suite\n");
 
-	  printf(" -h --help           Print this help\n");
+	  printf(" -h  --help                   Print this help\n");
 }
 
 
@@ -556,7 +558,7 @@ ParseOptions(int argc, char *argv[])
     	  memset(selected_test_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_test_name, testName);
       }
-      else if(SDL_strcmp(arg, "--test-name-contains") == 0 || SDL_strcmp(arg, "-ts") == 0) {
+      else if(SDL_strcmp(arg, "--name-contains") == 0 || SDL_strcmp(arg, "-ts") == 0) {
     	  only_tests_with_string = 1;
     	  char *substring = NULL;
 
