@@ -44,6 +44,9 @@ static int execute_inproc = 0;
 static int only_selected_test  = 0;
 //!< Flag for executing only the selected test suite
 static int only_selected_suite = 0;
+//!< Flag for executing only tests that contain certain string in their name
+static int only_tests_with_string = 0;
+
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
@@ -51,6 +54,9 @@ static int only_selected_suite = 0;
 char selected_test_name[NAME_BUFFER_SIZE];
 //!< Name of the selected suite
 char selected_suite_name[NAME_BUFFER_SIZE];
+
+//!< substring of test case name
+char testcase_name_substring[NAME_BUFFER_SIZE];
 
 
 //! Default directory of the test suites
@@ -331,6 +337,7 @@ printUsage() {
 	  printf("    --in-proc        Executes tests in-process\n");
 	  printf(" -t --test TEST      Executes only tests with given name\n");
 	  printf(" -s --suite SUITE    Executes only the given test suite\n");
+	  //! \todo add --test-name-contains
 
 	  printf(" -h --help           Print this help\n");
 }
@@ -370,6 +377,21 @@ ParseOptions(int argc, char *argv[])
 
     	  memset(selected_test_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_test_name, testName);
+      }
+      else if(SDL_strcmp(arg, "--test-name-contains") == 0 || SDL_strcmp(arg, "-ts") == 0) {
+    	  only_tests_with_string = 1;
+    	  char *substring = NULL;
+
+    	  if( (i + 1) < argc)  {
+    		  substring = argv[++i];
+    	  }  else {
+    		  printf("runner: substring of test name is missing\n");
+    		  printUsage();
+    		  exit(1);
+    	  }
+
+    	  memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
+    	  strcpy(testcase_name_substring, substring);
       }
       else if(SDL_strcmp(arg, "--suite") == 0 || SDL_strcmp(arg, "-s") == 0) {
     	  only_selected_suite = 1;
@@ -418,13 +440,20 @@ LoadTestCases(TestSuiteReference *suites) {
 
 			// Do the filtering
 			if(FilterTestCase(testReference)) {
-				//!< \todo deallocate these
 				TestCaseItem *item = SDL_malloc(sizeof(TestCaseItem));
 				memset(item, 0, sizeof(TestCaseItem));
 
 				item->testCaseInit = testCaseInit;
 				item->testCase = testCase;
 				item->testCaseQuit = testCaseQuit;
+
+				int length = strlen(suiteReference->name) + 1;
+				item->suiteName = SDL_malloc(length);
+				strcpy(item->suiteName, suiteReference->name);
+
+				length = strlen(testReference->name) + 1;
+				item->testName = SDL_malloc(length);
+				strcpy(item->testName, testReference->name);
 
 				// prepend the list
 				item->next = testCases;
@@ -445,6 +474,9 @@ void
 UnloadTestCases(TestCaseItem *item) {
 	TestCaseItem *ref = item;
 	while(ref) {
+		SDL_free(ref->testName);
+		SDL_free(ref->suiteName);
+
 		TestCaseItem *temp = ref->next;
 		SDL_free(ref);
 		ref = temp;
@@ -455,24 +487,26 @@ UnloadTestCases(TestCaseItem *item) {
 
 /*!
  * \todo add comment
+ *
+ * \return Non-zero means test will be added to execution list, zero means opposite
  */
 int
 FilterTestCase(TestCaseReference *testReference) {
-	//int retVal = 1;
+	int retVal = 1;
 
 	if(testReference->enabled == TEST_DISABLED) {
-		//retVal = 0;
-		return 0;
+		retVal = 0;
 	}
 
-	if(1 && strstr(testReference->name, "rect") != NULL) {
-		//retVal = 1;
-		return 1;
-	} else {
-		return 0;
+	if(only_tests_with_string) {
+		if(strstr(testReference->name, testcase_name_substring) != NULL) {
+			retVal = 1;
+		} else {
+			retVal = 0;
+		}
 	}
 
-	return 1;
+	return retVal;
 }
 
 /*!
@@ -535,10 +569,8 @@ main(int argc, char *argv[])
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
 	suites = LoadTestSuites(suites);
 
-	// load tests and filter them
 	TestCaseItem *testCases = LoadTestCases(suites);
 
-	// end result: list of tests to run
 	TestCaseItem *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
 		int retVal = ExecuteTest(testItem);
@@ -547,13 +579,13 @@ main(int argc, char *argv[])
 			failureCount++;
 			if(retVal == 2) {
 				//printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
-				printf("%s (in %s): FAILED -> No asserts\n", "<test name>", "<suite name>");
+				printf("%s (in %s): FAILED -> No asserts\n", testItem->testName, testItem->suiteName);
 			} else {
-				printf("%s (in %s): FAILED\n", "<test name>", "<suite name>");
+				printf("%s (in %s): FAILED\n", testItem->testName, testItem->suiteName);
 			}
 		} else {
 			passCount++;
-			printf("%s (in %s): ok\n", "<test name>", "<suite name>");
+			printf("%s (in %s): ok\n", testItem->testName, testItem->suiteName);
 		}
 
 		printf("\n");
