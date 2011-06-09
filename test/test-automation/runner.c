@@ -30,16 +30,17 @@
 
 #include "SDL_test.h"
 
+
 //!< Function pointer to a test case function
-typedef void (*TestCase)(void *arg);
+typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*TestCaseInit)(void);
+typedef void (*TestCaseInitFp)(void);
 //!< Function pointer to a test case quit function
-typedef int  (*TestCaseQuit)(void);
+typedef int  (*TestCaseQuitFp)(void);
+
 
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
-
 //!< Flag for executing only test with selected name
 static int only_selected_test  = 0;
 //!< Flag for executing only the selected test suite
@@ -58,31 +59,46 @@ char selected_suite_name[NAME_BUFFER_SIZE];
 //!< substring of test case name
 char testcase_name_substring[NAME_BUFFER_SIZE];
 
-
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
 
+
 /*!
- * Holds information about test suite. Implemented as
- * linked list. \todo write better doc
+ * Holds information about test suite such as it's name
+ * and pointer to dynamic library. Implemented as linked list.
  */
 typedef struct TestSuiteReference {
 	char *name; //!< test suite name
-	void *library; //!< pointer to shared/dynamic library implemeting the suite
+	void *library; //!< pointer to shared/dynamic library implementing the suite
 
 	struct TestSuiteReference *next; //!< Pointer to next item in the list
 } TestSuiteReference;
 
+
+/*!
+ * Holds information about the tests that will be executed.
+ *
+ * Implemented as linked list.
+ */
 typedef struct TestCaseItem {
 	char *testName;
 	char *suiteName;
 
-	TestCaseInit testCaseInit;
-	TestCase testCase;
-	TestCaseQuit testCaseQuit;
+	TestCaseInitFp testCaseInit;
+	TestCaseFp testCase;
+	TestCaseQuitFp testCaseQuit;
 
 	struct TestCaseItem *next;
-} TestCaseItem; //!< \todo rename
+} TestCase;
+
+
+
+/*! Some function prototypes. Add the rest of functions and move to runner.h */
+TestCaseFp LoadTestCaseFunction(void *suite, char *testName);
+TestCaseInitFp LoadTestCaseInitFunction(void *suite);
+TestCaseQuitFp LoadTestCaseQuitFunction(void *suite);
+TestCaseReference **QueryTestCaseReferences(void *library);
+
 
 /*!
  * Scans the tests/ directory and returns the names
@@ -99,7 +115,8 @@ typedef struct TestCaseItem {
  * \return Pointer to TestSuiteReference which holds all the info about suites
  */
 TestSuiteReference *
-ScanForTestSuites(char *directoryName, char *extension) {
+ScanForTestSuites(char *directoryName, char *extension)
+{
 	typedef struct dirent Entry;
 	DIR *directory = opendir(directoryName);
 
@@ -107,7 +124,7 @@ ScanForTestSuites(char *directoryName, char *extension) {
 
 	Entry *entry = NULL;
 	if(!directory) {
-		perror("Couldn't open directory: tests/");
+		perror("Couldn't open test suite directory!");
 	}
 
 	while(entry = readdir(directory)) {
@@ -143,7 +160,7 @@ ScanForTestSuites(char *directoryName, char *extension) {
 				reference->next = suites;
 				suites = reference;
 
-				printf("Reference added to: %s\n", buffer);
+				//printf("Reference added to: %s\n", buffer);
 			}
 		}
 	}
@@ -151,6 +168,116 @@ ScanForTestSuites(char *directoryName, char *extension) {
 	closedir(directory);
 
 	return suites;
+}
+
+
+/*!
+ * Goes through the previously loaded test suites and
+ * loads test cases from them. Test cases are filtered
+ * during the process. Function will only return the
+ * test cases which aren't filtered out.
+ *
+ * \param suite previously loaded test suites
+ *
+ * \return Test cases that survived filtering process.
+ */
+TestCase *
+LoadTestCases(TestSuiteReference *suites)
+{
+	TestCase *testCases = NULL;
+
+	TestSuiteReference *suiteReference = NULL;
+	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
+		TestCaseReference **tests = QueryTestCaseReferences(suiteReference->library);
+
+		TestCaseReference *testReference = NULL;
+		int counter = 0;
+		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
+
+			void *suite = suiteReference->library;
+
+			// Load test case functions
+			TestCaseInitFp testCaseInit = LoadTestCaseInitFunction(suiteReference->library);
+			TestCaseQuitFp testCaseQuit = LoadTestCaseQuitFunction(suiteReference->library);
+			TestCaseFp testCase = (TestCaseFp) LoadTestCaseFunction(suiteReference->library, testReference->name);
+
+			// Do the filtering
+			if(FilterTestCase(testReference)) {
+				TestCase *item = SDL_malloc(sizeof(TestCase));
+				memset(item, 0, sizeof(TestCase));
+
+				item->testCaseInit = testCaseInit;
+				item->testCase = testCase;
+				item->testCaseQuit = testCaseQuit;
+
+				int length = strlen(suiteReference->name) + 1;
+				item->suiteName = SDL_malloc(length);
+				strcpy(item->suiteName, suiteReference->name);
+
+				length = strlen(testReference->name) + 1;
+				item->testName = SDL_malloc(length);
+				strcpy(item->testName, testReference->name);
+
+				// prepend the list
+				item->next = testCases;
+				testCases = item;
+
+				//printf("Added test: %s\n", testReference->name);
+			}
+		}
+	}
+
+	return testCases;
+}
+
+
+/*!
+ * Unloads the given TestCases. Frees all the resources
+ * allocated for test cases.
+ *
+ * \param testCases Test cases to be deallocated
+ */
+void
+UnloadTestCases(TestCase *testCases)
+{
+	TestCase *ref = testCases;
+	while(ref) {
+		SDL_free(ref->testName);
+		SDL_free(ref->suiteName);
+
+		TestCase *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
+	testCases = NULL;
+}
+
+
+/*!
+ * Filters a test case based on its properties in TestCaseReference and user
+ * preference.
+ *
+ * \return Non-zero means test will be added to execution list, zero means opposite
+ */
+int
+FilterTestCase(TestCaseReference *testReference)
+{
+	int retVal = 1;
+
+	if(testReference->enabled == TEST_DISABLED) {
+		retVal = 0;
+	}
+
+	if(only_tests_with_string) {
+		if(strstr(testReference->name, testcase_name_substring) != NULL) {
+			retVal = 1;
+		} else {
+			retVal = 0;
+		}
+	}
+
+	return retVal;
 }
 
 
@@ -175,29 +302,73 @@ LoadTestSuite(char *testSuiteName)
 
 
 /*!
+ * Goes through all the given TestSuiteReferences
+ * and loads the dynamic libraries. Updates the suites
+ * parameter on-the-fly and returns it.
+ *
+ * \param suites Suites that will be loaded
+ *
+ * \return Updated TestSuiteReferences with pointer to loaded libraries
+ */
+TestSuiteReference *
+LoadTestSuites(TestSuiteReference *suites)
+{
+	TestSuiteReference *reference = NULL;
+	for(reference = suites; reference; reference = reference->next) {
+		reference->library = LoadTestSuite(reference->name);
+	}
+
+	return suites;
+}
+
+
+/*!
+ * Unloads the given TestSuiteReferences. Frees all
+ * the allocated resources including the dynamic libraries.
+ *
+ * \param suites TestSuiteReferences for deallocation process
+ */
+void
+UnloadTestSuites(TestSuiteReference *suites)
+{
+	TestSuiteReference *ref = suites;
+	while(ref) {
+		SDL_free(ref->name);
+		SDL_UnloadObject(ref->library);
+
+		TestSuiteReference *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
+	suites = NULL;
+}
+
+
+/*!
  * Loads the test case references from the given test suite.
 
  * \param library Previously loaded dynamic library AKA test suite
  * \return Pointer to array of TestCaseReferences or NULL if function failed
  */
 TestCaseReference **
-QueryTestCases(void *library)
+QueryTestCaseReferences(void *library)
 {
-	TestCaseReference **(*suite)(void);
+        TestCaseReference **(*suite)(void);
 
-	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
-	if(suite == NULL) {
-		fprintf(stderr, "Loading QueryTestCaseReferences() failed.\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-	}
+        suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
+        if(suite == NULL) {
+                fprintf(stderr, "Loading QueryTestCaseReferences() failed.\n");
+                fprintf(stderr, "%s\n", SDL_GetError());
+        }
 
-	TestCaseReference **tests = suite();
-	if(tests == NULL) {
-		fprintf(stderr, "Failed to load test references.\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-	}
+        TestCaseReference **tests = suite();
+        if(tests == NULL) {
+                fprintf(stderr, "Failed to load test references.\n");
+                fprintf(stderr, "%s\n", SDL_GetError());
+        }
 
-	return tests;
+        return tests;
 }
 
 
@@ -209,10 +380,10 @@ QueryTestCases(void *library)
  *
  * \return Function Pointer (TestCase) to loaded test case, NULL if function failed
  */
-TestCase
-LoadTestCase(void *suite, char *testName)
+TestCaseFp
+LoadTestCaseFunction(void *suite, char *testName)
 {
-	TestCase test = (TestCase) SDL_LoadFunction(suite, testName);
+	TestCaseFp test = (TestCaseFp) SDL_LoadFunction(suite, testName);
 	if(test == NULL) {
 		fprintf(stderr, "Loading test failed, tests == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
@@ -230,9 +401,9 @@ LoadTestCase(void *suite, char *testName)
  *
  * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
  */
-TestCaseInit
-LoadTestCaseInit(void *suite) {
-	TestCaseInit testCaseInit = (TestCaseInit) SDL_LoadFunction(suite, "_TestCaseInit");
+TestCaseInitFp
+LoadTestCaseInitFunction(void *suite) {
+	TestCaseInitFp testCaseInit = (TestCaseInitFp) SDL_LoadFunction(suite, "_TestCaseInit");
 	if(testCaseInit == NULL) {
 		fprintf(stderr, "Loading TestCaseInit function failed, testCaseInit == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
@@ -250,9 +421,9 @@ LoadTestCaseInit(void *suite) {
  *
  * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
  */
-TestCaseQuit
-LoadTestCaseQuit(void *suite) {
-	TestCaseQuit testCaseQuit = (TestCaseQuit) SDL_LoadFunction(suite, "_TestCaseQuit");
+TestCaseQuitFp
+LoadTestCaseQuitFunction(void *suite) {
+	TestCaseQuitFp testCaseQuit = (TestCaseQuitFp) SDL_LoadFunction(suite, "_TestCaseQuit");
 	if(testCaseQuit == NULL) {
 		fprintf(stderr, "Loading TestCaseQuit function failed, testCaseQuit == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
@@ -273,9 +444,8 @@ LoadTestCaseQuit(void *suite) {
  * \return 0 if test case succeeded, 1 otherwise
  */
 int
-HandleTestReturnValue(int stat_lock)
+HandleChildProcessReturnValue(int stat_lock)
 {
-	//! \todo rename to: HandleChildProcessReturnValue?
 	int returnValue = -1;
 
 	if(WIFEXITED(stat_lock)) {
@@ -299,7 +469,7 @@ HandleTestReturnValue(int stat_lock)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(TestCaseItem *testItem) {
+ExecuteTest(TestCase *testItem) {
 	int retVal = 1;
 	if(execute_inproc) {
 		testItem->testCaseInit();
@@ -319,7 +489,7 @@ ExecuteTest(TestCaseItem *testItem) {
 			int stat_lock = -1;
 			int child = wait(&stat_lock);
 
-			retVal = HandleTestReturnValue(stat_lock);
+			retVal = HandleChildProcessReturnValue(stat_lock);
 		}
 	}
 
@@ -334,10 +504,10 @@ void
 printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST] [--help]\n");
 	  printf("Options:\n");
-	  printf("    --in-proc        Executes tests in-process\n");
-	  printf(" -t --test TEST      Executes only tests with given name\n");
-	  printf(" -s --suite SUITE    Executes only the given test suite\n");
-	  //! \todo add --test-name-contains
+	  printf("     --in-proc                           Executes tests in-process\n");
+	  printf(" -t  --test TEST                         Executes only tests with given name\n");
+	  printf(" -ts --test-name-contains SUBSTRING      Executes only tests which test name has the given substring\n");
+	  printf(" -s  --suite SUITE    Executes only the given test suite\n");
 
 	  printf(" -h --help           Print this help\n");
 }
@@ -418,130 +588,6 @@ ParseOptions(int argc, char *argv[])
 
 
 /*!
- * \todo add comment
- */
-TestCaseItem *
-LoadTestCases(TestSuiteReference *suites) {
-	TestCaseItem *testCases = NULL;
-
-	TestSuiteReference *suiteReference = NULL;
-	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
-		TestCaseReference **tests = QueryTestCases(suiteReference->library);
-
-		TestCaseReference *testReference = NULL;
-		int counter = 0;
-		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
-
-			void *suite = suiteReference->library;
-			// Load test case functions
-			TestCaseInit testCaseInit = LoadTestCaseInit(suiteReference->library);
-			TestCaseQuit testCaseQuit = LoadTestCaseQuit(suiteReference->library);
-			TestCase testCase = (TestCase) LoadTestCase(suiteReference->library, testReference->name);
-
-			// Do the filtering
-			if(FilterTestCase(testReference)) {
-				TestCaseItem *item = SDL_malloc(sizeof(TestCaseItem));
-				memset(item, 0, sizeof(TestCaseItem));
-
-				item->testCaseInit = testCaseInit;
-				item->testCase = testCase;
-				item->testCaseQuit = testCaseQuit;
-
-				int length = strlen(suiteReference->name) + 1;
-				item->suiteName = SDL_malloc(length);
-				strcpy(item->suiteName, suiteReference->name);
-
-				length = strlen(testReference->name) + 1;
-				item->testName = SDL_malloc(length);
-				strcpy(item->testName, testReference->name);
-
-				// prepend the list
-				item->next = testCases;
-				testCases = item;
-
-				printf("Added test: %s\n", testReference->name);
-			}
-		}
-	}
-
-	return testCases;
-}
-
-/*!
- * \todo add comment
- */
-void
-UnloadTestCases(TestCaseItem *item) {
-	TestCaseItem *ref = item;
-	while(ref) {
-		SDL_free(ref->testName);
-		SDL_free(ref->suiteName);
-
-		TestCaseItem *temp = ref->next;
-		SDL_free(ref);
-		ref = temp;
-	}
-
-	item = NULL;
-}
-
-/*!
- * \todo add comment
- *
- * \return Non-zero means test will be added to execution list, zero means opposite
- */
-int
-FilterTestCase(TestCaseReference *testReference) {
-	int retVal = 1;
-
-	if(testReference->enabled == TEST_DISABLED) {
-		retVal = 0;
-	}
-
-	if(only_tests_with_string) {
-		if(strstr(testReference->name, testcase_name_substring) != NULL) {
-			retVal = 1;
-		} else {
-			retVal = 0;
-		}
-	}
-
-	return retVal;
-}
-
-/*!
- * \todo add comment
- */
-TestSuiteReference *
-LoadTestSuites(TestSuiteReference *suites) {
-	TestSuiteReference *reference = NULL;
-	for(reference = suites; reference; reference = reference->next) {
-		reference->library = LoadTestSuite(reference->name);
-	}
-
-	return suites;
-}
-
-
-/*!
- * \todo add comment
- */
-void UnloadTestSuites(TestSuiteReference *suites) {
-	TestSuiteReference *ref = suites;
-	while(ref) {
-		SDL_free(ref->name);
-		SDL_UnloadObject(ref->library);
-
-		TestSuiteReference *temp = ref->next;
-		SDL_free(ref);
-		ref = temp;
-	}
-
-	suites = NULL;
-}
-
-
-/*!
  * Entry point for test runner
  *
  * \param argc Count of command line arguments
@@ -569,16 +615,15 @@ main(int argc, char *argv[])
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
 	suites = LoadTestSuites(suites);
 
-	TestCaseItem *testCases = LoadTestCases(suites);
+	TestCase *testCases = LoadTestCases(suites);
 
-	TestCaseItem *testItem = NULL;
+	TestCase *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
 		int retVal = ExecuteTest(testItem);
 
 		if(retVal) {
 			failureCount++;
 			if(retVal == 2) {
-				//printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
 				printf("%s (in %s): FAILED -> No asserts\n", testItem->testName, testItem->suiteName);
 			} else {
 				printf("%s (in %s): FAILED\n", testItem->testName, testItem->suiteName);
@@ -600,7 +645,6 @@ main(int argc, char *argv[])
 
 	printf("%d tests passed\n", passCount);
 	printf("%d tests failed\n", failureCount);
-
 
 	return 0;
 }
