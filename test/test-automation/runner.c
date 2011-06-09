@@ -269,6 +269,14 @@ FilterTestCase(TestCaseReference *testReference)
 		retVal = 0;
 	}
 
+	if(only_selected_test) {
+		if(SDL_strncmp(testReference->name, selected_test_name, NAME_BUFFER_SIZE) == 0) {
+			retVal = 1;
+		} else {
+			retVal = 0;
+		}
+	}
+
 	if(only_tests_with_string) {
 		if(strstr(testReference->name, testcase_name_substring) != NULL) {
 			retVal = 1;
