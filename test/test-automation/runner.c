@@ -61,10 +61,22 @@ char selected_suite_name[NAME_BUFFER_SIZE];
  * linked list. \todo write better doc
  */
 typedef struct TestSuiteReference {
-	char *name; //<! test suite name
+	char *name; //!< test suite name
+	void *library; //!< pointer to shared/dynamic library implemeting the suite
+
 	struct TestSuiteReference *next; //!< Pointer to next item in the list
 } TestSuiteReference;
 
+typedef struct TestCaseItem {
+	char *testName;
+	char *suiteName;
+
+	TestCaseInit testCaseInit;
+	TestCase testCase;
+	TestCaseQuit testCaseQuit;
+
+	struct TestCaseItem *next;
+} TestCaseItem; //!< \todo rename
 
 /*!
  * Scans the tests/ directory and returns the names
@@ -88,49 +100,49 @@ ScanForTestSuites(char *directoryName, char *extension) {
 	TestSuiteReference *suites = NULL;
 
 	Entry *entry = NULL;
-	if(directory) {
-		while(entry = readdir(directory)) {
-			if(entry->d_namlen > 2) { // discards . and ..
+	if(!directory) {
+		perror("Couldn't open directory: tests/");
+	}
+
+	while(entry = readdir(directory)) {
+		if(entry->d_namlen > 2) { // discards . and ..
+			const char *delimiters = ".";
+			char *name = strtok(entry->d_name, delimiters);
+			char *ext = strtok(NULL, delimiters);
+
+			// filter out all other suites but the selected test suite
+			int ok = 1;
+			if(only_selected_suite) {
+				ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
+			}
+
+			if(ok && SDL_strcmp(ext, extension)  == 0) {
 				char buffer[NAME_BUFFER_SIZE];
 				memset(buffer, 0, NAME_BUFFER_SIZE);
 
-				char *name = strtok(entry->d_name, ".");
-				char *ext = strtok(NULL, ".");
+				strcat(buffer, directoryName);
+				strcat(buffer, name);
+				strcat(buffer, ".");
+				strcat(buffer, ext);
 
-				// filter out all other suites but the selected test suite
-				int ok = 1;
-				if(only_selected_suite) {
-					ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
-				}
+				// create test suite reference
+				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
+				memset(reference, 0, sizeof(TestSuiteReference));
 
-				if(ok && SDL_strcmp(ext, extension)  == 0) {
-					strcat(buffer, directoryName);
-					strcat(buffer, name);
-					strcat(buffer, ".");
-					strcat(buffer, ext);
+				int length = strlen(buffer) + 1; // + 1 for '\0'?
+				reference->name = SDL_malloc(length * sizeof(char));
 
-					// create tes suite reference
-					TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
-					memset(reference, 0, sizeof(TestSuiteReference));
+				strcpy(reference->name, buffer);
 
-					int length = strlen(buffer) + 1; // + 1 for '\0'?
-					reference->name = SDL_malloc(length * sizeof(char));
+				reference->next = suites;
+				suites = reference;
 
-					strcpy(reference->name, buffer);
-
-					reference->next = suites;
-
-					suites = reference;
-
-					printf("Reference added to: %s\n", buffer);
-				}
+				printf("Reference added to: %s\n", buffer);
 			}
 		}
-
-		closedir(directory);
-	} else {
-		perror("Couldn't open directory: tests/");
 	}
+
+	closedir(directory);
 
 	return suites;
 }
@@ -281,26 +293,22 @@ HandleTestReturnValue(int stat_lock)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(void *suite, TestCaseReference *testReference) {
-	TestCaseInit testCaseInit = LoadTestCaseInit(suite);
-	TestCaseQuit testCaseQuit = LoadTestCaseQuit(suite);
-	TestCase test = (TestCase) LoadTestCase(suite, testReference->name);
-
+ExecuteTest(TestCaseItem *testItem) {
 	int retVal = 1;
 	if(execute_inproc) {
-		testCaseInit();
+		testItem->testCaseInit();
 
-		test(0x0);
+		testItem->testCase(0x0);
 
-		retVal = testCaseQuit();
+		retVal = testItem->testCaseQuit();
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			testCaseInit();
+			testItem->testCaseInit();
 
-			test(0x0);
+			testItem->testCase(0x0);
 
-			exit(testCaseQuit());
+			exit(testItem->testCaseQuit());
 		} else {
 			int stat_lock = -1;
 			int child = wait(&stat_lock);
@@ -388,6 +396,118 @@ ParseOptions(int argc, char *argv[])
 
 
 /*!
+ * \todo add comment
+ */
+TestCaseItem *
+LoadTestCases(TestSuiteReference *suites) {
+	TestCaseItem *testCases = NULL;
+
+	TestSuiteReference *suiteReference = NULL;
+	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
+		TestCaseReference **tests = QueryTestCases(suiteReference->library);
+
+		TestCaseReference *testReference = NULL;
+		int counter = 0;
+		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
+
+			void *suite = suiteReference->library;
+			// Load test case functions
+			TestCaseInit testCaseInit = LoadTestCaseInit(suiteReference->library);
+			TestCaseQuit testCaseQuit = LoadTestCaseQuit(suiteReference->library);
+			TestCase testCase = (TestCase) LoadTestCase(suiteReference->library, testReference->name);
+
+			// Do the filtering
+			if(FilterTestCase(testReference)) {
+				//!< \todo deallocate these
+				TestCaseItem *item = SDL_malloc(sizeof(TestCaseItem));
+				memset(item, 0, sizeof(TestCaseItem));
+
+				item->testCaseInit = testCaseInit;
+				item->testCase = testCase;
+				item->testCaseQuit = testCaseQuit;
+
+				// prepend the list
+				item->next = testCases;
+				testCases = item;
+
+				printf("Added test: %s\n", testReference->name);
+			}
+		}
+	}
+
+	return testCases;
+}
+
+/*!
+ * \todo add comment
+ */
+void
+UnloadTestCases(TestCaseItem *item) {
+	TestCaseItem *ref = item;
+	while(ref) {
+		TestCaseItem *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
+	item = NULL;
+}
+
+/*!
+ * \todo add comment
+ */
+int
+FilterTestCase(TestCaseReference *testReference) {
+	//int retVal = 1;
+
+	if(testReference->enabled == TEST_DISABLED) {
+		//retVal = 0;
+		return 0;
+	}
+
+	if(1 && strstr(testReference->name, "rect") != NULL) {
+		//retVal = 1;
+		return 1;
+	} else {
+		return 0;
+	}
+
+	return 1;
+}
+
+/*!
+ * \todo add comment
+ */
+TestSuiteReference *
+LoadTestSuites(TestSuiteReference *suites) {
+	TestSuiteReference *reference = NULL;
+	for(reference = suites; reference; reference = reference->next) {
+		reference->library = LoadTestSuite(reference->name);
+	}
+
+	return suites;
+}
+
+
+/*!
+ * \todo add comment
+ */
+void UnloadTestSuites(TestSuiteReference *suites) {
+	TestSuiteReference *ref = suites;
+	while(ref) {
+		SDL_free(ref->name);
+		SDL_UnloadObject(ref->library);
+
+		TestSuiteReference *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
+	suites = NULL;
+}
+
+
+/*!
  * Entry point for test runner
  *
  * \param argc Count of command line arguments
@@ -411,52 +531,36 @@ main(int argc, char *argv[])
 #endif
 
 	const Uint32 startTicks = SDL_GetTicks();
+
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
+	suites = LoadTestSuites(suites);
 
-	// load the suites
 	// load tests and filter them
+	TestCaseItem *testCases = LoadTestCases(suites);
+
 	// end result: list of tests to run
+	TestCaseItem *testItem = NULL;
+	for(testItem = testCases; testItem; testItem = testItem->next) {
+		int retVal = ExecuteTest(testItem);
 
-	TestSuiteReference *suiteReference = NULL;
-	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
-		char *testSuiteName = suiteReference->name;
-
-		// if the current suite isn't selected, go to next suite
-		void *suite = LoadTestSuite(testSuiteName);
-		TestCaseReference **tests = QueryTestCases(suite);
-
-		TestCaseReference *reference = NULL;
-		int counter = 0;
-		for(reference = tests[counter]; reference; reference = tests[++counter]) {
-			if(only_selected_test && SDL_strncmp(selected_test_name, reference->name, NAME_BUFFER_SIZE) != 0) {
-				continue;
-			}
-
-			if(reference->enabled == TEST_DISABLED) {
-				printf("Test %s (in %s) disabled. Omitting...\n", reference->name, testSuiteName);
+		if(retVal) {
+			failureCount++;
+			if(retVal == 2) {
+				//printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
+				printf("%s (in %s): FAILED -> No asserts\n", "<test name>", "<suite name>");
 			} else {
-				printf("Executing %s (in %s):\n", reference->name, testSuiteName);
-
-				int retVal = ExecuteTest(suite, reference);
-
-				if(retVal) {
-					failureCount++;
-					if(retVal == 2) {
-						printf("%s (in %s): FAILED -> No asserts\n", reference->name, testSuiteName);
-					} else {
-						printf("%s (in %s): FAILED\n", reference->name, testSuiteName);
-					}
-				} else {
-					passCount++;
-					printf("%s (in %s): ok\n", reference->name, testSuiteName);
-				}
+				printf("%s (in %s): FAILED\n", "<test name>", "<suite name>");
 			}
-
-			printf("\n");
+		} else {
+			passCount++;
+			printf("%s (in %s): ok\n", "<test name>", "<suite name>");
 		}
 
-		SDL_UnloadObject(suite);
+		printf("\n");
 	}
+
+	UnloadTestCases(testCases);
+	UnloadTestSuites(suites);
 
 	const Uint32 endTicks = SDL_GetTicks();
 
@@ -465,15 +569,6 @@ main(int argc, char *argv[])
 	printf("%d tests passed\n", passCount);
 	printf("%d tests failed\n", failureCount);
 
-	// Deallocate the memory used by test suites
-	TestSuiteReference *ref = suites;
-	while(ref) {
-		SDL_free(ref->name);
-
-		TestSuiteReference *temp = ref->next;
-		SDL_free(ref);
-		ref = temp;
-	}
 
 	return 0;
 }

@@ -60,6 +60,7 @@ void dummycase1(void *arg)
 {
 	const char *revision = SDL_GetRevision();
 
+	printf("Dummycase 1\n");
 	printf("Revision is %s\n", revision);
 
 	AssertEquals(3, 5, "fails");
@@ -69,11 +70,13 @@ void dummycase2(void *arg)
 {
 	char *msg = "eello";
 	//msg[0] = 'H';
+	printf("Dummycase 2\n");
 	AssertTrue(0, "fails");
 }
 
 void dummycase3(void *arg)
 {
+	printf("Dummycase 3\n");
 	AssertTrue(1, "passes");
 }
 
