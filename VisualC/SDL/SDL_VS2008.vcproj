@@ -897,6 +897,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\SDL_hints_c.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\stdlib\SDL_iconv.c"
 			>
 		</File>

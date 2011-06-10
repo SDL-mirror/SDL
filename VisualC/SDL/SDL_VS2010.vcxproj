@@ -281,6 +281,7 @@
     <ClInclude Include="..\..\src\audio\dummy\SDL_dummyaudio.h" />
     <ClInclude Include="..\..\src\audio\windx5\SDL_dx5audio.h" />
     <ClInclude Include="..\..\src\SDL_error_c.h" />
+    <ClInclude Include="..\..\src\SDL_hints_c.h" />
     <ClInclude Include="..\..\src\events\SDL_events_c.h" />
     <ClInclude Include="..\..\src\SDL_fatal.h" />
     <ClInclude Include="..\..\src\video\SDL_glesfuncs.h" />

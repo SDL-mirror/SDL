@@ -120,6 +120,20 @@ extern "C" {
 #define SDL_HINT_RENDER_VSYNC               "SDL_RENDER_VSYNC"
 	
 /**
+ *  \brief  A variable controlling whether the idle timer is disabled on iOS.
+ *
+ *  When an iOS app does not receive touches for some time, the screen is
+ *  dimmed automatically. For games where the accelerometer is the only input
+ *  this is problematic. This functionality can be disabled by setting this
+ *  hint.
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - Enable idle timer
+ *    "1"       - Disable idle timer
+ */
+#define SDL_HINT_IDLE_TIMER_DISABLED "SDL_IOS_IDLE_TIMER_DISABLED"
+	
+/**
  *  \brief  A variable controlling which orientations are allowed on iOS.
  *
  *  In some circumstances it is necessary to be able to explicitly control

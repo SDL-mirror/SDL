@@ -21,6 +21,7 @@
 #include "SDL_config.h"
 
 #include "SDL_hints.h"
+#include "SDL_hints_c.h"
 
 
 /* Assuming there aren't many hints set and they aren't being queried in
@@ -30,11 +31,26 @@ typedef struct SDL_Hint {
     char *name;
     char *value;
     SDL_HintPriority priority;
+    SDL_HintChangedCb callback;
     struct SDL_Hint *next;
 } SDL_Hint;
 
 static SDL_Hint *SDL_hints;
 
+SDL_bool
+SDL_RegisterHintChangedCb(const char *name, SDL_HintChangedCb hintCb)
+{
+    SDL_Hint *hint;
+	
+    for (hint = SDL_hints; hint; hint = hint->next) {
+        if (SDL_strcmp(name, hint->name) == 0) {
+            hint->callback = hintCb;
+            return SDL_TRUE;
+        }
+    }
+	
+    return SDL_FALSE;
+}
 
 SDL_bool
 SDL_SetHintWithPriority(const char *name, const char *value,
@@ -59,6 +75,9 @@ SDL_SetHintWithPriority(const char *name, const char *value,
                 return SDL_FALSE;
             }
             if (SDL_strcmp(hint->value, value) != 0) {
+                if (hint->callback != NULL) {
+                    (*hint->callback)(name, hint->value, value);
+                }
                 SDL_free(hint->value);
                 hint->value = SDL_strdup(value);
             }
@@ -75,6 +94,7 @@ SDL_SetHintWithPriority(const char *name, const char *value,
     hint->name = SDL_strdup(name);
     hint->value = SDL_strdup(value);
     hint->priority = priority;
+    hint->callback = NULL;
     hint->next = SDL_hints;
     SDL_hints = hint;
     return SDL_TRUE;
