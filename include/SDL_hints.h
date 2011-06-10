@@ -118,6 +118,17 @@ extern "C" {
  *  By default SDL does not sync screen surface updates with vertical refresh.
  */
 #define SDL_HINT_RENDER_VSYNC               "SDL_RENDER_VSYNC"
+	
+/**
+ *  \brief  A variable controlling which orientations are allowed on iOS.
+ *
+ *  In some circumstances it is necessary to be able to explicitly control
+ *  which UI orientations are allowed.
+ *
+ *  This variable is a space delimited list of the following values:
+ *    "LandscapeLeft", "LandscapeRight", "Portrait" "PortraitUpsideDown"
+ */
+#define SDL_HINT_ORIENTATIONS "SDL_IOS_ORIENTATIONS"
 
 
 /**

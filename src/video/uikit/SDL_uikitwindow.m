@@ -24,6 +24,7 @@
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_assert.h"
+#include "SDL_hints.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
@@ -48,6 +49,37 @@
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient {
+    const char *orientationsCString;
+    if ((orientationsCString = SDL_GetHint(SDL_HINT_ORIENTATIONS)) != NULL) {
+        BOOL rotate = NO;
+        NSString *orientationsNSString = [NSString stringWithCString:orientationsCString
+                                                            encoding:NSUTF8StringEncoding];
+        NSArray *orientations = [orientationsNSString componentsSeparatedByCharactersInSet:
+                                 [NSCharacterSet characterSetWithCharactersInString:@" "]];
+        
+        switch (orient) {
+            case UIInterfaceOrientationLandscapeLeft:
+                rotate = [orientations containsObject:@"LandscapeLeft"];
+                break;
+                
+            case UIInterfaceOrientationLandscapeRight:
+                rotate = [orientations containsObject:@"LandscapeRight"];
+                break;
+                
+            case UIInterfaceOrientationPortrait:
+                rotate = [orientations containsObject:@"Portrait"];
+                break;
+                
+            case UIInterfaceOrientationPortraitUpsideDown:
+                rotate = [orientations containsObject:@"PortraitUpsideDown"];
+                break;
+                
+            default: break;
+        }
+        
+        return rotate;
+    }
+
     if (self->window->flags & SDL_WINDOW_RESIZABLE) {
         return YES;  // any orientation is okay.
     }
