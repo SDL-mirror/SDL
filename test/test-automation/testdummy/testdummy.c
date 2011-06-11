@@ -37,13 +37,13 @@
 
 /* Test case references */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0, 0};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {

@@ -10,7 +10,7 @@
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "rect_testIntersectRectAndLine", "description", TEST_ENABLED, 0 };
+		(TestCaseReference){ "rect_testIntersectRectAndLine", "description", TEST_ENABLED, 0, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {

@@ -35,10 +35,16 @@ extern int _testAssertsPassed;
  * Holds information about a test case
  */
 typedef struct TestCaseReference {
-	char *name;         /*!< "Func2Stress" */
-	char *description;  /*!< "This test beats the crap out of func2()" */
-	int enabled;       /*!< Set to TEST_ENABLED or TEST_DISABLED */
-	long requirements;  /*!< Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
+	/*!< "Func2Stress" */
+	char *name;
+	/*!< "This test beats the crap out of func2()" */
+	char *description;
+	/*!< Set to TEST_ENABLED or TEST_DISABLED */
+	int enabled;
+	/*!< Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
+	long requirements;
+	/*<! Timeout value in seconds. If exceeded runner will kill the test. 0 means infinite time */
+	long timeout;
 } TestCaseReference;
 
 /*! \fn _TestCaseInit
