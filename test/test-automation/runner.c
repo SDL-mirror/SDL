@@ -129,7 +129,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 	}
 
 	while(entry = readdir(directory)) {
-		if(entry->d_namlen > 2) { // discards . and ..
+		if(strlen(entry->d_name) > 2) { // discards . and ..
 			const char *delimiters = ".";
 			char *name = strtok(entry->d_name, delimiters);
 			char *ext = strtok(NULL, delimiters);
