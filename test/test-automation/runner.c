@@ -41,6 +41,8 @@ typedef int  (*TestCaseQuitFp)(void);
 
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
+//!< Flag for only printing out the test names
+static int only_print_tests = 0;
 //!< Flag for executing only test with selected name
 static int only_selected_test  = 0;
 //!< Flag for executing only the selected test suite
@@ -514,6 +516,7 @@ printUsage() {
 	  printf("                [--name-contains SUBSTR] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
+	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -539,9 +542,8 @@ ParseOptions(int argc, char *argv[])
       if(SDL_strcmp(arg, "--in-proc") == 0) {
          execute_inproc = 1;
       }
-      else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
-    	  printUsage();
-    	  exit(0);
+      else if(SDL_strcmp(arg, "--show-tests") == 0) {
+    	  only_print_tests = 1;
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
@@ -588,6 +590,10 @@ ParseOptions(int argc, char *argv[])
     	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_suite_name, suiteName);
       }
+      else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
+    	  printUsage();
+    	  exit(0);
+      }
       else {
     	  printf("runner: unknown command '%s'\n", arg);
     	  printUsage();
@@ -626,6 +632,16 @@ main(int argc, char *argv[])
 	suites = LoadTestSuites(suites);
 
 	TestCase *testCases = LoadTestCases(suites);
+
+	// if --show-tests option is given, only print tests and exit
+	if(only_print_tests) {
+		TestCase *testItem = NULL;
+		for(testItem = testCases; testItem; testItem = testItem->next) {
+			printf("%s (in %s)\n", testItem->testName, testItem->suiteName);
+		}
+
+		return 0;
+	}
 
 	TestCase *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
