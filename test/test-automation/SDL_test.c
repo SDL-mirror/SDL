@@ -66,10 +66,11 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       va_start( args, message );
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
-      printf("Assert Equals failed: expected %d, got %d; %s\n", expected, actual, buf);
+      printf("AssertEquals failed: expected %d, got %d; %s\n", expected, actual, buf);
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
+      printf("AssertEquals passed\n");
       _testAssertsPassed++;
    }
 }
@@ -85,12 +86,43 @@ AssertTrue(int condition, char *message, ...)
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
 
-      printf("Assert IsTrue failed: %s\n", buf);
+      printf("AssertTrue failed: %s\n", buf);
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
+     printf("AssertTrue passed\n");
       _testAssertsPassed++;
    }
+}
+
+void
+AssertPass(char *message, ...)
+{
+   va_list args;
+   char buf[256];
+   
+   va_start( args, message );
+   SDL_vsnprintf( buf, sizeof(buf), message, args );
+   va_end( args );
+
+   printf("AssertPass: %s\n", buf);
+
+   _testAssertsPassed++;
+}
+
+void
+AssertFail(char *message, ...)
+{
+   va_list args;
+   char buf[256];
+   
+   va_start( args, message );
+   SDL_vsnprintf( buf, sizeof(buf), message, args );
+   va_end( args );
+
+   printf("AssertFail: %s\n", buf);
+
+   _testAssertsFailed++;
 }
 
 #endif

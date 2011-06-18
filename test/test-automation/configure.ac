@@ -34,7 +34,8 @@ AC_FUNC_FORK
 
 AC_CONFIG_FILES([Makefile
 				 testdummy/Makefile 
-				 testrect/Makefile])
+				 testrect/Makefile
+				 testplatform/Makefile])
 AC_OUTPUT
 
 echo ""
