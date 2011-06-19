@@ -23,44 +23,54 @@
 
 #include "logger.h"
 
+#include <SDL/SDL.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
 /* \todo
- * - Fp to LogGenericOutput
- * - print <?xml version="1.0" encoding="utf-8" ?> as header
- * - use SDL_malloc etc...
- * - nest output /OK
- * - dummy functions for no-xml execution
- * - Make XML (and relevant comparisions) case-insensitive
+ * - Make XML (and relevant comparisons) case-insensitive
  */
-
-
-/*! Function pointer definitions. \todo Move to logger.h */
-typedef int (*LogInitFp)(void);
-typedef int (*LogCleanUptFp)(void);
-
-/*! Function prototypes */
-int LogGenericOutput(char *message);
-int XMLLogOutput(const char *tag, const char *fmt, va_list list);
 
 static int xml_enabled = 1;
 
 static int loggingPriority = 0;
 static int nestingDepth = 0;
 
-enum Priority {
+/*! Definitions of log priorities */
+typedef enum Priority {
 	VERBOSE,
 	DEFAULT,
-	SILENT
-};
+} Priority;
+
+/*! Function pointer definitions. \todo Move to logger.h */
+typedef int (*LogOutputFp)(char *);
+
+typedef int (*LogInitFp)(LogOutputFp, Priority);
+typedef int (*LogCleanUptFp)(void);
+
+typedef int (*StartTagFp)(Priority, const char *);
+typedef int (*EndTagFp)(Priority, const char *);
+typedef int (*TagFp)(Priority, const char *, const char *, ...);
 
 
+/*! Function pointer to output function */
+static LogOutputFp OutputFp = NULL;
+
+
+/*! Definitions for tag styles used in Tagify() */
 #define TAG_START 0x00000001
 #define TAG_END   0x00000002
 #define TAG_BOTH  (TAG_START & TAG_END)
+
+/*! Function prototypes \todo move to xml_logger.h */
+int XMLStartTag(Priority priority, const char *tag);
+int XMLEndTag(Priority priority, const char *tag);
+
+int LogGenericOutput(char *message);
+
 
 /*!
  * Defines structure used for "counting" open XML-tags
@@ -74,11 +84,13 @@ static TagList *openTags = NULL;
 
 /*!
  * Prepend the open tags list
+ *
+ * \return On error returns non-zero value, otherwise zero will returned
  */
 static int
 AddOpenTag(const char *tag)
 {
-	TagList *openTag = malloc(sizeof(TagList));
+	TagList *openTag = SDL_malloc(sizeof(TagList));
 	if(openTag == NULL) {
 		return 1;
 	}
@@ -94,6 +106,8 @@ AddOpenTag(const char *tag)
 
 /*!
  * Removes the first tag from the open tag list
+ *
+ * \return On error returns non-zero value, otherwise zero will returned
  */
 static int
 RemoveOpenTag(const char *tag)
@@ -105,37 +119,15 @@ RemoveOpenTag(const char *tag)
 	int retVal = 0;
 
 	// Tag should always be the same as previously opened tag
-	// to prevent opening and ending tag mismatch
-	if(strcmp(openTags->tag, tag) == 0) {
+	// It prevents opening and ending tag mismatch
+	if(SDL_strcmp(openTags->tag, tag) == 0) {
 		TagList *openTag = openTags;
 		openTags  = openTags->next;
 
 		free(openTag);
 	} else {
-		printf("Else activated!");
+		printf("Debug | RemoveOpenTag(): open/end tag mismatch");
 		retVal = 1;
-	}
-
-	return retVal;
-}
-
-/*!
- * Goes through the open tag list and checks if
- * given tag is already opened
- *
- * \return 1 is tag is open, 0 if not
- */
-static int
-IsTagOpen(const char *tag)
-{
-	int retVal = 0;
-
-	TagList *openTag = NULL;
-	for(openTag = openTags; openTag; openTag = openTag->next) {
-		if(strcmp(openTag->tag, tag) == 0) {
-			retVal = 1;
-			break;
-		}
 	}
 
 	return retVal;
@@ -144,7 +136,7 @@ IsTagOpen(const char *tag)
 /*!
  * Debug function. Prints the contents of the open tags list.
  */
-static int
+static void
 PrintOpenTags()
 {
 	printf("\nOpen tags:\n");
@@ -155,24 +147,37 @@ PrintOpenTags()
 	}
 }
 
-//! \TODO move these to upwards!!
-int XMLStartTag(int priority, const char *tag);
-int XMLEndTag(int priority, const char *tag);
-
+/*!
+ * Initializes the XML-logger for creating test reports in XML.
+ *
+ * \return Error code. \todo
+ */
 int
-XMLLogInit()
+XMLInit(LogOutputFp logOutputFp, Priority priority)
 {
+	OutputFp = logOutputFp;
+	loggingPriority = priority;
 
-	LogGenericOutput("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
-
-	XMLStartTag(0, "testlog");
+	//! make "doctype" work with priority level?
+	OutputFp("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+	XMLStartTag(DEFAULT, "testlog");
 }
 
+/*!
+ * Cleans up the logger and closes all open XML-tags
+ *
+ * \return Error code. \todo
+ */
 int
-XMLLogCleanUp()
+XMLCleanUp()
 {
-	//! \todo do CloseOpenTags() instead
-	XMLEndTag(0, "testlog");
+	// Close the open tags
+	TagList *openTag = openTags;
+	while(openTag) {
+		TagList *temp = openTag->next;
+		XMLEndTag(DEFAULT, openTag->tag);
+		openTag = temp;
+	}
 }
 
 /*!
@@ -181,6 +186,8 @@ XMLLogCleanUp()
  * \param tag XML-tag to create
  * \param tagStyle Do start or end tag, or both.
  * \param message text content of the tags
+ *
+ * \return Well-formed XML tag
  */
 static char *
 Tagify(const char *tag, const int tagStyle, const char *message)
@@ -207,17 +214,24 @@ Tagify(const char *tag, const int tagStyle, const char *message)
 	}
 
 
-	const int size = strlen(buffer) + 1;
-	char *newTag = malloc(size * sizeof(char));
+	const int size = SDL_strlen(buffer) + 1;
+	char *newTag = SDL_malloc(size * sizeof(char));
 	memset(newTag, 0, size * sizeof(char));
 	memcpy(newTag, buffer, size);
 
 	return newTag;
 }
 
-
+/*!
+ * Creates and outputs an start tag
+ *
+ * \param priority Priority of the tag
+ * \param tag Tag for outputting
+ *
+ * \return Error code. Non-zero on failure. Zero on success
+ */
 int
-XMLStartTag(int priority, const char *tag)
+XMLStartTag(Priority priority, const char *tag)
 {
 	if(priority < loggingPriority) {
 		return 1;
@@ -225,18 +239,26 @@ XMLStartTag(int priority, const char *tag)
 
 	AddOpenTag(tag);
 	char *newTag = Tagify(tag, TAG_START, NULL);
-	LogGenericOutput(newTag);
-	free(newTag);
+	OutputFp(newTag);
+	SDL_free(newTag);
 
 	nestingDepth++;
 }
 
+/*!
+ * Creates and outputs an end tag
+ *
+ * \param priority Priority of the tag
+ * \param tag Tag for outputting
+ *
+ *  \return Error code. Non-zero on failure. Zero on success
+ */
 int
-XMLEndTag(int priority, const char *tag)
+XMLEndTag(Priority priority, const char *tag)
 {
 	/*
 	Do it before priority check, so incorrect usage of
-	priorities won't mess it up
+	priorities won't mess it up (?)
 	*/
 	nestingDepth--;
 
@@ -247,12 +269,22 @@ XMLEndTag(int priority, const char *tag)
 	RemoveOpenTag(tag);
 
 	char *newTag = Tagify(tag, TAG_END, NULL);
-	LogGenericOutput(newTag);
-	free(newTag);
+	OutputFp(newTag);
+	SDL_free(newTag);
 }
 
+/*!
+ * Creates an XML-tag including start and end tags and text content
+ * between them.
+ *
+ * \param priority Priority of the tag
+ * \param tag Tag for outputting
+ * \param fmt Text content of tag as variadic parameter list
+ *
+ *  \return Error code. Non-zero on failure. Zero on success
+ */
 int
-XMLTag(int priority, const char *tag, const char *fmt, ...)
+XMLTag(Priority priority, const char *tag, const char *fmt, ...)
 {
 	if(priority < loggingPriority) {
 		return 1;
@@ -268,14 +300,16 @@ XMLTag(int priority, const char *tag, const char *fmt, ...)
 	va_end(list);
 
 	char *newTag = Tagify(tag, TAG_BOTH, buffer);
-	LogGenericOutput(newTag);
-	free(newTag);
+	//LogGenericOutput(newTag);
+	OutputFp(newTag);
+	SDL_free(newTag);
 }
 
-//! \TODO Make it changeable by using a function pointer
 /*!
  * Prints the given message to stderr. Function adds nesting
  * to the output.
+ *
+ * \return Possible error value (\todo)
  */
 int
 LogGenericOutput(char *message)
@@ -289,32 +323,63 @@ LogGenericOutput(char *message)
 }
 
 
+
+/*! Quick Dummy functions for testing non-xml output. \todo put to proper place*/
+int DummyInit(LogOutputFp output, Priority priority) {
+	return 0;
+}
+int DummyCleanUp() {
+	return 0;
+}
+int DummyStartTag(Priority priority, const char *tag) {
+	return 0;
+}
+int DummyEndTag(Priority priority, const char *tag) {
+	return 0;
+}
+int DummyTag(Priority priority, const char *tag, const char *fmt, ...) {
+	return 0;
+}
+
+
 /*!
  * Main for testing the logger
  */
 int
-main()
+main(int argc, char *argv[])
 {
 	LogInitFp LogInit = NULL;
 	LogCleanUptFp LogCleanUp = NULL;
+	StartTagFp StartTag = NULL;
+	EndTagFp EndTag = NULL;
+	TagFp Tag = NULL;
 
 	if(xml_enabled) {
 		// set logger functions to XML
-		LogInit = XMLLogInit;
-		LogCleanUp = XMLLogCleanUp;
+		LogInit = XMLInit;
+		LogCleanUp = XMLCleanUp;
+
+		StartTag = XMLStartTag;
+		EndTag = XMLEndTag;
+		Tag = XMLTag;
 	} else {
-		// set up dummy functions
+		// When no XML-output is desired, dummy functions are used
+		LogInit = DummyInit;
+		LogCleanUp = DummyCleanUp;
+
+		StartTag = DummyStartTag;
+		EndTag = DummyEndTag;
+		Tag = DummyTag;
 	}
 
-	LogInit();
-	XMLStartTag(0, "hello");
-	XMLStartTag(0, "world!");
-	XMLEndTag(0, "world!");
-	XMLEndTag(0, "hello");
+	LogInit(LogGenericOutput, VERBOSE);
+
+	StartTag(DEFAULT, "hello");
+	StartTag(DEFAULT, "world");
+	EndTag(DEFAULT, "world");
+	//EndTag(DEFAULT, "hello");
 
 	LogCleanUp();
-
-
 
 #if 0
 	XMLStartTag("log");

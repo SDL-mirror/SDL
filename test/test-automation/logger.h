@@ -21,23 +21,6 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
-/*!
- * Init the logger.
- */
-//int LogInit();
-
-/*!
- * Quit the logger.
- */
-//int LogQuit();
-
-/*!
- * Generic ouput function for the logger. Prints the
- * message to stderr.
- *
- * \param scope Source of message (eg. suite, test, harness)
- * \return non-zero if logging fails, zero on success
- */
-//int LogGenericOutput(int scope, const char *message, ...);
+// Put function pointers here
 
 #endif
