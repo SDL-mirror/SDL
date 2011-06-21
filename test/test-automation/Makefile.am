@@ -7,6 +7,11 @@ runner_SOURCES = runner.c SDL_test.c
 runner_CLAGS = -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
 runner_LDFLAGS = `sdl-config --libs` 
 
+bin_PROGRAMS = logger
+logger_SOURCES = xml_logger.c xml.c
+logger_CLAGS = -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
+logger_LDFLAGS = `sdl-config --libs` 
+
 install: install-tests
 install-tests:
 	-mkdir tests

@@ -21,6 +21,30 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
-// Put function pointers here
+#include <time.h>
+
+// Function pointer to function which handles to output
+typedef int (*LogOutputFp)(const char *);
+
+/*!
+ * Generic logger interface
+ *
+ */
+void RunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
+void RunEnded(time_t endTime, time_t totalRuntime);
+
+void SuiteStarted(const char *suiteName, time_t eventTime);
+void SuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
+                double endTime, time_t totalRuntime);
+
+void TestStarted(const char *testName, const char *testDescription, time_t startTime);
+void TestEnded(const char *testName, const char *testDescription, int testResult,
+               int numAsserts, time_t endTime, time_t totalRuntime);
+
+void Assert(const char *assertName, int assertResult, const char *assertMessage,
+            time_t eventTime);
+
+void Log(const char *logMessage, time_t eventTime);
+
 
 #endif
