@@ -18,42 +18,16 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _LOGGER_C
-#define _LOGGER_C
-
-#include "logger.h"
+#ifndef _XML_LOGGER_C
+#define _XML_LOGGER_C
 
 #include "xml.h"
+#include "logger.h"
 
-#include <SDL/SDL.h>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdarg.h>
-
-/*!
- * Prints the given message to stderr. Function adds nesting
- * to the output.
- *
- * \return Possible error value (\todo)
- */
-int
-LogGenericOutput(const char *message)
-{
-	/*
-	int depth = indentDepth;
-	while(depth--) {
-		fprintf(stderr, " ");
-	}
-	*/
-
-	fprintf(stderr, "%s\n", message);
-	fflush(stderr);
-}
+#include "xml_logger.h"
 
 void
-RunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime)
+XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime)
 {
 	XMLOpenDocument("testlog", outputFn);
 
@@ -63,13 +37,13 @@ RunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime)
 }
 
 void
-RunEnded(time_t endTime, time_t totalRuntime)
+XMLRunEnded(time_t endTime, time_t totalRuntime)
 {
-	XMLCloseDocument();
+	XMLCloseDocument("testlog");
 }
 
 void
-SuiteStarted(const char *suiteName, time_t eventTime)
+XMLSuiteStarted(const char *suiteName, time_t eventTime)
 {
 	XMLOpenElement("suite");
 
@@ -79,51 +53,59 @@ SuiteStarted(const char *suiteName, time_t eventTime)
 }
 
 void
-SuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
+XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime)
 {
 	XMLCloseElement("suite");
 }
 
 void
-TestStarted(const char *testName, const char *testDescription, time_t startTime)
+XMLTestStarted(const char *testName, const char *testDescription, time_t startTime)
 {
+	XMLOpenElement("test");
 
+	XMLOpenElement("name");
+	XMLAddContent(testName);
+	XMLCloseElement("name");
+
+	XMLOpenElement("description");
+	XMLAddContent(testDescription);
+	XMLCloseElement("description");
+
+	XMLOpenElement("starttime");
+	//XMLAddContent(startTime);
+	XMLCloseElement("starttime");
 }
 
 void
-TestEnded(const char *testName, const char *testDescription, int testResult,
-          int numAsserts, time_t endTime, time_t totalRuntime)
+XMLTestEnded(const char *testName, const char *testDescription,
+          int testResult, int numAsserts, time_t endTime, time_t totalRuntime)
 {
-
+	XMLCloseElement("test");
 }
 
 void
-Assert(const char *assertName, int assertResult, const char *assertMessage,
+XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
        time_t eventTime)
 {
+	XMLOpenElement("assert");
 
+	XMLOpenElement("result");
+	XMLAddContent((assertResult) ? "pass" : "failure");
+	XMLOpenElement("result");
+
+
+	XMLCloseElement("assert");
 }
 
 void
-Log(const char *logMessage, time_t eventTime)
+XMLLog(const char *logMessage, time_t eventTime)
 {
+	XMLOpenElement("log");
 
-}
+	XMLAddContent(logMessage);
 
-
-/*!
- * Main for testing the logger
- */
-int
-main(int argc, char *argv[])
-{
-	RunStarted(LogGenericOutput, "All the data from harness", 0);
-	SuiteStarted("Suite data here", 0);
-	SuiteEnded(0, 0, 0, 0.0f, 0);
-	RunEnded(0, 0);
-
-	return 0;
+	XMLCloseElement("log");
 }
 
 #endif

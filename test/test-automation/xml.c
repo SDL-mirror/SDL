@@ -19,10 +19,11 @@
 */
 
 
+#ifndef _XML_C
+#define _XML_C
+
 #include <stdio.h>
-//#include <stdlib.h>
 #include <string.h>
-//#include <stdarg.h>
 #include <assert.h>
 
 #include <SDL/SDL.h>
@@ -110,12 +111,12 @@ PrintOpenTags()
 /*
 ===================
 
-	XML
+	Functions to handle XML creation
 
 ===================
 */
 
-static int has_open_element = 0;
+static const char *root;
 
 void
 XMLOpenDocument(const char *rootTag, LogOutputFp log)
@@ -133,28 +134,14 @@ XMLOpenDocument(const char *rootTag, LogOutputFp log)
 
 	// add open tag
 	AddOpenTag(rootTag);
+
+	root = rootTag; // it's fine, as long as rootTag points to static memory?
 }
 
 void
 XMLCloseDocument() {
-	// Close the open tags with proper nesting
-	TagList *openTag = openTags;
-	while(openTag) {
-		TagList *temp = openTag->next;
-
-		size_t size = SDL_strlen(openTag->tag) + 4 + 1; /* one extra for '\0', '<', '/' and '>' */
-		char *buffer = SDL_malloc(size);
-		snprintf(buffer, size, "%s%s%s", "</", openTag->tag, ">");
-		logger(buffer);
-		SDL_free(buffer);
-
-		RemoveOpenTag(openTag->tag);
-
-		openTag = temp;
-	}
+	XMLCloseElement(root);
 }
-
-static const char *currentTag = NULL;
 
 void
 XMLOpenElement(const char *tag)
@@ -164,10 +151,6 @@ XMLOpenElement(const char *tag)
 	snprintf(buffer, size, "%s%s%s", "<", tag, ">");
 	logger(buffer);
 	SDL_free(buffer);
-
-	currentTag = tag;
-
-	has_open_element = 1;
 
 	AddOpenTag(tag);
 }
@@ -183,10 +166,6 @@ XMLOpenElementWithAttribute(const char *tag, Attribute attribute)
 	logger(buffer);
 	SDL_free(buffer);
 
-	currentTag = tag;
-
-	has_open_element = 1;
-
 	AddOpenTag(tag);
 }
 
@@ -194,10 +173,6 @@ XMLOpenElementWithAttribute(const char *tag, Attribute attribute)
 void
 XMLAddAttribute(const char *attribute, const char *value)
 {
-	// Requires open element
-	if(has_open_element == 0) {
-		return ;
-	}
 	size_t attributeSize = SDL_strlen(attribute);
 	size_t valueSize = SDL_strlen(value);
 
@@ -249,6 +224,7 @@ XMLCloseElement(const char *tag)
 			break;
 		}
 	}
-
-	has_open_element = 0;
 }
+
+
+#endif

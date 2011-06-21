@@ -67,10 +67,11 @@ void XMLAddAttribute(const char *attribute, const char *value);
 void XMLAddContent(const char *content);
 
 /*!
- * Closes previously opened element.
- * Enforces proper nesting by not allowing end elements haphazardly.
+ * Closes previously opened element until tag given as parameter is met.
+ * Enforces proper nesting by not allowing to close elements out-of-order.
  *
  * Closes all the opened elements until the given element/tag is found
+ * which will be the last tag to be closed
  *
  * \param tag Element to close
  */
