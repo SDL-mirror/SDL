@@ -5,16 +5,17 @@
 
 void XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
 
-void XMLRunEnded(time_t endTime, time_t totalRuntime);
+void XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
+                 time_t endTime, time_t totalRuntime);
 
 void XMLSuiteStarted(const char *suiteName, time_t eventTime);
 
 void XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime);
 
-void XMLTestStarted(const char *testName, const char *testDescription, time_t startTime);
+void XMLTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime);
 
-void XMLTestEnded(const char *testName, const char *testDescription,
+void XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime);
 
 void XMLAssert(const char *assertName, int assertResult, const char *assertMessage,

@@ -32,14 +32,16 @@ typedef int (*LogOutputFp)(const char *);
  *
  */
 typedef	void (*RunStartedFp)(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
-typedef	void (*RunEndedFp)(time_t endTime, time_t totalRuntime);
+typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
+                           time_t endTime, time_t totalRuntime);
 
 typedef	void (*SuiteStartedFp)(const char *suiteName, time_t eventTime);
 typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
 		                double endTime, time_t totalRuntime);
 
-typedef	void (*TestStartedFp)(const char *testName, const char *testDescription, time_t startTime);
-typedef	void (*TestEndedFp)(const char *testName, const char *testDescription, int testResult,
+typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
+                              const char *testDescription, time_t startTime);
+typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
 		               int numAsserts, time_t endTime, time_t totalRuntime);
 
 typedef	void (*AssertFp)(const char *assertName, int assertResult, const char *assertMessage,

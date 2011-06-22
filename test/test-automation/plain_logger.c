@@ -16,7 +16,8 @@ PlainRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t event
 }
 
 void
-PlainRunEnded(time_t endTime, time_t totalRuntime)
+PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
+              time_t endTime, time_t totalRuntime)
 {
 	// \todo add total number of tests, suites, pass/failure test count
 }
@@ -35,12 +36,12 @@ PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 }
 
 void
-PlainTestStarted(const char *testName, const char *testDescription, time_t startTime)
+PlainTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
 {
 }
 
 void
-PlainTestEnded(const char *testName, const char *testDescription,
+PlainTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime)
 {
 	printf("Asserts:%d\n", numAsserts);

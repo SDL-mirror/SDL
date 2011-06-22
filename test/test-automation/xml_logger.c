@@ -18,9 +18,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _XML_LOGGER_C
-#define _XML_LOGGER_C
-
 #include "xml.h"
 #include "logger.h"
 
@@ -37,7 +34,8 @@ XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTi
 }
 
 void
-XMLRunEnded(time_t endTime, time_t totalRuntime)
+XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
+            time_t endTime, time_t totalRuntime)
 {
 	XMLCloseDocument("testlog");
 }
@@ -60,11 +58,13 @@ XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 }
 
 void
-XMLTestStarted(const char *testName, const char *testDescription, time_t startTime)
+XMLTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
 {
 	XMLOpenElement("test");
 
-	XMLOpenElement("name");
+	Attribute attribute = {"test", "value"};
+
+	XMLOpenElementWithAttribute("name", &attribute);
 	XMLAddContent(testName);
 	XMLCloseElement("name");
 
@@ -78,7 +78,7 @@ XMLTestStarted(const char *testName, const char *testDescription, time_t startTi
 }
 
 void
-XMLTestEnded(const char *testName, const char *testDescription,
+XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime)
 {
 	XMLCloseElement("test");
@@ -108,4 +108,3 @@ XMLLog(const char *logMessage, time_t eventTime)
 	XMLCloseElement("log");
 }
 
-#endif

@@ -5,16 +5,18 @@
 
 void PlainRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
 
-void PlainRunEnded(time_t endTime, time_t totalRuntime);
+void PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
+                   time_t endTime, time_t totalRuntime);
 
 void PlainSuiteStarted(const char *suiteName, time_t eventTime);
 
 void PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime);
 
-void PlainTestStarted(const char *testName, const char *testDescription, time_t startTime);
+void PlainTestStarted(const char *testName, const char *suiteName,
+                      const char *testDescription, time_t startTime);
 
-void PlainTestEnded(const char *testName, const char *testDescription,
+void PlainTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime);
 
 void PlainAssert(const char *assertName, int assertResult, const char *assertMessage,

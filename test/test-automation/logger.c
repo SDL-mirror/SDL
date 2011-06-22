@@ -27,13 +27,6 @@ LogFp Log = 0;
 int
 LogGenericOutput(const char *message)
 {
-	/*
-	int depth = indentDepth;
-	while(depth--) {
-		fprintf(stderr, " ");
-	}
-	*/
-
 	fprintf(stderr, "%s\n", message);
 	fflush(stderr);
 }
@@ -73,17 +66,17 @@ main(int argc, char *argv[])
 		Log = PlainLog;
 	}
 
-	RunStarted(LogGenericOutput, "All the data from harness", 0);
+	RunStarted(LogGenericOutput, "some_data_here", 0);
 	SuiteStarted("Suite data here", 0);
 
-	TestStarted("test1", "desc", 0);
-	TestEnded("test1", "desc", 0, 0, 0, 0);
+	TestStarted("test1", "suite", "desc", 0);
+	TestEnded("test1", "suite", 0, 0, 0, 0);
 
 	//XMLTestStarted("test2", "desc", 0);
 	//XMLTestEnded("test2", "desc", 0, 0, 0, 0);
 
 	SuiteEnded(0, 0, 0, 0.0f, 0);
-	RunEnded(0, 0);
+	RunEnded(0, 0, 0, 0, 0, 0);
 
 	return 0;
 }

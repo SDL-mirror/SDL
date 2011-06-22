@@ -23,6 +23,7 @@
 
 #include "logger.h"
 
+/*! Defines attribute for XML elements */
 typedef struct Attribute {
 	const char *attribute;
 	const char *value;
@@ -52,12 +53,9 @@ void XMLCloseDocument();
 void XMLOpenElement(const char *tag);
 
 /*!
- * Add attribute to currently open element.
- *
- * \param attribute Name of the attribute
- * \param value Value of the given attribute
+ * Opens XML-element with given attributes
  */
-void XMLAddAttribute(const char *attribute, const char *value);
+void XMLOpenElementWithAttribute(const char *tag, Attribute *attribute);
 
 /*!
  * Add content to currently open element.

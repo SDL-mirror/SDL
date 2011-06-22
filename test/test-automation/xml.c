@@ -18,10 +18,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-
-#ifndef _XML_C
-#define _XML_C
-
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -111,7 +107,7 @@ PrintOpenTags()
 /*
 ===================
 
-	Functions to handle XML creation
+	Functions to handle creation of XML elements
 
 ===================
 */
@@ -128,7 +124,7 @@ XMLOpenDocument(const char *rootTag, LogOutputFp log)
 
 	size_t size = SDL_strlen(rootTag) + 3 + 1; /* one extra for '\0', '<' and '>' */
 	char *buffer = SDL_malloc(size);
-	snprintf(buffer, size, "%s%s%s", "<", rootTag, ">");
+	snprintf(buffer, size, "<%s>", rootTag);
 	logger(buffer);
 	SDL_free(buffer);
 
@@ -148,7 +144,7 @@ XMLOpenElement(const char *tag)
 {
 	size_t size = SDL_strlen(tag) + 2 + 1; /* one extra for '\0', '<' */
 	char *buffer = SDL_malloc(size);
-	snprintf(buffer, size, "%s%s%s", "<", tag, ">");
+	snprintf(buffer, size, "<%s>", tag);
 	logger(buffer);
 	SDL_free(buffer);
 
@@ -157,30 +153,18 @@ XMLOpenElement(const char *tag)
 
 
 void
-XMLOpenElementWithAttribute(const char *tag, Attribute attribute)
+XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 {
-	size_t size = SDL_strlen(tag) + 2 + 1; /* one extra for '\0', '<' */
-	char *buffer = SDL_malloc(size);
+	const int bufferSize = 1024;
+	char buffer[bufferSize];
+	memset(buffer, 0, bufferSize);
 
-	snprintf(buffer,  size, "%s%s", "<", tag);
+	snprintf(buffer, bufferSize, "<%s %s='%s'>", tag,
+			attribute->attribute, attribute->value);
+
 	logger(buffer);
-	SDL_free(buffer);
 
 	AddOpenTag(tag);
-}
-
-//! \todo make this static and remove from interface?
-void
-XMLAddAttribute(const char *attribute, const char *value)
-{
-	size_t attributeSize = SDL_strlen(attribute);
-	size_t valueSize = SDL_strlen(value);
-
-	size_t size = 1 + attributeSize + 3 + valueSize + 1;
-	char *buffer = SDL_malloc(size); // 1 for '='
-	snprintf(buffer, size, " %s%s\"%s\"", attribute, "=", value);
-	logger(buffer);
-	SDL_free(buffer);
 }
 
 void
@@ -203,7 +187,7 @@ XMLCloseElement(const char *tag)
 
 		size_t size = SDL_strlen(openTag->tag) + 4 + 1; /* one extra for '\0', '<', '/' and '>' */
 		char *buffer = SDL_malloc(size);
-		snprintf(buffer, size, "%s%s%s", "</", openTag->tag, ">");
+		snprintf(buffer, size, "<%s>", openTag->tag);
 		logger(buffer);
 		SDL_free(buffer);
 
@@ -226,5 +210,3 @@ XMLCloseElement(const char *tag)
 	}
 }
 
-
-#endif
