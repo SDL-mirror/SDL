@@ -26,6 +26,8 @@
 void
 XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime)
 {
+	//! \todo Giving outputFn to the function is awful, fix it
+	//! Make the outputting differently
 	XMLOpenDocument("testlog", outputFn);
 
 	XMLOpenElement("parameters");

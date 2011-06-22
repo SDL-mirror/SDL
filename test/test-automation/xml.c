@@ -104,6 +104,57 @@ PrintOpenTags()
 	}
 }
 
+
+/*!
+ * Converts the special characters ', ", <, >, and & to
+ * corresponding entities: &apos; &quot; &lt; &gt; and &amp;
+ *
+ * \param string String to be escaped
+ * \return Escaped string
+ */
+const char *EscapeString(const char *string) {
+	const int bufferSize = 4096;
+	char buffer[bufferSize];
+	memset(buffer, 0, bufferSize);
+
+	// prevents the code doing a 'bus error'
+	char stringBuffer[bufferSize];
+	strncpy(stringBuffer, string, bufferSize);
+
+	// Ampersand (&) must be first, otherwise it'll mess up the other entities
+	char *characters[] = {"&", "'", "\"", "<", ">"};
+	char *entities[] = {"&amp;", "&apos;", "&quot;", "&lt;", "&gt;"};
+	int maxCount = 5;
+
+	int counter = 0;
+	for(; counter < maxCount; ++counter) {
+		char *character = characters[counter];
+		char *entity = entities[counter];
+
+		if(strstr(stringBuffer, character) == NULL)
+			continue;
+
+		char *token = strtok(stringBuffer, character);
+		while(token) {
+			char *nextToken = strtok(NULL, character);
+
+			//! \todo use strncat and count the bytes left in the buffer
+			strcat(buffer, token);
+			if(nextToken)
+				strcat(buffer, entity);
+
+			token = nextToken;
+		}
+
+		memcpy(stringBuffer, buffer, bufferSize);
+		memset(buffer, 0, bufferSize);
+	}
+
+	return stringBuffer;
+}
+
+
+
 /*
 ===================
 
@@ -131,7 +182,6 @@ XMLOpenDocument(const char *rootTag, LogOutputFp log)
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
 	logger(buffer);
 
-	// add open tag
 	AddOpenTag(rootTag);
 
 	root = rootTag; // it's fine, as long as rootTag points to static memory?
@@ -167,8 +217,10 @@ XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 void
 XMLAddContent(const char *content)
 {
+	const char *escapedContent = EscapeString(content);
+
 	memset(buffer, 0, bufferSize);
-	snprintf(buffer, bufferSize, "%s", content);
+	snprintf(buffer, bufferSize, "%s", escapedContent);
 	logger(buffer);
 }
 

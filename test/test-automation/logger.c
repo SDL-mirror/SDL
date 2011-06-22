@@ -31,7 +31,6 @@ LogGenericOutput(const char *message)
 	fflush(stderr);
 }
 
-
 /*!
  * Test app for logging functionality
  */
@@ -66,14 +65,11 @@ main(int argc, char *argv[])
 		Log = PlainLog;
 	}
 
-	RunStarted(LogGenericOutput, "some_data_here", 0);
+	RunStarted(LogGenericOutput, "some_<data_>here&here", 0);
 	SuiteStarted("Suite data here", 0);
 
 	TestStarted("test1", "suite", "desc", 0);
 	TestEnded("test1", "suite", 0, 0, 0, 0);
-
-	//XMLTestStarted("test2", "desc", 0);
-	//XMLTestEnded("test2", "desc", 0, 0, 0, 0);
 
 	SuiteEnded(0, 0, 0, 0.0f, 0);
 	RunEnded(0, 0, 0, 0, 0, 0);
