@@ -114,6 +114,11 @@ PrintOpenTags()
 
 static const char *root;
 
+/*! Size for xml element buffer */
+#define bufferSize 1024
+/*! Buffer for storing the xml element under construction */
+static char buffer[bufferSize];
+
 void
 XMLOpenDocument(const char *rootTag, LogOutputFp log)
 {
@@ -122,11 +127,9 @@ XMLOpenDocument(const char *rootTag, LogOutputFp log)
 
 	logger("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
 
-	size_t size = SDL_strlen(rootTag) + 3 + 1; /* one extra for '\0', '<' and '>' */
-	char *buffer = SDL_malloc(size);
-	snprintf(buffer, size, "<%s>", rootTag);
+	memset(buffer, 0, bufferSize);
+	snprintf(buffer, bufferSize, "<%s>", rootTag);
 	logger(buffer);
-	SDL_free(buffer);
 
 	// add open tag
 	AddOpenTag(rootTag);
@@ -142,11 +145,9 @@ XMLCloseDocument() {
 void
 XMLOpenElement(const char *tag)
 {
-	size_t size = SDL_strlen(tag) + 2 + 1; /* one extra for '\0', '<' */
-	char *buffer = SDL_malloc(size);
-	snprintf(buffer, size, "<%s>", tag);
+	memset(buffer, 0, bufferSize);
+	snprintf(buffer, bufferSize, "<%s>", tag);
 	logger(buffer);
-	SDL_free(buffer);
 
 	AddOpenTag(tag);
 }
@@ -155,13 +156,9 @@ XMLOpenElement(const char *tag)
 void
 XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 {
-	const int bufferSize = 1024;
-	char buffer[bufferSize];
 	memset(buffer, 0, bufferSize);
-
 	snprintf(buffer, bufferSize, "<%s %s='%s'>", tag,
 			attribute->attribute, attribute->value);
-
 	logger(buffer);
 
 	AddOpenTag(tag);
@@ -170,11 +167,10 @@ XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 void
 XMLAddContent(const char *content)
 {
-	size_t size = SDL_strlen(content) + 1 + 1;
-	char *buffer = SDL_malloc(size);
-	snprintf(buffer, size, "%s", content);
+	memset(buffer, 0, bufferSize);
+	snprintf(buffer, bufferSize, "%s", content);
 	logger(buffer);
-	SDL_free(buffer);}
+}
 
 void
 XMLCloseElement(const char *tag)
@@ -185,11 +181,9 @@ XMLCloseElement(const char *tag)
 	while(openTag) {
 		TagList *temp = openTag->next;
 
-		size_t size = SDL_strlen(openTag->tag) + 4 + 1; /* one extra for '\0', '<', '/' and '>' */
-		char *buffer = SDL_malloc(size);
-		snprintf(buffer, size, "<%s>", openTag->tag);
+		memset(buffer, 0, bufferSize);
+		snprintf(buffer, bufferSize, "<%s>", openTag->tag);
 		logger(buffer);
-		SDL_free(buffer);
 
 		const int openTagSize = SDL_strlen(openTag->tag);
 		const int tagSize = SDL_strlen(tag);
