@@ -234,7 +234,7 @@ XMLCloseElement(const char *tag)
 		TagList *temp = openTag->next;
 
 		memset(buffer, 0, bufferSize);
-		snprintf(buffer, bufferSize, "<%s>", openTag->tag);
+		snprintf(buffer, bufferSize, "</%s>", openTag->tag);
 		logger(buffer);
 
 		const int openTagSize = SDL_strlen(openTag->tag);
