@@ -118,7 +118,7 @@ const char *EscapeString(const char *string) {
 	memset(buffer, 0, bufferSize);
 
 	// prevents the code doing a 'bus error'
-	char stringBuffer[bufferSize];
+	char *stringBuffer = SDL_malloc(bufferSize);
 	strncpy(stringBuffer, string, bufferSize);
 
 	// Ampersand (&) must be first, otherwise it'll mess up the other entities
@@ -170,40 +170,55 @@ static const char *root;
 /*! Buffer for storing the xml element under construction */
 static char buffer[bufferSize];
 
-void
-XMLOpenDocument(const char *rootTag, LogOutputFp log)
+char *
+XMLOpenDocument(const char *rootTag)
 {
-	assert(log != NULL);
-	logger = log;
-
-	logger("<?xml version=\"1.0\" encoding=\"utf-8\" ?>");
+	const char *doctype = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n";
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
-	logger(buffer);
+	//logger(buffer);
 
 	AddOpenTag(rootTag);
 
 	root = rootTag; // it's fine, as long as rootTag points to static memory?
+
+	const int doctypeSize = SDL_strlen(doctype);
+	const int tagSize = SDL_strlen(buffer);
+
+	const int size = doctypeSize + tagSize + 1; // extra byte for '\0'
+	char *ret = SDL_malloc(size);
+	// copy doctype
+	strncpy(ret, doctype, doctypeSize);
+	// copy tag
+	strncpy(ret + doctypeSize, buffer, tagSize);
+	ret[size] = '\0';
+	return ret;
 }
 
-void
+char *
 XMLCloseDocument() {
-	XMLCloseElement(root);
+	return XMLCloseElement(root);
 }
 
-void
+char *
 XMLOpenElement(const char *tag)
 {
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", tag);
-	logger(buffer);
 
 	AddOpenTag(tag);
+
+	const int size = SDL_strlen(buffer);
+	char *ret = SDL_malloc(size + 1);
+	strncpy(ret, buffer, size);
+	ret[size] = '\0';
+
+	return ret;
 }
 
 
-void
+char *
 XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 {
 	memset(buffer, 0, bufferSize);
@@ -212,21 +227,38 @@ XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
 	logger(buffer);
 
 	AddOpenTag(tag);
+
+	const int size = SDL_strlen(buffer);
+	char *ret = SDL_malloc(size + 1);
+	strncpy(ret, buffer, size);
+	ret[size] = '\0';
+
+	return ret;
 }
 
-void
+char *
 XMLAddContent(const char *content)
 {
 	const char *escapedContent = EscapeString(content);
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "%s", escapedContent);
-	logger(buffer);
+	SDL_free((char *)escapedContent);
+
+	const int size = SDL_strlen(buffer);
+	char *ret = SDL_malloc(size + 1);
+	strncpy(ret, buffer, size);
+	ret[size] = '\0';
+
+	return ret;
 }
 
-void
+char *
 XMLCloseElement(const char *tag)
 {
+	char *ret = SDL_malloc(bufferSize);
+	memset(ret, 0, bufferSize);
+
 	// Close the open tags with proper nesting. Closes tags until it finds
 	// the given tag which is the last tag that will be closed
 	TagList *openTag = openTags;
@@ -235,7 +267,10 @@ XMLCloseElement(const char *tag)
 
 		memset(buffer, 0, bufferSize);
 		snprintf(buffer, bufferSize, "</%s>", openTag->tag);
-		logger(buffer);
+
+		// \todo use strNcat
+		strcat(ret, buffer);
+		//logger(buffer);
 
 		const int openTagSize = SDL_strlen(openTag->tag);
 		const int tagSize = SDL_strlen(tag);
@@ -254,5 +289,7 @@ XMLCloseElement(const char *tag)
 			break;
 		}
 	}
+
+	return ret;
 }
 

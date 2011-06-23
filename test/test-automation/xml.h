@@ -35,34 +35,35 @@ typedef struct Attribute {
  * Creates header and start tag for root element.
  *
  * \param rootTag Root tag for the XML document
+ * \return The generated XML output
  */
-void XMLOpenDocument(const char *rootTag, LogOutputFp log);
+char *XMLOpenDocument(const char *rootTag);
 
 /*!
  * Closes the XML-document.
  * Creates end tag for root element and closes other open elements
  * with correct nesting.
  */
-void XMLCloseDocument();
+char *XMLCloseDocument();
 
 /*!
  *  Opens XML-element.
  *
  *  \param tag Element to be opened
  */
-void XMLOpenElement(const char *tag);
+char *XMLOpenElement(const char *tag);
 
 /*!
  * Opens XML-element with given attributes
  */
-void XMLOpenElementWithAttribute(const char *tag, Attribute *attribute);
+char *XMLOpenElementWithAttribute(const char *tag, Attribute *attribute);
 
 /*!
  * Add content to currently open element.
  *
  * \param content Content for the currently open element
  */
-void XMLAddContent(const char *content);
+char *XMLAddContent(const char *content);
 
 /*!
  * Closes previously opened element until tag given as parameter is met.
@@ -73,7 +74,7 @@ void XMLAddContent(const char *content);
  *
  * \param tag Element to close
  */
-void XMLCloseElement(const char *tag);
+char *XMLCloseElement(const char *tag);
 
 #endif
 

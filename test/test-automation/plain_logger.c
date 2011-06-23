@@ -53,7 +53,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
        time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	printf("%s %s: %s\n", assertName, assertResult, assertMessage);
+	printf("%s %d: %s\n", assertName, assertResult, assertMessage);
 }
 
 void

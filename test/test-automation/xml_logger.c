@@ -18,95 +18,165 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
+#include <SDL/SDL.h>
+
 #include "xml.h"
 #include "logger.h"
 
 #include "xml_logger.h"
 
+LogOutputFp logger;
+
 void
 XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime)
 {
-	//! \todo Giving outputFn to the function is awful, fix it
-	//! Make the outputting differently
-	XMLOpenDocument("testlog", outputFn);
+	logger = outputFn;
 
-	XMLOpenElement("parameters");
-	XMLAddContent(runnerParameters);
-	XMLCloseElement("parameters");
+	char *output = XMLOpenDocument("testlog");
+	logger(output);
+	SDL_free(output);
+
+	output = XMLOpenElement("parameters");
+	logger(output);
+	SDL_free(output);
+
+	output = XMLAddContent(runnerParameters);
+	logger(output);
+	SDL_free(output);
+
+	output = XMLCloseElement("parameters");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
             time_t endTime, time_t totalRuntime)
 {
-	XMLCloseDocument("testlog");
+	char *output = XMLCloseDocument("testlog");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLSuiteStarted(const char *suiteName, time_t eventTime)
 {
-	XMLOpenElement("suite");
+	char *output = XMLOpenElement("suite");
+	logger(output);
+	SDL_free(output);
 
-	XMLOpenElement("eventTime");
+	output = XMLOpenElement("eventTime");
+	logger(output);
+	SDL_free(output);
+
 	//XMLAddContent(evenTime);
-	XMLCloseElement("eventTime");
+	output = XMLCloseElement("eventTime");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime)
 {
-	XMLCloseElement("suite");
+	char *output = XMLCloseElement("suite");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
 {
-	XMLOpenElement("test");
+	char * output = XMLOpenElement("test");
+	logger(output);
+	SDL_free(output);
 
-	Attribute attribute = {"test", "value"};
 
-	XMLOpenElementWithAttribute("name", &attribute);
-	XMLAddContent(testName);
-	XMLCloseElement("name");
+	//Attribute attribute = {"test", "value"};
+	//XMLOpenElementWithAttribute("name", &attribute);
+	output = XMLOpenElement("name");
+	logger(output);
+	SDL_free(output);
 
-	XMLOpenElement("description");
-	XMLAddContent(testDescription);
-	XMLCloseElement("description");
+	output = XMLAddContent(testName);
+	logger(output);
+	SDL_free(output);
 
-	XMLOpenElement("starttime");
+	output = XMLCloseElement("name");
+	logger(output);
+	SDL_free(output);
+
+
+	output = XMLOpenElement("description");
+	logger(output);
+	SDL_free(output);
+
+
+	output = XMLAddContent(testDescription);
+	logger(output);
+	SDL_free(output);
+
+	output = XMLCloseElement("description");
+	logger(output);
+	SDL_free(output);
+
+	output = XMLOpenElement("starttime");
+	logger(output);
+	SDL_free(output);
+
 	//XMLAddContent(startTime);
-	XMLCloseElement("starttime");
+	output = XMLCloseElement("starttime");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime)
 {
-	XMLCloseElement("test");
+	char *output = XMLCloseElement("test");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
        time_t eventTime)
 {
-	XMLOpenElement("assert");
+	char *output = XMLOpenElement("assert");
+	logger(output);
+	SDL_free(output);
 
-	XMLOpenElement("result");
-	XMLAddContent((assertResult) ? "pass" : "failure");
-	XMLOpenElement("result");
+	output = XMLOpenElement("result");
+	logger(output);
+	SDL_free(output);
 
+	output = XMLAddContent((assertResult) ? "pass" : "failure");
+	logger(output);
+	SDL_free(output);
 
-	XMLCloseElement("assert");
+	output = XMLOpenElement("result");
+	logger(output);
+	SDL_free(output);
+
+	output = XMLCloseElement("assert");
+	logger(output);
+	SDL_free(output);
 }
 
 void
 XMLLog(const char *logMessage, time_t eventTime)
 {
-	XMLOpenElement("log");
+	char *output = XMLOpenElement("log");
+	logger(output);
+	SDL_free(output);
 
-	XMLAddContent(logMessage);
+	output = XMLAddContent(logMessage);
+	logger(output);
+	SDL_free(output);
 
-	XMLCloseElement("log");
+	output = XMLCloseElement("log");
+	logger(output);
+	SDL_free(output);
 }
 
