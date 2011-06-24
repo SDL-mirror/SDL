@@ -32,11 +32,11 @@ XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTi
 {
 	logger = outputFn;
 
-	char *output = XMLOpenDocument("testlog");
+	char *output = XMLOpenDocument("teSTtlog");
 	logger(output);
 	SDL_free(output);
 
-	output = XMLOpenElement("parameters");
+	output = XMLOpenElement("paRameters");
 	logger(output);
 	SDL_free(output);
 
@@ -44,7 +44,7 @@ XMLRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTi
 	logger(output);
 	SDL_free(output);
 
-	output = XMLCloseElement("parameters");
+	output = XMLCloseElement("Parameters");
 	logger(output);
 	SDL_free(output);
 }
@@ -53,7 +53,7 @@ void
 XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
             time_t endTime, time_t totalRuntime)
 {
-	char *output = XMLCloseDocument("testlog");
+	char *output = XMLCloseDocument("testlOg");
 	logger(output);
 	SDL_free(output);
 }
@@ -65,12 +65,12 @@ XMLSuiteStarted(const char *suiteName, time_t eventTime)
 	logger(output);
 	SDL_free(output);
 
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement("EVENTTime");
 	logger(output);
 	SDL_free(output);
 
 	//XMLAddContent(evenTime);
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement("eventTIME");
 	logger(output);
 	SDL_free(output);
 }
@@ -91,7 +91,6 @@ XMLTestStarted(const char *testName, const char *suiteName, const char *testDesc
 	logger(output);
 	SDL_free(output);
 
-
 	//Attribute attribute = {"test", "value"};
 	//XMLOpenElementWithAttribute("name", &attribute);
 	output = XMLOpenElement("name");
@@ -110,7 +109,6 @@ XMLTestStarted(const char *testName, const char *suiteName, const char *testDesc
 	output = XMLOpenElement("description");
 	logger(output);
 	SDL_free(output);
-
 
 	output = XMLAddContent(testDescription);
 	logger(output);

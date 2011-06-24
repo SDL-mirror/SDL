@@ -54,11 +54,6 @@ char *XMLCloseDocument();
 char *XMLOpenElement(const char *tag);
 
 /*!
- * Opens XML-element with given attributes
- */
-char *XMLOpenElementWithAttribute(const char *tag, Attribute *attribute);
-
-/*!
  * Add content to currently open element.
  *
  * \param content Content for the currently open element

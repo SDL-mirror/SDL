@@ -25,14 +25,14 @@ PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCoun
 void
 PlainSuiteStarted(const char *suiteName, time_t eventTime)
 {
-	printf("Executing tests in %s\n", suiteName);
+	logger("Executing tests in %s\n", suiteName);
 }
 
 void
 PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime)
 {
-	printf("Suite executed. %d passed, %d failed and %d skipped\n", testsPassed, testsFailed, testsSkipped);
+	logger("Suite executed. %d passed, %d failed and %d skipped\n", testsPassed, testsFailed, testsSkipped);
 }
 
 void
@@ -44,8 +44,8 @@ void
 PlainTestEnded(const char *testName, const char *suiteName,
           int testResult, int numAsserts, time_t endTime, time_t totalRuntime)
 {
-	printf("Asserts:%d\n", numAsserts);
-	printf("%s: ok\n", testName);
+	logger("Asserts:%d\n", numAsserts);
+	logger("%s: ok\n", testName);
 }
 
 void
@@ -53,7 +53,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
        time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	printf("%s %d: %s\n", assertName, assertResult, assertMessage);
+	logger("%s %d: %s\n", assertName, assertResult, assertMessage);
 }
 
 void

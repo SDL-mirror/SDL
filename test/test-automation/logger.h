@@ -24,7 +24,7 @@
 #include <time.h>
 
 // Function pointer to function which handles to output
-typedef int (*LogOutputFp)(const char *);
+typedef int (*LogOutputFp)(const char *, ...);
 
 
 /*!

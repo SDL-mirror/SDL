@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdarg.h>
 
+#include <SDL/SDL.h>
+
 #include "logger.h"
 #include "xml_logger.h"
 #include "plain_logger.h"
@@ -25,9 +27,15 @@ LogFp Log = 0;
  * \return Possible error value (\todo)
  */
 int
-LogGenericOutput(const char *message)
+LogGenericOutput(const char *message, ...)
 {
-	fprintf(stderr, "%s\n", message);
+	va_list list;
+	va_start(list, message);
+
+	char buffer[1024];
+	SDL_vsnprintf(buffer, sizeof(buffer), message, list);
+
+	fprintf(stderr, "%s\n", buffer);
 	fflush(stderr);
 }
 

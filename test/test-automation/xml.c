@@ -53,7 +53,10 @@ AddOpenTag(const char *tag)
 	}
 	memset(openTag, 0, sizeof(TagList));
 
-	openTag->tag = tag; // Should be fine without malloc?
+	const int tagSize = SDL_strlen(tag) + 1;
+	openTag->tag = SDL_malloc(tagSize);
+	strncpy(openTag->tag, tag, tagSize);
+
 	openTag->next = openTags;
 
 	openTags = openTag;
@@ -75,15 +78,27 @@ RemoveOpenTag(const char *tag)
 
 	int retVal = 0;
 
+	const int size = SDL_strlen(tag);
+	char *tempTag = SDL_malloc(size);
+	strncpy(tempTag, tag, size);
+
 	// Tag should always be the same as previously opened tag
 	// It prevents opening and ending tag mismatch
-	if(SDL_strcmp(openTags->tag, tag) == 0) {
+	if(SDL_strcmp(tempTag, tag) == 0) {
 		TagList *openTag = openTags;
-		openTags  = openTags->next;
+		SDL_free(openTag->tag);
 
-		free(openTag);
+		/*
+		int counter = 0;
+		for(; counter < strlen(buffer); ++counter) {
+			buffer[counter] = tolower(buffer[counter]);
+		}
+		*/
+
+		openTags  = openTags->next;
+		SDL_free(openTag);
 	} else {
-		printf("Debug | RemoveOpenTag(): open/end tag mismatch");
+		//printf("Debug | xml.c:RemoveOpenTag(): open/end tag mismatch");
 		retVal = 1;
 	}
 
@@ -153,7 +168,30 @@ const char *EscapeString(const char *string) {
 	return stringBuffer;
 }
 
+/*! Turns all the characters of the given
+ * string to lowercase and returns the resulting string.
+ *
+ * \param string String to be converted
+ * \return Lower-case version of the given string
+ */
+char *
+ToLowerCase(char *string)
+{
+	const int size = SDL_strlen(string);
+	char *ret = SDL_malloc(size + 1);
+	strncpy(ret, string, size);
+	ret[size] = '\0';
 
+	// turn the tag to lower case for case-insensitive comparation
+	int counter = 0;
+	for(; counter < size; ++counter) {
+		ret[counter] = tolower(ret[counter]);
+	}
+
+	// printf("Debug: %s == %s\n", string, ret);
+
+	return ret;
+}
 
 /*
 ===================
@@ -177,7 +215,6 @@ XMLOpenDocument(const char *rootTag)
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
-	//logger(buffer);
 
 	AddOpenTag(rootTag);
 
@@ -206,25 +243,6 @@ XMLOpenElement(const char *tag)
 {
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", tag);
-
-	AddOpenTag(tag);
-
-	const int size = SDL_strlen(buffer);
-	char *ret = SDL_malloc(size + 1);
-	strncpy(ret, buffer, size);
-	ret[size] = '\0';
-
-	return ret;
-}
-
-
-char *
-XMLOpenElementWithAttribute(const char *tag, Attribute *attribute)
-{
-	memset(buffer, 0, bufferSize);
-	snprintf(buffer, bufferSize, "<%s %s='%s'>", tag,
-			attribute->attribute, attribute->value);
-	logger(buffer);
 
 	AddOpenTag(tag);
 
@@ -265,21 +283,28 @@ XMLCloseElement(const char *tag)
 	while(openTag) {
 		TagList *temp = openTag->next;
 
+		char *lowOpenTag = ToLowerCase(openTag->tag);
+		char *lowTag = ToLowerCase(tag);
+
+		const int openTagSize = SDL_strlen(lowOpenTag);
+		const int tagSize = SDL_strlen(lowTag);
+		const int compSize = (openTagSize > tagSize) ? openTagSize : tagSize;
+
 		memset(buffer, 0, bufferSize);
-		snprintf(buffer, bufferSize, "</%s>", openTag->tag);
+
+		int breakOut = 0;
+		if(SDL_strncmp(lowOpenTag, lowTag, compSize) == 0) {
+			breakOut = 1;
+			snprintf(buffer, bufferSize, "</%s>", tag);
+		} else {
+			snprintf(buffer, bufferSize, "</%s>", openTag->tag);
+		}
+
+		SDL_free(lowOpenTag);
+		SDL_free(lowTag);
 
 		// \todo use strNcat
 		strcat(ret, buffer);
-		//logger(buffer);
-
-		const int openTagSize = SDL_strlen(openTag->tag);
-		const int tagSize = SDL_strlen(tag);
-		const int compSize = (openTagSize > tagSize) ? openTagSize : tagSize;
-
-		int breakOut = 0;
-		if(SDL_strncmp(openTag->tag, tag, compSize) == 0) {
-			breakOut = 1;
-		}
 
 		RemoveOpenTag(openTag->tag);
 
