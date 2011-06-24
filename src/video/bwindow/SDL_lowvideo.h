@@ -43,7 +43,7 @@ struct SDL_PrivateVideoData
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
 
     /* A completely clear cursor */
-    WMcursor *BlankCursor;
+    struct WMcursor *BlankCursor;
 
     SDL_Overlay *overlay;
 };

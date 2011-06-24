@@ -549,7 +549,10 @@ extern "C"
             current->flags |= SDL_NOFRAME;
             SDL_Win->SetLook(B_NO_BORDER_WINDOW_LOOK);
         } else {
-            if ((flags & SDL_RESIZABLE) && !(flags & SDL_INTERNALOPENGL)) {
+        	/* FIXME: What was SDL_INTERNALOPENGL? This used it before, but it
+        	          isn't defined anywhere. */
+            if ((flags & SDL_RESIZABLE) && !(flags & SDL_OPENGL
+            		/*SDL_INTERNALOPENGL*/)) {
                 current->flags |= SDL_RESIZABLE;
                 /* We don't want opaque resizing (TM). :-) */
                 SDL_Win->SetFlags(B_OUTLINE_RESIZE);
@@ -558,8 +561,8 @@ extern "C"
             }
         }
 
-        if (flags & SDL_INTERNALOPENGL) {
-            current->flags |= SDL_INTERNALOPENGL;
+        if (flags & SDL_OPENGL /*SDL_INTERNALOPENGL*/) {
+            current->flags |= SDL_OPENGL /*SDL_INTERNALOPENGL*/;
             current->pitch = 0;
             current->pixels = NULL;
             _this->UpdateRects = NULL;

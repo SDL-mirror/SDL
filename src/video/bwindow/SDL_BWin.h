@@ -33,6 +33,9 @@
 #endif
 #include <support/UTF8.h>
 
+//FIXME: Temporary fix until I can understand what the values used from here do
+#include "SDL_compat.h"
+
 #include "../../main/beos/SDL_BeApp.h"
 #include "SDL_events.h"
 #include "SDL_BView.h"
@@ -219,7 +222,8 @@ class SDL_BWin:public BDirectWindow
         if (inhibit_resize)
             inhibit_resize = false;
         else
-            SDL_PrivateResize((int) width, (int) height);
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED,
+            	(int) width, (int) height);
     }
     virtual int CreateView(Uint32 flags, Uint32 gl_flags)
     {
@@ -227,7 +231,7 @@ class SDL_BWin:public BDirectWindow
 
         retval = 0;
         Lock();
-        if (flags & SDL_INTERNALOPENGL) {
+        if (flags & SDL_OPENGL/*SDL_INTERNALOPENGL*/) {
 #if SDL_VIDEO_OPENGL
             if (SDL_GLView == NULL) {
                 SDL_GLView = new BGLView(Bounds(), "SDL GLView",
@@ -321,17 +325,24 @@ class SDL_BWin:public BDirectWindow
     virtual void Minimize(bool minimize)
     {
         /* This is only called when mimimized, not when restored */
-        //SDL_PrivateAppActive(minimize, SDL_APPACTIVE);
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
         BWindow::Minimize(minimize);
     }
     virtual void WindowActivated(bool active)
     {
-        SDL_PrivateAppActive(active, SDL_APPINPUTFOCUS);
+//        SDL_PrivateAppActive(active, SDL_APPINPUTFOCUS);
+        if( active ) {
+          SDL_SendWindowEvent(window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+          SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        } else {
+          SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+          SDL_SendWindowEvent(window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+        }
     }
     virtual bool QuitRequested(void)
     {
         if (SDL_BeAppActive > 0) {
-            SDL_PrivateQuit();
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_CLOSE, 0, 0);
             /* We don't ever actually close the window here because
                the application should respond to the quit request,
                or ignore it as desired.
@@ -401,19 +412,23 @@ class SDL_BWin:public BDirectWindow
                     && msg->FindInt32("be:transit", &transit) == B_OK) {
                     if (transit == B_EXITED_VIEW) {
                         if (SDL_GetAppState() & SDL_APPMOUSEFOCUS) {
-                            SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+//                            SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
+                            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+                            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
                             be_app->SetCursor(B_HAND_CURSOR);
                         }
                     } else {
                         int x, y;
                         if (!(SDL_GetAppState() & SDL_APPMOUSEFOCUS)) {
-                            SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+//                            SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
+                            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+                            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
                             SDL_SetCursor(NULL);
                         }
                         GetXYOffset(x, y);
                         x = (int) where.x - x;
                         y = (int) where.y - y;
-                        SDL_PrivateMouseMotion(0, 0, x, y);
+                        SDL_SendMouseMotion(window, 0, x, y);
                     }
                 }
                 break;
@@ -424,19 +439,21 @@ class SDL_BWin:public BDirectWindow
                 /*      it looks like mouse down is send only for first clicked
                    button, each next is not send while last one is holded */
                 int32 buttons;
-                int sdl_buttons = 0;
+//                int sdl_buttons = 0;
                 if (msg->FindInt32("buttons", &buttons) == B_OK) {
                     /* Add any mouse button events */
                     if (buttons & B_PRIMARY_MOUSE_BUTTON) {
-                        sdl_buttons |= SDL_BUTTON_LEFT;
+//                        sdl_buttons |= SDL_BUTTON_LMASK;
+                        SDL_SendMouseButton(window, SDL_PRESSED, SDL_BUTTON_LEFT);
                     }
                     if (buttons & B_SECONDARY_MOUSE_BUTTON) {
-                        sdl_buttons |= SDL_BUTTON_RIGHT;
+//                        sdl_buttons |= SDL_BUTTON_RMASK;
+                        SDL_SendMouseButton(window, SDL_PRESSED, SDL_BUTTON_RIGHT);
                     }
                     if (buttons & B_TERTIARY_MOUSE_BUTTON) {
-                        sdl_buttons |= SDL_BUTTON_MIDDLE;
+//                        sdl_buttons |= SDL_BUTTON_MMASK;
+                        SDL_SendMouseButton(window, SDL_PRESSED, SDL_BUTTON_MIDDLE);
                     }
-                    SDL_PrivateMouseButton(SDL_PRESSED, sdl_buttons, 0, 0);
 
                     last_buttons = buttons;
                 }
@@ -455,19 +472,21 @@ class SDL_BWin:public BDirectWindow
                    without releasing previous one first) - but that's probably
                    because of how drivers are written?, not BeOS itself. */
                 int32 buttons;
-                int sdl_buttons = 0;
+//                int sdl_buttons = 0;
                 if (msg->FindInt32("buttons", &buttons) == B_OK) {
                     /* Add any mouse button events */
                     if ((buttons ^ B_PRIMARY_MOUSE_BUTTON) & last_buttons) {
-                        sdl_buttons |= SDL_BUTTON_LEFT;
+//                        sdl_buttons |= SDL_BUTTON_LMASK;
+                        SDL_SendMouseButton(window, SDL_RELEASED, SDL_BUTTON_LEFT);
                     }
                     if ((buttons ^ B_SECONDARY_MOUSE_BUTTON) & last_buttons) {
-                        sdl_buttons |= SDL_BUTTON_RIGHT;
+//                        sdl_buttons |= SDL_BUTTON_RMASK;
+                        SDL_SendMouseButton(window, SDL_RELEASED, SDL_BUTTON_RIGHT);
                     }
                     if ((buttons ^ B_TERTIARY_MOUSE_BUTTON) & last_buttons) {
-                        sdl_buttons |= SDL_BUTTON_MIDDLE;
+//                        sdl_buttons |= SDL_BUTTON_MMASK;
+                        SDL_SendMouseButton(window, SDL_RELEASED, SDL_BUTTON_MIDDLE);
                     }
-                    SDL_PrivateMouseButton(SDL_RELEASED, sdl_buttons, 0, 0);
 
                     last_buttons = buttons;
                 }
@@ -481,15 +500,9 @@ class SDL_BWin:public BDirectWindow
                 if (msg->FindFloat("be:wheel_delta_x", &x) == B_OK
                     && msg->FindFloat("be:wheel_delta_y", &y) == B_OK) {
                     if (x < 0 || y < 0) {
-                        SDL_PrivateMouseButton(SDL_PRESSED,
-                                               SDL_BUTTON_WHEELDOWN, 0, 0);
-                        SDL_PrivateMouseButton(SDL_RELEASED,
-                                               SDL_BUTTON_WHEELDOWN, 0, 0);
+                        SDL_SendMouseWheel(window, (int)x, (int)y);
                     } else if (x > 0 || y > 0) {
-                        SDL_PrivateMouseButton(SDL_PRESSED,
-                                               SDL_BUTTON_WHEELUP, 0, 0);
-                        SDL_PrivateMouseButton(SDL_RELEASED,
-                                               SDL_BUTTON_WHEELUP, 0, 0);
+                        SDL_SendMouseWheel(window, (int)x, (int)y);
                     }
                 }
                 break;
@@ -509,7 +522,7 @@ class SDL_BWin:public BDirectWindow
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
                     SDL_Keysym keysym;
-                    keysym.scancode = key;
+                    keysym.scancode = (SDL_Scancode)key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];
                     } else {
@@ -520,6 +533,7 @@ class SDL_BWin:public BDirectWindow
                        anyway, and doesn't care about what we setup here */
                     keysym.mod = KMOD_NONE;
                     keysym.unicode = 0;
+#if 0 /* FIXME: As far as I can make out, this isn't really used anymore? */
                     if (SDL_TranslateUNICODE) {
                         const char *bytes;
                         if (msg->FindString("bytes", &bytes) == B_OK) {
@@ -530,7 +544,8 @@ class SDL_BWin:public BDirectWindow
                             keysym.unicode = Translate2Unicode(bytes);
                         }
                     }
-                    SDL_PrivateKeyboard(SDL_PRESSED, &keysym);
+#endif
+                    SDL_SendKeyboardKey(SDL_PRESSED, keysym.scancode);
                 }
                 break;
             }
@@ -543,7 +558,7 @@ class SDL_BWin:public BDirectWindow
                 if (msg->FindInt32("key", &key) == B_OK
                     && msg->FindInt32("modifiers", &modifiers) == B_OK) {
                     SDL_Keysym keysym;
-                    keysym.scancode = key;
+                    keysym.scancode = (SDL_Scancode)key;
                     if ((key > 0) && (key < 128)) {
                         keysym.sym = keymap[key];
                     } else {
@@ -551,13 +566,15 @@ class SDL_BWin:public BDirectWindow
                     }
                     keysym.mod = KMOD_NONE;     /* FIX THIS? */
                     keysym.unicode = 0;
+#if 0 /* FIXME: As far as I can make out, this isn't really used anymore? */
                     if (SDL_TranslateUNICODE) {
                         const char *bytes;
                         if (msg->FindString("bytes", &bytes) == B_OK) {
                             keysym.unicode = Translate2Unicode(bytes);
                         }
                     }
-                    SDL_PrivateKeyboard(SDL_RELEASED, &keysym);
+#endif
+                    SDL_SendKeyboardKey(SDL_RELEASED, keysym.scancode);
                 }
                 break;
             }
@@ -586,6 +603,8 @@ class SDL_BWin:public BDirectWindow
 
     int32 last_buttons;
     SDL_Keycode keymap[128];
+    
+    SDL_Window *window;
 };
 
 #endif /* _SDL_BWin_h */
