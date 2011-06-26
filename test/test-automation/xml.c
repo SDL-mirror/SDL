@@ -55,7 +55,7 @@ AddOpenTag(const char *tag)
 
 	const int tagSize = SDL_strlen(tag) + 1;
 	openTag->tag = SDL_malloc(tagSize);
-	strncpy(openTag->tag, tag, tagSize);
+	strncpy((char *)openTag->tag, (char *)tag, tagSize);
 
 	openTag->next = openTags;
 
@@ -86,7 +86,7 @@ RemoveOpenTag(const char *tag)
 	// It prevents opening and ending tag mismatch
 	if(SDL_strcmp(tempTag, tag) == 0) {
 		TagList *openTag = openTags;
-		SDL_free(openTag->tag);
+		SDL_free((char *)openTag->tag);
 
 		/*
 		int counter = 0;
@@ -175,7 +175,7 @@ const char *EscapeString(const char *string) {
  * \return Lower-case version of the given string
  */
 char *
-ToLowerCase(char *string)
+ToLowerCase(const char *string)
 {
 	const int size = SDL_strlen(string);
 	char *ret = SDL_malloc(size + 1);

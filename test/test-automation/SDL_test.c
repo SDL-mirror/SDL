@@ -24,6 +24,8 @@
 #include <stdio.h> /* printf/fprintf */
 #include <stdarg.h> /* va_list */
 
+#include "logger.h"
+
 #include "SDL_test.h"
 
 /*! \brief return value of test case. Non-zero value means that the test failed */
@@ -36,8 +38,16 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_TestCaseInit()
+_TestCaseInit(const int enable_xml_logging)
 {
+	// setup logging functions
+	// rather afwul way to do it, but function pointers didn't work
+	if(enable_xml_logging) {
+		SetupXMLLogger();
+	} else {
+		SetupPlainLogger();
+	}
+
 	_testReturnValue = 0;
 	_testAssertsFailed = 0;
 	_testAssertsPassed = 0;
@@ -46,8 +56,9 @@ _TestCaseInit()
 int
 _TestCaseQuit()
 {
-	//! \todo make the test fail, if it does not contain any asserts
-	printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
+	//printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
+	AssertSummary(_testAssertsFailed + _testAssertsPassed,
+                  _testAssertsFailed, _testAssertsPassed);
 
 	if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
 		_testReturnValue = 2;
@@ -66,11 +77,15 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       va_start( args, message );
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
-      printf("AssertEquals failed: expected %d, got %d; %s\n", expected, actual, buf);
+      //printf("AssertEquals failed: expected %d, got %d; %s\n", expected, actual, buf);
+      Assert("AssertEquals", 0, buf, 0);
+
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-      printf("AssertEquals passed\n");
+      //printf("AssertEquals passed\n");
+      Assert("AssertEquals", 1, "AssertEquals passed", 0);
+
       _testAssertsPassed++;
    }
 }
@@ -86,12 +101,15 @@ AssertTrue(int condition, char *message, ...)
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
 
-      printf("AssertTrue failed: %s\n", buf);
+      //printf("AssertTrue failed: %s\n", buf);
+      Assert("AssertTrue", 0, buf, 0);
+
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-     printf("AssertTrue passed\n");
-      _testAssertsPassed++;
+     //printf("AssertTrue passed\n");
+	 Assert("AssertTrue", 1, "AssertTrue passed", 0);
+     _testAssertsPassed++;
    }
 }
 
@@ -105,7 +123,8 @@ AssertPass(char *message, ...)
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
 
-   printf("AssertPass: %s\n", buf);
+   //printf("AssertPass: %s\n", buf);
+   Assert("AssertPass", 1, buf, 0);
 
    _testAssertsPassed++;
 }
@@ -120,7 +139,8 @@ AssertFail(char *message, ...)
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
 
-   printf("AssertFail: %s\n", buf);
+   //printf("AssertFail: %s\n", buf);
+   Assert("AssertFail", 0, buf, 0);
 
    _testAssertsFailed++;
 }

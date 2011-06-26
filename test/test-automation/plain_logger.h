@@ -17,10 +17,14 @@ void PlainTestStarted(const char *testName, const char *suiteName,
                       const char *testDescription, time_t startTime);
 
 void PlainTestEnded(const char *testName, const char *suiteName,
-          int testResult, int numAsserts, time_t endTime, time_t totalRuntime);
+          int testResult, time_t endTime, time_t totalRuntime);
+
 
 void PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
        time_t eventTime);
+
+void PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass);
+
 
 void PlainLog(const char *logMessage, time_t eventTime);
 

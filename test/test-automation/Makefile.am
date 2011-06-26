@@ -3,14 +3,9 @@ ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 SUBDIRS = testdummy testrect testplatform
 
 bin_PROGRAMS = runner
-runner_SOURCES = runner.c SDL_test.c
+runner_SOURCES = runner.c SDL_test.c logger.c xml_logger.c plain_logger.c xml.c
 runner_CLAGS = -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
 runner_LDFLAGS = `sdl-config --libs` 
-
-bin_PROGRAMS = logger
-logger_SOURCES = xml_logger.c xml.c plain_logger.c logger.c
-logger_CLAGS = -W -Wall -Wextra -g `sdl-config --cflags` -DSDL_NO_COMPAT
-logger_LDFLAGS = `sdl-config --libs` 
 
 install: install-tests
 install-tests:

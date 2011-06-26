@@ -26,7 +26,6 @@
 // Function pointer to function which handles to output
 typedef int (*LogOutputFp)(const char *, ...);
 
-
 /*!
  * Generic logger interface
  *
@@ -42,12 +41,29 @@ typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
 typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
                               const char *testDescription, time_t startTime);
 typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
-		               int numAsserts, time_t endTime, time_t totalRuntime);
+                            time_t endTime, time_t totalRuntime);
 
+/*!
+ * Note: for assertResult, non-zero == pass, zero == failure
+ *
+ */
 typedef	void (*AssertFp)(const char *assertName, int assertResult, const char *assertMessage,
 		            time_t eventTime);
+typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed, int numAssertsPass);
+
 
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
+int LogGenericOutput(const char *message, ...);
+
+extern RunStartedFp RunStarted;
+extern RunEndedFp RunEnded;
+extern SuiteStartedFp SuiteStarted;
+extern SuiteEndedFp SuiteEnded;
+extern TestStartedFp TestStarted;
+extern TestEndedFp TestEnded;
+extern AssertFp Assert;
+extern AssertSummaryFp AssertSummary;
+extern LogFp Log;
 
 #endif

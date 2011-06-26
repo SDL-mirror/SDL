@@ -18,7 +18,44 @@ SuiteEndedFp SuiteEnded = 0;
 TestStartedFp TestStarted = 0;
 TestEndedFp TestEnded = 0;
 AssertFp Assert = 0;
+AssertSummaryFp AssertSummary = 0;
 LogFp Log = 0;
+
+int
+SetupXMLLogger()
+{
+	RunStarted = XMLRunStarted;
+	RunEnded = XMLRunEnded;
+
+	SuiteStarted = XMLSuiteStarted;
+	SuiteEnded = XMLSuiteEnded;
+
+	TestStarted = XMLTestStarted;
+	TestEnded = XMLTestEnded;
+
+	Assert = XMLAssert;
+	AssertSummary = XMLAssertSummary;
+
+	Log = XMLLog;
+}
+
+int
+SetupPlainLogger()
+{
+	RunStarted = PlainRunStarted;
+	RunEnded = PlainRunEnded;
+
+	SuiteStarted = PlainSuiteStarted;
+	SuiteEnded = PlainSuiteEnded;
+
+	TestStarted = PlainTestStarted;
+	TestEnded = PlainTestEnded;
+
+	Assert = PlainAssert;
+	AssertSummary = PlainAssertSummary;
+
+	Log = PlainLog;
+}
 
 /*!
  * Prints the given message to stderr. Function adds nesting
@@ -39,6 +76,7 @@ LogGenericOutput(const char *message, ...)
 	fflush(stderr);
 }
 
+#if 0
 /*!
  * Test app for logging functionality
  */
@@ -48,29 +86,9 @@ main(int argc, char *argv[])
 	int xml_enabled = 1;
 
 	if(xml_enabled) {
-		RunStarted = XMLRunStarted;
-		RunEnded = XMLRunEnded;
-
-		SuiteStarted = XMLSuiteStarted;
-		SuiteEnded = XMLSuiteEnded;
-
-		TestStarted = XMLTestStarted;
-		TestEnded = XMLTestEnded;
-
-		Assert = XMLAssert;
-		Log = XMLLog;
+		SetupXMLLogger();
 	} else {
-		RunStarted = PlainRunStarted;
-		RunEnded = PlainRunEnded;
-
-		SuiteStarted = PlainSuiteStarted;
-		SuiteEnded = PlainSuiteEnded;
-
-		TestStarted = PlainTestStarted;
-		TestEnded = PlainTestEnded;
-
-		Assert = PlainAssert;
-		Log = PlainLog;
+		SetupPlainLogger();
 	}
 
 	RunStarted(LogGenericOutput, "some_<data_>here&here", 0);
@@ -84,3 +102,4 @@ main(int argc, char *argv[])
 
 	return 0;
 }
+#endif

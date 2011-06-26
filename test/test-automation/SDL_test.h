@@ -23,6 +23,8 @@
 
 #include <SDL/SDL.h>
 
+#include "logger.h"
+
 extern int _testReturnValue;
 extern int _testAssertsFailed;
 extern int _testAssertsPassed;
@@ -52,7 +54,7 @@ typedef struct TestCaseReference {
  *  the beginning of every test case, before doing
  *  anything else.
  */
-void _TestCaseInit();
+void _TestCaseInit(const int enable_xml_logging);
 
 /*! \fn _TestCaseQuit
  *  Deinitializes and exits the test case

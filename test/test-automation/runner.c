@@ -29,12 +29,12 @@
 #include <sys/types.h>
 
 #include "SDL_test.h"
-
+#include "logger.h"
 
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*TestCaseInitFp)(void);
+typedef void (*TestCaseInitFp)(const int);
 //!< Function pointer to a test case quit function
 typedef int  (*TestCaseQuitFp)(void);
 
@@ -49,6 +49,8 @@ static int only_selected_test  = 0;
 static int only_selected_suite = 0;
 //!< Flag for executing only tests that contain certain string in their name
 static int only_tests_with_string = 0;
+//!< Flag for enabling XML logging
+static int xml_enabled = 0;
 
 
 //!< Size of the test and suite name buffers
@@ -85,6 +87,10 @@ typedef struct TestSuiteReference {
 typedef struct TestCaseItem {
 	char *testName;
 	char *suiteName;
+
+	char *description;
+	long requirements;
+	long timeout;
 
 	TestCaseInitFp testCaseInit;
 	TestCaseFp testCase;
@@ -213,13 +219,23 @@ LoadTestCases(TestSuiteReference *suites)
 				item->testCase = testCase;
 				item->testCaseQuit = testCaseQuit;
 
+				// copy suite name
 				int length = strlen(suiteReference->name) + 1;
 				item->suiteName = SDL_malloc(length);
 				strcpy(item->suiteName, suiteReference->name);
 
+				// copy test name
 				length = strlen(testReference->name) + 1;
 				item->testName = SDL_malloc(length);
 				strcpy(item->testName, testReference->name);
+
+				// copy test description
+				length = strlen(testReference->description) + 1;
+				item->description = SDL_malloc(length);
+				strcpy(item->testName, testReference->name);
+
+				item->requirements = testReference->requirements;
+				item->timeout = testReference->timeout;
 
 				// prepend the list
 				item->next = testCases;
@@ -247,6 +263,7 @@ UnloadTestCases(TestCase *testCases)
 	while(ref) {
 		SDL_free(ref->testName);
 		SDL_free(ref->suiteName);
+		SDL_free(ref->description);
 
 		TestCase *temp = ref->next;
 		SDL_free(ref);
@@ -482,7 +499,7 @@ int
 ExecuteTest(TestCase *testItem) {
 	int retVal = 1;
 	if(execute_inproc) {
-		testItem->testCaseInit();
+		testItem->testCaseInit(xml_enabled);
 
 		testItem->testCase(0x0);
 
@@ -490,7 +507,7 @@ ExecuteTest(TestCase *testItem) {
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			testItem->testCaseInit();
+			testItem->testCaseInit(xml_enabled);
 
 			testItem->testCase(0x0);
 
@@ -517,6 +534,7 @@ printUsage() {
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
+	  printf("     --xml             		Enables XML logger\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -544,6 +562,9 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--show-tests") == 0) {
     	  only_print_tests = 1;
+      }
+      else if(SDL_strcmp(arg, "--xml") == 0) {
+    	  xml_enabled = 1;
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
@@ -625,6 +646,11 @@ main(int argc, char *argv[])
 #else
 	char *extension = "dylib";
 #endif
+	if(xml_enabled) {
+		SetupXMLLogger();
+	} else {
+		SetupPlainLogger();
+	}
 
 	const Uint32 startTicks = SDL_GetTicks();
 
@@ -637,29 +663,49 @@ main(int argc, char *argv[])
 	if(only_print_tests) {
 		TestCase *testItem = NULL;
 		for(testItem = testCases; testItem; testItem = testItem->next) {
+			//! \todo This should be handled by the logging system?
 			printf("%s (in %s)\n", testItem->testName, testItem->suiteName);
 		}
 
 		return 0;
 	}
 
+	RunStarted(LogGenericOutput, NULL, 0);
+
+	char *currentSuiteName = NULL;
+
 	TestCase *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
+		if(currentSuiteName == NULL) {
+			currentSuiteName = testItem->suiteName;
+			SuiteStarted(currentSuiteName, 0);
+		}
+
+		TestStarted(testItem->testName, testItem->suiteName,
+                    testItem->description, 0);
+
 		int retVal = ExecuteTest(testItem);
 
 		if(retVal) {
 			failureCount++;
 			if(retVal == 2) {
-				printf("%s (in %s): FAILED -> No asserts\n", testItem->testName, testItem->suiteName);
+				//printf("%s (in %s): FAILED -> No asserts\n", testItem->testName, testItem->suiteName);
 			} else {
-				printf("%s (in %s): FAILED\n", testItem->testName, testItem->suiteName);
+				//printf("%s (in %s): FAILED\n", testItem->testName, testItem->suiteName);
 			}
 		} else {
 			passCount++;
-			printf("%s (in %s): ok\n", testItem->testName, testItem->suiteName);
+			//printf("%s (in %s): ok\n", testItem->testName, testItem->suiteName);
 		}
 
-		printf("\n");
+		TestEnded(testItem->testName, testItem->suiteName, retVal, 0, 0);
+
+		if(strncmp(currentSuiteName, testItem->suiteName, 100) != 0) {
+			SuiteEnded(0, 0, 0, 0.0f, 0);
+
+			currentSuiteName = testItem->suiteName;
+			SuiteStarted(currentSuiteName, 0);
+		}
 	}
 
 	UnloadTestCases(testCases);
@@ -667,10 +713,14 @@ main(int argc, char *argv[])
 
 	const Uint32 endTicks = SDL_GetTicks();
 
+	RunEnded(passCount + failureCount, 1 /*add suiteCount */,
+			 passCount, failureCount, 0, 0);
+	/*
 	printf("Ran %d tests in %0.5f seconds.\n", (passCount + failureCount), (endTicks-startTicks)/1000.0f);
 
 	printf("%d tests passed\n", passCount);
 	printf("%d tests failed\n", failureCount);
+	*/
 
 	return 0;
 }
