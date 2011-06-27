@@ -671,33 +671,44 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
-	RunStarted(argc, argv, 0);
+	RunStarted(argc, argv, time(0));
 
 	char *currentSuiteName = NULL;
+
+	int suiteStartTime = SDL_GetTicks();
 
 	TestCase *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
 		if(currentSuiteName == NULL) {
 			currentSuiteName = testItem->suiteName;
-			SuiteStarted(currentSuiteName, 0);
+			SuiteStarted(currentSuiteName, time(0));
 
 			testFailureCount = testPassCount = 0;
+
+			//suiteStartTime = SDL_GetTicks();
 
 			suiteCounter++;
 		}
 		else if(strncmp(currentSuiteName, testItem->suiteName, NAME_BUFFER_SIZE) != 0) {
-			SuiteEnded(testPassCount, testFailureCount, testSkipCount, 0.0f, 0);
+			const double suiteRuntime = (SDL_GetTicks() - suiteStartTime) / 1000.0f;
+
+			SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
+						suiteRuntime);
 
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, 0);
 
 			testFailureCount = testPassCount = 0;
 
+			//suiteStartTime = SDL_GetTicks();
+
 			suiteCounter++;
 		}
 
 		TestStarted(testItem->testName, testItem->suiteName,
-                    testItem->description, 0);
+                    testItem->description, time(0));
+
+		const Uint32 testTimeStart = SDL_GetTicks();
 
 		int retVal = ExecuteTest(testItem);
 		if(retVal) {
@@ -708,22 +719,26 @@ main(int argc, char *argv[])
 			testPassCount++;
 		}
 
-		TestEnded(testItem->testName, testItem->suiteName, retVal, 0, 0);
+		const double testTotalRuntime = (SDL_GetTicks() - testTimeStart) / 1000.0f;
+
+		TestEnded(testItem->testName, testItem->suiteName, retVal, time(0), testTotalRuntime);
 	}
 
 	if(currentSuiteName) {
 		// \todo if no test are run, this will case incorrect nesting with
 		// xml output
-		SuiteEnded(testPassCount, testFailureCount, testSkipCount, 0.0f, 0);
+		SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
+					(SDL_GetTicks() - suiteStartTime) / 1000.0f);
 	}
 
 	UnloadTestCases(testCases);
 	UnloadTestSuites(suites);
 
 	const Uint32 endTicks = SDL_GetTicks();
+	const double totalRunTime = (endTicks - startTicks) / 1000.0f;
 
 	RunEnded(totalTestPassCount + totalTestfailureCount, suiteCounter,
-			 totalTestPassCount, totalTestfailureCount, 0, 0);
+			 totalTestPassCount, totalTestfailureCount, time(0), totalRunTime);
 
 	return 0;
 }

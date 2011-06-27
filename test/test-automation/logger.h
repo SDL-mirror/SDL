@@ -29,24 +29,25 @@
  */
 typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
-                           time_t endTime, time_t totalRuntime);
+                           time_t endTime, double totalRuntime);
 
 typedef	void (*SuiteStartedFp)(const char *suiteName, time_t eventTime);
 typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
-		                double endTime, time_t totalRuntime);
+		                time_t endTime, double totalRuntime);
 
 typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
                               const char *testDescription, time_t startTime);
 typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
-                            time_t endTime, time_t totalRuntime);
+                            time_t endTime, double totalRuntime);
 
 /*!
  * Note: for assertResult, non-zero == pass, zero == failure
  *
  */
-typedef	void (*AssertFp)(const char *assertName, int assertResult, const char *assertMessage,
-		            time_t eventTime);
-typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed, int numAssertsPass);
+typedef	void (*AssertFp)(const char *assertName, int assertResult,
+						 const char *assertMessage, time_t eventTime);
+typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
+								int numAssertsPass, time_t eventTime);
 
 
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);

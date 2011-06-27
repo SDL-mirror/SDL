@@ -23,6 +23,7 @@
 
 #include <stdio.h> /* printf/fprintf */
 #include <stdarg.h> /* va_list */
+#include <time.h>
 
 #include "logger.h"
 
@@ -58,7 +59,7 @@ _TestCaseQuit()
 {
 	//printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
 	AssertSummary(_testAssertsFailed + _testAssertsPassed,
-                  _testAssertsFailed, _testAssertsPassed);
+                  _testAssertsFailed, _testAssertsPassed, time(0));
 
 	if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
 		_testReturnValue = 2;
@@ -78,13 +79,13 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
       //printf("AssertEquals failed: expected %d, got %d; %s\n", expected, actual, buf);
-      Assert("AssertEquals", 0, buf, 0);
+      Assert("AssertEquals", 0, buf, time(0));
 
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
       //printf("AssertEquals passed\n");
-      Assert("AssertEquals", 1, "AssertEquals passed", 0);
+      Assert("AssertEquals", 1, "AssertEquals passed", time(0));
 
       _testAssertsPassed++;
    }
@@ -102,13 +103,13 @@ AssertTrue(int condition, char *message, ...)
       va_end( args );
 
       //printf("AssertTrue failed: %s\n", buf);
-      Assert("AssertTrue", 0, buf, 0);
+      Assert("AssertTrue", 0, buf, time(0));
 
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
      //printf("AssertTrue passed\n");
-	 Assert("AssertTrue", 1, "AssertTrue passed", 0);
+	 Assert("AssertTrue", 1, "AssertTrue passed", time(0));
      _testAssertsPassed++;
    }
 }
@@ -124,7 +125,7 @@ AssertPass(char *message, ...)
    va_end( args );
 
    //printf("AssertPass: %s\n", buf);
-   Assert("AssertPass", 1, buf, 0);
+   Assert("AssertPass", 1, buf, time(0));
 
    _testAssertsPassed++;
 }
@@ -140,7 +141,7 @@ AssertFail(char *message, ...)
    va_end( args );
 
    //printf("AssertFail: %s\n", buf);
-   Assert("AssertFail", 0, buf, 0);
+   Assert("AssertFail", 0, buf, time(0));
 
    _testAssertsFailed++;
 }

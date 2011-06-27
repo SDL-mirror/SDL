@@ -35,7 +35,7 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
 
 void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-              time_t endTime, time_t totalRuntime)
+              time_t endTime, double totalRuntime)
 {
 	Output("Ran %d tests in %0.5f seconds.", testCount, totalRuntime);
 
@@ -51,7 +51,7 @@ PlainSuiteStarted(const char *suiteName, time_t eventTime)
 
 void
 PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
-           double endTime, time_t totalRuntime)
+           time_t endTime, double totalRuntime)
 {
 	Output("Suite executed. %d passed, %d failed and %d skipped", testsPassed, testsFailed, testsSkipped);
 }
@@ -64,7 +64,7 @@ PlainTestStarted(const char *testName, const char *suiteName, const char *testDe
 
 void
 PlainTestEnded(const char *testName, const char *suiteName,
-          int testResult, time_t endTime, time_t totalRuntime)
+          int testResult, time_t endTime, double totalRuntime)
 {
 	Output("%s: ok", testName);
 }
@@ -78,7 +78,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 }
 
 void
-PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass)
+PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, time_t eventTime)
 {
 	Output("Asserts:%d", numAsserts);
 }
