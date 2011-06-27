@@ -27,7 +27,7 @@ Output(const char *message, ...)
 }
 
 void
-PlainRunStarted(const char *runnerParameters, time_t eventTime)
+PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
 {
 	Output("Test run started");
 	Output("Given command line options: %s", "add options");

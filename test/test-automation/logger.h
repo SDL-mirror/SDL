@@ -23,14 +23,11 @@
 
 #include <time.h>
 
-// Function pointer to function which handles to output
-typedef int (*LogOutputFp)(const char *, ...);
-
 /*!
  * Generic logger interface
  *
  */
-typedef	void (*RunStartedFp)(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
+typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
                            time_t endTime, time_t totalRuntime);
 
@@ -54,7 +51,6 @@ typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed, int numAss
 
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
-int Output(const char *message, ...);
 
 extern RunStartedFp RunStarted;
 extern RunEndedFp RunEnded;

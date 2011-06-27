@@ -26,9 +26,6 @@
 
 #include "xml.h"
 
-/*! Points the function which handles the output */
-static LogOutputFp logger = 0;
-
 /*!
  * Defines structure used for "counting" open XML-tags
  */
@@ -87,13 +84,6 @@ RemoveOpenTag(const char *tag)
 	if(SDL_strcmp(tempTag, tag) == 0) {
 		TagList *openTag = openTags;
 		SDL_free((char *)openTag->tag);
-
-		/*
-		int counter = 0;
-		for(; counter < strlen(buffer); ++counter) {
-			buffer[counter] = tolower(buffer[counter]);
-		}
-		*/
 
 		openTags  = openTags->next;
 		SDL_free(openTag);
@@ -188,7 +178,6 @@ ToLowerCase(const char *string)
 	strncpy(ret, string, size);
 	ret[size] = '\0';
 
-	// turn the tag to lower case for case-insensitive comparation
 	int counter = 0;
 	for(; counter < size; ++counter) {
 		ret[counter] = tolower(ret[counter]);
@@ -282,6 +271,9 @@ XMLCloseElement(const char *tag)
 {
 	char *ret = SDL_malloc(bufferSize);
 	memset(ret, 0, bufferSize);
+
+	// \todo check that element we're trying is actually open,
+	// otherwise it'll case nesting problems
 
 	// Close the open tags with proper nesting. Closes tags until it finds
 	// the given tag which is the last tag that will be closed

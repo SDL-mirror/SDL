@@ -60,10 +60,10 @@ static int prevEOL = YES;
  * \param the XML element itself
  *
  */
-void XMLOutputter(const int il, int EOL,  const char *message) {
+void XMLOutputter(const int currentIdentLevel, int EOL,  const char *message) {
 	int ident = 0;
-	for( ; ident < il && prevEOL; ++ident) {
-		printf(" ");
+	for( ; ident < currentIdentLevel && prevEOL; ++ident) {
+		printf("\t");
 	}
 
 	prevEOL = EOL;
@@ -73,24 +73,51 @@ void XMLOutputter(const int il, int EOL,  const char *message) {
 	} else {
 		printf("%s", message);
 	}
+
+	fflush(stdout);
 }
 
 void
-XMLRunStarted(const char *runnerParameters, time_t eventTime)
+XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
 {
 	char *output = XMLOpenDocument("testlog");
 	XMLOutputter(indentLevel++, YES, output);
 	SDL_free(output);
 
 	output = XMLOpenElement("parameters");
+	XMLOutputter(indentLevel++, YES, output);
+	SDL_free(output);
+
+	int counter = 0;
+	for(counter = 0; counter < parameterCount; counter++) {
+		char *parameter = runnerParameters[counter];
+
+		output = XMLOpenElement("parameter");
+		XMLOutputter(indentLevel++, NO, output);
+		SDL_free(output);
+
+		output = XMLAddContent(parameter);
+		XMLOutputter(indentLevel, NO, output);
+		SDL_free(output);
+
+		output = XMLCloseElement("parameter");
+		XMLOutputter(--indentLevel, YES, output);
+		SDL_free(output);
+	}
+
+	output = XMLCloseElement("parameters");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	output = XMLOpenElement("eventTime");
 	XMLOutputter(indentLevel++, NO, output);
 	SDL_free(output);
 
-	output = XMLAddContent("Add: runner parameter");
+	output = XMLAddContent(IntToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
 	SDL_free(output);
 
-	output = XMLCloseElement("parameters");
+	output = XMLCloseElement("eventTime");
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
 }
@@ -99,7 +126,88 @@ void
 XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
             time_t endTime, time_t totalRuntime)
 {
-	char *output = XMLCloseDocument("testlog");
+	// log suite count
+	char *output = XMLOpenElement("numSuites");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(suiteCount));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("numSuites");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log test count
+	output = XMLOpenElement("numTest");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testCount));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("numTest");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log passed test count
+	output = XMLOpenElement("numPassedTests");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testPassCount));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("numPassedTests");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log failed test count
+	output = XMLOpenElement("numFailedTests");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testFailCount));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("numFailedTests");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+
+	// log end timte
+	output = XMLOpenElement("endTime");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(endTime));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("endTime");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log total runtime
+	output = XMLOpenElement("totalRuntime");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(totalRuntime));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("totalRuntime");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+
+
+	output = XMLCloseDocument("testlog");
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
 }
@@ -128,11 +236,75 @@ void
 XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            double endTime, time_t totalRuntime)
 {
-	char *output = XMLCloseElement("suite");
+	// log tests passed
+	char *output = XMLOpenElement("testsPassed");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testsPassed));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("testsPassed");
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
 
-	//! \todo endTime and totalRuntiem
+	// log tests failed
+	output = XMLOpenElement("testsFailed");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testsFailed));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("testsFailed");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log tests skipped
+	output = XMLOpenElement("testsSkipped");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(testsSkipped));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("testsSkipped");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log tests skipped
+	output = XMLOpenElement("endTime");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(endTime));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("endTime");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log total runtime
+	output = XMLOpenElement("totalRuntime");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(IntToString(totalRuntime));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("totalRuntime");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+
+	output = XMLCloseElement("suite");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
 }
 
 void
@@ -155,7 +327,6 @@ XMLTestStarted(const char *testName, const char *suiteName, const char *testDesc
 	output = XMLCloseElement("name");
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
-
 
 	output = XMLOpenElement("description");
 	XMLOutputter(indentLevel++, NO, output);

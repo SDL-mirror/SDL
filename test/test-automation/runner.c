@@ -220,19 +220,19 @@ LoadTestCases(TestSuiteReference *suites)
 				item->testCaseQuit = testCaseQuit;
 
 				// copy suite name
-				int length = strlen(suiteReference->name) + 1;
+				int length = SDL_strlen(suiteReference->name) + 1;
 				item->suiteName = SDL_malloc(length);
-				strcpy(item->suiteName, suiteReference->name);
+				strncpy(item->suiteName, suiteReference->name, length);
 
 				// copy test name
-				length = strlen(testReference->name) + 1;
+				length = SDL_strlen(testReference->name) + 1;
 				item->testName = SDL_malloc(length);
-				strcpy(item->testName, testReference->name);
+				strncpy(item->testName, testReference->name, length);
 
 				// copy test description
-				length = strlen(testReference->description) + 1;
+				length = SDL_strlen(testReference->description) + 1;
 				item->description = SDL_malloc(length);
-				strcpy(item->testName, testReference->name);
+				strncpy(item->description, testReference->description, length);
 
 				item->requirements = testReference->requirements;
 				item->timeout = testReference->timeout;
@@ -637,7 +637,8 @@ main(int argc, char *argv[])
 
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
-	int failureCount = 0, passCount = 0;
+	int totalTestfailureCount = 0, totalTestPassCount = 0;
+	int testFailureCount = 0, testPassCount = 0, testSkipCount = 0;
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 
@@ -670,7 +671,7 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
-	RunStarted(Output, NULL, 0);
+	RunStarted(argc, argv, 0);
 
 	char *currentSuiteName = NULL;
 
@@ -679,50 +680,50 @@ main(int argc, char *argv[])
 		if(currentSuiteName == NULL) {
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, 0);
+
+			testFailureCount = testPassCount = 0;
+
+			suiteCounter++;
+		}
+		else if(strncmp(currentSuiteName, testItem->suiteName, NAME_BUFFER_SIZE) != 0) {
+			SuiteEnded(testPassCount, testFailureCount, testSkipCount, 0.0f, 0);
+
+			currentSuiteName = testItem->suiteName;
+			SuiteStarted(currentSuiteName, 0);
+
+			testFailureCount = testPassCount = 0;
+
+			suiteCounter++;
 		}
 
 		TestStarted(testItem->testName, testItem->suiteName,
                     testItem->description, 0);
 
 		int retVal = ExecuteTest(testItem);
-
 		if(retVal) {
-			failureCount++;
-			if(retVal == 2) {
-				//printf("%s (in %s): FAILED -> No asserts\n", testItem->testName, testItem->suiteName);
-			} else {
-				//printf("%s (in %s): FAILED\n", testItem->testName, testItem->suiteName);
-			}
+			totalTestfailureCount++;
+			testFailureCount++;
 		} else {
-			passCount++;
-			//printf("%s (in %s): ok\n", testItem->testName, testItem->suiteName);
+			totalTestPassCount++;
+			testPassCount++;
 		}
 
 		TestEnded(testItem->testName, testItem->suiteName, retVal, 0, 0);
-
-		if(strncmp(currentSuiteName, testItem->suiteName, 100) != 0) {
-			SuiteEnded(0, 0, 0, 0.0f, 0);
-
-			currentSuiteName = testItem->suiteName;
-			SuiteStarted(currentSuiteName, 0);
-		}
 	}
 
-	SuiteEnded(0, 0, 0, 0.0f, 0);
+	if(currentSuiteName) {
+		// \todo if no test are run, this will case incorrect nesting with
+		// xml output
+		SuiteEnded(testPassCount, testFailureCount, testSkipCount, 0.0f, 0);
+	}
 
 	UnloadTestCases(testCases);
 	UnloadTestSuites(suites);
 
 	const Uint32 endTicks = SDL_GetTicks();
 
-	RunEnded(passCount + failureCount, 1 /*add suiteCount */,
-			 passCount, failureCount, 0, 0);
-	/*
-	printf("Ran %d tests in %0.5f seconds.\n", (passCount + failureCount), (endTicks-startTicks)/1000.0f);
-
-	printf("%d tests passed\n", passCount);
-	printf("%d tests failed\n", failureCount);
-	*/
+	RunEnded(totalTestPassCount + totalTestfailureCount, suiteCounter,
+			 totalTestPassCount, totalTestfailureCount, 0, 0);
 
 	return 0;
 }

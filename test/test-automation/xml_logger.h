@@ -3,7 +3,7 @@
 
 #include "logger.h"
 
-void XMLRunStarted(const char *runnerParameters, time_t eventTime);
+void XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime);
 
 void XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
                  time_t endTime, time_t totalRuntime);
