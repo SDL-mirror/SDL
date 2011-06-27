@@ -24,8 +24,8 @@
 #include <time.h>
 
 /*!
- * Generic logger interface
- *
+ * Typedefs for function pointers that implement the  generic
+ * logging interface
  */
 typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
@@ -40,10 +40,6 @@ typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
 typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
                             time_t endTime, double totalRuntime);
 
-/*!
- * Note: for assertResult, non-zero == pass, zero == failure
- *
- */
 typedef	void (*AssertFp)(const char *assertName, int assertResult,
 						 const char *assertMessage, time_t eventTime);
 
@@ -57,6 +53,7 @@ typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
 
+/*! Function pointers to actual logging function implementations */
 extern RunStartedFp RunStarted;
 extern RunEndedFp RunEnded;
 extern SuiteStartedFp SuiteStarted;
@@ -79,7 +76,7 @@ char *IntToString(const int integer);
 /*!
  *  Helper functions. Turns the given double value in to a string
  *
- *  \param integer The converted double value
+ *  \param decimal The converted double value
  *  \returns Given double value as string
  */
 char *DoubleToString(const double decimal);

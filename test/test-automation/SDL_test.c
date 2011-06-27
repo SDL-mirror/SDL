@@ -39,11 +39,11 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_TestCaseInit(const int enable_xml_logging)
+_TestCaseInit(const int enableXMLLogging)
 {
 	// setup logging functions
 	// rather afwul way to do it, but function pointers didn't work
-	if(enable_xml_logging) {
+	if(enableXMLLogging) {
 		SetupXMLLogger();
 	} else {
 		SetupPlainLogger();

@@ -49,14 +49,16 @@ typedef struct TestCaseReference {
 	long timeout;
 } TestCaseReference;
 
-/*! \fn _TestCaseInit
+/*!
  *  Initialized the test case. Must be called at
  *  the beginning of every test case, before doing
  *  anything else.
+ *
+ *  \param enableXMLLogging Whether or not enable xml logging
  */
-void _TestCaseInit(const int enable_xml_logging);
+void _TestCaseInit(const int enableXMLLogging);
 
-/*! \fn _TestCaseQuit
+/*!
  *  Deinitializes and exits the test case
  *
  * \return 0 if test succeeded, otherwise 1
