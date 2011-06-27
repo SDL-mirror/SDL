@@ -3,7 +3,7 @@
 
 #include "logger.h"
 
-void PlainRunStarted(LogOutputFp outputFn, const char *runnerParameters, time_t eventTime);
+void PlainRunStarted(const char *runnerParameters, time_t eventTime);
 
 void PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
                    time_t endTime, time_t totalRuntime);

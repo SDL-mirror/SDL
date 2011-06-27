@@ -54,7 +54,7 @@ typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed, int numAss
 
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
-int LogGenericOutput(const char *message, ...);
+int Output(const char *message, ...);
 
 extern RunStartedFp RunStarted;
 extern RunEndedFp RunEnded;

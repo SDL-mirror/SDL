@@ -153,8 +153,14 @@ const char *EscapeString(const char *string) {
 		while(token) {
 			char *nextToken = strtok(NULL, character);
 
-			//! \todo use strncat and count the bytes left in the buffer
-			strcat(buffer, token);
+			int bytesLeft = bufferSize - SDL_strlen(buffer);
+			if(bytesLeft) {
+				strncat(buffer, token, bytesLeft);
+			} else {
+				// \! todo there's probably better way to report an error?
+				fprintf(stderr, "xml.c | EscapingString: Buffer is full");
+			}
+
 			if(nextToken)
 				strcat(buffer, entity);
 
@@ -211,7 +217,7 @@ static char buffer[bufferSize];
 char *
 XMLOpenDocument(const char *rootTag)
 {
-	const char *doctype = "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n";
+	const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
@@ -303,8 +309,13 @@ XMLCloseElement(const char *tag)
 		SDL_free(lowOpenTag);
 		SDL_free(lowTag);
 
-		// \todo use strNcat
-		strcat(ret, buffer);
+		int bytesLeft = bufferSize - SDL_strlen(ret);
+		if(bytesLeft) {
+			strncat(ret, buffer, bytesLeft);
+		} else {
+			// \! todo there's probably better way to report an error?
+			fprintf(stderr, "xml.c | XMLCloseElement: Buffer is full");
+		}
 
 		RemoveOpenTag(openTag->tag);
 

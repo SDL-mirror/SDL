@@ -670,7 +670,7 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
-	RunStarted(LogGenericOutput, NULL, 0);
+	RunStarted(Output, NULL, 0);
 
 	char *currentSuiteName = NULL;
 
@@ -707,6 +707,8 @@ main(int argc, char *argv[])
 			SuiteStarted(currentSuiteName, 0);
 		}
 	}
+
+	SuiteEnded(0, 0, 0, 0.0f, 0);
 
 	UnloadTestCases(testCases);
 	UnloadTestSuites(suites);

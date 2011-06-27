@@ -57,25 +57,6 @@ SetupPlainLogger()
 	Log = PlainLog;
 }
 
-/*!
- * Prints the given message to stderr. Function adds nesting
- * to the output.
- *
- * \return Possible error value (\todo)
- */
-int
-LogGenericOutput(const char *message, ...)
-{
-	va_list list;
-	va_start(list, message);
-
-	char buffer[1024];
-	SDL_vsnprintf(buffer, sizeof(buffer), message, list);
-
-	fprintf(stderr, "%s\n", buffer);
-	fflush(stderr);
-}
-
 #if 0
 /*!
  * Test app for logging functionality
@@ -91,7 +72,7 @@ main(int argc, char *argv[])
 		SetupPlainLogger();
 	}
 
-	RunStarted(LogGenericOutput, "some_<data_>here&here", 0);
+	RunStarted(Output, "some_<data_>here&here", 0);
 	SuiteStarted("Suite data here", 0);
 
 	TestStarted("test1", "suite", "desc", 0);
