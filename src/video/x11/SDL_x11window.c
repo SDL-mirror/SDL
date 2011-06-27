@@ -258,11 +258,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     int depth;
     XSetWindowAttributes xattr;
     Window w;
-    XSizeHints *sizehints;
-    XWMHints *wmhints;
-    XClassHint *classhints;
+    XSizeHints sizehints;
+    XWMHints wmhints;
+    XClassHint classhints;
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
+    Atom _NET_WM_PID;
     int wmstate_count;
     Atom wmstate_atoms[3];
     Uint32 fevent = 0;
@@ -414,20 +415,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 #endif
 
-    sizehints = XAllocSizeHints();
-    if (sizehints) {
-        if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
-            sizehints->min_width = sizehints->max_width = window->w;
-            sizehints->min_height = sizehints->max_height = window->h;
-            sizehints->flags = PMaxSize | PMinSize;
-        }
-        sizehints->x = window->x;
-        sizehints->y = window->y;
-        sizehints->flags |= USPosition;
-        XSetWMNormalHints(display, w, sizehints);
-        XFree(sizehints);
-    }
-
     if (window->flags & SDL_WINDOW_BORDERLESS) {
         SDL_bool set;
         Atom WM_HINTS;
@@ -511,22 +498,32 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         }
     }
 
-    /* Set the input hints so we get keyboard input */
-    wmhints = XAllocWMHints();
-    if (wmhints) {
-        wmhints->input = True;
-        wmhints->flags = InputHint;
-        XSetWMHints(display, w, wmhints);
-        XFree(wmhints);
+    /* Setup the normal size hints */
+    if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
+        sizehints.min_width = sizehints.max_width = window->w;
+        sizehints.min_height = sizehints.max_height = window->h;
+        sizehints.flags = PMaxSize | PMinSize;
     }
+    sizehints.x = window->x;
+    sizehints.y = window->y;
+    sizehints.flags |= USPosition;
 
-    /* Set the class hints so we can get an icon (AfterStep) */
-    classhints = XAllocClassHint();
-    if (classhints != NULL) {
-        classhints->res_name = data->classname;
-        classhints->res_class = data->classname;
-        XSetClassHint(display, w, classhints);
-        XFree(classhints);
+    /* Setup the input hints so we get keyboard input */
+    wmhints.input = True;
+    wmhints.flags = InputHint;
+
+    /* Setup the class hints so we can get an icon (AfterStep) */
+    classhints.res_name = data->classname;
+    classhints.res_class = data->classname;
+
+    /* Set the size, input and class hints, and define WM_CLIENT_MACHINE and WM_LOCALE_NAME */
+    XSetWMProperties(display, w, NULL, NULL, NULL, 0, &sizehints, &wmhints, &classhints);
+
+    /* Set the PID related to the window for the given hostname, if possible */
+    if (data->pid > 0) {
+        _NET_WM_PID = XInternAtom(display, "_NET_WM_PID", False);
+        XChangeProperty(display, w, _NET_WM_PID, XA_CARDINAL, 32, PropModeReplace,
+                        (unsigned char *)&data->pid, 1);
     }
 
     /* Set the window manager state */

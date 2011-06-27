@@ -328,6 +328,9 @@ X11_VideoInit(_THIS)
     /* Get the window class name, usually the name of the application */
     data->classname = get_classname();
 
+    /* Get the process PID to be associated to the window */
+    data->pid = getpid();
+
     /* Open a connection to the X input manager */
 #ifdef X_HAVE_UTF8_STRING
     if (SDL_X11_HAVE_UTF8) {

@@ -69,6 +69,7 @@ typedef struct SDL_VideoData
 {
     Display *display;
     char *classname;
+    pid_t pid;
     XIM im;
     Uint32 screensaver_activity;
     int numwindows;
