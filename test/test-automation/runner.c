@@ -685,8 +685,6 @@ main(int argc, char *argv[])
 
 			testFailureCount = testPassCount = 0;
 
-			//suiteStartTime = SDL_GetTicks();
-
 			suiteCounter++;
 		}
 		else if(strncmp(currentSuiteName, testItem->suiteName, NAME_BUFFER_SIZE) != 0) {
@@ -696,11 +694,9 @@ main(int argc, char *argv[])
 						suiteRuntime);
 
 			currentSuiteName = testItem->suiteName;
-			SuiteStarted(currentSuiteName, 0);
+			SuiteStarted(currentSuiteName, time(0));
 
 			testFailureCount = testPassCount = 0;
-
-			//suiteStartTime = SDL_GetTicks();
 
 			suiteCounter++;
 		}
@@ -725,8 +721,6 @@ main(int argc, char *argv[])
 	}
 
 	if(currentSuiteName) {
-		// \todo if no test are run, this will case incorrect nesting with
-		// xml output
 		SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
 					(SDL_GetTicks() - suiteStartTime) / 1000.0f);
 	}
