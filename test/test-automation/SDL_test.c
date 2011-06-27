@@ -57,7 +57,6 @@ _TestCaseInit(const int enable_xml_logging)
 int
 _TestCaseQuit()
 {
-	//printf("Asserts: passed %d, failed %d\n", _testAssertsPassed, _testAssertsFailed);
 	AssertSummary(_testAssertsFailed + _testAssertsPassed,
                   _testAssertsFailed, _testAssertsPassed, time(0));
 
@@ -78,14 +77,13 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       va_start( args, message );
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
-      //printf("AssertEquals failed: expected %d, got %d; %s\n", expected, actual, buf);
-      Assert("AssertEquals", 0, buf, time(0));
+      AssertWithValues("AssertEquals", 0, buf, actual, expected, time(0));
 
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-      //printf("AssertEquals passed\n");
-      Assert("AssertEquals", 1, "AssertEquals passed", time(0));
+      AssertWithValues("AssertEquals", 1, "AssertEquals passed",
+    		  actual, expected, time(0));
 
       _testAssertsPassed++;
    }

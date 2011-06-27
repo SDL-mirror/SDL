@@ -29,55 +29,6 @@
 
 #include "xml_logger.h"
 
-/*!
- *  Helper functions. Turns the given integer in to a string
- *
- *  \param integer The converted integer
- *  \returns Given integer as string
- */
-char *IntToString(const int integer) {
-	static char buffer[sizeof(int) * 8 + 1]; // malloc might work better
-	memset(buffer, 0, sizeof(buffer));
-
-	SDL_snprintf(buffer, sizeof(buffer), "%d", integer);
-
-	return buffer;
-}
-
-/*!
- *  Helper functions. Turns the given double value in to a string
- *
- *  \param integer The converted double value
- *  \returns Given double value as string
- */
-char *DoubleToString(const double decimal) {
-	static char buffer[sizeof(double) * 8 + 1]; // malloc might work better
-	memset(buffer, 0, sizeof(buffer));
-
-	SDL_snprintf(buffer, sizeof(buffer), "%.5f", decimal);
-
-	return buffer;
-}
-
-/*!
- * Converts unix timestamp to it's ascii presentation
- *
- * \param timestamp Timestamp
- * \return Ascii presentation
- */
-char *TimestampToString(const time_t timestamp) {
-	static char buffer[1024];
-	//char *buffer = SDL_malloc(1024);
-	memset(buffer, 0, 1024);
-
-	time_t copy = timestamp;
-
-	struct tm *local = localtime(&copy);
-	strftime(buffer, 1024, "%a %Y-%m-%d %H:%M:%S %Z", local);
-
-	return buffer;
-}
-
 static int indentLevel;
 
 //! Constants for XMLOuputters EOL parameter
@@ -397,7 +348,7 @@ XMLTestEnded(const char *testName, const char *suiteName,
 
 	if(testResult) {
 		if(testResult == 2) {
-			output = XMLAddContent("failed -> no assert");
+			output = XMLAddContent("failed. No assert");
 		} else {
 			output = XMLAddContent("failed");
 		}
@@ -439,9 +390,6 @@ XMLTestEnded(const char *testName, const char *suiteName,
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
 
-
-	//! \todo add endTime and TotalRuntime
-
 	output = XMLCloseElement("test");
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
@@ -449,7 +397,7 @@ XMLTestEnded(const char *testName, const char *suiteName,
 
 void
 XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
-       time_t eventTime)
+		  time_t eventTime)
 {
 	char *output = XMLOpenElement("assert");
 	XMLOutputter(indentLevel++, YES, output);
@@ -498,6 +446,59 @@ XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
 	XMLOutputter(--indentLevel, YES, output);
 	SDL_free(output);
 }
+
+void
+XMLAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
+		int actualValue, int excpected, time_t eventTime)
+{
+	char *output = XMLOpenElement("assert");
+	XMLOutputter(indentLevel++, YES, output);
+	SDL_free(output);
+
+	// log assert result
+	output = XMLOpenElement("result");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent((assertResult) ? "pass" : "failure");
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("result");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log assert message
+	output = XMLOpenElement("message");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(assertMessage);
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("message");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	// log event time
+	output = XMLOpenElement("eventTime");
+	XMLOutputter(indentLevel++, NO, output);
+	SDL_free(output);
+
+	output = XMLAddContent(TimestampToString(eventTime));
+	XMLOutputter(indentLevel, NO, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("eventTime");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+
+	output = XMLCloseElement("assert");
+	XMLOutputter(--indentLevel, YES, output);
+	SDL_free(output);
+}
+
 
 void
 XMLAssertSummary(int numAsserts, int numAssertsFailed,

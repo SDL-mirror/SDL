@@ -46,9 +46,13 @@ typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int tes
  */
 typedef	void (*AssertFp)(const char *assertName, int assertResult,
 						 const char *assertMessage, time_t eventTime);
+
+typedef	void (*AssertWithValuesFp)(const char *assertName, int assertResult,
+						 const char *assertMessage, int actualValue, int excpected,
+						 time_t eventTime);
+
 typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
 								int numAssertsPass, time_t eventTime);
-
 
 typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
@@ -60,7 +64,34 @@ extern SuiteEndedFp SuiteEnded;
 extern TestStartedFp TestStarted;
 extern TestEndedFp TestEnded;
 extern AssertFp Assert;
+extern AssertWithValuesFp AssertWithValues;
 extern AssertSummaryFp AssertSummary;
 extern LogFp Log;
+
+/*!
+ *  Helper functions. Turns the given integer in to a string
+ *
+ *  \param integer The converted integer
+ *  \returns Given integer as string
+ */
+char *IntToString(const int integer);
+
+/*!
+ *  Helper functions. Turns the given double value in to a string
+ *
+ *  \param integer The converted double value
+ *  \returns Given double value as string
+ */
+char *DoubleToString(const double decimal);
+
+
+/*!
+ * Converts unix timestamp to it's ascii presentation
+ *
+ * \param timestamp Timestamp
+ * \return Ascii presentation
+ */
+char *TimestampToString(const time_t timestamp);
+
 
 #endif

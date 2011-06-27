@@ -21,7 +21,10 @@ void PlainTestEnded(const char *testName, const char *suiteName,
 
 
 void PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
-       time_t eventTime);
+				time_t eventTime);
+
+void PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
+		int actualValue, int excpected, time_t eventTime);
 
 void PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, time_t eventTime);
 

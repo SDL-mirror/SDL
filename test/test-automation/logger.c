@@ -18,6 +18,7 @@ SuiteEndedFp SuiteEnded = 0;
 TestStartedFp TestStarted = 0;
 TestEndedFp TestEnded = 0;
 AssertFp Assert = 0;
+AssertWithValuesFp AssertWithValues = 0;
 AssertSummaryFp AssertSummary = 0;
 LogFp Log = 0;
 
@@ -34,6 +35,7 @@ SetupXMLLogger()
 	TestEnded = XMLTestEnded;
 
 	Assert = XMLAssert;
+	AssertWithValues = XMLAssertWithValues;
 	AssertSummary = XMLAssertSummary;
 
 	Log = XMLLog;
@@ -52,9 +54,43 @@ SetupPlainLogger()
 	TestEnded = PlainTestEnded;
 
 	Assert = PlainAssert;
+	AssertWithValues = PlainAssertWithValues;
 	AssertSummary = PlainAssertSummary;
 
 	Log = PlainLog;
+}
+
+
+char *IntToString(const int integer) {
+	static char buffer[sizeof(int) * 8 + 1]; // malloc might work better
+	memset(buffer, 0, sizeof(buffer));
+
+	SDL_snprintf(buffer, sizeof(buffer), "%d", integer);
+
+	return buffer;
+}
+
+
+char *DoubleToString(const double decimal) {
+	static char buffer[sizeof(double) * 8 + 1]; // malloc might work better
+	memset(buffer, 0, sizeof(buffer));
+
+	SDL_snprintf(buffer, sizeof(buffer), "%.5f", decimal);
+
+	return buffer;
+}
+
+char *TimestampToString(const time_t timestamp) {
+	static char buffer[1024];
+	//char *buffer = SDL_malloc(1024);
+	memset(buffer, 0, 1024);
+
+	time_t copy = timestamp;
+
+	struct tm *local = localtime(&copy);
+	strftime(buffer, 1024, "%a %Y-%m-%d %H:%M:%S %Z", local);
+
+	return buffer;
 }
 
 #if 0

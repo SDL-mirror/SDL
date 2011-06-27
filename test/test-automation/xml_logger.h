@@ -19,7 +19,11 @@ void XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, time_t endTime, double totalRuntime);
 
 void XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
-       time_t eventTime);
+			time_t eventTime);
+
+void XMLAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
+		int actualValue, int excpected, time_t eventTime);
+
 
 void XMLAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, time_t eventTime);
 
