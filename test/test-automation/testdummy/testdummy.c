@@ -59,10 +59,6 @@ TestCaseReference **QueryTestSuite() {
 void
 dummycase1(void *arg)
 {
-	const char *revision = SDL_GetRevision();
-
-	printf("Revision is %s\n", revision);
-
 	AssertEquals(3, 5, "fails");
 }
 
