@@ -34,6 +34,8 @@ typedef struct Attribute {
  * Opens XML document.
  * Creates header and start tag for root element.
  *
+ * Note: XML creation is not thread-safe!
+ *
  * \param rootTag Root tag for the XML document
  * \return The generated XML output
  */

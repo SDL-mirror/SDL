@@ -25,6 +25,15 @@
 #include <SDL/SDL.h>
 
 #include "xml.h"
+#include "logger_helpers.h"
+
+/*! Size for xml element buffer */
+#define bufferSize 1024
+/*! Buffer for storing the xml element under construction */
+static char buffer[bufferSize];
+
+/*! Pointer to XML root element's tag */
+static const char *root;
 
 /*!
  * Defines structure used for "counting" open XML-tags
@@ -52,6 +61,11 @@ AddOpenTag(const char *tag)
 
 	const int tagSize = SDL_strlen(tag) + 1;
 	openTag->tag = SDL_malloc(tagSize);
+	if(openTag->tag == NULL) {
+		SDL_free(openTag);
+		return 1;
+	}
+
 	strncpy((char *)openTag->tag, (char *)tag, tagSize);
 
 	openTag->next = openTags;
@@ -69,7 +83,7 @@ AddOpenTag(const char *tag)
 static int
 RemoveOpenTag(const char *tag)
 {
-	if(openTags == NULL) {
+	if(openTags == NULL || ValidateString(tag) == 0) {
 		return 1;
 	}
 
@@ -81,7 +95,7 @@ RemoveOpenTag(const char *tag)
 
 	// Tag should always be the same as previously opened tag
 	// It prevents opening and ending tag mismatch
-	if(SDL_strcmp(tempTag, tag) == 0) {
+	if(SDL_strncmp(tempTag, tag, size) == 0) {
 		TagList *openTag = openTags;
 		SDL_free((char *)openTag->tag);
 
@@ -115,15 +129,20 @@ PrintOpenTags()
  * corresponding entities: &apos; &quot; &lt; &gt; and &amp;
  *
  * \param string String to be escaped
- * \return Escaped string
+ * \return Newly allocated escaped string
  */
-const char *EscapeString(const char *string) {
-	const int bufferSize = 4096;
+const char *
+EscapeString(const char *string)
+{
+	//const int bufferSize = 4096;
 	char buffer[bufferSize];
 	memset(buffer, 0, bufferSize);
 
 	// prevents the code doing a 'bus error'
 	char *stringBuffer = SDL_malloc(bufferSize);
+	if(stringBuffer == NULL) {
+		return NULL;
+	}
 	strncpy(stringBuffer, string, bufferSize);
 
 	// Ampersand (&) must be first, otherwise it'll mess up the other entities
@@ -164,29 +183,6 @@ const char *EscapeString(const char *string) {
 	return stringBuffer;
 }
 
-/*! Turns all the characters of the given
- * string to lowercase and returns the resulting string.
- *
- * \param string String to be converted
- * \return Lower-case version of the given string
- */
-char *
-ToLowerCase(const char *string)
-{
-	const int size = SDL_strlen(string);
-	char *ret = SDL_malloc(size + 1);
-	strncpy(ret, string, size);
-	ret[size] = '\0';
-
-	int counter = 0;
-	for(; counter < size; ++counter) {
-		ret[counter] = tolower(ret[counter]);
-	}
-
-	// printf("Debug: %s == %s\n", string, ret);
-
-	return ret;
-}
 
 /*
 ===================
@@ -195,13 +191,6 @@ ToLowerCase(const char *string)
 
 ===================
 */
-
-static const char *root;
-
-/*! Size for xml element buffer */
-#define bufferSize 1024
-/*! Buffer for storing the xml element under construction */
-static char buffer[bufferSize];
 
 char *
 XMLOpenDocument(const char *rootTag)
@@ -252,7 +241,15 @@ XMLOpenElement(const char *tag)
 char *
 XMLAddContent(const char *content)
 {
+	if(ValidateString(content) == 0) {
+		return NULL;
+	}
+
 	const char *escapedContent = EscapeString(content);
+
+	if(SDL_strlen(escapedContent) >= bufferSize) {
+		return NULL;
+	}
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "%s", escapedContent);
@@ -269,11 +266,16 @@ XMLAddContent(const char *content)
 char *
 XMLCloseElement(const char *tag)
 {
-	char *ret = SDL_malloc(bufferSize);
-	memset(ret, 0, bufferSize);
+	if(ValidateString(tag) == 0) {
+		return NULL;
+	}
 
-	// \todo check that element we're trying is actually open,
-	// otherwise it'll case nesting problems
+	int retBufferSize = 150;
+	char *ret = SDL_malloc(retBufferSize);
+	memset(ret, 0, retBufferSize);
+
+	// \todo check that element we're trying to close is actually open,
+	// otherwise it'll cause nesting problems
 
 	// Close the open tags with proper nesting. Closes tags until it finds
 	// the given tag which is the last tag that will be closed

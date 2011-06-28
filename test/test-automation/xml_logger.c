@@ -25,87 +25,119 @@
 #include <SDL/SDL.h>
 
 #include "xml.h"
-#include "logger.h"
+#include "logger_helpers.h"
 
 #include "xml_logger.h"
 
+/*! Static strings for XML elements */
+const char *documentRoot = "testlog";
+const char *parametersElementName = "parameters";
+const char *parameterElementName = "parameter";
+const char *startTimeElementName = "startTime";
+const char *numSuitesElementName = "numSuites";
+const char *numTestElementName = "numTests";
+const char *numPassedTestsElementName = "numPassedTests";
+const char *numFailedTestsElementName = "numFailedTests";
+const char *endTimeElementName = "endTime";
+const char *totalRuntimeElementName = "totalRuntime";
+const char *suiteElementName = "suite";
+const char *testsPassedElementName = "testsPassed";
+const char *testsFailedElementName = "testsFailed";
+const char *testsSkippedElementName = "testsSkipped";
+const char *testElementName = "test";
+const char *nameElementName = "name";
+const char *descriptionElementName = "description";
+const char *resultElementName = "result";
+const char *assertElementName = "assert";
+const char *messageElementName = "message";
+const char *timeElementName = "time";
+const char *assertSummaryElementName = "assertSummary";
+const char *assertCountElementName = "assertName";
+const char *assertsPassedElementName = "assertsPassed";
+const char *assertsFailedElementName = "assertsFailed";
+const char *logElementName = "log";
+
+
+/*! Current indentationt level */
 static int indentLevel;
 
 //! Constants for XMLOuputters EOL parameter
 #define YES 1
 #define NO 0
 
-/*! Controls printing the identation in relation to line breaks */
+/*! Controls printing the indentation in relation to line breaks */
 static int prevEOL = YES;
 
 /*
  * Prints out the given xml element etc.
+ *
+ * \todo Make the destination of the output changeable (defaults to stdout)
  *
  * \param  identLevel the indent level of the message
  * \param EOL will it print end of line character or not
  * \param the XML element itself
  *
  */
-void XMLOutputter(const int currentIdentLevel, int EOL,  const char *message) {
-	int ident = 0;
-	for( ; ident < currentIdentLevel && prevEOL; ++ident) {
-		printf("\t");
-	}
+void
+XMLOutputter(const int currentIdentLevel,
+			 int EOL, const char *message)
+{
+	if(ValidateString(message)) {
+		int ident = 0;
+		for( ; ident < currentIdentLevel && prevEOL; ++ident) {
+			printf("  "); // \todo make configurable?
+		}
 
-	prevEOL = EOL;
+		prevEOL = EOL;
 
-	if(EOL) {
-		printf("%s\n", message);
+		if(EOL) {
+			fprintf(stdout, "%s\n", message);
+		} else {
+			fprintf(stdout, "%s", message);
+		}
+
+		fflush(stdout);
 	} else {
-		printf("%s", message);
+		fprintf(stdout, "Error: Tried to output invalid string!");
 	}
 
-	fflush(stdout);
+	SDL_free(message);
 }
 
 void
 XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
 {
-	char *output = XMLOpenDocument("testlog");
+	char *output = XMLOpenDocument(documentRoot);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("parameters");
+	output = XMLOpenElement(parametersElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
 	int counter = 0;
 	for(counter = 0; counter < parameterCount; counter++) {
 		char *parameter = runnerParameters[counter];
 
-		output = XMLOpenElement("parameter");
+		output = XMLOpenElement(parameterElementName);
 		XMLOutputter(indentLevel++, NO, output);
-		SDL_free(output);
 
 		output = XMLAddContent(parameter);
 		XMLOutputter(indentLevel, NO, output);
-		SDL_free(output);
 
-		output = XMLCloseElement("parameter");
+		output = XMLCloseElement(parameterElementName);
 		XMLOutputter(--indentLevel, YES, output);
-		SDL_free(output);
 	}
 
-	output = XMLCloseElement("parameters");
+	output = XMLCloseElement(parametersElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement(startTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
@@ -113,107 +145,83 @@ XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
             time_t endTime, double totalRuntime)
 {
 	// log suite count
-	char *output = XMLOpenElement("numSuites");
+	char *output = XMLOpenElement(numSuitesElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(suiteCount));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("numSuites");
+	output = XMLCloseElement(numSuitesElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log test count
-	output = XMLOpenElement("numTest");
+	output = XMLOpenElement(numTestElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testCount));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("numTest");
+	output = XMLCloseElement(numTestElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log passed test count
-	output = XMLOpenElement("numPassedTests");
+	output = XMLOpenElement(numPassedTestsElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testPassCount));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("numPassedTests");
+	output = XMLCloseElement(numPassedTestsElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log failed test count
-	output = XMLOpenElement("numFailedTests");
+	output = XMLOpenElement(numFailedTestsElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testFailCount));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("numFailedTests");
+	output = XMLCloseElement(numFailedTestsElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
-
 
 	// log end timte
-	output = XMLOpenElement("endTime");
+	output = XMLOpenElement(endTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(endTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("endTime");
+	output = XMLCloseElement(endTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log total runtime
-	output = XMLOpenElement("totalRuntime");
+	output = XMLOpenElement(totalRuntimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(DoubleToString(totalRuntime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("totalRuntime");
+	output = XMLCloseElement(totalRuntimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseDocument("testlog");
+	output = XMLCloseDocument(documentRoot);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLSuiteStarted(const char *suiteName, time_t eventTime)
 {
-	char *output = XMLOpenElement("suite");
+	char *output = XMLOpenElement(suiteElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement(startTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
@@ -221,130 +229,103 @@ XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            time_t endTime, double totalRuntime)
 {
 	// log tests passed
-	char *output = XMLOpenElement("testsPassed");
+	char *output = XMLOpenElement(testsPassedElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testsPassed));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("testsPassed");
+	output = XMLCloseElement(testsPassedElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log tests failed
-	output = XMLOpenElement("testsFailed");
+	output = XMLOpenElement(testsFailedElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testsFailed));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("testsFailed");
+	output = XMLCloseElement(testsFailedElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log tests skipped
-	output = XMLOpenElement("testsSkipped");
+	output = XMLOpenElement(testsSkippedElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(testsSkipped));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("testsSkipped");
+	output = XMLCloseElement(testsSkippedElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log tests skipped
-	output = XMLOpenElement("endTime");
+	output = XMLOpenElement(endTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(endTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("endTime");
+	output = XMLCloseElement(endTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log total runtime
-	output = XMLOpenElement("totalRuntime");
+	output = XMLOpenElement(totalRuntimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(DoubleToString(totalRuntime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("totalRuntime");
+	output = XMLCloseElement(totalRuntimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 
-	output = XMLCloseElement("suite");
+	output = XMLCloseElement(suiteElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLTestStarted(const char *testName, const char *suiteName,
 			  const char *testDescription, time_t startTime)
 {
-	char * output = XMLOpenElement("test");
+	char * output = XMLOpenElement(testElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
 	//Attribute attribute = {"test", "value"};
 	//XMLOpenElementWithAttribute("name", &attribute);
-	output = XMLOpenElement("name");
+	output = XMLOpenElement(nameElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(testName);
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("name");
+	output = XMLCloseElement(nameElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("description");
+	output = XMLOpenElement(descriptionElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(testDescription);
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("description");
+	output = XMLCloseElement(descriptionElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("startTime");
+	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(startTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("startTime");
+	output = XMLCloseElement(startTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, time_t endTime, double totalRuntime)
 {
-	char *output = XMLOpenElement("result");
+	char *output = XMLOpenElement(resultElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	if(testResult) {
 		if(testResult == 2) {
@@ -353,236 +334,184 @@ XMLTestEnded(const char *testName, const char *suiteName,
 			output = XMLAddContent("failed");
 		}
 		XMLOutputter(indentLevel, NO, output);
-		SDL_free(output);
 	} else {
 		output = XMLAddContent("passed");
 		XMLOutputter(indentLevel, NO, output);
-		SDL_free(output);
 	}
 
-	output = XMLCloseElement("result");
+	output = XMLCloseElement(resultElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log total runtime
-	output = XMLOpenElement("endTime");
+	output = XMLOpenElement(endTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(endTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("endTime");
+	output = XMLCloseElement(endTimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log total runtime
-	output = XMLOpenElement("totalRuntime");
+	output = XMLOpenElement(totalRuntimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(DoubleToString(totalRuntime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("totalRuntime");
+	output = XMLCloseElement(totalRuntimeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("test");
+	output = XMLCloseElement(testElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
 		  time_t eventTime)
 {
-	char *output = XMLOpenElement("assert");
+	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
 	// log assert result
-	output = XMLOpenElement("result");
+	output = XMLOpenElement(resultElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent((assertResult) ? "pass" : "failure");
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("result");
+	output = XMLCloseElement(resultElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log assert message
-	output = XMLOpenElement("message");
+	output = XMLOpenElement(messageElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(assertMessage);
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("message");
+	output = XMLCloseElement(messageElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log event time
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement(timeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement(timeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assert");
+	output = XMLCloseElement(assertElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
 		int actualValue, int excpected, time_t eventTime)
 {
-	char *output = XMLOpenElement("assert");
+	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
 	// log assert result
-	output = XMLOpenElement("result");
+	output = XMLOpenElement(resultElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent((assertResult) ? "pass" : "failure");
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("result");
+	output = XMLCloseElement(resultElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log assert message
-	output = XMLOpenElement("message");
+	output = XMLOpenElement(messageElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(assertMessage);
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("message");
+	output = XMLCloseElement(messageElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log event time
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement(timeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement(timeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assert");
+	output = XMLCloseElement(assertElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
-
 
 void
 XMLAssertSummary(int numAsserts, int numAssertsFailed,
 				 int numAssertsPass, time_t eventTime)
 {
-	char *output = XMLOpenElement("assertSummary");
+	char *output = XMLOpenElement(assertSummaryElementName);
 	XMLOutputter(indentLevel++, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("assertCount");
+	output = XMLOpenElement(assertCountElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(numAsserts));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assertCount");
+	output = XMLCloseElement(assertCountElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("assertsPassed");
+	output = XMLOpenElement(assertsPassedElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(numAssertsPass));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assertsPassed");
+	output = XMLCloseElement(assertsPassedElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLOpenElement("assertsFailed");
+	output = XMLOpenElement(assertsFailedElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(IntToString(numAsserts));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assertsFailed");
+	output = XMLCloseElement(assertsFailedElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("assertSummary");
+	output = XMLCloseElement(assertSummaryElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
 
 void
 XMLLog(const char *logMessage, time_t eventTime)
 {
-	char *output = XMLOpenElement("log");
+	char *output = XMLOpenElement(logElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	// log message
-	output = XMLOpenElement("message");
+	output = XMLOpenElement(messageElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(logMessage);
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("message");
+	output = XMLCloseElement(messageElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
 	// log eventTime
-	output = XMLOpenElement("eventTime");
+	output = XMLOpenElement(timeElementName);
 	XMLOutputter(indentLevel++, NO, output);
-	SDL_free(output);
 
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("eventTime");
+	output = XMLCloseElement(timeElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 
-	output = XMLCloseElement("log");
+	output = XMLCloseElement(logElementName);
 	XMLOutputter(--indentLevel, YES, output);
-	SDL_free(output);
 }
