@@ -52,7 +52,7 @@ const char *assertElementName = "assert";
 const char *messageElementName = "message";
 const char *timeElementName = "time";
 const char *assertSummaryElementName = "assertSummary";
-const char *assertCountElementName = "assertName";
+const char *assertCountElementName = "assertCount";
 const char *assertsPassedElementName = "assertsPassed";
 const char *assertsFailedElementName = "assertsFailed";
 const char *logElementName = "log";
@@ -214,6 +214,15 @@ XMLSuiteStarted(const char *suiteName, time_t eventTime)
 	char *output = XMLOpenElement(suiteElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
+	output = XMLOpenElement(nameElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(suiteName);
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(nameElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
 	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -373,6 +382,17 @@ XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
 	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
+	// log assert name
+	output = XMLOpenElement(nameElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(assertName);
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(nameElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
+
 	// log assert result
 	output = XMLOpenElement(resultElementName);
 	XMLOutputter(indentLevel++, NO, output);
@@ -413,6 +433,17 @@ XMLAssertWithValues(const char *assertName, int assertResult, const char *assert
 {
 	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
+
+	// log assert name
+	output = XMLOpenElement(nameElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(assertName);
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(nameElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
 
 	// log assert result
 	output = XMLOpenElement(resultElementName);

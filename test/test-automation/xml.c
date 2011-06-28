@@ -197,6 +197,9 @@ XMLOpenDocument(const char *rootTag)
 {
 	const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
 
+	//! \todo make this optional (and let the user supply the filename?)
+	const char *style = "<?xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"?>\n";
+
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
 
@@ -205,16 +208,18 @@ XMLOpenDocument(const char *rootTag)
 	root = rootTag; // it's fine, as long as rootTag points to static memory?
 
 	const int doctypeSize = SDL_strlen(doctype);
+	const int styleSize = SDL_strlen(style);
 	const int tagSize = SDL_strlen(buffer);
 
-	const int size = doctypeSize + tagSize + 1; // extra byte for '\0'
-	char *ret = SDL_malloc(size);
-	// copy doctype
-	strncpy(ret, doctype, doctypeSize);
-	// copy tag
-	strncpy(ret + doctypeSize, buffer, tagSize);
-	ret[size] = '\0';
-	return ret;
+	const int size = doctypeSize + styleSize + tagSize + 1; // extra byte for '\0'
+	char *retBuf = SDL_malloc(size);
+
+	// fill in the previous allocated retBuf
+	strcat(retBuf, doctype);
+	strcat(retBuf, style);
+	strcat(retBuf, buffer);
+
+	return retBuf;
 }
 
 char *
