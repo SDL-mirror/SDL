@@ -107,6 +107,9 @@ $(document).ready(function() {
 	/* Initially everything is hidden */
 	$("div.tests").hide();
 	$("div.asserts").hide();
+	
+	$("div.test[result='passed']").addClass('passedTest');
+	$("div.test[result='failed']").addClass('failedTest');
 });
 
 </script>
@@ -114,10 +117,7 @@ $(document).ready(function() {
 
 div, h1 {
   padding: 3px 10px 2px 10px;
-}
-
-h3 {
-  padding: 0 0 0 0;
+  margin: 5px 0px 5px 0px;
 }
 
 .document {
@@ -130,23 +130,28 @@ h3 {
   font-style: italic;
 }	
 	
+.bigtitle {
+  font-size: 14pt;
+  font-weight: bold;
+}
+	
 .title {
   font-weight: bold;
 }
 	
 .switch {
   font-style: italic;
-  color: rgb(10, 10, 200);
+  color: rgb(10, 10, 200); /*#024A68;*/
   font-size: 10pt;
   cursor: pointer;
 }	
 	
 .passedTest {
- background-color: green;
+ background-color: #64AA2B;
 }
 
 .failedTest {
- background-color: red;
+ background-color: #FF6E40;
 }
 	
 .statistics {
@@ -168,31 +173,33 @@ h3 {
 	<br/>
     <span class="title">Statistics:</span><br/>
     <div class="statistics">
-      <span>Suites: </span> <xsl:value-of select="testlog/numSuites"/> <br/>
-      <span>Tests in total: </span> <xsl:value-of select="testlog/numTests"/> <br/>
-      <div>
-        <span>Passed tests: </span><xsl:value-of select="testlog/numPassedTests"/> <br/>
-        <span>Failed tests: </span><xsl:value-of select="testlog/numFailedTests"/> <br/>
-      </div>
+      <span>Executed </span> <xsl:value-of select="testlog/numSuites"/> test suites. <br/>
+      <span>Tests in total: </span> <xsl:value-of select="testlog/numTests"/> (passed: <xsl:value-of select="testlog/numPassedTests"/> , failed: <xsl:value-of select="testlog/numFailedTests"/>)
     </div>
   </div>
 
   <div>
-	<h3>Test results:</h3>
-    <span class="switch show-all-tests">[Show All Tests] </span>| 
+	<br/>
+	<span class="bigtitle">Test Results</span><br/>
+    <span class="switch show-all-tests">[Show All Tests] </span> | 
     <span class="switch show-everything">[Show Everything]</span>
   </div>
-
+	<br/>
+	
   <xsl:for-each select="testlog/suite">
     <div id="suite">
-    Suite: <xsl:value-of select="name"/> (<xsl:value-of select="startTime"/>)
+    Suite: <span class="title"> <xsl:value-of select="name"/></span> (<xsl:value-of select="startTime"/>)
 	<div class="suiteInfo">
 		Tests: passed <xsl:value-of select="testsPassed"/>, failed <xsl:value-of select="testsFailed"/>, skipped <xsl:value-of select="testsSkipped"/>.<br/>
 		Total runtime: <xsl:value-of select="totalRuntime"/> seconds. <br/>
 		<span class="show-tests switch" uid="{generate-id(test)}">[Show tests]</span>
-		<div class="tests" uid="{generate-id(test)}">
-		    <xsl:for-each select="test">
-			<div>
+        <div class="tests" uid="{generate-id(test)}">
+	      <xsl:for-each select="test">
+			<div class="test">
+			  <xsl:attribute name="result">
+			    <xsl:value-of select="result"/>
+	          </xsl:attribute>
+		      
 		      Name:  <xsl:value-of select="name"/> (<xsl:value-of select="startTime"/>  - <xsl:value-of select="endTime"/>  ) <br/>
 		      Description: <span class="description"> <xsl:value-of select="description"/> </span><br/> 
 		
@@ -215,8 +222,8 @@ h3 {
 		      Asserts Failed <xsl:value-of select="assertSummary/assertsFailed"/> <br/>
 		    </div>
     		</div>
-		    </xsl:for-each>
-		</div>
+		  </xsl:for-each>
+	    </div>
 	</div>
   </div>
   </xsl:for-each>
