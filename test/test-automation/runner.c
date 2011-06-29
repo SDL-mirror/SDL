@@ -693,6 +693,8 @@ main(int argc, char *argv[])
 			SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
 						suiteRuntime);
 
+			suiteStartTime = SDL_GetTicks();
+
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, time(0));
 
