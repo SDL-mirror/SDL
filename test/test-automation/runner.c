@@ -114,78 +114,6 @@ TestCaseReference **QueryTestCaseReferences(void *library);
 
 
 /*!
- * Scans the tests/ directory and returns the names
- * of the dynamic libraries implementing the test suites.
- *
- * Note: currently function assumes that test suites names
- * are in following format: libtestsuite.dylib or libtestsuite.so.
- *
- * Note: if only_selected_suite flags is non-zero, only the selected
- * test will be loaded.
- *
- * \param directoryName Name of the directory which will be scanned
- * \param extension What file extension is used with dynamic objects
- *
- * \return Pointer to TestSuiteReference which holds all the info about suites
- */
-TestSuiteReference *
-ScanForTestSuites(char *directoryName, char *extension)
-{
-	typedef struct dirent Entry;
-	DIR *directory = opendir(directoryName);
-
-	TestSuiteReference *suites = NULL;
-
-	Entry *entry = NULL;
-	if(!directory) {
-		perror("Couldn't open test suite directory!");
-	}
-
-	while(entry = readdir(directory)) {
-		if(strlen(entry->d_name) > 2) { // discards . and ..
-			const char *delimiters = ".";
-			char *name = strtok(entry->d_name, delimiters);
-			char *ext = strtok(NULL, delimiters);
-
-			// filter out all other suites but the selected test suite
-			int ok = 1;
-			if(only_selected_suite) {
-				ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
-			}
-
-			if(ok && SDL_strcmp(ext, extension)  == 0) {
-				char buffer[NAME_BUFFER_SIZE];
-				memset(buffer, 0, NAME_BUFFER_SIZE);
-
-				strcat(buffer, directoryName);
-				strcat(buffer, name);
-				strcat(buffer, ".");
-				strcat(buffer, ext);
-
-				// create test suite reference
-				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
-				memset(reference, 0, sizeof(TestSuiteReference));
-
-				int length = strlen(buffer) + 1; // + 1 for '\0'?
-				reference->name = SDL_malloc(length * sizeof(char));
-
-				strcpy(reference->name, buffer);
-
-				reference->next = suites;
-				suites = reference;
-
-				//printf("Reference added to: %s\n", buffer);
-			}
-		}
-	}
-
-	closedir(directory);
-
-	return suites;
-}
-
-
-/*!
  * Goes through the previously loaded test suites and
  * loads test cases from them. Test cases are filtered
  * during the process. Function will only return the
@@ -315,6 +243,79 @@ FilterTestCase(TestCaseReference *testReference)
 
 
 /*!
+ * Scans the tests/ directory and returns the names
+ * of the dynamic libraries implementing the test suites.
+ *
+ * Note: currently function assumes that test suites names
+ * are in following format: libtestsuite.dylib or libtestsuite.so.
+ *
+ * Note: if only_selected_suite flags is non-zero, only the selected
+ * test will be loaded.
+ *
+ * \param directoryName Name of the directory which will be scanned
+ * \param extension What file extension is used with dynamic objects
+ *
+ * \return Pointer to TestSuiteReference which holds all the info about suites
+ */
+TestSuiteReference *
+ScanForTestSuites(char *directoryName, char *extension)
+{
+	typedef struct dirent Entry;
+	DIR *directory = opendir(directoryName);
+
+	TestSuiteReference *suites = NULL;
+
+	Entry *entry = NULL;
+	if(!directory) {
+		perror("Couldn't open test suite directory!");
+	}
+
+	while(entry = readdir(directory)) {
+		if(strlen(entry->d_name) > 2) { // discards . and ..
+			const char *delimiters = ".";
+			char *name = strtok(entry->d_name, delimiters);
+			char *ext = strtok(NULL, delimiters);
+
+			// filter out all other suites but the selected test suite
+			int ok = 1;
+			if(only_selected_suite) {
+				ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
+			}
+
+			if(ok && SDL_strcmp(ext, extension)  == 0) {
+				char buffer[NAME_BUFFER_SIZE];
+				memset(buffer, 0, NAME_BUFFER_SIZE);
+
+				//! \todo change strcat's to strncats
+				//strcat(buffer, directoryName);
+				strcat(buffer, name);
+				strcat(buffer, ".");
+				strcat(buffer, ext);
+
+				// create test suite reference
+				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
+				memset(reference, 0, sizeof(TestSuiteReference));
+
+				int length = strlen(buffer) + 1; // + 1 for '\0'?
+				reference->name = SDL_malloc(length * sizeof(char));
+
+				strcpy(reference->name, buffer);
+
+				reference->next = suites;
+				suites = reference;
+
+				//printf("Reference added to: %s\n", buffer);
+			}
+		}
+	}
+
+	closedir(directory);
+
+	return suites;
+}
+
+
+/*!
  * Loads test suite which is implemented as dynamic library.
  *
  * \param testSuiteName Name of the test suite which will be loaded
@@ -322,9 +323,16 @@ FilterTestCase(TestCaseReference *testReference)
  * \return Pointer to loaded test suite, or NULL if library could not be loaded
  */
 void *
-LoadTestSuite(char *testSuiteName)
+LoadTestSuite(const char *directory, const char *testSuiteName)
 {
-	void *library = SDL_LoadObject(testSuiteName);
+	const int nameSize = SDL_strlen(testSuiteName);
+	const int dirSize = SDL_strlen(directory);
+	const int size = nameSize + dirSize+ 1;
+
+	char *directoryPath = SDL_malloc(size);
+	snprintf(directoryPath, size, "%s%s", directory, testSuiteName);
+
+	void *library = SDL_LoadObject(directoryPath);
 	if(library == NULL) {
 		fprintf(stderr, "Loading %s failed\n", testSuiteName);
 		fprintf(stderr, "%s\n", SDL_GetError());
@@ -344,11 +352,11 @@ LoadTestSuite(char *testSuiteName)
  * \return Updated TestSuiteReferences with pointer to loaded libraries
  */
 TestSuiteReference *
-LoadTestSuites(TestSuiteReference *suites)
+LoadTestSuites(const char *directory, TestSuiteReference *suites)
 {
 	TestSuiteReference *reference = NULL;
 	for(reference = suites; reference; reference = reference->next) {
-		reference->library = LoadTestSuite(reference->name);
+		reference->library = LoadTestSuite(directory, reference->name);
 	}
 
 	return suites;
@@ -535,12 +543,13 @@ ExecuteTest(TestCase *testItem) {
 void
 printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
-	  printf("                [--name-contains SUBSTR] [--help]\n");
+	  printf("                [--name-contains SUBSTR] [--show-tests\n");
+	  printf("                [--xml] [--xsl STYLESHEET] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf("     --xml             		Enables XML logger\n");
-	  printf("     --xsl FILENAME     		Use the given file as XSL style sheet for XML\n"); // \todo add to wiki
+	  printf("     --xsl STYLESHEET    		Use the given file as XSL style sheet for XML\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -668,6 +677,7 @@ main(int argc, char *argv[])
 #else
 	char *extension = "dylib";
 #endif
+
 	if(xml_enabled) {
 		SetupXMLLogger();
 
@@ -681,7 +691,7 @@ main(int argc, char *argv[])
 	const Uint32 startTicks = SDL_GetTicks();
 
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
-	suites = LoadTestSuites(suites);
+	suites = LoadTestSuites(DEFAULT_TEST_DIRECTORY, suites);
 
 	TestCase *testCases = LoadTestCases(suites);
 
@@ -689,7 +699,6 @@ main(int argc, char *argv[])
 	if(only_print_tests) {
 		TestCase *testItem = NULL;
 		for(testItem = testCases; testItem; testItem = testItem->next) {
-			//! \todo This should be handled by the logging system?
 			printf("%s (in %s)\n", testItem->testName, testItem->suiteName);
 		}
 
