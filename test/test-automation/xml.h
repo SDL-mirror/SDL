@@ -39,7 +39,7 @@ typedef struct Attribute {
  * \param rootTag Root tag for the XML document
  * \return The generated XML output
  */
-char *XMLOpenDocument(const char *rootTag);
+char *XMLOpenDocument(const char *rootTag, const char *xslStyle);
 
 /*!
  * Closes the XML-document.

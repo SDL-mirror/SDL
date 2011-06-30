@@ -51,6 +51,8 @@ static int only_selected_suite = 0;
 static int only_tests_with_string = 0;
 //!< Flag for enabling XML logging
 static int xml_enabled = 0;
+//! Flag for enabling user-supplied style sheet for XML test report
+static int custom_xsl_enabled = 0;
 
 
 //!< Size of the test and suite name buffers
@@ -62,6 +64,9 @@ char selected_suite_name[NAME_BUFFER_SIZE];
 
 //!< substring of test case name
 char testcase_name_substring[NAME_BUFFER_SIZE];
+
+//! Name for user-supplied XSL style sheet name
+char xsl_stylesheet_name[NAME_BUFFER_SIZE];
 
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
@@ -535,6 +540,7 @@ printUsage() {
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf("     --xml             		Enables XML logger\n");
+	  printf("     --xsl FILENAME     		Use the given file as XSL style sheet for XML\n"); // \todo add to wiki
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -580,6 +586,21 @@ ParseOptions(int argc, char *argv[])
 
     	  memset(selected_test_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_test_name, testName);
+      }
+      else if(SDL_strcmp(arg, "--xsl") == 0) {
+    	  custom_xsl_enabled = 1;
+    	  char *stylesheet = NULL;
+
+    	  if( (i + 1) < argc)  {
+    		  stylesheet = argv[++i];
+    	  }  else {
+    		  printf("runner: filename of XSL stylesheet is missing\n");
+    		  printUsage();
+    		  exit(1);
+    	  }
+
+    	  memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
+    	  strncpy(xsl_stylesheet_name, stylesheet, NAME_BUFFER_SIZE);
       }
       else if(SDL_strcmp(arg, "--name-contains") == 0 || SDL_strcmp(arg, "-ts") == 0) {
     	  only_tests_with_string = 1;
@@ -649,8 +670,12 @@ main(int argc, char *argv[])
 #endif
 	if(xml_enabled) {
 		SetupXMLLogger();
+
+		RunStarted(argc, argv, time(0), xsl_stylesheet_name);
 	} else {
 		SetupPlainLogger();
+
+		RunStarted(argc, argv, time(0), NULL);
 	}
 
 	const Uint32 startTicks = SDL_GetTicks();
@@ -670,8 +695,6 @@ main(int argc, char *argv[])
 
 		return 0;
 	}
-
-	RunStarted(argc, argv, time(0));
 
 	char *currentSuiteName = NULL;
 

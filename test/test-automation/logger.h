@@ -25,9 +25,10 @@
 
 /*!
  * Typedefs for function pointers that implement the  generic
- * logging interface
+ * logging interface. See the headers of implementations (plain_logger.h or
+ * xml_logger.h) for more information.
  */
-typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime);
+typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime, void *data);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
                            time_t endTime, double totalRuntime);
 

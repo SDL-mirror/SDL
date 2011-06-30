@@ -9,8 +9,9 @@
  * \param parameterCount How many parameters were given
  * \param runnerParameters What parameters were given to the runner
  * \param eventTime When the execution started
+ * \param data Any additional data logger needs
  */
-void XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime);
+void XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime, void *data);
 
 /*!
  * Prints out information about ending the test run in XML

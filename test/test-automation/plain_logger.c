@@ -28,7 +28,8 @@ Output(const char *message, ...)
 }
 
 void
-PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
+PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
+				void *data)
 {
 	/*
     Output("Test run started with following parameters\n");

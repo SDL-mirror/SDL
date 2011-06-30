@@ -105,9 +105,18 @@ XMLOutputter(const int currentIdentLevel,
 }
 
 void
-XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime)
+XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
+			 void *data)
 {
-	char *output = XMLOpenDocument(documentRoot);
+	char *xslStylesheet = "style.xsl";
+	if(data != NULL) {
+		char *tmp = (char *)data;
+		if(SDL_strlen(tmp) > 0) {
+			xslStylesheet = tmp;
+		}
+	}
+
+	char *output = XMLOpenDocument(documentRoot, xslStylesheet);
 	XMLOutputter(indentLevel++, YES, output);
 
 	output = XMLOpenElement(parametersElementName);

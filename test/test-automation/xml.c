@@ -193,12 +193,22 @@ EscapeString(const char *string)
 */
 
 char *
-XMLOpenDocument(const char *rootTag)
+XMLOpenDocument(const char *rootTag, const char *xslStyle)
 {
 	const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
 
 	//! \todo make this optional (and let the user supply the filename?)
-	const char *style = "<?xml-stylesheet type=\"text/xsl\" href=\"style.xsl\"?>\n";
+	const char *styleStart = "<?xml-stylesheet type=\"text/xsl\" href=\"";
+	const char *styleEnd = "\"?>\n";
+
+	const int sizeStyleStart = SDL_strlen(styleStart);
+	const int sizeStyleEnd = SDL_strlen(styleEnd);
+	const int sizeStyleSheetName = SDL_strlen(xslStyle);
+
+	const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
+	char *style = SDL_malloc(tempSize);
+	memset(style, 0, tempSize);
+	snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
 
 	memset(buffer, 0, bufferSize);
 	snprintf(buffer, bufferSize, "<%s>", rootTag);
@@ -218,6 +228,8 @@ XMLOpenDocument(const char *rootTag)
 	strcat(retBuf, doctype);
 	strcat(retBuf, style);
 	strcat(retBuf, buffer);
+
+	SDL_free(style);
 
 	return retBuf;
 }
