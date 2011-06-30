@@ -736,5 +736,5 @@ main(int argc, char *argv[])
 	RunEnded(totalTestPassCount + totalTestfailureCount, suiteCounter,
 			 totalTestPassCount, totalTestfailureCount, time(0), totalRunTime);
 
-	return 0;
+	return (totalTestfailureCount ? 1 : 0);
 }
