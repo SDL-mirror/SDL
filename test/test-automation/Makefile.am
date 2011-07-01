@@ -9,13 +9,7 @@ runner_LDFLAGS = `sdl-config --libs`
 
 install: install-tests
 install-tests:
-	-mkdir tests
-	-cp -f testdummy/.libs/*.dylib tests/ 2> /dev/null
-	-cp -f testdummy/.libs/*.so tests/ 2> /dev/null
-	-cp -f testrect/.libs/*.dylib tests/ 2> /dev/null
-	-cp -f testrect/.libs/*.so tests/ 2> /dev/null
-	-cp -f testplatform/.libs/*.dylib tests/ 2> /dev/null
-	-cp -f testplatform/.libs/*.so tests/ 2> /dev/null
+	$(SHELL) install-tests.sh
 
 distclean-local:
 	-rm -Rf tests/ docs/
