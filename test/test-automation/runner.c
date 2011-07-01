@@ -330,7 +330,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 /*!
  * Loads test suite which is implemented as dynamic library.
  *
- * \param testSuiteName Name of the test suite which will be loaded
+ * \param suite Reference to test suite that'll be loaded
  *
  * \return Pointer to loaded test suite, or NULL if library could not be loaded
  */
