@@ -101,20 +101,14 @@ XMLOutputter(const int currentIdentLevel,
 		fprintf(stdout, "Error: Tried to output invalid string!");
 	}
 
-	SDL_free(message);
+	SDL_free((char *)message);
 }
 
 void
 XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 			 void *data)
 {
-	char *xslStylesheet = "style.xsl";
-	if(data != NULL) {
-		char *tmp = (char *)data;
-		if(SDL_strlen(tmp) > 0) {
-			xslStylesheet = tmp;
-		}
-	}
+	char *xslStylesheet = (char *)data;
 
 	char *output = XMLOpenDocument(documentRoot, xslStylesheet);
 	XMLOutputter(indentLevel++, YES, output);

@@ -37,6 +37,7 @@ typedef struct Attribute {
  * Note: XML creation is not thread-safe!
  *
  * \param rootTag Root tag for the XML document
+ * \param xslStyle Name of the style sheet file. (empty string if no style is used)
  * \return The generated XML output
  */
 char *XMLOpenDocument(const char *rootTag, const char *xslStyle);

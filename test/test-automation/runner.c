@@ -53,6 +53,8 @@ static int only_tests_with_string = 0;
 static int xml_enabled = 0;
 //! Flag for enabling user-supplied style sheet for XML test report
 static int custom_xsl_enabled = 0;
+//! Flag for disabling xsl-style from xml report
+static int xsl_enabled = 0;
 
 
 //!< Size of the test and suite name buffers
@@ -548,12 +550,13 @@ void
 printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--show-tests\n");
-	  printf("                [--xml] [--xsl STYLESHEET] [--help]\n");
+	  printf("                [--xml] [--xsl] [--xsl STYLESHEET] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
-	  printf("     --xml             		Enables XML logger\n");
-	  printf("     --xsl STYLESHEET    		Use the given file as XSL style sheet for XML\n");
+	  printf("     --xml                    Enables XML logger\n");
+	  printf("     --xsl                    Adds default XSL stylesheet to XML test reports\n");
+	  printf("     --xsl STYLESHEET         Use the given file as XSL style sheet for XML\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -601,19 +604,17 @@ ParseOptions(int argc, char *argv[])
     	  strcpy(selected_test_name, testName);
       }
       else if(SDL_strcmp(arg, "--xsl") == 0) {
-    	  custom_xsl_enabled = 1;
-    	  char *stylesheet = NULL;
+    	  xsl_enabled = 1;
 
     	  if( (i + 1) < argc)  {
-    		  stylesheet = argv[++i];
-    	  }  else {
-    		  printf("runner: filename of XSL stylesheet is missing\n");
-    		  printUsage();
-    		  exit(1);
-    	  }
+    		  char *stylesheet = argv[++i];
+    		  if(stylesheet[0] != '-') {
+    	    	  custom_xsl_enabled = 1;
 
-    	  memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
-    	  strncpy(xsl_stylesheet_name, stylesheet, NAME_BUFFER_SIZE);
+    	    	  memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
+    	    	  strncpy(xsl_stylesheet_name, stylesheet, NAME_BUFFER_SIZE);
+    		  }
+    	  }
       }
       else if(SDL_strcmp(arg, "--name-contains") == 0 || SDL_strcmp(arg, "-ts") == 0) {
     	  only_tests_with_string = 1;
@@ -685,7 +686,16 @@ main(int argc, char *argv[])
 	if(xml_enabled) {
 		SetupXMLLogger();
 
-		RunStarted(argc, argv, time(0), xsl_stylesheet_name);
+		char *sheet = NULL;
+		if(xsl_enabled) {
+			sheet = "style.xsl"; // default style sheet;
+		}
+
+		if(custom_xsl_enabled) {
+			sheet = xsl_stylesheet_name;
+		}
+
+		RunStarted(argc, argv, time(0), sheet);
 	} else {
 		SetupPlainLogger();
 

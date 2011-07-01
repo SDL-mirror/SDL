@@ -197,18 +197,21 @@ XMLOpenDocument(const char *rootTag, const char *xslStyle)
 {
 	const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
 
-	//! \todo make this optional (and let the user supply the filename?)
-	const char *styleStart = "<?xml-stylesheet type=\"text/xsl\" href=\"";
-	const char *styleEnd = "\"?>\n";
+	//! \todo refactor this mess
+	char *style = NULL;
+	if(xslStyle) {
+		const char *styleStart = "<?xml-stylesheet type=\"text/xsl\" href=\"";
+		const char *styleEnd = "\"?>\n";
 
-	const int sizeStyleStart = SDL_strlen(styleStart);
-	const int sizeStyleEnd = SDL_strlen(styleEnd);
-	const int sizeStyleSheetName = SDL_strlen(xslStyle);
+		const int sizeStyleStart = SDL_strlen(styleStart);
+		const int sizeStyleEnd = SDL_strlen(styleEnd);
+		const int sizeStyleSheetName = SDL_strlen(xslStyle);
 
-	const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
-	char *style = SDL_malloc(tempSize);
-	memset(style, 0, tempSize);
-	SDL_snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
+		const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
+		style = SDL_malloc(tempSize);
+		memset(style, 0, tempSize);
+		SDL_snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
+	}
 
 	memset(buffer, 0, bufferSize);
 	SDL_snprintf(buffer, bufferSize, "<%s>", rootTag);
@@ -217,19 +220,27 @@ XMLOpenDocument(const char *rootTag, const char *xslStyle)
 
 	root = rootTag; // it's fine, as long as rootTag points to static memory?
 
-	const int doctypeSize = SDL_strlen(doctype);
-	const int styleSize = SDL_strlen(style);
-	const int tagSize = SDL_strlen(buffer);
+	char *retBuf = NULL;
+	if(xslStyle) {
+		const int doctypeSize = SDL_strlen(doctype);
+		const int styleSize = SDL_strlen(style);
+		const int tagSize = SDL_strlen(buffer);
 
-	const int size = doctypeSize + styleSize + tagSize + 1; // extra byte for '\0'
-	char *retBuf = SDL_malloc(size);
+		const int size = doctypeSize + styleSize + tagSize + 1; // extra byte for '\0'
+		retBuf = SDL_malloc(size);
 
-	// fill in the previous allocated retBuf
-	strcat(retBuf, doctype);
-	strcat(retBuf, style);
-	strcat(retBuf, buffer);
+		SDL_snprintf(retBuf, size, "%s%s%s", doctype, style, buffer);
 
-	SDL_free(style);
+		SDL_free(style);
+	} else {
+		const int doctypeSize = SDL_strlen(doctype);
+		const int tagSize = SDL_strlen(buffer);
+
+		const int size = doctypeSize + tagSize + 1; // extra byte for '\0'
+		retBuf = SDL_malloc(size);
+
+		SDL_snprintf(retBuf, size, "%s%s", doctype, buffer);
+	}
 
 	return retBuf;
 }
