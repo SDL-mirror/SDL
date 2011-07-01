@@ -208,10 +208,10 @@ XMLOpenDocument(const char *rootTag, const char *xslStyle)
 	const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
 	char *style = SDL_malloc(tempSize);
 	memset(style, 0, tempSize);
-	snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
+	SDL_snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
 
 	memset(buffer, 0, bufferSize);
-	snprintf(buffer, bufferSize, "<%s>", rootTag);
+	SDL_snprintf(buffer, bufferSize, "<%s>", rootTag);
 
 	AddOpenTag(rootTag);
 
@@ -243,7 +243,7 @@ char *
 XMLOpenElement(const char *tag)
 {
 	memset(buffer, 0, bufferSize);
-	snprintf(buffer, bufferSize, "<%s>", tag);
+	SDL_snprintf(buffer, bufferSize, "<%s>", tag);
 
 	AddOpenTag(tag);
 
@@ -269,7 +269,7 @@ XMLAddContent(const char *content)
 	}
 
 	memset(buffer, 0, bufferSize);
-	snprintf(buffer, bufferSize, "%s", escapedContent);
+	SDL_snprintf(buffer, bufferSize, "%s", escapedContent);
 	SDL_free((char *)escapedContent);
 
 	const int size = SDL_strlen(buffer);
@@ -312,9 +312,9 @@ XMLCloseElement(const char *tag)
 		int breakOut = 0;
 		if(SDL_strncmp(lowOpenTag, lowTag, compSize) == 0) {
 			breakOut = 1;
-			snprintf(buffer, bufferSize, "</%s>", tag);
+			SDL_snprintf(buffer, bufferSize, "</%s>", tag);
 		} else {
-			snprintf(buffer, bufferSize, "</%s>", openTag->tag);
+			SDL_snprintf(buffer, bufferSize, "</%s>", openTag->tag);
 		}
 
 		SDL_free(lowOpenTag);

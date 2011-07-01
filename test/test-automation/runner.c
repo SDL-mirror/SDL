@@ -78,6 +78,7 @@ char xsl_stylesheet_name[NAME_BUFFER_SIZE];
  */
 typedef struct TestSuiteReference {
 	char *name; //!< test suite name
+	char *directoryPath; //!< test suites path (eg. tests/libtestsuite)
 	void *library; //!< pointer to shared/dynamic library implementing the suite
 
 	struct TestSuiteReference *next; //!< Pointer to next item in the list
@@ -283,28 +284,37 @@ ScanForTestSuites(char *directoryName, char *extension)
 			}
 
 			if(ok && SDL_strcmp(ext, extension)  == 0) {
-				char buffer[NAME_BUFFER_SIZE];
-				memset(buffer, 0, NAME_BUFFER_SIZE);
-
-				//! \todo change strcat's to strncats
-				//strcat(buffer, directoryName);
-				strcat(buffer, name);
-				strcat(buffer, ".");
-				strcat(buffer, ext);
-
 				// create test suite reference
 				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
 				memset(reference, 0, sizeof(TestSuiteReference));
 
-				int length = strlen(buffer) + 1; // + 1 for '\0'?
-				reference->name = SDL_malloc(length * sizeof(char));
 
-				strcpy(reference->name, buffer);
+				const int dirSize = SDL_strlen(directoryName);
+				const int extSize = SDL_strlen(ext);
+				const int nameSize = SDL_strlen(name) + 1;
+
+				// copy the name
+				reference->name = SDL_malloc(nameSize * sizeof(char));
+				if(reference->name == NULL) {
+					SDL_free(reference);
+					return NULL;
+				}
+
+				SDL_snprintf(reference->name, nameSize, "%s", name);
+
+				// copy the directory path
+				const int dpSize = dirSize + nameSize + 1 + extSize + 1;
+				reference->directoryPath = SDL_malloc(dpSize * sizeof(char));
+				if(reference->directoryPath == NULL) {
+					SDL_free(reference->name);
+					SDL_free(reference);
+					return NULL;
+				}
+				SDL_snprintf(reference->directoryPath, dpSize, "%s%s.%s",
+						directoryName, name, ext);
 
 				reference->next = suites;
 				suites = reference;
-
-				//printf("Reference added to: %s\n", buffer);
 			}
 		}
 	}
@@ -323,18 +333,11 @@ ScanForTestSuites(char *directoryName, char *extension)
  * \return Pointer to loaded test suite, or NULL if library could not be loaded
  */
 void *
-LoadTestSuite(const char *directory, const char *testSuiteName)
+LoadTestSuite(const TestSuiteReference *suite)
 {
-	const int nameSize = SDL_strlen(testSuiteName);
-	const int dirSize = SDL_strlen(directory);
-	const int size = nameSize + dirSize+ 1;
-
-	char *directoryPath = SDL_malloc(size);
-	snprintf(directoryPath, size, "%s%s", directory, testSuiteName);
-
-	void *library = SDL_LoadObject(directoryPath);
+	void *library = SDL_LoadObject(suite->directoryPath);
 	if(library == NULL) {
-		fprintf(stderr, "Loading %s failed\n", testSuiteName);
+		fprintf(stderr, "Loading %s failed\n", suite->name);
 		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
@@ -352,11 +355,11 @@ LoadTestSuite(const char *directory, const char *testSuiteName)
  * \return Updated TestSuiteReferences with pointer to loaded libraries
  */
 TestSuiteReference *
-LoadTestSuites(const char *directory, TestSuiteReference *suites)
+LoadTestSuites(TestSuiteReference *suites)
 {
 	TestSuiteReference *reference = NULL;
 	for(reference = suites; reference; reference = reference->next) {
-		reference->library = LoadTestSuite(directory, reference->name);
+		reference->library = LoadTestSuite(reference);
 	}
 
 	return suites;
@@ -375,6 +378,7 @@ UnloadTestSuites(TestSuiteReference *suites)
 	TestSuiteReference *ref = suites;
 	while(ref) {
 		SDL_free(ref->name);
+		SDL_free(ref->directoryPath);
 		SDL_UnloadObject(ref->library);
 
 		TestSuiteReference *temp = ref->next;
@@ -691,7 +695,7 @@ main(int argc, char *argv[])
 	const Uint32 startTicks = SDL_GetTicks();
 
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
-	suites = LoadTestSuites(DEFAULT_TEST_DIRECTORY, suites);
+	suites = LoadTestSuites(suites);
 
 	TestCase *testCases = LoadTestCases(suites);
 
