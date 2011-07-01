@@ -73,7 +73,8 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libtestplatform_la_LIBADD =
-am_libtestplatform_la_OBJECTS = testplatform.lo SDL_test.lo
+am_libtestplatform_la_OBJECTS = testplatform.lo SDL_test.lo logger.lo \
+	logger_helpers.lo plain_logger.lo xml_logger.lo xml.lo
 libtestplatform_la_OBJECTS = $(am_libtestplatform_la_OBJECTS)
 libtestplatform_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -208,7 +209,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libtestplatform.la
-libtestplatform_la_SOURCES = testplatform.c ../SDL_test.c
+libtestplatform_la_SOURCES = testplatform.c ../SDL_test.c ../logger.c ../logger_helpers.c ../plain_logger.c ../xml_logger.c ../xml.c
 libtestplatform_la_CLAGS = -fPIC -g
 libtestplatform_la_LDFLAGS = `sdl-config --libs`
 all: all-am
@@ -286,7 +287,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SDL_test.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logger_helpers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plain_logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testplatform.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_logger.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -315,6 +321,41 @@ SDL_test.lo: ../SDL_test.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../SDL_test.c' object='SDL_test.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o SDL_test.lo `test -f '../SDL_test.c' || echo '$(srcdir)/'`../SDL_test.c
+
+logger.lo: ../logger.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT logger.lo -MD -MP -MF $(DEPDIR)/logger.Tpo -c -o logger.lo `test -f '../logger.c' || echo '$(srcdir)/'`../logger.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/logger.Tpo $(DEPDIR)/logger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../logger.c' object='logger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o logger.lo `test -f '../logger.c' || echo '$(srcdir)/'`../logger.c
+
+logger_helpers.lo: ../logger_helpers.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT logger_helpers.lo -MD -MP -MF $(DEPDIR)/logger_helpers.Tpo -c -o logger_helpers.lo `test -f '../logger_helpers.c' || echo '$(srcdir)/'`../logger_helpers.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/logger_helpers.Tpo $(DEPDIR)/logger_helpers.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../logger_helpers.c' object='logger_helpers.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o logger_helpers.lo `test -f '../logger_helpers.c' || echo '$(srcdir)/'`../logger_helpers.c
+
+plain_logger.lo: ../plain_logger.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT plain_logger.lo -MD -MP -MF $(DEPDIR)/plain_logger.Tpo -c -o plain_logger.lo `test -f '../plain_logger.c' || echo '$(srcdir)/'`../plain_logger.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/plain_logger.Tpo $(DEPDIR)/plain_logger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../plain_logger.c' object='plain_logger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o plain_logger.lo `test -f '../plain_logger.c' || echo '$(srcdir)/'`../plain_logger.c
+
+xml_logger.lo: ../xml_logger.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xml_logger.lo -MD -MP -MF $(DEPDIR)/xml_logger.Tpo -c -o xml_logger.lo `test -f '../xml_logger.c' || echo '$(srcdir)/'`../xml_logger.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xml_logger.Tpo $(DEPDIR)/xml_logger.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../xml_logger.c' object='xml_logger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xml_logger.lo `test -f '../xml_logger.c' || echo '$(srcdir)/'`../xml_logger.c
+
+xml.lo: ../xml.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT xml.lo -MD -MP -MF $(DEPDIR)/xml.Tpo -c -o xml.lo `test -f '../xml.c' || echo '$(srcdir)/'`../xml.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/xml.Tpo $(DEPDIR)/xml.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='../xml.c' object='xml.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o xml.lo `test -f '../xml.c' || echo '$(srcdir)/'`../xml.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

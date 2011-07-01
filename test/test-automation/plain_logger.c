@@ -78,9 +78,9 @@ PlainTestEnded(const char *testName, const char *suiteName,
 {
 	if(testResult) {
 		if(testResult == 2) {
-			Output("%s: failed -> no assert");
+			Output("%s: failed -> no assert", testName);
 		} else {
-			Output("%s: failed");
+			Output("%s: failed", testName);
 		}
 	} else {
 		Output("%s: ok", testName);

@@ -85,4 +85,14 @@ void AssertEquals(Uint32 expected, Uint32 actual, char *message, ...);
  */
 void AssertTrue(int condition, char *message, ...);
 
+/*!
+\todo add markup
+*/
+void AssertFail(char *message, ...);
+
+/*!
+\todo add markup
+*/
+void AssertPass(char *message, ...);
+
 #endif
