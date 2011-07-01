@@ -134,53 +134,85 @@ PrintOpenTags()
 const char *
 EscapeString(const char *string)
 {
-	//const int bufferSize = 4096;
-	char buffer[bufferSize];
-	memset(buffer, 0, bufferSize);
+	// Calculate the size of the escaped string
+	int totalSize = 0;
 
-	// prevents the code doing a 'bus error'
-	char *stringBuffer = SDL_malloc(bufferSize);
-	if(stringBuffer == NULL) {
-		return NULL;
-	}
-	strncpy(stringBuffer, string, bufferSize);
-
-	// Ampersand (&) must be first, otherwise it'll mess up the other entities
-	char *characters[] = {"&", "'", "\"", "<", ">"};
-	char *entities[] = {"&amp;", "&apos;", "&quot;", "&lt;", "&gt;"};
-	int maxCount = 5;
+	const int maxCount = SDL_strlen(string);
 
 	int counter = 0;
 	for(; counter < maxCount; ++counter) {
-		char *character = characters[counter];
-		char *entity = entities[counter];
+		char character = string[counter];
 
-		if(strstr(stringBuffer, character) == NULL)
-			continue;
-
-		char *token = strtok(stringBuffer, character);
-		while(token) {
-			char *nextToken = strtok(NULL, character);
-
-			int bytesLeft = bufferSize - SDL_strlen(buffer);
-			if(bytesLeft) {
-				strncat(buffer, token, bytesLeft);
-			} else {
-				// \! todo there's probably better way to report an error?
-				fprintf(stderr, "xml.c | EscapingString: Buffer is full");
-			}
-
-			if(nextToken)
-				strcat(buffer, entity);
-
-			token = nextToken;
+		switch(character) {
+		case '&': totalSize +=  5; //SDL_strlen("&amp;");
+			break;
+		case '\'': totalSize += 6; //SDL_strlen("&apos;");
+			break;
+		case '"': totalSize += 6; //SDL_strlen("&quot;");
+			break;
+		case '<': totalSize += 4; //SDL_strlen("&lt;");
+			break;
+		case  '>': totalSize += 4; //SDL_strlen("&gt;");
+			break;
+		default:
+			totalSize += 1;
+			break;
 		}
-
-		memcpy(stringBuffer, buffer, bufferSize);
-		memset(buffer, 0, bufferSize);
 	}
 
-	return stringBuffer;
+	char *retBuffer = SDL_malloc(totalSize * sizeof(char));
+	if(retBuffer == NULL) {
+		return NULL;
+	}
+
+	// escape the string
+	int retBufferCounter = 0;
+	for(counter = 0; counter < maxCount; ++counter) {
+		char character = string[counter];
+		switch(character) {
+		case '&':
+			retBuffer[retBufferCounter++] = '&';
+			retBuffer[retBufferCounter++] = 'a';
+			retBuffer[retBufferCounter++] = 'm';
+			retBuffer[retBufferCounter++] = 'p';
+			retBuffer[retBufferCounter++] = ';';
+			break;
+		case '\'':
+			retBuffer[retBufferCounter++] = '&';
+			retBuffer[retBufferCounter++] = 'a';
+			retBuffer[retBufferCounter++] = 'p';
+			retBuffer[retBufferCounter++] = 'o';
+			retBuffer[retBufferCounter++] = 's';
+			retBuffer[retBufferCounter++] = ';';
+			break;
+		case '"':
+			retBuffer[retBufferCounter++] = '&';
+			retBuffer[retBufferCounter++] = 'q';
+			retBuffer[retBufferCounter++] = 'u';
+			retBuffer[retBufferCounter++] = 'o';
+			retBuffer[retBufferCounter++] = 't';
+			retBuffer[retBufferCounter++] = ';';
+			break;
+		case '<':
+			retBuffer[retBufferCounter++] = '&';
+			retBuffer[retBufferCounter++] = 'l';
+			retBuffer[retBufferCounter++] = 't';
+			retBuffer[retBufferCounter++] = ';';
+			break;
+		case  '>': totalSize += SDL_strlen("&gt;");
+			retBuffer[retBufferCounter++] = '&';
+			retBuffer[retBufferCounter++] = 'g';
+			retBuffer[retBufferCounter++] = 't';
+			retBuffer[retBufferCounter++] = ';';
+			break;
+		default:
+			retBuffer[retBufferCounter++] = character;
+			break;
+		}
+
+	}
+
+	return retBuffer;
 }
 
 
