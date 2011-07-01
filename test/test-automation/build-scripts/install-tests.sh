@@ -3,10 +3,10 @@
 DIRECTORY="tests"
 EXT="error"
 
-echo "Installing test suites to $DIRECTORY" 
+#echo "Installing test suites to $DIRECTORY" 
 
-rm -Rfv $DIRECTORY 2&>1 /dev/null
-mkdir $DIRECTORY 2&>1 /dev/null
+rm -Rfv $DIRECTORY > /dev/null 2>&1
+mkdir $DIRECTORY > /dev/null 2>&1
 
 PLATFORM="$(uname)"
 if [[ $PLATFORM ==  "Linux" ]]; then
@@ -21,4 +21,4 @@ do
 	cp -f "$suite/.libs/lib$suite.$EXT" $DIRECTORY
 done
 
-echo "Test suited installed."
+echo "Test suites installed."

@@ -9,8 +9,8 @@ runner_LDFLAGS = `sdl-config --libs`
 
 install: install-tests
 install-tests:
-	$(SHELL) install-tests.sh
+	$(SHELL) build-scripts/install-tests.sh
 
-distclean-local:
+clean-local:
 	-rm -Rf tests/ docs/
 
