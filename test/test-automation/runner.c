@@ -550,13 +550,14 @@ void
 printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--show-tests\n");
-	  printf("                [--xml] [--xsl] [--xsl STYLESHEET] [--help]\n");
+	  printf("                [--xml] [--xsl [STYLESHEET]] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf("     --xml                    Enables XML logger\n");
-	  printf("     --xsl                    Adds default XSL stylesheet to XML test reports\n");
-	  printf("     --xsl STYLESHEET         Use the given file as XSL style sheet for XML\n");
+	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
+	  printf("                              browser viewing. Optionally uses the specified XSL\n");
+	  printf("                              file or URL instead of the default one\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
