@@ -549,7 +549,7 @@ ExecuteTest(TestCase *testItem) {
 void
 printUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
-	  printf("                [--name-contains SUBSTR] [--show-tests\n");
+	  printf("                [--name-contains SUBSTR] [--show-tests]\n");
 	  printf("                [--xml] [--xsl [STYLESHEET]] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
