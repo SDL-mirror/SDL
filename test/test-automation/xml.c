@@ -159,6 +159,7 @@ EscapeString(const char *string)
 			break;
 		}
 	}
+	totalSize += 1; // for '\0'
 
 	char *retBuffer = SDL_malloc(totalSize * sizeof(char));
 	if(retBuffer == NULL) {
@@ -211,6 +212,8 @@ EscapeString(const char *string)
 		}
 
 	}
+
+	retBuffer[retBufferCounter] = '\0';
 
 	return retBuffer;
 }
