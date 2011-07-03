@@ -162,9 +162,11 @@ div, h1 {
     <!-- and ended at <xsl:value-of select="testlog/endTime"/>.<br/>-->
     <span class="title">Total runtime: </span><xsl:value-of select="testlog/totalRuntime"/> seconds.<br/>
     <span class="title">Harness parameters: </span>
-    <xsl:for-each select="testlog/parameters/parameter">
-      <xsl:value-of select="."/>	 
-    </xsl:for-each>
+	<span xml:space="preserve">
+      <xsl:for-each select="testlog/parameters/parameter">
+        <xsl:value-of select="."/> 	 
+      </xsl:for-each>
+    </span>
 	<br/>
     <span class="title">Statistics:</span><br/>
     <div class="statistics">
