@@ -684,6 +684,7 @@ main(int argc, char *argv[])
 	char *extension = "dylib";
 #endif
 
+	void *loggerData = NULL;
 	if(xml_enabled) {
 		SetupXMLLogger();
 
@@ -696,11 +697,9 @@ main(int argc, char *argv[])
 			sheet = xsl_stylesheet_name;
 		}
 
-		RunStarted(argc, argv, time(0), sheet);
+		loggerData = sheet;
 	} else {
 		SetupPlainLogger();
-
-		RunStarted(argc, argv, time(0), NULL);
 	}
 
 	const Uint32 startTicks = SDL_GetTicks();
@@ -719,6 +718,9 @@ main(int argc, char *argv[])
 
 		return 0;
 	}
+
+	RunStarted(argc, argv, time(0), loggerData);
+
 
 	char *currentSuiteName = NULL;
 
