@@ -28,6 +28,8 @@
 
 #include <sys/types.h>
 
+#include "config.h"
+
 #include "SDL_test.h"
 #include "logger.h"
 
@@ -547,7 +549,7 @@ ExecuteTest(TestCase *testItem) {
  * Prints usage information
  */
 void
-printUsage() {
+PrintUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--show-tests]\n");
 	  printf("                [--xml] [--xsl [STYLESHEET]] [--help]\n");
@@ -597,7 +599,7 @@ ParseOptions(int argc, char *argv[])
     		  testName = argv[++i];
     	  }  else {
     		  printf("runner: test name is missing\n");
-    		  printUsage();
+    		  PrintUsage();
     		  exit(1);
     	  }
 
@@ -625,7 +627,7 @@ ParseOptions(int argc, char *argv[])
     		  substring = argv[++i];
     	  }  else {
     		  printf("runner: substring of test name is missing\n");
-    		  printUsage();
+    		  PrintUsage();
     		  exit(1);
     	  }
 
@@ -640,20 +642,24 @@ ParseOptions(int argc, char *argv[])
     		  suiteName = argv[++i];
     	  }  else {
     		  printf("runner: suite name is missing\n");
-    		  printUsage();
+    		  PrintUsage();
     		  exit(1);
     	  }
 
     	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_suite_name, suiteName);
       }
+      else if(SDL_strcmp(arg, "--version") == 0) {
+    	  fprintf(stdout, "SDL test harness (version %s)\n", PACKAGE_VERSION);
+    	  exit(0);
+      }
       else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
-    	  printUsage();
+    	  PrintUsage();
     	  exit(0);
       }
       else {
     	  printf("runner: unknown command '%s'\n", arg);
-    	  printUsage();
+    	  PrintUsage();
     	  exit(0);
       }
    }

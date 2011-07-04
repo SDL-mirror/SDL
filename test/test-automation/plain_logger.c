@@ -9,16 +9,23 @@
 #include "plain_logger.h"
 
 
+static int indentLevel;
+
 /*!
  * Prints out the output of the logger
  *
  * \param message The message to be printed out
  */
 int
-Output(const char *message, ...)
+Output(const int currentIdentLevel, const char *message, ...)
 {
 	va_list list;
 	va_start(list, message);
+
+	int ident = 0;
+	for( ; ident < currentIdentLevel; ++ident) {
+		fprintf(stdout, "  "); // \todo make configurable?
+	}
 
 	char buffer[1024];
 	SDL_vsnprintf(buffer, sizeof(buffer), message, list);
@@ -46,30 +53,32 @@ void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
               time_t endTime, double totalRuntime)
 {
-	Output("\nRan %d tests in %0.5f seconds from %d suites.",
+	Output(indentLevel, "\nRan %d tests in %0.5f seconds from %d suites.",
 			testCount, totalRuntime, suiteCount);
 
-	Output("%d tests passed", testPassCount);
-	Output("%d tests failed", testFailCount);
+	Output(indentLevel, "%d tests passed", testPassCount);
+	Output(indentLevel, "%d tests failed", testFailCount);
 }
 
 void
 PlainSuiteStarted(const char *suiteName, time_t eventTime)
 {
-	Output("Executing tests from %s", suiteName);
+	Output(indentLevel++, "Executing tests from %s", suiteName);
 }
 
 void
 PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            time_t endTime, double totalRuntime)
 {
-	Output("Suite executed. %d passed, %d failed and %d skipped", testsPassed, testsFailed, testsSkipped);
+	Output(--indentLevel, "Suite executed. %d passed, %d failed and %d skipped. Total runtime %0.5f seconds",
+			testsPassed, testsFailed, testsSkipped, totalRuntime);
+	Output(indentLevel, "");
 }
 
 void
 PlainTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
 {
-	Output("%s (in %s) started", testName, suiteName);
+	Output(indentLevel++, "%s (in %s) started", testName, suiteName);
 }
 
 void
@@ -78,12 +87,12 @@ PlainTestEnded(const char *testName, const char *suiteName,
 {
 	if(testResult) {
 		if(testResult == 2) {
-			Output("%s: failed -> no assert", testName);
+			Output(--indentLevel, "%s: failed -> no assert", testName);
 		} else {
-			Output("%s: failed", testName);
+			Output(--indentLevel, "%s: failed", testName);
 		}
 	} else {
-		Output("%s: ok", testName);
+		Output(--indentLevel, "%s: ok", testName);
 	}
 }
 
@@ -92,7 +101,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 		time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output("%s: %s", assertName, assertMessage);
+	Output(indentLevel, "%s: %s", assertName, assertMessage);
 }
 
 void
@@ -100,20 +109,20 @@ PlainAssertWithValues(const char *assertName, int assertResult, const char *asse
 		int actualValue, int excpected, time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output("%s %d: %s", assertName, assertResult, assertMessage);
+	Output(indentLevel, "%s %d: %s", assertName, assertResult, assertMessage);
 }
 
 void
 PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, time_t eventTime)
 {
-	Output("Assert summary: %d failed, %d passed (total: %d)",
+	Output(indentLevel, "Assert summary: %d failed, %d passed (total: %d)",
 			numAssertsFailed, numAssertsPass, numAsserts);
 }
 
 void
 PlainLog(const char *logMessage, time_t eventTime)
 {
-	Output("%s %d", logMessage, eventTime);
+	Output(indentLevel, "%s %d", logMessage, eventTime);
 }
 
 #endif

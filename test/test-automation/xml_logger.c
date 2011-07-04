@@ -85,7 +85,7 @@ XMLOutputter(const int currentIdentLevel,
 	if(ValidateString(message)) {
 		int ident = 0;
 		for( ; ident < currentIdentLevel && prevEOL; ++ident) {
-			printf("  "); // \todo make configurable?
+			fprintf(stdout, "  "); // \todo make configurable?
 		}
 
 		prevEOL = EOL;
