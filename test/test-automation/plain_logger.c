@@ -6,7 +6,9 @@
 
 #include <SDL/SDL.h>
 
+#include "logger_helpers.h"
 #include "plain_logger.h"
+
 
 
 static int indentLevel;
@@ -38,13 +40,15 @@ void
 PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 				void *data)
 {
-	/*
-    Output("Test run started with following parameters\n");
+	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
+	Output(indentLevel, "");
+    /*
+	Output(indentLevel, "Runner: ");
 
 	int counter = 0;
 	for(counter = 0; counter < parameterCount; counter++) {
 		char *parameter = runnerParameters[counter];
-		Output("\t%s", parameter);
+		Output(indentLevel, "\t%s", parameter);
 	}
 	*/
 }
@@ -53,7 +57,7 @@ void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
               time_t endTime, double totalRuntime)
 {
-	Output(indentLevel, "\nRan %d tests in %0.5f seconds from %d suites.",
+	Output(indentLevel, "Ran %d tests in %0.5f seconds from %d suites.",
 			testCount, totalRuntime, suiteCount);
 
 	Output(indentLevel, "%d tests passed", testPassCount);
@@ -78,7 +82,7 @@ PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 void
 PlainTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
 {
-	Output(indentLevel++, "%s (in %s) started", testName, suiteName);
+	Output(indentLevel++, "Executing test: %s (in %s)", testName, suiteName);
 }
 
 void
@@ -106,10 +110,11 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 
 void
 PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
-		int actualValue, int excpected, time_t eventTime)
+		int actualValue, int expected, time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s %d: %s", assertName, assertResult, assertMessage);
+	Output(indentLevel, "%s %d (expected %d, actualValue &d): %s",
+			assertName, assertResult, expected, actualValue, assertMessage);
 }
 
 void
