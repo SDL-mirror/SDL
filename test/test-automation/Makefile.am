@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 
-SUBDIRS = testdummy testrect testplatform
+SUBDIRS = testdummy testrect testplatform testaudio
 
 bin_PROGRAMS = runner
 runner_SOURCES = runner.c SDL_test.c logger.c xml_logger.c plain_logger.c xml.c logger_helpers.c
