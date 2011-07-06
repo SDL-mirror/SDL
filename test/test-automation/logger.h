@@ -55,6 +55,7 @@ typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
 
 
 /*! Function pointers to actual logging function implementations */
+
 extern RunStartedFp RunStarted;
 extern RunEndedFp RunEnded;
 extern SuiteStartedFp SuiteStarted;

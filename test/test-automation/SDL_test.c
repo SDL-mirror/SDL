@@ -39,16 +39,8 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_TestCaseInit(const int enableXMLLogging)
+_TestCaseInit()
 {
-	// setup logging functions
-	// rather afwul way to do it, but function pointers didn't work
-	if(enableXMLLogging) {
-		SetupXMLLogger();
-	} else {
-		SetupPlainLogger();
-	}
-
 	_testReturnValue = 0;
 	_testAssertsFailed = 0;
 	_testAssertsPassed = 0;
@@ -82,7 +74,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-      AssertWithValues("AssertEquals", 1, "AssertEquals passed",
+	   AssertWithValues("AssertEquals", 1, "AssertEquals passed",
     		  actual, expected, time(0));
 
       _testAssertsPassed++;
@@ -122,7 +114,6 @@ AssertPass(char *message, ...)
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
 
-   //printf("AssertPass: %s\n", buf);
    Assert("AssertPass", 1, buf, time(0));
 
    _testAssertsPassed++;
@@ -138,7 +129,6 @@ AssertFail(char *message, ...)
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
 
-   //printf("AssertFail: %s\n", buf);
    Assert("AssertFail", 0, buf, time(0));
 
    _testAssertsFailed++;

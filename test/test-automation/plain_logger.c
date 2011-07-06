@@ -9,8 +9,6 @@
 #include "logger_helpers.h"
 #include "plain_logger.h"
 
-
-
 static int indentLevel;
 
 /*!

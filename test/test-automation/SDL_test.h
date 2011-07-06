@@ -29,6 +29,8 @@ extern int _testReturnValue;
 extern int _testAssertsFailed;
 extern int _testAssertsPassed;
 
+extern AssertFp testAssert;
+
 // \todo Should these be consts?
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
@@ -56,7 +58,7 @@ typedef struct TestCaseReference {
  *
  *  \param enableXMLLogging Whether or not enable xml logging
  */
-void _TestCaseInit(const int enableXMLLogging);
+void _TestCaseInit();
 
 /*!
  *  Deinitializes and exits the test case

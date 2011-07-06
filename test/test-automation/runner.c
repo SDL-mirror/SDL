@@ -31,12 +31,15 @@
 #include "config.h"
 
 #include "SDL_test.h"
+
+#include "plain_logger.h"
+#include "xml_logger.h"
 #include "logger.h"
 
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*TestCaseInitFp)(const int);
+typedef void (*TestCaseInitFp)(void);
 //!< Function pointer to a test case quit function
 typedef int  (*TestCaseQuitFp)(void);
 
@@ -116,6 +119,18 @@ TestCaseFp LoadTestCaseFunction(void *suite, char *testName);
 TestCaseInitFp LoadTestCaseInitFunction(void *suite);
 TestCaseQuitFp LoadTestCaseQuitFunction(void *suite);
 TestCaseReference **QueryTestCaseReferences(void *library);
+
+/*! Pointers to selected logger implementation */
+RunStartedFp RunStarted = NULL;
+RunEndedFp RunEnded = NULL;
+SuiteStartedFp SuiteStarted = NULL;
+SuiteEndedFp SuiteEnded = NULL;
+TestStartedFp TestStarted = NULL;
+TestEndedFp TestEnded = NULL;
+AssertFp Assert = NULL;
+AssertWithValuesFp AssertWithValues = NULL;
+AssertSummaryFp AssertSummary = NULL;
+LogFp Log = NULL;
 
 
 /*!
@@ -501,7 +516,8 @@ HandleChildProcessReturnValue(int stat_lock)
 		returnValue = WEXITSTATUS(stat_lock);
 	} else if(WIFSIGNALED(stat_lock)) {
 		int signal = WTERMSIG(stat_lock);
-		fprintf(stderr, "FAILURE: test was aborted due to signal no %d\n", signal);
+		// \todo add this to logger
+		//fprintf(stderr, "FAILURE: test was aborted due to signal no %d\n", signal);
 		returnValue = 1;
 	}
 
@@ -520,7 +536,7 @@ int
 ExecuteTest(TestCase *testItem) {
 	int retVal = 1;
 	if(execute_inproc) {
-		testItem->testCaseInit(xml_enabled);
+		testItem->testCaseInit();
 
 		testItem->testCase(0x0);
 
@@ -528,7 +544,7 @@ ExecuteTest(TestCase *testItem) {
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			testItem->testCaseInit(xml_enabled);
+			testItem->testCaseInit();
 
 			testItem->testCase(0x0);
 
@@ -692,7 +708,20 @@ main(int argc, char *argv[])
 
 	void *loggerData = NULL;
 	if(xml_enabled) {
-		SetupXMLLogger();
+		RunStarted = XMLRunStarted;
+		RunEnded = XMLRunEnded;
+
+		SuiteStarted = XMLSuiteStarted;
+		SuiteEnded = XMLSuiteEnded;
+
+		TestStarted = XMLTestStarted;
+		TestEnded = XMLTestEnded;
+
+		Assert = XMLAssert;
+		AssertWithValues = XMLAssertWithValues;
+		AssertSummary = XMLAssertSummary;
+
+		Log = XMLLog;
 
 		char *sheet = NULL;
 		if(xsl_enabled) {
@@ -705,7 +734,20 @@ main(int argc, char *argv[])
 
 		loggerData = sheet;
 	} else {
-		SetupPlainLogger();
+		RunStarted = PlainRunStarted;
+		RunEnded = PlainRunEnded;
+
+		SuiteStarted = PlainSuiteStarted;
+		SuiteEnded = PlainSuiteEnded;
+
+		TestStarted = PlainTestStarted;
+		TestEnded = PlainTestEnded;
+
+		Assert = PlainAssert;
+		AssertWithValues = PlainAssertWithValues;
+		AssertSummary = PlainAssertSummary;
+
+		Log = PlainLog;
 	}
 
 	const Uint32 startTicks = SDL_GetTicks();
