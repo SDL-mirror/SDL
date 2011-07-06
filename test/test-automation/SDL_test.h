@@ -55,8 +55,6 @@ typedef struct TestCaseReference {
  *  Initialized the test case. Must be called at
  *  the beginning of every test case, before doing
  *  anything else.
- *
- *  \param enableXMLLogging Whether or not enable xml logging
  */
 void _TestCaseInit();
 

@@ -14,6 +14,7 @@ static int indentLevel;
 /*!
  * Prints out the output of the logger
  *
+ * \param currentIdentLevel The currently used indentation level
  * \param message The message to be printed out
  */
 int
