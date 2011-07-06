@@ -125,7 +125,7 @@ div, h1 {
 }
 	
 .title {
-  font-weight: bold;
+  font-weight: bold; 
 }	
 </style>
 	

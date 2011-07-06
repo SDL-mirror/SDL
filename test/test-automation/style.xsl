@@ -102,20 +102,25 @@ $(document).ready(function() {
 	$("div.asserts").hide();
 	
 	/* Color the tests based on the result */
-	$("div.test[result='passed']").addClass('passed');
-	$("div.test[result='failed']").addClass('failed');
+	$("span.testResult[result='passed']").addClass('passed');
+	$("span.testResult[result='failed']").addClass('failed');
 	
 	/* Color the asserts based on the result */
-	$("div.assert[result='pass']").addClass('passed');
-	$("div.assert[result='failure']").addClass('failed');
+	$("span.assertResult[result='pass']").addClass('passed');
+	$("span.assertResult[result='failure']").addClass('failed');
 });
 
 </script>
 <style>
 
 div, h1 {
-  padding: 3px 10px 2px 10px;
+  padding: 2px 10px 2px 10px;
   margin: 5px 0px 5px 0px;
+}
+
+.assert {
+  padding: 0px 10px 0px 10px;
+  margin: 0px 0px 0px 0px;
 }
 
 .document {
@@ -139,17 +144,17 @@ div, h1 {
 	
 .switch {
   font-style: italic;
-  color: rgb(10, 10, 200); /*#024A68;*/
+  color: rgb(10, 10, 200); 
   font-size: 10pt;
   cursor: pointer;
 }	
 	
 .passed {
- background-color: #64AA2B;
+ color: green;
 }
 
 .failed {
- background-color: #FF6E40;
+ color: red;
 }
 
 </style>
@@ -193,33 +198,29 @@ div, h1 {
         <div class="tests" uid="{generate-id(test)}">
 	      <xsl:for-each select="test">
 			<div class="test">
+			Test <span class="title"><xsl:value-of select="name"/>: </span>
+			<span class="testResult">
 			  <xsl:attribute name="result">
-			    <xsl:value-of select="result"/>
-	          </xsl:attribute>
-		      
-		      Name:  <xsl:value-of select="name"/> (<xsl:value-of select="startTime"/>  - <xsl:value-of select="endTime"/>  ) <br/>
-		      Description: <span class="description"> <xsl:value-of select="description"/> </span><br/> 
-		
-	          Total runtime: <xsl:value-of select="totalRuntime"/> seconds  <br/>
-		      Result: <xsl:value-of select="result"/>  <br/>
-		      
+			    <xsl:value-of select="result"/> 
+	           </xsl:attribute><xsl:value-of select="result"/> 
+	        </span> 
+			(Total runtime: <xsl:value-of select="totalRuntime"/> seconds)<br/>
+			Description: <span class="description"> <xsl:value-of select="description"/> </span><br/>
 		      <span class="switch show-asserts" uid="{generate-id(assertSummary)}">[Show Assert Summary]</span><br/>
 			  <div class="asserts" uid="{generate-id(assertSummary)}">
 		        <xsl:for-each select="assert"> 
 			      <div class="assert">
-  			        <xsl:attribute name="result">
-				      <xsl:value-of select="result"/>
-				    </xsl:attribute>
-		            Assert name: <xsl:value-of select="name"/> <br/>
-		            Result: <xsl:value-of select="result"/> <br/>
-		            Message <xsl:value-of select="message"/> <br/>
-		            Time <xsl:value-of select="time"/> <br/>
+					<xsl:value-of select="name"/>: 
+					<span class="assertResult">
+						<xsl:attribute name="result">
+					      <xsl:value-of select="result"/>
+					    </xsl:attribute>
+					  <xsl:value-of select="result"/>  
+					</span>.
+					 Message: <span class="description"><xsl:value-of select="message"/></span>
 		          </div>
 		        </xsl:for-each>
-		        AssertSummary:
-		        Assert count: <xsl:value-of select="assertSummary/assertCount"/> <br/>
-		        Asserts Passed <xsl:value-of select="assertSummary/assertsPassed"/> <br/>
-		        Asserts Failed <xsl:value-of select="assertSummary/assertsFailed"/> <br/>
+				Asserts in total: <xsl:value-of select="assertSummary/assertCount"/> (passed: <xsl:value-of select="assertSummary/assertsPassed"/>, failed: <xsl:value-of select="assertSummary/assertsFailed"/>)
 		      </div>
     		</div>
 		  </xsl:for-each>
