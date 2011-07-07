@@ -465,10 +465,13 @@ static int CheckVidMode(_THIS, int *major, int *minor)
 
         metro_fp = fopen("/usr/X11R6/lib/X11/Metro/.version", "r");
         if ( metro_fp != NULL ) {
-            int major, minor, patch, version;
+            int major, minor, patch, version, scannum;
             major = 0; minor = 0; patch = 0;
-            fscanf(metro_fp, "%d.%d.%d", &major, &minor, &patch);
+            scannum = fscanf(metro_fp, "%d.%d.%d", &major, &minor, &patch);
             fclose(metro_fp);
+            if ( (scannum < 0) || (scannum > 3) ) {
+                return 0;  /* we need _something_ useful from fscanf(). */
+            }
             version = major*100+minor*10+patch;
             if ( version < 431 ) {
                 return 0;
