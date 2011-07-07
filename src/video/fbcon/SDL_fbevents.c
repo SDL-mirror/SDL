@@ -516,9 +516,9 @@ static int detect_imps2(int fd)
 			}
 		}
 
-   		/* Query for the type of mouse protocol */
-   		if ( write(fd, &query_ps2, sizeof (query_ps2)) == sizeof (query_ps2)) {
-   			Uint8 ch = 0;
+		/* Query for the type of mouse protocol */
+		if ( write(fd, &query_ps2, sizeof (query_ps2)) == sizeof (query_ps2)) {
+			Uint8 ch = 0;
 
 			/* Get the mouse protocol response */
 			do {
