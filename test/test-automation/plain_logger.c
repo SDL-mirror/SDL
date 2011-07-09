@@ -104,7 +104,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 		time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s: %s", assertName, assertMessage);
+	Output(indentLevel, "%s: %s; %s", assertName, result, assertMessage);
 }
 
 void
@@ -112,8 +112,8 @@ PlainAssertWithValues(const char *assertName, int assertResult, const char *asse
 		int actualValue, int expected, time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s %d (expected %d, actualValue &d): %s",
-			assertName, assertResult, expected, actualValue, assertMessage);
+	Output(indentLevel, "%s %s (expected %d, actualValue &d): %s",
+			assertName, result, expected, actualValue, assertMessage);
 }
 
 void

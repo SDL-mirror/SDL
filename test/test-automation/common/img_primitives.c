@@ -1,4 +1,5 @@
 /* GIMP RGB C-Source image dump (primitives.c) */
+#include "common.h"
 
 static const SurfaceImage_t img_primitives = {
   80, 60, 3,

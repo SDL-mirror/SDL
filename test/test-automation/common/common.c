@@ -7,11 +7,8 @@
  */
 
 
-#include "SDL.h"
-#include "../SDL_at.h"
 
 #include "common.h"
-
 
 /**
  * @brief Compares a surface and a surface image for equality.

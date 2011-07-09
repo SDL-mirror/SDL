@@ -74,7 +74,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-	   AssertWithValues("AssertEquals", 1, "AssertEquals passed",
+	   AssertWithValues("AssertEquals", 1, buf,
     		  actual, expected, time(0));
 
       _testAssertsPassed++;
@@ -92,15 +92,17 @@ AssertTrue(int condition, char *message, ...)
       SDL_vsnprintf( buf, sizeof(buf), message, args );
       va_end( args );
 
-      //printf("AssertTrue failed: %s\n", buf);
       Assert("AssertTrue", 0, buf, time(0));
 
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-     //printf("AssertTrue passed\n");
-	 Assert("AssertTrue", 1, "AssertTrue passed", time(0));
-     _testAssertsPassed++;
+		va_start( args, message );
+		SDL_vsnprintf( buf, sizeof(buf), message, args );
+		va_end( args );
+
+		Assert("AssertTrue", 1, buf, time(0));
+		_testAssertsPassed++;
    }
 }
 

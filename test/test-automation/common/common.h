@@ -10,6 +10,7 @@
 #ifndef COMMON_H
 #  define COMMON_H
 
+#include "SDL/SDL.h"
 
 #  define FORMAT  SDL_PIXELFORMAT_ARGB8888
 #  define AMASK   0xff000000 /**< Alpha bit mask. */

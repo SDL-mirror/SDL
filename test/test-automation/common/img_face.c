@@ -1,4 +1,5 @@
 /* GIMP RGBA C-Source image dump (face.c) */
+#include "common.h"
 
 static const SurfaceImage_t img_face = {
   32, 32, 4,

@@ -1,5 +1,7 @@
 /* GIMP RGB C-Source image dump (blit.c) */
 
+#include "common.h"
+
 static const SurfaceImage_t img_blit = {
   80, 60, 3,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"

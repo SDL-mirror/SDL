@@ -16,7 +16,7 @@ elif [[ $PLATFORM ==  "Darwin" ]]; then
 fi
 
 # TODO: put the test in an array
-for suite in "testdummy" "testplatform" "testrect" "testaudio"
+for suite in "testdummy" "testplatform" "testrect" "testaudio" "testsurface"
 do
 	cp -f "$suite/.libs/lib$suite.$EXT" $DIRECTORY
 done

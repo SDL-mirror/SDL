@@ -1,4 +1,5 @@
 /* GIMP RGB C-Source image dump (alpha.c) */
+#include "common.h"
 
 static const SurfaceImage_t img_blend = {
   80, 60, 3,
