@@ -134,7 +134,7 @@ void surface_testLoad(void *arg)
 
    /* See if it's the same. */
    AssertTrue(surface_compare( rface, &img_face, 0 ) == 0,
-		   "Primitives output not the same.");
+		   "Comparing primitives output.");
 
    /* Clean up. */
    SDL_FreeSurface( rface );
@@ -204,7 +204,7 @@ void surface_testBlit(void *arg)
 
    /* See if it's the same. */
    AssertTrue(surface_compare( testsur, &img_blit, 0 ) == 0,
-		   "Blitting output not the same (normal blit).");
+		   "Comparing blitting output (normal blit).");
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -229,7 +229,7 @@ void surface_testBlit(void *arg)
 
    /* See if it's the same. */
    AssertTrue(surface_compare( testsur, &img_blitColour, 0 ) == 0,
-		   "Blitting output not the same (using SDL_SetSurfaceColorMod).");
+		   "Comparing blitting output (using SDL_SetSurfaceColorMod).");
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -257,7 +257,7 @@ void surface_testBlit(void *arg)
 
    /* See if it's the same. */
    AssertTrue(surface_compare( testsur, &img_blitAlpha, 0 ) == 0,
-		   "Blitting output not the same (using SDL_SetSurfaceAlphaMod).");
+		   "Comparing blitting output (using SDL_SetSurfaceAlphaMod).");
 
    /* Clean up. */
    SDL_FreeSurface( face );
@@ -321,25 +321,25 @@ void surface_testBlitBlend(void *arg)
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_NONE ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendNone, 0 ) == 0,
-   		   "Blitting blending output not the same (using SDL_BLENDMODE_NONE).");
+   		   "Comparing blitting blending output (using SDL_BLENDMODE_NONE).");
 
    /* Test Blend. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_BLEND ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendBlend, 0 ) == 0,
-   		   "Blitting blending output not the same (using SDL_BLENDMODE_BLEND).");
+   		   "Comparing blitting blending output (using SDL_BLENDMODE_BLEND).");
 
    /* Test Add. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_ADD ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendAdd, 0 ) == 0,
-   		      "Blitting blending output not the same (using SDL_BLENDMODE_ADD).");
+   		      "Comparing blitting blending output (using SDL_BLENDMODE_ADD).");
 
    /* Test Mod. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendMod, 0 ) == 0,
-   		      "Blitting blending output not the same (using SDL_BLENDMODE_MOD).");
+   		      "Comparing blitting blending output not the same (using SDL_BLENDMODE_MOD).");
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -379,7 +379,7 @@ void surface_testBlitBlend(void *arg)
 
    /* Check to see if matches. */
    AssertTrue(surface_compare( testsur, &img_blendAll, 0 ) == 0,
-		      "Blitting blending output not the same (using SDL_BLEND_*).");
+		      "Surface comparison (surface_compare).");
 
    /* Clean up. */
    SDL_FreeSurface( face );
