@@ -516,8 +516,8 @@ HandleChildProcessReturnValue(int stat_lock)
 		returnValue = WEXITSTATUS(stat_lock);
 	} else if(WIFSIGNALED(stat_lock)) {
 		int signal = WTERMSIG(stat_lock);
-		// \todo add this to logger
-		//fprintf(stderr, "FAILURE: test was aborted due to signal no %d\n", signal);
+		// \todo add this to logger (add signal number)
+		Log("FAILURE: test was aborted due to signal\n", time(0));
 		returnValue = 1;
 	}
 

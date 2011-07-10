@@ -24,9 +24,6 @@
  * various asserts and (possible) other utilities.
  */
 
-#ifndef _TEST_C
-#define _TEST_C
-
 #include <stdio.h>
 
 #include <SDL/SDL.h>
@@ -59,7 +56,7 @@ TestCaseReference **QueryTestSuite() {
 void
 dummycase1(void *arg)
 {
-	AssertEquals(3, 5, "fails");
+	AssertEquals(5, 5, "Assert message");
 }
 
 void
@@ -67,13 +64,12 @@ dummycase2(void *arg)
 {
 	char *msg = "eello";
 	//msg[0] = 'H';
-	AssertTrue(0, "fails");
+	AssertTrue(1, "Assert message");
 }
 
 void
 dummycase3(void *arg)
 {
-	AssertTrue(1, "passes");
+	AssertTrue(1, "Assert message");
 }
 
-#endif

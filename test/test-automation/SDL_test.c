@@ -18,9 +18,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_TEST_C
-#define _SDL_TEST_C
-
 #include <stdio.h> /* printf/fprintf */
 #include <stdarg.h> /* va_list */
 #include <time.h>
@@ -60,15 +57,17 @@ _TestCaseQuit()
 }
 
 void
-AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
+AssertEquals(const int expected, const int actual, char *message, ...)
 {
    va_list args;
    char buf[256];
 
-   if(expected != actual) {
-      va_start( args, message );
-      SDL_vsnprintf( buf, sizeof(buf), message, args );
-      va_end( args );
+   va_start( args, message );
+   memset(buf, 0, sizeof(buf));
+   SDL_vsnprintf( buf, sizeof(buf), message, args );
+   va_end( args );
+
+   if(expected != expected) {
       AssertWithValues("AssertEquals", 0, buf, actual, expected, time(0));
 
       _testReturnValue = 1;
@@ -77,6 +76,7 @@ AssertEquals(Uint32 expected, Uint32 actual, char* message, ...)
 	   AssertWithValues("AssertEquals", 1, buf,
     		  actual, expected, time(0));
 
+      _testReturnValue = 0;
       _testAssertsPassed++;
    }
 }
@@ -86,22 +86,19 @@ AssertTrue(int condition, char *message, ...)
 {
    va_list args;
    char buf[256];
+   va_start( args, message );
+   SDL_vsnprintf( buf, sizeof(buf), message, args );
+   va_end( args );
 
    if (!condition) {
-      va_start( args, message );
-      SDL_vsnprintf( buf, sizeof(buf), message, args );
-      va_end( args );
-
       Assert("AssertTrue", 0, buf, time(0));
 
       _testReturnValue = 1;
       _testAssertsFailed++;
    } else {
-		va_start( args, message );
-		SDL_vsnprintf( buf, sizeof(buf), message, args );
-		va_end( args );
-
 		Assert("AssertTrue", 1, buf, time(0));
+
+		_testReturnValue = 0;
 		_testAssertsPassed++;
    }
 }
@@ -118,6 +115,7 @@ AssertPass(char *message, ...)
 
    Assert("AssertPass", 1, buf, time(0));
 
+   _testReturnValue = 0;
    _testAssertsPassed++;
 }
 
@@ -133,7 +131,7 @@ AssertFail(char *message, ...)
 
    Assert("AssertFail", 0, buf, time(0));
 
+   _testReturnValue = 1;
    _testAssertsFailed++;
 }
 
-#endif

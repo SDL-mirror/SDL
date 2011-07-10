@@ -2,8 +2,6 @@
  * Original code: automated SDL surface test written by Edgar Simo "bobbens"
  */
 
-#ifndef _TEST_C
-#define _TEST_C
 #include <stdio.h>
 
 #include <SDL/SDL.h>
@@ -53,6 +51,9 @@ CreateTestSurface() {
 	return testsur;
 }
 
+/**
+ * @brief Tests a blend mode.
+ */
 int testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 {
 	int ret;
@@ -63,7 +64,7 @@ int testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 	ret = SDL_FillRect( testsur, NULL,
 		 SDL_MapRGB( testsur->format, 0, 0, 0 ) );
 	if(ret == 0)
-	  return 1;
+		return 1;
 
 	/* Steps to take. */
 	ni     = testsur->w - face->w;
@@ -90,7 +91,7 @@ int testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 	  }
 	}
 
-	   return 0;
+	return 0;
 }
 
 /* Test case functions */
@@ -265,13 +266,6 @@ void surface_testBlit(void *arg)
    SDL_Quit();
 }
 
-
-/**
- * @brief Tests a blend mode.
- */
-
-
-
 /**
  * @brief Tests some more blitting routines.
  */
@@ -327,26 +321,25 @@ void surface_testBlitBlend(void *arg)
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_NONE ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendNone, 0 ) == 0,
-		   "Blitting blending output not the same (using SDL_BLENDMODE_NONE).");
-
+   		   "Blitting blending output not the same (using SDL_BLENDMODE_NONE).");
 
    /* Test Blend. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_BLEND ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendBlend, 0 ) == 0,
-		   "Blitting blending output not the same (using SDL_BLENDMODE_BLEND).");
+   		   "Blitting blending output not the same (using SDL_BLENDMODE_BLEND).");
 
    /* Test Add. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_ADD ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendAdd, 0 ) == 0,
-		      "Blitting blending output not the same (using SDL_BLENDMODE_ADD).");
+   		      "Blitting blending output not the same (using SDL_BLENDMODE_ADD).");
 
    /* Test Mod. */
    if (testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD ))
       return;
    AssertTrue(surface_compare( testsur, &img_blendMod, 0 ) == 0,
-		      "Blitting blending output not the same (using SDL_BLENDMODE_MOD).");
+   		      "Blitting blending output not the same (using SDL_BLENDMODE_MOD).");
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -394,5 +387,3 @@ void surface_testBlitBlend(void *arg)
 
    SDL_Quit();
 }
-
-#endif

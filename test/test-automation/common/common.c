@@ -7,11 +7,14 @@
  */
 
 
-
 #include "common.h"
 
 /**
- * @brief Compares a surface and a surface image for equality.
+ * @brief Compares a surface and a surface image for equality
+ *
+ * @param sur Surface used in comparison
+ * @param img Surface image used in comparison
+ * @param allowable_error Allowable difference in blending accuracy
  */
 int surface_compare( SDL_Surface *sur, const SurfaceImage_t *img, int allowable_error )
 {

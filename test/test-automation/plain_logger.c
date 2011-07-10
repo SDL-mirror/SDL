@@ -126,7 +126,7 @@ PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, tim
 void
 PlainLog(const char *logMessage, time_t eventTime)
 {
-	Output(indentLevel, "%s %d", logMessage, eventTime);
+	Output(indentLevel, "%s %d", logMessage, TimestampToString(eventTime));
 }
 
 #endif

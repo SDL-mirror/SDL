@@ -73,8 +73,7 @@ int _TestCaseQuit();
  * \param actual The actual value of tested variable
  * \param message Message that will be printed if assert fails
  */
-void AssertEquals(Uint32 expected, Uint32 actual, char *message, ...);
-
+void AssertEquals(const int expected, const int actual, char *message, ...);
 /*!
  *  Assert function. Tests if the given condition is true. True in
  *  this case means non-zero value. If the condition is true, the
