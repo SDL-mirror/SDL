@@ -21,7 +21,7 @@
 /*! \file
  * Dummy test suite for test runner. This can be used as a base for
  * writing new tests. Dummy suite also works as reference to using
- * various asserts and (possible) other utilities.
+ * various asserts and other (possible) utilities.
  */
 
 #include <stdio.h>
@@ -29,8 +29,6 @@
 #include <SDL/SDL.h>
 
 #include "../SDL_test.h"
-
-// \todo add some helpful commenting for possible test writers?
 
 /* Test case references */
 static const TestCaseReference test1 =
@@ -50,6 +48,37 @@ extern const TestCaseReference *testSuite[] =  {
 
 TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
+}
+
+/* Create test fixture */
+
+/*!
+ * SetUp function can be used to create a test fixture for test cases.
+ * The function will be called right before executing the test case.
+ *
+ * Note: this function is optional.
+ *
+ * \param arg parameters given to test. Usually NULL
+ */
+void
+SetUp(void *arg)
+{
+	// create test fixture,
+	// for example, set up static variables used by test cases here
+}
+
+/*!
+ * TearDown function can be used to destroy a test fixture for test cases.
+ * The function will be called right after executing the test case.
+ *
+ * Note: this function is optional.
+ *
+ * \param arg parameters given to test. Usually NULL
+ */
+void
+TearDown(void *arg)
+{
+	// destroy test fixture
 }
 
 /* Test case functions */

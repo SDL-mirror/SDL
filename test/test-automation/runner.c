@@ -39,9 +39,13 @@
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*TestCaseInitFp)(void);
+typedef void (*InitTestInvironmentFp)(void);
 //!< Function pointer to a test case quit function
-typedef int  (*TestCaseQuitFp)(void);
+typedef int  (*QuitTestInvironmentFp)(void);
+//!< Function pointer to a test case set up function
+typedef void (*TestCaseSetUpFp)(void *arg);
+//!< Function pointer to a test case tear down function
+typedef void  (*TestCaseTearDownFp)(void *arg);
 
 
 //!< Flag for executing tests in-process
@@ -105,20 +109,24 @@ typedef struct TestCaseItem {
 	long requirements;
 	long timeout;
 
-	TestCaseInitFp testCaseInit;
+	InitTestInvironmentFp initTestEnvironment;
+	TestCaseSetUpFp testSetUp;
 	TestCaseFp testCase;
-	TestCaseQuitFp testCaseQuit;
+	TestCaseTearDownFp testTearDown;
+ 	QuitTestInvironmentFp quitTestEnvironment;
 
 	struct TestCaseItem *next;
 } TestCase;
 
 
-
 /*! Some function prototypes. Add the rest of functions and move to runner.h */
 TestCaseFp LoadTestCaseFunction(void *suite, char *testName);
-TestCaseInitFp LoadTestCaseInitFunction(void *suite);
-TestCaseQuitFp LoadTestCaseQuitFunction(void *suite);
+InitTestInvironmentFp LoadInitTestInvironmentFunction(void *suite);
+QuitTestInvironmentFp LoadQuitTestInvironmentFunction(void *suite);
 TestCaseReference **QueryTestCaseReferences(void *library);
+TestCaseSetUpFp LoadTestSetUpFunction(void *suite);
+TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
+
 
 /*! Pointers to selected logger implementation */
 RunStartedFp RunStarted = NULL;
@@ -159,18 +167,26 @@ LoadTestCases(TestSuiteReference *suites)
 			void *suite = suiteReference->library;
 
 			// Load test case functions
-			TestCaseInitFp testCaseInit = LoadTestCaseInitFunction(suiteReference->library);
-			TestCaseQuitFp testCaseQuit = LoadTestCaseQuitFunction(suiteReference->library);
-			TestCaseFp testCase = (TestCaseFp) LoadTestCaseFunction(suiteReference->library, testReference->name);
+			InitTestInvironmentFp initTestEnvironment = LoadInitTestInvironmentFunction(suiteReference->library);
+			QuitTestInvironmentFp quitTestEnvironment = LoadQuitTestInvironmentFunction(suiteReference->library);
+
+			TestCaseSetUpFp testSetUp = LoadTestSetUpFunction(suiteReference->library);
+			TestCaseTearDownFp testTearDown = LoadTestTearDownFunction(suiteReference->library);
+
+			TestCaseFp testCase = LoadTestCaseFunction(suiteReference->library, testReference->name);
 
 			// Do the filtering
 			if(FilterTestCase(testReference)) {
 				TestCase *item = SDL_malloc(sizeof(TestCase));
 				memset(item, 0, sizeof(TestCase));
 
-				item->testCaseInit = testCaseInit;
+				item->initTestEnvironment = initTestEnvironment;
+				item->quitTestEnvironment = quitTestEnvironment;
+
+				item->testSetUp = testSetUp;
+				item->testTearDown = testTearDown;
+
 				item->testCase = testCase;
-				item->testCaseQuit = testCaseQuit;
 
 				// copy suite name
 				int length = SDL_strlen(suiteReference->name) + 1;
@@ -287,7 +303,9 @@ ScanForTestSuites(char *directoryName, char *extension)
 
 	Entry *entry = NULL;
 	if(!directory) {
-		perror("Couldn't open test suite directory!");
+		fprintf(stderr, "Failed to open test suite directory: %s\n", directoryName);
+		perror("Error message");
+		exit(1);
 	}
 
 	while(entry = readdir(directory)) {
@@ -458,42 +476,82 @@ LoadTestCaseFunction(void *suite, char *testName)
 
 
 /*!
- * Loads function that initialises the test case from the
- * given test suite.
+ * Loads function that sets up a fixture for a test case. Note: if there's
+ * no SetUp function present in the suite the function will return NULL.
  *
  * \param suite Used test suite
  *
- * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
+ * \return Function pointer to test case's set up function
  */
-TestCaseInitFp
-LoadTestCaseInitFunction(void *suite) {
-	TestCaseInitFp testCaseInit = (TestCaseInitFp) SDL_LoadFunction(suite, "_TestCaseInit");
-	if(testCaseInit == NULL) {
-		fprintf(stderr, "Loading TestCaseInit function failed, testCaseInit == NULL\n");
+TestCaseSetUpFp
+LoadTestSetUpFunction(void *suite) {
+	TestCaseSetUpFp testSetUp = (TestCaseSetUpFp) SDL_LoadFunction(suite, "SetUp");
+	if(testSetUp == NULL) {
+		fprintf(stderr, "Loading SetUp function failed, testSetUp == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
-	return testCaseInit;
+	return testSetUp;
 }
 
 
 /*!
- * Loads function that deinitialises the executed test case from the
- * given test suite.
+ * Loads function that tears down a fixture for a test case. Note: if there's
+ * no TearDown function present in the suite the function will return NULL.
  *
  * \param suite Used test suite
  *
- * \return Function pointer (TestCaseInit) which points to loaded init function. NULL if function fails.
+ * \return Function pointer to test case's tear down function
  */
-TestCaseQuitFp
-LoadTestCaseQuitFunction(void *suite) {
-	TestCaseQuitFp testCaseQuit = (TestCaseQuitFp) SDL_LoadFunction(suite, "_TestCaseQuit");
-	if(testCaseQuit == NULL) {
-		fprintf(stderr, "Loading TestCaseQuit function failed, testCaseQuit == NULL\n");
+TestCaseTearDownFp
+LoadTestTearDownFunction(void *suite) {
+	TestCaseTearDownFp testTearDown = (TestCaseTearDownFp) SDL_LoadFunction(suite, "TearDown");
+	if(testTearDown == NULL) {
+		fprintf(stderr, "Loading TearDown function failed, testTearDown == NULL\n");
 		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 
-	return testCaseQuit;
+	return testTearDown;
+}
+
+
+/*!
+ * Loads function that initialises the test environment for
+ * a test case in the given suite.
+ *
+ * \param suite Used test suite
+ *
+ * \return Function pointer (InitTestInvironmentFp) which points to loaded init function. NULL if function fails.
+ */
+InitTestInvironmentFp
+LoadInitTestInvironmentFunction(void *suite) {
+	InitTestInvironmentFp testEnvInit = (InitTestInvironmentFp) SDL_LoadFunction(suite, "_InitTestEnvironment");
+	if(testEnvInit == NULL) {
+		fprintf(stderr, "Loading _InitTestInvironment function failed, testEnvInit == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	return testEnvInit;
+}
+
+
+/*!
+ * Loads function that deinitialises the test environment (and returns
+ * the test case's result) created for the test case in the given suite.
+ *
+ * \param suite Used test suite
+ *
+ * \return Function pointer (QuitTestInvironmentFp) which points to loaded init function. NULL if function fails.
+ */
+QuitTestInvironmentFp
+LoadQuitTestInvironmentFunction(void *suite) {
+	QuitTestInvironmentFp testEnvQuit = (QuitTestInvironmentFp) SDL_LoadFunction(suite, "_QuitTestEnvironment");
+	if(testEnvQuit == NULL) {
+		fprintf(stderr, "Loading _QuitTestEnvironment function failed, testEnvQuit == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	return testEnvQuit;
 }
 
 
@@ -536,19 +594,37 @@ int
 ExecuteTest(TestCase *testItem) {
 	int retVal = 1;
 	if(execute_inproc) {
-		testItem->testCaseInit();
+		testItem->initTestEnvironment();
+
+		if(testItem->testSetUp) {
+			testItem->testSetUp(0x0);
+		}
 
 		testItem->testCase(0x0);
 
-		retVal = testItem->testCaseQuit();
+		if(testItem->testTearDown) {
+			testItem->testTearDown(0x0);
+		}
+
+		retVal = testItem->quitTestEnvironment();
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			testItem->testCaseInit();
+			testItem->initTestEnvironment();
+
+			if(testItem->testSetUp) {
+				testItem->testSetUp(0x0);
+			}
 
 			testItem->testCase(0x0);
 
-			exit(testItem->testCaseQuit());
+			// note: if test case is is aborted by some signal
+			// then TearDown function won't be called
+			if(testItem->testTearDown) {
+				testItem->testTearDown(0x0);
+			}
+
+			exit(testItem->quitTestEnvironment());
 		} else {
 			int stat_lock = -1;
 			int child = wait(&stat_lock);

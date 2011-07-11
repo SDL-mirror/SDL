@@ -25,6 +25,10 @@
 
 #include "logger.h"
 
+#include "common/common.h"
+#include "common/images.h"
+
+
 extern int _testReturnValue;
 extern int _testAssertsFailed;
 extern int _testAssertsPassed;
@@ -52,18 +56,18 @@ typedef struct TestCaseReference {
 } TestCaseReference;
 
 /*!
- *  Initialized the test case. Must be called at
- *  the beginning of every test case, before doing
- *  anything else.
+ *  Initialized the test environment such as asserts. Must be called at
+ *  the beginning of every test case, before doing anything else.
  */
-void _TestCaseInit();
+void _InitTestEnvironment();
 
 /*!
- *  Deinitializes and exits the test case
+ *  Deinitializes the test environment and
+ *  returns the result of the test (pass or failure)
  *
  * \return 0 if test succeeded, otherwise 1
  */
-int _TestCaseQuit();
+int _QuitTestEnvironment();
 
 /*!
  *  Assert function. Tests if the expected value equals the actual value, then
@@ -74,6 +78,7 @@ int _TestCaseQuit();
  * \param message Message that will be printed if assert fails
  */
 void AssertEquals(const int expected, const int actual, char *message, ...);
+
 /*!
  *  Assert function. Tests if the given condition is true. True in
  *  this case means non-zero value. If the condition is true, the

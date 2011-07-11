@@ -1,4 +1,4 @@
-/*
+	/*
   Copyright (C) 2011 Markus Kauppila <markus.kauppila@gmail.com>
 
   This software is provided 'as-is', without any express or implied
@@ -36,7 +36,7 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_TestCaseInit()
+_InitTestEnvironment() // InitTestEnvironment
 {
 	_testReturnValue = 0;
 	_testAssertsFailed = 0;
@@ -44,7 +44,7 @@ _TestCaseInit()
 }
 
 int
-_TestCaseQuit()
+_QuitTestEnvironment()
 {
 	AssertSummary(_testAssertsFailed + _testAssertsPassed,
                   _testAssertsFailed, _testAssertsPassed, time(0));
@@ -76,7 +76,6 @@ AssertEquals(const int expected, const int actual, char *message, ...)
 	   AssertWithValues("AssertEquals", 1, buf,
     		  actual, expected, time(0));
 
-      _testReturnValue = 0;
       _testAssertsPassed++;
    }
 }
@@ -98,7 +97,6 @@ AssertTrue(int condition, char *message, ...)
    } else {
 		Assert("AssertTrue", 1, buf, time(0));
 
-		_testReturnValue = 0;
 		_testAssertsPassed++;
    }
 }
@@ -115,7 +113,6 @@ AssertPass(char *message, ...)
 
    Assert("AssertPass", 1, buf, time(0));
 
-   _testReturnValue = 0;
    _testAssertsPassed++;
 }
 
