@@ -36,7 +36,7 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_InitTestEnvironment() // InitTestEnvironment
+_InitTestEnvironment()
 {
 	_testReturnValue = 0;
 	_testAssertsFailed = 0;
@@ -56,8 +56,13 @@ _QuitTestEnvironment()
 	return _testReturnValue;
 }
 
+int
+_CountFailedAsserts() {
+	return _testAssertsFailed;
+}
+
 void
-AssertEquals(const int expected, const int actual, char *message, ...)
+AssertEquals(int expected, int actual, char *message, ...)
 {
    va_list args;
    char buf[256];

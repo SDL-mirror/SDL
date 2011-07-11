@@ -38,6 +38,7 @@ const char *numSuitesElementName = "numSuites";
 const char *numTestElementName = "numTests";
 const char *numPassedTestsElementName = "numPassedTests";
 const char *numFailedTestsElementName = "numFailedTests";
+const char *numSkippedTestsElementName = "numSkippedTests";
 const char *endTimeElementName = "endTime";
 const char *totalRuntimeElementName = "totalRuntime";
 const char *suiteElementName = "suite";
@@ -145,7 +146,7 @@ XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 
 void
 XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-            time_t endTime, double totalRuntime)
+			int testSkippedCount, time_t endTime, double totalRuntime)
 {
 	// log suite count
 	char *output = XMLOpenElement(numSuitesElementName);
@@ -187,7 +188,17 @@ XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
 	output = XMLCloseElement(numFailedTestsElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
-	// log end timte
+	// log skipped test count
+	output = XMLOpenElement(numSkippedTestsElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(IntToString(testSkippedCount));
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(numSkippedTestsElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
+	// log end tite
 	output = XMLOpenElement(endTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -342,6 +353,9 @@ XMLTestEnded(const char *testName, const char *suiteName,
 	if(testResult) {
 		if(testResult == 2) {
 			output = XMLAddContent("failed. No assert");
+		}
+		else if(testResult == 3) {
+			output = XMLAddContent("skipped");
 		} else {
 			output = XMLAddContent("failed");
 		}

@@ -32,10 +32,38 @@ TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
+/* Function prototypes */
+SDL_Surface *_CreateTestSurface();
+
+
+/* Create test fixture */
+
+static SDL_Surface *testsur = NULL;
+
+
+void
+SetUp(void *arg)
+{
+	int ret = SDL_Init(SDL_INIT_VIDEO);
+	AssertTrue(ret == 0, "SDL_Init(SDL_INIT_VIDEO)");
+
+	testsur = _CreateTestSurface();
+	AssertTrue(testsur != NULL, "SDL_Init(SDL_INIT_VIDEO)");
+}
+
+void
+TearDown(void *arg)
+{
+	SDL_FreeSurface( testsur );
+
+	SDL_Quit();
+}
+
 /* Helper functions for the test cases */
 
 #define TEST_SURFACE_WIDTH 80
 #define TEST_SURFACE_HEIGHT 60
+
 
 /*!
  * Creates test surface
@@ -66,7 +94,7 @@ _CreateTestSurface()
 /**
  * @brief Tests a blend mode.
  */
-int _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
+void _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 {
 	int ret;
 	int i, j, ni, nj;
@@ -102,8 +130,6 @@ int _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 		 ret = SDL_BlitSurface( face, NULL, testsur, &rect );
 		 AssertTrue(ret != 0, "SDL_BlitSurface");	  }
 	}
-
-	return 0;
 }
 
 /* Test case functions */
@@ -115,13 +141,8 @@ void surface_testLoad(void *arg)
 	int ret;
     SDL_Surface *face, *rface;
 
-	ret = SDL_Init(SDL_INIT_VIDEO);
-	AssertTrue(ret == 0, "SDL_Init(SDL_INIT_VIDEO)");
-
-	SDL_Surface *testsur = _CreateTestSurface();
-
-   /* Clear surface. */
-   ret = SDL_FillRect( testsur, NULL,
+    /* Clear surface. */
+    ret = SDL_FillRect( testsur, NULL,
          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
 	AssertTrue(ret == 0,  "SDL_FillRect");
 
@@ -151,10 +172,6 @@ void surface_testLoad(void *arg)
    /* Clean up. */
    SDL_FreeSurface( rface );
    SDL_FreeSurface( face );
-
-   SDL_FreeSurface( testsur );
-
-   SDL_Quit();
 }
 
 
@@ -163,14 +180,8 @@ void surface_testLoad(void *arg)
  */
 void surface_testLoadFailure(void *arg)
 {
-	int ret = SDL_Init(SDL_INIT_VIDEO);
-	AssertTrue(ret == 0, "SDL_Init(SDL_INIT_VIDEO)");
-
 	SDL_Surface *face = SDL_LoadBMP("nonexistant.bmp");
-
 	AssertTrue(face == NULL, "SDL_CreateLoadBmp");
-
-	SDL_Quit();
 }
 
 
@@ -183,11 +194,6 @@ void surface_testBlit(void *arg)
    SDL_Rect rect;
    SDL_Surface *face;
    int i, j, ni, nj;
-
-	ret = SDL_Init(SDL_INIT_VIDEO);
-	AssertTrue(ret == 0, "SDL_Init(SDL_INIT_VIDEO)");
-
-   SDL_Surface *testsur = _CreateTestSurface();
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -292,9 +298,6 @@ void surface_testBlit(void *arg)
 
    /* Clean up. */
    SDL_FreeSurface( face );
-   SDL_FreeSurface( testsur );
-
-   SDL_Quit();
 }
 
 /**
@@ -307,11 +310,6 @@ void surface_testBlitBlend(void *arg)
    SDL_Surface *face;
    int i, j, ni, nj;
    int mode;
-
-	ret = SDL_Init(SDL_INIT_VIDEO);
-	AssertTrue(ret == 0, "SDL_Init(SDL_INIT_VIDEO)");
-
-   SDL_Surface *testsur = _CreateTestSurface();
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -415,7 +413,4 @@ void surface_testBlitBlend(void *arg)
 
    /* Clean up. */
    SDL_FreeSurface( face );
-   SDL_FreeSurface( testsur );
-
-   SDL_Quit();
 }

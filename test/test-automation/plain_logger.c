@@ -54,13 +54,14 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 
 void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-              time_t endTime, double totalRuntime)
+			  int testSkippedCount, time_t endTime, double totalRuntime)
 {
 	Output(indentLevel, "Ran %d tests in %0.5f seconds from %d suites.",
 			testCount, totalRuntime, suiteCount);
 
 	Output(indentLevel, "%d tests passed", testPassCount);
 	Output(indentLevel, "%d tests failed", testFailCount);
+	Output(indentLevel, "%d tests skipped", testSkippedCount);
 }
 
 void
@@ -91,6 +92,9 @@ PlainTestEnded(const char *testName, const char *suiteName,
 	if(testResult) {
 		if(testResult == 2) {
 			Output(--indentLevel, "%s: failed -> no assert", testName);
+		}
+		else if(testResult == 3) {
+			Output(--indentLevel, "%s: skipped", testName);
 		} else {
 			Output(--indentLevel, "%s: failed", testName);
 		}
@@ -104,7 +108,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 		time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s: %s; %s", assertName, result, assertMessage);
+	Output(indentLevel, "%s: %s - %s", assertName, result, assertMessage);
 }
 
 void
@@ -112,7 +116,7 @@ PlainAssertWithValues(const char *assertName, int assertResult, const char *asse
 		int actualValue, int expected, time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s %s (expected %d, actualValue &d): %s",
+	Output(indentLevel, "%s: %s (expected %d, actualValue &d) - %s",
 			assertName, result, expected, actualValue, assertMessage);
 }
 

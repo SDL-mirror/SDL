@@ -30,7 +30,7 @@
  */
 typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], time_t eventTime, void *data);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
-                           time_t endTime, double totalRuntime);
+                           int testSkippedCount, time_t endTime, double totalRuntime);
 
 typedef	void (*SuiteStartedFp)(const char *suiteName, time_t eventTime);
 typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,

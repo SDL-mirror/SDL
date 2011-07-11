@@ -26,7 +26,7 @@ void PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventT
  * \param totalRuntime How long the execution took
  */
 void PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-                   time_t endTime, double totalRuntime);
+				   int testSkippedCount, time_t endTime, double totalRuntime);
 
 /*!
  * Prints the data about the test suite that'll be executed next

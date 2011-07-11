@@ -46,6 +46,8 @@ typedef int  (*QuitTestInvironmentFp)(void);
 typedef void (*TestCaseSetUpFp)(void *arg);
 //!< Function pointer to a test case tear down function
 typedef void  (*TestCaseTearDownFp)(void *arg);
+//!< Function pointer to a function which returns the failed assert count
+typedef int (*CountFailedAssertsFp)(void);
 
 
 //!< Flag for executing tests in-process
@@ -115,6 +117,8 @@ typedef struct TestCaseItem {
 	TestCaseTearDownFp testTearDown;
  	QuitTestInvironmentFp quitTestEnvironment;
 
+ 	CountFailedAssertsFp countFailedAsserts;
+
 	struct TestCaseItem *next;
 } TestCase;
 
@@ -126,6 +130,7 @@ QuitTestInvironmentFp LoadQuitTestInvironmentFunction(void *suite);
 TestCaseReference **QueryTestCaseReferences(void *library);
 TestCaseSetUpFp LoadTestSetUpFunction(void *suite);
 TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
+CountFailedAssertsFp LoadCountFailedAssertsFunction(void *suite);
 
 
 /*! Pointers to selected logger implementation */
@@ -139,143 +144,6 @@ AssertFp Assert = NULL;
 AssertWithValuesFp AssertWithValues = NULL;
 AssertSummaryFp AssertSummary = NULL;
 LogFp Log = NULL;
-
-
-/*!
- * Goes through the previously loaded test suites and
- * loads test cases from them. Test cases are filtered
- * during the process. Function will only return the
- * test cases which aren't filtered out.
- *
- * \param suites previously loaded test suites
- *
- * \return Test cases that survived filtering process.
- */
-TestCase *
-LoadTestCases(TestSuiteReference *suites)
-{
-	TestCase *testCases = NULL;
-
-	TestSuiteReference *suiteReference = NULL;
-	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
-		TestCaseReference **tests = QueryTestCaseReferences(suiteReference->library);
-
-		TestCaseReference *testReference = NULL;
-		int counter = 0;
-		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
-
-			void *suite = suiteReference->library;
-
-			// Load test case functions
-			InitTestInvironmentFp initTestEnvironment = LoadInitTestInvironmentFunction(suiteReference->library);
-			QuitTestInvironmentFp quitTestEnvironment = LoadQuitTestInvironmentFunction(suiteReference->library);
-
-			TestCaseSetUpFp testSetUp = LoadTestSetUpFunction(suiteReference->library);
-			TestCaseTearDownFp testTearDown = LoadTestTearDownFunction(suiteReference->library);
-
-			TestCaseFp testCase = LoadTestCaseFunction(suiteReference->library, testReference->name);
-
-			// Do the filtering
-			if(FilterTestCase(testReference)) {
-				TestCase *item = SDL_malloc(sizeof(TestCase));
-				memset(item, 0, sizeof(TestCase));
-
-				item->initTestEnvironment = initTestEnvironment;
-				item->quitTestEnvironment = quitTestEnvironment;
-
-				item->testSetUp = testSetUp;
-				item->testTearDown = testTearDown;
-
-				item->testCase = testCase;
-
-				// copy suite name
-				int length = SDL_strlen(suiteReference->name) + 1;
-				item->suiteName = SDL_malloc(length);
-				strncpy(item->suiteName, suiteReference->name, length);
-
-				// copy test name
-				length = SDL_strlen(testReference->name) + 1;
-				item->testName = SDL_malloc(length);
-				strncpy(item->testName, testReference->name, length);
-
-				// copy test description
-				length = SDL_strlen(testReference->description) + 1;
-				item->description = SDL_malloc(length);
-				strncpy(item->description, testReference->description, length);
-
-				item->requirements = testReference->requirements;
-				item->timeout = testReference->timeout;
-
-				// prepend the list
-				item->next = testCases;
-				testCases = item;
-
-				//printf("Added test: %s\n", testReference->name);
-			}
-		}
-	}
-
-	return testCases;
-}
-
-
-/*!
- * Unloads the given TestCases. Frees all the resources
- * allocated for test cases.
- *
- * \param testCases Test cases to be deallocated
- */
-void
-UnloadTestCases(TestCase *testCases)
-{
-	TestCase *ref = testCases;
-	while(ref) {
-		SDL_free(ref->testName);
-		SDL_free(ref->suiteName);
-		SDL_free(ref->description);
-
-		TestCase *temp = ref->next;
-		SDL_free(ref);
-		ref = temp;
-	}
-
-	testCases = NULL;
-}
-
-
-/*!
- * Filters a test case based on its properties in TestCaseReference and user
- * preference.
- *
- * \return Non-zero means test will be added to execution list, zero means opposite
- */
-int
-FilterTestCase(TestCaseReference *testReference)
-{
-	int retVal = 1;
-
-	if(testReference->enabled == TEST_DISABLED) {
-		retVal = 0;
-	}
-
-	if(only_selected_test) {
-		if(SDL_strncmp(testReference->name, selected_test_name, NAME_BUFFER_SIZE) == 0) {
-			retVal = 1;
-		} else {
-			retVal = 0;
-		}
-	}
-
-	if(only_tests_with_string) {
-		if(strstr(testReference->name, testcase_name_substring) != NULL) {
-			retVal = 1;
-		} else {
-			retVal = 0;
-		}
-	}
-
-	return retVal;
-}
 
 
 /*!
@@ -298,10 +166,9 @@ ScanForTestSuites(char *directoryName, char *extension)
 {
 	typedef struct dirent Entry;
 	DIR *directory = opendir(directoryName);
-
 	TestSuiteReference *suites = NULL;
-
 	Entry *entry = NULL;
+
 	if(!directory) {
 		fprintf(stderr, "Failed to open test suite directory: %s\n", directoryName);
 		perror("Error message");
@@ -323,8 +190,11 @@ ScanForTestSuites(char *directoryName, char *extension)
 			if(ok && SDL_strcmp(ext, extension)  == 0) {
 				// create test suite reference
 				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
-				memset(reference, 0, sizeof(TestSuiteReference));
+				if(reference == NULL) {
+					fprintf(stderr, "Allocating TestSuiteReference failed\n");
+				}
 
+				memset(reference, 0, sizeof(TestSuiteReference));
 
 				const int dirSize = SDL_strlen(directoryName);
 				const int extSize = SDL_strlen(ext);
@@ -428,6 +298,147 @@ UnloadTestSuites(TestSuiteReference *suites)
 
 
 /*!
+ * Goes through the previously loaded test suites and
+ * loads test cases from them. Test cases are filtered
+ * during the process. Function will only return the
+ * test cases which aren't filtered out.
+ *
+ * \param suites previously loaded test suites
+ *
+ * \return Test cases that survived filtering process.
+ */
+TestCase *
+LoadTestCases(TestSuiteReference *suites)
+{
+	TestCase *testCases = NULL;
+
+	TestSuiteReference *suiteReference = NULL;
+	for(suiteReference = suites; suiteReference; suiteReference = suiteReference->next) {
+		TestCaseReference **tests = QueryTestCaseReferences(suiteReference->library);
+
+		TestCaseReference *testReference = NULL;
+		int counter = 0;
+		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
+
+			void *suite = suiteReference->library;
+
+			// Load test case functions
+			InitTestInvironmentFp initTestEnvironment = LoadInitTestInvironmentFunction(suiteReference->library);
+			QuitTestInvironmentFp quitTestEnvironment = LoadQuitTestInvironmentFunction(suiteReference->library);
+
+			TestCaseSetUpFp testSetUp = LoadTestSetUpFunction(suiteReference->library);
+			TestCaseTearDownFp testTearDown = LoadTestTearDownFunction(suiteReference->library);
+
+			TestCaseFp testCase = LoadTestCaseFunction(suiteReference->library, testReference->name);
+
+			CountFailedAssertsFp countFailedAsserts = LoadCountFailedAssertsFunction(suiteReference->library);
+
+			// Do the filtering
+			if(FilterTestCase(testReference)) {
+				TestCase *item = SDL_malloc(sizeof(TestCase));
+				memset(item, 0, sizeof(TestCase));
+
+				item->initTestEnvironment = initTestEnvironment;
+				item->quitTestEnvironment = quitTestEnvironment;
+
+				item->testSetUp = testSetUp;
+				item->testTearDown = testTearDown;
+
+				item->testCase = testCase;
+
+				item->countFailedAsserts = countFailedAsserts;
+
+				// copy suite name
+				int length = SDL_strlen(suiteReference->name) + 1;
+				item->suiteName = SDL_malloc(length);
+				strncpy(item->suiteName, suiteReference->name, length);
+
+				// copy test name
+				length = SDL_strlen(testReference->name) + 1;
+				item->testName = SDL_malloc(length);
+				strncpy(item->testName, testReference->name, length);
+
+				// copy test description
+				length = SDL_strlen(testReference->description) + 1;
+				item->description = SDL_malloc(length);
+				strncpy(item->description, testReference->description, length);
+
+				item->requirements = testReference->requirements;
+				item->timeout = testReference->timeout;
+
+				// prepend the list
+				item->next = testCases;
+				testCases = item;
+
+				//printf("Added test: %s\n", testReference->name);
+			}
+		}
+	}
+
+	return testCases;
+}
+
+
+/*!
+ * Unloads the given TestCases. Frees all the resources
+ * allocated for test cases.
+ *
+ * \param testCases Test cases to be deallocated
+ */
+void
+UnloadTestCases(TestCase *testCases)
+{
+	TestCase *ref = testCases;
+	while(ref) {
+		SDL_free(ref->testName);
+		SDL_free(ref->suiteName);
+		SDL_free(ref->description);
+
+		TestCase *temp = ref->next;
+		SDL_free(ref);
+		ref = temp;
+	}
+
+	testCases = NULL;
+}
+
+
+/*!
+ * Filters a test case based on its properties in TestCaseReference and user
+ * preference.
+ *
+ * \return Non-zero means test will be added to execution list, zero means opposite
+ */
+int
+FilterTestCase(TestCaseReference *testReference)
+{
+	int retVal = 1;
+
+	if(testReference->enabled == TEST_DISABLED) {
+		retVal = 0;
+	}
+
+	if(only_selected_test) {
+		if(SDL_strncmp(testReference->name, selected_test_name, NAME_BUFFER_SIZE) == 0) {
+			retVal = 1;
+		} else {
+			retVal = 0;
+		}
+	}
+
+	if(only_tests_with_string) {
+		if(strstr(testReference->name, testcase_name_substring) != NULL) {
+			retVal = 1;
+		} else {
+			retVal = 0;
+		}
+	}
+
+	return retVal;
+}
+
+
+/*!
  * Loads the test case references from the given test suite.
 
  * \param library Previously loaded dynamic library AKA test suite
@@ -436,21 +447,21 @@ UnloadTestSuites(TestSuiteReference *suites)
 TestCaseReference **
 QueryTestCaseReferences(void *library)
 {
-        TestCaseReference **(*suite)(void);
+	TestCaseReference **(*suite)(void);
 
-        suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
-        if(suite == NULL) {
-                fprintf(stderr, "Loading QueryTestCaseReferences() failed.\n");
-                fprintf(stderr, "%s\n", SDL_GetError());
-        }
+	suite = (TestCaseReference **(*)(void)) SDL_LoadFunction(library, "QueryTestSuite");
+	if(suite == NULL) {
+		fprintf(stderr, "Loading QueryTestCaseReferences() failed.\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
 
-        TestCaseReference **tests = suite();
-        if(tests == NULL) {
-                fprintf(stderr, "Failed to load test references.\n");
-                fprintf(stderr, "%s\n", SDL_GetError());
-        }
+	TestCaseReference **tests = suite();
+	if(tests == NULL) {
+		fprintf(stderr, "Failed to load test references.\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
 
-        return tests;
+	return tests;
 }
 
 
@@ -554,6 +565,81 @@ LoadQuitTestInvironmentFunction(void *suite) {
 	return testEnvQuit;
 }
 
+/*!
+ * Loads function that returns failed assert count in the current
+ * test environment
+ *
+ * \param suite Used test suite
+ *
+ * \return Function pointer to _CountFailedAsserts function
+ */
+CountFailedAssertsFp
+LoadCountFailedAssertsFunction(void *suite) {
+	CountFailedAssertsFp countFailedAssert = (CountFailedAssertsFp) SDL_LoadFunction(suite, "_CountFailedAsserts");
+	if(countFailedAssert == NULL) {
+		fprintf(stderr, "Loading _CountFailedAsserts function failed, countFailedAssert == NULL\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+
+	return countFailedAssert;
+}
+
+
+/*
+ * Execute the test
+ *
+ * \param testItem Test to be executed
+ */
+int
+RunTest(TestCase *testItem) {
+	testItem->initTestEnvironment();
+
+	if(testItem->testSetUp) {
+		testItem->testSetUp(0x0);
+	}
+
+	int cntFailedAsserts = testItem->countFailedAsserts();
+	if(cntFailedAsserts != 0) {
+		return 3;
+	}
+
+	testItem->testCase(0x0);
+
+	if(testItem->testTearDown) {
+		testItem->testTearDown(0x0);
+	}
+
+	return testItem->quitTestEnvironment();
+}
+
+/*!
+ * Executes a test case. Loads the test, executes it and
+ * returns the tests return value to the caller.
+ *
+ * \param testItem The test case that will be executed
+ * \return The return value of the test. Zero means success, non-zero failure.
+ */
+int
+ExecuteTest(TestCase *testItem) {
+	int retVal = 1;
+
+	if(execute_inproc) {
+		retVal = RunTest(testItem);
+	} else {
+		int childpid = fork();
+		if(childpid == 0) {
+			exit(RunTest(testItem));
+		} else {
+			int stat_lock = -1;
+			int child = wait(&stat_lock);
+
+			retVal = HandleChildProcessReturnValue(stat_lock);
+		}
+	}
+
+	return retVal;
+}
+
 
 /*!
  * If using out-of-proc execution of tests. This function
@@ -584,56 +670,58 @@ HandleChildProcessReturnValue(int stat_lock)
 
 
 /*!
- * Executes a test case. Loads the test, executes it and
- * returns the tests return value to the caller.
+ * Sets up the logger.
  *
- * \param testItem The test case that will be executed
- * \return The return value of the test. Zero means success, non-zero failure.
+ * \return Some special data that will be passed to StartRun() logger call
  */
-int
-ExecuteTest(TestCase *testItem) {
-	int retVal = 1;
-	if(execute_inproc) {
-		testItem->initTestEnvironment();
+void *
+SetUpLogger()
+{
+	void *loggerData = NULL;
+	if(xml_enabled) {
+		RunStarted = XMLRunStarted;
+		RunEnded = XMLRunEnded;
 
-		if(testItem->testSetUp) {
-			testItem->testSetUp(0x0);
+		SuiteStarted = XMLSuiteStarted;
+		SuiteEnded = XMLSuiteEnded;
+
+		TestStarted = XMLTestStarted;
+		TestEnded = XMLTestEnded;
+
+		Assert = XMLAssert;
+		AssertWithValues = XMLAssertWithValues;
+		AssertSummary = XMLAssertSummary;
+
+		Log = XMLLog;
+
+		char *sheet = NULL;
+		if(xsl_enabled) {
+			sheet = "style.xsl"; // default style sheet;
 		}
 
-		testItem->testCase(0x0);
-
-		if(testItem->testTearDown) {
-			testItem->testTearDown(0x0);
+		if(custom_xsl_enabled) {
+			sheet = xsl_stylesheet_name;
 		}
 
-		retVal = testItem->quitTestEnvironment();
+		loggerData = sheet;
 	} else {
-		int childpid = fork();
-		if(childpid == 0) {
-			testItem->initTestEnvironment();
+		RunStarted = PlainRunStarted;
+		RunEnded = PlainRunEnded;
 
-			if(testItem->testSetUp) {
-				testItem->testSetUp(0x0);
-			}
+		SuiteStarted = PlainSuiteStarted;
+		SuiteEnded = PlainSuiteEnded;
 
-			testItem->testCase(0x0);
+		TestStarted = PlainTestStarted;
+		TestEnded = PlainTestEnded;
 
-			// note: if test case is is aborted by some signal
-			// then TearDown function won't be called
-			if(testItem->testTearDown) {
-				testItem->testTearDown(0x0);
-			}
+		Assert = PlainAssert;
+		AssertWithValues = PlainAssertWithValues;
+		AssertSummary = PlainAssertSummary;
 
-			exit(testItem->quitTestEnvironment());
-		} else {
-			int stat_lock = -1;
-			int child = wait(&stat_lock);
-
-			retVal = HandleChildProcessReturnValue(stat_lock);
-		}
+		Log = PlainLog;
 	}
 
-	return retVal;
+	return loggerData;
 }
 
 
@@ -771,7 +859,7 @@ main(int argc, char *argv[])
 
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
-	int totalTestfailureCount = 0, totalTestPassCount = 0;
+	int totalTestFailureCount = 0, totalTestPassCount = 0, totalTestSkipCount = 0;
 	int testFailureCount = 0, testPassCount = 0, testSkipCount = 0;
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
@@ -782,49 +870,7 @@ main(int argc, char *argv[])
 	char *extension = "dylib";
 #endif
 
-	void *loggerData = NULL;
-	if(xml_enabled) {
-		RunStarted = XMLRunStarted;
-		RunEnded = XMLRunEnded;
-
-		SuiteStarted = XMLSuiteStarted;
-		SuiteEnded = XMLSuiteEnded;
-
-		TestStarted = XMLTestStarted;
-		TestEnded = XMLTestEnded;
-
-		Assert = XMLAssert;
-		AssertWithValues = XMLAssertWithValues;
-		AssertSummary = XMLAssertSummary;
-
-		Log = XMLLog;
-
-		char *sheet = NULL;
-		if(xsl_enabled) {
-			sheet = "style.xsl"; // default style sheet;
-		}
-
-		if(custom_xsl_enabled) {
-			sheet = xsl_stylesheet_name;
-		}
-
-		loggerData = sheet;
-	} else {
-		RunStarted = PlainRunStarted;
-		RunEnded = PlainRunEnded;
-
-		SuiteStarted = PlainSuiteStarted;
-		SuiteEnded = PlainSuiteEnded;
-
-		TestStarted = PlainTestStarted;
-		TestEnded = PlainTestEnded;
-
-		Assert = PlainAssert;
-		AssertWithValues = PlainAssertWithValues;
-		AssertSummary = PlainAssertSummary;
-
-		Log = PlainLog;
-	}
+	void *loggerData = SetUpLogger();
 
 	const Uint32 startTicks = SDL_GetTicks();
 
@@ -845,9 +891,7 @@ main(int argc, char *argv[])
 
 	RunStarted(argc, argv, time(0), loggerData);
 
-
 	char *currentSuiteName = NULL;
-
 	int suiteStartTime = SDL_GetTicks();
 
 	TestCase *testItem = NULL;
@@ -856,7 +900,7 @@ main(int argc, char *argv[])
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, time(0));
 
-			testFailureCount = testPassCount = 0;
+			testFailureCount = testPassCount = testSkipCount = 0;
 
 			suiteCounter++;
 		}
@@ -871,7 +915,7 @@ main(int argc, char *argv[])
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, time(0));
 
-			testFailureCount = testPassCount = 0;
+			testFailureCount = testPassCount = testSkipCount = 0;
 
 			suiteCounter++;
 		}
@@ -882,8 +926,12 @@ main(int argc, char *argv[])
 		const Uint32 testTimeStart = SDL_GetTicks();
 
 		int retVal = ExecuteTest(testItem);
-		if(retVal) {
-			totalTestfailureCount++;
+		if(retVal == 3) {
+			testSkipCount++;
+			totalTestSkipCount++;
+		}
+		else if(retVal) {
+			totalTestFailureCount++;
 			testFailureCount++;
 		} else {
 			totalTestPassCount++;
@@ -906,8 +954,8 @@ main(int argc, char *argv[])
 	const Uint32 endTicks = SDL_GetTicks();
 	const double totalRunTime = (endTicks - startTicks) / 1000.0f;
 
-	RunEnded(totalTestPassCount + totalTestfailureCount, suiteCounter,
-			 totalTestPassCount, totalTestfailureCount, time(0), totalRunTime);
+	RunEnded(totalTestPassCount + totalTestFailureCount, suiteCounter,
+			 totalTestPassCount, totalTestFailureCount, totalTestSkipCount, time(0), totalRunTime);
 
-	return (totalTestfailureCount ? 1 : 0);
+	return (totalTestFailureCount ? 1 : 0);
 }

@@ -70,12 +70,18 @@ void _InitTestEnvironment();
 int _QuitTestEnvironment();
 
 /*!
+ * Can be used to query the number of failed asserts
+ * \return Returns the failed assert count.
+ */
+int _CountFailedAsserts();
+
+/*!
  *  Assert function. Tests if the expected value equals the actual value, then
  *  the test assert succeeds, otherwise it fails and warns about it.
  *
  * \param expected Value user expects to have
  * \param actual The actual value of tested variable
- * \param message Message that will be printed if assert fails
+ * \param message Message that will be printed
  */
 void AssertEquals(const int expected, const int actual, char *message, ...);
 
@@ -85,18 +91,22 @@ void AssertEquals(const int expected, const int actual, char *message, ...);
  *  assert passes, otherwise it fails.
  *
  * \param condition Condition which will be evaluated
- * \param message Message that will be printed if assert fails
+ * \param message Message that will be printed
  */
 void AssertTrue(int condition, char *message, ...);
 
 /*!
-\todo add markup
-*/
+ *  Assert function which will always fail
+ *
+ * \param message Message that will be printed
+ */
 void AssertFail(char *message, ...);
 
 /*!
-\todo add markup
-*/
+ *  Assert function which will always pass
+ *
+ * \param message Message that will be printed
+ */
 void AssertPass(char *message, ...);
 
 #endif

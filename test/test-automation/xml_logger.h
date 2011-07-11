@@ -24,7 +24,7 @@ void XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTim
  * \param totalRuntime How long the execution took
  */
 void XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-                 time_t endTime, double totalRuntime);
+				 int testSkippedCount, time_t endTime, double totalRuntime);
 
 /*!
  * Prints the data about the test suite that'll be executed next in XML

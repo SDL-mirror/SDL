@@ -56,6 +56,9 @@ TestCaseReference **QueryTestSuite() {
  * SetUp function can be used to create a test fixture for test cases.
  * The function will be called right before executing the test case.
  *
+ * Note: If any assert in the function fails then the test will be skipped.
+ * In practice, the entire suite will be skipped if assert failure happens.
+ *
  * Note: this function is optional.
  *
  * \param arg parameters given to test. Usually NULL

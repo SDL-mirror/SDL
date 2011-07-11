@@ -104,6 +104,7 @@ $(document).ready(function() {
 	/* Color the tests based on the result */
 	$("span.testResult[result='passed']").addClass('passed');
 	$("span.testResult[result='failed']").addClass('failed');
+	$("span.testResult[result='skipped']").addClass('skipped');
 	
 	/* Color the asserts based on the result */
 	$("span.assertResult[result='pass']").addClass('passed');
@@ -155,6 +156,10 @@ div, h1 {
 
 .failed {
  color: red;
+}
+
+.skipped {
+ color: gray;
 }
 
 </style>
