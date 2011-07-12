@@ -18,7 +18,7 @@ static const TestCaseReference test2 =
 		(TestCaseReference){ "surface_testBlit", "Tests some blitting routines.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "surface_testBlitBlendNone", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "surface_testBlitBlendNone", "Tests blitting routines with none blending.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test4 =
 		(TestCaseReference){ "surface_testLoadFailure", "Tests sprite loading. A failure case.", TEST_ENABLED, 0, 0};
@@ -36,13 +36,13 @@ static const TestCaseReference test8 =
 		(TestCaseReference){ "surface_testBlitBlendLoop", "Test blittin routines with blending", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test9 =
-		(TestCaseReference){ "surface_testBlitBlendBlend", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "surface_testBlitBlendBlend", "Tests blitting routines with blend blending.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test10 =
-		(TestCaseReference){ "surface_testBlitBlendAdd", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "surface_testBlitBlendAdd", "Tests blitting routines with add blending.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test11 =
-		(TestCaseReference){ "surface_testBlitBlendMod", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "surface_testBlitBlendMod", "Tests blitting routines with modblending.", TEST_ENABLED, 0, 0};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {

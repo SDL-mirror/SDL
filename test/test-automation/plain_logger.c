@@ -40,16 +40,15 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 				void *data)
 {
 	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
-	Output(indentLevel, "");
-    /*
-	Output(indentLevel, "Runner: ");
+	Output(indentLevel, "Runner parameters: ");
 
 	int counter = 0;
 	for(counter = 0; counter < parameterCount; counter++) {
 		char *parameter = runnerParameters[counter];
 		Output(indentLevel, "\t%s", parameter);
 	}
-	*/
+
+	Output(indentLevel, "");
 }
 
 void
