@@ -24,11 +24,15 @@
 #define _SDL_BView_h
 
 /* This is the event handling and graphics update portion of SDL_BWin */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern "C"
-{
 #include "../../events/SDL_events_c.h"
-};
+
+#ifdef __cplusplus
+}
+#endif
 
 class SDL_BView:public BView
 {
