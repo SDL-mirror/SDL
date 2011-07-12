@@ -88,7 +88,7 @@ TearDown(void *arg)
 void
 dummycase1(void *arg)
 {
-	AssertEquals(5, 5, "Assert message");
+	//AssertEquals(5, 5, "Assert message");
 }
 
 void

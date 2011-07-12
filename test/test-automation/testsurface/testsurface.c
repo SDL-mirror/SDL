@@ -8,6 +8,8 @@
 
 #include "../SDL_test.h"
 
+#include <sys/stat.h>
+
 /* Test case references */
 static const TestCaseReference test1 =
 		(TestCaseReference){ "surface_testLoad", "Tests sprite loading.", TEST_ENABLED, 0, 0};
@@ -16,15 +18,36 @@ static const TestCaseReference test2 =
 		(TestCaseReference){ "surface_testBlit", "Tests some blitting routines.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "surface_testBlitBlend", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "surface_testBlitBlendNone", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test4 =
 		(TestCaseReference){ "surface_testLoadFailure", "Tests sprite loading. A failure case.", TEST_ENABLED, 0, 0};
 
+static const TestCaseReference test5 =
+		(TestCaseReference){ "surface_testConversion", "Tests sprite conversion.", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test6 =
+		(TestCaseReference){ "surface_testBlitColorMod", "Tests some blitting routines with color mod.", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test7 =
+		(TestCaseReference){ "surface_testBlitAlphaMod", "Tests some blitting routines with alpha mod.", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test8 =
+		(TestCaseReference){ "surface_testBlitBlendLoop", "Test blittin routines with blending", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test9 =
+		(TestCaseReference){ "surface_testBlitBlendBlend", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test10 =
+		(TestCaseReference){ "surface_testBlitBlendAdd", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
+
+static const TestCaseReference test11 =
+		(TestCaseReference){ "surface_testBlitBlendMod", "Tests some more blitting routines.", TEST_ENABLED, 0, 0};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, NULL
+	&test1, &test2, &test3, &test4, &test5,
+	&test6, &test7, &test8, &test9, &test10, &test11, NULL
 };
 
 
@@ -91,6 +114,34 @@ _CreateTestSurface()
 	return testsur;
 }
 
+/*!
+ * Create test surface from in-memory image
+ */
+SDL_Surface *
+_createTestSurfaceFromMemory()
+{
+	SDL_Surface *face = NULL;
+
+	/* Create face surface. */
+	face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
+		  img_face.width, img_face.height, 32, img_face.width*4,
+	#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+		  0xff000000, /* Red bit mask. */
+		  0x00ff0000, /* Green bit mask. */
+		  0x0000ff00, /* Blue bit mask. */
+		  0x000000ff /* Alpha bit mask. */
+	#else
+		  0x000000ff, /* Red bit mask. */
+		  0x0000ff00, /* Green bit mask. */
+		  0x00ff0000, /* Blue bit mask. */
+		  0xff000000 /* Alpha bit mask. */
+	#endif
+		  );
+	AssertTrue(face != NULL, "SDL_CreateRGBSurfaceFrom");
+
+	return face;
+}
+
 /**
  * @brief Tests a blend mode.
  */
@@ -132,9 +183,18 @@ void _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 	}
 }
 
+int
+_AssertFileExist(const char *filename)
+{
+	struct stat st;
+	int ret = stat(filename, &st);
+
+	AssertTrue(ret == 0, "Does file %s exist", filename);
+}
+
 /* Test case functions */
 /**
- * @brief Tests sprite loading.
+ * @brief Tests sprite loading
  */
 void surface_testLoad(void *arg)
 {
@@ -142,36 +202,54 @@ void surface_testLoad(void *arg)
     SDL_Surface *face, *rface;
 
     /* Clear surface. */
+    /*
     ret = SDL_FillRect( testsur, NULL,
          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
 	AssertTrue(ret == 0,  "SDL_FillRect");
+	*/
 
    /* Create the blit surface. */
-#ifdef __APPLE__
-	face = SDL_LoadBMP("icon.bmp");
-#else
-	face = SDL_LoadBMP("../icon.bmp");
-#endif
+	const char *filename = "icon.bmp";
+	_AssertFileExist(filename);
 
+	face = SDL_LoadBMP(filename);
 	AssertTrue(face != NULL, "SDL_CreateLoadBmp");
 
-   /* Set transparent pixel as the pixel at (0,0) */
-   if (face->format->palette) {
-      ret = SDL_SetColorKey(face, SDL_RLEACCEL, *(Uint8 *) face->pixels);
-      AssertTrue(ret == 0, "SDL_SetColorKey");
-   }
+	AssertTrue(face->w == 32, "testing icon width");
+	AssertTrue(face->h == 32, "testing icon height");
+}
 
-   /* Convert to 32 bit to compare. */
-   rface = SDL_ConvertSurface( face, testsur->format, 0 );
-   AssertTrue(rface != NULL, "SDL_ConvertSurface");
+/*!
+ *  Tests sprite conversion.
+ */
+void surface_testConversion(void *arg)
+{
+	SDL_Surface *rface = NULL, *face = NULL;
+	int ret = 0;
 
-   /* See if it's the same. */
-   AssertTrue(surface_compare( rface, &img_face, 0 ) == 0,
+	const char *filename = "icon.bmp";
+	_AssertFileExist(filename);
+
+	face = SDL_LoadBMP(filename);
+	AssertTrue(face != NULL, "SDL_CreateLoadBmp");
+
+	/* Set transparent pixel as the pixel at (0,0) */
+	if (face->format->palette) {
+	  ret = SDL_SetColorKey(face, SDL_RLEACCEL, *(Uint8 *) face->pixels);
+	  AssertTrue(ret == 0, "SDL_SetColorKey");
+	}
+
+	/* Convert to 32 bit to compare. */
+	rface = SDL_ConvertSurface( face, testsur->format, 0 );
+	AssertTrue(rface != NULL, "SDL_ConvertSurface");
+
+	/* See if it's the same. */
+	AssertTrue(surface_compare( rface, &img_face, 0 ) == 0,
 		   "Comparing primitives output.");
 
-   /* Clean up. */
-   SDL_FreeSurface( rface );
-   SDL_FreeSurface( face );
+	/* Clean up. */
+	SDL_FreeSurface( rface );
+	SDL_FreeSurface( face );
 }
 
 
@@ -184,7 +262,6 @@ void surface_testLoadFailure(void *arg)
 	AssertTrue(face == NULL, "SDL_CreateLoadBmp");
 }
 
-
 /**
  * @brief Tests some blitting routines.
  */
@@ -196,27 +273,13 @@ void surface_testBlit(void *arg)
    int i, j, ni, nj;
 
    /* Clear surface. */
+
    ret = SDL_FillRect( testsur, NULL,
          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
 
    AssertTrue(ret == 0, "SDL_FillRect");
 
-   /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   AssertTrue(face != NULL, "SDL_CreateRGBSurfaceFrom");
+   face = _createTestSurfaceFromMemory();
 
    /* Constant values. */
    rect.w = face->w;
@@ -241,31 +304,89 @@ void surface_testBlit(void *arg)
    AssertTrue(surface_compare( testsur, &img_blit, 0 ) == 0,
 		   "Comparing blitting output (normal blit).");
 
+   /* Clean up. */
+   SDL_FreeSurface( face );
+}
+
+/**
+ * @brief Tests some blitting routines with color mod
+ */
+void surface_testBlitColorMod(void *arg)
+{
+   int ret;
+   SDL_Rect rect;
+   SDL_Surface *face;
+   int i, j, ni, nj;
+
    /* Clear surface. */
+
    ret = SDL_FillRect( testsur, NULL,
          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+
    AssertTrue(ret == 0, "SDL_FillRect");
 
-   /* Test blitting with colour mod. */
-   for (j=0; j <= nj; j+=4) {
-      for (i=0; i <= ni; i+=4) {
-         /* Set colour mod. */
-         ret = SDL_SetSurfaceColorMod( face, (255/nj)*j, (255/ni)*i, (255/nj)*j );
-         AssertTrue(ret == 0, "SDL_SetSurfaceColorMod");
+   face = _createTestSurfaceFromMemory();
 
-         /* Blitting. */
-         rect.x = i;
-         rect.y = j;
-         // TODO Add pixel level validation, SDL_BlitSurface might be no-op
-         ret = SDL_BlitSurface( face, NULL, testsur, &rect );
+   /* Constant values. */
+   rect.w = face->w;
+   rect.h = face->h;
+   ni     = testsur->w - face->w;
+   nj     = testsur->h - face->h;
 
-         AssertTrue(ret == 0, "SDL_BlitSurface");
-      }
-   }
+   /* Clear surface. */
+    ret = SDL_FillRect( testsur, NULL,
+          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+    AssertTrue(ret == 0, "SDL_FillRect");
 
-   /* See if it's the same. */
-   AssertTrue(surface_compare( testsur, &img_blitColour, 0 ) == 0,
-		   "Comparing blitting output (using SDL_SetSurfaceColorMod).");
+    /* Test blitting with colour mod. */
+    for (j=0; j <= nj; j+=4) {
+       for (i=0; i <= ni; i+=4) {
+          /* Set colour mod. */
+          ret = SDL_SetSurfaceColorMod( face, (255/nj)*j, (255/ni)*i, (255/nj)*j );
+          AssertTrue(ret == 0, "SDL_SetSurfaceColorMod");
+
+          /* Blitting. */
+          rect.x = i;
+          rect.y = j;
+          // TODO Add pixel level validation, SDL_BlitSurface might be no-op
+          ret = SDL_BlitSurface( face, NULL, testsur, &rect );
+
+          AssertTrue(ret == 0, "SDL_BlitSurface");
+       }
+    }
+
+    /* See if it's the same. */
+    AssertTrue(surface_compare( testsur, &img_blitColour, 0 ) == 0,
+ 		   "Comparing blitting output (using SDL_SetSurfaceColorMod).");
+
+   /* Clean up. */
+   SDL_FreeSurface( face );
+}
+
+/**
+ * @brief Tests some blitting routines with alpha mod
+ */
+void surface_testBlitAlphaMod(void *arg)
+{
+   int ret;
+   SDL_Rect rect;
+   SDL_Surface *face;
+   int i, j, ni, nj;
+
+   /* Clear surface. */
+
+   ret = SDL_FillRect( testsur, NULL,
+         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+
+   AssertTrue(ret == 0, "SDL_FillRect");
+
+   face = _createTestSurfaceFromMemory();
+
+   /* Constant values. */
+   rect.w = face->w;
+   rect.h = face->h;
+   ni     = testsur->w - face->w;
+   nj     = testsur->h - face->h;
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
@@ -300,10 +421,11 @@ void surface_testBlit(void *arg)
    SDL_FreeSurface( face );
 }
 
+
 /**
  * @brief Tests some more blitting routines.
  */
-void surface_testBlitBlend(void *arg)
+void surface_testBlitBlendNone(void *arg)
 {
    int ret;
    SDL_Rect rect;
@@ -314,25 +436,9 @@ void surface_testBlitBlend(void *arg)
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
          SDL_MapRGB( testsur->format, 0, 0, 0 ) );
-
    AssertTrue(ret == 0, "SDL_FillRect");
 
-   /* Create the blit surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   AssertTrue(face != NULL, "SDL_CreateRGBSurfaceFrom");
+   face = _createTestSurfaceFromMemory();
 
    /* Set alpha mod. */
    // TODO alpha value could be generated by fuzzer
@@ -349,10 +455,8 @@ void surface_testBlitBlend(void *arg)
    /* Constant values. */
    rect.w = face->w;
    rect.h = face->h;
-
    /* Test None. */
   _testBlitBlendMode( testsur, face, SDL_BLENDMODE_NONE );
-
    AssertTrue(surface_compare( testsur, &img_blendNone, 0 ) == 0,
    		   "Comparing blitting blending output (using SDL_BLENDMODE_NONE).");
 
@@ -370,6 +474,161 @@ void surface_testBlitBlend(void *arg)
    _testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD );
    AssertTrue(surface_compare( testsur, &img_blendMod, 0 ) == 0,
    		      "Comparing blitting blending output not the same (using SDL_BLENDMODE_MOD).");
+}
+
+/**
+ * @brief Tests some more blitting routines.
+ */
+void surface_testBlitBlendBlend(void *arg)
+{
+   int ret;
+   SDL_Rect rect;
+   SDL_Surface *face;
+   int i, j, ni, nj;
+   int mode;
+
+   /* Clear surface. */
+   ret = SDL_FillRect( testsur, NULL,
+         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+   AssertTrue(ret == 0, "SDL_FillRect");
+
+   face = _createTestSurfaceFromMemory();
+
+   /* Set alpha mod. */
+   // TODO alpha value could be generated by fuzzer
+   ret = SDL_SetSurfaceAlphaMod( face, 100 );
+   AssertTrue(ret == 0, "SDL_SetSurfaceAlphaMod");
+
+   /* Steps to take. */
+   ni     = testsur->w - face->w;
+   nj     = testsur->h - face->h;
+
+   AssertTrue(ni != 0, "ni != 0");
+   AssertTrue(nj != 0, "nj != 0");
+
+   /* Constant values. */
+   rect.w = face->w;
+   rect.h = face->h;
+
+   /* Test Blend. */
+   _testBlitBlendMode( testsur, face, SDL_BLENDMODE_BLEND );
+   AssertTrue(surface_compare( testsur, &img_blendBlend, 0 ) == 0,
+   		   "Comparing blitting blending output (using SDL_BLENDMODE_BLEND).");
+}
+
+/**
+ * @brief Tests some more blitting routines.
+ */
+void surface_testBlitBlendAdd(void *arg)
+{
+   int ret;
+   SDL_Rect rect;
+   SDL_Surface *face;
+   int i, j, ni, nj;
+   int mode;
+
+   /* Clear surface. */
+   ret = SDL_FillRect( testsur, NULL,
+         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+   AssertTrue(ret == 0, "SDL_FillRect");
+
+   face = _createTestSurfaceFromMemory();
+
+   /* Set alpha mod. */
+   // TODO alpha value could be generated by fuzzer
+   ret = SDL_SetSurfaceAlphaMod( face, 100 );
+   AssertTrue(ret == 0, "SDL_SetSurfaceAlphaMod");
+
+   /* Steps to take. */
+   ni     = testsur->w - face->w;
+   nj     = testsur->h - face->h;
+
+   AssertTrue(ni != 0, "ni != 0");
+   AssertTrue(nj != 0, "nj != 0");
+
+   /* Constant values. */
+   rect.w = face->w;
+   rect.h = face->h;
+
+   /* Test Add. */
+   _testBlitBlendMode( testsur, face, SDL_BLENDMODE_ADD );
+   AssertTrue(surface_compare( testsur, &img_blendAdd, 0 ) == 0,
+   		      "Comparing blitting blending output (using SDL_BLENDMODE_ADD).");
+}
+
+/**
+ * @brief Tests some more blitting routines.
+ */
+void surface_testBlitBlendMod(void *arg)
+{
+   int ret;
+   SDL_Rect rect;
+   SDL_Surface *face;
+   int i, j, ni, nj;
+   int mode;
+
+   /* Clear surface. */
+   ret = SDL_FillRect( testsur, NULL,
+         SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+   AssertTrue(ret == 0, "SDL_FillRect");
+
+   face = _createTestSurfaceFromMemory();
+
+   /* Set alpha mod. */
+   // TODO alpha value could be generated by fuzzer
+   ret = SDL_SetSurfaceAlphaMod( face, 100 );
+   AssertTrue(ret == 0, "SDL_SetSurfaceAlphaMod");
+
+   /* Steps to take. */
+   ni     = testsur->w - face->w;
+   nj     = testsur->h - face->h;
+
+   AssertTrue(ni != 0, "ni != 0");
+   AssertTrue(nj != 0, "nj != 0");
+
+   /* Constant values. */
+   rect.w = face->w;
+   rect.h = face->h;
+   /* Test None. */
+
+   /* Test Mod. */
+   _testBlitBlendMode( testsur, face, SDL_BLENDMODE_MOD );
+   AssertTrue(surface_compare( testsur, &img_blendMod, 0 ) == 0,
+   		      "Comparing blitting blending output (using SDL_BLENDMODE_MOD).");
+}
+
+/**
+ * @brief Tests some more blitting routines with loop
+ */
+void surface_testBlitBlendLoop(void *arg) {
+	int ret;
+	SDL_Rect rect;
+	SDL_Surface *face;
+	int i, j, ni, nj;
+	int mode;
+
+	/* Clear surface. */
+	ret = SDL_FillRect( testsur, NULL,
+		 SDL_MapRGB( testsur->format, 0, 0, 0 ) );
+	AssertTrue(ret == 0, "SDL_FillRect");
+
+	face = _createTestSurfaceFromMemory();
+
+	/* Set alpha mod. */
+	// TODO alpha value could be generated by fuzzer
+	ret = SDL_SetSurfaceAlphaMod( face, 100 );
+	AssertTrue(ret == 0, "SDL_SetSurfaceAlphaMod");
+
+	/* Steps to take. */
+	ni     = testsur->w - face->w;
+	nj     = testsur->h - face->h;
+
+	AssertTrue(ni != 0, "ni != 0");
+	AssertTrue(nj != 0, "nj != 0");
+
+	/* Constant values. */
+	rect.w = face->w;
+	rect.h = face->h;
 
    /* Clear surface. */
    ret = SDL_FillRect( testsur, NULL,
