@@ -20,8 +20,10 @@
 */
 
 #include "SDL_bopengl.h"
-#include "../SDL_sysvideo.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Passing a NULL path means load pointers from the application */
 int BE_GL_LoadLibrary(_THIS, const char *path)
@@ -192,4 +194,8 @@ int BE_GL_MakeCurrent(_THIS)
     {
         SDL_Win->SwapBuffers();
     }
+#endif
+
+#ifdef __cplusplus
+}
 #endif

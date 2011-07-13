@@ -115,10 +115,10 @@ SDL_QuitBeApp(void)
 
 /* SDL_BApp functions */
 void SDL_BApp::ClearID(SDL_BWin *bwin) {
-	window_map[bwin->GetID()] = NULL;
-	int32 i = window_map.size() - 1;
-	while(i >= 0 && window_map[i] == NULL) {
-		window_map.pop_back();
+	_SetSDLWindow(NULL, bwin->GetID());
+	int32 i = _GetNumWindowSlots() - 1;
+	while(i >= 0 && _GetSDLWindow(i) == NULL) {
+		_PopBackWindow();
 		--i;
 	}
 }

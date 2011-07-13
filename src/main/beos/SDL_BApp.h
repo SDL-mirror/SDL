@@ -33,10 +33,13 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+
+#include <vector>	/* Vector should only be included if we use a C++
+					   compiler */
+
 #endif
 
 
-#include <vector>
 
 
 /* Forward declarations */
@@ -71,6 +74,17 @@ class SDL_BApp : public BApplication {
 public:
 	SDL_BApp(const char* signature) :
 		BApplication(signature) {
+#ifndef __cplusplus
+		/* Set vector imitation variables */
+		_ResizeArray();
+		_size = 0;
+		_length = 0;
+#endif
+	}
+	virtual ~SDL_BApp() {
+#ifndef __cplusplus
+		SDL_free(window_map);
+#endif
 	}
 		/* Event-handling functions */
 	virtual void MessageReceived(BMessage* message) {
@@ -145,20 +159,22 @@ public:
     /* Window creation/destruction methods */
     int32 GetID(SDL_Window *win) {
     	int32 i;
-    	for(i = 0; i < window_map.size(); ++i) {
-    		if( window_map[i] == NULL ) {
-    			window_map[i] = win;
+    	for(i = 0; i < _GetNumWindowSlots(); ++i) {
+    		if( _GetSDLWindow(i) == NULL ) {
+    			_SetSDLWindow(win, i);
     			return i;
     		}
     	}
     	
     	/* Expand the vector if all slots are full */
-    	if( i == window_map.size() ) {
-    		window_map.push_back(win);
+    	if( i == _GetNumWindowSlots() ) {
+    		_PushBackWindow(win);
     		return i;
     	}
     }
     
+    /* FIXME: Bad coding practice, but I can't include SDL_BWin.h here.  Is
+       there another way to do this? */
     void ClearID(SDL_BWin *bwin); /* Defined in SDL_BeApp.cc */
     
 private:
@@ -171,7 +187,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, sdlEventType, 0, 0);
 	}
 	
@@ -186,7 +202,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendMouseMotion(win, 0, dx, dy);
 	}
 	
@@ -201,7 +217,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendMouseButton(win, state, button);
 	}
 	
@@ -216,7 +232,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendMouseWheel(win, xTicks, yTicks);
 	}
 	
@@ -241,7 +257,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		if(bSetFocus) {
 			SDL_SetMouseFocus(win);
 		} else if(SDL_GetMouseFocus() == win) {
@@ -260,7 +276,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		if(bSetFocus) {
 			SDL_SetKeyboardFocus(win);
 		} else if(SDL_GetKeyboardFocus() == win) {
@@ -281,7 +297,7 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_MOVED, xPos, yPos);
 	}
 	
@@ -297,16 +313,80 @@ private:
 		) {
 			return;
 		}
-		win = window_map[winID];
+		win = _GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_RESIZED, w, h);
 	}
 
 	bool _GetWinID(BMessage *msg, int32 *winID) {
 		return msg->FindInt32("window-id", winID) == B_OK;
 	}
+
+
+
+	/* Vector imitators */
+	SDL_Window *_GetSDLWindow(int32 winID) {
+		return window_map[winID];
+	}
 	
+	void _SetSDLWindow(SDL_Window *win, int32 winID) {
+		window_map[winID] = win;
+	}
+	
+	int32 _GetNumWindowSlots() {
+#ifdef __cplusplus
+		return window_map.size();
+#else
+		return _size;
+#endif
+	}
+	
+	
+	void _PopBackWindow() {
+#ifdef __cplusplus
+		window_map.pop_back();
+#else
+		--_size;
+#endif
+	}
+
+	void _PushBackWindow(SDL_Window *win) {
+#ifdef __cplusplus
+		window_map.push_back(win);
+#else
+		/* Resize array */
+		if(_length == _size) {
+			_ResizeArray();
+		}
+
+		window_map[_size] = win;
+		++_size;
+#endif
+	}
+
+#ifndef __cplusplus
+	_ResizeArray() {
+		_length += 4;	/* Increase capacity by some arbitrary number */
+		SDL_Window *temp = (SDL_Window*)SDL_calloc(_length, 
+							sizeof(SDL_Window*));
+
+		/* Move windows from old list to new list */
+		int32 i;
+		for(i = 0; i < _size; ++i) {
+			temp[i] = window_map[i];
+		}
+		SDL_free(window_map);
+		window_map = temp;
+	}
+#endif
+
 	/* Members */
+#ifdef __cplusplus
 	vector<SDL_Window*> window_map; /* Keeps track of SDL_Windows by index-id */
+#else
+	int32 _size;
+	int32 _length;
+	SDL_Window *window_map;
+#endif
 };
 
 #endif

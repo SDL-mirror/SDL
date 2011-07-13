@@ -21,7 +21,21 @@
 
 #ifndef SDL_BOPENGL_H
 #define SDL_BOPENGL_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "../SDL_sysvideo.h"
+
+
+
 extern int BE_GL_LoadLibrary(_THIS, const char *path);
 extern void *BE_GL_GetProcAddress(_THIS, const char *proc);
 extern int BE_GL_MakeCurrent(_THIS);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif
