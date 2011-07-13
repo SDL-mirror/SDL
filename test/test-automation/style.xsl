@@ -209,6 +209,11 @@ div, h1 {
 			    <xsl:value-of select="result"/> 
 	           </xsl:attribute><xsl:value-of select="result"/> 
 	        </span> 
+			<xsl:if test="resultDescription != ''">
+			  <span xml:space="preserve">
+			  	 (<xsl:value-of select="resultDescription"/>)  
+			  </span>
+			</xsl:if>
 			(Total runtime: <xsl:value-of select="totalRuntime"/> seconds)<br/>
 			Description: <span class="description"> <xsl:value-of select="description"/> </span><br/>
 		      <span class="switch show-asserts" uid="{generate-id(assertSummary)}">[Show Assert Summary]</span><br/>

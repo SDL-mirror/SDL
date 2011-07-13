@@ -32,7 +32,7 @@
 
 /* Test case references */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0, 4};
 
 static const TestCaseReference test2 =
 		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0, 0};
@@ -89,6 +89,7 @@ void
 dummycase1(void *arg)
 {
 	//AssertEquals(5, 5, "Assert message");
+	while(1);
 }
 
 void

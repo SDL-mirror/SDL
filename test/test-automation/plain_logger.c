@@ -8,6 +8,7 @@
 
 #include "logger_helpers.h"
 #include "plain_logger.h"
+#include "SDL_test.h"
 
 static int indentLevel;
 
@@ -88,17 +89,25 @@ void
 PlainTestEnded(const char *testName, const char *suiteName,
           int testResult, time_t endTime, double totalRuntime)
 {
-	if(testResult) {
-		if(testResult == 2) {
-			Output(--indentLevel, "%s: failed -> no assert", testName);
-		}
-		else if(testResult == 3) {
-			Output(--indentLevel, "%s: skipped", testName);
-		} else {
+	switch(testResult) {
+		case TEST_RESULT_PASS:
+			Output(--indentLevel, "%s: ok", testName);
+			break;
+		case TEST_RESULT_FAILURE:
 			Output(--indentLevel, "%s: failed", testName);
-		}
-	} else {
-		Output(--indentLevel, "%s: ok", testName);
+			break;
+		case TEST_RESULT_NO_ASSERT:
+			Output(--indentLevel, "%s: failed -> no assert", testName);
+			break;
+		case TEST_RESULT_SKIPPED:
+			Output(--indentLevel, "%s: skipped", testName);
+			break;
+		case TEST_RESULT_KILLED:
+			Output(--indentLevel, "%s: killed, exceeded timeout", testName);
+			break;
+		case TEST_RESULT_SETUP_FAILURE:
+			Output(--indentLevel, "%s: killed, setup failure", testName);
+			break;
 	}
 }
 

@@ -600,7 +600,7 @@ RunTest(TestCase *testItem) {
 
 	int cntFailedAsserts = testItem->countFailedAsserts();
 	if(cntFailedAsserts != 0) {
-		return 3;
+		return TEST_RESULT_SETUP_FAILURE;
 	}
 
 	testItem->testCase(0x0);
@@ -613,6 +613,22 @@ RunTest(TestCase *testItem) {
 }
 
 /*!
+ * Kills test that hungs. Test hungs when its execution
+ * takes longer than timeout specified for it.
+ *
+ * When test will be killed SIG_ALRM will be triggered and
+ * it'll call this function which kills the test process.
+ *
+ * Note: if runner is executed with --in-proc then hung tests
+ * can't be killed
+ *
+ * \param signum
+ */
+void KillHungTest(int signum) {
+	exit(TEST_RESULT_KILLED);
+}
+
+/*!
  * Executes a test case. Loads the test, executes it and
  * returns the tests return value to the caller.
  *
@@ -621,13 +637,18 @@ RunTest(TestCase *testItem) {
  */
 int
 ExecuteTest(TestCase *testItem) {
-	int retVal = 1;
+	int retVal = -1;
 
 	if(execute_inproc) {
 		retVal = RunTest(testItem);
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
+			if(testItem->timeout > 0) {
+				signal(SIGALRM, KillHungTest);
+				alarm((unsigned int) testItem->timeout);
+			}
+
 			exit(RunTest(testItem));
 		} else {
 			int stat_lock = -1;
@@ -639,6 +660,7 @@ ExecuteTest(TestCase *testItem) {
 
 	return retVal;
 }
+
 
 
 /*!

@@ -39,6 +39,13 @@ extern AssertFp testAssert;
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
 
+#define TEST_RESULT_PASS			0
+#define TEST_RESULT_FAILURE			1
+#define TEST_RESULT_NO_ASSERT		2
+#define TEST_RESULT_SKIPPED			3
+#define TEST_RESULT_KILLED			4
+#define TEST_RESULT_SETUP_FAILURE	5
+
 /*!
  * Holds information about a test case
  */

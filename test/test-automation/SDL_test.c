@@ -38,7 +38,7 @@ int _testAssertsPassed;
 void
 _InitTestEnvironment()
 {
-	_testReturnValue = 0;
+	_testReturnValue = TEST_RESULT_PASS;
 	_testAssertsFailed = 0;
 	_testAssertsPassed = 0;
 }
@@ -50,7 +50,7 @@ _QuitTestEnvironment()
                   _testAssertsFailed, _testAssertsPassed, time(0));
 
 	if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
-		_testReturnValue = 2;
+		_testReturnValue = TEST_RESULT_NO_ASSERT;
 	}
 
 	return _testReturnValue;
@@ -75,7 +75,7 @@ AssertEquals(int expected, int actual, char *message, ...)
    if(expected != expected) {
       AssertWithValues("AssertEquals", 0, buf, actual, expected, time(0));
 
-      _testReturnValue = 1;
+      _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
    } else {
 	   AssertWithValues("AssertEquals", 1, buf,
@@ -97,7 +97,7 @@ AssertTrue(int condition, char *message, ...)
    if (!condition) {
       Assert("AssertTrue", 0, buf, time(0));
 
-      _testReturnValue = 1;
+      _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
    } else {
 		Assert("AssertTrue", 1, buf, time(0));
@@ -133,7 +133,7 @@ AssertFail(char *message, ...)
 
    Assert("AssertFail", 0, buf, time(0));
 
-   _testReturnValue = 1;
+   _testReturnValue = TEST_RESULT_FAILURE;
    _testAssertsFailed++;
 }
 

@@ -26,6 +26,7 @@
 
 #include "xml.h"
 #include "logger_helpers.h"
+#include "SDL_test.h"
 
 #include "xml_logger.h"
 
@@ -49,6 +50,7 @@ const char *testElementName = "test";
 const char *nameElementName = "name";
 const char *descriptionElementName = "description";
 const char *resultElementName = "result";
+const char *resultDescriptionElementName = "resultDescription";
 const char *assertElementName = "assert";
 const char *messageElementName = "message";
 const char *timeElementName = "time";
@@ -347,25 +349,59 @@ void
 XMLTestEnded(const char *testName, const char *suiteName,
           int testResult, time_t endTime, double totalRuntime)
 {
+	// Log test result
 	char *output = XMLOpenElement(resultElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
-	if(testResult) {
-		if(testResult == 2) {
-			output = XMLAddContent("failed. No assert");
-		}
-		else if(testResult == 3) {
-			output = XMLAddContent("skipped");
-		} else {
+	switch(testResult) {
+		case TEST_RESULT_PASS:
+			output = XMLAddContent("passed");
+			break;
+		case TEST_RESULT_FAILURE:
 			output = XMLAddContent("failed");
-		}
-		XMLOutputter(indentLevel, NO, output);
-	} else {
-		output = XMLAddContent("passed");
-		XMLOutputter(indentLevel, NO, output);
+			break;
+		case TEST_RESULT_NO_ASSERT:
+			output = XMLAddContent("failed");
+			break;
+		case TEST_RESULT_SKIPPED:
+			output = XMLAddContent("skipped");
+			break;
+		case TEST_RESULT_KILLED:
+			output = XMLAddContent("failed");
+			break;
+		case TEST_RESULT_SETUP_FAILURE:
+			output = XMLAddContent("failed");
+			break;
 	}
+	XMLOutputter(indentLevel, NO, output);
 
 	output = XMLCloseElement(resultElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
+	// Log description of test result. Why the test failed,
+	// if there's some specific reason
+	output = XMLOpenElement(resultDescriptionElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	switch(testResult) {
+		case TEST_RESULT_PASS:
+		case TEST_RESULT_FAILURE:
+		case TEST_RESULT_SKIPPED:
+			output = XMLAddContent("");
+			break;
+		case TEST_RESULT_NO_ASSERT:
+			output = XMLAddContent("No assert");
+			break;
+		case TEST_RESULT_KILLED:
+			output = XMLAddContent("Timeout exceeded");
+			break;
+		case TEST_RESULT_SETUP_FAILURE:
+			output = XMLAddContent("Setup failure, couldn't be executed");
+			break;
+	}
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(resultDescriptionElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
 	// log total runtime
