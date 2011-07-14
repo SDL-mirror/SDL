@@ -703,7 +703,7 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 				++joystick->nbuttons;
 			}
 		}
-		for ( i=0; i<ABS_MAX; ++i ) {
+		for ( i=0; i<ABS_MISC; ++i ) {
 			/* Skip hats */
 			if ( i == ABS_HAT0X ) {
 				i = ABS_HAT3Y;
