@@ -15,22 +15,29 @@ static int indentLevel;
 /*!
  * Prints out the output of the logger
  *
- * \param currentIdentLevel The currently used indentation level
+ * \param currentIndentLevel The currently used indentation level
  * \param message The message to be printed out
  */
 int
-Output(const int currentIdentLevel, const char *message, ...)
+Output(const int currentIndentLevel, const char *message, ...)
 {
-	va_list list;
-	va_start(list, message);
 
 	int ident = 0;
-	for( ; ident < currentIdentLevel; ++ident) {
+	for( ; ident < currentIndentLevel; ++ident) {
 		fprintf(stdout, "  "); // \todo make configurable?
 	}
 
-	char buffer[1024];
-	SDL_vsnprintf(buffer, sizeof(buffer), message, list);
+
+    char buffer[1024];
+	memset(buffer, 0, 1024);
+
+	va_list list;
+	va_start(list, message);
+
+	SDL_vsnprintf(buffer, 1024, message, list);
+
+	va_end(list);
+
 
 	fprintf(stdout, "%s\n", buffer);
 	fflush(stdout);
@@ -121,11 +128,11 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 
 void
 PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
-		int actualValue, int expected, time_t eventTime)
+		int actualValue, int expectedValue, time_t eventTime)
 {
 	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s: %s (expected %d, actualValue &d) - %s",
-			assertName, result, expected, actualValue, assertMessage);
+	Output(indentLevel, "%s: %s (expected %d, actualValue %d) - %s",
+			assertName, result, expectedValue, actualValue, assertMessage);
 }
 
 void

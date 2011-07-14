@@ -76,18 +76,18 @@ static int prevEOL = YES;
  *
  * \todo Make the destination of the output changeable (defaults to stdout)
  *
- * \param  identLevel the indent level of the message
+ * \param currentIndentLevel the indent level of the message
  * \param EOL will it print end of line character or not
  * \param the XML element itself
  *
  */
 void
-XMLOutputter(const int currentIdentLevel,
+XMLOutputter(const int currentIndentLevel,
 			 int EOL, const char *message)
 {
 	if(ValidateString(message)) {
 		int ident = 0;
-		for( ; ident < currentIdentLevel && prevEOL; ++ident) {
+		for( ; ident < currentIndentLevel && prevEOL; ++ident) {
 			fprintf(stdout, "  "); // \todo make configurable?
 		}
 

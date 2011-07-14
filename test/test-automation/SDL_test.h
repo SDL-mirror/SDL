@@ -90,7 +90,7 @@ int _CountFailedAsserts();
  * \param actual The actual value of tested variable
  * \param message Message that will be printed
  */
-void AssertEquals(const int expected, const int actual, char *message, ...);
+void AssertEquals(int expected, int actual, char *message, ...);
 
 /*!
  *  Assert function. Tests if the given condition is true. True in

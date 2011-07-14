@@ -586,9 +586,11 @@ LoadCountFailedAssertsFunction(void *suite) {
 
 
 /*
- * Execute the test
+ * Execute a test. Loads the test, executes it and
+ * returns the tests return value to the caller.
  *
  * \param testItem Test to be executed
+ * \param test result
  */
 int
 RunTest(TestCase *testItem) {
@@ -629,8 +631,8 @@ void KillHungTest(int signum) {
 }
 
 /*!
- * Executes a test case. Loads the test, executes it and
- * returns the tests return value to the caller.
+ * Sets up a test case. Decideds wheter the test will
+ * be executed in-proc or out-of-proc.
  *
  * \param testItem The test case that will be executed
  * \return The return value of the test. Zero means success, non-zero failure.

@@ -72,7 +72,7 @@ AssertEquals(int expected, int actual, char *message, ...)
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
 
-   if(expected != expected) {
+   if(expected != actual) {
       AssertWithValues("AssertEquals", 0, buf, actual, expected, time(0));
 
       _testReturnValue = TEST_RESULT_FAILURE;

@@ -45,7 +45,7 @@ typedef	void (*AssertFp)(const char *assertName, int assertResult,
 						 const char *assertMessage, time_t eventTime);
 
 typedef	void (*AssertWithValuesFp)(const char *assertName, int assertResult,
-						 const char *assertMessage, int actualValue, int excpected,
+						 const char *assertMessage, int actualValue, int expected,
 						 time_t eventTime);
 
 typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
