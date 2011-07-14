@@ -38,7 +38,7 @@ static const TestCaseReference test2 =
 		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0, 2};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
@@ -102,6 +102,7 @@ dummycase2(void *arg)
 void
 dummycase3(void *arg)
 {
-	AssertTrue(1, "Assert message");
+	while(1);
+	//AssertTrue(1, "Assert message");
 }
 
