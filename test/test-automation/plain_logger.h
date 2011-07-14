@@ -21,6 +21,7 @@ void PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventT
  * \param testCount How many tests were executed in total
  * \param suiteCount How many suite were executed in total
  * \param testPassCount How many tests passed in total
+ * \param testSkippedCount How many tests were skipped in total
  * \param testFailCount How many tests failed in total
  * \param endTime When the execution ended
  * \param totalRuntime How long the execution took
