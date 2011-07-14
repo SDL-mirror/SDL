@@ -157,7 +157,7 @@ void _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 	/* Clear surface. */
 	ret = SDL_FillRect( testsur, NULL,
 		 SDL_MapRGB( testsur->format, 0, 0, 0 ) );
-	 AssertTrue(ret != 0, "SDL_FillRect");
+	 AssertTrue(ret == 0, "SDL_FillRect");
 
 	/* Steps to take. */
 	ni     = testsur->w - face->w;
@@ -172,14 +172,15 @@ void _testBlitBlendMode(SDL_Surface *testsur, SDL_Surface *face, int mode)
 	  for (i=0; i <= ni; i+=4) {
 		 /* Set blend mode. */
 		 ret = SDL_SetSurfaceBlendMode( face, mode );
-		 AssertTrue(ret != 0, "SDL_SetSurfaceBlendMode");
+		 AssertTrue(ret == 0, "SDL_SetSurfaceBlendMode");
 
 		 /* Blitting. */
 		 rect.x = i;
 		 rect.y = j;
 		 // TODO Add pixel level validation, SDL_BlitSurface might be no-op
 		 ret = SDL_BlitSurface( face, NULL, testsur, &rect );
-		 AssertTrue(ret != 0, "SDL_BlitSurface");	  }
+		 AssertTrue(ret == 0, "SDL_BlitSurface");
+	  }
 	}
 }
 
