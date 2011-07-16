@@ -277,6 +277,11 @@ struct SDL_VideoDevice
     } gl_config;
 
     /* * * */
+    /* Cache current GL context; don't call the OS when it hasn't changed. */
+    SDL_Window *current_glwin;
+    SDL_GLContext current_glctx;
+
+    /* * * */
     /* Data private to this driver */
     void *driverdata;
     struct SDL_GLDriverData *gl_data;

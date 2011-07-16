@@ -1931,6 +1931,13 @@ SDL_DestroyWindow(SDL_Window * window)
 
     CHECK_WINDOW_MAGIC(window, );
 
+    /* make no context current if this is the current context window. */
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        if (_this->current_glwin == window) {
+            SDL_GL_MakeCurrent(NULL, NULL);
+        }
+    }
+
     /* Restore video mode, etc. */
     SDL_HideWindow(window);
 
@@ -2462,18 +2469,31 @@ SDL_GL_CreateContext(SDL_Window * window)
 }
 
 int
-SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext context)
+SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
 {
+    int retval;
+
     CHECK_WINDOW_MAGIC(window, -1);
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return -1;
     }
-    if (!context) {
+    if (!ctx) {
         window = NULL;
     }
-    return _this->GL_MakeCurrent(_this, window, context);
+
+    if ((window == _this->current_glwin) && (ctx == _this->current_glctx)) {
+        retval = 0;  /* we're already current. */
+    } else {
+        retval = _this->GL_MakeCurrent(_this, window, ctx);
+        if (retval == 0) {
+            _this->current_glwin = window;
+            _this->current_glctx = ctx;
+        }
+    }
+
+    return retval;
 }
 
 int
