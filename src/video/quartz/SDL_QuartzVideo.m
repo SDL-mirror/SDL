@@ -1252,7 +1252,7 @@ static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface)
      * Always get latest bitmap address and rowbytes for the screen surface;
      *  they can change dynamically (user has multiple monitors, etc).
      */
-    if (surface == SDL_VideoSurface) {
+    if ((surface == SDL_VideoSurface) && (surface->flags & SDL_HWSURFACE)) {
         surface->pixels = (void*) CGDisplayBaseAddress (kCGDirectMainDisplay);
         surface->pitch  = CGDisplayBytesPerRow (kCGDirectMainDisplay);
         return (surface->pixels != NULL);
