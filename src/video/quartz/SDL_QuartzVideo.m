@@ -84,25 +84,13 @@ static int          QZ_ToggleFullScreen (_THIS, int on);
 static int          QZ_SetColors        (_THIS, int first_color,
                                          int num_colors, SDL_Color *colors);
 
-static int          QZ_LockDoubleBuffer   (_THIS, SDL_Surface *surface);
-static void         QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface);
-static int          QZ_ThreadFlip         (_THIS);
-static int          QZ_FlipDoubleBuffer   (_THIS, SDL_Surface *surface);
-static void         QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects);
-
-static void         QZ_DirectUpdate     (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_UpdateRects      (_THIS, int num_rects, SDL_Rect *rects);
 static void         QZ_VideoQuit        (_THIS);
 
-/* Hardware surface functions (for fullscreen mode only) */
-#if 0 /* Not used (apparently, it's really slow) */
-static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color);
-#endif
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface);
 static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface);
-/* static int  QZ_FlipHWSurface (_THIS, SDL_Surface *surface); */
 
 /* Bootstrap binding, enables entry point into the driver */
 VideoBootStrap QZ_bootstrap = {
@@ -140,14 +128,13 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index)
     device->ToggleFullScreen = QZ_ToggleFullScreen;
     device->UpdateMouse      = QZ_UpdateMouse;
     device->SetColors        = QZ_SetColors;
-    /* device->UpdateRects      = QZ_UpdateRects; this is determined by SetVideoMode() */
+    device->UpdateRects      = QZ_UpdateRects;
     device->VideoQuit        = QZ_VideoQuit;
 
     device->LockHWSurface   = QZ_LockHWSurface;
     device->UnlockHWSurface = QZ_UnlockHWSurface;
     device->AllocHWSurface   = QZ_AllocHWSurface;
     device->FreeHWSurface   = QZ_FreeHWSurface;
-    /* device->FlipHWSurface   = QZ_FlipHWSurface */;
 
     device->SetGamma     = QZ_SetGamma;
     device->GetGamma     = QZ_GetGamma;
@@ -398,11 +385,7 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
 {
     /* Reset values that may change between switches */
     this->info.blit_fill  = 0;
-    this->FillHWRect      = NULL;
-    this->UpdateRects     = NULL;
-    this->LockHWSurface   = NULL;
-    this->UnlockHWSurface = NULL;
-    
+
     if (cg_context) {
         CGContextFlush (cg_context);
         CGContextRelease (cg_context);
@@ -413,17 +396,7 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
     if ( mode_flags & SDL_FULLSCREEN ) {
 
         NSRect screen_rect;
-        
-        /*  Release double buffer stuff */
-        if ( mode_flags & SDL_DOUBLEBUF) {
-            quit_thread = YES;
-            SDL_SemPost (sem1);
-            SDL_WaitThread (thread, NULL);
-            SDL_DestroySemaphore (sem1);
-            SDL_DestroySemaphore (sem2);
-            SDL_free (sw_buffers[0]);
-        }
-        
+
         /* If we still have a valid window, close it. */
         if ( qz_window ) {
             NSCAssert([ qz_window delegate ] == nil, @"full screen window shouldn't have a delegate"); /* if that should ever change, we'd have to release it here */
@@ -479,6 +452,10 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     NSRect contentRect;
     CGDisplayFadeReservationToken fade_token = kCGDisplayFadeReservationInvalidToken;
 
+    current->flags = SDL_FULLSCREEN;
+    current->w = width;
+    current->h = height;
+
     contentRect = NSMakeRect (0, 0, width, height);
 
     /* Fade to black to hide resolution-switching flicker (and garbage
@@ -524,72 +501,19 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         goto ERR_NO_SWITCH;
     }
 
-    current->pixels = (Uint32*) CGDisplayBaseAddress (display_id);
-    current->pitch  = CGDisplayBytesPerRow (display_id);
-
-    current->flags = 0;
-    current->w = width;
-    current->h = height;
-    current->flags |= SDL_FULLSCREEN;
-    current->flags |= SDL_HWSURFACE;
-    current->flags |= SDL_PREALLOC;
-    /* current->hwdata = (void *) CGDisplayGetDrawingContext (display_id); */
-
-    this->UpdateRects     = QZ_DirectUpdate;
-    this->LockHWSurface   = QZ_LockHWSurface;
-    this->UnlockHWSurface = QZ_UnlockHWSurface;
-
-    /* Setup double-buffer emulation */
-    if ( flags & SDL_DOUBLEBUF ) {
-        
-        /*
-            Setup a software backing store for reasonable results when
-            double buffering is requested (since a single-buffered hardware
-            surface looks hideous).
-            
-            The actual screen blit occurs in a separate thread to allow 
-            other blitting while waiting on the VBL (and hence results in higher framerates).
-        */
-        this->LockHWSurface = NULL;
-        this->UnlockHWSurface = NULL;
-        this->UpdateRects = NULL;
-        
-        current->flags |= (SDL_HWSURFACE|SDL_DOUBLEBUF);
-        this->UpdateRects = QZ_DoubleBufferUpdate;
-        this->LockHWSurface = QZ_LockDoubleBuffer;
-        this->UnlockHWSurface = QZ_UnlockDoubleBuffer;
-        this->FlipHWSurface = QZ_FlipDoubleBuffer;
-
-        current->pixels = SDL_malloc (current->pitch * current->h * 2);
-        if (current->pixels == NULL) {
-            SDL_OutOfMemory ();
-            goto ERR_DOUBLEBUF;
-        }
-        
-        sw_buffers[0] = current->pixels;
-        sw_buffers[1] = (Uint8*)current->pixels + current->pitch * current->h;
-        
-        quit_thread = NO;
-        sem1 = SDL_CreateSemaphore (0);
-        sem2 = SDL_CreateSemaphore (1);
-        thread = SDL_CreateThread ((int (*)(void *))QZ_ThreadFlip, this);
-    }
-
-    if ( CGDisplayCanSetPalette (display_id) )
-        current->flags |= SDL_HWPALETTE;
-
     /* Check if we should recreate the window */
     if (qz_window == nil) {
         /* Manually create a window, avoids having a nib file resource */
         qz_window = [ [ SDL_QuartzWindow alloc ] 
             initWithContentRect:contentRect
-                styleMask:0
+                styleMask:NSBorderlessWindowMask
                     backing:NSBackingStoreBuffered
                         defer:NO ];
 
         if (qz_window != nil) {
             [ qz_window setAcceptsMouseMovedEvents:YES ];
             [ qz_window setViewsNeedDisplay:NO ];
+            [ qz_window setContentView: [ [ [ SDL_QuartzView alloc ] init ] autorelease ] ];
         }
     }
     /* We already have a window, just change its size */
@@ -604,6 +528,9 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
         CGLError err;
         CGLContextObj ctx;
+
+        /* CGLSetFullScreen() will handle this for us. */
+        [ qz_window setLevel:NSNormalWindowLevel ];
 
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             goto ERR_NO_GL;
@@ -631,6 +558,39 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
         current->flags |= SDL_OPENGL;
     }
+    /* For 2D, we build a CGBitmapContext */
+    else {
+        CGColorSpaceRef cgColorspace;
+
+        /* Only recreate the view if it doesn't already exist */
+        if (window_view == nil) {
+            window_view = [ [ NSView alloc ] initWithFrame:contentRect ];
+            [ window_view setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
+            [ [ qz_window contentView ] addSubview:window_view ];
+            [ window_view release ];
+        }
+
+        cgColorspace = CGColorSpaceCreateDeviceRGB();
+        current->pitch = 4 * current->w;
+        current->pixels = SDL_malloc (current->h * current->pitch);
+        
+        cg_context = CGBitmapContextCreate (current->pixels, current->w, current->h,
+                        8, current->pitch, cgColorspace,
+                        kCGImageAlphaNoneSkipFirst);
+        CGColorSpaceRelease (cgColorspace);
+        
+        current->flags |= SDL_SWSURFACE;
+        current->flags |= SDL_ASYNCBLIT;
+        current->hwdata = (void *) cg_context;
+
+        /* Force this window to draw above _everything_. */
+        [ qz_window setLevel:CGShieldingWindowLevel() ];
+    }
+
+    [ qz_window setHasShadow:NO];
+    [ qz_window setOpaque:YES];
+    [ qz_window center ];
+    [ qz_window makeKeyAndOrderFront:nil ];
 
     /* If we don't hide menu bar, it will get events and interrupt the program */
     HideMenuBar ();
@@ -821,10 +781,6 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
         current->flags |= SDL_SWSURFACE;
         current->flags |= SDL_ASYNCBLIT;
         current->hwdata = (void *) cg_context;
-        
-        this->UpdateRects     = QZ_UpdateRects;
-        this->LockHWSurface   = QZ_LockHWSurface;
-        this->UnlockHWSurface = QZ_UnlockHWSurface;
     }
 
     /* Save flags to ensure correct teardown */
@@ -845,6 +801,9 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     current->flags = 0;
     current->pixels = NULL;
 
+    /* Force bpp to 32 */
+    bpp = 32;
+
     /* Setup full screen video */
     if ( flags & SDL_FULLSCREEN ) {
         current = QZ_SetVideoFullScreen (this, current, width, height, bpp, flags );
@@ -853,8 +812,6 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     }
     /* Setup windowed video */
     else {
-        /* Force bpp to 32 */
-        bpp = 32;
         current = QZ_SetVideoWindowed (this, current, width, height, &bpp, flags);
         if (current == NULL)
             return NULL;
@@ -879,24 +836,15 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                 return NULL;
             case 32:   /* (8)-8-8-8 ARGB */
                 amask = 0x00000000;
-		if ( flags & SDL_FULLSCREEN )
-		{
-			rmask = 0x00FF0000;
-			gmask = 0x0000FF00;
-			bmask = 0x000000FF;
-		}
-		else
-		{
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
-			rmask = 0x0000FF00;
-			gmask = 0x00FF0000;
-			bmask = 0xFF000000;
+                rmask = 0x0000FF00;
+                gmask = 0x00FF0000;
+                bmask = 0xFF000000;
 #else
-			rmask = 0x00FF0000;
-			gmask = 0x0000FF00;
-			bmask = 0x000000FF;
+                rmask = 0x00FF0000;
+                gmask = 0x0000FF00;
+                bmask = 0x000000FF;
 #endif
-		}
                 break;
         }
 
@@ -940,164 +888,6 @@ static int QZ_SetColors (_THIS, int first_color, int num_colors,
         return 0;
 
     return 1;
-}
-
-static int QZ_LockDoubleBuffer (_THIS, SDL_Surface *surface)
-{
-    return 1;
-}
-
-static void QZ_UnlockDoubleBuffer (_THIS, SDL_Surface *surface)
-{
-}
-
-/* The VBL delay is based on code by Ian R Ollmann's RezLib <iano@cco.caltech.edu> */
-static AbsoluteTime QZ_SecondsToAbsolute ( double seconds )
-{
-    union
-    {
-        UInt64 i;
-        Nanoseconds ns;
-    } temp;
-        
-    temp.i = seconds * 1000000000.0;
-    
-    return NanosecondsToAbsolute ( temp.ns );
-}
-
-static int QZ_ThreadFlip (_THIS)
-{
-    Uint8 *src, *dst;
-    int skip, len, h;
-    
-    /*
-        Give this thread the highest scheduling priority possible,
-        in the hopes that it will immediately run after the VBL delay
-    */
-    {
-        pthread_t current_thread;
-        int policy;
-        struct sched_param param;
-        
-        current_thread = pthread_self ();
-        pthread_getschedparam (current_thread, &policy, &param);
-        policy = SCHED_RR;
-        param.sched_priority = sched_get_priority_max (policy);
-        pthread_setschedparam (current_thread, policy, &param);
-    }
-    
-    while (1) {
-    
-        SDL_SemWait (sem1);
-        if (quit_thread)
-            return 0;
-                
-        /*
-         * We have to add SDL_VideoSurface->offset here, since we might be a
-         *  smaller surface in the center of the framebuffer (you asked for
-         *  a fullscreen resolution smaller than the hardware could supply
-         *  so SDL is centering it in a bigger resolution)...
-         */
-        dst = (Uint8 *)CGDisplayBaseAddress (display_id) + SDL_VideoSurface->offset;
-        src = current_buffer + SDL_VideoSurface->offset;
-        len = SDL_VideoSurface->w * SDL_VideoSurface->format->BytesPerPixel;
-        h = SDL_VideoSurface->h;
-        skip = SDL_VideoSurface->pitch;
-    
-        /* Wait for the VBL to occur (estimated since we don't have a hardware interrupt) */
-        {
-            
-            /* The VBL delay is based on Ian Ollmann's RezLib <iano@cco.caltech.edu> */
-            double refreshRate;
-            double linesPerSecond;
-            double target;
-            double position;
-            double adjustment;
-            AbsoluteTime nextTime;        
-            CFNumberRef refreshRateCFNumber;
-            
-            refreshRateCFNumber = CFDictionaryGetValue (mode, kCGDisplayRefreshRate);
-            if ( NULL == refreshRateCFNumber ) {
-                SDL_SetError ("Mode has no refresh rate");
-                goto ERROR;
-            }
-            
-            if ( 0 == CFNumberGetValue (refreshRateCFNumber, kCFNumberDoubleType, &refreshRate) ) {
-                SDL_SetError ("Error getting refresh rate");
-                goto ERROR;
-            }
-            
-            if ( 0 == refreshRate ) {
-               
-               SDL_SetError ("Display has no refresh rate, using 60hz");
-                
-                /* ok, for LCD's we'll emulate a 60hz refresh, which may or may not look right */
-                refreshRate = 60.0;
-            }
-            
-            linesPerSecond = refreshRate * h;
-            target = h;
-        
-            /* Figure out the first delay so we start off about right */
-            position = CGDisplayBeamPosition (display_id);
-            if (position > target)
-                position = 0;
-            
-            adjustment = (target - position) / linesPerSecond; 
-            
-            nextTime = AddAbsoluteToAbsolute (UpTime (), QZ_SecondsToAbsolute (adjustment));
-        
-            MPDelayUntil (&nextTime);
-        }
-        
-        
-        /* On error, skip VBL delay */
-        ERROR:
-        
-        /* TODO: use CGContextDrawImage here too!  Create two CGContextRefs the same way we
-           create two buffers, replace current_buffer with current_context and set it
-           appropriately in QZ_FlipDoubleBuffer.  */
-        while ( h-- ) {
-        
-            SDL_memcpy (dst, src, len);
-            src += skip;
-            dst += skip;
-        }
-        
-        /* signal flip completion */
-        SDL_SemPost (sem2);
-    }
-    
-    return 0;
-}
-        
-static int QZ_FlipDoubleBuffer (_THIS, SDL_Surface *surface)
-{
-    /* wait for previous flip to complete */
-    SDL_SemWait (sem2);
-    
-    current_buffer = surface->pixels;
-        
-    if (surface->pixels == sw_buffers[0])
-        surface->pixels = sw_buffers[1];
-    else
-        surface->pixels = sw_buffers[0];
-    
-    /* signal worker thread to do the flip */
-    SDL_SemPost (sem1);
-    
-    return 0;
-}
-
-static void QZ_DoubleBufferUpdate (_THIS, int num_rects, SDL_Rect *rects)
-{
-    /* perform a flip if someone calls updaterects on a doublebuferred surface */
-    this->FlipHWSurface (this, SDL_VideoSurface);
-}
-
-static void QZ_DirectUpdate (_THIS, int num_rects, SDL_Rect *rects)
-{
-#pragma unused(this,num_rects,rects)
 }
 
 
@@ -1237,27 +1027,8 @@ static void QZ_VideoQuit (_THIS)
     }
 }
 
-#if 0 /* Not used (apparently, it's really slow) */
-static int  QZ_FillHWRect (_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
-{
-    CGSDisplayHWFill (display_id, rect->x, rect->y, rect->w, rect->h, color);
-
-    return 0;
-}
-#endif
-
 static int  QZ_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-    /*
-     * Always get latest bitmap address and rowbytes for the screen surface;
-     *  they can change dynamically (user has multiple monitors, etc).
-     */
-    if ((surface == SDL_VideoSurface) && (surface->flags & SDL_HWSURFACE)) {
-        surface->pixels = (void*) CGDisplayBaseAddress (kCGDirectMainDisplay);
-        surface->pitch  = CGDisplayBytesPerRow (kCGDirectMainDisplay);
-        return (surface->pixels != NULL);
-    }
-
     return 1;
 }
 
@@ -1273,12 +1044,6 @@ static int QZ_AllocHWSurface(_THIS, SDL_Surface *surface)
 static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface)
 {
 }
-
-/*
- int QZ_FlipHWSurface (_THIS, SDL_Surface *surface) {
-     return 0;
- }
- */
 
 /* Gamma functions */
 int QZ_SetGamma (_THIS, float red, float green, float blue)
