@@ -496,13 +496,7 @@ LoadTestCaseFunction(void *suite, char *testName)
  */
 TestCaseSetUpFp
 LoadTestSetUpFunction(void *suite) {
-	TestCaseSetUpFp testSetUp = (TestCaseSetUpFp) SDL_LoadFunction(suite, "SetUp");
-	if(testSetUp == NULL) {
-		fprintf(stderr, "Loading SetUp function failed, testSetUp == NULL\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-	}
-
-	return testSetUp;
+	return (TestCaseSetUpFp) SDL_LoadFunction(suite, "SetUp");
 }
 
 
@@ -516,13 +510,7 @@ LoadTestSetUpFunction(void *suite) {
  */
 TestCaseTearDownFp
 LoadTestTearDownFunction(void *suite) {
-	TestCaseTearDownFp testTearDown = (TestCaseTearDownFp) SDL_LoadFunction(suite, "TearDown");
-	if(testTearDown == NULL) {
-		fprintf(stderr, "Loading TearDown function failed, testTearDown == NULL\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
-	}
-
-	return testTearDown;
+	return (TestCaseTearDownFp) SDL_LoadFunction(suite, "TearDown");
 }
 
 
@@ -585,6 +573,23 @@ LoadCountFailedAssertsFunction(void *suite) {
 }
 
 
+/*!
+ * Kills test that hungs. Test hungs when its execution
+ * takes longer than timeout specified for it.
+ *
+ * When test will be killed SIG_ALRM will be triggered and
+ * it'll call this function which kills the test process.
+ *
+ * Note: if runner is executed with --in-proc then hung tests
+ * can't be killed
+ *
+ * \param signum
+ */
+void KillHungTest(int signum) {
+	exit(TEST_RESULT_KILLED);
+}
+
+
 /*
  * Execute a test. Loads the test, executes it and
  * returns the tests return value to the caller.
@@ -614,21 +619,6 @@ RunTest(TestCase *testItem) {
 	return testItem->quitTestEnvironment();
 }
 
-/*!
- * Kills test that hungs. Test hungs when its execution
- * takes longer than timeout specified for it.
- *
- * When test will be killed SIG_ALRM will be triggered and
- * it'll call this function which kills the test process.
- *
- * Note: if runner is executed with --in-proc then hung tests
- * can't be killed
- *
- * \param signum
- */
-void KillHungTest(int signum) {
-	exit(TEST_RESULT_KILLED);
-}
 
 /*!
  * Sets up a test case. Decideds wheter the test will
