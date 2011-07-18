@@ -35,6 +35,7 @@
 #include "plain_logger.h"
 #include "xml_logger.h"
 #include "logger.h"
+#include "support.h"
 
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
@@ -436,6 +437,12 @@ FilterTestCase(TestCaseReference *testReference)
 		} else {
 			retVal = 0;
 		}
+	}
+
+	if(testReference->requirements & TEST_REQUIRES_AUDIO) {
+		//printf("Debug: checking for audio support.\n");
+		retVal = PlatformSupportsAudio();
+		//printf("Debug: Audio support: %d\n", retVal);
 	}
 
 	return retVal;

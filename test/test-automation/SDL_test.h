@@ -21,8 +21,6 @@
 #ifndef _SDL_TEST_H
 #define _SDL_TEST_H
 
-#include <SDL/SDL.h>
-
 #include "logger.h"
 
 #include "common/common.h"
@@ -39,12 +37,16 @@ extern AssertFp testAssert;
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
 
+//! Definition of all the possible test results
 #define TEST_RESULT_PASS			0
 #define TEST_RESULT_FAILURE			1
 #define TEST_RESULT_NO_ASSERT		2
 #define TEST_RESULT_SKIPPED			3
 #define TEST_RESULT_KILLED			4
 #define TEST_RESULT_SETUP_FAILURE	5
+
+//! Definitions for test requirements
+#define TEST_REQUIRES_AUDIO 1
 
 /*!
  * Holds information about a test case

@@ -8,18 +8,18 @@
 
 #include "../SDL_test.h"
 
-/* Test casess */
+/* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "audio_printOutputDevices", "Checks available output (non-capture) device names.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "audio_printOutputDevices", "Checks available output (non-capture) device names.", TEST_ENABLED, TEST_REQUIRES_AUDIO, 0};
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "audio_printInputDevices", "Checks available input (capture) device names.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "audio_printInputDevices", "Checks available input (capture) device names.", TEST_ENABLED, TEST_REQUIRES_AUDIO, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "audio_printAudioDrivers", "Checks available audio driver names.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "audio_printAudioDrivers", "Checks available audio driver names.", TEST_ENABLED, TEST_REQUIRES_AUDIO, 0};
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "audio_printCurrentAudioDriver", "Checks current audio driver name with initialized audio.", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "audio_printCurrentAudioDriver", "Checks current audio driver name with initialized audio.", TEST_ENABLED, TEST_REQUIRES_AUDIO, 0};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
