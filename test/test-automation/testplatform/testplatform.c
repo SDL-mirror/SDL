@@ -352,13 +352,52 @@ int platform_testSetErrorEmptyInput(void *arg)
 int platform_testSetErrorInvalidInput(void *arg)
 {
    const char *testError = NULL;
+   const char *probeError = "Testing";
    char *lastError;
+   int len;
+
+   // Reset
+   SDL_ClearError();
    
+   // Check for no-op
    SDL_SetError(testError);
    AssertPass("SDL_SetError()");
    lastError = (char *)SDL_GetError();   
-   AssertTrue(lastError == NULL, 
-             "SDL_GetError() == NULL");
+   AssertTrue(lastError != NULL, 
+             "SDL_GetError() != NULL");
+   if (lastError != NULL)
+   {
+     len = strlen(lastError);
+     AssertTrue(len == 0, 
+             "SDL_GetError(): expected message len 0, was len: %i", 
+             0, 
+             len);
+     AssertTrue(strcmp(lastError, "") == 0, 
+             "SDL_GetError(): expected message '', was message: '%s'",           
+             lastError);
+   }
+   
+   // Set
+   SDL_SetError(probeError);
+   
+   // Check for no-op
+   SDL_SetError(testError);
+   AssertPass("SDL_SetError()");
+   lastError = (char *)SDL_GetError();   
+   AssertTrue(lastError != NULL, 
+             "SDL_GetError() != NULL");
+   if (lastError != NULL)
+   {
+     len = strlen(lastError);
+     AssertTrue(len == strlen(probeError), 
+             "SDL_GetError(): expected message len %i, was len: %i", 
+             strlen(probeError), 
+             len);
+     AssertTrue(strcmp(lastError, probeError) == 0, 
+             "SDL_GetError(): expected message '%s', was message: '%s'",
+             probeError,
+             lastError);
+   }
 
    // Clean up                
    SDL_ClearError();

@@ -55,6 +55,9 @@ SDL_SetError(const char *fmt, ...)
     va_list ap;
     SDL_error *error;
 
+    /* Ignore call if invalid format pointer was passed */
+    if (fmt == NULL) return;
+    
     /* Copy in the key, mark error as valid */
     error = SDL_GetErrBuf();
     error->error = 1;
