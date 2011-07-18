@@ -2459,13 +2459,21 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
 SDL_GLContext
 SDL_GL_CreateContext(SDL_Window * window)
 {
+    SDL_GLContext ctx = NULL;
     CHECK_WINDOW_MAGIC(window, NULL);
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("The specified window isn't an OpenGL window");
         return NULL;
     }
-    return _this->GL_CreateContext(_this, window);
+
+    ctx = _this->GL_CreateContext(_this, window);
+
+    /* Creating a context is assumed to make it current in the SDL driver. */
+    _this->current_glwin = window;
+    _this->current_glctx = ctx;
+
+    return ctx;
 }
 
 int
