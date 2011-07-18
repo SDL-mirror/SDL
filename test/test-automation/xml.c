@@ -148,9 +148,9 @@ EscapeString(const char *string)
 			break;
 		case '\'': totalSize += 6; //SDL_strlen("&apos;");
 			break;
-		case '"': totalSize += 6; //SDL_strlen("&quot;");
+		case '"': totalSize += 6;  //SDL_strlen("&quot;");
 			break;
-		case '<': totalSize += 4; //SDL_strlen("&lt;");
+		case '<': totalSize += 4;  //SDL_strlen("&lt;");
 			break;
 		case  '>': totalSize += 4; //SDL_strlen("&gt;");
 			break;
@@ -167,53 +167,41 @@ EscapeString(const char *string)
 	}
 
 	// escape the string
-	int retBufferCounter = 0;
-	for(counter = 0; counter < maxCount; ++counter) {
-		char character = string[counter];
+	char *curRetBuffer = retBuffer;
+	char *curString = string;
+
+	char character = *curString;
+	while( (character = *curString++) ) {
+
 		switch(character) {
 		case '&':
-			retBuffer[retBufferCounter++] = '&';
-			retBuffer[retBufferCounter++] = 'a';
-			retBuffer[retBufferCounter++] = 'm';
-			retBuffer[retBufferCounter++] = 'p';
-			retBuffer[retBufferCounter++] = ';';
+			memcpy((void *)curRetBuffer, (void *)"&amp;", 5);
+			curRetBuffer += 5;
 			break;
 		case '\'':
-			retBuffer[retBufferCounter++] = '&';
-			retBuffer[retBufferCounter++] = 'a';
-			retBuffer[retBufferCounter++] = 'p';
-			retBuffer[retBufferCounter++] = 'o';
-			retBuffer[retBufferCounter++] = 's';
-			retBuffer[retBufferCounter++] = ';';
+			memcpy((void *)curRetBuffer, (void *)"&apos;", 6);
+			curRetBuffer += 6;
 			break;
 		case '"':
-			retBuffer[retBufferCounter++] = '&';
-			retBuffer[retBufferCounter++] = 'q';
-			retBuffer[retBufferCounter++] = 'u';
-			retBuffer[retBufferCounter++] = 'o';
-			retBuffer[retBufferCounter++] = 't';
-			retBuffer[retBufferCounter++] = ';';
+			memcpy((void *)curRetBuffer, (void *)"&quot;", 6);
+			curRetBuffer += 6;
 			break;
 		case '<':
-			retBuffer[retBufferCounter++] = '&';
-			retBuffer[retBufferCounter++] = 'l';
-			retBuffer[retBufferCounter++] = 't';
-			retBuffer[retBufferCounter++] = ';';
+			memcpy((void *)curRetBuffer, (void *)"&lt;", 4);
+			curRetBuffer += 4;
 			break;
-		case  '>': totalSize += SDL_strlen("&gt;");
-			retBuffer[retBufferCounter++] = '&';
-			retBuffer[retBufferCounter++] = 'g';
-			retBuffer[retBufferCounter++] = 't';
-			retBuffer[retBufferCounter++] = ';';
+		case  '>':
+			memcpy((void *)curRetBuffer, (void *)"&gt;", 4);
+			curRetBuffer += 4;
 			break;
 		default:
-			retBuffer[retBufferCounter++] = character;
+			*curRetBuffer = character;
+			curRetBuffer += 1;
 			break;
 		}
-
 	}
 
-	retBuffer[retBufferCounter] = '\0';
+	*curRetBuffer = '\0';
 
 	return retBuffer;
 }
