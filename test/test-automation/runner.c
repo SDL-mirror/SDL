@@ -131,6 +131,7 @@ TestCaseReference **QueryTestCaseReferences(void *library);
 TestCaseSetUpFp LoadTestSetUpFunction(void *suite);
 TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
 CountFailedAssertsFp LoadCountFailedAssertsFunction(void *suite);
+void KillHungTest(int signum);
 
 
 /*! Pointers to selected logger implementation */
@@ -574,6 +575,31 @@ LoadCountFailedAssertsFunction(void *suite) {
 
 
 /*!
+ * Set timeout for test.
+ *
+ * \param timeout Timeout interval in seconds!
+ * \param callback Function that will be called after timeout has elapsed
+ */
+void SetTestTimeout(int timeout, void (*callback)(int))
+{
+#if 0
+	/* Note:
+	 * SDL_Init(SDL_INIT_TIMER) should be successfully called before using this
+	 */
+	int timeoutInMilliseconds = timeout * 1000;
+	SDL_TimerID timerID = SDL_AddTimer(timeoutInMilliseconds, callback, 0x0);
+	if(timerID == NULL) {
+		fprintf(stderr, "Error: Creation of SDL timer failed.\n");
+		fprintf(stderr, "%s\n", SDL_GetError());
+	}
+#else
+	signal(SIGALRM, callback);
+	alarm((unsigned int) timeout);
+#endif
+}
+
+
+/*!
  * Kills test that hungs. Test hungs when its execution
  * takes longer than timeout specified for it.
  *
@@ -585,7 +611,8 @@ LoadCountFailedAssertsFunction(void *suite) {
  *
  * \param signum
  */
-void KillHungTest(int signum) {
+void KillHungTest(int signum)
+{
 	exit(TEST_RESULT_KILLED);
 }
 
@@ -598,7 +625,17 @@ void KillHungTest(int signum) {
  * \param test result
  */
 int
-RunTest(TestCase *testItem) {
+RunTest(TestCase *testItem)
+{
+	if(testItem->timeout > 0) {
+		if(execute_inproc) {
+			Log("Test asked for timeout which is not supported.", time(0));
+		}
+		else {
+			SetTestTimeout(testItem->timeout, KillHungTest);
+		}
+	}
+
 	testItem->initTestEnvironment();
 
 	if(testItem->testSetUp) {
@@ -632,18 +669,10 @@ ExecuteTest(TestCase *testItem) {
 	int retVal = -1;
 
 	if(execute_inproc) {
-		if(testItem->timeout > 0) {
-			Log("Test asked for timeout which is not supported.", time(0));
-		}
 		retVal = RunTest(testItem);
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			if(testItem->timeout > 0) {
-				signal(SIGALRM, KillHungTest);
-				alarm((unsigned int) testItem->timeout);
-			}
-
 			exit(RunTest(testItem));
 		} else {
 			int stat_lock = -1;
