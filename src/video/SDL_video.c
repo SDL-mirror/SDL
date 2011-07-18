@@ -2510,8 +2510,10 @@ SDL_GL_SetSwapInterval(int interval)
     if (!_this) {
         SDL_UninitializedVideo();
         return -1;
-    }
-    if (_this->GL_SetSwapInterval) {
+    } else if (_this->current_glctx == NULL) {
+        SDL_SetError("No OpenGL context has been made current");
+        return -1;
+    } else if (_this->GL_SetSwapInterval) {
         return _this->GL_SetSwapInterval(_this, interval);
     } else {
         SDL_SetError("Setting the swap interval is not supported");
@@ -2525,8 +2527,10 @@ SDL_GL_GetSwapInterval(void)
     if (!_this) {
         SDL_UninitializedVideo();
         return -1;
-    }
-    if (_this->GL_GetSwapInterval) {
+    } else if (_this->current_glctx == NULL) {
+        SDL_SetError("No OpenGL context has been made current");
+        return -1;
+    } else if (_this->GL_GetSwapInterval) {
         return _this->GL_GetSwapInterval(_this);
     } else {
         SDL_SetError("Getting the swap interval is not supported");
