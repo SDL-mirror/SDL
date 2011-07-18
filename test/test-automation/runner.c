@@ -66,7 +66,8 @@ static int xml_enabled = 0;
 static int custom_xsl_enabled = 0;
 //! Flag for disabling xsl-style from xml report
 static int xsl_enabled = 0;
-
+//! Flag for enabling universal timeout for tests
+static int universal_timeout_enabled = 0;
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
@@ -80,6 +81,8 @@ char testcase_name_substring[NAME_BUFFER_SIZE];
 
 //! Name for user-supplied XSL style sheet name
 char xsl_stylesheet_name[NAME_BUFFER_SIZE];
+
+int universal_timeout = -1;
 
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
@@ -131,7 +134,7 @@ TestCaseReference **QueryTestCaseReferences(void *library);
 TestCaseSetUpFp LoadTestSetUpFunction(void *suite);
 TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
 CountFailedAssertsFp LoadCountFailedAssertsFunction(void *suite);
-void KillHungTest(int signum);
+void KillHungTestInChildProcess(int signum);
 
 
 /*! Pointers to selected logger implementation */
@@ -582,6 +585,13 @@ LoadCountFailedAssertsFunction(void *suite) {
  */
 void SetTestTimeout(int timeout, void (*callback)(int))
 {
+	if(callback == NULL) {
+		fprintf(stderr, "Error: timeout callback can't be NULL");
+	}
+	if(timeout < 0) {
+		fprintf(stderr, "Error: timeout value must be bigger than zero.");
+	}
+
 #if 0
 	/* Note:
 	 * SDL_Init(SDL_INIT_TIMER) should be successfully called before using this
@@ -593,8 +603,11 @@ void SetTestTimeout(int timeout, void (*callback)(int))
 		fprintf(stderr, "%s\n", SDL_GetError());
 	}
 #else
+
+	int tm = (timeout > universal_timeout ? timeout : universal_timeout);
+
 	signal(SIGALRM, callback);
-	alarm((unsigned int) timeout);
+	alarm((unsigned int) tm);
 #endif
 }
 
@@ -611,7 +624,8 @@ void SetTestTimeout(int timeout, void (*callback)(int))
  *
  * \param signum
  */
-void KillHungTest(int signum)
+void
+KillHungTestInChildProcess(int signum)
 {
 	exit(TEST_RESULT_KILLED);
 }
@@ -627,12 +641,12 @@ void KillHungTest(int signum)
 int
 RunTest(TestCase *testItem)
 {
-	if(testItem->timeout > 0) {
+	if(testItem->timeout > 0 || universal_timeout > 0) {
 		if(execute_inproc) {
 			Log("Test asked for timeout which is not supported.", time(0));
 		}
 		else {
-			SetTestTimeout(testItem->timeout, KillHungTest);
+			SetTestTimeout(testItem->timeout, KillHungTestInChildProcess);
 		}
 	}
 
@@ -778,7 +792,8 @@ void
 PrintUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--show-tests]\n");
-	  printf("                [--xml] [--xsl [STYLESHEET]] [--help]\n");
+	  printf("                [--xml] [--xsl [STYLESHEET]] [--timeout VALUE]\n");
+	  printf("                [--version] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
@@ -786,6 +801,11 @@ PrintUsage() {
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");
 	  printf("                              file or URL instead of the default one\n");
+	  printf(" -tm --timeout VALUE          Specify common timeout value for all tests\n");
+	  printf("                              Timeout is given in seconds and it'll override\n");
+	  printf("                              test specific timeout value only if the given\n");
+	  printf("                              value is greater than the test specific value\n");
+	  printf("                              note: doesn't work with --in-proc option.\n");
 	  printf(" -t  --test TEST              Executes only tests with given name\n");
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
@@ -816,6 +836,20 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--xml") == 0) {
     	  xml_enabled = 1;
+      }
+      else if(SDL_strcmp(arg, "--timeout") == 0 || SDL_strcmp(arg, "-tm") == 0) {
+    	  universal_timeout_enabled = 1;
+    	  char *timeoutString = NULL;
+
+    	  if( (i + 1) < argc)  {
+    		  timeoutString = argv[++i];
+    	  }  else {
+    		  printf("runner: timeout is missing\n");
+    		  PrintUsage();
+    		  exit(1);
+    	  }
+
+    	  universal_timeout = atoi(timeoutString);
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
@@ -937,6 +971,14 @@ main(int argc, char *argv[])
 
 	RunStarted(argc, argv, time(0), loggerData);
 
+	if(execute_inproc && universal_timeout_enabled) {
+		Log("Test timeout is not supported with in-proc execution.", time(0));
+		Log("Timeout will be disabled...", time(0));
+
+		universal_timeout_enabled = 0;
+		universal_timeout = -1;
+	}
+
 	char *currentSuiteName = NULL;
 	int suiteStartTime = SDL_GetTicks();
 
@@ -979,7 +1021,8 @@ main(int argc, char *argv[])
 		else if(retVal) {
 			totalTestFailureCount++;
 			testFailureCount++;
-		} else {
+		}
+		else {
 			totalTestPassCount++;
 			testPassCount++;
 		}
