@@ -64,6 +64,11 @@
 #define GLX_CONTEXT_DEBUG_BIT_ARB          0x0001
 #define GLX_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB 0x0002
 
+#ifndef GLX_EXT_swap_control
+#define GLX_SWAP_INTERVAL_EXT              0x20F1
+#define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
+#endif
+
 /* Typedef for the GL 3.0 context creation function */
 typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
                                                         GLXFBConfig config,
