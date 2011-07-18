@@ -109,6 +109,6 @@ void XMLAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, 
  * \param logMessage Message to be logged
  * \param eventTime Timestamp for log message
  */
-void XMLLog(const char *logMessage, time_t eventTime);
+void XMLLog(time_t eventTime, char *fmt, ...);
 
 #endif

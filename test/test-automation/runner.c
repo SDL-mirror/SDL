@@ -557,6 +557,7 @@ LoadQuitTestInvironmentFunction(void *suite) {
 	return testEnvQuit;
 }
 
+
 /*!
  * Loads function that returns failed assert count in the current
  * test environment
@@ -643,7 +644,7 @@ RunTest(TestCase *testItem)
 {
 	if(testItem->timeout > 0 || universal_timeout > 0) {
 		if(execute_inproc) {
-			Log("Test asked for timeout which is not supported.", time(0));
+			Log(time(0), "Test asked for timeout which is not supported.");
 		}
 		else {
 			SetTestTimeout(testItem->timeout, KillHungTestInChildProcess);
@@ -700,7 +701,6 @@ ExecuteTest(TestCase *testItem) {
 }
 
 
-
 /*!
  * If using out-of-proc execution of tests. This function
  * will handle the return value of the child process
@@ -721,7 +721,7 @@ HandleChildProcessReturnValue(int stat_lock)
 	} else if(WIFSIGNALED(stat_lock)) {
 		int signal = WTERMSIG(stat_lock);
 		// \todo add this to logger (add signal number)
-		Log("FAILURE: test was aborted due to signal\n", time(0));
+		Log(time(0), "FAILURE: test was aborted due to  %d\n", signal);
 		returnValue = 1;
 	}
 
@@ -972,8 +972,8 @@ main(int argc, char *argv[])
 	RunStarted(argc, argv, time(0), loggerData);
 
 	if(execute_inproc && universal_timeout_enabled) {
-		Log("Test timeout is not supported with in-proc execution.", time(0));
-		Log("Timeout will be disabled...", time(0));
+		Log(time(0), "Test timeout is not supported with in-proc execution.");
+		Log(time(0), "Timeout will be disabled...");
 
 		universal_timeout_enabled = 0;
 		universal_timeout = -1;

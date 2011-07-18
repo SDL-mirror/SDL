@@ -95,7 +95,7 @@ void
 dummycase2(void *arg)
 {
 	char *msg = "eello";
-	//msg[0] = 'H';
+	msg[0] = 'H';
 	AssertTrue(1, "Assert message");
 }
 

@@ -51,7 +51,7 @@ typedef	void (*AssertWithValuesFp)(const char *assertName, int assertResult,
 typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
 								int numAssertsPass, time_t eventTime);
 
-typedef	void (*LogFp)(const char *logMessage, time_t eventTime);
+typedef	void (*LogFp)(time_t eventTime, char *fmt, ...);
 
 
 /*! Function pointers to actual logging function implementations */

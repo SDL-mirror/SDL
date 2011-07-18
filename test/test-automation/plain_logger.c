@@ -136,8 +136,17 @@ PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, tim
 }
 
 void
-PlainLog(const char *logMessage, time_t eventTime)
+PlainLog(time_t eventTime, char *fmt, ...)
 {
+	// create the log message
+	va_list args;
+	char logMessage[1024];
+	memset(logMessage, 0, sizeof(logMessage));
+
+	va_start( args, fmt );
+	SDL_vsnprintf( logMessage, sizeof(logMessage), fmt, args );
+	va_end( args );
+
 	Output(indentLevel, "%s", logMessage);
 }
 

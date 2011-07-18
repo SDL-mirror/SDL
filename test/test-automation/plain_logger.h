@@ -113,6 +113,6 @@ void PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass
  * \param logMessage Message to be logged
  * \param eventTime Timestamp for log message
  */
-void PlainLog(const char *logMessage, time_t eventTime);
+void PlainLog(time_t eventTime, char *fmt, ...);
 
 #endif

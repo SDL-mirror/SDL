@@ -571,15 +571,25 @@ XMLAssertSummary(int numAsserts, int numAssertsFailed,
 }
 
 void
-XMLLog(const char *logMessage, time_t eventTime)
+XMLLog(time_t eventTime, char *fmt, ...)
 {
+	// create the log message
+	va_list args;
+	char logMessage[1024];
+	memset(logMessage, 0, sizeof(logMessage));
+
+	va_start( args, fmt );
+	SDL_vsnprintf( logMessage, sizeof(logMessage), fmt, args );
+	va_end( args );
+
 	char *output = XMLOpenElement(logElementName);
-	XMLOutputter(indentLevel++, NO, output);
+	XMLOutputter(indentLevel++, YES, output);
 
 	// log message
 	output = XMLOpenElement(messageElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
+	// fix this here!
 	output = XMLAddContent(logMessage);
 	XMLOutputter(indentLevel, NO, output);
 
