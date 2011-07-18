@@ -632,6 +632,9 @@ ExecuteTest(TestCase *testItem) {
 	int retVal = -1;
 
 	if(execute_inproc) {
+		if(testItem->timeout > 0) {
+			Log("Test asked for timeout which is not supported.", time(0));
+		}
 		retVal = RunTest(testItem);
 	} else {
 		int childpid = fork();

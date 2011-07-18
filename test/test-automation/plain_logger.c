@@ -2,10 +2,6 @@
 #ifndef _PLAIN_LOGGER
 #define _PLAIN_LOGGER
 
-#include <stdio.h>
-
-#include <SDL/SDL.h>
-
 #include "logger_helpers.h"
 #include "plain_logger.h"
 #include "SDL_test.h"
@@ -21,12 +17,10 @@ static int indentLevel;
 int
 Output(const int currentIndentLevel, const char *message, ...)
 {
-
 	int ident = 0;
 	for( ; ident < currentIndentLevel; ++ident) {
 		fprintf(stdout, "  "); // \todo make configurable?
 	}
-
 
     char buffer[1024];
 	memset(buffer, 0, 1024);
@@ -37,7 +31,6 @@ Output(const int currentIndentLevel, const char *message, ...)
 	SDL_vsnprintf(buffer, 1024, message, list);
 
 	va_end(list);
-
 
 	fprintf(stdout, "%s\n", buffer);
 	fflush(stdout);
@@ -145,7 +138,7 @@ PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, tim
 void
 PlainLog(const char *logMessage, time_t eventTime)
 {
-	Output(indentLevel, "%s %d", logMessage, TimestampToString(eventTime));
+	Output(indentLevel, "%s", logMessage);
 }
 
 #endif
