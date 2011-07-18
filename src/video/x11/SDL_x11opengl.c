@@ -138,6 +138,9 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     _this->gl_data->glXSwapBuffers =
         (void (*)(Display *, GLXDrawable))
             X11_GL_GetProcAddress(_this, "glXSwapBuffers");
+    _this->gl_data->glXQueryDrawable =
+        (void (*)(Display*,GLXDrawable,int,unsigned int*))
+            X11_GL_GetProcAddress(_this, "glXQueryDrawable");
 
     if (!_this->gl_data->glXChooseVisual ||
         !_this->gl_data->glXCreateContext ||
@@ -254,20 +257,26 @@ X11_GL_InitExtensions(_THIS)
         extensions = NULL;
     }
 
-    /* Check for SGI_swap_control */
-    if (HasExtension("GLX_SGI_swap_control", extensions)) {
-        _this->gl_data->glXSwapIntervalSGI =
-            (int (*)(int)) X11_GL_GetProcAddress(_this, "glXSwapIntervalSGI");
+    /* Check for GLX_EXT_swap_control */
+    if (HasExtension("GLX_EXT_swap_control", extensions)) {
+        _this->gl_data->glXSwapIntervalEXT =
+            (void (*)(Display*,GLXDrawable,int))
+                X11_GL_GetProcAddress(_this, "glXSwapIntervalEXT");
     }
 
     /* Check for GLX_MESA_swap_control */
     if (HasExtension("GLX_MESA_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalMESA =
-            (GLint(*)(unsigned)) X11_GL_GetProcAddress(_this,
-                                                       "glXSwapIntervalMESA");
+            (int(*)(int)) X11_GL_GetProcAddress(_this, "glXSwapIntervalMESA");
         _this->gl_data->glXGetSwapIntervalMESA =
-            (GLint(*)(void)) X11_GL_GetProcAddress(_this,
+            (int(*)(void)) X11_GL_GetProcAddress(_this,
                                                    "glXGetSwapIntervalMESA");
+    }
+
+    /* Check for GLX_SGI_swap_control */
+    if (HasExtension("GLX_SGI_swap_control", extensions)) {
+        _this->gl_data->glXSwapIntervalSGI =
+            (int (*)(int)) X11_GL_GetProcAddress(_this, "glXSwapIntervalSGI");
     }
 
     /* Check for GLX_EXT_visual_rating */
@@ -506,12 +515,11 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 }
 
 /* 
-   0 is a valid argument to glxSwapIntervalMESA and setting it to 0
-   with the MESA version of the extension will undo the effect of a
-   previous call with a value that is greater than zero (or at least
-   that is what the FM says. OTOH, 0 is an invalid argument to
-   glxSwapIntervalSGI and it returns an error if you call it with 0 as
-   an argument.
+   0 is a valid argument to glxSwapInterval(MESA|EXT) and setting it to 0
+   will undo the effect of a previous call with a value that is greater
+   than zero (or at least that is what the docs say). OTOH, 0 is an invalid
+   argument to glxSwapIntervalSGI and it returns an error if you call it
+   with 0 as an argument.
 */
 
 static int swapinterval = -1;
@@ -520,7 +528,15 @@ X11_GL_SetSwapInterval(_THIS, int interval)
 {
     int status;
 
-    if (_this->gl_data->glXSwapIntervalMESA) {
+    if (_this->gl_data->glXSwapIntervalEXT) {
+        Display *display = ((SDL_VideoData *) _this->driverdata)->display;
+        const SDL_WindowData *windowdata = (SDL_WindowData *)
+            _this->current_glwin->driverdata;
+        Window drawable = windowdata->xwindow;
+        _this->gl_data->glXSwapIntervalEXT(display, drawable, interval);
+        status = 0;  /* always succeeds, apparently. */
+        swapinterval = interval;
+    } else if (_this->gl_data->glXSwapIntervalMESA) {
         status = _this->gl_data->glXSwapIntervalMESA(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalMESA failed");
@@ -546,7 +562,16 @@ X11_GL_SetSwapInterval(_THIS, int interval)
 int
 X11_GL_GetSwapInterval(_THIS)
 {
-    if (_this->gl_data->glXGetSwapIntervalMESA) {
+    if (_this->gl_data->glXSwapIntervalEXT) {
+        Display *display = ((SDL_VideoData *) _this->driverdata)->display;
+        const SDL_WindowData *windowdata = (SDL_WindowData *)
+            _this->current_glwin->driverdata;
+        Window drawable = windowdata->xwindow;
+        unsigned int value = 0;
+        _this->gl_data->glXQueryDrawable(display, drawable,
+                                         GLX_SWAP_INTERVAL_EXT, &value);
+        return (int) value;
+    } else if (_this->gl_data->glXGetSwapIntervalMESA) {
         return _this->gl_data->glXGetSwapIntervalMESA();
     } else {
         return swapinterval;
