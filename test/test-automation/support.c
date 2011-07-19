@@ -37,7 +37,19 @@ PlatformSupportsAudio()
 	return retValue;
 }
 
+
 /*
+
+Example of implementing new PlatformSupportXXX functions. The function
+should return 1 if the feature is supported. Otherwise return 0.
+
+Add call to the implemented function to runner.c in function
+CheckTestRequirements. Use the current implementation as a guide.
+
+Also add TEST_REQUIRES_XXX to SDL_test.h and use it in your tests
+TestCaseReference. In this case, you'd add TEST_REQUIRES_OPENGL to
+SDL_test.h
+
 int
 PlatformSupportsOpenGL() {
 	int retValue = 0;

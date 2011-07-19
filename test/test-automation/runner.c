@@ -439,12 +439,6 @@ FilterTestCase(TestCaseReference *testReference)
 		}
 	}
 
-	if(testReference->requirements & TEST_REQUIRES_AUDIO) {
-		//printf("Debug: checking for audio support.\n");
-		retVal = PlatformSupportsAudio();
-		//printf("Debug: Audio support: %d\n", retVal);
-	}
-
 	return retVal;
 }
 
@@ -638,6 +632,29 @@ KillHungTestInChildProcess(int signum)
 	exit(TEST_RESULT_KILLED);
 }
 
+/*!
+ * Checks if given test case can be executed on the current platform.
+ *
+ * \param testCase Test to be checked
+ * \returns 1 if test is runnable, otherwise 0. On error returns -1
+ */
+int
+CheckTestRequirements(TestCase *testCase)
+{
+	int retVal = 1;
+
+	if(testCase == NULL) {
+		fprintf(stderr, "TestCase parameter can't be NULL");
+		return -1;
+	}
+
+	if(testCase->requirements & TEST_REQUIRES_AUDIO) {
+		retVal = PlatformSupportsAudio();
+	}
+
+	return retVal;
+}
+
 
 /*
  * Execute a test. Loads the test, executes it and
@@ -647,35 +664,40 @@ KillHungTestInChildProcess(int signum)
  * \param test result
  */
 int
-RunTest(TestCase *testItem)
+RunTest(TestCase *testCase)
 {
-	if(testItem->timeout > 0 || universal_timeout > 0) {
+	int runnable = CheckTestRequirements(testCase);
+	if(runnable != 1) {
+		return TEST_RESULT_SKIPPED;
+	}
+
+	if(testCase->timeout > 0 || universal_timeout > 0) {
 		if(execute_inproc) {
 			Log(time(0), "Test asked for timeout which is not supported.");
 		}
 		else {
-			SetTestTimeout(testItem->timeout, KillHungTestInChildProcess);
+			SetTestTimeout(testCase->timeout, KillHungTestInChildProcess);
 		}
 	}
 
-	testItem->initTestEnvironment();
+	testCase->initTestEnvironment();
 
-	if(testItem->testSetUp) {
-		testItem->testSetUp(0x0);
+	if(testCase->testSetUp) {
+		testCase->testSetUp(0x0);
 	}
 
-	int cntFailedAsserts = testItem->countFailedAsserts();
+	int cntFailedAsserts = testCase->countFailedAsserts();
 	if(cntFailedAsserts != 0) {
 		return TEST_RESULT_SETUP_FAILURE;
 	}
 
-	testItem->testCase(0x0);
+	testCase->testCase(0x0);
 
-	if(testItem->testTearDown) {
-		testItem->testTearDown(0x0);
+	if(testCase->testTearDown) {
+		testCase->testTearDown(0x0);
 	}
 
-	return testItem->quitTestEnvironment();
+	return testCase->quitTestEnvironment();
 }
 
 
