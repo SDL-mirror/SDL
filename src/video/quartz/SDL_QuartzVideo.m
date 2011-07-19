@@ -589,7 +589,6 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
     [ qz_window setHasShadow:NO];
     [ qz_window setOpaque:YES];
-    [ qz_window center ];
     [ qz_window makeKeyAndOrderFront:nil ];
 
     /* If we don't hide menu bar, it will get events and interrupt the program */
