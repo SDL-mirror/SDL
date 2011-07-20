@@ -1,4 +1,4 @@
 lib_LTLIBRARIES = libtestrect.la
-libtestrect_la_SOURCES = testrect.c ../SDL_test.c ../logger_helpers.c ../plain_logger.c ../xml_logger.c ../xml.c
+libtestrect_la_SOURCES = testrect.c
 libtestrect_la_CLAGS = -fPIC -g
-libtestrect_la_LDFLAGS = `sdl-config --libs`
+libtestrect_la_LDFLAGS = `sdl-config --libs` -I ../.libs/libtest.la

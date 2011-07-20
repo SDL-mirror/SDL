@@ -14,6 +14,10 @@ libtest_la_SOURCES = SDL_test.c logger_helpers.c plain_logger.c xml_logger.c xml
 libtest_la_CLAGS = -fPIC -g
 libtest_la_LDFLAGS = `sdl-config --libs`
 
+libtest: libtest.la
+		echo "Test library compiled."
+
+all-local: install-tests
 install: install-tests
 install-tests:
 	$(SHELL) build-scripts/install-tests.sh
