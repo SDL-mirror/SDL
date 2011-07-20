@@ -37,25 +37,25 @@ static inline SDL_BApp *_GetBeApp() {
 	return ((SDL_BApp*)be_app);
 }
 
-int _InitWindow(_THIS, SDL_Window *window) {
+int _InitWindow(_THIS, SDL_Window *window) {printf("SDL_bwindow.cc: 40\n");
 	BRect bounds(
         window->x,
         window->y,
         window->x + window->w - 1,	//BeWindows have an off-by-one px w/h thing
         window->y + window->h - 1
     );
-    
+printf("SDL_bwindow.cc: 30\n");
     SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds);
     if(bwin == NULL)
     	return ENOMEM;
-    
+printf("SDL_bwindow.cc: 51\n");
     window->driverdata = bwin;
     int32 winID = _GetBeApp()->GetID(window);
     bwin->SetID(winID);
     return 0;
 }
 
-int BE_CreateWindow(_THIS, SDL_Window *window) {
+int BE_CreateWindow(_THIS, SDL_Window *window) {printf("SDL_bwindow.cc: 58\n");
 	if(_InitWindow(_this, window) == ENOMEM)
 		return ENOMEM;
 	
@@ -179,21 +179,27 @@ SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
 }
 
 
-extern int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
+
+int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
                                        Uint32 * format,
                                        void ** pixels, int *pitch) {
-	/* FIXME: Not BeOs/Haiku supported */
+	/* pitch = width of screen, in bytes */
+	BScreen bscreen;
+	*pitch = (bscreen->Frame().right - bscreen->Frame().left + 1) *	/*screen w*/
+			 SDL_BYTESPERPIXEL(*format);
+
+	/* FIXME: FINISH! */
 	return -1;
 }
 
-extern int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
+int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
                                        SDL_Rect * rects, int numrects) {
-	/* FIXME: Not BeOs/Haiku supported */
+	
 	return -1;
 }
 
-extern void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
-	/* FIXME: Not BeOs/Haiku supported */
+void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
+	/* FIXME: FINISH! */
 }
 
  

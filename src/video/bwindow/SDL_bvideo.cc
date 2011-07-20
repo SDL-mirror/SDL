@@ -20,22 +20,21 @@
 */
 
 
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "SDL_bwindow.h"
 #include "SDL_bclipboard.h"
 #include "SDL_bvideo.h"
 #include "SDL_bopengl.h"
 #include "SDL_bmodes.h"
+#include "SDL_bevents.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 /* FIXME: Undefined functions */
-//    #define BE_VideoInit NULL
-//    #define BE_VideoQuit NULL
-    #define BE_GetDisplayBounds NULL
-    #define BE_GetDisplayModes NULL
-    #define BE_SetDisplayMode NULL
-    #define BE_PumpEvents NULL
+//    #define BE_PumpEvents NULL
     
 #if SDL_VIDEO_OPENGL_WGL	/* FIXME: Replace with BeOs's SDL OPENGL stuff */
 //    #define BE_GL_LoadLibrary NULL
@@ -137,6 +136,11 @@ BE_CreateDevice(int devindex)
 
     return device;
 }
+
+VideoBootStrap BWINDOW_bootstrap = {
+	"bwindow", "BDirectWindow graphics",
+	BE_Available, BE_CreateDevice
+};
 
 static void BE_DeleteDevice(SDL_VideoDevice * device)
 {

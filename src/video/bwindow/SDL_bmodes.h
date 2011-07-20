@@ -22,6 +22,22 @@
 #ifndef SDL_BMODES_H
 #define SDL_BMODES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "../SDL_sysvideo.h"
+
 extern int BE_InitModes(_THIS);
 extern int BE_QuitModes(_THIS);
+extern int BE_GetDisplayBounds(_THIS, SDL_VideoDisplay *display,
+	SDL_Rect *rect);
+extern void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display);
+extern int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
+	SDL_DisplayMode *mode);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

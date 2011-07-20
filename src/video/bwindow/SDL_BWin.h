@@ -66,17 +66,16 @@ class SDL_BWin:public BDirectWindow
                                          B_TITLED_WINDOW, 0)
     {
         last_buttons = 0;
-
+printf("SDL_BWin.h: 69\n");
         the_view = NULL;
 #if SDL_VIDEO_OPENGL
         SDL_GLView = NULL;
 #endif
         SDL_View = NULL;
-        Unlock();
         _shown = false;
         inhibit_resize = false;
         mouse_focused = false;
-        prev_frame = NULL;
+        prev_frame = NULL; printf("SDL_BWin.h: 79\n");
     }
 
     virtual ~ SDL_BWin()
@@ -150,6 +149,12 @@ class SDL_BWin:public BDirectWindow
         Unlock();
         return (retval);
     }
+    
+    
+    /* * * * * Framebuffering* * * * */
+    virtual void DirectConnected(direct_buffer_info *info) {
+    }
+    
     
     /* * * * * Event sending * * * * */
     /* Hook functions */
@@ -460,13 +465,16 @@ private:
     	
     	/* Add any mouse button events */
     	if(buttonStateChange & B_PRIMARY_MOUSE_BUTTON) {
-    		_SendMouseButton(SDL_BUTTON_LEFT, buttons & B_PRIMARY_MOUSE_BUTTON);
+    		_SendMouseButton(SDL_BUTTON_LEFT, buttons &
+    			B_PRIMARY_MOUSE_BUTTON);
     	}
     	if(buttonStateChange & B_SECONDARY_MOUSE_BUTTON) {
-    		_SendMouseButton(SDL_BUTTON_RIGHT, buttons & B_PRIMARY_MOUSE_BUTTON);
+    		_SendMouseButton(SDL_BUTTON_RIGHT, buttons &
+    			B_PRIMARY_MOUSE_BUTTON);
     	}
     	if(buttonStateChange & B_TERTIARY_MOUSE_BUTTON) {
-    		_SendMouseButton(SDL_BUTTON_MIDDLE, buttons & B_PRIMARY_MOUSE_BUTTON);
+    		_SendMouseButton(SDL_BUTTON_MIDDLE, buttons &
+    			B_PRIMARY_MOUSE_BUTTON);
     	}
     	
     	last_buttons = buttons;

@@ -19,27 +19,15 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef BVIDEO_H
-#define BVIDEO_H
+#include "SDL_bevents.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "../../main/beos/SDL_BeApp.h"
-#include "../SDL_sysvideo.h"
-
-typedef struct SDL_VideoData {
-	
-} SDL_VideoData;
-
-extern void BE_VideoQuit(_THIS);
-extern int BE_VideoInit(_THIS);
-extern void BE_DeleteDevice(_THIS);
-extern int BE_Available(void);
+void BE_PumpEvents(_THIS) {
+}
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif

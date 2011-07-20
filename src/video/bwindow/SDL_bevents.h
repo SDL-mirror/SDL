@@ -17,26 +17,18 @@
   2. Altered source versions must be plainly marked as such, and must not be
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
-*/
+*/	
 
-#ifndef BVIDEO_H
-#define BVIDEO_H
+#ifndef SDL_BEVENTS_H
+#define SDL_BEVENTS_H
+
+#include "../SDL_sysvideo.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "../../main/beos/SDL_BeApp.h"
-#include "../SDL_sysvideo.h"
-
-typedef struct SDL_VideoData {
-	
-} SDL_VideoData;
-
-extern void BE_VideoQuit(_THIS);
-extern int BE_VideoInit(_THIS);
-extern void BE_DeleteDevice(_THIS);
-extern int BE_Available(void);
+extern void BE_PumpEvents(_THIS);
 
 #ifdef __cplusplus
 }
