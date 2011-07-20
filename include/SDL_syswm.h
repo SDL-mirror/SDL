@@ -209,7 +209,7 @@ typedef struct SDL_SysWMinfo {
  *
  * You typically use this function like this:
  * @code
- * SDL_SysWMInfo info;
+ * SDL_SysWMinfo info;
  * SDL_VERSION(&info.version);
  * if ( SDL_GetWMInfo(&info) ) { ... }
  * @endcode
