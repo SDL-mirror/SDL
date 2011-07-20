@@ -236,6 +236,8 @@ if test x$enable_libc = xyes; then
 
     AC_CHECK_LIB(iconv, iconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
     AC_CHECK_FUNCS(iconv)
+
+    AC_CHECK_MEMBER(struct sigaction.sa_sigaction,[AC_DEFINE(HAVE_SA_SIGACTION)], ,[#include <signal.h>])
 fi
 
 AC_CHECK_SIZEOF(void*)
