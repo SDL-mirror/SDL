@@ -585,29 +585,39 @@ LoadCountFailedAssertsFunction(void *suite) {
  * \param timeout Timeout interval in seconds!
  * \param callback Function that will be called after timeout has elapsed
  */
-void SetTestTimeout(int timeout, void (*callback)(int))
+void
+SetTestTimeout(int timeout, void (*callback)(int))
 {
 	if(callback == NULL) {
 		fprintf(stderr, "Error: timeout callback can't be NULL");
 	}
+
 	if(timeout < 0) {
 		fprintf(stderr, "Error: timeout value must be bigger than zero.");
 	}
 
-#if 0
+	int tm = (timeout > universal_timeout ? timeout : universal_timeout);
+
+#if 1
+	/* Init SDL timer if not initialized before */
+	if(SDL_WasInit(SDL_INIT_TIMER) == 0) {
+		if(SDL_InitSubSystem(SDL_INIT_TIMER)) {
+			fprintf(stderr, "Error: Failed to init timer subsystem");
+			fprintf(stderr, "%s\n", SDL_GetError());
+		}
+	}
+
 	/* Note:
 	 * SDL_Init(SDL_INIT_TIMER) should be successfully called before using this
 	 */
-	int timeoutInMilliseconds = timeout * 1000;
+	int timeoutInMilliseconds = tm * 1000;
+
 	SDL_TimerID timerID = SDL_AddTimer(timeoutInMilliseconds, callback, 0x0);
 	if(timerID == NULL) {
 		fprintf(stderr, "Error: Creation of SDL timer failed.\n");
-		fprintf(stderr, "%s\n", SDL_GetError());
+		fprintf(stderr, "Error: %s\n", SDL_GetError());
 	}
 #else
-
-	int tm = (timeout > universal_timeout ? timeout : universal_timeout);
-
 	signal(SIGALRM, callback);
 	alarm((unsigned int) tm);
 #endif
@@ -1074,6 +1084,9 @@ main(int argc, char *argv[])
 
 	RunEnded(totalTestPassCount + totalTestFailureCount, suiteCounter,
 			 totalTestPassCount, totalTestFailureCount, totalTestSkipCount, time(0), totalRunTime);
+
+	// Some SDL subsystem might be init'ed so shut them down
+	SDL_Quit();
 
 	return (totalTestFailureCount ? 1 : 0);
 }
