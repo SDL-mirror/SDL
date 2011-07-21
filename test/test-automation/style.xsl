@@ -181,7 +181,7 @@ div, h1 {
     <span class="title">Statistics:</span><br/>
     <div class="statistics">
       <span>Executed </span> <xsl:value-of select="testlog/numSuites"/> test suites. <br/>
-      <span>Tests in total: </span> <xsl:value-of select="testlog/numTests"/> (passed: <xsl:value-of select="testlog/numPassedTests"/>, failed: <xsl:value-of select="testlog/numFailedTests"/>)
+      <span>Tests in total: </span> <xsl:value-of select="testlog/numTests"/> (passed: <xsl:value-of select="testlog/numPassedTests"/>, failed: <xsl:value-of select="testlog/numFailedTests"/>, skipped: <xsl:value-of select="testlog/numSkippedTests"/>)
     </div>
   </div>
 

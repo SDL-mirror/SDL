@@ -15,7 +15,7 @@ libtest_la_CLAGS = -fPIC -g
 libtest_la_LDFLAGS = `sdl-config --libs`
 
 libtest: libtest.la
-		echo "Test library compiled."
+	echo "Test library compiled."
 
 all-local: install-tests
 install: install-tests
