@@ -40,9 +40,12 @@ static const TestCaseReference test9 =
 static const TestCaseReference test10 =
 		(TestCaseReference){ "platform_testSetErrorInvalidInput", "Tests SDL_SetError with invalid input", TEST_ENABLED, 0, 0 };
 
+static const TestCaseReference test11 =
+		(TestCaseReference){ "platform_testGetPowerInfo", "Tests SDL_GetPowerInfo function", TEST_ENABLED, 0, 0 };
+
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, NULL
+	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -137,6 +140,10 @@ int platform_testEndianessAndSwap(void *arg)
  * \brief Tests SDL_GetXYZ() functions
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_GetPlatform
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetCPUCount
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetCPUCacheLineSize
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetRevision
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetRevisionNumber
  */
 int platform_testGetFunctions (void *arg)
 {
@@ -158,6 +165,15 @@ int platform_testGetFunctions (void *arg)
     
    ret = SDL_GetCPUCount();
    AssertPass("SDL_GetCPUCount()");
+   AssertTrue(ret > 0,
+             "SDL_GetCPUCount(): expected count > 0, was: %i", 
+             ret);    
+
+   ret = SDL_GetCPUCacheLineSize();
+   AssertPass("SDL_GetCPUCacheLineSize()");
+   AssertTrue(ret >= 0,
+             "SDL_GetCPUCacheLineSize(): expected size >= 0, was: %i", 
+             ret);    
 
    revision = (char *)SDL_GetRevision();
    AssertPass("SDL_GetRevision()");
@@ -169,6 +185,16 @@ int platform_testGetFunctions (void *arg)
 
 /*!
  * \brief Tests SDL_HasXYZ() functions
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_Has3DNow
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasAltiVec
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasMMX
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasRDTSC
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasSSE
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasSSE2
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasSSE3
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasSSE41
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasSSE42
  */
 int platform_testHasFunctions (void *arg)
 {
@@ -206,6 +232,8 @@ int platform_testHasFunctions (void *arg)
 
 /*!
  * \brief Tests SDL_GetVersion
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetVersion
  */
 int platform_testGetVersion(void *arg)
 {
@@ -401,4 +429,80 @@ int platform_testSetErrorInvalidInput(void *arg)
 
    // Clean up                
    SDL_ClearError();
+}
+
+/*!
+ * \brief Tests SDL_GetPowerInfo
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetPowerInfo
+ */
+int platform_testGetPowerInfo(void *arg)
+{
+   SDL_PowerState state;
+   SDL_PowerState stateAgain;
+   int secs;
+   int secsAgain;
+   int pct;
+   int pctAgain;
+   
+   state = SDL_GetPowerInfo(&secs, &pct);
+   AssertPass("SDL_GetPowerInfo()");
+   AssertTrue(
+       state==SDL_POWERSTATE_UNKNOWN ||
+       state==SDL_POWERSTATE_ON_BATTERY ||
+       state==SDL_POWERSTATE_NO_BATTERY ||
+       state==SDL_POWERSTATE_CHARGING ||
+       state==SDL_POWERSTATE_CHARGED,
+       "SDL_GetPowerInfo(): state %i is one of the expected values",
+       (int)state);
+       
+   if (state==SDL_POWERSTATE_ON_BATTERY)
+   {
+      AssertTrue(
+         secs >= 0,
+         "SDL_GetPowerInfo(): on battery, secs >= 0, was: %i",
+         secs);
+      AssertTrue(
+         (pct >= 0) && (pct <= 100),
+         "SDL_GetPowerInfo(): on battery, pct=[0,100], was: %i",
+         pct);         
+   }
+
+   if (state==SDL_POWERSTATE_UNKNOWN ||
+       state==SDL_POWERSTATE_NO_BATTERY)
+   {
+      AssertTrue(
+         secs == -1,
+         "SDL_GetPowerInfo(): no battery, secs == -1, was: %i",
+         secs);
+      AssertTrue(
+         pct == -1,
+         "SDL_GetPowerInfo(): no battery, pct == -1, was: %i",
+         pct);         
+   }
+
+   // Partial return value variations   
+   stateAgain = SDL_GetPowerInfo(&secsAgain, NULL);
+   AssertTrue(
+        state==stateAgain,
+        "State %i returned when only 'secs' requested",
+        stateAgain);   
+   AssertTrue(
+        secs==secsAgain,
+        "Value %i matches when only 'secs' requested",
+        secsAgain);   
+   stateAgain = SDL_GetPowerInfo(NULL, &pctAgain);
+   AssertTrue(
+        state==stateAgain,
+        "State %i returned when only 'pct' requested",
+        stateAgain);   
+   AssertTrue(
+        pct==pctAgain,
+        "Value %i matches when only 'pct' requested",
+        pctAgain);   
+   stateAgain = SDL_GetPowerInfo(NULL, NULL);
+   AssertTrue(
+        state==stateAgain,
+        "State %i returned when no value requested",
+        stateAgain); 
 }
