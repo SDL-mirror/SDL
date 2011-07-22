@@ -46,11 +46,11 @@ typedef struct SDL_AudioDriverImpl
     void (*Deinitialize) (void);
 
     /* Some flags to push duplicate code into the core and reduce #ifdefs. */
-    int ProvidesOwnCallbackThread:1;
-    int SkipMixerLock:1;
-    int HasCaptureSupport:1;
-    int OnlyHasDefaultOutputDevice:1;
-    int OnlyHasDefaultInputDevice:1;
+    int ProvidesOwnCallbackThread;
+    int SkipMixerLock;
+    int HasCaptureSupport;
+    int OnlyHasDefaultOutputDevice;
+    int OnlyHasDefaultInputDevice;
 } SDL_AudioDriverImpl;
 
 
