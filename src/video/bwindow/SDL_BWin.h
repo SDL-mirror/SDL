@@ -42,7 +42,6 @@ extern "C" {
 #include <be/opengl/GLView.h>
 #endif
 #include "SDL_events.h"
-#include "SDL_BView.h"
 #include "../../main/beos/SDL_BApp.h"
 
 enum WinCommands {
@@ -67,11 +66,10 @@ class SDL_BWin:public BDirectWindow
     {
         last_buttons = 0;
 printf("SDL_BWin.h: 69\n");
-        the_view = NULL;
+
 #if SDL_VIDEO_OPENGL
         SDL_GLView = NULL;
 #endif
-        SDL_View = NULL;
         _shown = false;
         inhibit_resize = false;
         mouse_focused = false;
@@ -79,42 +77,39 @@ printf("SDL_BWin.h: 69\n");
         
         /* Handle framebuffer stuff */
         _connected = connection_disabled = false;
+        trash_window_buffer = false;
         buffer_locker = new BLocker();
+        window_buffer = NULL;
 //        LockBuffer();	/* Unlocked by buffer initialization */
     }
 
     virtual ~ SDL_BWin()
     {
         Lock();
-        connection_disabled = false;
+        connection_disabled = true;
         
-        if (the_view) {
 #if SDL_VIDEO_OPENGL
-            if (the_view == SDL_GLView) {
-                SDL_GLView->UnlockGL();
-            }
-#endif
-            RemoveChild(the_view);
-            the_view = NULL;
+        if (SDL_GLView) {
+            SDL_GLView->UnlockGL();
         }
+        RemoveChild(SDL_GLView);
+#endif    
         Unlock();
 #if SDL_VIDEO_OPENGL
         if (SDL_GLView) {
             delete SDL_GLView;
         }
 #endif
-        if (SDL_View) {
-            delete SDL_View;
-        }
         
         /* Clean up framebuffer stuff */
         buffer_locker->Lock();
-        buffer_locker->Unlock();
+        free(_clips);
         delete buffer_locker;
     }
     
-    
+
     /* Other construction */
+#if SDL_VIDEO_OPENGL
     virtual int CreateView(Uint32 flags, Uint32 gl_flags)
     {
         int retval;
@@ -122,7 +117,6 @@ printf("SDL_BWin.h: 69\n");
         retval = 0;
         Lock();
         if (flags & SDL_OPENGL/*SDL_INTERNALOPENGL*/) {
-#if SDL_VIDEO_OPENGL
             if (SDL_GLView == NULL) {
                 SDL_GLView = new BGLView(Bounds(), "SDL GLView",
                                          B_FOLLOW_ALL_SIDES,
@@ -137,31 +131,16 @@ printf("SDL_BWin.h: 69\n");
                 SDL_GLView->LockGL();
                 the_view = SDL_GLView;
             }
-#else
-            SDL_SetError("OpenGL support not enabled");
-            retval = -1;
-#endif
         } else {
-            if (SDL_View == NULL) {
-                SDL_View = new SDL_BView(Bounds());
-            }
-            if (the_view != SDL_View) {
-                if (the_view) {
-#if SDL_VIDEO_OPENGL
-                    if (the_view == SDL_GLView) {
-                        SDL_GLView->UnlockGL();
-                    }
-#endif
-                    RemoveChild(the_view);
-                }
-                AddChild(SDL_View);
-                the_view = SDL_View;
+            if (the_view) {
+                    SDL_GLView->UnlockGL();
+                RemoveChild(the_view);
             }
         }
         Unlock();
         return (retval);
     }
-    
+#endif
     
     /* * * * * Framebuffering* * * * */
     virtual void DirectConnected(direct_buffer_info *info) {
@@ -172,7 +151,7 @@ printf("SDL_BWin.h: 69\n");
     	
     	switch(info->buffer_state & B_DIRECT_MODE_MASK) {
     	case B_DIRECT_START:
-printf("SDL_BWin.h: 175 Direct start.\n");
+printf(__FILE__": %d; Direct start.\n", __LINE__);
     		_connected = true;
 
     	case B_DIRECT_MODIFY:
@@ -181,6 +160,12 @@ printf("SDL_BWin.h: 175 Direct start.\n");
     			free(_clips);
     			_clips = NULL;
     		}
+    		
+    		/* Can we reuse the window's pixel buffer after this? */
+    		trash_window_buffer = ((info->buffer_state & B_BUFFER_RESIZED)
+    							|| (info->buffer_state & B_BUFFER_RESET)
+    							|| ((info->buffer_state & B_DIRECT_MODE_MASK)
+    								== B_DIRECT_START));
     		
     		num_clips = info->clip_list_count;
     		_clips = (clipping_rect *)malloc(num_clips*sizeof(clipping_rect));
@@ -191,6 +176,7 @@ printf("SDL_BWin.h: 175 Direct start.\n");
     			_bits = (uint8*) info->bits;
     			row_bytes = info->bytes_per_row;
     			_bounds = info->window_bounds;
+    			bytes_per_px = info->bits_per_pixel / 8;
     		}
     		
     		break;
@@ -201,6 +187,8 @@ printf("SDL_BWin.h: 175 Direct start.\n");
     	}
     	UnlockBuffer();
     }
+    
+    
     
     
     /* * * * * Event sending * * * * */
@@ -412,54 +400,16 @@ printf("SDL_BWin.h: 175 Direct start.\n");
 	clipping_rect *GetClips() { return _clips; }
 	int32 GetNumClips() { return num_clips; }
 	uint8* GetBufferPx() { return _bits; }
+	int32 GetBytesPerPx() { return bytes_per_px; }
+	void SetWindowFramebuffer(uint8* fb) { window_buffer = fb; }
+	uint8* GetWindowFramebuffer() { return window_buffer; }
+	bool CanTrashWindowBuffer() { return trash_window_buffer; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
 
 
 
-
-
-
-
-
-
-	/* FIXME: Methods copied directly; do we need them? */
-#if 0	/* Disabled until its purpose is determined */
-    virtual void SetXYOffset(int x, int y)
-    {
-#if SDL_VIDEO_OPENGL
-        if (the_view == SDL_GLView) {
-            return;
-        }
-#endif
-        SDL_View->SetXYOffset(x, y);
-    }
-    virtual void GetXYOffset(int &x, int &y)
-    {
-#if SDL_VIDEO_OPENGL
-        if (the_view == SDL_GLView) {
-            x = 0;
-            y = 0;
-            return;
-        }
-#endif
-        SDL_View->GetXYOffset(x, y);
-    }
-#endif
-    virtual bool BeginDraw(void)
-    {
-        return (Lock());
-    }
-    virtual void DrawAsync(BRect updateRect)
-    {
-        SDL_View->DrawAsync(updateRect);
-    }
-    virtual void EndDraw(void)
-    {
-        SDL_View->Sync();
-        Unlock();
-    }
 #if SDL_VIDEO_OPENGL
     virtual void SwapBuffers(void)
     {
@@ -631,7 +581,6 @@ private:
 #if SDL_VIDEO_OPENGL
     BGLView * SDL_GLView;
 #endif
-    SDL_BView *SDL_View;
     BView *the_view;
     
     int32 last_buttons;
@@ -650,6 +599,9 @@ private:
     BLocker 		*buffer_locker;
     clipping_rect	*_clips;
     int32			num_clips;
+    int32			bytes_per_px;
+    uint8			*window_buffer;	/* A copy of the window buffer */
+    bool			trash_window_buffer;
 };
 
 #endif

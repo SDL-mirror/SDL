@@ -43,8 +43,8 @@ static inline SDL_BApp *_GetBeApp() {
 
 /* Copied from haiku/trunk/src/preferences/screen/ScreenMode.cpp */
 static float get_refresh_rate(display_mode &mode) {
-	return rint(10 * float(mode.timing.pixel_clock * 1000)
-		/ float(mode.timing.h_total * mode.timing.v_total)) / 10.0;
+	return float(mode.timing.pixel_clock * 1000)
+		/ float(mode.timing.h_total * mode.timing.v_total);
 }
 
 static inline int ColorSpaceToBitsPerPixel(uint32 colorspace)
@@ -78,7 +78,7 @@ static inline int ColorSpaceToBitsPerPixel(uint32 colorspace)
 	return(bitsperpixel);
 }
 
-static inline int32 BppToSDLPxFormat(int32 bpp) {
+static inline int32 BPPToSDLPxFormat(int32 bpp) {
 	/* Translation taken from SDL_windowsmodes.c */
 	switch (bpp) {
 	case 32:
@@ -112,7 +112,7 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 
 	/* Set the format */
 	int32 bpp = ColorSpaceToBitsPerPixel(bmode->space);
-	mode->format = BppToSDLPxFormat(bpp);
+	mode->format = BPPToSDLPxFormat(bpp);
 }
 
 /* Later, there may be more than one monitor available */
@@ -145,8 +145,6 @@ int BE_InitModes(_THIS) {
 
 int BE_QuitModes(_THIS) {
 	/* Restore the previous video mode */
-	printf("Quit Modes\n");
-	
 	BScreen screen;
 	display_mode *savedMode = _GetBeApp()->GetPrevMode();
 	screen.SetMode(savedMode);
@@ -223,14 +221,21 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	display_mode bmode;
 	bscreen.GetMode(&bmode);
 	int32 bpp = ColorSpaceToBitsPerPixel(bmode.space);
-	*format = BppToSDLPxFormat(bpp);
+	*format = BPPToSDLPxFormat(bpp);
 
 	/* pitch = width of screen, in bytes */
-	*pitch = bpp * bwin->GetFbWidth() / 8;
+	*pitch = bwin->GetFbWidth() * bwin->GetBytesPerPx();
 
-	/* Create a copy of the pixel buffer */
-	printf("SDL_bmodes.cc: 230; fbh: %i, pitch: %i; (x,y) = (%i, %i)\n", bwin->GetFbHeight(), (*pitch), bwin->GetFbX(), bwin->GetFbY());
-	*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * bpp / 8, sizeof(uint8));
+	/* Create a copy of the pixel buffer if it doesn't recycle */
+	*pixels = bwin->GetWindowFramebuffer();
+	if( bwin->CanTrashWindowBuffer() ) {
+		if( (*pixels) != NULL ) {
+			SDL_free(*pixels);
+		}
+		*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
+			bwin->GetBytesPerPx(), sizeof(uint8));
+		bwin->SetWindowFramebuffer((uint8*)(*pixels));
+	}
 
 	bwin->UnlockBuffer();
 	return 0;
@@ -253,9 +258,9 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 		uint8 *windowpx;
 		uint8 *bufferpx;
 
-		int32 bpp = window->surface->format->BitsPerPixel;
+		int32 BPP = bwin->GetBytesPerPx();
 		uint8 *windowBaseAddress = (uint8*)window->surface->pixels;
-		int32 windowSub = bwin->GetFbX() * bpp / 8 +
+		int32 windowSub = bwin->GetFbX() * BPP +
 						  bwin->GetFbY() * windowPitch;
 		clipping_rect *clips = bwin->GetClips();
 		int32 numClips = bwin->GetNumClips();
@@ -268,16 +273,15 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 			int32 width = clips[i].right - clips[i].left + 1;
 			int32 height = clips[i].bottom - clips[i].top + 1;
 			bufferpx = bwin->GetBufferPx() + 
-				clips[i].top * bufferPitch + clips[i].left * bpp / 8;
+				clips[i].top * bufferPitch + clips[i].left * BPP;
 			windowpx = windowBaseAddress + 
-				clips[i].top * windowPitch + clips[i].left * bpp / 8
-				- windowSub;
+				clips[i].top * windowPitch + clips[i].left * BPP - windowSub;
 
 			/* Copy each row of pixels from the window buffer into the frame
 			   buffer */
 			for(y = 0; y < height; ++y)
 			{
-				memcpy(bufferpx, windowpx, width * bpp / 8);
+				memcpy(bufferpx, windowpx, width * BPP);
 				bufferpx += bufferPitch;
 				windowpx += windowPitch;
 			}
@@ -288,8 +292,15 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 }
 
 void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
-	/* FIXME: FINISH! */
-	printf("ERROR: Attempted to destroy the window frame buffer\n");
+	SDL_BWin *bwin = _ToBeWin(window);
+	
+	bwin->LockBuffer();
+	
+	/* Free and clear the window buffer */
+	uint8* winBuffer = bwin->GetWindowFramebuffer();
+	SDL_free(winBuffer);
+	bwin->SetWindowFramebuffer(NULL);
+	bwin->UnlockBuffer();
 }
 
 #ifdef __cplusplus
