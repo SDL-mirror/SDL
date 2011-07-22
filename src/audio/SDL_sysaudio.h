@@ -120,7 +120,7 @@ typedef struct AudioBootStrap
     const char *name;
     const char *desc;
     int (*init) (SDL_AudioDriverImpl * impl);
-    int demand_only:1;          /* 1==request explicitly, or it won't be available. */
+    int demand_only;  /* 1==request explicitly, or it won't be available. */
 } AudioBootStrap;
 
 #endif /* _SDL_sysaudio_h */
