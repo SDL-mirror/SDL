@@ -76,11 +76,18 @@ printf("SDL_BWin.h: 69\n");
         inhibit_resize = false;
         mouse_focused = false;
         prev_frame = NULL; printf("SDL_BWin.h: 79\n");
+        
+        /* Handle framebuffer stuff */
+        _connected = connection_disabled = false;
+        buffer_locker = new BLocker();
+//        LockBuffer();	/* Unlocked by buffer initialization */
     }
 
     virtual ~ SDL_BWin()
     {
         Lock();
+        connection_disabled = false;
+        
         if (the_view) {
 #if SDL_VIDEO_OPENGL
             if (the_view == SDL_GLView) {
@@ -99,6 +106,11 @@ printf("SDL_BWin.h: 69\n");
         if (SDL_View) {
             delete SDL_View;
         }
+        
+        /* Clean up framebuffer stuff */
+        buffer_locker->Lock();
+        buffer_locker->Unlock();
+        delete buffer_locker;
     }
     
     
@@ -153,6 +165,41 @@ printf("SDL_BWin.h: 69\n");
     
     /* * * * * Framebuffering* * * * */
     virtual void DirectConnected(direct_buffer_info *info) {
+    	if(!_connected && connection_disabled) {
+    		return;
+    	}
+    	LockBuffer();
+    	
+    	switch(info->buffer_state & B_DIRECT_MODE_MASK) {
+    	case B_DIRECT_START:
+printf("SDL_BWin.h: 175 Direct start.\n");
+    		_connected = true;
+
+    	case B_DIRECT_MODIFY:
+
+    		if(_clips) {
+    			free(_clips);
+    			_clips = NULL;
+    		}
+    		
+    		num_clips = info->clip_list_count;
+    		_clips = (clipping_rect *)malloc(num_clips*sizeof(clipping_rect));
+    		if(_clips) {
+    			memcpy(_clips, info->clip_list,
+    				num_clips*sizeof(clipping_rect));
+    			
+    			_bits = (uint8*) info->bits;
+    			row_bytes = info->bytes_per_row;
+    			_bounds = info->window_bounds;
+    		}
+    		
+    		break;
+
+    	case B_DIRECT_STOP:
+    		_connected = false;
+    		break;
+    	}
+    	UnlockBuffer();
     }
     
     
@@ -353,6 +400,18 @@ printf("SDL_BWin.h: 69\n");
 	/* Accessor methods */
 	bool IsShown() { return _shown; }
 	int32 GetID() { return _id; }
+	void LockBuffer() {	buffer_locker->Lock(); }
+	void UnlockBuffer() { buffer_locker->Unlock(); }
+	uint32 GetRowBytes() { return row_bytes; }
+	int32 GetFbX() { return _bounds.left; }
+	int32 GetFbY() { return _bounds.top; }
+	int32 GetFbHeight() { return _bounds.bottom - _bounds.top + 1; }
+	int32 GetFbWidth() { return _bounds.right - _bounds.left + 1; }
+	bool ConnectionEnabled() { return !connection_disabled; }
+	bool Connected() { return _connected; }
+	clipping_rect *GetClips() { return _clips; }
+	int32 GetNumClips() { return num_clips; }
+	uint8* GetBufferPx() { return _bits; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
@@ -582,6 +641,15 @@ private:
     bool inhibit_resize;
     
     BRect *prev_frame;	/* Previous position and size of the window */
+    
+    /* Framebuffer members */
+    bool			_connected, connection_disabled;
+    uint8			*_bits;
+    uint32			row_bytes;
+    clipping_rect	_bounds;
+    BLocker 		*buffer_locker;
+    clipping_rect	*_clips;
+    int32			num_clips;
 };
 
 #endif

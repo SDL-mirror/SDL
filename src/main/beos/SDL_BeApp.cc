@@ -35,6 +35,9 @@
 
 #include "../../video/bwindow/SDL_BWin.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Flag to tell whether or not the Be application is active or not */
 int SDL_BeAppActive = 0;
 static SDL_Thread *SDL_AppThread = NULL;
@@ -113,6 +116,12 @@ SDL_QuitBeApp(void)
     }
 }
 
+
+/* vi: set ts=4 sw=4 expandtab: */
+#ifdef __cplusplus
+}
+#endif
+
 /* SDL_BApp functions */
 void SDL_BApp::ClearID(SDL_BWin *bwin) {
 	_SetSDLWindow(NULL, bwin->GetID());
@@ -122,6 +131,3 @@ void SDL_BApp::ClearID(SDL_BWin *bwin) {
 		--i;
 	}
 }
-
-/* vi: set ts=4 sw=4 expandtab: */
-

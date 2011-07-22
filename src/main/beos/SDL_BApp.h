@@ -21,11 +21,14 @@
 #ifndef SDL_BAPP_H
 #define SDL_BAPP_H
 
+#include <InterfaceKit.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "SDL_config.h"
+
 #include "SDL_video.h"
 
 /* Local includes */
@@ -172,6 +175,11 @@ public:
     		return i;
     	}
     }
+    
+    /* Modes methods */
+    void SetPrevMode(display_mode *prevMode) { saved_mode = prevMode; }
+    
+    display_mode* GetPrevMode() { return saved_mode; }
     
     /* FIXME: Bad coding practice, but I can't include SDL_BWin.h here.  Is
        there another way to do this? */
@@ -387,6 +395,8 @@ private:
 	int32 _length;
 	SDL_Window *window_map;
 #endif
+
+	display_mode *saved_mode;
 };
 
 #endif

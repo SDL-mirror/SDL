@@ -20,6 +20,10 @@
 */
 #include "SDL_config.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Handle the BeApp specific portions of the application */
 
 /* Initialize the Be Application, if it's not already started */
@@ -31,3 +35,7 @@ extern void SDL_QuitBeApp(void);
 /* Flag to tell whether the app is active or not */
 extern int SDL_BeAppActive;
 /* vi: set ts=4 sw=4 expandtab: */
+
+#ifdef __cplusplus
+}
+#endif

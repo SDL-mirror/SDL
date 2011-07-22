@@ -24,6 +24,7 @@
 #include <AppKit.h>
 #include <InterfaceKit.h>
 #include "SDL_bmodes.h"
+#include "SDL_BWin.h"
 
 #include "../../main/beos/SDL_BApp.h"
 
@@ -31,6 +32,9 @@
 extern "C" {
 #endif
 
+static inline SDL_BWin *_ToBeWin(SDL_Window *window) {
+	return ((SDL_BWin*)(window->driverdata));
+}
 
 static inline SDL_BApp *_GetBeApp() {
 	return ((SDL_BApp*)be_app);
@@ -197,6 +201,95 @@ int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 	}
 	
 	return -1;
+}
+
+
+
+int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
+                                       Uint32 * format,
+                                       void ** pixels, int *pitch) {
+	SDL_BWin *bwin = _ToBeWin(window);
+	BScreen bscreen;
+	if(!bscreen.IsValid()) {
+		return -1;
+	}
+	
+	while(!bwin->Connected()) { snooze(1600); }
+
+	/* Make sure we have exclusive access to frame buffer data */
+	bwin->LockBuffer();
+
+	/* format */
+	display_mode bmode;
+	bscreen.GetMode(&bmode);
+	int32 bpp = ColorSpaceToBitsPerPixel(bmode.space);
+	*format = BppToSDLPxFormat(bpp);
+
+	/* pitch = width of screen, in bytes */
+	*pitch = bpp * bwin->GetFbWidth() / 8;
+
+	/* Create a copy of the pixel buffer */
+	printf("SDL_bmodes.cc: 230; fbh: %i, pitch: %i; (x,y) = (%i, %i)\n", bwin->GetFbHeight(), (*pitch), bwin->GetFbX(), bwin->GetFbY());
+	*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * bpp / 8, sizeof(uint8));
+
+	bwin->UnlockBuffer();
+	return 0;
+}
+
+
+
+int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
+                                      SDL_Rect * rects, int numrects) {
+	SDL_BWin *bwin = _ToBeWin(window);
+	BScreen bscreen;
+	if(!bscreen.IsValid()) {
+		return -1;
+	}
+
+	if(bwin->ConnectionEnabled() && bwin->Connected()) {
+		bwin->LockBuffer();
+		int32 windowPitch = window->surface->pitch;
+		int32 bufferPitch = bwin->GetRowBytes();
+		uint8 *windowpx;
+		uint8 *bufferpx;
+
+		int32 bpp = window->surface->format->BitsPerPixel;
+		uint8 *windowBaseAddress = (uint8*)window->surface->pixels;
+		int32 windowSub = bwin->GetFbX() * bpp / 8 +
+						  bwin->GetFbY() * windowPitch;
+		clipping_rect *clips = bwin->GetClips();
+		int32 numClips = bwin->GetNumClips();
+		int i, y;
+
+		/* Blit each clipping rectangle */
+		bscreen.WaitForRetrace();
+		for(i = 0; i < numClips; ++i) {
+			/* Get addresses of the start of each clipping rectangle */
+			int32 width = clips[i].right - clips[i].left + 1;
+			int32 height = clips[i].bottom - clips[i].top + 1;
+			bufferpx = bwin->GetBufferPx() + 
+				clips[i].top * bufferPitch + clips[i].left * bpp / 8;
+			windowpx = windowBaseAddress + 
+				clips[i].top * windowPitch + clips[i].left * bpp / 8
+				- windowSub;
+
+			/* Copy each row of pixels from the window buffer into the frame
+			   buffer */
+			for(y = 0; y < height; ++y)
+			{
+				memcpy(bufferpx, windowpx, width * bpp / 8);
+				bufferpx += bufferPitch;
+				windowpx += windowPitch;
+			}
+		}
+		bwin->UnlockBuffer();
+	}
+	return 0;
+}
+
+void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
+	/* FIXME: FINISH! */
+	printf("ERROR: Attempted to destroy the window frame buffer\n");
 }
 
 #ifdef __cplusplus

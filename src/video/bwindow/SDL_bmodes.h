@@ -36,6 +36,14 @@ extern void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display);
 extern int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
 	SDL_DisplayMode *mode);
 
+extern int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
+                                       Uint32 * format,
+                                       void ** pixels, int *pitch);
+extern int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
+                                       SDL_Rect * rects, int numrects);
+extern void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window);
+
+
 #ifdef __cplusplus
 }
 #endif

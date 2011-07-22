@@ -45,12 +45,7 @@ extern void BE_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
                                     struct SDL_SysWMinfo *info);
 
-extern int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
-                                       Uint32 * format,
-                                       void ** pixels, int *pitch);
-extern int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
-                                       SDL_Rect * rects, int numrects);
-extern void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window);
+
 
 #endif
 

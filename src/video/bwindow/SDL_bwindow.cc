@@ -180,27 +180,6 @@ SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
 
 
 
-int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
-                                       Uint32 * format,
-                                       void ** pixels, int *pitch) {
-	/* pitch = width of screen, in bytes */
-	BScreen bscreen;
-	*pitch = (bscreen->Frame().right - bscreen->Frame().left + 1) *	/*screen w*/
-			 SDL_BYTESPERPIXEL(*format);
-
-	/* FIXME: FINISH! */
-	return -1;
-}
-
-int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
-                                       SDL_Rect * rects, int numrects) {
-	
-	return -1;
-}
-
-void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
-	/* FIXME: FINISH! */
-}
 
  
 #ifdef __cplusplus
