@@ -865,7 +865,8 @@ PrintUsage() {
 	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--show-tests]\n");
 	  printf("                [--xml] [--xsl [STYLESHEET]] [--timeout VALUE]\n");
-	  printf("                [--version] [--help]\n");
+	  printf("                [--exec-key KEY] [--iterations VALUE]\n");
+	  printf("                [--seed VALUE] [--version] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
@@ -873,6 +874,9 @@ PrintUsage() {
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");
 	  printf("                              file or URL instead of the default one\n");
+	  printf("     --seed VALUE             Specify fuzzing seed for the harness\n");
+	  printf("     --iterations VALUE       Specify how many times a test will be executed\n");
+	  printf("     --exec-key KEY           Run test(s) with specific execution key\n");
 	  printf(" -tm --timeout VALUE          Specify common timeout value for all tests\n");
 	  printf("                              Timeout is given in seconds and it'll override\n");
 	  printf("                              test specific timeout value only if the given\n");
