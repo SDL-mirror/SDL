@@ -37,7 +37,7 @@ typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
 		                time_t endTime, double totalRuntime);
 
 typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
-                              const char *testDescription, time_t startTime);
+                              const char *testDescription, int execKey, time_t startTime);
 typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
                             time_t endTime, double totalRuntime);
 
@@ -66,5 +66,10 @@ extern AssertFp Assert;
 extern AssertWithValuesFp AssertWithValues;
 extern AssertSummaryFp AssertSummary;
 extern LogFp Log;
+
+extern int globalExecKey;
+//! Run seed for harness
+extern const char *runSeed;
+
 
 #endif

@@ -80,9 +80,10 @@ PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 }
 
 void
-PlainTestStarted(const char *testName, const char *suiteName, const char *testDescription, time_t startTime)
+PlainTestStarted(const char *testName, const char *suiteName,
+				const char *testDescription, int execKey, time_t startTime)
 {
-	Output(indentLevel++, "Executing test: %s (in %s)", testName, suiteName);
+	Output(indentLevel++, "Executing test: %s (in %s). Execution key: %d", testName, suiteName, execKey);
 }
 
 void

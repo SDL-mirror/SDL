@@ -55,10 +55,11 @@ void PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
  * \param testName Name of the test that'll be executed
  * \param suiteName Name of the suite of the test
  * \param testDescription Description of the test
+ * \param execKey Execution key for fuzzing
  * \param startTime When the test started to execute
  */
 void PlainTestStarted(const char *testName, const char *suiteName,
-                      const char *testDescription, time_t startTime);
+                      const char *testDescription, int execKey, time_t startTime);
 
 /*!
  * Prints information about the test test that was just executed

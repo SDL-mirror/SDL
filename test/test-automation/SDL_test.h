@@ -26,6 +26,7 @@
 #include "common/common.h"
 #include "common/images.h"
 
+#include "fuzzer/fuzzer.h"
 
 extern int _testReturnValue;
 extern int _testAssertsFailed;
@@ -68,7 +69,7 @@ typedef struct TestCaseReference {
  *  Initialized the test environment such as asserts. Must be called at
  *  the beginning of every test case, before doing anything else.
  */
-void _InitTestEnvironment();
+void _InitTestEnvironment(const int execKey);
 
 /*!
  *  Deinitializes the test environment and

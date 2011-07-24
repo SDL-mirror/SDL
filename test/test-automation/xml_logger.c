@@ -35,6 +35,7 @@ const char *documentRoot = "testlog";
 const char *parametersElementName = "parameters";
 const char *parameterElementName = "parameter";
 const char *startTimeElementName = "startTime";
+const char *execKeyElementName = "executionKey";
 const char *numSuitesElementName = "numSuites";
 const char *numTestElementName = "numTests";
 const char *numPassedTestsElementName = "numPassedTests";
@@ -310,7 +311,7 @@ XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 
 void
 XMLTestStarted(const char *testName, const char *suiteName,
-			  const char *testDescription, time_t startTime)
+			  const char *testDescription, int execKey, time_t startTime)
 {
 	char * output = XMLOpenElement(testElementName);
 	XMLOutputter(indentLevel++, YES, output);
@@ -335,6 +336,17 @@ XMLTestStarted(const char *testName, const char *suiteName,
 	output = XMLCloseElement(descriptionElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
+	// log exec key
+	output = XMLOpenElement(execKeyElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(IntToString(execKey));
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(execKeyElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
+	// log start time
 	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
 

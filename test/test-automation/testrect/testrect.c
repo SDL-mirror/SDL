@@ -12,9 +12,14 @@
 static const TestCaseReference test1 =
 		(TestCaseReference){ "rect_testIntersectRectAndLine", "description", TEST_ENABLED, 0, 0 };
 
+static const TestCaseReference test2 =
+		(TestCaseReference){ "rect_testIntersectRectAndLineFuzzed", "Tests rect to line intersection with fuzzed values", TEST_ENABLED, 0, 0 };
+
+
+
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, NULL
+	&test1, &test2, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -23,6 +28,9 @@ TestCaseReference **QueryTestSuite() {
 
 /*!
  * \brief Tests SDL_IntersectRectAndLine()
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_IntersectRectAndLine
  */
 int rect_testIntersectRectAndLine (void *arg)
 {
@@ -131,3 +139,29 @@ int rect_testIntersectRectAndLine (void *arg)
         "diagonal line to upper right was incorrectly clipped: %d,%d - %d,%d",
         x1, y1, x2, y2);
 }
+
+/*!
+ * \brief Tests SDL_IntersectRectAndLine()
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_IntersectRectAndLine
+ */
+int rect_testIntersectRectAndLineFuzzed(void *arg)
+{
+	SDL_Rect rect = { 0, 0, RandomInteger(), RandomInteger() };
+    int x1, y1;
+    int x2, y2;
+    SDL_bool clipped;
+
+    x1 = -RandomInteger();
+    y1 = RandomInteger();
+    x2 = -RandomInteger();
+    y2 = RandomInteger();
+    clipped = SDL_IntersectRectAndLine(&rect, &x1, &y1, &x2, &y2);
+
+    AssertTrue( !clipped,
+                /*&& x1 == -10 && y1 == 0 && x2 == -10 && y2 == 31, */
+                "line outside to the left was incorrectly clipped: %d,%d - %d,%d",
+                x1, y1, x2, y2);
+}
+

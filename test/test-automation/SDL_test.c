@@ -23,6 +23,7 @@
 #include <time.h>
 
 #include "logger.h"
+#include "fuzzer/fuzzer.h"
 
 #include "SDL_test.h"
 
@@ -36,8 +37,13 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_InitTestEnvironment()
+_InitTestEnvironment(const int execKey)
 {
+	// The execKey gets corrupted while passing arguments
+	// hence the global variable to circumvent the problem
+	InitFuzzer(globalExecKey);
+
+
 	_testReturnValue = TEST_RESULT_PASS;
 	_testAssertsFailed = 0;
 	_testAssertsPassed = 0;
@@ -53,6 +59,8 @@ _QuitTestEnvironment()
 		_testReturnValue = TEST_RESULT_NO_ASSERT;
 	}
 
+	DeinitFuzzer();
+
 	return _testReturnValue;
 }
 
@@ -60,6 +68,7 @@ int
 _CountFailedAsserts() {
 	return _testAssertsFailed;
 }
+
 
 void
 AssertEquals(int expected, int actual, char *message, ...)

@@ -29,6 +29,7 @@
 #include <SDL/SDL.h>
 
 #include "../SDL_test.h"
+//#include "fuzzer/fuzzer.h"
 
 /* Test case references */
 static const TestCaseReference test1 =
@@ -89,6 +90,18 @@ void
 dummycase1(void *arg)
 {
 	AssertEquals(5, 5, "Assert message");
+
+	for(; 0 ;) {
+		int min = 50;
+		int max = 69;
+		int random =  RandomPositiveIntegerInRange(min, max);
+		if(random < min || random > max ) {
+			AssertFail("Generated incorrect integer");
+		}
+		Log(0, "%d", random);
+	}
+
+	//Log(0, "Random: %s", RandomAsciiString());
 }
 
 void

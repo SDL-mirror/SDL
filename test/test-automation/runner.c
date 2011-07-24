@@ -28,6 +28,9 @@
 
 #include <sys/types.h>
 
+#include "fuzzer/fuzzer.h"
+
+
 #include "config.h"
 
 #include "SDL_test.h"
@@ -82,11 +85,23 @@ char testcase_name_substring[NAME_BUFFER_SIZE];
 
 //! Name for user-supplied XSL style sheet name
 char xsl_stylesheet_name[NAME_BUFFER_SIZE];
-
+//! User-suppled timeout value for tests
 int universal_timeout = -1;
 
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
+
+int globalExecKey = -1;
+const char *runSeed = "seed";
+
+int userExecKey = 0;
+
+//! How man time a test will be invocated
+int testInvocationCount = 1;
+
+// \todo move this upper!! (and add comments)
+int totalTestFailureCount = 0, totalTestPassCount = 0, totalTestSkipCount = 0;
+int testFailureCount = 0, testPassCount = 0, testSkipCount = 0;
 
 
 /*!
@@ -674,8 +689,12 @@ CheckTestRequirements(TestCase *testCase)
  * \param test result
  */
 int
-RunTest(TestCase *testCase)
+RunTest(TestCase *testCase, const int execKey)
 {
+	if(!testCase) {
+		return -1;
+	}
+
 	int runnable = CheckTestRequirements(testCase);
 	if(runnable != 1) {
 		return TEST_RESULT_SKIPPED;
@@ -719,15 +738,15 @@ RunTest(TestCase *testCase)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(TestCase *testItem) {
+ExecuteTest(TestCase *testItem, const int execKey) {
 	int retVal = -1;
 
 	if(execute_inproc) {
-		retVal = RunTest(testItem);
+		retVal = RunTest(testItem, execKey);
 	} else {
 		int childpid = fork();
 		if(childpid == 0) {
-			exit(RunTest(testItem));
+			exit(RunTest(testItem, execKey));
 		} else {
 			int stat_lock = -1;
 			int child = wait(&stat_lock);
@@ -736,6 +755,20 @@ ExecuteTest(TestCase *testItem) {
 		}
 	}
 
+	if(retVal == TEST_RESULT_SKIPPED) {
+		testSkipCount++;
+		totalTestSkipCount++;
+	}
+	else if(retVal) {
+		totalTestFailureCount++;
+		testFailureCount++;
+	}
+	else {
+		totalTestPassCount++;
+		testPassCount++;
+	}
+
+	// return the value for logger
 	return retVal;
 }
 
@@ -890,6 +923,40 @@ ParseOptions(int argc, char *argv[])
 
     	  universal_timeout = atoi(timeoutString);
       }
+      else if(SDL_strcmp(arg, "--seed") == 0) {
+    	  if( (i + 1) < argc)  {
+    		  runSeed = argv[++i];
+    	  }  else {
+    		  printf("runner: seed value is missing\n");
+    		  PrintUsage();
+    		  exit(1);
+    	  }
+    	  //!Ê\todo should the seed be copied to a buffer?
+      }
+      else if(SDL_strcmp(arg, "--iterations") == 0) {
+    	  char *iterationsString = NULL;
+    	  if( (i + 1) < argc)  {
+    		  iterationsString = argv[++i];
+    	  }  else {
+    		  printf("runner: iterations value is missing\n");
+    		  PrintUsage();
+    		  exit(1);
+    	  }
+
+    	  testInvocationCount = atoi(iterationsString);
+      }
+      else if(SDL_strcmp(arg, "--exec-key") == 0) {
+    	  char *execKeyString = NULL;
+    	  if( (i + 1) < argc)  {
+    		  execKeyString = argv[++i];
+    	  }  else {
+    		  printf("runner: execkey value is missing\n");
+    		  PrintUsage();
+    		  exit(1);
+    	  }
+
+    	  userExecKey = atoi(execKeyString);
+      }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
     	  char *testName = NULL;
@@ -976,10 +1043,12 @@ main(int argc, char *argv[])
 {
 	ParseOptions(argc, argv);
 
+	CRC32_CTX crcContext;
+	utl_crc32Init(&crcContext);
+
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
-	int totalTestFailureCount = 0, totalTestPassCount = 0, totalTestSkipCount = 0;
-	int testFailureCount = 0, testPassCount = 0, testSkipCount = 0;
+
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 
@@ -1021,54 +1090,56 @@ main(int argc, char *argv[])
 	char *currentSuiteName = NULL;
 	int suiteStartTime = SDL_GetTicks();
 
+	int notFirstSuite = 0;
+	int startNewSuite = 1;
 	TestCase *testItem = NULL;
 	for(testItem = testCases; testItem; testItem = testItem->next) {
-		if(currentSuiteName == NULL) {
-			currentSuiteName = testItem->suiteName;
-			SuiteStarted(currentSuiteName, time(0));
-
-			testFailureCount = testPassCount = testSkipCount = 0;
-
-			suiteCounter++;
+		if(currentSuiteName && strncmp(currentSuiteName, testItem->suiteName, NAME_BUFFER_SIZE) != 0) {
+			startNewSuite = 1;
 		}
-		else if(strncmp(currentSuiteName, testItem->suiteName, NAME_BUFFER_SIZE) != 0) {
-			const double suiteRuntime = (SDL_GetTicks() - suiteStartTime) / 1000.0f;
 
-			SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
-						suiteRuntime);
+		if(startNewSuite) {
+			if(notFirstSuite) {
+				const double suiteRuntime = (SDL_GetTicks() - suiteStartTime) / 1000.0f;
+
+				SuiteEnded(testPassCount, testFailureCount, testSkipCount, time(0),
+							suiteRuntime);
+			}
 
 			suiteStartTime = SDL_GetTicks();
 
 			currentSuiteName = testItem->suiteName;
 			SuiteStarted(currentSuiteName, time(0));
-
 			testFailureCount = testPassCount = testSkipCount = 0;
-
 			suiteCounter++;
+
+			startNewSuite = 0;
+			notFirstSuite = 1;
 		}
 
-		TestStarted(testItem->testName, testItem->suiteName,
-                    testItem->description, time(0));
+		int currentIteration = testInvocationCount;
+		while(currentIteration > 0) {
+			if(userExecKey != 0) {
+				globalExecKey = userExecKey;
+			} else {
+				const int execKey = GenerateExecKey(crcContext, runSeed, testItem->suiteName,
+											  testItem->testName, currentIteration);
+				globalExecKey = execKey;
+			}
 
-		const Uint32 testTimeStart = SDL_GetTicks();
+			TestStarted(testItem->testName, testItem->suiteName,
+						testItem->description, globalExecKey, time(0));
 
-		int retVal = ExecuteTest(testItem);
-		if(retVal == 3) {
-			testSkipCount++;
-			totalTestSkipCount++;
+			const Uint32 testTimeStart = SDL_GetTicks();
+
+			int retVal = ExecuteTest(testItem, globalExecKey);
+
+			const double testTotalRuntime = (SDL_GetTicks() - testTimeStart) / 1000.0f;
+
+			TestEnded(testItem->testName, testItem->suiteName, retVal, time(0), testTotalRuntime);
+
+			currentIteration--;
 		}
-		else if(retVal) {
-			totalTestFailureCount++;
-			testFailureCount++;
-		}
-		else {
-			totalTestPassCount++;
-			testPassCount++;
-		}
-
-		const double testTotalRuntime = (SDL_GetTicks() - testTimeStart) / 1000.0f;
-
-		TestEnded(testItem->testName, testItem->suiteName, retVal, time(0), testTotalRuntime);
 	}
 
 	if(currentSuiteName) {
@@ -1082,11 +1153,13 @@ main(int argc, char *argv[])
 	const Uint32 endTicks = SDL_GetTicks();
 	const double totalRunTime = (endTicks - startTicks) / 1000.0f;
 
-	RunEnded(totalTestPassCount + totalTestFailureCount, suiteCounter,
+	RunEnded(totalTestPassCount + totalTestFailureCount + totalTestSkipCount, suiteCounter,
 			 totalTestPassCount, totalTestFailureCount, totalTestSkipCount, time(0), totalRunTime);
 
 	// Some SDL subsystem might be init'ed so shut them down
 	SDL_Quit();
+
+	utl_crc32Done(&crcContext);
 
 	return (totalTestFailureCount ? 1 : 0);
 }
