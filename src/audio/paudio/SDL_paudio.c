@@ -429,7 +429,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /*
      * The AIX paud device init can't modify the values of the audio_init
      * structure that we pass to it. So we don't need any recalculation
-     * of this stuff and no reinit call as in linux dsp and dma code.
+     * of this stuff and no reinit call as in linux dsp code.
      *
      * /dev/paud supports all of the encoding formats, so we don't need
      * to do anything like reopening the device, either.

@@ -67,7 +67,7 @@
 #define OPEN_FLAGS_INPUT (O_RDONLY|O_NONBLOCK)
 #endif
 
-/* !!! FIXME: so much cut and paste with dsp/dma drivers... */
+/* !!! FIXME: so much cut and paste with dsp target... */
 static char **outputDevices = NULL;
 static int outputDeviceCount = 0;
 static char **inputDevices = NULL;

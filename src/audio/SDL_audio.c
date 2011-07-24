@@ -45,7 +45,6 @@ static SDL_AudioDevice *open_devices[16];
  */
 extern AudioBootStrap BSD_AUDIO_bootstrap;
 extern AudioBootStrap DSP_bootstrap;
-extern AudioBootStrap DMA_bootstrap;
 extern AudioBootStrap ALSA_bootstrap;
 extern AudioBootStrap PULSEAUDIO_bootstrap;
 extern AudioBootStrap QSAAUDIO_bootstrap;
@@ -82,7 +81,6 @@ static const AudioBootStrap *const bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_OSS
     &DSP_bootstrap,
-    &DMA_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_QSA
     &QSAAUDIO_bootstrap,

@@ -682,7 +682,6 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [[default=yes]]]),
         if test x$have_oss = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_OSS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/dsp/*.c"
-            SOURCES="$SOURCES $srcdir/src/audio/dma/*.c"
             have_audio=yes
 
             # We may need to link with ossaudio emulation library
