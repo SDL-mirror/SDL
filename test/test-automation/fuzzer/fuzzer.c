@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <string.h>
-
 
 #include "../SDL_test.h"
 
@@ -77,43 +72,74 @@ RandomInteger()
 }
 
 int
-RandomPositiveIntegerInRange(int min, int max)
+RandomPositiveInteger()
 {
-	int number = utl_randomInt(&rndContext3);
-	number = abs(number);
-
-	return (number % (max - min)) + min;
+	return abs(utl_randomInt(&rndContext3));
 }
 
 int
-RandomBoundaryValue(const int max)
+RandomIntegerInRange(int min, int max)
 {
-	// Note: somehow integrate with RandomInteger?
-	// try to make more sensible & add new values
-	int boundaryValues[] = {0, 1, 15, 16, 17, 31, 32, 33, 63, 64, 65};
-	int retValue = -1;
+	if(min > max || (min - max) == 0) {
+		return -1; // Doesn't really make sense to return -1 on error?
+	}
 
-	do {
-		int index = RandomPositiveIntegerInRange(0, 10);
-		retValue = boundaryValues[index];
+	int number = utl_randomInt(&rndContext3);
+	number = abs(number);
 
-	} while( !(retValue <= max) );
+	return (number % ((max + 1) - min)) + min;
+}
+
+int
+GenerateBoundaryValueForSize(const int size)
+{
+	if(size < 0) {
+		return -1;
+	}
+
+	const int adjustment = RandomIntegerInRange(-1, 1);
+	int retValue = (1 << (RandomPositiveInteger() % size)) + adjustment;
 
 	return retValue;
 }
 
+int
+RandomUint8BoundaryValue()
+{
+	return GenerateBoundaryValueForSize(8);
+}
+
+int
+RandomInt8BoundaryValue()
+{
+	int value = GenerateBoundaryValueForSize(8);
+
+	return (RandomPositiveInteger() % 2 == 0 ? value : -value);
+}
 
 char *
 RandomAsciiString()
 {
-	const int size = abs(RandomInteger);
+	return RandomAsciiStringWithMaximumLength(255);
+}
+
+char *
+RandomAsciiStringWithMaximumLength(int maxSize)
+{
+	if(maxSize < 0) {
+		return NULL;
+	}
+
+	const int size = abs(RandomInteger) % maxSize;
 	char *string = SDL_malloc(size * sizeof(size));
 
 	int counter = 0;
 	for( ; counter < size; ++counter) {
-		char character = (char) RandomPositiveIntegerInRange(0, 127);
+		char character = (char) RandomPositiveIntegerInRange(1, 127);
 		string[counter] = character;
 	}
+
+	string[counter] = '\0';
 
 	return string;
 }

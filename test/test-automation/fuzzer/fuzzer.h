@@ -25,10 +25,12 @@
 #include "utl_md5.h"
 #include "utl_random.h"
 
+
 /*!
  * Inits the fuzzer for a test
  */
 void InitFuzzer(const int execKey);
+
 
 /*!
  * Deinits the fuzzer (for a test)
@@ -37,33 +39,68 @@ void DeinitFuzzer();
 
 
 /*!
- * Returns random integer
+ * Returns a random integer
  *
  * \returns Generated integer
  */
 int RandomInteger();
 
+
 /*!
- * Returns positive integer in range [min, max]
+ * Returns a random positive integer
  *
  * \returns Generated integer
  */
-int RandomPositiveIntegerInRange(int min, int max);
+int RandomPositiveInteger();
+
 
 /*!
- * Generates random ASCII string
+ * Returns integer in range [min, max]. Min and max
+ * value can be negative values as long as min is smaller than max.
+ * Min and max also can't be the same value.
+ *
+ * \returns Generated integer or ? in error
+ */
+int RandomIntegerInRange(int min, int max);
+
+
+/*!
+ * Generates random null-terminated string. The maximum length for
+ * the string is 255 characters and it can contain ASCII characters
+ * from 1 to 127.
+ *
+ * Note: Returned string needs to be deallocated.
  *
  * \returns newly allocated random string
  */
 char *RandomAsciiString();
 
+
 /*!
- * Generates a random boundary value. Max is the biggest
- * value the function can return.
+ * Generates random null-terminated string. The maximum length for
+ * the string is defined by maxLenght parameter.
+ * String can contain ASCII characters from 1 to 127.
  *
- * \returns a boundary value
+ * Note: Returned string needs to be deallocated.
+ *
+ * \param maxLength Maximum length of the generated string
+ *
+ * \returns newly allocated random string
  */
-int RandomBoundaryValue(const int max);
+char *RandomAsciiStringWithMaximumLength(int maxLength);
+
+
+/*!
+ * todo add markup
+ */
+int RandomUint8BoundaryValue();
+
+
+/*!
+ * todo add markup
+ */
+int RandomInt8BoundaryValue();
+
 
 /*!
  * Generates execution key (used for random seed) for a test

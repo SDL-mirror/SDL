@@ -91,9 +91,15 @@ dummycase1(void *arg)
 {
 	AssertEquals(5, 5, "Assert message");
 
+	for(; 1 ;) {
+		Log(0, "uint8: %d", RandomUint8BoundaryValue());
+		Log(0, "int8: %d", RandomInt8BoundaryValue());
+
+	}
+
 	for(; 0 ;) {
-		int min = 50;
-		int max = 69;
+		int min = -5;
+		int max = 5;
 		int random =  RandomPositiveIntegerInRange(min, max);
 		if(random < min || random > max ) {
 			AssertFail("Generated incorrect integer");
@@ -101,7 +107,7 @@ dummycase1(void *arg)
 		Log(0, "%d", random);
 	}
 
-	//Log(0, "Random: %s", RandomAsciiString());
+	//Log(0, "Random: %s", RandomAsciiStringWithMaximumLength(2));
 }
 
 void
