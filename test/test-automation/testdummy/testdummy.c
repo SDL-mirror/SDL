@@ -91,7 +91,7 @@ dummycase1(void *arg)
 {
 	AssertEquals(5, 5, "Assert message");
 
-	for(; 1 ;) {
+	for(; 0 ;) {
 		Log(0, "uint8: %d", RandomUint8BoundaryValue());
 		Log(0, "int8: %d", RandomInt8BoundaryValue());
 
@@ -100,7 +100,7 @@ dummycase1(void *arg)
 	for(; 0 ;) {
 		int min = -5;
 		int max = 5;
-		int random =  RandomPositiveIntegerInRange(min, max);
+		int random =  RandomIntegerInRange(min, max);
 		if(random < min || random > max ) {
 			AssertFail("Generated incorrect integer");
 		}

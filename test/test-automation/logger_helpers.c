@@ -4,7 +4,7 @@
 #include "logger_helpers.h"
 
 /*!
- * Helper functions. Turns the given integer in to a string
+ * Helper function. Turns the given integer in to a string
  *
  * Note: uses static buffer internally, so the return value
  * isn't valid after the next call of this function. If you
@@ -23,7 +23,27 @@ char *IntToString(const int integer) {
 }
 
 /*!
- * Helper functions. Turns the given double value in to a string
+ * Helper function. Turns the given integer in to a string in
+ * hex format.
+ *
+ * Note: uses static buffer internally, so the return value
+ * isn't valid after the next call of this function. If you
+ * want to retain the return value, make a copy of it
+ *
+ *  \param integer The converted integer
+ *  \returns Given integer as string in hex fomat
+ */
+char *IntToHexString(const int integer) {
+	static char buffer[256]; // malloc might work better
+	memset(buffer, 0, sizeof(buffer));
+
+	SDL_snprintf(buffer, sizeof(buffer), "%X", integer);
+
+	return buffer;
+}
+
+/*!
+ * Helper function. Turns the given double value in to a string
  *
  * Note: uses static buffer internally, so the return value
  * isn't valid after the next call of this function. If you

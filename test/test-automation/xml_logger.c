@@ -35,6 +35,7 @@ const char *documentRoot = "testlog";
 const char *parametersElementName = "parameters";
 const char *parameterElementName = "parameter";
 const char *startTimeElementName = "startTime";
+const char *seedElementName = "seed";
 const char *execKeyElementName = "executionKey";
 const char *numSuitesElementName = "numSuites";
 const char *numTestElementName = "numTests";
@@ -109,14 +110,15 @@ XMLOutputter(const int currentIndentLevel,
 }
 
 void
-XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
-			 void *data)
+XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
+			 time_t eventTime, void *data)
 {
 	char *xslStylesheet = (char *)data;
 
 	char *output = XMLOpenDocument(documentRoot, xslStylesheet);
 	XMLOutputter(indentLevel++, YES, output);
 
+	// log harness parameters
 	output = XMLOpenElement(parametersElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
@@ -137,6 +139,17 @@ XMLRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
 	output = XMLCloseElement(parametersElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
+	// log seed
+	output = XMLOpenElement(seedElementName);
+	XMLOutputter(indentLevel++, NO, output);
+
+	output = XMLAddContent(runSeed);
+	XMLOutputter(indentLevel, NO, output);
+
+	output = XMLCloseElement(seedElementName);
+	XMLOutputter(--indentLevel, YES, output);
+
+	// log start time
 	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -340,7 +353,7 @@ XMLTestStarted(const char *testName, const char *suiteName,
 	output = XMLOpenElement(execKeyElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
-	output = XMLAddContent(IntToString(execKey));
+	output = XMLAddContent(IntToHexString(execKey));
 	XMLOutputter(indentLevel, NO, output);
 
 	output = XMLCloseElement(execKeyElementName);

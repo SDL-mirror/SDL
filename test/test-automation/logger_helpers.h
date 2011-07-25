@@ -5,6 +5,8 @@
 
 char *IntToString(const int integer);
 
+char *IntToHexString(const int integer);
+
 char *DoubleToString(const double decimal);
 
 char *TimestampToString(const time_t timestamp);

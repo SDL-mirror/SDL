@@ -8,12 +8,13 @@
  *
  * \param parameterCount How many parameters were given
  * \param runnerParameters What parameters were given to the runner
+ * \param runSeed Fuzzer seed of the harness
  * \param eventTime When the execution started
  * \param data Any additional data logger needs
  *
  */
-void PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
-					 void *data);
+void PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
+					 time_t eventTime, void *data);
 
 /*!
  * Prints out information about ending the test run.

@@ -50,7 +50,7 @@ GenerateExecKey(CRC32_CTX crcContext, char *runSeed, char *suiteName,
 
 	utl_crc32Calc(&crcContext, md5Context.digest, sizeof(md5Context.digest), &result);
 
-	return result;
+	return abs(result); // makes sure that the key is positive
 }
 
 void
@@ -135,7 +135,7 @@ RandomAsciiStringWithMaximumLength(int maxSize)
 
 	int counter = 0;
 	for( ; counter < size; ++counter) {
-		char character = (char) RandomPositiveIntegerInRange(1, 127);
+		char character = (char) RandomIntegerInRange(1, 127);
 		string[counter] = character;
 	}
 

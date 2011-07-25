@@ -169,8 +169,8 @@ div, h1 {
   <h1>Test Report</h1>
   <div>
     <span class="title">Start time: </span><xsl:value-of select="testlog/startTime"/><br/>
-    <!-- and ended at <xsl:value-of select="testlog/endTime"/>.<br/>-->
     <span class="title">Total runtime: </span><xsl:value-of select="testlog/totalRuntime"/> seconds.<br/>
+    <span class="title">Fuzz seed: </span><xsl:value-of select="testlog/seed"/><br/>
     <span class="title">Harness parameters: </span>
 	<span xml:space="preserve">
       <xsl:for-each select="testlog/parameters/parameter">
@@ -184,7 +184,6 @@ div, h1 {
       <span>Tests in total: </span> <xsl:value-of select="testlog/numTests"/> (passed: <xsl:value-of select="testlog/numPassedTests"/>, failed: <xsl:value-of select="testlog/numFailedTests"/>, skipped: <xsl:value-of select="testlog/numSkippedTests"/>)
     </div>
   </div>
-
   <div>
 	<br/>
 	<span class="bigtitle">Test Results</span><br/>
@@ -214,6 +213,7 @@ div, h1 {
 			  	 (<xsl:value-of select="resultDescription"/>)  
 			  </span>
 			</xsl:if>
+			- exec-key: <xsl:value-of select="executionKey"/>
 			(Total runtime: <xsl:value-of select="totalRuntime"/> seconds)<br/>
 			Description: <span class="description"> <xsl:value-of select="description"/> </span><br/>
 		      <span class="switch show-asserts" uid="{generate-id(assertSummary)}">[Show Assert Summary]</span><br/>
@@ -241,6 +241,7 @@ div, h1 {
   <br/>
 </body>
 </html>
+
 
 </xsl:template>
 </xsl:stylesheet>

@@ -37,10 +37,11 @@ Output(const int currentIndentLevel, const char *message, ...)
 }
 
 void
-PlainRunStarted(int parameterCount, char *runnerParameters[], time_t eventTime,
-				void *data)
+PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
+			    time_t eventTime, void *data)
 {
 	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
+	Output(indentLevel, "Fuzzer seed is %s", runSeed);
 	Output(indentLevel, "Runner parameters: ");
 
 	int counter = 0;
@@ -83,7 +84,7 @@ void
 PlainTestStarted(const char *testName, const char *suiteName,
 				const char *testDescription, int execKey, time_t startTime)
 {
-	Output(indentLevel++, "Executing test: %s (in %s). Execution key: %d", testName, suiteName, execKey);
+	Output(indentLevel++, "Executing test: %s (in %s). Exec key: %X", testName, suiteName, execKey);
 }
 
 void

@@ -1052,7 +1052,6 @@ main(int argc, char *argv[])
 
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
-
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 
@@ -1081,7 +1080,7 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
-	RunStarted(argc, argv, time(0), loggerData);
+	RunStarted(argc, argv, runSeed, time(0), loggerData);
 
 	if(execute_inproc && universal_timeout_enabled) {
 		Log(time(0), "Test timeout is not supported with in-proc execution.");

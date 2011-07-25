@@ -55,6 +55,18 @@ int RandomPositiveInteger();
 
 
 /*!
+ * todo add markup
+ */
+int RandomUint8BoundaryValue();
+
+
+/*!
+ * todo add markup
+ */
+int RandomInt8BoundaryValue();
+
+
+/*!
  * Returns integer in range [min, max]. Min and max
  * value can be negative values as long as min is smaller than max.
  * Min and max also can't be the same value.
@@ -88,18 +100,6 @@ char *RandomAsciiString();
  * \returns newly allocated random string
  */
 char *RandomAsciiStringWithMaximumLength(int maxLength);
-
-
-/*!
- * todo add markup
- */
-int RandomUint8BoundaryValue();
-
-
-/*!
- * todo add markup
- */
-int RandomInt8BoundaryValue();
 
 
 /*!
