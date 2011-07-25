@@ -64,47 +64,46 @@ class SDL_BWin:public BDirectWindow
     SDL_BWin(BRect bounds):BDirectWindow(bounds, "Untitled",
                                          B_TITLED_WINDOW, 0)
     {
-        last_buttons = 0;
-printf("SDL_BWin.h: 69\n");
+        _last_buttons = 0;
 
 #if SDL_VIDEO_OPENGL
-        SDL_GLView = NULL;
+        _SDL_GLView = NULL;
 #endif
         _shown = false;
-        inhibit_resize = false;
-        mouse_focused = false;
-        prev_frame = NULL; printf("SDL_BWin.h: 79\n");
-        
+        _inhibit_resize = false;
+        _mouse_focused = false;
+        _prev_frame = NULL;
+
         /* Handle framebuffer stuff */
-        _connected = connection_disabled = false;
-        trash_window_buffer = false;
-        buffer_locker = new BLocker();
-        window_buffer = NULL;
+        _connected = _connection_disabled = false;
+        _trash__window_buffer = false;
+        _buffer_locker = new BLocker();
+        _window_buffer = NULL;
 //        LockBuffer();	/* Unlocked by buffer initialization */
     }
 
     virtual ~ SDL_BWin()
     {
         Lock();
-        connection_disabled = true;
+        _connection_disabled = true;
         
 #if SDL_VIDEO_OPENGL
-        if (SDL_GLView) {
-            SDL_GLView->UnlockGL();
+        if (_SDL_GLView) {
+            _SDL_GLView->UnlockGL();
         }
-        RemoveChild(SDL_GLView);
+        RemoveChild(_SDL_GLView);
 #endif    
         Unlock();
 #if SDL_VIDEO_OPENGL
-        if (SDL_GLView) {
-            delete SDL_GLView;
+        if (_SDL_GLView) {
+            delete _SDL_GLView;
         }
 #endif
         
         /* Clean up framebuffer stuff */
-        buffer_locker->Lock();
+        _buffer_locker->Lock();
         free(_clips);
-        delete buffer_locker;
+        delete _buffer_locker;
     }
     
 
@@ -117,24 +116,24 @@ printf("SDL_BWin.h: 69\n");
         retval = 0;
         Lock();
         if (flags & SDL_OPENGL/*SDL_INTERNALOPENGL*/) {
-            if (SDL_GLView == NULL) {
-                SDL_GLView = new BGLView(Bounds(), "SDL GLView",
+            if (_SDL_GLView == NULL) {
+                _SDL_GLView = new BGLView(Bounds(), "SDL GLView",
                                          B_FOLLOW_ALL_SIDES,
                                          (B_WILL_DRAW | B_FRAME_EVENTS),
                                          gl_flags);
             }
-            if (the_view != SDL_GLView) {
-                if (the_view) {
-                    RemoveChild(the_view);
+            if (_the_view != _SDL_GLView) {
+                if (_the_view) {
+                    RemoveChild(_the_view);
                 }
-                AddChild(SDL_GLView);
-                SDL_GLView->LockGL();
-                the_view = SDL_GLView;
+                AddChild(_SDL_GLView);
+                _SDL_GLView->LockGL();
+                _the_view = _SDL_GLView;
             }
         } else {
-            if (the_view) {
-                    SDL_GLView->UnlockGL();
-                RemoveChild(the_view);
+            if (_the_view) {
+                    _SDL_GLView->UnlockGL();
+                RemoveChild(_the_view);
             }
         }
         Unlock();
@@ -144,41 +143,41 @@ printf("SDL_BWin.h: 69\n");
     
     /* * * * * Framebuffering* * * * */
     virtual void DirectConnected(direct_buffer_info *info) {
-    	if(!_connected && connection_disabled) {
+    	if(!_connected && _connection_disabled) {
     		return;
     	}
     	LockBuffer();
     	
     	switch(info->buffer_state & B_DIRECT_MODE_MASK) {
     	case B_DIRECT_START:
-printf(__FILE__": %d; Direct start.\n", __LINE__);
     		_connected = true;
 
     	case B_DIRECT_MODIFY:
-
     		if(_clips) {
     			free(_clips);
     			_clips = NULL;
     		}
     		
     		/* Can we reuse the window's pixel buffer after this? */
-    		trash_window_buffer = ((info->buffer_state & B_BUFFER_RESIZED)
+    		_trash__window_buffer = ((info->buffer_state & B_BUFFER_RESIZED)
     							|| (info->buffer_state & B_BUFFER_RESET)
     							|| ((info->buffer_state & B_DIRECT_MODE_MASK)
     								== B_DIRECT_START));
-    		
-    		num_clips = info->clip_list_count;
-    		_clips = (clipping_rect *)malloc(num_clips*sizeof(clipping_rect));
+
+    		_num_clips = info->clip_list_count;
+    		_clips = (clipping_rect *)malloc(_num_clips*sizeof(clipping_rect));
     		if(_clips) {
     			memcpy(_clips, info->clip_list,
-    				num_clips*sizeof(clipping_rect));
+    				_num_clips*sizeof(clipping_rect));
     			
     			_bits = (uint8*) info->bits;
-    			row_bytes = info->bytes_per_row;
+    			_row_bytes = info->bytes_per_row;
     			_bounds = info->window_bounds;
-    			bytes_per_px = info->bits_per_pixel / 8;
+    			_bytes_per_px = info->bits_per_pixel / 8;
     		}
-    		
+
+    		/* Whatever the case, I think this merits a repaint event */
+//    		_RepaintEvent();
     		break;
 
     	case B_DIRECT_STOP:
@@ -218,7 +217,7 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
 	virtual bool QuitRequested() {
     	BMessage msg(BAPP_WINDOW_CLOSE_REQUESTED);
     	_PostWindowEvent(msg);
-    	
+
     	/* We won't allow a quit unless asked by DestroyWindow() */
     	return false;	
     }
@@ -235,8 +234,8 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
     	_PostWindowEvent(msg);
     	
     	/* Before the window zooms, record its size */
-    	if( !prev_frame )
-    		prev_frame = new BRect(Frame());
+    	if( !_prev_frame )
+    		_prev_frame = new BRect(Frame());
 
     	/* Perform normal hook operations */
     	BDirectWindow::Zoom(origin, width, height);
@@ -244,19 +243,19 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
     
     /* Member functions */
     virtual void Show() {
-    	BDirectWindow::Show();
+    	while(IsHidden()) {
+    		BDirectWindow::Show();
+    	}
     	_shown = true;
-    	
+
     	BMessage msg(BAPP_SHOW);
     	_PostWindowEvent(msg);
     }
     
     virtual void Hide() {
-    	/* FIXME: Multiple hides require multiple shows to undo. Should
-    	   this be altered to prevent this from happening? */
     	BDirectWindow::Hide();
     	_shown = false;
-    	
+
     	BMessage msg(BAPP_HIDE);
     	_PostWindowEvent(msg);
     }
@@ -273,7 +272,6 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
     /* BView message interruption */
     virtual void DispatchMessage(BMessage * msg, BHandler * target)
     {
-    	
         BPoint where;	/* Used by mouse moved */
         int32 buttons;	/* Used for mouse button events */
         int32 key;		/* Used for key events */
@@ -326,11 +324,6 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
             	_KeyEvent(key, SDL_RELEASED);
             }
             break;
-                
-        case _UPDATE_:
-        case _UPDATE_IF_NEEDED_:	/* Hopefully one doesn't call the other */
-        	_RepaintEvent();
-        	break;
         	
         default:
             /* move it after switch{} so it's always handled
@@ -341,6 +334,7 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
             //BDirectWindow::DispatchMessage(msg, target);
             break;
         }
+
         BDirectWindow::DispatchMessage(msg, target);
     }
     
@@ -388,22 +382,22 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
 	/* Accessor methods */
 	bool IsShown() { return _shown; }
 	int32 GetID() { return _id; }
-	void LockBuffer() {	buffer_locker->Lock(); }
-	void UnlockBuffer() { buffer_locker->Unlock(); }
-	uint32 GetRowBytes() { return row_bytes; }
+	void LockBuffer() {	_buffer_locker->Lock(); }
+	void UnlockBuffer() { _buffer_locker->Unlock(); }
+	uint32 GetRowBytes() { return _row_bytes; }
 	int32 GetFbX() { return _bounds.left; }
 	int32 GetFbY() { return _bounds.top; }
 	int32 GetFbHeight() { return _bounds.bottom - _bounds.top + 1; }
 	int32 GetFbWidth() { return _bounds.right - _bounds.left + 1; }
-	bool ConnectionEnabled() { return !connection_disabled; }
+	bool ConnectionEnabled() { return !_connection_disabled; }
 	bool Connected() { return _connected; }
 	clipping_rect *GetClips() { return _clips; }
-	int32 GetNumClips() { return num_clips; }
+	int32 GetNumClips() { return _num_clips; }
 	uint8* GetBufferPx() { return _bits; }
-	int32 GetBytesPerPx() { return bytes_per_px; }
-	void SetWindowFramebuffer(uint8* fb) { window_buffer = fb; }
-	uint8* GetWindowFramebuffer() { return window_buffer; }
-	bool CanTrashWindowBuffer() { return trash_window_buffer; }
+	int32 GetBytesPerPx() { return _bytes_per_px; }
+	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
+	uint8* GetWindowFramebuffer() { return _window_buffer; }
+	bool CanTrashWindowBuffer() { return _trash__window_buffer; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
@@ -413,14 +407,14 @@ printf(__FILE__": %d; Direct start.\n", __LINE__);
 #if SDL_VIDEO_OPENGL
     virtual void SwapBuffers(void)
     {
-        SDL_GLView->UnlockGL();
-        SDL_GLView->LockGL();
-        SDL_GLView->SwapBuffers();
+        _SDL_GLView->UnlockGL();
+        _SDL_GLView->LockGL();
+        _SDL_GLView->SwapBuffers();
     }
 #endif
     virtual BView *View(void)
     {
-        return (the_view);
+        return (_the_view);
     }
 
 	
@@ -434,27 +428,26 @@ private:
     void _MouseMotionEvent(BPoint &where, int32 transit) {
     	if(transit == B_EXITED_VIEW) {
     		/* Change mouse focus */
-    		if(mouse_focused) {
+    		if(_mouse_focused) {
     			_MouseFocusEvent(false);
     		}
     	} else {
     		static int x = 0, y = 0;
     		/* Change mouse focus */
-    		if (!mouse_focused) {
+    		if (!_mouse_focused) {
     			_MouseFocusEvent(true);
     		}
-//    		GetXYOffset(x, y);	//FIXME: What is this doing? (from SDL 1.2)
     		BMessage msg(BAPP_MOUSE_MOVED);
     		msg.AddInt32("dx", where.x - x);
     		msg.AddInt32("dy", where.y - y);
     		x = (int) where.x;
-    		y = (int) where.y;
+    		y = (int) where.y;    		
     		_PostWindowEvent(msg);
     	}
     }
     
     void _MouseFocusEvent(bool focusGained) {
-    	mouse_focused = focusGained;
+    	_mouse_focused = focusGained;
     	BMessage msg(BAPP_MOUSE_FOCUS);
     	msg.AddBool("focusGained", focusGained);
     	_PostWindowEvent(msg);
@@ -465,7 +458,7 @@ private:
     }
     
     void _MouseButtonEvent(int32 buttons) {
-    	int32 buttonStateChange = buttons ^ last_buttons;
+    	int32 buttonStateChange = buttons ^ _last_buttons;
     	
     	/* Make sure at least one button has changed state */ 
     	if( !(buttonStateChange) ) {
@@ -486,7 +479,7 @@ private:
     			B_PRIMARY_MOUSE_BUTTON);
     	}
     	
-    	last_buttons = buttons;
+    	_last_buttons = buttons;
     }
     
     void _SendMouseButton(int32 button, int32 state) {
@@ -561,9 +554,9 @@ private:
     		Minimize(false);
     	} else if(IsHidden()) {
     		Show();
-    	} else if(prev_frame != NULL) {	/* Zoomed */
-    		MoveTo(prev_frame->left, prev_frame->top);
-    		ResizeTo(prev_frame->Width(), prev_frame->Height());
+    	} else if(_prev_frame != NULL) {	/* Zoomed */
+    		MoveTo(_prev_frame->left, _prev_frame->top);
+    		ResizeTo(_prev_frame->Width(), _prev_frame->Height());
     	}
     }
 
@@ -579,29 +572,29 @@ private:
     
     /* Members */
 #if SDL_VIDEO_OPENGL
-    BGLView * SDL_GLView;
+    BGLView * _SDL_GLView;
 #endif
-    BView *the_view;
+    BView *_the_view;
     
-    int32 last_buttons;
+    int32 _last_buttons;
     int32 _id;	/* Window id used by SDL_BApp */
-    bool mouse_focused;		/* Does this window have mouse focus? */
-    bool _shown;
-    bool inhibit_resize;
+    bool  _mouse_focused;		/* Does this window have mouse focus? */
+    bool  _shown;
+    bool  _inhibit_resize;
     
-    BRect *prev_frame;	/* Previous position and size of the window */
+    BRect *_prev_frame;	/* Previous position and size of the window */
     
     /* Framebuffer members */
-    bool			_connected, connection_disabled;
-    uint8			*_bits;
-    uint32			row_bytes;
+    bool			_connected, _connection_disabled;
+    uint8		   *_bits;
+    uint32			_row_bytes;
     clipping_rect	_bounds;
-    BLocker 		*buffer_locker;
-    clipping_rect	*_clips;
-    int32			num_clips;
-    int32			bytes_per_px;
-    uint8			*window_buffer;	/* A copy of the window buffer */
-    bool			trash_window_buffer;
+    BLocker 	   *_buffer_locker;
+    clipping_rect  *_clips;
+    int32			_num_clips;
+    int32			_bytes_per_px;
+    uint8		   *_window_buffer;	/* A copy of the window buffer */
+    bool			_trash__window_buffer;
 };
 
 #endif

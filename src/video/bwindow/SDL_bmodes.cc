@@ -118,20 +118,19 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 /* Later, there may be more than one monitor available */
 void BE_AddDisplay(BScreen *screen) {
 	SDL_VideoDisplay display;
-	SDL_DisplayMode mode;
+	SDL_DisplayMode *mode = (SDL_DisplayMode*)SDL_calloc(1, sizeof(SDL_DisplayMode));
 	display_mode bmode;
 	screen->GetMode(&bmode);
 
-	BE_BDisplayModeToSdlDisplayMode(&bmode, &mode);
+	BE_BDisplayModeToSdlDisplayMode(&bmode, mode);
 	
 	SDL_zero(display);
-	display.desktop_mode = mode;
-	display.current_mode = mode;
+	display.desktop_mode = *mode;
+	display.current_mode = *mode;
 	SDL_AddVideoDisplay(&display);
 }
 
 int BE_InitModes(_THIS) {
-	printf("Init Modes\n");
 	BScreen screen;
 	
 	/* Save the current display mode */
@@ -144,6 +143,7 @@ int BE_InitModes(_THIS) {
 }
 
 int BE_QuitModes(_THIS) {
+	printf(__FILE__": %d; Begin quit\n", __LINE__);
 	/* Restore the previous video mode */
 	BScreen screen;
 	display_mode *savedMode = _GetBeApp()->GetPrevMode();
@@ -163,10 +163,9 @@ int BE_GetDisplayBounds(_THIS, SDL_VideoDisplay *display, SDL_Rect *rect) {
 }
 
 void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display) {
-	printf("Get Display Modes\n");
 	/* Get the current screen */
 	BScreen bscreen;
-	
+
 	/* Iterate through all of the modes */
 	SDL_DisplayMode mode;
 	display_mode this_bmode;
@@ -188,7 +187,6 @@ void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display) {
 }
 
 int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
-	printf("Set Display Modes\n");
 	/* Get the current screen */
 	BScreen bscreen;
 	
@@ -212,7 +210,7 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 		return -1;
 	}
 	
-	while(!bwin->Connected()) { snooze(1600); }
+	while(!bwin->Connected()) { snooze(10); }
 
 	/* Make sure we have exclusive access to frame buffer data */
 	bwin->LockBuffer();
@@ -228,7 +226,6 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 
 	/* Create a copy of the pixel buffer if it doesn't recycle */
 	*pixels = bwin->GetWindowFramebuffer();
-	printf(__FILE__": %d; window frame buffer make\n", __LINE__);
 	if( bwin->CanTrashWindowBuffer() || (*pixels) == NULL) {
 		if( (*pixels) != NULL ) {
 			SDL_free(*pixels);
@@ -236,11 +233,6 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 		*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
 			bwin->GetBytesPerPx(), sizeof(uint8));
 		bwin->SetWindowFramebuffer((uint8*)(*pixels));
-		if(*pixels) {
-			printf(__FILE__": %d; Success!\n", __LINE__);
-		} else {
-			printf(__FILE__": %d; FAIL!\n", __LINE__);
-		}
 	}
 
 	bwin->UnlockBuffer();
@@ -283,7 +275,7 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 				clips[i].top * bufferPitch + clips[i].left * BPP;
 			windowpx = windowBaseAddress + 
 				clips[i].top * windowPitch + clips[i].left * BPP - windowSub;
-printf(__FILE__": %d\n\twindowpx = 0x%x\n\tbufferpx = 0x%x\n\twindowPitch = %i\n\tbufferPitch = %i\n", __LINE__, windowpx, bufferpx, windowPitch, bufferPitch);
+
 			/* Copy each row of pixels from the window buffer into the frame
 			   buffer */
 			for(y = 0; y < height; ++y)

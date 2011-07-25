@@ -37,25 +37,25 @@ static inline SDL_BApp *_GetBeApp() {
 	return ((SDL_BApp*)be_app);
 }
 
-int _InitWindow(_THIS, SDL_Window *window) {printf("SDL_bwindow.cc: 40\n");
+int _InitWindow(_THIS, SDL_Window *window) {
 	BRect bounds(
         window->x,
         window->y,
         window->x + window->w - 1,	//BeWindows have an off-by-one px w/h thing
         window->y + window->h - 1
     );
-printf("SDL_bwindow.cc: 30\n");
+
     SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds);
     if(bwin == NULL)
     	return ENOMEM;
-printf("SDL_bwindow.cc: 51\n");
+
     window->driverdata = bwin;
     int32 winID = _GetBeApp()->GetID(window);
     bwin->SetID(winID);
     return 0;
 }
 
-int BE_CreateWindow(_THIS, SDL_Window *window) {printf("SDL_bwindow.cc: 58\n");
+int BE_CreateWindow(_THIS, SDL_Window *window) {
 	if(_InitWindow(_this, window) == ENOMEM)
 		return ENOMEM;
 	
