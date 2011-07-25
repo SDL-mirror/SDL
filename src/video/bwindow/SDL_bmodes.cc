@@ -228,13 +228,19 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 
 	/* Create a copy of the pixel buffer if it doesn't recycle */
 	*pixels = bwin->GetWindowFramebuffer();
-	if( bwin->CanTrashWindowBuffer() ) {
+	printf(__FILE__": %d; window frame buffer make\n", __LINE__);
+	if( bwin->CanTrashWindowBuffer() || (*pixels) == NULL) {
 		if( (*pixels) != NULL ) {
 			SDL_free(*pixels);
 		}
 		*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
 			bwin->GetBytesPerPx(), sizeof(uint8));
 		bwin->SetWindowFramebuffer((uint8*)(*pixels));
+		if(*pixels) {
+			printf(__FILE__": %d; Success!\n", __LINE__);
+		} else {
+			printf(__FILE__": %d; FAIL!\n", __LINE__);
+		}
 	}
 
 	bwin->UnlockBuffer();
@@ -269,6 +275,7 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 		/* Blit each clipping rectangle */
 		bscreen.WaitForRetrace();
 		for(i = 0; i < numClips; ++i) {
+			clipping_rect rc = clips[i];
 			/* Get addresses of the start of each clipping rectangle */
 			int32 width = clips[i].right - clips[i].left + 1;
 			int32 height = clips[i].bottom - clips[i].top + 1;
@@ -276,7 +283,7 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 				clips[i].top * bufferPitch + clips[i].left * BPP;
 			windowpx = windowBaseAddress + 
 				clips[i].top * windowPitch + clips[i].left * BPP - windowSub;
-
+printf(__FILE__": %d\n\twindowpx = 0x%x\n\tbufferpx = 0x%x\n\twindowPitch = %i\n\tbufferPitch = %i\n", __LINE__, windowpx, bufferpx, windowPitch, bufferPitch);
 			/* Copy each row of pixels from the window buffer into the frame
 			   buffer */
 			for(y = 0; y < height; ++y)
