@@ -91,10 +91,10 @@ int universal_timeout = -1;
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
 
-int globalExecKey = -1;
-const char *runSeed = "seed";
+char *globalExecKey = NULL;
+char *runSeed = "seed";
 
-int userExecKey = 0;
+char *userExecKey = NULL;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
@@ -689,7 +689,7 @@ CheckTestRequirements(TestCase *testCase)
  * \param test result
  */
 int
-RunTest(TestCase *testCase, const int execKey)
+RunTest(TestCase *testCase, char *execKey)
 {
 	if(!testCase) {
 		return -1;
@@ -738,7 +738,7 @@ RunTest(TestCase *testCase, const int execKey)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(TestCase *testItem, const int execKey) {
+ExecuteTest(TestCase *testItem, char *execKey) {
 	int retVal = -1;
 
 	if(execute_inproc) {
@@ -948,6 +948,10 @@ ParseOptions(int argc, char *argv[])
     	  }
 
     	  testInvocationCount = atoi(iterationsString);
+    	  if(testInvocationCount < 1) {
+    		  printf("Iteration value has to bigger than 0.\n");
+    		  exit(1);
+    	  }
       }
       else if(SDL_strcmp(arg, "--exec-key") == 0) {
     	  char *execKeyString = NULL;
@@ -959,7 +963,7 @@ ParseOptions(int argc, char *argv[])
     		  exit(1);
     	  }
 
-    	  userExecKey = atoi(execKeyString);
+    	  userExecKey = execKeyString;
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
@@ -1047,9 +1051,6 @@ main(int argc, char *argv[])
 {
 	ParseOptions(argc, argv);
 
-	CRC32_CTX crcContext;
-	utl_crc32Init(&crcContext);
-
 	// print: Testing against SDL version fuu (rev: bar) if verbose == true
 
 	char *testSuiteName = NULL;
@@ -1122,10 +1123,10 @@ main(int argc, char *argv[])
 
 		int currentIteration = testInvocationCount;
 		while(currentIteration > 0) {
-			if(userExecKey != 0) {
+			if(userExecKey != NULL) {
 				globalExecKey = userExecKey;
 			} else {
-				const int execKey = GenerateExecKey(crcContext, runSeed, testItem->suiteName,
+				char *execKey = GenerateExecKey(runSeed, testItem->suiteName,
 											  testItem->testName, currentIteration);
 				globalExecKey = execKey;
 			}
@@ -1142,6 +1143,9 @@ main(int argc, char *argv[])
 			TestEnded(testItem->testName, testItem->suiteName, retVal, time(0), testTotalRuntime);
 
 			currentIteration--;
+
+			SDL_free(globalExecKey);
+			globalExecKey = NULL;
 		}
 	}
 
@@ -1161,8 +1165,6 @@ main(int argc, char *argv[])
 
 	// Some SDL subsystem might be init'ed so shut them down
 	SDL_Quit();
-
-	utl_crc32Done(&crcContext);
 
 	return (totalTestFailureCount ? 1 : 0);
 }

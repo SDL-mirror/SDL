@@ -37,7 +37,7 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_InitTestEnvironment(const int execKey)
+_InitTestEnvironment(char *execKey)
 {
 	// The execKey gets corrupted while passing arguments
 	// hence the global variable to circumvent the problem

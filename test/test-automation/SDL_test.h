@@ -69,7 +69,7 @@ typedef struct TestCaseReference {
  *  Initialized the test environment such as asserts. Must be called at
  *  the beginning of every test case, before doing anything else.
  */
-void _InitTestEnvironment(const int execKey);
+void _InitTestEnvironment(char *execKey);
 
 /*!
  *  Deinitializes the test environment and

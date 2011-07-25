@@ -29,7 +29,7 @@
 /*!
  * Inits the fuzzer for a test
  */
-void InitFuzzer(const int execKey);
+void InitFuzzer(char *execKey);
 
 
 /*!
@@ -110,8 +110,9 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  * \param testName Test name
  * \param iteration Number of test iteration
  *
- * \return Generated execution key
+ * \return Generated execution key as blob of 16 bytes. It needs be deallocated.
+ * 			On error, returns NULL.
  */
-int GenerateExecKey(CRC32_CTX crcContext, char *runSeed, char *suiteName, char *testName, int interationNumber);
+char *GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
 
 #endif

@@ -5,16 +5,16 @@
 
 
 //! context for test-specific random number generator
-RND_CTX rndContext3;
+static RND_CTX rndContext;
 
-int
-GenerateExecKey(CRC32_CTX crcContext, char *runSeed, char *suiteName,
+char *
+GenerateExecKey(char *runSeed, char *suiteName,
 				char *testName, int iterationNumber)
 {
 	if(runSeed == NULL || suiteName == NULL ||
 	   testName == NULL || iterationNumber < 0) {
-		fprintf(stderr, "Incorrect parameter given to GenerateExecKey function\n");
-		return -1;
+		fprintf(stderr, "Error: Incorrect parameter given to GenerateExecKey function\n");
+		return NULL;
 	}
 
 	char iterationString[256];
@@ -30,33 +30,41 @@ GenerateExecKey(CRC32_CTX crcContext, char *runSeed, char *suiteName,
 
 	// size of the entire + 3 for slashes and + 1 for '\0'
 	const int entireString  = runSeedLength + suiteNameLength +
-							  testNameLength + iterationString + 3 + 1;
+							  testNameLength + iterationStringLength + 3 + 1;
 
-	int result = 0;
+	char *buffer = SDL_malloc(entireString);
+	if(!buffer) {
+		return NULL;
+	}
 
-	/* Let's take a hash from the strings separately because
-	 * it's really slow to calculate md5 or crc32 for a really long string
-	 * like 'runSeed/testSuiteName/testName/iteration'
-	 */
+	SDL_snprintf(buffer, entireString, "%s/%s/%s/%d", runSeed, suiteName,
+			testName, iterationNumber);
+
+	//printf("Debug: %s", buffer);
+
 	MD5_CTX md5Context;
 	utl_md5Init(&md5Context);
 
-	utl_md5Update(&md5Context, runSeed, runSeedLength);
-	utl_md5Update(&md5Context, suiteName, suiteNameLength);
-	utl_md5Update(&md5Context, testName, testNameLength);
-	utl_md5Update(&md5Context, iterationString, iterationStringLength);
-
+	utl_md5Update(&md5Context, buffer, entireString);
 	utl_md5Final(&md5Context);
 
-	utl_crc32Calc(&crcContext, md5Context.digest, sizeof(md5Context.digest), &result);
+	SDL_free(buffer);
 
-	return abs(result); // makes sure that the key is positive
+	const int keyLength = SDL_strlen(md5Context.digest);
+	char *key = SDL_malloc(keyLength);
+	SDL_snprintf(key, keyLength, "%s", md5Context.digest);
+
+	return key;
 }
 
 void
-InitFuzzer(const int execKey)
+InitFuzzer(char *execKey)
 {
-	utl_randomInit(&rndContext3, globalExecKey, globalExecKey / 0xfafafafa);
+	//int a = execKey[8,9,10,11];
+	int a = execKey[8] | execKey[9] | execKey[10] | execKey[11];
+	int b =  execKey[12] | execKey[13] | execKey[14] | execKey[15];
+
+	utl_randomInit(&rndContext, a, b);
 }
 
 void
@@ -68,13 +76,13 @@ DeinitFuzzer()
 int
 RandomInteger()
 {
-	return utl_randomInt(&rndContext3);
+	return utl_randomInt(&rndContext);
 }
 
 int
 RandomPositiveInteger()
 {
-	return abs(utl_randomInt(&rndContext3));
+	return abs(utl_randomInt(&rndContext));
 }
 
 int
@@ -84,7 +92,7 @@ RandomIntegerInRange(int min, int max)
 		return -1; // Doesn't really make sense to return -1 on error?
 	}
 
-	int number = utl_randomInt(&rndContext3);
+	int number = utl_randomInt(&rndContext);
 	number = abs(number);
 
 	return (number % ((max + 1) - min)) + min;
@@ -130,13 +138,12 @@ RandomAsciiStringWithMaximumLength(int maxSize)
 		return NULL;
 	}
 
-	const int size = abs(RandomInteger) % maxSize;
+	int size = abs(RandomInteger) % maxSize;
 	char *string = SDL_malloc(size * sizeof(size));
 
 	int counter = 0;
 	for( ; counter < size; ++counter) {
-		char character = (char) RandomIntegerInRange(1, 127);
-		string[counter] = character;
+		string[counter] = (char) RandomIntegerInRange(1, 127);
 	}
 
 	string[counter] = '\0';
