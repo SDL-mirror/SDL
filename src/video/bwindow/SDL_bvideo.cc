@@ -26,6 +26,7 @@
 extern "C" {
 #endif
 
+#include "SDL_bkeyboard.h"
 #include "SDL_bwindow.h"
 #include "SDL_bclipboard.h"
 #include "SDL_bvideo.h"
@@ -159,8 +160,13 @@ int BE_VideoInit(_THIS)
 		return -1;
 	}
 	
+	/* Initialize video modes */
 	BE_InitModes(_this);
 
+	/* Init the keymap */
+	BE_InitOSKeymap();
+	
+	
 #if SDL_VIDEO_OPENGL
         /* testgl application doesn't load library, just tries to load symbols */
         /* is it correct? if so we have to load library here */

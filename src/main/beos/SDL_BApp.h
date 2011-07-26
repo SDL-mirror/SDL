@@ -23,6 +23,9 @@
 
 #include <InterfaceKit.h>
 
+#include "../../video/bwindow/SDL_bkeyboard.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,6 +36,7 @@ extern "C" {
 
 /* Local includes */
 #include "../../events/SDL_events_c.h"
+#include "../../video/bwindow/SDL_bkeyboard.h"
 
 #ifdef __cplusplus
 }
@@ -252,7 +256,13 @@ private:
 		) {
 			return;
 		}
-		SDL_SendKeyboardKey(state, (SDL_Scancode)scancode);
+		
+		/* Make sure this isn't a repeated event (key pressed and held) */
+		if(state == SDL_PRESSED && BE_GetKeyState(scancode) == SDL_PRESSED) {
+			return;
+		}
+		BE_SetKeyState(scancode, state);
+		SDL_SendKeyboardKey(state, BE_GetScancodeFromBeKey(scancode));
 	}
 	
 	void _HandleMouseFocus(BMessage *msg) {
