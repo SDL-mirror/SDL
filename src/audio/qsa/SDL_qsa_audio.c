@@ -650,7 +650,7 @@ QSA_OpenDevice(_THIS, const char *devname, int iscapture)
     return 1;
 }
 
-int
+static int
 QSA_DetectDevices(int iscapture)
 {
     uint32_t it;
@@ -790,7 +790,7 @@ QSA_DetectDevices(int iscapture)
     }
 }
 
-const char *
+static const char *
 QSA_GetDeviceName(int index, int iscapture)
 {
     if (!iscapture) {
@@ -808,7 +808,7 @@ QSA_GetDeviceName(int index, int iscapture)
     }
 }
 
-void
+static void
 QSA_WaitDone(_THIS)
 {
     if (!this->hidden->iscapture) {
@@ -826,7 +826,7 @@ QSA_WaitDone(_THIS)
     }
 }
 
-void
+static void
 QSA_Deinitialize(void)
 {
     /* Clear devices array on shutdown */
