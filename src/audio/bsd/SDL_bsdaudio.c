@@ -49,12 +49,6 @@
 
 
 static void
-BSDAUDIO_Deinitialize(void)
-{
-}
-
-
-static void
 BSDAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
     SDL_EnumUnixAudioDevices(iscapture, 0, NULL, addfn);
@@ -361,7 +355,6 @@ BSDAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->WaitDevice = BSDAUDIO_WaitDevice;
     impl->GetDeviceBuf = BSDAUDIO_GetDeviceBuf;
     impl->CloseDevice = BSDAUDIO_CloseDevice;
-    impl->Deinitialize = BSDAUDIO_Deinitialize;
 
     return 1;   /* this audio target is available. */
 }

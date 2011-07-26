@@ -29,11 +29,6 @@
 
 #define DEBUG_COREAUDIO 0
 
-static void
-COREAUDIO_Deinitialize(void)
-{
-}
-
 /* The CoreAudio callback */
 static OSStatus
 outputCallback(void *inRefCon,
@@ -320,7 +315,6 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
     /* Set the function pointers */
     impl->OpenDevice = COREAUDIO_OpenDevice;
     impl->CloseDevice = COREAUDIO_CloseDevice;
-    impl->Deinitialize = COREAUDIO_Deinitialize;
     impl->ProvidesOwnCallbackThread = 1;
 
     /* added for iPhone */

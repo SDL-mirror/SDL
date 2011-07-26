@@ -47,11 +47,6 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_dspaudio.h"
 
-static void
-DSP_Deinitialize(void)
-{
-}
-
 
 static void
 DSP_DetectDevices(int iscapture)
@@ -308,7 +303,6 @@ DSP_Init(SDL_AudioDriverImpl * impl)
     impl->PlayDevice = DSP_PlayDevice;
     impl->GetDeviceBuf = DSP_GetDeviceBuf;
     impl->CloseDevice = DSP_CloseDevice;
-    impl->Deinitialize = DSP_Deinitialize;
 
     return 1;   /* this audio target is available. */
 }

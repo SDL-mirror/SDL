@@ -172,13 +172,6 @@ COREAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
     build_device_list(iscapture, addToDevList, addfn);
 }
 
-
-static void
-COREAUDIO_Deinitialize(void)
-{
-}
-
-
 /* The CoreAudio callback */
 static OSStatus
 outputCallback(void *inRefCon,
@@ -508,7 +501,6 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
     impl->DetectDevices = COREAUDIO_DetectDevices;
     impl->OpenDevice = COREAUDIO_OpenDevice;
     impl->CloseDevice = COREAUDIO_CloseDevice;
-    impl->Deinitialize = COREAUDIO_Deinitialize;
     impl->ProvidesOwnCallbackThread = 1;
 
     return 1;   /* this audio target is available. */
