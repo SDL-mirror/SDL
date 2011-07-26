@@ -38,9 +38,6 @@
 #include "../SDL_audio_c.h"
 #include "SDL_qsa_audio.h"
 
-/* The tag name used by QSA audio framework */
-#define DRIVER_NAME "qsa"
-
 /* default channel communication parameters */
 #define DEFAULT_CPARAMS_RATE   44100
 #define DEFAULT_CPARAMS_VOICES 1
@@ -863,7 +860,7 @@ QSA_Init(SDL_AudioDriverImpl * impl)
 }
 
 AudioBootStrap QSAAUDIO_bootstrap = {
-    DRIVER_NAME, "QNX QSA Audio", QSA_Init, 0
+    "qsa", "QNX QSA Audio", QSA_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

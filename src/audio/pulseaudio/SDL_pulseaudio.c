@@ -47,9 +47,6 @@
 #include "SDL_pulseaudio.h"
 #include "SDL_loadso.h"
 
-/* The tag name used by pulse audio */
-#define PULSEAUDIO_DRIVER_NAME         "pulseaudio"
-
 #if (PA_API_VERSION < 12)
 /** Return non-zero if the passed state is one of the connected states */
 static inline int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
@@ -502,7 +499,7 @@ PULSEAUDIO_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap PULSEAUDIO_bootstrap = {
-    PULSEAUDIO_DRIVER_NAME, "PulseAudio", PULSEAUDIO_Init, 0
+    "pulseaudio", "PulseAudio", PULSEAUDIO_Init, 0
 };
 
 #endif /* SDL_AUDIO_DRIVER_PULSEAUDIO */

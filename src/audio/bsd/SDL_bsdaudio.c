@@ -41,15 +41,6 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_bsdaudio.h"
 
-/* The tag name used by NetBSD/OpenBSD audio */
-#ifdef __NetBSD__
-#define BSD_AUDIO_DRIVER_NAME         "netbsd"
-#define BSD_AUDIO_DRIVER_DESC         "Native NetBSD audio"
-#else
-#define BSD_AUDIO_DRIVER_NAME         "openbsd"
-#define BSD_AUDIO_DRIVER_DESC         "Native OpenBSD audio"
-#endif
-
 /* Use timer for synchronization */
 /* #define USE_TIMER_SYNC */
 
@@ -377,7 +368,7 @@ BSDAUDIO_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap BSD_AUDIO_bootstrap = {
-    BSD_AUDIO_DRIVER_NAME, BSD_AUDIO_DRIVER_DESC, BSDAUDIO_Init, 0
+    "bsd", "BSD audio", BSDAUDIO_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -47,9 +47,6 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_dspaudio.h"
 
-/* The tag name used by DSP audio */
-#define DSP_DRIVER_NAME         "dsp"
-
 static void
 DSP_Deinitialize(void)
 {
@@ -318,7 +315,7 @@ DSP_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap DSP_bootstrap = {
-    DSP_DRIVER_NAME, "OSS /dev/dsp standard audio", DSP_Init, 0
+    "dsp", "OSS /dev/dsp standard audio", DSP_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

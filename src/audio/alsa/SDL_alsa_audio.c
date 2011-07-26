@@ -37,9 +37,6 @@
 #include "SDL_loadso.h"
 #endif
 
-/* The tag name used by ALSA audio */
-#define DRIVER_NAME         "alsa"
-
 static int (*ALSA_snd_pcm_open)
   (snd_pcm_t **, const char *, snd_pcm_stream_t, int);
 static int (*ALSA_snd_pcm_close) (snd_pcm_t * pcm);
@@ -684,7 +681,7 @@ ALSA_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap ALSA_bootstrap = {
-    DRIVER_NAME, "ALSA PCM audio", ALSA_Init, 0
+    "alsa", "ALSA PCM audio", ALSA_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

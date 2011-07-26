@@ -48,8 +48,6 @@
 typedef DFBResult DirectResult;
 #endif
 
-/* The tag name used by fusionsoundc audio */
-#define SDL_FS_DRIVER_NAME         "fusionsound"
 /* Buffers to use - more than 2 gives a lot of latency */
 #define FUSION_BUFFERS				(2)
 
@@ -344,7 +342,7 @@ SDL_FS_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap FUSIONSOUND_bootstrap = {
-    SDL_FS_DRIVER_NAME, "FusionSound", SDL_FS_Init, 0
+    "fusionsound", "FusionSound", SDL_FS_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */
