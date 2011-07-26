@@ -59,10 +59,11 @@ static SDL_VideoDevice *
 BE_CreateDevice(int devindex)
 {
     SDL_VideoDevice *device;
-    SDL_VideoData *data;
+    /*SDL_VideoData *data;*/
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+#if 0
     if (device) {
         data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
     } else {
@@ -75,7 +76,8 @@ BE_CreateDevice(int devindex)
         }
         return NULL;
     }
-    device->driverdata = data;
+#endif
+    device->driverdata = NULL; /*data;*/
 
 /* TODO: Figure out what sort of initialization needs to go here */
 

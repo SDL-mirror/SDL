@@ -25,6 +25,7 @@
 
 #include "../SDL_sysvideo.h"
 
+
 extern int BE_CreateWindow(_THIS, SDL_Window *window);
 extern int BE_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);
 extern void BE_SetWindowTitle(_THIS, SDL_Window * window);

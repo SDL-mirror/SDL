@@ -29,9 +29,6 @@ extern "C" {
 #include "../../main/beos/SDL_BeApp.h"
 #include "../SDL_sysvideo.h"
 
-typedef struct SDL_VideoData {
-	
-} SDL_VideoData;
 
 extern void BE_VideoQuit(_THIS);
 extern int BE_VideoInit(_THIS);

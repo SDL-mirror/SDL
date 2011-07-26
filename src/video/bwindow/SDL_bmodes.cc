@@ -32,6 +32,13 @@
 extern "C" {
 #endif
 
+/* This wrapper is here so that the driverdata can be freed */
+typedef struct SDL_DisplayModeData {
+	display_mode *bmode;
+};
+
+
+
 static inline SDL_BWin *_ToBeWin(SDL_Window *window) {
 	return ((SDL_BWin*)(window->driverdata));
 }
@@ -107,8 +114,9 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 	mode->w = bmode->virtual_width;
 	mode->h = bmode->virtual_height;
 	mode->refresh_rate = (int)get_refresh_rate(*bmode);
-	mode->driverdata = bmode;	/* This makes setting display
-									   modes easier */
+	SDL_DisplayModeData *data = (SDL_DisplayModeData*)SDL_calloc(1, sizeof(SDL_DisplayModeData));
+	data->bmode = bmode;
+	mode->driverdata = data;
 
 	/* Set the format */
 	int32 bpp = ColorSpaceToBitsPerPixel(bmode->space);
@@ -191,7 +199,7 @@ int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 	BScreen bscreen;
 	
 	/* Set the mode using the driver data */
-	display_mode *bmode = (display_mode*)mode->driverdata;
+	display_mode *bmode = ((SDL_DisplayModeData*)mode->driverdata)->bmode;
 	if(bscreen.SetMode(bmode) == B_OK) {
 		return 0;	/* No error */
 	}
