@@ -438,10 +438,9 @@ private:
     			_MouseFocusEvent(true);
     		}
     		BMessage msg(BAPP_MOUSE_MOVED);
-    		msg.AddInt32("dx", where.x - x);
-    		msg.AddInt32("dy", where.y - y);
-    		x = (int) where.x;
-    		y = (int) where.y;    		
+    		msg.AddInt32("x", (int)where.x);
+    		msg.AddInt32("y", (int)where.y);
+ 		
     		_PostWindowEvent(msg);
     	}
     }

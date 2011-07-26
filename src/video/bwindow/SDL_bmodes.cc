@@ -151,7 +151,7 @@ int BE_InitModes(_THIS) {
 }
 
 int BE_QuitModes(_THIS) {
-	printf(__FILE__": %d; Begin quit\n", __LINE__);
+/*	printf(__FILE__": %d; Begin quit\n", __LINE__);*/
 	/* Restore the previous video mode */
 	BScreen screen;
 	display_mode *savedMode = _GetBeApp()->GetPrevMode();

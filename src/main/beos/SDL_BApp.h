@@ -202,16 +202,16 @@ private:
 	void _HandleMouseMove(BMessage *msg) {
 		SDL_Window *win;
 		int32 winID;
-		int32 dx, dy;
+		int32 x = 0, y = 0;
 		if(	
 			!_GetWinID(msg, &winID) ||
-			msg->FindInt32("dx", &dx) != B_OK || /* x movement */
-			msg->FindInt32("dy", &dy) != B_OK    /* y movement */
+			msg->FindInt32("x", &x) != B_OK || /* x movement */
+			msg->FindInt32("y", &y) != B_OK    /* y movement */
 		) {
 			return;
 		}
 		win = _GetSDLWindow(winID);
-		SDL_SendMouseMotion(win, 0, dx, dy);
+		SDL_SendMouseMotion(win, 0, x, y);
 	}
 	
 	void _HandleMouseButton(BMessage *msg) {
