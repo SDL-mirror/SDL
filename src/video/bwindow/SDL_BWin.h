@@ -76,9 +76,14 @@ class SDL_BWin:public BDirectWindow
 
         /* Handle framebuffer stuff */
         _connected = _connection_disabled = false;
+        _buffer_created = _buffer_dirty = false;
         _trash__window_buffer = false;
         _buffer_locker = new BLocker();
         _window_buffer = NULL;
+        
+        _draw_thread_id = spawn_thread(BE_DrawThread, "drawing_thread",
+        					B_NORMAL_PRIORITY, (void*) this);
+        resume_thread(_draw_thread_id);
 //        LockBuffer();	/* Unlocked by buffer initialization */
     }
 
@@ -86,6 +91,7 @@ class SDL_BWin:public BDirectWindow
     {
         Lock();
         _connection_disabled = true;
+        int32 result;
         
 #if SDL_VIDEO_OPENGL
         if (_SDL_GLView) {
@@ -102,6 +108,7 @@ class SDL_BWin:public BDirectWindow
         
         /* Clean up framebuffer stuff */
         _buffer_locker->Lock();
+        wait_for_thread(_draw_thread_id, &result);
         free(_clips);
         delete _buffer_locker;
     }
@@ -382,8 +389,6 @@ class SDL_BWin:public BDirectWindow
 	/* Accessor methods */
 	bool IsShown() { return _shown; }
 	int32 GetID() { return _id; }
-	void LockBuffer() {	_buffer_locker->Lock(); }
-	void UnlockBuffer() { _buffer_locker->Unlock(); }
 	uint32 GetRowBytes() { return _row_bytes; }
 	int32 GetFbX() { return _bounds.left; }
 	int32 GetFbY() { return _bounds.top; }
@@ -395,12 +400,18 @@ class SDL_BWin:public BDirectWindow
 	int32 GetNumClips() { return _num_clips; }
 	uint8* GetBufferPx() { return _bits; }
 	int32 GetBytesPerPx() { return _bytes_per_px; }
-	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
 	uint8* GetWindowFramebuffer() { return _window_buffer; }
 	bool CanTrashWindowBuffer() { return _trash__window_buffer; }
+	bool BufferExists() { return _buffer_created; }
+	bool BufferIsDirty() { return _buffer_dirty; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
+	bool SetBufferExists(bool bufferExists) { _buffer_created = bufferExists; }
+	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
+	void LockBuffer() {	_buffer_locker->Lock(); }
+	void UnlockBuffer() { _buffer_locker->Unlock(); }
+	void SetBufferDirty(bool bufferDirty) { _buffer_dirty = bufferDirty; }
 
 
 
@@ -416,10 +427,6 @@ class SDL_BWin:public BDirectWindow
     {
         return (_the_view);
     }
-
-	
-	
-	
 	
 	
 	
@@ -584,7 +591,10 @@ private:
     BRect *_prev_frame;	/* Previous position and size of the window */
     
     /* Framebuffer members */
-    bool			_connected, _connection_disabled;
+    bool			_connected,
+    				_connection_disabled,
+    				_buffer_created,
+    				_buffer_dirty;
     uint8		   *_bits;
     uint32			_row_bytes;
     clipping_rect	_bounds;
@@ -594,6 +604,7 @@ private:
     int32			_bytes_per_px;
     uint8		   *_window_buffer;	/* A copy of the window buffer */
     bool			_trash__window_buffer;
+    thread_id		_draw_thread_id;
 };
 
 #endif

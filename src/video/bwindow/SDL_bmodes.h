@@ -42,6 +42,7 @@ extern int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 extern int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
                                        SDL_Rect * rects, int numrects);
 extern void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window);
+extern int32 BE_DrawThread(void *data);
 
 
 #ifdef __cplusplus

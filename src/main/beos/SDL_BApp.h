@@ -37,6 +37,7 @@ extern "C" {
 /* Local includes */
 #include "../../events/SDL_events_c.h"
 #include "../../video/bwindow/SDL_bkeyboard.h"
+#include "../../video/bwindow/SDL_bmodes.h"
 
 #ifdef __cplusplus
 }
@@ -167,7 +168,7 @@ public:
     int32 GetID(SDL_Window *win) {
     	int32 i;
     	for(i = 0; i < _GetNumWindowSlots(); ++i) {
-    		if( _GetSDLWindow(i) == NULL ) {
+    		if( GetSDLWindow(i) == NULL ) {
     			_SetSDLWindow(win, i);
     			return i;
     		}
@@ -189,6 +190,11 @@ public:
        there another way to do this? */
     void ClearID(SDL_BWin *bwin); /* Defined in SDL_BeApp.cc */
     
+    
+	SDL_Window *GetSDLWindow(int32 winID) {
+		return window_map[winID];
+	}
+    
 private:
 	/* Event management */
 	void _HandleBasicWindowEvent(BMessage *msg, int32 sdlEventType) {
@@ -199,7 +205,7 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, sdlEventType, 0, 0);
 	}
 	
@@ -214,8 +220,11 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendMouseMotion(win, 0, x, y);
+		
+		/* FIXME: Attempt at fixing rendering problems */
+		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
 	}
 	
 	void _HandleMouseButton(BMessage *msg) {
@@ -229,7 +238,7 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendMouseButton(win, state, button);
 	}
 	
@@ -244,7 +253,7 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendMouseWheel(win, xTicks, yTicks);
 	}
 	
@@ -275,7 +284,7 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		if(bSetFocus) {
 			SDL_SetMouseFocus(win);
 		} else if(SDL_GetMouseFocus() == win) {
@@ -294,7 +303,7 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		if(bSetFocus) {
 			SDL_SetKeyboardFocus(win);
 		} else if(SDL_GetKeyboardFocus() == win) {
@@ -315,8 +324,11 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_MOVED, xPos, yPos);
+		
+		/* FIXME: Attempt at fixing rendering problems */
+		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
 	}
 	
 	void _HandleWindowResized(BMessage *msg) {
@@ -331,8 +343,11 @@ private:
 		) {
 			return;
 		}
-		win = _GetSDLWindow(winID);
+		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_RESIZED, w, h);
+		
+		/* FIXME: Attempt at fixing rendering problems */
+		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
 	}
 
 	bool _GetWinID(BMessage *msg, int32 *winID) {
@@ -342,10 +357,6 @@ private:
 
 
 	/* Vector imitators */
-	SDL_Window *_GetSDLWindow(int32 winID) {
-		return window_map[winID];
-	}
-	
 	void _SetSDLWindow(SDL_Window *win, int32 winID) {
 		window_map[winID] = win;
 	}
