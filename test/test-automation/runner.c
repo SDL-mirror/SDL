@@ -74,6 +74,8 @@ static int xsl_enabled = 0;
 static int universal_timeout_enabled = 0;
 //! Flag for enabling verbose logging
 static int enable_verbose_logger = 0;
+//! Flag for using user supplied run seed
+static int userRunSeed = 0;
 
 
 //!< Size of the test and suite name buffers
@@ -94,15 +96,20 @@ int universal_timeout = -1;
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
 
-char *globalExecKey = NULL;
-char *runSeed = "seed";
+//! Fuzzer seed for the harness
+char *runSeed = NULL;
 
+
+//! Variable is used to pass the generated execution key to a test
+char *globalExecKey = NULL;
+
+//! Execution key that user supplied via command options
 char *userExecKey = NULL;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
 
-// \todo move this upper!! (and add comments)
+// \todo add comments
 int totalTestFailureCount = 0, totalTestPassCount = 0, totalTestSkipCount = 0;
 int testFailureCount = 0, testPassCount = 0, testSkipCount = 0;
 
@@ -805,6 +812,40 @@ HandleChildProcessReturnValue(int stat_lock)
 
 
 /*!
+ * Generates a random run seed for the harness.
+ *
+ * \param length The length of the generated seed
+ *
+ * \returns The generated seed
+ */
+char *
+GenerateRunSeed(const int length)
+{
+	if(length <= 0) {
+		fprintf(stderr, "Error: lenght of harness seed can't be less than zero\n");
+		return NULL;
+	}
+
+	char *seed = SDL_malloc(length * sizeof(8));
+	if(seed == NULL) {
+		fprintf(stderr, "Error: malloc for run seed failed\n");
+		return NULL;
+	}
+
+	RND_CTX randomContext;
+
+	utl_randomInitTime(&randomContext);
+
+	int counter = 0;
+	for( ; counter < length; ++counter) {
+		int number = abs(utl_random(&randomContext));
+		seed[counter] = (char) (number % (127-34)) + 34;
+	}
+
+	return seed;
+}
+
+/*!
  * Sets up the logger.
  *
  * \return Logger data structure (that needs be deallocated)
@@ -943,6 +984,8 @@ ParseOptions(int argc, char *argv[])
     	  universal_timeout = atoi(timeoutString);
       }
       else if(SDL_strcmp(arg, "--seed") == 0) {
+    	  userRunSeed = 1;
+
     	  if( (i + 1) < argc)  {
     		  runSeed = argv[++i];
     	  }  else {
@@ -1076,6 +1119,14 @@ main(int argc, char *argv[])
 #else
 	char *extension = "dylib";
 #endif
+
+	if(userRunSeed == 0) {
+		runSeed = GenerateRunSeed(16);
+		if(runSeed == NULL) {
+			fprintf(stderr, "Error: Generating harness seed failed\n");
+			return 1;
+		}
+	}
 
 	LoggerData *loggerData = SetUpLogger();
 

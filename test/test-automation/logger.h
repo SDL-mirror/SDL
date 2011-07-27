@@ -40,7 +40,7 @@ typedef struct LoggerData {
  * logging interface. See the headers of implementations (plain_logger.h or
  * xml_logger.h) for more information.
  */
-typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], char *runSeed, time_t eventTime, void *data);
+typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], char *runSeed, time_t eventTime, LoggerData *data);
 typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
                            int testSkippedCount, time_t endTime, double totalRuntime);
 
