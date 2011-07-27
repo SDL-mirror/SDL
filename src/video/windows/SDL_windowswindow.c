@@ -640,9 +640,11 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
             /* Restore any original event handler... */
             if (data->wndproc != NULL) {
 #ifdef GWLP_WNDPROC
-                SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR) data->wndproc);
+                SetWindowLongPtr(data->hwnd, GWLP_WNDPROC,
+                                 (LONG_PTR) data->wndproc);
 #else
-                SetWindowLong(hwnd, GWL_WNDPROC, (LONG_PTR) data->wndproc);
+                SetWindowLong(data->hwnd, GWL_WNDPROC,
+                              (LONG_PTR) data->wndproc);
 #endif
             }
         }
