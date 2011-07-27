@@ -28,15 +28,18 @@
 
 #include "fuzzer/fuzzer.h"
 
+/*
 extern int _testReturnValue;
 extern int _testAssertsFailed;
 extern int _testAssertsPassed;
+*/
 
-extern AssertFp testAssert;
-
-// \todo Should these be consts?
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
+
+//! Definitions of assert results
+#define ASSERT_PASS 1
+#define ASSERT_FAILURE 0
 
 //! Definition of all the possible test results
 #define TEST_RESULT_PASS			0

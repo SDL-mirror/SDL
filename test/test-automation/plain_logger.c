@@ -2,11 +2,16 @@
 #ifndef _PLAIN_LOGGER
 #define _PLAIN_LOGGER
 
+#include "Logger.h"
 #include "logger_helpers.h"
 #include "plain_logger.h"
 #include "SDL_test.h"
 
+/*! Current indentationt level */
 static int indentLevel;
+
+/*! Logging level of the logger */
+static Level level = STANDARD;
 
 /*!
  * Prints out the output of the logger
@@ -38,7 +43,7 @@ Output(const int currentIndentLevel, const char *message, ...)
 
 void
 PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-			    time_t eventTime, void *data)
+			    time_t eventTime, LoggerData *data)
 {
 	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
 	Output(indentLevel, "Fuzzer seed is %s", runSeed);
@@ -49,6 +54,8 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 		char *parameter = runnerParameters[counter];
 		Output(indentLevel, "\t%s", parameter);
 	}
+
+	level = data->level;
 
 	Output(indentLevel, "");
 }
@@ -117,6 +124,11 @@ void
 PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 		time_t eventTime)
 {
+	// Log passed asserts only on VERBOSE level
+	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+		return ;
+	}
+
 	const char *result = (assertResult) ? "passed" : "failed";
 	Output(indentLevel, "%s: %s - %s", assertName, result, assertMessage);
 }
@@ -125,6 +137,11 @@ void
 PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
 		int actualValue, int expectedValue, time_t eventTime)
 {
+	// Log passed asserts only on VERBOSE level
+	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+		return ;
+	}
+
 	const char *result = (assertResult) ? "passed" : "failed";
 	Output(indentLevel, "%s: %s (expected %d, actualValue %d) - %s",
 			assertName, result, expectedValue, actualValue, assertMessage);

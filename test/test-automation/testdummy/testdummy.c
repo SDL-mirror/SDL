@@ -107,7 +107,7 @@ dummycase1(void *arg)
 		Log(0, "%d", random);
 	}
 
-	Log(0, "Random: %s", RandomAsciiString());
+	//Log(0, "Random: %s", RandomAsciiString());
 }
 
 void

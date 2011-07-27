@@ -24,6 +24,7 @@
 
 #include <SDL/SDL.h>
 
+#include "Logger.h"
 #include "xml.h"
 #include "logger_helpers.h"
 #include "SDL_test.h"
@@ -65,6 +66,9 @@ const char *logElementName = "log";
 
 /*! Current indentationt level */
 static int indentLevel;
+
+/*! Logging level of the logger */
+static Level level = STANDARD;
 
 //! Constants for XMLOuputters EOL parameter
 #define YES 1
@@ -111,9 +115,10 @@ XMLOutputter(const int currentIndentLevel,
 
 void
 XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-			 time_t eventTime, void *data)
+			 time_t eventTime, LoggerData *data)
 {
-	char *xslStylesheet = (char *)data;
+	char *xslStylesheet = (char *)data->custom;
+	level = data->level;
 
 	char *output = XMLOpenDocument(documentRoot, xslStylesheet);
 	XMLOutputter(indentLevel++, YES, output);
@@ -241,6 +246,7 @@ XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
 void
 XMLSuiteStarted(const char *suiteName, time_t eventTime)
 {
+	// log suite name
 	char *output = XMLOpenElement(suiteElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
@@ -250,12 +256,14 @@ XMLSuiteStarted(const char *suiteName, time_t eventTime)
 	output = XMLAddContent(suiteName);
 	XMLOutputter(indentLevel, NO, output);
 
+	// log test name
 	output = XMLCloseElement(nameElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
 	output = XMLOpenElement(startTimeElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
+	// log beginning time
 	output = XMLAddContent(TimestampToString(eventTime));
 	XMLOutputter(indentLevel, NO, output);
 
@@ -329,8 +337,7 @@ XMLTestStarted(const char *testName, const char *suiteName,
 	char * output = XMLOpenElement(testElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
-	//Attribute attribute = {"test", "value"};
-	//XMLOpenElementWithAttribute("name", &attribute);
+	// log test name
 	output = XMLOpenElement(nameElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -340,6 +347,7 @@ XMLTestStarted(const char *testName, const char *suiteName,
 	output = XMLCloseElement(nameElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
+	// log test description
 	output = XMLOpenElement(descriptionElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -349,7 +357,7 @@ XMLTestStarted(const char *testName, const char *suiteName,
 	output = XMLCloseElement(descriptionElementName);
 	XMLOutputter(--indentLevel, YES, output);
 
-	// log exec key
+	// log execution key
 	output = XMLOpenElement(execKeyElementName);
 	XMLOutputter(indentLevel++, NO, output);
 
@@ -457,6 +465,11 @@ void
 XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
 		  time_t eventTime)
 {
+	// Log passed asserts only on VERBOSE level
+	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+		return ;
+	}
+
 	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
 
@@ -509,6 +522,11 @@ void
 XMLAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
 		int actualValue, int excpected, time_t eventTime)
 {
+	// Log passed asserts only on VERBOSE level
+	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+		return ;
+	}
+
 	char *output = XMLOpenElement(assertElementName);
 	XMLOutputter(indentLevel++, YES, output);
 

@@ -10,10 +10,10 @@
  * \param runnerParameters What parameters were given to the runner
  * \param runSeed Fuzzer seed of the harness
  * \param eventTime When the execution started
- * \param data Any additional data logger needs
+ * \param loggerData LoggerData structure which contains data for the logger
  */
 void XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-					time_t eventTime, void *data);
+					time_t eventTime, LoggerData *data);
 
 /*!
  * Prints out information about ending the test run in XML

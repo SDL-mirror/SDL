@@ -72,6 +72,9 @@ static int custom_xsl_enabled = 0;
 static int xsl_enabled = 0;
 //! Flag for enabling universal timeout for tests
 static int universal_timeout_enabled = 0;
+//! Flag for enabling verbose logging
+static int enable_verbose_logger = 0;
+
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
@@ -804,12 +807,19 @@ HandleChildProcessReturnValue(int stat_lock)
 /*!
  * Sets up the logger.
  *
- * \return Some special data that will be passed to StartRun() logger call
+ * \return Logger data structure (that needs be deallocated)
  */
 void *
 SetUpLogger()
 {
-	void *loggerData = NULL;
+	LoggerData *loggerData = SDL_malloc(sizeof(loggerData));
+	if(loggerData == NULL) {
+		fprintf(stderr, "Error: Logger data structure not allocated.");
+		return NULL;
+	}
+
+	loggerData->level = (enable_verbose_logger ? VERBOSE : STANDARD);
+
 	if(xml_enabled) {
 		RunStarted = XMLRunStarted;
 		RunEnded = XMLRunEnded;
@@ -835,7 +845,7 @@ SetUpLogger()
 			sheet = xsl_stylesheet_name;
 		}
 
-		loggerData = sheet;
+		loggerData->custom = sheet;
 	} else {
 		RunStarted = PlainRunStarted;
 		RunEnded = PlainRunEnded;
@@ -862,14 +872,15 @@ SetUpLogger()
  */
 void
 PrintUsage() {
-	  printf("Usage: ./runner [--in-proc] [--suite SUITE] [--test TEST]\n");
-	  printf("                [--name-contains SUBSTR] [--show-tests]\n");
-	  printf("                [--xml] [--xsl [STYLESHEET]] [--timeout VALUE]\n");
-	  printf("                [--exec-key KEY] [--iterations VALUE]\n");
-	  printf("                [--seed VALUE] [--version] [--help]\n");
+	  printf("Usage: ./runner [--in-proc] [--show-tests] [--verbose] [--xml]\n");
+	  printf("                [--xsl [STYLESHEET]] [--seed VALUE] [--iterations VALUE]\n");
+	  printf("                [--exec-key KEY] [--timeout VALUE] [--test TEST]\n");
+	  printf("                [--name-contains SUBSTR] [--suite SUITE]\n");
+	  printf("                [--version] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
+	  printf(" -v  --verbose                Enables verbose logging\n");
 	  printf("     --xml                    Enables XML logger\n");
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");
@@ -887,6 +898,7 @@ PrintUsage() {
 	  printf("                              substring in test name\n");
 	  printf(" -s  --suite SUITE            Executes only the given test suite\n");
 
+	  printf("     --version                Print version information\n");
 	  printf(" -h  --help                   Print this help\n");
 }
 
@@ -912,6 +924,9 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--xml") == 0) {
     	  xml_enabled = 1;
+      }
+      else if(SDL_strcmp(arg, "--verbose") == 0 || SDL_strcmp(arg, "-v") == 0) {
+    	  enable_verbose_logger = 1;
       }
       else if(SDL_strcmp(arg, "--timeout") == 0 || SDL_strcmp(arg, "-tm") == 0) {
     	  universal_timeout_enabled = 1;
@@ -1062,7 +1077,7 @@ main(int argc, char *argv[])
 	char *extension = "dylib";
 #endif
 
-	void *loggerData = SetUpLogger();
+	LoggerData *loggerData = SetUpLogger();
 
 	const Uint32 startTicks = SDL_GetTicks();
 
@@ -1082,6 +1097,9 @@ main(int argc, char *argv[])
 	}
 
 	RunStarted(argc, argv, runSeed, time(0), loggerData);
+
+	// logger data is no longer used
+	SDL_free(loggerData);
 
 	if(execute_inproc && universal_timeout_enabled) {
 		Log(time(0), "Test timeout is not supported with in-proc execution.");

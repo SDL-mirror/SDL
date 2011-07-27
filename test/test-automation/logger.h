@@ -23,6 +23,18 @@
 
 #include <time.h>
 
+/* Logging levels */
+typedef enum Level {
+	STANDARD = 1,
+	VERBOSE
+} Level;
+
+
+typedef struct LoggerData {
+	Level level; //!< Logging level of the logger (such as VERBOSE)
+	void  *custom; //!< Some custom data that a logger needs
+} LoggerData;
+
 /*!
  * Typedefs for function pointers that implement the  generic
  * logging interface. See the headers of implementations (plain_logger.h or
