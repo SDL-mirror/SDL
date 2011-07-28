@@ -112,10 +112,10 @@ char *runSeed = NULL;
 
 
 //! Variable is used to pass the generated execution key to a test
-char *globalExecKey = NULL;
+int globalExecKey = 0;
 
 //! Execution key that user supplied via command options
-char *userExecKey = NULL;
+int userExecKey = 0;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
@@ -716,7 +716,7 @@ CheckTestRequirements(TestCase *testCase)
  * \param test result
  */
 int
-RunTest(TestCase *testCase, char *execKey)
+RunTest(TestCase *testCase, int execKey)
 {
 	if(!testCase) {
 		return -1;
@@ -765,7 +765,7 @@ RunTest(TestCase *testCase, char *execKey)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(TestCase *testItem, char *execKey) {
+ExecuteTest(TestCase *testItem, int execKey) {
 	int retVal = -1;
 
 	if(execute_inproc) {
@@ -1121,7 +1121,9 @@ ParseOptions(int argc, char *argv[])
     		  exit(1);
     	  }
 
-    	  userExecKey = execKeyString;
+    	  // \todo User given string should be handled as a string
+    	  // representing a hex digit
+    	  userExecKey = atoi(execKeyString);
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
@@ -1341,7 +1343,7 @@ main(int argc, char *argv[])
 	}
 
 	UnloadTestCases(testCases);
-	UnloadTestSuites(suites); // crashes here with -ts case1
+	UnloadTestSuites(suites);
 
 	const Uint32 endTicks = SDL_GetTicks();
 	const double totalRunTime = (endTicks - startTicks) / 1000.0f;

@@ -59,7 +59,7 @@ void XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
  * \param startTime When the test started to execute
  */
 void XMLTestStarted(const char *testName, const char *suiteName,
-					const char *testDescription, char *execKey, time_t startTime);
+					const char *testDescription, int execKey, time_t startTime);
 
 /*!
  * Prints information about the test test that was just executed in XML

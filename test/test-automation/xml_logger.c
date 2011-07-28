@@ -351,7 +351,7 @@ XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 
 void
 XMLTestStarted(const char *testName, const char *suiteName,
-			  const char *testDescription, char *execKey, time_t startTime)
+			  const char *testDescription, int execKey, time_t startTime)
 {
 	char * output = XMLOpenElement(testElementName);
 	XMLOutputter(indentLevel++, YES, output);

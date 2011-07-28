@@ -7,14 +7,14 @@
 //! context for test-specific random number generator
 static RND_CTX rndContext;
 
-char *
+int
 GenerateExecKey(char *runSeed, char *suiteName,
 				char *testName, int iterationNumber)
 {
 	if(runSeed == NULL || suiteName == NULL ||
 	   testName == NULL || iterationNumber < 0) {
 		fprintf(stderr, "Error: Incorrect parameter given to GenerateExecKey function\n");
-		return NULL;
+		return -1;
 	}
 
 	char iterationString[256];
@@ -34,13 +34,11 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	char *buffer = SDL_malloc(entireString);
 	if(!buffer) {
-		return NULL;
+		return -1;
 	}
 
 	SDL_snprintf(buffer, entireString, "%s/%s/%s/%d", runSeed, suiteName,
 			testName, iterationNumber);
-
-	//printf("Debug: %s", buffer);
 
 	MD5_CTX md5Context;
 	utl_md5Init(&md5Context);
@@ -50,21 +48,20 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	SDL_free(buffer);
 
-	const int keyLength = SDL_strlen(md5Context.digest);
-	char *key = SDL_malloc(keyLength);
-	SDL_snprintf(key, keyLength, "%s", md5Context.digest);
+	char *execKey = md5Context.digest;
 
-	return key;
+	int key = execKey[4] << 24 |
+			  execKey[9] << 16 |
+			  execKey[13] << 8 |
+			  execKey[3] << 0;
+
+	return abs(key);
 }
 
 void
-InitFuzzer(char *execKey)
+InitFuzzer(int execKey)
 {
-	//int a = execKey[8,9,10,11];
-	int a = execKey[8] | execKey[9] | execKey[10] | execKey[11];
-	int b =  execKey[12] | execKey[13] | execKey[14] | execKey[15];
-
-	utl_randomInit(&rndContext, a, b);
+	utl_randomInit(&rndContext, execKey, execKey / 0xfafafafa);
 }
 
 void

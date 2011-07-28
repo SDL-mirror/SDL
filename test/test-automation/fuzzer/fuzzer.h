@@ -29,7 +29,7 @@
 /*!
  * Inits the fuzzer for a test
  */
-void InitFuzzer(char *execKey);
+void InitFuzzer(int execKey);
 
 
 /*!
@@ -113,6 +113,6 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  * \return Generated execution key as blob of 16 bytes. It needs be deallocated.
  * 			On error, returns NULL.
  */
-char *GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
+int GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
 
 #endif
