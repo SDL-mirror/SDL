@@ -77,6 +77,9 @@ static Level level = STANDARD;
 /*! Controls printing the indentation in relation to line breaks */
 static int prevEOL = YES;
 
+//! Handle to log file
+static FILE *logFile = NULL;
+
 /*
  * Prints out the given xml element etc.
  *
@@ -92,22 +95,22 @@ XMLOutputter(const int currentIndentLevel,
 			 int EOL, const char *message)
 {
 	if(ValidateString(message)) {
-		int ident = 0;
-		for( ; ident < currentIndentLevel && prevEOL; ++ident) {
-			fprintf(stdout, "  "); // \todo make configurable?
+		int indent = 0;
+		for( ; indent < currentIndentLevel && prevEOL; ++indent) {
+			fprintf(logFile, "  "); // \todo make configurable?
 		}
 
 		prevEOL = EOL;
 
 		if(EOL) {
-			fprintf(stdout, "%s\n", message);
+			fprintf(logFile, "%s\n", message);
 		} else {
-			fprintf(stdout, "%s", message);
+			fprintf(logFile, "%s", message);
 		}
 
-		fflush(stdout);
+		fflush(logFile);
 	} else {
-		fprintf(stdout, "Error: Tried to output invalid string!");
+		fprintf(logFile, "Error: Tried to output invalid string!");
 	}
 
 	SDL_free((char *)message);
@@ -117,8 +120,21 @@ void
 XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 			 time_t eventTime, LoggerData *data)
 {
+	// Set up the logging destination
+	if(data->stdoutEnabled) {
+		logFile = stdout;
+	} else {
+		logFile = fopen(data->filename, "w");
+		if(logFile == NULL) {
+			fprintf(stderr, "Log file %s couldn't opened\n", data->filename);
+			exit(3);
+		}
+	}
+
+	// Set up the style sheet
 	char *xslStylesheet = (char *)data->custom;
 	level = data->level;
+	//printf("Debug: %d == %d\n", level, data->level);
 
 	char *output = XMLOpenDocument(documentRoot, xslStylesheet);
 	XMLOutputter(indentLevel++, YES, output);

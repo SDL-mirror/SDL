@@ -2,6 +2,8 @@
 #ifndef _PLAIN_LOGGER
 #define _PLAIN_LOGGER
 
+#include "stdio.h"
+
 #include "Logger.h"
 #include "logger_helpers.h"
 #include "plain_logger.h"
@@ -13,6 +15,9 @@ static int indentLevel;
 /*! Logging level of the logger */
 static Level level = STANDARD;
 
+//! Handle to log file
+static FILE *logFile;
+
 /*!
  * Prints out the output of the logger
  *
@@ -22,9 +27,9 @@ static Level level = STANDARD;
 int
 Output(const int currentIndentLevel, const char *message, ...)
 {
-	int ident = 0;
-	for( ; ident < currentIndentLevel; ++ident) {
-		fprintf(stdout, "  "); // \todo make configurable?
+	int indent = 0;
+	for( ; indent < currentIndentLevel; ++indent) {
+		fprintf(logFile, "  "); // \todo make configurable?
 	}
 
     char buffer[1024];
@@ -37,16 +42,30 @@ Output(const int currentIndentLevel, const char *message, ...)
 
 	va_end(list);
 
-	fprintf(stdout, "%s\n", buffer);
-	fflush(stdout);
+	fprintf(logFile, "%s\n", buffer);
+	fflush(logFile);
 }
 
 void
 PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 			    time_t eventTime, LoggerData *data)
 {
+	// Set up the logging destination
+	if(data->stdoutEnabled) {
+		logFile = stdout;
+	} else {
+		logFile = fopen(data->filename, "w");
+		if(logFile == NULL) {
+			fprintf(stderr, "Log file %s couldn't opened\n", data->filename);
+			exit(3);
+		}
+	}
+
+	level = data->level;
+	//printf("Debug: %d == %d\n", level, data->level);
+
 	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
-	Output(indentLevel, "Fuzzer seed is %s", runSeed);
+	Output(indentLevel, "Fuzzer seed is: %s", runSeed);
 	Output(indentLevel, "Runner parameters: ");
 
 	int counter = 0;
@@ -54,8 +73,6 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 		char *parameter = runnerParameters[counter];
 		Output(indentLevel, "\t%s", parameter);
 	}
-
-	level = data->level;
 
 	Output(indentLevel, "");
 }

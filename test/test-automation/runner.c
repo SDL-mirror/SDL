@@ -27,6 +27,7 @@
 #include <dirent.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 
 #include "fuzzer/fuzzer.h"
 
@@ -80,8 +81,10 @@ static int userRunSeed = 0;
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
+
 //!< Name of the selected test
 char selected_test_name[NAME_BUFFER_SIZE];
+
 //!< Name of the selected suite
 char selected_suite_name[NAME_BUFFER_SIZE];
 
@@ -96,6 +99,13 @@ int universal_timeout = -1;
 //! Default directory of the test suites
 #define DEFAULT_TEST_DIRECTORY "tests/"
 
+//! Default directory for placing log files
+#define DEFAULT_LOG_DIRECTORY "logs"
+
+//! Default directory of the test suites
+#define DEFAULT_LOG_FILENAME "runner"
+
+
 //! Fuzzer seed for the harness
 char *runSeed = NULL;
 
@@ -108,6 +118,16 @@ char *userExecKey = NULL;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
+
+//! Whether or not logger should log to stdout instead of file
+static int log_stdout_enabled = 0;
+
+
+//! Stores the basename for log files
+char log_basename[NAME_BUFFER_SIZE];
+
+//! Stores directory name for placing the logs
+char log_directory[NAME_BUFFER_SIZE];
 
 // \todo add comments
 int totalTestFailureCount = 0, totalTestPassCount = 0, totalTestSkipCount = 0;
@@ -822,7 +842,7 @@ char *
 GenerateRunSeed(const int length)
 {
 	if(length <= 0) {
-		fprintf(stderr, "Error: lenght of harness seed can't be less than zero\n");
+		fprintf(stderr, "Error: length of the harness seed can't be less than zero\n");
 		return NULL;
 	}
 
@@ -839,7 +859,7 @@ GenerateRunSeed(const int length)
 	int counter = 0;
 	for( ; counter < length; ++counter) {
 		int number = abs(utl_random(&randomContext));
-		seed[counter] = (char) (number % (127-34)) + 34;
+		seed[counter] = (char) (number % (127 - 34)) + 34;
 	}
 
 	return seed;
@@ -860,6 +880,38 @@ SetUpLogger()
 	}
 
 	loggerData->level = (enable_verbose_logger ? VERBOSE : STANDARD);
+
+	if(log_stdout_enabled) {
+		loggerData->stdoutEnabled = SDL_TRUE;
+		loggerData->filename = NULL;
+	} else {
+		const char *extension = (xml_enabled ? "xml": "log");
+
+		/* Combine and create directory for log file */
+		// log_directory + log_basename + seed + . + type
+		const int directoryLength = SDL_strlen(log_directory);
+		const int basenameLength = SDL_strlen(log_basename);
+		const int seedLength = SDL_strlen(runSeed);
+		const int extensionLength = SDL_strlen(extension);
+
+		// create directory (if it doesn't exist yet)
+		unsigned int mode = S_IRWXU | S_IRGRP | S_ISUID;
+		mkdir(log_directory, mode);
+
+		// couple of extras bytes for '/', '-', '.' and '\0' at the end
+		const int length = directoryLength + basenameLength +seedLength +extensionLength + 4;
+		char *filename = SDL_malloc(length);
+		if(filename == NULL) {
+			SDL_free(loggerData);
+
+			fprintf(stderr, "Error: Failed to allocate memory for filename of log");
+			return NULL;
+		}
+
+		SDL_snprintf(filename, length, "%s/%s-%s.%s", log_directory, log_basename, runSeed, extension);
+
+		loggerData->filename = filename;
+	}
 
 	if(xml_enabled) {
 		RunStarted = XMLRunStarted;
@@ -913,7 +965,8 @@ SetUpLogger()
  */
 void
 PrintUsage() {
-	  printf("Usage: ./runner [--in-proc] [--show-tests] [--verbose] [--xml]\n");
+	  printf("Usage: ./runner [--in-proc] [--show-tests] [--verbose]\n");
+	  printf("                [--logfile BASENAME] [--logdir DIR] [--log-stdout] [--xml]\n");
 	  printf("                [--xsl [STYLESHEET]] [--seed VALUE] [--iterations VALUE]\n");
 	  printf("                [--exec-key KEY] [--timeout VALUE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--suite SUITE]\n");
@@ -922,6 +975,10 @@ PrintUsage() {
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf(" -v  --verbose                Enables verbose logging\n");
+	  printf("     --logfile BASENAME       Define basename for logfiles. Defaults to 'runner'\n");
+	  printf("     --logdir DIR             Define directory for logs. Defaults to 'logs'\n");
+	  printf("     --log-stdout             Log to stdout instead of file (overrides --logfile\n");
+	  printf("                              and --logdir options\n");
 	  printf("     --xml                    Enables XML logger\n");
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");
@@ -968,6 +1025,35 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--verbose") == 0 || SDL_strcmp(arg, "-v") == 0) {
     	  enable_verbose_logger = 1;
+      }
+      else if(SDL_strcmp(arg, "--logdir") == 0) {
+    	  char *dirString = NULL;
+
+    	  if( (i + 1) < argc)  {
+    		  dirString = argv[++i];
+    	  }  else {
+    		  printf("runner: dir is missing\n");
+    		  PrintUsage();
+    		  exit(1);
+    	  }
+
+    	  memcpy(log_directory, dirString, SDL_strlen(dirString));
+      }
+      else if(SDL_strcmp(arg, "--logfile") == 0) {
+		  char *fileString = NULL;
+
+		  if( (i + 1) < argc)  {
+			fileString = argv[++i];
+		  }  else {
+			printf("runner: file is missing\n");
+			PrintUsage();
+			exit(1);
+		  }
+
+		memcpy(log_basename, fileString, SDL_strlen(fileString));
+      }
+      else if(SDL_strcmp(arg, "--log-stdout") == 0) {
+    	  log_stdout_enabled = 1;
       }
       else if(SDL_strcmp(arg, "--timeout") == 0 || SDL_strcmp(arg, "-tm") == 0) {
     	  universal_timeout_enabled = 1;
@@ -1083,6 +1169,9 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--version") == 0) {
     	  fprintf(stdout, "SDL test harness (version %s)\n", PACKAGE_VERSION);
+
+     	  // print: Testing against SDL version fuu (rev: bar)
+
     	  exit(0);
       }
       else if(SDL_strcmp(arg, "--help") == 0 || SDL_strcmp(arg, "-h") == 0) {
@@ -1107,9 +1196,12 @@ ParseOptions(int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	ParseOptions(argc, argv);
+	// \todo turn this into something better.
+	// Inits some global buffers to their default values
+	memcpy(log_basename, (void *)DEFAULT_LOG_FILENAME, SDL_strlen(DEFAULT_LOG_FILENAME));
+	memcpy(log_directory, (void *)DEFAULT_LOG_DIRECTORY, SDL_strlen(DEFAULT_LOG_DIRECTORY));
 
-	// print: Testing against SDL version fuu (rev: bar) if verbose == true
+	ParseOptions(argc, argv);
 
 	char *testSuiteName = NULL;
 	int suiteCounter = 0;
@@ -1128,8 +1220,6 @@ main(int argc, char *argv[])
 		}
 	}
 
-	LoggerData *loggerData = SetUpLogger();
-
 	const Uint32 startTicks = SDL_GetTicks();
 
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
@@ -1147,18 +1237,26 @@ main(int argc, char *argv[])
 		return 0;
 	}
 
+	LoggerData *loggerData = SetUpLogger();
+
 	RunStarted(argc, argv, runSeed, time(0), loggerData);
 
-	// logger data is no longer used
-	SDL_free(loggerData);
-
+	// validate the parsed command options
 	if(execute_inproc && universal_timeout_enabled) {
 		Log(time(0), "Test timeout is not supported with in-proc execution.");
 		Log(time(0), "Timeout will be disabled...");
 
 		universal_timeout_enabled = 0;
 		universal_timeout = -1;
-	}
+	}/*
+	if(userExecKey && testInvocationCount > 1 || userRunSeed) {
+		printf("The given combination of command line options doesn't make sense\n");
+		printf("--exec-key should only be used to rerun failed fuzz tests\n");
+	}*/
+
+	// logger data is no longer used
+	SDL_free(loggerData->filename);
+	SDL_free(loggerData);
 
 	char *currentSuiteName = NULL;
 	int suiteStartTime = SDL_GetTicks();
@@ -1213,8 +1311,11 @@ main(int argc, char *argv[])
 
 			currentIteration--;
 
-			SDL_free(globalExecKey);
+			if(userExecKey != NULL) {
+				SDL_free(globalExecKey);
+			}
 			globalExecKey = NULL;
+
 		}
 	}
 

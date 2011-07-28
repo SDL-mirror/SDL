@@ -31,8 +31,14 @@ typedef enum Level {
 
 
 typedef struct LoggerData {
-	Level level; //!< Logging level of the logger (such as VERBOSE)
-	void  *custom; //!< Some custom data that a logger needs
+	//! If enabled logger will write to stdout instead of file
+	int stdoutEnabled;
+	//!< Name and directory of the log file (ie. logs/runner-seed.log)
+	char *filename;
+	//!< Logging level of the logger (such as VERBOSE)
+	Level level;
+	//!< Some custom data that a logger needs
+	void  *custom;
 } LoggerData;
 
 /*!
