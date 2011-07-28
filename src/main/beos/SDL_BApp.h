@@ -345,7 +345,7 @@ private:
 		}
 		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_RESIZED, w, h);
-		
+
 		/* FIXME: Attempt at fixing rendering problems */
 		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
 	}
@@ -356,66 +356,28 @@ private:
 
 
 
-	/* Vector imitators */
+	/* Vector functions: Wraps vector stuff in case we need to change 
+	   implementation */
 	void _SetSDLWindow(SDL_Window *win, int32 winID) {
 		window_map[winID] = win;
 	}
 	
 	int32 _GetNumWindowSlots() {
-#ifdef __cplusplus
 		return window_map.size();
-#else
-		return _size;
-#endif
 	}
 	
 	
 	void _PopBackWindow() {
-#ifdef __cplusplus
 		window_map.pop_back();
-#else
-		--_size;
-#endif
 	}
 
 	void _PushBackWindow(SDL_Window *win) {
-#ifdef __cplusplus
 		window_map.push_back(win);
-#else
-		/* Resize array */
-		if(_length == _size) {
-			_ResizeArray();
-		}
-
-		window_map[_size] = win;
-		++_size;
-#endif
 	}
 
-#ifndef __cplusplus
-	_ResizeArray() {
-		_length += 4;	/* Increase capacity by some arbitrary number */
-		SDL_Window *temp = (SDL_Window*)SDL_calloc(_length, 
-							sizeof(SDL_Window*));
-
-		/* Move windows from old list to new list */
-		int32 i;
-		for(i = 0; i < _size; ++i) {
-			temp[i] = window_map[i];
-		}
-		SDL_free(window_map);
-		window_map = temp;
-	}
-#endif
 
 	/* Members */
-#ifdef __cplusplus
 	vector<SDL_Window*> window_map; /* Keeps track of SDL_Windows by index-id */
-#else
-	int32 _size;
-	int32 _length;
-	SDL_Window *window_map;
-#endif
 
 	display_mode *saved_mode;
 };

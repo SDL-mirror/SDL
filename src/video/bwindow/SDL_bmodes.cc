@@ -217,12 +217,12 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	if(!bscreen.IsValid()) {
 		return -1;
 	}
-	
-	while(!bwin->Connected()) { snooze(100); }
 
+	while(!bwin->Connected()) { snooze(100); }
+	
 	/* Make sure we have exclusive access to frame buffer data */
 	bwin->LockBuffer();
-
+	
 	/* format */
 	display_mode bmode;
 	bscreen.GetMode(&bmode);
@@ -234,16 +234,15 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 
 	/* Create a copy of the pixel buffer if it doesn't recycle */
 	*pixels = bwin->GetWindowFramebuffer();
-	if( bwin->CanTrashWindowBuffer() || (*pixels) == NULL) {
-		if( (*pixels) != NULL ) {
-			SDL_free(*pixels);
-		}
-		*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
-			bwin->GetBytesPerPx(), sizeof(uint8));
-		bwin->SetWindowFramebuffer((uint8*)(*pixels));
+	if( (*pixels) != NULL ) {
+		SDL_free(*pixels);
 	}
+	*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
+		bwin->GetBytesPerPx(), sizeof(uint8));
+	bwin->SetWindowFramebuffer((uint8*)(*pixels));
 
 	bwin->SetBufferExists(true);
+	bwin->SetTrashBuffer(false);
 	bwin->UnlockBuffer();
 	return 0;
 }
@@ -305,15 +304,19 @@ int32 BE_DrawThread(void *data) {
 				   buffer */
 				for(y = 0; y < height; ++y)
 				{
+					if(bwin->CanTrashWindowBuffer()) {
+						goto escape;	/* Break out before the buffer is killed */
+					}
 					memcpy(bufferpx, windowpx, width * BPP);
 					bufferpx += bufferPitch;
 					windowpx += windowPitch;
 				}
 			}
 			bwin->SetBufferDirty(false);
+escape:
 			bwin->UnlockBuffer();
 		} else {
-			snooze(1000);
+			snooze(16000);
 		}
 	}
 	

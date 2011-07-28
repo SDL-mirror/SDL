@@ -77,14 +77,13 @@ class SDL_BWin:public BDirectWindow
         /* Handle framebuffer stuff */
         _connected = _connection_disabled = false;
         _buffer_created = _buffer_dirty = false;
-        _trash__window_buffer = false;
+        _trash_window_buffer = false;
         _buffer_locker = new BLocker();
         _window_buffer = NULL;
         
         _draw_thread_id = spawn_thread(BE_DrawThread, "drawing_thread",
         					B_NORMAL_PRIORITY, (void*) this);
         resume_thread(_draw_thread_id);
-//        LockBuffer();	/* Unlocked by buffer initialization */
     }
 
     virtual ~ SDL_BWin()
@@ -153,8 +152,13 @@ class SDL_BWin:public BDirectWindow
     	if(!_connected && _connection_disabled) {
     		return;
     	}
+
+		/* Determine if the pixel buffer is usable after this update */
+		_trash_window_buffer =		_trash_window_buffer
+								|| ((info->buffer_state & B_BUFFER_RESIZED)
+    							|| (info->buffer_state & B_BUFFER_RESET));
     	LockBuffer();
-    	
+
     	switch(info->buffer_state & B_DIRECT_MODE_MASK) {
     	case B_DIRECT_START:
     		_connected = true;
@@ -165,12 +169,6 @@ class SDL_BWin:public BDirectWindow
     			_clips = NULL;
     		}
     		
-    		/* Can we reuse the window's pixel buffer after this? */
-    		_trash__window_buffer = ((info->buffer_state & B_BUFFER_RESIZED)
-    							|| (info->buffer_state & B_BUFFER_RESET)
-    							|| ((info->buffer_state & B_DIRECT_MODE_MASK)
-    								== B_DIRECT_START));
-
     		_num_clips = info->clip_list_count;
     		_clips = (clipping_rect *)malloc(_num_clips*sizeof(clipping_rect));
     		if(_clips) {
@@ -181,16 +179,18 @@ class SDL_BWin:public BDirectWindow
     			_row_bytes = info->bytes_per_row;
     			_bounds = info->window_bounds;
     			_bytes_per_px = info->bits_per_pixel / 8;
+    			_buffer_dirty = true;
+    			
+    			/* Now we check for a good buffer */
+//    			SetBufferExists(!_trash_window_buffer);
     		}
-
-    		/* Whatever the case, I think this merits a repaint event */
-//    		_RepaintEvent();
     		break;
 
     	case B_DIRECT_STOP:
     		_connected = false;
     		break;
     	}
+    	
     	UnlockBuffer();
     }
     
@@ -401,17 +401,18 @@ class SDL_BWin:public BDirectWindow
 	uint8* GetBufferPx() { return _bits; }
 	int32 GetBytesPerPx() { return _bytes_per_px; }
 	uint8* GetWindowFramebuffer() { return _window_buffer; }
-	bool CanTrashWindowBuffer() { return _trash__window_buffer; }
+	bool CanTrashWindowBuffer() { return _trash_window_buffer; }
 	bool BufferExists() { return _buffer_created; }
 	bool BufferIsDirty() { return _buffer_dirty; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
-	bool SetBufferExists(bool bufferExists) { _buffer_created = bufferExists; }
+	void SetBufferExists(bool bufferExists) { _buffer_created = bufferExists; }
 	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
 	void LockBuffer() {	_buffer_locker->Lock(); }
 	void UnlockBuffer() { _buffer_locker->Unlock(); }
 	void SetBufferDirty(bool bufferDirty) { _buffer_dirty = bufferDirty; }
+	void SetTrashBuffer(bool trash) { _trash_window_buffer = trash; 	}
 
 
 
@@ -603,7 +604,7 @@ private:
     int32			_num_clips;
     int32			_bytes_per_px;
     uint8		   *_window_buffer;	/* A copy of the window buffer */
-    bool			_trash__window_buffer;
+    bool			_trash_window_buffer;
     thread_id		_draw_thread_id;
 };
 

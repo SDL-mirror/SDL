@@ -149,10 +149,10 @@ void BE_InitOSKeymap() {
 		keymap[0x63]		= SDL_GetScancodeFromKey(SDLK_RIGHT);
 		keymap[0x64]		= SDL_GetScancodeFromKey(SDLK_KP_0);
 		keymap[0x65]		= SDL_GetScancodeFromKey(SDLK_KP_PERIOD);
-		keymap[0x66]		= SDL_GetScancodeFromKey(SDLK_LGUI);	/* FIXME: Is this the right translation? */
-		keymap[0x67]		= SDL_GetScancodeFromKey(SDLK_RGUI);	/* FIXME: Is this the right translation? */
+		keymap[0x66]		= SDL_GetScancodeFromKey(SDLK_LGUI);
+		keymap[0x67]		= SDL_GetScancodeFromKey(SDLK_RGUI);
 		keymap[0x68]		= SDL_GetScancodeFromKey(SDLK_MENU);
-		keymap[0x69]		= SDL_GetScancodeFromKey(SDLK_UNKNOWN);	/* FIXME: I couldn't find a translation */
+		keymap[0x69]		= SDL_GetScancodeFromKey(SDLK_2); /* SDLK_EURO */
 		keymap[0x6a]		= SDL_GetScancodeFromKey(SDLK_KP_EQUALS);
 		keymap[0x6b]		= SDL_GetScancodeFromKey(SDLK_POWER);
 }
