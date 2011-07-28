@@ -77,7 +77,8 @@ static int universal_timeout_enabled = 0;
 static int enable_verbose_logger = 0;
 //! Flag for using user supplied run seed
 static int userRunSeed = 0;
-
+//! Whether or not logger should log to stdout instead of file
+static int log_stdout_enabled = 0;
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
@@ -118,10 +119,6 @@ char *userExecKey = NULL;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
-
-//! Whether or not logger should log to stdout instead of file
-static int log_stdout_enabled = 0;
-
 
 //! Stores the basename for log files
 char log_basename[NAME_BUFFER_SIZE];
@@ -859,8 +856,22 @@ GenerateRunSeed(const int length)
 	int counter = 0;
 	for( ; counter < length; ++counter) {
 		int number = abs(utl_random(&randomContext));
-		seed[counter] = (char) (number % (127 - 34)) + 34;
+		char ch = (char) (number % (122 - 48)) + 48;
+
+		// Remove all the special characters so the run seed
+		// can be used to form a valid filename.
+		// A lot more characters are skipped than necessary.
+		if(ch >= 58 && ch <= 64) {
+			ch = 65;
+		}
+		if(ch >= 91 && ch <= 96) {
+			ch = 97;
+		}
+
+		seed[counter] = ch;
 	}
+
+	seed[counter] = '\0';
 
 	return seed;
 }
@@ -878,11 +889,12 @@ SetUpLogger()
 		fprintf(stderr, "Error: Logger data structure not allocated.");
 		return NULL;
 	}
+	memset(loggerData, 0, sizeof(LoggerData));
 
 	loggerData->level = (enable_verbose_logger ? VERBOSE : STANDARD);
 
-	if(log_stdout_enabled) {
-		loggerData->stdoutEnabled = SDL_TRUE;
+	if(log_stdout_enabled == 1) {
+		loggerData->stdoutEnabled = 1;
 		loggerData->filename = NULL;
 	} else {
 		const char *extension = (xml_enabled ? "xml": "log");
@@ -1037,6 +1049,7 @@ ParseOptions(int argc, char *argv[])
     		  exit(1);
     	  }
 
+    	  memset(log_directory, 0, NAME_BUFFER_SIZE);
     	  memcpy(log_directory, dirString, SDL_strlen(dirString));
       }
       else if(SDL_strcmp(arg, "--logfile") == 0) {
@@ -1050,6 +1063,7 @@ ParseOptions(int argc, char *argv[])
 			exit(1);
 		  }
 
+   	    memset(log_basename, 0, NAME_BUFFER_SIZE);
 		memcpy(log_basename, fileString, SDL_strlen(fileString));
       }
       else if(SDL_strcmp(arg, "--log-stdout") == 0) {
@@ -1241,6 +1255,11 @@ main(int argc, char *argv[])
 
 	RunStarted(argc, argv, runSeed, time(0), loggerData);
 
+	// logger data is no longer used
+	SDL_free(loggerData->filename);
+	SDL_free(loggerData);
+
+	/*
 	// validate the parsed command options
 	if(execute_inproc && universal_timeout_enabled) {
 		Log(time(0), "Test timeout is not supported with in-proc execution.");
@@ -1248,15 +1267,11 @@ main(int argc, char *argv[])
 
 		universal_timeout_enabled = 0;
 		universal_timeout = -1;
-	}/*
+	}*/ /*
 	if(userExecKey && testInvocationCount > 1 || userRunSeed) {
 		printf("The given combination of command line options doesn't make sense\n");
 		printf("--exec-key should only be used to rerun failed fuzz tests\n");
 	}*/
-
-	// logger data is no longer used
-	SDL_free(loggerData->filename);
-	SDL_free(loggerData);
 
 	char *currentSuiteName = NULL;
 	int suiteStartTime = SDL_GetTicks();
@@ -1293,9 +1308,8 @@ main(int argc, char *argv[])
 			if(userExecKey != NULL) {
 				globalExecKey = userExecKey;
 			} else {
-				char *execKey = GenerateExecKey(runSeed, testItem->suiteName,
+				globalExecKey  = GenerateExecKey(runSeed, testItem->suiteName,
 											  testItem->testName, currentIteration);
-				globalExecKey = execKey;
 			}
 
 			TestStarted(testItem->testName, testItem->suiteName,
@@ -1311,10 +1325,12 @@ main(int argc, char *argv[])
 
 			currentIteration--;
 
+			/*
 			if(userExecKey != NULL) {
 				SDL_free(globalExecKey);
 			}
 			globalExecKey = NULL;
+			*/
 
 		}
 	}
@@ -1325,7 +1341,7 @@ main(int argc, char *argv[])
 	}
 
 	UnloadTestCases(testCases);
-	UnloadTestSuites(suites);
+	UnloadTestSuites(suites); // crashes here with -ts case1
 
 	const Uint32 endTicks = SDL_GetTicks();
 	const double totalRunTime = (endTicks - startTicks) / 1000.0f;

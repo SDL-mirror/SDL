@@ -27,12 +27,17 @@ static FILE *logFile;
 int
 Output(const int currentIndentLevel, const char *message, ...)
 {
+	if(logFile == NULL) {
+		fprintf(stderr, "logfile is NULL\n");
+		exit(3);
+	}
+
 	int indent = 0;
 	for( ; indent < currentIndentLevel; ++indent) {
 		fprintf(logFile, "  "); // \todo make configurable?
 	}
 
-    char buffer[1024];
+	char buffer[1024];
 	memset(buffer, 0, 1024);
 
 	va_list list;
@@ -41,17 +46,22 @@ Output(const int currentIndentLevel, const char *message, ...)
 	SDL_vsnprintf(buffer, 1024, message, list);
 
 	va_end(list);
-
 	fprintf(logFile, "%s\n", buffer);
 	fflush(logFile);
 }
+
 
 void
 PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 			    time_t eventTime, LoggerData *data)
 {
+	if(data == NULL) {
+		fprintf(stderr, "Logger data is NULL\n");
+		exit(3);
+	}
+
 	// Set up the logging destination
-	if(data->stdoutEnabled) {
+	if(data->stdoutEnabled == 1) {
 		logFile = stdout;
 	} else {
 		logFile = fopen(data->filename, "w");
@@ -60,6 +70,7 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 			exit(3);
 		}
 	}
+
 
 	level = data->level;
 	//printf("Debug: %d == %d\n", level, data->level);
@@ -87,6 +98,8 @@ PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCoun
 	Output(indentLevel, "%d tests passed", testPassCount);
 	Output(indentLevel, "%d tests failed", testFailCount);
 	Output(indentLevel, "%d tests skipped", testSkippedCount);
+
+	fclose(logFile);
 }
 
 void

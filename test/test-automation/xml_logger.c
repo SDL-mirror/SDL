@@ -257,6 +257,9 @@ XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
 
 	output = XMLCloseDocument(documentRoot);
 	XMLOutputter(--indentLevel, YES, output);
+
+	// close the log file
+	fclose(logFile);
 }
 
 void
