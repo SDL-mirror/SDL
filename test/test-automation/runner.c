@@ -1257,19 +1257,26 @@ main(int argc, char *argv[])
 
 	RunStarted(argc, argv, runSeed, time(0), loggerData);
 
+	if(log_stdout_enabled == 0) {
+		printf("Runner is executing the tests.\n");
+		printf("Test report is created to: %s\n", loggerData->filename);
+	}
+
 	// logger data is no longer used
 	SDL_free(loggerData->filename);
 	SDL_free(loggerData);
 
-	/*
+
 	// validate the parsed command options
+	// \todo add a lot more and refactor. There are many more combinations
+	//       of commands that doesn't make sense together
 	if(execute_inproc && universal_timeout_enabled) {
 		Log(time(0), "Test timeout is not supported with in-proc execution.");
 		Log(time(0), "Timeout will be disabled...");
 
 		universal_timeout_enabled = 0;
 		universal_timeout = -1;
-	}*/ /*
+	} /*
 	if(userExecKey && testInvocationCount > 1 || userRunSeed) {
 		printf("The given combination of command line options doesn't make sense\n");
 		printf("--exec-key should only be used to rerun failed fuzz tests\n");
