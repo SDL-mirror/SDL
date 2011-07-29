@@ -1006,7 +1006,7 @@ PrintUsage() {
 	  printf("     --logfile BASENAME       Define basename for logfiles. Defaults to 'runner'\n");
 	  printf("     --logdir DIR             Define directory for logs. Defaults to 'logs'\n");
 	  printf("     --log-stdout             Log to stdout instead of file (overrides --logfile\n");
-	  printf("                              and --logdir options\n");
+	  printf("                              and --logdir options)\n");
 	  printf("     --xml                    Enables XML logger\n");
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");

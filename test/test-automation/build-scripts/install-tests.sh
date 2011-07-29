@@ -21,6 +21,6 @@ do
 	cp -f "$suite/.libs/lib$suite.$EXT" $DIRECTORY
 done
 
-#sudo cp .libs/libtest.0.dylib /usr/local/lib/libtest.0.dylib
+sudo cp .libs/libtest.0.dylib /usr/local/lib/libtest.0.dylib
 
 echo "Test suites installed."
