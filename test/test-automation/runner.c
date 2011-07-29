@@ -219,11 +219,12 @@ ScanForTestSuites(char *directoryName, char *extension)
 	if(!directory) {
 		fprintf(stderr, "Failed to open test suite directory: %s\n", directoryName);
 		perror("Error message");
-		exit(1);
+		exit(2);
 	}
 
 	while(entry = readdir(directory)) {
-		if(strlen(entry->d_name) > 2) { // discards . and ..
+		 // discards . and .. and hidden files starting with .
+		if(strlen(entry->d_name) > 2 && entry->d_name[0] != '.') {
 			const char *delimiters = ".";
 			char *name = strtok(entry->d_name, delimiters);
 			char *ext = strtok(NULL, delimiters);
@@ -234,7 +235,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 				ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
 			}
 
-			if(ok && SDL_strcmp(ext, extension)  == 0) {
+			if(ok && SDL_strncmp(ext, extension, SDL_strlen(extension))  == 0) {
 				// create test suite reference
 				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
 				if(reference == NULL) {
@@ -366,9 +367,8 @@ LoadTestCases(TestSuiteReference *suites)
 
 		TestCaseReference *testReference = NULL;
 		int counter = 0;
-		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
-
-			void *suite = suiteReference->library;
+ 		for(testReference = tests[counter]; testReference; testReference = tests[++counter]) {
+			//void *suite = suiteReference->library;
 
 			// Load test case functions
 			InitTestInvironmentFp initTestEnvironment = LoadInitTestInvironmentFunction(suiteReference->library);
@@ -874,7 +874,7 @@ GenerateRunSeed(const int length)
 		int number = abs(utl_random(&randomContext));
 		char ch = (char) (number % (122 - 48)) + 48;
 
-		// Remove all the special characters so the run seed
+		// Skip all the special characters so the run seed
 		// can be used to form a valid filename.
 		// A lot more characters are skipped than necessary.
 		if(ch >= 58 && ch <= 64) {
@@ -1154,7 +1154,7 @@ ParseOptions(int argc, char *argv[])
     	  }
 
     	  memset(selected_test_name, 0, NAME_BUFFER_SIZE);
-    	  strcpy(selected_test_name, testName);
+    	  strncpy(selected_test_name, testName, NAME_BUFFER_SIZE);
       }
       else if(SDL_strcmp(arg, "--xsl") == 0) {
     	  xsl_enabled = 1;
@@ -1182,7 +1182,7 @@ ParseOptions(int argc, char *argv[])
     	  }
 
     	  memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
-    	  strcpy(testcase_name_substring, substring);
+    	  strncpy(testcase_name_substring, strdup(substring), NAME_BUFFER_SIZE);
       }
       else if(SDL_strcmp(arg, "--suite") == 0 || SDL_strcmp(arg, "-s") == 0) {
     	  only_selected_suite = 1;
@@ -1233,6 +1233,10 @@ main(int argc, char *argv[])
 	memcpy(log_basename, (void *)DEFAULT_LOG_FILENAME, SDL_strlen(DEFAULT_LOG_FILENAME));
 	memcpy(log_directory, (void *)DEFAULT_LOG_DIRECTORY, SDL_strlen(DEFAULT_LOG_DIRECTORY));
 
+	memset(selected_test_name, 0, NAME_BUFFER_SIZE);
+	memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
+	memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
+
 	ParseOptions(argc, argv);
 
 	char *testSuiteName = NULL;
@@ -1248,16 +1252,26 @@ main(int argc, char *argv[])
 		runSeed = GenerateRunSeed(16);
 		if(runSeed == NULL) {
 			fprintf(stderr, "Error: Generating harness seed failed\n");
-			return 1;
+			return 2;
 		}
 	}
 
 	const Uint32 startTicks = SDL_GetTicks();
 
 	TestSuiteReference *suites = ScanForTestSuites(DEFAULT_TEST_DIRECTORY, extension);
+	if(suites == NULL) {
+		fprintf(stderr, "No test suites loaded.\n");
+		fprintf(stderr, "Compile you suites and install them to tests/\n");
+		return 2;
+	}
 	suites = LoadTestSuites(suites);
 
 	TestCase *testCases = LoadTestCases(suites);
+	if(testCases == NULL) {
+		fprintf(stderr, "Found zero test cases\n");
+		fprintf(stderr, "Check out your command line options\n");
+		return 2;
+	}
 
 	// if --show-tests option is given, only print tests and exit
 	if(only_print_tests) {
@@ -1271,12 +1285,12 @@ main(int argc, char *argv[])
 
 	LoggerData *loggerData = SetUpLogger();
 
-	RunStarted(argc, argv, runSeed, time(0), loggerData);
-
 	if(log_stdout_enabled == 0) {
 		printf("Runner is executing the tests.\n");
 		printf("Test report is created to: %s\n", loggerData->filename);
 	}
+
+	RunStarted(argc, argv, runSeed, time(0), loggerData);
 
 	// logger data is no longer used
 	SDL_free(loggerData->filename);
@@ -1349,14 +1363,6 @@ main(int argc, char *argv[])
 			TestEnded(testItem->testName, testItem->suiteName, retVal, time(0), testTotalRuntime);
 
 			currentIteration--;
-
-			/*
-			if(userExecKey != NULL) {
-				SDL_free(globalExecKey);
-			}
-			globalExecKey = NULL;
-			*/
-
 		}
 	}
 
