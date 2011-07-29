@@ -264,6 +264,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 					SDL_free(reference);
 					return NULL;
 				}
+
 				SDL_snprintf(reference->directoryPath, dpSize, "%s%s.%s",
 						directoryName, name, ext);
 
@@ -398,16 +399,31 @@ LoadTestCases(TestSuiteReference *suites)
 				// copy suite name
 				int length = SDL_strlen(suiteReference->name) + 1;
 				item->suiteName = SDL_malloc(length);
+				if(item->suiteName == NULL) {
+					SDL_free(item);
+					return NULL;
+				}
 				strncpy(item->suiteName, suiteReference->name, length);
 
 				// copy test name
 				length = SDL_strlen(testReference->name) + 1;
 				item->testName = SDL_malloc(length);
+				if(item->testName == NULL) {
+						SDL_free(item->suiteName);
+						SDL_free(item);
+						return NULL;
+				}
 				strncpy(item->testName, testReference->name, length);
 
 				// copy test description
 				length = SDL_strlen(testReference->description) + 1;
 				item->description = SDL_malloc(length);
+				if(item->description == NULL) {
+						SDL_free(item->description);
+						SDL_free(item->suiteName);
+						SDL_free(item);
+						return NULL;
+				}
 				strncpy(item->description, testReference->description, length);
 
 				item->requirements = testReference->requirements;

@@ -50,6 +50,7 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	char *execKey = md5Context.digest;
 
+	//! \todo could this be enhanced?
 	int key = execKey[4] << 24 |
 			  execKey[9] << 16 |
 			  execKey[13] << 8 |
