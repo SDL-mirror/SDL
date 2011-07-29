@@ -31,6 +31,10 @@
 #include "cocoa/SDL_rwopsbundlesupport.h"
 #endif /* __APPLE__ */
 
+#ifdef ANDROID
+#include "../core/android/SDL_android.h"
+#endif
+
 #ifdef __NDS__
 /* include libfat headers for fatInitDefault(). */
 #include <fat.h>
@@ -441,7 +445,20 @@ SDL_RWFromFile(const char *file, const char *mode)
         SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
         return NULL;
     }
-#if defined(__WIN32__)
+#if defined(ANDROID)
+    rwops = SDL_AllocRW();
+    if (!rwops)
+        return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */
+    if (Android_JNI_FileOpen(rwops, file, mode) < 0) {
+        SDL_FreeRW(rwops);
+        return NULL;
+    }
+    rwops->seek = Android_JNI_FileSeek;
+    rwops->read = Android_JNI_FileRead;
+    rwops->write = Android_JNI_FileWrite;
+    rwops->close = Android_JNI_FileClose;
+
+#elif defined(__WIN32__)
     rwops = SDL_AllocRW();
     if (!rwops)
         return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */
