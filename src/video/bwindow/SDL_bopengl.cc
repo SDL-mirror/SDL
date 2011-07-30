@@ -21,14 +21,27 @@
 
 #include "SDL_bopengl.h"
 
+#include <unistd.h>
+#include <KernelKit.h>
+#include <OpenGLKit.h>
+#include "SDL_BWin.h"
+#include "../../main/beos/SDL_BApp.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+static inline SDL_BWin *_ToBeWin(SDL_Window *window) {
+	return ((SDL_BWin*)(window->driverdata));
+}
+
+static inline SDL_BApp *_GetBeApp() {
+	return ((SDL_BApp*)be_app);
+}
+
 /* Passing a NULL path means load pointers from the application */
 int BE_GL_LoadLibrary(_THIS, const char *path)
 {
-#if 0
 	if (path == NULL) {
 		if (_this->gl_config.dll_handle == NULL) {
 			image_info info;
@@ -83,12 +96,10 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 		*_this->gl_config.driver_path = '\0';
 		return -1;
 	}
-#endif
 }
 
 void *BE_GL_GetProcAddress(_THIS, const char *proc)
 {
-#if 0
 	if (_this->gl_config.dll_handle != NULL) {
 		void *location = NULL;
 		status_t err;
@@ -105,27 +116,7 @@ void *BE_GL_GetProcAddress(_THIS, const char *proc)
 		SDL_SetError("OpenGL library not loaded");
 		return NULL;
 	}
-#endif
 }
-
-
-
-
-int BE_GL_MakeCurrent(_THIS)
-{
-	/* FIXME: should we glview->unlock and then glview->lock()? */
-	return 0;
-}
-
-
-
-
-
-
-
-
-
-
 
 
 #if 0 /* Functions from 1.2 that do not appear to be used in 1.3 */
@@ -190,11 +181,39 @@ int BE_GL_MakeCurrent(_THIS)
         return 0;
     }
 
-    void BE_GL_SwapBuffers(_THIS)
-    {
-        SDL_Win->SwapBuffers();
-    }
 #endif
+    void BE_GL_SwapWindow(_THIS, SDL_Window * window) {
+        _ToBeWin(window)->SwapBuffers();
+    }
+
+int BE_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context) {
+	_GetBeApp()->SetCurrentContext((BGLView*)context);
+	return 0;
+}
+
+
+SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window) {
+	/* FIXME: Not sure what flags should be included here; may want to have
+	   most of them */
+	return (SDL_GLContext)(_ToBeWin(window)->CreateGLView(
+		BGL_RGB | BGL_DOUBLE));
+}
+
+void BE_GL_DeleteContext(_THIS, SDL_GLContext context) {
+	/* Currently, automatically unlocks the view */
+//	_ToBeWin(window)->RemoveGLView();	FIXME: Need to get the bwindow somehow
+}
+
+
+int BE_GL_SetSwapInterval(_THIS, int interval) {
+}
+
+int BE_GL_GetSwapInterval(_THIS) {
+}
+
+
+void BE_GL_UnloadLibrary(_THIS) {
+}
 
 #ifdef __cplusplus
 }

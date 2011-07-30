@@ -32,22 +32,11 @@ extern "C" {
 #include "SDL_bvideo.h"
 #include "SDL_bopengl.h"
 #include "SDL_bmodes.h"
+#include "SDL_bframebuffer.h"
 #include "SDL_bevents.h"
 
 /* FIXME: Undefined functions */
 //    #define BE_PumpEvents NULL
-    
-#if SDL_VIDEO_OPENGL_WGL	/* FIXME: Replace with BeOs's SDL OPENGL stuff */
-//    #define BE_GL_LoadLibrary NULL
-//    #define BE_GL_GetProcAddress NULL
-    #define BE_GL_UnloadLibrary NULL
-    #define BE_GL_CreateContext NULL
-//    #define BE_GL_MakeCurrent NULL
-    #define BE_GL_SetSwapInterval NULL
-    #define BE_GL_GetSwapInterval NULL
-    #define BE_GL_SwapWindow NULL
-    #define BE_GL_DeleteContext NULL
-#endif
     #define BE_StartTextInput NULL
     #define BE_StopTextInput NULL
     #define BE_SetTextInputRect NULL
@@ -115,8 +104,8 @@ BE_CreateDevice(int devindex)
     device->shape_driver.CreateShaper = NULL;
     device->shape_driver.SetWindowShape = NULL;
     device->shape_driver.ResizeWindowShape = NULL;
-    
-#if SDL_VIDEO_OPENGL_WGL	/* FIXME: Replace with BeOs's SDL OPENGL stuff */
+
+//#if SDL_VIDEO_OPENGL_WGL	/* FIXME: Replace with BeOs's SDL OPENGL stuff */
     device->GL_LoadLibrary = BE_GL_LoadLibrary;
     device->GL_GetProcAddress = BE_GL_GetProcAddress;
     device->GL_UnloadLibrary = BE_GL_UnloadLibrary;
@@ -126,7 +115,7 @@ BE_CreateDevice(int devindex)
     device->GL_GetSwapInterval = BE_GL_GetSwapInterval;
     device->GL_SwapWindow = BE_GL_SwapWindow;
     device->GL_DeleteContext = BE_GL_DeleteContext;
-#endif
+//#endif
     device->StartTextInput = BE_StartTextInput;
     device->StopTextInput = BE_StopTextInput;
     device->SetTextInputRect = BE_SetTextInputRect;

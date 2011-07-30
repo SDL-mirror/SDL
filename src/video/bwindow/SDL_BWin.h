@@ -29,6 +29,7 @@ extern "C" {
 #include "SDL_config.h"
 #include "SDL.h"
 #include "SDL_syswm.h"
+#include "SDL_bframebuffer.h"
 
 #ifdef __cplusplus
 }
@@ -43,6 +44,7 @@ extern "C" {
 #endif
 #include "SDL_events.h"
 #include "../../main/beos/SDL_BApp.h"
+
 
 enum WinCommands {
 	BWIN_MOVE_WINDOW,
@@ -113,38 +115,36 @@ class SDL_BWin:public BDirectWindow
     }
     
 
-    /* Other construction */
+    /* * * * * OpenGL functionality * * * * */
 #if SDL_VIDEO_OPENGL
-    virtual int CreateView(Uint32 flags, Uint32 gl_flags)
-    {
-        int retval;
-
-        retval = 0;
+    virtual BGLView *CreateGLView(Uint32 gl_flags) {
         Lock();
-        if (flags & SDL_OPENGL/*SDL_INTERNALOPENGL*/) {
-            if (_SDL_GLView == NULL) {
-                _SDL_GLView = new BGLView(Bounds(), "SDL GLView",
-                                         B_FOLLOW_ALL_SIDES,
-                                         (B_WILL_DRAW | B_FRAME_EVENTS),
-                                         gl_flags);
-            }
-            if (_the_view != _SDL_GLView) {
-                if (_the_view) {
-                    RemoveChild(_the_view);
-                }
-                AddChild(_SDL_GLView);
-                _SDL_GLView->LockGL();
-                _the_view = _SDL_GLView;
-            }
-        } else {
-            if (_the_view) {
-                    _SDL_GLView->UnlockGL();
-                RemoveChild(_the_view);
-            }
+        if (_SDL_GLView == NULL) {
+            _SDL_GLView = new BGLView(Bounds(), "SDL GLView",
+                                     B_FOLLOW_ALL_SIDES,
+                                     (B_WILL_DRAW | B_FRAME_EVENTS),
+                                     gl_flags);
         }
+        AddChild(_SDL_GLView);
+        _SDL_GLView->LockGL();	/* "New" GLViews are created */
         Unlock();
-        return (retval);
+        return (_SDL_GLView);
     }
+    
+    virtual void RemoveGLView() {
+    	Lock();
+    	if(_SDL_GLView) {
+    		_SDL_GLView->UnlockGL();
+    		RemoveChild(_SDL_GLView);
+    	}
+    	Unlock();
+    }
+    
+    virtual void SwapBuffers(void) {
+		_SDL_GLView->UnlockGL();
+		_SDL_GLView->LockGL();
+		_SDL_GLView->SwapBuffers();
+	}
 #endif
     
     /* * * * * Framebuffering* * * * */
@@ -180,9 +180,6 @@ class SDL_BWin:public BDirectWindow
     			_bounds = info->window_bounds;
     			_bytes_per_px = info->bits_per_pixel / 8;
     			_buffer_dirty = true;
-    			
-    			/* Now we check for a good buffer */
-//    			SetBufferExists(!_trash_window_buffer);
     		}
     		break;
 
@@ -190,6 +187,11 @@ class SDL_BWin:public BDirectWindow
     		_connected = false;
     		break;
     	}
+#if SDL_VIDEO_OPENGL
+		if(_SDL_GLView) {
+			_SDL_GLView->DirectConnected(info);
+		}
+#endif
     	
     	UnlockBuffer();
     }
@@ -213,8 +215,8 @@ class SDL_BWin:public BDirectWindow
     virtual void FrameResized(float width, float height) {
     	/* Post a message to the BApp so that it can handle the window event */
     	BMessage msg(BAPP_WINDOW_RESIZED);
-		msg.AddInt32("window-w", (int)width) + 1;	/* TODO: Check that +1 is needed */
-		msg.AddInt32("window-h", (int)height) + 1;
+		msg.AddInt32("window-w", (int)width + 1);	/* TODO: Check that +1 is needed */
+		msg.AddInt32("window-h", (int)height + 1);
     	_PostWindowEvent(msg);
 		
 		/* Perform normal hook operations */
@@ -413,22 +415,6 @@ class SDL_BWin:public BDirectWindow
 	void UnlockBuffer() { _buffer_locker->Unlock(); }
 	void SetBufferDirty(bool bufferDirty) { _buffer_dirty = bufferDirty; }
 	void SetTrashBuffer(bool trash) { _trash_window_buffer = trash; 	}
-
-
-
-#if SDL_VIDEO_OPENGL
-    virtual void SwapBuffers(void)
-    {
-        _SDL_GLView->UnlockGL();
-        _SDL_GLView->LockGL();
-        _SDL_GLView->SwapBuffers();
-    }
-#endif
-    virtual BView *View(void)
-    {
-        return (_the_view);
-    }
-	
 	
 	
 private:
@@ -581,7 +567,6 @@ private:
 #if SDL_VIDEO_OPENGL
     BGLView * _SDL_GLView;
 #endif
-    BView *_the_view;
     
     int32 _last_buttons;
     int32 _id;	/* Window id used by SDL_BApp */

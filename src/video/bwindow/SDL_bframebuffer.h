@@ -19,25 +19,22 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef SDL_BMODES_H
-#define SDL_BMODES_H
-
+#ifndef SDL_BFRAMEBUFFER_H
+#define SDL_BFRAMEBUFFER_H
+#include <SupportDefs.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "../SDL_sysvideo.h"
 
-extern int32 ColorSpaceToBitsPerPixel(uint32 colorspace);
-extern int32 BPPToSDLPxFormat(int32 bpp);
-
-extern int BE_InitModes(_THIS);
-extern int BE_QuitModes(_THIS);
-extern int BE_GetDisplayBounds(_THIS, SDL_VideoDisplay *display,
-	SDL_Rect *rect);
-extern void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display);
-extern int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
-	SDL_DisplayMode *mode);
+extern int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
+                                       Uint32 * format,
+                                       void ** pixels, int *pitch);
+extern int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
+                                       SDL_Rect * rects, int numrects);
+extern void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window);
+extern int32 BE_DrawThread(void *data);
 
 #ifdef __cplusplus
 }

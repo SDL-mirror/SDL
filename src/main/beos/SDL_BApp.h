@@ -22,6 +22,7 @@
 #define SDL_BAPP_H
 
 #include <InterfaceKit.h>
+#include <OpenGLKit.h>
 
 #include "../../video/bwindow/SDL_bkeyboard.h"
 
@@ -37,15 +38,13 @@ extern "C" {
 /* Local includes */
 #include "../../events/SDL_events_c.h"
 #include "../../video/bwindow/SDL_bkeyboard.h"
-#include "../../video/bwindow/SDL_bmodes.h"
+#include "../../video/bwindow/SDL_bframebuffer.h"
 
 #ifdef __cplusplus
 }
-
-#include <vector>	/* Vector should only be included if we use a C++
-					   compiler */
-
 #endif
+
+#include <vector>
 
 
 
@@ -82,18 +81,15 @@ class SDL_BApp : public BApplication {
 public:
 	SDL_BApp(const char* signature) :
 		BApplication(signature) {
-#ifndef __cplusplus
-		/* Set vector imitation variables */
-		_ResizeArray();
-		_size = 0;
-		_length = 0;
-#endif
+		_current_context = NULL;
 	}
+	
+	
 	virtual ~SDL_BApp() {
-#ifndef __cplusplus
-		SDL_free(window_map);
-#endif
 	}
+	
+	
+	
 		/* Event-handling functions */
 	virtual void MessageReceived(BMessage* message) {
 		/* Sort out SDL-related messages */
@@ -182,9 +178,9 @@ public:
     }
     
     /* Modes methods */
-    void SetPrevMode(display_mode *prevMode) { saved_mode = prevMode; }
+    void SetPrevMode(display_mode *prevMode) { _saved_mode = prevMode; }
     
-    display_mode* GetPrevMode() { return saved_mode; }
+    display_mode* GetPrevMode() { return _saved_mode; }
     
     /* FIXME: Bad coding practice, but I can't include SDL_BWin.h here.  Is
        there another way to do this? */
@@ -192,9 +188,15 @@ public:
     
     
 	SDL_Window *GetSDLWindow(int32 winID) {
-		return window_map[winID];
+		return _window_map[winID];
 	}
     
+    void SetCurrentContext(BGLView *newContext) {
+    	if(_current_context)
+    		_current_context->UnlockGL();
+    	_current_context = newContext;
+    	_current_context->LockGL();
+    }
 private:
 	/* Event management */
 	void _HandleBasicWindowEvent(BMessage *msg, int32 sdlEventType) {
@@ -359,27 +361,28 @@ private:
 	/* Vector functions: Wraps vector stuff in case we need to change 
 	   implementation */
 	void _SetSDLWindow(SDL_Window *win, int32 winID) {
-		window_map[winID] = win;
+		_window_map[winID] = win;
 	}
 	
 	int32 _GetNumWindowSlots() {
-		return window_map.size();
+		return _window_map.size();
 	}
 	
 	
 	void _PopBackWindow() {
-		window_map.pop_back();
+		_window_map.pop_back();
 	}
 
 	void _PushBackWindow(SDL_Window *win) {
-		window_map.push_back(win);
+		_window_map.push_back(win);
 	}
 
 
 	/* Members */
-	vector<SDL_Window*> window_map; /* Keeps track of SDL_Windows by index-id */
+	vector<SDL_Window*> _window_map; /* Keeps track of SDL_Windows by index-id */
 
-	display_mode *saved_mode;
+	display_mode *_saved_mode;
+	BGLView      *_current_context;
 };
 
 #endif
