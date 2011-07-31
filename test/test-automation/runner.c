@@ -31,7 +31,6 @@
 
 #include "fuzzer/fuzzer.h"
 
-
 #include "config.h"
 
 #include "SDL_test.h"
@@ -94,6 +93,7 @@ char testcase_name_substring[NAME_BUFFER_SIZE];
 
 //! Name for user-supplied XSL style sheet name
 char xsl_stylesheet_name[NAME_BUFFER_SIZE];
+
 //! User-suppled timeout value for tests
 int universal_timeout = -1;
 
@@ -106,10 +106,8 @@ int universal_timeout = -1;
 //! Default directory of the test suites
 #define DEFAULT_LOG_FILENAME "runner"
 
-
 //! Fuzzer seed for the harness
 char *runSeed = NULL;
-
 
 //! Variable is used to pass the generated execution key to a test
 int globalExecKey = 0;
@@ -845,7 +843,8 @@ HandleChildProcessReturnValue(int stat_lock)
 
 
 /*!
- * Generates a random run seed for the harness.
+ * Generates a random run seed for the harness. Seed
+ * can contain characters 0-9A-Z
  *
  * \param length The length of the generated seed
  *
@@ -859,7 +858,7 @@ GenerateRunSeed(const int length)
 		return NULL;
 	}
 
-	char *seed = SDL_malloc(length * sizeof(8));
+	char *seed = SDL_malloc((length + 1) * sizeof(char));
 	if(seed == NULL) {
 		fprintf(stderr, "Error: malloc for run seed failed\n");
 		return NULL;
@@ -870,18 +869,12 @@ GenerateRunSeed(const int length)
 	utl_randomInitTime(&randomContext);
 
 	int counter = 0;
-	for( ; counter < length; ++counter) {
+	for( ; counter < length - 1; ++counter) {
 		int number = abs(utl_random(&randomContext));
-		char ch = (char) (number % (122 - 48)) + 48;
+		char ch = (char) (number % (91 - 48)) + 48;
 
-		// Skip all the special characters so the run seed
-		// can be used to form a valid filename.
-		// A lot more characters are skipped than necessary.
 		if(ch >= 58 && ch <= 64) {
 			ch = 65;
-		}
-		if(ch >= 91 && ch <= 96) {
-			ch = 97;
 		}
 
 		seed[counter] = ch;
@@ -897,10 +890,10 @@ GenerateRunSeed(const int length)
  *
  * \return Logger data structure (that needs be deallocated)
  */
-void *
+LoggerData *
 SetUpLogger()
 {
-	LoggerData *loggerData = SDL_malloc(sizeof(loggerData));
+	LoggerData *loggerData = SDL_malloc(sizeof(LoggerData));
 	if(loggerData == NULL) {
 		fprintf(stderr, "Error: Logger data structure not allocated.");
 		return NULL;
@@ -913,7 +906,9 @@ SetUpLogger()
 		loggerData->stdoutEnabled = 1;
 		loggerData->filename = NULL;
 	} else {
-		const char *extension = (xml_enabled ? "xml": "log");
+		loggerData->stdoutEnabled = 0;
+
+		const char *extension = (xml_enabled ? "xml" : "log");
 
 		/* Combine and create directory for log file */
 		// log_directory + log_basename + seed + . + type
@@ -927,7 +922,8 @@ SetUpLogger()
 		mkdir(log_directory, mode);
 
 		// couple of extras bytes for '/', '-', '.' and '\0' at the end
-		const int length = directoryLength + basenameLength +seedLength +extensionLength + 4;
+		const int length = directoryLength + basenameLength + seedLength
+							+ extensionLength + 4;
 		char *filename = SDL_malloc(length);
 		if(filename == NULL) {
 			SDL_free(loggerData);
@@ -935,10 +931,25 @@ SetUpLogger()
 			fprintf(stderr, "Error: Failed to allocate memory for filename of log");
 			return NULL;
 		}
+		memset(filename, 0, length);
 
-		SDL_snprintf(filename, length, "%s/%s-%s.%s", log_directory, log_basename, runSeed, extension);
+		SDL_snprintf(filename, length, "%s/%s-%s.%s", log_directory, log_basename,
+					 runSeed, extension);
 
 		loggerData->filename = filename;
+	}
+
+	if(xml_enabled) {
+		char *sheet = NULL;
+		if(xsl_enabled) {
+			sheet = "style.xsl"; // default style sheet;
+		}
+
+		if(custom_xsl_enabled) {
+			sheet = xsl_stylesheet_name;
+		}
+
+		loggerData->custom = sheet;
 	}
 
 	if(xml_enabled) {
@@ -956,17 +967,6 @@ SetUpLogger()
 		AssertSummary = XMLAssertSummary;
 
 		Log = XMLLog;
-
-		char *sheet = NULL;
-		if(xsl_enabled) {
-			sheet = "style.xsl"; // default style sheet;
-		}
-
-		if(custom_xsl_enabled) {
-			sheet = xsl_stylesheet_name;
-		}
-
-		loggerData->custom = sheet;
 	} else {
 		RunStarted = PlainRunStarted;
 		RunEnded = PlainRunEnded;
@@ -1236,6 +1236,8 @@ main(int argc, char *argv[])
 	memset(selected_test_name, 0, NAME_BUFFER_SIZE);
 	memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
 	memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
+	memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
+
 
 	ParseOptions(argc, argv);
 
@@ -1247,14 +1249,6 @@ main(int argc, char *argv[])
 #else
 	char *extension = "dylib";
 #endif
-
-	if(userRunSeed == 0) {
-		runSeed = GenerateRunSeed(16);
-		if(runSeed == NULL) {
-			fprintf(stderr, "Error: Generating harness seed failed\n");
-			return 2;
-		}
-	}
 
 	const Uint32 startTicks = SDL_GetTicks();
 
@@ -1281,6 +1275,14 @@ main(int argc, char *argv[])
 		}
 
 		return 0;
+	}
+
+	if(userRunSeed == 0) {
+		runSeed = GenerateRunSeed(16);
+		if(runSeed == NULL) {
+			fprintf(stderr, "Error: Generating harness seed failed\n");
+			return 2;
+		}
 	}
 
 	LoggerData *loggerData = SetUpLogger();

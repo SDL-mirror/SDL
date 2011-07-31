@@ -38,7 +38,7 @@ typedef struct LoggerData {
 	//!< Logging level of the logger (such as VERBOSE)
 	Level level;
 	//!< Some custom data that a logger needs
-	void  *custom;
+	char  *custom;
 } LoggerData;
 
 /*!
