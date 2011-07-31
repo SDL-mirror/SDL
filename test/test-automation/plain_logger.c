@@ -13,7 +13,7 @@
 static int indentLevel;
 
 /*! Logging level of the logger */
-static Level level = STANDARD;
+static Level level = LOGGER_TERSE;
 
 //! Handle to log file
 static FILE *logFile;
@@ -155,7 +155,7 @@ PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
 		time_t eventTime)
 {
 	// Log passed asserts only on VERBOSE level
-	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
 		return ;
 	}
 
@@ -168,7 +168,7 @@ PlainAssertWithValues(const char *assertName, int assertResult, const char *asse
 		int actualValue, int expectedValue, time_t eventTime)
 {
 	// Log passed asserts only on VERBOSE level
-	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
 		return ;
 	}
 

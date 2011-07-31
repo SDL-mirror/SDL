@@ -106,6 +106,12 @@ int universal_timeout = -1;
 //! Default directory of the test suites
 #define DEFAULT_LOG_FILENAME "runner"
 
+//! Defines directory separator
+#define DIRECTORY_SEPARATOR '/'
+
+//! Name of the default stylesheet
+const char *defaultXSLStylesheet = "style.xsl";
+
 //! Fuzzer seed for the harness
 char *runSeed = NULL;
 
@@ -256,7 +262,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 				SDL_snprintf(reference->name, nameSize, "%s", name);
 
 				// copy the directory path
-				const int dpSize = dirSize + nameSize + 1 + extSize + 1;
+				const Uint32 dpSize = dirSize + nameSize + 1 + extSize + 1;
 				reference->directoryPath = SDL_malloc(dpSize * sizeof(char));
 				if(reference->directoryPath == NULL) {
 					SDL_free(reference->name);
@@ -891,7 +897,8 @@ GenerateRunSeed(const int length)
  * \return Logger data structure (that needs be deallocated)
  */
 LoggerData *
-SetUpLogger()
+SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_enabled,
+			const int custom_xsl_enabled, const char *defaultXslSheet)
 {
 	LoggerData *loggerData = SDL_malloc(sizeof(LoggerData));
 	if(loggerData == NULL) {
@@ -900,7 +907,7 @@ SetUpLogger()
 	}
 	memset(loggerData, 0, sizeof(LoggerData));
 
-	loggerData->level = (enable_verbose_logger ? VERBOSE : STANDARD);
+	loggerData->level = (enable_verbose_logger ? LOGGER_VERBOSE : LOGGER_TERSE);
 
 	if(log_stdout_enabled == 1) {
 		loggerData->stdoutEnabled = 1;
@@ -910,20 +917,24 @@ SetUpLogger()
 
 		const char *extension = (xml_enabled ? "xml" : "log");
 
-		/* Combine and create directory for log file */
-		// log_directory + log_basename + seed + . + type
-		const int directoryLength = SDL_strlen(log_directory);
-		const int basenameLength = SDL_strlen(log_basename);
-		const int seedLength = SDL_strlen(runSeed);
-		const int extensionLength = SDL_strlen(extension);
-
 		// create directory (if it doesn't exist yet)
 		unsigned int mode = S_IRWXU | S_IRGRP | S_ISUID;
 		mkdir(log_directory, mode);
 
+		/* Combine and create directory for log file */
+		const Uint32 directoryLength = SDL_strlen(log_directory);
+		const Uint32 basenameLength = SDL_strlen(log_basename);
+		const Uint32 seedLength = SDL_strlen(runSeed);
+		const Uint32 extensionLength = SDL_strlen(extension);
+
 		// couple of extras bytes for '/', '-', '.' and '\0' at the end
-		const int length = directoryLength + basenameLength + seedLength
+		const Uint32 length = directoryLength + basenameLength + seedLength
 							+ extensionLength + 4;
+
+		if(length <= 0) {
+			return NULL;
+		}
+
 		char *filename = SDL_malloc(length);
 		if(filename == NULL) {
 			SDL_free(loggerData);
@@ -933,8 +944,8 @@ SetUpLogger()
 		}
 		memset(filename, 0, length);
 
-		SDL_snprintf(filename, length, "%s/%s-%s.%s", log_directory, log_basename,
-					 runSeed, extension);
+		SDL_snprintf(filename, length, "%s%c%s-%s.%s", log_directory,
+				DIRECTORY_SEPARATOR, log_basename, runSeed, extension);
 
 		loggerData->filename = filename;
 	}
@@ -1285,7 +1296,12 @@ main(int argc, char *argv[])
 		}
 	}
 
-	LoggerData *loggerData = SetUpLogger();
+	LoggerData *loggerData = SetUpLogger(log_stdout_enabled, xml_enabled,
+			xsl_enabled, custom_xsl_enabled, defaultXSLStylesheet);
+	if(loggerData == NULL) {
+		printf("Failed to create a logger.\n");
+		return 2;
+	}
 
 	if(log_stdout_enabled == 0) {
 		printf("Runner is executing the tests.\n");

@@ -24,11 +24,12 @@
 #include <time.h>
 
 /* Logging levels */
-typedef enum Level {
-	STANDARD = 1,
-	VERBOSE
+typedef enum LogLevel {
+	LOGGER_TERSE = 1,
+	LOGGER_VERBOSE
 } Level;
 
+#define LOGGER_DEFAULT_LEVEL LOGGER_TERSE
 
 typedef struct LoggerData {
 	//! If enabled logger will write to stdout instead of file

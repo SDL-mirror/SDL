@@ -68,7 +68,7 @@ const char *logElementName = "log";
 static int indentLevel;
 
 /*! Logging level of the logger */
-static Level level = STANDARD;
+static Level level = LOGGER_TERSE;
 
 //! Constants for XMLOuputters EOL parameter
 #define YES 1
@@ -485,7 +485,7 @@ XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
 		  time_t eventTime)
 {
 	// Log passed asserts only on VERBOSE level
-	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
 		return ;
 	}
 
@@ -542,7 +542,7 @@ XMLAssertWithValues(const char *assertName, int assertResult, const char *assert
 		int actualValue, int excpected, time_t eventTime)
 {
 	// Log passed asserts only on VERBOSE level
-	if(level <= STANDARD && assertResult == ASSERT_PASS) {
+	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
 		return ;
 	}
 
