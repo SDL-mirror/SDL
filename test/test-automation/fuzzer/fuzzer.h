@@ -21,6 +21,8 @@
 #ifndef _FUZZER_H
 #define _FUZZER_H
 
+#include <SDL/SDL_stdinc.h>
+
 #include "utl_crc32.h"
 #include "utl_md5.h"
 #include "utl_random.h"
@@ -29,7 +31,7 @@
 /*!
  * Inits the fuzzer for a test
  */
-void InitFuzzer(int execKey);
+void InitFuzzer(Uint64 execKey);
 
 
 /*!
@@ -113,6 +115,6 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  * \return Generated execution key as blob of 16 bytes. It needs be deallocated.
  * 			On error, returns NULL.
  */
-int GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
+Uint64 GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
 
 #endif

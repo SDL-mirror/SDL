@@ -1,4 +1,7 @@
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "../SDL_test.h"
 
 #include "fuzzer.h"
@@ -7,29 +10,43 @@
 //! context for test-specific random number generator
 static RND_CTX rndContext;
 
-int
+Uint64
 GenerateExecKey(char *runSeed, char *suiteName,
 				char *testName, int iterationNumber)
 {
-	if(runSeed == NULL || suiteName == NULL ||
-	   testName == NULL || iterationNumber < 0) {
-		fprintf(stderr, "Error: Incorrect parameter given to GenerateExecKey function\n");
+	if(runSeed == NULL) {
+		fprintf(stderr, "Error: Incorrect runSeed given to GenerateExecKey function\n");
 		return -1;
 	}
 
-	char iterationString[256];
-	memset(iterationString, 0, sizeof(iterationString));
+	if(suiteName == NULL) {
+		fprintf(stderr, "Error: Incorrect suiteName given to GenerateExecKey function\n");
+		return -1;
+	}
 
-	snprintf(iterationString, sizeof(iterationString), "%d", iterationNumber);
+	if(testName == NULL) {
+		fprintf(stderr, "Error: Incorrect testName given to GenerateExecKey function\n");
+		return -1;
+	}
+
+	if(iterationNumber < 0) {
+		fprintf(stderr, "Error: Incorrect iteration number given to GenerateExecKey function\n");
+		return -1;
+	}
+
+
+	char iterationString[16];
+	memset(iterationString, 0, sizeof(iterationString));
+	SDL_snprintf(iterationString, sizeof(iterationString) - 1, "%d", iterationNumber);
 
 	// combine the parameters
-	const int runSeedLength = strlen(runSeed);
-	const int suiteNameLength = strlen(suiteName);
-	const int testNameLength = strlen(testName);
-	const int iterationStringLength = strlen(iterationString);
+	const Uint32 runSeedLength = strlen(runSeed);
+	const Uint32 suiteNameLength = strlen(suiteName);
+	const Uint32 testNameLength = strlen(testName);
+	const Uint32 iterationStringLength = strlen(iterationString);
 
 	// size of the entire + 3 for slashes and + 1 for '\0'
-	const int entireString  = runSeedLength + suiteNameLength +
+	const Uint32 entireString  = runSeedLength + suiteNameLength +
 							  testNameLength + iterationStringLength + 3 + 1;
 
 	char *buffer = SDL_malloc(entireString);
@@ -48,21 +65,32 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	SDL_free(buffer);
 
-	char *execKey = md5Context.digest;
+	const char *execKey = md5Context.digest;
 
-	//! \todo could this be enhanced?
-	int key = execKey[4] << 24 |
-			  execKey[9] << 16 |
-			  execKey[13] << 8 |
-			  execKey[3] << 0;
+	//printf("Debug: digest = %s\n", execKey);
 
-	return abs(key);
+	Uint64 key = execKey[8]  << 56 |
+				 execKey[9]  << 48 |
+				 execKey[10] << 40 |
+				 execKey[11] << 32 |
+				 execKey[12] << 24 |
+				 execKey[13] << 16 |
+				 execKey[14] << 8  |
+				 execKey[15] << 0;
+
+	return key;
 }
 
 void
-InitFuzzer(int execKey)
+InitFuzzer(Uint64 execKey)
 {
-	utl_randomInit(&rndContext, execKey, execKey / 0xfafafafa);
+	Uint32 a = (execKey >> 32)  & 0x00000000FFFFFFFF;
+	Uint32 b = execKey & 0x00000000FFFFFFFF;
+
+	//printf("Debug: execKey: %llx\n", execKey);
+	//printf("Debug: a = %x - b = %x\n", a, b);
+
+	utl_randomInit(&rndContext, a, b);
 }
 
 void

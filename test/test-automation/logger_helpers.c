@@ -33,11 +33,11 @@ char *IntToString(const int integer) {
  *  \param integer The converted integer
  *  \returns Given integer as string in hex fomat
  */
-char *IntToHexString(const int integer) {
+char *IntToHexString(const Uint64 integer) {
 	static char buffer[256]; // malloc might work better
 	memset(buffer, 0, sizeof(buffer));
 
-	SDL_snprintf(buffer, sizeof(buffer), "%X", integer);
+	SDL_snprintf(buffer, sizeof(buffer), "%llX", integer);
 
 	return buffer;
 }

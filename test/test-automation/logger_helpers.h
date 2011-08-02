@@ -5,7 +5,7 @@
 
 char *IntToString(const int integer);
 
-char *IntToHexString(const int integer);
+char *IntToHexString(const Uint64 integer);
 
 char *DoubleToString(const double decimal);
 

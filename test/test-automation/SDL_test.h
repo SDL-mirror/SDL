@@ -28,12 +28,6 @@
 
 #include "fuzzer/fuzzer.h"
 
-/*
-extern int _testReturnValue;
-extern int _testAssertsFailed;
-extern int _testAssertsPassed;
-*/
-
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
 
@@ -71,8 +65,10 @@ typedef struct TestCaseReference {
 /*!
  *  Initialized the test environment such as asserts. Must be called at
  *  the beginning of every test case, before doing anything else.
+ *
+ *  \param execKey Execution key for the test
  */
-void _InitTestEnvironment(char *execKey);
+void _InitTestEnvironment(Uint64 execKey);
 
 /*!
  *  Deinitializes the test environment and

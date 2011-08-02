@@ -21,6 +21,8 @@
 #ifndef _LOGGER_H
 #define _LOGGER_H
 
+#include <SDL/SDL_stdinc.h>
+
 #include <time.h>
 
 /* Logging levels */
@@ -56,7 +58,7 @@ typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
 		                time_t endTime, double totalRuntime);
 
 typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
-                              const char *testDescription, int execKey, time_t startTime);
+                              const char *testDescription, Uint64 execKey, time_t startTime);
 typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
                             time_t endTime, double totalRuntime);
 
@@ -86,8 +88,6 @@ extern AssertWithValuesFp AssertWithValues;
 extern AssertSummaryFp AssertSummary;
 extern LogFp Log;
 
-//! \todo move these two away from here
-extern int globalExecKey;
 //! Run seed for harness
 extern char *runSeed;
 

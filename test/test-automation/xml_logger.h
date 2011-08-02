@@ -1,6 +1,8 @@
 #ifndef _XML_LOGGER_H
 #define _XML_LOGGER_H
 
+#include <SDL/SDL_stdinc.h>
+
 #include "logger.h"
 
 /*!
@@ -59,7 +61,7 @@ void XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
  * \param startTime When the test started to execute
  */
 void XMLTestStarted(const char *testName, const char *suiteName,
-					const char *testDescription, int execKey, time_t startTime);
+					const char *testDescription, Uint64 execKey, time_t startTime);
 
 /*!
  * Prints information about the test test that was just executed in XML

@@ -22,6 +22,8 @@
 #include <stdarg.h> /* va_list */
 #include <time.h>
 
+#include <SDL/SDL_stdinc.h>
+
 #include "logger.h"
 #include "fuzzer/fuzzer.h"
 
@@ -37,12 +39,9 @@ int _testAssertsFailed;
 int _testAssertsPassed;
 
 void
-_InitTestEnvironment(char *execKey)
+_InitTestEnvironment(Uint64 execKey)
 {
-	// The execKey gets corrupted while passing arguments
-	// hence the global variable to circumvent the problem
-	InitFuzzer(globalExecKey);
-
+	InitFuzzer(execKey);
 
 	_testReturnValue = TEST_RESULT_PASS;
 	_testAssertsFailed = 0;

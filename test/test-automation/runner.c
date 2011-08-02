@@ -43,7 +43,7 @@
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*InitTestInvironmentFp)(void);
+typedef void (*InitTestInvironmentFp)(Uint64);
 //!< Function pointer to a test case quit function
 typedef int  (*QuitTestInvironmentFp)(void);
 //!< Function pointer to a test case set up function
@@ -115,11 +115,8 @@ const char *defaultXSLStylesheet = "style.xsl";
 //! Fuzzer seed for the harness
 char *runSeed = NULL;
 
-//! Variable is used to pass the generated execution key to a test
-int globalExecKey = 0;
-
 //! Execution key that user supplied via command options
-int userExecKey = 0;
+Uint64 userExecKey = 0;
 
 //! How man time a test will be invocated
 int testInvocationCount = 1;
@@ -762,7 +759,7 @@ CheckTestRequirements(TestCase *testCase)
  * \param test result
  */
 int
-RunTest(TestCase *testCase, int execKey)
+RunTest(TestCase *testCase, Uint64 execKey)
 {
 	if(!testCase) {
 		return -1;
@@ -782,7 +779,7 @@ RunTest(TestCase *testCase, int execKey)
 		}
 	}
 
-	testCase->initTestEnvironment();
+	testCase->initTestEnvironment(execKey);
 
 	if(testCase->testSetUp) {
 		testCase->testSetUp(0x0);
@@ -811,7 +808,7 @@ RunTest(TestCase *testCase, int execKey)
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int
-ExecuteTest(TestCase *testItem, int execKey) {
+ExecuteTest(TestCase *testItem, Uint64 execKey) {
 	int retVal = -1;
 
 	if(execute_inproc) {
@@ -1388,19 +1385,20 @@ main(int argc, char *argv[])
 
 		int currentIteration = testInvocationCount;
 		while(currentIteration > 0) {
-			if(userExecKey != NULL) {
-				globalExecKey = userExecKey;
+			Uint64 execKey = 5;
+			if(userExecKey != 0) {
+				execKey = userExecKey;
 			} else {
-				globalExecKey  = GenerateExecKey(runSeed, testItem->suiteName,
+				execKey  = GenerateExecKey(runSeed, testItem->suiteName,
 											  testItem->testName, currentIteration);
 			}
 
 			TestStarted(testItem->testName, testItem->suiteName,
-						testItem->description, globalExecKey, time(0));
+						testItem->description, execKey, time(0));
 
 			const Uint32 testTimeStart = SDL_GetTicks();
 
-			int retVal = ExecuteTest(testItem, globalExecKey);
+			int retVal = ExecuteTest(testItem, execKey);
 
 			const double testTotalRuntime = (SDL_GetTicks() - testTimeStart) / 1000.0f;
 

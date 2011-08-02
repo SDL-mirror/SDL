@@ -119,9 +119,9 @@ PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
 
 void
 PlainTestStarted(const char *testName, const char *suiteName,
-				const char *testDescription, int execKey, time_t startTime)
+				const char *testDescription, Uint64 execKey, time_t startTime)
 {
-	Output(indentLevel++, "Executing test: %s (in %s). Exec key: %X", testName, suiteName, execKey);
+	Output(indentLevel++, "Executing test: %s (in %s). Exec key: %llX", testName, suiteName, execKey);
 }
 
 void

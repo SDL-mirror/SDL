@@ -2,6 +2,8 @@
 #define _PLAIN_LOGGER_H
 
 #include "logger.h"
+#include <SDL/SDL_stdinc.h>
+
 
 /*!
  * Prints out information about starting the test run.
@@ -60,7 +62,7 @@ void PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
  * \param startTime When the test started to execute
  */
 void PlainTestStarted(const char *testName, const char *suiteName,
-                      const char *testDescription, int execKey, time_t startTime);
+                      const char *testDescription, Uint64 execKey, time_t startTime);
 
 /*!
  * Prints information about the test test that was just executed
