@@ -182,6 +182,7 @@ TestCaseSetUpFp LoadTestSetUpFunction(void *suite);
 TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
 CountFailedAssertsFp LoadCountFailedAssertsFunction(void *suite);
 void KillHungTestInChildProcess(int signum);
+void UnloadTestSuites(TestSuiteReference *suites);
 
 
 /*! Pointers to selected logger implementation */
@@ -211,18 +212,26 @@ LogFp Log = NULL;
  * \param extension What file extension is used with dynamic objects
  *
  * \return Pointer to TestSuiteReference which holds all the info about suites
+ * 		   or NULL on failure
  */
 TestSuiteReference *
 ScanForTestSuites(char *directoryName, char *extension)
 {
 	typedef struct dirent Entry;
-	DIR *directory = opendir(directoryName);
 	TestSuiteReference *suites = NULL;
+	TestSuiteReference *reference = NULL;
 	Entry *entry = NULL;
+	DIR *directory = NULL;
 
+	if(directoryName == NULL || extension == NULL ||
+		SDL_strlen(directoryName) == 0 || SDL_strlen(extension) == 0) {
+		return NULL;
+	}
+
+	directory = opendir(directoryName);
 	if(!directory) {
 		fprintf(stderr, "Failed to open test suite directory: %s\n", directoryName);
-		perror("Error message");
+		perror("Error message: ");
 		exit(2);
 	}
 
@@ -233,6 +242,10 @@ ScanForTestSuites(char *directoryName, char *extension)
 			char *name = strtok(entry->d_name, delimiters);
 			char *ext = strtok(NULL, delimiters);
 
+			if(name == NULL || ext == NULL) {
+				goto error;
+			}
+
 			// filter out all other suites but the selected test suite
 			int ok = 1;
 			if(only_selected_suite) {
@@ -241,22 +254,21 @@ ScanForTestSuites(char *directoryName, char *extension)
 
 			if(ok && SDL_strncmp(ext, extension, SDL_strlen(extension))  == 0) {
 				// create test suite reference
-				TestSuiteReference *reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
+				reference = (TestSuiteReference *) SDL_malloc(sizeof(TestSuiteReference));
 				if(reference == NULL) {
-					fprintf(stderr, "Allocating TestSuiteReference failed\n");
+					goto error;
 				}
 
 				memset(reference, 0, sizeof(TestSuiteReference));
 
-				const int dirSize = SDL_strlen(directoryName);
-				const int extSize = SDL_strlen(ext);
-				const int nameSize = SDL_strlen(name) + 1;
+				const Uint32 dirSize = SDL_strlen(directoryName);
+				const Uint32 extSize = SDL_strlen(ext);
+				const Uint32 nameSize = SDL_strlen(name) + 1;
 
 				// copy the name
 				reference->name = SDL_malloc(nameSize * sizeof(char));
 				if(reference->name == NULL) {
-					SDL_free(reference);
-					return NULL;
+					goto error;
 				}
 
 				SDL_snprintf(reference->name, nameSize, "%s", name);
@@ -265,9 +277,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 				const Uint32 dpSize = dirSize + nameSize + 1 + extSize + 1;
 				reference->directoryPath = SDL_malloc(dpSize * sizeof(char));
 				if(reference->directoryPath == NULL) {
-					SDL_free(reference->name);
-					SDL_free(reference);
-					return NULL;
+					goto error;
 				}
 
 				SDL_snprintf(reference->directoryPath, dpSize, "%s%s.%s",
@@ -279,7 +289,23 @@ ScanForTestSuites(char *directoryName, char *extension)
 		}
 	}
 
-	closedir(directory);
+	goto finished;
+
+	error:
+	if(reference) {
+		SDL_free(reference->name);
+		SDL_free(reference->directoryPath);
+		SDL_free(reference);
+	}
+
+	// Unload all the suites that are loaded thus far
+	UnloadTestSuites(suites);
+	suites = NULL;
+
+	finished:
+	if(directory) {
+		closedir(directory);
+	}
 
 	return suites;
 }
