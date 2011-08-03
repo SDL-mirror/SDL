@@ -45,7 +45,7 @@ void DeinitFuzzer();
  *
  * \returns Generated integer
  */
-int RandomInteger();
+Sint32 RandomInteger();
 
 
 /*!
@@ -53,29 +53,30 @@ int RandomInteger();
  *
  * \returns Generated integer
  */
-int RandomPositiveInteger();
+Uint32 RandomPositiveInteger();
 
 
 /*!
  * todo add markup
  */
-int RandomUint8BoundaryValue();
+Uint8 RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain);
 
 
 /*!
  * todo add markup
  */
-int RandomInt8BoundaryValue();
+Sint8 RandomSint8BoundaryValue();
 
 
 /*!
- * Returns integer in range [min, max]. Min and max
- * value can be negative values as long as min is smaller than max.
- * Min and max also can't be the same value.
+ * Returns integer in range [min, max] (inclusive).
+ * Min and max values can be negative values.
+ * If Max in smaller tham min, then the values are swapped.
+ * Min and max are the same value, that value will be returned.
  *
- * \returns Generated integer or ? in error
+ * \returns Generated integer
  */
-int RandomIntegerInRange(int min, int max);
+Sint32 RandomIntegerInRange(Sint32 min, Sint32 max);
 
 
 /*!
@@ -116,5 +117,6 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  * 			On error, returns NULL.
  */
 Uint64 GenerateExecKey(char *runSeed, char *suiteName, char *testName, int interationNumber);
+
 
 #endif

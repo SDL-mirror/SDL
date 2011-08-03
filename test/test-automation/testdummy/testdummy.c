@@ -91,10 +91,18 @@ dummycase1(void *arg)
 {
 	AssertEquals(5, 5, "Assert message");
 
-	for(; 0 ;) {
-		Log(0, "uint8: %d", RandomUint8BoundaryValue());
-		Log(0, "int8: %d", RandomInt8BoundaryValue());
+	/*
+	for( ; 1 ; )
+		Log(0, "uint8 (same value): %u", RandomPositiveInteger());
+	// */
 
+
+	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
+
+
+	for(; 1 ;) {
+		Log(0, "uint8: %u", RandomUint8BoundaryValue(10, 20, SDL_FALSE));
+		//Log(0, "int8: %d", RandomInt8BoundaryValue());
 	}
 
 	for(; 0 ;) {
