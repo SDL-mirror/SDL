@@ -81,7 +81,7 @@ class SDL_BWin:public BDirectWindow
         _buffer_created = _buffer_dirty = false;
         _trash_window_buffer = false;
         _buffer_locker = new BLocker();
-        _window_buffer = NULL;
+        _bitmap = NULL;
         
         _draw_thread_id = spawn_thread(BE_DrawThread, "drawing_thread",
         					B_NORMAL_PRIORITY, (void*) this);
@@ -394,27 +394,29 @@ class SDL_BWin:public BDirectWindow
 	uint32 GetRowBytes() { return _row_bytes; }
 	int32 GetFbX() { return _bounds.left; }
 	int32 GetFbY() { return _bounds.top; }
-	int32 GetFbHeight() { return _bounds.bottom - _bounds.top + 1; }
-	int32 GetFbWidth() { return _bounds.right - _bounds.left + 1; }
+//	int32 GetFbHeight() { return _bounds.bottom - _bounds.top + 1; }
+//	int32 GetFbWidth() { return _bounds.right - _bounds.left + 1; }
 	bool ConnectionEnabled() { return !_connection_disabled; }
 	bool Connected() { return _connected; }
 	clipping_rect *GetClips() { return _clips; }
 	int32 GetNumClips() { return _num_clips; }
 	uint8* GetBufferPx() { return _bits; }
 	int32 GetBytesPerPx() { return _bytes_per_px; }
-	uint8* GetWindowFramebuffer() { return _window_buffer; }
+//	uint8* GetWindowFramebuffer() { return _window_buffer; }
 	bool CanTrashWindowBuffer() { return _trash_window_buffer; }
 	bool BufferExists() { return _buffer_created; }
 	bool BufferIsDirty() { return _buffer_dirty; }
+	BBitmap *GetBitmap() { return _bitmap; }
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
 	void SetBufferExists(bool bufferExists) { _buffer_created = bufferExists; }
-	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
+//	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
 	void LockBuffer() {	_buffer_locker->Lock(); }
 	void UnlockBuffer() { _buffer_locker->Unlock(); }
 	void SetBufferDirty(bool bufferDirty) { _buffer_dirty = bufferDirty; }
 	void SetTrashBuffer(bool trash) { _trash_window_buffer = trash; 	}
+	void SetBitmap(BBitmap *bitmap) { _bitmap = bitmap; }
 	
 	
 private:
@@ -588,9 +590,11 @@ private:
     clipping_rect  *_clips;
     int32			_num_clips;
     int32			_bytes_per_px;
-    uint8		   *_window_buffer;	/* A copy of the window buffer */
+//    uint8		   *_window_buffer;	/* A copy of the window buffer */
     bool			_trash_window_buffer;
     thread_id		_draw_thread_id;
+    
+    BBitmap		   *_bitmap;
 };
 
 #endif

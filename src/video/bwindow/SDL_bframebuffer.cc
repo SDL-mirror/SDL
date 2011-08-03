@@ -60,17 +60,21 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	int32 bpp = ColorSpaceToBitsPerPixel(bmode.space);
 	*format = BPPToSDLPxFormat(bpp);
 
-	/* pitch = width of screen, in bytes */
-	*pitch = bwin->GetFbWidth() * bwin->GetBytesPerPx();
-
-	/* Create a copy of the pixel buffer if it doesn't recycle */
-	*pixels = bwin->GetWindowFramebuffer();
-	if( (*pixels) != NULL ) {
-		SDL_free(*pixels);
+	/* Create the new bitmap object */
+	BBitmap *bitmap = bwin->GetBitmap();
+	if(bitmap) {
+		delete bitmap;
 	}
-	*pixels = SDL_calloc((*pitch) * bwin->GetFbHeight() * 
-		bwin->GetBytesPerPx(), sizeof(uint8));
-	bwin->SetWindowFramebuffer((uint8*)(*pixels));
+	bitmap = new BBitmap(bwin->Bounds(), (color_space)bmode.space,
+			false,	/* Views not accepted */
+			true);	/* Contiguous memory required */
+	bwin->SetBitmap(bitmap);
+	
+	/* Set the pixel pointer */
+	*pixels = bitmap->Bits();
+
+	/* pitch = width of window, in bytes */
+	*pitch = bitmap->BytesPerRow();
 
 	bwin->SetBufferExists(true);
 	bwin->SetTrashBuffer(false);
@@ -106,13 +110,13 @@ int32 BE_DrawThread(void *data) {
 	while(bwin->ConnectionEnabled()) {
 		if( bwin->Connected() && bwin->BufferExists() && bwin->BufferIsDirty() ) {
 			bwin->LockBuffer();
-			int32 windowPitch = window->surface->pitch;
+			BBitmap *bitmap = bwin->GetBitmap();
+			int32 windowPitch = bitmap->BytesPerRow();
 			int32 bufferPitch = bwin->GetRowBytes();
 			uint8 *windowpx;
 			uint8 *bufferpx;
 
 			int32 BPP = bwin->GetBytesPerPx();
-			uint8 *windowBaseAddress = (uint8*)window->surface->pixels;
 			int32 windowSub = bwin->GetFbX() * BPP +
 						  bwin->GetFbY() * windowPitch;
 			clipping_rect *clips = bwin->GetClips();
@@ -128,8 +132,9 @@ int32 BE_DrawThread(void *data) {
 				int32 height = clips[i].bottom - clips[i].top + 1;
 				bufferpx = bwin->GetBufferPx() + 
 					clips[i].top * bufferPitch + clips[i].left * BPP;
-				windowpx = windowBaseAddress + 
-					clips[i].top * windowPitch + clips[i].left * BPP - windowSub;
+				windowpx = (uint8*)bitmap->Bits(); + 
+					clips[i].top * windowPitch + clips[i].left * BPP -
+					windowSub;
 
 				/* Copy each row of pixels from the window buffer into the frame
 				   buffer */
@@ -160,9 +165,9 @@ void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
 	bwin->LockBuffer();
 	
 	/* Free and clear the window buffer */
-	uint8* winBuffer = bwin->GetWindowFramebuffer();
-	SDL_free(winBuffer);
-	bwin->SetWindowFramebuffer(NULL);
+	BBitmap *bitmap = bwin->GetBitmap();
+	delete bitmap;
+	bwin->SetBitmap(NULL);
 	bwin->SetBufferExists(false);
 	bwin->UnlockBuffer();
 }
