@@ -38,20 +38,32 @@ static inline SDL_BApp *_GetBeApp() {
 }
 
 int _InitWindow(_THIS, SDL_Window *window) {
+	uint32 flags = 0;
 	BRect bounds(
         window->x,
         window->y,
         window->x + window->w - 1,	//BeWindows have an off-by-one px w/h thing
         window->y + window->h - 1
     );
+    
+    if(window->flags & SDL_WINDOW_FULLSCREEN) {
+    }
+    if(window->flags & SDL_WINDOW_OPENGL) {
+    }
+    if(!(window->flags & SDL_WINDOW_RESIZABLE)) {
+    	flags |= B_NOT_RESIZABLE;
+    }
+    if(window->flags & SDL_WINDOW_BORDERLESS) {
+    }
 
-    SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds);
+    SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds, flags);
     if(bwin == NULL)
     	return ENOMEM;
 
     window->driverdata = bwin;
     int32 winID = _GetBeApp()->GetID(window);
     bwin->SetID(winID);
+
     return 0;
 }
 
@@ -59,6 +71,7 @@ int BE_CreateWindow(_THIS, SDL_Window *window) {
 	if(_InitWindow(_this, window) == ENOMEM)
 		return ENOMEM;
 	
+	printf("Flags = 0x%x\n", window->flags);
 	/* Start window loop */
     _ToBeWin(window)->Show();
     return 0;
@@ -75,6 +88,11 @@ int BE_CreateWindowFrom(_THIS, SDL_Window * window, const void *data) {
 	window->y = (int)otherBWin->Frame().top;
 	window->w = (int)otherBWin->Frame().Width();
 	window->h = (int)otherBWin->Frame().Height();
+	
+	/* Set SDL flags */
+	if(!(otherBWin->Flags() & B_NOT_RESIZABLE)) {
+		window->flags |= SDL_WINDOW_RESIZABLE;
+	}
 	
 	/* If we are out of memory, return the error code */
 	if(_InitWindow(_this, window) == ENOMEM)

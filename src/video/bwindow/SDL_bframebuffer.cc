@@ -53,7 +53,7 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	
 	/* Make sure we have exclusive access to frame buffer data */
 	bwin->LockBuffer();
-	
+
 	/* format */
 	display_mode bmode;
 	bscreen.GetMode(&bmode);
