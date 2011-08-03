@@ -68,6 +68,7 @@ struct haptic_hweffect
 /*
  * Internal stuff.
  */
+static SDL_bool coinitialized = SDL_FALSE;
 static LPDIRECTINPUT dinput = NULL;
 
 
@@ -147,15 +148,18 @@ SDL_SYS_HapticInit(void)
 
     SDL_numhaptics = 0;
 
-    ret = CoInitialize(NULL);
+    ret = WIN_CoInitialize();
     if (FAILED(ret)) {
         DI_SetError("Coinitialize", ret);
         return -1;
     }
 
+    coinitialized = SDL_TRUE;
+
     ret = CoCreateInstance(&CLSID_DirectInput, NULL, CLSCTX_INPROC_SERVER,
                            &IID_IDirectInput, (LPVOID) & dinput);
     if (FAILED(ret)) {
+        SDL_SYS_HapticQuit();
         DI_SetError("CoCreateInstance", ret);
         return -1;
     }
@@ -163,12 +167,14 @@ SDL_SYS_HapticInit(void)
     /* Because we used CoCreateInstance, we need to Initialize it, first. */
     instance = GetModuleHandle(NULL);
     if (instance == NULL) {
+        SDL_SYS_HapticQuit();
         SDL_SetError("GetModuleHandle() failed with error code %d.",
                      GetLastError());
         return -1;
     }
     ret = IDirectInput_Initialize(dinput, instance, DIRECTINPUT_VERSION);
     if (FAILED(ret)) {
+        SDL_SYS_HapticQuit();
         DI_SetError("Initializing DirectInput device", ret);
         return -1;
     }
@@ -181,6 +187,7 @@ SDL_SYS_HapticInit(void)
                                    DIEDFL_FORCEFEEDBACK |
                                    DIEDFL_ATTACHEDONLY);
     if (FAILED(ret)) {
+        SDL_SYS_HapticQuit();
         DI_SetError("Enumerating DirectInput devices", ret);
         return -1;
     }
@@ -664,8 +671,15 @@ SDL_SYS_HapticQuit(void)
         }
     }
 
-    IDirectInput_Release(dinput);
-    dinput = NULL;
+    if (dinput != NULL) {
+        IDirectInput_Release(dinput);
+        dinput = NULL;
+    }
+
+    if (coinitialized) {
+        WIN_CoUninitialize();
+        coinitialized = SDL_FALSE;
+    }
 }
 
 
