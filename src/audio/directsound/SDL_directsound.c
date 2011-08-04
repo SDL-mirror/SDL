@@ -505,7 +505,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Create the audio buffer to which we write */
-    this->hidden->num_buffers = CreateSecondary(this, mainwin, &waveformat);
+    this->hidden->num_buffers = CreateSecondary(this, NULL, &waveformat);
     if (this->hidden->num_buffers < 0) {
         DSOUND_CloseDevice(this);
         return 0;
