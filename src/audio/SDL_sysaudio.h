@@ -45,9 +45,11 @@ typedef struct SDL_AudioDriverImpl
     void (*UnlockDevice) (_THIS);
     void (*Deinitialize) (void);
 
+    /* !!! FIXME: add pause(), so we can optimize instead of mixing silence. */
+
     /* Some flags to push duplicate code into the core and reduce #ifdefs. */
     int ProvidesOwnCallbackThread;
-    int SkipMixerLock;
+    int SkipMixerLock;  /* !!! FIXME: do we need this anymore? */
     int HasCaptureSupport;
     int OnlyHasDefaultOutputDevice;
     int OnlyHasDefaultInputDevice;

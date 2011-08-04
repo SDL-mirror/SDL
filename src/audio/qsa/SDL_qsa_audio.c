@@ -113,6 +113,7 @@ QSA_CheckBuggyCards(_THIS, unsigned long checkfor)
     return 0;
 }
 
+/* !!! FIXME: does this need to be here? Does the SDL version not work? */
 static void
 QSA_ThreadInit(_THIS)
 {
