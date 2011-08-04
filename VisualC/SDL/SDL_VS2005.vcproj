@@ -580,7 +580,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\directx.h"
+			RelativePath="..\..\src\audio\directsound\directx.h"
 			>
 		</File>
 		<File
@@ -840,11 +840,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\SDL_dx5audio.c"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\SDL_dx5audio.h"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
 			>
 		</File>
 		<File

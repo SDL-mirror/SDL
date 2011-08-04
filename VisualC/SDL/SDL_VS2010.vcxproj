@@ -250,7 +250,7 @@
     <ClInclude Include="..\..\src\core\windows\SDL_windows.h" />
     <ClInclude Include="..\..\src\events\blank_cursor.h" />
     <ClInclude Include="..\..\src\events\default_cursor.h" />
-    <ClInclude Include="..\..\src\audio\windx5\directx.h" />
+    <ClInclude Include="..\..\src\audio\directsound\directx.h" />
     <ClInclude Include="..\..\src\events\SDL_clipboardevents_c.h" />
     <ClInclude Include="..\..\src\events\SDL_gesture_c.h" />
     <ClInclude Include="..\..\src\events\SDL_touch_c.h" />
@@ -279,7 +279,7 @@
     <ClInclude Include="..\..\src\audio\windib\SDL_dibaudio.h" />
     <ClInclude Include="..\..\src\audio\disk\SDL_diskaudio.h" />
     <ClInclude Include="..\..\src\audio\dummy\SDL_dummyaudio.h" />
-    <ClInclude Include="..\..\src\audio\windx5\SDL_dx5audio.h" />
+    <ClInclude Include="..\..\src\audio\directsound\SDL_directsound.h" />
     <ClInclude Include="..\..\src\SDL_error_c.h" />
     <ClInclude Include="..\..\src\SDL_hints_c.h" />
     <ClInclude Include="..\..\src\events\SDL_events_c.h" />
@@ -380,7 +380,7 @@
     <ClCompile Include="..\..\src\audio\windib\SDL_dibaudio.c" />
     <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
     <ClCompile Include="..\..\src\audio\dummy\SDL_dummyaudio.c" />
-    <ClCompile Include="..\..\src\audio\windx5\SDL_dx5audio.c" />
+    <ClCompile Include="..\..\src\audio\directsound\SDL_directsound.c" />
     <ClCompile Include="..\..\src\joystick\windows\SDL_dxjoystick.c" />
     <ClCompile Include="..\..\src\SDL_error.c" />
     <ClCompile Include="..\..\src\events\SDL_events.c" />

@@ -2,7 +2,7 @@
 #ifndef _directx_h
 #define _directx_h
 
-/* Include all of the DirectX 5.0 headers and adds any necessary tweaks */
+/* Include all of the DirectX 8.0 headers and adds any necessary tweaks */
 
 #include "../../core/windows/SDL_windows.h"
 #include <mmsystem.h>
@@ -70,7 +70,7 @@
  */
 /* We need these defines to mark what version of DirectX API we use */
 #define DIRECTDRAW_VERSION  0x0700
-#define DIRECTSOUND_VERSION 0x0500
+#define DIRECTSOUND_VERSION 0x0800
 #define DIRECTINPUT_VERSION 0x0500
 
 #include <ddraw.h>

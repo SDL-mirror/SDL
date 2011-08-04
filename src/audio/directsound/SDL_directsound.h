@@ -20,8 +20,8 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_dx5audio_h
-#define _SDL_dx5audio_h
+#ifndef _SDL_directsound_h
+#define _SDL_directsound_h
 
 #include "directx.h"
 
@@ -41,6 +41,6 @@ struct SDL_PrivateAudioData
     Uint8 *locked_buf;
 };
 
-#endif /* _SDL_dx5audio_h */
+#endif /* _SDL_directsound_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
