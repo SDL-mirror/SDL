@@ -196,7 +196,7 @@ GenerateUnsignedBoundaryValues(const Uint64 maxValue,
 			tempBuf[index++] = boundary1 - 1;
 		}
 
-		if(boundary2 < maxValue) {
+		if(boundary2 < maxValue && boundary2 < UINT64_MAX) {
 			tempBuf[index++] = boundary2 + 1;
 		}
 	}
