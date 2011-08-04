@@ -57,29 +57,93 @@ Uint32 RandomPositiveInteger();
 
 
 /*!
- * todo add markup
+ * Returns a random boundary value for Uint8 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomUint8BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
+ * RandomUint8BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
+ * RandomUint8BoundaryValue(0, 99, SDL_FALSE) returns 100
+ * RandomUint8BoundaryValue(0, 255, SDL_FALSE) returns -1 (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Uint8 RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain);
 
 /*!
- * todo add markup
+ * Returns a random boundary value for Uint16 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomUint16BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
+ * RandomUint16BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
+ * RandomUint16BoundaryValue(0, 99, SDL_FALSE) returns 100
+ * RandomUint16BoundaryValue(0, 0xFFFF, SDL_FALSE) returns -1 (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Uint16 RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDomain);
 
 /*!
- * todo add markup
+ * Returns a random boundary value for Uint32 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomUint32BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
+ * RandomUint32BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
+ * RandomUint32BoundaryValue(0, 99, SDL_FALSE) returns 100
+ * RandomUint32BoundaryValue(0, 0xFFFFFFFF, SDL_FALSE) returns -1 (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Uint32 RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDomain);
 
 /*!
- * todo add markup
+ * Returns a random boundary value for Uint64 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomUint64BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
+ * RandomUint64BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
+ * RandomUint64BoundaryValue(0, 99, SDL_FALSE) returns 100
+ * RandomUint64BoundaryValue(0, 0xFFFFFFFFFFFFFFFF, SDL_FALSE) returns -1 (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Uint64 RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDomain);
 
-
-
 /*!
- * todo add markup
+ * Returns random Sint8 boundary value.
+ *
+ * Note: not implemented.
  */
 Sint8 RandomSint8BoundaryValue();
 
