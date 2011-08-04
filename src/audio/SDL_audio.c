@@ -58,7 +58,6 @@ extern AudioBootStrap WINMM_bootstrap;
 extern AudioBootStrap PAUDIO_bootstrap;
 extern AudioBootStrap BEOSAUDIO_bootstrap;
 extern AudioBootStrap COREAUDIO_bootstrap;
-extern AudioBootStrap COREAUDIOIPHONE_bootstrap;
 extern AudioBootStrap SNDMGR_bootstrap;
 extern AudioBootStrap DISKAUD_bootstrap;
 extern AudioBootStrap DUMMYAUD_bootstrap;
@@ -115,9 +114,6 @@ static const AudioBootStrap *const bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_COREAUDIO
     &COREAUDIO_bootstrap,
-#endif
-#if SDL_AUDIO_DRIVER_COREAUDIOIPHONE
-    &COREAUDIOIPHONE_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_DISK
     &DISKAUD_bootstrap,

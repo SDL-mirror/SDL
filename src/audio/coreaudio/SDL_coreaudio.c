@@ -20,12 +20,15 @@
 */
 #include "SDL_config.h"
 
+#if MACOSX_COREAUDIO
 #include <CoreAudio/CoreAudio.h>
 #include <CoreServices/CoreServices.h>
-#include <AudioUnit/AudioUnit.h>
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
 #include <AudioUnit/AUNTComponent.h>
 #endif
+#endif
+
+#include <AudioUnit/AudioUnit.h>
 
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
@@ -34,6 +37,16 @@
 
 #define DEBUG_COREAUDIO 0
 
+static void COREAUDIO_CloseDevice(_THIS);
+
+#define CHECK_RESULT(msg) \
+    if (result != noErr) { \
+        COREAUDIO_CloseDevice(this); \
+        SDL_SetError("CoreAudio error (%s): %d", msg, (int) result); \
+        return 0; \
+    }
+
+#if MACOSX_COREAUDIO
 typedef void (*addDevFn)(const char *name, AudioDeviceID devId, void *data);
 
 static void
@@ -172,6 +185,62 @@ COREAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
     build_device_list(iscapture, addToDevList, addfn);
 }
 
+static int
+find_device_by_name(_THIS, const char *devname, int iscapture)
+{
+    AudioDeviceID devid = 0;
+    OSStatus result = noErr;
+    UInt32 size = 0;
+    UInt32 alive = 0;
+    pid_t pid = 0;
+
+    if (devname == NULL) {
+        size = sizeof(AudioDeviceID);
+        const AudioHardwarePropertyID propid =
+            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
+             kAudioHardwarePropertyDefaultOutputDevice);
+
+        result = AudioHardwareGetProperty(propid, &size, &devid);
+        CHECK_RESULT("AudioHardwareGetProperty (default device)");
+    } else {
+        FindDevIdData data;
+        SDL_zero(data);
+        data.findname = devname;
+        build_device_list(iscapture, findDevId, &data);
+        if (!data.found) {
+            SDL_SetError("CoreAudio: No such audio device.");
+            return 0;
+        }
+        devid = data.devId;
+    }
+
+    size = sizeof(alive);
+    result = AudioDeviceGetProperty(devid, 0, iscapture,
+                                    kAudioDevicePropertyDeviceIsAlive,
+                                    &size, &alive);
+    CHECK_RESULT
+        ("AudioDeviceGetProperty (kAudioDevicePropertyDeviceIsAlive)");
+
+    if (!alive) {
+        SDL_SetError("CoreAudio: requested device exists, but isn't alive.");
+        return 0;
+    }
+
+    size = sizeof(pid);
+    result = AudioDeviceGetProperty(devid, 0, iscapture,
+                                    kAudioDevicePropertyHogMode, &size, &pid);
+
+    /* some devices don't support this property, so errors are fine here. */
+    if ((result == noErr) && (pid != -1)) {
+        SDL_SetError("CoreAudio: requested device is being hogged.");
+        return 0;
+    }
+
+    this->hidden->deviceID = devid;
+    return 1;
+}
+#endif
+
 /* The CoreAudio callback */
 static OSStatus
 outputCallback(void *inRefCon,
@@ -272,7 +341,11 @@ COREAUDIO_CloseDevice(_THIS)
                                           scope, bus, &callback,
                                           sizeof(callback));
 
+            /* !!! FIXME: how does iOS free this? */
+            #if MACOSX_COREAUDIO
             CloseComponent(this->hidden->audioUnit);
+            #endif
+
             this->hidden->audioUnitOpened = 0;
         }
         SDL_free(this->hidden->buffer);
@@ -282,105 +355,65 @@ COREAUDIO_CloseDevice(_THIS)
 }
 
 
-#define CHECK_RESULT(msg) \
-    if (result != noErr) { \
-        COREAUDIO_CloseDevice(this); \
-        SDL_SetError("CoreAudio error (%s): %d", msg, (int) result); \
-        return 0; \
-    }
-
-static int
-find_device_by_name(_THIS, const char *devname, int iscapture)
-{
-    AudioDeviceID devid = 0;
-    OSStatus result = noErr;
-    UInt32 size = 0;
-    UInt32 alive = 0;
-    pid_t pid = 0;
-
-    if (devname == NULL) {
-        size = sizeof(AudioDeviceID);
-        const AudioHardwarePropertyID propid =
-            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
-             kAudioHardwarePropertyDefaultOutputDevice);
-
-        result = AudioHardwareGetProperty(propid, &size, &devid);
-        CHECK_RESULT("AudioHardwareGetProperty (default device)");
-    } else {
-        FindDevIdData data;
-        SDL_zero(data);
-        data.findname = devname;
-        build_device_list(iscapture, findDevId, &data);
-        if (!data.found) {
-            SDL_SetError("CoreAudio: No such audio device.");
-            return 0;
-        }
-        devid = data.devId;
-    }
-
-    size = sizeof(alive);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyDeviceIsAlive,
-                                    &size, &alive);
-    CHECK_RESULT
-        ("AudioDeviceGetProperty (kAudioDevicePropertyDeviceIsAlive)");
-
-    if (!alive) {
-        SDL_SetError("CoreAudio: requested device exists, but isn't alive.");
-        return 0;
-    }
-
-    size = sizeof(pid);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyHogMode, &size, &pid);
-
-    /* some devices don't support this property, so errors are fine here. */
-    if ((result == noErr) && (pid != -1)) {
-        SDL_SetError("CoreAudio: requested device is being hogged.");
-        return 0;
-    }
-
-    this->hidden->deviceID = devid;
-    return 1;
-}
-
-
 static int
 prepare_audiounit(_THIS, const char *devname, int iscapture,
                   const AudioStreamBasicDescription * strdesc)
 {
     OSStatus result = noErr;
     AURenderCallbackStruct callback;
+#if MACOSX_COREAUDIO
     ComponentDescription desc;
     Component comp = NULL;
+#else
+    AudioComponentDescription desc;
+    AudioComponent comp = NULL;
+#endif
     const AudioUnitElement output_bus = 0;
     const AudioUnitElement input_bus = 1;
     const AudioUnitElement bus = ((iscapture) ? input_bus : output_bus);
     const AudioUnitScope scope = ((iscapture) ? kAudioUnitScope_Output :
                                   kAudioUnitScope_Input);
 
+#if MACOSX_COREAUDIO
     if (!find_device_by_name(this, devname, iscapture)) {
         SDL_SetError("Couldn't find requested CoreAudio device");
         return 0;
     }
-
-    SDL_memset(&desc, '\0', sizeof(ComponentDescription));
+#endif
+    
+    SDL_zero(desc);
     desc.componentType = kAudioUnitType_Output;
-    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
+#if MACOSX_COREAUDIO
+    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     comp = FindNextComponent(NULL, &desc);
+#else
+    desc.componentSubType = kAudioUnitSubType_RemoteIO;  /* !!! FIXME: ? */
+    comp = AudioComponentFindNext(NULL, &desc);
+#endif
+
     if (comp == NULL) {
         SDL_SetError("Couldn't find requested CoreAudio component");
         return 0;
     }
 
     /* Open & initialize the audio unit */
+#if MACOSX_COREAUDIO
     result = OpenAComponent(comp, &this->hidden->audioUnit);
     CHECK_RESULT("OpenAComponent");
+#else
+    /*
+       AudioComponentInstanceNew only available on iPhone OS 2.0 and Mac OS X 10.6
+       We can't use OpenAComponent on iPhone because it is not present
+     */
+    result = AudioComponentInstanceNew(comp, &this->hidden->audioUnit);
+    CHECK_RESULT("AudioComponentInstanceNew");
+#endif
 
     this->hidden->audioUnitOpened = 1;
 
+#if MACOSX_COREAUDIO
     result = AudioUnitSetProperty(this->hidden->audioUnit,
                                   kAudioOutputUnitProperty_CurrentDevice,
                                   kAudioUnitScope_Global, 0,
@@ -388,6 +421,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
                                   sizeof(AudioDeviceID));
     CHECK_RESULT
         ("AudioUnitSetProperty (kAudioOutputUnitProperty_CurrentDevice)");
+#endif
 
     /* Set the data format of the audio unit. */
     result = AudioUnitSetProperty(this->hidden->audioUnit,
@@ -498,16 +532,22 @@ static int
 COREAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
-    impl->DetectDevices = COREAUDIO_DetectDevices;
     impl->OpenDevice = COREAUDIO_OpenDevice;
     impl->CloseDevice = COREAUDIO_CloseDevice;
+
+#if MACOSX_COREAUDIO
+    impl->DetectDevices = COREAUDIO_DetectDevices;
+#else
+    impl->OnlyHasDefaultOutputDevice = 1;
+#endif
+    
     impl->ProvidesOwnCallbackThread = 1;
 
     return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap COREAUDIO_bootstrap = {
-    "coreaudio", "Mac OS X CoreAudio", COREAUDIO_Init, 0
+    "coreaudio", "CoreAudio", COREAUDIO_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

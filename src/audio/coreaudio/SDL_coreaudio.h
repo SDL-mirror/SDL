@@ -25,6 +25,10 @@
 
 #include "../SDL_sysaudio.h"
 
+#if !defined(__IPHONEOS__)
+#define MACOSX_COREAUDIO 1
+#endif
+
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
@@ -35,7 +39,9 @@ struct SDL_PrivateAudioData
     void *buffer;
     UInt32 bufferOffset;
     UInt32 bufferSize;
+#if MACOSX_COREAUDIO
     AudioDeviceID deviceID;
+#endif
 };
 
 #endif /* _SDL_coreaudio_h */

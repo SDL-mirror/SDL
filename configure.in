@@ -2306,7 +2306,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/coreaudio/*.c"
             have_audio=yes
         fi
         # Set up files for the joystick library
