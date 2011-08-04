@@ -276,7 +276,7 @@
     <ClInclude Include="..\..\src\video\SDL_blit_copy.h" />
     <ClInclude Include="..\..\src\video\SDL_blit_slow.h" />
     <ClInclude Include="..\..\src\video\SDL_shape_internals.h" />
-    <ClInclude Include="..\..\src\audio\windib\SDL_dibaudio.h" />
+    <ClInclude Include="..\..\src\audio\winmm\SDL_winmm.h" />
     <ClInclude Include="..\..\src\audio\disk\SDL_diskaudio.h" />
     <ClInclude Include="..\..\src\audio\dummy\SDL_dummyaudio.h" />
     <ClInclude Include="..\..\src\audio\directsound\SDL_directsound.h" />
@@ -377,7 +377,7 @@
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
     <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
     <ClCompile Include="..\..\src\video\SDL_shape.c" />
-    <ClCompile Include="..\..\src\audio\windib\SDL_dibaudio.c" />
+    <ClCompile Include="..\..\src\audio\winmm\SDL_winmm.c" />
     <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
     <ClCompile Include="..\..\src\audio\dummy\SDL_dummyaudio.c" />
     <ClCompile Include="..\..\src\audio\directsound\SDL_directsound.c" />

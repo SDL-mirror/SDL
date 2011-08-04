@@ -796,11 +796,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windib\SDL_dibaudio.c"
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windib\SDL_dibaudio.h"
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
 			>
 		</File>
 		<File

@@ -20,8 +20,8 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_dibaudio_h
-#define _SDL_dibaudio_h
+#ifndef _SDL_winmm_h
+#define _SDL_winmm_h
 
 #include "../SDL_sysaudio.h"
 
@@ -32,13 +32,14 @@
 
 struct SDL_PrivateAudioData
 {
-    HWAVEOUT sound;
+    HWAVEOUT hout;
+    HWAVEIN hin;
     HANDLE audio_sem;
     Uint8 *mixbuf;              /* The raw allocated mixing buffer */
     WAVEHDR wavebuf[NUM_BUFFERS];       /* Wave audio fragments */
     int next_buffer;
 };
 
-#endif /* _SDL_dibaudio_h */
+#endif /* _SDL_winmm_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -2057,8 +2057,8 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
                 AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
@@ -2144,8 +2144,8 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
                 AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
