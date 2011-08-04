@@ -148,96 +148,28 @@ SetDSerror(const char *function, int code)
 }
 
 
-
-/* !!! FIXME: this is a cut and paste of SDL_FreeUnixAudioDevices(),
- * !!! FIXME:  which is more proof this needs to be managed in SDL_audio.c
- * !!! FIXME:  and not in drivers.
- */
-static void
-FreeDSoundAudioDevices(char ***devices, int *devCount)
+static BOOL CALLBACK
+FindAllDevs(LPGUID guid, LPCWSTR desc, LPCWSTR module, LPVOID data)
 {
-    int i = *devCount;
-    if ((i > 0) && (*devices != NULL)) {
-        while (i--) {
-            SDL_free((*devices)[i]);
+    SDL_AddAudioDevice addfn = (SDL_AddAudioDevice) data;
+    if (guid != NULL) {  /* skip default device */
+        char *str = utf16_to_utf8(desc);
+        if (str != NULL) {
+            addfn(str);
+            SDL_free(str);  /* addfn() makes a copy of this string. */
         }
     }
-
-    if (*devices != NULL) {
-        SDL_free(*devices);
-    }
-
-    *devices = NULL;
-    *devCount = 0;
-}
-
-
-typedef struct FindAllDevsData
-{
-    const char **devs;
-    unsigned int devcount;
-} FindAllDevsData;
-
-static BOOL CALLBACK
-FindAllDevs(LPGUID guid, LPCWSTR desc, LPCWSTR module, LPVOID _data)
-{
-    FindAllDevsData *data = (FindAllDevsData *) _data;
-    void *ptr;
-    char *name;
-
-    if (guid == NULL)
-        return TRUE;  /* skip default device, go to the next one. */
-
-    ptr = SDL_realloc(data->devs, ((data->devcount) + 1) * sizeof(char *));
-    if (ptr == NULL)
-        return TRUE;  /* oh well. */
-
-    data->devs = (const char **) ptr;
-    name = utf16_to_utf8(desc);
-    if (name != NULL)
-        data->devs[data->devcount++] = name;
-
     return TRUE;  /* keep enumerating. */
 }
 
-static char **outputDevices = NULL;
-static int outputDeviceCount = 0;
-static char **inputDevices = NULL;
-static int inputDeviceCount = 0;
-
-static int
-DSOUND_DetectDevices(int iscapture)
+static void
+DSOUND_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    FindAllDevsData data;
-    data.devs = NULL;
-    data.devcount = 0;
-
     if (iscapture) {
-        FreeDSoundAudioDevices(&inputDevices, &inputDeviceCount);
-        pDirectSoundCaptureEnumerateW(FindAllDevs, &devs);
-        inputDevices = data.devs;
-        inputDeviceCount = data.devcount;
+        pDirectSoundCaptureEnumerateW(FindAllDevs, addfn);
     } else {
-        FreeDSoundAudioDevices(&outputDevices, &outputDeviceCount);
-        pDirectSoundEnumerateW(FindAllDevs, &devs);
-        outputDevices = data.devs;
-        outputDeviceCount = data.devcount;
+        pDirectSoundEnumerateW(FindAllDevs, addfn);
     }
-
-    return data.devcount;
-}
-
-static const char *
-DSOUND_GetDeviceName(int index, int iscapture)
-{
-    if ((iscapture) && (index < inputDeviceCount)) {
-        return inputDevices[index];
-    } else if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index];
-    }
-
-    SDL_SetError("No such device");
-    return NULL;
 }
 
 
@@ -589,8 +521,6 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
 static void
 DSOUND_Deinitialize(void)
 {
-    FreeDSoundAudioDevices(&inputDevices, &inputDeviceCount);
-    FreeDSoundAudioDevices(&outputDevices, &outputDeviceCount);
     DSOUND_Unload();
 }
 
@@ -604,7 +534,6 @@ DSOUND_Init(SDL_AudioDriverImpl * impl)
 
     /* Set the function pointers */
     impl->DetectDevices = DSOUND_DetectDevices;
-    impl->GetDeviceName = DSOUND_GetDeviceName;
     impl->OpenDevice = DSOUND_OpenDevice;
     impl->PlayDevice = DSOUND_PlayDevice;
     impl->WaitDevice = DSOUND_WaitDevice;

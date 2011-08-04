@@ -34,34 +34,36 @@
 
 #define DEBUG_COREAUDIO 0
 
-typedef struct COREAUDIO_DeviceList
-{
-    AudioDeviceID id;
-    const char *name;
-} COREAUDIO_DeviceList;
-
-static COREAUDIO_DeviceList *inputDevices = NULL;
-static int inputDeviceCount = 0;
-static COREAUDIO_DeviceList *outputDevices = NULL;
-static int outputDeviceCount = 0;
+typedef void (*addDevFn)(const char *name, AudioDeviceID devId, void *data);
 
 static void
-free_device_list(COREAUDIO_DeviceList ** devices, int *devCount)
+addToDevList(const char *name, AudioDeviceID devId, void *data)
 {
-    if (*devices) {
-        int i = *devCount;
-        while (i--)
-            SDL_free((void *) (*devices)[i].name);
-        SDL_free(*devices);
-        *devices = NULL;
-    }
-    *devCount = 0;
+    SDL_AddAudioDevice addfn = (SDL_AddAudioDevice) data;
+    addfn(name);
 }
 
+typedef struct
+{
+    const char *findname;
+    AudioDeviceID devId;
+    int found;
+} FindDevIdData;
 
 static void
-build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
-                  int *devCount)
+findDevId(const char *name, AudioDeviceID devId, void *_data)
+{
+    FindDevIdData *data = (FindDevIdData *) _data;
+    if (!data->found) {
+        if (SDL_strcmp(name, data->findname) == 0) {
+            data->found = 1;
+            data->devId = devId;
+        }
+    }
+}
+
+static void
+build_device_list(int iscapture, addDevFn addfn, void *addfndata)
 {
     Boolean outWritable = 0;
     OSStatus result = noErr;
@@ -69,8 +71,6 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
     AudioDeviceID *devs = NULL;
     UInt32 i = 0;
     UInt32 max = 0;
-
-    free_device_list(devices, devCount);
 
     result = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
                                           &size, &outWritable);
@@ -82,16 +82,12 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
     if (devs == NULL)
         return;
 
-    max = size / sizeof(AudioDeviceID);
-    *devices = (COREAUDIO_DeviceList *) SDL_malloc(max * sizeof(**devices));
-    if (*devices == NULL)
-        return;
-
     result = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
                                       &size, devs);
     if (result != kAudioHardwareNoError)
         return;
 
+    max = size / sizeof (AudioDeviceID);
     for (i = 0; i < max; i++) {
         CFStringRef cfstr = NULL;
         char *ptr = NULL;
@@ -156,9 +152,7 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
             usable = (len > 0);
         }
 
-        if (!usable) {
-            SDL_free(ptr);
-        } else {
+        if (usable) {
             ptr[len] = '\0';
 
 #if DEBUG_COREAUDIO
@@ -166,80 +160,22 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
                    ((iscapture) ? "capture" : "output"),
                    (int) *devCount, ptr, (int) dev);
 #endif
-
-            (*devices)[*devCount].id = dev;
-            (*devices)[*devCount].name = ptr;
-            (*devCount)++;
+            addfn(ptr, dev, addfndata);
         }
+        SDL_free(ptr);  /* addfn() would have copied the string. */
     }
 }
 
-static inline void
-build_device_lists(void)
+static void
+COREAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    build_device_list(0, &outputDevices, &outputDeviceCount);
-    build_device_list(1, &inputDevices, &inputDeviceCount);
-}
-
-
-static inline void
-free_device_lists(void)
-{
-    free_device_list(&outputDevices, &outputDeviceCount);
-    free_device_list(&inputDevices, &inputDeviceCount);
-}
-
-
-static int
-find_device_id(const char *devname, int iscapture, AudioDeviceID * id)
-{
-    int i = ((iscapture) ? inputDeviceCount : outputDeviceCount);
-    COREAUDIO_DeviceList *devs = ((iscapture) ? inputDevices : outputDevices);
-    while (i--) {
-        if (SDL_strcmp(devname, devs->name) == 0) {
-            *id = devs->id;
-            return 1;
-        }
-        devs++;
-    }
-
-    return 0;
-}
-
-
-static int
-COREAUDIO_DetectDevices(int iscapture)
-{
-    if (iscapture) {
-        build_device_list(1, &inputDevices, &inputDeviceCount);
-        return inputDeviceCount;
-    } else {
-        build_device_list(0, &outputDevices, &outputDeviceCount);
-        return outputDeviceCount;
-    }
-
-    return 0;                   /* shouldn't ever hit this. */
-}
-
-
-static const char *
-COREAUDIO_GetDeviceName(int index, int iscapture)
-{
-    if ((iscapture) && (index < inputDeviceCount)) {
-        return inputDevices[index].name;
-    } else if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index].name;
-    }
-
-    SDL_SetError("No such device");
-    return NULL;
+    build_device_list(iscapture, addToDevList, addfn);
 }
 
 
 static void
 COREAUDIO_Deinitialize(void)
 {
-    free_device_lists();
 }
 
 
@@ -378,10 +314,15 @@ find_device_by_name(_THIS, const char *devname, int iscapture)
         result = AudioHardwareGetProperty(propid, &size, &devid);
         CHECK_RESULT("AudioHardwareGetProperty (default device)");
     } else {
-        if (!find_device_id(devname, iscapture, &devid)) {
+        FindDevIdData data;
+        SDL_zero(data);
+        data.findname = devname;
+        build_device_list(iscapture, findDevId, &data);
+        if (!data.found) {
             SDL_SetError("CoreAudio: No such audio device.");
             return 0;
         }
+        devid = data.devId;
     }
 
     size = sizeof(alive);
@@ -565,13 +506,10 @@ COREAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = COREAUDIO_DetectDevices;
-    impl->GetDeviceName = COREAUDIO_GetDeviceName;
     impl->OpenDevice = COREAUDIO_OpenDevice;
     impl->CloseDevice = COREAUDIO_CloseDevice;
     impl->Deinitialize = COREAUDIO_Deinitialize;
     impl->ProvidesOwnCallbackThread = 1;
-
-    build_device_lists();       /* do an initial check for devices... */
 
     return 1;   /* this audio target is available. */
 }

@@ -33,89 +33,33 @@
 #include "win_ce_semaphore.h"
 #endif
 
+#define DETECT_DEV_IMPL(typ, capstyp) \
+static void DetectWave##typ##Devs(SDL_AddAudioDevice addfn) { \
+    const UINT devcount = wave##typ##GetNumDevs(); \
+    capstyp caps; \
+    UINT i; \
+    for (i = 0; i < devcount; i++) { \
+        if (wave##typ##GetDevCaps(i,&caps,sizeof(caps))==MMSYSERR_NOERROR) { \
+            char *name = WIN_StringToUTF8(caps.szPname); \
+            if (name != NULL) { \
+                addfn(name); \
+                SDL_free(name); \
+            } \
+        } \
+    } \
+}
 
-/* !!! FIXME: this is a cut and paste of SDL_FreeUnixAudioDevices(),
- * !!! FIXME:  which is more proof this needs to be managed in SDL_audio.c
- * !!! FIXME:  and not in drivers.
- */
+DETECT_DEV_IMPL(Out, WAVEOUTCAPS)
+DETECT_DEV_IMPL(In, WAVEINCAPS)
+
 static void
-FreeWaveOutAudioDevices(char ***devices, int *devCount)
+WINMM_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    int i = *devCount;
-    if ((i > 0) && (*devices != NULL)) {
-        while (i--) {
-            SDL_free((*devices)[i]);
-        }
+    if (iscapture) {
+        DetectWaveInDevs(addfn);
+    } else {
+        DetectWaveOutDevs(addfn);
     }
-
-    if (*devices != NULL) {
-        SDL_free(*devices);
-    }
-
-    *devices = NULL;
-    *devCount = 0;
-}
-
-static char **outputDevices = NULL;
-static int outputDeviceCount = 0;
-static char **inputDevices = NULL;
-static int inputDeviceCount = 0;
-
-static int
-DetectWaveOutDevices(void)
-{
-    UINT i;
-    const UINT devcount = waveOutGetNumDevs();
-    WAVEOUTCAPS caps;
-    FreeWaveOutAudioDevices(&outputDevices, &outputDeviceCount);
-    outputDevices = (const char **) SDL_malloc(sizeof (char *) * devcount);
-    for (i = 0; i < devcount; i++) {
-        if (waveOutGetDevCaps(i, &caps, sizeof (caps)) == MMSYSERR_NOERROR) {
-            outputDevices[outputDeviceCount] = WIN_StringToUTF8(caps.szPname);
-            if (outputDevices[outputDeviceCount] != NULL) {
-                outputDeviceCount++;
-            }
-        }
-    }
-    return outputDeviceCount;
-}
-
-static int
-DetectWaveInDevices(void)
-{
-    UINT i;
-    const UINT devcount = waveInGetNumDevs();
-    WAVEINCAPS caps;
-    FreeWaveInAudioDevices(&inputDevices, &inputDeviceCount);
-    inputDevices = (const char **) SDL_malloc(sizeof (char *) * devcount);
-    for (i = 0; i < devcount; i++) {
-        if (waveInGetDevCaps(i, &caps, sizeof (caps)) == MMSYSERR_NOERROR) {
-            inputDevices[inputDeviceCount] = WIN_StringToUTF8(caps.szPname);
-            if (inputDevices[inputDeviceCount] != NULL) {
-                inputDeviceCount++;
-            }
-        }
-    }
-    return inputDeviceCount;
-}
-
-static int
-WINMM_DetectDevices(int iscapture)
-{
-    return (iscapture) ? DetectWaveInDevices() : DetectWaveOutDevices();
-}
-
-static const char *
-WINMM_GetDeviceName(int index, int iscapture)
-{
-    if ((iscapture) && (index < inputDeviceCount)) {
-        return inputDevices[index];
-    } else if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index];
-    }
-
-    SDL_SetError("No such device");
-    return NULL;
 }
 
 static void CALLBACK
@@ -448,7 +392,6 @@ WINMM_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = WINMM_DetectDevices;
-    impl->GetDeviceName = WINMM_GetDeviceName;
     impl->OpenDevice = WINMM_OpenDevice;
     impl->PlayDevice = WINMM_PlayDevice;
     impl->WaitDevice = WINMM_WaitDevice;

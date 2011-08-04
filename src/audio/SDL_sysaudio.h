@@ -30,10 +30,12 @@
 typedef struct SDL_AudioDevice SDL_AudioDevice;
 #define _THIS	SDL_AudioDevice *_this
 
+/* Used by audio targets during DetectDevices() */
+typedef void (*SDL_AddAudioDevice)(const char *name);
+
 typedef struct SDL_AudioDriverImpl
 {
-    int (*DetectDevices) (int iscapture);
-    const char *(*GetDeviceName) (int index, int iscapture);
+    void (*DetectDevices) (int iscapture, SDL_AddAudioDevice addfn);
     int (*OpenDevice) (_THIS, const char *devname, int iscapture);
     void (*ThreadInit) (_THIS); /* Called by audio thread at start */
     void (*WaitDevice) (_THIS);
@@ -67,6 +69,12 @@ typedef struct SDL_AudioDriver
     const char *desc;
 
     SDL_AudioDriverImpl impl;
+
+    char **outputDevices;
+    int outputDeviceCount;
+
+    char **inputDevices;
+    int inputDeviceCount;
 } SDL_AudioDriver;
 
 

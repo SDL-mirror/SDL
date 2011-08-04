@@ -27,32 +27,6 @@
 #define INITGUID 1
 #include "SDL_xaudio2.h"
 
-/* !!! FIXME: this is a cut and paste of SDL_FreeUnixAudioDevices(),
- * !!! FIXME:  which is more proof this needs to be managed in SDL_audio.c
- * !!! FIXME:  and not in drivers.
- */
-static void
-FreeXAudio2AudioDevices(char ***devices, int *devCount)
-{
-    int i = *devCount;
-    if ((i > 0) && (*devices != NULL)) {
-        while (i--) {
-            SDL_free((*devices)[i]);
-        }
-    }
-
-    if (*devices != NULL) {
-        SDL_free(*devices);
-    }
-
-    *devices = NULL;
-    *devCount = 0;
-}
-
-
-static char **outputDevices = NULL;
-static int outputDeviceCount = 0;
-
 static __inline__ char *
 utf16_to_utf8(const WCHAR *S)
 {
@@ -61,59 +35,38 @@ utf16_to_utf8(const WCHAR *S)
                             (SDL_wcslen(S)+1)*sizeof(WCHAR));
 }
 
-static int
-XAUDIO2_DetectDevices(int iscapture)
+static void
+XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
     IXAudio2 *ixa2 = NULL;
     UINT32 devcount = 0;
     UINT32 i = 0;
     void *ptr = NULL;
 
-    if (!iscapture) {
-        FreeXAudio2AudioDevices(&outputDevices, &outputDeviceCount);
-    }
-
     if (iscapture) {
         SDL_SetError("XAudio2: capture devices unsupported.");
-        return 0;
+        return;
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
         SDL_SetError("XAudio2: XAudio2Create() failed.");
-        return 0;
+        return;
     } else if (IXAudio2_GetDeviceCount(ixa2, &devcount) != S_OK) {
         SDL_SetError("XAudio2: IXAudio2::GetDeviceCount() failed.");
         IXAudio2_Release(ixa2);
-        return 0;
-    } else if ((ptr = SDL_malloc(sizeof (char *) * devcount)) == NULL) {
-        SDL_OutOfMemory();
-        IXAudio2_Release(ixa2);
-        return 0;
+        return;
     }
 
-    outputDevices = (char **) ptr;
     for (i = 0; i < devcount; i++) {
         XAUDIO2_DEVICE_DETAILS details;
         if (IXAudio2_GetDeviceDetails(ixa2, i, &details) == S_OK) {
             char *str = utf16_to_utf8(details.DisplayName);
             if (str != NULL) {
-                outputDevices[outputDeviceCount++] = str;
+                addfn(str);
+                SDL_free(str);  /* addfn() made a copy of the string. */
             }
         }
     }
 
     IXAudio2_Release(ixa2);
-
-    return outputDeviceCount;
-}
-
-static const char *
-XAUDIO2_GetDeviceName(int index, int iscapture)
-{
-    if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index];
-    }
-
-    SDL_SetError("XAudio2: No such device");
-    return NULL;
 }
 
 static void STDMETHODCALLTYPE
@@ -436,7 +389,6 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 
     /* Set the function pointers */
     impl->DetectDevices = XAUDIO2_DetectDevices;
-    impl->GetDeviceName = XAUDIO2_GetDeviceName;
     impl->OpenDevice = XAUDIO2_OpenDevice;
     impl->PlayDevice = XAUDIO2_PlayDevice;
     impl->WaitDevice = XAUDIO2_WaitDevice;

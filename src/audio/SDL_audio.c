@@ -151,10 +151,9 @@ get_audio_device(SDL_AudioDeviceID id)
 
 
 /* stubs for audio drivers that don't need a specific entry point... */
-static int
-SDL_AudioDetectDevices_Default(int iscapture)
-{
-    return -1;
+static void
+SDL_AudioDetectDevices_Default(int iscapture, SDL_AddAudioDevice addfn)
+{                               /* no-op. */
 }
 
 static void
@@ -199,13 +198,6 @@ SDL_AudioOpenDevice_Default(_THIS, const char *devname, int iscapture)
     return 0;
 }
 
-static const char *
-SDL_AudioGetDeviceName_Default(int index, int iscapture)
-{
-    SDL_SetError("No such device");
-    return NULL;
-}
-
 static void
 SDL_AudioLockDevice_Default(SDL_AudioDevice * device)
 {
@@ -238,7 +230,6 @@ finalize_audio_entry_points(void)
             current_audio.impl.x = SDL_Audio##x##_Default; \
         }
     FILL_STUB(DetectDevices);
-    FILL_STUB(GetDeviceName);
     FILL_STUB(OpenDevice);
     FILL_STUB(ThreadInit);
     FILL_STUB(WaitDevice);
@@ -641,13 +632,64 @@ SDL_GetCurrentAudioDriver()
     return current_audio.name;
 }
 
+static void
+free_device_list(char ***devices, int *devCount)
+{
+    int i = *devCount;
+    if ((i > 0) && (*devices != NULL)) {
+        while (i--) {
+            SDL_free((*devices)[i]);
+        }
+    }
+
+    if (*devices != NULL) {
+        SDL_free(*devices);
+    }
+
+    *devices = NULL;
+    *devCount = 0;
+}
+
+static
+void SDL_AddCaptureAudioDevice(const char *_name)
+{
+    char *name = NULL;
+    void *ptr = SDL_realloc(current_audio.inputDevices,
+                          (current_audio.inputDeviceCount+1) * sizeof(char*));
+    if (ptr == NULL) {
+        return;  /* oh well. */
+    }
+
+    current_audio.inputDevices = (char **) ptr;
+    name = SDL_strdup(_name);  /* if this returns NULL, that's okay. */
+    current_audio.inputDevices[current_audio.inputDeviceCount++] = name;
+}
+
+static
+void SDL_AddOutputAudioDevice(const char *_name)
+{
+    char *name = NULL;
+    void *ptr = SDL_realloc(current_audio.outputDevices,
+                          (current_audio.outputDeviceCount+1) * sizeof(char*));
+    if (ptr == NULL) {
+        return;  /* oh well. */
+    }
+
+    current_audio.outputDevices = (char **) ptr;
+    name = SDL_strdup(_name);  /* if this returns NULL, that's okay. */
+    current_audio.outputDevices[current_audio.outputDeviceCount++] = name;
+}
+
 
 int
 SDL_GetNumAudioDevices(int iscapture)
 {
+    int retval = 0;
+
     if (!SDL_WasInit(SDL_INIT_AUDIO)) {
         return -1;
     }
+
     if ((iscapture) && (!current_audio.impl.HasCaptureSupport)) {
         return 0;
     }
@@ -660,7 +702,19 @@ SDL_GetNumAudioDevices(int iscapture)
         return 1;
     }
 
-    return current_audio.impl.DetectDevices(iscapture);
+    if (iscapture) {
+        free_device_list(&current_audio.inputDevices,
+                         &current_audio.inputDeviceCount);
+        current_audio.impl.DetectDevices(iscapture, SDL_AddCaptureAudioDevice);
+        retval = current_audio.inputDeviceCount;
+    } else {
+        free_device_list(&current_audio.outputDevices,
+                         &current_audio.outputDeviceCount);
+        current_audio.impl.DetectDevices(iscapture, SDL_AddOutputAudioDevice);
+        retval = current_audio.outputDeviceCount;
+    }
+
+    return retval;
 }
 
 
@@ -678,8 +732,7 @@ SDL_GetAudioDeviceName(int index, int iscapture)
     }
 
     if (index < 0) {
-        SDL_SetError("No such device");
-        return NULL;
+        goto no_such_device;
     }
 
     if ((iscapture) && (current_audio.impl.OnlyHasDefaultInputDevice)) {
@@ -690,7 +743,21 @@ SDL_GetAudioDeviceName(int index, int iscapture)
         return DEFAULT_OUTPUT_DEVNAME;
     }
 
-    return current_audio.impl.GetDeviceName(index, iscapture);
+    if (iscapture) {
+        if (index >= current_audio.inputDeviceCount) {
+            goto no_such_device;
+        }
+        return current_audio.inputDevices[index];
+    } else {
+        if (index >= current_audio.outputDeviceCount) {
+            goto no_such_device;
+        }
+        return current_audio.outputDevices[index];
+    }
+
+no_such_device:
+    SDL_SetError("No such device");
+    return NULL;
 }
 
 
@@ -879,6 +946,11 @@ open_audio_device(const char *devname, int iscapture,
             return 0;
         }
     }
+
+    /* force a device detection if we haven't done one yet. */
+    if ( ((iscapture) && (current_audio.inputDevices == NULL)) ||
+         ((!iscapture) && (current_audio.outputDevices == NULL)) )
+        SDL_GetNumAudioDevices(iscapture);
 
     if (!current_audio.impl.OpenDevice(device, devname, iscapture)) {
         close_audio_device(device);
@@ -1121,6 +1193,10 @@ SDL_AudioQuit(void)
 
     /* Free the driver data */
     current_audio.impl.Deinitialize();
+    free_device_list(&current_audio.outputDevices,
+                     &current_audio.outputDeviceCount);
+    free_device_list(&current_audio.inputDevices,
+                     &current_audio.inputDeviceCount);
     SDL_memset(&current_audio, '\0', sizeof(current_audio));
     SDL_memset(open_devices, '\0', sizeof(open_devices));
 }

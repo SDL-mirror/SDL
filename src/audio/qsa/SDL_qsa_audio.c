@@ -651,8 +651,8 @@ QSA_OpenDevice(_THIS, const char *devname, int iscapture)
     return 1;
 }
 
-static int
-QSA_DetectDevices(int iscapture)
+static void
+QSA_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
     uint32_t it;
     uint32_t cards;
@@ -667,7 +667,7 @@ QSA_DetectDevices(int iscapture)
     /* of available audio devices                                 */
     if (cards == 0) {
         /* We have no any available audio devices */
-        return 0;
+        return;
     }
 
     /* Find requested devices by type */
@@ -702,6 +702,7 @@ QSA_DetectDevices(int iscapture)
                             devices;
                         status = snd_pcm_close(handle);
                         if (status == EOK) {
+                            addfn(qsa_playback_device[qsa_playback_devices].name);
                             qsa_playback_devices++;
                         }
                     } else {
@@ -757,6 +758,7 @@ QSA_DetectDevices(int iscapture)
                             devices;
                         status = snd_pcm_close(handle);
                         if (status == EOK) {
+                            addfn(qsa_capture_device[qsa_capture_devices].name);
                             qsa_capture_devices++;
                         }
                     } else {
@@ -781,31 +783,6 @@ QSA_DetectDevices(int iscapture)
                 break;
             }
         }
-    }
-
-    /* Return amount of available playback or capture devices */
-    if (!iscapture) {
-        return qsa_playback_devices;
-    } else {
-        return qsa_capture_devices;
-    }
-}
-
-static const char *
-QSA_GetDeviceName(int index, int iscapture)
-{
-    if (!iscapture) {
-        if (index >= qsa_playback_devices) {
-            return "No such playback device";
-        }
-
-        return qsa_playback_device[index].name;
-    } else {
-        if (index >= qsa_capture_devices) {
-            return "No such capture device";
-        }
-
-        return qsa_capture_device[index].name;
     }
 }
 
@@ -857,7 +834,6 @@ QSA_Init(SDL_AudioDriverImpl * impl)
     /* DeviceLock and DeviceUnlock functions are used default,   */
     /* provided by SDL, which uses pthread_mutex for lock/unlock */
     impl->DetectDevices = QSA_DetectDevices;
-    impl->GetDeviceName = QSA_GetDeviceName;
     impl->OpenDevice = QSA_OpenDevice;
     impl->ThreadInit = QSA_ThreadInit;
     impl->WaitDevice = QSA_WaitDevice;
