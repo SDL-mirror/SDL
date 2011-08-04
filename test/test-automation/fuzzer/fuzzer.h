@@ -61,6 +61,22 @@ Uint32 RandomPositiveInteger();
  */
 Uint8 RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain);
 
+/*!
+ * todo add markup
+ */
+Uint16 RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDomain);
+
+/*!
+ * todo add markup
+ */
+Uint32 RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDomain);
+
+/*!
+ * todo add markup
+ */
+Uint64 RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDomain);
+
+
 
 /*!
  * todo add markup

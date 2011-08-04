@@ -25,6 +25,7 @@
  */
 
 #include <stdio.h>
+#include <stdint.h>
 
 #include <SDL/SDL.h>
 
@@ -96,13 +97,16 @@ dummycase1(void *arg)
 		Log(0, "uint8 (same value): %u", RandomPositiveInteger());
 	// */
 
-
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
 
-
+	Uint64 longlong = UINT64_MAX;
+	//printf("max: %llu", longlong);
 	for(; 1 ;) {
-		Log(0, "uint8: %u", RandomUint8BoundaryValue(10, 20, SDL_FALSE));
-		//Log(0, "int8: %d", RandomInt8BoundaryValue());
+		//Log(0, "int8: %u", RandomUint8BoundaryValue(0, 255, SDL_FALSE));
+		//Log(0, "uint16: %u", RandomUint16BoundaryValue(0, UINT16_MAX, SDL_FALSE));
+		//Log(0, "int32: %u", RandomUint32BoundaryValue(0, 0xFFFFFFFE, SDL_FALSE));
+		Log(0, "int64: %llu", RandomUint64BoundaryValue(2, 0xFFFFFFFFFFFFFFFE, SDL_FALSE));
+
 	}
 
 	for(; 0 ;) {

@@ -137,12 +137,14 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
  * If boundary2 < boundary1, the values are swapped.
  * If boundary1 == boundary2, value of boundary1 will be returned
  *
- * Generating boundary values for Uint8
+ * Generating boundary values for Uint8:
  * BoundaryValues(sizeof(Uint8), 10, 20, True) -> [10,11,19,20]
  * BoundaryValues(sizeof(Uint8), 10, 20, False) -> [9,21]
  * BoundaryValues(sizeof(Uint8), 0, 15, True) -> [0, 1, 14, 15]
  * BoundaryValues(sizeof(Uint8), 0, 15, False) -> [16]
- * BoundaryValues(sizeof(Uint8), 0, 255, False) -> []
+ * BoundaryValues(sizeof(Uint8), 0, 255, False) -> NULL
+ *
+ * Generator works the same for other types of unsigned integers.
  *
  * \param maxValue The biggest value that is acceptable for this data type.
  * 					For instance, for Uint8 -> 255, Uint16 -> 65536 etc.
@@ -154,7 +156,6 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
  * \param outBufferSize Size of outBuffer
  *
  * \returns NULL on error, outBuffer on success
- *
  */
 Uint64 *
 GenerateUnsignedBoundaryValues(const Uint64 maxValue,
@@ -183,17 +184,19 @@ GenerateUnsignedBoundaryValues(const Uint64 maxValue,
 	}
 	else if(validDomain) {
 		tempBuf[index++] = boundary1;
-		tempBuf[index++] = boundary1 + 1;
+
+		if(boundary1 < UINT64_MAX)
+			tempBuf[index++] = boundary1 + 1;
 
 		tempBuf[index++] = boundary2 - 1;
 		tempBuf[index++] = boundary2;
 	}
 	else {
-		if(boundary1 != 0) {
+		if(boundary1 > 0) {
 			tempBuf[index++] = boundary1 - 1;
 		}
 
-		if(boundary2 != maxValue) {
+		if(boundary2 < maxValue) {
 			tempBuf[index++] = boundary2 + 1;
 		}
 	}
@@ -223,13 +226,13 @@ RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain)
 	Uint32 size;
 
 	// max value for Uint8
-	const Uint64 maxValue = 255;
+	const Uint64 maxValue = UINT8_MAX;
 
 	buffer = GenerateUnsignedBoundaryValues(maxValue,
 										(Uint64) boundary1, (Uint64) boundary2,
 										validDomain, buffer, &size);
 	if(buffer == NULL) {
-		return 0; // Change to some better error value? What would be better?
+		return -1; // Change to some better error value? What would be better?
 	}
 
 	Uint32 index = RandomInteger() % size;
@@ -240,6 +243,77 @@ RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain)
 	return retVal;
 }
 
+Uint16
+RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDomain)
+{
+	Uint64 *buffer = NULL;
+	Uint32 size;
+
+	// max value for Uint16
+	const Uint64 maxValue = UINT16_MAX;
+
+	buffer = GenerateUnsignedBoundaryValues(maxValue,
+										(Uint64) boundary1, (Uint64) boundary2,
+										validDomain, buffer, &size);
+	if(buffer == NULL) {
+		return -1; // Change to some better error value? What would be better?
+	}
+
+	Uint32 index = RandomInteger() % size;
+	Uint16 retVal = (Uint16) buffer[index];
+
+	SDL_free(buffer);
+
+	return retVal;
+}
+
+Uint32
+RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDomain)
+{
+	Uint64 *buffer = NULL;
+	Uint32 size;
+
+	// max value for Uint32
+	const Uint64 maxValue = UINT32_MAX;
+
+	buffer = GenerateUnsignedBoundaryValues(maxValue,
+										(Uint64) boundary1, (Uint64) boundary2,
+										validDomain, buffer, &size);
+	if(buffer == NULL) {
+		return -1; // Change to some better error value? What would be better?
+	}
+
+	Uint32 index = RandomInteger() % size;
+	Uint32 retVal = (Uint32) buffer[index];
+
+	SDL_free(buffer);
+
+	return retVal;
+}
+
+Uint64
+RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDomain)
+{
+	Uint64 *buffer = NULL;
+	Uint32 size;
+
+	// max value for Uint64
+	const Uint64 maxValue = UINT64_MAX;
+
+	buffer = GenerateUnsignedBoundaryValues(maxValue,
+										(Uint64) boundary1, (Uint64) boundary2,
+										validDomain, buffer, &size);
+	if(buffer == NULL) {
+		return -1; // Change to some better error value? What would be better?
+	}
+
+	Uint32 index = RandomInteger() % size;
+	Uint64 retVal = (Uint64) buffer[index];
+
+	SDL_free(buffer);
+
+	return retVal;
+}
 
 Sint8
 RandomSint8BoundaryValue()
