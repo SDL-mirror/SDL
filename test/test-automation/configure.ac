@@ -38,7 +38,9 @@ AC_CONFIG_FILES([Makefile
 				 testplatform/Makefile
 				 testaudio/Makefile
 				 testsurface/Makefile
-				 testrwops/Makefile])
+				 testrwops/Makefile
+				 testrender/Makefile])
+
 AC_OUTPUT
 
 echo ""

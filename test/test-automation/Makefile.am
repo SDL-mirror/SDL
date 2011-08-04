@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 
-SUBDIRS = testdummy testrect testplatform testaudio testsurface testrwops
+SUBDIRS = testdummy testrect testplatform testaudio testsurface testrwops testrender
 runnerdir = .
 
 bin_PROGRAMS = runner
