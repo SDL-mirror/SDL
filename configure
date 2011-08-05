@@ -19132,7 +19132,6 @@ echo "${ECHO_T}$have_oss" >&6; }
 _ACEOF
 
             SOURCES="$SOURCES $srcdir/src/audio/dsp/*.c"
-            SOURCES="$SOURCES $srcdir/src/audio/dma/*.c"
             have_audio=yes
 
             # We may need to link with ossaudio emulation library
