@@ -49,9 +49,9 @@
 
 
 static void
-DSP_DetectDevices(int iscapture)
+DSP_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    SDL_EnumUnixAudioDevices(iscapture, 0, NULL);
+    SDL_EnumUnixAudioDevices(iscapture, 0, NULL, addfn);
 }
 
 
