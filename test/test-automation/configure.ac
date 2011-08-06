@@ -3,7 +3,7 @@
 
 AC_PREREQ([2.65])
 AC_INIT([runner], [0.01], [markus.kauppila@gmail.com])
-AC_CONFIG_SRCDIR([runner.c])
+AC_CONFIG_SRCDIR([src/runner/runner.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR(acinclude)
 AC_CONFIG_AUX_DIR(build-scripts)
@@ -33,13 +33,15 @@ CFLAGS="-g"
 AC_FUNC_FORK
 
 AC_CONFIG_FILES([Makefile
-				 testdummy/Makefile 
-				 testrect/Makefile
-				 testplatform/Makefile
-				 testaudio/Makefile
-				 testsurface/Makefile
-				 testrwops/Makefile
-				 testrender/Makefile])
+				 src/runner/Makefile
+				 src/libtest/Makefile
+				 tests/testdummy/Makefile 
+				 tests/testrect/Makefile
+				 tests/testplatform/Makefile
+				 tests/testaudio/Makefile
+				 tests/testsurface/Makefile
+				 tests/testrwops/Makefile
+				 tests/testrender/Makefile])
 
 AC_OUTPUT
 
