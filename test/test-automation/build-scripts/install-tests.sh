@@ -5,7 +5,6 @@ EXT="error"
 
 #echo "Installing test suites to $DIRECTORY" 
 
-#rm -Rfv $DIRECTORY/ > /dev/null 2>&1
 mkdir $DIRECTORY > /dev/null 2>&1
 
 PLATFORM="$(uname)"
@@ -20,7 +19,5 @@ for suite in "testdummy" "testplatform" "testrect" "testaudio" "testsurface" "te
 do
 	cp -f "$DIRECTORY/$suite/.libs/lib$suite.$EXT" $DIRECTORY
 done
-
-#sudo cp .libs/libtest.0.dylib /usr/local/lib/libtest.0.dylib
 
 echo "Test suites installed."

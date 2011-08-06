@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 
-SUBDIRS = src/libtest src/runner \
+SUBDIRS = src/libtest \
+		  src/runner \
 		  tests/testdummy \
 		  tests/testrect \
 		  tests/testplatform \
@@ -16,6 +17,6 @@ install-runner:
 install-tests:
 	$(SHELL) build-scripts/install-tests.sh
 
-clean:
-clean-local:
-	echo "clean-local is obsolete"
+distclean-local:
+	$(SHELL) build-scripts/distclean.sh
+
