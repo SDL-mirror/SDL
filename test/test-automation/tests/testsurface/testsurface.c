@@ -209,7 +209,7 @@ void surface_testLoad(void *arg)
 	*/
 
    /* Create the blit surface. */
-	const char *filename = "icon.bmp";
+	const char *filename = "data/images/icon.bmp";
 	_AssertFileExist(filename);
 
 	face = SDL_LoadBMP(filename);
@@ -227,7 +227,7 @@ void surface_testConversion(void *arg)
 	SDL_Surface *rface = NULL, *face = NULL;
 	int ret = 0;
 
-	const char *filename = "icon.bmp";
+	const char *filename = "data/images/icon.bmp";
 	_AssertFileExist(filename);
 
 	face = SDL_LoadBMP(filename);
