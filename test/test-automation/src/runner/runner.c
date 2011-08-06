@@ -234,7 +234,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 
 	while(entry = readdir(directory)) {
 		 // discards . and .. and hidden files starting with .
-		if(strlen(entry->d_name) > 2 && entry->d_name[0] != '.') {
+		if(strlen(entry->d_name) > 2 && entry->d_name[0] != '.' && entry->d_type == DT_REG) {
 			const char *delimiters = ".";
 			char *name = strtok(entry->d_name, delimiters);
 			char *ext = strtok(NULL, delimiters);
@@ -360,9 +360,14 @@ UnloadTestSuites(TestSuiteReference *suites)
 {
 	TestSuiteReference *ref = suites;
 	while(ref) {
-		SDL_free(ref->name);
-		SDL_free(ref->directoryPath);
-		SDL_UnloadObject(ref->library);
+		if(ref->name)
+			SDL_free(ref->name);
+
+		if(ref->directoryPath)
+			SDL_free(ref->directoryPath);
+
+		if(ref->library)
+			SDL_UnloadObject(ref->library);
 
 		TestSuiteReference *temp = ref->next;
 		SDL_free(ref);
@@ -480,9 +485,14 @@ UnloadTestCases(TestCase *testCases)
 {
 	TestCase *ref = testCases;
 	while(ref) {
-		SDL_free(ref->testName);
-		SDL_free(ref->suiteName);
-		SDL_free(ref->description);
+		if(ref->testName)
+			SDL_free(ref->testName);
+
+		if(ref->suiteName)
+			SDL_free(ref->suiteName);
+
+		if(ref->description)
+			SDL_free(ref->description);
 
 		TestCase *temp = ref->next;
 		SDL_free(ref);

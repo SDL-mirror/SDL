@@ -9,8 +9,10 @@ SUBDIRS = src/libtest src/runner \
 		  tests/testrwops \
 		  tests/testrender
 
-all-local: install-tests
-install: install-tests
+all-local: install
+install: install-runner install-tests
+install-runner: 
+	$(SHELL) build-scripts/install-runner.sh
 install-tests:
 	$(SHELL) build-scripts/install-tests.sh
 
