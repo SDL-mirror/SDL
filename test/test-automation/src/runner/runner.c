@@ -32,10 +32,10 @@
 #include "../../include/SDL_test.h"
 #include "../../config.h"
 
-#include "../libtest/fuzzer/fuzzer.h"
+#include "../libSDLtest/fuzzer/fuzzer.h"
 
-#include "../libtest/plain_logger.h"
-#include "../libtest/xml_logger.h"
+#include "../libSDLtest/plain_logger.h"
+#include "../libSDLtest/xml_logger.h"
 
 #include "logger.h"
 #include "support.h"

@@ -23,9 +23,9 @@
 
 #include "../src/runner/logger.h"
 
-#include "../src/libtest/common/common.h"
-#include "../src/libtest/common/images.h"
-#include "../src/libtest/fuzzer/fuzzer.h"
+#include "../src/libSDLtest/common/common.h"
+#include "../src/libSDLtest/common/images.h"
+#include "../src/libSDLtest/fuzzer/fuzzer.h"
 
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0

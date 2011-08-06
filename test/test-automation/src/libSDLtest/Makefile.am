@@ -1,5 +1,7 @@
-lib_LTLIBRARIES = libtest.la
-libtest_la_SOURCES = SDL_test.c \
+INCLUDE = -I../../include
+
+lib_LTLIBRARIES = libSDLtest.la
+libSDLtest_la_SOURCES = SDL_test.c \
 					 logger_helpers.c \
 					 plain_logger.c \
 					 xml_logger.c xml.c \
@@ -14,9 +16,8 @@ libtest_la_SOURCES = SDL_test.c \
 					 fuzzer/utl_random.c \
 					 fuzzer/fuzzer.c \
 					 ../runner/logger.h
-INCLUDE = -I../../include
-libtest_la_CLAGS = -fPIC -g
-libtest_la_LDFLAGS = `sdl-config --libs`
+libSDLtest_la_CLAGS = -fPIC -g
+libSDLtest_la_LDFLAGS = `sdl-config --libs`
 
-libtest: libtest.la
+libtest: libSDLtest.la
 	echo "Test library compiled."

@@ -34,7 +34,7 @@ AC_FUNC_FORK
 
 AC_CONFIG_FILES([Makefile
 				 src/runner/Makefile
-				 src/libtest/Makefile
+				 src/libSDLtest/Makefile
 				 tests/testdummy/Makefile 
 				 tests/testrect/Makefile
 				 tests/testplatform/Makefile

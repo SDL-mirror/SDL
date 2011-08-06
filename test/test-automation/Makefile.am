@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I acinclude -I build-scripts
 
-SUBDIRS = src/libtest \
+SUBDIRS = src/libSDLtest \
 		  src/runner \
 		  tests/testdummy \
 		  tests/testrect \
@@ -10,7 +10,7 @@ SUBDIRS = src/libtest \
 		  tests/testrwops \
 		  tests/testrender
 
-all-local: install
+##all-local: install
 install: install-runner install-tests
 install-runner: 
 	$(SHELL) build-scripts/install-runner.sh
