@@ -79,25 +79,13 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	MD5_CTX md5Context;
 	utl_md5Init(&md5Context);
-
 	utl_md5Update(&md5Context, buffer, entireString);
 	utl_md5Final(&md5Context);
 
 	SDL_free(buffer);
 
-	const char *execKey = md5Context.digest;
-
-	//printf("Debug: digest = %s\n", execKey);
-
-	// Casting fixes compiler warnings
-	Uint64 key = ((Uint64) execKey[8])  << 56 |
-					((Uint64) execKey[9])  << 48 |
-					((Uint64) execKey[10]) << 40 |
-					((Uint64) execKey[11]) << 32 |
-					((Uint64) execKey[12]) << 24 |
-					((Uint64) execKey[13]) << 16 |
-					((Uint64) execKey[14]) << 8  |
-					((Uint64) execKey[15]) << 0;
+	Uint64 *keys = (Uint64 *)md5Context.digest;
+	Uint64 key = keys[0];
 
 	return key;
 }
@@ -107,10 +95,6 @@ InitFuzzer(Uint64 execKey)
 {
 	Uint32 a = (execKey >> 32)  & 0x00000000FFFFFFFF;
 	Uint32 b = execKey & 0x00000000FFFFFFFF;
-
-	//printf("Debug: execKey: %llx\n", execKey);
-	//printf("Debug: a = %x - b = %x\n", a, b);
-
 	utl_randomInit(&rndContext, a, b);
 }
 
