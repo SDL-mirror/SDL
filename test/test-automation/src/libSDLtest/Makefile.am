@@ -19,5 +19,5 @@ libSDLtest_la_SOURCES = SDL_test.c \
 libSDLtest_la_CLAGS = -fPIC -g
 libSDLtest_la_LDFLAGS = `sdl-config --libs`
 
-libtest: libSDLtest.la
+libSDLtest: libSDLtest.la
 	echo "Test library compiled."
