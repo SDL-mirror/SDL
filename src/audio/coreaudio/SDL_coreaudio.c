@@ -19,17 +19,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
-
-#if MACOSX_COREAUDIO
-#include <CoreAudio/CoreAudio.h>
-#include <CoreServices/CoreServices.h>
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-#include <AudioUnit/AUNTComponent.h>
-#endif
-#endif
-
-#include <AudioUnit/AudioUnit.h>
-
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
