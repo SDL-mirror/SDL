@@ -33,6 +33,7 @@ typedef enum LogLevel {
 
 #define LOGGER_DEFAULT_LEVEL LOGGER_TERSE
 
+//! Contains information for the logger
 typedef struct LoggerData {
 	//! If enabled logger will write to stdout instead of file
 	int stdoutEnabled;
