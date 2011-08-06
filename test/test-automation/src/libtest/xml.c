@@ -168,7 +168,7 @@ EscapeString(const char *string)
 
 	// escape the string
 	char *curRetBuffer = retBuffer;
-	char *curString = string;
+	const char *curString =  string;
 
 	char character = *curString;
 	while( (character = *curString++) ) {

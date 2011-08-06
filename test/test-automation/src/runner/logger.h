@@ -22,7 +22,6 @@
 #define _LOGGER_H
 
 #include <SDL/SDL_stdinc.h>
-
 #include <time.h>
 
 /* Logging levels */
@@ -31,6 +30,7 @@ typedef enum LogLevel {
 	LOGGER_VERBOSE
 } Level;
 
+//! Default logging level
 #define LOGGER_DEFAULT_LEVEL LOGGER_TERSE
 
 //! Contains information for the logger
@@ -77,7 +77,6 @@ typedef	void (*LogFp)(time_t eventTime, char *fmt, ...);
 
 
 /*! Function pointers to actual logging function implementations */
-
 extern RunStartedFp RunStarted;
 extern RunEndedFp RunEnded;
 extern SuiteStartedFp SuiteStarted;
@@ -88,9 +87,5 @@ extern AssertFp Assert;
 extern AssertWithValuesFp AssertWithValues;
 extern AssertSummaryFp AssertSummary;
 extern LogFp Log;
-
-//! Run seed for harness
-extern char *runSeed;
-
 
 #endif

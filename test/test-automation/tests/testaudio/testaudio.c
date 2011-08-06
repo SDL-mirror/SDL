@@ -31,6 +31,23 @@ TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
+// Fixture
+
+void
+SetUp(void *arg)
+{
+	/* Start SDL. */
+	int ret = SDL_Init( SDL_INIT_AUDIO );
+	AssertTrue(ret==0, "SDL_Init(SDL_INIT_AUDIO): %s", SDL_GetError());
+}
+
+void
+TearDown(void *arg)
+{
+	/* Quit SDL. */
+	SDL_Quit();
+}
+
 /* Test case functions */
 
 /**
@@ -40,11 +57,7 @@ int audio_printOutputDevices()
 {
    int ret;
    int i, n;
-   char *name;
-
-   /* Start SDL. */
-   ret = SDL_Init( SDL_INIT_AUDIO );
-   AssertTrue(ret==0, "SDL_Init(SDL_INIT_AUDIO): %s", SDL_GetError());
+   const char *name;
 
    /* Get number of devices. */
    n = SDL_GetNumAudioDevices(0);
@@ -59,9 +72,6 @@ int audio_printOutputDevices()
          AssertTrue(strlen(name)>0, "name blank");
       }
    }
-
-   /* Quit SDL. */
-   SDL_Quit();
 }
 
 /**
@@ -71,11 +81,7 @@ int audio_printInputDevices()
 {
    int ret;
    int i, n;
-   char *name;
-
-   /* Start SDL. */
-   ret = SDL_Init( SDL_INIT_AUDIO );
-   AssertTrue(ret==0, "SDL_Init(SDL_INIT_AUDIO): %s", SDL_GetError());
+   const char *name;
 
    /* Get number of devices. */
    n = SDL_GetNumAudioDevices(1);
@@ -90,9 +96,6 @@ int audio_printInputDevices()
          AssertTrue(strlen(name)>0, "name empty");
       }
    }
-
-   /* Quit SDL. */
-   SDL_Quit();
 }
 
 /**
@@ -101,7 +104,7 @@ int audio_printInputDevices()
 int audio_printAudioDrivers()
 {
    int i, n;
-   char *name;
+   const char *name;
 
    /* Get number of drivers */
    n = SDL_GetNumAudioDrivers();
@@ -124,17 +127,10 @@ int audio_printAudioDrivers()
 int audio_printCurrentAudioDriver()
 {
    int ret;
-   char *name;
-
-   /* Start SDL. */
-   ret = SDL_Init(SDL_INIT_AUDIO);
-   AssertTrue(ret==0, "SDL_Init(SDL_INIT_AUDIO): %s", SDL_GetError());
+   const char *name;
 
    /* Check current audio driver */
    name = SDL_GetCurrentAudioDriver();
    AssertTrue(name != NULL, "name != NULL");
    AssertTrue(strlen(name)>0, "name empty");
-   
-   /* Quit SDL. */
-   SDL_Quit();   
 }

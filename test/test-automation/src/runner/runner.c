@@ -180,6 +180,8 @@ TestCaseTearDownFp LoadTestTearDownFunction(void *suite);
 CountFailedAssertsFp LoadCountFailedAssertsFunction(void *suite);
 void KillHungTestInChildProcess(int signum);
 void UnloadTestSuites(TestSuiteReference *suites);
+int FilterTestCase(TestCaseReference *testReference);
+int HandleChildProcessReturnValue(int stat_lock);
 
 
 /*! Pointers to selected logger implementation */
@@ -232,7 +234,7 @@ ScanForTestSuites(char *directoryName, char *extension)
 		exit(2);
 	}
 
-	while(entry = readdir(directory)) {
+	while( (entry = readdir(directory)) ) {
 		 // discards . and .. and hidden files starting with dot and directories etc.
 		if(strlen(entry->d_name) > 2 && entry->d_name[0] != '.' && entry->d_type == DT_REG) {
 			const char *delimiters = ".";
@@ -707,8 +709,8 @@ SetTestTimeout(int timeout, void (*callback)(int))
 	 */
 	int timeoutInMilliseconds = tm * 1000;
 
-	SDL_TimerID timerID = SDL_AddTimer(timeoutInMilliseconds, callback, 0x0);
-	if(timerID == NULL) {
+	SDL_TimerID timerID = SDL_AddTimer(timeoutInMilliseconds, (SDL_TimerCallback) callback, 0x0);
+	if(timerID == 0) {
 		fprintf(stderr, "Error: Creation of SDL timer failed.\n");
 		fprintf(stderr, "Error: %s\n", SDL_GetError());
 	}
@@ -734,6 +736,8 @@ SetTestTimeout(int timeout, void (*callback)(int))
 void
 KillHungTestInChildProcess(int signum)
 {
+	(void)signum; // keeps the compiler silent about unused variable
+
 	exit(TEST_RESULT_KILLED);
 }
 
@@ -829,7 +833,7 @@ ExecuteTest(TestCase *testItem, Uint64 execKey) {
 			exit(RunTest(testItem, execKey));
 		} else {
 			int stat_lock = -1;
-			int child = wait(&stat_lock);
+			wait(&stat_lock);
 
 			retVal = HandleChildProcessReturnValue(stat_lock);
 		}
@@ -986,7 +990,7 @@ SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_e
 	if(xml_enabled) {
 		char *sheet = NULL;
 		if(xsl_enabled) {
-			sheet = "style.xsl"; // default style sheet;
+			sheet = (char *) defaultXslSheet;
 		}
 
 		if(custom_xsl_enabled) {
@@ -1285,7 +1289,6 @@ main(int argc, char *argv[])
 
 	ParseOptions(argc, argv);
 
-	char *testSuiteName = NULL;
 	int suiteCounter = 0;
 
 #if defined(linux) || defined( __linux)
