@@ -2064,6 +2064,7 @@ ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
 
 
 
+
 orig_CFLAGS="$CFLAGS"
 
 #
@@ -3771,13 +3772,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:3774: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:3775: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3777: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:3778: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:3780: output\"" >&5)
+  (eval echo "\"\$as_me:3781: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5004,7 +5005,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5007 "configure"' > conftest.$ac_ext
+  echo '#line 5008 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7165,11 +7166,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7168: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7169: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7172: \$? = $ac_status" >&5
+   echo "$as_me:7173: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7504,11 +7505,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7507: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7508: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7511: \$? = $ac_status" >&5
+   echo "$as_me:7512: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7609,11 +7610,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7612: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7613: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7616: \$? = $ac_status" >&5
+   echo "$as_me:7617: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7664,11 +7665,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7667: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7668: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7671: \$? = $ac_status" >&5
+   echo "$as_me:7672: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10422,7 +10423,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10425 "configure"
+#line 10426 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10518,7 +10519,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10521 "configure"
+#line 10522 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14200,11 +14201,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14203: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14204: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14207: \$? = $ac_status" >&5
+   echo "$as_me:14208: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14299,11 +14300,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14302: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14303: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14306: \$? = $ac_status" >&5
+   echo "$as_me:14307: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14351,11 +14352,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14354: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14355: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14358: \$? = $ac_status" >&5
+   echo "$as_me:14359: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15786,25 +15787,29 @@ case "$enable_assertions" in
     auto) # Use optimization settings to determine assertion level
         ;;
     disabled)
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_DEFAULT_ASSERT_LEVEL 0
 _ACEOF
 
         ;;
     release)
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_DEFAULT_ASSERT_LEVEL 1
 _ACEOF
 
         ;;
     enabled)
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_DEFAULT_ASSERT_LEVEL 2
 _ACEOF
 
         ;;
     paranoid)
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_DEFAULT_ASSERT_LEVEL 3
 _ACEOF
 
@@ -15891,7 +15896,8 @@ else
 fi
 
 if test x$enable_libc = xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_LIBC 1
 _ACEOF
 
@@ -16785,7 +16791,8 @@ esac
 
 
     if test x$ac_cv_func_memcmp_working = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_MEMCMP 1
 _ACEOF
 
@@ -17034,7 +17041,8 @@ fi
 fi
 
     if test x$ac_cv_func_strtod = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_STRTOD 1
 _ACEOF
 
@@ -17158,7 +17166,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test ! -s conftest.err
        } && test -s conftest.$ac_objext; then
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_MPROTECT 1
 _ACEOF
 
@@ -17649,6 +17658,109 @@ _ACEOF
 fi
 done
 
+
+    { echo "$as_me:$LINENO: checking for struct sigaction.sa_sigaction" >&5
+echo $ECHO_N "checking for struct sigaction.sa_sigaction... $ECHO_C" >&6; }
+if test "${ac_cv_member_struct_sigaction_sa_sigaction+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <signal.h>
+
+int
+main ()
+{
+static struct sigaction ac_aggr;
+if (ac_aggr.sa_sigaction)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_member_struct_sigaction_sa_sigaction=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <signal.h>
+
+int
+main ()
+{
+static struct sigaction ac_aggr;
+if (sizeof ac_aggr.sa_sigaction)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_member_struct_sigaction_sa_sigaction=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_member_struct_sigaction_sa_sigaction=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_member_struct_sigaction_sa_sigaction" >&5
+echo "${ECHO_T}$ac_cv_member_struct_sigaction_sa_sigaction" >&6; }
+if test $ac_cv_member_struct_sigaction_sa_sigaction = yes; then
+  cat >>confdefs.h <<\_ACEOF
+#define HAVE_SA_SIGACTION 1
+_ACEOF
+
+fi
+
 fi
 
 { echo "$as_me:$LINENO: checking for void*" >&5
@@ -18126,7 +18238,8 @@ rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
 echo "${ECHO_T}$have_gcc_atomics" >&6; }
 
     if test x$have_gcc_atomics = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_GCC_ATOMICS 1
 _ACEOF
 
@@ -18183,13 +18296,81 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
         if test x$have_gcc_sync_lock_test_and_set = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_GCC_SYNC_LOCK_TEST_AND_SET 1
 _ACEOF
 
         fi
     fi
 fi
+
+# Check for pthread implementation
+{ echo "$as_me:$LINENO: checking for pthread spinlock" >&5
+echo $ECHO_N "checking for pthread spinlock... $ECHO_C" >&6; }
+have_pthread_spinlock=no
+
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+#include <pthread.h>
+
+int
+main ()
+{
+
+pthread_spinlock_t a;
+pthread_spin_trylock(&a);
+pthread_spin_unlock(&a);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+
+have_pthread_spinlock=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $have_pthread_spinlock" >&5
+echo "${ECHO_T}$have_pthread_spinlock" >&6; }
+if test x$have_pthread_spinlock = xyes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PTHREAD_SPINLOCK 1
+_ACEOF
+
+fi
+
 
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
@@ -18214,7 +18395,8 @@ else
 fi
 
 if test x$enable_atomic != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_ATOMIC_DISABLED 1
 _ACEOF
 
@@ -18227,7 +18409,8 @@ else
 fi
 
 if test x$enable_audio != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DISABLED 1
 _ACEOF
 
@@ -18240,7 +18423,8 @@ else
 fi
 
 if test x$enable_video != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DISABLED 1
 _ACEOF
 
@@ -18253,7 +18437,8 @@ else
 fi
 
 if test x$enable_render != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_RENDER_DISABLED 1
 _ACEOF
 
@@ -18266,7 +18451,8 @@ else
 fi
 
 if test x$enable_events != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_EVENTS_DISABLED 1
 _ACEOF
 
@@ -18279,7 +18465,8 @@ else
 fi
 
 if test x$enable_joystick != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_DISABLED 1
 _ACEOF
 
@@ -18294,7 +18481,8 @@ else
 fi
 
 if test x$enable_haptic != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_HAPTIC_DISABLED 1
 _ACEOF
 
@@ -18309,7 +18497,8 @@ else
 fi
 
 if test x$enable_power != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_POWER_DISABLED 1
 _ACEOF
 
@@ -18324,7 +18513,8 @@ else
 fi
 
 if test x$enable_threads != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREADS_DISABLED 1
 _ACEOF
 
@@ -18337,7 +18527,8 @@ else
 fi
 
 if test x$enable_timers != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMERS_DISABLED 1
 _ACEOF
 
@@ -18350,7 +18541,8 @@ else
 fi
 
 if test x$enable_file != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_FILE_DISABLED 1
 _ACEOF
 
@@ -18363,7 +18555,8 @@ else
 fi
 
 if test x$enable_loadso != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_DISABLED 1
 _ACEOF
 
@@ -18376,7 +18569,8 @@ else
 fi
 
 if test x$enable_cpuinfo != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_CPUINFO_DISABLED 1
 _ACEOF
 
@@ -18389,7 +18583,8 @@ else
 fi
 
 if test x$enable_atomic != xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_ATOMIC_DISABLED 1
 _ACEOF
 
@@ -18402,7 +18597,8 @@ else
 fi
 
 if test x$enable_assembly = xyes; then
-    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_ASSEMBLY_ROUTINES 1
 _ACEOF
 
@@ -18994,12 +19190,14 @@ echo "${ECHO_T}$have_gcc_altivec" >&6; }
         CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_altivec = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_ALTIVEC_BLITTERS 1
 _ACEOF
 
             if test x$have_altivec_h_hdr = xyes; then
-              cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_ALTIVEC_H 1
 _ACEOF
 
@@ -19110,7 +19308,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
        } && test -s conftest.$ac_objext; then
 
             have_oss=yes
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H 1
 _ACEOF
 
@@ -19127,7 +19326,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         { echo "$as_me:$LINENO: result: $have_oss" >&5
 echo "${ECHO_T}$have_oss" >&6; }
         if test x$have_oss = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_OSS 1
 _ACEOF
 
@@ -19424,7 +19624,8 @@ fi
 
             alsa_lib=`find_lib "libasound.so.*" "$ALSA_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_ALSA 1
 _ACEOF
 
@@ -19438,7 +19639,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic ALSA l
             if test x$have_loadso = xyes && \
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
                 echo "-- dynamic libasound -> $alsa_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_ALSA_DYNAMIC "$alsa_lib"
 _ACEOF
 
@@ -19760,7 +19962,8 @@ fi
 
             esd_lib=`find_lib "libesd.so.*" "$ESD_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_ESD 1
 _ACEOF
 
@@ -19774,7 +19977,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic ESD lo
             if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
                 echo "-- dynamic libesd -> $esd_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_ESD_DYNAMIC "$esd_lib"
 _ACEOF
 
@@ -19863,7 +20067,8 @@ fi
 
             pulseaudio_lib=`find_lib "libpulse-simple.so.*" "$PULSEAUDIO_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_PULSEAUDIO 1
 _ACEOF
 
@@ -19877,7 +20082,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic PulseA
             if test x$have_loadso = xyes && \
                test x$enable_pulseaudio_shared = xyes && test x$pulseaudio_lib != x; then
                 echo "-- dynamic libpulse-simple -> $pulseaudio_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC "$pulseaudio_lib"
 _ACEOF
 
@@ -20009,7 +20215,8 @@ fi
 
                 arts_lib=`find_lib "libartsc.so.*" "$ARTS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`
 
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_ARTS 1
 _ACEOF
 
@@ -20023,7 +20230,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic ARTS l
                 if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
                     echo "-- dynamic libartsc -> $arts_lib"
-                    cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_ARTS_DYNAMIC "$arts_lib"
 _ACEOF
 
@@ -20278,7 +20486,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic NAS lo
             if test x$have_loadso = xyes && \
                test x$enable_nas_shared = xyes && test x$nas_lib != x; then
                 echo "-- dynamic libaudio -> $nas_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_NAS_DYNAMIC "$nas_lib"
 _ACEOF
 
@@ -20286,7 +20495,8 @@ _ACEOF
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $NAS_LIBS"
             fi
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_NAS 1
 _ACEOF
 
@@ -20307,7 +20517,8 @@ else
 fi
 
     if test x$enable_audio = xyes -a x$enable_diskaudio = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_DISK 1
 _ACEOF
 
@@ -20325,7 +20536,8 @@ else
 fi
 
     if test x$enable_audio = xyes -a x$enable_dummyaudio = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_DUMMY 1
 _ACEOF
 
@@ -21781,7 +21993,8 @@ fi
             CFLAGS="$CFLAGS $X_CFLAGS"
             LDFLAGS="$LDFLAGS $X_LIBS"
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11 1
 _ACEOF
 
@@ -21808,11 +22021,13 @@ echo "$as_me: WARNING: You must have gcc4 (-fvisibility=hidden) for dynamic X11 
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 echo "-- dynamic libX11 -> $x11_lib"
                 echo "-- dynamic libX11ext -> $x11ext_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC "$x11_lib"
 _ACEOF
 
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "$x11ext_lib"
 _ACEOF
 
@@ -21886,7 +22101,8 @@ fi
                 if test x$have_xcursor_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xcursor_lib != x ; then
                         echo "-- dynamic libXcursor -> $xcursor_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR "$xcursor_lib"
 _ACEOF
 
@@ -21965,7 +22181,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_xcursor = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XCURSOR 1
 _ACEOF
 
@@ -22034,7 +22251,8 @@ fi
                 if test x$have_xinerama_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xinerama_lib != x ; then
                         echo "-- dynamic libXinerama -> $xinerama_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA "$xinerama_lib"
 _ACEOF
 
@@ -22113,7 +22331,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_xinerama = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XINERAMA 1
 _ACEOF
 
@@ -22182,7 +22401,8 @@ fi
                 if test x$have_xinput_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xinput_lib != x ; then
                         echo "-- dynamic libXi -> $xinput_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT "$xinput_lib"
 _ACEOF
 
@@ -22261,7 +22481,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_xinput = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XINPUT 1
 _ACEOF
 
@@ -22330,7 +22551,8 @@ fi
                 if test x$have_xrandr_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xrandr_lib != x ; then
                         echo "-- dynamic libXrandr -> $xrandr_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR "$xrandr_lib"
 _ACEOF
 
@@ -22409,7 +22631,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_xrandr = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XRANDR 1
 _ACEOF
 
@@ -22477,7 +22700,8 @@ fi
                 if test x$have_scrnsaver_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xss_lib != x ; then
                         echo "-- dynamic libXss -> $xss_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS "$xss_lib"
 _ACEOF
 
@@ -22556,7 +22780,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_scrnsaver = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XSCRNSAVER 1
 _ACEOF
 
@@ -22622,7 +22847,8 @@ fi
 
 
                 if test x$have_shape_h_hdr = xyes; then
-                    cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XSHAPE 1
 _ACEOF
 
@@ -22692,7 +22918,8 @@ fi
                 if test x$have_vm_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xvidmode_lib != x ; then
                         echo "-- dynamic libXxf86vm -> $xvidmode_lib"
-                        cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE "$xvidmode_lib"
 _ACEOF
 
@@ -22771,7 +22998,8 @@ fi
                 fi
             fi
             if test x$definitely_enable_video_x11_vm = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XVIDMODE 1
 _ACEOF
 
@@ -22783,7 +23011,8 @@ _ACEOF
 CheckBWINDOW()
 {
     if test x$enable_video = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_BWINDOW 1
 _ACEOF
 
@@ -22857,7 +23086,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 echo "${ECHO_T}$have_cocoa" >&6; }
         CFLAGS="$save_CFLAGS"
         if test x$have_cocoa = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_COCOA 1
 _ACEOF
 
@@ -23142,11 +23372,13 @@ else
 fi
 
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_DIRECTFB 1
 _ACEOF
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_DIRECTFB 1
 _ACEOF
 
@@ -23169,7 +23401,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic direct
                test x$enable_directfb_shared = xyes && test x$directfb_lib != x; then
                 directfb_shared=yes
                 echo "-- $directfb_lib_spec -> $directfb_lib"
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC "$directfb_lib"
 _ACEOF
 
@@ -23251,7 +23484,8 @@ echo $ECHO_N "checking for FusionSound $FUSIONSOUND_REQUIRED_VERSION support... 
 echo "${ECHO_T}$fusionsound" >&6; }
 
         if test x$fusionsound = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_FUSIONSOUND 1
 _ACEOF
 
@@ -23275,7 +23509,8 @@ echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic fusion
             fi
             if test x$have_loadso = xyes && \
                test x$enable_fusionsound_shared = xyes; then
-                cat >>confdefs.h <<_ACEOF
+
+cat >>confdefs.h <<_ACEOF
 #define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so"
 _ACEOF
 
@@ -23301,7 +23536,8 @@ else
 fi
 
     if test x$enable_video_dummy = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_DUMMY 1
 _ACEOF
 
@@ -23374,15 +23610,18 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         { echo "$as_me:$LINENO: result: $video_opengl" >&5
 echo "${ECHO_T}$video_opengl" >&6; }
         if test x$video_opengl = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL 1
 _ACEOF
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL_GLX 1
 _ACEOF
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_OGL 1
 _ACEOF
 
@@ -23393,15 +23632,18 @@ _ACEOF
 CheckWINDOWSGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL_WGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_OGL 1
 _ACEOF
 
@@ -23411,15 +23653,18 @@ _ACEOF
 CheckBeGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL_BGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_OGL 1
 _ACEOF
 
@@ -23430,15 +23675,18 @@ _ACEOF
 CheckMacGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_OPENGL_CGL 1
 _ACEOF
 
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_OGL 1
 _ACEOF
 
@@ -23516,7 +23764,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         { echo "$as_me:$LINENO: result: $use_input_events" >&5
 echo "${ECHO_T}$use_input_events" >&6; }
         if test x$use_input_events = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_INPUT_LINUXEV 1
 _ACEOF
 
@@ -23586,7 +23835,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
         { echo "$as_me:$LINENO: result: $enable_input_tslib" >&5
 echo "${ECHO_T}$enable_input_tslib" >&6; }
         if test x$enable_input_tslib = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_INPUT_TSLIB 1
 _ACEOF
 
@@ -23724,7 +23974,8 @@ echo "${ECHO_T}$use_pthreads" >&6; }
 
         # Do futher testing if we have pthread support...
         if test x$use_pthreads = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_PTHREAD 1
 _ACEOF
 
@@ -23782,7 +24033,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
        } && test -s conftest.$ac_objext; then
 
                 has_recursive_mutexes=yes
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1
 _ACEOF
 
@@ -23836,7 +24088,8 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
        } && test -s conftest.$ac_objext; then
 
                 has_recursive_mutexes=yes
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP 1
 _ACEOF
 
@@ -24584,6 +24837,136 @@ if test $ac_cv_header_dinput_h = yes; then
 fi
 
 
+        if test "${ac_cv_header_xaudio2_h+set}" = set; then
+  { echo "$as_me:$LINENO: checking for xaudio2.h" >&5
+echo $ECHO_N "checking for xaudio2.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_xaudio2_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_xaudio2_h" >&5
+echo "${ECHO_T}$ac_cv_header_xaudio2_h" >&6; }
+else
+  # Is the header compilable?
+{ echo "$as_me:$LINENO: checking xaudio2.h usability" >&5
+echo $ECHO_N "checking xaudio2.h usability... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+$ac_includes_default
+#include <xaudio2.h>
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_header_compiler=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_header_compiler=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
+echo "${ECHO_T}$ac_header_compiler" >&6; }
+
+# Is the header present?
+{ echo "$as_me:$LINENO: checking xaudio2.h presence" >&5
+echo $ECHO_N "checking xaudio2.h presence... $ECHO_C" >&6; }
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <xaudio2.h>
+_ACEOF
+if { (ac_try="$ac_cpp conftest.$ac_ext"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_cpp conftest.$ac_ext") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } >/dev/null && {
+	 test -z "$ac_c_preproc_warn_flag$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       }; then
+  ac_header_preproc=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+  ac_header_preproc=no
+fi
+
+rm -f conftest.err conftest.$ac_ext
+{ echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
+echo "${ECHO_T}$ac_header_preproc" >&6; }
+
+# So?  What about this header?
+case $ac_header_compiler:$ac_header_preproc:$ac_c_preproc_warn_flag in
+  yes:no: )
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: xaudio2.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: xaudio2.h: proceeding with the compiler's result" >&2;}
+    ac_header_preproc=yes
+    ;;
+  no:yes:* )
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: xaudio2.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: xaudio2.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: xaudio2.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: xaudio2.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: xaudio2.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: xaudio2.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: xaudio2.h: in the future, the compiler will take precedence" >&2;}
+
+    ;;
+esac
+{ echo "$as_me:$LINENO: checking for xaudio2.h" >&5
+echo $ECHO_N "checking for xaudio2.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_xaudio2_h+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_cv_header_xaudio2_h=$ac_header_preproc
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_header_xaudio2_h" >&5
+echo "${ECHO_T}$ac_cv_header_xaudio2_h" >&6; }
+
+fi
+if test $ac_cv_header_xaudio2_h = yes; then
+  have_xaudio2=yes
+fi
+
+
     fi
 }
 
@@ -24850,7 +25233,8 @@ fi
 
 fi
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_DLOPEN 1
 _ACEOF
 
@@ -25793,7 +26177,8 @@ fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
             if test x$have_machine_joystick = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H 1
 _ACEOF
 
@@ -25801,7 +26186,8 @@ _ACEOF
             { echo "$as_me:$LINENO: result: $have_machine_joystick" >&5
 echo "${ECHO_T}$have_machine_joystick" >&6; }
 
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_USBHID 1
 _ACEOF
 
@@ -25890,7 +26276,8 @@ if test $ac_cv_lib_rt_clock_gettime = yes; then
 fi
 
         if test x$have_clock_gettime = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_CLOCK_GETTIME 1
 _ACEOF
 
@@ -25962,7 +26349,8 @@ if test $ac_cv_lib_c_clock_gettime = yes; then
 fi
 
             if test x$have_clock_gettime = xyes; then
-               cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define HAVE_CLOCK_GETTIME 1
 _ACEOF
 
@@ -26166,7 +26554,8 @@ case "$host" in
         if test x$enable_audio = xyes; then
           case $ARCH in
             sysv5|solaris|hpux)
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_SUNAUDIO 1
 _ACEOF
 
@@ -26174,7 +26563,8 @@ _ACEOF
                 have_audio=yes
             ;;
             netbsd|openbsd)
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_BSD 1
 _ACEOF
 
@@ -26182,7 +26572,8 @@ _ACEOF
                 have_audio=yes
             ;;
             aix)
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_PAUDIO 1
 _ACEOF
 
@@ -26195,7 +26586,8 @@ _ACEOF
         if test x$enable_joystick = xyes; then
           case $ARCH in
             linux)
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_LINUX 1
 _ACEOF
 
@@ -26209,7 +26601,8 @@ _ACEOF
            if test x$use_input_events = xyes; then
              case $ARCH in
                linux)
-                   cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_HAPTIC_LINUX 1
 _ACEOF
 
@@ -26223,7 +26616,8 @@ _ACEOF
         if test x$enable_power = xyes; then
              case $ARCH in
                linux)
-                   cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_POWER_LINUX 1
 _ACEOF
 
@@ -26234,7 +26628,8 @@ _ACEOF
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMER_UNIX 1
 _ACEOF
 
@@ -26249,7 +26644,8 @@ _ACEOF
         CheckDummyAudio
         CheckWINDOWS
         if test x$enable_video = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_WINDOWS 1
 _ACEOF
 
@@ -26264,7 +26660,8 @@ fi
 
             enable_render_d3d=no
             if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_D3D 1
 _ACEOF
 
@@ -26272,23 +26669,34 @@ _ACEOF
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            cat >>confdefs.h <<\_ACEOF
-#define SDL_AUDIO_DRIVER_WINWAVEOUT 1
+
+cat >>confdefs.h <<\_ACEOF
+#define SDL_AUDIO_DRIVER_WINMM 1
 _ACEOF
 
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_DSOUND 1
 _ACEOF
 
-                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
+                SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
+            fi
+            if test x$have_xaudio2 = xyes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SDL_AUDIO_DRIVER_XAUDIO2 1
+_ACEOF
+
+                SOURCES="$SOURCES $srcdir/src/audio/xaudio2/*.c"
             fi
             have_audio=yes
         fi
         # Set up dummy files for the joystick for now
         if test x$enable_joystick = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_DUMMY 1
 _ACEOF
 
@@ -26297,7 +26705,8 @@ _ACEOF
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_WINDOWS 1
 _ACEOF
 
@@ -26309,7 +26718,8 @@ _ACEOF
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMER_WINCE 1
 _ACEOF
 
@@ -26318,7 +26728,8 @@ _ACEOF
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_WINDOWS 1
 _ACEOF
 
@@ -26365,7 +26776,8 @@ _ACEOF
 
         # Set up files for the video library
         if test x$enable_video = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_WINDOWS 1
 _ACEOF
 
@@ -26379,7 +26791,8 @@ else
 fi
 
             if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_RENDER_D3D 1
 _ACEOF
 
@@ -26387,31 +26800,43 @@ _ACEOF
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            cat >>confdefs.h <<\_ACEOF
-#define SDL_AUDIO_DRIVER_WINWAVEOUT 1
+
+cat >>confdefs.h <<\_ACEOF
+#define SDL_AUDIO_DRIVER_WINMM 1
 _ACEOF
 
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_DSOUND 1
 _ACEOF
 
-                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
+                SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
+            fi
+            if test x$have_xaudio2 = xyes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SDL_AUDIO_DRIVER_XAUDIO2 1
+_ACEOF
+
+                SOURCES="$SOURCES $srcdir/src/audio/xaudio2/*.c"
             fi
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
             if test x$have_dinput = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_DINPUT 1
 _ACEOF
 
                 SOURCES="$SOURCES $srcdir/src/joystick/windows/SDL_dxjoystick.c"
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldinput8 -ldxguid -ldxerr8"
             else
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_WINMM 1
 _ACEOF
 
@@ -26421,7 +26846,8 @@ _ACEOF
         fi
         if test x$enable_haptic = xyes; then
             if test x$have_dinput = xyes; then
-                cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_HAPTIC_DINPUT 1
 _ACEOF
 
@@ -26430,7 +26856,8 @@ _ACEOF
             fi
         fi
         if test x$enable_power = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_POWER_WINDOWS 1
 _ACEOF
 
@@ -26439,7 +26866,8 @@ _ACEOF
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_WINDOWS 1
 _ACEOF
 
@@ -26451,7 +26879,8 @@ _ACEOF
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMER_WINDOWS 1
 _ACEOF
 
@@ -26460,7 +26889,8 @@ _ACEOF
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_WINDOWS 1
 _ACEOF
 
@@ -26488,7 +26918,8 @@ _ACEOF
         CheckBeGL
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_BEOSAUDIO 1
 _ACEOF
 
@@ -26497,7 +26928,8 @@ _ACEOF
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_BEOS 1
 _ACEOF
 
@@ -26506,7 +26938,8 @@ _ACEOF
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREAD_BEOS 1
 _ACEOF
 
@@ -26517,7 +26950,8 @@ _ACEOF
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMER_BEOS 1
 _ACEOF
 
@@ -26526,7 +26960,8 @@ _ACEOF
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_BEOS 1
 _ACEOF
 
@@ -26535,7 +26970,8 @@ _ACEOF
         fi
         # Set up files for the system power library
         if test x$enable_power = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_POWER_BEOS 1
 _ACEOF
 
@@ -26565,7 +27001,8 @@ _ACEOF
         # Set up files for the shared object loading library
         # (this needs to be done before the dynamic X11 check)
         if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_DLCOMPAT 1
 _ACEOF
 
@@ -26587,16 +27024,18 @@ _ACEOF
 
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_AUDIO_DRIVER_COREAUDIO 1
 _ACEOF
 
-            SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
+            SOURCES="$SOURCES $srcdir/src/audio/coreaudio/*.c"
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_IOKIT 1
 _ACEOF
 
@@ -26605,7 +27044,8 @@ _ACEOF
         fi
         # Set up files for the haptic library
         if test x$enable_haptic = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_HAPTIC_IOKIT 1
 _ACEOF
 
@@ -26615,7 +27055,8 @@ _ACEOF
         fi
         # Set up files for the power library
         if test x$enable_power = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_POWER_MACOSX 1
 _ACEOF
 
@@ -26624,7 +27065,8 @@ _ACEOF
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMER_UNIX 1
 _ACEOF
 
@@ -26661,7 +27103,8 @@ esac
 
 if test x$have_joystick != xyes; then
     if test x$enable_joystick = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_JOYSTICK_DISABLED 1
 _ACEOF
 
@@ -26670,7 +27113,8 @@ _ACEOF
 fi
 if test x$have_haptic != xyes; then
     if test x$enable_haptic = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_HAPTIC_DISABLED 1
 _ACEOF
 
@@ -26679,7 +27123,8 @@ _ACEOF
 fi
 if test x$have_threads != xyes; then
     if test x$enable_threads = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_THREADS_DISABLED 1
 _ACEOF
 
@@ -26688,7 +27133,8 @@ _ACEOF
 fi
 if test x$have_timers != xyes; then
     if test x$enable_timers = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_TIMERS_DISABLED 1
 _ACEOF
 
@@ -26697,7 +27143,8 @@ _ACEOF
 fi
 if test x$have_loadso != xyes; then
     if test x$enable_loadso = xyes; then
-        cat >>confdefs.h <<\_ACEOF
+
+cat >>confdefs.h <<\_ACEOF
 #define SDL_LOADSO_DISABLED 1
 _ACEOF
 
