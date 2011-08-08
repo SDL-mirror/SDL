@@ -119,6 +119,52 @@ void *BE_GL_GetProcAddress(_THIS, const char *proc)
 }
 
 
+
+
+void BE_GL_SwapWindow(_THIS, SDL_Window * window) {
+    _ToBeWin(window)->SwapBuffers();
+}
+
+int BE_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context) {
+	_GetBeApp()->SetCurrentContext(((SDL_BWin*)context)->GetGLView());
+	return 0;
+}
+
+
+SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window) {
+	/* FIXME: Not sure what flags should be included here; may want to have
+	   most of them */
+	SDL_BWin *bwin = _ToBeWin(window);
+	bwin->CreateGLView(BGL_RGB | BGL_DOUBLE);
+	return (SDL_GLContext)(bwin);
+}
+
+void BE_GL_DeleteContext(_THIS, SDL_GLContext context) {
+	/* Currently, automatically unlocks the view */
+	((SDL_BWin*)context)->RemoveGLView();
+}
+
+
+int BE_GL_SetSwapInterval(_THIS, int interval) {
+	printf(__FILE__": %d- swap interval set\n", __LINE__);
+	return 0;
+}
+
+int BE_GL_GetSwapInterval(_THIS) {
+	printf(__FILE__": %d- swap interval requested\n", __LINE__);
+	return 0;
+}
+
+
+void BE_GL_UnloadLibrary(_THIS) {
+	printf(__FILE__": %d- Library unloaded\n", __LINE__);
+}
+
+
+
+
+
+
 #if 0 /* Functions from 1.2 that do not appear to be used in 1.3 */
 
     int BE_GL_GetAttribute(_THIS, SDL_GLattr attrib, int *value)
@@ -182,38 +228,13 @@ void *BE_GL_GetProcAddress(_THIS, const char *proc)
     }
 
 #endif
-    void BE_GL_SwapWindow(_THIS, SDL_Window * window) {
-        _ToBeWin(window)->SwapBuffers();
-    }
-
-int BE_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context) {
-	_GetBeApp()->SetCurrentContext((BGLView*)context);
-	return 0;
-}
 
 
-SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window) {
-	/* FIXME: Not sure what flags should be included here; may want to have
-	   most of them */
-	return (SDL_GLContext)(_ToBeWin(window)->CreateGLView(
-		BGL_RGB | BGL_DOUBLE));
-}
-
-void BE_GL_DeleteContext(_THIS, SDL_GLContext context) {
-	/* Currently, automatically unlocks the view */
-//	_ToBeWin(window)->RemoveGLView();	FIXME: Need to get the bwindow somehow
-}
 
 
-int BE_GL_SetSwapInterval(_THIS, int interval) {
-}
-
-int BE_GL_GetSwapInterval(_THIS) {
-}
 
 
-void BE_GL_UnloadLibrary(_THIS) {
-}
+
 
 #ifdef __cplusplus
 }

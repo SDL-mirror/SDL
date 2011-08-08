@@ -62,12 +62,20 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 
 	/* Create the new bitmap object */
 	BBitmap *bitmap = bwin->GetBitmap();
+
 	if(bitmap) {
 		delete bitmap;
 	}
 	bitmap = new BBitmap(bwin->Bounds(), (color_space)bmode.space,
 			false,	/* Views not accepted */
 			true);	/* Contiguous memory required */
+			
+	if(bitmap->InitCheck() != B_OK) {
+		SDL_SetError("Could not initialize back buffer!\n");
+		return -1;
+	}
+
+
 	bwin->SetBitmap(bitmap);
 	
 	/* Set the pixel pointer */
@@ -132,7 +140,7 @@ int32 BE_DrawThread(void *data) {
 				int32 height = clips[i].bottom - clips[i].top + 1;
 				bufferpx = bwin->GetBufferPx() + 
 					clips[i].top * bufferPitch + clips[i].left * BPP;
-				windowpx = (uint8*)bitmap->Bits(); + 
+				windowpx = (uint8*)bitmap->Bits() + 
 					clips[i].top * windowPitch + clips[i].left * BPP -
 					windowSub;
 
@@ -143,11 +151,14 @@ int32 BE_DrawThread(void *data) {
 					if(bwin->CanTrashWindowBuffer()) {
 						goto escape;	/* Break out before the buffer is killed */
 					}
+//					printf("memcpy(0x%x, 0x%x, %i) ", bufferpx, windowpx, width * BPP);
 					memcpy(bufferpx, windowpx, width * BPP);
 					bufferpx += bufferPitch;
 					windowpx += windowPitch;
 				}
+//				printf("\t-\t");
 			}
+//			printf("\n");
 			bwin->SetBufferDirty(false);
 escape:
 			bwin->UnlockBuffer();

@@ -156,7 +156,8 @@ class SDL_BWin:public BDirectWindow
 		/* Determine if the pixel buffer is usable after this update */
 		_trash_window_buffer =		_trash_window_buffer
 								|| ((info->buffer_state & B_BUFFER_RESIZED)
-    							|| (info->buffer_state & B_BUFFER_RESET));
+    							|| (info->buffer_state & B_BUFFER_RESET)
+    							|| (info->driver_state == B_MODE_CHANGED));
     	LockBuffer();
 
     	switch(info->buffer_state & B_DIRECT_MODE_MASK) {
@@ -193,7 +194,12 @@ class SDL_BWin:public BDirectWindow
 		}
 #endif
     	
+    	
+    	/* Call the base object directconnected */
+    	BDirectWindow::DirectConnected(info);
+    	
     	UnlockBuffer();
+    	
     }
     
     
@@ -407,6 +413,9 @@ class SDL_BWin:public BDirectWindow
 	bool BufferExists() { return _buffer_created; }
 	bool BufferIsDirty() { return _buffer_dirty; }
 	BBitmap *GetBitmap() { return _bitmap; }
+#if SDL_VIDEO_OPENGL
+	BGLView *GetGLView() { return _SDL_GLView; }
+#endif
 	
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
