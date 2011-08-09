@@ -1238,7 +1238,6 @@ CheckBWINDOW()
 {
     if test x$enable_video = xyes; then
         AC_DEFINE(SDL_VIDEO_DRIVER_BWINDOW, 1, [ ])
-        # SOURCES="$SOURCES $srcdir/src/video/bwindow/*.cc" .cc sources have been removed
         SOURCES="$SOURCES $srcdir/src/video/bwindow/*.cc"
         have_video=yes
     fi

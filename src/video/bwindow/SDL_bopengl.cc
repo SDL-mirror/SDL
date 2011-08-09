@@ -42,11 +42,28 @@ static inline SDL_BApp *_GetBeApp() {
 /* Passing a NULL path means load pointers from the application */
 int BE_GL_LoadLibrary(_THIS, const char *path)
 {
+	image_info info;
+			int32 cookie = 0;
+	while (get_next_image_info(0, &cookie, &info) == B_OK) {
+		void *location = NULL;
+		if( get_image_symbol(info.id, "glBegin", B_SYMBOL_TYPE_ANY,
+				&location) == B_OK) {
+					
+			printf("HERE2\n");
+			_this->gl_config.dll_handle = (void *) info.id;
+			_this->gl_config.driver_loaded = 1;
+			SDL_strlcpy(_this->gl_config.driver_path, "libGL.so",
+					SDL_arraysize(_this->gl_config.driver_path));
+		}
+	}
+#if 0
+printf("\n\nLibrary loading: %s\n\n", path);
 	if (path == NULL) {
 		if (_this->gl_config.dll_handle == NULL) {
 			image_info info;
 			int32 cookie = 0;
 			while (get_next_image_info(0, &cookie, &info) == B_OK) {
+				printf(__FILE__": %d - Inside while\n",__LINE__);
 				void *location = NULL;
 				if (get_image_symbol
 				((image_id) cookie, "glBegin",
@@ -69,7 +86,6 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
         if (_this->gl_config.dll_handle == NULL) {
         	return BE_GL_LoadLibrary(_this, NULL);
         }
-
             /* Unload old first */
             /*if (_this->gl_config.dll_handle != NULL) { */
             /* Do not try to unload application itself (if LoadLibrary was called before with NULL ;) */
@@ -91,11 +107,13 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 	if (_this->gl_config.dll_handle != NULL) {
 		return 0;
 	} else {
+printf(__FILE__": %d- gl_config.driver_loaded = 0\n", __LINE__);
 		_this->gl_config.dll_handle = NULL;
 		_this->gl_config.driver_loaded = 0;
 		*_this->gl_config.driver_path = '\0';
 		return -1;
 	}
+#endif
 }
 
 void *BE_GL_GetProcAddress(_THIS, const char *proc)
