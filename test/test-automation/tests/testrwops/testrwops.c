@@ -18,7 +18,7 @@
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "rwops_test", "rwopsy", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_test", "rwopsy", TEST_DISABLED, 0, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
