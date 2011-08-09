@@ -142,10 +142,27 @@ Uint64 RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool va
 
 /*!
  * Returns random Sint8 boundary value.
- *
- * Note: not implemented.
  */
-Sint8 RandomSint8BoundaryValue();
+Sint8
+RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain);
+
+/*!
+ * Returns random Sint8 boundary value.
+ */
+Sint16
+RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDomain);
+
+/*!
+ * Returns random Sint8 boundary value.
+ */
+Sint32
+RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDomain);
+
+/*!
+ * Returns random Sint8 boundary value.
+ */
+Sint64
+RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDomain);
 
 
 /*!
