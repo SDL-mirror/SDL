@@ -31,6 +31,8 @@
 
 #include "../../include/SDL_test.h"
 
+#include <limits.h>
+
 /* Test case references */
 static const TestCaseReference test1 =
 		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0, 4};
@@ -97,6 +99,14 @@ dummycase1(void *arg)
 	// */
 
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
+
+
+	for( ; 1 ; ) {
+		//Log(0, "sint8: %d", RandomSint8BoundaryValue(-11, 10, SDL_TRUE));
+		//Log(0, "sint16: %d", RandomSint16BoundaryValue(SHRT_MIN, SHRT_MAX, SDL_FALSE));
+		Log(0, "sint32: %d", RandomSint32BoundaryValue(INT_MIN, 3000, SDL_FALSE));
+		//Log(0, "sint64: %lld", RandomSint64BoundaryValue(-34, -34, SDL_FALSE));
+	}
 
 	for(; 0 ;) {
 		//Log(0, "int8: %u", RandomUint8BoundaryValue(0, 255, SDL_FALSE));

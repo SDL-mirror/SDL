@@ -108,13 +108,13 @@ DeinitFuzzer()
 Sint32
 RandomInteger()
 {
-	return utl_randomInt(&rndContext);
+	return (Sint32) utl_randomInt(&rndContext);
 }
 
 Uint32
 RandomPositiveInteger()
 {
-	return utl_randomInt(&rndContext);
+	return (Uint32) utl_randomInt(&rndContext);
 }
 
 Sint32
@@ -150,6 +150,9 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
  *
  * Generator works the same for other types of unsigned integers.
  *
+ * Note: outBuffer will be allocated and needs to be freed later.
+ * If outbuffer != NULL, it'll be freed.
+ *
  * \param maxValue The biggest value that is acceptable for this data type.
  * 					For instance, for Uint8 -> 255, Uint16 -> 65536 etc.
  * \param pBoundary1 defines lower boundary
@@ -159,12 +162,12 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
  * \param outBuffer The generated boundary values are put here
  * \param outBufferSize Size of outBuffer
  *
- * \returns NULL on error, outBuffer on success
+ * \returns Returns the number of elements in outBuffer or -1 in case of error
  */
-Uint64 *
+Uint32
 GenerateUnsignedBoundaryValues(const Uint64 maxValue,
 					Uint64 pBoundary1, Uint64 pBoundary2, SDL_bool validDomain,
-					Uint64 *outBuffer, Uint32 *outBufferSize)
+					Uint64 *outBuffer)
 {
 	Uint64 boundary1 = pBoundary1, boundary2 = pBoundary2;
 
@@ -178,9 +181,7 @@ GenerateUnsignedBoundaryValues(const Uint64 maxValue,
 		boundary2 = temp;
 	}
 
-	Uint64 tempBuf[8];
-	memset(tempBuf, 0, 8 * sizeof(Uint64));
-
+	Uint64 tempBuf[4];
 	Uint64 index = 0;
 
 	if(boundary1 == boundary2) {
@@ -207,20 +208,18 @@ GenerateUnsignedBoundaryValues(const Uint64 maxValue,
 
 	if(index == 0) {
 		// There are no valid boundaries
-		return NULL;
+		return 0;
 	}
 
 	// Create the return buffer
 	outBuffer = SDL_malloc(index * sizeof(Uint64));
 	if(outBuffer == NULL) {
-		return NULL;
+		return 0;
 	}
 
 	SDL_memcpy(outBuffer, tempBuf, index * sizeof(Uint64));
 
-	*outBufferSize = index;
-
-	return outBuffer;
+	return index;
 }
 
 Uint8
@@ -232,11 +231,11 @@ RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain)
 	// max value for Uint8
 	const Uint64 maxValue = UINT8_MAX;
 
-	buffer = GenerateUnsignedBoundaryValues(maxValue,
-										(Uint64) boundary1, (Uint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
-		return -1; // Change to some better error value? What would be better?
+	size = GenerateUnsignedBoundaryValues(maxValue,
+				(Uint64) boundary1, (Uint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
+		return 0;
 	}
 
 	Uint32 index = RandomInteger() % size;
@@ -256,11 +255,11 @@ RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDoma
 	// max value for Uint16
 	const Uint64 maxValue = UINT16_MAX;
 
-	buffer = GenerateUnsignedBoundaryValues(maxValue,
-										(Uint64) boundary1, (Uint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
-		return -1; // Change to some better error value? What would be better?
+	size = GenerateUnsignedBoundaryValues(maxValue,
+				(Uint64) boundary1, (Uint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
+		return 0;
 	}
 
 	Uint32 index = RandomInteger() % size;
@@ -280,11 +279,11 @@ RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDoma
 	// max value for Uint32
 	const Uint64 maxValue = UINT32_MAX;
 
-	buffer = GenerateUnsignedBoundaryValues(maxValue,
-										(Uint64) boundary1, (Uint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
-		return -1; // Change to some better error value? What would be better?
+	size = GenerateUnsignedBoundaryValues(maxValue,
+				(Uint64) boundary1, (Uint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
+		return 0;
 	}
 
 	Uint32 index = RandomInteger() % size;
@@ -304,11 +303,11 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
 	// max value for Uint64
 	const Uint64 maxValue = UINT64_MAX;
 
-	buffer = GenerateUnsignedBoundaryValues(maxValue,
-										(Uint64) boundary1, (Uint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
-		return -1; // Change to some better error value? What would be better?
+	size = GenerateUnsignedBoundaryValues(maxValue,
+				(Uint64) boundary1, (Uint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
+		return 0;
 	}
 
 	Uint32 index = RandomInteger() % size;
@@ -330,6 +329,10 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
  *
  * Generator works the same for other types of signed integers.
  *
+ * Note: outBuffer will be allocated and needs to be freed later.
+ * If outbuffer != NULL, it'll be freed.
+ *
+ *
  * \paran minValue The smallest value  that is acceptable for this data type.
  *					For instance, for Uint8 -> -128, Uint16 -> -32,768 etc.
  * \param maxValue The biggest value that is acceptable for this data type.
@@ -341,12 +344,12 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
  * \param outBuffer The generated boundary values are put here
  * \param outBufferSize Size of outBuffer
  *
- * \returns NULL on error, outBuffer on success
+ * \returns Returns the number of elements in outBuffer or -1 in case of error
  */
-Uint64 *
+Uint32
 GenerateSignedBoundaryValues(const Sint64 minValue, const Sint64 maxValue,
 					Sint64 pBoundary1, Sint64 pBoundary2, SDL_bool validDomain,
-					Sint64 *outBuffer, Uint32 *outBufferSize)
+					Sint64 *outBuffer)
 {
 	Sint64 boundary1 = pBoundary1, boundary2 = pBoundary2;
 
@@ -360,8 +363,7 @@ GenerateSignedBoundaryValues(const Sint64 minValue, const Sint64 maxValue,
 		boundary2 = temp;
 	}
 
-	Sint64 tempBuf[8];
-	memset(tempBuf, 0, 8 * sizeof(Sint64));
+	Sint64 tempBuf[4];
 
 	Sint64 index = 0;
 
@@ -391,20 +393,18 @@ GenerateSignedBoundaryValues(const Sint64 minValue, const Sint64 maxValue,
 
 	if(index == 0) {
 		// There are no valid boundaries
-		return NULL;
+		return 0;
 	}
 
 	// Create the return buffer
 	outBuffer = SDL_malloc(index * sizeof(Sint64));
 	if(outBuffer == NULL) {
-		return NULL;
+		return 0;
 	}
 
 	SDL_memcpy(outBuffer, tempBuf, index * sizeof(Sint64));
 
-	*outBufferSize = index;
-
-	return outBuffer;
+	return index;
 }
 
 Sint8
@@ -417,10 +417,10 @@ RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain)
 	const Sint64 maxValue = CHAR_MAX;
 	const Sint64 minValue = CHAR_MIN;
 
-	buffer = GenerateSignedBoundaryValues(minValue, maxValue,
-										(Sint64) boundary1, (Sint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
+	size = GenerateSignedBoundaryValues(minValue, maxValue,
+				(Sint64) boundary1, (Sint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
 		return CHAR_MIN;
 	}
 
@@ -442,10 +442,10 @@ RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDoma
 	const Sint64 maxValue = SHRT_MAX;
 	const Sint64 minValue = SHRT_MIN;
 
-	buffer = GenerateSignedBoundaryValues(minValue, maxValue,
-										(Sint64) boundary1, (Sint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
+	size = GenerateSignedBoundaryValues(minValue, maxValue,
+					(Sint64) boundary1, (Sint64) boundary2,
+					validDomain, buffer);
+	if(size == 0) {
 		return SHRT_MIN;
 	}
 
@@ -467,10 +467,10 @@ RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDoma
 	const Sint64 maxValue = INT_MAX;
 	const Sint64 minValue = INT_MIN;
 
-	buffer = GenerateSignedBoundaryValues(minValue, maxValue,
-										(Sint64) boundary1, (Sint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
+	size = GenerateSignedBoundaryValues(minValue, maxValue,
+				(Sint64) boundary1, (Sint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
 		return INT_MIN;
 	}
 
@@ -492,10 +492,10 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 	const Sint64 maxValue = LLONG_MAX;
 	const Sint64 minValue = LLONG_MIN;
 
-	buffer = GenerateSignedBoundaryValues(minValue, maxValue,
-										(Sint64) boundary1, (Sint64) boundary2,
-										validDomain, buffer, &size);
-	if(buffer == NULL) {
+	size = GenerateSignedBoundaryValues(minValue, maxValue,
+				(Sint64) boundary1, (Sint64) boundary2,
+				validDomain, buffer);
+	if(size == 0) {
 		return LLONG_MIN;
 	}
 
@@ -516,11 +516,11 @@ RandomAsciiString()
 char *
 RandomAsciiStringWithMaximumLength(int maxSize)
 {
-	if(maxSize < 0) {
+	if(maxSize < 1) {
 		return NULL;
 	}
 
-	int size = abs(RandomInteger()) % maxSize;
+	int size = (abs(RandomInteger()) % (maxSize + 1)) + 1;
 	char *string = SDL_malloc(size * sizeof(size));
 
 	int counter = 0;
