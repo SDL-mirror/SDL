@@ -41,6 +41,9 @@ AC_CONFIG_FILES([Makefile
 				 tests/testaudio/Makefile
 				 tests/testsurface/Makefile
 				 tests/testrwops/Makefile
+ 				 tests/testvideo/Makefile
+ 				 tests/testsyswm/Makefile
+ 				 tests/testclipboard/Makefile
 				 tests/testrender/Makefile])
 
 AC_OUTPUT

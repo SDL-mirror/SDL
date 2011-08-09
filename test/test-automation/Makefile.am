@@ -8,7 +8,10 @@ SUBDIRS = src/libSDLtest \
 		  tests/testaudio \
 		  tests/testsurface \
 		  tests/testrwops \
-		  tests/testrender
+		  tests/testrender \
+		  tests/testvideo \
+		  tests/testsyswm \
+		  tests/testclipboard
 
 ##all-local: install
 install: install-runner install-tests
