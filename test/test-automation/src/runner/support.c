@@ -37,6 +37,18 @@ PlatformSupportsAudio()
 	return retValue;
 }
 
+int
+PlatformSupportsStdio()
+{
+	int retValue = 0;
+
+#ifdef HAVE_STDIO_H
+	retValue = 1;
+#endif
+
+	return retValue;
+}
+
 
 /*
 

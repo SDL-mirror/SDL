@@ -28,4 +28,12 @@
  */
 int PlatformSupportsAudio();
 
+/*!
+ * Checks if platform supports stdio.
+ *
+ * \return 1 if audio is supported, otherwise 0
+ */
+int PlatformSupportsStdio();
+
+
 #endif

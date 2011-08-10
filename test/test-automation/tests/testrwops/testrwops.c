@@ -1,6 +1,10 @@
 /**
- * Original code: automated SDL platform test written by Edgar Simo "bobbens"
- * Extended and updated by aschiffler at ferzkopp dot net
+ * Automated SDL_RWops test.
+ *
+ * Original code written by Edgar Simo "bobbens"
+ * Ported by Markus Kauppila (markus.kauppila@gmail.com)
+ *
+ * Released under Public Domain.
  */
 
 #include <stdio.h>
@@ -9,31 +13,208 @@
 
 #include "../../include/SDL_test.h"
 
+#include "TestSupportRWops.h"
+
+const char* RWOPS_READ = "tests/testrwops/read";
+const char* RWOPS_WRITE = "tests/testrwops/write";
 
 
-/*!
- * Note: Port tests from "/test/automated/rwops" here
- *
- */
+static const char hello_world[] = "Hello World!";
+static const char const_mem[] = "Hello World!";
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "rwops_test", "rwopsy", TEST_DISABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testParam", "test parameters", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test2 =
+		(TestCaseReference){ "rwops_testMem", "Tests opening from memory", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test3 =
+		(TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test4 =
+		(TestCaseReference){ "rwops_testFile", "rwop sy", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test5 =
+		(TestCaseReference){ "rwops_testFP", "rwop sy", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, NULL
+	&test1, &test2, &test3, &test4, &test5, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
+
 /**
- * @brief Document test case here
+ * @brief Makes sure parameters work properly. Helper function
  */
-int
-rwops_test(void *arg)
+int _testGeneric( SDL_RWops *rw, int write )
 {
-	AssertPass("");
+   char buf[sizeof(hello_world)];
+   int i;
+
+   /* Set to start. */
+   i = SDL_RWseek( rw, 0, RW_SEEK_SET );
+   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d");
+
+   /* Test write. */
+   i = SDL_RWwrite( rw, hello_world, sizeof(hello_world)-1, 1 );
+
+   if (write) {
+	   AssertEquals(i, 1, "Writing with SDL_RWwrite (failed to write)");
+   }
+   else {
+		AssertTrue(i <= 0, "Writing with SDL_RWwrite (wrote when shouldn't have)");
+   }
+
+   /* Test seek. */
+   i = SDL_RWseek( rw, 6, RW_SEEK_SET );
+
+   AssertEquals(i, 6, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d", i, 0);
+
+   /* Test seek. */
+   i = SDL_RWseek( rw, 0, RW_SEEK_SET );
+   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d", i, 0);
+
+   /* Test read. */
+   i = SDL_RWread( rw, buf, 1, sizeof(hello_world)-1 );
+   AssertTrue(i == sizeof(hello_world)-1, "Reading with SDL_RWread");
+   AssertTrue(SDL_memcmp( buf, hello_world, sizeof(hello_world)-1 ) == 0, "Memory read does not match memory written");
+
+   /* More seek tests. */
+   i = SDL_RWseek( rw, -4, RW_SEEK_CUR );
+   AssertTrue(i == sizeof(hello_world)-5, "Seeking with SDL_RWseek (RW_SEEK_CUR): got %d, expected %d");
+
+   i = SDL_RWseek( rw, -1, RW_SEEK_END );
+   AssertTrue(i == sizeof(hello_world)-2, "Seeking with SDL_RWseek (RW_SEEK_END): got %d, expected %d", i, sizeof(hello_world)-2);
+}
+
+
+void rwops_testParam (void)
+{
+   SDL_RWops *rwops;
+
+   /* These should all fail. */
+   rwops = SDL_RWFromFile(NULL, NULL);
+   AssertTrue(rwops == NULL, "SDL_RWFromFile(NULL, NULL) worked");
+
+   rwops = SDL_RWFromFile(NULL, "ab+");
+   AssertTrue(rwops == NULL, "SDL_RWFromFile(NULL, NULL) worked");
+
+   rwops = SDL_RWFromFile(NULL, "sldfkjsldkfj");
+   AssertTrue(rwops == NULL, "SDL_RWFromFile(NULL, \"sldfkjsldkfj\") worked");
+
+   rwops = SDL_RWFromFile("something", "");
+   AssertTrue(rwops == NULL, "SDL_RWFromFile(\"something\", \"\") worked");
+
+   rwops = SDL_RWFromFile("something", NULL);
+   AssertTrue(rwops == NULL, "SDL_RWFromFile(\"something\", NULL) worked");
+}
+
+
+/**
+ * @brief Does a generic rwops test.
+ *
+ * RWops should have "Hello World!" in it already if write is disabled.
+ *
+ *    @param write Test writing also.
+ *    @return 1 if an assert is failed.
+ */
+/**
+ * @brief Tests opening from memory.
+ */
+void rwops_testMem (void)
+{
+   char mem[sizeof(hello_world)];
+   SDL_RWops *rw;
+
+   /* Open. */
+   rw = SDL_RWFromMem( mem, sizeof(hello_world)-1 );
+   AssertTrue(rw != NULL, "Opening memory with SDL_RWFromMem");
+
+   /* Run generic tests. */
+   _testGeneric( rw, 1 );
+
+   /* Close. */
+   SDL_FreeRW( rw );
+}
+
+
+/**
+ * @brief Tests opening from memory.
+ */
+void rwops_testConstMem (void)
+{
+   SDL_RWops *rw;
+
+   /* Open. */
+   rw = SDL_RWFromConstMem( const_mem, sizeof(const_mem)-1 );
+   AssertTrue(rw != NULL, "Opening memory with SDL_RWFromConstMem");
+
+   /* Run generic tests. */
+   _testGeneric( rw, 0 );
+
+   /* Close. */
+   SDL_FreeRW( rw );
+}
+
+
+/**
+ * @brief Tests opening from memory.
+ */
+void rwops_testFile (void)
+{
+   SDL_RWops *rw;
+
+   /* Read test. */
+   rw = TestSupportRWops_OpenRWopsFromReadDir( RWOPS_READ, "r" );
+   AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFile RWOPS_READ");
+
+   _testGeneric( rw, 0 );
+
+   SDL_FreeRW( rw );
+
+   /* Write test. */
+   rw = TestSupportRWops_OpenRWopsFromWriteDir( RWOPS_WRITE, "w+" );
+   AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFile RWOPS_WRITE");
+
+   _testGeneric( rw, 1 );
+
+   SDL_FreeRW( rw );
+}
+
+
+/**
+ * @brief Tests opening from stdio
+ */
+void rwops_testFP (void)
+{
+   FILE *fp;
+   SDL_RWops *rw;
+
+   /* Run read tests. */
+   fp = TestSupportRWops_OpenFPFromReadDir( RWOPS_READ, "r" );
+   AssertTrue(fp != NULL, "Failed to open file %s,", RWOPS_READ);
+
+   rw = SDL_RWFromFP( fp, 1 );
+   AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFP");
+
+   _testGeneric( rw, 0 );
+
+   SDL_FreeRW( rw );
+
+   /* Run write tests. */
+   fp = TestSupportRWops_OpenFPFromWriteDir( RWOPS_WRITE, "w+" );
+   AssertTrue(fp != NULL, "Failed to open file %s", RWOPS_WRITE);
+
+   rw = SDL_RWFromFP( fp, 1 );
+   AssertTrue( rw != NULL, "Opening memory with SDL_RWFromFP");
+
+   _testGeneric( rw, 1 );
+
+   SDL_FreeRW( rw );
 }

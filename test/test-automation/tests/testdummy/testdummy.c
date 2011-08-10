@@ -101,7 +101,7 @@ dummycase1(void *arg)
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
 
 
-	for( ; 1 ; ) {
+	for( ; 0 ; ) {
 		//Log(0, "sint8: %d", RandomSint8BoundaryValue(-11, 10, SDL_TRUE));
 		//Log(0, "sint16: %d", RandomSint16BoundaryValue(SHRT_MIN, SHRT_MAX, SDL_FALSE));
 		Log(0, "sint32: %d", RandomSint32BoundaryValue(INT_MIN, 3000, SDL_FALSE));

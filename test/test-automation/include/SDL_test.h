@@ -44,6 +44,8 @@
 
 //! Definitions for test requirements
 #define TEST_REQUIRES_AUDIO 1
+//! Defines that the a test requires STDIO
+#define TEST_REQUIRES_STDIO 1
 
 /*!
  * Holds information about a test case

@@ -761,6 +761,11 @@ CheckTestRequirements(TestCase *testCase)
 		retVal = PlatformSupportsAudio();
 	}
 
+	if(testCase->requirements & TEST_REQUIRES_STDIO) {
+		retVal = PlatformSupportsStdio();
+	}
+
+
 	return retVal;
 }
 
