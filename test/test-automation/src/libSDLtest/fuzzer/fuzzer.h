@@ -141,25 +141,90 @@ Uint32 RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool va
 Uint64 RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDomain);
 
 /*!
- * Returns random Sint8 boundary value.
+ * Returns a random boundary value for Sint8 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomSint8BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
+ * RandomSint8BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
+ * RandomSint8BoundaryValue(-128, 99, SDL_FALSE) returns 100
+ * RandomSint8BoundaryValue(-128, 127, SDL_FALSE) returns SINT8_MIN (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Sint8
 RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain);
 
+
 /*!
- * Returns random Sint8 boundary value.
+ * Returns a random boundary value for Sint16 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomSint16BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
+ * RandomSint16BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
+ * RandomSint16BoundaryValue(SINT8_MIN, 99, SDL_FALSE) returns 100
+ * RandomSint16BoundaryValue(SINT8_MIN, SINT8_MAX, SDL_FALSE) returns SINT16_MIN (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Sint16
 RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDomain);
 
 /*!
- * Returns random Sint8 boundary value.
+ * Returns a random boundary value for Sint32 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomSint32BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
+ * RandomSint32BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
+ * RandomSint32BoundaryValue(SINT32_MIN, 99, SDL_FALSE) returns 100
+ * RandomSint32BoundaryValue(SINT32_MIN, SINT32_MAX, SDL_FALSE) returns SINT32_MIN (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Sint32
 RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDomain);
 
 /*!
- * Returns random Sint8 boundary value.
+ * Returns a random boundary value for Sint64 within the given boundaries.
+ * Boundaries are inclusive, see the usage examples below. If validDomain
+ * is true, the function will only return valid boundaries, otherwise non-valid
+ * boundaries are also possible.
+ * If boundary1 > boundary2, the values are swapped
+ *
+ * Usage examples:
+ * RandomSint64BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
+ * RandomSint64BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
+ * RandomSint64BoundaryValue(SINT64_MIN, 99, SDL_FALSE) returns 100
+ * RandomSint64BoundaryValue(SINT64_MIN, SINT32_MAX, SDL_FALSE) returns SINT64_MIN (== error value)
+ *
+ * \param boundary1 Lower boundary limit
+ * \param boundary2 Upper boundary limit
+ * \param validDomain Should the generated boundary be valid or not?
+ *
+ * \returns Boundary value in given range or error value (-1)
  */
 Sint64
 RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDomain);
