@@ -411,7 +411,9 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
         if ( mode_flags & SDL_OPENGL ) {
         
             QZ_TearDownOpenGL (this);
+            #ifdef __powerpc__  /* we only use this for pre-10.3 compatibility. */
             CGLSetFullScreen (NULL);
+            #endif
         }
         if (to_desktop) {
             ShowMenuBar ();
@@ -529,9 +531,6 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         CGLError err;
         CGLContextObj ctx;
 
-        /* CGLSetFullScreen() will handle this for us. */
-        [ qz_window setLevel:NSNormalWindowLevel ];
-
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             goto ERR_NO_GL;
         }
@@ -542,13 +541,22 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         [ [ qz_window contentView ] addSubview:window_view ];	
         [ window_view release ];
 
+#ifdef __powerpc__  /* there's a Cocoa API for this in 10.3 */
+        /* CGLSetFullScreen() will handle this for us. */
+        [ qz_window setLevel:NSNormalWindowLevel ];
+
         ctx = QZ_GetCGLContextObj (gl_context);
         err = CGLSetFullScreen (ctx);
-
         if (err) {
             SDL_SetError ("Error setting OpenGL fullscreen: %s", CGLErrorString(err));
             goto ERR_NO_GL;
         }
+#else
+        [ qz_window setLevel:CGShieldingWindowLevel() ];
+        [ gl_context setView:window_view ];
+        [ gl_context setFullScreen ];
+        [ gl_context update ];
+#endif
 
         [ gl_context makeCurrentContext];
 
