@@ -13,11 +13,8 @@
 
 #include "../../include/SDL_test.h"
 
-#include "TestSupportRWops.h"
-
 const char* RWOPS_READ = "tests/testrwops/read";
 const char* RWOPS_WRITE = "tests/testrwops/write";
-
 
 static const char hello_world[] = "Hello World!";
 static const char const_mem[] = "Hello World!";
@@ -51,6 +48,11 @@ TestCaseReference **QueryTestSuite() {
 
 /**
  * @brief Makes sure parameters work properly. Helper function
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWseek
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWread
+ *
  */
 int _testGeneric( SDL_RWops *rw, int write )
 {
@@ -59,41 +61,45 @@ int _testGeneric( SDL_RWops *rw, int write )
 
    /* Set to start. */
    i = SDL_RWseek( rw, 0, RW_SEEK_SET );
-   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d");
+   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET)");
 
    /* Test write. */
-   i = SDL_RWwrite( rw, hello_world, sizeof(hello_world)-1, 1 );
+   i = SDL_RWwrite( rw, hello_world, sizeof(hello_world)-1, 1);
 
    if (write) {
 	   AssertEquals(i, 1, "Writing with SDL_RWwrite (failed to write)");
    }
    else {
-		AssertTrue(i <= 0, "Writing with SDL_RWwrite (wrote when shouldn't have)");
+		AssertTrue(i <= 0, "Writing with SDL_RWwrite (wrote when shouldn't have): %d <= 0", i);
    }
 
    /* Test seek. */
    i = SDL_RWseek( rw, 6, RW_SEEK_SET );
 
-   AssertEquals(i, 6, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d", i, 0);
+   AssertEquals(i, 6, "Seeking with SDL_RWseek (RW_SEEK_SET)");
 
    /* Test seek. */
    i = SDL_RWseek( rw, 0, RW_SEEK_SET );
-   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d", i, 0);
+   AssertEquals(i, 0, "Seeking with SDL_RWseek (RW_SEEK_SET)");
 
    /* Test read. */
    i = SDL_RWread( rw, buf, 1, sizeof(hello_world)-1 );
-   AssertTrue(i == sizeof(hello_world)-1, "Reading with SDL_RWread");
-   AssertTrue(SDL_memcmp( buf, hello_world, sizeof(hello_world)-1 ) == 0, "Memory read does not match memory written");
+   AssertEquals(i, sizeof(hello_world)-1, "Reading with SDL_RWread");
+   AssertEquals(SDL_memcmp( buf, hello_world, sizeof(hello_world)-1 ), 0, "Memory read does not match memory written");
 
    /* More seek tests. */
    i = SDL_RWseek( rw, -4, RW_SEEK_CUR );
-   AssertTrue(i == sizeof(hello_world)-5, "Seeking with SDL_RWseek (RW_SEEK_CUR): got %d, expected %d");
+   AssertEquals(i, sizeof(hello_world)-5, "Seeking with SDL_RWseek (RW_SEEK_CUR))");
 
    i = SDL_RWseek( rw, -1, RW_SEEK_END );
-   AssertTrue(i == sizeof(hello_world)-2, "Seeking with SDL_RWseek (RW_SEEK_END): got %d, expected %d", i, sizeof(hello_world)-2);
+   AssertEquals(i, sizeof(hello_world)-2, "Seeking with SDL_RWseek (RW_SEEK_END)");
 }
 
-
+/*!
+ * Tests rwops parameters
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
+ */
 void rwops_testParam (void)
 {
    SDL_RWops *rwops;
@@ -124,8 +130,11 @@ void rwops_testParam (void)
  *    @param write Test writing also.
  *    @return 1 if an assert is failed.
  */
+
 /**
  * @brief Tests opening from memory.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromMem
  */
 void rwops_testMem (void)
 {
@@ -146,6 +155,9 @@ void rwops_testMem (void)
 
 /**
  * @brief Tests opening from memory.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWFromConstMem
  */
 void rwops_testConstMem (void)
 {
@@ -165,13 +177,17 @@ void rwops_testConstMem (void)
 
 /**
  * @brief Tests opening from memory.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
+ * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
  */
 void rwops_testFile (void)
 {
    SDL_RWops *rw;
 
    /* Read test. */
-   rw = TestSupportRWops_OpenRWopsFromReadDir( RWOPS_READ, "r" );
+   rw = SDL_RWFromFile(RWOPS_READ, "r");
    AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFile RWOPS_READ");
 
    _testGeneric( rw, 0 );
@@ -179,7 +195,7 @@ void rwops_testFile (void)
    SDL_FreeRW( rw );
 
    /* Write test. */
-   rw = TestSupportRWops_OpenRWopsFromWriteDir( RWOPS_WRITE, "w+" );
+   rw = SDL_RWFromFile(RWOPS_WRITE, "w+");
    AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFile RWOPS_WRITE");
 
    _testGeneric( rw, 1 );
@@ -190,6 +206,10 @@ void rwops_testFile (void)
 
 /**
  * @brief Tests opening from stdio
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFP
+ * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
  */
 void rwops_testFP (void)
 {
@@ -197,7 +217,7 @@ void rwops_testFP (void)
    SDL_RWops *rw;
 
    /* Run read tests. */
-   fp = TestSupportRWops_OpenFPFromReadDir( RWOPS_READ, "r" );
+   fp = fopen(RWOPS_READ, "r");
    AssertTrue(fp != NULL, "Failed to open file %s,", RWOPS_READ);
 
    rw = SDL_RWFromFP( fp, 1 );
@@ -208,7 +228,7 @@ void rwops_testFP (void)
    SDL_FreeRW( rw );
 
    /* Run write tests. */
-   fp = TestSupportRWops_OpenFPFromWriteDir( RWOPS_WRITE, "w+" );
+   fp = fopen(RWOPS_WRITE, "w+");
    AssertTrue(fp != NULL, "Failed to open file %s", RWOPS_WRITE);
 
    rw = SDL_RWFromFP( fp, 1 );
