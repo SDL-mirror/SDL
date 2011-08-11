@@ -46,7 +46,7 @@ void *Atari_SysMalloc(Uint32 size, Uint16 alloc_type)
 
 	if (atari_mxalloc_avail) {
 		return (void *) Mxalloc(size, alloc_type);
-	} else { \
+	} else {
 		return (void *) Malloc(size);
 	}
 }
