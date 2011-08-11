@@ -26,6 +26,9 @@
 
 #include "fuzzer.h"
 
+/*!
+ * Note: doxygen documentation markup is in the header file.
+ */
 
 //! context for test-specific random number generator
 static RND_CTX rndContext;
@@ -105,6 +108,30 @@ DeinitFuzzer()
 
 }
 
+Uint8
+RandomUint8()
+{
+	return (Uint8) utl_randomInt(&rndContext) & 0x000000FF;
+}
+
+Sint8
+RandomSint8()
+{
+	return (Sint8) utl_randomInt(&rndContext) & 0x000000FF;
+}
+
+Uint16
+RandomUint16()
+{
+	return (Uint16) utl_randomInt(&rndContext) & 0x0000FFFF;
+}
+
+Sint16
+RandomSint16()
+{
+	return (Sint16) utl_randomInt(&rndContext) & 0x0000FFFF;
+}
+
 Sint32
 RandomInteger()
 {
@@ -116,6 +143,36 @@ RandomPositiveInteger()
 {
 	return (Uint32) utl_randomInt(&rndContext);
 }
+
+Uint64
+RandomUint64()
+{
+	Uint8 string[16];
+
+	int counter = 0;
+	for( ; counter < 16; ++counter) {
+		string[counter] = (Uint8) RandomIntegerInRange(0, 255);
+	}
+
+	Uint64 *value = (Uint64 *)string;
+	return value[0];
+}
+
+Sint64
+RandomSint64()
+{
+	Uint8 string[16];
+
+	int counter = 0;
+	for( ; counter < 16; ++counter) {
+		string[counter] = (Uint8) RandomIntegerInRange(0, 255);
+	}
+
+	Sint64 *value = (Sint64 *)string;
+	return value[0];
+}
+
+
 
 Sint32
 RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
@@ -507,6 +564,10 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 	return retVal;
 }
 
+float RandomFloat() {
+	return (float) utl_randomInt(&rndContext) / UINT_MAX;
+}
+
 char *
 RandomAsciiString()
 {
@@ -521,7 +582,7 @@ RandomAsciiStringWithMaximumLength(int maxSize)
 	}
 
 	int size = (abs(RandomInteger()) % (maxSize + 1)) + 1;
-	char *string = SDL_malloc(size * sizeof(size));
+	char *string = SDL_malloc(size * sizeof(char));
 
 	int counter = 0;
 	for( ; counter < size; ++counter) {

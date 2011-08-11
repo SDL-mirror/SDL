@@ -41,6 +41,36 @@ void DeinitFuzzer();
 
 
 /*!
+ * Returns a random Uint8
+ *
+ * \returns Generated integer
+ */
+Uint8 RandomUint8();
+
+/*!
+ * Returns a random Sint8
+ *
+ * \returns Generated signed integer
+ */
+Sint8 RandomSint8();
+
+
+/*!
+ * Returns a random Uint16
+ *
+ * \returns Generated integer
+ */
+Uint16 RandomUint16();
+
+/*!
+ * Returns a random Sint16
+ *
+ * \returns Generated signed integer
+ */
+Sint16 RandomSint16();
+
+
+/*!
  * Returns a random integer
  *
  * \returns Generated integer
@@ -55,6 +85,25 @@ Sint32 RandomInteger();
  */
 Uint32 RandomPositiveInteger();
 
+/*!
+ * Returns random Uint64.
+ *
+ * \returns Generated integer
+ */
+Uint64 RandomUint64();
+
+
+/*!
+ * Returns random Sint64.
+ *
+ * \returns Generated signed integer
+ */
+Sint64 RandomSint64();
+
+/*!
+ * Returns random float in range [0.0 - 1.0] (inclusive)
+ */
+float RandomFloat();
 
 /*!
  * Returns a random boundary value for Uint8 within the given boundaries.

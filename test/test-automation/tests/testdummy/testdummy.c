@@ -100,6 +100,8 @@ dummycase1(void *arg)
 
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
 
+	for(; 01 ; )
+		printf("%d\n", RandomSint16());
 
 	for( ; 0 ; ) {
 		//Log(0, "sint8: %d", RandomSint8BoundaryValue(-11, 10, SDL_TRUE));
