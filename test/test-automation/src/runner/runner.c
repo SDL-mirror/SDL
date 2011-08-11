@@ -824,6 +824,8 @@ RunTest(TestCase *testCase, Uint64 execKey)
  * be executed in-proc or out-of-proc.
  *
  * \param testItem The test case that will be executed
+ * \param execKey Execution key for the test case
+ *
  * \return The return value of the test. Zero means success, non-zero failure.
  */
 int

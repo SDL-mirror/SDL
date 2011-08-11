@@ -32,7 +32,7 @@
  * \param runnerParameters What parameters were given to the runner
  * \param runSeed Fuzzer seed of the harness
  * \param eventTime When the execution started
- * \param loggerData LoggerData structure which contains data for the logger
+ * \param data LoggerData structure which contains data for the logger
  */
 void XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 					time_t eventTime, LoggerData *data);
@@ -132,8 +132,8 @@ void XMLAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, 
 /*!
  * Prints given message in XML
  *
- * \param logMessage Message to be logged
  * \param eventTime Timestamp for log message
+ * \param fmt Message to be logged
  */
 void XMLLog(time_t eventTime, char *fmt, ...);
 

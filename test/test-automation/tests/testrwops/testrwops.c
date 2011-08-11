@@ -123,15 +123,6 @@ void rwops_testParam (void)
 
 
 /**
- * @brief Does a generic rwops test.
- *
- * RWops should have "Hello World!" in it already if write is disabled.
- *
- *    @param write Test writing also.
- *    @return 1 if an assert is failed.
- */
-
-/**
  * @brief Tests opening from memory.
  *
  * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromMem

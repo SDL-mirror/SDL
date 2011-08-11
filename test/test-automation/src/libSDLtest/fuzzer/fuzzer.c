@@ -217,7 +217,6 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
  * \param validDomain Generate only for valid domain (for the data type)
  *
  * \param outBuffer The generated boundary values are put here
- * \param outBufferSize Size of outBuffer
  *
  * \returns Returns the number of elements in outBuffer or -1 in case of error
  */
@@ -382,7 +381,11 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
  * If boundary1 == boundary2, value of boundary1 will be returned
  *
  * Generating boundary values for Sint8:
- * <Add examples>
+ * SignedBoundaryValues(sizeof(Sint8), -10, 20, True) -> [-11,-10,19,20]
+ * SignedBoundaryValues(sizeof(Sint8), -10, 20, False) -> [-11,21]
+ * SignedBoundaryValues(sizeof(Sint8), -30, -15, True) -> [-30, -29, -16, -15]
+ * SignedBoundaryValues(sizeof(Sint8), -128, 15, False) -> [16]
+ * SignedBoundaryValues(sizeof(Sint8), -128, 127, False) -> NULL
  *
  * Generator works the same for other types of signed integers.
  *
@@ -390,7 +393,7 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
  * If outbuffer != NULL, it'll be freed.
  *
  *
- * \paran minValue The smallest value  that is acceptable for this data type.
+ * \param minValue The smallest value  that is acceptable for this data type.
  *					For instance, for Uint8 -> -128, Uint16 -> -32,768 etc.
  * \param maxValue The biggest value that is acceptable for this data type.
  * 					For instance, for Uint8 -> 127, Uint16 -> 32767 etc.
@@ -399,7 +402,6 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
  * \param validDomain Generate only for valid domain (for the data type)
  *
  * \param outBuffer The generated boundary values are put here
- * \param outBufferSize Size of outBuffer
  *
  * \returns Returns the number of elements in outBuffer or -1 in case of error
  */
