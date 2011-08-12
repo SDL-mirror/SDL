@@ -48,8 +48,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 		void *location = NULL;
 		if( get_image_symbol(info.id, "glBegin", B_SYMBOL_TYPE_ANY,
 				&location) == B_OK) {
-					
-			printf("HERE2\n");
+
 			_this->gl_config.dll_handle = (void *) info.id;
 			_this->gl_config.driver_loaded = 1;
 			SDL_strlcpy(_this->gl_config.driver_path, "libGL.so",

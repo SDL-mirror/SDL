@@ -82,10 +82,11 @@ class SDL_BWin:public BDirectWindow
         _trash_window_buffer = false;
         _buffer_locker = new BLocker();
         _bitmap = NULL;
-        
+#ifdef DRAWTHREAD
         _draw_thread_id = spawn_thread(BE_DrawThread, "drawing_thread",
         					B_NORMAL_PRIORITY, (void*) this);
         resume_thread(_draw_thread_id);
+#endif
     }
 
     virtual ~ SDL_BWin()
@@ -109,7 +110,9 @@ class SDL_BWin:public BDirectWindow
         
         /* Clean up framebuffer stuff */
         _buffer_locker->Lock();
+#ifdef DRAWTHREAD
         wait_for_thread(_draw_thread_id, &result);
+#endif
         free(_clips);
         delete _buffer_locker;
     }

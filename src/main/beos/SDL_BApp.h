@@ -330,7 +330,7 @@ private:
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_MOVED, xPos, yPos);
 		
 		/* FIXME: Attempt at fixing rendering problems */
-		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
+//		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1); Handled by DirectConnected
 	}
 	
 	void _HandleWindowResized(BMessage *msg) {
@@ -349,7 +349,7 @@ private:
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_RESIZED, w, h);
 
 		/* FIXME: Attempt at fixing rendering problems */
-		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
+//		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1); Handled by DirectConnected
 	}
 
 	bool _GetWinID(BMessage *msg, int32 *winID) {
