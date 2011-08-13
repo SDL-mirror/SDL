@@ -141,7 +141,6 @@ dummycase2(void *arg)
 void
 dummycase3(void *arg)
 {
-	while(0);
-	//AssertTrue(1, "Assert message");
+	AssertTrue(RandomUint8() != 100, "Value is 100");
 }
 
