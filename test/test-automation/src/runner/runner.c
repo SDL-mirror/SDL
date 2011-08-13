@@ -78,6 +78,8 @@ static int enable_verbose_logger = 0;
 static int userRunSeed = 0;
 //! Whether or not logger should log to stdout instead of file
 static int log_stdout_enabled = 0;
+//! Whether or not dummy suite should be included to the test run
+static int include_dummy_suite = 0;
 
 //!< Size of the test and suite name buffers
 #define NAME_BUFFER_SIZE 1024
@@ -108,6 +110,8 @@ int universal_timeout = -1;
 
 //! Defines directory separator
 #define DIRECTORY_SEPARATOR '/'
+
+#define DUMMY_TEST_NAME "libtestdummy"
 
 //! Name of the default stylesheet
 const char *defaultXSLStylesheet = "style.xsl";
@@ -245,10 +249,20 @@ ScanForTestSuites(char *directoryName, char *extension)
 				goto error;
 			}
 
+
+			int ok = 1; // on default, we want to include all tests
+
 			// filter out all other suites but the selected test suite
-			int ok = 1;
 			if(only_selected_suite) {
 				ok = SDL_strncmp(selected_suite_name, name, NAME_BUFFER_SIZE) == 0;
+			}
+
+			if(SDL_strncmp(name, DUMMY_TEST_NAME, NAME_BUFFER_SIZE) == 0) {
+				if(include_dummy_suite) {
+					ok =  1;
+				} else {
+					ok = 0;
+				}
 			}
 
 			if(ok && SDL_strncmp(ext, extension, SDL_strlen(extension))  == 0) {
@@ -1078,6 +1092,7 @@ PrintUsage() {
 	  printf(" -ts --name-contains SUBSTR   Executes only tests that have given\n");
 	  printf("                              substring in test name\n");
 	  printf(" -s  --suite SUITE            Executes only the given test suite\n");
+	  printf("     --include-dummy          Includes dummy test suite in the test run\n");
 
 	  printf("     --version                Print version information\n");
 	  printf(" -h  --help                   Print this help\n");
@@ -1253,6 +1268,9 @@ ParseOptions(int argc, char *argv[])
 
     	  memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
     	  strcpy(selected_suite_name, suiteName);
+      }
+      else if(SDL_strcmp(arg, "--include-dummy") == 0) {
+    	  include_dummy_suite = 1;
       }
       else if(SDL_strcmp(arg, "--version") == 0) {
     	  fprintf(stdout, "SDL test harness (version %s)\n", PACKAGE_VERSION);
