@@ -1207,17 +1207,11 @@ ParseOptions(int argc, char *argv[])
     		  exit(1);
     	  }
 
-    	  // \todo User given string should be handled as a string
-    	  // representing a hex digit
-    	  //userExecKey = atoi(execKeyString);
-
     	  int ret = sscanf(execKeyString, "%llx", &userExecKey);
     	  if(ret != 1) {
     		  fprintf(stderr, "Error: Failed to parse exec-key option");
     		  exit(1);
     	  }
-
-    	  printf("%Lx", userExecKey);
       }
       else if(SDL_strcmp(arg, "--test") == 0 || SDL_strcmp(arg, "-t") == 0) {
     	  only_selected_test = 1;
