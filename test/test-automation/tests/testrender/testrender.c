@@ -17,10 +17,16 @@
 
 static SDL_Renderer *renderer;
 
-/*!
- * Note: Port tests from "/test/automated/render" here
- *
- */
+/* Prototypes for helper functions */
+static int render_clearScreen (void);
+static void render_compare(const char *msg, const SurfaceImage_t *s, int allowable_error);
+static int render_hasTexAlpha(void);
+static int render_hasTexColor(void);
+static SDL_Texture *render_loadTestFace(void);
+static int render_hasBlendModes(void);
+static int render_hasDrawColor(void);
+static int render_isSupported(int code);
+
 
 /* Test cases */
 static const TestCaseReference test1 =
@@ -49,8 +55,6 @@ static const TestCaseReference test8 =
 
 
 
-
-
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
 	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, NULL
@@ -71,8 +75,7 @@ SetUp(void *arg)
 
   SDL_Window *w = SDL_CreateWindow( "title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		  80, 60, SDL_WINDOW_SHOWN );
-  //if (SDL_ATassert( "SDL_CreateWindow", w!=NULL ))
-  renderer = SDL_CreateRenderer(w, 0, 0 );
+  renderer = SDL_CreateRenderer(w, 0, 0);
 }
                         
 void
@@ -84,6 +87,7 @@ TearDown(void *arg)
 
 /**
  * @brief Tests call to SDL_GetNumRenderDrivers
+ *
  * \sa 
  * http://wiki.libsdl.org/moin.cgi/SDL_GetNumRenderDrivers
  */
@@ -100,6 +104,7 @@ render_testGetNumRenderDrivers(void *arg)
 
 /**
  * @brief Tests call to SDL_CreateRenderer
+ *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_CreateRenderer
  */
@@ -126,235 +131,6 @@ render_testCreateRenderer(void *arg)
 }
 
 
-
-/**
- * @brief Compares screen pixels with image pixels.
- *
- *    @param msg Message on failure.
- *    @param s Image to compare against.
- *    @return 0 on success.
- */
-static void render_compare( const char *msg, const SurfaceImage_t *s, int allowable_error )
-{
-   int ret;
-   SDL_Rect rect;
-   Uint8 pix[4*80*60];
-   SDL_Surface *testsur;
-
-   /* Read pixels. */
-   /* Explicitly specify the rect in case the window isn't expected size... */
-   rect.x = 0;
-   rect.y = 0;
-   rect.w = 80;
-   rect.h = 60;
-   ret = SDL_RenderReadPixels(renderer, &rect, FORMAT, pix, 80*4 );
-   AssertEquals(ret, 0, "SDL_RenderReadPixels failed");
-
-   /* Create surface. */
-   testsur = SDL_CreateRGBSurfaceFrom( pix, 80, 60, 32, 80*4,
-                                       RMASK, GMASK, BMASK, AMASK);
-   AssertTrue(testsur!=NULL, "SDL_CreateRGBSurface failed");
-   /* Compare surface. */
-   ret = surface_compare( testsur, s, allowable_error );
-   AssertEquals(ret, 0, "surface_compare failed");
-
-   /* Clean up. */
-   SDL_FreeSurface( testsur );
-}
-
-/**
- * @brief Checks to see if functionality is supported.
- */
-static int render_isSupported( int code )
-{
-   return (code == 0);
-}
-
-
-/**
- * @brief Test to see if we can vary the draw colour.
- */
-static int render_hasDrawColor (void)
-{
-   int ret, fail;
-   Uint8 r, g, b, a;
-
-   fail = 0;
-
-   /* Set colour. */
-   ret = SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100 );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a );
-   if (!render_isSupported(ret))
-      fail = 1;
-   /* Restore natural. */
-   ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
-   if (!render_isSupported(ret))
-      fail = 1;
-
-   /* Something failed, consider not available. */
-   if (fail)
-      return 0;
-   /* Not set properly, consider failed. */
-   else if ((r != 100) || (g != 100) || (b != 100) || (a != 100))
-      return 0;
-   return 1;
-}
-
-
-/**
- * @brief Test to see if we can vary the blend mode.
- */
-static int render_hasBlendModes (void)
-{
-   int fail;
-   int ret;
-   SDL_BlendMode mode;
-
-   fail = 0;
-
-   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = (mode != SDL_BLENDMODE_BLEND);
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = (mode != SDL_BLENDMODE_ADD);
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MOD );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = (mode != SDL_BLENDMODE_MOD);
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = (mode != SDL_BLENDMODE_NONE);
-   if (!render_isSupported(ret))
-      fail = 1;
-
-   return !fail;
-}
-
-
-/**
- * @brief Loads the test face.
- */
-static SDL_Texture * render_loadTestFace (void)
-{
-   SDL_Surface *face;
-   SDL_Texture *tface;
-
-   /* Create face surface. */
-   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
-         img_face.width, img_face.height, 32, img_face.width*4,
-#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff /* Alpha bit mask. */
-#else
-         0x000000ff, /* Red bit mask. */
-         0x0000ff00, /* Green bit mask. */
-         0x00ff0000, /* Blue bit mask. */
-         0xff000000 /* Alpha bit mask. */
-#endif
-         );
-   if (face == NULL)
-      return 0;
-   tface = SDL_CreateTextureFromSurface(renderer, face);
-   SDL_FreeSurface(face);
-
-   return tface;
-}
-
-
-/**
- * @brief Test to see if can set texture colour mode.
- */
-static int render_hasTexColor (void)
-{
-   int fail;
-   int ret;
-   SDL_Texture *tface;
-   Uint8 r, g, b;
-
-   /* Get test face. */
-   tface = render_loadTestFace();
-   if (tface == 0)
-      return 0;
-
-   /* See if supported. */
-   fail = 0;
-   ret = SDL_SetTextureColorMod( tface, 100, 100, 100 );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetTextureColorMod( tface, &r, &g, &b );
-   if (!render_isSupported(ret))
-      fail = 1;
-
-   /* Clean up. */
-   SDL_DestroyTexture( tface );
-
-   if (fail)
-      return 0;
-   else if ((r != 100) || (g != 100) || (b != 100))
-      return 0;
-   return 1;
-}
-
-
-/**
- * @brief Test to see if we can vary the alpha of the texture.
- */
-static int render_hasTexAlpha (void)
-{
-   int fail;
-   int ret;
-   SDL_Texture *tface;
-   Uint8 a;
-
-   /* Get test face. */
-   tface = render_loadTestFace();
-   if (tface == 0)
-      return 0;
-
-   /* See if supported. */
-   fail = 0;
-   ret = SDL_SetTextureAlphaMod( tface, 100 );
-   if (!render_isSupported(ret))
-      fail = 1;
-   ret = SDL_GetTextureAlphaMod( tface, &a );
-   if (!render_isSupported(ret))
-      fail = 1;
-
-   /* Clean up. */
-   SDL_DestroyTexture( tface );
-
-   if (fail)
-      return 0;
-   else if (a != 100)
-      return 0;
-   return 1;
-}
 
 
 /**
@@ -449,6 +225,11 @@ int render_testPrimitives (void *arg)
 
 /**
  * @brief Tests the SDL primitives with alpha for rendering.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawColor
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawBlendMode
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderFillRect
  */
 int render_testPrimitivesBlend (void *arg)
 {
@@ -559,6 +340,10 @@ int render_testPrimitivesBlend (void *arg)
 
 /**
  * @brief Tests some blitting routines.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderCopy
+ * http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
  */
 int
 render_testBlit(void *arg)
@@ -602,6 +387,11 @@ render_testBlit(void *arg)
 
 /**
  * @brief Blits doing colour tests.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureColorMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderCopy
+ * http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
  */
 int
 render_testBlitColour (void *arg)
@@ -647,6 +437,11 @@ render_testBlitColour (void *arg)
 
 /**
  * @brief Tests blitting with alpha.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureAlphaMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderCopy
+ * http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
  */
 int
 render_testBlitAlpha (void *arg)
@@ -693,45 +488,11 @@ render_testBlitAlpha (void *arg)
 }
 
 /**
- * @brief Clears the screen.
- *
- * @note We don't test for errors, but they shouldn't happen.
- */
-static int render_clearScreen (void)
-{
-   int ret;
-
-   /* Set colour. */
-   ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
-   /*
-   if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
-      return -1;
-   */
-
-   /* Clear screen. */
-   ret = SDL_RenderFillRect(renderer, NULL );
-   /*
-   if (SDL_ATassert( "SDL_RenderFillRect", ret == 0))
-      return -1;
-   */
-
-   /* Set defaults. */
-   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE );
-   /*
-   if (SDL_ATassert( "SDL_SetRenderDrawBlendMode", ret == 0))
-      return -1;
-   */
-   ret = SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE );
-   /*
-   if (SDL_ATassert( "SDL_SetRenderDrawColor", ret == 0))
-      return -1;
-   */
-
-   return 0;
-}
-
-/**
  * @brief Tests a blend mode. Helper.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureBlendMode
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderCopy
  */
 void
 render_testBlitBlendMode( SDL_Texture * tface, int mode )
@@ -773,6 +534,12 @@ render_testBlitBlendMode( SDL_Texture * tface, int mode )
 
 /**
  * @brief Tests some more blitting routines.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureColorMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureAlphaMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureBlendMode
+ * http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
  */
 int
 render_testBlitBlend (void *arg)
@@ -871,3 +638,294 @@ render_testBlitBlend (void *arg)
 
 
 
+/**
+ * @brief Checks to see if functionality is supported.
+ */
+static
+int render_isSupported( int code )
+{
+   return (code == 0);
+}
+
+/**
+ * @brief Test to see if we can vary the draw colour.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawColor
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetRenderDrawColor
+ */
+static
+int render_hasDrawColor (void)
+{
+   int ret, fail;
+   Uint8 r, g, b, a;
+
+   fail = 0;
+
+   /* Set colour. */
+   ret = SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100 );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a );
+   if (!render_isSupported(ret))
+      fail = 1;
+   /* Restore natural. */
+   ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
+   if (!render_isSupported(ret))
+      fail = 1;
+
+   /* Something failed, consider not available. */
+   if (fail)
+      return 0;
+   /* Not set properly, consider failed. */
+   else if ((r != 100) || (g != 100) || (b != 100) || (a != 100))
+      return 0;
+   return 1;
+}
+
+/**
+ * @brief Test to see if we can vary the blend mode.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawBlendMode
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetRenderDrawBlendMode
+ */
+static int
+render_hasBlendModes (void)
+{
+   int fail;
+   int ret;
+   SDL_BlendMode mode;
+
+   fail = 0;
+
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = (mode != SDL_BLENDMODE_BLEND);
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_ADD );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = (mode != SDL_BLENDMODE_ADD);
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MOD );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = (mode != SDL_BLENDMODE_MOD);
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetRenderDrawBlendMode(renderer, &mode );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = (mode != SDL_BLENDMODE_NONE);
+   if (!render_isSupported(ret))
+      fail = 1;
+
+   return !fail;
+}
+
+
+/**
+ * @brief Loads the test face.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_CreateRGBSurfaceFrom
+ * http://wiki.libsdl.org/moin.cgi/SDL_CreateTextureFromSurface
+ */
+static SDL_Texture *
+render_loadTestFace(void)
+{
+   SDL_Surface *face;
+   SDL_Texture *tface;
+
+   /* Create face surface. */
+   face = SDL_CreateRGBSurfaceFrom( (void*)img_face.pixel_data,
+         img_face.width, img_face.height, 32, img_face.width*4,
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000 /* Alpha bit mask. */
+#endif
+         );
+   if (face == NULL)
+      return 0;
+   tface = SDL_CreateTextureFromSurface(renderer, face);
+   SDL_FreeSurface(face);
+
+   return tface;
+}
+
+
+/**
+ * @brief Test to see if can set texture colour mode.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureColorMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_GetTextureColorMod
+ * http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
+ */
+static int
+render_hasTexColor (void)
+{
+   int fail;
+   int ret;
+   SDL_Texture *tface;
+   Uint8 r, g, b;
+
+   /* Get test face. */
+   tface = render_loadTestFace();
+   if (tface == 0)
+      return 0;
+
+   /* See if supported. */
+   fail = 0;
+   ret = SDL_SetTextureColorMod( tface, 100, 100, 100 );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetTextureColorMod( tface, &r, &g, &b );
+   if (!render_isSupported(ret))
+      fail = 1;
+
+   /* Clean up. */
+   SDL_DestroyTexture( tface );
+
+   if (fail)
+      return 0;
+   else if ((r != 100) || (g != 100) || (b != 100))
+      return 0;
+   return 1;
+}
+
+/**
+ * @brief Test to see if we can vary the alpha of the texture.
+ *
+ * \sa
+ *  http://wiki.libsdl.org/moin.cgi/SDL_SetTextureAlphaMod
+ *  http://wiki.libsdl.org/moin.cgi/SDL_GetTextureAlphaMod
+ *  http://wiki.libsdl.org/moin.cgi/SDL_DestroyTexture
+ */
+static int
+render_hasTexAlpha(void)
+{
+   int fail;
+   int ret;
+   SDL_Texture *tface;
+   Uint8 a;
+
+   /* Get test face. */
+   tface = render_loadTestFace();
+   if (tface == 0)
+      return 0;
+
+   /* See if supported. */
+   fail = 0;
+   ret = SDL_SetTextureAlphaMod( tface, 100 );
+   if (!render_isSupported(ret))
+      fail = 1;
+   ret = SDL_GetTextureAlphaMod( tface, &a );
+   if (!render_isSupported(ret))
+      fail = 1;
+
+   /* Clean up. */
+   SDL_DestroyTexture( tface );
+
+   if (fail)
+      return 0;
+   else if (a != 100)
+      return 0;
+   return 1;
+}
+
+/**
+ * @brief Compares screen pixels with image pixels.
+ *
+ * @param msg Message on failure.
+ * @param s Image to compare against.
+ * @return 0 on success.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderReadPixels
+ * http://wiki.libsdl.org/moin.cgi/SDL_CreateRGBSurfaceFrom
+ * http://wiki.libsdl.org/moin.cgi/SDL_FreeSurface
+ */
+static void
+render_compare(const char *msg, const SurfaceImage_t *s, int allowable_error)
+{
+   int ret;
+   SDL_Rect rect;
+   Uint8 pix[4*80*60];
+   SDL_Surface *testsur;
+
+   /* Read pixels. */
+   /* Explicitly specify the rect in case the window isn't expected size... */
+   rect.x = 0;
+   rect.y = 0;
+   rect.w = 80;
+   rect.h = 60;
+   ret = SDL_RenderReadPixels(renderer, &rect, FORMAT, pix, 80*4 );
+   AssertEquals(ret, 0, "SDL_RenderReadPixels failed");
+
+   /* Create surface. */
+   testsur = SDL_CreateRGBSurfaceFrom( pix, 80, 60, 32, 80*4,
+                                       RMASK, GMASK, BMASK, AMASK);
+   AssertTrue(testsur!=NULL, "SDL_CreateRGBSurface failed");
+   /* Compare surface. */
+   ret = surface_compare( testsur, s, allowable_error );
+   AssertEquals(ret, 0, "surface_compare failed");
+
+   /* Clean up. */
+   SDL_FreeSurface( testsur );
+}
+
+/**
+ * @brief Clears the screen.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawColor
+ * http://wiki.libsdl.org/moin.cgi/SDL_RenderFillRect
+ * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawBlendMode
+ *
+ */
+static int
+render_clearScreen(void)
+{
+   int ret;
+
+   /* Set colour. */
+   ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
+   AssertEquals(ret, 0, "SDL_SetRenderDrawColor");
+
+   /* Clear screen. */
+   ret = SDL_RenderFillRect(renderer, NULL );
+   AssertEquals(ret, 0, "SDL_RenderFillRect");
+
+   /* Set defaults. */
+   ret = SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE );
+   AssertEquals(ret, 0, "SDL_SetRenderDrawBlendMode");
+
+   ret = SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE );
+   AssertEquals(ret, 0, "SDL_SetRenderDrawColor");
+
+   return 0;
+}
