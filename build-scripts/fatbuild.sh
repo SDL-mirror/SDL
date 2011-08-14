@@ -80,8 +80,8 @@ cd $srcdir
 #
 # Figure out which phase to build:
 # all,
-# configure, configure-ppc, configure-ppc64, configure-x86, configure-x64
-# make, make-ppc, make-ppc64, make-x86, make-x64, merge
+# configure, configure-x86, configure-x64
+# make, make-x86, make-x64, merge
 # install
 # clean
 if test x"$1" = x; then
@@ -91,27 +91,15 @@ else
 fi
 case $phase in
     all)
-        configure_ppc="yes"
-        configure_ppc64="yes"
         configure_x86="yes"
         configure_x64="yes"
-        make_ppc="yes"
-        make_ppc64="yes"
         make_x86="yes"
         make_x64="yes"
         merge="yes"
         ;;
     configure)
-        configure_ppc="yes"
-        configure_ppc64="yes"
         configure_x86="yes"
         configure_x64="yes"
-        ;;
-    configure-ppc)
-        configure_ppc="yes"
-        ;;
-    configure-ppc64)
-        configure_ppc64="yes"
         ;;
     configure-x86)
         configure_x86="yes"
@@ -120,17 +108,9 @@ case $phase in
         configure_x64="yes"
         ;;
     make)
-        make_ppc="yes"
-        make_ppc64="yes"
         make_x86="yes"
         make_x64="yes"
         merge="yes"
-        ;;
-    make-ppc)
-        make_ppc="yes"
-        ;;
-    make-ppc64)
-        make_ppc64="yes"
         ;;
     make-x86)
         make_x86="yes"
@@ -164,16 +144,8 @@ case $phase in
         install_man="yes"
         ;;
     clean)
-        clean_ppc="yes"
-        clean_ppc64="yes"
         clean_x86="yes"
         clean_x64="yes"
-        ;;
-    clean-ppc)
-        clean_ppc="yes"
-        ;;
-    clean-ppc64)
-        clean_ppc64="yes"
         ;;
     clean-x86)
         clean_x86="yes"
@@ -182,17 +154,11 @@ case $phase in
         clean_x64="yes"
         ;;
     *)
-        echo "Usage: $0 [all|configure[-ppc|-ppc64|-x86|-x64]|make[-ppc|-ppc64|-x86|-x64]|merge|install|clean[-ppc|-ppc64|-x86|-x64]]"
+        echo "Usage: $0 [all|configure[-x86|-x64]|make[-x86|-x64]|merge|install|clean[-x86|-x64]]"
         exit 1
         ;;
 esac
 case `uname -p` in
-    powerpc)
-        native_path=ppc
-        ;;
-    powerpc64)
-        native_path=ppc64
-        ;;
     *86)
         native_path=x86
         ;;
@@ -208,7 +174,7 @@ esac
 #
 # Create the build directories
 #
-for dir in build build/ppc build/ppc64 build/x86 build/x64; do
+for dir in build build/x86 build/x64; do
     if test -d $dir; then
         :
     else
@@ -328,7 +294,6 @@ do_clean()
 if test x$clean_x86 = xyes; then
     do_clean rm -r build/x86
 fi
-if test x$clean_ppc = xyes; then
-    do_clean rm -r build/ppc
+if test x$clean_x64 = xyes; then
+    do_clean rm -r build/x64
 fi
-
