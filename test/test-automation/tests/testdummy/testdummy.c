@@ -35,16 +35,16 @@
 
 /* Test case references */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "dummycase1", "description", TEST_ENABLED, 0, 4};
+		(TestCaseReference){ "test_dummy1", "description", TEST_ENABLED, 0, 4};
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0, 0};
+		(TestCaseReference){ "test_dummy2", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "testfuzzy_case3", "description", TEST_ENABLED, 0, 2};
+		(TestCaseReference){ "test_fuzzy", "description", TEST_ENABLED, 0, 2};
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "testfuzzy_case4", "description", TEST_ENABLED, 0, 2};
+		(TestCaseReference){ "test_leak", "description", TEST_ENABLED, 0, 2};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
@@ -92,7 +92,7 @@ TearDown(void *arg)
 
 /* Test case functions */
 void
-dummycase1(void *arg)
+test_dummy1(void *arg)
 {
 	AssertEquals(5, 5, "Assert message");
 
@@ -134,7 +134,7 @@ dummycase1(void *arg)
 }
 
 void
-dummycase2(void *arg)
+test_dummy2(void *arg)
 {
 	char *msg = "eello";
 	//msg[0] = 'H';
@@ -142,7 +142,7 @@ dummycase2(void *arg)
 }
 
 void
-testfuzzy_case3(void *arg)
+test_fuzzy(void *arg)
 {
 	// Simulates a fuzzing failure
 	AssertTrue(RandomUint8() != 100, "Value is 100");
@@ -156,7 +156,7 @@ f(void) {
 
 
 void
-testfuzzy_case4(void *arg)
+test_leak(void *arg)
 {
 	// Creates a memory leak
 	f();
