@@ -1066,7 +1066,7 @@ PrintUsage() {
 	  printf("                [--logfile BASENAME] [--logdir DIR] [--log-stdout] [--xml]\n");
 	  printf("                [--xsl [STYLESHEET]] [--seed VALUE] [--iterations VALUE]\n");
 	  printf("                [--exec-key KEY] [--timeout VALUE] [--test TEST]\n");
-	  printf("                [--name-contains SUBSTR] [--suite SUITE]\n");
+	  printf("                [--name-contains SUBSTR] [--suite SUITE] [--include-dummy]\n");
 	  printf("                [--version] [--help]\n");
 	  printf("Options:\n");
 	  printf("     --in-proc                Executes tests in-process\n");

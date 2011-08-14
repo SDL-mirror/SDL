@@ -41,11 +41,14 @@ static const TestCaseReference test2 =
 		(TestCaseReference){ "dummycase2", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "dummycase3", "description", TEST_ENABLED, 0, 2};
+		(TestCaseReference){ "testfuzzy_case3", "description", TEST_ENABLED, 0, 2};
+
+static const TestCaseReference test4 =
+		(TestCaseReference){ "testfuzzy_case4", "description", TEST_ENABLED, 0, 2};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, NULL
+	&test1, &test2, &test3, &test4, NULL
 };
 
 
@@ -139,8 +142,25 @@ dummycase2(void *arg)
 }
 
 void
-dummycase3(void *arg)
+testfuzzy_case3(void *arg)
 {
+	// Simulates a fuzzing failure
 	AssertTrue(RandomUint8() != 100, "Value is 100");
+}
+
+static void
+f(void) {
+     int* x = malloc(10 * sizeof(int));
+     x[10] = 0;        // problem 1: heap block overrun
+}                    // problem 2: memory leak -- x not freed
+
+
+void
+testfuzzy_case4(void *arg)
+{
+	// Creates a memory leak
+	f();
+
+	AssertPass("");
 }
 
