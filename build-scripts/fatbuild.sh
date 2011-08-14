@@ -16,60 +16,6 @@ fi
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 
-# They changed this from "darwin9" to "darwin10" in Xcode 3.2 (Snow Leopard).
-GCCUSRPATH_PPC=`ls -d $SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/powerpc-apple-darwin*/4.0.1`
-if [ ! -d "$GCCUSRPATH_PPC" ]; then
-    echo "Couldn't find any GCC usr path for 32-bit ppc"
-    exit 1
-fi
-GCCUSRPATH_PPC64=`ls -d $SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/powerpc-apple-darwin*/4.0.1`
-if [ ! -d "$GCCUSRPATH_PPC64" ]; then
-    echo "Couldn't find any GCC usr path for 64-bit ppc"
-    exit 1
-fi
-
-# PowerPC 32-bit configure flags (10.4 runtime compatibility)
-# We dynamically load X11, so using the system X11 headers is fine.
-CONFIG_PPC="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
---x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
-
-# PowerPC 32-bit compiler flags
-CC_PPC="gcc-4.0 -arch ppc"
-CXX_PPC="g++-4.0 -arch ppc"
-CFLAGS_PPC="-mmacosx-version-min=10.4"
-CPPFLAGS_PPC="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
--nostdinc \
--F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--I$GCCUSRPATH_PPC/include \
--isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
-
-# PowerPC 32-bit linker flags
-LFLAGS_PPC="-arch ppc -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
--F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--L$GCCUSRPATH_PPC \
--Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
-
-# PowerPC 64-bit configure flags (10.5 runtime compatibility)
-# We dynamically load X11, so using the system X11 headers is fine.
-CONFIG_PPC64="--build=`uname -p`-apple-darwin --host=powerpc-apple-darwin \
---x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
-
-# PowerPC 64-bit compiler flags
-CC_PPC64="gcc-4.0 -arch ppc64"
-CXX_PPC64="g++-4.0 -arch ppc64"
-CFLAGS_PPC64="-mmacosx-version-min=10.5"
-CPPFLAGS_PPC64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
--nostdinc \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--I$GCCUSRPATH_PPC64/include \
--isystem $SDK_PATH/MacOSX10.5.sdk/usr/include"
-
-# PowerPC 64-bit linker flags
-LFLAGS_PPC64="-arch ppc64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--L$GCCUSRPATH_PPC64/ppc64 \
--Wl,-syslibroot,$SDK_PATH/MacOSX10.5.sdk"
-
 # Intel 32-bit configure flags (10.4 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
 CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
@@ -269,28 +215,6 @@ for dir in build build/ppc build/ppc64 build/x86 build/x64; do
         mkdir $dir || exit 1
     fi
 done
-
-#
-# Build the PowerPC 32-bit binary
-#
-if test x$configure_ppc = xyes; then
-    (cd build/ppc && \
-     sh ../../configure $CONFIG_PPC CC="$CC_PPC" CXX="$CXX_PPC" CFLAGS="$CFLAGS $CFLAGS_PPC" CPPFLAGS="$CPPFLAGS_PPC" LDFLAGS="$LFLAGS_PPC") || exit 2
-fi
-if test x$make_ppc = xyes; then
-    (cd build/ppc && ls include && make -j$NJOB) || exit 3
-fi
-
-#
-# Build the PowerPC 64-bit binary
-#
-if test x$configure_ppc64 = xyes; then
-    (cd build/ppc64 && \
-     sh ../../configure $CONFIG_PPC64 CC="$CC_PPC64" CXX="$CXX_PPC64" CFLAGS="$CFLAGS $CFLAGS_PPC64" CPPFLAGS="$CPPFLAGS_PPC64" LDFLAGS="$LFLAGS_PPC64") || exit 2
-fi
-if test x$make_ppc64 = xyes; then
-    (cd build/ppc64 && ls include && make -j$NJOB) || exit 3
-fi
 
 #
 # Build the Intel 32-bit binary
