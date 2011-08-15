@@ -1368,7 +1368,11 @@ main(int argc, char *argv[])
 
 	if(log_stdout_enabled == 0) {
 		printf("Runner is executing the tests.\n");
+		if(enable_verbose_logger) {
+			printf("Logging level is set to verbose.\n");
+		}
 		printf("Test report is created to: %s\n", loggerData->filename);
+		fflush(stdout);
 	}
 
 	RunStarted(argc, argv, runSeed, time(0), loggerData);
