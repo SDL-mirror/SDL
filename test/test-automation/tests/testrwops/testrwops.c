@@ -13,6 +13,7 @@
 
 #include "../../include/SDL_test.h"
 
+// TODO create these at SetUp() and such TearDown()
 const char* RWOPS_READ = "tests/testrwops/read";
 const char* RWOPS_WRITE = "tests/testrwops/write";
 
@@ -30,15 +31,22 @@ static const TestCaseReference test3 =
 		(TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "rwops_testFile", "rwop sy", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testFileRead", "Tests reading from a file", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test5 =
-		(TestCaseReference){ "rwops_testFP", "rwop sy", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+		(TestCaseReference){ "rwops_testFileWrite", "Test writing to a file", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test6 =
+		(TestCaseReference){ "rwops_testFPRead", "Test reading from stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+
+static const TestCaseReference test7 =
+		(TestCaseReference){ "rwops_testFPWrite", "Test writing to stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+
 
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, NULL
+	&test1, &test2, &test3, &test4, &test5, &test6, &test7, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -52,7 +60,6 @@ TestCaseReference **QueryTestSuite() {
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWseek
  * http://wiki.libsdl.org/moin.cgi/SDL_RWread
- *
  */
 int _testGeneric( SDL_RWops *rw, int write )
 {
@@ -99,6 +106,8 @@ int _testGeneric( SDL_RWops *rw, int write )
  * Tests rwops parameters
  *
  * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
+ *
+ * TODO Add fuzzer support here, write and read a string
  */
 void rwops_testParam (void)
 {
@@ -167,13 +176,14 @@ void rwops_testConstMem (void)
 
 
 /**
- * @brief Tests opening from memory.
+ * @brief Tests reading from memory.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
  * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
  */
-void rwops_testFile (void)
+void
+rwops_testFileRead(void)
 {
    SDL_RWops *rw;
 
@@ -184,6 +194,19 @@ void rwops_testFile (void)
    _testGeneric( rw, 0 );
 
    SDL_FreeRW( rw );
+}
+
+/**
+ * @brief Tests writing from memory.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
+ * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ */
+void
+rwops_testFileWrite(void)
+{
+   SDL_RWops *rw;
 
    /* Write test. */
    rw = SDL_RWFromFile(RWOPS_WRITE, "w+");
@@ -196,13 +219,15 @@ void rwops_testFile (void)
 
 
 /**
- * @brief Tests opening from stdio
+ * @brief Tests reading from stdio
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFP
  * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ *
  */
-void rwops_testFP (void)
+void
+rwops_testFPRead(void)
 {
    FILE *fp;
    SDL_RWops *rw;
@@ -214,9 +239,18 @@ void rwops_testFP (void)
    rw = SDL_RWFromFP( fp, 1 );
    AssertTrue(rw != NULL, "Opening memory with SDL_RWFromFP");
 
+   // TODO bail out if NULL
    _testGeneric( rw, 0 );
 
    SDL_FreeRW( rw );
+   fclose(fp);
+}
+
+void
+rwops_testFPWrite(void)
+{
+   FILE *fp;
+   SDL_RWops *rw;
 
    /* Run write tests. */
    fp = fopen(RWOPS_WRITE, "w+");
@@ -228,4 +262,5 @@ void rwops_testFP (void)
    _testGeneric( rw, 1 );
 
    SDL_FreeRW( rw );
+   fclose(fp);
 }

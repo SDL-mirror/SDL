@@ -27,6 +27,11 @@
 #include "utl_md5.h"
 #include "utl_random.h"
 
+/*!
+ * \file
+ * Note: fuzzer implementation uses static instance of random context
+ * internally which makes it thread-UNsafe.
+ */
 
 /*!
  * Inits the fuzzer for a test
@@ -103,7 +108,22 @@ Sint64 RandomSint64();
 /*!
  * Returns random float in range [0.0 - 1.0] (inclusive)
  */
+float RandomUnitFloat();
+
+/*!
+ * Returns random double in range [0.0 - 1.0] (inclusive)
+ */
+double RandomUnitDouble();
+
+/*!
+ * Returns random float
+ */
 float RandomFloat();
+
+/*!
+ * Returns random double
+ */
+double RandomDouble();
 
 /*!
  * Returns a random boundary value for Uint8 within the given boundaries.

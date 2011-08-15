@@ -57,8 +57,6 @@ GenerateExecKey(char *runSeed, char *suiteName,
 		return -1;
 	}
 
-
-	// Change to itoa
 	char iterationString[16];
 	memset(iterationString, 0, sizeof(iterationString));
 	SDL_snprintf(iterationString, sizeof(iterationString) - 1, "%d", iterationNumber);
@@ -75,7 +73,7 @@ GenerateExecKey(char *runSeed, char *suiteName,
 
 	char *buffer = SDL_malloc(entireString);
 	if(!buffer) {
-		return -1;
+		return 0;
 	}
 
 	SDL_snprintf(buffer, entireString, "%s/%s/%s/%d", runSeed, suiteName,
@@ -89,9 +87,8 @@ GenerateExecKey(char *runSeed, char *suiteName,
 	SDL_free(buffer);
 
 	Uint64 *keys = (Uint64 *)md5Context.digest;
-	Uint64 key = keys[0];
 
-	return key;
+	return keys[0];
 }
 
 void
@@ -147,29 +144,25 @@ RandomPositiveInteger()
 Uint64
 RandomUint64()
 {
-	Uint8 string[16];
+	Uint64 value;
 
-	int counter = 0;
-	for( ; counter < 16; ++counter) {
-		string[counter] = (Uint8) RandomIntegerInRange(0, 255);
-	}
+	Uint32 *vp = (Uint32*)&value;
+	vp[0] = RandomSint32();
+	vp[1] = RandomSint32();
 
-	Uint64 *value = (Uint64 *)string;
-	return value[0];
+	return value;
 }
 
 Sint64
 RandomSint64()
 {
-	Uint8 string[16];
+	Uint64 value;
 
-	int counter = 0;
-	for( ; counter < 16; ++counter) {
-		string[counter] = (Uint8) RandomIntegerInRange(0, 255);
-	}
+	Uint32 *vp = (Uint32*)&value;
+	vp[0] = RandomSint32();
+	vp[1] = RandomSint32();
 
-	Sint64 *value = (Sint64 *)string;
-	return value[0];
+	return value;
 }
 
 
@@ -566,9 +559,32 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 	return retVal;
 }
 
-float RandomFloat() {
+float
+RandomUnitFloat()
+{
 	return (float) utl_randomInt(&rndContext) / UINT_MAX;
 }
+
+double
+RandomUnitDouble()
+{
+	return (double) RandomUint64() / LLONG_MAX;
+}
+
+float
+RandomFloat()
+{
+	// \todo to be implemented
+	return 0.0f;
+}
+
+double
+RandomDouble()
+{
+	// \todo to be implemented
+	return 0.0f;
+}
+
 
 char *
 RandomAsciiString()
