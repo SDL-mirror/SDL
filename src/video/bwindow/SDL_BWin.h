@@ -98,8 +98,10 @@ class SDL_BWin:public BDirectWindow
 #if SDL_VIDEO_OPENGL
         if (_SDL_GLView) {
             _SDL_GLView->UnlockGL();
+            RemoveChild(_SDL_GLView);	/* Why was this outside the if
+            								statement before? */
         }
-        RemoveChild(_SDL_GLView);
+        
 #endif    
         Unlock();
 #if SDL_VIDEO_OPENGL
@@ -129,6 +131,7 @@ class SDL_BWin:public BDirectWindow
                                      gl_flags);
         }
         AddChild(_SDL_GLView);
+        _SDL_GLView->EnableDirectMode(true);
         _SDL_GLView->LockGL();	/* "New" GLViews are created */
         Unlock();
         return (_SDL_GLView);

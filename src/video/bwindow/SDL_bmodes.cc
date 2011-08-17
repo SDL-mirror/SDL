@@ -32,12 +32,12 @@
 extern "C" {
 #endif
 
+#if 1
 /* This wrapper is here so that the driverdata can be freed */
 typedef struct SDL_DisplayModeData {
 	display_mode *bmode;
 };
-
-
+#endif
 
 static inline SDL_BWin *_ToBeWin(SDL_Window *window) {
 	return ((SDL_BWin*)(window->driverdata));
@@ -47,6 +47,13 @@ static inline SDL_BApp *_GetBeApp() {
 	return ((SDL_BApp*)be_app);
 }
 
+static inline display_mode * _ExtractBMode(SDL_DisplayMode *mode) {
+#if 0
+	return (display_mode*)(mode->driverdata);
+#else
+	return ((SDL_DisplayModeData*)mode->driverdata)->bmode;
+#endif
+}
 
 /* Copied from haiku/trunk/src/preferences/screen/ScreenMode.cpp */
 static float get_refresh_rate(display_mode &mode) {
@@ -114,9 +121,14 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 	mode->w = bmode->virtual_width;
 	mode->h = bmode->virtual_height;
 	mode->refresh_rate = (int)get_refresh_rate(*bmode);
+#if 1
 	SDL_DisplayModeData *data = (SDL_DisplayModeData*)SDL_calloc(1, sizeof(SDL_DisplayModeData));
 	data->bmode = bmode;
+	
 	mode->driverdata = data;
+#else
+	mode->driverdata = bmode;
+#endif
 
 	/* Set the format */
 	int32 bpp = ColorSpaceToBitsPerPixel(bmode->space);
@@ -127,14 +139,15 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 void BE_AddDisplay(BScreen *screen) {
 	SDL_VideoDisplay display;
 	SDL_DisplayMode *mode = (SDL_DisplayMode*)SDL_calloc(1, sizeof(SDL_DisplayMode));
-	display_mode bmode;
-	screen->GetMode(&bmode);
+	display_mode *bmode = (display_mode*)SDL_calloc(1, sizeof(display_mode));
+	screen->GetMode(bmode);
 
-	BE_BDisplayModeToSdlDisplayMode(&bmode, mode);
+	BE_BDisplayModeToSdlDisplayMode(bmode, mode);
 	
 	SDL_zero(display);
 	display.desktop_mode = *mode;
 	display.current_mode = *mode;
+	
 	SDL_AddVideoDisplay(&display);
 }
 
@@ -142,20 +155,19 @@ int BE_InitModes(_THIS) {
 	BScreen screen;
 	
 	/* Save the current display mode */
-	display_mode *prevMode;
-	screen.GetMode(prevMode);
-	_GetBeApp()->SetPrevMode(prevMode);
+//	display_mode *prevMode;
+//	screen.GetMode(prevMode);
+//	_GetBeApp()->SetPrevMode(prevMode);
 
 	/* Only one possible video display right now */
 	BE_AddDisplay(&screen);
 }
 
 int BE_QuitModes(_THIS) {
-/*	printf(__FILE__": %d; Begin quit\n", __LINE__);*/
 	/* Restore the previous video mode */
 	BScreen screen;
-	display_mode *savedMode = _GetBeApp()->GetPrevMode();
-	screen.SetMode(savedMode);
+//	display_mode *savedMode = _GetBeApp()->GetPrevMode();
+//	screen.SetMode(savedMode);
 	return 0;
 }
 
@@ -197,13 +209,37 @@ void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display) {
 int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 	/* Get the current screen */
 	BScreen bscreen;
-	
+	if(!bscreen.IsValid()) {
+		printf(__FILE__": %d - ERROR: BAD SCREEN\n", __LINE__);
+	}
+
 	/* Set the mode using the driver data */
-	display_mode *bmode = ((SDL_DisplayModeData*)mode->driverdata)->bmode;
-	if(bscreen.SetMode(bmode) == B_OK) {
+	display_mode *bmode = _ExtractBMode(mode);
+
+	status_t s;
+	if((s = bscreen.SetMode(bmode)) == B_OK) {
 		return 0;	/* No error */
 	}
-	
+printf(__FILE__": %d - ERROR: FAILED TO CHANGE VIDEO MODE; s = %i, status = B_BAD_VALUE? %i\n", __LINE__, s, s == B_BAD_VALUE);
+	display_mode *bmode_list;
+	uint32 count;
+	bscreen.GetModeList(&bmode_list, &count);
+	s = bscreen.ProposeMode(bmode, &bmode_list[count - 1], &bmode_list[0]);
+	switch(s) {
+	case B_OK:
+		printf(__FILE__": %d - B_OK\n", __LINE__);
+		break;
+	case B_BAD_VALUE:
+		printf(__FILE__": %d - B_BAD_VALUE\n", __LINE__);
+		break;
+	case B_ERROR:
+		printf(__FILE__": %d - B_ERROR\n", __LINE__);
+		break;
+	default:
+		printf(__FILE__": %d - (unknown error code)\n", __LINE__);
+		break;
+	}
+	free(bmode_list);
 	return -1;
 }
 

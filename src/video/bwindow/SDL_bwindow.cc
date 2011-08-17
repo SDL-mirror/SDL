@@ -51,7 +51,7 @@ int _InitWindow(_THIS, SDL_Window *window) {
     if(window->flags & SDL_WINDOW_OPENGL) {
     }
     if(!(window->flags & SDL_WINDOW_RESIZABLE)) {
-    	flags |= B_NOT_RESIZABLE;
+    	flags |= B_NOT_RESIZABLE | B_NOT_ZOOMABLE;
     }
     if(window->flags & SDL_WINDOW_BORDERLESS) {
     }
