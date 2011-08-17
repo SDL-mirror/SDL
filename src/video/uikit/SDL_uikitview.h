@@ -22,6 +22,7 @@
 #import <UIKit/UIKit.h>
 #include "SDL_stdinc.h"
 #include "SDL_events.h"
+#import "SDL_uikitviewcontroller.h"
 
 #define IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define FIXED_MULTITOUCH
@@ -29,16 +30,6 @@
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define MAX_SIMULTANEOUS_TOUCHES 5
 #endif
-
-@interface SDL_uikitviewcontroller : UIViewController {
-@private
-    SDL_Window *window;
-}
-- (id)initWithSDLWindow:(SDL_Window *)_window;
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
-- (void)loadView;
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
-@end
 
 /* *INDENT-OFF* */
 #if SDL_IPHONE_KEYBOARD
