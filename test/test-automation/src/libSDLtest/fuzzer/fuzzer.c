@@ -130,13 +130,13 @@ RandomSint16()
 }
 
 Sint32
-RandomInteger()
+RandomSint32()
 {
 	return (Sint32) utl_randomInt(&rndContext);
 }
 
 Uint32
-RandomPositiveInteger()
+RandomUint32()
 {
 	return (Uint32) utl_randomInt(&rndContext);
 }
@@ -147,8 +147,8 @@ RandomUint64()
 	Uint64 value;
 
 	Uint32 *vp = (Uint32*)&value;
-	vp[0] = RandomInteger();
-	vp[1] = RandomInteger();
+	vp[0] = RandomSint32();
+	vp[1] = RandomSint32();
 
 	return value;
 }
@@ -159,8 +159,8 @@ RandomSint64()
 	Uint64 value;
 
 	Uint32 *vp = (Uint32*)&value;
-	vp[0] = RandomInteger();
-	vp[1] = RandomInteger();
+	vp[0] = RandomSint32();
+	vp[1] = RandomSint32();
 
 	return value;
 }
@@ -180,7 +180,7 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
 		return min;
 	}
 
-	Sint32 number = abs(utl_randomInt(&rndContext));
+	Sint32 number = RandomSint32();
 
 	return (number % ((max + 1) - min)) + min;
 }
@@ -287,7 +287,7 @@ RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain)
 		return 0;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Uint8 retVal = (Uint8) buffer[index];
 
 	SDL_free(buffer);
@@ -311,7 +311,7 @@ RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDoma
 		return 0;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Uint16 retVal = (Uint16) buffer[index];
 
 	SDL_free(buffer);
@@ -335,7 +335,7 @@ RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDoma
 		return 0;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Uint32 retVal = (Uint32) buffer[index];
 
 	SDL_free(buffer);
@@ -359,7 +359,7 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
 		return 0;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Uint64 retVal = (Uint64) buffer[index];
 
 	SDL_free(buffer);
@@ -476,7 +476,7 @@ RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain)
 		return CHAR_MIN;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Sint8 retVal = (Sint8) buffer[index];
 
 	SDL_free(buffer);
@@ -501,7 +501,7 @@ RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDoma
 		return SHRT_MIN;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Sint16 retVal = (Sint16) buffer[index];
 
 	SDL_free(buffer);
@@ -526,7 +526,7 @@ RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDoma
 		return INT_MIN;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Sint32 retVal = (Sint32) buffer[index];
 
 	SDL_free(buffer);
@@ -551,7 +551,7 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 		return LLONG_MIN;
 	}
 
-	Uint32 index = RandomInteger() % size;
+	Uint32 index = RandomSint32() % size;
 	Sint64 retVal = (Sint64) buffer[index];
 
 	SDL_free(buffer);
@@ -599,7 +599,7 @@ RandomAsciiStringWithMaximumLength(int maxSize)
 		return NULL;
 	}
 
-	int size = (abs(RandomInteger()) % (maxSize + 1)) + 1;
+	int size = (abs(RandomSint32()) % (maxSize + 1)) + 1;
 	char *string = SDL_malloc(size * sizeof(char));
 
 	int counter = 0;

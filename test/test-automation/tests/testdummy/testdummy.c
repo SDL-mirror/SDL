@@ -98,7 +98,7 @@ test_dummy1(void *arg)
 
 	/*
 	for( ; 1 ; )
-		Log(0, "uint8 (same value): %u", RandomPositiveInteger());
+		Log(0, "uint8 (same value): %u", RandomUint32());
 	// */
 
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));

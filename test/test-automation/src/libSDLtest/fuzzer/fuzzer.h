@@ -80,7 +80,7 @@ Sint16 RandomSint16();
  *
  * \returns Generated integer
  */
-Sint32 RandomInteger();
+Sint32 RandomSint32();
 
 
 /*!
@@ -88,7 +88,7 @@ Sint32 RandomInteger();
  *
  * \returns Generated integer
  */
-Uint32 RandomPositiveInteger();
+Uint32 RandomUint32();
 
 /*!
  * Returns random Uint64.
