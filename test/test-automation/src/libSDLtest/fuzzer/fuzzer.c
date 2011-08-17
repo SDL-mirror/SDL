@@ -147,8 +147,8 @@ RandomUint64()
 	Uint64 value;
 
 	Uint32 *vp = (Uint32*)&value;
-	vp[0] = RandomSint32();
-	vp[1] = RandomSint32();
+	vp[0] = RandomInteger();
+	vp[1] = RandomInteger();
 
 	return value;
 }
@@ -159,8 +159,8 @@ RandomSint64()
 	Uint64 value;
 
 	Uint32 *vp = (Uint32*)&value;
-	vp[0] = RandomSint32();
-	vp[1] = RandomSint32();
+	vp[0] = RandomInteger();
+	vp[1] = RandomInteger();
 
 	return value;
 }
