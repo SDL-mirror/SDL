@@ -111,17 +111,21 @@ Sint64 RandomSint64();
 float RandomUnitFloat();
 
 /*!
- * Returns random double in range [0.0 - 1.0] (inclusive)
+ * Returns random double in range [0.0 - 1.0[ (note: zero included, 1 is not!)
  */
 double RandomUnitDouble();
 
 /*!
- * Returns random float
+ * Returns random float.
+ *
+ * Note: NOT implemented.
  */
 float RandomFloat();
 
 /*!
  * Returns random double
+ *
+ * Note: NOT implemented.
  */
 double RandomDouble();
 

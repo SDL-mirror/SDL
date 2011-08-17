@@ -562,13 +562,13 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 float
 RandomUnitFloat()
 {
-	return (float) utl_randomInt(&rndContext) / UINT_MAX;
+	return (float) RandomUint32() / UINT_MAX;
 }
 
 double
 RandomUnitDouble()
 {
-	return (double) RandomUint64() / LLONG_MAX;
+	 return (RandomUint64() >> 11) * (1.0/9007199254740992.0);
 }
 
 float
@@ -599,7 +599,7 @@ RandomAsciiStringWithMaximumLength(int maxSize)
 		return NULL;
 	}
 
-	int size = (abs(RandomSint32()) % (maxSize + 1)) + 1;
+	int size = (RandomUint32() % (maxSize + 1)) + 1;
 	char *string = SDL_malloc(size * sizeof(char));
 
 	int counter = 0;

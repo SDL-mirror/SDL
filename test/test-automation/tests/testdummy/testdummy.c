@@ -103,6 +103,9 @@ test_dummy1(void *arg)
 
 	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
 
+	for(; 1 ; )
+			printf("%f\n", RandomUnitFloat());
+
 	for(; 0 ; )
 		printf("%d\n", RandomSint16());
 
