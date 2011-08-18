@@ -130,7 +130,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (!_this) {
         return;
     }
-	
+    
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
@@ -146,10 +146,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (!_this) {
         return;
     }
-	
-	SDL_Window *window;
+    
+    SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
-		SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }
 
