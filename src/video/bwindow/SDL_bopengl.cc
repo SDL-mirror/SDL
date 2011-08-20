@@ -31,6 +31,9 @@
 extern "C" {
 #endif
 
+
+#define BGL_FLAGS BGL_RGB | BGL_DOUBLE
+
 static inline SDL_BWin *_ToBeWin(SDL_Window *window) {
 	return ((SDL_BWin*)(window->driverdata));
 }
@@ -152,12 +155,13 @@ SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window) {
 	/* FIXME: Not sure what flags should be included here; may want to have
 	   most of them */
 	SDL_BWin *bwin = _ToBeWin(window);
-	bwin->CreateGLView(BGL_RGB | BGL_DOUBLE);
+	bwin->CreateGLView(BGL_FLAGS);
 	return (SDL_GLContext)(bwin);
 }
 
 void BE_GL_DeleteContext(_THIS, SDL_GLContext context) {
 	/* Currently, automatically unlocks the view */
+printf(__FILE__": %d\n", __LINE__);
 	((SDL_BWin*)context)->RemoveGLView();
 }
 
@@ -179,7 +183,19 @@ void BE_GL_UnloadLibrary(_THIS) {
 
 
 
-
+void BE_GL_RebootContexts(_THIS) {
+	SDL_Window *window = _this->windows;
+	while(window) {
+		SDL_BWin *bwin = _ToBeWin(window);
+		if(bwin->GetGLView()) {
+			bwin->LockLooper();
+			bwin->RemoveGLView();
+			bwin->CreateGLView(BGL_FLAGS);
+			bwin->UnlockLooper();
+		}
+		window = window->next;
+	}
+}
 
 
 #if 0 /* Functions from 1.2 that do not appear to be used in 1.3 */

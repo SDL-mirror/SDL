@@ -71,7 +71,6 @@ int BE_CreateWindow(_THIS, SDL_Window *window) {
 	if(_InitWindow(_this, window) == ENOMEM)
 		return ENOMEM;
 	
-	printf("Flags = 0x%x\n", window->flags);
 	/* Start window loop */
     _ToBeWin(window)->Show();
     return 0;

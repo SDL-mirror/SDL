@@ -26,13 +26,20 @@
 #include "SDL_bmodes.h"
 #include "SDL_BWin.h"
 
+#if SDL_VIDEO_OPENGL
+#include "SDL_bopengl.h"
+#endif
+
 #include "../../main/beos/SDL_BApp.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#if 1
+
+#define WRAP_BMODE 1
+
+#if WRAP_BMODE
 /* This wrapper is here so that the driverdata can be freed */
 typedef struct SDL_DisplayModeData {
 	display_mode *bmode;
@@ -121,7 +128,7 @@ static inline void BE_BDisplayModeToSdlDisplayMode(display_mode *bmode,
 	mode->w = bmode->virtual_width;
 	mode->h = bmode->virtual_height;
 	mode->refresh_rate = (int)get_refresh_rate(*bmode);
-#if 1
+#if WRAP_BMODE
 	SDL_DisplayModeData *data = (SDL_DisplayModeData*)SDL_calloc(1, sizeof(SDL_DisplayModeData));
 	data->bmode = bmode;
 	
@@ -206,8 +213,159 @@ void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display) {
 	free(bmodes);
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+static int get_combine_mode(display_mode &mode) {
+	if ((mode.flags & B_SCROLL) == 0)
+		return 0;
+
+	if (mode.virtual_width == mode.timing.h_display * 2)
+		return 1;
+
+	if (mode.virtual_height == mode.timing.v_display * 2)
+		return 2;
+     
+		return 0;
+}
+#if 0
+bool _GetDisplayMode(const screen_mode& mode, display_mode& displayMode)
+{
+ 	uint16 virtualWidth, virtualHeight;
+ 	int32 bestIndex = -1;
+ 	float bestDiff = 999;
+ 
+ 	virtualWidth = mode.combine == kCombineHorizontally
+ 		? mode.width * 2 : mode.width;
+ 	virtualHeight = mode.combine == kCombineVertically
+ 		? mode.height * 2 : mode.height;
+ 
+ 	// try to find mode in list provided by driver
+ 	for (uint32 i = 0; i < fModeCount; i++) {
+ 		if (fModeList[i].virtual_width != virtualWidth
+ 			|| fModeList[i].virtual_height != virtualHeight
+ 			|| (color_space)fModeList[i].space != mode.space)
+ 			continue;
+ 
+ 		// Accept the mode if the computed refresh rate of the mode is within
+ 		// 0.6 percent of the refresh rate specified by the caller.  Note that
+ 		// refresh rates computed from mode parameters is not exact; especially
+ 		// some of the older modes such as 640x480, 800x600, and 1024x768.
+ 		// The tolerance of 0.6% was obtained by examining the various possible
+ 		// modes.
+
+ 		float refreshDiff = fabs(get_refresh_rate(fModeList[i]) - mode.refresh);
+ 		if (refreshDiff < 0.006 * mode.refresh) {
+ 			// Accept this mode.
+ 			displayMode = fModeList[i];
+ 			displayMode.h_display_start = 0;
+ 			displayMode.v_display_start = 0;
+ 
+			// Since the computed refresh rate of the selected mode might differ
+ 			// from selected refresh rate by a few tenths (e.g. 60.2 instead of
+ 			// 60.0), tweak the pixel clock so the the refresh rate of the mode
+ 			// matches the selected refresh rate.
+ 
+ 			displayMode.timing.pixel_clock = uint32(((displayMode.timing.h_total
+ 				* displayMode.timing.v_total * mode.refresh) / 1000.0) + 0.5);
+ 			return true;
+ 		}
+ 
+		// Mode not acceptable.
+ 
+ 		if (refreshDiff < bestDiff) {
+ 			bestDiff = refreshDiff;
+ 			bestIndex = i;
+		}
+	}
+ 
+ 	// we didn't find the exact mode, but something very similar?
+ 	if (bestIndex == -1)
+ 		return false;
+ 
+ 	displayMode = fModeList[bestIndex];
+ 	displayMode.h_display_start = 0;
+ 	displayMode.v_display_start = 0;
+ 
+ 	// For the mode selected by the width, height, and refresh rate, compute
+ 	// the video timing parameters for the mode by using the VESA Generalized
+ 	// Timing Formula (GTF).
+ 
+	ComputeGTFVideoTiming(displayMode.timing.h_display,
+ 		displayMode.timing.v_display, mode.refresh, displayMode.timing);
+
+	return true;
+}
+#endif
+
+void _SpoutModeData(display_mode *bmode) {
+	printf("BMode:\n");
+	printf("\tw,h = (%i,%i)\n", bmode->virtual_width, bmode->virtual_height);
+	printf("\th,v = (%i,%i)\n", bmode->h_display_start, 
+			bmode->v_display_start);
+	printf("\tcombine mode = %i\n", get_combine_mode(*bmode));
+	if(bmode->flags) {
+		printf("\tFlags:\n");
+		if(bmode->flags & B_SCROLL) {
+			printf("\t\tB_SCROLL\n");
+		}
+		if(bmode->flags & B_8_BIT_DAC) {
+			printf("\t\tB_8_BIT_DAC\n");
+		}
+		if(bmode->flags & B_HARDWARE_CURSOR) {
+			printf("\t\tB_HARDWARE_CURSOR\n");
+		}
+		if(bmode->flags & B_PARALLEL_ACCESS) {
+			printf("\t\tB_PARALLEL_ACCESS\n");
+		}
+		if(bmode->flags & B_DPMS) {
+			printf("\t\tB_DPMS\n");
+		}
+		if(bmode->flags & B_IO_FB_NA) {
+			printf("\t\tB_IO_FB_NA\n");
+		}
+	}
+	printf("\tTiming:\n");
+	printf("\t\tpx clock: %i\n", bmode->timing.pixel_clock);
+	printf("\t\th - display: %i sync start: %i sync end: %i total: %i\n",
+		bmode->timing.h_display, bmode->timing.h_sync_start,
+		bmode->timing.h_sync_end, bmode->timing.h_total);
+	printf("\t\tv - display: %i sync start: %i sync end: %i total: %i\n",
+		bmode->timing.v_display, bmode->timing.v_sync_start,
+		bmode->timing.v_sync_end, bmode->timing.v_total);
+	if(bmode->timing.flags) {
+		printf("\t\tFlags:\n");
+		if(bmode->timing.flags & B_BLANK_PEDESTAL) {
+			printf("\t\t\tB_BLANK_PEDESTAL\n");
+		}
+		if(bmode->timing.flags & B_TIMING_INTERLACED) {
+			printf("\t\t\tB_TIMING_INTERLACED\n");
+		}
+		if(bmode->timing.flags & B_POSITIVE_HSYNC) {
+			printf("\t\t\tB_POSITIVE_HSYNC\n");
+		}
+		if(bmode->timing.flags & B_POSITIVE_VSYNC) {
+			printf("\t\t\tB_POSITIVE_VSYNC\n");
+		}
+		if(bmode->timing.flags & B_SYNC_ON_GREEN) {
+			printf("\t\t\tB_SYNC_ON_GREEN\n");
+		}
+	}
+}
+
 int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 	/* Get the current screen */
+printf(__FILE__": %d\n", __LINE__);
 	BScreen bscreen;
 	if(!bscreen.IsValid()) {
 		printf(__FILE__": %d - ERROR: BAD SCREEN\n", __LINE__);
@@ -216,31 +374,39 @@ int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 	/* Set the mode using the driver data */
 	display_mode *bmode = _ExtractBMode(mode);
 
-	status_t s;
-	if((s = bscreen.SetMode(bmode)) == B_OK) {
-		return 0;	/* No error */
+
+_SpoutModeData(bmode);
+printf("\n");
+uint32 c = 0, i, x = 0;
+#define RES 0
+display_mode *bmode_list;
+bscreen.GetModeList(&bmode_list, &c);
+for(i = 0; i < c; ++i) {
+	if(	bmode_list[i].space == bmode->space &&
+		bmode_list[i].virtual_width == bmode->virtual_width &&
+		bmode_list[i].virtual_height == bmode->virtual_height ) {
+			if(x == RES)
+				bmode = &bmode_list[i];
+			
+			++x;
+			_SpoutModeData(&bmode_list[i]);
+//			break;
 	}
-printf(__FILE__": %d - ERROR: FAILED TO CHANGE VIDEO MODE; s = %i, status = B_BAD_VALUE? %i\n", __LINE__, s, s == B_BAD_VALUE);
-	display_mode *bmode_list;
-	uint32 count;
-	bscreen.GetModeList(&bmode_list, &count);
-	s = bscreen.ProposeMode(bmode, &bmode_list[count - 1], &bmode_list[0]);
-	switch(s) {
-	case B_OK:
-		printf(__FILE__": %d - B_OK\n", __LINE__);
-		break;
-	case B_BAD_VALUE:
-		printf(__FILE__": %d - B_BAD_VALUE\n", __LINE__);
-		break;
-	case B_ERROR:
-		printf(__FILE__": %d - B_ERROR\n", __LINE__);
-		break;
-	default:
-		printf(__FILE__": %d - (unknown error code)\n", __LINE__);
-		break;
+}
+
+	if(bscreen.SetMode(bmode) != B_OK) {
+		SDL_SetError("Bad video mode\n");
+		return -1;
 	}
-	free(bmode_list);
-	return -1;
+free(bmode_list);
+	
+#if SDL_VIDEO_OPENGL
+	/* The OpenGL context may need to be rebooted */
+//	BE_GL_RebootContexts(_this);
+#endif
+
+printf(__FILE__": %d\n", __LINE__);
+	return 0;
 }
 
 #ifdef __cplusplus

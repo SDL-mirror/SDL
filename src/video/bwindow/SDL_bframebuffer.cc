@@ -125,7 +125,10 @@ int32 BE_DrawThread(void *data) {
 	while(bwin->ConnectionEnabled()) {
 		if( bwin->Connected() && bwin->BufferExists() && bwin->BufferIsDirty() ) {
 			bwin->LockBuffer();
-			BBitmap *bitmap = bwin->GetBitmap();
+			BBitmap *bitmap = NULL;
+//			while(!bitmap) {
+				bitmap = bwin->GetBitmap();
+//			}
 			int32 windowPitch = bitmap->BytesPerRow();
 			int32 bufferPitch = bwin->GetRowBytes();
 			uint8 *windowpx;
@@ -193,6 +196,12 @@ void BE_DestroyWindowFramebuffer(_THIS, SDL_Window * window) {
 }
 
 
+/*
+ * TODO:
+ * This was written to test if certain errors were caused by threading issues.
+ * The specific issues have since become rare enough that they may have been
+ * solved, but I doubt it- they were pretty sporadic before now.
+ */
 int32 BE_UpdateOnce(SDL_Window *window) {
 	SDL_BWin *bwin = _ToBeWin(window);
 	BScreen bscreen;

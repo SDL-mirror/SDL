@@ -185,6 +185,9 @@ class SDL_BWin:public BDirectWindow
     			_bits = (uint8*) info->bits;
     			_row_bytes = info->bytes_per_row;
     			_bounds = info->window_bounds;
+printf("Bounds = (%i,%i,%i,%i), Frame = (%0.f,%0.f,%0.f,%0.f)\n", _bounds.left,
+	_bounds.top, _bounds.right, _bounds.bottom, Frame().left, Frame().top,
+	Frame().right, Frame().bottom);
     			_bytes_per_px = info->bits_per_pixel / 8;
     			_buffer_dirty = true;
     		}
@@ -572,12 +575,27 @@ private:
 
     void _SetFullScreen(BMessage *msg) {
     	bool fullscreen;
+
+    	BRect rc1 = Bounds(),
+    		  rc2 = Frame();
+printf(__FILE__": %d - bounds = (%.0f,%.0f,%.0f,%.0f), frame = (%.0f,%.0f,%.0f,%.0f\n", __LINE__, rc1.left, rc1.top, rc1.right, rc1.bottom,
+rc2.left, rc2.top, rc2.right, rc2.bottom);
     	if(
 			msg->FindBool("fullscreen", &fullscreen) != B_OK
 		) {
 			return;
     	}
+
+if(fullscreen) {
+	printf("Setting fullscreen...\n");
+} else {
+	printf("Unsetting fullscreen...\n");
+}
+#if 1
     	SetFullScreen(fullscreen);
+#endif
+printf(__FILE__": %d - bounds = (%.0f,%.0f,%.0f,%.0f), frame = (%.0f,%.0f,%.0f,%.0f\n", __LINE__, rc1.left, rc1.top, rc1.right, rc1.bottom,
+rc2.left, rc2.top, rc2.right, rc2.bottom);
     }
     
     /* Members */
