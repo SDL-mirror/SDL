@@ -1161,6 +1161,8 @@ SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current,
 			current = NULL;
 			goto done;
 		}
+		X11_PendingConfigureNotifyWidth = width;
+		X11_PendingConfigureNotifyHeight = height;
 	} else {
 		if (X11_CreateWindow(this,current,width,height,bpp,flags) < 0) {
 			current = NULL;

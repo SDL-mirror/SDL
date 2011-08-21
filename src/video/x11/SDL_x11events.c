@@ -57,6 +57,12 @@ static SDLKey ODD_keymap[256];
 static SDLKey MISC_keymap[256];
 SDLKey X11_TranslateKeycode(Display *display, KeyCode kc);
 
+/*
+ Pending resize target for ConfigureNotify (so outdated events don't
+ cause inappropriate resize events)
+*/
+int X11_PendingConfigureNotifyWidth = -1;
+int X11_PendingConfigureNotifyHeight = -1;
 
 #ifdef X_HAVE_UTF8_STRING
 Uint32 Utf8ToUcs4(const Uint8 *utf8)
@@ -819,6 +825,16 @@ printf("MapNotify!\n");
 #ifdef DEBUG_XEVENTS
 printf("ConfigureNotify! (resize: %dx%d)\n", xevent.xconfigure.width, xevent.xconfigure.height);
 #endif
+		if ((X11_PendingConfigureNotifyWidth != -1) &&
+		    (X11_PendingConfigureNotifyHeight != -1)) {
+		    if ((xevent.xconfigure.width != X11_PendingConfigureNotifyWidth) &&
+			(xevent.xconfigure.height != X11_PendingConfigureNotifyHeight)) {
+			    /* Event is from before the resize, so ignore. */
+			    break;
+		    }
+		    X11_PendingConfigureNotifyWidth = -1;
+		    X11_PendingConfigureNotifyHeight = -1;
+		}
 		if ( SDL_VideoSurface ) {
 		    if ((xevent.xconfigure.width != SDL_VideoSurface->w) ||
 		        (xevent.xconfigure.height != SDL_VideoSurface->h)) {
