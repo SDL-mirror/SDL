@@ -981,8 +981,7 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
     
     else {
         CGContextRef cgc = (CGContextRef)
-            [[NSGraphicsContext graphicsContextWithWindow: qz_window]
-                graphicsPort];
+            [[NSGraphicsContext currentContext] graphicsPort];
         QZ_DrawResizeIcon (this);
         CGContextFlush (cg_context);
         CGImageRef image = CGBitmapContextCreateImage (cg_context);
