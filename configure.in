@@ -735,9 +735,6 @@ AC_HELP_STRING([--enable-nasm], [use nasm assembly blitters on x86 [[default=yes
               win32)
                   NASMFLAGS="-f win32"
                   ;;
-              openbsd)
-                  NASMFLAGS="-f aoutb"
-                  ;;
               macosx)
                   NASMFLAGS="-f macho"
                   ;;
