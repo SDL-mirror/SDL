@@ -81,7 +81,8 @@ static int (*ALSA_snd_pcm_sw_params_set_start_threshold)
 static int (*ALSA_snd_pcm_sw_params) (snd_pcm_t *, snd_pcm_sw_params_t *);
 static int (*ALSA_snd_pcm_nonblock) (snd_pcm_t *, int);
 static int (*ALSA_snd_pcm_wait)(snd_pcm_t *, int);
-
+static int (*ALSA_snd_pcm_sw_params_set_avail_min)
+  (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
 
 #ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
@@ -140,6 +141,7 @@ load_alsa_syms(void)
     SDL_ALSA_SYM(snd_pcm_sw_params);
     SDL_ALSA_SYM(snd_pcm_nonblock);
     SDL_ALSA_SYM(snd_pcm_wait);
+    SDL_ALSA_SYM(snd_pcm_sw_params_set_avail_min);
     return 0;
 }
 
@@ -615,6 +617,13 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
     if (status < 0) {
         ALSA_CloseDevice(this);
         SDL_SetError("ALSA: Couldn't get software config: %s",
+                     ALSA_snd_strerror(status));
+        return 0;
+    }
+    status = ALSA_snd_pcm_sw_params_set_avail_min(pcm_handle, swparams, this->spec.samples);
+    if (status < 0) {
+        ALSA_CloseDevice(this);
+        SDL_SetError("Couldn't set minimum available samples: %s",
                      ALSA_snd_strerror(status));
         return 0;
     }
