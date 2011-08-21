@@ -27,6 +27,8 @@
 #define INITGUID 1
 #include "SDL_xaudio2.h"
 
+#if SDL_HAVE_XAUDIO2_H
+
 static __inline__ char *
 utf16_to_utf8(const WCHAR *S)
 {
@@ -370,9 +372,15 @@ XAUDIO2_Deinitialize(void)
     WIN_CoUninitialize();
 }
 
+#endif  /* SDL_HAVE_XAUDIO2_H */
+
+
 static int
 XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 {
+#if !SDL_HAVE_XAUDIO2_H
+    return 0;  /* no XAudio2 support, ever. Update your SDK! */
+#else
     /* XAudio2Create() is a macro that uses COM; we don't load the .dll */
     IXAudio2 *ixa2 = NULL;
     if (FAILED(WIN_CoInitialize())) {
@@ -398,6 +406,7 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
     impl->Deinitialize = XAUDIO2_Deinitialize;
 
     return 1;   /* this audio target is available. */
+#endif
 }
 
 AudioBootStrap XAUDIO2_bootstrap = {
