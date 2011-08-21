@@ -81,6 +81,7 @@ static int (*SDL_NAME(snd_pcm_hw_params_get_buffer_size))(const snd_pcm_hw_param
 static int (*SDL_NAME(snd_pcm_hw_params))(snd_pcm_t *pcm, snd_pcm_hw_params_t *params);
 /*
 */
+static int (*SDL_NAME(snd_pcm_sw_params_set_avail_min))(snd_pcm_t *pcm, snd_pcm_sw_params_t *swparams, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_params_t *swparams);
 static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
@@ -117,6 +118,7 @@ static struct {
 	{ "snd_pcm_hw_params_set_buffer_size_near",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_set_buffer_size_near) },
 	{ "snd_pcm_hw_params_get_buffer_size",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params_get_buffer_size) },
 	{ "snd_pcm_hw_params",	(void**)(char*)&SDL_NAME(snd_pcm_hw_params)	},
+	{ "snd_pcm_sw_params_set_avail_min",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_avail_min) },
 	{ "snd_pcm_sw_params_current",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_current)	},
 	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
 	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
@@ -575,6 +577,12 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	status = SDL_NAME(snd_pcm_sw_params_current)(pcm_handle, swparams);
 	if ( status < 0 ) {
 		SDL_SetError("Couldn't get software config: %s", SDL_NAME(snd_strerror)(status));
+		ALSA_CloseAudio(this);
+		return(-1);
+	}
+	status = SDL_NAME(snd_pcm_sw_params_set_avail_min)(pcm_handle, swparams, spec->samples);
+	if ( status < 0 ) {
+		SDL_SetError("Couldn't set minimum available samples: %s", SDL_NAME(snd_strerror)(status));
 		ALSA_CloseAudio(this);
 		return(-1);
 	}
