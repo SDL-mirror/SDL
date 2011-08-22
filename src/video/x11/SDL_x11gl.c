@@ -289,9 +289,16 @@ int X11_GL_CreateContext(_THIS)
 	if ( !glXExtensionSupported(this, "GLX_MESA_swap_control") ) {
 		this->gl_data->glXSwapIntervalMESA = NULL;
 	}
+	if ( !glXExtensionSupported(this, "GLX_EXT_swap_control") ) {
+		this->gl_data->glXSwapIntervalEXT = NULL;
+	}
+
 	if ( this->gl_config.swap_control >= 0 ) {
-        int rc = -1;
-		if ( this->gl_data->glXSwapIntervalMESA ) {
+		int rc = -1;
+		if ( this->gl_data->glXSwapIntervalEXT ) {
+			rc = this->gl_data->glXSwapIntervalEXT(GFX_Display, SDL_Window,
+					this->gl_config.swap_control);
+		} else if ( this->gl_data->glXSwapIntervalMESA ) {
 			rc = this->gl_data->glXSwapIntervalMESA(this->gl_config.swap_control);
 		} else if ( this->gl_data->glXSwapIntervalSGI ) {
 			rc = this->gl_data->glXSwapIntervalSGI(this->gl_config.swap_control);
@@ -418,7 +425,8 @@ int X11_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 		}
 		break;
 	    case SDL_GL_SWAP_CONTROL:
-		if ( ( this->gl_data->glXSwapIntervalMESA ) ||
+		if ( ( this->gl_data->glXSwapIntervalEXT ) ||
+		     ( this->gl_data->glXSwapIntervalMESA ) ||
 		     ( this->gl_data->glXSwapIntervalSGI ) ) {
 			*value = this->gl_data->swap_interval;
 			return 0;
@@ -473,6 +481,7 @@ void X11_GL_UnloadLibrary(_THIS)
 		this->gl_data->glXSwapBuffers = NULL;
 		this->gl_data->glXSwapIntervalSGI = NULL;
 		this->gl_data->glXSwapIntervalMESA = NULL;
+		this->gl_data->glXSwapIntervalEXT = NULL;
 
 		this->gl_config.dll_handle = NULL;
 		this->gl_config.driver_loaded = 0;
@@ -536,6 +545,8 @@ int X11_GL_LoadLibrary(_THIS, const char* path)
 		(int (*)(int)) X11_GL_GetProcAddress(this, "glXSwapIntervalSGI");
 	this->gl_data->glXSwapIntervalMESA =
 		(GLint (*)(unsigned)) X11_GL_GetProcAddress(this, "glXSwapIntervalMESA");
+	this->gl_data->glXSwapIntervalEXT =
+		(int (*)(Display*,GLXDrawable,int)) X11_GL_GetProcAddress(this, "glXSwapIntervalEXT");
 
 	if ( (this->gl_data->glXChooseVisual == NULL) || 
 	     (this->gl_data->glXCreateContext == NULL) ||
