@@ -37,7 +37,7 @@ static inline SDL_BApp *_GetBeApp() {
 	return ((SDL_BApp*)be_app);
 }
 
-int _InitWindow(_THIS, SDL_Window *window) {
+static int _InitWindow(_THIS, SDL_Window *window) {
 	uint32 flags = 0;
 	BRect bounds(
         window->x,

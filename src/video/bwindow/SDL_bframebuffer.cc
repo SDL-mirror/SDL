@@ -59,8 +59,8 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 	/* format */
 	display_mode bmode;
 	bscreen.GetMode(&bmode);
-	int32 bpp = ColorSpaceToBitsPerPixel(bmode.space);
-	*format = BPPToSDLPxFormat(bpp);
+	int32 bpp = BE_ColorSpaceToBitsPerPixel(bmode.space);
+	*format = BE_BPPToSDLPxFormat(bpp);
 
 	/* Create the new bitmap object */
 	BBitmap *bitmap = bwin->GetBitmap();

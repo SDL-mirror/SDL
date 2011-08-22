@@ -131,7 +131,7 @@ void _SpoutModeData(display_mode *bmode) {
 
 
 
-static inline int32 ColorSpaceToBitsPerPixel(uint32 colorspace)
+int32 BE_ColorSpaceToBitsPerPixel(uint32 colorspace)
 {
 	int bitsperpixel;
 
@@ -162,7 +162,7 @@ static inline int32 ColorSpaceToBitsPerPixel(uint32 colorspace)
 	return(bitsperpixel);
 }
 
-static inline int32 BPPToSDLPxFormat(int32 bpp) {
+int32 BE_BPPToSDLPxFormat(int32 bpp) {
 	/* Translation taken from SDL_windowsmodes.c */
 	switch (bpp) {
 	case 32:
@@ -186,7 +186,7 @@ static inline int32 BPPToSDLPxFormat(int32 bpp) {
 	}
 }
 
-static inline void _BDisplayModeToSdlDisplayMode(display_mode *bmode,
+static void _BDisplayModeToSdlDisplayMode(display_mode *bmode,
 		SDL_DisplayMode *mode) {
 	mode->w = bmode->virtual_width;
 	mode->h = bmode->virtual_height;
@@ -205,12 +205,12 @@ static inline void _BDisplayModeToSdlDisplayMode(display_mode *bmode,
 #endif
 
 	/* Set the format */
-	int32 bpp = ColorSpaceToBitsPerPixel(bmode->space);
-	mode->format = BPPToSDLPxFormat(bpp);
+	int32 bpp = BE_ColorSpaceToBitsPerPixel(bmode->space);
+	mode->format = BE_BPPToSDLPxFormat(bpp);
 }
 
 /* Later, there may be more than one monitor available */
-void _AddDisplay(BScreen *screen) {
+static void _AddDisplay(BScreen *screen) {
 	SDL_VideoDisplay display;
 	SDL_DisplayMode *mode = (SDL_DisplayMode*)SDL_calloc(1,
 		sizeof(SDL_DisplayMode));
@@ -307,7 +307,8 @@ int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 		SDL_SetError("Bad video mode\n");
 		return -1;
 	}
-free(bmode_list);
+	
+	free(bmode_list);
 	
 #if SDL_VIDEO_OPENGL
 	/* FIXME: Is there some way to reboot the OpenGL context?  This doesn't

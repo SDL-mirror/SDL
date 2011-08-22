@@ -122,7 +122,7 @@ VideoBootStrap BWINDOW_bootstrap = {
 	BE_Available, BE_CreateDevice
 };
 
-static void BE_DeleteDevice(SDL_VideoDevice * device)
+void BE_DeleteDevice(SDL_VideoDevice * device)
 {
 	SDL_free(device->driverdata);
 	SDL_free(device);
@@ -152,7 +152,7 @@ int BE_VideoInit(_THIS)
     return (0);
 }
 
-static int BE_Available(void)
+int BE_Available(void)
 {
     return (1);
 }

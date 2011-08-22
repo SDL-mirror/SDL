@@ -28,8 +28,8 @@ extern "C" {
 
 #include "../SDL_sysvideo.h"
 
-extern int32 ColorSpaceToBitsPerPixel(uint32 colorspace);
-extern int32 BPPToSDLPxFormat(int32 bpp);
+extern int32 BE_ColorSpaceToBitsPerPixel(uint32 colorspace);
+extern int32 BE_BPPToSDLPxFormat(int32 bpp);
 
 extern int BE_InitModes(_THIS);
 extern int BE_QuitModes(_THIS);
