@@ -841,10 +841,6 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.h"
-			>
-		</File>
-		<File
 			RelativePath="..\..\src\joystick\windows\SDL_dxjoystick.c"
 			>
 		</File>

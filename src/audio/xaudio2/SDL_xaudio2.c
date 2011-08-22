@@ -24,10 +24,34 @@
 #include "../SDL_audio_c.h"
 #include "SDL_assert.h"
 
-#define INITGUID 1
-#include "SDL_xaudio2.h"
+#include "../SDL_sysaudio.h"
+
+#if SDL_AUDIO_DRIVER_XAUDIO2
+#include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
+#if (defined(_DXSDK_BUILD_MAJOR) && (_DXSDK_BUILD_MAJOR >= 1284))
+#   define SDL_HAVE_XAUDIO2_H 1
+#endif
+#endif
 
 #ifdef SDL_HAVE_XAUDIO2_H
+
+#define INITGUID 1
+#include <XAudio2.h>
+
+/* Hidden "this" pointer for the audio functions */
+#define _THIS	SDL_AudioDevice *this
+
+struct SDL_PrivateAudioData
+{
+    IXAudio2 *ixa2;
+    IXAudio2SourceVoice *source;
+    IXAudio2MasteringVoice *mastering;
+    HANDLE semaphore;
+    Uint8 *mixbuf;
+    int mixlen;
+    Uint8 *nextbuf;
+};
+
 
 static __inline__ char *
 utf16_to_utf8(const WCHAR *S)
