@@ -38,7 +38,7 @@ struct SDL_GLDriverData
     Bool(*glXMakeCurrent) (Display*,GLXDrawable,GLXContext);
     void (*glXSwapBuffers) (Display*, GLXDrawable);
     void (*glXQueryDrawable) (Display*,GLXDrawable,int,unsigned int*);
-    void (*glXSwapIntervalEXT) (Display*,GLXDrawable,int);
+    int (*glXSwapIntervalEXT) (Display*,GLXDrawable,int);
     int (*glXSwapIntervalSGI) (int);
     int (*glXSwapIntervalMESA) (int);
     int (*glXGetSwapIntervalMESA) (void);

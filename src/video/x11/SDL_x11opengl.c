@@ -265,7 +265,7 @@ X11_GL_InitExtensions(_THIS)
     /* Check for GLX_EXT_swap_control */
     if (HasExtension("GLX_EXT_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalEXT =
-            (void (*)(Display*,GLXDrawable,int))
+            (int (*)(Display*,GLXDrawable,int))
                 X11_GL_GetProcAddress(_this, "glXSwapIntervalEXT");
     }
 
@@ -538,9 +538,13 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
         Window drawable = windowdata->xwindow;
-        _this->gl_data->glXSwapIntervalEXT(display, drawable, interval);
-        status = 0;  /* always succeeds, apparently. */
-        swapinterval = interval;
+        status = _this->gl_data->glXSwapIntervalEXT(display,drawable,interval);
+        if (status != 0) {
+            SDL_SetError("glxSwapIntervalEXT failed");
+            status = -1;
+        } else {
+            swapinterval = interval;
+        }
     } else if (_this->gl_data->glXSwapIntervalMESA) {
         status = _this->gl_data->glXSwapIntervalMESA(interval);
         if (status != 0) {
