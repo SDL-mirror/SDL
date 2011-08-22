@@ -22,18 +22,19 @@
 #include "../../core/windows/SDL_windows.h"
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
+#include "../SDL_sysaudio.h"
 #include "SDL_assert.h"
 
-#include "../SDL_sysaudio.h"
-
 #if SDL_AUDIO_DRIVER_XAUDIO2
+
 #include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
-#if (defined(_DXSDK_BUILD_MAJOR) && (_DXSDK_BUILD_MAJOR >= 1284))
-#   define SDL_HAVE_XAUDIO2_H 1
-#endif
+#if (!defined(_DXSDK_BUILD_MAJOR) || (_DXSDK_BUILD_MAJOR < 1284))
+#  warning Your DirectX SDK is too old. Disabling XAudio2 support.
+#else
+#  define SDL_XAUDIO2_HAS_SDK 1
 #endif
 
-#ifdef SDL_HAVE_XAUDIO2_H
+#ifdef SDL_XAUDIO2_HAS_SDK
 
 #define INITGUID 1
 #include <XAudio2.h>
@@ -396,13 +397,14 @@ XAUDIO2_Deinitialize(void)
     WIN_CoUninitialize();
 }
 
-#endif  /* SDL_HAVE_XAUDIO2_H */
+#endif  /* SDL_XAUDIO2_HAS_SDK */
 
 
 static int
 XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 {
-#if !SDL_HAVE_XAUDIO2_H
+#ifndef SDL_XAUDIO2_HAS_SDK
+    SDL_SetError("XAudio2: SDL was built without XAudio2 support (old DirectX SDK).");
     return 0;  /* no XAudio2 support, ever. Update your SDK! */
 #else
     /* XAudio2Create() is a macro that uses COM; we don't load the .dll */
@@ -436,5 +438,7 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap XAUDIO2_bootstrap = {
     "xaudio2", "XAudio2", XAUDIO2_Init, 0
 };
+
+#endif  /* SDL_AUDIO_DRIVER_XAUDIO2 */
 
 /* vi: set ts=4 sw=4 expandtab: */
