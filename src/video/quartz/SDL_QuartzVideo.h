@@ -40,7 +40,6 @@
         - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
-        - SetColors sets palette correctly but clears framebuffer
         - Crash in CG after several mode switches (I think this has been fixed)
         - Retained windows don't draw their title bar quite right (OS Bug) (not using retained windows)
         - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug) (update: not just Radeon)
@@ -86,13 +85,11 @@ CGLContextObj QZ_GetCGLContextObj(NSOpenGLContext *nsctx);
 
 /* Main driver structure to store required state information */
 typedef struct SDL_PrivateVideoData {
-
+    BOOL               snow_leopard_or_later;
     BOOL               allow_screensaver;  /* 0 == disable screensaver */
     CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
-    CFDictionaryRef    mode;               /* current mode of the display */
-    CFDictionaryRef    save_mode;          /* original mode of the display */
-    CFArrayRef         mode_list;          /* list of available fullscreen modes */
-    CGDirectPaletteRef palette;            /* palette of an 8-bit display */
+    const void         *mode;              /* current mode of the display */
+    const void         *save_mode;         /* original mode of the display */
     NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
     Uint32             width, height, bpp; /* frequently used data about the display */
     Uint32             flags;              /* flags for current mode, for teardown purposes */
@@ -129,9 +126,8 @@ typedef struct SDL_PrivateVideoData {
 #define display_id (this->hidden->display)
 #define mode (this->hidden->mode)
 #define save_mode (this->hidden->save_mode)
+#define snow_leopard_or_later (this->hidden->snow_leopard_or_later)
 #define allow_screensaver (this->hidden->allow_screensaver)
-#define mode_list (this->hidden->mode_list)
-#define palette (this->hidden->palette)
 #define gl_context (this->hidden->gl_context)
 #define device_width (this->hidden->width)
 #define device_height (this->hidden->height)

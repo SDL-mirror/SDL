@@ -178,15 +178,75 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index)
 
 static void QZ_DeleteDevice (SDL_VideoDevice *device)
 {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+    _THIS = device;
+    if (snow_leopard_or_later) {
+        CGDisplayModeRelease((CGDisplayModeRef) save_mode);  /* NULL is ok */
+        CGDisplayModeRelease((CGDisplayModeRef) mode);  /* NULL is ok */
+    }
+#endif
+
     SDL_free (device->hidden);
     SDL_free (device);
+}
+
+static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint32 *bpp)
+{
+    *w = *h = *bpp = 0;
+    if (_mode == NULL) {
+        return;
+    }
+
+    if (snow_leopard_or_later) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+        CGDisplayModeRef vidmode = (CGDisplayModeRef) _mode;
+        CFStringRef fmt = CGDisplayModeCopyPixelEncoding(vidmode);
+
+        *w = (Uint32) CGDisplayModeGetWidth(vidmode);
+        *h = (Uint32) CGDisplayModeGetHeight(vidmode);
+
+        /* we only care about the 32-bit modes... */
+        if (CFStringCompare(fmt, CFSTR(IO32BitDirectPixels),
+                            kCFCompareCaseInsensitive) == kCFCompareEqualTo) {
+            *bpp = 32;
+        }
+
+        CFRelease(fmt);
+#endif
+    } else {
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+        CFDictionaryRef vidmode = (CFDictionaryRef) _mode;
+        CFNumberGetValue (
+            CFDictionaryGetValue (vidmode, kCGDisplayBitsPerPixel),
+            kCFNumberSInt32Type, bpp);
+
+        CFNumberGetValue (
+            CFDictionaryGetValue (vidmode, kCGDisplayWidth),
+            kCFNumberSInt32Type, w);
+
+        CFNumberGetValue (
+            CFDictionaryGetValue (vidmode, kCGDisplayHeight),
+            kCFNumberSInt32Type, h);
+#endif
+    }
+
+    /* we only care about the 32-bit modes... */
+    if (*bpp != 32) {
+        *bpp = 0;
+    }
 }
 
 static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
 {
     NSRect r = NSMakeRect(0.0, 0.0, 0.0, 0.0);
     const char *env = NULL;
-	
+
+    /* we don't set this from system_version; you might not have the SDK. */
+    snow_leopard_or_later = NO;
+
+    if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
+        system_version = 0;
+
     /* Initialize the video settings; this data persists between mode switches */
     display_id = kCGDirectMainDisplay;
 
@@ -203,9 +263,23 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     }
 #endif
 
-    save_mode  = CGDisplayCurrentMode    (display_id);
-    mode_list  = CGDisplayAvailableModes (display_id);
-    palette    = CGPaletteCreateDefaultColorPalette ();
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+    if (CGDisplayCopyDisplayMode != NULL) {
+        snow_leopard_or_later = YES;
+        save_mode = CGDisplayCopyDisplayMode(display_id);
+    }
+#endif
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+    if (!snow_leopard_or_later) {
+        save_mode = CGDisplayCurrentMode(display_id);
+    }
+#endif
+
+    if (save_mode == NULL) {
+        SDL_SetError("Couldn't figure out current display mode.");
+        return -1;
+    }
 
     /* Allow environment override of screensaver disable. */
     env = SDL_getenv("SDL_VIDEO_ALLOW_SCREENSAVER");
@@ -220,14 +294,18 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     }
 
     /* Gather some information that is useful to know about the display */
-    CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayBitsPerPixel),
-                      kCFNumberSInt32Type, &device_bpp);
+    QZ_GetModeInfo(this, save_mode, &device_width, &device_height, &device_bpp);
+    if (device_bpp == 0) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+        if (snow_leopard_or_later) {
+            CGDisplayModeRelease((CGDisplayModeRef) save_mode);
+        }
+#endif
 
-    CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayWidth),
-                      kCFNumberSInt32Type, &device_width);
-
-    CFNumberGetValue (CFDictionaryGetValue (save_mode, kCGDisplayHeight),
-                      kCFNumberSInt32Type, &device_height);
+        save_mode = NULL;
+        SDL_SetError("Unsupported display mode");
+        return -1;
+    }
 
     /* Determine the current screen size */
     this->info.current_w = device_width;
@@ -242,10 +320,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     cursor_visible              = YES;
     current_mods = 0;
     field_edit =  [[SDLTranslatorResponder alloc] initWithFrame:r];
-    
-    if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
-        system_version = 0;
-    
+
     /* register for sleep notifications so wake from sleep generates SDL_VIDEOEXPOSE */
     QZ_RegisterForSleepNotifications (this);
     
@@ -257,6 +332,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
 
 static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
+    CFArrayRef mode_list = NULL;          /* list of available fullscreen modes */
     CFIndex num_modes;
     CFIndex i;
 
@@ -268,7 +344,6 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
 
     /* Free memory from previous call, if any */
     if ( client_mode_list != NULL ) {
-
         int i;
 
         for (i = 0; client_mode_list[i] != NULL; i++)
@@ -278,49 +353,40 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
         client_mode_list = NULL;
     }
 
+    if (snow_leopard_or_later) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+        mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
+#endif
+    } else {
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+        mode_list = CGDisplayAvailableModes(display_id);
+#endif
+    }
+
     num_modes = CFArrayGetCount (mode_list);
 
     /* Build list of modes with the requested bpp */
     for (i = 0; i < num_modes; i++) {
+        Uint32 width, height, bpp;
+        const void *onemode = CFArrayGetValueAtIndex(mode_list, i);
 
-        CFDictionaryRef onemode;
-        CFNumberRef     number;
-        int bpp;
+        QZ_GetModeInfo(this, onemode, &width, &height, &bpp);
 
-        onemode = CFArrayGetValueAtIndex (mode_list, i);
-        number = CFDictionaryGetValue (onemode, kCGDisplayBitsPerPixel);
-        CFNumberGetValue (number, kCFNumberSInt32Type, &bpp);
-
-        if (bpp == format->BitsPerPixel) {
-
-            int intvalue;
-            int hasMode;
-            int width, height;
-
-            number = CFDictionaryGetValue (onemode, kCGDisplayWidth);
-            CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
-            width = (Uint16) intvalue;
-
-            number = CFDictionaryGetValue (onemode, kCGDisplayHeight);
-            CFNumberGetValue (number, kCFNumberSInt32Type, &intvalue);
-            height = (Uint16) intvalue;
+        if (bpp && (bpp == format->BitsPerPixel)) {
+            int hasMode = SDL_FALSE;
+            int i;
 
             /* Check if mode is already in the list */
-            {
-                int i;
-                hasMode = SDL_FALSE;
-                for (i = 0; i < list_size; i++) {
-                    if (client_mode_list[i]->w == width && 
-                        client_mode_list[i]->h == height) {
+            for (i = 0; i < list_size; i++) {
+                if (client_mode_list[i]->w == width &&
+                    client_mode_list[i]->h == height) {
                         hasMode = SDL_TRUE;
                         break;
-                    }
                 }
             }
 
             /* Grow the list and add mode to the list */
             if ( ! hasMode ) {
-
                 SDL_Rect *rect;
 
                 list_size++;
@@ -328,13 +394,21 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
                 if (client_mode_list == NULL)
                     client_mode_list = (SDL_Rect**) 
                         SDL_malloc (sizeof(*client_mode_list) * (list_size+1) );
-                else
-                    client_mode_list = (SDL_Rect**) 
+                else {
+                    /* !!! FIXME: this leaks memory if SDL_realloc() fails! */
+                    client_mode_list = (SDL_Rect**)
                         SDL_realloc (client_mode_list, sizeof(*client_mode_list) * (list_size+1));
+                }
 
                 rect = (SDL_Rect*) SDL_malloc (sizeof(**client_mode_list));
 
                 if (client_mode_list == NULL || rect == NULL) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+                    /* we own this memory in 10.6+ */
+                    if (snow_leopard_or_later) {
+                        CFRelease(mode_list);
+                    }
+#endif
                     SDL_OutOfMemory ();
                     return NULL;
                 }
@@ -348,6 +422,12 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
             }
         }
     }
+
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+    if (snow_leopard_or_later) {
+        CFRelease(mode_list);  /* we own this memory in 10.6+ */
+    }
+#endif
 
     /* Sort list largest to smallest (by area) */
     {
@@ -367,6 +447,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
             }
         }
     }
+
     return client_mode_list;
 }
 
@@ -379,6 +460,26 @@ static SDL_bool QZ_WindowPosition(_THIS, int *x, int *y)
         }
     }
     return SDL_FALSE;
+}
+
+static CGError QZ_SetDisplayMode(_THIS, const void *vidmode)
+{
+    if (snow_leopard_or_later) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+        return CGDisplaySetDisplayMode(display_id, (CGDisplayModeRef) vidmode, NULL);
+#endif
+    } else {
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+        return CGDisplaySwitchToMode(display_id, (CFDictionaryRef) vidmode);
+#endif
+    }
+
+    return kCGErrorFailure;
+}
+
+static inline CGError QZ_RestoreDisplayMode(_THIS)
+{
+    return QZ_SetDisplayMode(this, save_mode);
 }
 
 static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
@@ -418,7 +519,7 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
         if (to_desktop) {
             ShowMenuBar ();
             /* Restore original screen resolution/bpp */
-            CGDisplaySwitchToMode (display_id, save_mode);
+            QZ_RestoreDisplayMode (this);
             CGReleaseAllDisplays ();
             /* 
                 Reset the main screen's rectangle
@@ -445,10 +546,51 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
     video_set = SDL_FALSE;
 }
 
+static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
+{
+    const void *best = NULL;
+
+    if (bpp == 0) {
+        return NULL;
+    }
+
+    if (snow_leopard_or_later) {
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+        /* apparently, we have to roll our own now. :/ */
+        CFArrayRef mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
+        if (mode_list != NULL) {
+            const CFIndex num_modes = CFArrayGetCount(mode_list);
+            CFIndex i;
+            for (i = 0; i < num_modes; i++) {
+                const void *vidmode = CFArrayGetValueAtIndex(mode_list, i);
+                Uint32 thisw, thish, thisbpp;
+                QZ_GetModeInfo(this, vidmode, &thisw, &thish, &thisbpp);
+
+                /* We only care about exact matches, apparently. */
+                if ((thisbpp == bpp) && (thisw == w) && (thish == h)) {
+                    best = vidmode;
+                    break;  /* got it! */
+                }
+            }
+            CGDisplayModeRetain((CGDisplayModeRef) best);  /* NULL is ok */
+            CFRelease(mode_list);
+        }
+#endif
+    } else {
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+        boolean_t exact = 0;
+        best = CGDisplayBestModeForParameters(display_id, bpp, w, h, &exact);
+        if (!exact) {
+            best = NULL;
+        }
+#endif
+    }
+    return best;
+}
+
 static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int width,
                                            int height, int bpp, Uint32 flags)
 {
-    boolean_t exact_match = 0;
     NSRect screen_rect;
     CGError error;
     NSRect contentRect;
@@ -476,12 +618,17 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         goto ERR_NO_MATCH;
     }
 
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+    if (snow_leopard_or_later) {
+        CGDisplayModeRelease((CGDisplayModeRef) mode);  /* NULL is ok */
+    }
+#endif
+
     /* See if requested mode exists */
-    mode = CGDisplayBestModeForParameters (display_id, bpp, width,
-                                           height, &exact_match);
+    mode = QZ_BestMode(this, bpp, width, height);
 
     /* Require an exact match to the requested mode */
-    if ( ! exact_match ) {
+    if ( mode == NULL ) {
         SDL_SetError ("Failed to find display resolution: %dx%dx%d", width, height, bpp);
         goto ERR_NO_MATCH;
     }
@@ -498,7 +645,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     }
 
     /* Do the physical switch */
-    if ( CGDisplayNoErr != CGDisplaySwitchToMode (display_id, mode) ) {
+    if ( CGDisplayNoErr != QZ_SetDisplayMode(this, mode) ) {
         SDL_SetError ("Failed switching display resolution");
         goto ERR_NO_SWITCH;
     }
@@ -627,8 +774,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     return current;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
-ERR_NO_GL:      
-ERR_DOUBLEBUF:  CGDisplaySwitchToMode (display_id, save_mode);
+ERR_NO_GL:      QZ_RestoreDisplayMode(this);
 ERR_NO_SWITCH:  CGReleaseAllDisplays ();
 ERR_NO_CAPTURE:
 ERR_NO_MATCH:   if ( fade_token != kCGDisplayFadeReservationInvalidToken ) {
@@ -876,25 +1022,7 @@ static int QZ_ToggleFullScreen (_THIS, int on)
 static int QZ_SetColors (_THIS, int first_color, int num_colors,
                          SDL_Color *colors)
 {
-    CGTableCount  index;
-    CGDeviceColor color;
-
-    for (index = first_color; index < first_color+num_colors; index++) {
-
-        /* Clamp colors between 0.0 and 1.0 */
-        color.red   = colors->r / 255.0;
-        color.blue  = colors->b / 255.0;
-        color.green = colors->g / 255.0;
-
-        colors++;
-
-        CGPaletteSetColorAtIndex (palette, color, index);
-    }
-
-    if ( CGDisplayNoErr != CGDisplaySetPalette (display_id, palette) )
-        return 0;
-
-    return 1;
+    return 0;  /* always fail: we shouldn't have an 8-bit mode on Mac OS X! */
 }
 
 
@@ -1018,8 +1146,6 @@ static void QZ_VideoQuit (_THIS)
     }
     else
         QZ_UnsetVideoMode (this, TRUE);
-    
-    CGPaletteRelease (palette);
 
     if (opengl_library) {
         SDL_UnloadObject(opengl_library);
@@ -1096,7 +1222,7 @@ int QZ_GetGamma (_THIS, float *red, float *green, float *blue)
 
 int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 {
-    const CGTableCount tableSize = 255;
+    const uint32_t tableSize = 255;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
     CGGammaValue blueTable[tableSize];
@@ -1122,11 +1248,11 @@ int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 
 int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
 {
-    const CGTableCount tableSize = 255;
+    const uint32_t tableSize = 255;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
     CGGammaValue blueTable[tableSize];
-    CGTableCount actual;
+    uint32_t actual;
     int i;
 
     if ( CGDisplayNoErr != CGGetDisplayTransferByTable

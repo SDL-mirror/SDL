@@ -47,18 +47,18 @@ WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     /* Allocate the cursor memory */
     cursor = (WMcursor *)SDL_malloc(sizeof(WMcursor));
     if (cursor == NULL) goto outOfMemory;
-    
+
     /* create the image representation and get the pointers to its storage */
-    imgrep = [ [ [ NSBitmapImageRep alloc ] initWithBitmapDataPlanes: NULL pixelsWide: w pixelsHigh: h bitsPerSample: 1 samplesPerPixel: 2 hasAlpha: YES isPlanar: YES colorSpaceName: NSDeviceBlackColorSpace bytesPerRow: (w+7)/8 bitsPerPixel: 0 ] autorelease ];
+    imgrep = [ [ [ NSBitmapImageRep alloc ] initWithBitmapDataPlanes: NULL pixelsWide: w pixelsHigh: h bitsPerSample: 1 samplesPerPixel: 2 hasAlpha: YES isPlanar: YES colorSpaceName: NSDeviceWhiteColorSpace bytesPerRow: (w+7)/8 bitsPerPixel: 0 ] autorelease ];
     if (imgrep == nil) goto outOfMemory;
     [ imgrep getBitmapDataPlanes: planes ];
     
     /* copy data and mask, extending the mask to all black pixels because the inversion effect doesn't work with Cocoa's alpha-blended cursors */
     for (i = 0; i < (w+7)/8*h; i++) {
-        planes[0][i] = data[i];
+        planes[0][i] = data[i] ^ 0xFF;
         planes[1][i] = mask[i] | data[i];
     }
-    
+
     /* create image and cursor */
     img = [ [ [ NSImage alloc ] initWithSize: NSMakeSize(w, h) ] autorelease ];
     if (img == nil) goto outOfMemory;
@@ -232,7 +232,7 @@ void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
 #endif /* Dead code */
 
 void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
-    
+    CGEventSourceRef evsrc = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
     NSPoint p;
     CGPoint cgp;
     
@@ -240,8 +240,9 @@ void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     cgp = QZ_PrivateSDLToCG (this, &p);
     
     /* this is the magic call that fixes cursor "freezing" after warp */
-    CGSetLocalEventsSuppressionInterval (0.0);
+    CGEventSourceSetLocalEventsSuppressionInterval(evsrc, 0.0);
     CGWarpMouseCursorPosition (cgp);
+    CFRelease(evsrc);
 }
 
 void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
