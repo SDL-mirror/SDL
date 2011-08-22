@@ -984,10 +984,9 @@ copy_32(void *dst, Uint32 * src, int n,
     Uint32 *d = dst;
     for (i = 0; i < n; i++) {
         unsigned r, g, b, a;
-        Uint32 pixel;
         RGBA_FROM_8888(*src, sfmt, r, g, b, a);
-        PIXEL_FROM_RGB(pixel, dfmt, r, g, b);
-        *d++ = pixel | a << 24;
+        PIXEL_FROM_RGBA(*d, dfmt, r, g, b, a);
+        d++;
         src++;
     }
     return n * 4;
