@@ -25,15 +25,14 @@
 
 #include "../SDL_sysaudio.h"
 
-/* XAudio2 is available as of the March 2008 DirectX SDK */
-#include <dxsdkver.h>
+#if SDL_AUDIO_DRIVER_XAUDIO2
+#include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
 #if (defined(_DXSDK_BUILD_MAJOR) && (_DXSDK_BUILD_MAJOR >= 1284))
 #   define SDL_HAVE_XAUDIO2_H 1
-#else
-#   define SDL_HAVE_XAUDIO2_H 0
+#endif
 #endif
 
-#if SDL_HAVE_XAUDIO2_H
+#ifdef SDL_HAVE_XAUDIO2_H
 #include <XAudio2.h>
 
 /* Hidden "this" pointer for the audio functions */

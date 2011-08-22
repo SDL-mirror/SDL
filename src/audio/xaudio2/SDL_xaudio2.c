@@ -27,7 +27,7 @@
 #define INITGUID 1
 #include "SDL_xaudio2.h"
 
-#if SDL_HAVE_XAUDIO2_H
+#ifdef SDL_HAVE_XAUDIO2_H
 
 static __inline__ char *
 utf16_to_utf8(const WCHAR *S)
