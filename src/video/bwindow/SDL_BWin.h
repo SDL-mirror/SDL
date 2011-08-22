@@ -53,7 +53,7 @@ enum WinCommands {
 	BWIN_HIDE_WINDOW,
 	BWIN_MAXIMIZE_WINDOW,
 	BWIN_MINIMIZE_WINDOW,
-	BWIN_RESTORE_WINDOW,	/* TODO: IMPLEMENT THIS! */
+	BWIN_RESTORE_WINDOW,
 	BWIN_SET_TITLE,
 	BWIN_FULLSCREEN
 };
@@ -185,9 +185,6 @@ class SDL_BWin:public BDirectWindow
     			_bits = (uint8*) info->bits;
     			_row_bytes = info->bytes_per_row;
     			_bounds = info->window_bounds;
-printf("Bounds = (%i,%i,%i,%i), Frame = (%0.f,%0.f,%0.f,%0.f)\n", _bounds.left,
-	_bounds.top, _bounds.right, _bounds.bottom, Frame().left, Frame().top,
-	Frame().right, Frame().bottom);
     			_bytes_per_px = info->bits_per_pixel / 8;
     			_buffer_dirty = true;
     		}
@@ -230,7 +227,8 @@ printf("Bounds = (%i,%i,%i,%i), Frame = (%0.f,%0.f,%0.f,%0.f)\n", _bounds.left,
     virtual void FrameResized(float width, float height) {
     	/* Post a message to the BApp so that it can handle the window event */
     	BMessage msg(BAPP_WINDOW_RESIZED);
-		msg.AddInt32("window-w", (int)width + 1);	/* TODO: Check that +1 is needed */
+
+		msg.AddInt32("window-w", (int)width + 1);
 		msg.AddInt32("window-h", (int)height + 1);
     	_PostWindowEvent(msg);
 		
@@ -409,15 +407,12 @@ printf("Bounds = (%i,%i,%i,%i), Frame = (%0.f,%0.f,%0.f,%0.f)\n", _bounds.left,
 	uint32 GetRowBytes() { return _row_bytes; }
 	int32 GetFbX() { return _bounds.left; }
 	int32 GetFbY() { return _bounds.top; }
-//	int32 GetFbHeight() { return _bounds.bottom - _bounds.top + 1; }
-//	int32 GetFbWidth() { return _bounds.right - _bounds.left + 1; }
 	bool ConnectionEnabled() { return !_connection_disabled; }
 	bool Connected() { return _connected; }
 	clipping_rect *GetClips() { return _clips; }
 	int32 GetNumClips() { return _num_clips; }
 	uint8* GetBufferPx() { return _bits; }
 	int32 GetBytesPerPx() { return _bytes_per_px; }
-//	uint8* GetWindowFramebuffer() { return _window_buffer; }
 	bool CanTrashWindowBuffer() { return _trash_window_buffer; }
 	bool BufferExists() { return _buffer_created; }
 	bool BufferIsDirty() { return _buffer_dirty; }
@@ -429,7 +424,6 @@ printf("Bounds = (%i,%i,%i,%i), Frame = (%0.f,%0.f,%0.f,%0.f)\n", _bounds.left,
 	/* Setter methods */
 	void SetID(int32 id) { _id = id; }
 	void SetBufferExists(bool bufferExists) { _buffer_created = bufferExists; }
-//	void SetWindowFramebuffer(uint8* fb) { _window_buffer = fb; }
 	void LockBuffer() {	_buffer_locker->Lock(); }
 	void UnlockBuffer() { _buffer_locker->Unlock(); }
 	void SetBufferDirty(bool bufferDirty) { _buffer_dirty = bufferDirty; }
@@ -575,27 +569,12 @@ private:
 
     void _SetFullScreen(BMessage *msg) {
     	bool fullscreen;
-
-    	BRect rc1 = Bounds(),
-    		  rc2 = Frame();
-printf(__FILE__": %d - bounds = (%.0f,%.0f,%.0f,%.0f), frame = (%.0f,%.0f,%.0f,%.0f\n", __LINE__, rc1.left, rc1.top, rc1.right, rc1.bottom,
-rc2.left, rc2.top, rc2.right, rc2.bottom);
     	if(
 			msg->FindBool("fullscreen", &fullscreen) != B_OK
 		) {
 			return;
     	}
-
-if(fullscreen) {
-	printf("Setting fullscreen...\n");
-} else {
-	printf("Unsetting fullscreen...\n");
-}
-#if 1
     	SetFullScreen(fullscreen);
-#endif
-printf(__FILE__": %d - bounds = (%.0f,%.0f,%.0f,%.0f), frame = (%.0f,%.0f,%.0f,%.0f\n", __LINE__, rc1.left, rc1.top, rc1.right, rc1.bottom,
-rc2.left, rc2.top, rc2.right, rc2.bottom);
     }
     
     /* Members */
@@ -615,7 +594,8 @@ rc2.left, rc2.top, rc2.right, rc2.bottom);
     bool			_connected,
     				_connection_disabled,
     				_buffer_created,
-    				_buffer_dirty;
+    				_buffer_dirty,
+    				_trash_window_buffer;
     uint8		   *_bits;
     uint32			_row_bytes;
     clipping_rect	_bounds;
@@ -623,11 +603,24 @@ rc2.left, rc2.top, rc2.right, rc2.bottom);
     clipping_rect  *_clips;
     int32			_num_clips;
     int32			_bytes_per_px;
-//    uint8		   *_window_buffer;	/* A copy of the window buffer */
-    bool			_trash_window_buffer;
     thread_id		_draw_thread_id;
     
     BBitmap		   *_bitmap;
 };
 
+
+/* FIXME:
+ * An explanation of framebuffer flags.
+ *
+ * _connected -           Original variable used to let the drawing thread know
+ *                         when changes are being made to the other framebuffer
+ *                         members.
+ * _connection_disabled - Used to signal to the drawing thread that the window
+ *                         is closing, and the thread should exit.
+ * _buffer_created -      True if the current buffer is valid
+ * _buffer_dirty -        True if the window should be redrawn.
+ * _trash_window_buffer - True if the window buffer needs to be trashed partway
+ *                         through a draw cycle.  Occurs when the previous
+ *                         buffer provided by DirectConnected() is invalidated.
+ */
 #endif

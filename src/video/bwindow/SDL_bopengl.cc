@@ -45,6 +45,7 @@ static inline SDL_BApp *_GetBeApp() {
 /* Passing a NULL path means load pointers from the application */
 int BE_GL_LoadLibrary(_THIS, const char *path)
 {
+/* FIXME: Is this working correctly? */
 	image_info info;
 			int32 cookie = 0;
 	while (get_next_image_info(0, &cookie, &info) == B_OK) {
@@ -58,64 +59,6 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 					SDL_arraysize(_this->gl_config.driver_path));
 		}
 	}
-#if 0
-printf("\n\nLibrary loading: %s\n\n", path);
-	if (path == NULL) {
-		if (_this->gl_config.dll_handle == NULL) {
-			image_info info;
-			int32 cookie = 0;
-			while (get_next_image_info(0, &cookie, &info) == B_OK) {
-				printf(__FILE__": %d - Inside while\n",__LINE__);
-				void *location = NULL;
-				if (get_image_symbol
-				((image_id) cookie, "glBegin",
-				B_SYMBOL_TYPE_ANY, &location) == B_OK) {
-					_this->gl_config.dll_handle = (void *) cookie;
-					_this->gl_config.driver_loaded = 1;
-					SDL_strlcpy(_this->gl_config.driver_path,
-					"libGL.so",
-					SDL_arraysize(_this->
-					gl_config.driver_path));
-				}
-			}
-		}
-	} else {
-        /*
-           FIXME None of BeOS libGL.so implementations have exported functions 
-           to load BGLView, which should be reloaded from new lib.
-           So for now just "load" linked libGL.so :(
-        */
-        if (_this->gl_config.dll_handle == NULL) {
-        	return BE_GL_LoadLibrary(_this, NULL);
-        }
-            /* Unload old first */
-            /*if (_this->gl_config.dll_handle != NULL) { */
-            /* Do not try to unload application itself (if LoadLibrary was called before with NULL ;) */
-            /*      image_info info;
-               if (get_image_info((image_id)_this->gl_config.dll_handle, &info) == B_OK) {
-               if (info.type != B_APP_IMAGE) {
-               unload_add_on((image_id)_this->gl_config.dll_handle);
-               }
-               }
-
-               }
-
-               if ((_this->gl_config.dll_handle = (void*)load_add_on(path)) != (void*)B_ERROR) {
-               _this->gl_config.driver_loaded = 1;
-               SDL_strlcpy(_this->gl_config.driver_path, path, SDL_arraysize(_this->gl_config.driver_path));
-               } */
-	}
-	
-	if (_this->gl_config.dll_handle != NULL) {
-		return 0;
-	} else {
-printf(__FILE__": %d- gl_config.driver_loaded = 0\n", __LINE__);
-		_this->gl_config.dll_handle = NULL;
-		_this->gl_config.driver_loaded = 0;
-		*_this->gl_config.driver_path = '\0';
-		return -1;
-	}
-#endif
 }
 
 void *BE_GL_GetProcAddress(_THIS, const char *proc)
@@ -161,28 +104,29 @@ SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window) {
 
 void BE_GL_DeleteContext(_THIS, SDL_GLContext context) {
 	/* Currently, automatically unlocks the view */
-printf(__FILE__": %d\n", __LINE__);
 	((SDL_BWin*)context)->RemoveGLView();
 }
 
 
 int BE_GL_SetSwapInterval(_THIS, int interval) {
-	printf(__FILE__": %d- swap interval set\n", __LINE__);
+	/* TODO: Implement this, if necessary? */
 	return 0;
 }
 
 int BE_GL_GetSwapInterval(_THIS) {
-	printf(__FILE__": %d- swap interval requested\n", __LINE__);
+	/* TODO: Implement this, if necessary? */
 	return 0;
 }
 
 
 void BE_GL_UnloadLibrary(_THIS) {
-	printf(__FILE__": %d- Library unloaded\n", __LINE__);
+	/* TODO: Implement this, if necessary? */
 }
 
 
-
+/* FIXME: This function is meant to clear the OpenGL context when the video
+   mode changes (see SDL_bmodes.cc), but it doesn't seem to help, and is not
+   currently in use. */
 void BE_GL_RebootContexts(_THIS) {
 	SDL_Window *window = _this->windows;
 	while(window) {

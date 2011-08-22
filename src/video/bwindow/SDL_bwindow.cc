@@ -47,13 +47,17 @@ int _InitWindow(_THIS, SDL_Window *window) {
     );
     
     if(window->flags & SDL_WINDOW_FULLSCREEN) {
+    	/* TODO: Add support for this flag */
+    	printf(__FILE__": %d!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n",__LINE__);
     }
     if(window->flags & SDL_WINDOW_OPENGL) {
+    	/* TODO: Add support for this flag */
     }
     if(!(window->flags & SDL_WINDOW_RESIZABLE)) {
     	flags |= B_NOT_RESIZABLE | B_NOT_ZOOMABLE;
     }
     if(window->flags & SDL_WINDOW_BORDERLESS) {
+    	/* TODO: Add support for this flag */
     }
 
     SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds, flags);
@@ -172,10 +176,12 @@ void BE_SetWindowFullscreen(_THIS, SDL_Window * window,
 
 int BE_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp) {
 	/* FIXME: Not BeOs/Haiku supported */
+	return -1;
 }
 
 int BE_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp) {
 	/* FIXME: Not BeOs/Haiku supported */
+	return -1;
 }
 
 
@@ -193,6 +199,7 @@ void BE_DestroyWindow(_THIS, SDL_Window * window) {
 SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
                                     struct SDL_SysWMinfo *info) {
 	/* FIXME: What is the point of this? What information should be included? */
+	return SDL_FALSE;
 }
 
 

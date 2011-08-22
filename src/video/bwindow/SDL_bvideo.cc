@@ -53,23 +53,11 @@ BE_CreateDevice(int devindex)
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
-#if 0
-    if (device) {
-        data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
-    } else {
-        data = NULL;
-    }
-    if (!data) {
-        SDL_OutOfMemory();
-        if (device) {
-            SDL_free(device);
-        }
-        return NULL;
-    }
-#endif
-    device->driverdata = NULL; /*data;*/
 
-/* TODO: Figure out what sort of initialization needs to go here */
+    device->driverdata = NULL; /* FIXME: Is this the cause of some of the
+    							  SDL_Quit() errors? */
+
+/* TODO: Figure out if any initialization needs to go here */
 
     /* Set the function pointers */
     device->VideoInit = BE_VideoInit;
@@ -105,7 +93,7 @@ BE_CreateDevice(int devindex)
     device->shape_driver.SetWindowShape = NULL;
     device->shape_driver.ResizeWindowShape = NULL;
 
-//#if SDL_VIDEO_OPENGL_WGL	/* FIXME: Replace with BeOs's SDL OPENGL stuff */
+
     device->GL_LoadLibrary = BE_GL_LoadLibrary;
     device->GL_GetProcAddress = BE_GL_GetProcAddress;
     device->GL_UnloadLibrary = BE_GL_UnloadLibrary;
@@ -115,7 +103,7 @@ BE_CreateDevice(int devindex)
     device->GL_GetSwapInterval = BE_GL_GetSwapInterval;
     device->GL_SwapWindow = BE_GL_SwapWindow;
     device->GL_DeleteContext = BE_GL_DeleteContext;
-//#endif
+
     device->StartTextInput = BE_StartTextInput;
     device->StopTextInput = BE_StopTextInput;
     device->SetTextInputRect = BE_SetTextInputRect;
@@ -140,8 +128,6 @@ static void BE_DeleteDevice(SDL_VideoDevice * device)
 	SDL_free(device);
 }
 
-/* FIXME: This is the 1.2 function at the moment.  Read through it and
-  o understand what it does. */
 int BE_VideoInit(_THIS)
 {
 	/* Initialize the Be Application for appserver interaction */
@@ -162,9 +148,6 @@ int BE_VideoInit(_THIS)
     BE_GL_LoadLibrary(_this, NULL);
 #endif
 
-        /* Fill in some window manager capabilities */
-//    _this->info.wm_available = 1;
-
         /* We're done! */
     return (0);
 }
@@ -177,23 +160,7 @@ static int BE_Available(void)
 void BE_VideoQuit(_THIS)
 {
 
-#if 0
-        SDL_Win->Quit();
-        SDL_Win = NULL;
-#endif
-#if 0
-        if (SDL_BlankCursor != NULL) {
-            BE_FreeWMCursor(_this, SDL_BlankCursor);
-            SDL_BlankCursor = NULL;
-        }
-#endif
-
     BE_QuitModes(_this);
-
-#if SDL_VIDEO_OPENGL
-//    if (_this->gl_config.dll_handle != NULL)
-//        unload_add_on((image_id) _this->gl_config.dll_handle);
-#endif
 
     SDL_QuitBeApp();
 }

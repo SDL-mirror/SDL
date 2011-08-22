@@ -126,9 +126,7 @@ int32 BE_DrawThread(void *data) {
 		if( bwin->Connected() && bwin->BufferExists() && bwin->BufferIsDirty() ) {
 			bwin->LockBuffer();
 			BBitmap *bitmap = NULL;
-//			while(!bitmap) {
-				bitmap = bwin->GetBitmap();
-//			}
+			bitmap = bwin->GetBitmap();
 			int32 windowPitch = bitmap->BytesPerRow();
 			int32 bufferPitch = bwin->GetRowBytes();
 			uint8 *windowpx;
@@ -163,14 +161,12 @@ int32 BE_DrawThread(void *data) {
 						goto escape;	/* Break out before the buffer is killed */
 					}
 
-//					printf("memcpy(0x%x, 0x%x, %i) ", bufferpx, windowpx, width * BPP);
 					memcpy(bufferpx, windowpx, width * BPP);
 					bufferpx += bufferPitch;
 					windowpx += windowPitch;
 				}
-//				printf("\t-\t");
 			}
-//			printf("\n");
+
 			bwin->SetBufferDirty(false);
 escape:
 			bwin->UnlockBuffer();

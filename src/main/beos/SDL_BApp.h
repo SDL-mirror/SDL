@@ -177,11 +177,6 @@ public:
     	}
     }
     
-    /* Modes methods */
-    void SetPrevMode(display_mode *prevMode) { _saved_mode = prevMode; }
-    
-    display_mode* GetPrevMode() { return _saved_mode; }
-    
     /* FIXME: Bad coding practice, but I can't include SDL_BWin.h here.  Is
        there another way to do this? */
     void ClearID(SDL_BWin *bwin); /* Defined in SDL_BeApp.cc */
@@ -225,7 +220,7 @@ private:
 		win = GetSDLWindow(winID);
 		SDL_SendMouseMotion(win, 0, x, y);
 		
-		/* FIXME: Attempt at fixing rendering problems */
+		/* Tell the application that the mouse passed over, redraw needed */
 		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1);
 	}
 	
@@ -328,9 +323,6 @@ private:
 		}
 		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_MOVED, xPos, yPos);
-		
-		/* FIXME: Attempt at fixing rendering problems */
-//		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1); Handled by DirectConnected
 	}
 	
 	void _HandleWindowResized(BMessage *msg) {
@@ -347,9 +339,6 @@ private:
 		}
 		win = GetSDLWindow(winID);
 		SDL_SendWindowEvent(win, SDL_WINDOWEVENT_RESIZED, w, h);
-
-		/* FIXME: Attempt at fixing rendering problems */
-//		BE_UpdateWindowFramebuffer(NULL,win,NULL,-1); Handled by DirectConnected
 	}
 
 	bool _GetWinID(BMessage *msg, int32 *winID) {
@@ -379,7 +368,7 @@ private:
 
 
 	/* Members */
-	vector<SDL_Window*> _window_map; /* Keeps track of SDL_Windows by index-id */
+	vector<SDL_Window*> _window_map; /* Keeps track of SDL_Windows by index-id*/
 
 	display_mode *_saved_mode;
 	BGLView      *_current_context;
