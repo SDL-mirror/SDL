@@ -67,16 +67,20 @@ findDevId(const char *name, AudioDeviceID devId, void *_data)
 static void
 build_device_list(int iscapture, addDevFn addfn, void *addfndata)
 {
-    Boolean outWritable = 0;
     OSStatus result = noErr;
     UInt32 size = 0;
     AudioDeviceID *devs = NULL;
     UInt32 i = 0;
     UInt32 max = 0;
 
-    result = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
-                                          &size, &outWritable);
+    AudioObjectPropertyAddress addr = {
+        kAudioHardwarePropertyDevices,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
 
+    result = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &addr,
+                                            0, NULL, &size);
     if (result != kAudioHardwareNoError)
         return;
 
@@ -84,8 +88,8 @@ build_device_list(int iscapture, addDevFn addfn, void *addfndata)
     if (devs == NULL)
         return;
 
-    result = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
-                                      &size, devs);
+    result = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr,
+                                        0, NULL, &size, devs);
     if (result != kAudioHardwareNoError)
         return;
 
@@ -98,9 +102,11 @@ build_device_list(int iscapture, addDevFn addfn, void *addfndata)
         int usable = 0;
         CFIndex len = 0;
 
-        result = AudioDeviceGetPropertyInfo(dev, 0, iscapture,
-                                            kAudioDevicePropertyStreamConfiguration,
-                                            &size, &outWritable);
+        addr.mScope = iscapture ? kAudioDevicePropertyScopeInput :
+                        kAudioDevicePropertyScopeOutput;
+        addr.mSelector = kAudioDevicePropertyStreamConfiguration;
+
+        result = AudioObjectGetPropertyDataSize(dev, &addr, 0, NULL, &size);
         if (result != noErr)
             continue;
 
@@ -108,9 +114,8 @@ build_device_list(int iscapture, addDevFn addfn, void *addfndata)
         if (buflist == NULL)
             continue;
 
-        result = AudioDeviceGetProperty(dev, 0, iscapture,
-                                        kAudioDevicePropertyStreamConfiguration,
-                                        &size, buflist);
+        result = AudioObjectGetPropertyData(dev, &addr, 0, NULL,
+                                            &size, buflist);
 
         if (result == noErr) {
             UInt32 j;
@@ -127,11 +132,9 @@ build_device_list(int iscapture, addDevFn addfn, void *addfndata)
         if (!usable)
             continue;
 
-        size = sizeof(CFStringRef);
-        result = AudioDeviceGetProperty(dev, 0, iscapture,
-                                        kAudioDevicePropertyDeviceNameCFString,
-                                        &size, &cfstr);
-
+        addr.mSelector = kAudioObjectPropertyName;
+        size = sizeof (CFStringRef);
+        result = AudioObjectGetPropertyData(dev, &addr, 0, NULL, &size, &cfstr);
         if (result != kAudioHardwareNoError)
             continue;
 
@@ -183,13 +186,19 @@ find_device_by_name(_THIS, const char *devname, int iscapture)
     UInt32 alive = 0;
     pid_t pid = 0;
 
-    if (devname == NULL) {
-        size = sizeof(AudioDeviceID);
-        const AudioHardwarePropertyID propid =
-            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
-             kAudioHardwarePropertyDefaultOutputDevice);
+    AudioObjectPropertyAddress addr = {
+        0,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
 
-        result = AudioHardwareGetProperty(propid, &size, &devid);
+    if (devname == NULL) {
+        size = sizeof (AudioDeviceID);
+        addr.mSelector =
+            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
+            kAudioHardwarePropertyDefaultOutputDevice);
+        result = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr,
+                                            0, NULL, &size, &devid);
         CHECK_RESULT("AudioHardwareGetProperty (default device)");
     } else {
         FindDevIdData data;
@@ -203,10 +212,12 @@ find_device_by_name(_THIS, const char *devname, int iscapture)
         devid = data.devId;
     }
 
-    size = sizeof(alive);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyDeviceIsAlive,
-                                    &size, &alive);
+    addr.mSelector = kAudioDevicePropertyDeviceIsAlive;
+    addr.mScope = iscapture ? kAudioDevicePropertyScopeInput :
+                    kAudioDevicePropertyScopeOutput;
+
+    size = sizeof (alive);
+    result = AudioObjectGetPropertyData(devid, &addr, 0, NULL, &size, &alive);
     CHECK_RESULT
         ("AudioDeviceGetProperty (kAudioDevicePropertyDeviceIsAlive)");
 
@@ -215,9 +226,9 @@ find_device_by_name(_THIS, const char *devname, int iscapture)
         return 0;
     }
 
-    size = sizeof(pid);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyHogMode, &size, &pid);
+    addr.mSelector = kAudioDevicePropertyHogMode;
+    size = sizeof (pid);
+    result = AudioObjectGetPropertyData(devid, &addr, 0, NULL, &size, &pid);
 
     /* some devices don't support this property, so errors are fine here. */
     if ((result == noErr) && (pid != -1)) {
