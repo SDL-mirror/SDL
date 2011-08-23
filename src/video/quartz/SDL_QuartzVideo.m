@@ -24,7 +24,8 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
-#if __MAC_OS_X_VERSION_MIN_REQUIRED < 1060   /* Fixed in Snow Leopard */
+/* Fixed in Snow Leopard */
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6
 /*
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
@@ -96,6 +97,44 @@ static void QZ_FreeHWSurface (_THIS, SDL_Surface *surface);
 VideoBootStrap QZ_bootstrap = {
     "Quartz", "Mac OS X CoreGraphics", QZ_Available, QZ_CreateDevice
 };
+
+
+/* !!! FIXME: clean out the pre-10.6 code when it makes sense to do so. */
+#define FORCE_OLD_API 0 || (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
+
+#if FORCE_OLD_API
+#undef MAC_OS_X_VERSION_MIN_REQUIRED
+#define MAC_OS_X_VERSION_MIN_REQUIRED MAC_OS_X_VERSION_10_5
+#endif
+
+static inline BOOL IS_SNOW_LEOPARD_OR_LATER(_THIS)
+{
+#if FORCE_OLD_API
+    return NO;
+#else
+    return (system_version >= 0x1060);
+#endif
+}
+
+static void QZ_ReleaseDisplayMode(_THIS, const void *moderef)
+{
+    /* we only own these references in the 10.6+ API. */
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+        CGDisplayModeRelease((CGDisplayModeRef) moderef);
+    }
+#endif
+}
+
+static void QZ_ReleaseDisplayModeList(_THIS, CFArrayRef mode_list)
+{
+    /* we only own these references in the 10.6+ API. */
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+        CFRelease(mode_list);
+    }
+#endif
+}
 
 
 /* Bootstrap functions */
@@ -178,14 +217,9 @@ static SDL_VideoDevice* QZ_CreateDevice (int device_index)
 
 static void QZ_DeleteDevice (SDL_VideoDevice *device)
 {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
     _THIS = device;
-    if (snow_leopard_or_later) {
-        CGDisplayModeRelease((CGDisplayModeRef) save_mode);  /* NULL is ok */
-        CGDisplayModeRelease((CGDisplayModeRef) mode);  /* NULL is ok */
-    }
-#endif
-
+    QZ_ReleaseDisplayMode(this, save_mode);
+    QZ_ReleaseDisplayMode(this, mode);
     SDL_free (device->hidden);
     SDL_free (device);
 }
@@ -197,8 +231,8 @@ static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint3
         return;
     }
 
-    if (snow_leopard_or_later) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
         CGDisplayModeRef vidmode = (CGDisplayModeRef) _mode;
         CFStringRef fmt = CGDisplayModeCopyPixelEncoding(vidmode);
 
@@ -212,9 +246,11 @@ static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint3
         }
 
         CFRelease(fmt);
+    }
 #endif
-    } else {
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
         CFDictionaryRef vidmode = (CFDictionaryRef) _mode;
         CFNumberGetValue (
             CFDictionaryGetValue (vidmode, kCGDisplayBitsPerPixel),
@@ -227,8 +263,8 @@ static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint3
         CFNumberGetValue (
             CFDictionaryGetValue (vidmode, kCGDisplayHeight),
             kCFNumberSInt32Type, h);
-#endif
     }
+#endif
 
     /* we only care about the 32-bit modes... */
     if (*bpp != 32) {
@@ -240,9 +276,6 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
 {
     NSRect r = NSMakeRect(0.0, 0.0, 0.0, 0.0);
     const char *env = NULL;
-
-    /* we don't set this from system_version; you might not have the SDK. */
-    snow_leopard_or_later = NO;
 
     if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
         system_version = 0;
@@ -263,15 +296,14 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     }
 #endif
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (CGDisplayCopyDisplayMode != NULL) {
-        snow_leopard_or_later = YES;
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
         save_mode = CGDisplayCopyDisplayMode(display_id);
     }
 #endif
 
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!snow_leopard_or_later) {
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
         save_mode = CGDisplayCurrentMode(display_id);
     }
 #endif
@@ -296,12 +328,7 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     /* Gather some information that is useful to know about the display */
     QZ_GetModeInfo(this, save_mode, &device_width, &device_height, &device_bpp);
     if (device_bpp == 0) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-        if (snow_leopard_or_later) {
-            CGDisplayModeRelease((CGDisplayModeRef) save_mode);
-        }
-#endif
-
+        QZ_ReleaseDisplayMode(this, save_mode);
         save_mode = NULL;
         SDL_SetError("Unsupported display mode");
         return -1;
@@ -353,15 +380,17 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
         client_mode_list = NULL;
     }
 
-    if (snow_leopard_or_later) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
         mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
-#endif
-    } else {
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-        mode_list = CGDisplayAvailableModes(display_id);
-#endif
     }
+#endif
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+        mode_list = CGDisplayAvailableModes(display_id);
+    }
+#endif
 
     num_modes = CFArrayGetCount (mode_list);
 
@@ -403,12 +432,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
                 rect = (SDL_Rect*) SDL_malloc (sizeof(**client_mode_list));
 
                 if (client_mode_list == NULL || rect == NULL) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-                    /* we own this memory in 10.6+ */
-                    if (snow_leopard_or_later) {
-                        CFRelease(mode_list);
-                    }
-#endif
+                    QZ_ReleaseDisplayModeList(this, mode_list);
                     SDL_OutOfMemory ();
                     return NULL;
                 }
@@ -423,11 +447,7 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
         }
     }
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (snow_leopard_or_later) {
-        CFRelease(mode_list);  /* we own this memory in 10.6+ */
-    }
-#endif
+    QZ_ReleaseDisplayModeList(this, mode_list);
 
     /* Sort list largest to smallest (by area) */
     {
@@ -464,15 +484,17 @@ static SDL_bool QZ_WindowPosition(_THIS, int *x, int *y)
 
 static CGError QZ_SetDisplayMode(_THIS, const void *vidmode)
 {
-    if (snow_leopard_or_later) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
         return CGDisplaySetDisplayMode(display_id, (CGDisplayModeRef) vidmode, NULL);
-#endif
-    } else {
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-        return CGDisplaySwitchToMode(display_id, (CFDictionaryRef) vidmode);
-#endif
     }
+#endif
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+        return CGDisplaySwitchToMode(display_id, (CFDictionaryRef) vidmode);
+    }
+#endif
 
     return kCGErrorFailure;
 }
@@ -554,8 +576,8 @@ static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
         return NULL;
     }
 
-    if (snow_leopard_or_later) {
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6)
+    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
         /* apparently, we have to roll our own now. :/ */
         CFArrayRef mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
         if (mode_list != NULL) {
@@ -575,16 +597,19 @@ static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
             CGDisplayModeRetain((CGDisplayModeRef) best);  /* NULL is ok */
             CFRelease(mode_list);
         }
+    }
 #endif
-    } else {
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_6)
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
         boolean_t exact = 0;
         best = CGDisplayBestModeForParameters(display_id, bpp, w, h, &exact);
         if (!exact) {
             best = NULL;
         }
-#endif
     }
+#endif
+
     return best;
 }
 
@@ -618,11 +643,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         goto ERR_NO_MATCH;
     }
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (snow_leopard_or_later) {
-        CGDisplayModeRelease((CGDisplayModeRef) mode);  /* NULL is ok */
-    }
-#endif
+    QZ_ReleaseDisplayMode(this, mode);  /* NULL is okay. */
 
     /* See if requested mode exists */
     mode = QZ_BestMode(this, bpp, width, height);

@@ -85,7 +85,6 @@ CGLContextObj QZ_GetCGLContextObj(NSOpenGLContext *nsctx);
 
 /* Main driver structure to store required state information */
 typedef struct SDL_PrivateVideoData {
-    BOOL               snow_leopard_or_later;
     BOOL               allow_screensaver;  /* 0 == disable screensaver */
     CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
     const void         *mode;              /* current mode of the display */
@@ -126,7 +125,6 @@ typedef struct SDL_PrivateVideoData {
 #define display_id (this->hidden->display)
 #define mode (this->hidden->mode)
 #define save_mode (this->hidden->save_mode)
-#define snow_leopard_or_later (this->hidden->snow_leopard_or_later)
 #define allow_screensaver (this->hidden->allow_screensaver)
 #define gl_context (this->hidden->gl_context)
 #define device_width (this->hidden->width)
