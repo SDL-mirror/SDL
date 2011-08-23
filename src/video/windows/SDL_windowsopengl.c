@@ -466,7 +466,7 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         *iAttr++ = _this->gl_config.multisamplesamples;
     }
 
-    if ( this->gl_config.accelerated >= 0 ) {
+    if (_this->gl_config.accelerated >= 0) {
         *iAttr++ = WGL_ACCELERATION_ARB;
         *iAttr++ = (_this->gl_config.accelerated ? WGL_FULL_ACCELERATION_ARB :
                                                    WGL_NO_ACCELERATION_ARB);
