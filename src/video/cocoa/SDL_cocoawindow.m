@@ -67,7 +67,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [window setAcceptsMouseMovedEvents:YES];
 
     [view setNextResponder:self];
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
     [view setAcceptsTouchEvents:YES];
 #endif
 }
@@ -380,7 +380,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
     NSSet *touches = 0;
     NSEnumerator *enumerator;
     NSTouch *touch;
@@ -442,7 +442,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         
         touch = (NSTouch*)[enumerator nextObject];
     }
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_6 */
+#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= 1060 */
 }
 
 @end
