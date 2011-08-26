@@ -129,7 +129,7 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 {
 	SDL_VideoDevice *device;
 	int vectors_mask;
-	unsigned long dummy;
+/*	unsigned long dummy;*/
 
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));

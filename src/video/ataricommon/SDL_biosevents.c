@@ -47,8 +47,8 @@ static void UpdateSpecialKeys(int special_keys_state);
 
 void AtariBios_InitOSKeymap(_THIS)
 {
-	int i, vectors_mask;
-	unsigned long dummy;
+	int vectors_mask;
+/*	unsigned long dummy;*/
 
 	SDL_memset(bios_currentkeyboard, 0, sizeof(bios_currentkeyboard));
 	SDL_memset(bios_previouskeyboard, 0, sizeof(bios_previouskeyboard));

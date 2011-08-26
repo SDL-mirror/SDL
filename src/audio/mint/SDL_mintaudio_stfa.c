@@ -84,6 +84,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 
 static int Audio_Available(void)
 {
+	unsigned long dummy;
 	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
 	/* Check if user asked a different audio driver */
@@ -103,10 +104,11 @@ static int Audio_Available(void)
 	}
 
 	/* Cookie STFA present ? */
-	if (Getcookie(C_STFA, (long *) &cookie_stfa) != C_FOUND) {
+	if (Getcookie(C_STFA, &dummy) != C_FOUND) {
 		DEBUG_PRINT((DEBUG_NAME "no STFA audio\n"));
 		return(0);
 	}
+	cookie_stfa = (cookie_stfa_t *) dummy;
 
 	SDL_MintAudio_stfa = cookie_stfa;
 

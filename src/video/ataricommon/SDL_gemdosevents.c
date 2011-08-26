@@ -56,8 +56,8 @@ static void UpdateSpecialKeys(int special_keys_state);
 
 void AtariGemdos_InitOSKeymap(_THIS)
 {
-	int i, vectors_mask;
-	unsigned long dummy;
+	int vectors_mask;
+/*	unsigned long dummy;*/
 
 	SDL_memset(gemdos_currentkeyboard, 0, sizeof(gemdos_currentkeyboard));
 	SDL_memset(gemdos_previouskeyboard, 0, sizeof(gemdos_previouskeyboard));

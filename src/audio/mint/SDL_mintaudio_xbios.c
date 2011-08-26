@@ -79,7 +79,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 
 static int Audio_Available(void)
 {
-	unsigned long dummy;
+/*	unsigned long dummy;*/
 	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
 	/*SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);*/
@@ -104,7 +104,7 @@ static int Audio_Available(void)
 	/* Check if we have 16 bits audio */
 	if ((cookie_snd & SND_16BIT)==0) {
 		DEBUG_PRINT((DEBUG_NAME "no 16 bits sound\n"));
-	    return(0);
+		return(0);
 	}
 
 	/* Check if audio is lockable */
@@ -334,7 +334,6 @@ static void Mint_CheckExternalClock(_THIS)
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int i;
-	Uint32 extclock;
 
 	DEBUG_PRINT((DEBUG_NAME "asked: %d bits, ",spec->format & 0x00ff));
 	DEBUG_PRINT(("signed=%d, ", ((spec->format & 0x8000)!=0)));

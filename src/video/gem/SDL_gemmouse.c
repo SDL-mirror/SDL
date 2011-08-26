@@ -34,6 +34,7 @@
 #include "../SDL_cursor_c.h"
 #include "SDL_gemmouse_c.h"
 #include "SDL_gemvideo.h"
+#include "../ataricommon/SDL_xbiosevents_c.h"
 
 /* Defines */
 

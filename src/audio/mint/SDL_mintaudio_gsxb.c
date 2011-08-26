@@ -199,7 +199,7 @@ static void Mint_CloseAudio(_THIS)
 
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
-	long snd_format;
+	long snd_format = 0;
 	int i, resolution, format_signed, format_bigendian;
     Uint16 test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;

@@ -36,6 +36,7 @@
 #include "../../events/SDL_events_c.h"
 #include "SDL_gemvideo.h"
 #include "SDL_gemevents_c.h"
+#include "SDL_gemmouse_c.h"
 #include "../ataricommon/SDL_atarikeys.h"	/* for keyboard scancodes */
 #include "../ataricommon/SDL_atarievents_c.h"
 #include "../ataricommon/SDL_xbiosevents_c.h"

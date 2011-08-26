@@ -45,9 +45,7 @@ static Uint16 atari_prevmouseb;	/* save state of mouse buttons */
 
 void AtariIkbd_InitOSKeymap(_THIS)
 {
-	int i;
-
-	SDL_memset(SDL_AtariIkbd_keyboard, KEY_UNDEFINED, sizeof(SDL_AtariIkbd_keyboard));
+	SDL_memset((void *) SDL_AtariIkbd_keyboard, KEY_UNDEFINED, sizeof(SDL_AtariIkbd_keyboard));
 
 	/* Now install our handler */
 	SDL_AtariIkbd_mouseb = SDL_AtariIkbd_mousex = SDL_AtariIkbd_mousey = 0;
@@ -72,7 +70,7 @@ static int atari_GetButton(int button)
 
 void AtariIkbd_PumpEvents(_THIS)
 {
-	int i, specialkeys;
+	int i;
 	SDL_keysym keysym;
 
 	/*--- Send keyboard events ---*/

@@ -112,10 +112,11 @@ static int Audio_Available(void)
 	}
 
 	/* Cookie MCSN present ? */
-	if (Getcookie(C_McSn, (long *) &cookie_mcsn) != C_FOUND) {
+	if (Getcookie(C_McSn, &dummy) != C_FOUND) {
 		DEBUG_PRINT((DEBUG_NAME "no MCSN audio\n"));
 		return(0);
 	}
+	cookie_mcsn = (cookie_mcsn_t *) dummy;
 
 	/* Check if interrupt at end of replay */
 	if (cookie_mcsn->pint == 0) {
