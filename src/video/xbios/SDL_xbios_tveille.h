@@ -32,12 +32,6 @@
 
 #include "SDL_xbios.h"
 
-/*--- Defines ---*/
-
-#ifndef C_VeiL
-#define C_VeiL 0x5665694CL
-#endif
-
 /*--- Structures ---*/
 
 typedef struct {

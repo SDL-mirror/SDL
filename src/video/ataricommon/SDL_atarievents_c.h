@@ -37,19 +37,6 @@
 
 #define ATARIBIOS_MAXKEYS 128
 
-/* Special keys state */
-#ifndef K_RSHIFT
-enum {
-	K_RSHIFT=0,
-	K_LSHIFT,
-	K_CTRL,
-	K_ALT,
-	K_CAPSLOCK,
-	K_CLRHOME,
-	K_INSERT
-};
-#endif
-
 extern void (*Atari_ShutdownEvents)(void);
 
 extern void Atari_InitOSKeymap(_THIS);

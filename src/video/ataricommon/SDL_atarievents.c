@@ -30,7 +30,6 @@
  */
 
 #include <mint/cookie.h>
-#include <mint/ostruct.h>
 #include <mint/osbind.h>
 
 #include "../../events/SDL_sysevents.h"
@@ -50,10 +49,6 @@ enum {
 	MCH_CLONE,
 	MCH_ARANYM
 };
-
-#ifndef KT_NOCHANGE
-# define KT_NOCHANGE -1
-#endif
 
 /* The translation tables from a console scancode to a SDL keysym */
 static SDLKey keymap[ATARIBIOS_MAXKEYS];

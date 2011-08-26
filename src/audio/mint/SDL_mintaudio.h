@@ -83,42 +83,6 @@ enum {
 #define MASTERPREDIV_FALCON	256
 #define MASTERPREDIV_MILAN	256
 
-/* MFP 68901 interrupt sources */
-#ifndef MFP_PARALLEL
-enum {
-	MFP_PARALLEL=0,
-	MFP_DCD,
-	MFP_CTS,
-	MFP_BITBLT,
-	MFP_TIMERD,
-	MFP_BAUDRATE=MFP_TIMERD,
-	MFP_TIMERC,
-	MFP_200HZ=MFP_TIMERC,
-	MFP_ACIA,
-	MFP_DISK,
-	MFP_TIMERB,
-	MFP_HBLANK=MFP_TIMERB,
-	MFP_TERR,
-	MFP_TBE,
-	MFP_RERR,
-	MFP_RBF,
-	MFP_TIMERA,
-	MFP_DMASOUND=MFP_TIMERA,
-	MFP_RING,
-	MFP_MONODETECT
-};
-#endif
-
-/* Xbtimer() timers */
-#ifndef XB_TIMERA
-enum {
-	XB_TIMERA=0,
-	XB_TIMERB,
-	XB_TIMERC,
-	XB_TIMERD
-};
-#endif
-
 /* Variables */
 extern SDL_AudioDevice *SDL_MintAudio_device;
 extern Uint8 *SDL_MintAudio_audiobuf[2];	/* Pointers to buffers */

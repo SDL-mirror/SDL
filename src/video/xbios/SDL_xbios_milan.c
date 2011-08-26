@@ -33,11 +33,6 @@
 #include "SDL_xbios.h"
 #include "SDL_xbios_milan.h"
 
-#ifndef Validmode
-#define Validmode(mode)	\
-	(short)trap_14_ww((short)0x5f,(short)(mode))
-#endif
-
 #define NUM_PREDEFINED_MODES 7
 
 typedef struct {
