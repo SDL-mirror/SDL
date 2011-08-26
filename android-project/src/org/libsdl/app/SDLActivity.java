@@ -1,6 +1,8 @@
 package org.libsdl.app;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.*;
 
@@ -388,7 +390,13 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             }
             EGLConfig config = configs[0];
 
-            EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, null);
+            int EGL_CONTEXT_CLIENT_VERSION=0x3098;
+            int contextAttrs[] = new int[]
+            {
+                EGL_CONTEXT_CLIENT_VERSION, majorVersion,
+                EGL10.EGL_NONE
+            }; 
+            EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, contextAttrs);
             if (ctx == EGL10.EGL_NO_CONTEXT) {
                 Log.e("SDL", "Couldn't create context");
                 return false;
@@ -424,7 +432,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         try {
             EGL10 egl = (EGL10)EGLContext.getEGL();
 
-            egl.eglWaitNative(EGL10.EGL_NATIVE_RENDERABLE, null);
+            egl.eglWaitNative(EGL10.EGL_CORE_NATIVE_ENGINE, null);
 
             // drawing here
 
