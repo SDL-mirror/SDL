@@ -114,9 +114,9 @@ public class SDLActivity extends Activity {
         mSingleton.sendCommand(COMMAND_CHANGE_TITLE, title);
     }
 
-	public static Context getContext() {
-		return mSingleton;
-	}
+    public static Context getContext() {
+        return mSingleton;
+    }
 
     // Audio
     private static Object buf;
