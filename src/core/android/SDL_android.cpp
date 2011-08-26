@@ -96,7 +96,7 @@ extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls)
     __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL_Android_Init()");
 
     mEnv = env;
-    mActivityClass = cls;
+    mActivityClass = (jclass)env->NewGlobalRef(cls);
 
     midCreateGLContext = mEnv->GetStaticMethodID(mActivityClass,
                                 "createGLContext","(II)Z");
