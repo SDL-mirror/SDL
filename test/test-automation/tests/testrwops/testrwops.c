@@ -13,12 +13,12 @@
 
 #include "../../include/SDL_test.h"
 
-// TODO create these at SetUp() and such TearDown()
-const char* RWOPS_READ = "tests/testrwops/read";
-const char* RWOPS_WRITE = "tests/testrwops/write";
+const char* RWOPS_READ = "rwops_read";
+const char* RWOPS_WRITE = "rwops_write";
 
 static const char hello_world[] = "Hello World!";
 static const char const_mem[] = "Hello World!";
+
 
 /* Test cases */
 static const TestCaseReference test1 =
@@ -53,6 +53,25 @@ TestCaseReference **QueryTestSuite() {
 	return (TestCaseReference **)testSuite;
 }
 
+
+// Fixture
+void
+SetUp(void *arg)
+{
+	FILE *handle = fopen(RWOPS_READ, "w");
+	AssertTrue(handle != NULL, "Creating file '%s' failed", RWOPS_READ);
+
+	fwrite(hello_world, 1, SDL_strlen(hello_world), handle);
+	fclose(handle);
+}
+
+void
+TearDown(void *arg)
+{
+	// Remove the created files
+	remove(RWOPS_READ);
+	remove(RWOPS_WRITE);
+}
 
 /**
  * @brief Makes sure parameters work properly. Helper function
