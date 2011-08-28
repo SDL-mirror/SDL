@@ -142,6 +142,8 @@ test_dummy2(void *arg)
 	char *msg = "eello";
 	//msg[0] = 'H';
 	AssertTrue(1, "Assert message");
+	AssertTrue(0, "Assert message");
+	AssertTrue(1, "Assert message");
 }
 
 void

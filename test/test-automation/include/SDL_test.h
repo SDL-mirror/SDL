@@ -69,7 +69,7 @@ typedef struct TestCaseReference {
  *
  *  \param execKey Execution key for the test
  */
-void _InitTestEnvironment(Uint64 execKey);
+void _InitTestEnvironment(Uint64 execKey, SDL_bool inproc);
 
 /*!
  *  Deinitializes the test environment and

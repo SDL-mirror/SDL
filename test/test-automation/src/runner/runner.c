@@ -44,7 +44,7 @@
 //!< Function pointer to a test case function
 typedef void (*TestCaseFp)(void *arg);
 //!< Function pointer to a test case init function
-typedef void (*InitTestInvironmentFp)(Uint64);
+typedef void (*InitTestInvironmentFp)(Uint64, SDL_bool);
 //!< Function pointer to a test case quit function
 typedef int  (*QuitTestInvironmentFp)(void);
 //!< Function pointer to a test case set up function
@@ -825,7 +825,7 @@ RunTest(TestCase *testCase, Uint64 execKey)
 		}
 	}
 
-	testCase->initTestEnvironment(execKey);
+	testCase->initTestEnvironment(execKey, execute_inproc);
 
 	if(testCase->testSetUp) {
 		testCase->testSetUp(0x0);

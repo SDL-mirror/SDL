@@ -40,10 +40,15 @@ int _testAssertsFailed;
 /*! \brief counts the passed asserts */
 int _testAssertsPassed;
 
+/*! \brief is the execution done in-process? */
+SDL_bool canBailOut;
+
 void
-_InitTestEnvironment(Uint64 execKey)
+_InitTestEnvironment(Uint64 execKey, SDL_bool inproc)
 {
 	InitFuzzer(execKey);
+
+	canBailOut = inproc == 0;
 
 	_testReturnValue = TEST_RESULT_PASS;
 	_testAssertsFailed = 0;
@@ -87,13 +92,17 @@ AssertEquals(int expected, int actual, char *message, ...)
 
       _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
-   } else {
+
+      if(canBailOut)
+    	  exit(TEST_RESULT_FAILURE); // bail out from the test
+      } else {
 	   AssertWithValues("AssertEquals", 1, buf,
     		  actual, expected, time(0));
 
       _testAssertsPassed++;
    }
 }
+
 
 void
 AssertTrue(int condition, char *message, ...)
@@ -109,6 +118,9 @@ AssertTrue(int condition, char *message, ...)
 
       _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
+
+      if(canBailOut)
+    	  exit(TEST_RESULT_FAILURE); // bail out from the test
    } else {
 		Assert("AssertTrue", 1, buf, time(0));
 
@@ -131,6 +143,7 @@ AssertPass(char *message, ...)
    _testAssertsPassed++;
 }
 
+
 void
 AssertFail(char *message, ...)
 {
@@ -145,5 +158,8 @@ AssertFail(char *message, ...)
 
    _testReturnValue = TEST_RESULT_FAILURE;
    _testAssertsFailed++;
+
+   if(canBailOut)
+	   exit(TEST_RESULT_FAILURE); // bail out from the test
 }
 
