@@ -34,15 +34,6 @@
 
 /*--- Defines ---*/
 
-/* Cookies */
-#ifndef C__MIL
-#define C__MIL 0x5F4D494CL
-#endif
-
-#ifndef C__VDI
-#define C__VDI 0x5F564449L
-#endif
-
 /* Vsetscreen() parameters */
 #define MI_MAGIC	0x4D49 
 
