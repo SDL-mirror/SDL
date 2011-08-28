@@ -1400,7 +1400,7 @@ main(int argc, char *argv[])
 
 	RunStarted(argc, argv, runSeed, startTimestamp, loggerData);
 
-	// logger data is no longer used
+	// logger data is no longer used so free it
 	SDL_free(loggerData->filename);
 	SDL_free(loggerData);
 
