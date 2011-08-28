@@ -36,10 +36,6 @@
 
 /*--- Defines ---*/
 
-#ifndef C_CNTS
-#define C_CNTS 0x434e5453L
-#endif
-
 #define CSCREEN_ENERGYSTAR		(1<<9)
 #define CSCREEN_SAVER			(1<<10)
 #define CSCREEN_VIRTUAL			(1<<11)
