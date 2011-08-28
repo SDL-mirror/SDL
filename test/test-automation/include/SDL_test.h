@@ -68,6 +68,7 @@ typedef struct TestCaseReference {
  *  the beginning of every test case, before doing anything else.
  *
  *  \param execKey Execution key for the test
+ *  \param inproc Whether tests are run in-process or not
  */
 void _InitTestEnvironment(Uint64 execKey, SDL_bool inproc);
 
