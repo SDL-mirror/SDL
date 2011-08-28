@@ -52,14 +52,14 @@ enum {
 
 /* The translation tables from a console scancode to a SDL keysym */
 static SDLKey keymap[ATARIBIOS_MAXKEYS];
-static unsigned char *keytab_normal;
+static char *keytab_normal;
 
 void (*Atari_ShutdownEvents)(void);
 
 static void Atari_InitializeEvents(_THIS)
 {
 	const char *envr;
-	unsigned long cookie_mch;
+	long cookie_mch;
 
 	/* Test if we are on an Atari machine or not */
 	if (Getcookie(C__MCH, &cookie_mch) == C_NOTFOUND) {

@@ -62,7 +62,7 @@
 
 /*--- Static variables ---*/
 
-static unsigned long cookie_snd;
+static long cookie_snd;
 
 /*--- Audio driver functions ---*/
 
@@ -265,14 +265,10 @@ static void Mint_CheckExternalClock(_THIS)
 {
 #define SIZE_BUF_CLOCK_MEASURE (44100/10)
 
-	unsigned long cookie_snd;
 	char *buffer;
 	int i, j;
 
 	/* DSP present with its GPIO port ? */
-	if (Getcookie(C__SND, &cookie_snd) == C_NOTFOUND) {
-		return;
-	}
 	if ((cookie_snd & SND_DSP)==0) {
 		return;
 	}

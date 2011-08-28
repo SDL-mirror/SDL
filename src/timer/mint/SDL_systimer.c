@@ -59,7 +59,7 @@ static int mint_present; /* can we use Syield() ? */
 void SDL_StartTicks(void)
 {
 	void *old_stack;
-	unsigned long dummy;
+	long dummy;
 
 	/* Set first ticks value */
 	old_stack = (void *)Super(0);

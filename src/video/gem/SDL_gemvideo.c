@@ -73,7 +73,7 @@ static unsigned char vdi_index[256] = {
 	9, 10, 11, 14, 12, 15, 13, 255
 };
 
-static const unsigned char empty_name[]="";
+static const char empty_name[]="";
 
 /* Initialization/Query functions */
 static int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -216,7 +216,7 @@ VideoBootStrap GEM_bootstrap = {
 static void VDI_ReadExtInfo(_THIS, short *work_out)
 {
 	unsigned long EdDI_version;
-	unsigned long cookie_EdDI;
+	long cookie_EdDI;
 	Uint32 num_colours;
 	Uint16 clut_type, num_bits;
 

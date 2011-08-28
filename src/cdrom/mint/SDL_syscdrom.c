@@ -49,7 +49,7 @@
 #define MAX_DRIVES	32	
 
 typedef struct {
-	unsigned char device[3];	/* Physical device letter + ':' + '\0' */
+	char		device[3];	/* Physical device letter + ':' + '\0' */
 	metaopen_t	metaopen;		/* Infos on opened drive */
 } metados_drive_t;
 

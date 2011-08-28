@@ -138,8 +138,8 @@ static const xbiosmode_t falconvgamodes[6]={
 
 static int XBIOS_Available(void)
 {
-	unsigned long cookie_vdo, /*cookie_mil,*/ cookie_hade, cookie_scpn;
-	unsigned long cookie_fvdi;
+	long cookie_vdo, /*cookie_mil,*/ cookie_hade, cookie_scpn;
+	long cookie_fvdi;
 	const char *envr = SDL_getenv("SDL_VIDEODRIVER");
 
 	/* Milan/Hades Atari clones do not have an Atari video chip */
@@ -362,7 +362,7 @@ static void XBIOS_ListFalconVgaModes(_THIS, int actually_add)
 static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	int i;
-	unsigned long cookie_blow, cookie_scpn, cookie_cnts;
+	long cookie_blow, cookie_scpn, cookie_cnts;
 
 	/* Initialize all variables that we clean on shutdown */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {

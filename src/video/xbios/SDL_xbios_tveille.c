@@ -37,7 +37,7 @@ static int status;
 
 int SDL_XBIOS_TveillePresent(_THIS)
 {
-	unsigned long dummy;
+	long dummy;
 
 	cookie_veil = NULL;
 	if (Getcookie(C_VeiL, &dummy) == C_FOUND) {
