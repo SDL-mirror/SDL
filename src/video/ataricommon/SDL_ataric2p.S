@@ -305,7 +305,7 @@ _SDL_Atari_C2pConvert4:
 	movel	c2p_dest,a1
 	lea	_SDL_Atari_table_c2p,a2
 	movel	#0x00070001,d3
-#if defined(__M68020__)
+#if defined(__mc68020__)
 	moveq	#0,d0
 #endif
 	
@@ -326,7 +326,7 @@ c2p4_bclx:
 	moveq	#0,d1
 	moveq	#7,d5
 c2p4_bcl07:
-#if defined(__M68020__)
+#if defined(__mc68020__)
 	moveb	a0@+,d0
 	lea		a2@(0,d0:w:4),a3
 #else
@@ -348,7 +348,7 @@ c2p4_bcl07:
 	moveq	#0,d1
 	moveq	#7,d5
 c2p4_bcl815:
-#if defined(__M68020__)
+#if defined(__mc68020__)
 	moveb	a0@+,d0
 	lea		a2@(0,d0:w:4),a3
 #else
