@@ -32,8 +32,6 @@
 
 /*--- Defines ---*/
 
-#define C_STFA	0x53544641L	/* Sound treiber für atari (seb/The removers) */
-
 #define STFA_PLAY_ENABLE	(1<<0)
 #define STFA_PLAY_DISABLE	(0<<0)
 #define STFA_PLAY_REPEAT	(1<<1)

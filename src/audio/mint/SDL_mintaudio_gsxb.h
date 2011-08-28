@@ -32,10 +32,6 @@
 
 #include <mint/falcon.h>	/* for trap_14_xxx macros */
 
-/* GSXB Cookie */
-
-#define C_GSXB		0x47535842L
-
 /* Bit 5 in cookie _SND */
 
 #define SND_GSXB	(1<<5)
