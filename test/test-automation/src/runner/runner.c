@@ -1310,6 +1310,19 @@ ParseOptions(int argc, char *argv[])
    }
 }
 
+void
+InitRunner()
+{
+	// Inits some global buffers to their default values
+	memcpy(log_basename, (void *)DEFAULT_LOG_FILENAME, SDL_strlen(DEFAULT_LOG_FILENAME));
+	memcpy(log_directory, (void *)DEFAULT_LOG_DIRECTORY, SDL_strlen(DEFAULT_LOG_DIRECTORY));
+
+	memset(selected_test_name, 0, NAME_BUFFER_SIZE);
+	memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
+	memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
+	memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
+}
+
 
 /*!
  * Entry point for test runner
@@ -1320,16 +1333,7 @@ ParseOptions(int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	// \todo turn this into something better.
-	// Inits some global buffers to their default values
-	memcpy(log_basename, (void *)DEFAULT_LOG_FILENAME, SDL_strlen(DEFAULT_LOG_FILENAME));
-	memcpy(log_directory, (void *)DEFAULT_LOG_DIRECTORY, SDL_strlen(DEFAULT_LOG_DIRECTORY));
-
-	memset(selected_test_name, 0, NAME_BUFFER_SIZE);
-	memset(selected_suite_name, 0, NAME_BUFFER_SIZE);
-	memset(testcase_name_substring, 0, NAME_BUFFER_SIZE);
-	memset(xsl_stylesheet_name, 0, NAME_BUFFER_SIZE);
-
+	InitRunner();
 
 	ParseOptions(argc, argv);
 

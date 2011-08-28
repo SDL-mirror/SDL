@@ -501,8 +501,7 @@ _testBlitBlendMode( SDL_Texture * tface, int mode )
    SDL_Rect rect;
 
    /* Clear surface. */
-   if (_clearScreen())
-      return -1;
+   _clearScreen();
 
    /* Steps to take. */
    ni     = SCREEN_W - FACE_W;
