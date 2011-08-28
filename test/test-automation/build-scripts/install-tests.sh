@@ -3,8 +3,6 @@
 DIRECTORY="tests"
 EXT="error"
 
-#echo "Installing test suites to $DIRECTORY" 
-
 mkdir $DIRECTORY > /dev/null 2>&1
 
 PLATFORM="$(uname)"
@@ -21,3 +19,7 @@ do
 done
 
 echo "Test suites installed."
+echo "Run './runner --show-tests' to see the available tests"
+echo "and './runner' to execute them"
+echo ""
+echo "For more commands: './runner --help'"

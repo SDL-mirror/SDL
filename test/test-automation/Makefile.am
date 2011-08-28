@@ -15,7 +15,6 @@ SUBDIRS = src/libSDLtest \
 		  tests/testevents \
 	  	  tests/testkeyboard 
 		
-##all-local: install
 install: install-runner install-tests
 install-runner: 
 	$(SHELL) build-scripts/install-runner.sh
