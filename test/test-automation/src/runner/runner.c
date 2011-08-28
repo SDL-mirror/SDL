@@ -1362,7 +1362,7 @@ main(int argc, char *argv[])
 	if(only_print_tests) {
 		TestCase *testItem = NULL;
 		for(testItem = testCases; testItem; testItem = testItem->next) {
-			printf("%s (in %s)\n", testItem->testName, testItem->suiteName);
+			printf("%s (in %s) - %s\n", testItem->testName, testItem->suiteName, testItem->description);
 		}
 
 		return 0;

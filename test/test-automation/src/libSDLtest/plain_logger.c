@@ -142,7 +142,8 @@ void
 PlainTestStarted(const char *testName, const char *suiteName,
 				const char *testDescription, Uint64 execKey, time_t startTime)
 {
-	Output(indentLevel++, "Executing test: %s (in %s). Exec key: %llX", testName, suiteName, execKey);
+	Output(indentLevel, "Executing test: %s (in %s). Exec key: %llX", testName, suiteName, execKey);
+	Output(indentLevel++, "Test description: %s", testDescription);
 }
 
 void
