@@ -59,7 +59,7 @@
 
 /*--- Static variables ---*/
 
-static unsigned long cookie_snd, cookie_gsxb;
+static long cookie_snd, cookie_gsxb;
 
 /*--- Audio driver functions ---*/
 

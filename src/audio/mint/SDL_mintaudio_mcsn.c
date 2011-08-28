@@ -61,7 +61,7 @@
 
 /*--- Static variables ---*/
 
-static unsigned long cookie_snd, cookie_mch;
+static long cookie_snd, cookie_mch;
 static cookie_mcsn_t *cookie_mcsn;
 
 /*--- Audio driver functions ---*/
@@ -79,7 +79,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
 
 static int Audio_Available(void)
 {
-	unsigned long dummy;
+	long dummy;
 	const char *envr = SDL_getenv("SDL_AUDIODRIVER");
 
 	SDL_MintAudio_mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
