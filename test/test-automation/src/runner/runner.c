@@ -969,7 +969,7 @@ GenerateRunSeed(const int length)
  */
 LoggerData *
 SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_enabled,
-			const int custom_xsl_enabled, const char *defaultXslSheet)
+			const int custom_xsl_enabled, const char *defaultXslSheet, const time_t timestamp)
 {
 	LoggerData *loggerData = SDL_malloc(sizeof(LoggerData));
 	if(loggerData == NULL) {
@@ -992,7 +992,7 @@ SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_e
 		unsigned int mode = S_IRWXU | S_IRGRP | S_ISUID;
 		mkdir(log_directory, mode);
 
-		char *timeString = TimestampToStringWithFormat(time(0), "%Y%m%d_%H:%M:%S");
+		char *timeString = TimestampToStringWithFormat(timestamp, "%Y%m%d_%H:%M:%S");
 
 
 		/* Combine and create directory for log file */
@@ -1376,8 +1376,10 @@ main(int argc, char *argv[])
 		}
 	}
 
+	const time_t startTimestamp = time(0);
+
 	LoggerData *loggerData = SetUpLogger(log_stdout_enabled, xml_enabled,
-			xsl_enabled, custom_xsl_enabled, defaultXSLStylesheet);
+			xsl_enabled, custom_xsl_enabled, defaultXSLStylesheet, startTimestamp);
 	if(loggerData == NULL) {
 		printf("Failed to create a logger.\n");
 		return 2;
@@ -1392,7 +1394,7 @@ main(int argc, char *argv[])
 		fflush(stdout);
 	}
 
-	RunStarted(argc, argv, runSeed, time(0), loggerData);
+	RunStarted(argc, argv, runSeed, startTimestamp, loggerData);
 
 	// logger data is no longer used
 	SDL_free(loggerData->filename);
