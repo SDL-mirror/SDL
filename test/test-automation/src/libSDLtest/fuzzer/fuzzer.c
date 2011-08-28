@@ -33,6 +33,9 @@
 //! context for test-specific random number generator
 static RND_CTX rndContext;
 
+//! Counts invocation of fuzzer generator functions
+int invocationCounter = 0;
+
 Uint64
 GenerateExecKey(char *runSeed, char *suiteName,
 				char *testName, int iterationNumber)
@@ -99,45 +102,63 @@ InitFuzzer(Uint64 execKey)
 	utl_randomInit(&rndContext, a, b);
 }
 
+int
+GetInvocationCount()
+{
+	return invocationCounter;
+}
+
 void
 DeinitFuzzer()
 {
-
+	invocationCounter = 0;
 }
 
 Uint8
 RandomUint8()
 {
+	invocationCounter++;
+
 	return (Uint8) utl_randomInt(&rndContext) & 0x000000FF;
 }
 
 Sint8
 RandomSint8()
 {
+	invocationCounter++;
+
 	return (Sint8) utl_randomInt(&rndContext) & 0x000000FF;
 }
 
 Uint16
 RandomUint16()
 {
+	invocationCounter++;
+
 	return (Uint16) utl_randomInt(&rndContext) & 0x0000FFFF;
 }
 
 Sint16
 RandomSint16()
 {
+	invocationCounter++;
+
 	return (Sint16) utl_randomInt(&rndContext) & 0x0000FFFF;
 }
 
 Sint32
 RandomSint32()
 {
+	invocationCounter++;
+
 	return (Sint32) utl_randomInt(&rndContext);
 }
 
 Uint32
 RandomUint32()
 {
+	invocationCounter++;
+
 	return (Uint32) utl_randomInt(&rndContext);
 }
 
@@ -145,6 +166,8 @@ Uint64
 RandomUint64()
 {
 	Uint64 value;
+
+	invocationCounter++;
 
 	Uint32 *vp = (Uint32*)&value;
 	vp[0] = RandomSint32();
@@ -157,6 +180,8 @@ Sint64
 RandomSint64()
 {
 	Uint64 value;
+
+	invocationCounter++;
 
 	Uint32 *vp = (Uint32*)&value;
 	vp[0] = RandomSint32();
@@ -180,7 +205,7 @@ RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
 		return min;
 	}
 
-	Sint32 number = RandomSint32();
+	Sint32 number = RandomSint32(); // invocation count increment in there
 
 	return (number % ((max + 1) - min)) + min;
 }
@@ -292,6 +317,8 @@ RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain)
 
 	SDL_free(buffer);
 
+	invocationCounter++;
+
 	return retVal;
 }
 
@@ -315,6 +342,8 @@ RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDoma
 	Uint16 retVal = (Uint16) buffer[index];
 
 	SDL_free(buffer);
+
+	invocationCounter++;
 
 	return retVal;
 }
@@ -340,6 +369,8 @@ RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDoma
 
 	SDL_free(buffer);
 
+	invocationCounter++;
+
 	return retVal;
 }
 
@@ -363,6 +394,8 @@ RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDoma
 	Uint64 retVal = (Uint64) buffer[index];
 
 	SDL_free(buffer);
+
+	invocationCounter++;
 
 	return retVal;
 }
@@ -481,6 +514,8 @@ RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain)
 
 	SDL_free(buffer);
 
+	invocationCounter++;
+
 	return retVal;
 }
 
@@ -505,6 +540,8 @@ RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDoma
 	Sint16 retVal = (Sint16) buffer[index];
 
 	SDL_free(buffer);
+
+	invocationCounter++;
 
 	return retVal;
 }
@@ -531,6 +568,8 @@ RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDoma
 
 	SDL_free(buffer);
 
+	invocationCounter++;
+
 	return retVal;
 }
 
@@ -556,6 +595,8 @@ RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDoma
 
 	SDL_free(buffer);
 
+	invocationCounter++;
+
 	return retVal;
 }
 
@@ -574,6 +615,8 @@ RandomUnitDouble()
 float
 RandomFloat()
 {
+	invocationCounter++;
+
 	// \todo to be implemented
 	return 0.0f;
 }
@@ -581,6 +624,8 @@ RandomFloat()
 double
 RandomDouble()
 {
+	invocationCounter++;
+
 	// \todo to be implemented
 	return 0.0f;
 }
@@ -589,12 +634,15 @@ RandomDouble()
 char *
 RandomAsciiString()
 {
+	// note: invocationCounter is increment in the RandomAsciiStringWithMaximumLenght
 	return RandomAsciiStringWithMaximumLength(255);
 }
 
 char *
 RandomAsciiStringWithMaximumLength(int maxSize)
 {
+	invocationCounter++;
+
 	if(maxSize < 1) {
 		return NULL;
 	}

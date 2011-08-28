@@ -353,5 +353,9 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  */
 Uint64 GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iterationNumber);
 
+/*!
+ * Returns test specific invocation count for the fuzzer.
+ */
+int GetInvocationCount();
 
 #endif

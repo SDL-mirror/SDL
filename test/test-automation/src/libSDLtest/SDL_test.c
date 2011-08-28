@@ -65,6 +65,8 @@ _QuitTestEnvironment()
 		_testReturnValue = TEST_RESULT_NO_ASSERT;
 	}
 
+	Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+
 	DeinitFuzzer();
 
 	return _testReturnValue;
@@ -75,6 +77,25 @@ _CountFailedAsserts() {
 	return _testAssertsFailed;
 }
 
+/*!
+ * Bail out from test case. For example, function is used to bail out
+ * after failed assert.
+ */
+void
+_BailOut()
+{
+    if(!canBailOut)
+    	return ;
+
+	AssertSummary(_testAssertsFailed + _testAssertsPassed,
+                  _testAssertsFailed, _testAssertsPassed, time(0));
+
+	Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+
+	DeinitFuzzer();
+
+	exit(TEST_RESULT_FAILURE); // bail out from the test
+}
 
 void
 AssertEquals(int expected, int actual, char *message, ...)
@@ -93,8 +114,7 @@ AssertEquals(int expected, int actual, char *message, ...)
       _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
 
-      if(canBailOut)
-    	  exit(TEST_RESULT_FAILURE); // bail out from the test
+      _BailOut();
       } else {
 	   AssertWithValues("AssertEquals", 1, buf,
     		  actual, expected, time(0));
@@ -119,8 +139,7 @@ AssertTrue(int condition, char *message, ...)
       _testReturnValue = TEST_RESULT_FAILURE;
       _testAssertsFailed++;
 
-      if(canBailOut)
-    	  exit(TEST_RESULT_FAILURE); // bail out from the test
+      _BailOut();
    } else {
 		Assert("AssertTrue", 1, buf, time(0));
 
@@ -159,7 +178,6 @@ AssertFail(char *message, ...)
    _testReturnValue = TEST_RESULT_FAILURE;
    _testAssertsFailed++;
 
-   if(canBailOut)
-	   exit(TEST_RESULT_FAILURE); // bail out from the test
+   _BailOut();
 }
 
