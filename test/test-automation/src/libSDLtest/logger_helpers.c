@@ -102,6 +102,30 @@ char *TimestampToString(const time_t timestamp) {
 	return buffer;
 }
 
+/*!
+ * Converts unix timestamp to its ascii presentation in given format
+ *
+ * Note: uses static buffer internally, so the return value
+ * isn't valid after the next call of this function. If you
+ * want to retain the return value, make a copy of it
+ *
+ * \param timestamp Timestamp
+ * \param format Formatting specification such as "%Y%m%d"
+ *
+ * \return Ascii presentation
+ */
+char *TimestampToStringWithFormat(const time_t timestamp, char *format) {
+	static char buffer[256];
+	memset(buffer, 0, sizeof(buffer));
+
+	time_t copy = timestamp;
+
+	struct tm *local = localtime(&copy);
+	strftime(buffer, sizeof(buffer), format, local);
+
+	return buffer;
+}
+
 /*! Turns all the characters of the given
  * string to lowercase and returns the resulting string.
  *

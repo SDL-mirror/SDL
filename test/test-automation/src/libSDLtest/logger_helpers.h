@@ -31,6 +31,8 @@ char *DoubleToString(const double decimal);
 
 char *TimestampToString(const time_t timestamp);
 
+char *TimestampToStringWithFormat(const time_t timestamp, char *format);
+
 char *ToLowerCase(const char *string);
 
 int ValidateString(const char *string);

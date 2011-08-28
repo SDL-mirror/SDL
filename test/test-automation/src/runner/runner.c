@@ -36,6 +36,7 @@
 
 #include "../libSDLtest/plain_logger.h"
 #include "../libSDLtest/xml_logger.h"
+#include "../libSDLtest/logger_helpers.h"
 
 #include "logger.h"
 #include "support.h"
@@ -56,28 +57,40 @@ typedef int (*CountFailedAssertsFp)(void);
 
 //!< Flag for executing tests in-process
 static int execute_inproc = 0;
+
 //!< Flag for only printing out the test names
 static int only_print_tests = 0;
+
 //!< Flag for executing only test with selected name
 static int only_selected_test  = 0;
+
 //!< Flag for executing only the selected test suite
 static int only_selected_suite = 0;
+
 //!< Flag for executing only tests that contain certain string in their name
 static int only_tests_with_string = 0;
+
 //!< Flag for enabling XML logging
 static int xml_enabled = 0;
+
 //! Flag for enabling user-supplied style sheet for XML test report
 static int custom_xsl_enabled = 0;
+
 //! Flag for disabling xsl-style from xml report
 static int xsl_enabled = 0;
+
 //! Flag for enabling universal timeout for tests
 static int universal_timeout_enabled = 0;
+
 //! Flag for enabling verbose logging
 static int enable_verbose_logger = 0;
+
 //! Flag for using user supplied run seed
 static int userRunSeed = 0;
+
 //! Whether or not logger should log to stdout instead of file
-static int log_stdout_enabled = 0;
+static int log_stdout_enabled = 1;
+
 //! Whether or not dummy suite should be included to the test run
 static int include_dummy_suite = 0;
 
@@ -106,7 +119,7 @@ int universal_timeout = -1;
 #define DEFAULT_LOG_DIRECTORY "logs"
 
 //! Default directory of the test suites
-#define DEFAULT_LOG_FILENAME "runner"
+#define DEFAULT_LOG_FILENAME "testrun"
 
 //! Defines directory separator
 #define DIRECTORY_SEPARATOR '/'
@@ -979,15 +992,20 @@ SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_e
 		unsigned int mode = S_IRWXU | S_IRGRP | S_ISUID;
 		mkdir(log_directory, mode);
 
+		char *timeString = TimestampToStringWithFormat(time(0), "%Y%m%d_%H:%M:%S");
+
+
 		/* Combine and create directory for log file */
 		const Uint32 directoryLength = SDL_strlen(log_directory);
 		const Uint32 basenameLength = SDL_strlen(log_basename);
 		const Uint32 seedLength = SDL_strlen(runSeed);
 		const Uint32 extensionLength = SDL_strlen(extension);
 
+		const Uint32 timeLength = SDL_strlen(timeString);
+
 		// couple of extras bytes for '/', '-', '.' and '\0' at the end
 		const Uint32 length = directoryLength + basenameLength + seedLength
-							+ extensionLength + 4;
+							+ extensionLength + timeLength + 5;
 
 		if(length <= 0) {
 			return NULL;
@@ -1002,8 +1020,8 @@ SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_e
 		}
 		memset(filename, 0, length);
 
-		SDL_snprintf(filename, length, "%s%c%s-%s.%s", log_directory,
-				DIRECTORY_SEPARATOR, log_basename, runSeed, extension);
+		SDL_snprintf(filename, length, "%s%c%s-%s-%s.%s", log_directory,
+				DIRECTORY_SEPARATOR, log_basename, timeString, runSeed, extension);
 
 		loggerData->filename = filename;
 	}
@@ -1063,7 +1081,7 @@ SetUpLogger(const int log_stdout_enabled, const int xml_enabled, const int xsl_e
 void
 PrintUsage() {
 	  printf("Usage: ./runner [--in-proc] [--show-tests] [--verbose]\n");
-	  printf("                [--logfile BASENAME] [--logdir DIR] [--log-stdout] [--xml]\n");
+	  printf("                [--logfile [BASENAME]] [--logdir DIR] [--xml]\n");
 	  printf("                [--xsl [STYLESHEET]] [--seed VALUE] [--iterations VALUE]\n");
 	  printf("                [--exec-key KEY] [--timeout VALUE] [--test TEST]\n");
 	  printf("                [--name-contains SUBSTR] [--suite SUITE] [--include-dummy]\n");
@@ -1072,10 +1090,10 @@ PrintUsage() {
 	  printf("     --in-proc                Executes tests in-process\n");
 	  printf("     --show-tests             Prints out all the executable tests\n");
 	  printf(" -v  --verbose                Enables verbose logging\n");
-	  printf("     --logfile BASENAME       Define basename for logfiles. Defaults to 'runner'\n");
+	  printf("     --logfile [BASENAME]     Enables logging to a file. If BASENAME is\n");
+	  printf("                              specified it'll be used as  basename for\n");
+	  printf("                              the log file\n");
 	  printf("     --logdir DIR             Define directory for logs. Defaults to 'logs'\n");
-	  printf("     --log-stdout             Log to stdout instead of file (overrides --logfile\n");
-	  printf("                              and --logdir options)\n");
 	  printf("     --xml                    Enables XML logger\n");
 	  printf("     --xsl [STYLESHEET]       Adds XSL stylesheet to the XML test reports for\n");
 	  printf("                              browser viewing. Optionally uses the specified XSL\n");
@@ -1137,23 +1155,22 @@ ParseOptions(int argc, char *argv[])
 
     	  memset(log_directory, 0, NAME_BUFFER_SIZE);
     	  memcpy(log_directory, dirString, SDL_strlen(dirString));
+
+    	  log_stdout_enabled = 0;
       }
       else if(SDL_strcmp(arg, "--logfile") == 0) {
 		  char *fileString = NULL;
 
 		  if( (i + 1) < argc)  {
-			fileString = argv[++i];
+			  fileString = argv[++i];
 		  }  else {
-			printf("runner: file is missing\n");
-			PrintUsage();
-			exit(1);
+			  fileString = DEFAULT_LOG_FILENAME;
 		  }
 
    	    memset(log_basename, 0, NAME_BUFFER_SIZE);
 		memcpy(log_basename, fileString, SDL_strlen(fileString));
-      }
-      else if(SDL_strcmp(arg, "--log-stdout") == 0) {
-    	  log_stdout_enabled = 1;
+
+		log_stdout_enabled = 0;
       }
       else if(SDL_strcmp(arg, "--timeout") == 0 || SDL_strcmp(arg, "-tm") == 0) {
     	  universal_timeout_enabled = 1;
