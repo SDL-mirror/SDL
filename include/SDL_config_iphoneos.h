@@ -104,7 +104,7 @@
 #define HAVE_SYSCTLBYNAME 1
 
 /* enable iPhone version of Core Audio driver */
-#define SDL_AUDIO_DRIVER_COREAUDIOIPHONE 1
+#define SDL_AUDIO_DRIVER_COREAUDIO 1
 /* Enable the dummy audio driver (src/audio/dummy/\*.c) */
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
