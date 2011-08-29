@@ -140,7 +140,7 @@ void _ReadWriteBarrier(void);
 /* Platform specific optimized versions of the atomic functions,
  * you can disable these by defining SDL_DISABLE_ATOMIC_INLINE
  */
-#if SDL_ATOMIC_DISABLED
+#if defined(SDL_ATOMIC_DISABLED) && SDL_ATOMIC_DISABLED
 #define SDL_DISABLE_ATOMIC_INLINE
 #endif
 #ifndef SDL_DISABLE_ATOMIC_INLINE

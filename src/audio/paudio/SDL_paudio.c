@@ -45,9 +45,6 @@
 #undef BIG_ENDIAN
 #include <sys/audio.h>
 
-/* The tag name used by paud audio */
-#define PAUDIO_DRIVER_NAME         "paud"
-
 /* Open the audio device for playback, and don't block if busy */
 /* #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK) */
 #define OPEN_FLAGS	O_WRONLY
@@ -429,7 +426,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /*
      * The AIX paud device init can't modify the values of the audio_init
      * structure that we pass to it. So we don't need any recalculation
-     * of this stuff and no reinit call as in linux dsp and dma code.
+     * of this stuff and no reinit call as in linux dsp code.
      *
      * /dev/paud supports all of the encoding formats, so we don't need
      * to do anything like reopening the device, either.
@@ -545,7 +542,7 @@ PAUDIO_Init(SDL_AudioDriverImpl * impl)
 }
 
 AudioBootStrap PAUDIO_bootstrap = {
-    PAUDIO_DRIVER_NAME, "AIX Paudio", PAUDIO_Init, 0
+    "paud", "AIX Paudio", PAUDIO_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

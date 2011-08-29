@@ -33,9 +33,6 @@
 #include "../SDL_audio_c.h"
 #include "SDL_diskaudio.h"
 
-/* The tag name used by DISK audio */
-#define DISKAUD_DRIVER_NAME         "disk"
-
 /* environment variables and defaults. */
 #define DISKENVR_OUTFILE         "SDL_DISKAUDIOFILE"
 #define DISKDEFAULT_OUTFILE      "sdlaudio.raw"
@@ -159,7 +156,7 @@ DISKAUD_Init(SDL_AudioDriverImpl * impl)
 }
 
 AudioBootStrap DISKAUD_bootstrap = {
-    DISKAUD_DRIVER_NAME, "direct-to-disk audio", DISKAUD_Init, 1
+    "disk", "direct-to-disk audio", DISKAUD_Init, 1
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

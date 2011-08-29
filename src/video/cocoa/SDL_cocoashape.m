@@ -28,7 +28,7 @@ SDL_WindowShaper*
 Cocoa_CreateShaper(SDL_Window* window) {
     SDL_WindowData* windata = (SDL_WindowData*)window->driverdata;
     [windata->nswindow setOpaque:NO];
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_6
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
     [windata->nswindow setStyleMask:NSBorderlessWindowMask];
 #endif
     SDL_WindowShaper* result = result = malloc(sizeof(SDL_WindowShaper));

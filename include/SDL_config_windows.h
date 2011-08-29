@@ -145,8 +145,9 @@ typedef unsigned int uintptr_t;
 /* Enable various audio drivers */
 #ifndef _WIN32_WCE
 #define SDL_AUDIO_DRIVER_DSOUND	1
+#define SDL_AUDIO_DRIVER_XAUDIO2	1
 #endif
-#define SDL_AUDIO_DRIVER_WINWAVEOUT	1
+#define SDL_AUDIO_DRIVER_WINMM	1
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 

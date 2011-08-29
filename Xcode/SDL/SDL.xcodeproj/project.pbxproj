@@ -1139,7 +1139,7 @@
 			children = (
 				04BDFD8712E6671700899322 /* disk */,
 				04BDFD9312E6671700899322 /* dummy */,
-				04BDFD9F12E6671700899322 /* macosx */,
+				04BDFD9F12E6671700899322 /* coreaudio */,
 				04BDFDB412E6671700899322 /* SDL_audio.c */,
 				04BDFDB512E6671700899322 /* SDL_audio_c.h */,
 				04BDFDB612E6671700899322 /* SDL_audiocvt.c */,
@@ -1174,13 +1174,13 @@
 			path = dummy;
 			sourceTree = "<group>";
 		};
-		04BDFD9F12E6671700899322 /* macosx */ = {
+		04BDFD9F12E6671700899322 /* coreaudio */ = {
 			isa = PBXGroup;
 			children = (
 				04BDFDA012E6671700899322 /* SDL_coreaudio.c */,
 				04BDFDA112E6671700899322 /* SDL_coreaudio.h */,
 			);
-			path = macosx;
+			path = coreaudio;
 			sourceTree = "<group>";
 		};
 		04BDFDD312E6671700899322 /* cpuinfo */ = {

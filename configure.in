@@ -3,6 +3,7 @@ AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
 AC_GNU_SOURCE
 AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
+AC_CONFIG_MACRO_DIR([acinclude])
 
 dnl Save the CFLAGS to see whether they were passed in or generated
 orig_CFLAGS="$CFLAGS"
@@ -146,16 +147,16 @@ case "$enable_assertions" in
     auto) # Use optimization settings to determine assertion level
         ;;
     disabled)
-        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 0)
+        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 0, [ ])
         ;;
     release)
-        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 1)
+        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 1, [ ])
         ;;
     enabled)
-        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 2)
+        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 2, [ ])
         ;;
     paranoid)
-        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 3)
+        AC_DEFINE(SDL_DEFAULT_ASSERT_LEVEL, 3, [ ])
         ;;
     *)
         AC_MSG_ERROR([*** unknown assertion level. stop.])
@@ -190,7 +191,7 @@ AC_ARG_ENABLE(libc,
 AC_HELP_STRING([--enable-libc], [Use the system C library [[default=yes]]]),
               , enable_libc=yes)
 if test x$enable_libc = xyes; then
-    AC_DEFINE(HAVE_LIBC)
+    AC_DEFINE(HAVE_LIBC, 1, [ ])
 
     dnl Check for C library headers
     AC_HEADER_STDC
@@ -213,11 +214,11 @@ if test x$enable_libc = xyes; then
 
     AC_FUNC_MEMCMP
     if test x$ac_cv_func_memcmp_working = xyes; then
-        AC_DEFINE(HAVE_MEMCMP)
+        AC_DEFINE(HAVE_MEMCMP, 1, [ ])
     fi
     AC_FUNC_STRTOD
     if test x$ac_cv_func_strtod = xyes; then
-        AC_DEFINE(HAVE_STRTOD)
+        AC_DEFINE(HAVE_STRTOD, 1, [ ])
     fi
     AC_CHECK_FUNC(mprotect,
         AC_TRY_COMPILE([
@@ -225,7 +226,7 @@ if test x$enable_libc = xyes; then
           #include <sys/mman.h>
         ],[
         ],[
-        AC_DEFINE(HAVE_MPROTECT)
+        AC_DEFINE(HAVE_MPROTECT, 1, [ ])
         ]),
     )
     AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep sysconf sysctlbyname)
@@ -235,6 +236,8 @@ if test x$enable_libc = xyes; then
 
     AC_CHECK_LIB(iconv, iconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
     AC_CHECK_FUNCS(iconv)
+
+    AC_CHECK_MEMBER(struct sigaction.sa_sigaction,[AC_DEFINE(HAVE_SA_SIGACTION)], ,[#include <signal.h>])
 fi
 
 AC_CHECK_SIZEOF(void*)
@@ -262,7 +265,7 @@ if test x$enable_gcc_atomics = xyes; then
     AC_MSG_RESULT($have_gcc_atomics)
 
     if test x$have_gcc_atomics = xyes; then
-        AC_DEFINE(HAVE_GCC_ATOMICS)
+        AC_DEFINE(HAVE_GCC_ATOMICS, 1, [ ])
     else
         # See if we have the minimum operation needed for GCC atomics
         AC_TRY_LINK([
@@ -274,10 +277,29 @@ if test x$enable_gcc_atomics = xyes; then
         have_gcc_sync_lock_test_and_set=yes
         ])
         if test x$have_gcc_sync_lock_test_and_set = xyes; then
-            AC_DEFINE(HAVE_GCC_SYNC_LOCK_TEST_AND_SET)
+            AC_DEFINE(HAVE_GCC_SYNC_LOCK_TEST_AND_SET, 1, [ ])
         fi
     fi
 fi
+
+# Check for pthread implementation
+AC_MSG_CHECKING(for pthread spinlock)
+have_pthread_spinlock=no
+
+AC_TRY_LINK([
+#include <pthread.h>
+],[
+pthread_spinlock_t a;
+pthread_spin_trylock(&a);
+pthread_spin_unlock(&a);
+],[
+have_pthread_spinlock=yes
+])
+AC_MSG_RESULT($have_pthread_spinlock)
+if test x$have_pthread_spinlock = xyes; then
+    AC_DEFINE(HAVE_PTHREAD_SPINLOCK, 1, [ ])
+fi
+
 
 # Standard C sources
 SOURCES="$SOURCES $srcdir/src/*.c"
@@ -299,37 +321,37 @@ AC_ARG_ENABLE(atomic,
 AC_HELP_STRING([--enable-atomic], [Enable the atomic operations subsystem [[default=yes]]]),
               , enable_atomic=yes)
 if test x$enable_atomic != xyes; then
-    AC_DEFINE(SDL_ATOMIC_DISABLED)
+    AC_DEFINE(SDL_ATOMIC_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(audio,
 AC_HELP_STRING([--enable-audio], [Enable the audio subsystem [[default=yes]]]),
               , enable_audio=yes)
 if test x$enable_audio != xyes; then
-    AC_DEFINE(SDL_AUDIO_DISABLED)
+    AC_DEFINE(SDL_AUDIO_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(video,
 AC_HELP_STRING([--enable-video], [Enable the video subsystem [[default=yes]]]),
               , enable_video=yes)
 if test x$enable_video != xyes; then
-    AC_DEFINE(SDL_VIDEO_DISABLED)
+    AC_DEFINE(SDL_VIDEO_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(render,
 AC_HELP_STRING([--enable-render], [Enable the render subsystem [[default=yes]]]),
               , enable_render=yes)
 if test x$enable_render != xyes; then
-    AC_DEFINE(SDL_RENDER_DISABLED)
+    AC_DEFINE(SDL_RENDER_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(events,
 AC_HELP_STRING([--enable-events], [Enable the events subsystem [[default=yes]]]),
               , enable_events=yes)
 if test x$enable_events != xyes; then
-    AC_DEFINE(SDL_EVENTS_DISABLED)
+    AC_DEFINE(SDL_EVENTS_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(joystick,
 AC_HELP_STRING([--enable-joystick], [Enable the joystick subsystem [[default=yes]]]),
               , enable_joystick=yes)
 if test x$enable_joystick != xyes; then
-    AC_DEFINE(SDL_JOYSTICK_DISABLED)
+    AC_DEFINE(SDL_JOYSTICK_DISABLED, 1, [ ])
 else
     SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 fi
@@ -337,7 +359,7 @@ AC_ARG_ENABLE(haptic,
 AC_HELP_STRING([--enable-haptic], [Enable the haptic (force feedback) subsystem [[default=yes]]]),
               , enable_haptic=yes)
 if test x$enable_haptic != xyes; then
-    AC_DEFINE(SDL_HAPTIC_DISABLED)
+    AC_DEFINE(SDL_HAPTIC_DISABLED, 1, [ ])
 else
     SOURCES="$SOURCES $srcdir/src/haptic/*.c"
 fi
@@ -345,7 +367,7 @@ AC_ARG_ENABLE(power,
 AC_HELP_STRING([--enable-power], [Enable the power subsystem [[default=yes]]]),
               , enable_power=yes)
 if test x$enable_power != xyes; then
-    AC_DEFINE(SDL_POWER_DISABLED)
+    AC_DEFINE(SDL_POWER_DISABLED, 1, [ ])
 else
     SOURCES="$SOURCES $srcdir/src/power/*.c"
 fi
@@ -353,43 +375,43 @@ AC_ARG_ENABLE(threads,
 AC_HELP_STRING([--enable-threads], [Enable the threading subsystem [[default=yes]]]),
               , enable_threads=yes)
 if test x$enable_threads != xyes; then
-    AC_DEFINE(SDL_THREADS_DISABLED)
+    AC_DEFINE(SDL_THREADS_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(timers,
 AC_HELP_STRING([--enable-timers], [Enable the timer subsystem [[default=yes]]]),
               , enable_timers=yes)
 if test x$enable_timers != xyes; then
-    AC_DEFINE(SDL_TIMERS_DISABLED)
+    AC_DEFINE(SDL_TIMERS_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(file,
 AC_HELP_STRING([--enable-file], [Enable the file subsystem [[default=yes]]]),
               , enable_file=yes)
 if test x$enable_file != xyes; then
-    AC_DEFINE(SDL_FILE_DISABLED)
+    AC_DEFINE(SDL_FILE_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(loadso,
 AC_HELP_STRING([--enable-loadso], [Enable the shared object loading subsystem [[default=yes]]]),
               , enable_loadso=yes)
 if test x$enable_loadso != xyes; then
-    AC_DEFINE(SDL_LOADSO_DISABLED)
+    AC_DEFINE(SDL_LOADSO_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(cpuinfo,
 AC_HELP_STRING([--enable-cpuinfo], [Enable the cpuinfo subsystem [[default=yes]]]),
               , enable_cpuinfo=yes)
 if test x$enable_cpuinfo != xyes; then
-    AC_DEFINE(SDL_CPUINFO_DISABLED)
+    AC_DEFINE(SDL_CPUINFO_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(atomic,
 AC_HELP_STRING([--enable-atomic], [Enable the atomic operations [[default=yes]]]),
               , enable_atomic=yes)
 if test x$enable_atomic != xyes; then
-    AC_DEFINE(SDL_ATOMIC_DISABLED)
+    AC_DEFINE(SDL_ATOMIC_DISABLED, 1, [ ])
 fi
 AC_ARG_ENABLE(assembly,
 AC_HELP_STRING([--enable-assembly], [Enable assembly routines [[default=yes]]]),
               , enable_assembly=yes)
 if test x$enable_assembly = xyes; then
-    AC_DEFINE(SDL_ASSEMBLY_ROUTINES)
+    AC_DEFINE(SDL_ASSEMBLY_ROUTINES, 1, [ ])
 
     # Make sure that we don't generate floating point code that would
     # cause illegal instruction exceptions on older processors
@@ -619,9 +641,9 @@ AC_HELP_STRING([--enable-altivec], [use Altivec assembly routines [[default=yes]
         CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_altivec = xyes; then
-            AC_DEFINE(SDL_ALTIVEC_BLITTERS)
+            AC_DEFINE(SDL_ALTIVEC_BLITTERS, 1, [ ])
             if test x$have_altivec_h_hdr = xyes; then
-              AC_DEFINE(HAVE_ALTIVEC_H)
+              AC_DEFINE(HAVE_ALTIVEC_H, 1, [ ])
             fi
             EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
         fi
@@ -653,14 +675,13 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [[default=yes]]]),
               int arg = SNDCTL_DSP_SETFRAGMENT;
             ],[
             have_oss=yes
-            AC_DEFINE(SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H)
+            AC_DEFINE(SDL_AUDIO_DRIVER_OSS_SOUNDCARD_H, 1, [ ])
             ])
         fi
         AC_MSG_RESULT($have_oss)
         if test x$have_oss = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_OSS)
+            AC_DEFINE(SDL_AUDIO_DRIVER_OSS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/dsp/*.c"
-            SOURCES="$SOURCES $srcdir/src/audio/dma/*.c"
             have_audio=yes
 
             # We may need to link with ossaudio emulation library
@@ -690,7 +711,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
                           , enable_alsa_shared=yes)
             alsa_lib=[`find_lib "libasound.so.*" "$ALSA_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
 
-            AC_DEFINE(SDL_AUDIO_DRIVER_ALSA)
+            AC_DEFINE(SDL_AUDIO_DRIVER_ALSA, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/alsa/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $ALSA_CFLAGS"
             if test x$have_loadso != xyes && \
@@ -700,7 +721,7 @@ AC_HELP_STRING([--enable-alsa-shared], [dynamically load ALSA audio support [[de
             if test x$have_loadso = xyes && \
                test x$enable_alsa_shared = xyes && test x$alsa_lib != x; then
                 echo "-- dynamic libasound -> $alsa_lib"
-                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib")
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ALSA_DYNAMIC, "$alsa_lib", [ ])
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ALSA_LIBS"
             fi
@@ -723,7 +744,7 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[defa
                           , enable_esd_shared=yes)
             esd_lib=[`find_lib "libesd.so.*" "$ESD_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
 
-            AC_DEFINE(SDL_AUDIO_DRIVER_ESD)
+            AC_DEFINE(SDL_AUDIO_DRIVER_ESD, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/esd/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $ESD_CFLAGS"
             if test x$have_loadso != xyes && \
@@ -733,7 +754,7 @@ AC_HELP_STRING([--enable-esd-shared], [dynamically load ESD audio support [[defa
             if test x$have_loadso = xyes && \
                test x$enable_esd_shared = xyes && test x$esd_lib != x; then
                 echo "-- dynamic libesd -> $esd_lib"
-                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ESD_DYNAMIC, "$esd_lib")
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ESD_DYNAMIC, "$esd_lib", [ ])
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ESD_LIBS"
             fi
@@ -770,7 +791,7 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
                           , enable_pulseaudio_shared=yes)
             pulseaudio_lib=[`find_lib "libpulse-simple.so.*" "$PULSEAUDIO_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
 
-            AC_DEFINE(SDL_AUDIO_DRIVER_PULSEAUDIO)
+            AC_DEFINE(SDL_AUDIO_DRIVER_PULSEAUDIO, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/pulseaudio/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $PULSEAUDIO_CFLAGS"
             if test x$have_loadso != xyes && \
@@ -780,7 +801,7 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
             if test x$have_loadso = xyes && \
                test x$enable_pulseaudio_shared = xyes && test x$pulseaudio_lib != x; then
                 echo "-- dynamic libpulse-simple -> $pulseaudio_lib"
-                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC, "$pulseaudio_lib")
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC, "$pulseaudio_lib", [ ])
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSEAUDIO_LIBS"
             fi
@@ -820,7 +841,7 @@ AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[de
                               , enable_arts_shared=yes)
                 arts_lib=[`find_lib "libartsc.so.*" "$ARTS_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`]
 
-                AC_DEFINE(SDL_AUDIO_DRIVER_ARTS)
+                AC_DEFINE(SDL_AUDIO_DRIVER_ARTS, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/arts/*.c"
                 EXTRA_CFLAGS="$EXTRA_CFLAGS $ARTS_CFLAGS"
                 if test x$have_loadso != xyes && \
@@ -830,7 +851,7 @@ AC_HELP_STRING([--enable-arts-shared], [dynamically load aRts audio support [[de
                 if test x$have_loadso = xyes && \
                    test x$enable_arts_shared = xyes && test x$arts_lib != x; then
                     echo "-- dynamic libartsc -> $arts_lib"
-                    AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ARTS_DYNAMIC, "$arts_lib")
+                    AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_ARTS_DYNAMIC, "$arts_lib", [ ])
                 else
                     EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ARTS_LIBS"
                 fi
@@ -879,12 +900,12 @@ AC_HELP_STRING([--enable-nas-shared], [dynamically load NAS audio support [[defa
             if test x$have_loadso = xyes && \
                test x$enable_nas_shared = xyes && test x$nas_lib != x; then
                 echo "-- dynamic libaudio -> $nas_lib"
-                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_NAS_DYNAMIC, "$nas_lib")
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_NAS_DYNAMIC, "$nas_lib", [ ])
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $NAS_LIBS"
             fi
 
-            AC_DEFINE(SDL_AUDIO_DRIVER_NAS)
+            AC_DEFINE(SDL_AUDIO_DRIVER_NAS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/nas/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $NAS_CFLAGS"
             have_audio=yes
@@ -899,7 +920,7 @@ CheckDiskAudio()
 AC_HELP_STRING([--enable-diskaudio], [support the disk writer audio driver [[default=yes]]]),
                   , enable_diskaudio=yes)
     if test x$enable_audio = xyes -a x$enable_diskaudio = xyes; then
-        AC_DEFINE(SDL_AUDIO_DRIVER_DISK)
+        AC_DEFINE(SDL_AUDIO_DRIVER_DISK, 1, [ ])
         SOURCES="$SOURCES $srcdir/src/audio/disk/*.c"
     fi
 }
@@ -911,7 +932,7 @@ CheckDummyAudio()
 AC_HELP_STRING([--enable-dummyaudio], [support the dummy audio driver [[default=yes]]]),
                   , enable_dummyaudio=yes)
     if test x$enable_audio = xyes -a x$enable_dummyaudio = xyes; then
-        AC_DEFINE(SDL_AUDIO_DRIVER_DUMMY)
+        AC_DEFINE(SDL_AUDIO_DRIVER_DUMMY, 1, [ ])
         SOURCES="$SOURCES $srcdir/src/audio/dummy/*.c"
     fi
 }
@@ -1005,7 +1026,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             CFLAGS="$CFLAGS $X_CFLAGS"
             LDFLAGS="$LDFLAGS $X_LIBS"
 
-            AC_DEFINE(SDL_VIDEO_DRIVER_X11)
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
 
@@ -1027,8 +1048,8 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                test x$enable_x11_shared = xyes && test x$x11_lib != x && test x$x11ext_lib != x; then
                 echo "-- dynamic libX11 -> $x11_lib"
                 echo "-- dynamic libX11ext -> $x11ext_lib"
-                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC, "$x11_lib")
-                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib")
+                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC, "$x11_lib", [ ])
+                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT, "$x11ext_lib", [ ])
             else
                 enable_x11_shared=no
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $X_LIBS -lX11 -lXext"
@@ -1048,7 +1069,7 @@ AC_HELP_STRING([--enable-video-x11-xcursor], [enable X11 Xcursor support [[defau
                 if test x$have_xcursor_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xcursor_lib != x ; then
                         echo "-- dynamic libXcursor -> $xcursor_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR, "$xcursor_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XCURSOR, "$xcursor_lib", [ ])
                         definitely_enable_video_x11_xcursor=yes
                     else
                         AC_CHECK_LIB(Xcursor, XcursorImageCreate, have_xcursor_lib=yes)
@@ -1060,7 +1081,7 @@ AC_HELP_STRING([--enable-video-x11-xcursor], [enable X11 Xcursor support [[defau
                 fi
             fi
             if test x$definitely_enable_video_x11_xcursor = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XCURSOR)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XCURSOR, 1, [ ])
             fi
             AC_ARG_ENABLE(video-x11-xinerama,
 AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [[default=yes]]]),
@@ -1075,7 +1096,7 @@ AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [[def
                 if test x$have_xinerama_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xinerama_lib != x ; then
                         echo "-- dynamic libXinerama -> $xinerama_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA, "$xinerama_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA, "$xinerama_lib", [ ])
                         definitely_enable_video_x11_xinerama=yes
                     else
                         AC_CHECK_LIB(Xinerama, XineramaQueryExtension, have_xinerama_lib=yes)
@@ -1087,7 +1108,7 @@ AC_HELP_STRING([--enable-video-x11-xinerama], [enable X11 Xinerama support [[def
                 fi
             fi
             if test x$definitely_enable_video_x11_xinerama = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINERAMA)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINERAMA, 1, [ ])
             fi
             AC_ARG_ENABLE(video-x11-xinput,
 AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for manymouse, tablets, etc [[default=yes]]]),
@@ -1102,7 +1123,7 @@ AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for man
                 if test x$have_xinput_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xinput_lib != x ; then
                         echo "-- dynamic libXi -> $xinput_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT, "$xinput_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT, "$xinput_lib", [ ])
                         definitely_enable_video_x11_xinput=yes
                     else
                         AC_CHECK_LIB(Xi, XOpenDevice, have_xinput_lib=yes)
@@ -1114,7 +1135,7 @@ AC_HELP_STRING([--enable-video-x11-xinput], [enable X11 XInput extension for man
                 fi
             fi
             if test x$definitely_enable_video_x11_xinput = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINPUT)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XINPUT, 1, [ ])
             fi
             AC_ARG_ENABLE(video-x11-xrandr,
 AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for fullscreen [[default=yes]]]),
@@ -1129,7 +1150,7 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
                 if test x$have_xrandr_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xrandr_lib != x ; then
                         echo "-- dynamic libXrandr -> $xrandr_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR, "$xrandr_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR, "$xrandr_lib", [ ])
                         definitely_enable_video_x11_xrandr=yes
                     else
                         AC_CHECK_LIB(Xrandr, XRRQueryExtension, have_xrandr_lib=yes)
@@ -1141,7 +1162,7 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
                 fi
             fi
             if test x$definitely_enable_video_x11_xrandr = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR, 1, [ ])
             fi
             AC_ARG_ENABLE(video-x11-scrnsaver,
 AC_HELP_STRING([--enable-video-x11-scrnsaver], [enable X11 screensaver extension [[default=yes]]]),
@@ -1155,7 +1176,7 @@ AC_HELP_STRING([--enable-video-x11-scrnsaver], [enable X11 screensaver extension
                 if test x$have_scrnsaver_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xss_lib != x ; then
                         echo "-- dynamic libXss -> $xss_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS, "$xss_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS, "$xss_lib", [ ])
                         definitely_enable_video_x11_scrnsaver=yes
                     else
                         AC_CHECK_LIB(Xss, XScreenSaverSuspend, have_xss_lib=yes)
@@ -1167,7 +1188,7 @@ AC_HELP_STRING([--enable-video-x11-scrnsaver], [enable X11 screensaver extension
                 fi
             fi
             if test x$definitely_enable_video_x11_scrnsaver = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XSCRNSAVER)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XSCRNSAVER, 1, [ ])
             fi
             AC_ARG_ENABLE(video-x11-xshape,
 AC_HELP_STRING([--enable-video-x11-xshape], [enable X11 XShape support [[default=yes]]]),
@@ -1179,7 +1200,7 @@ AC_HELP_STRING([--enable-video-x11-xshape], [enable X11 XShape support [[default
                                 [#include <X11/Xlib.h>
                                 ])
                 if test x$have_shape_h_hdr = xyes; then
-                    AC_DEFINE(SDL_VIDEO_DRIVER_X11_XSHAPE)
+                    AC_DEFINE(SDL_VIDEO_DRIVER_X11_XSHAPE, 1, [ ])
                 fi
             fi
             AC_ARG_ENABLE(video-x11-vm,
@@ -1195,7 +1216,7 @@ AC_HELP_STRING([--enable-video-x11-vm], [use X11 VM extension for fullscreen [[d
                 if test x$have_vm_h_hdr = xyes; then
                     if test x$enable_x11_shared = xyes && test x$xvidmode_lib != x ; then
                         echo "-- dynamic libXxf86vm -> $xvidmode_lib"
-                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE, "$xvidmode_lib")
+                        AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE, "$xvidmode_lib", [ ])
                         definitely_enable_video_x11_vm=yes
                     else
                         AC_CHECK_LIB(Xxf86vm, XF86VidModeQueryVersion, have_vm_lib=yes)
@@ -1207,7 +1228,7 @@ AC_HELP_STRING([--enable-video-x11-vm], [use X11 VM extension for fullscreen [[d
                 fi
             fi
             if test x$definitely_enable_video_x11_vm = xyes; then
-                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XVIDMODE)
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_XVIDMODE, 1, [ ])
             fi
         fi
     fi
@@ -1217,7 +1238,7 @@ dnl Set up the BWindow video driver if enabled
 CheckBWINDOW()
 {
     if test x$enable_video = xyes; then
-        AC_DEFINE(SDL_VIDEO_DRIVER_BWINDOW)
+        AC_DEFINE(SDL_VIDEO_DRIVER_BWINDOW, 1, [ ])
         SOURCES="$SOURCES $srcdir/src/video/bwindow/*.cc"
         have_video=yes
     fi
@@ -1244,7 +1265,7 @@ AC_HELP_STRING([--enable-video-cocoa], [use Cocoa video driver [[default=yes]]])
         AC_MSG_RESULT($have_cocoa)
         CFLAGS="$save_CFLAGS"
         if test x$have_cocoa = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_COCOA)
+            AC_DEFINE(SDL_VIDEO_DRIVER_COCOA, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/cocoa/*.m"
             have_video=yes
         fi
@@ -1300,8 +1321,8 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
 AC_HELP_STRING([--enable-directfb-shared], [dynamically load directfb support [[default=yes]]]),
                               , enable_directfb_shared=yes)
 
-            AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB)
-            AC_DEFINE(SDL_VIDEO_RENDER_DIRECTFB)
+            AC_DEFINE(SDL_VIDEO_DRIVER_DIRECTFB, 1, [ ])
+            AC_DEFINE(SDL_VIDEO_RENDER_DIRECTFB, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/directfb/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $DIRECTFB_CFLAGS"
 
@@ -1318,7 +1339,7 @@ AC_MSG_WARN("directfb $directfb_lib")
                test x$enable_directfb_shared = xyes && test x$directfb_lib != x; then
                 directfb_shared=yes
                 echo "-- $directfb_lib_spec -> $directfb_lib"
-                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC, "$directfb_lib")
+                AC_DEFINE_UNQUOTED(SDL_VIDEO_DRIVER_DIRECTFB_DYNAMIC, "$directfb_lib", [ ])
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $DIRECTFB_LIBS"
             fi
@@ -1351,7 +1372,7 @@ AC_HELP_STRING([--enable-fusionsound], [use FusionSound audio driver [[default=n
         AC_MSG_RESULT($fusionsound)
 
         if test x$fusionsound = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_FUSIONSOUND)
+            AC_DEFINE(SDL_AUDIO_DRIVER_FUSIONSOUND, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/fusionsound/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $FUSIONSOUND_CFLAGS"
             
@@ -1366,7 +1387,7 @@ AC_HELP_STRING([--enable-fusionsound-shared], [dynamically load fusionsound audi
             fi
             if test x$have_loadso = xyes && \
                test x$enable_fusionsound_shared = xyes; then
-                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC, "libfusionsound.so")
+                AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC, "libfusionsound.so", [ ])
                 fusionsound_shared=yes
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $FUSIONSOUND_LIBS"
@@ -1385,7 +1406,7 @@ CheckDummyVideo()
 AC_HELP_STRING([--enable-video-dummy], [use dummy video driver [[default=yes]]]),
                   , enable_video_dummy=yes)
     if test x$enable_video_dummy = xyes; then
-        AC_DEFINE(SDL_VIDEO_DRIVER_DUMMY)
+        AC_DEFINE(SDL_VIDEO_DRIVER_DUMMY, 1, [ ])
         SOURCES="$SOURCES $srcdir/src/video/dummy/*.c"
         have_video=yes
     fi
@@ -1411,9 +1432,9 @@ CheckOpenGLX11()
         ])
         AC_MSG_RESULT($video_opengl)
         if test x$video_opengl = xyes; then
-            AC_DEFINE(SDL_VIDEO_OPENGL)
-            AC_DEFINE(SDL_VIDEO_OPENGL_GLX)
-            AC_DEFINE(SDL_VIDEO_RENDER_OGL)
+            AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
+            AC_DEFINE(SDL_VIDEO_OPENGL_GLX, 1, [ ])
+            AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
         fi
     fi
 }
@@ -1422,9 +1443,9 @@ dnl Check for Windows OpenGL
 CheckWINDOWSGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        AC_DEFINE(SDL_VIDEO_OPENGL)
-        AC_DEFINE(SDL_VIDEO_OPENGL_WGL)
-        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_OPENGL_WGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
     fi
 }
 
@@ -1432,9 +1453,9 @@ dnl Check for BeOS OpenGL
 CheckBeGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        AC_DEFINE(SDL_VIDEO_OPENGL)
-        AC_DEFINE(SDL_VIDEO_OPENGL_BGL)
-        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_OPENGL_BGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL"
     fi
 }
@@ -1443,9 +1464,9 @@ dnl Check for MacOS OpenGL
 CheckMacGL()
 {
     if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
-        AC_DEFINE(SDL_VIDEO_OPENGL)
-        AC_DEFINE(SDL_VIDEO_OPENGL_CGL)
-        AC_DEFINE(SDL_VIDEO_RENDER_OGL)
+        AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_OPENGL_CGL, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
         case "$host" in
             *-*-darwin*)
                 if test x$enable_video_cocoa = xyes; then
@@ -1476,7 +1497,7 @@ AC_HELP_STRING([--enable-input-events], [use Linux 2.4 unified input interface [
         ])
         AC_MSG_RESULT($use_input_events)
         if test x$use_input_events = xyes; then
-            AC_DEFINE(SDL_INPUT_LINUXEV)
+            AC_DEFINE(SDL_INPUT_LINUXEV, 1, [ ])
         fi
     fi
 }
@@ -1498,7 +1519,7 @@ AC_HELP_STRING([--enable-input-tslib], [use the Touchscreen library for input [[
         ])
         AC_MSG_RESULT($enable_input_tslib)
         if test x$enable_input_tslib = xyes; then
-            AC_DEFINE(SDL_INPUT_TSLIB)
+            AC_DEFINE(SDL_INPUT_TSLIB, 1, [ ])
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lts"
         fi
     fi
@@ -1584,7 +1605,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
 
         # Do futher testing if we have pthread support...
         if test x$use_pthreads = xyes; then
-            AC_DEFINE(SDL_THREAD_PTHREAD)
+            AC_DEFINE(SDL_THREAD_PTHREAD, 1, [ ])
             EXTRA_CFLAGS="$EXTRA_CFLAGS $pthread_cflags"
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS $pthread_lib"
             SDL_CFLAGS="$SDL_CFLAGS $pthread_cflags"
@@ -1606,7 +1627,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
                   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
                 ],[
                 has_recursive_mutexes=yes
-                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX)
+                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX, 1, [ ])
                 ])
             fi
             if test x$has_recursive_mutexes = xno; then
@@ -1617,7 +1638,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
                   pthread_mutexattr_setkind_np(&attr, PTHREAD_MUTEX_RECURSIVE_NP);
                 ],[
                 has_recursive_mutexes=yes
-                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP)
+                AC_DEFINE(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP, 1, [ ])
                 ])
             fi
             AC_MSG_RESULT($has_recursive_mutexes)
@@ -1705,6 +1726,7 @@ AC_HELP_STRING([--enable-directx], [use DirectX for Windows audio/video [[defaul
         AC_CHECK_HEADER(ddraw.h, have_ddraw=yes)
         AC_CHECK_HEADER(dsound.h, have_dsound=yes)
         AC_CHECK_HEADER(dinput.h, have_dinput=yes)
+        AC_CHECK_HEADER(xaudio2.h, have_xaudio2=yes)
     fi
 }
 
@@ -1732,7 +1754,7 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [[de
             AC_CHECK_LIB(c, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS",
                AC_CHECK_LIB(dl, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldl",
                   AC_CHECK_LIB(ltdl, dlopen, EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lltdl")))
-            AC_DEFINE(SDL_LOADSO_DLOPEN)
+            AC_DEFINE(SDL_LOADSO_DLOPEN, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/loadso/dlopen/*.c"
             have_loadso=yes
         fi
@@ -1862,11 +1884,11 @@ CheckUSBHID()
             have_machine_joystick=yes
             ])
             if test x$have_machine_joystick = xyes; then
-                AC_DEFINE(SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H)
+                AC_DEFINE(SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H, 1, [ ])
             fi
             AC_MSG_RESULT($have_machine_joystick)
 
-            AC_DEFINE(SDL_JOYSTICK_USBHID)
+            AC_DEFINE(SDL_JOYSTICK_USBHID, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/joystick/bsd/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $USB_CFLAGS"
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS $USB_LIBS"
@@ -1885,12 +1907,12 @@ AC_HELP_STRING([--enable-clock_gettime], [use clock_gettime() instead of gettime
     if test x$enable_clock_gettime = xyes; then
         AC_CHECK_LIB(rt, clock_gettime, have_clock_gettime=yes)
         if test x$have_clock_gettime = xyes; then
-            AC_DEFINE(HAVE_CLOCK_GETTIME)
+            AC_DEFINE(HAVE_CLOCK_GETTIME, 1, [ ])
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lrt"
         else
             AC_CHECK_LIB(c, clock_gettime, have_clock_gettime=yes)
             if test x$have_clock_gettime = xyes; then
-               AC_DEFINE(HAVE_CLOCK_GETTIME)
+               AC_DEFINE(HAVE_CLOCK_GETTIME, 1, [ ])
                EXTRA_LDFLAGS="$EXTRA_LDFLAGS"
             fi
         fi
@@ -1961,17 +1983,17 @@ case "$host" in
         if test x$enable_audio = xyes; then
           case $ARCH in
             sysv5|solaris|hpux)
-                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO)
+                AC_DEFINE(SDL_AUDIO_DRIVER_SUNAUDIO, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
                 have_audio=yes
             ;;
             netbsd|openbsd)
-                AC_DEFINE(SDL_AUDIO_DRIVER_BSD)
+                AC_DEFINE(SDL_AUDIO_DRIVER_BSD, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/bsd/*.c"
                 have_audio=yes
             ;;
             aix)
-                AC_DEFINE(SDL_AUDIO_DRIVER_PAUDIO)
+                AC_DEFINE(SDL_AUDIO_DRIVER_PAUDIO, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/audio/paudio/*.c"
                 have_audio=yes
             ;;
@@ -1981,7 +2003,7 @@ case "$host" in
         if test x$enable_joystick = xyes; then
           case $ARCH in
             linux)
-                AC_DEFINE(SDL_JOYSTICK_LINUX)
+                AC_DEFINE(SDL_JOYSTICK_LINUX, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/joystick/linux/*.c"
                 have_joystick=yes
             ;;
@@ -1992,7 +2014,7 @@ case "$host" in
            if test x$use_input_events = xyes; then
              case $ARCH in
                linux)
-                   AC_DEFINE(SDL_HAPTIC_LINUX)
+                   AC_DEFINE(SDL_HAPTIC_LINUX, 1, [ ])
                    SOURCES="$SOURCES $srcdir/src/haptic/linux/*.c"
                    have_haptic=yes
                ;;
@@ -2003,7 +2025,7 @@ case "$host" in
         if test x$enable_power = xyes; then
              case $ARCH in
                linux)
-                   AC_DEFINE(SDL_POWER_LINUX)
+                   AC_DEFINE(SDL_POWER_LINUX, 1, [ ])
                    SOURCES="$SOURCES $srcdir/src/power/linux/*.c"
                    have_power=yes
                ;;
@@ -2011,7 +2033,7 @@ case "$host" in
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_UNIX)
+            AC_DEFINE(SDL_TIMER_UNIX, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
@@ -2023,7 +2045,7 @@ case "$host" in
         CheckDummyAudio
         CheckWINDOWS
         if test x$enable_video = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS)
+            AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/windows/*.c"
             have_video=yes
             AC_ARG_ENABLE(render-d3d,
@@ -2031,28 +2053,32 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
                                 , enable_render_d3d=yes)
             enable_render_d3d=no
             if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
-                AC_DEFINE(SDL_VIDEO_RENDER_D3D)
+                AC_DEFINE(SDL_VIDEO_RENDER_D3D, 1, [ ])
             fi
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT)
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
-                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND)
-                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
+                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
+                SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
+            fi
+            if test x$have_xaudio2 = xyes; then
+                AC_DEFINE(SDL_AUDIO_DRIVER_XAUDIO2, 1, [ ])
+                SOURCES="$SOURCES $srcdir/src/audio/xaudio2/*.c"
             fi
             have_audio=yes
         fi
         # Set up dummy files for the joystick for now
         if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_DUMMY)
+            AC_DEFINE(SDL_JOYSTICK_DUMMY, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
             have_joystick=yes
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            AC_DEFINE(SDL_THREAD_WINDOWS)
+            AC_DEFINE(SDL_THREAD_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_sysmutex.c"
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_syssem.c"
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_systhread.c"
@@ -2061,13 +2087,13 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_WINCE)
+            AC_DEFINE(SDL_TIMER_WINCE, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/timer/wince/*.c"
             have_timers=yes
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_WINDOWS)
+            AC_DEFINE(SDL_LOADSO_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/loadso/windows/*.c"
             have_loadso=yes
         fi
@@ -2111,53 +2137,57 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
 
         # Set up files for the video library
         if test x$enable_video = xyes; then
-            AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS)
+            AC_DEFINE(SDL_VIDEO_DRIVER_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/windows/*.c"
             have_video=yes
             AC_ARG_ENABLE(render-d3d,
 AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[default=yes]]]),
                                 , enable_render_d3d=yes)
             if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
-                AC_DEFINE(SDL_VIDEO_RENDER_D3D)
+                AC_DEFINE(SDL_VIDEO_RENDER_D3D, 1, [ ])
             fi
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_WINWAVEOUT)
-            SOURCES="$SOURCES $srcdir/src/audio/windib/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
-                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND)
-                SOURCES="$SOURCES $srcdir/src/audio/windx5/*.c"
+                AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
+                SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
+            fi
+            if test x$have_xaudio2 = xyes; then
+                AC_DEFINE(SDL_AUDIO_DRIVER_XAUDIO2, 1, [ ])
+                SOURCES="$SOURCES $srcdir/src/audio/xaudio2/*.c"
             fi
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
             if test x$have_dinput = xyes; then
-                AC_DEFINE(SDL_JOYSTICK_DINPUT)
+                AC_DEFINE(SDL_JOYSTICK_DINPUT, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/joystick/windows/SDL_dxjoystick.c"
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS -ldinput8 -ldxguid -ldxerr8"
             else
-                AC_DEFINE(SDL_JOYSTICK_WINMM)
+                AC_DEFINE(SDL_JOYSTICK_WINMM, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/joystick/windows/SDL_mmjoystick.c"
             fi
             have_joystick=yes
         fi
         if test x$enable_haptic = xyes; then
             if test x$have_dinput = xyes; then
-                AC_DEFINE(SDL_HAPTIC_DINPUT)
+                AC_DEFINE(SDL_HAPTIC_DINPUT, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/haptic/windows/SDL_syshaptic.c"
                 have_haptic=yes
             fi
         fi
         if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_WINDOWS)
+            AC_DEFINE(SDL_POWER_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/power/windows/SDL_syspower.c"
             have_power=yes
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            AC_DEFINE(SDL_THREAD_WINDOWS)
+            AC_DEFINE(SDL_THREAD_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_sysmutex.c"
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_syssem.c"
             SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_systhread.c"
@@ -2166,13 +2196,13 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_WINDOWS)
+            AC_DEFINE(SDL_TIMER_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/timer/windows/*.c"
             have_timers=yes
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_WINDOWS)
+            AC_DEFINE(SDL_LOADSO_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/loadso/windows/*.c"
             have_loadso=yes
         fi
@@ -2197,19 +2227,19 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckBeGL
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_BEOSAUDIO)
+            AC_DEFINE(SDL_AUDIO_DRIVER_BEOSAUDIO, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/audio/baudio/*.cc"
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_BEOS)
+            AC_DEFINE(SDL_JOYSTICK_BEOS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/joystick/beos/*.cc"
             have_joystick=yes
         fi
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
-            AC_DEFINE(SDL_THREAD_BEOS)
+            AC_DEFINE(SDL_THREAD_BEOS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/thread/beos/*.c"
             SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_sysmutex.c"
             SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
@@ -2217,19 +2247,19 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_BEOS)
+            AC_DEFINE(SDL_TIMER_BEOS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/timer/beos/*.c"
             have_timers=yes
         fi
         # Set up files for the shared object loading library
         if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_BEOS)
+            AC_DEFINE(SDL_LOADSO_BEOS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/loadso/beos/*.c"
             have_loadso=yes
         fi
         # Set up files for the system power library
         if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_BEOS)
+            AC_DEFINE(SDL_POWER_BEOS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/power/beos/*.c"
             have_power=yes
         fi
@@ -2256,7 +2286,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # Set up files for the shared object loading library
         # (this needs to be done before the dynamic X11 check)
         if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
-            AC_DEFINE(SDL_LOADSO_DLCOMPAT)
+            AC_DEFINE(SDL_LOADSO_DLCOMPAT, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
             have_loadso=yes
         fi
@@ -2275,32 +2305,32 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
 
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO)
-            SOURCES="$SOURCES $srcdir/src/audio/macosx/*.c"
+            AC_DEFINE(SDL_AUDIO_DRIVER_COREAUDIO, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/audio/coreaudio/*.c"
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_IOKIT)
+            AC_DEFINE(SDL_JOYSTICK_IOKIT, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/joystick/darwin/*.c"
             have_joystick=yes
         fi
         # Set up files for the haptic library
         if test x$enable_haptic = xyes; then
-            AC_DEFINE(SDL_HAPTIC_IOKIT)
+            AC_DEFINE(SDL_HAPTIC_IOKIT, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/haptic/darwin/*.c"
             have_haptic=yes
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ForceFeedback"
         fi
         # Set up files for the power library
         if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_MACOSX)
+            AC_DEFINE(SDL_POWER_MACOSX, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/power/macosx/*.c"
             have_power=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_UNIX)
+            AC_DEFINE(SDL_TIMER_UNIX, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
@@ -2330,31 +2360,31 @@ esac
 
 if test x$have_joystick != xyes; then
     if test x$enable_joystick = xyes; then
-        AC_DEFINE(SDL_JOYSTICK_DISABLED)
+        AC_DEFINE(SDL_JOYSTICK_DISABLED, 1, [ ])
     fi
     SOURCES="$SOURCES $srcdir/src/joystick/dummy/*.c"
 fi
 if test x$have_haptic != xyes; then
     if test x$enable_haptic = xyes; then
-        AC_DEFINE(SDL_HAPTIC_DISABLED)
+        AC_DEFINE(SDL_HAPTIC_DISABLED, 1, [ ])
     fi
     SOURCES="$SOURCES $srcdir/src/haptic/dummy/*.c"
 fi
 if test x$have_threads != xyes; then
     if test x$enable_threads = xyes; then
-        AC_DEFINE(SDL_THREADS_DISABLED)
+        AC_DEFINE(SDL_THREADS_DISABLED, 1, [ ])
     fi
     SOURCES="$SOURCES $srcdir/src/thread/generic/*.c"
 fi
 if test x$have_timers != xyes; then
     if test x$enable_timers = xyes; then
-        AC_DEFINE(SDL_TIMERS_DISABLED)
+        AC_DEFINE(SDL_TIMERS_DISABLED, 1, [ ])
     fi
     SOURCES="$SOURCES $srcdir/src/timer/dummy/*.c"
 fi
 if test x$have_loadso != xyes; then
     if test x$enable_loadso = xyes; then
-        AC_DEFINE(SDL_LOADSO_DISABLED)
+        AC_DEFINE(SDL_LOADSO_DISABLED, 1, [ ])
     fi
     SOURCES="$SOURCES $srcdir/src/loadso/dummy/*.c"
 fi

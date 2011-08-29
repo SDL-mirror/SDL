@@ -123,8 +123,9 @@ TestEndian(SDL_bool verbose)
         printf("Value 64 = 0x%I64X, swapped = 0x%I64X\n", value64,
                SDL_Swap64(value64));
 #else
-        printf("Value 64 = 0x%llX, swapped = 0x%llX\n", value64,
-               SDL_Swap64(value64));
+        printf("Value 64 = 0x%llX, swapped = 0x%llX\n",
+               (unsigned long long) value64,
+               (unsigned long long) SDL_Swap64(value64));
 #endif
     }
     if (SDL_Swap64(value64) != swapped64) {

@@ -202,7 +202,7 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 
 
 static void
-UIKit_AddDisplay(UIScreen *uiscreen, int w, int h)
+UIKit_AddDisplay(UIScreen *uiscreen, UIScreenMode *uimode, int w, int h)
 {
     SDL_VideoDisplay display;
     SDL_DisplayMode mode;
@@ -211,6 +211,9 @@ UIKit_AddDisplay(UIScreen *uiscreen, int w, int h)
     mode.w = w;
     mode.h = h;
     mode.refresh_rate = 0;
+    
+    [uimode retain];
+    mode.driverdata = uimode;
 
     SDL_zero(display);
     display.desktop_mode = mode;
@@ -238,8 +241,9 @@ UIKit_VideoInit(_THIS)
     if (!SDL_UIKit_supports_multiple_displays) {
         // Just give 'em the whole main screen.
         UIScreen *uiscreen = [UIScreen mainScreen];
+        UIScreenMode *uiscreenmode = [uiscreen currentMode];
         const CGRect rect = [uiscreen bounds];
-        UIKit_AddDisplay(uiscreen, (int)rect.size.width, (int)rect.size.height);
+        UIKit_AddDisplay(uiscreen, uiscreenmode, (int)rect.size.width, (int)rect.size.height);
     } else {
         const NSArray *screens = [UIScreen screens];
         const NSUInteger screen_count = [screens count];
@@ -247,8 +251,9 @@ UIKit_VideoInit(_THIS)
         for (i = 0; i < screen_count; i++) {
             // the main screen is the first element in the array.
             UIScreen *uiscreen = (UIScreen *) [screens objectAtIndex:i];
+            UIScreenMode *uiscreenmode = [uiscreen currentMode];
             const CGSize size = [[uiscreen currentMode] size];
-            UIKit_AddDisplay(uiscreen, (int) size.width, (int) size.height);
+            UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
         }
     }
 

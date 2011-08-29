@@ -144,7 +144,7 @@ AndroidAUD_Init(SDL_AudioDriverImpl * impl)
 }
 
 AudioBootStrap ANDROIDAUD_bootstrap = {
-    "android", "SDL Android audio driver", AndroidAUD_Init, 0       /*1? */
+    "android", "SDL Android audio driver", AndroidAUD_Init, 0
 };
 
 /* Called by the Java code to start the audio processing on a thread */

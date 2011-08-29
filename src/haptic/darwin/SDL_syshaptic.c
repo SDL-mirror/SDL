@@ -520,7 +520,7 @@ SDL_SYS_JoystickIsHaptic(SDL_Joystick * joystick)
 int
 SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    if (IOObjectIsEqualTo((io_object_t) haptic->hwdata->device,
+    if (IOObjectIsEqualTo((io_object_t) ((size_t)haptic->hwdata->device),
                           joystick->hwdata->ffservice))
         return 1;
     return 0;

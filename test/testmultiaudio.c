@@ -10,6 +10,7 @@
   freely.
 */
 #include "SDL.h"
+#include <stdio.h>
 
 static SDL_AudioSpec spec;
 static Uint8 *sound = NULL;     /* Pointer to wave data */

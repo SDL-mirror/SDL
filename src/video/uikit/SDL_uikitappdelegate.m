@@ -20,6 +20,9 @@
 */
 
 #import "../SDL_sysvideo.h"
+#import "SDL_assert.h"
+#import "SDL_hints.h"
+#import "../../SDL_hints_c.h"
 
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitopenglview.h"
@@ -55,6 +58,13 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue) {
+    SDL_assert(SDL_strcmp(name, SDL_HINT_IDLE_TIMER_DISABLED) == 0);
+    
+    BOOL disable = (*newValue != '0');
+    [UIApplication sharedApplication].idleTimerDisabled = disable;
+}
+
 @implementation SDLUIKitDelegate
 
 /* convenience method */
@@ -75,6 +85,10 @@ int main(int argc, char **argv) {
 }
 
 - (void)postFinishLaunch {
+    
+    /* register a callback for the idletimer hint */
+    SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
+    SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     /* run the user's application, passing argc and argv */
     int exit_status = SDL_main(forward_argc, forward_argv);
@@ -116,7 +130,7 @@ int main(int argc, char **argv) {
     if (!_this) {
         return;
     }
-	
+    
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
@@ -132,10 +146,10 @@ int main(int argc, char **argv) {
     if (!_this) {
         return;
     }
-	
-	SDL_Window *window;
+    
+    SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
-		SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }
 

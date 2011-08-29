@@ -549,6 +549,7 @@ X11_PumpEvents(_THIS)
     struct input_event ev[64];
     int size = sizeof (struct input_event);
 
+/* !!! FIXME: clean the tabstops out of here. */
     for(i = 0;i < SDL_GetNumTouch();++i) {
 	SDL_Touch* touch = SDL_GetTouchIndex(i);
 	if(!touch) printf("Touch %i/%i DNE\n",i,SDL_GetNumTouch());
@@ -561,12 +562,10 @@ X11_PumpEvents(_THIS)
 	if(data->eventStream <= 0) 
 	    printf("Error: Couldn't open stream\n");
 	rd = read(data->eventStream, ev, size * 64);
-	//printf("Got %i/%i bytes\n",rd,size);
 	if(rd >= size) {
 	    for (i = 0; i < rd / sizeof(struct input_event); i++) {
 		switch (ev[i].type) {
 		case EV_ABS:
-		    //printf("Got position x: %i!\n",data->x);
 		    switch (ev[i].code) {
 			case ABS_X:
 			    data->x = ev[i].value;
@@ -585,29 +584,37 @@ X11_PumpEvents(_THIS)
 			}
 		    break;
 		case EV_MSC:
-		    if(ev[i].code == MSC_SERIAL)
-			data->finger = ev[i].value;
-		    break;
+			if(ev[i].code == MSC_SERIAL)
+				data->finger = ev[i].value;
+			break;
+		case EV_KEY:
+			if(ev[i].code == BTN_TOUCH)
+			    if(ev[i].value == 0)
+			        data->up = SDL_TRUE;
+			break;
 		case EV_SYN:
-		  //printf("Id: %i\n",touch->id); 
-		  if(data->up) {
+		  if(!data->down) {
+		      data->down = SDL_TRUE;
 		      SDL_SendFingerDown(touch->id,data->finger,
-			  	       SDL_FALSE,data->x,data->y,
-				       data->pressure);		    
+		    		  data->down, data->x, data->y,
+		    		  data->pressure);
 		  }
-		  else if(data->x >= 0 || data->y >= 0)
+		  else if(!data->up)
 		    SDL_SendTouchMotion(touch->id,data->finger, 
-					SDL_FALSE,data->x,data->y,
+					SDL_FALSE, data->x,data->y,
 					data->pressure);
-		  
-		    //printf("Synched: %i tx: %i, ty: %i\n",
-		    //	   data->finger,data->x,data->y);
-		  data->x = -1;
-		  data->y = -1;
-		  data->pressure = -1;
-		  data->finger = 0;
-		  data->up = SDL_FALSE;
-		    
+		  else
+		  {
+		      data->down = SDL_FALSE;
+			  SDL_SendFingerDown(touch->id,data->finger,
+					  data->down, data->x,data->y,
+					  data->pressure);
+			  data->x = -1;
+			  data->y = -1;
+			  data->pressure = -1;
+			  data->finger = 0;
+			  data->up = SDL_FALSE;
+		  }
 		  break;		
 		}
 	    }

@@ -29,9 +29,9 @@ enum {
 };
 
 typedef struct {
-    GLuint program;
-    GLuint vert_shader;
-    GLuint frag_shader;
+    GLhandleARB program;
+    GLhandleARB vert_shader;
+    GLhandleARB frag_shader;
     const char *vert_source;
     const char *frag_source;
 } ShaderData;
@@ -124,7 +124,7 @@ static PFNGLSHADERSOURCEARBPROC glShaderSourceARB;
 static PFNGLUNIFORM1IARBPROC glUniform1iARB;
 static PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB;
 
-static SDL_bool CompileShader(GLenum shader, const char *source)
+static SDL_bool CompileShader(GLhandleARB shader, const char *source)
 {
     GLint status;
 

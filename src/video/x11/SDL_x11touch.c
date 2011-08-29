@@ -47,10 +47,9 @@ X11_InitTouch(_THIS)
   while(!feof(fd)) {
     if(fgets(line,256,fd) <=0) continue;
     if(line[0] == '\n') {
-      if(vendor == 1386){
-	/*printf("Wacom... Assuming it is a touch device\n");*/
-	/*sprintf(tstr,"/dev/input/event%i",event);*/
-	/*printf("At location: %s\n",tstr);*/
+    if(vendor == 1386 || vendor==1){
+
+	sprintf(tstr,"/dev/input/event%i",event);
 
 	SDL_Touch touch;
 	touch.pressure_max = 0;
@@ -66,6 +65,7 @@ X11_InitTouch(_THIS)
 	data->pressure = -1;
 	data->finger = 0;
 	data->up = SDL_FALSE;
+    data->down = SDL_FALSE;
 	
 
 	data->eventStream = open(tstr, 

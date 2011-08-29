@@ -32,9 +32,6 @@
 #include "../SDL_audio_c.h"
 #include "SDL_nasaudio.h"
 
-/* The tag name used by nas audio */
-#define NAS_DRIVER_NAME         "nas"
-
 static struct SDL_PrivateAudioData *this2 = NULL;
 
 
@@ -397,7 +394,7 @@ NAS_Init(SDL_AudioDriverImpl * impl)
 }
 
 AudioBootStrap NAS_bootstrap = {
-    NAS_DRIVER_NAME, "Network Audio System", NAS_Init, 0
+    "nas", "Network Audio System", NAS_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

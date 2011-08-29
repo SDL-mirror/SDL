@@ -1011,6 +1011,9 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
     if (data) {
+        if (data->shaders) {
+            GL_DestroyShaderContext(data->shaders);
+        }
         if (data->context) {
             /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
             SDL_GL_DeleteContext(data->context);

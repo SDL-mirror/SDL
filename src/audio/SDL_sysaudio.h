@@ -30,10 +30,12 @@
 typedef struct SDL_AudioDevice SDL_AudioDevice;
 #define _THIS	SDL_AudioDevice *_this
 
+/* Used by audio targets during DetectDevices() */
+typedef void (*SDL_AddAudioDevice)(const char *name);
+
 typedef struct SDL_AudioDriverImpl
 {
-    int (*DetectDevices) (int iscapture);
-    const char *(*GetDeviceName) (int index, int iscapture);
+    void (*DetectDevices) (int iscapture, SDL_AddAudioDevice addfn);
     int (*OpenDevice) (_THIS, const char *devname, int iscapture);
     void (*ThreadInit) (_THIS); /* Called by audio thread at start */
     void (*WaitDevice) (_THIS);
@@ -45,12 +47,14 @@ typedef struct SDL_AudioDriverImpl
     void (*UnlockDevice) (_THIS);
     void (*Deinitialize) (void);
 
+    /* !!! FIXME: add pause(), so we can optimize instead of mixing silence. */
+
     /* Some flags to push duplicate code into the core and reduce #ifdefs. */
-    int ProvidesOwnCallbackThread:1;
-    int SkipMixerLock:1;
-    int HasCaptureSupport:1;
-    int OnlyHasDefaultOutputDevice:1;
-    int OnlyHasDefaultInputDevice:1;
+    int ProvidesOwnCallbackThread;
+    int SkipMixerLock;  /* !!! FIXME: do we need this anymore? */
+    int HasCaptureSupport;
+    int OnlyHasDefaultOutputDevice;
+    int OnlyHasDefaultInputDevice;
 } SDL_AudioDriverImpl;
 
 
@@ -65,6 +69,12 @@ typedef struct SDL_AudioDriver
     const char *desc;
 
     SDL_AudioDriverImpl impl;
+
+    char **outputDevices;
+    int outputDeviceCount;
+
+    char **inputDevices;
+    int inputDeviceCount;
 } SDL_AudioDriver;
 
 
@@ -120,7 +130,7 @@ typedef struct AudioBootStrap
     const char *name;
     const char *desc;
     int (*init) (SDL_AudioDriverImpl * impl);
-    int demand_only:1;          /* 1==request explicitly, or it won't be available. */
+    int demand_only;  /* 1==request explicitly, or it won't be available. */
 } AudioBootStrap;
 
 #endif /* _SDL_sysaudio_h */

@@ -40,9 +40,6 @@
 #include "../SDL_audio_c.h"
 #include "SDL_umsaudio.h"
 
-/* The tag name used by UMS audio */
-#define UMS_DRIVER_NAME         "ums"
-
 #define DEBUG_AUDIO 1
 
 /* Audio driver functions */
@@ -152,8 +149,7 @@ Audio_CreateDevice(int devindex)
 }
 
 AudioBootStrap UMS_bootstrap = {
-    UMS_DRIVER_NAME, "AIX UMS audio",
-    Audio_Available, Audio_CreateDevice, 0
+    "ums", "AIX UMS audio", Audio_Available, Audio_CreateDevice, 0
 };
 
 static Uint8 *

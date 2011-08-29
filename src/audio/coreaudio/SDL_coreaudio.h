@@ -20,27 +20,39 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_dx5audio_h
-#define _SDL_dx5audio_h
-
-#include "directx.h"
+#ifndef _SDL_coreaudio_h
+#define _SDL_coreaudio_h
 
 #include "../SDL_sysaudio.h"
+
+#if !defined(__IPHONEOS__)
+#define MACOSX_COREAUDIO 1
+#endif
+
+#if MACOSX_COREAUDIO
+#include <CoreAudio/CoreAudio.h>
+#include <CoreServices/CoreServices.h>
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= 1050
+#include <AudioUnit/AUNTComponent.h>
+#endif
+#endif
+
+#include <AudioUnit/AudioUnit.h>
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
-/* The DirectSound objects */
 struct SDL_PrivateAudioData
 {
-    LPDIRECTSOUND sound;
-    LPDIRECTSOUNDBUFFER mixbuf;
-    int num_buffers;
-    int mixlen;
-    DWORD lastchunk;
-    Uint8 *locked_buf;
+    AudioUnit audioUnit;
+    int audioUnitOpened;
+    void *buffer;
+    UInt32 bufferOffset;
+    UInt32 bufferSize;
+#if MACOSX_COREAUDIO
+    AudioDeviceID deviceID;
+#endif
 };
 
-#endif /* _SDL_dx5audio_h */
-
+#endif /* _SDL_coreaudio_h */
 /* vi: set ts=4 sw=4 expandtab: */

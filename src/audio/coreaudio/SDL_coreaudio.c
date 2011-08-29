@@ -19,14 +19,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
-
-#include <CoreAudio/CoreAudio.h>
-#include <CoreServices/CoreServices.h>
-#include <AudioUnit/AudioUnit.h>
-#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
-#include <AudioUnit/AUNTComponent.h>
-#endif
-
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
@@ -34,47 +26,61 @@
 
 #define DEBUG_COREAUDIO 0
 
-typedef struct COREAUDIO_DeviceList
-{
-    AudioDeviceID id;
-    const char *name;
-} COREAUDIO_DeviceList;
+static void COREAUDIO_CloseDevice(_THIS);
 
-static COREAUDIO_DeviceList *inputDevices = NULL;
-static int inputDeviceCount = 0;
-static COREAUDIO_DeviceList *outputDevices = NULL;
-static int outputDeviceCount = 0;
+#define CHECK_RESULT(msg) \
+    if (result != noErr) { \
+        COREAUDIO_CloseDevice(this); \
+        SDL_SetError("CoreAudio error (%s): %d", msg, (int) result); \
+        return 0; \
+    }
+
+#if MACOSX_COREAUDIO
+typedef void (*addDevFn)(const char *name, AudioDeviceID devId, void *data);
 
 static void
-free_device_list(COREAUDIO_DeviceList ** devices, int *devCount)
+addToDevList(const char *name, AudioDeviceID devId, void *data)
 {
-    if (*devices) {
-        int i = *devCount;
-        while (i--)
-            SDL_free((void *) (*devices)[i].name);
-        SDL_free(*devices);
-        *devices = NULL;
-    }
-    *devCount = 0;
+    SDL_AddAudioDevice addfn = (SDL_AddAudioDevice) data;
+    addfn(name);
 }
 
+typedef struct
+{
+    const char *findname;
+    AudioDeviceID devId;
+    int found;
+} FindDevIdData;
 
 static void
-build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
-                  int *devCount)
+findDevId(const char *name, AudioDeviceID devId, void *_data)
 {
-    Boolean outWritable = 0;
+    FindDevIdData *data = (FindDevIdData *) _data;
+    if (!data->found) {
+        if (SDL_strcmp(name, data->findname) == 0) {
+            data->found = 1;
+            data->devId = devId;
+        }
+    }
+}
+
+static void
+build_device_list(int iscapture, addDevFn addfn, void *addfndata)
+{
     OSStatus result = noErr;
     UInt32 size = 0;
     AudioDeviceID *devs = NULL;
     UInt32 i = 0;
     UInt32 max = 0;
 
-    free_device_list(devices, devCount);
+    AudioObjectPropertyAddress addr = {
+        kAudioHardwarePropertyDevices,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
 
-    result = AudioHardwareGetPropertyInfo(kAudioHardwarePropertyDevices,
-                                          &size, &outWritable);
-
+    result = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &addr,
+                                            0, NULL, &size);
     if (result != kAudioHardwareNoError)
         return;
 
@@ -82,16 +88,12 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
     if (devs == NULL)
         return;
 
-    max = size / sizeof(AudioDeviceID);
-    *devices = (COREAUDIO_DeviceList *) SDL_malloc(max * sizeof(**devices));
-    if (*devices == NULL)
-        return;
-
-    result = AudioHardwareGetProperty(kAudioHardwarePropertyDevices,
-                                      &size, devs);
+    result = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr,
+                                        0, NULL, &size, devs);
     if (result != kAudioHardwareNoError)
         return;
 
+    max = size / sizeof (AudioDeviceID);
     for (i = 0; i < max; i++) {
         CFStringRef cfstr = NULL;
         char *ptr = NULL;
@@ -100,9 +102,11 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
         int usable = 0;
         CFIndex len = 0;
 
-        result = AudioDeviceGetPropertyInfo(dev, 0, iscapture,
-                                            kAudioDevicePropertyStreamConfiguration,
-                                            &size, &outWritable);
+        addr.mScope = iscapture ? kAudioDevicePropertyScopeInput :
+                        kAudioDevicePropertyScopeOutput;
+        addr.mSelector = kAudioDevicePropertyStreamConfiguration;
+
+        result = AudioObjectGetPropertyDataSize(dev, &addr, 0, NULL, &size);
         if (result != noErr)
             continue;
 
@@ -110,9 +114,8 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
         if (buflist == NULL)
             continue;
 
-        result = AudioDeviceGetProperty(dev, 0, iscapture,
-                                        kAudioDevicePropertyStreamConfiguration,
-                                        &size, buflist);
+        result = AudioObjectGetPropertyData(dev, &addr, 0, NULL,
+                                            &size, buflist);
 
         if (result == noErr) {
             UInt32 j;
@@ -129,11 +132,9 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
         if (!usable)
             continue;
 
-        size = sizeof(CFStringRef);
-        result = AudioDeviceGetProperty(dev, 0, iscapture,
-                                        kAudioDevicePropertyDeviceNameCFString,
-                                        &size, &cfstr);
-
+        addr.mSelector = kAudioObjectPropertyName;
+        size = sizeof (CFStringRef);
+        result = AudioObjectGetPropertyData(dev, &addr, 0, NULL, &size, &cfstr);
         if (result != kAudioHardwareNoError)
             continue;
 
@@ -156,9 +157,7 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
             usable = (len > 0);
         }
 
-        if (!usable) {
-            SDL_free(ptr);
-        } else {
+        if (usable) {
             ptr[len] = '\0';
 
 #if DEBUG_COREAUDIO
@@ -166,82 +165,81 @@ build_device_list(int iscapture, COREAUDIO_DeviceList ** devices,
                    ((iscapture) ? "capture" : "output"),
                    (int) *devCount, ptr, (int) dev);
 #endif
-
-            (*devices)[*devCount].id = dev;
-            (*devices)[*devCount].name = ptr;
-            (*devCount)++;
+            addfn(ptr, dev, addfndata);
         }
+        SDL_free(ptr);  /* addfn() would have copied the string. */
     }
 }
-
-static inline void
-build_device_lists(void)
-{
-    build_device_list(0, &outputDevices, &outputDeviceCount);
-    build_device_list(1, &inputDevices, &inputDeviceCount);
-}
-
-
-static inline void
-free_device_lists(void)
-{
-    free_device_list(&outputDevices, &outputDeviceCount);
-    free_device_list(&inputDevices, &inputDeviceCount);
-}
-
-
-static int
-find_device_id(const char *devname, int iscapture, AudioDeviceID * id)
-{
-    int i = ((iscapture) ? inputDeviceCount : outputDeviceCount);
-    COREAUDIO_DeviceList *devs = ((iscapture) ? inputDevices : outputDevices);
-    while (i--) {
-        if (SDL_strcmp(devname, devs->name) == 0) {
-            *id = devs->id;
-            return 1;
-        }
-        devs++;
-    }
-
-    return 0;
-}
-
-
-static int
-COREAUDIO_DetectDevices(int iscapture)
-{
-    if (iscapture) {
-        build_device_list(1, &inputDevices, &inputDeviceCount);
-        return inputDeviceCount;
-    } else {
-        build_device_list(0, &outputDevices, &outputDeviceCount);
-        return outputDeviceCount;
-    }
-
-    return 0;                   /* shouldn't ever hit this. */
-}
-
-
-static const char *
-COREAUDIO_GetDeviceName(int index, int iscapture)
-{
-    if ((iscapture) && (index < inputDeviceCount)) {
-        return inputDevices[index].name;
-    } else if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index].name;
-    }
-
-    SDL_SetError("No such device");
-    return NULL;
-}
-
 
 static void
-COREAUDIO_Deinitialize(void)
+COREAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    free_device_lists();
+    build_device_list(iscapture, addToDevList, addfn);
 }
 
+static int
+find_device_by_name(_THIS, const char *devname, int iscapture)
+{
+    AudioDeviceID devid = 0;
+    OSStatus result = noErr;
+    UInt32 size = 0;
+    UInt32 alive = 0;
+    pid_t pid = 0;
+
+    AudioObjectPropertyAddress addr = {
+        0,
+        kAudioObjectPropertyScopeGlobal,
+        kAudioObjectPropertyElementMaster
+    };
+
+    if (devname == NULL) {
+        size = sizeof (AudioDeviceID);
+        addr.mSelector =
+            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
+            kAudioHardwarePropertyDefaultOutputDevice);
+        result = AudioObjectGetPropertyData(kAudioObjectSystemObject, &addr,
+                                            0, NULL, &size, &devid);
+        CHECK_RESULT("AudioHardwareGetProperty (default device)");
+    } else {
+        FindDevIdData data;
+        SDL_zero(data);
+        data.findname = devname;
+        build_device_list(iscapture, findDevId, &data);
+        if (!data.found) {
+            SDL_SetError("CoreAudio: No such audio device.");
+            return 0;
+        }
+        devid = data.devId;
+    }
+
+    addr.mSelector = kAudioDevicePropertyDeviceIsAlive;
+    addr.mScope = iscapture ? kAudioDevicePropertyScopeInput :
+                    kAudioDevicePropertyScopeOutput;
+
+    size = sizeof (alive);
+    result = AudioObjectGetPropertyData(devid, &addr, 0, NULL, &size, &alive);
+    CHECK_RESULT
+        ("AudioDeviceGetProperty (kAudioDevicePropertyDeviceIsAlive)");
+
+    if (!alive) {
+        SDL_SetError("CoreAudio: requested device exists, but isn't alive.");
+        return 0;
+    }
+
+    addr.mSelector = kAudioDevicePropertyHogMode;
+    size = sizeof (pid);
+    result = AudioObjectGetPropertyData(devid, &addr, 0, NULL, &size, &pid);
+
+    /* some devices don't support this property, so errors are fine here. */
+    if ((result == noErr) && (pid != -1)) {
+        SDL_SetError("CoreAudio: requested device is being hogged.");
+        return 0;
+    }
+
+    this->hidden->deviceID = devid;
+    return 1;
+}
+#endif
 
 /* The CoreAudio callback */
 static OSStatus
@@ -343,7 +341,11 @@ COREAUDIO_CloseDevice(_THIS)
                                           scope, bus, &callback,
                                           sizeof(callback));
 
+            /* !!! FIXME: how does iOS free this? */
+            #if MACOSX_COREAUDIO
             CloseComponent(this->hidden->audioUnit);
+            #endif
+
             this->hidden->audioUnitOpened = 0;
         }
         SDL_free(this->hidden->buffer);
@@ -353,100 +355,65 @@ COREAUDIO_CloseDevice(_THIS)
 }
 
 
-#define CHECK_RESULT(msg) \
-    if (result != noErr) { \
-        COREAUDIO_CloseDevice(this); \
-        SDL_SetError("CoreAudio error (%s): %d", msg, (int) result); \
-        return 0; \
-    }
-
-static int
-find_device_by_name(_THIS, const char *devname, int iscapture)
-{
-    AudioDeviceID devid = 0;
-    OSStatus result = noErr;
-    UInt32 size = 0;
-    UInt32 alive = 0;
-    pid_t pid = 0;
-
-    if (devname == NULL) {
-        size = sizeof(AudioDeviceID);
-        const AudioHardwarePropertyID propid =
-            ((iscapture) ? kAudioHardwarePropertyDefaultInputDevice :
-             kAudioHardwarePropertyDefaultOutputDevice);
-
-        result = AudioHardwareGetProperty(propid, &size, &devid);
-        CHECK_RESULT("AudioHardwareGetProperty (default device)");
-    } else {
-        if (!find_device_id(devname, iscapture, &devid)) {
-            SDL_SetError("CoreAudio: No such audio device.");
-            return 0;
-        }
-    }
-
-    size = sizeof(alive);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyDeviceIsAlive,
-                                    &size, &alive);
-    CHECK_RESULT
-        ("AudioDeviceGetProperty (kAudioDevicePropertyDeviceIsAlive)");
-
-    if (!alive) {
-        SDL_SetError("CoreAudio: requested device exists, but isn't alive.");
-        return 0;
-    }
-
-    size = sizeof(pid);
-    result = AudioDeviceGetProperty(devid, 0, iscapture,
-                                    kAudioDevicePropertyHogMode, &size, &pid);
-
-    /* some devices don't support this property, so errors are fine here. */
-    if ((result == noErr) && (pid != -1)) {
-        SDL_SetError("CoreAudio: requested device is being hogged.");
-        return 0;
-    }
-
-    this->hidden->deviceID = devid;
-    return 1;
-}
-
-
 static int
 prepare_audiounit(_THIS, const char *devname, int iscapture,
                   const AudioStreamBasicDescription * strdesc)
 {
     OSStatus result = noErr;
     AURenderCallbackStruct callback;
+#if MACOSX_COREAUDIO
     ComponentDescription desc;
     Component comp = NULL;
+#else
+    AudioComponentDescription desc;
+    AudioComponent comp = NULL;
+#endif
     const AudioUnitElement output_bus = 0;
     const AudioUnitElement input_bus = 1;
     const AudioUnitElement bus = ((iscapture) ? input_bus : output_bus);
     const AudioUnitScope scope = ((iscapture) ? kAudioUnitScope_Output :
                                   kAudioUnitScope_Input);
 
+#if MACOSX_COREAUDIO
     if (!find_device_by_name(this, devname, iscapture)) {
         SDL_SetError("Couldn't find requested CoreAudio device");
         return 0;
     }
-
-    SDL_memset(&desc, '\0', sizeof(ComponentDescription));
+#endif
+    
+    SDL_zero(desc);
     desc.componentType = kAudioUnitType_Output;
-    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
 
+#if MACOSX_COREAUDIO
+    desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     comp = FindNextComponent(NULL, &desc);
+#else
+    desc.componentSubType = kAudioUnitSubType_RemoteIO;  /* !!! FIXME: ? */
+    comp = AudioComponentFindNext(NULL, &desc);
+#endif
+
     if (comp == NULL) {
         SDL_SetError("Couldn't find requested CoreAudio component");
         return 0;
     }
 
     /* Open & initialize the audio unit */
+#if MACOSX_COREAUDIO
     result = OpenAComponent(comp, &this->hidden->audioUnit);
     CHECK_RESULT("OpenAComponent");
+#else
+    /*
+       AudioComponentInstanceNew only available on iPhone OS 2.0 and Mac OS X 10.6
+       We can't use OpenAComponent on iPhone because it is not present
+     */
+    result = AudioComponentInstanceNew(comp, &this->hidden->audioUnit);
+    CHECK_RESULT("AudioComponentInstanceNew");
+#endif
 
     this->hidden->audioUnitOpened = 1;
 
+#if MACOSX_COREAUDIO
     result = AudioUnitSetProperty(this->hidden->audioUnit,
                                   kAudioOutputUnitProperty_CurrentDevice,
                                   kAudioUnitScope_Global, 0,
@@ -454,6 +421,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
                                   sizeof(AudioDeviceID));
     CHECK_RESULT
         ("AudioUnitSetProperty (kAudioOutputUnitProperty_CurrentDevice)");
+#endif
 
     /* Set the data format of the audio unit. */
     result = AudioUnitSetProperty(this->hidden->audioUnit,
@@ -564,20 +532,22 @@ static int
 COREAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
-    impl->DetectDevices = COREAUDIO_DetectDevices;
-    impl->GetDeviceName = COREAUDIO_GetDeviceName;
     impl->OpenDevice = COREAUDIO_OpenDevice;
     impl->CloseDevice = COREAUDIO_CloseDevice;
-    impl->Deinitialize = COREAUDIO_Deinitialize;
-    impl->ProvidesOwnCallbackThread = 1;
 
-    build_device_lists();       /* do an initial check for devices... */
+#if MACOSX_COREAUDIO
+    impl->DetectDevices = COREAUDIO_DetectDevices;
+#else
+    impl->OnlyHasDefaultOutputDevice = 1;
+#endif
+    
+    impl->ProvidesOwnCallbackThread = 1;
 
     return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap COREAUDIO_bootstrap = {
-    "coreaudio", "Mac OS X CoreAudio", COREAUDIO_Init, 0
+    "coreaudio", "CoreAudio", COREAUDIO_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

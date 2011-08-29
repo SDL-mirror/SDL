@@ -41,9 +41,6 @@
 #define SDL_NAME(X)	X
 #endif
 
-/* The tag name used by artsc audio */
-#define ARTS_DRIVER_NAME         "arts"
-
 #ifdef SDL_AUDIO_DRIVER_ARTS_DYNAMIC
 
 static const char *arts_library = SDL_AUDIO_DRIVER_ARTS_DYNAMIC;
@@ -372,7 +369,7 @@ ARTS_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap ARTS_bootstrap = {
-    ARTS_DRIVER_NAME, "Analog RealTime Synthesizer", ARTS_Init, 0
+    "arts", "Analog RealTime Synthesizer", ARTS_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -49,12 +49,21 @@ SDL_QuitInit(void)
 #ifdef HAVE_SIGACTION
     struct sigaction action;
     sigaction(SIGINT, NULL, &action);
+#ifdef HAVE_SA_SIGACTION
     if ( action.sa_handler == SIG_DFL && action.sa_sigaction == (void*)SIG_DFL ) {
+#else
+    if ( action.sa_handler == SIG_DFL ) {
+#endif
         action.sa_handler = SDL_HandleSIG;
         sigaction(SIGINT, &action, NULL);
     }
     sigaction(SIGTERM, NULL, &action);
+
+#ifdef HAVE_SA_SIGACTION
     if ( action.sa_handler == SIG_DFL && action.sa_sigaction == (void*)SIG_DFL ) {
+#else
+    if ( action.sa_handler == SIG_DFL ) {
+#endif
         action.sa_handler = SDL_HandleSIG;
         sigaction(SIGTERM, &action, NULL);
     }

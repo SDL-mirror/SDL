@@ -34,9 +34,9 @@
 
 typedef struct
 {
-    GLenum program;
-    GLenum vert_shader;
-    GLenum frag_shader;
+    GLhandleARB program;
+    GLhandleARB vert_shader;
+    GLhandleARB frag_shader;
 } GL_ShaderData;
 
 struct GL_ShaderContext
@@ -167,7 +167,7 @@ static const char *shader_source[NUM_SHADERS][2] =
 };
 
 static SDL_bool
-CompileShader(GL_ShaderContext *ctx, GLenum shader, const char *defines, const char *source)
+CompileShader(GL_ShaderContext *ctx, GLhandleARB shader, const char *defines, const char *source)
 {
     GLint status;
     const char *sources[2];

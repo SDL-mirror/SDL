@@ -57,6 +57,7 @@ extern HWND SDL_HelperWindow;
 
 
 /* local variables */
+static SDL_bool coinitialized = SDL_FALSE;
 static LPDIRECTINPUT dinput = NULL;
 extern HRESULT(WINAPI * DInputCreate) (HINSTANCE hinst, DWORD dwVersion,
                                        LPDIRECTINPUT * ppDI,
@@ -284,16 +285,19 @@ SDL_SYS_JoystickInit(void)
 
     SYS_NumJoysticks = 0;
 
-    result = CoInitialize(NULL);
+    result = WIN_CoInitialize();
     if (FAILED(result)) {
         SetDIerror("CoInitialize", result);
         return (-1);
     }
 
+    coinitialized = SDL_TRUE;
+
     result = CoCreateInstance(&CLSID_DirectInput, NULL, CLSCTX_INPROC_SERVER,
                               &IID_IDirectInput, (LPVOID)&dinput);
 
     if (FAILED(result)) {
+        SDL_SYS_JoystickQuit();
         SetDIerror("CoCreateInstance", result);
         return (-1);
     }
@@ -301,6 +305,7 @@ SDL_SYS_JoystickInit(void)
     /* Because we used CoCreateInstance, we need to Initialize it, first. */
     instance = GetModuleHandle(NULL);
     if (instance == NULL) {
+        SDL_SYS_JoystickQuit();
         SDL_SetError("GetModuleHandle() failed with error code %d.",
                      GetLastError());
         return (-1);
@@ -308,6 +313,7 @@ SDL_SYS_JoystickInit(void)
     result = IDirectInput_Initialize(dinput, instance, DIRECTINPUT_VERSION);
 
     if (FAILED(result)) {
+        SDL_SYS_JoystickQuit();
         SetDIerror("IDirectInput::Initialize", result);
         return (-1);
     }
@@ -802,8 +808,15 @@ SDL_SYS_JoystickQuit(void)
         }
     }
 
-    IDirectInput_Release(dinput);
-    dinput = NULL;
+    if (dinput != NULL) {
+        IDirectInput_Release(dinput);
+        dinput = NULL;
+    }
+
+    if (coinitialized) {
+        WIN_CoUninitialize();
+        coinitialized = SDL_FALSE;
+    }
 }
 
 #endif /* SDL_JOYSTICK_DINPUT */

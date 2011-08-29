@@ -41,100 +41,17 @@
 #include "../SDL_audiodev_c.h"
 #include "SDL_bsdaudio.h"
 
-/* The tag name used by NetBSD/OpenBSD audio */
-#ifdef __NetBSD__
-#define BSD_AUDIO_DRIVER_NAME         "netbsd"
-#define BSD_AUDIO_DRIVER_DESC         "Native NetBSD audio"
-#else
-#define BSD_AUDIO_DRIVER_NAME         "openbsd"
-#define BSD_AUDIO_DRIVER_DESC         "Native OpenBSD audio"
-#endif
-
-/* Open the audio device for playback, and don't block if busy */
-/* #define USE_BLOCKING_WRITES */
-
 /* Use timer for synchronization */
 /* #define USE_TIMER_SYNC */
 
 /* #define DEBUG_AUDIO */
 /* #define DEBUG_AUDIO_STREAM */
 
-#ifdef USE_BLOCKING_WRITES
-#define OPEN_FLAGS_OUTPUT O_WRONLY
-#define OPEN_FLAGS_INPUT O_RDONLY
-#else
-#define OPEN_FLAGS_OUTPUT (O_WRONLY|O_NONBLOCK)
-#define OPEN_FLAGS_INPUT (O_RDONLY|O_NONBLOCK)
-#endif
-
-/* !!! FIXME: so much cut and paste with dsp/dma drivers... */
-static char **outputDevices = NULL;
-static int outputDeviceCount = 0;
-static char **inputDevices = NULL;
-static int inputDeviceCount = 0;
-
-static inline void
-free_device_list(char ***devs, int *count)
-{
-    SDL_FreeUnixAudioDevices(devs, count);
-}
-
-static inline void
-build_device_list(int iscapture, char ***devs, int *count)
-{
-    const int flags = ((iscapture) ? OPEN_FLAGS_INPUT : OPEN_FLAGS_OUTPUT);
-    free_device_list(devs, count);
-    SDL_EnumUnixAudioDevices(flags, 0, NULL, devs, count);
-}
-
-static inline void
-build_device_lists(void)
-{
-    build_device_list(0, &outputDevices, &outputDeviceCount);
-    build_device_list(1, &inputDevices, &inputDeviceCount);
-}
-
-
-static inline void
-free_device_lists(void)
-{
-    free_device_list(&outputDevices, &outputDeviceCount);
-    free_device_list(&inputDevices, &inputDeviceCount);
-}
-
 
 static void
-BSDAUDIO_Deinitialize(void)
+BSDAUDIO_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    free_device_lists();
-}
-
-
-static int
-BSDAUDIO_DetectDevices(int iscapture)
-{
-    if (iscapture) {
-        build_device_list(1, &inputDevices, &inputDeviceCount);
-        return inputDeviceCount;
-    } else {
-        build_device_list(0, &outputDevices, &outputDeviceCount);
-        return outputDeviceCount;
-    }
-
-    return 0;                   /* shouldn't ever hit this. */
-}
-
-static const char *
-BSDAUDIO_GetDeviceName(int index, int iscapture)
-{
-    if ((iscapture) && (index < inputDeviceCount)) {
-        return inputDevices[index];
-    } else if ((!iscapture) && (index < outputDeviceCount)) {
-        return outputDevices[index];
-    }
-
-    SDL_SetError("No such device");
-    return NULL;
+    SDL_EnumUnixAudioDevices(iscapture, 0, NULL, addfn);
 }
 
 
@@ -318,12 +235,11 @@ BSDAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /* We don't care what the devname is...we'll try to open anything. */
     /*  ...but default to first name in the list... */
     if (devname == NULL) {
-        if (((iscapture) && (inputDeviceCount == 0)) ||
-            ((!iscapture) && (outputDeviceCount == 0))) {
+        devname = SDL_GetAudioDeviceName(0, iscapture);
+        if (devname == NULL) {
             SDL_SetError("No such audio device");
             return 0;
         }
-        devname = ((iscapture) ? inputDevices[0] : outputDevices[0]);
     }
 
     /* Initialize all variables that we clean on shutdown */
@@ -434,22 +350,18 @@ BSDAUDIO_Init(SDL_AudioDriverImpl * impl)
 {
     /* Set the function pointers */
     impl->DetectDevices = BSDAUDIO_DetectDevices;
-    impl->GetDeviceName = BSDAUDIO_GetDeviceName;
     impl->OpenDevice = BSDAUDIO_OpenDevice;
     impl->PlayDevice = BSDAUDIO_PlayDevice;
     impl->WaitDevice = BSDAUDIO_WaitDevice;
     impl->GetDeviceBuf = BSDAUDIO_GetDeviceBuf;
     impl->CloseDevice = BSDAUDIO_CloseDevice;
-    impl->Deinitialize = BSDAUDIO_Deinitialize;
-
-    build_device_lists();
 
     return 1;   /* this audio target is available. */
 }
 
 
 AudioBootStrap BSD_AUDIO_bootstrap = {
-    BSD_AUDIO_DRIVER_NAME, BSD_AUDIO_DRIVER_DESC, BSDAUDIO_Init, 0
+    "bsd", "BSD audio", BSDAUDIO_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

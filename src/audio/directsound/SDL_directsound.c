@@ -26,26 +26,23 @@
 #include "SDL_loadso.h"
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
-#include "SDL_dx5audio.h"
-
-/* !!! FIXME: move this somewhere that other drivers can use it... */
-#if defined(_WIN32_WCE)
-#define WINDOWS_OS_NAME "Windows CE/PocketPC"
-#elif defined(WIN64)
-#define WINDOWS_OS_NAME "Win64"
-#else
-#define WINDOWS_OS_NAME "Win32"
-#endif
+#include "SDL_directsound.h"
 
 /* DirectX function pointers for audio */
 static void* DSoundDLL = NULL;
-static HRESULT(WINAPI * DSoundCreate) (LPGUID, LPDIRECTSOUND *, LPUNKNOWN) =
-    NULL;
+typedef HRESULT(WINAPI*fnDirectSoundCreate8)(LPGUID,LPDIRECTSOUND*,LPUNKNOWN);
+typedef HRESULT(WINAPI*fnDirectSoundEnumerateW)(LPDSENUMCALLBACKW, LPVOID);
+typedef HRESULT(WINAPI*fnDirectSoundCaptureEnumerateW)(LPDSENUMCALLBACKW,LPVOID);
+static fnDirectSoundCreate8 pDirectSoundCreate8 = NULL;
+static fnDirectSoundEnumerateW pDirectSoundEnumerateW = NULL;
+static fnDirectSoundCaptureEnumerateW pDirectSoundCaptureEnumerateW = NULL;
 
 static void
 DSOUND_Unload(void)
 {
-    DSoundCreate = NULL;
+    pDirectSoundCreate8 = NULL;
+    pDirectSoundEnumerateW = NULL;
+    pDirectSoundCaptureEnumerateW = NULL;
 
     if (DSoundDLL != NULL) {
         SDL_UnloadObject(DSoundDLL);
@@ -65,18 +62,19 @@ DSOUND_Load(void)
     if (DSoundDLL == NULL) {
         SDL_SetError("DirectSound: failed to load DSOUND.DLL");
     } else {
-        /* Now make sure we have DirectX 5 or better... */
-        /*  (DirectSoundCaptureCreate was added in DX5) */
-        if (!SDL_LoadFunction(DSoundDLL, "DirectSoundCaptureCreate")) {
-            SDL_SetError("DirectSound: System doesn't appear to have DX5.");
-        } else {
-            DSoundCreate = SDL_LoadFunction(DSoundDLL, "DirectSoundCreate");
+        /* Now make sure we have DirectX 8 or better... */
+        #define DSOUNDLOAD(f) { \
+            p##f = (fn##f) SDL_LoadFunction(DSoundDLL, #f); \
+            if (!p##f) loaded = 0; \
         }
+        loaded = 1;  /* will reset if necessary. */
+        DSOUNDLOAD(DirectSoundCreate8);
+        DSOUNDLOAD(DirectSoundEnumerateW);
+        DSOUNDLOAD(DirectSoundCaptureEnumerateW);
+        #undef DSOUNDLOAD
 
-        if (!DSoundCreate) {
-            SDL_SetError("DirectSound: Failed to find DirectSoundCreate");
-        } else {
-            loaded = 1;
+        if (!loaded) {
+            SDL_SetError("DirectSound: System doesn't appear to have DX8.");
         }
     }
 
@@ -87,6 +85,13 @@ DSOUND_Load(void)
     return loaded;
 }
 
+static __inline__ char *
+utf16_to_utf8(const WCHAR *S)
+{
+    /* !!! FIXME: this should be UTF-16, not UCS-2! */
+    return SDL_iconv_string("UTF-8", "UCS-2", (char *)(S),
+                            (SDL_wcslen(S)+1)*sizeof(WCHAR));
+}
 
 static void
 SetDSerror(const char *function, int code)
@@ -97,7 +102,7 @@ SetDSerror(const char *function, int code)
     errbuf[0] = 0;
     switch (code) {
     case E_NOINTERFACE:
-        error = "Unsupported interface -- Is DirectX 5.0 or later installed?";
+        error = "Unsupported interface -- Is DirectX 8.0 or later installed?";
         break;
     case DSERR_ALLOCATED:
         error = "Audio device in use";
@@ -142,22 +147,31 @@ SetDSerror(const char *function, int code)
     return;
 }
 
-/* DirectSound needs to be associated with a window */
-static HWND mainwin = NULL;
-/* */
 
-void
-DSOUND_SoundFocus(HWND hwnd)
+static BOOL CALLBACK
+FindAllDevs(LPGUID guid, LPCWSTR desc, LPCWSTR module, LPVOID data)
 {
-    /* !!! FIXME: probably broken with multi-window support in SDL 1.3 ... */
-    mainwin = hwnd;
+    SDL_AddAudioDevice addfn = (SDL_AddAudioDevice) data;
+    if (guid != NULL) {  /* skip default device */
+        char *str = utf16_to_utf8(desc);
+        if (str != NULL) {
+            addfn(str);
+            SDL_free(str);  /* addfn() makes a copy of this string. */
+        }
+    }
+    return TRUE;  /* keep enumerating. */
 }
 
 static void
-DSOUND_ThreadInit(_THIS)
+DSOUND_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
-    SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_HIGHEST);
+    if (iscapture) {
+        pDirectSoundCaptureEnumerateW(FindAllDevs, addfn);
+    } else {
+        pDirectSoundEnumerateW(FindAllDevs, addfn);
+    }
 }
+
 
 static void
 DSOUND_WaitDevice(_THIS)
@@ -393,6 +407,30 @@ CreateSecondary(_THIS, HWND focus, WAVEFORMATEX * wavefmt)
     return (numchunks);
 }
 
+typedef struct FindDevGUIDData
+{
+    const char *devname;
+    GUID guid;
+    int found;
+} FindDevGUIDData;
+
+static BOOL CALLBACK
+FindDevGUID(LPGUID guid, LPCWSTR desc, LPCWSTR module, LPVOID _data)
+{
+    if (guid != NULL) {  /* skip the default device. */
+        FindDevGUIDData *data = (FindDevGUIDData *) _data;
+        char *str = utf16_to_utf8(desc);
+        const int match = (SDL_strcmp(str, data->devname) == 0);
+        SDL_free(str);
+        if (match) {
+            data->found = 1;
+            SDL_memcpy(&data->guid, guid, sizeof (data->guid));
+            return FALSE;  /* found it! stop enumerating. */
+        }
+    }
+    return TRUE;  /* keep enumerating. */
+}
+
 static int
 DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
 {
@@ -400,9 +438,23 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     WAVEFORMATEX waveformat;
     int valid_format = 0;
     SDL_AudioFormat test_format = SDL_FirstAudioFormat(this->spec.format);
+    FindDevGUIDData devguid;
+    LPGUID guid = NULL;
 
-    /* !!! FIXME: handle devname */
-    /* !!! FIXME: handle iscapture */
+    if (devname != NULL) {
+        devguid.found = 0;
+        devguid.devname = devname;
+        if (iscapture)
+            pDirectSoundCaptureEnumerateW(FindDevGUID, &devguid);
+        else
+            pDirectSoundEnumerateW(FindDevGUID, &devguid);
+
+        if (!devguid.found) {
+            SDL_SetError("DirectSound: Requested device not found");
+            return 0;
+        }
+        guid = &devguid.guid;
+    }
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
@@ -445,7 +497,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     SDL_CalculateAudioSpec(&this->spec);
 
     /* Open the audio device */
-    result = DSoundCreate(NULL, &this->hidden->sound, NULL);
+    result = pDirectSoundCreate8(guid, &this->hidden->sound, NULL);
     if (result != DS_OK) {
         DSOUND_CloseDevice(this);
         SetDSerror("DirectSoundCreate", result);
@@ -453,7 +505,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* Create the audio buffer to which we write */
-    this->hidden->num_buffers = CreateSecondary(this, mainwin, &waveformat);
+    this->hidden->num_buffers = CreateSecondary(this, NULL, &waveformat);
     if (this->hidden->num_buffers < 0) {
         DSOUND_CloseDevice(this);
         return 0;
@@ -476,42 +528,25 @@ DSOUND_Deinitialize(void)
 static int
 DSOUND_Init(SDL_AudioDriverImpl * impl)
 {
-    OSVERSIONINFO ver;
-
-    /*
-     * Unfortunately, the sound drivers on NT have higher latencies than the
-     *  audio buffers used by many SDL applications, so there are gaps in the
-     *  audio - it sounds terrible.  Punt for now.
-     */
-    SDL_memset(&ver, '\0', sizeof(OSVERSIONINFO));
-    ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&ver);
-    if (ver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
-        if (ver.dwMajorVersion <= 4) {
-            return 0;           /* NT4.0 or earlier. Disable dsound support. */
-        }
-    }
-
     if (!DSOUND_Load()) {
         return 0;
     }
 
     /* Set the function pointers */
+    impl->DetectDevices = DSOUND_DetectDevices;
     impl->OpenDevice = DSOUND_OpenDevice;
     impl->PlayDevice = DSOUND_PlayDevice;
     impl->WaitDevice = DSOUND_WaitDevice;
     impl->WaitDone = DSOUND_WaitDone;
-    impl->ThreadInit = DSOUND_ThreadInit;
     impl->GetDeviceBuf = DSOUND_GetDeviceBuf;
     impl->CloseDevice = DSOUND_CloseDevice;
     impl->Deinitialize = DSOUND_Deinitialize;
-    impl->OnlyHasDefaultOutputDevice = 1;       /* !!! FIXME */
 
     return 1;   /* this audio target is available. */
 }
 
 AudioBootStrap DSOUND_bootstrap = {
-    "dsound", WINDOWS_OS_NAME "DirectSound", DSOUND_Init, 0
+    "directsound", "DirectSound", DSOUND_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

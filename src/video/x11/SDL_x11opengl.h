@@ -31,26 +31,17 @@ struct SDL_GLDriverData
 {
     SDL_bool HAS_GLX_EXT_visual_rating;
 
-    void *(*glXGetProcAddress) (const GLubyte * procName);
-
-    XVisualInfo *(*glXChooseVisual)
-      (Display * dpy, int screen, int *attribList);
-
-      GLXContext(*glXCreateContext)
-      (Display * dpy, XVisualInfo * vis, GLXContext shareList, Bool direct);
-
-    void (*glXDestroyContext)
-      (Display * dpy, GLXContext ctx);
-
-      Bool(*glXMakeCurrent)
-      (Display * dpy, GLXDrawable drawable, GLXContext ctx);
-
-    void (*glXSwapBuffers)
-      (Display * dpy, GLXDrawable drawable);
-
-    int (*glXSwapIntervalSGI) (int interval);
-      GLint(*glXSwapIntervalMESA) (unsigned interval);
-      GLint(*glXGetSwapIntervalMESA) (void);
+    void *(*glXGetProcAddress) (const GLubyte*);
+    XVisualInfo *(*glXChooseVisual) (Display*,int,int*);
+    GLXContext (*glXCreateContext) (Display*,XVisualInfo*,GLXContext,Bool);
+    void (*glXDestroyContext) (Display*, GLXContext);
+    Bool(*glXMakeCurrent) (Display*,GLXDrawable,GLXContext);
+    void (*glXSwapBuffers) (Display*, GLXDrawable);
+    void (*glXQueryDrawable) (Display*,GLXDrawable,int,unsigned int*);
+    int (*glXSwapIntervalEXT) (Display*,GLXDrawable,int);
+    int (*glXSwapIntervalSGI) (int);
+    int (*glXSwapIntervalMESA) (int);
+    int (*glXGetSwapIntervalMESA) (void);
 };
 
 /* OpenGL functions */

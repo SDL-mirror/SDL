@@ -20,43 +20,27 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_dmaaudio_h
-#define _SDL_dmaaudio_h
+#ifndef _SDL_directsound_h
+#define _SDL_directsound_h
+
+#include "directx.h"
 
 #include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS	SDL_AudioDevice *this
 
+/* The DirectSound objects */
 struct SDL_PrivateAudioData
 {
-    /* The file descriptor for the audio device */
-    int audio_fd;
-
-    /* The parent process id, to detect when application quits */
-    pid_t parent;
-
-    /* Raw mixing buffer */
-    Uint8 *dma_buf;
-    int dma_len;
+    LPDIRECTSOUND sound;
+    LPDIRECTSOUNDBUFFER mixbuf;
     int num_buffers;
-
-    /* Support for audio timing using a timer, in addition to select() */
-    float frame_ticks;
-    float next_frame;
+    int mixlen;
+    DWORD lastchunk;
+    Uint8 *locked_buf;
 };
-#define FUDGE_TICKS	10      /* The scheduler overhead ticks per frame */
 
-/* Old variable names */
-/* !!! FIXME: remove these. */
-#define audio_fd		(this->hidden->audio_fd)
-#define parent			(this->hidden->parent)
-#define dma_buf			(this->hidden->dma_buf)
-#define dma_len			(this->hidden->dma_len)
-#define num_buffers		(this->hidden->num_buffers)
-#define frame_ticks		(this->hidden->frame_ticks)
-#define next_frame		(this->hidden->next_frame)
-
-#endif /* _SDL_dmaaudio_h */
+#endif /* _SDL_directsound_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

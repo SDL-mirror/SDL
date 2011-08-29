@@ -580,7 +580,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\directx.h"
+			RelativePath="..\..\src\audio\directsound\directx.h"
 			>
 		</File>
 		<File
@@ -796,11 +796,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windib\SDL_dibaudio.c"
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windib\SDL_dibaudio.h"
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
 			>
 		</File>
 		<File
@@ -840,11 +840,15 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\SDL_dx5audio.c"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\windx5\SDL_dx5audio.h"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.c"
 			>
 		</File>
 		<File
@@ -905,6 +909,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\SDL_hints.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\SDL_hints_c.h"
 			>
 		</File>
 		<File

@@ -37,9 +37,6 @@
 #include "SDL_loadso.h"
 #endif
 
-/* The tag name used by ALSA audio */
-#define DRIVER_NAME         "alsa"
-
 static int (*ALSA_snd_pcm_open)
   (snd_pcm_t **, const char *, snd_pcm_stream_t, int);
 static int (*ALSA_snd_pcm_close) (snd_pcm_t * pcm);
@@ -84,7 +81,8 @@ static int (*ALSA_snd_pcm_sw_params_set_start_threshold)
 static int (*ALSA_snd_pcm_sw_params) (snd_pcm_t *, snd_pcm_sw_params_t *);
 static int (*ALSA_snd_pcm_nonblock) (snd_pcm_t *, int);
 static int (*ALSA_snd_pcm_wait)(snd_pcm_t *, int);
-
+static int (*ALSA_snd_pcm_sw_params_set_avail_min)
+  (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
 
 #ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
@@ -143,6 +141,7 @@ load_alsa_syms(void)
     SDL_ALSA_SYM(snd_pcm_sw_params);
     SDL_ALSA_SYM(snd_pcm_nonblock);
     SDL_ALSA_SYM(snd_pcm_wait);
+    SDL_ALSA_SYM(snd_pcm_sw_params_set_avail_min);
     return 0;
 }
 
@@ -621,6 +620,13 @@ ALSA_OpenDevice(_THIS, const char *devname, int iscapture)
                      ALSA_snd_strerror(status));
         return 0;
     }
+    status = ALSA_snd_pcm_sw_params_set_avail_min(pcm_handle, swparams, this->spec.samples);
+    if (status < 0) {
+        ALSA_CloseDevice(this);
+        SDL_SetError("Couldn't set minimum available samples: %s",
+                     ALSA_snd_strerror(status));
+        return 0;
+    }
     status =
         ALSA_snd_pcm_sw_params_set_start_threshold(pcm_handle, swparams, 1);
     if (status < 0) {
@@ -684,7 +690,7 @@ ALSA_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap ALSA_bootstrap = {
-    DRIVER_NAME, "ALSA PCM audio", ALSA_Init, 0
+    "alsa", "ALSA PCM audio", ALSA_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

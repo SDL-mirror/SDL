@@ -77,9 +77,13 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
         : "=&r" (result) : "r" (1), "r" (lock) : "cc", "memory");
     return (result == 0);
 
-#else
+#elif HAVE_PTHREAD_SPINLOCK
+    /* pthread instructions */
+    return (pthread_spin_trylock(lock) == 0);
+#else	
     /* Need CPU instructions for spinlock here! */
     __need_spinlock_implementation__
+	
 #endif
 }
 
@@ -101,7 +105,10 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
 
 #elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
     __sync_lock_release(lock);
-
+    
+#elif HAVE_PTHREAD_SPINLOCK
+    pthread_spin_unlock(lock);
+	
 #else
     *lock = 0;
 #endif

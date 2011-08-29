@@ -41,9 +41,6 @@
 #define SDL_NAME(X)	X
 #endif
 
-/* The tag name used by ESD audio */
-#define ESD_DRIVER_NAME		"esd"
-
 #ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
 
 static const char *esd_library = SDL_AUDIO_DRIVER_ESD_DYNAMIC;
@@ -345,7 +342,7 @@ ESD_Init(SDL_AudioDriverImpl * impl)
 
 
 AudioBootStrap ESD_bootstrap = {
-    ESD_DRIVER_NAME, "Enlightened Sound Daemon", ESD_Init, 0
+    "esd", "Enlightened Sound Daemon", ESD_Init, 0
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

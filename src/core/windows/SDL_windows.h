@@ -47,6 +47,10 @@
 /* Sets an error message based on GetLastError() */
 extern void WIN_SetError(const char *prefix);
 
+/* Wrap up the oddities of CoInitialize() into a common function. */
+extern HRESULT WIN_CoInitialize(void);
+extern void WIN_CoUninitialize(void);
+
 #endif /* _INCLUDED_WINDOWS_H */
 
 /* vi: set ts=4 sw=4 expandtab: */

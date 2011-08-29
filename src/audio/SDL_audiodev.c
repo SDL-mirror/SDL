@@ -48,44 +48,18 @@
 
 static inline void
 test_device(const char *fname, int flags, int (*test) (int fd),
-            char ***devices, int *devCount)
+            SDL_AddAudioDevice addfn)
 {
     struct stat sb;
     if ((stat(fname, &sb) == 0) && (S_ISCHR(sb.st_mode))) {
-        int audio_fd = open(fname, flags, 0);
-        if ((audio_fd >= 0) && (test(audio_fd))) {
-            void *p =
-                SDL_realloc(*devices, ((*devCount) + 1) * sizeof(char *));
-            if (p != NULL) {
-                size_t len = strlen(fname) + 1;
-                char *str = (char *) SDL_malloc(len);
-                *devices = (char **) p;
-                if (str != NULL) {
-                    SDL_strlcpy(str, fname, len);
-                    (*devices)[(*devCount)++] = str;
-                }
+        const int audio_fd = open(fname, flags, 0);
+        if (audio_fd >= 0) {
+            if (test(audio_fd)) {
+                addfn(fname);
             }
             close(audio_fd);
         }
     }
-}
-
-void
-SDL_FreeUnixAudioDevices(char ***devices, int *devCount)
-{
-    int i = *devCount;
-    if ((i > 0) && (*devices != NULL)) {
-        while (i--) {
-            SDL_free((*devices)[i]);
-        }
-    }
-
-    if (*devices != NULL) {
-        SDL_free(*devices);
-    }
-
-    *devices = NULL;
-    *devCount = 0;
 }
 
 static int
@@ -95,9 +69,10 @@ test_stub(int fd)
 }
 
 void
-SDL_EnumUnixAudioDevices(int flags, int classic, int (*test) (int fd),
-                         char ***devices, int *devCount)
+SDL_EnumUnixAudioDevices(int iscapture, int classic, int (*test)(int fd),
+                         SDL_AddAudioDevice addfn)
 {
+    const int flags = ((iscapture) ? OPEN_FLAGS_INPUT : OPEN_FLAGS_OUTPUT);
     const char *audiodev;
     char audiopath[1024];
 
@@ -122,14 +97,14 @@ SDL_EnumUnixAudioDevices(int flags, int classic, int (*test) (int fd),
             }
         }
     }
-    test_device(audiodev, flags, test, devices, devCount);
+    test_device(audiodev, flags, test, addfn);
 
     if (SDL_strlen(audiodev) < (sizeof(audiopath) - 3)) {
         int instance = 0;
         while (instance++ <= 64) {
             SDL_snprintf(audiopath, SDL_arraysize(audiopath),
                          "%s%d", audiodev, instance);
-            test_device(audiopath, flags, test, devices, devCount);
+            test_device(audiopath, flags, test, addfn);
         }
     }
 }

@@ -18,10 +18,22 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL.h"
 #include "SDL_config.h"
+#include "SDL_sysaudio.h"
 
-void SDL_EnumUnixAudioDevices(int flags, int classic, int (*test) (int fd),
-                              char ***devs, int *count);
-void SDL_FreeUnixAudioDevices(char ***devices, int *devCount);
+/* Open the audio device for playback, and don't block if busy */
+/* #define USE_BLOCKING_WRITES */
+
+#ifdef USE_BLOCKING_WRITES
+#define OPEN_FLAGS_OUTPUT O_WRONLY
+#define OPEN_FLAGS_INPUT O_RDONLY
+#else
+#define OPEN_FLAGS_OUTPUT (O_WRONLY|O_NONBLOCK)
+#define OPEN_FLAGS_INPUT (O_RDONLY|O_NONBLOCK)
+#endif
+
+void SDL_EnumUnixAudioDevices(int iscapture, int classic,
+                              int (*test) (int fd), SDL_AddAudioDevice addfn);
 
 /* vi: set ts=4 sw=4 expandtab: */

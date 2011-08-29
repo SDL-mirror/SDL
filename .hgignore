@@ -92,5 +92,7 @@ test/testwm
 test/testwm2
 test/threadwin
 test/torturethread
+test/testthread
+test/testgamma
 test/*.exe
 test/*.dSYM

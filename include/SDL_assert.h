@@ -53,7 +53,7 @@ assert can have unique static variables associated with it.
 /* Don't include intrin.h here because it contains C++ code */
 extern void __cdecl __debugbreak(void);
     #define SDL_TriggerBreakpoint() __debugbreak()
-#elif (defined(__GNUC__) && ((__i386__) || (__x86_64__)))
+#elif (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)))
     #define SDL_TriggerBreakpoint() __asm__ __volatile__ ( "int $3\n\t" )
 #elif defined(HAVE_SIGNAL_H)
     #include <signal.h>
@@ -63,7 +63,7 @@ extern void __cdecl __debugbreak(void);
     #define SDL_TriggerBreakpoint()
 #endif
 
-#if (__STDC_VERSION__ >= 199901L) /* C99 supports __func__ as a standard. */
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) /* C99 supports __func__ as a standard. */
 #   define SDL_FUNCTION __func__
 #elif ((__GNUC__ >= 2) || defined(_MSC_VER))
 #   define SDL_FUNCTION __FUNCTION__
@@ -99,7 +99,7 @@ typedef enum
     SDL_ASSERTION_BREAK,  /**< Make the debugger trigger a breakpoint. */
     SDL_ASSERTION_ABORT,  /**< Terminate the program. */
     SDL_ASSERTION_IGNORE,  /**< Ignore the assert. */
-    SDL_ASSERTION_ALWAYS_IGNORE,  /**< Ignore the assert from now on. */
+    SDL_ASSERTION_ALWAYS_IGNORE  /**< Ignore the assert from now on. */
 } SDL_assert_state;
 
 typedef struct SDL_assert_data

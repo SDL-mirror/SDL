@@ -24,6 +24,7 @@
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_assert.h"
+#include "SDL_hints.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
@@ -37,88 +38,6 @@
 
 #include <Foundation/Foundation.h>
 
-@implementation SDL_uikitviewcontroller
-
-- (id)initWithSDLWindow:(SDL_Window *)_window {
-    if ((self = [self init]) == nil) {
-        return nil;
-    }
-    self->window = _window;
-    return self;
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient {
-    if (self->window->flags & SDL_WINDOW_RESIZABLE) {
-        return YES;  // any orientation is okay.
-    }
-
-    // If not resizable, allow device to orient to other matching sizes
-    //  (that is, let the user turn the device upside down...same screen
-    //   dimensions, but it lets the user place the device where it's most
-    //   comfortable in relation to its physical buttons, headphone jack, etc).
-    switch (orient) {
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-            return (self->window->w >= self->window->h);
-
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-            return (self->window->h >= self->window->w);
-
-        default: break;
-    }
-
-    return NO;  // Nothing else is acceptable.
-}
-
-- (void)loadView  {
-    // do nothing.
-}
-
-// Send a resized event when the orientation changes.
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
-    if ((self->window->flags & SDL_WINDOW_RESIZABLE) == 0) {
-        return;   // don't care, we're just flipping over in this case.
-    }
-
-    const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
-    SDL_WindowData *data = self->window->driverdata;
-    UIWindow *uiwindow = data->uiwindow;
-    UIScreen *uiscreen = [uiwindow screen];
-    const int noborder = self->window->flags & SDL_WINDOW_BORDERLESS;
-    CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
-    const CGSize size = frame.size;
-    int w, h;
-
-    switch (toInterfaceOrientation) {
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-            w = (size.width < size.height) ? size.width : size.height;
-            h = (size.width > size.height) ? size.width : size.height;
-            break;
-
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-            w = (size.width > size.height) ? size.width : size.height;
-            h = (size.width < size.height) ? size.width : size.height;
-            break;
-
-        default:
-            SDL_assert(0 && "Unexpected interface orientation!");
-            return;
-    }
-
-    frame.size.width = w;
-    frame.size.height = h;
-    frame.origin.x = 0;
-    frame.origin.y = 0;
-
-    [uiwindow setFrame:frame];
-    [data->view updateFrame];
-    SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
-}
-
-@end
 
 
 

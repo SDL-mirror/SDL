@@ -821,6 +821,7 @@ void
 SDL_WM_SetIcon(SDL_Surface * icon, Uint8 * mask)
 {
     SDL_VideoIcon = icon;
+    ++SDL_VideoIcon->refcount;
 }
 
 int
