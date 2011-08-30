@@ -86,13 +86,12 @@ typedef struct {
 	void *play_stop;
 	unsigned short frequency;
 	void *set_frequency;
-	
 	unsigned short frequency_threshold;
 	unsigned short *custom_freq_table;
 	unsigned short stfa_on_off;
 	void *new_drivers_list;
 	unsigned long old_bit_2_of_cookie_snd;
 	void (*stfa_it)(void);
-} cookie_stfa_t __attribute__((packed));
+} cookie_stfa_t;
 
 #endif /* _SDL_mintaudio_stfa_h */

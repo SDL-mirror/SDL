@@ -44,7 +44,7 @@ typedef struct {
 	unsigned long res2;
 	unsigned long res3;
 	unsigned long res4;
-} cookie_mcsn_t __attribute__((packed));
+} cookie_mcsn_t;
 
 enum {
 	MCSN_ST=0,
