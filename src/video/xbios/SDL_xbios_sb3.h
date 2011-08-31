@@ -57,7 +57,7 @@ typedef struct {
 	unsigned long	size;	/* Size of screen in bytes */
 	unsigned short	device;	/* Device number to find planes = getRez() */
 							/* = Index in scpn_planes_device[] */
-} __attribute__((packed)) scpn_screeninfo_t;
+} scpn_screeninfo_t;
 
 typedef struct {
 	unsigned long	magic;	/* just a BRA assembler jump */
@@ -71,7 +71,7 @@ typedef struct {
 	unsigned short	dummy4;
 	scpn_screeninfo_t	*screen_info;
 	unsigned short	dummy6;
-} __attribute__((packed)) scpn_cookie_t;
+} scpn_cookie_t;
 
 /*--- Function prototypes ---*/
 

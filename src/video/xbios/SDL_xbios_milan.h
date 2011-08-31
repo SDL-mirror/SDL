@@ -91,7 +91,7 @@ typedef struct _scrblk {
 	unsigned long	blk_w;		/* width */ 
 	unsigned long	blk_h;		/* height */ 
 	unsigned long	blk_wrap;	/* width in bytes */ 
-} __attribute__((packed)) SCRMEMBLK;
+} SCRMEMBLK;
 
 typedef struct screeninfo { 
 	unsigned long	size;		/* Size of structure */ 
@@ -120,7 +120,7 @@ typedef struct screeninfo {
 	unsigned long	pagemem;	/* needed memory for one page */ 
 	unsigned long	max_x;		/* max. possible width */ 
 	unsigned long	max_y;		/* max. possible heigth */ 
-} __attribute__((packed)) SCREENINFO; 
+} SCREENINFO; 
 
 /*--- Functions prototypes ---*/
 

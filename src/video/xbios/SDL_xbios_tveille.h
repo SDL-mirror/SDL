@@ -53,7 +53,7 @@ typedef struct {
 	unsigned char	serial_redir;
 	unsigned char	dummy4;
 	void		(*oldserial_ptr)();
-} __attribute__((packed)) tveille_t;
+} tveille_t;
 
 /*--- Functions prototypes ---*/
 

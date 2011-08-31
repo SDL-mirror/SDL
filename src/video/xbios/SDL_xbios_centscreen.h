@@ -60,7 +60,7 @@ typedef struct {
 	unsigned short	hsize;	/* screen height (mm) */
 	unsigned short	dummy[21];
 	unsigned char	name[32];	/* videomode name */
-} __attribute__((packed)) centscreen_mode_t;
+} centscreen_mode_t;
 
 /*--- Functions prototypes ---*/
 
