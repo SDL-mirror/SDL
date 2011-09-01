@@ -404,10 +404,23 @@ void SDL_JoystickClose(SDL_Joystick *joystick)
 
 void SDL_JoystickQuit(void)
 {
+	const int numsticks = SDL_numjoysticks;
+	int i;
+
 	/* Stop the event polling */
 	SDL_Lock_EventThread();
 	SDL_numjoysticks = 0;
 	SDL_Unlock_EventThread();
+
+	if (SDL_joysticks != NULL) {
+		for (i = 0; i < numsticks; i++) {
+			SDL_Joystick *stick = SDL_joysticks[i];
+			if (stick && (stick->ref_count >= 1)) {
+				stick->ref_count = 1;
+				SDL_JoystickClose(stick);
+			}
+		}
+	}
 
 	/* Quit the joystick setup */
 	SDL_SYS_JoystickQuit();
