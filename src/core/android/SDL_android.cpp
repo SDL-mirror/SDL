@@ -277,7 +277,7 @@ static bool Android_JNI_ExceptionOccurred()
         const char* exceptionNameUTF8 = mEnv->GetStringUTFChars(exceptionName, 0);
 
         mid = mEnv->GetMethodID(exceptionClass, "getMessage", "()Ljava/lang/String;");
-        jstring exceptionMessage = (jstring)mEnv->CallObjectMethod(exceptionClass, mid);
+        jstring exceptionMessage = (jstring)mEnv->CallObjectMethod(exception, mid);
 
         if (exceptionMessage != NULL) {
             const char* exceptionMessageUTF8 = mEnv->GetStringUTFChars(
