@@ -38,7 +38,6 @@
 
 Uint8 SDL_numjoysticks = 0;
 SDL_Joystick **SDL_joysticks = NULL;
-static SDL_Joystick *default_joystick = NULL;
 
 int SDL_JoystickInit(void)
 {
@@ -58,7 +57,6 @@ int SDL_JoystickInit(void)
 		}
 		status = 0;
 	}
-	default_joystick = NULL;
 	return(status);
 }
 
@@ -198,9 +196,6 @@ static int ValidJoystick(SDL_Joystick **joystick)
 {
 	int valid;
 
-	if ( *joystick == NULL ) {
-		*joystick = default_joystick;
-	}
 	if ( *joystick == NULL ) {
 		SDL_SetError("Joystick hasn't been opened yet");
 		valid = 0;
@@ -369,9 +364,6 @@ void SDL_JoystickClose(SDL_Joystick *joystick)
 	/* Lock the event queue - prevent joystick polling */
 	SDL_Lock_EventThread();
 
-	if ( joystick == default_joystick ) {
-		default_joystick = NULL;
-	}
 	SDL_SYS_JoystickClose(joystick);
 
 	/* Remove joystick from list */
