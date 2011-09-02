@@ -28,7 +28,7 @@
 #include <Carbon/Carbon.h>
 
 //#define DEBUG_IME NSLog
-#define DEBUG_IME
+#define DEBUG_IME (void)
 
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
