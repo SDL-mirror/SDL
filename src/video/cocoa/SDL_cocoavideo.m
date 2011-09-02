@@ -234,7 +234,7 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
                 data->trigger_count, (data->trigger_count == 1) ? "" : "s",
                 data->condition];
 
-    NSLog(@"%s", msg);
+    NSLog(@"%@", msg);
 
     /*
      * !!! FIXME: this code needs to deal with fullscreen modes:
