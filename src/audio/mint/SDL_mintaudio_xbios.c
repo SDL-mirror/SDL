@@ -384,7 +384,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 {
-	int channels_mode, dmaclock, prediv;
+	int channels_mode, prediv;
 	void *buffer;
 
 	/* Stop currently playing sound */
@@ -412,7 +412,6 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 		DEBUG_PRINT((DEBUG_NAME "Setmode() failed\n"));
 	}
 
-	dmaclock = MINTAUDIO_frequencies[MINTAUDIO_numfreq].masterclock;
 	prediv = MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
 	if (MINTAUDIO_frequencies[MINTAUDIO_numfreq].gpio_bits != -1) {
 		Gpio(GPIO_SET,7);		/* DSP port gpio outputs */

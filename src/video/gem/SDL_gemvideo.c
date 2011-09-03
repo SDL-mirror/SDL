@@ -217,8 +217,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 {
 	unsigned long EdDI_version;
 	long cookie_EdDI;
-	Uint32 num_colours;
-	Uint16 clut_type, num_bits;
+	Uint16 clut_type;
 
 	/* Read EdDI informations */
 	if  (Getcookie(C_EdDI, &cookie_EdDI) == C_NOTFOUND) {
@@ -231,8 +230,6 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 
 	VDI_format = work_out[0];
 	clut_type = work_out[1];
-	num_bits = work_out[2];
-	num_colours = *((Uint32 *) &work_out[3]);
 
 	/* With EdDI>=1.1, we can have screen pitch, address and format
 	 * so we can directly write to screen without using vro_cpyfm

@@ -173,14 +173,14 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message)
 {
-	int quit, posted, check_mouse_mode;
+	int quit, check_mouse_mode;
 	short x2,y2,w2,h2;
 
 	quit = check_mouse_mode = 0;
 	switch (message[0]) {
 		case WM_CLOSED:
 		case AP_TERM:    
-			posted = SDL_PrivateQuit();
+			SDL_PrivateQuit();
 			quit=1;
 			break;
 		case WM_MOVED:
