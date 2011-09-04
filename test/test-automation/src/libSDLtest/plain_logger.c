@@ -94,7 +94,6 @@ PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
 
 
 	level = data->level;
-	//printf("Debug: %d == %d\n", level, data->level);
 
 	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
 	Output(indentLevel, "Fuzzer seed is: %s", runSeed);
@@ -113,6 +112,8 @@ void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
 			  int testSkippedCount, time_t endTime, double totalRuntime)
 {
+	Output(indentLevel, "Test run ended at %s", TimestampToString(endTime));
+
 	Output(indentLevel, "Ran %d tests in %0.5f seconds from %d suites.",
 			testCount, totalRuntime, suiteCount);
 
@@ -142,7 +143,7 @@ void
 PlainTestStarted(const char *testName, const char *suiteName,
 				const char *testDescription, Uint64 execKey, time_t startTime)
 {
-	Output(indentLevel, "Executing test: %s (in %s). Exec key: %llX", testName, suiteName, execKey);
+	Output(indentLevel, "Executing test: %s (in %s, exec key: %llX)", testName, suiteName, execKey);
 	Output(indentLevel++, "Test description: %s", testDescription);
 }
 

@@ -22,25 +22,25 @@ static const char const_mem[] = "Hello World!";
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "rwops_testParam", "test parameters", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testParam", " Negative test for SDL_RWFromFile parameters", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "rwops_testMem", "Tests opening from memory", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testMem", "Tests opening from memory", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "rwops_testFileRead", "Tests reading from a file", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testFileRead", "Tests reading from a file", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test5 =
-		(TestCaseReference){ "rwops_testFileWrite", "Test writing to a file", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rwops_testFileWrite", "Test writing to a file", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test6 =
-		(TestCaseReference){ "rwops_testFPRead", "Test reading from stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+		(TestCaseReference){ "rwops_testFPRead", "Test reading from stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
 
 static const TestCaseReference test7 =
-		(TestCaseReference){ "rwops_testFPWrite", "Test writing to stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 0 };
+		(TestCaseReference){ "rwops_testFPWrite", "Test writing to stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
 
 
 
@@ -122,11 +122,10 @@ int _testGeneric( SDL_RWops *rw, int write )
 }
 
 /*!
- * Tests rwops parameters
+ * Negative test for SDL_RWFromFile parameters
  *
  * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
  *
- * TODO Add fuzzer support here, write and read a string
  */
 void rwops_testParam (void)
 {

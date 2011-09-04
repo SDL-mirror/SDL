@@ -1365,8 +1365,17 @@ main(int argc, char *argv[])
 	// if --show-tests option is given, only print tests and exit
 	if(only_print_tests) {
 		TestCase *testItem = NULL;
+		char *lastSuiteName = NULL;
 		for(testItem = testCases; testItem; testItem = testItem->next) {
-			printf("%s (in %s) - %s\n", testItem->testName, testItem->suiteName, testItem->description);
+		        if ((lastSuiteName == NULL) || (strcmp(lastSuiteName, testItem->suiteName)!=0)) {
+		                lastSuiteName = testItem->suiteName;
+		                printf ("%s:\n", lastSuiteName);
+		        }
+			printf("  %s: %s", testItem->testName, testItem->description);
+			if (testItem->timeout>0) {
+			        printf (" (timeout: %i sec)", testItem->timeout);
+			}
+			printf ("\n");
 		}
 
 		return 0;

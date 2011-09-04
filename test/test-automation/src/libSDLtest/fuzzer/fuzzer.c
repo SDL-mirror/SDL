@@ -195,19 +195,20 @@ RandomSint64()
 Sint32
 RandomIntegerInRange(Sint32 pMin, Sint32 pMax)
 {
-	Sint64 min = (Sint64) pMin, max = (Sint64) pMax;
+	Sint64 min = pMin;
+	Sint64 max = pMax;
 
-	if(min > max) {
+	if(pMin > pMax) {
 		Sint64 temp = min;
 		min = max;
 		max = temp;
-	} else if(min == max) {
+	} else if(pMin == pMax) {
 		return min;
 	}
 
-	Sint32 number = RandomSint32(); // invocation count increment in there
+	Sint64 number = RandomUint32(); // invocation count increment in there
 
-	return (number % ((max + 1) - min)) + min;
+	return (Sint32)((number % ((max + 1) - min)) + min);
 }
 
 /*!
