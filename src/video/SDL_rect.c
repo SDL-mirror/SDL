@@ -28,6 +28,11 @@ SDL_HasIntersection(const SDL_Rect * A, const SDL_Rect * B)
 {
     int Amin, Amax, Bmin, Bmax;
 
+    if (!A || !B) {
+        // TODO error message
+        return SDL_FALSE;
+    }
+
     /* Horizontal intersection */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -60,6 +65,11 @@ SDL_IntersectRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
 {
     int Amin, Amax, Bmin, Bmax;
 
+    if (!A || !B || !result) {
+        // TODO error message
+        return SDL_FALSE;
+    }
+
     /* Horizontal intersection */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -91,6 +101,10 @@ void
 SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
 {
     int Amin, Amax, Bmin, Bmax;
+
+    if (!A || !B || !result) {
+        return;
+    }
 
     /* Horizontal union */
     Amin = A->x;
@@ -127,7 +141,13 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
     int maxy = 0;
     int x, y, i;
 
+    if (!points || !clip) {
+        // TODO error message
+        return SDL_FALSE;
+    }
+
     if (count < 1) {
+        // TODO error message
         return SDL_FALSE;
     }
 
@@ -234,6 +254,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
     int outcode1, outcode2;
 
     if (!rect || !X1 || !Y1 || !X2 || !Y2) {
+        // TODO error message
         return SDL_FALSE;
     }
 
@@ -346,6 +367,21 @@ SDL_GetSpanEnclosingRect(int width, int height,
     int i;
     int span_y1, span_y2;
     int rect_y1, rect_y2;
+
+    if (width < 1 || height < 1) {
+        // TODO error message
+        return SDL_FALSE;
+    }
+
+    if (!rects || !span) {
+        // TODO error message
+        return SDL_FALSE;
+    }
+
+    if (numrects < 1) {
+        // TODO error message
+        return SDL_FALSE;
+    }
 
     /* Initialize to empty rect */
     span_y1 = height;
