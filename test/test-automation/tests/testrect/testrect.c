@@ -24,10 +24,28 @@ static const TestCaseReference test4 =
 static const TestCaseReference test5 =
 		(TestCaseReference){ "rect_testIntersectRectPoint", "Tests SDL_IntersectRect with 1x1 sized rectangles", TEST_ENABLED, 0, 0 };
 
+static const TestCaseReference test6 =
+		(TestCaseReference){ "rect_testIntersectRectParam", "Negative tests against SDL_IntersectRect with invalid parameters", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test7 =
+		(TestCaseReference){ "rect_testHasIntersectionInside", "Tests SDL_HasIntersection with B fully contained in A", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test8 =
+		(TestCaseReference){ "rect_testHasIntersectionOutside", "Tests SDL_HasIntersection with B fully outside of A", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test9 =
+		(TestCaseReference){ "rect_testHasIntersectionPartial", "Tests SDL_HasIntersection with B partially intersecting A", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test10 =
+		(TestCaseReference){ "rect_testHasIntersectionPoint", "Tests SDL_HasIntersection with 1x1 sized rectangles", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test11 =
+		(TestCaseReference){ "rect_testHasIntersectionParam", "Negative tests against SDL_HasIntersection with invalid parameters", TEST_ENABLED, 0, 0 };
+
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, NULL
+	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -149,6 +167,46 @@ int rect_testIntersectRectAndLine (void *arg)
 }
 
 /*!
+ * \brief Private helper to check SDL_HasIntersection results
+ */
+void _validateHasIntersectionResults(
+    SDL_bool intersection, SDL_bool expectedIntersection, 
+    SDL_Rect *rectA, SDL_Rect *rectB, SDL_Rect *refRectA, SDL_Rect *refRectB)
+{
+    AssertTrue(intersection == expectedIntersection, 
+        "Incorrect intersection result: expected %s, got %s intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)\n",
+        (expectedIntersection == SDL_TRUE) ? "true" : "false",
+        (intersection == SDL_TRUE) ? "true" : "false",
+        rectA->x, rectA->y, rectA->w, rectA->h, 
+        rectB->x, rectB->y, rectB->w, rectB->h);
+    AssertTrue(rectA->x == refRectA->x && rectA->y == refRectA->y && rectA->w == refRectA->w && rectA->h == refRectA->h,
+        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectA->x, rectA->y, rectA->w, rectA->h,
+        refRectA->x, refRectA->y, refRectA->w, refRectA->h);
+    AssertTrue(rectB->x == refRectB->x && rectB->y == refRectB->y && rectB->w == refRectB->w && rectB->h == refRectB->h,
+        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectB->x, rectB->y, rectB->w, rectB->h,
+        refRectB->x, refRectB->y, refRectB->w, refRectB->h);
+}
+
+/*!
+ * \brief Private helper to check SDL_IntersectRect results
+ */
+void _validateIntersectRectResults(
+    SDL_bool intersection, SDL_bool expectedIntersection, 
+    SDL_Rect *rectA, SDL_Rect *rectB, SDL_Rect *refRectA, SDL_Rect *refRectB, 
+    SDL_Rect *result, SDL_Rect *expectedResult)
+{
+    _validateHasIntersectionResults(intersection, expectedIntersection, rectA, rectB, refRectA, refRectB);
+    if (result && expectedResult) {
+        AssertTrue(result->x == expectedResult->x && result->y == expectedResult->y && result->w == expectedResult->w && result->h == expectedResult->h,
+            "Intersection of rectangles A and B was incorrectly calculated, got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+            result->x, result->y, result->w, result->h,
+            expectedResult->x, expectedResult->y, expectedResult->w, expectedResult->h);
+    }
+}
+
+/*!
  * \brief Tests SDL_IntersectRect() with B fully inside A
  *
  * \sa
@@ -171,21 +229,7 @@ int rect_testIntersectRectInside (void *arg)
     rectA = refRectA;
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
-    AssertTrue(intersection, 
-        "Incorrect intersection result: expected true, got false intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h, 
-        rectB.x, rectB.y, rectB.w, rectB.h);
-    AssertTrue(rectA.x == refRectA.x && rectA.y == refRectA.y && rectA.w == refRectA.w && rectA.h == refRectA.h,
-        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h,
-        refRectA.x, refRectA.y, refRectA.w, refRectA.h);
-    AssertTrue(rectB.x == refRectB.x && rectB.y == refRectB.y && rectB.w == refRectB.w && rectB.h == refRectB.h,
-        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectB.x, rectB.y, rectB.w, rectB.h,
-        refRectB.x, refRectB.y, refRectB.w, refRectB.h);
-    AssertTrue(result.x == refRectB.x && result.y == refRectB.y && result.w == refRectB.w && result.h == refRectB.h,
-        "Intersection of rectangles A and B was incorrectly calculated as: (%d,%d,%d,%d)",
-        result.x, result.y, result.w, result.h);
+    _validateIntersectRectResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB, &result, &refRectB);
 }
 
 /*!
@@ -211,18 +255,7 @@ int rect_testIntersectRectOutside (void *arg)
     rectA = refRectA;
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
-    AssertTrue(!intersection, 
-        "Incorrect intersection result: expected false, got true intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)\n",
-        rectA.x, rectA.y, rectA.w, rectA.h, 
-        rectB.x, rectB.y, rectB.w, rectB.h);    
-    AssertTrue(rectA.x == refRectA.x && rectA.y == refRectA.y && rectA.w == refRectA.w && rectA.h == refRectA.h,
-        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h,
-        refRectA.x, refRectA.y, refRectA.w, refRectA.h);
-    AssertTrue(rectB.x == refRectB.x && rectB.y == refRectB.y && rectB.w == refRectB.w && rectB.h == refRectB.h,
-        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectB.x, rectB.y, rectB.w, rectB.h,
-        refRectB.x, refRectB.y, refRectB.w, refRectB.h);
+    _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);    
 }
 
 /*!
@@ -238,6 +271,7 @@ int rect_testIntersectRectPartial (void *arg)
     SDL_Rect rectA;
     SDL_Rect rectB;
     SDL_Rect result;
+    SDL_Rect expectedResult;
     SDL_bool intersection;
 
     // rectB partially contained in rectA
@@ -247,22 +281,12 @@ int rect_testIntersectRectPartial (void *arg)
     refRectB.h = refRectA.h;
     rectA = refRectA;
     rectB = refRectB;
+    expectedResult.x = refRectB.x;
+    expectedResult.y = refRectB.y;
+    expectedResult.w = refRectA.w - refRectB.x;
+    expectedResult.h = refRectA.h - refRectB.y;    
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
-    AssertTrue(intersection, 
-        "Incorrect intersection result: expected true, got false intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)\n",
-        rectA.x, rectA.y, rectA.w, rectA.h, 
-        rectB.x, rectB.y, rectB.w, rectB.h);
-    AssertTrue(rectA.x == refRectA.x && rectA.y == refRectA.y && rectA.w == refRectA.w && rectA.h == refRectA.h,
-        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h,
-        refRectA.x, refRectA.y, refRectA.w, refRectA.h);
-    AssertTrue(rectB.x == refRectB.x && rectB.y == refRectB.y && rectB.w == refRectB.w && rectB.h == refRectB.h,
-        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectB.x, rectB.y, rectB.w, rectB.h,
-        refRectB.x, refRectB.y, refRectB.w, refRectB.h);
-    AssertTrue(result.x == refRectB.x && result.y == refRectB.y && result.w == (refRectA.w - refRectB.x) && result.h == (refRectA.h - refRectB.y),
-        "Intersection of rectangles A and B was incorrectly calculated as: (%d,%d,%d,%d)",
-        result.x, result.y, result.w, result.h);
+    _validateIntersectRectResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
 }
 
 /*!
@@ -279,6 +303,7 @@ int rect_testIntersectRectPoint (void *arg)
     SDL_Rect rectB;
     SDL_Rect result;
     SDL_bool intersection;
+    int offsetX, offsetY;
 
     // intersecting pixels
     refRectA.x = RandomIntegerInRange(1, 100);
@@ -288,37 +313,192 @@ int rect_testIntersectRectPoint (void *arg)
     rectA = refRectA;
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
-    AssertTrue(intersection, 
-        "Incorrect intersection result: expected true, got false intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)\n",
-        rectA.x, rectA.y, rectA.w, rectA.h, 
-        rectB.x, rectB.y, rectB.w, rectB.h);
-    AssertTrue(rectA.x == refRectA.x && rectA.y == refRectA.y && rectA.w == refRectA.w && rectA.h == refRectA.h,
-        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h,
-        refRectA.x, refRectA.y, refRectA.w, refRectA.h);
-    AssertTrue(rectB.x == refRectB.x && rectB.y == refRectB.y && rectB.w == refRectB.w && rectB.h == refRectB.h,
-        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectB.x, rectB.y, rectB.w, rectB.h,
-        refRectB.x, refRectB.y, refRectB.w, refRectB.h);
-    AssertTrue(result.x == refRectA.x && result.y == refRectA.y && result.w == refRectA.w && result.h == refRectA.h,
-        "Intersection of rectangles A and B was incorrectly calculated as: (%d,%d,%d,%d)",
-        result.x, result.y, result.w, result.h);
+    _validateIntersectRectResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB, &result, &refRectA);
 
-    // non-intersecting pixels case
-    refRectB.x++;
+    // non-intersecting pixels cases
+    for (offsetX = -1; offsetX <= 1; offsetX++) {
+        for (offsetY = -1; offsetY <= 1; offsetY++) {
+            if (offsetX != 0 || offsetY != 0) {
+                refRectA.x = RandomIntegerInRange(1, 100);
+                refRectA.y = RandomIntegerInRange(1, 100);
+                refRectB.x = refRectA.x;
+                refRectB.y = refRectA.y;    
+                refRectB.x += offsetX;
+                refRectB.y += offsetY;
+                rectA = refRectA;
+                rectB = refRectB;
+                intersection = SDL_IntersectRect(&rectA, &rectB, &result);
+                _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+            }
+        }
+    }
+}
+
+/*!
+ * \brief Negative tests against SDL_IntersectRect() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_IntersectRect
+ */
+int rect_testIntersectRectParam(void *arg)
+{
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_Rect result;
+    SDL_bool intersection;
+
+    // invalid parameter combinations
+    intersection = SDL_IntersectRect((SDL_Rect *)NULL, &rectB, &result);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 1st parameter was NULL"); 
+    intersection = SDL_IntersectRect(&rectA, (SDL_Rect *)NULL, &result);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 2st parameter was NULL"); 
+    intersection = SDL_IntersectRect(&rectA, &rectB, (SDL_Rect *)NULL);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 3st parameter was NULL"); 
+    intersection = SDL_IntersectRect((SDL_Rect *)NULL, (SDL_Rect *)NULL, &result);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 1st and 2nd parameters were NULL"); 
+    intersection = SDL_IntersectRect((SDL_Rect *)NULL, &rectB, (SDL_Rect *)NULL);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 1st and 3rd parameters were NULL "); 
+    intersection = SDL_IntersectRect((SDL_Rect *)NULL, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when all parameters were NULL");     
+}
+
+/*!
+ * \brief Tests SDL_HasIntersection() with B fully inside A
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionInside (void *arg)
+{
+    SDL_Rect refRectA = { 0, 0, 32, 32 };
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool intersection;
+
+    // rectB fully contained in rectA
+    refRectB.x = 0;
+    refRectB.y = 0;
+    refRectB.w = RandomIntegerInRange(refRectA.x + 1, refRectA.x + refRectA.w - 1);
+    refRectB.h = RandomIntegerInRange(refRectA.y + 1, refRectA.y + refRectA.h - 1);
     rectA = refRectA;
     rectB = refRectB;
-    intersection = SDL_IntersectRect(&rectA, &rectB, &result);
-    AssertTrue(!intersection, 
-        "Incorrect intersection result: expected false, got true intersecting A (%d,%d,%d,%d) with B (%d,%d,%d,%d)\n",
-        rectA.x, rectA.y, rectA.w, rectA.h, 
-        rectB.x, rectB.y, rectB.w, rectB.h);
-    AssertTrue(rectA.x == refRectA.x && rectA.y == refRectA.y && rectA.w == refRectA.w && rectA.h == refRectA.h,
-        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectA.x, rectA.y, rectA.w, rectA.h,
-        refRectA.x, refRectA.y, refRectA.w, refRectA.h);
-    AssertTrue(rectB.x == refRectB.x && rectB.y == refRectB.y && rectB.w == refRectB.w && rectB.h == refRectB.h,
-        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
-        rectB.x, rectB.y, rectB.w, rectB.h,
-        refRectB.x, refRectB.y, refRectB.w, refRectB.h);
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB);
+}
+
+/*!
+ * \brief Tests SDL_HasIntersection() with B fully outside A
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionOutside (void *arg)
+{
+    SDL_Rect refRectA = { 0, 0, 32, 32 };
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool intersection;
+
+    // rectB fully outside of rectA
+    refRectB.x = refRectA.x + refRectA.w + RandomIntegerInRange(1, 10);
+    refRectB.y = refRectA.y + refRectA.h + RandomIntegerInRange(1, 10);
+    refRectB.w = refRectA.w;
+    refRectB.h = refRectA.h;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB);
+}
+
+/*!
+ * \brief Tests SDL_HasIntersection() with B partially intersecting A
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionPartial (void *arg)
+{
+    SDL_Rect refRectA = { 0, 0, 32, 32 };
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool intersection;
+
+    // rectB partially contained in rectA
+    refRectB.x = RandomIntegerInRange(refRectA.x + 1, refRectA.x + refRectA.w - 1);
+    refRectB.y = RandomIntegerInRange(refRectA.y + 1, refRectA.y + refRectA.h - 1);
+    refRectB.w = refRectA.w;
+    refRectB.h = refRectA.h;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB);
+}
+
+/*!
+ * \brief Tests SDL_HasIntersection() with 1x1 pixel sized rectangles
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionPoint (void *arg)
+{
+    SDL_Rect refRectA = { 0, 0, 1, 1 };
+    SDL_Rect refRectB = { 0, 0, 1, 1 };
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_Rect result;
+    SDL_bool intersection;
+    int offsetX, offsetY;
+
+    // intersecting pixels
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectB.x = refRectA.x;
+    refRectB.y = refRectA.y;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_TRUE, &rectA, &rectB, &refRectA, &refRectB);
+
+    // non-intersecting pixels cases
+    for (offsetX = -1; offsetX <= 1; offsetX++) {
+        for (offsetY = -1; offsetY <= 1; offsetY++) {
+            if (offsetX != 0 || offsetY != 0) {
+                refRectA.x = RandomIntegerInRange(1, 100);
+                refRectA.y = RandomIntegerInRange(1, 100);
+                refRectB.x = refRectA.x;
+                refRectB.y = refRectA.y;    
+                refRectB.x += offsetX;
+                refRectB.y += offsetY;
+                rectA = refRectA;
+                rectB = refRectB;
+                intersection = SDL_HasIntersection(&rectA, &rectB);
+                _validateHasIntersectionResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB);
+            }
+        }
+    }
+}
+
+/*!
+ * \brief Negative tests against SDL_HasIntersection() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionParam(void *arg)
+{
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool intersection;
+
+    // invalid parameter combinations
+    intersection = SDL_HasIntersection((SDL_Rect *)NULL, &rectB);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 1st parameter was NULL"); 
+    intersection = SDL_HasIntersection(&rectA, (SDL_Rect *)NULL);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when 2st parameter was NULL"); 
+    intersection = SDL_HasIntersection((SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertTrue(intersection == SDL_FALSE, "Function did not return false when all parameters were NULL");     
 }
