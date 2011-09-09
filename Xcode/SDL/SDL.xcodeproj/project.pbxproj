@@ -204,7 +204,6 @@
 		04BD007112E6671800899322 /* SDL_joystick_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE1712E6671700899322 /* SDL_joystick_c.h */; };
 		04BD007212E6671800899322 /* SDL_sysjoystick.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE1812E6671700899322 /* SDL_sysjoystick.h */; };
 		04BD008812E6671800899322 /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE3312E6671700899322 /* SDL_sysloadso.c */; };
-		04BD008A12E6671800899322 /* SDL_dlcompat.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE3712E6671700899322 /* SDL_dlcompat.c */; };
 		04BD009412E6671800899322 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4B12E6671700899322 /* SDL_syspower.c */; };
 		04BD009612E6671800899322 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4E12E6671700899322 /* SDL_power.c */; };
 		04BD009B12E6671800899322 /* SDL_assert_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5512E6671700899322 /* SDL_assert_c.h */; };
@@ -362,7 +361,6 @@
 		04BD028C12E6671800899322 /* SDL_joystick_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE1712E6671700899322 /* SDL_joystick_c.h */; };
 		04BD028D12E6671800899322 /* SDL_sysjoystick.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE1812E6671700899322 /* SDL_sysjoystick.h */; };
 		04BD02A312E6671800899322 /* SDL_sysloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE3312E6671700899322 /* SDL_sysloadso.c */; };
-		04BD02A512E6671800899322 /* SDL_dlcompat.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE3712E6671700899322 /* SDL_dlcompat.c */; };
 		04BD02AE12E6671800899322 /* SDL_syspower.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4B12E6671700899322 /* SDL_syspower.c */; };
 		04BD02B012E6671800899322 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4E12E6671700899322 /* SDL_power.c */; };
 		04BD02B512E6671800899322 /* SDL_assert_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5512E6671700899322 /* SDL_assert_c.h */; };
@@ -692,7 +690,6 @@
 		04BDFE1712E6671700899322 /* SDL_joystick_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_joystick_c.h; sourceTree = "<group>"; };
 		04BDFE1812E6671700899322 /* SDL_sysjoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysjoystick.h; sourceTree = "<group>"; };
 		04BDFE3312E6671700899322 /* SDL_sysloadso.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_sysloadso.c; sourceTree = "<group>"; };
-		04BDFE3712E6671700899322 /* SDL_dlcompat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_dlcompat.c; sourceTree = "<group>"; };
 		04BDFE4B12E6671700899322 /* SDL_syspower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_syspower.c; sourceTree = "<group>"; };
 		04BDFE4E12E6671700899322 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_power.c; sourceTree = "<group>"; };
 		04BDFE5512E6671700899322 /* SDL_assert_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_assert_c.h; path = ../../src/SDL_assert_c.h; sourceTree = SOURCE_ROOT; };
@@ -1297,14 +1294,6 @@
 				04BDFE3312E6671700899322 /* SDL_sysloadso.c */,
 			);
 			path = dlopen;
-			sourceTree = "<group>";
-		};
-		04BDFE3612E6671700899322 /* macosx */ = {
-			isa = PBXGroup;
-			children = (
-				04BDFE3712E6671700899322 /* SDL_dlcompat.c */,
-			);
-			path = macosx;
 			sourceTree = "<group>";
 		};
 		04BDFE4512E6671700899322 /* power */ = {
@@ -2098,7 +2087,6 @@
 				04BD006612E6671800899322 /* SDL_sysjoystick.c in Sources */,
 				04BD007012E6671800899322 /* SDL_joystick.c in Sources */,
 				04BD008812E6671800899322 /* SDL_sysloadso.c in Sources */,
-				04BD008A12E6671800899322 /* SDL_dlcompat.c in Sources */,
 				04BD009412E6671800899322 /* SDL_syspower.c in Sources */,
 				04BD009612E6671800899322 /* SDL_power.c in Sources */,
 				04BD009C12E6671800899322 /* SDL_assert.c in Sources */,
@@ -2210,7 +2198,6 @@
 				04BD028112E6671800899322 /* SDL_sysjoystick.c in Sources */,
 				04BD028B12E6671800899322 /* SDL_joystick.c in Sources */,
 				04BD02A312E6671800899322 /* SDL_sysloadso.c in Sources */,
-				04BD02A512E6671800899322 /* SDL_dlcompat.c in Sources */,
 				04BD02AE12E6671800899322 /* SDL_syspower.c in Sources */,
 				04BD02B012E6671800899322 /* SDL_power.c in Sources */,
 				04BD02B612E6671800899322 /* SDL_assert.c in Sources */,

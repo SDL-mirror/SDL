@@ -219,7 +219,6 @@
 
 /* Enable various shared object loading systems */
 #undef SDL_LOADSO_BEOS
-#undef SDL_LOADSO_DLCOMPAT
 #undef SDL_LOADSO_DLOPEN
 #undef SDL_LOADSO_DUMMY
 #undef SDL_LOADSO_LDG

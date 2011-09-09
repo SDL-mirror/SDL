@@ -2282,15 +2282,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDiskAudio
         CheckDummyAudio
         CheckDLOPEN
-
-        # Set up files for the shared object loading library
-        # (this needs to be done before the dynamic X11 check)
-        if test x$enable_loadso = xyes -a x$have_dlopen != xyes; then
-            AC_DEFINE(SDL_LOADSO_DLCOMPAT, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/loadso/macosx/*.c"
-            have_loadso=yes
-        fi
-
         CheckCOCOA
         CheckX11
         CheckMacGL
