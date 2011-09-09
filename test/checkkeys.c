@@ -39,8 +39,8 @@ print_string(char **text, size_t *maxlen, const char *fmt, ...)
     len = SDL_vsnprintf(*text, *maxlen, fmt, ap);
     if (len > 0) {
         *text += len;
-        if (len < *maxlen) {
-            *maxlen -= len;
+        if ( ((size_t) len) < *maxlen ) {
+            *maxlen -= (size_t) len;
         } else {
             *maxlen = 0;
         }
