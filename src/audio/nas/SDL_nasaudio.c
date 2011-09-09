@@ -108,8 +108,8 @@ LoadNASLibrary(void)
         nas_handle = SDL_LoadObject(nas_library);
         if (nas_handle == NULL) {
             /* Copy error string so we can use it in a new SDL_SetError(). */
-            char *origerr = SDL_GetError();
-            size_t len = SDL_strlen(origerr) + 1;
+            const char *origerr = SDL_GetError();
+            const size_t len = SDL_strlen(origerr) + 1;
             char *err = (char *) alloca(len);
             SDL_strlcpy(err, origerr, len);
             retval = -1;
