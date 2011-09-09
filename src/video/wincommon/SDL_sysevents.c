@@ -241,53 +241,6 @@ static BOOL WINAPI WIN_TrackMouseEvent(TRACKMOUSEEVENT *ptme)
 }
 #endif /* WM_MOUSELEAVE */
 
-/* Function to retrieve the current keyboard modifiers */
-static void WIN_GetKeyboardState(void)
-{
-#ifndef NO_GETKEYBOARDSTATE
-	SDLMod state;
-	BYTE keyboard[256];
-	Uint8 *kstate = SDL_GetKeyState(NULL);
-
-	state = KMOD_NONE;
-	if ( GetKeyboardState(keyboard) ) {
-		if ( keyboard[VK_LSHIFT] & 0x80) {
-			state |= KMOD_LSHIFT;
-			kstate[SDLK_LSHIFT] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_RSHIFT] & 0x80) {
-			state |= KMOD_RSHIFT;
-			kstate[SDLK_RSHIFT] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_LCONTROL] & 0x80) {
-			state |= KMOD_LCTRL;
-			kstate[SDLK_LCTRL] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_RCONTROL] & 0x80) {
-			state |= KMOD_RCTRL;
-			kstate[SDLK_RCTRL] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_LMENU] & 0x80) {
-			state |= KMOD_LALT;
-			kstate[SDLK_LALT] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_RMENU] & 0x80) {
-			state |= KMOD_RALT;
-			kstate[SDLK_RALT] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_NUMLOCK] & 0x01) {
-			state |= KMOD_NUM;
-			kstate[SDLK_NUMLOCK] = SDL_PRESSED;
-		}
-		if ( keyboard[VK_CAPITAL] & 0x01) {
-			state |= KMOD_CAPS;
-			kstate[SDLK_CAPSLOCK] = SDL_PRESSED;
-		}
-	}
-	SDL_SetModState(state);
-#endif /* !NO_GETKEYBOARDSTATE */
-}
-
 /* The main Win32 event handler
 DJM: This is no longer static as (DX5/DIB)_CreateWindow needs it
 */
@@ -337,7 +290,6 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 #endif
 				posted = SDL_PrivateAppActive(1, appstate);
-				WIN_GetKeyboardState();
 			} else {
 				/* Lose the following states */
 				appstate = SDL_APPINPUTFOCUS;
