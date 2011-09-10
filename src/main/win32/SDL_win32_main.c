@@ -328,7 +328,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPWSTR szCmdLine, int sw)
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 #endif
 {
-	HINSTANCE handle;
+	HMODULE handle;
 	char **argv;
 	int argc;
 	char *cmdline;
