@@ -65,7 +65,9 @@ _QuitTestEnvironment()
 		_testReturnValue = TEST_RESULT_NO_ASSERT;
 	}
 
-	Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+	if(GetInvocationCount() > 0) {
+		Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+	}
 
 	DeinitFuzzer();
 
@@ -78,8 +80,8 @@ _CountFailedAsserts() {
 }
 
 /*!
- * Bail out from test case. For example, function is used to bail out
- * after failed assert.
+ * Bail out from test case. For example, the function is used to bail out
+ * from a test case after a failed assert.
  */
 void
 _BailOut()
@@ -90,7 +92,9 @@ _BailOut()
 	AssertSummary(_testAssertsFailed + _testAssertsPassed,
                   _testAssertsFailed, _testAssertsPassed, time(0));
 
-	Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+	if(GetInvocationCount() > 0) {
+		Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+	}
 
 	DeinitFuzzer();
 
