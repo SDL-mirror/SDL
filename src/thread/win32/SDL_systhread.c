@@ -60,7 +60,7 @@ typedef struct ThreadStartParms
   pfnSDL_CurrentEndThread pfnCurrentEndThread;
 } tThreadStartParms, *pThreadStartParms;
 
-static DWORD WINAPI RunThread(LPVOID data)
+static DWORD RunThread(void *data)
 {
   pThreadStartParms pThreadParms = (pThreadStartParms)data;
   pfnSDL_CurrentEndThread pfnCurrentEndThread = NULL;
@@ -78,6 +78,16 @@ static DWORD WINAPI RunThread(LPVOID data)
   if (pfnCurrentEndThread)
     (*pfnCurrentEndThread)(0);
   return(0);
+}
+
+static DWORD WINAPI RunThreadViaCreateThread(LPVOID data)
+{
+  return RunThread(data);
+}
+
+static unsigned __stdcall RunThreadViaBeginThreadEx(void *data)
+{
+  return (unsigned) RunThread(data);
 }
 
 #ifdef SDL_PASSED_BEGINTHREAD_ENDTHREAD
@@ -108,11 +118,11 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	if (pfnBeginThread) {
 		unsigned threadid = 0;
 		thread->handle = (SYS_ThreadHandle)
-				((size_t) pfnBeginThread(NULL, 0, RunThread,
+				((size_t) pfnBeginThread(NULL, 0, RunThreadViaBeginThreadEx,
 										 pThreadParms, 0, &threadid));
 	} else {
 		DWORD threadid = 0;
-		thread->handle = CreateThread(NULL, 0, RunThread, pThreadParms, 0, &threadid);
+		thread->handle = CreateThread(NULL, 0, RunThreadViaCreateThread, pThreadParms, 0, &threadid);
 	}
 	if (thread->handle == NULL) {
 		SDL_SetError("Not enough resources to create thread");
