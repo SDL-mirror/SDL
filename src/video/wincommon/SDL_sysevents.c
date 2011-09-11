@@ -816,7 +816,7 @@ static int GetCodePage()
 	return cp;
 }
 
-static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const PBYTE keystate, LPWSTR wchars, int wsize, UINT flags)
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, LPWSTR wchars, int wsize, UINT flags)
 {
 	BYTE	chars[2];
 
