@@ -32,7 +32,8 @@
 
 #if SDL_ASSEMBLY_ROUTINES
 #  if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-#    define MMX_ASMBLIT 1
+     /* forced MMX to 0...it breaks on most compilers now.  --ryan. */
+#    define MMX_ASMBLIT 0
 #    define GCC_ASMBLIT 1
 #  elif defined(_MSC_VER) && defined(_M_IX86)
 #    if (_MSC_VER <= 1200)  
