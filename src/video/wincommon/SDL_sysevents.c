@@ -820,7 +820,8 @@ static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, 
 {
 	BYTE	chars[2];
 
-	if (ToAsciiEx(vkey, scancode, keystate, (WORD*)chars, 0, GetKeyboardLayout(0)) == 1) {
+	/* arg #3 should be const BYTE *, but cygwin lists it as PBYTE. */
+	if (ToAsciiEx(vkey, scancode, (PBYTE) keystate, (WORD*)chars, 0, GetKeyboardLayout(0)) == 1) {
 		return MultiByteToWideChar(codepage, 0, chars, 1, wchars, wsize);
 	}
 	return 0;

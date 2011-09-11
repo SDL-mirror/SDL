@@ -36,12 +36,7 @@
 #include <process.h>
 #endif
 
-#if __GNUC__
-typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
-        unsigned (__stdcall *func)(void *), void *arg, 
-        unsigned, unsigned *threadID);
-typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
-#elif defined(__WATCOMC__)
+#if defined(__WATCOMC__)
 /* This is for Watcom targets except OS2 */
 #if __WATCOMC__ < 1240
 #define __watcall
@@ -65,7 +60,7 @@ typedef struct ThreadStartParms
   pfnSDL_CurrentEndThread pfnCurrentEndThread;
 } tThreadStartParms, *pThreadStartParms;
 
-static unsigned __stdcall RunThread(void *data)
+static DWORD WINAPI RunThread(LPVOID data)
 {
   pThreadStartParms pThreadParms = (pThreadStartParms)data;
   pfnSDL_CurrentEndThread pfnCurrentEndThread = NULL;
