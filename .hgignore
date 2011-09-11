@@ -12,7 +12,6 @@ SDL.spec
 SDL.qpg
 build
 build-deps
-Xcode
 .DS_Store
 sdl.pc
 include/SDL_config.h
