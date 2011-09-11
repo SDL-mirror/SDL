@@ -655,7 +655,7 @@ int DIB_CreateWindow(_THIS)
 		SDL_Window = (HWND)wcstol(windowid_t, NULL, 0);
 		SDL_free(windowid_t);
 #else
-		SDL_Window = (HWND)SDL_strtoull(windowid, NULL, 0);
+		SDL_Window = (HWND)((size_t)SDL_strtoull(windowid, NULL, 0));
 #endif
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
