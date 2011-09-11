@@ -119,7 +119,7 @@ _ConvertMMXpII32_24RGB888:
         dec ecx
         jnz .L3
 .L4:
-        return
+        retn
 
 
 
