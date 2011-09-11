@@ -65,7 +65,7 @@ typedef struct ThreadStartParms
   pfnSDL_CurrentEndThread pfnCurrentEndThread;
 } tThreadStartParms, *pThreadStartParms;
 
-static DWORD WINAPI RunThread(LPVOID *data)
+static unsigned __stdcall RunThread(void *data)
 {
   pThreadStartParms pThreadParms = (pThreadStartParms)data;
   pfnSDL_CurrentEndThread pfnCurrentEndThread = NULL;
@@ -99,7 +99,6 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	pfnSDL_CurrentEndThread pfnEndThread = _endthreadex;
 #endif
 #endif /* SDL_PASSED_BEGINTHREAD_ENDTHREAD */
-	DWORD threadid = 0;
 	pThreadStartParms pThreadParms = (pThreadStartParms)SDL_malloc(sizeof(tThreadStartParms));
 	if (!pThreadParms) {
 		SDL_OutOfMemory();
@@ -112,10 +111,12 @@ int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 	pThreadParms->args = args;
 
 	if (pfnBeginThread) {
+		unsigned threadid = 0;
 		thread->handle = (SYS_ThreadHandle)
 				((size_t) pfnBeginThread(NULL, 0, RunThread,
 										 pThreadParms, 0, &threadid));
 	} else {
+		DWORD threadid = 0;
 		thread->handle = CreateThread(NULL, 0, RunThread, pThreadParms, 0, &threadid);
 	}
 	if (thread->handle == NULL) {

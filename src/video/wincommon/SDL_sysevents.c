@@ -99,7 +99,7 @@ extern void DIB_SwapGamma(_THIS);
 static int codepage;
 static int Is9xME();
 static int GetCodePage();
-static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, BYTE *keystate, LPWSTR wchars, int wsize, UINT flags);
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, LPWSTR wchars, int wsize, UINT flags);
 
 ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
 #endif /* !NO_GETKEYBOARDSTATE */
@@ -816,7 +816,7 @@ static int GetCodePage()
 	return cp;
 }
 
-static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, PBYTE keystate, LPWSTR wchars, int wsize, UINT flags)
+static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const PBYTE keystate, LPWSTR wchars, int wsize, UINT flags)
 {
 	BYTE	chars[2];
 
