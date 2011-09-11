@@ -77,7 +77,7 @@ typedef struct ThreadStartParms
     pfnSDL_CurrentEndThread pfnCurrentEndThread;
 } tThreadStartParms, *pThreadStartParms;
 
-static DWORD __stdcall
+static unsigned __stdcall
 RunThread(void *data)
 {
     pThreadStartParms pThreadParms = (pThreadStartParms) data;
@@ -115,7 +115,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     pfnSDL_CurrentEndThread pfnEndThread = _endthreadex;
 #endif
 #endif /* SDL_PASSED_BEGINTHREAD_ENDTHREAD */
-    unsigned threadid;
+    DWORD threadid = 0;
     pThreadStartParms pThreadParms =
         (pThreadStartParms) SDL_malloc(sizeof(tThreadStartParms));
     if (!pThreadParms) {
