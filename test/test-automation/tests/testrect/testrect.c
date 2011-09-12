@@ -51,10 +51,23 @@ static const TestCaseReference test13 =
 static const TestCaseReference test14 =
 		(TestCaseReference){ "rect_testHasIntersectionParam", "Negative tests against SDL_HasIntersection with invalid parameters", TEST_ENABLED, 0, 0 };
 
+static const TestCaseReference test15 =
+		(TestCaseReference){ "rect_testEnclosePoints", "Tests SDL_EnclosePoints without clipping", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test16 =
+		(TestCaseReference){ "rect_testEnclosePointsWithClipping", "Tests SDL_EnclosePoints with clipping", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test17 =
+		(TestCaseReference){ "rect_testEnclosePointsRepeatedInput", "Tests SDL_EnclosePoints with repeated input", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test18 =
+		(TestCaseReference){ "rect_testEnclosePointsParam", "Negative tests against SDL_EnclosePoints with invalid parameters", TEST_ENABLED, 0, 0 };
+
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, &test12, &test13, &test14, NULL
+	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, &test12, &test13, &test14, 
+	&test15, &test16, &test17, &test18, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -736,4 +749,250 @@ int rect_testHasIntersectionParam(void *arg)
     AssertTrue(intersection == SDL_FALSE, "Function did not return false when 2st parameter was NULL"); 
     intersection = SDL_HasIntersection((SDL_Rect *)NULL, (SDL_Rect *)NULL);
     AssertTrue(intersection == SDL_FALSE, "Function did not return false when all parameters were NULL");     
+}
+
+/*!
+ * \brief Test SDL_EnclosePoints() without clipping
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_EnclosePoints
+ */
+int rect_testEnclosePoints(void *arg)
+{
+    const int numPoints = 16;
+    SDL_Point refPoints[numPoints];
+    SDL_Point points[numPoints];
+    int count;
+    SDL_Rect result;
+    SDL_bool anyEnclosed;
+    SDL_bool anyEnclosedNoResult;
+
+    // Create input data, tracking result
+    SDL_bool expectedEnclosed = SDL_TRUE;
+    int newx, newy;
+    int minx, maxx, miny, maxy;
+    int i;
+    for (i=0; i<numPoints; i++) {
+        newx = RandomIntegerInRange(-1024, 1024);
+        newy = RandomIntegerInRange(-1024, 1024);
+        refPoints[i].x = newx;
+        refPoints[i].y = newy;
+        points[i].x = newx;
+        points[i].y = newy;
+        if (i==0) {
+            minx=maxx=newx;
+            miny=maxy=newy;
+        } else {
+            if (newx<minx) minx=newx;
+            if (newx>maxx) maxx=newx;
+            if (newy<miny) miny=newy;
+            if (newy>maxy) maxy=newy;
+        }
+    }
+    
+    // Call function and validate - special case: no result requested
+    anyEnclosedNoResult = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertTrue(expectedEnclosed==anyEnclosedNoResult, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosedNoResult==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+
+    // Call function and validate
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)NULL, &result);
+    AssertTrue(expectedEnclosed==anyEnclosed, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosed==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+    AssertTrue(result.x==minx && result.y==miny && result.w==(maxx - minx + 1) && result.h==(maxy - miny + 1),
+        "Resulting enclosing rectangle incorrect: expected (%i,%i - %i,%i), actual (%i,%i - %i,%i)",
+        minx, miny, maxx, maxy, result.x, result.y, result.x + result.w - 1, result.y + result.h - 1);
+}
+
+/*!
+ * \brief Test SDL_EnclosePoints() with repeated input points
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_EnclosePoints
+ */
+int rect_testEnclosePointsRepeatedInput(void *arg)
+{
+    const int numPoints = 8;
+    const int halfPoints = numPoints/2;
+    SDL_Point refPoints[numPoints];
+    SDL_Point points[numPoints];
+    int count;
+    SDL_Rect result;
+    SDL_bool anyEnclosed;
+    SDL_bool anyEnclosedNoResult;
+
+    // Create input data, tracking result
+    SDL_bool expectedEnclosed = SDL_TRUE;
+    int newx, newy;
+    int minx, maxx, miny, maxy;
+    int i;
+    for (i=0; i<numPoints; i++) {
+        if (i < halfPoints) {
+            newx = RandomIntegerInRange(-1024, 1024);
+            newy = RandomIntegerInRange(-1024, 1024);
+        } else {
+            newx = refPoints[i-halfPoints].x;
+            newy = refPoints[i-halfPoints].y;
+        }
+        refPoints[i].x = newx;
+        refPoints[i].y = newy;
+        points[i].x = newx;
+        points[i].y = newy;
+        if (i==0) {
+            minx=maxx=newx;
+            miny=maxy=newy;
+        } else {
+            if (newx<minx) minx=newx;
+            if (newx>maxx) maxx=newx;
+            if (newy<miny) miny=newy;
+            if (newy>maxy) maxy=newy;
+        }
+    }
+
+    // Call function and validate - special case: no result requested
+    anyEnclosedNoResult = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertTrue(expectedEnclosed==anyEnclosedNoResult, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosedNoResult==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+    
+    // Call function and validate
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)NULL, &result);
+    AssertTrue(expectedEnclosed==anyEnclosed, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosed==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+    AssertTrue(result.x==minx && result.y==miny && result.w==(maxx - minx + 1) && result.h==(maxy - miny + 1),
+        "Resulting enclosing rectangle incorrect: expected (%i,%i - %i,%i), actual (%i,%i - %i,%i)",
+        minx, miny, maxx, maxy, result.x, result.y, result.x + result.w - 1, result.y + result.h - 1);
+}
+
+/*!
+ * \brief Test SDL_EnclosePoints() with clipping
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_EnclosePoints
+ */
+int rect_testEnclosePointsWithClipping(void *arg)
+{
+    const int numPoints = 16;
+    SDL_Point refPoints[numPoints];
+    SDL_Point points[numPoints];
+    int count;
+    SDL_Rect refClip;
+    SDL_Rect clip;
+    SDL_Rect result;
+    SDL_bool anyEnclosed;
+    SDL_bool anyEnclosedNoResult;
+
+    // Setup clipping rectangle
+    refClip.x = RandomIntegerInRange(-1024, 1024);
+    refClip.y = RandomIntegerInRange(-1024, 1024);
+    refClip.w = RandomIntegerInRange(1, 1024);
+    refClip.h = RandomIntegerInRange(1, 1024);
+
+    // Create input data, tracking result
+    SDL_bool expectedEnclosed = SDL_FALSE;
+    int newx, newy;
+    int minx, maxx, miny, maxy;
+    int i;
+    for (i=0; i<numPoints; i++) {
+        newx = RandomIntegerInRange(-1024, 1024);
+        newy = RandomIntegerInRange(-1024, 1024);
+        refPoints[i].x = newx;
+        refPoints[i].y = newy;
+        points[i].x = newx;
+        points[i].y = newy;
+        if ((newx>=refClip.x) && (newx<(refClip.x + refClip.w)) &&
+            (newy>=refClip.y) && (newy<(refClip.y + refClip.h))) {
+            if (expectedEnclosed==SDL_FALSE) {
+                minx=maxx=newx;
+                miny=maxy=newy;
+            } else {
+                if (newx<minx) minx=newx;
+                if (newx>maxx) maxx=newx;
+                if (newy<miny) miny=newy;
+                if (newy>maxy) maxy=newy;
+            }
+            expectedEnclosed = SDL_TRUE;
+        }
+    }
+
+    // Call function and validate - special case: no result requested
+    clip = refClip;
+    anyEnclosedNoResult = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)&clip, (SDL_Rect *)NULL);
+    AssertTrue(expectedEnclosed==anyEnclosedNoResult, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosedNoResult==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+    AssertTrue(refClip.x==clip.x && refClip.y==clip.y && refClip.w==clip.w && refClip.h==clip.h,
+        "Source clipping rectangle was incorrectly modified");
+    
+    // Call function and validate
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)&clip, &result);
+    AssertTrue(expectedEnclosed==anyEnclosed, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosed==SDL_TRUE) ? "true" : "false");
+    for (i=0; i<numPoints; i++) {
+        AssertTrue(refPoints[i].x==points[i].x && refPoints[i].y==points[i].y,
+            "Source point %i was incorrectly modified: expected (%i,%i) actual (%i,%i)", 
+            i, refPoints[i].x, refPoints[i].y, points[i].x, points[i].y);
+    }
+    AssertTrue(refClip.x==clip.x && refClip.y==clip.y && refClip.w==clip.w && refClip.h==clip.h,
+        "Source clipping rectangle was incorrectly modified");
+    if (expectedEnclosed==SDL_TRUE) {
+        AssertTrue(result.x==minx && result.y==miny && result.w==(maxx - minx + 1) && result.h==(maxy - miny + 1),
+            "Resulting enclosing rectangle incorrect: expected (%i,%i - %i,%i), actual (%i,%i - %i,%i)",
+            minx, miny, maxx, maxy, result.x, result.y, result.x + result.w - 1, result.y + result.h - 1);
+    }    
+}
+
+/*!
+ * \brief Negative tests against SDL_EnclosePoints() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_EnclosePoints
+ */
+int rect_testEnclosePointsParam(void *arg)
+{
+    SDL_Point points[1];
+    int count;
+    SDL_Rect clip;
+    SDL_Rect result;
+    SDL_bool anyEnclosed;
+
+    // invalid parameter combinations
+    anyEnclosed = SDL_EnclosePoints((SDL_Point *)NULL, 1, (const SDL_Rect *)&clip, &result);
+    AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 1st parameter was NULL"); 
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, 0, (const SDL_Rect *)&clip, &result);
+    AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 2nd parameter was 0");
+    count = RandomIntegerInRange(-100, -1);
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, count, (const SDL_Rect *)&clip, &result);
+    AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 2nd parameter was %i", count); 
+    anyEnclosed = SDL_EnclosePoints((SDL_Point *)NULL, 0, (const SDL_Rect *)&clip, &result);
+    AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 1st parameter was NULL and 2nd parameter was 0"); 
 }
