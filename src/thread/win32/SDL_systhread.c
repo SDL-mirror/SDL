@@ -45,6 +45,11 @@ typedef unsigned long (__watcall *pfnSDL_CurrentBeginThread) (void *, unsigned,
         unsigned (__stdcall *func)(void *), void *arg, 
         unsigned, unsigned *threadID);
 typedef void (__watcall *pfnSDL_CurrentEndThread)(unsigned code);
+#elif defined(__CYGWIN__) && !defined(__MINGW32__)
+typedef unsigned long (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
+        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned, unsigned *threadID);
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
 #else
 typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
         unsigned (__stdcall *func)(void *), void *arg, 
