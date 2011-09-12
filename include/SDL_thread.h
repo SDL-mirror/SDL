@@ -68,6 +68,11 @@ typedef struct SDL_Thread SDL_Thread;
 #ifdef __OS2__
 typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
 typedef void (*pfnSDL_CurrentEndThread)(void);
+#elif defined(__CYGWIN__) && !defined(__MINGW32__)
+typedef unsigned long (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
+        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned, unsigned *threadID);
+typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
 #else
 typedef uintptr_t (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
         unsigned (__stdcall *func)(void *), void *arg, 
