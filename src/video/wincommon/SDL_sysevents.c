@@ -765,7 +765,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 
 	/* Cygwin headers don't match windows.h, so we have to cast around a
 	   const issue here... */
-	SDL_ToUnicode = Is9xME() ? ToUnicode9xME : (ToUnicodeFn) ToUnicode;
+	SDL_ToUnicode = Is9xME() ? ToUnicode9xME : (ToUnicodeFN) ToUnicode;
 #endif
 
 	app_registered = 1;
