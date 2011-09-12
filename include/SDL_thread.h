@@ -90,17 +90,6 @@ typedef int (SDLCALL * SDL_ThreadFunction) (void *data);
 #include <process.h>            /* This has _beginthread() and _endthread() defined! */
 #endif
 
-#ifdef __GNUC__
-typedef unsigned long (__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
-                                                             unsigned
-                                                             (__stdcall *
-                                                              func) (void *),
-                                                             void *arg,
-                                                             unsigned,
-                                                             unsigned
-                                                             *threadID);
-typedef void (__cdecl * pfnSDL_CurrentEndThread) (unsigned code);
-#else
 typedef uintptr_t(__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
                                                         unsigned (__stdcall *
                                                                   func) (void
@@ -108,7 +97,6 @@ typedef uintptr_t(__cdecl * pfnSDL_CurrentBeginThread) (void *, unsigned,
                                                         void *arg, unsigned,
                                                         unsigned *threadID);
 typedef void (__cdecl * pfnSDL_CurrentEndThread) (unsigned code);
-#endif
 
 /**
  *  Create a thread.
