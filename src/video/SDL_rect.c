@@ -141,7 +141,7 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
     int maxy = 0;
     int x, y, i;
 
-    if (!points || !clip) {
+    if (!points) {
         // TODO error message
         return SDL_FALSE;
     }
@@ -167,6 +167,12 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
                 continue;
             }
             if (!added) {
+                /* Special case: if no result was requested, we are done */
+                if (result == NULL) {
+                    return SDL_TRUE;
+                }
+
+                /* First point added */
                 minx = maxx = x;
                 miny = maxy = y;
                 added = SDL_TRUE;
@@ -187,6 +193,11 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
             return SDL_FALSE;
         }
     } else {
+        /* Special case: if no result was requested, we are done */
+        if (result == NULL) {
+            return SDL_TRUE;
+        }
+        
         /* No clipping, always add the first point */
         minx = maxx = points[0].x;
         miny = maxy = points[0].y;
