@@ -30,6 +30,7 @@
 #include <InterfaceKit.h>
 #include <be/game/DirectWindow.h>
 #if SDL_VIDEO_OPENGL
+#include "SDL_opengl.h"
 #include <be/opengl/GLView.h>
 #endif
 #include <support/UTF8.h>
