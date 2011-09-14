@@ -117,11 +117,8 @@ VideoBootStrap QZ_bootstrap = {
 
 /* Disable compiler warnings we can't avoid. */
 #if (defined(__GNUC__) && (__GNUC__ >= 4))
-#  if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-     /* use ==, not >=, so we see future warnings. */
-#    if (MAC_OS_X_VERSION_MAX_ALLOWED == 1070) 
-#      pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#    endif
+#  if (MAC_OS_X_VERSION_MAX_ALLOWED <= 1070)
+#    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #  endif
 #endif
 
