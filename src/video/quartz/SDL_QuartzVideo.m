@@ -24,7 +24,7 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
-#if __MAC_OS_X_VERSION_MIN_REQUIRED < 1060  /* Fixed in Snow Leopard */
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)  /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
@@ -106,15 +106,6 @@ VideoBootStrap QZ_bootstrap = {
     "Quartz", "Mac OS X CoreGraphics", QZ_Available, QZ_CreateDevice
 };
 
-
-/* !!! FIXME: clean out pre-10.6 code when (if!) it makes sense to do so. */
-#define FORCE_OLD_API 0 || (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
-
-#if FORCE_OLD_API
-#undef MAC_OS_X_VERSION_MIN_REQUIRED
-#define MAC_OS_X_VERSION_MIN_REQUIRED 1050
-#endif
-
 /* Disable compiler warnings we can't avoid. */
 #if (defined(__GNUC__) && (__GNUC__ >= 4))
 #  if (MAC_OS_X_VERSION_MAX_ALLOWED <= 1070)
@@ -124,20 +115,12 @@ VideoBootStrap QZ_bootstrap = {
 
 static inline BOOL IS_LION_OR_LATER(_THIS)
 {
-#if FORCE_OLD_API
-    return NO;
-#else
     return (system_version >= 0x1070);
-#endif
 }
 
 static inline BOOL IS_SNOW_LEOPARD_OR_LATER(_THIS)
 {
-#if FORCE_OLD_API
-    return NO;
-#else
     return (system_version >= 0x1060);
-#endif
 }
 
 static void QZ_ReleaseDisplayMode(_THIS, const void *moderef)
@@ -784,11 +767,9 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         if (qz_window != nil) {
             [ qz_window setAcceptsMouseMovedEvents:YES ];
             [ qz_window setViewsNeedDisplay:NO ];
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
             if (isLion) {
                 [ qz_window setContentView: [ [ [ SDL_QuartzView alloc ] init ] autorelease ] ];
             }
-#endif
         }
     }
     /* We already have a window, just change its size */
@@ -812,22 +793,18 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
            view allow the cursor to be changed whilst in fullscreen.*/
         window_view = [ [ NSView alloc ] initWithFrame:contentRect ];
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
         if ( isLion ) {
             [ window_view setAutoresizingMask: NSViewWidthSizable | NSViewHeightSizable ];
         }
-#endif
 
         [ [ qz_window contentView ] addSubview:window_view ];
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
         if ( isLion ) {
             [ qz_window setLevel:CGShieldingWindowLevel() ];
             [ gl_context setView: window_view ];
             [ gl_context setFullScreen ];
             [ gl_context update ];
         }
-#endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070)
         if ( !isLion) {
@@ -851,7 +828,6 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
         current->flags |= SDL_OPENGL;
     } else if (isLion) {  /* For 2D, we build a CGBitmapContext */
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
         CGColorSpaceRef cgColorspace;
 
         /* Only recreate the view if it doesn't already exist */
@@ -881,16 +857,13 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         this->UpdateRects     = QZ_UpdateRects;
         this->LockHWSurface   = QZ_LockHWSurface;
         this->UnlockHWSurface = QZ_UnlockHWSurface;
-#endif
     }
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070)
     if (isLion) {
         [ qz_window setHasShadow:NO];
         [ qz_window setOpaque:YES];
         [ qz_window makeKeyAndOrderFront:nil ];
     }
-#endif
 
     /* If we don't hide menu bar, it will get events and interrupt the program */
     HideMenuBar ();
