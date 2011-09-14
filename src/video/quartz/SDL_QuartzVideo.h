@@ -40,6 +40,7 @@
         - Check accuracy of QZ_SetGamma()
     Problems:
         - OGL not working in full screen with software renderer
+        - SetColors sets palette correctly but clears framebuffer
         - Crash in CG after several mode switches (I think this has been fixed)
         - Retained windows don't draw their title bar quite right (OS Bug) (not using retained windows)
         - Cursor in 8 bit modes is screwy (might just be Radeon PCI bug) (update: not just Radeon)
@@ -89,6 +90,7 @@ typedef struct SDL_PrivateVideoData {
     CGDirectDisplayID  display;            /* 0 == main display (only support single display) */
     const void         *mode;              /* current mode of the display */
     const void         *save_mode;         /* original mode of the display */
+    CGDirectPaletteRef palette;            /* palette of an 8-bit display */
     NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
     Uint32             width, height, bpp; /* frequently used data about the display */
     Uint32             flags;              /* flags for current mode, for teardown purposes */
@@ -126,6 +128,7 @@ typedef struct SDL_PrivateVideoData {
 #define mode (this->hidden->mode)
 #define save_mode (this->hidden->save_mode)
 #define allow_screensaver (this->hidden->allow_screensaver)
+#define palette (this->hidden->palette)
 #define gl_context (this->hidden->gl_context)
 #define device_width (this->hidden->width)
 #define device_height (this->hidden->height)
