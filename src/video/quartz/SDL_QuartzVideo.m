@@ -24,7 +24,6 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
-
 #if __MAC_OS_X_VERSION_MIN_REQUIRED < 1060  /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
@@ -114,6 +113,16 @@ VideoBootStrap QZ_bootstrap = {
 #if FORCE_OLD_API
 #undef MAC_OS_X_VERSION_MIN_REQUIRED
 #define MAC_OS_X_VERSION_MIN_REQUIRED 1050
+#endif
+
+/* Disable compiler warnings we can't avoid. */
+#if (defined(__GNUC__) && (__GNUC__ >= 4))
+#  if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
+     /* use ==, not >=, so we see future warnings. */
+#    if (MAC_OS_X_VERSION_MAX_ALLOWED == 1070) 
+#      pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#    endif
+#  endif
 #endif
 
 static inline BOOL IS_LION_OR_LATER(_THIS)
