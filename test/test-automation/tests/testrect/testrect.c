@@ -1,5 +1,6 @@
 /**
  * Original code: automated SDL rect test written by Edgar Simo "bobbens"
+ * New/updated tests: aschiffler at ferzkopp dot net
  */
 
 #include <stdio.h>
@@ -8,7 +9,7 @@
 
 #include "../../include/SDL_test.h"
 
-/* Test cases */
+/* SDL_IntersectRectAndLine */
 static const TestCaseReference test1 =
 		(TestCaseReference){ "rect_testIntersectRectAndLine", "Tests SDL_IntersectRectAndLine clipping cases", TEST_ENABLED, 0, 0 };
 
@@ -21,6 +22,7 @@ static const TestCaseReference test3 =
 static const TestCaseReference test4 =
 		(TestCaseReference){ "rect_testIntersectRectAndLineParam", "Negative tests against SDL_IntersectRectAndLine with invalid parameters", TEST_ENABLED, 0, 0 };
 
+/* SDL_IntersectRect */
 static const TestCaseReference test5 =
 		(TestCaseReference){ "rect_testIntersectRectInside", "Tests SDL_IntersectRect with B fully contained in A", TEST_ENABLED, 0, 0 };
 
@@ -36,6 +38,7 @@ static const TestCaseReference test8 =
 static const TestCaseReference test9 =
 		(TestCaseReference){ "rect_testIntersectRectParam", "Negative tests against SDL_IntersectRect with invalid parameters", TEST_ENABLED, 0, 0 };
 
+/* SDL_HasIntersection */
 static const TestCaseReference test10 =
 		(TestCaseReference){ "rect_testHasIntersectionInside", "Tests SDL_HasIntersection with B fully contained in A", TEST_ENABLED, 0, 0 };
 
@@ -51,6 +54,7 @@ static const TestCaseReference test13 =
 static const TestCaseReference test14 =
 		(TestCaseReference){ "rect_testHasIntersectionParam", "Negative tests against SDL_HasIntersection with invalid parameters", TEST_ENABLED, 0, 0 };
 
+/* SDL_EnclosePoints */
 static const TestCaseReference test15 =
 		(TestCaseReference){ "rect_testEnclosePoints", "Tests SDL_EnclosePoints without clipping", TEST_ENABLED, 0, 0 };
 
@@ -63,11 +67,28 @@ static const TestCaseReference test17 =
 static const TestCaseReference test18 =
 		(TestCaseReference){ "rect_testEnclosePointsParam", "Negative tests against SDL_EnclosePoints with invalid parameters", TEST_ENABLED, 0, 0 };
 
+/* SDL_UnionRect */
+static const TestCaseReference test19 =
+		(TestCaseReference){ "rect_testUnionRectInside", "Tests SDL_UnionRect where rect B is inside rect A", TEST_ENABLED, 0, 0 };
 
-/* Test suite */
+static const TestCaseReference test20 =
+		(TestCaseReference){ "rect_testUnionRectOutside", "Tests SDL_UnionRect where rect B is outside rect A", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test21 =
+		(TestCaseReference){ "rect_testUnionRectParam", "Negative tests against SDL_UnionRect with invalid parameters", TEST_ENABLED, 0, 0 };
+
+/* TODO: SDL_RectEmpty */
+/* TODO: SDL_RectEquals */
+
+/*!
+ * \brief Test suite for functions that handle simple rectangles including overlaps and merges.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/CategoryRect
+ */
 extern const TestCaseReference *testSuite[] =  {
 	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, &test12, &test13, &test14, 
-	&test15, &test16, &test17, &test18, NULL
+	&test15, &test16, &test17, &test18, &test19, &test20, &test21, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -356,6 +377,29 @@ void _validateIntersectRectResults(
             result->x, result->y, result->w, result->h,
             expectedResult->x, expectedResult->y, expectedResult->w, expectedResult->h);
     }
+}
+
+/*!
+ * \brief Private helper to check SDL_UnionRect results
+ */
+void _validateUnionRectResults(
+    SDL_Rect *rectA, SDL_Rect *rectB, SDL_Rect *refRectA, SDL_Rect *refRectB, 
+    SDL_Rect *result, SDL_Rect *expectedResult)
+{
+    AssertTrue(rectA->x == refRectA->x && rectA->y == refRectA->y && rectA->w == refRectA->w && rectA->h == refRectA->h,
+        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectA->x, rectA->y, rectA->w, rectA->h,
+        refRectA->x, refRectA->y, refRectA->w, refRectA->h);
+    AssertTrue(rectB->x == refRectB->x && rectB->y == refRectB->y && rectB->w == refRectB->w && rectB->h == refRectB->h,
+        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectB->x, rectB->y, rectB->w, rectB->h,
+        refRectB->x, refRectB->y, refRectB->w, refRectB->h);
+    AssertTrue(result->x == expectedResult->x && result->y == expectedResult->y && result->w == expectedResult->w && result->h == expectedResult->h,
+        "Union of rectangles A (%d,%d,%d,%d) and B (%d,%d,%d,%d) was incorrectly calculated, got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectA->x, rectA->y, rectA->w, rectA->h, 
+        rectB->x, rectB->y, rectB->w, rectB->h,
+        result->x, result->y, result->w, result->h,
+        expectedResult->x, expectedResult->y, expectedResult->w, expectedResult->h);
 }
 
 /*!
@@ -995,4 +1039,163 @@ int rect_testEnclosePointsParam(void *arg)
     AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 2nd parameter was %i", count); 
     anyEnclosed = SDL_EnclosePoints((SDL_Point *)NULL, 0, (const SDL_Rect *)&clip, &result);
     AssertTrue(anyEnclosed == SDL_FALSE, "Function did not return false when 1st parameter was NULL and 2nd parameter was 0"); 
+}
+
+
+/*!
+ * \brief Tests SDL_UnionRect() where rect B is outside rect A
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_UnionRect
+ */
+int rect_testUnionRectOutside(void *arg)
+{
+    SDL_Rect refRectA, refRectB;
+    SDL_Rect rectA, rectB;
+    SDL_Rect expectedResult;
+    SDL_Rect result;
+    int minx, maxx, miny, maxy;
+    int dx, dy;
+    
+    /* Union 1x1 outside */
+    for (dx = -1; dx < 2; dx++) {     
+        for (dy = -1; dy < 2; dy++) {
+            if ((dx != 0) || (dy != 0)) {
+                refRectA.x=RandomIntegerInRange(-1024, 1024);
+                refRectA.y=RandomIntegerInRange(-1024, 1024);
+                refRectA.w=1;
+                refRectA.h=1;
+                refRectB.x=RandomIntegerInRange(-1024, 1024) + dx*2048;
+                refRectB.y=RandomIntegerInRange(-1024, 1024) + dx*2048;
+                refRectB.w=1;
+                refRectB.h=1;
+                minx = (refRectA.x<refRectB.x) ? refRectA.x : refRectB.x;
+                maxx = (refRectA.x>refRectB.x) ? refRectA.x : refRectB.x;
+                miny = (refRectA.y<refRectB.y) ? refRectA.y : refRectB.y;
+                maxy = (refRectA.y>refRectB.y) ? refRectA.y : refRectB.y;                
+                expectedResult.x = minx;
+                expectedResult.y = miny;
+                expectedResult.w = maxx - minx + 1;
+                expectedResult.h = maxy - miny + 1;
+                rectA = refRectA;
+                rectB = refRectB;
+                SDL_UnionRect(&rectA, &rectB, &result);
+                _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+            }
+        }
+    }
+
+    /* Union outside overlap */
+    for (dx = -1; dx < 2; dx++) {     
+        for (dy = -1; dy < 2; dy++) {
+            if ((dx != 0) || (dy != 0)) {
+                refRectA.x=RandomIntegerInRange(-1024, 1024);
+                refRectA.y=RandomIntegerInRange(-1024, 1024);
+                refRectA.w=RandomIntegerInRange(256, 512);
+                refRectA.h=RandomIntegerInRange(256, 512);
+                refRectB.x=refRectA.x + 1 + dx*2;
+                refRectB.y=refRectA.y + 1 + dy*2;
+                refRectB.w=refRectA.w - 2;
+                refRectB.h=refRectA.h - 2;
+                expectedResult = refRectA;
+                if (dx == -1) expectedResult.x--;
+                if (dy == -1) expectedResult.y--;
+                if ((dx == 1) || (dx == -1)) expectedResult.w++;
+                if ((dy == 1) || (dy == -1)) expectedResult.h++;
+                rectA = refRectA;
+                rectB = refRectB;
+                SDL_UnionRect(&rectA, &rectB, &result);
+                _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+            }
+        }
+    }
+}
+
+/*!
+ * \brief Tests SDL_UnionRect() where rect B is inside rect A
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_UnionRect
+ */
+int rect_testUnionRectInside(void *arg)
+{
+    SDL_Rect refRectA, refRectB;
+    SDL_Rect rectA, rectB;
+    SDL_Rect expectedResult;
+    SDL_Rect result;
+    int minx, maxx, miny, maxy;
+    int dx, dy;
+    
+    /* Union 1x1 with itself */
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=1;
+    refRectA.h=1;
+    expectedResult = refRectA;
+    rectA = refRectA;
+    SDL_UnionRect(&rectA, &rectA, &result);
+    _validateUnionRectResults(&rectA, &rectA, &refRectA, &refRectA, &result, &expectedResult);
+
+    /* Union 1x1 somewhere inside */
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=RandomIntegerInRange(256, 1024);
+    refRectA.h=RandomIntegerInRange(256, 1024);
+    refRectB.x=refRectA.x + 1 + RandomIntegerInRange(1, refRectA.w - 2);
+    refRectB.y=refRectA.y + 1 + RandomIntegerInRange(1, refRectA.h - 2);
+    refRectB.w=1;
+    refRectB.h=1;
+    expectedResult = refRectA;
+    rectA = refRectA;
+    rectB = refRectB;
+    SDL_UnionRect(&rectA, &rectB, &result);
+    _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+
+    /* Union inside with edges modified */
+    for (dx = -1; dx < 2; dx++) {     
+        for (dy = -1; dy < 2; dy++) {
+            if ((dx != 0) || (dy != 0)) {
+                refRectA.x=RandomIntegerInRange(-1024, 1024);
+                refRectA.y=RandomIntegerInRange(-1024, 1024);
+                refRectA.w=RandomIntegerInRange(256, 1024);
+                refRectA.h=RandomIntegerInRange(256, 1024);
+                refRectB = refRectA;
+                if (dx == -1) refRectB.x++;
+                if ((dx == 1) || (dx == -1)) refRectB.w--;
+                if (dy == -1) refRectB.y++;
+                if ((dy == 1) || (dy == -1)) refRectB.h--;                
+                expectedResult = refRectA;
+                rectA = refRectA;
+                rectB = refRectB;
+                SDL_UnionRect(&rectA, &rectB, &result);
+                _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+            }
+        }
+    }
+}
+
+/*!
+ * \brief Negative tests against SDL_UnionRect() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_UnionRect
+ */
+int rect_testUnionRectParam(void *arg)
+{
+    SDL_Rect rectA, rectB;
+    SDL_Rect result;
+
+    // invalid parameter combinations
+    SDL_UnionRect((SDL_Rect *)NULL, &rectB, &result);
+    AssertPass("Function did return when 1st parameter was NULL"); 
+    SDL_UnionRect(&rectA, (SDL_Rect *)NULL, &result);
+    AssertPass("Function did return when 2nd parameter was NULL"); 
+    SDL_UnionRect(&rectA, &rectB, (SDL_Rect *)NULL);
+    AssertPass("Function did return when 3rd parameter was NULL"); 
+    SDL_UnionRect((SDL_Rect *)NULL, &rectB, (SDL_Rect *)NULL);
+    AssertPass("Function did return when 1st and 3rd parameter were NULL"); 
+    SDL_UnionRect(&rectA, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertPass("Function did return when 2nd and 3rd parameter were NULL"); 
+    SDL_UnionRect((SDL_Rect *)NULL, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    AssertPass("Function did return when all parameters were NULL"); 
 }
