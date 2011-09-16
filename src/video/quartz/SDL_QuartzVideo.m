@@ -1097,6 +1097,12 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
             return NULL;
     }
 
+    if (qz_window != nil) {
+        NSGraphicsContext *ctx;
+        ctx = [NSGraphicsContext graphicsContextWithWindow:qz_window];
+        [NSGraphicsContext setCurrentContext:ctx];
+    }
+
     /* Setup the new pixel format */
     {
         int amask = 0,
