@@ -71,12 +71,13 @@ typedef struct SDL_Rect
 /**
  *  \brief Returns true if the rectangle has no area.
  */
-#define SDL_RectEmpty(X)    (((X)->w <= 0) || ((X)->h <= 0))
+#define SDL_RectEmpty(X)    ((!(X)) || ((X)->w <= 0) || ((X)->h <= 0))
 
 /**
  *  \brief Returns true if the two rectangles are equal.
  */
-#define SDL_RectEquals(A, B)   (((A)->x == (B)->x) && ((A)->y == (B)->y) && \
+#define SDL_RectEquals(A, B)   (((A) && ((B)) && \
+                                ((A)->x == (B)->x) && ((A)->y == (B)->y) && \
                                 ((A)->w == (B)->w) && ((A)->h == (B)->h))
 
 /**
