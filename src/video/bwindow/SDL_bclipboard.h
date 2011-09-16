@@ -18,14 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+
 #include "SDL_config.h"
 
-#include "SDL_syswm.h"
-#include "SDL_lowvideo.h"
+#ifndef SDL_BCLIPBOARD_H
+#define SDL_BCLIPBOARD_H
 
+extern int BE_SetClipboardText(_THIS, const char *text);
+extern char *BE_GetClipboardText(_THIS);
+extern SDL_bool BE_HasClipboardText(_THIS);
 
-/* Functions to be exported */
-extern void BE_SetWMCaption(_THIS, const char *title, const char *icon);
-extern int BE_IconifyWindow(_THIS);
-extern int BE_GetWMInfo(_THIS, SDL_SysWMinfo * info);
-/* vi: set ts=4 sw=4 expandtab: */
+#endif

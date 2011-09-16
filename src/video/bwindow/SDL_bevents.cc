@@ -18,23 +18,16 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
 
+#include "SDL_bevents.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Handle the BeApp specific portions of the application */
 
-/* Initialize the Be Application, if it's not already started */
-extern int SDL_InitBeApp(void);
-
-/* Quit the Be Application, if there's nothing left to do */
-extern void SDL_QuitBeApp(void);
-
-/* Flag to tell whether the app is active or not */
-extern int SDL_BeAppActive;
-/* vi: set ts=4 sw=4 expandtab: */
+void BE_PumpEvents(_THIS) {
+	/* Since the event thread is its own thread, this isn't really necessary */
+}
 
 #ifdef __cplusplus
 }

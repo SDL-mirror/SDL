@@ -18,15 +18,32 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
 
-#include "SDL_lowvideo.h"
+#ifndef SDL_BOPENGL_H
+#define SDL_BOPENGL_H
 
-/* Functions to be exported */
-extern void BE_FreeWMCursor(_THIS, WMcursor * cursor);
-extern WMcursor *BE_CreateWMCursor(_THIS,
-                                   Uint8 * data, Uint8 * mask, int w, int h,
-                                   int hot_x, int hot_y);
-extern int BE_ShowWMCursor(_THIS, WMcursor * cursor);
-extern void BE_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
-/* vi: set ts=4 sw=4 expandtab: */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#include "../SDL_sysvideo.h"
+
+
+extern int BE_GL_LoadLibrary(_THIS, const char *path);					//FIXME
+extern void *BE_GL_GetProcAddress(_THIS, const char *proc);				//FIXME
+extern void BE_GL_UnloadLibrary(_THIS);									//TODO
+extern int BE_GL_MakeCurrent(_THIS, SDL_Window * window,
+                              SDL_GLContext context);
+extern int BE_GL_SetSwapInterval(_THIS, int interval);					//TODO
+extern int BE_GL_GetSwapInterval(_THIS);								//TODO
+extern void BE_GL_SwapWindow(_THIS, SDL_Window * window);
+extern SDL_GLContext BE_GL_CreateContext(_THIS, SDL_Window * window);
+extern void BE_GL_DeleteContext(_THIS, SDL_GLContext context);
+
+extern void BE_GL_RebootContexts(_THIS);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

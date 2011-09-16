@@ -18,24 +18,29 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
 
+#ifndef SDL_BMODES_H
+#define SDL_BMODES_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* Handle the BeApp specific portions of the application */
 
-/* Initialize the Be Application, if it's not already started */
-extern int SDL_InitBeApp(void);
+#include "../SDL_sysvideo.h"
 
-/* Quit the Be Application, if there's nothing left to do */
-extern void SDL_QuitBeApp(void);
+extern int32 BE_ColorSpaceToBitsPerPixel(uint32 colorspace);
+extern int32 BE_BPPToSDLPxFormat(int32 bpp);
 
-/* Flag to tell whether the app is active or not */
-extern int SDL_BeAppActive;
-/* vi: set ts=4 sw=4 expandtab: */
+extern int BE_InitModes(_THIS);
+extern int BE_QuitModes(_THIS);
+extern int BE_GetDisplayBounds(_THIS, SDL_VideoDisplay *display,
+	SDL_Rect *rect);
+extern void BE_GetDisplayModes(_THIS, SDL_VideoDisplay *display);
+extern int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
+	SDL_DisplayMode *mode);
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif

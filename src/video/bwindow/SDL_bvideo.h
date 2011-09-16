@@ -18,31 +18,25 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
 
-#include <support/UTF8.h>
-#include <stdio.h>
-#include <string.h>
-#include "SDL_error.h"
-#include "SDL_events.h"
-#include "SDL_BWin.h"
-#include "SDL_lowvideo.h"
+#ifndef BVIDEO_H
+#define BVIDEO_H
 
-extern "C"
-{
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../../events/SDL_sysevents.h"
-#include "../../events/SDL_events_c.h"
-#include "SDL_sysevents_c.h"
+#include "../../main/beos/SDL_BeApp.h"
+#include "../SDL_sysvideo.h"
 
-    void BE_PumpEvents(_THIS)
-    {
-    }
 
-    void BE_InitOSKeymap(_THIS)
-    {
-    }
+extern void BE_VideoQuit(_THIS);
+extern int BE_VideoInit(_THIS);
+extern void BE_DeleteDevice(_THIS);
+extern int BE_Available(void);
 
-};                              /* Extern C */
+#ifdef __cplusplus
+}
+#endif
 
-/* vi: set ts=4 sw=4 expandtab: */
+#endif

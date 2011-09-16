@@ -27,11 +27,17 @@
 #include <storage/Entry.h>
 #include <unistd.h>
 
+#include "SDL_BApp.h"	/* SDL_BApp class definition */
 #include "SDL_BeApp.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "SDL_error.h"
 
+#include "../../video/bwindow/SDL_BWin.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* Flag to tell whether or not the Be application is active or not */
 int SDL_BeAppActive = 0;
 static SDL_Thread *SDL_AppThread = NULL;
@@ -41,7 +47,7 @@ StartBeApp(void *unused)
 {
     BApplication *App;
 
-    App = new BApplication("application/x-SDL-executable");
+    App = new SDL_BApp("application/x-SDL-executable");
 
     App->Run();
     delete App;
@@ -110,4 +116,18 @@ SDL_QuitBeApp(void)
     }
 }
 
+
 /* vi: set ts=4 sw=4 expandtab: */
+#ifdef __cplusplus
+}
+#endif
+
+/* SDL_BApp functions */
+void SDL_BApp::ClearID(SDL_BWin *bwin) {
+	_SetSDLWindow(NULL, bwin->GetID());
+	int32 i = _GetNumWindowSlots() - 1;
+	while(i >= 0 && GetSDLWindow(i) == NULL) {
+		_PopBackWindow();
+		--i;
+	}
+}

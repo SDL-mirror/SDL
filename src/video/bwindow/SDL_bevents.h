@@ -17,38 +17,21 @@
   2. Altered source versions must be plainly marked as such, and must not be
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
-*/
-#include "SDL_config.h"
+*/	
 
-#include "SDL_BWin.h"
+#ifndef SDL_BEVENTS_H
+#define SDL_BEVENTS_H
 
-extern "C"
-{
+#include "../SDL_sysvideo.h"
 
-#include "SDL_syswm_c.h"
-#include "SDL_error.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    void BE_SetWMCaption(_THIS, const char *title, const char *icon)
-    {
-        SDL_Win->SetTitle(title);
-    }
+extern void BE_PumpEvents(_THIS);
 
-    int BE_IconifyWindow(_THIS)
-    {
-        SDL_Win->Minimize(true);
-    }
+#ifdef __cplusplus
+}
+#endif
 
-    int BE_GetWMInfo(_THIS, SDL_SysWMinfo * info)
-    {
-        if (info->version.major <= SDL_MAJOR_VERSION) {
-            return 1;
-        } else {
-            SDL_SetError("Application not compiled with SDL %d.%d\n",
-                         SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
-            return -1;
-        }
-    }
-
-};                              /* Extern C */
-
-/* vi: set ts=4 sw=4 expandtab: */
+#endif
