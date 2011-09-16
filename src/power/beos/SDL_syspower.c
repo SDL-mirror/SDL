@@ -50,7 +50,7 @@ SDL_GetPowerInfo_BeOS(SDL_PowerState * state, int *seconds, int *percent)
     uint8 battery_flags;
     uint8 battery_life;
     uint32 battery_time;
-	int rc;	/* FIXME: This was undefined before; not sure what type it is */
+	int rc;
 	
     if (fd == -1) {
         return SDL_FALSE;       /* maybe some other method will work? */
@@ -78,9 +78,7 @@ SDL_GetPowerInfo_BeOS(SDL_PowerState * state, int *seconds, int *percent)
         if (battery_status == 0xFF) {
             battery_flags = 0xFF;
         } else {
-            battery_flags = (1 << battery_status); /* FIXME: Used to be
-            										  status.battery_status,
-            										  not sure why */
+            battery_flags = (1 << battery_status);
         }
     }
 
