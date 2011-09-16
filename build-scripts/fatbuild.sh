@@ -27,7 +27,7 @@ if [ ! -d "$GCCUSRPATH_X86" ]; then
     echo "Couldn't find any GCC usr path for 32-bit x86"
     exit 1
 fi
-GCCUSRPATH_X64=`ls -d $SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin*/4.0.1`
+GCCUSRPATH_X64=`ls -d $SDK_PATH/MacOSX10.6.sdk/usr/lib/gcc/i686-apple-darwin*/4.2.1`
 if [ ! -d "$GCCUSRPATH_X64" ]; then
     echo "Couldn't find any GCC usr path for 64-bit x86"
     exit 1
@@ -49,26 +49,26 @@ LFLAGS_X86="-arch i386 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.
 -L$GCCUSRPATH_X86 \
 -Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
 
-# Intel 64-bit configure flags (10.5 runtime compatibility)
+# Intel 64-bit configure flags (10.6 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
 CONFIG_X64="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
 # Intel 64-bit compiler flags
-CC_X64="gcc-4.0 -arch x86_64"
-CXX_X64="g++-4.0 -arch x86_64"
-CFLAGS_X64="-mmacosx-version-min=10.5"
-CPPFLAGS_X64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
+CC_X64="gcc-4.2 -arch x86_64"
+CXX_X64="g++-4.2 -arch x86_64"
+CFLAGS_X64="-mmacosx-version-min=10.6"
+CPPFLAGS_X64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1060 \
 -nostdinc \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
+-F$SDK_PATH/MacOSX10.6.sdk/System/Library/Frameworks \
 -I$GCCUSRPATH_X64/include \
--isystem $SDK_PATH/MacOSX10.5.sdk/usr/include"
+-isystem $SDK_PATH/MacOSX10.6.sdk/usr/include"
 
 # Intel 64-bit linker flags
-LFLAGS_X64="-arch x86_64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
+LFLAGS_X64="-arch x86_64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.6 \
+-F$SDK_PATH/MacOSX10.6.sdk/System/Library/Frameworks \
 -L$GCCUSRPATH_X64/x86_64 \
--Wl,-syslibroot,$SDK_PATH/MacOSX10.5.sdk"
+-Wl,-syslibroot,$SDK_PATH/MacOSX10.6.sdk"
 
 #
 # Find the configure script
