@@ -127,7 +127,7 @@ static void QZ_ReleaseDisplayMode(_THIS, const void *moderef)
 {
     /* we only own these references in the 10.6+ API. */
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         CGDisplayModeRelease((CGDisplayModeRef) moderef);
     }
 #endif
@@ -137,7 +137,7 @@ static void QZ_ReleaseDisplayModeList(_THIS, CFArrayRef mode_list)
 {
     /* we only own these references in the 10.6+ API. */
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         CFRelease(mode_list);
     }
 #endif
@@ -239,7 +239,7 @@ static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint3
     }
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         CGDisplayModeRef vidmode = (CGDisplayModeRef) _mode;
         CFStringRef fmt = CGDisplayModeCopyPixelEncoding(vidmode);
 
@@ -257,7 +257,7 @@ static void QZ_GetModeInfo(_THIS, const void *_mode, Uint32 *w, Uint32 *h, Uint3
 #endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (!use_new_mode_apis) {
         CFDictionaryRef vidmode = (CFDictionaryRef) _mode;
         CFNumberGetValue (
             CFDictionaryGetValue (vidmode, kCGDisplayBitsPerPixel),
@@ -287,6 +287,12 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
     if ( Gestalt(gestaltSystemVersion, &system_version) != noErr )
         system_version = 0;
 
+    use_new_mode_apis = NO;
+
+#if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
+    use_new_mode_apis = IS_SNOW_LEOPARD_OR_LATER(this);
+#endif
+
     /* Initialize the video settings; this data persists between mode switches */
     display_id = kCGDirectMainDisplay;
 
@@ -304,13 +310,13 @@ static int QZ_VideoInit (_THIS, SDL_PixelFormat *video_format)
 #endif
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         save_mode = CGDisplayCopyDisplayMode(display_id);
     }
 #endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (!use_new_mode_apis) {
         save_mode = CGDisplayCurrentMode(display_id);
     }
 #endif
@@ -394,13 +400,13 @@ static SDL_Rect** QZ_ListModes (_THIS, SDL_PixelFormat *format, Uint32 flags)
     }
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
     }
 #endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (!use_new_mode_apis) {
         mode_list = CGDisplayAvailableModes(display_id);
     }
 #endif
@@ -498,13 +504,13 @@ static SDL_bool QZ_WindowPosition(_THIS, int *x, int *y)
 static CGError QZ_SetDisplayMode(_THIS, const void *vidmode)
 {
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         return CGDisplaySetDisplayMode(display_id, (CGDisplayModeRef) vidmode, NULL);
     }
 #endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (!use_new_mode_apis) {
         return CGDisplaySwitchToMode(display_id, (CFDictionaryRef) vidmode);
     }
 #endif
@@ -606,7 +612,7 @@ static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
     }
 
 #if (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)
-    if (IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (use_new_mode_apis) {
         /* apparently, we have to roll our own now. :/ */
         CFArrayRef mode_list = CGDisplayCopyAllDisplayModes(display_id, NULL);
         if (mode_list != NULL) {
@@ -630,7 +636,7 @@ static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
 #endif
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)
-    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+    if (!use_new_mode_apis) {
         boolean_t exact = 0;
         best = CGDisplayBestModeForParameters(display_id, bpp, w, h, &exact);
         if (!exact) {
