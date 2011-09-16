@@ -77,7 +77,13 @@ static const TestCaseReference test20 =
 static const TestCaseReference test21 =
 		(TestCaseReference){ "rect_testUnionRectParam", "Negative tests against SDL_UnionRect with invalid parameters", TEST_ENABLED, 0, 0 };
 
-/* TODO: SDL_RectEmpty */
+/* SDL_RectEmpty */
+static const TestCaseReference test22 =
+		(TestCaseReference){ "rect_testRectEmpty", "Tests SDL_RectEmpty with various inputs", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test23 =
+		(TestCaseReference){ "rect_testRectEmptyParam", "Negative tests against SDL_RectEmpty with invalid parameters", TEST_ENABLED, 0, 0 };
+
 /* TODO: SDL_RectEquals */
 
 /*!
@@ -88,7 +94,7 @@ static const TestCaseReference test21 =
  */
 extern const TestCaseReference *testSuite[] =  {
 	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, &test12, &test13, &test14, 
-	&test15, &test16, &test17, &test18, &test19, &test20, &test21, NULL
+	&test15, &test16, &test17, &test18, &test19, &test20, &test21, &test22, &test23, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -400,6 +406,24 @@ void _validateUnionRectResults(
         rectB->x, rectB->y, rectB->w, rectB->h,
         result->x, result->y, result->w, result->h,
         expectedResult->x, expectedResult->y, expectedResult->w, expectedResult->h);
+}
+
+/*!
+ * \brief Private helper to check SDL_RectEmpty results
+ */
+void _validateRectEmptyResults(
+    SDL_bool empty, SDL_bool expectedEmpty, 
+    SDL_Rect *rect, SDL_Rect *refRect)
+{
+    AssertTrue(empty == expectedEmpty, 
+        "Incorrect empty result: expected %s, got %s testing (%d,%d,%d,%d)\n",
+        (expectedEmpty == SDL_TRUE) ? "true" : "false",
+        (empty == SDL_TRUE) ? "true" : "false",
+        rect->x, rect->y, rect->w, rect->h);
+    AssertTrue(rect->x == refRect->x && rect->y == refRect->y && rect->w == refRect->w && rect->h == refRect->h,
+        "Source rectangle was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rect->x, rect->y, rect->w, rect->h,
+        refRect->x, refRect->y, refRect->w, refRect->h);
 }
 
 /*!
@@ -1198,4 +1222,61 @@ int rect_testUnionRectParam(void *arg)
     AssertPass("Function did return when 2nd and 3rd parameter were NULL"); 
     SDL_UnionRect((SDL_Rect *)NULL, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
     AssertPass("Function did return when all parameters were NULL"); 
+}
+
+/*!
+ * \brief Tests SDL_RectEmpty() with various inputs
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RectEmpty
+ */
+int rect_testRectEmpty(void *arg)
+{
+    SDL_Rect refRect;
+    SDL_Rect rect;
+    SDL_bool expectedResult;
+    SDL_bool result;
+    int w, h;
+
+    // Non-empty case
+    refRect.x=RandomIntegerInRange(-1024, 1024);
+    refRect.y=RandomIntegerInRange(-1024, 1024);
+    refRect.w=RandomIntegerInRange(256, 1024);
+    refRect.h=RandomIntegerInRange(256, 1024);
+    expectedResult = SDL_FALSE;
+    rect = refRect;
+    result = SDL_RectEmpty((const SDL_Rect *)&rect);
+    _validateRectEmptyResults(result, expectedResult, &rect, &refRect);
+    
+    // Empty case
+    for (w=-1; w<2; w++) {
+        for (h=-1; h<2; h++) {
+            if ((w != 1) || (h != 1)) {
+                refRect.x=RandomIntegerInRange(-1024, 1024);
+                refRect.y=RandomIntegerInRange(-1024, 1024);
+                refRect.w=w;
+                refRect.h=h;
+                expectedResult = SDL_TRUE;
+                rect = refRect;
+                result = SDL_RectEmpty((const SDL_Rect *)&rect);
+                _validateRectEmptyResults(result, expectedResult, &rect, &refRect);
+            }
+        }
+    }
+}
+
+/*!
+ * \brief Negative tests against SDL_RectEmpty() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RectEmpty
+ */
+int rect_testRectEmptyParam(void *arg)
+{
+    SDL_Rect rect;
+    SDL_bool result;
+
+    // invalid parameter combinations
+    result = SDL_RectEmpty((const SDL_Rect *)NULL);
+    AssertTrue(result = SDL_TRUE, "Function did not return TRUE when 1st parameter was NULL"); 
 }
