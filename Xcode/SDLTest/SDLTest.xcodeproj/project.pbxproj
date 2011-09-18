@@ -2224,7 +2224,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 001B5A0C08BDB826006539E9 /* Build configuration list for PBXProject "SDLTest" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* SDLTest */;
 			projectDirPath = "";
 			projectReferences = (
@@ -3820,8 +3827,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = (
-				);
+				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = "Build All";
 				SECTORDER_FLAGS = "";
@@ -3899,10 +3905,6 @@
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
 				WARNING_CFLAGS = "-Wmost";
 				ZERO_LINK = NO;
 			};
@@ -3930,10 +3932,6 @@
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
 				WARNING_CFLAGS = "-Wmost";
 				ZERO_LINK = NO;
 			};
@@ -3961,10 +3959,6 @@
 				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
 				WARNING_CFLAGS = "-Wmost";
 				ZERO_LINK = NO;
 			};

@@ -1345,7 +1345,14 @@
 			isa = PBXProject;
 			buildConfigurationList = 0073178E0858DB0500B2BC32 /* Build configuration list for PBXProject "SDL" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* SDLFramework */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
@@ -2032,9 +2039,6 @@
 				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
 				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
 				PREBINDING = NO;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
 				SEPARATE_STRIP = YES;
 				STRIP_STYLE = "non-global";
 				WARNING_CFLAGS = "";
