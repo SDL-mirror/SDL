@@ -37,8 +37,7 @@
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
-/* This typedef is included in the 10.5+ SDK headers. */
-#ifndef MAC_OS_X_VERSION_10_5
+#if (MAC_OS_X_VERSION_MAX_ALLOWED <= 1050)
 typedef SInt16 FSIORefNum;
 #endif
 

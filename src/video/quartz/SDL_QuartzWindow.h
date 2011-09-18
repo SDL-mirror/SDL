@@ -21,8 +21,7 @@
 */
 #include "SDL_config.h"
 
-/* this is defined in the 10.5+ SDK headers
-#ifndef MAC_OS_X_VERSION_10_5
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1050)
 typedef unsigned int NSUInteger;
 #endif
 
