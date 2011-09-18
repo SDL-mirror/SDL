@@ -81,9 +81,8 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     /* pthread instructions */
     return (pthread_spin_trylock(lock) == 0);
 #else	
-    /* Need CPU instructions for spinlock here! */
-    __need_spinlock_implementation__
-	
+#error Please implement for your platform.
+    return SDL_FALSE;
 #endif
 }
 
