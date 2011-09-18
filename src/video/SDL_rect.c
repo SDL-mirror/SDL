@@ -170,27 +170,27 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
     int x, y, i;
 
     if (!points) {
-        // TODO error message
+        /* TODO error message */
         return SDL_FALSE;
     }
 
     if (count < 1) {
-        // TODO error message
+        /* TODO error message */
         return SDL_FALSE;
     }
 
     if (clip) {
+        SDL_bool added = SDL_FALSE;
+        const int clip_minx = clip->x;
+        const int clip_miny = clip->y;
+        const int clip_maxx = clip->x+clip->w-1;
+        const int clip_maxy = clip->y+clip->h-1;
+
         /* Special case for empty rectangle */
         if (SDL_RectEmpty(clip)) {
             return SDL_FALSE;
         }
         
-        SDL_bool added = SDL_FALSE;
-        int clip_minx = clip->x;
-        int clip_miny = clip->y;
-        int clip_maxx = clip->x+clip->w-1;
-        int clip_maxy = clip->y+clip->h-1;
-
         for (i = 0; i < count; ++i) {
             x = points[i].x;
             y = points[i].y;
