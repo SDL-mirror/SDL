@@ -1146,7 +1146,7 @@ ParseOptions(int argc, char *argv[])
       else if(SDL_strcmp(arg, "--logdir") == 0) {
     	  char *dirString = NULL;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  dirString = argv[++i];
     	  }  else {
     		  printf("runner: dir is missing\n");
@@ -1162,7 +1162,7 @@ ParseOptions(int argc, char *argv[])
       else if(SDL_strcmp(arg, "--logfile") == 0) {
 		  char *fileString = NULL;
 
-		  if( (i + 1) < argc)  {
+		  if( (i + 1) < argc && argv[i+1][0] != '-')  {
 			  fileString = argv[++i];
 		  }  else {
 			  fileString = DEFAULT_LOG_FILENAME;
@@ -1177,7 +1177,7 @@ ParseOptions(int argc, char *argv[])
     	  universal_timeout_enabled = 1;
     	  char *timeoutString = NULL;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  timeoutString = argv[++i];
     	  }  else {
     		  printf("runner: timeout is missing\n");
@@ -1190,7 +1190,7 @@ ParseOptions(int argc, char *argv[])
       else if(SDL_strcmp(arg, "--seed") == 0) {
     	  userRunSeed = 1;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  runSeed = argv[++i];
     	  }  else {
     		  printf("runner: seed value is missing\n");
@@ -1201,7 +1201,7 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--iterations") == 0) {
     	  char *iterationsString = NULL;
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  iterationsString = argv[++i];
     	  }  else {
     		  printf("runner: iterations value is missing\n");
@@ -1217,7 +1217,7 @@ ParseOptions(int argc, char *argv[])
       }
       else if(SDL_strcmp(arg, "--exec-key") == 0) {
     	  char *execKeyString = NULL;
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  execKeyString = argv[++i];
     	  }  else {
     		  printf("runner: execkey value is missing\n");
@@ -1235,7 +1235,7 @@ ParseOptions(int argc, char *argv[])
     	  only_selected_test = 1;
     	  char *testName = NULL;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  testName = argv[++i];
     	  }  else {
     		  printf("runner: test name is missing\n");
@@ -1249,7 +1249,7 @@ ParseOptions(int argc, char *argv[])
       else if(SDL_strcmp(arg, "--xsl") == 0) {
     	  xsl_enabled = 1;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  char *stylesheet = argv[++i];
     		  if(stylesheet[0] != '-') {
     	    	  custom_xsl_enabled = 1;
@@ -1263,7 +1263,7 @@ ParseOptions(int argc, char *argv[])
     	  only_tests_with_string = 1;
     	  char *substring = NULL;
 
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  substring = argv[++i];
     	  }  else {
     		  printf("runner: substring of test name is missing\n");
@@ -1278,7 +1278,7 @@ ParseOptions(int argc, char *argv[])
     	  only_selected_suite = 1;
 
     	  char *suiteName = NULL;
-    	  if( (i + 1) < argc)  {
+    	  if( (i + 1) < argc && argv[i+1][0] != '-')  {
     		  suiteName = argv[++i];
     	  }  else {
     		  printf("runner: suite name is missing\n");
