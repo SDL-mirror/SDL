@@ -17,74 +17,93 @@ static const TestCaseReference test2 =
 		(TestCaseReference){ "rect_testIntersectRectAndLineInside", "Tests SDL_IntersectRectAndLine with line fully contained in rect", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "rect_testIntersectRectAndLineOutside", "Tests SDL_IntersectRectAndLine with line fully contained in rect", TEST_ENABLED, 0, 0 };
+		(TestCaseReference){ "rect_testIntersectRectAndLineOutside", "Tests SDL_IntersectRectAndLine with line fully outside of rect", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test4 =
+		(TestCaseReference){ "rect_testIntersectRectAndLineEmpty", "Tests SDL_IntersectRectAndLine with empty rectangle ", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test5 =
 		(TestCaseReference){ "rect_testIntersectRectAndLineParam", "Negative tests against SDL_IntersectRectAndLine with invalid parameters", TEST_ENABLED, 0, 0 };
 
 /* SDL_IntersectRect */
-static const TestCaseReference test5 =
+static const TestCaseReference test6 =
 		(TestCaseReference){ "rect_testIntersectRectInside", "Tests SDL_IntersectRect with B fully contained in A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test6 =
+static const TestCaseReference test7 =
 		(TestCaseReference){ "rect_testIntersectRectOutside", "Tests SDL_IntersectRect with B fully outside of A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test7 =
+static const TestCaseReference test8 =
 		(TestCaseReference){ "rect_testIntersectRectPartial", "Tests SDL_IntersectRect with B partially intersecting A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test8 =
+static const TestCaseReference test9 =
 		(TestCaseReference){ "rect_testIntersectRectPoint", "Tests SDL_IntersectRect with 1x1 sized rectangles", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test9 =
+static const TestCaseReference test10 =
+		(TestCaseReference){ "rect_testIntersectRectEmpty", "Tests SDL_IntersectRect with empty rectangles", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test11 =
 		(TestCaseReference){ "rect_testIntersectRectParam", "Negative tests against SDL_IntersectRect with invalid parameters", TEST_ENABLED, 0, 0 };
 
 /* SDL_HasIntersection */
-static const TestCaseReference test10 =
+static const TestCaseReference test12 =
 		(TestCaseReference){ "rect_testHasIntersectionInside", "Tests SDL_HasIntersection with B fully contained in A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test11 =
+static const TestCaseReference test13 =
 		(TestCaseReference){ "rect_testHasIntersectionOutside", "Tests SDL_HasIntersection with B fully outside of A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test12 =
+static const TestCaseReference test14 =
 		(TestCaseReference){ "rect_testHasIntersectionPartial", "Tests SDL_HasIntersection with B partially intersecting A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test13 =
+static const TestCaseReference test15 =
 		(TestCaseReference){ "rect_testHasIntersectionPoint", "Tests SDL_HasIntersection with 1x1 sized rectangles", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test14 =
+static const TestCaseReference test16 =
+		(TestCaseReference){ "rect_testHasIntersectionEmpty", "Tests SDL_HasIntersection with empty rectangles", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test17 =
 		(TestCaseReference){ "rect_testHasIntersectionParam", "Negative tests against SDL_HasIntersection with invalid parameters", TEST_ENABLED, 0, 0 };
 
 /* SDL_EnclosePoints */
-static const TestCaseReference test15 =
+static const TestCaseReference test18 =
 		(TestCaseReference){ "rect_testEnclosePoints", "Tests SDL_EnclosePoints without clipping", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test16 =
+static const TestCaseReference test19 =
 		(TestCaseReference){ "rect_testEnclosePointsWithClipping", "Tests SDL_EnclosePoints with clipping", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test17 =
+static const TestCaseReference test20 =
 		(TestCaseReference){ "rect_testEnclosePointsRepeatedInput", "Tests SDL_EnclosePoints with repeated input", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test18 =
+static const TestCaseReference test21 =
 		(TestCaseReference){ "rect_testEnclosePointsParam", "Negative tests against SDL_EnclosePoints with invalid parameters", TEST_ENABLED, 0, 0 };
 
 /* SDL_UnionRect */
-static const TestCaseReference test19 =
+static const TestCaseReference test22 =
 		(TestCaseReference){ "rect_testUnionRectInside", "Tests SDL_UnionRect where rect B is inside rect A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test20 =
+static const TestCaseReference test23 =
 		(TestCaseReference){ "rect_testUnionRectOutside", "Tests SDL_UnionRect where rect B is outside rect A", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test21 =
+static const TestCaseReference test24 =
+		(TestCaseReference){ "rect_testUnionRectEmpty", "Tests SDL_UnionRect where rect A or rect B are empty", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test25 =
 		(TestCaseReference){ "rect_testUnionRectParam", "Negative tests against SDL_UnionRect with invalid parameters", TEST_ENABLED, 0, 0 };
 
 /* SDL_RectEmpty */
-static const TestCaseReference test22 =
+static const TestCaseReference test26 =
 		(TestCaseReference){ "rect_testRectEmpty", "Tests SDL_RectEmpty with various inputs", TEST_ENABLED, 0, 0 };
 
-static const TestCaseReference test23 =
+static const TestCaseReference test27 =
 		(TestCaseReference){ "rect_testRectEmptyParam", "Negative tests against SDL_RectEmpty with invalid parameters", TEST_ENABLED, 0, 0 };
 
-/* TODO: SDL_RectEquals */
+/* SDL_RectEquals */
+
+static const TestCaseReference test28 =
+		(TestCaseReference){ "rect_testRectEquals", "Tests SDL_RectEquals with various inputs", TEST_ENABLED, 0, 0 };
+
+static const TestCaseReference test29 =
+		(TestCaseReference){ "rect_testRectEqualsParam", "Negative tests against SDL_RectEquals with invalid parameters", TEST_ENABLED, 0, 0 };
+
 
 /*!
  * \brief Test suite for functions that handle simple rectangles including overlaps and merges.
@@ -94,7 +113,8 @@ static const TestCaseReference test23 =
  */
 extern const TestCaseReference *testSuite[] =  {
 	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, &test12, &test13, &test14, 
-	&test15, &test16, &test17, &test18, &test19, &test20, &test21, &test22, &test23, NULL
+	&test15, &test16, &test17, &test18, &test19, &test20, &test21, &test22, &test23, &test24, &test25, &test26, &test27,
+	&test28, &test29, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
@@ -312,6 +332,38 @@ int rect_testIntersectRectAndLineOutside (void *arg)
 }
 
 /*!
+ * \brief Tests SDL_IntersectRectAndLine() with empty rectangle
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_IntersectRectAndLine
+ */
+int rect_testIntersectRectAndLineEmpty (void *arg)
+{
+    SDL_Rect refRect;
+    SDL_Rect rect;
+    int x1, y1, x1Ref, y1Ref;
+    int x2, y2, x2Ref, y2Ref;
+    SDL_bool intersected;
+        
+    refRect.x = RandomIntegerInRange(1, 1024);
+    refRect.y = RandomIntegerInRange(1, 1024);
+    refRect.w = 0;
+    refRect.h = 0;
+    x1Ref = refRect.x;
+    y1Ref = refRect.y;
+    x2Ref = RandomIntegerInRange(1, 1024);
+    y2Ref = RandomIntegerInRange(1, 1024);
+
+    x1 = x1Ref;
+    y1 = y1Ref;
+    x2 = x2Ref;
+    y2 = y2Ref;
+    rect = refRect;
+    intersected = SDL_IntersectRectAndLine(&rect, &x1, &y1, &x2, &y2);
+    _validateIntersectRectAndLineResults(intersected, SDL_FALSE, &rect, &refRect, x1, y1, x2, y2, x1Ref, y1Ref, x2Ref, y2Ref);
+}
+
+/*!
  * \brief Negative tests against SDL_IntersectRectAndLine() with invalid parameters
  *
  * \sa
@@ -424,6 +476,29 @@ void _validateRectEmptyResults(
         "Source rectangle was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
         rect->x, rect->y, rect->w, rect->h,
         refRect->x, refRect->y, refRect->w, refRect->h);
+}
+
+/*!
+ * \brief Private helper to check SDL_RectEquals results
+ */
+void _validateRectEqualsResults(
+    SDL_bool equals, SDL_bool expectedEquals, 
+    SDL_Rect *rectA, SDL_Rect *rectB, SDL_Rect *refRectA, SDL_Rect *refRectB)
+{
+    AssertTrue(equals == expectedEquals, 
+        "Incorrect equals result: expected %s, got %s testing (%d,%d,%d,%d) and (%d,%d,%d,%d) \n",
+        (expectedEquals == SDL_TRUE) ? "true" : "false",
+        (equals == SDL_TRUE) ? "true" : "false",
+        rectA->x, rectA->y, rectA->w, rectA->h,
+        rectB->x, rectB->y, rectB->w, rectB->h);
+    AssertTrue(rectA->x == refRectA->x && rectA->y == refRectA->y && rectA->w == refRectA->w && rectA->h == refRectA->h,
+        "Source rectangle A was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectA->x, rectA->y, rectA->w, rectA->h,
+        refRectA->x, refRectA->y, refRectA->w, refRectA->h);
+    AssertTrue(rectB->x == refRectB->x && rectB->y == refRectB->y && rectB->w == refRectB->w && rectB->h == refRectB->h,
+        "Source rectangle B was modified: got (%d,%d,%d,%d) expected (%d,%d,%d,%d)",
+        rectB->x, rectB->y, rectB->w, rectB->h,
+        refRectB->x, refRectB->y, refRectB->w, refRectB->h);
 }
 
 /*!
@@ -608,6 +683,63 @@ int rect_testIntersectRectPoint (void *arg)
             }
         }
     }
+}
+
+/*!
+ * \brief Tests SDL_IntersectRect() with empty rectangles
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_IntersectRect
+ */
+int rect_testIntersectRectEmpty (void *arg)
+{
+    SDL_Rect refRectA;
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_Rect result;
+    SDL_bool intersection;
+
+    // Rect A empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectA.w = 0;
+    refRectA.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_IntersectRect(&rectA, &rectB, &result);
+    _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+
+    // Rect B empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectB.w = 0;
+    refRectB.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_IntersectRect(&rectA, &rectB, &result);
+    _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+
+    // Rect A and B empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectA.w = 0;
+    refRectA.h = 0;
+    refRectB.w = 0;
+    refRectB.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_IntersectRect(&rectA, &rectB, &result);
+    _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
 }
 
 /*!
@@ -796,6 +928,62 @@ int rect_testHasIntersectionPoint (void *arg)
             }
         }
     }
+}
+
+/*!
+ * \brief Tests SDL_HasIntersection() with empty rectangles
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_HasIntersection
+ */
+int rect_testHasIntersectionEmpty (void *arg)
+{
+    SDL_Rect refRectA;
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool intersection;
+
+    // Rect A empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectA.w = 0;
+    refRectA.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB);
+
+    // Rect B empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectB.w = 0;
+    refRectB.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB);
+
+    // Rect A and B empty
+    refRectA.x = RandomIntegerInRange(1, 100);
+    refRectA.y = RandomIntegerInRange(1, 100);
+    refRectA.w = RandomIntegerInRange(1, 100);
+    refRectA.h = RandomIntegerInRange(1, 100);
+    refRectB = refRectA;
+    refRectA.w = 0;
+    refRectA.h = 0;
+    refRectB.w = 0;
+    refRectB.h = 0;
+    rectA = refRectA;
+    rectB = refRectB;
+    intersection = SDL_HasIntersection(&rectA, &rectB);
+    _validateHasIntersectionResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB);
 }
 
 /*!
@@ -1037,6 +1225,15 @@ int rect_testEnclosePointsWithClipping(void *arg)
             "Resulting enclosing rectangle incorrect: expected (%i,%i - %i,%i), actual (%i,%i - %i,%i)",
             minx, miny, maxx, maxy, result.x, result.y, result.x + result.w - 1, result.y + result.h - 1);
     }    
+    
+    /* Empty clipping rectangle */
+    clip.w = 0;
+    clip.h = 0;
+    expectedEnclosed = SDL_FALSE;
+    anyEnclosed = SDL_EnclosePoints((const SDL_Point *)points, numPoints, (const SDL_Rect *)&clip, &result);
+    AssertTrue(expectedEnclosed==anyEnclosed, 
+        "Expected return value %s, got %s", 
+        (expectedEnclosed==SDL_TRUE) ? "true" : "false", (anyEnclosed==SDL_TRUE) ? "true" : "false");    
 }
 
 /*!
@@ -1133,6 +1330,69 @@ int rect_testUnionRectOutside(void *arg)
             }
         }
     }
+}
+
+/*!
+ * \brief Tests SDL_UnionRect() where rect A or rect B are empty
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_UnionRect
+ */
+int rect_testUnionRectEmpty(void *arg)
+{
+    SDL_Rect refRectA, refRectB;
+    SDL_Rect rectA, rectB;
+    SDL_Rect expectedResult;
+    SDL_Rect result;
+
+    /* A empty */    
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=0;
+    refRectA.h=0;
+    refRectB.x=RandomIntegerInRange(-1024, 1024);
+    refRectB.y=RandomIntegerInRange(-1024, 1024);
+    refRectB.w=RandomIntegerInRange(1, 1024);
+    refRectB.h=RandomIntegerInRange(1, 1024);
+    expectedResult = refRectB;
+    rectA = refRectA;
+    rectB = refRectB;
+    SDL_UnionRect(&rectA, &rectB, &result);
+    _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+    
+    /* B empty */    
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=RandomIntegerInRange(1, 1024);
+    refRectA.h=RandomIntegerInRange(1, 1024);
+    refRectB.x=RandomIntegerInRange(-1024, 1024);
+    refRectB.y=RandomIntegerInRange(-1024, 1024);
+    refRectB.w=0;
+    refRectB.h=0;
+    expectedResult = refRectA;
+    rectA = refRectA;
+    rectB = refRectB;
+    SDL_UnionRect(&rectA, &rectB, &result);
+    _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
+
+    /* A and B empty */    
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=0;
+    refRectA.h=0;
+    refRectB.x=RandomIntegerInRange(-1024, 1024);
+    refRectB.y=RandomIntegerInRange(-1024, 1024);
+    refRectB.w=0;
+    refRectB.h=0;
+    result.x=0;
+    result.y=0;
+    result.w=0;
+    result.h=0;
+    expectedResult = result;
+    rectA = refRectA;
+    rectB = refRectB;
+    SDL_UnionRect(&rectA, &rectB, &result);
+    _validateUnionRectResults(&rectA, &rectB, &refRectA, &refRectB, &result, &expectedResult);
 }
 
 /*!
@@ -1273,10 +1533,68 @@ int rect_testRectEmpty(void *arg)
  */
 int rect_testRectEmptyParam(void *arg)
 {
-    SDL_Rect rect;
     SDL_bool result;
 
     // invalid parameter combinations
     result = SDL_RectEmpty((const SDL_Rect *)NULL);
-    AssertTrue(result = SDL_TRUE, "Function did not return TRUE when 1st parameter was NULL"); 
+    AssertTrue(result == SDL_TRUE, "Function did not return TRUE when 1st parameter was NULL"); 
+}
+
+/*!
+ * \brief Tests SDL_RectEquals() with various inputs
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RectEquals
+ */
+int rect_testRectEquals(void *arg)
+{
+    SDL_Rect refRectA;
+    SDL_Rect refRectB;
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool expectedResult;
+    SDL_bool result;
+
+    // Equals
+    refRectA.x=RandomIntegerInRange(-1024, 1024);
+    refRectA.y=RandomIntegerInRange(-1024, 1024);
+    refRectA.w=RandomIntegerInRange(1, 1024);
+    refRectA.h=RandomIntegerInRange(1, 1024);
+    refRectB = refRectA;    
+    expectedResult = SDL_TRUE;
+    rectA = refRectA;
+    rectB = refRectB;
+    result = SDL_RectEquals((const SDL_Rect *)&rectA, (const SDL_Rect *)&rectB);
+    _validateRectEqualsResults(result, expectedResult, &rectA, &rectB, &refRectA, &refRectB);
+}
+
+/*!
+ * \brief Negative tests against SDL_RectEquals() with invalid parameters
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RectEquals
+ */
+int rect_testRectEqualsParam(void *arg)
+{
+    SDL_Rect rectA;
+    SDL_Rect rectB;
+    SDL_bool result;
+
+    /* data setup */
+    rectA.x=RandomIntegerInRange(-1024, 1024);
+    rectA.y=RandomIntegerInRange(-1024, 1024);
+    rectA.w=RandomIntegerInRange(1, 1024);
+    rectA.h=RandomIntegerInRange(1, 1024);
+    rectB.x=RandomIntegerInRange(-1024, 1024);
+    rectB.y=RandomIntegerInRange(-1024, 1024);
+    rectB.w=RandomIntegerInRange(1, 1024);
+    rectB.h=RandomIntegerInRange(1, 1024);
+
+    // invalid parameter combinations
+    result = SDL_RectEquals((const SDL_Rect *)NULL, (const SDL_Rect *)&rectB);
+    AssertTrue(result == SDL_FALSE, "Function did not return FALSE when 1st parameter was NULL"); 
+    result = SDL_RectEquals((const SDL_Rect *)&rectA, (const SDL_Rect *)NULL);
+    AssertTrue(result == SDL_FALSE, "Function did not return FALSE when 2nd parameter was NULL"); 
+    result = SDL_RectEquals((const SDL_Rect *)NULL, (const SDL_Rect *)NULL);
+    AssertTrue(result == SDL_FALSE, "Function did not return FALSE when 1st and 2nd parameter were NULL"); 
 }
