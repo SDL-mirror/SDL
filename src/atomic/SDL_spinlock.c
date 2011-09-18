@@ -55,9 +55,6 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     SDL_COMPILE_TIME_ASSERT(locksize, sizeof(*lock) == sizeof(long));
     return (InterlockedExchange((long*)lock, 1) == 0);
 
-#elif defined(__MACOSX__)
-    return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
-
 #elif HAVE_GCC_ATOMICS || HAVE_GCC_SYNC_LOCK_TEST_AND_SET
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
@@ -77,10 +74,22 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
         : "=&r" (result) : "r" (1), "r" (lock) : "cc", "memory");
     return (result == 0);
 
+#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+	int result;
+	__asm__ __volatile__(
+        "lock ; xchgl %0, (%1)\n"
+        : "=r" (result) : "r" (lock), "0" (1) : "cc", "memory");
+	return (result == 0);
+
+#elif defined(__MACOSX__)
+    /* Maybe used for PowerPC, but the Intel asm or gcc atomics are favored. */
+    return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
+
 #elif HAVE_PTHREAD_SPINLOCK
     /* pthread instructions */
     return (pthread_spin_trylock(lock) == 0);
-#else	
+
+#else
 #error Please implement for your platform.
     return SDL_FALSE;
 #endif
