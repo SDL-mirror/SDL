@@ -33,6 +33,11 @@ SDL_HasIntersection(const SDL_Rect * A, const SDL_Rect * B)
         return SDL_FALSE;
     }
 
+    /* Special cases for empty rects */
+    if (SDL_RectEmpty(A) || SDL_RectEmpty(B)) {
+        return SDL_FALSE;
+    }
+
     /* Horizontal intersection */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -70,6 +75,11 @@ SDL_IntersectRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         return SDL_FALSE;
     }
 
+    /* Special cases for empty rects */
+    if (SDL_RectEmpty(A) || SDL_RectEmpty(B)) {
+        return SDL_FALSE;
+    }
+    
     /* Horizontal intersection */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -106,6 +116,24 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         return;
     }
 
+    /* Special cases for empty Rects */
+    if (SDL_RectEmpty(A)) {
+      if (SDL_RectEmpty(B)) {
+       /* A and B empty */
+       return;
+      } else {
+       /* A empty, B not empty */
+       *result = *B;
+       return;
+      }
+    } else {      
+      if (SDL_RectEmpty(B)) {
+       /* A not empty, B empty */
+       *result = *A;
+       return;
+      } 
+    }
+    
     /* Horizontal union */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -118,7 +146,7 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         Amax = Bmax;
     result->w = Amax - Amin;
 
-    /* Vertical intersection */
+    /* Vertical union */
     Amin = A->y;
     Amax = Amin + A->h;
     Bmin = B->y;
@@ -152,6 +180,11 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
     }
 
     if (clip) {
+        /* Special case for empty rectangle */
+        if (SDL_RectEmpty(clip)) {
+            return SDL_FALSE;
+        }
+        
         SDL_bool added = SDL_FALSE;
         int clip_minx = clip->x;
         int clip_miny = clip->y;
@@ -269,6 +302,11 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         return SDL_FALSE;
     }
 
+    /* Special case for empty rect */
+    if (SDL_RectEmpty(rect)) {
+        return SDL_FALSE;
+    }
+    
     x1 = *X1;
     y1 = *Y1;
     x2 = *X2;
