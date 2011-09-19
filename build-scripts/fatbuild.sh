@@ -16,59 +16,27 @@ fi
 # Generic, cross-platform CFLAGS you always want go here.
 CFLAGS="-O3 -g -pipe"
 
-# Intel 32-bit configure flags (10.4 runtime compatibility)
 # We dynamically load X11, so using the system X11 headers is fine.
-CONFIG_X86="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
+BASE_CONFIG_FLAGS="--build=`uname -p`-apple-darwin \
 --x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
 
-# They changed this from "darwin9" to "darwin10" in Xcode 3.2 (Snow Leopard).
-GCCUSRPATH_X86=`ls -d $SDK_PATH/MacOSX10.4u.sdk/usr/lib/gcc/i686-apple-darwin*/4.0.1`
-if [ ! -d "$GCCUSRPATH_X86" ]; then
-    echo "Couldn't find any GCC usr path for 32-bit x86"
-    exit 1
-fi
-GCCUSRPATH_X64=`ls -d $SDK_PATH/MacOSX10.5.sdk/usr/lib/gcc/i686-apple-darwin*/4.0.1`
-if [ ! -d "$GCCUSRPATH_X64" ]; then
-    echo "Couldn't find any GCC usr path for 64-bit x86"
-    exit 1
-fi
+# PowerPC 32-bit compiler flags
+CONFIG_PPC="--host=powerpc-apple-darwin"
+CC_PPC="gcc-4.0"
+CXX_PPC="g++-4.0"
+BUILD_FLAGS_PPC="-arch ppc -mmacosx-version-min=10.4"
 
 # Intel 32-bit compiler flags
-CC_X86="gcc-4.0 -arch i386"
-CXX_X86="g++-4.0 -arch i386"
-CFLAGS_X86="-mmacosx-version-min=10.4"
-CPPFLAGS_X86="-DMAC_OS_X_VERSION_MIN_REQUIRED=1040 \
--nostdinc \
--F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--I$GCCUSRPATH_X86/include \
--isystem $SDK_PATH/MacOSX10.4u.sdk/usr/include"
-
-# Intel 32-bit linker flags
-LFLAGS_X86="-arch i386 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.4 \
--F$SDK_PATH/MacOSX10.4u.sdk/System/Library/Frameworks \
--L$GCCUSRPATH_X86 \
--Wl,-syslibroot,$SDK_PATH/MacOSX10.4u.sdk"
-
-# Intel 64-bit configure flags (10.5 runtime compatibility)
-# We dynamically load X11, so using the system X11 headers is fine.
-CONFIG_X64="--build=`uname -p`-apple-darwin --host=i386-apple-darwin \
---x-includes=/usr/X11R6/include --x-libraries=/usr/X11R6/lib"
+CONFIG_X86="--host=i386-apple-darwin"
+CC_X86="gcc"
+CXX_X86="g++"
+BUILD_FLAGS_X86="-arch i386 -mmacosx-version-min=10.4"
 
 # Intel 64-bit compiler flags
-CC_X64="gcc-4.0 -arch x86_64"
-CXX_X64="g++-4.0 -arch x86_64"
-CFLAGS_X64="-mmacosx-version-min=10.5"
-CPPFLAGS_X64="-DMAC_OS_X_VERSION_MIN_REQUIRED=1050 \
--nostdinc \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--I$GCCUSRPATH_X64/include \
--isystem $SDK_PATH/MacOSX10.5.sdk/usr/include"
-
-# Intel 64-bit linker flags
-LFLAGS_X64="-arch x86_64 -Wl,-headerpad_max_install_names -mmacosx-version-min=10.5 \
--F$SDK_PATH/MacOSX10.5.sdk/System/Library/Frameworks \
--L$GCCUSRPATH_X64/x86_64 \
--Wl,-syslibroot,$SDK_PATH/MacOSX10.5.sdk"
+CONFIG_X64="--host=x86_64-apple-darwin"
+CC_X64="gcc"
+CXX_X64="g++"
+BUILD_FLAGS_X64="-arch x86_64 -mmacosx-version-min=10.6"
 
 #
 # Find the configure script
@@ -77,11 +45,19 @@ srcdir=`dirname $0`/..
 auxdir=$srcdir/build-scripts
 cd $srcdir
 
+allow_ppc="yes"
+which gcc-4.0 >/dev/null 2>/dev/null
+if [ "x$?" = "x1" ]; then
+    #echo "WARNING: Can't find gcc-4.0, which means you don't have Xcode 3."
+    #echo "WARNING: Therefore, we can't do PowerPC support."
+    allow_ppc="no"
+fi
+
 #
 # Figure out which phase to build:
 # all,
-# configure, configure-x86, configure-x64
-# make, make-x86, make-x64, merge
+# configure, configure-ppc, configure-x86, configure-x64
+# make, make-ppc, make-x86, make-x64, merge
 # install
 # clean
 if test x"$1" = x; then
@@ -91,15 +67,21 @@ else
 fi
 case $phase in
     all)
+        configure_ppc="$allow_ppc"
         configure_x86="yes"
         configure_x64="yes"
+        make_ppc="$allow_ppc"
         make_x86="yes"
         make_x64="yes"
         merge="yes"
         ;;
     configure)
+        configure_ppc="$allow_ppc"
         configure_x86="yes"
         configure_x64="yes"
+        ;;
+    configure-ppc)
+        configure_ppc="$allow_ppc"
         ;;
     configure-x86)
         configure_x86="yes"
@@ -108,9 +90,13 @@ case $phase in
         configure_x64="yes"
         ;;
     make)
+        make_ppc="$allow_ppc"
         make_x86="yes"
         make_x64="yes"
         merge="yes"
+        ;;
+    make-ppc)
+        make_ppc="$allow_ppc"
         ;;
     make-x86)
         make_x86="yes"
@@ -144,8 +130,12 @@ case $phase in
         install_man="yes"
         ;;
     clean)
+        clean_ppc="yes"
         clean_x86="yes"
         clean_x64="yes"
+        ;;
+    clean-ppc)
+        clean_ppc="yes"
         ;;
     clean-x86)
         clean_x86="yes"
@@ -154,13 +144,16 @@ case $phase in
         clean_x64="yes"
         ;;
     *)
-        echo "Usage: $0 [all|configure[-x86|-x64]|make[-x86|-x64]|merge|install|clean[-x86|-x64]]"
+        echo "Usage: $0 [all|configure[-ppc|-x86|-x64]|make[-ppc|-x86|-x64]|merge|install|clean[-ppc|-x86|-x64]]"
         exit 1
         ;;
 esac
 case `uname -p` in
     *86)
         native_path=x86
+        ;;
+    *powerpc)
+        native_path=ppc
         ;;
     x86_64)
         native_path=x64
@@ -174,7 +167,7 @@ esac
 #
 # Create the build directories
 #
-for dir in build build/x86 build/x64; do
+for dir in build build/ppc build/x86 build/x64; do
     if test -d $dir; then
         :
     else
@@ -182,23 +175,34 @@ for dir in build build/x86 build/x64; do
     fi
 done
 
+
+#
+# Build the PowerPC 32-bit binary
+#
+if test x$configure_ppc = xyes; then
+    (cd build/ppc && \
+     sh ../../configure $BASE_CONFIG_FLAGS $CONFIG_PPC CC="$CC_PPC" CXX="$CXX_PPC" CFLAGS="$CFLAGS $BUILD_FLAGS_PPC $CFLAGS_PPC" LDFLAGS="$BUILD_FLAGS_PPC $LFLAGS_PPC") || exit 2
+fi
+if test x$make_ppc = xyes; then
+    (cd build/ppc && make -j$NJOB) || exit 3
+fi
 #
 # Build the Intel 32-bit binary
 #
 if test x$configure_x86 = xyes; then
     (cd build/x86 && \
-     sh ../../configure $CONFIG_X86 CC="$CC_X86" CXX="$CXX_X86" CFLAGS="$CFLAGS $CFLAGS_X86" CPPFLAGS="$CPPFLAGS_X86" LDFLAGS="$LFLAGS_X86") || exit 2
+     sh ../../configure $BASE_CONFIG_FLAGS $CONFIG_X86 CC="$CC_X86" CXX="$CXX_X86" CFLAGS="$CFLAGS $BUILD_FLAGS_X86 $CFLAGS_X86" LDFLAGS="$BUILD_FLAGS_X86 $LFLAGS_X86") || exit 2
 fi
 if test x$make_x86 = xyes; then
     (cd build/x86 && make -j$NJOB) || exit 3
 fi
 
 #
-# Build the Intel 32-bit binary
+# Build the Intel 64-bit binary
 #
 if test x$configure_x64 = xyes; then
     (cd build/x64 && \
-     sh ../../configure $CONFIG_X64 CC="$CC_X64" CXX="$CXX_X64" CFLAGS="$CFLAGS $CFLAGS_X64" CPPFLAGS="$CPPFLAGS_X64" LDFLAGS="$LFLAGS_X64") || exit 2
+     sh ../../configure $BASE_CONFIG_FLAGS $CONFIG_X64 CC="$CC_X64" CXX="$CXX_X64" CFLAGS="$CFLAGS $BUILD_FLAGS_X64 $CFLAGS_X64" LDFLAGS="$BUILD_FLAGS_X64 $LFLAGS_X64") || exit 2
 fi
 if test x$make_x64 = xyes; then
     (cd build/x64 && make -j$NJOB) || exit 3
@@ -291,6 +295,9 @@ do_clean()
     echo $*
     $* || exit 6
 }
+if test x$clean_ppc = xyes; then
+    do_clean rm -r build/ppc
+fi
 if test x$clean_x86 = xyes; then
     do_clean rm -r build/x86
 fi
