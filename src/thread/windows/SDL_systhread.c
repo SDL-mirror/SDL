@@ -79,19 +79,12 @@ static DWORD
 RunThread(void *data)
 {
     pThreadStartParms pThreadParms = (pThreadStartParms) data;
-    pfnSDL_CurrentEndThread pfnCurrentEndThread = NULL;
-
-    // Call the thread function!
-    SDL_RunThread(pThreadParms->args);
-
-    // Get the current endthread we have to use!
-    if (pThreadParms) {
-        pfnCurrentEndThread = pThreadParms->pfnCurrentEndThread;
-        SDL_free(pThreadParms);
-    }
-    // Call endthread!
-    if (pfnCurrentEndThread)
-        (*pfnCurrentEndThread) (0);
+    pfnSDL_CurrentEndThread pfnEndThread = pThreadParms->pfnCurrentEndThread;
+    void *args = pThreadParms->args;
+    SDL_free(pThreadParms);
+    SDL_RunThread(args);
+    if (pfnEndThread != NULL)
+        pfnEndThread(0);
     return (0);
 }
 
