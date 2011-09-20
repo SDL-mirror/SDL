@@ -43,8 +43,7 @@ static void *
 RunThread(void *data)
 {
     SDL_RunThread(data);
-    pthread_exit((void *) 0);
-    return ((void *) 0);        /* Prevent compiler warning */
+    return NULL;
 }
 
 int
