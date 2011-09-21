@@ -1075,12 +1075,8 @@ SDL_OpenAudio(SDL_AudioSpec * desired, SDL_AudioSpec * obtained)
     } else {
         id = open_audio_device(NULL, 0, desired, desired, 0, 1);
     }
-    if (id > 1) {               /* this should never happen in theory... */
-        SDL_CloseAudioDevice(id);
-        SDL_SetError("Internal error"); /* MUST be Device ID #1! */
-        return (-1);
-    }
 
+    SDL_assert((id == 0) || (id == 1));
     return ((id == 0) ? -1 : 0);
 }
 
