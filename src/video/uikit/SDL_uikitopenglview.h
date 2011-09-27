@@ -54,12 +54,12 @@
 - (void)setCurrentContext;
 
 - (id)initWithFrame:(CGRect)frame
-    retainBacking:(BOOL)retained \
-    rBits:(int)rBits \
-    gBits:(int)gBits \
-    bBits:(int)bBits \
-    aBits:(int)aBits \
-    depthBits:(int)depthBits \
+    retainBacking:(BOOL)retained
+    rBits:(int)rBits
+    gBits:(int)gBits
+    bBits:(int)bBits
+    aBits:(int)aBits
+    depthBits:(int)depthBits
     majorVersion:(int)majorVersion;
 
 - (void)updateFrame;

@@ -47,7 +47,6 @@ UIKit_GL_GetProcAddress(_THIS, const char *proc)
 */
 int UIKit_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-
     if (context) {
         SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
         [data->view setCurrentContext];
@@ -78,10 +77,10 @@ extern void SDL_UIKit_UpdateBatteryMonitoring(void);
 
 void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 {
-    #ifdef SDL_POWER_UIKIT
+#ifdef SDL_POWER_UIKIT
     // Check once a frame to see if we should turn off the battery monitor.
     SDL_UIKit_UpdateBatteryMonitoring();
-    #endif
+#endif
 
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
 
@@ -106,13 +105,13 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     UIWindow *uiwindow = data->uiwindow;
 
     /* construct our view, passing in SDL's OpenGL configuration data */
-    view = [[SDL_uikitopenglview alloc] initWithFrame: [uiwindow bounds] \
-                                    retainBacking: _this->gl_config.retained_backing \
-                                    rBits: _this->gl_config.red_size \
-                                    gBits: _this->gl_config.green_size \
-                                    bBits: _this->gl_config.blue_size \
-                                    aBits: _this->gl_config.alpha_size \
-                                    depthBits: _this->gl_config.depth_size \
+    view = [[SDL_uikitopenglview alloc] initWithFrame: [uiwindow bounds]
+                                    retainBacking: _this->gl_config.retained_backing
+                                    rBits: _this->gl_config.red_size
+                                    gBits: _this->gl_config.green_size
+                                    bBits: _this->gl_config.blue_size
+                                    aBits: _this->gl_config.alpha_size
+                                    depthBits: _this->gl_config.depth_size
                                     majorVersion: _this->gl_config.major_version];
 
     data->view = view;

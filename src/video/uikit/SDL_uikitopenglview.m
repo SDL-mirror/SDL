@@ -35,20 +35,21 @@
 
 @synthesize context;
 
-+ (Class)layerClass {
++ (Class)layerClass
+{
     return [CAEAGLLayer class];
 }
 
-- (id)initWithFrame:(CGRect)frame \
-      retainBacking:(BOOL)retained \
-      rBits:(int)rBits \
-      gBits:(int)gBits \
-      bBits:(int)bBits \
-      aBits:(int)aBits \
-      depthBits:(int)depthBits \
-      majorVersion:(int)majorVersion \
+- (id)initWithFrame:(CGRect)frame
+      retainBacking:(BOOL)retained
+      rBits:(int)rBits
+      gBits:(int)gBits
+      bBits:(int)bBits
+      aBits:(int)aBits
+      depthBits:(int)depthBits
+      majorVersion:(int)majorVersion
 {
-    NSString *colorFormat=nil;
+    NSString *colorFormat = nil;
     BOOL useDepthBuffer;
 
     if (rBits == 8 && gBits == 8 && bBits == 8) {
@@ -116,7 +117,7 @@
             glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_DEPTH_ATTACHMENT_OES, GL_RENDERBUFFER_OES, depthRenderbuffer);
         }
 
-        if(glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
+        if (glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES) != GL_FRAMEBUFFER_COMPLETE_OES) {
             return NO;
         }
         /* end create buffers */
@@ -131,7 +132,8 @@
     return self;
 }
 
-- (void)updateFrame {
+- (void)updateFrame
+{
     glBindFramebufferOES(GL_FRAMEBUFFER_OES, viewFramebuffer);
     glBindRenderbufferOES(GL_RENDERBUFFER_OES, 0);
     glFramebufferRenderbufferOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, GL_RENDERBUFFER_OES, 0);
@@ -156,22 +158,26 @@
         self.contentScaleFactor = [UIScreen mainScreen].scale;
 }
 
-- (void)setCurrentContext {
+- (void)setCurrentContext
+{
     [EAGLContext setCurrentContext:context];
 }
 
 
-- (void)swapBuffers {
+- (void)swapBuffers
+{
     glBindRenderbufferOES(GL_RENDERBUFFER_OES, viewRenderbuffer);
     [context presentRenderbuffer:GL_RENDERBUFFER_OES];
 }
 
 
-- (void)layoutSubviews {
+- (void)layoutSubviews
+{
     [EAGLContext setCurrentContext:context];
 }
 
-- (void)destroyFramebuffer {
+- (void)destroyFramebuffer
+{
     glDeleteFramebuffersOES(1, &viewFramebuffer);
     viewFramebuffer = 0;
     glDeleteRenderbuffersOES(1, &viewRenderbuffer);
@@ -184,7 +190,8 @@
 }
 
 
-- (void)dealloc {
+- (void)dealloc
+{
     [self destroyFramebuffer];
     if ([EAGLContext currentContext] == context) {
         [EAGLContext setCurrentContext:nil];

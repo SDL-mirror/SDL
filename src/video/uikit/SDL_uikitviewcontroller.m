@@ -33,7 +33,8 @@
 
 @implementation SDL_uikitviewcontroller
 
-- (id)initWithSDLWindow:(SDL_Window *)_window {
+- (id)initWithSDLWindow:(SDL_Window *)_window
+{
     if ((self = [self init]) == nil) {
         return nil;
     }
@@ -41,7 +42,8 @@
     return self;
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient {
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient
+{
     const char *orientationsCString;
     if ((orientationsCString = SDL_GetHint(SDL_HINT_ORIENTATIONS)) != NULL) {
         BOOL rotate = NO;
@@ -96,12 +98,14 @@
     return NO;  // Nothing else is acceptable.
 }
 
-- (void)loadView  {
+- (void)loadView
+{
     // do nothing.
 }
 
 // Send a resized event when the orientation changes.
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation {
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
     if ((self->window->flags & SDL_WINDOW_RESIZABLE) == 0) {
         return;   // don't care, we're just flipping over in this case.
     }

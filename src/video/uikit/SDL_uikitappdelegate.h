@@ -22,11 +22,11 @@
 #import <UIKit/UIKit.h>
 #import "SDL_uikitopenglview.h"
 
-@interface SDLUIKitDelegate:NSObject<UIApplicationDelegate> {
+@interface SDLUIKitDelegate : NSObject<UIApplicationDelegate> {
 }
 
-+(SDLUIKitDelegate *)sharedAppDelegate;
-+(NSString *)getAppDelegateClassName;
++ (SDLUIKitDelegate *)sharedAppDelegate;
++ (NSString *)getAppDelegateClassName;
 
 @end
 

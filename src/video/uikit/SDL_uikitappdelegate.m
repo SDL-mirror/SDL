@@ -37,15 +37,15 @@ extern int SDL_main(int argc, char *argv[]);
 static int forward_argc;
 static char **forward_argv;
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv)
+{
     int i;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     /* store arguments */
     forward_argc = argc;
     forward_argv = (char **)malloc((argc+1) * sizeof(char *));
-    for (i=0; i<argc; i++) {
+    for (i = 0; i < argc; i++) {
         forward_argv[i] = malloc( (strlen(argv[i])+1) * sizeof(char));
         strcpy(forward_argv[i], argv[i]);
     }
@@ -58,7 +58,8 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue) {
+static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue)
+{
     SDL_assert(SDL_strcmp(name, SDL_HINT_IDLE_TIMER_DISABLED) == 0);
 
     BOOL disable = (*newValue != '0');
@@ -68,24 +69,27 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 @implementation SDLUIKitDelegate
 
 /* convenience method */
-+(SDLUIKitDelegate *)sharedAppDelegate {
++ (SDLUIKitDelegate *)sharedAppDelegate
+{
     /* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
     return (SDLUIKitDelegate *)[[UIApplication sharedApplication] delegate];
 }
 
-+(NSString *)getAppDelegateClassName {
++ (NSString *)getAppDelegateClassName
+{
     /* subclassing notice: when you subclass this appdelegate, make sure to add a category to override
        this method and return the actual name of the delegate */
     return @"SDLUIKitDelegate";
 }
 
-- (id)init {
+- (id)init
+{
     self = [super init];
     return self;
 }
 
-- (void)postFinishLaunch {
-
+- (void)postFinishLaunch
+{
     /* register a callback for the idletimer hint */
     SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
     SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
@@ -95,7 +99,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
     /* free the memory we used to hold copies of argc and argv */
     int i;
-    for (i=0; i<forward_argc; i++) {
+    for (i = 0; i < forward_argc; i++) {
         free(forward_argv[i]);
     }
     free(forward_argv);
@@ -104,8 +108,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     exit(exit_status);
 }
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+{
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
 
@@ -114,8 +118,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     return YES;
 }
 
-- (void)applicationWillTerminate:(UIApplication *)application {
-
+- (void)applicationWillTerminate:(UIApplication *)application
+{
     SDL_SendQuit();
      /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
     longjmp(*(jump_env()), 1);

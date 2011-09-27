@@ -183,7 +183,8 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
 }
 
 void
-UIKit_DestroyWindow(_THIS, SDL_Window * window) {
+UIKit_DestroyWindow(_THIS, SDL_Window * window)
+{
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
     if (data) {
         [data->viewcontroller release];

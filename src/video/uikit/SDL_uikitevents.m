@@ -47,7 +47,7 @@ UIKit_PumpEvents(_THIS)
         SInt32 result;
         do {
             result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
-        } while(result == kCFRunLoopRunHandledSource);
+        } while (result == kCFRunLoopRunHandledSource);
     }
 }
 

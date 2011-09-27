@@ -52,7 +52,7 @@ BOOL SDL_UIKit_supports_multiple_displays = NO;
 static int
 UIKit_Available(void)
 {
-    return (1);
+    return 1;
 }
 
 static void UIKit_DeleteDevice(SDL_VideoDevice * device)

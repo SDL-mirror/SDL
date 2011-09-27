@@ -33,12 +33,13 @@
 
 @implementation SDL_uikitview
 
-- (void)dealloc {
+- (void)dealloc
+{
     [super dealloc];
 }
 
-- (id)initWithFrame:(CGRect)frame {
-
+- (id)initWithFrame:(CGRect)frame
+{
     self = [super initWithFrame: frame];
 
 #if SDL_IPHONE_KEYBOARD
@@ -72,8 +73,8 @@
 
 }
 
-- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
@@ -89,36 +90,35 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-      CGPoint locationInView = [touch locationInView: self];
-
+        CGPoint locationInView = [touch locationInView: self];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-      //FIXME: TODO: Using touch as the fingerId is potentially dangerous
-      //It is also much more efficient than storing the UITouch pointer
-      //and comparing it to the incoming event.
-      SDL_SendFingerDown(touchId,(long)touch,
-                 SDL_TRUE,locationInView.x,locationInView.y,
-                 1);
+        //FIXME: TODO: Using touch as the fingerId is potentially dangerous
+        //It is also much more efficient than storing the UITouch pointer
+        //and comparing it to the incoming event.
+        SDL_SendFingerDown(touchId, (long)touch,
+                           SDL_TRUE, locationInView.x, locationInView.y,
+                           1);
 #else
-      int i;
-      for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
-        if(finger[i] == NULL) {
-          finger[i] = touch;
-          SDL_SendFingerDown(touchId,i,
-                 SDL_TRUE,locationInView.x,locationInView.y,
-                 1);
-          break;
+        int i;
+        for(i = 0; i < MAX_SIMULTANEOUS_TOUCHES; i++) {
+            if (finger[i] == NULL) {
+                finger[i] = touch;
+                SDL_SendFingerDown(touchId, i,
+                                   SDL_TRUE, locationInView.x, locationInView.y,
+                                   1);
+                break;
+            }
         }
-      }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject];
+        touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
 
-- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
@@ -129,32 +129,32 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-      CGPoint locationInView = [touch locationInView: self];
-
+        CGPoint locationInView = [touch locationInView: self];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-      SDL_SendFingerDown(touchId,(long)touch,
-                 SDL_FALSE,locationInView.x,locationInView.y,
-                 1);
+        SDL_SendFingerDown(touchId, (long)touch,
+                           SDL_FALSE, locationInView.x, locationInView.y,
+                           1);
 #else
-      int i;
-      for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
-        if(finger[i] == touch) {
-          SDL_SendFingerDown(touchId,i,
-                 SDL_FALSE,locationInView.x,locationInView.y,
-                 1);
-          finger[i] = NULL;
-          break;
+        int i;
+        for (i = 0; i < MAX_SIMULTANEOUS_TOUCHES; i++) {
+            if (finger[i] == touch) {
+                SDL_SendFingerDown(touchId, i,
+                                   SDL_FALSE, locationInView.x, locationInView.y,
+                                   1);
+                finger[i] = NULL;
+                break;
+            }
         }
-      }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject];
+        touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
 
-- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
     /*
         this can happen if the user puts more than 5 touches on the screen
         at once, or perhaps in other circumstances.  Usually (it seems)
@@ -163,8 +163,8 @@
     [self touchesEnded: touches withEvent: event];
 }
 
-- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
@@ -177,26 +177,25 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-      CGPoint locationInView = [touch locationInView: self];
-
+        CGPoint locationInView = [touch locationInView: self];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-      SDL_SendTouchMotion(touchId,(long)touch,
-                  SDL_FALSE,locationInView.x,locationInView.y,
-                  1);
+        SDL_SendTouchMotion(touchId, (long)touch,
+                            SDL_FALSE, locationInView.x, locationInView.y,
+                            1);
 #else
-      int i;
-      for(i = 0;i < MAX_SIMULTANEOUS_TOUCHES;i++) {
-        if(finger[i] == touch) {
-          SDL_SendTouchMotion(touchId,i,
-                  SDL_FALSE,locationInView.x,locationInView.y,
-                  1);
-          break;
+        int i;
+        for (i = 0; i < MAX_SIMULTANEOUS_TOUCHES; i++) {
+            if (finger[i] == touch) {
+                SDL_SendTouchMotion(touchId, i,
+                                    SDL_FALSE, locationInView.x, locationInView.y,
+                                    1);
+                break;
+            }
         }
-      }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject];
+        touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
@@ -207,13 +206,14 @@
 #if SDL_IPHONE_KEYBOARD
 
 /* Is the iPhone virtual keyboard visible onscreen? */
-- (BOOL)keyboardVisible {
+- (BOOL)keyboardVisible
+{
     return keyboardVisible;
 }
 
 /* Set ourselves up as a UITextFieldDelegate */
-- (void)initializeKeyboard {
-
+- (void)initializeKeyboard
+{
     textField = [[UITextField alloc] initWithFrame: CGRectZero];
     textField.delegate = self;
     /* placeholder so there is something to delete! */
@@ -236,20 +236,22 @@
 }
 
 /* reveal onscreen virtual keyboard */
-- (void)showKeyboard {
+- (void)showKeyboard
+{
     keyboardVisible = YES;
     [textField becomeFirstResponder];
 }
 
 /* hide onscreen virtual keyboard */
-- (void)hideKeyboard {
+- (void)hideKeyboard
+{
     keyboardVisible = NO;
     [textField resignFirstResponder];
 }
 
 /* UITextFieldDelegate method.  Invoked when user types something. */
-- (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-
+- (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string
+{
     if ([string length] == 0) {
         /* it wants to replace text with nothing, ie a delete */
         SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
@@ -259,7 +261,7 @@
         /* go through all the characters in the string we've been sent
            and convert them to key presses */
         int i;
-        for (i=0; i<[string length]; i++) {
+        for (i = 0; i < [string length]; i++) {
 
             unichar c = [string characterAtIndex: i];
 
@@ -295,7 +297,8 @@
 }
 
 /* Terminates the editing session */
-- (BOOL)textFieldShouldReturn:(UITextField*)_textField {
+- (BOOL)textFieldShouldReturn:(UITextField*)_textField
+{
     SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RETURN);
     [self hideKeyboard];
     return YES;
@@ -308,8 +311,8 @@
 /* iPhone keyboard addition functions */
 #if SDL_IPHONE_KEYBOARD
 
-int SDL_iPhoneKeyboardShow(SDL_Window * window) {
-
+int SDL_iPhoneKeyboardShow(SDL_Window * window)
+{
     SDL_WindowData *data;
     SDL_uikitview *view;
 
@@ -331,8 +334,8 @@ int SDL_iPhoneKeyboardShow(SDL_Window * window) {
     }
 }
 
-int SDL_iPhoneKeyboardHide(SDL_Window * window) {
-
+int SDL_iPhoneKeyboardHide(SDL_Window * window)
+{
     SDL_WindowData *data;
     SDL_uikitview *view;
 
@@ -354,8 +357,8 @@ int SDL_iPhoneKeyboardHide(SDL_Window * window) {
     }
 }
 
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) {
-
+SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
+{
     SDL_WindowData *data;
     SDL_uikitview *view;
 
@@ -376,8 +379,8 @@ SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) {
     }
 }
 
-int SDL_iPhoneKeyboardToggle(SDL_Window * window) {
-
+int SDL_iPhoneKeyboardToggle(SDL_Window * window)
+{
     SDL_WindowData *data;
     SDL_uikitview *view;
 
@@ -408,21 +411,25 @@ int SDL_iPhoneKeyboardToggle(SDL_Window * window) {
 
 /* stubs, used if compiled without keyboard support */
 
-int SDL_iPhoneKeyboardShow(SDL_Window * window) {
+int SDL_iPhoneKeyboardShow(SDL_Window * window)
+{
     SDL_SetError("Not compiled with keyboard support");
     return -1;
 }
 
-int SDL_iPhoneKeyboardHide(SDL_Window * window) {
+int SDL_iPhoneKeyboardHide(SDL_Window * window)
+{
     SDL_SetError("Not compiled with keyboard support");
     return -1;
 }
 
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) {
+SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
+{
     return 0;
 }
 
-int SDL_iPhoneKeyboardToggle(SDL_Window * window) {
+int SDL_iPhoneKeyboardToggle(SDL_Window * window)
+{
     SDL_SetError("Not compiled with keyboard support");
     return -1;
 }
