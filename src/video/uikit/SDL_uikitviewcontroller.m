@@ -1,15 +1,15 @@
 /*
  Simple DirectMedia Layer
  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
- 
+
  This software is provided 'as-is', without any express or implied
  warranty.  In no event will the authors be held liable for any damages
  arising from the use of this software.
- 
+
  Permission is granted to anyone to use this software for any purpose,
  including commercial applications, and to alter it and redistribute it
  freely, subject to the following restrictions:
- 
+
  1. The origin of this software must not be misrepresented; you must not
  claim that you wrote the original software. If you use this software
  in a product, an acknowledgment in the product documentation would be
@@ -49,34 +49,34 @@
                                                             encoding:NSUTF8StringEncoding];
         NSArray *orientations = [orientationsNSString componentsSeparatedByCharactersInSet:
                                  [NSCharacterSet characterSetWithCharactersInString:@" "]];
-        
+
         switch (orient) {
             case UIInterfaceOrientationLandscapeLeft:
                 rotate = [orientations containsObject:@"LandscapeLeft"];
                 break;
-                
+
             case UIInterfaceOrientationLandscapeRight:
                 rotate = [orientations containsObject:@"LandscapeRight"];
                 break;
-                
+
             case UIInterfaceOrientationPortrait:
                 rotate = [orientations containsObject:@"Portrait"];
                 break;
-                
+
             case UIInterfaceOrientationPortraitUpsideDown:
                 rotate = [orientations containsObject:@"PortraitUpsideDown"];
                 break;
-                
+
             default: break;
         }
-        
+
         return rotate;
     }
-    
+
     if (self->window->flags & SDL_WINDOW_RESIZABLE) {
         return YES;  // any orientation is okay.
     }
-    
+
     // If not resizable, allow device to orient to other matching sizes
     //  (that is, let the user turn the device upside down...same screen
     //   dimensions, but it lets the user place the device where it's most
@@ -85,14 +85,14 @@
         case UIInterfaceOrientationLandscapeLeft:
         case UIInterfaceOrientationLandscapeRight:
             return (self->window->w >= self->window->h);
-            
+
         case UIInterfaceOrientationPortrait:
         case UIInterfaceOrientationPortraitUpsideDown:
             return (self->window->h >= self->window->w);
-            
+
         default: break;
     }
-    
+
     return NO;  // Nothing else is acceptable.
 }
 
@@ -105,7 +105,7 @@
     if ((self->window->flags & SDL_WINDOW_RESIZABLE) == 0) {
         return;   // don't care, we're just flipping over in this case.
     }
-    
+
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
@@ -114,30 +114,30 @@
     CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
     const CGSize size = frame.size;
     int w, h;
-    
+
     switch (toInterfaceOrientation) {
         case UIInterfaceOrientationPortrait:
         case UIInterfaceOrientationPortraitUpsideDown:
             w = (size.width < size.height) ? size.width : size.height;
             h = (size.width > size.height) ? size.width : size.height;
             break;
-            
+
         case UIInterfaceOrientationLandscapeLeft:
         case UIInterfaceOrientationLandscapeRight:
             w = (size.width > size.height) ? size.width : size.height;
             h = (size.width < size.height) ? size.width : size.height;
             break;
-            
+
         default:
             SDL_assert(0 && "Unexpected interface orientation!");
             return;
     }
-    
+
     frame.size.width = w;
     frame.size.height = h;
     frame.origin.x = 0;
     frame.origin.y = 0;
-    
+
     [uiwindow setFrame:frame];
     [data->view updateFrame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);

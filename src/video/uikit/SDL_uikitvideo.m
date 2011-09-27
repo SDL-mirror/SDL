@@ -84,8 +84,8 @@ UIKit_CreateDevice(int devindex)
     device->CreateWindow = UIKit_CreateWindow;
     device->DestroyWindow = UIKit_DestroyWindow;
     device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
-    
-    
+
+
     /* OpenGL (ES) functions */
     device->GL_MakeCurrent        = UIKit_GL_MakeCurrent;
     device->GL_SwapWindow        = UIKit_GL_SwapWindow;
@@ -211,7 +211,7 @@ UIKit_AddDisplay(UIScreen *uiscreen, UIScreenMode *uimode, int w, int h)
     mode.w = w;
     mode.h = h;
     mode.refresh_rate = 0;
-    
+
     [uimode retain];
     mode.driverdata = uimode;
 

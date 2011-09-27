@@ -40,10 +40,10 @@
 - (id)initWithFrame:(CGRect)frame {
 
     self = [super initWithFrame: frame];
-    
+
 #if SDL_IPHONE_KEYBOARD
     [self initializeKeyboard];
-#endif    
+#endif
 
 #ifdef FIXED_MULTITOUCH
     self.multipleTouchEnabled = YES;
@@ -53,7 +53,7 @@
 
     //touch.driverdata = SDL_malloc(sizeof(EventTouchData));
     //EventTouchData* data = (EventTouchData*)(touch.driverdata);
-    
+
     touch.x_min = 0;
     touch.x_max = frame.size.width;
     touch.native_xres = touch.x_max - touch.x_min;
@@ -79,7 +79,7 @@
 
     if (touch) {
         CGPoint locationInView = [touch locationInView: self];
-            
+
         /* send moved event */
         SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 
@@ -112,16 +112,16 @@
       }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject]; 
+      touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
-    
+
     if (touch) {
         /* send mouse up */
         SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
@@ -130,7 +130,7 @@
 #ifdef FIXED_MULTITOUCH
     while(touch) {
       CGPoint locationInView = [touch locationInView: self];
-      
+
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
       SDL_SendFingerDown(touchId,(long)touch,
@@ -149,7 +149,7 @@
       }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject]; 
+      touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
@@ -164,10 +164,10 @@
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
-    
+
     if (touch) {
         CGPoint locationInView = [touch locationInView: self];
 
@@ -178,7 +178,7 @@
 #ifdef FIXED_MULTITOUCH
     while(touch) {
       CGPoint locationInView = [touch locationInView: self];
-      
+
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
       SDL_SendTouchMotion(touchId,(long)touch,
@@ -196,7 +196,7 @@
       }
 #endif
 
-      touch = (UITouch*)[enumerator nextObject]; 
+      touch = (UITouch*)[enumerator nextObject];
     }
 #endif
 }
@@ -213,12 +213,12 @@
 
 /* Set ourselves up as a UITextFieldDelegate */
 - (void)initializeKeyboard {
-        
+
     textField = [[UITextField alloc] initWithFrame: CGRectZero];
     textField.delegate = self;
     /* placeholder so there is something to delete! */
-    textField.text = @" ";    
-    
+    textField.text = @" ";
+
     /* set UITextInputTrait properties, mostly to defaults */
     textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
     textField.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -226,8 +226,8 @@
     textField.keyboardAppearance = UIKeyboardAppearanceDefault;
     textField.keyboardType = UIKeyboardTypeDefault;
     textField.returnKeyType = UIReturnKeyDefault;
-    textField.secureTextEntry = NO;    
-    
+    textField.secureTextEntry = NO;
+
     textField.hidden = YES;
     keyboardVisible = NO;
     /* add the UITextField (hidden) to our view */
@@ -249,7 +249,7 @@
 
 /* UITextFieldDelegate method.  Invoked when user types something. */
 - (BOOL)textField:(UITextField *)_textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
-    
+
     if ([string length] == 0) {
         /* it wants to replace text with nothing, ie a delete */
         SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_DELETE);
@@ -260,12 +260,12 @@
            and convert them to key presses */
         int i;
         for (i=0; i<[string length]; i++) {
-            
+
             unichar c = [string characterAtIndex: i];
-            
+
             Uint16 mod = 0;
             SDL_Scancode code;
-            
+
             if (c < 127) {
                 /* figure out the SDL_Scancode and SDL_keymod for this unichar */
                 code = unicharToUIKeyInfoTable[c].code;
@@ -276,7 +276,7 @@
                 code = SDL_SCANCODE_UNKNOWN;
                 mod = 0;
             }
-            
+
             if (mod & KMOD_SHIFT) {
                 /* If character uses shift, press shift down */
                 SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_LSHIFT);
@@ -287,7 +287,7 @@
             if (mod & KMOD_SHIFT) {
                 /* If character uses shift, press shift back up */
                 SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
-            }            
+            }
         }
         SDL_SendKeyboardText([string UTF8String]);
     }
@@ -309,18 +309,18 @@
 #if SDL_IPHONE_KEYBOARD
 
 int SDL_iPhoneKeyboardShow(SDL_Window * window) {
-    
+
     SDL_WindowData *data;
     SDL_uikitview *view;
-    
+
     if (NULL == window) {
         SDL_SetError("Window does not exist");
         return -1;
     }
-    
+
     data = (SDL_WindowData *)window->driverdata;
     view = data->view;
-    
+
     if (nil == view) {
         SDL_SetError("Window has no view");
         return -1;
@@ -332,18 +332,18 @@ int SDL_iPhoneKeyboardShow(SDL_Window * window) {
 }
 
 int SDL_iPhoneKeyboardHide(SDL_Window * window) {
-    
+
     SDL_WindowData *data;
     SDL_uikitview *view;
-    
+
     if (NULL == window) {
         SDL_SetError("Window does not exist");
         return -1;
-    }    
-    
+    }
+
     data = (SDL_WindowData *)window->driverdata;
     view = data->view;
-    
+
     if (NULL == view) {
         SDL_SetError("Window has no view");
         return -1;
@@ -355,18 +355,18 @@ int SDL_iPhoneKeyboardHide(SDL_Window * window) {
 }
 
 SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) {
-    
+
     SDL_WindowData *data;
     SDL_uikitview *view;
-    
+
     if (NULL == window) {
         SDL_SetError("Window does not exist");
         return -1;
-    }    
-    
+    }
+
     data = (SDL_WindowData *)window->driverdata;
     view = data->view;
-    
+
     if (NULL == view) {
         SDL_SetError("Window has no view");
         return 0;
@@ -377,18 +377,18 @@ SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window) {
 }
 
 int SDL_iPhoneKeyboardToggle(SDL_Window * window) {
-    
+
     SDL_WindowData *data;
     SDL_uikitview *view;
-    
+
     if (NULL == window) {
         SDL_SetError("Window does not exist");
         return -1;
-    }    
-    
+    }
+
     data = (SDL_WindowData *)window->driverdata;
     view = data->view;
-    
+
     if (NULL == view) {
         SDL_SetError("Window has no view");
         return -1;

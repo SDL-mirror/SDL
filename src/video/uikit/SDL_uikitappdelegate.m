@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 
     int i;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    
+
     /* store arguments */
     forward_argc = argc;
     forward_argv = (char **)malloc((argc+1) * sizeof(char *));
@@ -53,14 +53,14 @@ int main(int argc, char **argv) {
 
     /* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
     UIApplicationMain(argc, argv, NULL, [SDLUIKitDelegate getAppDelegateClassName]);
-    
+
     [pool release];
     return 0;
 }
 
 static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue) {
     SDL_assert(SDL_strcmp(name, SDL_HINT_IDLE_TIMER_DISABLED) == 0);
-    
+
     BOOL disable = (*newValue != '0');
     [UIApplication sharedApplication].idleTimerDisabled = disable;
 }
@@ -85,37 +85,37 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 }
 
 - (void)postFinishLaunch {
-    
+
     /* register a callback for the idletimer hint */
     SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
     SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     /* run the user's application, passing argc and argv */
     int exit_status = SDL_main(forward_argc, forward_argv);
-    
+
     /* free the memory we used to hold copies of argc and argv */
     int i;
     for (i=0; i<forward_argc; i++) {
         free(forward_argv[i]);
     }
-    free(forward_argv);    
-        
+    free(forward_argv);
+
     /* exit, passing the return status from the user's application */
     exit(exit_status);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-            
+
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
-    
+
     [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 
     return YES;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    
+
     SDL_SendQuit();
      /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
     longjmp(*(jump_env()), 1);
@@ -130,7 +130,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (!_this) {
         return;
     }
-    
+
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
@@ -146,7 +146,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (!_this) {
         return;
     }
-    
+
     SDL_Window *window;
     for (window = _this->windows; window != nil; window = window->next) {
         SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);

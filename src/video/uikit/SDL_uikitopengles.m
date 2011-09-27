@@ -34,7 +34,7 @@ static int UIKit_GL_Initialize(_THIS);
 
 void *
 UIKit_GL_GetProcAddress(_THIS, const char *proc)
-{    
+{
     /* Look through all SO's for the proc symbol.  Here's why:
        -Looking for the path to the OpenGL Library seems not to work in the iPhone Simulator.
        -We don't know that the path won't change in the future.
@@ -47,7 +47,7 @@ UIKit_GL_GetProcAddress(_THIS, const char *proc)
 */
 int UIKit_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-    
+
     if (context) {
         SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
         [data->view setCurrentContext];
@@ -55,15 +55,15 @@ int UIKit_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     else {
         [EAGLContext setCurrentContext: nil];
     }
-        
+
     return 0;
 }
 
 int
 UIKit_GL_LoadLibrary(_THIS, const char *path)
 {
-    /* 
-        shouldn't be passing a path into this function 
+    /*
+        shouldn't be passing a path into this function
         why?  Because we've already loaded the library
         and because the SDK forbids loading an external SO
     */
@@ -84,7 +84,7 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
     #endif
 
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
-    
+
     if (nil == data->view) {
         return;
     }
@@ -95,7 +95,7 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 
     /* we need to let the event cycle run, or the OS won't update the OpenGL view! */
     SDL_PumpEvents();
-    
+
 }
 
 SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
@@ -114,7 +114,7 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     aBits: _this->gl_config.alpha_size \
                                     depthBits: _this->gl_config.depth_size \
                                     majorVersion: _this->gl_config.major_version];
-    
+
     data->view = view;
     view->viewcontroller = data->viewcontroller;
     if (view->viewcontroller != nil) {

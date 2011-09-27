@@ -46,7 +46,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     UIScreen *uiscreen = (UIScreen *) display->driverdata;
     SDL_WindowData *data;
-        
+
     /* Allocate the window data */
     data = (SDL_WindowData *)SDL_malloc(sizeof(*data));
     if (!data) {
@@ -64,7 +64,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         window->w = (int)uiwindow.frame.size.width;
         window->h = (int)uiwindow.frame.size.height;
     }
-    
+
     window->driverdata = data;
 
     // !!! FIXME: should we force this? Shouldn't specifying FULLSCREEN
@@ -164,7 +164,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
         uiwindow = [uiwindow initWithFrame:[uiscreen bounds]];
     else
         uiwindow = [uiwindow initWithFrame:[uiscreen applicationFrame]];
-    
+
     // put the window on an external display if appropriate. This implicitly
     //  does [uiwindow setframe:[uiscreen bounds]], so don't do it on the
     //  main display, where we land by default, as that would eat the
@@ -176,10 +176,10 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     if (SetupWindowData(_this, window, uiwindow, SDL_TRUE) < 0) {
         [uiwindow release];
         return -1;
-    }    
-    
+    }
+
     return 1;
-    
+
 }
 
 void

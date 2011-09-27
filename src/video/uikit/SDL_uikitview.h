@@ -48,7 +48,7 @@
 #if SDL_IPHONE_KEYBOARD
     UITextField *textField;
     BOOL keyboardVisible;
-#endif    
+#endif
 
 @public
     SDL_uikitviewcontroller *viewcontroller;
@@ -62,7 +62,7 @@
 - (void)hideKeyboard;
 - (void)initializeKeyboard;
 @property (readonly) BOOL keyboardVisible;
-#endif 
+#endif
 
 @end
 /* *INDENT-ON* */
