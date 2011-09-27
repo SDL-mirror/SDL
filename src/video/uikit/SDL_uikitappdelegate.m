@@ -36,6 +36,7 @@
 extern int SDL_main(int argc, char *argv[]);
 static int forward_argc;
 static char **forward_argv;
+static int exit_status;
 
 int main(int argc, char **argv)
 {
@@ -54,8 +55,14 @@ int main(int argc, char **argv)
     /* Give over control to run loop, SDLUIKitDelegate will handle most things from here */
     UIApplicationMain(argc, argv, NULL, [SDLUIKitDelegate getAppDelegateClassName]);
 
+    /* free the memory we used to hold copies of argc and argv */
+    for (i = 0; i < forward_argc; i++) {
+        free(forward_argv[i]);
+    }
+    free(forward_argv);
+
     [pool release];
-    return 0;
+    return exit_status;
 }
 
 static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue)
@@ -95,17 +102,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     /* run the user's application, passing argc and argv */
-    int exit_status = SDL_main(forward_argc, forward_argv);
-
-    /* free the memory we used to hold copies of argc and argv */
-    int i;
-    for (i = 0; i < forward_argc; i++) {
-        free(forward_argv[i]);
-    }
-    free(forward_argv);
+    exit_status = SDL_main(forward_argc, forward_argv);
 
     /* exit, passing the return status from the user's application */
-    exit(exit_status);
+    // exit(exit_status);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
