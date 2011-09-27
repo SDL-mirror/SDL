@@ -18,13 +18,10 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-
-#include "SDL_config.h"
-
 #ifndef _SDL_uikitopengles
 #define _SDL_uikitopengles
 
-#include "SDL_uikitvideo.h"
+#include "../SDL_sysvideo.h"
 
 extern int UIKit_GL_MakeCurrent(_THIS, SDL_Window * window,
                                 SDL_GLContext context);

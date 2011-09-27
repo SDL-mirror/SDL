@@ -18,12 +18,8 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
-
 #ifndef _SDL_uikitvideo_h
 #define _SDL_uikitvideo_h
-
-#include "../SDL_sysvideo.h"
 
 #include <UIKit/UIKit.h>
 

@@ -20,8 +20,6 @@
 */
 
 #import <UIKit/UIKit.h>
-#include "SDL_stdinc.h"
-#include "SDL_events.h"
 #import "SDL_uikitviewcontroller.h"
 
 #define IPHONE_TOUCH_EFFICIENT_DANGEROUS

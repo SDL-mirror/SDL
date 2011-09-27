@@ -20,7 +20,6 @@
 */
 
 #import <UIKit/UIKit.h>
-#import "SDL_uikitopenglview.h"
 
 @interface SDLUIKitDelegate : NSObject<UIApplicationDelegate> {
 }

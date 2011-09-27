@@ -21,8 +21,7 @@
 
 #import <UIKit/UIKit.h>
 
-#include "SDL_video.h"
-
+#include "../SDL_sysvideo.h"
 
 @interface SDL_uikitviewcontroller : UIViewController {
 @private
