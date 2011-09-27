@@ -31,7 +31,6 @@
 #define MAX_SIMULTANEOUS_TOUCHES 5
 #endif
 
-/* *INDENT-OFF* */
 #if SDL_IPHONE_KEYBOARD
 @interface SDL_uikitview : UIView<UITextFieldDelegate> {
 #else
@@ -65,6 +64,5 @@
 #endif
 
 @end
-/* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */

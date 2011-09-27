@@ -39,7 +39,6 @@ typedef struct
 
 /* So far only ASCII characters here */
 static UIKitKeyInfo unicharToUIKeyInfoTable[] = {
-/* *INDENT-OFF* */
 /*  0 */  {  SDL_SCANCODE_UNKNOWN, 0 },
 /*  1 */  {  SDL_SCANCODE_UNKNOWN, 0 },
 /*  2 */  {  SDL_SCANCODE_UNKNOWN, 0 },
@@ -168,7 +167,6 @@ static UIKitKeyInfo unicharToUIKeyInfoTable[] = {
 /*  125 */{    SDL_SCANCODE_RIGHTBRACKET, KMOD_SHIFT },    /* plus shift modifier '}' */
 /*  126 */{    SDL_SCANCODE_GRAVE, KMOD_SHIFT },         /* plus shift modifier '~' */
 /*  127 */{    SDL_SCANCODE_DELETE, KMOD_SHIFT }
-/* *INDENT-ON* */
 };
 
 #endif /* UIKitKeyInfo */

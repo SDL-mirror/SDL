@@ -22,7 +22,6 @@
 #import <UIKit/UIKit.h>
 #import "SDL_uikitopenglview.h"
 
-/* *INDENT-OFF* */
 @interface SDLUIKitDelegate:NSObject<UIApplicationDelegate> {
 }
 
@@ -30,6 +29,5 @@
 +(NSString *)getAppDelegateClassName;
 
 @end
-/* *INDENT-ON* */
 
 /* vi: set ts=4 sw=4 expandtab: */
