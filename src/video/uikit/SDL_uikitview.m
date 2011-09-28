@@ -311,100 +311,69 @@
 /* iPhone keyboard addition functions */
 #if SDL_IPHONE_KEYBOARD
 
+SDL_uikitview * getWindowView(SDL_Window * window)
+{
+    if (window == NULL) {
+        SDL_SetError("Window does not exist");
+        return nil;
+    }
+
+    SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
+    SDL_uikitview *view = data != NULL ? data->view : nil;
+
+    if (view == nil) {
+        SDL_SetError("Window has no view");
+    }
+
+    return view;
+}
+
 int SDL_iPhoneKeyboardShow(SDL_Window * window)
 {
-    SDL_WindowData *data;
-    SDL_uikitview *view;
-
-    if (NULL == window) {
-        SDL_SetError("Window does not exist");
+    SDL_uikitview *view = getWindowView(window);
+    if (view == nil) {
         return -1;
     }
 
-    data = (SDL_WindowData *)window->driverdata;
-    view = data->view;
-
-    if (nil == view) {
-        SDL_SetError("Window has no view");
-        return -1;
-    }
-    else {
-        [view showKeyboard];
-        return 0;
-    }
+    [view showKeyboard];
+    return 0;
 }
 
 int SDL_iPhoneKeyboardHide(SDL_Window * window)
 {
-    SDL_WindowData *data;
-    SDL_uikitview *view;
-
-    if (NULL == window) {
-        SDL_SetError("Window does not exist");
+    SDL_uikitview *view = getWindowView(window);
+    if (view == nil) {
         return -1;
     }
 
-    data = (SDL_WindowData *)window->driverdata;
-    view = data->view;
-
-    if (NULL == view) {
-        SDL_SetError("Window has no view");
-        return -1;
-    }
-    else {
-        [view hideKeyboard];
-        return 0;
-    }
+    [view hideKeyboard];
+    return 0;
 }
 
 SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
 {
-    SDL_WindowData *data;
-    SDL_uikitview *view;
-
-    if (NULL == window) {
-        SDL_SetError("Window does not exist");
-        return -1;
-    }
-
-    data = (SDL_WindowData *)window->driverdata;
-    view = data->view;
-
-    if (NULL == view) {
-        SDL_SetError("Window has no view");
+    SDL_uikitview *view = getWindowView(window);
+    if (view == nil) {
         return 0;
     }
-    else {
-        return view.keyboardVisible;
-    }
+
+    return view.keyboardVisible;
 }
 
 int SDL_iPhoneKeyboardToggle(SDL_Window * window)
 {
-    SDL_WindowData *data;
-    SDL_uikitview *view;
-
-    if (NULL == window) {
-        SDL_SetError("Window does not exist");
+    SDL_uikitview *view = getWindowView(window);
+    if (view == nil) {
         return -1;
     }
 
-    data = (SDL_WindowData *)window->driverdata;
-    view = data->view;
-
-    if (NULL == view) {
-        SDL_SetError("Window has no view");
-        return -1;
+    if (SDL_iPhoneKeyboardIsShown(window)) {
+        SDL_iPhoneKeyboardHide(window);
     }
     else {
-        if (SDL_iPhoneKeyboardIsShown(window)) {
-            SDL_iPhoneKeyboardHide(window);
-        }
-        else {
-            SDL_iPhoneKeyboardShow(window);
-        }
-        return 0;
+        SDL_iPhoneKeyboardShow(window);
     }
+    return 0;
 }
 
 #else
