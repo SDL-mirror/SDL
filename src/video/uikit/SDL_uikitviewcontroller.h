@@ -27,8 +27,12 @@
 @private
     SDL_Window *window;
 }
+
+@property (readwrite) SDL_Window *window;
+
 - (id)initWithSDLWindow:(SDL_Window *)_window;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
 - (void)loadView;
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
+
 @end

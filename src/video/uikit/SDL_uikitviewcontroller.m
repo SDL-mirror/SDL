@@ -33,12 +33,15 @@
 
 @implementation SDL_uikitviewcontroller
 
+@synthesize window;
+
 - (id)initWithSDLWindow:(SDL_Window *)_window
 {
-    if ((self = [self init]) == nil) {
+    self = [self init];
+    if (self == nil) {
         return nil;
     }
-    self->window = _window;
+    self.window = _window;
     return self;
 }
 
