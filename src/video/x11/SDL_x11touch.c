@@ -41,6 +41,7 @@ X11_InitTouch(_THIS)
 
   char c;
   int i = 0;
+  int tsfd;
   char line[256];
   char tstr[256];
   int vendor = -1,product = -1,event = -1;
@@ -51,7 +52,7 @@ X11_InitTouch(_THIS)
 
         sprintf(tstr,"/dev/input/event%i",event);
 
-        int tsfd = open( tstr, O_RDONLY | O_NONBLOCK );
+        tsfd = open( tstr, O_RDONLY | O_NONBLOCK );
         if ( tsfd == -1 )
             continue;   /* Maybe not enough permissions ? */
 
