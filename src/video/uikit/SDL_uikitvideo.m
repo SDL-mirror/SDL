@@ -118,32 +118,6 @@ The main screen should list a AxB mode for portrait orientation, and then
 
 */
 
-static CGSize
-UIKit_ForcePortrait(const CGSize size)
-{
-    CGSize retval;
-    if (size.width < size.height) { // portrait
-        retval = size;
-    } else {  // landscape
-        retval.width = size.height;
-        retval.height = size.width;
-    }
-    return retval;
-}
-
-static CGSize
-UIKit_ForceLandscape(const CGSize size)
-{
-    CGSize retval;
-    if (size.width > size.height) { // landscape
-        retval = size;
-    } else {  // portrait
-        retval.width = size.height;
-        retval.height = size.width;
-    }
-    return retval;
-}
-
 static void
 UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
@@ -156,18 +130,19 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
     if (!SDL_UIKit_supports_multiple_displays) {
         const CGRect rect = [uiscreen bounds];
         mode.format = SDL_PIXELFORMAT_ABGR8888;
-        mode.w = (int) rect.size.width;
-        mode.h = (int) rect.size.height;
         mode.refresh_rate = 0;
         mode.driverdata = NULL;
+
+        mode.w = (int) rect.size.width;
+        mode.h = (int) rect.size.height;
         SDL_AddDisplayMode(display, &mode);
+
         mode.w = (int) rect.size.height;  // swap the orientation, add again.
         mode.h = (int) rect.size.width;
         SDL_AddDisplayMode(display, &mode);
         return;
     }
 
-    const BOOL ismain = (uiscreen == [UIScreen mainScreen]);
     const NSArray *modes = [uiscreen availableModes];
     for (UIScreenMode *uimode in [uiscreen availableModes]) {
         CGSize size = [uimode size];
@@ -177,20 +152,12 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         mode.w = (int) size.width;
         mode.h = (int) size.height;
         if (SDL_AddDisplayMode(display, &mode))
-            [uimode retain];
+            [uimode retain];        // retain is needed because of mode.driverdata
 
-        if (ismain) {
-            // Add the mode twice, flipped to portrait and landscape.
-            //  SDL_AddDisplayMode() will ignore duplicates.
-            size = UIKit_ForcePortrait([uimode size]);
-            mode.w = (int) size.width;
-            mode.h = (int) size.height;
-            if (SDL_AddDisplayMode(display, &mode))
-                [uimode retain];
-
-            size = UIKit_ForceLandscape(size);
-            mode.w = (int) size.width;
-            mode.h = (int) size.height;
+        if (uiscreen == [UIScreen mainScreen]) {
+            // Add the mode with swapped width/height
+            mode.w = (int) size.height;
+            mode.h = (int) size.width;
             if (SDL_AddDisplayMode(display, &mode))
                 [uimode retain];
         }
@@ -239,8 +206,8 @@ UIKit_VideoInit(_THIS)
         // Just give 'em the whole main screen.
         UIScreen *uiscreen = [UIScreen mainScreen];
         UIScreenMode *uiscreenmode = [uiscreen currentMode];
-        const CGRect rect = [uiscreen bounds];
-        UIKit_AddDisplay(uiscreen, uiscreenmode, (int)rect.size.width, (int)rect.size.height);
+        const CGSize size = [uiscreen bounds].size;
+        UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
     } else {
         for (UIScreen *uiscreen in [UIScreen screens]) {
             // the main screen is the first element in the array.
