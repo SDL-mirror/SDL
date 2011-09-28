@@ -23,13 +23,6 @@
 #import <OpenGLES/EAGLDrawable.h>
 #import "SDL_uikitopenglview.h"
 
-@interface SDL_uikitopenglview (privateMethods)
-
-- (BOOL) createFramebuffer;
-- (void) destroyFramebuffer;
-
-@end
-
 
 @implementation SDL_uikitopenglview
 
