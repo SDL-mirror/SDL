@@ -51,6 +51,10 @@ X11_InitTouch(_THIS)
 
         sprintf(tstr,"/dev/input/event%i",event);
 
+        int tsfd = open( tstr, O_RDONLY | O_NONBLOCK );
+        if ( tsfd == -1 )
+            continue;   /* Maybe not enough permissions ? */
+
         SDL_Touch touch;
         touch.pressure_max = 0;
         touch.pressure_min = 0;
@@ -66,8 +70,7 @@ X11_InitTouch(_THIS)
         data->up = SDL_FALSE;
         data->down = SDL_FALSE;
 
-        data->eventStream = open(tstr, 
-                    O_RDONLY | O_NONBLOCK);
+        data->eventStream = tsfd;
         ioctl (data->eventStream, EVIOCGNAME (sizeof (tstr)), tstr);
 
         int abs[5];
