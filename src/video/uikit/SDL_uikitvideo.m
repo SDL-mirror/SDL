@@ -167,12 +167,9 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         return;
     }
 
-    const int ismain = (uiscreen == [UIScreen mainScreen]);
+    const BOOL ismain = (uiscreen == [UIScreen mainScreen]);
     const NSArray *modes = [uiscreen availableModes];
-    const NSUInteger mode_count = [modes count];
-    NSUInteger i;
-    for (i = 0; i < mode_count; i++) {
-        UIScreenMode *uimode = (UIScreenMode *) [modes objectAtIndex:i];
+    for (UIScreenMode *uimode in [uiscreen availableModes]) {
         CGSize size = [uimode size];
         mode.format = SDL_PIXELFORMAT_ABGR8888;
         mode.refresh_rate = 0;
@@ -245,12 +242,8 @@ UIKit_VideoInit(_THIS)
         const CGRect rect = [uiscreen bounds];
         UIKit_AddDisplay(uiscreen, uiscreenmode, (int)rect.size.width, (int)rect.size.height);
     } else {
-        const NSArray *screens = [UIScreen screens];
-        const NSUInteger screen_count = [screens count];
-        NSUInteger i;
-        for (i = 0; i < screen_count; i++) {
+        for (UIScreen *uiscreen in [UIScreen screens]) {
             // the main screen is the first element in the array.
-            UIScreen *uiscreen = (UIScreen *) [screens objectAtIndex:i];
             UIScreenMode *uiscreenmode = [uiscreen currentMode];
             const CGSize size = [[uiscreen currentMode] size];
             UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
