@@ -164,10 +164,10 @@ SDL_SYS_SetupThread(const char *name)
 #ifdef _MSC_VER  /* !!! FIXME: can we do SEH on other compilers yet? */
     /* This magic tells the debugger to name a thread if it's listening. */
     THREADNAME_INFO inf;
-    info.dwType = 0x1000;
-    info.szName = name;
-    info.dwThreadID = (DWORD) -1;
-    info.dwFlags = 0;
+    inf.dwType = 0x1000;
+    inf.szName = name;
+    inf.dwThreadID = (DWORD) -1;
+    inf.dwFlags = 0;
 
     __try
     {
