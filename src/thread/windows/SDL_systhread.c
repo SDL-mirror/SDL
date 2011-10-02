@@ -173,7 +173,7 @@ SDL_SYS_SetupThread(const char *name)
     {
         RaiseException(0x406D1388, 0, sizeof(inf)/sizeof(DWORD), (DWORD*)&inf);
     }
-    except(EXCEPTION_CONTINUE_EXECUTION)
+    __except(EXCEPTION_CONTINUE_EXECUTION)
     {
         /* The program itself should ignore this bogus exception. */
     }
