@@ -51,6 +51,7 @@ struct SDL_Thread
     SYS_ThreadHandle handle;
     int status;
     SDL_error errbuf;
+    char *name;
     void *data;
 };
 

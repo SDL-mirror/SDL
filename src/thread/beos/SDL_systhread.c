@@ -65,8 +65,13 @@ RunThread(void *data)
 int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
+    /* The docs say the thread name can't be longer than B_OS_NAME_LENGTH. */
+    char name[B_OS_NAME_LENGTH];
+    SDL_snprintf(name, sizeof (name), "%s", thread->name);
+    name[sizeof (name) - 1] = '\0';
+
     /* Create the thread and go! */
-    thread->handle = spawn_thread(RunThread, "SDL", B_NORMAL_PRIORITY, args);
+    thread->handle = spawn_thread(RunThread, name, B_NORMAL_PRIORITY, args);
     if ((thread->handle == B_NO_MORE_THREADS) ||
         (thread->handle == B_NO_MEMORY)) {
         SDL_SetError("Not enough resources to create thread");
@@ -77,8 +82,9 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 }
 
 void
-SDL_SYS_SetupThread(void)
+SDL_SYS_SetupThread(const char *name)
 {
+    /* We set the thread name during SDL_SYS_CreateThread(). */
     /* Mask asynchronous signals for this thread */
     SDL_MaskSignals(NULL);
 }

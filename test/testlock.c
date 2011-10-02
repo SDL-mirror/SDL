@@ -112,7 +112,9 @@ main(int argc, char *argv[])
     printf("Main thread: %lu\n", mainthread);
     atexit(printid);
     for (i = 0; i < maxproc; ++i) {
-        if ((threads[i] = SDL_CreateThread(Run, NULL)) == NULL)
+        char name[64];
+        SDL_snprintf(name, sizeof (name), "Worker%d", i);
+        if ((threads[i] = SDL_CreateThread(Run, name, NULL)) == NULL)
             fprintf(stderr, "Couldn't create thread!\n");
     }
     signal(SIGINT, terminate);

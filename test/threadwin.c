@@ -296,8 +296,8 @@ main(int argc, char *argv[])
     SDL_SetEventFilter(FilterEvents, NULL);
 
     /* Create the event handling threads */
-    mouse_thread = SDL_CreateThread(HandleMouse, NULL);
-    keybd_thread = SDL_CreateThread(HandleKeyboard, NULL);
+    mouse_thread = SDL_CreateThread(HandleMouse, "MouseHandler", NULL);
+    keybd_thread = SDL_CreateThread(HandleKeyboard, "KeyboardHandler", NULL);
 
     /* Set the surface pixels and refresh! */
     for (i = 0; i < 256; ++i) {

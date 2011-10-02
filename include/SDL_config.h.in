@@ -69,6 +69,7 @@
 #undef HAVE_ICONV_H
 #undef HAVE_SIGNAL_H
 #undef HAVE_ALTIVEC_H
+#undef HAVE_PTHREAD_NP_H
 
 /* C library functions */
 #undef HAVE_MALLOC
@@ -148,6 +149,8 @@
 #undef HAVE_GETPAGESIZE
 #undef HAVE_MPROTECT
 #undef HAVE_ICONV
+#undef HAVE_PTHREAD_SETNAME_NP
+#undef HAVE_PTHREAD_SET_NAME_NP
 
 #else
 /* We may need some replacement for stdarg.h here */

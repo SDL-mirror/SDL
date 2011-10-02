@@ -102,7 +102,7 @@ typedef void (__cdecl * pfnSDL_CurrentEndThread) (unsigned code);
  *  Create a thread.
  */
 extern DECLSPEC SDL_Thread *SDLCALL
-SDL_CreateThread(SDL_ThreadFunction fn, void *data,
+SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data,
                  pfnSDL_CurrentBeginThread pfnBeginThread,
                  pfnSDL_CurrentEndThread pfnEndThread);
 
@@ -111,25 +111,49 @@ SDL_CreateThread(SDL_ThreadFunction fn, void *data,
 /**
  *  Create a thread.
  */
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, NULL, NULL)
+#define SDL_CreateThread(fn, name, data) SDL_CreateThread(fn, name, data, NULL, NULL)
 
 #else
 
 /**
  *  Create a thread.
  */
-#define SDL_CreateThread(fn, data) SDL_CreateThread(fn, data, _beginthreadex, _endthreadex)
+#define SDL_CreateThread(fn, name, data) SDL_CreateThread(fn, name, data, _beginthreadex, _endthreadex)
 
 #endif
 #else
 
 /**
  *  Create a thread.
+ *
+ *   Thread naming is a little complicated: Most systems have very small
+ *    limits for the string length (BeOS has 32 bytes, Linux currently has 16,
+ *    Visual C++ 6.0 has nine!), and possibly other arbitrary rules. You'll
+ *    have to see what happens with your system's debugger. The name should be
+ *    UTF-8 (but using the naming limits of C identifiers is a better bet).
+ *   There are no requirements for thread naming conventions, so long as the
+ *    string is null-terminated UTF-8, but these guidelines are helpful in
+ *    choosing a name:
+ *
+ *    http://stackoverflow.com/questions/149932/naming-conventions-for-threads
+ *
+ *   If a system imposes requirements, SDL will try to munge the string for
+ *    it (truncate, etc), but the original string contents will be available
+ *    from SDL_GetThreadName().
  */
 extern DECLSPEC SDL_Thread *SDLCALL
-SDL_CreateThread(SDL_ThreadFunction fn, void *data);
+SDL_CreateThread(SDL_ThreadFunction fn, const char *name, void *data);
 
 #endif
+
+/**
+ * Get the thread name, as it was specified in SDL_CreateThread().
+ *  This function returns a pointer to a UTF-8 string that names the
+ *  specified thread, or NULL if it doesn't have a name. This is internal
+ *  memory, not to be free()'d by the caller, and remains valid until the
+ *  specified thread is cleaned up by SDL_WaitThread().
+ */
+extern DECLSPEC const char *SDLCALL SDL_GetThreadName(SDL_Thread *thread);
 
 /**
  *  Get the thread identifier for the current thread.

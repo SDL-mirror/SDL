@@ -100,7 +100,9 @@ main(int argc, char **argv)
            init_sem);
     /* Create all the threads */
     for (i = 0; i < NUM_THREADS; ++i) {
-        threads[i] = SDL_CreateThread(ThreadFunc, (void *) i);
+        char name[64];
+        SDL_snprintf(name, sizeof (name), "Thread%u", (unsigned int) i);
+        threads[i] = SDL_CreateThread(ThreadFunc, name, (void *) i);
     }
 
     /* Wait 10 seconds */

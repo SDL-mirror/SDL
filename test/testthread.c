@@ -63,7 +63,7 @@ main(int argc, char *argv[])
     }
 
     alive = 1;
-    thread = SDL_CreateThread(ThreadFunc, "#1");
+    thread = SDL_CreateThread(ThreadFunc, "One", "#1");
     if (thread == NULL) {
         fprintf(stderr, "Couldn't create thread: %s\n", SDL_GetError());
         quit(1);
@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 
     alive = 1;
     signal(SIGTERM, killed);
-    thread = SDL_CreateThread(ThreadFunc, "#2");
+    thread = SDL_CreateThread(ThreadFunc, "Two", "#2");
     if (thread == NULL) {
         fprintf(stderr, "Couldn't create thread: %s\n", SDL_GetError());
         quit(1);

@@ -146,10 +146,38 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     return (0);
 }
 
-void
-SDL_SYS_SetupThread(void)
+#ifdef _MSC_VER
+#pragma pack(push,8)
+typedef struct tagTHREADNAME_INFO
 {
-    return;
+    DWORD dwType; /* must be 0x1000 */
+    LPCSTR szName; /* pointer to name (in user addr space) */
+    DWORD dwThreadID; /* thread ID (-1=caller thread) */
+    DWORD dwFlags; /* reserved for future use, must be zero */
+} THREADNAME_INFO;
+#pragma pack(pop)
+#endif
+
+void
+SDL_SYS_SetupThread(const char *name)
+{
+#ifdef _MSC_VER  /* !!! FIXME: can we do SEH on other compilers yet? */
+    /* This magic tells the debugger to name a thread if it's listening. */
+    THREADNAME_INFO inf;
+    info.dwType = 0x1000;
+    info.szName = name;
+    info.dwThreadID = (DWORD) -1;
+    info.dwFlags = 0;
+
+    __try
+    {
+        RaiseException(0x406D1388, 0, sizeof(inf)/sizeof(DWORD), (DWORD*)&inf);
+    }
+    except(EXCEPTION_CONTINUE_EXECUTION)
+    {
+        /* The program itself should ignore this bogus exception. */
+    }
+#endif
 }
 
 SDL_threadID

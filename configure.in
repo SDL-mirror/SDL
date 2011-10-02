@@ -1642,6 +1642,30 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             ])
             AC_MSG_RESULT($has_pthread_spin_trylock)
 
+            AC_CHECK_HEADER(pthread_np.h, have_pthread_np_h=yes)
+            if test x$have_pthread_np_h = xyes; then
+                AC_DEFINE(HAVE_PTHREAD_NP_H, 1, [ ])
+            fi
+
+            # Check to see if pthread naming is available
+            AC_MSG_CHECKING(for pthread_setname_np)
+            AC_TRY_LINK_FUNC(pthread_setname_np, [
+              has_pthread_setname_np=yes
+              AC_DEFINE(HAVE_PTHREAD_SETNAME_NP, 1, [ ])
+            ],[
+              has_pthread_setname_np=no
+            ])
+            AC_MSG_RESULT($has_pthread_setname_np)
+
+            AC_MSG_CHECKING(for pthread_set_name_np)
+            AC_TRY_LINK_FUNC(pthread_set_name_np, [
+              has_pthread_set_name_np=yes
+              AC_DEFINE(HAVE_PTHREAD_SET_NAME_NP, 1, [ ])
+            ],[
+              has_pthread_set_name_np=no
+            ])
+            AC_MSG_RESULT($has_pthread_set_name_np)
+
             # Restore the compiler flags and libraries
             CFLAGS="$ac_save_cflags"; LIBS="$ac_save_libs"
 
