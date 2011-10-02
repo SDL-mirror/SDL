@@ -73,20 +73,14 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     return (0);
 }
 
-/* make pthread_setname_np() a weak reference even without SDK support. */
-#if __MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
-int pthread_setname_np(const char*) __attribute__((weak_import,visibility("default")));
-#elif __IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED < 30200)
-int pthread_setname_np(const char*) __attribute__((weak_import));
-#endif
-
 void
 SDL_SYS_SetupThread(const char *name)
 {
     int i;
     sigset_t mask;
 
-#if __MACOSX__ || __IPHONEOS__
+#if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
+      (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
     if (pthread_setname_np != NULL) { pthread_setname_np(name); }
 #elif HAVE_PTHREAD_SETNAME_NP
     pthread_setname_np(pthread_self(), name);
