@@ -161,6 +161,7 @@ typedef struct tagTHREADNAME_INFO
 void
 SDL_SYS_SetupThread(const char *name)
 {
+#if 0  /* !!! FIXME: __except needs C runtime, which we don't link against. */
 #ifdef _MSC_VER  /* !!! FIXME: can we do SEH on other compilers yet? */
     /* This magic tells the debugger to name a thread if it's listening. */
     THREADNAME_INFO inf;
@@ -177,6 +178,7 @@ SDL_SYS_SetupThread(const char *name)
     {
         /* The program itself should ignore this bogus exception. */
     }
+#endif
 #endif
 }
 
