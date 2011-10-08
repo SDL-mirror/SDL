@@ -38,55 +38,57 @@ X11_InitTouch(_THIS)
 #ifdef SDL_INPUT_LINUXEV
   FILE *fd;
   fd = fopen("/proc/bus/input/devices","r");
-  
+
   char c;
   int i = 0;
+  int tsfd;
   char line[256];
   char tstr[256];
   int vendor = -1,product = -1,event = -1;
   while(!feof(fd)) {
     if(fgets(line,256,fd) <=0) continue;
     if(line[0] == '\n') {
-    if(vendor == 1386 || vendor==1){
+      if(vendor == 1386 || vendor==1) {
 
-	sprintf(tstr,"/dev/input/event%i",event);
+        sprintf(tstr,"/dev/input/event%i",event);
 
-	SDL_Touch touch;
-	touch.pressure_max = 0;
-	touch.pressure_min = 0;
-	touch.id = event; 
-	
+        tsfd = open( tstr, O_RDONLY | O_NONBLOCK );
+        if ( tsfd == -1 )
+            continue;   /* Maybe not enough permissions ? */
 
-	touch.driverdata = SDL_malloc(sizeof(EventTouchData));
-	EventTouchData* data = (EventTouchData*)(touch.driverdata);
+        SDL_Touch touch;
+        touch.pressure_max = 0;
+        touch.pressure_min = 0;
+        touch.id = event; 
 
-	data->x = -1;
-	data->y = -1;
-	data->pressure = -1;
-	data->finger = 0;
-	data->up = SDL_FALSE;
-    data->down = SDL_FALSE;
-	
+        touch.driverdata = SDL_malloc(sizeof(EventTouchData));
+        EventTouchData* data = (EventTouchData*)(touch.driverdata);
 
-	data->eventStream = open(tstr, 
-				 O_RDONLY | O_NONBLOCK);
-	ioctl (data->eventStream, EVIOCGNAME (sizeof (tstr)), tstr);
+        data->x = -1;
+        data->y = -1;
+        data->pressure = -1;
+        data->finger = 0;
+        data->up = SDL_FALSE;
+        data->down = SDL_FALSE;
 
-	int abs[5];
-	ioctl(data->eventStream,EVIOCGABS(0),abs);	
-	touch.x_min = abs[1];
-	touch.x_max = abs[2];
-	touch.native_xres = touch.x_max - touch.x_min;
-	ioctl(data->eventStream,EVIOCGABS(ABS_Y),abs);	
-	touch.y_min = abs[1];
-	touch.y_max = abs[2];
-	touch.native_yres = touch.y_max - touch.y_min;
-	ioctl(data->eventStream,EVIOCGABS(ABS_PRESSURE),abs);	
-	touch.pressure_min = abs[1];
-	touch.pressure_max = abs[2];
-	touch.native_pressureres = touch.pressure_max - touch.pressure_min;
+        data->eventStream = tsfd;
+        ioctl (data->eventStream, EVIOCGNAME (sizeof (tstr)), tstr);
 
-	SDL_AddTouch(&touch, tstr);
+        int abs[5];
+        ioctl(data->eventStream,EVIOCGABS(0),abs);	
+        touch.x_min = abs[1];
+        touch.x_max = abs[2];
+        touch.native_xres = touch.x_max - touch.x_min;
+        ioctl(data->eventStream,EVIOCGABS(ABS_Y),abs);	
+        touch.y_min = abs[1];
+        touch.y_max = abs[2];
+        touch.native_yres = touch.y_max - touch.y_min;
+        ioctl(data->eventStream,EVIOCGABS(ABS_PRESSURE),abs);	
+        touch.pressure_min = abs[1];
+        touch.pressure_max = abs[2];
+        touch.native_pressureres = touch.pressure_max - touch.pressure_min;
+
+        SDL_AddTouch(&touch, tstr);
       }
       vendor = -1;
       product = -1;
@@ -95,20 +97,20 @@ X11_InitTouch(_THIS)
     else if(line[0] == 'I') {
       i = 1;
       while(line[i]) {
-	sscanf(&line[i],"Vendor=%x",&vendor);
-	sscanf(&line[i],"Product=%x",&product);
-	i++;
+        sscanf(&line[i],"Vendor=%x",&vendor);
+        sscanf(&line[i],"Product=%x",&product);
+        i++;
       }
     }
     else if(line[0] == 'H') {
       i = 1;
       while(line[i]) {
-	sscanf(&line[i],"event%d",&event);
-	i++;
+        sscanf(&line[i],"event%d",&event);
+        i++;
       }
     }
   }
-  
+
   close(fd);
 #endif
 }

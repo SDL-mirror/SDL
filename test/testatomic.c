@@ -143,7 +143,7 @@ void runAdder(void)
     SDL_AtomicSet(&threadsRunning, NThreads);
 
     while (T--)
-        SDL_CreateThread(adder, NULL);
+        SDL_CreateThread(adder, "Adder", NULL);
  
     while (SDL_AtomicGet(&threadsRunning) > 0)
         SDL_SemWait(threadDone);
@@ -618,7 +618,7 @@ static void RunFIFOTest(SDL_bool lock_free)
 #ifdef TEST_SPINLOCK_FIFO
     /* Start a monitoring thread */
     if (lock_free) {
-        SDL_CreateThread(FIFO_Watcher, &queue);
+        SDL_CreateThread(FIFO_Watcher, "FIFOWatcher", &queue);
     }
 #endif
 
@@ -627,9 +627,11 @@ static void RunFIFOTest(SDL_bool lock_free)
     SDL_zero(readerData);
     SDL_AtomicSet(&readersRunning, NUM_READERS);
     for (i = 0; i < NUM_READERS; ++i) {
+        char name[64];
+        SDL_snprintf(name, sizeof (name), "FIFOReader%d", i);
         readerData[i].queue = &queue;
         readerData[i].lock_free = lock_free;
-        SDL_CreateThread(FIFO_Reader, &readerData[i]);
+        SDL_CreateThread(FIFO_Reader, name, &readerData[i]);
     }
 
     /* Start up the writers */
@@ -637,10 +639,12 @@ static void RunFIFOTest(SDL_bool lock_free)
     SDL_zero(writerData);
     SDL_AtomicSet(&writersRunning, NUM_WRITERS);
     for (i = 0; i < NUM_WRITERS; ++i) {
+        char name[64];
+        SDL_snprintf(name, sizeof (name), "FIFOWriter%d", i);
         writerData[i].queue = &queue;
         writerData[i].index = i;
         writerData[i].lock_free = lock_free;
-        SDL_CreateThread(FIFO_Writer, &writerData[i]);
+        SDL_CreateThread(FIFO_Writer, name, &writerData[i]);
     }
  
     /* Wait for the writers */

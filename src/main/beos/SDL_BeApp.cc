@@ -60,7 +60,7 @@ SDL_InitBeApp(void)
 {
     /* Create the BApplication that handles appserver interaction */
     if (SDL_BeAppActive <= 0) {
-        SDL_AppThread = SDL_CreateThread(StartBeApp, NULL);
+        SDL_AppThread = SDL_CreateThread(StartBeApp, "SDLApplication", NULL);
         if (SDL_AppThread == NULL) {
             SDL_SetError("Couldn't create BApplication thread");
             return (-1);

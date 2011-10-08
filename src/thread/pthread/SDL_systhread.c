@@ -21,6 +21,11 @@
 #include "SDL_config.h"
 
 #include <pthread.h>
+
+#if HAVE_PTHREAD_NP_H
+#include <pthread_np.h>
+#endif
+
 #include <signal.h>
 #ifdef __LINUX__
 #include <sys/time.h>
@@ -28,6 +33,7 @@
 #include <sys/syscall.h>
 #endif
 
+#include "SDL_platform.h"
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
@@ -68,10 +74,19 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 }
 
 void
-SDL_SYS_SetupThread(void)
+SDL_SYS_SetupThread(const char *name)
 {
     int i;
     sigset_t mask;
+
+#if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
+      (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
+    if (pthread_setname_np != NULL) { pthread_setname_np(name); }
+#elif HAVE_PTHREAD_SETNAME_NP
+    pthread_setname_np(pthread_self(), name);
+#elif HAVE_PTHREAD_SET_NAME_NP
+    pthread_set_name_np(pthread_self(), name);
+#endif
 
     /* Mask asynchronous signals for this thread */
     sigemptyset(&mask);

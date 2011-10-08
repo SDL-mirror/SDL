@@ -38,7 +38,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 }
 
 void
-SDL_SYS_SetupThread(void)
+SDL_SYS_SetupThread(const char *name)
 {
     return;
 }

@@ -209,6 +209,7 @@ SDL_TimerInit(void)
     SDL_TimerData *data = &SDL_timer_data;
 
     if (!data->active) {
+        const char *name = "SDLTimer";
         data->timermap_lock = SDL_CreateMutex();
         if (!data->timermap_lock) {
             return -1;
@@ -224,9 +225,9 @@ SDL_TimerInit(void)
         /* !!! FIXME: this is nasty. */
 #if (defined(__WIN32__) && !defined(_WIN32_WCE)) && !defined(HAVE_LIBC)
 #undef SDL_CreateThread
-        data->thread = SDL_CreateThread(SDL_TimerThread, data, NULL, NULL);
+        data->thread = SDL_CreateThread(SDL_TimerThread, name, data, NULL, NULL);
 #else
-        data->thread = SDL_CreateThread(SDL_TimerThread, data);
+        data->thread = SDL_CreateThread(SDL_TimerThread, name, data);
 #endif
         if (!data->thread) {
             SDL_TimerQuit();
