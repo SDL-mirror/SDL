@@ -199,21 +199,23 @@ UIKit_VideoInit(_THIS)
     if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending)
         SDL_UIKit_supports_multiple_displays = YES;
 
+    // Add the main screen.
+    UIScreen *uiscreen = [UIScreen mainScreen];
+    UIScreenMode *uiscreenmode = [uiscreen currentMode];
+    const CGSize size = [uiscreen bounds].size;
+    UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
+
     // If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels.
     //  The iPad added both a larger main screen and the ability to use
-    //  external displays.
-    if (!SDL_UIKit_supports_multiple_displays) {
-        // Just give 'em the whole main screen.
-        UIScreen *uiscreen = [UIScreen mainScreen];
-        UIScreenMode *uiscreenmode = [uiscreen currentMode];
-        const CGSize size = [uiscreen bounds].size;
-        UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
-    } else {
+    //  external displays. So, add the other displays (screens in UI speak).
+    if (SDL_UIKit_supports_multiple_displays) {
         for (UIScreen *uiscreen in [UIScreen screens]) {
-            // the main screen is the first element in the array.
-            UIScreenMode *uiscreenmode = [uiscreen currentMode];
-            const CGSize size = [[uiscreen currentMode] size];
-            UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
+            // Only add the other screens
+            if (uiscreen != [UIScreen mainScreen]) {
+                UIScreenMode *uiscreenmode = [uiscreen currentMode];
+                const CGSize size = [uiscreen bounds].size;
+                UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
+            }
         }
     }
 
