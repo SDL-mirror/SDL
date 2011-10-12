@@ -939,6 +939,28 @@ CheckVisibilityHidden()
     fi
 }
 
+dnl See if GCC's -Wall is supported.
+CheckWarnAll()
+{
+    AC_MSG_CHECKING(for GCC -Wall option)
+    have_gcc_Wall=no
+
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$save_CFLAGS -Wall"
+    AC_TRY_COMPILE([
+    int x = 0;
+    ],[
+    ],[
+    have_gcc_Wall=yes
+    ])
+    AC_MSG_RESULT($have_gcc_Wall)
+    CFLAGS="$save_CFLAGS"
+
+    if test x$have_gcc_Wall = xyes; then
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall"
+    fi
+}
+
 
 dnl Find the X11 include and library directories
 CheckX11()
@@ -2355,6 +2377,9 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         ])
         ;;
 esac
+
+dnl Do this on all platforms, after everything else.
+CheckWarnAll
 
 # Verify that we have all the platform specific files we need
 
