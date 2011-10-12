@@ -536,7 +536,6 @@ ${sym}(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "$resample (x${multiple}) AUDIO_${from}, ${channels} channels.\\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt $lencvtop $multiple;
 EOF
 
