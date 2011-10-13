@@ -95,6 +95,7 @@ void (*WIN_WinPAINT)(_THIS, HDC hdc);
 extern void DIB_SwapGamma(_THIS);
 
 #ifndef NO_GETKEYBOARDSTATE
+#ifndef _WIN64
 /* Variables and support functions for SDL_ToUnicode() */
 static int codepage;
 static int Is9xME();
@@ -102,6 +103,7 @@ static int GetCodePage();
 static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, LPWSTR wchars, int wsize, UINT flags);
 
 ToUnicodeFN SDL_ToUnicode = ToUnicode9xME;
+#endif
 #endif /* !NO_GETKEYBOARDSTATE */
 
 
@@ -650,9 +652,10 @@ this->hidden->hiresFix, &x, &y);
 		return(0);
 
 #ifndef NO_GETKEYBOARDSTATE
-		case WM_INPUTLANGCHANGE: {
+		case WM_INPUTLANGCHANGE:
+#ifndef _WIN64
 			codepage = GetCodePage();
-		}
+#endif
 		return(TRUE);
 #endif
 
@@ -760,6 +763,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 #endif /* WM_MOUSELEAVE */
 
 #ifndef NO_GETKEYBOARDSTATE
+#ifndef _WIN64
 	/* Initialise variables for SDL_ToUnicode() */
 	codepage = GetCodePage();
 
@@ -767,6 +771,7 @@ int SDL_RegisterApp(char *name, Uint32 style, void *hInst)
 	   const issue here... */
 	SDL_ToUnicode = Is9xME() ? ToUnicode9xME : (ToUnicodeFN) ToUnicode;
 #endif
+#endif /* NO_GETKEYBOARDSTATE */
 
 	app_registered = 1;
 	return(0);
@@ -793,6 +798,7 @@ void SDL_UnregisterApp()
 }
 
 #ifndef NO_GETKEYBOARDSTATE
+#ifndef _WIN64
 /* JFP: Implementation of ToUnicode() that works on 9x/ME/2K/XP */
 
 static int Is9xME()
@@ -829,5 +835,5 @@ static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, 
 	}
 	return 0;
 }
-
+#endif
 #endif /* !NO_GETKEYBOARDSTATE */

@@ -140,9 +140,13 @@ extern void DX5_SoundFocus(HWND window);
    GDL_CreateWindow as well */
 LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#ifdef _WIN64
+#define SDL_ToUnicode  ToUnicode
+#else
 /* JFP: Implementation of ToUnicode() that works on 9x/ME/2K/XP */
 typedef int (WINAPI *ToUnicodeFN)(UINT, UINT, const BYTE *, LPWSTR, int, UINT);
 
 extern ToUnicodeFN SDL_ToUnicode;
+#endif
 
 #endif /* SDL_lowvideo_h */
