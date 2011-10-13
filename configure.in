@@ -958,6 +958,19 @@ CheckWarnAll()
 
     if test x$have_gcc_Wall = xyes; then
         EXTRA_CFLAGS="$EXTRA_CFLAGS -Wall"
+
+        dnl Haiku headers use multicharacter constants all over the place. Ignore these warnings when using -Wall.
+        AC_MSG_CHECKING(for necessary GCC -Wno-multichar option)
+        need_gcc_Wno_multichar=no
+        case "$host" in
+            *-*-beos* | *-*-haiku*)
+                need_gcc_Wno_multichar=yes
+                ;;
+        esac
+        AC_MSG_RESULT($need_gcc_Wno_multichar)
+        if test x$need_gcc_Wno_multichar = xyes; then
+            EXTRA_CFLAGS="$EXTRA_CFLAGS -Wno-multichar"
+        fi
     fi
 }
 
