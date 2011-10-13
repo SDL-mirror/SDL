@@ -485,6 +485,7 @@ SDL_RWops *SDL_RWFromFile(const char *file, const char *mode)
 	SDL_RWops *rwops = NULL;
 #ifdef HAVE_STDIO_H
 	FILE *fp = NULL;
+	(void) fp;
 #endif
 	if ( !file || !*file || !mode || !*mode ) {
 		SDL_SetError("SDL_RWFromFile(): No file or no mode specified");

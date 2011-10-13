@@ -150,8 +150,6 @@ struct ide_ctrl_info {
 int  SDL_SYS_CDInit(void)
 {
 	char *SDLcdrom;
-	int raw_fd;
-	struct ide_ctrl_info info;
 
 	/* Fill in our driver capabilities */
 	SDL_CDcaps.Name = SDL_SYS_CDName;

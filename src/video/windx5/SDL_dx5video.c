@@ -1034,7 +1034,8 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
 	SDL_Surface *video;
-	int prev_w, prev_h;
+	int prev_w = -1;
+	int prev_h = -1;
 	HRESULT result;
 	DWORD sharemode;
 	DWORD style;

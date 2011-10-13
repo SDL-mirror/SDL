@@ -220,13 +220,13 @@ static BOOL (WINAPI *_TrackMouseEvent)(TRACKMOUSEEVENT *ptme) = NULL;
 static VOID CALLBACK
 TrackMouseTimerProc(HWND hWnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 {
-	RECT rect;
+	union { RECT rect; POINT pt; } rectpt;  /* prevent type-punning issue. */
 	POINT pt;
 
-	GetClientRect(hWnd, &rect);
-	MapWindowPoints(hWnd, NULL, (LPPOINT)&rect, 2);
+	GetClientRect(hWnd, &rectpt.rect);
+	MapWindowPoints(hWnd, NULL, &rectpt.pt, 2);
 	GetCursorPos(&pt);
-	if ( !PtInRect(&rect, pt) || (WindowFromPoint(pt) != hWnd) ) {
+	if ( !PtInRect(&rectpt.rect, pt) || (WindowFromPoint(pt) != hWnd) ) {
 		if ( !KillTimer(hWnd, idEvent) ) {
 			/* Error killing the timer! */
 		}
@@ -572,11 +572,24 @@ this->hidden->hiresFix, &x, &y);
 
 		case WM_WINDOWPOSCHANGED: {
 			SDL_VideoDevice *this = current_video;
+			POINT pt;
 			int w, h;
 
 			GetClientRect(SDL_Window, &SDL_bounds);
-			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds);
-			ClientToScreen(SDL_Window, (LPPOINT)&SDL_bounds+1);
+
+			/* avoiding type-punning here... */
+			pt.x = SDL_bounds.left;
+			pt.y = SDL_bounds.top;
+			ClientToScreen(SDL_Window, &pt);
+			SDL_bounds.left = pt.x;
+			SDL_bounds.top = pt.y;
+
+			pt.x = SDL_bounds.right;
+			pt.y = SDL_bounds.bottom;
+			ClientToScreen(SDL_Window, &pt);
+			SDL_bounds.right = pt.x;
+			SDL_bounds.bottom = pt.y;
+
 			if ( !SDL_resizing && !IsZoomed(SDL_Window) &&
 			     SDL_PublicSurface &&
 				!(SDL_PublicSurface->flags & SDL_FULLSCREEN) ) {
@@ -831,7 +844,7 @@ static int WINAPI ToUnicode9xME(UINT vkey, UINT scancode, const BYTE *keystate, 
 
 	/* arg #3 should be const BYTE *, but cygwin lists it as PBYTE. */
 	if (ToAsciiEx(vkey, scancode, (PBYTE) keystate, (WORD*)chars, 0, GetKeyboardLayout(0)) == 1) {
-		return MultiByteToWideChar(codepage, 0, chars, 1, wchars, wsize);
+		return MultiByteToWideChar(codepage, 0, (LPCSTR) chars, 1, wchars, wsize);
 	}
 	return 0;
 }
