@@ -574,7 +574,17 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
             #endif
         }
         if (to_desktop) {
-            ShowMenuBar ();
+            /* !!! FIXME: keep an eye on this.
+             * This API is officially unavailable for 64-bit binaries.
+             *  It happens to work, as of 10.7, but we're going to see if
+             *  we can just simply do without it on newer OSes...
+             */
+            #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070) && !defined(__LP64__)
+            if ( !IS_LION_OR_LATER(this) ) {
+                ShowMenuBar ();
+            }
+            #endif
+
             /* Restore original screen resolution/bpp */
             QZ_RestoreDisplayMode (this);
             CGReleaseAllDisplays ();
@@ -869,8 +879,17 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         [ qz_window makeKeyAndOrderFront:nil ];
     }
 
-    /* If we don't hide menu bar, it will get events and interrupt the program */
-    HideMenuBar ();
+    /* !!! FIXME: keep an eye on this.
+     * This API is officially unavailable for 64-bit binaries.
+     *  It happens to work, as of 10.7, but we're going to see if
+     *  we can just simply do without it on newer OSes...
+     */
+    #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070) && !defined(__LP64__)
+    if ( !IS_LION_OR_LATER(this) ) {
+        /* If we don't hide menu bar, it will get events and interrupt the program */
+        HideMenuBar ();
+    }
+    #endif
 
     /* Fade in again (asynchronously) */
     if ( fade_token != kCGDisplayFadeReservationInvalidToken ) {
