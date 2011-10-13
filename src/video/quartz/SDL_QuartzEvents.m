@@ -78,7 +78,6 @@
 #endif
 
 void     QZ_InitOSKeymap (_THIS) {
-    const void *KCHRPtr;
     BOOL saw_layout = NO;
     UInt32 state;
     UInt32 value;
@@ -274,7 +273,7 @@ void     QZ_InitOSKeymap (_THIS) {
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1050)
     if (!saw_layout) {
         /* Get a pointer to the systems cached KCHR */
-        KCHRPtr = (void *)GetScriptManagerVariable(smKCHRCache);
+        const void *KCHRPtr = (const void *)GetScriptManagerVariable(smKCHRCache);
         if (KCHRPtr)
         {
             /* Loop over all 127 possible scan codes */

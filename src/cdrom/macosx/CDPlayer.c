@@ -140,7 +140,6 @@ int ReadTOCData (FSVolumeRefNum theVolume, SDL_CD *theCD)
     ByteCount         actualRead;
     CFDataRef         dataRef = 0;
     CFPropertyListRef propertyListRef = 0;
-    int               i;
     FSRefParam      fsRefPB;
     FSRef           tocPlistFSRef;
     FSRef           rootRef;
