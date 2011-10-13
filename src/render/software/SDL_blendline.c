@@ -124,7 +124,6 @@ SDL_BlendLine_RGB555(SDL_Surface * dst, int x1, int y1, int x2, int y2,
                      SDL_BlendMode blendMode, Uint8 _r, Uint8 _g, Uint8 _b, Uint8 _a,
                      SDL_bool draw_end)
 {
-    const SDL_PixelFormat *fmt = dst->format;
     unsigned r, g, b, a, inva;
 
     if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
@@ -216,7 +215,6 @@ SDL_BlendLine_RGB565(SDL_Surface * dst, int x1, int y1, int x2, int y2,
                      SDL_BlendMode blendMode, Uint8 _r, Uint8 _g, Uint8 _b, Uint8 _a,
                      SDL_bool draw_end)
 {
-    const SDL_PixelFormat *fmt = dst->format;
     unsigned r, g, b, a, inva;
 
     if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
@@ -492,7 +490,6 @@ SDL_BlendLine_RGB888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
                      SDL_BlendMode blendMode, Uint8 _r, Uint8 _g, Uint8 _b, Uint8 _a,
                      SDL_bool draw_end)
 {
-    const SDL_PixelFormat *fmt = dst->format;
     unsigned r, g, b, a, inva;
 
     if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {
@@ -584,7 +581,6 @@ SDL_BlendLine_ARGB8888(SDL_Surface * dst, int x1, int y1, int x2, int y2,
                        SDL_BlendMode blendMode, Uint8 _r, Uint8 _g, Uint8 _b, Uint8 _a,
                        SDL_bool draw_end)
 {
-    const SDL_PixelFormat *fmt = dst->format;
     unsigned r, g, b, a, inva;
 
     if (blendMode == SDL_BLENDMODE_BLEND || blendMode == SDL_BLENDMODE_ADD) {

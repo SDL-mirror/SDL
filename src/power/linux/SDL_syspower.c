@@ -128,7 +128,6 @@ check_proc_acpi_battery(const char * node, SDL_bool * have_battery,
     char *val = NULL;
     SDL_bool charge = SDL_FALSE;
     SDL_bool choose = SDL_FALSE;
-    SDL_bool is_ac = SDL_FALSE;
     int maximum = -1;
     int remaining = -1;
     int secs = -1;
@@ -214,13 +213,6 @@ check_proc_acpi_ac_adapter(const char * node, SDL_bool * have_ac)
     char *ptr = NULL;
     char *key = NULL;
     char *val = NULL;
-    SDL_bool charge = SDL_FALSE;
-    SDL_bool choose = SDL_FALSE;
-    SDL_bool is_ac = SDL_FALSE;
-    int maximum = -1;
-    int remaining = -1;
-    int secs = -1;
-    int pct = -1;
 
     if (!load_acpi_file(base, node, "state", state, sizeof (state))) {
         return;

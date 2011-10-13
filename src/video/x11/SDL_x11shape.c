@@ -26,6 +26,7 @@
 #include "SDL_x11video.h"
 #include "SDL_x11shape.h"
 #include "SDL_x11window.h"
+#include "../SDL_shape_internals.h"
 
 SDL_Window*
 X11_CreateShapedWindow(const char *title,unsigned int x,unsigned int y,unsigned int w,unsigned int h,Uint32 flags) {

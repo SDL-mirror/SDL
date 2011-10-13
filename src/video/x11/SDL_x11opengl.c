@@ -19,8 +19,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
-
 #include "SDL_x11video.h"
+#include "SDL_assert.h"
 
 /* GLX implementation of SDL OpenGL support */
 
@@ -388,8 +388,10 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
     XVisualInfo *vinfo;
 
     /* 64 seems nice. */
-    int attribs[64];
-    int i = X11_GL_GetAttributes(_this,display,screen,attribs,64);
+    const int max_attrs = 64;
+    int attribs[max_attrs];
+    const int i = X11_GL_GetAttributes(_this,display,screen,attribs,max_attrs);
+    SDL_assert(i <= max_attrs);
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
     if (!vinfo) {

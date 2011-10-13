@@ -45,13 +45,13 @@
 
 #define DRAW_SETPIXEL(setpixel) \
 do { \
-    unsigned sr = r, sg = g, sb = b, sa = a; \
+    unsigned sr = r, sg = g, sb = b, sa = a; (void) sa; \
     setpixel; \
 } while (0)
 
 #define DRAW_SETPIXEL_BLEND(getpixel, setpixel) \
 do { \
-    unsigned sr, sg, sb, sa; sa; \
+    unsigned sr, sg, sb, sa; (void) sa; \
     getpixel; \
     sr = DRAW_MUL(inva, sr) + r; \
     sg = DRAW_MUL(inva, sg) + g; \
@@ -61,7 +61,7 @@ do { \
 
 #define DRAW_SETPIXEL_ADD(getpixel, setpixel) \
 do { \
-    unsigned sr, sg, sb, sa; sa; \
+    unsigned sr, sg, sb, sa; (void) sa; \
     getpixel; \
     sr += r; if (sr > 0xff) sr = 0xff; \
     sg += g; if (sg > 0xff) sg = 0xff; \
@@ -71,7 +71,7 @@ do { \
 
 #define DRAW_SETPIXEL_MOD(getpixel, setpixel) \
 do { \
-    unsigned sr, sg, sb, sa; sa; \
+    unsigned sr, sg, sb, sa; (void) sa; \
     getpixel; \
     sr = DRAW_MUL(sr, r); \
     sg = DRAW_MUL(sg, g); \

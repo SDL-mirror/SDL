@@ -183,7 +183,10 @@ X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects,
                   rect->x, rect->y, rect->w, rect->h);
         }
     }
+
     XSync(display, False);
+
+    return 0;
 }
 
 void
