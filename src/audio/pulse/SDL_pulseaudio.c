@@ -37,6 +37,7 @@
 #include "../SDL_audiomem.h"
 #include "../SDL_audio_c.h"
 #include "../SDL_audiodev_c.h"
+#include "../../../include/SDL_video.h"  /* for SDL_WM_GetCaption(). */
 #include "SDL_pulseaudio.h"
 
 #ifdef SDL_AUDIO_DRIVER_PULSE_DYNAMIC
