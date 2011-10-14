@@ -23,6 +23,8 @@
 
 #include "SDL_android.h"
 
+#include <algorithm>
+
 extern "C" {
 #include "../../events/SDL_events_c.h"
 #include "../../video/android/SDL_androidkeyboard.h"
@@ -346,11 +348,6 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     ctx->hidden.androidio.inputStream = inputStream;
     ctx->hidden.androidio.inputStreamRef = mEnv->NewGlobalRef(inputStream);
 
-    // Store .skip id for seeking purposes
-    mid = mEnv->GetMethodID(mEnv->GetObjectClass(inputStream),
-            "skip", "(J)J");
-    ctx->hidden.androidio.skipMethod = mid;
-
     // Despite all the visible documentation on [Asset]InputStream claiming
     // that the .available() method is not guaranteed to return the entire file
     // size, comments in <sdk>/samples/<ver>/ApiDemos/src/com/example/ ...
@@ -518,16 +515,21 @@ extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
 
     long movement = newPosition - ctx->hidden.androidio.position;
     jobject inputStream = (jobject)ctx->hidden.androidio.inputStream;
-    jmethodID skipMethod = (jmethodID)ctx->hidden.androidio.skipMethod;
 
     if (movement > 0) {
+        unsigned char buffer[1024];
+
         // The easy case where we're seeking forwards
         while (movement > 0) {
-            // inputStream.skip(...);
-            movement -= mEnv->CallLongMethod(inputStream, skipMethod, movement);
-            if (Android_JNI_ExceptionOccurred()) {
+            size_t result = Android_JNI_FileRead(ctx, buffer, 1,
+                std::min(movement, (long)sizeof(buffer)));
+
+            if (result <= 0) {
+                // Failed to read/skip the required amount, so fail
                 return -1;
             }
+
+            movement -= result;
         }
     } else if (movement < 0) {
         // We can't seek backwards so we have to reopen the file and seek
