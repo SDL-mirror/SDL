@@ -23,8 +23,6 @@
 
 #include "SDL_android.h"
 
-#include <algorithm>
-
 extern "C" {
 #include "../../events/SDL_events_c.h"
 #include "../../video/android/SDL_androidkeyboard.h"
@@ -521,8 +519,11 @@ extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
 
         // The easy case where we're seeking forwards
         while (movement > 0) {
-            size_t result = Android_JNI_FileRead(ctx, buffer, 1,
-                std::min(movement, (long)sizeof(buffer)));
+            long amount = (long) sizeof (buffer);
+            if (amount > movement) {
+                amount = movement;
+            }
+            size_t result = Android_JNI_FileRead(ctx, buffer, 1, amount);
 
             if (result <= 0) {
                 // Failed to read/skip the required amount, so fail
