@@ -29,6 +29,14 @@ extern "C" {
 #include "../../video/android/SDL_androidtouch.h"
 #include "../../video/android/SDL_androidvideo.h"
 
+#include <android/log.h>
+#define LOG_TAG "SDL_android"
+//#define LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
+//#define LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define LOGI(...) do {} while (false)
+#define LOGE(...) do {} while (false)
+
+
 /* Impelemented in audio/android/SDL_androidaudio.c */
 extern void Android_RunAudioThread();
 } // C
@@ -45,6 +53,7 @@ extern void Android_RunAudioThread();
 *******************************************************************************/
 static JNIEnv* mEnv = NULL;
 static JNIEnv* mAudioEnv = NULL;
+static JavaVM* mJavaVM;
 
 // Main activity
 static jclass mActivityClass;
@@ -68,6 +77,14 @@ static float fLastAccelerometer[3];
 // Library init
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
+    JNIEnv *env;
+    mJavaVM = vm;
+    LOGI("JNI_OnLoad called");
+    if (mJavaVM->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
+        LOGE("Failed to get the environment using GetEnv()");
+        return -1;
+    }
+
     return JNI_VERSION_1_4;
 }
 
@@ -96,6 +113,7 @@ extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls)
        !midAudioWriteShortBuffer || !midAudioWriteByteBuffer || !midAudioQuit) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "SDL: Couldn't locate Java callbacks, check that they're named and typed correctly");
     }
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "SDL_Android_Init() finished!");
 }
 
 // Resize
@@ -204,28 +222,47 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
 {
     int audioBufferFrames;
 
+    int status;
+    JNIEnv *env;
+    static bool isAttached = false;    
+    status = mJavaVM->GetEnv((void **) &env, JNI_VERSION_1_4);
+    if(status < 0) {
+        LOGE("callback_handler: failed to get JNI environment, assuming native thread");
+        status = mJavaVM->AttachCurrentThread(&env, NULL);
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+            return 0;
+        }
+        isAttached = true;
+    }
+
+    
     __android_log_print(ANDROID_LOG_VERBOSE, "SDL", "SDL audio: opening device");
     audioBuffer16Bit = is16Bit;
     audioBufferStereo = channelCount > 1;
 
-    audioBuffer = mEnv->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
+    audioBuffer = env->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
 
     if (audioBuffer == NULL) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "SDL audio: didn't get back a good audio buffer!");
         return 0;
     }
-    audioBuffer = mEnv->NewGlobalRef(audioBuffer);
+    audioBuffer = env->NewGlobalRef(audioBuffer);
 
     jboolean isCopy = JNI_FALSE;
     if (audioBuffer16Bit) {
-        audioBufferPinned = mEnv->GetShortArrayElements((jshortArray)audioBuffer, &isCopy);
-        audioBufferFrames = mEnv->GetArrayLength((jshortArray)audioBuffer);
+        audioBufferPinned = env->GetShortArrayElements((jshortArray)audioBuffer, &isCopy);
+        audioBufferFrames = env->GetArrayLength((jshortArray)audioBuffer);
     } else {
-        audioBufferPinned = mEnv->GetByteArrayElements((jbyteArray)audioBuffer, &isCopy);
-        audioBufferFrames = mEnv->GetArrayLength((jbyteArray)audioBuffer);
+        audioBufferPinned = env->GetByteArrayElements((jbyteArray)audioBuffer, &isCopy);
+        audioBufferFrames = env->GetArrayLength((jbyteArray)audioBuffer);
     }
     if (audioBufferStereo) {
         audioBufferFrames /= 2;
+    }
+ 
+    if (isAttached) {
+        mJavaVM->DetachCurrentThread();
     }
 
     return audioBufferFrames;
@@ -251,12 +288,30 @@ extern "C" void Android_JNI_WriteAudioBuffer()
 
 extern "C" void Android_JNI_CloseAudioDevice()
 {
-    mEnv->CallStaticVoidMethod(mActivityClass, midAudioQuit); 
+    int status;
+    JNIEnv *env;
+    static bool isAttached = false;    
+    status = mJavaVM->GetEnv((void **) &env, JNI_VERSION_1_4);
+    if(status < 0) {
+        LOGE("callback_handler: failed to get JNI environment, assuming native thread");
+        status = mJavaVM->AttachCurrentThread(&env, NULL);
+        if(status < 0) {
+            LOGE("callback_handler: failed to attach current thread");
+            return;
+        }
+        isAttached = true;
+    }
+
+    env->CallStaticVoidMethod(mActivityClass, midAudioQuit); 
 
     if (audioBuffer) {
-        mEnv->DeleteGlobalRef(audioBuffer);
+        env->DeleteGlobalRef(audioBuffer);
         audioBuffer = NULL;
         audioBufferPinned = NULL;
+    }
+
+    if (isAttached) {
+        mJavaVM->DetachCurrentThread();
     }
 }
 
