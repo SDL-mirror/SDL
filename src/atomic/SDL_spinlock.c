@@ -81,7 +81,7 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
         : "=r" (result) : "r" (lock), "0" (1) : "cc", "memory");
 	return (result == 0);
 
-#elif defined(__MACOSX__)
+#elif defined(__MACOSX__) || defined(__IPHONEOS__)
     /* Maybe used for PowerPC, but the Intel asm or gcc atomics are favored. */
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 
