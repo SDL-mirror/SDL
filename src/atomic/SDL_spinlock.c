@@ -60,7 +60,8 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 
 #elif defined(__GNUC__) && defined(__arm__) && \
         (defined(__ARM_ARCH_4__) || defined(__ARM_ARCH_4T__) || \
-         defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5TE__))
+         defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5TE__) || \
+         defined(__ARM_ARCH_5TEJ__))
     int result;
     __asm__ __volatile__ (
         "swp %0, %1, [%2]\n"
