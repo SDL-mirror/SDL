@@ -1,6 +1,8 @@
 package org.libsdl.app;
 
+import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.*;
 
@@ -93,7 +95,8 @@ public class SDLActivity extends Activity {
     public static native void onNativeResize(int x, int y, int format);
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
-    public static native void onNativeTouch(int action, float x, 
+    public static native void onNativeTouch(int touchDevId, int pointerFingerId,
+                                            int action, float x, 
                                             float y, float p);
     public static native void onNativeAccel(float x, float y, float z);
     public static native void nativeRunAudioThread();
@@ -387,7 +390,13 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             }
             EGLConfig config = configs[0];
 
-            EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, null);
+            int EGL_CONTEXT_CLIENT_VERSION=0x3098;
+            int contextAttrs[] = new int[]
+            {
+                EGL_CONTEXT_CLIENT_VERSION, majorVersion,
+                EGL10.EGL_NONE
+            }; 
+            EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, contextAttrs);
             if (ctx == EGL10.EGL_NO_CONTEXT) {
                 Log.e("SDL", "Couldn't create context");
                 return false;
@@ -423,7 +432,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         try {
             EGL10 egl = (EGL10)EGLContext.getEGL();
 
-            egl.eglWaitNative(EGL10.EGL_NATIVE_RENDERABLE, null);
+            egl.eglWaitNative(EGL10.EGL_CORE_NATIVE_ENGINE, null);
 
             // drawing here
 
@@ -459,16 +468,34 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
     // Touch events
     public boolean onTouch(View v, MotionEvent event) {
-    
-        int action = event.getAction();
-        float x = event.getX();
-        float y = event.getY();
-        float p = event.getPressure();
+        {
+             final int touchDevId = event.getDeviceId();
+             final int pointerCount = event.getPointerCount();
+             // touchId, pointerId, action, x, y, pressure
+             int actionPointerIndex = event.getActionIndex();
+             int pointerFingerId = event.getPointerId(actionPointerIndex);
+             int action = event.getActionMasked();
 
-        // TODO: Anything else we need to pass?        
-        SDLActivity.onNativeTouch(action, x, y, p);
-        return true;
-    }
+             float x = event.getX(actionPointerIndex);
+             float y = event.getY(actionPointerIndex);
+             float p = event.getPressure(actionPointerIndex);
+
+             if (action == MotionEvent.ACTION_MOVE && pointerCount > 1) {
+                // TODO send motion to every pointer if its position has
+                // changed since prev event.
+                for (int i = 0; i < pointerCount; i++) {
+                    pointerFingerId = event.getPointerId(i);
+                    x = event.getX(i);
+                    y = event.getY(i);
+                    p = event.getPressure(i);
+                    SDLActivity.onNativeTouch(touchDevId, pointerFingerId, action, x, y, p);
+                }
+             } else {
+                SDLActivity.onNativeTouch(touchDevId, pointerFingerId, action, x, y, p);
+             }
+        }
+      return true;
+   } 
 
     // Sensor events
     public void enableSensor(int sensortype, boolean enabled) {

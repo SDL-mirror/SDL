@@ -234,7 +234,6 @@ X11_DispatchEvent(_THIS)
     case KeyPress:{
             KeyCode keycode = xevent.xkey.keycode;
             KeySym keysym = NoSymbol;
-            SDL_Scancode scancode;
             char text[SDL_TEXTINPUTEVENT_TEXT_SIZE];
             Status status = 0;
 
@@ -243,7 +242,7 @@ X11_DispatchEvent(_THIS)
 #endif
             SDL_SendKeyboardKey(SDL_PRESSED, videodata->key_layout[keycode]);
 #if 1
-            if (videodata->key_layout[keycode] == SDLK_UNKNOWN) {
+            if (videodata->key_layout[keycode] == SDL_SCANCODE_UNKNOWN) {
                 int min_keycode, max_keycode;
                 XDisplayKeycodes(display, &min_keycode, &max_keycode);
                 keysym = XKeycodeToKeysym(display, keycode, 0);
@@ -522,6 +521,11 @@ X11_Pending(Display * display)
     return (0);
 }
 
+
+/* !!! FIXME: this should be exposed in a header, or something. */
+int SDL_GetNumTouch(void);
+
+
 void
 X11_PumpEvents(_THIS)
 {
@@ -545,7 +549,6 @@ X11_PumpEvents(_THIS)
 #ifdef SDL_INPUT_LINUXEV
     /* Process Touch events - TODO When X gets touch support, use that instead*/
     int i = 0,rd;
-    char name[256];
     struct input_event ev[64];
     int size = sizeof (struct input_event);
 

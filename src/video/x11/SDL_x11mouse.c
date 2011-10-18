@@ -136,7 +136,7 @@ X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
     /* Code below assumes ARGB pixel format */
     SDL_assert(surface->format->format == SDL_PIXELFORMAT_ARGB8888);
 
-    rfg = gfg = bfg = rbg = gbg = bbg = fgBits = 0;
+    rfg = gfg = bfg = rbg = gbg = bbg = fgBits = bgBits = 0;
     for (y = 0; y < surface->h; ++y) {
         ptr = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch);
         for (x = 0; x < surface->w; ++x) {

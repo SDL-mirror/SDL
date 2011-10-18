@@ -24,6 +24,7 @@
 
 #include "SDL_events.h"
 #include "../../events/SDL_mouse_c.h"
+#include "../../events/SDL_touch_c.h"
 
 #include "SDL_androidtouch.h"
 
@@ -33,27 +34,55 @@
 #define ACTION_MOVE 2
 #define ACTION_CANCEL 3
 #define ACTION_OUTSIDE 4
+// The following two are deprecated but it seems they are still emitted (instead the corresponding ACTION_UP/DOWN) as of Android 3.2
+#define ACTION_POINTER_1_DOWN 5
+#define ACTION_POINTER_1_UP 6
 
-void Android_OnTouch(int action, float x, float y, float p)
+void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int action, float x, float y, float p) 
 {
+    SDL_TouchID touchDeviceId = 0;
+    SDL_FingerID fingerId = 0;
+    
     if (!Android_Window) {
         return;
     }
+    
+    touchDeviceId = (SDL_TouchID)touch_device_id_in;
+    if (!SDL_GetTouch(touchDeviceId)) {
+        SDL_Touch touch;
+        memset( &touch, 0, sizeof(touch) );
+        touch.id = touchDeviceId;
+        touch.x_min = 0.0f;
+        touch.x_max = (float)Android_ScreenWidth;
+        touch.native_xres = touch.x_max - touch.x_min;
+        touch.y_min = 0.0f;
+        touch.y_max = (float)Android_ScreenHeight;
+        touch.native_yres = touch.y_max - touch.y_min;
+        touch.pressure_min = 0.0f;
+        touch.pressure_max = 1.0f;
+        touch.native_pressureres = touch.pressure_max - touch.pressure_min;
+        if (SDL_AddTouch(&touch, "") < 0) {
+             SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
+        }
+    }
 
-    if ((action != ACTION_CANCEL) && (action != ACTION_OUTSIDE)) {
-        SDL_SetMouseFocus(Android_Window);
-        SDL_SendMouseMotion(Android_Window, 0, (int)x, (int)y);
-        switch(action) {
+    
+    fingerId = (SDL_FingerID)pointer_finger_id_in;
+    switch (action) {
         case ACTION_DOWN:
-            SDL_SendMouseButton(Android_Window, SDL_PRESSED, SDL_BUTTON_LEFT);
+        case ACTION_POINTER_1_DOWN:
+            SDL_SendFingerDown(touchDeviceId, fingerId, SDL_TRUE, x, y, p);
+            break;
+        case ACTION_MOVE:
+            SDL_SendTouchMotion(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
             break;
         case ACTION_UP:
-            SDL_SendMouseButton(Android_Window, SDL_RELEASED, SDL_BUTTON_LEFT);
+        case ACTION_POINTER_1_UP:
+            SDL_SendFingerDown(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
             break;
-        }
-    } else {
-        SDL_SetMouseFocus(NULL);
-    }
+        default:
+            break;
+    } 
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

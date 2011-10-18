@@ -39,7 +39,6 @@ X11_InitTouch(_THIS)
   FILE *fd;
   fd = fopen("/proc/bus/input/devices","r");
 
-  char c;
   int i = 0;
   int tsfd;
   char line[256];
@@ -111,7 +110,7 @@ X11_InitTouch(_THIS)
     }
   }
 
-  close(fd);
+  fclose(fd);
 #endif
 }
 

@@ -349,7 +349,6 @@ SDL_Cursor *
 SDL_CreateCursor(const Uint8 * data, const Uint8 * mask,
                  int w, int h, int hot_x, int hot_y)
 {
-    SDL_Mouse *mouse = SDL_GetMouse();
     SDL_Surface *surface;
     SDL_Cursor *cursor;
     int x, y;

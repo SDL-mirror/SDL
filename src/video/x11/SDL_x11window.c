@@ -86,31 +86,6 @@ X11_GetWMStateProperty(_THIS, SDL_Window * window, Atom atoms[3])
     return count;
 }
 
-static void
-X11_GetDisplaySize(_THIS, SDL_Window * window, int *w, int *h)
-{
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    SDL_DisplayData *displaydata =
-        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
-    XWindowAttributes attr;
-
-    XGetWindowAttributes(data->display, RootWindow(data->display, displaydata->screen), &attr);
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        /* The bounds when this window is visible is the fullscreen mode */
-        SDL_DisplayMode fullscreen_mode;
-        if (SDL_GetWindowDisplayMode(window, &fullscreen_mode) == 0) {
-            attr.width = fullscreen_mode.w;
-            attr.height = fullscreen_mode.h;
-        }
-    }
-    if (w) {
-        *w = attr.width;
-    }
-    if (h) {
-        *h = attr.height;
-    }
-}
-
 static int
 SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
 {
@@ -320,7 +295,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     xattr.border_pixel = 0;
 
     if (visual->class == DirectColor) {
-        Status status;
         XColor *colorcells;
         int i;
         int ncolors;
@@ -757,7 +731,6 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
-    int x, y;
 
     XMoveWindow(display, data->xwindow, window->x, window->y);
     XFlush(display);
@@ -952,7 +925,7 @@ X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
     int ncolors;
     int rmask, gmask, bmask;
     int rshift, gshift, bshift;
-    int i, j;
+    int i;
 
     if (visual->class != DirectColor) {
         SDL_SetError("Window doesn't have DirectColor visual");

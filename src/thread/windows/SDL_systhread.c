@@ -161,25 +161,27 @@ typedef struct tagTHREADNAME_INFO
 void
 SDL_SYS_SetupThread(const char *name)
 {
-#if 0  /* !!! FIXME: __except needs C runtime, which we don't link against. */
-#ifdef _MSC_VER  /* !!! FIXME: can we do SEH on other compilers yet? */
-    /* This magic tells the debugger to name a thread if it's listening. */
-    THREADNAME_INFO inf;
-    inf.dwType = 0x1000;
-    inf.szName = name;
-    inf.dwThreadID = (DWORD) -1;
-    inf.dwFlags = 0;
+    if (name != NULL) {
+        #if 0  /* !!! FIXME: __except needs C runtime, which we don't link against. */
+        #ifdef _MSC_VER  /* !!! FIXME: can we do SEH on other compilers yet? */
+        /* This magic tells the debugger to name a thread if it's listening. */
+        THREADNAME_INFO inf;
+        inf.dwType = 0x1000;
+        inf.szName = name;
+        inf.dwThreadID = (DWORD) -1;
+        inf.dwFlags = 0;
 
-    __try
-    {
-        RaiseException(0x406D1388, 0, sizeof(inf)/sizeof(DWORD), (DWORD*)&inf);
+        __try
+        {
+            RaiseException(0x406D1388, 0, sizeof(inf)/sizeof(DWORD), (DWORD*)&inf);
+        }
+        __except(EXCEPTION_CONTINUE_EXECUTION)
+        {
+            /* The program itself should ignore this bogus exception. */
+        }
+        #endif
+        #endif
     }
-    __except(EXCEPTION_CONTINUE_EXECUTION)
-    {
-        /* The program itself should ignore this bogus exception. */
-    }
-#endif
-#endif
 }
 
 SDL_threadID

@@ -384,6 +384,8 @@ SDL_GetCPUType(void)
     return SDL_CPUType;
 }
 
+
+#ifdef TEST_MAIN  /* !!! FIXME: only used for test at the moment. */
 static const char *
 SDL_GetCPUName(void)
 {
@@ -455,6 +457,7 @@ SDL_GetCPUName(void)
     }
     return SDL_CPUName;
 }
+#endif
 
 int
 SDL_GetCPUCacheLineSize(void)

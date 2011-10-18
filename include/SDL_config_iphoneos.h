@@ -140,6 +140,9 @@
 /* enable iPhone keyboard support */
 #define SDL_IPHONE_KEYBOARD 1
 
+/* enable joystick subsystem */
+#define SDL_JOYSTICK_DISABLED 0
+
 /* Set max recognized G-force from accelerometer
    See src/joystick/uikit/SDLUIAccelerationDelegate.m for notes on why this is needed
  */

@@ -176,7 +176,8 @@ UIKit_AddDisplay(UIScreen *uiscreen, UIScreenMode *uimode, int w, int h)
     mode.h = h;
     mode.refresh_rate = 0;
 
-    [uimode retain];
+    [uimode retain];  // once for the desktop_mode
+    [uimode retain];  // once for the current_mode
     mode.driverdata = uimode;
 
     SDL_zero(display);
@@ -248,13 +249,14 @@ UIKit_VideoQuit(_THIS)
         UIScreen *uiscreen = (UIScreen *) display->driverdata;
         [uiscreen release];
         display->driverdata = NULL;
+        [((UIScreenMode *) display->desktop_mode.driverdata) release];
+        display->desktop_mode.driverdata = NULL;
+        [((UIScreenMode *) display->current_mode.driverdata) release];
+        display->current_mode.driverdata = NULL;
         for (j = 0; j < display->num_display_modes; j++) {
             SDL_DisplayMode *mode = &display->display_modes[j];
-            UIScreenMode *uimode = (UIScreenMode *) mode->driverdata;
-            if (uimode) {
-                [uimode release];
-                mode->driverdata = NULL;
-            }
+            [((UIScreenMode *) mode->driverdata) release];
+            mode->driverdata = NULL;
         }
     }
 }

@@ -88,6 +88,8 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     data->mouse_pressed = SDL_FALSE;
     data->videodata = videodata;
 
+    window->driverdata = data;
+
     /* Associate the data with the window */
     if (!SetProp(hwnd, TEXT("SDL_WindowData"), data)) {
         ReleaseDC(hwnd, data->hdc);
@@ -183,7 +185,6 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     }
 
     /* All done! */
-    window->driverdata = data;
     return 0;
 }
 

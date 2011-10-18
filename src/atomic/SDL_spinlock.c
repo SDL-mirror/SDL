@@ -60,7 +60,8 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
 
 #elif defined(__GNUC__) && defined(__arm__) && \
         (defined(__ARM_ARCH_4__) || defined(__ARM_ARCH_4T__) || \
-         defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5TE__))
+         defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5TE__) || \
+         defined(__ARM_ARCH_5TEJ__))
     int result;
     __asm__ __volatile__ (
         "swp %0, %1, [%2]\n"
@@ -81,7 +82,7 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
         : "=r" (result) : "r" (lock), "0" (1) : "cc", "memory");
 	return (result == 0);
 
-#elif defined(__MACOSX__)
+#elif defined(__MACOSX__) || defined(__IPHONEOS__)
     /* Maybe used for PowerPC, but the Intel asm or gcc atomics are favored. */
     return OSAtomicCompareAndSwap32Barrier(0, 1, lock);
 

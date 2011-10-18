@@ -7102,7 +7102,6 @@ SDL_Upsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 1;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -7130,7 +7129,6 @@ SDL_Downsample_U8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7157,7 +7155,6 @@ SDL_Upsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 1;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -7187,7 +7184,6 @@ SDL_Downsample_U8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7214,7 +7210,6 @@ SDL_Upsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 2;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -7247,7 +7242,6 @@ SDL_Downsample_U8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7278,7 +7272,6 @@ SDL_Upsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 2;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -7315,7 +7308,6 @@ SDL_Downsample_U8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7346,7 +7338,6 @@ SDL_Upsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 4;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -7389,7 +7380,6 @@ SDL_Downsample_U8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7428,7 +7418,6 @@ SDL_Upsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 4;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -7479,7 +7468,6 @@ SDL_Downsample_U8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7518,7 +7506,6 @@ SDL_Upsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 6;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -7571,7 +7558,6 @@ SDL_Downsample_U8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7618,7 +7604,6 @@ SDL_Upsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 6;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -7683,7 +7668,6 @@ SDL_Downsample_U8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7730,7 +7714,6 @@ SDL_Upsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 8;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -7793,7 +7776,6 @@ SDL_Downsample_U8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7848,7 +7830,6 @@ SDL_Upsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint8 *dst = ((Uint8 *) (cvt->buf + dstsize)) - 8;
     const Uint8 *src = ((Uint8 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -7927,7 +7908,6 @@ SDL_Downsample_U8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint8 *dst = (Uint8 *) cvt->buf;
     const Uint8 *src = (Uint8 *) cvt->buf;
@@ -7982,7 +7962,6 @@ SDL_Upsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 1;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -8010,7 +7989,6 @@ SDL_Downsample_S8_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8037,7 +8015,6 @@ SDL_Upsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 1;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -8067,7 +8044,6 @@ SDL_Downsample_S8_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8094,7 +8070,6 @@ SDL_Upsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 2;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -8127,7 +8102,6 @@ SDL_Downsample_S8_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8158,7 +8132,6 @@ SDL_Upsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 2;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -8195,7 +8168,6 @@ SDL_Downsample_S8_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8226,7 +8198,6 @@ SDL_Upsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 4;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -8269,7 +8240,6 @@ SDL_Downsample_S8_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8308,7 +8278,6 @@ SDL_Upsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 4;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -8359,7 +8328,6 @@ SDL_Downsample_S8_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8398,7 +8366,6 @@ SDL_Upsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 6;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -8451,7 +8418,6 @@ SDL_Downsample_S8_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8498,7 +8464,6 @@ SDL_Upsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 6;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -8563,7 +8528,6 @@ SDL_Downsample_S8_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8610,7 +8574,6 @@ SDL_Upsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 8;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -8673,7 +8636,6 @@ SDL_Downsample_S8_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8728,7 +8690,6 @@ SDL_Upsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint8 *dst = ((Sint8 *) (cvt->buf + dstsize)) - 8;
     const Sint8 *src = ((Sint8 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -8807,7 +8768,6 @@ SDL_Downsample_S8_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S8, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint8 *dst = (Sint8 *) cvt->buf;
     const Sint8 *src = (Sint8 *) cvt->buf;
@@ -8862,7 +8822,6 @@ SDL_Upsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 1;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -8890,7 +8849,6 @@ SDL_Downsample_U16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -8917,7 +8875,6 @@ SDL_Upsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 1;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -8947,7 +8904,6 @@ SDL_Downsample_U16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -8974,7 +8930,6 @@ SDL_Upsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 2;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -9007,7 +8962,6 @@ SDL_Downsample_U16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9038,7 +8992,6 @@ SDL_Upsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 2;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -9075,7 +9028,6 @@ SDL_Downsample_U16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9106,7 +9058,6 @@ SDL_Upsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 4;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -9149,7 +9100,6 @@ SDL_Downsample_U16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9188,7 +9138,6 @@ SDL_Upsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 4;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -9239,7 +9188,6 @@ SDL_Downsample_U16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9278,7 +9226,6 @@ SDL_Upsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 6;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -9331,7 +9278,6 @@ SDL_Downsample_U16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9378,7 +9324,6 @@ SDL_Upsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 6;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -9443,7 +9388,6 @@ SDL_Downsample_U16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9490,7 +9434,6 @@ SDL_Upsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 8;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -9553,7 +9496,6 @@ SDL_Downsample_U16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9608,7 +9550,6 @@ SDL_Upsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 8;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -9687,7 +9628,6 @@ SDL_Downsample_U16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -9742,7 +9682,6 @@ SDL_Upsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 1;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -9770,7 +9709,6 @@ SDL_Downsample_S16LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -9797,7 +9735,6 @@ SDL_Upsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 1;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -9827,7 +9764,6 @@ SDL_Downsample_S16LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -9854,7 +9790,6 @@ SDL_Upsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 2;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -9887,7 +9822,6 @@ SDL_Downsample_S16LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -9918,7 +9852,6 @@ SDL_Upsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 2;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -9955,7 +9888,6 @@ SDL_Downsample_S16LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -9986,7 +9918,6 @@ SDL_Upsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 4;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -10029,7 +9960,6 @@ SDL_Downsample_S16LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10068,7 +9998,6 @@ SDL_Upsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 4;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -10119,7 +10048,6 @@ SDL_Downsample_S16LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10158,7 +10086,6 @@ SDL_Upsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 6;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -10211,7 +10138,6 @@ SDL_Downsample_S16LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10258,7 +10184,6 @@ SDL_Upsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 6;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -10323,7 +10248,6 @@ SDL_Downsample_S16LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10370,7 +10294,6 @@ SDL_Upsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 8;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -10433,7 +10356,6 @@ SDL_Downsample_S16LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10488,7 +10410,6 @@ SDL_Upsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 8;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -10567,7 +10488,6 @@ SDL_Downsample_S16LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -10622,7 +10542,6 @@ SDL_Upsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 1;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -10650,7 +10569,6 @@ SDL_Downsample_U16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -10677,7 +10595,6 @@ SDL_Upsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 1;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -10707,7 +10624,6 @@ SDL_Downsample_U16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -10734,7 +10650,6 @@ SDL_Upsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 2;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -10767,7 +10682,6 @@ SDL_Downsample_U16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -10798,7 +10712,6 @@ SDL_Upsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 2;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -10835,7 +10748,6 @@ SDL_Downsample_U16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -10866,7 +10778,6 @@ SDL_Upsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 4;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -10909,7 +10820,6 @@ SDL_Downsample_U16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -10948,7 +10858,6 @@ SDL_Upsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 4;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -10999,7 +10908,6 @@ SDL_Downsample_U16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -11038,7 +10946,6 @@ SDL_Upsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 6;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -11091,7 +10998,6 @@ SDL_Downsample_U16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -11138,7 +11044,6 @@ SDL_Upsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 6;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -11203,7 +11108,6 @@ SDL_Downsample_U16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -11250,7 +11154,6 @@ SDL_Upsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 8;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -11313,7 +11216,6 @@ SDL_Downsample_U16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -11368,7 +11270,6 @@ SDL_Upsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Uint16 *dst = ((Uint16 *) (cvt->buf + dstsize)) - 8;
     const Uint16 *src = ((Uint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -11447,7 +11348,6 @@ SDL_Downsample_U16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_U16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Uint16 *dst = (Uint16 *) cvt->buf;
     const Uint16 *src = (Uint16 *) cvt->buf;
@@ -11502,7 +11402,6 @@ SDL_Upsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 1;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -11530,7 +11429,6 @@ SDL_Downsample_S16MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11557,7 +11455,6 @@ SDL_Upsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 1;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -11587,7 +11484,6 @@ SDL_Downsample_S16MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11614,7 +11510,6 @@ SDL_Upsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 2;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -11647,7 +11542,6 @@ SDL_Downsample_S16MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11678,7 +11572,6 @@ SDL_Upsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 2;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -11715,7 +11608,6 @@ SDL_Downsample_S16MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11746,7 +11638,6 @@ SDL_Upsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 4;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -11789,7 +11680,6 @@ SDL_Downsample_S16MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11828,7 +11718,6 @@ SDL_Upsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 4;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -11879,7 +11768,6 @@ SDL_Downsample_S16MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -11918,7 +11806,6 @@ SDL_Upsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 6;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -11971,7 +11858,6 @@ SDL_Downsample_S16MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -12018,7 +11904,6 @@ SDL_Upsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 6;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -12083,7 +11968,6 @@ SDL_Downsample_S16MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -12130,7 +12014,6 @@ SDL_Upsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 8;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -12193,7 +12076,6 @@ SDL_Downsample_S16MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -12248,7 +12130,6 @@ SDL_Upsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint16 *dst = ((Sint16 *) (cvt->buf + dstsize)) - 8;
     const Sint16 *src = ((Sint16 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -12327,7 +12208,6 @@ SDL_Downsample_S16MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S16MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint16 *dst = (Sint16 *) cvt->buf;
     const Sint16 *src = (Sint16 *) cvt->buf;
@@ -12382,7 +12262,6 @@ SDL_Upsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 1;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -12410,7 +12289,6 @@ SDL_Downsample_S32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12437,7 +12315,6 @@ SDL_Upsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 1;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -12467,7 +12344,6 @@ SDL_Downsample_S32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12494,7 +12370,6 @@ SDL_Upsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 2;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -12527,7 +12402,6 @@ SDL_Downsample_S32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12558,7 +12432,6 @@ SDL_Upsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 2;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -12595,7 +12468,6 @@ SDL_Downsample_S32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12626,7 +12498,6 @@ SDL_Upsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 4;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -12669,7 +12540,6 @@ SDL_Downsample_S32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12708,7 +12578,6 @@ SDL_Upsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 4;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -12759,7 +12628,6 @@ SDL_Downsample_S32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12798,7 +12666,6 @@ SDL_Upsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 6;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -12851,7 +12718,6 @@ SDL_Downsample_S32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -12898,7 +12764,6 @@ SDL_Upsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 6;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -12963,7 +12828,6 @@ SDL_Downsample_S32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13010,7 +12874,6 @@ SDL_Upsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 8;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -13073,7 +12936,6 @@ SDL_Downsample_S32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13128,7 +12990,6 @@ SDL_Upsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 8;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -13207,7 +13068,6 @@ SDL_Downsample_S32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13262,7 +13122,6 @@ SDL_Upsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 1;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -13290,7 +13149,6 @@ SDL_Downsample_S32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13317,7 +13175,6 @@ SDL_Upsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 1;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -13347,7 +13204,6 @@ SDL_Downsample_S32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13374,7 +13230,6 @@ SDL_Upsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 2;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -13407,7 +13262,6 @@ SDL_Downsample_S32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13438,7 +13292,6 @@ SDL_Upsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 2;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -13475,7 +13328,6 @@ SDL_Downsample_S32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13506,7 +13358,6 @@ SDL_Upsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 4;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -13549,7 +13400,6 @@ SDL_Downsample_S32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13588,7 +13438,6 @@ SDL_Upsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 4;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -13639,7 +13488,6 @@ SDL_Downsample_S32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13678,7 +13526,6 @@ SDL_Upsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 6;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -13731,7 +13578,6 @@ SDL_Downsample_S32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13778,7 +13624,6 @@ SDL_Upsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 6;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -13843,7 +13688,6 @@ SDL_Downsample_S32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -13890,7 +13734,6 @@ SDL_Upsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 8;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -13953,7 +13796,6 @@ SDL_Downsample_S32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -14008,7 +13850,6 @@ SDL_Upsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     Sint32 *dst = ((Sint32 *) (cvt->buf + dstsize)) - 8;
     const Sint32 *src = ((Sint32 *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -14087,7 +13928,6 @@ SDL_Downsample_S32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_S32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     Sint32 *dst = (Sint32 *) cvt->buf;
     const Sint32 *src = (Sint32 *) cvt->buf;
@@ -14142,7 +13982,6 @@ SDL_Upsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 1;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -14170,7 +14009,6 @@ SDL_Downsample_F32LSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14197,7 +14035,6 @@ SDL_Upsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 1;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -14227,7 +14064,6 @@ SDL_Downsample_F32LSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14254,7 +14090,6 @@ SDL_Upsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 2;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -14287,7 +14122,6 @@ SDL_Downsample_F32LSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14318,7 +14152,6 @@ SDL_Upsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 2;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -14355,7 +14188,6 @@ SDL_Downsample_F32LSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14386,7 +14218,6 @@ SDL_Upsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 4;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -14429,7 +14260,6 @@ SDL_Downsample_F32LSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14468,7 +14298,6 @@ SDL_Upsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 4;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -14519,7 +14348,6 @@ SDL_Downsample_F32LSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14558,7 +14386,6 @@ SDL_Upsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 6;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -14611,7 +14438,6 @@ SDL_Downsample_F32LSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14658,7 +14484,6 @@ SDL_Upsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 6;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -14723,7 +14548,6 @@ SDL_Downsample_F32LSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14770,7 +14594,6 @@ SDL_Upsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 8;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -14833,7 +14656,6 @@ SDL_Downsample_F32LSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -14888,7 +14710,6 @@ SDL_Upsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 8;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -14967,7 +14788,6 @@ SDL_Downsample_F32LSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32LSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15022,7 +14842,6 @@ SDL_Upsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 1;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -15050,7 +14869,6 @@ SDL_Downsample_F32MSB_1c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15077,7 +14895,6 @@ SDL_Upsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 1;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 1;
@@ -15107,7 +14924,6 @@ SDL_Downsample_F32MSB_1c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 1 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15134,7 +14950,6 @@ SDL_Upsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 2;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -15167,7 +14982,6 @@ SDL_Downsample_F32MSB_2c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15198,7 +15012,6 @@ SDL_Upsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 2;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 2;
@@ -15235,7 +15048,6 @@ SDL_Downsample_F32MSB_2c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 2 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15266,7 +15078,6 @@ SDL_Upsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 4;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -15309,7 +15120,6 @@ SDL_Downsample_F32MSB_4c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15348,7 +15158,6 @@ SDL_Upsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 4;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 4;
@@ -15399,7 +15208,6 @@ SDL_Downsample_F32MSB_4c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 4 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15438,7 +15246,6 @@ SDL_Upsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 6;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -15491,7 +15298,6 @@ SDL_Downsample_F32MSB_6c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15538,7 +15344,6 @@ SDL_Upsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 6;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 6;
@@ -15603,7 +15408,6 @@ SDL_Downsample_F32MSB_6c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 6 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15650,7 +15454,6 @@ SDL_Upsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x2) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 2;
     float *dst = ((float *) (cvt->buf + dstsize)) - 8;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -15713,7 +15516,6 @@ SDL_Downsample_F32MSB_8c_x2(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x2) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 2;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;
@@ -15768,7 +15570,6 @@ SDL_Upsample_F32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Upsample (x4) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt * 4;
     float *dst = ((float *) (cvt->buf + dstsize)) - 8;
     const float *src = ((float *) (cvt->buf + cvt->len_cvt)) - 8;
@@ -15847,7 +15648,6 @@ SDL_Downsample_F32MSB_8c_x4(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     fprintf(stderr, "Downsample (x4) AUDIO_F32MSB, 8 channels.\n");
 #endif
 
-    const int srcsize = cvt->len_cvt;
     const int dstsize = cvt->len_cvt / 4;
     float *dst = (float *) cvt->buf;
     const float *src = (float *) cvt->buf;

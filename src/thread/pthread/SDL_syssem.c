@@ -23,6 +23,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <sys/time.h>
 
 #include "SDL_thread.h"
 #include "SDL_timer.h"
