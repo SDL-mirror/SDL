@@ -166,7 +166,7 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 
 
 static void
-UIKit_AddDisplay(UIScreen *uiscreen, UIScreenMode *uimode, int w, int h)
+UIKit_AddDisplay(UIScreen *uiscreen, int w, int h)
 {
     SDL_VideoDisplay display;
     SDL_DisplayMode mode;
@@ -176,9 +176,14 @@ UIKit_AddDisplay(UIScreen *uiscreen, UIScreenMode *uimode, int w, int h)
     mode.h = h;
     mode.refresh_rate = 0;
 
-    [uimode retain];  // once for the desktop_mode
-    [uimode retain];  // once for the current_mode
-    mode.driverdata = uimode;
+    // UIScreenMode showed up in 3.2 (the iPad and later). We're
+    //  misusing this supports_multiple_displays flag here for that.
+    if (!SDL_UIKit_supports_multiple_displays) {
+        UIScreenMode *uimode = [uiscreen currentMode];
+        [uimode retain];  // once for the desktop_mode
+        [uimode retain];  // once for the current_mode
+        mode.driverdata = uimode;
+    }
 
     SDL_zero(display);
     display.desktop_mode = mode;
@@ -202,9 +207,8 @@ UIKit_VideoInit(_THIS)
 
     // Add the main screen.
     UIScreen *uiscreen = [UIScreen mainScreen];
-    UIScreenMode *uiscreenmode = [uiscreen currentMode];
     const CGSize size = [uiscreen bounds].size;
-    UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
+    UIKit_AddDisplay(uiscreen, (int)size.width, (int)size.height);
 
     // If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels.
     //  The iPad added both a larger main screen and the ability to use
@@ -213,9 +217,8 @@ UIKit_VideoInit(_THIS)
         for (UIScreen *uiscreen in [UIScreen screens]) {
             // Only add the other screens
             if (uiscreen != [UIScreen mainScreen]) {
-                UIScreenMode *uiscreenmode = [uiscreen currentMode];
                 const CGSize size = [uiscreen bounds].size;
-                UIKit_AddDisplay(uiscreen, uiscreenmode, (int)size.width, (int)size.height);
+                UIKit_AddDisplay(uiscreen, (int)size.width, (int)size.height);
             }
         }
     }
