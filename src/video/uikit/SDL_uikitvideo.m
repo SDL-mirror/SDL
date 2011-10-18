@@ -242,6 +242,19 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     return 0;
 }
 
+static void
+UIKit_ReleaseUIScreenMode(SDL_DisplayMode * mode)
+{
+    if (!SDL_UIKit_supports_multiple_displays) {
+        // Not on at least iPhoneOS 3.2 (versions prior to iPad).
+        SDL_assert(mode->driverdata == NULL);
+    } else {
+        UIScreenMode *uimode = (UIScreenMode *) mode->driverdata;
+        [uimode release];
+        mode->driverdata = NULL;
+    }
+}
+
 void
 UIKit_VideoQuit(_THIS)
 {
@@ -252,14 +265,11 @@ UIKit_VideoQuit(_THIS)
         UIScreen *uiscreen = (UIScreen *) display->driverdata;
         [uiscreen release];
         display->driverdata = NULL;
-        [((UIScreenMode *) display->desktop_mode.driverdata) release];
-        display->desktop_mode.driverdata = NULL;
-        [((UIScreenMode *) display->current_mode.driverdata) release];
-        display->current_mode.driverdata = NULL;
+        UIKit_ReleaseUIScreenMode(&display->desktop_mode);
+        UIKit_ReleaseUIScreenMode(&display->current_mode);
         for (j = 0; j < display->num_display_modes; j++) {
             SDL_DisplayMode *mode = &display->display_modes[j];
-            [((UIScreenMode *) mode->driverdata) release];
-            mode->driverdata = NULL;
+            UIKit_ReleaseUIScreenMode(mode);
         }
     }
 }
