@@ -66,8 +66,9 @@ int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
     /* The docs say the thread name can't be longer than B_OS_NAME_LENGTH. */
+    const char *threadname = thread->name ? thread->name : "SDL Thread";
     char name[B_OS_NAME_LENGTH];
-    SDL_snprintf(name, sizeof (name), "%s", thread->name);
+    SDL_snprintf(name, sizeof (name), "%s", threadname);
     name[sizeof (name) - 1] = '\0';
 
     /* Create the thread and go! */
