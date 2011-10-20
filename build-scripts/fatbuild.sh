@@ -42,6 +42,7 @@ BUILD_FLAGS_X64="-arch x86_64 -mmacosx-version-min=10.6"
 # Find the configure script
 #
 srcdir=`dirname $0`/..
+srcdir=`cd $srcdir && pwd`
 auxdir=$srcdir/build-scripts
 cd $srcdir
 
