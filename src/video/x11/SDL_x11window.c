@@ -593,14 +593,14 @@ X11_GetWindowTitle(_THIS, Window xwindow)
     status = XGetWindowProperty(display, xwindow, data->_NET_WM_NAME,
                 0L, 8192L, False, data->UTF8_STRING, &real_type, &real_format,
                 &items_read, &items_left, &propdata);
-    if (status == Success) {
+    if (status == Success && propdata) {
         title = SDL_strdup(SDL_static_cast(char*, propdata));
         XFree(propdata);
     } else {
         status = XGetWindowProperty(display, xwindow, XA_WM_NAME,
                     0L, 8192L, False, XA_STRING, &real_type, &real_format,
                     &items_read, &items_left, &propdata);
-        if (status == Success) {
+        if (status == Success && propdata) {
             title = SDL_iconv_string("UTF-8", "", SDL_static_cast(char*, propdata), items_read+1);
         } else {
             title = SDL_strdup("");
