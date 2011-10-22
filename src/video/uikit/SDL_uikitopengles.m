@@ -112,6 +112,7 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     bBits: _this->gl_config.blue_size
                                     aBits: _this->gl_config.alpha_size
                                     depthBits: _this->gl_config.depth_size
+                                    stencilBits: _this->gl_config.stencil_size
                                     majorVersion: _this->gl_config.major_version];
 
     data->view = view;

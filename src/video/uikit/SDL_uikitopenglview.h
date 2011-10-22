@@ -60,6 +60,7 @@
     bBits:(int)bBits
     aBits:(int)aBits
     depthBits:(int)depthBits
+    stencilBits:(int)stencilBits
     majorVersion:(int)majorVersion;
 
 - (void)updateFrame;
