@@ -43,37 +43,22 @@
       stencilBits:(int)stencilBits
       majorVersion:(int)majorVersion
 {
-    const BOOL useStencilBuffer = (stencilBits != 0);
-    const BOOL useDepthBuffer = (depthBits != 0);
-    NSString *colorFormat = nil;
-
-    if (rBits == 8 && gBits == 8 && bBits == 8) {
-        /* if user specifically requests rbg888 or some color format higher than 16bpp */
-        colorFormat = kEAGLColorFormatRGBA8;
-    }
-    else {
-        /* default case (faster) */
-        colorFormat = kEAGLColorFormatRGB565;
-    }
-
     depthBufferFormat = 0;
 
-    if (useDepthBuffer) {
-        if (depthBits == 24) {
-            depthBufferFormat = GL_DEPTH_COMPONENT24_OES;
-        }
-        else {
-            /* default case when depth buffer is not disabled */
-            /*
-               strange, even when we use this, we seem to get a 24 bit depth buffer on iPhone.
-               perhaps that's the only depth format iPhone actually supports
-            */
-            depthBufferFormat = GL_DEPTH_COMPONENT16_OES;
-        }
-    }
-
     if ((self = [super initWithFrame:frame])) {
-        // Get the layer
+        const BOOL useStencilBuffer = (stencilBits != 0);
+        const BOOL useDepthBuffer = (depthBits != 0);
+        NSString *colorFormat = nil;
+
+        if (rBits == 8 && gBits == 8 && bBits == 8) {
+            /* if user specifically requests rbg888 or some color format higher than 16bpp */
+            colorFormat = kEAGLColorFormatRGBA8;
+        } else {
+            /* default case (faster) */
+            colorFormat = kEAGLColorFormatRGB565;
+        }
+
+        /* Get the layer */
         CAEAGLLayer *eaglLayer = (CAEAGLLayer *)self.layer;
 
         eaglLayer.opaque = YES;
@@ -104,10 +89,13 @@
 
         if ((useDepthBuffer) || (useStencilBuffer)) {
             if (useStencilBuffer) {
-                // Apparently you need to pack stencil and depth into one buffer.
-                // !!! FIXME: this is the only thing (currently) supported. May not always be true.
+                /* Apparently you need to pack stencil and depth into one buffer. */
                 depthBufferFormat = GL_DEPTH24_STENCIL8_OES;
+            } else if (useDepthBuffer) {
+                /* iOS only has 24-bit depth buffers, even with GL_DEPTH_COMPONENT16_OES */
+                depthBufferFormat = GL_DEPTH_COMPONENT24_OES;
             }
+
             glGenRenderbuffersOES(1, &depthRenderbuffer);
             glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
             glRenderbufferStorageOES(GL_RENDERBUFFER_OES, depthBufferFormat, backingWidth, backingHeight);
