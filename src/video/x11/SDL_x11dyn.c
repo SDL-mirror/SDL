@@ -119,7 +119,7 @@ char *(*pXGetICValues) (XIC, ...) = NULL;
 #endif
 
 /* These SDL_X11_HAVE_* flags are here whether you have dynamic X11 or not. */
-#define SDL_X11_MODULE(modname) int SDL_X11_HAVE_##modname = 1;
+#define SDL_X11_MODULE(modname) int SDL_X11_HAVE_##modname = 0;
 #define SDL_X11_SYM(rc,fn,params,args,ret)
 #include "SDL_x11sym.h"
 #undef SDL_X11_MODULE
@@ -138,7 +138,7 @@ SDL_X11_UnloadSymbols(void)
             int i;
 
             /* set all the function pointers to NULL. */
-#define SDL_X11_MODULE(modname) SDL_X11_HAVE_##modname = 1;
+#define SDL_X11_MODULE(modname) SDL_X11_HAVE_##modname = 0;
 #define SDL_X11_SYM(rc,fn,params,args,ret) p##fn = NULL;
 #include "SDL_x11sym.h"
 #undef SDL_X11_MODULE
