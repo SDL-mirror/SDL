@@ -200,6 +200,8 @@ int vm_event, vm_error = -1;
 static SDL_bool
 CheckXinerama(Display * display, int *major, int *minor)
 {
+    int event_base = 0;
+    int error_base = 0;
     const char *env;
 
     /* Default the extension not available */
@@ -216,7 +218,8 @@ CheckXinerama(Display * display, int *major, int *minor)
     }
 
     /* Query the extension version */
-    if (!XineramaQueryExtension(display, major, minor) ||
+    if (!XineramaQueryExtension(display, &event_base, &error_base) ||
+        !XineramaQueryVersion(display, major, minor) ||
         !XineramaIsActive(display)) {
         return SDL_FALSE;
     }
