@@ -33,7 +33,7 @@
 
 int UTF8_TrailingBytes(unsigned char c)
 {
-    if (c >= 0xC0 && c<= 0xDF)
+    if (c >= 0xC0 && c <= 0xDF)
         return 1;
     else if (c >= 0xE0 && c <= 0xEF)
         return 2;

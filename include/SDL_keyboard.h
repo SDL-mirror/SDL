@@ -111,15 +111,22 @@ extern DECLSPEC SDL_Scancode SDLCALL SDL_GetScancodeFromKey(SDL_Keycode key);
 /**
  *  \brief Get a human-readable name for a scancode.
  *  
- *  \return A pointer to a UTF-8 string that stays valid at least until the next
- *          call to this function. If you need it around any longer, you must 
- *          copy it.  If the scancode doesn't have a name, this function returns
+ *  \return A pointer to the name for the scancode.
+ *          If the scancode doesn't have a name, this function returns
  *          an empty string ("").
  *
  *  \sa SDL_Scancode
  */
-extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_Scancode
-                                                        scancode);
+extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_Scancode scancode);
+
+/**
+ *  \brief Get a scancode from a human-readable name
+ *  
+ *  \return scancode, or SDL_SCANCODE_UNKNOWN if the name wasn't recognized
+ *
+ *  \sa SDL_Scancode
+ */
+extern DECLSPEC SDL_Scancode SDLCALL SDL_GetScancodeFromName(const char *name);
 
 /**
  *  \brief Get a human-readable name for a key.
@@ -132,6 +139,15 @@ extern DECLSPEC const char *SDLCALL SDL_GetScancodeName(SDL_Scancode
  *  \sa SDL_Key
  */
 extern DECLSPEC const char *SDLCALL SDL_GetKeyName(SDL_Keycode key);
+
+/**
+ *  \brief Get a key code from a human-readable name
+ *  
+ *  \return key code, or SDLK_UNKNOWN if the name wasn't recognized
+ *
+ *  \sa SDL_Keycode
+ */
+extern DECLSPEC SDL_Keycode SDLCALL SDL_GetKeyFromName(const char *name);
 
 /**
  *  \brief Start accepting Unicode text input events.
