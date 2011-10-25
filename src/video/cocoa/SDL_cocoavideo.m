@@ -193,7 +193,7 @@ Cocoa_CreateImage(SDL_Surface * surface)
     SDL_FreeSurface(converted);
 
     /* Premultiply the alpha channel */
-    for (i = (converted->h * converted->w); i--; ) {
+    for (i = (surface->h * surface->w); i--; ) {
         Uint8 alpha = pixels[3];
         pixels[0] = (Uint8)(((Uint16)pixels[0] * alpha) / 255);
         pixels[1] = (Uint8)(((Uint16)pixels[1] * alpha) / 255);
