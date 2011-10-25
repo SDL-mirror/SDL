@@ -176,6 +176,13 @@ SDL_X11_LoadSymbols(void)
                 x11libs[i].lib = SDL_LoadObject(x11libs[i].libname);
             }
         }
+
+#define SDL_X11_MODULE(modname) SDL_X11_HAVE_##modname = 1; /* default yes */
+#define SDL_X11_SYM(a,fn,x,y,z)
+#include "SDL_x11sym.h"
+#undef SDL_X11_MODULE
+#undef SDL_X11_SYM
+
 #define SDL_X11_MODULE(modname) thismod = &SDL_X11_HAVE_##modname;
 #define SDL_X11_SYM(a,fn,x,y,z) X11_GetSym(#fn,thismod,(void**)&p##fn);
 #include "SDL_x11sym.h"
