@@ -42,10 +42,11 @@ WIN_SetError(const char *prefix)
 HRESULT
 WIN_CoInitialize(void)
 {
+    const HRESULT hr = CoInitialize(NULL);
+
     /* S_FALSE means success, but someone else already initialized. */
     /* You still need to call CoUninitialize in this case! */
-    const HRESULT hr = CoInitialize(NULL);
-    if ((hr == S_OK) || (hr == S_FALSE)) {
+    if (hr == S_FALSE) {
         return S_OK;
     }
 
