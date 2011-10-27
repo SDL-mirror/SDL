@@ -227,7 +227,8 @@ int SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src)
 
         if (touchId >= 0) {
             //printf("Adding loaded gesture to 1 touch\n");
-            if (SDL_AddDollarGesture(touch,templ.path)) loaded++;
+            if (SDL_AddDollarGesture(touch, templ.path) >= 0)
+                loaded++;
         }
         else {
             //printf("Adding to: %i touches\n",SDL_numGestureTouches);
