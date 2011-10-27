@@ -63,7 +63,7 @@ typedef struct {
 } SDL_DollarTemplate;
 
 typedef struct {
-    SDL_GestureID id;
+    SDL_TouchID id;
     SDL_FloatPoint res;
     SDL_FloatPoint centroid;
     SDL_DollarPath dollarPath;
