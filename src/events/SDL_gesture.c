@@ -162,52 +162,47 @@ int SDL_SaveDollarTemplate(SDL_GestureID gestureId, SDL_RWops *src)
 
 //path is an already sampled set of points
 //Returns the index of the gesture on success, or -1
-static int SDL_AddDollarGesture(SDL_GestureTouch* inTouch,SDL_FloatPoint* path)
+static int SDL_AddDollarGesture_one(SDL_GestureTouch* inTouch, SDL_FloatPoint* path)
 {
     SDL_DollarTemplate* dollarTemplate;
     SDL_DollarTemplate *templ;
+    int index;
+
+    index = inTouch->numDollarTemplates;
+    dollarTemplate =
+        (SDL_DollarTemplate *)SDL_realloc(inTouch->dollarTemplate,
+                                          (index + 1) *
+                                          sizeof(SDL_DollarTemplate));
+    if (!dollarTemplate) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    inTouch->dollarTemplate = dollarTemplate;
+
+    templ = &inTouch->dollarTemplate[index];
+    SDL_memcpy(templ->path, path, DOLLARNPOINTS*sizeof(SDL_FloatPoint));
+    templ->hash = SDL_HashDollar(templ->path);
+    inTouch->numDollarTemplates++;
+
+    return index;
+}
+
+static int SDL_AddDollarGesture(SDL_GestureTouch* inTouch, SDL_FloatPoint* path)
+{
+    int index;
     int i = 0;
     if (inTouch == NULL) {
         if (SDL_numGestureTouches == 0) return -1;
         for (i = 0; i < SDL_numGestureTouches; i++) {
             inTouch = &SDL_gestureTouch[i];
-
-            dollarTemplate =
-                (SDL_DollarTemplate *)SDL_realloc(inTouch->dollarTemplate,
-                                                  (inTouch->numDollarTemplates + 1) *
-                                                  sizeof(SDL_DollarTemplate));
-            if (!dollarTemplate) {
-                SDL_OutOfMemory();
+            index = SDL_AddDollarGesture_one(inTouch, path);
+            if (index < 0)
                 return -1;
-            }
-
-            inTouch->dollarTemplate = dollarTemplate;
-
-            templ =
-                &inTouch->dollarTemplate[inTouch->numDollarTemplates];
-            SDL_memcpy(templ->path,path,DOLLARNPOINTS*sizeof(SDL_FloatPoint));
-            templ->hash = SDL_HashDollar(templ->path);
-            inTouch->numDollarTemplates++;
         }
-        return inTouch->numDollarTemplates - 1;
+        // Use the index of the last one added.
+        return index;
     } else {
-        SDL_DollarTemplate* dollarTemplate =
-            ( SDL_DollarTemplate *)SDL_realloc(inTouch->dollarTemplate,
-                                               (inTouch->numDollarTemplates + 1) *
-                                               sizeof(SDL_DollarTemplate));
-        if (!dollarTemplate) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-
-        inTouch->dollarTemplate = dollarTemplate;
-
-        templ =
-            &inTouch->dollarTemplate[inTouch->numDollarTemplates];
-        SDL_memcpy(templ->path,path,DOLLARNPOINTS*sizeof(SDL_FloatPoint));
-        templ->hash = SDL_HashDollar(templ->path);
-        inTouch->numDollarTemplates++;
-        return inTouch->numDollarTemplates - 1;
+        return SDL_AddDollarGesture_one(inTouch, path);
     }
     return -1;
 }
