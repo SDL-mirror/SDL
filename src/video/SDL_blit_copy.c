@@ -127,7 +127,7 @@ SDL_BlitCopy(SDL_BlitInfo * info)
 #endif
 
 #ifdef __MMX__
-    if (SDL_HasMMX()) {
+    if (SDL_HasMMX() && !(srcskip & 7) && !(dstskip & 7)) {
         while (h--) {
             SDL_memcpyMMX(dst, src, w);
             src += srcskip;
