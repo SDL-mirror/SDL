@@ -59,6 +59,7 @@ SDL_memcpySSE(Uint8 * dst, const Uint8 * src, int len)
 static __inline__ void
 SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
 {
+    const int remain = (len & 63);
     int i;
 
     __m64* d64 = (__m64*)dst;
@@ -78,8 +79,11 @@ SDL_memcpyMMX(Uint8 * dst, const Uint8 * src, int len)
         s64 += 8;
     }
 
-    if (len & 63)
-        SDL_memcpy(dst, src, len & 63);
+    if (remain)
+    {
+        const int skip = len - remain;
+        SDL_memcpy(dst + skip, src + skip, remain);
+    }
 }
 #endif /* __MMX__ */
 
