@@ -129,25 +129,20 @@ X11_GetClipboardText(_THIS)
     if (!text) {
         text = SDL_strdup("");
     }
+    
     return text;
 }
 
 SDL_bool
 X11_HasClipboardText(_THIS)
 {
-    /* Not an easy way to tell with X11, as far as I know... */
-    char *text;
-    SDL_bool retval;
-
-    text = X11_GetClipboardText(_this);
-    if (*text) {
-        retval = SDL_TRUE;
-    } else {
-        retval = SDL_FALSE;
-    }
-    SDL_free(text);
-
-    return retval;
+    SDL_bool result = SDL_FALSE;
+    char *text = X11_GetClipboardText(_this);
+    if (text) {
+        result = (SDL_strlen(text)>0) ? SDL_TRUE : SDL_FALSE;
+        SDL_free(text);
+    }    
+    return result;
 }
 
 #endif /* SDL_VIDEO_DRIVER_X11 */

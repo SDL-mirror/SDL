@@ -94,24 +94,12 @@ Cocoa_GetClipboardText(_THIS)
 SDL_bool
 Cocoa_HasClipboardText(_THIS)
 {
-    NSAutoreleasePool *pool;
-    NSPasteboard *pasteboard;
-    NSString *format = GetTextFormat(_this);
-    NSString *available;
-    SDL_bool result;
-
-    pool = [[NSAutoreleasePool alloc] init];
-
-    pasteboard = [NSPasteboard generalPasteboard];
-    available = [pasteboard availableTypeFromArray: [NSArray arrayWithObject:format]];
-    if ([available isEqualToString:format]) {
-        result = SDL_TRUE;
-    } else {
-        result = SDL_FALSE;
+    SDL_bool result = SDL_FALSE;
+    char *text = Cocoa_GetClipboardText(_this);
+    if (text) {
+	result = (SDL_strlen(text)>0) ? SDL_TRUE : SDL_FALSE;
+	SDL_free(text);
     }
-
-    [pool release];
-
     return result;
 }
 

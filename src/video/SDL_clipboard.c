@@ -35,6 +35,9 @@ SDL_SetClipboardText(const char *text)
     if (_this->SetClipboardText) {
         return _this->SetClipboardText(_this, text);
     } else {
+        if (_this->clipboard_text) {
+            SDL_free(_this->clipboard_text);
+        }
         _this->clipboard_text = SDL_strdup(text);
         return 0;
     }
@@ -64,7 +67,7 @@ SDL_HasClipboardText(void)
     if (_this->HasClipboardText) {
         return _this->HasClipboardText(_this);
     } else {
-        if (_this->clipboard_text) {
+        if ((_this->clipboard_text) && (SDL_strlen(_this->clipboard_text)>0)) {
             return SDL_TRUE;
         } else {
             return SDL_FALSE;

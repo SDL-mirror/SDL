@@ -136,11 +136,13 @@ WIN_GetClipboardText(_THIS)
 SDL_bool
 WIN_HasClipboardText(_THIS)
 {
-    if (IsClipboardFormatAvailable(TEXT_FORMAT)) {
-        return SDL_TRUE;
-    } else {
-        return SDL_FALSE;
-    }
+    SDL_bool result = SDL_FALSE;
+    char *text = WIN_GetClipboardText(_this);
+    if (text) {
+        result = (SDL_strlen(text)>0) ? SDL_TRUE : SDL_FALSE;
+        SDL_free(text);
+    } 
+    return result;
 }
 
 void

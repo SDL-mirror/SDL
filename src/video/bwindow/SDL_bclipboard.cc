@@ -51,8 +51,9 @@ int BE_SetClipboardText(_THIS, const char *text) {
 
 char *BE_GetClipboardText(_THIS) {
 	BMessage *clip = NULL;
-	const char *text;
+	const char *text = NULL;	
 	ssize_t length;
+	char *result;
 	if(be_clipboard->Lock()) {
 		if((clip = be_clipboard->Data())) {
 			/* Presumably the string of characters is ascii-format */
@@ -60,37 +61,29 @@ char *BE_GetClipboardText(_THIS) {
 				&length);
 		} else {
 			be_clipboard->Unlock();
-			return NULL;
 		}
 		be_clipboard->Unlock();
-	} else {
-		return NULL;
-	}
+	} 
 	
-	/* Copy the data and pass on to SDL */
-	char *result = (char*)SDL_calloc(1, sizeof(char*)*length);
-	SDL_strlcpy(result, text, length);
+	if (!text) {
+		result = SDL_strdup("");
+	} else {
+		/* Copy the data and pass on to SDL */
+		result = (char*)SDL_calloc(1, sizeof(char*)*length);
+		SDL_strlcpy(result, text, length);
+	}
 	
 	return result;
 }
 
 SDL_bool BE_HasClipboardText(_THIS) {
-	BMessage *clip = NULL;
-	const char *text;
-	ssize_t length;
-	SDL_bool retval = SDL_FALSE;
-	
-	if(be_clipboard->Lock()) {
-		if((clip = be_clipboard->Data())) {
-			/* Presumably the string of characters is ascii-format */
-			clip->FindData("text/plain", B_MIME_TYPE, (const void**)&text,
-				&length);
-			if( text ) retval = SDL_TRUE;
-		}
-		be_clipboard->Unlock();
-	}
-	return retval;
-
+	SDL_bool result = SDL_FALSE;
+	char *text = BE_GetClipboardText(_this);
+	if (text) {
+		result = (SDL_strlen(text)>0) ? SDL_TRUE : SDL_FALSE;
+		SDL_free(text);
+	} 
+	return result;
 }
 
 #ifdef __cplusplus
