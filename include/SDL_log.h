@@ -121,7 +121,7 @@ extern DECLSPEC void SDLCALL SDL_LogSetPriority(int category,
                                                 SDL_LogPriority priority);
 
 /**
- *  \brief Set the priority of a particular log category
+ *  \brief Get the priority of a particular log category
  */
 extern DECLSPEC SDL_LogPriority SDLCALL SDL_LogGetPriority(int category);
 
