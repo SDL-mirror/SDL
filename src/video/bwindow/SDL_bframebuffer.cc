@@ -115,7 +115,6 @@ int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
 
 int32 BE_DrawThread(void *data) {
 	SDL_BWin *bwin = (SDL_BWin*)data;
-	SDL_Window *window = _GetBeApp()->GetSDLWindow(bwin->GetID());
 	
 	BScreen bscreen;
 	if(!bscreen.IsValid()) {

@@ -59,6 +59,7 @@ int BE_GL_LoadLibrary(_THIS, const char *path)
 					SDL_arraysize(_this->gl_config.driver_path));
 		}
 	}
+	return 0;
 }
 
 void *BE_GL_GetProcAddress(_THIS, const char *proc)

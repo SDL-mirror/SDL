@@ -49,7 +49,7 @@ SDL_Surface *
 SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
 {
     SDL_bool was_error;
-    long fp_offset;
+    long fp_offset = 0;
     int bmpPitch;
     int i, pad;
     SDL_Surface *surface;

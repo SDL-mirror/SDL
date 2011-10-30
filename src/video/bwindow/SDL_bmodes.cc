@@ -184,6 +184,10 @@ int32 BE_BPPToSDLPxFormat(int32 bpp) {
 		return SDL_PIXELFORMAT_INDEX4LSB;
 		break;
 	}
+
+	/* May never get here, but safer and needed to shut up compiler */
+	SDL_SetError("Invalid bpp value");
+	return 0;       
 }
 
 static void _BDisplayModeToSdlDisplayMode(display_mode *bmode,
@@ -236,6 +240,7 @@ int BE_InitModes(_THIS) {
 	/* TODO: When Haiku supports multiple display screens, call
 	   _AddDisplayScreen() for each of them. */
 	_AddDisplay(&screen);
+	return 0;
 }
 
 int BE_QuitModes(_THIS) {

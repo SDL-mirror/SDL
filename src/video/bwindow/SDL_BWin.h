@@ -300,7 +300,6 @@ class SDL_BWin:public BDirectWindow
         
         switch (msg->what) {
         case B_MOUSE_MOVED:
-            where;
             int32 transit;
             if (msg->FindPoint("where", &where) == B_OK
                 && msg->FindInt32("be:transit", &transit) == B_OK) {
@@ -440,7 +439,6 @@ private:
     			_MouseFocusEvent(false);
     		}
     	} else {
-    		static int x = 0, y = 0;
     		/* Change mouse focus */
     		if (!_mouse_focused) {
     			_MouseFocusEvent(true);

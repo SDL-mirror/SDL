@@ -47,6 +47,7 @@ int BE_SetClipboardText(_THIS, const char *text) {
 		}
 		be_clipboard->Unlock();
 	}
+	return 0;
 }
 
 char *BE_GetClipboardText(_THIS) {

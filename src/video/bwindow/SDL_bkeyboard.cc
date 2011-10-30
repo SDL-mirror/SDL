@@ -158,7 +158,7 @@ void BE_InitOSKeymap() {
 }
 
 SDL_Scancode BE_GetScancodeFromBeKey(int32 bkey) {
-	if(bkey > 0 && bkey < SDL_TABLESIZE(keymap)) {
+	if(bkey > 0 && bkey < (int32)SDL_TABLESIZE(keymap)) {
 		return keymap[bkey];
 	} else {
 		return SDL_SCANCODE_UNKNOWN;

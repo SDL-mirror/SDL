@@ -175,6 +175,9 @@ public:
     		_PushBackWindow(win);
     		return i;
     	}
+    	
+    	/* TODO: error handling */
+    	return 0;
     }
     
     /* FIXME: Bad coding practice, but I can't include SDL_BWin.h here.  Is
