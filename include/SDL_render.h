@@ -389,7 +389,7 @@ extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
                                                    SDL_Rect * rect);
 
 /**
- *  \brief Set the color used for drawing operations (Fill and Line).
+ *  \brief Set the color used for drawing operations (Rect, Line and Clear).
  *  
  *  \param r The red value used to draw on the rendering target.
  *  \param g The green value used to draw on the rendering target.
@@ -404,7 +404,7 @@ extern DECLSPEC int SDL_SetRenderDrawColor(SDL_Renderer * renderer,
                                            Uint8 a);
 
 /**
- *  \brief Get the color used for drawing operations (Fill and Line).
+ *  \brief Get the color used for drawing operations (Rect, Line and Clear).
  *  
  *  \param r A pointer to the red value used to draw on the rendering target.
  *  \param g A pointer to the green value used to draw on the rendering target.
