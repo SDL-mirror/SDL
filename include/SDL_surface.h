@@ -355,6 +355,8 @@ extern DECLSPEC SDL_Surface *SDLCALL SDL_ConvertSurfaceFormat
 
 /**
  * \brief Copy a block of pixels of one format to another format
+ *  
+ *  \return 0 on success, or -1 if there was an error
  */
 extern DECLSPEC int SDLCALL SDL_ConvertPixels(int width, int height,
                                               Uint32 src_format,

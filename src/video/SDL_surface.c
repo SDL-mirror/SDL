@@ -952,7 +952,7 @@ int SDL_ConvertPixels(int width, int height,
             src = (Uint8*)src + src_pitch;
             dst = (Uint8*)dst + dst_pitch;
         }
-        return SDL_TRUE;
+        return 0;
     }
 
     if (!SDL_CreateSurfaceOnStack(width, height, src_format, (void*)src,
