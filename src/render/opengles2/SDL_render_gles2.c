@@ -786,6 +786,8 @@ static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points
 static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count);
 static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
                             const SDL_Rect *dstrect);
+static int GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                    Uint32 pixel_format, void * pixels, int pitch);
 static void GLES2_RenderPresent(SDL_Renderer *renderer);
 
 
@@ -1047,6 +1049,57 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     return 0;
 }
 
+static int
+GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                    Uint32 pixel_format, void * pixels, int pitch)
+{
+    SDL_Window *window = renderer->window;
+    Uint32 temp_format = SDL_PIXELFORMAT_ABGR8888;
+    void *temp_pixels;
+    int temp_pitch;
+    Uint8 *src, *dst, *tmp;
+    int w, h, length, rows;
+    int status;
+
+    GLES2_ActivateRenderer(renderer);
+
+    temp_pitch = rect->w * SDL_BYTESPERPIXEL(temp_format);
+    temp_pixels = SDL_malloc(rect->h * temp_pitch);
+    if (!temp_pixels) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    SDL_GetWindowSize(window, &w, &h);
+
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    glReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
+                       GL_RGBA, GL_UNSIGNED_BYTE, temp_pixels);
+
+    /* Flip the rows to be top-down */
+    length = rect->w * SDL_BYTESPERPIXEL(temp_format);
+    src = (Uint8*)temp_pixels + (rect->h-1)*temp_pitch;
+    dst = (Uint8*)temp_pixels;
+    tmp = SDL_stack_alloc(Uint8, length);
+    rows = rect->h / 2;
+    while (rows--) {
+        SDL_memcpy(tmp, dst, length);
+        SDL_memcpy(dst, src, length);
+        SDL_memcpy(src, tmp, length);
+        dst += temp_pitch;
+        src -= temp_pitch;
+    }
+    SDL_stack_free(tmp);
+
+    status = SDL_ConvertPixels(rect->w, rect->h,
+                               temp_format, temp_pixels, temp_pitch,
+                               pixel_format, pixels, pitch);
+    SDL_free(temp_pixels);
+
+    return status;
+}
+
 static void
 GLES2_RenderPresent(SDL_Renderer *renderer)
 {
@@ -1176,6 +1229,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->RenderDrawLines     = &GLES2_RenderDrawLines;
     renderer->RenderFillRects     = &GLES2_RenderFillRects;
     renderer->RenderCopy          = &GLES2_RenderCopy;
+    renderer->RenderReadPixels    = &GLES2_RenderReadPixels;
     renderer->RenderPresent       = &GLES2_RenderPresent;
     renderer->DestroyTexture      = &GLES2_DestroyTexture;
     renderer->DestroyRenderer     = &GLES2_DestroyRenderer;
