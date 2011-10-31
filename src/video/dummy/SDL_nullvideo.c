@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_DUMMY
+
 /* Dummy SDL video driver implementation; this is just enough to make an
  *  SDL-based application THINK it's got a working video driver, for
  *  applications that call SDL_Init(SDL_INIT_VIDEO) when they don't need it,
@@ -138,5 +140,7 @@ void
 DUMMY_VideoQuit(_THIS)
 {
 }
+
+#endif /* SDL_VIDEO_DRIVER_DUMMY */
 
 /* vi: set ts=4 sw=4 expandtab: */

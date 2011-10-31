@@ -22,7 +22,7 @@ static const char rcsid[] =
  * exponentiation or a multiplication.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 libm_hidden_proto(copysign)

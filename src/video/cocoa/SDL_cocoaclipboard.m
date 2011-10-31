@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL_cocoavideo.h"
 #include "../../events/SDL_clipboardevents_c.h"
 
@@ -123,5 +125,7 @@ Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data)
 
     [pool release];
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */

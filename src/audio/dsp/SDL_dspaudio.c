@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_OSS
+
 /* Allow access to a raw mixing buffer */
 
 #include <stdio.h>              /* For perror() */
@@ -311,5 +313,7 @@ DSP_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap DSP_bootstrap = {
     "dsp", "OSS /dev/dsp standard audio", DSP_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_OSS */
 
 /* vi: set ts=4 sw=4 expandtab: */

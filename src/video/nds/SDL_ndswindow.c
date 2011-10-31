@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_NDS
+
 #include "SDL_ndsvideo.h"
 
 
@@ -29,5 +31,7 @@ int NDS_CreateWindow(_THIS, SDL_Window * window)
     window->flags |= SDL_WINDOW_FULLSCREEN;
     return 0;
 }
+
+#endif /* SDL_VIDEO_DRIVER_NDS */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -30,6 +30,8 @@
 
 #include "SDL_config.h"
 
+#ifndef __IPHONEOS__
+
 #ifdef __WIN32__
 #define WIN32_LEAN_AND_MEAN
 #ifndef NOMINMAX
@@ -11122,6 +11124,8 @@ typedef void (APIENTRYP PFNGLVDPAUUNMAPSURFACESNVPROC) (GLsizei numSurface, cons
 #endif
 /* *INDENT-ON* */
 #endif /* NO_SDL_GLEXT */
+
+#endif /* !__IPHONEOS__ */
 
 #endif /* _SDL_opengl_h */
 

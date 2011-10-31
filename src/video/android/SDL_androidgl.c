@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 /* Android SDL video driver implementation */
 
 #include "SDL_video.h"
@@ -111,5 +113,7 @@ Android_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_DeleteContext\n");
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -854,23 +854,6 @@ SDL_GetKeyFromScancode(SDL_Scancode scancode)
     return keyboard->keymap[scancode];
 }
 
-SDL_Keycode SDL_GetKeycodeFromName(const char *name)
-{
-	int i;
-
-	if (!name || !*name) {
-		return SDL_SCANCODE_UNKNOWN;
-	}
-
-	for (i = 0; i < SDL_arraysize(SDL_scancode_names); ++i) {
-		if (SDL_strcasecmp(name, SDL_scancode_names[i]) == 0) {
-			return (SDL_Scancode)i;
-		}
-	}
-	return SDL_SCANCODE_UNKNOWN;
-}
-
-
 SDL_Scancode
 SDL_GetScancodeFromKey(SDL_Keycode key)
 {

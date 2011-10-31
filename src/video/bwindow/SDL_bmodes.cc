@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
 
-
+#if SDL_VIDEO_DRIVER_BWINDOW
 
 #include <AppKit.h>
 #include <InterfaceKit.h>
@@ -327,3 +328,5 @@ int BE_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode){
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

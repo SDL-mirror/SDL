@@ -22,6 +22,9 @@ be used in advertising or otherwise to promote the sale, use or other deal-
 ings in this Software without prior written authorization from the XFree86
 Project.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_X11
 
 /* $XFree86: xc/lib/X11/imKStoUCS.c,v 1.4 2003/04/29 11:29:18 pascal Exp $ */
 
@@ -343,3 +346,5 @@ X11_KeySymToUcs4(KeySym keysym)
     else
         return 0;
 }
+
+#endif /* SDL_VIDEO_DRIVER_X11 */

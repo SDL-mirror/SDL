@@ -50,7 +50,7 @@ static const char rcsid[] =
  *	   thus, reducing the rounding error in the subtraction.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 #ifdef __STDC__

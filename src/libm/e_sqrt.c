@@ -85,7 +85,7 @@ static const char rcsid[] =
  *---------------
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 #ifdef __STDC__

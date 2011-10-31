@@ -20,7 +20,7 @@
 */
 #include "SDL_config.h"
 
-#if SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_DRIVER_X11 && SDL_VIDEO_OPENGL_ES
 
 #include "SDL_x11video.h"
 #include "SDL_x11opengles.h"
@@ -360,6 +360,6 @@ X11_GLES_DeleteContext(_THIS, SDL_GLContext context)
 
 }
 
-#endif /* SDL_VIDEO_OPENGL_ES */
+#endif /* SDL_VIDEO_DRIVER_X11 && SDL_VIDEO_OPENGL_ES */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_BEOSAUDIO
+
 /* Allow access to the audio stream on BeOS */
 
 #include <SoundPlayer.h>
@@ -213,5 +215,7 @@ extern "C"
 AudioBootStrap BEOSAUDIO_bootstrap = {
     "baudio", "BeOS BSoundPlayer", BEOSAUDIO_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_BEOSAUDIO */
 
 /* vi: set ts=4 sw=4 expandtab: */

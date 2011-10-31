@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 #include <android/log.h>
 
 #include "SDL_events.h"
@@ -84,5 +86,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
             break;
     } 
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

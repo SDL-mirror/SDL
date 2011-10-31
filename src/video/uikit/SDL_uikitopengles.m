@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_UIKIT
 
 #include "SDL_uikitopengles.h"
 #include "SDL_uikitopenglview.h"
@@ -27,6 +30,7 @@
 #include "SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
+#include "../../power/uikit/SDL_syspower.h"
 #include "SDL_loadso.h"
 #include <dlfcn.h>
 
@@ -73,8 +77,6 @@ UIKit_GL_LoadLibrary(_THIS, const char *path)
     return 0;
 }
 
-extern void SDL_UIKit_UpdateBatteryMonitoring(void);
-
 void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 {
 #ifdef SDL_POWER_UIKIT
@@ -101,7 +103,6 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
 {
     SDL_uikitopenglview *view;
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    UIScreen *uiscreen = (UIScreen *) SDL_GetDisplayForWindow(window)->driverdata;
     UIWindow *uiwindow = data->uiwindow;
 
     /* construct our view, passing in SDL's OpenGL configuration data */
@@ -149,5 +150,7 @@ void UIKit_GL_DeleteContext(_THIS, SDL_GLContext context)
     [view removeFromSuperview];
     [view release];
 }
+
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -19,6 +19,9 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_X11
+
 #include "SDL_x11video.h"
 #include "SDL_assert.h"
 
@@ -609,5 +612,7 @@ X11_GL_DeleteContext(_THIS, SDL_GLContext context)
 }
 
 #endif /* SDL_VIDEO_OPENGL_GLX */
+
+#endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */

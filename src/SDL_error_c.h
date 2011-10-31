@@ -56,6 +56,9 @@ typedef struct SDL_error
     } args[ERR_MAX_ARGS];
 } SDL_error;
 
+/* Defined in SDL_thread.c */
+extern SDL_error *SDL_GetErrBuf(void);
+
 #endif /* _SDL_error_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

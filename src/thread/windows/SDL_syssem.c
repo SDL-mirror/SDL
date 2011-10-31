@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_THREAD_WINDOWS
+
 /* Semaphore functions using the Win32 API */
 
 #include "../../core/windows/SDL_windows.h"
@@ -168,5 +170,7 @@ SDL_SemPost(SDL_sem * sem)
     }
     return 0;
 }
+
+#endif /* SDL_THREAD_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -103,7 +103,7 @@ int SDL_RecordGesture(SDL_TouchID touchId) {
   return (touchId < 0);
 }
 
-unsigned long SDL_HashDollar(SDL_FloatPoint* points) {
+static unsigned long SDL_HashDollar(SDL_FloatPoint* points) {
   unsigned long hash = 5381;
   int i;
   for(i = 0;i < DOLLARNPOINTS; i++) { 
@@ -242,7 +242,7 @@ int SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWops *src) {
 }
 
 
-float dollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ,float ang) {
+static float dollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ,float ang) {
   //  SDL_FloatPoint p[DOLLARNPOINTS];
   float dist = 0;
   SDL_FloatPoint p;
@@ -257,7 +257,7 @@ float dollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ,float ang) {
   
 }
 
-float bestDollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ) {
+static float bestDollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ) {
   //------------BEGIN DOLLAR BLACKBOX----------------//
   //-TRANSLATED DIRECTLY FROM PSUDEO-CODE AVAILABLE AT-//
   //-"http://depts.washington.edu/aimgroup/proj/dollar/"-//
@@ -294,7 +294,7 @@ float bestDollarDifference(SDL_FloatPoint* points,SDL_FloatPoint* templ) {
 }
 
 //DollarPath contains raw points, plus (possibly) the calculated length
-int dollarNormalize(const SDL_DollarPath *path,SDL_FloatPoint *points) {
+static int dollarNormalize(const SDL_DollarPath *path,SDL_FloatPoint *points) {
   int i;
   float interval;
   float dist;
@@ -387,7 +387,7 @@ int dollarNormalize(const SDL_DollarPath *path,SDL_FloatPoint *points) {
   return numPoints;
 }
 
-float dollarRecognize(const SDL_DollarPath *path,int *bestTempl,SDL_GestureTouch* touch) {
+static float dollarRecognize(const SDL_DollarPath *path,int *bestTempl,SDL_GestureTouch* touch) {
         
         SDL_FloatPoint points[DOLLARNPOINTS];
         int i;
@@ -431,20 +431,7 @@ int SDL_GestureAddTouch(SDL_Touch* touch) {
   return 0;
 }
 
-int SDL_GestureRemoveTouch(SDL_TouchID id) {
-  int i;
-  for (i = 0; i < SDL_numGestureTouches; i++) {
-    if (SDL_gestureTouch[i].id == id) {
-      SDL_numGestureTouches--;
-      SDL_memcpy(&SDL_gestureTouch[i], &SDL_gestureTouch[SDL_numGestureTouches], sizeof(SDL_gestureTouch[i]));
-      return 1;
-    }
-  }
-  return -1;
-}
-
-
-SDL_GestureTouch * SDL_GetGestureTouch(SDL_TouchID id) {
+static SDL_GestureTouch * SDL_GetGestureTouch(SDL_TouchID id) {
   int i;
   for(i = 0;i < SDL_numGestureTouches; i++) {
     //printf("%i ?= %i\n",SDL_gestureTouch[i].id,id);
@@ -453,7 +440,7 @@ SDL_GestureTouch * SDL_GetGestureTouch(SDL_TouchID id) {
   return NULL;
 }
 
-int SDL_SendGestureMulti(SDL_GestureTouch* touch,float dTheta,float dDist) {
+static int SDL_SendGestureMulti(SDL_GestureTouch* touch,float dTheta,float dDist) {
   SDL_Event event;
   event.mgesture.type = SDL_MULTIGESTURE;
   event.mgesture.touchId = touch->id;
@@ -465,7 +452,7 @@ int SDL_SendGestureMulti(SDL_GestureTouch* touch,float dTheta,float dDist) {
   return SDL_PushEvent(&event) > 0;
 }
 
-int SDL_SendGestureDollar(SDL_GestureTouch* touch,
+static int SDL_SendGestureDollar(SDL_GestureTouch* touch,
                           SDL_GestureID gestureId,float error) {
   SDL_Event event;
   event.dgesture.type = SDL_DOLLARGESTURE;
@@ -483,7 +470,7 @@ int SDL_SendGestureDollar(SDL_GestureTouch* touch,
 }
 
 
-int SDL_SendDollarRecord(SDL_GestureTouch* touch,SDL_GestureID gestureId) {
+static int SDL_SendDollarRecord(SDL_GestureTouch* touch,SDL_GestureID gestureId) {
   SDL_Event event;
   event.dgesture.type = SDL_DOLLARRECORD;
   event.dgesture.touchId = touch->id;

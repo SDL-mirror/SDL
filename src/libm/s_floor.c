@@ -24,7 +24,7 @@ static const char rcsid[] =
  *	Inexact flag raised if x not equal to floor(x).
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 #ifdef __STDC__

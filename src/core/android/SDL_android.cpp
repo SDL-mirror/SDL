@@ -21,6 +21,8 @@
 #include "SDL_config.h"
 #include "SDL_stdinc.h"
 
+#ifdef __ANDROID__
+
 #include "SDL_android.h"
 
 extern "C" {
@@ -604,5 +606,7 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
 {
     return Android_JNI_FileClose(ctx, true);
 }
+
+#endif /* __ANDROID__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

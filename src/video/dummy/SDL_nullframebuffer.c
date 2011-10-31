@@ -20,7 +20,10 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_DUMMY
+
 #include "../SDL_sysvideo.h"
+#include "SDL_nullframebuffer_c.h"
 
 
 #define DUMMY_SURFACE   "_SDL_DummySurface"
@@ -85,5 +88,7 @@ void SDL_DUMMY_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
         SDL_FreeSurface(surface);
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_DUMMY */
 
 /* vi: set ts=4 sw=4 expandtab: */

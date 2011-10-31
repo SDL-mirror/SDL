@@ -1,8 +1,3 @@
-/* I'm gambling no one uses this audio backend...we'll see who emails.  :)  */
-#error this code has not been updated for SDL 1.3.
-#error if no one emails icculus at icculus.org and tells him that this
-#error  code is needed, this audio backend will eventually be removed from SDL.
-
 /*
   Simple DirectMedia Layer
   Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
@@ -24,6 +19,13 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
+
+#if SDL_AUDIO_DRIVER_SUNAUDIO
+
+/* I'm gambling no one uses this audio backend...we'll see who emails.  :)  */
+#error this code has not been updated for SDL 1.3.
+#error if no one emails icculus at icculus.org and tells him that this
+#error  code is needed, this audio backend will eventually be removed from SDL.
 
 /* Allow access to a raw mixing buffer */
 
@@ -449,5 +451,7 @@ snd2au(int sample)
     }
     return (mask & sample);
 }
+
+#endif /* SDL_AUDIO_DRIVER_SUNAUDIO */
 
 /* vi: set ts=4 sw=4 expandtab: */

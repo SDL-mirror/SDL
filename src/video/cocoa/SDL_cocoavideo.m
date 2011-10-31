@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
@@ -258,5 +260,7 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
 
     return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vim: set ts=4 sw=4 expandtab: */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_NAS
+
 /* Allow access to a raw mixing buffer */
 
 #include <signal.h>
@@ -50,7 +52,7 @@ static AuEventHandlerRec *(*NAS_AuRegisterEventHandler)
   (AuServer *, AuMask, int, AuID, AuEventHandlerCallback, AuPointer);
 
 
-#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+#if SDL_AUDIO_DRIVER_NAS_DYNAMIC
 
 static const char *nas_library = SDL_AUDIO_DRIVER_NAS_DYNAMIC;
 static void *nas_handle = NULL;
@@ -89,7 +91,7 @@ load_nas_syms(void)
 
 #undef SDL_NAS_SYM
 
-#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
+#if SDL_AUDIO_DRIVER_NAS_DYNAMIC
 
 static void
 UnloadNASLibrary(void)
@@ -396,5 +398,7 @@ NAS_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap NAS_bootstrap = {
     "nas", "Network Audio System", NAS_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_NAS */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -106,7 +106,7 @@ static void (*PULSEAUDIO_pa_stream_unref) (pa_stream *);
 static int load_pulseaudio_syms(void);
 
 
-#ifdef SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC
+#if SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC
 
 static const char *pulseaudio_library = SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC;
 static void *pulseaudio_handle = NULL;

@@ -43,7 +43,7 @@ static const char rcsid[] =
  *		sin(x) = x + (S1*x + (x *(r-y/2)+y))
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 #ifdef __STDC__

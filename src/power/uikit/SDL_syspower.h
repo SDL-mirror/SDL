@@ -20,8 +20,13 @@
 */
 #include "SDL_config.h"
 
-#include <sys/types.h>
+#if SDL_POWER_UIKIT
 
-typedef pid_t SYS_ThreadHandle;
+#include "SDL_power.h"
+
+void SDL_UIKit_UpdateBatteryMonitoring(void);
+SDL_bool SDL_GetPowerInfo_UIKit(SDL_PowerState * state, int *seconds, int *percent);
+
+#endif /* SDL_POWER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

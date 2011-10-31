@@ -20,8 +20,7 @@
 */
 #include "SDL_config.h"
 
-/* Being a null driver, there's no event stream. We just define stubs for
-   most of the API. */
+#if SDL_VIDEO_DRIVER_NDS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,5 +48,7 @@ NDS_PumpEvents(_THIS)
         SDL_SendMouseMotion(0, 0, t.px, t.py);
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_NDS */
 
 /* vi: set ts=4 sw=4 expandtab: */

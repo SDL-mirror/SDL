@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_NDS
+
 /* Output audio to NDS */
 
 #include <nds.h>
@@ -121,5 +123,7 @@ NDSAUD_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap NDSAUD_bootstrap = {
     "nds", "SDL NDS audio driver", NDSAUD_Init, 0       /*1? */
 };
+
+#endif /* SDL_AUDIO_DRIVER_NDS */
 
 /* vi: set ts=4 sw=4 expandtab: */

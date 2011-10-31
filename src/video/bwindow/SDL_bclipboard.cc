@@ -18,10 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_BWINDOW
 
 /* BWindow based framebuffer implementation */
-#include "SDL_config.h"
 
 #include <unistd.h>
 #include <TypeConstants.h>
@@ -91,3 +92,4 @@ SDL_bool BE_HasClipboardText(_THIS) {
 }					/* Extern C */
 #endif
 
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

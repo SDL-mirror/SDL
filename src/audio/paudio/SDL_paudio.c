@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_PAUDIO
+
 /* Allow access to a raw mixing buffer */
 
 #include <errno.h>
@@ -544,5 +546,7 @@ PAUDIO_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap PAUDIO_bootstrap = {
     "paud", "AIX Paudio", PAUDIO_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_PAUDIO */
 
 /* vi: set ts=4 sw=4 expandtab: */

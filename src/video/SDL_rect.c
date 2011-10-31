@@ -21,6 +21,7 @@
 #include "SDL_config.h"
 
 #include "SDL_rect.h"
+#include "SDL_rect_c.h"
 
 
 SDL_bool

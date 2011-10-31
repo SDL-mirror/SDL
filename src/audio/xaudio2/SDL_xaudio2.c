@@ -19,13 +19,14 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
+
+#if SDL_AUDIO_DRIVER_XAUDIO2
+
 #include "../../core/windows/SDL_windows.h"
 #include "SDL_audio.h"
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 #include "SDL_assert.h"
-
-#if SDL_AUDIO_DRIVER_XAUDIO2
 
 #include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
 #if (!defined(_DXSDK_BUILD_MAJOR) || (_DXSDK_BUILD_MAJOR < 1284))

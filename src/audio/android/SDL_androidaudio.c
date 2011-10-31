@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_ANDROID
+
 /* Output audio to Android */
 
 #include "SDL_audio.h"
@@ -153,5 +155,7 @@ Android_RunAudioThread()
 {
 	SDL_RunAudio(audioDevice);
 }
+
+#endif /* SDL_AUDIO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_BSD
+
 /*
  * Driver for native OpenBSD/NetBSD audio(4).
  * vedge@vedge.com.ar.
@@ -363,5 +365,7 @@ BSDAUDIO_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap BSD_AUDIO_bootstrap = {
     "bsd", "BSD audio", BSDAUDIO_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_BSD */
 
 /* vi: set ts=4 sw=4 expandtab: */

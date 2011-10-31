@@ -21,7 +21,7 @@
 #include "SDL_config.h"
 
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_LINUX
+#if SDL_POWER_LINUX
 
 #include <stdio.h>
 #include <unistd.h>

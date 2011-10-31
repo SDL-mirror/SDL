@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_DSOUND
+
 /* Allow access to a raw mixing buffer */
 
 #include "SDL_timer.h"
@@ -548,5 +550,7 @@ DSOUND_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap DSOUND_bootstrap = {
     "directsound", "DirectSound", DSOUND_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_DSOUND */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -19,6 +19,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_BWINDOW
 #include "../SDL_sysvideo.h"
 
 #include "SDL_BWin.h"
@@ -210,3 +212,4 @@ SDL_bool BE_GetWindowWMInfo(_THIS, SDL_Window * window,
 }
 #endif
 
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

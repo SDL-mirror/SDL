@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_UIKIT
+
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_uikitvideo.h"
@@ -50,5 +52,7 @@ UIKit_PumpEvents(_THIS)
         } while (result == kCFRunLoopRunHandledSource);
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

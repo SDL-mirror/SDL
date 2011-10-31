@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_DIRECTFB
 
 #include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_modes.h"
@@ -520,3 +523,5 @@ DirectFB_AdjustWindowSurface(SDL_Window * window)
   error:
     return;
 }
+
+#endif /* SDL_VIDEO_DRIVER_DIRECTFB */

@@ -115,7 +115,7 @@ SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitm
         SDL_UnlockSurface(shape);
 }
 
-SDL_ShapeTree*
+static SDL_ShapeTree*
 RecursivelyCalculateShapeTree(SDL_WindowShapeMode mode,SDL_Surface* mask,SDL_Rect dimensions) {
     int x = 0,y = 0;
     Uint8* pixel = NULL;
@@ -249,7 +249,7 @@ SDL_SetWindowShape(SDL_Window *window,SDL_Surface *shape,SDL_WindowShapeMode *sh
     return result;
 }
 
-SDL_bool
+static SDL_bool
 SDL_WindowHasAShape(SDL_Window *window) {
     if (window == NULL || !SDL_IsShapedWindow(window))
         return SDL_FALSE;

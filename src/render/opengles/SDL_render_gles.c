@@ -581,7 +581,6 @@ static int
 GLES_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
                       int count)
 {
-    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
     GLshort *vertices;
 
@@ -603,7 +602,6 @@ static int
 GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
                      int count)
 {
-    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
     GLshort *vertices;
 
@@ -632,7 +630,6 @@ static int
 GLES_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects,
                      int count)
 {
-    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     int i;
 
     GLES_SetDrawingState(renderer);

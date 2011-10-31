@@ -745,7 +745,7 @@ SDL_UnlockTextureYUV(SDL_Texture * texture)
     SDL_UnlockTexture(native);
 }
 
-void
+static void
 SDL_UnlockTextureNative(SDL_Texture * texture)
 {
     SDL_Texture *native = texture->native;

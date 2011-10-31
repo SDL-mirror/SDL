@@ -18,8 +18,10 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
 
-#include <stdio.h>
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_assert.h"
 #include "SDL_windowsshape.h"
 #include "SDL_windowsvideo.h"
@@ -101,3 +103,5 @@ Win32_ResizeWindowShape(SDL_Window *window) {
     
     return 0;
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */

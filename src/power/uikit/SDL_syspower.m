@@ -21,13 +21,14 @@
 #include "SDL_config.h"
 
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_UIKIT
+#if SDL_POWER_UIKIT
 
 #import <UIKit/UIKit.h>
 
 #include "SDL_power.h"
 #include "SDL_timer.h"
 #include "SDL_assert.h"
+#include "SDL_syspower.h"
 
 // turn off the battery monitor if it's been more than X ms since last check.
 static const int BATTERY_MONITORING_TIMEOUT = 3000;

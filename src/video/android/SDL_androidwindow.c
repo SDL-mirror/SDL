@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 #include "../SDL_sysvideo.h"
 
 #include "SDL_androidvideo.h"
@@ -61,5 +63,7 @@ Android_DestroyWindow(_THIS, SDL_Window * window)
         Android_Window = NULL;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

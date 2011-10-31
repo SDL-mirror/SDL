@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_ALSA
+
 /* Allow access to a raw mixing buffer */
 
 #include <sys/types.h>
@@ -33,7 +35,7 @@
 #include "../SDL_audio_c.h"
 #include "SDL_alsa_audio.h"
 
-#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #include "SDL_loadso.h"
 #endif
 
@@ -84,7 +86,7 @@ static int (*ALSA_snd_pcm_wait)(snd_pcm_t *, int);
 static int (*ALSA_snd_pcm_sw_params_set_avail_min)
   (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
 
-#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
 #define snd_pcm_sw_params_sizeof ALSA_snd_pcm_sw_params_sizeof
 
@@ -147,7 +149,7 @@ load_alsa_syms(void)
 
 #undef SDL_ALSA_SYM
 
-#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 
 static void
 UnloadALSALibrary(void)
@@ -692,5 +694,7 @@ ALSA_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap ALSA_bootstrap = {
     "alsa", "ALSA PCM audio", ALSA_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_ALSA */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -19,7 +19,7 @@ static const char rcsid[] =
  * fabs(x) returns the absolute value of x.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 libm_hidden_proto(fabs)

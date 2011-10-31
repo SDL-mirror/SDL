@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_BWINDOW
 
 #include "SDL_bframebuffer.h"
 
@@ -248,3 +251,5 @@ int32 BE_UpdateOnce(SDL_Window *window) {
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

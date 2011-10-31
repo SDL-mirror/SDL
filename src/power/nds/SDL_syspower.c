@@ -21,7 +21,7 @@
 #include "SDL_config.h"
 
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_NINTENDODS
+#if SDL_POWER_NINTENDODS
 
 #include "SDL_power.h"
 

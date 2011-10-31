@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_WINMM
+
 /* Allow access to a raw mixing buffer */
 
 #include "../../core/windows/SDL_windows.h"
@@ -405,5 +407,7 @@ WINMM_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap WINMM_bootstrap = {
     "winmm", "Windows Waveform Audio", WINMM_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_WINMM */
 
 /* vi: set ts=4 sw=4 expandtab: */

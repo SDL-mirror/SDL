@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL_cocoavideo.h"
 
 /* !!! FIXME: clean out the pre-10.6 code when it makes sense to do so. */
@@ -113,7 +115,6 @@ static SDL_bool
 GetDisplayMode(_THIS, const void *moderef, SDL_DisplayMode *mode)
 {
     SDL_DisplayModeData *data;
-    CFNumberRef number;
     long width, height, bpp, refreshRate;
 
     data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
@@ -146,6 +147,7 @@ GetDisplayMode(_THIS, const void *moderef, SDL_DisplayMode *mode)
 
     #if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
     if (!IS_SNOW_LEOPARD_OR_LATER(_this)) {
+        CFNumberRef number;
         CFDictionaryRef vidmode = (CFDictionaryRef) moderef;
         number = CFDictionaryGetValue(vidmode, kCGDisplayWidth);
         CFNumberGetValue(number, kCFNumberLongType, &width);
@@ -447,5 +449,7 @@ Cocoa_QuitModes(_THIS)
     }
     ShowMenuBar();
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */

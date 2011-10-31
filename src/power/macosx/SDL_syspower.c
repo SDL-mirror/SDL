@@ -21,7 +21,7 @@
 #include "SDL_config.h"
 
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_MACOSX
+#if SDL_POWER_MACOSX
 
 #include <Carbon/Carbon.h>
 #include <IOKit/ps/IOPowerSources.h>

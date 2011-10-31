@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_THREAD_WINDOWS
+
 /* Win32 thread management routines for SDL */
 
 #include "SDL_thread.h"
@@ -215,5 +217,7 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
     WaitForSingleObject(thread->handle, INFINITE);
     CloseHandle(thread->handle);
 }
+
+#endif /* SDL_THREAD_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

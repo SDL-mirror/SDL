@@ -59,7 +59,7 @@ static char rcsid[] = "$NetBSD: e_pow.c,v 1.9 1995/05/12 04:57:32 jtc Exp $";
  * to produce the hexadecimal values shown.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 libm_hidden_proto(scalbn)

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef __BEOS__
+
 /* Handle the BeApp specific portions of the application */
 
 #include <AppKit.h>
@@ -116,8 +118,6 @@ SDL_QuitBeApp(void)
     }
 }
 
-
-/* vi: set ts=4 sw=4 expandtab: */
 #ifdef __cplusplus
 }
 #endif
@@ -131,3 +131,7 @@ void SDL_BApp::ClearID(SDL_BWin *bwin) {
 		--i;
 	}
 }
+
+#endif /* __BEOS__ */
+
+/* vi: set ts=4 sw=4 expandtab: */

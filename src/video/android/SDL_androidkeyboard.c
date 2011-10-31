@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 #include <android/log.h>
 
 #include "../../events/SDL_events_c.h"
@@ -175,5 +177,7 @@ Android_OnKeyUp(int keycode)
 {
     return SDL_SendKeyboardKey(SDL_RELEASED, TranslateKeycode(keycode));
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

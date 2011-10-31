@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 /* Android SDL video driver implementation
 */
 
@@ -165,5 +167,7 @@ Android_SetScreenResolution(int width, int height, Uint32 format)
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_RESIZED, width, height);
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

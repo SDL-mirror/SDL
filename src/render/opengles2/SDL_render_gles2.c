@@ -877,7 +877,6 @@ GLES2_SetDrawingState(SDL_Renderer * renderer)
 static int
 GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count)
 {
-    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat *vertices;
     int idx;
 
@@ -910,7 +909,6 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
 static int
 GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count)
 {
-    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat *vertices;
     int idx;
 
@@ -943,7 +941,6 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
 static int
 GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 {
-    GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat vertices[8];
     int idx;
 

@@ -21,7 +21,7 @@ static const char rcsid[] =
  * with the sign bit of y.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 libm_hidden_proto(copysign)

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_windowsvideo.h"
 #include "SDL_windowswindow.h"
 #include "../../events/SDL_clipboardevents_c.h"
@@ -162,5 +164,7 @@ WIN_CheckClipboardUpdate(struct SDL_VideoData * data)
         data->clipboard_count = count;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

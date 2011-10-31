@@ -23,6 +23,7 @@
 #if !SDL_RENDER_DISABLED
 
 #include "../SDL_sysrender.h"
+#include "SDL_render_sw_c.h"
 
 #include "SDL_draw.h"
 #include "SDL_blendfillrect.h"

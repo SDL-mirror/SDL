@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_UIKIT
 
 #import "SDL_uikitview.h"
 
@@ -28,6 +31,7 @@
 #if SDL_IPHONE_KEYBOARD
 #import "keyinfotable.h"
 #import "SDL_uikitappdelegate.h"
+#import "SDL_uikitkeyboard.h"
 #import "SDL_uikitwindow.h"
 #endif
 
@@ -311,7 +315,7 @@
 /* iPhone keyboard addition functions */
 #if SDL_IPHONE_KEYBOARD
 
-SDL_uikitview * getWindowView(SDL_Window * window)
+static SDL_uikitview * getWindowView(SDL_Window * window)
 {
     if (window == NULL) {
         SDL_SetError("Window does not exist");
@@ -404,5 +408,7 @@ int SDL_iPhoneKeyboardToggle(SDL_Window * window)
 }
 
 #endif /* SDL_IPHONE_KEYBOARD */
+
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

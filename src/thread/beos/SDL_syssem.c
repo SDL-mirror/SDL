@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_THREAD_BEOS
+
 /* Semaphores in the BeOS environment */
 
 #include <be/kernel/OS.h>
@@ -147,5 +149,7 @@ SDL_SemPost(SDL_sem * sem)
     }
     return 0;
 }
+
+#endif /* SDL_THREAD_BEOS */
 
 /* vi: set ts=4 sw=4 expandtab: */

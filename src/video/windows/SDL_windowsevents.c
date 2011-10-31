@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-
 #include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_WINDOWS
 
 #include "SDL_windowsvideo.h"
 #include "SDL_windowsshape.h"
@@ -693,5 +694,7 @@ SDL_UnregisterApp()
         SDL_Appname = NULL;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

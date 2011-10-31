@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_main.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -185,5 +187,7 @@ WIN_VideoQuit(_THIS)
     WIN_QuitKeyboard(_this);
     WIN_QuitMouse(_this);
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vim: set ts=4 sw=4 expandtab: */

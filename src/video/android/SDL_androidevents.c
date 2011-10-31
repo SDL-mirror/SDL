@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_ANDROID
+
 #include "SDL_androidevents.h"
 
 void
@@ -27,5 +29,7 @@ Android_PumpEvents(_THIS)
 {
     /* No polling necessary */
 }
+
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

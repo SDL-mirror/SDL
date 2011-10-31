@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_THREAD_WINDOWS
+
 /* Mutex functions using the Win32 API */
 
 #include "../../core/windows/SDL_windows.h"
@@ -89,5 +91,7 @@ SDL_mutexV(SDL_mutex * mutex)
     LeaveCriticalSection(&mutex->cs);
     return (0);
 }
+
+#endif /* SDL_THREAD_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

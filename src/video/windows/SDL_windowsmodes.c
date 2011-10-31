@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_windowsvideo.h"
 
 /* Windows CE compatibility */
@@ -315,5 +317,7 @@ WIN_QuitModes(_THIS)
 {
     /* All fullscreen windows should have restored modes by now */
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

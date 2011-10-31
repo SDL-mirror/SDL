@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_PANDORA
+
 /* Being a null driver, there's no event stream. We just define stubs for
    most of the API. */
 
@@ -30,5 +32,7 @@ PND_PumpEvents(_THIS)
 {
     /* Not implemented. */
 }
+
+#endif /* SDL_VIDEO_DRIVER_PANDORA */
 
 /* vi: set ts=4 sw=4 expandtab: */

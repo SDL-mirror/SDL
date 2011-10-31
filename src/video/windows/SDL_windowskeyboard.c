@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #ifdef _WIN32_WCE
 #define SDL_DISABLE_WINDOWS_IME
 #endif
@@ -1538,5 +1540,7 @@ void IME_Present(SDL_VideoData *videodata)
 }
 
 #endif /* SDL_DISABLE_WINDOWS_IME */
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

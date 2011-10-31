@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_windowsvideo.h"
 
 #ifndef _WIN32_WCE
@@ -120,5 +122,7 @@ void WIN_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
         data->hbm = NULL;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,6 +21,8 @@
 
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_QSA
+
 #include <errno.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -862,5 +864,7 @@ QSA_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap QSAAUDIO_bootstrap = {
     "qsa", "QNX QSA Audio", QSA_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_QSA */
 
 /* vi: set ts=4 sw=4 expandtab: */

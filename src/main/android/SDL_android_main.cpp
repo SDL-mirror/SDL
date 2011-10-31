@@ -1,4 +1,8 @@
 
+#include "SDL_config.h"
+
+#ifdef __ANDROID__
+
 /* Include the SDL main definition header */
 #include "SDL_main.h"
 
@@ -32,5 +36,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass c
     /* We exit here for consistency with other platforms. */
     exit(status);
 }
+
+#endif /* __ANDROID__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_DUMMY
+
 /* Being a null driver, there's no event stream. We just define stubs for
    most of the API. */
 
@@ -33,5 +35,7 @@ DUMMY_PumpEvents(_THIS)
 {
     /* do nothing. */
 }
+
+#endif /* SDL_VIDEO_DRIVER_DUMMY */
 
 /* vi: set ts=4 sw=4 expandtab: */

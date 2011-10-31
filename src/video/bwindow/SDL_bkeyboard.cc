@@ -19,6 +19,9 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_BWINDOW
 
 #include <SupportDefs.h>
 #include <support/UTF8.h>
@@ -182,3 +185,5 @@ void BE_SetKeyState(int32 bkey, int8 state) {
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

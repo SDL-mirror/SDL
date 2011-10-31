@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_AUDIO_DRIVER_FUSIONSOUND
+
 /* Allow access to a raw mixing buffer */
 
 #ifdef HAVE_SIGNAL_H
@@ -37,7 +39,7 @@
 
 //#define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so"
 
-#ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
+#if SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
@@ -51,7 +53,7 @@ typedef DFBResult DirectResult;
 /* Buffers to use - more than 2 gives a lot of latency */
 #define FUSION_BUFFERS				(2)
 
-#ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
+#if SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 
 static const char *fs_library = SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC;
 static void *fs_handle = NULL;
@@ -344,5 +346,7 @@ SDL_FS_Init(SDL_AudioDriverImpl * impl)
 AudioBootStrap FUSIONSOUND_bootstrap = {
     "fusionsound", "FusionSound", SDL_FS_Init, 0
 };
+
+#endif /* SDL_AUDIO_DRIVER_FUSIONSOUND */
 
 /* vi: set ts=4 sw=4 expandtab: */

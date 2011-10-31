@@ -29,7 +29,7 @@
  * to produce the hexadecimal values shown.
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 static const double atanhi[] = {

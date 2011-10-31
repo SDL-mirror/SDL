@@ -21,7 +21,7 @@
 #include "SDL_config.h"
 
 #ifndef SDL_POWER_DISABLED
-#ifdef SDL_POWER_BEOS
+#if SDL_POWER_BEOS
 
 #include <stdio.h>
 #include <stdlib.h>

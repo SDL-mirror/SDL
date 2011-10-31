@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_NDS
+
 /* SDL Nintendo DS video driver implementation */
 
 #include <stdio.h>
@@ -393,5 +395,7 @@ double SDLCALL SDL_pow(double x, double y)
 	}
 	return 0;
 }
+
+#endif /* SDL_VIDEO_DRIVER_NDS */
 
 /* vi: set ts=4 sw=4 expandtab: */

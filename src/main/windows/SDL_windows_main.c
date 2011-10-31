@@ -3,6 +3,9 @@
 
     The WinMain function -- calls your program's main() function
 */
+#include "SDL_config.h"
+
+#ifdef __WIN32__
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -201,5 +204,7 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPTSTR szCmdLine, int sw)
     /* Hush little compiler, don't you cry... */
     return 0;
 }
+
+#endif /* __WIN32__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

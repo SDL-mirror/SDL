@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef __WIN32__
+
 #include "SDL_error.h"
 #include "SDL_windows.h"
 
@@ -58,5 +60,7 @@ WIN_CoUninitialize(void)
 {
     CoUninitialize();
 }
+
+#endif /* __WIN32__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

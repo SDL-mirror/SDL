@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_UIKIT
+
 #include "SDL_syswm.h"
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -88,11 +90,11 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
             [UIApplication sharedApplication].statusBarHidden = NO;
         }
 
-        const UIDeviceOrientation o = [[UIDevice currentDevice] orientation];
-        const BOOL landscape = (o == UIDeviceOrientationLandscapeLeft) ||
-                                   (o == UIDeviceOrientationLandscapeRight);
-        const BOOL rotate = ( ((window->w > window->h) && (!landscape)) ||
-                              ((window->w < window->h) && (landscape)) );
+        //const UIDeviceOrientation o = [[UIDevice currentDevice] orientation];
+        //const BOOL landscape = (o == UIDeviceOrientationLandscapeLeft) ||
+        //                           (o == UIDeviceOrientationLandscapeRight);
+        //const BOOL rotate = ( ((window->w > window->h) && (!landscape)) ||
+        //                      ((window->w < window->h) && (landscape)) );
 
         // The View Controller will handle rotating the view when the
         //  device orientation changes. This will trigger resize events, if
@@ -214,5 +216,7 @@ UIKit_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
         return SDL_FALSE;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

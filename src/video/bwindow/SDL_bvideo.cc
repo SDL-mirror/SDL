@@ -18,8 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
 
-
+#if SDL_VIDEO_DRIVER_BWINDOW
 
 
 #ifdef __cplusplus
@@ -168,3 +169,5 @@ void BE_VideoQuit(_THIS)
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* SDL_VIDEO_DRIVER_BWINDOW */

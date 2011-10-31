@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_WINDOWS
+
 #include "SDL_windowsvideo.h"
 
 /* WGL implementation of SDL OpenGL support */
@@ -604,5 +606,7 @@ WIN_GL_DeleteContext(_THIS, SDL_GLContext context)
 }
 
 #endif /* SDL_VIDEO_OPENGL_WGL */
+
+#endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

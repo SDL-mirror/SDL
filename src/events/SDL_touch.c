@@ -59,7 +59,7 @@ SDL_GetTouchIndex(int index)
     return SDL_touchPads[index];
 }
 
-int
+static int
 SDL_GetFingerIndexId(SDL_Touch* touch,SDL_FingerID fingerid)
 {
     int i;
@@ -190,6 +190,7 @@ SDL_GetNumTouch(void)
 {
     return SDL_num_touch;
 }
+
 SDL_Window *
 SDL_GetTouchFocusWindow(SDL_TouchID id)
 {

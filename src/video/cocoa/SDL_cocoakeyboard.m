@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL_cocoavideo.h"
 
 #include "../../events/SDL_keyboard_c.h"
@@ -28,7 +30,7 @@
 #include <Carbon/Carbon.h>
 
 //#define DEBUG_IME NSLog
-#define DEBUG_IME (void)
+#define DEBUG_IME(...)
 
 #ifndef NX_DEVICERCTLKEYMASK
     #define NX_DEVICELCTLKEYMASK    0x00000001
@@ -732,5 +734,7 @@ void
 Cocoa_QuitKeyboard(_THIS)
 {
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */

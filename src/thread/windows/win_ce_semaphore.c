@@ -26,7 +26,11 @@
    6. The wait function emulates WaitForSingleObject only. An emulation of
       WaitForMultipleObjects is much harder to implement outside the kernel,
       and it is not clear how to handle a mixture of WCE semaphores and normal
-      events and mutexes. */
+      events and mutexes.
+*/
+#include "SDL_config.h"
+
+#if SDL_THREAD_WINDOWS
 
 #include "../../core/windows/SDL_windows.h"
 
@@ -223,5 +227,7 @@ CleanUp(SYNCHHANDLE hSynch, DWORD Flags)
     /* Everything worked */
     return hSynch;
 }
+
+#endif /* SDL_THREAD_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

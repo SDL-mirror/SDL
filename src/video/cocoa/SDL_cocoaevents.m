@@ -19,6 +19,8 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_COCOA
 #include "SDL_timer.h"
 
 #include "SDL_cocoavideo.h"
@@ -219,5 +221,7 @@ Cocoa_PumpEvents(_THIS)
     }
     [pool release];
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */

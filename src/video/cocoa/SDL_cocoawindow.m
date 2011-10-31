@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL_syswm.h"
 #include "SDL_timer.h"  /* For SDL_GetTicks() */
 #include "../SDL_sysvideo.h"
@@ -277,8 +279,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)mouseEntered:(NSEvent *)theEvent
 {
-    SDL_Mouse *mouse = SDL_GetMouse();
-
     SDL_SetMouseFocus(_data->window);
 
     SDL_SetCursor(NULL);
@@ -990,5 +990,7 @@ Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
         return SDL_FALSE;
     }
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */

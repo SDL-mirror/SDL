@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#ifdef SDL_THREAD_BEOS
+
 /* BeOS thread management routines for SDL */
 
 #include <stdio.h>
@@ -119,5 +121,7 @@ SDL_SYS_WaitThread(SDL_Thread * thread)
 
     wait_for_thread(thread->handle, &the_status);
 }
+
+#endif /* SDL_THREAD_BEOS */
 
 /* vi: set ts=4 sw=4 expandtab: */

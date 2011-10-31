@@ -21,7 +21,7 @@ static const char rcsid[] =
  * use __kernel_rem_pio2()
  */
 
-#include "math.h"
+#include "math_libm.h"
 #include "math_private.h"
 
 libm_hidden_proto(fabs)

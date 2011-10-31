@@ -20,11 +20,11 @@
 */
 #include "SDL_config.h"
 
-#include "SDL_cocoavideo.h"
-
 /* NSOpenGL implementation of SDL OpenGL support */
 
 #if SDL_VIDEO_OPENGL_CGL
+#include "SDL_cocoavideo.h"
+
 #include <OpenGL/CGLTypes.h>
 #include <OpenGL/OpenGL.h>
 #include <OpenGL/CGLRenderers.h>

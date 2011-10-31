@@ -18,9 +18,11 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_DRIVER_PANDORA
 
 /* SDL internals */
-#include "SDL_config.h"
 #include "../SDL_sysvideo.h"
 #include "SDL_version.h"
 #include "SDL_syswm.h"
@@ -862,5 +864,7 @@ PND_gl_deletecontext(_THIS, SDL_GLContext context)
 
     return;
 }
+
+#endif /* SDL_VIDEO_DRIVER_PANDORA */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,6 +20,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_COCOA
+
 #include "SDL_events.h"
 #include "SDL_cocoavideo.h"
 
@@ -147,21 +149,6 @@ Cocoa_InitMouse(_THIS)
     SDL_SetDefaultCursor(Cocoa_CreateDefaultCursor());
 }
 
-static int
-ConvertMouseButtonToSDL(int button)
-{
-    switch (button)
-    {
-        case 0:
-            return(SDL_BUTTON_LEFT);   /* 1 */
-        case 1:
-            return(SDL_BUTTON_RIGHT);  /* 3 */
-        case 2:
-            return(SDL_BUTTON_MIDDLE); /* 2 */
-    }
-    return button+1;
-}
-
 void
 Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
 {
@@ -201,5 +188,7 @@ void
 Cocoa_QuitMouse(_THIS)
 {
 }
+
+#endif /* SDL_VIDEO_DRIVER_COCOA */
 
 /* vi: set ts=4 sw=4 expandtab: */
