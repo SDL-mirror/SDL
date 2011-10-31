@@ -258,7 +258,7 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
     }
 
     /* Make sure we don't exceed array bounds */
-    if (priority < 0 || priority >= SDL_NUM_LOG_PRIORITIES) {
+    if ((int)priority < 0 || priority >= SDL_NUM_LOG_PRIORITIES) {
         return;
     }
 
