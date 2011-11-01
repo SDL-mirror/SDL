@@ -265,6 +265,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     int wmstate_count;
     Atom wmstate_atoms[3];
+    Uint32 fevent = 0;
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 /* FIXME
@@ -554,27 +555,18 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 
 #ifdef X_HAVE_UTF8_STRING
-    {
-        Uint32 fevent = 0;
+    if (SDL_X11_HAVE_UTF8) {
         pXGetICValues(((SDL_WindowData *) window->driverdata)->ic,
                       XNFilterEvents, &fevent, NULL);
-        XSelectInput(display, w,
-                     (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                      ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                      PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                      PropertyChangeMask | StructureNotifyMask |
-                      KeymapStateMask | fevent));
-    }
-#else
-    {
-        XSelectInput(display, w,
-                     (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
-                      ExposureMask | ButtonPressMask | ButtonReleaseMask |
-                      PointerMotionMask | KeyPressMask | KeyReleaseMask |
-                      PropertyChangeMask | StructureNotifyMask |
-                      KeymapStateMask));
     }
 #endif
+
+    XSelectInput(display, w,
+                 (FocusChangeMask | EnterWindowMask | LeaveWindowMask |
+                 ExposureMask | ButtonPressMask | ButtonReleaseMask |
+                 PointerMotionMask | KeyPressMask | KeyReleaseMask |
+                 PropertyChangeMask | StructureNotifyMask |
+                 KeymapStateMask | fevent));
 
     XFlush(display);
 
