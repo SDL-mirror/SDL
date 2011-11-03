@@ -37,6 +37,7 @@
 #endif
 
 Uint8 SDL_numjoysticks = 0;
+int SDL_allocatedjoysticks = 0;
 SDL_Joystick **SDL_joysticks = NULL;
 
 int SDL_JoystickInit(void)
@@ -47,10 +48,12 @@ int SDL_JoystickInit(void)
 	SDL_numjoysticks = 0;
 	status = SDL_SYS_JoystickInit();
 	if ( status >= 0 ) {
-		arraylen = (status+1)*sizeof(*SDL_joysticks);
+		SDL_allocatedjoysticks = status;
+		arraylen = (SDL_allocatedjoysticks+1)*sizeof(*SDL_joysticks);
 		SDL_joysticks = (SDL_Joystick **)SDL_malloc(arraylen);
 		if ( SDL_joysticks == NULL ) {
 			SDL_numjoysticks = 0;
+			SDL_allocatedjoysticks = 0;
 		} else {
 			SDL_memset(SDL_joysticks, 0, arraylen);
 			SDL_numjoysticks = status;
@@ -370,7 +373,7 @@ void SDL_JoystickClose(SDL_Joystick *joystick)
 	for ( i=0; SDL_joysticks[i]; ++i ) {
 		if ( joystick == SDL_joysticks[i] ) {
 			SDL_memmove(&SDL_joysticks[i], &SDL_joysticks[i+1],
-			       (SDL_numjoysticks-i)*sizeof(joystick));
+			       (SDL_allocatedjoysticks-i)*sizeof(joystick));
 			break;
 		}
 	}
@@ -419,6 +422,7 @@ void SDL_JoystickQuit(void)
 	if ( SDL_joysticks ) {
 		SDL_free(SDL_joysticks);
 		SDL_joysticks = NULL;
+		SDL_allocatedjoysticks = 0;
 	}
 }
 
