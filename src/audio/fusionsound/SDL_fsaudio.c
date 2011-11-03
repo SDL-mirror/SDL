@@ -39,7 +39,7 @@
 
 //#define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so"
 
-#if SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
@@ -53,7 +53,7 @@ typedef DFBResult DirectResult;
 /* Buffers to use - more than 2 gives a lot of latency */
 #define FUSION_BUFFERS				(2)
 
-#if SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 
 static const char *fs_library = SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC;
 static void *fs_handle = NULL;

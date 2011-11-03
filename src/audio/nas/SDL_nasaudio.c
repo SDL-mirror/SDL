@@ -52,7 +52,7 @@ static AuEventHandlerRec *(*NAS_AuRegisterEventHandler)
   (AuServer *, AuMask, int, AuID, AuEventHandlerCallback, AuPointer);
 
 
-#if SDL_AUDIO_DRIVER_NAS_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
 
 static const char *nas_library = SDL_AUDIO_DRIVER_NAS_DYNAMIC;
 static void *nas_handle = NULL;
@@ -91,7 +91,7 @@ load_nas_syms(void)
 
 #undef SDL_NAS_SYM
 
-#if SDL_AUDIO_DRIVER_NAS_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_NAS_DYNAMIC
 
 static void
 UnloadNASLibrary(void)

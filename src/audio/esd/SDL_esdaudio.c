@@ -36,14 +36,14 @@
 #include "../SDL_audio_c.h"
 #include "SDL_esdaudio.h"
 
-#if SDL_AUDIO_DRIVER_ESD_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
 #define SDL_NAME(X)	X
 #endif
 
-#if SDL_AUDIO_DRIVER_ESD_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
 
 static const char *esd_library = SDL_AUDIO_DRIVER_ESD_DYNAMIC;
 static void *esd_handle = NULL;

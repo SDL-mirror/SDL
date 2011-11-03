@@ -35,7 +35,7 @@
 #include "../SDL_audio_c.h"
 #include "SDL_alsa_audio.h"
 
-#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #include "SDL_loadso.h"
 #endif
 
@@ -86,7 +86,7 @@ static int (*ALSA_snd_pcm_wait)(snd_pcm_t *, int);
 static int (*ALSA_snd_pcm_sw_params_set_avail_min)
   (snd_pcm_t *, snd_pcm_sw_params_t *, snd_pcm_uframes_t);
 
-#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 #define snd_pcm_hw_params_sizeof ALSA_snd_pcm_hw_params_sizeof
 #define snd_pcm_sw_params_sizeof ALSA_snd_pcm_sw_params_sizeof
 
@@ -149,7 +149,7 @@ load_alsa_syms(void)
 
 #undef SDL_ALSA_SYM
 
-#if SDL_AUDIO_DRIVER_ALSA_DYNAMIC
+#ifdef SDL_AUDIO_DRIVER_ALSA_DYNAMIC
 
 static void
 UnloadALSALibrary(void)
