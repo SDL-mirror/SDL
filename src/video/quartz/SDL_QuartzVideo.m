@@ -930,7 +930,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     return current;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
-ERR_NO_GL:
+ERR_NO_GL:      goto ERR_DOUBLEBUF;  /* this goto is to stop a compiler warning on newer SDKs. */
 ERR_DOUBLEBUF:  QZ_RestoreDisplayMode(this);
 ERR_NO_SWITCH:  CGReleaseAllDisplays ();
 ERR_NO_CAPTURE:
