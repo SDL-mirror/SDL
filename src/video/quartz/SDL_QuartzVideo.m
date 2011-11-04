@@ -798,9 +798,6 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Setup OpenGL for a fullscreen context */
     if (flags & SDL_OPENGL) {
 
-        CGLError err;
-        CGLContextObj ctx;
-
         if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
             goto ERR_NO_GL;
         }
@@ -818,13 +815,18 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         /* Apparently Lion checks some version flag set by the linker
            and changes API behavior. Annoying. */
 #if (MAC_OS_X_VERSION_MAX_ALLOWED < 1070)
-        [ qz_window setLevel:NSNormalWindowLevel ];
-        ctx = QZ_GetCGLContextObj (gl_context);
-        err = CGLSetFullScreen (ctx);
+        {
+            CGLError err;
+            CGLContextObj ctx;
+
+            [ qz_window setLevel:NSNormalWindowLevel ];
+            ctx = QZ_GetCGLContextObj (gl_context);
+            err = CGLSetFullScreen (ctx);
     
-        if (err) {
-            SDL_SetError ("Error setting OpenGL fullscreen: %s", CGLErrorString(err));
-            goto ERR_NO_GL;
+            if (err) {
+                SDL_SetError ("Error setting OpenGL fullscreen: %s", CGLErrorString(err));
+                goto ERR_NO_GL;
+            }
         }
 #else
         [ qz_window setLevel:CGShieldingWindowLevel() ];
