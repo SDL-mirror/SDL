@@ -24,6 +24,18 @@
 #include "SDL_QuartzVideo.h"
 #include "SDL_QuartzWindow.h"
 
+/* These APIs aren't just deprecated; they're gone from the headers in the
+   10.7 SDK. If we're using a >= 10.7 SDK, but targeting < 10.7, then we
+   force these function declarations. */
+#if ((MAC_OS_X_VERSION_MIN_REQUIRED < 1070) && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1070))
+CG_EXTERN void *CGDisplayBaseAddress(CGDirectDisplayID display)
+  CG_AVAILABLE_BUT_DEPRECATED(__MAC_10_0, __MAC_10_6,
+    __IPHONE_NA, __IPHONE_NA);
+CG_EXTERN size_t CGDisplayBytesPerRow(CGDirectDisplayID display)
+  CG_AVAILABLE_BUT_DEPRECATED(__MAC_10_0, __MAC_10_6,
+    __IPHONE_NA, __IPHONE_NA);
+#endif
+
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)  /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
