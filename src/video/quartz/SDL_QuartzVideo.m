@@ -1113,6 +1113,37 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
                                      int height, int bpp, Uint32 flags)
 {
     const BOOL isLion = IS_LION_OR_LATER(this);
+
+    /* Don't throw away the GL context if we can just resize the current one. */
+    if ( (video_set == SDL_TRUE) && ((flags & (SDL_OPENGL | SDL_FULLSCREEN)) == (current->flags & (SDL_OPENGL | SDL_FULLSCREEN))) && (bpp == current->format->BitsPerPixel) ) {
+        const NSRect contentRect = NSMakeRect (0, 0, width, height);
+        if (flags & SDL_FULLSCREEN) {
+            /* if these fail, we'll try the old way, of tearing everything down. */
+            const void *newmode = QZ_BestMode(this, bpp, width, height);
+            if ( newmode != NULL ) {
+                if ( QZ_SetDisplayMode(this, newmode) != CGDisplayNoErr ) {
+                    QZ_ReleaseDisplayMode(this, newmode);
+                } else {
+                    QZ_ReleaseDisplayMode(this, mode);  /* NULL is okay. */
+                    mode = newmode;
+                    current->w = width;
+                    current->h = height;
+                    [ qz_window setContentSize:contentRect.size ];
+                    [ window_view setFrameSize:contentRect.size ];
+                    [ gl_context update ];
+                    return current;
+                }
+            }
+        } else {
+            current->w = width;
+            current->h = height;
+            [ qz_window setContentSize:contentRect.size ];
+            [ window_view setFrameSize:contentRect.size ];
+            [ gl_context update ];
+            return current;
+        }
+    }
+
     current->flags = 0;
     current->pixels = NULL;
 
