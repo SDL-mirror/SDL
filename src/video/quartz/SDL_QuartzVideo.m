@@ -87,7 +87,7 @@ static int          QZ_VideoInit        (_THIS, SDL_PixelFormat *video_format);
 
 static SDL_Rect**   QZ_ListModes        (_THIS, SDL_PixelFormat *format,
                                          Uint32 flags);
-static void         QZ_UnsetVideoMode   (_THIS, BOOL to_desktop);
+static void         QZ_UnsetVideoMode   (_THIS, BOOL to_desktop, BOOL save_gl);
 
 static SDL_Surface* QZ_SetVideoMode     (_THIS, SDL_Surface *current,
                                          int width, int height, int bpp,
@@ -535,7 +535,7 @@ static inline CGError QZ_RestoreDisplayMode(_THIS)
     return QZ_SetDisplayMode(this, save_mode);
 }
 
-static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
+static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop, BOOL save_gl)
 {
     /* Reset values that may change between switches */
     this->info.blit_fill  = 0;
@@ -579,8 +579,10 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
             Do this first to avoid trash on the display before fade
         */
         if ( mode_flags & SDL_OPENGL ) {
-        
-            QZ_TearDownOpenGL (this);
+            if (!save_gl) {
+                QZ_TearDownOpenGL (this);
+            }
+
             #ifdef __powerpc__  /* we only use this for pre-10.3 compatibility. */
             CGLSetFullScreen (NULL);
             #endif
@@ -617,8 +619,11 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop)
         window_view = nil;
 
         /* Release the OpenGL context */
-        if ( mode_flags & SDL_OPENGL )
-            QZ_TearDownOpenGL (this);
+        if ( mode_flags & SDL_OPENGL ) {
+            if (!save_gl) {
+                QZ_TearDownOpenGL (this);
+            }
+        }
     }
 
     /* Signal successful teardown */
@@ -671,7 +676,8 @@ static const void *QZ_BestMode(_THIS, const int bpp, const int w, const int h)
 }
 
 static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int width,
-                                           int height, int bpp, Uint32 flags)
+                                           int height, int bpp, Uint32 flags,
+                                           const BOOL save_gl)
 {
     const BOOL isLion = IS_LION_OR_LATER(this);
     NSRect screen_rect;
@@ -693,7 +699,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     
     /* Destroy any previous mode */
     if (video_set == SDL_TRUE)
-        QZ_UnsetVideoMode (this, FALSE);
+        QZ_UnsetVideoMode (this, FALSE, save_gl);
 
     /* Sorry, QuickDraw was ripped out. */
     if (getenv("SDL_NSWindowPointer") || getenv("SDL_NSQuickDrawViewPointer")) {
@@ -810,8 +816,10 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Setup OpenGL for a fullscreen context */
     if (flags & SDL_OPENGL) {
 
-        if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
-            goto ERR_NO_GL;
+        if ( ! save_gl ) {
+            if ( ! QZ_SetupOpenGL (this, bpp, flags) ) {
+                goto ERR_NO_GL;
+            }
         }
 
         /* Initialize the NSView and add it to our window.  The presence of a valid window and
@@ -942,7 +950,8 @@ ERR_NO_MATCH:   if ( fade_token != kCGDisplayFadeReservationInvalidToken ) {
 }
 
 static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
-                                         int height, int *bpp, Uint32 flags)
+                                         int height, int *bpp, Uint32 flags,
+                                         const BOOL save_gl)
 {
     unsigned int style;
     NSRect contentRect;
@@ -970,12 +979,12 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
             if (CGAcquireDisplayFadeReservation (5, &fade_token) == kCGErrorSuccess) {
                 CGDisplayFade (fade_token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0.0, 0.0, 0.0, TRUE);
             }
-            QZ_UnsetVideoMode (this, TRUE);
+            QZ_UnsetVideoMode (this, TRUE, save_gl);
         }
         else if ( ((mode_flags ^ flags) & (SDL_NOFRAME|SDL_RESIZABLE)) ||
                   (mode_flags & SDL_OPENGL) || 
                   (flags & SDL_OPENGL) ) {
-            QZ_UnsetVideoMode (this, TRUE);
+            QZ_UnsetVideoMode (this, TRUE, save_gl);
         }
     }
     
@@ -1048,12 +1057,14 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     /* For OpenGL, we bind the context to a subview */
     if ( flags & SDL_OPENGL ) {
 
-        if ( ! QZ_SetupOpenGL (this, *bpp, flags) ) {
-            if (fade_token != kCGDisplayFadeReservationInvalidToken) {
-                CGDisplayFade (fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
-                CGReleaseDisplayFadeReservation (fade_token);
+        if ( ! save_gl ) {
+            if ( ! QZ_SetupOpenGL (this, *bpp, flags) ) {
+                if (fade_token != kCGDisplayFadeReservationInvalidToken) {
+                    CGDisplayFade (fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
+                    CGReleaseDisplayFadeReservation (fade_token);
+                }
+                return NULL;
             }
-            return NULL;
         }
 
         window_view = [ [ NSView alloc ] initWithFrame:contentRect ];
@@ -1109,43 +1120,12 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
     return current;
 }
 
-static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
-                                     int height, int bpp, Uint32 flags)
+
+static SDL_Surface* QZ_SetVideoModeInternal (_THIS, SDL_Surface *current,
+                                             int width, int height, int bpp,
+                                             Uint32 flags, BOOL save_gl)
 {
     const BOOL isLion = IS_LION_OR_LATER(this);
-
-    /* Don't throw away the GL context if we can just resize the current one. */
-    if ( (video_set == SDL_TRUE) && ((flags & SDL_OPENGL) == (current->flags & SDL_OPENGL)) && (bpp == current->format->BitsPerPixel) ) {
-        const NSRect contentRect = NSMakeRect (0, 0, width, height);
-        if (flags & SDL_FULLSCREEN) {
-            /* if these fail, we'll try the old way, of tearing everything down. */
-            const void *newmode = QZ_BestMode(this, bpp, width, height);
-            if ( newmode != NULL ) {
-                if ( QZ_SetDisplayMode(this, newmode) != CGDisplayNoErr ) {
-                    QZ_ReleaseDisplayMode(this, newmode);
-                } else {
-                    QZ_ReleaseDisplayMode(this, mode);  /* NULL is okay. */
-                    mode = newmode;
-                    current->w = width;
-                    current->h = height;
-                    [ qz_window setContentSize:contentRect.size ];
-                    [ window_view setFrameSize:contentRect.size ];
-                    [ gl_context update ];
-                    return current;
-                }
-            }
-        } else {
-            QZ_RestoreDisplayMode(this);
-            QZ_ReleaseDisplayMode(this, mode);  /* NULL is okay. */
-            mode = NULL;
-            current->w = width;
-            current->h = height;
-            [ qz_window setContentSize:contentRect.size ];
-            [ window_view setFrameSize:contentRect.size ];
-            [ gl_context update ];
-            return current;
-        }
-    }
 
     current->flags = 0;
     current->pixels = NULL;
@@ -1155,7 +1135,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
         if ( isLion ) {
             bpp = 32;
         }
-        current = QZ_SetVideoFullScreen (this, current, width, height, bpp, flags );
+        current = QZ_SetVideoFullScreen (this, current, width, height, bpp, flags, save_gl );
         if (current == NULL)
             return NULL;
     }
@@ -1163,7 +1143,7 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
     else {
         /* Force bpp to 32 */
         bpp = 32;
-        current = QZ_SetVideoWindowed (this, current, width, height, &bpp, flags);
+        current = QZ_SetVideoWindowed (this, current, width, height, &bpp, flags, save_gl );
         if (current == NULL)
             return NULL;
     }
@@ -1223,6 +1203,29 @@ static SDL_Surface* QZ_SetVideoMode (_THIS, SDL_Surface *current, int width,
 
     return current;
 }
+
+static SDL_Surface* QZ_SetVideoMode(_THIS, SDL_Surface *current,
+                                    int width, int height, int bpp,
+                                    Uint32 flags)
+{
+    /* Don't throw away the GL context if we can just resize the current one. */
+    const BOOL save_gl = ( (video_set == SDL_TRUE) && ((flags & SDL_OPENGL) == (current->flags & SDL_OPENGL)) && (bpp == current->format->BitsPerPixel) );
+    NSOpenGLContext *glctx = gl_context;
+    SDL_Surface* retval = NULL;
+
+    if (save_gl) {
+        [glctx retain];  /* just so we don't lose this when killing old views, etc */
+    }
+
+    retval = QZ_SetVideoModeInternal (this, current, width, height, bpp, flags, save_gl);
+
+    if (save_gl) {
+        [glctx release];  /* something else should own this now, or we legitimately release it. */
+    }
+
+    return retval;
+}
+
 
 static int QZ_ToggleFullScreen (_THIS, int on)
 {
@@ -1529,14 +1532,14 @@ static void QZ_VideoQuit (_THIS)
         if (CGAcquireDisplayFadeReservation (5, &fade_token) == kCGErrorSuccess) {
             CGDisplayFade (fade_token, 0.3, kCGDisplayBlendNormal, kCGDisplayBlendSolidColor, 0.0, 0.0, 0.0, TRUE);
         }
-        QZ_UnsetVideoMode (this, TRUE);
+        QZ_UnsetVideoMode (this, TRUE, FALSE);
         if (fade_token != kCGDisplayFadeReservationInvalidToken) {
             CGDisplayFade (fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
             CGReleaseDisplayFadeReservation (fade_token);
         }
     }
     else
-        QZ_UnsetVideoMode (this, TRUE);
+        QZ_UnsetVideoMode (this, TRUE, FALSE);
 
 #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070)
     if (!IS_LION_OR_LATER(this)) {
