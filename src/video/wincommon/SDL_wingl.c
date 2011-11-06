@@ -226,7 +226,18 @@ int WIN_GL_SetupWindow(_THIS)
 	*iAttr++ = this->gl_config.green_size;
 	*iAttr++ = WGL_BLUE_BITS_ARB;
 	*iAttr++ = this->gl_config.blue_size;
-	
+
+	/* We always choose either FULL or NO accel on Windows, because of flaky
+	   drivers. If the app didn't specify, we use FULL, because that's
+	   probably what they wanted (and if you didn't care and got FULL, that's
+	   a perfectly valid result in any case. */
+	*iAttr++ = WGL_ACCELERATION_ARB;
+	if (this->gl_config.accelerated) {
+		*iAttr++ = WGL_FULL_ACCELERATION_ARB;
+	} else {
+		*iAttr++ = WGL_NO_ACCELERATION_ARB;
+	}
+
 	if ( this->gl_config.alpha_size ) {
 		*iAttr++ = WGL_ALPHA_BITS_ARB;
 		*iAttr++ = this->gl_config.alpha_size;
@@ -276,11 +287,6 @@ int WIN_GL_SetupWindow(_THIS)
 	if ( this->gl_config.multisamplesamples ) {
 		*iAttr++ = WGL_SAMPLES_ARB;
 		*iAttr++ = this->gl_config.multisamplesamples;
-	}
-
-	if ( this->gl_config.accelerated >= 0 ) {
-		*iAttr++ = WGL_ACCELERATION_ARB;
-		*iAttr++ = (this->gl_config.accelerated ? WGL_FULL_ACCELERATION_ARB : WGL_NO_ACCELERATION_ARB);
 	}
 
 	*iAttr = 0;
