@@ -319,7 +319,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 #ifdef __WIN32__
     state = SDL_PromptAssertion_windows(data);
 
-#elif __MACOSX__
+#elif defined __MACOSX__ && defined SDL_VIDEO_DRIVER_COCOA
     /* This has to be done in an Objective-C (*.m) file, so we call out. */
     extern SDL_assert_state SDL_PromptAssertion_cocoa(const SDL_assert_data *);
     state = SDL_PromptAssertion_cocoa(data);
