@@ -190,24 +190,34 @@ static void
 GLES2_DestroyRenderer(SDL_Renderer *renderer)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    GLES2_ProgramCacheEntry *entry;
-    GLES2_ProgramCacheEntry *next;
 
     /* Deallocate everything */
     if (rdata) {
         GLES2_ActivateRenderer(renderer);
 
-        entry = rdata->program_cache.head;
-        while (entry) {
-            glDeleteShader(entry->vertex_shader->id);
-            glDeleteShader(entry->fragment_shader->id);
-            SDL_free(entry->vertex_shader);
-            SDL_free(entry->fragment_shader);
-            glDeleteProgram(entry->id);
-            next = entry->next;
-            SDL_free(entry);
-            entry = next;
-        }
+	{
+	    GLES2_ShaderCacheEntry *entry;
+	    GLES2_ShaderCacheEntry *next;
+	    entry = rdata->shader_cache.head;
+	    while (entry)
+	    {
+                glDeleteShader(entry->id);
+                next = entry->next;
+                SDL_free(entry);
+                entry = next;
+	    }
+	}
+	{
+	    GLES2_ProgramCacheEntry *entry;
+	    GLES2_ProgramCacheEntry *next;
+            entry = rdata->program_cache.head;
+            while (entry) {
+                glDeleteProgram(entry->id);
+                next = entry->next;
+                SDL_free(entry);
+                entry = next;
+            }
+	}
         if (rdata->context) {
             SDL_GL_DeleteContext(rdata->context);
         }
