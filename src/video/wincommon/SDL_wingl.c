@@ -176,6 +176,7 @@ int WIN_GL_SetupWindow(_THIS)
 	int i;
 	int iAttribs[64];
 	int *iAttr;
+	int *iAccelAttr = NULL;
 	float fAttribs[1] = { 0 };
 	const GLubyte *(WINAPI *glGetStringFunc)(GLenum);
 	const char *wglext;
@@ -232,6 +233,7 @@ int WIN_GL_SetupWindow(_THIS)
 	   probably what they wanted (and if you didn't care and got FULL, that's
 	   a perfectly valid result in any case. */
 	*iAttr++ = WGL_ACCELERATION_ARB;
+	iAccelAttr = iAttr;
 	if (this->gl_config.accelerated) {
 		*iAttr++ = WGL_FULL_ACCELERATION_ARB;
 	} else {
@@ -301,6 +303,12 @@ int WIN_GL_SetupWindow(_THIS)
 
 		/* Choose and set the closest available pixel format */
 		pixel_format = ChoosePixelFormatARB(this, iAttribs, fAttribs);
+		/* App said "don't care about accel" and FULL accel failed. Try NO. */
+		if ( ( !pixel_format ) && ( this->gl_config.accelerated < 0 ) ) {
+			*iAccelAttr = WGL_NO_ACCELERATION_ARB;
+			pixel_format = ChoosePixelFormatARB(this, iAttribs, fAttribs);
+			*iAccelAttr = WGL_FULL_ACCELERATION_ARB;  /* if we try again. */
+		}
 		if ( !pixel_format ) {
 			pixel_format = ChoosePixelFormat(GL_hdc, &GL_pfd);
 		}
