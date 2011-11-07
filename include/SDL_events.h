@@ -280,7 +280,7 @@ typedef struct SDL_JoyButtonEvent
 
 
 /**
- *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ *  \brief Touch finger motion/finger event structure (event.tfinger.*)
  */
 typedef struct SDL_TouchFingerEvent
 {
@@ -302,7 +302,7 @@ typedef struct SDL_TouchFingerEvent
 
 
 /**
- *  \brief Touch finger motion/finger event structure (event.tmotion.*)
+ *  \brief Touch finger motion/finger event structure (event.tbutton.*)
  */
 typedef struct SDL_TouchButtonEvent
 {
