@@ -178,7 +178,7 @@ UIKit_AddDisplay(UIScreen *uiscreen, int w, int h)
 
     // UIScreenMode showed up in 3.2 (the iPad and later). We're
     //  misusing this supports_multiple_displays flag here for that.
-    if (!SDL_UIKit_supports_multiple_displays) {
+    if (SDL_UIKit_supports_multiple_displays) {
         UIScreenMode *uimode = [uiscreen currentMode];
         [uimode retain];  // once for the desktop_mode
         [uimode retain];  // once for the current_mode
