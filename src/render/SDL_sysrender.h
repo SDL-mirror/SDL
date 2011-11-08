@@ -99,6 +99,7 @@ struct SDL_Renderer
 
     /* The window associated with the renderer */
     SDL_Window *window;
+    SDL_bool minimized;
 
     /* The drawable area within the window */
     SDL_Rect viewport;

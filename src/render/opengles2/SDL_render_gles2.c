@@ -169,6 +169,11 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
     }
+
+    if (event->event == SDL_WINDOWEVENT_MINIMIZED) {
+        /* According to Apple documentation, we need to finish drawing NOW! */
+	glFinish();
+    }
 }
 
 static int

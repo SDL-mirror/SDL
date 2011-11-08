@@ -111,6 +111,10 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                 viewport.w = renderer->viewport.w;
                 viewport.h = renderer->viewport.h;
                 SDL_RenderSetViewport(renderer, &viewport);
+            } else if (event->window.event == SDL_WINDOWEVENT_MINIMIZED) {
+                renderer->minimized = SDL_TRUE;
+            } else if (event->window.event == SDL_WINDOWEVENT_RESTORED) {
+                renderer->minimized = SDL_FALSE;
             }
         }
     }
@@ -188,6 +192,12 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
     if (renderer) {
         renderer->magic = &renderer_magic;
         renderer->window = window;
+
+        if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
+            renderer->minimized = SDL_TRUE;
+        } else {
+            renderer->minimized = SDL_FALSE;
+        }
 
         SDL_SetWindowData(window, SDL_WINDOWRENDERDATA, renderer);
 
@@ -873,6 +883,10 @@ SDL_RenderClear(SDL_Renderer * renderer)
 {
     CHECK_RENDERER_MAGIC(renderer, -1);
 
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
+        return 0;
+    }
     return renderer->RenderClear(renderer);
 }
 
@@ -897,6 +911,10 @@ SDL_RenderDrawPoints(SDL_Renderer * renderer,
         return -1;
     }
     if (count < 1) {
+        return 0;
+    }
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
         return 0;
     }
     return renderer->RenderDrawPoints(renderer, points, count);
@@ -925,6 +943,10 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
         return -1;
     }
     if (count < 2) {
+        return 0;
+    }
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
         return 0;
     }
     return renderer->RenderDrawLines(renderer, points, count);
@@ -976,6 +998,10 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
         return 0;
     }
 
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
+        return 0;
+    }
     for (i = 0; i < count; ++i) {
         if (SDL_RenderDrawRect(renderer, &rects[i]) < 0) {
             return -1;
@@ -1013,6 +1039,10 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
         return -1;
     }
     if (count < 1) {
+        return 0;
+    }
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
         return 0;
     }
     return renderer->RenderFillRects(renderer, rects, count);
@@ -1072,6 +1102,10 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         texture = texture->native;
     }
 
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
+        return 0;
+    }
     return renderer->RenderCopy(renderer, texture, &real_srcrect,
                                 &real_dstrect);
 }
@@ -1121,6 +1155,10 @@ SDL_RenderPresent(SDL_Renderer * renderer)
 {
     CHECK_RENDERER_MAGIC(renderer, );
 
+    /* Don't draw while we're minimized */
+    if (renderer->minimized) {
+        return;
+    }
     renderer->RenderPresent(renderer);
 }
 
