@@ -1186,6 +1186,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
         SDL_SetWindowTitle(window, title);
     }
     SDL_FinishWindowCreation(window, flags);
+    
+    /* If the window was created fullscreen, make sure the mode code matches */
+    SDL_UpdateFullscreenMode(window, FULLSCREEN_VISIBLE(window));
 
     return window;
 }
