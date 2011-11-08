@@ -470,7 +470,7 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
     }
     if (entry)
     {
-        if (rdata->program_cache.count > 1)
+        if (rdata->program_cache.head != entry)
         {
             if (entry->next)
                 entry->next->prev = entry->prev;
