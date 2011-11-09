@@ -115,7 +115,10 @@ static SDL_bool
 GetDisplayMode(_THIS, const void *moderef, SDL_DisplayMode *mode)
 {
     SDL_DisplayModeData *data;
-    long width, height, bpp, refreshRate;
+    long width = 0;
+    long height = 0;
+    long bpp = 0;
+    long refreshRate = 0;
 
     data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
     if (!data) {
