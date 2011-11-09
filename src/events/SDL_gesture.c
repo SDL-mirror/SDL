@@ -189,7 +189,7 @@ static int SDL_AddDollarGesture_one(SDL_GestureTouch* inTouch, SDL_FloatPoint* p
 
 static int SDL_AddDollarGesture(SDL_GestureTouch* inTouch, SDL_FloatPoint* path)
 {
-    int index;
+    int index = -1;
     int i = 0;
     if (inTouch == NULL) {
         if (SDL_numGestureTouches == 0) return -1;
