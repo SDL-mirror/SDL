@@ -187,6 +187,21 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
 }
 
 void
+UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
+{
+    UIScreen *uiscreen = (UIScreen *) display->driverdata;
+    UIWindow *uiwindow = ((SDL_WindowData *) window->driverdata)->uiwindow;
+
+    if (fullscreen) {
+        [UIApplication sharedApplication].statusBarHidden = YES;
+        uiwindow.frame = [uiscreen bounds];
+    } else {
+        [UIApplication sharedApplication].statusBarHidden = NO;
+        uiwindow.frame = [uiscreen applicationFrame];
+    }
+}
+
+void
 UIKit_DestroyWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *)window->driverdata;
