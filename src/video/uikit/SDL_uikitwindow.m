@@ -63,8 +63,27 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     {
         window->x = 0;
         window->y = 0;
-        window->w = (int)uiwindow.frame.size.width;
-        window->h = (int)uiwindow.frame.size.height;
+
+        /* We can pick either width or height here and we'll rotate the
+           screen to match, so we pick the closest to what we wanted.
+         */
+        if (window->w >= window->h) {
+            if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+                window->w = (int)uiwindow.frame.size.width;
+                window->h = (int)uiwindow.frame.size.height;
+            } else {
+                window->w = (int)uiwindow.frame.size.height;
+                window->h = (int)uiwindow.frame.size.width;
+            }
+        } else {
+            if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+                window->w = (int)uiwindow.frame.size.height;
+                window->h = (int)uiwindow.frame.size.width;
+            } else {
+                window->w = (int)uiwindow.frame.size.width;
+                window->h = (int)uiwindow.frame.size.height;
+            }
+        }
     }
 
     window->driverdata = data;
@@ -198,6 +217,27 @@ UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     } else {
         [UIApplication sharedApplication].statusBarHidden = NO;
         uiwindow.frame = [uiscreen applicationFrame];
+    }
+
+    /* We can pick either width or height here and we'll rotate the
+       screen to match, so we pick the closest to what we wanted.
+     */
+    if (window->w >= window->h) {
+        if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+            window->w = (int)uiwindow.frame.size.width;
+            window->h = (int)uiwindow.frame.size.height;
+        } else {
+            window->w = (int)uiwindow.frame.size.height;
+            window->h = (int)uiwindow.frame.size.width;
+        }
+    } else {
+        if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+            window->w = (int)uiwindow.frame.size.height;
+            window->h = (int)uiwindow.frame.size.width;
+        } else {
+            window->w = (int)uiwindow.frame.size.width;
+            window->h = (int)uiwindow.frame.size.height;
+        }
     }
 }
 

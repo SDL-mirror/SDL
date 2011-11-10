@@ -111,15 +111,11 @@
 // Send a resized event when the orientation changes.
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
-    if ((self->window->flags & SDL_WINDOW_RESIZABLE) == 0) {
-        return;   // don't care, we're just flipping over in this case.
-    }
-
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
     UIScreen *uiscreen = [uiwindow screen];
-    const int noborder = self->window->flags & SDL_WINDOW_BORDERLESS;
+    const int noborder = (self->window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS));
     CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
     const CGSize size = frame.size;
     int w, h;
@@ -140,6 +136,10 @@
         default:
             SDL_assert(0 && "Unexpected interface orientation!");
             return;
+    }
+
+    if (w == frame.size.width && h == frame.size.height) {
+        return;
     }
 
     frame.size.width = w;

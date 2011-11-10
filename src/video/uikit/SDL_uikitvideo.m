@@ -238,6 +238,13 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     } else {
         UIScreenMode *uimode = (UIScreenMode *) mode->driverdata;
         [uiscreen setCurrentMode:uimode];
+
+        CGSize size = [uimode size];
+        if (size.width >= size.height) {
+            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
+        } else {
+            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
+        }
     }
 
     return 0;
