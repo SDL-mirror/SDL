@@ -889,7 +889,8 @@ D3D_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 
     /* DirectX 9 has the same line rasterization semantics as GDI,
        so we need to close the endpoint of the line */
-    if (points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
+    if (count == 2 ||
+        points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
         vertices[0].x = (float) points[count-1].x;
         vertices[0].y = (float) points[count-1].y;
         result = IDirect3DDevice9_DrawPrimitiveUP(data->device, D3DPT_POINTLIST, 1, vertices, sizeof(*vertices));

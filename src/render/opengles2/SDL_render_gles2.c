@@ -944,6 +944,12 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
     glGetError();
     glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     glDrawArrays(GL_LINE_STRIP, 0, count);
+
+    /* We need to close the endpoint of the line */
+    if (count == 2 ||
+        points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
+        glDrawArrays(GL_POINTS, count-1, 1);
+    }
     SDL_stack_free(vertices);
     if (glGetError() != GL_NO_ERROR)
     {

@@ -625,6 +625,8 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
         glDrawArrays(GL_LINE_LOOP, 0, count);
     } else {
         glDrawArrays(GL_LINE_STRIP, 0, count);
+        /* We need to close the endpoint of the line */
+        glDrawArrays(GL_POINTS, count-1, 1);
     }
     SDL_stack_free(vertices);
 
