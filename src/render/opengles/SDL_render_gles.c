@@ -488,7 +488,7 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrthof((GLfloat) 0,
-			 (GLfloat) renderer->viewport.w,
+             (GLfloat) renderer->viewport.w,
              (GLfloat) renderer->viewport.h,
              (GLfloat) 0, 0.0, 1.0);
     return 0;
@@ -701,7 +701,8 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         cropRect[3] = -srcrect->h;
         glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES,
                                cropRect);
-        glDrawTexiOES(dstrect->x, h - dstrect->y - dstrect->h, 0,
+        glDrawTexiOES(renderer->viewport.x + dstrect->x,
+	              h - (renderer->viewport.y + dstrect->y) - dstrect->h, 0,
                             dstrect->w, dstrect->h);
     } else {
 
