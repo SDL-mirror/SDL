@@ -109,7 +109,9 @@ SDL_GetPixelFormatName(Uint32 format)
     CASE(SDL_PIXELFORMAT_RGB24)
     CASE(SDL_PIXELFORMAT_BGR24)
     CASE(SDL_PIXELFORMAT_RGB888)
+    CASE(SDL_PIXELFORMAT_RGBX8888)
     CASE(SDL_PIXELFORMAT_BGR888)
+    CASE(SDL_PIXELFORMAT_BGRX8888)
     CASE(SDL_PIXELFORMAT_ARGB8888)
     CASE(SDL_PIXELFORMAT_RGBA8888)
     CASE(SDL_PIXELFORMAT_ABGR8888)
@@ -426,11 +428,23 @@ SDL_MasksToPixelFormatEnum(int bpp, Uint32 Rmask, Uint32 Gmask, Uint32 Bmask,
             Amask == 0x00000000) {
             return SDL_PIXELFORMAT_RGB888;
         }
+        if (Rmask == 0xFF000000 &&
+            Gmask == 0x00FF0000 &&
+            Bmask == 0x0000FF00 &&
+            Amask == 0x00000000) {
+            return SDL_PIXELFORMAT_RGBX8888;
+        }
         if (Rmask == 0x000000FF &&
             Gmask == 0x0000FF00 &&
             Bmask == 0x00FF0000 &&
             Amask == 0x00000000) {
             return SDL_PIXELFORMAT_BGR888;
+        }
+        if (Rmask == 0x0000FF00 &&
+            Gmask == 0x00FF0000 &&
+            Bmask == 0xFF000000 &&
+            Amask == 0x00000000) {
+            return SDL_PIXELFORMAT_BGRX8888;
         }
         if (Rmask == 0x00FF0000 &&
             Gmask == 0x0000FF00 &&
