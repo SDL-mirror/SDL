@@ -55,18 +55,18 @@ GetWindowStyle(SDL_Window * window)
 {
     DWORD style = 0;
 
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
         style |= STYLE_FULLSCREEN;
-	} else {
-		if (window->flags & SDL_WINDOW_BORDERLESS) {
+    } else {
+        if (window->flags & SDL_WINDOW_BORDERLESS) {
             style |= STYLE_BORDERLESS;
-		} else {
+        } else {
             style |= STYLE_NORMAL;
-		}
-		if (window->flags & SDL_WINDOW_RESIZABLE) {
+        }
+        if (window->flags & SDL_WINDOW_RESIZABLE) {
             style |= STYLE_RESIZABLE;
-		}
-	}
+        }
+    }
     return style;
 }
 
@@ -181,7 +181,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
         }
     }
 
-	/* Enable multi-touch */
+    /* Enable multi-touch */
     if (videodata->RegisterTouchWindow) {
         videodata->RegisterTouchWindow(hwnd, (TWF_FINETOUCH|TWF_WANTPALM));
     }
@@ -634,7 +634,7 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
 
     if (data) {
 #ifdef _WIN32_WCE
-	WINCE_ShowWindow(_this, window, 0);
+        WINCE_ShowWindow(_this, window, 0);
 #endif
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
