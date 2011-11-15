@@ -138,16 +138,8 @@
             return;
     }
 
-    if (w == frame.size.width && h == frame.size.height) {
-        return;
-    }
-
-    frame.size.width = w;
-    frame.size.height = h;
-    frame.origin.x = 0;
-    frame.origin.y = 0;
-
     [uiwindow setFrame:frame];
+    [data->view setFrame:frame];
     [data->view updateFrame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }

@@ -1,4 +1,4 @@
-/*
+ /*
   Simple DirectMedia Layer
   Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
 
@@ -60,10 +60,10 @@
     //EventTouchData* data = (EventTouchData*)(touch.driverdata);
 
     touch.x_min = 0;
-    touch.x_max = frame.size.width;
+    touch.x_max = 1;
     touch.native_xres = touch.x_max - touch.x_min;
     touch.y_min = 0;
-    touch.y_max = frame.size.height;
+    touch.y_max = 1;
     touch.native_yres = touch.y_max - touch.y_min;
     touch.pressure_min = 0;
     touch.pressure_max = 1;
@@ -75,6 +75,17 @@
 
     return self;
 
+}
+
+- (CGPoint)touchLocation:(UITouch *)touch
+{
+    CGPoint point = [touch locationInView: self];
+    CGRect frame = [self frame];
+
+    frame = CGRectApplyAffineTransform(frame, [self transform]);
+    point.x /= frame.size.width;
+    point.y /= frame.size.height;
+    return point;
 }
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
@@ -94,7 +105,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [touch locationInView: self];
+        CGPoint locationInView = [self touchLocation:touch];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         //FIXME: TODO: Using touch as the fingerId is potentially dangerous
@@ -133,7 +144,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [touch locationInView: self];
+        CGPoint locationInView = [self touchLocation:touch];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendFingerDown(touchId, (long)touch,
@@ -181,7 +192,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [touch locationInView: self];
+        CGPoint locationInView = [self touchLocation:touch];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendTouchMotion(touchId, (long)touch,
