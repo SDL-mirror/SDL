@@ -62,6 +62,9 @@
 #ifndef __DragonFly__
 #include <osreldate.h>
 #endif
+#if __FreeBSD_kernel_version > 800063
+#include <dev/usb/usb_ioctl.h>
+#endif
 #include <sys/joystick.h>
 #endif
 
@@ -77,16 +80,14 @@
 #define MAX_JOY_JOYS	2
 #define MAX_JOYS	(MAX_UHID_JOYS + MAX_JOY_JOYS)
 
-#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063) && false
-struct usb_ctl_report {
-    int     ucr_report;
-    u_char  ucr_data[1024]; /* filled data size will vary */
-};
-#endif
 
 struct report
 {
+#if defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)
+    struct usb_gen_descriptor *buf; /* Buffer */
+#else
     struct usb_ctl_report *buf; /* Buffer */
+#endif
     size_t size;                /* Buffer size */
     int rid;                    /* Report ID */
     enum
@@ -148,8 +149,10 @@ static char *joydevnames[MAX_JOYS];
 static int report_alloc(struct report *, struct report_desc *, int);
 static void report_free(struct report *);
 
-#if defined(USBHID_UCR_DATA) || (defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063)) || defined(__FreeBSD_kernel__)
+#if defined(USBHID_UCR_DATA) || defined(__FreeBSD_kernel__)
 #define REP_BUF_DATA(rep) ((rep)->buf->ucr_data)
+#elif (defined(__FREEBSD__) && (__FreeBSD_kernel_version > 800063))
+#define REP_BUF_DATA(rep) ((rep)->buf->ugd_data)
 #else
 #define REP_BUF_DATA(rep) ((rep)->buf->data)
 #endif
