@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
 AC_GNU_SOURCE
-AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
+AC_CONFIG_AUX_DIR(build-scripts)
 AC_CONFIG_MACRO_DIR([acinclude])
 
 dnl Save the CFLAGS to see whether they were passed in or generated

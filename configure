@@ -2033,7 +2033,7 @@ _ACEOF
 
 
 ac_aux_dir=
-for ac_dir in $srcdir/build-scripts; do
+for ac_dir in build-scripts "$srcdir"/build-scripts; do
   if test -f "$ac_dir/install-sh"; then
     ac_aux_dir=$ac_dir
     ac_install_sh="$ac_aux_dir/install-sh -c"
@@ -2049,8 +2049,8 @@ for ac_dir in $srcdir/build-scripts; do
   fi
 done
 if test -z "$ac_aux_dir"; then
-  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in $srcdir/build-scripts" >&5
-echo "$as_me: error: cannot find install-sh or install.sh in $srcdir/build-scripts" >&2;}
+  { { echo "$as_me:$LINENO: error: cannot find install-sh or install.sh in build-scripts \"$srcdir\"/build-scripts" >&5
+echo "$as_me: error: cannot find install-sh or install.sh in build-scripts \"$srcdir\"/build-scripts" >&2;}
    { (exit 1); exit 1; }; }
 fi
 
