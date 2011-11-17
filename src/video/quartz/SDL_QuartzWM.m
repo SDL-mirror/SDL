@@ -243,6 +243,7 @@ void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     CGEventSourceSetLocalEventsSuppressionInterval(evsrc, 0.0);
     CGWarpMouseCursorPosition (cgp);
     CFRelease(evsrc);
+    SDL_PrivateAppActive (QZ_IsMouseInWindow (this), SDL_APPMOUSEFOCUS);
 }
 
 void QZ_WarpWMCursor (_THIS, Uint16 x, Uint16 y) {
