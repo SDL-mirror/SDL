@@ -651,7 +651,7 @@ static int DGA_InitHWSurfaces(_THIS, SDL_Surface *screen, Uint8 *base, int size)
 	surfaces.base = screen->pixels;
 	surfaces.size = (unsigned int)((long)base - (long)surfaces.base);
 	surfaces.next = bucket;
-	screen->hwdata = (struct private_hwdata *)&surfaces;
+	screen->hwdata = (struct private_hwdata *)((char*)&surfaces);
 	return(0);
 }
 static void DGA_FreeHWSurfaces(_THIS)
