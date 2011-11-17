@@ -61,27 +61,30 @@ static x11dynlib x11libs[] =
     { NULL, SDL_VIDEO_DRIVER_X11_DYNAMIC_XRANDR },
 };
 
-static void X11_GetSym(const char *fnname, int *rc, void **fn)
+static void *X11_GetSym(const char *fnname, int *rc)
 {
+	void *fn = NULL;
 	int i;
 	for (i = 0; i < SDL_TABLESIZE(x11libs); i++) {
 		if (x11libs[i].lib != NULL)
 		{
-			*fn = SDL_LoadFunction(x11libs[i].lib, fnname);
-			if (*fn != NULL)
+			fn = SDL_LoadFunction(x11libs[i].lib, fnname);
+			if (fn != NULL)
 				break;
 		}
 	}
 
 	#if DEBUG_DYNAMIC_X11
-	if (*fn != NULL)
+	if (fn != NULL)
 		printf("X11: Found '%s' in %s (%p)\n", fnname, x11libs[i].libname, *fn);
 	else
 		printf("X11: Symbol '%s' NOT FOUND!\n", fnname);
 	#endif
 
-	if (*fn == NULL)
+	if (fn == NULL)
 		*rc = 0;  /* kill this module. */
+
+	return fn;
 }
 
 
@@ -158,14 +161,17 @@ int SDL_X11_LoadSymbols(void)
 			}
 		}
 		#define SDL_X11_MODULE(modname) thismod = &SDL_X11_HAVE_##modname;
-		#define SDL_X11_SYM(a,fn,x,y,z) X11_GetSym(#fn,thismod,(void**)&p##fn);
+		#define SDL_X11_SYM(rc,fn,params,args,ret) \
+            p##fn = (rc(*)params) X11_GetSym(#fn, thismod);
 		#include "SDL_x11sym.h"
 		#undef SDL_X11_MODULE
 		#undef SDL_X11_SYM
 
 		#ifdef X_HAVE_UTF8_STRING
-		X11_GetSym("XCreateIC",&SDL_X11_HAVE_UTF8,(void **)&pXCreateIC);
-		X11_GetSym("XGetICValues",&SDL_X11_HAVE_UTF8,(void **)&pXGetICValues);
+		pXCreateIC = (XIC(*)(XIM,...)) X11_GetSym("XCreateIC",
+		                                          &SDL_X11_HAVE_UTF8);
+		pXGetICValues = (char * (*)(XIC,...)) X11_GetSym("XGetICValues",
+		                                                 &SDL_X11_HAVE_UTF8);
 		#endif
 
 		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
