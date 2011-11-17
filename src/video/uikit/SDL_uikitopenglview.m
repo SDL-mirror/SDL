@@ -78,6 +78,11 @@
             return nil;
         }
 
+        // !!! FIXME: use the screen this is on!
+        /* Use the main screen scale (for retina display support) */
+        if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+            self.contentScaleFactor = [UIScreen mainScreen].scale;
+
         /* create the buffers */
         glGenFramebuffersOES(1, &viewFramebuffer);
         glGenRenderbuffersOES(1, &viewRenderbuffer);
@@ -115,11 +120,6 @@
         }
         /* end create buffers */
 
-        // !!! FIXME: use the screen this is on!
-        /* Use the main screen scale (for retina display support) */
-        if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
-            self.contentScaleFactor = [UIScreen mainScreen].scale;
-
         self.autoresizingMask = 0;  // don't allow autoresize, since we need to do some magic in -(void)updateFrame.
     }
     return self;
@@ -144,11 +144,6 @@
         glBindRenderbufferOES(GL_RENDERBUFFER_OES, depthRenderbuffer);
         glRenderbufferStorageOES(GL_RENDERBUFFER_OES, depthBufferFormat, backingWidth, backingHeight);
     }
-
-    // !!! FIXME: use the screen this is on!
-    /* Use the main screen scale (for retina display support) */
-    if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
-        self.contentScaleFactor = [UIScreen mainScreen].scale;
 }
 
 - (void)setCurrentContext
