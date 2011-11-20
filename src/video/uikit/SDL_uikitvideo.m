@@ -201,10 +201,8 @@ UIKit_VideoInit(_THIS)
 {
     _this->gl_config.driver_loaded = 1;
 
-    NSString *reqSysVer = @"3.2";
-    NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
-    if ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending)
-        SDL_UIKit_supports_multiple_displays = YES;
+    // this tells us whether we are running on ios >= 3.2
+    SDL_UIKit_supports_multiple_displays = [UIScreen instancesRespondToSelector:@selector(currentMode)];
 
     // Add the main screen.
     UIScreen *uiscreen = [UIScreen mainScreen];
