@@ -24,7 +24,7 @@
 @interface SDLUIKitDelegate : NSObject<UIApplicationDelegate> {
 }
 
-+ (SDLUIKitDelegate *)sharedAppDelegate;
++ (id) sharedAppDelegate;
 + (NSString *)getAppDelegateClassName;
 
 @end

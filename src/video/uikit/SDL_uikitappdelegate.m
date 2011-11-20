@@ -79,10 +79,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 @implementation SDLUIKitDelegate
 
 /* convenience method */
-+ (SDLUIKitDelegate *)sharedAppDelegate
++ (id) sharedAppDelegate
 {
     /* the delegate is set in UIApplicationMain(), which is garaunteed to be called before this method */
-    return (SDLUIKitDelegate *)[[UIApplication sharedApplication] delegate];
+    return [[UIApplication sharedApplication] delegate];
 }
 
 + (NSString *)getAppDelegateClassName
