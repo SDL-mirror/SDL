@@ -79,7 +79,7 @@ UIKit_GL_LoadLibrary(_THIS, const char *path)
 
 void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 {
-#ifdef SDL_POWER_UIKIT
+#if SDL_POWER_UIKIT
     // Check once a frame to see if we should turn off the battery monitor.
     SDL_UIKit_UpdateBatteryMonitoring();
 #endif
