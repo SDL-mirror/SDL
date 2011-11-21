@@ -104,8 +104,10 @@ typedef enum
     SDL_MULTIGESTURE,
 
     /* Clipboard events */
-
     SDL_CLIPBOARDUPDATE = 0x900, /**< The clipboard changed */
+
+    /* Drag and drop events */
+    SDL_DROPFILE        = 0x1000, /**< The system requests a file open */
 
     /* Obsolete events */
     SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
@@ -350,6 +352,18 @@ typedef struct SDL_DollarGestureEvent
 
 
 /**
+ *  \brief An event used to request a file open by the system (event.drop.*)
+ *         This event is disabled by default, you can enable it with SDL_EventState()
+ *  \note If you enable this event, you must free the filename in the event.
+ */
+typedef struct SDL_DropEvent
+{
+    Uint32 type;        /**< ::SDL_DROPFILE */
+    char *file;         /**< The file name, which should be freed with SDL_free() */
+} SDL_DropEvent;
+
+
+/**
  *  \brief The "quit requested" event
  */
 typedef struct SDL_QuitEvent
@@ -376,7 +390,8 @@ typedef struct SDL_SysWMmsg SDL_SysWMmsg;
 
 /**
  *  \brief A video driver dependent system event (event.syswm.*)
- *  
+ *         This event is disabled by default, you can enable it with SDL_EventState()
+ *
  *  \note If you want to use this event, you should include SDL_syswm.h.
  */
 typedef struct SDL_SysWMEvent
@@ -437,6 +452,7 @@ typedef union SDL_Event
     SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
     SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data */
     SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data */
+    SDL_DropEvent drop;             /**< Drag and drop event data */
 
     /** Temporarily here for backwards compatibility */
     /*@{*/

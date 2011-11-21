@@ -51,6 +51,11 @@
     SDL_SendQuit();
     return NSTerminateCancel;
 }
+
+- (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
+{
+    return (BOOL)SDL_SendDropFile([filename UTF8String]);
+}
 @end
 
 static NSString *

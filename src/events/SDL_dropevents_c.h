@@ -20,30 +20,11 @@
 */
 #include "SDL_config.h"
 
-/* Useful functions and variables from SDL_events.c */
-#include "SDL_events.h"
-#include "SDL_thread.h"
-#include "SDL_clipboardevents_c.h"
-#include "SDL_dropevents_c.h"
-#include "SDL_gesture_c.h"
-#include "SDL_keyboard_c.h"
-#include "SDL_mouse_c.h"
-#include "SDL_touch_c.h"
-#include "SDL_windowevents_c.h"
+#ifndef _SDL_dropevents_c_h
+#define _SDL_dropevents_c_h
 
-/* Start and stop the event processing loop */
-extern int SDL_StartEventLoop(void);
-extern void SDL_StopEventLoop(void);
-extern void SDL_QuitInterrupt(void);
+extern int SDL_SendDropFile(const char *file);
 
-extern int SDL_SendSysWMEvent(SDL_SysWMmsg * message);
-
-extern int SDL_QuitInit(void);
-extern int SDL_SendQuit(void);
-extern void SDL_QuitQuit(void);
-
-/* The event filter function */
-extern SDL_EventFilter SDL_EventOK;
-extern void *SDL_EventOKParam;
+#endif /* _SDL_dropevents_c_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,30 +20,28 @@
 */
 #include "SDL_config.h"
 
-/* Useful functions and variables from SDL_events.c */
+/* Drag and drop event handling code for SDL */
+
 #include "SDL_events.h"
-#include "SDL_thread.h"
-#include "SDL_clipboardevents_c.h"
+#include "SDL_events_c.h"
 #include "SDL_dropevents_c.h"
-#include "SDL_gesture_c.h"
-#include "SDL_keyboard_c.h"
-#include "SDL_mouse_c.h"
-#include "SDL_touch_c.h"
-#include "SDL_windowevents_c.h"
 
-/* Start and stop the event processing loop */
-extern int SDL_StartEventLoop(void);
-extern void SDL_StopEventLoop(void);
-extern void SDL_QuitInterrupt(void);
 
-extern int SDL_SendSysWMEvent(SDL_SysWMmsg * message);
+int
+SDL_SendDropFile(const char *file)
+{
+    int posted;
 
-extern int SDL_QuitInit(void);
-extern int SDL_SendQuit(void);
-extern void SDL_QuitQuit(void);
+    /* Post the event, if desired */
+    posted = 0;
+    if (SDL_GetEventState(SDL_DROPFILE) == SDL_ENABLE) {
+        SDL_Event event;
+        event.type = SDL_DROPFILE;
+	event.drop.file = SDL_strdup(file);
 
-/* The event filter function */
-extern SDL_EventFilter SDL_EventOK;
-extern void *SDL_EventOKParam;
+        posted = (SDL_PushEvent(&event) > 0);
+    }
+    return (posted);
+}
 
 /* vi: set ts=4 sw=4 expandtab: */
