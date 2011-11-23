@@ -113,7 +113,6 @@ case $phase in
         install_hdrs="yes"
         install_lib="yes"
         install_data="yes"
-        install_man="yes"
         ;;
     install-bin)
         install_bin="yes"
@@ -126,9 +125,6 @@ case $phase in
         ;;
     install-data)
         install_data="yes"
-        ;;
-    install-man)
-        install_man="yes"
         ;;
     clean)
         clean_ppc="yes"
@@ -279,13 +275,6 @@ fi
 if test x$install_data = xyes; then
     do_install sh $auxdir/mkinstalldirs $datadir/aclocal
     do_install /usr/bin/install -c -m 644 $srcdir/sdl.m4 $datadir/aclocal/sdl.m4
-fi
-if test x$install_man = xyes; then
-    do_install sh $auxdir/mkinstalldirs $mandir/man3
-    for src in $srcdir/docs/man3/*.3; do \
-        file=`echo $src | sed -e 's|^.*/||'`; \
-        do_install /usr/bin/install -c -m 644 $src $mandir/man3/$file; \
-    done
 fi
 
 #
