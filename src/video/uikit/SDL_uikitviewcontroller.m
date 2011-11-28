@@ -29,9 +29,8 @@
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_uikitwindow.h"
-
-#import "SDL_uikitviewcontroller.h"
-
+#include "SDL_uikitviewcontroller.h"
+#include "SDL_uikitvideo.h"
 
 @implementation SDL_uikitviewcontroller
 
@@ -114,7 +113,11 @@
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
     UIWindow *uiwindow = data->uiwindow;
-    UIScreen *uiscreen = [uiwindow screen];
+    UIScreen *uiscreen;
+    if (SDL_UIKit_supports_multiple_displays)
+        uiscreen = [uiwindow screen];
+    else
+        uiscreen = [UIScreen mainScreen];
     const int noborder = (self->window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS));
     CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
     const CGSize size = frame.size;
