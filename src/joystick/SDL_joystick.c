@@ -404,7 +404,7 @@ SDL_JoystickQuit(void)
     SDL_numjoysticks = 0;
 
     for (i = 0; i < numsticks; i++) {
-        SDL_Joystick *stick = SDL_joysticks[i];
+        SDL_Joystick *stick = SDL_joysticks[0];
         if (stick && (stick->ref_count >= 1)) {
             stick->ref_count = 1;
             SDL_JoystickClose(stick);
