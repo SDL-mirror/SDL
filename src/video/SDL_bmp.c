@@ -36,6 +36,8 @@
 #include "SDL_endian.h"
 #include "SDL_pixels_c.h"
 
+#define SAVE_32BIT_BMP
+
 /* Compression encodings for BMP files */
 #ifndef BI_RGB
 #define BI_RGB		0
