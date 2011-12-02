@@ -330,8 +330,8 @@ SDL_Overlay *X11_CreateYUVOverlay(_THIS, int width, int height, Uint32 format, S
 #ifdef PITCH_WORKAROUND
 	if ( hwdata->image != NULL && hwdata->image->pitches[0] != (width*bpp) ) {
 		/* Ajust overlay width according to pitch */ 
-		XFree(hwdata->image);
 		width = hwdata->image->pitches[0] / bpp;
+		XFree(hwdata->image);
 		hwdata->image = SDL_NAME(XvShmCreateImage)(GFX_Display, xv_port, format,
 							   0, width, height, yuvshm);
 	}
