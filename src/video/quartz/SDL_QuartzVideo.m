@@ -834,7 +834,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
 
         /* Apparently Lion checks some version flag set by the linker
            and changes API behavior. Annoying. */
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1070)
+#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070)
         {
             CGLError err;
             CGLContextObj ctx;
