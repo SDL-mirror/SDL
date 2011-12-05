@@ -24,6 +24,9 @@
 
 #include "SDL_cocoavideo.h"
 
+/* Include prototypes to avoid compiler warnings on ShowMenuBar/HideMenuBar */
+#include <Menus.h>
+
 /* !!! FIXME: clean out the pre-10.6 code when it makes sense to do so. */
 #define FORCE_OLD_API 0 || (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)
 
