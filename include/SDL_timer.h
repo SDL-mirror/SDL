@@ -92,7 +92,7 @@ extern DECLSPEC SDL_TimerID SDLCALL SDL_AddTimer(Uint32 interval,
  *
  * \warning It is not safe to remove a timer multiple times.
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_RemoveTimer(SDL_TimerID t);
+extern DECLSPEC SDL_bool SDLCALL SDL_RemoveTimer(SDL_TimerID id);
 
 
 /* Ends C function definitions when using C++ */
