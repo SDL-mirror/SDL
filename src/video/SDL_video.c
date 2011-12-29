@@ -979,6 +979,11 @@ SDL_Surface *SDL_DisplayFormatAlpha(SDL_Surface *surface)
 		if ( (vf->Rmask == 0xff) && (vf->Bmask == 0xff0000) ) {
 			rmask = 0xff;
 			bmask = 0xff0000;
+		} else if ( vf->Rmask == 0xFF00 && (vf->Bmask = 0xFF000000) ) {
+			amask = 0x000000FF;
+			rmask = 0x0000FF00;
+			gmask = 0x00FF0000;
+			bmask = 0xFF000000;
 		}
 		break;
 
