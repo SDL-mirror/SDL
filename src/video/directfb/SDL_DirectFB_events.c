@@ -79,6 +79,15 @@ void DirectFB_PumpEvents (_THIS)
               else if (evt.axis == DIAI_Y)
                 posted += SDL_PrivateMouseMotion(0, 1, 0, evt.axisrel);
             }
+          else if (evt.flags & DIEF_AXISABS)
+            {
+              static int last_x, last_y;
+              if (evt.axis == DIAI_X)
+                last_x = evt.axisabs;
+              else if (evt.axis == DIAI_Y)
+                last_y = evt.axisabs;
+              posted += SDL_PrivateMouseMotion(0, 0, last_x, last_y);
+            }
           break;
         default:
           ;
