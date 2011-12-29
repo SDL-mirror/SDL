@@ -20593,6 +20593,70 @@ echo "${ECHO_T}$have_gcc_fvisibility" >&6; }
     fi
 }
 
+CheckStackBoundary()
+{
+    { echo "$as_me:$LINENO: checking for GCC -mpreferred-stack-boundary option" >&5
+echo $ECHO_N "checking for GCC -mpreferred-stack-boundary option... $ECHO_C" >&6; }
+    have_gcc_preferred_stack_boundary=no
+
+    save_CFLAGS="$CFLAGS"
+    CFLAGS="$save_CFLAGS -mpreferred-stack-boundary=2"
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+    int x = 0;
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+    have_gcc_preferred_stack_boundary=yes
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    { echo "$as_me:$LINENO: result: $have_gcc_preferred_stack_boundary" >&5
+echo "${ECHO_T}$have_gcc_preferred_stack_boundary" >&6; }
+    CFLAGS="$save_CFLAGS"
+
+    if test x$have_gcc_preferred_stack_boundary = xyes; then
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -mpreferred-stack-boundary=2"
+    fi
+}
+
+
 CheckWarnAll()
 {
     { echo "$as_me:$LINENO: checking for GCC -Wall option" >&5
@@ -24695,6 +24759,9 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     { echo "$as_me:$LINENO: result: $have_wince" >&5
 echo "${ECHO_T}$have_wince" >&6; }
+
+    # This fixes Windows stack alignment with newer GCC
+    CheckStackBoundary
 }
 
 CheckDIRECTX()
