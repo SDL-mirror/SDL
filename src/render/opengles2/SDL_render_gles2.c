@@ -38,8 +38,11 @@ SDL_RenderDriver GLES2_RenderDriver = {
     {
         "opengles2",
         (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
-        1,
-        {SDL_PIXELFORMAT_ABGR8888},
+        4,
+        {SDL_PIXELFORMAT_ABGR8888,
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_PIXELFORMAT_RGB888,
+        SDL_PIXELFORMAT_BGR888},
         0,
         0
     }
@@ -111,7 +114,10 @@ typedef enum
 typedef enum
 {
     GLES2_IMAGESOURCE_SOLID,
-    GLES2_IMAGESOURCE_TEXTURE
+    GLES2_IMAGESOURCE_TEXTURE_ABGR,
+    GLES2_IMAGESOURCE_TEXTURE_ARGB,
+    GLES2_IMAGESOURCE_TEXTURE_RGB,
+    GLES2_IMAGESOURCE_TEXTURE_BGR
 } GLES2_ImageSource;
 
 typedef struct GLES2_DriverContext
@@ -272,6 +278,9 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     switch (texture->format)
     {
     case SDL_PIXELFORMAT_ABGR8888:
+    case SDL_PIXELFORMAT_ARGB8888:
+    case SDL_PIXELFORMAT_BGR888:
+    case SDL_PIXELFORMAT_RGB888:
         format = GL_RGBA;
         type = GL_UNSIGNED_BYTE;
         break;
@@ -635,7 +644,7 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
     if (glGetError() != GL_NO_ERROR || !compileSuccessful)
     {
         char *info = NULL;
-        int length;
+        int length = 0;
 
         glGetShaderiv(entry->id, GL_INFO_LOG_LENGTH, &length);
         if (length > 0) {
@@ -701,9 +710,20 @@ GLES2_SelectProgram(SDL_Renderer *renderer, GLES2_ImageSource source, SDL_BlendM
     case GLES2_IMAGESOURCE_SOLID:
         ftype = GLES2_SHADER_FRAGMENT_SOLID_SRC;
         break;
-    case GLES2_IMAGESOURCE_TEXTURE:
-        ftype = GLES2_SHADER_FRAGMENT_TEXTURE_SRC;
+    case GLES2_IMAGESOURCE_TEXTURE_ABGR:
+        ftype = GLES2_SHADER_FRAGMENT_TEXTURE_ABGR_SRC;
+            break;
+    case GLES2_IMAGESOURCE_TEXTURE_ARGB:
+        ftype = GLES2_SHADER_FRAGMENT_TEXTURE_ARGB_SRC;
         break;
+    case GLES2_IMAGESOURCE_TEXTURE_RGB:
+        ftype = GLES2_SHADER_FRAGMENT_TEXTURE_RGB_SRC;
+        break;
+    case GLES2_IMAGESOURCE_TEXTURE_BGR:
+        ftype = GLES2_SHADER_FRAGMENT_TEXTURE_BGR_SRC;
+        break;
+    default:
+        goto fault;
     }
 
     /* Load the requested shaders */
@@ -1015,7 +1035,21 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
 
     /* Activate an appropriate shader and set the projection matrix */
     blendMode = texture->blendMode;
-    sourceType = GLES2_IMAGESOURCE_TEXTURE;
+    switch (texture->format)
+    {
+        case SDL_PIXELFORMAT_ABGR8888:
+            sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;
+            break;
+        case SDL_PIXELFORMAT_ARGB8888:
+            sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+            break;
+        case SDL_PIXELFORMAT_BGR888:
+            sourceType = GLES2_IMAGESOURCE_TEXTURE_BGR;
+            break;
+        case SDL_PIXELFORMAT_RGB888:
+            sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
+            break;
+    }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
         return -1;
 
