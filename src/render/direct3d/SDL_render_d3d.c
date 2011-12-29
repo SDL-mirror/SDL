@@ -441,11 +441,11 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     result = IDirect3D9_CreateDevice(data->d3d, data->adapter,
                                      D3DDEVTYPE_HAL,
                                      pparams.hDeviceWindow,
-                                     (caps.
+                                     D3DCREATE_FPU_PRESERVE | ((caps.
                                       DevCaps &
                                       D3DDEVCAPS_HWTRANSFORMANDLIGHT) ?
                                      D3DCREATE_HARDWARE_VERTEXPROCESSING :
-                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING,
+                                     D3DCREATE_SOFTWARE_VERTEXPROCESSING),
                                      &pparams, &data->device);
     if (FAILED(result)) {
         D3D_DestroyRenderer(renderer);
