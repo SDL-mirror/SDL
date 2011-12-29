@@ -309,6 +309,8 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					if ( WINDIB_FULLSCREEN() ) {
 						appstate |= SDL_APPMOUSEFOCUS;
 						SDL_RestoreDesktopMode();
+						/* A fullscreen app gets hidden but will not get a minimize event */
+						appstate |= (SDL_APPACTIVE | SDL_APPMOUSEFOCUS);
 #if defined(_WIN32_WCE)
 						LoadAygshell();
 						if( SHFullScreen ) 
