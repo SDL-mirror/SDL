@@ -569,15 +569,10 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                 rect->h, data->format, data->formattype,
                                 pixels);
     if (data->yuv) {
-        const void *top;
-
         renderdata->glPixelStorei(GL_UNPACK_ROW_LENGTH, (pitch / 2));
 
-        /* Skip to the top of the next texture */
-        top = (const void*)((const Uint8*)pixels + (texture->h-rect->y) * pitch - rect->x);
-
         /* Skip to the correct offset into the next texture */
-        pixels = (const void*)((const Uint8*)top + (rect->y / 2) * pitch + rect->x / 2);
+        pixels = (const void*)((const Uint8*)pixels + rect->h * pitch);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
             renderdata->glBindTexture(data->type, data->vtexture);
         } else {
@@ -587,11 +582,8 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                     rect->w/2, rect->h/2,
                                     data->format, data->formattype, pixels);
 
-        /* Skip to the top of the next texture */
-        top = (const void*)((const Uint8*)top + (texture->h * pitch)/4);
-
         /* Skip to the correct offset into the next texture */
-        pixels = (const void*)((const Uint8*)top + (rect->y / 2) * pitch + rect->x / 2);
+        pixels = (const void*)((const Uint8*)pixels + (rect->h * pitch)/4);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
             renderdata->glBindTexture(data->type, data->utexture);
         } else {
