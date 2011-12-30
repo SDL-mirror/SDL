@@ -581,7 +581,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 {
 	SDL_bool handled;
 	unsigned char n;
-	int old_axes, tmp_naxes, tmp_nhats, tmp_nballs;
+	int tmp_naxes, tmp_nhats, tmp_nballs;
 	const char *name;
 	char *env, env_name[128];
 	int i;
@@ -601,7 +601,6 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 	}
 
 	name = SDL_SYS_JoystickName(joystick->index);
-	old_axes = joystick->naxes;
 
 	/* Generic analog joystick support */
 	if ( SDL_strstr(name, "Analog") == name && SDL_strstr(name, "-hat") ) {
