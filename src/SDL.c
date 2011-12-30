@@ -64,6 +64,25 @@ int surfaces_allocated = 0;
 
 int SDL_InitSubSystem(Uint32 flags)
 {
+#if !SDL_TIMERS_DISABLED
+	/* Initialize the timer subsystem */
+	if ( ! ticks_started ) {
+		SDL_StartTicks();
+		ticks_started = 1;
+	}
+	if ( (flags & SDL_INIT_TIMER) && !(SDL_initialized & SDL_INIT_TIMER) ) {
+		if ( SDL_TimerInit() < 0 ) {
+			return(-1);
+		}
+		SDL_initialized |= SDL_INIT_TIMER;
+	}
+#else
+	if ( flags & SDL_INIT_TIMER ) {
+		SDL_SetError("SDL not built with timer support");
+		return(-1);
+	}
+#endif
+
 #if !SDL_VIDEO_DISABLED
 	/* Initialize the video/event subsystem */
 	if ( (flags & SDL_INIT_VIDEO) && !(SDL_initialized & SDL_INIT_VIDEO) ) {
@@ -91,25 +110,6 @@ int SDL_InitSubSystem(Uint32 flags)
 #else
 	if ( flags & SDL_INIT_AUDIO ) {
 		SDL_SetError("SDL not built with audio support");
-		return(-1);
-	}
-#endif
-
-#if !SDL_TIMERS_DISABLED
-	/* Initialize the timer subsystem */
-	if ( ! ticks_started ) {
-		SDL_StartTicks();
-		ticks_started = 1;
-	}
-	if ( (flags & SDL_INIT_TIMER) && !(SDL_initialized & SDL_INIT_TIMER) ) {
-		if ( SDL_TimerInit() < 0 ) {
-			return(-1);
-		}
-		SDL_initialized |= SDL_INIT_TIMER;
-	}
-#else
-	if ( flags & SDL_INIT_TIMER ) {
-		SDL_SetError("SDL not built with timer support");
 		return(-1);
 	}
 #endif
@@ -185,12 +185,6 @@ void SDL_QuitSubSystem(Uint32 flags)
 		SDL_initialized &= ~SDL_INIT_JOYSTICK;
 	}
 #endif
-#if !SDL_TIMERS_DISABLED
-	if ( (flags & SDL_initialized & SDL_INIT_TIMER) ) {
-		SDL_TimerQuit();
-		SDL_initialized &= ~SDL_INIT_TIMER;
-	}
-#endif
 #if !SDL_AUDIO_DISABLED
 	if ( (flags & SDL_initialized & SDL_INIT_AUDIO) ) {
 		SDL_AudioQuit();
@@ -201,6 +195,12 @@ void SDL_QuitSubSystem(Uint32 flags)
 	if ( (flags & SDL_initialized & SDL_INIT_VIDEO) ) {
 		SDL_VideoQuit();
 		SDL_initialized &= ~SDL_INIT_VIDEO;
+	}
+#endif
+#if !SDL_TIMERS_DISABLED
+	if ( (flags & SDL_initialized & SDL_INIT_TIMER) ) {
+		SDL_TimerQuit();
+		SDL_initialized &= ~SDL_INIT_TIMER;
 	}
 #endif
 }
