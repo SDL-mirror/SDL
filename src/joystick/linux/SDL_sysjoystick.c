@@ -935,6 +935,10 @@ void HandleHat(SDL_Joystick *stick, Uint8 hat, int axis, int value)
 	SDL_logical_joydecl(SDL_Joystick *logicaljoy = NULL);
 	SDL_logical_joydecl(struct joystick_logical_mapping* hats = NULL);
 
+	if (stick->nhats <= hat) {
+		return;  /* whoops, that shouldn't happen! */
+	}
+
 	the_hat = &stick->hwdata->hats[hat];
 	if ( value < 0 ) {
 		value = 0;
@@ -973,6 +977,9 @@ void HandleHat(SDL_Joystick *stick, Uint8 hat, int axis, int value)
 static __inline__
 void HandleBall(SDL_Joystick *stick, Uint8 ball, int axis, int value)
 {
+	if ((stick->nballs <= ball) || (axis >= 2)) {
+		return;  /* whoops, that shouldn't happen! */
+	}
 	stick->hwdata->balls[ball].axis[axis] += value;
 }
 
