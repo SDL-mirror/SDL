@@ -243,13 +243,14 @@ static BOOL WINAPI WIN_TrackMouseEvent(TRACKMOUSEEVENT *ptme)
 }
 #endif /* WM_MOUSELEAVE */
 
+int sysevents_mouse_pressed = 0;
+
 /* The main Win32 event handler
 DJM: This is no longer static as (DX5/DIB)_CreateWindow needs it
 */
 LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	SDL_VideoDevice *this = current_video;
-	static int mouse_pressed = 0;
+	SDL_VideoDevice *this = current_video;	
 #ifdef WMMSG_DEBUG
 	fprintf(stderr, "Received windows message:  ");
 	if ( msg > MAX_WMMSG ) {
@@ -426,14 +427,14 @@ LRESULT CALLBACK WinMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				}
 				if ( state == SDL_PRESSED ) {
 					/* Grab mouse so we get up events */
-					if ( ++mouse_pressed > 0 ) {
+					if ( ++sysevents_mouse_pressed > 0 ) {
 						SetCapture(hwnd);
 					}
 				} else {
 					/* Release mouse after all up events */
-					if ( --mouse_pressed <= 0 ) {
+					if ( --sysevents_mouse_pressed <= 0 ) {
 						ReleaseCapture();
-						mouse_pressed = 0;
+						sysevents_mouse_pressed = 0;
 					}
 				}
 				if ( mouse_relative ) {

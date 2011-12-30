@@ -573,6 +573,10 @@ static void SDL_CreateShadowSurface(int depth)
     #include <sys/neutrino.h>
 #endif /* __QNXNTO__ */
 
+#ifdef WIN32
+	extern int sysevents_mouse_pressed;
+#endif
+
 /*
  * Set the requested video mode, allocating a shadow buffer if necessary.
  */
@@ -585,6 +589,10 @@ SDL_Surface * SDL_SetVideoMode (int width, int height, int bpp, Uint32 flags)
 	int video_bpp;
 	int is_opengl;
 	SDL_GrabMode saved_grab;
+
+	#ifdef WIN32
+		sysevents_mouse_pressed = 0;
+	#endif
 
 	/* Start up the video driver, if necessary..
 	   WARNING: This is the only function protected this way!
