@@ -574,7 +574,9 @@ static void DIB_ResizeWindow(_THIS, int width, int height, int prev_width, int p
 			SDL_windowX = SDL_bounds.left;
 			SDL_windowY = SDL_bounds.top;
 		}
-		SetForegroundWindow(SDL_Window);
+		if ( GetParent(SDL_Window) == NULL ) {
+			SetForegroundWindow(SDL_Window);
+		}
 	}
 }
 
