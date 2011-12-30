@@ -1209,7 +1209,12 @@ static SDL_Surface* QZ_SetVideoMode(_THIS, SDL_Surface *current,
                                     Uint32 flags)
 {
     /* Don't throw away the GL context if we can just resize the current one. */
+#if 0  /* !!! FIXME: half-finished side project. Reenable this if you ever debug the corner cases. */
     const BOOL save_gl = ( (video_set == SDL_TRUE) && ((flags & SDL_OPENGL) == (current->flags & SDL_OPENGL)) && (bpp == current->format->BitsPerPixel) );
+#else
+    const BOOL save_gl = NO;
+#endif
+
     NSOpenGLContext *glctx = gl_context;
     SDL_Surface* retval = NULL;
 
