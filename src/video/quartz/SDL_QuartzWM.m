@@ -124,16 +124,14 @@ int QZ_ShowWMCursor (_THIS, WMcursor *cursor) {
         QZ_UpdateCursor(this);
     }
     else {
-        if (qz_window ==nil || (mode_flags & SDL_FULLSCREEN)) {
-            [ cursor->nscursor set ];
-        }
-        else {
+        if ( qz_window != nil && !(mode_flags & SDL_FULLSCREEN) ) {
             [ qz_window invalidateCursorRectsForView: [ qz_window contentView ] ];
         }
         if ( ! cursor_should_be_visible ) {
             cursor_should_be_visible = YES;
             QZ_ChangeGrabState (this, QZ_SHOWCURSOR);
         }
+        [ cursor->nscursor performSelectorOnMainThread:@selector(set) withObject:nil waitUntilDone:NO ];
         QZ_UpdateCursor(this);
     }
 
