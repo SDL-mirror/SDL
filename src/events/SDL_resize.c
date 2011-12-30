@@ -41,19 +41,14 @@ int SDL_PrivateResize(int w, int h)
 	SDL_Event events[32];
 
 	/* See if this event would change the video surface */
-	if ( !w || !h
-#ifndef __OS2__
-            || ((last_resize.w == w) && (last_resize.h == h))
-#endif
-    ) {
-		return(0);
+	if ( !w || !h ||
+	     (( last_resize.w == w ) && ( last_resize.h == h )) ||
+	     !SDL_VideoSurface ) {
+		 return(0);
 	}
-        last_resize.w = w;
-        last_resize.h = h;
-	if ( ! SDL_VideoSurface ||
-	     ((w == SDL_VideoSurface->w) && (h == SDL_VideoSurface->h)) ) {
-		return(0);
-	}
+	last_resize.w = w;
+	last_resize.h = h;
+
 	SDL_SetMouseRange(w, h);
 
 	/* Pull out all old resize events */
