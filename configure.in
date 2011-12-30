@@ -1556,6 +1556,7 @@ AC_HELP_STRING([--enable-video-qtopia], [use Qtopia video driver [[default=no]]]
             AC_DEFINE(SDL_VIDEO_DRIVER_QTOPIA)
             SOURCES="$SOURCES $srcdir/src/video/qtopia/*.cc"
             SDLMAIN_SOURCES="$srcdir/src/main/qtopia/*.cc"
+            SDLMAIN_LDFLAGS="-static"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $QTOPIA_FLAGS"
             SDL_CFLAGS="$SDL_CFLAGS -DQWS -Dmain=SDL_main"
             SDL_LIBS="-lSDLmain $SDL_LIBS -L${QPEDIR}/lib -L${QTDIR}/lib/ -lqpe -lqte"
@@ -2548,8 +2549,9 @@ case "$host" in
         # The Win32 platform requires special setup
         SOURCES="$SOURCES $srcdir/src/main/win32/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
+        SDLMAIN_LDFLAGS="-static"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
+        SDL_LIBS="-lSDLmain $SDL_LIBS -mwindows"
         ;;
     *-wince*)
         ARCH=win32
@@ -2591,6 +2593,7 @@ case "$host" in
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lcoredll -lcommctrl"
         # The Win32 platform requires special setup
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
+        SDLMAIN_LDFLAGS="-static"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         ;;
@@ -2722,6 +2725,7 @@ case "$host" in
         fi
         # The Mac OS X platform requires special setup.
         SDLMAIN_SOURCES="$srcdir/src/main/macosx/*.m"
+        SDLMAIN_LDFLAGS="-static"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         SDL_LIBS="-lSDLmain $SDL_LIBS"
         if test x$enable_video_cocoa = xyes; then
@@ -2858,6 +2862,7 @@ if test x$have_loadso != xyes; then
 fi
 if test x$SDLMAIN_SOURCES = x; then
     SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
+    SDLMAIN_LDFLAGS="-static"
 fi
 
 OBJECTS=`echo $SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.asm,$(objects)/\1.lo,g'`
@@ -2865,11 +2870,11 @@ OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.S,$(objects)/\1.lo,g'`
-OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
+OBJECTS=`echo $OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.lo,g'`
 
-SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.o,g'`
-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.o,g'`
-SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
+SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES | sed 's,[[^ ]]*/\([[^ ]]*\)\.cc,$(objects)/\1.lo,g'`
+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.m,$(objects)/\1.lo,g'`
+SDLMAIN_OBJECTS=`echo $SDLMAIN_OBJECTS | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 
 # Set runtime shared library paths as needed
 
@@ -2931,6 +2936,7 @@ AC_SUBST(SOURCES)
 AC_SUBST(OBJECTS)
 AC_SUBST(SDLMAIN_SOURCES)
 AC_SUBST(SDLMAIN_OBJECTS)
+AC_SUBST(SDLMAIN_LDFLAGS)
 AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
