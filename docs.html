@@ -53,6 +53,9 @@ SDL 1.2.15 is a minor bug fix release.
 <P>
 	Use the OpenGL GLX_EXT_swap_control extension if available
 </P>
+<P>
+	XRandR support is disabled by default because it causes desktop reconfiguring.  It can be enabled with the SDL_VIDEO_X11_XRANDR=1 environment variable, or by applying this patch: <a href="http://hg.libsdl.org/SDL/raw-rev/8ec3036098df">http://hg.libsdl.org/SDL/raw-rev/8ec3036098df</a>
+</P>
 </BLOCKQUOTE>
 
 <H3> Windows Notes </H3>
@@ -62,10 +65,10 @@ SDL 1.2.15 is a minor bug fix release.
 	Fixed SDL_GL_ACCELERATED_VISUAL handling
 </P>
 <P>
-	Fixed occasional crash handling WM_ACTIVATEAPP in Direct X code
+	Fixed application state handling with ALT-Tab
 </P>
 <P>
-	Fixed application state handling with ALT-Tab
+	Fixed occasional crash handling WM_ACTIVATEAPP in Direct X code
 </P>
 <P>
 	Fixed UTF-8 decoding of Russian characters
