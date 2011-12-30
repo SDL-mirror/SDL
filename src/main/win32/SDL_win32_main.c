@@ -98,7 +98,7 @@ static int ParseCommandLine(char *cmdline, char **argv)
 				++argc;
 			}
 			/* Skip over word */
-			while ( *bufp && ( *bufp != '"' || *lastp == '\\' ) ) {
+			while ( *bufp && ( *bufp != '"' || (lastp && *lastp == '\\') ) ) {
 				lastp = bufp;
 				++bufp;
 			}
