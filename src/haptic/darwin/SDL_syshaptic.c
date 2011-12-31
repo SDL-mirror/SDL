@@ -426,7 +426,7 @@ SDL_SYS_HapticOpenFromService(SDL_Haptic * haptic, io_service_t service)
 
     /* Get supported features. */
     ret2 = GetSupportedFeatures(haptic);
-    if (haptic->supported < 0) {
+    if (ret2 < 0) {
         goto open_err;
     }
 
