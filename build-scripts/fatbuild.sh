@@ -222,7 +222,10 @@ if test x$merge = xyes; then
      cp $native_path/build/.libs/libSDL.la $output &&
      cp $native_path/build/.libs/libSDL.lai $output &&
      cp $native_path/build/libSDL.la . &&
-     lipo -create -o libSDLmain.a */build/libSDLmain.a &&
+     lipo -create -o $output/libSDLmain.a */build/.libs/libSDLmain.a &&
+     cp $native_path/build/.libs/libSDLmain.la $output &&
+     cp $native_path/build/.libs/libSDLmain.lai $output &&
+     cp $native_path/build/libSDLmain.la . &&
      echo "Build complete!" &&
      echo "Files can be found in the build directory.") || exit 4
     cd ..
@@ -272,8 +275,7 @@ fi
 if test x$install_lib = xyes; then
     do_install sh $auxdir/mkinstalldirs $libdir
     do_install sh build/$native_path/libtool --mode=install /usr/bin/install -c  build/libSDL.la $libdir/libSDL.la
-    do_install /usr/bin/install -c -m 644 build/libSDLmain.a $libdir/libSDLmain.a
-    do_install ranlib $libdir/libSDLmain.a
+    do_install sh build/$native_path/libtool --mode=install /usr/bin/install -c  build/libSDLmain.la $libdir/libSDLmain.la
 fi
 if test x$install_data = xyes; then
     do_install sh $auxdir/mkinstalldirs $datadir/aclocal
