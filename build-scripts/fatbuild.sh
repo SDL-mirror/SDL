@@ -280,6 +280,8 @@ fi
 if test x$install_data = xyes; then
     do_install sh $auxdir/mkinstalldirs $datadir/aclocal
     do_install /usr/bin/install -c -m 644 $srcdir/sdl.m4 $datadir/aclocal/sdl.m4
+    do_install sh $auxdir/mkinstalldirs $libdir/pkgconfig
+    do_install /usr/bin/install -m 644 build/$native_path/sdl.pc $libdir/pkgconfig/sdl.pc
 fi
 if test x$install_man = xyes; then
     do_install sh $auxdir/mkinstalldirs $mandir/man3
