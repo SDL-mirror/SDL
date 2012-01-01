@@ -2551,7 +2551,7 @@ case "$host" in
         SDLMAIN_SOURCES="$srcdir/src/main/win32/*.c"
         SDLMAIN_LDFLAGS="-static"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lSDLmain $SDL_LIBS -mwindows"
+        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
         ;;
     *-wince*)
         ARCH=win32
