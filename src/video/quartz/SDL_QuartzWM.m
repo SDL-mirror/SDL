@@ -436,6 +436,7 @@ SDL_GrabMode QZ_GrabInput (_THIS, SDL_GrabMode grab_mode) {
             QZ_ChangeGrabState (this, QZ_DISABLE_GRAB);
         
         current_grab_mode = doGrab ? SDL_GRAB_ON : SDL_GRAB_OFF;
+        QZ_UpdateCursor(this);
     }
 
     return current_grab_mode;

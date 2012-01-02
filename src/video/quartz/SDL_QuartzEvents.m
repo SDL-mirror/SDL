@@ -721,6 +721,8 @@ void QZ_DoActivate (_THIS) {
         QZ_GetMouseLocation (this, &p);
         SDL_PrivateMouseMotion (0, 0, p.x, p.y);
     }
+
+    QZ_UpdateCursor(this);
 }
 
 void QZ_DoDeactivate (_THIS) {
