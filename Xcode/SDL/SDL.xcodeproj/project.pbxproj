@@ -2305,227 +2305,25 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		0073177C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = B;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_NAME = SDL;
-				SDKROOT = macosx10.6;
-				WRAPPER_EXTENSION = framework;
-			};
-			name = Deployment_for_official_releases_using_10.6SDK;
-		};
-		0073177D0858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DYLIB_COMPATIBILITY_VERSION = 1.3;
-				DYLIB_CURRENT_VERSION = 1.3.0;
-				FRAMEWORK_VERSION = B;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
-				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_NAME = SDL;
-				WRAPPER_EXTENSION = framework;
-			};
-			name = Default;
-		};
-		007317800858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
-				SDKROOT = macosx10.6;
-			};
-			name = Deployment_for_official_releases_using_10.6SDK;
-		};
-		007317810858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
-					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
-				);
-				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
-				PRODUCT_NAME = SDL;
-			};
-			name = Default;
-		};
-		007317880858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Standard DMG";
-				SDKROOT = macosx10.6;
-			};
-			name = Deployment_for_official_releases_using_10.6SDK;
-		};
-		007317890858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Standard DMG";
-			};
-			name = Default;
-		};
-		0073178C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Deployment_for_official_releases_using_10.6SDK;
-		};
-		0073178D0858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Default;
-		};
-		007317900858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				DEPLOYMENT_POSTPROCESSING = YES;
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_VERSION = 4.0;
-				"GCC_VERSION[arch=x86_64]" = 4.2;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				"MACOSX_DEPLOYMENT_TARGET[arch=x86_64]" = 10.6;
-				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.4u.sdk";
-				"SDKROOT[arch=x86_64]" = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
-				SEPARATE_STRIP = YES;
-				STRIP_STYLE = "non-global";
-				WARNING_CFLAGS = "";
-			};
-			name = Deployment_for_official_releases_using_10.6SDK;
-		};
-		007317910858DB0500B2BC32 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
-				GCC_ALTIVEC_EXTENSIONS = YES;
-				GCC_AUTO_VECTORIZATION = YES;
-				GCC_ENABLE_CPP_EXCEPTIONS = NO;
-				GCC_ENABLE_CPP_RTTI = NO;
-				GCC_ENABLE_SSE3_EXTENSIONS = YES;
-				GCC_OPTIMIZATION_LEVEL = 3;
-				GCC_VERSION = 4.0;
-				GCC_VERSION_i386 = 4.0;
-				GCC_VERSION_ppc = 4.0;
-				GCC_VERSION_x86_64 = 4.2;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_i386 = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_ppc = 10.4;
-				MACOSX_DEPLOYMENT_TARGET_x86_64 = 10.6;
-				SDKROOT_i386 = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_ppc = /Developer/SDKs/MacOSX10.4u.sdk;
-				SDKROOT_x86_64 = /Developer/SDKs/MacOSX10.6.sdk;
-				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
-			};
-			name = Default;
-		};
-		008310401072EA5700A531F1 /* Deployment_for_official_releases_using_10.6SDK */ = {
+		008310421072EA5700A531F1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Generate Doxygen DocSet";
 			};
-			name = Deployment_for_official_releases_using_10.6SDK;
+			name = Debug;
 		};
-		008310421072EA5700A531F1 /* Development_native_only */ = {
+		008310431072EA5700A531F1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Generate Doxygen DocSet";
 			};
-			name = Development_native_only;
+			name = Release;
 		};
-		008310431072EA5700A531F1 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Deployment_native_only;
-		};
-		008310441072EA5700A531F1 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Default;
-		};
-		00CFA621106A567900758660 /* Deployment_native_only */ = {
+		00CFA621106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DEPLOYMENT_POSTPROCESSING = YES;
@@ -2535,15 +2333,15 @@
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 3;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = macosx;
 				SEPARATE_STRIP = YES;
 				STRIP_STYLE = "non-global";
 				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA622106A567900758660 /* Deployment_native_only */ = {
+		00CFA622106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1.3;
@@ -2560,30 +2358,22 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
+				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_NAME = SDL;
 				WRAPPER_EXTENSION = framework;
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA623106A567900758660 /* Deployment_native_only */ = {
+		00CFA623106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -2591,25 +2381,25 @@
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA625106A567900758660 /* Deployment_native_only */ = {
+		00CFA625106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA626106A567900758660 /* Deployment_native_only */ = {
+		00CFA626106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
-			name = Deployment_native_only;
+			name = Release;
 		};
-		00CFA627106A568900758660 /* Development_native_only */ = {
+		00CFA627106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_ALTIVEC_EXTENSIONS = YES;
@@ -2618,13 +2408,13 @@
 				GCC_ENABLE_CPP_RTTI = NO;
 				GCC_ENABLE_SSE3_EXTENSIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				MACOSX_DEPLOYMENT_TARGET = 10.4;
+				MACOSX_DEPLOYMENT_TARGET = 10.5;
+				SDKROOT = macosx;
 				WARNING_CFLAGS = "";
-				ZERO_LINK = NO;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA628106A568900758660 /* Development_native_only */ = {
+		00CFA628106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1.3;
@@ -2641,30 +2431,22 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
+				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_NAME = SDL;
 				WRAPPER_EXTENSION = framework;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA629106A568900758660 /* Development_native_only */ = {
+		00CFA629106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(GCC_PREPROCESSOR_DEFINITIONS)",
-					"SDL_VIDEO_DRIVER_DGA=1",
-					"SDL_VIDEO_DRIVER_X11=1",
-					"SDL_VIDEO_DRIVER_X11_DGAMOUSE=1",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_1)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_2)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_3)",
 					"$(GCC_PREPROCESSOR_DEFINITIONS_QUOTED_4)",
-					"SDL_VIDEO_DRIVER_X11_VIDMODE=1",
-					"SDL_VIDEO_DRIVER_X11_XINERAMA=1",
-					"SDL_VIDEO_DRIVER_X11_XME=1",
-					"SDL_VIDEO_DRIVER_X11_XRANDR=1",
-					"SDL_VIDEO_DRIVER_X11_XV=1",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -2672,25 +2454,25 @@
 				OTHER_CFLAGS = "$(OTHER_CFLAGS_$(CURRENT_ARCH))";
 				PRODUCT_NAME = SDL;
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA62B106A568900758660 /* Development_native_only */ = {
+		00CFA62B106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00CFA62C106A568900758660 /* Development_native_only */ = {
+		00CFA62C106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
-			name = Development_native_only;
+			name = Debug;
 		};
-		00D8D9F21195090800638393 /* Deployment_for_official_releases_using_10.6SDK */ = {
+		00D8D9F41195090800638393 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2707,9 +2489,9 @@
 				);
 				PRODUCT_NAME = testsdl;
 			};
-			name = Deployment_for_official_releases_using_10.6SDK;
+			name = Debug;
 		};
-		00D8D9F41195090800638393 /* Development_native_only */ = {
+		00D8D9F51195090800638393 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -2726,45 +2508,7 @@
 				);
 				PRODUCT_NAME = testsdl;
 			};
-			name = Development_native_only;
-		};
-		00D8D9F51195090800638393 /* Deployment_native_only */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PRODUCT_NAME = testsdl;
-			};
-			name = Deployment_native_only;
-		};
-		00D8D9F61195090800638393 /* Default */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PRODUCT_NAME = testsdl;
-			};
-			name = Default;
+			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
@@ -2772,79 +2516,65 @@
 		0073177A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0073177C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */,
-				00CFA628106A568900758660 /* Development_native_only */,
-				00CFA622106A567900758660 /* Deployment_native_only */,
-				0073177D0858DB0500B2BC32 /* Default */,
+				00CFA628106A568900758660 /* Debug */,
+				00CFA622106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073177E0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Static Library" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317800858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */,
-				00CFA629106A568900758660 /* Development_native_only */,
-				00CFA623106A567900758660 /* Deployment_native_only */,
-				007317810858DB0500B2BC32 /* Default */,
+				00CFA629106A568900758660 /* Debug */,
+				00CFA623106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		007317860858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Standard DMG" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317880858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */,
-				00CFA62B106A568900758660 /* Development_native_only */,
-				00CFA625106A567900758660 /* Deployment_native_only */,
-				007317890858DB0500B2BC32 /* Default */,
+				00CFA62B106A568900758660 /* Debug */,
+				00CFA625106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073178A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Developer Extras Package" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0073178C0858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */,
-				00CFA62C106A568900758660 /* Development_native_only */,
-				00CFA626106A567900758660 /* Deployment_native_only */,
-				0073178D0858DB0500B2BC32 /* Default */,
+				00CFA62C106A568900758660 /* Debug */,
+				00CFA626106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		0073178E0858DB0500B2BC32 /* Build configuration list for PBXProject "SDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				007317900858DB0500B2BC32 /* Deployment_for_official_releases_using_10.6SDK */,
-				00CFA627106A568900758660 /* Development_native_only */,
-				00CFA621106A567900758660 /* Deployment_native_only */,
-				007317910858DB0500B2BC32 /* Default */,
+				00CFA627106A568900758660 /* Debug */,
+				00CFA621106A567900758660 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		008310471072EAAE00A531F1 /* Build configuration list for PBXAggregateTarget "Generate Doxygen DocSet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				008310401072EA5700A531F1 /* Deployment_for_official_releases_using_10.6SDK */,
-				008310421072EA5700A531F1 /* Development_native_only */,
-				008310431072EA5700A531F1 /* Deployment_native_only */,
-				008310441072EA5700A531F1 /* Default */,
+				008310421072EA5700A531F1 /* Debug */,
+				008310431072EA5700A531F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 		00D8D9F71195090900638393 /* Build configuration list for PBXNativeTarget "testsdl" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				00D8D9F21195090800638393 /* Deployment_for_official_releases_using_10.6SDK */,
-				00D8D9F41195090800638393 /* Development_native_only */,
-				00D8D9F51195090800638393 /* Deployment_native_only */,
-				00D8D9F61195090800638393 /* Default */,
+				00D8D9F41195090800638393 /* Debug */,
+				00D8D9F51195090800638393 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
