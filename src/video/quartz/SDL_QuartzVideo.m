@@ -36,7 +36,7 @@ CG_EXTERN size_t CGDisplayBytesPerRow(CGDirectDisplayID display)
     __IPHONE_NA, __IPHONE_NA);
 #endif
 
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060)  /* Fixed in Snow Leopard */
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)  /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
