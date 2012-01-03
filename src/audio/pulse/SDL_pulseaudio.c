@@ -446,6 +446,7 @@ static int PULSE_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		}
 		if ( paspec.format != PA_SAMPLE_INVALID )
 			break;
+		test_format = SDL_NextAudioFormat();
 	}
 	if (paspec.format == PA_SAMPLE_INVALID ) {
 		SDL_SetError("Couldn't find any suitable audio formats");
