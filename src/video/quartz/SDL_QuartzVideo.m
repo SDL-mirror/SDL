@@ -1149,9 +1149,8 @@ static SDL_Surface* QZ_SetVideoModeInternal (_THIS, SDL_Surface *current,
     }
 
     if (qz_window != nil) {
-        NSGraphicsContext *ctx;
-        ctx = [NSGraphicsContext graphicsContextWithWindow:qz_window];
-        [NSGraphicsContext setCurrentContext:ctx];
+        nsgfx_context = [NSGraphicsContext graphicsContextWithWindow:qz_window];
+        [NSGraphicsContext setCurrentContext:nsgfx_context];
     }
 
     /* Setup the new pixel format */
@@ -1507,8 +1506,12 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
     }
     
     else {
-        CGContextRef cgc = (CGContextRef)
-            [[NSGraphicsContext currentContext] graphicsPort];
+        NSGraphicsContext *ctx = [NSGraphicsContext currentContext];
+        if (ctx != nsgfx_context) { /* uhoh, you might be rendering from another thread... */
+            [NSGraphicsContext setCurrentContext:nsgfx_context];
+            ctx = nsgfx_context;
+        }
+        CGContextRef cgc = (CGContextRef) [ctx graphicsPort];
         QZ_DrawResizeIcon (this);
         CGContextFlush (cg_context);
         CGImageRef image = CGBitmapContextCreateImage (cg_context);

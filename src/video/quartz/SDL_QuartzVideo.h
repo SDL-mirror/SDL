@@ -93,6 +93,7 @@ typedef struct SDL_PrivateVideoData {
     const void         *save_mode;         /* original mode of the display */
     CGDirectPaletteRef palette;            /* palette of an 8-bit display */
     NSOpenGLContext    *gl_context;        /* OpenGL rendering context */
+    NSGraphicsContext  *nsgfx_context;     /* Cocoa graphics context */
     Uint32             width, height, bpp; /* frequently used data about the display */
     Uint32             flags;              /* flags for current mode, for teardown purposes */
     Uint32             video_set;          /* boolean; indicates if video was set correctly */
@@ -132,6 +133,7 @@ typedef struct SDL_PrivateVideoData {
 #define allow_screensaver (this->hidden->allow_screensaver)
 #define palette (this->hidden->palette)
 #define gl_context (this->hidden->gl_context)
+#define nsgfx_context (this->hidden->nsgfx_context)
 #define device_width (this->hidden->width)
 #define device_height (this->hidden->height)
 #define device_bpp (this->hidden->bpp)
