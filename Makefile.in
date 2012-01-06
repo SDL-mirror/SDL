@@ -36,7 +36,7 @@ VERSION_OBJECTS = @VERSION_OBJECTS@
 SDLMAIN_TARGET = libSDLmain.a
 SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 
-SRC_DIST = acinclude Android.mk autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iPhoneOS
+SRC_DIST = acinclude Android.mk autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl-config.in sdl.m4 sdl.pc.in SDL.spec.in src test TODO VisualC.html VisualC VisualCE Watcom-Win32.zip WhatsNew Xcode Xcode-iOS
 GEN_DIST = SDL.spec
 
 HDRS = \

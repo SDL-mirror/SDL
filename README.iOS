@@ -5,30 +5,31 @@ Building the Simple DirectMedia Layer for iPhone OS 2.0
 Requirements: Mac OS X v10.5 or later and the iPhone SDK.
 
 Instructions:
-1.  Open SDLiPhoneOS.xcodeproj (located in Xcode-iPhoneOS/SDL) in XCode.
-2.  Set Project->Set Active SDK to "Use Project Settings"
-3.  Select your desired target, and hit build.
+1.  Open SDL.xcodeproj (located in Xcode-iOS/SDL) in XCode.
+2.  Select your desired target, and hit build.
 
 There are three build targets:
-- StaticLibiPhoneOS:
-	Build SDL as a statically linked (armv6) library for iPhone OS 2.0.
-- StaticLibSimulator:
-	Build SDL as a statically linked (x86) library for the iPhone Simulator
+- libSDL.a:
+	Build SDL as a statically linked library
+- testsdl
+	Build a test program (there are known test failures which are fine)
 - Template:
 	Package a project template together with the SDL for iPhone static libraries and copies of the SDL headers.  The template includes proper references to the SDL library and headers, skeleton code for a basic SDL program, and placeholder graphics for the application icon and startup screen.
 
 ==============================================================================
-Using the Simple DirectMedia Layer for iPhone OS 2.0
+Using the Simple DirectMedia Layer for iOS
 ==============================================================================
 
+FIXME: This needs to be updated for the latest methods
+
 Here is the easiest method:
-1.  Build the SDL libraries (libSDLiPhoneOS.a and libSDLSimulator.a) and the iPhone SDL Application template.
-1.  Install the iPhone SDL Application template by copying it to one of XCode's template directories.  I recommend creating a directory called "SDL" in "/Developer/Platforms/iPhoneOS.platform/Developer/Library/XCode/Project Templates/" and placing it there.
+1.  Build the SDL libraries (libSDL.a and libSDLSimulator.a) and the iPhone SDL Application template.
+1.  Install the iPhone SDL Application template by copying it to one of XCode's template directories.  I recommend creating a directory called "SDL" in "/Developer/Platforms/iOS.platform/Developer/Library/XCode/Project Templates/" and placing it there.
 2.  Start a new project using the template.  The project should be immediately ready for use with SDL.
 
 Here is a more manual method:
 1.  Create a new iPhone view based application.
-2.  Build the SDL static libraries (libSDLiPhoneOS.a and libSDLSimulator.a) for iPhone and include them in your project.  XCode will ignore the library that is not currently of the correct architecture, hence your app will work both on iPhone and in the iPhone Simulator.
+2.  Build the SDL static libraries (libSDL.a and libSDLSimulator.a) for iPhone and include them in your project.  XCode will ignore the library that is not currently of the correct architecture, hence your app will work both on iPhone and in the iPhone Simulator.
 3.  Include the SDL header files in your project.
 4.  Remove the ApplicationDelegate.h and ApplicationDelegate.m files -- SDL for iPhone provides its own UIApplicationDelegate.  Remove MainWindow.xib -- SDL for iPhone produces its user interface programmatically.
 5.  Delete the contents of main.m and program your app as a regular SDL program instead.  You may replace main.m with your own main.c, but you must tell XCode not to use the project prefix file, as it includes Objective-C code.
@@ -86,7 +87,7 @@ MySDLApp Home/
 When your SDL based iPhone application starts up, it sets the working directory to the main bundle (MySDLApp Home/MySDLApp.app), where your application resources are stored.  You cannot write to this directory.  Instead, I advise you to write document files to "../Documents/" and preferences to "../Library/Preferences".  
 
 More information on this subject is available here:
-http://developer.apple.com/iphone/library/documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/ApplicationEnvironment/chapter_6_section_3.html#//apple_ref/doc/uid/TP40007072-CH7-SW21
+http://developer.apple.com/library/ios/#documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/Introduction/Introduction.html
 
 ==============================================================================
 Notes -- iPhone SDL limitations
@@ -106,6 +107,4 @@ Audio:
 
 Loading Shared Objects:
 	This is disabled by default since it seems to break the terms of the iPhone SDK agreement.  It can be re-enabled in SDL_config_iphoneos.h.
-
-
 

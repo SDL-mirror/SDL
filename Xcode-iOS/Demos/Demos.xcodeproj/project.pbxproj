@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -107,66 +107,66 @@
 /* Begin PBXContainerItemProxy section */
 		049F3694130CD86800FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F3696130CD87600FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F3698130CD87F00FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369A130CD88800FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369C130CD89000FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F369E130CD89800FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		049F36A0130CD8A000FF080F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = FD6526620DE8FCCB002AD96B;
 			remoteInfo = libSDL;
 		};
 		04AB757011E563D200BE9753 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 006E982211955059001DE610;
 			remoteInfo = testsdl;
 		};
 		FD1B489D0E313154007AB34E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = FD6526630DE8FCCB002AD96B;
-			remoteInfo = StaticLibiPhoneOS;
+			remoteInfo = StaticLib;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -177,7 +177,7 @@
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FD15FCB20E086866003BDF25 /* Happy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Happy.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDLiPhoneOS.xcodeproj; path = ../SDL/SDLiPhoneOS.xcodeproj; sourceTree = SOURCE_ROOT; };
+		FD1B48920E313154007AB34E /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = ../SDL/SDL.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FD5F9BE40E0DEBEA008E885B /* Accel.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Accel.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD77A0050E26BC0500F39101 /* accelerometer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = accelerometer.c; sourceTree = "<group>"; };
 		FD77A0060E26BC0500F39101 /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = common.c; sourceTree = "<group>"; };
@@ -336,7 +336,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */,
+				FD1B48920E313154007AB34E /* SDL.xcodeproj */,
 				FD77A0040E26BC0500F39101 /* src */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -562,8 +562,11 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "DemosiPhoneOS" */;
-			compatibilityVersion = "Xcode 3.1";
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Demos" */;
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -577,7 +580,7 @@
 			projectReferences = (
 				{
 					ProductGroup = FD1B48930E313154007AB34E /* Products */;
-					ProjectRef = FD1B48920E313154007AB34E /* SDLiPhoneOS.xcodeproj */;
+					ProjectRef = FD1B48920E313154007AB34E /* SDL.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -795,20 +798,7 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphoneos\"",
-					"\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphonesimulator\"",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
 				PRODUCT_NAME = Rectangles;
 			};
 			name = Debug;
@@ -816,18 +806,7 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphoneos\"",
-					"\"$(SRCROOT)/../SDLiPod/build/Release-iphoneos\"",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../SDLiPod/build/Debug-iphonesimulator\"",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
 				PRODUCT_NAME = Rectangles;
 			};
 			name = Release;
@@ -835,19 +814,11 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = ../../include;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
-				LIBRARY_SEARCH_PATHS = "";
-				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				PRELINK_LIBS = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -857,18 +828,10 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
-				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				PRELINK_LIBS = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -878,19 +841,8 @@
 		FD15FCB50E086866003BDF25 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Happy;
 				SDKROOT = iphoneos;
 			};
@@ -899,42 +851,16 @@
 		FD15FCB60E086866003BDF25 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Happy;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		FD5F9BE70E0DEBEB008E885B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Accel;
 				SDKROOT = iphoneos;
 			};
@@ -943,40 +869,16 @@
 		FD5F9BE80E0DEBEB008E885B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Accel;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		FDB6520A0E43D1F300F688B5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PREBINDING = NO;
 				PRODUCT_NAME = Keyboard;
 				SDKROOT = iphoneos;
 			};
@@ -985,40 +887,16 @@
 		FDB6520B0E43D1F300F688B5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PREBINDING = NO;
-				PRODUCT_NAME = Fireworks;
+				PRODUCT_NAME = Keyboard;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		FDC202EC0E107B1200ABAC90 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Touch;
 				SDKROOT = iphoneos;
 			};
@@ -1027,40 +905,16 @@
 		FDC202ED0E107B1200ABAC90 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Touch;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		FDC52EDC0E2843D6008D768C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PREBINDING = NO;
 				PRODUCT_NAME = Fireworks;
 				SDKROOT = iphoneos;
 			};
@@ -1069,41 +923,16 @@
 		FDC52EDD0E2843D6008D768C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = "$(inherited)";
-				PREBINDING = NO;
 				PRODUCT_NAME = Fireworks;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
 		FDF0D6A20E12D05400247964 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Mixer;
 				SDKROOT = iphoneos;
 			};
@@ -1112,24 +941,9 @@
 		FDF0D6A30E12D05400247964 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				COPY_PHASE_STRIP = YES;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					"\"$(SRCROOT)\"",
-					"\"$(SRCROOT)/../SDL/build/Debug-iphoneos\"",
-				);
-				PREBINDING = NO;
 				PRODUCT_NAME = Mixer;
 				SDKROOT = iphoneos;
-				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
@@ -1145,7 +959,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "DemosiPhoneOS" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Demos" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

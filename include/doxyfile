@@ -635,7 +635,7 @@ EXCLUDE                = ../doxy \
                          ../Xcode \
                          ../VisualC \
                          ../VisualCE \
-                         ../Xcode-iPhoneOS
+                         ../Xcode-iOS
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or 
 # directories that are symbolic links (a Unix filesystem feature) are excluded 
