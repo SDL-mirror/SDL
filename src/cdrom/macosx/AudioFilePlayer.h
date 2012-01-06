@@ -37,7 +37,7 @@
 #include <AudioUnit/AUNTComponent.h>
 #endif
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED <= 1050)
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1050)
 typedef SInt16 FSIORefNum;
 #endif
 

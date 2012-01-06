@@ -36,7 +36,18 @@ CG_EXTERN size_t CGDisplayBytesPerRow(CGDirectDisplayID display)
     __IPHONE_NA, __IPHONE_NA);
 #endif
 
-#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1060)  /* Fixed in Snow Leopard */
+
+static inline BOOL IS_LION_OR_LATER(_THIS)
+{
+    return (system_version >= 0x1070);
+}
+
+static inline BOOL IS_SNOW_LEOPARD_OR_LATER(_THIS)
+{
+    return (system_version >= 0x1060);
+}
+
+#if (MAC_OS_X_VERSION_MAX_ALLOWED < 1060) && !defined(__LP64__)  /* Fixed in Snow Leopard */
 /*
     Add methods to get at private members of NSScreen. 
     Since there is a bug in Apple's screen switching code
@@ -54,12 +65,14 @@ CG_EXTERN size_t CGDisplayBytesPerRow(CGDirectDisplayID display)
     _frame = frame;
 }
 @end
-static inline void QZ_SetFrame(NSScreen *nsscreen, NSRect frame)
+static inline void QZ_SetFrame(_THIS, NSScreen *nsscreen, NSRect frame)
 {
-    [nsscreen setFrame:frame];
+    if (!IS_SNOW_LEOPARD_OR_LATER(this)) {
+        [nsscreen setFrame:frame];
+    }
 }
 #else
-static inline void QZ_SetFrame(NSScreen *nsscreen, NSRect frame)
+static inline void QZ_SetFrame(_THIS, NSScreen *nsscreen, NSRect frame)
 {
 }
 #endif
@@ -124,16 +137,6 @@ VideoBootStrap QZ_bootstrap = {
 #    pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #  endif
 #endif
-
-static inline BOOL IS_LION_OR_LATER(_THIS)
-{
-    return (system_version >= 0x1070);
-}
-
-static inline BOOL IS_SNOW_LEOPARD_OR_LATER(_THIS)
-{
-    return (system_version >= 0x1060);
-}
 
 static void QZ_ReleaseDisplayMode(_THIS, const void *moderef)
 {
@@ -607,7 +610,7 @@ static void QZ_UnsetVideoMode (_THIS, BOOL to_desktop, BOOL save_gl)
                 See comment in QZ_SetVideoFullscreen for why we do this
             */
             screen_rect = NSMakeRect(0,0,device_width,device_height);
-            QZ_SetFrame([ NSScreen mainScreen ], screen_rect);
+            QZ_SetFrame(this, [ NSScreen mainScreen ], screen_rect);
         }
     }
     /* Release window mode resources */
@@ -927,7 +930,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         ourselves. This hack should be removed if/when the bug is fixed.
     */
     screen_rect = NSMakeRect(0,0,width,height);
-    QZ_SetFrame([ NSScreen mainScreen ], screen_rect);
+    QZ_SetFrame(this, [ NSScreen mainScreen ], screen_rect);
 
     /* Save the flags to ensure correct tear-down */
     mode_flags = current->flags;
