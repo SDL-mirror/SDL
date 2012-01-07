@@ -67,6 +67,9 @@ static const SDL_RenderDriver *render_drivers[] = {
     &SW_RenderDriver
 #endif /* !SDL_RENDER_DISABLED */
 };
+/* If this triggers you may need to install OpenGL development environment */
+SDL_COMPILE_TIME_ASSERT(HAS_RENDER_DRIVERS, SDL_arraysize(render_drivers) > 0);
+
 static char renderer_magic;
 static char texture_magic;
 
