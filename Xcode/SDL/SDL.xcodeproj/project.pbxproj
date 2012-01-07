@@ -500,6 +500,7 @@
 		566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		BECDF6760761BA81005FE872 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; };
 		BECDF6770761BA81005FE872 /* SDL_name.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC705C4450500E5DC7F /* SDL_name.h */; };
 /* End PBXBuildFile section */
@@ -2191,6 +2192,7 @@
 				04BD025C12E6671800899322 /* SDL_cpuinfo.c in Sources */,
 				04BD026312E6671800899322 /* SDL_clipboardevents.c in Sources */,
 				04BD026512E6671800899322 /* SDL_events.c in Sources */,
+				AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */,
 				04BD026712E6671800899322 /* SDL_gesture.c in Sources */,
 				04BD026912E6671800899322 /* SDL_keyboard.c in Sources */,
 				04BD026B12E6671800899322 /* SDL_mouse.c in Sources */,
