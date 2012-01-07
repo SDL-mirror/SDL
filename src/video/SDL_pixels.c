@@ -969,7 +969,8 @@ SDL_InvalidateMap(SDL_BlitMap * map)
         return;
     }
     map->dst = NULL;
-    map->palette_version = 0;
+    map->src_palette_version = 0;
+    map->dst_palette_version = 0;
     if (map->info.table) {
         SDL_free(map->info.table);
         map->info.table = NULL;
@@ -1036,9 +1037,15 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
     map->dst = dst;
 
     if (dstfmt->palette) {
-        map->palette_version = dstfmt->palette->version;
+        map->dst_palette_version = dstfmt->palette->version;
     } else {
-        map->palette_version = 0;
+        map->dst_palette_version = 0;
+    }
+
+    if (srcfmt->palette) {
+        map->src_palette_version = srcfmt->palette->version;
+    } else {
+        map->src_palette_version = 0;
     }
 
     /* Choose your blitters wisely */

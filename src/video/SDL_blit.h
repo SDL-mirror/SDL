@@ -92,7 +92,8 @@ typedef struct SDL_BlitMap
 
     /* the version count matches the destination; mismatch indicates
        an invalid mapping */
-    Uint32 palette_version;
+    Uint32 dst_palette_version;
+    Uint32 src_palette_version;
 } SDL_BlitMap;
 
 /* Functions found in SDL_blit.c */
