@@ -239,6 +239,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
             }
         }
         if (!renderer) {
+            SDL_SetError("No hardware accelerated renderers available");
             return -1;
         }
 
