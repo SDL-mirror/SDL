@@ -418,21 +418,18 @@ static void create_aux_windows(_THIS)
     }
 
 	{
+		pid_t pid = getpid();
 		char hostname[256];
 
-		if (gethostname(hostname, sizeof(hostname)) > -1) {
+		if (pid > 0 && gethostname(hostname, sizeof(hostname)) > -1) {
+			Atom _NET_WM_PID = XInternAtom(SDL_Display, "_NET_WM_PID", False);
+			Atom WM_CLIENT_MACHINE = XInternAtom(SDL_Display, "WM_CLIENT_MACHINE", False);
+			
 			hostname[sizeof(hostname)-1] = '\0';
-			pid_t pid = getpid();
-
-			if (pid > 0) {
-				Atom _NET_WM_PID = XInternAtom(SDL_Display, "_NET_WM_PID", False);
-				Atom WM_CLIENT_MACHINE = XInternAtom(SDL_Display, "WM_CLIENT_MACHINE", False);
-				
-				XChangeProperty(SDL_Display, WMwindow, _NET_WM_PID, XA_CARDINAL, 32,
-				                PropModeReplace, (unsigned char *)&pid, 1);
-				XChangeProperty(SDL_Display, WMwindow, WM_CLIENT_MACHINE, XA_STRING, 8,
-				                PropModeReplace, hostname, SDL_strlen(hostname));
-			}
+			XChangeProperty(SDL_Display, WMwindow, _NET_WM_PID, XA_CARDINAL, 32,
+					PropModeReplace, (unsigned char *)&pid, 1);
+			XChangeProperty(SDL_Display, WMwindow, WM_CLIENT_MACHINE, XA_STRING, 8,
+					PropModeReplace, (unsigned char *)hostname, SDL_strlen(hostname));
 		}
 	}
 
