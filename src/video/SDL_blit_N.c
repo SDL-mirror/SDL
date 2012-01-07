@@ -28,6 +28,9 @@
 /* Functions to blit from N-bit surfaces to other surfaces */
 
 #if SDL_ALTIVEC_BLITTERS
+#ifdef HAVE_ALTIVEC_H
+#include <altivec.h>
+#endif
 #define assert(X)
 #ifdef __MACOSX__
 #include <sys/sysctl.h>
@@ -108,9 +111,10 @@ calc_swizzle32(const SDL_PixelFormat * srcfmt, const SDL_PixelFormat * dstfmt)
     /* ARGB */
     const static const struct SDL_PixelFormat default_pixel_format = {
         0, NULL, 0, 0,
+        {0, 0},
+        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, 0, 0, 0,
         16, 8, 0, 24,
-        0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000,
         0, NULL
     };
     if (!srcfmt) {
