@@ -30,7 +30,7 @@
 
 #include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
 #if (!defined(_DXSDK_BUILD_MAJOR) || (_DXSDK_BUILD_MAJOR < 1284))
-#  warning Your DirectX SDK is too old. Disabling XAudio2 support.
+#  pragma message("Your DirectX SDK is too old. Disabling XAudio2 support.")
 #else
 #  define SDL_XAUDIO2_HAS_SDK 1
 #endif
