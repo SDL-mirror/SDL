@@ -1211,6 +1211,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->info = GLES2_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = rdata;
+    renderer->window = window;
 
     /* Create an OpenGL ES 2.0 context */
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
