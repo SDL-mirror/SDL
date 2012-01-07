@@ -80,7 +80,7 @@
 
         // !!! FIXME: use the screen this is on!
         /* Use the main screen scale (for retina display support) */
-        if ([[UIScreen mainScreen] respondsToSelector:@selector(scale)])
+        if ([self respondsToSelector:@selector(contentScaleFactor)])
             self.contentScaleFactor = [UIScreen mainScreen].scale;
 
         /* create the buffers */
