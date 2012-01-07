@@ -39,6 +39,7 @@ TARGETS = \
 	testloadso$(EXE) \
 	testlock$(EXE) \
 	testmultiaudio$(EXE) \
+	testnative$(EXE) \
 	testoverlay$(EXE) \
 	testoverlay2$(EXE) \
 	testplatform$(EXE) \
@@ -161,6 +162,12 @@ testloadso$(EXE): $(srcdir)/testloadso.c
 
 testlock$(EXE): $(srcdir)/testlock.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+
+testnative$(EXE): $(srcdir)/testnative.c \
+			$(srcdir)/testnativecocoa.m \
+			$(srcdir)/testnativew32.c \
+			$(srcdir)/testnativex11.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11 -framework Cocoa
 
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
