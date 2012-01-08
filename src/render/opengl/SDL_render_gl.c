@@ -239,6 +239,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     window_flags = SDL_GetWindowFlags(window);
     if (!(window_flags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, window_flags | SDL_WINDOW_OPENGL) < 0) {
+            /* Uh oh, better try to put it back... */
+            SDL_RecreateWindow(window, window_flags);
             return NULL;
         }
     }
