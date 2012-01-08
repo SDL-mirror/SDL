@@ -187,8 +187,10 @@ X11_GL_UnloadLibrary(_THIS)
 #endif
 
     /* Free OpenGL memory */
-    SDL_free(_this->gl_data);
-    _this->gl_data = NULL;
+    if (_this->gl_data) {
+        SDL_free(_this->gl_data);
+        _this->gl_data = NULL;
+    }
 }
 
 static SDL_bool
@@ -395,6 +397,11 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
     int attribs[max_attrs];
     const int i = X11_GL_GetAttributes(_this,display,screen,attribs,max_attrs);
     SDL_assert(i <= max_attrs);
+
+    if (!_this->gl_data) {
+        /* The OpenGL library wasn't loaded, SDL_GetError() should have info */
+        return NULL;
+    }
 
     vinfo = _this->gl_data->glXChooseVisual(display, screen, attribs);
     if (!vinfo) {
