@@ -286,7 +286,7 @@ struct SDL_VideoDevice
     void *driverdata;
     struct SDL_GLDriverData *gl_data;
 
-#if SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES
     struct SDL_PrivateGLESData *gles_data;
 #endif
 

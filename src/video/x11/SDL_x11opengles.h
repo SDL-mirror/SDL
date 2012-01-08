@@ -32,6 +32,7 @@ typedef struct SDL_PrivateGLESData
 {
     int egl_active;             /* to stop switching drivers while we have a valid context */
     XVisualInfo *egl_visualinfo;
+    void *egl_dll_handle;
     EGLDisplay egl_display;
     EGLContext egl_context;     /* Current GLES context */
     EGLSurface egl_surface;

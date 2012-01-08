@@ -31,7 +31,7 @@
 #include "SDL_x11mouse.h"
 #include "SDL_x11shape.h"
 
-#ifdef SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
 #endif
 
@@ -289,7 +289,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         XFree(vinfo);
     } else
 #endif
-#ifdef SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
@@ -401,17 +401,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         SDL_SetError("Couldn't create window");
         return -1;
     }
-#if SDL_VIDEO_DRIVER_PANDORA
-    /* Create the GLES window surface */
-    _this->gles_data->egl_surface =
-        _this->gles_data->eglCreateWindowSurface(_this->gles_data->
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        /* Create the GLES window surface */
+        _this->gles_data->egl_surface =
+            _this->gles_data->eglCreateWindowSurface(_this->gles_data->
                                                  egl_display,
                                                  _this->gles_data->egl_config,
                                                  (NativeWindowType) w, NULL);
 
-    if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
-        SDL_SetError("Could not create GLES window surface");
-        return -1;
+        if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
+            SDL_SetError("Could not create GLES window surface");
+            return -1;
+        }
     }
 #endif
 

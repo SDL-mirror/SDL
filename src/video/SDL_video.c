@@ -189,6 +189,9 @@ ShouldUseTextureFramebuffer()
         }
         return hasAcceleratedOpenGL;
     }
+#elif SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    /* Let's be optimistic about this! */
+    return SDL_TRUE;
 #else
     return SDL_FALSE;
 #endif
@@ -1138,7 +1141,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     }
 
     /* Some platforms have OpenGL enabled by default */
-#if (SDL_VIDEO_OPENGL && __MACOSX__) || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+#if (SDL_VIDEO_OPENGL && __MACOSX__) || __IPHONEOS__ || __ANDROID__
     flags |= SDL_WINDOW_OPENGL;
 #endif
     if (flags & SDL_WINDOW_OPENGL) {

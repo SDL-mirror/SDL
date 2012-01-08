@@ -34,7 +34,7 @@
 #include "SDL_x11shape.h"
 #include "SDL_x11touch.h" 
 
-#if SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
 #endif
 
@@ -110,7 +110,7 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     }
     SDL_free(data->windowlist);
     SDL_free(device->driverdata);
-#if SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     SDL_free(device->gles_data);
 #endif
     SDL_free(device);
@@ -143,7 +143,7 @@ X11_CreateDevice(int devindex)
     }
     device->driverdata = data;
 
-#if SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     device->gles_data = (struct SDL_PrivateGLESData *) SDL_calloc(1, sizeof(SDL_PrivateGLESData));
     if (!device->gles_data) {
         SDL_OutOfMemory();
@@ -226,7 +226,7 @@ X11_CreateDevice(int devindex)
     device->GL_SwapWindow = X11_GL_SwapWindow;
     device->GL_DeleteContext = X11_GL_DeleteContext;
 #endif
-#if SDL_VIDEO_DRIVER_PANDORA
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     device->GL_LoadLibrary = X11_GLES_LoadLibrary;
     device->GL_GetProcAddress = X11_GLES_GetProcAddress;
     device->GL_UnloadLibrary = X11_GLES_UnloadLibrary;

@@ -3764,12 +3764,10 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
- #if defined (__QNXNTO__)
-    #include <GLES/gl.h>
- #elif defined (__IPHONEOS__)
+ #if defined (__IPHONEOS__)
     #include <OpenGLES/ES1/gl.h>
  #else
-    #error "No OpenGL ES support"
+    #include <GLES/gl.h>
  #endif /* __QNXNTO__ */
 
 int
@@ -3812,11 +3810,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 { echo "$as_me:$LINENO: result: $have_opengles" >&5
 echo "${ECHO_T}$have_opengles" >&6; }
 
-if test x$have_opengl = xyes; then
-    CFLAGS="$CFLAGS -DHAVE_OPENGL"
-    GLLIB="$XPATH $SYS_GL_LIBS"
-elif test x$have_opengles = xyes; then
+GLLIB=""
+if test x$have_opengles = xyes; then
     CFLAGS="$CFLAGS -DHAVE_OPENGLES"
+    GLLIB="$XPATH -lGLESv1_CM"
+elif test x$have_opengl = xyes; then
+    CFLAGS="$CFLAGS -DHAVE_OPENGL"
     GLLIB="$XPATH $SYS_GL_LIBS"
 else
     GLLIB=""

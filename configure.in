@@ -1474,6 +1474,57 @@ CheckOpenGLX11()
     fi
 }
 
+dnl Check to see if OpenGL ES support is desired
+AC_ARG_ENABLE(video-opengles,
+AC_HELP_STRING([--enable-video-opengles], [include OpenGL ES support [[default=yes]]]),
+              , enable_video_opengles=yes)
+
+dnl Find OpenGL ES
+CheckOpenGLESX11()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengles = xyes; then
+        AC_MSG_CHECKING(for OpenGL ES (EGL) support)
+        video_opengles=no
+        AC_TRY_COMPILE([
+         #include <EGL/egl.h>
+        ],[
+        ],[
+        video_opengles=yes
+        ])
+        AC_MSG_RESULT($video_opengles)
+        if test x$video_opengles = xyes; then
+            AC_MSG_CHECKING(for OpenGL ES v1 headers)
+            video_opengles_v1=no
+            AC_TRY_COMPILE([
+             #include <GLES/gl.h>
+             #include <GLES/glext.h>
+            ],[
+            ],[
+            video_opengles_v1=yes
+            ])
+            AC_MSG_RESULT($video_opengles_v1)
+            if test x$video_opengles_v1 = xyes; then
+                AC_DEFINE(SDL_VIDEO_OPENGL_ES, 1, [ ])
+                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES, 1, [ ])
+            fi
+            AC_MSG_CHECKING(for OpenGL ES v2 headers)
+            video_opengles_v2=no
+            AC_TRY_COMPILE([
+             #include <GLES2/gl2.h>
+             #include <GLES2/gl2ext.h>
+            ],[
+            ],[
+            video_opengles_v2=yes
+            ])
+            AC_MSG_RESULT($video_opengles_v2)
+            if test x$video_opengles_v2 = xyes; then
+                AC_DEFINE(SDL_VIDEO_OPENGL_ES2, 1, [ ])
+                AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES2, 1, [ ])
+            fi
+        fi
+    fi
+}
+
 dnl Check for Windows OpenGL
 CheckWINDOWSGL()
 {
@@ -2043,6 +2094,7 @@ case "$host" in
         CheckDirectFB
         CheckFusionSound
         CheckOpenGLX11
+        CheckOpenGLESX11
         CheckInputEvents
         CheckTslib
         CheckUSBHID
