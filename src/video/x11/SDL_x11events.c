@@ -83,7 +83,7 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
             if (event->xbutton.button == Button4) {
                 *ticks = 1;
             }
-            else {
+            else if (event->xbutton.button == Button5) {
                 *ticks = -1;
             }
 
