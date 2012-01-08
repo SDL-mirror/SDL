@@ -167,6 +167,26 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit(
     SDL_SendQuit();
 }
 
+// Pause
+extern "C" void Java_org_libsdl_app_SDLActivity_nativePause(
+                                    JNIEnv* env, jclass cls)
+{
+    if (Android_Window) {
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+    }
+}
+
+// Resume
+extern "C" void Java_org_libsdl_app_SDLActivity_nativeResume(
+                                    JNIEnv* env, jclass cls)
+{
+    if (Android_Window) {
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+    }
+}
+
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
                                     JNIEnv* env, jclass cls)
 {
