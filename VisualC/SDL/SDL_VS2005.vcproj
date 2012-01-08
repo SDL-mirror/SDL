@@ -1084,6 +1084,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\thread\generic\SDL_syscond.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\events\SDL_sysevents.h"
 			>
 		</File>

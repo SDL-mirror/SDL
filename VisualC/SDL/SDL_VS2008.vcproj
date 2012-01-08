@@ -104,91 +104,6 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="Debug|x64"
-			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
-			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
-			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-				PreprocessorDefinitions="_DEBUG"
-				MkTypLibCompatible="true"
-				SuppressStartupBanner="true"
-				TargetEnvironment="3"
-				TypeLibraryName=".\Debug/SDL.tlb"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include"
-				PreprocessorDefinitions="_DEBUG;_WINDOWS"
-				RuntimeLibrary="2"
-				BufferSecurityCheck="false"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				Detect64BitPortabilityProblems="false"
-				DebugInformationFormat="3"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLinkerTool"
-				AdditionalDependencies="winmm.lib imm32.lib version.lib"
-				OutputFile="$(IntDir)\SDL.dll"
-				SuppressStartupBanner="true"
-				IgnoreAllDefaultLibraries="true"
-				GenerateDebugInformation="true"
-				SubSystem="2"
-				TargetMachine="17"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="Release|Win32"
 			OutputDirectory=".\Release"
 			IntermediateDirectory=".\Release"
@@ -251,6 +166,91 @@
 				SuppressStartupBanner="true"
 				IgnoreAllDefaultLibraries="true"
 				SubSystem="2"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="$(PlatformName)\$(ConfigurationName)"
+			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
+			ConfigurationType="2"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="3"
+				TypeLibraryName=".\Debug/SDL.tlb"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\include"
+				PreprocessorDefinitions="_DEBUG;_WINDOWS"
+				RuntimeLibrary="2"
+				BufferSecurityCheck="false"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="winmm.lib imm32.lib version.lib"
+				OutputFile="$(IntDir)\SDL.dll"
+				SuppressStartupBanner="true"
+				IgnoreAllDefaultLibraries="true"
+				GenerateDebugInformation="true"
+				SubSystem="2"
+				TargetMachine="17"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -785,11 +785,11 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
+			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
 			>
 		</File>
 		<File
@@ -826,18 +826,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\audio\dummy\SDL_dummyaudio.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\directsound\SDL_directsound.c"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\directsound\SDL_directsound.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.c"
 			>
 		</File>
 		<File
@@ -1073,6 +1061,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\thread\generic\SDL_syscond.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\events\SDL_sysevents.h"
 			>
 		</File>
@@ -1266,6 +1258,18 @@
 		</File>
 		<File
 			RelativePath="..\..\src\video\windows\SDL_windowswindow.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\winmm\SDL_winmm.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\audio\xaudio2\SDL_xaudio2.c"
 			>
 		</File>
 		<File
