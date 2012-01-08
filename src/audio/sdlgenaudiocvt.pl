@@ -404,11 +404,11 @@ EOF
     # Upsampling (growing the buffer) needs to work backwards, since we
     #  overwrite the buffer as we go.
     if ($upsample) {
-        $endcomparison = '>';  # dst > target
+        $endcomparison = '>=';  # dst > target
         print <<EOF;
     $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
     const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
-    const $fctype *target = ((const $fctype *) cvt->buf) - $channels;
+    const $fctype *target = ((const $fctype *) cvt->buf);
 EOF
     } else {
         $endcomparison = '<';  # dst < target
@@ -544,11 +544,11 @@ EOF
     # Upsampling (growing the buffer) needs to work backwards, since we
     #  overwrite the buffer as we go.
     if ($upsample) {
-        $endcomparison = '>';  # dst > target
+        $endcomparison = '>=';  # dst > target
         print <<EOF;
     $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
     const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
-    const $fctype *target = ((const $fctype *) cvt->buf) - $channels;
+    const $fctype *target = ((const $fctype *) cvt->buf);
 EOF
     } else {
         $endcomparison = '<';  # dst < target
