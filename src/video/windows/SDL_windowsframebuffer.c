@@ -113,6 +113,11 @@ void WIN_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
+    if (!data) {
+        /* The window wasn't fully initialized */
+        return;
+    }
+
     if (data->mdc) {
         DeleteDC(data->mdc);
         data->mdc = NULL;

@@ -193,7 +193,14 @@ void
 X11_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-    Display *display = data->videodata->display;
+    Display *display;
+
+    if (!data) {
+        /* The window wasn't fully initialized */
+        return;
+    }
+
+    display = data->videodata->display;
 
     if (data->ximage) {
         XDestroyImage(data->ximage);
