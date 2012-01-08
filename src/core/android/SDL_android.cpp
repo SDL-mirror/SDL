@@ -39,7 +39,7 @@ extern "C" {
 #define LOGE(...) do {} while (false)
 
 
-/* Impelemented in audio/android/SDL_androidaudio.c */
+/* Implemented in audio/android/SDL_androidaudio.c */
 extern void Android_RunAudioThread();
 } // C
 
@@ -172,8 +172,8 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativePause(
                                     JNIEnv* env, jclass cls)
 {
     if (Android_Window) {
-        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
 }
 
@@ -182,8 +182,8 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeResume(
                                     JNIEnv* env, jclass cls)
 {
     if (Android_Window) {
-        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_SHOWN, 0, 0);
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+        SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
 }
 
