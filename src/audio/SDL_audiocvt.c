@@ -295,7 +295,7 @@ SDL_ConvertStereo(SDL_AudioCVT * cvt, SDL_AudioFormat format)
     { \
         const type *src = (const type *) (cvt->buf + cvt->len_cvt); \
         type *dst = (type *) (cvt->buf + cvt->len_cvt * 2); \
-        for (i = cvt->len_cvt / 2; i; --i, --src) { \
+        for (i = cvt->len_cvt / sizeof(type); i; --i, --src) { \
             const type val = *src; \
             dst -= 2; \
             dst[0] = dst[1] = val; \
