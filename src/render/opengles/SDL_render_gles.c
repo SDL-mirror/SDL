@@ -40,7 +40,7 @@ glDrawTexiOES(GLint x, GLint y, GLint z, GLint width, GLint height)
 
 /* OpenGL ES 1.1 renderer implementation, based on the OpenGL renderer */
 
-/* Used to re-create the window with OpenGL capability */
+/* Used to re-create the window with OpenGL ES capability */
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 static const float inv255f = 1.0f / 255.0f;
@@ -151,6 +151,14 @@ GLES_SetError(const char *prefix, GLenum result)
 
 static int GLES_LoadFunctions(GLES_RenderData * data)
 {
+#if SDL_VIDEO_DRIVER_UIKIT
+#define __SDL_NOGETPROCADDR__
+#elif SDL_VIDEO_DRIVER_ANDROID
+#define __SDL_NOGETPROCADDR__
+#elif SDL_VIDEO_DRIVER_PANDORA
+#define __SDL_NOGETPROCADDR__
+#endif
+
 #ifdef __SDL_NOGETPROCADDR__
 #define SDL_PROC(ret,func,params) data->func=func;
 #else
@@ -318,6 +326,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
 static void
 GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
@@ -325,7 +335,7 @@ GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_MINIMIZED) {
         /* According to Apple documentation, we need to finish drawing NOW! */
-	glFinish();
+	data->glFinish();
     }
 }
 

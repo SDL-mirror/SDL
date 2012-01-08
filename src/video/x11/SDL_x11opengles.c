@@ -25,10 +25,10 @@
 #include "SDL_x11video.h"
 #include "SDL_x11opengles.h"
 
-#define DEFAULT_EGL "/usr/lib/libEGL.so"
-#define DEFAULT_OGL_ES2 "/usr/lib/libGLESv2.so"
-#define DEFAULT_OGL_ES_PVR "/usr/lib/libGLES_CM.so"
-#define DEFAULT_OGL_ES "/usr/lib/libGLESv1_CM.so"
+#define DEFAULT_EGL "libEGL.so"
+#define DEFAULT_OGL_ES2 "libGLESv2.so"
+#define DEFAULT_OGL_ES_PVR "libGLES_CM.so"
+#define DEFAULT_OGL_ES "libGLESv1_CM.so"
 
 #define LOAD_FUNC(NAME) \
 	*((void**)&_this->gles_data->NAME) = dlsym(handle, #NAME); \
@@ -143,6 +143,7 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
     LOAD_FUNC(eglDestroySurface);
     LOAD_FUNC(eglMakeCurrent);
     LOAD_FUNC(eglSwapBuffers);
+    LOAD_FUNC(eglSwapInterval);
 
     _this->gles_data->egl_display =
         _this->gles_data->eglGetDisplay((NativeDisplayType) data->display);
@@ -304,6 +305,7 @@ X11_GLES_CreateContext(_THIS, SDL_Window * window)
 
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    SDL_GLContext context = 1;
 
     XSync(display, False);
 
@@ -323,13 +325,14 @@ X11_GLES_CreateContext(_THIS, SDL_Window * window)
     }
 
     _this->gles_data->egl_active = 1;
+    _this->gles_data->egl_swapinterval = 0;
 
     if (X11_GLES_MakeCurrent(_this, window, context) < 0) {
         X11_GLES_DeleteContext(_this, context);
         return NULL;
     }
 
-    return (SDL_GLContext)(1);
+    return context;
 }
 
 int
@@ -353,17 +356,34 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     return (retval);
 }
 
-static int swapinterval = -1;
 int
 X11_GLES_SetSwapInterval(_THIS, int interval)
 {
-    return 0;
+    if (_this->gles_data->egl_active != 1) {
+        SDL_SetError("OpenGL ES context not active");
+        return -1;
+    }
+
+    EGLBoolean status;
+    status = _this->gles_data->eglSwapInterval(_this->gles_data->egl_display, interval);
+    if (status == EGL_TRUE) {
+        _this->gles_data->egl_swapinterval = interval;
+        return 0; 
+    }
+
+    SDL_SetError("Unable to set the EGL swap interval");
+    return -1;
 }
 
 int
 X11_GLES_GetSwapInterval(_THIS)
 {
-    return 0;
+    if (_this->gles_data->egl_active != 1) {
+        SDL_SetError("OpenGL ES context not active");
+        return -1;
+    }
+
+    return _this->gles_data->egl_swapinterval;
 }
 
 void

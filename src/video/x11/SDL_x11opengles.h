@@ -37,13 +37,14 @@ typedef struct SDL_PrivateGLESData
     EGLContext egl_context;     /* Current GLES context */
     EGLSurface egl_surface;
     EGLConfig egl_config;
+    int egl_swapinterval;
 
       EGLDisplay(*eglGetDisplay) (NativeDisplayType display);
       EGLBoolean(*eglInitialize) (EGLDisplay dpy, EGLint * major,
                                   EGLint * minor);
       EGLBoolean(*eglTerminate) (EGLDisplay dpy);
 
-    void *(*eglGetProcAddress) (const GLubyte * procName);
+    void *(*eglGetProcAddress) (const char * procName);
 
       EGLBoolean(*eglChooseConfig) (EGLDisplay dpy,
                                     const EGLint * attrib_list,
@@ -67,6 +68,8 @@ typedef struct SDL_PrivateGLESData
                                    EGLSurface read, EGLContext ctx);
 
       EGLBoolean(*eglSwapBuffers) (EGLDisplay dpy, EGLSurface draw);
+
+      EGLBoolean(*eglSwapInterval) (EGLDisplay dpy, EGLint interval);
 
     const char *(*eglQueryString) (EGLDisplay dpy, EGLint name);
 

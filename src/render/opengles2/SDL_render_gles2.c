@@ -27,7 +27,7 @@
 #include "../SDL_sysrender.h"
 #include "SDL_shaders_gles2.h"
 
-/* Used to re-create the window with OpenGL capability */
+/* Used to re-create the window with OpenGL ES capability */
 extern int SDL_RecreateWindow(SDL_Window * window, Uint32 flags);
 
 /*************************************************************************************************
@@ -158,7 +158,15 @@ static SDL_GLContext SDL_CurrentContext = NULL;
 
 static int GLES2_LoadFunctions(GLES2_DriverContext * data)
 {
-#ifdef __SDL_NOGETPROCADDR__
+#if SDL_VIDEO_DRIVER_UIKIT
+#define __SDL_NOGETPROCADDR__
+#elif SDL_VIDEO_DRIVER_ANDROID
+#define __SDL_NOGETPROCADDR__
+#elif SDL_VIDEO_DRIVER_PANDORA
+#define __SDL_NOGETPROCADDR__
+#endif
+
+#if defined __SDL_NOGETPROCADDR__
 #define SDL_PROC(ret,func,params) data->func=func;
 #else
 #define SDL_PROC(ret,func,params) \
