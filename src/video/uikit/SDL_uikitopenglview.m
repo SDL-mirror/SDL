@@ -75,6 +75,7 @@
         }
         if (!context || ![EAGLContext setCurrentContext:context]) {
             [self release];
+            SDL_SetError("OpenGL ES %d not supported", majorVersion);
             return nil;
         }
 

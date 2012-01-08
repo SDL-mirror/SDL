@@ -115,6 +115,9 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     depthBits: _this->gl_config.depth_size
                                     stencilBits: _this->gl_config.stencil_size
                                     majorVersion: _this->gl_config.major_version];
+    if (!view) {
+        return NULL;
+    }
 
     data->view = view;
     view->viewcontroller = data->viewcontroller;
