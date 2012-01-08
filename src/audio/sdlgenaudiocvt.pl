@@ -546,7 +546,7 @@ EOF
     if ($upsample) {
         $endcomparison = '>=';  # dst > target
         print <<EOF;
-    $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels;
+    $fctype *dst = (($fctype *) (cvt->buf + dstsize)) - $channels * $multiple;
     const $fctype *src = (($fctype *) (cvt->buf + cvt->len_cvt)) - $channels;
     const $fctype *target = ((const $fctype *) cvt->buf);
 EOF
