@@ -82,8 +82,8 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
                                                         *attrib_list);
 #endif
 
-#define OPENGL_REQUIRS_DLOPEN
-#if defined(OPENGL_REQUIRS_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
+#define OPENGL_REQUIRES_DLOPEN
+#if defined(OPENGL_REQUIRES_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
 #include <dlfcn.h>
 #define GL_LoadObject(X)	dlopen(X, (RTLD_NOW|RTLD_GLOBAL))
 #define GL_LoadFunction		dlsym
@@ -109,8 +109,11 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     if (path == NULL) {
         path = DEFAULT_OPENGL;
     }
-    _this->gl_config.dll_handle = SDL_LoadObject(path);
+    _this->gl_config.dll_handle = GL_LoadObject(path);
     if (!_this->gl_config.dll_handle) {
+#if defined(OPENGL_REQUIRES_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
+        SDL_SetError("Failed loading %s: %s", path, dlerror());
+#endif
         return -1;
     }
     SDL_strlcpy(_this->gl_config.driver_path, path,
