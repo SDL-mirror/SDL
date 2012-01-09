@@ -132,7 +132,12 @@
 #ifdef __BORLANDC__
 #pragma nopackwarning
 #endif
+#ifdef _M_X64
+/* Use 8-byte alignment on 64-bit architectures, so pointers are aligned */
+#pragma pack(push,8)
+#else
 #pragma pack(push,4)
+#endif
 #elif (defined(__MWERKS__) && defined(__MACOS__))
 #pragma options align=mac68k4byte
 #pragma enumsalwaysint on
