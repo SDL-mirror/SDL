@@ -84,9 +84,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/SDL.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				ImportLibrary=".\Debug/SDL.lib"
 				CLRUnmanagedCodeCheck="false"
 			/>
 			<Tool
@@ -176,9 +173,6 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\Debug/SDL.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				ImportLibrary=".\Debug/SDL.lib"
 				TargetMachine="17"
 				CLRUnmanagedCodeCheck="false"
 			/>
@@ -271,9 +265,6 @@
 				IgnoreAllDefaultLibraries="false"
 				ProgramDatabaseFile=".\Release/SDL.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				ImportLibrary=".\Release/SDL.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -363,9 +354,6 @@
 				IgnoreAllDefaultLibraries="false"
 				ProgramDatabaseFile=".\Release/SDL.pdb"
 				SubSystem="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="0"
-				ImportLibrary=".\Release/SDL.lib"
 				TargetMachine="17"
 			/>
 			<Tool
