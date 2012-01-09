@@ -87,7 +87,12 @@
 #ifdef __BORLANDC__
 #pragma nopackwarning
 #endif
+#ifdef _M_X64
+/* Use 8-byte alignment on 64-bit architectures, so pointers are aligned */
+#pragma pack(push,8)
+#else
 #pragma pack(push,4)
+#endif
 #endif /* Compiler needs structure packing set */
 
 /* Set up compiler-specific options for inlining functions */
