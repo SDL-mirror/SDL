@@ -38,6 +38,7 @@
 #include "../SDL_sysaudio.h"
 
 #include "../../video/ataricommon/SDL_atarimxalloc_c.h"
+#include "../../video/ataricommon/SDL_atarisuper.h"
 
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_stfa.h"
@@ -164,7 +165,7 @@ static void Mint_LockAudio(_THIS)
 	/* Stop replay */
 	oldpile=(void *)Super(0);
 	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
-	Super(oldpile);
+	SuperToUser(oldpile);
 }
 
 static void Mint_UnlockAudio(_THIS)
@@ -174,7 +175,7 @@ static void Mint_UnlockAudio(_THIS)
 	/* Restart replay */
 	oldpile=(void *)Super(0);
 	cookie_stfa->sound_enable=STFA_PLAY_ENABLE|STFA_PLAY_REPEAT;
-	Super(oldpile);
+	SuperToUser(oldpile);
 }
 
 static void Mint_CloseAudio(_THIS)
@@ -184,7 +185,7 @@ static void Mint_CloseAudio(_THIS)
 	/* Stop replay */
 	oldpile=(void *)Super(0);
 	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
-	Super(oldpile);
+	SuperToUser(oldpile);
 
 	/* Wait if currently playing sound */
 	while (SDL_MintAudio_mutex != 0) {
@@ -283,7 +284,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	/* Restart replay */
 	cookie_stfa->sound_enable=STFA_PLAY_ENABLE|STFA_PLAY_REPEAT;
 
-	Super(oldpile);
+	SuperToUser(oldpile);
 
 	DEBUG_PRINT((DEBUG_NAME "hardware initialized\n"));
 }

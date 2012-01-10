@@ -41,6 +41,7 @@
 #include "../SDL_sysaudio.h"
 
 #include "../../video/ataricommon/SDL_atarimxalloc_c.h"
+#include "../../video/ataricommon/SDL_atarisuper.h"
 
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_dma8.h"
@@ -258,7 +259,7 @@ static void Devconnect2(int src, int dst, int sclk, int pre)
 	DMAAUDIO_IO.dest_ctrl = dest_ctrl;
 	DMAAUDIO_IO.sync_div = sync_div;
 
-	Super(oldstack);
+	SuperToUser(oldstack);
 }
 
 static void Mint_CheckExternalClock(_THIS)

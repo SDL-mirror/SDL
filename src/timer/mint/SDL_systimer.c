@@ -46,6 +46,8 @@
 #include "../SDL_timer_c.h"
 #include "SDL_thread.h"
 
+#include "../../video/ataricommon/SDL_atarisuper.h"
+
 #include "SDL_vbltimer_s.h"
 
 /* from audio/mint */
@@ -64,7 +66,7 @@ void SDL_StartTicks(void)
 	/* Set first ticks value */
 	old_stack = (void *)Super(0);
 	start = *((volatile long *)_hz_200);
-	Super(old_stack);
+	SuperToUser(old_stack);
 
 	start *= 5;	/* One _hz_200 tic is 5ms */
 
@@ -80,7 +82,7 @@ Uint32 SDL_GetTicks (void)
 	} else {
 		void *old_stack = (void *)Super(0);
 		now = *((volatile long *)_hz_200);
-		Super(old_stack);
+		SuperToUser(old_stack);
 	}
 
 	return((now*5)-start);
@@ -111,7 +113,7 @@ int SDL_SYS_TimerInit(void)
 	/* Install RunTimer in vbl vector */
 	old_stack = (void *)Super(0);
 	timer_installed = !SDL_AtariVblInstall(SDL_ThreadedTimerCheck);
-	Super(old_stack);
+	SuperToUser(old_stack);
 
 	if (!timer_installed) {
 		return(-1);
@@ -127,7 +129,7 @@ void SDL_SYS_TimerQuit(void)
 	if (timer_installed) {
 		void *old_stack = (void *)Super(0);
 		SDL_AtariVblUninstall(SDL_ThreadedTimerCheck);
-		Super(old_stack);
+		SuperToUser(old_stack);
 		timer_installed = SDL_FALSE;
 	}
 	read_hz200_from_vbl = SDL_FALSE;
