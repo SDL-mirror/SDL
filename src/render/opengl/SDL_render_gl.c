@@ -470,10 +470,15 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MIN_FILTER, scaleMode);
     renderdata->glTexParameteri(data->type, GL_TEXTURE_MAG_FILTER, scaleMode);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
-                                GL_CLAMP_TO_EDGE);
-    renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
-                                GL_CLAMP_TO_EDGE);
+    /* According to the spec, CLAMP_TO_EDGE is the default for TEXTURE_RECTANGLE
+       and setting it causes an INVALID_ENUM error in the latest NVidia drivers.
+    */
+    if (data->type != GL_TEXTURE_RECTANGLE_ARB) {
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_S,
+                                    GL_CLAMP_TO_EDGE);
+        renderdata->glTexParameteri(data->type, GL_TEXTURE_WRAP_T,
+                                    GL_CLAMP_TO_EDGE);
+    }
 #ifdef __MACOSX__
 #ifndef GL_TEXTURE_STORAGE_HINT_APPLE
 #define GL_TEXTURE_STORAGE_HINT_APPLE       0x85BC
