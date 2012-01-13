@@ -611,28 +611,28 @@ EOF
             for (my $i = $channels-1; $i >= 0; $i--) {
                 my $dsti = $i + ($channels * 3);
                 print <<EOF;
-        dst[$dsti] = ($fctype) sample${i};
+        dst[$dsti] = ($fctype) ((sample${i} + ($mult3 * last_sample${i})) $interp2);
 EOF
             }
 
             for (my $i = $channels-1; $i >= 0; $i--) {
                 my $dsti = $i + ($channels * 2);
                 print <<EOF;
-        dst[$dsti] = ($fctype) ((($mult3 * sample${i}) + last_sample${i}) $interp2);
+        dst[$dsti] = ($fctype) ((sample${i} + last_sample${i}) $interp);
 EOF
             }
 
             for (my $i = $channels-1; $i >= 0; $i--) {
                 my $dsti = $i + ($channels * 1);
                 print <<EOF;
-        dst[$dsti] = ($fctype) ((sample${i} + last_sample${i}) $interp);
+        dst[$dsti] = ($fctype) ((($mult3 * sample${i}) + last_sample${i}) $interp2);
 EOF
             }
 
             for (my $i = $channels-1; $i >= 0; $i--) {
                 my $dsti = $i + ($channels * 0);
                 print <<EOF;
-        dst[$dsti] = ($fctype) ((sample${i} + ($mult3 * last_sample${i})) $interp2);
+        dst[$dsti] = ($fctype) sample${i};
 EOF
             }
         } else {
