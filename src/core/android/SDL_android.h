@@ -31,7 +31,7 @@ extern "C" {
 extern SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion);
 extern void Android_JNI_SwapWindow();
 extern void Android_JNI_SetActivityTitle(const char *title);
-extern void Android_JNI_GetAccelerometerValues(float values[3]);
+extern SDL_bool Android_JNI_GetAccelerometerValues(float values[3]);
 
 // Audio support
 extern int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);

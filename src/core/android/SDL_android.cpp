@@ -70,7 +70,7 @@ static jmethodID midAudioQuit;
 
 // Accelerometer data storage
 static float fLastAccelerometer[3];
-
+static bool bHasNewData;
 
 /*******************************************************************************
                  Functions called by JNI
@@ -110,6 +110,8 @@ extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls)
                                 "audioWriteByteBuffer", "([B)V");
     midAudioQuit = mEnv->GetStaticMethodID(mActivityClass,
                                 "audioQuit", "()V");
+
+    bHasNewData = false;
 
     if(!midCreateGLContext || !midFlipBuffers || !midAudioInit ||
        !midAudioWriteShortBuffer || !midAudioWriteByteBuffer || !midAudioQuit) {
@@ -156,7 +158,8 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
 {
     fLastAccelerometer[0] = x;
     fLastAccelerometer[1] = y;
-    fLastAccelerometer[2] = z;   
+    fLastAccelerometer[2] = z;
+    bHasNewData = true;
 }
 
 // Quit
@@ -224,12 +227,20 @@ extern "C" void Android_JNI_SetActivityTitle(const char *title)
     }
 }
 
-extern "C" void Android_JNI_GetAccelerometerValues(float values[3])
+extern "C" SDL_bool Android_JNI_GetAccelerometerValues(float values[3])
 {
     int i;
-    for (i = 0; i < 3; ++i) {
-        values[i] = fLastAccelerometer[i];
+    SDL_bool retval = SDL_FALSE;
+
+    if (bHasNewData) {
+        for (i = 0; i < 3; ++i) {
+            values[i] = fLastAccelerometer[i];
+        }
+        bHasNewData = false;
+        retval = SDL_TRUE;
     }
+
+    return retval;
 }
 
 //

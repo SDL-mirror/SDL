@@ -565,9 +565,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            SDLActivity.onNativeAccel(event.values[0],
-                                      event.values[1],
-                                      event.values[2]);
+            SDLActivity.onNativeAccel(event.values[0] / SensorManager.GRAVITY_EARTH,
+                                      event.values[1] / SensorManager.GRAVITY_EARTH,
+                                      event.values[2] / SensorManager.GRAVITY_EARTH);
         }
     }
 
