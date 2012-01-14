@@ -1932,15 +1932,23 @@ SDL_DestroyWindow(SDL_Window * window)
 
     CHECK_WINDOW_MAGIC(window, );
 
+    /* Restore video mode, etc. */
+    SDL_HideWindow(window);
+
+    /* Make sure this window no longer has focus */
+    if (SDL_GetKeyboardFocus() == window) {
+        SDL_SetKeyboardFocus(NULL);
+    }
+    if (SDL_GetMouseFocus() == window) {
+        SDL_SetMouseFocus(NULL);
+    }
+
     /* make no context current if this is the current context window. */
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (_this->current_glwin == window) {
             SDL_GL_MakeCurrent(NULL, NULL);
         }
     }
-
-    /* Restore video mode, etc. */
-    SDL_HideWindow(window);
 
     if (window->surface) {
         window->surface->flags &= ~SDL_DONTFREE;
