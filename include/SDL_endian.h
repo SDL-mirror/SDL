@@ -91,10 +91,10 @@ SDL_Swap16(Uint16 x)
 static __inline__ Uint16
 SDL_Swap16(Uint16 x)
 {
-    Uint16 result;
+    int result;
 
   __asm__("rlwimi %0,%2,8,16,23": "=&r"(result):"0"(x >> 8), "r"(x));
-    return result;
+    return (Uint16)result;
 }
 #elif defined(__GNUC__) && (defined(__M68000__) || defined(__M68020__)) && !defined(__mcoldfire__)
 static __inline__ Uint16
