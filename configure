@@ -24485,6 +24485,67 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
                 { echo "$as_me:$LINENO: result: $have_pthread_sem" >&5
 echo "${ECHO_T}$have_pthread_sem" >&6; }
             fi
+            if test x$have_pthread_sem = xyes; then
+                { echo "$as_me:$LINENO: checking for sem_timedwait" >&5
+echo $ECHO_N "checking for sem_timedwait... $ECHO_C" >&6; }
+                have_sem_timedwait=no
+                cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+                  #include <pthread.h>
+                  #include <semaphore.h>
+
+int
+main ()
+{
+
+                  sem_timedwait(NULL, NULL);
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+
+                have_sem_timedwait=yes
+                cat >>confdefs.h <<\_ACEOF
+#define HAVE_SEM_TIMEDWAIT 1
+_ACEOF
+
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+                { echo "$as_me:$LINENO: result: $have_sem_timedwait" >&5
+echo "${ECHO_T}$have_sem_timedwait" >&6; }
+            fi
 
             { echo "$as_me:$LINENO: checking for pthread_spin_trylock" >&5
 echo $ECHO_N "checking for pthread_spin_trylock... $ECHO_C" >&6; }

@@ -151,6 +151,7 @@
 #undef HAVE_ICONV
 #undef HAVE_PTHREAD_SETNAME_NP
 #undef HAVE_PTHREAD_SET_NAME_NP
+#undef HAVE_SEM_TIMEDWAIT
 
 #else
 /* We may need some replacement for stdarg.h here */

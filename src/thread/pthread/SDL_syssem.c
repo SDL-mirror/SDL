@@ -103,8 +103,12 @@ int
 SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
 {
     int retval;
+#ifdef HAVE_SEM_TIMEDWAIT
     struct timeval now;
     struct timespec ts_timeout;
+#else
+    Uint32 end;
+#endif
 
     if (!sem) {
         SDL_SetError("Passed a NULL semaphore");
@@ -119,6 +123,7 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
         return SDL_SemWait(sem);
     }
 
+#ifdef HAVE_SEM_TIMEDWAIT
     /* Setup the timeout. sem_timedwait doesn't wait for
     * a lapse of time, but until we reach a certain time.
     * This time is now plus the timeout.
@@ -147,6 +152,15 @@ SDL_SemWaitTimeout(SDL_sem * sem, Uint32 timeout)
     if (retval < 0) {
         SDL_SetError("sem_timedwait() failed");
     }
+#else
+    end = SDL_GetTicks() + timeout;
+    while ((retval = SDL_SemTryWait(sem)) == SDL_MUTEX_TIMEDOUT) {
+        if ((SDL_GetTicks() - end) >= 0) {
+            break;
+        }
+        SDL_Delay(0);
+    }
+#endif /* HAVE_SEM_TIMEDWAIT */
 
     return retval;
 }
