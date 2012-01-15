@@ -1994,6 +1994,20 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
                 ])
                 AC_MSG_RESULT($have_pthread_sem)
             fi
+            if test x$have_pthread_sem = xyes; then
+                AC_MSG_CHECKING(for sem_timedwait)
+                have_sem_timedwait=no
+                AC_TRY_LINK([
+                  #include <pthread.h>
+                  #include <semaphore.h>
+                ],[
+                  sem_timedwait(NULL, NULL);
+                ],[
+                have_sem_timedwait=yes
+                AC_DEFINE(HAVE_SEM_TIMEDWAIT)
+                ])
+                AC_MSG_RESULT($have_sem_timedwait)
+            fi
 
             # Restore the compiler flags and libraries
             CFLAGS="$ac_save_cflags"; LIBS="$ac_save_libs"
