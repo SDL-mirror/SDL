@@ -230,7 +230,6 @@ void QZ_PrivateCGToSDL (_THIS, NSPoint *p) {
 #endif /* Dead code */
 
 void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
-    CGEventSourceRef evsrc = CGEventSourceCreate(kCGEventSourceStateCombinedSessionState);
     NSPoint p;
     CGPoint cgp;
     
@@ -238,9 +237,11 @@ void  QZ_PrivateWarpCursor (_THIS, int x, int y) {
     cgp = QZ_PrivateSDLToCG (this, &p);
     
     /* this is the magic call that fixes cursor "freezing" after warp */
-    CGEventSourceSetLocalEventsSuppressionInterval(evsrc, 0.0);
+    CGAssociateMouseAndMouseCursorPosition (0);
     CGWarpMouseCursorPosition (cgp);
-    CFRelease(evsrc);
+    if (grab_state != QZ_INVISIBLE_GRAB) { /* can't leave it disassociated? */
+        CGAssociateMouseAndMouseCursorPosition (1);
+    }
     SDL_PrivateAppActive (QZ_IsMouseInWindow (this), SDL_APPMOUSEFOCUS);
 }
 
