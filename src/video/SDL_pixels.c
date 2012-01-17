@@ -968,6 +968,12 @@ SDL_InvalidateMap(SDL_BlitMap * map)
     if (!map) {
         return;
     }
+    if (map->dst) {
+        /* Release our reference to the surface - see the note below */
+        if (--map->dst->refcount <= 0) {
+            SDL_FreeSurface(map->dst);
+        }
+    }
     map->dst = NULL;
     map->src_palette_version = 0;
     map->dst_palette_version = 0;
@@ -1035,6 +1041,17 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
     }
 
     map->dst = dst;
+
+    if (map->dst) {
+        /* Keep a reference to this surface so it doesn't get deleted
+           while we're still pointing at it.
+
+           A better method would be for the destination surface to keep
+           track of surfaces that are mapped to it and automatically 
+           invalidate them when it is freed, but this will do for now.
+        */
+        ++map->dst->refcount;
+    }
 
     if (dstfmt->palette) {
         map->dst_palette_version = dstfmt->palette->version;
