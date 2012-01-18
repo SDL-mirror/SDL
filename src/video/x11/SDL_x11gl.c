@@ -143,11 +143,6 @@ XVisualInfo *X11_GL_GetVisual(_THIS)
 		attribs[i++] = this->gl_config.alpha_size;
 	}
 
-	if( this->gl_config.buffer_size ) {
-		attribs[i++] = GLX_BUFFER_SIZE;
-		attribs[i++] = this->gl_config.buffer_size;
-	}
-
 	if( this->gl_config.double_buffer ) {
 		attribs[i++] = GLX_DOUBLEBUFFER;
 	}
