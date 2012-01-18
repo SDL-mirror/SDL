@@ -112,6 +112,21 @@ char *(*pXGetICValues)(XIC, ...) = NULL;
 #undef SDL_X11_SYM
 
 
+static void *SDL_XGetRequest_workaround(Display* dpy, CARD8 type, size_t len)
+{
+	xReq *req;
+	WORD64ALIGN
+	if (dpy->bufptr + len > dpy->bufmax)
+		_XFlush(dpy);
+	dpy->last_req = dpy->bufptr;
+	req = (xReq*)dpy->bufptr;
+	req->reqType = type;
+	req->length = len / 4;
+	dpy->bufptr += len;
+	dpy->request++;
+	return req;
+}
+
 static int x11_load_refcount = 0;
 
 void SDL_X11_UnloadSymbols(void)
@@ -173,6 +188,15 @@ int SDL_X11_LoadSymbols(void)
 		pXGetICValues = (char * (*)(XIC,...)) X11_GetSym("XGetICValues",
 		                                                 &SDL_X11_HAVE_UTF8);
 		#endif
+
+		/*
+		 * In case we're built with newer Xlib headers, we need to make sure
+		 *  that _XGetRequest() is available, even on older systems.
+		 *  Otherwise, various Xlib macros we use will call a NULL pointer.
+		 */
+		if (!SDL_X11_HAVE_XGETREQUEST) {
+			p_XGetRequest = SDL_XGetRequest_workaround;
+		}
 
 		if (SDL_X11_HAVE_BASEXLIB) {  /* all required symbols loaded. */
 			SDL_ClearError();

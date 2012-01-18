@@ -170,6 +170,12 @@ SDL_X11_SYM(void,_XRead32,(Display *dpy,register long *data,long len),(dpy,data,
 #endif
 
 /*
+ * libX11 1.4.99.1 added _XGetRequest, and macros use it behind the scenes.
+ */
+SDL_X11_MODULE(XGETREQUEST)
+SDL_X11_SYM(void *,_XGetRequest,(Display* a,CARD8 b,size_t c),(a,b,c),return)
+
+/*
  * These only show up on some variants of Unix.
  */
 #if defined(__osf__)
