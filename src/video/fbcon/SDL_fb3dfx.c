@@ -96,7 +96,6 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	SDL_VideoDevice *this = current_video;
 	int bpp;
 	Uint32 src_format;
-	Uint32 dst_format;
 	Uint32 src_base;
 	Uint32 dst_base;
 	int srcX, srcY;
@@ -118,7 +117,6 @@ static int HWAccelBlit(SDL_Surface *src, SDL_Rect *srcrect,
 	src_format = src->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
 	dst_base = ((char *)dst->pixels - mapped_mem);
 	bpp = dst->format->BitsPerPixel;
-	dst_format = dst->pitch | ((bpp+((bpp==8) ? 0 : 8)) << 13);
 
 	srcX = srcrect->x;
 	srcY = srcrect->y;

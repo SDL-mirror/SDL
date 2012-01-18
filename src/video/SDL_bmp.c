@@ -132,6 +132,17 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 		biClrUsed	= SDL_ReadLE32(src);
 		biClrImportant	= SDL_ReadLE32(src);
 	}
+
+	/* stop some compiler warnings. */
+	(void) bfSize;
+	(void) bfReserved1;
+	(void) bfReserved2;
+	(void) biPlanes;
+	(void) biSizeImage;
+	(void) biXPelsPerMeter;
+	(void) biYPelsPerMeter;
+	(void) biClrImportant;
+
 	if (biHeight < 0) {
 		topDown = SDL_TRUE;
 		biHeight = -biHeight;
