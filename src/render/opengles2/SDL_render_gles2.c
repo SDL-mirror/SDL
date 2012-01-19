@@ -55,6 +55,15 @@ SDL_RenderDriver GLES2_RenderDriver = {
  * Context structures                                                                            *
  *************************************************************************************************/
 
+typedef struct GLES2_FBOList GLES2_FBOList;
+
+struct GLES2_FBOList
+{
+   Uint32 w, h;
+   GLuint FBO;
+   GLES2_FBOList *next;
+};
+
 typedef struct GLES2_TextureData
 {
     GLenum texture;
@@ -63,6 +72,7 @@ typedef struct GLES2_TextureData
     GLenum pixel_type;
     void *pixel_data;
     size_t pitch;
+    GLES2_FBOList *fbo;
 } GLES2_TextureData;
 
 typedef struct GLES2_ShaderCacheEntry
@@ -134,6 +144,9 @@ typedef struct GLES2_DriverContext
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
 #include "SDL_gles2funcs.h"
 #undef SDL_PROC
+    GLES2_FBOList *framebuffers;
+    SDL_Texture *renderTarget;
+    SDL_Rect viewport_copy;
 
     int shader_format_count;
     GLenum *shader_formats;
@@ -153,6 +166,8 @@ static void GLES2_WindowEvent(SDL_Renderer * renderer,
                               const SDL_WindowEvent *event);
 static int GLES2_UpdateViewport(SDL_Renderer * renderer);
 static void GLES2_DestroyRenderer(SDL_Renderer *renderer);
+
+static int GLES2_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 
 static SDL_GLContext SDL_CurrentContext = NULL;
 
@@ -176,12 +191,32 @@ static int GLES2_LoadFunctions(GLES2_DriverContext * data)
             SDL_SetError("Couldn't load GLES2 function %s: %s\n", #func, SDL_GetError()); \
             return -1; \
         } \
-    } while ( 0 );  
+    } while ( 0 );
 #endif /* _SDL_NOGETPROCADDR_ */
 
 #include "SDL_gles2funcs.h"
 #undef SDL_PROC
     return 0;
+}
+
+GLES2_FBOList *
+GLES2_GetFBO(GLES2_DriverContext *data, Uint32 w, Uint32 h)
+{
+   GLES2_FBOList *result = data->framebuffers;
+   while ((result) && ((result->w != w) || (result->h != h)) )
+   {
+       result = result->next;
+   }
+   if (result == NULL)
+   {
+       result = SDL_malloc(sizeof(GLES2_FBOList));
+       result->w = w;
+       result->h = h;
+       glGenFramebuffers(1, &result->FBO);
+       result->next = data->framebuffers;
+       data->framebuffers = result;
+   }
+   return result;
 }
 
 static int
@@ -207,7 +242,7 @@ static void
 GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    
+
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
@@ -267,6 +302,12 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
             }
         }
         if (rdata->context) {
+            while (rdata->framebuffers) {
+                GLES2_FBOList *nextnode = rdata->framebuffers->next;
+                rdata->glDeleteFramebuffers(1, &rdata->framebuffers->FBO);
+                SDL_free(rdata->framebuffers);
+                rdata->framebuffers = nextnode;
+            }
             SDL_GL_DeleteContext(rdata->context);
         }
         if (rdata->shader_formats) {
@@ -371,6 +412,13 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
         return -1;
     }
     texture->driverdata = tdata;
+
+    if (texture->access == SDL_TEXTUREACCESS_TARGET) {
+       tdata->fbo = GLES2_GetFBO(renderer->driverdata, texture->w, texture->h);
+    } else {
+       tdata->fbo = NULL;
+    }
+
     return 0;
 }
 
@@ -433,7 +481,7 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     int y;
 
     GLES2_ActivateRenderer(renderer);
-    
+
     /* Bail out if we're supposed to update an empty rectangle */
     if (rect->w <= 0 || rect->h <= 0)
         return 0;
@@ -543,7 +591,7 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
     entry->vertex_shader = vertex;
     entry->fragment_shader = fragment;
     entry->blend_mode = blendMode;
-    
+
     /* Create the program and link it */
     rdata->glGetError();
     entry->id = rdata->glCreateProgram();
@@ -560,7 +608,7 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
         SDL_free(entry);
         return NULL;
     }
-    
+
     /* Predetermine locations of uniform variables */
     entry->uniform_locations[GLES2_UNIFORM_PROJECTION] =
         rdata->glGetUniformLocation(entry->id, "u_projection");
@@ -625,7 +673,7 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
         SDL_SetError("No shader matching the requested characteristics was found");
         return NULL;
     }
-    
+
     /* Find a matching shader instance that's supported on this hardware */
     for (i = 0; i < shader->instance_count && !instance; ++i)
     {
@@ -872,7 +920,7 @@ GLES2_RenderClear(SDL_Renderer * renderer)
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
 
     GLES2_ActivateRenderer(renderer);
-    
+
     rdata->glClearColor((GLfloat) renderer->r * inv255f,
                  (GLfloat) renderer->g * inv255f,
                  (GLfloat) renderer->b * inv255f,
@@ -1080,20 +1128,83 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
 
     /* Activate an appropriate shader and set the projection matrix */
     blendMode = texture->blendMode;
-    switch (texture->format)
-    {
-        case SDL_PIXELFORMAT_ABGR8888:
-            sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;
-            break;
-        case SDL_PIXELFORMAT_ARGB8888:
-            sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
-            break;
-        case SDL_PIXELFORMAT_BGR888:
-            sourceType = GLES2_IMAGESOURCE_TEXTURE_BGR;
-            break;
-        case SDL_PIXELFORMAT_RGB888:
-            sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
-            break;
+    if (rdata->renderTarget!=NULL) {
+        /* Check if we need to do color mapping between the source and render target textures */
+        if (rdata->renderTarget->format != texture->format) {
+            switch (texture->format)
+            {
+            case SDL_PIXELFORMAT_ABGR8888:
+                switch (rdata->renderTarget->format)
+                {
+                    case SDL_PIXELFORMAT_ARGB8888:
+                    case SDL_PIXELFORMAT_RGB888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                        break;
+                    case SDL_PIXELFORMAT_BGR888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;
+                        break;
+                }
+                break;
+            case SDL_PIXELFORMAT_ARGB8888:
+                switch (rdata->renderTarget->format)
+                {
+                    case SDL_PIXELFORMAT_ABGR8888:
+                    case SDL_PIXELFORMAT_BGR888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                        break;
+                    case SDL_PIXELFORMAT_RGB888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;
+                        break;
+                }
+                break;
+            case SDL_PIXELFORMAT_BGR888:
+                switch (rdata->renderTarget->format)
+                {
+                    case SDL_PIXELFORMAT_ABGR8888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_BGR;
+                        break;
+                    case SDL_PIXELFORMAT_ARGB8888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
+                        break;
+                    case SDL_PIXELFORMAT_RGB888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                        break;
+                }
+                break;
+            case SDL_PIXELFORMAT_RGB888:
+                switch (rdata->renderTarget->format)
+                {
+                    case SDL_PIXELFORMAT_ABGR8888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                        break;
+                    case SDL_PIXELFORMAT_ARGB8888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_BGR;
+                        break;
+                    case SDL_PIXELFORMAT_BGR888:
+                        sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                        break;
+                }
+                break;
+            }
+        }
+        else sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;   // Texture formats match, use the non color mapping shader (even if the formats are not ABGR)
+    }
+    else {
+        switch (texture->format)
+        {
+            case SDL_PIXELFORMAT_ABGR8888:
+                sourceType = GLES2_IMAGESOURCE_TEXTURE_ABGR;
+                break;
+            case SDL_PIXELFORMAT_ARGB8888:
+                sourceType = GLES2_IMAGESOURCE_TEXTURE_ARGB;
+                break;
+            case SDL_PIXELFORMAT_BGR888:
+                sourceType = GLES2_IMAGESOURCE_TEXTURE_BGR;
+                break;
+            case SDL_PIXELFORMAT_RGB888:
+                sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
+                break;
+        }
     }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
         return -1;
@@ -1119,15 +1230,29 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    vertices[0] = (GLfloat)dstrect->x;
-    vertices[1] = (GLfloat)dstrect->y;
-    vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[3] = (GLfloat)dstrect->y;
-    vertices[4] = (GLfloat)dstrect->x;
-    vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
-    vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
+    if (rdata->renderTarget!=NULL) {
+        // Flip the texture vertically to compensate for the inversion it'll be subjected to later when it's rendered to the screen
+        vertices[0] = (GLfloat)dstrect->x;
+        vertices[1] = (GLfloat)renderer->viewport.h-dstrect->y;
+        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
+        vertices[3] = (GLfloat)renderer->viewport.h-dstrect->y;
+        vertices[4] = (GLfloat)dstrect->x;
+        vertices[5] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
+        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
+        vertices[7] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
+    }
+    else {
+        vertices[0] = (GLfloat)dstrect->x;
+        vertices[1] = (GLfloat)dstrect->y;
+        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
+        vertices[3] = (GLfloat)dstrect->y;
+        vertices[4] = (GLfloat)dstrect->x;
+        vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
+        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
+        vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
+    }
     rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
+
     texCoords[0] = srcrect->x / (GLfloat)texture->w;
     texCoords[1] = srcrect->y / (GLfloat)texture->h;
     texCoords[2] = (srcrect->x + srcrect->w) / (GLfloat)texture->w;
@@ -1231,6 +1356,60 @@ GLES2_ResetState(SDL_Renderer *renderer)
     rdata->glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
 }
 
+static int
+GLES2_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    GLES2_DriverContext *data = (GLES2_DriverContext *) renderer->driverdata;
+    GLES2_TextureData *texturedata = NULL;
+    GLenum status;
+    SDL_BlendMode blendMode;
+
+    if (!renderer) return -1;
+
+    blendMode = texture->blendMode;
+    if (texture == NULL) {
+        if (data->renderTarget!=NULL) {
+            data->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            renderer->viewport = data->viewport_copy;
+            data->renderTarget = NULL;
+            data->glViewport(renderer->viewport.x, renderer->viewport.y, renderer->viewport.w, renderer->viewport.h);
+            if(data->current_program) GLES2_SetOrthographicProjection(renderer);
+        }
+        return 0;
+    }
+    if (renderer != texture->renderer) return -1;
+    if (data->renderTarget==NULL) {
+        // Keep a copy of the default viewport to restore when texture==NULL
+        data->viewport_copy = renderer->viewport;
+    }
+
+    texturedata = (GLES2_TextureData *) texture->driverdata;
+    if (!texturedata) {
+        if (texture->native && texture->native->driverdata) {
+            texture = texture->native;
+            texturedata = texture->driverdata;
+        }
+        else return -1;
+    }
+    data->glBindFramebuffer(GL_FRAMEBUFFER, texturedata->fbo->FBO);
+    /* TODO: check if texture pixel format allows this operation */
+    data->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texturedata->texture_type, texturedata->texture, 0);
+    /* Check FBO status */
+    status = data->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        return -1;
+    }
+    
+    renderer->viewport.x = 0;
+    renderer->viewport.y = 0;
+    renderer->viewport.w = texture->w;
+    renderer->viewport.h = texture->h;
+    data->renderTarget = texture;
+    data->glViewport(0, 0, texture->w, texture->h);
+    if(data->current_program) GLES2_SetOrthographicProjection(renderer);
+    return 0;
+}
+
 static SDL_Renderer *
 GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 {
@@ -1241,10 +1420,10 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     GLboolean hasCompiler;
 #endif
     Uint32 windowFlags;
-    
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-    
+
     windowFlags = SDL_GetWindowFlags(window);
     if (!(windowFlags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, windowFlags | SDL_WINDOW_OPENGL) < 0) {
@@ -1331,6 +1510,9 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
         rdata->shader_formats[nFormats - 1] = (GLenum)-1;
 #endif /* ZUNE_HD */
 
+    rdata->framebuffers = NULL;
+    rdata->renderTarget = NULL;
+
     /* Populate the function pointers for the module */
     renderer->WindowEvent         = &GLES2_WindowEvent;
     renderer->CreateTexture       = &GLES2_CreateTexture;
@@ -1347,6 +1529,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->RenderPresent       = &GLES2_RenderPresent;
     renderer->DestroyTexture      = &GLES2_DestroyTexture;
     renderer->DestroyRenderer     = &GLES2_DestroyRenderer;
+    renderer->SetTargetTexture    = &GLES2_SetTargetTexture;
 
     GLES2_ResetState(renderer);
 

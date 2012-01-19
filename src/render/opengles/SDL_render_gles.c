@@ -73,6 +73,16 @@ static void GLES_RenderPresent(SDL_Renderer * renderer);
 static void GLES_DestroyTexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture);
 static void GLES_DestroyRenderer(SDL_Renderer * renderer);
+static int GLES_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+
+typedef struct GLES_FBOList GLES_FBOList;
+
+struct GLES_FBOList
+{
+   Uint32 w, h;
+   GLuint FBO;
+   GLES_FBOList *next;
+};
 
 
 SDL_RenderDriver GLES_RenderDriver = {
@@ -98,6 +108,10 @@ typedef struct
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
 #include "SDL_glesfuncs.h"
 #undef SDL_PROC
+    SDL_bool GL_OES_framebuffer_object_supported;
+    GLES_FBOList *framebuffers;
+    SDL_Texture *renderTarget;
+    SDL_Rect viewport_copy;
 
     SDL_bool useDrawTexture;
     SDL_bool GL_OES_draw_texture_supported;
@@ -113,6 +127,7 @@ typedef struct
     GLenum formattype;
     void *pixels;
     int pitch;
+    GLES_FBOList *fbo;
 } GLES_TextureData;
 
 static void
@@ -179,6 +194,27 @@ static int GLES_LoadFunctions(GLES_RenderData * data)
 
 static SDL_GLContext SDL_CurrentContext = NULL;
 
+GLES_FBOList *
+GLES_GetFBO(GLES_RenderData *data, Uint32 w, Uint32 h)
+{
+   GLES_FBOList *result = data->framebuffers;
+   while ((result) && ((result->w != w) || (result->h != h)) )
+   {
+       result = result->next;
+   }
+   if (result == NULL)
+   {
+       result = SDL_malloc(sizeof(GLES_FBOList));
+       result->w = w;
+       result->h = h;
+       glGenFramebuffersOES(1, &result->FBO);
+       result->next = data->framebuffers;
+       data->framebuffers = result;
+   }
+   return result;
+}
+
+
 static int
 GLES_ActivateRenderer(SDL_Renderer * renderer)
 {
@@ -219,6 +255,71 @@ GLES_ResetState(SDL_Renderer *renderer)
 
     data->glEnableClientState(GL_VERTEX_ARRAY);
     data->glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
+static int
+GLES_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    int w, h;
+    GLES_TextureData *texturedata = NULL;
+    GLenum status;
+
+    if (!renderer) return -1;
+    GLES_ActivateRenderer(renderer);
+    if (! data->GL_OES_framebuffer_object_supported) {
+        SDL_Unsupported();
+        return -1;
+    }
+
+    if (texture == NULL) {
+        if (data->renderTarget != NULL) {
+            data->renderTarget = NULL;
+            renderer->viewport = data->viewport_copy;
+            data->glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+            data->glMatrixMode(GL_PROJECTION);
+            data->glLoadIdentity();
+            data->glMatrixMode(GL_MODELVIEW);
+            data->glLoadIdentity();
+            data->glViewport(renderer->viewport.x, renderer->viewport.y, renderer->viewport.w, renderer->viewport.h);
+            data->glOrthof(0.0, (GLfloat) renderer->viewport.w, (GLfloat) renderer->viewport.h, 0.0, 0.0, 1.0);
+        }
+        return 0;
+    }
+
+    if (renderer != texture->renderer) return -1;
+    if (data->renderTarget==NULL) {
+        // Keep a copy of the default viewport to restore when texture==NULL
+        data->viewport_copy = renderer->viewport;
+    }
+    texturedata = (GLES_TextureData *) texture->driverdata;
+    if (!texturedata) {
+        if (texture->native && texture->native->driverdata) {
+            texture = texture->native;
+            texturedata = texture->driverdata;
+        }
+        else return -1;
+    }
+    data->glBindFramebufferOES(GL_FRAMEBUFFER_OES, texturedata->fbo->FBO);
+    /* TODO: check if texture pixel format allows this operation */
+    data->glFramebufferTexture2DOES(GL_FRAMEBUFFER_OES, GL_COLOR_ATTACHMENT0_OES, texturedata->type, texturedata->texture, 0);
+    /* Check FBO status */
+    status = data->glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
+    if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
+        return -1;
+    }
+    data->renderTarget = texture;
+    renderer->viewport.x = 0;
+    renderer->viewport.y = 0;
+    renderer->viewport.w = texture->w;
+    renderer->viewport.h = texture->h;
+    data->glMatrixMode(GL_PROJECTION);
+    data->glLoadIdentity();
+    data->glOrthof(0.0, (GLfloat) texture->w, 0.0, (GLfloat) texture->h, 0.0, 1.0);
+    data->glMatrixMode(GL_MODELVIEW);
+    data->glLoadIdentity();
+    data->glViewport(0, 0, texture->w, texture->h);
+    return 0;
 }
 
 SDL_Renderer *
@@ -274,6 +375,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
     renderer->window = window;
+    renderer->SetTargetTexture = GLES_SetTargetTexture;
 
     data->context = SDL_GL_CreateContext(window);
     if (!data->context) {
@@ -317,6 +419,12 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_height = value;
 
+    if (SDL_GL_ExtensionSupported("GL_OES_framebuffer_object")) {
+        data->GL_OES_framebuffer_object_supported = SDL_TRUE;
+    }
+    data->framebuffers = NULL;
+    data->renderTarget = NULL;
+
     /* Set up parameters for rendering */
     GLES_ResetState(renderer);
 
@@ -335,7 +443,7 @@ GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_MINIMIZED) {
         /* According to Apple documentation, we need to finish drawing NOW! */
-	data->glFinish();
+        data->glFinish();
     }
 }
 
@@ -403,6 +511,11 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     texture->driverdata = data;
+    if (texture->access == SDL_TEXTUREACCESS_TARGET) {
+       data->fbo = GLES_GetFBO(renderer->driverdata, texture->w, texture->h);
+    } else {
+       data->fbo = NULL;
+    }
 
     renderdata->glGetError();
     renderdata->glEnable(GL_TEXTURE_2D);
@@ -757,15 +870,26 @@ GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_Window *window = renderer->window;
 
         SDL_GetWindowSize(window, &w, &h);
-        cropRect[0] = srcrect->x;
-        cropRect[1] = srcrect->y + srcrect->h;
-        cropRect[2] = srcrect->w;
-        cropRect[3] = -srcrect->h;
-        data->glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES,
-                               cropRect);
-        data->glDrawTexiOES(renderer->viewport.x + dstrect->x,
-	              h - (renderer->viewport.y + dstrect->y) - dstrect->h, 0,
-                            dstrect->w, dstrect->h);
+        if (data->renderTarget != NULL) {
+            cropRect[0] = srcrect->x;
+            cropRect[1] = srcrect->y;
+            cropRect[2] = srcrect->w;
+            cropRect[3] = srcrect->h;
+            data->glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES,
+                                   cropRect);
+            data->glDrawTexiOES(renderer->viewport.x + dstrect->x, renderer->viewport.y + dstrect->y, 0,
+                                dstrect->w, dstrect->h);
+        } else {
+            cropRect[0] = srcrect->x;
+            cropRect[1] = srcrect->y + srcrect->h;
+            cropRect[2] = srcrect->w;
+            cropRect[3] = -srcrect->h;
+            data->glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_CROP_RECT_OES,
+                                   cropRect);
+            data->glDrawTexiOES(renderer->viewport.x + dstrect->x,
+                        h - (renderer->viewport.y + dstrect->y) - dstrect->h, 0,
+                        dstrect->w, dstrect->h);
+        }
     } else {
 
         minx = dstrect->x;
@@ -901,6 +1025,12 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         if (data->context) {
+            while (data->framebuffers) {
+               GLES_FBOList *nextnode = data->framebuffers->next;
+               data->glDeleteFramebuffersOES(1, &data->framebuffers->FBO);
+               SDL_free(data->framebuffers);
+               data->framebuffers = nextnode;
+            }
             SDL_GL_DeleteContext(data->context);
         }
         SDL_free(data);

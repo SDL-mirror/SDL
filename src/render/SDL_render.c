@@ -1014,9 +1014,9 @@ int
 SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
     SDL_Rect full_rect;
-	
+
     CHECK_RENDERER_MAGIC(renderer, -1);
-	
+
     /* If 'rect' == NULL, then outline the whole surface */
     if (!rect) {
         full_rect.x = 0;
@@ -1148,6 +1148,35 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     return renderer->RenderReadPixels(renderer, &real_rect,
                                       format, pixels, pitch);
+}
+
+SDL_bool
+SDL_RenderTargetSupported(SDL_Renderer *renderer)
+{
+    if ((!renderer) || (!renderer->SetTargetTexture)) {
+        return SDL_FALSE;
+    }
+    return SDL_TRUE;
+}
+
+int
+SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
+{
+    
+    if(!renderer) {
+        return -1;
+    }
+    if (!renderer->SetTargetTexture) {
+        SDL_Unsupported();
+        return -1;
+    }
+    // Warning: texture==NULL is a valid parameter
+    if( texture ) {
+        CHECK_TEXTURE_MAGIC(texture, -1);
+        if(renderer != texture->renderer) return -1;
+    }
+    
+    return renderer->SetTargetTexture(renderer, texture);
 }
 
 void

@@ -27,5 +27,13 @@ SDL_PROC(void, glTexParameteriv, (GLenum, GLenum, const GLint *))
 SDL_PROC(void, glTexSubImage2D, (GLenum, GLint, GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, const GLvoid *))
 SDL_PROC(void, glVertexPointer, (GLint, GLenum, GLsizei, const GLvoid *))
 SDL_PROC(void, glViewport, (GLint, GLint, GLsizei, GLsizei))
+SDL_PROC(void, glBindFramebufferOES, (GLenum, GLuint))
+SDL_PROC(void, glFramebufferTexture2DOES, (GLenum, GLenum, GLenum, GLuint, GLint))
+SDL_PROC(GLenum, glCheckFramebufferStatusOES, (GLenum))
+SDL_PROC(void, glPushMatrix, (void))
+SDL_PROC(void, glTranslatef, (GLfloat, GLfloat, GLfloat))
+SDL_PROC(void, glRotatef, (GLfloat, GLfloat, GLfloat, GLfloat))
+SDL_PROC(void, glPopMatrix, (void))
+SDL_PROC(void, glDeleteFramebuffersOES, (GLsizei, const GLuint*))
 
 /* vi: set ts=4 sw=4 expandtab: */
