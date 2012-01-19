@@ -153,8 +153,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidResize:(NSNotification *)aNotification
 {
     SDL_VideoDevice *device = SDL_GetVideoDevice();
-    int w, h;
+    int x, y, w, h;
     NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
+    ConvertNSRect(&rect);
+    x = (int)rect.origin.x;
+    y = (int)rect.origin.y;
     w = (int)rect.size.width;
     h = (int)rect.size.height;
     if (SDL_IsShapedWindow(_data->window))
@@ -164,6 +167,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
         [((NSOpenGLContext *) device->current_glctx) update];
     }
 
+    /* The window can move during a resize event, such as when maximizing
+       or resizing from a corner */
+    SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MOVED, x, y);
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
