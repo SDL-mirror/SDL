@@ -911,7 +911,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
      *  we can just simply do without it on newer OSes...
      */
     #if (MAC_OS_X_VERSION_MIN_REQUIRED < 1070) && !defined(__LP64__)
-    if ( !IS_LION_OR_LATER(this) ) {
+    if ( !isLion ) {
         /* If we don't hide menu bar, it will get events and interrupt the program */
         HideMenuBar ();
     }
