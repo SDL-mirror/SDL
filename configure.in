@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
-AC_CONFIG_HEADER(include/SDL_config_generated.h)
+AC_CONFIG_HEADER(include/SDL_config.h)
 AC_GNU_SOURCE
 AC_CONFIG_AUX_DIR(build-scripts)
 AC_CONFIG_MACRO_DIR([acinclude])
@@ -65,7 +65,7 @@ if test x$srcdir != x.; then
 elif test -d .hg; then
     AC_MSG_ERROR([
 *** When building from Mercurial you should configure and build in a
-    separate directory so you don't clobber SDL_revision.h
+    separate directory so you don't clobber SDL_config.h, SDL_revision.h
 ])
 fi
 case "$host" in
@@ -82,7 +82,7 @@ esac
 # Uncomment the following line if you want to force SDL and applications
 # built with it to be compiled for a particular architecture.
 #AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
-BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DGENERATED_CONFIG_H"
+BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DUSING_GENERATED_CONFIG_H"
 # The default optimization for SDL 1.3 is -O3 (Bug #31)
 if test x$orig_CFLAGS = x; then
     BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`

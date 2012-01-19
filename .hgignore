@@ -8,7 +8,6 @@ sdl-config
 SDL.spec
 SDL.qpg
 build
-include/SDL_config_generated.h
 
 # for Xcode
 *.orig
