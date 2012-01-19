@@ -840,7 +840,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
         if ( isLion ) {
             [ qz_window setLevel:CGShieldingWindowLevel() ];
             [ gl_context setView: window_view ];
-            [ gl_context setFullScreen ];
+            //[ gl_context setFullScreen ];
             [ gl_context update ];
         }
 
@@ -903,6 +903,7 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     if (isLion) {
         [ qz_window setHasShadow:NO];
         [ qz_window setOpaque:YES];
+        [ qz_window makeKeyAndOrderFront:nil ];
     }
 
     /* !!! FIXME: keep an eye on this.
