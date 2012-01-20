@@ -573,6 +573,7 @@ D3D_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *texturedata;
+    D3DMATRIX matrix;
     HRESULT result;
 
     if (!renderer) return -1;
@@ -590,7 +591,6 @@ D3D_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     /* Prepare an identity world and view matrix */
-    D3DMATRIX matrix;
     matrix.m[0][0] = 1.0f;
     matrix.m[0][1] = 0.0f;
     matrix.m[0][2] = 0.0f;
