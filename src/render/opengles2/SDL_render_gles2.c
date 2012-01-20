@@ -40,7 +40,7 @@ SDL_RenderDriver GLES2_RenderDriver = {
     GLES2_CreateRenderer,
     {
         "opengles2",
-        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),
+        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),
         4,
         {SDL_PIXELFORMAT_ABGR8888,
         SDL_PIXELFORMAT_ARGB8888,
@@ -1447,7 +1447,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
         return NULL;
     }
     renderer->info = GLES2_RenderDriver.info;
-    renderer->info.flags = SDL_RENDERER_ACCELERATED;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
     renderer->driverdata = rdata;
     renderer->window = window;
 

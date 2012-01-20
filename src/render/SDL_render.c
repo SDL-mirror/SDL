@@ -1153,10 +1153,10 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 SDL_bool
 SDL_RenderTargetSupported(SDL_Renderer *renderer)
 {
-    if ((!renderer) || (!renderer->SetTargetTexture)) {
+    if (!renderer || !renderer->SetTargetTexture) {
         return SDL_FALSE;
     }
-    return SDL_TRUE;
+    return (renderer->info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
 }
 
 int
