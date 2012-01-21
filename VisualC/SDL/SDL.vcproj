@@ -819,6 +819,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\main\win32\version.rc"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\wincommon\Wmmsg.h"
 			>
 		</File>
