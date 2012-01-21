@@ -576,7 +576,6 @@ D3D_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     D3DMATRIX matrix;
     HRESULT result;
 
-    if (!renderer) return -1;
     D3D_ActivateRenderer(renderer);
 
     if (data->NumSimultaneousRTs < 2) {
