@@ -61,7 +61,7 @@ extern "C" {
     15 14 13 12 11 10 09 08 07 06 05 04 03 02 01 00
     \endverbatim
  *  
- *  There are macros in SDL 1.3 and later to query these bits.
+ *  There are macros in SDL 2.0 and later to query these bits.
  */
 typedef Uint16 SDL_AudioFormat;
 

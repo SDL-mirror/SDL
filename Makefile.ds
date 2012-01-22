@@ -26,7 +26,7 @@ INCLUDES	:=	include
 #---------------------------------------------------------------------------------
 ARCH	:=	-mthumb -mthumb-interwork \
 		-D__NDS__ -DENABLE_NDS -DNO_SIGNAL_H -DDISABLE_THREADS -DPACKAGE=\"SDL\" \
-		 -DVERSION=\"1.3\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1  
+		 -DVERSION=\"2.0\" -DHAVE_ALLOCA_H=1 -DHAVE_ALLOCA=1  
 
 CFLAGS	:=	-g -Wall -O2\
 		-march=armv5te -mtune=arm946e-s \

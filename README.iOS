@@ -97,7 +97,7 @@ Windows:
 	Full-size, single window applications only.  You cannot create multi-window SDL applications for iPhone OS.  The application window will fill the display, though you have the option of turning on or off the menu-bar (pass SDL_CreateWindow the flag SDL_WINDOW_BORDERLESS).  Presently, landscape mode is not supported.
 
 Video:
-	For real time frame-rates, you are advised to use strictly SDL 1.3 video calls.  Using compatibility video calls uploads an OpenGL texture for each frame drawn, and this operation is excruciatingly slow.
+	For real time frame-rates, you are advised to use strictly SDL 2.0 video calls.  Using compatibility video calls uploads an OpenGL texture for each frame drawn, and this operation is excruciatingly slow.
 
 Textures:
 	SDL for iPhone Textures supports only SDL_PIXELFORMAT_ABGR8888 and SDL_PIXELFORMAT_RGB24 pixel formats.  This is because texture support in SDL for iPhone is done through OpenGL ES, which supports fewer pixel formats than OpenGL, will not re-order pixel data for you, and has no support for color-paletted formats (without extensions).

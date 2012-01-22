@@ -34,7 +34,7 @@ tests that you can run either on the DS or with desmume. For instance:
   2 bytes per pixel. And there is only 256KB reserved for the textures. For instance,
   testscale won't display sample.bmp, unless it's resized to a smaller picture.
 * the screen size is 256 x 384. Anything else won't work.
-* there is no 8 bits/pixel mode because SDL 1.3 doesn't support palettes.
+* there is no 8 bits/pixel mode because SDL 2.0 doesn't support palettes.
 
 -Joystick mapping-
 The Joystick presented to SDL has 2 axes and 8 buttons

@@ -9,7 +9,7 @@
   including commercial applications, and to alter it and redistribute it
   freely.
 */
-/* A simple program to test the Input Method support in the SDL library (1.3+) */
+/* A simple program to test the Input Method support in the SDL library (2.0+) */
 
 #include <stdlib.h>
 #include <stdio.h>
