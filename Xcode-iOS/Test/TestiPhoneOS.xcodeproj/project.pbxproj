@@ -972,11 +972,9 @@
 		FDA8A73B0E2D0F0400EA573E /* src */ = {
 			isa = PBXGroup;
 			children = (
-				AAE7DFB414CBB5F700DF1A0E /* testrendertarget.c */,
-				AAE7DF4514CBB43900DF1A0E /* testscale.c */,
+				047A63F013285CD100CD7973 /* checkkeys.c */,
 				FDA8A7840E2D0F1F00EA573E /* common.c */,
 				FDA8A7850E2D0F1F00EA573E /* common.h */,
-				047A63F013285CD100CD7973 /* checkkeys.c */,
 				FDA8A7870E2D0F2700EA573E /* graywin.c */,
 				FDA8A78B0E2D0F3D00EA573E /* loopwave.c */,
 				FDA8A7400E2D0F1600EA573E /* testalpha.c */,
@@ -984,13 +982,13 @@
 				FDA8A7420E2D0F1600EA573E /* testbitmap.c */,
 				FDA8A7430E2D0F1600EA573E /* testblitspeed.c */,
 				FDA8A7450E2D0F1600EA573E /* testcursor.c */,
+				FDC430090F0D86BF009C87E1 /* testdraw2.c */,
 				FDAAC5390E2D517D001DB1D8 /* testdyngles.c */,
 				FDA8A7470E2D0F1600EA573E /* testerror.c */,
 				FDA8A7480E2D0F1600EA573E /* testfile.c */,
 				FDA8A7490E2D0F1600EA573E /* testgamma.c */,
 				046CEF8913254F63007AD51D /* testgesture.c */,
 				FDAAC6290E2D5960001DB1D8 /* testgles.c */,
-				FDA8A74C0E2D0F1600EA573E /* testthread.c */,
 				FDA8A74D0E2D0F1600EA573E /* testiconv.c */,
 				FDA8A74E0E2D0F1600EA573E /* testjoystick.c */,
 				FDA8A74F0E2D0F1600EA573E /* testkeys.c */,
@@ -1001,9 +999,12 @@
 				FDA8A7540E2D0F1600EA573E /* testoverlay2.c */,
 				FDA8A7560E2D0F1600EA573E /* testplatform.c */,
 				56ED0510118A904200A56AA6 /* testpower.c */,
+				AAE7DFB414CBB5F700DF1A0E /* testrendertarget.c */,
+				AAE7DF4514CBB43900DF1A0E /* testscale.c */,
 				FDA8A7570E2D0F1600EA573E /* testsem.c */,
 				FDA8A7580E2D0F1600EA573E /* testsprite.c */,
 				FDA8A7590E2D0F1600EA573E /* testsprite2.c */,
+				FDA8A74C0E2D0F1600EA573E /* testthread.c */,
 				FDA8A75A0E2D0F1600EA573E /* testtimer.c */,
 				FDA8A75B0E2D0F1600EA573E /* testver.c */,
 				FDA8A75C0E2D0F1600EA573E /* testvidinfo.c */,
@@ -1012,7 +1013,6 @@
 				FDA8A75F0E2D0F1600EA573E /* testwm2.c */,
 				FDA8A7600E2D0F1600EA573E /* threadwin.c */,
 				FDA8A7610E2D0F1600EA573E /* torturethread.c */,
-				FDC430090F0D86BF009C87E1 /* testdraw2.c */,
 			);
 			name = src;
 			sourceTree = "<group>";
