@@ -54,6 +54,7 @@ static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_UpdateViewport(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
@@ -66,7 +67,6 @@ static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 pixel_format, void * pixels, int pitch);
-static int GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
@@ -104,8 +104,6 @@ typedef struct
     
     SDL_bool GL_EXT_framebuffer_object_supported;
     GL_FBOList *framebuffers;
-    SDL_Texture *renderTarget;
-    SDL_Rect viewport_copy;
 
     /* OpenGL functions */
 #define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
@@ -309,19 +307,19 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
+    renderer->SetTargetTexture = GL_SetTargetTexture;
     renderer->UpdateViewport = GL_UpdateViewport;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
     renderer->RenderDrawLines = GL_RenderDrawLines;
     renderer->RenderFillRects = GL_RenderFillRects;
     renderer->RenderCopy = GL_RenderCopy;
-    renderer->SetTargetTexture = GL_SetTargetTexture;
     renderer->RenderReadPixels = GL_RenderReadPixels;
     renderer->RenderPresent = GL_RenderPresent;
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
     renderer->info = GL_RenderDriver.info;
-    renderer->info.flags = SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
     renderer->window = window;
 
@@ -399,11 +397,11 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
             SDL_GL_GetProcAddress("glFramebufferTexture2DEXT");
         data->glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)
             SDL_GL_GetProcAddress("glBindFramebufferEXT");
-       data->glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)
+        data->glCheckFramebufferStatusEXT = (PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC)
             SDL_GL_GetProcAddress("glCheckFramebufferStatusEXT");
+        renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
     }
     data->framebuffers = NULL;
-    data->renderTarget = NULL;
 
     /* Set up parameters for rendering */
     GL_ResetState(renderer);
@@ -463,74 +461,6 @@ GetScaleQuality(void)
     } else {
         return GL_LINEAR;
     }
-}
-
-static int
-GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;    
-    
-    GL_TextureData *texturedata;
-    GLenum status;
-
-    if (!renderer) return -1;
-    GL_ActivateRenderer(renderer);
-    
-    if (! data->GL_EXT_framebuffer_object_supported) {
-        SDL_Unsupported();
-        return -1;
-    }
-    
-    if (texture == NULL) {
-        if (data->renderTarget != NULL) {
-            data->renderTarget = NULL;
-            renderer->viewport = data->viewport_copy;
-            data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
-            data->glMatrixMode(GL_PROJECTION);
-            data->glLoadIdentity();
-            data->glMatrixMode(GL_MODELVIEW);
-            data->glLoadIdentity();
-            data->glViewport(renderer->viewport.x, renderer->viewport.y, renderer->viewport.w, renderer->viewport.h);
-            data->glOrtho(0.0, (GLdouble) renderer->viewport.w, (GLdouble) renderer->viewport.h, 0.0, 0.0, 1.0);
-        }
-        return 0;
-    }
-    if (renderer != texture->renderer) return -1;
-    if (data->renderTarget==NULL) {
-        // Keep a copy of the default viewport to restore when texture==NULL
-        data->viewport_copy = renderer->viewport;
-    }
-    
-    
-    texturedata = (GL_TextureData *) texture->driverdata;
-    if (!texturedata) {
-        if (texture->native && texture->native->driverdata) {
-            texture = texture->native;
-            texturedata = texture->driverdata;
-        }
-        else return -1;
-    }
-    data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, texturedata->fbo->FBO);
-    /* TODO: check if texture pixel format allows this operation */
-    data->glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texturedata->type, texturedata->texture, 0);
-    /* Check FBO status */
-    status = data->glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
-    if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
-        return -1;
-    }
-
-    data->renderTarget = texture;
-    renderer->viewport.x = 0;
-    renderer->viewport.y = 0;
-    renderer->viewport.w = texture->w;
-    renderer->viewport.h = texture->h;
-    data->glMatrixMode(GL_PROJECTION);
-    data->glLoadIdentity();
-    data->glOrtho(0.0, (GLdouble) texture->w, 0.0, (GLdouble) texture->h, 0.0, 1.0);
-    data->glMatrixMode(GL_MODELVIEW);
-    data->glLoadIdentity();
-    data->glViewport(0, 0, texture->w, texture->h);    
-    return 0;
 }
 
 static int
@@ -777,6 +707,33 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
+GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;    
+    GL_TextureData *texturedata;
+    GLenum status;
+
+    GL_ActivateRenderer(renderer);
+    
+    if (texture == NULL) {
+        data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+        return 0;
+    }
+
+    texturedata = (GL_TextureData *) texture->driverdata;
+    data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, texturedata->fbo->FBO);
+    /* TODO: check if texture pixel format allows this operation */
+    data->glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texturedata->type, texturedata->texture, 0);
+    /* Check FBO status */
+    status = data->glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
+    if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
+        SDL_SetError("glFramebufferTexture2DEXT() failed");
+        return -1;
+    }
+    return 0;
+}
+
+static int
 GL_UpdateViewport(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
@@ -791,10 +748,19 @@ GL_UpdateViewport(SDL_Renderer * renderer)
 
     data->glMatrixMode(GL_PROJECTION);
     data->glLoadIdentity();
-    data->glOrtho((GLdouble) 0,
-                  (GLdouble) renderer->viewport.w,
-                  (GLdouble) renderer->viewport.h,
-                  (GLdouble) 0, 0.0, 1.0);
+    if (renderer->target) {
+        data->glOrtho((GLdouble) 0,
+                      (GLdouble) renderer->viewport.w,
+                      (GLdouble) 0,
+                      (GLdouble) renderer->viewport.h,
+                       0.0, 1.0);
+    } else {
+        data->glOrtho((GLdouble) 0,
+                      (GLdouble) renderer->viewport.w,
+                      (GLdouble) renderer->viewport.h,
+                      (GLdouble) 0,
+                       0.0, 1.0);
+    }
     return 0;
 }
 

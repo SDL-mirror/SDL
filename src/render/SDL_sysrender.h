@@ -77,6 +77,7 @@ struct SDL_Renderer
     int (*LockTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                         const SDL_Rect * rect, void **pixels, int *pitch);
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
+    int (*SetTargetTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*UpdateViewport) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,
@@ -87,7 +88,6 @@ struct SDL_Renderer
                             int count);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
-    int (*SetTargetTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
                              Uint32 format, void * pixels, int pitch);
     void (*RenderPresent) (SDL_Renderer * renderer);
@@ -104,9 +104,11 @@ struct SDL_Renderer
 
     /* The drawable area within the window */
     SDL_Rect viewport;
+    SDL_Rect viewport_backup;
 
     /* The list of textures */
     SDL_Texture *textures;
+    SDL_Texture *target;
 
     Uint8 r, g, b, a;                   /**< Color for drawing operations values */
     SDL_BlendMode blendMode;            /**< The drawing blend mode */

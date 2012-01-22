@@ -106,11 +106,16 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                 SDL_Rect viewport;
 
                 SDL_GetWindowSize(window, &w, &h);
-                viewport.x = (w - renderer->viewport.w) / 2;
-                viewport.y = (h - renderer->viewport.h) / 2;
-                viewport.w = renderer->viewport.w;
-                viewport.h = renderer->viewport.h;
-                SDL_RenderSetViewport(renderer, &viewport);
+                if (renderer->target) {
+                    renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
+                    renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
+                } else {
+                    viewport.x = (w - renderer->viewport.w) / 2;
+                    viewport.y = (h - renderer->viewport.h) / 2;
+                    viewport.w = renderer->viewport.w;
+                    viewport.h = renderer->viewport.h;
+                    SDL_RenderSetViewport(renderer, &viewport);
+                }
             } else if (event->window.event == SDL_WINDOWEVENT_MINIMIZED) {
                 renderer->minimized = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_RESTORED) {
@@ -796,6 +801,72 @@ SDL_UnlockTexture(SDL_Texture * texture)
     }
 }
 
+SDL_bool
+SDL_RenderTargetSupported(SDL_Renderer *renderer)
+{
+    if (!renderer || !renderer->SetTargetTexture) {
+        return SDL_FALSE;
+    }
+    return (renderer->info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
+}
+
+int
+SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
+{
+    SDL_Rect viewport;
+
+    if (!SDL_RenderTargetSupported(renderer)) {
+        SDL_Unsupported();
+        return -1;
+    }
+    if (texture == renderer->target) {
+        /* Nothing to do! */
+        return 0;
+    }
+
+    /* texture == NULL is valid and means reset the target to the window */
+    if (texture) {
+        CHECK_TEXTURE_MAGIC(texture, -1);
+        if (renderer != texture->renderer) {
+            SDL_SetError("Texture was not created with this renderer");
+            return -1;
+        }
+        if (!(texture->access & SDL_TEXTUREACCESS_TARGET)) {
+            SDL_SetError("Texture not created with SDL_TEXTUREACCESS_TARGET");
+            return -1;
+        }
+        if (texture->native) {
+            /* Always render to the native texture */
+            texture = texture->native;
+        }
+    }
+
+    if (texture && !renderer->target) {
+        /* Make a backup of the viewport */
+        renderer->viewport_backup = renderer->viewport;
+    }
+    renderer->target = texture;
+
+    if (renderer->SetTargetTexture(renderer, texture) < 0) {
+        return -1;
+    }
+
+    if (texture) {
+        viewport.x = 0;
+        viewport.y = 0;
+        viewport.w = texture->w;
+        viewport.h = texture->h;
+    } else {
+        viewport = renderer->viewport_backup;
+    }
+    if (SDL_RenderSetViewport(renderer, &viewport) < 0) {
+        return -1;
+    }
+
+    /* All set! */
+    return 0;
+}
+
 int
 SDL_RenderSetViewport(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
@@ -1148,35 +1219,6 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     return renderer->RenderReadPixels(renderer, &real_rect,
                                       format, pixels, pitch);
-}
-
-SDL_bool
-SDL_RenderTargetSupported(SDL_Renderer *renderer)
-{
-    if (!renderer || !renderer->SetTargetTexture) {
-        return SDL_FALSE;
-    }
-    return (renderer->info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
-}
-
-int
-SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
-{
-    
-    if(!renderer) {
-        return -1;
-    }
-    if (!renderer->SetTargetTexture) {
-        SDL_Unsupported();
-        return -1;
-    }
-    // Warning: texture==NULL is a valid parameter
-    if( texture ) {
-        CHECK_TEXTURE_MAGIC(texture, -1);
-        if(renderer != texture->renderer) return -1;
-    }
-    
-    return renderer->SetTargetTexture(renderer, texture);
 }
 
 void
