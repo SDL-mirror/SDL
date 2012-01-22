@@ -5,8 +5,7 @@ config.log
 config.status
 Makefile
 sdl-config
-SDL.spec
-SDL.qpg
+SDL2.spec
 build
 
 # for Xcode
@@ -37,7 +36,7 @@ test/config.cache
 test/config.log
 test/config.status
 test/Makefile
-test/SDL.dll
+test/SDL2.dll
 test/checkkeys
 test/graywin
 test/loopwave

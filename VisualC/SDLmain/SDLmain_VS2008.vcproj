@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="SDLmain"
+	Name="SDL2main"
 	ProjectGUID="{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
 	RootNamespace="SDLmain"
 	TargetFrameworkVersion="131072"

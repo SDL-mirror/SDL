@@ -6,9 +6,9 @@ exec_prefix_set=no
 libdir=@libdir@
 
 @ENABLE_STATIC_FALSE@usage="\
-@ENABLE_STATIC_FALSE@Usage: sdl-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--cflags] [--libs]"
+@ENABLE_STATIC_FALSE@Usage: $0 [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--cflags] [--libs]"
 @ENABLE_STATIC_TRUE@usage="\
-@ENABLE_STATIC_TRUE@Usage: sdl-config [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--cflags] [--libs] [--static-libs]"
+@ENABLE_STATIC_TRUE@Usage: $0 [--prefix[=DIR]] [--exec-prefix[=DIR]] [--version] [--cflags] [--libs] [--static-libs]"
 
 if test $# -eq 0; then
       echo "${usage}" 1>&2
@@ -42,7 +42,7 @@ while test $# -gt 0; do
       echo @SDL_VERSION@
       ;;
     --cflags)
-      echo -I@includedir@/SDL @SDL_CFLAGS@
+      echo -I@includedir@/SDL2 @SDL_CFLAGS@
       ;;
 @ENABLE_SHARED_TRUE@    --libs)
 @ENABLE_SHARED_TRUE@      echo -L@libdir@ @SDL_RLD_FLAGS@ @SDL_LIBS@

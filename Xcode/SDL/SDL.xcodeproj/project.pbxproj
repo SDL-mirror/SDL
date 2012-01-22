@@ -62,8 +62,8 @@
 		006E94A8119511A1001DE610 /* sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A1119511A1001DE610 /* sample.wav */; };
 		006E94A9119511A1001DE610 /* utf8.txt in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A2119511A1001DE610 /* utf8.txt */; };
 		006E94BC11951217001DE610 /* read in Copy rwops */ = {isa = PBXBuildFile; fileRef = 00D8DA121195093100638393 /* read */; };
-		006E94EF11951255001DE610 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL.framework */; };
-		006E94F01195125B001DE610 /* SDL.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL.framework */; };
+		006E94EF11951255001DE610 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
+		006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
 		007317A40858DECD00B2BC32 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179D0858DECD00B2BC32 /* Cocoa.framework */; };
@@ -536,7 +536,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				006E94F01195125B001DE610 /* SDL.framework in Copy Frameworks */,
+				006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */,
 			);
 			name = "Copy Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -840,8 +840,8 @@
 		B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = SOURCE_ROOT; };
 		B2CF8DC705C4450500E5DC7F /* SDL_name.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_name.h; path = ../../include/SDL_name.h; sourceTree = SOURCE_ROOT; };
 		BECDF66B0761BA81005FE872 /* Info-Framework.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Framework.plist"; sourceTree = "<group>"; };
-		BECDF66C0761BA81005FE872 /* SDL.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		BECDF6B30761BA81005FE872 /* libSDL.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		BECDF66C0761BA81005FE872 /* SDL2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BECDF6B30761BA81005FE872 /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6BE0761BA81005FE872 /* Standard DMG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Standard DMG"; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6C30761BA81005FE872 /* Developer Extras Package */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Developer Extras Package"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F59C70FF00D5CB5801000001 /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
@@ -860,7 +860,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				006E94EF11951255001DE610 /* SDL.framework in Frameworks */,
+				006E94EF11951255001DE610 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1067,8 +1067,8 @@
 			isa = PBXGroup;
 			children = (
 				089C1665FE841158C02AAC07 /* Resources */,
-				BECDF66C0761BA81005FE872 /* SDL.framework */,
-				BECDF6B30761BA81005FE872 /* libSDL.a */,
+				BECDF66C0761BA81005FE872 /* SDL2.framework */,
+				BECDF6B30761BA81005FE872 /* libSDL2.a */,
 				BECDF6BE0761BA81005FE872 /* Standard DMG */,
 				BECDF6C30761BA81005FE872 /* Developer Extras Package */,
 				00D8D9EF1195090700638393 /* testsdl.app */,
@@ -1886,7 +1886,7 @@
 			name = Framework;
 			productInstallPath = "@executable_path/../Frameworks";
 			productName = SDL;
-			productReference = BECDF66C0761BA81005FE872 /* SDL.framework */;
+			productReference = BECDF66C0761BA81005FE872 /* SDL2.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		BECDF66D0761BA81005FE872 /* Static Library */ = {
@@ -1906,7 +1906,7 @@
 			name = "Static Library";
 			productInstallPath = /usr/local/lib;
 			productName = "Static Library";
-			productReference = BECDF6B30761BA81005FE872 /* libSDL.a */;
+			productReference = BECDF6B30761BA81005FE872 /* libSDL2.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		BECDF6BB0761BA81005FE872 /* Standard DMG */ = {
@@ -2030,7 +2030,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/SDL.framework build/dmg-tmp/\n\n# strip moved to Xcode native mechanism\n# strip -x build/dmg-tmp/SDL.framework/SDL\n\ncp pkg-support/resources/License.rtf build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\ncp pkg-support/resources/UniversalBinaryNotes.rtf build/dmg-tmp\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\nfind -d build/dmg-tmp -type d -name .svn -exec rm -rf \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL -srcfolder build/dmg-tmp build/SDL.dmg\n\n# clean up\nrm -rf build/dmg-tmp\n\n# compress it???\n#(cd build; gnutar -zcvf SDL.dmg.tar.gz SDL.dmg)";
+			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
 		};
 		BECDF6C20761BA81005FE872 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2347,12 +2347,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = B;
+				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
 				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Release;
@@ -2369,7 +2369,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 			};
 			name = Release;
 		};
@@ -2409,12 +2409,12 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_VERSION = B;
+				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
 				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
 			};
 			name = Debug;
@@ -2431,7 +2431,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				PRODUCT_NAME = SDL;
+				PRODUCT_NAME = SDL2;
 			};
 			name = Debug;
 		};

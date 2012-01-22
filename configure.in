@@ -11,7 +11,7 @@ orig_CFLAGS="$CFLAGS"
 dnl Set various version strings - taken gratefully from the GTk sources
 #
 # Making releases:
-# Edit include/SDL/SDL_version.h and change the version, then:
+# Edit include/SDL_version.h and change the version, then:
 #   SDL_MICRO_VERSION += 1;
 #   SDL_INTERFACE_AGE += 1;
 #   SDL_BINARY_AGE += 1;
@@ -19,8 +19,8 @@ dnl Set various version strings - taken gratefully from the GTk sources
 # if backwards compatibility has been broken,
 # set SDL_BINARY_AGE and SDL_INTERFACE_AGE to 0.
 #
-SDL_MAJOR_VERSION=1
-SDL_MINOR_VERSION=3
+SDL_MAJOR_VERSION=2
+SDL_MINOR_VERSION=0
 SDL_MICRO_VERSION=0
 SDL_INTERFACE_AGE=0
 SDL_BINARY_AGE=0
@@ -83,7 +83,7 @@ esac
 # built with it to be compiled for a particular architecture.
 #AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
 BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DUSING_GENERATED_CONFIG_H"
-# The default optimization for SDL 1.3 is -O3 (Bug #31)
+# The default optimization for SDL is -O3 (Bug #31)
 if test x$orig_CFLAGS = x; then
     BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`
 fi
@@ -100,7 +100,7 @@ EXTRA_LDFLAGS="$BASE_LDFLAGS"
 #    fi
 #done
 SDL_CFLAGS="$BASE_CFLAGS"
-SDL_LIBS="-lSDL $BASE_LDFLAGS"
+SDL_LIBS="-lSDL2 $BASE_LDFLAGS"
 CPPFLAGS="$CPPFLAGS $EXTRA_CFLAGS"
 CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 LDFLAGS="$LDFLAGS $EXTRA_LDFLAGS"
@@ -2249,7 +2249,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The Windows platform requires special setup
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -Dmain=SDL_main -D_WIN32_WCE=0x420"
-        EXTRA_LDFLAGS="-lSDLmain $EXTRA_LDFLAGS"
+        EXTRA_LDFLAGS="-lSDL2main $EXTRA_LDFLAGS"
         ;;
     *-*-cygwin* | *-*-mingw32*)
         ARCH=win32
@@ -2344,7 +2344,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             have_loadso=yes
         fi
         # Set up the system libraries we need
-        # SDL 1.3 is unicode, and unicows emulates this on Windows 98/ME
+        # SDL is unicode, and unicows emulates this on Windows 98/ME
         # You can get this here: http://libunicows.sourceforge.net/
         #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid"
@@ -2352,7 +2352,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         VERSION_SOURCES="$srcdir/src/main/windows/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDLmain $SDL_LIBS -mwindows"
+        SDL_LIBS="-lmingw32 -lSDL2main $SDL_LIBS -mwindows"
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos
@@ -2562,7 +2562,7 @@ fi
 case "$ARCH" in
   macosx)
     # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${libdir}/libSDL.a $EXTRA_LDFLAGS"
+    SDL_STATIC_LIBS="\${libdir}/libSDL2.a $EXTRA_LDFLAGS"
     ;;
   *)
     SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
@@ -2618,6 +2618,6 @@ $SDLMAIN_DEPENDS
 __EOF__
 
 AC_CONFIG_FILES([
-    Makefile:Makefile.in:Makefile.rules sdl-config SDL.spec sdl.pc
+    Makefile:Makefile.in:Makefile.rules sdl2-config SDL2.spec sdl2.pc
 ])
 AC_OUTPUT

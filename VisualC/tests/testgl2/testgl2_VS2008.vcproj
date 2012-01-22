@@ -101,7 +101,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL"
-				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll&quot; &quot;$(TargetDir)\SDL.dll&quot;"
+				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;"
 			/>
 		</Configuration>
 		<Configuration
@@ -190,7 +190,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copy SDL"
-				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL.dll&quot; &quot;$(TargetDir)\SDL.dll&quot;"
+				CommandLine="copy &quot;$(SolutionDir)\SDL\$(ConfigurationName)\SDL2.dll&quot; &quot;$(TargetDir)\SDL2.dll&quot;"
 			/>
 		</Configuration>
 	</Configurations>

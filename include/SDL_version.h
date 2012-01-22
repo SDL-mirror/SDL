@@ -59,8 +59,8 @@ typedef struct SDL_version
 
 /* Printable format: "%d.%d.%d", MAJOR, MINOR, PATCHLEVEL
 */
-#define SDL_MAJOR_VERSION	1
-#define SDL_MINOR_VERSION	3
+#define SDL_MAJOR_VERSION	2
+#define SDL_MINOR_VERSION	0
 #define SDL_PATCHLEVEL		0
 
 /**
