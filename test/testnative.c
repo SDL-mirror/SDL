@@ -62,7 +62,7 @@ LoadSprite(SDL_Renderer *renderer, char *file)
 
     /* Set transparent pixel as the pixel at (0,0) */
     if (temp->format->palette) {
-        SDL_SetColorKey(temp, SDL_SRCCOLORKEY, *(Uint8 *) temp->pixels);
+        SDL_SetColorKey(temp, 1, *(Uint8 *) temp->pixels);
     }
 
     /* Create textures from the image */

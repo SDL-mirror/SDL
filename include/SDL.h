@@ -90,7 +90,6 @@
 #include "SDL_timer.h"
 #include "SDL_version.h"
 #include "SDL_video.h"
-#include "SDL_compat.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

@@ -109,12 +109,6 @@ typedef enum
     /* Drag and drop events */
     SDL_DROPFILE        = 0x1000, /**< The system requests a file open */
 
-    /* Obsolete events */
-    SDL_EVENT_COMPAT1 = 0x7000, /**< SDL 1.2 events for compatibility */
-    SDL_EVENT_COMPAT2,
-    SDL_EVENT_COMPAT3,
-
-
     /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
      *  and should be allocated with SDL_RegisterEvents()
      */
@@ -419,36 +413,6 @@ typedef struct SDL_SysWMEvent
     SDL_SysWMmsg *msg;  /**< driver dependent data, defined in SDL_syswm.h */
 } SDL_SysWMEvent;
 
-#ifndef SDL_NO_COMPAT
-/**
- *  \addtogroup Compatibility 
- */
-/*@{*/
-
-/**
- *  \name Typedefs for backwards compatibility
- */
-/*@{*/
-typedef struct SDL_ActiveEvent
-{
-    Uint32 type;
-    Uint32 timestamp;
-    Uint8 gain;
-    Uint8 state;
-} SDL_ActiveEvent;
-
-typedef struct SDL_ResizeEvent
-{
-    Uint32 type;
-    Uint32 timestamp;
-    int w;
-    int h;
-} SDL_ResizeEvent;
-/*@}*/
-
-/*@}*//*Compatibility*/
-#endif
-
 /**
  *  \brief General event structure
  */
@@ -474,14 +438,6 @@ typedef union SDL_Event
     SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data */
     SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data */
     SDL_DropEvent drop;             /**< Drag and drop event data */
-
-    /** Temporarily here for backwards compatibility */
-    /*@{*/
-#ifndef SDL_NO_COMPAT
-    SDL_ActiveEvent active;
-    SDL_ResizeEvent resize;
-#endif
-    /*@}*/
 } SDL_Event;
 
 
