@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 45;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -36,6 +36,30 @@
 		56ED0508118A8FE400A56AA6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
 		56ED0509118A8FE400A56AA6 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
 		56ED0511118A904200A56AA6 /* testpower.c in Sources */ = {isa = PBXBuildFile; fileRef = 56ED0510118A904200A56AA6 /* testpower.c */; };
+		AAE7DEDC14CBB1E100DF1A0E /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
+		AAE7DEDE14CBB1E100DF1A0E /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7840E2D0F1F00EA573E /* common.c */; };
+		AAE7DEE114CBB1E100DF1A0E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		AAE7DEE214CBB1E100DF1A0E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
+		AAE7DEE314CBB1E100DF1A0E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
+		AAE7DEE414CBB1E100DF1A0E /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
+		AAE7DEE514CBB1E100DF1A0E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89B0E2D111A00EA573E /* CoreGraphics.framework */; };
+		AAE7DEE614CBB1E100DF1A0E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
+		AAE7DEE714CBB1E100DF1A0E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
+		AAE7DEE814CBB1E100DF1A0E /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
+		AAE7DF4614CBB43900DF1A0E /* testscale.c in Sources */ = {isa = PBXBuildFile; fileRef = AAE7DF4514CBB43900DF1A0E /* testscale.c */; };
+		AAE7DF4714CBB45000DF1A0E /* sample.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AADE0E2D33C100EA573E /* sample.bmp */; };
+		AAE7DFA014CBB54E00DF1A0E /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AAD90E2D33B000EA573E /* icon.bmp */; };
+		AAE7DFA114CBB54E00DF1A0E /* sample.bmp in Resources */ = {isa = PBXBuildFile; fileRef = FDA8AADE0E2D33C100EA573E /* sample.bmp */; };
+		AAE7DFA314CBB54E00DF1A0E /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7840E2D0F1F00EA573E /* common.c */; };
+		AAE7DFA614CBB54E00DF1A0E /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD1B48B80E3131CA007AB34E /* libSDL.a */; };
+		AAE7DFA714CBB54E00DF1A0E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
+		AAE7DFA814CBB54E00DF1A0E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8990E2D111A00EA573E /* QuartzCore.framework */; };
+		AAE7DFA914CBB54E00DF1A0E /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89A0E2D111A00EA573E /* OpenGLES.framework */; };
+		AAE7DFAA14CBB54E00DF1A0E /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89B0E2D111A00EA573E /* CoreGraphics.framework */; };
+		AAE7DFAB14CBB54E00DF1A0E /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89C0E2D111A00EA573E /* UIKit.framework */; };
+		AAE7DFAC14CBB54E00DF1A0E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89D0E2D111A00EA573E /* Foundation.framework */; };
+		AAE7DFAD14CBB54E00DF1A0E /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A89E0E2D111A00EA573E /* CoreAudio.framework */; };
+		AAE7DFB514CBB5F700DF1A0E /* testrendertarget.c in Sources */ = {isa = PBXBuildFile; fileRef = AAE7DFB414CBB5F700DF1A0E /* testrendertarget.c */; };
 		FDA8A79B0E2D0F8B00EA573E /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A7840E2D0F1F00EA573E /* common.c */; };
 		FDA8A79C0E2D0F9300EA573E /* testwm2.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA8A75F0E2D0F1600EA573E /* testwm2.c */; };
 		FDA8A89F0E2D111A00EA573E /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDA8A8980E2D111A00EA573E /* AudioToolbox.framework */; };
@@ -298,17 +322,17 @@
 /* Begin PBXContainerItemProxy section */
 		0466EE6F11E565E4000198A4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48AC0E3131CA007AB34E /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 006E982211955059001DE610;
 			remoteInfo = testsdl;
 		};
 		FD1B48B70E3131CA007AB34E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */;
+			containerPortal = FD1B48AC0E3131CA007AB34E /* SDL.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = FD6526630DE8FCCB002AD96B;
-			remoteInfo = StaticLibiPhoneOS;
+			remoteInfo = StaticLib;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -320,7 +344,11 @@
 		1D6058910D05DD3D006BFB54 /* testwm2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testwm2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ED050D118A8FE400A56AA6 /* testpower.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testpower.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		56ED0510118A904200A56AA6 /* testpower.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testpower.c; path = ../../test/testpower.c; sourceTree = SOURCE_ROOT; };
-		FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDLiPhoneOS.xcodeproj; path = ../SDL/SDLiPhoneOS.xcodeproj; sourceTree = SOURCE_ROOT; };
+		AAE7DEEC14CBB1E100DF1A0E /* testscale.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testscale.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAE7DF4514CBB43900DF1A0E /* testscale.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testscale.c; path = ../../test/testscale.c; sourceTree = "<group>"; };
+		AAE7DFB114CBB54E00DF1A0E /* testrendertarget.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testrendertarget.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAE7DFB414CBB5F700DF1A0E /* testrendertarget.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testrendertarget.c; path = ../../test/testrendertarget.c; sourceTree = "<group>"; };
+		FD1B48AC0E3131CA007AB34E /* SDL.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SDL.xcodeproj; path = ../SDL/SDL.xcodeproj; sourceTree = SOURCE_ROOT; };
 		FDA8A7400E2D0F1600EA573E /* testalpha.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testalpha.c; path = ../../test/testalpha.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7410E2D0F1600EA573E /* testaudioinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testaudioinfo.c; path = ../../test/testaudioinfo.c; sourceTree = SOURCE_ROOT; };
 		FDA8A7420E2D0F1600EA573E /* testbitmap.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testbitmap.c; path = ../../test/testbitmap.c; sourceTree = SOURCE_ROOT; };
@@ -456,6 +484,36 @@
 				56ED0507118A8FE400A56AA6 /* UIKit.framework in Frameworks */,
 				56ED0508118A8FE400A56AA6 /* Foundation.framework in Frameworks */,
 				56ED0509118A8FE400A56AA6 /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAE7DEE014CBB1E100DF1A0E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DEE114CBB1E100DF1A0E /* libSDL.a in Frameworks */,
+				AAE7DEE214CBB1E100DF1A0E /* AudioToolbox.framework in Frameworks */,
+				AAE7DEE314CBB1E100DF1A0E /* QuartzCore.framework in Frameworks */,
+				AAE7DEE414CBB1E100DF1A0E /* OpenGLES.framework in Frameworks */,
+				AAE7DEE514CBB1E100DF1A0E /* CoreGraphics.framework in Frameworks */,
+				AAE7DEE614CBB1E100DF1A0E /* UIKit.framework in Frameworks */,
+				AAE7DEE714CBB1E100DF1A0E /* Foundation.framework in Frameworks */,
+				AAE7DEE814CBB1E100DF1A0E /* CoreAudio.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAE7DFA514CBB54E00DF1A0E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DFA614CBB54E00DF1A0E /* libSDL.a in Frameworks */,
+				AAE7DFA714CBB54E00DF1A0E /* AudioToolbox.framework in Frameworks */,
+				AAE7DFA814CBB54E00DF1A0E /* QuartzCore.framework in Frameworks */,
+				AAE7DFA914CBB54E00DF1A0E /* OpenGLES.framework in Frameworks */,
+				AAE7DFAA14CBB54E00DF1A0E /* CoreGraphics.framework in Frameworks */,
+				AAE7DFAB14CBB54E00DF1A0E /* UIKit.framework in Frameworks */,
+				AAE7DFAC14CBB54E00DF1A0E /* Foundation.framework in Frameworks */,
+				AAE7DFAD14CBB54E00DF1A0E /* CoreAudio.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -884,6 +942,8 @@
 				56ED050D118A8FE400A56AA6 /* testpower.app */,
 				046CEF8613254F23007AD51D /* testgesture.app */,
 				047A63ED13285C3200CD7973 /* checkkeys.app */,
+				AAE7DEEC14CBB1E100DF1A0E /* testscale.app */,
+				AAE7DFB114CBB54E00DF1A0E /* testrendertarget.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -891,7 +951,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */,
+				FD1B48AC0E3131CA007AB34E /* SDL.xcodeproj */,
 				FDA8AAD60E2D339A00EA573E /* Resources */,
 				FDA8A7C30E2D10FA00EA573E /* Linked Frameworks */,
 				FDA8A73B0E2D0F0400EA573E /* src */,
@@ -912,6 +972,8 @@
 		FDA8A73B0E2D0F0400EA573E /* src */ = {
 			isa = PBXGroup;
 			children = (
+				AAE7DFB414CBB5F700DF1A0E /* testrendertarget.c */,
+				AAE7DF4514CBB43900DF1A0E /* testscale.c */,
 				FDA8A7840E2D0F1F00EA573E /* common.c */,
 				FDA8A7850E2D0F1F00EA573E /* common.h */,
 				047A63F013285CD100CD7973 /* checkkeys.c */,
@@ -998,7 +1060,7 @@
 			dependencies = (
 			);
 			name = testgesture;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = 046CEF8613254F23007AD51D /* testgesture.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1015,7 +1077,7 @@
 			dependencies = (
 			);
 			name = checkkeys;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = 047A63ED13285C3200CD7973 /* checkkeys.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1032,7 +1094,7 @@
 			dependencies = (
 			);
 			name = testwm2;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = 1D6058910D05DD3D006BFB54 /* testwm2.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1049,8 +1111,42 @@
 			dependencies = (
 			);
 			name = testpower;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = 56ED050D118A8FE400A56AA6 /* testpower.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AAE7DEDA14CBB1E100DF1A0E /* testscale */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAE7DEE914CBB1E100DF1A0E /* Build configuration list for PBXNativeTarget "testscale" */;
+			buildPhases = (
+				AAE7DEDB14CBB1E100DF1A0E /* Resources */,
+				AAE7DEDD14CBB1E100DF1A0E /* Sources */,
+				AAE7DEE014CBB1E100DF1A0E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = testscale;
+			productName = Test;
+			productReference = AAE7DEEC14CBB1E100DF1A0E /* testscale.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AAE7DF9E14CBB54E00DF1A0E /* testrendertarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAE7DFAE14CBB54E00DF1A0E /* Build configuration list for PBXNativeTarget "testrendertarget" */;
+			buildPhases = (
+				AAE7DF9F14CBB54E00DF1A0E /* Resources */,
+				AAE7DFA214CBB54E00DF1A0E /* Sources */,
+				AAE7DFA514CBB54E00DF1A0E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = testrendertarget;
+			productName = Test;
+			productReference = AAE7DFB114CBB54E00DF1A0E /* testrendertarget.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FDA8A91D0E2D1C0B00EA573E /* graywin */ = {
@@ -1066,7 +1162,7 @@
 			dependencies = (
 			);
 			name = graywin;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDA8A92F0E2D1C0B00EA573E /* graywin.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1083,7 +1179,7 @@
 			dependencies = (
 			);
 			name = loopwav;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDA8AABB0E2D330F00EA573E /* loopwav.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1100,7 +1196,7 @@
 			dependencies = (
 			);
 			name = testalpha;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDA8AB260E2D386600EA573E /* testalpha.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1117,7 +1213,7 @@
 			dependencies = (
 			);
 			name = testaudioinfo;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC3CD0E2D47E6001DB1D8 /* testaudioinfo.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1134,7 +1230,7 @@
 			dependencies = (
 			);
 			name = testbitmap;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC4410E2D4961001DB1D8 /* testbitmap.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1151,7 +1247,7 @@
 			dependencies = (
 			);
 			name = testblitspeed;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC4650E2D4C27001DB1D8 /* testblitspeed.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1168,7 +1264,7 @@
 			dependencies = (
 			);
 			name = testdyngles;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC5150E2D4FEB001DB1D8 /* testdyngles.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1185,7 +1281,7 @@
 			dependencies = (
 			);
 			name = testerror;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC59B0E2D5429001DB1D8 /* testerror.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1202,7 +1298,7 @@
 			dependencies = (
 			);
 			name = testfile;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC5C90E2D55B5001DB1D8 /* testfile.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1219,7 +1315,7 @@
 			dependencies = (
 			);
 			name = testgamma;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC5FA0E2D5843001DB1D8 /* testgamma.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1236,7 +1332,7 @@
 			dependencies = (
 			);
 			name = testgles;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDAAC6260E2D5914001DB1D8 /* testgles.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1253,7 +1349,7 @@
 			dependencies = (
 			);
 			name = testdraw2;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDC430000F0D866D009C87E1 /* torturethread.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1270,7 +1366,7 @@
 			dependencies = (
 			);
 			name = testthread;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C10A0E2E4F4B00B7A85F /* testthread.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1287,7 +1383,7 @@
 			dependencies = (
 			);
 			name = testiconv;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C1810E2E52C000B7A85F /* testiconv.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1304,7 +1400,7 @@
 			dependencies = (
 			);
 			name = testjoystick;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C1A50E2E534F00B7A85F /* testjoystick.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1321,7 +1417,7 @@
 			dependencies = (
 			);
 			name = testkeys;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C45E0E2E773800B7A85F /* testkeys.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1338,7 +1434,7 @@
 			dependencies = (
 			);
 			name = testlock;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C47C0E2E77D700B7A85F /* testlock.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1355,7 +1451,7 @@
 			dependencies = (
 			);
 			name = testplatform;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C50B0E2E7F4800B7A85F /* testplatform.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1372,7 +1468,7 @@
 			dependencies = (
 			);
 			name = testsem;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C5290E2E807600B7A85F /* testsem.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1389,7 +1485,7 @@
 			dependencies = (
 			);
 			name = testsprite2;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C54E0E2E80E400B7A85F /* testsprite2.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1406,7 +1502,7 @@
 			dependencies = (
 			);
 			name = testtimer;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C5870E2E8C7400B7A85F /* testtimer.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1423,7 +1519,7 @@
 			dependencies = (
 			);
 			name = testver;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C5C50E2E8CFC00B7A85F /* testver.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1440,7 +1536,7 @@
 			dependencies = (
 			);
 			name = testvidinfo;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C5E10E2E8E0300B7A85F /* testvidinfo.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1457,7 +1553,7 @@
 			dependencies = (
 			);
 			name = testwin;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C6270E2E8F0600B7A85F /* testwin.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1474,7 +1570,7 @@
 			dependencies = (
 			);
 			name = threadwin;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C6B30E2E92D200B7A85F /* threadwin.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1491,7 +1587,7 @@
 			dependencies = (
 			);
 			name = torturethread;
-			productName = TestiPhoneOS;
+			productName = Test;
 			productReference = FDD2C6F40E2E959E00B7A85F /* torturethread.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -1500,8 +1596,11 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "TestiPhoneOS" */;
-			compatibilityVersion = "Xcode 3.1";
+			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -1515,7 +1614,7 @@
 			projectReferences = (
 				{
 					ProductGroup = FD1B48AD0E3131CA007AB34E /* Products */;
-					ProjectRef = FD1B48AC0E3131CA007AB34E /* SDLiPhoneOS.xcodeproj */;
+					ProjectRef = FD1B48AC0E3131CA007AB34E /* SDL.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -1550,6 +1649,8 @@
 				FDD2C6150E2E8F0600B7A85F /* testwin */,
 				FDD2C6A10E2E92D200B7A85F /* threadwin */,
 				FDD2C6E20E2E959E00B7A85F /* torturethread */,
+				AAE7DEDA14CBB1E100DF1A0E /* testscale */,
+				AAE7DF9E14CBB54E00DF1A0E /* testrendertarget */,
 			);
 		};
 /* End PBXProject section */
@@ -1599,6 +1700,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				56ED04FE118A8FE400A56AA6 /* icon.bmp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAE7DEDB14CBB1E100DF1A0E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DEDC14CBB1E100DF1A0E /* icon.bmp in Resources */,
+				AAE7DF4714CBB45000DF1A0E /* sample.bmp in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAE7DF9F14CBB54E00DF1A0E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DFA014CBB54E00DF1A0E /* icon.bmp in Resources */,
+				AAE7DFA114CBB54E00DF1A0E /* sample.bmp in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1831,6 +1950,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AAE7DEDD14CBB1E100DF1A0E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DEDE14CBB1E100DF1A0E /* common.c in Sources */,
+				AAE7DF4614CBB43900DF1A0E /* testscale.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAE7DFA214CBB54E00DF1A0E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAE7DFA314CBB54E00DF1A0E /* common.c in Sources */,
+				AAE7DFB514CBB5F700DF1A0E /* testrendertarget.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FDA8A91F0E2D1C0B00EA573E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2048,12 +2185,6 @@
 		046CEF8413254F23007AD51D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgesture;
 			};
@@ -2062,10 +2193,6 @@
 		046CEF8513254F23007AD51D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgesture;
 			};
@@ -2074,12 +2201,6 @@
 		047A63EB13285C3200CD7973 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = checkkeys;
 			};
@@ -2088,10 +2209,6 @@
 		047A63EC13285C3200CD7973 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = checkkeys;
 			};
@@ -2100,12 +2217,6 @@
 		1D6058940D05DD3E006BFB54 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testwm2;
 			};
@@ -2114,10 +2225,6 @@
 		1D6058950D05DD3E006BFB54 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testwm2;
 			};
@@ -2126,12 +2233,6 @@
 		56ED050B118A8FE400A56AA6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testpower;
 			};
@@ -2140,12 +2241,40 @@
 		56ED050C118A8FE400A56AA6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testpower;
+			};
+			name = Release;
+		};
+		AAE7DEEA14CBB1E100DF1A0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = testscale;
+			};
+			name = Debug;
+		};
+		AAE7DEEB14CBB1E100DF1A0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = testscale;
+			};
+			name = Release;
+		};
+		AAE7DFAF14CBB54E00DF1A0E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = testrendertarget;
+			};
+			name = Debug;
+		};
+		AAE7DFB014CBB54E00DF1A0E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = Info.plist;
+				PRODUCT_NAME = testrendertarget;
 			};
 			name = Release;
 		};
@@ -2154,14 +2283,10 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = ../../include;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2173,27 +2298,18 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				GCC_C_LANGUAGE_STANDARD = c99;
-				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = ../../include;
 				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
 				OTHER_LDFLAGS = "-ObjC";
-				PREBINDING = NO;
 				"PROVISIONING_PROFILE[sdk=iphoneos*]" = "";
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
 		FDA8A92D0E2D1C0B00EA573E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = graywin;
 			};
@@ -2202,10 +2318,6 @@
 		FDA8A92E0E2D1C0B00EA573E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = graywin;
 			};
@@ -2214,12 +2326,6 @@
 		FDA8AAB90E2D330F00EA573E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = loopwav;
 			};
@@ -2228,10 +2334,6 @@
 		FDA8AABA0E2D330F00EA573E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = loopwav;
 			};
@@ -2240,12 +2342,6 @@
 		FDA8AB240E2D386600EA573E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testalpha;
 			};
@@ -2254,10 +2350,6 @@
 		FDA8AB250E2D386600EA573E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testalpha;
 			};
@@ -2266,12 +2358,6 @@
 		FDAAC3CB0E2D47E6001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testaudioinfo;
 			};
@@ -2280,10 +2366,6 @@
 		FDAAC3CC0E2D47E6001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testaudioinfo;
 			};
@@ -2292,12 +2374,6 @@
 		FDAAC43F0E2D4961001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testbitmap;
 			};
@@ -2306,10 +2382,6 @@
 		FDAAC4400E2D4961001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testbitmap;
 			};
@@ -2318,12 +2390,6 @@
 		FDAAC4630E2D4C27001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testblitspeed;
 			};
@@ -2332,10 +2398,6 @@
 		FDAAC4640E2D4C27001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testblitspeed;
 			};
@@ -2344,12 +2406,6 @@
 		FDAAC5130E2D4FEB001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testdyngles;
 			};
@@ -2358,10 +2414,6 @@
 		FDAAC5140E2D4FEB001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testdyngles;
 			};
@@ -2370,12 +2422,6 @@
 		FDAAC5990E2D5429001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testerror;
 			};
@@ -2384,10 +2430,6 @@
 		FDAAC59A0E2D5429001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testerror;
 			};
@@ -2396,12 +2438,6 @@
 		FDAAC5C70E2D55B5001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testfile;
 			};
@@ -2410,10 +2446,6 @@
 		FDAAC5C80E2D55B5001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testfile;
 			};
@@ -2422,12 +2454,6 @@
 		FDAAC5F80E2D5843001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgamma;
 			};
@@ -2436,10 +2462,6 @@
 		FDAAC5F90E2D5843001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgamma;
 			};
@@ -2448,12 +2470,6 @@
 		FDAAC6240E2D5914001DB1D8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgles;
 			};
@@ -2462,10 +2478,6 @@
 		FDAAC6250E2D5914001DB1D8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testgles;
 			};
@@ -2474,12 +2486,6 @@
 		FDC42FFE0F0D866D009C87E1 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = torturethread;
 			};
@@ -2488,10 +2494,6 @@
 		FDC42FFF0F0D866D009C87E1 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = torturethread;
 			};
@@ -2500,12 +2502,6 @@
 		FDD2C1080E2E4F4B00B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testthread;
 			};
@@ -2514,10 +2510,6 @@
 		FDD2C1090E2E4F4B00B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testthread;
 			};
@@ -2526,12 +2518,6 @@
 		FDD2C17F0E2E52C000B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testiconv;
 			};
@@ -2540,10 +2526,6 @@
 		FDD2C1800E2E52C000B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testiconv;
 			};
@@ -2552,12 +2534,6 @@
 		FDD2C1A30E2E534F00B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testjoystick;
 			};
@@ -2566,10 +2542,6 @@
 		FDD2C1A40E2E534F00B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testjoystick;
 			};
@@ -2578,12 +2550,6 @@
 		FDD2C45C0E2E773800B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testkeys;
 			};
@@ -2592,10 +2558,6 @@
 		FDD2C45D0E2E773800B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testkeys;
 			};
@@ -2604,12 +2566,6 @@
 		FDD2C47A0E2E77D700B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testlock;
 			};
@@ -2618,10 +2574,6 @@
 		FDD2C47B0E2E77D700B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testlock;
 			};
@@ -2630,12 +2582,6 @@
 		FDD2C5090E2E7F4800B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testplatform;
 			};
@@ -2644,10 +2590,6 @@
 		FDD2C50A0E2E7F4800B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testplatform;
 			};
@@ -2656,12 +2598,6 @@
 		FDD2C5270E2E807600B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testsem;
 			};
@@ -2670,10 +2606,6 @@
 		FDD2C5280E2E807600B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testsem;
 			};
@@ -2682,12 +2614,6 @@
 		FDD2C54C0E2E80E400B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testsprite2;
 			};
@@ -2696,10 +2622,6 @@
 		FDD2C54D0E2E80E400B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testsprite2;
 			};
@@ -2708,12 +2630,6 @@
 		FDD2C5850E2E8C7400B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testtimer;
 			};
@@ -2722,10 +2638,6 @@
 		FDD2C5860E2E8C7400B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testtimer;
 			};
@@ -2734,12 +2646,6 @@
 		FDD2C5C30E2E8CFC00B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testver;
 			};
@@ -2748,10 +2654,6 @@
 		FDD2C5C40E2E8CFC00B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testver;
 			};
@@ -2760,12 +2662,6 @@
 		FDD2C5DF0E2E8E0300B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testvidinfo;
 			};
@@ -2774,10 +2670,6 @@
 		FDD2C5E00E2E8E0300B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testvidinfo;
 			};
@@ -2786,12 +2678,6 @@
 		FDD2C6250E2E8F0600B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testwin;
 			};
@@ -2800,10 +2686,6 @@
 		FDD2C6260E2E8F0600B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = testwin;
 			};
@@ -2812,12 +2694,6 @@
 		FDD2C6B10E2E92D200B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = threadwin;
 			};
@@ -2826,10 +2702,6 @@
 		FDD2C6B20E2E92D200B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = threadwin;
 			};
@@ -2838,12 +2710,6 @@
 		FDD2C6F20E2E959E00B7A85F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = torturethread;
 			};
@@ -2852,10 +2718,6 @@
 		FDD2C6F30E2E959E00B7A85F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = YES;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = Info.plist;
 				PRODUCT_NAME = torturethread;
 			};
@@ -2896,6 +2758,24 @@
 			buildConfigurations = (
 				56ED050B118A8FE400A56AA6 /* Debug */,
 				56ED050C118A8FE400A56AA6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAE7DEE914CBB1E100DF1A0E /* Build configuration list for PBXNativeTarget "testscale" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAE7DEEA14CBB1E100DF1A0E /* Debug */,
+				AAE7DEEB14CBB1E100DF1A0E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAE7DFAE14CBB54E00DF1A0E /* Build configuration list for PBXNativeTarget "testrendertarget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAE7DFAF14CBB54E00DF1A0E /* Debug */,
+				AAE7DFB014CBB54E00DF1A0E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
