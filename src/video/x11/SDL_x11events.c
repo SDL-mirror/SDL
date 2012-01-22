@@ -1246,14 +1246,23 @@ static void get_modifier_masks(Display *display)
  * sequences (dead accents, compose key sequences) will not work since the
  * state has been irrevocably lost.
  */
+extern DECLSPEC Uint16 SDLCALL X11_KeyToUnicode(SDLKey, SDLMod);
+
 Uint16 X11_KeyToUnicode(SDLKey keysym, SDLMod modifiers)
 {
+	static int warning = 0;
 	struct SDL_VideoDevice *this = current_video;
 	char keybuf[32];
 	int i;
 	KeySym xsym = 0;
 	XKeyEvent xkey;
 	Uint16 unicode;
+
+	if ( warning ) {
+		warning = 0;
+		fprintf(stderr, "WARNING: Application is using X11_KeyToUnicode().\n");
+		fprintf(stderr, "This is not an official SDL function, please report this as a bug.\n");
+	}
 
 	if ( !this || !SDL_Display ) {
 		return 0;
