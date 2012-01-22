@@ -384,7 +384,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *rendere
 /**
  * \brief Set a texture as the current rendering target.
  *
- * \param texture The targeted texture, or NULL for the default render target
+ * \param texture The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag, or NULL for the default render target
  *
  * \return 0 on success, or -1 on error
  */
