@@ -327,7 +327,7 @@ static int GLES2_LockTexture(SDL_Renderer *renderer, SDL_Texture *texture, const
 static void GLES2_UnlockTexture(SDL_Renderer *renderer, SDL_Texture *texture);
 static int GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *rect,
                                const void *pixels, int pitch);
-static int GLES2_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 
 static GLenum
 GetScaleQuality(void)
@@ -533,7 +533,7 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
 }
 
 static int
-GLES2_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GLES2_DriverContext *data = (GLES2_DriverContext *) renderer->driverdata;
     GLES2_TextureData *texturedata = NULL;
@@ -1489,7 +1489,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->UpdateTexture       = &GLES2_UpdateTexture;
     renderer->LockTexture         = &GLES2_LockTexture;
     renderer->UnlockTexture       = &GLES2_UnlockTexture;
-    renderer->SetTargetTexture    = &GLES2_SetTargetTexture;
+    renderer->SetRenderTarget     = &GLES2_SetRenderTarget;
     renderer->UpdateViewport      = &GLES2_UpdateViewport;
     renderer->RenderClear         = &GLES2_RenderClear;
     renderer->RenderDrawPoints    = &GLES2_RenderDrawPoints;

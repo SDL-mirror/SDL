@@ -51,7 +51,7 @@ static int SW_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int SW_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_UpdateViewport(SDL_Renderer * renderer);
 static int SW_RenderClear(SDL_Renderer * renderer);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
@@ -145,7 +145,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UpdateTexture = SW_UpdateTexture;
     renderer->LockTexture = SW_LockTexture;
     renderer->UnlockTexture = SW_UnlockTexture;
-    renderer->SetTargetTexture = SW_SetTargetTexture;
+    renderer->SetRenderTarget = SW_SetRenderTarget;
     renderer->UpdateViewport = SW_UpdateViewport;
     renderer->RenderClear = SW_RenderClear;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
@@ -283,7 +283,7 @@ SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-SW_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
 

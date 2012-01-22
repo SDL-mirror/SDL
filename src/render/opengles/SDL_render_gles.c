@@ -56,7 +56,7 @@ static int GLES_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, void **pixels, int *pitch);
 static void GLES_UnlockTexture(SDL_Renderer * renderer,
                                SDL_Texture * texture);
-static int GLES_SetTargetTexture(SDL_Renderer * renderer,
+static int GLES_SetRenderTarget(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int GLES_UpdateViewport(SDL_Renderer * renderer);
 static int GLES_RenderClear(SDL_Renderer * renderer);
@@ -295,7 +295,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GLES_UpdateTexture;
     renderer->LockTexture = GLES_LockTexture;
     renderer->UnlockTexture = GLES_UnlockTexture;
-    renderer->SetTargetTexture = GLES_SetTargetTexture;
+    renderer->SetRenderTarget = GLES_SetRenderTarget;
     renderer->UpdateViewport = GLES_UpdateViewport;
     renderer->RenderClear = GLES_RenderClear;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
@@ -575,7 +575,7 @@ GLES_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GLES_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+GLES_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = NULL;

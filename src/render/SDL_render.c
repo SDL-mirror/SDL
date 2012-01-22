@@ -804,14 +804,14 @@ SDL_UnlockTexture(SDL_Texture * texture)
 SDL_bool
 SDL_RenderTargetSupported(SDL_Renderer *renderer)
 {
-    if (!renderer || !renderer->SetTargetTexture) {
+    if (!renderer || !renderer->SetRenderTarget) {
         return SDL_FALSE;
     }
     return (renderer->info.flags & SDL_RENDERER_TARGETTEXTURE) != 0;
 }
 
 int
-SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
+SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
 {
     SDL_Rect viewport;
 
@@ -847,7 +847,7 @@ SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     }
     renderer->target = texture;
 
-    if (renderer->SetTargetTexture(renderer, texture) < 0) {
+    if (renderer->SetRenderTarget(renderer, texture) < 0) {
         return -1;
     }
 

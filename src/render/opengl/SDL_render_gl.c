@@ -54,7 +54,7 @@ static int GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * rect, void **pixels, int *pitch);
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_UpdateViewport(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
@@ -307,7 +307,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = GL_UpdateTexture;
     renderer->LockTexture = GL_LockTexture;
     renderer->UnlockTexture = GL_UnlockTexture;
-    renderer->SetTargetTexture = GL_SetTargetTexture;
+    renderer->SetRenderTarget = GL_SetRenderTarget;
     renderer->UpdateViewport = GL_UpdateViewport;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
@@ -707,7 +707,7 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
-GL_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;    
     GL_TextureData *texturedata;

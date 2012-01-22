@@ -77,7 +77,7 @@ struct SDL_Renderer
     int (*LockTexture) (SDL_Renderer * renderer, SDL_Texture * texture,
                         const SDL_Rect * rect, void **pixels, int *pitch);
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
-    int (*SetTargetTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
+    int (*SetRenderTarget) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*UpdateViewport) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_Point * points,

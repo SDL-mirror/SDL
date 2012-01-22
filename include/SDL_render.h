@@ -373,6 +373,25 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);
 
 /**
+ * \brief Determines whether a window supports the use of render targets
+ *
+ * \param renderer The renderer that will be checked
+ *
+ * \return SDL_TRUE if supported, SDL_FALSE if not.
+ */
+extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *renderer);
+
+/**
+ * \brief Set a texture as the current rendering target.
+ *
+ * \param texture The targeted texture, or NULL for the default render target
+ *
+ * \return 0 on success, or -1 on error
+ */
+extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
+                                                SDL_Texture *texture);
+
+/**
  *  \brief Set the drawing area for rendering on the current target.
  *
  *  \param rect The rectangle representing the drawing area, or NULL to set the viewport to the entire target.
@@ -564,30 +583,6 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Renderer * renderer,
                                            const SDL_Rect * srcrect,
                                            const SDL_Rect * dstrect);
 
-
-/**
- * \fn SDL_bool SDL_RenderTargetSupported(SDL_Renderer *renderer)
- *
- * \brief Determines whether a window supports the use of render targets
- *
- * \param renderer The renderer that will be checked
- *
- * \return SDL_TRUE if supported, SDL_FALSE if not.
- */
-extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *renderer);
-
-/**
- * \fn int SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture)
- *
- * \brief Set a texture as the current rendering target.
- *
- * \param renderer The renderer that will be checked
- *
- * \param texture The targeted texture, or NULL for the default render target
- *
- * \return 0 on success, or -1 if there is no rendering context current, or the driver doesn't support the requested operation.
- */
-extern DECLSPEC int SDLCALL SDL_SetTargetTexture(SDL_Renderer *renderer, SDL_Texture *texture);
 
 /**
  *  \brief Read pixels from the current rendering target.

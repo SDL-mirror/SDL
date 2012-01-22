@@ -99,7 +99,7 @@ static int D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-static int D3D_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_UpdateViewport(SDL_Renderer * renderer);
 static int D3D_RenderClear(SDL_Renderer * renderer);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
@@ -388,7 +388,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = D3D_UpdateTexture;
     renderer->LockTexture = D3D_LockTexture;
     renderer->UnlockTexture = D3D_UnlockTexture;
-    renderer->SetTargetTexture = D3D_SetTargetTexture;
+    renderer->SetRenderTarget = D3D_SetRenderTarget;
     renderer->UpdateViewport = D3D_UpdateViewport;
     renderer->RenderClear = D3D_RenderClear;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
@@ -734,7 +734,7 @@ D3D_UpdateViewport(SDL_Renderer * renderer)
 }
 
 static int
-D3D_SetTargetTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *texturedata;

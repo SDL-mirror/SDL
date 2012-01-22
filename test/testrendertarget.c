@@ -99,7 +99,7 @@ Draw(DrawState *s)
     SDL_RenderGetViewport(s->renderer, &viewport);
 
     target = SDL_CreateTexture(s->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, viewport.w, viewport.h);
-    SDL_SetTargetTexture(s->renderer, target);
+    SDL_SetRenderTarget(s->renderer, target);
 
     /* Draw the background */
     SDL_RenderCopy(s->renderer, s->background, NULL, NULL);
@@ -121,7 +121,7 @@ Draw(DrawState *s)
 
     SDL_RenderCopy(s->renderer, s->sprite, NULL, &s->sprite_rect);
 
-    SDL_SetTargetTexture(s->renderer, NULL);
+    SDL_SetRenderTarget(s->renderer, NULL);
     SDL_RenderCopy(s->renderer, target, NULL, NULL);
     SDL_DestroyTexture(target);
 
