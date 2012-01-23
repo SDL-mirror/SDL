@@ -209,7 +209,6 @@
     <ClInclude Include="..\..\include\SDL_audio.h" />
     <ClInclude Include="..\..\include\SDL_blendmode.h" />
     <ClInclude Include="..\..\include\SDL_clipboard.h" />
-    <ClInclude Include="..\..\include\SDL_compat.h" />
     <ClInclude Include="..\..\include\SDL_config.h" />
     <ClInclude Include="..\..\include\SDL_config_windows.h" />
     <ClInclude Include="..\..\include\SDL_copying.h" />
@@ -377,7 +376,6 @@
     <ClCompile Include="..\..\src\video\SDL_blit_N.c" />
     <ClCompile Include="..\..\src\video\SDL_blit_slow.c" />
     <ClCompile Include="..\..\src\video\SDL_bmp.c" />
-    <ClCompile Include="..\..\src\SDL_compat.c" />
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
     <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
     <ClCompile Include="..\..\src\video\SDL_shape.c" />

@@ -384,10 +384,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\SDL_compat.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\include\SDL_config.h"
 				>
 			</File>
@@ -766,10 +762,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\events\SDL_clipboardevents_c.h"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\SDL_compat.c"
 			>
 		</File>
 		<File

@@ -121,7 +121,6 @@
 		FD3F495C0DEA5B2100C5B771 /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8CC0DD52EB400FB1D6B /* begin_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F495D0DEA5B2100C5B771 /* close_code.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8CD0DD52EB400FB1D6B /* close_code.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F495F0DEA5B2100C5B771 /* SDL_audio.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8CF0DD52EB400FB1D6B /* SDL_audio.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		FD3F49610DEA5B2100C5B771 /* SDL_compat.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8D10DD52EB400FB1D6B /* SDL_compat.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F49690DEA5B2100C5B771 /* SDL_copying.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DA0DD52EB400FB1D6B /* SDL_copying.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F496A0DEA5B2100C5B771 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DB0DD52EB400FB1D6B /* SDL_cpuinfo.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FD3F496B0DEA5B2100C5B771 /* SDL_error.h in Headers */ = {isa = PBXBuildFile; fileRef = FD99B8DC0DD52EB400FB1D6B /* SDL_error.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -172,7 +171,6 @@
 		FD6526740DE8FCDD002AD96B /* SDL_quit.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B9990DD52EDC00FB1D6B /* SDL_quit.c */; };
 		FD6526750DE8FCDD002AD96B /* SDL_windowevents.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B99B0DD52EDC00FB1D6B /* SDL_windowevents.c */; };
 		FD6526760DE8FCDD002AD96B /* SDL_rwops.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B99E0DD52EDC00FB1D6B /* SDL_rwops.c */; };
-		FD6526770DE8FCDD002AD96B /* SDL_compat.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B9D30DD52EDC00FB1D6B /* SDL_compat.c */; };
 		FD6526780DE8FCDD002AD96B /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B9D50DD52EDC00FB1D6B /* SDL_error.c */; };
 		FD6526790DE8FCDD002AD96B /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B9D60DD52EDC00FB1D6B /* SDL_fatal.c */; };
 		FD65267A0DE8FCDD002AD96B /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99B9D80DD52EDC00FB1D6B /* SDL.c */; };
@@ -400,7 +398,6 @@
 		FD99B8CC0DD52EB400FB1D6B /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = begin_code.h; path = ../../include/begin_code.h; sourceTree = "<group>"; };
 		FD99B8CD0DD52EB400FB1D6B /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = close_code.h; path = ../../include/close_code.h; sourceTree = "<group>"; };
 		FD99B8CF0DD52EB400FB1D6B /* SDL_audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_audio.h; path = ../../include/SDL_audio.h; sourceTree = "<group>"; };
-		FD99B8D10DD52EB400FB1D6B /* SDL_compat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_compat.h; path = ../../include/SDL_compat.h; sourceTree = "<group>"; };
 		FD99B8DA0DD52EB400FB1D6B /* SDL_copying.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_copying.h; path = ../../include/SDL_copying.h; sourceTree = "<group>"; };
 		FD99B8DB0DD52EB400FB1D6B /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = "<group>"; };
 		FD99B8DC0DD52EB400FB1D6B /* SDL_error.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_error.h; path = ../../include/SDL_error.h; sourceTree = "<group>"; };
@@ -457,7 +454,6 @@
 		FD99B99B0DD52EDC00FB1D6B /* SDL_windowevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_windowevents.c; sourceTree = "<group>"; };
 		FD99B99C0DD52EDC00FB1D6B /* SDL_windowevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_windowevents_c.h; sourceTree = "<group>"; };
 		FD99B99E0DD52EDC00FB1D6B /* SDL_rwops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rwops.c; sourceTree = "<group>"; };
-		FD99B9D30DD52EDC00FB1D6B /* SDL_compat.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_compat.c; path = ../../src/SDL_compat.c; sourceTree = "<group>"; };
 		FD99B9D40DD52EDC00FB1D6B /* SDL_error_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_error_c.h; path = ../../src/SDL_error_c.h; sourceTree = "<group>"; };
 		FD99B9D50DD52EDC00FB1D6B /* SDL_error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_error.c; path = ../../src/SDL_error.c; sourceTree = "<group>"; };
 		FD99B9D60DD52EDC00FB1D6B /* SDL_fatal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_fatal.c; path = ../../src/SDL_fatal.c; sourceTree = "<group>"; };
@@ -888,7 +884,6 @@
 				FD99B8CF0DD52EB400FB1D6B /* SDL_audio.h */,
 				04FFAB9312E23BDC00BA343D /* SDL_blendmode.h */,
 				044E5FB311E6069F0076F181 /* SDL_clipboard.h */,
-				FD99B8D10DD52EB400FB1D6B /* SDL_compat.h */,
 				04B2ED061025CF9E00F9BC5F /* SDL_config.h */,
 				04EC8B501025D12900431D42 /* SDL_config_iphoneos.h */,
 				FD99B8DA0DD52EB400FB1D6B /* SDL_copying.h */,
@@ -954,7 +949,6 @@
 				FDA682420DF2374D00F98A1A /* video */,
 				04F2AF551104ABD200D6DDF7 /* SDL_assert.c */,
 				04BAC09A1300C1290055DE28 /* SDL_assert_c.h */,
-				FD99B9D30DD52EDC00FB1D6B /* SDL_compat.c */,
 				FD99B9D40DD52EDC00FB1D6B /* SDL_error_c.h */,
 				FD99B9D50DD52EDC00FB1D6B /* SDL_error.c */,
 				FD99B9D60DD52EDC00FB1D6B /* SDL_fatal.c */,
@@ -1144,7 +1138,6 @@
 				FD3F495C0DEA5B2100C5B771 /* begin_code.h in Headers */,
 				FD3F495D0DEA5B2100C5B771 /* close_code.h in Headers */,
 				FD3F495F0DEA5B2100C5B771 /* SDL_audio.h in Headers */,
-				FD3F49610DEA5B2100C5B771 /* SDL_compat.h in Headers */,
 				FD3F49690DEA5B2100C5B771 /* SDL_copying.h in Headers */,
 				FD3F496A0DEA5B2100C5B771 /* SDL_cpuinfo.h in Headers */,
 				FD3F496B0DEA5B2100C5B771 /* SDL_error.h in Headers */,
@@ -1375,7 +1368,6 @@
 				FD6526740DE8FCDD002AD96B /* SDL_quit.c in Sources */,
 				FD6526750DE8FCDD002AD96B /* SDL_windowevents.c in Sources */,
 				FD6526760DE8FCDD002AD96B /* SDL_rwops.c in Sources */,
-				FD6526770DE8FCDD002AD96B /* SDL_compat.c in Sources */,
 				FD6526780DE8FCDD002AD96B /* SDL_error.c in Sources */,
 				FD6526790DE8FCDD002AD96B /* SDL_fatal.c in Sources */,
 				FD65267A0DE8FCDD002AD96B /* SDL.c in Sources */,
