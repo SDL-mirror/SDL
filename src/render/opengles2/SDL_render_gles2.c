@@ -241,7 +241,9 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
 
-    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED ||
+        event->event == SDL_WINDOWEVENT_SHOWN ||
+        event->event == SDL_WINDOWEVENT_HIDDEN) {
         /* Rebind the context to the window area */
         SDL_CurrentContext = NULL;
     }

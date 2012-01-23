@@ -412,7 +412,9 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
 static void
 GL_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
-    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+    if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED ||
+        event->event == SDL_WINDOWEVENT_SHOWN ||
+        event->event == SDL_WINDOWEVENT_HIDDEN) {
         /* Rebind the context to the window area and update matrices */
         SDL_CurrentContext = NULL;
     }
