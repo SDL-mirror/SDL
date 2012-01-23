@@ -126,6 +126,26 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
     return 0;
 }
 
+int
+SDL_CreateWindowAndRenderer(int width, int height, Uint32 window_flags,
+                            SDL_Window **window, SDL_Renderer **renderer)
+{
+    *window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_UNDEFINED,
+                                     SDL_WINDOWPOS_UNDEFINED,
+                                     width, height, window_flags);
+    if (!*window) {
+        *renderer = NULL;
+        return -1;
+    }
+
+    *renderer = SDL_CreateRenderer(*window, -1, 0);
+    if (!*renderer) {
+        return -1;
+    }
+
+    return 0;
+}
+
 SDL_Renderer *
 SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 {

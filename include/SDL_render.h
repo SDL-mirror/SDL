@@ -148,6 +148,22 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDriverInfo(int index,
                                                     SDL_RendererInfo * info);
 
 /**
+ *  \brief Create a window and default renderer
+ *
+ *  \param width    The width of the window
+ *  \param height   The height of the window
+ *  \param window_flags The flags used to create the window
+ *  \param window   A pointer filled with the window, or NULL on error
+ *  \param renderer A pointer filled with the renderer, or NULL on error
+ *
+ *  \return 0 on success, or -1 on error
+ */
+extern DECLSPEC int SDLCALL SDL_CreateWindowAndRenderer(
+                                int width, int height, Uint32 window_flags,
+                                SDL_Window **window, SDL_Renderer **renderer);
+
+
+/**
  *  \brief Create a 2D rendering context for a window.
  *  
  *  \param window The window where rendering is displayed.
