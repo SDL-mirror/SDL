@@ -25,6 +25,22 @@
 
 extern BOOL SDL_UIKit_supports_multiple_displays;
 
+typedef struct SDL_DisplayData SDL_DisplayData;
+
+struct SDL_DisplayData
+{
+    UIScreen *uiscreen;
+    CGFloat scale;
+};
+
+typedef struct SDL_DisplayModeData SDL_DisplayModeData;
+
+struct SDL_DisplayModeData
+{
+    UIScreenMode *uiscreenmode;
+    CGFloat scale;
+};
+
 #endif /* _SDL_uikitvideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

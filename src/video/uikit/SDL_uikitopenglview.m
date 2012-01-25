@@ -37,6 +37,7 @@
 }
 
 - (id)initWithFrame:(CGRect)frame
+      scale:(CGFloat)scale
       retainBacking:(BOOL)retained
       rBits:(int)rBits
       gBits:(int)gBits
@@ -79,10 +80,9 @@
             return nil;
         }
 
-        // !!! FIXME: use the screen this is on!
-        /* Use the main screen scale (for retina display support) */
+        /* Set the appropriate scale (for retina display support) */
         if ([self respondsToSelector:@selector(contentScaleFactor)])
-            self.contentScaleFactor = [UIScreen mainScreen].scale;
+            self.contentScaleFactor = scale;
 
         /* create the buffers */
         glGenFramebuffersOES(1, &viewFramebuffer);

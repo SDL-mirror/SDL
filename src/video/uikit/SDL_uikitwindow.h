@@ -22,6 +22,7 @@
 #define _SDL_uikitwindow_h
 
 #include "../SDL_sysvideo.h"
+#import "SDL_uikitvideo.h"
 #import "SDL_uikitopenglview.h"
 #import "SDL_uikitviewcontroller.h"
 

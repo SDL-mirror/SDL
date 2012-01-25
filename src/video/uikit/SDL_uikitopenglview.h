@@ -54,6 +54,7 @@
 - (void)setCurrentContext;
 
 - (id)initWithFrame:(CGRect)frame
+    scale:(CGFloat)scale
     retainBacking:(BOOL)retained
     rBits:(int)rBits
     gBits:(int)gBits
