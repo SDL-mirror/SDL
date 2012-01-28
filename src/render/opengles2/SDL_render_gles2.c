@@ -266,6 +266,10 @@ GLES2_UpdateViewport(SDL_Renderer * renderer)
 
     rdata->glViewport(renderer->viewport.x, renderer->viewport.y,
                renderer->viewport.w, renderer->viewport.h);
+
+    if (rdata->current_program) {
+        GLES2_SetOrthographicProjection(renderer);
+    }
     return 0;
 }
 
@@ -554,9 +558,6 @@ GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
             SDL_SetError("glFramebufferTexture2D() failed");
             return -1;
         }
-    }
-    if (data->current_program) {
-        GLES2_SetOrthographicProjection(renderer);
     }
     return 0;
 }
