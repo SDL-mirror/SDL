@@ -210,7 +210,7 @@ GLES2_GetFBO(GLES2_DriverContext *data, Uint32 w, Uint32 h)
        result = SDL_malloc(sizeof(GLES2_FBOList));
        result->w = w;
        result->h = h;
-       glGenFramebuffers(1, &result->FBO);
+       data->glGenFramebuffers(1, &result->FBO);
        result->next = data->framebuffers;
        data->framebuffers = result;
    }

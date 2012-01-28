@@ -206,7 +206,7 @@ GLES_GetFBO(GLES_RenderData *data, Uint32 w, Uint32 h)
        result = SDL_malloc(sizeof(GLES_FBOList));
        result->w = w;
        result->h = h;
-       glGenFramebuffersOES(1, &result->FBO);
+       data->glGenFramebuffersOES(1, &result->FBO);
        result->next = data->framebuffers;
        data->framebuffers = result;
    }
