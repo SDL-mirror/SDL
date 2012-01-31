@@ -63,31 +63,31 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		001794CC1073666100F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794CD1073666800F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794CE1073666F00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794CF1073667300F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D01073667700F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D11073667B00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D21073667F00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D31073668400F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D41073668800F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D51073668D00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D61073669200F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D71073669700F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D81073669A00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794D91073669E00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794DB107366A700F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794DC107366AC00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794DD107366B100F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794DE107366B900F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794DF107366BD00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E0107366C100F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E1107366C600F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E2107366CA00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E3107366CE00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E4107366D200F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		001794E5107366D900F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001794CC1073666100F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794CD1073666800F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794CE1073666F00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794CF1073667300F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D01073667700F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D11073667B00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D21073667F00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D31073668400F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D41073668800F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D51073668D00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D61073669200F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D71073669700F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D81073669A00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794D91073669E00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794DB107366A700F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794DC107366AC00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794DD107366B100F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794DE107366B900F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794DF107366BD00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E0107366C100F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E1107366C600F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E2107366CA00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E3107366CE00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E4107366D200F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		001794E5107366D900F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001794FB1073699500F5D044 /* testcursor.c in Sources */ = {isa = PBXBuildFile; fileRef = 001794FA1073699500F5D044 /* testcursor.c */; };
 		0017957B10741F7900F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017957C10741F7900F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -99,7 +99,7 @@
 		0017958210741F7900F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017958310741F7900F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017958410741F7900F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017958510741F7900F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017958510741F7900F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001795901074216E00F5D044 /* testatomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017958F1074216E00F5D044 /* testatomic.c */; };
 		0017959C107421BF00F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017959D107421BF00F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -111,7 +111,7 @@
 		001795A3107421BF00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001795A4107421BF00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		001795A5107421BF00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001795A6107421BF00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001795A6107421BF00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001795B11074222D00F5D044 /* testaudioinfo.c in Sources */ = {isa = PBXBuildFile; fileRef = 001795B01074222D00F5D044 /* testaudioinfo.c */; };
 		0017971010742F3200F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017971110742F3200F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -123,7 +123,7 @@
 		0017971710742F3200F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017971810742F3200F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017971910742F3200F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017971A10742F3200F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017971A10742F3200F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		0017972810742FB900F5D044 /* testgl2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017972710742FB900F5D044 /* testgl2.c */; };
 		00179737107430D600F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		00179738107430D600F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -135,7 +135,7 @@
 		0017973E107430D600F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017973F107430D600F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		00179740107430D600F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		00179741107430D600F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		00179741107430D600F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		0017974F1074315700F5D044 /* testhaptic.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017974E1074315700F5D044 /* testhaptic.c */; };
 		0017975D107431B300F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017975E107431B300F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -147,7 +147,7 @@
 		00179764107431B300F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		00179765107431B300F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		00179766107431B300F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		00179767107431B300F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		00179767107431B300F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001797721074320D00F5D044 /* testdraw2.c in Sources */ = {isa = PBXBuildFile; fileRef = 001797711074320D00F5D044 /* testdraw2.c */; };
 		0017977D107432AE00F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017977E107432AE00F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -159,7 +159,7 @@
 		00179784107432AE00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		00179785107432AE00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		00179786107432AE00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		00179787107432AE00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		00179787107432AE00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		00179792107432FA00F5D044 /* testime.c in Sources */ = {isa = PBXBuildFile; fileRef = 00179791107432FA00F5D044 /* testime.c */; };
 		0017979D1074334C00F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017979E1074334C00F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -171,7 +171,7 @@
 		001797A41074334C00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001797A51074334C00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		001797A61074334C00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001797A71074334C00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001797A71074334C00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001797B41074339C00F5D044 /* testintersections.c in Sources */ = {isa = PBXBuildFile; fileRef = 001797B31074339C00F5D044 /* testintersections.c */; };
 		001797BF107433C600F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		001797C0107433C600F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -183,7 +183,7 @@
 		001797C6107433C600F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001797C7107433C600F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		001797C8107433C600F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001797C9107433C600F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001797C9107433C600F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001797D41074343E00F5D044 /* testloadso.c in Sources */ = {isa = PBXBuildFile; fileRef = 001797D31074343E00F5D044 /* testloadso.c */; };
 		001798011074355200F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		001798021074355200F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -195,7 +195,7 @@
 		001798081074355200F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001798091074355200F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017980A1074355200F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017980B1074355200F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017980B1074355200F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001798161074359B00F5D044 /* testmultiaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798151074359B00F5D044 /* testmultiaudio.c */; };
 		0017987C1074392D00F5D044 /* testnative.h in Headers */ = {isa = PBXBuildFile; fileRef = 0017985B107436ED00F5D044 /* testnative.h */; };
 		0017987F1074392D00F5D044 /* testnative.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017985A107436ED00F5D044 /* testnative.c */; };
@@ -211,7 +211,7 @@
 		0017988A1074392D00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017988B1074392D00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017988C1074392D00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017988D1074392D00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017988D1074392D00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001798A4107439DF00F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		001798A5107439DF00F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
 		001798A6107439DF00F5D044 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863B10730545007319AE /* CoreAudio.framework */; };
@@ -222,7 +222,7 @@
 		001798AB107439DF00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001798AC107439DF00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		001798AD107439DF00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001798AE107439DF00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001798AE107439DF00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001798BA10743A4900F5D044 /* testpower.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798B910743A4900F5D044 /* testpower.c */; };
 		001798E110743BEC00F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		001798E210743BEC00F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -234,7 +234,7 @@
 		001798E810743BEC00F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		001798E910743BEC00F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		001798EA10743BEC00F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		001798EB10743BEC00F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		001798EB10743BEC00F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		001798FA10743E9200F5D044 /* testresample.c in Sources */ = {isa = PBXBuildFile; fileRef = 001798F910743E9200F5D044 /* testresample.c */; };
 		0017990510743F1000F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017990610743F1000F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -246,7 +246,7 @@
 		0017990C10743F1000F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017990D10743F1000F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017990E10743F1000F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017990F10743F1000F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017990F10743F1000F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		0017991A10743F5300F5D044 /* testsprite2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017991910743F5300F5D044 /* testsprite2.c */; };
 		0017992710743FB700F5D044 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		0017992810743FB700F5D044 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -258,11 +258,11 @@
 		0017992E10743FB700F5D044 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
 		0017992F10743FB700F5D044 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
 		0017993010743FB700F5D044 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		0017993110743FB700F5D044 /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		0017993110743FB700F5D044 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		0017993C10743FEF00F5D044 /* testwm2.c in Sources */ = {isa = PBXBuildFile; fileRef = 0017993B10743FEF00F5D044 /* testwm2.c */; };
 		002A85AF10730028007319AE /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = 002A85AD10730028007319AE /* common.c */; };
 		002A85B010730028007319AE /* common.h in Headers */ = {isa = PBXBuildFile; fileRef = 002A85AE10730028007319AE /* common.h */; };
-		002A863010730405007319AE /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		002A863010730405007319AE /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		002A863E10730545007319AE /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863B10730545007319AE /* CoreAudio.framework */; };
 		002A863F10730546007319AE /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863C10730545007319AE /* ForceFeedback.framework */; };
 		002A864010730546007319AE /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863D10730545007319AE /* IOKit.framework */; };
@@ -503,9 +503,9 @@
 		002A875610730677007319AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
 		002A875710730678007319AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
 		002A875810730678007319AE /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
-		002A875D1073073C007319AE /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		002A875E10730745007319AE /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
-		002A875F1073074E007319AE /* libSDL.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL.a */; };
+		002A875D1073073C007319AE /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		002A875E10730745007319AE /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		002A875F1073074E007319AE /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
 		002F338F09CA16BF00EBEB88 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		002F339B09CA17BC00EBEB88 /* testblitspeed.c in Sources */ = {isa = PBXBuildFile; fileRef = 002F339A09CA17BC00EBEB88 /* testblitspeed.c */; };
 		002F33A809CA188600EBEB88 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
@@ -1494,7 +1494,7 @@
 				0017958210741F7900F5D044 /* OpenGL.framework in Frameworks */,
 				0017958310741F7900F5D044 /* AudioUnit.framework in Frameworks */,
 				0017958410741F7900F5D044 /* Carbon.framework in Frameworks */,
-				0017958510741F7900F5D044 /* libSDL.a in Frameworks */,
+				0017958510741F7900F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1512,7 +1512,7 @@
 				001795A3107421BF00F5D044 /* OpenGL.framework in Frameworks */,
 				001795A4107421BF00F5D044 /* AudioUnit.framework in Frameworks */,
 				001795A5107421BF00F5D044 /* Carbon.framework in Frameworks */,
-				001795A6107421BF00F5D044 /* libSDL.a in Frameworks */,
+				001795A6107421BF00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1530,7 +1530,7 @@
 				0017971710742F3200F5D044 /* OpenGL.framework in Frameworks */,
 				0017971810742F3200F5D044 /* AudioUnit.framework in Frameworks */,
 				0017971910742F3200F5D044 /* Carbon.framework in Frameworks */,
-				0017971A10742F3200F5D044 /* libSDL.a in Frameworks */,
+				0017971A10742F3200F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1548,7 +1548,7 @@
 				0017973E107430D600F5D044 /* OpenGL.framework in Frameworks */,
 				0017973F107430D600F5D044 /* AudioUnit.framework in Frameworks */,
 				00179740107430D600F5D044 /* Carbon.framework in Frameworks */,
-				00179741107430D600F5D044 /* libSDL.a in Frameworks */,
+				00179741107430D600F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1566,7 +1566,7 @@
 				00179764107431B300F5D044 /* OpenGL.framework in Frameworks */,
 				00179765107431B300F5D044 /* AudioUnit.framework in Frameworks */,
 				00179766107431B300F5D044 /* Carbon.framework in Frameworks */,
-				00179767107431B300F5D044 /* libSDL.a in Frameworks */,
+				00179767107431B300F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1584,7 +1584,7 @@
 				00179784107432AE00F5D044 /* OpenGL.framework in Frameworks */,
 				00179785107432AE00F5D044 /* AudioUnit.framework in Frameworks */,
 				00179786107432AE00F5D044 /* Carbon.framework in Frameworks */,
-				00179787107432AE00F5D044 /* libSDL.a in Frameworks */,
+				00179787107432AE00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1602,7 +1602,7 @@
 				001797A41074334C00F5D044 /* OpenGL.framework in Frameworks */,
 				001797A51074334C00F5D044 /* AudioUnit.framework in Frameworks */,
 				001797A61074334C00F5D044 /* Carbon.framework in Frameworks */,
-				001797A71074334C00F5D044 /* libSDL.a in Frameworks */,
+				001797A71074334C00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1620,7 +1620,7 @@
 				001797C6107433C600F5D044 /* OpenGL.framework in Frameworks */,
 				001797C7107433C600F5D044 /* AudioUnit.framework in Frameworks */,
 				001797C8107433C600F5D044 /* Carbon.framework in Frameworks */,
-				001797C9107433C600F5D044 /* libSDL.a in Frameworks */,
+				001797C9107433C600F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1638,7 +1638,7 @@
 				001798081074355200F5D044 /* OpenGL.framework in Frameworks */,
 				001798091074355200F5D044 /* AudioUnit.framework in Frameworks */,
 				0017980A1074355200F5D044 /* Carbon.framework in Frameworks */,
-				0017980B1074355200F5D044 /* libSDL.a in Frameworks */,
+				0017980B1074355200F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1656,7 +1656,7 @@
 				0017988A1074392D00F5D044 /* OpenGL.framework in Frameworks */,
 				0017988B1074392D00F5D044 /* AudioUnit.framework in Frameworks */,
 				0017988C1074392D00F5D044 /* Carbon.framework in Frameworks */,
-				0017988D1074392D00F5D044 /* libSDL.a in Frameworks */,
+				0017988D1074392D00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1674,7 +1674,7 @@
 				001798AB107439DF00F5D044 /* OpenGL.framework in Frameworks */,
 				001798AC107439DF00F5D044 /* AudioUnit.framework in Frameworks */,
 				001798AD107439DF00F5D044 /* Carbon.framework in Frameworks */,
-				001798AE107439DF00F5D044 /* libSDL.a in Frameworks */,
+				001798AE107439DF00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1692,7 +1692,7 @@
 				001798E810743BEC00F5D044 /* OpenGL.framework in Frameworks */,
 				001798E910743BEC00F5D044 /* AudioUnit.framework in Frameworks */,
 				001798EA10743BEC00F5D044 /* Carbon.framework in Frameworks */,
-				001798EB10743BEC00F5D044 /* libSDL.a in Frameworks */,
+				001798EB10743BEC00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1710,7 +1710,7 @@
 				0017990C10743F1000F5D044 /* OpenGL.framework in Frameworks */,
 				0017990D10743F1000F5D044 /* AudioUnit.framework in Frameworks */,
 				0017990E10743F1000F5D044 /* Carbon.framework in Frameworks */,
-				0017990F10743F1000F5D044 /* libSDL.a in Frameworks */,
+				0017990F10743F1000F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1728,7 +1728,7 @@
 				0017992E10743FB700F5D044 /* OpenGL.framework in Frameworks */,
 				0017992F10743FB700F5D044 /* AudioUnit.framework in Frameworks */,
 				0017993010743FB700F5D044 /* Carbon.framework in Frameworks */,
-				0017993110743FB700F5D044 /* libSDL.a in Frameworks */,
+				0017993110743FB700F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1746,7 +1746,7 @@
 				002A86FD107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871F10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874410730676007319AE /* Carbon.framework in Frameworks */,
-				001794CD1073666800F5D044 /* libSDL.a in Frameworks */,
+				001794CD1073666800F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1764,7 +1764,7 @@
 				002A8704107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872610730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874B10730676007319AE /* Carbon.framework in Frameworks */,
-				001794CF1073667300F5D044 /* libSDL.a in Frameworks */,
+				001794CF1073667300F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1782,7 +1782,7 @@
 				002A8702107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872410730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874910730676007319AE /* Carbon.framework in Frameworks */,
-				001794D11073667B00F5D044 /* libSDL.a in Frameworks */,
+				001794D11073667B00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1800,7 +1800,7 @@
 				002A86FF107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A872110730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874610730676007319AE /* Carbon.framework in Frameworks */,
-				001794D41073668800F5D044 /* libSDL.a in Frameworks */,
+				001794D41073668800F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1818,7 +1818,7 @@
 				002A8709107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872B10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A875010730677007319AE /* Carbon.framework in Frameworks */,
-				001794D91073669E00F5D044 /* libSDL.a in Frameworks */,
+				001794D91073669E00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1836,7 +1836,7 @@
 				002A870B107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872D10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A875210730677007319AE /* Carbon.framework in Frameworks */,
-				001794DB107366A700F5D044 /* libSDL.a in Frameworks */,
+				001794DB107366A700F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1854,7 +1854,7 @@
 			files = (
 				BEC568620761D90600A33029 /* libsdlcommon.a in Frameworks */,
 				002F33C109CA188600EBEB88 /* Cocoa.framework in Frameworks */,
-				002A863010730405007319AE /* libSDL.a in Frameworks */,
+				002A863010730405007319AE /* libSDL2.a in Frameworks */,
 				002A864D10730546007319AE /* CoreAudio.framework in Frameworks */,
 				002A864E10730546007319AE /* ForceFeedback.framework in Frameworks */,
 				002A864F10730546007319AE /* IOKit.framework in Frameworks */,
@@ -1880,7 +1880,7 @@
 				002A86F9107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871B10730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A874010730676007319AE /* Carbon.framework in Frameworks */,
-				002A875D1073073C007319AE /* libSDL.a in Frameworks */,
+				002A875D1073073C007319AE /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1898,7 +1898,7 @@
 				002A86FA107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871C10730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A874110730676007319AE /* Carbon.framework in Frameworks */,
-				002A875E10730745007319AE /* libSDL.a in Frameworks */,
+				002A875E10730745007319AE /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1916,7 +1916,7 @@
 				002A86FB107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871D10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874210730676007319AE /* Carbon.framework in Frameworks */,
-				002A875F1073074E007319AE /* libSDL.a in Frameworks */,
+				002A875F1073074E007319AE /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1934,7 +1934,7 @@
 				002A86FC107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871E10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874310730676007319AE /* Carbon.framework in Frameworks */,
-				001794CC1073666100F5D044 /* libSDL.a in Frameworks */,
+				001794CC1073666100F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1952,7 +1952,7 @@
 				002A86FE107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A872010730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874510730676007319AE /* Carbon.framework in Frameworks */,
-				001794CE1073666F00F5D044 /* libSDL.a in Frameworks */,
+				001794CE1073666F00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1970,7 +1970,7 @@
 				002A8703107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872510730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874A10730676007319AE /* Carbon.framework in Frameworks */,
-				001794D01073667700F5D044 /* libSDL.a in Frameworks */,
+				001794D01073667700F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1988,7 +1988,7 @@
 				002A8701107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872310730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874810730676007319AE /* Carbon.framework in Frameworks */,
-				001794D21073667F00F5D044 /* libSDL.a in Frameworks */,
+				001794D21073667F00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2006,7 +2006,7 @@
 				002A8700107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A872210730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874710730676007319AE /* Carbon.framework in Frameworks */,
-				001794D31073668400F5D044 /* libSDL.a in Frameworks */,
+				001794D31073668400F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2024,7 +2024,7 @@
 				002A870E107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A873010730625007319AE /* AudioUnit.framework in Frameworks */,
 				002A875510730677007319AE /* Carbon.framework in Frameworks */,
-				001794DE107366B900F5D044 /* libSDL.a in Frameworks */,
+				001794DE107366B900F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2042,7 +2042,7 @@
 				002A8705107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872710730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874C10730676007319AE /* Carbon.framework in Frameworks */,
-				001794D51073668D00F5D044 /* libSDL.a in Frameworks */,
+				001794D51073668D00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2060,7 +2060,7 @@
 				002A8706107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872810730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874D10730677007319AE /* Carbon.framework in Frameworks */,
-				001794D61073669200F5D044 /* libSDL.a in Frameworks */,
+				001794D61073669200F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2078,7 +2078,7 @@
 				002A8707107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872910730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874E10730677007319AE /* Carbon.framework in Frameworks */,
-				001794D71073669700F5D044 /* libSDL.a in Frameworks */,
+				001794D71073669700F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2096,7 +2096,7 @@
 				002A8708107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872A10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A874F10730677007319AE /* Carbon.framework in Frameworks */,
-				001794D81073669A00F5D044 /* libSDL.a in Frameworks */,
+				001794D81073669A00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2114,7 +2114,7 @@
 				002A870C107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872E10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A875310730677007319AE /* Carbon.framework in Frameworks */,
-				001794DC107366AC00F5D044 /* libSDL.a in Frameworks */,
+				001794DC107366AC00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2132,7 +2132,7 @@
 				002A870D107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A872F10730624007319AE /* AudioUnit.framework in Frameworks */,
 				002A875410730677007319AE /* Carbon.framework in Frameworks */,
-				001794DD107366B100F5D044 /* libSDL.a in Frameworks */,
+				001794DD107366B100F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2150,7 +2150,7 @@
 				002A8711107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A873310730625007319AE /* AudioUnit.framework in Frameworks */,
 				002A875810730678007319AE /* Carbon.framework in Frameworks */,
-				001794DF107366BD00F5D044 /* libSDL.a in Frameworks */,
+				001794DF107366BD00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2168,7 +2168,7 @@
 				002A8710107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A873210730625007319AE /* AudioUnit.framework in Frameworks */,
 				002A875710730678007319AE /* Carbon.framework in Frameworks */,
-				001794E0107366C100F5D044 /* libSDL.a in Frameworks */,
+				001794E0107366C100F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2186,7 +2186,7 @@
 				002A870F107305CF007319AE /* OpenGL.framework in Frameworks */,
 				002A873110730625007319AE /* AudioUnit.framework in Frameworks */,
 				002A875610730677007319AE /* Carbon.framework in Frameworks */,
-				001794E1107366C600F5D044 /* libSDL.a in Frameworks */,
+				001794E1107366C600F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2204,7 +2204,7 @@
 				002A86F7107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871910730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A873E10730675007319AE /* Carbon.framework in Frameworks */,
-				001794E2107366CA00F5D044 /* libSDL.a in Frameworks */,
+				001794E2107366CA00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2222,7 +2222,7 @@
 				002A86F6107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871810730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A873D10730675007319AE /* Carbon.framework in Frameworks */,
-				001794E4107366D200F5D044 /* libSDL.a in Frameworks */,
+				001794E4107366D200F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2240,7 +2240,7 @@
 				002A86F5107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871710730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A873C10730675007319AE /* Carbon.framework in Frameworks */,
-				001794E3107366CE00F5D044 /* libSDL.a in Frameworks */,
+				001794E3107366CE00F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2258,7 +2258,7 @@
 				002A86F4107305CE007319AE /* OpenGL.framework in Frameworks */,
 				002A871610730623007319AE /* AudioUnit.framework in Frameworks */,
 				002A873B10730675007319AE /* Carbon.framework in Frameworks */,
-				001794E5107366D900F5D044 /* libSDL.a in Frameworks */,
+				001794E5107366D900F5D044 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2299,8 +2299,8 @@
 		003FA63B093FFD41000C53B3 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				003FA643093FFD41000C53B3 /* SDL.framework */,
-				003FA645093FFD41000C53B3 /* libSDL.a */,
+				003FA643093FFD41000C53B3 /* SDL2.framework */,
+				003FA645093FFD41000C53B3 /* libSDL2.a */,
 				003FA649093FFD41000C53B3 /* Standard DMG */,
 				003FA64B093FFD41000C53B3 /* Developer Extras Package */,
 				45377480120914AE002F0F45 /* testsdl.app */,
@@ -3748,17 +3748,17 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		003FA643093FFD41000C53B3 /* SDL.framework */ = {
+		003FA643093FFD41000C53B3 /* SDL2.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = SDL.framework;
+			path = SDL2.framework;
 			remoteRef = 003FA642093FFD41000C53B3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		003FA645093FFD41000C53B3 /* libSDL.a */ = {
+		003FA645093FFD41000C53B3 /* libSDL2.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = libSDL.a;
+			path = libSDL2.a;
 			remoteRef = 003FA644093FFD41000C53B3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
