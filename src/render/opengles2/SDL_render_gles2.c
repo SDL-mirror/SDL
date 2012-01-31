@@ -145,6 +145,7 @@ typedef struct GLES2_DriverContext
 #include "SDL_gles2funcs.h"
 #undef SDL_PROC
     GLES2_FBOList *framebuffers;
+    GLuint window_framebuffer;
 
     int shader_format_count;
     GLenum *shader_formats;
@@ -546,7 +547,7 @@ GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum status;
 
     if (texture == NULL) {
-        data->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        data->glBindFramebuffer(GL_FRAMEBUFFER, data->window_framebuffer);
     } else {
         texturedata = (GLES2_TextureData *) texture->driverdata;
         data->glBindFramebuffer(GL_FRAMEBUFFER, texturedata->fbo->FBO);
@@ -1394,6 +1395,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     GLboolean hasCompiler;
 #endif
     Uint32 windowFlags;
+    GLint window_framebuffer;
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
@@ -1485,6 +1487,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 #endif /* ZUNE_HD */
 
     rdata->framebuffers = NULL;
+    rdata->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &window_framebuffer);
+    rdata->window_framebuffer = (GLuint)window_framebuffer;
 
     /* Populate the function pointers for the module */
     renderer->WindowEvent         = &GLES2_WindowEvent;

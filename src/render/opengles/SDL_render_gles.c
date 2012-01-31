@@ -111,6 +111,7 @@ typedef struct
 #undef SDL_PROC
     SDL_bool GL_OES_framebuffer_object_supported;
     GLES_FBOList *framebuffers;
+    GLuint window_framebuffer;
 
     SDL_bool useDrawTexture;
     SDL_bool GL_OES_draw_texture_supported;
@@ -356,6 +357,9 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     if (SDL_GL_ExtensionSupported("GL_OES_framebuffer_object")) {
         data->GL_OES_framebuffer_object_supported = SDL_TRUE;
         renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
+
+        data->glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &value);
+        data->window_framebuffer = (GLuint)value;
     }
     data->framebuffers = NULL;
 
@@ -586,7 +590,7 @@ GLES_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
     GLES_ActivateRenderer(renderer);
 
     if (texture == NULL) {
-        data->glBindFramebufferOES(GL_FRAMEBUFFER_OES, 0);
+        data->glBindFramebufferOES(GL_FRAMEBUFFER_OES, data->window_framebuffer);
         return 0;
     }
 
