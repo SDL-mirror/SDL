@@ -349,8 +349,10 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 #endif
 
+    value = 0;
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_width = value;
+    value = 0;
     data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_height = value;
 
@@ -358,6 +360,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->GL_OES_framebuffer_object_supported = SDL_TRUE;
         renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
 
+        value = 0;
         data->glGetIntegerv(GL_FRAMEBUFFER_BINDING_OES, &value);
         data->window_framebuffer = (GLuint)value;
     }
