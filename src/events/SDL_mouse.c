@@ -323,9 +323,13 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
     /* Set the relative mode */
     mouse->relative_mode = enabled;
 
-    if (!enabled && mouse->focus) {
+    if (enabled) {
+        /* Save the expected mouse position */
+        mouse->original_x = mouse->x;
+        mouse->original_y = mouse->y;
+    } else if (mouse->focus) {
         /* Restore the expected mouse position */
-        SDL_WarpMouseInWindow(mouse->focus, mouse->x, mouse->y);
+        SDL_WarpMouseInWindow(mouse->focus, mouse->original_x, mouse->original_y);
     }
 
     /* Flush pending mouse motion */
