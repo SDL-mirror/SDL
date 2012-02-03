@@ -92,15 +92,13 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    if (SDL_GetMouseFocus()) {
-        if (cursor) {
-            NSCursor *nscursor = (NSCursor *)cursor->driverdata;
+    if (cursor) {
+        NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
-            [nscursor set];
-            [NSCursor unhide];
-        } else {
-            [NSCursor hide];
-        }
+        [nscursor set];
+        [NSCursor unhide];
+    } else {
+        [NSCursor hide];
     }
 
     [pool release];

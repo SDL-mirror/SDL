@@ -313,9 +313,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         } else {
             SDL_SetMouseFocus(NULL);
-
-            [[NSCursor arrowCursor] set];
-            [NSCursor unhide];
+            SDL_SetCursor(NULL);
         }
     }
 }
