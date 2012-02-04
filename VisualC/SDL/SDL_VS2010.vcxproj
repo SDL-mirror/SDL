@@ -436,7 +436,7 @@
     <ClCompile Include="..\..\src\events\SDL_windowevents.c" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Version.rc" />
+    <ResourceCompile Include="..\..\src\main\windows\version.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
