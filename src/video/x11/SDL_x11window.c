@@ -501,10 +501,11 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 
     /* Setup the normal size hints */
+    sizehints.flags = 0;
     if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
         sizehints.min_width = sizehints.max_width = window->w;
         sizehints.min_height = sizehints.max_height = window->h;
-        sizehints.flags = PMaxSize | PMinSize;
+        sizehints.flags |= (PMaxSize | PMinSize);
     }
     sizehints.x = window->x;
     sizehints.y = window->y;
