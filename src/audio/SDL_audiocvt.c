@@ -25,12 +25,9 @@
 #include "SDL_audio.h"
 #include "SDL_audio_c.h"
 
-/* #define DEBUG_CONVERT */
+#include "SDL_assert.h"
 
-/* !!! FIXME */
-#ifndef assert
-#define assert(x)
-#endif
+/* #define DEBUG_CONVERT */
 
 /* Effectively mix right and left channels into a single channel */
 static void SDLCALL
@@ -881,9 +878,9 @@ SDL_FindFrequencyMultiple(const int src_rate, const int dst_rate)
     int lo, hi;
     int div;
 
-    assert(src_rate != 0);
-    assert(dst_rate != 0);
-    assert(src_rate != dst_rate);
+    SDL_assert(src_rate != 0);
+    SDL_assert(dst_rate != 0);
+    SDL_assert(src_rate != dst_rate);
 
     if (src_rate < dst_rate) {
         lo = src_rate;

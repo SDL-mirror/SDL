@@ -424,7 +424,6 @@ BlitRGBtoRGBPixelAlphaMMX(SDL_BlitInfo * info)
 #if HAVE_ALTIVEC_H
 #include <altivec.h>
 #endif
-#include <assert.h>
 
 #if (defined(__MACOSX__) && (__GNUC__ < 4))
 #define VECUINT8_LITERAL(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p) \
