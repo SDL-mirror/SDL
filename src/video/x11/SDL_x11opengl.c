@@ -327,11 +327,6 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
         attribs[i++] = _this->gl_config.alpha_size;
     }
 
-    if (_this->gl_config.buffer_size) {
-        attribs[i++] = GLX_BUFFER_SIZE;
-        attribs[i++] = _this->gl_config.buffer_size;
-    }
-
     if (_this->gl_config.double_buffer) {
         attribs[i++] = GLX_DOUBLEBUFFER;
     }
