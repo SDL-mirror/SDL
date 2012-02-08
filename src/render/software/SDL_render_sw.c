@@ -183,6 +183,7 @@ SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         data->surface = NULL;
+        data->window = NULL;
     }
 }
 
