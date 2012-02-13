@@ -28,12 +28,12 @@
 #include <stdlib.h>
 #include <nds.h>
 #include <fat.h>
-#include <gl2d.h>
 
 #include "SDL_video.h"
 #include "SDL_ndsvideo.h"
 #include "SDL_ndsevents_c.h"
 #include "../../render/SDL_sysrender.h"
+#include "../../render/nds/SDL_libgl2D.h"
 #include "SDL_log.h"
 
 #define NDSVID_DRIVER_NAME "nds"
