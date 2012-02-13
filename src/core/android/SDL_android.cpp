@@ -20,6 +20,7 @@
 */
 #include "SDL_config.h"
 #include "SDL_stdinc.h"
+#include "SDL_assert.h"
 
 #ifdef __ANDROID__
 
@@ -203,6 +204,41 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
+
+class LocalReferenceHolder
+{
+private:
+    static int s_active;
+
+public:
+    static bool IsActive() {
+        return s_active > 0;
+    }
+
+public:
+    LocalReferenceHolder() : m_env(NULL) { }
+    ~LocalReferenceHolder() {
+        if (m_env) {
+            m_env->PopLocalFrame(NULL);
+            --s_active;
+        }
+    }
+
+    bool init(JNIEnv *env, jint capacity = 16) {
+        if (env->PushLocalFrame(capacity) < 0) {
+            SDL_SetError("Failed to allocate enough JVM local references");
+            return false;
+        }
+        ++s_active;
+        m_env = env;
+        return true;
+    }
+
+protected:
+    JNIEnv *m_env;
+};
+int LocalReferenceHolder::s_active;
+
 extern "C" SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion)
 {
     if (mEnv->CallStaticBooleanMethod(mActivityClass, midCreateGLContext, majorVersion, minorVersion)) {
@@ -351,6 +387,8 @@ extern "C" void Android_JNI_CloseAudioDevice()
 // Test for an exception and call SDL_SetError with its detail if one occurs
 static bool Android_JNI_ExceptionOccurred()
 {
+    SDL_assert(LocalReferenceHolder::IsActive());
+
     jthrowable exception = mEnv->ExceptionOccurred();
     if (exception != NULL) {
         jmethodID mid;
@@ -373,16 +411,11 @@ static bool Android_JNI_ExceptionOccurred()
                     exceptionMessage, 0);
             SDL_SetError("%s: %s", exceptionNameUTF8, exceptionMessageUTF8);
             mEnv->ReleaseStringUTFChars(exceptionMessage, exceptionMessageUTF8);
-            mEnv->DeleteLocalRef(exceptionMessage);
         } else {
             SDL_SetError("%s", exceptionNameUTF8);
         }
 
         mEnv->ReleaseStringUTFChars(exceptionName, exceptionNameUTF8);
-        mEnv->DeleteLocalRef(exceptionName);
-        mEnv->DeleteLocalRef(classClass);
-        mEnv->DeleteLocalRef(exceptionClass);
-        mEnv->DeleteLocalRef(exception);
 
         return true;
     }
@@ -392,6 +425,7 @@ static bool Android_JNI_ExceptionOccurred()
 
 static int Android_JNI_FileOpen(SDL_RWops* ctx)
 {
+    LocalReferenceHolder refs;
     int result = 0;
 
     jmethodID mid;
@@ -402,13 +436,8 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     jobject readableByteChannel;
     jstring fileNameJString;
 
-    bool allocatedLocalFrame = false;
-
-    if (mEnv->PushLocalFrame(16) < 0) {
-        SDL_SetError("Failed to allocate enough JVM local references");
+    if (!refs.init(mEnv)) {
         goto failure;
-    } else {
-        allocatedLocalFrame = true;
     }
 
     fileNameJString = (jstring)ctx->hidden.androidio.fileName;
@@ -481,16 +510,18 @@ failure:
         }
     }
 
-    if (allocatedLocalFrame) {
-        mEnv->PopLocalFrame(NULL);
-    }
-
     return result;
 }
 
 extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
         const char* fileName, const char*)
 {
+    LocalReferenceHolder refs;
+
+    if (!refs.init(mEnv)) {
+        return -1;
+    }
+
     if (!ctx) {
         return -1;
     }
@@ -499,7 +530,6 @@ extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
     ctx->hidden.androidio.fileName = fileNameJString;
     ctx->hidden.androidio.fileNameRef = mEnv->NewGlobalRef(fileNameJString);
     ctx->hidden.androidio.inputStreamRef = NULL;
-    mEnv->DeleteLocalRef(fileNameJString);
 
     return Android_JNI_FileOpen(ctx);
 }
@@ -507,8 +537,13 @@ extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
 extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         size_t size, size_t maxnum)
 {
+    LocalReferenceHolder refs;
     int bytesRemaining = size * maxnum;
     int bytesRead = 0;
+
+    if (!refs.init(mEnv)) {
+        return -1;
+    }
 
     jobject readableByteChannel = (jobject)ctx->hidden.androidio.readableByteChannel;
     jmethodID readMethod = (jmethodID)ctx->hidden.androidio.readMethod;
@@ -519,7 +554,6 @@ extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         int result = mEnv->CallIntMethod(readableByteChannel, readMethod, byteBuffer);
 
         if (Android_JNI_ExceptionOccurred()) {
-            mEnv->DeleteLocalRef(byteBuffer);
             return 0;
         }
 
@@ -531,8 +565,6 @@ extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         bytesRead += result;
         ctx->hidden.androidio.position += result;
     }
-
-    mEnv->DeleteLocalRef(byteBuffer);
 
     return bytesRead / size;
 }
@@ -546,7 +578,13 @@ extern "C" size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer,
 
 static int Android_JNI_FileClose(SDL_RWops* ctx, bool release)
 {
+    LocalReferenceHolder refs;
     int result = 0;
+
+    if (!refs.init(mEnv)) {
+        SDL_SetError("Failed to allocate enough JVM local references");
+        return -1;
+    }
 
     if (ctx) {
         if (release) {
