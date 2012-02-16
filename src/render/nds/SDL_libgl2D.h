@@ -13,6 +13,9 @@
  *
  *	A very small and simple DS rendering lib using the 3d core to render 2D stuff
  */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_RENDER_NDS
 
 #include <nds/arm9/videoGL.h>
 
@@ -148,3 +151,4 @@ void glBox(int x1, int y1, int x2, int y2, int color);
  */
 void glBoxFilled(int x1, int y1, int x2, int y2, int color);
 
+#endif /* SDL_VIDEO_RENDER_NDS */

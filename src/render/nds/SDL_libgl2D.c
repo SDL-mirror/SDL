@@ -13,6 +13,9 @@
  *
  *	A very small and simple DS rendering lib using the 3d core to render 2D stuff
  */
+#include "SDL_config.h"
+
+#if SDL_VIDEO_RENDER_NDS
 
 #include "SDL_libgl2D.h"
 
@@ -308,3 +311,5 @@ void glSpriteScaleXY(int x, int y, s32 scaleX, s32 scaleY, int flipmode, const g
 	glPopMatrix(1);
 	g_depth++;
 }
+
+#endif /* SDL_VIDEO_RENDER_NDS */
