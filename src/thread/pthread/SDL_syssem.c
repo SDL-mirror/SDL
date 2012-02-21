@@ -144,8 +144,14 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
 		retval = sem_timedwait(&sem->sem, &ts_timeout);
 	while (retval == -1 && errno == EINTR);
 
-	if (retval == -1)
-		SDL_SetError(strerror(errno));
+	if (retval == -1) {
+		if (errno == ETIMEDOUT) {
+			retval = SDL_MUTEX_TIMEDOUT;
+		}
+		else {
+			SDL_SetError(strerror(errno));
+		}
+	}
 #else
 	end = SDL_GetTicks() + timeout;
 	while ((retval = SDL_SemTryWait(sem)) == SDL_MUTEX_TIMEDOUT) {
