@@ -180,9 +180,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
                 // desktop_mode doesn't change here (the higher level will
                 //  use it to set all the screens back to their defaults
                 //  upon window destruction, SDL_Quit(), etc.
-                [((UIScreenMode *) display->current_mode.driverdata) release];
                 display->current_mode = *bestmode;
-                [((UIScreenMode *) display->current_mode.driverdata) retain];
             }
         }
     }

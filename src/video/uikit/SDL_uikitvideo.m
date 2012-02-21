@@ -121,14 +121,11 @@ The main screen should list a AxB mode for portrait orientation, and then
 */
 
 static int
-UIKit_AddSingleDisplayMode(SDL_VideoDisplay * display, int w, int h,
+UIKit_AllocateDisplayModeData(SDL_DisplayMode * mode,
     UIScreenMode * uiscreenmode, CGFloat scale)
 {
-    SDL_DisplayMode mode;
-    SDL_zero(mode);
-    
     SDL_DisplayModeData *data = NULL;
-
+    
     if (uiscreenmode != nil) {
         /* Allocate the display mode data */
         data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
@@ -138,24 +135,56 @@ UIKit_AddSingleDisplayMode(SDL_VideoDisplay * display, int w, int h,
         }
         
         data->uiscreenmode = uiscreenmode;
+        [data->uiscreenmode retain];
+        
         data->scale = scale;
     }
     
+    mode->driverdata = data;
+    
+    return 0;
+}
+
+static void
+UIKit_FreeDisplayModeData(SDL_DisplayMode * mode)
+{
+    if (!SDL_UIKit_supports_multiple_displays) {
+        // Not on at least iPhoneOS 3.2 (versions prior to iPad).
+        SDL_assert(mode->driverdata == NULL);
+    } else if (mode->driverdata != NULL) {
+        SDL_DisplayModeData *data = (SDL_DisplayModeData *)mode->driverdata;
+        [data->uiscreenmode release];
+        SDL_free(data);
+        mode->driverdata = NULL;
+    }
+}
+
+static int
+UIKit_AddSingleDisplayMode(SDL_VideoDisplay * display, int w, int h,
+    UIScreenMode * uiscreenmode, CGFloat scale)
+{
+    SDL_DisplayMode mode;
+    SDL_zero(mode);
+    
     mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.refresh_rate = 0;
-    mode.driverdata = data;
+    if (UIKit_AllocateDisplayModeData(&mode, uiscreenmode, scale) < 0) {
+        return -1;
+    }
     
     mode.w = w;
     mode.h = h;
     if (SDL_AddDisplayMode(display, &mode)) {
-        if (uiscreenmode != nil) {
-            [uiscreenmode retain];
-        }
-        
         return 0;
     }
     
-    SDL_free(data);
+    // Failure case; free resources
+    SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode.driverdata;
+    
+    if (data != NULL) {
+        [data->uiscreenmode release];
+        SDL_free(data);
+    }
 
     return -1;
 }
@@ -237,39 +266,27 @@ UIKit_AddDisplay(UIScreen *uiscreen, CGSize size)
     mode.w = (int)(size.width * scale);
     mode.h = (int)(size.height * scale);
     mode.refresh_rate = 0;
-
+ 
+    UIScreenMode * uiscreenmode = nil;
     // UIScreenMode showed up in 3.2 (the iPad and later). We're
     //  misusing this supports_multiple_displays flag here for that.
     if (SDL_UIKit_supports_multiple_displays) {
-        SDL_DisplayModeData *data;
-        
-        /* Allocate the mode data */
-        data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
-        if (!data) {
-            SDL_OutOfMemory();
-            return -1;
-        }
-        
-        data->uiscreenmode = [uiscreen currentMode];
-        [data->uiscreenmode retain];  // once for the desktop_mode
-        [data->uiscreenmode retain];  // once for the current_mode
-        
-        data->scale = scale;
-
-        mode.driverdata = data;
+        uiscreenmode = [uiscreen currentMode];
+    }
+    
+    if (UIKit_AllocateDisplayModeData(&mode, uiscreenmode, scale) < 0) {
+        return -1;
     }
 
     SDL_zero(display);
     display.desktop_mode = mode;
     display.current_mode = mode;
-	
-    SDL_DisplayData *data;
 
     /* Allocate the display data */
-    data = (SDL_DisplayData *) SDL_malloc(sizeof(*data));
+    SDL_DisplayData *data = (SDL_DisplayData *) SDL_malloc(sizeof(*data));
     if (!data) {
-        SDL_free(mode.driverdata);
         SDL_OutOfMemory();
+        UIKit_FreeDisplayModeData(&display.desktop_mode);
         return -1;
     }
 	
@@ -341,20 +358,6 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     return 0;
 }
 
-static void
-UIKit_ReleaseUIScreenMode(SDL_DisplayMode * mode)
-{
-    if (!SDL_UIKit_supports_multiple_displays) {
-        // Not on at least iPhoneOS 3.2 (versions prior to iPad).
-        SDL_assert(mode->driverdata == NULL);
-    } else {
-        SDL_DisplayModeData *data = (SDL_DisplayModeData *)mode->driverdata;
-        [data->uiscreenmode release];
-        SDL_free(data);
-        mode->driverdata = NULL;
-    }
-}
-
 void
 UIKit_VideoQuit(_THIS)
 {
@@ -366,11 +369,10 @@ UIKit_VideoQuit(_THIS)
         [data->uiscreen release];
         SDL_free(data);
         display->driverdata = NULL;
-        UIKit_ReleaseUIScreenMode(&display->desktop_mode);
-        UIKit_ReleaseUIScreenMode(&display->current_mode);
+        UIKit_FreeDisplayModeData(&display->desktop_mode);
         for (j = 0; j < display->num_display_modes; j++) {
             SDL_DisplayMode *mode = &display->display_modes[j];
-            UIKit_ReleaseUIScreenMode(mode);
+            UIKit_FreeDisplayModeData(mode);
         }
     }
 }
