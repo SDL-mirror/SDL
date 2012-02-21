@@ -707,6 +707,8 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
         while ((UNALIGNED_PTR(dst)) && (width)) {
             bits = *(src++);
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = srcfmt->alpha;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             width--;
         }
@@ -734,6 +736,8 @@ ConvertAltivec32to32_noprefetch(SDL_BlitInfo * info)
         while (extrawidth) {
             bits = *(src++);    /* max 7 pixels, don't bother with prefetch. */
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = srcfmt->alpha;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             extrawidth--;
         }
@@ -790,6 +794,8 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
                       DST_CHAN_DEST);
             bits = *(src++);
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = srcfmt->alpha;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             width--;
         }
@@ -821,6 +827,8 @@ ConvertAltivec32to32_prefetch(SDL_BlitInfo * info)
         while (extrawidth) {
             bits = *(src++);    /* max 7 pixels, don't bother with prefetch. */
             RGBA_FROM_8888(bits, srcfmt, r, g, b, a);
+            if(!srcfmt->Amask)
+              a = srcfmt->alpha;
             *(dst++) = MAKE8888(dstfmt, r, g, b, a);
             extrawidth--;
         }
