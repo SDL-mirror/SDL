@@ -500,6 +500,8 @@ SDL_VideoInit(const char *driver_name)
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 0;
 #endif
+    _this->gl_config.flags = 0;
+    _this->gl_config.profile_mask = 0;
 
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
@@ -2300,6 +2302,12 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
     case SDL_GL_CONTEXT_MINOR_VERSION:
         _this->gl_config.minor_version = value;
         break;
+    case SDL_GL_CONTEXT_FLAGS:
+        _this->gl_config.flags = value;
+        break;
+    case SDL_GL_CONTEXT_PROFILE_MASK:
+        _this->gl_config.profile_mask = value;
+        break;
     default:
         SDL_SetError("Unknown OpenGL attribute");
         retval = -1;
@@ -2444,6 +2452,16 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_CONTEXT_MINOR_VERSION:
         {
             *value = _this->gl_config.minor_version;
+            return 0;
+        }
+    case SDL_GL_CONTEXT_FLAGS:
+        {
+            *value = _this->gl_config.flags;
+            return 0;
+        }
+    case SDL_GL_CONTEXT_PROFILE_MASK:
+        {
+            *value = _this->gl_config.profile_mask;
             return 0;
         }
     default:
