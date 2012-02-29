@@ -27900,15 +27900,7 @@ else
   SDL_RLD_FLAGS=""
 fi
 
-case "$ARCH" in
-  macosx)
-    # Evil hack to allow static linking on Mac OS X
-    SDL_STATIC_LIBS="\${libdir}/libSDL2.a $EXTRA_LDFLAGS"
-    ;;
-  *)
-    SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
-    ;;
-esac
+SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
 
 
 
