@@ -255,9 +255,9 @@ static void SDL_GenerateAssertionReport(void)
 static void SDL_ExitProcess(int exitcode)
 {
 #ifdef __WIN32__
-    ExitProcess(42);
+    ExitProcess(exitcode);
 #else
-    _exit(42);
+    _exit(exitcode);
 #endif
 }
 
