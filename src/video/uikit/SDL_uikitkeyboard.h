@@ -22,11 +22,25 @@
 #ifndef sdl_uikitkeyboard_h
 #define sdl_uikitkeyboard_h
 
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
+
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
 extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
 #endif
+
+#endif /* sdl_uikitkeyboard_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
