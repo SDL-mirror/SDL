@@ -324,6 +324,8 @@ int
 X11_CheckXInput2(_THIS)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
     if (SDL_X11_HAVE_XINPUT2) {
         XIEventMask eventmask;
         unsigned char mask[3] = { 0,0,0 };
