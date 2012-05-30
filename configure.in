@@ -1091,6 +1091,25 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             fi
             have_video=yes
 
+            AC_MSG_CHECKING(for const parameter to XextAddDisplay)
+            have_const_param_XextAddDisplay=no
+            AC_TRY_COMPILE([
+              #include <X11/Xlib.h>
+              #include <X11/Xproto.h>
+              #include <X11/extensions/Xext.h>
+              #include <X11/extensions/extutil.h>
+            ],[
+XExtDisplayInfo*
+XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f)
+{
+    return (XExtDisplayInfo*)0;
+}
+            ],[
+            have_const_param_XextAddDisplay=yes
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY)
+            ])
+            AC_MSG_RESULT($have_const_param_XextAddDisplay)
+
             AC_CHECK_LIB(X11, XGetEventData, AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS, 1, [Have XGenericEvent]))
 
             AC_ARG_ENABLE(video-x11-xcursor,

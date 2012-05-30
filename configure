@@ -22166,6 +22166,140 @@ _ACEOF
             fi
             have_video=yes
 
+            { echo "$as_me:$LINENO: checking for const parameter to XextAddDisplay" >&5
+echo $ECHO_N "checking for const parameter to XextAddDisplay... $ECHO_C" >&6; }
+            have_const_param_XextAddDisplay=no
+            cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+              #include <X11/Xlib.h>
+              #include <X11/Xproto.h>
+              #include <X11/extensions/Xext.h>
+              #include <X11/extensions/extutil.h>
+
+int
+main ()
+{
+
+XExtDisplayInfo*
+XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f)
+{
+    return (XExtDisplayInfo*)0;
+}
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            have_const_param_XextAddDisplay=yes
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY 1
+_ACEOF
+
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+            { echo "$as_me:$LINENO: result: $have_const_param_XextAddDisplay" >&5
+echo "${ECHO_T}$have_const_param_XextAddDisplay" >&6; }
+
+            { echo "$as_me:$LINENO: checking for XGetEventData in -lX11" >&5
+echo $ECHO_N "checking for XGetEventData in -lX11... $ECHO_C" >&6; }
+if test "${ac_cv_lib_X11_XGetEventData+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lX11  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char XGetEventData ();
+int
+main ()
+{
+return XGetEventData ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext &&
+       $as_test_x conftest$ac_exeext; then
+  ac_cv_lib_X11_XGetEventData=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_cv_lib_X11_XGetEventData=no
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ echo "$as_me:$LINENO: result: $ac_cv_lib_X11_XGetEventData" >&5
+echo "${ECHO_T}$ac_cv_lib_X11_XGetEventData" >&6; }
+if test $ac_cv_lib_X11_XGetEventData = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS 1
+_ACEOF
+
+fi
+
+
             # Check whether --enable-video-x11-xcursor was given.
 if test "${enable_video_x11_xcursor+set}" = set; then
   enableval=$enable_video_x11_xcursor;
@@ -22475,9 +22609,9 @@ fi
 
             if test x$enable_video_x11_xinput = xyes; then
                 definitely_enable_video_x11_xinput=no
-                { echo "$as_me:$LINENO: checking for X11/extensions/XInput.h" >&5
-echo $ECHO_N "checking for X11/extensions/XInput.h... $ECHO_C" >&6; }
-if test "${ac_cv_header_X11_extensions_XInput_h+set}" = set; then
+                { echo "$as_me:$LINENO: checking for X11/extensions/XInput2.h" >&5
+echo $ECHO_N "checking for X11/extensions/XInput2.h... $ECHO_C" >&6; }
+if test "${ac_cv_header_X11_extensions_XInput2_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   cat >conftest.$ac_ext <<_ACEOF
@@ -22489,7 +22623,7 @@ cat >>conftest.$ac_ext <<_ACEOF
 #include <X11/Xlib.h>
 
 
-#include <X11/extensions/XInput.h>
+#include <X11/extensions/XInput2.h>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (ac_try="$ac_compile"
@@ -22508,19 +22642,19 @@ eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
 	 test -z "$ac_c_werror_flag" ||
 	 test ! -s conftest.err
        } && test -s conftest.$ac_objext; then
-  ac_cv_header_X11_extensions_XInput_h=yes
+  ac_cv_header_X11_extensions_XInput2_h=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_header_X11_extensions_XInput_h=no
+	ac_cv_header_X11_extensions_XInput2_h=no
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
-{ echo "$as_me:$LINENO: result: $ac_cv_header_X11_extensions_XInput_h" >&5
-echo "${ECHO_T}$ac_cv_header_X11_extensions_XInput_h" >&6; }
-if test $ac_cv_header_X11_extensions_XInput_h = yes; then
+{ echo "$as_me:$LINENO: result: $ac_cv_header_X11_extensions_XInput2_h" >&5
+echo "${ECHO_T}$ac_cv_header_X11_extensions_XInput2_h" >&6; }
+if test $ac_cv_header_X11_extensions_XInput2_h = yes; then
   have_xinput_h_hdr=yes
 else
   have_xinput_h_hdr=no
@@ -22532,7 +22666,7 @@ fi
                         echo "-- dynamic libXi -> $xinput_lib"
 
 cat >>confdefs.h <<_ACEOF
-#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT "$xinput_lib"
+#define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINPUT2 "$xinput_lib"
 _ACEOF
 
                         definitely_enable_video_x11_xinput=yes
@@ -22612,7 +22746,7 @@ fi
             if test x$definitely_enable_video_x11_xinput = xyes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define SDL_VIDEO_DRIVER_X11_XINPUT 1
+#define SDL_VIDEO_DRIVER_X11_XINPUT2 1
 _ACEOF
 
             fi
