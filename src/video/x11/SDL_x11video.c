@@ -321,6 +321,54 @@ X11_CheckWindowManager(_THIS)
 }
 
 int
+X11_CheckXInput2(_THIS)
+{
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+    if (SDL_X11_HAVE_XINPUT2) {
+        XIEventMask eventmask;
+        unsigned char mask[3] = { 0,0,0 };
+        int opcode, event, err;
+        int major = 2, minor = 0;
+        /*
+        * Initialize XInput 2
+        * According to http://who-t.blogspot.com/2009/05/xi2-recipes-part-1.html its better
+        * to inform Xserver what version of Xinput we support.The server will store the version we support. 
+        * "As XI2 progresses it becomes important that you use this call as the server may treat the client 
+        * differently depending on the supported version".
+        *
+        * FIXME:event and err are not needed but if not passed XQueryExtension returns SegmentationFault
+        */
+        if (!XQueryExtension(data->display, "XInputExtension", &opcode, &event, &err)) {
+            SDL_SetError("XInput 2 extension not available.");
+            return -1;
+        }
+      
+        if (XIQueryVersion(data->display, &major, &minor) != Success) {
+            SDL_SetError("Error supporting XInput 2 version");
+            return -1;      
+        }
+
+        /* Save the opcode for event processing */
+        data->xinput_opcode = opcode;
+
+        /*Enable  Raw motion events for this display*/
+        eventmask.deviceid = XIAllMasterDevices;
+        eventmask.mask_len = sizeof(mask);
+        eventmask.mask = mask;
+
+        XISetMask(mask, XI_RawMotion);
+             
+        if (XISelectEvents(data->display,DefaultRootWindow(data->display),&eventmask,1) != Success) {
+            SDL_SetError("Error in selecting XInput 2 Raw motion events");
+            return -1;      
+        }
+    }
+#else
+    return 0;
+#endif
+}
+
+int
 X11_VideoInit(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -358,6 +406,8 @@ X11_VideoInit(_THIS)
     if (X11_InitModes(_this) < 0) {
         return -1;
     }
+
+    X11_CheckXInput2(_this);
 
     if (X11_InitKeyboard(_this) != 0) {
         return -1;

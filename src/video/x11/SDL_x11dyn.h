@@ -49,8 +49,8 @@
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
-#if SDL_VIDEO_DRIVER_X11_XINPUT
-#include <X11/extensions/XInput.h>
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+#include <X11/extensions/XInput2.h>
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
 #include <X11/extensions/Xrandr.h>

@@ -22,6 +22,7 @@ TARGETS = \
 	testiconv$(EXE) \
 	testime$(EXE) \
 	testintersections$(EXE) \
+	testrelative$(EXE) \
 	testjoystick$(EXE) \
 	testkeys$(EXE) \
 	testloadso$(EXE) \
@@ -70,6 +71,9 @@ testatomic$(EXE): $(srcdir)/testatomic.c
 
 testintersections$(EXE): $(srcdir)/testintersections.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testintersections.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
+
+testrelative$(EXE): $(srcdir)/testrelative.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testrelative.c $(srcdir)/common.c $(CFLAGS) $(LIBS)
 
 testdraw2$(EXE): $(srcdir)/testdraw2.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testdraw2.c $(srcdir)/common.c $(CFLAGS) $(LIBS)

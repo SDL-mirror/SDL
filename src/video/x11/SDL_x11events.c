@@ -44,7 +44,6 @@
 #include <linux/input.h>
 #include <fcntl.h>
 #endif
-/*#define DEBUG_XEVENTS*/
 
 /* Check to see if this is a repeated key.
    (idea shamelessly lifted from GII -- thanks guys! :)
@@ -95,6 +94,56 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
     return SDL_FALSE;
 }
 
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+static void X11_HandleRawMotion(SDL_VideoData *videodata,const XIRawEvent *rawev)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+    const double *values = rawev->raw_values;
+    int relative_cords[2] = {0,0};
+    int i;
+
+    if (!mouse->relative_mode) {
+        return;
+    }
+   
+    /*2 axis,X-Y*/
+    for (i = 0; i < 2; i++) {
+        if (XIMaskIsSet(rawev->valuators.mask, i)) {
+            const int value = (int) *values;
+            relative_cords[i] = value;
+            values++;
+        }
+    }
+#ifdef DEBUG_MOTION
+    printf("XInput relative motion: %d,%d\n", relative_cords[0],relative_cords[1]);
+#endif
+    SDL_SendMouseMotion(mouse->focus,1,relative_cords[0],relative_cords[1]);
+}
+#endif /* SDL_VIDEO_DRIVER_X11_XINPUT2 */
+
+#if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
+{
+    XGenericEventCookie *cookie = &event.xcookie;
+    XGetEventData(videodata->display, cookie);
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+    if(cookie->extension == videodata->xinput_opcode) {
+        switch(cookie->evtype) {
+            case XI_RawMotion: {
+                const XIRawEvent *rawev = (const XIRawEvent*)cookie->data;
+                X11_HandleRawMotion(videodata,rawev);
+                }
+                break;
+
+        }
+    }
+#endif
+    XFreeEventData(videodata->display,cookie);
+}
+#endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
+
+
+
 static void
 X11_DispatchEvent(_THIS)
 {
@@ -126,6 +175,13 @@ X11_DispatchEvent(_THIS)
         wmmsg.msg.x11.event = xevent;
         SDL_SendSysWMEvent(&wmmsg);
     }
+
+#if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+    if(xevent.type == GenericEvent) {
+        X11_HandleGenericEvent(videodata,xevent);
+        return;
+    }
+#endif
 
     data = NULL;
     if (videodata && videodata->windowlist) {
@@ -337,10 +393,14 @@ X11_DispatchEvent(_THIS)
         break;
 
     case MotionNotify:{
+            SDL_Mouse *mouse = SDL_GetMouse();  
+            if(!mouse->relative_mode) {
 #ifdef DEBUG_MOTION
-            printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
+                printf("X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
 #endif
-            SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+
+                SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+            }
         }
         break;
 

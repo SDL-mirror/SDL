@@ -272,8 +272,13 @@ X11_WarpMouse(SDL_Window * window, int x, int y)
 static int
 X11_SetRelativeMouseMode(SDL_bool enabled)
 {
+#if SDL_VIDEO_DRIVER_X11_XINPUT2
+    /* FIXME: Need to remember from init if XInput2 is actually supported */
+    return 0;
+#else
     SDL_Unsupported();
     return -1;
+#endif
 }
 
 void
