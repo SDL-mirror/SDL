@@ -30,6 +30,7 @@
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
 #include "SDL_x11shape.h"
+#include "SDL_x11xinput2.h"
 
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
 #include "SDL_x11opengles.h"
@@ -560,6 +561,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       XNFilterEvents, &fevent, NULL);
     }
 #endif
+
+    X11_Xinput2SelectTouch(_this, window);
 
     XSelectInput(display, w,
                  (FocusChangeMask | EnterWindowMask | LeaveWindowMask |

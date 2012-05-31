@@ -30,6 +30,7 @@
 
 #include "SDL_x11video.h"
 #include "SDL_x11touch.h"
+#include "SDL_x11xinput2.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
@@ -94,50 +95,13 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
     return SDL_FALSE;
 }
 
-#if SDL_VIDEO_DRIVER_X11_XINPUT2
-static void X11_HandleRawMotion(SDL_VideoData *videodata,const XIRawEvent *rawev)
-{
-    SDL_Mouse *mouse = SDL_GetMouse();
-    const double *values = rawev->raw_values;
-    int relative_cords[2] = {0,0};
-    int i;
-
-    if (!mouse->relative_mode) {
-        return;
-    }
-   
-    /*2 axis,X-Y*/
-    for (i = 0; i < 2; i++) {
-        if (XIMaskIsSet(rawev->valuators.mask, i)) {
-            const int value = (int) *values;
-            relative_cords[i] = value;
-            values++;
-        }
-    }
-#ifdef DEBUG_MOTION
-    printf("XInput relative motion: %d,%d\n", relative_cords[0],relative_cords[1]);
-#endif
-    SDL_SendMouseMotion(mouse->focus,1,relative_cords[0],relative_cords[1]);
-}
-#endif /* SDL_VIDEO_DRIVER_X11_XINPUT2 */
 
 #if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
 static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
 {
     XGenericEventCookie *cookie = &event.xcookie;
     XGetEventData(videodata->display, cookie);
-#if SDL_VIDEO_DRIVER_X11_XINPUT2
-    if(cookie->extension == videodata->xinput_opcode) {
-        switch(cookie->evtype) {
-            case XI_RawMotion: {
-                const XIRawEvent *rawev = (const XIRawEvent*)cookie->data;
-                X11_HandleRawMotion(videodata,rawev);
-                }
-                break;
-
-        }
-    }
-#endif
+    X11_HandleXinput2Event(videodata,cookie);
     XFreeEventData(videodata->display,cookie);
 }
 #endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
@@ -605,9 +569,13 @@ X11_PumpEvents(_THIS)
     while (X11_Pending(data->display)) {
         X11_DispatchEvent(_this);
     }
+    /*Dont process evtouch events if XInput2 multitouch is supported*/
+    if(X11_Xinput2IsMutitouchSupported()) {
+        return;
+    }
 
 #ifdef SDL_INPUT_LINUXEV
-    /* Process Touch events - TODO When X gets touch support, use that instead*/
+    /* Process Touch events*/
     int i = 0,rd;
     struct input_event ev[64];
     int size = sizeof (struct input_event);

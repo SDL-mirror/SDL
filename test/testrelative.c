@@ -54,7 +54,9 @@ main(int argc, char *argv[])
     }
 
     srand((unsigned int)time(NULL));
-    SDL_SetRelativeMouseMode(SDL_TRUE);
+    if(SDL_SetRelativeMouseMode(SDL_TRUE) < 0) {
+        return 3;
+    };
 
     rect.x = DEFAULT_WINDOW_WIDTH / 2;
     rect.y = DEFAULT_WINDOW_HEIGHT / 2;

@@ -20,22 +20,23 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_x11touch_h
-#define _SDL_x11touch_h
+#ifndef _SDL_x11xinput2_h
+#define _SDL_x11xinput2_h
 
-#ifdef SDL_INPUT_LINUXEV
-typedef struct EventTouchData
-{
-    int x,y,pressure,finger; /* Temporary Variables until sync */
-    int eventStream;
-    SDL_bool up;
-    SDL_bool down;
-} EventTouchData;
-#endif
+#ifndef SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
+/*Define XGenericEventCookie as forward declaration when 
+ *xinput2 is not available in order to compile*/
+struct XGenericEventCookie;
+typedef struct XGenericEventCookie XGenericEventCookie;
+#endif 
 
-extern void X11_InitTouch(_THIS);
-extern void X11_QuitTouch(_THIS);
+extern void X11_InitXinput2(_THIS);
+extern void X11_InitXinput2Multitouch(_THIS);
+extern int X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie);
+extern int X11_Xinput2IsInitialized(void);
+extern int X11_Xinput2IsMutitouchSupported(void);
+extern void X11_Xinput2SelectTouch(_THIS, SDL_Window *window);
 
-#endif /* _SDL_x11touch_h */
+#endif /* _SDL_x11xinput2_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

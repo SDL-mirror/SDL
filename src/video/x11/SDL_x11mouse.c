@@ -25,6 +25,7 @@
 #include "SDL_assert.h"
 #include "SDL_x11video.h"
 #include "SDL_x11mouse.h"
+#include "SDL_x11xinput2.h"
 #include "../../events/SDL_mouse_c.h"
 
 
@@ -273,12 +274,12 @@ static int
 X11_SetRelativeMouseMode(SDL_bool enabled)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
-    /* FIXME: Need to remember from init if XInput2 is actually supported */
-    return 0;
+    if(X11_Xinput2IsInitialized())
+        return 0;
 #else
     SDL_Unsupported();
-    return -1;
 #endif
+    return -1;
 }
 
 void
