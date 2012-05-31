@@ -41,6 +41,9 @@ main(int argc, char *argv[])
     if (!state) {
         return 1;
     }
+    for (i = 1; i < argc;i++) {
+        CommonArg(state, i);
+    }
     if (!CommonInit(state)) {
         return 2;
     }

@@ -210,6 +210,7 @@ X11_InitXinput2Multitouch(_THIS) {
             }
         }
     }
+    XIFreeDeviceInfo(info);
 #endif
 }
 

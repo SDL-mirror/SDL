@@ -105,8 +105,8 @@ testthread$(EXE): $(srcdir)/testthread.c
 testiconv$(EXE): $(srcdir)/testiconv.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
-testime$(EXE): $(srcdir)/testime.c
-	$(CC) -o $@ $? $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
+testime$(EXE): $(srcdir)/testime.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testime.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
 
 testjoystick$(EXE): $(srcdir)/testjoystick.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
