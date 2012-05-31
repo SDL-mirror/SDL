@@ -22749,6 +22749,68 @@ cat >>confdefs.h <<\_ACEOF
 #define SDL_VIDEO_DRIVER_X11_XINPUT2 1
 _ACEOF
 
+                { echo "$as_me:$LINENO: checking for xinput2 multitouch" >&5
+echo $ECHO_N "checking for xinput2 multitouch... $ECHO_C" >&6; }
+            	have_xinput2_multitouch=no
+            	cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+              		#include <X11/Xlib.h>
+             		#include <X11/Xproto.h>
+			#include <X11/extensions/XInput2.h>
+
+int
+main ()
+{
+
+Status
+XIAllowTouchEvents(Display *a,int b,unsigned int c,Window d,int f)
+{
+    return (Status)0;
+}
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval "echo \"\$as_me:$LINENO: $ac_try_echo\"") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+            	have_xinput2_multitouch=yes
+            	cat >>confdefs.h <<\_ACEOF
+#define SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH 1
+_ACEOF
+
+
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+            	{ echo "$as_me:$LINENO: result: $have_xinput2_multitouch" >&5
+echo "${ECHO_T}$have_xinput2_multitouch" >&6; }
             fi
             # Check whether --enable-video-x11-xrandr was given.
 if test "${enable_video_x11_xrandr+set}" = set; then
