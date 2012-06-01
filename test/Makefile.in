@@ -45,6 +45,7 @@ TARGETS = \
 	testver$(EXE) \
 	testwm2$(EXE) \
 	torturethread$(EXE) \
+	testrendercopyex$(EXE) \
 
 all: Makefile $(TARGETS)
 
@@ -171,6 +172,9 @@ testwm2$(EXE): $(srcdir)/testwm2.c $(srcdir)/common.c
 torturethread$(EXE): $(srcdir)/torturethread.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+testrendercopyex$(EXE): $(srcdir)/testrendercopyex.c $(srcdir)/common.c
+	$(CC) -o $@ $(srcdir)/testrendercopyex.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @MATHLIB@
+	
 clean:
 	rm -f $(TARGETS)
 

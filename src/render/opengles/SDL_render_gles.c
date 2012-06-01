@@ -71,6 +71,9 @@ static int GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                            const SDL_Rect * dstrect);
 static int GLES_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     Uint32 pixel_format, void * pixels, int pitch);
+static int GLES_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                         const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+                         const double angle, const SDL_Point *center, const SDL_RendererFlip flip);
 static void GLES_RenderPresent(SDL_Renderer * renderer);
 static void GLES_DestroyTexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture);
@@ -304,6 +307,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderFillRects = GLES_RenderFillRects;
     renderer->RenderCopy = GLES_RenderCopy;
     renderer->RenderReadPixels = GLES_RenderReadPixels;
+    renderer->RenderCopyEx = GLES_RenderCopyEx;
     renderer->RenderPresent = GLES_RenderPresent;
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
@@ -956,6 +960,98 @@ GLES_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     SDL_free(temp_pixels);
 
     return status;
+}
+
+static int
+GLES_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+                const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
+{
+
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
+    int minx, miny, maxx, maxy;
+    GLfloat minu, maxu, minv, maxv;
+    GLfloat centerx, centery;
+    
+    GLES_ActivateRenderer(renderer);
+
+    data->glEnable(GL_TEXTURE_2D);
+
+    data->glBindTexture(texturedata->type, texturedata->texture);
+
+    if (texture->modMode) {
+        GLES_SetColor(data, texture->r, texture->g, texture->b, texture->a);
+    } else {
+        GLES_SetColor(data, 255, 255, 255, 255);
+    }
+
+    GLES_SetBlendMode(data, texture->blendMode);
+
+    GLES_SetTexCoords(data, SDL_TRUE);
+
+    centerx = (GLfloat)center->x;
+    centery = (GLfloat)center->y;
+
+    // Rotate and translate
+    data->glPushMatrix();
+    data->glTranslatef((GLfloat)dstrect->x + centerx, (GLfloat)dstrect->y + centery, (GLfloat)0.0);
+    data->glRotatef((GLfloat)angle, (GLfloat)0.0, (GLfloat)0.0, (GLfloat)1.0);
+
+    if (flip & SDL_FLIP_HORIZONTAL) {
+        minx = (GLfloat) dstrect->w - centerx;
+        maxx = -centerx;
+    }
+    else {
+        minx = -centerx;
+        maxx = dstrect->w - centerx;
+    }
+
+    if (flip & SDL_FLIP_VERTICAL) {
+        miny = dstrect->h - centery;
+        maxy = -centery;
+    }
+    else {
+        miny = -centery;
+        maxy = dstrect->h - centery;
+    }
+
+    minu = (GLfloat) srcrect->x / texture->w;
+    minu *= texturedata->texw;
+    maxu = (GLfloat) (srcrect->x + srcrect->w) / texture->w;
+    maxu *= texturedata->texw;
+    minv = (GLfloat) srcrect->y / texture->h;
+    minv *= texturedata->texh;
+    maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
+    maxv *= texturedata->texh;
+
+    GLshort vertices[8];
+    GLfloat texCoords[8];
+
+    vertices[0] = minx;
+    vertices[1] = miny;
+    vertices[2] = maxx;
+    vertices[3] = miny;
+    vertices[4] = minx;
+    vertices[5] = maxy;
+    vertices[6] = maxx;
+    vertices[7] = maxy;
+
+    texCoords[0] = minu;
+    texCoords[1] = minv;
+    texCoords[2] = maxu;
+    texCoords[3] = minv;
+    texCoords[4] = minu;
+    texCoords[5] = maxv;
+    texCoords[6] = maxu;
+    texCoords[7] = maxv;
+    data->glVertexPointer(2, GL_SHORT, 0, vertices);
+    data->glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
+    data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    data->glPopMatrix();
+    data->glDisable(GL_TEXTURE_2D);
+
+    return 0;
 }
 
 static void

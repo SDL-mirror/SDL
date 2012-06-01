@@ -88,6 +88,9 @@ struct SDL_Renderer
                             int count);
     int (*RenderCopy) (SDL_Renderer * renderer, SDL_Texture * texture,
                        const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+    int (*RenderCopyEx) (SDL_Renderer * renderer, SDL_Texture * texture,
+                       const SDL_Rect * srcquad, const SDL_Rect * dstrect,
+                       const double angle, const SDL_Point *center, const SDL_RendererFlip flip);
     int (*RenderReadPixels) (SDL_Renderer * renderer, const SDL_Rect * rect,
                              Uint32 format, void * pixels, int pitch);
     void (*RenderPresent) (SDL_Renderer * renderer);

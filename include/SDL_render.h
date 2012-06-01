@@ -105,6 +105,16 @@ typedef enum
 } SDL_TextureModulate;
 
 /**
+ *  \brief Flip constants for SDL_RenderCopyEx
+ */
+typedef enum
+{
+    SDL_FLIP_NONE = 0x00000000,     /**< Do not flip */
+    SDL_FLIP_HORIZONTAL = 0x00000001,    /**< flip horizontally */
+    SDL_FLIP_VERTICAL = 0x00000002     /**< flip vertically */
+} SDL_RendererFlip;
+
+/**
  *  \brief A structure representing rendering state
  */
 struct SDL_Renderer;
@@ -599,6 +609,27 @@ extern DECLSPEC int SDLCALL SDL_RenderCopy(SDL_Renderer * renderer,
                                            const SDL_Rect * srcrect,
                                            const SDL_Rect * dstrect);
 
+/**
+ *  \brief Copy a portion of the source texture to the current rendering target, rotating it by angle around the given center 
+ *
+ *  \param texture The source texture.
+ *  \param srcrect   A pointer to the source rectangle, or NULL for the entire
+ *                   texture.
+ *  \param dstrect   A pointer to the destination rectangle, or NULL for the
+ *                   entire rendering target.
+ *  \param angle    An angle in degrees that indicates the rotation that will be applied to dstrect
+ *  \param center   A pointer to a point indicating the point around which dstrect will be rotated (if NULL, rotation will be done aroud dstrect.w/2, dstrect.h/2)
+ *  \param flip     A SFL_Flip value stating which flipping actions should be performed on the texture
+ * 
+ *  \return 0 on success, or -1 on error
+ */
+extern DECLSPEC int SDLCALL SDL_RenderCopyEx(SDL_Renderer * renderer,
+                                           SDL_Texture * texture,
+                                           const SDL_Rect * srcrect,
+                                           const SDL_Rect * dstrect,
+                                           const double angle,
+                                           const SDL_Point *center,
+                                           const SDL_RendererFlip flip);
 
 /**
  *  \brief Read pixels from the current rendering target.

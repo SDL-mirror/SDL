@@ -1231,6 +1231,62 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                                 &real_dstrect);
 }
 
+
+int
+SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+               const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+               const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
+{
+    SDL_Window *window;
+    SDL_Rect real_srcrect, real_dstrect;
+    SDL_Point real_center;
+
+    CHECK_RENDERER_MAGIC(renderer, -1);
+    CHECK_TEXTURE_MAGIC(texture, -1);
+
+    if (renderer != texture->renderer) {
+        SDL_SetError("Texture was not created with this renderer");
+        return -1;
+    }
+    if (!renderer->RenderCopyEx) {
+        SDL_SetError("Renderer does not support RenderCopyEx");
+        return -1;
+    }
+    
+    window = renderer->window;
+
+    real_srcrect.x = 0;
+    real_srcrect.y = 0;
+    real_srcrect.w = texture->w;
+    real_srcrect.h = texture->h;
+    if (srcrect) {
+        if (!SDL_IntersectRect(srcrect, &real_srcrect, &real_srcrect)) {
+            return 0;
+        }
+    }
+
+    /* We don't intersect the dstrect with the viewport as RenderCopy does because of potential rotation clipping issues... TODO: should we? */
+    if (dstrect) real_dstrect = *dstrect;
+    else {
+        real_srcrect.x = 0;
+        real_srcrect.y = 0;
+        real_srcrect.w = renderer->viewport.w;
+        real_srcrect.h = renderer->viewport.h;
+    }
+
+    if (texture->native) {
+        texture = texture->native;
+    }
+
+    if(center) real_center = *center;
+    else {
+        real_center.x = real_dstrect.w/2;
+        real_center.y = real_dstrect.h/2;
+    }
+
+    return renderer->RenderCopyEx(renderer, texture, &real_srcrect, &real_dstrect, angle, &real_center, flip);
+}
+
 int
 SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)

@@ -65,6 +65,9 @@ static int GL_RenderFillRects(SDL_Renderer * renderer,
                               const SDL_Rect * rects, int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+static int GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                         const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+                         const double angle, const SDL_Point *center, const SDL_RendererFlip flip);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 pixel_format, void * pixels, int pitch);
 static void GL_RenderPresent(SDL_Renderer * renderer);
@@ -314,6 +317,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderDrawLines = GL_RenderDrawLines;
     renderer->RenderFillRects = GL_RenderFillRects;
     renderer->RenderCopy = GL_RenderCopy;
+    renderer->RenderCopyEx = GL_RenderCopyEx;
     renderer->RenderReadPixels = GL_RenderReadPixels;
     renderer->RenderPresent = GL_RenderPresent;
     renderer->DestroyTexture = GL_DestroyTexture;
@@ -1013,6 +1017,96 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glVertex2f((GLfloat) maxx, (GLfloat) maxy);
     data->glEnd();
 
+    data->glDisable(texturedata->type);
+
+    return 0;
+}
+
+static int
+GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+              const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+              const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
+    GLfloat minx, miny, maxx, maxy;
+    GLfloat centerx, centery;
+    GLfloat minu, maxu, minv, maxv;
+    GL_ActivateRenderer(renderer);
+
+    data->glEnable(texturedata->type);
+    if (texturedata->yuv) {
+        data->glActiveTextureARB(GL_TEXTURE2_ARB);
+        data->glBindTexture(texturedata->type, texturedata->vtexture);
+
+        data->glActiveTextureARB(GL_TEXTURE1_ARB);
+        data->glBindTexture(texturedata->type, texturedata->utexture);
+
+        data->glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+    data->glBindTexture(texturedata->type, texturedata->texture);
+
+    if (texture->modMode) {
+        GL_SetColor(data, texture->r, texture->g, texture->b, texture->a);
+    } else {
+        GL_SetColor(data, 255, 255, 255, 255);
+    }
+
+    GL_SetBlendMode(data, texture->blendMode);
+
+    if (texturedata->yuv) {
+        GL_SetShader(data, SHADER_YV12);
+    } else {
+        GL_SetShader(data, SHADER_RGB);
+    }
+
+    centerx = (GLfloat)center->x;
+    centery = (GLfloat)center->y;
+
+    if (flip & SDL_FLIP_HORIZONTAL) {
+        minx = (GLfloat) dstrect->w - centerx;
+        maxx = -centerx;
+    }
+    else {
+        minx = -centerx;
+        maxx = (GLfloat) dstrect->w - centerx;
+    }
+
+    if (flip & SDL_FLIP_VERTICAL) {
+        miny = (GLfloat) dstrect->h - centery;
+        maxy = -centery;
+    }
+    else {
+        miny = -centery;
+        maxy = (GLfloat) dstrect->h - centery;
+    }
+
+    minu = (GLfloat) srcrect->x / texture->w;
+    minu *= texturedata->texw;
+    maxu = (GLfloat) (srcrect->x + srcrect->w) / texture->w;
+    maxu *= texturedata->texw;
+    minv = (GLfloat) srcrect->y / texture->h;
+    minv *= texturedata->texh;
+    maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
+    maxv *= texturedata->texh;
+
+    // Translate to flip, rotate, translate to position
+    data->glPushMatrix();
+    data->glTranslatef((GLfloat)dstrect->x + centerx, (GLfloat)dstrect->y + centery, (GLfloat)0.0);    
+    data->glRotated(angle, (GLdouble)0.0, (GLdouble)0.0, (GLdouble)1.0);
+    
+    data->glBegin(GL_TRIANGLE_STRIP);
+    data->glTexCoord2f(minu, minv);
+    data->glVertex2f(minx, miny);
+    data->glTexCoord2f(maxu, minv);
+    data->glVertex2f(maxx, miny);
+    data->glTexCoord2f(minu, maxv);
+    data->glVertex2f(minx, maxy);
+    data->glTexCoord2f(maxu, maxv);
+    data->glVertex2f(maxx, maxy);
+    data->glEnd();
+    data->glPopMatrix();
+    
     data->glDisable(texturedata->type);
 
     return 0;
