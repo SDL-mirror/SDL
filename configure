@@ -22181,6 +22181,8 @@ cat >>conftest.$ac_ext <<_ACEOF
               #include <X11/extensions/Xext.h>
               #include <X11/extensions/extutil.h>
 
+extern XExtDisplayInfo* XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f);
+
 int
 main ()
 {

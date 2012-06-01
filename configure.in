@@ -1099,6 +1099,7 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
               #include <X11/extensions/Xext.h>
               #include <X11/extensions/extutil.h>
             ],[
+extern XExtDisplayInfo* XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f);
 XExtDisplayInfo*
 XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f)
 {
