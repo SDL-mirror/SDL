@@ -1101,10 +1101,6 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             ],[
 extern XExtDisplayInfo* XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f);
 XExtDisplayInfo*
-XextAddDisplay(XExtensionInfo* a,Display* b,_Xconst char* c,XExtensionHooks* d,int e,XPointer f)
-{
-    return (XExtDisplayInfo*)0;
-}
             ],[
             have_const_param_XextAddDisplay=yes
             AC_DEFINE(SDL_VIDEO_DRIVER_X11_CONST_PARAM_XEXTADDDISPLAY)
