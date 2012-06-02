@@ -29,7 +29,7 @@
 
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitopenglview.h"
-#import "SDL_events_c.h"
+#import "../../events/SDL_events_c.h"
 #import "jumphack.h"
 
 #ifdef main
