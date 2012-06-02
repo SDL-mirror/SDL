@@ -28,6 +28,7 @@ freely, subject to the following restrictions:
 Andreas Schiffler -- aschiffler at ferzkopp dot net
 
 */
+#include "SDL_config.h"
 
 #ifdef WIN32
 #include <windows.h>
