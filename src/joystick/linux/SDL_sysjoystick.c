@@ -1106,6 +1106,9 @@ static __inline__ void EV_HandleEvents(SDL_Joystick *joystick)
 				}
 				break;
 			    case EV_ABS:
+				if (code > ABS_MISC) {
+					break;
+				}
 				switch (code) {
 				    case ABS_HAT0X:
 				    case ABS_HAT0Y:
