@@ -64,6 +64,7 @@ extern void Android_GL_DeleteContext(_THIS, SDL_GLContext context);
 int Android_ScreenWidth = 0;
 int Android_ScreenHeight = 0;
 Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
+SDL_sem *Android_PauseSem = NULL, *Android_ResumeSem = NULL;
 
 /* Currently only one window */
 SDL_Window *Android_Window = NULL;

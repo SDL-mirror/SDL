@@ -23,6 +23,7 @@
 #ifndef _SDL_androidvideo_h
 #define _SDL_androidvideo_h
 
+#include "SDL_mutex.h"
 #include "../SDL_sysvideo.h"
 
 /* Called by the JNI layer when the screen changes size or format */
@@ -33,7 +34,9 @@ extern void Android_SetScreenResolution(int width, int height, Uint32 format);
 extern int Android_ScreenWidth;
 extern int Android_ScreenHeight;
 extern Uint32 Android_ScreenFormat;
+extern SDL_sem *Android_PauseSem, *Android_ResumeSem;
 extern SDL_Window *Android_Window;
+
 
 #endif /* _SDL_androidvideo_h */
 
