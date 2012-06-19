@@ -273,6 +273,7 @@
     <ClInclude Include="..\..\src\render\software\SDL_drawline.h" />
     <ClInclude Include="..\..\src\render\software\SDL_drawpoint.h" />
     <ClInclude Include="..\..\src\render\software\SDL_render_sw_c.h" />
+    <ClInclude Include="..\..\src\render\software\SDL_rotate.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullframebuffer_c.h" />
     <ClInclude Include="..\..\src\video\SDL_blit.h" />
     <ClInclude Include="..\..\src\video\SDL_blit_auto.h" />
@@ -356,6 +357,7 @@
     <ClCompile Include="..\..\src\render\software\SDL_drawline.c" />
     <ClCompile Include="..\..\src\render\software\SDL_drawpoint.c" />
     <ClCompile Include="..\..\src\render\software\SDL_render_sw.c" />
+    <ClCompile Include="..\..\src\render\software\SDL_rotate.c" />
     <ClCompile Include="..\..\src\SDL.c" />
     <ClCompile Include="..\..\src\SDL_assert.c" />
     <ClCompile Include="..\..\src\atomic\SDL_atomic.c" />

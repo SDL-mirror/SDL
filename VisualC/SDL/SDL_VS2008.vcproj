@@ -1001,6 +1001,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\render\software\SDL_rotate.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\render\software\SDL_rotate.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\file\SDL_rwops.c"
 			>
 		</File>

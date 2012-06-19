@@ -521,7 +521,6 @@ SW_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_Surface *src = (SDL_Surface *) texture->driverdata;
     SDL_Rect final_rect = *dstrect, tmp_rect;
     SDL_Surface *surface_rotated, *surface_scaled;
-    SDL_Point final_rect_center;
     Uint32 colorkey;
     int retval, dstwidth, dstheight, abscenterx, abscentery;
     double cangle, sangle, px, py, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;

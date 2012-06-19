@@ -1320,7 +1320,7 @@ D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     // Rotate and translate
     ID3DXMatrixStack_Push(data->matrixStack);
     ID3DXMatrixStack_LoadIdentity(data->matrixStack);
-    ID3DXMatrixStack_RotateYawPitchRoll(data->matrixStack, 0.0, 0.0, M_PI * (float) angle / 180.0f);
+    ID3DXMatrixStack_RotateYawPitchRoll(data->matrixStack, 0.0, 0.0, (float)(M_PI * (float) angle / 180.0f));
     ID3DXMatrixStack_Translate(data->matrixStack, (float)dstrect->x + centerx, (float)dstrect->y + centery, (float)0.0);
     IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, (D3DMATRIX*)ID3DXMatrixStack_GetTop(data->matrixStack));
 
