@@ -2439,6 +2439,54 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         SOURCES="$srcdir/src/main/beos/*.cc $SOURCES"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
         ;;
+    arm*-apple-darwin*)
+        # iOS - We are not writing anything to confdefs.h because you have to replace
+        # SDL_config.h for SDL_config_iphoneos.h anyway
+        ARCH=ios
+
+        CheckVisibilityHidden
+        CheckDummyVideo
+        CheckDiskAudio
+        CheckDummyAudio
+        CheckDLOPEN
+        CheckCOCOA
+        CheckPTHREAD
+
+
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+            SOURCES="$SOURCES $srcdir/src/audio/coreaudio/*.c"
+            have_audio=yes
+        fi
+        # Set up files for the joystick library
+        if test x$enable_joystick = xyes; then
+            SOURCES="$SOURCES $srcdir/src/joystick/iphoneos/*.m"
+            have_joystick=yes
+        fi
+        # Set up files for the haptic library
+        #if test x$enable_haptic = xyes; then
+        #    SOURCES="$SOURCES $srcdir/src/haptic/darwin/*.c"
+        #    have_haptic=yes
+        #    EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,ForceFeedback"
+        #fi
+        # Set up files for the power library
+        if test x$enable_power = xyes; then
+            SOURCES="$SOURCES $srcdir/src/power/uikit/*.m"
+            have_power=yes
+        fi
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
+        fi
+        # Set up additional files for the file library
+        if test x$enable_file = xyes; then
+            SOURCES="$SOURCES $srcdir/src/file/cocoa/*.m"
+        fi
+        # The iOS platform requires special setup.
+        SOURCES="$SOURCES $srcdir/src/video/uikit/*.m"
+        SOURCES="$SOURCES $srcdir/src/video/uikit/*.c"
+        ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is
         # just the OS X kernel sans upper layers like Carbon and Cocoa.
