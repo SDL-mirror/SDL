@@ -269,14 +269,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom wmstate_atoms[3];
     Uint32 fevent = 0;
 
-#if SDL_VIDEO_DRIVER_X11_XINERAMA
-/* FIXME
-    if ( use_xinerama ) {
-        x = xinerama_info.x_org;
-        y = xinerama_info.y_org;
-    }
-*/
-#endif
 #if SDL_VIDEO_OPENGL_GLX
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;

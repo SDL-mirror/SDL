@@ -63,6 +63,7 @@ extern int X11_GetVisualInfoFromVisual(Display * display, Visual * visual,
                                        XVisualInfo * vinfo);
 extern Uint32 X11_GetPixelFormatFromVisualInfo(Display * display,
                                                XVisualInfo * vinfo);
+extern int X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect);
 
 #endif /* _SDL_x11modes_h */
 
