@@ -541,6 +541,8 @@ extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
     jstring fileNameJString = mEnv->NewStringUTF(fileName);
     ctx->hidden.androidio.fileNameRef = mEnv->NewGlobalRef(fileNameJString);
     ctx->hidden.androidio.inputStreamRef = NULL;
+    ctx->hidden.androidio.readableByteChannelRef = NULL;
+    ctx->hidden.androidio.readMethod = NULL;
 
     return Android_JNI_FileOpen(ctx);
 }
