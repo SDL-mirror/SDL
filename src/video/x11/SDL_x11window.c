@@ -765,13 +765,27 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     XFlush(display);
 }
 
+static Bool isMapNotify(Display *dpy, XEvent *ev, XPointer win)
+{
+    return ev->type == MapNotify && ev->xmap.window == *((Window*)win);
+}
+static Bool isUnmapNotify(Display *dpy, XEvent *ev, XPointer win)
+{
+    return ev->type == UnmapNotify && ev->xunmap.window == *((Window*)win);
+}
+
 void
 X11_ShowWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    XEvent event;
 
     XMapRaised(display, data->xwindow);
+    /* Blocking wait for "MapNotify" event.
+     * We use XIfEvent because XWindowEvent takes a mask rather than a type, 
+     * and XCheckTypedWindowEvent doesn't block */
+    XIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow);
     XFlush(display);
 }
 
@@ -780,8 +794,11 @@ X11_HideWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    XEvent event;
 
     XUnmapWindow(display, data->xwindow);
+    /* Blocking wait for "UnmapNotify" event */
+    XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);    
     XFlush(display);
 }
 
