@@ -22831,7 +22831,8 @@ cat >>conftest.$ac_ext <<_ACEOF
 int
 main ()
 {
-
+int event_type = XI_TouchBegin;
+XITouchClassInfo *t;
 Status
 XIAllowTouchEvents(Display *a,int b,unsigned int c,Window d,int f)
 {
