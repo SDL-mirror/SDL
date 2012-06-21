@@ -881,7 +881,7 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
             SDL_SetError("Texture was not created with this renderer");
             return -1;
         }
-        if (!(texture->access & SDL_TEXTUREACCESS_TARGET)) {
+        if (texture->access != SDL_TEXTUREACCESS_TARGET) {
             SDL_SetError("Texture not created with SDL_TEXTUREACCESS_TARGET");
             return -1;
         }
