@@ -497,6 +497,14 @@
 		8CB0A77811F6A87F00CBA2DE /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8CB0A77911F6A87F00CBA2DE /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = 8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
+		AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
+		AA628ACB159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
+		AA628ACC159367B7005138DD /* SDL_rotate.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628AC9159367B7005138DD /* SDL_rotate.h */; };
+		AA628ACD159367B7005138DD /* SDL_rotate.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628AC9159367B7005138DD /* SDL_rotate.h */; };
+		AA628AD1159367F2005138DD /* SDL_x11xinput2.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628ACF159367F2005138DD /* SDL_x11xinput2.c */; };
+		AA628AD2159367F2005138DD /* SDL_x11xinput2.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628ACF159367F2005138DD /* SDL_x11xinput2.c */; };
+		AA628AD3159367F2005138DD /* SDL_x11xinput2.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628AD0159367F2005138DD /* SDL_x11xinput2.h */; };
+		AA628AD4159367F2005138DD /* SDL_x11xinput2.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628AD0159367F2005138DD /* SDL_x11xinput2.h */; };
 		BECDF6760761BA81005FE872 /* SDL_cpuinfo.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */; };
 		BECDF6770761BA81005FE872 /* SDL_name.h in Headers */ = {isa = PBXBuildFile; fileRef = B2CF8DC705C4450500E5DC7F /* SDL_name.h */; };
 /* End PBXBuildFile section */
@@ -830,6 +838,10 @@
 		566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_dropevents.c; sourceTree = "<group>"; };
 		8CB0A77611F6A87F00CBA2DE /* SDL_gesture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_gesture.h; path = ../../include/SDL_gesture.h; sourceTree = SOURCE_ROOT; };
 		8CB0A77711F6A87F00CBA2DE /* SDL_touch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_touch.h; path = ../../include/SDL_touch.h; sourceTree = SOURCE_ROOT; };
+		AA628AC8159367B7005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
+		AA628AC9159367B7005138DD /* SDL_rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rotate.h; sourceTree = "<group>"; };
+		AA628ACF159367F2005138DD /* SDL_x11xinput2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11xinput2.c; sourceTree = "<group>"; };
+		AA628AD0159367F2005138DD /* SDL_x11xinput2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_x11xinput2.h; sourceTree = "<group>"; };
 		B29A290D04E5B28700A80002 /* SDL_loadso.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_loadso.h; path = ../../include/SDL_loadso.h; sourceTree = "<group>"; };
 		B2CF8DC405C444E400E5DC7F /* SDL_cpuinfo.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_cpuinfo.h; path = ../../include/SDL_cpuinfo.h; sourceTree = SOURCE_ROOT; };
 		B2CF8DC705C4450500E5DC7F /* SDL_name.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = SDL_name.h; path = ../../include/SDL_name.h; sourceTree = SOURCE_ROOT; };
@@ -1110,8 +1122,10 @@
 				04F7804512FB74A200FC43C0 /* SDL_drawline.h */,
 				04F7804612FB74A200FC43C0 /* SDL_drawpoint.c */,
 				04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */,
-				0442EC1A12FE1BCB004C9285 /* SDL_render_sw_c.h */,
 				0442EC1B12FE1BCB004C9285 /* SDL_render_sw.c */,
+				0442EC1A12FE1BCB004C9285 /* SDL_render_sw_c.h */,
+				AA628AC8159367B7005138DD /* SDL_rotate.c */,
+				AA628AC9159367B7005138DD /* SDL_rotate.h */,
 			);
 			path = software;
 			sourceTree = "<group>";
@@ -1475,6 +1489,8 @@
 				04BDFFD412E6671800899322 /* SDL_x11video.h */,
 				04BDFFD512E6671800899322 /* SDL_x11window.c */,
 				04BDFFD612E6671800899322 /* SDL_x11window.h */,
+				AA628ACF159367F2005138DD /* SDL_x11xinput2.c */,
+				AA628AD0159367F2005138DD /* SDL_x11xinput2.h */,
 			);
 			path = x11;
 			sourceTree = "<group>";
@@ -1722,6 +1738,8 @@
 				0435673F1303160F00BA5428 /* SDL_shaders_gl.h in Headers */,
 				0417A4F5130C984E00578583 /* SDL_keycode.h in Headers */,
 				566CDE8F148F0AC200C5A9BB /* SDL_dropevents_c.h in Headers */,
+				AA628ACC159367B7005138DD /* SDL_rotate.h in Headers */,
+				AA628AD3159367F2005138DD /* SDL_x11xinput2.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1833,6 +1851,8 @@
 				04BAC0B41300C1CB0055DE28 /* SDL_log.h in Headers */,
 				043567411303160F00BA5428 /* SDL_shaders_gl.h in Headers */,
 				0417A4F4130C984E00578583 /* SDL_keycode.h in Headers */,
+				AA628ACD159367B7005138DD /* SDL_rotate.h in Headers */,
+				AA628AD4159367F2005138DD /* SDL_x11xinput2.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2020,7 +2040,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n/Developer/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
+			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n`xcode-select -print-path`/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
 		};
 		BECDF6C20761BA81005FE872 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -2160,6 +2180,8 @@
 				04BAC0C81300C2160055DE28 /* SDL_log.c in Sources */,
 				0435673E1303160F00BA5428 /* SDL_shaders_gl.c in Sources */,
 				566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */,
+				AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */,
+				AA628AD1159367F2005138DD /* SDL_x11xinput2.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2271,6 +2293,8 @@
 				0442EC6012FE1C75004C9285 /* SDL_hints.c in Sources */,
 				04BAC0C91300C2160055DE28 /* SDL_log.c in Sources */,
 				043567401303160F00BA5428 /* SDL_shaders_gl.c in Sources */,
+				AA628ACB159367B7005138DD /* SDL_rotate.c in Sources */,
+				AA628AD2159367F2005138DD /* SDL_x11xinput2.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2364,7 +2388,6 @@
 		00CFA625106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
 			name = Release;
@@ -2372,7 +2395,6 @@
 		00CFA626106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
 			name = Release;
@@ -2426,7 +2448,6 @@
 		00CFA62B106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Standard DMG";
 			};
 			name = Debug;
@@ -2434,7 +2455,6 @@
 		00CFA62C106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				PRODUCT_NAME = "Developer Extras Package";
 			};
 			name = Debug;
