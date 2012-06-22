@@ -108,6 +108,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     exit_status = SDL_main(forward_argc, forward_argv);
 
     /* exit, passing the return status from the user's application */
+    // We don't actually exit to support applications that do setup in
+    // their main function and then allow the Cocoa event loop to run.
     // exit(exit_status);
 }
 

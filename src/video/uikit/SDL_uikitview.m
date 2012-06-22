@@ -31,7 +31,6 @@
 #if SDL_IPHONE_KEYBOARD
 #import "keyinfotable.h"
 #import "SDL_uikitappdelegate.h"
-#import "SDL_uikitkeyboard.h"
 #import "SDL_uikitwindow.h"
 #endif
 

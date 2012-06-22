@@ -19,9 +19,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef sdl_uikitkeyboard_h
-#define sdl_uikitkeyboard_h
+/**
+ *  \file SDL_system.h
+ *  
+ *  Include file for platform specific SDL API functions
+ */
 
+#ifndef _SDL_system_h
+#define _SDL_system_h
+
+#include "SDL_stdinc.h"
+
+#include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
@@ -29,10 +38,18 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+#if __IPHONEOS__
+
+#include "SDL_video.h"
+
+extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
+
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
 extern DECLSPEC SDL_bool SDLCALL SDL_iPhoneKeyboardIsShown(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
+
+#endif
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -40,7 +57,8 @@ extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardToggle(SDL_Window * window);
 }
 /* *INDENT-ON* */
 #endif
+#include "close_code.h"
 
-#endif /* sdl_uikitkeyboard_h */
+#endif /* _SDL_system_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

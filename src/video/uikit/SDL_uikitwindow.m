@@ -279,6 +279,20 @@ UIKit_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
     }
 }
 
+int
+SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam)
+{
+    SDL_WindowData *data = window ? (SDL_WindowData *)window->driverdata : NULL;
+
+    if (!data || !data->view) {
+        SDL_SetError("Invalid window or view not set");
+        return -1;
+    }
+
+    [data->view setAnimationCallback:interval callback:callback callbackParam:callbackParam];
+    return 0;
+}
+
 #endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

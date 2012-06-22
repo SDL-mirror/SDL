@@ -78,7 +78,7 @@ Finally, if your application completely redraws the screen each frame, you may f
 Notes -- Keyboard
 ==============================================================================
 
-SDL for iPhone contains several additional functions related to keyboard visibility.  These functions are not part of the SDL standard API, but are necessary for revealing and hiding the iPhone's virtual onscreen keyboard.  You can use them in your own applications by including a copy of the SDL_uikitkeyboard.h header (located in src/video/uikit) in your project.
+SDL for iPhone contains several additional functions related to keyboard visibility.  These functions are not part of the SDL standard API, but are necessary for revealing and hiding the iPhone's virtual onscreen keyboard.
 
 int SDL_iPhoneKeyboardShow(SDL_Window * window) 
 	-- reveals the onscreen keyboard.  Returns 0 on success and -1 on error.
