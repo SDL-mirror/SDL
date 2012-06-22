@@ -833,7 +833,7 @@ GLES2_SelectProgram(SDL_Renderer *renderer, GLES2_ImageSource source, SDL_BlendM
         break;
     case GLES2_IMAGESOURCE_TEXTURE_ABGR:
         ftype = GLES2_SHADER_FRAGMENT_TEXTURE_ABGR_SRC;
-            break;
+        break;
     case GLES2_IMAGESOURCE_TEXTURE_ARGB:
         ftype = GLES2_SHADER_FRAGMENT_TEXTURE_ARGB_SRC;
         break;
@@ -906,15 +906,23 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
     projection[0][2] = 0.0f;
     projection[0][3] = 0.0f;
     projection[1][0] = 0.0f;
-    projection[1][1] = -2.0f / renderer->viewport.h;
+    if (renderer->target) {
+        projection[1][1] = 2.0f / renderer->viewport.h;
+    } else {
+        projection[1][1] = -2.0f / renderer->viewport.h;
+    }
     projection[1][2] = 0.0f;
     projection[1][3] = 0.0f;
     projection[2][0] = 0.0f;
     projection[2][1] = 0.0f;
-    projection[2][2] = 1.0f;
+    projection[2][2] = 0.0f;
     projection[2][3] = 0.0f;
     projection[3][0] = -1.0f;
-    projection[3][1] = 1.0f;
+    if (renderer->target) {
+        projection[3][1] = -1.0f;
+    } else {
+        projection[3][1] = 1.0f;
+    }
     projection[3][2] = 0.0f;
     projection[3][3] = 1.0f;
 
@@ -1027,11 +1035,21 @@ GLES2_SetDrawingState(SDL_Renderer * renderer)
 
     /* Select the color to draw with */
     locColor = rdata->current_program->uniform_locations[GLES2_UNIFORM_COLOR];
-    rdata->glUniform4f(locColor,
-                renderer->r * inv255f,
-                renderer->g * inv255f,
-                renderer->b * inv255f,
-                renderer->a * inv255f);
+    if (renderer->target &&
+        (renderer->target->format == SDL_PIXELFORMAT_ARGB8888 ||
+         renderer->target->format == SDL_PIXELFORMAT_RGB888)) {
+        rdata->glUniform4f(locColor,
+                    renderer->b * inv255f,
+                    renderer->g * inv255f,
+                    renderer->r * inv255f,
+                    renderer->a * inv255f);
+    } else {
+        rdata->glUniform4f(locColor,
+                    renderer->r * inv255f,
+                    renderer->g * inv255f,
+                    renderer->b * inv255f,
+                    renderer->a * inv255f);
+    }
     return 0;
 }
 
@@ -1248,17 +1266,27 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     /* Select the target texture */
     locTexture = rdata->current_program->uniform_locations[GLES2_UNIFORM_TEXTURE];
     rdata->glGetError();
-	rdata->glActiveTexture(GL_TEXTURE0);
+    rdata->glActiveTexture(GL_TEXTURE0);
     rdata->glBindTexture(tdata->texture_type, tdata->texture);
     rdata->glUniform1i(locTexture, 0);
 
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
-    rdata->glUniform4f(locModulation,
-                texture->r * inv255f,
-                texture->g * inv255f,
-                texture->b * inv255f,
-                texture->a * inv255f);
+    if (renderer->target &&
+        (renderer->target->format == SDL_PIXELFORMAT_ARGB8888 ||
+         renderer->target->format == SDL_PIXELFORMAT_RGB888)) {
+        rdata->glUniform4f(locModulation,
+                    texture->b * inv255f,
+                    texture->g * inv255f,
+                    texture->r * inv255f,
+                    texture->a * inv255f);
+    } else {
+        rdata->glUniform4f(locModulation,
+                    texture->r * inv255f,
+                    texture->g * inv255f,
+                    texture->b * inv255f,
+                    texture->a * inv255f);
+    }
 
     /* Configure texture blending */
     GLES2_SetBlendMode(rdata, blendMode);
@@ -1266,27 +1294,14 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    if (renderer->target) {
-        // Flip the texture vertically to compensate for the inversion it'll be subjected to later when it's rendered to the screen
-        vertices[0] = (GLfloat)dstrect->x;
-        vertices[1] = (GLfloat)renderer->viewport.h-dstrect->y;
-        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[3] = (GLfloat)renderer->viewport.h-dstrect->y;
-        vertices[4] = (GLfloat)dstrect->x;
-        vertices[5] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
-        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[7] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
-    }
-    else {
-        vertices[0] = (GLfloat)dstrect->x;
-        vertices[1] = (GLfloat)dstrect->y;
-        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[3] = (GLfloat)dstrect->y;
-        vertices[4] = (GLfloat)dstrect->x;
-        vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
-        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
-    }
+    vertices[0] = (GLfloat)dstrect->x;
+    vertices[1] = (GLfloat)dstrect->y;
+    vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
+    vertices[3] = (GLfloat)dstrect->y;
+    vertices[4] = (GLfloat)dstrect->x;
+    vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
+    vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
+    vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
     rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     texCoords[0] = srcrect->x / (GLfloat)texture->w;
     texCoords[1] = srcrect->y / (GLfloat)texture->h;
@@ -1423,11 +1438,21 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
 
     /* Configure color modulation */
     locModulation = rdata->current_program->uniform_locations[GLES2_UNIFORM_MODULATION];
-    rdata->glUniform4f(locModulation,
-                texture->r * inv255f,
-                texture->g * inv255f,
-                texture->b * inv255f,
-                texture->a * inv255f);
+    if (renderer->target &&
+        (renderer->target->format == SDL_PIXELFORMAT_ARGB8888 ||
+         renderer->target->format == SDL_PIXELFORMAT_RGB888)) {
+        rdata->glUniform4f(locModulation,
+                    texture->b * inv255f,
+                    texture->g * inv255f,
+                    texture->r * inv255f,
+                    texture->a * inv255f);
+    } else {
+        rdata->glUniform4f(locModulation,
+                    texture->r * inv255f,
+                    texture->g * inv255f,
+                    texture->b * inv255f,
+                    texture->a * inv255f);
+    }
 
     /* Configure texture blending */
     GLES2_SetBlendMode(rdata, blendMode);
@@ -1435,27 +1460,14 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    if (renderer->target) {
-        // Flip the texture vertically to compensate for the inversion it'll be subjected to later when it's rendered to the screen
-        vertices[0] = (GLfloat)dstrect->x;
-        vertices[1] = (GLfloat)renderer->viewport.h-dstrect->y;
-        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[3] = (GLfloat)renderer->viewport.h-dstrect->y;
-        vertices[4] = (GLfloat)dstrect->x;
-        vertices[5] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
-        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[7] = (GLfloat)renderer->viewport.h-(dstrect->y + dstrect->h);
-    }
-    else {
-        vertices[0] = (GLfloat)dstrect->x;
-        vertices[1] = (GLfloat)dstrect->y;
-        vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[3] = (GLfloat)dstrect->y;
-        vertices[4] = (GLfloat)dstrect->x;
-        vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
-        vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-        vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
-    }
+    vertices[0] = (GLfloat)dstrect->x;
+    vertices[1] = (GLfloat)dstrect->y;
+    vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
+    vertices[3] = (GLfloat)dstrect->y;
+    vertices[4] = (GLfloat)dstrect->x;
+    vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
+    vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
+    vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
     if (flip & SDL_FLIP_HORIZONTAL) {
         tmp = vertices[0];
         vertices[0] = vertices[4] = vertices[2];
