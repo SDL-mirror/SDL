@@ -754,7 +754,7 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
 
          XGetWMNormalHints(display, data->xwindow, sizehints, &userhints);
 
-         sizehints->min_width = sizehints->max_height = window->w;
+         sizehints->min_width = sizehints->max_width = window->w;
          sizehints->min_height = sizehints->max_height = window->h;
 
          XSetWMNormalHints(display, data->xwindow, sizehints);
