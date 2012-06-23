@@ -243,6 +243,7 @@
     <ClInclude Include="..\..\include\SDL_shape.h" />
     <ClInclude Include="..\..\include\SDL_stdinc.h" />
     <ClInclude Include="..\..\include\SDL_surface.h" />
+    <ClInclude Include="..\..\include\SDL_system.h" />
     <ClInclude Include="..\..\include\SDL_syswm.h" />
     <ClInclude Include="..\..\include\SDL_thread.h" />
     <ClInclude Include="..\..\include\SDL_timer.h" />
