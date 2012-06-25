@@ -26,6 +26,7 @@
 #import "SDL_assert.h"
 #import "SDL_hints.h"
 #import "../../SDL_hints_c.h"
+#import "SDL_system.h"
 
 #import "SDL_uikitappdelegate.h"
 #import "SDL_uikitopenglview.h"
@@ -105,7 +106,9 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     /* run the user's application, passing argc and argv */
+    SDL_iPhoneSetEventPump(SDL_TRUE);
     exit_status = SDL_main(forward_argc, forward_argv);
+    SDL_iPhoneSetEventPump(SDL_FALSE);
 
     /* exit, passing the return status from the user's application */
     // We don't actually exit to support applications that do setup in

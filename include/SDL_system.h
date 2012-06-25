@@ -43,6 +43,7 @@ extern "C" {
 #include "SDL_video.h"
 
 extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
+extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardShow(SDL_Window * window);
 extern DECLSPEC int SDLCALL SDL_iPhoneKeyboardHide(SDL_Window * window);
