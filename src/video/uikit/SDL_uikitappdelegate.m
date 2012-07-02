@@ -101,10 +101,6 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void)postFinishLaunch
 {
-    /* register a callback for the idletimer hint */
-    SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
-    SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
-
     /* run the user's application, passing argc and argv */
     SDL_iPhoneSetEventPump(SDL_TRUE);
     exit_status = SDL_main(forward_argc, forward_argv);
@@ -120,6 +116,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 {
     /* Set working directory to resource path */
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
+
+    /* register a callback for the idletimer hint */
+    SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
+    SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
 
     [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 
