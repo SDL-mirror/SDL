@@ -46,6 +46,7 @@ X11_InitTouch(_THIS)
 #ifdef SDL_INPUT_LINUXEV
     FILE *fd;
     fd = fopen("/proc/bus/input/devices","r");
+    if (!fd) return;
 
     int i = 0;
     int tsfd;
