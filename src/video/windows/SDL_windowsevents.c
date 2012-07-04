@@ -173,6 +173,24 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
+
+				if(SDL_GetMouse()->relative_mode) {
+					LONG cx, cy;
+					RECT rect;
+					GetWindowRect(hwnd, &rect);
+
+					cx = (rect.left + rect.right) / 2;
+					cy = (rect.top + rect.bottom) / 2;
+
+					/* Make an absurdly small clip rect */
+					rect.left = cx-1;
+					rect.right = cx+1;
+					rect.top = cy-1;
+					rect.bottom = cy+1;
+
+					ClipCursor(&rect);
+				}
+
                 /*
                  * FIXME: Update keyboard state
                  */
@@ -191,6 +209,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
 	case WM_MOUSEMOVE:
+		if(SDL_GetMouse()->relative_mode)
+			break;
 #ifdef _WIN32_WCE
         /* transform coords for VGA, WVGA... */
         {
@@ -207,6 +227,25 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 #endif
         SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
+
+	case WM_INPUT:
+	{
+		HRAWINPUT hRawInput = (HRAWINPUT)lParam;
+		RAWINPUT inp;
+		UINT size = sizeof(inp);
+		GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
+
+		/* Mouse data */
+		if(inp.header.dwType == RIM_TYPEMOUSE)
+		{
+			RAWMOUSE* mouse = &inp.data.mouse;
+
+			if((mouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE)
+				SDL_SendMouseMotion(data->window, 1, (int)mouse->lLastX, (int)mouse->lLastY);
+
+		}
+		break;
+	}
 
     case WM_LBUTTONDOWN:
         SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_LEFT);
