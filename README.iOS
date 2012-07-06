@@ -51,8 +51,9 @@ Here is a more manual method:
 1.  Create a new iPhone view based application.
 2.  Build the SDL static libraries (libSDL.a and libSDLSimulator.a) for iPhone and include them in your project.  XCode will ignore the library that is not currently of the correct architecture, hence your app will work both on iPhone and in the iPhone Simulator.
 3.  Include the SDL header files in your project.
-4.  Remove the ApplicationDelegate.h and ApplicationDelegate.m files -- SDL for iPhone provides its own UIApplicationDelegate.  Remove MainWindow.xib -- SDL for iPhone produces its user interface programmatically.
-5.  Delete the contents of main.m and program your app as a regular SDL program instead.  You may replace main.m with your own main.c, but you must tell XCode not to use the project prefix file, as it includes Objective-C code.
+4.  Remove the AppDelegate.h and AppDelegate.m files -- SDL for iPhone provides its own UIApplicationDelegate.  Remove ViewController.h, ViewController.m, and ViewController.xib -- SDL for iPhone produces its user interface programmatically.
+5.  Make sure your project links to the following, iOS-provided frameworks: OpenGLES.framework, AudioToolbox.framework, and QuartzCore.framework
+6.  Delete the contents of main.m and program your app as a regular SDL program instead.  You may replace main.m with your own main.c, but you must tell XCode not to use the project prefix file, as it includes Objective-C code.
 
 ==============================================================================
 Notes -- Accelerometer as Joystick
