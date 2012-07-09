@@ -92,6 +92,20 @@ manually or quit the app (which is actually the kind of behaviour you'll see
 under iOS, if the OS can not restore your GL context it will just kill your app)
 
 ================================================================================
+ Threads and the JAVA VM
+================================================================================
+
+For a quick tour on how Linux native threads interoperate with the JAVA VM, take
+a look here: http://developer.android.com/guide/practices/jni.html
+If you want to use threads in your SDL app, it's strongly recommended that you
+do so by creating them using SDL functions. This way, the required attach/detach
+handling is managed by SDL automagically. If you have threads created by other
+means and they make calls to SDL functions, make sure that you call
+Android_JNI_SetupThread before doing anything else otherwise SDL will attach
+your thread automatically anyway (when you make an SDL call), but it'll never
+detach it.
+
+================================================================================
  Additional documentation
 ================================================================================
 

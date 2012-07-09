@@ -47,6 +47,12 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer, size_t size, size_t ma
 size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer, size_t size, size_t num);
 int Android_JNI_FileClose(SDL_RWops* ctx);
 
+// Threads
+#include <jni.h>
+static void Android_JNI_ThreadDestroyed(void*);
+JNIEnv *Android_JNI_GetEnv(void);
+int Android_JNI_SetupThread(void);
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
