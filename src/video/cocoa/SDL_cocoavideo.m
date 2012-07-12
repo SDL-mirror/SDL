@@ -22,6 +22,12 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
+#if defined(__APPLE__) && defined(__POWERPC__)
+#include <altivec.h>
+#undef bool
+#undef vector
+#endif
+
 #include "SDL.h"
 #include "SDL_endian.h"
 #include "SDL_cocoavideo.h"
