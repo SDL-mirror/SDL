@@ -75,6 +75,7 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
                                                         Bool direct,
                                                         const int
                                                         *attrib_list);
+#endif
 
 #ifndef GLX_ARB_create_context_profile
 #define GLX_ARB_create_context_profile
@@ -89,7 +90,6 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
 #define GLX_CONTEXT_RESET_NOTIFICATION_STRATEGY_ARB     0x8256
 #define GLX_NO_RESET_NOTIFICATION_ARB                   0x8261
 #define GLX_LOSE_CONTEXT_ON_RESET_ARB                   0x8252
-#endif
 #endif
 
 #ifndef GLX_EXT_create_context_es2_profile
