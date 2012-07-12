@@ -512,6 +512,7 @@ AC_HELP_STRING([--enable-sndio], [support the sndio audio API [[default=yes]]]),
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS $SNDIO_LIBS"
             have_audio=yes
         fi
+    fi
 }
 
 dnl Find PulseAudio
