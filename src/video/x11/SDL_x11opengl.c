@@ -424,7 +424,7 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
 
     /* 64 seems nice. */
     int attribs[64];
-    int i = X11_GL_GetAttributes(_this,display,screen,attribs,64,SDL_FALSE);
+    X11_GL_GetAttributes(_this,display,screen,attribs,64,SDL_FALSE);
 
     if (!_this->gl_data) {
         /* The OpenGL library wasn't loaded, SDL_GetError() should have info */
