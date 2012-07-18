@@ -22103,6 +22103,12 @@ fi
                     xss_lib='/usr/X11R6/lib/libXss.1.dylib'
                     xvidmode_lib='/usr/X11R6/lib/libXxf86vm.1.dylib'
                     ;;
+                *-*-openbsd*)
+                    x11_lib='libX11.so'
+                    x11ext_lib='libXext.so'
+                    xrender_lib='libXrender.so'
+                    xrandr_lib='libXrandr.so'
+                    ;;
                 *)
                     x11_lib=`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`
                     x11ext_lib=`find_lib "libXext.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`
