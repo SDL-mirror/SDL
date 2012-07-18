@@ -269,24 +269,19 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom wmstate_atoms[3];
     Uint32 fevent = 0;
 
-#if SDL_VIDEO_OPENGL_GLX
+#if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-        vinfo = X11_GL_GetVisual(_this, display, screen);
-        if (!vinfo) {
-            return -1;
-        }
-        visual = vinfo->visual;
-        depth = vinfo->depth;
-        XFree(vinfo);
-    } else
-#endif
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (window->flags & SDL_WINDOW_OPENGL) {
-        XVisualInfo *vinfo;
+        if (data->gles) {
+            vinfo = X11_GLES_GetVisual(_this, display, screen);
+        } else
+#endif
+        {
+            vinfo = X11_GL_GetVisual(_this, display, screen);
+        }
 
-        vinfo = X11_GLES_GetVisual(_this, display, screen);
         if (!vinfo) {
             return -1;
         }
@@ -395,7 +390,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         return -1;
     }
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (window->flags & SDL_WINDOW_OPENGL) {
+    if (data->gles && window->flags & SDL_WINDOW_OPENGL) {
         /* Create the GLES window surface */
         _this->gles_data->egl_surface =
             _this->gles_data->eglCreateWindowSurface(_this->gles_data->
