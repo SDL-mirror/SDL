@@ -493,12 +493,15 @@ SDL_VideoInit(const char *driver_name)
 #if SDL_VIDEO_OPENGL
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 1;
+    _this->gl_config.use_egl = 0;
 #elif SDL_VIDEO_OPENGL_ES
     _this->gl_config.major_version = 1;
     _this->gl_config.minor_version = 1;
+    _this->gl_config.use_egl = 1;
 #elif SDL_VIDEO_OPENGL_ES2
     _this->gl_config.major_version = 2;
     _this->gl_config.minor_version = 0;
+    _this->gl_config.use_egl = 1;
 #endif
     _this->gl_config.flags = 0;
     _this->gl_config.profile_mask = 0;
@@ -2302,6 +2305,9 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
     case SDL_GL_CONTEXT_MINOR_VERSION:
         _this->gl_config.minor_version = value;
         break;
+    case SDL_GL_CONTEXT_EGL:
+        _this->gl_config.use_egl = value;
+        break;
     case SDL_GL_CONTEXT_FLAGS:
         _this->gl_config.flags = value;
         break;
@@ -2452,6 +2458,11 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_CONTEXT_MINOR_VERSION:
         {
             *value = _this->gl_config.minor_version;
+            return 0;
+        }
+    case SDL_GL_CONTEXT_EGL:
+        {
+            *value = _this->gl_config.use_egl;
             return 0;
         }
     case SDL_GL_CONTEXT_FLAGS:

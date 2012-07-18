@@ -111,9 +111,6 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     }
     SDL_free(data->windowlist);
     SDL_free(device->driverdata);
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    SDL_free(device->gles_data);
-#endif
     SDL_free(device);
 
     SDL_X11_UnloadSymbols();
@@ -144,29 +141,6 @@ X11_CreateDevice(int devindex)
     }
     device->driverdata = data;
 
-    /* In case GL and GLES/GLES2 is compiled in, we default to GL, but use
-     * GLES if SDL_VIDEO_X11_GLES is set.
-     */
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-#if SDL_VIDEO_OPENGL_GLX
-    data->gles = SDL_getenv("SDL_VIDEO_X11_GLES") != NULL;
-#else
-    data->gles = SDL_TRUE;
-#endif
-#endif
-
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (data->gles) {
-        device->gles_data = (struct SDL_PrivateGLESData *) SDL_calloc(1, sizeof(SDL_PrivateGLESData));
-        if (!device->gles_data) {
-            SDL_OutOfMemory();
-            SDL_free(device->driverdata);
-            SDL_free(device);
-            return NULL;
-        }
-    }
-#endif
-
     /* FIXME: Do we need this?
        if ( (SDL_strncmp(XDisplayName(display), ":", 1) == 0) ||
        (SDL_strncmp(XDisplayName(display), "unix:", 5) == 0) ) {
@@ -190,9 +164,6 @@ X11_CreateDevice(int devindex)
     }
 #endif
     if (data->display == NULL) {
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-        SDL_free(device->gles_data);
-#endif
         SDL_free(device->driverdata);
         SDL_free(device);
         SDL_SetError("Couldn't open X11 display");
@@ -237,30 +208,25 @@ X11_CreateDevice(int devindex)
     device->shape_driver.ResizeWindowShape = X11_ResizeWindowShape;
 
 #if SDL_VIDEO_OPENGL_GLX
-    if (!data->gles) {
-        device->GL_LoadLibrary = X11_GL_LoadLibrary;
-        device->GL_GetProcAddress = X11_GL_GetProcAddress;
-        device->GL_UnloadLibrary = X11_GL_UnloadLibrary;
-        device->GL_CreateContext = X11_GL_CreateContext;
-        device->GL_MakeCurrent = X11_GL_MakeCurrent;
-        device->GL_SetSwapInterval = X11_GL_SetSwapInterval;
-        device->GL_GetSwapInterval = X11_GL_GetSwapInterval;
-        device->GL_SwapWindow = X11_GL_SwapWindow;
-        device->GL_DeleteContext = X11_GL_DeleteContext;
-    }
-#endif
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (data->gles) {
-        device->GL_LoadLibrary = X11_GLES_LoadLibrary;
-        device->GL_GetProcAddress = X11_GLES_GetProcAddress;
-        device->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
-        device->GL_CreateContext = X11_GLES_CreateContext;
-        device->GL_MakeCurrent = X11_GLES_MakeCurrent;
-        device->GL_SetSwapInterval = X11_GLES_SetSwapInterval;
-        device->GL_GetSwapInterval = X11_GLES_GetSwapInterval;
-        device->GL_SwapWindow = X11_GLES_SwapWindow;
-        device->GL_DeleteContext = X11_GLES_DeleteContext;
-    }
+    device->GL_LoadLibrary = X11_GL_LoadLibrary;
+    device->GL_GetProcAddress = X11_GL_GetProcAddress;
+    device->GL_UnloadLibrary = X11_GL_UnloadLibrary;
+    device->GL_CreateContext = X11_GL_CreateContext;
+    device->GL_MakeCurrent = X11_GL_MakeCurrent;
+    device->GL_SetSwapInterval = X11_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = X11_GL_GetSwapInterval;
+    device->GL_SwapWindow = X11_GL_SwapWindow;
+    device->GL_DeleteContext = X11_GL_DeleteContext;
+#elif SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    device->GL_LoadLibrary = X11_GLES_LoadLibrary;
+    device->GL_GetProcAddress = X11_GLES_GetProcAddress;
+    device->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
+    device->GL_CreateContext = X11_GLES_CreateContext;
+    device->GL_MakeCurrent = X11_GLES_MakeCurrent;
+    device->GL_SetSwapInterval = X11_GLES_SetSwapInterval;
+    device->GL_GetSwapInterval = X11_GLES_GetSwapInterval;
+    device->GL_SwapWindow = X11_GLES_SwapWindow;
+    device->GL_DeleteContext = X11_GLES_DeleteContext;
 #endif
 
     device->SetClipboardText = X11_SetClipboardText;

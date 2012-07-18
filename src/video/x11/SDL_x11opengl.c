@@ -29,6 +29,7 @@
 
 #if SDL_VIDEO_OPENGL_GLX
 #include "SDL_loadso.h"
+#include "SDL_x11opengles.h"
 
 #if defined(__IRIX__)
 /* IRIX doesn't have a GL library versioning system */
@@ -121,6 +122,28 @@ int
 X11_GL_LoadLibrary(_THIS, const char *path)
 {
     void *handle;
+
+    if (_this->gl_data) {
+        SDL_SetError("OpenGL context already created");
+        return -1;
+    }
+
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+    /* If SDL_GL_CONTEXT_EGL has been changed to 1, switch over to X11_GLES functions  */
+    if (_this->gl_config.use_egl == 1) {
+        _this->GL_LoadLibrary = X11_GLES_LoadLibrary;
+        _this->GL_GetProcAddress = X11_GLES_GetProcAddress;
+        _this->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
+        _this->GL_CreateContext = X11_GLES_CreateContext;
+        _this->GL_MakeCurrent = X11_GLES_MakeCurrent;
+        _this->GL_SetSwapInterval = X11_GLES_SetSwapInterval;
+        _this->GL_GetSwapInterval = X11_GLES_GetSwapInterval;
+        _this->GL_SwapWindow = X11_GLES_SwapWindow;
+        _this->GL_DeleteContext = X11_GLES_DeleteContext;
+        return X11_GLES_LoadLibrary(_this, path);
+    }
+#endif
+
 
     /* Load the OpenGL library */
     if (path == NULL) {

@@ -273,15 +273,16 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-        if (data->gles) {
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2        
+        if (_this->gl_config.use_egl == 1) {
             vinfo = X11_GLES_GetVisual(_this, display, screen);
         } else
 #endif
         {
+#if SDL_VIDEO_OPENGL_GLX
             vinfo = X11_GL_GetVisual(_this, display, screen);
+#endif
         }
-
         if (!vinfo) {
             return -1;
         }
@@ -390,7 +391,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         return -1;
     }
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (data->gles && window->flags & SDL_WINDOW_OPENGL) {
+    if (window->flags & SDL_WINDOW_OPENGL) {
         /* Create the GLES window surface */
         _this->gles_data->egl_surface =
             _this->gles_data->eglCreateWindowSurface(_this->gles_data->

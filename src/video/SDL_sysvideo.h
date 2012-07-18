@@ -272,6 +272,7 @@ struct SDL_VideoDevice
         int minor_version;
         int flags;
         int profile_mask;
+        int use_egl;
         int retained_backing;
         int driver_loaded;
         char driver_path[256];
@@ -288,7 +289,7 @@ struct SDL_VideoDevice
     void *driverdata;
     struct SDL_GLDriverData *gl_data;
 
-#if SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     struct SDL_PrivateGLESData *gles_data;
 #endif
 

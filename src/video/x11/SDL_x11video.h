@@ -92,9 +92,7 @@ typedef struct SDL_VideoData
     Atom UTF8_STRING;
 
     SDL_Scancode key_layout[256];
-    SDL_bool selection_waiting;
-
-    SDL_bool gles;
+    SDL_bool selection_waiting;    
 } SDL_VideoData;
 
 extern SDL_bool X11_UseDirectColorVisuals(void);
