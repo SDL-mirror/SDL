@@ -1106,7 +1106,24 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             ])
             AC_MSG_RESULT($have_const_param_XextAddDisplay)
 
-            AC_CHECK_LIB(X11, XGetEventData, AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS, 1, [Have XGenericEvent]))
+            dnl AC_CHECK_LIB(X11, XGetEventData, AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS, 1, [Have XGenericEvent]))
+            AC_MSG_CHECKING([for XGenericEvent])
+            have_XGenericEvent=no
+            AC_TRY_COMPILE([
+              	#include <X11/Xlib.h>
+            ],[
+Display *display;
+XEvent event;
+XGenericEventCookie *cookie = &event.xcookie;
+XNextEvent(display, &event);
+XGetEventData(display, cookie);
+XFreeEventData(display, cookie);
+            ],[
+                have_XGenericEvent=yes
+                AC_DEFINE(SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS)
+            ])
+            AC_MSG_RESULT($have_XGenericEvent)
+
             AC_CHECK_LIB(X11, XkbKeycodeToKeysym, AC_DEFINE(SDL_VIDEO_DRIVER_X11_HAS_XKBKEYCODETOKEYSYM, 1, [Have XkbKeycodeToKeysym]))
 
             AC_ARG_ENABLE(video-x11-xcursor,
