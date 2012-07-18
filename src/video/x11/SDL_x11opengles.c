@@ -115,7 +115,7 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
     if ((dlsym(handle, "eglChooseConfig") == NULL) && (path == NULL)) {
 
         dlclose(handle);
-        path = getenv("SDL_VIDEO_GL_DRIVER");
+        path = getenv("SDL_VIDEO_EGL_DRIVER");
         if (path == NULL) {
             path = DEFAULT_EGL;
         }
