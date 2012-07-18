@@ -148,6 +148,8 @@ X11_CreateDevice(int devindex)
     device->gles_data = (struct SDL_PrivateGLESData *) SDL_calloc(1, sizeof(SDL_PrivateGLESData));
     if (!device->gles_data) {
         SDL_OutOfMemory();
+        SDL_free(device->driverdata);
+        SDL_free(device);
         return NULL;
     }
 #endif
@@ -175,6 +177,10 @@ X11_CreateDevice(int devindex)
     }
 #endif
     if (data->display == NULL) {
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
+        SDL_free(device->gles_data);
+#endif
+        SDL_free(device->driverdata);
         SDL_free(device);
         SDL_SetError("Couldn't open X11 display");
         return NULL;
