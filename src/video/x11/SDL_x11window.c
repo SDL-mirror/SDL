@@ -391,7 +391,12 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         return -1;
     }
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
-    if (window->flags & SDL_WINDOW_OPENGL) {
+    if ((window->flags & SDL_WINDOW_OPENGL) && (_this->gl_config.use_egl == 1)) {
+        if (!_this->gles_data) {
+            XDestroyWindow(display, w);
+            return -1;
+        }
+
         /* Create the GLES window surface */
         _this->gles_data->egl_surface =
             _this->gles_data->eglCreateWindowSurface(_this->gles_data->
@@ -401,6 +406,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
         if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
             SDL_SetError("Could not create GLES window surface");
+            XDestroyWindow(display, w);
             return -1;
         }
     }

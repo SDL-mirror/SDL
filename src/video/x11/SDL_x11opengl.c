@@ -128,9 +128,9 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     /* If SDL_GL_CONTEXT_EGL has been changed to 1, switch over to X11_GLES functions  */
     if (_this->gl_config.use_egl == 1) {
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
         _this->GL_LoadLibrary = X11_GLES_LoadLibrary;
         _this->GL_GetProcAddress = X11_GLES_GetProcAddress;
         _this->GL_UnloadLibrary = X11_GLES_UnloadLibrary;
@@ -141,8 +141,11 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         _this->GL_SwapWindow = X11_GLES_SwapWindow;
         _this->GL_DeleteContext = X11_GLES_DeleteContext;
         return X11_GLES_LoadLibrary(_this, path);
-    }
+#else
+        SDL_SetError("SDL not configured with OpenGL ES/EGL support");
+        return -1;
 #endif
+    }
 
 
     /* Load the OpenGL library */

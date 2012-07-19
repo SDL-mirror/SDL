@@ -99,9 +99,9 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
         return -1;
     }
 
-#if SDL_VIDEO_OPENGL_GLX
     /* If SDL_GL_CONTEXT_EGL has been changed to 0, switch over to X11_GL functions  */
     if (_this->gl_config.use_egl == 0) {
+#if SDL_VIDEO_OPENGL_GLX
         _this->GL_LoadLibrary = X11_GL_LoadLibrary;
         _this->GL_GetProcAddress = X11_GL_GetProcAddress;
         _this->GL_UnloadLibrary = X11_GL_UnloadLibrary;
@@ -112,8 +112,11 @@ X11_GLES_LoadLibrary(_THIS, const char *path)
         _this->GL_SwapWindow = X11_GL_SwapWindow;
         _this->GL_DeleteContext = X11_GL_DeleteContext;
         return X11_GL_LoadLibrary(_this, path);
-    }
+#else
+        SDL_SetError("SDL not configured with OpenGL/GLX support");
+        return -1;
 #endif
+    }
 
 #ifdef RTLD_GLOBAL
     dlopen_flags = RTLD_LAZY | RTLD_GLOBAL;
