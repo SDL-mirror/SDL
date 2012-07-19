@@ -267,10 +267,12 @@ SDL_bool
 UIKit_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
     UIWindow *uiwindow = ((SDL_WindowData *) window->driverdata)->uiwindow;
+    UIViewController *uiviewcontroller = ((SDL_WindowData *) window->driverdata)->viewcontroller;
 
     if (info->version.major <= SDL_MAJOR_VERSION) {
         info->subsystem = SDL_SYSWM_UIKIT;
         info->info.uikit.window = uiwindow;
+        info->info.uikit.viewcontroller = uiviewcontroller;
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",

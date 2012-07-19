@@ -92,6 +92,7 @@ typedef struct _NSWindow NSWindow;
 #include <UIKit/UIKit.h>
 #else
 typedef struct _UIWindow UIWindow;
+typedef struct _UIViewController UIViewController;
 #endif
 #endif
 
@@ -195,6 +196,7 @@ struct SDL_SysWMinfo
         struct
         {
             UIWindow *window;           /* The UIKit window */
+            UIViewController *viewcontroller;   /* The UIKit view controller */
         } uikit;
 #endif
         /* Can't have an empty union */
