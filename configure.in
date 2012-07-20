@@ -1826,7 +1826,7 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             ])
             AC_MSG_RESULT($has_pthread_spin_trylock)
 
-            AC_CHECK_HEADER(pthread_np.h, have_pthread_np_h=yes)
+            AC_CHECK_HEADER(pthread_np.h, have_pthread_np_h=yes, have_pthread_np_h=no, [ #include <pthread.h> ])
             if test x$have_pthread_np_h = xyes; then
                 AC_DEFINE(HAVE_PTHREAD_NP_H, 1, [ ])
             fi
