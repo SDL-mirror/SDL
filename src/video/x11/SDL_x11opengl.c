@@ -95,7 +95,9 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
 
 #ifndef GLX_EXT_create_context_es2_profile
 #define GLX_EXT_create_context_es2_profile
+#ifndef GLX_CONTEXT_ES2_PROFILE_BIT_EXT
 #define GLX_CONTEXT_ES2_PROFILE_BIT_EXT    0x00000002
+#endif
 #endif
 
 #ifndef GLX_EXT_swap_control

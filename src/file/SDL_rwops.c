@@ -438,9 +438,6 @@ SDL_RWops *
 SDL_RWFromFile(const char *file, const char *mode)
 {
     SDL_RWops *rwops = NULL;
-#ifdef HAVE_STDIO_H
-    FILE *fp = NULL;
-#endif
     if (!file || !*file || !mode || !*mode) {
         SDL_SetError("SDL_RWFromFile(): No file or no mode specified");
         return NULL;
@@ -472,15 +469,17 @@ SDL_RWFromFile(const char *file, const char *mode)
     rwops->close = windows_file_close;
 
 #elif HAVE_STDIO_H
-	#ifdef __APPLE__
-	fp = SDL_OpenFPFromBundleOrFallback(file, mode);
-    #else
-	fp = fopen(file, mode);
-	#endif
-	if (fp == NULL) {
-        SDL_SetError("Couldn't open %s", file);
-    } else {
-        rwops = SDL_RWFromFP(fp, 1);
+    {
+    	#ifdef __APPLE__
+    	FILE *fp = SDL_OpenFPFromBundleOrFallback(file, mode);
+        #else
+    	FILE *fp = fopen(file, mode);
+    	#endif
+    	if (fp == NULL) {
+            SDL_SetError("Couldn't open %s", file);
+        } else {
+            rwops = SDL_RWFromFP(fp, 1);
+        }
     }
 #else
     SDL_SetError("SDL not compiled with stdio support");
