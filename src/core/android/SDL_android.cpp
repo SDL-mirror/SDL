@@ -591,8 +591,12 @@ extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         size_t size, size_t maxnum)
 {
     LocalReferenceHolder refs;
-    int bytesRemaining = size * maxnum;
+    jlong bytesRemaining = (jlong) (size * maxnum);
+    jlong bytesMax = (jlong) (ctx->hidden.androidio.size -  ctx->hidden.androidio.position);
     int bytesRead = 0;
+
+    /* Don't read more bytes than those that remain in the file, otherwise we get an exception */
+    if (bytesRemaining >  bytesMax) bytesRemaining = bytesMax;
 
     JNIEnv *mEnv = Android_JNI_GetEnv();
     if (!refs.init(mEnv)) {
