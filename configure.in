@@ -84,7 +84,7 @@ esac
 #AX_GCC_ARCHFLAG([no], [BASE_CFLAGS="$BASE_CFLAGS $ax_cv_gcc_archflag]")
 BUILD_CFLAGS="$CFLAGS $CPPFLAGS -DUSING_GENERATED_CONFIG_H"
 # The default optimization for SDL is -O3 (Bug #31)
-if test x$orig_CFLAGS = x; then
+if test "x$orig_CFLAGS" = x; then
     BUILD_CFLAGS=`echo $BUILD_CFLAGS | sed 's/-O2/-O3/'`
 fi
 EXTRA_CFLAGS="$INCLUDE $BASE_CFLAGS"
