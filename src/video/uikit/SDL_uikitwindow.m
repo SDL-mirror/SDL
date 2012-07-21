@@ -200,6 +200,9 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     if (external) {
         [uiwindow setScreen:data->uiscreen];
     }
+    
+    // Make sure the native window gets displayed.
+    [uiwindow makeKeyAndVisible];
 
     if (SetupWindowData(_this, window, uiwindow, SDL_TRUE) < 0) {
         [uiwindow release];
