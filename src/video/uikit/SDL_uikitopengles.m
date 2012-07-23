@@ -93,7 +93,6 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 
     /* we need to let the event cycle run, or the OS won't update the OpenGL view! */
     SDL_PumpEvents();
-
 }
 
 SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)

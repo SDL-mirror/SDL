@@ -214,6 +214,22 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
 }
 
 void
+UIKit_ShowWindow(_THIS, SDL_Window * window)
+{
+    UIWindow *uiwindow = ((SDL_WindowData *) window->driverdata)->uiwindow;
+
+    [uiwindow makeKeyAndVisible];
+}
+
+void
+UIKit_HideWindow(_THIS, SDL_Window * window)
+{
+    UIWindow *uiwindow = ((SDL_WindowData *) window->driverdata)->uiwindow;
+
+    uiwindow.hidden = YES;
+}
+
+void
 UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
     SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
