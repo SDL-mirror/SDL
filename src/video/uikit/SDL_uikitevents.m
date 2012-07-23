@@ -61,6 +61,11 @@ UIKit_PumpEvents(_THIS)
         do {
             result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, TRUE);
         } while (result == kCFRunLoopRunHandledSource);
+		
+		/* Make sure UIScrollView objects scroll properly. */
+		do {
+			result = CFRunLoopRunInMode((CFStringRef)UITrackingRunLoopMode, 0, TRUE);
+		} while(result == kCFRunLoopRunHandledSource);
     }
 }
 
