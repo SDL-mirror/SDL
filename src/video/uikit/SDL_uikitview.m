@@ -94,6 +94,12 @@
 
     if (touch) {
         CGPoint locationInView = [touch locationInView: self];
+        
+        /* Make sure UIView points are converted to screen pixels: */
+        if ([self respondsToSelector:@selector(contentScaleFactor)]) {
+            locationInView.x *= self.contentScaleFactor;
+            locationInView.y *= self.contentScaleFactor;
+        }
 
         /* send moved event */
         SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
@@ -184,6 +190,12 @@
 
     if (touch) {
         CGPoint locationInView = [touch locationInView: self];
+        
+        /* Make sure UIView points are converted to screen pixels: */
+        if ([self respondsToSelector:@selector(contentScaleFactor)]) {
+            locationInView.x *= self.contentScaleFactor;
+            locationInView.y *= self.contentScaleFactor;
+        }
 
         /* send moved event */
         SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
