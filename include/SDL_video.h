@@ -789,7 +789,9 @@ extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_Window * window,
  *  \brief Set the swap interval for the current OpenGL context.
  *  
  *  \param interval 0 for immediate updates, 1 for updates synchronized with the
- *                  vertical retrace.
+ *                  vertical retrace. If the system supports it, you may
+ *                  specify -1 to allow late swaps to happen immediately
+ *                  instead of waiting for the next retrace.
  *  
  *  \return 0 on success, or -1 if setting the swap interval is not supported.
  *  
@@ -801,8 +803,10 @@ extern DECLSPEC int SDLCALL SDL_GL_SetSwapInterval(int interval);
  *  \brief Get the swap interval for the current OpenGL context.
  *  
  *  \return 0 if there is no vertical retrace synchronization, 1 if the buffer 
- *          swap is synchronized with the vertical retrace, and -1 if getting 
- *          the swap interval is not supported.
+ *          swap is synchronized with the vertical retrace, and -1 if late
+ *          swaps happen immediately instead of waiting for the next retrace.
+ *          If the system can't determine the swap interval, or there isn't a
+ *          valid current context, this will return 0 as a safe default.
  *  
  *  \sa SDL_GL_SetSwapInterval()
  */

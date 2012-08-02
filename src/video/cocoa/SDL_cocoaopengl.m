@@ -250,7 +250,7 @@ Cocoa_GL_GetSwapInterval(_THIS)
     NSAutoreleasePool *pool;
     NSOpenGLContext *nscontext;
     GLint value;
-    int status;
+    int status = 0;
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -258,9 +258,6 @@ Cocoa_GL_GetSwapInterval(_THIS)
     if (nscontext != nil) {
         [nscontext getValues:&value forParameter:NSOpenGLCPSwapInterval];
         status = (int)value;
-    } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
     }
 
     [pool release];

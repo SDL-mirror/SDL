@@ -2578,16 +2578,13 @@ int
 SDL_GL_GetSwapInterval(void)
 {
     if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
+        return 0;
     } else if (_this->current_glctx == NULL) {
-        SDL_SetError("No OpenGL context has been made current");
-        return -1;
+        return 0;
     } else if (_this->GL_GetSwapInterval) {
         return _this->GL_GetSwapInterval(_this);
     } else {
-        SDL_SetError("Getting the swap interval is not supported");
-        return -1;
+        return 0;
     }
 }
 

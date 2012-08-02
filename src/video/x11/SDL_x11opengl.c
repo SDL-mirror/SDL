@@ -105,6 +105,10 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
 #define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
 #endif
 
+#ifndef GLX_EXT_swap_control_tear
+#define GLX_LATE_SWAPS_TEAR_EXT 0x20F3
+#endif
+
 #define OPENGL_REQUIRES_DLOPEN
 #if defined(OPENGL_REQUIRES_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
 #include <dlfcn.h>
@@ -318,11 +322,15 @@ X11_GL_InitExtensions(_THIS)
         extensions = NULL;
     }
 
-    /* Check for GLX_EXT_swap_control */
+    /* Check for GLX_EXT_swap_control(_tear) */
+    _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_FALSE;
     if (HasExtension("GLX_EXT_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalEXT =
             (int (*)(Display*,GLXDrawable,int))
                 X11_GL_GetProcAddress(_this, "glXSwapIntervalEXT");
+        if (HasExtension("GLX_EXT_swap_control_tear", extensions)) {
+            _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_TRUE;
+        }
     }
 
     /* Check for GLX_MESA_swap_control */
@@ -615,9 +623,11 @@ static int swapinterval = -1;
 int
 X11_GL_SetSwapInterval(_THIS, int interval)
 {
-    int status;
+    int status = -1;
 
-    if (_this->gl_data->glXSwapIntervalEXT) {
+    if ((interval < 0) && (!_this->gl_data->HAS_GLX_EXT_swap_control_tear)) {
+        SDL_SetError("Negative swap interval unsupported in this GL");
+    } else if (_this->gl_data->glXSwapIntervalEXT) {
         Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
@@ -625,7 +635,6 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalEXT(display,drawable,interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalEXT failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
@@ -633,7 +642,6 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalMESA(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalMESA failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
@@ -641,13 +649,11 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalSGI(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalSGI failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
     } else {
         SDL_Unsupported();
-        status = -1;
     }
     return status;
 }
@@ -660,10 +666,23 @@ X11_GL_GetSwapInterval(_THIS)
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
         Window drawable = windowdata->xwindow;
-        unsigned int value = 0;
+        unsigned int allow_late_swap_tearing = 0;
+        unsigned int interval = 0;
+
+        if (_this->gl_data->HAS_GLX_EXT_swap_control_tear) {
+            _this->gl_data->glXQueryDrawable(display, drawable,
+                                            GLX_LATE_SWAPS_TEAR_EXT,
+                                            &allow_late_swap_tearing);
+        }
+
         _this->gl_data->glXQueryDrawable(display, drawable,
-                                         GLX_SWAP_INTERVAL_EXT, &value);
-        return (int) value;
+                                         GLX_SWAP_INTERVAL_EXT, &interval);
+
+        if ((allow_late_swap_tearing) && (interval > 0)) {
+            return -((int) interval);
+        }
+
+        return (int) interval;
     } else if (_this->gl_data->glXGetSwapIntervalMESA) {
         return _this->gl_data->glXGetSwapIntervalMESA();
     } else {

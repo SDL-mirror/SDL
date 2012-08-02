@@ -112,10 +112,6 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         GetProcAddress(handle, "wglDeleteContext");
     _this->gl_data->wglMakeCurrent = (BOOL(WINAPI *) (HDC, HGLRC))
         GetProcAddress(handle, "wglMakeCurrent");
-    _this->gl_data->wglSwapIntervalEXT = (void (WINAPI *) (int))
-        GetProcAddress(handle, "wglSwapIntervalEXT");
-    _this->gl_data->wglGetSwapIntervalEXT = (int (WINAPI *) (void))
-        GetProcAddress(handle, "wglGetSwapIntervalEXT");
 
     if (!_this->gl_data->wglGetProcAddress ||
         !_this->gl_data->wglCreateContext ||
@@ -341,7 +337,7 @@ WIN_GL_InitExtensions(_THIS, HDC hdc)
     }
 
     /* Check for WGL_ARB_pixel_format */
-    _this->gl_data->WGL_ARB_pixel_format = 0;
+    _this->gl_data->HAS_WGL_ARB_pixel_format = SDL_FALSE;
     if (HasExtension("WGL_ARB_pixel_format", extensions)) {
         _this->gl_data->wglChoosePixelFormatARB = (BOOL(WINAPI *)
                                                    (HDC, const int *,
@@ -354,16 +350,20 @@ WIN_GL_InitExtensions(_THIS, HDC hdc)
 
         if ((_this->gl_data->wglChoosePixelFormatARB != NULL) &&
             (_this->gl_data->wglGetPixelFormatAttribivARB != NULL)) {
-            _this->gl_data->WGL_ARB_pixel_format = 1;
+            _this->gl_data->HAS_WGL_ARB_pixel_format = SDL_TRUE;
         }
     }
 
     /* Check for WGL_EXT_swap_control */
+    _this->gl_data->HAS_WGL_EXT_swap_control_tear = SDL_FALSE;
     if (HasExtension("WGL_EXT_swap_control", extensions)) {
         _this->gl_data->wglSwapIntervalEXT =
             WIN_GL_GetProcAddress(_this, "wglSwapIntervalEXT");
         _this->gl_data->wglGetSwapIntervalEXT =
             WIN_GL_GetProcAddress(_this, "wglGetSwapIntervalEXT");
+        if (HasExtension("WGL_EXT_swap_control_tear", extensions)) {
+            _this->gl_data->HAS_WGL_EXT_swap_control_tear = SDL_TRUE;
+        }
     } else {
         _this->gl_data->wglSwapIntervalEXT = NULL;
         _this->gl_data->wglGetSwapIntervalEXT = NULL;
@@ -397,7 +397,7 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
 
         WIN_GL_InitExtensions(_this, hdc);
 
-        if (_this->gl_data->WGL_ARB_pixel_format) {
+        if (_this->gl_data->HAS_WGL_ARB_pixel_format) {
             _this->gl_data->wglChoosePixelFormatARB(hdc, iAttribs, fAttribs,
                                                     1, &pixel_format,
                                                     &matching);
@@ -611,7 +611,9 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 int
 WIN_GL_SetSwapInterval(_THIS, int interval)
 {
-    if (_this->gl_data->wglSwapIntervalEXT) {
+    if ((interval < 0) && (!_this->gl_data->HAS_WGL_EXT_swap_control_tear)) {
+        SDL_SetError("Negative swap interval unsupported in this GL");
+    } else if (_this->gl_data->wglSwapIntervalEXT) {
         _this->gl_data->wglSwapIntervalEXT(interval);
         return 0;
     } else {
@@ -626,8 +628,8 @@ WIN_GL_GetSwapInterval(_THIS)
     if (_this->gl_data->wglGetSwapIntervalEXT) {
         return _this->gl_data->wglGetSwapIntervalEXT();
     } else {
-        SDL_Unsupported();
-        return -1;
+        /*SDL_Unsupported();*/
+        return 0;  /* just say we're unsync'd. */
     }
 }
 
