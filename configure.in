@@ -1045,8 +1045,13 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
                 *-*-openbsd*)
                     x11_lib='libX11.so'
                     x11ext_lib='libXext.so'
-                    xrender_lib='libXrender.so'
+                    xcursor_lib='libXcursor.so'
+                    xinerama_lib='libXinerama.so'
+                    xinput_lib='libXi.so'
                     xrandr_lib='libXrandr.so'
+                    xrender_lib='libXrender.so'
+                    xss_lib='libXss.so'
+                    xvidmode_lib='libXxf86vm.so'
                     ;;
                 *)
                     x11_lib=[`find_lib "libX11.so.*" "$X_LIBS -L/usr/X11/$base_libdir -L/usr/X11R6/$base_libdir" | sed 's/.*\/\(.*\)/\1/; q'`]
