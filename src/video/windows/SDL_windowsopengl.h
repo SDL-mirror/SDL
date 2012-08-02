@@ -45,7 +45,7 @@ struct SDL_GLDriverData
                                                    UINT nAttributes,
                                                    const int *piAttributes,
                                                    int *piValues);
-    void (WINAPI * wglSwapIntervalEXT) (int interval);
+    BOOL (WINAPI * wglSwapIntervalEXT) (int interval);
     int (WINAPI * wglGetSwapIntervalEXT) (void);
 };
 
