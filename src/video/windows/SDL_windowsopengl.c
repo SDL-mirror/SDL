@@ -611,26 +611,29 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 int
 WIN_GL_SetSwapInterval(_THIS, int interval)
 {
+    int retval = -1;
     if ((interval < 0) && (!_this->gl_data->HAS_WGL_EXT_swap_control_tear)) {
         SDL_SetError("Negative swap interval unsupported in this GL");
     } else if (_this->gl_data->wglSwapIntervalEXT) {
-        _this->gl_data->wglSwapIntervalEXT(interval);
-        return 0;
+        if (_this->gl_data->wglSwapIntervalEXT(interval) == TRUE) {
+            retval = 0;
+        } else {
+            WIN_SetError("wglSwapIntervalEXT()");
+        }
     } else {
         SDL_Unsupported();
-        return -1;
     }
+    return retval;
 }
 
 int
 WIN_GL_GetSwapInterval(_THIS)
 {
+    int retval = 0;
     if (_this->gl_data->wglGetSwapIntervalEXT) {
-        return _this->gl_data->wglGetSwapIntervalEXT();
-    } else {
-        /*SDL_Unsupported();*/
-        return 0;  /* just say we're unsync'd. */
+        retval = _this->gl_data->wglGetSwapIntervalEXT();
     }
+    return retval;
 }
 
 void
