@@ -539,9 +539,9 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
              final int touchDevId = event.getDeviceId();
              final int pointerCount = event.getPointerCount();
              // touchId, pointerId, action, x, y, pressure
-             int actionPointerIndex = event.getActionIndex();
+             int actionPointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent. ACTION_POINTER_ID_SHIFT; /* API 8: event.getActionIndex(); */
              int pointerFingerId = event.getPointerId(actionPointerIndex);
-             int action = event.getActionMasked();
+             int action = (event.getAction() & MotionEvent.ACTION_MASK); /* API 8: event.getActionMasked(); */
 
              float x = event.getX(actionPointerIndex);
              float y = event.getY(actionPointerIndex);
