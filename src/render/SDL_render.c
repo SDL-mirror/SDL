@@ -546,11 +546,8 @@ int
 SDL_GetTextureColorMod(SDL_Texture * texture, Uint8 * r, Uint8 * g,
                        Uint8 * b)
 {
-    SDL_Renderer *renderer;
-
     CHECK_TEXTURE_MAGIC(texture, -1);
 
-    renderer = texture->renderer;
     if (r) {
         *r = texture->r;
     }
@@ -1173,7 +1170,6 @@ int
 SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
-    SDL_Window *window;
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
 
@@ -1184,7 +1180,6 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_SetError("Texture was not created with this renderer");
         return -1;
     }
-    window = renderer->window;
 
     real_srcrect.x = 0;
     real_srcrect.y = 0;
@@ -1237,7 +1232,6 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                const SDL_Rect * srcrect, const SDL_Rect * dstrect,
                const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
 {
-    SDL_Window *window;
     SDL_Rect real_srcrect, real_dstrect;
     SDL_Point real_center;
 
@@ -1253,8 +1247,6 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         return -1;
     }
     
-    window = renderer->window;
-
     real_srcrect.x = 0;
     real_srcrect.y = 0;
     real_srcrect.w = texture->w;
@@ -1291,7 +1283,6 @@ int
 SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                      Uint32 format, void * pixels, int pitch)
 {
-    SDL_Window *window;
     SDL_Rect real_rect;
 
     CHECK_RENDERER_MAGIC(renderer, -1);
@@ -1300,10 +1291,9 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         SDL_Unsupported();
         return -1;
     }
-    window = renderer->window;
 
     if (!format) {
-        format = SDL_GetWindowPixelFormat(window);
+        format = SDL_GetWindowPixelFormat(renderer->window);
     }
 
     real_rect.x = renderer->viewport.x;
