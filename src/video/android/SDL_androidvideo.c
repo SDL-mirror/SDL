@@ -119,6 +119,13 @@ Android_CreateDevice(int devindex)
     device->GL_SwapWindow = Android_GL_SwapWindow;
     device->GL_DeleteContext = Android_GL_DeleteContext;
 
+    /* Screen keyboard */
+    device->SDL_HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
+    device->SDL_ShowScreenKeyboard = Android_ShowScreenKeyboard;
+    device->SDL_HideScreenKeyboard = Android_HideScreenKeyboard;
+    device->SDL_ToggleScreenKeyboard = Android_ToggleScreenKeyboard;
+    device->SDL_IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
+
     return device;
 }
 

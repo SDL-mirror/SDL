@@ -178,6 +178,40 @@ Android_OnKeyUp(int keycode)
     return SDL_SendKeyboardKey(SDL_RELEASED, TranslateKeycode(keycode));
 }
 
+// has to fit Activity constant
+#define COMMAND_KEYBOARD_SHOW 2
+
+SDL_bool
+Android_HasScreenKeyboardSupport(_THIS, SDL_Window * window)
+{
+    return Android_Window ? SDL_TRUE : SDL_FALSE;
+}
+
+int
+Android_ShowScreenKeyboard(_THIS, SDL_Window * window)
+{
+    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 1) : -1;
+}
+
+int
+Android_HideScreenKeyboard(_THIS, SDL_Window * window)
+{
+    
+    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 0) : -1;
+}
+
+int
+Android_ToggleScreenKeyboard(_THIS, SDL_Window * window)
+{
+    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 2) : -1;
+}
+
+SDL_bool
+Android_IsScreenKeyboardShown(_THIS, SDL_Window * window)
+{
+    return SDL_FALSE;
+}
+
 #endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

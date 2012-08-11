@@ -53,6 +53,9 @@ static void Android_JNI_ThreadDestroyed(void*);
 JNIEnv *Android_JNI_GetEnv(void);
 int Android_JNI_SetupThread(void);
 
+// Generic messages
+int Android_JNI_SendMessage(int command, int param);
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */

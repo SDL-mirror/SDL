@@ -2753,4 +2753,49 @@ SDL_SetTextInputRect(SDL_Rect *rect)
     }
 }
 
+SDL_bool
+SDL_HasScreenKeyboardSupport(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_HasScreenKeyboardSupport) {
+        return _this->SDL_HasScreenKeyboardSupport(_this, window);
+    }
+    return SDL_FALSE;
+}
+
+int
+SDL_ShowScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_ShowScreenKeyboard) {
+        return _this->SDL_ShowScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+int
+SDL_HideScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_HideScreenKeyboard) {
+        return _this->SDL_HideScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+int
+SDL_ToggleScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_ToggleScreenKeyboard) {
+        return _this->SDL_ToggleScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+SDL_bool
+SDL_IsScreenKeyboardShown(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_IsScreenKeyboardShown) {
+        return _this->SDL_IsScreenKeyboardShown(_this, window);
+    }
+    return SDL_FALSE;
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

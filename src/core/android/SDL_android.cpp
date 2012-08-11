@@ -735,6 +735,21 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
     return Android_JNI_FileClose(ctx, true);
 }
 
+// sends message to be handled on the UI event dispatch thread
+extern "C" int Android_JNI_SendMessage(int command, int param)
+{
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "sendMessage", "(II)V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod(mActivityClass, mid, command, param);
+    return 0;
+}
+
 #endif /* __ANDROID__ */
 
 /* vi: set ts=4 sw=4 expandtab: */
