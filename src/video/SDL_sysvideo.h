@@ -280,6 +280,7 @@ struct SDL_VideoDevice
         int flags;
         int profile_mask;
         int use_egl;
+        int share_with_current_context;
         int retained_backing;
         int driver_loaded;
         char driver_path[256];

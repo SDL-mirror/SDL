@@ -484,7 +484,13 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     XWindowAttributes xattr;
     XVisualInfo v, *vinfo;
     int n;
-    GLXContext context = NULL;
+    GLXContext context = NULL, share_context;
+
+    if (_this->gl_config.share_with_current_context) {
+        share_context = (GLXContext)(_this->current_glctx);
+    } else {
+        share_context = NULL;
+    }
 
     /* We do this to create a clean separation between X and GLX errors. */
     XSync(display, False);
@@ -493,9 +499,12 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     v.visualid = XVisualIDFromVisual(xattr.visual);
     vinfo = XGetVisualInfo(display, VisualScreenMask | VisualIDMask, &v, &n);
     if (vinfo) {
-        if (_this->gl_config.major_version < 3) {
+        if (_this->gl_config.major_version < 3 &&
+            _this->gl_config.profile_mask == 0 &&
+            _this->gl_config.flags == 0) {
+            /* Create legacy context */
             context =
-                _this->gl_data->glXCreateContext(display, vinfo, NULL, True);
+                _this->gl_data->glXCreateContext(display, vinfo, share_context, True);
         } else {
             /* If we want a GL 3.0 context or later we need to get a temporary
                context to grab the new context creation function */
@@ -505,7 +514,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                 SDL_SetError("Could not create GL context");
                 return NULL;
             } else {
-	        /* max 8 attributes plus terminator */
+                /* max 8 attributes plus terminator */
                 int attribs[9] = {
                     GLX_CONTEXT_MAJOR_VERSION_ARB,
                     _this->gl_config.major_version,
@@ -513,21 +522,21 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                     _this->gl_config.minor_version,
                     0
                 };
-		int iattr = 4;
+                int iattr = 4;
 
-		/* SDL profile bits match GLX profile bits */
-		if( _this->gl_config.profile_mask != 0 ) {
-		    attribs[iattr++] = GLX_CONTEXT_PROFILE_MASK_ARB;
-		    attribs[iattr++] = _this->gl_config.profile_mask;
-		}
+                /* SDL profile bits match GLX profile bits */
+                if( _this->gl_config.profile_mask != 0 ) {
+                    attribs[iattr++] = GLX_CONTEXT_PROFILE_MASK_ARB;
+                    attribs[iattr++] = _this->gl_config.profile_mask;
+                }
 
-		/* SDL flags match GLX flags */
-		if( _this->gl_config.flags != 0 ) {
-		    attribs[iattr++] = GLX_CONTEXT_FLAGS_ARB;
-		    attribs[iattr++] = _this->gl_config.flags;
-		}
+                /* SDL flags match GLX flags */
+                if( _this->gl_config.flags != 0 ) {
+                    attribs[iattr++] = GLX_CONTEXT_FLAGS_ARB;
+                    attribs[iattr++] = _this->gl_config.flags;
+                }
 
-		attribs[iattr++] = 0;
+                attribs[iattr++] = 0;
 
                 /* Get a pointer to the context creation function for GL 3.0 */
                 PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs =
@@ -568,7 +577,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                         context =
                             glXCreateContextAttribs(display,
                                                     framebuffer_config[0],
-                                                    NULL, True, attribs);
+                                                    share_context, True, attribs);
                         _this->gl_data->glXDestroyContext(display,
                                                           temp_context);
                     }

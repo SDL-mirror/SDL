@@ -505,6 +505,7 @@ SDL_VideoInit(const char *driver_name)
 #endif
     _this->gl_config.flags = 0;
     _this->gl_config.profile_mask = 0;
+    _this->gl_config.share_with_current_context = 0;
 
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
@@ -2309,11 +2310,30 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         _this->gl_config.use_egl = value;
         break;
     case SDL_GL_CONTEXT_FLAGS:
+        if( value & ~(SDL_GL_CONTEXT_DEBUG_FLAG |
+		      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG |
+		      SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG |
+		      SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) ) {
+	    SDL_SetError("Unknown OpenGL context flag %d", value);
+	    retval = -1;
+	    break;
+	}
         _this->gl_config.flags = value;
         break;
     case SDL_GL_CONTEXT_PROFILE_MASK:
+        if( value != 0 &&
+	    value != SDL_GL_CONTEXT_PROFILE_CORE &&
+	    value != SDL_GL_CONTEXT_PROFILE_COMPATIBILITY &&
+	    value != SDL_GL_CONTEXT_PROFILE_ES ) {
+	    SDL_SetError("Unknown OpenGL context profile %d", value);
+	    retval = -1;
+	    break;
+	}
         _this->gl_config.profile_mask = value;
         break;
+    case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
+        _this->gl_config.share_with_current_context = value;
+	break;
     default:
         SDL_SetError("Unknown OpenGL attribute");
         retval = -1;
@@ -2473,6 +2493,11 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
     case SDL_GL_CONTEXT_PROFILE_MASK:
         {
             *value = _this->gl_config.profile_mask;
+            return 0;
+        }
+    case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
+        {
+            *value = _this->gl_config.share_with_current_context;
             return 0;
         }
     default:

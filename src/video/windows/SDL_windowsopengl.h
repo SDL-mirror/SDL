@@ -34,6 +34,7 @@ struct SDL_GLDriverData
       HGLRC(WINAPI * wglCreateContext) (HDC hdc);
       BOOL(WINAPI * wglDeleteContext) (HGLRC hglrc);
       BOOL(WINAPI * wglMakeCurrent) (HDC hdc, HGLRC hglrc);
+      BOOL(WINAPI * wglShareLists) (HGLRC hglrc1, HGLRC hglrc2);
       BOOL(WINAPI * wglChoosePixelFormatARB) (HDC hdc,
                                               const int *piAttribIList,
                                               const FLOAT * pfAttribFList,

@@ -61,6 +61,11 @@
 #define WGL_CONTEXT_ES2_PROFILE_BIT_EXT           0x00000004
 #endif
 
+#ifndef WGL_EXT_create_context_es_profile
+#define WGL_EXT_create_context_es_profile
+#define WGL_CONTEXT_ES_PROFILE_BIT_EXT            0x00000004
+#endif
+
 typedef HGLRC(APIENTRYP PFNWGLCREATECONTEXTATTRIBSARBPROC) (HDC hDC,
                                                             HGLRC
                                                             hShareContext,
@@ -112,6 +117,8 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         GetProcAddress(handle, "wglDeleteContext");
     _this->gl_data->wglMakeCurrent = (BOOL(WINAPI *) (HDC, HGLRC))
         GetProcAddress(handle, "wglMakeCurrent");
+    _this->gl_data->wglShareLists = (BOOL(WINAPI *) (HGLRC, HGLRC))
+        GetProcAddress(handle, "wglShareLists");
 
     if (!_this->gl_data->wglGetProcAddress ||
         !_this->gl_data->wglCreateContext ||
@@ -519,10 +526,22 @@ SDL_GLContext
 WIN_GL_CreateContext(_THIS, SDL_Window * window)
 {
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
-    HGLRC context;
+    HGLRC context, share_context;
 
-    if (_this->gl_config.major_version < 3) {
+    if (_this->gl_config.share_with_current_context) {
+        share_context = (HGLRC)(_this->current_glctx);
+    } else {
+        share_context = 0;
+    }
+
+    if (_this->gl_config.major_version < 3 &&
+	_this->gl_config.profile_mask == 0 &&
+	_this->gl_config.flags == 0) {
+        /* Create legacy context */
         context = _this->gl_data->wglCreateContext(hdc);
+	if( share_context != 0 ) {
+            _this->gl_data->wglShareLists(share_context, hdc);
+	}
     } else {
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
         HGLRC temp_context = _this->gl_data->wglCreateContext(hdc);
@@ -567,7 +586,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
 	    attribs[iattr++] = 0;
 
             /* Create the GL 3.x context */
-            context = wglCreateContextAttribsARB(hdc, 0, attribs);
+            context = wglCreateContextAttribsARB(hdc, share_context, attribs);
             /* Delete the GL 2.x context */
             _this->gl_data->wglDeleteContext(temp_context);
         }
