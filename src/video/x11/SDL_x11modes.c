@@ -972,15 +972,6 @@ int X11_ResizeFullScreen(_THIS)
     return(1);
 }
 
-void X11_QueueEnterFullScreen(_THIS)
-{
-    switch_waiting = 0x01 | SDL_FULLSCREEN;
-    switch_time = SDL_GetTicks() + 1500;
-#if 0 /* This causes a BadMatch error if the window is iconified (not needed) */
-    XSetInputFocus(SDL_Display, WMwindow, RevertToNone, CurrentTime);
-#endif
-}
-
 int X11_EnterFullScreen(_THIS)
 {
     int okay;
