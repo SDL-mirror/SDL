@@ -29,20 +29,22 @@
 #define MAX_NUM_AXES 6
 #define MAX_NUM_HATS 2
 
+static void
+DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
+{
+    const SDL_Rect area = { x, y, w, h };
+    SDL_RenderFillRect(r, &area);
+}
+
 void
 WatchJoystick(SDL_Joystick * joystick)
 {
-    SDL_Window *window;
-    SDL_Renderer *screen;
-    const char *name;
-    int i, done;
+    SDL_Window *window = NULL;
+    SDL_Renderer *screen = NULL;
+    const char *name = NULL;
+    int done = 0;
     SDL_Event event;
-    int x, y;
-    SDL_Rect axis_area[MAX_NUM_AXES][2];
-    int axis_draw[MAX_NUM_AXES];
-    SDL_Rect hat_area[MAX_NUM_HATS][2];
-    int hat_draw[MAX_NUM_HATS];
-    Uint8 hat_pos;
+    int i;
 
     /* Create a window to display joystick axis position */
     window = SDL_CreateWindow("Joystick Test", SDL_WINDOWPOS_CENTERED,
@@ -62,6 +64,7 @@ WatchJoystick(SDL_Joystick * joystick)
 
     SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(screen);
+    SDL_RenderPresent(screen);
 
     /* Print info about the joystick we are watching */
     name = SDL_JoystickName(SDL_JoystickIndex(joystick));
@@ -71,15 +74,12 @@ WatchJoystick(SDL_Joystick * joystick)
            SDL_JoystickNumAxes(joystick), SDL_JoystickNumHats(joystick),
            SDL_JoystickNumBalls(joystick), SDL_JoystickNumButtons(joystick));
 
-    /* Initialize drawing rectangles */
-    memset(axis_area, 0, (sizeof axis_area));
-    memset(axis_draw, 0, (sizeof axis_draw));
-    memset(hat_area, 0, (sizeof hat_area));
-    memset(hat_draw, 0, (sizeof hat_draw));
-
     /* Loop, getting joystick events! */
-    done = 0;
     while (!done) {
+        /* blank screen, set up for drawing this frame. */
+        SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+        SDL_RenderClear(screen);
+
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_JOYAXISMOTION:
@@ -128,32 +128,17 @@ WatchJoystick(SDL_Joystick * joystick)
             }
         }
         /* Update visual joystick state */
+        SDL_SetRenderDrawColor(screen, 0x00, 0xFF, 0x00, SDL_ALPHA_OPAQUE);
         for (i = 0; i < SDL_JoystickNumButtons(joystick); ++i) {
-            SDL_Rect area;
-
-            area.x = i * 34;
-            area.y = SCREEN_HEIGHT - 34;
-            area.w = 32;
-            area.h = 32;
             if (SDL_JoystickGetButton(joystick, i) == SDL_PRESSED) {
-                SDL_SetRenderDrawColor(screen, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-            } else {
-                SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+                DrawRect(screen, i * 34, SCREEN_HEIGHT - 34, 32, 32);
             }
-            SDL_RenderFillRect(screen, &area);
-            SDL_RenderPresent(screen);
         }
 
-        for (i = 0;
-             i < SDL_JoystickNumAxes(joystick) / 2
-             && i < SDL_arraysize(axis_area); ++i) {
-
-            /* Erase previous axes */
-            SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(screen, &axis_area[i][axis_draw[i]]);
-
+        SDL_SetRenderDrawColor(screen, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE);
+        for (i = 0; i < SDL_JoystickNumAxes(joystick) / 2; ++i) {
             /* Draw the X/Y axis */
-            axis_draw[i] = !axis_draw[i];
+            int x, y;
             x = (((int) SDL_JoystickGetAxis(joystick, i * 2 + 0)) + 32768);
             x *= SCREEN_WIDTH;
             x /= 65535;
@@ -171,51 +156,32 @@ WatchJoystick(SDL_Joystick * joystick)
                 y = SCREEN_HEIGHT - 16;
             }
 
-            axis_area[i][axis_draw[i]].x = (Sint16) x;
-            axis_area[i][axis_draw[i]].y = (Sint16) y;
-            axis_area[i][axis_draw[i]].w = 16;
-            axis_area[i][axis_draw[i]].h = 16;
-
-            SDL_SetRenderDrawColor(screen, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(screen, &axis_area[i][axis_draw[i]]);
-            SDL_RenderPresent(screen);
+            DrawRect(screen, x, y, 16, 16);
         }
 
-        for (i = 0;
-             i < SDL_JoystickNumHats(joystick)
-             && i < SDL_arraysize(hat_area); ++i) {
-
-            /* Erase previous hat position */
-            SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(screen, &hat_area[i][hat_draw[i]]);
-
-            hat_draw[i] = !hat_draw[i];
-
+        SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0xFF, SDL_ALPHA_OPAQUE);
+        for (i = 0; i < SDL_JoystickNumHats(joystick); ++i) {
             /* Derive the new position */
-            hat_pos = SDL_JoystickGetHat(joystick, i);
-
-            hat_area[i][hat_draw[i]].x = SCREEN_WIDTH/2;
-            hat_area[i][hat_draw[i]].y = SCREEN_HEIGHT/2;
-            hat_area[i][hat_draw[i]].w = 8;
-            hat_area[i][hat_draw[i]].h = 8;
+            int x = SCREEN_WIDTH/2;
+            int y = SCREEN_HEIGHT/2;
+            const Uint8 hat_pos = SDL_JoystickGetHat(joystick, i);
 
             if (hat_pos & SDL_HAT_UP) {
-                hat_area[i][hat_draw[i]].y = 0;
+                y = 0;
             } else if (hat_pos & SDL_HAT_DOWN) {
-                hat_area[i][hat_draw[i]].y = SCREEN_HEIGHT-8;
+                y = SCREEN_HEIGHT-8;
             }
 
             if (hat_pos & SDL_HAT_LEFT) {
-                hat_area[i][hat_draw[i]].x = 0;
+                x = 0;
             } else if (hat_pos & SDL_HAT_RIGHT) {
-                hat_area[i][hat_draw[i]].x = SCREEN_WIDTH-8;
+                x = SCREEN_WIDTH-8;
             }
 
-            /* Draw it */
-            SDL_SetRenderDrawColor(screen, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-            SDL_RenderFillRect(screen, &hat_area[i][hat_draw[i]]);
-            SDL_RenderPresent(screen);
+            DrawRect(screen, x, y, 8, 8);
         }
+
+        SDL_RenderPresent(screen);
     }
 
     SDL_DestroyRenderer(screen);
