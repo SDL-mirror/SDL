@@ -1260,10 +1260,10 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     /* We don't intersect the dstrect with the viewport as RenderCopy does because of potential rotation clipping issues... TODO: should we? */
     if (dstrect) real_dstrect = *dstrect;
     else {
-        real_srcrect.x = 0;
-        real_srcrect.y = 0;
-        real_srcrect.w = renderer->viewport.w;
-        real_srcrect.h = renderer->viewport.h;
+        real_dstrect.x = 0;
+        real_dstrect.y = 0;
+        real_dstrect.w = renderer->viewport.w;
+        real_dstrect.h = renderer->viewport.h;
     }
 
     if (texture->native) {
