@@ -681,6 +681,7 @@ GetScaleQuality(void)
 static int
 D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
+    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     D3D_TextureData *data;
     D3DPOOL pool;
     DWORD usage;
@@ -728,7 +729,6 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-    D3D_RenderData *renderdata = (D3D_RenderData *) renderer->driverdata;
     RECT d3drect;
     D3DLOCKED_RECT locked;
     const Uint8 *src;
