@@ -540,7 +540,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
         /* Create legacy context */
         context = _this->gl_data->wglCreateContext(hdc);
 	if( share_context != 0 ) {
-            _this->gl_data->wglShareLists(share_context, hdc);
+            _this->gl_data->wglShareLists(share_context, context);
 	}
     } else {
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
