@@ -422,6 +422,8 @@ SDL_LoadWAV_RW(SDL_RWops * src, int freesrc,
     /* FMT chunk */
     WaveFMT *format = NULL;
 
+    SDL_zero(chunk);
+
     /* Make sure we are passed a valid data source */
     was_error = 0;
     if (src == NULL) {
