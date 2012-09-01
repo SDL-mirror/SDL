@@ -505,6 +505,7 @@ SDL_VideoInit(const char *driver_name)
 #endif
     _this->gl_config.flags = 0;
     _this->gl_config.profile_mask = 0;
+    _this->gl_config.share_with_current_context = 0;
 
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
@@ -2309,11 +2310,30 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         _this->gl_config.use_egl = value;
         break;
     case SDL_GL_CONTEXT_FLAGS:
+        if( value & ~(SDL_GL_CONTEXT_DEBUG_FLAG |
+		      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG |
+		      SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG |
+		      SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) ) {
+	    SDL_SetError("Unknown OpenGL context flag %d", value);
+	    retval = -1;
+	    break;
+	}
         _this->gl_config.flags = value;
         break;
     case SDL_GL_CONTEXT_PROFILE_MASK:
+        if( value != 0 &&
+	    value != SDL_GL_CONTEXT_PROFILE_CORE &&
+	    value != SDL_GL_CONTEXT_PROFILE_COMPATIBILITY &&
+	    value != SDL_GL_CONTEXT_PROFILE_ES ) {
+	    SDL_SetError("Unknown OpenGL context profile %d", value);
+	    retval = -1;
+	    break;
+	}
         _this->gl_config.profile_mask = value;
         break;
+    case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
+        _this->gl_config.share_with_current_context = value;
+	break;
     default:
         SDL_SetError("Unknown OpenGL attribute");
         retval = -1;
@@ -2475,6 +2495,11 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
             *value = _this->gl_config.profile_mask;
             return 0;
         }
+    case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
+        {
+            *value = _this->gl_config.share_with_current_context;
+            return 0;
+        }
     default:
         SDL_SetError("Unknown OpenGL attribute");
         return -1;
@@ -2578,16 +2603,13 @@ int
 SDL_GL_GetSwapInterval(void)
 {
     if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
+        return 0;
     } else if (_this->current_glctx == NULL) {
-        SDL_SetError("No OpenGL context has been made current");
-        return -1;
+        return 0;
     } else if (_this->GL_GetSwapInterval) {
         return _this->GL_GetSwapInterval(_this);
     } else {
-        SDL_SetError("Getting the swap interval is not supported");
-        return -1;
+        return 0;
     }
 }
 
@@ -2754,6 +2776,51 @@ SDL_SetTextInputRect(SDL_Rect *rect)
     if (_this && _this->SetTextInputRect) {
         _this->SetTextInputRect(_this, rect);
     }
+}
+
+SDL_bool
+SDL_HasScreenKeyboardSupport(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_HasScreenKeyboardSupport) {
+        return _this->SDL_HasScreenKeyboardSupport(_this, window);
+    }
+    return SDL_FALSE;
+}
+
+int
+SDL_ShowScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_ShowScreenKeyboard) {
+        return _this->SDL_ShowScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+int
+SDL_HideScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_HideScreenKeyboard) {
+        return _this->SDL_HideScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+int
+SDL_ToggleScreenKeyboard(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_ToggleScreenKeyboard) {
+        return _this->SDL_ToggleScreenKeyboard(_this, window);
+    }
+    return -1;
+}
+
+SDL_bool
+SDL_IsScreenKeyboardShown(SDL_Window *window)
+{
+    if (window && _this && _this->SDL_IsScreenKeyboardShown) {
+        return _this->SDL_IsScreenKeyboardShown(_this, window);
+    }
+    return SDL_FALSE;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

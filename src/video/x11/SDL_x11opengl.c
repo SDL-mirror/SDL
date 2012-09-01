@@ -105,6 +105,10 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
 #define GLX_MAX_SWAP_INTERVAL_EXT          0x20F2
 #endif
 
+#ifndef GLX_EXT_swap_control_tear
+#define GLX_LATE_SWAPS_TEAR_EXT 0x20F3
+#endif
+
 #define OPENGL_REQUIRES_DLOPEN
 #if defined(OPENGL_REQUIRES_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
 #include <dlfcn.h>
@@ -318,11 +322,15 @@ X11_GL_InitExtensions(_THIS)
         extensions = NULL;
     }
 
-    /* Check for GLX_EXT_swap_control */
+    /* Check for GLX_EXT_swap_control(_tear) */
+    _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_FALSE;
     if (HasExtension("GLX_EXT_swap_control", extensions)) {
         _this->gl_data->glXSwapIntervalEXT =
             (int (*)(Display*,GLXDrawable,int))
                 X11_GL_GetProcAddress(_this, "glXSwapIntervalEXT");
+        if (HasExtension("GLX_EXT_swap_control_tear", extensions)) {
+            _this->gl_data->HAS_GLX_EXT_swap_control_tear = SDL_TRUE;
+        }
     }
 
     /* Check for GLX_MESA_swap_control */
@@ -476,7 +484,13 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     XWindowAttributes xattr;
     XVisualInfo v, *vinfo;
     int n;
-    GLXContext context = NULL;
+    GLXContext context = NULL, share_context;
+
+    if (_this->gl_config.share_with_current_context) {
+        share_context = (GLXContext)(_this->current_glctx);
+    } else {
+        share_context = NULL;
+    }
 
     /* We do this to create a clean separation between X and GLX errors. */
     XSync(display, False);
@@ -485,9 +499,12 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     v.visualid = XVisualIDFromVisual(xattr.visual);
     vinfo = XGetVisualInfo(display, VisualScreenMask | VisualIDMask, &v, &n);
     if (vinfo) {
-        if (_this->gl_config.major_version < 3) {
+        if (_this->gl_config.major_version < 3 &&
+            _this->gl_config.profile_mask == 0 &&
+            _this->gl_config.flags == 0) {
+            /* Create legacy context */
             context =
-                _this->gl_data->glXCreateContext(display, vinfo, NULL, True);
+                _this->gl_data->glXCreateContext(display, vinfo, share_context, True);
         } else {
             /* If we want a GL 3.0 context or later we need to get a temporary
                context to grab the new context creation function */
@@ -497,7 +514,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                 SDL_SetError("Could not create GL context");
                 return NULL;
             } else {
-	        /* max 8 attributes plus terminator */
+                /* max 8 attributes plus terminator */
                 int attribs[9] = {
                     GLX_CONTEXT_MAJOR_VERSION_ARB,
                     _this->gl_config.major_version,
@@ -505,21 +522,21 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                     _this->gl_config.minor_version,
                     0
                 };
-		int iattr = 4;
+                int iattr = 4;
 
-		/* SDL profile bits match GLX profile bits */
-		if( _this->gl_config.profile_mask != 0 ) {
-		    attribs[iattr++] = GLX_CONTEXT_PROFILE_MASK_ARB;
-		    attribs[iattr++] = _this->gl_config.profile_mask;
-		}
+                /* SDL profile bits match GLX profile bits */
+                if( _this->gl_config.profile_mask != 0 ) {
+                    attribs[iattr++] = GLX_CONTEXT_PROFILE_MASK_ARB;
+                    attribs[iattr++] = _this->gl_config.profile_mask;
+                }
 
-		/* SDL flags match GLX flags */
-		if( _this->gl_config.flags != 0 ) {
-		    attribs[iattr++] = GLX_CONTEXT_FLAGS_ARB;
-		    attribs[iattr++] = _this->gl_config.flags;
-		}
+                /* SDL flags match GLX flags */
+                if( _this->gl_config.flags != 0 ) {
+                    attribs[iattr++] = GLX_CONTEXT_FLAGS_ARB;
+                    attribs[iattr++] = _this->gl_config.flags;
+                }
 
-		attribs[iattr++] = 0;
+                attribs[iattr++] = 0;
 
                 /* Get a pointer to the context creation function for GL 3.0 */
                 PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribs =
@@ -560,7 +577,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
                         context =
                             glXCreateContextAttribs(display,
                                                     framebuffer_config[0],
-                                                    NULL, True, attribs);
+                                                    share_context, True, attribs);
                         _this->gl_data->glXDestroyContext(display,
                                                           temp_context);
                     }
@@ -615,9 +632,11 @@ static int swapinterval = -1;
 int
 X11_GL_SetSwapInterval(_THIS, int interval)
 {
-    int status;
+    int status = -1;
 
-    if (_this->gl_data->glXSwapIntervalEXT) {
+    if ((interval < 0) && (!_this->gl_data->HAS_GLX_EXT_swap_control_tear)) {
+        SDL_SetError("Negative swap interval unsupported in this GL");
+    } else if (_this->gl_data->glXSwapIntervalEXT) {
         Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
@@ -625,7 +644,6 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalEXT(display,drawable,interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalEXT failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
@@ -633,7 +651,6 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalMESA(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalMESA failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
@@ -641,13 +658,11 @@ X11_GL_SetSwapInterval(_THIS, int interval)
         status = _this->gl_data->glXSwapIntervalSGI(interval);
         if (status != 0) {
             SDL_SetError("glxSwapIntervalSGI failed");
-            status = -1;
         } else {
             swapinterval = interval;
         }
     } else {
         SDL_Unsupported();
-        status = -1;
     }
     return status;
 }
@@ -660,10 +675,23 @@ X11_GL_GetSwapInterval(_THIS)
         const SDL_WindowData *windowdata = (SDL_WindowData *)
             _this->current_glwin->driverdata;
         Window drawable = windowdata->xwindow;
-        unsigned int value = 0;
+        unsigned int allow_late_swap_tearing = 0;
+        unsigned int interval = 0;
+
+        if (_this->gl_data->HAS_GLX_EXT_swap_control_tear) {
+            _this->gl_data->glXQueryDrawable(display, drawable,
+                                            GLX_LATE_SWAPS_TEAR_EXT,
+                                            &allow_late_swap_tearing);
+        }
+
         _this->gl_data->glXQueryDrawable(display, drawable,
-                                         GLX_SWAP_INTERVAL_EXT, &value);
-        return (int) value;
+                                         GLX_SWAP_INTERVAL_EXT, &interval);
+
+        if ((allow_late_swap_tearing) && (interval > 0)) {
+            return -((int) interval);
+        }
+
+        return (int) interval;
     } else if (_this->gl_data->glXGetSwapIntervalMESA) {
         return _this->gl_data->glXGetSwapIntervalMESA();
     } else {

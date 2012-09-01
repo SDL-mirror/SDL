@@ -912,6 +912,7 @@ int SDL_ConvertPixels(int width, int height,
     SDL_PixelFormat src_fmt, dst_fmt;
     SDL_BlitMap src_blitmap, dst_blitmap;
     SDL_Rect rect;
+    void *nonconst_src = (void *) src;
 
     /* Fast path for same format copy */
     if (src_format == dst_format) {
@@ -942,7 +943,7 @@ int SDL_ConvertPixels(int width, int height,
         return 0;
     }
 
-    if (!SDL_CreateSurfaceOnStack(width, height, src_format, (void*)src,
+    if (!SDL_CreateSurfaceOnStack(width, height, src_format, nonconst_src,
                                   src_pitch,
                                   &src_surface, &src_fmt, &src_blitmap)) {
         return -1;

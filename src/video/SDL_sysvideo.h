@@ -233,6 +233,13 @@ struct SDL_VideoDevice
     void (*StopTextInput) (_THIS);
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
+    /* Screen keyboard */
+    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS, SDL_Window *window);
+    int (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
+    int (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
+    int (*SDL_ToggleScreenKeyboard) (_THIS, SDL_Window *window);
+    SDL_bool (*SDL_IsScreenKeyboardShown) (_THIS, SDL_Window *window);
+
     /* Clipboard */
     int (*SetClipboardText) (_THIS, const char *text);
     char * (*GetClipboardText) (_THIS);
@@ -273,6 +280,7 @@ struct SDL_VideoDevice
         int flags;
         int profile_mask;
         int use_egl;
+        int share_with_current_context;
         int retained_backing;
         int driver_loaded;
         char driver_path[256];

@@ -58,7 +58,7 @@ android-project/
 	AndroidManifest.xml	- package manifest, do not modify
 	build.properties	- empty
 	build.xml		- build description file, used by ant
-	default.properties	- holds the ABI for the application, currently android-4 which corresponds to the Android 1.6 system image
+	default.properties	- holds the ABI for the application, currently android-5 which corresponds to the Android 2.0 system image
 	local.properties	- holds the SDK path, you should change this to the path to your SDK
 	jni/			- directory holding native code
 	jni/Android.mk		- Android makefile that includes all subdirectories
@@ -126,7 +126,7 @@ Once you've copied the SDL android project and customized it, you can create an 
  * Select the Android -> Android Project wizard and click Next
  * Enter the name you'd like your project to have
  * Select "Create project from existing source" and browse for your project directory
- * Make sure the Build Target is set to Android 1.6
+ * Make sure the Build Target is set to Android 2.0
  * Click Finish
 
 

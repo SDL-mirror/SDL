@@ -355,7 +355,17 @@ static SDL_uikitview * getWindowView(SDL_Window * window)
     return view;
 }
 
-int SDL_iPhoneKeyboardShow(SDL_Window * window)
+SDL_bool UIKit_HasScreenKeyboardSupport(_THIS, SDL_Window *window)
+{
+    SDL_uikitview *view = getWindowView(window);
+    if (view == nil) {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+
+int UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
     if (view == nil) {
@@ -366,7 +376,7 @@ int SDL_iPhoneKeyboardShow(SDL_Window * window)
     return 0;
 }
 
-int SDL_iPhoneKeyboardHide(SDL_Window * window)
+int UIKit_HideScreenKeyboard(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
     if (view == nil) {
@@ -377,7 +387,7 @@ int SDL_iPhoneKeyboardHide(SDL_Window * window)
     return 0;
 }
 
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
+SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
     if (view == nil) {
@@ -387,47 +397,20 @@ SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
     return view.keyboardVisible;
 }
 
-int SDL_iPhoneKeyboardToggle(SDL_Window * window)
+int UIKit_ToggleScreenKeyboard(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
     if (view == nil) {
         return -1;
     }
 
-    if (SDL_iPhoneKeyboardIsShown(window)) {
-        SDL_iPhoneKeyboardHide(window);
+    if (UIKit_IsScreenKeyboardShown(_this, window)) {
+        UIKit_HideScreenKeyboard(_this, window);
     }
     else {
-        SDL_iPhoneKeyboardShow(window);
+        UIKit_ShowScreenKeyboard(_this, window);
     }
     return 0;
-}
-
-#else
-
-/* stubs, used if compiled without keyboard support */
-
-int SDL_iPhoneKeyboardShow(SDL_Window * window)
-{
-    SDL_SetError("Not compiled with keyboard support");
-    return -1;
-}
-
-int SDL_iPhoneKeyboardHide(SDL_Window * window)
-{
-    SDL_SetError("Not compiled with keyboard support");
-    return -1;
-}
-
-SDL_bool SDL_iPhoneKeyboardIsShown(SDL_Window * window)
-{
-    return 0;
-}
-
-int SDL_iPhoneKeyboardToggle(SDL_Window * window)
-{
-    SDL_SetError("Not compiled with keyboard support");
-    return -1;
 }
 
 #endif /* SDL_IPHONE_KEYBOARD */

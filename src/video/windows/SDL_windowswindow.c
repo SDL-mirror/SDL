@@ -74,7 +74,6 @@ static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_WindowData *data;
 
     /* Allocate the window data */
@@ -193,7 +192,6 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 int
 WIN_CreateWindow(_THIS, SDL_Window * window)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     HWND hwnd;
     RECT rect;
     DWORD style = STYLE_BASIC;
@@ -344,7 +342,6 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
     DWORD style;
@@ -481,11 +478,12 @@ void
 WIN_MaximizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
 #ifdef _WIN32_WCE
-    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen)
+    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen) {
+        SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
         videodata->SHFullScreen(hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
+    }
 #endif
 
     ShowWindow(hwnd, SW_MAXIMIZE);
@@ -495,13 +493,14 @@ void
 WIN_MinimizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
     ShowWindow(hwnd, SW_MINIMIZE);
 
 #ifdef _WIN32_WCE
-    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen)
+    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen) {
+        SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
         videodata->SHFullScreen(hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
+    }
 #endif
 }
 

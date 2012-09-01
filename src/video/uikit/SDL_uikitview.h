@@ -60,6 +60,13 @@
 - (void)hideKeyboard;
 - (void)initializeKeyboard;
 @property (readonly) BOOL keyboardVisible;
+
+SDL_bool UIKit_HasScreenKeyboardSupport(_THIS, SDL_Window *window);
+int UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window);
+int UIKit_HideScreenKeyboard(_THIS, SDL_Window *window);
+int UIKit_ToggleScreenKeyboard(_THIS, SDL_Window *window);
+SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window);
+
 #endif
 
 @end

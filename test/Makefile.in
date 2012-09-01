@@ -121,11 +121,25 @@ testloadso$(EXE): $(srcdir)/testloadso.c
 testlock$(EXE): $(srcdir)/testlock.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
+ifeq (@ISMACOSX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
 			$(srcdir)/testnativecocoa.m \
 			$(srcdir)/testnativew32.c \
 			$(srcdir)/testnativex11.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11 -framework Cocoa
+endif
+
+ifeq (@ISWINDOWS@,true)
+testnative$(EXE): $(srcdir)/testnative.c \
+			$(srcdir)/testnativew32.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
+endif
+
+ifeq (@ISUNIX@,true)
+testnative$(EXE): $(srcdir)/testnative.c \
+			$(srcdir)/testnativex11.c
+	$(CC) -o $@ $? $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11
+endif
 
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)

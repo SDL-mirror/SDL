@@ -89,6 +89,11 @@ UIKit_CreateDevice(int devindex)
     device->DestroyWindow = UIKit_DestroyWindow;
     device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
 
+    device->SDL_HasScreenKeyboardSupport = UIKit_HasScreenKeyboardSupport;
+    device->SDL_ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
+    device->SDL_HideScreenKeyboard = UIKit_HideScreenKeyboard;
+    device->SDL_ToggleScreenKeyboard = UIKit_ToggleScreenKeyboard;
+    device->SDL_IsScreenKeyboardShown = UIKit_IsScreenKeyboardShown;
 
     /* OpenGL (ES) functions */
     device->GL_MakeCurrent        = UIKit_GL_MakeCurrent;
