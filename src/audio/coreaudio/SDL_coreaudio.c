@@ -388,7 +388,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
     desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     comp = FindNextComponent(NULL, &desc);
 #else
-    desc.componentSubType = kAudioUnitSubType_RemoteIO;  /* !!! FIXME: ? */
+    desc.componentSubType = kAudioUnitSubType_RemoteIO;
     comp = AudioComponentFindNext(NULL, &desc);
 #endif
 
