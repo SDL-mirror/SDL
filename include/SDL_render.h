@@ -672,6 +672,28 @@ extern DECLSPEC void SDLCALL SDL_DestroyTexture(SDL_Texture * texture);
 extern DECLSPEC void SDLCALL SDL_DestroyRenderer(SDL_Renderer * renderer);
 
 
+/**
+ *  \brief Bind the texture to the current OpenGL/ES/ES2 context for use with
+ *         OpenGL instructions.
+ *
+ *  \param texture  The SDL texture to bind
+ *  \param texw     A pointer to a float that will be filled with the texture width
+ *  \param texh     A pointer to a float that will be filled with the texture height
+ *
+ *  \return 0 on success, or -1 if the operation is not supported
+ */
+extern DECLSPEC int SDLCALL SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh);
+
+/**
+ *  \brief Unbind a texture from the current OpenGL/ES/ES2 context.
+ *
+ *  \param texture  The SDL texture to unbind
+ *
+ *  \return 0 on success, or -1 if the operation is not supported
+ */
+extern DECLSPEC int SDLCALL SDL_GL_UnbindTexture(SDL_Texture *texture);
+
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */

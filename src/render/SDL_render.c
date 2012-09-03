@@ -1382,4 +1382,32 @@ SDL_DestroyRenderer(SDL_Renderer * renderer)
     renderer->DestroyRenderer(renderer);
 }
 
+int SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh)
+{
+    SDL_Renderer *renderer;
+
+    CHECK_TEXTURE_MAGIC(texture, );
+    renderer = texture->renderer;
+    if (renderer && renderer->GL_BindTexture) {
+        return renderer->GL_BindTexture(renderer, texture, texw, texh);
+    }
+
+    SDL_Unsupported();
+    return -1;
+}
+
+int SDL_GL_UnbindTexture(SDL_Texture *texture)
+{
+    SDL_Renderer *renderer;
+
+    CHECK_TEXTURE_MAGIC(texture, );
+    renderer = texture->renderer;
+    if (renderer && renderer->GL_UnbindTexture) {
+        return renderer->GL_UnbindTexture(renderer, texture);
+    }
+
+    SDL_Unsupported();
+    return -1;
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

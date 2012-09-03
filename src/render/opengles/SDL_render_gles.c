@@ -78,6 +78,8 @@ static void GLES_RenderPresent(SDL_Renderer * renderer);
 static void GLES_DestroyTexture(SDL_Renderer * renderer,
                                 SDL_Texture * texture);
 static void GLES_DestroyRenderer(SDL_Renderer * renderer);
+static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh);
+static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture);
 
 typedef struct GLES_FBOList GLES_FBOList;
 
@@ -312,6 +314,8 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderPresent = GLES_RenderPresent;
     renderer->DestroyTexture = GLES_DestroyTexture;
     renderer->DestroyRenderer = GLES_DestroyRenderer;
+    renderer->GL_BindTexture = GLES_BindTexture;
+    renderer->GL_UnbindTexture = GLES_UnbindTexture;
     renderer->info = GLES_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
@@ -1104,6 +1108,30 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     }
     SDL_free(renderer);
 }
+
+static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
+    GLES_ActivateRenderer(renderer);
+
+    data->glEnable(GL_TEXTURE_2D);
+    data->glBindTexture(texturedata->type, texturedata->texture);
+
+    if(texw) *texw = (float)texturedata->texw;
+    if(texh) *texh = (float)texturedata->texh;
+
+    return 0;
+}
+
+static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
+    GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
+    GLES_ActivateRenderer(renderer);
+    data->glDisable(texturedata->type);
+
+    return 0;
+}
+
 
 #endif /* SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED */
 

@@ -73,7 +73,8 @@ static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 static void GL_RenderPresent(SDL_Renderer * renderer);
 static void GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static void GL_DestroyRenderer(SDL_Renderer * renderer);
-
+static int GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh);
+static int GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture);
 
 SDL_RenderDriver GL_RenderDriver = {
     GL_CreateRenderer,
@@ -322,6 +323,8 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderPresent = GL_RenderPresent;
     renderer->DestroyTexture = GL_DestroyTexture;
     renderer->DestroyRenderer = GL_DestroyRenderer;
+    renderer->GL_BindTexture = GL_BindTexture;
+    renderer->GL_UnbindTexture = GL_UnbindTexture;
     renderer->info = GL_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
@@ -1226,6 +1229,49 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
         SDL_free(data);
     }
     SDL_free(renderer);
+}
+
+static int GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
+    GL_ActivateRenderer(renderer);
+
+    data->glEnable(texturedata->type);
+    if (texturedata->yuv) {
+        data->glActiveTextureARB(GL_TEXTURE2_ARB);
+        data->glBindTexture(texturedata->type, texturedata->vtexture);
+
+        data->glActiveTextureARB(GL_TEXTURE1_ARB);
+        data->glBindTexture(texturedata->type, texturedata->utexture);
+
+        data->glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+    data->glBindTexture(texturedata->type, texturedata->texture);
+
+    if(texw) *texw = (float)texturedata->texw;
+    if(texh) *texh = (float)texturedata->texh;
+
+    return 0;
+}
+
+static int GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
+    GL_ActivateRenderer(renderer);
+
+    if (texturedata->yuv) {
+        data->glActiveTextureARB(GL_TEXTURE2_ARB);
+        data->glDisable(texturedata->type);
+
+        data->glActiveTextureARB(GL_TEXTURE1_ARB);
+        data->glDisable(texturedata->type);
+
+        data->glActiveTextureARB(GL_TEXTURE0_ARB);
+    }
+    
+    data->glDisable(texturedata->type);
+
+    return 0;
 }
 
 #endif /* SDL_VIDEO_RENDER_OGL && !SDL_RENDER_DISABLED */

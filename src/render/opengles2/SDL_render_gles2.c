@@ -1564,6 +1564,39 @@ GLES2_RenderPresent(SDL_Renderer *renderer)
     SDL_GL_SwapWindow(renderer->window);
 }
 
+
+/*************************************************************************************************
+ * Bind/unbinding of textures
+ *************************************************************************************************/
+static int GLES2_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh);
+static int GLES2_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture);
+
+static int GLES2_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+    GLES2_DriverContext *data = (GLES2_DriverContext *)renderer->driverdata;
+    GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
+    GLES2_ActivateRenderer(renderer);
+
+    data->glActiveTexture(GL_TEXTURE0);
+    data->glBindTexture(texturedata->texture_type, texturedata->texture);
+
+    if(texw) *texw = 1.0;
+    if(texh) *texh = 1.0;
+
+    return 0;
+}
+
+static int GLES2_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+    GLES2_DriverContext *data = (GLES2_DriverContext *)renderer->driverdata;
+    GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
+    GLES2_ActivateRenderer(renderer);
+
+    data->glActiveTexture(GL_TEXTURE0);
+    data->glDisable(texturedata->texture_type);
+
+    return 0;
+}
+
+
 /*************************************************************************************************
  * Renderer instantiation                                                                        *
  *************************************************************************************************/
@@ -1712,6 +1745,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->RenderPresent       = &GLES2_RenderPresent;
     renderer->DestroyTexture      = &GLES2_DestroyTexture;
     renderer->DestroyRenderer     = &GLES2_DestroyRenderer;
+    renderer->GL_BindTexture      = &GLES2_BindTexture;
+    renderer->GL_UnbindTexture    = &GLES2_UnbindTexture;
 
     GLES2_ResetState(renderer);
 

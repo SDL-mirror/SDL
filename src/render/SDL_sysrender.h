@@ -98,6 +98,9 @@ struct SDL_Renderer
 
     void (*DestroyRenderer) (SDL_Renderer * renderer);
 
+    int (*GL_BindTexture) (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh);
+    int (*GL_UnbindTexture) (SDL_Renderer * renderer, SDL_Texture *texture);
+
     /* The current renderer info */
     SDL_RendererInfo info;
 
