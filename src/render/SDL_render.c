@@ -1386,7 +1386,7 @@ int SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh)
 {
     SDL_Renderer *renderer;
 
-    CHECK_TEXTURE_MAGIC(texture, );
+    CHECK_TEXTURE_MAGIC(texture, -1);
     renderer = texture->renderer;
     if (renderer && renderer->GL_BindTexture) {
         return renderer->GL_BindTexture(renderer, texture, texw, texh);
@@ -1400,7 +1400,7 @@ int SDL_GL_UnbindTexture(SDL_Texture *texture)
 {
     SDL_Renderer *renderer;
 
-    CHECK_TEXTURE_MAGIC(texture, );
+    CHECK_TEXTURE_MAGIC(texture, -1);
     renderer = texture->renderer;
     if (renderer && renderer->GL_UnbindTexture) {
         return renderer->GL_UnbindTexture(renderer, texture);
