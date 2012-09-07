@@ -1373,7 +1373,9 @@ SDL_DestroyRenderer(SDL_Renderer * renderer)
         SDL_DestroyTexture(renderer->textures);
     }
 
-    SDL_SetWindowData(renderer->window, SDL_WINDOWRENDERDATA, NULL);
+    if (renderer->window) {
+        SDL_SetWindowData(renderer->window, SDL_WINDOWRENDERDATA, NULL);
+    }
 
     /* It's no longer magical... */
     renderer->magic = NULL;
