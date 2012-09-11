@@ -107,11 +107,6 @@ static SDL_VideoDevice *_this = NULL;
         return retval; \
     }
 
-#define INVALIDATE_GLCONTEXT() \
-    _this->current_glwin = NULL; \
-    _this->current_glctx = NULL;
-
-
 /* Support for framebuffer emulation using an accelerated renderer */
 
 #define SDL_WINDOWTEXTUREDATA   "_SDL_WindowTextureData"
@@ -1865,14 +1860,12 @@ SDL_GetWindowGrab(SDL_Window * window)
 void
 SDL_OnWindowShown(SDL_Window * window)
 {
-    INVALIDATE_GLCONTEXT();
     SDL_OnWindowRestored(window);
 }
 
 void
 SDL_OnWindowHidden(SDL_Window * window)
 {
-    INVALIDATE_GLCONTEXT();
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 }
 
@@ -1896,6 +1889,13 @@ SDL_OnWindowRestored(SDL_Window * window)
 
     if (FULLSCREEN_VISIBLE(window)) {
         SDL_UpdateFullscreenMode(window, SDL_TRUE);
+    }
+
+    /* This needs to be done on iOS to rebind the nscontext to the view,
+       and (hopefully) doesn't hurt on other systems.
+    */
+    if (window == _this->current_glwin) {
+        _this->GL_MakeCurrent(_this, _this->current_glwin, _this->current_glctx);
     }
 }
 
