@@ -1890,13 +1890,6 @@ SDL_OnWindowRestored(SDL_Window * window)
     if (FULLSCREEN_VISIBLE(window)) {
         SDL_UpdateFullscreenMode(window, SDL_TRUE);
     }
-
-    /* This needs to be done on iOS to rebind the nscontext to the view,
-       and (hopefully) doesn't hurt on other systems.
-    */
-    if (window == _this->current_glwin) {
-        _this->GL_MakeCurrent(_this, _this->current_glwin, _this->current_glctx);
-    }
 }
 
 void

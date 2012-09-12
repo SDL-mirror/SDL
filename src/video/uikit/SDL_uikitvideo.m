@@ -85,6 +85,7 @@ UIKit_CreateDevice(int devindex)
     device->CreateWindow = UIKit_CreateWindow;
     device->ShowWindow = UIKit_ShowWindow;
     device->HideWindow = UIKit_HideWindow;
+    device->RaiseWindow = UIKit_RaiseWindow;
     device->SetWindowFullscreen = UIKit_SetWindowFullscreen;
     device->DestroyWindow = UIKit_DestroyWindow;
     device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
