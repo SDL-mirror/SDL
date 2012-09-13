@@ -1491,6 +1491,24 @@ SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 }
 
 void
+SDL_SetWindowBordered(SDL_Window * window, SDL_bool bordered)
+{
+    CHECK_WINDOW_MAGIC(window, );
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        const int want = (bordered != SDL_FALSE);  /* normalize the flag. */
+        const int have = ((window->flags & SDL_WINDOW_BORDERLESS) == 0);
+        if ((want != have) && (_this->SetWindowBordered)) {
+            if (want) {
+                window->flags &= ~SDL_WINDOW_BORDERLESS;
+            } else {
+                window->flags |= SDL_WINDOW_BORDERLESS;
+            }
+            _this->SetWindowBordered(_this, window, (SDL_bool) want);
+        }
+    }
+}
+
+void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window, );

@@ -505,6 +505,13 @@ WIN_MinimizeWindow(_THIS, SDL_Window * window)
 }
 
 void
+WIN_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+{
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    SetWindowLong(hwnd, GWL_STYLE, GetWindowStyle(window));
+}
+
+void
 WIN_RestoreWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;

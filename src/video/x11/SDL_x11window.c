@@ -247,6 +247,37 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     return 0;
 }
 
+static void
+SetWindowBordered(Display *display, int screen, Window window, SDL_bool border)
+{
+    /*
+     * this code used to check for KWM_WIN_DECORATION, but KDE hasn't
+     *  supported it for years and years. It now respects _MOTIF_WM_HINTS.
+     *  Gnome is similar: just use the Motif atom.
+     */
+
+    Atom WM_HINTS = XInternAtom(display, "_MOTIF_WM_HINTS", True);
+    if (WM_HINTS != None) {
+        /* Hints used by Motif compliant window managers */
+        struct
+        {
+            unsigned long flags;
+            unsigned long functions;
+            unsigned long decorations;
+            long input_mode;
+            unsigned long status;
+        } MWMHints = {
+            (1L << 1), 0, border ? 1 : 0, 0, 0
+        };
+
+        XChangeProperty(display, window, WM_HINTS, WM_HINTS, 32,
+                        PropModeReplace, (unsigned char *) &MWMHints,
+                        sizeof(MWMHints) / 4);
+    } else {  /* set the transient hints instead, if necessary */
+        XSetTransientForHint(display, window, RootWindow(display, screen));
+    }
+}
+
 int
 X11_CreateWindow(_THIS, SDL_Window * window)
 {
@@ -412,88 +443,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 #endif
 
-    if (window->flags & SDL_WINDOW_BORDERLESS) {
-        SDL_bool set;
-        Atom WM_HINTS;
-
-        /* We haven't modified the window manager hints yet */
-        set = SDL_FALSE;
-
-        /* First try to set MWM hints */
-        WM_HINTS = XInternAtom(display, "_MOTIF_WM_HINTS", True);
-        if (WM_HINTS != None) {
-            /* Hints used by Motif compliant window managers */
-            struct
-            {
-                unsigned long flags;
-                unsigned long functions;
-                unsigned long decorations;
-                long input_mode;
-                unsigned long status;
-            } MWMHints = {
-            (1L << 1), 0, 0, 0, 0};
-
-            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
-                            PropModeReplace, (unsigned char *) &MWMHints,
-                            sizeof(MWMHints) / 4);
-            set = SDL_TRUE;
-        }
-        /* Now try to set KWM hints */
-        WM_HINTS = XInternAtom(display, "KWM_WIN_DECORATION", True);
-        if (WM_HINTS != None) {
-            long KWMHints = 0;
-
-            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
-                            PropModeReplace,
-                            (unsigned char *) &KWMHints,
-                            sizeof(KWMHints) / 4);
-            set = SDL_TRUE;
-        }
-        /* Now try to set GNOME hints */
-        WM_HINTS = XInternAtom(display, "_WIN_HINTS", True);
-        if (WM_HINTS != None) {
-            long GNOMEHints = 0;
-
-            XChangeProperty(display, w, WM_HINTS, WM_HINTS, 32,
-                            PropModeReplace,
-                            (unsigned char *) &GNOMEHints,
-                            sizeof(GNOMEHints) / 4);
-            set = SDL_TRUE;
-        }
-        /* Finally set the transient hints if necessary */
-        if (!set) {
-            XSetTransientForHint(display, w, RootWindow(display, screen));
-        }
-    } else {
-        SDL_bool set;
-        Atom WM_HINTS;
-
-        /* We haven't modified the window manager hints yet */
-        set = SDL_FALSE;
-
-        /* First try to unset MWM hints */
-        WM_HINTS = XInternAtom(display, "_MOTIF_WM_HINTS", True);
-        if (WM_HINTS != None) {
-            XDeleteProperty(display, w, WM_HINTS);
-            set = SDL_TRUE;
-        }
-        /* Now try to unset KWM hints */
-        WM_HINTS = XInternAtom(display, "KWM_WIN_DECORATION", True);
-        if (WM_HINTS != None) {
-            XDeleteProperty(display, w, WM_HINTS);
-            set = SDL_TRUE;
-        }
-        /* Now try to unset GNOME hints */
-        WM_HINTS = XInternAtom(display, "_WIN_HINTS", True);
-        if (WM_HINTS != None) {
-            XDeleteProperty(display, w, WM_HINTS);
-            set = SDL_TRUE;
-        }
-        /* Finally unset the transient hints if necessary */
-        if (!set) {
-            XDeleteProperty(display, w, XA_WM_TRANSIENT_FOR);
-        }
-    }
+    SetWindowBordered(display, screen, w,
+                      (window->flags & SDL_WINDOW_BORDERLESS) == 0);
 
     /* Setup the normal size hints */
     sizehints.flags = 0;
@@ -774,6 +725,29 @@ static Bool isMapNotify(Display *dpy, XEvent *ev, XPointer win)
 static Bool isUnmapNotify(Display *dpy, XEvent *ev, XPointer win)
 {
     return ev->type == UnmapNotify && ev->xunmap.window == *((Window*)win);
+}
+static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
+{
+    return ev->type == ConfigureNotify && ev->xunmap.window == *((Window*)win);
+}
+
+void
+X11_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
+    Display *display = data->videodata->display;
+    XEvent event;
+
+    SetWindowBordered(display, displaydata->screen, data->xwindow, bordered);
+    XIfEvent(display, &event, &isConfigureNotify, (XPointer)&data->xwindow);
+
+    /* make sure these don't make it to the real event queue if they fired here. */
+    while (XCheckIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow)) {}
+    while (XCheckIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow)) {}
+
+    XFlush(display);
 }
 
 void

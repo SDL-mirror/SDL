@@ -1142,6 +1142,17 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
+        case SDLK_b:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrl-B toggle window border */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    const Uint32 flags = SDL_GetWindowFlags(window);
+                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0);
+                    SDL_SetWindowBordered(window, b);
+                }
+            }
+            break;
         case SDLK_ESCAPE:
             *done = 1;
             break;

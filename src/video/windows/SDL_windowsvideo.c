@@ -125,6 +125,7 @@ WIN_CreateDevice(int devindex)
     device->MaximizeWindow = WIN_MaximizeWindow;
     device->MinimizeWindow = WIN_MinimizeWindow;
     device->RestoreWindow = WIN_RestoreWindow;
+    device->SetWindowBordered = WIN_SetWindowBordered;
     device->SetWindowFullscreen = WIN_SetWindowFullscreen;
     device->SetWindowGammaRamp = WIN_SetWindowGammaRamp;
     device->GetWindowGammaRamp = WIN_GetWindowGammaRamp;

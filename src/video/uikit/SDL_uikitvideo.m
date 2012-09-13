@@ -90,6 +90,8 @@ UIKit_CreateDevice(int devindex)
     device->DestroyWindow = UIKit_DestroyWindow;
     device->GetWindowWMInfo = UIKit_GetWindowWMInfo;
 
+    /* !!! FIXME: implement SetWindowBordered */
+
     device->SDL_HasScreenKeyboardSupport = UIKit_HasScreenKeyboardSupport;
     device->SDL_ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
     device->SDL_HideScreenKeyboard = UIKit_HideScreenKeyboard;

@@ -822,6 +822,20 @@ Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
 }
 
 void
+Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+{
+    /* this message arrived in 10.6. You're out of luck on older OSes. */
+#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
+        [nswindow setStyleMask:GetWindowStyle(window)];
+    }
+    [pool release];
+#endif
+}
+
+void
 Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

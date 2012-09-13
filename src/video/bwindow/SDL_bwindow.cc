@@ -139,6 +139,12 @@ void BE_SetWindowSize(_THIS, SDL_Window * window) {
 	_ToBeWin(window)->PostMessage(&msg);
 }
 
+void BE_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered) {
+	BMessage msg(BWIN_SET_BORDERED);
+	msg.AddBool("window-border", bordered != SDL_FALSE);
+	_ToBeWin(window)->PostMessage(&msg);
+}
+
 void BE_ShowWindow(_THIS, SDL_Window * window) {
 	BMessage msg(BWIN_SHOW_WINDOW);
 	_ToBeWin(window)->PostMessage(&msg);

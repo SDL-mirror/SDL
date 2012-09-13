@@ -131,6 +131,8 @@ PND_create()
     device->GL_DeleteContext = PND_gl_deletecontext;
     device->PumpEvents = PND_PumpEvents;
 
+    /* !!! FIXME: implement SetWindowBordered */
+
     return device;
 }
 

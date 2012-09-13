@@ -194,6 +194,7 @@ X11_CreateDevice(int devindex)
     device->MaximizeWindow = X11_MaximizeWindow;
     device->MinimizeWindow = X11_MinimizeWindow;
     device->RestoreWindow = X11_RestoreWindow;
+    device->SetWindowBordered = X11_SetWindowBordered;
     device->SetWindowFullscreen = X11_SetWindowFullscreen;
     device->SetWindowGammaRamp = X11_SetWindowGammaRamp;
     device->SetWindowGrab = X11_SetWindowGrab;

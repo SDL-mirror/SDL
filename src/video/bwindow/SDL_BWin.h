@@ -55,6 +55,7 @@ enum WinCommands {
 	BWIN_MINIMIZE_WINDOW,
 	BWIN_RESTORE_WINDOW,
 	BWIN_SET_TITLE,
+	BWIN_SET_BORDERED,
 	BWIN_FULLSCREEN
 };
 
@@ -372,6 +373,9 @@ class SDL_BWin:public BDirectWindow
     		case BWIN_RESIZE_WINDOW:
     			_ResizeTo(message);
     			break;
+    		case BWIN_SET_BORDERED:
+    			_SetBordered(message);
+    			break;
     		case BWIN_SHOW_WINDOW:
     			Show();
     			break;
@@ -553,7 +557,15 @@ private:
 		}
     	ResizeTo(w, h);
     }
-    
+
+    void _SetBordered(BMessage *msg) {
+    	bool bEnabled;
+    	if(msg->FindInt32("window-border", &bEnabled) != B_OK) {
+			return;
+		}
+    	SetLook(bEnabled ? B_BORDERED_WINDOW_LOOK : B_NO_BORDER_WINDOW_LOOK);
+    }
+
     void _Restore() {
     	if(IsMinimized()) {
     		Minimize(false);
