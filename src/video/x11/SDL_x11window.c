@@ -734,6 +734,8 @@ static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
 void
 X11_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
 {
+    const SDL_bool focused = ((window->flags & SDL_WINDOW_INPUT_FOCUS) != 0);
+    const SDL_bool visible = ((window->flags & SDL_WINDOW_HIDDEN) == 0);
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
@@ -741,13 +743,25 @@ X11_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
     XEvent event;
 
     SetWindowBordered(display, displaydata->screen, data->xwindow, bordered);
+    XFlush(display);
     XIfEvent(display, &event, &isConfigureNotify, (XPointer)&data->xwindow);
 
-    /* make sure these don't make it to the real event queue if they fired here. */
-    while (XCheckIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow)) {}
-    while (XCheckIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow)) {}
+    if (visible) {
+        XWindowAttributes attr;
+        do {
+            XSync(display, False);
+            XGetWindowAttributes(display, data->xwindow, &attr);
+        } while (attr.map_state != IsViewable);
 
-    XFlush(display);
+        if (focused) {
+            XSetInputFocus(display, data->xwindow, RevertToParent, CurrentTime);
+        }
+    }
+
+    /* make sure these don't make it to the real event queue if they fired here. */
+    XSync(display, False);
+    XCheckIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);
+    XCheckIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow);
 }
 
 void
