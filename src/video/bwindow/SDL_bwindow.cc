@@ -41,6 +41,8 @@ static inline SDL_BApp *_GetBeApp() {
 
 static int _InitWindow(_THIS, SDL_Window *window) {
 	uint32 flags = 0;
+	window_look look = B_BORDERED_WINDOW_LOOK;
+
 	BRect bounds(
         window->x,
         window->y,
@@ -59,10 +61,10 @@ static int _InitWindow(_THIS, SDL_Window *window) {
     	flags |= B_NOT_RESIZABLE | B_NOT_ZOOMABLE;
     }
     if(window->flags & SDL_WINDOW_BORDERLESS) {
-    	/* TODO: Add support for this flag */
+    	look = B_NO_BORDER_WINDOW_LOOK;
     }
 
-    SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds, flags);
+    SDL_BWin *bwin = new(std::nothrow) SDL_BWin(bounds, look, flags);
     if(bwin == NULL)
     	return ENOMEM;
 

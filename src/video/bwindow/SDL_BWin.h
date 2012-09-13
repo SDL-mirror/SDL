@@ -63,8 +63,8 @@ class SDL_BWin:public BDirectWindow
 {
   public:
   	/* Constructor/Destructor */
-    SDL_BWin(BRect bounds, uint32 flags):BDirectWindow(bounds, "Untitled",
-                                         B_TITLED_WINDOW, flags)
+    SDL_BWin(BRect bounds, window_look look, uint32 flags)
+        : BDirectWindow(bounds, "Untitled", look, B_NORMAL_WINDOW_FEEL, flags)
     {
         _last_buttons = 0;
 
