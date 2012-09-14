@@ -830,6 +830,9 @@ Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
         [nswindow setStyleMask:GetWindowStyle(window)];
+        if (bordered) {
+            Cocoa_SetWindowTitle(_this, window);  // this got blanked out.
+        }
     }
     [pool release];
 #endif
