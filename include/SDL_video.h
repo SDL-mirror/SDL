@@ -84,7 +84,7 @@ typedef struct
  *  \sa SDL_SetWindowIcon()
  *  \sa SDL_SetWindowPosition()
  *  \sa SDL_SetWindowSize()
- *  \sa SDL_SetWindowBorder()
+ *  \sa SDL_SetWindowBordered()
  *  \sa SDL_SetWindowTitle()
  *  \sa SDL_ShowWindow()
  */
