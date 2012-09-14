@@ -487,7 +487,18 @@ void
 WIN_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    SetWindowLong(hwnd, GWL_STYLE, GetWindowStyle(window));
+    DWORD style = GetWindowLong(hwnd, GWL_STYLE);
+
+    if (bordered) {
+        style &= ~STYLE_BORDERLESS;
+        style |= STYLE_NORMAL;
+    } else {
+        style &= ~STYLE_NORMAL;
+        style |= STYLE_BORDERLESS;
+    }
+
+    SetWindowLong(hwnd, GWL_STYLE, style);
+    SetWindowPos(hwnd, hwnd, window->x, window->y, window->w, window->h, SWP_FRAMECHANGED | SWP_NOREPOSITION | SWP_NOZORDER |SWP_NOACTIVATE | SWP_NOSENDCHANGING);
 }
 
 void
