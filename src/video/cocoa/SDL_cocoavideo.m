@@ -100,7 +100,7 @@ Cocoa_CreateDevice(int devindex)
     device->MaximizeWindow = Cocoa_MaximizeWindow;
     device->MinimizeWindow = Cocoa_MinimizeWindow;
     device->RestoreWindow = Cocoa_RestoreWindow;
-    device->SetWindowFullscreen = Cocoa_SetWindowBordered;
+    device->SetWindowBordered = Cocoa_SetWindowBordered;
     device->SetWindowFullscreen = Cocoa_SetWindowFullscreen;
     device->SetWindowGammaRamp = Cocoa_SetWindowGammaRamp;
     device->GetWindowGammaRamp = Cocoa_GetWindowGammaRamp;
