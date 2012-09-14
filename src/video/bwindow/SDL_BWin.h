@@ -560,7 +560,7 @@ private:
 
     void _SetBordered(BMessage *msg) {
     	bool bEnabled;
-    	if(msg->FindInt32("window-border", &bEnabled) != B_OK) {
+    	if(msg->FindBool("window-border", &bEnabled) != B_OK) {
 			return;
 		}
     	SetLook(bEnabled ? B_BORDERED_WINDOW_LOOK : B_NO_BORDER_WINDOW_LOOK);
