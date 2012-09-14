@@ -339,8 +339,8 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
 }
 
-void
-WIN_SetWindowPosition(_THIS, SDL_Window * window)
+static void
+WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     RECT rect;
@@ -372,40 +372,19 @@ WIN_SetWindowPosition(_THIS, SDL_Window * window)
     x = window->x + rect.left;
     y = window->y + rect.top;
 
-    SetWindowPos(hwnd, top, x, y, 0, 0, (SWP_NOCOPYBITS | SWP_NOSIZE));
+    SetWindowPos(hwnd, top, x, y, w, h, flags);
+}
+
+void
+WIN_SetWindowPosition(_THIS, SDL_Window * window)
+{
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOSIZE);
 }
 
 void
 WIN_SetWindowSize(_THIS, SDL_Window * window)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    RECT rect;
-    DWORD style;
-    HWND top;
-    BOOL menu;
-    int w, h;
-
-    /* Figure out what the window area will be */
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        top = HWND_TOPMOST;
-    } else {
-        top = HWND_NOTOPMOST;
-    }
-    style = GetWindowLong(hwnd, GWL_STYLE);
-    rect.left = 0;
-    rect.top = 0;
-    rect.right = window->w;
-    rect.bottom = window->h;
-#ifdef _WIN32_WCE
-    menu = FALSE;
-#else
-    menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-#endif
-    AdjustWindowRectEx(&rect, style, menu, 0);
-    w = (rect.right - rect.left);
-    h = (rect.bottom - rect.top);
-
-    SetWindowPos(hwnd, top, 0, 0, w, h, (SWP_NOCOPYBITS | SWP_NOMOVE));
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOMOVE);
 }
 
 #ifdef _WIN32_WCE
