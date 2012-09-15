@@ -242,7 +242,6 @@
 #undef SDL_TIMER_NDS
 #undef SDL_TIMER_UNIX
 #undef SDL_TIMER_WINDOWS
-#undef SDL_TIMER_WINCE
 
 /* Enable various video drivers */
 #undef SDL_VIDEO_DRIVER_BWINDOW

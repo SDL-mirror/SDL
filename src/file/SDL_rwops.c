@@ -43,9 +43,6 @@
 #ifdef __WIN32__
 
 /* Functions to read/write Win32 API file pointers */
-/* Will not use it on WinCE because stdio is buffered, it means
-   faster, and all stdio functions anyway are embedded in coredll.dll - 
-   the main wince dll*/
 
 #include "../core/windows/SDL_windows.h"
 
@@ -58,9 +55,7 @@
 static int SDLCALL
 windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
 {
-#ifndef _WIN32_WCE
     UINT old_error_mode;
-#endif
     HANDLE h;
     DWORD r_right, w_right;
     DWORD must_exist, truncate;
@@ -98,16 +93,6 @@ windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
         SDL_OutOfMemory();
         return -1;
     }
-#ifdef _WIN32_WCE
-    {
-        LPTSTR tstr = WIN_UTF8ToString(filename);
-        h = CreateFile(tstr, (w_right | r_right),
-                       (w_right) ? 0 : FILE_SHARE_READ, NULL,
-                       (must_exist | truncate | a_mode),
-                       FILE_ATTRIBUTE_NORMAL, NULL);
-        SDL_free(tstr);
-    }
-#else
     /* Do not open a dialog box if failure */
     old_error_mode =
         SetErrorMode(SEM_NOOPENFILEERRORBOX | SEM_FAILCRITICALERRORS);
@@ -123,7 +108,6 @@ windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
 
     /* restore old behavior */
     SetErrorMode(old_error_mode);
-#endif /* _WIN32_WCE */
 
     if (h == INVALID_HANDLE_VALUE) {
         SDL_free(context->hidden.windowsio.buffer.data);

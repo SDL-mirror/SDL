@@ -324,10 +324,7 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
         }
         SDL_FreeSurface(surface);
 
-/* TODO: create the icon in WinCE (CreateIconFromResource isn't available) */
-#ifndef _WIN32_WCE
         hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
-#endif
     }
     SDL_RWclose(dst);
     SDL_stack_free(icon_bmp);
@@ -361,11 +358,7 @@ WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
     rect.top = 0;
     rect.right = window->w;
     rect.bottom = window->h;
-#ifdef _WIN32_WCE
-    menu = FALSE;
-#else
     menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-#endif
     AdjustWindowRectEx(&rect, style, menu, 0);
     w = (rect.right - rect.left);
     h = (rect.bottom - rect.top);
@@ -387,56 +380,18 @@ WIN_SetWindowSize(_THIS, SDL_Window * window)
     WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOMOVE);
 }
 
-#ifdef _WIN32_WCE
-void WINCE_ShowWindow(_THIS, SDL_Window* window, int visible)
-{
-    SDL_WindowData* windowdata = (SDL_WindowData*) window->driverdata;
-    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-
-    if(visible) {
-        if(window->flags & SDL_WINDOW_FULLSCREEN) {
-            if(videodata->SHFullScreen)
-                videodata->SHFullScreen(windowdata->hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
-
-            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_HIDE);
-        }
-
-        ShowWindow(windowdata->hwnd, SW_SHOW);
-        SetForegroundWindow(windowdata->hwnd);
-    } else {
-        ShowWindow(windowdata->hwnd, SW_HIDE);
-
-        if(window->flags & SDL_WINDOW_FULLSCREEN) {
-            if(videodata->SHFullScreen)
-                videodata->SHFullScreen(windowdata->hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
-
-            ShowWindow(FindWindow(TEXT("HHTaskBar"), NULL), SW_SHOW);
-
-        }
-    }
-}
-#endif /* _WIN32_WCE */
-
 void
 WIN_ShowWindow(_THIS, SDL_Window * window)
 {
-#ifdef _WIN32_WCE
-    WINCE_ShowWindow(_this, window, 1);
-#else
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     ShowWindow(hwnd, SW_SHOW);
-#endif
 }
 
 void
 WIN_HideWindow(_THIS, SDL_Window * window)
 {
-#ifdef _WIN32_WCE
-    WINCE_ShowWindow(_this, window, 0);
-#else
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     ShowWindow(hwnd, SW_HIDE);
-#endif
 }
 
 void
@@ -457,14 +412,6 @@ void
 WIN_MaximizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-
-#ifdef _WIN32_WCE
-    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen) {
-        SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-        videodata->SHFullScreen(hwnd, SHFS_HIDETASKBAR | SHFS_HIDESTARTICON | SHFS_HIDESIPBUTTON);
-    }
-#endif
-
     ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
@@ -472,15 +419,7 @@ void
 WIN_MinimizeWindow(_THIS, SDL_Window * window)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-
     ShowWindow(hwnd, SW_MINIMIZE);
-
-#ifdef _WIN32_WCE
-    if((window->flags & SDL_WINDOW_FULLSCREEN) && videodata->SHFullScreen) {
-        SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-        videodata->SHFullScreen(hwnd, SHFS_SHOWTASKBAR | SHFS_SHOWSTARTICON | SHFS_SHOWSIPBUTTON);
-    }
-#endif
 }
 
 void
@@ -543,11 +482,7 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
         rect.top = 0;
         rect.right = window->windowed.w;
         rect.bottom = window->windowed.h;
-#ifdef _WIN32_WCE
-        menu = FALSE;
-#else
         menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-#endif
         AdjustWindowRectEx(&rect, style, menu, 0);
         w = (rect.right - rect.left);
         h = (rect.bottom - rect.top);
@@ -561,10 +496,6 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
 int
 WIN_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
 {
-#ifdef _WIN32_WCE
-    SDL_Unsupported();
-    return -1;
-#else
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
     HDC hdc;
@@ -579,16 +510,11 @@ WIN_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
         DeleteDC(hdc);
     }
     return succeeded ? 0 : -1;
-#endif
 }
 
 int
 WIN_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 {
-#ifdef _WIN32_WCE
-    SDL_Unsupported();
-    return -1;
-#else
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
     HDC hdc;
@@ -603,7 +529,6 @@ WIN_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
         DeleteDC(hdc);
     }
     return succeeded ? 0 : -1;
-#endif
 }
 
 void
@@ -629,9 +554,6 @@ WIN_DestroyWindow(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
-#ifdef _WIN32_WCE
-        WINCE_ShowWindow(_this, window, 0);
-#endif
         ReleaseDC(data->hwnd, data->hdc);
         if (data->created) {
             DestroyWindow(data->hwnd);
@@ -675,7 +597,6 @@ SDL_HelperWindowCreate(void)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
     WNDCLASS wce;
-    HWND hWndParent = NULL;
 
     /* Make sure window isn't created twice. */
     if (SDL_HelperWindow != NULL) {
@@ -695,17 +616,12 @@ SDL_HelperWindowCreate(void)
         return -1;
     }
 
-#ifndef _WIN32_WCE
-    /* WinCE doesn't have HWND_MESSAGE */
-    hWndParent = HWND_MESSAGE;
-#endif
-
     /* Create the window. */
     SDL_HelperWindow = CreateWindowEx(0, SDL_HelperWindowClassName,
                                       SDL_HelperWindowName,
                                       WS_OVERLAPPED, CW_USEDEFAULT,
                                       CW_USEDEFAULT, CW_USEDEFAULT,
-                                      CW_USEDEFAULT, hWndParent, NULL,
+                                      CW_USEDEFAULT, HWND_MESSAGE, NULL,
                                       hInstance, NULL);
     if (SDL_HelperWindow == NULL) {
         UnregisterClass(SDL_HelperWindowClassName, hInstance);

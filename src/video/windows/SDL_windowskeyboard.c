@@ -22,10 +22,6 @@
 
 #if SDL_VIDEO_DRIVER_WINDOWS
 
-#ifdef _WIN32_WCE
-#define SDL_DISABLE_WINDOWS_IME
-#endif
-
 #include "SDL_windowsvideo.h"
 
 #include "../../events/SDL_keyboard_c.h"

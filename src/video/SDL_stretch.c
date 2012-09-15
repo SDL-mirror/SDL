@@ -33,7 +33,7 @@
    into the general blitting mechanism.
 */
 
-#if ((defined(_MFC_VER) && defined(_M_IX86)/* && !defined(_WIN32_WCE) still needed? */) || \
+#if ((defined(_MFC_VER) && defined(_M_IX86)) || \
      defined(__WATCOMC__) || \
      (defined(__GNUC__) && defined(__i386__))) && SDL_ASSEMBLY_ROUTINES
 /* There's a bug with gcc 4.4.1 and -O2 where srcp doesn't get the correct

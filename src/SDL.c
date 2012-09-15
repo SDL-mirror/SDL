@@ -288,11 +288,7 @@ SDL_GetPlatform()
 #elif __SOLARIS__
     return "Solaris";
 #elif __WIN32__
-#ifdef _WIN32_WCE
-    return "Windows CE";
-#else
     return "Windows";
-#endif
 #elif __IPHONEOS__
     return "iPhone OS";
 #else

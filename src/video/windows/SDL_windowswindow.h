@@ -23,15 +23,6 @@
 #ifndef _SDL_windowswindow_h
 #define _SDL_windowswindow_h
 
-#ifdef _WIN32_WCE
-#define SHFS_SHOWTASKBAR        0x0001
-#define SHFS_HIDETASKBAR        0x0002
-#define SHFS_SHOWSIPBUTTON      0x0004
-#define SHFS_HIDESIPBUTTON      0x0008
-#define SHFS_SHOWSTARTICON      0x0010
-#define SHFS_HIDESTARTICON      0x0020
-#endif
-
 typedef struct
 {
     SDL_Window *window;
