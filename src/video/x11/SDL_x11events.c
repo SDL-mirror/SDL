@@ -574,7 +574,7 @@ X11_PumpEvents(_THIS)
         X11_DispatchEvent(_this);
     }
     /*Dont process evtouch events if XInput2 multitouch is supported*/
-    if(X11_Xinput2IsMutitouchSupported()) {
+    if(X11_Xinput2IsMultitouchSupported()) {
         return;
     }
 

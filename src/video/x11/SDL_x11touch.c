@@ -39,7 +39,7 @@ X11_InitTouch(_THIS)
     /*Initilized Xinput2 multitouch 
     * and return in order to not initialize
     * evtouch also*/
-    if(X11_Xinput2IsMutitouchSupported()) {
+    if(X11_Xinput2IsMultitouchSupported()) {
         X11_InitXinput2Multitouch(_this);
         return;
     }

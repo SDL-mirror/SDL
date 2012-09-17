@@ -248,7 +248,7 @@ X11_Xinput2IsInitialized() {
 }
 
 int
-X11_Xinput2IsMutitouchSupported() {
+X11_Xinput2IsMultitouchSupported() {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
     return xinput2_initialized && xinput2_multitouch_supported;
 #else
