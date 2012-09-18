@@ -121,7 +121,8 @@
         }
         /* end create buffers */
 
-        self.autoresizingMask = 0;  // don't allow autoresize, since we need to do some magic in -(void)updateFrame.
+        self.autoresizingMask = (UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight);
+        self.autoresizesSubviews = YES;
     }
     return self;
 }
@@ -198,6 +199,7 @@
 - (void)layoutSubviews
 {
     [EAGLContext setCurrentContext:context];
+    [self updateFrame];
 }
 
 - (void)destroyFramebuffer

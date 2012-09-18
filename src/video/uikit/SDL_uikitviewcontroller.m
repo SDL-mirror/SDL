@@ -145,7 +145,6 @@
 
     [uiwindow setFrame:frame];
     [data->view setFrame:frame];
-    [data->view updateFrame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 
