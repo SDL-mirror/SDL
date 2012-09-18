@@ -76,14 +76,24 @@
 
 }
 
-- (CGPoint)touchLocation:(UITouch *)touch
+- (CGPoint)touchLocation:(UITouch *)touch shouldNormalize:(BOOL)normalize
 {
     CGPoint point = [touch locationInView: self];
     CGRect frame = [self frame];
 
     frame = CGRectApplyAffineTransform(frame, [self transform]);
-    point.x /= frame.size.width;
-    point.y /= frame.size.height;
+
+    // Get the display scale and apply that to the input coordinates
+    SDL_Window *window = self->viewcontroller.window;
+    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+    SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+    point.x *= displaymodedata->scale;
+    point.y *= displaymodedata->scale;
+    
+    if (normalize) {
+        point.x /= frame.size.width;
+        point.y /= frame.size.height;
+    }
     return point;
 }
 
@@ -93,7 +103,7 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     if (touch) {
-        CGPoint locationInView = [touch locationInView: self];
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
         /* send moved event */
         SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
@@ -104,7 +114,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [self touchLocation:touch];
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         //FIXME: TODO: Using touch as the fingerId is potentially dangerous
@@ -143,7 +153,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [self touchLocation:touch];
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendFingerDown(touchId, (long)touch,
@@ -183,7 +193,7 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     if (touch) {
-        CGPoint locationInView = [touch locationInView: self];
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
         /* send moved event */
         SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
@@ -191,7 +201,7 @@
 
 #ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [self touchLocation:touch];
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendTouchMotion(touchId, (long)touch,
