@@ -43,7 +43,37 @@
         return nil;
     }
     self.window = _window;
+
+    // Register for notification when the status bar size changes    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarFrameChanged:) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
+
     return self;
+}
+
+- (void)loadView
+{
+    // do nothing.
+}
+
+- (void)statusBarFrameChanged:(NSNotification*)notification
+{
+    [self onWindowSizeChanged];
+}
+
+- (void)onWindowSizeChanged
+{
+    if (self->window->flags & SDL_WINDOW_RESIZABLE) {
+        SDL_WindowData *data = self->window->driverdata;
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(self->window);
+        SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
+        const CGSize size = data->view.bounds.size;
+        int w, h;
+
+        w = (int)(size.width * displaymodedata->scale);
+        h = (int)(size.height * displaymodedata->scale);
+
+        SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
+    }
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient
@@ -108,27 +138,14 @@
     return NO;  // Nothing else is acceptable.
 }
 
-- (void)loadView
-{
-    // do nothing.
-}
-
 // Send a resized event when the orientation changes.
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
-    const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
-    SDL_WindowData *data = self->window->driverdata;
-    SDL_VideoDisplay *display = SDL_GetDisplayForWindow(self->window);
-    SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    const CGSize size = data->view.bounds.size;
-    int w, h;
-
-    w = (int)(size.width * displaymodedata->scale);
-    h = (int)(size.height * displaymodedata->scale);
-
-    SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
+    [self onWindowSizeChanged];
 }
 
 #endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 @end
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -31,8 +31,10 @@
 @property (readwrite) SDL_Window *window;
 
 - (id)initWithSDLWindow:(SDL_Window *)_window;
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
 - (void)loadView;
+- (void)statusBarFrameChanged:(NSNotification*)notification;
+- (void)onWindowSizeChanged;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
 
 @end
