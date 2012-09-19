@@ -48,6 +48,12 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient
 {
+    // Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation
+    if (orient == UIInterfaceOrientationPortraitUpsideDown) {
+        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
+            return NO;
+    }
+
     const char *orientationsCString;
     if ((orientationsCString = SDL_GetHint(SDL_HINT_ORIENTATIONS)) != NULL) {
         BOOL rotate = NO;
