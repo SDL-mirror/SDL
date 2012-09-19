@@ -79,9 +79,6 @@
 - (CGPoint)touchLocation:(UITouch *)touch shouldNormalize:(BOOL)normalize
 {
     CGPoint point = [touch locationInView: self];
-    CGRect frame = [self frame];
-
-    frame = CGRectApplyAffineTransform(frame, [self transform]);
 
     // Get the display scale and apply that to the input coordinates
     SDL_Window *window = self->viewcontroller.window;
@@ -91,8 +88,9 @@
     point.y *= displaymodedata->scale;
     
     if (normalize) {
-        point.x /= frame.size.width;
-        point.y /= frame.size.height;
+        CGRect bounds = [self bounds];
+        point.x /= bounds.size.width;
+        point.y /= bounds.size.height;
     }
     return point;
 }

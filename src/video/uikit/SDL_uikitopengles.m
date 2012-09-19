@@ -105,7 +105,13 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     UIWindow *uiwindow = data->uiwindow;
 
     /* construct our view, passing in SDL's OpenGL configuration data */
-    view = [[SDL_uikitopenglview alloc] initWithFrame: [uiwindow bounds]
+    CGRect frame;
+    if (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS)) {
+        frame = [displaydata->uiscreen bounds];
+    } else {
+        frame = [displaydata->uiscreen applicationFrame];
+    }
+    view = [[SDL_uikitopenglview alloc] initWithFrame: frame
                                     scale: displaymodedata->scale
                                     retainBacking: _this->gl_config.retained_backing
                                     rBits: _this->gl_config.red_size
