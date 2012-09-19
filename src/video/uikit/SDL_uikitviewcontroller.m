@@ -112,39 +112,14 @@
 {
     const UIInterfaceOrientation toInterfaceOrientation = [self interfaceOrientation];
     SDL_WindowData *data = self->window->driverdata;
-    UIWindow *uiwindow = data->uiwindow;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(self->window);
-    SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
     SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    UIScreen *uiscreen = displaydata->uiscreen;
-    const int noborder = (self->window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS));
-    CGRect frame = noborder ? [uiscreen bounds] : [uiscreen applicationFrame];
-    const CGSize size = frame.size;
+    const CGSize size = data->view.bounds.size;
     int w, h;
 
-    switch (toInterfaceOrientation) {
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-            w = (size.width < size.height) ? size.width : size.height;
-            h = (size.width > size.height) ? size.width : size.height;
-            break;
+    w = (int)(size.width * displaymodedata->scale);
+    h = (int)(size.height * displaymodedata->scale);
 
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-            w = (size.width > size.height) ? size.width : size.height;
-            h = (size.width < size.height) ? size.width : size.height;
-            break;
-
-        default:
-            SDL_assert(0 && "Unexpected interface orientation!");
-            return;
-    }
-
-    w = (int)(w * displaymodedata->scale);
-    h = (int)(h * displaymodedata->scale);
-
-    [uiwindow setFrame:frame];
-    [data->view setFrame:frame];
     SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
 }
 

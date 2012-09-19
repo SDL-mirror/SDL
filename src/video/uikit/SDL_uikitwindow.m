@@ -65,15 +65,22 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         window->x = 0;
         window->y = 0;
 
+        CGRect bounds;
+        if (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS)) {
+            bounds = [displaydata->uiscreen bounds];
+        } else {
+            bounds = [displaydata->uiscreen applicationFrame];
+        }
+
         /* Get frame dimensions in pixels */
-        int width = (int)(uiwindow.frame.size.width * displaymodedata->scale);
-        int height = (int)(uiwindow.frame.size.height * displaymodedata->scale);
+        int width = (int)(bounds.size.width * displaymodedata->scale);
+        int height = (int)(bounds.size.height * displaymodedata->scale);
 
         /* We can pick either width or height here and we'll rotate the
            screen to match, so we pick the closest to what we wanted.
          */
         if (window->w >= window->h) {
-            if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+            if (width > height) {
                 window->w = width;
                 window->h = height;
             } else {
@@ -81,7 +88,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
                 window->h = width;
             }
         } else {
-            if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+            if (width > height) {
                 window->w = height;
                 window->h = width;
             } else {
@@ -112,12 +119,6 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
             [UIApplication sharedApplication].statusBarHidden = NO;
         }
 
-        //const UIDeviceOrientation o = [[UIDevice currentDevice] orientation];
-        //const BOOL landscape = (o == UIDeviceOrientationLandscapeLeft) ||
-        //                           (o == UIDeviceOrientationLandscapeRight);
-        //const BOOL rotate = ( ((window->w > window->h) && (!landscape)) ||
-        //                      ((window->w < window->h) && (landscape)) );
-
         // The View Controller will handle rotating the view when the
         //  device orientation changes. This will trigger resize events, if
         //  appropriate.
@@ -125,7 +126,6 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         controller = [SDL_uikitviewcontroller alloc];
         data->viewcontroller = [controller initWithSDLWindow:window];
         [data->viewcontroller setTitle:@"SDL App"];  // !!! FIXME: hook up SDL_SetWindowTitle()
-        // !!! FIXME: if (rotate), force a "resize" right at the start
     }
 
     return 0;
@@ -187,10 +187,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
     /* ignore the size user requested, and make a fullscreen window */
     // !!! FIXME: can we have a smaller view?
     UIWindow *uiwindow = [UIWindow alloc];
-    if (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS))
-        uiwindow = [uiwindow initWithFrame:[data->uiscreen bounds]];
-    else
-        uiwindow = [uiwindow initWithFrame:[data->uiscreen applicationFrame]];
+    uiwindow = [uiwindow initWithFrame:[data->uiscreen bounds]];
 
     // put the window on an external display if appropriate. This implicitly
     //  does [uiwindow setframe:[uiscreen bounds]], so don't do it on the
@@ -244,21 +241,26 @@ UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
 
     if (fullscreen) {
         [UIApplication sharedApplication].statusBarHidden = YES;
-        uiwindow.frame = [displaydata->uiscreen bounds];
     } else {
         [UIApplication sharedApplication].statusBarHidden = NO;
-        uiwindow.frame = [displaydata->uiscreen applicationFrame];
+    }
+
+    CGRect bounds;
+    if (fullscreen) {
+        bounds = [displaydata->uiscreen bounds];
+    } else {
+        bounds = [displaydata->uiscreen applicationFrame];
     }
 
     /* Get frame dimensions in pixels */
-    int width = (int)(uiwindow.frame.size.width * displaymodedata->scale);
-    int height = (int)(uiwindow.frame.size.height * displaymodedata->scale);
+    int width = (int)(bounds.size.width * displaymodedata->scale);
+    int height = (int)(bounds.size.height * displaymodedata->scale);
 
     /* We can pick either width or height here and we'll rotate the
        screen to match, so we pick the closest to what we wanted.
      */
     if (window->w >= window->h) {
-        if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+        if (width > height) {
             window->w = width;
             window->h = height;
         } else {
@@ -266,7 +268,7 @@ UIKit_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
             window->h = width;
         }
     } else {
-        if (uiwindow.frame.size.width > uiwindow.frame.size.height) {
+        if (width > height) {
             window->w = height;
             window->h = width;
         } else {
