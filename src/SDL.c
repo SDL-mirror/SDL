@@ -248,6 +248,8 @@ SDL_GetPlatform()
 {
 #if __AIX__
     return "AIX";
+#elif __ANDROID__
+    return "Android";
 #elif __HAIKU__
 /* Haiku must appear here before BeOS, since it also defines __BEOS__ */
     return "Haiku";
