@@ -1503,7 +1503,7 @@ Optional Features:
   --enable-ssemath        Allow GCC to use SSE floating point math
                           [[default=no]]
   --enable-mmx            use MMX assembly routines [[default=yes]]
-  --enable-3dnow          use MMX assembly routines [[default=yes]]
+  --enable-3dnow          use 3DNow! assembly routines [[default=yes]]
   --enable-sse            use SSE assembly routines [[default=yes]]
   --enable-sse2           use SSE2 assembly routines [[default=no]]
   --enable-altivec        use Altivec assembly routines [[default=yes]]
