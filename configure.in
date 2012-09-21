@@ -459,12 +459,14 @@ AC_HELP_STRING([--enable-3dnow], [use MMX assembly routines [[default=yes]]]),
         amd3dnow_CFLAGS="-m3dnow"
         CFLAGS="$save_CFLAGS $amd3dnow_CFLAGS"
 
-        AC_TRY_COMPILE([
+        AC_TRY_LINK([
         #include <mm3dnow.h>
         #ifndef __3dNOW__
         #error Assembler CPP flag not enabled
         #endif
         ],[
+        void *p = 0;
+        _m_prefetch(p);
         ],[
         have_gcc_3dnow=yes
         ])

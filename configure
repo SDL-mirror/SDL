@@ -17219,17 +17219,20 @@ int
 main ()
 {
 
+        void *p = 0;
+        _m_prefetch(p);
 
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
+if ac_fn_c_try_link "$LINENO"; then :
 
         have_gcc_3dnow=yes
 
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_gcc_3dnow" >&5
 $as_echo "$have_gcc_3dnow" >&6; }
         CFLAGS="$save_CFLAGS"
