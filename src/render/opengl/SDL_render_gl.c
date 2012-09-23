@@ -361,14 +361,16 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
-    renderer->info.max_texture_width = value;
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
-    renderer->info.max_texture_height = value;
-
     if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
         || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
         data->GL_ARB_texture_rectangle_supported = SDL_TRUE;
+        data->glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE_ARB, &value);
+        renderer->info.max_texture_width = value;
+        renderer->info.max_texture_height = value;
+    } else {
+        data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+        renderer->info.max_texture_width = value;
+        renderer->info.max_texture_height = value;
     }
 
     /* Check for multitexture support */
