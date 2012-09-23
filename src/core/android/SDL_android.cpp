@@ -735,6 +735,96 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
     return Android_JNI_FileClose(ctx, true);
 }
 
+// returns 0 on success or -1 on error (others undefined then)
+// returns truthy or falsy value in plugged, charged and battery
+// returns the value in seconds and percent or -1 if not available
+extern "C" int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seconds, int* percent)
+{
+    LocalReferenceHolder refs;
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return -1;
+    }
+
+    jmethodID mid;
+
+    mid = env->GetStaticMethodID(mActivityClass, "getContext", "()Landroid/content/Context;");
+    jobject context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+    jstring action = env->NewStringUTF("android.intent.action.BATTERY_CHANGED");
+
+    jclass cls = env->FindClass("android/content/IntentFilter");
+
+    mid = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;)V");
+    jobject filter = env->NewObject(cls, mid, action);
+
+    env->DeleteLocalRef(action);
+
+    mid = env->GetMethodID(mActivityClass, "registerReceiver", "(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;");
+    jobject intent = env->CallObjectMethod(context, mid, NULL, filter);
+
+    env->DeleteLocalRef(filter);
+
+    cls = env->GetObjectClass(intent);
+
+    jstring iname;
+    jmethodID imid = env->GetMethodID(cls, "getIntExtra", "(Ljava/lang/String;I)I");
+
+#define GET_INT_EXTRA(var, key) \
+    iname = env->NewStringUTF(key); \
+    int var = env->CallIntMethod(intent, imid, iname, -1); \
+    env->DeleteLocalRef(iname);
+
+    jstring bname;
+    jmethodID bmid = env->GetMethodID(cls, "getBooleanExtra", "(Ljava/lang/String;Z)Z");
+
+#define GET_BOOL_EXTRA(var, key) \
+    bname = env->NewStringUTF(key); \
+    int var = env->CallBooleanMethod(intent, bmid, bname, JNI_FALSE); \
+    env->DeleteLocalRef(bname);
+
+    if (plugged) {
+        GET_INT_EXTRA(plug, "plugged") // == BatteryManager.EXTRA_PLUGGED (API 5)
+        if (plug == -1) {
+            return -1;
+        }
+        // 1 == BatteryManager.BATTERY_PLUGGED_AC
+        // 2 == BatteryManager.BATTERY_PLUGGED_USB
+        *plugged = (0 < plug) ? 1 : 0;
+    }
+
+    if (charged) {
+        GET_INT_EXTRA(status, "status") // == BatteryManager.EXTRA_STATUS (API 5)
+        if (status == -1) {
+            return -1;
+        }
+        // 5 == BatteryManager.BATTERY_STATUS_FULL
+        *charged = (status == 5) ? 1 : 0;
+    }
+
+    if (battery) {
+        GET_BOOL_EXTRA(present, "present") // == BatteryManager.EXTRA_PRESENT (API 5)
+        *battery = present ? 1 : 0;
+    }
+
+    if (seconds) {
+        *seconds = -1; // not possible
+    }
+
+    if (percent) {
+        GET_INT_EXTRA(level, "level") // == BatteryManager.EXTRA_LEVEL (API 5)
+        GET_INT_EXTRA(scale, "scale") // == BatteryManager.EXTRA_SCALE (API 5)
+        if ((level == -1) || (scale == -1)) {
+            return -1;
+        }
+        *percent = level * 100 / scale;
+    }
+
+    env->DeleteLocalRef(intent);
+
+    return 0;
+}
+
 // sends message to be handled on the UI event dispatch thread
 extern "C" int Android_JNI_SendMessage(int command, int param)
 {

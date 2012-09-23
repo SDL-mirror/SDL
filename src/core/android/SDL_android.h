@@ -47,6 +47,9 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer, size_t size, size_t ma
 size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer, size_t size, size_t num);
 int Android_JNI_FileClose(SDL_RWops* ctx);
 
+/* Power support */
+int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seconds, int* percent);
+
 // Threads
 #include <jni.h>
 static void Android_JNI_ThreadDestroyed(void*);
