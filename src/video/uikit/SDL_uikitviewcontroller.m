@@ -44,9 +44,6 @@
     }
     self.window = _window;
 
-    // Register for notification when the status bar size changes    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(statusBarFrameChanged:) name:UIApplicationDidChangeStatusBarFrameNotification object:nil];
-
     return self;
 }
 
@@ -55,12 +52,7 @@
     // do nothing.
 }
 
-- (void)statusBarFrameChanged:(NSNotification*)notification
-{
-    [self onWindowSizeChanged];
-}
-
-- (void)onWindowSizeChanged
+- (void)viewDidLayoutSubviews
 {
     if (self->window->flags & SDL_WINDOW_RESIZABLE) {
         SDL_WindowData *data = self->window->driverdata;
@@ -68,22 +60,18 @@
         SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
         const CGSize size = data->view.bounds.size;
         int w, h;
-
+        
         w = (int)(size.width * displaymodedata->scale);
         h = (int)(size.height * displaymodedata->scale);
-
+        
         SDL_SendWindowEvent(self->window, SDL_WINDOWEVENT_RESIZED, w, h);
     }
 }
 
-- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient
+- (NSUInteger)supportedInterfaceOrientations
 {
-    // Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation
-    if (orient == UIInterfaceOrientationPortraitUpsideDown) {
-        if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone)
-            return NO;
-    }
-
+    NSUInteger orientationMask = 0;
+    
     const char *orientationsCString;
     if ((orientationsCString = SDL_GetHint(SDL_HINT_ORIENTATIONS)) != NULL) {
         BOOL rotate = NO;
@@ -91,61 +79,46 @@
                                                             encoding:NSUTF8StringEncoding];
         NSArray *orientations = [orientationsNSString componentsSeparatedByCharactersInSet:
                                  [NSCharacterSet characterSetWithCharactersInString:@" "]];
-
-        switch (orient) {
-            case UIInterfaceOrientationLandscapeLeft:
-                rotate = [orientations containsObject:@"LandscapeLeft"];
-                break;
-
-            case UIInterfaceOrientationLandscapeRight:
-                rotate = [orientations containsObject:@"LandscapeRight"];
-                break;
-
-            case UIInterfaceOrientationPortrait:
-                rotate = [orientations containsObject:@"Portrait"];
-                break;
-
-            case UIInterfaceOrientationPortraitUpsideDown:
-                rotate = [orientations containsObject:@"PortraitUpsideDown"];
-                break;
-
-            default: break;
+        
+        if ([orientations containsObject:@"LandscapeLeft"]) {
+            orientationMask |= UIInterfaceOrientationMaskLandscapeLeft;
         }
-
-        return rotate;
+        if ([orientations containsObject:@"LandscapeRight"]) {
+            orientationMask |= UIInterfaceOrientationMaskLandscapeRight;
+        }
+        if ([orientations containsObject:@"Portrait"]) {
+            orientationMask |= UIInterfaceOrientationMaskPortrait;
+        }
+        if ([orientations containsObject:@"PortraitUpsideDown"]) {
+            orientationMask |= UIInterfaceOrientationMaskPortraitUpsideDown;
+        }
+        
+    } else if (self->window->flags & SDL_WINDOW_RESIZABLE) {
+        orientationMask = UIInterfaceOrientationMaskAll;  // any orientation is okay.
+    } else {
+        if (self->window->w >= self->window->h) {
+            orientationMask |= UIInterfaceOrientationMaskLandscape;
+        }
+        if (self->window->h >= self->window->w) {
+            orientationMask |= (UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskPortraitUpsideDown);
+        }
     }
-
-    if (self->window->flags & SDL_WINDOW_RESIZABLE) {
-        return YES;  // any orientation is okay.
+    
+    // Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
+        orientationMask &= ~UIInterfaceOrientationMaskPortraitUpsideDown;
     }
-
-    // If not resizable, allow device to orient to other matching sizes
-    //  (that is, let the user turn the device upside down...same screen
-    //   dimensions, but it lets the user place the device where it's most
-    //   comfortable in relation to its physical buttons, headphone jack, etc).
-    switch (orient) {
-        case UIInterfaceOrientationLandscapeLeft:
-        case UIInterfaceOrientationLandscapeRight:
-            return (self->window->w >= self->window->h);
-
-        case UIInterfaceOrientationPortrait:
-        case UIInterfaceOrientationPortraitUpsideDown:
-            return (self->window->h >= self->window->w);
-
-        default: break;
-    }
-
-    return NO;  // Nothing else is acceptable.
+    return orientationMask;
 }
 
-// Send a resized event when the orientation changes.
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient
 {
-    [self onWindowSizeChanged];
+    NSUInteger orientationMask = [self supportedInterfaceOrientations];
+    return (orientationMask & (1 << orient));
 }
-
-#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 @end
+
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

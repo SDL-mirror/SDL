@@ -32,9 +32,8 @@
 
 - (id)initWithSDLWindow:(SDL_Window *)_window;
 - (void)loadView;
-- (void)statusBarFrameChanged:(NSNotification*)notification;
-- (void)onWindowSizeChanged;
+- (void)viewDidLayoutSubviews;
+- (NSUInteger)supportedInterfaceOrientations;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)orient;
-- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
 
 @end
