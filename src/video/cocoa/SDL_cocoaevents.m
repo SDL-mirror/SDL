@@ -206,23 +206,17 @@ Cocoa_PumpEvents(_THIS)
         case NSMouseMoved:
         case NSScrollWheel:
             Cocoa_HandleMouseEvent(_this, event);
-            /* Pass through to NSApp to make sure everything stays in sync */
-            [NSApp sendEvent:event];
             break;
         case NSKeyDown:
         case NSKeyUp:
         case NSFlagsChanged:
             Cocoa_HandleKeyEvent(_this, event);
-            /* Fall through to pass event to NSApp; er, nevermind... */
-
-            /* Add to support system-wide keyboard shortcuts like CMD+Space */
-            if (([event modifierFlags] & NSCommandKeyMask) || [event type] == NSFlagsChanged)
-               [NSApp sendEvent: event];
             break;
         default:
-            [NSApp sendEvent:event];
             break;
         }
+        /* Pass through to NSApp to make sure everything stays in sync */
+        [NSApp sendEvent:event];
     }
     [pool release];
 }
