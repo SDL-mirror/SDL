@@ -23,6 +23,8 @@
 
 SDL_X11_MODULE(BASEXLIB)
 SDL_X11_SYM(XSizeHints*,XAllocSizeHints,(void),(),return)
+SDL_X11_SYM(XWMHints*,XAllocWMHints,(void),(),return)
+SDL_X11_SYM(XClassHint*,XAllocClassHint,(void),(),return)
 SDL_X11_SYM(int,XAutoRepeatOn,(Display* a),(a),return)
 SDL_X11_SYM(int,XAutoRepeatOff,(Display* a),(a),return)
 SDL_X11_SYM(int,XChangePointerControl,(Display* a,Bool b,Bool c,int d,int e,int f),(a,b,c,d,e,f),return)

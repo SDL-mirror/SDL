@@ -290,9 +290,9 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     int depth;
     XSetWindowAttributes xattr;
     Window w;
-    XSizeHints sizehints;
-    XWMHints wmhints;
-    XClassHint classhints;
+    XSizeHints *sizehints;
+    XWMHints *wmhints;
+    XClassHint *classhints;
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     Atom _NET_WM_PID;
@@ -446,28 +446,34 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     SetWindowBordered(display, screen, w,
                       (window->flags & SDL_WINDOW_BORDERLESS) == 0);
 
+    sizehints = XAllocSizeHints();
     /* Setup the normal size hints */
-    sizehints.flags = 0;
+    sizehints->flags = 0;
     if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
-        sizehints.min_width = sizehints.max_width = window->w;
-        sizehints.min_height = sizehints.max_height = window->h;
-        sizehints.flags |= (PMaxSize | PMinSize);
+        sizehints->min_width = sizehints->max_width = window->w;
+        sizehints->min_height = sizehints->max_height = window->h;
+        sizehints->flags |= (PMaxSize | PMinSize);
     }
-    sizehints.x = window->x;
-    sizehints.y = window->y;
-    sizehints.flags |= USPosition;
+    sizehints->x = window->x;
+    sizehints->y = window->y;
+    sizehints->flags |= USPosition;
 
     /* Setup the input hints so we get keyboard input */
-    wmhints.input = True;
-    wmhints.flags = InputHint;
+    wmhints = XAllocWMHints();
+    wmhints->input = True;
+    wmhints->flags = InputHint;
 
     /* Setup the class hints so we can get an icon (AfterStep) */
-    classhints.res_name = data->classname;
-    classhints.res_class = data->classname;
+    classhints = XAllocClassHint();
+    classhints->res_name = data->classname;
+    classhints->res_class = data->classname;
 
     /* Set the size, input and class hints, and define WM_CLIENT_MACHINE and WM_LOCALE_NAME */
-    XSetWMProperties(display, w, NULL, NULL, NULL, 0, &sizehints, &wmhints, &classhints);
+    XSetWMProperties(display, w, NULL, NULL, NULL, 0, sizehints, wmhints, classhints);
 
+    XFree(sizehints);
+    XFree(wmhints);
+    XFree(classhints);
     /* Set the PID related to the window for the given hostname, if possible */
     if (data->pid > 0) {
         _NET_WM_PID = XInternAtom(display, "_NET_WM_PID", False);
