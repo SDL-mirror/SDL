@@ -161,10 +161,10 @@ void _ReadWriteBarrier(void);
 #include <libkern/OSAtomic.h>
 
 #define SDL_AtomicCAS(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((oldval), (newval), &(a)->value)
-#if SIZEOF_VOIDP == 4
-#define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((int32_t)(oldval), (int32_t)(newval), (int32_t*)(a))
-#elif SIZEOF_VOIDP == 8
+#ifdef __LP64__
 #define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap64Barrier((int64_t)(oldval), (int64_t)(newval), (int64_t*)(a))
+#else
+#define SDL_AtomicCASPtr(a, oldval, newval) OSAtomicCompareAndSwap32Barrier((int32_t)(oldval), (int32_t)(newval), (int32_t*)(a))
 #endif
 
 #elif defined(HAVE_GCC_ATOMICS)
