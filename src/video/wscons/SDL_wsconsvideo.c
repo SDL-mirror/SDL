@@ -141,7 +141,13 @@ VideoBootStrap WSCONS_bootstrap = {
   WSCONS_CreateDevice
 };
 
+#ifdef __NetBSD__
+#define WSCONSDEV_FORMAT "/dev/ttyE%01x"
+#endif
+
+#ifdef __OpenBSD__
 #define WSCONSDEV_FORMAT "/dev/ttyC%01x"
+#endif
 
 int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
@@ -184,6 +190,11 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
     return -1;
   }
   if (private->info.depth > 8) {
+#ifdef __NetBSD__
+    private->greenMask = 0x00ff00;
+    private->blueMask = 0x0000ff;
+    private->redMask = 0xff0000;
+#else
     if (wstype == WSDISPLAY_TYPE_SUN24 ||
 	wstype == WSDISPLAY_TYPE_SUNCG12 ||
 	wstype == WSDISPLAY_TYPE_SUNCG14 ||
@@ -202,6 +213,7 @@ int WSCONS_VideoInit(_THIS, SDL_PixelFormat *vformat)
       WSCONS_ReportError("Unknown video hardware");
       return -1;
     }
+#endif
   } else {
     WSCONS_ReportError("Displays with 8 bpp or less are not supported");
     return -1;
