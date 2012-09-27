@@ -561,7 +561,7 @@ LoadIcon(const char *file)
 SDL_bool
 CommonInit(CommonState * state)
 {
-    int i, j, m, n;
+    int i, j, m, n, w, h;
     SDL_DisplayMode fullscreen_mode;
 
     if (state->flags & SDL_INIT_VIDEO) {
@@ -735,8 +735,12 @@ CommonInit(CommonState * state)
                         SDL_GetError());
                 return SDL_FALSE;
             }
-            SDL_GetWindowSize(state->windows[i], &state->window_w, &state->window_h);
-
+            SDL_GetWindowSize(state->windows[i], &w, &h);
+            if (w != state->window_w || h != state->window_h) {
+                printf("Window requested size %dx%d, got %dx%d\n", state->window_w, state->window_h, w, h);
+                state->window_w = w;
+                state->window_h = h;
+            }
             if (SDL_SetWindowDisplayMode(state->windows[i], &fullscreen_mode) < 0) {
                 fprintf(stderr, "Can't set up fullscreen display mode: %s\n",
                         SDL_GetError());
