@@ -882,6 +882,31 @@ X11_RestoreWindow(_THIS, SDL_Window * window)
     X11_ShowWindow(_this, window);
 }
 
+static Bool
+isActionAllowed(SDL_WindowData *data, Atom action)
+{
+    Atom _NET_WM_ALLOWED_ACTIONS = data->videodata->_NET_WM_ALLOWED_ACTIONS;
+    Atom type;
+    Display *display = data->videodata->display;
+    int form;
+    unsigned long remain;
+    unsigned long len, i;
+    Atom *list;
+    Bool ret = False;
+    if (XGetWindowProperty(display, data->xwindow, _NET_WM_ALLOWED_ACTIONS, 0, 1024, False, XA_ATOM, &type, &form, &len, &remain, (unsigned char **)&list) == Success)
+    {
+        for (i=0; i<len; ++i)
+        {
+            if (list[i] == action) {
+                ret = True;
+                break;
+            }
+        }
+        XFree(list);
+    }
+    return ret;
+}
+
 void
 X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * _display, SDL_bool fullscreen)
 {
@@ -896,6 +921,29 @@ X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * _display,
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
 
+        if (isActionAllowed(data, data->videodata->_NET_WM_ACTION_FULLSCREEN) == False)
+        {
+            /* We aren't allowed to go into fullscreen mode... */
+            if ((window->flags & SDL_WINDOW_RESIZABLE) == 0) {
+                /* ...and we aren't resizable. Compiz refuses fullscreen toggle in this case. */
+                XSizeHints *sizehints = XAllocSizeHints();
+                long flags = 0;
+                XGetWMNormalHints(display, data->xwindow, sizehints, &flags);
+                /* set the resize flags on */
+                sizehints->flags |= PMinSize | PMaxSize;
+                if (fullscreen) {
+                    /* we are going fullscreen so turn the flags off */
+                    sizehints->flags ^= (PMinSize | PMaxSize);
+                } else {
+                    /* Reset the min/max width height to make the window non-resizable again */
+                    sizehints->min_width = sizehints->max_width = window->w;
+                    sizehints->min_height = sizehints->max_height = window->h;
+                }
+                XSetWMNormalHints(display, data->xwindow, sizehints);
+                XFree(sizehints);
+            }
+        }
+        
         SDL_zero(e);
         e.xany.type = ClientMessage;
         e.xclient.message_type = _NET_WM_STATE;
