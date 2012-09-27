@@ -204,7 +204,7 @@ X11_InitModes(_THIS)
         mode.refresh_rate = 0;
         mode.driverdata = NULL;
 
-        displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
+        displaydata = (SDL_DisplayData *) SDL_calloc(1, sizeof(*displaydata));
         if (!displaydata) {
             continue;
         }
@@ -272,10 +272,16 @@ CheckXinerama(Display * display, int *major, int *minor)
     /* Allow environment override */
     env = getenv("SDL_VIDEO_X11_XINERAMA");
     if (env && !SDL_atoi(env)) {
+#ifdef X11MODES_DEBUG
+        printf("Xinerama disabled due to environment variable\n");
+#endif
         return SDL_FALSE;
     }
 
     if (!SDL_X11_HAVE_XINERAMA) {
+#ifdef X11MODES_DEBUG
+        printf("Xinerama support not available\n");
+#endif
         return SDL_FALSE;
     }
 
@@ -283,8 +289,14 @@ CheckXinerama(Display * display, int *major, int *minor)
     if (!XineramaQueryExtension(display, &event_base, &error_base) ||
         !XineramaQueryVersion(display, major, minor) ||
         !XineramaIsActive(display)) {
+#ifdef X11MODES_DEBUG
+        printf("Xinerama not active on the display\n");
+#endif
         return SDL_FALSE;
     }
+#ifdef X11MODES_DEBUG
+    printf("Xinerama available!\n");
+#endif
     return SDL_TRUE;
 }
 #endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
@@ -301,17 +313,29 @@ CheckXRandR(Display * display, int *major, int *minor)
     /* Allow environment override */
     env = getenv("SDL_VIDEO_X11_XRANDR");
     if (env && !SDL_atoi(env)) {
+#ifdef X11MODES_DEBUG
+        printf("XRandR disabled due to environment variable\n");
+#endif
         return SDL_FALSE;
     }
 
     if (!SDL_X11_HAVE_XRANDR) {
+#ifdef X11MODES_DEBUG
+        printf("XRandR support not available\n");
+#endif
         return SDL_FALSE;
     }
 
     /* Query the extension version */
     if (!XRRQueryVersion(display, major, minor)) {
+#ifdef X11MODES_DEBUG
+        printf("XRandR not active on the display\n");
+#endif
         return SDL_FALSE;
     }
+#ifdef X11MODES_DEBUG
+    printf("XRandR available!\n");
+#endif
     return SDL_TRUE;
 }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
@@ -328,10 +352,16 @@ CheckVidMode(Display * display, int *major, int *minor)
     /* Allow environment override */
     env = getenv("SDL_VIDEO_X11_XVIDMODE");
     if (env && !SDL_atoi(env)) {
+#ifdef X11MODES_DEBUG
+        printf("XVidMode disabled due to environment variable\n");
+#endif
         return SDL_FALSE;
     }
 
     if (!SDL_X11_HAVE_XVIDMODE) {
+#ifdef X11MODES_DEBUG
+        printf("XVidMode support not available\n");
+#endif
         return SDL_FALSE;
     }
 
@@ -339,8 +369,14 @@ CheckVidMode(Display * display, int *major, int *minor)
     vm_error = -1;
     if (!XF86VidModeQueryExtension(display, &vm_event, &vm_error)
         || !XF86VidModeQueryVersion(display, major, minor)) {
+#ifdef X11MODES_DEBUG
+        printf("XVidMode not active on the display\n");
+#endif
         return SDL_FALSE;
     }
+#ifdef X11MODES_DEBUG
+    printf("XVidMode available!\n");
+#endif
     return SDL_TRUE;
 }
 
@@ -437,8 +473,6 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
     mode.format = sdl_display->current_mode.format;
     mode.driverdata = NULL;
 
-    data->use_xrandr = 0;
-    data->use_vidmode = 0;
     screen_w = DisplayWidth(display, data->screen);
     screen_h = DisplayHeight(display, data->screen);
 
