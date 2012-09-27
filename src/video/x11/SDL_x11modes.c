@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_X11
 
+#include "SDL_hints.h"
 #include "SDL_x11video.h"
 
 /*#define X11MODES_DEBUG*/
@@ -270,10 +271,10 @@ CheckXinerama(Display * display, int *major, int *minor)
     *major = *minor = 0;
 
     /* Allow environment override */
-    env = getenv("SDL_VIDEO_X11_XINERAMA");
+    env = SDL_GetHint(SDL_HINT_VIDEO_X11_XINERAMA);
     if (env && !SDL_atoi(env)) {
 #ifdef X11MODES_DEBUG
-        printf("Xinerama disabled due to environment variable\n");
+        printf("Xinerama disabled due to hint\n");
 #endif
         return SDL_FALSE;
     }
@@ -311,10 +312,10 @@ CheckXRandR(Display * display, int *major, int *minor)
     *major = *minor = 0;
 
     /* Allow environment override */
-    env = getenv("SDL_VIDEO_X11_XRANDR");
+    env = SDL_GetHint(SDL_HINT_VIDEO_X11_XRANDR);
     if (env && !SDL_atoi(env)) {
 #ifdef X11MODES_DEBUG
-        printf("XRandR disabled due to environment variable\n");
+        printf("XRandR disabled due to hint\n");
 #endif
         return SDL_FALSE;
     }
@@ -350,10 +351,10 @@ CheckVidMode(Display * display, int *major, int *minor)
     *major = *minor = 0;
 
     /* Allow environment override */
-    env = getenv("SDL_VIDEO_X11_XVIDMODE");
+    env = SDL_GetHint(SDL_HINT_VIDEO_X11_XVIDMODE);
     if (env && !SDL_atoi(env)) {
 #ifdef X11MODES_DEBUG
-        printf("XVidMode disabled due to environment variable\n");
+        printf("XVidMode disabled due to hint\n");
 #endif
         return SDL_FALSE;
     }
