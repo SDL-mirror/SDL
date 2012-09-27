@@ -991,8 +991,6 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     const int screen = displaydata->screen;
     Window root = RootWindow(display, screen);
     const int def_vis = (visual == DefaultVisual(display, screen));
-    const int w = maxint(window->w, _display->current_mode.w);
-    const int h = maxint(window->h, _display->current_mode.h);
     unsigned long xattrmask = 0;
     XSetWindowAttributes xattr;
     XEvent ev;
