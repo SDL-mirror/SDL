@@ -1134,9 +1134,12 @@ X11_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * _display,
     if (env) {
         legacy = SDL_atoi(env);
     } else {
+        SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
         SDL_DisplayData *displaydata = (SDL_DisplayData *) _display->driverdata;
         if ( displaydata->use_vidmode ) {
             legacy = SDL_TRUE;  /* the new stuff only works with XRandR. */
+        } else if ( !videodata->net_wm ) {
+            legacy = SDL_TRUE;  /* The window manager doesn't support it */
         } else {
             /* !!! FIXME: look at the window manager name, and blacklist certain ones? */
             /* http://stackoverflow.com/questions/758648/find-the-name-of-the-x-window-manager */
