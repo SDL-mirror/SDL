@@ -149,6 +149,11 @@ X11_DispatchEvent(_THIS)
     }
 #endif
 
+#if 0
+    printf("type = %d display = %d window = %d\n",
+           xevent.type, xevent.xany.display, xevent.xany.window);
+#endif
+
     data = NULL;
     if (videodata && videodata->windowlist) {
         for (i = 0; i < videodata->numwindows; ++i) {
@@ -163,10 +168,6 @@ X11_DispatchEvent(_THIS)
         return;
     }
 
-#if 0
-    printf("type = %d display = %d window = %d\n",
-           xevent.type, xevent.xany.display, xevent.xany.window);
-#endif
     switch (xevent.type) {
 
         /* Gaining mouse coverage? */
