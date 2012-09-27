@@ -46,6 +46,8 @@
 #include <fcntl.h>
 #endif
 
+/*#define DEBUG_XEVENTS*/
+
 /* Check to see if this is a repeated key.
    (idea shamelessly lifted from GII -- thanks guys! :)
  */
