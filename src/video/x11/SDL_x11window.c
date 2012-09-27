@@ -996,12 +996,13 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     unsigned long xattrmask = 0;
     XSetWindowAttributes xattr;
     XEvent ev;
-    int x = 0;
-    int y = 0;
+    SDL_Rect rect;
 
     if ( data->fswindow ) {
         return;  /* already fullscreen, I hope. */
     }
+
+    X11_GetDisplayBounds(_this, _display, &rect);
 
     /* Ungrab the input so that we can move the mouse around */
     XUngrabPointer(display, CurrentTime);
@@ -1020,7 +1021,8 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     xattr.colormap = data->colormap;
     xattrmask |= CWColormap;
 
-    data->fswindow = XCreateWindow(display, root, x, y, w, h, 0,
+    data->fswindow = XCreateWindow(display, root,
+                                   rect.x, rect.y, rect.w, rect.h, 0,
                                    displaydata->depth, InputOutput,
                                    visual, xattrmask, &xattr);
 
@@ -1048,9 +1050,9 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     //XIfEvent(display, &ev, &isConfigureNotify, (XPointer)&data->xwindow);
 
     /* Center actual window within our cover-the-screen window. */
-    x += (w - window->w) / 2;
-    y += (h - window->h) / 2;
-    XReparentWindow(display, data->xwindow, data->fswindow, x, y);
+    rect.x += (rect.w - window->w) / 2;
+    rect.y += (rect.h - window->h) / 2;
+    XReparentWindow(display, data->xwindow, data->fswindow, rect.x, rect.y);
     XRaiseWindow(display, data->xwindow);
 
     /* Make sure the fswindow is in view by warping mouse to the corner */
@@ -1058,9 +1060,9 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     XFlush(display);
 
     /* Center mouse in the window. */
-    x += (window->w / 2);
-    y += (window->h / 2);
-    XWarpPointer(display, None, root, 0, 0, 0, 0, x, y);
+    rect.x += (window->w / 2);
+    rect.y += (window->h / 2);
+    XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);

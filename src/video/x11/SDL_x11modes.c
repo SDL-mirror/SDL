@@ -151,9 +151,8 @@ X11_InitModes(_THIS)
      */
     if (CheckXinerama(data->display, &xinerama_major, &xinerama_minor)) {
         xinerama = XineramaQueryScreens(data->display, &screencount);
-        if (!xinerama) screencount = ScreenCount(data->display);
     }
-    else {
+    if (!xinerama) {
         screencount = ScreenCount(data->display);
     }
 #else
@@ -807,14 +806,11 @@ X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
         return 0;
     }
 #endif
-    if (_this->windows) {
-        rect->x = 0;
-        rect->y = 0;
-        rect->w = _this->windows->w;
-        rect->h = _this->windows->h;
-        return 0;
-    }
-    return -1;
+    rect->x = 0;
+    rect->y = 0;
+    rect->w = sdl_display->current_mode.w;
+    rect->h = sdl_display->current_mode.h;
+    return 0;
 }
 
 #endif /* SDL_VIDEO_DRIVER_X11 */
