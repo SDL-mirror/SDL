@@ -56,14 +56,6 @@ static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
 {
     return ev->type == ConfigureNotify && ev->xunmap.window == *((Window*)win);
 }
-static Bool isFocusOut(Display *dpy, XEvent *ev, XPointer win)
-{
-    return ev->type == FocusOut && ev->xunmap.window == *((Window*)win);
-}
-static Bool isFocusIn(Display *dpy, XEvent *ev, XPointer win)
-{
-    return ev->type == FocusIn && ev->xunmap.window == *((Window*)win);
-}
 
 static SDL_bool
 X11_IsWindowLegacyFullscreen(_THIS, SDL_Window * window)
