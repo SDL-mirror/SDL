@@ -1065,6 +1065,7 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
+    XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
 
     /* Wait to be visible, or XSetInputFocus() triggers an X error. */
