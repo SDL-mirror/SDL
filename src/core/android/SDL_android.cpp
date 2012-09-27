@@ -735,6 +735,84 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
     return Android_JNI_FileClose(ctx, true);
 }
 
+// returns a new global reference which needs to be released later
+static jobject Android_JNI_GetSystemServiceObject(const char* name)
+{
+    LocalReferenceHolder refs;
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return NULL;
+    }
+
+    jstring service = env->NewStringUTF(name);
+
+    jmethodID mid;
+
+    mid = env->GetStaticMethodID(mActivityClass, "getContext", "()Landroid/content/Context;");
+    jobject context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+    mid = env->GetMethodID(mActivityClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    jobject manager = env->CallObjectMethod(context, mid, service);
+
+    env->DeleteLocalRef(service);
+
+    return manager ? env->NewGlobalRef(manager) : NULL;
+}
+
+#define SETUP_CLIPBOARD(error) \
+    LocalReferenceHolder refs; \
+    JNIEnv* env = Android_JNI_GetEnv(); \
+    if (!refs.init(env)) { \
+        return error; \
+    } \
+    jobject clipboard = Android_JNI_GetSystemServiceObject("clipboard"); \
+    if (!clipboard) { \
+        return error; \
+    }
+
+extern "C" int Android_JNI_SetClipboardText(const char* text)
+{
+    SETUP_CLIPBOARD(-1)
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "setText", "(Ljava/lang/CharSequence;)V");
+    jstring string = env->NewStringUTF(text);
+    env->CallVoidMethod(clipboard, mid, string);
+    env->DeleteGlobalRef(clipboard);
+    env->DeleteLocalRef(string);
+    return 0;
+}
+
+extern "C" char* Android_JNI_GetClipboardText()
+{
+    SETUP_CLIPBOARD(SDL_strdup(""))
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "getText", "()Ljava/lang/CharSequence;");
+    jobject sequence = env->CallObjectMethod(clipboard, mid);
+    env->DeleteGlobalRef(clipboard);
+    if (sequence) {
+        mid = env->GetMethodID(env->GetObjectClass(sequence), "toString", "()Ljava/lang/String;");
+        jstring string = reinterpret_cast<jstring>(env->CallObjectMethod(sequence, mid));
+        const char* utf = env->GetStringUTFChars(string, 0);
+        if (utf) {
+            char* text = SDL_strdup(utf);
+            env->ReleaseStringUTFChars(string, utf);
+            return text;
+        }
+    }
+    return SDL_strdup("");
+}
+
+extern "C" SDL_bool Android_JNI_HasClipboardText()
+{
+    SETUP_CLIPBOARD(SDL_FALSE)
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "hasText", "()Z");
+    jboolean has = env->CallBooleanMethod(clipboard, mid);
+    env->DeleteGlobalRef(clipboard);
+    return has ? SDL_TRUE : SDL_FALSE;
+}
+
+
 // returns 0 on success or -1 on error (others undefined then)
 // returns truthy or falsy value in plugged, charged and battery
 // returns the value in seconds and percent or -1 if not available

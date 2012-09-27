@@ -33,6 +33,7 @@
 #include "../../events/SDL_windowevents_c.h"
 
 #include "SDL_androidvideo.h"
+#include "SDL_androidclipboard.h"
 #include "SDL_androidevents.h"
 #include "SDL_androidkeyboard.h"
 #include "SDL_androidwindow.h"
@@ -125,6 +126,11 @@ Android_CreateDevice(int devindex)
     device->SDL_HideScreenKeyboard = Android_HideScreenKeyboard;
     device->SDL_ToggleScreenKeyboard = Android_ToggleScreenKeyboard;
     device->SDL_IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
+
+    /* Clipboard */
+    device->SetClipboardText = Android_SetClipboardText;
+    device->GetClipboardText = Android_GetClipboardText;
+    device->HasClipboardText = Android_HasClipboardText;
 
     return device;
 }
