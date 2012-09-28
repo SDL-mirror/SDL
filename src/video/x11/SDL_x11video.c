@@ -116,6 +116,35 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     SDL_X11_UnloadSymbols();
 }
 
+/* An error handler to reset the vidmode and then call the default handler. */
+static SDL_bool safety_net_triggered = SDL_FALSE;
+static int (*orig_x11_errhandler) (Display *, XErrorEvent *) = NULL;
+static int
+X11_SafetyNetErrHandler(Display * d, XErrorEvent * e)
+{
+    /* if we trigger an error in our error handler, don't try again. */
+    if (!safety_net_triggered) {
+        safety_net_triggered = SDL_TRUE;
+        SDL_VideoDevice *device = SDL_GetVideoDevice();
+        if (device != NULL) {
+            int i;
+            for (i = 0; i < device->num_displays; i++) {
+                SDL_VideoDisplay *display = &device->displays[i];
+                if (SDL_memcmp(&display->current_mode, &display->desktop_mode,
+                               sizeof (SDL_DisplayMode)) != 0) {
+                    X11_SetDisplayMode(device, display, &display->desktop_mode);
+                }
+            }
+        }
+    }
+
+    if (orig_x11_errhandler != NULL) {
+        return orig_x11_errhandler(d, e);  /* probably terminate. */
+    }
+
+    return 0;
+}
+
 static SDL_VideoDevice *
 X11_CreateDevice(int devindex)
 {
@@ -172,6 +201,10 @@ X11_CreateDevice(int devindex)
 #ifdef X11_DEBUG
     XSynchronize(data->display, True);
 #endif
+
+    /* Hook up an X11 error handler to recover the desktop resolution. */
+    safety_net_triggered = SDL_FALSE;
+    orig_x11_errhandler = XSetErrorHandler(X11_SafetyNetErrHandler);
 
     /* Set the function pointers */
     device->VideoInit = X11_VideoInit;
