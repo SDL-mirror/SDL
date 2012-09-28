@@ -1978,7 +1978,7 @@ SDL_DestroyWindow(SDL_Window * window)
     /* make no context current if this is the current context window. */
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (_this->current_glwin == window) {
-            SDL_GL_MakeCurrent(NULL, NULL);
+            SDL_GL_MakeCurrent(window, NULL);
         }
     }
 
