@@ -736,7 +736,8 @@ CommonInit(CommonState * state)
                 return SDL_FALSE;
             }
             SDL_GetWindowSize(state->windows[i], &w, &h);
-            if (w != state->window_w || h != state->window_h) {
+            if (!(state->window_flags & SDL_WINDOW_RESIZABLE) &&
+                (w != state->window_w || h != state->window_h)) {
                 printf("Window requested size %dx%d, got %dx%d\n", state->window_w, state->window_h, w, h);
                 state->window_w = w;
                 state->window_h = h;
