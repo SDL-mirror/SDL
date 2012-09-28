@@ -56,14 +56,6 @@ static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
 {
     return ev->type == ConfigureNotify && ev->xconfigure.window == *((Window*)win);
 }
-static Bool isFocusIn(Display *dpy, XEvent *ev, XPointer win)
-{
-    return ev->type == FocusIn && ev->xfocus.window == *((Window*)win);
-}
-static Bool isFocusOut(Display *dpy, XEvent *ev, XPointer win)
-{
-    return ev->type == FocusOut && ev->xfocus.window == *((Window*)win);
-}
 
 static SDL_bool
 X11_IsWindowLegacyFullscreen(_THIS, SDL_Window * window)
@@ -1019,10 +1011,12 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
 
     XSelectInput(display, data->fswindow, StructureNotifyMask);
     XSetWindowBackground(display, data->fswindow, 0);
+    XInstallColormap(display, data->colormap);
     XClearWindow(display, data->fswindow);
     XMapRaised(display, data->fswindow);
 
     /* Make sure the fswindow is in view by warping mouse to the corner */
+    XUngrabPointer(display, CurrentTime);
     XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
@@ -1034,7 +1028,6 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
         XF86VidModeLockModeSwitch(display, screen, True);
     }
 #endif
-    XInstallColormap(display, data->colormap);
 
     SetWindowBordered(display, displaydata->screen, data->xwindow, SDL_FALSE);
 
@@ -1051,10 +1044,6 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     /* Wait to be mapped, filter Unmap event out if it arrives. */
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
     XCheckIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
-
-    /* Set the input focus because we're about to grab input */
-    window->flags |= SDL_WINDOW_INPUT_FOCUS;
-    SDL_SetKeyboardFocus(data->window);
 
     X11_SetWindowGrab(_this, window);
 }
@@ -1214,9 +1203,9 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
     /* ICCCM2.0-compliant window managers can handle fullscreen windows */
     oldstyle_fullscreen = X11_IsWindowLegacyFullscreen(_this, window);
 
-    if (((window->flags & SDL_WINDOW_INPUT_GRABBED) || oldstyle_fullscreen)
-        && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
-        XEvent ev;
+    if (oldstyle_fullscreen ||
+        ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
+         (window->flags & SDL_WINDOW_INPUT_FOCUS))) {
 
         /* Try to grab the mouse */
         for (;;) {
@@ -1235,15 +1224,11 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
         /* Now grab the keyboard */
         XGrabKeyboard(display, data->xwindow, True, GrabModeAsync,
                       GrabModeAsync, CurrentTime);
-
-        /* flush these events so they don't confuse normal event handling */
-        XSync(display, False);
-        XCheckIfEvent(display, &ev, &isFocusIn, (XPointer)&data->xwindow);
-        XCheckIfEvent(display, &ev, &isFocusOut, (XPointer)&data->xwindow);
     } else {
         XUngrabPointer(display, CurrentTime);
         XUngrabKeyboard(display, CurrentTime);
     }
+    XSync(display, False);
 }
 
 void
