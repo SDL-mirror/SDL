@@ -809,12 +809,14 @@ X11_ShowWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
     XEvent event;
 
-    XMapRaised(display, data->xwindow);
-    /* Blocking wait for "MapNotify" event.
-     * We use XIfEvent because XWindowEvent takes a mask rather than a type, 
-     * and XCheckTypedWindowEvent doesn't block */
-    XIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow);
-    XFlush(display);
+    if (!X11_IsWindowMapped(_this, window)) {
+        XMapRaised(display, data->xwindow);
+        /* Blocking wait for "MapNotify" event.
+         * We use XIfEvent because XWindowEvent takes a mask rather than a type, 
+         * and XCheckTypedWindowEvent doesn't block */
+        XIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow);
+        XFlush(display);
+    }
 }
 
 void
@@ -824,10 +826,12 @@ X11_HideWindow(_THIS, SDL_Window * window)
     Display *display = data->videodata->display;
     XEvent event;
 
-    XUnmapWindow(display, data->xwindow);
-    /* Blocking wait for "UnmapNotify" event */
-    XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);    
-    XFlush(display);
+    if (X11_IsWindowMapped(_this, window)) {
+        XUnmapWindow(display, data->xwindow);
+        /* Blocking wait for "UnmapNotify" event */
+        XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);    
+        XFlush(display);
+    }
 }
 
 void
