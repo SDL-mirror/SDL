@@ -150,43 +150,51 @@ typedef struct
     GL_FBOList *fbo;
 } GL_TextureData;
 
-
-static void
-GL_SetError(const char *prefix, GLenum result)
+static inline const char*
+GL_TranslateError (GLenum error)
 {
-    const char *error;
-
-    switch (result) {
-    case GL_NO_ERROR:
-        error = "GL_NO_ERROR";
-        break;
-    case GL_INVALID_ENUM:
-        error = "GL_INVALID_ENUM";
-        break;
-    case GL_INVALID_VALUE:
-        error = "GL_INVALID_VALUE";
-        break;
-    case GL_INVALID_OPERATION:
-        error = "GL_INVALID_OPERATION";
-        break;
-    case GL_STACK_OVERFLOW:
-        error = "GL_STACK_OVERFLOW";
-        break;
-    case GL_STACK_UNDERFLOW:
-        error = "GL_STACK_UNDERFLOW";
-        break;
-    case GL_OUT_OF_MEMORY:
-        error = "GL_OUT_OF_MEMORY";
-        break;
-    case GL_TABLE_TOO_LARGE:
-        error = "GL_TABLE_TOO_LARGE";
-        break;
+#define GL_ERROR_TRANSLATE(e) case e: return #e;
+    switch (error) {
+    GL_ERROR_TRANSLATE(GL_INVALID_ENUM)
+    GL_ERROR_TRANSLATE(GL_INVALID_VALUE)
+    GL_ERROR_TRANSLATE(GL_INVALID_OPERATION)
+    GL_ERROR_TRANSLATE(GL_OUT_OF_MEMORY)
+    GL_ERROR_TRANSLATE(GL_NO_ERROR)
+    GL_ERROR_TRANSLATE(GL_STACK_OVERFLOW)
+    GL_ERROR_TRANSLATE(GL_STACK_UNDERFLOW)
+    GL_ERROR_TRANSLATE(GL_TABLE_TOO_LARGE)
     default:
-        error = "UNKNOWN";
-        break;
-    }
-    SDL_SetError("%s: %s", prefix, error);
+        return "UNKNOWN";
 }
+#undef GL_ERROR_TRANSLATE
+}
+
+static __inline__ int
+GL_CheckAllErrors (const char *prefix, SDL_Renderer * renderer, const char *file, int line, const char *function)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+    int ret = 0;
+    /* check gl errors (can return multiple errors) */
+    for (;;) {
+        GLenum error = data->glGetError();
+        if (error != GL_NO_ERROR) {
+            if (prefix == NULL || prefix[0] == '\0') {
+                prefix = "generic";
+            }
+            SDL_SetError("%s: %s (%d): %s %s (0x%X)", prefix, file, line, function, GL_TranslateError(error), error);
+            ret++;
+        } else {
+            break;
+        }
+    }
+    return ret;
+}
+
+#if 1
+#define GL_CheckError(prefix, renderer) GL_CheckAllErrors(prefix, renderer, __FILE__, __LINE__, __PRETTY_FUNCTION__)
+#else
+#define GL_CheckError(prefix, renderer)
+#endif
 
 static int
 GL_LoadFunctions(GL_RenderData * data)
@@ -250,6 +258,8 @@ GL_ResetState(SDL_Renderer *renderer)
 
     data->glMatrixMode(GL_MODELVIEW);
     data->glLoadIdentity();
+
+    GL_CheckError("", renderer);
 }
 
 
@@ -483,7 +493,6 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum format, type;
     int texture_w, texture_h;
     GLenum scaleMode;
-    GLenum result;
 
     GL_ActivateRenderer(renderer);
 
@@ -525,7 +534,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         data->fbo = NULL;
     }
 
-    renderdata->glGetError();
+    GL_CheckError("", renderer);
     renderdata->glGenTextures(1, &data->texture);
     if ((renderdata->GL_ARB_texture_rectangle_supported)
         /*&& texture->access != SDL_TEXTUREACCESS_TARGET*/){
@@ -593,9 +602,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                  texture_h, 0, format, type, NULL);
     }
     renderdata->glDisable(data->type);
-    result = renderdata->glGetError();
-    if (result != GL_NO_ERROR) {
-        GL_SetError("glTexImage2D()", result);
+    if (GL_CheckError("glTexImage2D()", renderer) > 0) {
         return -1;
     }
 
@@ -633,6 +640,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
         renderdata->glDisable(data->type);
     }
+
+    GL_CheckError("", renderer);
     return 0;
 }
 
@@ -642,11 +651,10 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     GL_RenderData *renderdata = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
-    GLenum result;
 
     GL_ActivateRenderer(renderer);
 
-    renderdata->glGetError();
+    GL_CheckError("", renderer);
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -681,9 +689,7 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                     data->format, data->formattype, pixels);
     }
     renderdata->glDisable(data->type);
-    result = renderdata->glGetError();
-    if (result != GL_NO_ERROR) {
-        GL_SetError("glTexSubImage2D()", result);
+    if (GL_CheckError("glTexSubImage2D()", renderer) > 0) {
         return -1;
     }
     return 0;
@@ -754,6 +760,11 @@ GL_UpdateViewport(SDL_Renderer * renderer)
         return 0;
     }
 
+    if (!renderer->viewport.w || !renderer->viewport.h) {
+        /* The viewport isn't set up yet, ignore it */
+        return -1;
+    }
+
     data->glViewport(renderer->viewport.x, renderer->viewport.y,
                      renderer->viewport.w, renderer->viewport.h);
 
@@ -772,6 +783,7 @@ GL_UpdateViewport(SDL_Renderer * renderer)
                       (GLdouble) 0,
                        0.0, 1.0);
     }
+    GL_CheckError("", renderer);
     return 0;
 }
 
@@ -939,6 +951,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 #endif
         data->glEnd();
     }
+    GL_CheckError("", renderer);
 
     return 0;
 }
@@ -956,6 +969,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
 
         data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
     }
+    GL_CheckError("", renderer);
 
     return 0;
 }
@@ -1023,6 +1037,8 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glEnd();
 
     data->glDisable(texturedata->type);
+
+    GL_CheckError("", renderer);
 
     return 0;
 }
@@ -1114,6 +1130,8 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     
     data->glDisable(texturedata->type);
 
+    GL_CheckError("", renderer);
+
     return 0;
 }
 
@@ -1151,6 +1169,8 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     data->glReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
                        format, type, temp_pixels);
+
+    GL_CheckError("", renderer);
 
     /* Flip the rows to be top-down */
     length = rect->w * SDL_BYTESPERPIXEL(temp_format);
@@ -1222,6 +1242,7 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
                 GL_FBOList *nextnode = data->framebuffers->next;
                 /* delete the framebuffer object */
                 data->glDeleteFramebuffersEXT(1, &data->framebuffers->FBO);
+                GL_CheckError("", renderer);
                 SDL_free(data->framebuffers);
                 data->framebuffers = nextnode;
             }            
