@@ -150,7 +150,7 @@ typedef struct
     GL_FBOList *fbo;
 } GL_TextureData;
 
-static inline const char*
+static __inline__ const char*
 GL_TranslateError (GLenum error)
 {
 #define GL_ERROR_TRANSLATE(e) case e: return #e;
@@ -190,10 +190,12 @@ GL_CheckAllErrors (const char *prefix, SDL_Renderer * renderer, const char *file
     return ret;
 }
 
-#if 1
-#define GL_CheckError(prefix, renderer) GL_CheckAllErrors(prefix, renderer, __FILE__, __LINE__, __PRETTY_FUNCTION__)
-#else
+#if 0
 #define GL_CheckError(prefix, renderer)
+#elif defined(_MSC_VER)
+#define GL_CheckError(prefix, renderer) GL_CheckAllErrors(prefix, renderer, __FILE__, __LINE__, __FUNCTION__)
+#else
+#define GL_CheckError(prefix, renderer) GL_CheckAllErrors(prefix, renderer, __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #endif
 
 static int
