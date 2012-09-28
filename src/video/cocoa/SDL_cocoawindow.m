@@ -530,14 +530,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     /* Fill in the SDL window with the window data */
     {
         NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
-        NSView *contentView = [ nswindow contentView ];
-        /* Create view if not already exists */
-        if (!contentView) {
-            contentView = [[SDLView alloc] initWithFrame:rect];
-            [nswindow setContentView: contentView];
-            [contentView release];
-        }
-
         ConvertNSRect(&rect);
         window->x = (int)rect.origin.x;
         window->y = (int)rect.origin.y;
@@ -626,6 +618,12 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         }
     }
     nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:YES screen:screen];
+
+    // Create a default view for this window
+    rect = [nswindow contentRectForFrameRect:[nswindow frame]];
+    NSView *contentView = [[SDLView alloc] initWithFrame:rect];
+    [nswindow setContentView: contentView];
+    [contentView release];
 
     [pool release];
 
