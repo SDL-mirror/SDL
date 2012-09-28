@@ -393,6 +393,13 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
             return NULL;
         }
 
+        /* Swap textures to have texture before texture->native in the list */
+        texture->native->next = texture->next;
+        texture->prev = texture->native->prev;
+        texture->native->prev = texture;
+        texture->next = texture->native;
+        renderer->textures = texture;
+
         if (SDL_ISPIXELFORMAT_FOURCC(texture->format)) {
             texture->yuv = SDL_SW_CreateYUVTexture(format, w, h);
             if (!texture->yuv) {
