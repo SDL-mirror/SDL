@@ -596,15 +596,6 @@ static void
 get_real_resolution(Display * display, SDL_DisplayData * data, int *w, int *h,
                     int *rate)
 {
-#if SDL_VIDEO_DRIVER_X11_XINERAMA
-    if (data->use_xinerama) {
-        *w = data->xinerama_info.width;
-        *h = data->xinerama_info.height;
-        *rate = 0;
-        return;
-    }
-#endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
-
 #if SDL_VIDEO_DRIVER_X11_XRANDR
     if (data->use_xrandr) {
         int nsizes;
@@ -644,6 +635,15 @@ get_real_resolution(Display * display, SDL_DisplayData * data, int *w, int *h,
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+    if (data->use_xinerama) {
+        *w = data->xinerama_info.width;
+        *h = data->xinerama_info.height;
+        *rate = 0;
+        return;
+    }
+#endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
+
     *w = DisplayWidth(display, data->screen);
     *h = DisplayHeight(display, data->screen);
     *rate = 0;
@@ -658,15 +658,9 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
     /* check current mode so we can avoid uneccessary mode changes */
     get_real_resolution(display, data, &real_w, &real_h, &real_rate);
 
-#if SDL_VIDEO_DRIVER_X11_XINERAMA
-    if (w == real_w && h == real_h && (data->use_xinerama || !rate || rate == real_rate)) {
+    if (w == real_w && h == real_h && (!rate || !real_rate || rate == real_rate)) {
         return;
     }
-#else
-    if (w == real_w && h == real_h && (!rate || rate == real_rate)) {
-        return;
-    }
-#endif
 
 #if SDL_VIDEO_DRIVER_X11_XRANDR
     if (data->use_xrandr) {
