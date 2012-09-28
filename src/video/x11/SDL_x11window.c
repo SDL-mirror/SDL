@@ -118,16 +118,21 @@ int
 X11_GetWMStateProperty(_THIS, Uint32 flags, Atom atoms[5])
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;
+    /*Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;*/
     Atom _NET_WM_STATE_FOCUSED = videodata->_NET_WM_STATE_FOCUSED;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN = videodata->_NET_WM_STATE_FULLSCREEN;
     int count = 0;
 
+    /* The window manager sets this property, we shouldn't set it.
+       If we did, this would indicate to the window manager that we don't
+       actually want to be mapped during XMapRaised(), which would be bad.
+     *
     if (flags & SDL_WINDOW_HIDDEN) {
         atoms[count++] = _NET_WM_STATE_HIDDEN;
     }
+    */
     if (flags & SDL_WINDOW_INPUT_FOCUS) {
         atoms[count++] = _NET_WM_STATE_FOCUSED;
     }
@@ -169,7 +174,7 @@ X11_GetNetWMState(_THIS, SDL_Window * window)
 
         for (i = 0; i < numItems; ++i) {
             if (atoms[i] == _NET_WM_STATE_HIDDEN) {
-                flags |= (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED);
+                flags |= SDL_WINDOW_HIDDEN;
             } else if (atoms[i] == _NET_WM_STATE_FOCUSED) {
                 flags |= SDL_WINDOW_INPUT_FOCUS;
             } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_VERT) {
