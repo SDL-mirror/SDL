@@ -871,6 +871,11 @@ PrintEvent(SDL_Event * event)
                     event->window.windowID, event->window.data1,
                     event->window.data2);
             break;
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+            fprintf(stderr, "Window %d changed size to %dx%d",
+                    event->window.windowID, event->window.data1,
+                    event->window.data2);
+            break;
         case SDL_WINDOWEVENT_MINIMIZED:
             fprintf(stderr, "Window %d minimized", event->window.windowID);
             break;
