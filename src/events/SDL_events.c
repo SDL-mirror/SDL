@@ -86,6 +86,8 @@ SDL_StopEventLoop(void)
 {
     int i;
 
+    SDL_EventQ.active = 0;
+
     if (SDL_EventQ.lock) {
         SDL_DestroyMutex(SDL_EventQ.lock);
         SDL_EventQ.lock = NULL;
