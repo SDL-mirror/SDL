@@ -54,7 +54,15 @@ static Bool isUnmapNotify(Display *dpy, XEvent *ev, XPointer win)
 }
 static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
 {
-    return ev->type == ConfigureNotify && ev->xunmap.window == *((Window*)win);
+    return ev->type == ConfigureNotify && ev->xconfigure.window == *((Window*)win);
+}
+static Bool isFocusIn(Display *dpy, XEvent *ev, XPointer win)
+{
+    return ev->type == FocusIn && ev->xfocus.window == *((Window*)win);
+}
+static Bool isFocusOut(Display *dpy, XEvent *ev, XPointer win)
+{
+    return ev->type == FocusOut && ev->xfocus.window == *((Window*)win);
 }
 
 static SDL_bool
@@ -1002,13 +1010,6 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
 
     X11_GetDisplayBounds(_this, _display, &rect);
 
-    /* Ungrab the input so that we can move the mouse around */
-    XUngrabPointer(display, CurrentTime);
-
-    #if SDL_VIDEO_DRIVER_X11_XINERAMA
-    /* !!! FIXME: there was some Xinerama code in 1.2 here to set x,y to the origin of a specific screen. */
-    #endif
-
     SDL_zero(xattr);
     xattr.override_redirect = True;
     xattrmask |= CWOverrideRedirect;
@@ -1025,11 +1026,12 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
                                    visual, xattrmask, &xattr);
 
     XSelectInput(display, data->fswindow, StructureNotifyMask);
-
     XSetWindowBackground(display, data->fswindow, 0);
     XClearWindow(display, data->fswindow);
-
     XMapRaised(display, data->fswindow);
+
+    /* Make sure the fswindow is in view by warping mouse to the corner */
+    XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->fswindow);
@@ -1040,22 +1042,14 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
         XF86VidModeLockModeSwitch(display, screen, True);
     }
 #endif
-
     XInstallColormap(display, data->colormap);
 
     SetWindowBordered(display, displaydata->screen, data->xwindow, SDL_FALSE);
-    XFlush(display);
-    //XIfEvent(display, &ev, &isConfigureNotify, (XPointer)&data->xwindow);
 
     /* Center actual window within our cover-the-screen window. */
     rect.x += (rect.w - window->w) / 2;
     rect.y += (rect.h - window->h) / 2;
     XReparentWindow(display, data->xwindow, data->fswindow, rect.x, rect.y);
-    XRaiseWindow(display, data->xwindow);
-
-    /* Make sure the fswindow is in view by warping mouse to the corner */
-    XWarpPointer(display, None, root, 0, 0, 0, 0, 0, 0);
-    XFlush(display);
 
     /* Center mouse in the window. */
     rect.x += (window->w / 2);
@@ -1063,25 +1057,14 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
-    XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
+    XCheckIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
 
-    /* Wait to be visible, or XSetInputFocus() triggers an X error. */
-    while (SDL_TRUE) {
-        XWindowAttributes attr;
-        XSync(display, False);
-        XGetWindowAttributes(display, data->xwindow, &attr);
-        if (attr.map_state == IsViewable)
-            break;
-    }
-
-    XSetInputFocus(display, data->xwindow, RevertToParent, CurrentTime);
+    /* Set the input focus because we're about to grab input */
     window->flags |= SDL_WINDOW_INPUT_FOCUS;
     SDL_SetKeyboardFocus(data->window);
 
     X11_SetWindowGrab(_this, window);
-
-    XSync(display, False);
 }
 
 static void
@@ -1092,12 +1075,14 @@ X11_EndWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _di
     Display *display = data->videodata->display;
     const int screen = displaydata->screen;
     Window root = RootWindow(display, screen);
+    Window fswindow = data->fswindow;
     XEvent ev;
 
-    if (!data->fswindow)
+    if (!data->fswindow) {
         return;  /* already not fullscreen, I hope. */
+    }
 
-    XReparentWindow(display, data->xwindow, root, window->x, window->y);
+    data->fswindow = None;
 
 #if SDL_VIDEO_DRIVER_X11_VIDMODE
     if ( displaydata->use_vidmode ) {
@@ -1105,24 +1090,22 @@ X11_EndWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _di
     }
 #endif
 
-    XUnmapWindow(display, data->fswindow);
-    /* Wait to be unmapped. */
-    XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->fswindow);
-    XDestroyWindow(display, data->fswindow);
-    data->fswindow = 0;
+    X11_SetWindowGrab(_this, window);
 
-    /* catch these events so we know the window is back in business. */
+    XReparentWindow(display, data->xwindow, root, window->x, window->y);
+
+    /* flush these events so they don't confuse normal event handling */
     XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
     XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
-
-    XSync(display, True);   /* Flush spurious mode change events */
-
-    X11_SetWindowGrab(_this, window);
 
     SetWindowBordered(display, screen, data->xwindow,
                       (window->flags & SDL_WINDOW_BORDERLESS) == 0);
 
-    XFlush(display);
+    XUnmapWindow(display, fswindow);
+
+    /* Wait to be unmapped. */
+    XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&fswindow);
+    XDestroyWindow(display, fswindow);
 }
 
 
@@ -1241,6 +1224,8 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
 
     if (((window->flags & SDL_WINDOW_INPUT_GRABBED) || oldstyle_fullscreen)
         && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+        XEvent ev;
+
         /* Try to grab the mouse */
         for (;;) {
             int result =
@@ -1258,6 +1243,11 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
         /* Now grab the keyboard */
         XGrabKeyboard(display, data->xwindow, True, GrabModeAsync,
                       GrabModeAsync, CurrentTime);
+
+        /* flush these events so they don't confuse normal event handling */
+        XSync(display, False);
+        XIfEvent(display, &ev, &isFocusIn, (XPointer)&data->xwindow);
+        XIfEvent(display, &ev, &isFocusOut, (XPointer)&data->xwindow);
     } else {
         XUngrabPointer(display, CurrentTime);
         XUngrabKeyboard(display, CurrentTime);
