@@ -114,15 +114,18 @@ X11_IsActionAllowed(SDL_Window *window, Atom action)
     return ret;
 }
 
-int
-X11_GetWMStateProperty(_THIS, Uint32 flags, Atom atoms[5])
+void
+X11_SetNetWMState(_THIS, Window xwindow, Uint32 flags)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Display *display = videodata->display;
+    Atom _NET_WM_STATE = videodata->_NET_WM_STATE;
     /*Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;*/
     Atom _NET_WM_STATE_FOCUSED = videodata->_NET_WM_STATE_FOCUSED;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN = videodata->_NET_WM_STATE_FULLSCREEN;
+    Atom atoms[5];
     int count = 0;
 
     /* The window manager sets this property, we shouldn't set it.
@@ -143,14 +146,19 @@ X11_GetWMStateProperty(_THIS, Uint32 flags, Atom atoms[5])
     if (flags & SDL_WINDOW_FULLSCREEN) {
         atoms[count++] = _NET_WM_STATE_FULLSCREEN;
     }
-    return count;
+    if (count > 0) {
+        XChangeProperty(display, xwindow, _NET_WM_STATE, XA_ATOM, 32,
+                        PropModeReplace, (unsigned char *)atoms, count);
+    } else {
+        XDeleteProperty(display, xwindow, _NET_WM_STATE);
+    }
 }
 
 Uint32
-X11_GetNetWMState(_THIS, SDL_Window * window)
+X11_GetNetWMState(_THIS, Window xwindow)
 {
-    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Display *display = videodata->display;
     Atom _NET_WM_STATE = videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;
     Atom _NET_WM_STATE_FOCUSED = videodata->_NET_WM_STATE_FOCUSED;
@@ -164,7 +172,7 @@ X11_GetNetWMState(_THIS, SDL_Window * window)
     long maxLength = 1024;
     Uint32 flags = 0;
 
-    if (XGetWindowProperty(videodata->display, data->xwindow, _NET_WM_STATE,
+    if (XGetWindowProperty(display, xwindow, _NET_WM_STATE,
                            0l, maxLength, False, XA_ATOM, &actualType,
                            &actualFormat, &numItems, &bytesAfter,
                            &propertyValue) == Success) {
@@ -214,8 +222,6 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         SDL_OutOfMemory();
         return -1;
     }
-    window->driverdata = data;
-
     data->window = window;
     data->xwindow = w;
 #ifdef X_HAVE_UTF8_STRING
@@ -269,7 +275,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         data->colormap = attrib.colormap;
     }
 
-    window->flags |= X11_GetNetWMState(_this, window);
+    window->flags |= X11_GetNetWMState(_this, w);
 
     {
         Window FocalWindow;
@@ -290,6 +296,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     }
 
     /* All done! */
+    window->driverdata = data;
     return 0;
 }
 
@@ -342,8 +349,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     Atom _NET_WM_PID;
-    int wmstate_count;
-    Atom wmstate_atoms[5];
     Uint32 fevent = 0;
 
 #if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
@@ -528,14 +533,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 
     /* Set the window manager state */
-    wmstate_count = X11_GetWMStateProperty(_this, window->flags, wmstate_atoms);
-    if (wmstate_count > 0) {
-        XChangeProperty(display, w, data->_NET_WM_STATE, XA_ATOM, 32,
-                        PropModeReplace,
-                        (unsigned char *)wmstate_atoms, wmstate_count);
-    } else {
-        XDeleteProperty(display, w, data->_NET_WM_STATE);
-    }
+    X11_SetNetWMState(_this, w, window->flags);
 
     /* Let the window manager know we're a "normal" window */
     _NET_WM_WINDOW_TYPE = XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
@@ -875,9 +873,7 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     } else {
-        int count;
         Uint32 flags;
-        Atom atoms[5];
 
         flags = window->flags;
         if (maximized) {
@@ -885,13 +881,7 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
         } else {
             flags &= ~SDL_WINDOW_MAXIMIZED;
         }
-        count = X11_GetWMStateProperty(_this, flags, atoms);
-        if (count > 0) {
-            XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
-                            PropModeReplace, (unsigned char *)atoms, count);
-        } else {
-            XDeleteProperty(display, data->xwindow, _NET_WM_STATE);
-        }
+        X11_SetNetWMState(_this, data->xwindow, flags);
     }
     XFlush(display);
 }
@@ -970,9 +960,7 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     } else {
-        int count;
         Uint32 flags;
-        Atom atoms[5];
 
         flags = window->flags;
         if (fullscreen) {
@@ -980,13 +968,7 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
         } else {
             flags &= ~SDL_WINDOW_FULLSCREEN;
         }
-        count = X11_GetWMStateProperty(_this, flags, atoms);
-        if (count > 0) {
-            XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
-                            PropModeReplace, (unsigned char *)atoms, count);
-        } else {
-            XDeleteProperty(display, data->xwindow, _NET_WM_STATE);
-        }
+        X11_SetNetWMState(_this, data->xwindow, flags);
     }
     XFlush(display);
 }

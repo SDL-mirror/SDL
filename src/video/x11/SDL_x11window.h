@@ -42,8 +42,8 @@ typedef struct
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
 
-extern int X11_GetWMStateProperty(_THIS, Uint32 flags, Atom atoms[5]);
-extern Uint32 X11_GetNetWMState(_THIS, SDL_Window * window);
+extern void X11_SetNetWMState(_THIS, Window xwindow, Uint32 flags);
+extern Uint32 X11_GetNetWMState(_THIS, Window xwindow);
 
 extern int X11_CreateWindow(_THIS, SDL_Window * window);
 extern int X11_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);

@@ -485,7 +485,7 @@ X11_DispatchEvent(_THIS)
                    without ever mapping / unmapping them, so we handle that here,
                    because they use the NETWM protocol to notify us of changes.
                  */
-                Uint32 flags = X11_GetNetWMState(_this, data->window);
+                Uint32 flags = X11_GetNetWMState(_this, xevent.xproperty.window);
                 if ((flags^data->window->flags) & SDL_WINDOW_HIDDEN) {
                     if (flags & SDL_WINDOW_HIDDEN) {
                         X11_DispatchUnmapNotify(data);
