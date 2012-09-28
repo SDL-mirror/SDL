@@ -36,6 +36,7 @@ typedef struct
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     XineramaScreenInfo xinerama_info;
+    int xinerama_screen;
 #endif
 #if SDL_VIDEO_DRIVER_X11_XRANDR
     XRRScreenConfiguration *screen_config;

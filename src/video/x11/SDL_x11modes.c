@@ -217,6 +217,7 @@ X11_InitModes(_THIS)
             displaydata->screen = 0;
             displaydata->use_xinerama = xinerama_major * 100 + xinerama_minor;
             displaydata->xinerama_info = xinerama[screen];
+            displaydata->xinerama_screen = screen;
         }
         else displaydata->screen = screen;
 #else
@@ -642,8 +643,8 @@ get_real_resolution(Display * display, SDL_DisplayData * data, int *w, int *h,
 
         /* Update the current screen layout information */
         xinerama = XineramaQueryScreens(display, &screencount);
-        if (xinerama && data->screen < screencount) {
-            data->xinerama_info = xinerama[data->screen];
+        if (xinerama && data->xinerama_screen < screencount) {
+            data->xinerama_info = xinerama[data->xinerama_screen];
         }
         if (xinerama) XFree(xinerama);
 
