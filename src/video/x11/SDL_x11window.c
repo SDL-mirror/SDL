@@ -1032,13 +1032,12 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     SetWindowBordered(display, displaydata->screen, data->xwindow, SDL_FALSE);
 
     /* Center actual window within our cover-the-screen window. */
-    rect.x += (rect.w - window->w) / 2;
-    rect.y += (rect.h - window->h) / 2;
-    XReparentWindow(display, data->xwindow, data->fswindow, rect.x, rect.y);
+    XReparentWindow(display, data->xwindow, data->fswindow,
+                    (rect.w - window->w) / 2, (rect.h - window->h) / 2);
 
-    /* Center mouse in the window. */
-    rect.x += (window->w / 2);
-    rect.y += (window->h / 2);
+    /* Center mouse in the fullscreen window. */
+    rect.x += (rect.w / 2);
+    rect.y += (rect.h / 2);
     XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
 
     /* Wait to be mapped, filter Unmap event out if it arrives. */
