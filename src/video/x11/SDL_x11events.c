@@ -109,6 +109,19 @@ static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
 #endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
 
 
+static void
+X11_DispatchMapNotify(SDL_WindowData *data)
+{
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+}
+
+static void
+X11_DispatchUnmapNotify(SDL_WindowData *data)
+{
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+    SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+}
 
 static void
 X11_DispatchEvent(_THIS)
@@ -315,8 +328,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("UnmapNotify!\n");
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+            X11_DispatchUnmapNotify(data);
         }
         break;
 
@@ -325,8 +337,7 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("MapNotify!\n");
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+            X11_DispatchMapNotify(data);
         }
         break;
 
@@ -463,7 +474,26 @@ X11_DispatchEvent(_THIS)
                     }
                 }
             }
-#endif
+            if (status == Success) {
+                XFree(propdata);
+            }
+#endif /* DEBUG_XEVENTS */
+
+            if (xevent.xproperty.atom == data->videodata->_NET_WM_STATE) {
+                /* Get the new state from the window manager.
+                   Compositing window managers can alter visibility of windows
+                   without ever mapping / unmapping them, so we handle that here,
+                   because they use the NETWM protocol to notify us of changes.
+                 */
+                Uint32 flags = X11_GetNetWMState(_this, data->window);
+                if ((flags^data->window->flags) & SDL_WINDOW_HIDDEN) {
+                    if (flags & SDL_WINDOW_HIDDEN) {
+                        X11_DispatchUnmapNotify(data);
+                    } else {
+                        X11_DispatchMapNotify(data);
+                    }
+                }
+            }
         }
         break;
 

@@ -87,20 +87,113 @@ X11_IsWindowMapped(_THIS, SDL_Window * window)
     }
 }
 
-static int
-X11_GetWMStateProperty(_THIS, SDL_Window * window, Atom atoms[3])
+static SDL_bool
+X11_IsActionAllowed(SDL_Window *window, Atom action)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Atom _NET_WM_ALLOWED_ACTIONS = data->videodata->_NET_WM_ALLOWED_ACTIONS;
+    Atom type;
+    Display *display = data->videodata->display;
+    int form;
+    unsigned long remain;
+    unsigned long len, i;
+    Atom *list;
+    SDL_bool ret = SDL_FALSE;
+
+    if (XGetWindowProperty(display, data->xwindow, _NET_WM_ALLOWED_ACTIONS, 0, 1024, False, XA_ATOM, &type, &form, &len, &remain, (unsigned char **)&list) == Success)
+    {
+        for (i=0; i<len; ++i)
+        {
+            if (list[i] == action) {
+                ret = SDL_TRUE;
+                break;
+            }
+        }
+        XFree(list);
+    }
+    return ret;
+}
+
+int
+X11_GetWMStateProperty(_THIS, Uint32 flags, Atom atoms[5])
+{
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;
+    Atom _NET_WM_STATE_FOCUSED = videodata->_NET_WM_STATE_FOCUSED;
+    Atom _NET_WM_STATE_MAXIMIZED_VERT = videodata->_NET_WM_STATE_MAXIMIZED_VERT;
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ = videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
+    Atom _NET_WM_STATE_FULLSCREEN = videodata->_NET_WM_STATE_FULLSCREEN;
     int count = 0;
 
-    if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        atoms[count++] = data->_NET_WM_STATE_FULLSCREEN;
+    if (flags & SDL_WINDOW_HIDDEN) {
+        atoms[count++] = _NET_WM_STATE_HIDDEN;
     }
-    if (window->flags & SDL_WINDOW_MAXIMIZED) {
-        atoms[count++] = data->_NET_WM_STATE_MAXIMIZED_VERT;
-        atoms[count++] = data->_NET_WM_STATE_MAXIMIZED_HORZ;
+    if (flags & SDL_WINDOW_INPUT_FOCUS) {
+        atoms[count++] = _NET_WM_STATE_FOCUSED;
+    }
+    if (flags & SDL_WINDOW_MAXIMIZED) {
+        atoms[count++] = _NET_WM_STATE_MAXIMIZED_VERT;
+        atoms[count++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+    }
+    if (flags & SDL_WINDOW_FULLSCREEN) {
+        atoms[count++] = _NET_WM_STATE_FULLSCREEN;
     }
     return count;
+}
+
+Uint32
+X11_GetNetWMState(_THIS, SDL_Window * window)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+    Atom _NET_WM_STATE = videodata->_NET_WM_STATE;
+    Atom _NET_WM_STATE_HIDDEN = videodata->_NET_WM_STATE_HIDDEN;
+    Atom _NET_WM_STATE_FOCUSED = videodata->_NET_WM_STATE_FOCUSED;
+    Atom _NET_WM_STATE_MAXIMIZED_VERT = videodata->_NET_WM_STATE_MAXIMIZED_VERT;
+    Atom _NET_WM_STATE_MAXIMIZED_HORZ = videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
+    Atom _NET_WM_STATE_FULLSCREEN = videodata->_NET_WM_STATE_FULLSCREEN;
+    Atom _NET_WM_ACTION_RESIZE = videodata->_NET_WM_ACTION_RESIZE;
+    Atom actualType;
+    int actualFormat;
+    unsigned long i, numItems, bytesAfter;
+    unsigned char *propertyValue = NULL;
+    long maxLength = 1024;
+    Uint32 flags = 0;
+
+    if (XGetWindowProperty(videodata->display, data->xwindow, _NET_WM_STATE,
+                           0l, maxLength, False, XA_ATOM, &actualType,
+                           &actualFormat, &numItems, &bytesAfter,
+                           &propertyValue) == Success) {
+        Atom *atoms = (Atom *) propertyValue;
+        int maximized = 0;
+        int fullscreen = 0;
+
+        for (i = 0; i < numItems; ++i) {
+            if (atoms[i] == _NET_WM_STATE_HIDDEN) {
+                flags |= (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED);
+            } else if (atoms[i] == _NET_WM_STATE_FOCUSED) {
+                flags |= SDL_WINDOW_INPUT_FOCUS;
+            } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_VERT) {
+                maximized |= 1;
+            } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_HORZ) {
+                maximized |= 2;
+            } else if ( atoms[i] == _NET_WM_STATE_FULLSCREEN) {
+                fullscreen = 1;
+            }
+        }
+        if (maximized == 3) {
+            flags |= SDL_WINDOW_MAXIMIZED;
+        }  else if (fullscreen == 1) {
+            flags |= SDL_WINDOW_FULLSCREEN;
+        }
+        XFree(propertyValue);
+    }
+
+    if (X11_IsActionAllowed(window, _NET_WM_ACTION_RESIZE)) {
+        flags |= SDL_WINDOW_RESIZABLE;
+    }
+
+    return flags;
 }
 
 static int
@@ -118,6 +211,8 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         SDL_OutOfMemory();
         return -1;
     }
+    window->driverdata = data;
+
     data->window = window;
     data->xwindow = w;
 #ifdef X_HAVE_UTF8_STRING
@@ -171,42 +266,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         data->colormap = attrib.colormap;
     }
 
-    {
-        Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
-        Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
-        Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
-        Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
-        Atom actualType;
-        int actualFormat;
-        unsigned long i, numItems, bytesAfter;
-        unsigned char *propertyValue = NULL;
-        long maxLength = 1024;
-
-        if (XGetWindowProperty(data->videodata->display, w, _NET_WM_STATE,
-                               0l, maxLength, False, XA_ATOM, &actualType,
-                               &actualFormat, &numItems, &bytesAfter,
-                               &propertyValue) == Success) {
-            Atom *atoms = (Atom *) propertyValue;
-            int maximized = 0;
-            int fullscreen = 0;
-
-            for (i = 0; i < numItems; ++i) {
-                if (atoms[i] == _NET_WM_STATE_MAXIMIZED_VERT) {
-                    maximized |= 1;
-                } else if (atoms[i] == _NET_WM_STATE_MAXIMIZED_HORZ) {
-                    maximized |= 2;
-                } else if ( atoms[i] == _NET_WM_STATE_FULLSCREEN) {
-                    fullscreen = 1;
-                }
-            }
-            if (maximized == 3) {
-                window->flags |= SDL_WINDOW_MAXIMIZED;
-            }  else if (fullscreen == 1) {
-                window->flags |= SDL_WINDOW_FULLSCREEN;
-            }
-            XFree(propertyValue);
-        }
-    }
+    window->flags |= X11_GetNetWMState(_this, window);
 
     {
         Window FocalWindow;
@@ -215,6 +275,9 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         if (FocalWindow==w)
         {
             window->flags |= SDL_WINDOW_INPUT_FOCUS;
+        }
+
+        if (window->flags & SDL_WINDOW_INPUT_FOCUS) {
             SDL_SetKeyboardFocus(data->window);
         }
 
@@ -223,43 +286,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
         }
     }
 
-    /* FIXME: How can I tell?
-       {
-       DWORD style = GetWindowLong(hwnd, GWL_STYLE);
-       if (style & WS_VISIBLE) {
-       if (style & (WS_BORDER | WS_THICKFRAME)) {
-       window->flags &= ~SDL_WINDOW_BORDERLESS;
-       } else {
-       window->flags |= SDL_WINDOW_BORDERLESS;
-       }
-       if (style & WS_THICKFRAME) {
-       window->flags |= SDL_WINDOW_RESIZABLE;
-       } else {
-       window->flags &= ~SDL_WINDOW_RESIZABLE;
-       }
-       if (style & WS_MINIMIZE) {
-       window->flags |= SDL_WINDOW_MINIMIZED;
-       } else {
-       window->flags &= ~SDL_WINDOW_MINIMIZED;
-       }
-       }
-       if (GetFocus() == hwnd) {
-       int index = data->videodata->keyboard;
-       window->flags |= SDL_WINDOW_INPUT_FOCUS;
-       SDL_SetKeyboardFocus(index, data->window);
-
-       if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
-       RECT rect;
-       GetClientRect(hwnd, &rect);
-       ClientToScreen(hwnd, (LPPOINT) & rect);
-       ClientToScreen(hwnd, (LPPOINT) & rect + 1);
-       ClipCursor(&rect);
-       }
-       }
-     */
-
     /* All done! */
-    window->driverdata = data;
     return 0;
 }
 
@@ -313,7 +340,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     Atom _NET_WM_PID;
     int wmstate_count;
-    Atom wmstate_atoms[3];
+    Atom wmstate_atoms[5];
     Uint32 fevent = 0;
 
 #if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
@@ -719,8 +746,9 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
 
-    if (SDL_IsShapedWindow(window))
+    if (SDL_IsShapedWindow(window)) {
         X11_ResizeWindowShape(window);
+    }
     if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
          /* Apparently, if the X11 Window is set to a 'non-resizable' window, you cannot resize it using the XResizeWindow, thus
             we must set the size hints to adjust the window size.*/
@@ -735,8 +763,9 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
          XSetWMNormalHints(display, data->xwindow, sizehints);
 
          XFree(sizehints);
-    } else
+    } else {
         XResizeWindow(display, data->xwindow, window->w, window->h);
+    }
     XFlush(display);
 }
 
@@ -821,7 +850,6 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
-    Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
 
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
@@ -840,16 +868,17 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     } else {
-        int count = 0;
-        Atom atoms[3];
+        int count;
+        Uint32 flags;
+        Atom atoms[5];
 
-        if (window->flags & SDL_WINDOW_FULLSCREEN) {
-            atoms[count++] = _NET_WM_STATE_FULLSCREEN;
-        }
+        flags = window->flags;
         if (maximized) {
-            atoms[count++] = _NET_WM_STATE_MAXIMIZED_VERT;
-            atoms[count++] = _NET_WM_STATE_MAXIMIZED_HORZ;
+            flags |= SDL_WINDOW_MAXIMIZED;
+        } else {
+            flags &= ~SDL_WINDOW_MAXIMIZED;
         }
+        count = X11_GetWMStateProperty(_this, flags, atoms);
         if (count > 0) {
             XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
                             PropModeReplace, (unsigned char *)atoms, count);
@@ -885,31 +914,6 @@ X11_RestoreWindow(_THIS, SDL_Window * window)
     X11_ShowWindow(_this, window);
 }
 
-static Bool
-isActionAllowed(SDL_WindowData *data, Atom action)
-{
-    Atom _NET_WM_ALLOWED_ACTIONS = data->videodata->_NET_WM_ALLOWED_ACTIONS;
-    Atom type;
-    Display *display = data->videodata->display;
-    int form;
-    unsigned long remain;
-    unsigned long len, i;
-    Atom *list;
-    Bool ret = False;
-    if (XGetWindowProperty(display, data->xwindow, _NET_WM_ALLOWED_ACTIONS, 0, 1024, False, XA_ATOM, &type, &form, &len, &remain, (unsigned char **)&list) == Success)
-    {
-        for (i=0; i<len; ++i)
-        {
-            if (list[i] == action) {
-                ret = True;
-                break;
-            }
-        }
-        XFree(list);
-    }
-    return ret;
-}
-
 /* This asks the Window Manager to handle fullscreen for us. Most don't do it right, though. */
 static void
 X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _display, SDL_bool fullscreen)
@@ -918,15 +922,13 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
     SDL_DisplayData *displaydata = (SDL_DisplayData *) _display->driverdata;
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
-    Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
-    Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
+    Atom _NET_WM_ACTION_FULLSCREEN = data->videodata->_NET_WM_ACTION_FULLSCREEN;
 
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
 
-        if (isActionAllowed(data, data->videodata->_NET_WM_ACTION_FULLSCREEN) == False)
-        {
+        if (!X11_IsActionAllowed(window, _NET_WM_ACTION_FULLSCREEN)) {
             /* We aren't allowed to go into fullscreen mode... */
             if ((window->flags & SDL_WINDOW_RESIZABLE) == 0) {
                 /* ...and we aren't resizable. Compiz refuses fullscreen toggle in this case. */
@@ -961,16 +963,17 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     } else {
-        int count = 0;
-        Atom atoms[3];
+        int count;
+        Uint32 flags;
+        Atom atoms[5];
 
+        flags = window->flags;
         if (fullscreen) {
-            atoms[count++] = _NET_WM_STATE_FULLSCREEN;
+            flags |= SDL_WINDOW_FULLSCREEN;
+        } else {
+            flags &= ~SDL_WINDOW_FULLSCREEN;
         }
-        if (window->flags & SDL_WINDOW_MAXIMIZED) {
-            atoms[count++] = _NET_WM_STATE_MAXIMIZED_VERT;
-            atoms[count++] = _NET_WM_STATE_MAXIMIZED_HORZ;
-        }
+        count = X11_GetWMStateProperty(_this, flags, atoms);
         if (count > 0) {
             XChangeProperty(display, data->xwindow, _NET_WM_STATE, XA_ATOM, 32,
                             PropModeReplace, (unsigned char *)atoms, count);
