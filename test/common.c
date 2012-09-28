@@ -546,14 +546,10 @@ LoadIcon(const char *file)
         return (NULL);
     }
 
-    if (icon->format->palette == NULL) {
-        fprintf(stderr, "Icon must have a palette!\n");
-        SDL_FreeSurface(icon);
-        return (NULL);
+    if (icon->format->palette) {
+        /* Set the colorkey */
+        SDL_SetColorKey(icon, 1, *((Uint8 *) icon->pixels));
     }
-
-    /* Set the colorkey */
-    SDL_SetColorKey(icon, 1, *((Uint8 *) icon->pixels));
 
     return (icon);
 }
