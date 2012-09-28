@@ -373,7 +373,7 @@ extern DECLSPEC int SDLCALL SDL_UpdateTexture(SDL_Texture * texture,
                                               const void *pixels, int pitch);
 
 /**
- *  \brief Lock a portion of the texture for pixel access.
+ *  \brief Lock a portion of the texture for write-only pixel access.
  *  
  *  \param texture   The texture to lock for access, which was created with 
  *                   ::SDL_TEXTUREACCESS_STREAMING.
