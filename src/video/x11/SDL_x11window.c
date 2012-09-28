@@ -523,7 +523,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     }
 
     /* Set the window manager state */
-    wmstate_count = X11_GetWMStateProperty(_this, window, wmstate_atoms);
+    wmstate_count = X11_GetWMStateProperty(_this, window->flags, wmstate_atoms);
     if (wmstate_count > 0) {
         XChangeProperty(display, w, data->_NET_WM_STATE, XA_ATOM, 32,
                         PropModeReplace,
