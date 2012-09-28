@@ -637,6 +637,16 @@ get_real_resolution(Display * display, SDL_DisplayData * data, int *w, int *h,
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     if (data->use_xinerama) {
+        int screencount;
+        XineramaScreenInfo *xinerama;
+
+        /* Update the current screen layout information */
+        xinerama = XineramaQueryScreens(display, &screencount);
+        if (xinerama && data->screen < screencount) {
+            data->xinerama_info = xinerama[data->screen];
+        }
+        if (xinerama) XFree(xinerama);
+
         *w = data->xinerama_info.width;
         *h = data->xinerama_info.height;
         *rate = 0;
@@ -789,21 +799,20 @@ X11_QuitModes(_THIS)
 int
 X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
 {
+    Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     SDL_DisplayData *data = (SDL_DisplayData *) sdl_display->driverdata;
+    int real_rate;
 
-#if SDL_VIDEO_DRIVER_X11_XINERAMA
-    if (data && data->use_xinerama) {
-        rect->x = data->xinerama_info.x_org;
-        rect->y = data->xinerama_info.y_org;
-        rect->w = data->xinerama_info.width;
-        rect->h = data->xinerama_info.height;
-        return 0;
-    }
-#endif
     rect->x = 0;
     rect->y = 0;
-    rect->w = sdl_display->current_mode.w;
-    rect->h = sdl_display->current_mode.h;
+    get_real_resolution(display, data, &rect->w, &rect->h, &real_rate);
+
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+    if (data->use_xinerama) {
+        rect->x = data->xinerama_info.x_org;
+        rect->y = data->xinerama_info.y_org;
+    }
+#endif
     return 0;
 }
 
