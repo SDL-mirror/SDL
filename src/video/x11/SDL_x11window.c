@@ -152,7 +152,6 @@ X11_GetNetWMState(_THIS, SDL_Window * window)
     Atom _NET_WM_STATE_MAXIMIZED_VERT = videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN = videodata->_NET_WM_STATE_FULLSCREEN;
-    Atom _NET_WM_ACTION_RESIZE = videodata->_NET_WM_ACTION_RESIZE;
     Atom actualType;
     int actualFormat;
     unsigned long i, numItems, bytesAfter;
@@ -189,9 +188,8 @@ X11_GetNetWMState(_THIS, SDL_Window * window)
         XFree(propertyValue);
     }
 
-    if (X11_IsActionAllowed(window, _NET_WM_ACTION_RESIZE)) {
-        flags |= SDL_WINDOW_RESIZABLE;
-    }
+    /* FIXME, check the size hints for resizable */
+    /*flags |= SDL_WINDOW_RESIZABLE;*/
 
     return flags;
 }

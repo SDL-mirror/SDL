@@ -88,7 +88,6 @@ typedef struct SDL_VideoData
     Atom _NET_WM_STATE_MAXIMIZED_HORZ;
     Atom _NET_WM_STATE_FULLSCREEN;
     Atom _NET_WM_ALLOWED_ACTIONS;
-    Atom _NET_WM_ACTION_RESIZE;
     Atom _NET_WM_ACTION_FULLSCREEN;
     Atom _NET_WM_NAME;
     Atom _NET_WM_ICON_NAME;
