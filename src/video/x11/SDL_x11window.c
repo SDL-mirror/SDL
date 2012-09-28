@@ -1238,8 +1238,8 @@ X11_SetWindowGrab(_THIS, SDL_Window * window)
 
         /* flush these events so they don't confuse normal event handling */
         XSync(display, False);
-        XIfEvent(display, &ev, &isFocusIn, (XPointer)&data->xwindow);
-        XIfEvent(display, &ev, &isFocusOut, (XPointer)&data->xwindow);
+        XCheckIfEvent(display, &ev, &isFocusIn, (XPointer)&data->xwindow);
+        XCheckIfEvent(display, &ev, &isFocusOut, (XPointer)&data->xwindow);
     } else {
         XUngrabPointer(display, CurrentTime);
         XUngrabKeyboard(display, CurrentTime);
