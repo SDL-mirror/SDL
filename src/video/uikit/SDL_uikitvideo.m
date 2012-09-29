@@ -357,11 +357,12 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         SDL_DisplayModeData *modedata = (SDL_DisplayModeData *)mode->driverdata;
         [data->uiscreen setCurrentMode:modedata->uiscreenmode];
 
-        CGSize size = [modedata->uiscreenmode size];
-        if (size.width >= size.height) {
-            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
-        } else {
-            [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
+        if (mode->w > mode->h) {
+            if (!UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
+        } else if (mode->w < mode->h) {
+            if (!UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
         }
     }
 
