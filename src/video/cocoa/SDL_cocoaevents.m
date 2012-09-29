@@ -81,6 +81,7 @@ CreateApplicationMenus(void)
     NSString *appName;
     NSString *title;
     NSMenu *appleMenu;
+    NSMenu *serviceMenu;
     NSMenu *windowMenu;
     NSMenuItem *menuItem;
     
@@ -97,14 +98,22 @@ CreateApplicationMenus(void)
 
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
-    [appleMenu addItemWithTitle:@"Preferences" action:nil keyEquivalent:@""];
+    [appleMenu addItemWithTitle:@"Preferences…" action:nil keyEquivalent:@","];
+
+    [appleMenu addItem:[NSMenuItem separatorItem]];
+
+    serviceMenu = [[NSMenu alloc] initWithTitle:@""];
+    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Services" action:nil keyEquivalent:@""];
+    [menuItem setSubmenu:serviceMenu];
+
+    [NSApp setServicesMenu:serviceMenu];
 
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
     title = [@"Hide " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@/*"h"*/""];
+    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
 
-    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@/*"h"*/""];
+    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
     [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
 
     [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
@@ -112,7 +121,7 @@ CreateApplicationMenus(void)
     [appleMenu addItem:[NSMenuItem separatorItem]];
 
     title = [@"Quit " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@/*"q"*/""];
+    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
     
     /* Put menu into the menubar */
     menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
@@ -128,11 +137,11 @@ CreateApplicationMenus(void)
     /* Create the window menu */
     windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
     
-    /* "Minimize" item */
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@/*"m"*/""];
-    [windowMenu addItem:menuItem];
-    [menuItem release];
+    /* Add menu items */
+    [windowMenu addItemWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
     
+    [windowMenu addItemWithTitle:@"Zoom" action:@selector(performZoom:) keyEquivalent:@""];
+
     /* Put menu into the menubar */
     menuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
     [menuItem setSubmenu:windowMenu];
