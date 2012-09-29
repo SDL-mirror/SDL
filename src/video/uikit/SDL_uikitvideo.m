@@ -321,7 +321,7 @@ UIKit_VideoInit(_THIS)
 
     // Add the main screen.
     UIScreen *uiscreen = [UIScreen mainScreen];
-    const CGSize size = [uiscreen bounds].size;
+    CGSize size = [uiscreen bounds].size;
 
     if (UIKit_AddDisplay(uiscreen, size) < 0) {
         return -1;
@@ -334,7 +334,7 @@ UIKit_VideoInit(_THIS)
         for (UIScreen *uiscreen in [UIScreen screens]) {
             // Only add the other screens
             if (uiscreen != [UIScreen mainScreen]) {
-                const CGSize size = [uiscreen bounds].size;
+                size = [uiscreen bounds].size;
                 if (UIKit_AddDisplay(uiscreen, size) < 0) {
                     return -1;
                 }
