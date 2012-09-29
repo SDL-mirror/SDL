@@ -1058,6 +1058,24 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
     switch (event->type) {
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+            {
+                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
+                if (window) {
+                    for (i = 0; i < state->num_windows; ++i) {
+                        if (window == state->windows[i] &&
+                            (state->window_flags & SDL_WINDOW_RESIZABLE)) {
+                            SDL_Rect viewport;
+
+                            viewport.x = 0;
+                            viewport.y = 0;
+                            SDL_GetWindowSize(window, &viewport.w, &viewport.h);
+                            SDL_RenderSetViewport(state->renderers[i], &viewport);
+                        }
+                    }
+                }
+            }
+            break;
         case SDL_WINDOWEVENT_CLOSE:
 			{
                 SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
