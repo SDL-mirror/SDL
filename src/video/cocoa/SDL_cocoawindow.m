@@ -224,6 +224,29 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 }
 
+// We'll respond to key events by doing nothing so we don't beep.
+// We could handle key messages here, but we lose some in the NSApp dispatch,
+// where they get converted to action messages, etc.
+- (void)flagsChanged:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+- (void)keyDown:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+- (void)keyUp:(NSEvent *)theEvent
+{
+    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+}
+
+// We'll respond to selectors by doing nothing so we don't beep.
+// The escape key gets converted to a "cancel" selector, etc.
+- (void)doCommandBySelector:(SEL)aSelector
+{
+    //NSLog(@"doCommandBySelector: %@\n", NSStringFromSelector(aSelector));
+}
+
 - (void)mouseDown:(NSEvent *)theEvent
 {
     int button;
