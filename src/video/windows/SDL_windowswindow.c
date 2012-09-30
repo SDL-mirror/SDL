@@ -29,6 +29,9 @@
 #include "SDL_windowsvideo.h"
 #include "SDL_windowswindow.h"
 
+/* Dropfile support */
+#include <shellapi.h>
+
 /* This is included after SDL_windowsvideo.h, which includes windows.h */
 #include "SDL_syswm.h"
 
@@ -184,6 +187,9 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     if (videodata->RegisterTouchWindow) {
         videodata->RegisterTouchWindow(hwnd, (TWF_FINETOUCH|TWF_WANTPALM));
     }
+
+    /* Enable dropping files */
+    DragAcceptFiles(hwnd, TRUE);
 
     /* All done! */
     return 0;

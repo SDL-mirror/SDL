@@ -29,6 +29,10 @@
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_touch_c.h"
 
+/* Dropfile support */
+#include <shellapi.h>
+
+
 
 
 /*#define WMMSG_DEBUG*/
@@ -619,7 +623,29 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		break;
-	}
+
+    case WM_DROPFILES:
+        {
+            UINT i;
+            HDROP drop = (HDROP) wParam;
+            UINT count = DragQueryFile(drop, 0xFFFFFFFF, NULL, 0);
+            for (i = 0; i < count; ++i) {
+                UINT size = DragQueryFile(drop, i, NULL, 0) + 1;
+                LPTSTR buffer = SDL_stack_alloc(TCHAR, size);
+                if (buffer) {
+                    if (DragQueryFile(drop, i, buffer, size)) {
+                        char *file = WIN_StringToUTF8(buffer);
+                        SDL_SendDropFile(file);
+                        SDL_free(file);
+                    }
+                    SDL_stack_free(buffer);
+                }
+            }
+            DragFinish(drop);
+            return 0;
+        }
+        break;
+    }
 
     /* If there's a window proc, assume it's going to handle messages */
     if (data->wndproc) {
