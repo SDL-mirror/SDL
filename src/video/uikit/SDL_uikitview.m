@@ -85,13 +85,14 @@
     SDL_Window *window = self->viewcontroller.window;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    point.x *= displaymodedata->scale;
-    point.y *= displaymodedata->scale;
     
     if (normalize) {
         CGRect bounds = [self bounds];
         point.x /= bounds.size.width;
         point.y /= bounds.size.height;
+    } else {
+        point.x *= displaymodedata->scale;
+        point.y *= displaymodedata->scale;
     }
     return point;
 }
