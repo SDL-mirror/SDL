@@ -132,15 +132,14 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         [view->viewcontroller setView:view];
         [view->viewcontroller retain];
     }
+    [uiwindow addSubview: view];
     
     // The view controller needs to be the root in order to control rotation on iOS 6.0
     if (uiwindow.rootViewController == nil) {
         uiwindow.rootViewController = view->viewcontroller;
-    } else {
-        [uiwindow addSubview: view];
     }
 
-    if ( UIKit_GL_MakeCurrent(_this, window, view) < 0 ) {
+    if (UIKit_GL_MakeCurrent(_this, window, view) < 0) {
         UIKit_GL_DeleteContext(_this, view);
         return NULL;
     }
@@ -159,6 +158,10 @@ void UIKit_GL_DeleteContext(_THIS, SDL_GLContext context)
     /* the delegate has retained the view, this will release him */
     SDL_uikitopenglview *view = (SDL_uikitopenglview *)context;
     if (view->viewcontroller) {
+        UIWindow *uiwindow = (UIWindow *)view.superview;
+        if (uiwindow.rootViewController == view->viewcontroller) {
+            uiwindow.rootViewController = nil;
+        }
         [view->viewcontroller setView:nil];
         [view->viewcontroller release];
     }
