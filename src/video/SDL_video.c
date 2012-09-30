@@ -2639,7 +2639,7 @@ SDL_GL_SwapWindow(SDL_Window * window)
 void
 SDL_GL_DeleteContext(SDL_GLContext context)
 {
-    if (!_this || !_this->gl_data || !context) {
+    if (!_this || !context) {
         return;
     }
     _this->GL_MakeCurrent(_this, NULL, NULL);

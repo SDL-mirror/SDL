@@ -610,6 +610,11 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     GLXContext glx_context = (GLXContext) context;
     int status;
 
+    if (!_this->gl_data) {
+        SDL_SetError("OpenGL not initialized");
+        return -1;
+    }
+
     status = 0;
     if (!_this->gl_data->glXMakeCurrent(display, drawable, glx_context)) {
         SDL_SetError("Unable to make GL context current");
@@ -714,6 +719,9 @@ X11_GL_DeleteContext(_THIS, SDL_GLContext context)
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     GLXContext glx_context = (GLXContext) context;
 
+    if (!_this->gl_data) {
+        return;
+    }
     _this->gl_data->glXDestroyContext(display, glx_context);
     XSync(display, False);
 }
