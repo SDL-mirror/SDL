@@ -22,16 +22,17 @@
 
 #if SDL_VIDEO_DRIVER_UIKIT
 
-#import "SDL_uikitview.h"
+#include "SDL_uikitview.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_touch_c.h"
 
 #if SDL_IPHONE_KEYBOARD
-#import "keyinfotable.h"
-#import "SDL_uikitappdelegate.h"
-#import "SDL_uikitwindow.h"
+#include "keyinfotable.h"
+#include "SDL_uikitappdelegate.h"
+#include "SDL_uikitmodes.h"
+#include "SDL_uikitwindow.h"
 #endif
 
 @implementation SDL_uikitview

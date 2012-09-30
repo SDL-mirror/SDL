@@ -28,9 +28,11 @@
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_events_c.h"
 
-#include "SDL_uikitwindow.h"
 #include "SDL_uikitviewcontroller.h"
 #include "SDL_uikitvideo.h"
+#include "SDL_uikitmodes.h"
+#include "SDL_uikitwindow.h"
+
 
 #ifndef __IPHONE_6_0
 // This enum isn't available in older SDKs, but we use it for our own purposes on iOS 5.1 and for the system on iOS 6.0

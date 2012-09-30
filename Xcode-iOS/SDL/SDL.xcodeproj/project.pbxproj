@@ -98,6 +98,8 @@
 		56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */ = {isa = PBXBuildFile; fileRef = 56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */; };
 		93CB792313FC5E5200BD3E05 /* SDL_uikitviewcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 93CB792213FC5E5200BD3E05 /* SDL_uikitviewcontroller.h */; };
 		93CB792613FC5F5300BD3E05 /* SDL_uikitviewcontroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 93CB792513FC5F5300BD3E05 /* SDL_uikitviewcontroller.m */; };
+		AA126AD41617C5E7005ABC8F /* SDL_uikitmodes.h in Headers */ = {isa = PBXBuildFile; fileRef = AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */; };
+		AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */ = {isa = PBXBuildFile; fileRef = AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */; };
 		AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AD9159369E3005138DD /* SDL_rotate.c */; };
 		AA628ADC159369E3005138DD /* SDL_rotate.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628ADA159369E3005138DD /* SDL_rotate.h */; };
 		AA7558981595D55500BBD41B /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558651595D55500BBD41B /* begin_code.h */; };
@@ -349,6 +351,8 @@
 		56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDL_syspower.m; path = ../../src/power/uikit/SDL_syspower.m; sourceTree = SOURCE_ROOT; };
 		93CB792213FC5E5200BD3E05 /* SDL_uikitviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitviewcontroller.h; sourceTree = "<group>"; };
 		93CB792513FC5F5300BD3E05 /* SDL_uikitviewcontroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitviewcontroller.m; sourceTree = "<group>"; };
+		AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitmodes.h; sourceTree = "<group>"; };
+		AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmodes.m; sourceTree = "<group>"; };
 		AA628AD9159369E3005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
 		AA628ADA159369E3005138DD /* SDL_rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rotate.h; sourceTree = "<group>"; };
 		AA7558651595D55500BBD41B /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
@@ -837,25 +841,27 @@
 		FD689F090E26E5D900F90B21 /* uikit */ = {
 			isa = PBXGroup;
 			children = (
-				FDC656450E560DF800311C8E /* jumphack.h */,
 				FDC656440E560DF800311C8E /* jumphack.c */,
-				FD689F0C0E26E5D900F90B21 /* SDL_uikitevents.h */,
-				FD689F0D0E26E5D900F90B21 /* SDL_uikitevents.m */,
-				FD689F0E0E26E5D900F90B21 /* SDL_uikitopengles.h */,
-				FD689F0F0E26E5D900F90B21 /* SDL_uikitopengles.m */,
-				FD689F100E26E5D900F90B21 /* SDL_uikitvideo.h */,
-				FD689F110E26E5D900F90B21 /* SDL_uikitvideo.m */,
+				FDC656450E560DF800311C8E /* jumphack.h */,
 				FDC261780E3A3FC8001C4554 /* keyinfotable.h */,
-				FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */,
-				FD689F130E26E5D900F90B21 /* SDL_uikitview.m */,
-				FD689F140E26E5D900F90B21 /* SDL_uikitwindow.h */,
-				FD689F150E26E5D900F90B21 /* SDL_uikitwindow.m */,
-				FD689F160E26E5D900F90B21 /* SDL_uikitopenglview.h */,
-				FD689F170E26E5D900F90B21 /* SDL_uikitopenglview.m */,
 				FD689FCD0E26E9D400F90B21 /* SDL_uikitappdelegate.h */,
 				FD689FCC0E26E9D400F90B21 /* SDL_uikitappdelegate.m */,
+				FD689F0C0E26E5D900F90B21 /* SDL_uikitevents.h */,
+				FD689F0D0E26E5D900F90B21 /* SDL_uikitevents.m */,
+				AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */,
+				AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */,
+				FD689F0E0E26E5D900F90B21 /* SDL_uikitopengles.h */,
+				FD689F0F0E26E5D900F90B21 /* SDL_uikitopengles.m */,
+				FD689F160E26E5D900F90B21 /* SDL_uikitopenglview.h */,
+				FD689F170E26E5D900F90B21 /* SDL_uikitopenglview.m */,
+				FD689F100E26E5D900F90B21 /* SDL_uikitvideo.h */,
+				FD689F110E26E5D900F90B21 /* SDL_uikitvideo.m */,
+				FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */,
+				FD689F130E26E5D900F90B21 /* SDL_uikitview.m */,
 				93CB792213FC5E5200BD3E05 /* SDL_uikitviewcontroller.h */,
 				93CB792513FC5F5300BD3E05 /* SDL_uikitviewcontroller.m */,
+				FD689F140E26E5D900F90B21 /* SDL_uikitwindow.h */,
+				FD689F150E26E5D900F90B21 /* SDL_uikitwindow.m */,
 			);
 			path = uikit;
 			sourceTree = "<group>";
@@ -1234,6 +1240,7 @@
 				AA7558C81595D55500BBD41B /* SDL_version.h in Headers */,
 				AA7558C91595D55500BBD41B /* SDL_video.h in Headers */,
 				AA7558CA1595D55500BBD41B /* SDL.h in Headers */,
+				AA126AD41617C5E7005ABC8F /* SDL_uikitmodes.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1450,6 +1457,7 @@
 				56EA86FB13E9EC2B002E47EB /* SDL_coreaudio.c in Sources */,
 				93CB792613FC5F5300BD3E05 /* SDL_uikitviewcontroller.m in Sources */,
 				AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */,
+				AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

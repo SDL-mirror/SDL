@@ -623,8 +623,8 @@ SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect)
             SDL_GetDisplayBounds(displayIndex-1, rect);
             rect->x += rect->w;
         }
-        rect->w = display->desktop_mode.w;
-        rect->h = display->desktop_mode.h;
+        rect->w = display->current_mode.w;
+        rect->h = display->current_mode.h;
     }
     return 0;
 }

@@ -18,13 +18,32 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#ifndef _SDL_uikitvideo_h
-#define _SDL_uikitvideo_h
+#include "SDL_config.h"
 
-#include <UIKit/UIKit.h>
+#ifndef _SDL_uikitmodes_h
+#define _SDL_uikitmodes_h
 
-#include "../SDL_sysvideo.h"
+#include "SDL_uikitvideo.h"
 
-#endif /* _SDL_uikitvideo_h */
+typedef struct
+{
+    UIScreen *uiscreen;
+    CGFloat scale;
+} SDL_DisplayData;
+
+typedef struct
+{
+    UIScreenMode *uiscreenmode;
+    CGFloat scale;
+} SDL_DisplayModeData;
+
+extern BOOL SDL_UIKit_supports_multiple_displays;
+
+extern int UIKit_InitModes(_THIS);
+extern void UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
+extern int UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
+extern void UIKit_QuitModes(_THIS);
+
+#endif /* _SDL_uikitmodes_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

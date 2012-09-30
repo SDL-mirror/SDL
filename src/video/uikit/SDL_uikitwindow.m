@@ -33,6 +33,7 @@
 
 #include "SDL_uikitvideo.h"
 #include "SDL_uikitevents.h"
+#include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
 #import "SDL_uikitappdelegate.h"
 
