@@ -93,13 +93,13 @@ UIKit_AddSingleDisplayMode(SDL_VideoDisplay * display, int w, int h,
 
 static int
 UIKit_AddDisplayMode(SDL_VideoDisplay * display, int w, int h, CGFloat scale,
-                     UIScreenMode * uiscreenmode, BOOL addRotated)
+                     UIScreenMode * uiscreenmode, SDL_bool addRotation)
 {
     if (UIKit_AddSingleDisplayMode(display, w, h, uiscreenmode, scale) < 0) {
         return -1;
     }
     
-    if (addRotated) {
+    if (addRotation) {
         // Add the rotated version
         if (UIKit_AddSingleDisplayMode(display, h, w, uiscreenmode, scale) < 0) {
             return -1;
@@ -114,6 +114,13 @@ UIKit_AddDisplay(UIScreen *uiscreen)
 {
     CGSize size = [uiscreen bounds].size;
 
+    // Make sure the width/height are oriented correctly
+    if (UIKit_IsDisplayLandscape(uiscreen) != (size.width > size.height)) {
+        CGFloat height = size.width;
+        size.width = size.height;
+        size.height = height;
+    }
+
     // When dealing with UIKit all coordinates are specified in terms of
     // what Apple refers to as points. On earlier devices without the
     // so called "Retina" display, there is a one to one mapping between
@@ -127,7 +134,7 @@ UIKit_AddDisplay(UIScreen *uiscreen)
     } else {
         scale = 1.0f; // iOS < 4.0
     }
-	
+
     SDL_VideoDisplay display;
     SDL_DisplayMode mode;
     SDL_zero(mode);
@@ -168,6 +175,16 @@ UIKit_AddDisplay(UIScreen *uiscreen)
     return 0;
 }
 
+SDL_bool
+UIKit_IsDisplayLandscape(UIScreen *uiscreen)
+{
+    if (uiscreen == [UIScreen mainScreen]) {
+        return UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]);
+    } else {
+        CGSize size = [uiscreen bounds].size;
+        return (size.width > size.height);
+    }
+}
 
 int
 UIKit_InitModes(_THIS)
@@ -203,6 +220,9 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
 
+    SDL_bool isLandscape = UIKit_IsDisplayLandscape(data->uiscreen);
+    SDL_bool addRotation = (data->uiscreen == [UIScreen mainScreen]);
+
     if (SDL_UIKit_supports_multiple_displays) {
         // availableModes showed up in 3.2 (the iPad and later). We should only
         //  land here for at least that version of the OS.
@@ -210,10 +230,16 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
             CGSize size = [uimode size];
             int w = (int)size.width;
             int h = (int)size.height;
-            BOOL addRotated = (data->uiscreen == [UIScreen mainScreen]);
-            
+ 
+            // Make sure the width/height are oriented correctly
+            if (isLandscape != (w > h)) {
+                int tmp = w;
+                w = h;
+                h = tmp;
+            }
+
             // Add the native screen resolution.
-            UIKit_AddDisplayMode(display, w, h, data->scale, uimode, addRotated);
+            UIKit_AddDisplayMode(display, w, h, data->scale, uimode, addRotation);
 
             if (data->scale != 1.0f) {
                 // Add the native screen resolution divided by its scale.
@@ -222,14 +248,22 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
                 UIKit_AddDisplayMode(display,
                     (int)(size.width / data->scale),
                     (int)(size.height / data->scale),
-                    1.0f, uimode, addRotated);
+                    1.0f, uimode, addRotation);
             }
         }
     } else {
-        const CGRect rect = [data->uiscreen bounds];
-        UIKit_AddDisplayMode(display,
-            (int)rect.size.width, (int)rect.size.height,
-            1.0f, nil, YES);
+        const CGSize size = [data->uiscreen bounds].size;
+        int w = (int)size.width;
+        int h = (int)size.height;
+
+        // Make sure the width/height are oriented correctly
+        if (isLandscape != (w > h)) {
+            int tmp = w;
+            w = h;
+            h = tmp;
+        }
+
+        UIKit_AddDisplayMode(display, w, h, 1.0f, nil, addRotation);
     } 
 }
 
@@ -237,6 +271,7 @@ int
 UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
+
     if (!SDL_UIKit_supports_multiple_displays) {
         // Not on at least iPhoneOS 3.2 (versions prior to iPad).
         SDL_assert(mode->driverdata == NULL);
@@ -244,15 +279,18 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
         SDL_DisplayModeData *modedata = (SDL_DisplayModeData *)mode->driverdata;
         [data->uiscreen setCurrentMode:modedata->uiscreenmode];
 
-        if (mode->w > mode->h) {
-            if (!UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation]))
-                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
-        } else if (mode->w < mode->h) {
-            if (!UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))
-                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
+        if (data->uiscreen == [UIScreen mainScreen]) {
+            if (mode->w > mode->h) {
+                if (!UIKit_IsDisplayLandscape(data->uiscreen)) {
+                    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
+                }
+            } else if (mode->w < mode->h) {
+                if (UIKit_IsDisplayLandscape(data->uiscreen)) {
+                    [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
+                }
+            }
         }
     }
-
     return 0;
 }
 

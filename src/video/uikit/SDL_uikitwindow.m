@@ -76,32 +76,16 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
         /* Get frame dimensions in pixels */
         int width = (int)(bounds.size.width * displaymodedata->scale);
         int height = (int)(bounds.size.height * displaymodedata->scale);
-        
-        if ([UIScreen mainScreen] == displaydata->uiscreen) {
-            /* We can pick either width or height here and we'll rotate the
-             screen to match, so we pick the closest to what we wanted.
-             */
-            if (window->w >= window->h) {
-                if (width > height) {
-                    window->w = width;
-                    window->h = height;
-                } else {
-                    window->w = height;
-                    window->h = width;
-                }
-            } else {
-                if (width > height) {
-                    window->w = height;
-                    window->h = width;
-                } else {
-                    window->w = width;
-                    window->h = height;
-                }
-            }
-        } else {
-            window->w = width;
-            window->h = height;
+
+        // Make sure the width/height are oriented correctly
+        if (UIKit_IsDisplayLandscape(displaydata->uiscreen) != (width > height)) {
+            int temp = width;
+            width = height;
+            height = temp;
         }
+
+        window->w = width;
+        window->h = height;
     }
 
     window->driverdata = data;
@@ -112,13 +96,13 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     // SDL_WINDOW_BORDERLESS controls whether status bar is hidden.
     // This is only set if the window is on the main screen. Other screens
     //  just force the window to have the borderless flag.
-    if ([UIScreen mainScreen] == displaydata->uiscreen) {
+    if (displaydata->uiscreen == [UIScreen mainScreen]) {
         window->flags |= SDL_WINDOW_INPUT_FOCUS;  // always has input focus
         
-        if (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS)) {
-            [UIApplication sharedApplication].statusBarHidden = YES;
+        if ([UIApplication sharedApplication].statusBarHidden) {
+            window->flags |= SDL_WINDOW_BORDERLESS;
         } else {
-            [UIApplication sharedApplication].statusBarHidden = NO;
+            window->flags &= ~SDL_WINDOW_BORDERLESS;
         }
     } else {
         window->flags &= ~SDL_WINDOW_RESIZABLE;  // window is NEVER resizeable
@@ -179,6 +163,26 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
                 //  use it to set all the screens back to their defaults
                 //  upon window destruction, SDL_Quit(), etc.
                 display->current_mode = *bestmode;
+            }
+        }
+    }
+    
+    if (data->uiscreen == [UIScreen mainScreen]) {
+        if (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_BORDERLESS)) {
+            [UIApplication sharedApplication].statusBarHidden = YES;
+        } else {
+            [UIApplication sharedApplication].statusBarHidden = NO;
+        }
+    }
+    
+    if (!(window->flags & SDL_WINDOW_RESIZABLE)) {
+        if (window->w > window->h) {
+            if (!UIKit_IsDisplayLandscape(data->uiscreen)) {
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationLandscapeRight animated:NO];
+            }
+        } else if (window->w < window->h) {
+            if (UIKit_IsDisplayLandscape(data->uiscreen)) {
+                [[UIApplication sharedApplication] setStatusBarOrientation:UIInterfaceOrientationPortrait animated:NO];
             }
         }
     }

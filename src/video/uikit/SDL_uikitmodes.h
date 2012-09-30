@@ -39,6 +39,8 @@ typedef struct
 
 extern BOOL SDL_UIKit_supports_multiple_displays;
 
+extern SDL_bool UIKit_IsDisplayLandscape(UIScreen *uiscreen);
+
 extern int UIKit_InitModes(_THIS);
 extern void UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
 extern int UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
