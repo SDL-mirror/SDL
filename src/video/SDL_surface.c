@@ -693,26 +693,39 @@ SDL_LowerBlitScaled(SDL_Surface * src, SDL_Rect * srcrect,
     /* Save off the original dst width, height */
     int dstW = dstrect->w;
     int dstH = dstrect->h;
+    SDL_Rect full_rect;
     SDL_Rect final_dst = *dstrect;
     SDL_Rect final_src = *srcrect;
 
     /* Clip the dst surface to the dstrect */
-    SDL_SetClipRect( dst, &final_dst );
+    full_rect.x = 0;
+    full_rect.y = 0;
+    full_rect.w = dst->w;
+    full_rect.h = dst->h;
+    if (!SDL_IntersectRect(&final_dst, &full_rect, &final_dst)) {
+        return 0;
+    }
 
     /* Did the dst width change? */
-    if ( dstW != dst->clip_rect.w ) {
+    if ( dstW != final_dst.w ) {
         /* scale the src width appropriately */
         final_src.w = final_src.w * dst->clip_rect.w / dstW;
     }
 
     /* Did the dst height change? */
-    if ( dstH != dst->clip_rect.h ) {
+    if ( dstH != final_dst.h ) {
         /* scale the src width appropriately */
         final_src.h = final_src.h * dst->clip_rect.h / dstH;
     }
 
     /* Clip the src surface to the srcrect */
-    SDL_SetClipRect( src, &final_src );
+    full_rect.x = 0;
+    full_rect.y = 0;
+    full_rect.w = src->w;
+    full_rect.h = src->h;
+    if (!SDL_IntersectRect(&final_src, &full_rect, &final_src)) {
+        return 0;
+    }
 
     src->map->info.flags |= SDL_COPY_NEAREST;
 
