@@ -684,6 +684,12 @@ int
 SDL_LowerBlitScaled(SDL_Surface * src, SDL_Rect * srcrect,
                 SDL_Surface * dst, SDL_Rect * dstrect)
 {
+    static const Uint32 complex_copy_flags = (
+        SDL_COPY_MODULATE_COLOR | SDL_COPY_MODULATE_ALPHA |
+        SDL_COPY_BLEND | SDL_COPY_ADD | SDL_COPY_MOD |
+        SDL_COPY_COLORKEY
+    );
+
     /* Save off the original dst width, height */
     int dstW = dstrect->w;
     int dstH = dstrect->h;
@@ -710,7 +716,9 @@ SDL_LowerBlitScaled(SDL_Surface * src, SDL_Rect * srcrect,
 
     src->map->info.flags |= SDL_COPY_NEAREST;
 
-    if ( src->format->format == dst->format->format && !SDL_ISPIXELFORMAT_INDEXED(src->format->format) ) {
+    if ( !(src->map->info.flags & complex_copy_flags) &&
+         src->format->format == dst->format->format && 
+         !SDL_ISPIXELFORMAT_INDEXED(src->format->format) ) {
         return SDL_SoftStretch( src, &final_src, dst, &final_dst );
     } else {
         return SDL_LowerBlit( src, &final_src, dst, &final_dst );
