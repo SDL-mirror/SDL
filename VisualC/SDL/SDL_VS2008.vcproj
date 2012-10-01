@@ -809,6 +809,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\events\SDL_dropevents.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\events\SDL_dropevents_c.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\audio\dummy\SDL_dummyaudio.c"
 			>
 		</File>
