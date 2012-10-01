@@ -273,7 +273,7 @@
     <ClInclude Include="..\..\src\render\software\SDL_draw.h" />
     <ClInclude Include="..\..\src\render\software\SDL_drawline.h" />
     <ClInclude Include="..\..\src\render\software\SDL_drawpoint.h" />
-    <ClInclude Include="..\..\src\events\SDL_dropevents_c.c" />
+    <ClInclude Include="..\..\src\events\SDL_dropevents_c.h" />
     <ClInclude Include="..\..\src\render\software\SDL_render_sw_c.h" />
     <ClInclude Include="..\..\src\render\software\SDL_rotate.h" />
     <ClInclude Include="..\..\src\video\dummy\SDL_nullframebuffer_c.h" />

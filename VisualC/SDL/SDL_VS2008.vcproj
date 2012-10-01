@@ -813,7 +813,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\events\SDL_dropevents_c.c"
+			RelativePath="..\..\src\events\SDL_dropevents_c.h"
 			>
 		</File>
 		<File
