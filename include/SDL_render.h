@@ -437,6 +437,32 @@ extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
                                                    SDL_Rect * rect);
 
 /**
+ *  \brief Set the drawing scale for rendering on the current target.
+ *
+ *  \param scaleX The horizontal scaling factor
+ *  \param scaleY The vertical scaling factor
+ *
+ *  The drawing coordinates are scaled by the x/y scaling factors
+ *  before they are used by the renderer.  This allows resolution
+ *  independent drawing with a single coordinate system.
+ *
+ *  \note If this results in scaling or subpixel drawing by the 
+ *        rendering backend, it will be handled using the appropriate
+ *        quality hints.  For best results use integer scaling factors.
+ */
+extern DECLSPEC int SDLCALL SDL_RenderSetScale(SDL_Renderer * renderer,
+                                               float scaleX, float scaleY);
+
+/**
+ *  \brief Get the drawing scale for the current target.
+ *
+ *  \param scaleX A pointer filled in with the horizontal scaling factor
+ *  \param scaleY A pointer filled in with the vertical scaling factor
+ */
+extern DECLSPEC void SDLCALL SDL_RenderGetScale(SDL_Renderer * renderer,
+                                               float *scaleX, float *scaleY);
+
+/**
  *  \brief Set the color used for drawing operations (Rect, Line and Clear).
  *  
  *  \param r The red value used to draw on the rendering target.

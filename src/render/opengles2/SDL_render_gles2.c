@@ -945,16 +945,16 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
 static const float inv255f = 1.0f / 255.0f;
 
 static int GLES2_RenderClear(SDL_Renderer *renderer);
-static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count);
-static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count);
-static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count);
+static int GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int count);
+static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *points, int count);
+static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count);
 static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
-                            const SDL_Rect *dstrect);
+                            const SDL_FRect *dstrect);
 static int GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     Uint32 pixel_format, void * pixels, int pitch);
 static int GLES2_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                         const double angle, const SDL_Point *center, const SDL_RendererFlip flip);
+                         const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+                         const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip);
 static void GLES2_RenderPresent(SDL_Renderer *renderer);
 
 
@@ -1054,7 +1054,7 @@ GLES2_SetDrawingState(SDL_Renderer * renderer)
 }
 
 static int
-GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int count)
+GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int count)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat *vertices;
@@ -1068,8 +1068,8 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
     vertices = SDL_stack_alloc(GLfloat, count * 2);
     for (idx = 0; idx < count; ++idx)
     {
-        GLfloat x = (GLfloat)points[idx].x + 0.5f;
-        GLfloat y = (GLfloat)points[idx].y + 0.5f;
+        GLfloat x = points[idx].x + 0.5f;
+        GLfloat y = points[idx].y + 0.5f;
 
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
@@ -1087,7 +1087,7 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_Point *points, int coun
 }
 
 static int
-GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count)
+GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *points, int count)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat *vertices;
@@ -1101,8 +1101,8 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
     vertices = SDL_stack_alloc(GLfloat, count * 2);
     for (idx = 0; idx < count; ++idx)
     {
-        GLfloat x = (GLfloat)points[idx].x + 0.5f;
-        GLfloat y = (GLfloat)points[idx].y + 0.5f;
+        GLfloat x = points[idx].x + 0.5f;
+        GLfloat y = points[idx].y + 0.5f;
 
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
@@ -1126,7 +1126,7 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_Point *points, int count
 }
 
 static int
-GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
+GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLfloat vertices[8];
@@ -1139,12 +1139,12 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
     /* Emit a line loop for each rectangle */
     rdata->glGetError();
     for (idx = 0; idx < count; ++idx) {
-        const SDL_Rect *rect = &rects[idx];
+        const SDL_FRect *rect = &rects[idx];
 
-        GLfloat xMin = (GLfloat)rect->x;
-        GLfloat xMax = (GLfloat)(rect->x + rect->w);
-        GLfloat yMin = (GLfloat)rect->y;
-        GLfloat yMax = (GLfloat)(rect->y + rect->h);
+        GLfloat xMin = rect->x;
+        GLfloat xMax = (rect->x + rect->w);
+        GLfloat yMin = rect->y;
+        GLfloat yMax = (rect->y + rect->h);
 
         vertices[0] = xMin;
         vertices[1] = yMin;
@@ -1167,7 +1167,7 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_Rect *rects, int count)
 
 static int
 GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
-                 const SDL_Rect *dstrect)
+                 const SDL_FRect *dstrect)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLES2_TextureData *tdata = (GLES2_TextureData *)texture->driverdata;
@@ -1294,14 +1294,14 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    vertices[0] = (GLfloat)dstrect->x;
-    vertices[1] = (GLfloat)dstrect->y;
-    vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[3] = (GLfloat)dstrect->y;
-    vertices[4] = (GLfloat)dstrect->x;
-    vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
-    vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
+    vertices[0] = dstrect->x;
+    vertices[1] = dstrect->y;
+    vertices[2] = (dstrect->x + dstrect->w);
+    vertices[3] = dstrect->y;
+    vertices[4] = dstrect->x;
+    vertices[5] = (dstrect->y + dstrect->h);
+    vertices[6] = (dstrect->x + dstrect->w);
+    vertices[7] = (dstrect->y + dstrect->h);
     rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     texCoords[0] = srcrect->x / (GLfloat)texture->w;
     texCoords[1] = srcrect->y / (GLfloat)texture->h;
@@ -1323,7 +1323,7 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
 
 static int
 GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
-                 const SDL_Rect *dstrect, const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
+                 const SDL_FRect *dstrect, const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
     GLES2_TextureData *tdata = (GLES2_TextureData *)texture->driverdata;
@@ -1343,8 +1343,8 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     rdata->glEnableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
     fAngle[0] = fAngle[1] = fAngle[2] = fAngle[3] = (GLfloat)angle;
     /* Calculate the center of rotation */
-    translate[0] = translate[2] = translate[4] = translate[6] = (GLfloat)(center->x + dstrect->x);
-    translate[1] = translate[3] = translate[5] = translate[7] = (GLfloat)(center->y + dstrect->y);
+    translate[0] = translate[2] = translate[4] = translate[6] = (center->x + dstrect->x);
+    translate[1] = translate[3] = translate[5] = translate[7] = (center->y + dstrect->y);
 
     /* Activate an appropriate shader and set the projection matrix */
     blendMode = texture->blendMode;
@@ -1460,14 +1460,14 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     GLES2_SetTexCoords(rdata, SDL_TRUE);
 
     /* Emit the textured quad */
-    vertices[0] = (GLfloat)dstrect->x;
-    vertices[1] = (GLfloat)dstrect->y;
-    vertices[2] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[3] = (GLfloat)dstrect->y;
-    vertices[4] = (GLfloat)dstrect->x;
-    vertices[5] = (GLfloat)(dstrect->y + dstrect->h);
-    vertices[6] = (GLfloat)(dstrect->x + dstrect->w);
-    vertices[7] = (GLfloat)(dstrect->y + dstrect->h);
+    vertices[0] = dstrect->x;
+    vertices[1] = dstrect->y;
+    vertices[2] = (dstrect->x + dstrect->w);
+    vertices[3] = dstrect->y;
+    vertices[4] = dstrect->x;
+    vertices[5] = (dstrect->y + dstrect->h);
+    vertices[6] = (dstrect->x + dstrect->w);
+    vertices[7] = (dstrect->y + dstrect->h);
     if (flip & SDL_FLIP_HORIZONTAL) {
         tmp = vertices[0];
         vertices[0] = vertices[4] = vertices[2];

@@ -103,26 +103,22 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
             if (event->window.event == SDL_WINDOWEVENT_RESIZED) {
                 /* Try to keep the previous viewport centered */
                 int w, h;
-                SDL_Rect viewport;
 
                 SDL_GetWindowSize(window, &w, &h);
                 if (renderer->target) {
                     renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
                     renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
                 } else {
-                    viewport.x = (w - renderer->viewport.w) / 2;
-                    viewport.y = (h - renderer->viewport.h) / 2;
-                    viewport.w = renderer->viewport.w;
-                    viewport.h = renderer->viewport.h;
-                    SDL_RenderSetViewport(renderer, &viewport);
+                    renderer->viewport.x = (w - renderer->viewport.w) / 2;
+                    renderer->viewport.y = (h - renderer->viewport.h) / 2;
+                    renderer->UpdateViewport(renderer);
                 }
                 renderer->resized = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                int w, h;
-                SDL_Rect viewport;
-
                 if (!renderer->resized) {
                     /* Window was programmatically resized, reset viewport */
+                    int w, h;
+
                     SDL_GetWindowSize(window, &w, &h);
                     if (renderer->target) {
                         renderer->viewport_backup.x = 0;
@@ -130,14 +126,14 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                         renderer->viewport_backup.w = w;
                         renderer->viewport_backup.h = h;
                     } else {
-                        viewport.x = 0;
-                        viewport.y = 0;
-                        viewport.w = w;
-                        viewport.h = h;
-                        SDL_RenderSetViewport(renderer, &viewport);
+                        renderer->viewport.x = 0;
+                        renderer->viewport.y = 0;
+                        renderer->viewport.w = w;
+                        renderer->viewport.h = h;
+                        renderer->UpdateViewport(renderer);
                     }
-                    renderer->resized = SDL_FALSE;
                 }
+                renderer->resized = SDL_FALSE;
             } else if (event->window.event == SDL_WINDOWEVENT_HIDDEN) {
                 renderer->hidden = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_SHOWN) {
@@ -247,6 +243,8 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
     if (renderer) {
         renderer->magic = &renderer_magic;
         renderer->window = window;
+        renderer->scale.x = 1.0f;
+        renderer->scale.y = 1.0f;
 
         if (SDL_GetWindowFlags(window) & (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED)) {
             renderer->hidden = SDL_TRUE;
@@ -867,8 +865,6 @@ SDL_RenderTargetSupported(SDL_Renderer *renderer)
 int
 SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
 {
-    SDL_Rect viewport;
-
     if (!SDL_RenderTargetSupported(renderer)) {
         SDL_Unsupported();
         return -1;
@@ -898,6 +894,7 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
     if (texture && !renderer->target) {
         /* Make a backup of the viewport */
         renderer->viewport_backup = renderer->viewport;
+        renderer->scale_backup = renderer->scale;
     }
     renderer->target = texture;
 
@@ -906,14 +903,17 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
     }
 
     if (texture) {
-        viewport.x = 0;
-        viewport.y = 0;
-        viewport.w = texture->w;
-        viewport.h = texture->h;
+        renderer->viewport.x = 0;
+        renderer->viewport.y = 0;
+        renderer->viewport.w = texture->w;
+        renderer->viewport.h = texture->h;
+        renderer->scale.x = 1.0f;
+        renderer->scale.y = 1.0f;
     } else {
-        viewport = renderer->viewport_backup;
+        renderer->viewport = renderer->viewport_backup;
+        renderer->scale = renderer->scale_backup;
     }
-    if (SDL_RenderSetViewport(renderer, &viewport) < 0) {
+    if (renderer->UpdateViewport(renderer) < 0) {
         return -1;
     }
 
@@ -927,7 +927,10 @@ SDL_RenderSetViewport(SDL_Renderer * renderer, const SDL_Rect * rect)
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (rect) {
-        renderer->viewport = *rect;
+        renderer->viewport.x = (int)SDL_floor(rect->x * renderer->scale.x);
+        renderer->viewport.y = (int)SDL_floor(rect->y * renderer->scale.y);
+        renderer->viewport.w = (int)SDL_ceil(rect->w * renderer->scale.x);
+        renderer->viewport.h = (int)SDL_ceil(rect->h * renderer->scale.y);
     } else {
         renderer->viewport.x = 0;
         renderer->viewport.y = 0;
@@ -948,7 +951,35 @@ SDL_RenderGetViewport(SDL_Renderer * renderer, SDL_Rect * rect)
 {
     CHECK_RENDERER_MAGIC(renderer, );
 
-    *rect = renderer->viewport;
+    if (rect) {
+        rect->x = (int)(renderer->viewport.x / renderer->scale.x);
+        rect->y = (int)(renderer->viewport.y / renderer->scale.y);
+        rect->w = (int)(renderer->viewport.w / renderer->scale.x);
+        rect->h = (int)(renderer->viewport.h / renderer->scale.y);
+    }
+}
+
+int
+SDL_RenderSetScale(SDL_Renderer * renderer, float scaleX, float scaleY)
+{
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
+    renderer->scale.x = scaleX;
+    renderer->scale.y = scaleY;
+    return 0;
+}
+
+void
+SDL_RenderGetScale(SDL_Renderer * renderer, float *scaleX, float *scaleY)
+{
+    CHECK_RENDERER_MAGIC(renderer, );
+
+    if (scaleX) {
+        *scaleX = renderer->scale.x;
+    }
+    if (scaleY) {
+        *scaleY = renderer->scale.y;
+    }
 }
 
 int
@@ -1025,10 +1056,41 @@ SDL_RenderDrawPoint(SDL_Renderer * renderer, int x, int y)
     return SDL_RenderDrawPoints(renderer, &point, 1);
 }
 
+static int
+RenderDrawPointsWithRects(SDL_Renderer * renderer,
+                     const SDL_Point * points, int count)
+{
+    SDL_FRect *frects;
+    int i;
+    int status;
+
+    frects = SDL_stack_alloc(SDL_FRect, count);
+    if (!frects) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    for (i = 0; i < count; ++i) {
+        frects[i].x = points[i].x * renderer->scale.x;
+        frects[i].y = points[i].y * renderer->scale.y;
+        frects[i].w = renderer->scale.x;
+        frects[i].h = renderer->scale.y;
+    }
+
+    status = renderer->RenderFillRects(renderer, frects, count);
+
+    SDL_stack_free(frects);
+
+    return status;
+}
+
 int
 SDL_RenderDrawPoints(SDL_Renderer * renderer,
                      const SDL_Point * points, int count)
 {
+    SDL_FPoint *fpoints;
+    int i;
+    int status;
+
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
@@ -1042,7 +1104,26 @@ SDL_RenderDrawPoints(SDL_Renderer * renderer,
     if (renderer->hidden) {
         return 0;
     }
-    return renderer->RenderDrawPoints(renderer, points, count);
+
+    if (renderer->scale.x != 1.0f || renderer->scale.y != 1.0f) {
+        return RenderDrawPointsWithRects(renderer, points, count);
+    }
+
+    fpoints = SDL_stack_alloc(SDL_FPoint, count);
+    if (!fpoints) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    for (i = 0; i < count; ++i) {
+        fpoints[i].x = points[i].x * renderer->scale.x;
+        fpoints[i].y = points[i].y * renderer->scale.y;
+    }
+
+    status = renderer->RenderDrawPoints(renderer, fpoints, count);
+
+    SDL_stack_free(fpoints);
+
+    return status;
 }
 
 int
@@ -1057,10 +1138,71 @@ SDL_RenderDrawLine(SDL_Renderer * renderer, int x1, int y1, int x2, int y2)
     return SDL_RenderDrawLines(renderer, points, 2);
 }
 
+static int
+RenderDrawLinesWithRects(SDL_Renderer * renderer,
+                     const SDL_Point * points, int count)
+{
+    SDL_FRect *frect;
+    SDL_FRect *frects;
+    SDL_FPoint fpoints[2];
+    int i, nrects;
+    int status;
+
+    frects = SDL_stack_alloc(SDL_FRect, count-1);
+    if (!frects) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+
+    status = 0;
+    nrects = 0;
+    for (i = 0; i < count-1; ++i) {
+        if (points[i].x == points[i+1].x) {
+            int minY = SDL_min(points[i].y, points[i+1].y);
+            int maxY = SDL_max(points[i].y, points[i+1].y);
+
+            frect = &frects[nrects++];
+            frect->x = points[i].x * renderer->scale.x;
+            frect->y = minY * renderer->scale.y;
+            frect->w = renderer->scale.x;
+            frect->h = (maxY - minY + 1) * renderer->scale.y;
+        } else if (points[i].y == points[i+1].y) {
+            int minX = SDL_min(points[i].x, points[i+1].x);
+            int maxX = SDL_max(points[i].x, points[i+1].x);
+
+            frect = &frects[nrects++];
+            frect->x = minX * renderer->scale.x;
+            frect->y = points[i].y * renderer->scale.y;
+            frect->w = (maxX - minX + 1) * renderer->scale.x;
+            frect->h = renderer->scale.y;
+        } else {
+            /* FIXME: We can't use a rect for this line... */
+            frects[0].x = points[i].x * renderer->scale.x;
+            frects[0].y = points[i].y * renderer->scale.y;
+            frects[1].x = points[i+1].x * renderer->scale.x;
+            frects[1].y = points[i+1].y * renderer->scale.y;
+            status += renderer->RenderDrawLines(renderer, fpoints, 2);
+        }
+    }
+
+    status += renderer->RenderFillRects(renderer, frects, nrects);
+
+    SDL_stack_free(frects);
+
+    if (status < 0) {
+        status = -1;
+    }
+    return status;
+}
+
 int
 SDL_RenderDrawLines(SDL_Renderer * renderer,
                     const SDL_Point * points, int count)
 {
+    SDL_FPoint *fpoints;
+    int i;
+    int status;
+
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
@@ -1074,7 +1216,26 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
     if (renderer->hidden) {
         return 0;
     }
-    return renderer->RenderDrawLines(renderer, points, count);
+
+    if (renderer->scale.x != 1.0f || renderer->scale.y != 1.0f) {
+        return RenderDrawLinesWithRects(renderer, points, count);
+    }
+
+    fpoints = SDL_stack_alloc(SDL_FPoint, count);
+    if (!fpoints) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    for (i = 0; i < count; ++i) {
+        fpoints[i].x = points[i].x * renderer->scale.x;
+        fpoints[i].y = points[i].y * renderer->scale.y;
+    }
+
+    status = renderer->RenderDrawLines(renderer, fpoints, count);
+
+    SDL_stack_free(fpoints);
+
+    return status;
 }
 
 int
@@ -1087,10 +1248,9 @@ SDL_RenderDrawRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 
     /* If 'rect' == NULL, then outline the whole surface */
     if (!rect) {
+        SDL_RenderGetViewport(renderer, &full_rect);
         full_rect.x = 0;
         full_rect.y = 0;
-        full_rect.w = renderer->viewport.w;
-        full_rect.h = renderer->viewport.h;
         rect = &full_rect;
     }
 
@@ -1144,10 +1304,9 @@ SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 
     /* If 'rect' == NULL, then outline the whole surface */
     if (!rect) {
+        SDL_RenderGetViewport(renderer, &full_rect);
         full_rect.x = 0;
         full_rect.y = 0;
-        full_rect.w = renderer->viewport.w;
-        full_rect.h = renderer->viewport.h;
         rect = &full_rect;
     }
     return SDL_RenderFillRects(renderer, rect, 1);
@@ -1157,6 +1316,10 @@ int
 SDL_RenderFillRects(SDL_Renderer * renderer,
                     const SDL_Rect * rects, int count)
 {
+    SDL_FRect *frects;
+    int i;
+    int status;
+
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
@@ -1170,7 +1333,24 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
     if (renderer->hidden) {
         return 0;
     }
-    return renderer->RenderFillRects(renderer, rects, count);
+
+    frects = SDL_stack_alloc(SDL_FRect, count);
+    if (!frects) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    for (i = 0; i < count; ++i) {
+        frects[i].x = rects[i].x * renderer->scale.x;
+        frects[i].y = rects[i].y * renderer->scale.y;
+        frects[i].w = rects[i].w * renderer->scale.x;
+        frects[i].h = rects[i].h * renderer->scale.y;
+    }
+
+    status = renderer->RenderFillRects(renderer, frects, count);
+
+    SDL_stack_free(frects);
+
+    return status;
 }
 
 int
@@ -1179,6 +1359,7 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     SDL_Rect real_srcrect;
     SDL_Rect real_dstrect;
+    SDL_FRect frect;
 
     CHECK_RENDERER_MAGIC(renderer, -1);
     CHECK_TEXTURE_MAGIC(texture, -1);
@@ -1198,10 +1379,9 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         }
     }
 
+    SDL_RenderGetViewport(renderer, &real_dstrect);
     real_dstrect.x = 0;
     real_dstrect.y = 0;
-    real_dstrect.w = renderer->viewport.w;
-    real_dstrect.h = renderer->viewport.h;
     if (dstrect) {
         if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
             return 0;
@@ -1229,8 +1409,13 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (renderer->hidden) {
         return 0;
     }
-    return renderer->RenderCopy(renderer, texture, &real_srcrect,
-                                &real_dstrect);
+
+    frect.x = real_dstrect.x * renderer->scale.x;
+    frect.y = real_dstrect.y * renderer->scale.y;
+    frect.w = real_dstrect.w * renderer->scale.x;
+    frect.h = real_dstrect.h * renderer->scale.y;
+
+    return renderer->RenderCopy(renderer, texture, &real_srcrect, &frect);
 }
 
 
@@ -1241,6 +1426,8 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     SDL_Rect real_srcrect, real_dstrect;
     SDL_Point real_center;
+    SDL_FRect frect;
+    SDL_FPoint fcenter;
 
     CHECK_RENDERER_MAGIC(renderer, -1);
     CHECK_TEXTURE_MAGIC(texture, -1);
@@ -1265,12 +1452,12 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     /* We don't intersect the dstrect with the viewport as RenderCopy does because of potential rotation clipping issues... TODO: should we? */
-    if (dstrect) real_dstrect = *dstrect;
-    else {
+    if (dstrect) {
+        real_dstrect = *dstrect;
+    } else {
+        SDL_RenderGetViewport(renderer, &real_dstrect);
         real_dstrect.x = 0;
         real_dstrect.y = 0;
-        real_dstrect.w = renderer->viewport.w;
-        real_dstrect.h = renderer->viewport.h;
     }
 
     if (texture->native) {
@@ -1283,7 +1470,15 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         real_center.y = real_dstrect.h/2;
     }
 
-    return renderer->RenderCopyEx(renderer, texture, &real_srcrect, &real_dstrect, angle, &real_center, flip);
+    frect.x = real_dstrect.x * renderer->scale.x;
+    frect.y = real_dstrect.y * renderer->scale.y;
+    frect.w = real_dstrect.w * renderer->scale.x;
+    frect.h = real_dstrect.h * renderer->scale.y;
+
+    fcenter.x = real_center.x * renderer->scale.x;
+    fcenter.y = real_center.y * renderer->scale.y;
+
+    return renderer->RenderCopyEx(renderer, texture, &real_srcrect, &frect, angle, &fcenter, flip);
 }
 
 int

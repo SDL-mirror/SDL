@@ -58,16 +58,16 @@ static int GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_UpdateViewport(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
-                               const SDL_Point * points, int count);
+                               const SDL_FPoint * points, int count);
 static int GL_RenderDrawLines(SDL_Renderer * renderer,
-                              const SDL_Point * points, int count);
+                              const SDL_FPoint * points, int count);
 static int GL_RenderFillRects(SDL_Renderer * renderer,
-                              const SDL_Rect * rects, int count);
+                              const SDL_FRect * rects, int count);
 static int GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Rect * srcrect, const SDL_Rect * dstrect);
+                         const SDL_Rect * srcrect, const SDL_FRect * dstrect);
 static int GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
-                         const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-                         const double angle, const SDL_Point *center, const SDL_RendererFlip flip);
+                         const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+                         const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip);
 static int GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 pixel_format, void * pixels, int pitch);
 static void GL_RenderPresent(SDL_Renderer * renderer);
@@ -876,7 +876,7 @@ GL_RenderClear(SDL_Renderer * renderer)
 }
 
 static int
-GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
                     int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
@@ -894,7 +894,7 @@ GL_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
                    int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
@@ -959,7 +959,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
 }
 
 static int
-GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
+GL_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int i;
@@ -967,9 +967,9 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
     GL_SetDrawingState(renderer);
 
     for (i = 0; i < count; ++i) {
-        const SDL_Rect *rect = &rects[i];
+        const SDL_FRect *rect = &rects[i];
 
-        data->glRecti(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+        data->glRectf(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
     }
     GL_CheckError("", renderer);
 
@@ -978,11 +978,11 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
 
 static int
 GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-              const SDL_Rect * srcrect, const SDL_Rect * dstrect)
+              const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
-    int minx, miny, maxx, maxy;
+    GLfloat minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
 
     GL_ActivateRenderer(renderer);
@@ -1029,13 +1029,13 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
-    data->glVertex2f((GLfloat) minx, (GLfloat) miny);
+    data->glVertex2f(minx, miny);
     data->glTexCoord2f(maxu, minv);
-    data->glVertex2f((GLfloat) maxx, (GLfloat) miny);
+    data->glVertex2f(maxx, miny);
     data->glTexCoord2f(minu, maxv);
-    data->glVertex2f((GLfloat) minx, (GLfloat) maxy);
+    data->glVertex2f(minx, maxy);
     data->glTexCoord2f(maxu, maxv);
-    data->glVertex2f((GLfloat) maxx, (GLfloat) maxy);
+    data->glVertex2f(maxx, maxy);
     data->glEnd();
 
     data->glDisable(texturedata->type);
@@ -1047,8 +1047,8 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 static int
 GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
-              const SDL_Rect * srcrect, const SDL_Rect * dstrect,
-              const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
+              const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+              const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
@@ -1083,25 +1083,25 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         GL_SetShader(data, SHADER_RGB);
     }
 
-    centerx = (GLfloat)center->x;
-    centery = (GLfloat)center->y;
+    centerx = center->x;
+    centery = center->y;
 
     if (flip & SDL_FLIP_HORIZONTAL) {
-        minx = (GLfloat) dstrect->w - centerx;
+        minx =  dstrect->w - centerx;
         maxx = -centerx;
     }
     else {
         minx = -centerx;
-        maxx = (GLfloat) dstrect->w - centerx;
+        maxx =  dstrect->w - centerx;
     }
 
     if (flip & SDL_FLIP_VERTICAL) {
-        miny = (GLfloat) dstrect->h - centery;
+        miny =  dstrect->h - centery;
         maxy = -centery;
     }
     else {
         miny = -centery;
-        maxy = (GLfloat) dstrect->h - centery;
+        maxy =  dstrect->h - centery;
     }
 
     minu = (GLfloat) srcrect->x / texture->w;
