@@ -361,8 +361,8 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
         return -1;
     }
     if (renderer->viewport.x || renderer->viewport.y) {
-        float x = renderer->viewport.x * renderer->scale.x;
-        float y = renderer->viewport.y * renderer->scale.y;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
 
         for (i = 0; i < count; ++i) {
             final_points[i].x = (int)(x + points[i].x);
@@ -411,8 +411,8 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
         return -1;
     }
     if (renderer->viewport.x || renderer->viewport.y) {
-        float x = renderer->viewport.x * renderer->scale.x;
-        float y = renderer->viewport.y * renderer->scale.y;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
 
         for (i = 0; i < count; ++i) {
             final_points[i].x = (int)(x + points[i].x);
@@ -460,8 +460,8 @@ SW_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
         return -1;
     }
     if (renderer->viewport.x || renderer->viewport.y) {
-        float x = renderer->viewport.x * renderer->scale.x;
-        float y = renderer->viewport.y * renderer->scale.y;
+        int x = renderer->viewport.x;
+        int y = renderer->viewport.y;
 
         for (i = 0; i < count; ++i) {
             final_rects[i].x = (int)(x + rects[i].x);
@@ -507,8 +507,8 @@ SW_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     if (renderer->viewport.x || renderer->viewport.y) {
-        final_rect.x = (int)((renderer->viewport.x * renderer->scale.x) + dstrect->x);
-        final_rect.y = (int)((renderer->viewport.y * renderer->scale.y) + dstrect->y);
+        final_rect.x = (int)(renderer->viewport.x + dstrect->x);
+        final_rect.y = (int)(renderer->viewport.y + dstrect->y);
     } else {
         final_rect.x = (int)dstrect->x;
         final_rect.y = (int)dstrect->y;
@@ -553,8 +553,8 @@ SW_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     if (renderer->viewport.x || renderer->viewport.y) {
-        final_rect.x = (int)((renderer->viewport.x * renderer->scale.x) + dstrect->x);
-        final_rect.y = (int)((renderer->viewport.y * renderer->scale.y) + dstrect->y);
+        final_rect.x = (int)(renderer->viewport.x + dstrect->x);
+        final_rect.y = (int)(renderer->viewport.y + dstrect->y);
     } else {
         final_rect.x = (int)dstrect->x;
         final_rect.y = (int)dstrect->y;
