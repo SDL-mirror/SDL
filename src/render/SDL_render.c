@@ -418,7 +418,13 @@ SDL_CreateTexture(SDL_Renderer * renderer, Uint32 format, int access, int w, int
 
         /* Swap textures to have texture before texture->native in the list */
         texture->native->next = texture->next;
+        if (texture->native->next) {
+            texture->native->next->prev = texture->native;
+        }
         texture->prev = texture->native->prev;
+        if (texture->prev) {
+            texture->prev->next = texture;
+        }
         texture->native->prev = texture;
         texture->next = texture->native;
         renderer->textures = texture;
