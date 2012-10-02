@@ -268,8 +268,6 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->window = window;
         renderer->scale.x = 1.0f;
         renderer->scale.y = 1.0f;
-        renderer->logical_w = 0;
-        renderer->logical_h = 0;
 
         if (SDL_GetWindowFlags(window) & (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED)) {
             renderer->hidden = SDL_TRUE;
@@ -299,6 +297,8 @@ SDL_CreateSoftwareRenderer(SDL_Surface * surface)
 
     if (renderer) {
         renderer->magic = &renderer_magic;
+        renderer->scale.x = 1.0f;
+        renderer->scale.y = 1.0f;
 
         SDL_RenderSetViewport(renderer, NULL);
     }
