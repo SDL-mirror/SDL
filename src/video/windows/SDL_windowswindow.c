@@ -377,13 +377,13 @@ WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
-    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOSIZE);
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOSIZE | SWP_NOACTIVATE);
 }
 
 void
 WIN_SetWindowSize(_THIS, SDL_Window * window)
 {
-    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOMOVE);
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOACTIVATE);
 }
 
 void
