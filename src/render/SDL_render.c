@@ -993,6 +993,8 @@ UpdateLogicalSize(SDL_Renderer *renderer)
 
     /* Set the new scale */
     SDL_RenderSetScale(renderer, scale, scale);
+
+    return 0;
 }
 
 int
