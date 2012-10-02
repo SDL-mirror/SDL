@@ -418,6 +418,40 @@ extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
                                                 SDL_Texture *texture);
 
 /**
+ *  \brief Set device independent resolution for rendering
+ *
+ *  \param w      The width of the logical resolution
+ *  \param h      The height of the logical resolution
+ *
+ *  This function uses the viewport and scaling functionality to allow a fixed logical
+ *  resolution for rendering, regardless of the actual output resolution.  If the actual
+ *  output resolution doesn't have the same aspect ratio the output rendering will be
+ *  centered within the output display.
+ *
+ *  If the output display is a window, mouse events in the window will be filtered
+ *  and scaled so they seem to arrive within the logical resolution.
+ *
+ *  \note If this function results in scaling or subpixel drawing by the 
+ *        rendering backend, it will be handled using the appropriate
+ *        quality hints.
+ *
+ *  \sa SDL_RenderGetLogicalSize()
+ *  \sa SDL_RenderSetScale()
+ *  \sa SDL_RenderSetViewport()
+ */
+extern DECLSPEC int SDLCALL SDL_RenderSetLogicalSize(SDL_Renderer * renderer, int w, int h);
+
+/**
+ *  \brief Get device independent resolution for rendering
+ *
+ *  \param w      A pointer filled with the width of the logical resolution
+ *  \param h      A pointer filled with the height of the logical resolution
+ *
+ *  \sa SDL_RenderSetLogicalSize()
+ */
+extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, int *w, int *y);
+
+/**
  *  \brief Set the drawing area for rendering on the current target.
  *
  *  \param rect The rectangle representing the drawing area, or NULL to set the viewport to the entire target.
@@ -426,12 +460,17 @@ extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
  *
  *  \note When the window is resized, the current viewport is automatically
  *        centered within the new window size.
+ *
+ *  \sa SDL_RenderGetViewport()
+ *  \sa SDL_RenderSetLogicalSize()
  */
 extern DECLSPEC int SDLCALL SDL_RenderSetViewport(SDL_Renderer * renderer,
                                                   const SDL_Rect * rect);
 
 /**
  *  \brief Get the drawing area for the current target.
+ *
+ *  \sa SDL_RenderSetViewport()
  */
 extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
                                                    SDL_Rect * rect);
@@ -449,6 +488,9 @@ extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
  *  \note If this results in scaling or subpixel drawing by the 
  *        rendering backend, it will be handled using the appropriate
  *        quality hints.  For best results use integer scaling factors.
+ *
+ *  \sa SDL_RenderGetScale()
+ *  \sa SDL_RenderSetLogicalSize()
  */
 extern DECLSPEC int SDLCALL SDL_RenderSetScale(SDL_Renderer * renderer,
                                                float scaleX, float scaleY);
@@ -458,6 +500,8 @@ extern DECLSPEC int SDLCALL SDL_RenderSetScale(SDL_Renderer * renderer,
  *
  *  \param scaleX A pointer filled in with the horizontal scaling factor
  *  \param scaleY A pointer filled in with the vertical scaling factor
+ *
+ *  \sa SDL_RenderSetScale()
  */
 extern DECLSPEC void SDLCALL SDL_RenderGetScale(SDL_Renderer * renderer,
                                                float *scaleX, float *scaleY);

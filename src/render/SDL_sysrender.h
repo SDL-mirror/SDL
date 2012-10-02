@@ -123,6 +123,10 @@ struct SDL_Renderer
     SDL_bool hidden;
     SDL_bool resized;
 
+    /* The logical resolution for rendering */
+    int logical_w;
+    int logical_h;
+
     /* The drawable area within the window */
     SDL_Rect viewport;
     SDL_Rect viewport_backup;

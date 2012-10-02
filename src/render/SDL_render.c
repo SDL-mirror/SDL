@@ -70,6 +70,8 @@ static const SDL_RenderDriver *render_drivers[] = {
 static char renderer_magic;
 static char texture_magic;
 
+static int UpdateLogicalSize(SDL_Renderer *renderer);
+
 int
 SDL_GetNumRenderDrivers(void)
 {
@@ -101,21 +103,27 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
             }
 
             if (event->window.event == SDL_WINDOWEVENT_RESIZED) {
-                /* Try to keep the previous viewport centered */
-                int w, h;
-
-                SDL_GetWindowSize(window, &w, &h);
-                if (renderer->target) {
-                    renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
-                    renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
+                if (renderer->logical_w) {
+                    /* We'll update the renderer in the SIZE_CHANGED event */
                 } else {
-                    renderer->viewport.x = (w - renderer->viewport.w) / 2;
-                    renderer->viewport.y = (h - renderer->viewport.h) / 2;
-                    renderer->UpdateViewport(renderer);
+                    /* Try to keep the previous viewport centered */
+                    int w, h;
+
+                    SDL_GetWindowSize(window, &w, &h);
+                    if (renderer->target) {
+                        renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
+                        renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
+                    } else {
+                        renderer->viewport.x = (w - renderer->viewport.w) / 2;
+                        renderer->viewport.y = (h - renderer->viewport.h) / 2;
+                        renderer->UpdateViewport(renderer);
+                    }
                 }
                 renderer->resized = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
-                if (!renderer->resized) {
+                if (renderer->logical_w) {
+                    UpdateLogicalSize(renderer);
+                } else if (!renderer->resized) {
                     /* Window was programmatically resized, reset viewport */
                     int w, h;
 
@@ -147,6 +155,21 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                     renderer->hidden = SDL_FALSE;
                 }
             }
+        }
+    } else if (event->type == SDL_MOUSEMOTION) {
+        if (renderer->logical_w) {
+            event->motion.x -= renderer->viewport.x;
+            event->motion.y -= renderer->viewport.y;
+            event->motion.x = (int)(event->motion.x / renderer->scale.x);
+            event->motion.y = (int)(event->motion.y / renderer->scale.y);
+        }
+    } else if (event->type == SDL_MOUSEBUTTONDOWN ||
+               event->type == SDL_MOUSEBUTTONUP) {
+        if (renderer->logical_w) {
+            event->button.x -= renderer->viewport.x;
+            event->button.y -= renderer->viewport.y;
+            event->button.x = (int)(event->button.x / renderer->scale.x);
+            event->button.y = (int)(event->button.y / renderer->scale.y);
         }
     }
     return 0;
@@ -245,6 +268,8 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
         renderer->window = window;
         renderer->scale.x = 1.0f;
         renderer->scale.y = 1.0f;
+        renderer->logical_w = 0;
+        renderer->logical_h = 0;
 
         if (SDL_GetWindowFlags(window) & (SDL_WINDOW_HIDDEN|SDL_WINDOW_MINIMIZED)) {
             renderer->hidden = SDL_TRUE;
@@ -919,6 +944,88 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
 
     /* All set! */
     return 0;
+}
+
+static int
+UpdateLogicalSize(SDL_Renderer *renderer)
+{
+    int w, h;
+    float want_aspect;
+    float real_aspect;
+    float scale;
+    SDL_Rect viewport;
+
+    if (renderer->window) {
+        SDL_GetWindowSize(renderer->window, &w, &h);
+    } else {
+        /* FIXME */
+        SDL_SetError("Internal error: No way to get output resolution");
+        return -1;
+    }
+
+    want_aspect = (float)renderer->logical_w / renderer->logical_h;
+    real_aspect = (float)w / h;
+
+    /* Clear the scale because we're setting viewport in output coordinates */
+    SDL_RenderSetScale(renderer, 1.0f, 1.0f);
+
+    if (SDL_fabs(want_aspect-real_aspect) < 0.0001) {
+        /* The aspect ratios are the same, just scale appropriately */
+        scale = (float)w / renderer->logical_w;
+        SDL_RenderSetViewport(renderer, NULL);
+    } else if (want_aspect > real_aspect) {
+        /* We want a wider aspect ratio than is available - letterbox it */
+        scale = (float)w / renderer->logical_w;
+        viewport.x = 0;
+        viewport.w = w;
+        viewport.h = (int)SDL_ceil(renderer->logical_h * scale);
+        viewport.y = (h - viewport.h) / 2;
+        SDL_RenderSetViewport(renderer, &viewport);
+    } else {
+        /* We want a narrower aspect ratio than is available - use side-bars */
+        scale = (float)h / renderer->logical_h;
+        viewport.y = 0;
+        viewport.h = h;
+        viewport.w = (int)SDL_ceil(renderer->logical_w * scale);
+        viewport.x = (w - viewport.w) / 2;
+        SDL_RenderSetViewport(renderer, &viewport);
+    }
+
+    /* Set the new scale */
+    SDL_RenderSetScale(renderer, scale, scale);
+}
+
+int
+SDL_RenderSetLogicalSize(SDL_Renderer * renderer, int w, int h)
+{
+    CHECK_RENDERER_MAGIC(renderer, -1);
+
+    if (!w || !h) {
+        /* Clear any previous logical resolution */
+        renderer->logical_w = 0;
+        renderer->logical_h = 0;
+        SDL_RenderSetViewport(renderer, NULL);
+        SDL_RenderSetScale(renderer, 1.0f, 1.0f);
+        return 0;
+    }
+
+    renderer->logical_w = w;
+    renderer->logical_h = h;
+
+    return UpdateLogicalSize(renderer);
+}
+
+void
+SDL_RenderGetLogicalSize(SDL_Renderer * renderer, int *w, int *h)
+{
+    CHECK_RENDERER_MAGIC(renderer, );
+
+    if (w) {
+        *w = renderer->logical_w;
+    }
+    if (h) {
+        *h = renderer->logical_h;
+    }
 }
 
 int
