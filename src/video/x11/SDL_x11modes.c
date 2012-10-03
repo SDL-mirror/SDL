@@ -25,7 +25,7 @@
 #include "SDL_hints.h"
 #include "SDL_x11video.h"
 
-/*#define X11MODES_DEBUG*/
+#define X11MODES_DEBUG
 
 static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
@@ -339,6 +339,21 @@ CheckXRandR(Display * display, int *major, int *minor)
 #endif
     return SDL_TRUE;
 }
+
+#define XRANDR_ROTATION_LEFT    (1 << 1)
+#define XRANDR_ROTATION_RIGHT   (1 << 3)
+
+static void
+get_xrandr_mode_size(XRRModeInfo *mode, Rotation rotation, int *w, int *h)
+{
+    if (rotation & (XRANDR_ROTATION_LEFT|XRANDR_ROTATION_RIGHT)) {
+        *w = mode->height;
+        *h = mode->width;
+    } else {
+        *w = mode->width;
+        *h = mode->height;
+    }
+}
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
 #if SDL_VIDEO_DRIVER_X11_XVIDMODE
@@ -517,6 +532,7 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
         if (nsizes > 0) {
             int i, j;
             for (i = 0; i < nsizes; i++) {
+                get_xrandr_mode_size(XRRModeInfo *mode, Rotation rotation, int *w, int *h)
                 mode.w = sizes[i].width;
                 mode.h = sizes[i].height;
 
@@ -685,48 +701,150 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
         XRRScreenSize *sizes;
         short *rates;
 
-        /* find the smallest resolution that is at least as big as the user requested */
-        best = -1;
-        sizes = XRRConfigSizes(data->screen_config, &nsizes);
-        for (i = 0; i < nsizes; ++i) {
-            if (sizes[i].width < w || sizes[i].height < h) {
-                continue;
-            }
-            if (sizes[i].width == w && sizes[i].height == h) {
-                best = i;
-                break;
-            }
-            if (best == -1 ||
-                (sizes[i].width < sizes[best].width) ||
-                (sizes[i].width == sizes[best].width
-                 && sizes[i].height < sizes[best].height)) {
-                best = i;
-            }
-        }
+#if SDL_VIDEO_DRIVER_X11_XINERAMA
+        if (data->use_xrandr >= 102 && data->use_xinerama) {
+            /* See http://cgit.freedesktop.org/xorg/app/xrandr/tree/xrandr.c for the rationale behind this */
+            /* Note by Gabriel: the refresh rate is ignored in this code, and seeing that both xrandr
+             * and nvidia-settings don't provide a way to set it when Xinerama is enabled, it may not be possible to set it */
+            int screencount;
+            XineramaScreenInfo * xinerama = NULL;
+            XRRScreenResources  *res;
 
-        if (best >= 0) {
-            best_rate = 0;
-            rates = XRRConfigRates(data->screen_config, best, &nrates);
-            for (i = 0; i < nrates; ++i) {
-                if (rates[i] == rate) {
-                    best_rate = rate;
+            /* Update the current screen layout information */
+            xinerama = XineramaQueryScreens(display, &screencount);
+            if (xinerama && data->xinerama_screen < screencount) {
+                data->xinerama_info = xinerama[data->xinerama_screen];
+            }
+            if (xinerama) XFree(xinerama);
+
+            res = XRRGetScreenResources (display, RootWindow(display, data->screen));
+            if (res) {
+                XRROutputInfo *output_info = NULL;
+                XRRCrtcInfo *crtc = NULL;
+                XRRModeInfo *mode_info, *best_mode_info = NULL;
+                int mode_index = 0, output_mode_index = 0, output;
+                int mode_w, mode_h, best_w = 0, best_h = 0;
+
+                for ( output = 0; output < res->noutput; output++) {
+                    output_info = XRRGetOutputInfo (display, res, res->outputs[output]);
+                    if (!output_info || !output_info->crtc) {
+                        XRRFreeOutputInfo(output_info);
+                        continue;
+                    }
+
+                    crtc = XRRGetCrtcInfo (display, res, output_info->crtc);
+                    if (!crtc || data->xinerama_info.x_org != crtc->x || data->xinerama_info.y_org != crtc->y) {
+                        XRRFreeCrtcInfo(crtc);
+                        continue;
+                    }
+
+                    /* The CRT offset matches the Xinerama mode, let's hope it's the right one! */
+#ifdef X11MODES_DEBUG
+                    fprintf(stderr, "XRANDR: set_best_resolution, matched Xinerama screen %d to CRT %d at %d,%d\n",
+                        data->xinerama_info.screen_number, output_info->crtc, crtc->x, crtc->y);
+#endif
+                    /* Find out the best mode we can use */
+                    for (mode_index = 0; mode_index < res->nmode; mode_index++) {
+                        mode_info = &res->modes[mode_index];
+                        get_xrandr_mode_size(mode_info, crtc->rotation, &mode_w, &mode_h);
+                        if (mode_w >= w && mode_h >= h) {
+                            /* This may be a useful mode, check out if it belongs to the correct output */
+#ifdef X11MODES_DEBUG
+                            fprintf(stderr, "Evaluating valid mode %d, w: %d, h: %d\n", mode_index, mode_info->width, mode_info->height);
+#endif
+                            for ( output_mode_index = 0; output_mode_index < output_info->nmode; output_mode_index++) {
+                                if (output_info->modes[output_mode_index] == mode_info->id) {
+                                    break;
+                                }
+                            }
+                            if (output_mode_index < output_info->nmode) {
+#ifdef X11MODES_DEBUG
+                                fprintf(stderr, "Mode belongs to the desired output %d w: %d, h: %d, rotation: %x\n", mode_index, mode_info->width, mode_info->height, crtc->rotation);
+#endif
+                                /* We have a mode that belongs to the right output and that can contain the w,h required, see if it's smaller than the current one */
+                                if ( !best_mode_info || mode_w < best_w || (mode_w == best_w && mode_h < best_h) ) {
+                                    best_mode_info = mode_info;
+                                    best_w = mode_w;
+                                    best_h = mode_h;
+                                }
+                            }
+#ifdef X11MODES_DEBUG
+                            else {
+                                fprintf(stderr, "Discarding mode because it does not belong to the desired output %d, w: %d, h: %d, rotation: %d\n", mode_index, mode_info->width, mode_info->height, crtc->rotation);
+                            }
+#endif
+                        }
+                    }
+
+                    if (best_mode_info) {
+#ifdef X11MODES_DEBUG
+                            fprintf(stderr, "XRANDR: set_best_resolution, setting mode w = %d, h = %d on output: %d, CRT with offsets: %d,%d for Xinerama screen: %d\n",
+                                    best_mode_info->width, best_mode_info->height, output, crtc->x, crtc->y, data->xinerama_info.screen_number);
+#endif
+                        XGrabServer (display);
+                        XRRSetCrtcConfig (display, res, output_info->crtc, CurrentTime,
+                          crtc->x, crtc->y, best_mode_info->id, crtc->rotation,
+                          &res->outputs[output], 1);
+                        /* TODO: Handle screen rotations, should we call XRRSetCrtcTransform if Xrandr >=1.3 ? */
+                        XUngrabServer (display);
+                    } else {
+                        /* If we reach here, we have found the right screen but no valid best mode */
+                        SDL_SetError("The selected screen can't support a resolution of the size desired");
+                    }
+                    XRRFreeCrtcInfo(crtc);
+                    XRRFreeOutputInfo(output_info);
                     break;
                 }
-                if (!rate) {
-                    /* Higher is better, right? */
-                    if (rates[i] > best_rate) {
-                        best_rate = rates[i];
-                    }
-                } else {
-                    if (SDL_abs(rates[i] - rate) < SDL_abs(best_rate - rate)) {
-                        best_rate = rates[i];
-                    }
+                XRRFreeScreenResources(res);
+            }
+        }
+        else
+#endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
+        {
+            /* Use older xrandr functions that don't play along very nicely with multi monitors setups */
+            /* find the smallest resolution that is at least as big as the user requested */
+            best = -1;
+            sizes = XRRConfigSizes(data->screen_config, &nsizes);
+            for (i = 0; i < nsizes; ++i) {
+                if (sizes[i].width < w || sizes[i].height < h) {
+                    continue;
+                }
+                if (sizes[i].width == w && sizes[i].height == h) {
+                    best = i;
+                    break;
+                }
+                if (best == -1 ||
+                    (sizes[i].width < sizes[best].width) ||
+                    (sizes[i].width == sizes[best].width
+                     && sizes[i].height < sizes[best].height)) {
+                    best = i;
                 }
             }
-            XRRSetScreenConfigAndRate(display, data->screen_config,
-                                      RootWindow(display, data->screen), best,
-                                      data->saved_rotation, best_rate,
-                                      CurrentTime);
+
+            if (best >= 0) {
+                best_rate = 0;
+                rates = XRRConfigRates(data->screen_config, best, &nrates);
+                for (i = 0; i < nrates; ++i) {
+                    if (rates[i] == rate) {
+                        best_rate = rate;
+                        break;
+                    }
+                    if (!rate) {
+                        /* Higher is better, right? */
+                        if (rates[i] > best_rate) {
+                            best_rate = rates[i];
+                        }
+                    } else {
+                        if (SDL_abs(rates[i] - rate) < SDL_abs(best_rate - rate)) {
+                            best_rate = rates[i];
+                        }
+                    }
+                }
+                XRRSetScreenConfigAndRate(display, data->screen_config,
+                                          RootWindow(display, data->screen), best,
+                                          data->saved_rotation, best_rate,
+                                          CurrentTime);
+            }
         }
         return;
     }

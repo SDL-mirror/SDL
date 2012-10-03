@@ -237,6 +237,15 @@ SDL_X11_SYM(short *,XRRConfigRates,(XRRScreenConfiguration *config,int sizeID,in
 SDL_X11_SYM(XRRScreenSize *,XRRConfigSizes,(XRRScreenConfiguration *config,int *nsizes),(config,nsizes),return)
 SDL_X11_SYM(Status,XRRSetScreenConfigAndRate,(Display *dpy,XRRScreenConfiguration *config,Drawable draw,int size_index,Rotation rotation,short rate,Time timestamp),(dpy,config,draw,size_index,rotation,rate,timestamp),return)
 SDL_X11_SYM(void,XRRFreeScreenConfigInfo,(XRRScreenConfiguration *config),(config),)
+SDL_X11_SYM(void,XRRSetScreenSize,(Display *dpy, Window window,int width, int height,int mmWidth, int mmHeight),(dpy,window,width,height,mmWidth,mmHeight),)
+SDL_X11_SYM(Status,XRRGetScreenSizeRange,(Display *dpy, Window window,int *minWidth, int *minHeight, int *maxWidth, int *maxHeight),(dpy,window,minWidth,minHeight,maxWidth,maxHeight),return)
+SDL_X11_SYM(XRRScreenResources *,XRRGetScreenResources,(Display *dpy, Window window),(dpy, window),return)
+SDL_X11_SYM(void,XRRFreeScreenResources,(XRRScreenResources *resources),(resources),)
+SDL_X11_SYM(XRROutputInfo *,XRRGetOutputInfo,(Display *dpy, XRRScreenResources *resources, RROutput output),(dpy,resources,output),return)
+SDL_X11_SYM(void,XRRFreeOutputInfo,(XRROutputInfo *outputInfo),(outputInfo),)
+SDL_X11_SYM(XRRCrtcInfo *,XRRGetCrtcInfo,(Display *dpy, XRRScreenResources *resources, RRCrtc crtc),(dpy,resources,crtc),return)
+SDL_X11_SYM(void,XRRFreeCrtcInfo,(XRRCrtcInfo *crtcInfo),(crtcInfo),)
+SDL_X11_SYM(Status,XRRSetCrtcConfig,(Display *dpy, XRRScreenResources *resources, RRCrtc crtc, Time timestamp, int x, int y, RRMode mode, Rotation rotation, RROutput *outputs, int noutputs),(dpy,resources,crtc,timestamp,x,y,mode,rotation,outputs,noutputs),return)
 #endif
 
 /* MIT-SCREEN-SAVER support */
