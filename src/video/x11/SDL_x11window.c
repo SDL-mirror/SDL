@@ -79,6 +79,7 @@ X11_IsWindowMapped(_THIS, SDL_Window * window)
     }
 }
 
+#if 0
 static SDL_bool
 X11_IsActionAllowed(SDL_Window *window, Atom action)
 {
@@ -105,6 +106,7 @@ X11_IsActionAllowed(SDL_Window *window, Atom action)
     }
     return ret;
 }
+#endif /* 0 */
 
 void
 X11_SetNetWMState(_THIS, Window xwindow, Uint32 flags)
@@ -912,7 +914,6 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
     Display *display = data->videodata->display;
     Atom _NET_WM_STATE = data->videodata->_NET_WM_STATE;
     Atom _NET_WM_STATE_FULLSCREEN = data->videodata->_NET_WM_STATE_FULLSCREEN;
-    Atom _NET_WM_ACTION_FULLSCREEN = data->videodata->_NET_WM_ACTION_FULLSCREEN;
 
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
@@ -930,8 +931,8 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
             } else {
                 /* Reset the min/max width height to make the window non-resizable again */
                 sizehints->flags |= PMinSize | PMaxSize;
-                sizehints->min_width = sizehints->max_width = window->w;
-                sizehints->min_height = sizehints->max_height = window->h;
+                sizehints->min_width = sizehints->max_width = window->windowed.w;
+                sizehints->min_height = sizehints->max_height = window->windowed.h;
             }
             XSetWMNormalHints(display, data->xwindow, sizehints);
             XFree(sizehints);
