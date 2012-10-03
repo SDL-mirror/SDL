@@ -1472,8 +1472,8 @@ int
 SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                const SDL_Rect * srcrect, const SDL_Rect * dstrect)
 {
-    SDL_Rect real_srcrect;
-    SDL_Rect real_dstrect;
+    SDL_Rect real_srcrect = { 0, 0, 0, 0 };
+    SDL_Rect real_dstrect = { 0, 0, 0, 0 };
     SDL_FRect frect;
 
     CHECK_RENDERER_MAGIC(renderer, -1);
