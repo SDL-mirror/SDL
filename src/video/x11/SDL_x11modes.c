@@ -25,7 +25,7 @@
 #include "SDL_hints.h"
 #include "SDL_x11video.h"
 
-#define X11MODES_DEBUG
+/*#define X11MODES_DEBUG*/
 
 static int
 get_visualinfo(Display * display, int screen, XVisualInfo * vinfo)
@@ -532,7 +532,6 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
         if (nsizes > 0) {
             int i, j;
             for (i = 0; i < nsizes; i++) {
-                get_xrandr_mode_size(XRRModeInfo *mode, Rotation rotation, int *w, int *h)
                 mode.w = sizes[i].width;
                 mode.h = sizes[i].height;
 
@@ -740,7 +739,7 @@ set_best_resolution(Display * display, SDL_DisplayData * data, int w, int h,
 
                     /* The CRT offset matches the Xinerama mode, let's hope it's the right one! */
 #ifdef X11MODES_DEBUG
-                    fprintf(stderr, "XRANDR: set_best_resolution, matched Xinerama screen %d to CRT %d at %d,%d\n",
+                    fprintf(stderr, "XRANDR: set_best_resolution, matched Xinerama screen %d to CRT %ld at %d,%d\n",
                         data->xinerama_info.screen_number, output_info->crtc, crtc->x, crtc->y);
 #endif
                     /* Find out the best mode we can use */
