@@ -1100,7 +1100,9 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
-        case SDLK_EQUALS: {
+        case SDLK_EQUALS:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrt-+ double the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
@@ -1109,7 +1111,9 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
-        case SDLK_MINUS: {
+        case SDLK_MINUS:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                /* Ctrt-- double the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
