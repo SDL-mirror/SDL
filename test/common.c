@@ -1100,6 +1100,24 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
+        case SDLK_EQUALS: {
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    SDL_SetWindowSize(window, w*2, h*2);
+                }
+            }
+            break;
+        case SDLK_MINUS: {
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    SDL_SetWindowSize(window, w/2, h/2);
+                }
+            }
+            break;
         case SDLK_c:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-C copy awesome text! */
