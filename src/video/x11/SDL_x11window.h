@@ -55,6 +55,7 @@ typedef struct
     SDL_bool created;
     PendingFocusEnum pending_focus;
     Uint32 pending_focus_time;
+    XConfigureEvent last_xconfigure;
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
 

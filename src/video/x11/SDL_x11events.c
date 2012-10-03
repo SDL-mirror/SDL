@@ -365,14 +365,22 @@ X11_DispatchEvent(_THIS)
         /* Have we been resized or moved? */
     case ConfigureNotify:{
 #ifdef DEBUG_XEVENTS
-            printf("window %p: ConfigureNotify! (resize: %dx%d)\n", data,
+            printf("window %p: ConfigureNotify! (position: %d,%d, size: %dx%d)\n", data,
+                   xevent.xconfigure.x, xevent.xconfigure.y,
                    xevent.xconfigure.width, xevent.xconfigure.height);
 #endif
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
-                                xevent.xconfigure.x, xevent.xconfigure.y);
-            SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
-                                xevent.xconfigure.width,
-                                xevent.xconfigure.height);
+            if (xevent.xconfigure.x != data->last_xconfigure.x ||
+                xevent.xconfigure.y != data->last_xconfigure.y) {
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_MOVED,
+                                    xevent.xconfigure.x, xevent.xconfigure.y);
+            }
+            if (xevent.xconfigure.width != data->last_xconfigure.width ||
+                xevent.xconfigure.height != data->last_xconfigure.height) {
+                SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_RESIZED,
+                                    xevent.xconfigure.width,
+                                    xevent.xconfigure.height);
+            }
+            data->last_xconfigure = xevent.xconfigure;
         }
         break;
 
