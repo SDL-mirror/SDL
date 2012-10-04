@@ -933,13 +933,20 @@ SDL_GetWindowDisplay(SDL_Window * window)
     }
 
     /* Find the display containing the window */
+    for (i = 0; i < _this->num_displays; ++i) {
+        SDL_VideoDisplay *display = &_this->displays[i];
+
+        if (display->fullscreen_window == window) {
+            return i;
+        }
+    }
     center.x = window->x + window->w / 2;
     center.y = window->y + window->h / 2;
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
 
         SDL_GetDisplayBounds(i, &rect);
-        if (display->fullscreen_window == window || SDL_EnclosePoints(&center, 1, &rect, NULL)) {
+        if (SDL_EnclosePoints(&center, 1, &rect, NULL)) {
             return i;
         }
 
