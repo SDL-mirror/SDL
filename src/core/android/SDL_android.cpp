@@ -218,6 +218,30 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
     Android_RunAudioThread();
 }
 
+extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
+                                    JNIEnv* env, jclass cls,
+                                    jstring text, jint newCursorPosition)
+{
+    const char *utftext = env->GetStringUTFChars(text, NULL);
+
+    SDL_SendKeyboardText(utftext);
+
+    env->ReleaseStringUTFChars(text, utftext);
+}
+
+extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeSetComposingText(
+                                    JNIEnv* env, jclass cls,
+                                    jstring text, jint newCursorPosition)
+{
+    const char *utftext = env->GetStringUTFChars(text, NULL);
+
+    SDL_SendEditingText(utftext, 0, 0);
+
+    env->ReleaseStringUTFChars(text, utftext);
+}
+
+
+
 
 /*******************************************************************************
              Functions called by SDL into Java
@@ -917,6 +941,42 @@ extern "C" int Android_JNI_SendMessage(int command, int param)
     env->CallStaticVoidMethod(mActivityClass, mid, command, param);
     return 0;
 }
+
+extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
+{
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod( mActivityClass, mid,
+                               inputRect->x,
+                               inputRect->y,
+                               inputRect->w,
+                               inputRect->h );
+    return 0;
+}
+
+/*extern "C" int Android_JNI_HideTextInput()
+{
+
+
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "hideTextInput", "()V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod(mActivityClass, mid);
+    return 0;
+}*/
 
 #endif /* __ANDROID__ */
 

@@ -87,16 +87,23 @@ Android_CreateDevice(int devindex)
 {
     printf("Creating video device\n");
     SDL_VideoDevice *device;
+    SDL_VideoData *data;
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
         SDL_OutOfMemory();
-        if (device) {
-            SDL_free(device);
-        }
-        return (0);
+        return NULL;
     }
+
+    data = (SDL_VideoData*) SDL_calloc(1, sizeof(SDL_VideoData));
+    if (!data) {
+        SDL_OutOfMemory();
+        SDL_free(device);
+        return NULL;
+    }
+
+    device->driverdata = data;
 
     /* Set the function pointers */
     device->VideoInit = Android_VideoInit;
@@ -131,6 +138,11 @@ Android_CreateDevice(int devindex)
     device->SetClipboardText = Android_SetClipboardText;
     device->GetClipboardText = Android_GetClipboardText;
     device->HasClipboardText = Android_HasClipboardText;
+
+    /* Text input */
+    device->StartTextInput = Android_StartTextInput;
+    device->StopTextInput = Android_StopTextInput;
+    device->SetTextInputRect = Android_SetTextInputRect;
 
     return device;
 }

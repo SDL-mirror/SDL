@@ -321,6 +321,27 @@ Android_IsScreenKeyboardShown(_THIS, SDL_Window * window)
     return SDL_FALSE;
 }
 
+void
+Android_StartTextInput(_THIS)
+{
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+    Android_JNI_ShowTextInput(&videodata->textRect);
+}
+
+#define COMMAND_TEXTEDIT_HIDE 3
+void
+Android_StopTextInput(_THIS)
+{
+    Android_JNI_SendMessage(COMMAND_TEXTEDIT_HIDE, 0);
+}
+
+void
+Android_SetTextInputRect(_THIS, SDL_Rect *rect)
+{
+    SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+    videodata->textRect = *rect;
+}
+
 #endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */
