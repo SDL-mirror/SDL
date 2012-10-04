@@ -740,6 +740,10 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
             SDL_SetError("XRRSetCrtcConfig failed");
             return -1;
         }
+
+        /* Hack to let the window manager adjust to the mode change */
+        const int WINDOW_MANAGER_DELAY_HACK = 250;
+        SDL_Delay(WINDOW_MANAGER_DELAY_HACK);
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */
 
