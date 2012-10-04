@@ -29,6 +29,8 @@ typedef struct
     Visual *visual;
     int depth;
     int scanline_pad;
+    int x;
+    int y;
 
     int use_xinerama;
     int use_xrandr;
@@ -38,21 +40,24 @@ typedef struct
     XineramaScreenInfo xinerama_info;
     int xinerama_screen;
 #endif
+
 #if SDL_VIDEO_DRIVER_X11_XRANDR
-    XRRScreenConfiguration *screen_config;
-    int saved_size;
-    Rotation saved_rotation;
-    short saved_rate;
-#endif
-#if SDL_VIDEO_DRIVER_X11_XVIDMODE
-    XF86VidModeModeInfo saved_mode;
-    struct
-    {
-        int x, y;
-    } saved_view;
+    RROutput xrandr_output;
 #endif
 
 } SDL_DisplayData;
+
+typedef struct
+{
+#if SDL_VIDEO_DRIVER_X11_XRANDR
+    RRMode xrandr_mode;
+#endif
+
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+    XF86VidModeModeInfo vm_mode;
+#endif
+
+} SDL_DisplayModeData;
 
 extern int X11_InitModes(_THIS);
 extern void X11_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
