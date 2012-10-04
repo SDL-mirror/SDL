@@ -511,7 +511,8 @@ X11_InitModes(_THIS)
 
             for (output = 0; output < res->noutput; output++) {
                 output_info = XRRGetOutputInfo(data->display, res, res->outputs[output]);
-                if (!output_info || output_info->connection == RR_Disconnected) {
+                if (!output_info || !output_info->crtc ||
+                    output_info->connection == RR_Disconnected) {
                     XRRFreeOutputInfo(output_info);
                     continue;
                 }
