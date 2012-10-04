@@ -99,10 +99,14 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     self->splash = [[UIImageView alloc] init];
     [self setView:self->splash];
 
-    self->splashPortrait = [UIImage imageNamed:@"Default.png"];
+    CGSize size = [UIScreen mainScreen].bounds.size;
+    float height = SDL_max(size.width, size.height);
+    self->splashPortrait = [UIImage imageNamed:[NSString stringWithFormat:@"Default-%dh.png", (int)height]];
+    if (!self->splashPortrait) {
+        self->splashPortrait = [UIImage imageNamed:@"Default.png"];
+    }
     self->splashLandscape = [UIImage imageNamed:@"Default-Landscape.png"];
-    if (!self->splashLandscape && self->splashPortrait)
-    {
+    if (!self->splashLandscape && self->splashPortrait) {
         self->splashLandscape = [[UIImage alloc] initWithCGImage: self->splashPortrait.CGImage
                                                            scale: 1.0
                                                      orientation: UIImageOrientationRight];
