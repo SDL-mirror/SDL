@@ -1539,7 +1539,8 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                const SDL_Rect * srcrect, const SDL_Rect * dstrect,
                const double angle, const SDL_Point *center, const SDL_RendererFlip flip)
 {
-    SDL_Rect real_srcrect, real_dstrect;
+    SDL_Rect real_srcrect = { 0, 0, 0, 0 };
+    SDL_Rect real_dstrect = { 0, 0, 0, 0 };
     SDL_Point real_center;
     SDL_FRect frect;
     SDL_FPoint fcenter;
