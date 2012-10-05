@@ -25,14 +25,15 @@
 #include "SDL_hints.h"
 #include "SDL_x11video.h"
 
-#define X11MODES_DEBUG
+/*#define X11MODES_DEBUG*/
 
-/* I'm becoming more and more convinced that the application should never use XRandR,
- * and it's the window manager's responsibility to track and manage display modes for
- * fullscreen windows.  Right now XRandR is completely broken with respect to window
- * manager behavior on every window manager that I can find.  For example, on Unity 3D
- * if you show a fullscreen window while the resolution is changing (within ~250 ms)
- * your window will retain the fullscreen state hint but be decorated and windowed.
+/* I'm becoming more and more convinced that the application should never
+ * use XRandR, and it's the window manager's responsibility to track and
+ * manage display modes for fullscreen windows.  Right now XRandR is completely
+ * broken with respect to window manager behavior on every window manager that
+ * I can find.  For example, on Unity 3D if you show a fullscreen window while
+ * the resolution is changing (within ~250 ms) your window will retain the
+ * fullscreen state hint but be decorated and windowed.
 */
 #define XRANDR_DISABLED_BY_DEFAULT
 
