@@ -274,7 +274,7 @@ SetXRandRModeInfo(Display *display, XRRScreenResources *res, XRROutputInfo *outp
             mode->refresh_rate = CalculateXRandRRefreshRate(info);
             ((SDL_DisplayModeData*)mode->driverdata)->xrandr_mode = modeID;
 #ifdef X11MODES_DEBUG
-            printf("XRandR mode %d: %dx%d@%dHz\n", modeID, mode->w, mode->h, mode->refresh_rate);
+            printf("XRandR mode %d: %dx%d@%dHz\n", (int) modeID, mode->w, mode->h, mode->refresh_rate);
 #endif
             return SDL_TRUE;
         }
