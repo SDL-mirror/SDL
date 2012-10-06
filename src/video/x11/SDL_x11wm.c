@@ -128,6 +128,7 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 		SDL_FreeSurface(surface);
 		SDL_free(propdata);
 
+		XFlush(SDL_Display);
 		SDL_Unlock_EventThread();
 
 		return;
