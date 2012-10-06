@@ -685,9 +685,9 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 #ifdef X11MODES_DEBUG
         printf("VidMode modes: (unsorted)\n");
         for (i = 0; i < nmodes; ++i) {
-            printf("Mode %d: %d x %d @ %d\n", i,
+            printf("Mode %d: %d x %d @ %d, flags: 0x%x\n", i,
                    modes[i]->hdisplay, modes[i]->vdisplay,
-                   CalculateXVidModeRefreshRate(modes[i]));
+                   CalculateXVidModeRefreshRate(modes[i]), modes[i]->flags);
         }
 #endif
         for (i = 0; i < nmodes; ++i) {
