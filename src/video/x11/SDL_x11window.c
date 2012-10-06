@@ -718,6 +718,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
                             32, PropModeReplace, (unsigned char *) propdata,
                             propsize);
         }
+        SDL_free(propdata);
         SDL_FreeSurface(surface);
     } else {
         XDeleteProperty(display, data->xwindow, _NET_WM_ICON);
