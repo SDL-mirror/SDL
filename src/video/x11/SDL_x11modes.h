@@ -45,6 +45,10 @@ typedef struct
     RROutput xrandr_output;
 #endif
 
+#if SDL_VIDEO_DRIVER_X11_XVIDMODE
+    int vidmode_screen;
+#endif
+
 } SDL_DisplayData;
 
 typedef struct

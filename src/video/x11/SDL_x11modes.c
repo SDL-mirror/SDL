@@ -573,7 +573,12 @@ X11_InitModes(_THIS)
 #endif
             use_vidmode) {
             displaydata->use_vidmode = use_vidmode;
-            XF86VidModeGetModeInfo(data->display, screen, &modedata->vm_mode);
+            if (displaydata->use_xinerama) {
+                displaydata->vidmode_screen = 0;
+            } else {
+                displaydata->vidmode_screen = screen;
+            }
+            XF86VidModeGetModeInfo(data->display, displaydata->vidmode_screen, &modedata->vm_mode);
         }
 #endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
@@ -674,7 +679,7 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 
 #if SDL_VIDEO_DRIVER_X11_XVIDMODE
     if (data->use_vidmode &&
-        XF86VidModeGetAllModeLines(display, data->screen, &nmodes, &modes)) {
+        XF86VidModeGetAllModeLines(display, data->vidmode_screen, &nmodes, &modes)) {
         int i;
 
 #ifdef X11MODES_DEBUG
@@ -767,7 +772,7 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
 
 #if SDL_VIDEO_DRIVER_X11_XVIDMODE
     if (data->use_vidmode) {
-        XF86VidModeSwitchToMode(display, data->screen, &modedata->vm_mode);
+        XF86VidModeSwitchToMode(display, data->vidmode_screen, &modedata->vm_mode);
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XVIDMODE */
 
