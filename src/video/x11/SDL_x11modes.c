@@ -567,7 +567,9 @@ X11_InitModes(_THIS)
 #if SDL_VIDEO_DRIVER_X11_XVIDMODE
         if (!displaydata->use_xrandr &&
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
-            (!displaydata->use_xinerama || displaydata->xinerama_info.screen_number == 0) &&
+            /* XVidMode only works on the screen at the origin */
+            (!displaydata->use_xinerama ||
+             (displaydata->x == 0 && displaydata->y == 0)) &&
 #endif
             use_vidmode) {
             displaydata->use_vidmode = use_vidmode;
