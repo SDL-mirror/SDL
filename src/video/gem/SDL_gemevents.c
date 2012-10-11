@@ -114,6 +114,8 @@ void GEM_PumpEvents(_THIS)
 		if (resultat & MU_KEYBD) {
 			if ((prevkc != kc) || (prevks != kstate)) {
 				do_keyboard(kc,kstate);
+				prevkc = kc;
+				prevks = ks;
 			} else {
 				/* Avoid looping, if repeating same key */
 				break;
