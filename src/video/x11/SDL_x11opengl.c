@@ -60,6 +60,12 @@
 #define GLX_NON_CONFORMANT_VISUAL_EXT      0x800D
 #endif
 
+#ifndef GLX_EXT_visual_info
+#define GLX_EXT_visual_info
+#define GLX_X_VISUAL_TYPE_EXT              0x22
+#define GLX_DIRECT_COLOR_EXT               0x8003
+#endif
+
 #ifndef GLX_ARB_create_context
 #define GLX_ARB_create_context
 #define GLX_CONTEXT_MAJOR_VERSION_ARB      0x2091
@@ -353,6 +359,11 @@ X11_GL_InitExtensions(_THIS)
         _this->gl_data->HAS_GLX_EXT_visual_rating = SDL_TRUE;
     }
 
+    /* Check for GLX_EXT_visual_info */
+    if (HasExtension("GLX_EXT_visual_info", extensions)) {
+        _this->gl_data->HAS_GLX_EXT_visual_info = SDL_TRUE;
+    }
+
     if (context) {
         _this->gl_data->glXMakeCurrent(display, None, NULL);
         _this->gl_data->glXDestroyContext(display, context);
@@ -368,9 +379,10 @@ int
 X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int size, Bool for_FBConfig)
 {
     int i = 0;
+	const int MAX_ATTRIBUTES = 64;
 
     /* assert buffer is large enough to hold all SDL attributes. */ 
-    SDL_assert(size >= 32);
+    SDL_assert(size >= MAX_ATTRIBUTES);
 
     /* Setup our GLX attributes according to the gl_config. */
     if( for_FBConfig ) {
@@ -448,7 +460,17 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
                                                       GLX_SLOW_VISUAL_EXT;
     }
 
+    // If we're supposed to use DirectColor visuals, and we've got the EXT_visual_info
+    //  extension, then add GLX_X_VISUAL_TYPE_EXT.
+    if (X11_UseDirectColorVisuals() &&
+        _this->gl_data->HAS_GLX_EXT_visual_info) {
+        attribs[i++] = GLX_X_VISUAL_TYPE_EXT;
+        attribs[i++] = GLX_DIRECT_COLOR_EXT;
+    }
+
     attribs[i++] = None;
+
+    SDL_assert(i <= MAX_ATTRIBUTES);
  
     return i;
 }
