@@ -993,11 +993,13 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
         X11_SetNetWMState(_this, data->xwindow, flags);
     }
 
-	if( fullscreen ) {
-		XInstallColormap(display, data->colormap);
-	} else {
-		XUninstallColormap(display, data->colormap);
-	}
+    if (data->visual->class == DirectColor) {
+        if ( fullscreen ) {
+            XInstallColormap(display, data->colormap);
+        } else {
+            XUninstallColormap(display, data->colormap);
+        }
+    }
 
     XFlush(display);
 }
