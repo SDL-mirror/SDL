@@ -156,6 +156,10 @@ X11_CreateDevice(int devindex)
         return NULL;
     }
 
+    // Need for threading gl calls. This is also required for the proprietary nVidia
+	//  driver to be threaded.
+    XInitThreads();
+
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
     if (!device) {
