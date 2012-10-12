@@ -126,6 +126,8 @@ struct SDL_Renderer
     /* The logical resolution for rendering */
     int logical_w;
     int logical_h;
+    int logical_w_backup;
+    int logical_h_backup;
 
     /* The drawable area within the window */
     SDL_Rect viewport;
