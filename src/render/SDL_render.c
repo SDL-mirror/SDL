@@ -1057,7 +1057,10 @@ SDL_RenderSetViewport(SDL_Renderer * renderer, const SDL_Rect * rect)
     } else {
         renderer->viewport.x = 0;
         renderer->viewport.y = 0;
-        if (renderer->window) {
+        if (renderer->target) {
+            SDL_QueryTexture(renderer->target, NULL, NULL,
+                              &renderer->viewport.w, &renderer->viewport.h);
+        } else if (renderer->window) {
             SDL_GetWindowSize(renderer->window,
                               &renderer->viewport.w, &renderer->viewport.h);
         } else {
