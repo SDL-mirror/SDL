@@ -316,6 +316,16 @@ static void do_mouse_motion(_THIS, short mx, short my)
 		return;
 	}
 
+	/* Relative mouse motion ? */
+	if (GEM_mouse_relative) {
+		if (GEM_usedevmouse) {
+			SDL_AtariDevMouse_PostMouseEvents(this, SDL_FALSE);
+		} else {
+			SDL_AtariXbios_PostMouseEvents(this, SDL_FALSE);
+		}
+		return;
+	}
+
 	/* Retrieve window coords, and generate mouse events accordingly */
 	x2 = y2 = 0;
 	w2 = VDI_w;
@@ -324,30 +334,21 @@ static void do_mouse_motion(_THIS, short mx, short my)
 		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
 	}
 
-	/* Mouse motion ? */
-	if (GEM_mouse_relative) {
-		if (GEM_usedevmouse) {
-			SDL_AtariDevMouse_PostMouseEvents(this, SDL_FALSE);
-		} else {
-			SDL_AtariXbios_PostMouseEvents(this, SDL_FALSE);
-		}
-	} else {
-		if ((prevmousex!=mx) || (prevmousey!=my)) {
-			int posx, posy;
+	if ((prevmousex!=mx) || (prevmousey!=my)) {
+		int posx, posy;
 
-			/* Give mouse position relative to window position */
-			posx = mx - x2;
-			if (posx<0) posx = 0;
-			if (posx>w2) posx = w2-1;
-			posy = my - y2;
-			if (posy<0) posy = 0;
-			if (posy>h2) posy = h2-1;
+		/* Give mouse position relative to window position */
+		posx = mx - x2;
+		if (posx<0) posx = 0;
+		if (posx>w2) posx = w2-1;
+		posy = my - y2;
+		if (posy<0) posy = 0;
+		if (posy>h2) posy = h2-1;
 
-			SDL_PrivateMouseMotion(0, 0, posx, posy);
-		}
-		prevmousex = mx;
-		prevmousey = my;
+		SDL_PrivateMouseMotion(0, 0, posx, posy);
 	}
+	prevmousex = mx;
+	prevmousey = my;
 }
 
 static void do_mouse_buttons(_THIS, short mb)
