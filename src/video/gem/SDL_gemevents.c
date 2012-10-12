@@ -50,8 +50,9 @@ static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
 /* Functions prototypes */
 
 static int do_messages(_THIS, short *message);
-static void do_keyboard(short kc, short ks);
-static void do_mouse(_THIS, short mx, short my, short mb, short ks);
+static void do_keyboard(short kc);
+static void do_keyboard_special(short ks);
+static void do_mouse(_THIS, short mx, short my, short mb);
 
 /* Functions */
 
@@ -68,13 +69,13 @@ void GEM_InitOSKeymap(_THIS)
 
 void GEM_PumpEvents(_THIS)
 {
-	short prevkc, prevks;
+	short prevkc;
 	static short maskmouseb=0;
 	int i;
 	SDL_keysym	keysym;
 
 	SDL_memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
-	prevkc = prevks = 0;
+	prevkc = 0;
 
 	for (;;)
 	{
@@ -110,15 +111,18 @@ void GEM_PumpEvents(_THIS)
 		if (resultat & MU_MESAG)
 			quit = do_messages(this, buffer);
 
+		/* Special keys ? */
+		if (resultat & (MU_KEYBD|MU_BUTTON))
+			do_keyboard_special(kstate);
+
 		/* Keyboard event ? */
 		if (resultat & MU_KEYBD) {
-			if ((prevkc != kc) || (prevks != kstate)) {
-				do_keyboard(kc,kstate);
+			if (prevkc != kc) {
+				do_keyboard(kc);
 				prevkc = kc;
-				prevks = ks;
 			} else {
 				/* Avoid looping, if repeating same key */
-				break;
+				quit = 1;
 			}
 		}
 
@@ -134,7 +138,7 @@ void GEM_PumpEvents(_THIS)
 
 		/* Mouse button event ? */
 		if (resultat & MU_BUTTON) {
-			do_mouse(this, mousex, mousey, mouseb, kstate);
+			do_mouse(this, mousex, mousey, mouseb);
 			maskmouseb = mouseb & 7;
 		}
 
@@ -277,7 +281,7 @@ static int do_messages(_THIS, short *message)
 	return quit;
 }
 
-static void do_keyboard(short kc, short ks)
+static void do_keyboard(short kc)
 {
 	int scancode;
 
@@ -285,7 +289,10 @@ static void do_keyboard(short kc, short ks)
 		scancode=(kc>>8) & (ATARIBIOS_MAXKEYS-1);
 		gem_currentkeyboard[scancode]=0xFF;
 	}
+}
 
+static void do_keyboard_special(short ks)
+{
 	/* Read special keys */
 	if (ks & K_RSHIFT)
 		gem_currentkeyboard[SCANCODE_RIGHTSHIFT]=0xFF;
@@ -297,7 +304,7 @@ static void do_keyboard(short kc, short ks)
 		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
 }
 
-static void do_mouse(_THIS, short mx, short my, short mb, short ks)
+static void do_mouse(_THIS, short mx, short my, short mb)
 {
 	static short prevmousex=0, prevmousey=0, prevmouseb=0;
 	short x2, y2, w2, h2;
@@ -364,14 +371,4 @@ static void do_mouse(_THIS, short mx, short my, short mb, short ks)
 		}
 		prevmouseb = mb;
 	}
-
-	/* Read special keys */
-	if (ks & K_RSHIFT)
-		gem_currentkeyboard[SCANCODE_RIGHTSHIFT]=0xFF;
-	if (ks & K_LSHIFT)
-		gem_currentkeyboard[SCANCODE_LEFTSHIFT]=0xFF;
-	if (ks & K_CTRL)
-		gem_currentkeyboard[SCANCODE_LEFTCONTROL]=0xFF;
-	if (ks & K_ALT)
-		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
 }
