@@ -952,6 +952,12 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
     return 0;
 }
 
+SDL_Texture *
+SDL_GetRenderTarget(SDL_Renderer *renderer)
+{
+    return renderer->target;
+}
+
 static int
 UpdateLogicalSize(SDL_Renderer *renderer)
 {
@@ -961,7 +967,9 @@ UpdateLogicalSize(SDL_Renderer *renderer)
     float scale;
     SDL_Rect viewport;
 
-    if (renderer->window) {
+    if (renderer->target) {
+        SDL_QueryTexture(renderer->target, NULL, NULL, &w, &h);
+    } else if (renderer->window) {
         SDL_GetWindowSize(renderer->window, &w, &h);
     } else {
         /* FIXME */

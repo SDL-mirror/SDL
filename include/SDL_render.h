@@ -413,9 +413,20 @@ extern DECLSPEC SDL_bool SDLCALL SDL_RenderTargetSupported(SDL_Renderer *rendere
  * \param texture The targeted texture, which must be created with the SDL_TEXTUREACCESS_TARGET flag, or NULL for the default render target
  *
  * \return 0 on success, or -1 on error
+ *
+ *  \sa SDL_GetRenderTarget()
  */
 extern DECLSPEC int SDLCALL SDL_SetRenderTarget(SDL_Renderer *renderer,
                                                 SDL_Texture *texture);
+
+/**
+ * \brief Get the current render target or NULL for the default render target.
+ *
+ * \return The current render target
+ *
+ *  \sa SDL_SetRenderTarget()
+ */
+extern DECLSPEC SDL_Texture * SDLCALL SDL_GetRenderTarget(SDL_Renderer *renderer);
 
 /**
  *  \brief Set device independent resolution for rendering
