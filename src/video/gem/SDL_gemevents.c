@@ -54,6 +54,7 @@ static void do_keyboard(short kc);
 static void do_keyboard_special(short ks);
 static void do_mouse_motion(_THIS, short mx, short my);
 static void do_mouse_buttons(_THIS, short mb);
+static int mouse_in_work_area(int winhandle, short mx, short my);
 
 /* Functions */
 
@@ -70,38 +71,26 @@ void GEM_InitOSKeymap(_THIS)
 
 void GEM_PumpEvents(_THIS)
 {
-	short prevkc;
-	static short prevmb=0;
+	short prevkc=0;
+	static short prevmx=0, prevmy=0, prevmb=0;
 	int i;
 	SDL_keysym	keysym;
 
 	SDL_memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
-	prevkc = 0;
 
 	for (;;)
 	{
-		int quit, resultat, event_mask, mouse_event;
+		int quit, resultat;
 		short buffer[8], kc;
-		short x2,y2,w2,h2;
 		short mousex, mousey, mouseb, dummy;
 		short kstate;
 
-		quit =
-			mouse_event =
-			x2=y2=w2=h2 = 0;
-
-		event_mask = MU_MESAG|MU_TIMER|MU_KEYBD|MU_BUTTON;
-		if (!GEM_fullscreen && (GEM_handle>=0)) {
-			wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
-			event_mask |= MU_M1;
-			mouse_event = ( (SDL_GetAppState() & SDL_APPMOUSEFOCUS)
-				== SDL_APPMOUSEFOCUS) ? MO_LEAVE : MO_ENTER;
-		}
+		quit = 0;
 
 		resultat = evnt_multi(
-			event_mask,
+			MU_MESAG|MU_TIMER|MU_KEYBD|MU_BUTTON|MU_M1,
 			0x101,7,prevmb,
-			mouse_event,x2,y2,w2,h2,
+			MO_LEAVE,prevmx,prevmy,1,1,
 			0,0,0,0,0,
 			buffer,
 			10,
@@ -127,19 +116,25 @@ void GEM_PumpEvents(_THIS)
 			}
 		}
 
-		/* Mouse entering/leaving window */
+		/* Mouse motion event ? */
 		if (resultat & MU_M1) {
 			if (this->input_grab == SDL_GRAB_OFF) {
 				/* Switch mouse focus state */
-				SDL_PrivateAppActive((mouse_event == MO_ENTER),
-					SDL_APPMOUSEFOCUS);
+				if (!GEM_fullscreen && (GEM_handle>=0)) {
+					SDL_PrivateAppActive(
+						mouse_in_work_area(GEM_handle, mousex,mousey),
+						SDL_APPMOUSEFOCUS);
+				}
 			}
 			GEM_CheckMouseMode(this);
+
+			do_mouse_motion(this, mousex, mousey);
+			prevmx = mousex;
+			prevmy = mousey;
 		}
 
 		/* Mouse button event ? */
 		if (resultat & MU_BUTTON) {
-			do_mouse_motion(this, mousex, mousey);
 			do_mouse_buttons(this, mouseb);
 			prevmb = mouseb & 7;
 		}
@@ -378,4 +373,27 @@ static void do_mouse_buttons(_THIS, short mb)
 	}
 
 	prevmouseb = mb;
+}
+
+/* Check if mouse in visible area of the window */
+static int mouse_in_work_area(int winhandle, short mx, short my)
+{
+	short todo[4];
+	short inside[4] = {mx,my,1,1};
+
+	/* Browse the rectangle list */
+	if (wind_get(winhandle, WF_FIRSTXYWH, &todo[0], &todo[1], &todo[2], &todo[3])!=0) {
+		while (todo[2] && todo[3]) {
+			if (rc_intersect((GRECT *)inside,(GRECT *)todo)) {
+				return 1;
+			}
+
+			if (wind_get(winhandle, WF_NEXTXYWH, &todo[0], &todo[1], &todo[2], &todo[3])==0) {
+				break;
+			}
+		}
+
+	}
+
+	return 0;
 }
