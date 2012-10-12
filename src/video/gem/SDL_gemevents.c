@@ -52,7 +52,8 @@ static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
 static int do_messages(_THIS, short *message);
 static void do_keyboard(short kc);
 static void do_keyboard_special(short ks);
-static void do_mouse(_THIS, short mx, short my, short mb);
+static void do_mouse_motion(_THIS, short mx, short my);
+static void do_mouse_buttons(_THIS, short mb);
 
 /* Functions */
 
@@ -70,7 +71,7 @@ void GEM_InitOSKeymap(_THIS)
 void GEM_PumpEvents(_THIS)
 {
 	short prevkc;
-	static short maskmouseb=0;
+	static short prevmb=0;
 	int i;
 	SDL_keysym	keysym;
 
@@ -99,7 +100,7 @@ void GEM_PumpEvents(_THIS)
 
 		resultat = evnt_multi(
 			event_mask,
-			0x101,7,maskmouseb,
+			0x101,7,prevmb,
 			mouse_event,x2,y2,w2,h2,
 			0,0,0,0,0,
 			buffer,
@@ -138,8 +139,9 @@ void GEM_PumpEvents(_THIS)
 
 		/* Mouse button event ? */
 		if (resultat & MU_BUTTON) {
-			do_mouse(this, mousex, mousey, mouseb);
-			maskmouseb = mouseb & 7;
+			do_mouse_motion(this, mousex, mousey);
+			do_mouse_buttons(this, mouseb);
+			prevmb = mouseb & 7;
 		}
 
 		/* Timer event ? */
@@ -304,9 +306,9 @@ static void do_keyboard_special(short ks)
 		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
 }
 
-static void do_mouse(_THIS, short mx, short my, short mb)
+static void do_mouse_motion(_THIS, short mx, short my)
 {
-	static short prevmousex=0, prevmousey=0, prevmouseb=0;
+	static short prevmousex=0, prevmousey=0;
 	short x2, y2, w2, h2;
 
 	/* Don't return mouse events if out of window */
@@ -320,11 +322,6 @@ static void do_mouse(_THIS, short mx, short my, short mb)
 	h2 = VDI_h;
 	if ((!GEM_fullscreen) && (GEM_handle>=0)) {
 		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
-
-		/* Do not generate mouse button event if out of window working area */
-		if ((mx<x2) || (mx>=x2+w2) || (my<y2) || (my>=y2+h2)) {
-			mb=prevmouseb;
-		}
 	}
 
 	/* Mouse motion ? */
@@ -351,24 +348,33 @@ static void do_mouse(_THIS, short mx, short my, short mb)
 		prevmousex = mx;
 		prevmousey = my;
 	}
+}
 
-	/* Mouse button ? */
-	if (prevmouseb!=mb) {
-		int i;
+static void do_mouse_buttons(_THIS, short mb)
+{
+	static short prevmouseb=0;
+	int i;
 
-		for (i=0;i<3;i++) {
-			int curbutton, prevbutton;
+	/* Don't return mouse events if out of window */
+	if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS)==0)
+		return;
+
+	if (prevmouseb==mb)
+		return;
+
+	for (i=0;i<3;i++) {
+		int curbutton, prevbutton;
 		
-			curbutton = mb & (1<<i);
-			prevbutton = prevmouseb & (1<<i);
-		
-			if (curbutton && !prevbutton) {
-				SDL_PrivateMouseButton(SDL_PRESSED, i+1, 0, 0);
-			}
-			if (!curbutton && prevbutton) {
-				SDL_PrivateMouseButton(SDL_RELEASED, i+1, 0, 0);
-			}
+		curbutton = mb & (1<<i);
+		prevbutton = prevmouseb & (1<<i);
+	
+		if (curbutton && !prevbutton) {
+			SDL_PrivateMouseButton(SDL_PRESSED, i+1, 0, 0);
 		}
-		prevmouseb = mb;
+		if (!curbutton && prevbutton) {
+			SDL_PrivateMouseButton(SDL_RELEASED, i+1, 0, 0);
+		}
 	}
+
+	prevmouseb = mb;
 }
