@@ -267,6 +267,17 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     }
 }
 
+- (BOOL)application:(UIApplication *)application openURL:(NSURL *)url sourceApplication:(NSString *)sourceApplication annotation:(id)annotation
+{
+    NSURL *fileURL = [url filePathURL];
+    if (fileURL != nil) {
+        SDL_SendDropFile([[fileURL path] UTF8String]);
+    } else {
+        SDL_SendDropFile([[url absoluteString] UTF8String]);
+    }
+    return YES;
+}
+
 @end
 
 #endif /* SDL_VIDEO_DRIVER_UIKIT */

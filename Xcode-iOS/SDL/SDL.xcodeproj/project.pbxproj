@@ -102,6 +102,8 @@
 		AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */ = {isa = PBXBuildFile; fileRef = AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */; };
 		AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AD9159369E3005138DD /* SDL_rotate.c */; };
 		AA628ADC159369E3005138DD /* SDL_rotate.h in Headers */ = {isa = PBXBuildFile; fileRef = AA628ADA159369E3005138DD /* SDL_rotate.h */; };
+		AA704DD6162AA90A0076D1C1 /* SDL_dropevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = AA704DD4162AA90A0076D1C1 /* SDL_dropevents_c.h */; };
+		AA704DD7162AA90A0076D1C1 /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = AA704DD5162AA90A0076D1C1 /* SDL_dropevents.c */; };
 		AA7558981595D55500BBD41B /* begin_code.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558651595D55500BBD41B /* begin_code.h */; };
 		AA7558991595D55500BBD41B /* close_code.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558661595D55500BBD41B /* close_code.h */; };
 		AA75589A1595D55500BBD41B /* SDL_assert.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558671595D55500BBD41B /* SDL_assert.h */; };
@@ -355,6 +357,8 @@
 		AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmodes.m; sourceTree = "<group>"; };
 		AA628AD9159369E3005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
 		AA628ADA159369E3005138DD /* SDL_rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rotate.h; sourceTree = "<group>"; };
+		AA704DD4162AA90A0076D1C1 /* SDL_dropevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_dropevents_c.h; sourceTree = "<group>"; };
+		AA704DD5162AA90A0076D1C1 /* SDL_dropevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_dropevents.c; sourceTree = "<group>"; };
 		AA7558651595D55500BBD41B /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
 		AA7558661595D55500BBD41B /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = close_code.h; sourceTree = "<group>"; };
 		AA7558671595D55500BBD41B /* SDL_assert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_assert.h; sourceTree = "<group>"; };
@@ -1014,25 +1018,27 @@
 		FD99B98C0DD52EDC00FB1D6B /* events */ = {
 			isa = PBXGroup;
 			children = (
-				04BA9D5F11EF474A00B60E01 /* SDL_gesture_c.h */,
-				04BA9D6011EF474A00B60E01 /* SDL_gesture.c */,
-				04BA9D6111EF474A00B60E01 /* SDL_touch_c.h */,
-				04BA9D6211EF474A00B60E01 /* SDL_touch.c */,
 				FD99B98D0DD52EDC00FB1D6B /* blank_cursor.h */,
 				FD99B98E0DD52EDC00FB1D6B /* default_cursor.h */,
 				FD99B98F0DD52EDC00FB1D6B /* scancodes_darwin.h */,
 				FD99B9900DD52EDC00FB1D6B /* scancodes_linux.h */,
 				FD99B9920DD52EDC00FB1D6B /* scancodes_xfree86.h */,
-				0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */,
 				0420496F11E6F03D007E7EC9 /* SDL_clipboardevents.c */,
+				0420496E11E6F03D007E7EC9 /* SDL_clipboardevents_c.h */,
+				AA704DD5162AA90A0076D1C1 /* SDL_dropevents.c */,
+				AA704DD4162AA90A0076D1C1 /* SDL_dropevents_c.h */,
 				FD99B9930DD52EDC00FB1D6B /* SDL_events.c */,
 				FD99B9940DD52EDC00FB1D6B /* SDL_events_c.h */,
+				04BA9D6011EF474A00B60E01 /* SDL_gesture.c */,
+				04BA9D5F11EF474A00B60E01 /* SDL_gesture_c.h */,
 				FD99B9950DD52EDC00FB1D6B /* SDL_keyboard.c */,
 				FD99B9960DD52EDC00FB1D6B /* SDL_keyboard_c.h */,
 				FD99B9970DD52EDC00FB1D6B /* SDL_mouse.c */,
 				FD99B9980DD52EDC00FB1D6B /* SDL_mouse_c.h */,
 				FD99B9990DD52EDC00FB1D6B /* SDL_quit.c */,
 				FD99B99A0DD52EDC00FB1D6B /* SDL_sysevents.h */,
+				04BA9D6211EF474A00B60E01 /* SDL_touch.c */,
+				04BA9D6111EF474A00B60E01 /* SDL_touch_c.h */,
 				FD99B99B0DD52EDC00FB1D6B /* SDL_windowevents.c */,
 				FD99B99C0DD52EDC00FB1D6B /* SDL_windowevents_c.h */,
 			);
@@ -1241,6 +1247,7 @@
 				AA7558C91595D55500BBD41B /* SDL_video.h in Headers */,
 				AA7558CA1595D55500BBD41B /* SDL.h in Headers */,
 				AA126AD41617C5E7005ABC8F /* SDL_uikitmodes.h in Headers */,
+				AA704DD6162AA90A0076D1C1 /* SDL_dropevents_c.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1458,6 +1465,7 @@
 				93CB792613FC5F5300BD3E05 /* SDL_uikitviewcontroller.m in Sources */,
 				AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */,
 				AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */,
+				AA704DD7162AA90A0076D1C1 /* SDL_dropevents.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
