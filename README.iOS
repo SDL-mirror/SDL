@@ -114,16 +114,10 @@ Notes -- iPhone SDL limitations
 ==============================================================================
 
 Windows:
-	Full-size, single window applications only.  You cannot create multi-window SDL applications for iPhone OS.  The application window will fill the display, though you have the option of turning on or off the menu-bar (pass SDL_CreateWindow the flag SDL_WINDOW_BORDERLESS).  Presently, landscape mode is not supported.
-
-Video:
-	For real time frame-rates, you are advised to use strictly SDL 2.0 video calls.  Using compatibility video calls uploads an OpenGL texture for each frame drawn, and this operation is excruciatingly slow.
+	Full-size, single window applications only.  You cannot create multi-window SDL applications for iPhone OS.  The application window will fill the display, though you have the option of turning on or off the menu-bar (pass SDL_CreateWindow the flag SDL_WINDOW_BORDERLESS).
 
 Textures:
-	SDL for iPhone Textures supports only SDL_PIXELFORMAT_ABGR8888 and SDL_PIXELFORMAT_RGB24 pixel formats.  This is because texture support in SDL for iPhone is done through OpenGL ES, which supports fewer pixel formats than OpenGL, will not re-order pixel data for you, and has no support for color-paletted formats (without extensions).
-
-Audio:
-	SDL for iPhone does not yet support audio input.
+	The optimal texture formats on iOS are SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_ABGR8888, SDL_PIXELFORMAT_BGR888, and SDL_PIXELFORMAT_RGB24 pixel formats.
 
 Loading Shared Objects:
 	This is disabled by default since it seems to break the terms of the iPhone SDK agreement.  It can be re-enabled in SDL_config_iphoneos.h.
@@ -143,7 +137,7 @@ e.g.
 extern "C"
 void ShowFrame(void*)
 {
-    ... do frame logic and rendering
+    ... do event handling, frame logic and rendering
 }
 
 int main(int argc, char *argv[])
@@ -156,13 +150,12 @@ int main(int argc, char *argv[])
 
         // Set up the game to run in the window animation callback on iOS
         // so that Game Center and so forth works correctly.
-        SDL_iPhoneSetAnimationCallback(screen->GetWindow(), 1, ShowFrame, 0);
+        SDL_iPhoneSetAnimationCallback(window, 1, ShowFrame, NULL);
 #else
-        while ( gRunning ) {
+        while ( running ) {
                 ShowFrame(0);
                 DelayFrame();
         }
-        CleanUp();
 #endif
         return 0;
 }
