@@ -613,6 +613,11 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     HDC hdc;
     int status;
 
+    if (!_this->gl_data) {
+        SDL_SetError("OpenGL not initialized");
+        return -1;
+    }
+
     if (window) {
         hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     } else {
@@ -666,6 +671,9 @@ WIN_GL_SwapWindow(_THIS, SDL_Window * window)
 void
 WIN_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
+    if (!_this->gl_data) {
+        return;
+    }
     _this->gl_data->wglDeleteContext((HGLRC) context);
 }
 

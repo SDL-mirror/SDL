@@ -23,11 +23,15 @@
 #if SDL_VIDEO_DRIVER_ANDROID
 
 #include "SDL_androidevents.h"
+#include "SDL_events.h"
 
 void
 Android_PumpEvents(_THIS)
 {
     static int isPaused = 0;
+#if SDL_ANDROID_BLOCK_ON_PAUSE
+    static int isPausing = 0;
+#endif
     /* No polling necessary */
 
     /*
@@ -36,10 +40,12 @@ Android_PumpEvents(_THIS)
      * When the resume semaphore is signaled, SDL_GL_CreateContext is called which in turn calls Java code
      * SDLActivity::createGLContext -> SDLActivity:: initEGL -> SDLActivity::createEGLSurface -> SDLActivity::createEGLContext
      */
-    if (isPaused) {
+
 #if SDL_ANDROID_BLOCK_ON_PAUSE
+    if (isPaused && !isPausing) {
         if(SDL_SemWait(Android_ResumeSem) == 0) {
 #else
+    if (isPaused) {
         if(SDL_SemTryWait(Android_ResumeSem) == 0) {
 #endif
             isPaused = 0;
@@ -53,10 +59,25 @@ Android_PumpEvents(_THIS)
         }
     }
     else {
+#if SDL_ANDROID_BLOCK_ON_PAUSE
+        if( isPausing || SDL_SemTryWait(Android_PauseSem) == 0 ) {
+            /* We've been signaled to pause, but before we block ourselves, we need to make sure that
+            SDL_WINDOWEVENT_FOCUS_LOST and SDL_WINDOWEVENT_MINIMIZED have reached the app */
+            if (SDL_HasEvent(SDL_WINDOWEVENT)) {
+                isPausing = 1;
+            }
+            else {
+                isPausing = 0;
+                isPaused = 1;
+            }
+        }
+#else
         if(SDL_SemTryWait(Android_PauseSem) == 0) {
             /* If we fall in here, the system is/was paused */
             isPaused = 1;
         }
+#endif
+
     }
 }
 

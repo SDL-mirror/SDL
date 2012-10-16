@@ -107,11 +107,6 @@ static SDL_VideoDevice *_this = NULL;
         return retval; \
     }
 
-#define INVALIDATE_GLCONTEXT() \
-    _this->current_glwin = NULL; \
-    _this->current_glctx = NULL;
-
-
 /* Support for framebuffer emulation using an accelerated renderer */
 
 #define SDL_WINDOWTEXTUREDATA   "_SDL_WindowTextureData"
@@ -628,8 +623,8 @@ SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect)
             SDL_GetDisplayBounds(displayIndex-1, rect);
             rect->x += rect->w;
         }
-        rect->w = display->desktop_mode.w;
-        rect->h = display->desktop_mode.h;
+        rect->w = display->current_mode.w;
+        rect->h = display->current_mode.h;
     }
     return 0;
 }
@@ -938,13 +933,18 @@ SDL_GetWindowDisplay(SDL_Window * window)
     }
 
     /* Find the display containing the window */
-    center.x = window->x + window->w / 2;
-    center.y = window->y + window->h / 2;
     for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
 
+        if (display->fullscreen_window == window) {
+            return i;
+        }
+    }
+    center.x = window->x + window->w / 2;
+    center.y = window->y + window->h / 2;
+    for (i = 0; i < _this->num_displays; ++i) {
         SDL_GetDisplayBounds(i, &rect);
-        if (display->fullscreen_window == window || SDL_EnclosePoints(&center, 1, &rect, NULL)) {
+        if (SDL_EnclosePoints(&center, 1, &rect, NULL)) {
             return i;
         }
 
@@ -1496,6 +1496,24 @@ SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 }
 
 void
+SDL_SetWindowBordered(SDL_Window * window, SDL_bool bordered)
+{
+    CHECK_WINDOW_MAGIC(window, );
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        const int want = (bordered != SDL_FALSE);  /* normalize the flag. */
+        const int have = ((window->flags & SDL_WINDOW_BORDERLESS) == 0);
+        if ((want != have) && (_this->SetWindowBordered)) {
+            if (want) {
+                window->flags &= ~SDL_WINDOW_BORDERLESS;
+            } else {
+                window->flags |= SDL_WINDOW_BORDERLESS;
+            }
+            _this->SetWindowBordered(_this, window, (SDL_bool) want);
+        }
+    }
+}
+
+void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window, );
@@ -1865,14 +1883,12 @@ SDL_GetWindowGrab(SDL_Window * window)
 void
 SDL_OnWindowShown(SDL_Window * window)
 {
-    INVALIDATE_GLCONTEXT();
     SDL_OnWindowRestored(window);
 }
 
 void
 SDL_OnWindowHidden(SDL_Window * window)
 {
-    INVALIDATE_GLCONTEXT();
     SDL_UpdateFullscreenMode(window, SDL_FALSE);
 }
 
@@ -1967,7 +1983,7 @@ SDL_DestroyWindow(SDL_Window * window)
     /* make no context current if this is the current context window. */
     if (window->flags & SDL_WINDOW_OPENGL) {
         if (_this->current_glwin == window) {
-            SDL_GL_MakeCurrent(NULL, NULL);
+            SDL_GL_MakeCurrent(window, NULL);
         }
     }
 
@@ -2628,7 +2644,7 @@ SDL_GL_SwapWindow(SDL_Window * window)
 void
 SDL_GL_DeleteContext(SDL_GLContext context)
 {
-    if (!_this || !_this->gl_data || !context) {
+    if (!_this || !context) {
         return;
     }
     _this->GL_MakeCurrent(_this, NULL, NULL);

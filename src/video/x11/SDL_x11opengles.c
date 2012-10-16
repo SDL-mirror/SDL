@@ -358,6 +358,11 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 //    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 //    Display *display = data->videodata->display;
 
+    if (!_this->gles_data) {
+        SDL_SetError("OpenGL not initialized");
+        return -1;
+    }
+
     retval = 1;
     if (!_this->gles_data->eglMakeCurrent(_this->gles_data->egl_display,
                                           _this->gles_data->egl_surface,
@@ -412,32 +417,33 @@ void
 X11_GLES_DeleteContext(_THIS, SDL_GLContext context)
 {
     /* Clean up GLES and EGL */
-    if (_this->gles_data) {  
-        if (_this->gles_data->egl_context != EGL_NO_CONTEXT ||
-            _this->gles_data->egl_surface != EGL_NO_SURFACE) {
-            _this->gles_data->eglMakeCurrent(_this->gles_data->egl_display,
-                                             EGL_NO_SURFACE, EGL_NO_SURFACE,
-                                             EGL_NO_CONTEXT);
-
-            if (_this->gles_data->egl_context != EGL_NO_CONTEXT) {
-                _this->gles_data->eglDestroyContext(_this->gles_data->egl_display,
-                                                    _this->gles_data->
-                                                    egl_context);
-                _this->gles_data->egl_context = EGL_NO_CONTEXT;
-            }
-
-            if (_this->gles_data->egl_surface != EGL_NO_SURFACE) {
-                _this->gles_data->eglDestroySurface(_this->gles_data->egl_display,
-                                                    _this->gles_data->
-                                                    egl_surface);
-                _this->gles_data->egl_surface = EGL_NO_SURFACE;
-            }
-        }
-
-        /* crappy fix */
-        X11_GLES_UnloadLibrary(_this);
+    if (!_this->gles_data) {  
+        return;
     }
 
+    if (_this->gles_data->egl_context != EGL_NO_CONTEXT ||
+        _this->gles_data->egl_surface != EGL_NO_SURFACE) {
+        _this->gles_data->eglMakeCurrent(_this->gles_data->egl_display,
+                                         EGL_NO_SURFACE, EGL_NO_SURFACE,
+                                         EGL_NO_CONTEXT);
+
+        if (_this->gles_data->egl_context != EGL_NO_CONTEXT) {
+            _this->gles_data->eglDestroyContext(_this->gles_data->egl_display,
+                                                _this->gles_data->
+                                                egl_context);
+            _this->gles_data->egl_context = EGL_NO_CONTEXT;
+        }
+
+        if (_this->gles_data->egl_surface != EGL_NO_SURFACE) {
+            _this->gles_data->eglDestroySurface(_this->gles_data->egl_display,
+                                                _this->gles_data->
+                                                egl_surface);
+            _this->gles_data->egl_surface = EGL_NO_SURFACE;
+        }
+    }
+
+    /* crappy fix */
+    X11_GLES_UnloadLibrary(_this);
 }
 
 #endif /* SDL_VIDEO_DRIVER_X11 && SDL_VIDEO_OPENGL_ES */

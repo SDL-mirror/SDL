@@ -116,6 +116,35 @@ X11_DeleteDevice(SDL_VideoDevice * device)
     SDL_X11_UnloadSymbols();
 }
 
+/* An error handler to reset the vidmode and then call the default handler. */
+static SDL_bool safety_net_triggered = SDL_FALSE;
+static int (*orig_x11_errhandler) (Display *, XErrorEvent *) = NULL;
+static int
+X11_SafetyNetErrHandler(Display * d, XErrorEvent * e)
+{
+    /* if we trigger an error in our error handler, don't try again. */
+    if (!safety_net_triggered) {
+        safety_net_triggered = SDL_TRUE;
+        SDL_VideoDevice *device = SDL_GetVideoDevice();
+        if (device != NULL) {
+            int i;
+            for (i = 0; i < device->num_displays; i++) {
+                SDL_VideoDisplay *display = &device->displays[i];
+                if (SDL_memcmp(&display->current_mode, &display->desktop_mode,
+                               sizeof (SDL_DisplayMode)) != 0) {
+                    X11_SetDisplayMode(device, display, &display->desktop_mode);
+                }
+            }
+        }
+    }
+
+    if (orig_x11_errhandler != NULL) {
+        return orig_x11_errhandler(d, e);  /* probably terminate. */
+    }
+
+    return 0;
+}
+
 static SDL_VideoDevice *
 X11_CreateDevice(int devindex)
 {
@@ -126,6 +155,10 @@ X11_CreateDevice(int devindex)
     if (!SDL_X11_LoadSymbols()) {
         return NULL;
     }
+
+    // Need for threading gl calls. This is also required for the proprietary nVidia
+	//  driver to be threaded.
+    XInitThreads();
 
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
@@ -173,6 +206,10 @@ X11_CreateDevice(int devindex)
     XSynchronize(data->display, True);
 #endif
 
+    /* Hook up an X11 error handler to recover the desktop resolution. */
+    safety_net_triggered = SDL_FALSE;
+    orig_x11_errhandler = XSetErrorHandler(X11_SafetyNetErrHandler);
+
     /* Set the function pointers */
     device->VideoInit = X11_VideoInit;
     device->VideoQuit = X11_VideoQuit;
@@ -194,6 +231,7 @@ X11_CreateDevice(int devindex)
     device->MaximizeWindow = X11_MaximizeWindow;
     device->MinimizeWindow = X11_MinimizeWindow;
     device->RestoreWindow = X11_RestoreWindow;
+    device->SetWindowBordered = X11_SetWindowBordered;
     device->SetWindowFullscreen = X11_SetWindowFullscreen;
     device->SetWindowGammaRamp = X11_SetWindowGammaRamp;
     device->SetWindowGrab = X11_SetWindowGrab;
@@ -335,9 +373,12 @@ X11_VideoInit(_THIS)
     GET_ATOM(WM_DELETE_WINDOW);
     GET_ATOM(_NET_WM_STATE);
     GET_ATOM(_NET_WM_STATE_HIDDEN);
+    GET_ATOM(_NET_WM_STATE_FOCUSED);
     GET_ATOM(_NET_WM_STATE_MAXIMIZED_VERT);
     GET_ATOM(_NET_WM_STATE_MAXIMIZED_HORZ);
     GET_ATOM(_NET_WM_STATE_FULLSCREEN);
+    GET_ATOM(_NET_WM_ALLOWED_ACTIONS);
+    GET_ATOM(_NET_WM_ACTION_FULLSCREEN);
     GET_ATOM(_NET_WM_NAME);
     GET_ATOM(_NET_WM_ICON_NAME);
     GET_ATOM(_NET_WM_ICON);

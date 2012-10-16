@@ -10,6 +10,7 @@ LIBS	= @LIBS@
 TARGETS = \
 	checkkeys$(EXE) \
 	loopwave$(EXE) \
+	testaudioinfo$(EXE) \
 	testdraw2$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
@@ -109,7 +110,7 @@ testiconv$(EXE): $(srcdir)/testiconv.c
 testime$(EXE): $(srcdir)/testime.c $(srcdir)/common.c
 	$(CC) -o $@ $(srcdir)/testime.c $(srcdir)/common.c $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
 
-testjoystick$(EXE): $(srcdir)/testjoystick.c
+testjoystick$(EXE): $(srcdir)/testjoystick.c $(srcdir)/common.c
 	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
 
 testkeys$(EXE): $(srcdir)/testkeys.c

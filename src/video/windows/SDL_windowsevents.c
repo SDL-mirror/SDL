@@ -29,6 +29,10 @@
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_touch_c.h"
 
+/* Dropfile support */
+#include <shellapi.h>
+
+
 
 
 /*#define WMMSG_DEBUG*/
@@ -164,12 +168,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
                 SDL_SendWindowEvent(data->window,
                                     SDL_WINDOWEVENT_RESTORED, 0, 0);
-#ifndef _WIN32_WCE              /* WinCE misses IsZoomed() */
                 if (IsZoomed(hwnd)) {
                     SDL_SendWindowEvent(data->window,
                                         SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
                 }
-#endif
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
@@ -211,20 +213,6 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 		if(SDL_GetMouse()->relative_mode)
 			break;
-#ifdef _WIN32_WCE
-        /* transform coords for VGA, WVGA... */
-        {
-            SDL_VideoData *videodata = data->videodata;
-            if(videodata->CoordTransform) {
-                POINT pt;
-                pt.x = LOWORD(lParam);
-                pt.y = HIWORD(lParam);
-                videodata->CoordTransform(data->window, &pt);
-                SDL_SendMouseMotion(data->window, 0, pt.x, pt.y);
-                break;
-            }
-        }
-#endif
         SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
         break;
 
@@ -463,16 +451,12 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 
             style = GetWindowLong(hwnd, GWL_STYLE);
-#ifdef _WIN32_WCE
-            menu = FALSE;
-#else
             /* DJM - according to the docs for GetMenu(), the
                return value is undefined if hwnd is a child window.
                Aparently it's too difficult for MS to check
                inside their function, so I have to do it here.
              */
             menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-#endif
             AdjustWindowRectEx(&size, style, menu, 0);
             w = size.right - size.left;
             h = size.bottom - size.top;
@@ -639,7 +623,29 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			return 0;
 		}
 		break;
-	}
+
+    case WM_DROPFILES:
+        {
+            UINT i;
+            HDROP drop = (HDROP) wParam;
+            UINT count = DragQueryFile(drop, 0xFFFFFFFF, NULL, 0);
+            for (i = 0; i < count; ++i) {
+                UINT size = DragQueryFile(drop, i, NULL, 0) + 1;
+                LPTSTR buffer = SDL_stack_alloc(TCHAR, size);
+                if (buffer) {
+                    if (DragQueryFile(drop, i, buffer, size)) {
+                        char *file = WIN_StringToUTF8(buffer);
+                        SDL_SendDropFile(file);
+                        SDL_free(file);
+                    }
+                    SDL_stack_free(buffer);
+                }
+            }
+            DragFinish(drop);
+            return 0;
+        }
+        break;
+    }
 
     /* If there's a window proc, assume it's going to handle messages */
     if (data->wndproc) {

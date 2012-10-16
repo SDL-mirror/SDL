@@ -218,6 +218,30 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
     Android_RunAudioThread();
 }
 
+extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
+                                    JNIEnv* env, jclass cls,
+                                    jstring text, jint newCursorPosition)
+{
+    const char *utftext = env->GetStringUTFChars(text, NULL);
+
+    SDL_SendKeyboardText(utftext);
+
+    env->ReleaseStringUTFChars(text, utftext);
+}
+
+extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeSetComposingText(
+                                    JNIEnv* env, jclass cls,
+                                    jstring text, jint newCursorPosition)
+{
+    const char *utftext = env->GetStringUTFChars(text, NULL);
+
+    SDL_SendEditingText(utftext, 0, 0);
+
+    env->ReleaseStringUTFChars(text, utftext);
+}
+
+
+
 
 /*******************************************************************************
              Functions called by SDL into Java
@@ -735,6 +759,174 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
     return Android_JNI_FileClose(ctx, true);
 }
 
+// returns a new global reference which needs to be released later
+static jobject Android_JNI_GetSystemServiceObject(const char* name)
+{
+    LocalReferenceHolder refs;
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return NULL;
+    }
+
+    jstring service = env->NewStringUTF(name);
+
+    jmethodID mid;
+
+    mid = env->GetStaticMethodID(mActivityClass, "getContext", "()Landroid/content/Context;");
+    jobject context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+    mid = env->GetMethodID(mActivityClass, "getSystemService", "(Ljava/lang/String;)Ljava/lang/Object;");
+    jobject manager = env->CallObjectMethod(context, mid, service);
+
+    env->DeleteLocalRef(service);
+
+    return manager ? env->NewGlobalRef(manager) : NULL;
+}
+
+#define SETUP_CLIPBOARD(error) \
+    LocalReferenceHolder refs; \
+    JNIEnv* env = Android_JNI_GetEnv(); \
+    if (!refs.init(env)) { \
+        return error; \
+    } \
+    jobject clipboard = Android_JNI_GetSystemServiceObject("clipboard"); \
+    if (!clipboard) { \
+        return error; \
+    }
+
+extern "C" int Android_JNI_SetClipboardText(const char* text)
+{
+    SETUP_CLIPBOARD(-1)
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "setText", "(Ljava/lang/CharSequence;)V");
+    jstring string = env->NewStringUTF(text);
+    env->CallVoidMethod(clipboard, mid, string);
+    env->DeleteGlobalRef(clipboard);
+    env->DeleteLocalRef(string);
+    return 0;
+}
+
+extern "C" char* Android_JNI_GetClipboardText()
+{
+    SETUP_CLIPBOARD(SDL_strdup(""))
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "getText", "()Ljava/lang/CharSequence;");
+    jobject sequence = env->CallObjectMethod(clipboard, mid);
+    env->DeleteGlobalRef(clipboard);
+    if (sequence) {
+        mid = env->GetMethodID(env->GetObjectClass(sequence), "toString", "()Ljava/lang/String;");
+        jstring string = reinterpret_cast<jstring>(env->CallObjectMethod(sequence, mid));
+        const char* utf = env->GetStringUTFChars(string, 0);
+        if (utf) {
+            char* text = SDL_strdup(utf);
+            env->ReleaseStringUTFChars(string, utf);
+            return text;
+        }
+    }
+    return SDL_strdup("");
+}
+
+extern "C" SDL_bool Android_JNI_HasClipboardText()
+{
+    SETUP_CLIPBOARD(SDL_FALSE)
+
+    jmethodID mid = env->GetMethodID(env->GetObjectClass(clipboard), "hasText", "()Z");
+    jboolean has = env->CallBooleanMethod(clipboard, mid);
+    env->DeleteGlobalRef(clipboard);
+    return has ? SDL_TRUE : SDL_FALSE;
+}
+
+
+// returns 0 on success or -1 on error (others undefined then)
+// returns truthy or falsy value in plugged, charged and battery
+// returns the value in seconds and percent or -1 if not available
+extern "C" int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seconds, int* percent)
+{
+    LocalReferenceHolder refs;
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return -1;
+    }
+
+    jmethodID mid;
+
+    mid = env->GetStaticMethodID(mActivityClass, "getContext", "()Landroid/content/Context;");
+    jobject context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+    jstring action = env->NewStringUTF("android.intent.action.BATTERY_CHANGED");
+
+    jclass cls = env->FindClass("android/content/IntentFilter");
+
+    mid = env->GetMethodID(cls, "<init>", "(Ljava/lang/String;)V");
+    jobject filter = env->NewObject(cls, mid, action);
+
+    env->DeleteLocalRef(action);
+
+    mid = env->GetMethodID(mActivityClass, "registerReceiver", "(Landroid/content/BroadcastReceiver;Landroid/content/IntentFilter;)Landroid/content/Intent;");
+    jobject intent = env->CallObjectMethod(context, mid, NULL, filter);
+
+    env->DeleteLocalRef(filter);
+
+    cls = env->GetObjectClass(intent);
+
+    jstring iname;
+    jmethodID imid = env->GetMethodID(cls, "getIntExtra", "(Ljava/lang/String;I)I");
+
+#define GET_INT_EXTRA(var, key) \
+    iname = env->NewStringUTF(key); \
+    int var = env->CallIntMethod(intent, imid, iname, -1); \
+    env->DeleteLocalRef(iname);
+
+    jstring bname;
+    jmethodID bmid = env->GetMethodID(cls, "getBooleanExtra", "(Ljava/lang/String;Z)Z");
+
+#define GET_BOOL_EXTRA(var, key) \
+    bname = env->NewStringUTF(key); \
+    int var = env->CallBooleanMethod(intent, bmid, bname, JNI_FALSE); \
+    env->DeleteLocalRef(bname);
+
+    if (plugged) {
+        GET_INT_EXTRA(plug, "plugged") // == BatteryManager.EXTRA_PLUGGED (API 5)
+        if (plug == -1) {
+            return -1;
+        }
+        // 1 == BatteryManager.BATTERY_PLUGGED_AC
+        // 2 == BatteryManager.BATTERY_PLUGGED_USB
+        *plugged = (0 < plug) ? 1 : 0;
+    }
+
+    if (charged) {
+        GET_INT_EXTRA(status, "status") // == BatteryManager.EXTRA_STATUS (API 5)
+        if (status == -1) {
+            return -1;
+        }
+        // 5 == BatteryManager.BATTERY_STATUS_FULL
+        *charged = (status == 5) ? 1 : 0;
+    }
+
+    if (battery) {
+        GET_BOOL_EXTRA(present, "present") // == BatteryManager.EXTRA_PRESENT (API 5)
+        *battery = present ? 1 : 0;
+    }
+
+    if (seconds) {
+        *seconds = -1; // not possible
+    }
+
+    if (percent) {
+        GET_INT_EXTRA(level, "level") // == BatteryManager.EXTRA_LEVEL (API 5)
+        GET_INT_EXTRA(scale, "scale") // == BatteryManager.EXTRA_SCALE (API 5)
+        if ((level == -1) || (scale == -1)) {
+            return -1;
+        }
+        *percent = level * 100 / scale;
+    }
+
+    env->DeleteLocalRef(intent);
+
+    return 0;
+}
+
 // sends message to be handled on the UI event dispatch thread
 extern "C" int Android_JNI_SendMessage(int command, int param)
 {
@@ -749,6 +941,42 @@ extern "C" int Android_JNI_SendMessage(int command, int param)
     env->CallStaticVoidMethod(mActivityClass, mid, command, param);
     return 0;
 }
+
+extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
+{
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod( mActivityClass, mid,
+                               inputRect->x,
+                               inputRect->y,
+                               inputRect->w,
+                               inputRect->h );
+    return 0;
+}
+
+/*extern "C" int Android_JNI_HideTextInput()
+{
+
+
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "hideTextInput", "()V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod(mActivityClass, mid);
+    return 0;
+}*/
 
 #endif /* __ANDROID__ */
 
