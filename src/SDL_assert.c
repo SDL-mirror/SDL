@@ -26,7 +26,7 @@
 #include "SDL_assert_c.h"
 #include "video/SDL_sysvideo.h"
 
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__WINRT__)
 #include "core/windows/SDL_windows.h"
 
 #ifndef WS_OVERLAPPEDWINDOW
@@ -59,7 +59,7 @@ debug_print(const char *fmt, ...) __attribute__((format (printf, 1, 2)));
 static void
 debug_print(const char *fmt, ...)
 {
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__WINRT__)
     /* Format into a buffer for OutputDebugStringA(). */
     char buf[1024];
     char *startptr;
@@ -213,6 +213,18 @@ SDL_PromptAssertion_windows(const SDL_assert_data *data)
 #endif
 
 
+#ifdef __WINRT__
+
+static SDL_assert_state
+SDL_PromptAssertion_windowsrt(const SDL_assert_data *data)
+{
+    /* TODO, WinRT: implement SDL_PromptAssertion_windowsrt */
+    return SDL_ASSERTION_ABORT;
+}
+
+#endif
+
+
 static void SDL_AddAssertionToReport(SDL_assert_data *data)
 {
     /* (data) is always a static struct defined with the assert macros, so
@@ -254,8 +266,10 @@ static void SDL_GenerateAssertionReport(void)
 
 static void SDL_ExitProcess(int exitcode)
 {
-#ifdef __WIN32__
+#if defined(__WIN32__)
     ExitProcess(exitcode);
+#elif defined(__WINRT__)
+    exit(exitcode);
 #else
     _exit(exitcode);
 #endif
@@ -317,8 +331,11 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 
     /* platform-specific UI... */
 
-#ifdef __WIN32__
+#if defined(__WIN32__)
     state = SDL_PromptAssertion_windows(data);
+
+#elif defined(__WINRT__)
+    state = SDL_PromptAssertion_windowsrt(data);
 
 #elif defined __MACOSX__ && defined SDL_VIDEO_DRIVER_COCOA
     /* This has to be done in an Objective-C (*.m) file, so we call out. */

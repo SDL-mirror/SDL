@@ -456,13 +456,16 @@ SDL_RWFromFile(const char *file, const char *mode)
     {
     	#ifdef __APPLE__
     	FILE *fp = SDL_OpenFPFromBundleOrFallback(file, mode);
+        #elif __WINRT__
+        FILE *fp = NULL;
+        fopen_s(&fp, file, mode);
         #else
     	FILE *fp = fopen(file, mode);
     	#endif
     	if (fp == NULL) {
             SDL_SetError("Couldn't open %s", file);
         } else {
-            rwops = SDL_RWFromFP(fp, 1);
+            rwops = SDL_RWFromFP(fp, SDL_TRUE);
         }
     }
 #else
