@@ -340,7 +340,7 @@ do {						\
 /* We can count on memcpy existing on Mac OS X and being well-tuned. */
 #if defined(__MACOSX__)
 #define SDL_memcpy      memcpy
-#elif defined(__GNUC__) && defined(i386)
+#elif defined(__GNUC__) && defined(i386) && !defined(__WIN32__)
 #define SDL_memcpy(dst, src, len)					  \
 do {									  \
 	int u0, u1, u2;						  	  \
