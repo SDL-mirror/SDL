@@ -336,7 +336,7 @@ typedef struct SDL_MultiGestureEvent
     SDL_TouchID touchId;        /**< The touch device index */
     float dTheta;
     float dDist;
-    float x;  //currently 0...1. Change to screen coords?
+    float x;  /* currently 0...1. Change to screen coords? */
     float y;  
     Uint16 numFingers;
     Uint16 padding;
