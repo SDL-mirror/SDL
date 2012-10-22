@@ -18,6 +18,8 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+/* Need this so Linux systems define fseek64o, ftell64o and off64_t */
+#define _LARGEFILE64_SOURCE
 #include "SDL_config.h"
 
 /* This file provides a general interface for SDL to read and write
