@@ -33,8 +33,11 @@
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+
+#if HAVE_PTHREAD_SETNAME_NP
 extern int pthread_setname_np (pthread_t __target_thread, __const char *__name) __THROW __nonnull ((2));
 #endif
+#endif // __LINUX__
 
 #include "SDL_platform.h"
 #include "SDL_thread.h"
@@ -91,7 +94,10 @@ SDL_SYS_SetupThread(const char *name)
     if (name != NULL) {
 #if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
       (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
-        if (pthread_setname_np != NULL) { pthread_setname_np(name); }
+        int (*dynamic_pthread_setname_np)(const char*);
+        *reinterpret_cast<void**>(&dynamic_pthread_setname_np) = dlsym(RTLD_DEFAULT, "pthread_setname_np");
+        if ( dynamic_pthread_setname_np )
+            dynamic_pthread_setname_np( name );
 #elif HAVE_PTHREAD_SETNAME_NP
         pthread_setname_np(pthread_self(), name);
 #elif HAVE_PTHREAD_SET_NAME_NP
