@@ -39,6 +39,12 @@ extern int pthread_setname_np (pthread_t __target_thread, __const char *__name) 
 #endif
 #endif // __LINUX__
 
+#if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
+      (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
+#define NEED_DYNAMIC_PTHREAD_SETNAME_NP
+#include <dlfcn.h>
+#endif
+
 #include "SDL_platform.h"
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
@@ -92,8 +98,7 @@ SDL_SYS_SetupThread(const char *name)
     sigset_t mask;
 
     if (name != NULL) {
-#if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
-      (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
+#ifdef NEED_DYNAMIC_PTHREAD_SETNAME_NP
         int (*dynamic_pthread_setname_np)(const char*);
         *(void**)(&dynamic_pthread_setname_np) = dlsym(RTLD_DEFAULT, "pthread_setname_np");
         if ( dynamic_pthread_setname_np )
