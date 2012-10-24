@@ -2839,4 +2839,55 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
     return SDL_FALSE;
 }
 
+#if SDL_VIDEO_DRIVER_X11
+extern int X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
+#endif
+
+int
+SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
+{
+    int dummybutton;
+
+    if (!buttonid) {
+        buttonid = &dummybutton;
+    }
+    if (_this && _this->ShowMessageBox) {
+        if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
+            return 0;
+        }
+    }
+
+    /* It's completely fine to call this function before video is initialized */
+#if SDL_VIDEO_DRIVER_X11
+    if (X11_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+
+    SDL_SetError("No message system available");
+    return -1;
+}
+
+int
+SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, SDL_Window *window)
+{
+    SDL_MessageBoxData data;
+    SDL_MessageBoxButtonData button;
+
+    SDL_zero(data);
+    data.flags = flags;
+    data.title = title;
+    data.message = message;
+    data.numbuttons = 1;
+    data.buttons = &button;
+    data.window = window;
+
+    SDL_zero(button);
+    button.flags |= SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+    button.flags |= SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT;
+    button.text = "OK";
+
+    return SDL_ShowMessageBox(&data, NULL);
+}
+
 /* vi: set ts=4 sw=4 expandtab: */
