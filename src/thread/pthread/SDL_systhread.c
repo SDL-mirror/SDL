@@ -95,7 +95,7 @@ SDL_SYS_SetupThread(const char *name)
 #if ( (__MACOSX__ && (MAC_OS_X_VERSION_MAX_ALLOWED >= 1060)) || \
       (__IPHONEOS__ && (__IPHONE_OS_VERSION_MAX_ALLOWED >= 30200)) )
         int (*dynamic_pthread_setname_np)(const char*);
-        *reinterpret_cast<void**>(&dynamic_pthread_setname_np) = dlsym(RTLD_DEFAULT, "pthread_setname_np");
+        *(void**)(&dynamic_pthread_setname_np) = dlsym(RTLD_DEFAULT, "pthread_setname_np");
         if ( dynamic_pthread_setname_np )
             dynamic_pthread_setname_np( name );
 #elif HAVE_PTHREAD_SETNAME_NP
