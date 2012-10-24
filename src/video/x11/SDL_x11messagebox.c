@@ -36,11 +36,11 @@ static const char g_MessageBoxFont[] = "-*-*-medium-r-normal--0-120-*-*-p-0-iso8
 
 static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] =
 {
-	{ 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,       
-	{ 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,             
-	{ 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,    
-	{ 105, 102, 99  }, // SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND,
-	{ 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,  
+    { 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,       
+    { 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,             
+    { 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,    
+    { 105, 102, 99  }, // SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND,
+    { 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,  
 };
 
 #define SDL_MAKE_RGB( _r, _g, _b )  ( ( ( Uint32 )( _r ) << 16 ) | \
@@ -70,7 +70,7 @@ typedef struct SDL_MessageBoxDataX11
     Font hfont;
     Window window;
     Display *display;
-	long event_mask;
+    long event_mask;
     Atom wm_protocols;
     Atom wm_delete_message;
 
@@ -91,7 +91,7 @@ typedef struct SDL_MessageBoxDataX11
     const SDL_MessageBoxButtonData *buttondata;
     SDL_MessageBoxButtonDataX11 buttonpos[ MAX_BUTTONS ];
 
-	Uint32 color[ SDL_MESSAGEBOX_COLOR_MAX ];
+    Uint32 color[ SDL_MESSAGEBOX_COLOR_MAX ];
 
     const SDL_MessageBoxData *messageboxdata;
 } SDL_MessageBoxDataX11;
@@ -146,10 +146,10 @@ GetHitButtonIndex( SDL_MessageBoxDataX11 *data, int x, int y )
 static int
 X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * messageboxdata, int * pbuttonid )
 {
-	int i;
+    int i;
     int numbuttons = messageboxdata->numbuttons;
     const SDL_MessageBoxButtonData *buttondata = messageboxdata->buttons;
-	const SDL_MessageBoxColor *colorhints;
+    const SDL_MessageBoxColor *colorhints;
 
     if ( numbuttons > MAX_BUTTONS ) {
         SDL_SetError("Too many buttons (%d max allowed)", MAX_BUTTONS);
@@ -175,16 +175,16 @@ X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * mess
         return -1;
     }
 
-	if ( messageboxdata->colorScheme ) {
-		colorhints = messageboxdata->colorScheme->colors;
-	} else {
-		colorhints = g_default_colors;
-	}
+    if ( messageboxdata->colorScheme ) {
+        colorhints = messageboxdata->colorScheme->colors;
+    } else {
+        colorhints = g_default_colors;
+    }
 
-	/* Convert our SDL_MessageBoxColor r,g,b values to packed RGB format. */
-	for ( i = 0; i < SDL_MESSAGEBOX_COLOR_MAX; i++ ) {
-		data->color[ i ] = SDL_MAKE_RGB( colorhints[ i ].r, colorhints[ i ].g, colorhints[ i ].b );
-	}
+    /* Convert our SDL_MessageBoxColor r,g,b values to packed RGB format. */
+    for ( i = 0; i < SDL_MESSAGEBOX_COLOR_MAX; i++ ) {
+        data->color[ i ] = SDL_MAKE_RGB( colorhints[ i ].r, colorhints[ i ].g, colorhints[ i ].b );
+    }
 
     return 0;
 }
@@ -358,7 +358,7 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
     data->event_mask = ExposureMask |
         ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask |
         StructureNotifyMask | FocusChangeMask | PointerMotionMask;
-	wnd_attr.event_mask = data->event_mask;
+    wnd_attr.event_mask = data->event_mask;
 
     data->window = XCreateWindow(
                             display, DefaultRootWindow( display ),
@@ -458,7 +458,7 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
 
         XSetForeground( display, ctx, ( data->mouse_over_index == i ) ?
                         data->color[ SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED ] :
-						data->color[ SDL_MESSAGEBOX_COLOR_TEXT ] );
+                        data->color[ SDL_MESSAGEBOX_COLOR_TEXT ] );
         XDrawString( display, window, ctx,
             buttondatax11->x + offset, buttondatax11->y + offset,
             buttondata->text, buttondatax11->length );
@@ -492,7 +492,7 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
         XEvent e;
         SDL_bool draw = SDL_TRUE;
 
-		XWindowEvent( data->display, data->window, data->event_mask, &e );
+        XWindowEvent( data->display, data->window, data->event_mask, &e );
 
         /* If XFilterEvent returns True, then some input method has filtered the
            event, and the client should discard the event. */
