@@ -539,6 +539,8 @@
 		AA75585D1595D4D800BBD41B /* SDL_video.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7557F81595D4D800BBD41B /* SDL_video.h */; };
 		AA75585E1595D4D800BBD41B /* SDL.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7557F91595D4D800BBD41B /* SDL.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AA75585F1595D4D800BBD41B /* SDL.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7557F91595D4D800BBD41B /* SDL.h */; };
+		AA9FF95A1637CBF9000DF050 /* SDL_messagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AA9FF9591637CBF9000DF050 /* SDL_messagebox.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		AA9FF95D1637CC82000DF050 /* SDL_x11messagebox.c in Sources */ = {isa = PBXBuildFile; fileRef = AA9FF95C1637CC82000DF050 /* SDL_x11messagebox.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -880,6 +882,8 @@
 		AA7557F71595D4D800BBD41B /* SDL_version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_version.h; sourceTree = "<group>"; };
 		AA7557F81595D4D800BBD41B /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_video.h; sourceTree = "<group>"; };
 		AA7557F91595D4D800BBD41B /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
+		AA9FF9591637CBF9000DF050 /* SDL_messagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_messagebox.h; sourceTree = "<group>"; };
+		AA9FF95C1637CC82000DF050 /* SDL_x11messagebox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11messagebox.c; sourceTree = "<group>"; };
 		BECDF66B0761BA81005FE872 /* Info-Framework.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Framework.plist"; sourceTree = "<group>"; };
 		BECDF66C0761BA81005FE872 /* SDL2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6B30761BA81005FE872 /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1053,13 +1057,14 @@
 			children = (
 				AA7557C71595D4D800BBD41B /* begin_code.h */,
 				AA7557C81595D4D800BBD41B /* close_code.h */,
+				AA7557F91595D4D800BBD41B /* SDL.h */,
 				AA7557C91595D4D800BBD41B /* SDL_assert.h */,
 				AA7557CA1595D4D800BBD41B /* SDL_atomic.h */,
 				AA7557CB1595D4D800BBD41B /* SDL_audio.h */,
 				AA7557CC1595D4D800BBD41B /* SDL_blendmode.h */,
 				AA7557CD1595D4D800BBD41B /* SDL_clipboard.h */,
-				AA7557CE1595D4D800BBD41B /* SDL_config_macosx.h */,
 				AA7557CF1595D4D800BBD41B /* SDL_config.h */,
+				AA7557CE1595D4D800BBD41B /* SDL_config_macosx.h */,
 				AA7557D01595D4D800BBD41B /* SDL_copying.h */,
 				AA7557D11595D4D800BBD41B /* SDL_cpuinfo.h */,
 				AA7557D21595D4D800BBD41B /* SDL_endian.h */,
@@ -1075,6 +1080,7 @@
 				AA7557DC1595D4D800BBD41B /* SDL_loadso.h */,
 				AA7557DD1595D4D800BBD41B /* SDL_log.h */,
 				AA7557DE1595D4D800BBD41B /* SDL_main.h */,
+				AA9FF9591637CBF9000DF050 /* SDL_messagebox.h */,
 				AA7557DF1595D4D800BBD41B /* SDL_mouse.h */,
 				AA7557E01595D4D800BBD41B /* SDL_mutex.h */,
 				AA7557E11595D4D800BBD41B /* SDL_name.h */,
@@ -1101,7 +1107,6 @@
 				AA7557F61595D4D800BBD41B /* SDL_types.h */,
 				AA7557F71595D4D800BBD41B /* SDL_version.h */,
 				AA7557F81595D4D800BBD41B /* SDL_video.h */,
-				AA7557F91595D4D800BBD41B /* SDL.h */,
 			);
 			name = "Public Headers";
 			path = ../../include;
@@ -1511,6 +1516,7 @@
 				0442EC5912FE1C60004C9285 /* SDL_x11framebuffer.h */,
 				04BDFFC212E6671800899322 /* SDL_x11keyboard.c */,
 				04BDFFC312E6671800899322 /* SDL_x11keyboard.h */,
+				AA9FF95C1637CC82000DF050 /* SDL_x11messagebox.c */,
 				04BDFFC412E6671800899322 /* SDL_x11modes.c */,
 				04BDFFC512E6671800899322 /* SDL_x11modes.h */,
 				04BDFFC612E6671800899322 /* SDL_x11mouse.c */,
@@ -1670,6 +1676,7 @@
 				AA7558241595D4D800BBD41B /* SDL_loadso.h in Headers */,
 				AA7558261595D4D800BBD41B /* SDL_log.h in Headers */,
 				AA7558281595D4D800BBD41B /* SDL_main.h in Headers */,
+				AA9FF95A1637CBF9000DF050 /* SDL_messagebox.h in Headers */,
 				AA75582A1595D4D800BBD41B /* SDL_mouse.h in Headers */,
 				AA75582C1595D4D800BBD41B /* SDL_mutex.h in Headers */,
 				AA75582E1595D4D800BBD41B /* SDL_name.h in Headers */,
@@ -2253,6 +2260,7 @@
 				566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */,
 				AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */,
 				AA628AD1159367F2005138DD /* SDL_x11xinput2.c in Sources */,
+				AA9FF95D1637CC82000DF050 /* SDL_x11messagebox.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
