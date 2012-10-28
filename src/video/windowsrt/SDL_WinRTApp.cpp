@@ -57,12 +57,8 @@ void SDL_WinRTApp::Load(Platform::String^ entryPoint)
 {
 }
 
-#include "SDL.h"
-
 void SDL_WinRTApp::Run()
 {
-    SDL_Init(0);
-
 	BasicTimer^ timer = ref new BasicTimer();
 
 	while (!m_windowClosed)
