@@ -158,7 +158,9 @@ typedef unsigned int uintptr_t;
 #define SDL_LOADSO_WINDOWS	1
 
 /* Enable various threading systems */
-#define SDL_THREAD_WINDOWS	1
+// TODO, WinRT: get threads working on WinRT
+#define SDL_THREADS_DISABLED    1
+//#define SDL_THREAD_WINDOWS	1
 
 /* Enable various timer systems */
 // TODO, WinRT: look into getting SDL's pre-WinRT timers working.
