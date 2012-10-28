@@ -28,7 +28,7 @@
 #include <stdio.h>
 #endif
 
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(__WINRT__)
 #include "core/windows/SDL_windows.h"
 #elif defined(__ANDROID__)
 #include <android/log.h>
@@ -280,7 +280,7 @@ static void
 SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
               const char *message)
 {
-#if defined(__WIN32__)
+#if defined(__WIN32__) || defined(__WINRT__)
     /* Way too many allocations here, urgh */
     {
         char *output;
