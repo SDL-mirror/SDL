@@ -2,6 +2,13 @@
 #include "SDL_WinRTApp.h"
 #include "BasicTimer.h"
 
+// HACK, DLudwig: The C-style main() will get loaded via the app's
+// WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
+// This seems wrong on some level, but does seem to work.
+typedef int (*SDL_WinRT_MainFunction)(int, char **);
+static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
+
+
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
@@ -59,6 +66,15 @@ void SDL_WinRTApp::Load(Platform::String^ entryPoint)
 
 void SDL_WinRTApp::Run()
 {
+    if (SDL_WinRT_main)
+    {
+        // TODO, WinRT: pass the C-style main() a reasonably realistic
+        // representation of command line arguments.
+        int argc = 0;
+        char **argv = NULL;
+        SDL_WinRT_main(argc, argv);
+    }
+
 	BasicTimer^ timer = ref new BasicTimer();
 
 	while (!m_windowClosed)
@@ -140,9 +156,10 @@ IFrameworkView^ Direct3DApplicationSource::CreateView()
     return ref new SDL_WinRTApp();
 }
 
-__declspec(dllexport) int SDL_WinRT_RunApplication(/*Platform::Array<Platform::String^>^*/)
+__declspec(dllexport) int SDL_WinRT_RunApplication(SDL_WinRT_MainFunction mainFunction)
 {
-	auto direct3DApplicationSource = ref new Direct3DApplicationSource();
+    SDL_WinRT_main = mainFunction;
+    auto direct3DApplicationSource = ref new Direct3DApplicationSource();
 	CoreApplication::Run(direct3DApplicationSource);
 	return 0;
 }
