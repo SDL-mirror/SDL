@@ -2,6 +2,9 @@
 
 #include "SDLmain_WinRT_common.h"
 #include "CubeRenderer.h"
+#include <vector>
+
+using namespace Windows::UI::Core;
 
 ref class SDL_WinRTApp sealed : public Windows::ApplicationModel::Core::IFrameworkView
 {
@@ -14,6 +17,10 @@ public:
 	virtual void Load(Platform::String^ entryPoint);
 	virtual void Run();
 	virtual void Uninitialize();
+
+internal:
+    // SDL-specific methods
+    SDL_DisplayMode GetMainDisplayMode();
 
 protected:
 	// Event Handlers.

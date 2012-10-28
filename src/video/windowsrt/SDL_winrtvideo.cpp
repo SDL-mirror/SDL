@@ -28,12 +28,15 @@
    was based off of SDL's "dummy" video driver.
  */
 
+extern "C" {
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
+}
 
+#include "SDL_WinRTApp.h"
 #include "SDL_winrtvideo.h"
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtframebuffer_c.h"
@@ -93,23 +96,16 @@ VideoBootStrap WINRT_bootstrap = {
     WINRT_Available, WINRT_CreateDevice
 };
 
+extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 int
 WINRT_VideoInit(_THIS)
 {
-    SDL_DisplayMode mode;
-
-    /* Use a fake 32-bpp desktop mode */
-    mode.format = SDL_PIXELFORMAT_RGB888;
-    mode.w = 1024;
-    mode.h = 768;
-    mode.refresh_rate = 0;
-    mode.driverdata = NULL;
+    SDL_DisplayMode mode = SDL_WinRTGlobalApp->GetMainDisplayMode();
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
 
-    SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     /* We're done! */

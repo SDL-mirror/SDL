@@ -2,11 +2,26 @@
 #include "SDL_WinRTApp.h"
 #include "BasicTimer.h"
 
+extern "C" {
+#include "SDL_assert.h"
+#include "SDL_stdinc.h"
+#include "../SDL_sysvideo.h"
+}
+
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
 // This seems wrong on some level, but does seem to work.
 typedef int (*SDL_WinRT_MainFunction)(int, char **);
 static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
+
+// HACK, DLudwig: record a reference to the global, Windows RT 'app'/view.
+// SDL/WinRT will use this throughout its code.
+//
+// TODO, WinRT: consider replacing SDL_WinRTGlobalApp with something
+// non-global, such as something created inside
+// SDL_InitSubSystem(SDL_INIT_VIDEO), or something inside
+// SDL_CreateWindow().
+SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
 
 using namespace Windows::ApplicationModel;
@@ -151,9 +166,30 @@ void SDL_WinRTApp::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 	// does not occur if the app was previously terminated.
 }
 
+SDL_DisplayMode SDL_WinRTApp::GetMainDisplayMode()
+{
+    SDL_DisplayMode mode;
+    SDL_zero(mode);
+    mode.format = SDL_PIXELFORMAT_RGB888;
+    mode.w = (int) CoreWindow::GetForCurrentThread()->Bounds.Width;
+    mode.h = (int) CoreWindow::GetForCurrentThread()->Bounds.Height;
+    mode.refresh_rate = 0;  // TODO, WinRT: see if refresh rate data is available, or relevant (for WinRT apps)
+    mode.driverdata = NULL;
+    return mode;
+}
+
 IFrameworkView^ Direct3DApplicationSource::CreateView()
 {
-    return ref new SDL_WinRTApp();
+    // TODO, WinRT: see if this function (CreateView) can ever get called
+    // more than once.  For now, just prevent it from ever assigning
+    // SDL_WinRTGlobalApp more than once.
+    SDL_assert(!SDL_WinRTGlobalApp);
+    SDL_WinRTApp ^ app = ref new SDL_WinRTApp();
+    if (!SDL_WinRTGlobalApp)
+    {
+        SDL_WinRTGlobalApp = app;
+    }
+    return app;
 }
 
 __declspec(dllexport) int SDL_WinRT_RunApplication(SDL_WinRT_MainFunction mainFunction)

@@ -5,3 +5,8 @@
 #include <DirectXMath.h>
 #include <memory>
 #include <agile.h>
+#include <vector>
+
+extern "C" {
+#include "../SDL_sysvideo.h"
+}

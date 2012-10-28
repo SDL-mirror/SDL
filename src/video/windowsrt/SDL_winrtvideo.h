@@ -23,7 +23,15 @@
 #ifndef _SDL_winrtvideo_h
 #define _SDL_winrtvideo_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "../SDL_sysvideo.h"
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SDL_winrtvideo_h */
 
