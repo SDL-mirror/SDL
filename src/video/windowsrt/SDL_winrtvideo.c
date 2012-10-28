@@ -50,12 +50,7 @@ static void WINRT_VideoQuit(_THIS);
 static int
 WINRT_Available(void)
 {
-    const char *envr = SDL_getenv("SDL_VIDEODRIVER");
-    if ((envr) && (SDL_strcmp(envr, WINRTVID_DRIVER_NAME) == 0)) {
-        return (1);
-    }
-
-    return (0);
+    return (1);
 }
 
 static void
