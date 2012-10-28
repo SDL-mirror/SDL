@@ -1168,7 +1168,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
             SDL_SetError("No OpenGL support in video driver");
             return NULL;
         }
-        SDL_GL_LoadLibrary(NULL);
+        if (SDL_GL_LoadLibrary(NULL) < 0) {
+            return NULL;
+        }
     }
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
     window->magic = &_this->window_magic;
