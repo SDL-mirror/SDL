@@ -169,7 +169,8 @@ typedef unsigned int uintptr_t;
 #define SDL_TIMERS_DISABLED	1
 
 /* Enable various video drivers */
-#define SDL_VIDEO_DRIVER_DUMMY	1
+#define SDL_VIDEO_DRIVER_WINRT	1
+#define SDL_VIDEO_DRIVER_DUMMY  1
 
 // TODO, WinRT: Get a Direct3D 11 based renderer working in SDL.
 

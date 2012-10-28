@@ -125,6 +125,9 @@
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</CompileAsWinRT>
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</CompileAsWinRT>
     </ClCompile>
+    <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtevents.c" />
+    <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtframebuffer.c" />
+    <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtvideo.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\begin_code.h" />
@@ -234,6 +237,9 @@
     <ClInclude Include="..\..\src\video\windowsrt\DirectXHelper.h" />
     <ClInclude Include="..\..\src\video\windowsrt\SDLmain_WinRT_common.h" />
     <ClInclude Include="..\..\src\video\windowsrt\SDL_WinRTApp.h" />
+    <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtevents_c.h" />
+    <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtframebuffer_c.h" />
+    <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtvideo.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{aeaea3a2-d4e6-45b1-8ec6-53d84287fc14}</ProjectGuid>
