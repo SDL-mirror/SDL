@@ -1,6 +1,5 @@
 ﻿#include "SDLmain_WinRT_common.h"
 #include "SDL_WinRTApp.h"
-#include "BasicTimer.h"
 
 extern "C" {
 #include "SDL_assert.h"
@@ -90,15 +89,12 @@ void SDL_WinRTApp::Run()
         SDL_WinRT_main(argc, argv);
     }
 
-	BasicTimer^ timer = ref new BasicTimer();
-
 	while (!m_windowClosed)
 	{
 		if (m_windowVisible)
 		{
-			timer->Update();
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			m_renderer->Update(timer->Total, timer->Delta);
+			m_renderer->Update(0.0f, 0.0f);
 			m_renderer->Render();
 			m_renderer->Present(); // This call is synchronized to the display frame rate.
 		}

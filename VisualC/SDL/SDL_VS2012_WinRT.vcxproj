@@ -238,7 +238,6 @@
     <ClInclude Include="..\..\src\video\SDL_RLEaccel_c.h" />
     <ClInclude Include="..\..\src\video\SDL_shape_internals.h" />
     <ClInclude Include="..\..\src\video\SDL_sysvideo.h" />
-    <ClInclude Include="..\..\src\video\windowsrt\BasicTimer.h" />
     <ClInclude Include="..\..\src\video\windowsrt\CubeRenderer.h" />
     <ClInclude Include="..\..\src\video\windowsrt\Direct3DBase.h" />
     <ClInclude Include="..\..\src\video\windowsrt\DirectXHelper.h" />
