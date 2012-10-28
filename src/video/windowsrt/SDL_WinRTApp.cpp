@@ -57,8 +57,12 @@ void SDL_WinRTApp::Load(Platform::String^ entryPoint)
 {
 }
 
+#include "SDL.h"
+
 void SDL_WinRTApp::Run()
 {
+    SDL_Init(0);
+
 	BasicTimer^ timer = ref new BasicTimer();
 
 	while (!m_windowClosed)
@@ -140,7 +144,7 @@ IFrameworkView^ Direct3DApplicationSource::CreateView()
     return ref new SDL_WinRTApp();
 }
 
-int SDL_WinRT_RunApplication(/*Platform::Array<Platform::String^>^*/)
+__declspec(dllexport) int SDL_WinRT_RunApplication(/*Platform::Array<Platform::String^>^*/)
 {
 	auto direct3DApplicationSource = ref new Direct3DApplicationSource();
 	CoreApplication::Run(direct3DApplicationSource);
