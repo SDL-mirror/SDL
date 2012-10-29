@@ -41,6 +41,8 @@ extern "C" {
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtframebuffer_c.h"
 
+extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
+
 #define WINRTVID_DRIVER_NAME "dummy"
 
 /* Initialization/Query functions */
@@ -95,8 +97,6 @@ VideoBootStrap WINRT_bootstrap = {
     WINRTVID_DRIVER_NAME, "SDL Windows RT video driver",
     WINRT_Available, WINRT_CreateDevice
 };
-
-extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 int
 WINRT_VideoInit(_THIS)

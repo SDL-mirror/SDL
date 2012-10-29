@@ -5,6 +5,8 @@ extern "C" {
 #include "SDL_assert.h"
 #include "SDL_stdinc.h"
 #include "../SDL_sysvideo.h"
+#include "../../events/SDL_mouse_c.h"
+#include "SDL_events.h"
 }
 
 // HACK, DLudwig: The C-style main() will get loaded via the app's
@@ -68,6 +70,9 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
 	window->PointerPressed +=
 		ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerPressed);
 
+    window->PointerReleased +=
+		ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerReleased);
+
 	window->PointerMoved +=
 		ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerMoved);
 
@@ -129,7 +134,14 @@ void SDL_WinRTApp::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 
 void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 {
-	// Insert your code here.
+    // TODO, WinRT: consider attaching the SDL_Window to the mouse down button event
+	SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+}
+
+void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
+{
+    // TODO, WinRT: consider attaching the SDL_Window to the mouse up button event
+	SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
 }
 
 void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
