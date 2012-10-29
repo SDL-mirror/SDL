@@ -7,6 +7,7 @@ extern "C" {
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_mouse_c.h"
 #include "SDL_events.h"
+#include "SDL_log.h"
 }
 
 // HACK, DLudwig: The C-style main() will get loaded via the app's
@@ -36,7 +37,8 @@ using namespace concurrency;
 
 SDL_WinRTApp::SDL_WinRTApp() :
 	m_windowClosed(false),
-	m_windowVisible(true)
+	m_windowVisible(true),
+    m_sdlWindowData(NULL)
 {
 }
 
@@ -134,19 +136,26 @@ void SDL_WinRTApp::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 
 void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 {
-    // TODO, WinRT: consider attaching the SDL_Window to the mouse down button event
-	SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+    if (m_sdlWindowData)
+    {
+    	SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_PRESSED, SDL_BUTTON_LEFT);
+    }
 }
 
 void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
 {
-    // TODO, WinRT: consider attaching the SDL_Window to the mouse up button event
-	SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+    if (m_sdlWindowData)
+    {
+    	SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_RELEASED, SDL_BUTTON_LEFT);
+    }
 }
 
 void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
 {
-	// Insert your code here.
+    if (m_sdlWindowData)
+    {
+        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, (int)args->CurrentPoint->Position.X, (int)args->CurrentPoint->Position.Y);
+    }
 }
 
 void SDL_WinRTApp::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
@@ -187,6 +196,11 @@ SDL_DisplayMode SDL_WinRTApp::GetMainDisplayMode()
     mode.refresh_rate = 0;  // TODO, WinRT: see if refresh rate data is available, or relevant (for WinRT apps)
     mode.driverdata = NULL;
     return mode;
+}
+
+void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData* windowData)
+{
+    m_sdlWindowData = windowData;
 }
 
 IFrameworkView^ Direct3DApplicationSource::CreateView()

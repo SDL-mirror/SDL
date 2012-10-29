@@ -33,6 +33,11 @@ extern "C" {
 }
 #endif
 
+struct SDL_WindowData
+{
+    SDL_Window *sdlWindow;
+};
+
 #endif /* _SDL_winrtvideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

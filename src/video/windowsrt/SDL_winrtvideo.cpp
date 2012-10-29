@@ -41,6 +41,11 @@ extern "C" {
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtframebuffer_c.h"
 
+/* On Windows, windows.h defines CreateWindow */
+#ifdef CreateWindow
+#undef CreateWindow
+#endif
+
 extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 #define WINRTVID_DRIVER_NAME "dummy"
@@ -49,6 +54,10 @@ extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 static int WINRT_VideoInit(_THIS);
 static int WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 static void WINRT_VideoQuit(_THIS);
+
+/* Window functions */
+static int WINRT_CreateWindow(_THIS, SDL_Window * window);
+static void WINRT_DestroyWindow(_THIS, SDL_Window * window);
 
 /* WinRT driver bootstrap functions */
 
@@ -82,6 +91,8 @@ WINRT_CreateDevice(int devindex)
     /* Set the function pointers */
     device->VideoInit = WINRT_VideoInit;
     device->VideoQuit = WINRT_VideoQuit;
+    device->CreateWindow = WINRT_CreateWindow;
+    device->DestroyWindow = WINRT_DestroyWindow;
     device->SetDisplayMode = WINRT_SetDisplayMode;
     device->PumpEvents = WINRT_PumpEvents;
     device->CreateWindowFramebuffer = SDL_WINRT_CreateWindowFramebuffer;
@@ -122,6 +133,39 @@ void
 WINRT_VideoQuit(_THIS)
 {
 }
+
+int
+WINRT_CreateWindow(_THIS, SDL_Window * window)
+{
+    // TODO, WinRT: modify WINRT_Createwindow to ensure that, for now, only one window gets created
+    // (until multimonitor support is added to the WinRT port).
+
+    SDL_WindowData *data;
+    data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
+    if (!data) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    SDL_zerop(data);
+    data->sdlWindow = window;
+
+    /* Adjust the window data to match the screen */
+    window->x = 0;
+    window->y = 0;
+    window->w = _this->displays->desktop_mode.w;
+    window->h = _this->displays->desktop_mode.h;
+
+    SDL_WinRTGlobalApp->SetSDLWindowData(data);
+
+    return 0;
+}
+
+void
+WINRT_DestroyWindow(_THIS, SDL_Window * window)
+{
+    SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
+}
+
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */
 

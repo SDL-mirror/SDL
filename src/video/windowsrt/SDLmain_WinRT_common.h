@@ -10,3 +10,6 @@
 extern "C" {
 #include "../SDL_sysvideo.h"
 }
+
+#include "SDL_winrtvideo.h"
+

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "SDLmain_WinRT_common.h"
+#include "SDL_winrtvideo.h"
 #include "CubeRenderer.h"
 #include <vector>
 
@@ -22,6 +23,7 @@ internal:
     // SDL-specific methods
     SDL_DisplayMode GetMainDisplayMode();
     void PumpEvents();
+    void SetSDLWindowData(const SDL_WindowData* windowData);
 
 protected:
 	// Event Handlers.
@@ -40,6 +42,7 @@ private:
 	CubeRenderer^ m_renderer;
 	bool m_windowClosed;
 	bool m_windowVisible;
+    const SDL_WindowData* m_sdlWindowData;
 };
 
 ref class Direct3DApplicationSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
