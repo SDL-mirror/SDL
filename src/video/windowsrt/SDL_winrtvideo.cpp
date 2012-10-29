@@ -137,8 +137,13 @@ WINRT_VideoQuit(_THIS)
 int
 WINRT_CreateWindow(_THIS, SDL_Window * window)
 {
-    // TODO, WinRT: modify WINRT_Createwindow to ensure that, for now, only one window gets created
-    // (until multimonitor support is added to the WinRT port).
+    // Make sure that only one window gets created, at least until multimonitor
+    // support is added.
+    if (SDL_WinRTGlobalApp->HasSDLWindowData())
+    {
+        SDL_SetError("WinRT only supports one window");
+        return -1;
+    }
 
     SDL_WindowData *data;
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
@@ -163,7 +168,10 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
 void
 WINRT_DestroyWindow(_THIS, SDL_Window * window)
 {
-    SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
+    if (SDL_WinRTGlobalApp->HasSDLWindowData())
+    {
+        SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
+    }
 }
 
 

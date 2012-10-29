@@ -23,6 +23,7 @@ internal:
     // SDL-specific methods
     SDL_DisplayMode GetMainDisplayMode();
     void PumpEvents();
+    bool HasSDLWindowData() const;
     void SetSDLWindowData(const SDL_WindowData* windowData);
 
 protected:
