@@ -21,6 +21,7 @@ public:
 internal:
     // SDL-specific methods
     SDL_DisplayMode GetMainDisplayMode();
+    void PumpEvents();
 
 protected:
 	// Event Handlers.

@@ -22,18 +22,18 @@
 
 #if SDL_VIDEO_DRIVER_WINRT
 
-/* Being a null driver, there's no event stream. We just define stubs for
-   most of the API. */
-
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_winrtvideo.h"
 #include "SDL_winrtevents_c.h"
+#include "SDL_WinRTApp.h"
+
+extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 void
 WINRT_PumpEvents(_THIS)
 {
-    /* do nothing. */
+    SDL_WinRTGlobalApp->PumpEvents();
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */

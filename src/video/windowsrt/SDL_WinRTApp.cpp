@@ -88,8 +88,11 @@ void SDL_WinRTApp::Run()
         char **argv = NULL;
         SDL_WinRT_main(argc, argv);
     }
+}
 
-	while (!m_windowClosed)
+void SDL_WinRTApp::PumpEvents()
+{
+	if (!m_windowClosed)
 	{
 		if (m_windowVisible)
 		{
