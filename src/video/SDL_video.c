@@ -2844,6 +2844,9 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
 #if SDL_VIDEO_DRIVER_COCOA
 #include "cocoa/SDL_cocoamessagebox.h"
 #endif
+#if SDL_VIDEO_DRIVER_UIKIT
+#include "uikit/SDL_uikitmessagebox.h"
+#endif
 #if SDL_VIDEO_DRIVER_X11
 #include "x11/SDL_x11messagebox.h"
 #endif
@@ -2865,6 +2868,11 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     /* It's completely fine to call this function before video is initialized */
 #if SDL_VIDEO_DRIVER_COCOA
     if (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+#if SDL_VIDEO_DRIVER_UIKIT
+    if (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0) {
         return 0;
     }
 #endif

@@ -157,6 +157,8 @@
 		AA7558CA1595D55500BBD41B /* SDL.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558971595D55500BBD41B /* SDL.h */; };
 		AA9781C91576A7FA00472542 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FD6526630DE8FCCB002AD96B /* libSDL2.a */; };
 		AA9FF9511637C6E5000DF050 /* SDL_messagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AA9FF9501637C6E5000DF050 /* SDL_messagebox.h */; };
+		AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */; };
+		AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */; };
 		FD3F4A760DEA620800C5B771 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A700DEA620800C5B771 /* SDL_getenv.c */; };
 		FD3F4A770DEA620800C5B771 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A710DEA620800C5B771 /* SDL_iconv.c */; };
 		FD3F4A780DEA620800C5B771 /* SDL_malloc.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A720DEA620800C5B771 /* SDL_malloc.c */; };
@@ -412,6 +414,8 @@
 		AA7558961595D55500BBD41B /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_video.h; sourceTree = "<group>"; };
 		AA7558971595D55500BBD41B /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
 		AA9FF9501637C6E5000DF050 /* SDL_messagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_messagebox.h; sourceTree = "<group>"; };
+		AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitmessagebox.h; sourceTree = "<group>"; };
+		AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmessagebox.m; sourceTree = "<group>"; };
 		FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitview.h; sourceTree = "<group>"; };
 		FD3F4A700DEA620800C5B771 /* SDL_getenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_getenv.c; sourceTree = "<group>"; };
 		FD3F4A710DEA620800C5B771 /* SDL_iconv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_iconv.c; sourceTree = "<group>"; };
@@ -854,6 +858,8 @@
 				FD689FCC0E26E9D400F90B21 /* SDL_uikitappdelegate.m */,
 				FD689F0C0E26E5D900F90B21 /* SDL_uikitevents.h */,
 				FD689F0D0E26E5D900F90B21 /* SDL_uikitevents.m */,
+				AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */,
+				AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */,
 				AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */,
 				AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */,
 				FD689F0E0E26E5D900F90B21 /* SDL_uikitopengles.h */,
@@ -1252,6 +1258,7 @@
 				AA126AD41617C5E7005ABC8F /* SDL_uikitmodes.h in Headers */,
 				AA704DD6162AA90A0076D1C1 /* SDL_dropevents_c.h in Headers */,
 				AA9FF9511637C6E5000DF050 /* SDL_messagebox.h in Headers */,
+				AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1470,6 +1477,7 @@
 				AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */,
 				AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */,
 				AA704DD7162AA90A0076D1C1 /* SDL_dropevents.c in Sources */,
+				AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
