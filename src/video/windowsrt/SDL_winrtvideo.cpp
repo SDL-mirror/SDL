@@ -168,7 +168,8 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
 void
 WINRT_DestroyWindow(_THIS, SDL_Window * window)
 {
-    if (SDL_WinRTGlobalApp->HasSDLWindowData())
+    if (SDL_WinRTGlobalApp->HasSDLWindowData() &&
+        SDL_WinRTGlobalApp->GetSDLWindowData()->sdlWindow == window)
     {
         SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
     }

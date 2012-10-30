@@ -198,6 +198,11 @@ SDL_DisplayMode SDL_WinRTApp::GetMainDisplayMode()
     return mode;
 }
 
+const SDL_WindowData * SDL_WinRTApp::GetSDLWindowData() const
+{
+    return m_sdlWindowData;
+}
+
 bool SDL_WinRTApp::HasSDLWindowData() const
 {
     return (m_sdlWindowData != NULL);
