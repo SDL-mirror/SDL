@@ -35,6 +35,7 @@
 #endif
 
 #define DEFAULT_PRIORITY                SDL_LOG_PRIORITY_CRITICAL
+#define DEFAULT_ASSERT_PRIORITY         SDL_LOG_PRIORITY_WARN
 #define DEFAULT_APPLICATION_PRIORITY    SDL_LOG_PRIORITY_INFO
 
 typedef struct SDL_LogLevel
@@ -50,8 +51,9 @@ static void SDL_LogOutput(void *userdata,
                           const char *message);
 
 static SDL_LogLevel *SDL_loglevels;
-static SDL_LogPriority SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
 static SDL_LogPriority SDL_default_priority = DEFAULT_PRIORITY;
+static SDL_LogPriority SDL_assert_priority = DEFAULT_ASSERT_PRIORITY;
+static SDL_LogPriority SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
 static SDL_LogOutputFunction SDL_log_function = SDL_LogOutput;
 static void *SDL_log_userdata = NULL;
 
@@ -95,7 +97,9 @@ SDL_LogSetAllPriority(SDL_LogPriority priority)
     for (entry = SDL_loglevels; entry; entry = entry->next) {
         entry->priority = priority;
     }
-    SDL_application_priority = SDL_default_priority = priority;
+    SDL_default_priority = priority;
+    SDL_assert_priority = priority;
+    SDL_application_priority = priority;
 }
 
 void
@@ -133,6 +137,8 @@ SDL_LogGetPriority(int category)
 
     if (category == SDL_LOG_CATEGORY_APPLICATION) {
         return SDL_application_priority;
+    } else if (category == SDL_LOG_CATEGORY_ASSERT) {
+        return SDL_assert_priority;
     } else {
         return SDL_default_priority;
     }
@@ -149,8 +155,9 @@ SDL_LogResetPriorities(void)
         SDL_free(entry);
     }
 
-    SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
     SDL_default_priority = DEFAULT_PRIORITY;
+    SDL_assert_priority = DEFAULT_ASSERT_PRIORITY;
+    SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
 }
 
 void
@@ -301,6 +308,19 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
 
         SDL_snprintf(tag, SDL_arraysize(tag), "SDL/%s", GetCategoryPrefix(category));
         __android_log_write(SDL_android_priority[priority], tag, message);
+    }
+#elif defined(__APPLE__)
+    extern void SDL_NSLog(const char *text);
+    {
+        char *text;
+
+        text = SDL_stack_alloc(char, SDL_MAX_LOG_MESSAGE);
+        if (text) {
+            SDL_snprintf(text, SDL_MAX_LOG_MESSAGE, "%s: %s", SDL_priority_prefixes[priority], message);
+            SDL_NSLog(text);
+            SDL_stack_free(text);
+            return;
+        }
     }
 #endif
 #if HAVE_STDIO_H
