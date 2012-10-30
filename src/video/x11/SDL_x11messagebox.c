@@ -308,7 +308,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
             data->buttonpos[ i ].y = y + ( button_height - button_text_height - 1 ) / 2 + button_text_height;
 
             /* Scoot over for next button. */
-            x += button_width + button_text_height;
+            x += button_width + button_spacing;
         }
     }
 
