@@ -111,6 +111,11 @@ typedef struct
  *
  *  \return -1 on error, otherwise 0 and buttonid contains user id of button
  *          hit or -1 if dialog was closed.
+ *
+ *  \note This function should be called on the thread that created the parent
+ *        window, or on the main thread if the messagebox has no parent.  It will
+ *        block execution of that thread until the user clicks a button or
+ *        closes the messagebox.
  */
 extern DECLSPEC int SDLCALL SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
@@ -123,6 +128,8 @@ extern DECLSPEC int SDLCALL SDL_ShowMessageBox(const SDL_MessageBoxData *message
  *  \param window   The parent window, or NULL for no parent
  *
  *  \return 0 on success, -1 on error
+ *
+ *  \sa SDL_ShowMessageBox
  */
 extern DECLSPEC int SDLCALL SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, SDL_Window *window);
 
