@@ -26,6 +26,7 @@
 #include <altivec.h>
 #undef bool
 #undef vector
+#undef pixel
 #endif
 
 #include "SDL.h"
