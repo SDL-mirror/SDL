@@ -22,7 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
-#include "SDL.h"
+#include "SDL_messagebox.h"
 #include "SDL_cocoavideo.h"
 
 
