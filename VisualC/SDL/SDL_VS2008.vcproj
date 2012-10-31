@@ -1217,6 +1217,14 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\video\windows\SDL_windowsmessagebox.c"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\video\windows\SDL_windowsmessagebox.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\video\windows\SDL_windowsmodes.c"
 			>
 		</File>
