@@ -57,11 +57,7 @@ extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 #endif /* __IPHONEOS__ */
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*
-/* Platform specific functions for Android 
-/*
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Platform specific functions for Android */
 #if __ANDROID__
 
 /* Get the JNI environment for the current thread
