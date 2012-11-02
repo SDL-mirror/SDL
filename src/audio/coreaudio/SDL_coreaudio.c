@@ -340,9 +340,10 @@ COREAUDIO_CloseDevice(_THIS)
                                           scope, bus, &callback,
                                           sizeof(callback));
 
-            /* !!! FIXME: how does iOS free this? */
             #if MACOSX_COREAUDIO
             CloseComponent(this->hidden->audioUnit);
+            #else
+            AudioComponentInstanceDispose(this->hidden->audioUnit);
             #endif
 
             this->hidden->audioUnitOpened = 0;
