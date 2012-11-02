@@ -37,6 +37,8 @@
 int
 Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
+    Cocoa_RegisterApp();
+
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     NSAlert* alert = [[NSAlert alloc] init];
