@@ -12,29 +12,10 @@
          directory under src matching the package, e.g.
          	src/com/gamemaker/game/MyGame.java
 
-        /**********************************************************/
-	package com.gamemaker.game;
+         then replace "SDLActivity" with the name of your class (e.g. "MyGame")
+         in the XML below.
 
-	import org.libsdl.app.SDLActivity; 
-	import android.os.*; 
-
-	/* 
-	 * A sample wrapper class that just calls SDLActivity 
-	 */ 
-
-	public class MyGame extends SDLActivity { 
-	    protected void onCreate(Bundle savedInstanceState) { 
-	        super.onCreate(savedInstanceState); 
-	    } 
-	   
-	    protected void onDestroy() { 
-	        super.onDestroy(); 
-	    } 
-	}
-        /**********************************************************/
-
-         then replace "SDLActivity" in the XML below with the name of
-         your class, e.g. "MyGame" ...
+         An example Java class can be found in README.android
     -->
     <application android:label="@string/app_name"
                  android:icon="@drawable/icon"
