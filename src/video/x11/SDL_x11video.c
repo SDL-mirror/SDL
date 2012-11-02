@@ -370,6 +370,7 @@ X11_VideoInit(_THIS)
 
     /* Look up some useful Atoms */
 #define GET_ATOM(X) data->X = XInternAtom(data->display, #X, False)
+    GET_ATOM(WM_PROTOCOLS);
     GET_ATOM(WM_DELETE_WINDOW);
     GET_ATOM(_NET_WM_STATE);
     GET_ATOM(_NET_WM_STATE_HIDDEN);

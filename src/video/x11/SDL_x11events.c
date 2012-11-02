@@ -386,7 +386,8 @@ X11_DispatchEvent(_THIS)
 
         /* Have we been requested to quit (or another client message?) */
     case ClientMessage:{
-            if ((xevent.xclient.format == 32) &&
+            if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
+                (xevent.xclient.format == 32) &&
                 (xevent.xclient.data.l[0] == videodata->WM_DELETE_WINDOW)) {
 
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
