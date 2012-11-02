@@ -734,7 +734,7 @@ class DummyEdit extends View implements View.OnKeyListener {
         ic = new SDLInputConnection(this, true);
 
         outAttrs.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI
-                | EditorInfo.IME_FLAG_NO_FULLSCREEN;
+                | 33554432 /* API 11: EditorInfo.IME_FLAG_NO_FULLSCREEN */;
 
         return ic;
     }
