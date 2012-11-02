@@ -43,11 +43,7 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/*
-/* Platform specific functions for iOS 
-/*
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Platform specific functions for iOS */
 #if __IPHONEOS__
 
 extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
