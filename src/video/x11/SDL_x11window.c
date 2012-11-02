@@ -536,8 +536,14 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                     PropModeReplace,
                     (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
 
-    /* Allow the window to be deleted by the window manager */
-    XSetWMProtocols(display, w, &data->WM_DELETE_WINDOW, 1);
+    
+    {
+        Atom protocols[] = {
+            data->WM_DELETE_WINDOW, /* Allow window to be deleted by the WM */
+            data->_NET_WM_PING, /* Respond so WM knows we're alive */
+        };
+        XSetWMProtocols(display, w, protocols, sizeof (protocols) / sizeof (protocols[0]));
+    }
 
     if (SetupWindowData(_this, window, w, SDL_TRUE) < 0) {
         XDestroyWindow(display, w);

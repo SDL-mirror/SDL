@@ -383,6 +383,7 @@ X11_VideoInit(_THIS)
     GET_ATOM(_NET_WM_NAME);
     GET_ATOM(_NET_WM_ICON_NAME);
     GET_ATOM(_NET_WM_ICON);
+    GET_ATOM(_NET_WM_PING);
     GET_ATOM(UTF8_STRING);
 
     /* Detect the window manager */
