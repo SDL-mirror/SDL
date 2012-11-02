@@ -24,6 +24,7 @@
 
 #ifdef __ANDROID__
 
+#include "SDL_system.h"
 #include "SDL_android.h"
 
 extern "C" {
@@ -963,8 +964,6 @@ extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
 
 /*extern "C" int Android_JNI_HideTextInput()
 {
-
-
     JNIEnv *env = Android_JNI_GetEnv();
     if (!env) {
         return -1;
@@ -977,6 +976,155 @@ extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
     env->CallStaticVoidMethod(mActivityClass, mid);
     return 0;
 }*/
+
+//////////////////////////////////////////////////////////////////////////////
+//
+// Functions exposed to SDL applications in SDL_system.h
+//
+
+extern "C" void *SDL_AndroidGetJNIEnv()
+{
+    return Android_JNI_GetEnv();
+}
+
+extern "C" void *SDL_AndroidGetActivity()
+{
+    LocalReferenceHolder refs;
+    jmethodID mid;
+
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return NULL;
+    }
+
+    // return SDLActivity.getContext();
+    mid = env->GetStaticMethodID(mActivityClass,
+            "getContext","()Landroid/content/Context;");
+    return env->CallStaticObjectMethod(mActivityClass, mid);
+}
+
+extern "C" const char * SDL_AndroidGetInternalStoragePath()
+{
+    static char *s_AndroidInternalFilesPath = NULL;
+
+    if (!s_AndroidInternalFilesPath) {
+        LocalReferenceHolder refs;
+        jmethodID mid;
+        jobject context;
+        jobject fileObject;
+        jstring pathString;
+        const char *path;
+
+        JNIEnv *env = Android_JNI_GetEnv();
+        if (!refs.init(env)) {
+            return NULL;
+        }
+
+        // context = SDLActivity.getContext();
+        mid = env->GetStaticMethodID(mActivityClass,
+                "getContext","()Landroid/content/Context;");
+        context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+        // fileObj = context.getFilesDir();
+        mid = env->GetMethodID(env->GetObjectClass(context),
+                "getFilesDir", "()Ljava/io/File;");
+        fileObject = env->CallObjectMethod(context, mid);
+        if (!fileObject) {
+            SDL_SetError("Couldn't get internal directory");
+            return NULL;
+        }
+
+        // path = fileObject.getAbsolutePath();
+        mid = env->GetMethodID(env->GetObjectClass(fileObject),
+                "getAbsolutePath", "()Ljava/lang/String;");
+        pathString = (jstring)env->CallObjectMethod(fileObject, mid);
+
+        path = env->GetStringUTFChars(pathString, NULL);
+        s_AndroidInternalFilesPath = SDL_strdup(path);
+        env->ReleaseStringUTFChars(pathString, path);
+    }
+    return s_AndroidInternalFilesPath;
+}
+
+extern "C" int SDL_AndroidGetExternalStorageState()
+{
+    LocalReferenceHolder refs;
+    jmethodID mid;
+    jclass cls;
+    jstring stateString;
+    const char *state;
+    int stateFlags;
+
+    JNIEnv *env = Android_JNI_GetEnv();
+    if (!refs.init(env)) {
+        return 0;
+    }
+
+    cls = env->FindClass("android/os/Environment");
+    mid = env->GetStaticMethodID(cls,
+            "getExternalStorageState", "()Ljava/lang/String;");
+    stateString = (jstring)env->CallStaticObjectMethod(cls, mid);
+
+    state = env->GetStringUTFChars(stateString, NULL);
+
+    // Print an info message so people debugging know the storage state
+    __android_log_print(ANDROID_LOG_INFO, "SDL", "external storage state: %s", state);
+
+    if (SDL_strcmp(state, "mounted") == 0) {
+        stateFlags = SDL_ANDROID_EXTERNAL_STORAGE_READ |
+                     SDL_ANDROID_EXTERNAL_STORAGE_WRITE;
+    } else if (SDL_strcmp(state, "mounted_ro") == 0) {
+        stateFlags = SDL_ANDROID_EXTERNAL_STORAGE_READ;
+    } else {
+        stateFlags = 0;
+    }
+    env->ReleaseStringUTFChars(stateString, state);
+
+    return stateFlags;
+}
+
+extern "C" const char * SDL_AndroidGetExternalStoragePath()
+{
+    static char *s_AndroidExternalFilesPath = NULL;
+
+    if (!s_AndroidExternalFilesPath) {
+        LocalReferenceHolder refs;
+        jmethodID mid;
+        jobject context;
+        jobject fileObject;
+        jstring pathString;
+        const char *path;
+
+        JNIEnv *env = Android_JNI_GetEnv();
+        if (!refs.init(env)) {
+            return NULL;
+        }
+
+        // context = SDLActivity.getContext();
+        mid = env->GetStaticMethodID(mActivityClass,
+                "getContext","()Landroid/content/Context;");
+        context = env->CallStaticObjectMethod(mActivityClass, mid);
+
+        // fileObj = context.getExternalFilesDir();
+        mid = env->GetMethodID(env->GetObjectClass(context),
+                "getExternalFilesDir", "(Ljava/lang/String;)Ljava/io/File;");
+        fileObject = env->CallObjectMethod(context, mid, NULL);
+        if (!fileObject) {
+            SDL_SetError("Couldn't get external directory");
+            return NULL;
+        }
+
+        // path = fileObject.getAbsolutePath();
+        mid = env->GetMethodID(env->GetObjectClass(fileObject),
+                "getAbsolutePath", "()Ljava/lang/String;");
+        pathString = (jstring)env->CallObjectMethod(fileObject, mid);
+
+        path = env->GetStringUTFChars(pathString, NULL);
+        s_AndroidExternalFilesPath = SDL_strdup(path);
+        env->ReleaseStringUTFChars(pathString, path);
+    }
+    return s_AndroidExternalFilesPath;
+}
 
 #endif /* __ANDROID__ */
 
