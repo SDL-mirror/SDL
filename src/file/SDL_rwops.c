@@ -427,6 +427,17 @@ SDL_RWFromFile(const char *file, const char *mode)
         return NULL;
     }
 #if defined(ANDROID)
+#ifdef HAVE_STDIO_H
+    /* Try to open the file on the filesystem first */
+    {
+        FILE *fp = fopen(file, mode);
+        if (fp) {
+            return SDL_RWFromFP(fp, 1);
+        }
+    }
+#endif
+
+    /* Try to open the file from the asset system */
     rwops = SDL_AllocRW();
     if (!rwops)
         return NULL;            /* SDL_SetError already setup by SDL_AllocRW() */
