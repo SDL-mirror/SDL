@@ -1204,6 +1204,12 @@ CommonEvent(CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
+        case SDLK_1:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Test Message", "You're awesome!", window);
+            }
+            break;
         case SDLK_ESCAPE:
             *done = 1;
             break;

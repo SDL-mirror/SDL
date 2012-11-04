@@ -59,12 +59,14 @@ extern "C" {
  *  \brief The predefined log categories
  *
  *  By default the application category is enabled at the INFO level,
- *  and all other categories are enabled at the CRITICAL level.
+ *  the assert category is enabled at the WARN level, and all other
+ *  categories are enabled at the CRITICAL level.
  */
 enum
 {
     SDL_LOG_CATEGORY_APPLICATION,
     SDL_LOG_CATEGORY_ERROR,
+    SDL_LOG_CATEGORY_ASSERT,
     SDL_LOG_CATEGORY_SYSTEM,
     SDL_LOG_CATEGORY_AUDIO,
     SDL_LOG_CATEGORY_VIDEO,

@@ -22,8 +22,9 @@
 #import <UIKit/UIKit.h>
 #import "SDL_uikitviewcontroller.h"
 
+#include "SDL_touch.h"
+
 #define IPHONE_TOUCH_EFFICIENT_DANGEROUS
-#define FIXED_MULTITOUCH
 
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
 #define MAX_SIMULTANEOUS_TOUCHES 5
@@ -35,11 +36,10 @@
 @interface SDL_uikitview : UIView {
 #endif
 
-#ifdef FIXED_MULTITOUCH
-    long touchId;
+    SDL_TouchID touchId;
+    SDL_FingerID leftFingerDown;
 #ifndef IPHONE_TOUCH_EFFICIENT_DANGEROUS
     UITouch *finger[MAX_SIMULTANEOUS_TOUCHES];
-#endif
 #endif
 
 #if SDL_IPHONE_KEYBOARD

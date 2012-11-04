@@ -39,18 +39,16 @@ src/main/android/SDL_android_main.cpp
 
 Instructions:
 1. Copy the android-project directory wherever you want to keep your projects and rename it to the name of your project.
-2. Move this SDL directory into the <project>/jni directory and then copy
-SDL_config_android.h to SDL_config.h inside the include folder
-3. Place your application source files in the <project>/jni/src directory
-4. Edit <project>/jni/src/Android.mk to include your source files
-5. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
+2. Move or symlink this SDL directory into the <project>/jni directory
+3. Edit <project>/jni/src/Android.mk to include your source files
+4. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
 
 If you want to use the Eclipse IDE, skip to the Eclipse section below.
 
-6. Edit <project>/local.properties to point to the Android SDK directory
-7. Run 'ant debug' in android/project. This compiles the .java and eventually 
+5. Edit <project>/local.properties to point to the Android SDK directory
+6. Run 'ant debug' in android/project. This compiles the .java and eventually 
 creates a .apk with the native code embedded
-8. 'ant install' will push the apk to the device or emulator (if connected)
+7. 'ant install' will push the apk to the device or emulator (if connected)
 
 Here's an explanation of the files in the Android project, so you can customize them:
 
@@ -72,6 +70,58 @@ android-project/
 	res/values/strings.xml	- strings used in your application, including the application name shown on the phone.
 	src/org/libsdl/app/SDLActivity.java	- the Java class handling the initialization and binding to SDL.  Be very careful changing this, as the SDL library relies on this implementation.
 
+
+================================================================================
+ Customizing your application name
+================================================================================
+
+To customize your application name, edit AndroidManifest.xml and replace
+"org.libsdl.app" with an identifier for your product package.
+
+Then create a Java class extending SDLActivity and place it in a directory
+under src matching your package, e.g.
+	src/com/gamemaker/game/MyGame.java
+
+Here's an example of a minimal class file:
+--- MyGame.java --------------------------
+package com.gamemaker.game;
+
+import org.libsdl.app.SDLActivity; 
+import android.os.*; 
+
+/* 
+ * A sample wrapper class that just calls SDLActivity 
+ */ 
+
+public class MyGame extends SDLActivity { 
+    protected void onCreate(Bundle savedInstanceState) { 
+	super.onCreate(savedInstanceState); 
+    } 
+   
+    protected void onDestroy() { 
+	super.onDestroy(); 
+    } 
+}
+------------------------------------------
+
+Then replace "SDLActivity" in AndroidManifest.xml with the name of your
+class, .e.g. "MyGame"
+
+================================================================================
+ Customizing your application icon
+================================================================================
+
+Conceptually changing your icon is just replacing the icon.png files in the
+drawable directories under the res directory.
+
+The easiest way to create a set of icons for your project is to remove all
+the existing icon.png files, and then use the Eclipse IDE to create a dummy
+project.  During the process of doing this Eclipse will prompt you to create
+an icon. Then just copy the drawable directories it creates over to your
+res directory.
+
+You may need to change the name of your icon in AndroidManifest.xml to match
+the filename used by Eclipse.
 
 ================================================================================
  Pause / Resume behaviour
@@ -104,6 +154,16 @@ means and they make calls to SDL functions, make sure that you call
 Android_JNI_SetupThread before doing anything else otherwise SDL will attach
 your thread automatically anyway (when you make an SDL call), but it'll never
 detach it.
+
+================================================================================
+ Using STL
+================================================================================
+
+You can use STL in your project by creating an Application.mk file in the jni
+folder and adding the following line:
+APP_STL := stlport_static
+
+For more information check out CPLUSPLUS-SUPPORT.html in the NDK documentation.
 
 ================================================================================
  Additional documentation

@@ -80,6 +80,7 @@ typedef struct SDL_VideoData
     SDL_bool net_wm;
 
     /* Useful atoms */
+    Atom WM_PROTOCOLS;
     Atom WM_DELETE_WINDOW;
     Atom _NET_WM_STATE;
     Atom _NET_WM_STATE_HIDDEN;
@@ -92,6 +93,7 @@ typedef struct SDL_VideoData
     Atom _NET_WM_NAME;
     Atom _NET_WM_ICON_NAME;
     Atom _NET_WM_ICON;
+    Atom _NET_WM_PING;
     Atom UTF8_STRING;
 
     SDL_Scancode key_layout[256];

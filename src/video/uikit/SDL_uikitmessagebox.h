@@ -18,36 +18,12 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "SDL_config.h"
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
+#if SDL_VIDEO_DRIVER_UIKIT
 
-#include "SDL_platform.h"
+extern int UIKit_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
-/**
- *  \file SDL_config.h
- */
- 
-/* Add any platform that doesn't build using the configure system. */
-#if defined(__WIN32__)
-#include "SDL_config_windows.h"
-#elif defined(__WINRT__)
-#include "SDL_config_windowsrt.h"
-#elif defined(__MACOSX__)
-#include "SDL_config_macosx.h"
-#elif defined(__IPHONEOS__) 
-#include "SDL_config_iphoneos.h"
-#elif defined(__ANDROID__)
-#include "SDL_config_android.h"
-#elif defined(__NINTENDODS__)
-#include "SDL_config_nintendods.h"
-#else
-/* This is a minimal configuration just to get SDL running on new platforms */
-#include "SDL_config_minimal.h"
-#endif /* platform config */
+#endif /* SDL_VIDEO_DRIVER_UIKIT */
 
-#ifdef USING_GENERATED_CONFIG_H
-#error Wrong SDL_config.h, check your include path?
-#endif
-
-#endif /* _SDL_config_h */
+/* vi: set ts=4 sw=4 expandtab: */

@@ -46,13 +46,18 @@ extern "C" {
 typedef struct SDL_RWops
 {
     /**
+     *  Return the size of the file in this rwops, or -1 if unknown
+     */
+    Sint64 (SDLCALL * size) (struct SDL_RWops * context);
+
+    /**
      *  Seek to \c offset relative to \c whence, one of stdio's whence values:
      *  RW_SEEK_SET, RW_SEEK_CUR, RW_SEEK_END
      *  
      *  \return the final offset in the data stream.
      */
-    long (SDLCALL * seek) (struct SDL_RWops * context, long offset,
-                           int whence);
+    Sint64 (SDLCALL * seek) (struct SDL_RWops * context, Sint64 offset,
+                             int whence);
 
     /**
      *  Read up to \c maxnum objects each of size \c size from the data
@@ -60,8 +65,8 @@ typedef struct SDL_RWops
      *  
      *  \return the number of objects read, or 0 at error or end of file.
      */
-    size_t(SDLCALL * read) (struct SDL_RWops * context, void *ptr,
-                            size_t size, size_t maxnum);
+    size_t (SDLCALL * read) (struct SDL_RWops * context, void *ptr,
+                             size_t size, size_t maxnum);
 
     /**
      *  Write exactly \c num objects each of size \c size from the area
@@ -69,8 +74,8 @@ typedef struct SDL_RWops
      *  
      *  \return the number of objects written, or 0 at error or end of file.
      */
-    size_t(SDLCALL * write) (struct SDL_RWops * context, const void *ptr,
-                             size_t size, size_t num);
+    size_t (SDLCALL * write) (struct SDL_RWops * context, const void *ptr,
+                              size_t size, size_t num);
 
     /**
      *  Close and free an allocated SDL_RWops structure.
@@ -166,6 +171,7 @@ extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops * area);
  *  Macros to easily read and write from an SDL_RWops structure.
  */
 /*@{*/
+#define SDL_RWsize(ctx)	        (ctx)->size(ctx)
 #define SDL_RWseek(ctx, offset, whence)	(ctx)->seek(ctx, offset, whence)
 #define SDL_RWtell(ctx)			(ctx)->seek(ctx, 0, RW_SEEK_CUR)
 #define SDL_RWread(ctx, ptr, size, n)	(ctx)->read(ctx, ptr, size, n)

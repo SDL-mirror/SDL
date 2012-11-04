@@ -139,6 +139,8 @@
 #undef HAVE_SIN
 #undef HAVE_SINF
 #undef HAVE_SQRT
+#undef HAVE_FSEEKO
+#undef HAVE_FSEEKO64
 #undef HAVE_SIGACTION
 #undef HAVE_SA_SIGACTION
 #undef HAVE_SETJMP
