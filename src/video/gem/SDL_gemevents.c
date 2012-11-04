@@ -117,16 +117,6 @@ void GEM_PumpEvents(_THIS)
 
 		/* Mouse motion event ? */
 		if (resultat & MU_M1) {
-			if (this->input_grab == SDL_GRAB_OFF) {
-				/* Switch mouse focus state */
-				if (!GEM_fullscreen && (GEM_handle>=0)) {
-					SDL_PrivateAppActive(
-						mouse_in_work_area(GEM_handle, mousex,mousey),
-						SDL_APPMOUSEFOCUS);
-				}
-			}
-			GEM_CheckMouseMode(this);
-
 			do_mouse_motion(this, mousex, mousey);
 			prevmx = mousex;
 			prevmy = mousey;
@@ -303,6 +293,16 @@ static void do_keyboard_special(short ks)
 static void do_mouse_motion(_THIS, short mx, short my)
 {
 	short x2, y2, w2, h2;
+
+	if (this->input_grab == SDL_GRAB_OFF) {
+		/* Switch mouse focus state */
+		if (!GEM_fullscreen && (GEM_handle>=0)) {
+			SDL_PrivateAppActive(
+				mouse_in_work_area(GEM_handle, mx,my),
+				SDL_APPMOUSEFOCUS);
+		}
+	}
+	GEM_CheckMouseMode(this);
 
 	/* Don't return mouse events if out of window */
 	if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS)==0) {
