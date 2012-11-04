@@ -47,6 +47,8 @@
 static unsigned char gem_currentkeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
 
+static short prevmx=0,prevmy=0,prevmb=0;
+
 /* Functions prototypes */
 
 static int do_messages(_THIS, short *message);
@@ -71,19 +73,16 @@ void GEM_InitOSKeymap(_THIS)
 
 void GEM_PumpEvents(_THIS)
 {
-	short prevkc=0;
-	static short prevmx=0, prevmy=0, prevmb=0;
+	short prevkc=0, mousex, mousey, mouseb, kstate;
 	int i;
-	SDL_keysym	keysym;
+	SDL_keysym keysym;
 
 	SDL_memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
 
 	for (;;)
 	{
 		int quit, resultat;
-		short buffer[8], kc;
-		short mousex, mousey, mouseb, dummy;
-		short kstate;
+		short buffer[8], kc, dummy;
 
 		quit = 0;
 
@@ -303,7 +302,6 @@ static void do_keyboard_special(short ks)
 
 static void do_mouse_motion(_THIS, short mx, short my)
 {
-	static short prevmousex=0, prevmousey=0;
 	short x2, y2, w2, h2;
 
 	/* Don't return mouse events if out of window */
@@ -329,7 +327,7 @@ static void do_mouse_motion(_THIS, short mx, short my)
 		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
 	}
 
-	if ((prevmousex!=mx) || (prevmousey!=my)) {
+	if ((prevmx!=mx) || (prevmy!=my)) {
 		int posx, posy;
 
 		/* Give mouse position relative to window position */
@@ -342,27 +340,27 @@ static void do_mouse_motion(_THIS, short mx, short my)
 
 		SDL_PrivateMouseMotion(0, 0, posx, posy);
 	}
-	prevmousex = mx;
-	prevmousey = my;
+
+	prevmx = mx;
+	prevmy = my;
 }
 
 static void do_mouse_buttons(_THIS, short mb)
 {
-	static short prevmouseb=0;
 	int i;
 
 	/* Don't return mouse events if out of window */
 	if ((SDL_GetAppState() & SDL_APPMOUSEFOCUS)==0)
 		return;
 
-	if (prevmouseb==mb)
+	if (prevmb==mb)
 		return;
 
 	for (i=0;i<3;i++) {
 		int curbutton, prevbutton;
 		
 		curbutton = mb & (1<<i);
-		prevbutton = prevmouseb & (1<<i);
+		prevbutton = prevmb & (1<<i);
 	
 		if (curbutton && !prevbutton) {
 			SDL_PrivateMouseButton(SDL_PRESSED, i+1, 0, 0);
@@ -372,7 +370,7 @@ static void do_mouse_buttons(_THIS, short mb)
 		}
 	}
 
-	prevmouseb = mb;
+	prevmb = mb;
 }
 
 /* Check if mouse in visible area of the window */
