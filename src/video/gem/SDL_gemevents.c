@@ -87,25 +87,22 @@ void GEM_PumpEvents(_THIS)
 		quit = 0;
 
 		resultat = evnt_multi(
-			MU_MESAG|MU_TIMER|MU_KEYBD|MU_BUTTON|MU_M1,
-			0x101,7,prevmb,
-			MO_LEAVE,prevmx,prevmy,1,1,
+			MU_MESAG|MU_TIMER|MU_KEYBD,
+			0,0,0,
+			0,0,0,0,0,
 			0,0,0,0,0,
 			buffer,
 			10,
-			&mousex,&mousey,&mouseb,&kstate,&kc,&dummy
+			&dummy,&dummy,&dummy,&kstate,&kc,&dummy
 		);
 
 		/* Message event ? */
 		if (resultat & MU_MESAG)
 			quit = do_messages(this, buffer);
 
-		/* Special keys ? */
-		if (resultat & (MU_KEYBD|MU_BUTTON))
-			do_keyboard_special(kstate);
-
 		/* Keyboard event ? */
 		if (resultat & MU_KEYBD) {
+			do_keyboard_special(kstate);
 			if (prevkc != kc) {
 				do_keyboard(kc);
 				prevkc = kc;
@@ -115,23 +112,16 @@ void GEM_PumpEvents(_THIS)
 			}
 		}
 
-		/* Mouse motion event ? */
-		if (resultat & MU_M1) {
-			do_mouse_motion(this, mousex, mousey);
-			prevmx = mousex;
-			prevmy = mousey;
-		}
-
-		/* Mouse button event ? */
-		if (resultat & MU_BUTTON) {
-			do_mouse_buttons(this, mouseb);
-			prevmb = mouseb & 7;
-		}
-
 		/* Timer event ? */
 		if ((resultat & MU_TIMER) || quit)
 			break;
 	}
+
+	/* Update mouse state */
+	graf_mkstate(&mousex, &mousey, &mouseb, &kstate);
+	do_keyboard_special(kstate);
+	do_mouse_motion(this, mousex, mousey);
+	do_mouse_buttons(this, mouseb);
 
 	/* Now generate keyboard events */
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
