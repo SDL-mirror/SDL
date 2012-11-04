@@ -48,7 +48,7 @@ If you want to use the Eclipse IDE, skip to the Eclipse section below.
 5. Edit <project>/local.properties to point to the Android SDK directory
 6. Run 'ant debug' in android/project. This compiles the .java and eventually 
 creates a .apk with the native code embedded
-7. 'ant install' will push the apk to the device or emulator (if connected)
+7. 'ant debug install' will push the apk to the device or emulator (if connected)
 
 Here's an explanation of the files in the Android project, so you can customize them:
 
@@ -273,6 +273,50 @@ You can add logging to your code to help show what's happening:
 
 If you need to build without optimization turned on, you can create a file called "Application.mk" in the jni directory, with the following line in it:
 APP_OPTIM := debug
+
+
+================================================================================
+ Memory debugging
+================================================================================
+
+The best (and slowest) way to debug memory issues on Android is valgrind.
+Valgrind has support for Android out of the box, just grab code using:
+	svn co svn://svn.valgrind.org/valgrind/trunk valgrind
+... and follow the instructions in the file README.android to build it.
+
+One thing I needed to do on Mac OS X was change the path to the toolchain,
+and add ranlib to the environment variables:
+export RANLIB=$NDKROOT/toolchains/arm-linux-androideabi-4.4.3/prebuilt/darwin-x86/bin/arm-linux-androideabi-ranlib
+
+Once valgrind is built, you can create a wrapper script to launch your
+application with it, changing org.libsdl.app to your package identifier:
+--- start_valgrind_app -------------------
+#!/system/bin/sh
+export TMPDIR=/data/data/org.libsdl.app
+exec /data/local/Inst/bin/valgrind --log-file=/sdcard/valgrind.log --error-limit=no $*
+------------------------------------------
+
+Then push it to the device:
+	adb push start_valgrind_app /data/local
+
+and make it executable:
+	adb shell chmod 755 /data/local/start_valgrind_app
+
+and tell Android to use the script to launch your application:
+	adb shell setprop wrap.org.libsdl.app "logwrapper /data/local/start_valgrind_app"
+
+If the setprop command says "could not set property", it's likely that
+your package name is too long and you should make it shorter by changing
+AndroidManifest.xml and the path to your class file in android-project/src
+
+You can then launch your application normally and waaaaaaaiiittt for it.
+You can monitor the startup process with the logcat command above, and
+when it's done (or even while it's running) you can grab the valgrind
+output file:
+	adb pull /sdcard/valgrind.log
+
+When you're done instrumenting with valgrind, you can disable the wrapper:
+	adb shell setprop wrap.org.libsdl.app ""
 
 
 ================================================================================
