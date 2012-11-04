@@ -318,8 +318,8 @@ static Sint64 SDLCALL
 stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
 {
 #ifdef HAVE_FSEEKO64
-    if (fseek64o(context->hidden.stdio.fp, (off64_t)offset, whence) == 0) {
-        return ftell64o(context->hidden.stdio.fp);
+    if (fseeko64(context->hidden.stdio.fp, (off64_t)offset, whence) == 0) {
+        return ftello64(context->hidden.stdio.fp);
     }
 #elif defined(HAVE_FSEEKO)
     if (fseeko(context->hidden.stdio.fp, (off_t)offset, whence) == 0) {
