@@ -129,6 +129,22 @@ UIKit_VideoQuit(_THIS)
     UIKit_QuitModes(_this);
 }
 
+/*
+ * iOS log support.
+ *
+ * This doesn't really have aything to do with the interfaces of the SDL video
+ *  subsystem, but we need to stuff this into an Objective-C source code file.
+ */
+
+void SDL_NSLog(const char *text)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+    NSLog(@"%@", [[NSString alloc] initWithUTF8String:text]);
+
+    [pool release];
+}
+
 #endif /* SDL_VIDEO_DRIVER_UIKIT */
 
 /* vi: set ts=4 sw=4 expandtab: */

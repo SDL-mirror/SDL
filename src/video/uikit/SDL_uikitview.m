@@ -50,7 +50,6 @@
     [self initializeKeyboard];
 #endif
 
-#ifdef FIXED_MULTITOUCH
     self.multipleTouchEnabled = YES;
 
     SDL_Touch touch;
@@ -69,9 +68,7 @@
     touch.pressure_max = 1;
     touch.native_pressureres = touch.pressure_max - touch.pressure_min;
 
-
     touchId = SDL_AddTouch(&touch, "IPHONE SCREEN");
-#endif
 
     return self;
 
@@ -102,25 +99,25 @@
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
-    if (touch) {
-        CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
+    while (touch) {
+        if (!leftFingerDown) {
+            CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
-        /* send moved event */
-        SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+            /* send moved event */
+            SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
 
-        /* send mouse down event */
-        SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
-    }
+            /* send mouse down event */
+            SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
 
-#ifdef FIXED_MULTITOUCH
-    while(touch) {
+            leftFingerDown = (SDL_FingerID)touch;
+        }
+
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
-
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-        //FIXME: TODO: Using touch as the fingerId is potentially dangerous
-        //It is also much more efficient than storing the UITouch pointer
-        //and comparing it to the incoming event.
-        SDL_SendFingerDown(touchId, (long)touch,
+        // FIXME: TODO: Using touch as the fingerId is potentially dangerous
+        // It is also much more efficient than storing the UITouch pointer
+        // and comparing it to the incoming event.
+        SDL_SendFingerDown(touchId, (SDL_FingerID)touch,
                            SDL_TRUE, locationInView.x, locationInView.y,
                            1);
 #else
@@ -135,10 +132,8 @@
             }
         }
 #endif
-
         touch = (UITouch*)[enumerator nextObject];
     }
-#endif
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -146,15 +141,14 @@
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
-    if (touch) {
-        /* send mouse up */
-        SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
-    }
-
-#ifdef FIXED_MULTITOUCH
     while(touch) {
-        CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
+        if ((SDL_FingerID)touch == leftFingerDown) {
+            /* send mouse up */
+            SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+            leftFingerDown = 0;
+        }
 
+        CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendFingerDown(touchId, (long)touch,
                            SDL_FALSE, locationInView.x, locationInView.y,
@@ -171,10 +165,8 @@
             }
         }
 #endif
-
         touch = (UITouch*)[enumerator nextObject];
     }
-#endif
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
@@ -192,17 +184,15 @@
     NSEnumerator *enumerator = [touches objectEnumerator];
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
-    if (touch) {
-        CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
+    while (touch) {
+        if ((SDL_FingerID)touch == leftFingerDown) {
+            CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
-        /* send moved event */
-        SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
-    }
+            /* send moved event */
+            SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+        }
 
-#ifdef FIXED_MULTITOUCH
-    while(touch) {
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
-
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
         SDL_SendTouchMotion(touchId, (long)touch,
                             SDL_FALSE, locationInView.x, locationInView.y,
@@ -218,10 +208,8 @@
             }
         }
 #endif
-
         touch = (UITouch*)[enumerator nextObject];
     }
-#endif
 }
 
 /*

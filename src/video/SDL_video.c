@@ -1171,7 +1171,9 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
             SDL_SetError("No OpenGL support in video driver");
             return NULL;
         }
-        SDL_GL_LoadLibrary(NULL);
+        if (SDL_GL_LoadLibrary(NULL) < 0) {
+            return NULL;
+        }
     }
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
     window->magic = &_this->window_magic;
@@ -2840,6 +2842,81 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
         return _this->SDL_IsScreenKeyboardShown(_this, window);
     }
     return SDL_FALSE;
+}
+
+#if SDL_VIDEO_DRIVER_WINDOWS
+#include "windows/SDL_windowsmessagebox.h"
+#endif
+#if SDL_VIDEO_DRIVER_COCOA
+#include "cocoa/SDL_cocoamessagebox.h"
+#endif
+#if SDL_VIDEO_DRIVER_UIKIT
+#include "uikit/SDL_uikitmessagebox.h"
+#endif
+#if SDL_VIDEO_DRIVER_X11
+#include "x11/SDL_x11messagebox.h"
+#endif
+
+int
+SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
+{
+    int dummybutton;
+
+    if (!buttonid) {
+        buttonid = &dummybutton;
+    }
+    if (_this && _this->ShowMessageBox) {
+        if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
+            return 0;
+        }
+    }
+
+    /* It's completely fine to call this function before video is initialized */
+#if SDL_VIDEO_DRIVER_WINDOWS
+    if (WIN_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+#if SDL_VIDEO_DRIVER_COCOA
+    if (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+#if SDL_VIDEO_DRIVER_UIKIT
+    if (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+#if SDL_VIDEO_DRIVER_X11
+    if (X11_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        return 0;
+    }
+#endif
+
+    SDL_SetError("No message system available");
+    return -1;
+}
+
+int
+SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, SDL_Window *window)
+{
+    SDL_MessageBoxData data;
+    SDL_MessageBoxButtonData button;
+
+    SDL_zero(data);
+    data.flags = flags;
+    data.title = title;
+    data.message = message;
+    data.numbuttons = 1;
+    data.buttons = &button;
+    data.window = window;
+
+    SDL_zero(button);
+    button.flags |= SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+    button.flags |= SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT;
+    button.text = "OK";
+
+    return SDL_ShowMessageBox(&data, NULL);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

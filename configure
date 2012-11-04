@@ -10244,13 +10244,15 @@ cygwin* | mingw* | pw32* | cegcc*)
     case $host_os in
     cygwin*)
       # Cygwin DLLs use 'cyg' prefix rather than 'lib'
-      soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
+      #soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
+      soname_spec='`echo ${libname} | sed -e 's/^lib//'`${shared_ext}'
 
       sys_lib_search_path_spec="$sys_lib_search_path_spec /usr/lib/w32api"
       ;;
     mingw* | cegcc*)
       # MinGW DLLs use traditional 'lib' prefix
-      soname_spec='${libname}`echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
+      #soname_spec='${libname}`echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
+      soname_spec='`echo ${libname} | $SED -e 's/^lib//'`${shared_ext}'
       ;;
     pw32*)
       # pw32 DLLs use 'pw' prefix rather than 'lib'
@@ -14919,12 +14921,14 @@ cygwin* | mingw* | pw32* | cegcc*)
     case $host_os in
     cygwin*)
       # Cygwin DLLs use 'cyg' prefix rather than 'lib'
-      soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
+      #soname_spec='`echo ${libname} | sed -e 's/^lib/cyg/'``echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
+      soname_spec='`echo ${libname} | sed -e 's/^lib//'`${shared_ext}'
 
       ;;
     mingw* | cegcc*)
       # MinGW DLLs use traditional 'lib' prefix
-      soname_spec='${libname}`echo ${release} | $SED -e 's/[.]/-/g'`${versuffix}${shared_ext}'
+      #soname_spec='${libname}`echo ${release} | $SED -e 's/[[.]]/-/g'`${versuffix}${shared_ext}'
+      soname_spec='`echo ${libname} | $SED -e 's/^lib//'`${shared_ext}'
       ;;
     pw32*)
       # pw32 DLLs use 'pw' prefix rather than 'lib'
@@ -16684,7 +16688,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 
-    for ac_func in malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp sscanf snprintf vsnprintf sigaction setjmp nanosleep sysconf sysctlbyname
+    for ac_func in malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove strlen strlcpy strlcat strdup _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp sscanf snprintf vsnprintf fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -16930,6 +16934,7 @@ SOURCES="$SOURCES $srcdir/src/audio/*.c"
 SOURCES="$SOURCES $srcdir/src/cpuinfo/*.c"
 SOURCES="$SOURCES $srcdir/src/events/*.c"
 SOURCES="$SOURCES $srcdir/src/file/*.c"
+SOURCES="$SOURCES $srcdir/src/libm/*.c"
 SOURCES="$SOURCES $srcdir/src/render/*.c"
 SOURCES="$SOURCES $srcdir/src/render/*/*.c"
 SOURCES="$SOURCES $srcdir/src/stdlib/*.c"

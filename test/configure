@@ -3865,37 +3865,50 @@ fi
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for SDL_ttf" >&5
-$as_echo_n "checking for SDL_ttf... " >&6; }
-have_SDL_ttf=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for TTF_Init in -lSDL2_ttf" >&5
+$as_echo_n "checking for TTF_Init in -lSDL2_ttf... " >&6; }
+if ${ac_cv_lib_SDL2_ttf_TTF_Init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lSDL2_ttf  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
- #include "SDL_ttf.h"
-
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char TTF_Init ();
 int
 main ()
 {
-
-
+return TTF_Init ();
   ;
   return 0;
 }
 _ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-have_SDL_ttf=yes
-
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_SDL2_ttf_TTF_Init=yes
+else
+  ac_cv_lib_SDL2_ttf_TTF_Init=no
 fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_SDL_ttf" >&5
-$as_echo "$have_SDL_ttf" >&6; }
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_SDL2_ttf_TTF_Init" >&5
+$as_echo "$ac_cv_lib_SDL2_ttf_TTF_Init" >&6; }
+if test "x$ac_cv_lib_SDL2_ttf_TTF_Init" = xyes; then :
+  have_SDL_ttf=yes
+fi
 
 if test x$have_SDL_ttf = xyes; then
     CFLAGS="$CFLAGS -DHAVE_SDL_TTF"
-    SDL_TTF_LIB="-lSDL_ttf"
+    SDL_TTF_LIB="-lSDL2_ttf"
 fi
-
 
 
 ac_config_files="$ac_config_files Makefile"
