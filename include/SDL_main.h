@@ -30,7 +30,7 @@
  *  Redefine main() on some platforms so that it is called by SDL.
  */
 
-#if defined(__WIN32__) || defined(__IPHONEOS__) || defined(__ANDROID__)
+#if defined(__WIN32__) || defined(__WINRT__) || defined(__IPHONEOS__) || defined(__ANDROID__)
 #ifndef SDL_MAIN_HANDLED
 #define SDL_MAIN_NEEDED
 #endif
