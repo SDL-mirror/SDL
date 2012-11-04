@@ -696,9 +696,14 @@ static int Android_JNI_FileClose(SDL_RWops* ctx, bool release)
 }
 
 
-extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
+extern "C" Sint64 Android_JNI_FileSize(SDL_RWops* ctx)
 {
-    long newPosition;
+    return ctx->hidden.androidio.size;
+}
+
+extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence)
+{
+    Sint64 newPosition;
 
     switch (whence) {
         case RW_SEEK_SET:
@@ -714,27 +719,27 @@ extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
             SDL_SetError("Unknown value for 'whence'");
             return -1;
     }
+
+    /* Validate the new position */
     if (newPosition < 0) {
-        newPosition = 0;
+        SDL_Error(SDL_EFSEEK);
+        return -1;
     }
     if (newPosition > ctx->hidden.androidio.size) {
         newPosition = ctx->hidden.androidio.size;
     }
 
-    long movement = newPosition - ctx->hidden.androidio.position;
-    jobject inputStream = (jobject)ctx->hidden.androidio.inputStreamRef;
-
+    Sint64 movement = newPosition - ctx->hidden.androidio.position;
     if (movement > 0) {
         unsigned char buffer[1024];
 
         // The easy case where we're seeking forwards
         while (movement > 0) {
-            long amount = (long) sizeof (buffer);
+            Sint64 amount = sizeof (buffer);
             if (amount > movement) {
                 amount = movement;
             }
             size_t result = Android_JNI_FileRead(ctx, buffer, 1, amount);
-
             if (result <= 0) {
                 // Failed to read/skip the required amount, so fail
                 return -1;
@@ -742,6 +747,7 @@ extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
 
             movement -= result;
         }
+
     } else if (movement < 0) {
         // We can't seek backwards so we have to reopen the file and seek
         // forwards which obviously isn't very efficient
@@ -749,8 +755,6 @@ extern "C" long Android_JNI_FileSeek(SDL_RWops* ctx, long offset, int whence)
         Android_JNI_FileOpen(ctx);
         Android_JNI_FileSeek(ctx, newPosition, RW_SEEK_SET);
     }
-
-    ctx->hidden.androidio.position = newPosition;
 
     return ctx->hidden.androidio.position;
 }
