@@ -53,7 +53,7 @@ creates a .apk with the native code embedded
 Here's an explanation of the files in the Android project, so you can customize them:
 
 android-project/
-	AndroidManifest.xml	- package manifest, do not modify
+	AndroidManifest.xml	- package manifest, customize this for your app
 	build.properties	- empty
 	build.xml		- build description file, used by ant
 	default.properties	- holds the ABI for the application, currently android-5 which corresponds to the Android 2.0 system image
