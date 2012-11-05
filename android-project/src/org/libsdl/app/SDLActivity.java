@@ -119,7 +119,7 @@ public class SDLActivity extends Activity {
 
     // Messages from the SDLMain thread
     static final int COMMAND_CHANGE_TITLE = 1;
-    static final int COMMAND_KEYBOARD_SHOW = 2;
+    static final int COMMAND_UNUSED = 2;
     static final int COMMAND_TEXTEDIT_HIDE = 3;
 
     // Handler for the messages
@@ -130,22 +130,6 @@ public class SDLActivity extends Activity {
             case COMMAND_CHANGE_TITLE:
                 setTitle((String)msg.obj);
                 break;
-            case COMMAND_KEYBOARD_SHOW:
-                InputMethodManager manager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-                if (manager != null) {
-                    switch (((Integer)msg.obj).intValue()) {
-                    case 0:
-                        manager.hideSoftInputFromWindow(mSurface.getWindowToken(), 0);
-                        break;
-                    case 1:
-                        manager.showSoftInput(mSurface, 0);
-                        break;
-                    case 2:
-                        manager.toggleSoftInputFromWindow(mSurface.getWindowToken(), 0, 0);
-                        break;
-                    }
-                }
-               break;
             case COMMAND_TEXTEDIT_HIDE:
                 if (mTextEdit != null) {
                     mTextEdit.setVisibility(View.GONE);

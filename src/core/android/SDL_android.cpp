@@ -957,39 +957,30 @@ extern "C" int Android_JNI_SendMessage(int command, int param)
     return 0;
 }
 
-extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
+extern "C" void Android_JNI_ShowTextInput(SDL_Rect *inputRect)
 {
     JNIEnv *env = Android_JNI_GetEnv();
     if (!env) {
-        return -1;
+        return;
     }
 
     jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)V");
     if (!mid) {
-        return -1;
+        return;
     }
     env->CallStaticVoidMethod( mActivityClass, mid,
                                inputRect->x,
                                inputRect->y,
                                inputRect->w,
                                inputRect->h );
-    return 0;
 }
 
-/*extern "C" int Android_JNI_HideTextInput()
+extern "C" void Android_JNI_HideTextInput()
 {
-    JNIEnv *env = Android_JNI_GetEnv();
-    if (!env) {
-        return -1;
-    }
-
-    jmethodID mid = env->GetStaticMethodID(mActivityClass, "hideTextInput", "()V");
-    if (!mid) {
-        return -1;
-    }
-    env->CallStaticVoidMethod(mActivityClass, mid);
-    return 0;
-}*/
+    // has to match Activity constant
+    const int COMMAND_TEXTEDIT_HIDE = 3;
+    Android_JNI_SendMessage(COMMAND_TEXTEDIT_HIDE, 0);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //

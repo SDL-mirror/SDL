@@ -52,7 +52,7 @@ Android_CreateWindow(_THIS, SDL_Window * window)
 
     /* One window, it always has focus */
     SDL_SetMouseFocus(window);
-    //SDL_SetKeyboardFocus(window);
+    SDL_SetKeyboardFocus(window);
 
     return 0;
 }

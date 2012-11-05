@@ -166,9 +166,7 @@ main(int argc, char *argv[])
     SDL_GL_CreateContext(window);
 #endif
 
-    if (SDL_HasScreenKeyboardSupport(window)) {
-        SDL_ShowScreenKeyboard(window);
-    }
+    SDL_StartTextInput();
 
     /* Watch keystrokes */
     done = 0;

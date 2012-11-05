@@ -313,7 +313,7 @@
 {
     SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_RETURN);
     SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RETURN);
-    [self hideKeyboard];
+    SDL_StopTextInput();
     return YES;
 }
 
@@ -341,36 +341,25 @@ static SDL_uikitview * getWindowView(SDL_Window * window)
     return view;
 }
 
-SDL_bool UIKit_HasScreenKeyboardSupport(_THIS, SDL_Window *window)
+SDL_bool UIKit_HasScreenKeyboardSupport(_THIS)
 {
-    SDL_uikitview *view = getWindowView(window);
-    if (view == nil) {
-        return SDL_FALSE;
-    }
-
     return SDL_TRUE;
 }
 
-int UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window)
+void UIKit_ShowScreenKeyboard(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
-    if (view == nil) {
-        return -1;
+    if (view != nil) {
+        [view showKeyboard];
     }
-
-    [view showKeyboard];
-    return 0;
 }
 
-int UIKit_HideScreenKeyboard(_THIS, SDL_Window *window)
+void UIKit_HideScreenKeyboard(_THIS, SDL_Window *window)
 {
     SDL_uikitview *view = getWindowView(window);
-    if (view == nil) {
-        return -1;
+    if (view != nil) {
+        [view hideKeyboard];
     }
-
-    [view hideKeyboard];
-    return 0;
 }
 
 SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window)
@@ -381,22 +370,6 @@ SDL_bool UIKit_IsScreenKeyboardShown(_THIS, SDL_Window *window)
     }
 
     return view.keyboardVisible;
-}
-
-int UIKit_ToggleScreenKeyboard(_THIS, SDL_Window *window)
-{
-    SDL_uikitview *view = getWindowView(window);
-    if (view == nil) {
-        return -1;
-    }
-
-    if (UIKit_IsScreenKeyboardShown(_this, window)) {
-        UIKit_HideScreenKeyboard(_this, window);
-    }
-    else {
-        UIKit_ShowScreenKeyboard(_this, window);
-    }
-    return 0;
 }
 
 #endif /* SDL_IPHONE_KEYBOARD */

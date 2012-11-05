@@ -2771,19 +2771,47 @@ SDL_GetWindowWMInfo(SDL_Window * window, struct SDL_SysWMinfo *info)
 void
 SDL_StartTextInput(void)
 {
+    SDL_Window *window;
+
+    /* First, enable text events */
+    SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE);
+    SDL_EventState(SDL_TEXTEDITING, SDL_ENABLE);
+
+    /* Then show the on-screen keyboard, if any */
+    window = SDL_GetFocusWindow();
+    if (window && _this && _this->SDL_ShowScreenKeyboard) {
+        _this->SDL_ShowScreenKeyboard(_this, window);
+    }
+
+    /* Finally start the text input system */
     if (_this && _this->StartTextInput) {
         _this->StartTextInput(_this);
     }
-    SDL_EventState(SDL_TEXTINPUT, SDL_ENABLE);
-    SDL_EventState(SDL_TEXTEDITING, SDL_ENABLE);
+}
+
+SDL_bool
+SDL_IsTextInputActive(void)
+{
+    return (SDL_GetEventState(SDL_TEXTINPUT) == SDL_ENABLE);
 }
 
 void
 SDL_StopTextInput(void)
 {
+    SDL_Window *window;
+
+    /* Stop the text input system */
     if (_this && _this->StopTextInput) {
         _this->StopTextInput(_this);
     }
+
+    /* Hide the on-screen keyboard, if any */
+    window = SDL_GetFocusWindow();
+    if (window && _this && _this->SDL_HideScreenKeyboard) {
+        _this->SDL_HideScreenKeyboard(_this, window);
+    }
+
+    /* Finally disable text events */
     SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
     SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
 }
@@ -2797,39 +2825,12 @@ SDL_SetTextInputRect(SDL_Rect *rect)
 }
 
 SDL_bool
-SDL_HasScreenKeyboardSupport(SDL_Window *window)
+SDL_HasScreenKeyboardSupport(void)
 {
-    if (window && _this && _this->SDL_HasScreenKeyboardSupport) {
-        return _this->SDL_HasScreenKeyboardSupport(_this, window);
+    if (_this && _this->SDL_HasScreenKeyboardSupport) {
+        return _this->SDL_HasScreenKeyboardSupport(_this);
     }
     return SDL_FALSE;
-}
-
-int
-SDL_ShowScreenKeyboard(SDL_Window *window)
-{
-    if (window && _this && _this->SDL_ShowScreenKeyboard) {
-        return _this->SDL_ShowScreenKeyboard(_this, window);
-    }
-    return -1;
-}
-
-int
-SDL_HideScreenKeyboard(SDL_Window *window)
-{
-    if (window && _this && _this->SDL_HideScreenKeyboard) {
-        return _this->SDL_HideScreenKeyboard(_this, window);
-    }
-    return -1;
-}
-
-int
-SDL_ToggleScreenKeyboard(SDL_Window *window)
-{
-    if (window && _this && _this->SDL_ToggleScreenKeyboard) {
-        return _this->SDL_ToggleScreenKeyboard(_this, window);
-    }
-    return -1;
 }
 
 SDL_bool

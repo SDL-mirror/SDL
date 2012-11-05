@@ -236,10 +236,9 @@ struct SDL_VideoDevice
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
     /* Screen keyboard */
-    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS, SDL_Window *window);
-    int (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
-    int (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
-    int (*SDL_ToggleScreenKeyboard) (_THIS, SDL_Window *window);
+    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS);
+    void (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
+    void (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
     SDL_bool (*SDL_IsScreenKeyboardShown) (_THIS, SDL_Window *window);
 
     /* Clipboard */
