@@ -164,7 +164,6 @@ Android_VideoInit(_THIS)
         return -1;
     }
 
-    SDL_zero(mode);
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     Android_InitKeyboard();
