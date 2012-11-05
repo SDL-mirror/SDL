@@ -207,10 +207,13 @@ Once you've copied the SDL android project and customized it, you can create an 
 
 
 ================================================================================
- Loading files and resources
+ Using the emulator
 ================================================================================
 
-NEED CONTENT
+There are some good tips and tricks for getting the most out of the
+emulator here: http://developer.android.com/tools/devices/emulator.html
+
+Especially useful is the info on setting up OpenGL ES 2.0 emulation.
 
 
 ================================================================================
