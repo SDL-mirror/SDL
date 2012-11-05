@@ -305,7 +305,6 @@ Android_ShowScreenKeyboard(_THIS, SDL_Window * window)
 int
 Android_HideScreenKeyboard(_THIS, SDL_Window * window)
 {
-    
     return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 0) : -1;
 }
 

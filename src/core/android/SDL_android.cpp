@@ -246,7 +246,6 @@ extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeSetComposingText(
 
 
 
-
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
