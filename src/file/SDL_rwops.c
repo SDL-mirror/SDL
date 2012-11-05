@@ -640,10 +640,19 @@ SDL_FreeRW(SDL_RWops * area)
 
 /* Functions for dynamically reading and writing endian-specific values */
 
+Uint8
+SDL_ReadU8(SDL_RWops * src)
+{
+    Uint8 value = 0;
+
+    SDL_RWread(src, &value, (sizeof value), 1);
+    return value;
+}
+
 Uint16
 SDL_ReadLE16(SDL_RWops * src)
 {
-    Uint16 value;
+    Uint16 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapLE16(value));
@@ -652,7 +661,7 @@ SDL_ReadLE16(SDL_RWops * src)
 Uint16
 SDL_ReadBE16(SDL_RWops * src)
 {
-    Uint16 value;
+    Uint16 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapBE16(value));
@@ -661,7 +670,7 @@ SDL_ReadBE16(SDL_RWops * src)
 Uint32
 SDL_ReadLE32(SDL_RWops * src)
 {
-    Uint32 value;
+    Uint32 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapLE32(value));
@@ -670,7 +679,7 @@ SDL_ReadLE32(SDL_RWops * src)
 Uint32
 SDL_ReadBE32(SDL_RWops * src)
 {
-    Uint32 value;
+    Uint32 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapBE32(value));
@@ -679,7 +688,7 @@ SDL_ReadBE32(SDL_RWops * src)
 Uint64
 SDL_ReadLE64(SDL_RWops * src)
 {
-    Uint64 value;
+    Uint64 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapLE64(value));
@@ -688,10 +697,16 @@ SDL_ReadLE64(SDL_RWops * src)
 Uint64
 SDL_ReadBE64(SDL_RWops * src)
 {
-    Uint64 value;
+    Uint64 value = 0;
 
     SDL_RWread(src, &value, (sizeof value), 1);
     return (SDL_SwapBE64(value));
+}
+
+size_t
+SDL_WriteU8(SDL_RWops * dst, Uint8 value)
+{
+    return (SDL_RWwrite(dst, &value, (sizeof value), 1));
 }
 
 size_t
