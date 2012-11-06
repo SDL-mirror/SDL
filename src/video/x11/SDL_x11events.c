@@ -389,17 +389,11 @@ X11_DispatchEvent(_THIS)
             if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
                 (xevent.xclient.format == 32) &&
                 (xevent.xclient.data.l[0] == videodata->_NET_WM_PING)) {
-
-                SDL_DisplayData *dpydata;
-                Window root;
+                Window root = DefaultRootWindow(display);
 
 #ifdef DEBUG_XEVENTS
                 printf("window %p: _NET_WM_PING\n", data);
 #endif
-
-                dpydata = (SDL_DisplayData *)
-                    SDL_GetDisplayForWindow(data->window);
-                root = RootWindow(display, dpydata->screen);
                 xevent.xclient.window = root;
                 XSendEvent(display, root, False, SubstructureRedirectMask | SubstructureNotifyMask, &xevent);
                 break;
@@ -412,7 +406,6 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
                 printf("window %p: WM_DELETE_WINDOW\n", data);
 #endif
-
                 SDL_SendWindowEvent(data->window, SDL_WINDOWEVENT_CLOSE, 0, 0);
                 break;
             }
