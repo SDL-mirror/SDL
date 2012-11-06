@@ -56,6 +56,7 @@ test/testjoystick
 test/testkeys
 test/testloadso
 test/testlock
+test/testmessage
 test/testmultiaudio
 test/testnative
 test/testoverlay2
