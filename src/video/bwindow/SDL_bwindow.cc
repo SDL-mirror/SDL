@@ -195,7 +195,7 @@ int BE_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp) {
 }
 
 
-void BE_SetWindowGrab(_THIS, SDL_Window * window) {
+void BE_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed) {
 	/* TODO: Implement this! */
 }
 

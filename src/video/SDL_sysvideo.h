@@ -191,7 +191,7 @@ struct SDL_VideoDevice
     void (*SetWindowFullscreen) (_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
     int (*SetWindowGammaRamp) (_THIS, SDL_Window * window, const Uint16 * ramp);
     int (*GetWindowGammaRamp) (_THIS, SDL_Window * window, Uint16 * ramp);
-    void (*SetWindowGrab) (_THIS, SDL_Window * window);
+    void (*SetWindowGrab) (_THIS, SDL_Window * window, SDL_bool grabbed);
     void (*DestroyWindow) (_THIS, SDL_Window * window);
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
     int (*UpdateWindowFramebuffer) (_THIS, SDL_Window * window, SDL_Rect * rects, int numrects);
@@ -364,6 +364,7 @@ extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
+extern void SDL_UpdateWindowGrab(SDL_Window * window);
 extern SDL_Window * SDL_GetFocusWindow(void);
 
 #endif /* _SDL_sysvideo_h */

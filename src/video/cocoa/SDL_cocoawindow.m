@@ -992,11 +992,10 @@ Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 }
 
 void
-Cocoa_SetWindowGrab(_THIS, SDL_Window * window)
+Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     /* Move the cursor to the nearest point in the window */
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+    if (grabbed) {
         int x, y;
         CGPoint cgpoint;
 

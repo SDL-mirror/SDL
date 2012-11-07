@@ -1850,11 +1850,18 @@ SDL_GetWindowGammaRamp(SDL_Window * window, Uint16 * red,
     return 0;
 }
 
-static void
+void
 SDL_UpdateWindowGrab(SDL_Window * window)
 {
-    if ((window->flags & SDL_WINDOW_INPUT_FOCUS) && _this->SetWindowGrab) {
-        _this->SetWindowGrab(_this, window);
+    if (_this->SetWindowGrab) {
+        SDL_bool grabbed;
+        if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
+            (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+            grabbed = SDL_TRUE;
+        } else {
+            grabbed = SDL_FALSE;
+        }
+        _this->SetWindowGrab(_this, window, grabbed);
     }
 }
 
@@ -1924,10 +1931,7 @@ SDL_OnWindowFocusGained(SDL_Window * window)
         _this->SetWindowGammaRamp(_this, window, window->gamma);
     }
 
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN)) &&
-        _this->SetWindowGrab) {
-        _this->SetWindowGrab(_this, window);
-    }
+    SDL_UpdateWindowGrab(window);
 }
 
 void
@@ -1937,10 +1941,7 @@ SDL_OnWindowFocusLost(SDL_Window * window)
         _this->SetWindowGammaRamp(_this, window, window->saved_gamma);
     }
 
-    if ((window->flags & (SDL_WINDOW_INPUT_GRABBED | SDL_WINDOW_FULLSCREEN)) &&
-        _this->SetWindowGrab) {
-        _this->SetWindowGrab(_this, window);
-    }
+    SDL_UpdateWindowGrab(window);
 
     /* If we're fullscreen on a single-head system and lose focus, minimize */
     if ((window->flags & SDL_WINDOW_FULLSCREEN) && _this->num_displays == 1) {
