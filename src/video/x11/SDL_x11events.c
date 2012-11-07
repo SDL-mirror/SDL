@@ -249,6 +249,12 @@ X11_DispatchEvent(_THIS)
 
         /* Gaining input focus? */
     case FocusIn:{
+            if (xevent.xfocus.detail == NotifyInferior) {
+#ifdef DEBUG_XEVENTS
+                printf("window %p: FocusIn (NotifierInferior, ignoring)\n", data);
+#endif
+                break;
+            }
 #ifdef DEBUG_XEVENTS
             printf("window %p: FocusIn!\n", data);
 #endif
@@ -259,6 +265,13 @@ X11_DispatchEvent(_THIS)
 
         /* Losing input focus? */
     case FocusOut:{
+            if (xevent.xfocus.detail == NotifyInferior) {
+                /* We still have focus if a child gets focus */
+#ifdef DEBUG_XEVENTS
+                printf("window %p: FocusOut (NotifierInferior, ignoring)\n", data);
+#endif
+                break;
+            }
 #ifdef DEBUG_XEVENTS
             printf("window %p: FocusOut!\n", data);
 #endif
