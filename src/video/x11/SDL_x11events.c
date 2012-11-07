@@ -258,6 +258,13 @@ X11_DispatchEvent(_THIS)
 #ifdef DEBUG_XEVENTS
             printf("window %p: FocusIn!\n", data);
 #endif
+            if (data->pending_focus == PENDING_FOCUS_OUT &&
+                data->window == SDL_GetKeyboardFocus()) {
+                /* We want to reset the keyboard here, because we may have
+                   missed keyboard messages after our previous FocusOut.
+                 */
+                SDL_ResetKeyboard();
+            }
             data->pending_focus = PENDING_FOCUS_IN;
             data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_IN_TIME;
         }

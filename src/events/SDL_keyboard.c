@@ -28,6 +28,8 @@
 #include "../video/SDL_sysvideo.h"
 
 
+/*#define DEBUG_KEYBOARD*/
+
 /* Global keyboard information */
 
 typedef struct SDL_Keyboard SDL_Keyboard;
@@ -563,6 +565,9 @@ SDL_ResetKeyboard(void)
     SDL_Keyboard *keyboard = &SDL_keyboard;
     SDL_Scancode scancode;
 
+#ifdef DEBUG_KEYBOARD
+    printf("Resetting keyboard\n");
+#endif
     for (scancode = 0; scancode < SDL_NUM_SCANCODES; ++scancode) {
         if (keyboard->keystate[scancode] == SDL_PRESSED) {
             SDL_SendKeyboardKey(SDL_RELEASED, scancode);
@@ -633,6 +638,9 @@ SDL_SetKeyboardFocus(SDL_Window * window)
                 video->StartTextInput(video);
             }
         }
+    } else {
+        /* We won't get anymore keyboard messages, so reset keyboard state */
+        SDL_ResetKeyboard();
     }
 }
 
@@ -648,7 +656,7 @@ SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode)
     if (!scancode) {
         return 0;
     }
-#if 0
+#ifdef DEBUG_KEYBOARD
     printf("The '%s' key has been %s\n", SDL_GetScancodeName(scancode),
            state == SDL_PRESSED ? "pressed" : "released");
 #endif
