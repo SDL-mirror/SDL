@@ -143,14 +143,16 @@ See SDL_system.h for more details on these functions.
  Pause / Resume behaviour
 ================================================================================
 
-If SDL is compiled with SDL_ANDROID_BLOCK_ON_PAUSE defined, the event loop will
-block itself when the app is paused (ie, when the user returns to the main
-Android dashboard). Blocking is better in terms of battery use, and it allows your
-app to spring back to life instantaneously after resume (versus polling for
-a resume message).
+If SDL is compiled with SDL_ANDROID_BLOCK_ON_PAUSE defined (the default),
+the event loop will block itself when the app is paused (ie, when the user
+returns to the main Android dashboard). Blocking is better in terms of battery
+use, and it allows your app to spring back to life instantaneously after resume
+(versus polling for a resume message).
+
 Upon resume, SDL will attempt to restore the GL context automatically.
 In modern devices (Android 3.0 and up) this will most likely succeed and your
 app can continue to operate as it was.
+
 However, there's a chance (on older hardware, or on systems under heavy load),
 where the GL context can not be restored. In that case you have to listen for
 a specific message, (which is not yet implemented!) and restore your textures
