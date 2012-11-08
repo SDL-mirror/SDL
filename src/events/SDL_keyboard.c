@@ -612,6 +612,11 @@ SDL_SetKeyboardFocus(SDL_Window * window)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
 
+    if (keyboard->focus && !window) {
+        /* We won't get anymore keyboard messages, so reset keyboard state */
+        SDL_ResetKeyboard();
+    }
+
     /* See if the current window has lost focus */
     if (keyboard->focus && keyboard->focus != window) {
         SDL_SendWindowEvent(keyboard->focus, SDL_WINDOWEVENT_FOCUS_LOST,
@@ -638,9 +643,6 @@ SDL_SetKeyboardFocus(SDL_Window * window)
                 video->StartTextInput(video);
             }
         }
-    } else {
-        /* We won't get anymore keyboard messages, so reset keyboard state */
-        SDL_ResetKeyboard();
     }
 }
 
