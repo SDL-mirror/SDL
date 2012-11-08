@@ -130,7 +130,21 @@ SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint8 buttonstate)
     } else {
         inWindow = SDL_TRUE;
     }
+
+/* Linux doesn't give you mouse events outside your window unless you grab
+   the pointer.
+
+   Windows doesn't give you mouse events outside your window unless you call
+   SetCapture().
+
+   Both of these are slightly scary changes, so for now we'll punt and if the
+   mouse leaves the window you'll lose mouse focus and reset button state.
+*/
+#ifdef SUPPORT_DRAG_OUTSIDE_WINDOW
     if (!inWindow && !buttonstate) {
+#else
+    if (!inWindow) {
+#endif
         if (window == mouse->focus) {
 #ifdef DEBUG_MOUSE
             printf("Mouse left window, synthesizing focus lost event\n");
