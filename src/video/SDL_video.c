@@ -2842,12 +2842,7 @@ SDL_HasScreenKeyboardSupport(void)
     if (_this && _this->SDL_HasScreenKeyboardSupport) {
         return _this->SDL_HasScreenKeyboardSupport(_this);
     }
-/* FIXME: The event system queries this before we initialize our video driver */
-#if __IPHONEOS__ || __ANDROID__
-    return SDL_TRUE;
-#else
     return SDL_FALSE;
-#endif
 }
 
 SDL_bool
