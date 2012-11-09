@@ -522,6 +522,17 @@ SDL_VideoInit(const char *driver_name)
         _this->DestroyWindowFramebuffer = SDL_DestroyWindowTexture;
     }
 
+    /* If we don't use a screen keyboard, turn on text input by default,
+       otherwise programs that expect to get text events without enabling
+       UNICODE input won't get any events.
+
+       Actually, come to think of it, you needed to call SDL_EnableUNICODE(1)
+       in SDL 1.2 before you got text input events.  Hmm...
+     */
+    if (!SDL_HasScreenKeyboardSupport()) {
+        SDL_StartTextInput();
+    }
+
     /* We're ready to go! */
     return 0;
 }
@@ -2831,7 +2842,12 @@ SDL_HasScreenKeyboardSupport(void)
     if (_this && _this->SDL_HasScreenKeyboardSupport) {
         return _this->SDL_HasScreenKeyboardSupport(_this);
     }
+/* FIXME: The event system queries this before we initialize our video driver */
+#if __IPHONEOS__ || __ANDROID__
+    return SDL_TRUE;
+#else
     return SDL_FALSE;
+#endif
 }
 
 SDL_bool
