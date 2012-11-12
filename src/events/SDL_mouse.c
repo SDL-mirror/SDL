@@ -118,7 +118,7 @@ SDL_SetMouseFocus(SDL_Window * window)
 
 /* Check to see if we need to synthesize focus events */
 static SDL_bool
-SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint8 buttonstate)
+SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
     int w, h;
@@ -264,7 +264,7 @@ SDL_SendMouseButton(SDL_Window * window, Uint8 state, Uint8 button)
     SDL_Mouse *mouse = SDL_GetMouse();
     int posted;
     Uint32 type;
-    Uint8 buttonstate = mouse->buttonstate;
+    Uint32 buttonstate = mouse->buttonstate;
 
     /* Figure out which event to perform */
     switch (state) {
@@ -345,7 +345,7 @@ SDL_MouseQuit(void)
 {
 }
 
-Uint8
+Uint32
 SDL_GetMouseState(int *x, int *y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
@@ -359,7 +359,7 @@ SDL_GetMouseState(int *x, int *y)
     return mouse->buttonstate;
 }
 
-Uint8
+Uint32
 SDL_GetRelativeMouseState(int *x, int *y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
