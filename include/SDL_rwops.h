@@ -186,6 +186,7 @@ extern DECLSPEC void SDLCALL SDL_FreeRW(SDL_RWops * area);
  *  Read an item of the specified endianness and return in native format.
  */
 /*@{*/
+extern DECLSPEC Uint8 SDLCALL SDL_ReadU8(SDL_RWops * src);
 extern DECLSPEC Uint16 SDLCALL SDL_ReadLE16(SDL_RWops * src);
 extern DECLSPEC Uint16 SDLCALL SDL_ReadBE16(SDL_RWops * src);
 extern DECLSPEC Uint32 SDLCALL SDL_ReadLE32(SDL_RWops * src);
@@ -200,6 +201,7 @@ extern DECLSPEC Uint64 SDLCALL SDL_ReadBE64(SDL_RWops * src);
  *  Write an item of native format to the specified endianness.
  */
 /*@{*/
+extern DECLSPEC size_t SDLCALL SDL_WriteU8(SDL_RWops * dst, Uint8 value);
 extern DECLSPEC size_t SDLCALL SDL_WriteLE16(SDL_RWops * dst, Uint16 value);
 extern DECLSPEC size_t SDLCALL SDL_WriteBE16(SDL_RWops * dst, Uint16 value);
 extern DECLSPEC size_t SDLCALL SDL_WriteLE32(SDL_RWops * dst, Uint32 value);

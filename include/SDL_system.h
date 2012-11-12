@@ -49,11 +49,6 @@ extern "C" {
 extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
 extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
-#define SDL_iPhoneKeyboardShow  SDL_ShowScreenKeyboard
-#define SDL_iPhoneKeyboardHide  SDL_HideScreenKeyboard
-#define SDL_iPhoneKeyboardToggle    SDL_ToggleScreenKeyboard
-#define SDL_iPhoneKeyboardIsShown   SDL_IsScreenKeyboardShown
-
 #endif /* __IPHONEOS__ */
 
 
@@ -76,7 +71,10 @@ extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity();
 #define SDL_ANDROID_EXTERNAL_STORAGE_READ   0x01
 #define SDL_ANDROID_EXTERNAL_STORAGE_WRITE  0x02
 
-/* Get the path used for internal storage for this application */
+/* Get the path used for internal storage for this application.
+   This path is unique to your application and cannot be written to
+   by other applications.
+ */
 extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath();
 
 /* Get the current state of external storage, a bitmask of these values:
@@ -86,7 +84,10 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetInternalStoragePath();
 */
 extern DECLSPEC int SDLCALL SDL_AndroidGetExternalStorageState();
 
-/* Get the path used for external storage for this application */
+/* Get the path used for external storage for this application.
+   This path is unique to your application, but is public and can be
+   written to by other applications.
+ */
 extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
 
 #endif /* __ANDROID__ */

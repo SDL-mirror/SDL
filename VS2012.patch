@@ -1,0 +1,3169 @@
+# HG changeset patch
+# User Andreas Schiffler <aschiffler@ferzkopp.net>
+# Date 1352307747 28800
+# Node ID a8a5772a0691f8b90248ab49ae63eef1e65fea10
+# Parent  4016ef96095ab8d8d927b2c6b83c08f2e988de2f
+Added VS2012 project files
+
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/SDL/SDL_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/SDL/SDL_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,455 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>SDL</ProjectName>
++    <ProjectGuid>{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}</ProjectGuid>
++    <RootNamespace>SDL</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>DynamicLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <PreBuildEvent />
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);"$(DXSDK_DIR)\Include";</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <BufferSecurityCheck>false</BufferSecurityCheck>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <CLRUnmanagedCodeCheck>false</CLRUnmanagedCodeCheck>
++      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>X64</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);"$(DXSDK_DIR)\Include";</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <BufferSecurityCheck>false</BufferSecurityCheck>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <CLRUnmanagedCodeCheck>false</CLRUnmanagedCodeCheck>
++      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <PreBuildEvent />
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <IntrinsicFunctions>false</IntrinsicFunctions>
++      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);"$(DXSDK_DIR)\Include";</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <BufferSecurityCheck>false</BufferSecurityCheck>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
++      <SubSystem>Windows</SubSystem>
++      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x86</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>X64</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <IntrinsicFunctions>false</IntrinsicFunctions>
++      <AdditionalIncludeDirectories>..\..\include;%(AdditionalIncludeDirectories);"$(DXSDK_DIR)\Include";</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <BufferSecurityCheck>false</BufferSecurityCheck>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
++      <SubSystem>Windows</SubSystem>
++      <AdditionalLibraryDirectories>$(DXSDK_DIR)\lib\x64</AdditionalLibraryDirectories>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClInclude Include="..\..\include\SDL.h" />
++    <ClInclude Include="..\..\include\SDL_assert.h" />
++    <ClInclude Include="..\..\include\SDL_atomic.h" />
++    <ClInclude Include="..\..\include\SDL_audio.h" />
++    <ClInclude Include="..\..\include\SDL_blendmode.h" />
++    <ClInclude Include="..\..\include\SDL_clipboard.h" />
++    <ClInclude Include="..\..\include\SDL_config.h" />
++    <ClInclude Include="..\..\include\SDL_config_windows.h" />
++    <ClInclude Include="..\..\include\SDL_copying.h" />
++    <ClInclude Include="..\..\include\SDL_cpuinfo.h" />
++    <ClInclude Include="..\..\include\SDL_endian.h" />
++    <ClInclude Include="..\..\include\SDL_error.h" />
++    <ClInclude Include="..\..\include\SDL_events.h" />
++    <ClInclude Include="..\..\include\SDL_gesture.h" />
++    <ClInclude Include="..\..\include\SDL_haptic.h" />
++    <ClInclude Include="..\..\include\SDL_hints.h" />
++    <ClInclude Include="..\..\include\SDL_input.h" />
++    <ClInclude Include="..\..\include\SDL_joystick.h" />
++    <ClInclude Include="..\..\include\SDL_keyboard.h" />
++    <ClInclude Include="..\..\include\SDL_keycode.h" />
++    <ClInclude Include="..\..\include\SDL_loadso.h" />
++    <ClInclude Include="..\..\include\SDL_log.h" />
++    <ClInclude Include="..\..\include\SDL_main.h" />
++    <ClInclude Include="..\..\include\SDL_mouse.h" />
++    <ClInclude Include="..\..\include\SDL_mutex.h" />
++    <ClInclude Include="..\..\include\SDL_name.h" />
++    <ClInclude Include="..\..\include\SDL_opengl.h" />
++    <ClInclude Include="..\..\include\SDL_opengles.h" />
++    <ClInclude Include="..\..\include\SDL_pixels.h" />
++    <ClInclude Include="..\..\include\SDL_platform.h" />
++    <ClInclude Include="..\..\include\SDL_power.h" />
++    <ClInclude Include="..\..\include\SDL_quit.h" />
++    <ClInclude Include="..\..\include\SDL_rect.h" />
++    <ClInclude Include="..\..\include\SDL_render.h" />
++    <ClInclude Include="..\..\include\SDL_revision.h" />
++    <ClInclude Include="..\..\include\SDL_rwops.h" />
++    <ClInclude Include="..\..\include\SDL_scancode.h" />
++    <ClInclude Include="..\..\include\SDL_shape.h" />
++    <ClInclude Include="..\..\include\SDL_stdinc.h" />
++    <ClInclude Include="..\..\include\SDL_surface.h" />
++    <ClInclude Include="..\..\include\SDL_system.h" />
++    <ClInclude Include="..\..\include\SDL_syswm.h" />
++    <ClInclude Include="..\..\include\SDL_thread.h" />
++    <ClInclude Include="..\..\include\SDL_timer.h" />
++    <ClInclude Include="..\..\include\SDL_touch.h" />
++    <ClInclude Include="..\..\include\SDL_types.h" />
++    <ClInclude Include="..\..\include\SDL_version.h" />
++    <ClInclude Include="..\..\include\SDL_video.h" />
++    <ClInclude Include="..\..\src\core\windows\SDL_windows.h" />
++    <ClInclude Include="..\..\src\events\blank_cursor.h" />
++    <ClInclude Include="..\..\src\events\default_cursor.h" />
++    <ClInclude Include="..\..\src\audio\directsound\directx.h" />
++    <ClInclude Include="..\..\src\events\SDL_clipboardevents_c.h" />
++    <ClInclude Include="..\..\src\events\SDL_gesture_c.h" />
++    <ClInclude Include="..\..\src\events\SDL_touch_c.h" />
++    <ClInclude Include="..\..\src\libm\math.h" />
++    <ClInclude Include="..\..\src\libm\math_private.h" />
++    <ClInclude Include="..\..\src\render\mmx.h" />
++    <ClInclude Include="..\..\src\render\opengl\SDL_shaders_gl.h" />
++    <ClInclude Include="..\..\src\render\SDL_sysrender.h" />
++    <ClInclude Include="..\..\src\render\SDL_yuv_sw_c.h" />
++    <ClInclude Include="..\..\src\audio\SDL_audio_c.h" />
++    <ClInclude Include="..\..\src\audio\SDL_audiodev_c.h" />
++    <ClInclude Include="..\..\src\audio\SDL_audiomem.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_blendfillrect.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_blendline.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_blendpoint.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_draw.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_drawline.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_drawpoint.h" />
++    <ClInclude Include="..\..\src\events\SDL_dropevents_c.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_render_sw_c.h" />
++    <ClInclude Include="..\..\src\render\software\SDL_rotate.h" />
++    <ClInclude Include="..\..\src\video\dummy\SDL_nullframebuffer_c.h" />
++    <ClInclude Include="..\..\src\video\SDL_blit.h" />
++    <ClInclude Include="..\..\src\video\SDL_blit_auto.h" />
++    <ClInclude Include="..\..\src\video\SDL_blit_copy.h" />
++    <ClInclude Include="..\..\src\video\SDL_blit_slow.h" />
++    <ClInclude Include="..\..\src\video\SDL_shape_internals.h" />
++    <ClInclude Include="..\..\src\audio\winmm\SDL_winmm.h" />
++    <ClInclude Include="..\..\src\audio\disk\SDL_diskaudio.h" />
++    <ClInclude Include="..\..\src\audio\dummy\SDL_dummyaudio.h" />
++    <ClInclude Include="..\..\src\audio\directsound\SDL_directsound.h" />
++    <ClInclude Include="..\..\src\SDL_error_c.h" />
++    <ClInclude Include="..\..\src\SDL_hints_c.h" />
++    <ClInclude Include="..\..\src\events\SDL_events_c.h" />
++    <ClInclude Include="..\..\src\SDL_fatal.h" />
++    <ClInclude Include="..\..\src\video\SDL_glesfuncs.h" />
++    <ClInclude Include="..\..\src\video\SDL_glfuncs.h" />
++    <ClInclude Include="..\..\src\joystick\SDL_joystick_c.h" />
++    <ClInclude Include="..\..\src\events\SDL_keyboard_c.h" />
++    <ClInclude Include="..\..\src\events\SDL_mouse_c.h" />
++    <ClInclude Include="..\..\src\video\dummy\SDL_nullevents_c.h" />
++    <ClInclude Include="..\..\src\video\dummy\SDL_nullvideo.h" />
++    <ClInclude Include="..\..\src\video\SDL_pixels_c.h" />
++    <ClInclude Include="..\..\src\video\SDL_rect_c.h" />
++    <ClInclude Include="..\..\src\video\SDL_RLEaccel_c.h" />
++    <ClInclude Include="..\..\src\video\SDL_stretch_c.h" />
++    <ClInclude Include="..\..\src\audio\SDL_sysaudio.h" />
++    <ClInclude Include="..\..\src\events\SDL_sysevents.h" />
++    <ClInclude Include="..\..\src\haptic\SDL_syshaptic.h" />
++    <ClInclude Include="..\..\src\joystick\SDL_sysjoystick.h" />
++    <ClInclude Include="..\..\src\thread\SDL_systhread.h" />
++    <ClInclude Include="..\..\src\thread\windows\SDL_systhread_c.h" />
++    <ClInclude Include="..\..\src\timer\SDL_systimer.h" />
++    <ClInclude Include="..\..\src\video\SDL_sysvideo.h" />
++    <ClInclude Include="..\..\src\thread\SDL_thread_c.h" />
++    <ClInclude Include="..\..\src\timer\SDL_timer_c.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_vkeys.h" />
++    <ClInclude Include="..\..\src\audio\SDL_wave.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsclipboard.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsevents.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsframebuffer.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowskeyboard.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsmessagebox.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsmodes.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsmouse.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsopengl.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsshape.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowsvideo.h" />
++    <ClInclude Include="..\..\src\video\windows\SDL_windowswindow.h" />
++    <ClInclude Include="..\..\src\events\SDL_windowevents_c.h" />
++    <ClInclude Include="..\..\src\video\windows\wmmsg.h" />
++    <ClInclude Include="resource.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\src\core\windows\SDL_windows.c" />
++    <ClCompile Include="..\..\src\events\SDL_clipboardevents.c" />
++    <ClCompile Include="..\..\src\events\SDL_gesture.c" />
++    <ClCompile Include="..\..\src\events\SDL_touch.c" />
++    <ClCompile Include="..\..\src\libm\e_atan2.c" />
++    <ClCompile Include="..\..\src\libm\e_log.c" />
++    <ClCompile Include="..\..\src\libm\e_pow.c" />
++    <ClCompile Include="..\..\src\libm\e_rem_pio2.c" />
++    <ClCompile Include="..\..\src\libm\e_sqrt.c" />
++    <ClCompile Include="..\..\src\libm\k_cos.c" />
++    <ClCompile Include="..\..\src\libm\k_rem_pio2.c" />
++    <ClCompile Include="..\..\src\libm\k_sin.c" />
++    <ClCompile Include="..\..\src\libm\s_atan.c" />
++    <ClCompile Include="..\..\src\libm\s_copysign.c" />
++    <ClCompile Include="..\..\src\libm\s_cos.c" />
++    <ClCompile Include="..\..\src\libm\s_fabs.c" />
++    <ClCompile Include="..\..\src\libm\s_floor.c" />
++    <ClCompile Include="..\..\src\libm\s_scalbn.c" />
++    <ClCompile Include="..\..\src\libm\s_sin.c" />
++    <ClCompile Include="..\..\src\render\direct3d\SDL_render_d3d.c" />
++    <ClCompile Include="..\..\src\render\opengl\SDL_render_gl.c" />
++    <ClCompile Include="..\..\src\render\opengl\SDL_shaders_gl.c" />
++    <ClCompile Include="..\..\src\render\SDL_render.c" />
++    <ClCompile Include="..\..\src\render\SDL_yuv_mmx.c" />
++    <ClCompile Include="..\..\src\render\SDL_yuv_sw.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_blendfillrect.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_blendline.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_blendpoint.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_drawline.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_drawpoint.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_render_sw.c" />
++    <ClCompile Include="..\..\src\render\software\SDL_rotate.c" />
++    <ClCompile Include="..\..\src\SDL.c" />
++    <ClCompile Include="..\..\src\SDL_assert.c" />
++    <ClCompile Include="..\..\src\atomic\SDL_atomic.c" />
++    <ClCompile Include="..\..\src\atomic\SDL_spinlock.c" />
++    <ClCompile Include="..\..\src\audio\SDL_audio.c" />
++    <ClCompile Include="..\..\src\audio\SDL_audiocvt.c" />
++    <ClCompile Include="..\..\src\audio\SDL_audiodev.c" />
++    <ClCompile Include="..\..\src\audio\SDL_audiotypecvt.c" />
++    <ClCompile Include="..\..\src\SDL_hints.c" />
++    <ClCompile Include="..\..\src\SDL_log.c" />
++    <ClCompile Include="..\..\src\video\dummy\SDL_nullframebuffer.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_0.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_1.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_A.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_auto.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_copy.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_N.c" />
++    <ClCompile Include="..\..\src\video\SDL_blit_slow.c" />
++    <ClCompile Include="..\..\src\video\SDL_bmp.c" />
++    <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c" />
++    <ClCompile Include="..\..\src\video\SDL_clipboard.c" />
++    <ClCompile Include="..\..\src\video\SDL_shape.c" />
++    <ClCompile Include="..\..\src\audio\winmm\SDL_winmm.c" />
++    <ClCompile Include="..\..\src\audio\disk\SDL_diskaudio.c" />
++    <ClCompile Include="..\..\src\audio\dummy\SDL_dummyaudio.c" />
++    <ClCompile Include="..\..\src\audio\directsound\SDL_directsound.c" />
++    <ClCompile Include="..\..\src\events\SDL_dropevents.c" />
++    <ClCompile Include="..\..\src\audio\xaudio2\SDL_xaudio2.c" />
++    <ClCompile Include="..\..\src\joystick\windows\SDL_dxjoystick.c" />
++    <ClCompile Include="..\..\src\SDL_error.c" />
++    <ClCompile Include="..\..\src\events\SDL_events.c" />
++    <ClCompile Include="..\..\src\SDL_fatal.c" />
++    <ClCompile Include="..\..\src\video\SDL_fillrect.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_getenv.c" />
++    <ClCompile Include="..\..\src\haptic\SDL_haptic.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_iconv.c" />
++    <ClCompile Include="..\..\src\joystick\SDL_joystick.c" />
++    <ClCompile Include="..\..\src\events\SDL_keyboard.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_malloc.c" />
++    <ClCompile Include="..\..\src\audio\SDL_mixer.c" />
++    <ClCompile Include="..\..\src\joystick\windows\SDL_mmjoystick.c" />
++    <ClCompile Include="..\..\src\events\SDL_mouse.c" />
++    <ClCompile Include="..\..\src\video\dummy\SDL_nullevents.c" />
++    <ClCompile Include="..\..\src\video\dummy\SDL_nullvideo.c" />
++    <ClCompile Include="..\..\src\video\SDL_pixels.c" />
++    <ClCompile Include="..\..\src\power\SDL_power.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_qsort.c" />
++    <ClCompile Include="..\..\src\events\SDL_quit.c" />
++    <ClCompile Include="..\..\src\video\SDL_rect.c" />
++    <ClCompile Include="..\..\src\video\SDL_RLEaccel.c" />
++    <ClCompile Include="..\..\src\file\SDL_rwops.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_stdlib.c" />
++    <ClCompile Include="..\..\src\video\SDL_stretch.c" />
++    <ClCompile Include="..\..\src\stdlib\SDL_string.c" />
++    <ClCompile Include="..\..\src\video\SDL_surface.c" />
++    <ClCompile Include="..\..\src\thread\generic\SDL_syscond.c" />
++    <ClCompile Include="..\..\src\haptic\windows\SDL_syshaptic.c" />
++    <ClCompile Include="..\..\src\loadso\windows\SDL_sysloadso.c" />
++    <ClCompile Include="..\..\src\thread\windows\SDL_sysmutex.c" />
++    <ClCompile Include="..\..\src\power\windows\SDL_syspower.c" />
++    <ClCompile Include="..\..\src\thread\windows\SDL_syssem.c" />
++    <ClCompile Include="..\..\src\thread\windows\SDL_systhread.c" />
++    <ClCompile Include="..\..\src\timer\windows\SDL_systimer.c" />
++    <ClCompile Include="..\..\src\thread\SDL_thread.c" />
++    <ClCompile Include="..\..\src\timer\SDL_timer.c" />
++    <ClCompile Include="..\..\src\video\SDL_video.c" />
++    <ClCompile Include="..\..\src\audio\SDL_wave.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsclipboard.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsevents.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsframebuffer.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowskeyboard.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsmessagebox.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsmodes.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsmouse.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsopengl.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsshape.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowsvideo.c" />
++    <ClCompile Include="..\..\src\video\windows\SDL_windowswindow.c" />
++    <ClCompile Include="..\..\src\events\SDL_windowevents.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <ResourceCompile Include="..\..\src\main\windows\version.rc" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/SDL_VS2012.sln
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/SDL_VS2012.sln	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,179 @@
++﻿
++Microsoft Visual Studio Solution File, Format Version 11.00
++# Visual Studio 2010
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDL", "SDL\SDL_VS2012.vcxproj", "{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDLmain", "SDLmain\SDLmain_VS2012.vcxproj", "{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}"
++EndProject
++Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CE748C1F-3C21-4825-AA6A-F895A023F7E7}"
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "automated", "tests\automated\automated_VS2010.vcxproj", "{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "loopwave", "tests\loopwave\loopwave_VS2012.vcxproj", "{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testplatform", "tests\testplatform\testplatform_VS2012.vcxproj", "{26932B24-EFC6-4E3A-B277-ED653DA37968}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testfile", "tests\testfile\testfile_VS2012.vcxproj", "{CAE4F1D0-314F-4B10-805B-0EFD670133A0}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testgl2", "tests\testgl2\testgl2_VS2012.vcxproj", "{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "checkkeys", "tests\checkkeys\checkkeys_VS2012.vcxproj", "{26828762-C95D-4637-9CB1-7F0979523813}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testsprite2", "tests\testsprite2\testsprite2_VS2012.vcxproj", "{40FB7794-D3C3-4CFE-BCF4-A80C96635682}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testshape", "tests\testshape\testshape_VS2012.vcxproj", "{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testdraw2", "tests\testdraw2\testdraw2_VS2012.vcxproj", "{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testpower", "tests\testpower\testpower_VS2012.vcxproj", "{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}"
++	ProjectSection(ProjectDependencies) = postProject
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
++	EndProjectSection
++EndProject
++Global
++	GlobalSection(SolutionConfigurationPlatforms) = preSolution
++		Debug|Win32 = Debug|Win32
++		Debug|x64 = Debug|x64
++		Release|Win32 = Release|Win32
++		Release|x64 = Release|x64
++	EndGlobalSection
++	GlobalSection(ProjectConfigurationPlatforms) = postSolution
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Debug|Win32.ActiveCfg = Debug|Win32
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Debug|Win32.Build.0 = Debug|Win32
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Debug|x64.ActiveCfg = Debug|x64
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Debug|x64.Build.0 = Debug|x64
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Release|Win32.ActiveCfg = Release|Win32
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Release|Win32.Build.0 = Release|Win32
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Release|x64.ActiveCfg = Release|x64
++		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}.Release|x64.Build.0 = Release|x64
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Debug|Win32.ActiveCfg = Debug|Win32
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Debug|Win32.Build.0 = Debug|Win32
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Debug|x64.ActiveCfg = Debug|x64
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Debug|x64.Build.0 = Debug|x64
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|Win32.ActiveCfg = Release|Win32
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|Win32.Build.0 = Release|Win32
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.ActiveCfg = Release|x64
++		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}.Release|x64.Build.0 = Release|x64
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|Win32.ActiveCfg = Debug|Win32
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|Win32.Build.0 = Debug|Win32
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|x64.ActiveCfg = Debug|x64
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Debug|x64.Build.0 = Debug|x64
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|Win32.ActiveCfg = Release|Win32
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|Win32.Build.0 = Release|Win32
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}.Release|x64.ActiveCfg = Release|Win32
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Debug|Win32.ActiveCfg = Debug|Win32
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Debug|Win32.Build.0 = Debug|Win32
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Debug|x64.ActiveCfg = Debug|x64
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Debug|x64.Build.0 = Debug|x64
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Release|Win32.ActiveCfg = Release|Win32
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Release|Win32.Build.0 = Release|Win32
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}.Release|x64.ActiveCfg = Release|Win32
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Debug|Win32.ActiveCfg = Debug|Win32
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Debug|Win32.Build.0 = Debug|Win32
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Debug|x64.ActiveCfg = Debug|x64
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Debug|x64.Build.0 = Debug|x64
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Release|Win32.ActiveCfg = Release|Win32
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Release|Win32.Build.0 = Release|Win32
++		{26932B24-EFC6-4E3A-B277-ED653DA37968}.Release|x64.ActiveCfg = Release|Win32
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Debug|Win32.ActiveCfg = Debug|Win32
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Debug|Win32.Build.0 = Debug|Win32
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Debug|x64.ActiveCfg = Debug|x64
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Debug|x64.Build.0 = Debug|x64
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Release|Win32.ActiveCfg = Release|Win32
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Release|Win32.Build.0 = Release|Win32
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0}.Release|x64.ActiveCfg = Release|Win32
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Debug|Win32.ActiveCfg = Debug|Win32
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Debug|Win32.Build.0 = Debug|Win32
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Debug|x64.ActiveCfg = Debug|x64
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Debug|x64.Build.0 = Debug|x64
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Release|Win32.ActiveCfg = Release|Win32
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Release|Win32.Build.0 = Release|Win32
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}.Release|x64.ActiveCfg = Release|Win32
++		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|Win32.ActiveCfg = Debug|Win32
++		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|Win32.Build.0 = Debug|Win32
++		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|x64.ActiveCfg = Debug|x64
++		{26828762-C95D-4637-9CB1-7F0979523813}.Debug|x64.Build.0 = Debug|x64
++		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.ActiveCfg = Release|Win32
++		{26828762-C95D-4637-9CB1-7F0979523813}.Release|Win32.Build.0 = Release|Win32
++		{26828762-C95D-4637-9CB1-7F0979523813}.Release|x64.ActiveCfg = Release|Win32
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|Win32.ActiveCfg = Debug|Win32
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|Win32.Build.0 = Debug|Win32
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|x64.ActiveCfg = Debug|x64
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Debug|x64.Build.0 = Debug|x64
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Release|Win32.ActiveCfg = Release|Win32
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Release|Win32.Build.0 = Release|Win32
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682}.Release|x64.ActiveCfg = Release|Win32
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Debug|Win32.ActiveCfg = Debug|Win32
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Debug|Win32.Build.0 = Debug|Win32
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Debug|x64.ActiveCfg = Debug|x64
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Debug|x64.Build.0 = Debug|x64
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Release|Win32.ActiveCfg = Release|Win32
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}.Release|x64.ActiveCfg = Release|Win32
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Debug|Win32.ActiveCfg = Debug|Win32
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Debug|Win32.Build.0 = Debug|Win32
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Debug|x64.ActiveCfg = Debug|x64
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Debug|x64.Build.0 = Debug|x64
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Release|Win32.ActiveCfg = Release|Win32
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Release|Win32.Build.0 = Release|Win32
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}.Release|x64.ActiveCfg = Release|Win32
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|Win32.ActiveCfg = Debug|Win32
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|Win32.Build.0 = Debug|Win32
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|x64.ActiveCfg = Debug|x64
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Debug|x64.Build.0 = Debug|x64
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.ActiveCfg = Release|Win32
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.Build.0 = Release|Win32
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|x64.ActiveCfg = Release|Win32
++	EndGlobalSection
++	GlobalSection(SolutionProperties) = preSolution
++		HideSolutionNode = FALSE
++	EndGlobalSection
++	GlobalSection(NestedProjects) = preSolution
++		{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{26932B24-EFC6-4E3A-B277-ED653DA37968} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{CAE4F1D0-314F-4B10-805B-0EFD670133A0} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{8B5CFB38-CCBA-40A8-AD7A-89C57B070884} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{26828762-C95D-4637-9CB1-7F0979523813} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{40FB7794-D3C3-4CFE-BCF4-A80C96635682} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{EDEA9D00-AF64-45DE-8F60-5957048F2F0F} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3} = {CE748C1F-3C21-4825-AA6A-F895A023F7E7}
++	EndGlobalSection
++EndGlobal
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/SDLmain/SDLmain_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/SDLmain/SDLmain_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,163 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>SDLmain</ProjectName>
++    <ProjectGuid>{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>StaticLibrary</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <PreBuildEvent />
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\include;..\..\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <Lib>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <TargetEnvironment>X64</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\include;..\..\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <Lib>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <PreBuildEvent />
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\include;..\..\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <Lib>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <TargetEnvironment>X64</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\include;..\..\include\SDL;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <PrecompiledHeaderOutputFile>.\Debug/SDLmain.pch</PrecompiledHeaderOutputFile>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>OldStyle</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <Lib>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Lib>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\src\main\windows\SDL_windows_main.c" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/automated/automated_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/automated/automated_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,189 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>automated</ProjectName>
++    <ProjectGuid>{DDD710DB-EC7B-4CCB-BD75-535D401A2FE0}</ProjectGuid>
++    <RootNamespace>automated</RootNamespace>
++    <Keyword>Win32Proj</Keyword>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <CharacterSet>Unicode</CharacterSet>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <CharacterSet>Unicode</CharacterSet>
++    <WholeProgramOptimization>true</WholeProgramOptimization>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <CharacterSet>Unicode</CharacterSet>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <CharacterSet>MultiByte</CharacterSet>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>$(SolutionDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MinimalRebuild>true</MinimalRebuild>
++      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <TargetMachine>MachineX86</TargetMachine>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>$(SolutionDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <ClCompile>
++      <Optimization>MaxSpeed</Optimization>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <AdditionalIncludeDirectories>$(SolutionDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <OptimizeReferences>true</OptimizeReferences>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++      <TargetMachine>MachineX86</TargetMachine>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <ClCompile>
++      <Optimization>MaxSpeed</Optimization>
++      <IntrinsicFunctions>true</IntrinsicFunctions>
++      <AdditionalIncludeDirectories>$(SolutionDir)..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <Link>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++      <OptimizeReferences>true</OptimizeReferences>
++      <EnableCOMDATFolding>true</EnableCOMDATFolding>
++    </Link>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\automated\audio\audio.c" />
++    <ClCompile Include="..\..\..\test\automated\common\common.c" />
++    <ClCompile Include="..\..\..\test\automated\platform\platform.c" />
++    <ClCompile Include="..\..\..\test\automated\rect\rect.c" />
++    <ClCompile Include="..\..\..\test\automated\render\render.c" />
++    <ClCompile Include="..\..\..\test\automated\rwops\rwops.c" />
++    <ClCompile Include="..\..\..\test\automated\rwops\TestSupportRWops_Generic.c" />
++    <ClCompile Include="..\..\..\test\automated\SDL_at.c" />
++    <ClCompile Include="..\..\..\test\automated\surface\surface.c" />
++    <ClCompile Include="..\..\..\test\automated\testsdl.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClInclude Include="..\..\..\test\automated\audio\audio.h" />
++    <ClInclude Include="..\..\..\test\automated\common\common.h" />
++    <ClInclude Include="..\..\..\test\automated\common\images.h" />
++    <ClInclude Include="..\..\..\test\automated\platform\platform.h" />
++    <ClInclude Include="..\..\..\test\automated\render\render.h" />
++    <ClInclude Include="..\..\..\test\automated\rwops\rwops.h" />
++    <ClInclude Include="..\..\..\test\automated\SDL_at.h" />
++    <ClInclude Include="..\..\..\test\automated\surface\surface.h" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/checkkeys/checkkeys_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/checkkeys/checkkeys_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,231 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>checkkeys</ProjectName>
++    <RootNamespace>checkkeys</RootNamespace>
++    <ProjectGuid>{26828762-C95D-4637-9CB1-7F0979523813}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\checkkeys.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/loopwave/loopwave_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/loopwave/loopwave_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,231 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>loopwave</ProjectName>
++    <RootNamespace>loopwave</RootNamespace>
++    <ProjectGuid>{AAAD1CB5-7ADA-47AE-85A0-08A6EC48FAFB}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\Test\Loopwave.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testdraw2/testdraw2_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testdraw2/testdraw2_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,232 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testdraw2</ProjectName>
++    <RootNamespace>testdraw2</RootNamespace>
++    <ProjectGuid>{8682FE1E-0CF6-4EDD-9BB5-1733D8C8B4DF}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\common.c" />
++    <ClCompile Include="..\..\..\test\testdraw2.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testfile/testfile_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testfile/testfile_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,231 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testfile</ProjectName>
++    <RootNamespace>testfile</RootNamespace>
++    <ProjectGuid>{CAE4F1D0-314F-4B10-805B-0EFD670133A0}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\Test\testfile.c" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testgl2/testgl2_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testgl2/testgl2_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,236 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testgl2</ProjectName>
++    <RootNamespace>testgl2</RootNamespace>
++    <ProjectGuid>{8B5CFB38-CCBA-40A8-AD7A-89C57B070884}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;HAVE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;HAVE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;HAVE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;HAVE_OPENGL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\common.c" />
++    <ClCompile Include="..\..\..\test\testgl2.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testplatform/testplatform_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testplatform/testplatform_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,250 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testplatform</ProjectName>
++    <RootNamespace>testplatform</RootNamespace>
++    <ProjectGuid>{26932B24-EFC6-4E3A-B277-ED653DA37968}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MinimalRebuild>true</MinimalRebuild>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <Bscmake>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Bscmake>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <Bscmake>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Bscmake>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++      <TypeLibraryName>.\Release/testplatform.tlb</TypeLibraryName>
++      <HeaderFileName>
++      </HeaderFileName>
++    </Midl>
++    <ClCompile>
++      <Optimization>MaxSpeed</Optimization>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeaderOutputFile>.\Release/testplatform.pch</PrecompiledHeaderOutputFile>
++      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
++      <ObjectFileName>$(IntDir)</ObjectFileName>
++      <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <Bscmake>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Bscmake>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>MaxSpeed</Optimization>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <Bscmake>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Bscmake>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\Test\testplatform.c">
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
++    </ClCompile>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testpower/testpower_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testpower/testpower_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,234 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testpower</ProjectName>
++    <ProjectGuid>{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}</ProjectGuid>
++    <RootNamespace>testpower</RootNamespace>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\testpower.c">
++      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug/testpower.pch</PrecompiledHeaderOutputFile>
++      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\Debug/testpower.pch</PrecompiledHeaderOutputFile>
++    </ClCompile>
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testshape/testshape_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testshape/testshape_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,231 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testshape</ProjectName>
++    <RootNamespace>testshape</RootNamespace>
++    <ProjectGuid>{EDEA9D00-AF64-45DE-8F60-5957048F2F0F}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\testshape.c" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file
+diff -r 4016ef96095a -r a8a5772a0691 VisualC/tests/testsprite2/testsprite2_VS2012.vcxproj
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ b/VisualC/tests/testsprite2/testsprite2_VS2012.vcxproj	Wed Nov 07 09:02:27 2012 -0800
+@@ -0,0 +1,236 @@
++﻿<?xml version="1.0" encoding="utf-8"?>
++<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
++  <ItemGroup Label="ProjectConfigurations">
++    <ProjectConfiguration Include="Debug|Win32">
++      <Configuration>Debug</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Debug|x64">
++      <Configuration>Debug</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|Win32">
++      <Configuration>Release</Configuration>
++      <Platform>Win32</Platform>
++    </ProjectConfiguration>
++    <ProjectConfiguration Include="Release|x64">
++      <Configuration>Release</Configuration>
++      <Platform>x64</Platform>
++    </ProjectConfiguration>
++  </ItemGroup>
++  <PropertyGroup Label="Globals">
++    <ProjectName>testsprite2</ProjectName>
++    <RootNamespace>testsprite2</RootNamespace>
++    <ProjectGuid>{40FB7794-D3C3-4CFE-BCF4-A80C96635682}</ProjectGuid>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <CharacterSet>MultiByte</CharacterSet>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
++    <ConfigurationType>Application</ConfigurationType>
++    <UseOfMfc>false</UseOfMfc>
++    <PlatformToolset>v110</PlatformToolset>
++  </PropertyGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
++  <ImportGroup Label="ExtensionSettings">
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
++    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
++    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC70.props" />
++  </ImportGroup>
++  <PropertyGroup Label="UserMacros" />
++  <PropertyGroup>
++    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</OutDir>
++    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</OutDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Platform)\$(Configuration)\</IntDir>
++    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
++    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
++  </PropertyGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
++copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL and data files</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
++    <Midl>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <StringPooling>true</StringPooling>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
++      <FunctionLevelLinking>true</FunctionLevelLinking>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
++copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL and data files</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <TargetEnvironment>Win32</TargetEnvironment>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
++copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL and data files</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
++    <Midl>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <MkTypLibCompatible>true</MkTypLibCompatible>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++    </Midl>
++    <ClCompile>
++      <Optimization>Disabled</Optimization>
++      <AdditionalIncludeDirectories>..\..\..\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
++      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
++      <PrecompiledHeader>
++      </PrecompiledHeader>
++      <WarningLevel>Level3</WarningLevel>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
++      <CompileAs>Default</CompileAs>
++    </ClCompile>
++    <ResourceCompile>
++      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
++      <Culture>0x0409</Culture>
++    </ResourceCompile>
++    <Link>
++      <SuppressStartupBanner>true</SuppressStartupBanner>
++      <GenerateDebugInformation>true</GenerateDebugInformation>
++      <SubSystem>Windows</SubSystem>
++    </Link>
++    <PostBuildEvent>
++      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"
++copy "$(SolutionDir)\..\test\icon.bmp" "$(TargetDir)\icon.bmp"</Command>
++    </PostBuildEvent>
++    <PostBuildEvent>
++      <Message>Copy SDL and data files</Message>
++    </PostBuildEvent>
++  </ItemDefinitionGroup>
++  <ItemGroup>
++    <ClCompile Include="..\..\..\test\common.c" />
++    <ClCompile Include="..\..\..\test\testsprite2.c" />
++  </ItemGroup>
++  <ItemGroup>
++    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
++    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
++  </ItemGroup>
++  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
++  <ImportGroup Label="ExtensionTargets">
++  </ImportGroup>
++</Project>
+\ No newline at end of file

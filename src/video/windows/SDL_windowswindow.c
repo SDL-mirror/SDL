@@ -538,12 +538,11 @@ WIN_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 }
 
 void
-WIN_SetWindowGrab(_THIS, SDL_Window * window)
+WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 
-    if ((window->flags & SDL_WINDOW_INPUT_GRABBED) &&
-        (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+    if (grabbed) {
         RECT rect;
         GetClientRect(hwnd, &rect);
         ClientToScreen(hwnd, (LPPOINT) & rect);

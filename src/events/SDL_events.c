@@ -125,6 +125,8 @@ SDL_StartEventLoop(void)
 
     /* No filter to start with, process most event types */
     SDL_EventOK = NULL;
+    SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
+    SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
     SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
 
     /* Create the lock and set ourselves active */

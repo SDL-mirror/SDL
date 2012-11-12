@@ -21,6 +21,7 @@
 #include "SDL_config.h"
 #include "SDL_stdinc.h"
 #include "SDL_assert.h"
+#include "SDL_log.h"
 
 #ifdef __ANDROID__
 
@@ -41,6 +42,8 @@ extern "C" {
 #define LOGI(...) do {} while (false)
 #define LOGE(...) do {} while (false)
 
+/* Uncomment this to log messages entering and exiting methods in this file */
+//#define DEBUG_JNI
 
 /* Implemented in audio/android/SDL_androidaudio.c */
 extern void Android_RunAudioThread();
@@ -243,7 +246,6 @@ extern "C" void Java_org_libsdl_app_SDLInputConnection_nativeSetComposingText(
 
 
 
-
 /*******************************************************************************
              Functions called by SDL into Java
 *******************************************************************************/
@@ -259,8 +261,15 @@ public:
     }
 
 public:
-    LocalReferenceHolder() : m_env(NULL) { }
+    LocalReferenceHolder(const char *func) : m_env(NULL), m_func(func) {
+#ifdef DEBUG_JNI
+        SDL_Log("Entering function %s", m_func);
+#endif
+    }
     ~LocalReferenceHolder() {
+#ifdef DEBUG_JNI
+        SDL_Log("Leaving function %s", m_func);
+#endif
         if (m_env) {
             m_env->PopLocalFrame(NULL);
             --s_active;
@@ -279,6 +288,7 @@ public:
 
 protected:
     JNIEnv *m_env;
+    const char *m_func;
 };
 int LocalReferenceHolder::s_active;
 
@@ -497,7 +507,7 @@ static bool Android_JNI_ExceptionOccurred()
 
 static int Android_JNI_FileOpen(SDL_RWops* ctx)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     int result = 0;
 
     jmethodID mid;
@@ -592,7 +602,7 @@ failure:
 extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
         const char* fileName, const char*)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     JNIEnv *mEnv = Android_JNI_GetEnv();
 
     if (!refs.init(mEnv)) {
@@ -615,7 +625,7 @@ extern "C" int Android_JNI_FileOpen(SDL_RWops* ctx,
 extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         size_t size, size_t maxnum)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     jlong bytesRemaining = (jlong) (size * maxnum);
     jlong bytesMax = (jlong) (ctx->hidden.androidio.size -  ctx->hidden.androidio.position);
     int bytesRead = 0;
@@ -661,7 +671,7 @@ extern "C" size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer,
 
 static int Android_JNI_FileClose(SDL_RWops* ctx, bool release)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     int result = 0;
     JNIEnv *mEnv = Android_JNI_GetEnv();
 
@@ -731,7 +741,7 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
 
     Sint64 movement = newPosition - ctx->hidden.androidio.position;
     if (movement > 0) {
-        unsigned char buffer[1024];
+        unsigned char buffer[4096];
 
         // The easy case where we're seeking forwards
         while (movement > 0) {
@@ -767,7 +777,7 @@ extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
 // returns a new global reference which needs to be released later
 static jobject Android_JNI_GetSystemServiceObject(const char* name)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     JNIEnv* env = Android_JNI_GetEnv();
     if (!refs.init(env)) {
         return NULL;
@@ -789,7 +799,7 @@ static jobject Android_JNI_GetSystemServiceObject(const char* name)
 }
 
 #define SETUP_CLIPBOARD(error) \
-    LocalReferenceHolder refs; \
+    LocalReferenceHolder refs(__FUNCTION__); \
     JNIEnv* env = Android_JNI_GetEnv(); \
     if (!refs.init(env)) { \
         return error; \
@@ -847,7 +857,7 @@ extern "C" SDL_bool Android_JNI_HasClipboardText()
 // returns the value in seconds and percent or -1 if not available
 extern "C" int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seconds, int* percent)
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     JNIEnv* env = Android_JNI_GetEnv();
     if (!refs.init(env)) {
         return -1;
@@ -947,39 +957,30 @@ extern "C" int Android_JNI_SendMessage(int command, int param)
     return 0;
 }
 
-extern "C" int Android_JNI_ShowTextInput(SDL_Rect *inputRect)
+extern "C" void Android_JNI_ShowTextInput(SDL_Rect *inputRect)
 {
     JNIEnv *env = Android_JNI_GetEnv();
     if (!env) {
-        return -1;
+        return;
     }
 
     jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)V");
     if (!mid) {
-        return -1;
+        return;
     }
     env->CallStaticVoidMethod( mActivityClass, mid,
                                inputRect->x,
                                inputRect->y,
                                inputRect->w,
                                inputRect->h );
-    return 0;
 }
 
-/*extern "C" int Android_JNI_HideTextInput()
+extern "C" void Android_JNI_HideTextInput()
 {
-    JNIEnv *env = Android_JNI_GetEnv();
-    if (!env) {
-        return -1;
-    }
-
-    jmethodID mid = env->GetStaticMethodID(mActivityClass, "hideTextInput", "()V");
-    if (!mid) {
-        return -1;
-    }
-    env->CallStaticVoidMethod(mActivityClass, mid);
-    return 0;
-}*/
+    // has to match Activity constant
+    const int COMMAND_TEXTEDIT_HIDE = 3;
+    Android_JNI_SendMessage(COMMAND_TEXTEDIT_HIDE, 0);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -993,7 +994,7 @@ extern "C" void *SDL_AndroidGetJNIEnv()
 
 extern "C" void *SDL_AndroidGetActivity()
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     jmethodID mid;
 
     JNIEnv *env = Android_JNI_GetEnv();
@@ -1012,7 +1013,7 @@ extern "C" const char * SDL_AndroidGetInternalStoragePath()
     static char *s_AndroidInternalFilesPath = NULL;
 
     if (!s_AndroidInternalFilesPath) {
-        LocalReferenceHolder refs;
+        LocalReferenceHolder refs(__FUNCTION__);
         jmethodID mid;
         jobject context;
         jobject fileObject;
@@ -1052,7 +1053,7 @@ extern "C" const char * SDL_AndroidGetInternalStoragePath()
 
 extern "C" int SDL_AndroidGetExternalStorageState()
 {
-    LocalReferenceHolder refs;
+    LocalReferenceHolder refs(__FUNCTION__);
     jmethodID mid;
     jclass cls;
     jstring stateString;
@@ -1092,7 +1093,7 @@ extern "C" const char * SDL_AndroidGetExternalStoragePath()
     static char *s_AndroidExternalFilesPath = NULL;
 
     if (!s_AndroidExternalFilesPath) {
-        LocalReferenceHolder refs;
+        LocalReferenceHolder refs(__FUNCTION__);
         jmethodID mid;
         jobject context;
         jobject fileObject;

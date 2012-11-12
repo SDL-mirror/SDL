@@ -947,6 +947,7 @@ int SDL_ConvertPixels(int width, int height,
             case SDL_PIXELFORMAT_UYVY:
             case SDL_PIXELFORMAT_YVYU:
                 bpp = 2;
+                break;
             default:
                 SDL_SetError("Unknown FOURCC pixel format");
                 return -1;

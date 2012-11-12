@@ -56,8 +56,6 @@ typedef struct SDL_WindowData SDL_WindowData;
 -(void) mouseUp:(NSEvent *) theEvent;
 -(void) rightMouseUp:(NSEvent *) theEvent;
 -(void) otherMouseUp:(NSEvent *) theEvent;
--(void) mouseEntered:(NSEvent *)theEvent;
--(void) mouseExited:(NSEvent *)theEvent;
 -(void) mouseMoved:(NSEvent *) theEvent;
 -(void) mouseDragged:(NSEvent *) theEvent;
 -(void) rightMouseDragged:(NSEvent *) theEvent;
@@ -106,7 +104,7 @@ extern void Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordere
 extern void Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 extern int Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 extern int Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
-extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window);
+extern void Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
 extern void Cocoa_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window,
                                       struct SDL_SysWMinfo *info);

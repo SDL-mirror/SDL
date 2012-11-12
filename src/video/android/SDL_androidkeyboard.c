@@ -287,38 +287,16 @@ Android_OnKeyUp(int keycode)
     return SDL_SendKeyboardKey(SDL_RELEASED, TranslateKeycode(keycode));
 }
 
-// has to fit Activity constant
-#define COMMAND_KEYBOARD_SHOW 2
-
 SDL_bool
-Android_HasScreenKeyboardSupport(_THIS, SDL_Window * window)
+Android_HasScreenKeyboardSupport(_THIS)
 {
-    return Android_Window ? SDL_TRUE : SDL_FALSE;
-}
-
-int
-Android_ShowScreenKeyboard(_THIS, SDL_Window * window)
-{
-    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 1) : -1;
-}
-
-int
-Android_HideScreenKeyboard(_THIS, SDL_Window * window)
-{
-    
-    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 0) : -1;
-}
-
-int
-Android_ToggleScreenKeyboard(_THIS, SDL_Window * window)
-{
-    return Android_Window ? Android_JNI_SendMessage(COMMAND_KEYBOARD_SHOW, 2) : -1;
+    return SDL_TRUE;
 }
 
 SDL_bool
 Android_IsScreenKeyboardShown(_THIS, SDL_Window * window)
 {
-    return SDL_FALSE;
+    return SDL_IsTextInputActive();
 }
 
 void
@@ -328,11 +306,10 @@ Android_StartTextInput(_THIS)
     Android_JNI_ShowTextInput(&videodata->textRect);
 }
 
-#define COMMAND_TEXTEDIT_HIDE 3
 void
 Android_StopTextInput(_THIS)
 {
-    Android_JNI_SendMessage(COMMAND_TEXTEDIT_HIDE, 0);
+    Android_JNI_HideTextInput();
 }
 
 void
