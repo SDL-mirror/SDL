@@ -517,6 +517,25 @@ extern DECLSPEC void SDLCALL SDL_SetWindowSize(SDL_Window * window, int w,
  */
 extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
                                                int *h);
+    
+/**
+ *  \brief Set the minimum size of a window's client area.
+ *
+ *  \note You can't change the minimum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
+                                                      int min_w, int min_h);
+    
+/**
+ *  \brief Get the minimum size of a window's client area.
+ *
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
+                                                      int *w, int *h);
 
 /**
  *  \brief Set the border state of a window.

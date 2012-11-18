@@ -23,6 +23,10 @@ build
 *.pbxuser
 (^|/)build($|/)
 .DS_Store
+Xcode/SDL/SDL.xcodeproj/xcuserdata
+Xcode/SDL/SDL.xcodeproj/project.xcworkspace/xcuserdata
+Xcode/SDL/SDLTest.xcodeproj/xcuserdata
+Xcode/SDL/SDLTest.xcodeproj/project.xcworkspace/xcuserdata
 
 # for Visual C++
 Debug
