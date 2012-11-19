@@ -24,6 +24,9 @@
 
 #include "../SDL_sysvideo.h"
 #include "SDL_winrtframebuffer_c.h"
+#include "SDL_WinRTApp.h"
+
+extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 
 #define WINRT_SURFACE   "_SDL_WinRTSurface"
@@ -76,6 +79,9 @@ int SDL_WINRT_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rec
                      SDL_GetWindowID(window), ++frame_number);
         SDL_SaveBMP(surface, file);
     }
+
+    SDL_WinRTGlobalApp->UpdateWindowFramebuffer(surface, rects, numrects);
+
     return 0;
 }
 

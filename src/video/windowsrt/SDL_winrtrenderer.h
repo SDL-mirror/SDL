@@ -16,14 +16,13 @@ struct VertexPositionColor
 };
 
 // This class renders a simple spinning cube.
-ref class CubeRenderer sealed : public Direct3DBase
+ref class SDL_winrtrenderer sealed : public Direct3DBase
 {
 public:
-	CubeRenderer();
+	SDL_winrtrenderer();
 
 	// Direct3DBase methods.
 	virtual void CreateDeviceResources() override;
-	virtual void CreateWindowSizeDependentResources() override;
 	virtual void Render() override;
 	
 	// Method for updating time-dependent objects.
@@ -34,11 +33,11 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_indexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterState;
 
-	uint32 m_indexCount;
+	uint32 m_vertexCount;
 	ModelViewProjectionConstantBuffer m_constantBufferData;
 };

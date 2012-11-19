@@ -2,7 +2,7 @@
 
 #include "SDLmain_WinRT_common.h"
 #include "SDL_winrtvideo.h"
-#include "CubeRenderer.h"
+#include "SDL_winrtrenderer.h"
 #include <vector>
 
 using namespace Windows::UI::Core;
@@ -26,6 +26,7 @@ internal:
     const SDL_WindowData * GetSDLWindowData() const;
     bool HasSDLWindowData() const;
     void SetSDLWindowData(const SDL_WindowData * windowData);
+    void UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects);
 
 protected:
 	// Event Handlers.
@@ -43,7 +44,7 @@ protected:
     void OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
 
 private:
-	CubeRenderer^ m_renderer;
+	SDL_winrtrenderer^ m_renderer;
 	bool m_windowClosed;
 	bool m_windowVisible;
     const SDL_WindowData* m_sdlWindowData;
