@@ -528,6 +528,26 @@ SDL_CreateColorCursor(SDL_Surface *surface, int hot_x, int hot_y)
     return cursor;
 }
 
+SDL_Cursor *
+SDL_CreateSystemCursor(SDL_SystemCursor id)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+    SDL_Cursor *cursor;
+
+    if (!mouse->CreateSystemCursor) {
+        SDL_SetError("CreateSystemCursor is not currently supported");
+        return NULL;
+    }
+
+	cursor = mouse->CreateSystemCursor(id);
+    if (cursor) {
+        cursor->next = mouse->cursors;
+        mouse->cursors = cursor;
+    }
+
+	return cursor;
+}
+
 /* SDL_SetCursor(NULL) can be used to force the cursor redraw,
    if this is desired for any reason.  This is used when setting
    the video mode and when the SDL window gains the mouse focus.

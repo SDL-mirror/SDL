@@ -36,6 +36,9 @@ typedef struct
     /* Create a cursor from a surface */
     SDL_Cursor *(*CreateCursor) (SDL_Surface * surface, int hot_x, int hot_y);
 
+    /* Create a system cursor */
+	SDL_Cursor *(*CreateSystemCursor) (SDL_SystemCursor id);
+
     /* Show the specified cursor, or hide if cursor is NULL */
     int (*ShowCursor) (SDL_Cursor * cursor);
 
