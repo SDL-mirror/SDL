@@ -28,8 +28,26 @@ quit(int rc)
 int
 main(int argc, char *argv[])
 {
+    static const char *cursorNames[] = {
+        "arrow",
+        "ibeam",
+        "wait",
+        "crosshair",
+        "waitarrow",
+        "sizeNWSE",
+        "sizeNESW",
+        "sizeWE",
+        "sizeNS",
+        "sizeALL",
+        "NO",
+        "hand",
+    };
+    SDL_assert(SDL_arraysize(cursorNames) == SDL_NUM_SYSTEM_CURSORS);
+
     int i, done;
     SDL_Event event;
+    int system_cursor = -1;
+    SDL_Cursor *cursor = NULL;
 
     /* Initialize test framework */
     state = CommonCreateState(argv, SDL_INIT_VIDEO);
@@ -73,8 +91,33 @@ main(int argc, char *argv[])
                     }
                 }
             }
+            if (event.type == SDL_KEYUP) {
+                SDL_bool updateCursor = SDL_FALSE;
+
+                if (event.key.keysym.sym == SDLK_LEFT) {
+                    --system_cursor;
+                    if (system_cursor < 0) {
+                        system_cursor = SDL_NUM_SYSTEM_CURSORS - 1;
+                    }
+                    updateCursor = SDL_TRUE;
+                } else if (event.key.keysym.sym == SDLK_RIGHT) {
+                    ++system_cursor;
+                    if (system_cursor >= SDL_NUM_SYSTEM_CURSORS) {
+                        system_cursor = 0;
+                    }
+                    updateCursor = SDL_TRUE;
+                }
+                if (updateCursor) {
+                    SDL_Log("Changing cursor to \"%s\"", cursorNames[system_cursor]);
+                    SDL_FreeCursor(cursor);
+                    cursor = SDL_CreateSystemCursor((SDL_SystemCursor)system_cursor);
+                    SDL_SetCursor(cursor);
+                }
+            }
         }
     }
+    SDL_FreeCursor(cursor);
+
     quit(0);
 	// keep the compiler happy ...
 	return(0);

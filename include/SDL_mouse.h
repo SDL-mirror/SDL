@@ -75,6 +75,7 @@ typedef enum
     SDL_SYSTEM_CURSOR_SIZEALL,   // Four pointed arrow pointing north, south, east, and west
     SDL_SYSTEM_CURSOR_NO,        // Slashed circle or crossbones
     SDL_SYSTEM_CURSOR_HAND,      // Hand
+    SDL_NUM_SYSTEM_CURSORS
 } SDL_SystemCursor;
 
 /* Function prototypes */
