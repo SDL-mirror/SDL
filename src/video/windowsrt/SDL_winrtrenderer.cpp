@@ -1,18 +1,18 @@
 ﻿#include "SDLmain_WinRT_common.h"
-#include "CubeRenderer.h"
+#include "SDL_winrtrenderer.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace Windows::Foundation;
 using namespace Windows::UI::Core;
 
-CubeRenderer::CubeRenderer() :
+SDL_winrtrenderer::SDL_winrtrenderer() :
 	m_loadingComplete(false),
-	m_indexCount(0)
+	m_vertexCount(0)
 {
 }
 
-void CubeRenderer::CreateDeviceResources()
+void SDL_winrtrenderer::CreateDeviceResources()
 {
 	Direct3DBase::CreateDeviceResources();
 
@@ -69,15 +69,13 @@ void CubeRenderer::CreateDeviceResources()
 	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
 		VertexPositionColor cubeVertices[] = 
 		{
-			{XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, 0.0f)},
-			{XMFLOAT3(-0.5f, -0.5f,  0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-			{XMFLOAT3(-0.5f,  0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-			{XMFLOAT3(-0.5f,  0.5f,  0.5f), XMFLOAT3(0.0f, 1.0f, 1.0f)},
-			{XMFLOAT3( 0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-			{XMFLOAT3( 0.5f, -0.5f,  0.5f), XMFLOAT3(1.0f, 0.0f, 1.0f)},
-			{XMFLOAT3( 0.5f,  0.5f, -0.5f), XMFLOAT3(1.0f, 1.0f, 0.0f)},
-			{XMFLOAT3( 0.5f,  0.5f,  0.5f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
+			{XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
+			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
+			{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
+			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
 		};
+
+		m_vertexCount = ARRAYSIZE(cubeVertices);
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
 		vertexBufferData.pSysMem = cubeVertices;
@@ -91,42 +89,6 @@ void CubeRenderer::CreateDeviceResources()
 				&m_vertexBuffer
 				)
 			);
-
-		unsigned short cubeIndices[] = 
-		{
-			0,2,1, // -x
-			1,2,3,
-
-			4,5,6, // +x
-			5,7,6,
-
-			0,1,5, // -y
-			0,5,4,
-
-			2,6,7, // +y
-			2,7,3,
-
-			0,4,6, // -z
-			0,6,2,
-
-			1,3,7, // +z
-			1,7,5,
-		};
-
-		m_indexCount = ARRAYSIZE(cubeIndices);
-
-		D3D11_SUBRESOURCE_DATA indexBufferData = {0};
-		indexBufferData.pSysMem = cubeIndices;
-		indexBufferData.SysMemPitch = 0;
-		indexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC indexBufferDesc(sizeof(cubeIndices), D3D11_BIND_INDEX_BUFFER);
-		DX::ThrowIfFailed(
-			m_d3dDevice->CreateBuffer(
-				&indexBufferDesc,
-				&indexBufferData,
-				&m_indexBuffer
-				)
-			);
 	});
 
 	createCubeTask.then([this] () {
@@ -134,35 +96,7 @@ void CubeRenderer::CreateDeviceResources()
 	});
 }
 
-void CubeRenderer::CreateWindowSizeDependentResources()
-{
-	Direct3DBase::CreateWindowSizeDependentResources();
-
-	float aspectRatio = m_windowBounds.Width / m_windowBounds.Height;
-	float fovAngleY = 70.0f * XM_PI / 180.0f;
-
-	// Note that the m_orientationTransform3D matrix is post-multiplied here
-	// in order to correctly orient the scene to match the display orientation.
-	// This post-multiplication step is required for any draw calls that are
-	// made to the swap chain render target. For draw calls to other targets,
-	// this transform should not be applied.
-	XMStoreFloat4x4(
-		&m_constantBufferData.projection,
-		XMMatrixTranspose(
-			XMMatrixMultiply(
-				XMMatrixPerspectiveFovRH(
-					fovAngleY,
-					aspectRatio,
-					0.01f,
-					100.0f
-					),
-				XMLoadFloat4x4(&m_orientationTransform3D)
-				)
-			)
-		);
-}
-
-void CubeRenderer::Update(float timeTotal, float timeDelta)
+void SDL_winrtrenderer::Update(float timeTotal, float timeDelta)
 {
 	(void) timeDelta; // Unused parameter.
 
@@ -170,11 +104,11 @@ void CubeRenderer::Update(float timeTotal, float timeDelta)
 	XMVECTOR at = XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
 	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(XMMatrixRotationY(timeTotal * XM_PIDIV4)));
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixIdentity());
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixIdentity());
 }
 
-void CubeRenderer::Render()
+void SDL_winrtrenderer::Render()
 {
 	const float midnightBlue[] = { 0.098f, 0.098f, 0.439f, 1.000f };
 	m_d3dContext->ClearRenderTargetView(
@@ -194,6 +128,8 @@ void CubeRenderer::Render()
 	{
 		return;
 	}
+
+	m_d3dContext->RSSetState(m_rasterState.Get());
 
 	m_d3dContext->OMSetRenderTargets(
 		1,
@@ -220,13 +156,7 @@ void CubeRenderer::Render()
 		&offset
 		);
 
-	m_d3dContext->IASetIndexBuffer(
-		m_indexBuffer.Get(),
-		DXGI_FORMAT_R16_UINT,
-		0
-		);
-
-	m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
 	m_d3dContext->IASetInputLayout(m_inputLayout.Get());
 
@@ -248,9 +178,5 @@ void CubeRenderer::Render()
 		0
 		);
 
-	m_d3dContext->DrawIndexed(
-		m_indexCount,
-		0,
-		0
-		);
+	m_d3dContext->Draw(4, 0);
 }

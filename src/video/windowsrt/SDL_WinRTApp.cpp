@@ -11,6 +11,9 @@ extern "C" {
 #include "SDL_log.h"
 }
 
+// TODO, WinRT: Remove reference(s) to BasicTimer.h
+#include "BasicTimer.h"
+
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
 // This seems wrong on some level, but does seem to work.
@@ -54,7 +57,7 @@ void SDL_WinRTApp::Initialize(CoreApplicationView^ applicationView)
 	CoreApplication::Resuming +=
         ref new EventHandler<Platform::Object^>(this, &SDL_WinRTApp::OnResuming);
 
-	m_renderer = ref new CubeRenderer();
+	m_renderer = ref new SDL_winrtrenderer();
 }
 
 void SDL_WinRTApp::SetWindow(CoreWindow^ window)
@@ -112,14 +115,21 @@ void SDL_WinRTApp::PumpEvents()
 		if (m_windowVisible)
 		{
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
-			m_renderer->Update(0.0f, 0.0f);
-			m_renderer->Render();
-			m_renderer->Present(); // This call is synchronized to the display frame rate.
 		}
 		else
 		{
 			CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
 		}
+	}
+}
+
+void SDL_WinRTApp::UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects)
+{
+    if (!m_windowClosed && m_windowVisible)
+	{
+		m_renderer->Update(0.0f, 0.0f);
+		m_renderer->Render();
+		m_renderer->Present(); // This call is synchronized to the display frame rate.
 	}
 }
 
