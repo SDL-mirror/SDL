@@ -108,8 +108,6 @@ void SDL_winrtrenderer::Render()
 		return;
 	}
 
-	m_d3dContext->RSSetState(m_rasterState.Get());
-
 	m_d3dContext->OMSetRenderTargets(
 		1,
 		m_renderTargetView.GetAddressOf(),

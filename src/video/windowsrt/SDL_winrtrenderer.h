@@ -25,8 +25,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> m_constantBuffer;
-	Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterState;
 
 	uint32 m_vertexCount;
 };
