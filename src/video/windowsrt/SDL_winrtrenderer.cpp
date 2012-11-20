@@ -55,15 +55,6 @@ void SDL_winrtrenderer::CreateDeviceResources()
 				&m_pixelShader
 				)
 			);
-
-		CD3D11_BUFFER_DESC constantBufferDesc(sizeof(ModelViewProjectionConstantBuffer), D3D11_BIND_CONSTANT_BUFFER);
-		DX::ThrowIfFailed(
-			m_d3dDevice->CreateBuffer(
-				&constantBufferDesc,
-				nullptr,
-				&m_constantBuffer
-				)
-			);
 	});
 
 	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
@@ -96,18 +87,6 @@ void SDL_winrtrenderer::CreateDeviceResources()
 	});
 }
 
-void SDL_winrtrenderer::Update(float timeTotal, float timeDelta)
-{
-	(void) timeDelta; // Unused parameter.
-
-	XMVECTOR eye = XMVectorSet(0.0f, 0.7f, 1.5f, 0.0f);
-	XMVECTOR at = XMVectorSet(0.0f, -0.1f, 0.0f, 0.0f);
-	XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixIdentity());
-	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixIdentity());
-}
-
 void SDL_winrtrenderer::Render()
 {
 	const float midnightBlue[] = { 0.098f, 0.098f, 0.439f, 1.000f };
@@ -137,15 +116,6 @@ void SDL_winrtrenderer::Render()
 		m_depthStencilView.Get()
 		);
 
-	m_d3dContext->UpdateSubresource(
-		m_constantBuffer.Get(),
-		0,
-		NULL,
-		&m_constantBufferData,
-		0,
-		0
-		);
-
 	UINT stride = sizeof(VertexPositionColor);
 	UINT offset = 0;
 	m_d3dContext->IASetVertexBuffers(
@@ -164,12 +134,6 @@ void SDL_winrtrenderer::Render()
 		m_vertexShader.Get(),
 		nullptr,
 		0
-		);
-
-	m_d3dContext->VSSetConstantBuffers(
-		0,
-		1,
-		m_constantBuffer.GetAddressOf()
 		);
 
 	m_d3dContext->PSSetShader(

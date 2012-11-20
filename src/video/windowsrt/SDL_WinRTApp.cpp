@@ -127,7 +127,6 @@ void SDL_WinRTApp::UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rec
 {
     if (!m_windowClosed && m_windowVisible)
 	{
-		m_renderer->Update(0.0f, 0.0f);
 		m_renderer->Render();
 		m_renderer->Present(); // This call is synchronized to the display frame rate.
 	}
