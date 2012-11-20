@@ -16,8 +16,8 @@ void SDL_winrtrenderer::CreateDeviceResources()
 {
 	Direct3DBase::CreateDeviceResources();
 
-	auto loadVSTask = DX::ReadDataAsync("SimpleVertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync("SimplePixelShader.cso");
+	auto loadVSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimpleVertexShader.cso");
+	auto loadPSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimplePixelShader.cso");
 
 	auto createVSTask = loadVSTask.then([this](Platform::Array<byte>^ fileData) {
 		DX::ThrowIfFailed(
