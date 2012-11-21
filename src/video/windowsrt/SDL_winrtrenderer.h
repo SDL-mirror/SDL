@@ -6,6 +6,7 @@ struct VertexPositionColor
 {
 	DirectX::XMFLOAT3 pos;
 	DirectX::XMFLOAT3 color;
+	DirectX::XMFLOAT2 tex;
 };
 
 // This class renders a simple spinning cube.
@@ -25,6 +26,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_mainTexture;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_mainTextureResourceView;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_mainSampler;
 
 	uint32 m_vertexCount;
 };

@@ -33,6 +33,7 @@ void SDL_winrtrenderer::CreateDeviceResources()
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
 			{ "COLOR",    0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(
@@ -60,10 +61,10 @@ void SDL_winrtrenderer::CreateDeviceResources()
 	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
 		VertexPositionColor cubeVertices[] = 
 		{
-			{XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f)},
-			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f)},
-			{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f)},
-			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f)},
+			{XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
+			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
+			{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f)},
+			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT2(1.0f, 1.0f)},
 		};
 
 		m_vertexCount = ARRAYSIZE(cubeVertices);
@@ -82,7 +83,77 @@ void SDL_winrtrenderer::CreateDeviceResources()
 			);
 	});
 
-	createCubeTask.then([this] () {
+	auto createMainTextureTask = createCubeTask.then([this] () {
+		D3D11_TEXTURE2D_DESC textureDesc = {0};
+		textureDesc.Width = (int)m_windowBounds.Width;
+		textureDesc.Height = (int)m_windowBounds.Height;
+		textureDesc.MipLevels = 1;
+		textureDesc.ArraySize = 1;
+		textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		textureDesc.SampleDesc.Count = 1;
+		textureDesc.SampleDesc.Quality = 0;
+		textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+		textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		textureDesc.MiscFlags = 0;
+
+		int numPixels = (int)m_windowBounds.Width * (int)m_windowBounds.Height;
+		std::vector<uint8> initialTexturePixels(numPixels * 4);
+		for (int i = 0; i < (numPixels * 4); i += 4) {
+			initialTexturePixels[i+0] = 0xFF;
+			initialTexturePixels[i+1] = 0x00;
+			initialTexturePixels[i+2] = 0x00;
+			initialTexturePixels[i+3] = 0xFF;
+		}
+		D3D11_SUBRESOURCE_DATA initialTextureData = {0};
+		initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
+		initialTextureData.SysMemPitch = (int)m_windowBounds.Width * 4;
+		initialTextureData.SysMemSlicePitch = numPixels * 4;
+		DX::ThrowIfFailed(
+			m_d3dDevice->CreateTexture2D(
+				&textureDesc,
+				&initialTextureData,
+				&m_mainTexture
+				)
+			);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
+		resourceViewDesc.Format = textureDesc.Format;
+		resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+		resourceViewDesc.Texture2D.MostDetailedMip = 0;
+		resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
+		DX::ThrowIfFailed(
+			m_d3dDevice->CreateShaderResourceView(
+				m_mainTexture.Get(),
+				&resourceViewDesc,
+				&m_mainTextureResourceView)
+			);
+	});
+
+	auto createMainSamplerTask = createMainTextureTask.then([this] () {
+		D3D11_SAMPLER_DESC samplerDesc;
+		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+		samplerDesc.MipLODBias = 0.0f;
+		samplerDesc.MaxAnisotropy = 1;
+		samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+		samplerDesc.BorderColor[0] = 0.0f;
+		samplerDesc.BorderColor[1] = 0.0f;
+		samplerDesc.BorderColor[2] = 0.0f;
+		samplerDesc.BorderColor[3] = 0.0f;
+		samplerDesc.MinLOD = 0.0f;
+		samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		DX::ThrowIfFailed(
+			m_d3dDevice->CreateSamplerState(
+				&samplerDesc,
+				&m_mainSampler
+				)
+			);
+	});
+
+	createMainSamplerTask.then([this] () {
 		m_loadingComplete = true;
 	});
 }
@@ -139,6 +210,10 @@ void SDL_winrtrenderer::Render()
 		nullptr,
 		0
 		);
+
+	m_d3dContext->PSSetShaderResources(0, 1, m_mainTextureResourceView.GetAddressOf());
+
+	m_d3dContext->PSSetSamplers(0, 1, m_mainSampler.GetAddressOf());
 
 	m_d3dContext->Draw(4, 0);
 }
