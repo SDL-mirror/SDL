@@ -178,6 +178,30 @@ void SDL_winrtrenderer::Render()
 		return;
 	}
 
+	// Update the main texture (for SDL usage):
+	D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
+	DX::ThrowIfFailed(
+		m_d3dContext->Map(
+			m_mainTexture.Get(),
+			0,
+			D3D11_MAP_WRITE_DISCARD,
+			0,
+			&textureMemory)
+		);
+
+	const int max = (int)m_windowBounds.Width * (int)m_windowBounds.Height * 4;
+	uint8 * buf = (uint8 *)textureMemory.pData;
+	for (int i = 0; i < max; i += 4) {
+		buf[i+0] = 0x00;
+		buf[i+1] = 0xFF;
+		buf[i+2] = 0x00;
+		buf[i+3] = 0xFF;
+	}
+
+	m_d3dContext->Unmap(
+		m_mainTexture.Get(),
+		0);
+
 	m_d3dContext->OMSetRenderTargets(
 		1,
 		m_renderTargetView.GetAddressOf(),
