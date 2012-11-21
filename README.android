@@ -38,7 +38,8 @@ src/main/android/SDL_android_main.cpp
 ================================================================================
 
 Instructions:
-1. Copy the android-project directory wherever you want to keep your projects and rename it to the name of your project.
+1. Copy the android-project directory wherever you want to keep your projects
+   and rename it to the name of your project.
 2. Move or symlink this SDL directory into the <project>/jni directory
 3. Edit <project>/jni/src/Android.mk to include your source files
 4. Run 'ndk-build' (a script provided by the NDK). This compiles the C source
@@ -47,28 +48,38 @@ If you want to use the Eclipse IDE, skip to the Eclipse section below.
 
 5. Edit <project>/local.properties to point to the Android SDK directory
 6. Run 'ant debug' in android/project. This compiles the .java and eventually 
-creates a .apk with the native code embedded
+   creates a .apk with the native code embedded
 7. 'ant debug install' will push the apk to the device or emulator (if connected)
 
 Here's an explanation of the files in the Android project, so you can customize them:
 
 android-project/
-	AndroidManifest.xml	- package manifest, customize this for your app
+	AndroidManifest.xml	- package manifest. Among others, it contains the class name
+				  of the main activity.
 	build.properties	- empty
-	build.xml		- build description file, used by ant
-	default.properties	- holds the ABI for the application, currently android-5 which corresponds to the Android 2.0 system image
+	build.xml		- build description file, used by ant. The actual application name
+				  is specified here.
+	default.properties	- holds the target ABI for the application, can range between
+				  android-5 and android-16
 	local.properties	- holds the SDK path, you should change this to the path to your SDK
 	jni/			- directory holding native code
-	jni/Android.mk		- Android makefile that includes all subdirectories
-	jni/SDL/		- directory holding the SDL library files
+	jni/Android.mk		- Android makefile that can call recursively the Android.mk files
+				  in all subdirectories
+	jni/SDL/		- (symlink to) directory holding the SDL library files
 	jni/SDL/Android.mk	- Android makefile for creating the SDL shared library
 	jni/src/		- directory holding your C/C++ source
-	jni/src/Android.mk	- Android makefile that you should customize to include your source code and any library references
+	jni/src/Android.mk	- Android makefile that you should customize to include your 
+                                  source code and any library references
 	res/			- directory holding resources for your application
-	res/drawable-*		- directories holding icons for different phone hardware
-	res/layout/main.xml	- place holder for the main screen layout, overridden by the SDL video output
-	res/values/strings.xml	- strings used in your application, including the application name shown on the phone.
-	src/org/libsdl/app/SDLActivity.java	- the Java class handling the initialization and binding to SDL.  Be very careful changing this, as the SDL library relies on this implementation.
+	res/drawable-*		- directories holding icons for different phone hardware. Could be
+				  one dir called "drawable".
+	res/layout/main.xml	- Usually contains a file main.xml, which declares the screen layout.
+				  We don't need it because we use the SDL video output.
+	res/values/strings.xml	- strings used in your application, including the application name
+				  shown on the phone.
+	src/org/libsdl/app/SDLActivity.java - the Java class handling the initialization and binding
+				  to SDL.  Be very careful changing this, as the SDL library relies
+				  on this implementation.
 
 
 ================================================================================
@@ -87,21 +98,13 @@ Here's an example of a minimal class file:
 package com.gamemaker.game;
 
 import org.libsdl.app.SDLActivity; 
-import android.os.*; 
 
 /* 
  * A sample wrapper class that just calls SDLActivity 
  */ 
 
-public class MyGame extends SDLActivity { 
-    protected void onCreate(Bundle savedInstanceState) { 
-	super.onCreate(savedInstanceState); 
-    } 
-   
-    protected void onDestroy() { 
-	super.onDestroy(); 
-    } 
-}
+public class MyGame extends SDLActivity { }
+
 ------------------------------------------
 
 Then replace "SDLActivity" in AndroidManifest.xml with the name of your
@@ -112,16 +115,12 @@ class, .e.g. "MyGame"
 ================================================================================
 
 Conceptually changing your icon is just replacing the icon.png files in the
-drawable directories under the res directory.
-
-The easiest way to create a set of icons for your project is to remove all
-the existing icon.png files, and then use the Eclipse IDE to create a dummy
-project.  During the process of doing this Eclipse will prompt you to create
-an icon. Then just copy the drawable directories it creates over to your
-res directory.
+drawable directories under the res directory. There are 3 directories for
+different screen sizes. These can be replaced with 1 dir called 'drawable',
+containing an icon file 'icon.png' with dimensions 48x48 or 72x72.
 
 You may need to change the name of your icon in AndroidManifest.xml to match
-the filename used by Eclipse.
+this icon filename.
 
 ================================================================================
  Loading assets
@@ -187,7 +186,8 @@ For more information check out CPLUSPLUS-SUPPORT.html in the NDK documentation.
  Additional documentation
 ================================================================================
 
-The documentation in the NDK docs directory is very helpful in understanding the build process and how to work with native code on the Android platform.
+The documentation in the NDK docs directory is very helpful in understanding the
+build process and how to work with native code on the Android platform.
 
 The best place to start is with docs/OVERVIEW.TXT
 
@@ -217,6 +217,8 @@ emulator here: http://developer.android.com/tools/devices/emulator.html
 
 Especially useful is the info on setting up OpenGL ES 2.0 emulation.
 
+Notice that this software emulator is incredibly slow and needs a lot of disk space.
+Using a real device works better.
 
 ================================================================================
  Troubleshooting
@@ -243,14 +245,17 @@ You can see the files on the SD card with a shell command:
 You can start a command shell on the default device with:
 	adb shell
 
-You can do a clean build with the following commands:
+You can remove the library files of your project (and not the SDL lib files) with:
 	ndk-build clean
+
+You can do a build with the following command:
 	ndk-build
 
 You can see the complete command line that ndk-build is using by passing V=1 on the command line:
 	ndk-build V=1
 
-If your application crashes in native code, you can use addr2line to convert the addresses in the stack trace to lines in your code.
+If your application crashes in native code, you can use addr2line to convert the
+addresses in the stack trace to lines in your code.
 
 For example, if your crash looks like this:
 I/DEBUG   (   31): signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 400085d0
@@ -263,7 +268,8 @@ I/DEBUG   (   31):          #01  pc 0001ccf6  /system/lib/libc.so
 I/DEBUG   (   31):          #02  pc 000014bc  /data/data/org.libsdl.app/lib/libmain.so
 I/DEBUG   (   31):          #03  pc 00001506  /data/data/org.libsdl.app/lib/libmain.so
 
-You can see that there's a crash in the C library being called from the main code.  I run addr2line with the debug version of my code:
+You can see that there's a crash in the C library being called from the main code.
+I run addr2line with the debug version of my code:
 	arm-eabi-addr2line -C -f -e obj/local/armeabi/libmain.so
 and then paste in the number after "pc" in the call stack, from the line that I care about:
 000014bc
@@ -276,7 +282,8 @@ You can add logging to your code to help show what's happening:
 
 	__android_log_print(ANDROID_LOG_INFO, "foo", "Something happened! x = %d", x);
 
-If you need to build without optimization turned on, you can create a file called "Application.mk" in the jni directory, with the following line in it:
+If you need to build without optimization turned on, you can create a file called
+"Application.mk" in the jni directory, with the following line in it:
 APP_OPTIM := debug
 
 
@@ -328,5 +335,4 @@ When you're done instrumenting with valgrind, you can disable the wrapper:
  Known issues
 ================================================================================
 
-- SDL audio (although it's mostly written, just not working properly yet)
 - TODO. I'm sure there's a bunch more stuff I haven't thought of 
