@@ -4,7 +4,7 @@ SamplerState theSampler : register(s0);
 struct PixelShaderInput
 {
 	float4 pos : SV_POSITION;
-	float3 color : COLOR0;
+
 	float2 tex : TEXCOORD0;
 };
 
