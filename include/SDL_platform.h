@@ -114,12 +114,44 @@
 #undef __SOLARIS__
 #define __SOLARIS__	1
 #endif
+
 #if defined(WIN32) || defined(_WIN32)
-#if ! defined(__WINRT__)
+/* Try to find out what version of Windows we are compiling for */
+#if defined(_MSC_VER) && (_MSC_VER >= 1700)	/* _MSC_VER==1700 for MSVC 2012 */
+#include <winapifamily.h>
+#endif
+/* Default to classic, Win32 / Desktop compilation if the version of Windows
+   cannot be determined via winapifamily.h. */
+#if ! defined(WINAPI_FAMILY_PARTITION)
+#undef __WIN32__
+#define __WIN32__ 1
+#else
+/* Include Win32 / Desktop App APIs in SDL, if available: */
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#undef __WIN32__
+#define __WIN32__ 1
+#endif
+/* Include WinRT / Windows Store APIs in SDL, if available: */
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#undef __WINRT__
+#define __WINRT__ 1
+#endif
+#endif
+#endif
+
+/*
+#if ! defined(WINAPI_FAMILY_PARTITION) || ! WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #undef __WIN32__
 #define __WIN32__	1
+#error win32_defined
 #endif
 #endif
+#if defined(WINAPI_FAMILY_PARTITION) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#undef __WINRT__
+#define __WINRT__	1
+#error winrt_defined
+#endif
+*/
 
 #if defined(__NDS__)
 #undef __NINTENDODS__
