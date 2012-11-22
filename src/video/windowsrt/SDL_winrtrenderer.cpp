@@ -60,10 +60,10 @@ void SDL_winrtrenderer::CreateDeviceResources()
 	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
 		VertexPositionColor cubeVertices[] = 
 		{
-			{XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 0.0f)},
-			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
-			{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
-			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+			{XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 1.0f)},
+			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
+			{XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
 		};
 
 		m_vertexCount = ARRAYSIZE(cubeVertices);
@@ -96,14 +96,8 @@ void SDL_winrtrenderer::CreateDeviceResources()
 		textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 		textureDesc.MiscFlags = 0;
 
-		int numPixels = (int)m_windowBounds.Width * (int)m_windowBounds.Height;
-		std::vector<uint8> initialTexturePixels(numPixels * 4);
-		for (int i = 0; i < (numPixels * 4); i += 4) {
-			initialTexturePixels[i+0] = 0xFF;
-			initialTexturePixels[i+1] = 0x00;
-			initialTexturePixels[i+2] = 0x00;
-			initialTexturePixels[i+3] = 0xFF;
-		}
+		const int numPixels = (int)m_windowBounds.Width * (int)m_windowBounds.Height;
+		std::vector<uint8> initialTexturePixels(numPixels * 4, 0x00);
 		D3D11_SUBRESOURCE_DATA initialTextureData = {0};
 		initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
 		initialTextureData.SysMemPitch = (int)m_windowBounds.Width * 4;
@@ -157,12 +151,12 @@ void SDL_winrtrenderer::CreateDeviceResources()
 	});
 }
 
-void SDL_winrtrenderer::Render()
+void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)
 {
-	const float midnightBlue[] = { 0.098f, 0.098f, 0.439f, 1.000f };
+	const float blackColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	m_d3dContext->ClearRenderTargetView(
 		m_renderTargetView.Get(),
-		midnightBlue
+		blackColor
 		);
 
 	m_d3dContext->ClearDepthStencilView(
@@ -189,14 +183,10 @@ void SDL_winrtrenderer::Render()
 			&textureMemory)
 		);
 
-	const int max = (int)m_windowBounds.Width * (int)m_windowBounds.Height * 4;
-	uint8 * buf = (uint8 *)textureMemory.pData;
-	for (int i = 0; i < max; i += 4) {
-		buf[i+0] = 0x00;
-		buf[i+1] = 0xFF;
-		buf[i+2] = 0x00;
-		buf[i+3] = 0xFF;
-	}
+	// TODO, WinRT: only copy over the requested rects (via SDL_BlitSurface, perhaps?)
+	// TODO, WinRT: do a sanity check on the src and dest data when updating the window surface
+	const unsigned int numBytes = (int)m_windowBounds.Width * (int)m_windowBounds.Height * 4;
+	memcpy(textureMemory.pData, surface->pixels, numBytes);
 
 	m_d3dContext->Unmap(
 		m_mainTexture.Get(),

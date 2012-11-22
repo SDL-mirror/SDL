@@ -16,7 +16,9 @@ public:
 
 	// Direct3DBase methods.
 	virtual void CreateDeviceResources() override;
-	virtual void Render() override;
+
+internal:
+	virtual void Render(SDL_Surface * surface, SDL_Rect * rects, int numrects) override;
 
 private:
 	bool m_loadingComplete;

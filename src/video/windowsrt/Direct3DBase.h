@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "DirectXHelper.h"
+#include "SDL.h"
 
 // Helper class that initializes DirectX APIs for 3D rendering.
 ref class Direct3DBase abstract
@@ -14,9 +15,11 @@ public:
 	virtual void CreateDeviceResources();
 	virtual void CreateWindowSizeDependentResources();
 	virtual void UpdateForWindowSizeChange();
-	virtual void Render() = 0;
 	virtual void Present();
 	virtual float ConvertDipsToPixels(float dips);
+
+internal:
+	virtual void Render(SDL_Surface * surface, SDL_Rect * rects, int numrects) = 0;
 
 protected private:
 	// Direct3D Objects.
