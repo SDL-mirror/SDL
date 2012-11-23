@@ -34,6 +34,7 @@ struct SDL_mutex
 };
 
 /* Create a mutex */
+extern "C"
 SDL_mutex *
 SDL_CreateMutex(void)
 {
@@ -57,6 +58,7 @@ SDL_CreateMutex(void)
 }
 
 /* Free the mutex */
+extern "C"
 void
 SDL_DestroyMutex(SDL_mutex * mutex)
 {
@@ -69,6 +71,7 @@ SDL_DestroyMutex(SDL_mutex * mutex)
 }
 
 /* Lock the semaphore */
+extern "C"
 int
 SDL_mutexP(SDL_mutex * mutex)
 {
@@ -100,6 +103,7 @@ SDL_mutexP(SDL_mutex * mutex)
 }
 
 /* Unlock the mutex */
+extern "C"
 int
 SDL_mutexV(SDL_mutex * mutex)
 {

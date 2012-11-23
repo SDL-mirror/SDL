@@ -22,9 +22,12 @@
 
 /* Thread management routines for SDL */
 
+extern "C" {
 #include "SDL_thread.h"
 #include "../SDL_systhread.h"
+}
 
+extern "C"
 int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
@@ -32,24 +35,28 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     return (-1);
 }
 
+extern "C"
 void
 SDL_SYS_SetupThread(const char *name)
 {
     return;
 }
 
+extern "C"
 SDL_threadID
 SDL_ThreadID(void)
 {
     return (0);
 }
 
+extern "C"
 int
 SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
     return (0);
 }
 
+extern "C"
 void
 SDL_SYS_WaitThread(SDL_Thread * thread)
 {

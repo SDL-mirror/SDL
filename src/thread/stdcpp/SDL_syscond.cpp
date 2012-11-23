@@ -38,6 +38,7 @@ struct SDL_cond
 };
 
 /* Create a condition variable */
+extern "C"
 SDL_cond *
 SDL_CreateCond(void)
 {
@@ -60,6 +61,7 @@ SDL_CreateCond(void)
 }
 
 /* Destroy a condition variable */
+extern "C"
 void
 SDL_DestroyCond(SDL_cond * cond)
 {
@@ -78,6 +80,7 @@ SDL_DestroyCond(SDL_cond * cond)
 }
 
 /* Restart one of the threads that are waiting on the condition variable */
+extern "C"
 int
 SDL_CondSignal(SDL_cond * cond)
 {
@@ -103,6 +106,7 @@ SDL_CondSignal(SDL_cond * cond)
 }
 
 /* Restart all threads that are waiting on the condition variable */
+extern "C"
 int
 SDL_CondBroadcast(SDL_cond * cond)
 {
@@ -158,6 +162,7 @@ Thread B:
     SDL_CondSignal(cond);
     SDL_UnlockMutex(lock);
  */
+extern "C"
 int
 SDL_CondWaitTimeout(SDL_cond * cond, SDL_mutex * mutex, Uint32 ms)
 {
@@ -214,6 +219,7 @@ SDL_CondWaitTimeout(SDL_cond * cond, SDL_mutex * mutex, Uint32 ms)
 }
 
 /* Wait on the condition variable forever */
+extern "C"
 int
 SDL_CondWait(SDL_cond * cond, SDL_mutex * mutex)
 {

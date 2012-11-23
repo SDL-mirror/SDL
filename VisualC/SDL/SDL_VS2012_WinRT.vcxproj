@@ -91,9 +91,9 @@
     <ClCompile Include="..\..\src\stdlib\SDL_string.c" />
     <ClCompile Include="..\..\src\thread\generic\SDL_syssem.c" />
     <ClCompile Include="..\..\src\thread\SDL_thread.c" />
-    <ClCompile Include="..\..\src\thread\stdcpp\SDL_syscond.c" />
-    <ClCompile Include="..\..\src\thread\stdcpp\SDL_sysmutex.c" />
-    <ClCompile Include="..\..\src\thread\stdcpp\SDL_systhread.c" />
+    <ClCompile Include="..\..\src\thread\stdcpp\SDL_syscond.cpp" />
+    <ClCompile Include="..\..\src\thread\stdcpp\SDL_sysmutex.cpp" />
+    <ClCompile Include="..\..\src\thread\stdcpp\SDL_systhread.cpp" />
     <ClCompile Include="..\..\src\timer\dummy\SDL_systimer.c" />
     <ClCompile Include="..\..\src\timer\SDL_timer.c" />
     <ClCompile Include="..\..\src\video\dummy\SDL_nullevents.c" />
