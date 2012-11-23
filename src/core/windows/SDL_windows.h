@@ -24,6 +24,7 @@
 #ifndef _INCLUDED_WINDOWS_H
 #define _INCLUDED_WINDOWS_H
 
+#if defined(__WIN32__)
 #define WIN32_LEAN_AND_MEAN
 #define STRICT
 #ifndef UNICODE
@@ -31,6 +32,7 @@
 #endif
 #undef _WIN32_WINNT
 #define _WIN32_WINNT  0x501   /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices(), 0x501 for raw input */
+#endif
 
 #include <windows.h>
 

@@ -144,7 +144,7 @@ typedef unsigned int uintptr_t;
 #endif
 
 /* Enable various audio drivers */
-//#define SDL_AUDIO_DRIVER_XAUDIO2	1	// TODO, WinRT: see if SDL's XAudio2 driver can compile
+#define SDL_AUDIO_DRIVER_XAUDIO2	1
 #define SDL_AUDIO_DRIVER_DISK	1
 #define SDL_AUDIO_DRIVER_DUMMY	1
 
