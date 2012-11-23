@@ -20,44 +20,40 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_thread_c_h
-#define _SDL_thread_c_h
+/* Thread management routines for SDL */
 
-/* Need the definitions of SYS_ThreadHandle */
-#if SDL_THREADS_DISABLED
-#include "generic/SDL_systhread_c.h"
-#elif SDL_THREAD_BEOS
-#include "beos/SDL_systhread_c.h"
-#elif SDL_THREAD_EPOC
-#include "epoc/SDL_systhread_c.h"
-#elif SDL_THREAD_PTHREAD
-#include "pthread/SDL_systhread_c.h"
-#elif SDL_THREAD_WINDOWS
-#include "windows/SDL_systhread_c.h"
-#elif SDL_THREAD_NDS
-#include "nds/SDL_systhread_c.h"
-#elif SDL_THREAD_STDCPP
-#include "stdcpp/SDL_systhread_c.h"
-#else
-#error Need thread implementation for this platform
-#include "generic/SDL_systhread_c.h"
-#endif
-#include "../SDL_error_c.h"
+#include "SDL_thread.h"
+#include "../SDL_systhread.h"
 
-/* This is the system-independent thread info structure */
-struct SDL_Thread
+int
+SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
-    SDL_threadID threadid;
-    SYS_ThreadHandle handle;
-    int status;
-    SDL_error errbuf;
-    char *name;
-    void *data;
-};
+    SDL_SetError("Threads are not supported on this platform");
+    return (-1);
+}
 
-/* This is the function called to run a thread */
-extern void SDL_RunThread(void *data);
+void
+SDL_SYS_SetupThread(const char *name)
+{
+    return;
+}
 
-#endif /* _SDL_thread_c_h */
+SDL_threadID
+SDL_ThreadID(void)
+{
+    return (0);
+}
+
+int
+SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
+{
+    return (0);
+}
+
+void
+SDL_SYS_WaitThread(SDL_Thread * thread)
+{
+    return;
+}
 
 /* vi: set ts=4 sw=4 expandtab: */
