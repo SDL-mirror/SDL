@@ -136,22 +136,8 @@
 #undef __WINRT__
 #define __WINRT__ 1
 #endif
-#endif
-#endif
-
-/*
-#if ! defined(WINAPI_FAMILY_PARTITION) || ! WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#undef __WIN32__
-#define __WIN32__	1
-#error win32_defined
-#endif
-#endif
-#if defined(WINAPI_FAMILY_PARTITION) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-#undef __WINRT__
-#define __WINRT__	1
-#error winrt_defined
-#endif
-*/
+#endif /* if ! defined(WINAPI_FAMILY_PARTITION) ; else */
+#endif /* if defined(WIN32) || defined(_WIN32) */
 
 #if defined(__NDS__)
 #undef __NINTENDODS__
