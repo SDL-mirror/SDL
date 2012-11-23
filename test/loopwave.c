@@ -78,18 +78,22 @@ poked(int sig)
 int
 main(int argc, char *argv[])
 {
+    char filename[4096];
+
     /* Load the SDL library */
     if (SDL_Init(SDL_INIT_AUDIO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         return (1);
     }
 
-    if (argv[1] == NULL) {
-        argv[1] = "sample.wav";
+    if (argc >= 1) {
+        SDL_strlcpy(filename, argv[1], sizeof(filename));
+    } else {
+        SDL_strlcpy(filename, "sample.wav", sizeof(filename));
     }
     /* Load the wave file into memory */
-    if (SDL_LoadWAV(argv[1], &wave.spec, &wave.sound, &wave.soundlen) == NULL) {
-        fprintf(stderr, "Couldn't load %s: %s\n", argv[1], SDL_GetError());
+    if (SDL_LoadWAV(filename, &wave.spec, &wave.sound, &wave.soundlen) == NULL) {
+        fprintf(stderr, "Couldn't load %s: %s\n", filename, SDL_GetError());
         quit(1);
     }
 
