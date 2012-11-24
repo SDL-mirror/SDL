@@ -20,41 +20,34 @@
 */
 #include "SDL_config.h"
 
-/* An implementation of mutexes using semaphores */
-
+extern "C" {
 #include "SDL_thread.h"
 #include "SDL_systhread_c.h"
+#include "SDL_log.h"
+}
 
+#include <exception>
 
-struct SDL_mutex
-{
-    int recursive;
-    SDL_threadID owner;
-    SDL_sem *sem;
-};
+#include "SDL_sysmutex_c.h"
+#include <Windows.h>
+
 
 /* Create a mutex */
 extern "C"
 SDL_mutex *
 SDL_CreateMutex(void)
 {
-    SDL_mutex *mutex;
-
-    /* Allocate mutex memory */
-    mutex = (SDL_mutex *) SDL_malloc(sizeof(*mutex));
-    if (mutex) {
-        /* Create the mutex semaphore, with initial value 1 */
-        mutex->sem = SDL_CreateSemaphore(1);
-        mutex->recursive = 0;
-        mutex->owner = 0;
-        if (!mutex->sem) {
-            SDL_free(mutex);
-            mutex = NULL;
-        }
-    } else {
-        SDL_OutOfMemory();
+    /* Allocate and initialize the mutex */
+    try {
+        SDL_mutex * mutex = new SDL_mutex;
+        return mutex;
+    } catch (std::exception & ex) {
+        SDL_SetError("unable to create C++ mutex: %s", ex.what());
+        return NULL;
+    } catch (...) {
+        SDL_SetError("unable to create C++ mutex due to an unknown exception");
+        return NULL;
     }
-    return mutex;
 }
 
 /* Free the mutex */
@@ -63,10 +56,11 @@ void
 SDL_DestroyMutex(SDL_mutex * mutex)
 {
     if (mutex) {
-        if (mutex->sem) {
-            SDL_DestroySemaphore(mutex->sem);
+        try {
+            delete mutex;
+        } catch (...) {
+            // catch any and all exceptions, just in case something happens
         }
-        SDL_free(mutex);
     }
 }
 
@@ -75,31 +69,23 @@ extern "C"
 int
 SDL_mutexP(SDL_mutex * mutex)
 {
-#if SDL_THREADS_DISABLED
-    return 0;
-#else
-    SDL_threadID this_thread;
-
+    SDL_threadID threadID = SDL_ThreadID();
+    DWORD realThreadID = GetCurrentThreadId();
     if (mutex == NULL) {
         SDL_SetError("Passed a NULL mutex");
         return -1;
     }
 
-    this_thread = SDL_ThreadID();
-    if (mutex->owner == this_thread) {
-        ++mutex->recursive;
-    } else {
-        /* The order of operations is important.
-           We set the locking thread id after we obtain the lock
-           so unlocks from other threads will fail.
-         */
-        SDL_SemWait(mutex->sem);
-        mutex->owner = this_thread;
-        mutex->recursive = 0;
+    try {
+        mutex->cpp_mutex.lock();
+        return 0;
+    } catch (std::exception & ex) {
+        SDL_SetError("unable to lock C++ mutex: %s", ex.what());
+        return -1;
+    } catch (...) {
+        SDL_SetError("unable to lock C++ mutex due to an unknown exception");
+        return -1;
     }
-
-    return 0;
-#endif /* SDL_THREADS_DISABLED */
 }
 
 /* Unlock the mutex */
@@ -107,33 +93,21 @@ extern "C"
 int
 SDL_mutexV(SDL_mutex * mutex)
 {
-#if SDL_THREADS_DISABLED
-    return 0;
-#else
+    SDL_threadID threadID = SDL_ThreadID();
+    DWORD realThreadID = GetCurrentThreadId();
     if (mutex == NULL) {
         SDL_SetError("Passed a NULL mutex");
         return -1;
     }
 
-    /* If we don't own the mutex, we can't unlock it */
-    if (SDL_ThreadID() != mutex->owner) {
-        SDL_SetError("mutex not owned by this thread");
+    try {
+        mutex->cpp_mutex.unlock();
+        return 0;
+    } catch (...) {
+        // catch any and all exceptions, just in case something happens.
+        SDL_SetError("unable to unlock C++ mutex due to an unknown exception");
         return -1;
     }
-
-    if (mutex->recursive) {
-        --mutex->recursive;
-    } else {
-        /* The order of operations is important.
-           First reset the owner so another thread doesn't lock
-           the mutex and set the ownership before we reset it,
-           then release the lock semaphore.
-         */
-        mutex->owner = 0;
-        SDL_SemPost(mutex->sem);
-    }
-    return 0;
-#endif /* SDL_THREADS_DISABLED */
 }
 
 /* vi: set ts=4 sw=4 expandtab: */
