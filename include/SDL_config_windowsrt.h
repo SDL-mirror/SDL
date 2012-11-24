@@ -76,10 +76,8 @@ typedef unsigned int uintptr_t;
 # define SIZEOF_VOIDP 4
 #endif
 
-/* Enabled for SDL 1.2 (binary compatibility) */
-#define HAVE_LIBC     1
-#ifdef HAVE_LIBC
 /* Useful headers */
+#define HAVE_LIBC 1
 #define HAVE_STDIO_H 1
 #define STDC_HEADERS 1
 #define HAVE_STRING_H 1
@@ -102,13 +100,13 @@ typedef unsigned int uintptr_t;
 #define HAVE_STRLEN 1
 #define HAVE__STRREV 1
 #define HAVE__STRUPR 1
-//#define HAVE__STRLWR 1	// TODO, WinRT: use _strlwr_s instead
+//#define HAVE__STRLWR 1	// TODO, WinRT: consider using _strlwr_s instead
 #define HAVE_STRCHR 1
 #define HAVE_STRRCHR 1
 #define HAVE_STRSTR 1
 #define HAVE_ITOA 1
-//#define HAVE__LTOA 1	// TODO, WinRT: use _ltoa_s instead
-//#define HAVE__ULTOA 1	// TODO, WinRT: use _ultoa_s instead
+//#define HAVE__LTOA 1	// TODO, WinRT: consider using _ltoa_s instead
+//#define HAVE__ULTOA 1	// TODO, WinRT: consider using _ultoa_s instead
 #define HAVE_STRTOL 1
 #define HAVE_STRTOUL 1
 #define HAVE_STRTOLL 1
@@ -119,7 +117,7 @@ typedef unsigned int uintptr_t;
 #define HAVE_STRNCMP 1
 #define HAVE__STRICMP 1
 #define HAVE__STRNICMP 1
-//#define HAVE_SSCANF 1	// TODO, WinRT: use sscanf_s instead
+//#define HAVE_SSCANF 1	// TODO, WinRT: consider using sscanf_s instead
 #define HAVE_M_PI 1
 #define HAVE_ATAN 1
 #define HAVE_ATAN2 1
@@ -135,13 +133,6 @@ typedef unsigned int uintptr_t;
 #define HAVE_SIN 1
 #define HAVE_SINF 1
 #define HAVE_SQRT 1
-#else
-#define HAVE_STDARG_H	1
-#define HAVE_STDDEF_H	1
-//#define HAVE_STDLIB_H	1
-//#define HAVE_MALLOC		1
-//#define HAVE_FREE 1
-#endif
 
 /* Enable various audio drivers */
 //#define SDL_AUDIO_DRIVER_XAUDIO2	1   /* Disabled pending work to fix quality + stability issues */
@@ -155,11 +146,11 @@ typedef unsigned int uintptr_t;
 #define SDL_JOYSTICK_DISABLED	1
 
 /* Enable various shared object loading systems */
-#define SDL_LOADSO_WINDOWS	1
+// TODO, WinRT: adapt the Win32 shared object loading code for WinRT 
+#define SDL_LOADSO_DISABLED 1
+//#define SDL_LOADSO_WINDOWS	1
 
 /* Enable various threading systems */
-//#define SDL_THREADS_DISABLED    1
-//#define SDL_THREAD_WINDOWS	1
 #define SDL_THREAD_STDCPP   1
 
 /* Enable various timer systems */
@@ -175,7 +166,8 @@ typedef unsigned int uintptr_t;
 // TODO, WinRT: Get a Direct3D 11 based renderer working in SDL.
 
 /* Enable system power support */
-#define SDL_POWER_WINDOWS 1
+// TODO, WinRT: investigate system power support.  The Win32-based APIs don't work on WinRT.
+#define SDL_POWER_DISABLED  1
 
 /* Enable assembly routines (Win64 doesn't have inline asm) */
 #ifndef _WIN64
