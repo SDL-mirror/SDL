@@ -8,6 +8,7 @@ using Windows::Devices::Enumeration::DeviceInformationCollection;
 
 HRESULT IXAudio2_GetDeviceCount(IXAudio2 * ixa2, UINT32 * devcount)
 {
+    // TODO, WinRT: make xaudio2 device enumeration only happen once, and in the background
     auto operation = DeviceInformation::FindAllAsync(DeviceClass::AudioRender);
     while (operation->Status != Windows::Foundation::AsyncStatus::Completed)
     {

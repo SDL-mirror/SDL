@@ -128,14 +128,6 @@ struct SDL_PrivateAudioData
 };
 
 
-static __inline__ char *
-utf16_to_utf8(const WCHAR *S)
-{
-    /* !!! FIXME: this should be UTF-16, not UCS-2! */
-    return SDL_iconv_string("UTF-8", "UCS-2", (char *)(S),
-                            (SDL_wcslen(S)+1)*sizeof(WCHAR));
-}
-
 static void
 XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
 {
@@ -159,7 +151,7 @@ XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
     for (i = 0; i < devcount; i++) {
         XAUDIO2_DEVICE_DETAILS details;
         if (IXAudio2_GetDeviceDetails(ixa2, i, &details) == S_OK) {
-            char *str = utf16_to_utf8(details.DisplayName);
+            char *str = WIN_StringToUTF8(details.DisplayName);
             if (str != NULL) {
                 addfn(str);
                 SDL_free(str);  /* addfn() made a copy of the string. */
@@ -313,7 +305,7 @@ XAUDIO2_CloseDevice(_THIS)
             SDL_free(this->hidden->mixbuf);
         }
         if (this->hidden->semaphore != NULL) {
-            CloseHandle(this->hidden->semaphore);
+            SDL_DestroySemaphore(this->hidden->semaphore);
         }
 
         SDL_free(this->hidden);
@@ -331,7 +323,8 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     IXAudio2 *ixa2 = NULL;
     IXAudio2SourceVoice *source = NULL;
 #if defined(__WINRT__)
-    WCHAR devId[256];
+    WCHAR devIdBuffer[256];
+    LPCWSTR devId = 0;
 #else
     UINT32 devId = 0;  /* 0 == system default device. */
 #endif
@@ -353,7 +346,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 #endif // ! defined(__cplusplus)
 
 #if defined(__WINRT__)
-    SDL_zero(devId);
+    SDL_zero(devIdBuffer);
 #endif
 
     if (iscapture) {
@@ -363,6 +356,14 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         SDL_SetError("XAudio2: XAudio2Create() failed.");
         return 0;
     }
+    XAUDIO2_DEBUG_CONFIGURATION debugConfig;
+    debugConfig.TraceMask = XAUDIO2_LOG_ERRORS; //XAUDIO2_LOG_WARNINGS | XAUDIO2_LOG_DETAIL | XAUDIO2_LOG_FUNC_CALLS | XAUDIO2_LOG_TIMING | XAUDIO2_LOG_LOCKS | XAUDIO2_LOG_MEMORY | XAUDIO2_LOG_STREAMING;
+    debugConfig.BreakMask = XAUDIO2_LOG_ERRORS; //XAUDIO2_LOG_WARNINGS;
+    debugConfig.LogThreadID = TRUE;
+    debugConfig.LogFileline = TRUE;
+    debugConfig.LogFunctionName = TRUE;
+    debugConfig.LogTiming = TRUE;
+    ixa2->SetDebugConfiguration(&debugConfig);
 
     if (devname != NULL) {
         UINT32 devcount = 0;
@@ -376,13 +377,14 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         for (i = 0; i < devcount; i++) {
             XAUDIO2_DEVICE_DETAILS details;
             if (IXAudio2_GetDeviceDetails(ixa2, i, &details) == S_OK) {
-                char *str = utf16_to_utf8(details.DisplayName);
+                char *str = WIN_StringToUTF8(details.DisplayName);
                 if (str != NULL) {
                     const int match = (SDL_strcmp(str, devname) == 0);
                     SDL_free(str);
                     if (match) {
 #if defined(__WINRT__)
-                        wcsncpy_s(devId, ARRAYSIZE(devId), details.DeviceID, _TRUNCATE);
+                        wcsncpy_s(devIdBuffer, ARRAYSIZE(devIdBuffer), details.DeviceID, _TRUNCATE);
+                        devId = (LPCWSTR) &devIdBuffer;
 #else
                         devId = i;
 #endif
@@ -478,11 +480,19 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         waveformat.nChannels * (waveformat.wBitsPerSample / 8);
     waveformat.nAvgBytesPerSec =
         waveformat.nSamplesPerSec * waveformat.nBlockAlign;
+    waveformat.cbSize = sizeof(waveformat);
 
+#ifdef __WINRT__
+    result = IXAudio2_CreateSourceVoice(ixa2, &source, &waveformat,
+                                        0,
+                                        1.0f, &callbacks, NULL, NULL);
+#else
     result = IXAudio2_CreateSourceVoice(ixa2, &source, &waveformat,
                                         XAUDIO2_VOICE_NOSRC |
                                         XAUDIO2_VOICE_NOPITCH,
                                         1.0f, &callbacks, NULL, NULL);
+
+#endif
     if (result != S_OK) {
         XAUDIO2_CloseDevice(this);
         SDL_SetError("XAudio2: Couldn't create source voice");
@@ -529,6 +539,7 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
     /* XAudio2Create() is a macro that uses COM; we don't load the .dll */
     IXAudio2 *ixa2 = NULL;
 #if defined(__WIN32__)
+    // TODO, WinRT: Investigate using CoInitializeEx here
     if (FAILED(WIN_CoInitialize())) {
         SDL_SetError("XAudio2: CoInitialize() failed");
         return 0;
