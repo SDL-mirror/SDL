@@ -48,7 +48,7 @@ SDL_StartTicks(void)
 #ifdef USE_GETTICKCOUNT
     start = GetTickCount();
 #else
-#if 0                           /* Apparently there are problems with QPC on Win2K */
+#ifdef __WINRT__      /* Apparently there are problems with QPC on Win2K */
     if (QueryPerformanceFrequency(&hires_ticks_per_second) == TRUE) {
         hires_timer_available = TRUE;
         QueryPerformanceCounter(&hires_start_ticks);
@@ -56,8 +56,12 @@ SDL_StartTicks(void)
 #endif
     {
         hires_timer_available = FALSE;
+#ifdef __WINRT__
+        start = 0;              /* the timer failed to start! */
+#else
         timeBeginPeriod(1);     /* use 1 ms timer precision */
         start = timeGetTime();
+#endif
     }
 #endif
 }
@@ -82,7 +86,11 @@ SDL_GetTicks(void)
 
         return (DWORD) hires_now.QuadPart;
     } else {
+#ifdef __WINRT__
+        now = 0;
+#else
         now = timeGetTime();
+#endif
     }
 #endif
 
@@ -115,6 +123,19 @@ SDL_GetPerformanceFrequency(void)
     }
     return frequency.QuadPart;
 }
+
+#ifdef __WINRT__
+static void
+Sleep(DWORD timeout)
+{
+    static HANDLE mutex = 0;
+    if ( ! mutex )
+    {
+        mutex = CreateEventEx(0, 0, 0, EVENT_ALL_ACCESS);
+    }
+    WaitForSingleObjectEx(mutex, timeout, FALSE);
+}
+#endif
 
 void
 SDL_Delay(Uint32 ms)

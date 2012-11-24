@@ -154,10 +154,7 @@ typedef unsigned int uintptr_t;
 #define SDL_THREAD_STDCPP   1
 
 /* Enable various timer systems */
-// TODO, WinRT: look into getting SDL's pre-WinRT timers working.
-// Some functions there are supported in WinRT, others are not.
-//#define SDL_TIMER_WINDOWS	1
-#define SDL_TIMERS_DISABLED	1
+#define SDL_TIMER_WINDOWS	1
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_WINRT	1
