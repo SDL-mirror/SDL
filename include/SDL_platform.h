@@ -130,9 +130,8 @@
 #if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #undef __WIN32__
 #define __WIN32__ 1
-#endif
+#elif WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 /* Include WinRT / Windows Store APIs in SDL, if available: */
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
 #undef __WINRT__
 #define __WINRT__ 1
 #endif
