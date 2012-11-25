@@ -356,6 +356,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         SDL_SetError("XAudio2: XAudio2Create() failed.");
         return 0;
     }
+    /*
     XAUDIO2_DEBUG_CONFIGURATION debugConfig;
     debugConfig.TraceMask = XAUDIO2_LOG_ERRORS; //XAUDIO2_LOG_WARNINGS | XAUDIO2_LOG_DETAIL | XAUDIO2_LOG_FUNC_CALLS | XAUDIO2_LOG_TIMING | XAUDIO2_LOG_LOCKS | XAUDIO2_LOG_MEMORY | XAUDIO2_LOG_STREAMING;
     debugConfig.BreakMask = XAUDIO2_LOG_ERRORS; //XAUDIO2_LOG_WARNINGS;
@@ -364,6 +365,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     debugConfig.LogFunctionName = TRUE;
     debugConfig.LogTiming = TRUE;
     ixa2->SetDebugConfiguration(&debugConfig);
+    */
 
     if (devname != NULL) {
         UINT32 devcount = 0;
