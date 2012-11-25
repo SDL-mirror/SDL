@@ -48,7 +48,7 @@ extern "C" {
 
 extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
-#define WINRTVID_DRIVER_NAME "dummy"
+#define WINRTVID_DRIVER_NAME "winrt"
 
 /* Initialization/Query functions */
 static int WINRT_VideoInit(_THIS);
