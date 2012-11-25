@@ -28,6 +28,7 @@
 
 /* Display a UIKit message box */
 
+static SDL_bool s_showingMessageBox = SDL_FALSE;
 
 @interface UIKit_UIAlertViewDelegate : NSObject <UIAlertViewDelegate> {
 @private
@@ -60,6 +61,12 @@
 @end // UIKit_UIAlertViewDelegate
 
 
+SDL_bool
+UIKit_ShowingMessageBox()
+{
+    return s_showingMessageBox;
+}
+
 int
 UIKit_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
@@ -86,9 +93,12 @@ UIKit_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     
     // Run the main event loop until the alert has finished
     // Note that this needs to be done on the main thread
+    s_showingMessageBox = SDL_TRUE;
     while (clicked == messageboxdata->numbuttons) {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
     }
+    s_showingMessageBox = SDL_FALSE;
+
     *buttonid = messageboxdata->buttons[clicked].buttonid;
 
     [pool release];

@@ -22,9 +22,10 @@
 
 #if SDL_VIDEO_DRIVER_UIKIT
 
-#import <QuartzCore/QuartzCore.h>
-#import <OpenGLES/EAGLDrawable.h>
-#import "SDL_uikitopenglview.h"
+#include <QuartzCore/QuartzCore.h>
+#include <OpenGLES/EAGLDrawable.h>
+#include "SDL_uikitopenglview.h"
+#include "SDL_uikitmessagebox.h"
 
 
 @implementation SDL_uikitopenglview
@@ -180,7 +181,10 @@
 
 - (void)doLoop:(id)sender
 {
-    animationCallback(animationCallbackParam);
+    // Don't run the game loop while a messagebox is up
+    if (!UIKit_ShowingMessageBox()) {
+        animationCallback(animationCallbackParam);
+    }
 }
 
 - (void)setCurrentContext
