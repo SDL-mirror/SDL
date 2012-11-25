@@ -82,48 +82,7 @@ void SDL_winrtrenderer::CreateDeviceResources()
 			);
 	});
 
-	auto createMainTextureTask = createCubeTask.then([this] () {
-		D3D11_TEXTURE2D_DESC textureDesc = {0};
-		textureDesc.Width = (int)m_windowBounds.Width;
-		textureDesc.Height = (int)m_windowBounds.Height;
-		textureDesc.MipLevels = 1;
-		textureDesc.ArraySize = 1;
-		textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-		textureDesc.SampleDesc.Count = 1;
-		textureDesc.SampleDesc.Quality = 0;
-		textureDesc.Usage = D3D11_USAGE_DYNAMIC;
-		textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-		textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		textureDesc.MiscFlags = 0;
-
-		const int numPixels = (int)m_windowBounds.Width * (int)m_windowBounds.Height;
-		std::vector<uint8> initialTexturePixels(numPixels * 4, 0x00);
-		D3D11_SUBRESOURCE_DATA initialTextureData = {0};
-		initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
-		initialTextureData.SysMemPitch = (int)m_windowBounds.Width * 4;
-		initialTextureData.SysMemSlicePitch = numPixels * 4;
-		DX::ThrowIfFailed(
-			m_d3dDevice->CreateTexture2D(
-				&textureDesc,
-				&initialTextureData,
-				&m_mainTexture
-				)
-			);
-
-		D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
-		resourceViewDesc.Format = textureDesc.Format;
-		resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-		resourceViewDesc.Texture2D.MostDetailedMip = 0;
-		resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
-		DX::ThrowIfFailed(
-			m_d3dDevice->CreateShaderResourceView(
-				m_mainTexture.Get(),
-				&resourceViewDesc,
-				&m_mainTextureResourceView)
-			);
-	});
-
-	auto createMainSamplerTask = createMainTextureTask.then([this] () {
+    auto createMainSamplerTask = createCubeTask.then([this] () {
 		D3D11_SAMPLER_DESC samplerDesc;
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -151,6 +110,48 @@ void SDL_winrtrenderer::CreateDeviceResources()
 	});
 }
 
+void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
+{
+    D3D11_TEXTURE2D_DESC textureDesc = {0};
+	textureDesc.Width = w;
+	textureDesc.Height = h;
+	textureDesc.MipLevels = 1;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	textureDesc.MiscFlags = 0;
+
+	const int numPixels = textureDesc.Width * textureDesc.Height;
+	std::vector<uint8> initialTexturePixels(numPixels * 4, 0x00);
+	D3D11_SUBRESOURCE_DATA initialTextureData = {0};
+	initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
+	initialTextureData.SysMemPitch = textureDesc.Width * 4;
+	initialTextureData.SysMemSlicePitch = numPixels * 4;
+	DX::ThrowIfFailed(
+		m_d3dDevice->CreateTexture2D(
+			&textureDesc,
+			&initialTextureData,
+			&m_mainTexture
+			)
+		);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
+	resourceViewDesc.Format = textureDesc.Format;
+	resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	resourceViewDesc.Texture2D.MostDetailedMip = 0;
+	resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
+	DX::ThrowIfFailed(
+		m_d3dDevice->CreateShaderResourceView(
+			m_mainTexture.Get(),
+			&resourceViewDesc,
+			&m_mainTextureResourceView)
+		);
+}
+
 void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)
 {
 	const float blackColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -171,6 +172,10 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 	{
 		return;
 	}
+    if (!m_mainTextureResourceView)
+    {
+        return;
+    }
 
 	// Update the main texture (for SDL usage):
 	D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
@@ -185,7 +190,9 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 
 	// TODO, WinRT: only copy over the requested rects (via SDL_BlitSurface, perhaps?)
 	// TODO, WinRT: do a sanity check on the src and dest data when updating the window surface
-	const unsigned int numBytes = (int)m_windowBounds.Width * (int)m_windowBounds.Height * 4;
+    D3D11_TEXTURE2D_DESC textureDesc = {0};
+    m_mainTexture->GetDesc(&textureDesc);
+	const unsigned int numBytes = textureDesc.Width * textureDesc.Height * 4;
 	memcpy(textureMemory.pData, surface->pixels, numBytes);
 
 	m_d3dContext->Unmap(

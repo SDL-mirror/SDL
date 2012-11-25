@@ -447,6 +447,11 @@ void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData* windowData)
     m_sdlWindowData = windowData;
 }
 
+void SDL_WinRTApp::ResizeMainTexture(int w, int h)
+{
+    m_renderer->ResizeMainTexture(w, h);
+}
+
 IFrameworkView^ Direct3DApplicationSource::CreateView()
 {
     // TODO, WinRT: see if this function (CreateView) can ever get called

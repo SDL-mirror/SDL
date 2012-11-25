@@ -53,11 +53,15 @@ int SDL_WINRT_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * forma
         return -1;
     }
 
-    /* Save the info and return! */
+    /* Save info on the surface */
     SDL_SetWindowData(window, WINRT_SURFACE, surface);
     *format = surface_format;
     *pixels = surface->pixels;
     *pitch = surface->pitch;
+
+    /* Make sure a Direct3D texture exists to draw the surface onto */
+    SDL_WinRTGlobalApp->ResizeMainTexture(surface->w, surface->h);
+
     return 0;
 }
 

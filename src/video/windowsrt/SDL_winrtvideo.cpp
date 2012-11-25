@@ -154,14 +154,50 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
     SDL_zerop(data);
     data->sdlWindow = window;
 
-    /* Adjust the window data to match the screen */
+    /* Make sure the window is considered to be positioned at {0,0},
+       and is considered fullscreen, shown, and the like.
+    */
     window->x = 0;
     window->y = 0;
-    window->w = _this->displays->desktop_mode.w;
-    window->h = _this->displays->desktop_mode.h;
+    window->flags =
+        SDL_WINDOW_FULLSCREEN |
+        SDL_WINDOW_SHOWN |
+        SDL_WINDOW_BORDERLESS |
+        SDL_WINDOW_MAXIMIZED |
+        SDL_WINDOW_INPUT_GRABBED;
 
+    /* HACK from DLudwig: The following line of code prevents
+       SDL_CreateWindow and SDL_UpdateFullscreenMode from trying to resize
+       the window after the call to WINRT_CreateWindow returns.
+       
+       This hack should allow a window to be created in virtually any size,
+       and more importantly, it allows a window's framebuffer, as created and
+       retrieved via SDL_GetWindowSurface, to be in any size.  This can be
+       utilized by apps centered around software rendering, such as ports
+       of older apps.  The app can have SDL create a framebuffer in any size
+       it chooses.  SDL will scale the framebuffer to the native
+       screen size on the GPU (via SDL_UpdateWindowSurface).
+    */
+    _this->displays[0].fullscreen_window = window;
+
+    /* Further prevent any display resizing, and make sure SDL_GetWindowDisplayMode
+       can report the correct size of windows, by creating a new display
+       mode in the requested size.  To note, if the window is being created in
+       the device's native screen size, SDL_AddDisplayMode will do nothing.
+    */
+    window->fullscreen_mode = SDL_WinRTGlobalApp->GetMainDisplayMode();
+    window->fullscreen_mode.w = window->w;
+    window->fullscreen_mode.h = window->h;
+    SDL_AddDisplayMode(&_this->displays[0], &window->fullscreen_mode);
+
+    /* TODO: Consider removing custom display modes in WINRT_DestroyWindow. */
+ 
+    /* Make sure the WinRT app's IFramworkView can post events on
+       behalf of SDL:
+    */
     SDL_WinRTGlobalApp->SetSDLWindowData(data);
 
+    /* All done! */
     return 0;
 }
 

@@ -19,6 +19,7 @@ public:
 
 internal:
 	virtual void Render(SDL_Surface * surface, SDL_Rect * rects, int numrects) override;
+    void ResizeMainTexture(int w, int h);
 
 private:
 	bool m_loadingComplete;

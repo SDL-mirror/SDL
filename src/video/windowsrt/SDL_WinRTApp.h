@@ -27,6 +27,7 @@ internal:
     bool HasSDLWindowData() const;
     void SetSDLWindowData(const SDL_WindowData * windowData);
     void UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects);
+    void ResizeMainTexture(int w, int h);
 
 protected:
 	// Event Handlers.
