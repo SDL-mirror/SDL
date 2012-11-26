@@ -30,7 +30,7 @@
 
 #include "SDL_stdinc.h"
 
-#if __IPHONEOS__
+#if defined(__IPHONEOS__) && __IPHONEOS__
 #include "SDL_video.h"
 #include "SDL_keyboard.h"
 #endif
@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 /* Platform specific functions for iOS */
-#if __IPHONEOS__
+#if defined(__IPHONEOS__) && __IPHONEOS__
 
 extern DECLSPEC int SDLCALL SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callback)(void*), void *callbackParam);
 extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
@@ -53,7 +53,7 @@ extern DECLSPEC void SDLCALL SDL_iPhoneSetEventPump(SDL_bool enabled);
 
 
 /* Platform specific functions for Android */
-#if __ANDROID__
+#if defined(__ANDROID__) && __ANDROID__
 
 /* Get the JNI environment for the current thread
    This returns JNIEnv*, but the prototype is void* so we don't need jni.h

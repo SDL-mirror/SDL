@@ -95,6 +95,7 @@ Cocoa_CreateDevice(int devindex)
     device->SetWindowIcon = Cocoa_SetWindowIcon;
     device->SetWindowPosition = Cocoa_SetWindowPosition;
     device->SetWindowSize = Cocoa_SetWindowSize;
+    device->SetWindowMinimumSize = Cocoa_SetWindowMinimumSize;
     device->ShowWindow = Cocoa_ShowWindow;
     device->HideWindow = Cocoa_HideWindow;
     device->RaiseWindow = Cocoa_RaiseWindow;

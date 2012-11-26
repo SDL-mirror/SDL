@@ -2581,6 +2581,7 @@ fi
 if test x$SDLMAIN_SOURCES = x; then
     SDLMAIN_SOURCES="$srcdir/src/main/dummy/*.c"
 fi
+SDLTEST_SOURCES="$srcdir/src/test/*.c"
 
 OBJECTS=`echo $SOURCES`
 DEPENDS=`echo $SOURCES | tr ' ' '\n'`
@@ -2602,6 +2603,13 @@ SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
 SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.c,\\\\
+\\$(objects)/\\2.o: \\1/\\2.c\\\\
+	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
+
+SDLTEST_OBJECTS=`echo $SDLTEST_SOURCES`
+SDLTEST_DEPENDS=`echo $SDLTEST_SOURCES`
+SDLTEST_OBJECTS=`echo "$SDLTEST_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.o,g'`
+SDLTEST_DEPENDS=`echo "$SDLTEST_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.c,\\\\
 \\$(objects)/\\2.o: \\1/\\2.c\\\\
 	\\$(LIBTOOL) --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 
@@ -2650,6 +2658,7 @@ AC_SUBST(INCLUDE)
 AC_SUBST(OBJECTS)
 AC_SUBST(VERSION_OBJECTS)
 AC_SUBST(SDLMAIN_OBJECTS)
+AC_SUBST(SDLTEST_OBJECTS)
 AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
@@ -2666,6 +2675,7 @@ $srcdir/src/SDL.c: update-revision
 $DEPENDS
 $VERSION_DEPENDS
 $SDLMAIN_DEPENDS
+$SDLTEST_DEPENDS
 __EOF__
 
 AC_CONFIG_FILES([

@@ -731,6 +731,21 @@ Cocoa_SetWindowSize(_THIS, SDL_Window * window)
 }
 
 void
+Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+        
+    NSSize minSize;
+    minSize.width = window->min_w;
+    minSize.height = window->min_h;
+        
+    [windata->nswindow setMinSize:minSize];
+    
+    [pool release];
+}
+
+void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

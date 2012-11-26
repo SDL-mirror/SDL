@@ -18,14 +18,41 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "SDL_config.h"
 
-#if SDL_VIDEO_DRIVER_UIKIT
+/**
+ *  \file SDLTest.h
+ *  
+ *  Include file for SDL test framework.
+ *
+ *  This code is a part of the SDL2_test library, not the main SDL library.
+ */
 
-extern SDL_bool UIKit_ShowingMessageBox();
+#ifndef _SDLTest_h
+#define _SDLTest_h
 
-extern int UIKit_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
+#include "SDL.h"
+#include "SDL_test_font.h"
 
-#endif /* SDL_VIDEO_DRIVER_UIKIT */
+#include "begin_code.h"
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+extern "C" {
+/* *INDENT-ON* */
+#endif
+
+/* Function prototypes */
+
+/* ADD STUFF HERE */
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+/* *INDENT-OFF* */
+}
+/* *INDENT-ON* */
+#endif
+#include "close_code.h"
+
+#endif /* _SDLTest_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

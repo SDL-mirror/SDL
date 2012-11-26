@@ -1566,19 +1566,47 @@ SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
     CHECK_WINDOW_MAGIC(window, );
 
     if (_this && window && window->magic == &_this->window_magic) {
-        if (w) {
-            *w = window->w;
+        *w = window->w;
+        *h = window->h;
+    }
+}
+
+void
+SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
+{
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        window->min_w = min_w;
+        window->min_h = min_h;
+        if (_this->SetWindowMinimumSize) {
+            _this->SetWindowMinimumSize(_this, window);
         }
-        if (h) {
-            *h = window->h;
-        }
-    } else {
-        if (w) {
-            *w = 0;
-        }
-        if (h) {
-            *h = 0;
-        }
+        /* Ensure that window is not smaller than minimal size */
+        SDL_SetWindowSize(window, SDL_max(window->w, window->min_w), SDL_max(window->h, window->min_h));
+    }
+}
+
+void
+SDL_GetWindowMinimumSize(SDL_Window * window, int *min_w, int *min_h)
+{
+    int dummy;
+    
+    if (!min_w) {
+        min_w = &dummy;
+    }
+    if (!min_h) {
+        min_h = &dummy;
+    }
+    
+    *min_w = 0;
+    *min_h = 0;
+    
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (_this && window && window->magic == &_this->window_magic) {
+        *min_w = window->min_w;
+        *min_h = window->min_h;
     }
 }
 
