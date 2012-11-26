@@ -359,15 +359,6 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 			)
 		);
 
-	CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
-	DX::ThrowIfFailed(
-		m_d3dDevice->CreateDepthStencilView(
-			depthStencil.Get(),
-			&depthStencilViewDesc,
-			&m_depthStencilView
-			)
-		);
-
 	// Set the rendering viewport to target the entire window.
 	CD3D11_VIEWPORT viewport(
 		0.0f,
@@ -431,7 +422,6 @@ void SDL_winrtrenderer::UpdateForWindowSizeChange()
 		ID3D11RenderTargetView* nullViews[] = {nullptr};
 		m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
 		m_renderTargetView = nullptr;
-		m_depthStencilView = nullptr;
 		m_d3dContext->Flush();
 		CreateWindowSizeDependentResources();
 	}
@@ -443,13 +433,6 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 	m_d3dContext->ClearRenderTargetView(
 		m_renderTargetView.Get(),
 		blackColor
-		);
-
-	m_d3dContext->ClearDepthStencilView(
-		m_depthStencilView.Get(),
-		D3D11_CLEAR_DEPTH,
-		1.0f,
-		0
 		);
 
 	// Only draw the cube once it is loaded (loading is asynchronous).
@@ -487,7 +470,7 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 	m_d3dContext->OMSetRenderTargets(
 		1,
 		m_renderTargetView.GetAddressOf(),
-		m_depthStencilView.Get()
+		nullptr
 		);
 
 	UINT stride = sizeof(VertexPositionColor);
@@ -543,9 +526,6 @@ void SDL_winrtrenderer::Present()
 	// This is a valid operation only when the existing contents will be entirely
 	// overwritten. If dirty or scroll rects are used, this call should be removed.
 	m_d3dContext->DiscardView(m_renderTargetView.Get());
-
-	// Discard the contents of the depth stencil.
-	m_d3dContext->DiscardView(m_depthStencilView.Get());
 
 	// If the device was removed either by a disconnect or a driver upgrade, we 
 	// must recreate all device resources.

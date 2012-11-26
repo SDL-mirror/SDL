@@ -34,7 +34,6 @@ protected private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext1> m_d3dContext;
 	Microsoft::WRL::ComPtr<IDXGISwapChain1> m_swapChain;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
-	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> m_depthStencilView;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
