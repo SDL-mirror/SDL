@@ -28,6 +28,7 @@ internal:
     void SetSDLWindowData(const SDL_WindowData * windowData);
     void UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects);
     void ResizeMainTexture(int w, int h);
+    Windows::Foundation::Point TransformCursor(Windows::Foundation::Point rawPosition);
 
 protected:
 	// Event Handlers.

@@ -167,11 +167,25 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
     }
 }
 
+// Applies necessary geometric transformations to raw cursor positions:
+Point SDL_WinRTApp::TransformCursor(Point rawPosition)
+{
+    if ( ! m_sdlWindowData || ! m_sdlWindowData->sdlWindow ) {
+        return rawPosition;
+    }
+    CoreWindow ^ nativeWindow = CoreWindow::GetForCurrentThread();
+    Point outputPosition;
+    outputPosition.X = rawPosition.X * (((float32)m_sdlWindowData->sdlWindow->w) / nativeWindow->Bounds.Width);
+    outputPosition.Y = rawPosition.Y * (((float32)m_sdlWindowData->sdlWindow->h) / nativeWindow->Bounds.Height);
+    return outputPosition;
+}
+
 void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
 {
     if (m_sdlWindowData)
     {
-        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, (int)args->CurrentPoint->Position.X, (int)args->CurrentPoint->Position.Y);
+        Point transformedPoint = TransformCursor(args->CurrentPoint->Position);
+        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, (int)transformedPoint.X, (int)transformedPoint.Y);
     }
 }
 
