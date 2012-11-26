@@ -130,8 +130,8 @@ void SDL_winrtrenderer::CreateDeviceResources()
 			);
 	});
 
-	auto createCubeTask = (createPSTask && createVSTask).then([this] () {
-		VertexPositionColor cubeVertices[] = 
+	auto createVertexBuffer = (createPSTask && createVSTask).then([this] () {
+		VertexPositionColor vertices[] = 
 		{
 			{XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 1.0f)},
 			{XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
@@ -139,13 +139,13 @@ void SDL_winrtrenderer::CreateDeviceResources()
 			{XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
 		};
 
-		m_vertexCount = ARRAYSIZE(cubeVertices);
+		m_vertexCount = ARRAYSIZE(vertices);
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-		vertexBufferData.pSysMem = cubeVertices;
+		vertexBufferData.pSysMem = vertices;
 		vertexBufferData.SysMemPitch = 0;
 		vertexBufferData.SysMemSlicePitch = 0;
-		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(cubeVertices), D3D11_BIND_VERTEX_BUFFER);
+		CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
 		DX::ThrowIfFailed(
 			m_d3dDevice->CreateBuffer(
 				&vertexBufferDesc,
@@ -155,7 +155,7 @@ void SDL_winrtrenderer::CreateDeviceResources()
 			);
 	});
 
-    auto createMainSamplerTask = createCubeTask.then([this] () {
+    auto createMainSamplerTask = createVertexBuffer.then([this] () {
 		D3D11_SAMPLER_DESC samplerDesc;
 		samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 		samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
@@ -435,7 +435,7 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 		blackColor
 		);
 
-	// Only draw the cube once it is loaded (loading is asynchronous).
+	// Only draw the screen once it is loaded (some loading is asynchronous).
 	if (!m_loadingComplete)
 	{
 		return;
