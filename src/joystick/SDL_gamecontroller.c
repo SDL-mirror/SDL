@@ -96,7 +96,9 @@ const char *s_ControllerMappings [] =
 };
 
 static ControllerMapping_t *s_pSupportedControllers = NULL;
+#ifdef SDL_JOYSTICK_DINPUT
 static ControllerMapping_t *s_pXInputMapping = NULL;
+#endif
 
 /* The SDL game controller structure */
 struct _SDL_GameController
