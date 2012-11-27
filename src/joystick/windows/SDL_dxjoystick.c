@@ -524,7 +524,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_USB_DEVICE, 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1
 static int
 SDL_JoystickThread(void *_data)
 {
-	int nDevicesLast = 0;
 	HRESULT result = S_OK;	
 	HWND messageWindow = 0;
 	HDEVNOTIFY hNotify = 0;
@@ -570,8 +569,6 @@ SDL_JoystickThread(void *_data)
 
 		if ( s_pKnownJoystickGUIDs && s_bWindowsDeviceChanged )
 		{
-			int nDevices = 0;
-
 			SDL_Delay( 300 ); // wait for direct input to find out about this device
 
 			s_bDeviceRemoved = SDL_TRUE;
