@@ -157,13 +157,15 @@ static void report_free(struct report *);
 #define REP_BUF_DATA(rep) ((rep)->buf->data)
 #endif
 
+int SDL_SYS_numjoysticks = 0;
+
 int
 SDL_SYS_JoystickInit(void)
 {
     char s[16];
     int i, fd;
 
-    SDL_numjoysticks = 0;
+    SDL_SYS_numjoysticks = 0;
 
     SDL_memset(joynames, 0, sizeof(joynames));
     SDL_memset(joydevnames, 0, sizeof(joydevnames));
@@ -173,12 +175,12 @@ SDL_SYS_JoystickInit(void)
 
         SDL_snprintf(s, SDL_arraysize(s), "/dev/uhid%d", i);
 
-        nj.index = SDL_numjoysticks;
+        nj.index = SDL_SYS_numjoysticks;
         joynames[nj.index] = strdup(s);
 
-        if (SDL_SYS_JoystickOpen(&nj) == 0) {
+        if (SDL_SYS_JoystickOpen(&nj, nj.index) == 0) {
             SDL_SYS_JoystickClose(&nj);
-            SDL_numjoysticks++;
+            SDL_SYS_numjoysticks++;
         } else {
             SDL_free(joynames[nj.index]);
             joynames[nj.index] = NULL;
@@ -188,7 +190,7 @@ SDL_SYS_JoystickInit(void)
         SDL_snprintf(s, SDL_arraysize(s), "/dev/joy%d", i);
         fd = open(s, O_RDONLY);
         if (fd != -1) {
-            joynames[SDL_numjoysticks++] = strdup(s);
+            joynames[SDL_SYS_numjoysticks++] = strdup(s);
             close(fd);
         }
     }
@@ -196,11 +198,11 @@ SDL_SYS_JoystickInit(void)
     /* Read the default USB HID usage table. */
     hid_init(NULL);
 
-    return (SDL_numjoysticks);
+    return (SDL_SYS_numjoysticks);
 }
 
 const char *
-SDL_SYS_JoystickName(int index)
+SDL_SYS_JoystickNameForIndex(int index)
 {
     if (joydevnames[index] != NULL) {
         return (joydevnames[index]);
@@ -260,9 +262,9 @@ hatval_to_sdl(Sint32 hatval)
 
 
 int
-SDL_SYS_JoystickOpen(SDL_Joystick * joy)
+SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
 {
-    char *path = joynames[joy->index];
+    char *path = joynames[device_index];
     struct joystick_hwdata *hw;
     struct hid_item hitem;
     struct hid_data *hdata;
@@ -556,6 +558,52 @@ SDL_SYS_JoystickQuit(void)
     return;
 }
 
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
+{
+    return index;
+}
+
+/* Function to determine is this joystick is attached to the system right now */
+int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return 1;
+}
+
+int SDL_SYS_NumJoysticks()
+{
+    return SDL_SYS_numjoysticks;
+}
+
+int SDL_SYS_JoystickNeedsPolling()
+{
+    return 0;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
+}
+
+JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = joystick->name;
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
+}
+
 static int
 report_alloc(struct report *r, struct report_desc *rd, int repind)
 {
@@ -612,4 +660,5 @@ report_free(struct report *r)
 }
 
 #endif /* SDL_JOYSTICK_USBHID */
+
 /* vi: set ts=4 sw=4 expandtab: */
