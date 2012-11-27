@@ -1248,7 +1248,7 @@ SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
 /* Function to determine is this joystick is attached to the system right now */
 int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
 {
-    return joystick->closed;
+    return !joystick->closed;
 }
 
 int SDL_SYS_NumJoysticks()
