@@ -135,6 +135,8 @@ GetJoystickName(int index, const char *szRegKey)
     return (name);
 }
 
+static int SDL_SYS_numjoysticks = 0;
+
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
  * joysticks.  Joystick 0 should be the system default joystick.
@@ -145,7 +147,6 @@ SDL_SYS_JoystickInit(void)
 {
     int i;
     int maxdevs;
-    int numdevs;
     JOYINFOEX joyinfo;
     JOYCAPS joycaps;
     MMRESULT result;
@@ -157,9 +158,9 @@ SDL_SYS_JoystickInit(void)
     }
 
     /* Loop over all potential joystick devices */
-    numdevs = 0;
+    SDL_SYS_numjoysticks = 0;
     maxdevs = joyGetNumDevs();
-    for (i = JOYSTICKID1; i < maxdevs && numdevs < MAX_JOYSTICKS; ++i) {
+    for (i = JOYSTICKID1; i < maxdevs && SDL_SYS_numjoysticks < MAX_JOYSTICKS; ++i) {
 
         joyinfo.dwSize = sizeof(joyinfo);
         joyinfo.dwFlags = JOY_RETURNALL;
@@ -167,20 +168,20 @@ SDL_SYS_JoystickInit(void)
         if (result == JOYERR_NOERROR) {
             result = joyGetDevCaps(i, &joycaps, sizeof(joycaps));
             if (result == JOYERR_NOERROR) {
-                SYS_JoystickID[numdevs] = i;
-                SYS_Joystick[numdevs] = joycaps;
-                SYS_JoystickName[numdevs] =
+                SYS_JoystickID[SDL_SYS_numjoysticks] = i;
+                SYS_Joystick[SDL_SYS_numjoysticks] = joycaps;
+                SYS_JoystickName[SDL_SYS_numjoysticks] =
                     GetJoystickName(i, joycaps.szRegKey);
-                numdevs++;
+                SDL_SYS_numjoysticks++;
             }
         }
     }
-    return (numdevs);
+    return (SDL_SYS_numjoysticks);
 }
 
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickName(int index)
+SDL_SYS_JoystickNameForIndex(int index)
 {
     if (SYS_JoystickName[index] != NULL) {
         return (SYS_JoystickName[index]);
@@ -195,7 +196,7 @@ SDL_SYS_JoystickName(int index)
    It returns 0, or -1 if there is an error.
  */
 int
-SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
+SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
     int index, i;
     int caps_flags[MAX_AXES - 2] =
@@ -204,7 +205,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
 
 
     /* shortcut */
-    index = joystick->index;
+    index = device_index;
     axis_min[0] = SYS_Joystick[index].wXmin;
     axis_max[0] = SYS_Joystick[index].wXmax;
     axis_min[1] = SYS_Joystick[index].wYmin;
@@ -219,6 +220,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
     axis_max[5] = SYS_Joystick[index].wVmax;
 
     /* allocate memory for system specific hardware data */
+    joystick->instance_id = device_index;
     joystick->hwdata =
         (struct joystick_hwdata *) SDL_malloc(sizeof(*joystick->hwdata));
     if (joystick->hwdata == NULL) {
@@ -375,6 +377,53 @@ SDL_SYS_JoystickQuit(void)
             SYS_JoystickName[i] = NULL;
         }
     }
+}
+
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
+{
+    return index;
+}
+
+/* Function to determine is this joystick is attached to the system right now */
+int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return 1;
+}
+
+int SDL_SYS_NumJoysticks()
+{
+    return SDL_SYS_numjoysticks;
+}
+
+int SDL_SYS_JoystickNeedsPolling()
+{
+    return 0;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
+}
+
+
+JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = joystick->name;
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
 }
 
 

@@ -50,6 +50,8 @@ extern "C"
         int16 *new_axes;
     };
 
+    static int SDL_SYS_numjoysticks = 0;
+
 /* Function to scan the system for joysticks.
  * This function should set SDL_numjoysticks to the number of available
  * joysticks.  Joystick 0 should be the system default joystick.
@@ -58,34 +60,33 @@ extern "C"
     int SDL_SYS_JoystickInit(void)
     {
         BJoystick joystick;
-        int numjoysticks;
         int i;
         int32 nports;
         char name[B_OS_NAME_LENGTH];
 
         /* Search for attached joysticks */
           nports = joystick.CountDevices();
-          numjoysticks = 0;
+          SDL_SYS_numjoysticks = 0;
           SDL_memset(SDL_joyport, 0, (sizeof SDL_joyport));
           SDL_memset(SDL_joyname, 0, (sizeof SDL_joyname));
-        for (i = 0; (SDL_numjoysticks < MAX_JOYSTICKS) && (i < nports); ++i)
+        for (i = 0; (SDL_SYS_numjoysticks < MAX_JOYSTICKS) && (i < nports); ++i)
         {
             if (joystick.GetDeviceName(i, name) == B_OK) {
                 if (joystick.Open(name) != B_ERROR) {
                     BString stick_name;
                       joystick.GetControllerName(&stick_name);
-                      SDL_joyport[numjoysticks] = strdup(name);
-                      SDL_joyname[numjoysticks] = strdup(stick_name.String());
-                      numjoysticks++;
+                      SDL_joyport[SDL_SYS_numjoysticks] = strdup(name);
+                      SDL_joyname[SDL_SYS_numjoysticks] = strdup(stick_name.String());
+                      SDL_SYS_numjoysticks++;
                       joystick.Close();
                 }
             }
         }
-        return (numjoysticks);
+        return (SDL_SYS_numjoysticks);
     }
 
 /* Function to get the device-dependent name of a joystick */
-    const char *SDL_SYS_JoystickName(int index)
+    const char *SDL_SYS_JoystickNameForIndex(int index)
     {
         return SDL_joyname[index];
     }
@@ -95,11 +96,12 @@ extern "C"
    This should fill the nbuttons and naxes fields of the joystick structure.
    It returns 0, or -1 if there is an error.
  */
-    int SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
+    int SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     {
         BJoystick *stick;
 
         /* Create the joystick data structure */
+        joystick->instance_id = device_index;
         joystick->hwdata = (struct joystick_hwdata *)
             SDL_malloc(sizeof(*joystick->hwdata));
         if (joystick->hwdata == NULL) {
@@ -111,7 +113,7 @@ extern "C"
         joystick->hwdata->stick = stick;
 
         /* Open the requested joystick for use */
-        if (stick->Open(SDL_joyport[joystick->index]) == B_ERROR) {
+        if (stick->Open(SDL_joyport[device_index]) == B_ERROR) {
             SDL_SetError("Unable to open joystick");
             SDL_SYS_JoystickClose(joystick);
             return (-1);
@@ -231,6 +233,53 @@ extern "C"
             SDL_free(SDL_joyname[i]);
         }
         SDL_joyname[0] = NULL;
+    }
+
+/* Function to perform the mapping from device index to the instance id for this index */
+    SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
+    {
+        return index;
+    }
+
+/* Function to determine is this joystick is attached to the system right now */
+    int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+    {
+        return 1;
+    }
+
+    int SDL_SYS_NumJoysticks()
+    {
+        return SDL_SYS_numjoysticks;
+    }
+
+    int SDL_SYS_JoystickNeedsPolling()
+    {
+        return 0;
+    }
+
+    void SDL_SYS_JoystickDetect()
+    {
+    }
+
+    JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+    {
+        JoystickGUID guid;
+        // the GUID is just the first 16 chars of the name for now
+        const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+        SDL_zero( guid );
+        SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+        return guid;
+    }
+
+
+    JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+    {
+        JoystickGUID guid;
+        // the GUID is just the first 16 chars of the name for now
+        const char *name = joystick->name;
+        SDL_zero( guid );
+        SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+        return guid;
     }
 
 };                              // extern "C"

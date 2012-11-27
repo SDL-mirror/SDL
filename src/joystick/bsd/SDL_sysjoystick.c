@@ -278,6 +278,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
         return (-1);
     }
 
+    joy->instance_id = device_index;
     hw = (struct joystick_hwdata *)
         SDL_malloc(sizeof(struct joystick_hwdata));
     if (hw == NULL) {

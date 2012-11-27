@@ -68,12 +68,10 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 		joystick->nbuttons = 0;
 		[[SDLUIAccelerationDelegate sharedDelegate] startup];
 		return 0;
-	}
-	else {
+	} else {
 		SDL_SetError("No joystick available with that index");
 		return (-1);
 	}
-	
 }
 
 /* Function to update the state of a joystick - called as a device poll.

@@ -831,8 +831,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     for (index = device_index; index > 0; index--)
         device = device->pNext;
 
-    joystick->hwdata = device;
 	joystick->instance_id = device->instance_id;
+    joystick->hwdata = device;
 	joystick->name = device->product;
 
 	joystick->naxes = device->axes;

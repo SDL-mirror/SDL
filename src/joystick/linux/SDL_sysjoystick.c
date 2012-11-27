@@ -390,7 +390,7 @@ EV_IsJoystick(int fd)
 
 #endif /* SDL_INPUT_LINUXEV */
 
-int SDL_SYS_numjoysticks = 0;
+static int SDL_SYS_numjoysticks = 0;
 
 /* Function to scan the system for joysticks */
 int
@@ -827,6 +827,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         SDL_SetError("Unable to open %s\n", SDL_joylist[joystick->instance_id]);
         return (-1);
     }
+    joystick->instance_id = device_index;
     joystick->hwdata = (struct joystick_hwdata *)
         SDL_malloc(sizeof(*joystick->hwdata));
     if (joystick->hwdata == NULL) {
@@ -837,7 +838,6 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
     joystick->hwdata->fd = fd;
     joystick->hwdata->fname = fname;
-    joystick->instance_id = device_index;
 
     /* Set the joystick to non-blocking read mode */
     fcntl(fd, F_SETFL, O_NONBLOCK);

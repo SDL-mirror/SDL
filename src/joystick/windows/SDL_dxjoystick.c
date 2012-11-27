@@ -707,6 +707,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     dipdw.diph.dwHeaderSize = sizeof(DIPROPHEADER);
 
     /* allocate memory for system specific hardware data */
+	joystick->instance_id = joystickdevice->nInstanceID;
     joystick->hwdata =
         (struct joystick_hwdata *) SDL_malloc(sizeof(struct joystick_hwdata));
     if (joystick->hwdata == NULL) {
@@ -716,7 +717,6 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     SDL_memset(joystick->hwdata, 0, sizeof(struct joystick_hwdata));
     joystick->hwdata->buffered = 1;
 	joystick->hwdata->removed = 0;
-	joystick->instance_id = joystickdevice->nInstanceID;
     joystick->hwdata->Capabilities.dwSize = sizeof(DIDEVCAPS);
 	joystick->hwdata->guid = joystickdevice->guid;
 
