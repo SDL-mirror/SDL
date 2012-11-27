@@ -113,7 +113,7 @@ extern JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index );
  */
 extern JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick);
 
-#ifdef __WIN32__
+#ifdef SDL_JOYSTICK_DINPUT
 /* Function to get the current instance id of the joystick located at device_index */
 extern int SDL_SYS_IsXInputDeviceIndex( int device_index );
 #endif
