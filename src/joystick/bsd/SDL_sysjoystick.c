@@ -175,15 +175,14 @@ SDL_SYS_JoystickInit(void)
 
         SDL_snprintf(s, SDL_arraysize(s), "/dev/uhid%d", i);
 
-        nj.index = SDL_SYS_numjoysticks;
-        joynames[nj.index] = strdup(s);
+        joynames[SDL_SYS_numjoysticks] = strdup(s);
 
-        if (SDL_SYS_JoystickOpen(&nj, nj.index) == 0) {
+        if (SDL_SYS_JoystickOpen(&nj, SDL_SYS_numjoysticks) == 0) {
             SDL_SYS_JoystickClose(&nj);
             SDL_SYS_numjoysticks++;
         } else {
-            SDL_free(joynames[nj.index]);
-            joynames[nj.index] = NULL;
+            SDL_free(joynames[SDL_SYS_numjoysticks]);
+            joynames[SDL_SYS_numjoysticks] = NULL;
         }
     }
     for (i = 0; i < MAX_JOY_JOYS; i++) {
@@ -295,7 +294,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
         joy->nbuttons = 2;
         joy->nhats = 0;
         joy->nballs = 0;
-        joydevnames[joy->index] = strdup("Gameport joystick");
+        joydevnames[device_index] = strdup("Gameport joystick");
         goto usbend;
     } else {
         hw->type = BSDJOY_UHID;
@@ -359,8 +358,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
                     s = hid_usage_in_page(hitem.usage);
                     sp = SDL_malloc(SDL_strlen(s) + 5);
                     SDL_snprintf(sp, SDL_strlen(s) + 5, "%s (%d)",
-                                 s, joy->index);
-                    joydevnames[joy->index] = sp;
+                                 s, device_index);
+                    joydevnames[device_index] = sp;
                 }
             }
             break;
