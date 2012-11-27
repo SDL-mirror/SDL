@@ -528,6 +528,9 @@ SDL_JoystickThread(void *_data)
 	HWND messageWindow = 0;
 	HDEVNOTIFY hNotify = 0;
 	DEV_BROADCAST_DEVICEINTERFACE dbh;
+	SDL_bool bOpenedXInputDevices[4];
+
+	SDL_memset( bOpenedXInputDevices, 0x0, sizeof(bOpenedXInputDevices) );
 
 	result = WIN_CoInitialize();
 
@@ -557,6 +560,9 @@ SDL_JoystickThread(void *_data)
 	while ( s_bJoystickThreadQuit == SDL_FALSE )
 	{
 		MSG messages;
+		Uint8 userId;
+		int nCurrentOpenedXInputDevices = 0;
+		int nNewOpenedXInputDevices = 0;
 		SDL_CondWaitTimeout( s_condJoystickThread, s_mutexJoyStickEnum, 300 );
 
 		while ( s_bJoystickThreadQuit == SDL_FALSE && PeekMessage(&messages, messageWindow, 0, 0, PM_NOREMOVE) )
@@ -567,7 +573,29 @@ SDL_JoystickThread(void *_data)
 			}
 		}
 
-		if ( s_pKnownJoystickGUIDs && s_bWindowsDeviceChanged )
+		// scan for any change in XInput devices
+		for ( userId = 0; userId < 4; userId++ )
+		{
+			XINPUT_CAPABILITIES	capabilities;
+			DWORD result;
+
+			if ( bOpenedXInputDevices[userId] == SDL_TRUE )
+				nCurrentOpenedXInputDevices++;
+
+			result = XINPUTGETCAPABILITIES( userId, XINPUT_FLAG_GAMEPAD, &capabilities );
+			if ( result == ERROR_SUCCESS )
+			{
+				bOpenedXInputDevices[userId] = SDL_TRUE;
+				nNewOpenedXInputDevices++;
+			}
+			else
+			{
+				bOpenedXInputDevices[userId] = SDL_FALSE;
+			}
+		}
+
+
+		if ( s_pKnownJoystickGUIDs && ( s_bWindowsDeviceChanged || nNewOpenedXInputDevices != nCurrentOpenedXInputDevices ) )
 		{
 			SDL_Delay( 300 ); // wait for direct input to find out about this device
 
