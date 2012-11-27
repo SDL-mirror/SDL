@@ -428,6 +428,7 @@
 		04F7805F12FB74A200FC43C0 /* SDL_drawpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */; };
 		566CDE8F148F0AC200C5A9BB /* SDL_dropevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 566CDE8D148F0AC200C5A9BB /* SDL_dropevents_c.h */; };
 		566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
+		AA0AD09D16648D1700CE5896 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
 		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
 		AA628ACB159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
@@ -546,7 +547,6 @@
 		AABCC38E164063D200AB8930 /* SDL_cocoamessagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AABCC38B164063D200AB8930 /* SDL_cocoamessagebox.h */; };
 		AABCC38F164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC38C164063D200AB8930 /* SDL_cocoamessagebox.m */; };
 		AABCC390164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC38C164063D200AB8930 /* SDL_cocoamessagebox.m */; };
-		BBFC088B164C6514003E6A99 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
 		BBFC088D164C6647003E6A99 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
 /* End PBXBuildFile section */
 
@@ -2277,6 +2277,7 @@
 				AA628AD1159367F2005138DD /* SDL_x11xinput2.c in Sources */,
 				AA9E4093163BE51E007A2AD0 /* SDL_x11messagebox.c in Sources */,
 				AABCC38F164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */,
+				AA0AD09D16648D1700CE5896 /* SDL_gamecontroller.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
