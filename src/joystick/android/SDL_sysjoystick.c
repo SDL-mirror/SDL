@@ -64,13 +64,18 @@ SDL_SYS_JoystickNameForIndex(int index)
    It returns 0, or -1 if there is an error.
  */
 int
-SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int index)
+SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
-    joystick->nbuttons = 0;
-    joystick->nhats = 0;
-    joystick->nballs = 0;
-    joystick->naxes = 3;
-    return 0;
+    if (device_index == 0) {
+        joystick->nbuttons = 0;
+        joystick->nhats = 0;
+        joystick->nballs = 0;
+        joystick->naxes = 3;
+        return 0;
+	} else {
+		SDL_SetError("No joystick available with that index");
+		return (-1);
+	}
 }
 
 
