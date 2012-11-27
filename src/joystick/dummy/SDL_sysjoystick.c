@@ -39,7 +39,7 @@ SDL_SYS_JoystickInit(void)
 
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickNameForDevice(int index)
+SDL_SYS_JoystickNameForIndex(int index)
 {
     SDL_SetError("Logic error: No joysticks available");
     return (NULL);
