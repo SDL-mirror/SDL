@@ -37,13 +37,12 @@ const char *accelerometerName = "iPhone accelerometer";
 int
 SDL_SYS_JoystickInit(void)
 {
-    SDL_numjoysticks = 1;
     return (1);
 }
 
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickName(int index)
+SDL_SYS_JoystickNameForIndex(int index)
 {
 	switch(index) {
 		case 0:
@@ -60,14 +59,13 @@ SDL_SYS_JoystickName(int index)
    It returns 0, or -1 if there is an error.
  */
 int
-SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
+SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
-	if (joystick->index == 0) {
+	if (device_index == 0) {
 		joystick->naxes = 3;
 		joystick->nhats = 0;
 		joystick->nballs = 0;
 		joystick->nbuttons = 0;
-		joystick->name  = accelerometerName;
 		[[SDLUIAccelerationDelegate sharedDelegate] startup];
 		return 0;
 	}
@@ -107,7 +105,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 void
 SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 {
-	if (joystick->index == 0 && [[SDLUIAccelerationDelegate sharedDelegate] isRunning]) {
+	if ([[SDLUIAccelerationDelegate sharedDelegate] isRunning]) {
 		[[SDLUIAccelerationDelegate sharedDelegate] shutdown];
 	}
 	SDL_SetError("No joystick open with that index");
@@ -121,4 +119,51 @@ SDL_SYS_JoystickQuit(void)
 {
     return;
 }
+
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
+{
+    return index;
+}
+
+/* Function to determine is this joystick is attached to the system right now */
+int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return 1;
+}
+
+int SDL_SYS_NumJoysticks()
+{
+    return 1;
+}
+
+int SDL_SYS_JoystickNeedsPolling()
+{
+    return 0;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
+}
+
+JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+{
+    JoystickGUID guid;
+    // the GUID is just the first 16 chars of the name for now
+    const char *name = joystick->name;
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
+    return guid;
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

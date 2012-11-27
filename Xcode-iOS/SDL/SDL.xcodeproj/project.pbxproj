@@ -98,6 +98,8 @@
 		56ED04E3118A8EFD00A56AA6 /* SDL_syspower.m in Sources */ = {isa = PBXBuildFile; fileRef = 56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */; };
 		93CB792313FC5E5200BD3E05 /* SDL_uikitviewcontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = 93CB792213FC5E5200BD3E05 /* SDL_uikitviewcontroller.h */; };
 		93CB792613FC5F5300BD3E05 /* SDL_uikitviewcontroller.m in Sources */ = {isa = PBXBuildFile; fileRef = 93CB792513FC5F5300BD3E05 /* SDL_uikitviewcontroller.m */; };
+		AA0AD06216647BBB00CE5896 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = AA0AD06116647BBB00CE5896 /* SDL_gamecontroller.c */; };
+		AA0AD06516647BD400CE5896 /* SDL_gamecontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = AA0AD06416647BD400CE5896 /* SDL_gamecontroller.h */; };
 		AA126AD41617C5E7005ABC8F /* SDL_uikitmodes.h in Headers */ = {isa = PBXBuildFile; fileRef = AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */; };
 		AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */ = {isa = PBXBuildFile; fileRef = AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */; };
 		AA628ADB159369E3005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AD9159369E3005138DD /* SDL_rotate.c */; };
@@ -356,6 +358,8 @@
 		56ED04E2118A8EFD00A56AA6 /* SDL_syspower.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SDL_syspower.m; path = ../../src/power/uikit/SDL_syspower.m; sourceTree = SOURCE_ROOT; };
 		93CB792213FC5E5200BD3E05 /* SDL_uikitviewcontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitviewcontroller.h; sourceTree = "<group>"; };
 		93CB792513FC5F5300BD3E05 /* SDL_uikitviewcontroller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitviewcontroller.m; sourceTree = "<group>"; };
+		AA0AD06116647BBB00CE5896 /* SDL_gamecontroller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gamecontroller.c; sourceTree = "<group>"; };
+		AA0AD06416647BD400CE5896 /* SDL_gamecontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gamecontroller.h; sourceTree = "<group>"; };
 		AA126AD21617C5E6005ABC8F /* SDL_uikitmodes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitmodes.h; sourceTree = "<group>"; };
 		AA126AD31617C5E6005ABC8F /* SDL_uikitmodes.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmodes.m; sourceTree = "<group>"; };
 		AA628AD9159369E3005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
@@ -830,6 +834,7 @@
 			isa = PBXGroup;
 			children = (
 				FD689EFF0E26E5B600F90B21 /* iphoneos */,
+				AA0AD06116647BBB00CE5896 /* SDL_gamecontroller.c */,
 				FD5F9D1E0E0E08B3008E885B /* SDL_joystick.c */,
 				FD5F9D1F0E0E08B3008E885B /* SDL_joystick_c.h */,
 				FD5F9D200E0E08B3008E885B /* SDL_sysjoystick.h */,
@@ -914,6 +919,7 @@
 				AA7558701595D55500BBD41B /* SDL_endian.h */,
 				AA7558711595D55500BBD41B /* SDL_error.h */,
 				AA7558721595D55500BBD41B /* SDL_events.h */,
+				AA0AD06416647BD400CE5896 /* SDL_gamecontroller.h */,
 				AA7558731595D55500BBD41B /* SDL_gesture.h */,
 				AA7558741595D55500BBD41B /* SDL_haptic.h */,
 				AA7558751595D55500BBD41B /* SDL_hints.h */,
@@ -1259,6 +1265,7 @@
 				AA704DD6162AA90A0076D1C1 /* SDL_dropevents_c.h in Headers */,
 				AA9FF9511637C6E5000DF050 /* SDL_messagebox.h in Headers */,
 				AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */,
+				AA0AD06516647BD400CE5896 /* SDL_gamecontroller.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1478,6 +1485,7 @@
 				AA126AD51617C5E7005ABC8F /* SDL_uikitmodes.m in Sources */,
 				AA704DD7162AA90A0076D1C1 /* SDL_dropevents.c in Sources */,
 				AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */,
+				AA0AD06216647BBB00CE5896 /* SDL_gamecontroller.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

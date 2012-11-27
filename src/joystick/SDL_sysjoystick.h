@@ -107,7 +107,7 @@ extern int SDL_SYS_JoystickNeedsPolling();
 
 /* Function to return the stable GUID for a plugged in device
  */
-extern JoystickGUID SDL_SYS_PrivateJoystickGetDeviceID( int device_index );
+extern JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index );
 
 /* Function to return the stable GUID for a opened joystick
  */

@@ -513,7 +513,7 @@ SDL_SYS_JoystickNameForIndex(int index)
 {
     int fd;
     static char namebuf[128];
-    char *name;
+    const char *name;
     SDL_logical_joydecl(int oindex = index);
 
 #ifndef NO_LOGICAL_JOYSTICKS
@@ -1248,7 +1248,7 @@ SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
 /* Function to determine is this joystick is attached to the system right now */
 int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
 {
-    return !joystick->closed;
+    return 1;
 }
 
 int SDL_SYS_NumJoysticks()
@@ -1265,24 +1265,27 @@ void SDL_SYS_JoystickDetect()
 {
 }
 
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceID( int device_index )
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
 {
-    static JoystickGUID guid;
+    JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now
     const char *name = SDL_SYS_JoystickNameForIndex( device_index );
-    SDL_memcpy( &guid, name, sizeof(guid) );
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
 
 
 JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
 {
-    static JoystickGUID guid;
+    JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now
-    const char *name = SDL_SYS_JoystickNameForIndex( joystick->name );
-    SDL_memcpy( &guid, name, sizeof(guid) );
+    const char *name = joystick->name;
+    SDL_zero( guid );
+    SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
 
 #endif /* SDL_JOYSTICK_LINUX */
+
 /* vi: set ts=4 sw=4 expandtab: */

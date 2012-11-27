@@ -661,13 +661,13 @@ SDL_PrivateJoystickNeedsPolling()
 }
 
 
-/* return the guid for this index*/
+/* return the guid for this index */
 JoystickGUID SDL_JoystickGetDeviceGUID( int device_index )
 {
-	return SDL_SYS_PrivateJoystickGetDeviceID( device_index );
+	return SDL_SYS_PrivateJoystickGetDeviceGUID( device_index );
 }
 
-/* return the guid for this openeded device*/
+/* return the guid for this opened device */
 JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
 {
 	return SDL_SYS_PrivateJoystickGetGUID( joystick );

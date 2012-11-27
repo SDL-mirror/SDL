@@ -1651,7 +1651,7 @@ int SDL_SYS_JoystickNeedsPolling()
 }
 
 /* return the stable device guid for this device index */
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceID( int device_index )
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
 {
 	JoyStick_DeviceData *device = SYS_Joystick;
 	int index;

@@ -1089,7 +1089,7 @@ SDL_SYS_JoystickNeedsPolling()
 	return s_bDeviceAdded;
 }
 
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceID( int device_index )
+JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
 {
     recDevice *device = gpDeviceList;
     int index;
