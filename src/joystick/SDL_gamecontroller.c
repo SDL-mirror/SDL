@@ -730,8 +730,6 @@ SDL_GameControllerOpen(int device_index)
 	SDL_GameController *gamecontrollerlist;
 	ControllerMapping_t *pSupportedController = NULL;
 
-	int deviceMappingIndex = -1;
-
     if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
         SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
         return (NULL);
