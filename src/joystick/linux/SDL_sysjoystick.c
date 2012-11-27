@@ -298,7 +298,7 @@ CountLogicalJoysticks(int max)
     ret = 0;
 
     for (i = 0; i < max; i++) {
-        name = SDL_SYS_JoystickNameForIndex(i);
+        name = SDL_SYS_JoystickNameForDeviceIndex(i);
 
         fd = open(SDL_joylist[i].fname, O_RDONLY, 0);
         if (fd >= 0) {
@@ -507,27 +507,41 @@ SDL_SYS_JoystickInit(void)
     return (numjoysticks);
 }
 
+int SDL_SYS_NumJoysticks()
+{
+    return SDL_SYS_numjoysticks;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+SDL_bool SDL_SYS_JoystickNeedsPolling()
+{
+    return SDL_FALSE;
+}
+
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickNameForIndex(int index)
+SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
     int fd;
     static char namebuf[128];
     const char *name;
-    SDL_logical_joydecl(int oindex = index);
+    SDL_logical_joydecl(int oindex = device_index);
 
 #ifndef NO_LOGICAL_JOYSTICKS
-    SDL_joylist_head(index, index);
+    SDL_joylist_head(device_index, device_index);
 #endif
     name = NULL;
-    fd = open(SDL_joylist[index].fname, O_RDONLY, 0);
+    fd = open(SDL_joylist[device_index].fname, O_RDONLY, 0);
     if (fd >= 0) {
         if (
 #if SDL_INPUT_LINUXEV
                (ioctl(fd, EVIOCGNAME(sizeof(namebuf)), namebuf) <= 0) &&
 #endif
                (ioctl(fd, JSIOCGNAME(sizeof(namebuf)), namebuf) <= 0)) {
-            name = SDL_joylist[index].fname;
+            name = SDL_joylist[device_index].fname;
         } else {
             name = namebuf;
         }
@@ -536,12 +550,18 @@ SDL_SYS_JoystickNameForIndex(int index)
 
 #ifndef NO_LOGICAL_JOYSTICKS
         if (SDL_joylist[oindex].prev || SDL_joylist[oindex].next
-            || index != oindex) {
+            || device_index != oindex) {
             LogicalSuffix(SDL_joylist[oindex].logicalno, namebuf, 128);
         }
 #endif
     }
     return name;
+}
+
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+{
+    return device_index;
 }
 
 static int
@@ -604,7 +624,7 @@ JS_ConfigJoystick(SDL_Joystick * joystick, int fd)
         joystick->nbuttons = n;
     }
 
-    name = SDL_SYS_JoystickNameForIndex(joystick->instance_id);
+    name = SDL_SYS_JoystickNameForDeviceIndex(joystick->instance_id);
 
     /* Generic analog joystick support */
     if (SDL_strstr(name, "Analog") == name && SDL_strstr(name, "-hat")) {
@@ -854,6 +874,12 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         JS_ConfigJoystick(joystick, fd);
 
     return (0);
+}
+
+/* Function to determine is this joystick is attached to the system right now */
+SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return SDL_TRUE;
 }
 
 #ifndef NO_LOGICAL_JOYSTICKS
@@ -1239,44 +1265,17 @@ SDL_SYS_JoystickQuit(void)
     }
 }
 
-/* Function to perform the mapping from device index to the instance id for this index */
-SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
-{
-    return index;
-}
-
-/* Function to determine is this joystick is attached to the system right now */
-int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
-{
-    return 1;
-}
-
-int SDL_SYS_NumJoysticks()
-{
-    return SDL_SYS_numjoysticks;
-}
-
-int SDL_SYS_JoystickNeedsPolling()
-{
-    return 0;
-}
-
-void SDL_SYS_JoystickDetect()
-{
-}
-
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now
-    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
     SDL_zero( guid );
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
 
-
-JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now

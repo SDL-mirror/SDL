@@ -62,8 +62,14 @@ extern "C" {
 struct _SDL_Joystick;
 typedef struct _SDL_Joystick SDL_Joystick;
 
+/* A structure that encodes the stable unique id for a joystick device */
+typedef struct {
+	Uint8 data[16];
+} JoystickGUID;
+
 typedef int SDL_JoystickID;
-	
+
+
 /* Function prototypes */
 /**
  *  Count the number of joysticks attached to the system right now
@@ -93,12 +99,6 @@ extern DECLSPEC SDL_Joystick *SDLCALL SDL_JoystickOpen(int device_index);
  */
 extern DECLSPEC const char *SDLCALL SDL_JoystickName(SDL_Joystick * joystick);
 	
-/* A structure that encodes the stable unique id for a joystick device */
-typedef struct
-{
-	Uint8 data[16];
-} JoystickGUID;
-
 /**
  *  Return the GUID for the joystick at this index
  */
@@ -119,14 +119,13 @@ extern DECLSPEC char *SDLCALL SDL_JoystickGetGUIDString(JoystickGUID guid);
  */
 extern DECLSPEC JoystickGUID SDLCALL SDL_JoystickGetGUIDFromString(const char *pchGUID);
 
-
 /**
- *  Returns 1 if the joystick has been opened and currently connected, or 0 if it has not.
+ *  Returns SDL_TRUE if the joystick has been opened and currently connected, or SDL_FALSE if it has not.
  */
-extern DECLSPEC int SDLCALL SDL_JoystickGetAttached(SDL_Joystick * joystick);
+extern DECLSPEC SDL_bool SDLCALL SDL_JoystickGetAttached(SDL_Joystick * joystick);
 
 /**
- *  Get the device index of an opened joystick.
+ *  Get the instance ID of an opened joystick.
  */
 extern DECLSPEC SDL_JoystickID SDLCALL SDL_JoystickInstanceID(SDL_Joystick * joystick);
 

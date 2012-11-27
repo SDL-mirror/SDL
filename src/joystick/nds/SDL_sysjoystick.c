@@ -36,9 +36,6 @@
 #include "../../video/nds/SDL_ndsevents_c.h"
 
 /* Function to scan the system for joysticks.
- * This function should set SDL_numjoysticks to the number of available
- * joysticks.  Joystick 0 should be the system default joystick.
- * It should return 0, or -1 on an unrecoverable fatal error.
  */
 int
 SDL_SYS_JoystickInit(void)
@@ -46,14 +43,31 @@ SDL_SYS_JoystickInit(void)
     return (1);
 }
 
+int SDL_SYS_NumJoysticks()
+{
+    return 1;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+SDL_bool SDL_SYS_JoystickNeedsPolling()
+{
+    return SDL_FALSE;
+}
+
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickNameForIndex(int index)
+SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
-    if (!index)
-        return "NDS builtin joypad";
-    SDL_SetError("No joystick available with that index");
-    return (NULL);
+    return "NDS builtin joypad";
+}
+
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+{
+    return device_index;
 }
 
 /* Function to open a joystick for use.
@@ -71,6 +85,11 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     return 0;
 }
 
+/* Function to determine is this joystick is attached to the system right now */
+SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return SDL_TRUE;
+}
 
 /* Function to update the state of a joystick - called as a device poll.
  * This function shouldn't update the joystick structure directly,
@@ -167,44 +186,17 @@ SDL_SYS_JoystickQuit(void)
 {
 }
 
-/* Function to perform the mapping from device index to the instance id for this index */
-SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
-{
-    return index;
-}
-
-/* Function to determine is this joystick is attached to the system right now */
-int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
-{
-    return 1;
-}
-
-int SDL_SYS_NumJoysticks()
-{
-    return 1;
-}
-
-int SDL_SYS_JoystickNeedsPolling()
-{
-    return 0;
-}
-
-void SDL_SYS_JoystickDetect()
-{
-}
-
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now
-    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
     SDL_zero( guid );
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
 
-
-JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now

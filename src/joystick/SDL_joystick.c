@@ -63,7 +63,7 @@ SDL_JoystickNameForIndex(int device_index)
         SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
         return (NULL);
     }
-    return (SDL_SYS_JoystickNameForIndex(device_index));
+    return (SDL_SYS_JoystickNameForDeviceIndex(device_index));
 }
 
 /*
@@ -112,7 +112,7 @@ SDL_JoystickOpen(int device_index)
         return NULL;
     }
 
-	joystickname = SDL_SYS_JoystickNameForIndex( device_index );
+	joystickname = SDL_SYS_JoystickNameForDeviceIndex( device_index );
 	if ( joystickname )
 		joystick->name = SDL_strdup( joystickname );
 	else
@@ -332,11 +332,11 @@ SDL_JoystickGetButton(SDL_Joystick * joystick, int button)
  * Return if the joystick in question is currently attached to the system,
  *  \return 0 if not plugged in, 1 if still present.
  */
-int
-SDL_JoystickGetAttached( SDL_Joystick * joystick )
+SDL_bool
+SDL_JoystickGetAttached(SDL_Joystick * joystick)
 {
 	if (!SDL_PrivateJoystickValid(joystick)) {
-        return (0);
+        return SDL_FALSE;
     }
 
 	return SDL_SYS_JoystickAttached(joystick);
@@ -346,7 +346,7 @@ SDL_JoystickGetAttached( SDL_Joystick * joystick )
  * Get the instance id for this opened joystick
  */
 SDL_JoystickID 
-SDL_JoystickInstanceID( SDL_Joystick * joystick )
+SDL_JoystickInstanceID(SDL_Joystick * joystick)
 {
 	if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
@@ -645,13 +645,13 @@ SDL_JoystickEventState(int state)
 }
 
 /* return 1 if you want to run the joystick update loop this frame, used by hotplug support */
-int 
+SDL_bool 
 SDL_PrivateJoystickNeedsPolling()
 {
 	if ( SDL_SYS_JoystickNeedsPolling() )
 	{
 		// sys layer needs us to think
-		return 1;
+		return SDL_TRUE;
 	}
 	else
 	{
@@ -662,16 +662,15 @@ SDL_PrivateJoystickNeedsPolling()
 
 
 /* return the guid for this index */
-JoystickGUID SDL_JoystickGetDeviceGUID( int device_index )
+JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
 {
-	return SDL_SYS_PrivateJoystickGetDeviceGUID( device_index );
+	return SDL_SYS_JoystickGetDeviceGUID( device_index );
 }
 
 /* return the guid for this opened device */
 JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
 {
-	return SDL_SYS_PrivateJoystickGetGUID( joystick );
-
+	return SDL_SYS_JoystickGetGUID( joystick );
 }
 
 /* convert the guid to a printable string */

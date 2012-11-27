@@ -157,7 +157,7 @@ static void report_free(struct report *);
 #define REP_BUF_DATA(rep) ((rep)->buf->data)
 #endif
 
-int SDL_SYS_numjoysticks = 0;
+static int SDL_SYS_numjoysticks = 0;
 
 int
 SDL_SYS_JoystickInit(void)
@@ -200,13 +200,33 @@ SDL_SYS_JoystickInit(void)
     return (SDL_SYS_numjoysticks);
 }
 
-const char *
-SDL_SYS_JoystickNameForIndex(int index)
+int SDL_SYS_NumJoysticks()
 {
-    if (joydevnames[index] != NULL) {
-        return (joydevnames[index]);
+    return SDL_SYS_numjoysticks;
+}
+
+void SDL_SYS_JoystickDetect()
+{
+}
+
+SDL_bool SDL_SYS_JoystickNeedsPolling()
+{
+    return SDL_FALSE;
+}
+
+const char *
+SDL_SYS_JoystickNameForDeviceIndex(int device_index)
+{
+    if (joydevnames[device_index] != NULL) {
+        return (joydevnames[device_index]);
     }
-    return (joynames[index]);
+    return (joynames[device_index]);
+}
+
+/* Function to perform the mapping from device index to the instance id for this index */
+SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+{
+    return device_index;
 }
 
 static int
@@ -404,6 +424,12 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
     return (-1);
 }
 
+/* Function to determine is this joystick is attached to the system right now */
+SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+{
+    return SDL_TRUE;
+}
+
 void
 SDL_SYS_JoystickUpdate(SDL_Joystick * joy)
 {
@@ -558,43 +584,17 @@ SDL_SYS_JoystickQuit(void)
     return;
 }
 
-/* Function to perform the mapping from device index to the instance id for this index */
-SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int index)
-{
-    return index;
-}
-
-/* Function to determine is this joystick is attached to the system right now */
-int SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
-{
-    return 1;
-}
-
-int SDL_SYS_NumJoysticks()
-{
-    return SDL_SYS_numjoysticks;
-}
-
-int SDL_SYS_JoystickNeedsPolling()
-{
-    return 0;
-}
-
-void SDL_SYS_JoystickDetect()
-{
-}
-
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now
-    const char *name = SDL_SYS_JoystickNameForIndex( device_index );
+    const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
     SDL_zero( guid );
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
 
-JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick * joystick)
+JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
     JoystickGUID guid;
     // the GUID is just the first 16 chars of the name for now

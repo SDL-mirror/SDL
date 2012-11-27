@@ -63,7 +63,7 @@ static recDevice *gpDeviceList = NULL;
 /* OSX reference to the notification object that tells us about device insertion/removal */
 IONotificationPortRef notificationPort = 0;
 /* if 1 then a device was added since the last update call */
-Uint8 s_bDeviceAdded = 0;
+static SDL_bool s_bDeviceAdded = SDL_FALSE;
 
 /* static incrementing counter for new joystick devices seen on the system. Devices should start with index 0 */
 static int s_joystick_instance_id = -1;
@@ -674,7 +674,7 @@ AddDeviceHelper( io_object_t ioHIDDeviceObject )
 	}
 	
 	device->send_open_event = 1;
-	s_bDeviceAdded = 1;
+	s_bDeviceAdded = SDL_TRUE;
 	
 	/* Add device to the end of the list */
 	if ( !gpDeviceList )
@@ -805,16 +805,87 @@ SDL_SYS_JoystickInit(void)
     return SDL_SYS_NumJoysticks();
 }
 
+/* Function to return the number of joystick devices plugged in right now */
+int
+SDL_SYS_NumJoysticks()
+{
+	recDevice *device = gpDeviceList;
+    int nJoySticks = 0;
+	
+	while ( device )
+	{
+		nJoySticks++;
+        device = device->pNext;
+	}
+
+	return nJoySticks;
+}
+
+/* Function to cause any queued joystick insertions to be processed
+ */
+void
+SDL_SYS_JoystickDetect()
+{
+	if ( s_bDeviceAdded )
+	{
+		recDevice *device = gpDeviceList;
+		s_bDeviceAdded = SDL_FALSE;
+		int device_index = 0;
+		// send notifications
+		while ( device )
+		{
+			if ( device->send_open_event )
+			{
+				device->send_open_event = 0;
+#if !SDL_EVENTS_DISABLED
+				SDL_Event event;
+				event.type = SDL_JOYDEVICEADDED;
+				
+				if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+					event.jdevice.which = device_index;
+					if ((SDL_EventOK == NULL)
+						|| (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+						SDL_PushEvent(&event);
+					}
+				}
+#endif /* !SDL_EVENTS_DISABLED */
+			}
+			device_index++;
+			device = device->pNext;
+		}
+	}
+}
+
+SDL_bool
+SDL_SYS_JoystickNeedsPolling()
+{
+	return s_bDeviceAdded;
+}
+
 /* Function to get the device-dependent name of a joystick */
 const char *
-SDL_SYS_JoystickNameForIndex(int index)
+SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
     recDevice *device = gpDeviceList;
 
-    for (; index > 0; index--)
+    for (; device_index > 0; device_index--)
         device = device->pNext;
 
 	return device->product;
+}
+
+/* Function to return the instance id of the joystick at device_index
+ */
+SDL_JoystickID
+SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+{
+    recDevice *device = gpDeviceList;
+    int index;
+	
+    for (index = device_index; index > 0; index--)
+        device = device->pNext;
+
+	return device->instance_id;
 }
 
 /* Function to open a joystick for use.
@@ -842,57 +913,25 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     return 0;
 }
 
-
-/* Function to return the instance id of the joystick at device_index
+/* Function to query if the joystick is currently attached
+ *   It returns 1 if attached, 0 otherwise.
  */
-SDL_JoystickID
-SDL_SYS_GetInstanceIdOfDeviceIndex( int device_index )
+SDL_bool
+SDL_SYS_JoystickAttached(SDL_Joystick * joystick)
 {
-    recDevice *device = gpDeviceList;
+	recDevice *device = gpDeviceList;
     int index;
 	
-    for (index = device_index; index > 0; index--)
-        device = device->pNext;
-
-	return device->instance_id;
-}
-
-
-/* Function to cause any queued joystick insertions to be processed
- */
-void
-SDL_SYS_JoystickDetect()
-{
-	if ( s_bDeviceAdded )
+	while ( device )
 	{
-		recDevice *device = gpDeviceList;
-		s_bDeviceAdded = 0;
-		int device_index = 0;
-		// send notifications
-		while ( device )
-		{
-			if ( device->send_open_event )
-			{
-				device->send_open_event = 0;
-#if !SDL_EVENTS_DISABLED
-				SDL_Event event;
-				event.type = SDL_JOYDEVICEADDED;
-				
-				if (SDL_GetEventState(event.type) == SDL_ENABLE) {
-					event.jdevice.which = device_index;
-					if ((SDL_EventOK == NULL)
-						|| (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-						SDL_PushEvent(&event);
-					}
-				}
-#endif /* !SDL_EVENTS_DISABLED */
-			}
-			device_index++;
-			device = device->pNext;
-		}
-	}
-}
+		if ( joystick->instance_id == device->instance_id )
+			return SDL_TRUE;
 
+        device = device->pNext;
+	}
+	
+	return SDL_FALSE;
+}
 
 /* Function to update the state of a joystick - called as a device poll.
  * This function shouldn't update the joystick structure directly,
@@ -1023,28 +1062,6 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
     return;
 }
 
-
-/* Function to query if the joystick is currently attached
- *   It returns 1 if attached, 0 otherwise.
- */
-int
-SDL_SYS_JoystickAttached(SDL_Joystick * joystick)
-{
-	recDevice *device = gpDeviceList;
-    int index;
-	
-	while ( device )
-	{
-		if ( joystick->instance_id == device->instance_id )
-			return (1);
-		
-        device = device->pNext;
-	}
-	
-	return 0;
-}
-
-
 /* Function to close a joystick after use */
 void
 SDL_SYS_JoystickClose(SDL_Joystick * joystick)
@@ -1067,29 +1084,7 @@ SDL_SYS_JoystickQuit(void)
 }
 
 
-/* Function to return the number of joystick devices plugged in right now*/
-int
-SDL_SYS_NumJoysticks()
-{
-	recDevice *device = gpDeviceList;
-    int nJoySticks = 0;
-	
-	while ( device )
-	{
-		nJoySticks++;
-        device = device->pNext;
-	}
-
-	return nJoySticks;
-}
-
-int
-SDL_SYS_JoystickNeedsPolling()
-{
-	return s_bDeviceAdded;
-}
-
-JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
+JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     recDevice *device = gpDeviceList;
     int index;
@@ -1100,7 +1095,7 @@ JoystickGUID SDL_SYS_PrivateJoystickGetDeviceGUID( int device_index )
 	return device->guid;	
 }
 
-JoystickGUID SDL_SYS_PrivateJoystickGetGUID(SDL_Joystick *joystick)
+JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick *joystick)
 {
 	return joystick->hwdata->guid;
 }
