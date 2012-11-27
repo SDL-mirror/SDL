@@ -14,6 +14,7 @@ TARGETS = \
 	testdraw2$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
+	testgamecontroller$(EXE) \
 	testgesture$(EXE) \
 	testgl2$(EXE) \
 	testgles$(EXE) \
@@ -87,6 +88,9 @@ testerror$(EXE): $(srcdir)/testerror.c
 testfile$(EXE): $(srcdir)/testfile.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+testgamecontroller$(EXE): $(srcdir)/testgamecontroller.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+ 
 testgesture$(EXE): $(srcdir)/testgesture.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
  

@@ -24,34 +24,22 @@
 
 #include "SDL_events.h"
 #include "SDL_sysjoystick.h"
-#include "SDL_joystick_c.h"
 #include "SDL_assert.h"
 
 #if !SDL_EVENTS_DISABLED
 #include "../events/SDL_events_c.h"
 #endif
 
-Uint8 SDL_numjoysticks = 0;
-SDL_Joystick **SDL_joysticks = NULL;
+SDL_Joystick *SDL_joysticks = NULL;
 
 int
 SDL_JoystickInit(void)
 {
-    int arraylen;
     int status;
 
-    SDL_numjoysticks = 0;
     status = SDL_SYS_JoystickInit();
     if (status >= 0) {
-        arraylen = (status + 1) * sizeof(*SDL_joysticks);
-        SDL_joysticks = (SDL_Joystick **) SDL_malloc(arraylen);
-        if (SDL_joysticks == NULL) {
-            SDL_numjoysticks = 0;
-        } else {
-            SDL_memset(SDL_joysticks, 0, arraylen);
-            SDL_numjoysticks = status;
-        }
-        status = 0;
+      status = 0;
     }
     return (status);
 }
@@ -62,20 +50,20 @@ SDL_JoystickInit(void)
 int
 SDL_NumJoysticks(void)
 {
-    return SDL_numjoysticks;
+    return SDL_SYS_NumJoysticks();
 }
 
 /*
  * Get the implementation dependent name of a joystick
  */
 const char *
-SDL_JoystickName(int device_index)
+SDL_JoystickNameForIndex(int device_index)
 {
-    if ((device_index < 0) || (device_index >= SDL_numjoysticks)) {
-        SDL_SetError("There are %d joysticks available", SDL_numjoysticks);
+    if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
+        SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
         return (NULL);
     }
-    return (SDL_SYS_JoystickName(device_index));
+    return (SDL_SYS_JoystickNameForIndex(device_index));
 }
 
 /*
@@ -88,21 +76,27 @@ SDL_JoystickName(int device_index)
 SDL_Joystick *
 SDL_JoystickOpen(int device_index)
 {
-    int i;
     SDL_Joystick *joystick;
+	SDL_Joystick *joysticklist;
+	const char *joystickname = NULL;
 
-    if ((device_index < 0) || (device_index >= SDL_numjoysticks)) {
-        SDL_SetError("There are %d joysticks available", SDL_numjoysticks);
+    if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
+        SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
         return (NULL);
     }
 
-    /* If the joystick is already open, return it */
-    for (i = 0; SDL_joysticks[i]; ++i) {
-        if (device_index == SDL_joysticks[i]->index) {
-            joystick = SDL_joysticks[i];
-            ++joystick->ref_count;
-            return (joystick);
-        }
+	joysticklist = SDL_joysticks;
+    /* If the joystick is already open, return it 
+	* it is important that we have a single joystick * for each instance id 
+	*/
+	while ( joysticklist )
+	{
+		if ( SDL_SYS_GetInstanceIdOfDeviceIndex(device_index) == joysticklist->instance_id ) {
+				joystick = joysticklist;
+				++joystick->ref_count;
+				return (joystick);
+		}
+		joysticklist = joysticklist->next;
     }
 
     /* Create and initialize the joystick */
@@ -113,11 +107,17 @@ SDL_JoystickOpen(int device_index)
     }
 
     SDL_memset(joystick, 0, (sizeof *joystick));
-    joystick->index = device_index;
-    if (SDL_SYS_JoystickOpen(joystick) < 0) {
+    if (SDL_SYS_JoystickOpen(joystick, device_index) < 0) {
         SDL_free(joystick);
         return NULL;
     }
+
+	joystickname = SDL_SYS_JoystickNameForIndex( device_index );
+	if ( joystickname )
+		joystick->name = SDL_strdup( joystickname );
+	else
+		joystick->name = NULL;
+
     if (joystick->naxes > 0) {
         joystick->axes = (Sint16 *) SDL_malloc
             (joystick->naxes * sizeof(Sint16));
@@ -158,29 +158,13 @@ SDL_JoystickOpen(int device_index)
 
     /* Add joystick to list */
     ++joystick->ref_count;
-    for (i = 0; SDL_joysticks[i]; ++i)
-        /* Skip to next joystick */ ;
-    SDL_joysticks[i] = joystick;
+	/* Link the joystick in the list */
+	joystick->next = SDL_joysticks;
+	SDL_joysticks = joystick;
+
+	SDL_SYS_JoystickUpdate( joystick );
 
     return (joystick);
-}
-
-/*
- * Returns 1 if the joystick has been opened, or 0 if it has not.
- */
-int
-SDL_JoystickOpened(int device_index)
-{
-    int i, opened;
-
-    opened = 0;
-    for (i = 0; SDL_joysticks[i]; ++i) {
-        if (SDL_joysticks[i]->index == (Uint8) device_index) {
-            opened = 1;
-            break;
-        }
-    }
-    return (opened);
 }
 
 
@@ -188,29 +172,23 @@ SDL_JoystickOpened(int device_index)
  * Checks to make sure the joystick is valid.
  */
 int
-SDL_PrivateJoystickValid(SDL_Joystick ** joystick)
+SDL_PrivateJoystickValid(SDL_Joystick * joystick)
 {
     int valid;
 
-    if (*joystick == NULL) {
+    if ( joystick == NULL ) {
         SDL_SetError("Joystick hasn't been opened yet");
         valid = 0;
     } else {
         valid = 1;
     }
+	
+	if ( joystick && joystick->closed )
+	{
+		valid = 0;
+	}
+	
     return valid;
-}
-
-/*
- * Get the device index of an opened joystick.
- */
-int
-SDL_JoystickIndex(SDL_Joystick * joystick)
-{
-    if (!SDL_PrivateJoystickValid(&joystick)) {
-        return (-1);
-    }
-    return (joystick->index);
 }
 
 /*
@@ -219,7 +197,7 @@ SDL_JoystickIndex(SDL_Joystick * joystick)
 int
 SDL_JoystickNumAxes(SDL_Joystick * joystick)
 {
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
     return (joystick->naxes);
@@ -231,7 +209,7 @@ SDL_JoystickNumAxes(SDL_Joystick * joystick)
 int
 SDL_JoystickNumHats(SDL_Joystick * joystick)
 {
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
     return (joystick->nhats);
@@ -243,7 +221,7 @@ SDL_JoystickNumHats(SDL_Joystick * joystick)
 int
 SDL_JoystickNumBalls(SDL_Joystick * joystick)
 {
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
     return (joystick->nballs);
@@ -255,7 +233,7 @@ SDL_JoystickNumBalls(SDL_Joystick * joystick)
 int
 SDL_JoystickNumButtons(SDL_Joystick * joystick)
 {
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
     return (joystick->nbuttons);
@@ -269,7 +247,7 @@ SDL_JoystickGetAxis(SDL_Joystick * joystick, int axis)
 {
     Sint16 state;
 
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (0);
     }
     if (axis < joystick->naxes) {
@@ -289,7 +267,7 @@ SDL_JoystickGetHat(SDL_Joystick * joystick, int hat)
 {
     Uint8 state;
 
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (0);
     }
     if (hat < joystick->nhats) {
@@ -309,7 +287,7 @@ SDL_JoystickGetBall(SDL_Joystick * joystick, int ball, int *dx, int *dy)
 {
     int retval;
 
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
 
@@ -338,7 +316,7 @@ SDL_JoystickGetButton(SDL_Joystick * joystick, int button)
 {
     Uint8 state;
 
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (0);
     }
     if (button < joystick->nbuttons) {
@@ -351,14 +329,55 @@ SDL_JoystickGetButton(SDL_Joystick * joystick, int button)
 }
 
 /*
+ * Return if the joystick in question is currently attached to the system,
+ *  \return 0 if not plugged in, 1 if still present.
+ */
+int
+SDL_JoystickGetAttached( SDL_Joystick * joystick )
+{
+	if (!SDL_PrivateJoystickValid(joystick)) {
+        return (0);
+    }
+
+	return SDL_SYS_JoystickAttached(joystick);
+}
+
+/*
+ * Get the instance id for this opened joystick
+ */
+SDL_JoystickID 
+SDL_JoystickInstanceID( SDL_Joystick * joystick )
+{
+	if (!SDL_PrivateJoystickValid(joystick)) {
+        return (-1);
+    }
+
+	return (joystick->instance_id);
+}
+
+/*
+ * Get the friendly name of this joystick
+ */
+const char *
+SDL_JoystickName(SDL_Joystick * joystick)
+{
+    if (!SDL_PrivateJoystickValid(joystick)) {
+        return (NULL);
+    }
+	
+    return (joystick->name);
+}
+
+/*
  * Close a joystick previously opened with SDL_JoystickOpen()
  */
 void
 SDL_JoystickClose(SDL_Joystick * joystick)
 {
-    int i;
+	SDL_Joystick *joysticklist;
+	SDL_Joystick *joysticklistprev;
 
-    if (!SDL_PrivateJoystickValid(&joystick)) {
+    if (!joystick) {
         return;
     }
 
@@ -368,15 +387,31 @@ SDL_JoystickClose(SDL_Joystick * joystick)
     }
 
     SDL_SYS_JoystickClose(joystick);
+	
+	joysticklist = SDL_joysticks;
+	joysticklistprev = NULL;
+	while ( joysticklist )
+	{
+		if (joystick == joysticklist) 
+		{
+			if ( joysticklistprev )
+			{
+				// unlink this entry
+				joysticklistprev->next = joysticklist->next;
+			}
+			else
+			{
+				SDL_joysticks = joystick->next;
+			}
 
-    /* Remove joystick from list */
-    for (i = 0; SDL_joysticks[i]; ++i) {
-        if (joystick == SDL_joysticks[i]) {
-            SDL_memmove(&SDL_joysticks[i], &SDL_joysticks[i + 1],
-                        (SDL_numjoysticks - i) * sizeof(joystick));
-            break;
-        }
-    }
+			break;
+		}
+		joysticklistprev = joysticklist;
+		joysticklist = joysticklist->next;
+	}
+	
+	if (joystick->name)
+		SDL_free(joystick->name);
 
     /* Free the data associated with this joystick */
     if (joystick->axes) {
@@ -397,26 +432,15 @@ SDL_JoystickClose(SDL_Joystick * joystick)
 void
 SDL_JoystickQuit(void)
 {
-    const int numsticks = SDL_numjoysticks;
-    int i;
-
     /* Stop the event polling */
-    SDL_numjoysticks = 0;
-
-    for (i = numsticks; i--; ) {
-        SDL_Joystick *stick = SDL_joysticks[i];
-        if (stick && (stick->ref_count >= 1)) {
-            stick->ref_count = 1;
-            SDL_JoystickClose(stick);
-        }
-    }
+	while ( SDL_joysticks )
+	{
+		SDL_joysticks->ref_count = 1;
+        SDL_JoystickClose(SDL_joysticks);
+ 	}
 
     /* Quit the joystick setup */
     SDL_SYS_JoystickQuit();
-    if (SDL_joysticks) {
-        SDL_free(SDL_joysticks);
-        SDL_joysticks = NULL;
-    }
 }
 
 
@@ -441,14 +465,10 @@ SDL_PrivateJoystickAxis(SDL_Joystick * joystick, Uint8 axis, Sint16 value)
     if (SDL_GetEventState(SDL_JOYAXISMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.type = SDL_JOYAXISMOTION;
-        event.jaxis.which = joystick->index;
+        event.jaxis.which = joystick->instance_id;
         event.jaxis.axis = axis;
         event.jaxis.value = value;
-        if ((SDL_EventOK == NULL)
-            || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-            posted = 1;
-            SDL_PushEvent(&event);
-        }
+        posted = SDL_PushEvent(&event) == 1;
     }
 #endif /* !SDL_EVENTS_DISABLED */
     return (posted);
@@ -473,14 +493,10 @@ SDL_PrivateJoystickHat(SDL_Joystick * joystick, Uint8 hat, Uint8 value)
     if (SDL_GetEventState(SDL_JOYHATMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.jhat.type = SDL_JOYHATMOTION;
-        event.jhat.which = joystick->index;
+        event.jhat.which = joystick->instance_id;
         event.jhat.hat = hat;
         event.jhat.value = value;
-        if ((SDL_EventOK == NULL)
-            || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-            posted = 1;
-            SDL_PushEvent(&event);
-        }
+        posted = SDL_PushEvent(&event) == 1;
     }
 #endif /* !SDL_EVENTS_DISABLED */
     return (posted);
@@ -507,15 +523,11 @@ SDL_PrivateJoystickBall(SDL_Joystick * joystick, Uint8 ball,
     if (SDL_GetEventState(SDL_JOYBALLMOTION) == SDL_ENABLE) {
         SDL_Event event;
         event.jball.type = SDL_JOYBALLMOTION;
-        event.jball.which = joystick->index;
+        event.jball.which = joystick->instance_id;
         event.jball.ball = ball;
         event.jball.xrel = xrel;
         event.jball.yrel = yrel;
-        if ((SDL_EventOK == NULL)
-            || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-            posted = 1;
-            SDL_PushEvent(&event);
-        }
+        posted = SDL_PushEvent(&event) == 1;
     }
 #endif /* !SDL_EVENTS_DISABLED */
     return (posted);
@@ -553,14 +565,10 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
     posted = 0;
 #if !SDL_EVENTS_DISABLED
     if (SDL_GetEventState(event.type) == SDL_ENABLE) {
-        event.jbutton.which = joystick->index;
+        event.jbutton.which = joystick->instance_id;
         event.jbutton.button = button;
         event.jbutton.state = state;
-        if ((SDL_EventOK == NULL)
-            || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-            posted = 1;
-            SDL_PushEvent(&event);
-        }
+        posted = SDL_PushEvent(&event) == 1;
     }
 #endif /* !SDL_EVENTS_DISABLED */
     return (posted);
@@ -569,11 +577,39 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
 void
 SDL_JoystickUpdate(void)
 {
-    int i;
+	SDL_Joystick *joystick;
+		
+	joystick = SDL_joysticks;
+	while ( joystick )
+	{
+		SDL_Joystick *joysticknext;
+		/* save off the next pointer, the Update call may cause a joystick removed event
+		 * and cause our joystick pointer to be freed
+		 */
+		joysticknext = joystick->next;
 
-    for (i = 0; SDL_joysticks[i]; ++i) {
-        SDL_SYS_JoystickUpdate(SDL_joysticks[i]);
-    }
+        SDL_SYS_JoystickUpdate( joystick );
+
+		if ( joystick->closed && joystick->uncentered )
+		{
+			int i;
+			joystick->uncentered = 0;
+
+            // Tell the app that everything is centered/unpressed... 
+            for (i = 0; i < joystick->naxes; i++)
+                SDL_PrivateJoystickAxis(joystick, i, 0);
+
+            for (i = 0; i < joystick->nbuttons; i++)
+                SDL_PrivateJoystickButton(joystick, i, 0);
+
+            for (i = 0; i < joystick->nhats; i++)
+                SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
+		}
+
+		joystick = joysticknext;
+	}
+
+	SDL_SYS_JoystickDetect();
 }
 
 int
@@ -584,7 +620,7 @@ SDL_JoystickEventState(int state)
 #else
     const Uint32 event_list[] = {
         SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYHATMOTION,
-        SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP,
+        SDL_JOYBUTTONDOWN, SDL_JOYBUTTONUP, SDL_JOYDEVICEADDED, SDL_JOYDEVICEREMOVED
     };
     unsigned int i;
 
@@ -607,5 +643,122 @@ SDL_JoystickEventState(int state)
     return (state);
 #endif /* SDL_EVENTS_DISABLED */
 }
+
+/* return 1 if you want to run the joystick update loop this frame, used by hotplug support */
+int 
+SDL_PrivateJoystickNeedsPolling()
+{
+	if ( SDL_SYS_JoystickNeedsPolling() )
+	{
+		// sys layer needs us to think
+		return 1;
+	}
+	else
+	{
+		// otherwise only do it if a joystick is opened
+		return SDL_joysticks != NULL; 
+	}
+}
+
+
+/* return the guid for this index*/
+JoystickGUID SDL_JoystickGetDeviceGUID( int device_index )
+{
+	return SDL_SYS_PrivateJoystickGetDeviceID( device_index );
+}
+
+/* return the guid for this openeded device*/
+JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
+{
+	return SDL_SYS_PrivateJoystickGetGUID( joystick );
+
+}
+
+/* convert the guid to a printable string */
+char *SDL_JoystickGetGUIDString(JoystickGUID guid)
+{
+	static const char k_rgchHexToASCII[] = "0123456789abcdef";
+	char *pchOut = NULL;
+	char *pchString = NULL;
+	int i;
+	pchString = SDL_malloc(33); // 16 bytes
+	if ( !pchString )
+	{
+		SDL_OutOfMemory();
+		return NULL;
+	}
+	
+	pchOut = pchString;
+
+	for ( i = 0; i < sizeof(guid); i++ )
+	{
+		// each input byte writes 2 ascii chars, and might write a null byte.
+		// If we don't have room for next input byte, stop
+		unsigned char c = guid.data[i];
+
+		*pchOut++ = k_rgchHexToASCII[ c >> 4 ];
+		*pchOut++ = k_rgchHexToASCII[ c & 0x0F ];
+	}
+	*pchOut = '\0';
+	return pchString;
+}
+
+
+//-----------------------------------------------------------------------------
+// Purpose: Returns the 4 bit nibble for a hex character
+// Input  : c - 
+// Output : unsigned char
+//-----------------------------------------------------------------------------
+static unsigned char nibble( char c )
+{
+	if ( ( c >= '0' ) &&
+		( c <= '9' ) )
+	{
+		return (unsigned char)(c - '0');
+	}
+
+	if ( ( c >= 'A' ) &&
+		( c <= 'F' ) )
+	{
+		return (unsigned char)(c - 'A' + 0x0a);
+	}
+
+	if ( ( c >= 'a' ) &&
+		( c <= 'f' ) )
+	{
+		return (unsigned char)(c - 'a' + 0x0a);
+	}
+
+	// received an invalid character, and no real way to return an error
+	// AssertMsg1( false, "Q_nibble invalid hex character '%c' ", c );
+	return 0;
+}
+
+
+/* convert the string version of a joystick guid to the struct */
+JoystickGUID SDL_JoystickGetGUIDFromString(const char *pchGUID)
+{
+	JoystickGUID guid;
+	int maxoutputbytes= sizeof(guid);
+	int len = SDL_strlen( pchGUID );
+	Uint8 *p;
+	int i;
+
+	// Make sure it's even
+	len = ( len ) & ~0x1;
+
+	SDL_memset( &guid, 0x00, sizeof(guid) );
+
+	p = (Uint8 *)&guid;
+	for ( i = 0; 
+		( i < len ) && ( ( p - (Uint8 *)&guid ) < maxoutputbytes ); 
+		i+=2, p++ )
+	{
+		*p = ( nibble( pchGUID[i] ) << 4 ) | nibble( pchGUID[i+1] );		
+	}
+
+	return guid;
+}
+
 
 /* vi: set ts=4 sw=4 expandtab: */

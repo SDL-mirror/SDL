@@ -520,7 +520,7 @@ SDL_SYS_HapticMouse(void)
 
     /* Grab the first mouse haptic device we find. */
     for (i = 0; i < SDL_numhaptics; i++) {
-        if (SDL_hapticlist[i].capabilities.dwDevType == DIDEVTYPE_MOUSE) {
+        if (SDL_hapticlist[i].capabilities.dwDevType == DI8DEVCLASS_POINTER ) {
             return i;
         }
     }

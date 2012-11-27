@@ -559,6 +559,18 @@
 		00794F8709D2413B003FC8A1 /* sample.bmp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 00794E6109D20839003FC8A1 /* sample.bmp */; };
 		4537749F12091551002F0F45 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
 		453774A5120915E3002F0F45 /* testshape.c in Sources */ = {isa = PBXBuildFile; fileRef = 453774A4120915E3002F0F45 /* testshape.c */; };
+		BBFC08BF164C6862003E6A99 /* libsdlcommon.a in Frameworks */ = {isa = PBXBuildFile; fileRef = BEC567FF0761D90600A33029 /* libsdlcommon.a */; };
+		BBFC08C0164C6862003E6A99 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002F33A709CA188600EBEB88 /* Cocoa.framework */; };
+		BBFC08C1164C6862003E6A99 /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863B10730545007319AE /* CoreAudio.framework */; };
+		BBFC08C2164C6862003E6A99 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863C10730545007319AE /* ForceFeedback.framework */; };
+		BBFC08C3164C6862003E6A99 /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A863D10730545007319AE /* IOKit.framework */; };
+		BBFC08C4164C6862003E6A99 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A869F10730593007319AE /* AudioToolbox.framework */; };
+		BBFC08C5164C6862003E6A99 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86A010730593007319AE /* CoreFoundation.framework */; };
+		BBFC08C6164C6862003E6A99 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A86F2107305CE007319AE /* OpenGL.framework */; };
+		BBFC08C7164C6862003E6A99 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A871410730623007319AE /* AudioUnit.framework */; };
+		BBFC08C8164C6862003E6A99 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 002A873910730675007319AE /* Carbon.framework */; };
+		BBFC08C9164C6862003E6A99 /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 003FA645093FFD41000C53B3 /* libSDL2.a */; };
+		BBFC08D0164C6876003E6A99 /* testgamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088E164C6820003E6A99 /* testgamecontroller.c */; };
 		BEC566B10761D90300A33029 /* checkkeys.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D10FFB30A2C7F000001 /* checkkeys.c */; };
 		BEC566BE0761D90300A33029 /* graywin.c in Sources */ = {isa = PBXBuildFile; fileRef = 092D6D1BFFB30C237F000001 /* graywin.c */; };
 		BEC566CB0761D90300A33029 /* loopwave.c in Sources */ = {isa = PBXBuildFile; fileRef = 083E4872006D84C97F000001 /* loopwave.c */; };
@@ -1098,6 +1110,13 @@
 			remoteGlobalIDString = BEC567F70761D90600A33029;
 			remoteInfo = sdlcommon;
 		};
+		BBFC08B9164C6862003E6A99 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BEC567F70761D90600A33029;
+			remoteInfo = "libsdlmain.a (Upgraded)";
+		};
 		BEC568300761D90600A33029 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -1452,6 +1471,21 @@
 		4537749212091504002F0F45 /* testshape.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testshape.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		453774A4120915E3002F0F45 /* testshape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testshape.c; path = ../../test/testshape.c; sourceTree = SOURCE_ROOT; };
 		B207FF2404E1B19600A80002 /* sdlcommon_prefix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdlcommon_prefix.h; sourceTree = "<group>"; };
+		BBFC088E164C6820003E6A99 /* testgamecontroller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgamecontroller.c; path = ../../test/testgamecontroller.c; sourceTree = "<group>"; };
+		BBFC089C164C684D003E6A99 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		BBFC089F164C684D003E6A99 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		BBFC08A0164C684D003E6A99 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		BBFC08A1164C684D003E6A99 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		BBFC08A4164C684D003E6A99 /* testgamecontroller-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testgamecontroller-Info.plist"; sourceTree = "<group>"; };
+		BBFC08A6164C684D003E6A99 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		BBFC08A8164C684D003E6A99 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		BBFC08AA164C684D003E6A99 /* testgamecontroller-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "testgamecontroller-Prefix.pch"; sourceTree = "<group>"; };
+		BBFC08AC164C684D003E6A99 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		BBFC08AE164C684D003E6A99 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		BBFC08AF164C684D003E6A99 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		BBFC08B2164C684D003E6A99 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		BBFC08CD164C6862003E6A99 /* testgamecontroller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testgamecontroller.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBFC08CF164C6863003E6A99 /* testjoystick copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "testjoystick copy-Info.plist"; path = "/Users/alfred/valve/steam3_rel_Client/src/external/SDL2/build/Xcode/SDLTest/testjoystick copy-Info.plist"; sourceTree = "<absolute>"; };
 		BEC566B60761D90300A33029 /* checkkeys.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = checkkeys.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC566C30761D90300A33029 /* graywin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = graywin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC566D10761D90300A33029 /* loopwave.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = loopwave.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1845,6 +1879,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				4537749F12091551002F0F45 /* libsdlcommon.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBFC08BE164C6862003E6A99 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBFC08BF164C6862003E6A99 /* libsdlcommon.a in Frameworks */,
+				BBFC08C0164C6862003E6A99 /* Cocoa.framework in Frameworks */,
+				BBFC08C1164C6862003E6A99 /* CoreAudio.framework in Frameworks */,
+				BBFC08C2164C6862003E6A99 /* ForceFeedback.framework in Frameworks */,
+				BBFC08C3164C6862003E6A99 /* IOKit.framework in Frameworks */,
+				BBFC08C4164C6862003E6A99 /* AudioToolbox.framework in Frameworks */,
+				BBFC08C5164C6862003E6A99 /* CoreFoundation.framework in Frameworks */,
+				BBFC08C6164C6862003E6A99 /* OpenGL.framework in Frameworks */,
+				BBFC08C7164C6862003E6A99 /* AudioUnit.framework in Frameworks */,
+				BBFC08C8164C6862003E6A99 /* Carbon.framework in Frameworks */,
+				BBFC08C9164C6862003E6A99 /* libSDL2.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2330,7 +2382,10 @@
 				B207FF2404E1B19600A80002 /* sdlcommon_prefix.h */,
 				002F33A209CA183B00EBEB88 /* Linked Frameworks */,
 				00794E4609D207B4003FC8A1 /* Resources */,
+				BBFC08A2164C684D003E6A99 /* testgamecontroller */,
+				BBFC089B164C684D003E6A99 /* Frameworks */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				BBFC08CF164C6863003E6A99 /* testjoystick copy-Info.plist */,
 			);
 			comments = "I made these tests link against our \"default\" framework which includes X11 stuff. If you didn't install the X11 headers with Xcode, you might have problems building the SDL.framework (which is a dependency). You can swap the dependencies around to get around this, or you can modify the default SDL.framework target to not include X11 stuff. (Go into its target build options and remove all the Preprocessor macros.)\n\n\n\nWe are sort of in a half-way state at the moment. Going \"all-the-way\" means we copy the SDL.framework inside the app bundle so we can run the test without the step of the user \"installing\" the framework. But there is an oversight/bug in Xcode that doesn't correctly find the location of the framework when in an embedded/nested Xcode project. We could probably try to hack this with a shell script that checks multiple directories for existence, but this is messier and more work than I prefer, so I rather just wait for Apple to fix this. In the meantime...\n\nThe \"All\" target will build the SDL framework from the Xcode project. The other targets do not have this dependency set (for flexibility reasons in case we make changes). If you have not built the framework, you will probably be unable to link. You will either need to build the framework, or you need to add \"-framework SDL\" to the link options and make sure you have the SDL.framework installed somewhere where it can be seen (like /Library/Frameworks...I think we already set this one up.) \n\nTo run though, you should have a copy of the SDL.framework in /Library/Frameworks or ~/Library/Frameworks.\n\n\n\n\ntestgl and testdyngl need -DHAVE_OPENGL\ntestgl needs to link against OpenGL.framework\n\n";
 			name = SDLTest;
@@ -2363,6 +2418,7 @@
 				00179791107432FA00F5D044 /* testime.c */,
 				001797B31074339C00F5D044 /* testintersections.c */,
 				092D6D62FFB312AA7F000001 /* testjoystick.c */,
+				BBFC088E164C6820003E6A99 /* testgamecontroller.c */,
 				092D6D6CFFB313437F000001 /* testkeys.c */,
 				001797D31074343E00F5D044 /* testloadso.c */,
 				092D6D75FFB313BB7F000001 /* testlock.c */,
@@ -2440,8 +2496,51 @@
 				0017991610743F1000F5D044 /* testsprite2.app */,
 				0017993810743FB700F5D044 /* testwm2.app */,
 				4537749212091504002F0F45 /* testshape.app */,
+				BBFC08CD164C6862003E6A99 /* testgamecontroller.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		BBFC089B164C684D003E6A99 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BBFC089C164C684D003E6A99 /* Cocoa.framework */,
+				BBFC089E164C684D003E6A99 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		BBFC089E164C684D003E6A99 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				BBFC089F164C684D003E6A99 /* AppKit.framework */,
+				BBFC08A0164C684D003E6A99 /* CoreData.framework */,
+				BBFC08A1164C684D003E6A99 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		BBFC08A2164C684D003E6A99 /* testgamecontroller */ = {
+			isa = PBXGroup;
+			children = (
+				BBFC08AE164C684D003E6A99 /* AppDelegate.h */,
+				BBFC08AF164C684D003E6A99 /* AppDelegate.m */,
+				BBFC08B1164C684D003E6A99 /* MainMenu.xib */,
+				BBFC08A3164C684D003E6A99 /* Supporting Files */,
+			);
+			path = testgamecontroller;
+			sourceTree = "<group>";
+		};
+		BBFC08A3164C684D003E6A99 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				BBFC08A4164C684D003E6A99 /* testgamecontroller-Info.plist */,
+				BBFC08A5164C684D003E6A99 /* InfoPlist.strings */,
+				BBFC08A8164C684D003E6A99 /* main.m */,
+				BBFC08AA164C684D003E6A99 /* testgamecontroller-Prefix.pch */,
+				BBFC08AB164C684D003E6A99 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -2582,6 +2681,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		002F345C09CA204F00EBEB88 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBFC08BA164C6862003E6A99 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -3182,6 +3288,26 @@
 			productReference = 4537749212091504002F0F45 /* testshape.app */;
 			productType = "com.apple.product-type.application";
 		};
+		BBFC08B7164C6862003E6A99 /* testgamecontroller */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBFC08CA164C6862003E6A99 /* Build configuration list for PBXNativeTarget "testgamecontroller" */;
+			buildPhases = (
+				BBFC08BA164C6862003E6A99 /* Headers */,
+				BBFC08BB164C6862003E6A99 /* Resources */,
+				BBFC08BC164C6862003E6A99 /* Sources */,
+				BBFC08BE164C6862003E6A99 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BBFC08B8164C6862003E6A99 /* PBXTargetDependency */,
+			);
+			name = testgamecontroller;
+			productInstallPath = "$(USER_APPS_DIR)";
+			productName = testjoystick;
+			productReference = BBFC08CD164C6862003E6A99 /* testgamecontroller.app */;
+			productType = "com.apple.product-type.application";
+		};
 		BEC566AB0761D90300A33029 /* checkkeys */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 001B593808BDB826006539E9 /* Build configuration list for PBXNativeTarget "checkkeys" */;
@@ -3686,6 +3812,7 @@
 				Japanese,
 				French,
 				German,
+				en,
 			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* SDLTest */;
 			projectDirPath = "";
@@ -3743,6 +3870,7 @@
 				BEC567EA0761D90600A33029 /* torturethread */,
 				BEC567F70761D90600A33029 /* sdlcommon */,
 				4537749112091504002F0F45 /* testshape */,
+				BBFC08B7164C6862003E6A99 /* testgamecontroller */,
 			);
 		};
 /* End PBXProject section */
@@ -3927,6 +4055,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4537748E12091504002F0F45 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBFC08BB164C6862003E6A99 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -4274,6 +4409,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				453774A5120915E3002F0F45 /* testshape.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BBFC08BC164C6862003E6A99 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BBFC08D0164C6876003E6A99 /* testgamecontroller.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4797,6 +4940,11 @@
 			target = BEC567F70761D90600A33029 /* sdlcommon */;
 			targetProxy = 4537749D1209152D002F0F45 /* PBXContainerItemProxy */;
 		};
+		BBFC08B8164C6862003E6A99 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BEC567F70761D90600A33029 /* sdlcommon */;
+			targetProxy = BBFC08B9164C6862003E6A99 /* PBXContainerItemProxy */;
+		};
 		BEC568310761D90600A33029 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BEC567F70761D90600A33029 /* sdlcommon */;
@@ -4913,6 +5061,33 @@
 			targetProxy = BEC568600761D90600A33029 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		BBFC08A5164C684D003E6A99 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BBFC08A6164C684D003E6A99 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		BBFC08AB164C684D003E6A99 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BBFC08AC164C684D003E6A99 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		BBFC08B1164C684D003E6A99 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				BBFC08B2164C684D003E6A99 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0017958910741F7900F5D044 /* Debug */ = {
@@ -5830,6 +6005,24 @@
 			};
 			name = Release;
 		};
+		BBFC08CB164C6862003E6A99 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "testgamecontroller-Info.plist";
+				PRODUCT_NAME = testgamecontroller;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		BBFC08CC164C6862003E6A99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = "testgamecontroller-Info.plist";
+				PRODUCT_NAME = testgamecontroller;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -6252,6 +6445,15 @@
 			buildConfigurations = (
 				4537749712091509002F0F45 /* Debug */,
 				4537749812091509002F0F45 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BBFC08CA164C6862003E6A99 /* Build configuration list for PBXNativeTarget "testgamecontroller" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BBFC08CB164C6862003E6A99 /* Debug */,
+				BBFC08CC164C6862003E6A99 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

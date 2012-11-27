@@ -546,6 +546,8 @@
 		AABCC38E164063D200AB8930 /* SDL_cocoamessagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AABCC38B164063D200AB8930 /* SDL_cocoamessagebox.h */; };
 		AABCC38F164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC38C164063D200AB8930 /* SDL_cocoamessagebox.m */; };
 		AABCC390164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC38C164063D200AB8930 /* SDL_cocoamessagebox.m */; };
+		BBFC088B164C6514003E6A99 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
+		BBFC088D164C6647003E6A99 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -891,6 +893,7 @@
 		AA9FF9591637CBF9000DF050 /* SDL_messagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_messagebox.h; sourceTree = "<group>"; };
 		AABCC38B164063D200AB8930 /* SDL_cocoamessagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_cocoamessagebox.h; sourceTree = "<group>"; };
 		AABCC38C164063D200AB8930 /* SDL_cocoamessagebox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_cocoamessagebox.m; sourceTree = "<group>"; };
+		BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_gamecontroller.c; sourceTree = "<group>"; };
 		BECDF66B0761BA81005FE872 /* Info-Framework.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Info-Framework.plist"; sourceTree = "<group>"; };
 		BECDF66C0761BA81005FE872 /* SDL2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6B30761BA81005FE872 /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1325,6 +1328,7 @@
 				04BDFE0612E6671700899322 /* darwin */,
 				04BDFE1612E6671700899322 /* SDL_joystick.c */,
 				04BDFE1712E6671700899322 /* SDL_joystick_c.h */,
+				BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */,
 				04BDFE1812E6671700899322 /* SDL_sysjoystick.h */,
 			);
 			name = joystick;
@@ -2306,6 +2310,7 @@
 				04BD027612E6671800899322 /* SDL_syshaptic.c in Sources */,
 				04BD027A12E6671800899322 /* SDL_haptic.c in Sources */,
 				04BD028112E6671800899322 /* SDL_sysjoystick.c in Sources */,
+				BBFC088D164C6647003E6A99 /* SDL_gamecontroller.c in Sources */,
 				04BD028B12E6671800899322 /* SDL_joystick.c in Sources */,
 				04BD02A312E6671800899322 /* SDL_sysloadso.c in Sources */,
 				04BD02AE12E6671800899322 /* SDL_syspower.c in Sources */,

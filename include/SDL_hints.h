@@ -190,6 +190,14 @@ extern "C" {
 
 
 /**
+ *  \brief  A variable that lets you manually hint extra gamecontroller db entries
+ *
+ *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
+ */
+#define SDL_HINT_GAMECONTROLLERCONFIG "SDL_GAMECONTROLLERCONFIG"
+
+
+/**
  *  \brief  An enumeration of hint priorities
  */
 typedef enum
