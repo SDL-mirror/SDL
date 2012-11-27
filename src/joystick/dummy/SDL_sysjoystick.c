@@ -29,14 +29,11 @@
 #include "../SDL_joystick_c.h"
 
 /* Function to scan the system for joysticks.
- * This function should set SDL_numjoysticks to the number of available
- * joysticks.  Joystick 0 should be the system default joystick.
  * It should return 0, or -1 on an unrecoverable fatal error.
  */
 int
 SDL_SYS_JoystickInit(void)
 {
-    SDL_numjoysticks = 0;
     return (0);
 }
 
