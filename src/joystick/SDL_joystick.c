@@ -30,7 +30,8 @@
 #include "../events/SDL_events_c.h"
 #endif
 
-SDL_Joystick *SDL_joysticks = NULL;
+static SDL_Joystick *SDL_joysticks = NULL;
+static SDL_Joystick *SDL_updating_joystick = NULL;
 
 int
 SDL_JoystickInit(void)
@@ -386,6 +387,10 @@ SDL_JoystickClose(SDL_Joystick * joystick)
         return;
     }
 
+    if (joystick == SDL_updating_joystick) {
+        return;
+    }
+
     SDL_SYS_JoystickClose(joystick);
 	
 	joysticklist = SDL_joysticks;
@@ -432,6 +437,9 @@ SDL_JoystickClose(SDL_Joystick * joystick)
 void
 SDL_JoystickQuit(void)
 {
+    /* Make sure we're not getting called in the middle of updating joysticks */
+    SDL_assert(!SDL_updating_joystick);
+
     /* Stop the event polling */
 	while ( SDL_joysticks )
 	{
@@ -588,6 +596,8 @@ SDL_JoystickUpdate(void)
 		 */
 		joysticknext = joystick->next;
 
+        SDL_updating_joystick = joystick;
+
         SDL_SYS_JoystickUpdate( joystick );
 
 		if ( joystick->closed && joystick->uncentered )
@@ -595,7 +605,7 @@ SDL_JoystickUpdate(void)
 			int i;
 			joystick->uncentered = 0;
 
-            // Tell the app that everything is centered/unpressed... 
+            /* Tell the app that everything is centered/unpressed...  */
             for (i = 0; i < joystick->naxes; i++)
                 SDL_PrivateJoystickAxis(joystick, i, 0);
 
@@ -604,7 +614,15 @@ SDL_JoystickUpdate(void)
 
             for (i = 0; i < joystick->nhats; i++)
                 SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
+
 		}
+
+        SDL_updating_joystick = NULL;
+
+        /* If the joystick was closed while updating, free it here */
+        if ( joystick->ref_count <= 0 ) {
+            SDL_JoystickClose(joystick);
+        }
 
 		joystick = joysticknext;
 	}

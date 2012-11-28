@@ -498,24 +498,6 @@ LRESULT CALLBACK SDL_PrivateJoystickDetectProc(HWND hwnd, UINT message, WPARAM w
 }
 
 
-/*  helper func to create a hidden, message only window for the joystick detect thread
- */
-HWND CreateHiddenJoystickDetectWindow() {
-	WNDCLASSEX wincl;
-	HWND hMessageWindow = 0;
-	SDL_memset( &wincl, 0x0, sizeof(wincl) );
-	wincl.hInstance = GetModuleHandle( NULL );
-	wincl.lpszClassName = L"Message";
-	wincl.lpfnWndProc = SDL_PrivateJoystickDetectProc;      // This function is called by windows
-	wincl.cbSize = sizeof (WNDCLASSEX);
-
-	if (!RegisterClassEx (&wincl))
-		return 0;
-
-	hMessageWindow = (HWND)CreateWindowEx( 0,  L"Message", NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL );
-	return hMessageWindow;
-}
-
 DEFINE_GUID(GUID_DEVINTERFACE_USB_DEVICE, 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, \
 	0xC0, 0x4F, 0xB9, 0x51, 0xED);
 
@@ -529,12 +511,26 @@ SDL_JoystickThread(void *_data)
 	HDEVNOTIFY hNotify = 0;
 	DEV_BROADCAST_DEVICEINTERFACE dbh;
 	SDL_bool bOpenedXInputDevices[4];
+	WNDCLASSEX wincl;
 
 	SDL_memset( bOpenedXInputDevices, 0x0, sizeof(bOpenedXInputDevices) );
 
 	result = WIN_CoInitialize();
 
-	messageWindow = CreateHiddenJoystickDetectWindow();
+	SDL_memset( &wincl, 0x0, sizeof(wincl) );
+	wincl.hInstance = GetModuleHandle( NULL );
+	wincl.lpszClassName = L"Message";
+	wincl.lpfnWndProc = SDL_PrivateJoystickDetectProc;      // This function is called by windows
+	wincl.cbSize = sizeof (WNDCLASSEX);
+
+	if (!RegisterClassEx (&wincl))
+	{		
+		SDL_SetError("Failed to create register class for joystick autodetect.",
+		GetLastError());
+		return -1;
+	}
+
+	messageWindow = (HWND)CreateWindowEx( 0,  L"Message", NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL );
 	if ( !messageWindow )
 	{
 		SDL_SetError("Failed to create message window for joystick autodetect.",
@@ -611,6 +607,8 @@ SDL_JoystickThread(void *_data)
 
 	if ( messageWindow )
 		DestroyWindow( messageWindow );
+
+	UnregisterClass( wincl.lpszClassName, wincl.hInstance );
 	messageWindow = 0;
 	WIN_CoUninitialize();
 	return 1;
@@ -720,22 +718,25 @@ static BOOL CALLBACK
 	EnumJoysticksCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
 {
 	JoyStick_DeviceData *pNewJoystick;
+	JoyStick_DeviceData *pPrevJoystick = NULL;
 	SDL_bool bXInputDevice;
 	pNewJoystick = *(JoyStick_DeviceData **)pContext;
 	while ( pNewJoystick )
 	{
 		if ( !SDL_memcmp( &pNewJoystick->dxdevice.guidInstance, &pdidInstance->guidInstance, sizeof(pNewJoystick->dxdevice.guidInstance) ) )
 		{
-			if ( SYS_Joystick )
-			{
-				pNewJoystick->pNext = SYS_Joystick;
-			}
-			SYS_Joystick = pNewJoystick;
 			/* if we are replacing the front of the list then update it */
 			if ( pNewJoystick == *(JoyStick_DeviceData **)pContext ) 
 			{
 				*(JoyStick_DeviceData **)pContext = pNewJoystick->pNext;
 			}
+			else if ( pPrevJoystick )
+			{
+				pPrevJoystick->pNext = pNewJoystick->pNext;
+			}
+
+			pNewJoystick->pNext = SYS_Joystick;
+			SYS_Joystick = pNewJoystick;
 
 			s_pKnownJoystickGUIDs[ s_iNewGUID ] = pdidInstance->guidInstance;
 			s_iNewGUID++;
@@ -745,6 +746,7 @@ static BOOL CALLBACK
 				return DIENUM_STOP; 
 		}
 
+		pPrevJoystick = pNewJoystick;
 		pNewJoystick = pNewJoystick->pNext;
 	}
 
@@ -756,17 +758,17 @@ static BOOL CALLBACK
 
 	if ( bXInputDevice )
 	{
-		SDL_memset(&(pNewJoystick->dxdevice), 0x0,
-			sizeof(DIDEVICEINSTANCE));
 		pNewJoystick->bXInputDevice = SDL_TRUE;
 		pNewJoystick->XInputUserId = INVALID_XINPUT_USERID;
 	}
 	else
 	{
 		pNewJoystick->bXInputDevice = SDL_FALSE;
-		SDL_memcpy(&(pNewJoystick->dxdevice), pdidInstance,
-			sizeof(DIDEVICEINSTANCE));
 	}
+	
+	SDL_memcpy(&(pNewJoystick->dxdevice), pdidInstance,
+		sizeof(DIDEVICEINSTANCE));
+
 	pNewJoystick->joystickname = WIN_StringToUTF8(pdidInstance->tszProductName);
 	pNewJoystick->send_add_event = 1;
 	pNewJoystick->nInstanceID = ++s_nInstanceID;
