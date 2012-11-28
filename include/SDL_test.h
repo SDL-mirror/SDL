@@ -33,6 +33,7 @@
 #include "SDL.h"
 #include "SDL_test_font.h"
 #include "SDL_test_random.h"
+#include "SDL_test_fuzzer.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

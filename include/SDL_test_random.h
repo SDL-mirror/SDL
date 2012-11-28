@@ -54,11 +54,9 @@ extern "C" {
 /* ------- Definitions ------- */
 
 /*
- * Macros that return random number in a specific format.
- * Float values are in the range [0.0-1.0].
+ * Macros that return a random number in a specific format.
  */
-#define SDL_TestRandomInt(c)		((int)SDL_TestRandom(c))
-#define SDL_TestRandomFloat(c)		((double)SDL_TestRandom(c)/(unsigned long)0xffffffff)
+#define SDLTest_RandomInt(c)		((int)SDLTest_Random(c))
 
 /*
  * Context structure for the random number generator state.
