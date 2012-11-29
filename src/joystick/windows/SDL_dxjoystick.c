@@ -63,7 +63,7 @@ extern HWND SDL_HelperWindow;
 
 /* local variables */
 static SDL_bool coinitialized = SDL_FALSE;
-static LPDIRECTINPUT dinput = NULL;
+static LPDIRECTINPUT8 dinput = NULL;
 static SDL_bool s_bDeviceAdded = SDL_FALSE;
 static SDL_bool s_bDeviceRemoved = SDL_FALSE;
 static int s_nInstanceID = -1;
@@ -919,7 +919,7 @@ int
 SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
     HRESULT result;
-    LPDIRECTINPUTDEVICE device;
+    LPDIRECTINPUTDEVICE8 device;
     DIPROPDWORD dipdw;
 	JoyStick_DeviceData *joystickdevice = SYS_Joystick;
 
@@ -1008,7 +1008,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			return (-1);
 		}
 
-		/* Now get the IDirectInputDevice2 interface, instead. */
+		/* Now get the IDirectInputDevice8 interface, instead. */
 		result = IDirectInputDevice8_QueryInterface(device,
 												   &IID_IDirectInputDevice8,
 												   (LPVOID *) & joystick->
@@ -1017,7 +1017,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 		IDirectInputDevice8_Release(device);
 
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice::QueryInterface", result);
+			SetDIerror("IDirectInputDevice8::QueryInterface", result);
 			return (-1);
 		}
 
@@ -1029,7 +1029,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 													DISCL_NONEXCLUSIVE |
 													DISCL_BACKGROUND);
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice2::SetCooperativeLevel", result);
+			SetDIerror("IDirectInputDevice8::SetCooperativeLevel", result);
 			return (-1);
 		}
 
@@ -1038,7 +1038,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			IDirectInputDevice8_SetDataFormat(joystick->hwdata->InputDevice,
 											  &c_dfDIJoystick2);
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice2::SetDataFormat", result);
+			SetDIerror("IDirectInputDevice8::SetDataFormat", result);
 			return (-1);
 		}
 
@@ -1048,7 +1048,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 												&joystick->hwdata->Capabilities);
 
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice2::GetCapabilities", result);
+			SetDIerror("IDirectInputDevice8::GetCapabilities", result);
 			return (-1);
 		}
 
@@ -1058,7 +1058,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			result = IDirectInputDevice8_Acquire(joystick->hwdata->InputDevice);
 
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice2::Acquire", result);
+				SetDIerror("IDirectInputDevice8::Acquire", result);
 				return (-1);
 			}
 
@@ -1070,7 +1070,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 
 			/* Not necessarily supported, ignore if not supported.
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice2::SendForceFeedbackCommand",
+				SetDIerror("IDirectInputDevice8::SendForceFeedbackCommand",
 						   result);
 				return (-1);
 			}
@@ -1079,7 +1079,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			result = IDirectInputDevice8_Unacquire(joystick->hwdata->InputDevice);
 
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice2::Unacquire", result);
+				SetDIerror("IDirectInputDevice8::Unacquire", result);
 				return (-1);
 			}
 
@@ -1095,7 +1095,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 
 			/* Not necessarily supported, ignore if not supported.
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice2::SetProperty", result);
+				SetDIerror("IDirectInputDevice8::SetProperty", result);
 				return (-1);
 			}
 			*/
@@ -1124,7 +1124,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			 * to use less reliable polling. */
 			joystick->hwdata->buffered = 0;
 		} else if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice2::SetProperty", result);
+			SetDIerror("IDirectInputDevice8::SetProperty", result);
 			return (-1);
 		}
 	}
