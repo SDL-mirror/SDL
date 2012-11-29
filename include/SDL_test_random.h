@@ -48,10 +48,7 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* Function prototypes */
-
-
-/* ------- Definitions ------- */
+/* --- Definitions */
 
 /*
  * Macros that return a random number in a specific format.
@@ -69,13 +66,14 @@ extern "C" {
     unsigned int al;
   } SDLTest_RandomContext;
 
-/* ---- Function Prototypes -------- */
+
+/* --- Function prototypes */
 
 /**
  *  \brief Initialize random number generator with two integers. 
  *
- * Note: The random sequence of numbers returned by ...Random() is the
- *       same for the same two integers and has a period of 2^31.
+ *  Note: The random sequence of numbers returned by ...Random() is the
+ *  same for the same two integers and has a period of 2^31.
  *
  *  \param rndContext     pointer to context structure
  *  \param xi         integer that defines the random sequence
@@ -97,8 +95,8 @@ extern "C" {
 /**
  *  \brief Initialize random number generator based on current system time. 
  *
- * Note: ...RandomInit() or ...RandomInitTime() must have been called
- *       before using this function.
+ *  Note: ...RandomInit() or ...RandomInitTime() must have been called
+ *  before using this function.
  *
  *  \param rndContext     pointer to context structure
  *
