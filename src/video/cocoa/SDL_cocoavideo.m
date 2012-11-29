@@ -228,11 +228,7 @@ Cocoa_CreateImage(SDL_Surface * surface)
 
 void SDL_NSLog(const char *text)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-    NSLog(@"%@", [[NSString alloc] initWithUTF8String:text]);
-
-    [pool release];
+    NSLog(@"%s", text);
 }
 
 /*
