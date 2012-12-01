@@ -45,6 +45,16 @@ extern "C" {
 #endif
 
 /**
+ * \brief Fails the assert.
+ */
+#define ASSERT_FAIL		0
+
+/**
+ * \brief Passes the assert.
+ */
+#define ASSERT_PASS		1
+
+/**
  * \brief Assert that logs and break execution flow on failures.
  *
  * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
@@ -57,8 +67,10 @@ void SDLTest_Assert(int assertCondition, char *assertDescription);
  *
  * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
  * \param assertDescription Message to log with the assert describing it.
+ *
+ * \returns Returns the assertCondition so it can be used to externall to break execution flow if desired.
  */
-void SDLTest_AssertCheck(int assertCondition, char *assertDescription);
+int SDLTest_AssertCheck(int assertCondition, char *assertDescription);
 
 /**
  * \brief Resets the assert summary counters to zero.

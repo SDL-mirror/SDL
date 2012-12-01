@@ -920,7 +920,6 @@ SDL_bool
 SDL_SYS_JoystickAttached(SDL_Joystick * joystick)
 {
 	recDevice *device = gpDeviceList;
-    int index;
 	
 	while ( device )
 	{

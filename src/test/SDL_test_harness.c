@@ -23,7 +23,10 @@
 
 #include "SDL_test.h"
 
-// TODO: port over harness
+#include <stdio.h>
+#include <string.h>
+
+// TODO: port over remaining harness
 
 /**
  * Generates a random run seed string for the harness. The generated seed
@@ -139,4 +142,49 @@ SDLTest_GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iter
 	keys = (Uint64 *)md5Context.digest;
 
 	return keys[0];
+}
+
+/**
+ * \brief Set timeout handler for test.
+ *
+ * Note: SDL_Init(SDL_INIT_TIMER) will be called if it wasn't done so before.
+ *
+ * \param timeout Timeout interval in seconds.
+ * \param callback Function that will be called after timeout has elapsed.
+ * 
+ * \return Timer id or -1 on failure.
+ */
+SDL_TimerID
+SetTestTimeout(int timeout, void (*callback)())
+{
+	Uint32 timeoutInMilliseconds;
+	SDL_TimerID timerID;
+
+	if (callback == NULL) {
+		SDLTest_LogError("Timeout callback can't be NULL");
+		return -1;
+	}
+
+	if (timeout < 0) {
+		SDLTest_LogError("Timeout value must be bigger than zero.");
+		return -1;
+	}
+
+	/* Init SDL timer if not initialized before */
+	if (SDL_WasInit(SDL_INIT_TIMER) == 0) {
+		if (SDL_InitSubSystem(SDL_INIT_TIMER)) {
+			SDLTest_LogError("Failed to init timer subsystem: %s", SDL_GetError());
+			return -1;
+		}
+	}
+
+	/* Set timer */
+	timeoutInMilliseconds = timeout * 1000;
+	timerID = SDL_AddTimer(timeoutInMilliseconds, (SDL_TimerCallback)callback, 0x0);
+	if (timerID == 0) {
+		SDLTest_LogError("Creation of SDL timer failed: %s", SDL_GetError());
+		return -1;
+	}
+
+	return timerID;
 }

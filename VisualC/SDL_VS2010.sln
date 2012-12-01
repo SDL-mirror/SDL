@@ -67,6 +67,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "testpower", "tests\testpowe
 		{DA956FD3-E142-46F2-9DD5-C78BEBB56B7A} = {DA956FD3-E142-46F2-9DD5-C78BEBB56B7A}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SDLtest", "SDLtest\SDLtest_VS2010.vcxproj", "{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68} = {81CE8DAF-EBB2-4761-8E45-B71ABCCA8C68}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -160,6 +165,14 @@ Global
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.ActiveCfg = Release|Win32
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|Win32.Build.0 = Release|Win32
 		{C4E04D18-EF76-4B42-B4C2-16A1BACDC0A3}.Release|x64.ActiveCfg = Release|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|Win32.Build.0 = Debug|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|x64.ActiveCfg = Debug|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Debug|x64.Build.0 = Debug|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|Win32.ActiveCfg = Release|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|Win32.Build.0 = Release|Win32
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|x64.ActiveCfg = Release|x64
+		{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

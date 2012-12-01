@@ -30,10 +30,10 @@
 #include "SDL_test.h"
 
 /*! \brief counts the failed asserts */
-static Uint32 SDLTest_testAssertsFailed = 0;
+static Uint32 SDLTest_AssertsFailed = 0;
 
 /*! \brief counts the passed asserts */
-static Uint32 SDLTest_testAssertsPassed = 0;
+static Uint32 SDLTest_AssertsPassed = 0;
 
 /* Assert check message format */
 const char *SDLTest_AssertCheckFmt = "Assert %s: %s";
@@ -46,26 +46,27 @@ const char *SDLTest_AssertSummaryFmt = "Assert Summary: Total=%d Passed=%d Faile
  */
 void SDLTest_Assert(int assertCondition, char *assertDescription)
 {
-	SDLTest_AssertCheck(assertCondition, assertDescription);
-	SDL_assert((assertCondition));
+	SDL_assert((SDLTest_AssertCheck(assertCondition, assertDescription)));
 }
 
 /*
  * Assert that logs but does not break execution flow on failures (i.e. for test cases).
  */
-void SDLTest_AssertCheck(int assertCondition, char *assertDescription)
+int SDLTest_AssertCheck(int assertCondition, char *assertDescription)
 {
 	char *fmt = (char *)SDLTest_AssertCheckFmt;
-	if (assertCondition)
+	if (assertCondition == ASSERT_FAIL)
 	{
-		SDLTest_testAssertsPassed++;
-		SDLTest_Log(fmt, "Passed", assertDescription);
+		SDLTest_AssertsFailed++;
+		SDLTest_LogError(fmt, "Failed", assertDescription);
 	} 
 	else 
 	{
-		SDLTest_testAssertsFailed++;
-		SDLTest_LogError(fmt, "Failed", assertDescription);
+		SDLTest_AssertsPassed++;
+		SDLTest_Log(fmt, "Passed", assertDescription);
 	}
+
+	return assertCondition;
 }
 
 /*
@@ -73,8 +74,8 @@ void SDLTest_AssertCheck(int assertCondition, char *assertDescription)
  */
 void SDLTest_ResetAssertSummary()
 {
-	SDLTest_testAssertsPassed = 0;
-	SDLTest_testAssertsFailed = 0;
+	SDLTest_AssertsPassed = 0;
+	SDLTest_AssertsFailed = 0;
 }
 
 /*
@@ -84,13 +85,13 @@ void SDLTest_ResetAssertSummary()
 void SDLTest_LogAssertSummary()
 {
 	char *fmt = (char *)SDLTest_AssertSummaryFmt;
-	Uint32 totalAsserts = SDLTest_testAssertsPassed + SDLTest_testAssertsFailed;
-	if (SDLTest_testAssertsFailed == 0)
+	Uint32 totalAsserts = SDLTest_AssertsPassed + SDLTest_AssertsFailed;
+	if (SDLTest_AssertsFailed == 0)
 	{
-		SDLTest_Log(fmt, totalAsserts, SDLTest_testAssertsPassed, SDLTest_testAssertsFailed);
+		SDLTest_Log(fmt, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
 	} 
 	else 
 	{
-		SDLTest_LogError(fmt, totalAsserts, SDLTest_testAssertsPassed, SDLTest_testAssertsFailed);
+		SDLTest_LogError(fmt, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
 	}
 }

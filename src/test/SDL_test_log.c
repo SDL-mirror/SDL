@@ -25,6 +25,9 @@
 
 */
 
+// quiet windows compiler warnings
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "SDL_config.h"
 
 #include <stdarg.h> /* va_list */
