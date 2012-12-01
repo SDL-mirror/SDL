@@ -20,25 +20,21 @@
 */
 
 /**
- *  \file SDL_test.h
+ *  \file SDL_test_assert.h
  *  
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-#ifndef _SDL_test_h
-#define _SDL_test_h
+/* 
+ *
+ * Assert API for test code and test cases
+ *
+ */
 
-#include "SDL.h"
-#include "SDL_test_font.h"
-#include "SDL_test_random.h"
-#include "SDL_test_fuzzer.h"
-#include "SDL_test_crc32.h"
-#include "SDL_test_md5.h"
-#include "SDL_test_log.h"
-#include "SDL_test_assert.h"
-#include "SDL_test_harness.h"
+#ifndef _SDL_test_assert_h
+#define _SDL_test_assert_h
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -48,11 +44,33 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* Function prototypes */
+/**
+ * \brief Assert that logs and break execution flow on failures.
+ *
+ * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
+ * \param assertDescription Message to log with the assert describing it.
+ */
+void SDLTest_Assert(int assertCondition, char *assertDescription);
 
-/* ADD STUFF HERE */
+/**
+ * \brief Assert for test cases that logs but does not break execution flow on failures.
+ *
+ * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
+ * \param assertDescription Message to log with the assert describing it.
+ */
+void SDLTest_AssertCheck(int assertCondition, char *assertDescription);
 
-/* Ends C function definitions when using C++ */
+/**
+ * \brief Resets the assert summary counters to zero.
+ */
+void SDLTest_ResetAssertSummary();
+
+/**
+ * \brief Logs summary of all assertions (total, pass, fail) since last reset as INFO or ERROR.
+ *
+ */
+void SDLTest_LogAssertSummary();
+
 #ifdef __cplusplus
 /* *INDENT-OFF* */
 }
@@ -60,6 +78,6 @@ extern "C" {
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_test_h */
+#endif /* _SDL_test_assert_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -20,25 +20,21 @@
 */
 
 /**
- *  \file SDL_test.h
+ *  \file SDL_test_log.h
  *  
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-#ifndef _SDL_test_h
-#define _SDL_test_h
+/* 
+ *
+ *  Wrapper to log in the TEST category
+ *
+ */
 
-#include "SDL.h"
-#include "SDL_test_font.h"
-#include "SDL_test_random.h"
-#include "SDL_test_fuzzer.h"
-#include "SDL_test_crc32.h"
-#include "SDL_test_md5.h"
-#include "SDL_test_log.h"
-#include "SDL_test_assert.h"
-#include "SDL_test_harness.h"
+#ifndef _SDL_test_log_h
+#define _SDL_test_log_h
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -48,9 +44,19 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* Function prototypes */
+/**
+ * \brief Prints given message with a timestamp in the TEST category and INFO priority.
+ *
+ * \param fmt Message to be logged
+ */
+void SDLTest_Log(char *fmt, ...);
 
-/* ADD STUFF HERE */
+/**
+ * \brief Prints given message with a timestamp in the TEST category and the ERROR priority.
+ *
+ * \param fmt Message to be logged
+ */
+void SDLTest_LogError(char *fmt, ...);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -60,6 +66,6 @@ extern "C" {
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_test_h */
+#endif /* _SDL_test_log_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

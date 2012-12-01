@@ -37,6 +37,7 @@
 #define DEFAULT_PRIORITY                SDL_LOG_PRIORITY_CRITICAL
 #define DEFAULT_ASSERT_PRIORITY         SDL_LOG_PRIORITY_WARN
 #define DEFAULT_APPLICATION_PRIORITY    SDL_LOG_PRIORITY_INFO
+#define DEFAULT_TEST_PRIORITY           SDL_LOG_PRIORITY_VERBOSE
 
 typedef struct SDL_LogLevel
 {
@@ -54,6 +55,7 @@ static SDL_LogLevel *SDL_loglevels;
 static SDL_LogPriority SDL_default_priority = DEFAULT_PRIORITY;
 static SDL_LogPriority SDL_assert_priority = DEFAULT_ASSERT_PRIORITY;
 static SDL_LogPriority SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
+static SDL_LogPriority SDL_test_priority = DEFAULT_TEST_PRIORITY;
 static SDL_LogOutputFunction SDL_log_function = SDL_LogOutput;
 static void *SDL_log_userdata = NULL;
 
@@ -135,7 +137,9 @@ SDL_LogGetPriority(int category)
         }
     }
 
-    if (category == SDL_LOG_CATEGORY_APPLICATION) {
+    if (category == SDL_LOG_CATEGORY_TEST) {
+        return SDL_test_priority;    
+    } else if (category == SDL_LOG_CATEGORY_APPLICATION) {
         return SDL_application_priority;
     } else if (category == SDL_LOG_CATEGORY_ASSERT) {
         return SDL_assert_priority;
@@ -158,6 +162,7 @@ SDL_LogResetPriorities(void)
     SDL_default_priority = DEFAULT_PRIORITY;
     SDL_assert_priority = DEFAULT_ASSERT_PRIORITY;
     SDL_application_priority = DEFAULT_APPLICATION_PRIORITY;
+    SDL_test_priority = DEFAULT_TEST_PRIORITY;
 }
 
 void
