@@ -27,7 +27,7 @@
 /* Testcases. */
 static void surface_testLoad( SDL_Surface *testsur );
 static void surface_testBlit( SDL_Surface *testsur );
-static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, int mode );
+static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, SDL_BlendMode bMode );
 static void surface_testBlitBlend( SDL_Surface *testsur );
 
 
