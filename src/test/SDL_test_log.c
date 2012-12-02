@@ -31,6 +31,8 @@
 #include "SDL_config.h"
 
 #include <stdarg.h> /* va_list */
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include "SDL_test.h"

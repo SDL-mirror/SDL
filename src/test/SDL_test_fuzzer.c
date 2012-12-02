@@ -263,7 +263,7 @@ SDLTest_RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool vali
 	size = SDLTest_GenerateUnsignedBoundaryValues(maxValue,
 				(Uint64) boundary1, (Uint64) boundary2,
 				validDomain, buffer);
-	if (size == 0) {
+	if (buffer == NULL || size == 0) {
 		return 0;
 	}
 
@@ -291,7 +291,7 @@ SDLTest_RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool v
 	size = SDLTest_GenerateUnsignedBoundaryValues(maxValue,
 				(Uint64) boundary1, (Uint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return 0;
 	}
 
@@ -319,7 +319,7 @@ SDLTest_RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool v
 	size = SDLTest_GenerateUnsignedBoundaryValues(maxValue,
 				(Uint64) boundary1, (Uint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return 0;
 	}
 
@@ -347,7 +347,7 @@ SDLTest_RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool v
 	size = SDLTest_GenerateUnsignedBoundaryValues(maxValue,
 				(Uint64) boundary1, (Uint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return 0;
 	}
 
@@ -467,7 +467,7 @@ SDLTest_RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool vali
 	size = SDLTest_GenerateSignedBoundaryValues(minValue, maxValue,
 				(Sint64) boundary1, (Sint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return CHAR_MIN;
 	}
 
@@ -495,7 +495,7 @@ SDLTest_RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool v
 	size = SDLTest_GenerateSignedBoundaryValues(minValue, maxValue,
 					(Sint64) boundary1, (Sint64) boundary2,
 					validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return SHRT_MIN;
 	}
 
@@ -524,7 +524,7 @@ SDLTest_RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool v
 	size = SDLTest_GenerateSignedBoundaryValues(minValue, maxValue,
 				(Sint64) boundary1, (Sint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return INT_MIN;
 	}
 
@@ -553,7 +553,7 @@ SDLTest_RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool v
 	size = SDLTest_GenerateSignedBoundaryValues(minValue, maxValue,
 				(Sint64) boundary1, (Sint64) boundary2,
 				validDomain, buffer);
-	if(size == 0) {
+	if (buffer == NULL || size == 0) {
 		return LLONG_MIN;
 	}
 
