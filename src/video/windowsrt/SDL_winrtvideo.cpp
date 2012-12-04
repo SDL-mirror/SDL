@@ -40,6 +40,7 @@ extern "C" {
 #include "SDL_winrtvideo.h"
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtframebuffer_c.h"
+#include "SDL_winrtmouse.h"
 
 /* On Windows, windows.h defines CreateWindow */
 #ifdef CreateWindow
@@ -52,6 +53,7 @@ extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
 
 /* Initialization/Query functions */
 static int WINRT_VideoInit(_THIS);
+static int WINRT_InitModes(_THIS);
 static int WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 static void WINRT_VideoQuit(_THIS);
 
@@ -112,14 +114,24 @@ VideoBootStrap WINRT_bootstrap = {
 int
 WINRT_VideoInit(_THIS)
 {
+    if (WINRT_InitModes(_this) < 0) {
+        return -1;
+    }
+
+    WINRT_InitMouse(_this);
+
+    return 0;
+}
+
+static int
+WINRT_InitModes(_THIS)
+{
     SDL_DisplayMode mode = SDL_WinRTGlobalApp->GetMainDisplayMode();
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
 
     SDL_AddDisplayMode(&_this->displays[0], &mode);
-
-    /* We're done! */
     return 0;
 }
 
@@ -132,6 +144,7 @@ WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 void
 WINRT_VideoQuit(_THIS)
 {
+    WINRT_QuitMouse(_this);
 }
 
 int
