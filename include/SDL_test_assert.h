@@ -54,6 +54,12 @@ extern "C" {
  */
 #define ASSERT_PASS		1
 
+/*! \brief counts the failed asserts */
+static Uint32 SDLTest_AssertsFailed = 0;
+
+/*! \brief counts the passed asserts */
+static Uint32 SDLTest_AssertsPassed = 0;
+
 /**
  * \brief Assert that logs and break execution flow on failures.
  *

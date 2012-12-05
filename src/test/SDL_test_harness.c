@@ -24,9 +24,18 @@
 #include "SDL_test.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-// TODO: port over remaining harness
+/* Assert check message format */
+const char *SDLTest_TestCheckFmt = "Test '%s': %s";
+
+/* Invalid test name/description message format */
+const char *SDLTest_InvalidNameFmt = "(Invalid)";
+
+/*! \brief Timeout for single test case execution */
+static Uint32 SDLTest_TestCaseTimeout = 3600;
 
 /**
  * Generates a random run seed string for the harness. The generated seed
@@ -155,7 +164,7 @@ SDLTest_GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iter
  * \return Timer id or -1 on failure.
  */
 SDL_TimerID
-SetTestTimeout(int timeout, void (*callback)())
+SDLTest_SetTestTimeout(int timeout, void (*callback)())
 {
 	Uint32 timeoutInMilliseconds;
 	SDL_TimerID timerID;
@@ -187,4 +196,259 @@ SetTestTimeout(int timeout, void (*callback)())
 	}
 
 	return timerID;
+}
+
+void
+SDLTest_BailOut()
+{
+	SDLTest_LogError("TestCaseTimeout timer expired. Aborting test run.");
+	exit(TEST_ABORTED); // bail out from the test
+}
+
+/**
+ * \brief Execute a test using the given execution key.
+ *
+ * \param testSuite Suite containing the test case.
+ * \param testCase Case to execute.
+ * \param execKey Execution key for the fuzzer.
+ *
+ * \returns Test case result.
+ */
+int
+SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference *testCase, Uint64 execKey)
+{
+	SDL_TimerID timer = 0;
+
+	if (testSuite==NULL || testCase==NULL || testSuite->name==NULL || testCase->name==NULL)
+	{
+		SDLTest_LogError("Setup failure: testSuite or testCase references NULL");
+		return TEST_RESULT_SETUP_FAILURE;
+	}
+
+	if (!testCase->enabled)
+	{
+		SDLTest_Log((char *)SDLTest_TestCheckFmt, testCase->name, "Skipped");
+		return TEST_RESULT_SKIPPED;
+	}
+
+    // Initialize fuzzer
+	SDLTest_FuzzerInit(execKey);
+
+	// Reset assert tracker
+	SDLTest_ResetAssertSummary();
+
+	// Set timeout timer
+	timer = SDLTest_SetTestTimeout(SDLTest_TestCaseTimeout, SDLTest_BailOut);
+
+	// Maybe run suite initalizer function
+	if (testSuite->testSetUp) {
+		testSuite->testSetUp(0x0);
+		if (SDLTest_AssertsFailed > 0) {
+			SDLTest_LogError((char *)SDLTest_TestCheckFmt, testSuite->name, "Failed");
+			return TEST_RESULT_SETUP_FAILURE;
+		}
+	}
+
+	// Run test case function
+	testCase->testCase(0x0);
+
+	// Maybe run suite cleanup function
+	if (testSuite->testTearDown) {
+		testSuite->testTearDown(0x0);
+	}
+
+	// Cancel timeout timer
+	if (timer) {
+		SDL_RemoveTimer(timer);
+	}
+
+	// Report on asserts and fuzzer usage
+	SDLTest_Log("Fuzzer invocations: %d", SDLTest_GetFuzzerInvocationCount());
+	SDLTest_LogAssertSummary();
+
+	// Analyze assert count to determine test case result
+	if (SDLTest_AssertsFailed > 0) {
+		SDLTest_LogError((char *)SDLTest_TestCheckFmt, testCase->name, "Failed");
+		return TEST_RESULT_FAILED;
+	} else {
+		if (SDLTest_AssertsPassed > 0) {
+			SDLTest_Log((char *)SDLTest_TestCheckFmt, testCase->name, "Passed");
+			return TEST_RESULT_PASSED;
+		} else {
+			SDLTest_LogError((char *)SDLTest_TestCheckFmt, testCase->name, "No Asserts");
+			return TEST_RESULT_NO_ASSERT;
+		}
+	}
+}
+
+/* Prints summary of all suites/tests contained in the given reference */
+void SDLTest_LogTestSuiteSummary(SDLTest_TestSuiteReference *testSuites)
+{
+	int suiteCounter;
+	int testCounter;
+	SDLTest_TestSuiteReference *testSuite;
+	SDLTest_TestCaseReference *testCase;
+
+	// Loop over all suites
+	suiteCounter = 0;
+	while(&testSuites[suiteCounter]) {
+		testSuite=&testSuites[suiteCounter];
+		suiteCounter++;
+		SDLTest_Log("Test Suite %i - %s\n", suiteCounter, 
+			(testSuite->name) ? testSuite->name : SDLTest_InvalidNameFmt);
+
+		// Loop over all test cases
+		testCounter = 0;
+		while(testSuite->testCases[testCounter])
+		{
+			testCase=(SDLTest_TestCaseReference *)testSuite->testCases[testCounter];
+			testCounter++;
+			SDLTest_Log("  Test Case %i - %s: %s", testCounter, 
+				(testCase->name) ? testCase->name : SDLTest_InvalidNameFmt, 
+				(testCase->description) ? testCase->description : SDLTest_InvalidNameFmt);
+		}
+	}
+}
+
+
+/**
+ * \brief Execute a test using the given execution key.
+ *
+ * \param testSuites Suites containing the test case.
+ * \param userRunSeed Custom run seed provided by user, or NULL to autogenerate one.
+ * \param userExecKey Custom execution key provided by user, or 0 to autogenerate one.
+ * \param testIterations Number of iterations to run each test case.
+ *
+ * \returns Test run result; 0 when all tests passed, 1 if any tests failed.
+ */
+int
+SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites, char *userRunSeed, Uint64 userExecKey, int testIterations)
+{
+	int suiteCounter;
+	int testCounter;
+	int iterationCounter;
+	SDLTest_TestSuiteReference *testSuite;
+	SDLTest_TestCaseReference *testCase;
+	char *runSeed;
+	Uint64 execKey;
+	Uint32 runStartTicks;
+	time_t runStartTimestamp;
+	Uint32 suiteStartTicks;
+	time_t suiteStartTimestamp;
+	Uint32 testStartTicks;
+	time_t testStartTimestamp;
+	Uint32 runEndTicks;
+	time_t runEndTimestamp;
+	Uint32 suiteEndTicks;
+	time_t suiteEndTimestamp;
+	Uint32 testEndTicks;
+	time_t testEndTimestamp;
+	int testResult;
+	int totalTestFailedCount, totalTestPassedCount, totalTestSkippedCount;
+	int testFailedCount, testPassedCount, testSkippedCount;
+
+	// Sanitize test iterations
+	if (testIterations < 1) {
+		testIterations = 1;
+	}
+
+	// Generate run see if we don't have one already
+	if (userRunSeed == NULL || strlen(userRunSeed) == 0) {
+		runSeed = SDLTest_GenerateRunSeed(16);
+		if (runSeed == NULL) {
+			SDLTest_LogError("Generating a random run seed failed");
+			return 2;
+		}
+	}
+
+	// Reset per-run counters
+	totalTestFailedCount = totalTestPassedCount = totalTestSkippedCount = 0;
+
+	// Take time - run start
+	runStartTicks = SDL_GetTicks();
+	runStartTimestamp = time(0);
+
+	// TODO log run started
+
+	// Loop over all suites
+	suiteCounter = 0;
+	while(&testSuites[suiteCounter]) {
+		testSuite=&testSuites[suiteCounter];
+		suiteCounter++;
+
+		// Reset per-suite counters
+		testFailedCount = testPassedCount = testSkippedCount = 0;
+
+		// Take time - suite start
+		suiteStartTicks = SDL_GetTicks();
+		suiteStartTimestamp = time(0);
+
+		// TODO log suite started
+		SDLTest_Log("Test Suite %i - %s\n", suiteCounter, 
+			(testSuite->name) ? testSuite->name : SDLTest_InvalidNameFmt);
+
+		// Loop over all test cases
+		testCounter = 0;
+		while(testSuite->testCases[testCounter])
+		{
+			testCase=(SDLTest_TestCaseReference *)testSuite->testCases[testCounter];
+			testCounter++;
+			
+			// Take time - test start
+			testStartTicks = SDL_GetTicks();
+			testStartTimestamp = time(0);
+
+			// TODO log test started
+			SDLTest_Log("Test Case %i - %s: %s", testCounter, 
+				(testCase->name) ? testCase->name : SDLTest_InvalidNameFmt, 
+				(testCase->description) ? testCase->description : SDLTest_InvalidNameFmt);
+
+			// Loop over all iterations
+			iterationCounter = 0;
+			while(iterationCounter < testIterations)
+			{
+				iterationCounter++;
+
+				if(userExecKey != 0) {
+					execKey = userExecKey;
+				} else {
+					execKey = SDLTest_GenerateExecKey(runSeed, testSuite->name, testCase->name, iterationCounter);
+				}
+
+				SDLTest_Log("Test Iteration %i: execKey %d", iterationCounter, execKey);
+				testResult = SDLTest_RunTest(testSuite, testCase, execKey);
+
+				if (testResult == TEST_RESULT_PASSED) {
+					testPassedCount++;
+					totalTestPassedCount++;
+				} else if (testResult == TEST_RESULT_SKIPPED) {
+					testSkippedCount++;
+					totalTestSkippedCount++;
+				} else {
+					testFailedCount++;
+					totalTestFailedCount++;
+				}
+			}
+
+			// Take time - test end
+			testEndTicks = SDL_GetTicks();
+			testEndTimestamp = time(0);
+
+			// TODO log test ended
+		}
+
+		// Take time - suite end
+		suiteEndTicks = SDL_GetTicks();
+		suiteEndTimestamp = time(0);
+
+		// TODO log suite ended
+	}
+
+	// Take time - run end
+	runEndTicks = SDL_GetTicks();
+	runEndTimestamp = time(0);
+
+	// TODO log run ended
+
+	return (totalTestFailedCount ? 1 : 0);
 }

@@ -49,22 +49,17 @@ extern "C" {
 #define TEST_ENABLED  1
 #define TEST_DISABLED 0
 
-//! Definitions of assert results
-#define ASSERT_PASS		1
-#define ASSERT_FAIL		0
-
 //! Definition of all the possible test return values of the test case method
 #define TEST_ABORTED		-1
 #define TEST_COMPLETED		 0
 #define TEST_SKIPPED		 1
 
 //! Definition of all the possible test results for the harness
-#define TEST_RESULT_PASSED			0
-#define TEST_RESULT_FAILED			1
+#define TEST_RESULT_PASSED				0
+#define TEST_RESULT_FAILED				1
 #define TEST_RESULT_NO_ASSERT			2
-#define TEST_RESULT_SKIPPED			3
-#define TEST_RESULT_KILLED			4
-#define TEST_RESULT_SETUP_FAILURE		5
+#define TEST_RESULT_SKIPPED				3
+#define TEST_RESULT_SETUP_FAILURE		4
 
 //!< Function pointer to a test case setup function (run before every test)
 typedef void (*SDLTest_TestCaseSetUpFp)(void *arg);
@@ -92,7 +87,7 @@ typedef struct SDLTest_TestCaseReference {
 /**
  * Holds information about a test suite (multiple test cases).
  */
-typedef struct TestSuiteReference {
+typedef struct SDLTest_TestSuiteReference {
 	/*!< "PlatformSuite" */
 	char *name;
 	/*!< The function that is run before each test. NULL skips. */
@@ -101,7 +96,7 @@ typedef struct TestSuiteReference {
 	const SDLTest_TestCaseReference **testCases;
 	/*!< The function that is run after each test. NULL skips. */
 	SDLTest_TestCaseTearDownFp testTearDown;
-} TestSuiteReference;
+} SDLTest_TestSuiteReference;
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

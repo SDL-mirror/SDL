@@ -29,14 +29,8 @@
 
 #include "SDL_test.h"
 
-/*! \brief counts the failed asserts */
-static Uint32 SDLTest_AssertsFailed = 0;
-
-/*! \brief counts the passed asserts */
-static Uint32 SDLTest_AssertsPassed = 0;
-
 /* Assert check message format */
-const char *SDLTest_AssertCheckFmt = "Assert %s: %s";
+const char *SDLTest_AssertCheckFmt = "Assert '%s': %s";
 
 /* Assert summary message format */
 const char *SDLTest_AssertSummaryFmt = "Assert Summary: Total=%d Passed=%d Failed=%d";
@@ -58,12 +52,12 @@ int SDLTest_AssertCheck(int assertCondition, char *assertDescription)
 	if (assertCondition == ASSERT_FAIL)
 	{
 		SDLTest_AssertsFailed++;
-		SDLTest_LogError(fmt, "Failed", assertDescription);
+		SDLTest_LogError(fmt, assertDescription, "Failed");
 	} 
 	else 
 	{
 		SDLTest_AssertsPassed++;
-		SDLTest_Log(fmt, "Passed", assertDescription);
+		SDLTest_Log(fmt, assertDescription, "Passed");
 	}
 
 	return assertCondition;
