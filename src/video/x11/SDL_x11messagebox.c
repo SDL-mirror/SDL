@@ -654,13 +654,22 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int ret;
     SDL_MessageBoxDataX11 data;
+    char *origlocale;
 
     SDL_zero(data);
 
-    setlocale(LC_ALL, "");
-
     if ( !SDL_X11_LoadSymbols() )
         return -1;
+
+    origlocale = setlocale(LC_ALL, NULL);
+    if (origlocale != NULL) {
+        origlocale = SDL_strdup(origlocale);
+        if (origlocale == NULL) {
+            SDL_OutOfMemory();
+            return -1;
+        }
+        setlocale(LC_ALL, "");
+    }
 
     /* This code could get called from multiple threads maybe? */
     XInitThreads();
@@ -681,6 +690,12 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     }
 
     X11_MessageBoxShutdown( &data );
+
+    if (origlocale) {
+        setlocale(LC_ALL, origlocale);
+        SDL_free(origlocale);
+    }
+
     return ret;
 }
 
