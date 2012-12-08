@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+
+/* !!! FIXME: clean up differences in coding style in this file. */
+
 #include "SDL_config.h"
 
 #if SDL_VIDEO_DRIVER_X11
@@ -26,13 +29,16 @@
 #include "SDL_x11video.h"
 #include "SDL_x11dyn.h"
 
+#include <locale.h>
+
 #define MAX_BUTTONS             8       /* Maximum number of buttons supported */
 #define MAX_TEXT_LINES          32      /* Maximum number of text lines supported */
 #define MIN_BUTTON_WIDTH        64      /* Minimum button width */
 #define MIN_DIALOG_WIDTH        200     /* Minimum dialog width */
 #define MIN_DIALOG_HEIGHT       100     /* Minimum dialog height */
 
-static const char g_MessageBoxFont[] = "-*-*-medium-r-normal--0-120-*-*-p-0-iso8859-1";
+static const char g_MessageBoxFontLatin1[] = "-*-*-medium-r-normal--0-120-*-*-p-0-iso8859-1";
+static const char g_MessageBoxFont[] = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*";
 
 static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] =
 {
@@ -67,7 +73,8 @@ typedef struct TextLineData
 
 typedef struct SDL_MessageBoxDataX11
 {
-    Font hfont;
+    XFontSet font_set;                  /* for UTF-8 systems */
+    XFontStruct *font_struct;            /* Latin1 (ASCII) fallback. */
     Window window;
     Display *display;
     long event_mask;
@@ -105,17 +112,22 @@ IntMax( int a, int b )
 
 /* Return width and height for a string. */
 static void
-GetTextWidthHeight( XFontStruct *font_struct, const char *str, int nchars, int *pwidth, int *pheight )
+GetTextWidthHeight( SDL_MessageBoxDataX11 *data, const char *str, int nbytes, int *pwidth, int *pheight )
 {
-    XCharStruct text_structure;
-    int font_direction, font_ascent, font_descent;
-
-    XTextExtents( font_struct, str, nchars,
-                     &font_direction, &font_ascent, &font_descent,
-                     &text_structure );
-
-    *pwidth = text_structure.width;
-    *pheight = text_structure.ascent + text_structure.descent;
+    if (SDL_X11_HAVE_UTF8) {
+        XRectangle overall_ink, overall_logical;
+        Xutf8TextExtents(data->font_set, str, nbytes, &overall_ink, &overall_logical);
+        *pwidth = overall_logical.width;
+        *pheight = overall_logical.height;
+    } else {
+        XCharStruct text_structure;
+        int font_direction, font_ascent, font_descent;
+        XTextExtents( data->font_struct, str, nbytes,
+                      &font_direction, &font_ascent, &font_descent,
+                      &text_structure );
+        *pwidth = text_structure.width;
+        *pheight = text_structure.ascent + text_structure.descent;
+    }
 }
 
 /* Return index of button if position x,y is contained therein. */
@@ -169,10 +181,24 @@ X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * mess
         return -1;
     }
 
-    data->hfont = XLoadFont( data->display, g_MessageBoxFont );
-    if ( data->hfont == None ) {
-        SDL_SetError("Couldn't load font %s", g_MessageBoxFont);
-        return -1;
+    if (SDL_X11_HAVE_UTF8) {
+        char **missing = NULL;
+        int num_missing = 0;
+        data->font_set = XCreateFontSet(data->display, g_MessageBoxFont,
+                                        &missing, &num_missing, NULL);
+        if ( missing != NULL ) {
+            XFreeStringList(missing);
+        }
+        if ( data->font_set == NULL ) {
+            SDL_SetError("Couldn't load font %s", g_MessageBoxFont);
+            return -1;
+        }
+    } else {
+        data->font_struct = XLoadQueryFont( data->display, g_MessageBoxFontLatin1 );
+        if ( data->font_struct == NULL ) {
+            SDL_SetError("Couldn't load font %s", g_MessageBoxFontLatin1);
+            return -1;
+        }
     }
 
     if ( messageboxdata->colorScheme ) {
@@ -200,12 +226,6 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
     int button_width = MIN_BUTTON_WIDTH;
     const SDL_MessageBoxData *messageboxdata = data->messageboxdata;
 
-    XFontStruct *fontinfo = XQueryFont( data->display, data->hfont );
-    if ( !fontinfo ) {
-        SDL_SetError("Couldn't get font info");
-        return -1;
-    }
-
     /* Go over text and break linefeeds into separate lines. */
     if ( messageboxdata->message && messageboxdata->message[ 0 ] )
     {
@@ -223,7 +243,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
             plinedata->length = ( lf && ( i < MAX_TEXT_LINES - 1 ) ) ? ( lf - text ) : SDL_strlen( text );
             plinedata->text = text;
 
-            GetTextWidthHeight( fontinfo, text, plinedata->length, &plinedata->width, &height );
+            GetTextWidthHeight( data, text, plinedata->length, &plinedata->width, &height );
 
             /* Text and widths are the largest we've ever seen. */
             data->text_height = IntMax( data->text_height, height );
@@ -248,7 +268,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         data->buttonpos[ i ].buttondata = &data->buttondata[ i ];
         data->buttonpos[ i ].length = SDL_strlen( data->buttondata[ i ].text );
 
-        GetTextWidthHeight( fontinfo, data->buttondata[ i ].text, SDL_strlen( data->buttondata[ i ].text ),
+        GetTextWidthHeight( data, data->buttondata[ i ].text, SDL_strlen( data->buttondata[ i ].text ),
                             &data->buttonpos[ i ].text_width, &height );
 
         button_width = IntMax( button_width, data->buttonpos[ i ].text_width );
@@ -312,7 +332,6 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         }
     }
 
-    XFreeFontInfo( NULL, fontinfo, 1 );
     return 0;
 }
 
@@ -320,10 +339,16 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
 static void
 X11_MessageBoxShutdown( SDL_MessageBoxDataX11 *data )
 {
-    if ( data->hfont != None )
+    if ( data->font_set != NULL )
     {
-        XUnloadFont( data->display, data->hfont );
-        data->hfont = None;
+        XFreeFontSet( data->display, data->font_set );
+        data->font_set = NULL;
+    }
+
+    if ( data->font_struct != NULL )
+    {
+        XFreeFont( data->display, data->font_struct );
+        data->font_struct = NULL;
     }
 
     if ( data->display )
@@ -434,9 +459,15 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
     {
         TextLineData *plinedata = &data->linedata[ i ];
 
-        XDrawString( display, window, ctx,
-                     data->xtext, data->ytext + i * data->text_height,
-                     plinedata->text, plinedata->length );
+        if (SDL_X11_HAVE_UTF8) {
+            Xutf8DrawString( display, window, data->font_set, ctx,
+                             data->xtext, data->ytext + i * data->text_height,
+                             plinedata->text, plinedata->length );
+        } else {
+            XDrawString( display, window, ctx,
+                         data->xtext, data->ytext + i * data->text_height,
+                         plinedata->text, plinedata->length );
+        }
     }
 
     for ( i = 0; i < data->numbuttons; i++ )
@@ -459,9 +490,17 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
         XSetForeground( display, ctx, ( data->mouse_over_index == i ) ?
                         data->color[ SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED ] :
                         data->color[ SDL_MESSAGEBOX_COLOR_TEXT ] );
-        XDrawString( display, window, ctx,
-            buttondatax11->x + offset, buttondatax11->y + offset,
-            buttondata->text, buttondatax11->length );
+
+        if (SDL_X11_HAVE_UTF8) {
+            Xutf8DrawString( display, window, data->font_set, ctx,
+                             buttondatax11->x + offset,
+                             buttondatax11->y + offset,
+                             buttondata->text, buttondatax11->length );
+        } else {
+            XDrawString( display, window, ctx,
+                         buttondatax11->x + offset, buttondatax11->y + offset,
+                         buttondata->text, buttondatax11->length );
+        }
     }
 }
 
@@ -474,12 +513,18 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
     SDL_bool close_dialog = SDL_FALSE;
     SDL_bool has_focus = SDL_TRUE;
     KeySym last_key_pressed = XK_VoidSymbol;
+    unsigned long gcflags = GCForeground | GCBackground;
 
-    ctx_vals.font = data->hfont;
+    SDL_zero(ctx_vals);
     ctx_vals.foreground = data->color[ SDL_MESSAGEBOX_COLOR_BACKGROUND ];
     ctx_vals.background = data->color[ SDL_MESSAGEBOX_COLOR_BACKGROUND ];
 
-    ctx = XCreateGC( data->display, data->window, GCForeground | GCBackground | GCFont, &ctx_vals );
+    if (!SDL_X11_HAVE_UTF8) {
+        gcflags |= GCFont;
+        ctx_vals.font = data->font_struct->fid;
+    }
+
+    ctx = XCreateGC( data->display, data->window, gcflags, &ctx_vals );
     if ( ctx == None ) {
         SDL_SetError("Couldn't create graphics context");
         return -1;
@@ -610,7 +655,9 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     int ret;
     SDL_MessageBoxDataX11 data;
 
-    SDL_memset( &data, 0, sizeof( data ) );
+    SDL_zero(data);
+
+    setlocale(LC_ALL, "");
 
     if ( !SDL_X11_LoadSymbols() )
         return -1;
