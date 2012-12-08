@@ -19,8 +19,6 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-/* !!! FIXME: clean up differences in coding style in this file. */
-
 #include "SDL_config.h"
 
 #if SDL_VIDEO_DRIVER_X11
@@ -40,21 +38,19 @@
 static const char g_MessageBoxFontLatin1[] = "-*-*-medium-r-normal--0-120-*-*-p-0-iso8859-1";
 static const char g_MessageBoxFont[] = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*";
 
-static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] =
-{
-    { 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,       
-    { 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,             
-    { 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,    
+static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] = {
+    { 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,
+    { 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,
+    { 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,
     { 105, 102, 99  }, // SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND,
-    { 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,  
+    { 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,
 };
 
 #define SDL_MAKE_RGB( _r, _g, _b )  ( ( ( Uint32 )( _r ) << 16 ) | \
                                       ( ( Uint32 )( _g ) << 8 ) |  \
                                       ( ( Uint32 )( _b ) ) )
 
-typedef struct SDL_MessageBoxButtonDataX11
-{
+typedef struct SDL_MessageBoxButtonDataX11 {
     int x, y;                           /* Text position */
     int length;                         /* Text length */
     int text_width;                     /* Text width */
@@ -64,15 +60,13 @@ typedef struct SDL_MessageBoxButtonDataX11
     const SDL_MessageBoxButtonData *buttondata;   /* Button data from caller */
 } SDL_MessageBoxButtonDataX11;
 
-typedef struct TextLineData
-{
+typedef struct TextLineData {
     int width;                          /* Width of this text line */
     int length;                         /* String length of this text line */
     const char *text;                   /* Text for this line */
 } TextLineData;
 
-typedef struct SDL_MessageBoxDataX11
-{
+typedef struct SDL_MessageBoxDataX11 {
     XFontSet font_set;                  /* for UTF-8 systems */
     XFontStruct *font_struct;            /* Latin1 (ASCII) fallback. */
     Window window;
@@ -138,15 +132,13 @@ GetHitButtonIndex( SDL_MessageBoxDataX11 *data, int x, int y )
     int numbuttons = data->numbuttons;
     SDL_MessageBoxButtonDataX11 *buttonpos = data->buttonpos;
 
-    for ( i = 0; i < numbuttons; i++ )
-    {
+    for ( i = 0; i < numbuttons; i++ ) {
         SDL_Rect *rect = &buttonpos[ i ].rect;
 
         if ( ( x >= rect->x ) &&
-            ( x <= ( rect->x + rect->w ) ) &&
-            ( y >= rect->y ) &&
-            ( y <= ( rect->y + rect->h ) ) )
-        {
+             ( x <= ( rect->x + rect->w ) ) &&
+             ( y >= rect->y ) &&
+             ( y <= ( rect->y + rect->h ) ) ) {
             return i;
         }
     }
@@ -227,13 +219,11 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
     const SDL_MessageBoxData *messageboxdata = data->messageboxdata;
 
     /* Go over text and break linefeeds into separate lines. */
-    if ( messageboxdata->message && messageboxdata->message[ 0 ] )
-    {
+    if ( messageboxdata->message && messageboxdata->message[ 0 ] ) {
         const char *text = messageboxdata->message;
         TextLineData *plinedata = data->linedata;
 
-        for ( i = 0; i < MAX_TEXT_LINES; i++, plinedata++ )
-        {
+        for ( i = 0; i < MAX_TEXT_LINES; i++, plinedata++ ) {
             int height;
             char *lf = SDL_strchr( ( char * )text, '\n' );
 
@@ -261,8 +251,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
     }
 
     /* Loop through all buttons and calculate the button widths and height. */
-    for ( i = 0; i < data->numbuttons; i++ )
-    {
+    for ( i = 0; i < data->numbuttons; i++ ) {
         int height;
 
         data->buttonpos[ i ].buttondata = &data->buttondata[ i ];
@@ -275,8 +264,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         button_text_height = IntMax( button_text_height, height );
     }
 
-    if ( data->numlines )
-    {
+    if ( data->numlines ) {
         /* x,y for this line of text. */
         data->xtext = data->text_height;
         data->ytext = data->text_height + data->text_height;
@@ -287,15 +275,12 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         /* Bump the dialog box width and height up if needed. */
         data->dialog_width = IntMax( data->dialog_width, 2 * data->xtext + text_width_max );
         data->dialog_height = IntMax( data->dialog_height, ybuttons );
-    }
-    else
-    {
+    } else {
         /* Button y starts at height of button text. */
         ybuttons = button_text_height;
     }
 
-    if ( data->numbuttons )
-    {
+    if ( data->numbuttons ) {
         int x, y;
         int width_of_buttons;
         int button_spacing = button_text_height;
@@ -315,8 +300,7 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
         x = ( data->dialog_width - width_of_buttons ) / 2;
         y = ybuttons + ( data->dialog_height - ybuttons - button_height ) / 2;
 
-        for ( i = 0; i < data->numbuttons; i++ )
-        {
+        for ( i = 0; i < data->numbuttons; i++ ) {
             /* Button coordinates. */
             data->buttonpos[ i ].rect.x = x;
             data->buttonpos[ i ].rect.y = y;
@@ -339,22 +323,18 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
 static void
 X11_MessageBoxShutdown( SDL_MessageBoxDataX11 *data )
 {
-    if ( data->font_set != NULL )
-    {
+    if ( data->font_set != NULL ) {
         XFreeFontSet( data->display, data->font_set );
         data->font_set = NULL;
     }
 
-    if ( data->font_struct != NULL )
-    {
+    if ( data->font_struct != NULL ) {
         XFreeFont( data->display, data->font_struct );
         data->font_struct = NULL;
     }
 
-    if ( data->display )
-    {
-        if ( data->window != None )
-        {
+    if ( data->display ) {
+        if ( data->window != None ) {
             XUnmapWindow( data->display, data->window );
             XDestroyWindow( data->display, data->window );
             data->window = None;
@@ -381,16 +361,16 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
     }
 
     data->event_mask = ExposureMask |
-        ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask |
-        StructureNotifyMask | FocusChangeMask | PointerMotionMask;
+                       ButtonPressMask | ButtonReleaseMask | KeyPressMask | KeyReleaseMask |
+                       StructureNotifyMask | FocusChangeMask | PointerMotionMask;
     wnd_attr.event_mask = data->event_mask;
 
     data->window = XCreateWindow(
-                            display, DefaultRootWindow( display ),
-                            0, 0,
-                            data->dialog_width, data->dialog_height,
-                            0, CopyFromParent, InputOutput, CopyFromParent,
-                            CWEventMask, &wnd_attr );
+                       display, DefaultRootWindow( display ),
+                       0, 0,
+                       data->dialog_width, data->dialog_height,
+                       0, CopyFromParent, InputOutput, CopyFromParent,
+                       CWEventMask, &wnd_attr );
     if ( data->window == None ) {
         SDL_SetError("Couldn't create X window");
         return -1;
@@ -455,8 +435,7 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
     XFillRectangle( display, window, ctx, 0, 0, data->dialog_width, data->dialog_height );
 
     XSetForeground( display, ctx, data->color[ SDL_MESSAGEBOX_COLOR_TEXT ] );
-    for ( i = 0; i < data->numlines; i++ )
-    {
+    for ( i = 0; i < data->numlines; i++ ) {
         TextLineData *plinedata = &data->linedata[ i ];
 
         if (SDL_X11_HAVE_UTF8) {
@@ -470,8 +449,7 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
         }
     }
 
-    for ( i = 0; i < data->numbuttons; i++ )
-    {
+    for ( i = 0; i < data->numbuttons; i++ ) {
         SDL_MessageBoxButtonDataX11 *buttondatax11 = &data->buttonpos[ i ];
         const SDL_MessageBoxButtonData *buttondata = buttondatax11->buttondata;
         int border = ( buttondata->flags & SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT ) ? 2 : 0;
@@ -583,8 +561,7 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
             last_key_pressed = XLookupKeysym( &e.xkey, 0 );
             break;
 
-        case KeyRelease:
-        {
+        case KeyRelease: {
             Uint32 mask = 0;
             KeySym key = XLookupKeysym( &e.xkey, 0 );
 
