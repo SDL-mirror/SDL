@@ -26,8 +26,19 @@
 #include "SDL.h"
 #include "SDL_x11video.h"
 #include "SDL_x11dyn.h"
+#include "SDL_assert.h"
 
 #include <locale.h>
+
+
+#define SDL_FORK_MESSAGEBOX 1
+
+#if SDL_FORK_MESSAGEBOX
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
+#endif
 
 #define MAX_BUTTONS             8       /* Maximum number of buttons supported */
 #define MAX_TEXT_LINES          32      /* Maximum number of text lines supported */
@@ -625,9 +636,8 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
     return 0;
 }
 
-/* Display an x11 message box. */
-int
-X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
+static int
+X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int ret;
     SDL_MessageBoxDataX11 data;
@@ -676,6 +686,61 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     return ret;
 }
 
+/* Display an x11 message box. */
+int
+X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
+{
+#if SDL_FORK_MESSAGEBOX
+    /* Use a child process to protect against setlocale(). Annoying. */
+    pid_t pid;
+    int fds[2];
+    int status = 0;
+
+    if (pipe(fds) == -1) {
+        return X11_ShowMessageBoxImpl(messageboxdata, buttonid); /* oh well. */
+    }
+
+    pid = fork();
+    if (pid == -1) {  /* failed */
+        close(fds[0]);
+        close(fds[1]);
+        return X11_ShowMessageBoxImpl(messageboxdata, buttonid); /* oh well. */
+    } else if (pid == 0) {  /* we're the child */
+        int exitcode = 0;
+        close(fds[0]);
+        status = X11_ShowMessageBoxImpl(messageboxdata, buttonid);
+        if (write(fds[1], &status, sizeof (int)) != sizeof (int))
+            exitcode = 1;
+        else if (write(fds[1], buttonid, sizeof (int)) != sizeof (int))
+            exitcode = 1;
+        close(fds[1]);
+        _exit(exitcode);  /* don't run atexit() stuff, static destructors, etc. */
+    } else {  /* we're the parent */
+        pid_t rc;
+        close(fds[1]);
+        do {
+            rc = waitpid(pid, &status, 0);
+        } while ((rc == -1) && (errno == EINTR));
+
+        SDL_assert(rc == pid);  /* not sure what to do if this fails. */
+
+        if ((rc == -1) || (!WIFEXITED(status)) || (WEXITSTATUS(status) != 0)) {
+            SDL_SetError("msgbox child process failed");
+            return -1;
+        }
+
+        if (read(fds[0], &status, sizeof (int)) != sizeof (int))
+            status = -1;
+        else if (read(fds[0], buttonid, sizeof (int)) != sizeof (int))
+            status = -1;
+        close(fds[0]);
+
+        return status;
+    }
+#else
+    return X11_ShowMessageBoxImpl(messageboxdata, buttonid);
+#endif
+}
 #endif /* SDL_VIDEO_DRIVER_X11 */
 
 /* vi: set ts=4 sw=4 expandtab: */
