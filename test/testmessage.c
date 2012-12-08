@@ -49,6 +49,16 @@ main(int argc, char *argv[])
         quit(1);
     }
 
+    /* Google says this is Traditional Chinese for "beef with broccoli" */
+    success = SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                "UTF-8 Simple MessageBox",
+                "Unicode text: '牛肉西蘭花' ...",
+                NULL);
+    if (success == -1) {
+        printf("Error Presenting MessageBox: %s\n", SDL_GetError());
+        quit(1);
+    }
+
     {
         const SDL_MessageBoxButtonData buttons[] = {
             {
