@@ -9,9 +9,18 @@ using namespace Windows::Graphics::Display;
 
 // Constructor.
 SDL_winrtrenderer::SDL_winrtrenderer() :
+    m_mainTextureHelperSurface(NULL),
     m_loadingComplete(false),
 	m_vertexCount(0)
 {
+}
+
+SDL_winrtrenderer::~SDL_winrtrenderer()
+{
+    if (m_mainTextureHelperSurface) {
+        SDL_FreeSurface(m_mainTextureHelperSurface);
+        m_mainTextureHelperSurface = NULL;
+    }
 }
 
 // Initialize the Direct3D resources required to run.
@@ -372,12 +381,14 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 
 void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
 {
+    const int pixelSizeInBytes = 4;
+
     D3D11_TEXTURE2D_DESC textureDesc = {0};
 	textureDesc.Width = w;
 	textureDesc.Height = h;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	textureDesc.Format = DXGI_FORMAT_B8G8R8X8_UNORM;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -385,12 +396,21 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
 	textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	textureDesc.MiscFlags = 0;
 
-	const int numPixels = textureDesc.Width * textureDesc.Height;
-	std::vector<uint8> initialTexturePixels(numPixels * 4, 0x00);
+    const int numPixels = textureDesc.Width * textureDesc.Height;
+    std::vector<uint8> initialTexturePixels(numPixels * pixelSizeInBytes, 0x00);
+
+    // Fill the texture with a non-black color, for debugging purposes:
+    //for (int i = 0; i < (numPixels * pixelSizeInBytes); i += pixelSizeInBytes) {
+    //    initialTexturePixels[i+0] = 0xff;
+    //    initialTexturePixels[i+1] = 0xff;
+    //    initialTexturePixels[i+2] = 0x00;
+    //    initialTexturePixels[i+3] = 0xff;
+    //}
+
 	D3D11_SUBRESOURCE_DATA initialTextureData = {0};
 	initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
-	initialTextureData.SysMemPitch = textureDesc.Width * 4;
-	initialTextureData.SysMemSlicePitch = numPixels * 4;
+	initialTextureData.SysMemPitch = textureDesc.Width * pixelSizeInBytes;
+	initialTextureData.SysMemSlicePitch = numPixels * pixelSizeInBytes;
 	DX::ThrowIfFailed(
 		m_d3dDevice->CreateTexture2D(
 			&textureDesc,
@@ -398,6 +418,20 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
 			&m_mainTexture
 			)
 		);
+
+    if (m_mainTextureHelperSurface) {
+        SDL_FreeSurface(m_mainTextureHelperSurface);
+        m_mainTextureHelperSurface = NULL;
+    }
+    m_mainTextureHelperSurface = SDL_CreateRGBSurfaceFrom(
+        NULL,
+        textureDesc.Width, textureDesc.Height,
+        (pixelSizeInBytes * 8),
+        0,      // Use an nil pitch for now.  This'll be filled in when updating the texture.
+        0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000);    // TODO, WinRT: calculate masks given the Direct3D-defined pixel format of the texture
+    if (m_mainTextureHelperSurface == NULL) {
+        DX::ThrowIfFailed(E_FAIL);  // TODO, WinRT: generate a better error here, taking into account who's calling this function.
+    }
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
 	resourceViewDesc.Format = textureDesc.Format;
@@ -429,7 +463,7 @@ void SDL_winrtrenderer::UpdateForWindowSizeChange()
 
 void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)
 {
-	const float blackColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	const float blackColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	m_d3dContext->ClearRenderTargetView(
 		m_renderTargetView.Get(),
 		blackColor
@@ -445,7 +479,8 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
         return;
     }
 
-	// Update the main texture (for SDL usage):
+	// Update the main texture (for SDL usage).  Start by mapping the SDL
+    // window's main texture to CPU-accessible memory:
 	D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
 	DX::ThrowIfFailed(
 		m_d3dContext->Map(
@@ -456,13 +491,15 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 			&textureMemory)
 		);
 
-	// TODO, WinRT: only copy over the requested rects (via SDL_BlitSurface, perhaps?)
-	// TODO, WinRT: do a sanity check on the src and dest data when updating the window surface
-    D3D11_TEXTURE2D_DESC textureDesc = {0};
-    m_mainTexture->GetDesc(&textureDesc);
-	const unsigned int numBytes = textureDesc.Width * textureDesc.Height * 4;
-	memcpy(textureMemory.pData, surface->pixels, numBytes);
+    // Copy pixel data to the locked texture's memory:
+    m_mainTextureHelperSurface->pixels = textureMemory.pData;
+    m_mainTextureHelperSurface->pitch = textureMemory.RowPitch;
+    SDL_BlitSurface(surface, NULL, m_mainTextureHelperSurface, NULL);
+	// TODO, WinRT: only update the requested rects (passed to SDL_UpdateWindowSurface), rather than everything
 
+    // Clean up a bit, then commit the texture's memory back to Direct3D:
+    m_mainTextureHelperSurface->pixels = NULL;
+    m_mainTextureHelperSurface->pitch = 0;
 	m_d3dContext->Unmap(
 		m_mainTexture.Get(),
 		0);

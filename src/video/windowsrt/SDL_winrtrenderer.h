@@ -16,6 +16,7 @@ internal:
 	SDL_winrtrenderer();
 
 public:
+    virtual ~SDL_winrtrenderer();
 	virtual void Initialize(Windows::UI::Core::CoreWindow^ window);
 	virtual void HandleDeviceLost();
 	virtual void CreateDeviceResources();
@@ -41,6 +42,9 @@ protected private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> m_mainTexture;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_mainTextureResourceView;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> m_mainSampler;
+
+    // UpdateWindowSurface helper objects
+    SDL_Surface * m_mainTextureHelperSurface;
 
 	// Cached renderer properties.
 	D3D_FEATURE_LEVEL m_featureLevel;
