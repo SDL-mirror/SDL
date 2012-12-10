@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\include\SDL_test.h" />
     <ClInclude Include="..\..\include\SDL_test_assert.h" />
+    <ClInclude Include="..\..\include\SDL_test_common.h" />
     <ClInclude Include="..\..\include\SDL_test_crc32.h" />
     <ClInclude Include="..\..\include\SDL_test_font.h" />
     <ClInclude Include="..\..\include\SDL_test_fuzzer.h" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\test\SDL_test_assert.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_common.c" />
     <ClCompile Include="..\..\src\test\SDL_test_crc32.c" />
     <ClCompile Include="..\..\src\test\SDL_test_font.c" />
     <ClCompile Include="..\..\src\test\SDL_test_fuzzer.c" />

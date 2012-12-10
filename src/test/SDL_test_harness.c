@@ -218,6 +218,7 @@ int
 SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference *testCase, Uint64 execKey)
 {
 	SDL_TimerID timer = 0;
+	int testResult = 0;
 
 	if (testSuite==NULL || testCase==NULL || testSuite->name==NULL || testCase->name==NULL)
 	{
@@ -243,7 +244,7 @@ SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference
 	// Maybe run suite initalizer function
 	if (testSuite->testSetUp) {
 		testSuite->testSetUp(0x0);
-		if (SDLTest_AssertsFailed > 0) {
+		if (SDLTest_AssertSummaryToTestResult() == TEST_RESULT_FAILED) {
 			SDLTest_LogError((char *)SDLTest_TestCheckFmt, testSuite->name, "Failed");
 			return TEST_RESULT_SETUP_FAILURE;
 		}
@@ -251,8 +252,9 @@ SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference
 
 	// Run test case function
 	testCase->testCase(0x0);
+	testResult = SDLTest_AssertSummaryToTestResult();
 
-	// Maybe run suite cleanup function
+	// Maybe run suite cleanup function (ignore failed asserts)
 	if (testSuite->testTearDown) {
 		testSuite->testTearDown(0x0);
 	}
@@ -266,19 +268,17 @@ SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference
 	SDLTest_Log("Fuzzer invocations: %d", SDLTest_GetFuzzerInvocationCount());
 	SDLTest_LogAssertSummary();
 
-	// Analyze assert count to determine test case result
-	if (SDLTest_AssertsFailed > 0) {
-		SDLTest_LogError((char *)SDLTest_TestCheckFmt, testCase->name, "Failed");
-		return TEST_RESULT_FAILED;
-	} else {
-		if (SDLTest_AssertsPassed > 0) {
+	// Analyze assert count to determine final test case result
+	switch (testResult) {
+		case TEST_RESULT_PASSED:
+			SDLTest_LogError((char *)SDLTest_TestCheckFmt, testCase->name, "Failed");
+		case TEST_RESULT_FAILED:
 			SDLTest_Log((char *)SDLTest_TestCheckFmt, testCase->name, "Passed");
-			return TEST_RESULT_PASSED;
-		} else {
+		case TEST_RESULT_NO_ASSERT:
 			SDLTest_LogError((char *)SDLTest_TestCheckFmt, testCase->name, "No Asserts");
-			return TEST_RESULT_NO_ASSERT;
-		}
 	}
+
+	return testResult;
 }
 
 /* Prints summary of all suites/tests contained in the given reference */
@@ -329,7 +329,7 @@ SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites, char *userRunSeed, Uin
 	int iterationCounter;
 	SDLTest_TestSuiteReference *testSuite;
 	SDLTest_TestCaseReference *testCase;
-	char *runSeed;
+	char *runSeed = NULL;
 	Uint64 execKey;
 	Uint32 runStartTicks;
 	time_t runStartTimestamp;

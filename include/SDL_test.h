@@ -31,6 +31,7 @@
 #define _SDL_test_h
 
 #include "SDL.h"
+#include "SDL_test_common.h"
 #include "SDL_test_font.h"
 #include "SDL_test_random.h"
 #include "SDL_test_fuzzer.h"

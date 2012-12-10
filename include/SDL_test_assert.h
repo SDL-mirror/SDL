@@ -54,12 +54,6 @@ extern "C" {
  */
 #define ASSERT_PASS		1
 
-/*! \brief counts the failed asserts */
-static Uint32 SDLTest_AssertsFailed = 0;
-
-/*! \brief counts the passed asserts */
-static Uint32 SDLTest_AssertsPassed = 0;
-
 /**
  * \brief Assert that logs and break execution flow on failures.
  *
@@ -85,9 +79,16 @@ void SDLTest_ResetAssertSummary();
 
 /**
  * \brief Logs summary of all assertions (total, pass, fail) since last reset as INFO or ERROR.
- *
  */
 void SDLTest_LogAssertSummary();
+
+
+/**
+ * \brief Converts the current assert summary state to a test result.
+ *
+ * \returns TEST_RESULT_PASSED, TEST_RESULT_FAILED, or TEST_RESULT_NO_ASSERT
+ */
+int SDLTest_AssertSummaryToTestResult();
 
 #ifdef __cplusplus
 /* *INDENT-OFF* */

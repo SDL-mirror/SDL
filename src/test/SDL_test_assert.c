@@ -35,6 +35,12 @@ const char *SDLTest_AssertCheckFmt = "Assert '%s': %s";
 /* Assert summary message format */
 const char *SDLTest_AssertSummaryFmt = "Assert Summary: Total=%d Passed=%d Failed=%d";
 
+/*! \brief counts the failed asserts */
+static Uint32 SDLTest_AssertsFailed = 0;
+
+/*! \brief counts the passed asserts */
+static Uint32 SDLTest_AssertsPassed = 0;
+
 /*
  *  Assert that logs and break execution flow on failures (i.e. for harness errors).
  */
@@ -87,5 +93,21 @@ void SDLTest_LogAssertSummary()
 	else 
 	{
 		SDLTest_LogError(fmt, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
+	}
+}
+
+/*
+ * Converts the current assert state into a test result
+ */
+int SDLTest_AssertSummaryToTestResult()
+{
+	if (SDLTest_AssertsFailed > 0) {
+		return TEST_RESULT_FAILED;
+	} else {
+		if (SDLTest_AssertsPassed > 0) {
+			return TEST_RESULT_PASSED;
+		} else {
+			return TEST_RESULT_NO_ASSERT;
+		}
 	}
 }
