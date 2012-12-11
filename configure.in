@@ -1650,10 +1650,6 @@ dnl See if we can use the new unified event interface in Linux 2.4
 CheckInputEvents()
 {
     dnl Check for Linux 2.4 unified input event interface support
-    AC_ARG_ENABLE(input-events,
-AC_HELP_STRING([--enable-input-events], [use Linux 2.4 unified input interface [[default=yes]]]),
-                  , enable_input_events=yes)
-    if test x$enable_input_events = xyes; then
         AC_MSG_CHECKING(for Linux 2.4 unified input interface)
         use_input_events=no
         AC_TRY_COMPILE([
@@ -1669,7 +1665,6 @@ AC_HELP_STRING([--enable-input-events], [use Linux 2.4 unified input interface [
         if test x$use_input_events = xyes; then
             AC_DEFINE(SDL_INPUT_LINUXEV, 1, [ ])
         fi
-    fi
 }
 
 dnl See if we can use the Touchscreen input library
