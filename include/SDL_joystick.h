@@ -65,7 +65,7 @@ typedef struct _SDL_Joystick SDL_Joystick;
 /* A structure that encodes the stable unique id for a joystick device */
 typedef struct {
 	Uint8 data[16];
-} JoystickGUID;
+} SDL_JoystickGUID;
 
 typedef int SDL_JoystickID;
 
@@ -102,22 +102,22 @@ extern DECLSPEC const char *SDLCALL SDL_JoystickName(SDL_Joystick * joystick);
 /**
  *  Return the GUID for the joystick at this index
  */
-extern DECLSPEC JoystickGUID SDLCALL SDL_JoystickGetDeviceGUID(int device_index);
+extern DECLSPEC SDL_JoystickGUID SDLCALL SDL_JoystickGetDeviceGUID(int device_index);
 
 /**
  *  Return the GUID for this opened joystick
  */
-extern DECLSPEC JoystickGUID SDLCALL SDL_JoystickGetGUID(SDL_Joystick * joystick);
+extern DECLSPEC SDL_JoystickGUID SDLCALL SDL_JoystickGetGUID(SDL_Joystick * joystick);
 
 /**
  *  Return a string representation for this guid. You are responsible for freeing memory from this call
  */
-extern DECLSPEC char *SDLCALL SDL_JoystickGetGUIDString(JoystickGUID guid);
+extern DECLSPEC void SDL_JoystickGetGUIDString(SDL_JoystickGUID guid, char *pszGUID, int cbGUID);
 
 /**
  *  convert a string into a joystick formatted guid
  */
-extern DECLSPEC JoystickGUID SDLCALL SDL_JoystickGetGUIDFromString(const char *pchGUID);
+extern DECLSPEC SDL_JoystickGUID SDLCALL SDL_JoystickGetGUIDFromString(const char *pchGUID);
 
 /**
  *  Returns SDL_TRUE if the joystick has been opened and currently connected, or SDL_FALSE if it has not.

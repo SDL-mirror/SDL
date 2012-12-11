@@ -104,10 +104,10 @@ extern void SDL_SYS_JoystickClose(SDL_Joystick * joystick);
 extern void SDL_SYS_JoystickQuit(void);
 
 /* Function to return the stable GUID for a plugged in device */
-extern JoystickGUID SDL_SYS_JoystickGetDeviceGUID(int device_index);
+extern SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID(int device_index);
 
 /* Function to return the stable GUID for a opened joystick */
-extern JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick);
+extern SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick);
 
 #ifdef SDL_JOYSTICK_DINPUT
 /* Function to get the current instance id of the joystick located at device_index */

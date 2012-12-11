@@ -683,34 +683,28 @@ SDL_PrivateJoystickNeedsPolling()
 
 
 /* return the guid for this index */
-JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
+SDL_JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
 {
 	return SDL_SYS_JoystickGetDeviceGUID( device_index );
 }
 
 /* return the guid for this opened device */
-JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
+SDL_JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
 {
 	return SDL_SYS_JoystickGetGUID( joystick );
 }
 
 /* convert the guid to a printable string */
-char *SDL_JoystickGetGUIDString(JoystickGUID guid)
+void SDL_JoystickGetGUIDString( SDL_JoystickGUID guid, char *pszGUID, int cbGUID )
 {
 	static const char k_rgchHexToASCII[] = "0123456789abcdef";
 	char *pchOut = NULL;
 	char *pchString = NULL;
 	int i;
-	pchString = SDL_malloc(33); // 16 bytes
-	if ( !pchString )
-	{
-		SDL_OutOfMemory();
-		return NULL;
-	}
 	
-	pchOut = pchString;
+	pchOut = pszGUID;
 
-	for ( i = 0; i < sizeof(guid); i++ )
+	for ( i = 0; i < sizeof(guid) && i < (cbGUID-1); i++ )
 	{
 		// each input byte writes 2 ascii chars, and might write a null byte.
 		// If we don't have room for next input byte, stop
@@ -720,7 +714,6 @@ char *SDL_JoystickGetGUIDString(JoystickGUID guid)
 		*pchOut++ = k_rgchHexToASCII[ c & 0x0F ];
 	}
 	*pchOut = '\0';
-	return pchString;
 }
 
 
@@ -756,9 +749,9 @@ static unsigned char nibble( char c )
 
 
 /* convert the string version of a joystick guid to the struct */
-JoystickGUID SDL_JoystickGetGUIDFromString(const char *pchGUID)
+SDL_JoystickGUID SDL_JoystickGetGUIDFromString(const char *pchGUID)
 {
-	JoystickGUID guid;
+	SDL_JoystickGUID guid;
 	int maxoutputbytes= sizeof(guid);
 	int len = SDL_strlen( pchGUID );
 	Uint8 *p;

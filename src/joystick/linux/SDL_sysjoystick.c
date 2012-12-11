@@ -953,13 +953,15 @@ SDL_SYS_JoystickQuit(void)
 #endif
 }
 
-JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
+SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
+    JoystickGUID guid;
     return JoystickByDevIndex(device_index)->guid;
 }
 
-JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
+SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
+    JoystickGUID guid;
     return joystick->hwdata->guid;
 }
 

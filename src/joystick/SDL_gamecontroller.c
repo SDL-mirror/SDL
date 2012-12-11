@@ -48,7 +48,7 @@ struct _SDL_HatAsButton
 /* our in memory mapping db between joystick objects and controller mappings*/
 struct _SDL_ControllerMapping
 {
-	JoystickGUID guid;
+	SDL_JoystickGUID guid;
 	const char *name;
 
 	// mapping of axis/button id to controller version
@@ -71,7 +71,7 @@ struct _SDL_ControllerMapping
 /* our hard coded list of mapping support */
 typedef struct _ControllerMapping_t
 {
-	JoystickGUID guid;
+	SDL_JoystickGUID guid;
 	char *name;
 	const char *mapping;
 	struct _ControllerMapping_t *next;
@@ -458,7 +458,7 @@ SDL_PrivateGameControllerParseControllerConfigString( struct _SDL_ControllerMapp
 /*
  * Make a new button mapping struct
  */
-void SDL_PrivateLoadButtonMapping( struct _SDL_ControllerMapping *pMapping, JoystickGUID guid, const char *pchName, const char *pchMapping )
+void SDL_PrivateLoadButtonMapping( struct _SDL_ControllerMapping *pMapping, SDL_JoystickGUID guid, const char *pchName, const char *pchMapping )
 {
 	int j;
 
@@ -673,7 +673,7 @@ SDL_GameControllerNameForIndex(int device_index)
 	}
 	else
 	{
-		JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
+		SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
 		pSupportedController = s_pSupportedControllers;
 		while ( pSupportedController )
 		{
@@ -700,10 +700,11 @@ int SDL_IsGameController(int device_index)
 	}
 	else
 	{
-		JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
+		SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
 		pSupportedController = s_pSupportedControllers;
 		// debug code to help get the guid string for a new joystick
-		/*const char *pchGUID = SDL_JoystickGetGUIDString( jGUID );
+		/* char szGUID[33];
+		SDL_JoystickGetGUIDString( jGUID, szGUID, sizeof(szGUID) );
 		printf( "%s\n", pchGUID );
 		SDL_free( pchGUID );*/
 		while ( pSupportedController )
@@ -759,7 +760,7 @@ SDL_GameControllerOpen(int device_index)
 	pSupportedController =  SDL_PrivateGetControllerMapping(device_index);
 	if ( !pSupportedController )
 	{
-		JoystickGUID jGUID;
+		SDL_JoystickGUID jGUID;
 
 		jGUID = SDL_JoystickGetDeviceGUID( device_index );
 		pSupportedController = s_pSupportedControllers;

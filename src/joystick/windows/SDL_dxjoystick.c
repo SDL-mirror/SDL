@@ -79,7 +79,7 @@ extern HRESULT(WINAPI * DInputCreate) (HINSTANCE hinst, DWORD dwVersion,
                                        LPUNKNOWN punkOuter);
 struct JoyStick_DeviceData_
 {
-	JoystickGUID guid;
+	SDL_JoystickGUID guid;
 	DIDEVICEINSTANCE dxdevice;
 	char *joystickname;
 	Uint8 send_add_event;
@@ -1676,7 +1676,7 @@ SDL_SYS_JoystickQuit(void)
 
 
 /* return the stable device guid for this device index */
-JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
+SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
 	JoyStick_DeviceData *device = SYS_Joystick;
 	int index;
@@ -1687,7 +1687,7 @@ JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 	return device->guid;
 }
 
-JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
+SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
 	return joystick->hwdata->guid;
 }
