@@ -812,7 +812,7 @@ enable_fusionsound_shared
 enable_video_dummy
 enable_video_opengl
 enable_video_opengles
-enable_input_events
+enable_libudev
 enable_input_tslib
 enable_pthreads
 enable_pthread_sem
@@ -1535,8 +1535,7 @@ Optional Features:
   --enable-video-dummy    use dummy video driver [[default=yes]]
   --enable-video-opengl   include OpenGL support [[default=yes]]
   --enable-video-opengles include OpenGL ES support [[default=yes]]
-  --enable-input-events   use Linux 2.4 unified input interface
-                          [[default=yes]]
+  --enable-libudev        enable libudev support [[default=yes]]
   --enable-input-tslib    use the Touchscreen library for input
                           [[default=yes]]
   --enable-pthreads       use POSIX threads for multi-threading
@@ -20680,15 +20679,7 @@ $as_echo "#define SDL_VIDEO_RENDER_OGL 1" >>confdefs.h
 
 CheckInputEvents()
 {
-        # Check whether --enable-input-events was given.
-if test "${enable_input_events+set}" = set; then :
-  enableval=$enable_input_events;
-else
-  enable_input_events=yes
-fi
-
-    if test x$enable_input_events = xyes; then
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Linux 2.4 unified input interface" >&5
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Linux 2.4 unified input interface" >&5
 $as_echo_n "checking for Linux 2.4 unified input interface... " >&6; }
         use_input_events=no
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -20719,6 +20710,31 @@ $as_echo "$use_input_events" >&6; }
         if test x$use_input_events = xyes; then
 
 $as_echo "#define SDL_INPUT_LINUXEV 1" >>confdefs.h
+
+        fi
+}
+
+CheckLibUDev()
+{
+    # Check whether --enable-libudev was given.
+if test "${enable_libudev+set}" = set; then :
+  enableval=$enable_libudev;
+else
+  enable_libudev=yes
+fi
+
+    if test x$enable_libudev = xyes; then
+        ac_fn_c_check_header_mongrel "$LINENO" "libudev.h" "ac_cv_header_libudev_h" "$ac_includes_default"
+if test "x$ac_cv_header_libudev_h" = xyes; then :
+  have_libudev_h_hdr=yes
+else
+  have_libudev_h_hdr=no
+fi
+
+
+        if test x$have_libudev_h_hdr = xyes; then
+
+$as_echo "#define HAVE_LIBUDEV_H 1" >>confdefs.h
 
         fi
     fi
@@ -21910,6 +21926,7 @@ case "$host" in
         CheckFusionSound
         CheckOpenGLX11
         CheckOpenGLESX11
+        CheckLibUDev
         CheckInputEvents
         CheckTslib
         CheckUSBHID
