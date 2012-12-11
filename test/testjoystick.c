@@ -250,11 +250,17 @@ main(int argc, char *argv[])
                 SDL_JoystickClose(joystick);
             }
 
+            joystick = NULL;
             if (keepGoing) {
-                joystick = NULL;
-                SDL_WaitEvent( &event );
-                if ( event.type == SDL_JOYDEVICEADDED ) {
+                printf("Waiting for attach\n");
+            }
+            while (keepGoing) {
+                SDL_WaitEvent(&event);
+                if (event.type == SDL_QUIT) {
+                    keepGoing = SDL_FALSE;
+                } else if (event.type == SDL_JOYDEVICEADDED) {
                     joystick = SDL_JoystickOpen(atoi(argv[1]));
+                    break;
                 }
             }
         }
