@@ -698,22 +698,22 @@ SDL_JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
 void SDL_JoystickGetGUIDString( SDL_JoystickGUID guid, char *pszGUID, int cbGUID )
 {
 	static const char k_rgchHexToASCII[] = "0123456789abcdef";
-	char *pchOut = NULL;
-	char *pchString = NULL;
 	int i;
-	
-	pchOut = pszGUID;
 
-	for ( i = 0; i < sizeof(guid) && i < (cbGUID-1); i++ )
+    if ((pszGUID == NULL) || (cbGUID <= 0)) {
+        return;
+    }
+
+	for ( i = 0; i < sizeof(guid.data) && i < (cbGUID-1); i++ )
 	{
 		// each input byte writes 2 ascii chars, and might write a null byte.
 		// If we don't have room for next input byte, stop
 		unsigned char c = guid.data[i];
 
-		*pchOut++ = k_rgchHexToASCII[ c >> 4 ];
-		*pchOut++ = k_rgchHexToASCII[ c & 0x0F ];
+		*pszGUID++ = k_rgchHexToASCII[ c >> 4 ];
+		*pszGUID++ = k_rgchHexToASCII[ c & 0x0F ];
 	}
-	*pchOut = '\0';
+	*pszGUID = '\0';
 }
 
 
