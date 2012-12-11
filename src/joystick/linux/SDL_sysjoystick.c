@@ -174,7 +174,7 @@ typedef struct SDL_joylist_item
     int device_instance;
     char *path;   /* "/dev/input/event2" or whatever */
     char *name;   /* "SideWinder 3D Pro" or whatever */
-    JoystickGUID guid;
+    SDL_JoystickGUID guid;
     dev_t devnum;
     struct joystick_hwdata *hwdata;
     struct SDL_joylist_item *next;
@@ -190,7 +190,7 @@ static int instance_counter = 0;
 #define NBITS(x) ((((x)-1)/(sizeof(long) * 8))+1)
 
 static int
-IsJoystick(int fd, char *namebuf, const size_t namebuflen, JoystickGUID *guid)
+IsJoystick(int fd, char *namebuf, const size_t namebuflen, SDL_JoystickGUID *guid)
 {
     unsigned long evbit[NBITS(EV_MAX)] = { 0 };
     unsigned long keybit[NBITS(KEY_MAX)] = { 0 };
@@ -240,7 +240,7 @@ MaybeAddDevice(const char *path)
     int fd = -1;
     int isstick = 0;
     char namebuf[128];
-    JoystickGUID guid;
+    SDL_JoystickGUID guid;
     SDL_joylist_item *item;
 
     if (path == NULL) {
@@ -955,13 +955,11 @@ SDL_SYS_JoystickQuit(void)
 
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
-    JoystickGUID guid;
     return JoystickByDevIndex(device_index)->guid;
 }
 
 SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
-    JoystickGUID guid;
     return joystick->hwdata->guid;
 }
 

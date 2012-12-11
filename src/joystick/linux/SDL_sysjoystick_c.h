@@ -28,7 +28,7 @@ struct joystick_hwdata
     int device_instance;
     SDL_bool removed;
 
-    JoystickGUID guid;
+    SDL_JoystickGUID guid;
     char *fname;                /* Used in haptic subsystem */
 
     /* The current linux joystick driver maps hats to two axes */
