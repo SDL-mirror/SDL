@@ -219,15 +219,15 @@ main(int argc, char *argv[])
             fprintf(stderr, "SDL_JoystickOpen(%d) failed: %s\n", i,
                     SDL_GetError());
         } else {
-            JoystickGUID guid = SDL_JoystickGetGUID(joystick);
-            char *guidstr = SDL_JoystickGetGUIDString(guid);
+            char guid[64];
+            SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(joystick),
+                                      guid, sizeof (guid));
             printf("       axes: %d\n", SDL_JoystickNumAxes(joystick));
             printf("      balls: %d\n", SDL_JoystickNumBalls(joystick));
             printf("       hats: %d\n", SDL_JoystickNumHats(joystick));
             printf("    buttons: %d\n", SDL_JoystickNumButtons(joystick));
             printf("instance id: %d\n", SDL_JoystickInstanceID(joystick));
-            printf("       guid: %s\n", guidstr);
-            SDL_free(guidstr);
+            printf("       guid: %s\n", guid);
             SDL_JoystickClose(joystick);
         }
     }
