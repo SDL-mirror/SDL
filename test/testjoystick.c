@@ -36,13 +36,14 @@ DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
     SDL_RenderFillRect(r, &area);
 }
 
-void
+static SDL_bool
 WatchJoystick(SDL_Joystick * joystick)
 {
     SDL_Window *window = NULL;
     SDL_Renderer *screen = NULL;
     const char *name = NULL;
-    int done = 0;
+    SDL_bool retval = SDL_FALSE;
+    SDL_bool done = SDL_FALSE;
     SDL_Event event;
     int i;
 
@@ -52,14 +53,14 @@ WatchJoystick(SDL_Joystick * joystick)
                               SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
         fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
-        return;
+        return SDL_FALSE;
     }
 
     screen = SDL_CreateRenderer(window, -1, 0);
     if (screen == NULL) {
         fprintf(stderr, "Couldn't create renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
-        return;
+        return SDL_FALSE;
     }
 
     SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
@@ -122,7 +123,7 @@ WatchJoystick(SDL_Joystick * joystick)
                 }
                 /* Fall through to signal quit */
             case SDL_QUIT:
-                done = 1;
+                done = SDL_TRUE;
                 break;
             default:
                 break;
@@ -183,12 +184,16 @@ WatchJoystick(SDL_Joystick * joystick)
         }
 
         SDL_RenderPresent(screen);
-		
-		done = SDL_JoystickGetAttached( joystick ) == 0;
+
+        if (SDL_JoystickGetAttached( joystick ) == 0) {
+            done = SDL_TRUE;
+            retval = SDL_TRUE;  /* keep going, wait for reattach. */
+        }
     }
 
     SDL_DestroyRenderer(screen);
     SDL_DestroyWindow(window);
+    return retval;
 }
 
 int
@@ -225,9 +230,10 @@ main(int argc, char *argv[])
 
     if (argv[1]) {
 		int nreportederror = 0;
+        SDL_bool keepGoing = SDL_TRUE;
 		SDL_Event event;
 		joystick = SDL_JoystickOpen(atoi(argv[1]));
-		while ( 1 ) {
+		while ( keepGoing ) {
 			if (joystick == NULL) {
 				if ( nreportederror == 0 ) {
 					printf("Couldn't open joystick %d: %s\n", atoi(argv[1]), SDL_GetError());
@@ -235,17 +241,19 @@ main(int argc, char *argv[])
 				}
 			} else {
 				nreportederror = 0;
-				WatchJoystick(joystick);
+				keepGoing = WatchJoystick(joystick);
 				SDL_JoystickClose(joystick);
 			}
 			
-			joystick = NULL;
-			SDL_WaitEvent( &event );
-			if ( event.type == SDL_JOYDEVICEADDED )
-				joystick = SDL_JoystickOpen(atoi(argv[1]));
+            if (keepGoing) {
+    			joystick = NULL;
+    			SDL_WaitEvent( &event );
+    			if ( event.type == SDL_JOYDEVICEADDED )
+    				joystick = SDL_JoystickOpen(atoi(argv[1]));
+            }
 		}
 	}
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 
-    return (0);
+    return 0;
 }
