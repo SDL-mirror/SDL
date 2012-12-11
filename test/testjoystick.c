@@ -237,6 +237,7 @@ main(int argc, char *argv[])
             if (joystick == NULL) {
                 if ( !reportederror ) {
                     printf("Couldn't open joystick %d: %s\n", atoi(argv[1]), SDL_GetError());
+                    keepGoing = SDL_FALSE;
                     reportederror = SDL_TRUE;
                 }
             } else {
