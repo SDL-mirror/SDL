@@ -79,7 +79,7 @@ struct joystick_hwdata
     int uncentered;
 	
 	int instance_id;
-	JoystickGUID guid;
+	SDL_JoystickGUID guid;
 	Uint8 send_open_event;		/* 1 if we need to send an Added event for this device */
 
     struct joystick_hwdata *pNext;      /* next device */
