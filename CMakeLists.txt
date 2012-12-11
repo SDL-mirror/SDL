@@ -648,7 +648,9 @@ if(UNIX AND NOT APPLE)
       set(SOURCE_FILES ${SOURCE_FILES} ${HAPTIC_SOURCES})
       set(HAVE_SDL_HAPTIC TRUE)
     endif(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
-  endif(LINUX
+
+    check_include_file("libudev.h" HAVE_LIBUDEV_H)
+  endif(LINUX)
 
   if(INPUT_TSLIB)
     check_c_source_compiles("

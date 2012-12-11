@@ -1667,6 +1667,22 @@ CheckInputEvents()
         fi
 }
 
+dnl See if the platform offers libudev for device enumeration and hotplugging.
+CheckLibUDev()
+{
+    AC_ARG_ENABLE(libudev,
+AC_HELP_STRING([--enable-libudev], [enable libudev support [[default=yes]]]),
+                        , enable_libudev=yes)
+    if test x$enable_libudev = xyes; then
+        AC_CHECK_HEADER(libudev.h,
+                        have_libudev_h_hdr=yes,
+                        have_libudev_h_hdr=no)
+        if test x$have_libudev_h_hdr = xyes; then
+            AC_DEFINE(HAVE_LIBUDEV_H, 1, [ ])
+        fi
+    fi
+}
+
 dnl See if we can use the Touchscreen input library
 CheckTslib()
 {
@@ -2191,6 +2207,7 @@ case "$host" in
         CheckFusionSound
         CheckOpenGLX11
         CheckOpenGLESX11
+        CheckLibUDev
         CheckInputEvents
         CheckTslib
         CheckUSBHID
