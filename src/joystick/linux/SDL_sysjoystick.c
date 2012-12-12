@@ -302,6 +302,7 @@ MaybeAddDevice(const char *path)
     return numjoysticks++;
 }
 
+#if SDL_USE_LIBUDEV
 /* !!! FIXME: I would love to dump this code and use libudev instead. */
 static int
 MaybeRemoveDevice(const char *path)
@@ -341,6 +342,7 @@ MaybeRemoveDevice(const char *path)
 
     return -1;
 }
+#endif
 
 static int
 JoystickInitWithoutUdev(void)
