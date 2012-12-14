@@ -722,7 +722,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         return -1;
     }
 
-    joystick->instance_id = device_index;
+    joystick->instance_id = item->device_instance;
     joystick->hwdata = (struct joystick_hwdata *)
         SDL_malloc(sizeof(*joystick->hwdata));
     if (joystick->hwdata == NULL) {
@@ -732,7 +732,6 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     }
     SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
     joystick->hwdata->removed = SDL_FALSE;
-    joystick->hwdata->device_instance = item->device_instance;
     joystick->hwdata->guid = item->guid;
     joystick->hwdata->fd = fd;
     joystick->hwdata->fname = SDL_strdup(item->path);

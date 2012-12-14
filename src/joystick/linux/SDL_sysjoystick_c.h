@@ -25,7 +25,6 @@
 struct joystick_hwdata
 {
     int fd;
-    int device_instance;
     SDL_bool removed;
 
     SDL_JoystickGUID guid;
