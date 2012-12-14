@@ -61,7 +61,7 @@
 
 /* we never link directly to libudev. */
 /* !!! FIXME: can we generalize this? ALSA, etc, do the same things. */
-static const char *udev_library = "libudev.so";
+static const char *udev_library = "libudev.so.0";
 static void *udev_handle = NULL;
 
 /* !!! FIXME: this is kinda ugly. */
