@@ -428,6 +428,8 @@
 		04F7805F12FB74A200FC43C0 /* SDL_drawpoint.h in Headers */ = {isa = PBXBuildFile; fileRef = 04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */; };
 		566CDE8F148F0AC200C5A9BB /* SDL_dropevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 566CDE8D148F0AC200C5A9BB /* SDL_dropevents_c.h */; };
 		566CDE90148F0AC200C5A9BB /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
+		A77E6EB4167AB0A90010E40B /* SDL_gamecontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A77E6EB5167AB0A90010E40B /* SDL_gamecontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */; };
 		AA0AD09D16648D1700CE5896 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
 		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
@@ -834,6 +836,7 @@
 		04F7804712FB74A200FC43C0 /* SDL_drawpoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_drawpoint.h; sourceTree = "<group>"; };
 		566CDE8D148F0AC200C5A9BB /* SDL_dropevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_dropevents_c.h; sourceTree = "<group>"; };
 		566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_dropevents.c; sourceTree = "<group>"; };
+		A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gamecontroller.h; sourceTree = "<group>"; };
 		AA628AC8159367B7005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
 		AA628AC9159367B7005138DD /* SDL_rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rotate.h; sourceTree = "<group>"; };
 		AA628ACF159367F2005138DD /* SDL_x11xinput2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11xinput2.c; sourceTree = "<group>"; };
@@ -1080,6 +1083,7 @@
 				AA7557D21595D4D800BBD41B /* SDL_endian.h */,
 				AA7557D31595D4D800BBD41B /* SDL_error.h */,
 				AA7557D41595D4D800BBD41B /* SDL_events.h */,
+				A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */,
 				AA7557D51595D4D800BBD41B /* SDL_gesture.h */,
 				AA7557D61595D4D800BBD41B /* SDL_haptic.h */,
 				AA7557D71595D4D800BBD41B /* SDL_hints.h */,
@@ -1679,6 +1683,7 @@
 				AA7558101595D4D800BBD41B /* SDL_endian.h in Headers */,
 				AA7558121595D4D800BBD41B /* SDL_error.h in Headers */,
 				AA7558141595D4D800BBD41B /* SDL_events.h in Headers */,
+				A77E6EB4167AB0A90010E40B /* SDL_gamecontroller.h in Headers */,
 				AA7558161595D4D800BBD41B /* SDL_gesture.h in Headers */,
 				AA7558181595D4D800BBD41B /* SDL_haptic.h in Headers */,
 				AA75581A1595D4D800BBD41B /* SDL_hints.h in Headers */,
@@ -1946,6 +1951,7 @@
 				AA75585D1595D4D800BBD41B /* SDL_video.h in Headers */,
 				AA75585F1595D4D800BBD41B /* SDL.h in Headers */,
 				AABCC38E164063D200AB8930 /* SDL_cocoamessagebox.h in Headers */,
+				A77E6EB5167AB0A90010E40B /* SDL_gamecontroller.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
