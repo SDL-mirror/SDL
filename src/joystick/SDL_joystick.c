@@ -637,7 +637,7 @@ int
 SDL_JoystickEventState(int state)
 {
 #if SDL_EVENTS_DISABLED
-    return SDL_IGNORE;
+    return SDL_DISABLE;
 #else
     const Uint32 event_list[] = {
         SDL_JOYAXISMOTION, SDL_JOYBALLMOTION, SDL_JOYHATMOTION,
@@ -647,7 +647,7 @@ SDL_JoystickEventState(int state)
 
     switch (state) {
     case SDL_QUERY:
-        state = SDL_IGNORE;
+        state = SDL_DISABLE;
         for (i = 0; i < SDL_arraysize(event_list); ++i) {
             state = SDL_EventState(event_list[i], SDL_QUERY);
             if (state == SDL_ENABLE) {
@@ -669,15 +669,10 @@ SDL_JoystickEventState(int state)
 SDL_bool 
 SDL_PrivateJoystickNeedsPolling()
 {
-	if ( SDL_SYS_JoystickNeedsPolling() )
-	{
-		// sys layer needs us to think
+	if (SDL_joysticks != NULL) {
 		return SDL_TRUE;
-	}
-	else
-	{
-		// otherwise only do it if a joystick is opened
-		return SDL_joysticks != NULL; 
+	} else {
+		return SDL_SYS_JoystickNeedsPolling();
 	}
 }
 
