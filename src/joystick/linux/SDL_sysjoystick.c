@@ -319,7 +319,7 @@ MaybeRemoveDevice(const char *path)
         if (SDL_strcmp(path, item->path) == 0) {
             const int retval = item->device_instance;
             if (item->hwdata) {
-                item->hwdata->removed = SDL_TRUE;
+                item->hwdata->item = NULL;
             }
             if (prev != NULL) {
                 prev->next = item->next;
@@ -731,7 +731,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         return (-1);
     }
     SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
-    joystick->hwdata->removed = SDL_FALSE;
+    joystick->hwdata->item = item;
     joystick->hwdata->guid = item->guid;
     joystick->hwdata->fd = fd;
     joystick->hwdata->fname = SDL_strdup(item->path);
@@ -758,7 +758,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 /* Function to determine is this joystick is attached to the system right now */
 SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
 {
-    return !joystick->closed && !joystick->hwdata->removed;
+    return !joystick->closed && (joystick->hwdata->item != NULL);
 }
 
 static __inline__ void
@@ -913,6 +913,9 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 {
     if (joystick->hwdata) {
         close(joystick->hwdata->fd);
+        if (joystick->hwdata->item) {
+            joystick->hwdata->item->hwdata = NULL;
+        }
         SDL_free(joystick->hwdata->hats);
         SDL_free(joystick->hwdata->balls);
         SDL_free(joystick->hwdata->fname);

@@ -21,12 +21,13 @@
 
 #include <linux/input.h>
 
+struct SDL_joylist_item;
+
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
 {
     int fd;
-    SDL_bool removed;
-
+    struct SDL_joylist_item *item;
     SDL_JoystickGUID guid;
     char *fname;                /* Used in haptic subsystem */
 
