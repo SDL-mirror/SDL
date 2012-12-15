@@ -98,6 +98,20 @@ typedef struct SDLTest_TestSuiteReference {
 	SDLTest_TestCaseTearDownFp testTearDown;
 } SDLTest_TestSuiteReference;
 
+
+/**
+ * \brief Execute a test suite using the given run seed and execution key.
+ *
+ * \param testSuites Suites containing the test case.
+ * \param userRunSeed Custom run seed provided by user, or NULL to autogenerate one.
+ * \param userExecKey Custom execution key provided by user, or 0 to autogenerate one.
+ * \param testIterations Number of iterations to run each test case.
+ *
+ * \returns Test run result; 0 when all tests passed, 1 if any tests failed.
+ */
+int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, Uint64 userExecKey, int testIterations);
+         
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */

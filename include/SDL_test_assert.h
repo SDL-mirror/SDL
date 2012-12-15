@@ -60,17 +60,24 @@ extern "C" {
  * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
  * \param assertDescription Message to log with the assert describing it.
  */
-void SDLTest_Assert(int assertCondition, char *assertDescription);
+void SDLTest_Assert(int assertCondition, char *assertDescription, ...);
 
 /**
- * \brief Assert for test cases that logs but does not break execution flow on failures.
+ * \brief Assert for test cases that logs but does not break execution flow on failures. Updates assertion counters.
  *
  * \param assertCondition Evaluated condition or variable to assert; fail (==0) or pass (!=0).
  * \param assertDescription Message to log with the assert describing it.
  *
- * \returns Returns the assertCondition so it can be used to externall to break execution flow if desired.
+ * \returns Returns the assertCondition so it can be used to externally to break execution flow if desired.
  */
-int SDLTest_AssertCheck(int assertCondition, char *assertDescription);
+int SDLTest_AssertCheck(int assertCondition, char *assertDescription, ...);
+
+/**
+ * \brief Explicitely pass without checking an assertion condition. Updates assertion counter.
+ *
+ * \param assertDescription Message to log with the assert describing it.
+ */
+void SDLTest_AssertPass(char *assertDescription, ...);
 
 /**
  * \brief Resets the assert summary counters to zero.

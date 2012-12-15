@@ -58,7 +58,7 @@ SDLTest_FuzzerInit(Uint64 execKey)
 }
 
 int
-SDLTest_GetInvocationCount()
+SDLTest_GetFuzzerInvocationCount()
 {
 	return fuzzerInvocationCounter;
 }

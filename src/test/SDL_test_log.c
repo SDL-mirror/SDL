@@ -37,12 +37,6 @@
 
 #include "SDL_test.h"
 
-/* 
- * Note: Maximum size of SDLTest log message is less than SDLs limit 
- * to ensure we can fit additional information such as the timestamp. 
- */
-#define SDLTEST_MAX_LOGMESSAGE_LENGTH	3584
-
 /*!
  * Converts unix timestamp to its ascii representation in localtime
  *
@@ -52,18 +46,18 @@
  *
  * \param timestamp A Timestamp, i.e. time(0)
  *
- * \return Ascii representation of the timestamp in localtime
+ * \return Ascii representation of the timestamp in localtime in the format '08/23/01 14:55:02'
  */
 char *SDLTest_TimestampToString(const time_t timestamp) 
 {
 	time_t copy;
-	static char buffer[256];
+	static char buffer[64];
 	struct tm *local;
 
 	memset(buffer, 0, sizeof(buffer));\
 	copy = timestamp;
 	local = localtime(&copy);
-	strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", local);
+	strftime(buffer, sizeof(buffer), "%x %X", local);
 
 	return buffer;
 }
@@ -83,7 +77,7 @@ void SDLTest_Log(char *fmt, ...)
 	va_end(list);
 
 	// Log with timestamp and newline
-	SDL_LogMessage(SDL_LOG_CATEGORY_TEST, SDL_LOG_PRIORITY_INFO, "%s: %s\n", SDLTest_TimestampToString(time(0)), logMessage);
+	SDL_LogMessage(SDL_LOG_CATEGORY_TEST, SDL_LOG_PRIORITY_INFO, " %s: %s", SDLTest_TimestampToString(time(0)), logMessage);
 }
 
 /*
@@ -101,5 +95,5 @@ void SDLTest_LogError(char *fmt, ...)
 	va_end(list);
 
 	// Log with timestamp and newline
-	SDL_LogMessage(SDL_LOG_CATEGORY_TEST, SDL_LOG_PRIORITY_ERROR, "%s: %s\n", SDLTest_TimestampToString(time(0)), logMessage);
+	SDL_LogMessage(SDL_LOG_CATEGORY_TEST, SDL_LOG_PRIORITY_ERROR, "%s: %s", SDLTest_TimestampToString(time(0)), logMessage);
 }
