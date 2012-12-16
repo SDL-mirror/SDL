@@ -250,6 +250,10 @@ X11_MessageBoxInitPositions( SDL_MessageBoxDataX11 *data )
             data->text_height = IntMax( data->text_height, height );
             text_width_max = IntMax( text_width_max, plinedata->width );
 
+            if (lf && (lf > text) && (lf[-1] == '\r')) {
+                plinedata->length--;
+            }
+
             text += plinedata->length + 1;
 
             /* Break if there are no more linefeeds. */
