@@ -38,7 +38,7 @@
 /** 
  *Counter for fuzzer invocations
  */
-static int fuzzerInvocationCounter;
+static int fuzzerInvocationCounter = 0;
 
 /**
  * Context for shared random number generator
@@ -52,9 +52,11 @@ static SDLTest_RandomContext rndContext;
 void
 SDLTest_FuzzerInit(Uint64 execKey)
 {
-	Uint32 a = (execKey >> 32)  & 0x00000000FFFFFFFF;
+	Uint32 a = (execKey >> 32) & 0x00000000FFFFFFFF;
 	Uint32 b = execKey & 0x00000000FFFFFFFF;
+	SDL_memset((void *)&rndContext, 0, sizeof(SDLTest_RandomContext));
 	SDLTest_RandomInit(&rndContext, a, b);
+	fuzzerInvocationCounter = 0;
 }
 
 int

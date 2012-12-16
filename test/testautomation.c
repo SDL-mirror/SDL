@@ -34,6 +34,9 @@ int
 main(int argc, char *argv[])
 {
     int result;
+    int testIterations = 1;
+    Uint64 userExecKey = 0;
+    char *userRunSeed = NULL;
     int i;
 
     /* Initialize test framework */
@@ -52,27 +55,33 @@ main(int argc, char *argv[])
         consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
             consumed = -1;
-/* Parse additional parameters
-
-            if (SDL_strcasecmp(argv[i], "--BLAH") == 0) {
+            if (SDL_strcasecmp(argv[i], "--iterations") == 0) {
                 if (argv[i + 1]) {
-                    if (SDL_strcasecmp(argv[i + 1], "BLUB") == 0) {
-                        blah = blub;
-                        consumed = 2;
-                    }
+                    testIterations = SDL_atoi(argv[i + 1]);
+                    if (testIterations < 1) testIterations = 1;
+                    consumed = 2;                    
                 }
-            } else if (SDL_strcasecmp(argv[i], "--BINGO") == 0) {
-                bingo = SDL_TRUE;
-                consumed = 1;
-            }
-*/
+            } 
+            else if (SDL_strcasecmp(argv[i], "--execKey") == 0) {
+                if (argv[i + 1]) {
+                    SDL_sscanf(argv[i + 1], "%llu", &userExecKey);
+                    consumed = 2;                    
+                }
+            } 
+            else if (SDL_strcasecmp(argv[i], "--seed") == 0) {
+                if (argv[i + 1]) {
+                    userRunSeed = SDL_strdup(argv[i + 1]);
+                    consumed = 2;
+                }
+            } 
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--BLAH BLUB --BINGO]\n",
+                    "Usage: %s %s [--iterations #] [--execKey #] [--seed string]\n",
                     argv[0], SDLTest_CommonUsage(state));
             quit(1);
         }
+        
         i += consumed;
     }
 
@@ -89,10 +98,13 @@ main(int argc, char *argv[])
     }
 
     /* Call Harness */
-    // TODO: pass custom parameters
-    result = SDLTest_RunSuites(testSuites, NULL, 0, 1);
-//int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites, char *userRunSeed, Uint64 userExecKey, int testIterations);
-    
+    result = SDLTest_RunSuites(testSuites, userRunSeed, userExecKey, testIterations);
+
+    /* Clean up */
+    if (userRunSeed != NULL) {
+        SDL_free(userRunSeed);
+    }
+        
     /* Shutdown everything */
     quit(result);        
     return(result);

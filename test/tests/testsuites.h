@@ -14,7 +14,7 @@
 //extern SDLTest_TestSuiteReference eventsTestSuite;
 //extern SDLTest_TestSuiteReference keyboardTestSuite;
 extern SDLTest_TestSuiteReference platformTestSuite;
-//extern SDLTest_TestSuiteReference rectTestSuite;
+extern SDLTest_TestSuiteReference rectTestSuite;
 //extern SDLTest_TestSuiteReference renderTestSuite;
 //extern SDLTest_TestSuiteReference rwopsTestSuite;
 //extern SDLTest_TestSuiteReference surfaceTestSuite;
@@ -28,7 +28,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 //	&eventsTestSuite,
 //	&keyboardTestSuite,
 	&platformTestSuite,
-//	&rectTestSuite,
+	&rectTestSuite,
 //	&renderTestSuite,
 //	&rwopsTestSuite,
 //	&surfaceTestSuite,
