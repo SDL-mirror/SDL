@@ -12,7 +12,7 @@ extern "C" {
 }
 
 // TODO, WinRT: Remove reference(s) to BasicTimer.h
-#include "BasicTimer.h"
+//#include "BasicTimer.h"
 
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
