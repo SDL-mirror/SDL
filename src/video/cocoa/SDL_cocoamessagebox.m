@@ -51,8 +51,8 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         [alert setAlertStyle:NSInformationalAlertStyle];
     }
 
-    [alert setMessageText:[[NSString alloc] initWithUTF8String:messageboxdata->title]];
-    [alert setInformativeText:[[NSString alloc] initWithUTF8String:messageboxdata->message]];
+    [alert setMessageText:[NSString stringWithUTF8String:messageboxdata->title]];
+    [alert setInformativeText:[NSString stringWithUTF8String:messageboxdata->message]];
 
     const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;
     int i;
@@ -70,6 +70,7 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     NSInteger clicked = [alert runModal];
     clicked -= NSAlertFirstButtonReturn;
     *buttonid = buttons[clicked].buttonid;
+    [alert release];
 
     [pool release];
 

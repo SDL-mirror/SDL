@@ -996,6 +996,23 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         cgpoint.y = window->y + y;
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
+	
+    if ( window->flags & SDL_WINDOW_FULLSCREEN )
+	{
+		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+
+		if (window->flags & SDL_WINDOW_INPUT_FOCUS)
+		{
+			/* OpenGL is rendering to the window, so make it visible! */
+			[data->nswindow setLevel:CGShieldingWindowLevel()];
+		} 
+		else 
+		{
+			[data->nswindow setLevel:kCGNormalWindowLevel];
+		}
+		
+	}
+
 }
 
 void

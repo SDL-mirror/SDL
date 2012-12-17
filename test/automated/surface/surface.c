@@ -27,7 +27,7 @@
 /* Testcases. */
 static void surface_testLoad( SDL_Surface *testsur );
 static void surface_testBlit( SDL_Surface *testsur );
-static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, int mode );
+static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, SDL_BlendMode bMode );
 static void surface_testBlitBlend( SDL_Surface *testsur );
 
 
@@ -212,7 +212,7 @@ static void surface_testBlit( SDL_Surface *testsur )
 /**
  * @brief Tests a blend mode.
  */
-static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, int mode )
+static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, SDL_BlendMode bMode )
 {
    int ret;
    int i, j, ni, nj;
@@ -236,7 +236,7 @@ static int surface_testBlitBlendMode( SDL_Surface *testsur, SDL_Surface *face, i
    for (j=0; j <= nj; j+=4) {
       for (i=0; i <= ni; i+=4) {
          /* Set blend mode. */
-         ret = SDL_SetSurfaceBlendMode( face, mode );
+         ret = SDL_SetSurfaceBlendMode( face, bMode );
          if (SDL_ATassert( "SDL_SetSurfaceBlendMode", ret == 0))
             return 1;
 
@@ -263,6 +263,7 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
    SDL_Surface *face;
    int i, j, ni, nj;
    int mode;
+   SDL_BlendMode bMode;
 
    SDL_ATbegin( "Blit Blending Tests" );
 
@@ -353,11 +354,11 @@ static void surface_testBlitBlend( SDL_Surface *testsur )
 
          /* Crazy blending mode magic. */
          mode = (i/4*j/4) % 4;
-         if (mode==0) mode = SDL_BLENDMODE_NONE;
-         else if (mode==1) mode = SDL_BLENDMODE_BLEND;
-         else if (mode==2) mode = SDL_BLENDMODE_ADD;
-         else if (mode==3) mode = SDL_BLENDMODE_MOD;
-         ret = SDL_SetSurfaceBlendMode( face, mode );
+         if (mode==0) bMode = SDL_BLENDMODE_NONE;
+         else if (mode==1) bMode = SDL_BLENDMODE_BLEND;
+         else if (mode==2) bMode = SDL_BLENDMODE_ADD;
+         else if (mode==3) bMode = SDL_BLENDMODE_MOD;
+         ret = SDL_SetSurfaceBlendMode( face, bMode );
          if (SDL_ATassert( "SDL_SetSurfaceBlendMode", ret == 0))
             return;
 

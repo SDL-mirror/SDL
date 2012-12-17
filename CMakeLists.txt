@@ -205,7 +205,6 @@ dep_option(ARTS_SHARED         "Dynamically load aRts audio support" ON "ARTS" O
 set_option(NAS                 "Support the NAS audio API" ${UNIX_SYS})
 set_option(RPATH               "Use an rpath when linking SDL" ${UNIX_SYS})
 set_option(CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" OFF)
-set_option(INPUT_EVENTS        "Use Linux 2.4 unified input interface" ${LINUX})
 set_option(INPUT_TSLIB         "Use the Touchscreen library for input" ${UNIX_SYS})
 set_option(VIDEO_X11           "Use X11 video driver" ${UNIX_SYS})
 dep_option(X11_SHARED          "Dynamically load X11 support" ON "VIDEO_X11" OFF)
@@ -632,7 +631,7 @@ if(UNIX AND NOT APPLE)
     CheckOpenGLESX11()
   endif(SDL_VIDEO)
 
-  if(INPUT_EVENTS)
+  if(LINUX)
     check_c_source_compiles("
         #include <linux/input.h>
         #ifndef EVIOCGNAME
@@ -642,16 +641,16 @@ if(UNIX AND NOT APPLE)
     if(HAVE_INPUT_EVENTS)
       set(SDL_INPUT_LINUXEV 1)
     endif(HAVE_INPUT_EVENTS)
-  endif(INPUT_EVENTS)
 
-  if(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
-    if(LINUX)
+    if(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
       set(SDL_HAPTIC_LINUX 1)
       file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/linux/*.c)
       set(SOURCE_FILES ${SOURCE_FILES} ${HAPTIC_SOURCES})
       set(HAVE_SDL_HAPTIC TRUE)
-    endif(LINUX)
-  endif(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
+    endif(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
+
+    check_include_file("libudev.h" HAVE_LIBUDEV_H)
+  endif(LINUX)
 
   if(INPUT_TSLIB)
     check_c_source_compiles("

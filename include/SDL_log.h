@@ -59,8 +59,9 @@ extern "C" {
  *  \brief The predefined log categories
  *
  *  By default the application category is enabled at the INFO level,
- *  the assert category is enabled at the WARN level, and all other
- *  categories are enabled at the CRITICAL level.
+ *  the assert category is enabled at the WARN level, test is enabled
+ *  at the VERBOSE level and all other categories are enabled at the 
+ *  CRITICAL level.
  */
 enum
 {
@@ -72,6 +73,7 @@ enum
     SDL_LOG_CATEGORY_VIDEO,
     SDL_LOG_CATEGORY_RENDER,
     SDL_LOG_CATEGORY_INPUT,
+    SDL_LOG_CATEGORY_TEST,
 
     /* Reserved for future SDL library use */
     SDL_LOG_CATEGORY_RESERVED1,

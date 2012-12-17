@@ -20,18 +20,26 @@
 */
 
 /**
- *  \file SDLTest.h
+ *  \file SDL_test.h
  *  
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-#ifndef _SDLTest_h
-#define _SDLTest_h
+#ifndef _SDL_test_h
+#define _SDL_test_h
 
 #include "SDL.h"
+#include "SDL_test_common.h"
 #include "SDL_test_font.h"
+#include "SDL_test_random.h"
+#include "SDL_test_fuzzer.h"
+#include "SDL_test_crc32.h"
+#include "SDL_test_md5.h"
+#include "SDL_test_log.h"
+#include "SDL_test_assert.h"
+#include "SDL_test_harness.h"
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -41,9 +49,13 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* Function prototypes */
+/* Global definitions */
 
-/* ADD STUFF HERE */
+/* 
+ * Note: Maximum size of SDLTest log message is less than SDLs limit 
+ * to ensure we can fit additional information such as the timestamp. 
+ */
+#define SDLTEST_MAX_LOGMESSAGE_LENGTH	3584
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -53,6 +65,6 @@ extern "C" {
 #endif
 #include "close_code.h"
 
-#endif /* _SDLTest_h */
+#endif /* _SDL_test_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

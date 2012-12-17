@@ -78,6 +78,7 @@ poked(int sig)
 int
 main(int argc, char *argv[])
 {
+    int i;
     char filename[4096];
 
     /* Load the SDL library */
@@ -110,6 +111,17 @@ main(int argc, char *argv[])
     signal(SIGTERM, poked);
 #endif /* HAVE_SIGNAL_H */
 
+    /* Show the list of available drivers */
+    printf("Available audio drivers: ");
+    for (i = 0; i < SDL_GetNumAudioDrivers(); ++i) {
+        if (i == 0) {
+            printf("%s", SDL_GetAudioDriver(i));
+        } else {
+            printf(", %s", SDL_GetAudioDriver(i));
+        }
+    }
+    printf("\n");
+
     /* Initialize fillerup() variables */
     if (SDL_OpenAudio(&wave.spec, NULL) < 0) {
         fprintf(stderr, "Couldn't open audio: %s\n", SDL_GetError());
@@ -130,3 +142,5 @@ main(int argc, char *argv[])
     SDL_Quit();
     return (0);
 }
+
+/* vi: set ts=4 sw=4 expandtab: */

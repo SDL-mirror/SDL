@@ -128,6 +128,12 @@ static void SDL_AbortAssertion(void)
 static SDL_assert_state
 SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 {
+#ifdef __WIN32__
+    #define ENDLINE "\r\n"
+#else
+    #define ENDLINE "\n"
+#endif
+
     const char *envr;
     SDL_assert_state state = SDL_ASSERTION_ABORT;
     SDL_Window *window;
@@ -152,7 +158,8 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
         return SDL_ASSERTION_ABORT;
     }
     SDL_snprintf(message, SDL_MAX_LOG_MESSAGE,
-                 "Assertion failure at %s (%s:%d), triggered %u %s:\r\n  '%s'",
+                 "Assertion failure at %s (%s:%d), triggered %u %s:" ENDLINE
+                    "  '%s'",
                  data->function, data->filename, data->linenum,
                  data->trigger_count, (data->trigger_count == 1) ? "time" : "times",
                  data->condition);

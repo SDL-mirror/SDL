@@ -62,13 +62,13 @@ static void rwops_testParam (void)
 static int rwops_testGeneric( SDL_RWops *rw, int write )
 {
    char buf[sizeof(hello_world)];
-   int i;
+   Sint64 i;
 
    /* Set to start. */
    i = SDL_RWseek( rw, 0, RW_SEEK_SET );
    if (SDL_ATvassert( i == 0,
             "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d",
-            i, 0 ))
+            (int)i, 0 ))
       return 1;
 
    /* Test write. */
@@ -86,14 +86,14 @@ static int rwops_testGeneric( SDL_RWops *rw, int write )
    i = SDL_RWseek( rw, 6, RW_SEEK_SET );
    if (SDL_ATvassert( i == 6,
             "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d",
-            i, 0 ))
+            (int)i, 0 ))
        return 1;
 
    /* Test seek. */
    i = SDL_RWseek( rw, 0, RW_SEEK_SET );
    if (SDL_ATvassert( i == 0,
             "Seeking with SDL_RWseek (RW_SEEK_SET): got %d, expected %d",
-            i, 0 ))
+            (int)i, 0 ))
       return 1;
 
    /* Test read. */
@@ -108,12 +108,12 @@ static int rwops_testGeneric( SDL_RWops *rw, int write )
    i = SDL_RWseek( rw, -4, RW_SEEK_CUR );
    if (SDL_ATvassert( i == sizeof(hello_world)-5,
             "Seeking with SDL_RWseek (RW_SEEK_CUR): got %d, expected %d",
-            i, sizeof(hello_world)-5 ))
+            (int)i, sizeof(hello_world)-5 ))
       return 1;
    i = SDL_RWseek( rw, -1, RW_SEEK_END );
    if (SDL_ATvassert( i == sizeof(hello_world)-2,
             "Seeking with SDL_RWseek (RW_SEEK_END): got %d, expected %d",
-            i, sizeof(hello_world)-2 ))
+            (int)i, sizeof(hello_world)-2 ))
       return 1;
 
    return 0;
