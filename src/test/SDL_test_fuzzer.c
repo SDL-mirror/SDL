@@ -630,7 +630,7 @@ SDLTest_RandomAsciiStringWithMaximumLength(int maxSize)
         }
 
 	for(counter = 0; counter < size; ++counter) {
-		string[counter] = (char)SDLTest_RandomIntegerInRange(1, 127);
+		string[counter] = (char)SDLTest_RandomIntegerInRange(32, 126);
 	}
 
 	string[counter] = '\0';

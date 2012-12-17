@@ -342,6 +342,7 @@ SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, U
 	float runEndSeconds;
 	float suiteEndSeconds;
 	float testEndSeconds;
+	float runtime;
 	int testResult = 0;
 	int runResult = 0;
 	Uint32 totalTestFailedCount = 0;
@@ -450,14 +451,16 @@ SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, U
 
 			// Take time - test end
 			testEndSeconds = GetClock();
+			runtime = testEndSeconds - testStartSeconds;
+			if (runtime < 0.0f) runtime = 0.0f;
 
 			if (testIterations > 1) {
         			// Log test runtime
-	        		SDLTest_Log("Runtime of %i iterations: %.1f sec", testIterations, testEndSeconds - testStartSeconds);
-	        		SDLTest_Log("Test runtime: %.5f sec", (testEndSeconds - testStartSeconds) / (float)testIterations);
+	        		SDLTest_Log("Runtime of %i iterations: %.1f sec", testIterations, runtime);
+	        		SDLTest_Log("Test runtime: %.5f sec", runtime / (float)testIterations);
                         } else {
         			// Log test runtime
-	        		SDLTest_Log("Test runtime: %.1f sec", testEndSeconds - testStartSeconds);
+	        		SDLTest_Log("Test runtime: %.1f sec", runtime);
                         }
 
 			// Log final test result
@@ -476,9 +479,11 @@ SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, U
 
 		// Take time - suite end
 		suiteEndSeconds = GetClock();
+		runtime = suiteEndSeconds - suiteStartSeconds;
+		if (runtime < 0.0f) runtime = 0.0f;
 
 		// Log suite runtime
-		SDLTest_Log("Suite runtime: %.1f sec", suiteEndSeconds - suiteStartSeconds);
+		SDLTest_Log("Suite runtime: %.1f sec", runtime);
 
 		// Log summary and final Suite result
 		countSum = testPassedCount + testFailedCount + testSkippedCount;
@@ -496,9 +501,11 @@ SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, U
 
 	// Take time - run end
 	runEndSeconds = GetClock();
+	runtime = runEndSeconds - runStartSeconds;
+	if (runtime < 0.0f) runtime = 0.0f;
 
 	// Log total runtime
-	SDLTest_Log("Total runtime: %.1f sec", runEndSeconds - runStartSeconds);
+	SDLTest_Log("Total runtime: %.1f sec", runtime);
 
 	// Log summary and final run result
 	countSum = totalTestPassedCount + totalTestFailedCount + totalTestSkippedCount;
