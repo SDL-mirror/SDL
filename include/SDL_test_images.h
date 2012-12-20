@@ -20,27 +20,21 @@
 */
 
 /**
- *  \file SDL_test.h
+ *  \file SDL_test_images.h
  *  
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-#ifndef _SDL_test_h
-#define _SDL_test_h
+/* 
 
-#include "SDL.h"
-#include "SDL_test_common.h"
-#include "SDL_test_font.h"
-#include "SDL_test_random.h"
-#include "SDL_test_fuzzer.h"
-#include "SDL_test_crc32.h"
-#include "SDL_test_md5.h"
-#include "SDL_test_log.h"
-#include "SDL_test_assert.h"
-#include "SDL_test_harness.h"
-#include "SDL_test_images.h"
+ Defines some images for tests.
+  
+*/
+
+#ifndef _SDL_test_images_h
+#define _SDL_test_images_h
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
@@ -50,13 +44,29 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-/* Global definitions */
 
-/* 
- * Note: Maximum size of SDLTest log message is less than SDLs limit 
- * to ensure we can fit additional information such as the timestamp. 
+/**
+ *Type for test images.
  */
-#define SDLTEST_MAX_LOGMESSAGE_LENGTH	3584
+typedef struct SDLTest_SurfaceImage_s {
+  int width;
+  int height;
+  unsigned int  bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
+  const unsigned char pixel_data[];
+} SDLTest_SurfaceImage_t;
+
+/* Test images */
+const SDLTest_SurfaceImage_t SDLTest_imageBlit;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitColor;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendAdd;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitBlend;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendMod;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendNone;
+const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendAll;
+const SDLTest_SurfaceImage_t SDLTest_ImageFace;
+const SDLTest_SurfaceImage_t SDLTest_imagePrimitives;
+const SDLTest_SurfaceImage_t SDLTest_imagePrimitivesBlend;
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
@@ -66,6 +76,6 @@ extern "C" {
 #endif
 #include "close_code.h"
 
-#endif /* _SDL_test_h */
+#endif /* _SDL_test_images_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -50,7 +50,7 @@ void SDLTest_Assert(int assertCondition, char *assertDescription, ...)
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
                 
 	// Print assert description into a buffer
-	memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
+	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
 	va_start(list, assertDescription);
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, assertDescription, list);
 	va_end(list);
@@ -69,7 +69,7 @@ int SDLTest_AssertCheck(int assertCondition, char *assertDescription, ...)
 	char *logFormat = (char *)SDLTest_AssertCheckFormat;
                 
 	// Print assert description into a buffer
-	memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
+	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
 	va_start(list, assertDescription);
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, assertDescription, list);
 	va_end(list);
@@ -99,7 +99,7 @@ void SDLTest_AssertPass(char *assertDescription, ...)
 	char *logFormat = (char *)SDLTest_AssertCheckFormat;
                 
 	// Print assert description into a buffer
-	memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
+	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
 	va_start(list, assertDescription);
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, assertDescription, list);
 	va_end(list);
