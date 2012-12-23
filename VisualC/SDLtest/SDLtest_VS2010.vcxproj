@@ -162,6 +162,7 @@
     <ClInclude Include="..\..\include\SDL_test_md5.h" />
     <ClInclude Include="..\..\include\SDL_test_random.h" />
     <ClInclude Include="..\..\include\SDL_test_images.h" />
+    <ClInclude Include="..\..\include\SDL_test_compare.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\test\SDL_test_assert.c" />
@@ -178,6 +179,7 @@
     <ClCompile Include="..\..\src\test\SDL_test_imageFace.c" />
     <ClCompile Include="..\..\src\test\SDL_test_imagePrimitives.c" />
     <ClCompile Include="..\..\src\test\SDL_test_imagePrimitivesBlend.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_compare.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
