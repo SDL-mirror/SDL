@@ -332,15 +332,14 @@ float GetClock()
 *
 * \returns Test run result; 0 when all tests passed, 1 if any tests failed.
 */
-int
-	SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, Uint64 userExecKey, char *filter, int testIterations)
+int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *userRunSeed, Uint64 userExecKey, const char *filter, int testIterations)
 {
 	int suiteCounter;
 	int testCounter;
 	int iterationCounter;
 	SDLTest_TestSuiteReference *testSuite;
 	SDLTest_TestCaseReference *testCase;
-	char *runSeed = NULL;
+	const char *runSeed = NULL;
 	char *currentSuiteName;
 	char *currentTestName;
 	Uint64 execKey;
