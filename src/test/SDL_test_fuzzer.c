@@ -116,8 +116,8 @@ SDLTest_RandomUint32()
 Uint64
 SDLTest_RandomUint64()
 {
-	Uint64 value;
-	Uint32 *vp = (void*)&value;
+	Uint64 value = 0;
+	Uint32 *vp = (void *)&value;
 
 	fuzzerInvocationCounter++;
 
@@ -130,8 +130,8 @@ SDLTest_RandomUint64()
 Sint64
 SDLTest_RandomSint64()
 {
-	Uint64 value;
-	Uint32 *vp = (void*)&value;
+	Uint64 value = 0;
+	Uint32 *vp = (void *)&value;
 
 	fuzzerInvocationCounter++;
 

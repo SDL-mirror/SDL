@@ -37,6 +37,7 @@ main(int argc, char *argv[])
     int testIterations = 1;
     Uint64 userExecKey = 0;
     char *userRunSeed = NULL;
+    char *filter = NULL;
     int i;
 
     /* Initialize test framework */
@@ -74,6 +75,12 @@ main(int argc, char *argv[])
                     consumed = 2;
                 }
             } 
+            else if (SDL_strcasecmp(argv[i], "--filter") == 0) {
+                if (argv[i + 1]) {
+                    filter = SDL_strdup(argv[i + 1]);
+                    consumed = 2;
+                }
+            } 
         }
         if (consumed < 0) {
             fprintf(stderr,
@@ -98,11 +105,14 @@ main(int argc, char *argv[])
     }
 
     /* Call Harness */
-    result = SDLTest_RunSuites(testSuites, userRunSeed, userExecKey, testIterations);
+    result = SDLTest_RunSuites(testSuites, userRunSeed, userExecKey, filter, testIterations);
 
     /* Clean up */
     if (userRunSeed != NULL) {
         SDL_free(userRunSeed);
+    }
+    if (filter != NULL) {
+        SDL_free(filter);
     }
         
     /* Shutdown everything */

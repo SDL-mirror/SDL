@@ -15,7 +15,7 @@ extern SDLTest_TestSuiteReference clipboardTestSuite;
 //extern SDLTest_TestSuiteReference keyboardTestSuite;
 extern SDLTest_TestSuiteReference platformTestSuite;
 extern SDLTest_TestSuiteReference rectTestSuite;
-//extern SDLTest_TestSuiteReference renderTestSuite;
+extern SDLTest_TestSuiteReference renderTestSuite;
 extern SDLTest_TestSuiteReference rwopsTestSuite;
 //extern SDLTest_TestSuiteReference surfaceTestSuite;
 //extern SDLTest_TestSuiteReference syswmTestSuite;
@@ -29,7 +29,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 //	&keyboardTestSuite,
 	&platformTestSuite,
 	&rectTestSuite,
-//	&renderTestSuite,
+	&renderTestSuite,
 	&rwopsTestSuite,
 //	&surfaceTestSuite,
 //	&syswmTestSuite,

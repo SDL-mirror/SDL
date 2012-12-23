@@ -535,6 +535,32 @@ const SDLTest_SurfaceImage_t SDLTest_imageBlit = {
   "\0\0",
 };
 
+/**
+ * \brief Returns the Blit test image as SDL_Surface.
+ */
+SDL_Surface *SDLTest_ImageBlit()
+{
+   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom( 
+        (void*)SDLTest_imageBlit.pixel_data,
+        SDLTest_imageBlit.width, 
+        SDLTest_imageBlit.height, 
+        SDLTest_imageBlit.bytes_per_pixel * 8, 
+        SDLTest_imageBlit.width * SDLTest_imageBlit.bytes_per_pixel,
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff  /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000  /* Alpha bit mask. */
+#endif
+         );
+   return surface;
+}
+
 const SDLTest_SurfaceImage_t SDLTest_imageBlitColor = {
   80, 60, 3,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -991,6 +1017,32 @@ const SDLTest_SurfaceImage_t SDLTest_imageBlitColor = {
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
 };
+
+/**
+ * \brief Returns the BlitColor test image as SDL_Surface.
+ */
+SDL_Surface *SDLTest_ImageBlitColor()
+{
+   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom( 
+        (void*)SDLTest_imageBlitColor.pixel_data,
+        SDLTest_imageBlitColor.width, 
+        SDLTest_imageBlitColor.height, 
+        SDLTest_imageBlitColor.bytes_per_pixel * 8, 
+        SDLTest_imageBlitColor.width * SDLTest_imageBlitColor.bytes_per_pixel,
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff  /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000  /* Alpha bit mask. */
+#endif
+         );
+   return surface;
+}
 
 const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha = {
   80, 60, 3,
@@ -1478,3 +1530,28 @@ const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha = {
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",
 };
 
+/**
+ * \brief Returns the BlitAlpha test image as SDL_Surface.
+ */
+SDL_Surface *SDLTest_ImageBlitAlpha()
+{
+   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom( 
+        (void*)SDLTest_imageBlitAlpha.pixel_data,
+        SDLTest_imageBlitAlpha.width, 
+        SDLTest_imageBlitAlpha.height, 
+        SDLTest_imageBlitAlpha.bytes_per_pixel * 8,
+        SDLTest_imageBlitAlpha.width * SDLTest_imageBlitAlpha.bytes_per_pixel,
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff  /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000  /* Alpha bit mask. */
+#endif
+         );
+   return surface;
+}

@@ -485,3 +485,28 @@ const SDLTest_SurfaceImage_t SDLTest_imagePrimitives = {
   "\310\15I\310\15I\310\15I\310\15I\310\5ii",
 };
 
+/**
+ * \brief Returns the Primitives test image as SDL_Surface.
+ */
+SDL_Surface *SDLTest_ImagePrimitives()
+{
+   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom( 
+        (void*)SDLTest_imagePrimitives.pixel_data,
+        SDLTest_imagePrimitives.width, 
+        SDLTest_imagePrimitives.height,
+        SDLTest_imagePrimitives.bytes_per_pixel * 8, 
+        SDLTest_imagePrimitives.width * SDLTest_imagePrimitives.bytes_per_pixel,
+#if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+         0xff000000, /* Red bit mask. */
+         0x00ff0000, /* Green bit mask. */
+         0x0000ff00, /* Blue bit mask. */
+         0x000000ff  /* Alpha bit mask. */
+#else
+         0x000000ff, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x00ff0000, /* Blue bit mask. */
+         0xff000000  /* Alpha bit mask. */
+#endif
+         );
+   return surface;
+}
