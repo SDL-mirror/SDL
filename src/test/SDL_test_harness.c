@@ -502,7 +502,7 @@ int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *user
 						if (userExecKey != 0) {
 							execKey = userExecKey;
 						} else {
-							execKey = SDLTest_GenerateExecKey(runSeed, testSuite->name, testCase->name, iterationCounter);
+							execKey = SDLTest_GenerateExecKey((char *)runSeed, testSuite->name, testCase->name, iterationCounter);
 						}
 
 						SDLTest_Log("Test Iteration %i: execKey %llu", iterationCounter, execKey);

@@ -21,7 +21,6 @@
 
 static SDLTest_CommonState *state;
 
-
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
 quit(int rc)
@@ -45,9 +44,6 @@ main(int argc, char *argv[])
     if (!state) {
         return 1;
     }
-
-    // Needed?
-    // state->window_flags |= SDL_WINDOW_RESIZABLE;
 
     /* Parse commandline */
     for (i = 1; i < argc;) {
@@ -84,7 +80,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--iterations #] [--execKey #] [--seed string]\n",
+                    "Usage: %s %s [--iterations #] [--execKey #] [--seed string] [--filter suite_name|test_name]\n",
                     argv[0], SDLTest_CommonUsage(state));
             quit(1);
         }

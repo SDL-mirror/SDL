@@ -18,6 +18,8 @@
 
 #include "SDL.h"
 
+#ifndef SDL_JOYSTICK_DISABLED
+
 #ifdef __IPHONEOS__
 #define SCREEN_WIDTH	320
 #define SCREEN_HEIGHT	480
@@ -28,6 +30,7 @@
 
 #define MAX_NUM_AXES 6
 #define MAX_NUM_HATS 2
+
 
 static void
 DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
@@ -269,3 +272,14 @@ main(int argc, char *argv[])
 
     return 0;
 }
+
+#else
+
+int
+main(int argc, char *argv[])
+{
+    fprintf(stderr, "SDL compiled without Joystick support.\n");
+    exit(1);
+}
+
+#endif

@@ -26,13 +26,15 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
  * includes
  */
 #include <stdlib.h>
-#include "SDL.h"
-#include "SDL_haptic.h"
-
 #include <stdio.h>              /* printf */
 #include <string.h>             /* strstr */
 #include <ctype.h>              /* isdigit */
 
+#include "SDL.h"
+
+#ifndef SDL_HAPTIC_DISABLED
+
+#include "SDL_haptic.h"
 
 static SDL_Haptic *haptic;
 
@@ -142,3 +144,13 @@ main(int argc, char **argv)
     return 0;
 }
 
+#else
+
+int
+main(int argc, char *argv[])
+{
+    fprintf(stderr, "SDL compiled without Haptic support.\n");
+    exit(1);
+}
+
+#endif
