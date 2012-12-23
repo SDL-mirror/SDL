@@ -11,6 +11,7 @@ TARGETS = \
 	checkkeys$(EXE) \
 	loopwave$(EXE) \
 	testaudioinfo$(EXE) \
+	testautomation$(EXE) \
 	testdraw2$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
@@ -66,6 +67,14 @@ testresample$(EXE): $(srcdir)/testresample.c
 
 testaudioinfo$(EXE): $(srcdir)/testaudioinfo.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testautomation$(EXE): $(srcdir)/testautomation.c \
+		      $(srcdir)/testautomation_clipboard.c \
+		      $(srcdir)/testautomation_platform.c \
+		      $(srcdir)/testautomation_rect.c \
+		      $(srcdir)/testautomation_render.c \
+		      $(srcdir)/testautomation_rwops.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -lSDL2_test
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

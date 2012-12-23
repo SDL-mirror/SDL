@@ -17,7 +17,7 @@
 #include "SDL.h"
 #include "SDL_test.h"
 
-#include "tests/testsuites.h"
+#include "testautomation_suites.h"
 
 static SDLTest_CommonState *state;
 
