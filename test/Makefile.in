@@ -74,7 +74,7 @@ testautomation$(EXE): $(srcdir)/testautomation.c \
 		      $(srcdir)/testautomation_rect.c \
 		      $(srcdir)/testautomation_render.c \
 		      $(srcdir)/testautomation_rwops.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -lSDL2_test
+	$(CC) -o $@ $^ $(CFLAGS) -lSDL2_test $(LIBS) 
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
