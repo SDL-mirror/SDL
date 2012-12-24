@@ -690,7 +690,6 @@ render_testBlitBlend (void *arg)
 }
 
 
-
 /**
  * @brief Checks to see if functionality is supported. Helper function.
  */
@@ -722,6 +721,7 @@ _hasDrawColor (void)
    ret = SDL_GetRenderDrawColor(renderer, &r, &g, &b, &a );
    if (!_isSupported(ret))
       fail = 1;
+      
    /* Restore natural. */
    ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
    if (!_isSupported(ret))
@@ -730,6 +730,7 @@ _hasDrawColor (void)
    /* Something failed, consider not available. */
    if (fail)
       return 0;
+      
    /* Not set properly, consider failed. */
    else if ((r != 100) || (g != 100) || (b != 100) || (a != 100))
       return 0;
@@ -839,7 +840,7 @@ _hasTexColor (void)
 
    /* Get test face. */
    tface = _loadTestFace();
-   if (tface == 0)
+   if (tface == NULL)
       return 0;
 
    /* See if supported. */
@@ -879,7 +880,7 @@ _hasTexAlpha(void)
 
    /* Get test face. */
    tface = _loadTestFace();
-   if (tface == 0)
+   if (tface == NULL)
       return 0;
 
    /* See if supported. */
@@ -901,7 +902,8 @@ _hasTexAlpha(void)
    return 1;
 }
 
-static _renderCompareCount = 0;
+/* Counter for _compare calls use for filename creation when comparisons fail */
+static int _renderCompareCount = 0;
 
 /**
  * @brief Compares screen pixels with image pixels. Helper function.
@@ -920,7 +922,7 @@ _compare(const char *msg, SDL_Surface *s, int allowable_error)
 {
    int ret;
    SDL_Rect rect;
-   Uint8 pix[4*80*60];
+   Uint8 pix[4*TESTRENDER_SCREEN_W*TESTRENDER_SCREEN_H];
    SDL_Surface *testsur;
    char imageFilename[128];
    char referenceFilename[128];
@@ -929,8 +931,8 @@ _compare(const char *msg, SDL_Surface *s, int allowable_error)
    /* Explicitly specify the rect in case the window isn't expected size... */
    rect.x = 0;
    rect.y = 0;
-   rect.w = 80;
-   rect.h = 60;
+   rect.w = TESTRENDER_SCREEN_W;
+   rect.h = TESTRENDER_SCREEN_H;
    ret = SDL_RenderReadPixels(renderer, &rect, RENDER_COMPARE_FORMAT, pix, 80*4 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDL_RenderReadPixels, expected: 0, got: %i", ret);
 
@@ -943,17 +945,18 @@ _compare(const char *msg, SDL_Surface *s, int allowable_error)
    ret = SDLTest_CompareSurfaces( testsur, s, allowable_error );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
+   /* Save source image and reference image for analysis */
    _renderCompareCount++;
    if (ret != 0) {
-      SDL_snprintf(imageFilename, 127, "image%i.bmp", _renderCompareCount);
+      SDL_snprintf(imageFilename, 127, "compare%04d_SourceImage.bmp", _renderCompareCount);
       SDL_SaveBMP(testsur, imageFilename);
-      SDL_snprintf(referenceFilename, 127, "reference%i.bmp", _renderCompareCount);
+      SDL_snprintf(referenceFilename, 127, "compare%04d_ReferenceImage.bmp", _renderCompareCount);
       SDL_SaveBMP(s, referenceFilename);
-      SDLTest_LogError("Surfaces from failed comparison saved as %s and %s", imageFilename, referenceFilename);
+      SDLTest_LogError("Surfaces from failed comparison saved as '%s' and '%s'", imageFilename, referenceFilename);
    }
 
    /* Clean up. */
-   SDL_FreeSurface( testsur );
+   SDL_FreeSurface(testsur);
 }
 
 /**

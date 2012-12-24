@@ -9,7 +9,7 @@
 #include "SDL_test.h"
 
 // Test collections
-//extern SDLTest_TestSuiteReference audioTestSuite;
+extern SDLTest_TestSuiteReference audioTestSuite;
 extern SDLTest_TestSuiteReference clipboardTestSuite;
 //extern SDLTest_TestSuiteReference eventsTestSuite;
 //extern SDLTest_TestSuiteReference keyboardTestSuite;
@@ -23,7 +23,7 @@ extern SDLTest_TestSuiteReference rwopsTestSuite;
 
 // All test suites
 SDLTest_TestSuiteReference *testSuites[] =  {
-//	&audioTestSuite,
+	&audioTestSuite,
 	&clipboardTestSuite,
 //	&eventsTestSuite,
 //	&keyboardTestSuite,

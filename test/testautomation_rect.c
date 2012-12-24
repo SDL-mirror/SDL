@@ -951,12 +951,12 @@ int rect_testEnclosePoints(void *arg)
     SDL_Rect result;
     SDL_bool anyEnclosed;
     SDL_bool anyEnclosedNoResult;
-
-    // Create input data, tracking result
     SDL_bool expectedEnclosed = SDL_TRUE;
     int newx, newy;
-    int minx, maxx, miny, maxy;
+    int minx = 0, maxx = 0, miny = 0, maxy = 0;
     int i;
+
+    // Create input data, tracking result
     for (i=0; i<numPoints; i++) {
         newx = SDLTest_RandomIntegerInRange(-1024, 1024);
         newy = SDLTest_RandomIntegerInRange(-1024, 1024);
@@ -965,13 +965,15 @@ int rect_testEnclosePoints(void *arg)
         points[i].x = newx;
         points[i].y = newy;
         if (i==0) {
-            minx=maxx=newx;
-            miny=maxy=newy;
+            minx = newx;
+            maxx = newx;
+            miny = newy;
+            maxy = newy;
         } else {
-            if (newx<minx) minx=newx;
-            if (newx>maxx) maxx=newx;
-            if (newy<miny) miny=newy;
-            if (newy>maxy) maxy=newy;
+            if (newx < minx) minx = newx;
+            if (newx > maxx) maxx = newx;
+            if (newy < miny) miny = newy;
+            if (newy > maxy) maxy = newy;
         }
     }
     
@@ -1020,12 +1022,12 @@ int rect_testEnclosePointsRepeatedInput(void *arg)
     SDL_Rect result;
     SDL_bool anyEnclosed;
     SDL_bool anyEnclosedNoResult;
-
-    // Create input data, tracking result
     SDL_bool expectedEnclosed = SDL_TRUE;
     int newx, newy;
-    int minx, maxx, miny, maxy;
+    int minx = 0, maxx = 0, miny = 0, maxy = 0;
     int i;
+
+    // Create input data, tracking result
     for (i=0; i<numPoints; i++) {
         if (i < halfPoints) {
             newx = SDLTest_RandomIntegerInRange(-1024, 1024);
@@ -1039,13 +1041,15 @@ int rect_testEnclosePointsRepeatedInput(void *arg)
         points[i].x = newx;
         points[i].y = newy;
         if (i==0) {
-            minx=maxx=newx;
-            miny=maxy=newy;
+            minx = newx;
+            maxx = newx;
+            miny = newy;
+            maxy = newy;
         } else {
-            if (newx<minx) minx=newx;
-            if (newx>maxx) maxx=newx;
-            if (newy<miny) miny=newy;
-            if (newy>maxy) maxy=newy;
+            if (newx < minx) minx = newx;
+            if (newx > maxx) maxx = newx;
+            if (newy < miny) miny = newy;
+            if (newy > maxy) maxy = newy;
         }
     }
 
@@ -1097,7 +1101,7 @@ int rect_testEnclosePointsWithClipping(void *arg)
     SDL_bool anyEnclosedNoResult;
     SDL_bool expectedEnclosed = SDL_FALSE;
     int newx, newy;
-    int minx, maxx, miny, maxy;
+    int minx = 0, maxx = 0, miny = 0, maxy = 0;
     int i;
 
     // Setup clipping rectangle
@@ -1117,13 +1121,15 @@ int rect_testEnclosePointsWithClipping(void *arg)
         if ((newx>=refClip.x) && (newx<(refClip.x + refClip.w)) &&
             (newy>=refClip.y) && (newy<(refClip.y + refClip.h))) {
             if (expectedEnclosed==SDL_FALSE) {
-                minx=maxx=newx;
-                miny=maxy=newy;
+                minx = newx;
+                maxx = newx;
+                miny = newy;
+                maxy = newy;
             } else {
-                if (newx<minx) minx=newx;
-                if (newx>maxx) maxx=newx;
-                if (newy<miny) miny=newy;
-                if (newy>maxy) maxy=newy;
+                if (newx < minx) minx = newx;
+                if (newx > maxx) maxx = newx;
+                if (newy < miny) miny = newy;
+                if (newy > maxy) maxy = newy;
             }
             expectedEnclosed = SDL_TRUE;
         }

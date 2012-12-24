@@ -44,7 +44,7 @@ static Uint32 SDLTest_AssertsPassed = 0;
 /*
  *  Assert that logs and break execution flow on failures (i.e. for harness errors).
  */
-void SDLTest_Assert(int assertCondition, char *assertDescription, ...)
+void SDLTest_Assert(int assertCondition, const char *assertDescription, ...)
 {
         va_list list;
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
@@ -62,11 +62,10 @@ void SDLTest_Assert(int assertCondition, char *assertDescription, ...)
 /*
  * Assert that logs but does not break execution flow on failures (i.e. for test cases).
  */
-int SDLTest_AssertCheck(int assertCondition, char *assertDescription, ...)
+int SDLTest_AssertCheck(int assertCondition, const char *assertDescription, ...)
 {
     va_list list;
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
-	char *logFormat = (char *)SDLTest_AssertCheckFormat;
                 
 	// Print assert description into a buffer
 	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
@@ -78,12 +77,12 @@ int SDLTest_AssertCheck(int assertCondition, char *assertDescription, ...)
 	if (assertCondition == ASSERT_FAIL)
 	{
 		SDLTest_AssertsFailed++;
-		SDLTest_LogError(logFormat, logMessage, "Failed");
+		SDLTest_LogError(SDLTest_AssertCheckFormat, logMessage, "Failed");
 	} 
 	else 
 	{
 		SDLTest_AssertsPassed++;
-		SDLTest_Log(logFormat, logMessage, "Passed");
+		SDLTest_Log(SDLTest_AssertCheckFormat, logMessage, "Passed");
 	}
 
 	return assertCondition;
@@ -92,11 +91,10 @@ int SDLTest_AssertCheck(int assertCondition, char *assertDescription, ...)
 /*
  * Explicitly passing Assert that logs (i.e. for test cases).
  */
-void SDLTest_AssertPass(char *assertDescription, ...)
+void SDLTest_AssertPass(const char *assertDescription, ...)
 {
     va_list list;
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
-	char *logFormat = (char *)SDLTest_AssertCheckFormat;
                 
 	// Print assert description into a buffer
 	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
@@ -104,9 +102,9 @@ void SDLTest_AssertPass(char *assertDescription, ...)
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, assertDescription, list);
 	va_end(list);
                             
-    // Log pass message                            
+        // Log pass message                            
 	SDLTest_AssertsPassed++;
-	SDLTest_Log(logFormat, logMessage, "Pass");
+	SDLTest_Log(SDLTest_AssertCheckFormat, logMessage, "Pass");
 }
 
 /*
@@ -124,15 +122,14 @@ void SDLTest_ResetAssertSummary()
  */
 void SDLTest_LogAssertSummary()
 {
-	char *logFormat = (char *)SDLTest_AssertSummaryFormat;
 	Uint32 totalAsserts = SDLTest_AssertsPassed + SDLTest_AssertsFailed;
 	if (SDLTest_AssertsFailed == 0)
 	{
-		SDLTest_Log(logFormat, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
+		SDLTest_Log(SDLTest_AssertSummaryFormat, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
 	} 
 	else 
 	{
-		SDLTest_LogError(logFormat, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
+		SDLTest_LogError(SDLTest_AssertSummaryFormat, totalAsserts, SDLTest_AssertsPassed, SDLTest_AssertsFailed);
 	}
 }
 

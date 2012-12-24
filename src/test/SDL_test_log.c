@@ -35,6 +35,8 @@
 #include <string.h>
 #include <time.h>
 
+#include "SDL.h"
+
 #include "SDL_test.h"
 
 /*!
@@ -54,7 +56,7 @@ char *SDLTest_TimestampToString(const time_t timestamp)
 	static char buffer[64];
 	struct tm *local;
 
-	memset(buffer, 0, sizeof(buffer));\
+	SDL_memset(buffer, 0, sizeof(buffer));\
 	copy = timestamp;
 	local = localtime(&copy);
 	strftime(buffer, sizeof(buffer), "%x %X", local);
@@ -65,13 +67,13 @@ char *SDLTest_TimestampToString(const time_t timestamp)
 /*
  * Prints given message with a timestamp in the TEST category and INFO priority.
  */
-void SDLTest_Log(char *fmt, ...)
+void SDLTest_Log(const char *fmt, ...)
 {
 	va_list list;
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
 
 	// Print log message into a buffer
-	memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
+	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
 	va_start(list, fmt);
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, fmt, list);
 	va_end(list);
@@ -83,13 +85,13 @@ void SDLTest_Log(char *fmt, ...)
 /*
  * Prints given message with a timestamp in the TEST category and the ERROR priority.
  */
-void SDLTest_LogError(char *fmt, ...)
+void SDLTest_LogError(const char *fmt, ...)
 {
 	va_list list;
 	char logMessage[SDLTEST_MAX_LOGMESSAGE_LENGTH];
 
 	// Print log message into a buffer
-	memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
+	SDL_memset(logMessage, 0, SDLTEST_MAX_LOGMESSAGE_LENGTH);
 	va_start(list, fmt);
 	SDL_vsnprintf(logMessage, SDLTEST_MAX_LOGMESSAGE_LENGTH - 1, fmt, list);
 	va_end(list);

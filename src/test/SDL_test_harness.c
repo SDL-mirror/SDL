@@ -51,7 +51,7 @@ static Uint32 SDLTest_TestCaseTimeout = 3600;
 * \returns The generated seed string
 */
 char *
-	SDLTest_GenerateRunSeed(const int length)
+SDLTest_GenerateRunSeed(const int length)
 {
 	char *seed = NULL;
 	SDLTest_RandomContext randomContext;
@@ -97,7 +97,7 @@ char *
 *
 */
 Uint64
-	SDLTest_GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iteration)
+SDLTest_GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iteration)
 {
 	SDLTest_Md5Context md5Context;
 	Uint64 *keys;
@@ -109,17 +109,17 @@ Uint64
 	Uint32 entireStringLength;
 	char *buffer;
 
-	if (runSeed == NULL || strlen(runSeed)==0) {
+	if (runSeed == NULL || SDL_strlen(runSeed)==0) {
 		SDLTest_LogError("Invalid runSeed string.");
 		return -1;
 	}
 
-	if (suiteName == NULL || strlen(suiteName)==0) {
+	if (suiteName == NULL || SDL_strlen(suiteName)==0) {
 		SDLTest_LogError("Invalid suiteName string.");
 		return -1;
 	}
 
-	if (testName == NULL || strlen(testName)==0) {
+	if (testName == NULL || SDL_strlen(testName)==0) {
 		SDLTest_LogError("Invalid testName string.");
 		return -1;
 	}
@@ -130,14 +130,14 @@ Uint64
 	}
 
 	// Convert iteration number into a string
-	memset(iterationString, 0, sizeof(iterationString));
+	SDL_memset(iterationString, 0, sizeof(iterationString));
 	SDL_snprintf(iterationString, sizeof(iterationString) - 1, "%d", iteration);
 
 	// Combine the parameters into single string
-	runSeedLength = strlen(runSeed);
-	suiteNameLength = strlen(suiteName);
-	testNameLength = strlen(testName);
-	iterationStringLength = strlen(iterationString);
+	runSeedLength = SDL_strlen(runSeed);
+	suiteNameLength = SDL_strlen(suiteName);
+	testNameLength = SDL_strlen(testName);
+	iterationStringLength = SDL_strlen(iterationString);
 	entireStringLength  = runSeedLength + suiteNameLength + testNameLength + iterationStringLength + 1;
 	buffer = (char *)SDL_malloc(entireStringLength);
 	if (buffer == NULL) {
@@ -167,7 +167,7 @@ Uint64
 * \return Timer id or -1 on failure.
 */
 SDL_TimerID
-	SDLTest_SetTestTimeout(int timeout, void (*callback)())
+SDLTest_SetTestTimeout(int timeout, void (*callback)())
 {
 	Uint32 timeoutInMilliseconds;
 	SDL_TimerID timerID;
@@ -371,7 +371,7 @@ int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *user
 	}
 
 	// Generate run see if we don't have one already
-	if (userRunSeed == NULL || strlen(userRunSeed) == 0) {
+	if (userRunSeed == NULL || SDL_strlen(userRunSeed) == 0) {
 		runSeed = SDLTest_GenerateRunSeed(16);
 		if (runSeed == NULL) {
 			SDLTest_LogError("Generating a random seed failed");
@@ -488,7 +488,7 @@ int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *user
 						suiteCounter,
 						testCounter, 
 						currentTestName);
-					if (testCase->description != NULL && strlen(testCase->description)>0) {
+					if (testCase->description != NULL && SDL_strlen(testCase->description)>0) {
 						SDLTest_Log("Test Description: '%s'", 
 							(testCase->description) ? testCase->description : SDLTest_InvalidNameFormat);
 					}

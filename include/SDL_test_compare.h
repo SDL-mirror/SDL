@@ -37,6 +37,7 @@
 #define _SDL_test_compare_h
 
 #include "SDL.h"
+
 #include "SDL_test_images.h"
 
 #include "begin_code.h"
@@ -50,13 +51,13 @@ extern "C" {
 /**
  * \brief Compares a surface and with reference image data for equality
  *
- * \param sur Surface used in comparison
- * \param img Test Surface used in comparison
- * \param allowable_error Allowable difference in blending accuracy
+ * \param surface Surface used in comparison
+ * \param referenceSurface Test Surface used in comparison
+ * \param allowable_error Allowable difference (squared) in blending accuracy.
  *
- * \returns 0 if comparison succeeded, >0 (=number of pixels where comparison failed) if comparison failed, <0 for any other error.
+ * \returns 0 if comparison succeeded, >0 (=number of pixels where comparison failed) if comparison failed, -1 if any of the surfaces were NULL, -2 if the surface sizes differ.
  */
-int SDLTest_CompareSurfaces(SDL_Surface *sur, SDL_Surface *img, int allowable_error);
+int SDLTest_CompareSurfaces(SDL_Surface *surface, SDL_Surface *referenceSurface, int allowable_error);
       
 
 /* Ends C function definitions when using C++ */
