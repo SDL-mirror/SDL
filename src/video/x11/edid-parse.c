@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -722,6 +723,7 @@ dump_monitor_info (MonitorInfo *info)
 	printf ("  Top Border: %d\n", timing->top_border);
 	switch (timing->stereo)
 	{
+	default:
 	case NO_STEREO:   s = "No Stereo"; break;
 	case FIELD_RIGHT: s = "Field Sequential, Right on Sync"; break;
 	case FIELD_LEFT:  s = "Field Sequential, Left on Sync"; break;
