@@ -22,13 +22,14 @@
 #define ALLOWABLE_ERROR_OPAQUE	0
 #define ALLOWABLE_ERROR_BLENDED	64
 
+/* Test window and renderer */
 SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
 /* Prototypes for helper functions */
 
 static int _clearScreen (void);
-static void _compare(const char *msg, SDL_Surface *s, int allowable_error);
+static void _compare(SDL_Surface *reference, int allowable_error);
 static int _hasTexAlpha(void);
 static int _hasTexColor(void);
 static SDL_Texture *_loadTestFace(void);
@@ -53,7 +54,7 @@ void InitCreateRenderer(void *arg)
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
   SDLTest_AssertPass("SDL_CreateRenderer()");
   SDLTest_AssertCheck(renderer != 0, "Check SDL_CreateRenderer result");
-  if (renderer == 0) {
+  if (renderer == NULL) {
       SDL_DestroyWindow(window);
       return;
   }
@@ -66,11 +67,13 @@ void CleanupDestroyRenderer(void *arg)
 {
   if (renderer != NULL) {  
      SDL_DestroyRenderer(renderer);
+     renderer = NULL;
      SDLTest_AssertPass("SDL_DestroyRenderer()");
   }
   
   if (window != NULL) {  
      SDL_DestroyWindow(window);
+     window = NULL;
      SDLTest_AssertPass("SDL_DestroyWindow");
   }
 }
@@ -106,6 +109,7 @@ int render_testPrimitives (void *arg)
    int ret;
    int x, y;
    SDL_Rect rect;
+   SDL_Surface *referenceSurface = NULL;
    int checkFailCount1;
    int checkFailCount2;
 
@@ -182,7 +186,14 @@ int render_testPrimitives (void *arg)
    SDLTest_AssertCheck(ret == 0, "Validate result from SDL_RenderDrawLine, expected: 0, got: %i", ret);
 
    /* See if it's the same. */
-   _compare( "Primitives output not the same.", SDLTest_ImagePrimitives(), ALLOWABLE_ERROR_OPAQUE );
+   referenceSurface = SDLTest_ImagePrimitives();
+   _compare(referenceSurface, ALLOWABLE_ERROR_OPAQUE );
+
+   /* Clean up. */
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    return TEST_COMPLETED;
 }
@@ -200,6 +211,7 @@ int render_testPrimitivesBlend (void *arg)
    int ret;
    int i, j;
    SDL_Rect rect;
+   SDL_Surface *referenceSurface = NULL;
    int checkFailCount1;
    int checkFailCount2;
    int checkFailCount3;
@@ -317,9 +329,16 @@ int render_testPrimitivesBlend (void *arg)
    SDLTest_AssertCheck(checkFailCount3 == 0, "Validate results from calls to SDL_RenderDrawPoint, expected: 0, got: %i", checkFailCount3);
 
    /* See if it's the same. */
-   _compare( "Blended primitives output not the same.", SDLTest_ImagePrimitivesBlend(), ALLOWABLE_ERROR_BLENDED );
+   referenceSurface = SDLTest_ImagePrimitivesBlend();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED );
 
-    return TEST_COMPLETED;
+   /* Clean up. */
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
+
+   return TEST_COMPLETED;
 }
 
 
@@ -337,6 +356,7 @@ render_testBlit(void *arg)
    int ret;
    SDL_Rect rect;
    SDL_Texture *tface;
+   SDL_Surface *referenceSurface = NULL;
    Uint32 tformat;
    int taccess, tw, th;
    int i, j, ni, nj;
@@ -374,11 +394,16 @@ render_testBlit(void *arg)
    }
    SDLTest_AssertCheck(checkFailCount1 == 0, "Validate results from calls to SDL_RenderCopy, expected: 0, got: %i", checkFailCount1);
 
+   /* See if it's the same */
+   referenceSurface = SDLTest_ImageBlit();
+   _compare(referenceSurface, ALLOWABLE_ERROR_OPAQUE );
+
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* See if it's the same */
-   _compare( "Blit output not the same.", SDLTest_ImageBlit(), ALLOWABLE_ERROR_OPAQUE );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    return TEST_COMPLETED;
 }
@@ -398,6 +423,7 @@ render_testBlitColor (void *arg)
    int ret;
    SDL_Rect rect;
    SDL_Texture *tface;
+   SDL_Surface *referenceSurface = NULL;
    Uint32 tformat;
    int taccess, tw, th;
    int i, j, ni, nj;
@@ -438,12 +464,16 @@ render_testBlitColor (void *arg)
    SDLTest_AssertCheck(checkFailCount1 == 0, "Validate results from calls to SDL_SetTextureColorMod, expected: 0, got: %i", checkFailCount1);
    SDLTest_AssertCheck(checkFailCount2 == 0, "Validate results from calls to SDL_RenderCopy, expected: 0, got: %i", checkFailCount2);
 
+   /* See if it's the same. */
+   referenceSurface = SDLTest_ImageBlitColor();
+   _compare(referenceSurface, ALLOWABLE_ERROR_OPAQUE );
+
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* See if it's the same. */
-   _compare( "Blit output not the same (using SDL_SetTextureColorMod).",
-            SDLTest_ImageBlitColor(), ALLOWABLE_ERROR_OPAQUE );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    return TEST_COMPLETED;
 }
@@ -463,12 +493,12 @@ render_testBlitAlpha (void *arg)
    int ret;
    SDL_Rect rect;
    SDL_Texture *tface;
+   SDL_Surface *referenceSurface = NULL;
    Uint32 tformat;
    int taccess, tw, th;
    int i, j, ni, nj;
    int checkFailCount1;
    int checkFailCount2;
-
 
    /* Need alpha or just skip test. */
    SDLTest_AssertCheck(_hasTexAlpha(), "_hasTexAlpha");
@@ -507,12 +537,16 @@ render_testBlitAlpha (void *arg)
    SDLTest_AssertCheck(checkFailCount1 == 0, "Validate results from calls to SDL_SetTextureAlphaMod, expected: 0, got: %i", checkFailCount1);
    SDLTest_AssertCheck(checkFailCount2 == 0, "Validate results from calls to SDL_RenderCopy, expected: 0, got: %i", checkFailCount2);
 
+   /* See if it's the same. */
+   referenceSurface = SDLTest_ImageBlitAlpha();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED );
+
    /* Clean up. */
    SDL_DestroyTexture( tface );
-
-   /* See if it's the same. */
-   _compare( "Blit output not the same (using SDL_SetSurfaceAlphaMod).",
-            SDLTest_ImageBlitAlpha(), ALLOWABLE_ERROR_BLENDED );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    return TEST_COMPLETED;
 }
@@ -584,6 +618,7 @@ render_testBlitBlend (void *arg)
    int ret;
    SDL_Rect rect;
    SDL_Texture *tface;
+   SDL_Surface *referenceSurface = NULL;
    Uint32 tformat;
    int taccess, tw, th;
    int i, j, ni, nj;
@@ -618,26 +653,39 @@ render_testBlitBlend (void *arg)
 
    /* Test None. */
    _testBlitBlendMode( tface, SDL_BLENDMODE_NONE );
-   /* See if it's the same. */
-   _compare( "Blit blending output not the same (using SDL_BLENDMODE_NONE).",
-            SDLTest_ImageBlitBlendNone(), ALLOWABLE_ERROR_OPAQUE ); 
-
-
+   referenceSurface = SDLTest_ImageBlitBlendNone();
+   _compare(referenceSurface, ALLOWABLE_ERROR_OPAQUE ); 
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
+   
    /* Test Blend. */
    _testBlitBlendMode( tface, SDL_BLENDMODE_BLEND );
-   _compare( "Blit blending output not the same (using SDL_BLENDMODE_BLEND).",
-            SDLTest_ImageBlitBlend(), ALLOWABLE_ERROR_BLENDED );
-
+   referenceSurface = SDLTest_ImageBlitBlend();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    /* Test Add. */
    _testBlitBlendMode( tface, SDL_BLENDMODE_ADD );
-   _compare( "Blit blending output not the same (using SDL_BLENDMODE_ADD).",
-            SDLTest_ImageBlitBlendAdd(), ALLOWABLE_ERROR_BLENDED );
+   referenceSurface = SDLTest_ImageBlitBlendAdd();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    /* Test Mod. */
    _testBlitBlendMode( tface, SDL_BLENDMODE_MOD);
-   _compare( "Blit blending output not the same (using SDL_BLENDMODE_MOD).",
-            SDLTest_ImageBlitBlendMod(), ALLOWABLE_ERROR_BLENDED );
+   referenceSurface = SDLTest_ImageBlitBlendMod();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED );
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    /* Clear surface. */
    _clearScreen();
@@ -682,9 +730,13 @@ render_testBlitBlend (void *arg)
    /* Clean up. */
    SDL_DestroyTexture( tface );
 
-   /* Check to see if matches. */
-   _compare( "Blit blending output not the same (using SDL_BLENDMODE_*).",
-            SDLTest_ImageBlitBlendAll(), ALLOWABLE_ERROR_BLENDED);
+   /* Check to see if final image matches. */
+   referenceSurface = SDLTest_ImageBlitBlendAll();
+   _compare(referenceSurface, ALLOWABLE_ERROR_BLENDED);
+   if (referenceSurface != NULL) {
+      SDL_FreeSurface(referenceSurface);
+      referenceSurface = NULL;
+   }
 
    return TEST_COMPLETED;
 }
@@ -902,9 +954,6 @@ _hasTexAlpha(void)
    return 1;
 }
 
-/* Counter for _compare calls use for filename creation when comparisons fail */
-static int _renderCompareCount = 0;
-
 /**
  * @brief Compares screen pixels with image pixels. Helper function.
  *
@@ -918,17 +967,15 @@ static int _renderCompareCount = 0;
  * http://wiki.libsdl.org/moin.cgi/SDL_FreeSurface
  */
 static void
-_compare(const char *msg, SDL_Surface *s, int allowable_error)
+_compare(SDL_Surface *referenceSurface, int allowable_error)
 {
    int ret;
    SDL_Rect rect;
    Uint8 pix[4*TESTRENDER_SCREEN_W*TESTRENDER_SCREEN_H];
-   SDL_Surface *testsur;
-   char imageFilename[128];
-   char referenceFilename[128];
+   SDL_Surface *testSurface;
 
    /* Read pixels. */
-   /* Explicitly specify the rect in case the window isn't expected size... */
+   /* Explicitly specify the rect in case the window isn't the expected size... */
    rect.x = 0;
    rect.y = 0;
    rect.w = TESTRENDER_SCREEN_W;
@@ -937,26 +984,18 @@ _compare(const char *msg, SDL_Surface *s, int allowable_error)
    SDLTest_AssertCheck(ret == 0, "Validate result from SDL_RenderReadPixels, expected: 0, got: %i", ret);
 
    /* Create surface. */
-   testsur = SDL_CreateRGBSurfaceFrom( pix, TESTRENDER_SCREEN_W, TESTRENDER_SCREEN_H, 32, TESTRENDER_SCREEN_W*4,
+   testSurface = SDL_CreateRGBSurfaceFrom( pix, TESTRENDER_SCREEN_W, TESTRENDER_SCREEN_H, 32, TESTRENDER_SCREEN_W*4,
                                        RENDER_COMPARE_RMASK, RENDER_COMPARE_GMASK, RENDER_COMPARE_BMASK, RENDER_COMPARE_AMASK);
-   SDLTest_AssertCheck(testsur != NULL, "Verify result from SDL_CreateRGBSurfaceFrom");
+   SDLTest_AssertCheck(testSurface != NULL, "Verify result from SDL_CreateRGBSurfaceFrom");
 
    /* Compare surface. */
-   ret = SDLTest_CompareSurfaces( testsur, s, allowable_error );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, allowable_error );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
-   /* Save source image and reference image for analysis */
-   _renderCompareCount++;
-   if (ret != 0) {
-      SDL_snprintf(imageFilename, 127, "compare%04d_SourceImage.bmp", _renderCompareCount);
-      SDL_SaveBMP(testsur, imageFilename);
-      SDL_snprintf(referenceFilename, 127, "compare%04d_ReferenceImage.bmp", _renderCompareCount);
-      SDL_SaveBMP(s, referenceFilename);
-      SDLTest_LogError("Surfaces from failed comparison saved as '%s' and '%s'", imageFilename, referenceFilename);
-   }
-
    /* Clean up. */
-   SDL_FreeSurface(testsur);
+   if (testSurface != NULL) {
+       SDL_FreeSurface(testSurface);
+   }
 }
 
 /**

@@ -17,7 +17,7 @@ extern SDLTest_TestSuiteReference platformTestSuite;
 extern SDLTest_TestSuiteReference rectTestSuite;
 extern SDLTest_TestSuiteReference renderTestSuite;
 extern SDLTest_TestSuiteReference rwopsTestSuite;
-//extern SDLTest_TestSuiteReference surfaceTestSuite;
+extern SDLTest_TestSuiteReference surfaceTestSuite;
 //extern SDLTest_TestSuiteReference syswmTestSuite;
 //extern SDLTest_TestSuiteReference videoTestSuite;
 
@@ -31,7 +31,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 	&rectTestSuite,
 	&renderTestSuite,
 	&rwopsTestSuite,
-//	&surfaceTestSuite,
+	&surfaceTestSuite,
 //	&syswmTestSuite,
 //	&videoTestSuite,
 	NULL

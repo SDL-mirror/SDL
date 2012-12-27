@@ -32,7 +32,11 @@
 #include "SDL_test.h"
 
 
-int SDLTest_CompareSurfaces( SDL_Surface *surface, SDL_Surface *referenceSurface, int allowable_error )
+/* Counter for _CompareSurface calls; used for filename creation when comparisons fail */
+static int _CompareSurfaceCount = 0;
+
+/* Compare surfaces */
+int SDLTest_CompareSurfaces(SDL_Surface *surface, SDL_Surface *referenceSurface, int allowable_error)
 {
    int ret;
    int i,j;
@@ -41,18 +45,20 @@ int SDLTest_CompareSurfaces( SDL_Surface *surface, SDL_Surface *referenceSurface
    int dist;
    Uint8 R, G, B, A;
    Uint8 Rd, Gd, Bd, Ad;
+   char imageFilename[128];
+   char referenceFilename[128];
 
    /* Validate input surfaces */
    if (surface == NULL || referenceSurface == NULL) {
       return -1;
    }
 
-   /* Make surface size is the same. */
+   /* Make sure surface size is the same. */
    if ((surface->w != referenceSurface->w) || (surface->h != referenceSurface->h)) {
       return -2;
    }
 
-   /* Sanitize input */
+   /* Sanitize input value */
    if (allowable_error<0) {
       allowable_error = 0;
    }
@@ -86,6 +92,16 @@ int SDLTest_CompareSurfaces( SDL_Surface *surface, SDL_Surface *referenceSurface
 
    SDL_UnlockSurface( surface );
    SDL_UnlockSurface( referenceSurface );
+
+   /* Save test image and reference for analysis on failures */
+   _CompareSurfaceCount++;
+   if (ret != 0) {
+      SDL_snprintf(imageFilename, 127, "CompareSurfaces%04d_TestOutput.bmp", _CompareSurfaceCount);
+      SDL_SaveBMP(surface, imageFilename);
+      SDL_snprintf(referenceFilename, 127, "CompareSurfaces%04d_Reference.bmp", _CompareSurfaceCount);
+      SDL_SaveBMP(referenceSurface, referenceFilename);
+      SDLTest_LogError("Surfaces from failed comparison saved as '%s' and '%s'", imageFilename, referenceFilename);
+   }
 
    return ret;
 }
