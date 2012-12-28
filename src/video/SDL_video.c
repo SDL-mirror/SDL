@@ -1305,7 +1305,9 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 
     if ((window->flags & SDL_WINDOW_OPENGL) != (flags & SDL_WINDOW_OPENGL)) {
         if (flags & SDL_WINDOW_OPENGL) {
-            SDL_GL_LoadLibrary(NULL);
+            if (SDL_GL_LoadLibrary(NULL) < 0) {
+                return -1;
+            }
         } else {
             SDL_GL_UnloadLibrary();
         }
