@@ -173,6 +173,14 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
     }
 }
 
+static inline int _lround(float arg) {
+    if (arg >= 0.0f) {
+        return (int)floor(arg + 0.5f);
+    } else {
+        return (int)ceil(arg - 0.5f);
+    }
+}
+
 void SDL_WinRTApp::OnMouseMoved(MouseDevice^ mouseDevice, MouseEventArgs^ args)
 {
     if (m_sdlWindowData && m_useRelativeMouseMode) {
@@ -229,9 +237,16 @@ void SDL_WinRTApp::OnMouseMoved(MouseDevice^ mouseDevice, MouseEventArgs^ args)
         // are compared to the values from OnMouseMoved in order to detect
         // when this bug is active.  A suitable transformation could then be made to
         // OnMouseMoved's values.  For now, however, the system-reported values are sent
-        // without transformation.
+        // to SDL with minimal transformation: from native screen coordinates (in DIPs)
+        // to SDL window coordinates.
         //
-        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 1, args->MouseDelta.X, args->MouseDelta.Y);
+        const Point mouseDeltaInDIPs((float)args->MouseDelta.X, (float)args->MouseDelta.Y);
+        const Point mouseDeltaInSDLWindowCoords = TransformCursor(mouseDeltaInDIPs);
+        SDL_SendMouseMotion(
+            m_sdlWindowData->sdlWindow,
+            1,
+            _lround(mouseDeltaInSDLWindowCoords.X),
+            _lround(mouseDeltaInSDLWindowCoords.Y));
     }
 }
 
