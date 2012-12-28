@@ -25,6 +25,7 @@ internal:
     void PumpEvents();
     const SDL_WindowData * GetSDLWindowData() const;
     bool HasSDLWindowData() const;
+    void SetRelativeMouseMode(bool enable);
     void SetSDLWindowData(const SDL_WindowData * windowData);
     void UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects);
     void ResizeMainTexture(int w, int h);
@@ -42,6 +43,7 @@ protected:
 	void OnPointerPressed(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerReleased(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
 	void OnPointerMoved(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::PointerEventArgs^ args);
+    void OnMouseMoved(Windows::Devices::Input::MouseDevice^ mouseDevice, Windows::Devices::Input::MouseEventArgs^ args);
     void OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
     void OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
 
@@ -50,6 +52,7 @@ private:
 	bool m_windowClosed;
 	bool m_windowVisible;
     const SDL_WindowData* m_sdlWindowData;
+    bool m_useRelativeMouseMode;
 };
 
 ref class Direct3DApplicationSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource

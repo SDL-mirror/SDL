@@ -108,12 +108,12 @@ WINRT_ShowCursor(SDL_Cursor * cursor)
     return 0;
 }
 
-//static int
-//WINRT_SetRelativeMouseMode(SDL_bool enabled)
-//{
-//    //return -1;
-//    return 0;
-//}
+static int
+WINRT_SetRelativeMouseMode(SDL_bool enabled)
+{
+    SDL_WinRTGlobalApp->SetRelativeMouseMode(enabled ? true : false);
+    return 0;
+}
 
 void
 WINRT_InitMouse(_THIS)
@@ -131,7 +131,7 @@ WINRT_InitMouse(_THIS)
     mouse->ShowCursor = WINRT_ShowCursor;
     mouse->FreeCursor = WINRT_FreeCursor;
     //mouse->WarpMouse = WINRT_WarpMouse;
-    //mouse->SetRelativeMouseMode = WINRT_SetRelativeMouseMode; // DLudwig: 'relative mouse mode' support is pending
+    mouse->SetRelativeMouseMode = WINRT_SetRelativeMouseMode;
 
     SDL_SetDefaultCursor(WINRT_CreateDefaultCursor());
 }

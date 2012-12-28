@@ -33,6 +33,7 @@ SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::Devices::Input;
 using namespace Windows::UI::Core;
 using namespace Windows::System;
 using namespace Windows::Foundation;
@@ -42,7 +43,8 @@ using namespace concurrency;
 SDL_WinRTApp::SDL_WinRTApp() :
 	m_windowClosed(false),
 	m_windowVisible(true),
-    m_sdlWindowData(NULL)
+    m_sdlWindowData(NULL),
+    m_useRelativeMouseMode(false)
 {
 }
 
@@ -81,6 +83,10 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
 
 	window->PointerMoved +=
 		ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerMoved);
+
+    // Retrieves relative-only mouse movements:
+    Windows::Devices::Input::MouseDevice::GetForCurrentView()->MouseMoved +=
+        ref new TypedEventHandler<MouseDevice^, MouseEventArgs^>(this, &SDL_WinRTApp::OnMouseMoved);
 
     window->KeyDown +=
 		ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &SDL_WinRTApp::OnKeyDown);
@@ -167,6 +173,68 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
     }
 }
 
+void SDL_WinRTApp::OnMouseMoved(MouseDevice^ mouseDevice, MouseEventArgs^ args)
+{
+    if (m_sdlWindowData && m_useRelativeMouseMode) {
+        // DLudwig, 2012-12-28: On some systems, namely Visual Studio's Windows
+        // Simulator, as well as Windows 8 in a Parallels 8 VM, MouseEventArgs'
+        // MouseDelta field often reports very large values.  More information
+        // on this can be found at the following pages on MSDN:
+        //  - http://social.msdn.microsoft.com/Forums/en-US/winappswithnativecode/thread/a3c789fa-f1c5-49c4-9c0a-7db88d0f90f8
+        //  - https://connect.microsoft.com/VisualStudio/Feedback/details/756515
+        //
+        // The values do not appear to be as large when running on some systems,
+        // most notably a Surface RT.  Furthermore, the values returned by
+        // CoreWindow's PointerMoved event, and sent to this class' OnPointerMoved
+        // method, do not ever appear to be large, even when MouseEventArgs'
+        // MouseDelta is reporting to the contrary.
+        //
+        // On systems with the large-values behavior, it appears that the values
+        // get reported as if the screen's size is 65536 units in both the X and Y
+        // dimensions.  This can be viewed by using Windows' now-private, "Raw Input"
+        // APIs.  (GetRawInputData, RegisterRawInputDevices, WM_INPUT, etc.)
+        //
+        // MSDN's documentation on MouseEventArgs' MouseDelta field (at
+        // http://msdn.microsoft.com/en-us/library/windows/apps/windows.devices.input.mouseeventargs.mousedelta ),
+        // does not seem to indicate (to me) that its values should be so large.  It
+        // says that its values should be a "change in screen location".  I could
+        // be misinterpreting this, however a post on MSDN from a Microsoft engineer (see: 
+        // http://social.msdn.microsoft.com/Forums/en-US/winappswithnativecode/thread/09a9868e-95bb-4858-ba1a-cb4d2c298d62 ),
+        // indicates that these values are in DIPs, which is the same unit used
+        // by CoreWindow's PointerMoved events (via the Position field in its CurrentPoint
+        // property.  See http://msdn.microsoft.com/en-us/library/windows/apps/windows.ui.input.pointerpoint.position.aspx
+        // for details.)
+        //
+        // To note, PointerMoved events are sent a 'RawPosition' value (via the
+        // CurrentPoint property in MouseEventArgs), however these do not seem
+        // to exhibit the same large-value behavior.
+        //
+        // The values passed via PointerMoved events can't always be used for relative
+        // mouse motion, unfortunately.  Its values are bound to the cursor's position,
+        // which stops when it hits one of the screen's edges.  This can be a problem in
+        // first person shooters, whereby it is normal for mouse motion to travel far
+        // along any one axis for a period of time.  MouseMoved events do not have the
+        // screen-bounding limitation, and can be used regardless of where the system's
+        // cursor is.
+        //
+        // One possible workaround would be to programmatically set the cursor's
+        // position to the screen's center (when SDL's relative mouse mode is enabled),
+        // however Windows RT does not yet seem to have the ability to set the cursor's
+        // position via a public API.  Win32 did this via an API call, SetCursorPos,
+        // however WinRT makes this function be private.  Apps that use it won't get
+        // approved for distribution in the Windows Store.  I've yet to be able to find
+        // a suitable, store-friendly counterpart for WinRT.
+        //
+        // There may be some room for a workaround whereby OnPointerMoved's values
+        // are compared to the values from OnMouseMoved in order to detect
+        // when this bug is active.  A suitable transformation could then be made to
+        // OnMouseMoved's values.  For now, however, the system-reported values are sent
+        // without transformation.
+        //
+        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 1, args->MouseDelta.X, args->MouseDelta.Y);
+    }
+}
+
 // Applies necessary geometric transformations to raw cursor positions:
 Point SDL_WinRTApp::TransformCursor(Point rawPosition)
 {
@@ -182,7 +250,7 @@ Point SDL_WinRTApp::TransformCursor(Point rawPosition)
 
 void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
 {
-    if (m_sdlWindowData)
+    if (m_sdlWindowData && ! m_useRelativeMouseMode)
     {
         Point transformedPoint = TransformCursor(args->CurrentPoint->Position);
         SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, (int)transformedPoint.X, (int)transformedPoint.Y);
@@ -454,6 +522,11 @@ const SDL_WindowData * SDL_WinRTApp::GetSDLWindowData() const
 bool SDL_WinRTApp::HasSDLWindowData() const
 {
     return (m_sdlWindowData != NULL);
+}
+
+void SDL_WinRTApp::SetRelativeMouseMode(bool enable)
+{
+    m_useRelativeMouseMode = enable;
 }
 
 void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData* windowData)
