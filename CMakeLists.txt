@@ -650,6 +650,9 @@ if(UNIX AND NOT APPLE)
     endif(SDL_HAPTIC AND HAVE_INPUT_EVENTS)
 
     check_include_file("libudev.h" HAVE_LIBUDEV_H)
+
+    # !!! FIXME: this needs pkg-config to find the include path, I think.
+    check_include_file("dbus/dbus.h" HAVE_DBUS_DBUS_H)
   endif(LINUX)
 
   if(INPUT_TSLIB)

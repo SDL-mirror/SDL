@@ -66,6 +66,7 @@
 #cmakedefine HAVE_ALTIVEC_H 1
 #cmakedefine HAVE_PTHREAD_NP_H 1
 #cmakedefine HAVE_LIBUDEV_H 1
+#cmakedefine HAVE_DBUS_DBUS_H 1
 
 /* C library functions */
 #cmakedefine HAVE_MALLOC 1

@@ -71,6 +71,7 @@
 #undef HAVE_ALTIVEC_H
 #undef HAVE_PTHREAD_NP_H
 #undef HAVE_LIBUDEV_H
+#undef HAVE_DBUS_DBUS_H
 
 /* C library functions */
 #undef HAVE_MALLOC
