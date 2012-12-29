@@ -53,7 +53,11 @@ typedef struct SDLTest_SurfaceImage_s {
   int width;
   int height;
   unsigned int bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
+#if (defined(__GNUC__) && (__GNUC__ <= 2))
   unsigned char pixel_data[0];
+#else
+  unsigned char pixel_data[];
+#endif
 } SDLTest_SurfaceImage_t;
 
 /* Test images */
