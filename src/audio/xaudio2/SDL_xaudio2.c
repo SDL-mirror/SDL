@@ -485,6 +485,10 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     waveformat.cbSize = sizeof(waveformat);
 
 #ifdef __WINRT__
+    // DLudwig: for now, make XAudio2 do sample rate conversion, just to
+    // get the loopwave test to work.
+    //
+    // TODO, WinRT: consider removing WinRT-specific source-voice creation code from SDL_xaudio2.c
     result = IXAudio2_CreateSourceVoice(ixa2, &source, &waveformat,
                                         0,
                                         1.0f, &callbacks, NULL, NULL);
