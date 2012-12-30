@@ -192,7 +192,7 @@ public:
         VoiceCBOnBufferEnd(pBufferContext);
     }
     STDMETHOD_(void, OnBufferStart)(void *pBufferContext) {
-        VoiceCBOnBufferEnd(pBufferContext);
+        VoiceCBOnBufferStart(pBufferContext);
     }
     STDMETHOD_(void, OnLoopEnd)(void *pBufferContext) {
         VoiceCBOnLoopEnd(pBufferContext);
