@@ -3,6 +3,10 @@
  * Adapted/rewritten for test lib by Andreas Schiffler
  */
 
+/* Supress C4996 VS compiler warnings for unlink() */
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE
+
 #include <stdio.h>
 #include <sys/stat.h>
 
