@@ -11,33 +11,52 @@
 
 /* ================= Test Case Implementation ================== */
 
-
 /* Shared test surface */
 
-static SDL_Surface *testsurface = NULL;
+static SDL_Surface *referenceSurface = NULL;
+static SDL_Surface *testSurface = NULL;
+
+/* Helper functions for the test cases */
+
+#define TEST_SURFACE_WIDTH testSurface->w
+#define TEST_SURFACE_HEIGHT testSurface->h
 
 /* Fixture */
 
+/* Create a 32-bit writable surface for screen tests */
 void
 _surfaceSetUp(void *arg)
 {
-   testsurface = SDLTest_ImageBlit();
-   SDLTest_AssertCheck(testsurface != NULL, "Check that testsurface is not NULL");
+    Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x000000ff;
+    gmask = 0x0000ff00;
+    bmask = 0x00ff0000;
+    amask = 0xff000000;
+#endif
+
+	referenceSurface = SDLTest_ImageBlit(); /* For size info */
+	testSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, referenceSurface->w, referenceSurface->h, 32, rmask, gmask, bmask, amask);
+    SDLTest_AssertCheck(testSurface != NULL, "Check that testSurface is not NULL");
 }
 
 void
 _surfaceTearDown(void *arg)
 {
-	if (testsurface != NULL) {
-		SDL_FreeSurface(testsurface);
-		testsurface = NULL;
+	if (referenceSurface != NULL) {
+		SDL_FreeSurface(referenceSurface);
+		referenceSurface = NULL;
+	}
+	if (testSurface != NULL) {
+		SDL_FreeSurface(testSurface);
+		testSurface = NULL;
 	}
 }
-
-/* Helper functions for the test cases */
-
-#define TEST_SURFACE_WIDTH testsurface->w
-#define TEST_SURFACE_HEIGHT testsurface->h
 
 /**
  * Helper that clears the test surface
@@ -48,9 +67,9 @@ void _clearTestSurface()
 	Uint32 color;
 	
 	/* Clear surface. */
-	color = SDL_MapRGB( testsurface->format, 0, 0, 0);
+	color = SDL_MapRGB( testSurface->format, 0, 0, 0);
 	SDLTest_AssertPass("Call to SDL_MapRGB()");
-	ret = SDL_FillRect( testsurface, NULL, color);
+	ret = SDL_FillRect( testSurface, NULL, color);
 	SDLTest_AssertPass("Call to SDL_FillRect()");
 	SDLTest_AssertCheck(ret == 0, "Verify result from SDL_FillRect, expected: 0, got: %i", ret);
 }
@@ -64,16 +83,16 @@ void _testBlitBlendMode(int mode)
 	int i, j, ni, nj;
 	SDL_Surface *face;
 	SDL_Rect rect;
-	Uint32 color;
 	int nmode;
+	SDL_BlendMode bmode;
 	int checkFailCount1;
 	int checkFailCount2;
 	int checkFailCount3;
 	int checkFailCount4;
 
 	/* Check test surface */
-	SDLTest_AssertCheck(testsurface != NULL, "Verify testsurface is not NULL");
-	if (testsurface == NULL) return;
+	SDLTest_AssertCheck(testSurface != NULL, "Verify testSurface is not NULL");
+	if (testSurface == NULL) return;
 	
 	/* Create sample surface */
 	face = SDLTest_ImageFace();
@@ -88,8 +107,8 @@ void _testBlitBlendMode(int mode)
 	rect.h = face->h;
 	
 	/* Steps to take */
-	ni = testsurface->w - face->w;
-	nj = testsurface->h - face->h;
+	ni = testSurface->w - face->w;
+	nj = testSurface->h - face->h;
 
 	/* Optionally set blend mode. */
 	if (mode >= 0) {
@@ -118,18 +137,18 @@ void _testBlitBlendMode(int mode)
 		else if (mode == -4) {
 			/* Crazy blending mode magic. */
 			nmode = (i/4*j/4) % 4;
-			if (nmode==0) nmode = SDL_BLENDMODE_NONE;
-			else if (nmode==1) nmode = SDL_BLENDMODE_BLEND;
-			else if (nmode==2) nmode = SDL_BLENDMODE_ADD;
-			else if (nmode==3) nmode = SDL_BLENDMODE_MOD;
-			ret = SDL_SetSurfaceBlendMode( face, nmode );		
+			if (nmode==0) bmode = SDL_BLENDMODE_NONE;
+			else if (nmode==1) bmode = SDL_BLENDMODE_BLEND;
+			else if (nmode==2) bmode = SDL_BLENDMODE_ADD;
+			else if (nmode==3) bmode = SDL_BLENDMODE_MOD;
+			ret = SDL_SetSurfaceBlendMode( face, bmode );		
 			if (ret != 0) checkFailCount4++;
 		}
 
 		 /* Blitting. */
 		 rect.x = i;
 		 rect.y = j;
-		 ret = SDL_BlitSurface( face, NULL, testsurface, &rect );
+		 ret = SDL_BlitSurface( face, NULL, testSurface, &rect );
 		 if (ret != 0) checkFailCount1++;
 	  }
 	}
@@ -172,7 +191,7 @@ surface_testSaveLoadBitmap(void *arg)
     /* Create sample surface */
     face = SDLTest_ImageFace();
     SDLTest_AssertCheck(face != NULL, "Verify face surface is not NULL");
-    if (face == NULL) return;
+    if (face == NULL) return TEST_ABORTED;
 
     /* Delete test file; ignore errors */
     unlink(sampleFilename);
@@ -231,7 +250,7 @@ surface_testSurfaceConversion(void *arg)
 	}
 
 	/* Convert to 32 bit to compare. */
-	rface = SDL_ConvertSurface( face, testsurface->format, 0 );
+	rface = SDL_ConvertSurface( face, testSurface->format, 0 );
 	SDLTest_AssertPass("Call to SDL_ConvertSurface()");
 	SDLTest_AssertCheck(rface != NULL, "Verify result from SDL_ConvertSurface is not NULL");
 
@@ -279,7 +298,7 @@ surface_testBlit(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlit();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -304,7 +323,7 @@ surface_testBlitColorMod(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitColor();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -329,7 +348,7 @@ surface_testBlitAlphaMod(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitAlpha();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -355,7 +374,7 @@ surface_testBlitBlendNone(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitBlendNone();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -380,7 +399,7 @@ surface_testBlitBlendBlend(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitBlend();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -405,7 +424,7 @@ surface_testBlitBlendAdd(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitBlendAdd();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -430,7 +449,7 @@ surface_testBlitBlendMod(void *arg)
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitBlendMod();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
@@ -455,7 +474,7 @@ surface_testBlitBlendLoop(void *arg) {
    
    /* Verify result by comparing surfaces */
    referenceSurface = SDLTest_ImageBlitBlendAll();
-   ret = SDLTest_CompareSurfaces( testsurface, referenceSurface, 0 );
+   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
    
    /* Clean up. */
