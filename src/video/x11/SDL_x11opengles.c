@@ -321,7 +321,7 @@ X11_GLES_CreateContext(_THIS, SDL_Window * window)
 
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
-    SDL_GLContext context = 1;
+    SDL_GLContext context = (SDL_GLContext)1;
 
     XSync(display, False);
 
