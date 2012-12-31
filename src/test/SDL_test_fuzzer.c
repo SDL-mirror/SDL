@@ -27,7 +27,15 @@
 
 #include "SDL_config.h"
 
+/* Visual Studio 2008 doesn't have stdint.h */
+#if defined(_MSC_VER) && _MSC_VER <= 1500
+#define UINT8_MAX   ~(Uint8)0
+#define UINT16_MAX  ~(Uint16)0
+#define UINT32_MAX  ~(Uint32)0
+#define UINT64_MAX  ~(Uint64)0
+#else
 #include <stdint.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <limits.h>
