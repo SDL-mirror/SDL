@@ -1641,6 +1641,45 @@ SDL_GetWindowMinimumSize(SDL_Window * window, int *min_w, int *min_h)
 }
 
 void
+SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
+{
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        window->max_w = max_w;
+        window->max_h = max_h;
+        if (_this->SetWindowMaximumSize) {
+            _this->SetWindowMaximumSize(_this, window);
+        }
+        /* Ensure that window is not larger than maximal size */
+        SDL_SetWindowSize(window, SDL_min(window->w, window->max_w), SDL_min(window->h, window->max_h));
+    }
+}
+
+void
+SDL_GetWindowMaximumSize(SDL_Window * window, int *max_w, int *max_h)
+{
+    int dummy;
+    
+    if (!max_w) {
+        max_w = &dummy;
+    }
+    if (!max_h) {
+        max_h = &dummy;
+    }
+    
+    *max_w = 0;
+    *max_h = 0;
+    
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (_this && window && window->magic == &_this->window_magic) {
+        *max_w = window->max_w;
+        *max_h = window->max_h;
+    }
+}
+
+void
 SDL_ShowWindow(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, );

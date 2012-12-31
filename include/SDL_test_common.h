@@ -65,6 +65,10 @@ typedef struct
     int window_y;
     int window_w;
     int window_h;
+    int window_minW;
+    int window_minH;
+    int window_maxW;
+    int window_maxH;
     int depth;
     int refresh_rate;
     int num_windows;

@@ -80,6 +80,15 @@ main(int argc, char *argv[])
             SDLTest_CommonEvent(state, &event, &done);
 
             if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    SDL_Window *window = SDL_GetWindowFromID(event.window.windowID);
+                    if (window) {
+                        printf("Window %d resized to %dx%d\n",
+                            event.window.windowID,
+                            event.window.data1,
+                            event.window.data2);
+                    }
+                }
                 if (event.window.event == SDL_WINDOWEVENT_MOVED) {
                     SDL_Window *window = SDL_GetWindowFromID(event.window.windowID);
                     if (window) {

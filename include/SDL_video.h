@@ -535,6 +535,7 @@ extern DECLSPEC void SDLCALL SDL_GetWindowSize(SDL_Window * window, int *w,
  *        automatically matches the size of the display mode.
  *
  *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
  */
 extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
                                                       int min_w, int min_h);
@@ -542,9 +543,31 @@ extern DECLSPEC void SDLCALL SDL_SetWindowMinimumSize(SDL_Window * window,
 /**
  *  \brief Get the minimum size of a window's client area.
  *
+ *  \sa SDL_GetWindowMaximumSize()
  *  \sa SDL_SetWindowMinimumSize()
  */
 extern DECLSPEC void SDLCALL SDL_GetWindowMinimumSize(SDL_Window * window,
+                                                      int *w, int *h);
+
+/**
+ *  \brief Set the maximum size of a window's client area.
+ *
+ *  \note You can't change the maximum size of a fullscreen window, it
+ *        automatically matches the size of the display mode.
+ *
+ *  \sa SDL_GetWindowMaximumSize()
+ *  \sa SDL_SetWindowMinimumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_SetWindowMaximumSize(SDL_Window * window,
+                                                      int max_w, int max_h);
+    
+/**
+ *  \brief Get the maximum size of a window's client area.
+ *
+ *  \sa SDL_GetWindowMinimumSize()
+ *  \sa SDL_SetWindowMaximumSize()
+ */
+extern DECLSPEC void SDLCALL SDL_GetWindowMaximumSize(SDL_Window * window,
                                                       int *w, int *h);
 
 /**

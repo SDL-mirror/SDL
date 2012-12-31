@@ -75,6 +75,7 @@ struct SDL_Window
     int x, y;
     int w, h;
     int min_w, min_h;
+    int max_w, max_h;
     Uint32 flags;
 
     /* Stored position and size for windowed mode */
@@ -184,6 +185,7 @@ struct SDL_VideoDevice
     void (*SetWindowPosition) (_THIS, SDL_Window * window);
     void (*SetWindowSize) (_THIS, SDL_Window * window);
     void (*SetWindowMinimumSize) (_THIS, SDL_Window * window);
+    void (*SetWindowMaximumSize) (_THIS, SDL_Window * window);
     void (*ShowWindow) (_THIS, SDL_Window * window);
     void (*HideWindow) (_THIS, SDL_Window * window);
     void (*RaiseWindow) (_THIS, SDL_Window * window);

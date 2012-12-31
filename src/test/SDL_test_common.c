@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -264,6 +264,44 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         *h++ = '\0';
         state->window_w = SDL_atoi(w);
         state->window_h = SDL_atoi(h);
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--min-geometry") == 0) {
+        char *w, *h;
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        w = argv[index];
+        h = argv[index];
+        while (*h && *h != 'x') {
+            ++h;
+        }
+        if (!*h) {
+            return -1;
+        }
+        *h++ = '\0';
+        state->window_minW = SDL_atoi(w);
+        state->window_minH = SDL_atoi(h);
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--max-geometry") == 0) {
+        char *w, *h;
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        w = argv[index];
+        h = argv[index];
+        while (*h && *h != 'x') {
+            ++h;
+        }
+        if (!*h) {
+            return -1;
+        }
+        *h++ = '\0';
+        state->window_maxW = SDL_atoi(w);
+        state->window_maxH = SDL_atoi(h);
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--depth") == 0) {
@@ -750,6 +788,12 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
                 fprintf(stderr, "Couldn't create window: %s\n",
                         SDL_GetError());
                 return SDL_FALSE;
+            }
+            if (state->window_minW || state->window_minH) {
+                SDL_SetWindowMinimumSize(state->windows[i], state->window_minW, state->window_minH);
+            }
+            if (state->window_maxW || state->window_maxH) {
+                SDL_SetWindowMaximumSize(state->windows[i], state->window_maxW, state->window_maxH);
             }
             SDL_GetWindowSize(state->windows[i], &w, &h);
             if (!(state->window_flags & SDL_WINDOW_RESIZABLE) &&

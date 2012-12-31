@@ -447,6 +447,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int x, y;
             int w, h;
             int min_w, min_h;
+            int max_w, max_h;
             int style;
             BOOL menu;
 
@@ -462,11 +463,14 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             /* Calculate current size of our window */
             SDL_GetWindowSize(data->window, &w, &h);
             SDL_GetWindowMinimumSize(data->window, &min_w, &min_h);
+            SDL_GetWindowMaximumSize(data->window, &max_w, &max_h);
 
             /* Store in min_w and min_h difference between current size and minimal 
                size so we don't need to call AdjustWindowRectEx twice */
             min_w -= w;
             min_h -= h;
+            max_w -= w;
+            max_h -= h;
 
             size.top = 0;
             size.left = 0;
@@ -489,6 +493,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 info->ptMinTrackSize.x = w + min_w;
                 info->ptMinTrackSize.y = h + min_h;
+                info->ptMaxTrackSize.x = w + max_w;
+                info->ptMaxTrackSize.y = h + max_h;
             } else {
                 info->ptMaxSize.x = w;
                 info->ptMaxSize.y = h;

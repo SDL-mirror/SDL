@@ -220,7 +220,7 @@ Cocoa_ReleaseDisplayModeList(_THIS, CFArrayRef modelist)
     #endif
 }
 
-static char *
+static const char *
 Cocoa_GetDisplayName(CGDirectDisplayID displayID)
 {
     NSDictionary *deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(displayID), kIODisplayOnlyPreferredName);
@@ -299,7 +299,7 @@ Cocoa_InitModes(_THIS)
             displaydata->display = displays[i];
 
             SDL_zero(display);
-            display.name = Cocoa_GetDisplayName(displays[i]);
+            display.name = (char *)Cocoa_GetDisplayName(displays[i]);
             if (!GetDisplayMode (_this, moderef, &mode)) {
                 Cocoa_ReleaseDisplayMode(_this, moderef);
                 SDL_free(displaydata);

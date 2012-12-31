@@ -740,7 +740,22 @@ Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
     minSize.width = window->min_w;
     minSize.height = window->min_h;
         
-    [windata->nswindow setMinSize:minSize];
+    [windata->nswindow setContentMinSize:minSize];
+    
+    [pool release];
+}
+
+void
+Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+        
+    NSSize maxSize;
+    maxSize.width = window->max_w;
+    maxSize.height = window->max_h;
+        
+    [windata->nswindow setContentMaxSize:maxSize];
     
     [pool release];
 }
