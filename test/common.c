@@ -182,6 +182,11 @@ CommonArg(CommonState * state, int index)
         state->num_windows = 1;
         return 1;
     }
+    if (SDL_strcasecmp(argv[index], "--fullscreen-desktop") == 0) {
+        state->window_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        state->num_windows = 1;
+        return 1;
+    }
     if (SDL_strcasecmp(argv[index], "--windows") == 0) {
         ++index;
         if (!argv[index] || !SDL_isdigit(*argv[index])) {
