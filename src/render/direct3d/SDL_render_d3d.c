@@ -538,9 +538,14 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
+		if ( ( window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP )  {
+			pparams.Windowed = TRUE;
+			pparams.FullScreen_RefreshRateInHz = 0;
+		} else {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
             fullscreen_mode.refresh_rate;
+		}
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;

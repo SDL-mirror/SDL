@@ -221,6 +221,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		HRAWINPUT hRawInput = (HRAWINPUT)lParam;
 		RAWINPUT inp;
 		UINT size = sizeof(inp);
+
+		if(!SDL_GetMouse()->relative_mode)
+			break;
+
 		GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
 
 		/* Mouse data */
@@ -229,8 +233,24 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RAWMOUSE* mouse = &inp.data.mouse;
 
 			if((mouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE)
+			{
 				SDL_SendMouseMotion(data->window, 1, (int)mouse->lLastX, (int)mouse->lLastY);
+			}
+			else
+			{
+				// synthesize relative moves from the abs position
+				static SDL_Point initialMousePoint;
+				if ( initialMousePoint.x == 0 && initialMousePoint.y == 0 )
+				{
+					initialMousePoint.x = mouse->lLastX;
+					initialMousePoint.y = mouse->lLastY;
+				}
 
+				SDL_SendMouseMotion(data->window, 1, (int)(mouse->lLastX-initialMousePoint.x), (int)(mouse->lLastY-initialMousePoint.y) );
+
+				initialMousePoint.x = mouse->lLastX;
+				initialMousePoint.y = mouse->lLastY;
+			}
 		}
 		break;
 	}
