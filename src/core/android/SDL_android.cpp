@@ -27,6 +27,7 @@
 
 #include "SDL_system.h"
 #include "SDL_android.h"
+#include <EGL/egl.h>
 
 extern "C" {
 #include "../../events/SDL_events_c.h"
@@ -115,7 +116,7 @@ extern "C" void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
     mActivityClass = (jclass)mEnv->NewGlobalRef(cls);
 
     midCreateGLContext = mEnv->GetStaticMethodID(mActivityClass,
-                                "createGLContext","(II)Z");
+                                "createGLContext","(II[I)Z");
     midFlipBuffers = mEnv->GetStaticMethodID(mActivityClass,
                                 "flipBuffers","()V");
     midAudioInit = mEnv->GetStaticMethodID(mActivityClass, 
@@ -292,14 +293,38 @@ protected:
 };
 int LocalReferenceHolder::s_active;
 
-extern "C" SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion)
+extern "C" SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion,
+                                int red, int green, int blue, int alpha,
+                                int buffer, int depth, int stencil,
+                                int buffers, int samples)
 {
-    JNIEnv *mEnv = Android_JNI_GetEnv();
-    if (mEnv->CallStaticBooleanMethod(mActivityClass, midCreateGLContext, majorVersion, minorVersion)) {
-        return SDL_TRUE;
-    } else {
-        return SDL_FALSE;
-    }
+    JNIEnv *env = Android_JNI_GetEnv();
+
+    jint attribs[] = {
+        EGL_RED_SIZE, red,
+        EGL_GREEN_SIZE, green,
+        EGL_BLUE_SIZE, blue,
+        EGL_ALPHA_SIZE, alpha,
+        EGL_BUFFER_SIZE, buffer,
+        EGL_DEPTH_SIZE, depth,
+        EGL_STENCIL_SIZE, stencil,
+        EGL_SAMPLE_BUFFERS, buffers,
+        EGL_SAMPLES, samples,
+        EGL_RENDERABLE_TYPE, (majorVersion == 1 ? EGL_OPENGL_ES_BIT : EGL_OPENGL_ES2_BIT),
+        EGL_NONE
+    };
+    int len = SDL_arraysize(attribs);
+
+    jintArray array;
+
+    array = env->NewIntArray(len);
+    env->SetIntArrayRegion(array, 0, len, attribs);
+
+    jboolean success = env->CallStaticBooleanMethod(mActivityClass, midCreateGLContext, majorVersion, minorVersion, array);
+
+    env->DeleteLocalRef(array);
+
+    return success ? SDL_TRUE : SDL_FALSE;
 }
 
 extern "C" void Android_JNI_SwapWindow()

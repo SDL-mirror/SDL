@@ -167,8 +167,8 @@ public class SDLActivity extends Activity {
 
     // Java functions called from C
 
-    public static boolean createGLContext(int majorVersion, int minorVersion) {
-        return initEGL(majorVersion, minorVersion);
+    public static boolean createGLContext(int majorVersion, int minorVersion, int[] attribs) {
+        return initEGL(majorVersion, minorVersion, attribs);
     }
 
     public static void flipBuffers() {
@@ -251,7 +251,7 @@ public class SDLActivity extends Activity {
 
 
     // EGL functions
-    public static boolean initEGL(int majorVersion, int minorVersion) {
+    public static boolean initEGL(int majorVersion, int minorVersion, int[] attribs) {
         try {
             if (SDLActivity.mEGLDisplay == null) {
                 Log.v("SDL", "Starting up OpenGL ES " + majorVersion + "." + minorVersion);
@@ -263,22 +263,9 @@ public class SDLActivity extends Activity {
                 int[] version = new int[2];
                 egl.eglInitialize(dpy, version);
 
-                int EGL_OPENGL_ES_BIT = 1;
-                int EGL_OPENGL_ES2_BIT = 4;
-                int renderableType = 0;
-                if (majorVersion == 2) {
-                    renderableType = EGL_OPENGL_ES2_BIT;
-                } else if (majorVersion == 1) {
-                    renderableType = EGL_OPENGL_ES_BIT;
-                }
-                int[] configSpec = {
-                    //EGL10.EGL_DEPTH_SIZE,   16,
-                    EGL10.EGL_RENDERABLE_TYPE, renderableType,
-                    EGL10.EGL_NONE
-                };
                 EGLConfig[] configs = new EGLConfig[1];
                 int[] num_config = new int[1];
-                if (!egl.eglChooseConfig(dpy, configSpec, configs, 1, num_config) || num_config[0] == 0) {
+                if (!egl.eglChooseConfig(dpy, attribs, configs, 1, num_config) || num_config[0] == 0) {
                     Log.e("SDL", "No EGL config available");
                     return false;
                 }
