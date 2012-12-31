@@ -146,9 +146,7 @@ typedef unsigned int uintptr_t;
 #define SDL_JOYSTICK_DISABLED	1
 
 /* Enable various shared object loading systems */
-// TODO, WinRT: adapt the Win32 shared object loading code for WinRT 
-#define SDL_LOADSO_DISABLED 1
-//#define SDL_LOADSO_WINDOWS	1
+#define SDL_LOADSO_WINDOWS	1
 
 /* Enable various threading systems */
 #define SDL_THREAD_STDCPP   1

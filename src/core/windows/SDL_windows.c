@@ -20,12 +20,12 @@
 */
 #include "SDL_config.h"
 
-#ifdef __WIN32__
+#if defined(__WIN32__) || defined(__WINRT__)
 
 #include "SDL_error.h"
 #include "SDL_windows.h"
 
-#include <objbase.h>  /* for CoInitialize/CoUninitialize */
+#include <objbase.h>  /* for CoInitialize/CoUninitialize (Win32 only) */
 
 
 /* Sets an error message based on GetLastError() */
@@ -44,6 +44,14 @@ WIN_SetError(const char *prefix)
 HRESULT
 WIN_CoInitialize(void)
 {
+#ifdef __WINRT__
+    /* DLudwig: On WinRT, it is assumed that COM was initialized in main().
+       CoInitializeEx is available (not CoInitialize though), however
+       on WinRT, main() is typically declared with the [MTAThread]
+       attribute, which, AFAIK, should initialize COM.
+    */
+    return S_OK;
+#else
     const HRESULT hr = CoInitialize(NULL);
 
     /* S_FALSE means success, but someone else already initialized. */
@@ -53,12 +61,15 @@ WIN_CoInitialize(void)
     }
 
     return hr;
+#endif
 }
 
 void
 WIN_CoUninitialize(void)
 {
+#ifndef __WINRT__
     CoUninitialize();
+#endif
 }
 
 #endif /* __WIN32__ */
