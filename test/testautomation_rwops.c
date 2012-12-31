@@ -1,3 +1,4 @@
+
 /**
  * Automated SDL_RWops test.
  *
@@ -200,8 +201,6 @@ rwops_testMem (void)
    /* Close */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW(rw);
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
 
    return TEST_COMPLETED;
 }
@@ -232,8 +231,6 @@ rwops_testConstMem (void)
    /* Close handle */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW( rw );
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
 
   return TEST_COMPLETED;
 }
@@ -265,8 +262,6 @@ rwops_testFileRead(void)
    /* Close handle */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW( rw );
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
 
    return TEST_COMPLETED;
 }
@@ -297,8 +292,6 @@ rwops_testFileWrite(void)
    /* Close handle */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW( rw );
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
 
    return TEST_COMPLETED;
 }
@@ -331,7 +324,10 @@ rwops_testFPRead(void)
    SDLTest_AssertCheck(rw != NULL, "Verify opening file with SDL_RWFromFP in read mode does not return NULL");
 
    /* Bail out if NULL */
-   if (rw == NULL) return TEST_ABORTED;
+   if (rw == NULL) {
+     fclose(fp);
+     return TEST_ABORTED;
+   }
 
    /* Run generic tests */
    _testGenericRWopsValidations( rw, 0 );
@@ -339,8 +335,6 @@ rwops_testFPRead(void)
    /* Close handle */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW( rw );
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
    fclose(fp);
 
    return TEST_COMPLETED;
@@ -374,7 +368,10 @@ rwops_testFPWrite(void)
    SDLTest_AssertCheck(rw != NULL, "Verify opening file with SDL_RWFromFP in write mode does not return NULL");
 
    /* Bail out if NULL */
-   if (rw == NULL) return TEST_ABORTED;
+   if (rw == NULL) {
+     fclose(fp);
+     return TEST_ABORTED;
+   }
 
    /* Run generic tests */
    _testGenericRWopsValidations( rw, 1 );
@@ -382,12 +379,33 @@ rwops_testFPWrite(void)
    /* Close handle */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   SDL_FreeRW( rw );
-   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
    fclose(fp);
 
    return TEST_COMPLETED;
 }
+
+/**
+ * @brief Tests alloc and free RW context.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_AllocRW
+ */
+int
+rwops_testAllocFree (void)
+{
+   /* Allocate context */
+   SDL_RWops *rw = SDL_AllocRW();
+   SDLTest_AssertPass("Call to SDL_AllocRW() succeeded");
+   SDLTest_AssertCheck(rw != NULL, "Validate result from SDL_AllocRW() is not NULL");
+   if (rw==NULL) return TEST_ABORTED;
+          
+   /* Free context again */
+   SDL_FreeRW(rw);
+   SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
+
+   return TEST_COMPLETED;
+}
+
 
 /* ================= Test References ================== */
 
@@ -413,9 +431,12 @@ static const SDLTest_TestCaseReference rwopsTest6 =
 static const SDLTest_TestCaseReference rwopsTest7 =
 		{ (SDLTest_TestCaseFp)rwops_testFPWrite, "rwops_testFPWrite", "Test writing to file pointer", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference rwopsTest8 =
+		{ (SDLTest_TestCaseFp)rwops_testAllocFree, "rwops_testAllocFree", "Test alloc and free of RW context", TEST_ENABLED };
+
 /* Sequence of RWops test cases */
 static const SDLTest_TestCaseReference *rwopsTests[] =  {
-	&rwopsTest1, &rwopsTest2, &rwopsTest3, &rwopsTest4, &rwopsTest5, &rwopsTest6, &rwopsTest7, NULL
+	&rwopsTest1, &rwopsTest2, &rwopsTest3, &rwopsTest4, &rwopsTest5, &rwopsTest6, &rwopsTest7, &rwopsTest8, NULL
 };
 
 /* RWops test suite (global) */
