@@ -15,13 +15,12 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "SDL.h"
-#include "common.h"
+#include "SDL_test_common.h"
 
 #define WINDOW_WIDTH    640
 #define WINDOW_HEIGHT   480
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 
 typedef struct {
     SDL_Window *window;
@@ -36,7 +35,7 @@ typedef struct {
 static void
 quit(int rc)
 {
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     exit(rc);
 }
 
@@ -143,21 +142,21 @@ main(int argc, char *argv[])
     Uint32 then, now;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;) {
         int consumed;
 
-        consumed = CommonArg(state, i);
+        consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
-            fprintf(stderr, "Usage: %s %s\n", argv[0], CommonUsage(state));
+            fprintf(stderr, "Usage: %s %s\n", argv[0], SDLTest_CommonUsage(state));
             return 1;
         }
         i += consumed;
     }
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         quit(2);
     }
 
@@ -185,7 +184,7 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
             Draw(&drawstates[i]);

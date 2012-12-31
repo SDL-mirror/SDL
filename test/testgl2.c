@@ -14,7 +14,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 #ifdef __MACOS__
 #define HAVE_OPENGL
@@ -27,7 +27,7 @@
 /* Undefine this if you want a flat cube instead of a rainbow cube */
 #define SHADED_CUBE
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static SDL_GLContext context;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
@@ -38,7 +38,7 @@ quit(int rc)
         /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
         SDL_GL_DeleteContext(context);
     }
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     exit(rc);
 }
 
@@ -186,14 +186,14 @@ main(int argc, char *argv[])
     accel = -1;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;) {
         int consumed;
 
-        consumed = CommonArg(state, i);
+        consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
             if (SDL_strcasecmp(argv[i], "--fsaa") == 0) {
                 ++fsaa;
@@ -207,7 +207,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr, "Usage: %s %s [--fsaa] [--accel n]\n", argv[0],
-                    CommonUsage(state));
+                    SDLTest_CommonUsage(state));
             quit(1);
         }
         i += consumed;
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
         state->gl_accelerated = accel;
     }
 
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         quit(2);
     }
 
@@ -327,7 +327,7 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
             int w, h;

@@ -16,10 +16,10 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static SDL_Rect rect;
 
 static void
@@ -37,14 +37,14 @@ main(int argc, char *argv[])
 
  
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;i++) {
-        CommonArg(state, i);
+        SDLTest_CommonArg(state, i);
     }
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         return 2;
     }
 
@@ -70,7 +70,7 @@ main(int argc, char *argv[])
     while (!done) {
         /* Check for events */
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
             switch(event.type) {
                 case SDL_MOUSEMOTION:
                 {
@@ -93,7 +93,7 @@ main(int argc, char *argv[])
         }
     }
 
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     return 0;
 }
 

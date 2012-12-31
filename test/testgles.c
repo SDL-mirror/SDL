@@ -14,7 +14,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #define HAVE_OPENGLES
@@ -24,7 +24,7 @@
 
 #include "SDL_opengles.h"
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static SDL_GLContext *context = NULL;
 static int depth = 16;
 
@@ -44,7 +44,7 @@ quit(int rc)
         SDL_free(context);
     }
 
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     exit(rc);
 }
 
@@ -115,14 +115,14 @@ main(int argc, char *argv[])
     accel = 0;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;) {
         int consumed;
 
-        consumed = CommonArg(state, i);
+        consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
             if (SDL_strcasecmp(argv[i], "--fsaa") == 0) {
                 ++fsaa;
@@ -144,7 +144,7 @@ main(int argc, char *argv[])
         }
         if (consumed < 0) {
             fprintf(stderr, "Usage: %s %s [--fsaa] [--accel] [--zdepth %%d]\n", argv[0],
-                    CommonUsage(state));
+                    SDLTest_CommonUsage(state));
             quit(1);
         }
         i += consumed;
@@ -163,7 +163,7 @@ main(int argc, char *argv[])
     if (accel) {
         state->gl_accelerated=1;
     }
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         quit(2);
     }
 
@@ -306,7 +306,7 @@ main(int argc, char *argv[])
                         break;
                 }
             }
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
             status = SDL_GL_MakeCurrent(state->windows[i], context[i]);

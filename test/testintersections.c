@@ -16,12 +16,12 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 #define SWAP(typ,a,b) do{typ t=a;a=b;b=t;}while(0)
 #define NUM_OBJECTS	100
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static int num_objects;
 static SDL_bool cycle_color;
 static SDL_bool cycle_alpha;
@@ -204,14 +204,14 @@ main(int argc, char *argv[])
     num_objects = NUM_OBJECTS;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;) {
         int consumed;
 
-        consumed = CommonArg(state, i);
+        consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
             consumed = -1;
             if (SDL_strcasecmp(argv[i], "--blend") == 0) {
@@ -244,12 +244,12 @@ main(int argc, char *argv[])
         if (consumed < 0) {
             fprintf(stderr,
                     "Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
-                    argv[0], CommonUsage(state));
+                    argv[0], SDLTest_CommonUsage(state));
             return 1;
         }
         i += consumed;
     }
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         return 2;
     }
 
@@ -271,7 +271,7 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
             switch (event.type) {
             case SDL_MOUSEBUTTONDOWN:
                 mouse_begin_x = event.button.x;
@@ -322,7 +322,7 @@ main(int argc, char *argv[])
         }
     }
 
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
 
     /* Print out some timing information */
     now = SDL_GetTicks();
