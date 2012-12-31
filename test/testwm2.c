@@ -87,7 +87,7 @@ main(int argc, char *argv[])
                             event.window.windowID,
                             event.window.data1,
                             event.window.data2,
-                            SDL_GetWindowDisplay(window));
+                            SDL_GetWindowDisplayIndex(window));
                     }
                 }
             }

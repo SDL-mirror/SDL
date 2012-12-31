@@ -339,7 +339,7 @@ extern DECLSPEC SDL_DisplayMode * SDLCALL SDL_GetClosestDisplayMode(int displayI
  *  \return the display index of the display containing the center of the
  *          window, or -1 on error.
  */
-extern DECLSPEC int SDLCALL SDL_GetWindowDisplay(SDL_Window * window);
+extern DECLSPEC int SDLCALL SDL_GetWindowDisplayIndex(SDL_Window * window);
 
 /**
  *  \brief Set the display mode used when a fullscreen window is visible.
