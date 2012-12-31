@@ -2989,4 +2989,18 @@ SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, S
     return SDL_ShowMessageBox(&data, NULL);
 }
 
+SDL_bool
+SDL_ShouldAllowTopmost()
+{
+	const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
+	if (hint) {
+		if (*hint == '0') {
+			return SDL_FALSE;
+		} else {
+			return SDL_TRUE;
+		}
+	}
+	return SDL_TRUE;
+}
+
 /* vi: set ts=4 sw=4 expandtab: */

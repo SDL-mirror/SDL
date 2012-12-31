@@ -369,6 +369,8 @@ extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern void SDL_UpdateWindowGrab(SDL_Window * window);
 extern SDL_Window * SDL_GetFocusWindow(void);
 
+extern SDL_bool SDL_ShouldAllowTopmost();
+
 #endif /* _SDL_sysvideo_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -915,7 +915,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     }
 
 #ifdef FULLSCREEN_TOGGLEABLE
-    if (fullscreen) {
+    if (SDL_ShouldAllowTopmost() && fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
         [nswindow setLevel:CGShieldingWindowLevel()];
     } else {
@@ -997,22 +997,16 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
 	
-    if ( window->flags & SDL_WINDOW_FULLSCREEN )
-	{
+    if ( window->flags & SDL_WINDOW_FULLSCREEN ) {
 		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
-		if (window->flags & SDL_WINDOW_INPUT_FOCUS)
-		{
+		if (SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
 			/* OpenGL is rendering to the window, so make it visible! */
 			[data->nswindow setLevel:CGShieldingWindowLevel()];
-		} 
-		else 
-		{
+		} else {
 			[data->nswindow setLevel:kCGNormalWindowLevel];
 		}
-		
 	}
-
 }
 
 void

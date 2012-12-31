@@ -28,7 +28,6 @@
 
 #include "SDL_windowsvideo.h"
 #include "SDL_windowswindow.h"
-#include "SDL_hints.h"
 
 /* Dropfile support */
 #include <shellapi.h>
@@ -72,22 +71,6 @@ GetWindowStyle(SDL_Window * window)
         }
     }
     return style;
-}
-
-static SDL_bool
-ShouldAllowTopMost()
-{
-    const char *hint;
-
-    /* If the user has specified a software renderer we can't use a
-       texture framebuffer, or renderer creation will go recursive.
-     */
-    hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
-    if (hint && hint[0] == '0' ) {
-        return SDL_FALSE;
-    }
-
-	return SDL_TRUE;
 }
 
 static int
@@ -371,7 +354,7 @@ WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
     int w, h;
 
     /* Figure out what the window area will be */
-    if ( ShouldAllowTopMost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
 		top = HWND_TOPMOST;
     } else {
         top = HWND_NOTOPMOST;
@@ -423,7 +406,7 @@ WIN_RaiseWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     HWND top;
 
-	if ( ShouldAllowTopMost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
 		top = HWND_TOPMOST;
 	} else {
 		top = HWND_NOTOPMOST;
@@ -484,7 +467,7 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     int x, y;
     int w, h;
 
-	if ( ShouldAllowTopMost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
 		top = HWND_TOPMOST;
 	} else {
 		top = HWND_NOTOPMOST;
@@ -577,7 +560,7 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 		HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
 		UINT flags = SWP_NOMOVE | SWP_NOSIZE;
 
-		if ( ShouldAllowTopMost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
+		if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
 			top = HWND_TOPMOST;
 		} else {
 			top = HWND_NOTOPMOST;
