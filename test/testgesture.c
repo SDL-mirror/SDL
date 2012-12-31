@@ -94,8 +94,8 @@ void setpix(SDL_Surface *screen, float _x, float _y, unsigned int col)
   int y = (int)_y;
   float a;
   
-  if(x < 0 || x > screen->w) return;
-  if(y < 0 || y > screen->h) return;
+  if(x < 0 || x >= screen->w) return;
+  if(y < 0 || y >= screen->h) return;
 
   pixmem32 = (Uint32*) screen->pixels  + y*screen->pitch/BPP + x;
   
@@ -195,7 +195,7 @@ SDL_Surface* initScreen(int width,int height)
   if (!window) {
     window = SDL_CreateWindow("Gesture Test",
                               SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              WIDTH, HEIGHT, SDL_WINDOW_RESIZABLE);
+                              width, height, SDL_WINDOW_RESIZABLE);
   }
   if (!window) {
     return NULL;
@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 	    break;
 	  case SDL_WINDOWEVENT:
             if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-	      if (!(screen = initScreen(0, 0)))
+	      if (!(screen = initScreen(event.window.data1, event.window.data2)))
 	      {
 		SDL_Quit();
 		return 1;
