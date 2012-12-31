@@ -83,11 +83,11 @@ main(int argc, char *argv[])
                 if (event.window.event == SDL_WINDOWEVENT_MOVED) {
                     SDL_Window *window = SDL_GetWindowFromID(event.window.windowID);
                     if (window) {
-                        printf("Window %d moved to %d,%d (display %d)\n",
+                        printf("Window %d moved to %d,%d (display %s)\n",
                             event.window.windowID,
                             event.window.data1,
                             event.window.data2,
-                            SDL_GetWindowDisplayIndex(window));
+                            SDL_GetDisplayName(SDL_GetWindowDisplayIndex(window)));
                     }
                 }
             }

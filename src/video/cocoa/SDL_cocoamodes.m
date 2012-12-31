@@ -24,6 +24,9 @@
 
 #include "SDL_cocoavideo.h"
 
+/* We need this for IODisplayCreateInfoDictionary and kIODisplayOnlyPreferredName */
+#include <IOKit/graphics/IOGraphicsLib.h>
+
 /* we need this for ShowMenuBar() and HideMenuBar(). */
 #include <Carbon/Carbon.h>
 
@@ -217,6 +220,18 @@ Cocoa_ReleaseDisplayModeList(_THIS, CFArrayRef modelist)
     #endif
 }
 
+static char *
+Cocoa_GetDisplayName(CGDirectDisplayID displayID)
+{
+    NSDictionary *deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(displayID), kIODisplayOnlyPreferredName);
+    NSDictionary *localizedNames = [deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
+
+    if ([localizedNames count] > 0) {
+        return [[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String];
+    }
+    return NULL;
+}
+
 void
 Cocoa_InitModes(_THIS)
 {
@@ -284,6 +299,7 @@ Cocoa_InitModes(_THIS)
             displaydata->display = displays[i];
 
             SDL_zero(display);
+            display.name = Cocoa_GetDisplayName(displays[i]);
             if (!GetDisplayMode (_this, moderef, &mode)) {
                 Cocoa_ReleaseDisplayMode(_this, moderef);
                 SDL_free(displaydata);

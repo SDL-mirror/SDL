@@ -581,6 +581,15 @@ SDL_AddVideoDisplay(const SDL_VideoDisplay * display)
         displays[index] = *display;
         displays[index].device = _this;
         _this->displays = displays;
+
+        if (display->name) {
+            displays[index].name = SDL_strdup(display->name);
+        } else {
+            char name[32];
+
+            SDL_itoa(index, name, 10);
+            displays[index].name = SDL_strdup(name);
+        }
     } else {
         SDL_OutOfMemory();
     }
@@ -610,6 +619,14 @@ SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 
     /* Couldn't find the display, just use index 0 */
     return 0;
+}
+
+const char *
+SDL_GetDisplayName(int displayIndex)
+{
+    CHECK_DISPLAY_INDEX(displayIndex, NULL);
+
+    return _this->displays[displayIndex].name;
 }
 
 int
@@ -2195,8 +2212,12 @@ SDL_VideoQuit(void)
         }
     }
     if (_this->displays) {
+        for (i = 0; i < _this->num_displays; ++i) {
+            SDL_free(_this->displays[i].name);
+        }
         SDL_free(_this->displays);
         _this->displays = NULL;
+        _this->num_displays = 0;
     }
     if (_this->clipboard_text) {
         SDL_free(_this->clipboard_text);

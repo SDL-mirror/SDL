@@ -270,6 +270,15 @@ extern DECLSPEC const char *SDLCALL SDL_GetCurrentVideoDriver(void);
 extern DECLSPEC int SDLCALL SDL_GetNumVideoDisplays(void);
 
 /**
+ *  \brief Get the name of a display in UTF-8 encoding
+ *  
+ *  \return The name of a display, or NULL for an invalid display index.
+ *  
+ *  \sa SDL_GetNumVideoDisplays()
+ */
+extern DECLSPEC const char * SDLCALL SDL_GetDisplayName(int displayIndex);
+
+/**
  *  \brief Get the desktop area represented by a display, with the primary
  *         display located at 0,0
  *  
