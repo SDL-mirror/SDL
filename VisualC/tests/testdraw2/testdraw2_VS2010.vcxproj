@@ -215,10 +215,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\test\common.c" />
     <ClCompile Include="..\..\..\test\testdraw2.c" />
   </ItemGroup>
   <ItemGroup>
+    <Library Include="..\..\SDLtest\Win32\Debug\SDLtest.lib">
+      <FileType>Document</FileType>
+    </Library>
     <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
     <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
   </ItemGroup>
