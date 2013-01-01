@@ -674,7 +674,7 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
             n = SDL_GetNumVideoDisplays();
             fprintf(stderr, "Number of displays: %d\n", n);
             for (i = 0; i < n; ++i) {
-                fprintf(stderr, "Display %d:\n", i);
+                fprintf(stderr, "Display %d: %s\n", i, SDL_GetDisplayName(i));
 
                 SDL_zero(bounds);
                 SDL_GetDisplayBounds(i, &bounds);
