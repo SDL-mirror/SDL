@@ -58,7 +58,7 @@ typedef enum
 	SDL_CONTROLLER_BINDTYPE_NONE = 0,
 	SDL_CONTROLLER_BINDTYPE_BUTTON,
 	SDL_CONTROLLER_BINDTYPE_AXIS,
-	SDL_CONTROLLER_BINDTYPE_HAT,
+	SDL_CONTROLLER_BINDTYPE_HAT
 } SDL_CONTROLLER_BINDTYPE;
 /**
  *  get the sdl joystick layer binding for this controller button/axis mapping
