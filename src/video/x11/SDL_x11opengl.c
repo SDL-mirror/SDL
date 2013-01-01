@@ -628,7 +628,7 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     Window drawable =
-        (window ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
+        (context ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
     GLXContext glx_context = (GLXContext) context;
     int status;
 
