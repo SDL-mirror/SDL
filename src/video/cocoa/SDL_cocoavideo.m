@@ -250,37 +250,36 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
         }
     }
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
+        NSString *msg = [NSString stringWithFormat:
+                @"Assertion failure at %s (%s:%d), triggered %u time%s:\n  '%s'",
+                    data->function, data->filename, data->linenum,
+                    data->trigger_count, (data->trigger_count == 1) ? "" : "s",
+                    data->condition];
 
-    NSString *msg = [NSString stringWithFormat:
-            @"Assertion failure at %s (%s:%d), triggered %u time%s:\n  '%s'",
-                data->function, data->filename, data->linenum,
-                data->trigger_count, (data->trigger_count == 1) ? "" : "s",
-                data->condition];
+        NSLog(@"%@", msg);
 
-    NSLog(@"%@", msg);
+        /*
+         * !!! FIXME: this code needs to deal with fullscreen modes:
+         * !!! FIXME:  reset to default desktop, runModal, reset to current?
+         */
 
-    /*
-     * !!! FIXME: this code needs to deal with fullscreen modes:
-     * !!! FIXME:  reset to default desktop, runModal, reset to current?
-     */
+        NSAlert* alert = [[NSAlert alloc] init];
+        [alert setAlertStyle:NSCriticalAlertStyle];
+        [alert setMessageText:msg];
+        [alert addButtonWithTitle:@"Retry"];
+        [alert addButtonWithTitle:@"Break"];
+        [alert addButtonWithTitle:@"Abort"];
+        [alert addButtonWithTitle:@"Ignore"];
+        [alert addButtonWithTitle:@"Always Ignore"];
+        const NSInteger clicked = [alert runModal];
 
-    NSAlert* alert = [[NSAlert alloc] init];
-    [alert setAlertStyle:NSCriticalAlertStyle];
-    [alert setMessageText:msg];
-    [alert addButtonWithTitle:@"Retry"];
-    [alert addButtonWithTitle:@"Break"];
-    [alert addButtonWithTitle:@"Abort"];
-    [alert addButtonWithTitle:@"Ignore"];
-    [alert addButtonWithTitle:@"Always Ignore"];
-    const NSInteger clicked = [alert runModal];
-    [pool release];
+        if (!initialized) {
+            SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        }
 
-    if (!initialized) {
-        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
     }
-
-    return (SDL_assert_state) (clicked - NSAlertFirstButtonReturn);
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

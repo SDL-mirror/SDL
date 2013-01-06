@@ -158,33 +158,30 @@ Cocoa_RegisterApp(void)
 {
     /* This can get called more than once! Be careful what you initialize! */
     ProcessSerialNumber psn;
-    NSAutoreleasePool *pool;
 
     if (!GetCurrentProcess(&psn)) {
         TransformProcessType(&psn, kProcessTransformToForegroundApplication);
         SetFrontProcess(&psn);
     }
 
-    pool = [[NSAutoreleasePool alloc] init];
-    if (NSApp == nil) {
-        [NSApplication sharedApplication];
+    @autoreleasepool {
+        if (NSApp == nil) {
+            [NSApplication sharedApplication];
 
-        if ([NSApp mainMenu] == nil) {
-            CreateApplicationMenus();
+            if ([NSApp mainMenu] == nil) {
+                CreateApplicationMenus();
+            }
+            [NSApp finishLaunching];
         }
-        [NSApp finishLaunching];
+        if ([NSApp delegate] == nil) {
+            [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
+        }
     }
-    if ([NSApp delegate] == nil) {
-        [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
-    }
-    [pool release];
 }
 
 void
 Cocoa_PumpEvents(_THIS)
 {
-    NSAutoreleasePool *pool;
-
     /* Update activity every 30 seconds to prevent screensaver */
     if (_this->suspend_screensaver) {
         SDL_VideoData *data = (SDL_VideoData *)_this->driverdata;
@@ -196,39 +193,39 @@ Cocoa_PumpEvents(_THIS)
         }
     }
 
-    pool = [[NSAutoreleasePool alloc] init];
-    for ( ; ; ) {
-        NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES ];
-        if ( event == nil ) {
-            break;
+    @autoreleasepool {
+        for ( ; ; ) {
+            NSEvent *event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES ];
+            if ( event == nil ) {
+                break;
+            }
+            
+            switch ([event type]) {
+            case NSLeftMouseDown:
+            case NSOtherMouseDown:
+            case NSRightMouseDown:
+            case NSLeftMouseUp:
+            case NSOtherMouseUp:
+            case NSRightMouseUp:
+            case NSLeftMouseDragged:
+            case NSRightMouseDragged:
+            case NSOtherMouseDragged: /* usually middle mouse dragged */
+            case NSMouseMoved:
+            case NSScrollWheel:
+                Cocoa_HandleMouseEvent(_this, event);
+                break;
+            case NSKeyDown:
+            case NSKeyUp:
+            case NSFlagsChanged:
+                Cocoa_HandleKeyEvent(_this, event);
+                break;
+            default:
+                break;
+            }
+            /* Pass through to NSApp to make sure everything stays in sync */
+            [NSApp sendEvent:event];
         }
-		
-        switch ([event type]) {
-        case NSLeftMouseDown:
-        case NSOtherMouseDown:
-        case NSRightMouseDown:
-        case NSLeftMouseUp:
-        case NSOtherMouseUp:
-        case NSRightMouseUp:
-        case NSLeftMouseDragged:
-        case NSRightMouseDragged:
-        case NSOtherMouseDragged: /* usually middle mouse dragged */
-        case NSMouseMoved:
-        case NSScrollWheel:
-            Cocoa_HandleMouseEvent(_this, event);
-            break;
-        case NSKeyDown:
-        case NSKeyUp:
-        case NSFlagsChanged:
-            Cocoa_HandleKeyEvent(_this, event);
-            break;
-        default:
-            break;
-        }
-        /* Pass through to NSApp to make sure everything stays in sync */
-        [NSApp sendEvent:event];
     }
-    [pool release];
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

@@ -39,40 +39,38 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     Cocoa_RegisterApp();
 
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    @autoreleasepool {
+        NSAlert* alert = [[NSAlert alloc] init];
 
-    NSAlert* alert = [[NSAlert alloc] init];
-
-    if (messageboxdata->flags & SDL_MESSAGEBOX_ERROR) {
-        [alert setAlertStyle:NSCriticalAlertStyle];
-    } else if (messageboxdata->flags & SDL_MESSAGEBOX_WARNING) {
-        [alert setAlertStyle:NSWarningAlertStyle];
-    } else {
-        [alert setAlertStyle:NSInformationalAlertStyle];
-    }
-
-    [alert setMessageText:[NSString stringWithUTF8String:messageboxdata->title]];
-    [alert setInformativeText:[NSString stringWithUTF8String:messageboxdata->message]];
-
-    const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;
-    int i;
-    for (i = 0; i < messageboxdata->numbuttons; ++i) {
-        NSButton *button = [alert addButtonWithTitle:[[NSString alloc] initWithUTF8String:buttons[i].text]];
-        if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT) {
-            [button setKeyEquivalent:@"\r"];
-        } else if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT) {
-            [button setKeyEquivalent:@"\033"];
+        if (messageboxdata->flags & SDL_MESSAGEBOX_ERROR) {
+            [alert setAlertStyle:NSCriticalAlertStyle];
+        } else if (messageboxdata->flags & SDL_MESSAGEBOX_WARNING) {
+            [alert setAlertStyle:NSWarningAlertStyle];
         } else {
-            [button setKeyEquivalent:@""];
+            [alert setAlertStyle:NSInformationalAlertStyle];
         }
+
+        [alert setMessageText:[NSString stringWithUTF8String:messageboxdata->title]];
+        [alert setInformativeText:[NSString stringWithUTF8String:messageboxdata->message]];
+
+        const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;
+        int i;
+        for (i = 0; i < messageboxdata->numbuttons; ++i) {
+            NSButton *button = [alert addButtonWithTitle:[[NSString alloc] initWithUTF8String:buttons[i].text]];
+            if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT) {
+                [button setKeyEquivalent:@"\r"];
+            } else if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT) {
+                [button setKeyEquivalent:@"\033"];
+            } else {
+                [button setKeyEquivalent:@""];
+            }
+        }
+
+        NSInteger clicked = [alert runModal];
+        clicked -= NSAlertFirstButtonReturn;
+        *buttonid = buttons[clicked].buttonid;
+        [alert release];
     }
-
-    NSInteger clicked = [alert runModal];
-    clicked -= NSAlertFirstButtonReturn;
-    *buttonid = buttons[clicked].buttonid;
-    [alert release];
-
-    [pool release];
 
     return 0;
 }

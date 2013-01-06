@@ -625,28 +625,27 @@ void
 Cocoa_StartTextInput(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSView *parentView = [[NSApp keyWindow] contentView];
+    @autoreleasepool {
+        NSView *parentView = [[NSApp keyWindow] contentView];
 
-    /* We only keep one field editor per process, since only the front most
-     * window can receive text input events, so it make no sense to keep more
-     * than one copy. When we switched to another window and requesting for
-     * text input, simply remove the field editor from its superview then add
-     * it to the front most window's content view */
-    if (!data->fieldEdit) {
-        data->fieldEdit =
-            [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+        /* We only keep one field editor per process, since only the front most
+         * window can receive text input events, so it make no sense to keep more
+         * than one copy. When we switched to another window and requesting for
+         * text input, simply remove the field editor from its superview then add
+         * it to the front most window's content view */
+        if (!data->fieldEdit) {
+            data->fieldEdit =
+                [[SDLTranslatorResponder alloc] initWithFrame: NSMakeRect(0.0, 0.0, 0.0, 0.0)];
+        }
+
+        if (![[data->fieldEdit superview] isEqual: parentView])
+        {
+            // DEBUG_IME(@"add fieldEdit to window contentView");
+            [data->fieldEdit removeFromSuperview];
+            [parentView addSubview: data->fieldEdit];
+            [[NSApp keyWindow] makeFirstResponder: data->fieldEdit];
+        }
     }
-
-    if (![[data->fieldEdit superview] isEqual: parentView])
-    {
-        // DEBUG_IME(@"add fieldEdit to window contentView");
-        [data->fieldEdit removeFromSuperview];
-        [parentView addSubview: data->fieldEdit];
-        [[NSApp keyWindow] makeFirstResponder: data->fieldEdit];
-    }
-
-    [pool release];
 }
 
 void
@@ -655,11 +654,11 @@ Cocoa_StopTextInput(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     if (data && data->fieldEdit) {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        [data->fieldEdit removeFromSuperview];
-        [data->fieldEdit release];
-        data->fieldEdit = nil;
-        [pool release];
+        @autoreleasepool {
+            [data->fieldEdit removeFromSuperview];
+            [data->fieldEdit release];
+            data->fieldEdit = nil;
+        }
     }
 }
 
