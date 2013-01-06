@@ -75,7 +75,11 @@ testautomation$(EXE): $(srcdir)/testautomation.c \
 		      $(srcdir)/testautomation_render.c \
 		      $(srcdir)/testautomation_rwops.c \
 		      $(srcdir)/testautomation_audio.c \
-		      $(srcdir)/testautomation_surface.c
+		      $(srcdir)/testautomation_surface.c \
+		      $(srcdir)/testautomation_events.c \
+		      $(srcdir)/testautomation_keyboard.c \
+		      $(srcdir)/testautomation_video.c \
+		      $(srcdir)/testautomation_syswm.c
 	$(CC) -o $@ $^ $(CFLAGS) -lSDL2_test $(LIBS) 
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c

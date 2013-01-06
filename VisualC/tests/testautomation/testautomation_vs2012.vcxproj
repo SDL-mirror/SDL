@@ -188,6 +188,10 @@
     <ClCompile Include="..\..\..\test\testautomation_render.c" />
     <ClCompile Include="..\..\..\test\testautomation_rwops.c" />
     <ClCompile Include="..\..\..\test\testautomation_surface.c" />
+    <ClCompile Include="..\..\..\test\testautomation_events.c" />
+    <ClCompile Include="..\..\..\test\testautomation_keyboard.c" />
+    <ClCompile Include="..\..\..\test\testautomation_video.c" />
+    <ClCompile Include="..\..\..\test\testautomation_syswm.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\test\testautomation_suites.h" />
