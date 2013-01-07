@@ -120,7 +120,7 @@ extern "C" void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
     midFlipBuffers = mEnv->GetStaticMethodID(mActivityClass,
                                 "flipBuffers","()V");
     midAudioInit = mEnv->GetStaticMethodID(mActivityClass, 
-                                "audioInit", "(IZZI)Ljava/lang/Object;");
+                                "audioInit", "(IZZI)V");
     midAudioWriteShortBuffer = mEnv->GetStaticMethodID(mActivityClass,
                                 "audioWriteShortBuffer", "([S)V");
     midAudioWriteByteBuffer = mEnv->GetStaticMethodID(mActivityClass,
@@ -433,13 +433,30 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
     audioBuffer16Bit = is16Bit;
     audioBufferStereo = channelCount > 1;
 
-    audioBuffer = env->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
+    env->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
+
+    /* Allocating the audio buffer from the Java side and passing it as the return value for audioInit no longer works on
+     * Android >= 4.2 due to a "stale global reference" error. So now we allocate this buffer directly from this side. */
+    
+    if (is16Bit) {
+        jshortArray audioBufferLocal = env->NewShortArray(desiredBufferFrames * (audioBufferStereo ? 2 : 1));
+        if (audioBufferLocal) {
+            audioBuffer = env->NewGlobalRef(audioBufferLocal);
+            env->DeleteLocalRef(audioBufferLocal);
+        }
+    }
+    else {
+        jbyteArray audioBufferLocal = env->NewByteArray(desiredBufferFrames * (audioBufferStereo ? 2 : 1));
+        if (audioBufferLocal) {
+            audioBuffer = env->NewGlobalRef(audioBufferLocal);
+            env->DeleteLocalRef(audioBufferLocal);
+        }
+    }
 
     if (audioBuffer == NULL) {
-        __android_log_print(ANDROID_LOG_WARN, "SDL", "SDL audio: didn't get back a good audio buffer!");
+        __android_log_print(ANDROID_LOG_WARN, "SDL", "SDL audio: could not allocate an audio buffer!");
         return 0;
     }
-    audioBuffer = env->NewGlobalRef(audioBuffer);
 
     jboolean isCopy = JNI_FALSE;
     if (audioBuffer16Bit) {

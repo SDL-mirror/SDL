@@ -353,8 +353,6 @@ public class SDLActivity extends Activity {
     }
 
     // Audio
-    private static Object buf;
-    
     public static Object audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
         int channelConfig = isStereo ? AudioFormat.CHANNEL_CONFIGURATION_STEREO : AudioFormat.CHANNEL_CONFIGURATION_MONO;
         int audioFormat = is16Bit ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
@@ -373,13 +371,6 @@ public class SDLActivity extends Activity {
         audioStartThread();
         
         Log.v("SDL", "SDL audio: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono") + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit") + " " + ((float)mAudioTrack.getSampleRate() / 1000f) + "kHz, " + desiredFrames + " frames buffer");
-        
-        if (is16Bit) {
-            buf = new short[desiredFrames * (isStereo ? 2 : 1)];
-        } else {
-            buf = new byte[desiredFrames * (isStereo ? 2 : 1)]; 
-        }
-        return buf;
     }
     
     public static void audioStartThread() {
