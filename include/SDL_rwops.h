@@ -94,8 +94,11 @@ typedef struct SDL_RWops
             void *inputStreamRef;
             void *readableByteChannelRef;
             void *readMethod;
+            void *assetFileDescriptorRef;
             long position;
-            int size;
+            long size;
+            long offset;
+            int fd;
         } androidio;
 #elif defined(__WIN32__)
         struct
