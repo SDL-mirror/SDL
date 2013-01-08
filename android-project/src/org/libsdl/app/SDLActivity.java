@@ -353,7 +353,7 @@ public class SDLActivity extends Activity {
     }
 
     // Audio
-    public static Object audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
+    public static void audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
         int channelConfig = isStereo ? AudioFormat.CHANNEL_CONFIGURATION_STEREO : AudioFormat.CHANNEL_CONFIGURATION_MONO;
         int audioFormat = is16Bit ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
         int frameSize = (isStereo ? 2 : 1) * (is16Bit ? 2 : 1);
