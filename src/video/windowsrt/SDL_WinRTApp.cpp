@@ -151,6 +151,13 @@ void SDL_WinRTApp::OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEven
 void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
 {
     m_windowVisible = args->Visible;
+    if (m_sdlWindowData) {
+        if (args->Visible) {
+            SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_SHOWN, 0, 0);
+        } else {
+            SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+        }
+    }
 }
 
 void SDL_WinRTApp::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
