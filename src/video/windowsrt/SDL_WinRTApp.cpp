@@ -7,6 +7,7 @@ extern "C" {
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_windowevents_c.h"
 #include "SDL_events.h"
 #include "SDL_log.h"
 }
@@ -494,6 +495,26 @@ void SDL_WinRTApp::OnActivated(CoreApplicationView^ applicationView, IActivatedE
 	CoreWindow::GetForCurrentThread()->Activate();
 }
 
+static int SDLCALL RemoveAppSuspendAndResumeEvents(void * userdata, SDL_Event * event)
+{
+    if (event->type == SDL_WINDOWEVENT)
+    {
+        switch (event->window.event)
+        {
+            case SDL_WINDOWEVENT_MINIMIZED:
+            case SDL_WINDOWEVENT_RESTORED:
+                // Return 0 to indicate that the event should be removed from the
+                // event queue:
+                return 0;
+            default:
+                break;
+        }
+    }
+
+    // Return 1 to indicate that the event should stay in the event queue:
+    return 1;
+}
+
 void SDL_WinRTApp::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ args)
 {
 	// Save app state asynchronously after requesting a deferral. Holding a deferral
@@ -501,20 +522,46 @@ void SDL_WinRTApp::OnSuspending(Platform::Object^ sender, SuspendingEventArgs^ a
 	// aware that a deferral may not be held indefinitely. After about five seconds,
 	// the app will be forced to exit.
 	SuspendingDeferral^ deferral = args->SuspendingOperation->GetDeferral();
-
 	create_task([this, deferral]()
 	{
-		// Insert your code here.
-
+        // Send a window-minimized event immediately to observers.
+        // CoreDispatcher::ProcessEvents, which is the backbone on which
+        // SDL_WinRTApp::PumpEvents is built, will not return to its caller
+        // once it sends out a suspend event.  Any events posted to SDL's
+        // event queue won't get received until the WinRT app is resumed.
+        // SDL_AddEventWatch() may be used to receive app-suspend events on
+        // WinRT.
+        //
+        // In order to prevent app-suspend events from being received twice:
+        // first via a callback passed to SDL_AddEventWatch, and second via
+        // SDL's event queue, the event will be sent to SDL, then immediately
+        // removed from the queue.
+        if (m_sdlWindowData)
+        {
+            SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_MINIMIZED, 0, 0);   // TODO: see if SDL_WINDOWEVENT_SIZE_CHANGED should be getting triggered here (it is, currently)
+            SDL_FilterEvents(RemoveAppSuspendAndResumeEvents, 0);
+        }
 		deferral->Complete();
 	});
 }
- 
+
 void SDL_WinRTApp::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 {
 	// Restore any data or state that was unloaded on suspend. By default, data
 	// and state are persisted when resuming from suspend. Note that this event
 	// does not occur if the app was previously terminated.
+    if (m_sdlWindowData)
+    {
+        SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_RESTORED, 0, 0);    // TODO: see if SDL_WINDOWEVENT_SIZE_CHANGED should be getting triggered here (it is, currently)
+
+        // Remove the app-resume event from the queue, as is done with the
+        // app-suspend event.
+        //
+        // TODO, WinRT: consider posting this event to the queue even though
+        // its counterpart, the app-suspend event, effectively has to be
+        // processed immediately.
+        SDL_FilterEvents(RemoveAppSuspendAndResumeEvents, 0);
+    }
 }
 
 SDL_DisplayMode SDL_WinRTApp::GetMainDisplayMode()
