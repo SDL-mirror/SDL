@@ -130,6 +130,155 @@ keyboard_getKeyFromScancode(void *arg)
    return TEST_COMPLETED;
 }
 
+/**
+ * @brief Check call to SDL_GetKeyName
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_GetKeyName
+ */
+int
+keyboard_getKeyName(void *arg)
+{   
+   char *result;
+   char *expected;
+
+   /* Case where key has a 1 character name */
+   expected = "3";
+   result = (char *)SDL_GetKeyName(SDLK_3);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   /* Case where key has a 2 character name */
+   expected = "F1";
+   result = (char *)SDL_GetKeyName(SDLK_F1);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   /* Case where key has a 3 character name */
+   expected = "Cut";
+   result = (char *)SDL_GetKeyName(SDLK_CUT);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   /* Case where key has a 4 character name */
+   expected = "Down";
+   result = (char *)SDL_GetKeyName(SDLK_DOWN);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   /* Case where key has a N character name */
+   expected = "BrightnessUp";
+   result = (char *)SDL_GetKeyName(SDLK_BRIGHTNESSUP);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   /* Case where key has a N character name with space */
+   expected = "Keypad MemStore";
+   result = (char *)SDL_GetKeyName(SDLK_KP_MEMSTORE);
+   SDLTest_AssertPass("Call to SDL_GetKeyName()");
+   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
+   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: %s, got: %s", expected, result);
+
+   return TEST_COMPLETED;
+}
+
+/**
+ * @brief Check call to SDL_GetModState and SDL_SetModState
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_GetModState
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_SetModState
+ */
+int
+keyboard_getSetModState(void *arg)
+{   
+   SDL_Keymod result;
+   SDL_Keymod currentState;
+   SDL_Keymod newState;
+   SDL_Keymod allStates =     
+    KMOD_NONE |
+    KMOD_LSHIFT |
+    KMOD_RSHIFT |
+    KMOD_LCTRL |
+    KMOD_RCTRL |
+    KMOD_LALT |
+    KMOD_RALT |
+    KMOD_LGUI |
+    KMOD_RGUI |
+    KMOD_NUM |
+    KMOD_CAPS |
+    KMOD_MODE |
+    KMOD_RESERVED;
+
+   /* Get state, cache for later reset */                                                   
+   result = SDL_GetModState();
+   SDLTest_AssertPass("Call to SDL_GetModState()");
+   SDLTest_AssertCheck(result >=0 && result <= allStates, "Verify result from call is valid, expected: 0 <= result <= %i, got: %i", allStates, result);   
+   currentState = result;
+
+   /* Set random state */   
+   newState = SDLTest_RandomIntegerInRange(0, allStates);
+   SDL_SetModState(newState);
+   SDLTest_AssertPass("Call to SDL_SetModState(%i)", newState);
+   result = SDL_GetModState();
+   SDLTest_AssertPass("Call to SDL_GetModState()");
+   SDLTest_AssertCheck(result == newState, "Verify result from call is valid, expected: %i, got: %i", newState, result);
+
+   /* Set zero state */
+   SDL_SetModState(0);
+   SDLTest_AssertPass("Call to SDL_SetModState(0)");
+   result = SDL_GetModState();
+   SDLTest_AssertPass("Call to SDL_GetModState()");
+   SDLTest_AssertCheck(result == 0, "Verify result from call is valid, expected: 0, got: %i", result);
+
+   /* Revert back to cached current state if needed */
+   if (currentState != 0) {
+     SDL_SetModState(currentState);
+     SDLTest_AssertPass("Call to SDL_SetModState(%i)", currentState);
+     result = SDL_GetModState();
+     SDLTest_AssertPass("Call to SDL_GetModState()");
+     SDLTest_AssertCheck(result == currentState, "Verify result from call is valid, expected: %i, got: %i", currentState, result);
+   }
+
+   return TEST_COMPLETED;
+}
+
+
+/**
+ * @brief Check call to SDL_StartTextInput and SDL_StopTextInput
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_StartTextInput
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_StopTextInput
+ */
+int
+keyboard_startStopTextInput(void *arg)
+{   
+   /* Start-Stop */
+   SDL_StartTextInput();
+   SDLTest_AssertPass("Call to SDL_StartTextInput()");
+   SDL_StopTextInput();
+   SDLTest_AssertPass("Call to SDL_StopTextInput()");
+
+   /* Stop-Start */
+   SDL_StartTextInput();
+   SDLTest_AssertPass("Call to SDL_StartTextInput()");
+   
+   /* Start-Start */
+   SDL_StartTextInput();
+   SDLTest_AssertPass("Call to SDL_StartTextInput()");
+
+   /* Stop-Stop */   
+   SDL_StopTextInput();
+   SDLTest_AssertPass("Call to SDL_StopTextInput()");
+   SDL_StopTextInput();
+   SDLTest_AssertPass("Call to SDL_StopTextInput()");
+
+   return TEST_COMPLETED;
+}
+
 
 
 /* ================= Test References ================== */
@@ -147,9 +296,18 @@ static const SDLTest_TestCaseReference keyboardTest3 =
 static const SDLTest_TestCaseReference keyboardTest4 =
 		{ (SDLTest_TestCaseFp)keyboard_getKeyFromScancode, "keyboard_getKeyFromScancode", "Check call to SDL_GetKeyFromScancode", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference keyboardTest5 =
+		{ (SDLTest_TestCaseFp)keyboard_getKeyName, "keyboard_getKeyName", "Check call to SDL_GetKeyName", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference keyboardTest6 =
+		{ (SDLTest_TestCaseFp)keyboard_getSetModState, "keyboard_getSetModState", "Check call to SDL_GetModState and SDL_SetModState", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference keyboardTest7 =
+		{ (SDLTest_TestCaseFp)keyboard_startStopTextInput, "keyboard_startStopTextInput", "Check call to SDL_StartTextInput and SDL_StopTextInput", TEST_ENABLED };
+
 /* Sequence of Keyboard test cases */
 static const SDLTest_TestCaseReference *keyboardTests[] =  {
-	&keyboardTest1, &keyboardTest2, &keyboardTest3, &keyboardTest4, NULL
+	&keyboardTest1, &keyboardTest2, &keyboardTest3, &keyboardTest4, &keyboardTest5, &keyboardTest6, &keyboardTest7, NULL
 };
 
 /* Keyboard test suite (global) */
