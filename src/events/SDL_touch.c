@@ -268,7 +268,6 @@ SDL_AddFinger(SDL_Touch* touch,SDL_Finger *finger)
                 //printf("Making room for it!\n");
                 fingers = (SDL_Finger **) SDL_realloc(touch->fingers,
                                                      (touch->num_fingers + 1) * sizeof(SDL_Finger *));
-                touch->max_fingers = touch->num_fingers+1;
                 if (!fingers) {
                         SDL_OutOfMemory();
                         return -1;
