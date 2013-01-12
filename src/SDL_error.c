@@ -235,6 +235,9 @@ SDL_Error(SDL_errorcode code)
     case SDL_UNSUPPORTED:
         SDL_SetError("That operation is not supported");
         break;
+    case SDL_INVALIDPARAM:
+        SDL_SetError("Parameter is invalid");
+        break;
     default:
         SDL_SetError("Unknown SDL error");
         break;

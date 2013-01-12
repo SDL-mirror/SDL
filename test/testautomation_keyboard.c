@@ -279,6 +279,132 @@ keyboard_startStopTextInput(void *arg)
    return TEST_COMPLETED;
 }
 
+/* Internal function to test SDL_SetTextInputRect */
+void _testSetTextInputRect(SDL_Rect refRect)
+{
+   SDL_Rect testRect;
+   
+   testRect = refRect;
+   SDL_SetTextInputRect(&testRect);
+   SDLTest_AssertPass("Call to SDL_SetTextInputRect with refRect(x:%i,y:%i,w:%i,h:%i)", refRect.x, refRect.y, refRect.w, refRect.h);
+   SDLTest_AssertCheck(
+      (refRect.x == testRect.x) && (refRect.y == testRect.y) && (refRect.w == testRect.w) && (refRect.h == testRect.h), 
+      "Check that input data was not modified, expected: x:%i,y:%i,w:%i,h:%i, got: x:%i,y:%i,w:%i,h:%i", 
+      refRect.x, refRect.y, refRect.w, refRect.h, 
+      testRect.x, testRect.y, testRect.w, testRect.h);
+}
+
+/**
+ * @brief Check call to SDL_SetTextInputRect
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_SetTextInputRect
+ */
+int
+keyboard_setTextInputRect(void *arg)
+{   
+   SDL_Rect refRect;
+   
+   /* Normal visible refRect, origin inside */
+   refRect.x = SDLTest_RandomIntegerInRange(1, 50);;
+   refRect.y = SDLTest_RandomIntegerInRange(1, 50);;
+   refRect.w = SDLTest_RandomIntegerInRange(10, 50);
+   refRect.h = SDLTest_RandomIntegerInRange(10, 50);
+   _testSetTextInputRect(refRect);
+   
+   /* Normal visible refRect, origin 0,0 */
+   refRect.x = 0;
+   refRect.y = 0;
+   refRect.w = SDLTest_RandomIntegerInRange(10, 50);
+   refRect.h = SDLTest_RandomIntegerInRange(10, 50);
+   _testSetTextInputRect(refRect);
+
+   /* 1Pixel refRect */
+   refRect.x = SDLTest_RandomIntegerInRange(10, 50);;
+   refRect.y = SDLTest_RandomIntegerInRange(10, 50);;
+   refRect.w = 1;
+   refRect.h = 1;
+   _testSetTextInputRect(refRect);
+
+   /* 0pixel refRect */
+   refRect.x = 1;
+   refRect.y = 1;
+   refRect.w = 1;
+   refRect.h = 0;
+   _testSetTextInputRect(refRect);
+
+   /* 0pixel refRect */
+   refRect.x = 1;
+   refRect.y = 1;
+   refRect.w = 0;
+   refRect.h = 1;
+   _testSetTextInputRect(refRect);
+
+   /* 0pixel refRect */
+   refRect.x = 1;
+   refRect.y = 1;
+   refRect.w = 0;
+   refRect.h = 0;
+   _testSetTextInputRect(refRect);
+
+   /* 0pixel refRect */
+   refRect.x = 0;
+   refRect.y = 0;
+   refRect.w = 0;
+   refRect.h = 0;
+   _testSetTextInputRect(refRect);
+
+   /* negative refRect */
+   refRect.x = SDLTest_RandomIntegerInRange(-200, -100);;
+   refRect.y = SDLTest_RandomIntegerInRange(-200, -100);;
+   refRect.w = 50;
+   refRect.h = 50;
+   _testSetTextInputRect(refRect);
+
+   /* oversized refRect */
+   refRect.x = SDLTest_RandomIntegerInRange(1, 50);;
+   refRect.y = SDLTest_RandomIntegerInRange(1, 50);;
+   refRect.w = 5000;
+   refRect.h = 5000;
+   _testSetTextInputRect(refRect);
+
+   /* NULL refRect */
+   SDL_SetTextInputRect(NULL);
+   SDLTest_AssertPass("Call to SDL_SetTextInputRect(NULL)");
+
+   return TEST_COMPLETED;
+}
+
+/**
+ * @brief Check call to SDL_SetTextInputRect with invalid data
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_SetTextInputRect
+ */
+int
+keyboard_setTextInputRectNegative(void *arg)
+{      
+   const char *expectedError = "Parameter is invalid";
+   const char *error;
+   
+   SDL_ClearError();
+   SDLTest_AssertPass("Call to SDL_ClearError()");
+   
+   /* NULL refRect */
+   SDL_SetTextInputRect(NULL);
+   SDLTest_AssertPass("Call to SDL_SetTextInputRect(NULL)");
+   error = SDL_GetError();
+   SDLTest_AssertPass("Call to SDL_GetError()");
+   SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+   if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+   }
+
+   SDL_ClearError();
+   SDLTest_AssertPass("Call to SDL_ClearError()");
+      
+   return TEST_COMPLETED;
+}
+
 
 
 /* ================= Test References ================== */
@@ -305,9 +431,16 @@ static const SDLTest_TestCaseReference keyboardTest6 =
 static const SDLTest_TestCaseReference keyboardTest7 =
 		{ (SDLTest_TestCaseFp)keyboard_startStopTextInput, "keyboard_startStopTextInput", "Check call to SDL_StartTextInput and SDL_StopTextInput", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference keyboardTest8 =
+		{ (SDLTest_TestCaseFp)keyboard_setTextInputRect, "keyboard_setTextInputRect", "Check call to SDL_SetTextInputRect", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference keyboardTest9 =
+		{ (SDLTest_TestCaseFp)keyboard_setTextInputRectNegative, "keyboard_setTextInputRectNegative", "Check call to SDL_SetTextInputRect with invalid data", TEST_ENABLED };
+
 /* Sequence of Keyboard test cases */
 static const SDLTest_TestCaseReference *keyboardTests[] =  {
-	&keyboardTest1, &keyboardTest2, &keyboardTest3, &keyboardTest4, &keyboardTest5, &keyboardTest6, &keyboardTest7, NULL
+	&keyboardTest1, &keyboardTest2, &keyboardTest3, &keyboardTest4, &keyboardTest5, &keyboardTest6, 
+	&keyboardTest7, &keyboardTest8, &keyboardTest9, NULL
 };
 
 /* Keyboard test suite (global) */
