@@ -39,7 +39,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 SDLTEST_TARGET = libSDL2_test.a
 SDLTEST_OBJECTS = @SDLTEST_OBJECTS@
 
-SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC VisualCE WhatsNew Xcode Xcode-iOS
+SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC WhatsNew Xcode Xcode-iOS
 GEN_DIST = SDL2.spec
 
 HDRS = \
