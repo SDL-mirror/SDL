@@ -669,7 +669,7 @@ Cocoa_SetTextInputRect(_THIS, SDL_Rect *rect)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     if (!rect) {
-	SDL_InvalidParamError();
+	SDL_InvalidParamError("rect");
 	return;
     }
 

@@ -329,29 +329,43 @@ Sint32 SDLTest_RandomIntegerInRange(Sint32 min, Sint32 max);
 
 
 /**
- * Generates random null-terminated string. The maximum length for
- * the string is 255 characters and it can contain ASCII characters
- * from 1 to 127.
+ * Generates random null-terminated string. The minimum length for
+ * the string is 1 character, maximum length for the string is 255 
+ * characters and it can contain ASCII characters from 32 to 126.
  *
  * Note: Returned string needs to be deallocated.
  *
- * \returns newly allocated random string
+ * \returns Newly allocated random string; or NULL if length was invalid or string could not be allocated.
  */
 char * SDLTest_RandomAsciiString();
 
 
 /**
  * Generates random null-terminated string. The maximum length for
- * the string is defined by maxLenght parameter.
- * String can contain ASCII characters from 1 to 127.
+ * the string is defined by the maxLength parameter.
+ * String can contain ASCII characters from 32 to 126.
  *
  * Note: Returned string needs to be deallocated.
  *
- * \param maxLength Maximum length of the generated string
+ * \param maxLength The maximum length of the generated string.
  *
- * \returns newly allocated random string
+ * \returns Newly allocated random string; or NULL if maxLength was invalid or string could not be allocated. 
  */
 char * SDLTest_RandomAsciiStringWithMaximumLength(int maxLength);
+
+
+/**
+ * Generates random null-terminated string. The length for
+ * the string is defined by the size parameter.
+ * String can contain ASCII characters from 32 to 126.
+ *
+ * Note: Returned string needs to be deallocated.
+ *
+ * \param size The length of the generated string
+ *
+ * \returns Newly allocated random string; or NULL if size was invalid or string could not be allocated.
+ */
+char * SDLTest_RandomAsciiStringOfSize(int size);
 
 /**
  * Returns the invocation count for the fuzzer since last ...FuzzerInit.

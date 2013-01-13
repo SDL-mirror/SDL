@@ -27,10 +27,13 @@ static SDL_Surface *testSurface = NULL;
 
 /* Fixture */
 
-/* Create a 32-bit writable surface for screen tests */
+/* Create a 32-bit writable surface for blitting tests */
 void
 _surfaceSetUp(void *arg)
 {
+    int result;
+    SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
+    SDL_BlendMode currentBlendMode;
     Uint32 rmask, gmask, bmask, amask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     rmask = 0xff000000;
@@ -44,9 +47,17 @@ _surfaceSetUp(void *arg)
     amask = 0xff000000;
 #endif
 
-	referenceSurface = SDLTest_ImageBlit(); /* For size info */
-	testSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, referenceSurface->w, referenceSurface->h, 32, rmask, gmask, bmask, amask);
+    referenceSurface = SDLTest_ImageBlit(); /* For size info */
+    testSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, referenceSurface->w, referenceSurface->h, 32, rmask, gmask, bmask, amask);
     SDLTest_AssertCheck(testSurface != NULL, "Check that testSurface is not NULL");
+    if (testSurface != NULL) {
+      /* Disable blend mode for target surface */
+      result = SDL_SetSurfaceBlendMode(testSurface, blendMode);
+      SDLTest_AssertCheck(result == 0, "Validate result from SDL_SetSurfaceBlendMode, expected: 0, got: %i", result);
+      result = SDL_GetSurfaceBlendMode(testSurface, &currentBlendMode);
+      SDLTest_AssertCheck(result == 0, "Validate result from SDL_GetSurfaceBlendMode, expected: 0, got: %i", result);
+      SDLTest_AssertCheck(currentBlendMode == blendMode, "Validate blendMode, expected: %i, got: %i", blendMode, currentBlendMode);      
+    }
 }
 
 void
@@ -69,10 +80,10 @@ void _clearTestSurface()
 {
 	int ret;
 	Uint32 color;
-	
+
 	/* Clear surface. */
-	color = SDL_MapRGB( testSurface->format, 0, 0, 0);
-	SDLTest_AssertPass("Call to SDL_MapRGB()");
+	color = SDL_MapRGBA( testSurface->format, 0, 0, 0, 0);
+	SDLTest_AssertPass("Call to SDL_MapRGBA()");
 	ret = SDL_FillRect( testSurface, NULL, color);
 	SDLTest_AssertPass("Call to SDL_FillRect()");
 	SDLTest_AssertCheck(ret == 0, "Verify result from SDL_FillRect, expected: 0, got: %i", ret);
@@ -102,6 +113,21 @@ void _testBlitBlendMode(int mode)
 	face = SDLTest_ImageFace();
 	SDLTest_AssertCheck(face != NULL, "Verify face surface is not NULL");
 	if (face == NULL) return;
+
+        /* Reset alpha modulation */	
+	ret = SDL_SetSurfaceAlphaMod(face, 255);
+	SDLTest_AssertPass("Call to SDL_SetSurfaceAlphaMod()");
+	SDLTest_AssertCheck(ret == 0, "Verify result from SDL_SetSurfaceAlphaMod(), expected: 0, got: %i", ret);
+
+        /* Reset color modulation */	
+	ret = SDL_SetSurfaceColorMod(face, 255, 255, 255);
+	SDLTest_AssertPass("Call to SDL_SetSurfaceColorMod()");
+	SDLTest_AssertCheck(ret == 0, "Verify result from SDL_SetSurfaceColorMod(), expected: 0, got: %i", ret);
+
+        /* Reset color key */	
+	ret = SDL_SetColorKey(face, SDL_FALSE, 0);
+	SDLTest_AssertPass("Call to SDL_SetColorKey()");
+	SDLTest_AssertCheck(ret == 0, "Verify result from SDL_SetColorKey(), expected: 0, got: %i", ret);
 
 	/* Clear the test surface */
         _clearTestSurface();
@@ -141,11 +167,16 @@ void _testBlitBlendMode(int mode)
 		else if (mode == -4) {
 			/* Crazy blending mode magic. */
 			nmode = (i/4*j/4) % 4;
-			if (nmode==0) bmode = SDL_BLENDMODE_NONE;
-			else if (nmode==1) bmode = SDL_BLENDMODE_BLEND;
-			else if (nmode==2) bmode = SDL_BLENDMODE_ADD;
-			else if (nmode==3) bmode = SDL_BLENDMODE_MOD;
-			ret = SDL_SetSurfaceBlendMode( face, bmode );		
+			if (nmode==0) {
+				bmode = SDL_BLENDMODE_NONE;
+			} else if (nmode==1) {
+				bmode = SDL_BLENDMODE_BLEND;
+			} else if (nmode==2) {
+				bmode = SDL_BLENDMODE_ADD;				
+			} else if (nmode==3) {
+				bmode = SDL_BLENDMODE_MOD;
+			}
+			ret = SDL_SetSurfaceBlendMode( face, bmode );
 			if (ret != 0) checkFailCount4++;
 		}
 
@@ -473,7 +504,7 @@ surface_testBlitBlendLoop(void *arg) {
    int ret;
    SDL_Surface *referenceSurface;
 
-   /* All blitting */ 
+   /* All blitting modes */ 
    _testBlitBlendMode(-4);
    
    /* Verify result by comparing surfaces */

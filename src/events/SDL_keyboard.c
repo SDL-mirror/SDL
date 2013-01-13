@@ -895,17 +895,20 @@ SDL_Scancode SDL_GetScancodeFromName(const char *name)
 	int i;
 
 	if (!name || !*name) {
+	        SDL_InvalidParamError("name");
 		return SDL_SCANCODE_UNKNOWN;
 	}
 
 	for (i = 0; i < SDL_arraysize(SDL_scancode_names); ++i) {
 		if (!SDL_scancode_names[i]) {
 			continue;
-		}
+		}		
 		if (SDL_strcasecmp(name, SDL_scancode_names[i]) == 0) {
 			return (SDL_Scancode)i;
 		}
 	}
+
+	SDL_InvalidParamError("name");
 	return SDL_SCANCODE_UNKNOWN;
 }
 

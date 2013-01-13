@@ -614,25 +614,37 @@ SDLTest_RandomDouble()
 char *
 SDLTest_RandomAsciiString()
 {
-	// note: fuzzerInvocationCounter is increment in the RandomAsciiStringWithMaximumLenght
 	return SDLTest_RandomAsciiStringWithMaximumLength(255);
 }
 
 char *
-SDLTest_RandomAsciiStringWithMaximumLength(int maxSize)
+SDLTest_RandomAsciiStringWithMaximumLength(int maxLength)
 {
 	int size;
-	char *string;
-	int counter;
 
-	fuzzerInvocationCounter++;
-
-	if(maxSize < 1) {
+	if(maxLength < 1) {
+                SDL_InvalidParamError("maxLength");
 		return NULL;
 	}
 
-	size = (SDLTest_RandomUint32() % (maxSize + 1)) + 1;
-	string = (char *)SDL_malloc(size * sizeof(char));
+	size = (SDLTest_RandomUint32() % (maxLength + 1));
+	
+	return SDLTest_RandomAsciiStringOfSize(size);	
+}
+
+char *
+SDLTest_RandomAsciiStringOfSize(int size)
+{
+	char *string;
+	int counter;
+
+
+	if(size < 1) {
+                SDL_InvalidParamError("size");
+		return NULL;
+	}
+
+	string = (char *)SDL_malloc((size + 1) * sizeof(char));
 	if (string==NULL) {
 	  return NULL;
         }
@@ -642,6 +654,8 @@ SDLTest_RandomAsciiStringWithMaximumLength(int maxSize)
 	}
 
 	string[counter] = '\0';
+
+	fuzzerInvocationCounter++;
 
 	return string;
 }
