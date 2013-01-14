@@ -613,6 +613,9 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     descriptor = mEnv->GetFieldID(fdCls, "descriptor", "I");
     ctx->hidden.androidio.fd = mEnv->GetIntField(fd, descriptor);
 
+    // Seek to the correct offset in the file.
+    lseek(ctx->hidden.androidio.fd, (off_t)ctx->hidden.androidio.offset, SEEK_SET);
+
     if (false) {
 fallback:
         __android_log_print(ANDROID_LOG_DEBUG, "SDL", "Falling back to legacy InputStream method for opening file");

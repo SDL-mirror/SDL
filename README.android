@@ -138,6 +138,18 @@ SDL_AndroidGetExternalStoragePath()
 
 See SDL_system.h for more details on these functions.
 
+The asset packaging system will, by default, compress certain file extensions.
+SDL includes two asset file access mechanisms, the preferred one is the so
+called "File Descriptor" method, which is faster and doesn't involve the Dalvik
+GC, but given this method does not work on compressed assets, there is also the
+"Input Stream" method, which is automatically used as a fall back by SDL. You
+may want to keep this fact in mind when building your APK, specially when large
+files are involved.
+For more information on which extensions get compressed by default and how to
+disable this behaviour, see for example:
+    
+http://ponystyle.com/blog/2010/03/26/dealing-with-asset-compression-in-android-apps/
+
 ================================================================================
  Pause / Resume behaviour
 ================================================================================
