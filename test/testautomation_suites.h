@@ -21,6 +21,7 @@ extern SDLTest_TestSuiteReference surfaceTestSuite;
 extern SDLTest_TestSuiteReference syswmTestSuite;
 extern SDLTest_TestSuiteReference videoTestSuite;
 extern SDLTest_TestSuiteReference mouseTestSuite;
+extern SDLTest_TestSuiteReference timerTestSuite;
 
 // All test suites
 SDLTest_TestSuiteReference *testSuites[] =  {
@@ -36,6 +37,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 	&syswmTestSuite,
 	&videoTestSuite,
 	&mouseTestSuite,
+	&timerTestSuite,
 	NULL
 };
 
