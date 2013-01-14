@@ -332,10 +332,9 @@ rwops_testFPRead(void)
    /* Run generic tests */
    _testGenericRWopsValidations( rw, 0 );
 
-   /* Close handle */
+   /* Close handle - does fclose() */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   fclose(fp);
 
    return TEST_COMPLETED;
 }
@@ -376,10 +375,9 @@ rwops_testFPWrite(void)
    /* Run generic tests */
    _testGenericRWopsValidations( rw, 1 );
 
-   /* Close handle */
+   /* Close handle - does fclose() */
    SDL_RWclose(rw);
    SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
-   fclose(fp);
 
    return TEST_COMPLETED;
 }
