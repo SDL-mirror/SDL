@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 
+#include "SDL_config.h"
 #include "SDL.h"
 #include "SDL_test.h"
 
@@ -110,6 +111,8 @@ keyboard_getKeyFromName(void *arg)
 int
 keyboard_getKeyFromScancode(void *arg)
 {
+   const char *expectedError = "Parameter 'scancode' is invalid";
+   const char *error;   
    SDL_Keycode result;
 
    /* Case where input is valid */
@@ -119,13 +122,41 @@ keyboard_getKeyFromScancode(void *arg)
 
    /* Case where input is zero */
    result = SDL_GetKeyFromScancode(0);
-   SDLTest_AssertPass("Call to SDL_GetKeyFromScancode(zero)");
+   SDLTest_AssertPass("Call to SDL_GetKeyFromScancode(0)");
    SDLTest_AssertCheck(result == SDLK_UNKNOWN, "Verify result from call is UNKNOWN, expected: %i, got: %i", SDLK_UNKNOWN, result);
 
-   /* Case where input is invalid */
+   SDL_ClearError();
+   SDLTest_AssertPass("Call to SDL_ClearError()");
+
+   /* Case where input is invalid (too small) */
    result = SDL_GetKeyFromScancode(-999);
-   SDLTest_AssertPass("Call to SDL_GetKeyFromScancode(invalid)");
+   SDLTest_AssertPass("Call to SDL_GetKeyFromScancode(-999)");
    SDLTest_AssertCheck(result == SDLK_UNKNOWN, "Verify result from call is UNKNOWN, expected: %i, got: %i", SDLK_UNKNOWN, result);
+   error = SDL_GetError();
+   SDLTest_AssertPass("Call to SDL_GetError()");
+   SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+   if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+   }
+
+   SDL_ClearError();
+   SDLTest_AssertPass("Call to SDL_ClearError()");
+
+   /* Case where input is invalid (too big) */
+   result = SDL_GetKeyFromScancode(999);
+   SDLTest_AssertPass("Call to SDL_GetKeyFromScancode(999)");
+   SDLTest_AssertCheck(result == SDLK_UNKNOWN, "Verify result from call is UNKNOWN, expected: %i, got: %i", SDLK_UNKNOWN, result);
+   error = SDL_GetError();
+   SDLTest_AssertPass("Call to SDL_GetError()");
+   SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+   if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+   }
+
+   SDL_ClearError();
+   SDLTest_AssertPass("Call to SDL_ClearError()");
 
    return TEST_COMPLETED;
 }
@@ -382,15 +413,21 @@ keyboard_setTextInputRect(void *arg)
 int
 keyboard_setTextInputRectNegative(void *arg)
 {      
+   /* Some platforms set also an error message; prepare for checking it */
+#if SDL_VIDEO_DRIVER_WINDOWS || SDL_VIDEO_DRIVER_ANDROID || SDL_VIDEO_DRIVER_COCOA  
    const char *expectedError = "Parameter 'rect' is invalid";
    const char *error;
    
    SDL_ClearError();
    SDLTest_AssertPass("Call to SDL_ClearError()");
+#endif
    
    /* NULL refRect */
    SDL_SetTextInputRect(NULL);
    SDLTest_AssertPass("Call to SDL_SetTextInputRect(NULL)");
+
+   /* Some platforms set also an error message; so check it */
+#if SDL_VIDEO_DRIVER_WINDOWS || SDL_VIDEO_DRIVER_ANDROID || SDL_VIDEO_DRIVER_COCOA  
    error = SDL_GetError();
    SDLTest_AssertPass("Call to SDL_GetError()");
    SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
@@ -401,6 +438,7 @@ keyboard_setTextInputRectNegative(void *arg)
 
    SDL_ClearError();
    SDLTest_AssertPass("Call to SDL_ClearError()");
+#endif
       
    return TEST_COMPLETED;
 }

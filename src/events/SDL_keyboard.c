@@ -860,6 +860,11 @@ SDL_Keycode
 SDL_GetKeyFromScancode(SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
+    
+    if (scancode<SDL_SCANCODE_UNKNOWN || scancode >= SDL_NUM_SCANCODES) {
+          SDL_InvalidParamError("scancode");
+          return 0;
+    }
 
     return keyboard->keymap[scancode];
 }
