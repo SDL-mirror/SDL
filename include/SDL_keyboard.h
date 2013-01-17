@@ -193,7 +193,7 @@ extern DECLSPEC void SDLCALL SDL_SetTextInputRect(SDL_Rect *rect);
  *  
  *  \sa SDL_IsScreenKeyboardShown()
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasScreenKeyboardSupport();
+extern DECLSPEC SDL_bool SDLCALL SDL_HasScreenKeyboardSupport(void);
 
 /**
  *  \brief Returns whether the screen keyboard is shown for given window.
