@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "SDL.h"
 #include "SDL_test.h"
@@ -133,7 +134,10 @@ int audio_enumerateAndNameAudioDevicesNegativeTests()
 
 
 /**
- * @brief Checks available audio driver names.
+ * \brief Checks available audio driver names.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_GetNumAudioDrivers
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_GetAudioDriver
  */
 int audio_printAudioDrivers()
 {
@@ -163,7 +167,9 @@ int audio_printAudioDrivers()
 
 
 /**
- * @brief Checks current audio driver name with initialized audio.
+ * \brief Checks current audio driver name with initialized audio.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_GetCurrentAudioDriver
  */
 int audio_printCurrentAudioDriver()
 {
@@ -180,6 +186,316 @@ int audio_printCurrentAudioDriver()
    return TEST_COMPLETED;
 }
 
+
+/**
+ * \brief Builds various audio conversion structures
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_BuildAudioCVT
+ */
+int audio_buildAudioCVT()
+{
+  int result;
+  SDL_AudioCVT  cvt;
+  SDL_AudioSpec spec1;
+  SDL_AudioSpec spec2;
+  int i, j, k;
+  const int numFormats = 18;
+  SDL_AudioFormat formats[] = { AUDIO_S8, AUDIO_U8, AUDIO_S16LSB, AUDIO_S16MSB, AUDIO_S16SYS, AUDIO_S16, AUDIO_U16LSB, 
+                                AUDIO_U16MSB, AUDIO_U16SYS, AUDIO_U16, AUDIO_S32LSB, AUDIO_S32MSB, AUDIO_S32SYS, AUDIO_S32, 
+                                AUDIO_F32LSB, AUDIO_F32MSB, AUDIO_F32SYS, AUDIO_F32 };
+  const int numChannels = 4;
+  Uint8 channels[] = { 1, 2, 4, 6 };
+  const int numFrequencies = 4;
+  int frequencies[] = { 11025, 22050, 44100, 48000 };
+  
+  /* No conversion needed */
+  spec1.format = AUDIO_S16LSB;
+  spec1.channels = 2;
+  spec1.freq = 22050;
+  result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
+                                   spec1.format, spec1.channels, spec1.freq);
+  SDLTest_AssertPass("Call to SDL_BuildAudioCVT(spec1 ==> spec1)");
+  SDLTest_AssertCheck(result == 0, "Verify result value; expected: 0, got: %i", result);
+
+  /* Typical conversion */
+  spec1.format = AUDIO_S8;
+  spec1.channels = 1;
+  spec1.freq = 22050;
+  spec2.format = AUDIO_S16LSB;
+  spec2.channels = 2;
+  spec2.freq = 44100;  
+  result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
+                                   spec2.format, spec2.channels, spec2.freq);
+  SDLTest_AssertPass("Call to SDL_BuildAudioCVT(spec1 ==> spec2)");
+  SDLTest_AssertCheck(result == 1, "Verify result value; expected: 1, got: %i", result);
+
+  /* All source conversions with random conversion targets */
+  for (i=0; i<numFormats; i++) {
+    for (j=0; j<numChannels; j++) {
+      for (k=0; k<numFrequencies; k++) {
+        spec1.format = formats[i];
+        spec1.channels = channels[j];
+        spec1.freq = frequencies[k];
+        spec2.format = formats[SDLTest_RandomIntegerInRange(0, numFormats - 1)];
+        spec2.channels = channels[SDLTest_RandomIntegerInRange(0, numChannels - 1)];
+        spec2.freq = frequencies[SDLTest_RandomIntegerInRange(0, numFrequencies - 1)];
+        result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
+                                        spec2.format, spec2.channels, spec2.freq);
+        SDLTest_AssertPass("Call to SDL_BuildAudioCVT(format=%i,channels=%i,freq=%i ==> format=%i,channels=%i,freq=%i)", 
+            spec1.format, spec1.channels, spec1.freq, spec2.format, spec2.channels, spec2.freq);
+        SDLTest_AssertCheck(result == 0 || result == 1, "Verify result value; expected: 0 or 1, got: %i", result);
+        if (result<0) {
+          SDLTest_LogError(SDL_GetError());
+        }
+      }
+    }
+  }
+
+   return TEST_COMPLETED;
+}
+
+/**
+ * \brief Checkes calls with invalid input to SDL_BuildAudioCVT
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_BuildAudioCVT
+ */
+int audio_buildAudioCVTNegative()
+{
+  const char *expectedError = "Parameter 'cvt' is invalid";
+  const char *error;   
+  int result;
+  SDL_AudioCVT  cvt;
+  SDL_AudioSpec spec1;
+  SDL_AudioSpec spec2;
+  int i;
+  char message[256];
+
+  /* Valid format */  
+  spec1.format = AUDIO_S8;
+  spec1.channels = 1;
+  spec1.freq = 22050;
+  spec2.format = AUDIO_S16LSB;
+  spec2.channels = 2;
+  spec2.freq = 44100;  
+
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
+
+  /* NULL input for CVT buffer */
+  result = SDL_BuildAudioCVT((SDL_AudioCVT *)NULL, spec1.format, spec1.channels, spec1.freq,
+                                                   spec2.format, spec2.channels, spec2.freq);
+  SDLTest_AssertPass("Call to SDL_BuildAudioCVT(NULL,...)");
+  SDLTest_AssertCheck(result == -1, "Verify result value; expected: -1, got: %i", result); 
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+  }
+
+  /* Invalid conversions */
+  for (i = 1; i < 64; i++) {
+    /* Valid format to start with */  
+    spec1.format = AUDIO_S8;
+    spec1.channels = 1;
+    spec1.freq = 22050;
+    spec2.format = AUDIO_S16LSB;
+    spec2.channels = 2;
+    spec2.freq = 44100;  
+
+    SDL_ClearError();
+    SDLTest_AssertPass("Call to SDL_ClearError()");
+   
+    /* Set various invalid format inputs */
+    strcpy(message, "Invalid: ");
+    if (i & 1) {
+        strcat(message, " spec1.format");
+        spec1.format = 0;
+    }
+    if (i & 2) { 
+        strcat(message, " spec1.channels");
+        spec1.channels = 0;
+    }
+    if (i & 4) { 
+        strcat(message, " spec1.freq");
+        spec1.freq = 0;
+    }
+    if (i & 8) { 
+        strcat(message, " spec2.format");
+        spec2.format = 0;
+    }
+    if (i & 16) { 
+        strcat(message, " spec2.channels");
+        spec2.channels = 0;
+    }
+    if (i & 32) { 
+        strcat(message, " spec2.freq");
+        spec2.freq = 0;
+    }
+    SDLTest_Log(message);
+    result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
+                                   spec2.format, spec2.channels, spec2.freq);
+    SDLTest_AssertPass("Call to SDL_BuildAudioCVT(spec1 ==> spec2)");
+    SDLTest_AssertCheck(result == -1, "Verify result value; expected: -1, got: %i", result);
+    error = SDL_GetError();
+    SDLTest_AssertPass("Call to SDL_GetError()");
+    SDLTest_AssertCheck(error != NULL && SDL_strlen(error)>0, "Validate that error message was not NULL or empty");
+  }
+
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
+                                                
+  return TEST_COMPLETED;
+}
+
+/**
+ * \brief Checks current audio status.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_GetAudioStatus
+ */
+int audio_getAudioStatus()
+{
+   SDL_AudioStatus result;
+
+   /* Check current audio status */
+   result = SDL_GetAudioStatus();
+   SDLTest_AssertPass("Call to SDL_GetAudioStatus()");
+   SDLTest_AssertCheck(result == SDL_AUDIO_STOPPED || result == SDL_AUDIO_PLAYING || result == SDL_AUDIO_PAUSED,
+        "Verify returned value; expected: STOPPED (%i) | PLAYING (%i) | PAUSED (%i), got: %i", 
+        SDL_AUDIO_STOPPED, SDL_AUDIO_PLAYING, SDL_AUDIO_PAUSED, result);
+
+   return TEST_COMPLETED;
+}
+
+
+/* Test callback function */
+void _audio_testCallback(void *userdata, Uint8 *stream, int len)
+{
+}
+
+/**
+ * \brief Opens, checks current audio status, and closes a device.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_GetAudioStatus
+ */
+int audio_openCloseAndGetAudioStatus()
+{
+   SDL_AudioStatus result;
+   int i;
+   int count;
+   char *device;   
+   SDL_AudioDeviceID id;
+   SDL_AudioSpec desired, obtained;
+   
+   /* Get number of devices. */
+   count = SDL_GetNumAudioDevices(0);
+   SDLTest_AssertPass("Call to SDL_GetNumAudioDevices(0)");
+   if (count>0) {
+     for (i=0; i< count; i++) {
+       /* Get device name */
+       device = (char *)SDL_GetAudioDeviceName(i, 0);
+       SDLTest_AssertPass("SDL_GetAudioDeviceName(%i,0)", i);
+       SDLTest_AssertCheck(device != NULL, "Validate device name is not NULL; got: %s", (device != NULL) ? device : "NULL");
+       if (device == NULL) return TEST_ABORTED;
+
+       /* Set standard desired spec */
+       desired.freq=22050;
+       desired.format=AUDIO_S16SYS;
+       desired.channels=2;
+       desired.samples=4096;
+       desired.callback=_audio_testCallback;
+       desired.userdata=NULL;
+       
+       /* Open device */
+       id = SDL_OpenAudioDevice((const char *)device, 0, &desired, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+       SDLTest_AssertPass("SDL_OpenAudioDevice('%s',...)", device);
+       SDLTest_AssertCheck(id > 1, "Validate device ID; expected: >=2, got: %i", id);
+       if (id > 1) {
+     
+         /* Check device audio status */
+         result = SDL_GetAudioDeviceStatus(id);
+         SDLTest_AssertPass("Call to SDL_GetAudioDeviceStatus()");
+         SDLTest_AssertCheck(result == SDL_AUDIO_STOPPED || result == SDL_AUDIO_PLAYING || result == SDL_AUDIO_PAUSED,
+            "Verify returned value; expected: STOPPED (%i) | PLAYING (%i) | PAUSED (%i), got: %i", 
+            SDL_AUDIO_STOPPED, SDL_AUDIO_PLAYING, SDL_AUDIO_PAUSED, result);         
+         
+         /* Close device again */
+         SDL_CloseAudioDevice(id);
+         SDLTest_AssertPass("Call to SDL_CloseAudioDevice()");
+       }
+     }
+   } else {
+     SDLTest_Log("No devices to test with");
+   }
+   
+   return TEST_COMPLETED;
+}
+
+/**
+ * \brief Locks and unlocks open audio device.
+ *
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_LockAudioDevice
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_UnlockAudioDevice
+ */
+int audio_lockUnlockOpenAudioDevice()
+{
+   int i;
+   int count;
+   char *device;   
+   SDL_AudioDeviceID id;
+   SDL_AudioSpec desired, obtained;
+   
+   /* Get number of devices. */
+   count = SDL_GetNumAudioDevices(0);
+   SDLTest_AssertPass("Call to SDL_GetNumAudioDevices(0)");
+   if (count>0) {
+     for (i=0; i< count; i++) {
+       /* Get device name */
+       device = (char *)SDL_GetAudioDeviceName(i, 0);
+       SDLTest_AssertPass("SDL_GetAudioDeviceName(%i,0)", i);
+       SDLTest_AssertCheck(device != NULL, "Validate device name is not NULL; got: %s", (device != NULL) ? device : "NULL");
+       if (device == NULL) return TEST_ABORTED;
+
+       /* Set standard desired spec */
+       desired.freq=22050;
+       desired.format=AUDIO_S16SYS;
+       desired.channels=2;
+       desired.samples=4096;
+       desired.callback=_audio_testCallback;
+       desired.userdata=NULL;
+       
+       /* Open device */
+       id = SDL_OpenAudioDevice((const char *)device, 0, &desired, &obtained, SDL_AUDIO_ALLOW_ANY_CHANGE);
+       SDLTest_AssertPass("SDL_OpenAudioDevice('%s',...)", device);
+       SDLTest_AssertCheck(id > 1, "Validate device ID; expected: >=2, got: %i", id);
+       if (id > 1) {     
+         /* Lock to protect callback */
+         SDL_LockAudioDevice(id);
+         SDLTest_AssertPass("SDL_LockAudioDevice(%i)", id);
+         
+         /* Simulate callback processing */
+         SDL_Delay(10);
+         SDLTest_Log("Simulate callback processing - delay");
+         
+         /* Unlock again*/         
+         SDL_UnlockAudioDevice(id);
+         SDLTest_AssertPass("SDL_UnlockAudioDevice(%i)", id);         
+         
+         /* Close device again */
+         SDL_CloseAudioDevice(id);
+         SDLTest_AssertPass("Call to SDL_CloseAudioDevice()");
+       }
+     }
+   } else {
+     SDLTest_Log("No devices to test with");
+   }
+   
+   return TEST_COMPLETED;
+}
+
+
+
 /* ================= Test Case References ================== */
 
 /* Audio test cases */
@@ -195,9 +511,24 @@ static const SDLTest_TestCaseReference audioTest3 =
 static const SDLTest_TestCaseReference audioTest4 =
 		{ (SDLTest_TestCaseFp)audio_printCurrentAudioDriver, "audio_printCurrentAudioDriver", "Checks current audio driver name with initialized audio.", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference audioTest5 =
+		{ (SDLTest_TestCaseFp)audio_buildAudioCVT, "audio_buildAudioCVT", "Builds various audio conversion structures.", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference audioTest6 =
+		{ (SDLTest_TestCaseFp)audio_buildAudioCVTNegative, "audio_buildAudioCVTNegative", "Checks calls with invalid input to SDL_BuildAudioCVT", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference audioTest7 =
+		{ (SDLTest_TestCaseFp)audio_getAudioStatus, "audio_getAudioStatus", "Checks current audio status.", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference audioTest8 =
+		{ (SDLTest_TestCaseFp)audio_openCloseAndGetAudioStatus, "audio_openCloseAndGetAudioStatus", "Opens and closes audio device and get audio status.", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference audioTest9 =
+		{ (SDLTest_TestCaseFp)audio_lockUnlockOpenAudioDevice, "audio_lockUnlockOpenAudioDevice", "Locks and unlocks an open audio device.", TEST_ENABLED };
+
 /* Sequence of Audio test cases */
 static const SDLTest_TestCaseReference *audioTests[] =  {
-	&audioTest1, &audioTest2, &audioTest3, &audioTest4, NULL
+	&audioTest1, &audioTest2, &audioTest3, &audioTest4, &audioTest5, &audioTest6, &audioTest7, &audioTest8, &audioTest9, NULL
 };
 
 /* Audio test suite (global) */

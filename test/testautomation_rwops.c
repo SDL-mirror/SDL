@@ -4,7 +4,7 @@
  *
  * Original code written by Edgar Simo "bobbens"
  * Ported by Markus Kauppila (markus.kauppila@gmail.com)
- * Updated for SDL_test by aschiffler at ferzkopp dot net
+ * Updated and extended for SDL_test by aschiffler at ferzkopp dot net
  *
  * Released under Public Domain.
  */
@@ -42,7 +42,7 @@ RWopsSetUp(void *arg)
 	/* Create a test file */
 	handle = fopen(RWopsReadTestFilename, "w");
 	SDLTest_AssertCheck(handle != NULL, "Verify creation of file '%s' returned non NULL handle", RWopsReadTestFilename);
-    if (handle == NULL) return;
+        if (handle == NULL) return;
 
 	/* Write some known test into it */
 	writtenLen = (int)fwrite(RWopsHelloWorldTestString, 1, fileLen, handle);
@@ -177,6 +177,7 @@ rwops_testParamNegative (void)
  * @brief Tests opening from memory.
  *
  * \sa http://wiki.libsdl.org/moin.cgi/SDL_RWFromMem
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  */
 int
 rwops_testMem (void)
@@ -211,6 +212,7 @@ rwops_testMem (void)
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromConstMem
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  */
 int 
 rwops_testConstMem (void)
@@ -241,7 +243,7 @@ rwops_testConstMem (void)
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
- * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  */
 int
 rwops_testFileRead(void)
@@ -267,11 +269,11 @@ rwops_testFileRead(void)
 }
 
 /**
- * @brief Tests writing from memory.
+ * @brief Tests writing from file.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
- * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  */
 int
 rwops_testFileWrite(void)
@@ -302,7 +304,7 @@ rwops_testFileWrite(void)
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFP
- * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  *
  */
 int
@@ -345,7 +347,7 @@ rwops_testFPRead(void)
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFP
- * http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
  *
  */
 int
@@ -385,8 +387,8 @@ rwops_testFPWrite(void)
 /**
  * @brief Tests alloc and free RW context.
  *
- * \sa http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
  * \sa http://wiki.libsdl.org/moin.cgi/SDL_AllocRW
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_FreeRW
  */
 int
 rwops_testAllocFree (void)
@@ -400,6 +402,130 @@ rwops_testAllocFree (void)
    /* Free context again */
    SDL_FreeRW(rw);
    SDLTest_AssertPass("Call to SDL_FreeRW() succeeded");
+
+   return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests writing and reading from file using endian aware functions.
+ *
+ * \sa
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWFromFile
+ * http://wiki.libsdl.org/moin.cgi/SDL_RWClose
+ * http://wiki.libsdl.org/moin.cgi/SDL_ReadBE16
+ * http://wiki.libsdl.org/moin.cgi/SDL_WriteBE16
+ */
+int
+rwops_testFileWriteReadEndian(void)
+{
+   SDL_RWops *rw;
+   int result;
+   int mode;
+   size_t objectsWritten;
+   Uint16 BE16value;
+   Uint32 BE32value;
+   Uint64 BE64value;
+   Uint16 LE16value;
+   Uint32 LE32value;
+   Uint64 LE64value;
+   Uint16 BE16test;
+   Uint32 BE32test;
+   Uint64 BE64test;
+   Uint16 LE16test;
+   Uint32 LE32test;
+   Uint64 LE64test;
+
+   for (mode = 0; mode < 3; mode++) {
+   
+     /* Create test data */
+     switch (mode) {
+       case 0:
+        SDLTest_Log("All 0 values");
+        BE16value = 0;
+        BE32value = 0;
+        BE64value = 0;
+        LE16value = 0;
+        LE32value = 0;
+        LE64value = 0;
+        break;
+       case 1:
+        SDLTest_Log("All 1 values");
+        BE16value = 1;
+        BE32value = 1;
+        BE64value = 1;
+        LE16value = 1;
+        LE32value = 1;
+        LE64value = 1;
+        break;
+       case 2:
+        SDLTest_Log("Random values");
+        BE16value = SDLTest_RandomUint16();
+        BE32value = SDLTest_RandomUint32();
+        BE64value = SDLTest_RandomUint64();
+        LE16value = SDLTest_RandomUint16();
+        LE32value = SDLTest_RandomUint32();
+        LE64value = SDLTest_RandomUint64();
+        break;
+     }
+   
+     /* Write test. */
+     rw = SDL_RWFromFile(RWopsWriteTestFilename, "w+");
+     SDLTest_AssertPass("Call to SDL_RWFromFile(..,\"w+\")");
+     SDLTest_AssertCheck(rw != NULL, "Verify opening file with SDL_RWFromFile in write mode does not return NULL");
+
+     // Bail out if NULL
+     if (rw == NULL) return TEST_ABORTED;
+
+     /* Write test data */
+     objectsWritten = SDL_WriteBE16(rw, BE16value);
+     SDLTest_AssertPass("Call to SDL_WriteBE16");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+     objectsWritten = SDL_WriteBE32(rw, BE32value);
+     SDLTest_AssertPass("Call to SDL_WriteBE32");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+     objectsWritten = SDL_WriteBE64(rw, BE64value);
+     SDLTest_AssertPass("Call to SDL_WriteBE64");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+     objectsWritten = SDL_WriteLE16(rw, LE16value);
+     SDLTest_AssertPass("Call to SDL_WriteLE16");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+     objectsWritten = SDL_WriteLE32(rw, LE32value);
+     SDLTest_AssertPass("Call to SDL_WriteLE32");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+     objectsWritten = SDL_WriteLE64(rw, LE64value);
+     SDLTest_AssertPass("Call to SDL_WriteLE64");
+     SDLTest_AssertCheck(objectsWritten == 1, "Validate number of objects written, expected: 1, got: %i", objectsWritten);   
+
+     /* Test seek to start */
+     result = SDL_RWseek( rw, 0, RW_SEEK_SET );
+     SDLTest_AssertPass("Call to SDL_RWseek succeeded");
+     SDLTest_AssertCheck(result == 0, "Verify result from position 0 with SDL_RWseek, expected 0, got %i", result);
+
+     /* Read test data */
+     BE16test = SDL_ReadBE16(rw);
+     SDLTest_AssertPass("Call to SDL_ReadBE16");
+     SDLTest_AssertCheck(BE16test == BE16value, "Validate return value from SDL_ReadBE16, expected: %hu, got: %hu", BE16value, BE16test);
+     BE32test = SDL_ReadBE32(rw);
+     SDLTest_AssertPass("Call to SDL_ReadBE32");
+     SDLTest_AssertCheck(BE32test == BE32value, "Validate return value from SDL_ReadBE32, expected: %u, got: %u", BE32value, BE32test);   
+     BE64test = SDL_ReadBE64(rw);
+     SDLTest_AssertPass("Call to SDL_ReadBE64");
+     SDLTest_AssertCheck(BE64test == BE64value, "Validate return value from SDL_ReadBE64, expected: %llu, got: %llu", BE64value, BE64test);   
+     LE16test = SDL_ReadLE16(rw);
+     SDLTest_AssertPass("Call to SDL_ReadLE16");
+     SDLTest_AssertCheck(LE16test == LE16value, "Validate return value from SDL_ReadLE16, expected: %hu, got: %hu", LE16value, LE16test);
+     LE32test = SDL_ReadLE32(rw);
+     SDLTest_AssertPass("Call to SDL_ReadLE32");
+     SDLTest_AssertCheck(LE32test == LE32value, "Validate return value from SDL_ReadLE32, expected: %u, got: %u", LE32value, LE32test);   
+     LE64test = SDL_ReadLE64(rw);
+     SDLTest_AssertPass("Call to SDL_ReadLE64");
+     SDLTest_AssertCheck(LE64test == LE64value, "Validate return value from SDL_ReadLE64, expected: %llu, got: %llu", LE64value, LE64test);
+
+     /* Close handle */
+     SDL_RWclose(rw);
+     SDLTest_AssertPass("Call to SDL_RWclose() succeeded");
+   
+   }
 
    return TEST_COMPLETED;
 }
@@ -432,9 +558,13 @@ static const SDLTest_TestCaseReference rwopsTest7 =
 static const SDLTest_TestCaseReference rwopsTest8 =
 		{ (SDLTest_TestCaseFp)rwops_testAllocFree, "rwops_testAllocFree", "Test alloc and free of RW context", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference rwopsTest9 =
+		{ (SDLTest_TestCaseFp)rwops_testFileWriteReadEndian, "rwops_testFileWriteReadEndian", "Test writing and reading via the Endian aware functions", TEST_ENABLED };
+
 /* Sequence of RWops test cases */
 static const SDLTest_TestCaseReference *rwopsTests[] =  {
-	&rwopsTest1, &rwopsTest2, &rwopsTest3, &rwopsTest4, &rwopsTest5, &rwopsTest6, &rwopsTest7, &rwopsTest8, NULL
+	&rwopsTest1, &rwopsTest2, &rwopsTest3, &rwopsTest4, &rwopsTest5, &rwopsTest6, 
+	&rwopsTest7, &rwopsTest8, &rwopsTest9, NULL
 };
 
 /* RWops test suite (global) */
