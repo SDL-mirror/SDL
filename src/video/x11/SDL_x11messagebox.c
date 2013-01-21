@@ -50,11 +50,11 @@ static const char g_MessageBoxFontLatin1[] = "-*-*-medium-r-normal--0-120-*-*-p-
 static const char g_MessageBoxFont[] = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*";
 
 static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] = {
-    { 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,
-    { 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,
-    { 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,
-    { 105, 102, 99  }, // SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND,
-    { 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,
+    { 56,  54,  53  }, /* SDL_MESSAGEBOX_COLOR_BACKGROUND, */
+    { 209, 207, 205 }, /* SDL_MESSAGEBOX_COLOR_TEXT, */
+    { 140, 135, 129 }, /* SDL_MESSAGEBOX_COLOR_BUTTON_BORDER, */
+    { 105, 102, 99  }, /* SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND, */
+    { 205, 202, 53  }, /* SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED, */
 };
 
 #define SDL_MAKE_RGB( _r, _g, _b )  ( ( ( Uint32 )( _r ) << 16 ) | \

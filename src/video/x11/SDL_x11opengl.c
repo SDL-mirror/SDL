@@ -460,8 +460,8 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
                                                       GLX_SLOW_VISUAL_EXT;
     }
 
-    // If we're supposed to use DirectColor visuals, and we've got the EXT_visual_info
-    //  extension, then add GLX_X_VISUAL_TYPE_EXT.
+    /* If we're supposed to use DirectColor visuals, and we've got the
+       EXT_visual_info extension, then add GLX_X_VISUAL_TYPE_EXT. */
     if (X11_UseDirectColorVisuals() &&
         _this->gl_data->HAS_GLX_EXT_visual_info) {
         attribs[i++] = GLX_X_VISUAL_TYPE_EXT;

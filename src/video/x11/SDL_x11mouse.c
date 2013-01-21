@@ -230,8 +230,8 @@ X11_CreateSystemCursor(SDL_SystemCursor id)
     default:
         SDL_assert(0);
         return NULL;
-	// X Font Cursors reference:
-	//   http://tronche.com/gui/x/xlib/appendix/b/
+	/* X Font Cursors reference:
+	   http://tronche.com/gui/x/xlib/appendix/b/ */
     case SDL_SYSTEM_CURSOR_ARROW:     shape = XC_arrow; break;
     case SDL_SYSTEM_CURSOR_IBEAM:     shape = XC_xterm; break;
     case SDL_SYSTEM_CURSOR_WAIT:      shape = XC_watch; break;

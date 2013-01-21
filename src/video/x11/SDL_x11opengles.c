@@ -355,8 +355,10 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     int retval;
 
-//    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-//    Display *display = data->videodata->display;
+/*
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    Display *display = data->videodata->display;
+*/
 
     if (!_this->gles_data) {
         SDL_SetError("OpenGL not initialized");
@@ -371,7 +373,10 @@ X11_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_SetError("Unable to make EGL context current");
         retval = -1;
     }
-//    XSync(display, False);
+
+/*
+    XSync(display, False);
+*/
 
     return (retval);
 }

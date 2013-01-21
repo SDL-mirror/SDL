@@ -293,8 +293,8 @@ X11_CreateDevice(int devindex)
         return NULL;
     }
 
-    // Need for threading gl calls. This is also required for the proprietary nVidia
-	//  driver to be threaded.
+    /* Need for threading gl calls. This is also required for the proprietary
+        nVidia driver to be threaded. */
     XInitThreads();
 
     /* Initialize all variables that we clean on shutdown */

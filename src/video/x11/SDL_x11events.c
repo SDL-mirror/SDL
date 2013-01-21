@@ -42,7 +42,7 @@
 #include <stdio.h>
 
 #ifdef SDL_INPUT_LINUXEV
-//Touch Input/event* includes
+/* Touch Input/event* includes */
 #include <linux/input.h>
 #include <fcntl.h>
 #endif
