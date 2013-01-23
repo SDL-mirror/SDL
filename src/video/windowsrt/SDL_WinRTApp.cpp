@@ -465,7 +465,7 @@ TranslateKeycode(int keycode)
 {
     /* Try to get a documented, WinRT, 'VirtualKey' first (as documented at
        http://msdn.microsoft.com/en-us/library/windows/apps/windows.system.virtualkey.aspx ).
-       If that fails, try to get a Win32 virtual key.
+       If that fails, fall back to a Win32 virtual key.
     */
     // TODO, WinRT: try filling out the WinRT keycode table as much as possible, using the Win32 table for interpretation hints
     SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
