@@ -261,6 +261,9 @@
     <ClCompile Include="..\..\src\cpuinfo\SDL_cpuinfo.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\windowsrt\SDL_winrtpaths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\begin_code.h">
@@ -554,9 +557,6 @@
     <ClInclude Include="..\..\src\render\SDL_sysrender.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\SDL_system.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\thread\SDL_systhread.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -595,6 +595,9 @@
     </ClInclude>
     <ClInclude Include="..\..\src\events\default_cursor.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\SDL_system.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
