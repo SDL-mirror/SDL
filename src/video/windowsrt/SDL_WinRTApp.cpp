@@ -13,6 +13,8 @@ extern "C" {
 #include "SDL_log.h"
 }
 
+#include <unordered_map>
+
 // TODO, WinRT: Remove reference(s) to BasicTimer.h
 //#include "BasicTimer.h"
 
@@ -291,7 +293,7 @@ void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
     }
 }
 
-static SDL_Scancode WinRT_Keycodes[] = {
+static SDL_Scancode WinRT_Official_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, // VirtualKey.None -- 0
     SDL_SCANCODE_UNKNOWN, // VirtualKey.LeftButton -- 1
     SDL_SCANCODE_UNKNOWN, // VirtualKey.RightButton -- 2
@@ -460,17 +462,32 @@ static SDL_Scancode WinRT_Keycodes[] = {
     SDL_SCANCODE_MENU, // VirtualKey.RightMenu -- 165
 };
 
+static std::unordered_map<int, SDL_Scancode> WinRT_Unofficial_Keycodes;
+
 static SDL_Scancode
 TranslateKeycode(int keycode)
 {
+    if (WinRT_Unofficial_Keycodes.empty()) {
+        /* Set up a table of undocumented (by Microsoft), WinRT-specific,
+           key codes: */
+        // TODO, WinRT: move content declarations of WinRT_Unofficial_Keycodes into a C++11 initializer list, when possible
+        WinRT_Unofficial_Keycodes[222] = SDL_SCANCODE_BACKSLASH;
+    }
+
     /* Try to get a documented, WinRT, 'VirtualKey' first (as documented at
        http://msdn.microsoft.com/en-us/library/windows/apps/windows.system.virtualkey.aspx ).
        If that fails, fall back to a Win32 virtual key.
     */
     // TODO, WinRT: try filling out the WinRT keycode table as much as possible, using the Win32 table for interpretation hints
+    //SDL_Log("WinRT TranslateKeycode, keycode=%d\n", (int)keycode);
     SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
-    if (keycode < SDL_arraysize(WinRT_Keycodes)) {
-        scancode = WinRT_Keycodes[keycode];
+    if (keycode < SDL_arraysize(WinRT_Official_Keycodes)) {
+        scancode = WinRT_Official_Keycodes[keycode];
+    }
+    if (scancode == SDL_SCANCODE_UNKNOWN) {
+        if (WinRT_Unofficial_Keycodes.find(keycode) != WinRT_Unofficial_Keycodes.end()) {
+            scancode = WinRT_Unofficial_Keycodes[keycode];
+        }
     }
     if (scancode == SDL_SCANCODE_UNKNOWN) {
         if (keycode < SDL_arraysize(windows_scancode_table)) {
