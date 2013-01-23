@@ -8,6 +8,7 @@ extern "C" {
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_windowevents_c.h"
+#include "../../events/scancodes_windows.h"
 #include "SDL_events.h"
 #include "SDL_log.h"
 }
@@ -462,9 +463,19 @@ static SDL_Scancode WinRT_Keycodes[] = {
 static SDL_Scancode
 TranslateKeycode(int keycode)
 {
+    /* Try to get a documented, WinRT, 'VirtualKey' first (as documented at
+       http://msdn.microsoft.com/en-us/library/windows/apps/windows.system.virtualkey.aspx ).
+       If that fails, try to get a Win32 virtual key.
+    */
+    // TODO, WinRT: try filling out the WinRT keycode table as much as possible, using the Win32 table for interpretation hints
     SDL_Scancode scancode = SDL_SCANCODE_UNKNOWN;
     if (keycode < SDL_arraysize(WinRT_Keycodes)) {
         scancode = WinRT_Keycodes[keycode];
+    }
+    if (scancode == SDL_SCANCODE_UNKNOWN) {
+        if (keycode < SDL_arraysize(windows_scancode_table)) {
+            scancode = windows_scancode_table[keycode];
+        }
     }
     if (scancode == SDL_SCANCODE_UNKNOWN) {
         SDL_Log("WinRT TranslateKeycode, unknown keycode=%d\n", (int)keycode);
