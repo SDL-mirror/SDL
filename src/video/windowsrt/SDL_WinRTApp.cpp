@@ -289,7 +289,7 @@ static SDL_Scancode WinRT_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, // VirtualKey.XButton1 -- 5
     SDL_SCANCODE_UNKNOWN, // VirtualKey.XButton2 -- 6
     SDL_SCANCODE_UNKNOWN, // -- 7
-    SDL_SCANCODE_UNKNOWN, // VirtualKey.Back -- 8  (maybe SDL_SCANCODE_AC_BACK ?)
+    SDL_SCANCODE_BACKSPACE, // VirtualKey.Back -- 8
     SDL_SCANCODE_TAB, // VirtualKey.Tab -- 9
     SDL_SCANCODE_UNKNOWN, // -- 10
     SDL_SCANCODE_UNKNOWN, // -- 11
