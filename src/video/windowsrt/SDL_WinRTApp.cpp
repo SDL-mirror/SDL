@@ -471,6 +471,7 @@ TranslateKeycode(int keycode)
         /* Set up a table of undocumented (by Microsoft), WinRT-specific,
            key codes: */
         // TODO, WinRT: move content declarations of WinRT_Unofficial_Keycodes into a C++11 initializer list, when possible
+        WinRT_Unofficial_Keycodes[220] = SDL_SCANCODE_GRAVE;
         WinRT_Unofficial_Keycodes[222] = SDL_SCANCODE_BACKSLASH;
     }
 
