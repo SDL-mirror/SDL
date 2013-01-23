@@ -152,11 +152,21 @@ void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEven
 {
     m_windowVisible = args->Visible;
     if (m_sdlWindowData) {
+        SDL_bool wasSDLWindowSurfaceValid = m_sdlWindowData->sdlWindow->surface_valid;
+
         if (args->Visible) {
             SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_SHOWN, 0, 0);
         } else {
             SDL_SendWindowEvent(m_sdlWindowData->sdlWindow, SDL_WINDOWEVENT_HIDDEN, 0, 0);
         }
+
+        // HACK: Prevent SDL's window-hide handling code, which currently
+        // triggers a fake window resize (possibly erronously), from
+        // marking the SDL window's surface as invalid.
+        //
+        // A better solution to this probably involves figuring out if the
+        // fake window resize can be prevented.
+        m_sdlWindowData->sdlWindow->surface_valid = wasSDLWindowSurfaceValid;
     }
 }
 
