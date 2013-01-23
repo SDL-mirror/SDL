@@ -93,6 +93,45 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
 #endif /* __ANDROID__ */
 
 
+/* Platform specific functions for Windows RT */
+#if defined(__WINRT__) && __WINRT__
+
+/* Gets the path to the local app data store.
+   Files and directories that should be limited to the local device can be
+   created in this path.
+
+   This function may be used safely on Windows Phone 8, as opposed to
+   SDL_WinRTGetRoamingFolderPath() and SDL_WinRTGetTemporaryFolderPath(),
+   which do not work on Windows Phone 8 (and will return NULL if called
+   from this platform).
+ */
+extern DECLSPEC const char * SDLCALL SDL_WinRTGetLocalFolderPath();
+
+/* Gets the path to the roaming app data store.
+   Files and directories that should roam to different devices can be
+   created in this path.  Be sure to read Microsoft's documentation on
+   roaming files for more information on how this works, as restrictions
+   do apply.
+
+   Please note that on Windows Phone 8, this function will return NULL,
+   as Windows Phone 8 apps do not have an accessible roaming app data
+   store.
+ */
+extern DECLSPEC const char * SDLCALL SDL_WinRTGetRoamingFolderPath();
+
+/* Gets the path to the temporary app data store.
+   Files and directories may be written here, however they may be deleted
+   by Windows at a future date.
+
+   Please note that on Windows Phone 8, this function will return NULL,
+   as Windows Phone 8 apps do not have an accessible temporary app data
+   store.
+*/
+extern DECLSPEC const char * SDLCALL SDL_WinRTGetTemporaryFolderPath();
+
+#endif /* __WINRT__ */
+
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 /* *INDENT-OFF* */
