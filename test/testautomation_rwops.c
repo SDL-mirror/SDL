@@ -419,7 +419,7 @@ int
 rwops_testFileWriteReadEndian(void)
 {
    SDL_RWops *rw;
-   int result;
+   Sint64 result;
    int mode;
    size_t objectsWritten;
    Uint16 BE16value;

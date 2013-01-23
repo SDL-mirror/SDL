@@ -3,6 +3,9 @@
  * New/updated tests: aschiffler at ferzkopp dot net
  */
 
+/* quiet windows compiler warnings */
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include <string.h>
 

@@ -202,8 +202,8 @@ mouse_createFreeCursor(void *arg)
 
 	/* Create a cursor */
 	cursor = _initArrowCursor(_mouseArrowData);
-    SDLTest_AssertPass("Call to SDL_CreateCursor()");
-    SDLTest_AssertCheck(cursor != NULL, "Validate result from SDL_CreateCursor() is not NULL");	
+        SDLTest_AssertPass("Call to SDL_CreateCursor()");
+        SDLTest_AssertCheck(cursor != NULL, "Validate result from SDL_CreateCursor() is not NULL");	
 	if (cursor == NULL) {
 		return TEST_ABORTED;
 	}
@@ -222,10 +222,10 @@ void _changeCursorVisibility(int state)
 	int newState;
 	int result;
 
-    oldState = SDL_ShowCursor(SDL_QUERY);
+        oldState = SDL_ShowCursor(SDL_QUERY);
 	SDLTest_AssertPass("Call to SDL_ShowCursor(SDL_QUERY)");
 
-    result = SDL_ShowCursor(state);
+        result = SDL_ShowCursor(state);
 	SDLTest_AssertPass("Call to SDL_ShowCursor(%s)", (state == SDL_ENABLE) ? "SDL_ENABLE" : "SDL_DISABLE");
 	SDLTest_AssertCheck(result == oldState, "Validate result from SDL_ShowCursor(%s), expected: %i, got: %i", 
 		(state == SDL_ENABLE) ? "SDL_ENABLE" : "SDL_DISABLE", oldState, result);
@@ -278,8 +278,8 @@ mouse_setCursor(void *arg)
 
 	/* Create a cursor */
 	cursor = _initArrowCursor(_mouseArrowData);
-    SDLTest_AssertPass("Call to SDL_CreateCursor()");
-    SDLTest_AssertCheck(cursor != NULL, "Validate result from SDL_CreateCursor() is not NULL");	
+        SDLTest_AssertPass("Call to SDL_CreateCursor()");
+        SDLTest_AssertCheck(cursor != NULL, "Validate result from SDL_CreateCursor() is not NULL");	
 	if (cursor == NULL) {
 		return TEST_ABORTED;
 	}
@@ -296,6 +296,143 @@ mouse_setCursor(void *arg)
 	SDL_FreeCursor(cursor);
 	SDLTest_AssertPass("Call to SDL_FreeCursor()");
 
+	return TEST_COMPLETED;
+}
+
+#define MOUSE_TESTWINDOW_WIDTH	320
+#define MOUSE_TESTWINDOW_HEIGHT 200
+
+/**
+ * Create s test window
+ */
+SDL_Window *_createTestWindow()
+{
+  int posX = 100, posY = 100, width = MOUSE_TESTWINDOW_WIDTH, height = MOUSE_TESTWINDOW_HEIGHT;
+  SDL_Window *window;
+  window = SDL_CreateWindow("mouse_createTestWindow", posX, posY, width, height, 0);
+  SDLTest_AssertPass("SDL_CreateWindow()");
+  SDLTest_AssertCheck(window != NULL, "Check SDL_CreateWindow result");
+  return window;
+}
+
+/*
+ * Destroy test window  
+ */
+void _destroyTestWindow(SDL_Window *window)
+{
+  if (window != NULL) {  
+     SDL_DestroyWindow(window);
+     window = NULL;
+     SDLTest_AssertPass("SDL_DestroyWindow");
+  }
+}
+
+/**
+ * @brief Check call to SDL_WarpMouseInWindow
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_WarpMouseInWindow
+ */
+int
+mouse_warpMouseInWindow(void *arg)
+{
+  	const int w = MOUSE_TESTWINDOW_WIDTH, h = MOUSE_TESTWINDOW_HEIGHT;
+  	int numPositions = 6;
+  	int xPositions[] = {-1, 0, 1, w-1, w, w+1 };  
+  	int yPositions[] = {-1, 0, 1, h-1, h, h+1 };
+	int x, y, i, j;
+	SDL_Window *window;
+	
+	/* Create test window */
+	window = _createTestWindow();
+	if (window == NULL) return TEST_ABORTED;
+
+	/* Mouse to random position inside window */	
+	x = SDLTest_RandomIntegerInRange(1, w-1);
+	y = SDLTest_RandomIntegerInRange(1, h-1);
+	SDL_WarpMouseInWindow(window, x, y);
+	SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
+
+        /* Same position again */
+   	SDL_WarpMouseInWindow(window, x, y);
+	SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
+
+	/* Mouse to various boundary positions */
+	for (i=0; i<numPositions; i++) {	
+	  for (j=0; j<numPositions; j++) {	
+	    x = xPositions[i];
+	    y = yPositions[j];
+	    SDL_WarpMouseInWindow(window, x, y);
+	    SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
+
+	    /* TODO: add tracking of events and check that each call generates a mouse motion event */
+	    SDL_PumpEvents();
+	    SDLTest_AssertPass("SDL_PumpEvents()");
+	  }
+	}
+	
+
+        /* Clean up test window */	
+	_destroyTestWindow(window);
+	
+	return TEST_COMPLETED;
+}
+
+/**
+ * @brief Check call to SDL_GetMouseFocus
+ * 
+ * @sa http://wiki.libsdl.org/moin.cgi/SDL_GetMouseFocus
+ */
+int
+mouse_getMouseFocus(void *arg)
+{
+  	const int w = MOUSE_TESTWINDOW_WIDTH, h = MOUSE_TESTWINDOW_HEIGHT;
+  	int x, y;
+	SDL_Window *window;
+	SDL_Window *focusWindow;	
+
+	/* Get focus - focus non-deterministic */
+	focusWindow = SDL_GetMouseFocus();
+	SDLTest_AssertPass("SDL_GetMouseFocus()");
+
+        /* Create test window */	
+	window = _createTestWindow();
+	if (window == NULL) return TEST_ABORTED;
+
+	/* Mouse to random position inside window */	
+	x = SDLTest_RandomIntegerInRange(1, w-1);
+	y = SDLTest_RandomIntegerInRange(1, h-1);
+	SDL_WarpMouseInWindow(window, x, y);
+	SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
+
+	/* Pump events to update focus state */
+	SDL_PumpEvents();
+	SDLTest_AssertPass("SDL_PumpEvents()");
+
+        /* Get focus with explicit window setup - focus deterministic */	
+	focusWindow = SDL_GetMouseFocus();
+	SDLTest_AssertPass("SDL_GetMouseFocus()");
+	SDLTest_AssertCheck (focusWindow != NULL, "Check returned window value is not NULL");
+	SDLTest_AssertCheck (focusWindow == window, "Check returned window value is test window");
+
+	/* Mouse to random position outside window */	
+	x = SDLTest_RandomIntegerInRange(-9, -1);
+	y = SDLTest_RandomIntegerInRange(-9, -1);
+	SDL_WarpMouseInWindow(window, x, y);
+	SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
+
+        /* Clean up test window */	
+	_destroyTestWindow(window);
+
+	/* Pump events to update focus state */
+	SDL_PumpEvents();
+	SDLTest_AssertPass("SDL_PumpEvents()");
+
+        /* Get focus for non-existing window */	
+	focusWindow = SDL_GetMouseFocus();
+	SDLTest_AssertPass("SDL_GetMouseFocus()");
+	SDLTest_AssertCheck (focusWindow == NULL, "Check returned window value is NULL");
+
+	
 	return TEST_COMPLETED;
 }
 
@@ -317,9 +454,15 @@ static const SDLTest_TestCaseReference mouseTest4 =
 static const SDLTest_TestCaseReference mouseTest5 =
 		{ (SDLTest_TestCaseFp)mouse_setCursor, "mouse_setCursor", "Check call to SDL_SetCursor", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference mouseTest6 =
+		{ (SDLTest_TestCaseFp)mouse_warpMouseInWindow, "mouse_warpMouseInWindow", "Check call to SDL_WarpMouseInWindow", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference mouseTest7 =
+		{ (SDLTest_TestCaseFp)mouse_getMouseFocus, "mouse_getMouseFocus", "Check call to SDL_getMouseFocus", TEST_ENABLED };
+
 /* Sequence of Mouse test cases */
 static const SDLTest_TestCaseReference *mouseTests[] =  {
-	&mouseTest1, &mouseTest2, &mouseTest3, &mouseTest4, &mouseTest5, NULL
+	&mouseTest1, &mouseTest2, &mouseTest3, &mouseTest4, &mouseTest5, &mouseTest6, &mouseTest7, NULL
 };
 
 /* Mouse test suite (global) */
