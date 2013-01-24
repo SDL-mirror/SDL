@@ -118,9 +118,9 @@ clipboard_testClipboardTextFunctions(void *arg)
 		charResult != NULL,
 		"Verify SDL_GetClipboardText did not return NULL");
 	SDLTest_AssertCheck(
-		strlen(charResult) == 0,
+		SDL_strlen(charResult) == 0,
 		"Verify SDL_GetClipboardText returned string with length 0, got length %i",
-		strlen(charResult));
+		SDL_strlen(charResult));
     intResult = SDL_SetClipboardText((const char *)text);
 	SDLTest_AssertPass("Call to SDL_SetClipboardText succeeded");
 	SDLTest_AssertCheck(
@@ -128,7 +128,7 @@ clipboard_testClipboardTextFunctions(void *arg)
 		"Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
 		intResult);
 	SDLTest_AssertCheck(
-		strcmp(textRef, text) == 0,
+		SDL_strcmp(textRef, text) == 0,
 		"Verify SDL_SetClipboardText did not modify input string, expected '%s', got '%s'",
 		textRef, text);
 	boolResult = SDL_HasClipboardText();

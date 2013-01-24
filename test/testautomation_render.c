@@ -969,30 +969,37 @@ _hasTexAlpha(void)
 static void
 _compare(SDL_Surface *referenceSurface, int allowable_error)
 {
-   int ret;
+   int result;
    SDL_Rect rect;
-   Uint8 pix[4*TESTRENDER_SCREEN_W*TESTRENDER_SCREEN_H];
+   Uint8 *pixels;
    SDL_Surface *testSurface;
 
    /* Read pixels. */
+   pixels = (Uint8 *)SDL_malloc(4*TESTRENDER_SCREEN_W*TESTRENDER_SCREEN_H);
+   SDLTest_AssertCheck(pixels != NULL, "Validate allocated temp pixel buffer");
+   if (pixels == NULL) return;
+
    /* Explicitly specify the rect in case the window isn't the expected size... */
    rect.x = 0;
    rect.y = 0;
    rect.w = TESTRENDER_SCREEN_W;
    rect.h = TESTRENDER_SCREEN_H;
-   ret = SDL_RenderReadPixels(renderer, &rect, RENDER_COMPARE_FORMAT, pix, 80*4 );
-   SDLTest_AssertCheck(ret == 0, "Validate result from SDL_RenderReadPixels, expected: 0, got: %i", ret);
+   result = SDL_RenderReadPixels(renderer, &rect, RENDER_COMPARE_FORMAT, pixels, 80*4 );
+   SDLTest_AssertCheck(result == 0, "Validate result from SDL_RenderReadPixels, expected: 0, got: %i", result);
 
    /* Create surface. */
-   testSurface = SDL_CreateRGBSurfaceFrom( pix, TESTRENDER_SCREEN_W, TESTRENDER_SCREEN_H, 32, TESTRENDER_SCREEN_W*4,
+   testSurface = SDL_CreateRGBSurfaceFrom(pixels, TESTRENDER_SCREEN_W, TESTRENDER_SCREEN_H, 32, TESTRENDER_SCREEN_W*4,
                                        RENDER_COMPARE_RMASK, RENDER_COMPARE_GMASK, RENDER_COMPARE_BMASK, RENDER_COMPARE_AMASK);
-   SDLTest_AssertCheck(testSurface != NULL, "Verify result from SDL_CreateRGBSurfaceFrom");
+   SDLTest_AssertCheck(testSurface != NULL, "Verify result from SDL_CreateRGBSurfaceFrom is not NULL");
 
    /* Compare surface. */
-   ret = SDLTest_CompareSurfaces( testSurface, referenceSurface, allowable_error );
-   SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
+   result = SDLTest_CompareSurfaces( testSurface, referenceSurface, allowable_error );
+   SDLTest_AssertCheck(result == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", result);
 
    /* Clean up. */
+   if (pixels != NULL) {
+	   SDL_free(pixels);
+   }
    if (testSurface != NULL) {
        SDL_FreeSurface(testSurface);
    }

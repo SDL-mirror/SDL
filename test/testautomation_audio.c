@@ -3,9 +3,6 @@
  * New/updated tests: aschiffler at ferzkopp dot net
  */
 
-/* quiet windows compiler warnings */
-#define _CRT_SECURE_NO_WARNINGS
-
 #include <stdio.h>
 #include <string.h>
 
@@ -311,29 +308,29 @@ int audio_buildAudioCVTNegative()
     SDLTest_AssertPass("Call to SDL_ClearError()");
    
     /* Set various invalid format inputs */
-    strcpy(message, "Invalid: ");
+    SDL_strlcpy(message, "Invalid: ", 256);
     if (i & 1) {
-        strcat(message, " spec1.format");
+        SDL_strlcat(message, " spec1.format", 256);
         spec1.format = 0;
     }
     if (i & 2) { 
-        strcat(message, " spec1.channels");
+        SDL_strlcat(message, " spec1.channels", 256);
         spec1.channels = 0;
     }
     if (i & 4) { 
-        strcat(message, " spec1.freq");
+        SDL_strlcat(message, " spec1.freq", 256);
         spec1.freq = 0;
     }
     if (i & 8) { 
-        strcat(message, " spec2.format");
+        SDL_strlcat(message, " spec2.format", 256);
         spec2.format = 0;
     }
     if (i & 16) { 
-        strcat(message, " spec2.channels");
+        SDL_strlcat(message, " spec2.channels", 256);
         spec2.channels = 0;
     }
     if (i & 32) { 
-        strcat(message, " spec2.freq");
+        SDL_strlcat(message, " spec2.freq", 256);
         spec2.freq = 0;
     }
     SDLTest_Log(message);
