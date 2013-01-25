@@ -518,21 +518,26 @@ char *SDL_PrivateGetControllerGUIDFromMappingString( const char *pMapping )
  */
 char *SDL_PrivateGetControllerNameFromMappingString( const char *pMapping )
 {
-	const char *pFirstComma = SDL_strchr( pMapping, ',' );
-	const char *pSecondComma = SDL_strchr( pFirstComma + 1, ',' );
-	if ( pFirstComma && pSecondComma )
-	{
-		char *pchName = SDL_malloc( pSecondComma - pFirstComma );
-		if ( !pchName )
-		{
-			SDL_OutOfMemory();
-			return NULL;
-		}
-		SDL_memcpy( pchName, pFirstComma + 1, pSecondComma - pFirstComma );
-		pchName[ pSecondComma - pFirstComma - 1 ] = 0;
-		return pchName;
-	}
-	return NULL;
+	const char *pFirstComma, *pSecondComma;
+    char *pchName;
+
+    pFirstComma = SDL_strchr( pMapping, ',' );
+    if ( !pFirstComma )
+        return NULL;
+
+	pSecondComma = SDL_strchr( pFirstComma + 1, ',' );
+    if ( !pSecondComma )
+        return NULL;
+
+    pchName = SDL_malloc( pSecondComma - pFirstComma );
+    if ( !pchName )
+    {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+    SDL_memcpy( pchName, pFirstComma + 1, pSecondComma - pFirstComma );
+    pchName[ pSecondComma - pFirstComma - 1 ] = 0;
+    return pchName;
 }
 
 
@@ -541,12 +546,17 @@ char *SDL_PrivateGetControllerNameFromMappingString( const char *pMapping )
  */
 const char *SDL_PrivateGetControllerMappingFromMappingString( const char *pMapping )
 {
-	const char *pFirstComma = SDL_strchr( pMapping, ',' );
-	const char *pSecondComma = SDL_strchr( pFirstComma + 1, ',' );
-	if ( pSecondComma )
-		return pSecondComma + 1; // mapping is everything after the 3rd comma, no need to malloc it
-	else
-		return NULL;
+	const char *pFirstComma, *pSecondComma;
+
+    pFirstComma = SDL_strchr( pMapping, ',' );
+    if ( !pFirstComma )
+        return NULL;
+
+	pSecondComma = SDL_strchr( pFirstComma + 1, ',' );
+    if ( !pSecondComma )
+        return NULL;
+
+    return pSecondComma + 1; /* mapping is everything after the 3rd comma, no need to malloc it */
 }
 
 
@@ -603,8 +613,8 @@ SDL_GameControllerInit(void)
 		if ( hint && hint[0] )
 		{
 			int nchHints = SDL_strlen( hint );
-			char *pUserMappings = SDL_malloc( nchHints + 1 );
-			SDL_memcpy( pUserMappings, hint, nchHints );
+			char *pUserMappings = SDL_malloc( nchHints + 1 ); /* FIXME: memory leak, but we can't free it in this function because pchMapping below points into this memory */
+			SDL_memcpy( pUserMappings, hint, nchHints + 1 );
 			while ( pUserMappings )
 			{
 				char *pchGUID;
