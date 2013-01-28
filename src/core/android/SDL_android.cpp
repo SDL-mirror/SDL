@@ -593,7 +593,6 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
         goto fallback;
     }
 
-    ctx->hidden.androidio.assetFileDescriptorRef = mEnv->NewGlobalRef(inputStream);
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(inputStream), "getStartOffset", "()J");
     ctx->hidden.androidio.offset = mEnv->CallLongMethod(inputStream, mid);
     if (Android_JNI_ExceptionOccurred()) {
@@ -602,7 +601,6 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
 
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(inputStream), "getDeclaredLength", "()J");
     ctx->hidden.androidio.size = mEnv->CallLongMethod(inputStream, mid);
-    
     if (Android_JNI_ExceptionOccurred()) {
         goto fallback;
     }
@@ -612,6 +610,7 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     fdCls = mEnv->GetObjectClass(fd);
     descriptor = mEnv->GetFieldID(fdCls, "descriptor", "I");
     ctx->hidden.androidio.fd = mEnv->GetIntField(fd, descriptor);
+    ctx->hidden.androidio.assetFileDescriptorRef = mEnv->NewGlobalRef(inputStream);
 
     // Seek to the correct offset in the file.
     lseek(ctx->hidden.androidio.fd, (off_t)ctx->hidden.androidio.offset, SEEK_SET);
