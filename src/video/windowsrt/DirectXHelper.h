@@ -25,7 +25,12 @@ namespace DX
         
         return create_task(folder->GetFileAsync(filename)).then([] (StorageFile^ file) 
         {
-            return FileIO::ReadBufferAsync(file);
+            return file->OpenReadAsync();
+        }).then([] (Streams::IRandomAccessStreamWithContentType^ stream)
+        {
+            unsigned int bufferSize = static_cast<unsigned int>(stream->Size);
+            auto fileBuffer = ref new Streams::Buffer(bufferSize);
+            return stream->ReadAsync(fileBuffer, bufferSize, Streams::InputStreamOptions::None);
         }).then([] (Streams::IBuffer^ fileBuffer) -> Platform::Array<byte>^ 
         {
             auto fileData = ref new Platform::Array<byte>(fileBuffer->Length);

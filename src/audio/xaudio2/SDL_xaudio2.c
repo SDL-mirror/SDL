@@ -367,6 +367,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     ixa2->SetDebugConfiguration(&debugConfig);
     */
 
+#if ! defined(__WINRT__) || WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
     if (devname != NULL) {
         UINT32 devcount = 0;
         UINT32 i = 0;
@@ -402,6 +403,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
             return 0;
         }
     }
+#endif
 
     /* Initialize all variables that we clean on shutdown */
     this->hidden = (struct SDL_PrivateAudioData *)
