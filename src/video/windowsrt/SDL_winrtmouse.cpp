@@ -126,6 +126,7 @@ WINRT_InitMouse(_THIS)
         - programmatically moveable cursors
     */
 
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
     //mouse->CreateCursor = WINRT_CreateCursor;
     mouse->CreateSystemCursor = WINRT_CreateSystemCursor;
     mouse->ShowCursor = WINRT_ShowCursor;
@@ -134,6 +135,7 @@ WINRT_InitMouse(_THIS)
     mouse->SetRelativeMouseMode = WINRT_SetRelativeMouseMode;
 
     SDL_SetDefaultCursor(WINRT_CreateDefaultCursor());
+#endif
 }
 
 void

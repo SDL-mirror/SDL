@@ -98,8 +98,13 @@ void SDL_winrtrenderer::CreateDeviceResources()
         context.As(&m_d3dContext)
         );
 
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    auto loadVSTask = DX::ReadDataAsync("SimpleVertexShader.cso");
+    auto loadPSTask = DX::ReadDataAsync("SimplePixelShader.cso");
+#else
     auto loadVSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimpleVertexShader.cso");
     auto loadPSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimplePixelShader.cso");
+#endif
 
     auto createVSTask = loadVSTask.then([this](Platform::Array<byte>^ fileData) {
         DX::ThrowIfFailed(
@@ -194,7 +199,7 @@ void SDL_winrtrenderer::CreateDeviceResources()
 
 // Allocate all memory resources that change on a window SizeChanged event.
 void SDL_winrtrenderer::CreateWindowSizeDependentResources()
-{ 
+{
     // Store the window bounds so the next time we get a SizeChanged event we can
     // avoid rebuilding everything if the size is identical.
     m_windowBounds = m_window->Bounds;
@@ -238,8 +243,13 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
         swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = 2; // Use double-buffering to minimize latency.
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+        swapChainDesc.Scaling = DXGI_SCALING_STRETCH; // On phone, only stretch and aspect-ratio stretch scaling are allowed.
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // On phone, no swap effects are supported.
+#else
         swapChainDesc.Scaling = DXGI_SCALING_NONE;
         swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect.
+#endif
         swapChainDesc.Flags = 0;
 
         ComPtr<IDXGIDevice1>  dxgiDevice;
@@ -327,9 +337,12 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
             throw ref new Platform::FailureException();
     }
 
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
+    // TODO, WinRT: Windows Phone does not have the IDXGISwapChain1::SetRotation method.  Check if an alternative is available, or needed.
     DX::ThrowIfFailed(
         m_swapChain->SetRotation(rotation)
         );
+#endif
 
     // Create a render target view of the swap chain back buffer.
     ComPtr<ID3D11Texture2D> backBuffer;
@@ -546,8 +559,15 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 // Method to deliver the final image to the display.
 void SDL_winrtrenderer::Present()
 {
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    // The first argument instructs DXGI to block until VSync, putting the application
+	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
+	// frames that will never be displayed to the screen.
+	HRESULT hr = m_swapChain->Present(1, 0);
+#else
     // The application may optionally specify "dirty" or "scroll"
     // rects to improve efficiency in certain scenarios.
+    // This option is not available on Windows Phone 8, to note.
     DXGI_PRESENT_PARAMETERS parameters = {0};
     parameters.DirtyRectsCount = 0;
     parameters.pDirtyRects = nullptr;
@@ -558,6 +578,7 @@ void SDL_winrtrenderer::Present()
     // to sleep until the next VSync. This ensures we don't waste any cycles rendering
     // frames that will never be displayed to the screen.
     HRESULT hr = m_swapChain->Present1(1, 0, &parameters);
+#endif
 
     // Discard the contents of the render target.
     // This is a valid operation only when the existing contents will be entirely

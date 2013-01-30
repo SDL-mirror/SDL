@@ -33,7 +33,6 @@ static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
 // SDL_CreateWindow().
 SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
-
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
@@ -77,7 +76,9 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
     window->Closed += 
         ref new TypedEventHandler<CoreWindow^, CoreWindowEventArgs^>(this, &SDL_WinRTApp::OnWindowClosed);
 
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
     window->PointerCursor = ref new CoreCursor(CoreCursorType::Arrow, 0);
+#endif
 
     window->PointerPressed +=
         ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerPressed);
@@ -88,9 +89,11 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
     window->PointerMoved +=
         ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerMoved);
 
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
     // Retrieves relative-only mouse movements:
     Windows::Devices::Input::MouseDevice::GetForCurrentView()->MouseMoved +=
         ref new TypedEventHandler<MouseDevice^, MouseEventArgs^>(this, &SDL_WinRTApp::OnMouseMoved);
+#endif
 
     window->KeyDown +=
         ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &SDL_WinRTApp::OnKeyDown);
