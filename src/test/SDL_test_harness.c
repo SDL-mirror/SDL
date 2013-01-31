@@ -221,7 +221,7 @@ void
 * \returns Test case result.
 */
 int
-	SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference *testCase, Uint64 execKey)
+SDLTest_RunTest(SDLTest_TestSuiteReference *testSuite, SDLTest_TestCaseReference *testCase, Uint64 execKey)
 {
 	SDL_TimerID timer = 0;
 	int testResult = 0;
@@ -479,6 +479,11 @@ int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *user
 							testCounter,
 							currentTestName);
 				} else {
+					// Override 'disabled' flag if we specified a test filter (i.e. force run for debugging)
+					if (testFilter == 1 && !testCase->enabled) {
+						SDLTest_Log("Force run of disabled test since test filter was set");
+						testCase->enabled = 1;
+					}
 
 					// Take time - test start
 					testStartSeconds = GetClock();

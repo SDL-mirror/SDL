@@ -37,7 +37,8 @@ main(int argc, char *argv[])
     Uint64 userExecKey = 0;
     char *userRunSeed = NULL;
     char *filter = NULL;
-    int i;
+    int i, done;
+    SDL_Event event;
 
     /* Initialize test framework */
     state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
@@ -102,6 +103,15 @@ main(int argc, char *argv[])
 
     /* Call Harness */
     result = SDLTest_RunSuites(testSuites, (const char *)userRunSeed, userExecKey, (const char *)filter, testIterations);
+
+    /* Empty event queue */    
+    done = 0;
+    for (i=0; i<100; i++)  {
+      while (SDL_PollEvent(&event)) {
+        SDLTest_CommonEvent(state, &event, &done);
+      }
+      SDL_Delay(10);
+    }
 
     /* Clean up */
     if (userRunSeed != NULL) {
