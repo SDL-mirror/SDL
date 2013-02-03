@@ -96,6 +96,12 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
 /* Platform specific functions for Windows RT */
 #if defined(__WINRT__) && __WINRT__
 
+/* Gets the path to the installed app's root directory.
+
+   This function may be used safely on Windows Phone 8.
+*/
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetInstalledLocationPath();
+
 /* Gets the path to the local app data store.
    Files and directories that should be limited to the local device can be
    created in this path.

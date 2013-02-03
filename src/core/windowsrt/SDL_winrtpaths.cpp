@@ -30,6 +30,16 @@ WINRT_CopySystemPath(Windows::Storage::StorageFolder ^ folder)
 }
 
 extern "C" const wchar_t *
+SDL_WinRTGetInstalledLocationPath()
+{
+    static const wchar_t * path = nullptr;
+    if (!path) {
+        path = WINRT_CopySystemPath(Windows::ApplicationModel::Package::Current->InstalledLocation);
+    }
+    return path;
+}
+
+extern "C" const wchar_t *
 SDL_WinRTGetLocalFolderPath()
 {
     static const wchar_t * path = nullptr;
