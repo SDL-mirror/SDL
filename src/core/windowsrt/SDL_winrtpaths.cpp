@@ -42,23 +42,31 @@ SDL_WinRTGetLocalFolderPath()
 extern "C" const wchar_t *
 SDL_WinRTGetRoamingFolderPath()
 {
-    // TODO, WinRT: make SDL_WinRTGetRoamingFolderPath return NULL on Windows Phone 8
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    SDL_Unsupported();
+    return NULL;
+#else
     static const wchar_t * path = nullptr;
     if (!path) {
         path = WINRT_CopySystemPath(ApplicationData::Current->RoamingFolder);
     }
     return path;
+#endif
 }
 
 extern "C" const wchar_t *
 SDL_WinRTGetTemporaryFolderPath()
 {
-    // TODO, WinRT: make SDL_WinRTGetTemporaryFolderPath return NULL on Windows Phone 8
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    SDL_Unsupported();
+    return NULL;
+#else
     static const wchar_t * path = nullptr;
     if (!path) {
         path = WINRT_CopySystemPath(ApplicationData::Current->TemporaryFolder);
     }
     return path;
+#endif
 }
 
 #endif /* __WINRT__ */
