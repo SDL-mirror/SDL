@@ -13,40 +13,29 @@ extern "C" {
 #include "../windows/SDL_windows.h"
 }
 
-using namespace Windows::Storage;
+#include <string>
 
-static const wchar_t *
-WINRT_CopySystemPath(Windows::Storage::StorageFolder ^ folder)
-{
-    const wchar_t * srcPath = folder->Path->Data();
-    const size_t srcPathLen = SDL_wcslen(srcPath);
-    wchar_t * destPath = (wchar_t *) SDL_calloc(srcPathLen + 1, sizeof(wchar_t));
-    if (!destPath) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-    SDL_wcslcpy(destPath, srcPath, srcPathLen + 1);
-    return destPath;
-}
+using namespace std;
+using namespace Windows::Storage;
 
 extern "C" const wchar_t *
 SDL_WinRTGetInstalledLocationPath()
 {
-    static const wchar_t * path = nullptr;
-    if (!path) {
-        path = WINRT_CopySystemPath(Windows::ApplicationModel::Package::Current->InstalledLocation);
+    static wstring path;
+    if (path.empty()) {
+        path = Windows::ApplicationModel::Package::Current->InstalledLocation->Path->Data();
     }
-    return path;
+    return path.c_str();
 }
 
 extern "C" const wchar_t *
 SDL_WinRTGetLocalFolderPath()
 {
-    static const wchar_t * path = nullptr;
-    if (!path) {
-        path = WINRT_CopySystemPath(ApplicationData::Current->LocalFolder);
+    static wstring path;
+    if (path.empty()) {
+        path = ApplicationData::Current->LocalFolder->Path->Data();
     }
-    return path;
+    return path.c_str();
 }
 
 extern "C" const wchar_t *
@@ -56,11 +45,11 @@ SDL_WinRTGetRoamingFolderPath()
     SDL_Unsupported();
     return NULL;
 #else
-    static const wchar_t * path = nullptr;
-    if (!path) {
-        path = WINRT_CopySystemPath(ApplicationData::Current->RoamingFolder);
+    static wstring path;
+    if (path.empty()) {
+        path = ApplicationData::Current->RoamingFolder->Path->Data();
     }
-    return path;
+    return path.c_str();
 #endif
 }
 
@@ -71,11 +60,11 @@ SDL_WinRTGetTemporaryFolderPath()
     SDL_Unsupported();
     return NULL;
 #else
-    static const wchar_t * path = nullptr;
-    if (!path) {
-        path = WINRT_CopySystemPath(ApplicationData::Current->TemporaryFolder);
+    static wstring path;
+    if (path.empty()) {
+        path = ApplicationData::Current->TemporaryFolder->Path->Data();
     }
-    return path;
+    return path.c_str();
 #endif
 }
 
