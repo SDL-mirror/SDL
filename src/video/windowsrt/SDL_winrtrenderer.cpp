@@ -1,8 +1,13 @@
-﻿#include "SDLmain_WinRT_common.h"
+﻿
+#include <fstream>
+#include <string>
+#include <vector>
+#include "SDLmain_WinRT_common.h"
 #include "SDL_winrtrenderer.h"
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
+using namespace std;
 using namespace Windows::UI::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
@@ -45,6 +50,34 @@ void SDL_winrtrenderer::HandleDeviceLost()
     // TODO, WinRT: reconnect HandleDeviceLost to SDL_Renderer
     CreateDeviceResources();
     UpdateForWindowSizeChange();
+}
+
+static bool
+read_file_contents(const wstring & fileName, vector<char> & out)
+{
+    ifstream in(fileName, ios::in | ios::binary);
+    if (!in) {
+        return false;
+    }
+
+    in.seekg(0, ios::end);
+    out.resize((size_t) in.tellg());
+    in.seekg(0, ios::beg);
+    in.read(&out[0], out.size());
+    return in.good();
+}
+
+static bool
+read_shader_contents(const wstring & shaderName, vector<char> & out)
+{
+    wstring fileName = SDL_WinRTGetInstalledLocationPath();
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    fileName += L"\\";
+#else
+    fileName += L"\\SDL_VS2012_WinRT\\";
+#endif
+    fileName += shaderName;
+    return read_file_contents(fileName, out);
 }
 
 // These are the resources that depend on the device.
@@ -102,103 +135,114 @@ void SDL_winrtrenderer::CreateDeviceResources()
         context.As(&m_sdlRendererData->d3dContext)
         );
 
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-    auto loadVSTask = DX::ReadDataAsync("SimpleVertexShader.cso");
-    auto loadPSTask = DX::ReadDataAsync("SimplePixelShader.cso");
-#else
-    auto loadVSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimpleVertexShader.cso");
-    auto loadPSTask = DX::ReadDataAsync("SDL_VS2012_WinRT\\SimplePixelShader.cso");
-#endif
+    // Start loading GPU shaders:
+    vector<char> fileData;
 
-    auto createVSTask = loadVSTask.then([this](Platform::Array<byte>^ fileData) {
-        DX::ThrowIfFailed(
-            (m_sdlRendererData->d3dDevice)->CreateVertexShader(
-                fileData->Data,
-                fileData->Length,
-                nullptr,
-                &m_sdlRendererData->vertexShader
-                )
-            );
+    //
+    // Load in SDL's one and only vertex shader:
+    //
+    if (!read_shader_contents(L"SimpleVertexShader.cso", fileData)) {
+        throw ref new Platform::Exception(E_FAIL, L"Unable to open SDL's vertex shader file.");
+    }
 
-        const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
-        {
-            { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-            { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        };
+    DX::ThrowIfFailed(
+        (m_sdlRendererData->d3dDevice)->CreateVertexShader(
+            &fileData[0],
+            fileData.size(),
+            nullptr,
+            &m_sdlRendererData->vertexShader
+            )
+        );
 
-        DX::ThrowIfFailed(
-            m_sdlRendererData->d3dDevice->CreateInputLayout(
-                vertexDesc,
-                ARRAYSIZE(vertexDesc),
-                fileData->Data,
-                fileData->Length,
-                &m_sdlRendererData->inputLayout
-                )
-            );
-    });
+    //
+    // Create an input layout for SDL's vertex shader:
+    //
+    const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
 
-    auto createPSTask = loadPSTask.then([this](Platform::Array<byte>^ fileData) {
-        DX::ThrowIfFailed(
-            m_sdlRendererData->d3dDevice->CreatePixelShader(
-                fileData->Data,
-                fileData->Length,
-                nullptr,
-                &m_sdlRendererData->pixelShader
-                )
-            );
-    });
+    DX::ThrowIfFailed(
+        m_sdlRendererData->d3dDevice->CreateInputLayout(
+            vertexDesc,
+            ARRAYSIZE(vertexDesc),
+            &fileData[0],
+            fileData.size(),
+            &m_sdlRendererData->inputLayout
+            )
+        );
 
-    auto createVertexBuffer = (createPSTask && createVSTask).then([this] () {
-        VertexPositionColor vertices[] = 
-        {
-            {XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 1.0f)},
-            {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
-            {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
-            {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
-        };
+    //
+    // Load in SDL's one and only pixel shader (for now, more are likely to follow):
+    //
+    if (!read_shader_contents(L"SimplePixelShader.cso", fileData)) {
+        throw ref new Platform::Exception(E_FAIL, L"Unable to open SDL's pixel shader file.");
+    }
 
-        m_vertexCount = ARRAYSIZE(vertices);
+    DX::ThrowIfFailed(
+        m_sdlRendererData->d3dDevice->CreatePixelShader(
+            &fileData[0],
+            fileData.size(),
+            nullptr,
+            &m_sdlRendererData->pixelShader
+            )
+        );
 
-        D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-        vertexBufferData.pSysMem = vertices;
-        vertexBufferData.SysMemPitch = 0;
-        vertexBufferData.SysMemSlicePitch = 0;
-        CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
-        DX::ThrowIfFailed(
-            m_sdlRendererData->d3dDevice->CreateBuffer(
-                &vertexBufferDesc,
-                &vertexBufferData,
-                &m_sdlRendererData->vertexBuffer
-                )
-            );
-    });
+    //
+    // Create a vertex buffer:
+    //
+    VertexPositionColor vertices[] = 
+    {
+        {XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 1.0f)},
+        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
+        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
+    };
 
-    auto createMainSamplerTask = createVertexBuffer.then([this] () {
-        D3D11_SAMPLER_DESC samplerDesc;
-        samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-        samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-        samplerDesc.MipLODBias = 0.0f;
-        samplerDesc.MaxAnisotropy = 1;
-        samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-        samplerDesc.BorderColor[0] = 0.0f;
-        samplerDesc.BorderColor[1] = 0.0f;
-        samplerDesc.BorderColor[2] = 0.0f;
-        samplerDesc.BorderColor[3] = 0.0f;
-        samplerDesc.MinLOD = 0.0f;
-        samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-        DX::ThrowIfFailed(
-            m_sdlRendererData->d3dDevice->CreateSamplerState(
-                &samplerDesc,
-                &m_sdlRendererData->mainSampler
-                )
-            );
-    });
+    m_vertexCount = ARRAYSIZE(vertices);
 
-    createMainSamplerTask.then([this] () {
-        m_loadingComplete = true;
-    });
+    D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
+    vertexBufferData.pSysMem = vertices;
+    vertexBufferData.SysMemPitch = 0;
+    vertexBufferData.SysMemSlicePitch = 0;
+    CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
+    DX::ThrowIfFailed(
+        m_sdlRendererData->d3dDevice->CreateBuffer(
+            &vertexBufferDesc,
+            &vertexBufferData,
+            &m_sdlRendererData->vertexBuffer
+            )
+        );
+
+    //
+    // Create a sampler to use when drawing textures:
+    //
+    D3D11_SAMPLER_DESC samplerDesc;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0.0f;
+    samplerDesc.BorderColor[1] = 0.0f;
+    samplerDesc.BorderColor[2] = 0.0f;
+    samplerDesc.BorderColor[3] = 0.0f;
+    samplerDesc.MinLOD = 0.0f;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    DX::ThrowIfFailed(
+        m_sdlRendererData->d3dDevice->CreateSamplerState(
+            &samplerDesc,
+            &m_sdlRendererData->mainSampler
+            )
+        );
+
+    //
+    // All done!
+    //
+    m_loadingComplete = true;       // This variable can probably be factored-out
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
