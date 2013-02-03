@@ -33,6 +33,12 @@ static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
 // SDL_CreateWindow().
 SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
+// HACK: provide a temporary means for the Direct3D 11.1 renderer to handle lost devices, while refactoring is underway
+void WINRT_HandleDeviceLost()
+{
+    SDL_WinRTGlobalApp->m_renderer->HandleDeviceLost();
+}
+
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;

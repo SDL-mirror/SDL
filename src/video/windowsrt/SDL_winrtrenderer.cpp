@@ -12,6 +12,7 @@ SDL_winrtrenderer::SDL_winrtrenderer() :
     m_mainTextureHelperSurface(NULL),
     m_loadingComplete(false),
     m_vertexCount(0),
+    m_sdlRenderer(NULL),
     m_sdlRendererData(NULL)
 {
 }
@@ -562,42 +563,7 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 // Method to deliver the final image to the display.
 void SDL_winrtrenderer::Present()
 {
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-    // The first argument instructs DXGI to block until VSync, putting the application
-	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
-	// frames that will never be displayed to the screen.
-	HRESULT hr = m_sdlRendererData->swapChain->Present(1, 0);
-#else
-    // The application may optionally specify "dirty" or "scroll"
-    // rects to improve efficiency in certain scenarios.
-    // This option is not available on Windows Phone 8, to note.
-    DXGI_PRESENT_PARAMETERS parameters = {0};
-    parameters.DirtyRectsCount = 0;
-    parameters.pDirtyRects = nullptr;
-    parameters.pScrollRect = nullptr;
-    parameters.pScrollOffset = nullptr;
-    
-    // The first argument instructs DXGI to block until VSync, putting the application
-    // to sleep until the next VSync. This ensures we don't waste any cycles rendering
-    // frames that will never be displayed to the screen.
-    HRESULT hr = m_sdlRendererData->swapChain->Present1(1, 0, &parameters);
-#endif
-
-    // Discard the contents of the render target.
-    // This is a valid operation only when the existing contents will be entirely
-    // overwritten. If dirty or scroll rects are used, this call should be removed.
-    m_sdlRendererData->d3dContext->DiscardView(m_sdlRendererData->renderTargetView.Get());
-
-    // If the device was removed either by a disconnect or a driver upgrade, we 
-    // must recreate all device resources.
-    if (hr == DXGI_ERROR_DEVICE_REMOVED)
-    {
-        HandleDeviceLost();
-    }
-    else
-    {
-        DX::ThrowIfFailed(hr);
-    }
+    SDL_RenderPresent(m_sdlRenderer);
 }
 
 // Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.

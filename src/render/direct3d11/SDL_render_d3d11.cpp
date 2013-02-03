@@ -62,7 +62,7 @@ static int D3D11_UpdateViewport(SDL_Renderer * renderer);
 //                          const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
 //static int D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 //                                Uint32 format, void * pixels, int pitch);
-//static void D3D11_RenderPresent(SDL_Renderer * renderer);
+static void D3D11_RenderPresent(SDL_Renderer * renderer);
 //static void D3D11_DestroyTexture(SDL_Renderer * renderer,
 //                               SDL_Texture * texture);
 //static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
@@ -135,7 +135,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     //renderer->RenderCopy = D3D11_RenderCopy;
     //renderer->RenderCopyEx = D3D11_RenderCopyEx;
     //renderer->RenderReadPixels = D3D11_RenderReadPixels;
-    //renderer->RenderPresent = D3D11_RenderPresent;
+    renderer->RenderPresent = D3D11_RenderPresent;
     //renderer->DestroyTexture = D3D11_DestroyTexture;
     //renderer->DestroyRenderer = D3D11_DestroyRenderer;
     renderer->info = D3D11_RenderDriver.info;
@@ -284,6 +284,51 @@ static int
 D3D11_UpdateViewport(SDL_Renderer * renderer)
 {
     return 0;
+}
+
+static void
+D3D11_RenderPresent(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+    // The first argument instructs DXGI to block until VSync, putting the application
+    // to sleep until the next VSync. This ensures we don't waste any cycles rendering
+    // frames that will never be displayed to the screen.
+    HRESULT hr = data->swapChain->Present(1, 0);
+#else
+    // The application may optionally specify "dirty" or "scroll"
+    // rects to improve efficiency in certain scenarios.
+    // This option is not available on Windows Phone 8, to note.
+    DXGI_PRESENT_PARAMETERS parameters = {0};
+    parameters.DirtyRectsCount = 0;
+    parameters.pDirtyRects = nullptr;
+    parameters.pScrollRect = nullptr;
+    parameters.pScrollOffset = nullptr;
+    
+    // The first argument instructs DXGI to block until VSync, putting the application
+    // to sleep until the next VSync. This ensures we don't waste any cycles rendering
+    // frames that will never be displayed to the screen.
+    HRESULT hr = data->swapChain->Present1(1, 0, &parameters);
+#endif
+
+    // Discard the contents of the render target.
+    // This is a valid operation only when the existing contents will be entirely
+    // overwritten. If dirty or scroll rects are used, this call should be removed.
+    data->d3dContext->DiscardView(data->renderTargetView.Get());
+
+    // If the device was removed either by a disconnect or a driver upgrade, we 
+    // must recreate all device resources.
+    if (hr == DXGI_ERROR_DEVICE_REMOVED)
+    {
+        extern void WINRT_HandleDeviceLost();   // TODO, WinRT: move lost-device handling into the Direct3D 11.1 renderer, as appropriate
+        WINRT_HandleDeviceLost();
+    }
+    else
+    {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, hr);
+        // TODO, WinRT: consider throwing an exception if D3D11_RenderPresent fails, especially if there is a way to salvedge debug info from users' machines
+    }
 }
 
 #endif /* SDL_VIDEO_RENDER_D3D && !SDL_RENDER_DISABLED */

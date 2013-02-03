@@ -46,6 +46,9 @@
 #define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)(S), SDL_strlen(S)+1)
 #endif
 
+/* Sets an error message based on a given HRESULT */
+extern void WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr);
+
 /* Sets an error message based on GetLastError() */
 extern void WIN_SetError(const char *prefix);
 

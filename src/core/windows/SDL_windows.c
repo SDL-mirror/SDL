@@ -30,15 +30,22 @@
 
 /* Sets an error message based on GetLastError() */
 void
-WIN_SetError(const char *prefix)
+WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr)
 {
     TCHAR buffer[1024];
     char *message;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, GetLastError(), 0,
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, hr, 0,
                   buffer, SDL_arraysize(buffer), NULL);
     message = WIN_StringToUTF8(buffer);
     SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
     SDL_free(message);
+}
+
+/* Sets an error message based on GetLastError() */
+void
+WIN_SetError(const char *prefix)
+{
+    WIN_SetErrorFromHRESULT(prefix, GetLastError());
 }
 
 HRESULT

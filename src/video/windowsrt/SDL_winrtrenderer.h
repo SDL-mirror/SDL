@@ -31,7 +31,8 @@ internal:
     void ResizeMainTexture(int w, int h);
 
 internal:
-    // Internal SDL rendeerer (likely a temporary addition, for refactoring purposes):
+    // Internal SDL renderer (likely a temporary addition, for refactoring purposes):
+    SDL_Renderer * m_sdlRenderer;
     D3D11_RenderData * m_sdlRendererData;
 
 protected private:
