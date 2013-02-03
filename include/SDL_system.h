@@ -105,7 +105,7 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
    which do not work on Windows Phone 8 (and will return NULL if called
    from this platform).
  */
-extern DECLSPEC const char * SDLCALL SDL_WinRTGetLocalFolderPath();
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetLocalFolderPath();
 
 /* Gets the path to the roaming app data store.
    Files and directories that should roam to different devices can be
@@ -117,7 +117,7 @@ extern DECLSPEC const char * SDLCALL SDL_WinRTGetLocalFolderPath();
    as Windows Phone 8 apps do not have an accessible roaming app data
    store.
  */
-extern DECLSPEC const char * SDLCALL SDL_WinRTGetRoamingFolderPath();
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetRoamingFolderPath();
 
 /* Gets the path to the temporary app data store.
    Files and directories may be written here, however they may be deleted
@@ -127,7 +127,7 @@ extern DECLSPEC const char * SDLCALL SDL_WinRTGetRoamingFolderPath();
    as Windows Phone 8 apps do not have an accessible temporary app data
    store.
 */
-extern DECLSPEC const char * SDLCALL SDL_WinRTGetTemporaryFolderPath();
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetTemporaryFolderPath();
 
 #endif /* __WINRT__ */
 
