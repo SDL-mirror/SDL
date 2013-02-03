@@ -264,6 +264,9 @@
     <ClCompile Include="..\..\src\core\windowsrt\SDL_winrtpaths.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\render\direct3d11\SDL_render_d3d11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\begin_code.h">
@@ -598,6 +601,9 @@
     </ClInclude>
     <ClInclude Include="..\..\include\SDL_system.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\render\direct3d11\SDL_render_d3d11_cpp.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

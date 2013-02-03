@@ -34,6 +34,7 @@ extern "C" {
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
+#include "../../render/SDL_sysrender.h"
 }
 
 #include "SDL_WinRTApp.h"
@@ -209,6 +210,19 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
        behalf of SDL:
     */
     SDL_WinRTGlobalApp->SetSDLWindowData(data);
+
+    /* For now, create a Direct3D 11 renderer up-front.  Eventually, this
+       won't be done in WINRT_CreateWindow, although it may get done in
+       SDL_WINRT_CreateWindowFramebuffer.
+    */
+
+    // Link SDL_winrtrenderer to the SDL_Renderer temporarily,
+    // for refactoring purposes.  Initialize the SDL_Renderer
+    // first in order to give it the opportunity to create key
+    // resources first.
+    SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
+    SDL_WinRTGlobalApp->m_renderer->m_sdlRendererData = (D3D11_RenderData *) renderer->driverdata;
+    SDL_WinRTGlobalApp->m_renderer->Initialize(CoreWindow::GetForCurrentThread());
 
     /* All done! */
     return 0;

@@ -159,6 +159,8 @@ typedef unsigned int uintptr_t;
 #define SDL_VIDEO_DRIVER_DUMMY  1
 
 // TODO, WinRT: Get a Direct3D 11 based renderer working in SDL.
+/* Enable appropriate renderer(s) */
+#define SDL_VIDEO_RENDER_D3D11  1
 
 /* Enable system power support */
 // TODO, WinRT: investigate system power support.  The Win32-based APIs don't work on WinRT.

@@ -47,7 +47,8 @@ SDL_WinRTApp::SDL_WinRTApp() :
     m_windowClosed(false),
     m_windowVisible(true),
     m_sdlWindowData(NULL),
-    m_useRelativeMouseMode(false)
+    m_useRelativeMouseMode(false),
+    m_renderer(nullptr)
 {
 }
 
@@ -101,8 +102,7 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
     window->KeyUp +=
         ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &SDL_WinRTApp::OnKeyUp);
 
-
-    m_renderer->Initialize(CoreWindow::GetForCurrentThread());
+    //m_renderer->Initialize(CoreWindow::GetForCurrentThread());    // DLudwig: moved this call to WINRT_CreateWindow, likely elsewhere in the future
 }
 
 void SDL_WinRTApp::Load(Platform::String^ entryPoint)

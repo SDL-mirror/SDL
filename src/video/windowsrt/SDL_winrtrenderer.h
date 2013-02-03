@@ -2,6 +2,7 @@
 
 #include "DirectXHelper.h"
 #include "SDL.h"
+#include "../../render/direct3d11/SDL_render_d3d11_cpp.h"
 
 struct VertexPositionColor
 {
@@ -29,20 +30,11 @@ internal:
     virtual void Render(SDL_Surface * surface, SDL_Rect * rects, int numrects);
     void ResizeMainTexture(int w, int h);
 
-protected private:
-    // Direct3D Objects.
-    Microsoft::WRL::ComPtr<ID3D11Device1> m_d3dDevice;
-    Microsoft::WRL::ComPtr<ID3D11DeviceContext1> m_d3dContext;
-    Microsoft::WRL::ComPtr<IDXGISwapChain1> m_swapChain;
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_renderTargetView;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> m_vertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_mainTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_mainTextureResourceView;
-    Microsoft::WRL::ComPtr<ID3D11SamplerState> m_mainSampler;
+internal:
+    // Internal SDL rendeerer (likely a temporary addition, for refactoring purposes):
+    D3D11_RenderData * m_sdlRendererData;
 
+protected private:
     // UpdateWindowSurface helper objects
     SDL_Surface * m_mainTextureHelperSurface;
 

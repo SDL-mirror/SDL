@@ -11,7 +11,8 @@ using namespace Windows::Graphics::Display;
 SDL_winrtrenderer::SDL_winrtrenderer() :
     m_mainTextureHelperSurface(NULL),
     m_loadingComplete(false),
-    m_vertexCount(0)
+    m_vertexCount(0),
+    m_sdlRendererData(NULL)
 {
 }
 
@@ -38,8 +39,9 @@ void SDL_winrtrenderer::HandleDeviceLost()
     // Reset these member variables to ensure that UpdateForWindowSizeChange recreates all resources.
     m_windowBounds.Width = 0;
     m_windowBounds.Height = 0;
-    m_swapChain = nullptr;
+    m_sdlRendererData->swapChain = nullptr;
 
+    // TODO, WinRT: reconnect HandleDeviceLost to SDL_Renderer
     CreateDeviceResources();
     UpdateForWindowSizeChange();
 }
@@ -90,12 +92,13 @@ void SDL_winrtrenderer::CreateDeviceResources()
         );
 
     // Get the Direct3D 11.1 API device and context interfaces.
+    Microsoft::WRL::ComPtr<ID3D11Device1> d3dDevice1;
     DX::ThrowIfFailed(
-        device.As(&m_d3dDevice)
+        device.As(&(m_sdlRendererData->d3dDevice))
         );
 
     DX::ThrowIfFailed(
-        context.As(&m_d3dContext)
+        context.As(&m_sdlRendererData->d3dContext)
         );
 
 #if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
@@ -108,11 +111,11 @@ void SDL_winrtrenderer::CreateDeviceResources()
 
     auto createVSTask = loadVSTask.then([this](Platform::Array<byte>^ fileData) {
         DX::ThrowIfFailed(
-            m_d3dDevice->CreateVertexShader(
+            (m_sdlRendererData->d3dDevice)->CreateVertexShader(
                 fileData->Data,
                 fileData->Length,
                 nullptr,
-                &m_vertexShader
+                &m_sdlRendererData->vertexShader
                 )
             );
 
@@ -123,23 +126,23 @@ void SDL_winrtrenderer::CreateDeviceResources()
         };
 
         DX::ThrowIfFailed(
-            m_d3dDevice->CreateInputLayout(
+            m_sdlRendererData->d3dDevice->CreateInputLayout(
                 vertexDesc,
                 ARRAYSIZE(vertexDesc),
                 fileData->Data,
                 fileData->Length,
-                &m_inputLayout
+                &m_sdlRendererData->inputLayout
                 )
             );
     });
 
     auto createPSTask = loadPSTask.then([this](Platform::Array<byte>^ fileData) {
         DX::ThrowIfFailed(
-            m_d3dDevice->CreatePixelShader(
+            m_sdlRendererData->d3dDevice->CreatePixelShader(
                 fileData->Data,
                 fileData->Length,
                 nullptr,
-                &m_pixelShader
+                &m_sdlRendererData->pixelShader
                 )
             );
     });
@@ -161,10 +164,10 @@ void SDL_winrtrenderer::CreateDeviceResources()
         vertexBufferData.SysMemSlicePitch = 0;
         CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
         DX::ThrowIfFailed(
-            m_d3dDevice->CreateBuffer(
+            m_sdlRendererData->d3dDevice->CreateBuffer(
                 &vertexBufferDesc,
                 &vertexBufferData,
-                &m_vertexBuffer
+                &m_sdlRendererData->vertexBuffer
                 )
             );
     });
@@ -185,9 +188,9 @@ void SDL_winrtrenderer::CreateDeviceResources()
         samplerDesc.MinLOD = 0.0f;
         samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
         DX::ThrowIfFailed(
-            m_d3dDevice->CreateSamplerState(
+            m_sdlRendererData->d3dDevice->CreateSamplerState(
                 &samplerDesc,
-                &m_mainSampler
+                &m_sdlRendererData->mainSampler
                 )
             );
     });
@@ -218,11 +221,11 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
     m_renderTargetSize.Width = swapDimensions ? windowHeight : windowWidth;
     m_renderTargetSize.Height = swapDimensions ? windowWidth : windowHeight;
 
-    if(m_swapChain != nullptr)
+    if(m_sdlRendererData->swapChain != nullptr)
     {
         // If the swap chain already exists, resize it.
         DX::ThrowIfFailed(
-            m_swapChain->ResizeBuffers(
+            m_sdlRendererData->swapChain->ResizeBuffers(
                 2, // Double-buffered swap chain.
                 static_cast<UINT>(m_renderTargetSize.Width),
                 static_cast<UINT>(m_renderTargetSize.Height),
@@ -254,7 +257,7 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 
         ComPtr<IDXGIDevice1>  dxgiDevice;
         DX::ThrowIfFailed(
-            m_d3dDevice.As(&dxgiDevice)
+            m_sdlRendererData->d3dDevice.As(&dxgiDevice)
             );
 
         ComPtr<IDXGIAdapter> dxgiAdapter;
@@ -273,11 +276,11 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
         Windows::UI::Core::CoreWindow^ window = m_window.Get();
         DX::ThrowIfFailed(
             dxgiFactory->CreateSwapChainForCoreWindow(
-                m_d3dDevice.Get(),
+                m_sdlRendererData->d3dDevice.Get(),
                 reinterpret_cast<IUnknown*>(window),
                 &swapChainDesc,
                 nullptr, // Allow on all displays.
-                &m_swapChain
+                &m_sdlRendererData->swapChain
                 )
             );
             
@@ -340,14 +343,14 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 #if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
     // TODO, WinRT: Windows Phone does not have the IDXGISwapChain1::SetRotation method.  Check if an alternative is available, or needed.
     DX::ThrowIfFailed(
-        m_swapChain->SetRotation(rotation)
+        m_sdlRendererData->swapChain->SetRotation(rotation)
         );
 #endif
 
     // Create a render target view of the swap chain back buffer.
     ComPtr<ID3D11Texture2D> backBuffer;
     DX::ThrowIfFailed(
-        m_swapChain->GetBuffer(
+        m_sdlRendererData->swapChain->GetBuffer(
             0,
             __uuidof(ID3D11Texture2D),
             &backBuffer
@@ -355,10 +358,10 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
         );
 
     DX::ThrowIfFailed(
-        m_d3dDevice->CreateRenderTargetView(
+        m_sdlRendererData->d3dDevice->CreateRenderTargetView(
             backBuffer.Get(),
             nullptr,
-            &m_renderTargetView
+            &m_sdlRendererData->renderTargetView
             )
         );
 
@@ -374,7 +377,7 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 
     ComPtr<ID3D11Texture2D> depthStencil;
     DX::ThrowIfFailed(
-        m_d3dDevice->CreateTexture2D(
+        m_sdlRendererData->d3dDevice->CreateTexture2D(
             &depthStencilDesc,
             nullptr,
             &depthStencil
@@ -389,7 +392,7 @@ void SDL_winrtrenderer::CreateWindowSizeDependentResources()
         m_renderTargetSize.Height
         );
 
-    m_d3dContext->RSSetViewports(1, &viewport);
+    m_sdlRendererData->d3dContext->RSSetViewports(1, &viewport);
 }
 
 void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
@@ -425,10 +428,10 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
     initialTextureData.SysMemPitch = textureDesc.Width * pixelSizeInBytes;
     initialTextureData.SysMemSlicePitch = numPixels * pixelSizeInBytes;
     DX::ThrowIfFailed(
-        m_d3dDevice->CreateTexture2D(
+        m_sdlRendererData->d3dDevice->CreateTexture2D(
             &textureDesc,
             &initialTextureData,
-            &m_mainTexture
+            &m_sdlRendererData->mainTexture
             )
         );
 
@@ -452,10 +455,10 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
     resourceViewDesc.Texture2D.MostDetailedMip = 0;
     resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
     DX::ThrowIfFailed(
-        m_d3dDevice->CreateShaderResourceView(
-            m_mainTexture.Get(),
+        m_sdlRendererData->d3dDevice->CreateShaderResourceView(
+            m_sdlRendererData->mainTexture.Get(),
             &resourceViewDesc,
-            &m_mainTextureResourceView)
+            &m_sdlRendererData->mainTextureResourceView)
         );
 }
 
@@ -467,9 +470,9 @@ void SDL_winrtrenderer::UpdateForWindowSizeChange()
         m_orientation != DisplayProperties::CurrentOrientation)
     {
         ID3D11RenderTargetView* nullViews[] = {nullptr};
-        m_d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-        m_renderTargetView = nullptr;
-        m_d3dContext->Flush();
+        m_sdlRendererData->d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+        m_sdlRendererData->renderTargetView = nullptr;
+        m_sdlRendererData->d3dContext->Flush();
         CreateWindowSizeDependentResources();
     }
 }
@@ -477,8 +480,8 @@ void SDL_winrtrenderer::UpdateForWindowSizeChange()
 void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)
 {
     const float blackColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    m_d3dContext->ClearRenderTargetView(
-        m_renderTargetView.Get(),
+    m_sdlRendererData->d3dContext->ClearRenderTargetView(
+        m_sdlRendererData->renderTargetView.Get(),
         blackColor
         );
 
@@ -487,7 +490,7 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
     {
         return;
     }
-    if (!m_mainTextureResourceView)
+    if (!m_sdlRendererData->mainTextureResourceView)
     {
         return;
     }
@@ -496,8 +499,8 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
     // window's main texture to CPU-accessible memory:
     D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
     DX::ThrowIfFailed(
-        m_d3dContext->Map(
-            m_mainTexture.Get(),
+        m_sdlRendererData->d3dContext->Map(
+            m_sdlRendererData->mainTexture.Get(),
             0,
             D3D11_MAP_WRITE_DISCARD,
             0,
@@ -513,47 +516,47 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
     // Clean up a bit, then commit the texture's memory back to Direct3D:
     m_mainTextureHelperSurface->pixels = NULL;
     m_mainTextureHelperSurface->pitch = 0;
-    m_d3dContext->Unmap(
-        m_mainTexture.Get(),
+    m_sdlRendererData->d3dContext->Unmap(
+        m_sdlRendererData->mainTexture.Get(),
         0);
 
-    m_d3dContext->OMSetRenderTargets(
+    m_sdlRendererData->d3dContext->OMSetRenderTargets(
         1,
-        m_renderTargetView.GetAddressOf(),
+        m_sdlRendererData->renderTargetView.GetAddressOf(),
         nullptr
         );
 
     UINT stride = sizeof(VertexPositionColor);
     UINT offset = 0;
-    m_d3dContext->IASetVertexBuffers(
+    m_sdlRendererData->d3dContext->IASetVertexBuffers(
         0,
         1,
-        m_vertexBuffer.GetAddressOf(),
+        m_sdlRendererData->vertexBuffer.GetAddressOf(),
         &stride,
         &offset
         );
 
-    m_d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    m_sdlRendererData->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
-    m_d3dContext->IASetInputLayout(m_inputLayout.Get());
+    m_sdlRendererData->d3dContext->IASetInputLayout(m_sdlRendererData->inputLayout.Get());
 
-    m_d3dContext->VSSetShader(
-        m_vertexShader.Get(),
+    m_sdlRendererData->d3dContext->VSSetShader(
+        m_sdlRendererData->vertexShader.Get(),
         nullptr,
         0
         );
 
-    m_d3dContext->PSSetShader(
-        m_pixelShader.Get(),
+    m_sdlRendererData->d3dContext->PSSetShader(
+        m_sdlRendererData->pixelShader.Get(),
         nullptr,
         0
         );
 
-    m_d3dContext->PSSetShaderResources(0, 1, m_mainTextureResourceView.GetAddressOf());
+    m_sdlRendererData->d3dContext->PSSetShaderResources(0, 1, m_sdlRendererData->mainTextureResourceView.GetAddressOf());
 
-    m_d3dContext->PSSetSamplers(0, 1, m_mainSampler.GetAddressOf());
+    m_sdlRendererData->d3dContext->PSSetSamplers(0, 1, m_sdlRendererData->mainSampler.GetAddressOf());
 
-    m_d3dContext->Draw(4, 0);
+    m_sdlRendererData->d3dContext->Draw(4, 0);
 }
 
 // Method to deliver the final image to the display.
@@ -563,7 +566,7 @@ void SDL_winrtrenderer::Present()
     // The first argument instructs DXGI to block until VSync, putting the application
 	// to sleep until the next VSync. This ensures we don't waste any cycles rendering
 	// frames that will never be displayed to the screen.
-	HRESULT hr = m_swapChain->Present(1, 0);
+	HRESULT hr = m_sdlRendererData->swapChain->Present(1, 0);
 #else
     // The application may optionally specify "dirty" or "scroll"
     // rects to improve efficiency in certain scenarios.
@@ -577,13 +580,13 @@ void SDL_winrtrenderer::Present()
     // The first argument instructs DXGI to block until VSync, putting the application
     // to sleep until the next VSync. This ensures we don't waste any cycles rendering
     // frames that will never be displayed to the screen.
-    HRESULT hr = m_swapChain->Present1(1, 0, &parameters);
+    HRESULT hr = m_sdlRendererData->swapChain->Present1(1, 0, &parameters);
 #endif
 
     // Discard the contents of the render target.
     // This is a valid operation only when the existing contents will be entirely
     // overwritten. If dirty or scroll rects are used, this call should be removed.
-    m_d3dContext->DiscardView(m_renderTargetView.Get());
+    m_sdlRendererData->d3dContext->DiscardView(m_sdlRendererData->renderTargetView.Get());
 
     // If the device was removed either by a disconnect or a driver upgrade, we 
     // must recreate all device resources.

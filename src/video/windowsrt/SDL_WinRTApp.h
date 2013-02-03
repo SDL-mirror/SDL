@@ -47,8 +47,10 @@ protected:
     void OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
     void OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
 
-private:
+internal:
     SDL_winrtrenderer^ m_renderer;
+
+private:
     bool m_windowClosed;
     bool m_windowVisible;
     const SDL_WindowData* m_sdlWindowData;
