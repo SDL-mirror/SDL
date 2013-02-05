@@ -31,7 +31,8 @@
 #include <locale.h>
 
 
-#define SDL_FORK_MESSAGEBOX 1
+#define SDL_FORK_MESSAGEBOX 0
+#define SDL_SET_LOCALE      0
 
 #if SDL_FORK_MESSAGEBOX
 #include <sys/types.h>
@@ -645,13 +646,16 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int ret;
     SDL_MessageBoxDataX11 data;
+#if SDL_SET_LOCALE
     char *origlocale;
+#endif
 
     SDL_zero(data);
 
     if ( !SDL_X11_LoadSymbols() )
         return -1;
 
+#if SDL_SET_LOCALE
     origlocale = setlocale(LC_ALL, NULL);
     if (origlocale != NULL) {
         origlocale = SDL_strdup(origlocale);
@@ -661,6 +665,7 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         }
         setlocale(LC_ALL, "");
     }
+#endif
 
     /* This code could get called from multiple threads maybe? */
     XInitThreads();
@@ -682,10 +687,12 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 
     X11_MessageBoxShutdown( &data );
 
+#if SDL_SET_LOCALE
     if (origlocale) {
         setlocale(LC_ALL, origlocale);
         SDL_free(origlocale);
     }
+#endif
 
     return ret;
 }
@@ -699,6 +706,9 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     pid_t pid;
     int fds[2];
     int status = 0;
+
+	/* Need to flush here in case someone has turned grab off and it hasn't gone through yet, etc. */
+	XFlush(data->display);
 
     if (pipe(fds) == -1) {
         return X11_ShowMessageBoxImpl(messageboxdata, buttonid); /* oh well. */
