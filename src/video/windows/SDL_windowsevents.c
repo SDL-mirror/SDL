@@ -469,8 +469,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                size so we don't need to call AdjustWindowRectEx twice */
             min_w -= w;
             min_h -= h;
-            max_w -= w;
-            max_h -= h;
+            if (max_w && max_h) {
+                max_w -= w;
+                max_h -= h;
+            }
 
             size.top = 0;
             size.left = 0;
