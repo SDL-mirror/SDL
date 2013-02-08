@@ -225,11 +225,13 @@ Cocoa_GetDisplayName(CGDirectDisplayID displayID)
 {
     NSDictionary *deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(displayID), kIODisplayOnlyPreferredName);
     NSDictionary *localizedNames = [deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
-
+    const char* displayName = NULL;
+    
     if ([localizedNames count] > 0) {
-        return [[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String];
+        displayName = SDL_strdup([[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String]);
     }
-    return NULL;
+    [deviceInfo release];
+    return displayName;
 }
 
 void
@@ -302,9 +304,11 @@ Cocoa_InitModes(_THIS)
             displaydata->display = displays[i];
 
             SDL_zero(display);
+            // this returns a stddup'ed string
             display.name = (char *)Cocoa_GetDisplayName(displays[i]);
             if (!GetDisplayMode (_this, moderef, &mode)) {
                 Cocoa_ReleaseDisplayMode(_this, moderef);
+                if (display.name) SDL_free(display.name);
                 SDL_free(displaydata);
                 continue;
             }
@@ -313,6 +317,7 @@ Cocoa_InitModes(_THIS)
             display.current_mode = mode;
             display.driverdata = displaydata;
             SDL_AddVideoDisplay(&display);
+            if (display.name) SDL_free(display.name);
         }
     }
     SDL_stack_free(displays);

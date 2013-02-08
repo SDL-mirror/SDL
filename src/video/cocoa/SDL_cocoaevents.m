@@ -107,6 +107,7 @@ CreateApplicationMenus(void)
     [menuItem setSubmenu:serviceMenu];
 
     [NSApp setServicesMenu:serviceMenu];
+    [serviceMenu release];
 
     [appleMenu addItem:[NSMenuItem separatorItem]];
 

@@ -273,6 +273,7 @@ SDL_PromptAssertion_cocoa(const SDL_assert_data *data)
         [alert addButtonWithTitle:@"Ignore"];
         [alert addButtonWithTitle:@"Always Ignore"];
         const NSInteger clicked = [alert runModal];
+        [alert release];
 
         if (!initialized) {
             SDL_QuitSubSystem(SDL_INIT_VIDEO);

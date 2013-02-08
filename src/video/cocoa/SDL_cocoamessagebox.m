@@ -56,7 +56,7 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;
         int i;
         for (i = 0; i < messageboxdata->numbuttons; ++i) {
-            NSButton *button = [alert addButtonWithTitle:[[NSString alloc] initWithUTF8String:buttons[i].text]];
+            NSButton *button = [alert addButtonWithTitle:[NSString stringWithUTF8String:buttons[i].text]];
             if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT) {
                 [button setKeyEquivalent:@"\r"];
             } else if (buttons[i].flags & SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT) {
