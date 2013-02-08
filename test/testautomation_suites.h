@@ -19,6 +19,7 @@ extern SDLTest_TestSuiteReference renderTestSuite;
 extern SDLTest_TestSuiteReference rwopsTestSuite;
 extern SDLTest_TestSuiteReference surfaceTestSuite;
 extern SDLTest_TestSuiteReference syswmTestSuite;
+extern SDLTest_TestSuiteReference sdltestTestSuite;
 extern SDLTest_TestSuiteReference videoTestSuite;
 extern SDLTest_TestSuiteReference mouseTestSuite;
 extern SDLTest_TestSuiteReference timerTestSuite;
@@ -35,6 +36,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 	&rwopsTestSuite,
 	&surfaceTestSuite,
 	&syswmTestSuite,
+	&sdltestTestSuite,
 	&videoTestSuite,
 	&mouseTestSuite,
 	&timerTestSuite,

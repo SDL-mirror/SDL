@@ -586,7 +586,7 @@ SDLTest_RandomUnitFloat()
 float
 SDLTest_RandomFloat()
 {
-        return (float) (FLT_MIN + SDLTest_RandomUnitDouble() * (FLT_MAX - FLT_MIN));
+        return (float) (SDLTest_RandomUnitDouble() * (double)2.0 * (double)FLT_MAX - (double)(FLT_MAX));
 }
 
 double
