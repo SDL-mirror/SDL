@@ -16,7 +16,6 @@ internal:
 
 public:
     virtual ~SDL_winrtrenderer();
-    virtual void Initialize();
     virtual void HandleDeviceLost();
     virtual void CreateDeviceResources();
     virtual void CreateWindowSizeDependentResources();

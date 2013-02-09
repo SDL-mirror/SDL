@@ -79,11 +79,11 @@ static int D3D11_UpdateViewport(SDL_Renderer * renderer);
 static void D3D11_RenderPresent(SDL_Renderer * renderer);
 //static void D3D11_DestroyTexture(SDL_Renderer * renderer,
 //                               SDL_Texture * texture);
-//static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
+static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
 
 /* Direct3D 11.1 Internal Functions */
 HRESULT D3D11_CreateDeviceResources(SDL_Renderer * renderer);
-
+HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
 
 extern "C" {
     SDL_RenderDriver D3D11_RenderDriver = {
@@ -110,17 +110,6 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
     SDL_Renderer *renderer;
     D3D11_RenderData *data;
-//    SDL_SysWMinfo windowinfo;
- //   HRESULT result;
- //   D3DPRESENT_PARAMETERS pparams;
- //   IDirect3DSwapChain9 *chain;
- //   D3DCAPS9 caps;
- //   Uint32 window_flags;
- //   int w, h;
- //   SDL_DisplayMode fullscreen_mode;
- //   D3DMATRIX matrix;
- //   int d3dxVersion;
-	//char d3dxDLLFile[50];
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -158,147 +147,36 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     //renderer->RenderReadPixels = D3D11_RenderReadPixels;
     renderer->RenderPresent = D3D11_RenderPresent;
     //renderer->DestroyTexture = D3D11_DestroyTexture;
-    //renderer->DestroyRenderer = D3D11_DestroyRenderer;
+    renderer->DestroyRenderer = D3D11_DestroyRenderer;
     renderer->info = D3D11_RenderDriver.info;
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
 
-    renderer->info.flags = SDL_RENDERER_ACCELERATED;
+    // HACK: make sure the SDL_Renderer references the SDL_Window data now, in
+    // order to give init functions access to the underlying window handle:
+    renderer->window = window;
 
-    //SDL_VERSION(&windowinfo.version);
-    //SDL_GetWindowWMInfo(window, &windowinfo);
-
-    //window_flags = SDL_GetWindowFlags(window);
-    //SDL_GetWindowSize(window, &w, &h);
-    //SDL_GetWindowDisplayMode(window, &fullscreen_mode);
-
-    //SDL_zero(pparams);
-    //pparams.hDeviceWindow = windowinfo.info.win.window;
-    //pparams.BackBufferWidth = w;
-    //pparams.BackBufferHeight = h;
-    //if (window_flags & SDL_WINDOW_FULLSCREEN) {
-    //    pparams.BackBufferFormat =
-    //        PixelFormatToD3DFMT(fullscreen_mode.format);
-    //} else {
-    //    pparams.BackBufferFormat = D3DFMT_UNKNOWN;
-    //}
-    //pparams.BackBufferCount = 1;
-    //pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
-
-    //if (window_flags & SDL_WINDOW_FULLSCREEN) {
-    //    pparams.Windowed = FALSE;
-    //    pparams.FullScreen_RefreshRateInHz =
-    //        fullscreen_mode.refresh_rate;
-    //} else {
-    //    pparams.Windowed = TRUE;
-    //    pparams.FullScreen_RefreshRateInHz = 0;
-    //}
-    //if (flags & SDL_RENDERER_PRESENTVSYNC) {
-    //    pparams.PresentationInterval = D3DPRESENT_INTERVAL_ONE;
-    //} else {
-    //    pparams.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
-    //}
-
-    ///* FIXME: Which adapter? */
-    //data->adapter = D3DADAPTER_DEFAULT;
-    //IDirect3D9_GetDeviceCaps(data->d3d, data->adapter, D3DDEVTYPE_HAL, &caps);
-
-    //result = IDirect3D9_CreateDevice(data->d3d, data->adapter,
-    //                                 D3DDEVTYPE_HAL,
-    //                                 pparams.hDeviceWindow,
-    //                                 D3DCREATE_FPU_PRESERVE | ((caps.
-    //                                  DevCaps &
-    //                                  D3DDEVCAPS_HWTRANSFORMANDLIGHT) ?
-    //                                 D3DCREATE_HARDWARE_VERTEXPROCESSING :
-    //                                 D3DCREATE_SOFTWARE_VERTEXPROCESSING),
-    //                                 &pparams, &data->device);
-    //if (FAILED(result)) {
-    //    D3D11_DestroyRenderer(renderer);
-    //    D3D11_SetError("CreateDevice()", result);
-    //    return NULL;
-    //}
-    //data->beginScene = SDL_TRUE;
-    //data->scaleMode = D3DTEXF_FORCE_DWORD;
-
-    ///* Get presentation parameters to fill info */
-    //result = IDirect3DDevice9_GetSwapChain(data->device, 0, &chain);
-    //if (FAILED(result)) {
-    //    D3D11_DestroyRenderer(renderer);
-    //    D3D11_SetError("GetSwapChain()", result);
-    //    return NULL;
-    //}
-    //result = IDirect3DSwapChain9_GetPresentParameters(chain, &pparams);
-    //if (FAILED(result)) {
-    //    IDirect3DSwapChain9_Release(chain);
-    //    D3D11_DestroyRenderer(renderer);
-    //    D3D11_SetError("GetPresentParameters()", result);
-    //    return NULL;
-    //}
-    //IDirect3DSwapChain9_Release(chain);
-    //if (pparams.PresentationInterval == D3DPRESENT_INTERVAL_ONE) {
-    //    renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
-    //}
-    //data->pparams = pparams;
-
-    //IDirect3DDevice9_GetDeviceCaps(data->device, &caps);
-    //renderer->info.max_texture_width = caps.MaxTextureWidth;
-    //renderer->info.max_texture_height = caps.MaxTextureHeight;
-    //if (caps.NumSimultaneousRTs >= 2) {
-    //    renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
-    //}
-
-    ///* Set up parameters for rendering */
-    //IDirect3DDevice9_SetVertexShader(data->device, NULL);
-    //IDirect3DDevice9_SetFVF(data->device,
-    //                        D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1);
-    //IDirect3DDevice9_SetRenderState(data->device, D3DRS_ZENABLE, D3DZB_FALSE);
-    //IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
-    //                                D3DCULL_NONE);
-    //IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
-    ///* Enable color modulation by diffuse color */
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLOROP,
-    //                                      D3DTOP_MODULATE);
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLORARG1,
-    //                                      D3DTA_TEXTURE);
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_COLORARG2,
-    //                                      D3DTA_DIFFUSE);
-    ///* Enable alpha modulation by diffuse alpha */
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAOP,
-    //                                      D3DTOP_MODULATE);
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG1,
-    //                                      D3DTA_TEXTURE);
-    //IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG2,
-    //                                      D3DTA_DIFFUSE);
-    ///* Disable second texture stage, since we're done */
-    //IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_COLOROP,
-    //                                      D3DTOP_DISABLE);
-    //IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_ALPHAOP,
-    //                                      D3DTOP_DISABLE);
-
-    ///* Store the default render target */
-    //IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget );
-    //data->currentRenderTarget = NULL;
-
-    ///* Set an identity world and view matrix */
-    //matrix.m[0][0] = 1.0f;
-    //matrix.m[0][1] = 0.0f;
-    //matrix.m[0][2] = 0.0f;
-    //matrix.m[0][3] = 0.0f;
-    //matrix.m[1][0] = 0.0f;
-    //matrix.m[1][1] = 1.0f;
-    //matrix.m[1][2] = 0.0f;
-    //matrix.m[1][3] = 0.0f;
-    //matrix.m[2][0] = 0.0f;
-    //matrix.m[2][1] = 0.0f;
-    //matrix.m[2][2] = 1.0f;
-    //matrix.m[2][3] = 0.0f;
-    //matrix.m[3][0] = 0.0f;
-    //matrix.m[3][1] = 0.0f;
-    //matrix.m[3][2] = 0.0f;
-    //matrix.m[3][3] = 1.0f;
-    //IDirect3DDevice9_SetTransform(data->device, D3DTS_WORLD, &matrix);
-    //IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, &matrix);
+    /* Initialize Direct3D resources */
+    if (FAILED(D3D11_CreateDeviceResources(renderer))) {
+        D3D11_DestroyRenderer(renderer);
+        return NULL;
+    }
+    if (FAILED(D3D11_CreateWindowSizeDependentResources(renderer))) {
+        D3D11_DestroyRenderer(renderer);
+        return NULL;
+    }
 
     return renderer;
+}
+
+static void
+D3D11_DestroyRenderer(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    if (data) {
+        delete data;
+        data = NULL;
+    }
 }
 
 static bool

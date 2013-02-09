@@ -36,13 +36,6 @@ SDL_winrtrenderer::~SDL_winrtrenderer()
     }
 }
 
-// Initialize the Direct3D resources required to run.
-void SDL_winrtrenderer::Initialize()
-{ 
-    CreateDeviceResources();
-    CreateWindowSizeDependentResources();
-}
-
 // Recreate all device resources and set them back to the current state.
 void SDL_winrtrenderer::HandleDeviceLost()
 {

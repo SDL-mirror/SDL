@@ -232,7 +232,7 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
     SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     SDL_WinRTGlobalApp->m_renderer->m_sdlRenderer = renderer;
     SDL_WinRTGlobalApp->m_renderer->m_sdlRendererData = (D3D11_RenderData *) renderer->driverdata;
-    SDL_WinRTGlobalApp->m_renderer->Initialize();
+    //SDL_WinRTGlobalApp->m_renderer->Initialize();
 
     /* All done! */
     return 0;
