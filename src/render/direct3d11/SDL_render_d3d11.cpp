@@ -53,32 +53,32 @@ using namespace Windows::UI::Core;
 static SDL_Renderer *D3D11_CreateRenderer(SDL_Window * window, Uint32 flags);
 static void D3D11_WindowEvent(SDL_Renderer * renderer,
                             const SDL_WindowEvent *event);
-//static int D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-//static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-//                             const SDL_Rect * rect, const void *pixels,
-//                             int pitch);
+static int D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                             const SDL_Rect * rect, const void *pixels,
+                             int pitch);
 //static int D3D11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 //                           const SDL_Rect * rect, void **pixels, int *pitch);
 //static void D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 //static int D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateViewport(SDL_Renderer * renderer);
-//static int D3D11_RenderClear(SDL_Renderer * renderer);
+static int D3D11_RenderClear(SDL_Renderer * renderer);
 //static int D3D11_RenderDrawPoints(SDL_Renderer * renderer,
 //                                const SDL_FPoint * points, int count);
 //static int D3D11_RenderDrawLines(SDL_Renderer * renderer,
 //                               const SDL_FPoint * points, int count);
 //static int D3D11_RenderFillRects(SDL_Renderer * renderer,
 //                               const SDL_FRect * rects, int count);
-//static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-//                          const SDL_Rect * srcrect, const SDL_FRect * dstrect);
+static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+                            const SDL_Rect * srcrect, const SDL_FRect * dstrect);
 //static int D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 //                          const SDL_Rect * srcrect, const SDL_FRect * dstrect,
 //                          const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
 //static int D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 //                                Uint32 format, void * pixels, int pitch);
 static void D3D11_RenderPresent(SDL_Renderer * renderer);
-//static void D3D11_DestroyTexture(SDL_Renderer * renderer,
-//                               SDL_Texture * texture);
+static void D3D11_DestroyTexture(SDL_Renderer * renderer,
+                                 SDL_Texture * texture);
 static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
 
 /* Direct3D 11.1 Internal Functions */
@@ -91,10 +91,10 @@ extern "C" {
     SDL_RenderDriver D3D11_RenderDriver = {
     D3D11_CreateRenderer,
     {
-     "direct3d",
+     "direct3d 11.1",
      (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),
      1,
-     {SDL_PIXELFORMAT_ARGB8888},
+     {SDL_PIXELFORMAT_RGB888},
      0,
      0}
     };
@@ -132,21 +132,21 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->renderTargetSize = XMFLOAT2(0, 0);
 
     renderer->WindowEvent = D3D11_WindowEvent;
-    //renderer->CreateTexture = D3D11_CreateTexture;
-    //renderer->UpdateTexture = D3D11_UpdateTexture;
+    renderer->CreateTexture = D3D11_CreateTexture;
+    renderer->UpdateTexture = D3D11_UpdateTexture;
     //renderer->LockTexture = D3D11_LockTexture;
     //renderer->UnlockTexture = D3D11_UnlockTexture;
     //renderer->SetRenderTarget = D3D11_SetRenderTarget;
     renderer->UpdateViewport = D3D11_UpdateViewport;
-    //renderer->RenderClear = D3D11_RenderClear;
+    renderer->RenderClear = D3D11_RenderClear;
     //renderer->RenderDrawPoints = D3D11_RenderDrawPoints;
     //renderer->RenderDrawLines = D3D11_RenderDrawLines;
     //renderer->RenderFillRects = D3D11_RenderFillRects;
-    //renderer->RenderCopy = D3D11_RenderCopy;
+    renderer->RenderCopy = D3D11_RenderCopy;
     //renderer->RenderCopyEx = D3D11_RenderCopyEx;
     //renderer->RenderReadPixels = D3D11_RenderReadPixels;
     renderer->RenderPresent = D3D11_RenderPresent;
-    //renderer->DestroyTexture = D3D11_DestroyTexture;
+    renderer->DestroyTexture = D3D11_DestroyTexture;
     renderer->DestroyRenderer = D3D11_DestroyRenderer;
     renderer->info = D3D11_RenderDriver.info;
     renderer->info.flags = SDL_RENDERER_ACCELERATED;
@@ -165,6 +165,8 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
         D3D11_DestroyRenderer(renderer);
         return NULL;
     }
+
+    // TODO, WinRT: fill in renderer->info.texture_formats where appropriate
 
     return renderer;
 }
@@ -721,8 +723,206 @@ D3D11_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 }
 
 static int
+D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData;
+    HRESULT result;
+
+    textureData = new D3D11_TextureData;
+    if (!textureData) {
+        SDL_OutOfMemory();
+        return -1;
+    }
+    textureData->pixelFormat = SDL_AllocFormat(texture->format);
+
+    texture->driverdata = textureData;
+
+    const int pixelSizeInBytes = textureData->pixelFormat->BytesPerPixel;
+
+    D3D11_TEXTURE2D_DESC textureDesc = {0};
+    textureDesc.Width = texture->w;
+    textureDesc.Height = texture->h;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_B8G8R8X8_UNORM;
+    textureDesc.SampleDesc.Count = 1;
+    textureDesc.SampleDesc.Quality = 0;
+    textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+    textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    textureDesc.MiscFlags = 0;
+
+    const int numPixels = textureDesc.Width * textureDesc.Height;
+    std::vector<uint8> initialTexturePixels(numPixels * pixelSizeInBytes, 0x00);
+
+    // Fill the texture with a non-black color, for debugging purposes:
+    //for (int i = 0; i < (numPixels * pixelSizeInBytes); i += pixelSizeInBytes) {
+    //    initialTexturePixels[i+0] = 0xff;
+    //    initialTexturePixels[i+1] = 0xff;
+    //    initialTexturePixels[i+2] = 0x00;
+    //    initialTexturePixels[i+3] = 0xff;
+    //}
+
+    D3D11_SUBRESOURCE_DATA initialTextureData = {0};
+    initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
+    initialTextureData.SysMemPitch = textureDesc.Width * pixelSizeInBytes;
+    initialTextureData.SysMemSlicePitch = numPixels * pixelSizeInBytes;
+    result = rendererData->d3dDevice->CreateTexture2D(
+        &textureDesc,
+        &initialTextureData,
+        &textureData->mainTexture
+        );
+    if (FAILED(result)) {
+        D3D11_DestroyTexture(renderer, texture);
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return -1;
+    }
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
+    resourceViewDesc.Format = textureDesc.Format;
+    resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    resourceViewDesc.Texture2D.MostDetailedMip = 0;
+    resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
+    result = rendererData->d3dDevice->CreateShaderResourceView(
+        textureData->mainTexture.Get(),
+        &resourceViewDesc,
+        &textureData->mainTextureResourceView
+        );
+    if (FAILED(result)) {
+        D3D11_DestroyTexture(renderer, texture);
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return -1;
+    }
+
+    return 0;
+}
+
+static void
+D3D11_DestroyTexture(SDL_Renderer * renderer,
+                     SDL_Texture * texture)
+{
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+
+    if (textureData) {
+        if (textureData->pixelFormat) {
+            SDL_FreeFormat(textureData->pixelFormat);
+            textureData->pixelFormat = NULL;
+        }
+
+        delete textureData;
+        texture = NULL;
+        texture->driverdata = NULL;
+    }
+}
+
+static int
+D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                    const SDL_Rect * rect, const void *pixels,
+                    int pitch)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+    HRESULT result = S_OK;
+
+    D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
+    result = rendererData->d3dContext->Map(
+        textureData->mainTexture.Get(),
+        0,
+        D3D11_MAP_WRITE_DISCARD,
+        0,
+        &textureMemory
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return -1;
+    }
+
+    // Copy pixel data to the locked texture's memory:
+    for (int y = 0; y < rect->h; ++y) {
+        memcpy(
+            ((Uint8 *)textureMemory.pData) + (textureMemory.RowPitch * y),
+            ((Uint8 *)pixels) + (pitch * y),
+            pitch
+            );
+    }
+
+    // Clean up a bit, then commit the texture's memory back to Direct3D:
+    rendererData->d3dContext->Unmap(
+        textureData->mainTexture.Get(),
+        0);
+
+    return 0;
+}
+
+static int
 D3D11_UpdateViewport(SDL_Renderer * renderer)
 {
+    return 0;
+}
+
+static int
+D3D11_RenderClear(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    const float colorRGBA[] = {
+        renderer->r,
+        renderer->g,
+        renderer->b,
+        renderer->a
+    };
+    data->d3dContext->ClearRenderTargetView(
+        data->renderTargetView.Get(),
+        colorRGBA
+        );
+    return 0;
+}
+
+static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+                            const SDL_Rect * srcrect, const SDL_FRect * dstrect)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+    //HRESULT result = S_OK;
+
+    rendererData->d3dContext->OMSetRenderTargets(
+        1,
+        rendererData->renderTargetView.GetAddressOf(),
+        nullptr
+        );
+
+    UINT stride = sizeof(VertexPositionColor);
+    UINT offset = 0;
+    rendererData->d3dContext->IASetVertexBuffers(
+        0,
+        1,
+        rendererData->vertexBuffer.GetAddressOf(),
+        &stride,
+        &offset
+        );
+
+    rendererData->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+    rendererData->d3dContext->IASetInputLayout(rendererData->inputLayout.Get());
+
+    rendererData->d3dContext->VSSetShader(
+        rendererData->vertexShader.Get(),
+        nullptr,
+        0
+        );
+
+    rendererData->d3dContext->PSSetShader(
+        rendererData->pixelShader.Get(),
+        nullptr,
+        0
+        );
+
+    rendererData->d3dContext->PSSetShaderResources(0, 1, textureData->mainTextureResourceView.GetAddressOf());
+
+    rendererData->d3dContext->PSSetSamplers(0, 1, rendererData->mainSampler.GetAddressOf());
+
+    rendererData->d3dContext->Draw(4, 0);
+
     return 0;
 }
 

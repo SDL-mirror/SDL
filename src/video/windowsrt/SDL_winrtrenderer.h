@@ -29,5 +29,5 @@ internal:
 
 protected private:
     // UpdateWindowSurface helper objects
-    SDL_Surface * m_mainTextureHelperSurface;
+    SDL_Texture * m_mainTexture;
 };

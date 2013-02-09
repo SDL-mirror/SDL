@@ -34,8 +34,6 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> mainTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mainTextureResourceView;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
     D3D_FEATURE_LEVEL featureLevel;
     unsigned int vertexCount;
@@ -52,6 +50,9 @@ typedef struct
 
 typedef struct
 {
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> mainTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mainTextureResourceView;
+    SDL_PixelFormat * pixelFormat;
 } D3D11_TextureData;
 
 struct VertexPositionColor
