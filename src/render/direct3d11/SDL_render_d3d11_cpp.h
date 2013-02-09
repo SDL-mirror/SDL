@@ -40,6 +40,14 @@ typedef struct
     D3D_FEATURE_LEVEL featureLevel;
     unsigned int vertexCount;
     bool loadingComplete;
+
+    // Cached renderer properties.
+    DirectX::XMFLOAT2 windowSizeInDIPs;
+    DirectX::XMFLOAT2 renderTargetSize;
+    Windows::Graphics::Display::DisplayOrientations orientation;
+
+    // Transform used for display orientation.
+    DirectX::XMFLOAT4X4 orientationTransform3D;
 } D3D11_RenderData;
 
 typedef struct

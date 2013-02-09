@@ -5,12 +5,20 @@
 #include "SDLmain_WinRT_common.h"
 #include "SDL_winrtrenderer.h"
 
+extern "C" {
+#include "SDL_syswm.h"
+}
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace std;
 using namespace Windows::UI::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
+
+extern HRESULT D3D11_CreateDeviceResources(SDL_Renderer * renderer);
+extern CoreWindow ^ D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer);
+extern HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
 
 // Constructor.
 SDL_winrtrenderer::SDL_winrtrenderer() :
@@ -29,10 +37,8 @@ SDL_winrtrenderer::~SDL_winrtrenderer()
 }
 
 // Initialize the Direct3D resources required to run.
-void SDL_winrtrenderer::Initialize(CoreWindow^ window)
-{
-    m_window = window;
-    
+void SDL_winrtrenderer::Initialize()
+{ 
     CreateDeviceResources();
     CreateWindowSizeDependentResources();
 }
@@ -41,8 +47,8 @@ void SDL_winrtrenderer::Initialize(CoreWindow^ window)
 void SDL_winrtrenderer::HandleDeviceLost()
 {
     // Reset these member variables to ensure that UpdateForWindowSizeChange recreates all resources.
-    m_windowBounds.Width = 0;
-    m_windowBounds.Height = 0;
+    m_sdlRendererData->windowSizeInDIPs.x = 0;
+    m_sdlRendererData->windowSizeInDIPs.y = 0;
     m_sdlRendererData->swapChain = nullptr;
 
     // TODO, WinRT: reconnect HandleDeviceLost to SDL_Renderer
@@ -50,207 +56,16 @@ void SDL_winrtrenderer::HandleDeviceLost()
     UpdateForWindowSizeChange();
 }
 
-extern HRESULT WINRT_CreateDeviceResources(SDL_Renderer * renderer);
-
 // These are the resources that depend on the device.
 void SDL_winrtrenderer::CreateDeviceResources()
 {
-    DX::ThrowIfFailed(WINRT_CreateDeviceResources(m_sdlRenderer));
+    DX::ThrowIfFailed(D3D11_CreateDeviceResources(m_sdlRenderer));
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
 void SDL_winrtrenderer::CreateWindowSizeDependentResources()
 {
-    // Store the window bounds so the next time we get a SizeChanged event we can
-    // avoid rebuilding everything if the size is identical.
-    m_windowBounds = m_window->Bounds;
-
-    // Calculate the necessary swap chain and render target size in pixels.
-    float windowWidth = ConvertDipsToPixels(m_windowBounds.Width);
-    float windowHeight = ConvertDipsToPixels(m_windowBounds.Height);
-
-    // The width and height of the swap chain must be based on the window's
-    // landscape-oriented width and height. If the window is in a portrait
-    // orientation, the dimensions must be reversed.
-    m_orientation = DisplayProperties::CurrentOrientation;
-    bool swapDimensions =
-        m_orientation == DisplayOrientations::Portrait ||
-        m_orientation == DisplayOrientations::PortraitFlipped;
-    m_renderTargetSize.Width = swapDimensions ? windowHeight : windowWidth;
-    m_renderTargetSize.Height = swapDimensions ? windowWidth : windowHeight;
-
-    if(m_sdlRendererData->swapChain != nullptr)
-    {
-        // If the swap chain already exists, resize it.
-        DX::ThrowIfFailed(
-            m_sdlRendererData->swapChain->ResizeBuffers(
-                2, // Double-buffered swap chain.
-                static_cast<UINT>(m_renderTargetSize.Width),
-                static_cast<UINT>(m_renderTargetSize.Height),
-                DXGI_FORMAT_B8G8R8A8_UNORM,
-                0
-                )
-            );
-    }
-    else
-    {
-        // Otherwise, create a new one using the same adapter as the existing Direct3D device.
-        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
-        swapChainDesc.Width = static_cast<UINT>(m_renderTargetSize.Width); // Match the size of the window.
-        swapChainDesc.Height = static_cast<UINT>(m_renderTargetSize.Height);
-        swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // This is the most common swap chain format.
-        swapChainDesc.Stereo = false;
-        swapChainDesc.SampleDesc.Count = 1; // Don't use multi-sampling.
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-        swapChainDesc.BufferCount = 2; // Use double-buffering to minimize latency.
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-        swapChainDesc.Scaling = DXGI_SCALING_STRETCH; // On phone, only stretch and aspect-ratio stretch scaling are allowed.
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // On phone, no swap effects are supported.
-#else
-        swapChainDesc.Scaling = DXGI_SCALING_NONE;
-        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect.
-#endif
-        swapChainDesc.Flags = 0;
-
-        ComPtr<IDXGIDevice1>  dxgiDevice;
-        DX::ThrowIfFailed(
-            m_sdlRendererData->d3dDevice.As(&dxgiDevice)
-            );
-
-        ComPtr<IDXGIAdapter> dxgiAdapter;
-        DX::ThrowIfFailed(
-            dxgiDevice->GetAdapter(&dxgiAdapter)
-            );
-
-        ComPtr<IDXGIFactory2> dxgiFactory;
-        DX::ThrowIfFailed(
-            dxgiAdapter->GetParent(
-                __uuidof(IDXGIFactory2), 
-                &dxgiFactory
-                )
-            );
-
-        Windows::UI::Core::CoreWindow^ window = m_window.Get();
-        DX::ThrowIfFailed(
-            dxgiFactory->CreateSwapChainForCoreWindow(
-                m_sdlRendererData->d3dDevice.Get(),
-                reinterpret_cast<IUnknown*>(window),
-                &swapChainDesc,
-                nullptr, // Allow on all displays.
-                &m_sdlRendererData->swapChain
-                )
-            );
-            
-        // Ensure that DXGI does not queue more than one frame at a time. This both reduces latency and
-        // ensures that the application will only render after each VSync, minimizing power consumption.
-        DX::ThrowIfFailed(
-            dxgiDevice->SetMaximumFrameLatency(1)
-            );
-    }
-    
-    // Set the proper orientation for the swap chain, and generate the
-    // 3D matrix transformation for rendering to the rotated swap chain.
-    DXGI_MODE_ROTATION rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
-    switch (m_orientation)
-    {
-        case DisplayOrientations::Landscape:
-            rotation = DXGI_MODE_ROTATION_IDENTITY;
-            m_orientationTransform3D = XMFLOAT4X4( // 0-degree Z-rotation
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
-            break;
-
-        case DisplayOrientations::Portrait:
-            rotation = DXGI_MODE_ROTATION_ROTATE270;
-            m_orientationTransform3D = XMFLOAT4X4( // 90-degree Z-rotation
-                0.0f, 1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
-            break;
-
-        case DisplayOrientations::LandscapeFlipped:
-            rotation = DXGI_MODE_ROTATION_ROTATE180;
-            m_orientationTransform3D = XMFLOAT4X4( // 180-degree Z-rotation
-                -1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
-            break;
-
-        case DisplayOrientations::PortraitFlipped:
-            rotation = DXGI_MODE_ROTATION_ROTATE90;
-            m_orientationTransform3D = XMFLOAT4X4( // 270-degree Z-rotation
-                0.0f, -1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
-            break;
-
-        default:
-            throw ref new Platform::FailureException();
-    }
-
-#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
-    // TODO, WinRT: Windows Phone does not have the IDXGISwapChain1::SetRotation method.  Check if an alternative is available, or needed.
-    DX::ThrowIfFailed(
-        m_sdlRendererData->swapChain->SetRotation(rotation)
-        );
-#endif
-
-    // Create a render target view of the swap chain back buffer.
-    ComPtr<ID3D11Texture2D> backBuffer;
-    DX::ThrowIfFailed(
-        m_sdlRendererData->swapChain->GetBuffer(
-            0,
-            __uuidof(ID3D11Texture2D),
-            &backBuffer
-            )
-        );
-
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreateRenderTargetView(
-            backBuffer.Get(),
-            nullptr,
-            &m_sdlRendererData->renderTargetView
-            )
-        );
-
-    // Create a depth stencil view.
-    CD3D11_TEXTURE2D_DESC depthStencilDesc(
-        DXGI_FORMAT_D24_UNORM_S8_UINT, 
-        static_cast<UINT>(m_renderTargetSize.Width),
-        static_cast<UINT>(m_renderTargetSize.Height),
-        1,
-        1,
-        D3D11_BIND_DEPTH_STENCIL
-        );
-
-    ComPtr<ID3D11Texture2D> depthStencil;
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreateTexture2D(
-            &depthStencilDesc,
-            nullptr,
-            &depthStencil
-            )
-        );
-
-    // Set the rendering viewport to target the entire window.
-    CD3D11_VIEWPORT viewport(
-        0.0f,
-        0.0f,
-        m_renderTargetSize.Width,
-        m_renderTargetSize.Height
-        );
-
-    m_sdlRendererData->d3dContext->RSSetViewports(1, &viewport);
+    DX::ThrowIfFailed(D3D11_CreateWindowSizeDependentResources(m_sdlRenderer));
 }
 
 void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
@@ -323,9 +138,10 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
 // This method is called in the event handler for the SizeChanged event.
 void SDL_winrtrenderer::UpdateForWindowSizeChange()
 {
-    if (m_window->Bounds.Width  != m_windowBounds.Width ||
-        m_window->Bounds.Height != m_windowBounds.Height ||
-        m_orientation != DisplayProperties::CurrentOrientation)
+    CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(m_sdlRenderer);
+    if (coreWindow->Bounds.Width  != m_sdlRendererData->windowSizeInDIPs.x ||
+        coreWindow->Bounds.Height != m_sdlRendererData->windowSizeInDIPs.y ||
+        m_sdlRendererData->orientation != DisplayProperties::CurrentOrientation)
     {
         ID3D11RenderTargetView* nullViews[] = {nullptr};
         m_sdlRendererData->d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);

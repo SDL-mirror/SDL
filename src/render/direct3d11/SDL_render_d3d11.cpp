@@ -43,6 +43,11 @@ using namespace DirectX;
 using namespace Microsoft::WRL;
 using namespace std;
 
+#ifdef __WINRT__
+using namespace Windows::Graphics::Display;
+using namespace Windows::UI::Core;
+#endif
+
 /* Direct3D 11.1 renderer implementation */
 
 static SDL_Renderer *D3D11_CreateRenderer(SDL_Window * window, Uint32 flags);
@@ -77,7 +82,7 @@ static void D3D11_RenderPresent(SDL_Renderer * renderer);
 //static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
 
 /* Direct3D 11.1 Internal Functions */
-HRESULT WINRT_CreateDeviceResources(SDL_Renderer * renderer);
+HRESULT D3D11_CreateDeviceResources(SDL_Renderer * renderer);
 
 
 extern "C" {
@@ -132,6 +137,8 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->featureLevel = (D3D_FEATURE_LEVEL) 0;
     data->vertexCount = 0;
     data->loadingComplete = false;
+    data->windowSizeInDIPs = XMFLOAT2(0, 0);
+    data->renderTargetSize = XMFLOAT2(0, 0);
 
     // TODO: Create Direct3D Object(s)
 
@@ -327,7 +334,7 @@ D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
 }
 
 HRESULT
-WINRT_CreateDeviceResources(SDL_Renderer * renderer)
+D3D11_CreateDeviceResources(SDL_Renderer * renderer)
 {
     D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
 
@@ -509,6 +516,264 @@ WINRT_CreateDeviceResources(SDL_Renderer * renderer)
     // All done!
     //
     data->loadingComplete = true;       // This variable can probably be factored-out
+    return S_OK;
+}
+
+#ifdef __WINRT__
+
+CoreWindow ^
+D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer)
+{
+    SDL_Window * sdlWindow = renderer->window;
+    if ( ! renderer->window ) {
+        return nullptr;
+    }
+
+    SDL_SysWMinfo sdlWindowInfo;
+    SDL_VERSION(&sdlWindowInfo.version);
+    if ( ! SDL_GetWindowWMInfo(sdlWindow, &sdlWindowInfo) ) {
+        return nullptr;
+    }
+
+    if (sdlWindowInfo.subsystem != SDL_SYSWM_WINDOWSRT) {
+        return nullptr;
+    }
+
+    CoreWindow ^* coreWindowPointer = (CoreWindow ^*) sdlWindowInfo.info.winrt.window;
+    if ( ! coreWindowPointer ) {
+        return nullptr;
+    }
+
+    return *coreWindowPointer;
+}
+
+static float
+D3D11_ConvertDipsToPixels(float dips)
+{
+    static const float dipsPerInch = 96.0f;
+    return floor(dips * DisplayProperties::LogicalDpi / dipsPerInch + 0.5f); // Round to nearest integer.
+}
+#endif
+
+// WinRT, TODO: get D3D11_CreateWindowSizeDependentResources working on Win32
+HRESULT
+D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+    Windows::UI::Core::CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
+
+    // Store the window bounds so the next time we get a SizeChanged event we can
+    // avoid rebuilding everything if the size is identical.
+    data->windowSizeInDIPs.x = coreWindow->Bounds.Width;
+    data->windowSizeInDIPs.y = coreWindow->Bounds.Height;
+
+    // Calculate the necessary swap chain and render target size in pixels.
+    float windowWidth = D3D11_ConvertDipsToPixels(data->windowSizeInDIPs.x);
+    float windowHeight = D3D11_ConvertDipsToPixels(data->windowSizeInDIPs.y);
+
+    // The width and height of the swap chain must be based on the window's
+    // landscape-oriented width and height. If the window is in a portrait
+    // orientation, the dimensions must be reversed.
+    data->orientation = DisplayProperties::CurrentOrientation;
+    bool swapDimensions =
+        data->orientation == DisplayOrientations::Portrait ||
+        data->orientation == DisplayOrientations::PortraitFlipped;
+    data->renderTargetSize.x = swapDimensions ? windowHeight : windowWidth;
+    data->renderTargetSize.y = swapDimensions ? windowWidth : windowHeight;
+
+    if(data->swapChain != nullptr)
+    {
+        // If the swap chain already exists, resize it.
+        result = data->swapChain->ResizeBuffers(
+            2, // Double-buffered swap chain.
+            static_cast<UINT>(data->renderTargetSize.x),
+            static_cast<UINT>(data->renderTargetSize.y),
+            DXGI_FORMAT_B8G8R8A8_UNORM,
+            0
+            );
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+    }
+    else
+    {
+        // Otherwise, create a new one using the same adapter as the existing Direct3D device.
+        DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {0};
+        swapChainDesc.Width = static_cast<UINT>(data->renderTargetSize.x); // Match the size of the window.
+        swapChainDesc.Height = static_cast<UINT>(data->renderTargetSize.y);
+        swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM; // This is the most common swap chain format.
+        swapChainDesc.Stereo = false;
+        swapChainDesc.SampleDesc.Count = 1; // Don't use multi-sampling.
+        swapChainDesc.SampleDesc.Quality = 0;
+        swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+        swapChainDesc.BufferCount = 2; // Use double-buffering to minimize latency.
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+        swapChainDesc.Scaling = DXGI_SCALING_STRETCH; // On phone, only stretch and aspect-ratio stretch scaling are allowed.
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD; // On phone, no swap effects are supported.
+#else
+        swapChainDesc.Scaling = DXGI_SCALING_NONE;
+        swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // All Windows Store apps must use this SwapEffect.
+#endif
+        swapChainDesc.Flags = 0;
+
+        ComPtr<IDXGIDevice1>  dxgiDevice;
+        result = data->d3dDevice.As(&dxgiDevice);
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+
+        ComPtr<IDXGIAdapter> dxgiAdapter;
+        result = dxgiDevice->GetAdapter(&dxgiAdapter);
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+
+        ComPtr<IDXGIFactory2> dxgiFactory;
+        result = dxgiAdapter->GetParent(
+            __uuidof(IDXGIFactory2), 
+            &dxgiFactory
+            );
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+
+        result = dxgiFactory->CreateSwapChainForCoreWindow(
+            data->d3dDevice.Get(),
+            reinterpret_cast<IUnknown*>(coreWindow),
+            &swapChainDesc,
+            nullptr, // Allow on all displays.
+            &data->swapChain
+            );
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+            
+        // Ensure that DXGI does not queue more than one frame at a time. This both reduces latency and
+        // ensures that the application will only render after each VSync, minimizing power consumption.
+        result = dxgiDevice->SetMaximumFrameLatency(1);
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+    }
+    
+    // Set the proper orientation for the swap chain, and generate the
+    // 3D matrix transformation for rendering to the rotated swap chain.
+    DXGI_MODE_ROTATION rotation = DXGI_MODE_ROTATION_UNSPECIFIED;
+    switch (data->orientation)
+    {
+        case DisplayOrientations::Landscape:
+            rotation = DXGI_MODE_ROTATION_IDENTITY;
+            data->orientationTransform3D = XMFLOAT4X4( // 0-degree Z-rotation
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::Portrait:
+            rotation = DXGI_MODE_ROTATION_ROTATE270;
+            data->orientationTransform3D = XMFLOAT4X4( // 90-degree Z-rotation
+                0.0f, 1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::LandscapeFlipped:
+            rotation = DXGI_MODE_ROTATION_ROTATE180;
+            data->orientationTransform3D = XMFLOAT4X4( // 180-degree Z-rotation
+                -1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, -1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::PortraitFlipped:
+            rotation = DXGI_MODE_ROTATION_ROTATE90;
+            data->orientationTransform3D = XMFLOAT4X4( // 270-degree Z-rotation
+                0.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        default:
+            throw ref new Platform::FailureException();
+    }
+
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
+    // TODO, WinRT: Windows Phone does not have the IDXGISwapChain1::SetRotation method.  Check if an alternative is available, or needed.
+    result = data->swapChain->SetRotation(rotation);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+#endif
+
+    // Create a render target view of the swap chain back buffer.
+    ComPtr<ID3D11Texture2D> backBuffer;
+    result = data->swapChain->GetBuffer(
+        0,
+        __uuidof(ID3D11Texture2D),
+        &backBuffer
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    result = data->d3dDevice->CreateRenderTargetView(
+        backBuffer.Get(),
+        nullptr,
+        &data->renderTargetView
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    // Create a depth stencil view.
+    CD3D11_TEXTURE2D_DESC depthStencilDesc(
+        DXGI_FORMAT_D24_UNORM_S8_UINT, 
+        static_cast<UINT>(data->renderTargetSize.x),
+        static_cast<UINT>(data->renderTargetSize.y),
+        1,
+        1,
+        D3D11_BIND_DEPTH_STENCIL
+        );
+
+    ComPtr<ID3D11Texture2D> depthStencil;
+    result = data->d3dDevice->CreateTexture2D(
+        &depthStencilDesc,
+        nullptr,
+        &depthStencil
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    // Set the rendering viewport to target the entire window.
+    CD3D11_VIEWPORT viewport(
+        0.0f,
+        0.0f,
+        data->renderTargetSize.x,
+        data->renderTargetSize.y
+        );
+
+    data->d3dContext->RSSetViewports(1, &viewport);
+
     return S_OK;
 }
 
