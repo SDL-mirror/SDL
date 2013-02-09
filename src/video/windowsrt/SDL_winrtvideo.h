@@ -23,19 +23,14 @@
 #ifndef _SDL_winrtvideo_h
 #define _SDL_winrtvideo_h
 
-#ifdef __cplusplus
 extern "C" {
-#endif
-
 #include "../SDL_sysvideo.h"
-
-#ifdef __cplusplus
 }
-#endif
 
 struct SDL_WindowData
 {
     SDL_Window *sdlWindow;
+    Windows::UI::Core::CoreWindow ^* coreWindow;
 };
 
 #endif /* _SDL_winrtvideo_h */

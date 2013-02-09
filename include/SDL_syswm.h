@@ -103,6 +103,7 @@ typedef enum
 {
     SDL_SYSWM_UNKNOWN,
     SDL_SYSWM_WINDOWS,
+    SDL_SYSWM_WINDOWSRT,
     SDL_SYSWM_X11,
     SDL_SYSWM_DIRECTFB,
     SDL_SYSWM_COCOA,
@@ -170,6 +171,12 @@ struct SDL_SysWMinfo
         {
             HWND window;                /**< The window handle */
         } win;
+#endif
+#if defined(SDL_VIDEO_DRIVER_WINRT)
+        struct
+        {
+            void * window;          /**< The Windows RT CoreWindow, casted from 'CoreWindow ^*' to 'void *' */
+        } winrt;
 #endif
 #if defined(SDL_VIDEO_DRIVER_X11)
         struct

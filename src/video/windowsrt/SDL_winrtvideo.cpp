@@ -35,6 +35,7 @@ extern "C" {
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
 #include "../../render/SDL_sysrender.h"
+#include "SDL_syswm.h"
 }
 
 #include "SDL_WinRTApp.h"
@@ -61,6 +62,7 @@ static void WINRT_VideoQuit(_THIS);
 /* Window functions */
 static int WINRT_CreateWindow(_THIS, SDL_Window * window);
 static void WINRT_DestroyWindow(_THIS, SDL_Window * window);
+static SDL_bool WINRT_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info);
 
 /* WinRT driver bootstrap functions */
 
@@ -101,6 +103,7 @@ WINRT_CreateDevice(int devindex)
     device->CreateWindowFramebuffer = SDL_WINRT_CreateWindowFramebuffer;
     device->UpdateWindowFramebuffer = SDL_WINRT_UpdateWindowFramebuffer;
     device->DestroyWindowFramebuffer = SDL_WINRT_DestroyWindowFramebuffer;
+    device->GetWindowWMInfo = WINRT_GetWindowWMInfo;
 
     device->free = WINRT_DeleteDevice;
 
@@ -159,14 +162,13 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
         return -1;
     }
 
-    SDL_WindowData *data;
-    data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
+    SDL_WindowData *data = new SDL_WindowData;
     if (!data) {
         SDL_OutOfMemory();
         return -1;
     }
-    SDL_zerop(data);
     data->sdlWindow = window;
+    data->coreWindow = new CoreWindow^(CoreWindow::GetForCurrentThread());
 
     /* Make sure the window is considered to be positioned at {0,0},
        and is considered fullscreen, shown, and the like.
@@ -222,6 +224,11 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
     // resources first.
     //
     // TODO, WinRT: either make WINRT_CreateWindow not call SDL_CreateRenderer, or have it do error checking if it does call it
+
+    // HACK: make sure the SDL window references SDL_WindowData data now, in
+    // order to allow the SDL_Renderer to be created in WINRT_CreateWindow
+    window->driverdata = data;
+
     SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
     SDL_WinRTGlobalApp->m_renderer->m_sdlRenderer = renderer;
     SDL_WinRTGlobalApp->m_renderer->m_sdlRendererData = (D3D11_RenderData *) renderer->driverdata;
@@ -234,6 +241,21 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
 void
 WINRT_DestroyWindow(_THIS, SDL_Window * window)
 {
+    SDL_WindowData * data = (SDL_WindowData *) window->driverdata;
+
+    if (data) {
+        // Delete the reference to the WinRT CoreWindow:
+        CoreWindow ^* windowPointer = ((SDL_WindowData *) window->driverdata)->coreWindow;
+        if (windowPointer) {
+            *windowPointer = nullptr;   // Clear the C++/CX reference to the CoreWindow
+            delete windowPointer;       // Delete the C++/CX reference itself
+        }
+
+        // Delete the internal window data:
+        delete data;
+        data = NULL;
+    }
+
     if (SDL_WinRTGlobalApp->HasSDLWindowData() &&
         SDL_WinRTGlobalApp->GetSDLWindowData()->sdlWindow == window)
     {
@@ -241,6 +263,23 @@ WINRT_DestroyWindow(_THIS, SDL_Window * window)
     }
 }
 
+SDL_bool
+WINRT_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
+{
+    SDL_WindowData * data = (SDL_WindowData *) window->driverdata;
+    CoreWindow ^* windowPointer = data->coreWindow;
+
+    if (info->version.major <= SDL_MAJOR_VERSION) {
+        info->subsystem = SDL_SYSWM_WINDOWSRT;
+        info->info.winrt.window = windowPointer;
+        return SDL_TRUE;
+    } else {
+        SDL_SetError("Application not compiled with SDL %d.%d\n",
+                     SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
+        return SDL_FALSE;
+    }
+    return SDL_FALSE;
+}
 
 #endif /* SDL_VIDEO_DRIVER_WINRT */
 
