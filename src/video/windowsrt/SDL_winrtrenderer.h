@@ -4,12 +4,6 @@
 #include "SDL.h"
 #include "../../render/direct3d11/SDL_render_d3d11_cpp.h"
 
-struct VertexPositionColor
-{
-    DirectX::XMFLOAT3 pos;
-    DirectX::XMFLOAT2 tex;
-};
-
 // Helper class that initializes DirectX APIs for 3D rendering.
 ref class SDL_winrtrenderer
 {
@@ -40,12 +34,10 @@ protected private:
     SDL_Surface * m_mainTextureHelperSurface;
 
     // Cached renderer properties.
-    D3D_FEATURE_LEVEL m_featureLevel;
     Windows::Foundation::Size m_renderTargetSize;
     Windows::Foundation::Rect m_windowBounds;
     Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
     Windows::Graphics::Display::DisplayOrientations m_orientation;
-    uint32 m_vertexCount;
 
     // Transform used for display orientation.
     DirectX::XMFLOAT4X4 m_orientationTransform3D;

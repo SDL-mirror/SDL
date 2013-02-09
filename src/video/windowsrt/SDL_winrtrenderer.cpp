@@ -15,8 +15,6 @@ using namespace Windows::Graphics::Display;
 // Constructor.
 SDL_winrtrenderer::SDL_winrtrenderer() :
     m_mainTextureHelperSurface(NULL),
-    m_loadingComplete(false),
-    m_vertexCount(0),
     m_sdlRenderer(NULL),
     m_sdlRendererData(NULL)
 {
@@ -52,197 +50,12 @@ void SDL_winrtrenderer::HandleDeviceLost()
     UpdateForWindowSizeChange();
 }
 
-static bool
-read_file_contents(const wstring & fileName, vector<char> & out)
-{
-    ifstream in(fileName, ios::in | ios::binary);
-    if (!in) {
-        return false;
-    }
-
-    in.seekg(0, ios::end);
-    out.resize((size_t) in.tellg());
-    in.seekg(0, ios::beg);
-    in.read(&out[0], out.size());
-    return in.good();
-}
-
-static bool
-read_shader_contents(const wstring & shaderName, vector<char> & out)
-{
-    wstring fileName = SDL_WinRTGetInstalledLocationPath();
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-    fileName += L"\\";
-#else
-    fileName += L"\\SDL_VS2012_WinRT\\";
-#endif
-    fileName += shaderName;
-    return read_file_contents(fileName, out);
-}
+extern HRESULT WINRT_CreateDeviceResources(SDL_Renderer * renderer);
 
 // These are the resources that depend on the device.
 void SDL_winrtrenderer::CreateDeviceResources()
 {
-    // This flag adds support for surfaces with a different color channel ordering
-    // than the API default. It is required for compatibility with Direct2D.
-    UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-#if defined(_DEBUG)
-    // If the project is in a debug build, enable debugging via SDK Layers with this flag.
-    creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-    // This array defines the set of DirectX hardware feature levels this app will support.
-    // Note the ordering should be preserved.
-    // Don't forget to declare your application's minimum required feature level in its
-    // description.  All applications are assumed to support 9.1 unless otherwise stated.
-    D3D_FEATURE_LEVEL featureLevels[] = 
-    {
-        D3D_FEATURE_LEVEL_11_1,
-        D3D_FEATURE_LEVEL_11_0,
-        D3D_FEATURE_LEVEL_10_1,
-        D3D_FEATURE_LEVEL_10_0,
-        D3D_FEATURE_LEVEL_9_3,
-        D3D_FEATURE_LEVEL_9_2,
-        D3D_FEATURE_LEVEL_9_1
-    };
-
-    // Create the Direct3D 11 API device object and a corresponding context.
-    ComPtr<ID3D11Device> device;
-    ComPtr<ID3D11DeviceContext> context;
-    DX::ThrowIfFailed(
-        D3D11CreateDevice(
-            nullptr, // Specify nullptr to use the default adapter.
-            D3D_DRIVER_TYPE_HARDWARE,
-            nullptr,
-            creationFlags, // Set set debug and Direct2D compatibility flags.
-            featureLevels, // List of feature levels this app can support.
-            ARRAYSIZE(featureLevels),
-            D3D11_SDK_VERSION, // Always set this to D3D11_SDK_VERSION for Windows Store apps.
-            &device, // Returns the Direct3D device created.
-            &m_featureLevel, // Returns feature level of device created.
-            &context // Returns the device immediate context.
-            )
-        );
-
-    // Get the Direct3D 11.1 API device and context interfaces.
-    Microsoft::WRL::ComPtr<ID3D11Device1> d3dDevice1;
-    DX::ThrowIfFailed(
-        device.As(&(m_sdlRendererData->d3dDevice))
-        );
-
-    DX::ThrowIfFailed(
-        context.As(&m_sdlRendererData->d3dContext)
-        );
-
-    // Start loading GPU shaders:
-    vector<char> fileData;
-
-    //
-    // Load in SDL's one and only vertex shader:
-    //
-    if (!read_shader_contents(L"SimpleVertexShader.cso", fileData)) {
-        throw ref new Platform::Exception(E_FAIL, L"Unable to open SDL's vertex shader file.");
-    }
-
-    DX::ThrowIfFailed(
-        (m_sdlRendererData->d3dDevice)->CreateVertexShader(
-            &fileData[0],
-            fileData.size(),
-            nullptr,
-            &m_sdlRendererData->vertexShader
-            )
-        );
-
-    //
-    // Create an input layout for SDL's vertex shader:
-    //
-    const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
-    {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreateInputLayout(
-            vertexDesc,
-            ARRAYSIZE(vertexDesc),
-            &fileData[0],
-            fileData.size(),
-            &m_sdlRendererData->inputLayout
-            )
-        );
-
-    //
-    // Load in SDL's one and only pixel shader (for now, more are likely to follow):
-    //
-    if (!read_shader_contents(L"SimplePixelShader.cso", fileData)) {
-        throw ref new Platform::Exception(E_FAIL, L"Unable to open SDL's pixel shader file.");
-    }
-
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreatePixelShader(
-            &fileData[0],
-            fileData.size(),
-            nullptr,
-            &m_sdlRendererData->pixelShader
-            )
-        );
-
-    //
-    // Create a vertex buffer:
-    //
-    VertexPositionColor vertices[] = 
-    {
-        {XMFLOAT3(-1.0f, -1.0f, 0.0f),  XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
-    };
-
-    m_vertexCount = ARRAYSIZE(vertices);
-
-    D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-    vertexBufferData.pSysMem = vertices;
-    vertexBufferData.SysMemPitch = 0;
-    vertexBufferData.SysMemSlicePitch = 0;
-    CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreateBuffer(
-            &vertexBufferDesc,
-            &vertexBufferData,
-            &m_sdlRendererData->vertexBuffer
-            )
-        );
-
-    //
-    // Create a sampler to use when drawing textures:
-    //
-    D3D11_SAMPLER_DESC samplerDesc;
-    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
-    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-    samplerDesc.MipLODBias = 0.0f;
-    samplerDesc.MaxAnisotropy = 1;
-    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
-    samplerDesc.BorderColor[0] = 0.0f;
-    samplerDesc.BorderColor[1] = 0.0f;
-    samplerDesc.BorderColor[2] = 0.0f;
-    samplerDesc.BorderColor[3] = 0.0f;
-    samplerDesc.MinLOD = 0.0f;
-    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-    DX::ThrowIfFailed(
-        m_sdlRendererData->d3dDevice->CreateSamplerState(
-            &samplerDesc,
-            &m_sdlRendererData->mainSampler
-            )
-        );
-
-    //
-    // All done!
-    //
-    m_loadingComplete = true;       // This variable can probably be factored-out
+    DX::ThrowIfFailed(WINRT_CreateDeviceResources(m_sdlRenderer));
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
@@ -531,7 +344,7 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
         );
 
     // Only draw the screen once it is loaded (some loading is asynchronous).
-    if (!m_loadingComplete)
+    if (!m_sdlRendererData->loadingComplete)
     {
         return;
     }

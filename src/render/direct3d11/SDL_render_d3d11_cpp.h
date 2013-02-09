@@ -21,6 +21,7 @@
 #include "SDL_config.h"
 
 #include <D3D11_1.h>
+#include <DirectXMath.h>
 #include <wrl/client.h>
 
 typedef struct
@@ -36,10 +37,19 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11Texture2D> mainTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mainTextureResourceView;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
+    D3D_FEATURE_LEVEL featureLevel;
+    unsigned int vertexCount;
+    bool loadingComplete;
 } D3D11_RenderData;
 
 typedef struct
 {
 } D3D11_TextureData;
+
+struct VertexPositionColor
+{
+    DirectX::XMFLOAT3 pos;
+    DirectX::XMFLOAT2 tex;
+};
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -27,14 +27,23 @@ extern "C" {
 #include "../../core/windows/SDL_windows.h"
 //#include "SDL_hints.h"
 //#include "SDL_loadso.h"
+#include "SDL_system.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysrender.h"
 //#include "stdio.h"
 }
 
+#include <fstream>
+#include <string>
+#include <vector>
+
 #include "SDL_render_d3d11_cpp.h"
 
-/* Direct3D renderer implementation */
+using namespace DirectX;
+using namespace Microsoft::WRL;
+using namespace std;
+
+/* Direct3D 11.1 renderer implementation */
 
 static SDL_Renderer *D3D11_CreateRenderer(SDL_Window * window, Uint32 flags);
 //static void D3D11_WindowEvent(SDL_Renderer * renderer,
@@ -66,6 +75,9 @@ static void D3D11_RenderPresent(SDL_Renderer * renderer);
 //static void D3D11_DestroyTexture(SDL_Renderer * renderer,
 //                               SDL_Texture * texture);
 //static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
+
+/* Direct3D 11.1 Internal Functions */
+HRESULT WINRT_CreateDeviceResources(SDL_Renderer * renderer);
 
 
 extern "C" {
@@ -114,10 +126,12 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     data = new D3D11_RenderData;    // Use the C++ 'new' operator to make sure the struct's members initialize using C++ rules
     if (!data) {
-        delete data;
         SDL_OutOfMemory();
         return NULL;
     }
+    data->featureLevel = (D3D_FEATURE_LEVEL) 0;
+    data->vertexCount = 0;
+    data->loadingComplete = false;
 
     // TODO: Create Direct3D Object(s)
 
@@ -278,6 +292,224 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     //IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, &matrix);
 
     return renderer;
+}
+
+static bool
+D3D11_ReadFileContents(const wstring & fileName, vector<char> & out)
+{
+    ifstream in(fileName, ios::in | ios::binary);
+    if (!in) {
+        return false;
+    }
+
+    in.seekg(0, ios::end);
+    out.resize((size_t) in.tellg());
+    in.seekg(0, ios::beg);
+    in.read(&out[0], out.size());
+    return in.good();
+}
+
+static bool
+D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
+{
+    wstring fileName;
+
+#if WINAPI_FAMILY == WINAPI_FAMILY_APP
+    fileName = SDL_WinRTGetInstalledLocationPath();
+    fileName += L"\\SDL_VS2012_WinRT\\";
+#elif WINAPI_FAMILY == WINAPI_PHONE_APP
+    fileName = SDL_WinRTGetInstalledLocationPath();
+    fileName += L"\\";
+#endif
+    // WinRT, TODO: test Direct3D 11.1 shader loading on Win32
+    fileName += shaderName;
+    return D3D11_ReadFileContents(fileName, out);
+}
+
+HRESULT
+WINRT_CreateDeviceResources(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+
+    // This flag adds support for surfaces with a different color channel ordering
+    // than the API default. It is required for compatibility with Direct2D.
+    UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
+
+#if defined(_DEBUG)
+    // If the project is in a debug build, enable debugging via SDK Layers with this flag.
+    creationFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+    // This array defines the set of DirectX hardware feature levels this app will support.
+    // Note the ordering should be preserved.
+    // Don't forget to declare your application's minimum required feature level in its
+    // description.  All applications are assumed to support 9.1 unless otherwise stated.
+    D3D_FEATURE_LEVEL featureLevels[] = 
+    {
+        D3D_FEATURE_LEVEL_11_1,
+        D3D_FEATURE_LEVEL_11_0,
+        D3D_FEATURE_LEVEL_10_1,
+        D3D_FEATURE_LEVEL_10_0,
+        D3D_FEATURE_LEVEL_9_3,
+        D3D_FEATURE_LEVEL_9_2,
+        D3D_FEATURE_LEVEL_9_1
+    };
+
+    // Create the Direct3D 11 API device object and a corresponding context.
+    ComPtr<ID3D11Device> device;
+    ComPtr<ID3D11DeviceContext> context;
+    HRESULT result = S_OK;
+    result = D3D11CreateDevice(
+        nullptr, // Specify nullptr to use the default adapter.
+        D3D_DRIVER_TYPE_HARDWARE,
+        nullptr,
+        creationFlags, // Set set debug and Direct2D compatibility flags.
+        featureLevels, // List of feature levels this app can support.
+        ARRAYSIZE(featureLevels),
+        D3D11_SDK_VERSION, // Always set this to D3D11_SDK_VERSION for Windows Store apps.
+        &device, // Returns the Direct3D device created.
+        &data->featureLevel, // Returns feature level of device created.
+        &context // Returns the device immediate context.
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    // Get the Direct3D 11.1 API device and context interfaces.
+    Microsoft::WRL::ComPtr<ID3D11Device1> d3dDevice1;
+    result = device.As(&(data->d3dDevice));
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    result = context.As(&data->d3dContext);
+    if (FAILED(result)) {
+        return result;
+    }
+
+    // Start loading GPU shaders:
+    vector<char> fileData;
+
+    //
+    // Load in SDL's one and only vertex shader:
+    //
+    if (!D3D11_ReadShaderContents(L"SimpleVertexShader.cso", fileData)) {
+        SDL_SetError("Unable to open SDL's vertex shader file.");
+        return E_FAIL;
+    }
+
+    result = data->d3dDevice->CreateVertexShader(
+        &fileData[0],
+        fileData.size(),
+        nullptr,
+        &data->vertexShader
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // Create an input layout for SDL's vertex shader:
+    //
+    const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
+    {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+    result = data->d3dDevice->CreateInputLayout(
+        vertexDesc,
+        ARRAYSIZE(vertexDesc),
+        &fileData[0],
+        fileData.size(),
+        &data->inputLayout
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // Load in SDL's one and only pixel shader (for now, more are likely to follow):
+    //
+    if (!D3D11_ReadShaderContents(L"SimplePixelShader.cso", fileData)) {
+        SDL_SetError("Unable to open SDL's pixel shader file.");
+        return E_FAIL;
+    }
+
+    result = data->d3dDevice->CreatePixelShader(
+        &fileData[0],
+        fileData.size(),
+        nullptr,
+        &data->pixelShader
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // Create a vertex buffer:
+    //
+    VertexPositionColor vertices[] = 
+    {
+        {XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
+        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
+        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
+    };
+
+    data->vertexCount = ARRAYSIZE(vertices);
+
+    D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
+    vertexBufferData.pSysMem = vertices;
+    vertexBufferData.SysMemPitch = 0;
+    vertexBufferData.SysMemSlicePitch = 0;
+    CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
+    result = data->d3dDevice->CreateBuffer(
+        &vertexBufferDesc,
+        &vertexBufferData,
+        &data->vertexBuffer
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // Create a sampler to use when drawing textures:
+    //
+    D3D11_SAMPLER_DESC samplerDesc;
+    samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+    samplerDesc.MipLODBias = 0.0f;
+    samplerDesc.MaxAnisotropy = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0.0f;
+    samplerDesc.BorderColor[1] = 0.0f;
+    samplerDesc.BorderColor[2] = 0.0f;
+    samplerDesc.BorderColor[3] = 0.0f;
+    samplerDesc.MinLOD = 0.0f;
+    samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+    result = data->d3dDevice->CreateSamplerState(
+        &samplerDesc,
+        &data->mainSampler
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // All done!
+    //
+    data->loadingComplete = true;       // This variable can probably be factored-out
+    return S_OK;
 }
 
 static int
