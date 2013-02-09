@@ -151,7 +151,11 @@ void SDL_WinRTApp::Uninitialize()
 
 void SDL_WinRTApp::OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
-    m_renderer->UpdateForWindowSizeChange();
+    SDL_SendWindowEvent(
+        m_sdlWindowData->sdlWindow,
+        SDL_WINDOWEVENT_RESIZED,
+        (int) ceil(args->Size.Width),
+        (int) ceil(args->Size.Height));
 }
 
 void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)

@@ -16,7 +16,6 @@ internal:
 
 public:
     virtual ~SDL_winrtrenderer();
-    virtual void UpdateForWindowSizeChange();
     virtual void Present();
 
 internal:

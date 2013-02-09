@@ -16,9 +16,6 @@ using namespace Windows::UI::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 
-extern CoreWindow ^ D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer);
-extern HRESULT D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer);
-
 // Constructor.
 SDL_winrtrenderer::SDL_winrtrenderer() :
     m_mainTextureHelperSurface(NULL),
@@ -100,12 +97,6 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
             &resourceViewDesc,
             &m_sdlRendererData->mainTextureResourceView)
         );
-}
-
-// This method is called in the event handler for the SizeChanged event.
-void SDL_winrtrenderer::UpdateForWindowSizeChange()
-{
-    DX::ThrowIfFailed(D3D11_UpdateForWindowSizeChange(m_sdlRenderer));
 }
 
 void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)

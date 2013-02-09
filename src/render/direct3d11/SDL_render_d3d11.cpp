@@ -51,8 +51,8 @@ using namespace Windows::UI::Core;
 /* Direct3D 11.1 renderer implementation */
 
 static SDL_Renderer *D3D11_CreateRenderer(SDL_Window * window, Uint32 flags);
-//static void D3D11_WindowEvent(SDL_Renderer * renderer,
-//                            const SDL_WindowEvent *event);
+static void D3D11_WindowEvent(SDL_Renderer * renderer,
+                            const SDL_WindowEvent *event);
 //static int D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 //static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 //                             const SDL_Rect * rect, const void *pixels,
@@ -131,9 +131,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     data->windowSizeInDIPs = XMFLOAT2(0, 0);
     data->renderTargetSize = XMFLOAT2(0, 0);
 
-    // TODO: Create Direct3D Object(s)
-
-    //renderer->WindowEvent = D3D11_WindowEvent;
+    renderer->WindowEvent = D3D11_WindowEvent;
     //renderer->CreateTexture = D3D11_CreateTexture;
     //renderer->UpdateTexture = D3D11_UpdateTexture;
     //renderer->LockTexture = D3D11_LockTexture;
@@ -402,7 +400,7 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
 
 #ifdef __WINRT__
 
-CoreWindow ^
+static CoreWindow ^
 D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer)
 {
     SDL_Window * sdlWindow = renderer->window;
@@ -660,6 +658,7 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     return S_OK;
 }
 
+// This method is called when the window's size changes.
 HRESULT
 D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer)
 {
@@ -691,7 +690,7 @@ D3D11_HandleDeviceLost(SDL_Renderer * renderer)
     D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
     HRESULT result = S_OK;
 
-    // Reset these member variables to ensure that UpdateForWindowSizeChange recreates all resources.
+    // Reset these member variables to ensure that D3D11_UpdateForWindowSizeChange recreates all resources.
     data->windowSizeInDIPs.x = 0;
     data->windowSizeInDIPs.y = 0;
     data->swapChain = nullptr;
@@ -709,6 +708,16 @@ D3D11_HandleDeviceLost(SDL_Renderer * renderer)
     }
 
     return S_OK;
+}
+
+static void
+D3D11_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
+{
+    //D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+
+    if (event->event == SDL_WINDOWEVENT_RESIZED) {
+        D3D11_UpdateForWindowSizeChange(renderer);
+    }
 }
 
 static int
