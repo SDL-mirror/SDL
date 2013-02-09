@@ -84,6 +84,8 @@ static void D3D11_DestroyRenderer(SDL_Renderer * renderer);
 /* Direct3D 11.1 Internal Functions */
 HRESULT D3D11_CreateDeviceResources(SDL_Renderer * renderer);
 HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
+HRESULT D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer);
+HRESULT D3D11_HandleDeviceLost(SDL_Renderer * renderer);
 
 extern "C" {
     SDL_RenderDriver D3D11_RenderDriver = {
@@ -211,6 +213,7 @@ D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
     return D3D11_ReadFileContents(fileName, out);
 }
 
+// Create resources that depend on the device.
 HRESULT
 D3D11_CreateDeviceResources(SDL_Renderer * renderer)
 {
@@ -425,6 +428,7 @@ D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer)
     return *coreWindowPointer;
 }
 
+// Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.
 static float
 D3D11_ConvertDipsToPixels(float dips)
 {
@@ -433,6 +437,7 @@ D3D11_ConvertDipsToPixels(float dips)
 }
 #endif
 
+// Initialize all resources that change when the window's size changes.
 // WinRT, TODO: get D3D11_CreateWindowSizeDependentResources working on Win32
 HRESULT
 D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
@@ -655,6 +660,57 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     return S_OK;
 }
 
+HRESULT
+D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+    Windows::UI::Core::CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
+
+    if (coreWindow->Bounds.Width  != data->windowSizeInDIPs.x ||
+        coreWindow->Bounds.Height != data->windowSizeInDIPs.y ||
+        data->orientation != DisplayProperties::CurrentOrientation)
+    {
+        ID3D11RenderTargetView* nullViews[] = {nullptr};
+        data->d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+        data->renderTargetView = nullptr;
+        data->d3dContext->Flush();
+        result = D3D11_CreateWindowSizeDependentResources(renderer);
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return result;
+        }
+    }
+
+    return S_OK;
+}
+
+HRESULT
+D3D11_HandleDeviceLost(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+
+    // Reset these member variables to ensure that UpdateForWindowSizeChange recreates all resources.
+    data->windowSizeInDIPs.x = 0;
+    data->windowSizeInDIPs.y = 0;
+    data->swapChain = nullptr;
+
+    result = D3D11_CreateDeviceResources(renderer);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    result = D3D11_UpdateForWindowSizeChange(renderer);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    return S_OK;
+}
+
 static int
 D3D11_UpdateViewport(SDL_Renderer * renderer)
 {
@@ -694,15 +750,18 @@ D3D11_RenderPresent(SDL_Renderer * renderer)
 
     // If the device was removed either by a disconnect or a driver upgrade, we 
     // must recreate all device resources.
+    //
+    // TODO, WinRT: consider throwing an exception if D3D11_RenderPresent fails, especially if there is a way to salvedge debug info from users' machines
     if (hr == DXGI_ERROR_DEVICE_REMOVED)
     {
-        extern void WINRT_HandleDeviceLost();   // TODO, WinRT: move lost-device handling into the Direct3D 11.1 renderer, as appropriate
-        WINRT_HandleDeviceLost();
+        hr = D3D11_HandleDeviceLost(renderer);
+        if (FAILED(hr)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, hr);
+        }
     }
     else
     {
         WIN_SetErrorFromHRESULT(__FUNCTION__, hr);
-        // TODO, WinRT: consider throwing an exception if D3D11_RenderPresent fails, especially if there is a way to salvedge debug info from users' machines
     }
 }
 

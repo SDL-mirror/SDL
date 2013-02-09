@@ -16,9 +16,8 @@ using namespace Windows::UI::Core;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
 
-extern HRESULT D3D11_CreateDeviceResources(SDL_Renderer * renderer);
 extern CoreWindow ^ D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer);
-extern HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
+extern HRESULT D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer);
 
 // Constructor.
 SDL_winrtrenderer::SDL_winrtrenderer() :
@@ -34,31 +33,6 @@ SDL_winrtrenderer::~SDL_winrtrenderer()
         SDL_FreeSurface(m_mainTextureHelperSurface);
         m_mainTextureHelperSurface = NULL;
     }
-}
-
-// Recreate all device resources and set them back to the current state.
-void SDL_winrtrenderer::HandleDeviceLost()
-{
-    // Reset these member variables to ensure that UpdateForWindowSizeChange recreates all resources.
-    m_sdlRendererData->windowSizeInDIPs.x = 0;
-    m_sdlRendererData->windowSizeInDIPs.y = 0;
-    m_sdlRendererData->swapChain = nullptr;
-
-    // TODO, WinRT: reconnect HandleDeviceLost to SDL_Renderer
-    CreateDeviceResources();
-    UpdateForWindowSizeChange();
-}
-
-// These are the resources that depend on the device.
-void SDL_winrtrenderer::CreateDeviceResources()
-{
-    DX::ThrowIfFailed(D3D11_CreateDeviceResources(m_sdlRenderer));
-}
-
-// Allocate all memory resources that change on a window SizeChanged event.
-void SDL_winrtrenderer::CreateWindowSizeDependentResources()
-{
-    DX::ThrowIfFailed(D3D11_CreateWindowSizeDependentResources(m_sdlRenderer));
 }
 
 void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
@@ -131,17 +105,7 @@ void SDL_winrtrenderer::ResizeMainTexture(int w, int h)
 // This method is called in the event handler for the SizeChanged event.
 void SDL_winrtrenderer::UpdateForWindowSizeChange()
 {
-    CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(m_sdlRenderer);
-    if (coreWindow->Bounds.Width  != m_sdlRendererData->windowSizeInDIPs.x ||
-        coreWindow->Bounds.Height != m_sdlRendererData->windowSizeInDIPs.y ||
-        m_sdlRendererData->orientation != DisplayProperties::CurrentOrientation)
-    {
-        ID3D11RenderTargetView* nullViews[] = {nullptr};
-        m_sdlRendererData->d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-        m_sdlRendererData->renderTargetView = nullptr;
-        m_sdlRendererData->d3dContext->Flush();
-        CreateWindowSizeDependentResources();
-    }
+    DX::ThrowIfFailed(D3D11_UpdateForWindowSizeChange(m_sdlRenderer));
 }
 
 void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numrects)
@@ -230,11 +194,4 @@ void SDL_winrtrenderer::Render(SDL_Surface * surface, SDL_Rect * rects, int numr
 void SDL_winrtrenderer::Present()
 {
     SDL_RenderPresent(m_sdlRenderer);
-}
-
-// Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.
-float SDL_winrtrenderer::ConvertDipsToPixels(float dips)
-{
-    static const float dipsPerInch = 96.0f;
-    return floor(dips * DisplayProperties::LogicalDpi / dipsPerInch + 0.5f); // Round to nearest integer.
 }

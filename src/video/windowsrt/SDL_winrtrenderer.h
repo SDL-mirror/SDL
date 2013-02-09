@@ -16,12 +16,8 @@ internal:
 
 public:
     virtual ~SDL_winrtrenderer();
-    virtual void HandleDeviceLost();
-    virtual void CreateDeviceResources();
-    virtual void CreateWindowSizeDependentResources();
     virtual void UpdateForWindowSizeChange();
     virtual void Present();
-    virtual float ConvertDipsToPixels(float dips);
 
 internal:
     virtual void Render(SDL_Surface * surface, SDL_Rect * rects, int numrects);
