@@ -825,7 +825,6 @@ D3D11_DestroyTexture(SDL_Renderer * renderer,
         }
 
         delete textureData;
-        texture = NULL;
         texture->driverdata = NULL;
     }
 }
