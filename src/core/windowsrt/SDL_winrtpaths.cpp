@@ -19,53 +19,53 @@ using namespace std;
 using namespace Windows::Storage;
 
 extern "C" const wchar_t *
-SDL_WinRTGetInstalledLocationPath()
+SDL_WinRTGetFileSystemPath(SDL_WinRT_Path pathType)
 {
-    static wstring path;
-    if (path.empty()) {
-        path = Windows::ApplicationModel::Package::Current->InstalledLocation->Path->Data();
-    }
-    return path.c_str();
-}
+    switch (pathType) {
+        case SDL_WINRT_PATH_INSTALLED_LOCATION:
+        {
+            static wstring path;
+            if (path.empty()) {
+                path = Windows::ApplicationModel::Package::Current->InstalledLocation->Path->Data();
+            }
+            return path.c_str();
+        }
 
-extern "C" const wchar_t *
-SDL_WinRTGetLocalFolderPath()
-{
-    static wstring path;
-    if (path.empty()) {
-        path = ApplicationData::Current->LocalFolder->Path->Data();
-    }
-    return path.c_str();
-}
+        case SDL_WINRT_PATH_LOCAL_FOLDER:
+        {
+            static wstring path;
+            if (path.empty()) {
+                path = ApplicationData::Current->LocalFolder->Path->Data();
+            }
+            return path.c_str();
+        }
 
-extern "C" const wchar_t *
-SDL_WinRTGetRoamingFolderPath()
-{
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+#if WINAPI_FAMILY != WINAPI_FAMILY_PHONE_APP
+        case SDL_WINRT_PATH_ROAMING_FOLDER:
+        {
+            static wstring path;
+            if (path.empty()) {
+                path = ApplicationData::Current->RoamingFolder->Path->Data();
+            }
+            return path.c_str();
+        }
+
+        case SDL_WINRT_PATH_TEMP_FOLDER:
+        {
+            static wstring path;
+            if (path.empty()) {
+                path = ApplicationData::Current->TemporaryFolder->Path->Data();
+            }
+            return path.c_str();
+        }
+#endif
+
+        default:
+            break;
+    }
+
     SDL_Unsupported();
     return NULL;
-#else
-    static wstring path;
-    if (path.empty()) {
-        path = ApplicationData::Current->RoamingFolder->Path->Data();
-    }
-    return path.c_str();
-#endif
-}
-
-extern "C" const wchar_t *
-SDL_WinRTGetTemporaryFolderPath()
-{
-#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
-    SDL_Unsupported();
-    return NULL;
-#else
-    static wstring path;
-    if (path.empty()) {
-        path = ApplicationData::Current->TemporaryFolder->Path->Data();
-    }
-    return path.c_str();
-#endif
 }
 
 #endif /* __WINRT__ */

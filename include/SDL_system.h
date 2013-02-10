@@ -96,44 +96,46 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
 /* Platform specific functions for Windows RT */
 #if defined(__WINRT__) && __WINRT__
 
-/* Gets the path to the installed app's root directory.
-
-   This function may be used safely on Windows Phone 8.
-*/
-extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetInstalledLocationPath();
-
-/* Gets the path to the local app data store.
-   Files and directories that should be limited to the local device can be
-   created in this path.
-
-   This function may be used safely on Windows Phone 8, as opposed to
-   SDL_WinRTGetRoamingFolderPath() and SDL_WinRTGetTemporaryFolderPath(),
-   which do not work on Windows Phone 8 (and will return NULL if called
-   from this platform).
+/**
+ *  \brief Windows RT / Windows Phone path types
  */
-extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetLocalFolderPath();
+typedef enum
+{
+    /** \brief The installed app's root directory.
+        Files here are likely to be read-only. */
+    SDL_WINRT_PATH_INSTALLED_LOCATION,
 
-/* Gets the path to the roaming app data store.
-   Files and directories that should roam to different devices can be
-   created in this path.  Be sure to read Microsoft's documentation on
-   roaming files for more information on how this works, as restrictions
-   do apply.
+    /** \brief The app's local data store.  Files may be written here */
+    SDL_WINRT_PATH_LOCAL_FOLDER,
 
-   Please note that on Windows Phone 8, this function will return NULL,
-   as Windows Phone 8 apps do not have an accessible roaming app data
-   store.
+    /** \brief The app's roaming data store.  Unsupported on Windows Phone.
+        Files written here may be copied to other machines via a network
+        connection.
+    */
+    SDL_WINRT_PATH_ROAMING_FOLDER,
+
+    /** \brief The app's temporary data store.  Unsupported on Windows Phone.
+        Files written here may be deleted at any time. */
+    SDL_WINRT_PATH_TEMP_FOLDER
+} SDL_WinRT_Path;
+
+
+/**
+ *  \brief Retrieves a Windows RT defined path on the local file system
+ *
+ *  \note Documentation on most app-specific path types on Windows RT
+ *      can be found on MSDN, at the URL:
+ *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
+ *
+ *  \param pathType The type of path to retrieve.
+ *  \ret A UCS-2 string (16-bit, wide-char) containing the path, or NULL
+ *      if the path is not available for any reason.  Not all paths are
+ *      available on all versions of Windows.  This is especially true on
+ *      Windows Phone.  Check the documentation for the given
+ *      SDL_WinRT_Path for more information on which path types are
+ *      supported where.
  */
-extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetRoamingFolderPath();
-
-/* Gets the path to the temporary app data store.
-   Files and directories may be written here, however they may be deleted
-   by Windows at a future date.
-
-   Please note that on Windows Phone 8, this function will return NULL,
-   as Windows Phone 8 apps do not have an accessible temporary app data
-   store.
-*/
-extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetTemporaryFolderPath();
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFileSystemPath(SDL_WinRT_Path pathType);
 
 #endif /* __WINRT__ */
 

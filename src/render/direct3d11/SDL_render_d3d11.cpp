@@ -202,10 +202,10 @@ D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
     wstring fileName;
 
 #if WINAPI_FAMILY == WINAPI_FAMILY_APP
-    fileName = SDL_WinRTGetInstalledLocationPath();
+    fileName = SDL_WinRTGetFileSystemPath(SDL_WINRT_PATH_INSTALLED_LOCATION);
     fileName += L"\\SDL_VS2012_WinRT\\";
 #elif WINAPI_FAMILY == WINAPI_PHONE_APP
-    fileName = SDL_WinRTGetInstalledLocationPath();
+    fileName = SDL_WinRTGetFileSystemPath(SDL_WINRT_PATH_INSTALLED_LOCATION);
     fileName += L"\\";
 #endif
     // WinRT, TODO: test Direct3D 11.1 shader loading on Win32
