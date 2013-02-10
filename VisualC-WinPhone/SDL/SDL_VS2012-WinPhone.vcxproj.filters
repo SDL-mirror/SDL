@@ -333,13 +333,7 @@
     <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtevents_c.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtframebuffer_c.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtmouse.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtrenderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\video\windowsrt\SDL_winrtvideo.h">
@@ -593,13 +587,7 @@
     <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtevents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtframebuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtmouse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtrenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\video\windowsrt\SDL_winrtvideo.cpp">

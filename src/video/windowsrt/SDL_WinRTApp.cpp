@@ -1,5 +1,6 @@
 ﻿#include "SDLmain_WinRT_common.h"
 #include "SDL_WinRTApp.h"
+#include "ppltasks.h"
 
 extern "C" {
 #include "SDL_assert.h"
@@ -47,8 +48,7 @@ SDL_WinRTApp::SDL_WinRTApp() :
     m_windowClosed(false),
     m_windowVisible(true),
     m_sdlWindowData(NULL),
-    m_useRelativeMouseMode(false),
-    m_renderer(nullptr)
+    m_useRelativeMouseMode(false)
 {
 }
 
@@ -62,8 +62,6 @@ void SDL_WinRTApp::Initialize(CoreApplicationView^ applicationView)
 
     CoreApplication::Resuming +=
         ref new EventHandler<Platform::Object^>(this, &SDL_WinRTApp::OnResuming);
-
-    m_renderer = ref new SDL_winrtrenderer();
 }
 
 void SDL_WinRTApp::SetWindow(CoreWindow^ window)
@@ -133,15 +131,6 @@ void SDL_WinRTApp::PumpEvents()
         {
             CoreWindow::GetForCurrentThread()->Dispatcher->ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
         }
-    }
-}
-
-void SDL_WinRTApp::UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects)
-{
-    if (!m_windowClosed && m_windowVisible)
-    {
-        m_renderer->Render(surface, rects, numrects);
-        m_renderer->Present(); // This call is synchronized to the display frame rate.
     }
 }
 
@@ -647,11 +636,6 @@ void SDL_WinRTApp::SetRelativeMouseMode(bool enable)
 void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData* windowData)
 {
     m_sdlWindowData = windowData;
-}
-
-void SDL_WinRTApp::ResizeMainTexture(int w, int h)
-{
-    m_renderer->ResizeMainTexture(w, h);
 }
 
 IFrameworkView^ Direct3DApplicationSource::CreateView()

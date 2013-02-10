@@ -41,7 +41,6 @@ extern "C" {
 #include "SDL_WinRTApp.h"
 #include "SDL_winrtvideo.h"
 #include "SDL_winrtevents_c.h"
-#include "SDL_winrtframebuffer_c.h"
 #include "SDL_winrtmouse.h"
 
 /* On Windows, windows.h defines CreateWindow */
@@ -100,9 +99,9 @@ WINRT_CreateDevice(int devindex)
     device->DestroyWindow = WINRT_DestroyWindow;
     device->SetDisplayMode = WINRT_SetDisplayMode;
     device->PumpEvents = WINRT_PumpEvents;
-    device->CreateWindowFramebuffer = SDL_WINRT_CreateWindowFramebuffer;
-    device->UpdateWindowFramebuffer = SDL_WINRT_UpdateWindowFramebuffer;
-    device->DestroyWindowFramebuffer = SDL_WINRT_DestroyWindowFramebuffer;
+    //device->CreateWindowFramebuffer = SDL_WINRT_CreateWindowFramebuffer;
+    //device->UpdateWindowFramebuffer = SDL_WINRT_UpdateWindowFramebuffer;
+    //device->DestroyWindowFramebuffer = SDL_WINRT_DestroyWindowFramebuffer;
     device->GetWindowWMInfo = WINRT_GetWindowWMInfo;
 
     device->free = WINRT_DeleteDevice;
@@ -167,6 +166,7 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
         SDL_OutOfMemory();
         return -1;
     }
+    window->driverdata = data;
     data->sdlWindow = window;
     data->coreWindow = new CoreWindow^(CoreWindow::GetForCurrentThread());
 
@@ -212,27 +212,6 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
        behalf of SDL:
     */
     SDL_WinRTGlobalApp->SetSDLWindowData(data);
-
-    /* For now, create a Direct3D 11 renderer up-front.  Eventually, this
-       won't be done in WINRT_CreateWindow, although it may get done in
-       SDL_WINRT_CreateWindowFramebuffer.
-    */
-
-    // Link SDL_winrtrenderer to the SDL_Renderer temporarily,
-    // for refactoring purposes.  Initialize the SDL_Renderer
-    // first in order to give it the opportunity to create key
-    // resources first.
-    //
-    // TODO, WinRT: either make WINRT_CreateWindow not call SDL_CreateRenderer, or have it do error checking if it does call it
-
-    // HACK: make sure the SDL window references SDL_WindowData data now, in
-    // order to allow the SDL_Renderer to be created in WINRT_CreateWindow
-    window->driverdata = data;
-
-    SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
-    SDL_WinRTGlobalApp->m_renderer->m_sdlRenderer = renderer;
-    SDL_WinRTGlobalApp->m_renderer->m_sdlRendererData = (D3D11_RenderData *) renderer->driverdata;
-    //SDL_WinRTGlobalApp->m_renderer->Initialize();
 
     /* All done! */
     return 0;

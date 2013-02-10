@@ -2,7 +2,6 @@
 
 #include "SDLmain_WinRT_common.h"
 #include "SDL_winrtvideo.h"
-#include "SDL_winrtrenderer.h"
 #include <vector>
 
 using namespace Windows::UI::Core;
@@ -27,8 +26,6 @@ internal:
     bool HasSDLWindowData() const;
     void SetRelativeMouseMode(bool enable);
     void SetSDLWindowData(const SDL_WindowData * windowData);
-    void UpdateWindowFramebuffer(SDL_Surface * surface, SDL_Rect * rects, int numrects);
-    void ResizeMainTexture(int w, int h);
     Windows::Foundation::Point TransformCursor(Windows::Foundation::Point rawPosition);
 
 protected:
@@ -46,9 +43,6 @@ protected:
     void OnMouseMoved(Windows::Devices::Input::MouseDevice^ mouseDevice, Windows::Devices::Input::MouseEventArgs^ args);
     void OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
     void OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args);
-
-internal:
-    SDL_winrtrenderer^ m_renderer;
 
 private:
     bool m_windowClosed;
