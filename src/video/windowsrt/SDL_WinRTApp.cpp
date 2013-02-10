@@ -88,6 +88,9 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
     window->PointerReleased +=
         ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerReleased);
 
+    window->PointerWheelChanged +=
+        ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerWheelChanged);
+
     window->PointerMoved +=
         ref new TypedEventHandler<CoreWindow^, PointerEventArgs^>(this, &SDL_WinRTApp::OnPointerMoved);
 
@@ -245,9 +248,10 @@ static void
 WINRT_LogPointerEvent(const string & header, PointerEventArgs ^ args)
 {
     PointerPoint ^ pt = args->CurrentPoint;
-    SDL_Log("%s: Position={%f,%f}, FrameId=%d, PointerId=%d, PointerUpdateKind=%s\n",
+    SDL_Log("%s: Position={%f,%f}, MouseWheelDelta=%d, FrameId=%d, PointerId=%d, PointerUpdateKind=%s\n",
         header.c_str(),
         pt->Position.X, pt->Position.Y,
+        pt->Properties->MouseWheelDelta,
         pt->FrameId,
         pt->PointerId,
         WINRT_ConvertPointerUpdateKindToString(args->CurrentPoint->Properties->PointerUpdateKind));
@@ -278,6 +282,17 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
         if (button) {
             SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_RELEASED, button);
         }
+    }
+}
+
+void SDL_WinRTApp::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ args)
+{
+#if 0
+    WINRT_LogPointerEvent("wheel changed", args);
+#endif
+
+    if (m_sdlWindowData) {
+        SDL_SendMouseWheel(m_sdlWindowData->sdlWindow, 0, args->CurrentPoint->Properties->MouseWheelDelta);
     }
 }
 
