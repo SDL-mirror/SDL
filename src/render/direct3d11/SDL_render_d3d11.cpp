@@ -879,10 +879,10 @@ D3D11_RenderClear(SDL_Renderer * renderer)
 {
     D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
     const float colorRGBA[] = {
-        renderer->r,
-        renderer->g,
-        renderer->b,
-        renderer->a
+        (renderer->r / 255.0f),
+        (renderer->g / 255.0f),
+        (renderer->b / 255.0f),
+        (renderer->a / 255.0f)
     };
     data->d3dContext->ClearRenderTargetView(
         data->renderTargetView.Get(),
