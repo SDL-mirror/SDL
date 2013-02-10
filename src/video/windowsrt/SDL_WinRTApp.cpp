@@ -14,6 +14,7 @@ extern "C" {
 #include "SDL_log.h"
 }
 
+#include <string>
 #include <unordered_map>
 
 // TODO, WinRT: Remove reference(s) to BasicTimer.h
@@ -34,11 +35,13 @@ static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
 // SDL_CreateWindow().
 SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
+using namespace std;
 using namespace Windows::ApplicationModel;
 using namespace Windows::ApplicationModel::Core;
 using namespace Windows::ApplicationModel::Activation;
 using namespace Windows::Devices::Input;
 using namespace Windows::UI::Core;
+using namespace Windows::UI::Input;
 using namespace Windows::System;
 using namespace Windows::Foundation;
 using namespace Windows::Graphics::Display;
@@ -174,19 +177,107 @@ void SDL_WinRTApp::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
     m_windowClosed = true;
 }
 
+static Uint8
+WINRT_GetSDLButtonForPointerPoint(PointerPoint ^ pt)
+{
+    switch (pt->Properties->PointerUpdateKind)
+    {
+        case PointerUpdateKind::LeftButtonPressed:
+        case PointerUpdateKind::LeftButtonReleased:
+            return SDL_BUTTON_LEFT;
+
+        case PointerUpdateKind::RightButtonPressed:
+        case PointerUpdateKind::RightButtonReleased:
+            return SDL_BUTTON_RIGHT;
+
+        case PointerUpdateKind::MiddleButtonPressed:
+        case PointerUpdateKind::MiddleButtonReleased:
+            return SDL_BUTTON_MIDDLE;
+
+        case PointerUpdateKind::XButton1Pressed:
+        case PointerUpdateKind::XButton1Released:
+            return SDL_BUTTON_X1;
+
+        case PointerUpdateKind::XButton2Pressed:
+        case PointerUpdateKind::XButton2Released:
+            return SDL_BUTTON_X2;
+
+        default:
+            break;
+    }
+
+    return 0;
+}
+
+static const char *
+WINRT_ConvertPointerUpdateKindToString(PointerUpdateKind kind)
+{
+    switch (kind)
+    {
+        case PointerUpdateKind::Other:
+            return "Other";
+        case PointerUpdateKind::LeftButtonPressed:
+            return "LeftButtonPressed";
+        case PointerUpdateKind::LeftButtonReleased:
+            return "LeftButtonReleased";
+        case PointerUpdateKind::RightButtonPressed:
+            return "RightButtonPressed";
+        case PointerUpdateKind::RightButtonReleased:
+            return "RightButtonReleased";
+        case PointerUpdateKind::MiddleButtonPressed:
+            return "MiddleButtonPressed";
+        case PointerUpdateKind::MiddleButtonReleased:
+            return "MiddleButtonReleased";
+        case PointerUpdateKind::XButton1Pressed:
+            return "XButton1Pressed";
+        case PointerUpdateKind::XButton1Released:
+            return "XButton1Released";
+        case PointerUpdateKind::XButton2Pressed:
+            return "XButton2Pressed";
+        case PointerUpdateKind::XButton2Released:
+            return "XButton2Released";
+    }
+
+    return "";
+}
+
+static void
+WINRT_LogPointerEvent(const string & header, PointerEventArgs ^ args)
+{
+    PointerPoint ^ pt = args->CurrentPoint;
+    SDL_Log("%s: Position={%f,%f}, FrameId=%d, PointerId=%d, PointerUpdateKind=%s\n",
+        header.c_str(),
+        pt->Position.X, pt->Position.Y,
+        pt->FrameId,
+        pt->PointerId,
+        WINRT_ConvertPointerUpdateKindToString(args->CurrentPoint->Properties->PointerUpdateKind));
+}
+
 void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 {
-    if (m_sdlWindowData)
-    {
-        SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_PRESSED, SDL_BUTTON_LEFT);
+#if 0
+    WINRT_LogPointerEvent("mouse down", args);
+#endif
+
+    if (m_sdlWindowData) {
+        Uint8 button = WINRT_GetSDLButtonForPointerPoint(args->CurrentPoint);
+        if (button) {
+            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_PRESSED, button);
+        }
     }
 }
 
 void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
 {
-    if (m_sdlWindowData)
-    {
-        SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_RELEASED, SDL_BUTTON_LEFT);
+#if 0
+    WINRT_LogPointerEvent("mouse up", args);
+#endif
+
+    if (m_sdlWindowData) {
+        Uint8 button = WINRT_GetSDLButtonForPointerPoint(args->CurrentPoint);
+        if (button) {
+            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_RELEASED, button);
+        }
     }
 }
 
