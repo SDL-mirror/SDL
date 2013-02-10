@@ -24,6 +24,11 @@
 #include <DirectXMath.h>
 #include <wrl/client.h>
 
+struct SDL_VertexShaderConstants
+{
+	DirectX::XMFLOAT4X4 projection;
+};
+
 typedef struct
 {
     Microsoft::WRL::ComPtr<ID3D11Device1> d3dDevice;
@@ -38,6 +43,10 @@ typedef struct
     D3D_FEATURE_LEVEL featureLevel;
     unsigned int vertexCount;
     bool loadingComplete;
+
+    // Vertex buffer constants:
+    SDL_VertexShaderConstants vertexShaderConstantsData;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> vertexShaderConstants;
 
     // Cached renderer properties.
     DirectX::XMFLOAT2 windowSizeInDIPs;

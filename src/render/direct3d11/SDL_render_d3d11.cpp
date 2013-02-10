@@ -340,6 +340,20 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     }
 
     //
+    // Setup space to hold vertex shader constants:
+    //
+    CD3D11_BUFFER_DESC constantBufferDesc(sizeof(SDL_VertexShaderConstants), D3D11_BIND_CONSTANT_BUFFER);
+    result = data->d3dDevice->CreateBuffer(
+		&constantBufferDesc,
+		nullptr,
+        &data->vertexShaderConstants
+		);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
     // Create a vertex buffer:
     //
     VertexPositionColor vertices[] = 
@@ -553,7 +567,7 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     {
         case DisplayOrientations::Landscape:
             rotation = DXGI_MODE_ROTATION_IDENTITY;
-            data->orientationTransform3D = XMFLOAT4X4( // 0-degree Z-rotation
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 0-degree Z-rotation
                 1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
@@ -563,9 +577,9 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
 
         case DisplayOrientations::Portrait:
             rotation = DXGI_MODE_ROTATION_ROTATE270;
-            data->orientationTransform3D = XMFLOAT4X4( // 90-degree Z-rotation
-                0.0f, 1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f, 0.0f,
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 270-degree Z-rotation
+                0.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
@@ -573,7 +587,7 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
 
         case DisplayOrientations::LandscapeFlipped:
             rotation = DXGI_MODE_ROTATION_ROTATE180;
-            data->orientationTransform3D = XMFLOAT4X4( // 180-degree Z-rotation
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 180-degree Z-rotation
                 -1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, -1.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
@@ -583,9 +597,9 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
 
         case DisplayOrientations::PortraitFlipped:
             rotation = DXGI_MODE_ROTATION_ROTATE90;
-            data->orientationTransform3D = XMFLOAT4X4( // 270-degree Z-rotation
-                0.0f, -1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f, 0.0f,
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 90-degree Z-rotation
+                0.0f, 1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
@@ -891,6 +905,15 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         nullptr
         );
 
+    rendererData->d3dContext->UpdateSubresource(
+        rendererData->vertexShaderConstants.Get(),
+		0,
+		NULL,
+		&rendererData->vertexShaderConstantsData,
+		0,
+		0
+		);
+
     UINT stride = sizeof(VertexPositionColor);
     UINT offset = 0;
     rendererData->d3dContext->IASetVertexBuffers(
@@ -910,6 +933,12 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         nullptr,
         0
         );
+
+    rendererData->d3dContext->VSSetConstantBuffers(
+		0,
+		1,
+        rendererData->vertexShaderConstants.GetAddressOf()
+		);
 
     rendererData->d3dContext->PSSetShader(
         rendererData->pixelShader.Get(),
