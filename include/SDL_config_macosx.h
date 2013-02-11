@@ -130,7 +130,7 @@
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_COCOA	1
 #define SDL_VIDEO_DRIVER_DUMMY	1
-#define SDL_VIDEO_DRIVER_X11 0
+#undef SDL_VIDEO_DRIVER_X11
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC "/usr/X11R6/lib/libX11.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XEXT "/usr/X11R6/lib/libXext.6.dylib"
 #define SDL_VIDEO_DRIVER_X11_DYNAMIC_XINERAMA "/usr/X11R6/lib/libXinerama.1.dylib"
