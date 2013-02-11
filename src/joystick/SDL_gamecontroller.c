@@ -242,10 +242,23 @@ ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 	{
 		return s_pXInputMapping;
 	}
+	else
 #endif
+	{
+		SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
+		ControllerMapping_t *pSupportedController = s_pSupportedControllers;
+		while ( pSupportedController )
+		{
+			if ( !SDL_memcmp( &jGUID, &pSupportedController->guid, sizeof(jGUID) ) )
+			{
+				return pSupportedController;
+			}
+			pSupportedController = pSupportedController->next;
+		}
+	}
+
 	return NULL;
 }
-
 
 /*
  * convert a string to its enum equivalent
@@ -681,19 +694,6 @@ SDL_GameControllerNameForIndex(int device_index)
 	{
 		return pSupportedController->name;
 	}
-	else
-	{
-		SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
-		pSupportedController = s_pSupportedControllers;
-		while ( pSupportedController )
-		{
-			if ( !SDL_memcmp( &jGUID, &pSupportedController->guid, sizeof(jGUID) ) )
-			{
-				return pSupportedController->name;
-			}
-			pSupportedController = pSupportedController->next;
-		}
-	}
     return NULL;
 }
 
@@ -707,24 +707,6 @@ int SDL_IsGameController(int device_index)
 	if ( pSupportedController )
 	{
 		return 1;
-	}
-	else
-	{
-		SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID( device_index );
-		pSupportedController = s_pSupportedControllers;
-		// debug code to help get the guid string for a new joystick
-		/* char szGUID[33];
-		SDL_JoystickGetGUIDString( jGUID, szGUID, sizeof(szGUID) );
-		printf( "%s\n", pchGUID );
-		SDL_free( pchGUID );*/
-		while ( pSupportedController )
-		{
-			if ( !SDL_memcmp( &jGUID, &pSupportedController->guid, sizeof(jGUID) ) )
-			{
-				return 1;
-			}
-			pSupportedController = pSupportedController->next;
-		}
 	}
 	return 0;
 }
@@ -760,35 +742,19 @@ SDL_GameControllerOpen(int device_index)
 		gamecontrollerlist = gamecontrollerlist->next;
     }
 
-    // Create and initialize the joystick 
-    gamecontroller = (SDL_GameController *) SDL_malloc((sizeof *gamecontroller));
-    if (gamecontroller == NULL) {
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
+	// Find a Controller Mapping 
 	pSupportedController =  SDL_PrivateGetControllerMapping(device_index);
-	if ( !pSupportedController )
-	{
-		SDL_JoystickGUID jGUID;
-
-		jGUID = SDL_JoystickGetDeviceGUID( device_index );
-		pSupportedController = s_pSupportedControllers;
-		while ( pSupportedController )
-		{
-			if ( !SDL_memcmp( &jGUID, &pSupportedController->guid, sizeof(jGUID) ) )
-			{
-				break;
-			}
-
-			pSupportedController = pSupportedController->next;
-		}
-	}
-
 	if ( !pSupportedController )
 	{
 		SDL_SetError("Couldn't find mapping for device (%d)", device_index );
 		return (NULL);
+	}
+
+	// Create and initialize the joystick 
+	gamecontroller = (SDL_GameController *) SDL_malloc((sizeof *gamecontroller));
+	if (gamecontroller == NULL) {
+		SDL_OutOfMemory();
+		return NULL;
 	}
 
     SDL_memset(gamecontroller, 0, (sizeof *gamecontroller));
@@ -1024,7 +990,6 @@ SDL_GameControllerQuit(void)
         SDL_GameControllerClose(SDL_gamecontrollers);
  	}
 
-	pControllerMap = s_pSupportedControllers;
 	while ( s_pSupportedControllers )
 	{
 		pControllerMap = s_pSupportedControllers;
