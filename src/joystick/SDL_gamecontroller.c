@@ -36,14 +36,18 @@
 /* a list of currently opened game controllers */
 static SDL_GameController *SDL_gamecontrollers = NULL;
 
-/* keep track of the hat and mask value that transforms this hat movement into a button press */
-struct _SDL_HatAsButton
+/* keep track of the hat and mask value that transforms this hat movement into a button/axis press */
+struct _SDL_HatMapping
 {
 	int hat;
 	Uint8 mask;
 };
 
 #define k_nMaxReverseEntries 20
+
+// We are encoding the "HAT" as 0xhm. where h == hat ID and m == mask
+// MAX 4 hats supported
+#define k_nMaxHatEntries 0x3f + 1
 
 /* our in memory mapping db between joystick objects and controller mappings*/
 struct _SDL_ControllerMapping
@@ -57,7 +61,7 @@ struct _SDL_ControllerMapping
 
 	int buttons[SDL_CONTROLLER_BUTTON_MAX];
 	int axesasbutton[SDL_CONTROLLER_BUTTON_MAX];
-	struct _SDL_HatAsButton hatasbutton[SDL_CONTROLLER_BUTTON_MAX];
+	struct _SDL_HatMapping hatasbutton[SDL_CONTROLLER_BUTTON_MAX];
 
 	// reverse mapping, joystick indices to buttons
 	SDL_CONTROLLER_AXIS raxes[k_nMaxReverseEntries];
@@ -65,8 +69,8 @@ struct _SDL_ControllerMapping
 
 	SDL_CONTROLLER_BUTTON rbuttons[k_nMaxReverseEntries];
 	SDL_CONTROLLER_BUTTON raxesasbutton[k_nMaxReverseEntries];
+	SDL_CONTROLLER_BUTTON rhatasbutton[k_nMaxHatEntries];
 
-	struct _SDL_HatAsButton rhatasbutton[k_nMaxReverseEntries];
 };
 
 
@@ -107,6 +111,7 @@ struct _SDL_GameController
 {
 	SDL_Joystick *joystick;	/* underlying joystick device */
 	int ref_count;
+	Uint8 hatState[4]; /* the current hat state for this controller */
 	struct _SDL_ControllerMapping mapping; /* the mapping object for this controller */
 	struct _SDL_GameController *next; /* pointer to next game controller we have allocated */
 };
@@ -124,6 +129,8 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 	{
 	case SDL_JOYAXISMOTION:
 		{
+			if ( event->jaxis.axis >= k_nMaxReverseEntries ) break;
+
 			SDL_GameController *controllerlist = SDL_gamecontrollers;
 			while ( controllerlist )
 			{
@@ -135,7 +142,7 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 					}
 					else if ( controllerlist->mapping.raxesasbutton[event->jaxis.axis] >= 0 ) // simlate an axis as a button
 					{
-						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.raxesasbutton[event->jaxis.axis], ABS(event->jaxis.value) > 32768/2 ? 1 : 0 );
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.raxesasbutton[event->jaxis.axis], ABS(event->jaxis.value) > 32768/2 ? SDL_PRESSED : SDL_RELEASED );
 					}
 					break;
 				}
@@ -146,6 +153,8 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 	case SDL_JOYBUTTONDOWN:
 	case SDL_JOYBUTTONUP:
 		{
+			if ( event->jbutton.button >= k_nMaxReverseEntries ) break;
+
 			SDL_GameController *controllerlist = SDL_gamecontrollers;
 			while ( controllerlist )
 			{
@@ -167,35 +176,46 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 		break;
 	case SDL_JOYHATMOTION:
 		{
-			if ( event->jhat.hat == 0 ) // BUGBUG - multiple hat support??
+			if ( event->jhat.hat >= 4 ) break;
+
+			SDL_GameController *controllerlist = SDL_gamecontrollers;
+			while ( controllerlist )
 			{
-				SDL_GameController *controllerlist = SDL_gamecontrollers;
-				while ( controllerlist )
+				if ( controllerlist->joystick->instance_id == event->jhat.which )
 				{
-					if ( controllerlist->joystick->instance_id == event->jhat.which )
-					{
-						static Uint8 bHatsDown = 0;
-						if ( event->jhat.value == 0 )
-						{
-							if ( bHatsDown & SDL_HAT_DOWN )
-								SDL_PrivateGameControllerButton( controllerlist, SDL_CONTROLLER_BUTTON_DPAD_DOWN, 0 );
-							if ( bHatsDown & SDL_HAT_UP )
-								SDL_PrivateGameControllerButton( controllerlist, SDL_CONTROLLER_BUTTON_DPAD_UP, 0 );
-							if ( bHatsDown & SDL_HAT_LEFT )
-								SDL_PrivateGameControllerButton( controllerlist, SDL_CONTROLLER_BUTTON_DPAD_LEFT, 0 );
-							if ( bHatsDown & SDL_HAT_RIGHT )
-								SDL_PrivateGameControllerButton( controllerlist, SDL_CONTROLLER_BUTTON_DPAD_RIGHT, 0 );
-							bHatsDown = 0;
-						}
-						else if ( controllerlist->mapping.rhatasbutton[event->jhat.value].hat >= 0 )
-						{
-							bHatsDown |= event->jhat.value;
-							SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[event->jhat.value].hat, (event->jhat.value & controllerlist->mapping.rhatasbutton[event->jhat.value].mask) > 0 ? 1 : 0 );
-						}
-						break;
-					}
-					controllerlist = controllerlist->next;
+					Uint8 bSame = controllerlist->hatState[event->jhat.hat] & event->jhat.value;
+					// Get list of removed bits (button release)
+					Uint8 bChanged = controllerlist->hatState[event->jhat.hat] ^ bSame;
+					// the hat idx in the high nibble
+					int bHighHat = event->jhat.hat << 4;
+
+					if ( bChanged & SDL_HAT_DOWN )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_DOWN], SDL_RELEASED );
+					if ( bChanged & SDL_HAT_UP )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_UP], SDL_RELEASED );
+					if ( bChanged & SDL_HAT_LEFT )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_LEFT], SDL_RELEASED );
+					if ( bChanged & SDL_HAT_RIGHT )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_RIGHT], SDL_RELEASED );
+
+					// Get list of added bits (button press)
+					bChanged = event->jhat.value ^ bSame;
+
+					if ( bChanged & SDL_HAT_DOWN )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_DOWN], SDL_PRESSED );
+					if ( bChanged & SDL_HAT_UP )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_UP], SDL_PRESSED );
+					if ( bChanged & SDL_HAT_LEFT )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_LEFT], SDL_PRESSED );
+					if ( bChanged & SDL_HAT_RIGHT )
+						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.rhatasbutton[bHighHat | SDL_HAT_RIGHT], SDL_PRESSED );
+
+					// update our state cache
+					controllerlist->hatState[event->jhat.hat] = event->jhat.value;
+
+					break;
 				}
+				controllerlist = controllerlist->next;
 			}
 		}
 		break;
@@ -342,14 +362,13 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 	axis = SDL_GameControllerGetAxisFromString( szGameButton );
 	iSDLButton = SDL_atoi( &szJoystickButton[1] );
 
-	if ( iSDLButton >= k_nMaxReverseEntries )
-	{
-		SDL_SetError("Button index too large: %d", iSDLButton );
-		return;
-	}
-
 	if ( szJoystickButton[0] == 'a' )
 	{
+		if ( iSDLButton >= k_nMaxReverseEntries )
+		{
+			SDL_SetError("Axis index too large: %d", iSDLButton );
+			return;
+		}
 		if ( axis != SDL_CONTROLLER_AXIS_INVALID )
 		{
 			pMapping->axes[ axis ] = iSDLButton;
@@ -368,6 +387,11 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 	}
 	else if ( szJoystickButton[0] == 'b' )
 	{
+		if ( iSDLButton >= k_nMaxReverseEntries )
+		{
+			SDL_SetError("Button index too large: %d", iSDLButton );
+			return;
+		}
 		if ( button != SDL_CONTROLLER_BUTTON_INVALID )
 		{
 			pMapping->buttons[ button ] = iSDLButton;
@@ -387,17 +411,20 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 	{
 		int hat = SDL_atoi( &szJoystickButton[1] );
 		int mask = SDL_atoi( &szJoystickButton[3] );
+		if (hat >= 4) {
+			SDL_SetError("Hat index too large: %d", iSDLButton );
+		}
 
 		if ( button != SDL_CONTROLLER_BUTTON_INVALID )
 		{
 			pMapping->hatasbutton[ button ].hat = hat;
 			pMapping->hatasbutton[ button ].mask = mask;
-			pMapping->rhatasbutton[ mask ].hat = button;
-			pMapping->rhatasbutton[ mask ].mask = mask;
+			int ridx = (hat << 4) | mask;
+			pMapping->rhatasbutton[ ridx ] = button;
 		}
 		else if ( axis != SDL_CONTROLLER_AXIS_INVALID )
 		{
-			SDL_assert( !"Support hat as axis" );
+			SDL_assert( !"Support has as axis" );
 		}
 		else
 		{
@@ -499,7 +526,11 @@ void SDL_PrivateLoadButtonMapping( struct _SDL_ControllerMapping *pMapping, SDL_
 		pMapping->rbuttonasaxis[j] = SDL_CONTROLLER_AXIS_INVALID;
 		pMapping->rbuttons[j] = SDL_CONTROLLER_BUTTON_INVALID;
 		pMapping->raxesasbutton[j] = SDL_CONTROLLER_BUTTON_INVALID;
-		pMapping->rhatasbutton[j].hat = -1;
+	}
+
+	for (j = 0; j < k_nMaxHatEntries; j++)
+	{
+		pMapping->rhatasbutton[j] = SDL_CONTROLLER_BUTTON_INVALID;
 	}
 
 	SDL_PrivateGameControllerParseControllerConfigString( pMapping, pchMapping );
@@ -1034,6 +1065,8 @@ SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLE
 int
 SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button, Uint8 state)
 {
+    if ( button == SDL_CONTROLLER_BUTTON_INVALID ) return;
+
     int posted;
 #if !SDL_EVENTS_DISABLED
 	SDL_Event event;
