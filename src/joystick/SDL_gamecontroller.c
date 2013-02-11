@@ -53,18 +53,20 @@ struct _SDL_ControllerMapping
 
 	// mapping of axis/button id to controller version
 	int axes[SDL_CONTROLLER_AXIS_MAX];
-	int buttons[SDL_CONTROLLER_BUTTON_MAX];
+	int buttonasaxis[SDL_CONTROLLER_AXIS_MAX];
 
+	int buttons[SDL_CONTROLLER_BUTTON_MAX];
 	int axesasbutton[SDL_CONTROLLER_BUTTON_MAX];
 	struct _SDL_HatAsButton hatasbutton[SDL_CONTROLLER_BUTTON_MAX];
-	int buttonasaxis[SDL_CONTROLLER_AXIS_MAX];
 
 	// reverse mapping, joystick indices to buttons
 	SDL_CONTROLLER_AXIS raxes[k_nMaxReverseEntries];
+	SDL_CONTROLLER_AXIS rbuttonasaxis[k_nMaxReverseEntries];
+
 	SDL_CONTROLLER_BUTTON rbuttons[k_nMaxReverseEntries];
 	SDL_CONTROLLER_BUTTON raxesasbutton[k_nMaxReverseEntries];
+
 	struct _SDL_HatAsButton rhatasbutton[k_nMaxReverseEntries];
-	SDL_CONTROLLER_AXIS rbuttonasaxis[k_nMaxReverseEntries];
 };
 
 
@@ -355,8 +357,8 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 		}
 		else if ( button != SDL_CONTROLLER_BUTTON_INVALID )
 		{
-			pMapping->buttonasaxis[ button ] = iSDLButton;
-			pMapping->rbuttonasaxis[ iSDLButton ] = button;
+			pMapping->axesasbutton[ button ] = iSDLButton;
+			pMapping->raxesasbutton[ iSDLButton ] = button;
 		}
 		else
 		{
@@ -494,10 +496,10 @@ void SDL_PrivateLoadButtonMapping( struct _SDL_ControllerMapping *pMapping, SDL_
 	for ( j = 0; j < k_nMaxReverseEntries; j++ )
 	{
 		pMapping->raxes[j] = SDL_CONTROLLER_AXIS_INVALID;
+		pMapping->rbuttonasaxis[j] = SDL_CONTROLLER_AXIS_INVALID;
 		pMapping->rbuttons[j] = SDL_CONTROLLER_BUTTON_INVALID;
 		pMapping->raxesasbutton[j] = SDL_CONTROLLER_BUTTON_INVALID;
 		pMapping->rhatasbutton[j].hat = -1;
-		pMapping->rbuttonasaxis[j] = SDL_CONTROLLER_AXIS_INVALID;
 	}
 
 	SDL_PrivateGameControllerParseControllerConfigString( pMapping, pchMapping );
