@@ -430,12 +430,11 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
     }
     Android_JNI_SetupThread();
 
-    
     __android_log_print(ANDROID_LOG_VERBOSE, "SDL", "SDL audio: opening device");
     audioBuffer16Bit = is16Bit;
     audioBufferStereo = channelCount > 1;
 
-    env->CallStaticObjectMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
+    env->CallStaticVoidMethod(mActivityClass, midAudioInit, sampleRate, audioBuffer16Bit, audioBufferStereo, desiredBufferFrames);
 
     /* Allocating the audio buffer from the Java side and passing it as the return value for audioInit no longer works on
      * Android >= 4.2 due to a "stale global reference" error. So now we allocate this buffer directly from this side. */
@@ -471,7 +470,7 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
     if (audioBufferStereo) {
         audioBufferFrames /= 2;
     }
- 
+
     return audioBufferFrames;
 }
 
