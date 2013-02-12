@@ -1065,7 +1065,8 @@ SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLE
 int
 SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button, Uint8 state)
 {
-    if ( button == SDL_CONTROLLER_BUTTON_INVALID ) return;
+    if ( button == SDL_CONTROLLER_BUTTON_INVALID )
+        return (0);
 
     int posted;
 #if !SDL_EVENTS_DISABLED
