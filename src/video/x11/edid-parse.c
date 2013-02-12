@@ -603,6 +603,7 @@ dump_monitor_info (MonitorInfo *info)
 	case MDDI: interface = "MDDI"; break;
 	case DISPLAY_PORT: interface = "DisplayPort"; break;
 	case UNDEFINED: interface = "undefined"; break;
+	default: interface = "unknown"; break;
 	}
 	printf ("Interface: %s\n", interface);
 	
@@ -631,6 +632,7 @@ dump_monitor_info (MonitorInfo *info)
 	case MONOCHROME: s = "monochrome"; break;
 	case RGB: s = "rgb"; break;
 	case OTHER_COLOR: s = "other color"; break;
+	default: s = "unknown"; break;
 	};
 	
 	printf ("Color: %s\n", s);
@@ -731,6 +733,7 @@ dump_monitor_info (MonitorInfo *info)
 	case TWO_WAY_LEFT_ON_EVEN:  s = "Two-way, Left on Even"; break;
 	case FOUR_WAY_INTERLEAVED:  s = "Four-way Interleaved"; break;
 	case SIDE_BY_SIDE:          s = "Side-by-Side"; break;
+	default:          s = "unknown"; break;
 	}
 	printf ("  Stereo: %s\n", s);
 	

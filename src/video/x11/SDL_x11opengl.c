@@ -678,7 +678,7 @@ X11_GL_SetSwapInterval(_THIS, int interval)
          * it has the wrong value cached. To work around it, we just run a no-op
          * update to the current value.
          */
-        int currentInterval = _this, X11_GL_GetSwapInterval(_this);
+        int currentInterval = X11_GL_GetSwapInterval(_this);
         _this->gl_data->glXSwapIntervalEXT(display, drawable, currentInterval);
         _this->gl_data->glXSwapIntervalEXT(display, drawable, interval);
 
