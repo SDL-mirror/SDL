@@ -129,9 +129,11 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 	{
 	case SDL_JOYAXISMOTION:
 		{
+			SDL_GameController *controllerlist;
+
 			if ( event->jaxis.axis >= k_nMaxReverseEntries ) break;
 
-			SDL_GameController *controllerlist = SDL_gamecontrollers;
+			controllerlist = SDL_gamecontrollers;
 			while ( controllerlist )
 			{
 				if ( controllerlist->joystick->instance_id == event->jaxis.which )
@@ -153,9 +155,11 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 	case SDL_JOYBUTTONDOWN:
 	case SDL_JOYBUTTONUP:
 		{
+			SDL_GameController *controllerlist;
+
 			if ( event->jbutton.button >= k_nMaxReverseEntries ) break;
 
-			SDL_GameController *controllerlist = SDL_gamecontrollers;
+			controllerlist = SDL_gamecontrollers;
 			while ( controllerlist )
 			{
 				if ( controllerlist->joystick->instance_id == event->jbutton.which )
@@ -176,9 +180,11 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 		break;
 	case SDL_JOYHATMOTION:
 		{
+			SDL_GameController *controllerlist;
+
 			if ( event->jhat.hat >= 4 ) break;
 
-			SDL_GameController *controllerlist = SDL_gamecontrollers;
+			controllerlist = SDL_gamecontrollers;
 			while ( controllerlist )
 			{
 				if ( controllerlist->joystick->instance_id == event->jhat.which )
