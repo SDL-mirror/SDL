@@ -48,7 +48,8 @@ static SDL_bool SDL_bInMainQuit = SDL_FALSE;
 static Uint8 SDL_SubsystemRefCount[ 32 ];
 
 /* Private helper to increment a subsystem's ref counter. */
-static void SDL_PrivateSubsystemRefCountIncr(Uint32 subsystem)
+static void
+SDL_PrivateSubsystemRefCountIncr(Uint32 subsystem)
 {
     int subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
     SDL_assert(SDL_SubsystemRefCount[subsystem_index] < 255);
@@ -56,7 +57,8 @@ static void SDL_PrivateSubsystemRefCountIncr(Uint32 subsystem)
 }
 
 /* Private helper to decrement a subsystem's ref counter. */
-void SDL_PrivateSubsystemRefCountDecr(Uint32 subsystem)
+static void
+SDL_PrivateSubsystemRefCountDecr(Uint32 subsystem)
 {
     int subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
     if (SDL_SubsystemRefCount[subsystem_index] > 0) {
@@ -68,11 +70,12 @@ void SDL_PrivateSubsystemRefCountDecr(Uint32 subsystem)
 static SDL_bool
 SDL_PrivateShouldInitSubsystem(Uint32 flags, Uint32 subsystem)
 {
+    int subsystem_index;
     if ((flags & subsystem) == 0) {
       return SDL_FALSE;
     }
 
-    int subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
+    subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
     SDL_assert(SDL_SubsystemRefCount[subsystem_index] < 255);
     return (SDL_SubsystemRefCount[subsystem_index] == 0);
 }
