@@ -361,6 +361,9 @@ D3D_Reset(SDL_Renderer * renderer)
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
     HRESULT result;
 
+    /* Release the default render target before reset */
+    IDirect3DSurface9_Release(data->defaultRenderTarget);
+
     result = IDirect3DDevice9_Reset(data->device, &data->pparams);
     if (FAILED(result)) {
         if (result == D3DERR_DEVICELOST) {
@@ -377,6 +380,7 @@ D3D_Reset(SDL_Renderer * renderer)
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_CULLMODE,
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
+    IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget);
     return 0;
 }
 
