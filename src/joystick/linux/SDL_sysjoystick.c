@@ -59,6 +59,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+/* This isn't defined in older Linux kernel headers */
+#ifndef SYN_DROPPED
+#define SYN_DROPPED 3
+#endif
+
 /* we never link directly to libudev. */
 /* !!! FIXME: can we generalize this? ALSA, etc, do the same things. */
 static const char *udev_library = "libudev.so.0";
