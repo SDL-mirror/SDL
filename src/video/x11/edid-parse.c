@@ -733,7 +733,6 @@ dump_monitor_info (MonitorInfo *info)
 	case TWO_WAY_LEFT_ON_EVEN:  s = "Two-way, Left on Even"; break;
 	case FOUR_WAY_INTERLEAVED:  s = "Four-way Interleaved"; break;
 	case SIDE_BY_SIDE:          s = "Side-by-Side"; break;
-	default:          s = "unknown"; break;
 	}
 	printf ("  Stereo: %s\n", s);
 	
