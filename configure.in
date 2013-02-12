@@ -32,16 +32,6 @@ AC_SUBST(SDL_INTERFACE_AGE)
 AC_SUBST(SDL_BINARY_AGE)
 AC_SUBST(SDL_VERSION)
 
-dnl On Mac OS X we need to build with clang
-dnl We can't use $host or reorder AC_CANONICAL_HOST because of autoconf magic.
-case "`/bin/sh $ac_aux_dir/config.guess`" in
-    *-*-darwin*)
-        if test "x$CC" = "x"; then
-            CC=clang
-        fi
-        ;;
-esac
-
 # libtool versioning
 LT_INIT([win32-dll])
 
