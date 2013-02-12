@@ -451,6 +451,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int max_w, max_h;
             int style;
             BOOL menu;
+			BOOL constrain_max_size;
 
             /* If we allow resizing, let the resize happen naturally */
             if (SDL_IsShapedWindow(data->window))
@@ -473,6 +474,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (max_w && max_h) {
                 max_w -= w;
                 max_h -= h;
+                constrain_max_size = TRUE;
+            } else {
+                constrain_max_size = FALSE;
             }
 
             size.top = 0;
@@ -496,8 +500,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 info->ptMinTrackSize.x = w + min_w;
                 info->ptMinTrackSize.y = h + min_h;
-                info->ptMaxTrackSize.x = w + max_w;
-                info->ptMaxTrackSize.y = h + max_h;
+                if (constrain_max_size) {
+                    info->ptMaxTrackSize.x = w + max_w;
+                    info->ptMaxTrackSize.y = h + max_h;
+                }
             } else {
                 info->ptMaxSize.x = w;
                 info->ptMaxSize.y = h;
