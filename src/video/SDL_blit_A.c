@@ -258,7 +258,7 @@ static void
 BlitRGBtoRGBSurfaceAlphaMMX(SDL_BlitInfo * info)
 {
     SDL_PixelFormat *df = info->dst_fmt;
-    Uint32 chanmask = df->Rmask | df->Gmask | df->Bmask;
+    Uint32 chanmask;
     unsigned alpha = info->a;
 
     if (alpha == 128 && (df->Rmask | df->Gmask | df->Bmask) == 0x00FFFFFF) {

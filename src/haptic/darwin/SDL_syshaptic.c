@@ -173,7 +173,6 @@ SDL_SYS_HapticInit(void)
     /* IOServiceGetMatchingServices consumes dictionary. */
 
     if (!IOIteratorIsValid(iter)) {     /* No iterator. */
-        numhaptics = 0;
         return 0;
     }
 

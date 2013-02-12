@@ -71,7 +71,6 @@ SDL_CalculateShapeBitmap(SDL_WindowShapeMode mode,SDL_Surface *shape,Uint8* bitm
     SDL_Color key;
     if(SDL_MUSTLOCK(shape))
         SDL_LockSurface(shape);
-    pixel = (Uint8*)shape->pixels;
     for(y = 0;y<shape->h;y++) {
         for(x=0;x<shape->w;x++) {
             alpha = 0;
