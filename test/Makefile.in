@@ -70,6 +70,7 @@ testaudioinfo$(EXE): $(srcdir)/testaudioinfo.c
 
 testautomation$(EXE): $(srcdir)/testautomation.c \
 		      $(srcdir)/testautomation_clipboard.c \
+		      $(srcdir)/testautomation_main.c \
 		      $(srcdir)/testautomation_platform.c \
 		      $(srcdir)/testautomation_rect.c \
 		      $(srcdir)/testautomation_render.c \

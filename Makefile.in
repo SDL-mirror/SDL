@@ -47,6 +47,7 @@ HDRS = \
 	SDL_assert.h \
 	SDL_atomic.h \
 	SDL_audio.h \
+        SDL_bits.h \
 	SDL_blendmode.h \
 	SDL_clipboard.h \
 	SDL_cpuinfo.h \

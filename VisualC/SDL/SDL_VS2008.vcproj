@@ -376,6 +376,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_bits.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_blendmode.h"
 				>
 			</File>

@@ -13,6 +13,7 @@ extern SDLTest_TestSuiteReference audioTestSuite;
 extern SDLTest_TestSuiteReference clipboardTestSuite;
 extern SDLTest_TestSuiteReference eventsTestSuite;
 extern SDLTest_TestSuiteReference keyboardTestSuite;
+extern SDLTest_TestSuiteReference mainTestSuite;
 extern SDLTest_TestSuiteReference platformTestSuite;
 extern SDLTest_TestSuiteReference rectTestSuite;
 extern SDLTest_TestSuiteReference renderTestSuite;
@@ -30,6 +31,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 	&clipboardTestSuite,
 	&eventsTestSuite,
 	&keyboardTestSuite,
+	&mainTestSuite,
 	&platformTestSuite,
 	&rectTestSuite,
 	&renderTestSuite,
