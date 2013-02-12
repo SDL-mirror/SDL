@@ -222,6 +222,12 @@ WINRT_DestroyWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData * data = (SDL_WindowData *) window->driverdata;
 
+    if (SDL_WinRTGlobalApp->HasSDLWindowData() &&
+        SDL_WinRTGlobalApp->GetSDLWindowData()->sdlWindow == window)
+    {
+        SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
+    }
+
     if (data) {
         // Delete the reference to the WinRT CoreWindow:
         CoreWindow ^* windowPointer = ((SDL_WindowData *) window->driverdata)->coreWindow;
@@ -233,12 +239,6 @@ WINRT_DestroyWindow(_THIS, SDL_Window * window)
         // Delete the internal window data:
         delete data;
         data = NULL;
-    }
-
-    if (SDL_WinRTGlobalApp->HasSDLWindowData() &&
-        SDL_WinRTGlobalApp->GetSDLWindowData()->sdlWindow == window)
-    {
-        SDL_WinRTGlobalApp->SetSDLWindowData(NULL);
     }
 }
 
