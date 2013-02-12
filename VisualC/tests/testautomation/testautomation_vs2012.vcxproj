@@ -184,6 +184,7 @@
     <ClCompile Include="..\..\..\test\testautomation_audio.c" />
     <ClCompile Include="..\..\..\test\testautomation_clipboard.c" />
     <ClCompile Include="..\..\..\test\testautomation_platform.c" />
+    <ClCompile Include="..\..\..\test\testautomation_main.c" />
     <ClCompile Include="..\..\..\test\testautomation_rect.c" />
     <ClCompile Include="..\..\..\test\testautomation_render.c" />
     <ClCompile Include="..\..\..\test\testautomation_rwops.c" />
