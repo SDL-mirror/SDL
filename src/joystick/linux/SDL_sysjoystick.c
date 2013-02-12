@@ -763,6 +763,9 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     /* Get the number of buttons and axes on the joystick */
     ConfigJoystick(joystick, fd);
 
+    // mark joystick as fresh and ready
+    joystick->hwdata->fresh = 1;
+
     return (0);
 }
 
@@ -834,11 +837,54 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
 }
 
 static __inline__ void
+PollAllValues(SDL_Joystick * joystick)
+{
+    struct input_absinfo absinfo;
+    int a, b = 0;
+
+    // Poll all axis
+    for (a = ABS_X; b < ABS_MAX; a++) {
+        switch (a) {
+        case ABS_HAT0X:
+        case ABS_HAT0Y:
+        case ABS_HAT1X:
+        case ABS_HAT1Y:
+        case ABS_HAT2X:
+        case ABS_HAT2Y:
+        case ABS_HAT3X:
+        case ABS_HAT3Y:
+            // ingore hats
+            break;
+        default:
+            if (joystick->hwdata->abs_correct[b].used) {
+                if (ioctl(joystick->hwdata->fd, EVIOCGABS(a), &absinfo) >= 0) {
+                    absinfo.value = AxisCorrect(joystick, b, absinfo.value);
+
+#ifdef DEBUG_INPUT_EVENTS
+                    printf("Joystick : Re-read Axis %d (%d) val= %d\n",
+                        joystick->hwdata->abs_map[b], a, absinfo.value);
+#endif
+                    SDL_PrivateJoystickAxis(joystick,
+                            joystick->hwdata->abs_map[b],
+                            absinfo.value);
+                }
+            }
+            b++;
+        }
+    }
+}
+
+static __inline__ void
 HandleInputEvents(SDL_Joystick * joystick)
 {
     struct input_event events[32];
     int i, len;
     int code;
+
+    if (joystick->hwdata->fresh) {
+        PollAllValues(joystick);
+        joystick->hwdata->fresh = 0;
+    }
 
     while ((len = read(joystick->hwdata->fd, events, (sizeof events))) > 0) {
         len /= sizeof(events[0]);
@@ -890,6 +936,17 @@ HandleInputEvents(SDL_Joystick * joystick)
                     break;
                 }
                 break;
+            case EV_SYN:
+                switch (code) {
+                case SYN_DROPPED :
+#ifdef DEBUG_INPUT_EVENTS
+                    printf("Event SYN_DROPPED dectected\n");
+#endif
+                    PollAllValues(joystick);
+                    break;
+                default:
+                    break;
+                }
             default:
                 break;
             }

@@ -50,4 +50,8 @@ struct joystick_hwdata
         int used;
         int coef[3];
     } abs_correct[ABS_MAX];
+
+    int fresh;
 };
+
+/* vi: set ts=4 sw=4 expandtab: */
