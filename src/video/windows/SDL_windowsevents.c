@@ -291,7 +291,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEWHEEL:
         {
-            int motion = (short) HIWORD(wParam);
+            // FIXME: This may need to accumulate deltas up to WHEEL_DELTA
+            short motion = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 
             SDL_SendMouseWheel(data->window, 0, motion);
             break;
