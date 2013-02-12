@@ -151,8 +151,6 @@ BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         }
     }
 
-    format.buffer_size = _this->spec.samples;
-
     if (!valid_datatype) {      /* shouldn't happen, but just in case... */
         BEOSAUDIO_CloseDevice(_this);
         SDL_SetError("Unsupported audio format");
@@ -161,6 +159,8 @@ BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Calculate the final parameters for this audio specification */
     SDL_CalculateAudioSpec(&_this->spec);
+
+    format.buffer_size = _this->spec.size;
 
     /* Subscribe to the audio stream (creates a new thread) */
     sigset_t omask;
