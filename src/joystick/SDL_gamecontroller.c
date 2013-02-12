@@ -423,9 +423,10 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 
 		if ( button != SDL_CONTROLLER_BUTTON_INVALID )
 		{
+            int ridx;
 			pMapping->hatasbutton[ button ].hat = hat;
 			pMapping->hatasbutton[ button ].mask = mask;
-			int ridx = (hat << 4) | mask;
+			ridx = (hat << 4) | mask;
 			pMapping->rhatasbutton[ ridx ] = button;
 		}
 		else if ( axis != SDL_CONTROLLER_AXIS_INVALID )
@@ -1071,12 +1072,12 @@ SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLE
 int
 SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button, Uint8 state)
 {
-    if ( button == SDL_CONTROLLER_BUTTON_INVALID )
-        return (0);
-
     int posted;
 #if !SDL_EVENTS_DISABLED
 	SDL_Event event;
+
+    if ( button == SDL_CONTROLLER_BUTTON_INVALID )
+        return (0);
 
     switch (state) {
     case SDL_PRESSED:
