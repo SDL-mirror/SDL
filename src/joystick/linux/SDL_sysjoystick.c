@@ -668,13 +668,13 @@ ConfigJoystick(SDL_Joystick * joystick, int fd)
                 } else {
                     joystick->hwdata->abs_correct[i].used = 1;
                     joystick->hwdata->abs_correct[i].coef[0] =
-                        (absinfo.maximum + absinfo.minimum) / 2 - absinfo.flat;
+                        (absinfo.maximum + absinfo.minimum) - 2 * absinfo.flat;
                     joystick->hwdata->abs_correct[i].coef[1] =
-                        (absinfo.maximum + absinfo.minimum) / 2 + absinfo.flat;
-                    t = ((absinfo.maximum - absinfo.minimum) / 2 - 2 * absinfo.flat);
+                        (absinfo.maximum + absinfo.minimum) + 2 * absinfo.flat;
+                    t = ((absinfo.maximum - absinfo.minimum) - 4 * absinfo.flat);
                     if (t != 0) {
                         joystick->hwdata->abs_correct[i].coef[2] =
-                            (1 << 29) / t;
+                            (1 << 28) / t;
                     } else {
                         joystick->hwdata->abs_correct[i].coef[2] = 0;
                     }
@@ -815,6 +815,7 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
 
     correct = &joystick->hwdata->abs_correct[which];
     if (correct->used) {
+        value *= 2;
         if (value > correct->coef[0]) {
             if (value < correct->coef[1]) {
                 return 0;
@@ -824,7 +825,7 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
             value -= correct->coef[0];
         }
         value *= correct->coef[2];
-        value >>= 14;
+        value >>= 13;
     }
 
     /* Clamp and return */
