@@ -21,23 +21,30 @@ FILE* TestSupportRWops_OpenFPFromReadDir(const char *file, const char *mode)
     FILE* fp = NULL;
 
 	// If the file mode is writable, skip all the bundle stuff because generally the bundle is read-only.
-	if (strcmp("r", mode) && strcmp("rb", mode)) {
+	if(strcmp("r", mode) && strcmp("rb", mode))
+	{
 		return fopen(file, mode);
 	}
 	
-	@autoreleasepool {
-        NSFileManager* file_manager = [NSFileManager defaultManager];
-        NSString* resource_path = [[NSBundle mainBundle] resourcePath];
+	NSAutoreleasePool* autorelease_pool = [[NSAutoreleasePool alloc] init];
 
-        NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
 
-        NSString* full_path_with_file_to_try = [resource_path stringByAppendingPathComponent:ns_string_file_component];
-        if ([file_manager fileExistsAtPath:full_path_with_file_to_try]) {
-            fp = fopen([full_path_with_file_to_try fileSystemRepresentation], mode);
-        } else {
-            fp = fopen(file, mode);
-        }
-    }
+	NSFileManager* file_manager = [NSFileManager defaultManager];
+	NSString* resource_path = [[NSBundle mainBundle] resourcePath];
+
+	NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
+
+	NSString* full_path_with_file_to_try = [resource_path stringByAppendingPathComponent:ns_string_file_component];
+	if([file_manager fileExistsAtPath:full_path_with_file_to_try])
+	{
+		fp = fopen([full_path_with_file_to_try fileSystemRepresentation], mode);
+	}
+	else
+	{
+		fp = fopen(file, mode);
+	}
+
+	[autorelease_pool drain];
 
 	return fp;
 }
@@ -46,14 +53,16 @@ FILE* TestSupportRWops_OpenFPFromWriteDir(const char *file, const char *mode)
 {
     FILE* fp = NULL;
 	
-	@autoreleasepool {
-        NSFileManager* file_manager = [NSFileManager defaultManager];
-        NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
-        NSString* full_path_with_file_to_try = [NSTemporaryDirectory() stringByAppendingPathComponent:ns_string_file_component];
+	NSAutoreleasePool* autorelease_pool = [[NSAutoreleasePool alloc] init];
+	
+	NSFileManager* file_manager = [NSFileManager defaultManager];
+	NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
+	NSString* full_path_with_file_to_try = [NSTemporaryDirectory() stringByAppendingPathComponent:ns_string_file_component];
 
-        fp = fopen([full_path_with_file_to_try fileSystemRepresentation], mode);
-    }
-    
+	fp = fopen([full_path_with_file_to_try fileSystemRepresentation], mode);
+	
+	[autorelease_pool drain];
+	
 	return fp;
 }
 
@@ -66,14 +75,15 @@ SDL_RWops* TestSupportRWops_OpenRWopsFromWriteDir(const char *file, const char *
 {
 	SDL_RWops* rw = NULL;
 
-	@autoreleasepool {
-        NSFileManager* file_manager = [NSFileManager defaultManager];
-        NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
-        NSString* full_path_with_file_to_try = [NSTemporaryDirectory() stringByAppendingPathComponent:ns_string_file_component];
-        
-        rw = SDL_RWFromFile( [full_path_with_file_to_try fileSystemRepresentation], mode );
-    }
-    
+	NSAutoreleasePool* autorelease_pool = [[NSAutoreleasePool alloc] init];
+	
+	NSFileManager* file_manager = [NSFileManager defaultManager];
+	NSString* ns_string_file_component = [file_manager stringWithFileSystemRepresentation:file length:strlen(file)];
+	NSString* full_path_with_file_to_try = [NSTemporaryDirectory() stringByAppendingPathComponent:ns_string_file_component];
+	
+	rw = SDL_RWFromFile( [full_path_with_file_to_try fileSystemRepresentation], mode );
+
+	[autorelease_pool drain];
 	return rw;
 }
 

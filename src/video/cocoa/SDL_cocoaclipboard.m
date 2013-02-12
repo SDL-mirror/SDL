@@ -45,46 +45,51 @@ int
 Cocoa_SetClipboardText(_THIS, const char *text)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
+    NSAutoreleasePool *pool;
     NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
 
-    @autoreleasepool {
-        pasteboard = [NSPasteboard generalPasteboard];
-        data->clipboard_count = [pasteboard declareTypes:[NSArray arrayWithObject:format] owner:nil];
-        [pasteboard setString:[NSString stringWithUTF8String:text] forType:format];
-    }
-    
+    pool = [[NSAutoreleasePool alloc] init];
+
+    pasteboard = [NSPasteboard generalPasteboard];
+    data->clipboard_count = [pasteboard declareTypes:[NSArray arrayWithObject:format] owner:nil];
+    [pasteboard setString:[NSString stringWithUTF8String:text] forType:format];
+
+    [pool release];
+
     return 0;
 }
 
 char *
 Cocoa_GetClipboardText(_THIS)
 {
+    NSAutoreleasePool *pool;
     NSPasteboard *pasteboard;
     NSString *format = GetTextFormat(_this);
     NSString *available;
     char *text;
 
-    @autoreleasepool {
-        pasteboard = [NSPasteboard generalPasteboard];
-        available = [pasteboard availableTypeFromArray: [NSArray arrayWithObject:format]];
-        if ([available isEqualToString:format]) {
-            NSString* string;
-            const char *utf8;
+    pool = [[NSAutoreleasePool alloc] init];
 
-            string = [pasteboard stringForType:format];
-            if (string == nil) {
-                utf8 = "";
-            } else {
-                utf8 = [string UTF8String];
-            }
-            text = SDL_strdup(utf8);
+    pasteboard = [NSPasteboard generalPasteboard];
+    available = [pasteboard availableTypeFromArray: [NSArray arrayWithObject:format]];
+    if ([available isEqualToString:format]) {
+        NSString* string;
+        const char *utf8;
+
+        string = [pasteboard stringForType:format];
+        if (string == nil) {
+            utf8 = "";
         } else {
-            text = SDL_strdup("");
+            utf8 = [string UTF8String];
         }
+        text = SDL_strdup(utf8);
+    } else {
+        text = SDL_strdup("");
     }
-    
+
+    [pool release];
+
     return text;
 }
 
@@ -103,19 +108,22 @@ Cocoa_HasClipboardText(_THIS)
 void
 Cocoa_CheckClipboardUpdate(struct SDL_VideoData * data)
 {
+    NSAutoreleasePool *pool;
     NSPasteboard *pasteboard;
     NSInteger count;
 
-    @autoreleasepool {
-        pasteboard = [NSPasteboard generalPasteboard];
-        count = [pasteboard changeCount];
-        if (count != data->clipboard_count) {
-            if (data->clipboard_count) {
-                SDL_SendClipboardUpdate();
-            }
-            data->clipboard_count = count;
+    pool = [[NSAutoreleasePool alloc] init];
+
+    pasteboard = [NSPasteboard generalPasteboard];
+    count = [pasteboard changeCount];
+    if (count != data->clipboard_count) {
+        if (data->clipboard_count) {
+            SDL_SendClipboardUpdate();
         }
+        data->clipboard_count = count;
     }
+
+    [pool release];
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */
