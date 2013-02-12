@@ -339,13 +339,12 @@ MaybeRemoveDevice(const char *path)
             }
             if (prev != NULL) {
                 prev->next = item->next;
-                if (item == SDL_joylist_tail) {
-                    SDL_joylist_tail = prev;
-                }
             } else {
-                SDL_assert(!SDL_joylist);
-                SDL_assert(!SDL_joylist_tail);
-                SDL_joylist = SDL_joylist_tail = NULL;
+                SDL_assert(SDL_joylist == item);
+                SDL_joylist = item->next;
+            }
+            if (item == SDL_joylist_tail) {
+                SDL_joylist_tail = prev;
             }
             SDL_free(item->path);
             SDL_free(item->name);
