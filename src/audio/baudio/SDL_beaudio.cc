@@ -199,10 +199,10 @@ int BE_OpenAudio(_THIS, SDL_AudioSpec *spec)
         return (-1);
     }
 
-    format.buffer_size = spec->samples;
-
 	/* Calculate the final parameters for this audio specification */
 	SDL_CalculateAudioSpec(spec);
+
+    format.buffer_size = spec->size;
 
 	/* Subscribe to the audio stream (creates a new thread) */
 	{ sigset_t omask;
