@@ -937,8 +937,8 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     {
         {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(0.0f, 0.0f)},
         {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->h, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->h, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f)},
     };
 
     if (rendererData->vertexBuffer) {
