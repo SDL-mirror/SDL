@@ -26,6 +26,7 @@
 
 struct SDL_VertexShaderConstants
 {
+	DirectX::XMFLOAT4X4 view;
 	DirectX::XMFLOAT4X4 projection;
 };
 
@@ -40,6 +41,7 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> mainRasterizer;
     D3D_FEATURE_LEVEL featureLevel;
     bool loadingComplete;
 

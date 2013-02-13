@@ -385,6 +385,27 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     }
 
     //
+    // Setup the Direct3D rasterizer
+    //
+    D3D11_RASTERIZER_DESC rasterDesc;
+    memset(&rasterDesc, 0, sizeof(rasterDesc));
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_NONE;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+	result = data->d3dDevice->CreateRasterizerState(&rasterDesc, &data->mainRasterizer);
+	if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
     // All done!
     //
     data->loadingComplete = true;       // This variable can probably be factored-out
@@ -594,6 +615,17 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
         return result;
     }
 #endif
+
+    //
+    // Update the view matrix
+    //
+    XMStoreFloat4x4(&data->vertexShaderConstantsData.view,  // (4)
+        XMMatrixMultiply(
+            XMMatrixScaling(2.0f / windowWidth, 2.0f / windowHeight, 1.0f),
+            XMMatrixMultiply(
+                XMMatrixTranslation(-1, -1, 0),
+                XMMatrixRotationX(XM_PI)
+                )));
 
     // Create a render target view of the swap chain back buffer.
     ComPtr<ID3D11Texture2D> backBuffer;
@@ -893,12 +925,20 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     //
     // Create or update the vertex buffer:
     //
-    VertexPositionColor vertices[] = 
+
+    // WinRT, TODO: get srcrect working in tandem with SDL_RenderCopy, etc.
+    //SDL_FRect fSrcRect;
+    //fSrcRect.x = (float)srcrect->x;
+    //fSrcRect.y = (float)srcrect->y;
+    //fSrcRect.w = (float)srcrect->w;
+    //fSrcRect.h = (float)srcrect->h;
+
+    VertexPositionColor vertices[] =
     {
-        {XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(0.0f, 0.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(0.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->h, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->h, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f)},
     };
 
     if (rendererData->vertexBuffer) {
@@ -955,6 +995,8 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     rendererData->d3dContext->PSSetShaderResources(0, 1, textureData->mainTextureResourceView.GetAddressOf());
 
     rendererData->d3dContext->PSSetSamplers(0, 1, rendererData->mainSampler.GetAddressOf());
+
+    rendererData->d3dContext->RSSetState(rendererData->mainRasterizer.Get());
 
     rendererData->d3dContext->Draw(4, 0);
 
