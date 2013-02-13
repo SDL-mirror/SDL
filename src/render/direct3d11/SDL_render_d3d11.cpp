@@ -126,7 +126,6 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
     data->featureLevel = (D3D_FEATURE_LEVEL) 0;
-    data->vertexCount = 0;
     data->loadingComplete = false;
     data->windowSizeInDIPs = XMFLOAT2(0, 0);
     data->renderTargetSize = XMFLOAT2(0, 0);
@@ -354,32 +353,10 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     }
 
     //
-    // Create a vertex buffer:
+    // Make sure that the vertex buffer, if already created, gets freed.
+    // It will be recreated later.
     //
-    VertexPositionColor vertices[] = 
-    {
-        {XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
-        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
-    };
-
-    data->vertexCount = ARRAYSIZE(vertices);
-
-    D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-    vertexBufferData.pSysMem = vertices;
-    vertexBufferData.SysMemPitch = 0;
-    vertexBufferData.SysMemSlicePitch = 0;
-    CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
-    result = data->d3dDevice->CreateBuffer(
-        &vertexBufferDesc,
-        &vertexBufferData,
-        &data->vertexBuffer
-        );
-    if (FAILED(result)) {
-        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
-        return result;
-    }
+    data->vertexBuffer = nullptr;
 
     //
     // Create a sampler to use when drawing textures:
@@ -896,7 +873,7 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
     D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
-    //HRESULT result = S_OK;
+    HRESULT result = S_OK;
 
     rendererData->d3dContext->OMSetRenderTargets(
         1,
@@ -912,6 +889,36 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		0,
 		0
 		);
+
+    //
+    // Create or update the vertex buffer:
+    //
+    VertexPositionColor vertices[] = 
+    {
+        {XMFLOAT3(-1.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f)},
+        {XMFLOAT3(-1.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f)},
+        {XMFLOAT3(1.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f)},
+        {XMFLOAT3(1.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f)},
+    };
+
+    if (rendererData->vertexBuffer) {
+        rendererData->d3dContext->UpdateSubresource(rendererData->vertexBuffer.Get(), 0, NULL, vertices, sizeof(vertices), 0);
+    } else {
+        D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
+        vertexBufferData.pSysMem = vertices;
+        vertexBufferData.SysMemPitch = 0;
+        vertexBufferData.SysMemSlicePitch = 0;
+        CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
+        result = rendererData->d3dDevice->CreateBuffer(
+            &vertexBufferDesc,
+            &vertexBufferData,
+            &rendererData->vertexBuffer
+            );
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return -1;
+        }
+    }
 
     UINT stride = sizeof(VertexPositionColor);
     UINT offset = 0;

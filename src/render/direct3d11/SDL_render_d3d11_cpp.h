@@ -41,7 +41,6 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
     D3D_FEATURE_LEVEL featureLevel;
-    unsigned int vertexCount;
     bool loadingComplete;
 
     // Vertex buffer constants:
