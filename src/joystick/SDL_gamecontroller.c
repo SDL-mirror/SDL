@@ -265,6 +265,10 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
  */
 ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 {
+    if ( (device_index < 0) || (device_index >= SDL_NumJoysticks()) ) {
+        return NULL;
+    }
+
 #ifdef SDL_JOYSTICK_DINPUT
 	if ( SDL_SYS_IsXInputDeviceIndex(device_index) && s_pXInputMapping )
 	{
@@ -741,14 +745,16 @@ SDL_GameControllerNameForIndex(int device_index)
 /*
  * Return 1 if the joystick at this device index is a supported controller
  */
-int SDL_IsGameController(int device_index)
+SDL_bool
+SDL_IsGameController(int device_index)
 {
 	ControllerMapping_t *pSupportedController =  SDL_PrivateGetControllerMapping(device_index);
 	if ( pSupportedController )
 	{
-		return 1;
+		return SDL_TRUE;
 	}
-	return 0;
+
+	return SDL_FALSE;
 }
 
 /*
@@ -881,11 +887,11 @@ SDL_GameControllerGetButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_
  * Return if the joystick in question is currently attached to the system,
  *  \return 0 if not plugged in, 1 if still present.
  */
-int
+SDL_bool
 SDL_GameControllerGetAttached( SDL_GameController * gamecontroller )
 {
 	if ( !gamecontroller )
-		return 0;
+		return SDL_FALSE;
 
 	return SDL_JoystickGetAttached(gamecontroller->joystick);
 }

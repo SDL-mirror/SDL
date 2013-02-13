@@ -113,7 +113,7 @@ typedef struct _SDL_GameControllerButtonBind
  *  Is the joystick on this index supported by the game controller interface?
  *		returns 1 if supported, 0 otherwise.
  */
-extern DECLSPEC int SDLCALL SDL_IsGameController(int joystick_index);
+extern DECLSPEC SDL_bool SDLCALL SDL_IsGameController(int joystick_index);
 
 
 /**
@@ -141,7 +141,7 @@ extern DECLSPEC const char *SDLCALL SDL_GameControllerName(SDL_GameController * 
 /**
  *  Returns 1 if the controller has been opened and currently connected, or 0 if it has not.
  */
-extern DECLSPEC int SDLCALL SDL_GameControllerGetAttached(SDL_GameController * gamecontroller);
+extern DECLSPEC SDL_bool SDLCALL SDL_GameControllerGetAttached(SDL_GameController * gamecontroller);
 
 /**
  *  Get the underlying joystick object used by a controller
