@@ -49,9 +49,9 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_D3D
     &D3D_RenderDriver,
 #endif
-#if SDL_VIDEO_RENDER_D3D11
-    &D3D11_RenderDriver,
-#endif
+//#if SDL_VIDEO_RENDER_D3D11
+//    &D3D11_RenderDriver,
+//#endif
 #if SDL_VIDEO_RENDER_OGL
     &GL_RenderDriver,
 #endif
@@ -67,7 +67,11 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_NDS
     &NDS_RenderDriver,
 #endif
-    &SW_RenderDriver
+    &SW_RenderDriver,
+#if SDL_VIDEO_RENDER_D3D11
+    // WinRT, TODO: once the Direct3D 11.1 renderer is ready, make it be used over the SW renderer via SDL_CreateRenderer(window, -1, 0)
+    &D3D11_RenderDriver
+#endif
 #endif /* !SDL_RENDER_DISABLED */
 };
 static char renderer_magic;
