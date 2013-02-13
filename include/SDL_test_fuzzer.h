@@ -158,13 +158,13 @@ double SDLTest_RandomDouble();
  * RandomUint8BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
  * RandomUint8BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
  * RandomUint8BoundaryValue(0, 99, SDL_FALSE) returns 100
- * RandomUint8BoundaryValue(0, 255, SDL_FALSE) returns -1 (== error value)
+ * RandomUint8BoundaryValue(0, 255, SDL_FALSE) returns 0 (error set)
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or 0 with error set
  */
 Uint8 SDLTest_RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_bool validDomain);
 
@@ -179,13 +179,13 @@ Uint8 SDLTest_RandomUint8BoundaryValue(Uint8 boundary1, Uint8 boundary2, SDL_boo
  * RandomUint16BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
  * RandomUint16BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
  * RandomUint16BoundaryValue(0, 99, SDL_FALSE) returns 100
- * RandomUint16BoundaryValue(0, 0xFFFF, SDL_FALSE) returns -1 (== error value)
+ * RandomUint16BoundaryValue(0, 0xFFFF, SDL_FALSE) returns 0 (error set)
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or 0 with error set
  */
 Uint16 SDLTest_RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL_bool validDomain);
 
@@ -200,13 +200,13 @@ Uint16 SDLTest_RandomUint16BoundaryValue(Uint16 boundary1, Uint16 boundary2, SDL
  * RandomUint32BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
  * RandomUint32BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
  * RandomUint32BoundaryValue(0, 99, SDL_FALSE) returns 100
- * RandomUint32BoundaryValue(0, 0xFFFFFFFF, SDL_FALSE) returns -1 (== error value)
+ * RandomUint32BoundaryValue(0, 0xFFFFFFFF, SDL_FALSE) returns 0 (with error set)
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or 0 with error set
  */
 Uint32 SDLTest_RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDomain);
 
@@ -221,13 +221,13 @@ Uint32 SDLTest_RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL
  * RandomUint64BoundaryValue(10, 20, SDL_TRUE) returns 10, 11, 19 or 20
  * RandomUint64BoundaryValue(1, 20, SDL_FALSE) returns 0 or 21
  * RandomUint64BoundaryValue(0, 99, SDL_FALSE) returns 100
- * RandomUint64BoundaryValue(0, 0xFFFFFFFFFFFFFFFF, SDL_FALSE) returns -1 (== error value)
+ * RandomUint64BoundaryValue(0, 0xFFFFFFFFFFFFFFFF, SDL_FALSE) returns 0 (with error set)
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or 0 with error set
  */
 Uint64 SDLTest_RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL_bool validDomain);
 
@@ -241,14 +241,14 @@ Uint64 SDLTest_RandomUint64BoundaryValue(Uint64 boundary1, Uint64 boundary2, SDL
  * Usage examples:
  * RandomSint8BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
  * RandomSint8BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
- * RandomSint8BoundaryValue(-128, 99, SDL_FALSE) returns 100
- * RandomSint8BoundaryValue(-128, 127, SDL_FALSE) returns SINT8_MIN (== error value)
+ * RandomSint8BoundaryValue(SINT8_MIN, 99, SDL_FALSE) returns 100
+ * RandomSint8BoundaryValue(SINT8_MIN, SINT8_MAX, SDL_FALSE) returns SINT8_MIN (== error value) with error set
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or SINT8_MIN with error set
  */
 Sint8 SDLTest_RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_bool validDomain);
 
@@ -263,14 +263,14 @@ Sint8 SDLTest_RandomSint8BoundaryValue(Sint8 boundary1, Sint8 boundary2, SDL_boo
  * Usage examples:
  * RandomSint16BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
  * RandomSint16BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
- * RandomSint16BoundaryValue(SINT8_MIN, 99, SDL_FALSE) returns 100
- * RandomSint16BoundaryValue(SINT8_MIN, SINT8_MAX, SDL_FALSE) returns SINT16_MIN (== error value)
+ * RandomSint16BoundaryValue(SINT16_MIN, 99, SDL_FALSE) returns 100
+ * RandomSint16BoundaryValue(SINT16_MIN, SINT16_MAX, SDL_FALSE) returns SINT16_MIN (== error value) with error set
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or SINT16_MIN with error set
  */
 Sint16 SDLTest_RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL_bool validDomain);
 
@@ -289,9 +289,9 @@ Sint16 SDLTest_RandomSint16BoundaryValue(Sint16 boundary1, Sint16 boundary2, SDL
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or SINT32_MIN with error set
  */
 Sint32 SDLTest_RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDomain);
 
@@ -306,13 +306,13 @@ Sint32 SDLTest_RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL
  * RandomSint64BoundaryValue(-10, 20, SDL_TRUE) returns -11, -10, 19 or 20
  * RandomSint64BoundaryValue(-100, -10, SDL_FALSE) returns -101 or -9
  * RandomSint64BoundaryValue(SINT64_MIN, 99, SDL_FALSE) returns 100
- * RandomSint64BoundaryValue(SINT64_MIN, SINT32_MAX, SDL_FALSE) returns SINT64_MIN (== error value)
+ * RandomSint64BoundaryValue(SINT64_MIN, SINT64_MAX, SDL_FALSE) returns SINT64_MIN (== error value) and error set
  *
  * \param boundary1 Lower boundary limit
  * \param boundary2 Upper boundary limit
- * \param validDomain Should the generated boundary be valid or not?
+ * \param validDomain Should the generated boundary be valid (=within the bounds) or not?
  *
- * \returns Boundary value in given range or error value (-1)
+ * \returns Random boundary value for the given range and domain or SINT64_MIN with error set
  */
 Sint64 SDLTest_RandomSint64BoundaryValue(Sint64 boundary1, Sint64 boundary2, SDL_bool validDomain);
 

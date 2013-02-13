@@ -81,6 +81,8 @@ static int main_testImpliedJoystickInit (void *arg)
     SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
     initialized_system = SDL_WasInit(joy_and_controller);
     SDLTest_AssertCheck( (initialized_system & joy_and_controller) == 0, "SDL_WasInit() should be false for joystick & controller (%x)", initialized_system );
+
+	return TEST_COMPLETED;
 }
 
 static int main_testImpliedJoystickQuit (void *arg)
@@ -103,6 +105,8 @@ static int main_testImpliedJoystickQuit (void *arg)
     SDLTest_AssertCheck( (initialized_system & joy_and_controller) == SDL_INIT_JOYSTICK, "SDL_WasInit() should be false for joystick & controller (%x)", initialized_system );
 
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+
+	return TEST_COMPLETED;
 }
 
 static const SDLTest_TestCaseReference mainTest1 =
