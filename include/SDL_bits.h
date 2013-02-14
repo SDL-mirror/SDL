@@ -65,27 +65,24 @@ SDL_MostSignificantBitIndex32(Uint32 x)
 #else
     /* Based off of Bit Twiddling Hacks by Sean Eron Anderson
      * <seander@cs.stanford.edu>, released in the public domain.
-     * http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogLookup
+     * http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
      */
-    static const Sint8 LogTable256[256] =
-    {
-    #define LT(n) n, n, n, n, n, n, n, n, n, n, n, n, n, n, n, n
-        -1, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3,
-        LT(4), LT(5), LT(5), LT(6), LT(6), LT(6), LT(6),
-        LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7), LT(7)
-    #undef LT
-    };
+    const Uint32 b[] = {0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000};
+    const Uint8  S[] = {1, 2, 4, 8, 16};
 
-    register unsigned int t, tt;
+    Uint8 msbIndex = 0;
+    int i;
 
-    if (tt = x >> 16)
+    for (i = 4; i >= 0; i--)
     {
-      return ((t = tt >> 8) ? 24 + LogTable256[t] : 16 + LogTable256[tt]);
+        if (x & b[i])
+        {
+            x >>= S[i];
+            msbIndex |= S[i];
+        }
     }
-    else
-    {
-      return ((t = x >> 8) ? 8 + LogTable256[t] : LogTable256[x]);
-    }
+
+    return msbIndex;
 #endif
 }
 
