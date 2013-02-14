@@ -2991,40 +2991,51 @@ int
 SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int dummybutton;
+	int retval = -1;
+	SDL_bool relative_mode = SDL_GetRelativeMouseMode();
+	int show_cursor_prev = SDL_ShowCursor( 1 );
+
+	SDL_SetRelativeMouseMode( SDL_FALSE );
 
     if (!buttonid) {
         buttonid = &dummybutton;
     }
     if (_this && _this->ShowMessageBox) {
         if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
-            return 0;
+			retval = 0;
         }
     }
 
     /* It's completely fine to call this function before video is initialized */
 #if SDL_VIDEO_DRIVER_WINDOWS
-    if (WIN_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (WIN_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_COCOA
-    if (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_UIKIT
-    if (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_X11
-    if (X11_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (X11_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 
-    SDL_SetError("No message system available");
-    return -1;
+	SDL_ShowCursor( show_cursor_prev );
+	SDL_SetRelativeMouseMode( relative_mode );
+
+	if(retval == -1)
+	{
+		SDL_SetError("No message system available");
+	}
+    return retval;
 }
 
 int
