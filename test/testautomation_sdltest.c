@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
+#include <ctype.h>
 
 #include "SDL.h"
 #include "SDL_test.h"
@@ -984,6 +985,216 @@ sdltest_randomBoundaryNumberSint64(void *arg)
   return TEST_COMPLETED;
 }
 
+/**
+ * @brief Calls to SDLTest_RandomIntegerInRange
+ */
+int
+sdltest_randomIntegerInRange(void *arg)
+{
+  Sint32 min, max;
+  Sint32 result;
+
+  /* Standard range */
+  min = (Sint32)SDLTest_RandomSint16();
+  max = min + (Sint32)SDLTest_RandomUint8() + 2;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(min,max)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+  /* One Range */
+  min = (Sint32)SDLTest_RandomSint16();
+  max = min + 1;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(min,min+1)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+  /* Zero range */
+  min = (Sint32)SDLTest_RandomSint16();
+  max = min;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(min,min)");
+  SDLTest_AssertCheck(min == result, "Validated returned value; expected: %d, got: %d", min, result);
+
+  /* Zero range at zero */
+  min = 0;
+  max = 0;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(0,0)");
+  SDLTest_AssertCheck(result == 0, "Validated returned value; expected: 0, got: %d", min, max, result);
+
+  /* Swapped min-max */
+  min = (Sint32)SDLTest_RandomSint16();
+  max = min + (Sint32)SDLTest_RandomUint8() + 2;
+  result = SDLTest_RandomIntegerInRange(max, min);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(max,min)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+
+  /* Range with min at integer limit */
+  min = LONG_MIN;
+  max = LONG_MIN + (Sint32)SDLTest_RandomSint16();
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(SINT32_MIN,...)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+  /* Range with max at integer limit */
+  min = LONG_MAX - (Sint32)SDLTest_RandomSint16();;
+  max = LONG_MAX;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(...,SINT32_MAX)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+  /* Full integer range */
+  min = LONG_MIN;
+  max = LONG_MAX;
+  result = SDLTest_RandomIntegerInRange(min, max);
+  SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(SINT32_MIN,SINT32_MAX)");
+  SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
+
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Calls to SDLTest_RandomAsciiString
+ */
+int
+sdltest_randomAsciiString(void *arg)
+{
+  char* result;
+  int len;
+  int nonAsciiCharacters;
+  int i;
+
+  result = SDLTest_RandomAsciiString();
+  SDLTest_AssertPass("Call to SDLTest_RandomAsciiString()");
+  SDLTest_AssertCheck(result != NULL, "Validate that result is not NULL");
+  if (result != NULL) {
+     len = SDL_strlen(result);
+     SDLTest_AssertCheck(len >= 0 && len <= 255, "Validate that result length; expected: len=[1,255], got: %d", len);
+     nonAsciiCharacters = 0;
+     for (i=0; i<len; i++) {
+       if (iscntrl(result[i])) {
+         nonAsciiCharacters++;
+       }
+     }
+     SDLTest_AssertCheck(nonAsciiCharacters == 0, "Validate that result does not contain non-Ascii characters, got: %d", nonAsciiCharacters);
+     if (nonAsciiCharacters) {
+     	SDLTest_LogError("Invalid result from generator: '%s'", result);
+     }
+     SDL_free(result);  
+  }
+ 
+  return TEST_COMPLETED;
+}
+
+
+/**
+ * @brief Calls to SDLTest_RandomAsciiStringWithMaximumLength
+ */
+int
+sdltest_randomAsciiStringWithMaximumLength(void *arg)
+{
+  const char* expectedError = "Parameter 'maxLength' is invalid";
+  char* lastError;
+  char* result;
+  int targetLen;
+  int len;
+  int nonAsciiCharacters;
+  int i;
+
+  targetLen = 16 + SDLTest_RandomUint8();
+  result = SDLTest_RandomAsciiStringWithMaximumLength(targetLen);
+  SDLTest_AssertPass("Call to SDLTest_RandomAsciiStringWithMaximumLength(%d)", targetLen);
+  SDLTest_AssertCheck(result != NULL, "Validate that result is not NULL");
+  if (result != NULL) {
+     len = SDL_strlen(result);
+     SDLTest_AssertCheck(len >= 0 && len <= targetLen, "Validate that result length; expected: len=[1,%d], got: %d", targetLen, len);
+     nonAsciiCharacters = 0;
+     for (i=0; i<len; i++) {
+       if (iscntrl(result[i])) {
+         nonAsciiCharacters++;
+       }
+     }
+     SDLTest_AssertCheck(nonAsciiCharacters == 0, "Validate that result does not contain non-Ascii characters, got: %d", nonAsciiCharacters);
+     if (nonAsciiCharacters) {
+     	SDLTest_LogError("Invalid result from generator: '%s'", result);
+     }
+     SDL_free(result);  
+  }
+
+  /* Negative test */
+  targetLen = 0;
+  result = SDLTest_RandomAsciiStringWithMaximumLength(targetLen);
+  SDLTest_AssertPass("Call to SDLTest_RandomAsciiStringWithMaximumLength(%d)", targetLen);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  lastError = (char *)SDL_GetError();
+  SDLTest_AssertPass("SDL_GetError()");
+  SDLTest_AssertCheck(lastError != NULL && SDL_strcmp(lastError, expectedError) == 0,
+             "SDL_GetError(): expected message '%s', was message: '%s'",
+             expectedError,
+             lastError);
+
+  /* Clear error messages */
+  SDL_ClearError();
+  SDLTest_AssertPass("SDL_ClearError()");
+ 
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Calls to SDLTest_RandomAsciiStringOfSize
+ */
+int
+sdltest_randomAsciiStringOfSize(void *arg)
+{
+  const char* expectedError = "Parameter 'size' is invalid";
+  char* lastError;
+  char* result;
+  int targetLen;
+  int len;
+  int nonAsciiCharacters;
+  int i;
+
+  /* Positive test */
+  targetLen = 16 + SDLTest_RandomUint8();
+  result = SDLTest_RandomAsciiStringOfSize(targetLen);
+  SDLTest_AssertPass("Call to SDLTest_RandomAsciiStringOfSize(%d)", targetLen);
+  SDLTest_AssertCheck(result != NULL, "Validate that result is not NULL");
+  if (result != NULL) {
+     len = SDL_strlen(result);
+     SDLTest_AssertCheck(len == targetLen, "Validate that result length; expected: len=%d, got: %d", targetLen, len);
+     nonAsciiCharacters = 0;
+     for (i=0; i<len; i++) {
+       if (iscntrl(result[i])) {
+         nonAsciiCharacters++;
+       }
+     }
+     SDLTest_AssertCheck(nonAsciiCharacters == 0, "Validate that result does not contain non-Ascii characters, got: %d", nonAsciiCharacters);
+     if (nonAsciiCharacters) {
+     	SDLTest_LogError("Invalid result from generator: '%s'", result);
+     }
+     SDL_free(result);  
+  }
+ 
+  /* Negative test */
+  targetLen = 0;
+  result = SDLTest_RandomAsciiStringOfSize(targetLen);
+  SDLTest_AssertPass("Call to SDLTest_RandomAsciiStringOfSize(%d)", targetLen);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  lastError = (char *)SDL_GetError();
+  SDLTest_AssertPass("SDL_GetError()");
+  SDLTest_AssertCheck(lastError != NULL && SDL_strcmp(lastError, expectedError) == 0,
+             "SDL_GetError(): expected message '%s', was message: '%s'",
+             expectedError,
+             lastError);
+
+  /* Clear error messages */
+  SDL_ClearError();
+  SDLTest_AssertPass("SDL_ClearError()");
+   
+  return TEST_COMPLETED;
+}
+
 
 /* ================= Test References ================== */
 
@@ -1018,10 +1229,23 @@ static const SDLTest_TestCaseReference sdltestTest9 =
 static const SDLTest_TestCaseReference sdltestTest10 =
 		{ (SDLTest_TestCaseFp)sdltest_randomBoundaryNumberSint64, "sdltest_randomBoundaryNumberSint64", "Calls to random boundary number generators for Sint64", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference sdltestTest11 =
+		{ (SDLTest_TestCaseFp)sdltest_randomIntegerInRange, "sdltest_randomIntegerInRange", "Calls to ranged random number generator", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference sdltestTest12 =
+		{ (SDLTest_TestCaseFp)sdltest_randomAsciiString, "sdltest_randomAsciiString", "Calls to default ASCII string generator", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference sdltestTest13 =
+		{ (SDLTest_TestCaseFp)sdltest_randomAsciiStringWithMaximumLength, "sdltest_randomAsciiStringWithMaximumLength", "Calls to random maximum length ASCII string generator", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference sdltestTest14 =
+		{ (SDLTest_TestCaseFp)sdltest_randomAsciiStringOfSize, "sdltest_randomAsciiStringOfSize", "Calls to fixed size ASCII string generator", TEST_ENABLED };
+
 /* Sequence of SDL_test test cases */
 static const SDLTest_TestCaseReference *sdltestTests[] =  {
 	&sdltestTest1, &sdltestTest2, &sdltestTest3, &sdltestTest4, &sdltestTest5, &sdltestTest6,
-	&sdltestTest7, &sdltestTest8, &sdltestTest9, &sdltestTest10, NULL
+	&sdltestTest7, &sdltestTest8, &sdltestTest9, &sdltestTest10, &sdltestTest11, &sdltestTest12,
+	&sdltestTest13, &sdltestTest14, NULL
 };
 
 /* SDL_test test suite (global) */
