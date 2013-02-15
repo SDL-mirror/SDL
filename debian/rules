@@ -3,7 +3,10 @@
 DEB_HOST_ARCH_CPU ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_CPU)
 DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
-confflags = --disable-rpath --disable-video-directfb
+confflags = --disable-rpath --disable-video-directfb \
+            --disable-nas --disable-esd --disable-arts \
+            --disable-alsa-shared --disable-pulseaudio-shared \
+            --disable-x11-shared
 
 %:
 	dh $@ --parallel
