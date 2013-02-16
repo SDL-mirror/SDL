@@ -672,27 +672,6 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
         return result;
     }
 
-    // Create a depth stencil view.
-    CD3D11_TEXTURE2D_DESC depthStencilDesc(
-        DXGI_FORMAT_D24_UNORM_S8_UINT, 
-        static_cast<UINT>(data->renderTargetSize.x),
-        static_cast<UINT>(data->renderTargetSize.y),
-        1,
-        1,
-        D3D11_BIND_DEPTH_STENCIL
-        );
-
-    ComPtr<ID3D11Texture2D> depthStencil;
-    result = data->d3dDevice->CreateTexture2D(
-        &depthStencilDesc,
-        nullptr,
-        &depthStencil
-        );
-    if (FAILED(result)) {
-        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
-        return result;
-    }
-
     // Set the rendering viewport to target the entire window.
     CD3D11_VIEWPORT viewport(
         0.0f,
