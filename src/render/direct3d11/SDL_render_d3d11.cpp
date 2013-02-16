@@ -240,6 +240,37 @@ D3D11_LoadPixelShader(SDL_Renderer * renderer,
     return S_OK;
 }
 
+static HRESULT
+D3D11_CreateBlendMode(SDL_Renderer * renderer,
+                      BOOL enableBlending,
+                      D3D11_BLEND srcBlend,
+                      D3D11_BLEND destBlend,
+                      ID3D11BlendState ** blendStateOutput)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+
+    D3D11_BLEND_DESC blendDesc;
+    memset(&blendDesc, 0, sizeof(blendDesc));
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.IndependentBlendEnable = FALSE;
+    blendDesc.RenderTarget[0].BlendEnable = enableBlending;
+    blendDesc.RenderTarget[0].SrcBlend = srcBlend;
+    blendDesc.RenderTarget[0].DestBlend = destBlend;
+    blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+    blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+    blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+    blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    result = data->d3dDevice->CreateBlendState(&blendDesc, blendStateOutput);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    return S_OK;
+}
+
 // Create resources that depend on the device.
 HRESULT
 D3D11_CreateDeviceResources(SDL_Renderer * renderer)
@@ -425,6 +456,42 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
 	result = data->d3dDevice->CreateRasterizerState(&rasterDesc, &data->mainRasterizer);
 	if (FAILED(result)) {
         WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    //
+    // Create blending states:
+    //
+    result = D3D11_CreateBlendMode(
+        renderer,
+        TRUE,
+        D3D11_BLEND_SRC_ALPHA,
+        D3D11_BLEND_INV_SRC_ALPHA,
+        &data->blendModeBlend);
+    if (FAILED(result)) {
+        // D3D11_CreateBlendMode will set the SDL error, if it fails
+        return result;
+    }
+
+    result = D3D11_CreateBlendMode(
+        renderer,
+        TRUE,
+        D3D11_BLEND_SRC_ALPHA,
+        D3D11_BLEND_ONE,
+        &data->blendModeAdd);
+    if (FAILED(result)) {
+        // D3D11_CreateBlendMode will set the SDL error, if it fails
+        return result;
+    }
+
+    result = D3D11_CreateBlendMode(
+        renderer,
+        TRUE,
+        D3D11_BLEND_ZERO,
+        D3D11_BLEND_SRC_COLOR,
+        &data->blendModeMod);
+    if (FAILED(result)) {
+        // D3D11_CreateBlendMode will set the SDL error, if it fails
         return result;
     }
 
@@ -960,6 +1027,21 @@ D3D11_RenderStartDrawOp(SDL_Renderer * renderer)
 		0,
 		0
 		);
+
+    switch (renderer->blendMode) {
+        case SDL_BLENDMODE_BLEND:
+            rendererData->d3dContext->OMSetBlendState(rendererData->blendModeBlend.Get(), 0, 0xFFFFFFFF);
+            break;
+        case SDL_BLENDMODE_ADD:
+            rendererData->d3dContext->OMSetBlendState(rendererData->blendModeAdd.Get(), 0, 0xFFFFFFFF);
+            break;
+        case SDL_BLENDMODE_MOD:
+            rendererData->d3dContext->OMSetBlendState(rendererData->blendModeMod.Get(), 0, 0xFFFFFFFF);
+            break;
+        case SDL_BLENDMODE_NONE:
+            rendererData->d3dContext->OMSetBlendState(NULL, 0, 0xFFFFFFFF);
+            break;
+    }
 }
 
 static void
@@ -994,10 +1076,10 @@ D3D11_RenderFillRects(SDL_Renderer * renderer,
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
     float r, g, b, a;
 
-    r = (float)(renderer->r / 255);
-    g = (float)(renderer->g / 255);
-    b = (float)(renderer->b / 255);
-    a = (float)(renderer->a / 255);
+    r = (float)(renderer->r / 255.0f);
+    g = (float)(renderer->g / 255.0f);
+    b = (float)(renderer->b / 255.0f);
+    a = (float)(renderer->a / 255.0f);
 
     D3D11_RenderStartDrawOp(renderer);
 

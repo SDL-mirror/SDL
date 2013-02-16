@@ -41,6 +41,9 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> texturePixelShader;
     Microsoft::WRL::ComPtr<ID3D11PixelShader> colorPixelShader;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> blendModeBlend;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> blendModeAdd;
+    Microsoft::WRL::ComPtr<ID3D11BlendState> blendModeMod;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> mainRasterizer;
     D3D_FEATURE_LEVEL featureLevel;
