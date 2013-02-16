@@ -39,7 +39,8 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> pixelShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> texturePixelShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> colorPixelShader;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> mainRasterizer;
     D3D_FEATURE_LEVEL featureLevel;
@@ -69,6 +70,7 @@ struct VertexPositionColor
 {
     DirectX::XMFLOAT3 pos;
     DirectX::XMFLOAT2 tex;
+    DirectX::XMFLOAT4 color;
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

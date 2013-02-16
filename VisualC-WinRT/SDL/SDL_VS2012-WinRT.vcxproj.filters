@@ -1,10 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <FxCompile Include="..\..\src\video\windowsrt\SimplePixelShader.hlsl">
+    <FxCompile Include="..\..\src\video\windowsrt\SimpleVertexShader.hlsl">
       <Filter>GPU Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\src\video\windowsrt\SimpleVertexShader.hlsl">
+    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_TextureCopy.hlsl">
+      <Filter>GPU Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_FixedColor.hlsl">
       <Filter>GPU Shaders</Filter>
     </FxCompile>
   </ItemGroup>

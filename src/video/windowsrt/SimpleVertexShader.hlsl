@@ -11,12 +11,14 @@ struct VertexShaderInput
 {
     float3 pos : POSITION;
     float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
 };
 
 struct VertexShaderOutput
 {
     float4 pos : SV_POSITION;
     float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
@@ -29,8 +31,9 @@ VertexShaderOutput main(VertexShaderInput input)
     pos = mul(pos, projection);
     output.pos = pos;
 
-    // Pass through the texture's color without modification.
+    // Pass through texture coordinates and color values without transformation
     output.tex = input.tex;
+    output.color = input.color;
 
     return output;
 }

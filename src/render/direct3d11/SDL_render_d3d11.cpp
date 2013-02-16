@@ -67,8 +67,8 @@ static int D3D11_RenderClear(SDL_Renderer * renderer);
 //                                const SDL_FPoint * points, int count);
 //static int D3D11_RenderDrawLines(SDL_Renderer * renderer,
 //                               const SDL_FPoint * points, int count);
-//static int D3D11_RenderFillRects(SDL_Renderer * renderer,
-//                               const SDL_FRect * rects, int count);
+static int D3D11_RenderFillRects(SDL_Renderer * renderer,
+                                 const SDL_FRect * rects, int count);
 static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * srcrect, const SDL_FRect * dstrect);
 //static int D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
@@ -140,7 +140,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderClear = D3D11_RenderClear;
     //renderer->RenderDrawPoints = D3D11_RenderDrawPoints;
     //renderer->RenderDrawLines = D3D11_RenderDrawLines;
-    //renderer->RenderFillRects = D3D11_RenderFillRects;
+    renderer->RenderFillRects = D3D11_RenderFillRects;
     renderer->RenderCopy = D3D11_RenderCopy;
     //renderer->RenderCopyEx = D3D11_RenderCopyEx;
     //renderer->RenderReadPixels = D3D11_RenderReadPixels;
@@ -212,6 +212,34 @@ D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
     return D3D11_ReadFileContents(fileName, out);
 }
 
+static HRESULT
+D3D11_LoadPixelShader(SDL_Renderer * renderer,
+                      const wstring & shaderName,
+                      ID3D11PixelShader ** shaderOutput)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+    vector<char> fileData;
+    
+    if (!D3D11_ReadShaderContents(shaderName, fileData)) {
+        SDL_SetError("Unable to open SDL's pixel shader file.");
+        return E_FAIL;
+    }
+
+    result = data->d3dDevice->CreatePixelShader(
+        &fileData[0],
+        fileData.size(),
+        nullptr,
+        shaderOutput
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        return result;
+    }
+
+    return S_OK;
+}
+
 // Create resources that depend on the device.
 HRESULT
 D3D11_CreateDeviceResources(SDL_Renderer * renderer)
@@ -276,12 +304,10 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
         return result;
     }
 
-    // Start loading GPU shaders:
-    vector<char> fileData;
-
     //
     // Load in SDL's one and only vertex shader:
     //
+    vector<char> fileData;
     if (!D3D11_ReadShaderContents(L"SimpleVertexShader.cso", fileData)) {
         SDL_SetError("Unable to open SDL's vertex shader file.");
         return E_FAIL;
@@ -303,8 +329,9 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     //
     const D3D11_INPUT_ELEMENT_DESC vertexDesc[] = 
     {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
     result = data->d3dDevice->CreateInputLayout(
@@ -320,21 +347,17 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     }
 
     //
-    // Load in SDL's one and only pixel shader (for now, more are likely to follow):
+    // Load in SDL's pixel shaders
     //
-    if (!D3D11_ReadShaderContents(L"SimplePixelShader.cso", fileData)) {
-        SDL_SetError("Unable to open SDL's pixel shader file.");
-        return E_FAIL;
+    result = D3D11_LoadPixelShader(renderer, L"SDL_D3D11_PixelShader_TextureCopy.cso", &data->texturePixelShader);
+    if (FAILED(result)) {
+        // D3D11_LoadPixelShader will have aleady set the SDL error
+        return result;
     }
 
-    result = data->d3dDevice->CreatePixelShader(
-        &fileData[0],
-        fileData.size(),
-        nullptr,
-        &data->pixelShader
-        );
+    result = D3D11_LoadPixelShader(renderer, L"SDL_D3D11_PixelShader_FixedColor.cso", &data->colorPixelShader);
     if (FAILED(result)) {
-        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+        // D3D11_LoadPixelShader will have aleady set the SDL error
         return result;
     }
 
@@ -900,55 +923,21 @@ D3D11_RenderClear(SDL_Renderer * renderer)
     return 0;
 }
 
-static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                            const SDL_Rect * srcrect, const SDL_FRect * dstrect)
+static int
+D3D11_UpdateVertexBuffer(SDL_Renderer *renderer,
+                         const void * vertexData, unsigned int dataSizeInBytes)
 {
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
-    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
     HRESULT result = S_OK;
 
-    rendererData->d3dContext->OMSetRenderTargets(
-        1,
-        rendererData->renderTargetView.GetAddressOf(),
-        nullptr
-        );
-
-    rendererData->d3dContext->UpdateSubresource(
-        rendererData->vertexShaderConstants.Get(),
-		0,
-		NULL,
-		&rendererData->vertexShaderConstantsData,
-		0,
-		0
-		);
-
-    //
-    // Create or update the vertex buffer:
-    //
-
-    // WinRT, TODO: get srcrect working in tandem with SDL_RenderCopy, etc.
-    //SDL_FRect fSrcRect;
-    //fSrcRect.x = (float)srcrect->x;
-    //fSrcRect.y = (float)srcrect->y;
-    //fSrcRect.w = (float)srcrect->w;
-    //fSrcRect.h = (float)srcrect->h;
-
-    VertexPositionColor vertices[] =
-    {
-        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(0.0f, 0.0f)},
-        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(0.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f)},
-    };
-
     if (rendererData->vertexBuffer) {
-        rendererData->d3dContext->UpdateSubresource(rendererData->vertexBuffer.Get(), 0, NULL, vertices, sizeof(vertices), 0);
+        rendererData->d3dContext->UpdateSubresource(rendererData->vertexBuffer.Get(), 0, NULL, vertexData, dataSizeInBytes, 0);
     } else {
         D3D11_SUBRESOURCE_DATA vertexBufferData = {0};
-        vertexBufferData.pSysMem = vertices;
+        vertexBufferData.pSysMem = vertexData;
         vertexBufferData.SysMemPitch = 0;
         vertexBufferData.SysMemSlicePitch = 0;
-        CD3D11_BUFFER_DESC vertexBufferDesc(sizeof(vertices), D3D11_BIND_VERTEX_BUFFER);
+        CD3D11_BUFFER_DESC vertexBufferDesc(dataSizeInBytes, D3D11_BIND_VERTEX_BUFFER);
         result = rendererData->d3dDevice->CreateBuffer(
             &vertexBufferDesc,
             &vertexBufferData,
@@ -970,35 +959,119 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         &offset
         );
 
-    rendererData->d3dContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    return 0;
+}
 
-    rendererData->d3dContext->IASetInputLayout(rendererData->inputLayout.Get());
+static void
+D3D11_RenderStartDrawOp(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
 
-    rendererData->d3dContext->VSSetShader(
-        rendererData->vertexShader.Get(),
-        nullptr,
-        0
+    rendererData->d3dContext->OMSetRenderTargets(
+        1,
+        rendererData->renderTargetView.GetAddressOf(),
+        nullptr
         );
 
-    rendererData->d3dContext->VSSetConstantBuffers(
+    rendererData->d3dContext->UpdateSubresource(
+        rendererData->vertexShaderConstants.Get(),
 		0,
-		1,
-        rendererData->vertexShaderConstants.GetAddressOf()
+		NULL,
+		&rendererData->vertexShaderConstantsData,
+		0,
+		0
 		);
+}
 
-    rendererData->d3dContext->PSSetShader(
-        rendererData->pixelShader.Get(),
-        nullptr,
-        0
-        );
+static void
+D3D11_SetPixelShader(SDL_Renderer * renderer,
+                     ID3D11PixelShader * shader,
+                     ID3D11ShaderResourceView * shaderResource,
+                     ID3D11SamplerState * sampler)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    rendererData->d3dContext->PSSetShader(shader, nullptr, 0);
+    rendererData->d3dContext->PSSetShaderResources(0, 1, &shaderResource);
+    rendererData->d3dContext->PSSetSamplers(0, 1, &sampler);
+}
 
-    rendererData->d3dContext->PSSetShaderResources(0, 1, textureData->mainTextureResourceView.GetAddressOf());
-
-    rendererData->d3dContext->PSSetSamplers(0, 1, rendererData->mainSampler.GetAddressOf());
-
+static void
+D3D11_RenderFinishDrawOp(SDL_Renderer * renderer,
+                         D3D11_PRIMITIVE_TOPOLOGY primitiveTopology)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    rendererData->d3dContext->IASetPrimitiveTopology(primitiveTopology);
+    rendererData->d3dContext->IASetInputLayout(rendererData->inputLayout.Get());
+    rendererData->d3dContext->VSSetShader(rendererData->vertexShader.Get(), nullptr, 0);
+    rendererData->d3dContext->VSSetConstantBuffers(0, 1, rendererData->vertexShaderConstants.GetAddressOf());
     rendererData->d3dContext->RSSetState(rendererData->mainRasterizer.Get());
-
     rendererData->d3dContext->Draw(4, 0);
+}
+
+static int
+D3D11_RenderFillRects(SDL_Renderer * renderer,
+                      const SDL_FRect * rects, int count)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    float r, g, b, a;
+
+    r = (float)(renderer->r / 255);
+    g = (float)(renderer->g / 255);
+    b = (float)(renderer->b / 255);
+    a = (float)(renderer->a / 255);
+
+    D3D11_RenderStartDrawOp(renderer);
+
+    for (int i = 0; i < count; ++i) {
+        VertexPositionColor vertices[] = {
+            {XMFLOAT3(rects[i].x, rects[i].y, 0.0f),                           XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},
+            {XMFLOAT3(rects[i].x, rects[i].y + rects[i].h, 0.0f),              XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},
+            {XMFLOAT3(rects[i].x + rects[i].w, rects[i].y, 0.0f),              XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},
+            {XMFLOAT3(rects[i].x + rects[i].w, rects[i].y + rects[i].h, 0.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},
+        };
+        if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
+            return -1;
+        }
+
+        D3D11_SetPixelShader(
+            renderer,
+            rendererData->colorPixelShader.Get(),
+            nullptr,
+            nullptr);
+
+        D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+    }
+
+    return 0;
+}
+
+static int
+D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
+                 const SDL_Rect * srcrect, const SDL_FRect * dstrect)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+
+    D3D11_RenderStartDrawOp(renderer);
+
+    // WinRT, TODO: get srcrect working in tandem with SDL_RenderCopy, etc.
+    VertexPositionColor vertices[] = {
+        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(0.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+    };
+    if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
+        return -1;
+    }
+
+    D3D11_SetPixelShader(
+        renderer,
+        rendererData->texturePixelShader.Get(),
+        textureData->mainTextureResourceView.Get(),
+        rendererData->mainSampler.Get());
+
+    D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 
     return 0;
 }
