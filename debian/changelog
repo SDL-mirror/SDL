@@ -1,4 +1,4 @@
-sdl2 (2.0.0.1) UNRELEASED; urgency=low
+libsdl2 (2.0.0.1) UNRELEASED; urgency=low
 
   * SDL is now a native debian package.
   * Removed udeb package
@@ -6,13 +6,13 @@ sdl2 (2.0.0.1) UNRELEASED; urgency=low
 
  -- Sam Lantinga <slouken@libsdl.org>  Fri, 15 Feb 2013 08:55:04 -0800
 
-sdl2 (2.0.0~20130127-1) UNRELEASED; urgency=low
+libsdl2 (2.0.0~20130127-1) UNRELEASED; urgency=low
 
   * New upstream snapshot.
 
  -- Sam Hocevar <sho@debian.org>  Wed, 30 Jan 2013 23:01:12 +0100
 
-sdl2 (2.0.0~20130103-1) unstable; urgency=low
+libsdl2 (2.0.0~20130103-1) unstable; urgency=low
 
   [ Manuel A. Fernandez Montecelo ]
   * debian/control:
@@ -44,7 +44,7 @@ sdl2 (2.0.0~20130103-1) unstable; urgency=low
 
  -- Manuel A. Fernandez Montecelo <manuel.montezelo@gmail.com>  Sun, 27 Jan 2013 16:40:49 +0100
 
-sdl2 (2.0~20120220c-1) experimental; urgency=low
+libsdl2 (2.0~20120220c-1) experimental; urgency=low
 
   * Upstream version was renamed to 2.0 (Closes: #669367).
   * New upstream snapshot (Closes: #671506).
