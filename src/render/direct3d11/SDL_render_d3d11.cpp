@@ -655,42 +655,18 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     {
         case DisplayOrientations::Landscape:
             rotation = DXGI_MODE_ROTATION_IDENTITY;
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 0-degree Z-rotation
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
             break;
 
         case DisplayOrientations::Portrait:
             rotation = DXGI_MODE_ROTATION_ROTATE270;
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 270-degree Z-rotation
-                0.0f, -1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
             break;
 
         case DisplayOrientations::LandscapeFlipped:
             rotation = DXGI_MODE_ROTATION_ROTATE180;
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 180-degree Z-rotation
-                -1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, -1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
             break;
 
         case DisplayOrientations::PortraitFlipped:
             rotation = DXGI_MODE_ROTATION_ROTATE90;
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 90-degree Z-rotation
-                0.0f, 1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, 1.0f, 0.0f,
-                0.0f, 0.0f, 0.0f, 1.0f
-                );
             break;
 
         default:
@@ -705,17 +681,6 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
         return result;
     }
 #endif
-
-    //
-    // Update the view matrix
-    //
-    XMStoreFloat4x4(&data->vertexShaderConstantsData.view,  // (4)
-        XMMatrixMultiply(
-            XMMatrixScaling(2.0f / windowWidth, 2.0f / windowHeight, 1.0f),
-            XMMatrixMultiply(
-                XMMatrixTranslation(-1, -1, 0),
-                XMMatrixRotationX(XM_PI)
-                )));
 
     // Create a render target view of the swap chain back buffer.
     ComPtr<ID3D11Texture2D> backBuffer;
@@ -739,15 +704,10 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
         return result;
     }
 
-    // Set the rendering viewport to target the entire window.
-    CD3D11_VIEWPORT viewport(
-        0.0f,
-        0.0f,
-        data->renderTargetSize.x,
-        data->renderTargetSize.y
-        );
-
-    data->d3dContext->RSSetViewports(1, &viewport);
+    if (D3D11_UpdateViewport(renderer) != 0) {
+        // D3D11_UpdateViewport will set the SDL error if it fails.
+        return E_FAIL;
+    }
 
     return S_OK;
 }
@@ -949,6 +909,81 @@ D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static int
 D3D11_UpdateViewport(SDL_Renderer * renderer)
 {
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+
+    if (renderer->viewport.w == 0 || renderer->viewport.h == 0) {
+        // If the viewport is empty, assume that it is because
+        // SDL_CreateRenderer is calling it, and will call it again later
+        // with a non-empty viewport.
+        return 0;
+    }
+
+    switch (data->orientation)
+    {
+        case DisplayOrientations::Landscape:
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 0-degree Z-rotation
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::Portrait:
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 270-degree Z-rotation
+                0.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::LandscapeFlipped:
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 180-degree Z-rotation
+                -1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, -1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        case DisplayOrientations::PortraitFlipped:
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 90-degree Z-rotation
+                0.0f, 1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 1.0f
+                );
+            break;
+
+        default:
+            SDL_SetError("An unknown DisplayOrientation is being used");
+            return -1;
+    }
+
+    //
+    // Update the view matrix
+    //
+    float windowWidth = (float) renderer->viewport.w;
+    float windowHeight = (float) renderer->viewport.h;
+    XMStoreFloat4x4(&data->vertexShaderConstantsData.view,  // (4)
+        XMMatrixMultiply(
+            XMMatrixScaling(2.0f / windowWidth, 2.0f / windowHeight, 1.0f),
+            XMMatrixMultiply(
+                XMMatrixTranslation(-1, -1, 0),
+                XMMatrixRotationX(XM_PI)
+                )));
+
+    D3D11_VIEWPORT viewport;
+    memset(&viewport, 0, sizeof(viewport));
+    viewport.TopLeftX = (float) renderer->viewport.x;
+    viewport.TopLeftY = (float) renderer->viewport.y;
+    viewport.Width = (float) renderer->viewport.w;
+    viewport.Height = (float) renderer->viewport.h;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    data->d3dContext->RSSetViewports(1, &viewport);
+
     return 0;
 }
 
