@@ -1,4 +1,4 @@
-libsdl2 (2.0.0.1) UNRELEASED; urgency=low
+libsdl2 (2.0.0) UNRELEASED; urgency=low
 
   * SDL is now a native debian package.
   * Removed udeb package
