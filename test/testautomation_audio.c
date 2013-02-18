@@ -46,7 +46,7 @@ int audio_enumerateAndNameAudioDevices()
       /* Get number of devices. */
       n = SDL_GetNumAudioDevices(t);
       SDLTest_AssertPass("Call to SDL_GetNumAudioDevices(%i)", t);
-      SDLTest_Log("Number of %s devices < 0, reported as %i", (t) ? "output" : "capture", n);
+      SDLTest_Log("Number of %s devices < 0, reported as %i", (t) ? "capture" : "output", n);
       SDLTest_AssertCheck(n >= 0, "Validate result is >= 0, got: %i", n);
 
       /* Variation of non-zero type */
