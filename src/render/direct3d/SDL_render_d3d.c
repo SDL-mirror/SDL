@@ -362,7 +362,10 @@ D3D_Reset(SDL_Renderer * renderer)
     HRESULT result;
 
     /* Release the default render target before reset */
-    IDirect3DSurface9_Release(data->defaultRenderTarget);
+    if (data->defaultRenderTarget) {
+        IDirect3DSurface9_Release(data->defaultRenderTarget);
+        data->defaultRenderTarget = NULL;
+    }
 
     result = IDirect3DDevice9_Reset(data->device, &data->pparams);
     if (FAILED(result)) {
@@ -1486,7 +1489,10 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
 
     if (data) {
         // Release the render target
-        IDirect3DSurface9_Release(data->defaultRenderTarget);
+        if (data->defaultRenderTarget) {
+            IDirect3DSurface9_Release(data->defaultRenderTarget);
+            data->defaultRenderTarget = NULL;
+        }
         if (data->currentRenderTarget != NULL) {
             IDirect3DSurface9_Release(data->currentRenderTarget);
             data->currentRenderTarget = NULL;
