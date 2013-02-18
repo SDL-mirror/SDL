@@ -30,6 +30,8 @@ extern "C" {
 #include "SDL_system.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysrender.h"
+#include "SDL_log.h"
+#include "../../video/SDL_sysvideo.h"
 //#include "stdio.h"
 }
 
@@ -561,7 +563,7 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     // landscape-oriented width and height. If the window is in a portrait
     // orientation, the dimensions must be reversed.
     data->orientation = DisplayProperties::CurrentOrientation;
-    bool swapDimensions =
+    const bool swapDimensions =
         data->orientation == DisplayOrientations::Portrait ||
         data->orientation == DisplayOrientations::PortraitFlipped;
     data->renderTargetSize.x = swapDimensions ? windowHeight : windowWidth;
@@ -930,9 +932,9 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
             break;
 
         case DisplayOrientations::Portrait:
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 270-degree Z-rotation
-                0.0f, -1.0f, 0.0f, 0.0f,
-                1.0f, 0.0f, 0.0f, 0.0f,
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 90-degree Z-rotation
+                0.0f, 1.0f, 0.0f, 0.0f,
+                -1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
@@ -948,9 +950,9 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
             break;
 
         case DisplayOrientations::PortraitFlipped:
-            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 90-degree Z-rotation
-                0.0f, 1.0f, 0.0f, 0.0f,
-                -1.0f, 0.0f, 0.0f, 0.0f,
+            data->vertexShaderConstantsData.projection = XMFLOAT4X4( // 270-degree Z-rotation
+                0.0f, -1.0f, 0.0f, 0.0f,
+                1.0f, 0.0f, 0.0f, 0.0f,
                 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f
                 );
@@ -964,25 +966,57 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
     //
     // Update the view matrix
     //
-    float windowWidth = (float) renderer->viewport.w;
-    float windowHeight = (float) renderer->viewport.h;
-    XMStoreFloat4x4(&data->vertexShaderConstantsData.view,  // (4)
+    float viewportWidth = (float) renderer->viewport.w;
+    float viewportHeight = (float) renderer->viewport.h;
+    XMStoreFloat4x4(&data->vertexShaderConstantsData.view,
         XMMatrixMultiply(
-            XMMatrixScaling(2.0f / windowWidth, 2.0f / windowHeight, 1.0f),
+            XMMatrixScaling(2.0f / viewportWidth, 2.0f / viewportHeight, 1.0f),
             XMMatrixMultiply(
                 XMMatrixTranslation(-1, -1, 0),
                 XMMatrixRotationX(XM_PI)
                 )));
 
+    //
+    // Update the Direct3D viewport, which seems to be aligned to the
+    // swap buffer's coordinate space, which is always in landscape:
+    //
+    SDL_FRect orientationAlignedViewport;
+    const bool swapDimensions =
+        data->orientation == DisplayOrientations::Portrait ||
+        data->orientation == DisplayOrientations::PortraitFlipped;
+    if (swapDimensions) {
+        orientationAlignedViewport.x = (float) renderer->viewport.y;
+        orientationAlignedViewport.y = (float) renderer->viewport.x;
+        orientationAlignedViewport.w = (float) renderer->viewport.h;
+        orientationAlignedViewport.h = (float) renderer->viewport.w;
+    } else {
+        orientationAlignedViewport.x = (float) renderer->viewport.x;
+        orientationAlignedViewport.y = (float) renderer->viewport.y;
+        orientationAlignedViewport.w = (float) renderer->viewport.w;
+        orientationAlignedViewport.h = (float) renderer->viewport.h;
+    }
+    // WinRT, TODO: get custom viewports working with non-Landscape modes (Portrait, PortraitFlipped, and LandscapeFlipped)
+
     D3D11_VIEWPORT viewport;
     memset(&viewport, 0, sizeof(viewport));
-    viewport.TopLeftX = (float) renderer->viewport.x;
-    viewport.TopLeftY = (float) renderer->viewport.y;
-    viewport.Width = (float) renderer->viewport.w;
-    viewport.Height = (float) renderer->viewport.h;
+    viewport.TopLeftX = orientationAlignedViewport.x;
+    viewport.TopLeftY = orientationAlignedViewport.y;
+    viewport.Width = orientationAlignedViewport.w;
+    viewport.Height = orientationAlignedViewport.h;
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
     data->d3dContext->RSSetViewports(1, &viewport);
+
+#if 0
+    SDL_Log("%s, oav={%.0f,%.0f,%.0f,%.0f}, rend={%.0f,%.0f}\n",
+        __FUNCTION__,
+        orientationAlignedViewport.x,
+        orientationAlignedViewport.y,
+        orientationAlignedViewport.w,
+        orientationAlignedViewport.h,
+        data->renderTargetSize.x,
+        data->renderTargetSize.y);
+#endif
 
     return 0;
 }
@@ -1116,9 +1150,33 @@ D3D11_RenderFillRects(SDL_Renderer * renderer,
     b = (float)(renderer->b / 255.0f);
     a = (float)(renderer->a / 255.0f);
 
-    D3D11_RenderStartDrawOp(renderer);
+#if 0
+    // Set up a test pattern:
+    SDL_FRect rects[] = {
+        {-1.1f, 1.1f, 1.1f, -1.1f},
+        {-1.0f, 1.0f, 1.0f, -1.0f},     // red
+        {0.0f, 1.0f, 1.0f, -1.0f},      // green
+        {-1.0f, 0.0f, 1.0f, -1.0f},     // blue
+        {0.0f, 0.0f, 1.0f, -1.0f}       // white
+    };
+    count = sizeof(rects) / sizeof(SDL_FRect);
+#endif
 
     for (int i = 0; i < count; ++i) {
+        D3D11_RenderStartDrawOp(renderer);
+
+#if 0
+        // Set colors for the test pattern:
+        a = 1.0f;
+        switch (i) {
+            case 0: r = 1.0f; g = 1.0f; b = 0.0f; break;
+            case 1: r = 1.0f; g = 0.0f; b = 0.0f; break;
+            case 2: r = 0.0f; g = 1.0f; b = 0.0f; break;
+            case 3: r = 0.0f; g = 0.0f; b = 1.0f; break;
+            case 4: r = 1.0f; g = 1.0f; b = 1.0f; break;
+        }
+#endif
+
         VertexPositionColor vertices[] = {
             {XMFLOAT3(rects[i].x, rects[i].y, 0.0f),                           XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},
             {XMFLOAT3(rects[i].x, rects[i].y + rects[i].h, 0.0f),              XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)},

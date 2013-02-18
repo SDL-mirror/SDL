@@ -74,6 +74,7 @@ WINRT_Available(void)
 static void
 WINRT_DeleteDevice(SDL_VideoDevice * device)
 {
+    SDL_WinRTGlobalApp->SetSDLVideoDevice(NULL);
     SDL_free(device);
 }
 
@@ -103,8 +104,9 @@ WINRT_CreateDevice(int devindex)
     //device->UpdateWindowFramebuffer = SDL_WINRT_UpdateWindowFramebuffer;
     //device->DestroyWindowFramebuffer = SDL_WINRT_DestroyWindowFramebuffer;
     device->GetWindowWMInfo = WINRT_GetWindowWMInfo;
-
     device->free = WINRT_DeleteDevice;
+
+    SDL_WinRTGlobalApp->SetSDLVideoDevice(device);
 
     return device;
 }

@@ -51,6 +51,7 @@ SDL_WinRTApp::SDL_WinRTApp() :
     m_windowClosed(false),
     m_windowVisible(true),
     m_sdlWindowData(NULL),
+    m_sdlVideoDevice(NULL),
     m_useRelativeMouseMode(false)
 {
 }
@@ -146,11 +147,35 @@ void SDL_WinRTApp::Uninitialize()
 
 void SDL_WinRTApp::OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
-    SDL_SendWindowEvent(
-        m_sdlWindowData->sdlWindow,
-        SDL_WINDOWEVENT_RESIZED,
-        (int) ceil(args->Size.Width),
-        (int) ceil(args->Size.Height));
+#if 0
+    SDL_Log("%s, {%f,%f}\n", __FUNCTION__, args->Size.Width, args->Size.Height);
+#endif
+
+    if (m_sdlWindowData) {
+        // Make the new window size be the one true fullscreen mode.
+        // This change was done, in part, to allow the Direct3D 11.1 renderer
+        // to receive window-resize events as a device rotates.
+        // Before, rotating a device from landscape, to portrait, and then
+        // back to landscape would cause the Direct3D 11.1 swap buffer to
+        // not get resized appropriately.  SDL would, on the rotation from
+        // landscape to portrait, re-resize the SDL window to it's initial
+        // size (landscape).  On the subsequent rotation, SDL would drop the
+        // window-resize event as it appeared the SDL window didn't change
+        // size, and the Direct3D 11.1 renderer wouldn't resize its swap
+        // chain.
+        //
+        // TODO, WinRT: consider dropping old display modes after the fullscreen window changes size (from rotations, etc.)
+        m_sdlWindowData->sdlWindow->fullscreen_mode = SDL_WinRTGlobalApp->GetMainDisplayMode();
+        SDL_AddDisplayMode(&m_sdlVideoDevice->displays[0], &m_sdlWindowData->sdlWindow->fullscreen_mode);
+
+        const int windowWidth = (int) ceil(args->Size.Width);
+        const int windowHeight = (int) ceil(args->Size.Height);
+        SDL_SendWindowEvent(
+            m_sdlWindowData->sdlWindow,
+            SDL_WINDOWEVENT_RESIZED,
+            windowWidth,
+            windowHeight);
+    }
 }
 
 void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
@@ -739,9 +764,14 @@ void SDL_WinRTApp::SetRelativeMouseMode(bool enable)
     m_useRelativeMouseMode = enable;
 }
 
-void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData* windowData)
+void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData * windowData)
 {
     m_sdlWindowData = windowData;
+}
+
+void SDL_WinRTApp::SetSDLVideoDevice(const SDL_VideoDevice * videoDevice)
+{
+    m_sdlVideoDevice = videoDevice;
 }
 
 IFrameworkView^ Direct3DApplicationSource::CreateView()

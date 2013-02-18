@@ -26,6 +26,7 @@ internal:
     bool HasSDLWindowData() const;
     void SetRelativeMouseMode(bool enable);
     void SetSDLWindowData(const SDL_WindowData * windowData);
+    void SetSDLVideoDevice(const SDL_VideoDevice * videoDevice);
     Windows::Foundation::Point TransformCursor(Windows::Foundation::Point rawPosition);
 
 protected:
@@ -49,6 +50,7 @@ private:
     bool m_windowClosed;
     bool m_windowVisible;
     const SDL_WindowData* m_sdlWindowData;
+    const SDL_VideoDevice* m_sdlVideoDevice;
     bool m_useRelativeMouseMode;
 };
 
