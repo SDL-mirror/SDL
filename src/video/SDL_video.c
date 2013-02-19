@@ -437,7 +437,7 @@ SDL_VideoInit(const char *driver_name)
     }
     if (driver_name != NULL) {
         for (i = 0; bootstrap[i]; ++i) {
-            if (SDL_strcasecmp(bootstrap[i]->name, driver_name) == 0) {
+            if (SDL_strncasecmp(bootstrap[i]->name, driver_name, SDL_strlen(driver_name)) == 0) {
                 video = bootstrap[i]->create(index);
                 break;
             }

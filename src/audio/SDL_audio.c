@@ -580,8 +580,8 @@ SDL_AudioInit(const char *driver_name)
     for (i = 0; (!initialized) && (bootstrap[i]); ++i) {
         /* make sure we should even try this driver before doing so... */
         const AudioBootStrap *backend = bootstrap[i];
-        if (((driver_name) && (SDL_strcasecmp(backend->name, driver_name))) ||
-            ((!driver_name) && (backend->demand_only))) {
+        if ((driver_name && (SDL_strncasecmp(backend->name, driver_name, SDL_strlen(driver_name)) != 0)) ||
+            (!driver_name && backend->demand_only)) {
             continue;
         }
 
