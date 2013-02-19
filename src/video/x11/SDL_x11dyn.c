@@ -211,6 +211,12 @@ SDL_X11_LoadSymbols(void)
         }
     }
 #else
+#define SDL_X11_MODULE(modname) SDL_X11_HAVE_##modname = 1; /* default yes */
+#define SDL_X11_SYM(a,fn,x,y,z)
+#include "SDL_x11sym.h"
+#undef SDL_X11_MODULE
+#undef SDL_X11_SYM
+
 #ifdef X_HAVE_UTF8_STRING
     pXCreateIC = XCreateIC;
     pXGetICValues = XGetICValues;
