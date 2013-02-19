@@ -553,6 +553,14 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
                test x$enable_pulseaudio_shared = xyes && test x$pulse_lib != x; then
                 echo "-- dynamic libpulse-simple -> $pulse_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSE_DYNAMIC, "$pulse_lib")
+
+                case "$host" in
+                    # On Solaris, pulseaudio must be linked deferred explicitly
+                    # to prevent undefined symbol failures.
+                    *-*-solaris*)
+                        PULSE_LIBS=`echo $PULSE_LIBS | sed 's/\-l/-Wl,-l/g'`
+                        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-zdeferred $PULSE_LIBS -Wl,-znodeferred"
+                esac
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSE_LIBS"
             fi
@@ -851,7 +859,7 @@ AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [[defau
             have_altivec_h_hdr=yes
             ])
             AC_MSG_RESULT($have_gcc_altivec)
-	fi
+        fi
 
         if test x$have_gcc_altivec = xno; then
             AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
@@ -1918,9 +1926,20 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-pthread"
             ;;
-        *-*-solaris*)
+        *-*-solaris2.9)
+            # From Solaris 9+, posix4's preferred name is rt.
             pthread_cflags="-D_REENTRANT"
-            pthread_lib="-lpthread -lposix4"
+            pthread_lib="-lpthread -lrt"
+            ;;
+        *-*-solaris2.10)
+            # Solaris 10+ merged pthread into libc.
+            pthread_cflags="-D_REENTRANT"
+            pthread_lib="-lrt"
+            ;;
+        *-*-solaris*)
+            # Solaris 11+ merged rt into libc.
+            pthread_cflags="-D_REENTRANT"
+            pthread_lib=""
             ;;
         *-*-sysv5*)
             pthread_cflags="-D_REENTRANT -Kthread"
