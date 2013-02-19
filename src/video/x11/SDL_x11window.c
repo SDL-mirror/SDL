@@ -768,37 +768,28 @@ X11_SetWindowSize(_THIS, SDL_Window * window)
          XFree(sizehints);
 
         /* From Pierre-Loup:
-           For the windowed resize problem; WMs each have their little quirks with
-           that.  When you change the size hints, they get a ConfigureNotify event
-           with the WM_NORMAL_SIZE_HINTS Atom.  They all save the hints then, but
-           they don't all resize the window right away to enforce the new hints.
-           Those who do properly do it are:
-          
-             - XFWM
-             - metacity
-             - KWin
+           WMs each have their little quirks with that.  When you change the
+           size hints, they get a ConfigureNotify event with the
+           WM_NORMAL_SIZE_HINTS Atom.  They all save the hints then, but they
+           don't all resize the window right away to enforce the new hints.
 
-           These are great.  Now, others are more problematic as you could observe
-           first hand.  Compiz/Unity only falls into the code that does it on select
-           actions, such as window move, raise, map, etc.
+           Some of them resize only after:
+            - A user-initiated move or resize
+            - A code-initiated move or resize
+            - Hiding & showing window (Unmap & map)
 
-           WindowMaker is even more difficult and will _only_ do it on map.
-
-           Awesome only does it on user-initiated moves as far as I can tell.
-          
-           Your raise workaround only fixes compiz/Unity.  With that all "modern"
-           window managers are covered.  Trying to Hide/Show on windowed resize
-           (UnMap/Map) fixes both Unity and WindowMaker, but introduces subtle
-           problems with transitioning from Windowed to Fullscreen on Unity.  Since
-           some window moves happen after the transitions to fullscreen, that forces
-           SDL to fall from windowed to fullscreen repeatedly and it sometimes leaves
-           itself in a state where the fullscreen window is slightly offset by what
-           used to be the window decoration titlebar.
-        */
+           The following move & resize seems to help a lot of WMs that didn't
+           properly update after the hints were changed. We don't do a
+           hide/show, because there are supposedly subtle problems with doing so
+           and transitioning from windowed to fullscreen in Unity.
+         */
+        XResizeWindow(display, data->xwindow, window->w, window->h);
+        XMoveWindow(display, data->xwindow, window->x, window->y);
         XRaiseWindow(display, data->xwindow);
     } else {
         XResizeWindow(display, data->xwindow, window->w, window->h);
     }
+
     XFlush(display);
 }
 
