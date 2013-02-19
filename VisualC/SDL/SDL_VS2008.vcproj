@@ -866,14 +866,6 @@
 
 			<File
 
-				RelativePath="..\..\include\SDL_input.h"
-
-				>
-
-			</File>
-
-			<File
-
 				RelativePath="..\..\include\SDL_joystick.h"
 
 				>

@@ -123,7 +123,6 @@
 		AA7558A61595D55500BBD41B /* SDL_gesture.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558731595D55500BBD41B /* SDL_gesture.h */; };
 		AA7558A71595D55500BBD41B /* SDL_haptic.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558741595D55500BBD41B /* SDL_haptic.h */; };
 		AA7558A81595D55500BBD41B /* SDL_hints.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558751595D55500BBD41B /* SDL_hints.h */; };
-		AA7558A91595D55500BBD41B /* SDL_input.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558761595D55500BBD41B /* SDL_input.h */; };
 		AA7558AA1595D55500BBD41B /* SDL_joystick.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558771595D55500BBD41B /* SDL_joystick.h */; };
 		AA7558AB1595D55500BBD41B /* SDL_keyboard.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558781595D55500BBD41B /* SDL_keyboard.h */; };
 		AA7558AC1595D55500BBD41B /* SDL_keycode.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558791595D55500BBD41B /* SDL_keycode.h */; };
@@ -384,7 +383,6 @@
 		AA7558731595D55500BBD41B /* SDL_gesture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gesture.h; sourceTree = "<group>"; };
 		AA7558741595D55500BBD41B /* SDL_haptic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_haptic.h; sourceTree = "<group>"; };
 		AA7558751595D55500BBD41B /* SDL_hints.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_hints.h; sourceTree = "<group>"; };
-		AA7558761595D55500BBD41B /* SDL_input.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_input.h; sourceTree = "<group>"; };
 		AA7558771595D55500BBD41B /* SDL_joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_joystick.h; sourceTree = "<group>"; };
 		AA7558781595D55500BBD41B /* SDL_keyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_keyboard.h; sourceTree = "<group>"; };
 		AA7558791595D55500BBD41B /* SDL_keycode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_keycode.h; sourceTree = "<group>"; };
@@ -926,7 +924,6 @@
 				AA7558731595D55500BBD41B /* SDL_gesture.h */,
 				AA7558741595D55500BBD41B /* SDL_haptic.h */,
 				AA7558751595D55500BBD41B /* SDL_hints.h */,
-				AA7558761595D55500BBD41B /* SDL_input.h */,
 				AA7558771595D55500BBD41B /* SDL_joystick.h */,
 				AA7558781595D55500BBD41B /* SDL_keyboard.h */,
 				AA7558791595D55500BBD41B /* SDL_keycode.h */,
@@ -1230,7 +1227,6 @@
 				AA7558A61595D55500BBD41B /* SDL_gesture.h in Headers */,
 				AA7558A71595D55500BBD41B /* SDL_haptic.h in Headers */,
 				AA7558A81595D55500BBD41B /* SDL_hints.h in Headers */,
-				AA7558A91595D55500BBD41B /* SDL_input.h in Headers */,
 				AA7558AA1595D55500BBD41B /* SDL_joystick.h in Headers */,
 				AA7558AB1595D55500BBD41B /* SDL_keyboard.h in Headers */,
 				AA7558AC1595D55500BBD41B /* SDL_keycode.h in Headers */,
