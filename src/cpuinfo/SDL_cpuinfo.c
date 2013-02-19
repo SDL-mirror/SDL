@@ -223,6 +223,7 @@ done:
 "        movl    %edx,-8(%rbp)     \n"
 #endif
 "1:                                \n"
+	    );
 #endif
 	return features;
 }
