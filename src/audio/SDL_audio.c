@@ -577,11 +577,6 @@ SDL_AudioInit(const char *driver_name)
         driver_name = SDL_getenv("SDL_AUDIODRIVER");
     }
 
-    /* Older versions of SDL had a different name for the PulseAudio target. */
-    if (driver_name && (SDL_strcmp(driver_name, "pulse") == 0)) {
-        driver_name = "pulseaudio";
-    }
-
     for (i = 0; (!initialized) && (bootstrap[i]); ++i) {
         /* make sure we should even try this driver before doing so... */
         const AudioBootStrap *backend = bootstrap[i];
