@@ -975,6 +975,9 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
                 XMMatrixTranslation(-1, -1, 0),
                 XMMatrixRotationX(XM_PI)
                 )));
+#if 0
+    data->vertexShaderConstantsData.view = XMMatrixIdentity();
+#endif
 
     //
     // Update the Direct3D viewport, which seems to be aligned to the
@@ -1152,14 +1155,15 @@ D3D11_RenderFillRects(SDL_Renderer * renderer,
 
 #if 0
     // Set up a test pattern:
-    SDL_FRect rects[] = {
+    SDL_FRect _rects[] = {
         {-1.1f, 1.1f, 1.1f, -1.1f},
         {-1.0f, 1.0f, 1.0f, -1.0f},     // red
         {0.0f, 1.0f, 1.0f, -1.0f},      // green
         {-1.0f, 0.0f, 1.0f, -1.0f},     // blue
         {0.0f, 0.0f, 1.0f, -1.0f}       // white
     };
-    count = sizeof(rects) / sizeof(SDL_FRect);
+    count = sizeof(_rects) / sizeof(SDL_FRect);
+#define rects _rects
 #endif
 
     for (int i = 0; i < count; ++i) {
