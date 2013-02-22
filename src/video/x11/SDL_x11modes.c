@@ -860,6 +860,7 @@ X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
         if (xinerama) {
             rect->x = xinerama[data->xinerama_screen].x_org;
             rect->y = xinerama[data->xinerama_screen].y_org;
+            XFree(xinerama);
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
