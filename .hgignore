@@ -39,6 +39,9 @@ Release
 *.ncb
 *.suo
 
+# for Android
+android-project/local.properties
+
 sdl.pc
 test/autom4te*
 test/config.cache
