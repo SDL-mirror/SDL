@@ -14,10 +14,15 @@ extern "C" {
 #include "SDL_log.h"
 #include "SDL_render.h"
 #include "../../render/SDL_sysrender.h"
+#include "SDL_hints.h"
+#include "../../SDL_hints_c.h"
 }
 
 #include <string>
 #include <unordered_map>
+#include <sstream>
+
+using namespace Windows::Graphics::Display;
 
 // TODO, WinRT: Remove reference(s) to BasicTimer.h
 //#include "BasicTimer.h"
@@ -27,6 +32,55 @@ extern "C" {
 // This seems wrong on some level, but does seem to work.
 typedef int (*SDL_WinRT_MainFunction)(int, char **);
 static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
+
+static void WINRT_SetDisplayOrientationsPreference(const char *name, const char *oldValue, const char *newValue)
+{
+    SDL_assert(SDL_strcmp(name, SDL_HINT_ORIENTATIONS) == 0);
+
+    // Start with no orientation flags, then add each in as they're parsed
+    // from newValue.
+    unsigned int orientationFlags = 0;
+    std::istringstream tokenizer(newValue);
+    while (!tokenizer.eof()) {
+        std::string orientationName;
+        std::getline(tokenizer, orientationName, ' ');
+        if (orientationName == "LandscapeLeft") {
+            orientationFlags |= (unsigned int) DisplayOrientations::LandscapeFlipped;
+        } else if (orientationName == "LandscapeRight") {
+            orientationFlags |= (unsigned int) DisplayOrientations::Landscape;
+        } else if (orientationName == "Portrait") {
+            orientationFlags |= (unsigned int) DisplayOrientations::Portrait;
+        } else if (orientationName == "PortraitUpsideDown") {
+            orientationFlags |= (unsigned int) DisplayOrientations::PortraitFlipped;
+        }
+    }
+
+    // If no valid orientation flags were specified, use a reasonable set of defaults:
+    if (!orientationFlags) {
+        // TODO, WinRT: consider seeing if an app's default orientation flags can be found out via some API call(s).
+        orientationFlags = (unsigned int) ( \
+            DisplayOrientations::Landscape |
+            DisplayOrientations::LandscapeFlipped |
+            DisplayOrientations::Portrait |
+            DisplayOrientations::PortraitFlipped);
+    }
+
+    // Set the orientation/rotation preferences.  Please note that this does
+    // not constitute a 100%-certain lock of a given set of possible
+    // orientations.  According to Microsoft's documentation on Windows RT [1]
+    // when a device is not capable of being rotated, Windows may ignore
+    // the orientation preferences, and stick to what the device is capable of
+    // displaying.
+    //
+    // [1] Documentation on the 'InitialRotationPreference' setting for a
+    // Windows app's manifest file describes how some orientation/rotation
+    // preferences may be ignored.  See
+    // http://msdn.microsoft.com/en-us/library/windows/apps/hh700343.aspx
+    // for details.  Microsoft's "Display orientation sample" also gives an
+    // outline of how Windows treats device rotation
+    // (http://code.msdn.microsoft.com/Display-Orientation-Sample-19a58e93).
+    DisplayProperties::AutoRotationPreferences = (DisplayOrientations) orientationFlags;
+}
 
 // HACK, DLudwig: record a reference to the global, Windows RT 'app'/view.
 // SDL/WinRT will use this throughout its code.
@@ -68,6 +122,14 @@ void SDL_WinRTApp::Initialize(CoreApplicationView^ applicationView)
 
     CoreApplication::Resuming +=
         ref new EventHandler<Platform::Object^>(this, &SDL_WinRTApp::OnResuming);
+
+    // Register the hint, SDL_HINT_ORIENTATIONS, with SDL.  This needs to be
+    // done before the hint's callback is registered (as of Feb 22, 2013),
+    // otherwise the hint callback won't get registered.
+    //
+    // WinRT, TODO: see if an app's default orientation can be found out via WinRT API(s), then set the initial value of SDL_HINT_ORIENTATIONS accordingly.
+    SDL_SetHint(SDL_HINT_ORIENTATIONS, "LandscapeLeft LandscapeRight Portrait PortraitUpsideDown");
+    SDL_RegisterHintChangedCb(SDL_HINT_ORIENTATIONS, WINRT_SetDisplayOrientationsPreference);
 }
 
 void SDL_WinRTApp::SetWindow(CoreWindow^ window)
@@ -661,7 +723,7 @@ TranslateKeycode(int keycode)
 
 void SDL_WinRTApp::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args)
 {
-#if 0
+#if 1
     SDL_Log("key down, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, scan code=%d, was down?=%s, vkey=%d\n",
         (args->Handled ? "1" : "0"),
         (args->KeyStatus.IsExtendedKey ? "1" : "0"),
