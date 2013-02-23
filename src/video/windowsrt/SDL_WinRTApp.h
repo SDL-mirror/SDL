@@ -2,9 +2,6 @@
 
 #include "SDLmain_WinRT_common.h"
 #include "SDL_winrtvideo.h"
-#include <vector>
-
-using namespace Windows::UI::Core;
 
 ref class SDL_WinRTApp sealed : public Windows::ApplicationModel::Core::IFrameworkView
 {
@@ -52,10 +49,4 @@ private:
     const SDL_WindowData* m_sdlWindowData;
     const SDL_VideoDevice* m_sdlVideoDevice;
     bool m_useRelativeMouseMode;
-};
-
-ref class Direct3DApplicationSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
-{
-public:
-    virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
 };

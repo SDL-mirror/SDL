@@ -49,6 +49,34 @@ static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
 // SDL_CreateWindow().
 SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
+ref class SDLApplicationSource sealed : Windows::ApplicationModel::Core::IFrameworkViewSource
+{
+public:
+    virtual Windows::ApplicationModel::Core::IFrameworkView^ CreateView();
+};
+
+IFrameworkView^ SDLApplicationSource::CreateView()
+{
+    // TODO, WinRT: see if this function (CreateView) can ever get called
+    // more than once.  For now, just prevent it from ever assigning
+    // SDL_WinRTGlobalApp more than once.
+    SDL_assert(!SDL_WinRTGlobalApp);
+    SDL_WinRTApp ^ app = ref new SDL_WinRTApp();
+    if (!SDL_WinRTGlobalApp)
+    {
+        SDL_WinRTGlobalApp = app;
+    }
+    return app;
+}
+
+__declspec(dllexport) int SDL_WinRT_RunApplication(SDL_WinRT_MainFunction mainFunction)
+{
+    SDL_WinRT_main = mainFunction;
+    auto direct3DApplicationSource = ref new SDLApplicationSource();
+    CoreApplication::Run(direct3DApplicationSource);
+    return 0;
+}
+
 static void WINRT_SetDisplayOrientationsPreference(const char *name, const char *oldValue, const char *newValue)
 {
     SDL_assert(SDL_strcmp(name, SDL_HINT_ORIENTATIONS) == 0);
@@ -858,26 +886,4 @@ void SDL_WinRTApp::SetSDLWindowData(const SDL_WindowData * windowData)
 void SDL_WinRTApp::SetSDLVideoDevice(const SDL_VideoDevice * videoDevice)
 {
     m_sdlVideoDevice = videoDevice;
-}
-
-IFrameworkView^ Direct3DApplicationSource::CreateView()
-{
-    // TODO, WinRT: see if this function (CreateView) can ever get called
-    // more than once.  For now, just prevent it from ever assigning
-    // SDL_WinRTGlobalApp more than once.
-    SDL_assert(!SDL_WinRTGlobalApp);
-    SDL_WinRTApp ^ app = ref new SDL_WinRTApp();
-    if (!SDL_WinRTGlobalApp)
-    {
-        SDL_WinRTGlobalApp = app;
-    }
-    return app;
-}
-
-__declspec(dllexport) int SDL_WinRT_RunApplication(SDL_WinRT_MainFunction mainFunction)
-{
-    SDL_WinRT_main = mainFunction;
-    auto direct3DApplicationSource = ref new Direct3DApplicationSource();
-    CoreApplication::Run(direct3DApplicationSource);
-    return 0;
 }

@@ -43,6 +43,8 @@ extern "C" {
 #include "SDL_winrtevents_c.h"
 #include "SDL_winrtmouse.h"
 
+using namespace Windows::UI::Core;
+
 /* On Windows, windows.h defines CreateWindow */
 #ifdef CreateWindow
 #undef CreateWindow

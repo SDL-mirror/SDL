@@ -32,6 +32,7 @@ extern "C" {
 #include "SDL_WinRTApp.h"
 #include "SDL_winrtmouse.h"
 
+using namespace Windows::UI::Core;
 using Windows::UI::Core::CoreCursor;
 
 extern SDL_WinRTApp ^ SDL_WinRTGlobalApp;
