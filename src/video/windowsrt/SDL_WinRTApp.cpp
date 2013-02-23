@@ -744,7 +744,7 @@ TranslateKeycode(int keycode)
 
 void SDL_WinRTApp::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args)
 {
-#if 1
+#if 0
     SDL_Log("key down, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, scan code=%d, was down?=%s, vkey=%d\n",
         (args->Handled ? "1" : "0"),
         (args->KeyStatus.IsExtendedKey ? "1" : "0"),
