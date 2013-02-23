@@ -22,16 +22,32 @@ extern "C" {
 #include <unordered_map>
 #include <sstream>
 
+using namespace concurrency;
+using namespace std;
+using namespace Windows::ApplicationModel;
+using namespace Windows::ApplicationModel::Core;
+using namespace Windows::ApplicationModel::Activation;
+using namespace Windows::Devices::Input;
 using namespace Windows::Graphics::Display;
-
-// TODO, WinRT: Remove reference(s) to BasicTimer.h
-//#include "BasicTimer.h"
+using namespace Windows::Foundation;
+using namespace Windows::System;
+using namespace Windows::UI::Core;
+using namespace Windows::UI::Input;
 
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
 // This seems wrong on some level, but does seem to work.
 typedef int (*SDL_WinRT_MainFunction)(int, char **);
 static SDL_WinRT_MainFunction SDL_WinRT_main = nullptr;
+
+// HACK, DLudwig: record a reference to the global, Windows RT 'app'/view.
+// SDL/WinRT will use this throughout its code.
+//
+// TODO, WinRT: consider replacing SDL_WinRTGlobalApp with something
+// non-global, such as something created inside
+// SDL_InitSubSystem(SDL_INIT_VIDEO), or something inside
+// SDL_CreateWindow().
+SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
 
 static void WINRT_SetDisplayOrientationsPreference(const char *name, const char *oldValue, const char *newValue)
 {
@@ -81,27 +97,6 @@ static void WINRT_SetDisplayOrientationsPreference(const char *name, const char 
     // (http://code.msdn.microsoft.com/Display-Orientation-Sample-19a58e93).
     DisplayProperties::AutoRotationPreferences = (DisplayOrientations) orientationFlags;
 }
-
-// HACK, DLudwig: record a reference to the global, Windows RT 'app'/view.
-// SDL/WinRT will use this throughout its code.
-//
-// TODO, WinRT: consider replacing SDL_WinRTGlobalApp with something
-// non-global, such as something created inside
-// SDL_InitSubSystem(SDL_INIT_VIDEO), or something inside
-// SDL_CreateWindow().
-SDL_WinRTApp ^ SDL_WinRTGlobalApp = nullptr;
-
-using namespace std;
-using namespace Windows::ApplicationModel;
-using namespace Windows::ApplicationModel::Core;
-using namespace Windows::ApplicationModel::Activation;
-using namespace Windows::Devices::Input;
-using namespace Windows::UI::Core;
-using namespace Windows::UI::Input;
-using namespace Windows::System;
-using namespace Windows::Foundation;
-using namespace Windows::Graphics::Display;
-using namespace concurrency;
 
 SDL_WinRTApp::SDL_WinRTApp() :
     m_windowClosed(false),
@@ -170,8 +165,6 @@ void SDL_WinRTApp::SetWindow(CoreWindow^ window)
 
     window->KeyUp +=
         ref new TypedEventHandler<CoreWindow^, KeyEventArgs^>(this, &SDL_WinRTApp::OnKeyUp);
-
-    //m_renderer->Initialize(CoreWindow::GetForCurrentThread());    // DLudwig: moved this call to WINRT_CreateWindow, likely elsewhere in the future
 }
 
 void SDL_WinRTApp::Load(Platform::String^ entryPoint)
