@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -221,6 +221,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		HRAWINPUT hRawInput = (HRAWINPUT)lParam;
 		RAWINPUT inp;
 		UINT size = sizeof(inp);
+
+		if(!SDL_GetMouse()->relative_mode)
+			break;
+
 		GetRawInputData(hRawInput, RID_INPUT, &inp, &size, sizeof(RAWINPUTHEADER));
 
 		/* Mouse data */
@@ -229,8 +233,24 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			RAWMOUSE* mouse = &inp.data.mouse;
 
 			if((mouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE)
+			{
 				SDL_SendMouseMotion(data->window, 1, (int)mouse->lLastX, (int)mouse->lLastY);
+			}
+			else
+			{
+				// synthesize relative moves from the abs position
+				static SDL_Point initialMousePoint;
+				if ( initialMousePoint.x == 0 && initialMousePoint.y == 0 )
+				{
+					initialMousePoint.x = mouse->lLastX;
+					initialMousePoint.y = mouse->lLastY;
+				}
 
+				SDL_SendMouseMotion(data->window, 1, (int)(mouse->lLastX-initialMousePoint.x), (int)(mouse->lLastY-initialMousePoint.y) );
+
+				initialMousePoint.x = mouse->lLastX;
+				initialMousePoint.y = mouse->lLastY;
+			}
 		}
 		break;
 	}
@@ -271,7 +291,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEWHEEL:
         {
-            int motion = (short) HIWORD(wParam);
+            // FIXME: This may need to accumulate deltas up to WHEEL_DELTA
+            short motion = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 
             SDL_SendMouseWheel(data->window, 0, motion);
             break;
@@ -427,8 +448,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             int x, y;
             int w, h;
             int min_w, min_h;
+            int max_w, max_h;
             int style;
             BOOL menu;
+			BOOL constrain_max_size;
 
             /* If we allow resizing, let the resize happen naturally */
             if (SDL_IsShapedWindow(data->window))
@@ -442,11 +465,19 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             /* Calculate current size of our window */
             SDL_GetWindowSize(data->window, &w, &h);
             SDL_GetWindowMinimumSize(data->window, &min_w, &min_h);
+            SDL_GetWindowMaximumSize(data->window, &max_w, &max_h);
 
             /* Store in min_w and min_h difference between current size and minimal 
                size so we don't need to call AdjustWindowRectEx twice */
             min_w -= w;
             min_h -= h;
+            if (max_w && max_h) {
+                max_w -= w;
+                max_h -= h;
+                constrain_max_size = TRUE;
+            } else {
+                constrain_max_size = FALSE;
+            }
 
             size.top = 0;
             size.left = 0;
@@ -469,6 +500,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             if (SDL_GetWindowFlags(data->window) & SDL_WINDOW_RESIZABLE) {
                 info->ptMinTrackSize.x = w + min_w;
                 info->ptMinTrackSize.y = h + min_h;
+                if (constrain_max_size) {
+                    info->ptMaxTrackSize.x = w + max_w;
+                    info->ptMaxTrackSize.y = h + max_h;
+                }
             } else {
                 info->ptMaxSize.x = w;
                 info->ptMaxSize.y = h;

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -75,6 +75,7 @@ struct SDL_Window
     int x, y;
     int w, h;
     int min_w, min_h;
+    int max_w, max_h;
     Uint32 flags;
 
     /* Stored position and size for windowed mode */
@@ -109,6 +110,7 @@ struct SDL_Window
  */
 struct SDL_VideoDisplay
 {
+    char *name;
     int max_display_modes;
     int num_display_modes;
     SDL_DisplayMode *display_modes;
@@ -183,6 +185,7 @@ struct SDL_VideoDevice
     void (*SetWindowPosition) (_THIS, SDL_Window * window);
     void (*SetWindowSize) (_THIS, SDL_Window * window);
     void (*SetWindowMinimumSize) (_THIS, SDL_Window * window);
+    void (*SetWindowMaximumSize) (_THIS, SDL_Window * window);
     void (*ShowWindow) (_THIS, SDL_Window * window);
     void (*HideWindow) (_THIS, SDL_Window * window);
     void (*RaiseWindow) (_THIS, SDL_Window * window);
@@ -371,6 +374,8 @@ extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern void SDL_UpdateWindowGrab(SDL_Window * window);
 extern SDL_Window * SDL_GetFocusWindow(void);
+
+extern SDL_bool SDL_ShouldAllowTopmost();
 
 #endif /* _SDL_sysvideo_h */
 

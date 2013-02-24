@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -860,6 +860,11 @@ SDL_Keycode
 SDL_GetKeyFromScancode(SDL_Scancode scancode)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
+    
+    if (scancode<SDL_SCANCODE_UNKNOWN || scancode >= SDL_NUM_SCANCODES) {
+          SDL_InvalidParamError("scancode");
+          return 0;
+    }
 
     return keyboard->keymap[scancode];
 }
@@ -895,17 +900,20 @@ SDL_Scancode SDL_GetScancodeFromName(const char *name)
 	int i;
 
 	if (!name || !*name) {
+	        SDL_InvalidParamError("name");
 		return SDL_SCANCODE_UNKNOWN;
 	}
 
 	for (i = 0; i < SDL_arraysize(SDL_scancode_names); ++i) {
 		if (!SDL_scancode_names[i]) {
 			continue;
-		}
+		}		
 		if (SDL_strcasecmp(name, SDL_scancode_names[i]) == 0) {
 			return (SDL_Scancode)i;
 		}
 	}
+
+	SDL_InvalidParamError("name");
 	return SDL_SCANCODE_UNKNOWN;
 }
 
@@ -953,6 +961,9 @@ SDL_GetKeyFromName(const char *name)
 {
 	SDL_Keycode key;
 
+        /* Check input */
+        if (name == NULL) return SDLK_UNKNOWN;
+        
 	/* If it's a single UTF-8 character, then that's the keycode itself */
 	key = *(const unsigned char *)name;
 	if (key >= 0xF0) {

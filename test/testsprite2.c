@@ -15,12 +15,12 @@
 #include <stdio.h>
 #include <time.h>
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 #define NUM_SPRITES    100
 #define MAX_SPEED     1
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static int num_sprites;
 static SDL_Texture **sprites;
 static SDL_bool cycle_color;
@@ -46,7 +46,7 @@ quit(int rc)
     if (velocities) {
         SDL_free(velocities);
     }
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     exit(rc);
 }
 
@@ -226,7 +226,7 @@ main(int argc, char *argv[])
     num_sprites = NUM_SPRITES;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
@@ -236,7 +236,7 @@ main(int argc, char *argv[])
     for (i = 1; i < argc;) {
         int consumed;
 
-        consumed = CommonArg(state, i);
+        consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
             consumed = -1;
             if (SDL_strcasecmp(argv[i], "--blend") == 0) {
@@ -269,12 +269,12 @@ main(int argc, char *argv[])
         if (consumed < 0) {
             fprintf(stderr,
                     "Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha]\n",
-                    argv[0], CommonUsage(state));
+                    argv[0], SDLTest_CommonUsage(state));
             quit(1);
         }
         i += consumed;
     }
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         quit(2);
     }
 
@@ -323,7 +323,7 @@ main(int argc, char *argv[])
         /* Check for events */
         ++frames;
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
         }
         for (i = 0; i < state->num_windows; ++i) {
             MoveSprites(state->renderers[i], sprites[i]);

@@ -17,10 +17,9 @@
 #include "SDL.h"
 #include "SDL_test.h"
 
-#include "tests/testsuites.h"
+#include "testautomation_suites.h"
 
 static SDLTest_CommonState *state;
-
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -37,16 +36,15 @@ main(int argc, char *argv[])
     int testIterations = 1;
     Uint64 userExecKey = 0;
     char *userRunSeed = NULL;
-    int i;
+    char *filter = NULL;
+    int i, done;
+    SDL_Event event;
 
     /* Initialize test framework */
     state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
-
-    // Needed?
-    // state->window_flags |= SDL_WINDOW_RESIZABLE;
 
     /* Parse commandline */
     for (i = 1; i < argc;) {
@@ -64,7 +62,7 @@ main(int argc, char *argv[])
             } 
             else if (SDL_strcasecmp(argv[i], "--execKey") == 0) {
                 if (argv[i + 1]) {
-                    SDL_sscanf(argv[i + 1], "%llu", &userExecKey);
+                    SDL_sscanf(argv[i + 1], "%llu", (long long unsigned int *)&userExecKey);
                     consumed = 2;                    
                 }
             } 
@@ -74,10 +72,16 @@ main(int argc, char *argv[])
                     consumed = 2;
                 }
             } 
+            else if (SDL_strcasecmp(argv[i], "--filter") == 0) {
+                if (argv[i + 1]) {
+                    filter = SDL_strdup(argv[i + 1]);
+                    consumed = 2;
+                }
+            } 
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--iterations #] [--execKey #] [--seed string]\n",
+                    "Usage: %s %s [--iterations #] [--execKey #] [--seed string] [--filter suite_name|test_name]\n",
                     argv[0], SDLTest_CommonUsage(state));
             quit(1);
         }
@@ -98,11 +102,23 @@ main(int argc, char *argv[])
     }
 
     /* Call Harness */
-    result = SDLTest_RunSuites(testSuites, userRunSeed, userExecKey, testIterations);
+    result = SDLTest_RunSuites(testSuites, (const char *)userRunSeed, userExecKey, (const char *)filter, testIterations);
+
+    /* Empty event queue */    
+    done = 0;
+    for (i=0; i<100; i++)  {
+      while (SDL_PollEvent(&event)) {
+        SDLTest_CommonEvent(state, &event, &done);
+      }
+      SDL_Delay(10);
+    }
 
     /* Clean up */
     if (userRunSeed != NULL) {
         SDL_free(userRunSeed);
+    }
+    if (filter != NULL) {
+        SDL_free(filter);
     }
         
     /* Shutdown everything */

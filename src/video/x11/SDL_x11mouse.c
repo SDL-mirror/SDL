@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -232,7 +232,7 @@ X11_CreateSystemCursor(SDL_SystemCursor id)
         return NULL;
 	// X Font Cursors reference:
 	//   http://tronche.com/gui/x/xlib/appendix/b/
-    case SDL_SYSTEM_CURSOR_ARROW:     shape = XC_arrow; break;
+    case SDL_SYSTEM_CURSOR_ARROW:     shape = XC_left_ptr; break;
     case SDL_SYSTEM_CURSOR_IBEAM:     shape = XC_xterm; break;
     case SDL_SYSTEM_CURSOR_WAIT:      shape = XC_watch; break;
     case SDL_SYSTEM_CURSOR_CROSSHAIR: shape = XC_tcross; break;

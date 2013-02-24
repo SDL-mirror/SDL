@@ -1683,6 +1683,30 @@ AC_HELP_STRING([--enable-libudev], [enable libudev support [[default=yes]]]),
     fi
 }
 
+dnl See if the platform offers libdbus for various IPC techniques.
+CheckDBus()
+{
+    AC_ARG_ENABLE(dbus,
+AC_HELP_STRING([--enable-dbus], [enable D-Bus support [[default=yes]]]),
+                        , enable_dbus=yes)
+    if test x$enable_dbus = xyes; then
+        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+        if test x$PKG_CONFIG != xno; then
+            DBUS_CFLAGS=`$PKG_CONFIG --cflags dbus-1`
+            save_CFLAGS="$CFLAGS"
+            CFLAGS="$save_CFLAGS $DBUS_CFLAGS"
+            AC_CHECK_HEADER(dbus/dbus.h,
+                            have_dbus_dbus_h_hdr=yes,
+                            have_dbus_dbus_h_hdr=no)
+            CFLAGS="$save_CFLAGS"
+            if test x$have_dbus_dbus_h_hdr = xyes; then
+                AC_DEFINE(HAVE_DBUS_DBUS_H, 1, [ ])
+                EXTRA_CFLAGS="$EXTRA_CFLAGS $DBUS_CFLAGS"
+            fi
+        fi
+    fi
+}
+
 dnl See if we can use the Touchscreen input library
 CheckTslib()
 {
@@ -2208,6 +2232,7 @@ case "$host" in
         CheckOpenGLX11
         CheckOpenGLESX11
         CheckLibUDev
+        CheckDBus
         CheckInputEvents
         CheckTslib
         CheckUSBHID

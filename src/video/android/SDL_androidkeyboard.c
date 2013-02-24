@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -316,6 +316,12 @@ void
 Android_SetTextInputRect(_THIS, SDL_Rect *rect)
 {
     SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+
+    if (!rect) {
+        SDL_InvalidParamError("rect");
+        return;
+    }
+    
     videodata->textRect = *rect;
 }
 

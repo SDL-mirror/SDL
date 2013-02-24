@@ -11,6 +11,7 @@ TARGETS = \
 	checkkeys$(EXE) \
 	loopwave$(EXE) \
 	testaudioinfo$(EXE) \
+	testautomation$(EXE) \
 	testdraw2$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
@@ -67,19 +68,37 @@ testresample$(EXE): $(srcdir)/testresample.c
 testaudioinfo$(EXE): $(srcdir)/testaudioinfo.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+testautomation$(EXE): $(srcdir)/testautomation.c \
+		      $(srcdir)/testautomation_clipboard.c \
+		      $(srcdir)/testautomation_main.c \
+		      $(srcdir)/testautomation_platform.c \
+		      $(srcdir)/testautomation_rect.c \
+		      $(srcdir)/testautomation_render.c \
+		      $(srcdir)/testautomation_rwops.c \
+		      $(srcdir)/testautomation_audio.c \
+		      $(srcdir)/testautomation_surface.c \
+		      $(srcdir)/testautomation_events.c \
+		      $(srcdir)/testautomation_keyboard.c \
+		      $(srcdir)/testautomation_video.c \
+		      $(srcdir)/testautomation_syswm.c \
+		      $(srcdir)/testautomation_sdltest.c \
+		      $(srcdir)/testautomation_mouse.c \
+		      $(srcdir)/testautomation_timer.c
+	$(CC) -o $@ $^ $(CFLAGS) -lSDL2_test $(LIBS) 
+
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testatomic$(EXE): $(srcdir)/testatomic.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testintersections$(EXE): $(srcdir)/testintersections.c $(srcdir)/common.c
+testintersections$(EXE): $(srcdir)/testintersections.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testrelative$(EXE): $(srcdir)/testrelative.c $(srcdir)/common.c
+testrelative$(EXE): $(srcdir)/testrelative.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testdraw2$(EXE): $(srcdir)/testdraw2.c $(srcdir)/common.c
+testdraw2$(EXE): $(srcdir)/testdraw2.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testerror$(EXE): $(srcdir)/testerror.c
@@ -94,10 +113,10 @@ testgamecontroller$(EXE): $(srcdir)/testgamecontroller.c
 testgesture$(EXE): $(srcdir)/testgesture.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
  
-testgl2$(EXE): $(srcdir)/testgl2.c $(srcdir)/common.c
+testgl2$(EXE): $(srcdir)/testgl2.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
-testgles$(EXE): $(srcdir)/testgles.c $(srcdir)/common.c
+testgles$(EXE): $(srcdir)/testgles.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @GLLIB@ @MATHLIB@
 
 testhaptic$(EXE): $(srcdir)/testhaptic.c
@@ -112,10 +131,10 @@ testthread$(EXE): $(srcdir)/testthread.c
 testiconv$(EXE): $(srcdir)/testiconv.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testime$(EXE): $(srcdir)/testime.c $(srcdir)/common.c
+testime$(EXE): $(srcdir)/testime.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @SDL_TTF_LIB@
 
-testjoystick$(EXE): $(srcdir)/testjoystick.c $(srcdir)/common.c
+testjoystick$(EXE): $(srcdir)/testjoystick.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testkeys$(EXE): $(srcdir)/testkeys.c
@@ -156,10 +175,10 @@ testplatform$(EXE): $(srcdir)/testplatform.c
 testpower$(EXE): $(srcdir)/testpower.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testrendertarget$(EXE): $(srcdir)/testrendertarget.c $(srcdir)/common.c
+testrendertarget$(EXE): $(srcdir)/testrendertarget.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testscale$(EXE): $(srcdir)/testscale.c $(srcdir)/common.c
+testscale$(EXE): $(srcdir)/testscale.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testsem$(EXE): $(srcdir)/testsem.c
@@ -171,8 +190,8 @@ testshader$(EXE): $(srcdir)/testshader.c
 testshape$(EXE): $(srcdir)/testshape.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testsprite2$(EXE): $(srcdir)/testsprite2.c $(srcdir)/common.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
+testsprite2$(EXE): $(srcdir)/testsprite2.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testspriteminimal$(EXE): $(srcdir)/testspriteminimal.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
@@ -186,13 +205,13 @@ testtimer$(EXE): $(srcdir)/testtimer.c
 testver$(EXE): $(srcdir)/testver.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testwm2$(EXE): $(srcdir)/testwm2.c $(srcdir)/common.c
+testwm2$(EXE): $(srcdir)/testwm2.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 torturethread$(EXE): $(srcdir)/torturethread.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
-testrendercopyex$(EXE): $(srcdir)/testrendercopyex.c $(srcdir)/common.c
+testrendercopyex$(EXE): $(srcdir)/testrendercopyex.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
 
 testmessage$(EXE): $(srcdir)/testmessage.c

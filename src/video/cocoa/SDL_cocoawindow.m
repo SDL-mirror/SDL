@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -740,7 +740,22 @@ Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
     minSize.width = window->min_w;
     minSize.height = window->min_h;
         
-    [windata->nswindow setMinSize:minSize];
+    [windata->nswindow setContentMinSize:minSize];
+    
+    [pool release];
+}
+
+void
+Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+        
+    NSSize maxSize;
+    maxSize.width = window->max_w;
+    maxSize.height = window->max_h;
+        
+    [windata->nswindow setContentMaxSize:maxSize];
     
     [pool release];
 }
@@ -915,7 +930,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     }
 
 #ifdef FULLSCREEN_TOGGLEABLE
-    if (fullscreen) {
+    if (SDL_ShouldAllowTopmost() && fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
         [nswindow setLevel:CGShieldingWindowLevel()];
     } else {
@@ -997,22 +1012,16 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
 	
-    if ( window->flags & SDL_WINDOW_FULLSCREEN )
-	{
+    if ( window->flags & SDL_WINDOW_FULLSCREEN ) {
 		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
-		if (window->flags & SDL_WINDOW_INPUT_FOCUS)
-		{
+		if (SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
 			/* OpenGL is rendering to the window, so make it visible! */
 			[data->nswindow setLevel:CGShieldingWindowLevel()];
-		} 
-		else 
-		{
+		} else {
 			[data->nswindow setLevel:kCGNormalWindowLevel];
 		}
-		
 	}
-
 }
 
 void

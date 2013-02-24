@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -65,6 +65,10 @@ typedef struct
     int window_y;
     int window_w;
     int window_h;
+    int window_minW;
+    int window_minH;
+    int window_maxW;
+    int window_maxH;
     int depth;
     int refresh_rate;
     int num_windows;

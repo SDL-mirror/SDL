@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -105,11 +105,12 @@ typedef struct SDLTest_TestSuiteReference {
  * \param testSuites Suites containing the test case.
  * \param userRunSeed Custom run seed provided by user, or NULL to autogenerate one.
  * \param userExecKey Custom execution key provided by user, or 0 to autogenerate one.
+ * \param filter Filter specification. NULL disables. Case sensitive.
  * \param testIterations Number of iterations to run each test case.
  *
  * \returns Test run result; 0 when all tests passed, 1 if any tests failed.
  */
-int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], char *userRunSeed, Uint64 userExecKey, int testIterations);
+int SDLTest_RunSuites(SDLTest_TestSuiteReference *testSuites[], const char *userRunSeed, Uint64 userExecKey, const char *filter, int testIterations);
          
 
 /* Ends C function definitions when using C++ */

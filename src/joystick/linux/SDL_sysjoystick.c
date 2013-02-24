@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -58,6 +58,11 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+/* This isn't defined in older Linux kernel headers */
+#ifndef SYN_DROPPED
+#define SYN_DROPPED 3
+#endif
 
 /* we never link directly to libudev. */
 /* !!! FIXME: can we generalize this? ALSA, etc, do the same things. */
@@ -217,16 +222,27 @@ IsJoystick(int fd, char *namebuf, const size_t namebuflen, SDL_JoystickGUID *gui
         return 0;
     }
 
+#ifdef DEBUG_JOYSTICK
+    printf("Joystick: %s, bustype = %d, vendor = 0x%x, product = 0x%x, version = %d\n", namebuf, inpid.bustype, inpid.vendor, inpid.product, inpid.version);
+#endif
+
+    SDL_memset(guid->data, 0, sizeof(guid->data));
+
     /* We only need 16 bits for each of these; space them out to fill 128. */
     /* Byteswap so devices get same GUID on little/big endian platforms. */
     *(guid16++) = SDL_SwapLE16(inpid.bustype);
     *(guid16++) = 0;
-    *(guid16++) = SDL_SwapLE16(inpid.vendor);
-    *(guid16++) = 0;
-    *(guid16++) = SDL_SwapLE16(inpid.product);
-    *(guid16++) = 0;
-    *(guid16++) = SDL_SwapLE16(inpid.version);
-    *(guid16++) = 0;
+
+    if (inpid.vendor && inpid.product && inpid.version) {
+        *(guid16++) = SDL_SwapLE16(inpid.vendor);
+        *(guid16++) = 0;
+        *(guid16++) = SDL_SwapLE16(inpid.product);
+        *(guid16++) = 0;
+        *(guid16++) = SDL_SwapLE16(inpid.version);
+        *(guid16++) = 0;
+    } else {
+        SDL_strlcpy((char*)guid16, namebuf, sizeof(guid->data) - 4);
+    }
 
     return 1;
 }
@@ -323,13 +339,12 @@ MaybeRemoveDevice(const char *path)
             }
             if (prev != NULL) {
                 prev->next = item->next;
-                if (item == SDL_joylist_tail) {
-                    SDL_joylist_tail = prev;
-                }
             } else {
-                SDL_assert(!SDL_joylist);
-                SDL_assert(!SDL_joylist_tail);
-                SDL_joylist = SDL_joylist_tail = NULL;
+                SDL_assert(SDL_joylist == item);
+                SDL_joylist = item->next;
+            }
+            if (item == SDL_joylist_tail) {
+                SDL_joylist_tail = prev;
             }
             SDL_free(item->path);
             SDL_free(item->name);
@@ -657,13 +672,13 @@ ConfigJoystick(SDL_Joystick * joystick, int fd)
                 } else {
                     joystick->hwdata->abs_correct[i].used = 1;
                     joystick->hwdata->abs_correct[i].coef[0] =
-                        (absinfo.maximum + absinfo.minimum) / 2 - absinfo.flat;
+                        (absinfo.maximum + absinfo.minimum) - 2 * absinfo.flat;
                     joystick->hwdata->abs_correct[i].coef[1] =
-                        (absinfo.maximum + absinfo.minimum) / 2 + absinfo.flat;
-                    t = ((absinfo.maximum - absinfo.minimum) / 2 - 2 * absinfo.flat);
+                        (absinfo.maximum + absinfo.minimum) + 2 * absinfo.flat;
+                    t = ((absinfo.maximum - absinfo.minimum) - 4 * absinfo.flat);
                     if (t != 0) {
                         joystick->hwdata->abs_correct[i].coef[2] =
-                            (1 << 29) / t;
+                            (1 << 28) / t;
                     } else {
                         joystick->hwdata->abs_correct[i].coef[2] = 0;
                     }
@@ -752,6 +767,9 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     /* Get the number of buttons and axes on the joystick */
     ConfigJoystick(joystick, fd);
 
+    // mark joystick as fresh and ready
+    joystick->hwdata->fresh = 1;
+
     return (0);
 }
 
@@ -801,6 +819,7 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
 
     correct = &joystick->hwdata->abs_correct[which];
     if (correct->used) {
+        value *= 2;
         if (value > correct->coef[0]) {
             if (value < correct->coef[1]) {
                 return 0;
@@ -810,7 +829,7 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
             value -= correct->coef[0];
         }
         value *= correct->coef[2];
-        value >>= 14;
+        value >>= 13;
     }
 
     /* Clamp and return */
@@ -823,11 +842,54 @@ AxisCorrect(SDL_Joystick * joystick, int which, int value)
 }
 
 static __inline__ void
+PollAllValues(SDL_Joystick * joystick)
+{
+    struct input_absinfo absinfo;
+    int a, b = 0;
+
+    // Poll all axis
+    for (a = ABS_X; b < ABS_MAX; a++) {
+        switch (a) {
+        case ABS_HAT0X:
+        case ABS_HAT0Y:
+        case ABS_HAT1X:
+        case ABS_HAT1Y:
+        case ABS_HAT2X:
+        case ABS_HAT2Y:
+        case ABS_HAT3X:
+        case ABS_HAT3Y:
+            // ingore hats
+            break;
+        default:
+            if (joystick->hwdata->abs_correct[b].used) {
+                if (ioctl(joystick->hwdata->fd, EVIOCGABS(a), &absinfo) >= 0) {
+                    absinfo.value = AxisCorrect(joystick, b, absinfo.value);
+
+#ifdef DEBUG_INPUT_EVENTS
+                    printf("Joystick : Re-read Axis %d (%d) val= %d\n",
+                        joystick->hwdata->abs_map[b], a, absinfo.value);
+#endif
+                    SDL_PrivateJoystickAxis(joystick,
+                            joystick->hwdata->abs_map[b],
+                            absinfo.value);
+                }
+            }
+            b++;
+        }
+    }
+}
+
+static __inline__ void
 HandleInputEvents(SDL_Joystick * joystick)
 {
     struct input_event events[32];
     int i, len;
     int code;
+
+    if (joystick->hwdata->fresh) {
+        PollAllValues(joystick);
+        joystick->hwdata->fresh = 0;
+    }
 
     while ((len = read(joystick->hwdata->fd, events, (sizeof events))) > 0) {
         len /= sizeof(events[0]);
@@ -879,6 +941,17 @@ HandleInputEvents(SDL_Joystick * joystick)
                     break;
                 }
                 break;
+            case EV_SYN:
+                switch (code) {
+                case SYN_DROPPED :
+#ifdef DEBUG_INPUT_EVENTS
+                    printf("Event SYN_DROPPED dectected\n");
+#endif
+                    PollAllValues(joystick);
+                    break;
+                default:
+                    break;
+                }
             default:
                 break;
             }

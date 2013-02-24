@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -49,14 +49,14 @@ extern "C" {
  *
  * \param fmt Message to be logged
  */
-void SDLTest_Log(char *fmt, ...);
+void SDLTest_Log(const char *fmt, ...);
 
 /**
  * \brief Prints given message with a timestamp in the TEST category and the ERROR priority.
  *
  * \param fmt Message to be logged
  */
-void SDLTest_LogError(char *fmt, ...);
+void SDLTest_LogError(const char *fmt, ...);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

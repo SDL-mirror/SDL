@@ -24,9 +24,13 @@ build
 (^|/)build($|/)
 .DS_Store
 Xcode/SDL/SDL.xcodeproj/xcuserdata
-Xcode/SDL/SDL.xcodeproj/project.xcworkspace/xcuserdata
-Xcode/SDL/SDLTest.xcodeproj/xcuserdata
-Xcode/SDL/SDLTest.xcodeproj/project.xcworkspace/xcuserdata
+Xcode/SDL/SDL.xcodeproj/project.xcworkspace
+Xcode/SDLTest/SDLTest.xcodeproj/xcuserdata
+Xcode/SDLTest/SDLTest.xcodeproj/project.xcworkspace
+Xcode-iOS/SDL/SDL.xcodeproj/xcuserdata
+Xcode-iOS/SDL/SDL.xcodeproj/project.xcworkspace
+Xcode-iOS/Demos/Demos.xcodeproj/xcuserdata
+Xcode-iOS/Demos/Demos.xcodeproj/project.xcworkspace
 
 # for Visual C++
 Debug
@@ -34,6 +38,9 @@ Release
 *.user
 *.ncb
 *.suo
+
+# for Android
+android-project/local.properties
 
 sdl.pc
 test/autom4te*

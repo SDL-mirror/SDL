@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,7 +31,8 @@
 #include <locale.h>
 
 
-#define SDL_FORK_MESSAGEBOX 1
+#define SDL_FORK_MESSAGEBOX 0
+#define SDL_SET_LOCALE      0
 
 #if SDL_FORK_MESSAGEBOX
 #include <sys/types.h>
@@ -50,11 +51,11 @@ static const char g_MessageBoxFontLatin1[] = "-*-*-medium-r-normal--0-120-*-*-p-
 static const char g_MessageBoxFont[] = "-*-*-*-*-*-*-*-*-*-*-*-*-*-*";
 
 static const SDL_MessageBoxColor g_default_colors[ SDL_MESSAGEBOX_COLOR_MAX ] = {
-    { 56,  54,  53  }, // SDL_MESSAGEBOX_COLOR_BACKGROUND,
-    { 209, 207, 205 }, // SDL_MESSAGEBOX_COLOR_TEXT,
-    { 140, 135, 129 }, // SDL_MESSAGEBOX_COLOR_BUTTON_BORDER,
-    { 105, 102, 99  }, // SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND,
-    { 205, 202, 53  }, // SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED,
+    { 56,  54,  53  }, /* SDL_MESSAGEBOX_COLOR_BACKGROUND, */
+    { 209, 207, 205 }, /* SDL_MESSAGEBOX_COLOR_TEXT, */
+    { 140, 135, 129 }, /* SDL_MESSAGEBOX_COLOR_BUTTON_BORDER, */
+    { 105, 102, 99  }, /* SDL_MESSAGEBOX_COLOR_BUTTON_BACKGROUND, */
+    { 205, 202, 53  }, /* SDL_MESSAGEBOX_COLOR_BUTTON_SELECTED, */
 };
 
 #define SDL_MAKE_RGB( _r, _g, _b )  ( ( ( Uint32 )( _r ) << 16 ) | \
@@ -645,13 +646,16 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int ret;
     SDL_MessageBoxDataX11 data;
+#if SDL_SET_LOCALE
     char *origlocale;
+#endif
 
     SDL_zero(data);
 
     if ( !SDL_X11_LoadSymbols() )
         return -1;
 
+#if SDL_SET_LOCALE
     origlocale = setlocale(LC_ALL, NULL);
     if (origlocale != NULL) {
         origlocale = SDL_strdup(origlocale);
@@ -661,6 +665,7 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         }
         setlocale(LC_ALL, "");
     }
+#endif
 
     /* This code could get called from multiple threads maybe? */
     XInitThreads();
@@ -682,10 +687,12 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 
     X11_MessageBoxShutdown( &data );
 
+#if SDL_SET_LOCALE
     if (origlocale) {
         setlocale(LC_ALL, origlocale);
         SDL_free(origlocale);
     }
+#endif
 
     return ret;
 }
@@ -699,6 +706,9 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     pid_t pid;
     int fds[2];
     int status = 0;
+
+	/* Need to flush here in case someone has turned grab off and it hasn't gone through yet, etc. */
+	XFlush(data->display);
 
     if (pipe(fds) == -1) {
         return X11_ShowMessageBoxImpl(messageboxdata, buttonid); /* oh well. */

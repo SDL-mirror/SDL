@@ -20,13 +20,13 @@
 #include "SDL_ttf.h"
 #endif
 
-#include "common.h"
+#include "SDL_test_common.h"
 
 #define DEFAULT_PTSIZE  30
 #define DEFAULT_FONT    "/System/Library/Fonts/华文细黑.ttf"
 #define MAX_TEXT_LENGTH 256
 
-static CommonState *state;
+static SDLTest_CommonState *state;
 static SDL_Rect textRect, markedRect;
 static SDL_Color lineColor = {0,0,0,0};
 static SDL_Color backColor = {255,255,255,0};
@@ -211,12 +211,12 @@ int main(int argc, char *argv[]) {
     const char *fontname = DEFAULT_FONT;
 
     /* Initialize test framework */
-    state = CommonCreateState(argv, SDL_INIT_VIDEO);
+    state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {
         return 1;
     }
     for (i = 1; i < argc;i++) {
-        CommonArg(state, i);
+        SDLTest_CommonArg(state, i);
     }
     for (argc--, argv++; argc > 0; argc--, argv++)
     {
@@ -239,7 +239,7 @@ int main(int argc, char *argv[]) {
         }
     }
     
-    if (!CommonInit(state)) {
+    if (!SDLTest_CommonInit(state)) {
         return 2;
     }
 
@@ -273,7 +273,7 @@ int main(int argc, char *argv[]) {
     while (!done) {
         /* Check for events */
         while (SDL_PollEvent(&event)) {
-            CommonEvent(state, &event, &done);
+            SDLTest_CommonEvent(state, &event, &done);
             switch(event.type) {
                 case SDL_KEYDOWN: {
                     switch (event.key.keysym.sym)
@@ -361,7 +361,7 @@ int main(int argc, char *argv[]) {
         }
     }
     CleanupVideo();
-    CommonQuit(state);
+    SDLTest_CommonQuit(state);
     return 0;
 }
 

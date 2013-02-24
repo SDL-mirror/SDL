@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -193,7 +193,7 @@ extern DECLSPEC void SDLCALL SDL_SetTextInputRect(SDL_Rect *rect);
  *  
  *  \sa SDL_IsScreenKeyboardShown()
  */
-extern DECLSPEC SDL_bool SDLCALL SDL_HasScreenKeyboardSupport();
+extern DECLSPEC SDL_bool SDLCALL SDL_HasScreenKeyboardSupport(void);
 
 /**
  *  \brief Returns whether the screen keyboard is shown for given window.

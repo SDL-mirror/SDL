@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -569,27 +569,29 @@ SDL_JoystickThread(void *_data)
 			}
 		}
 
-		// scan for any change in XInput devices
-		for ( userId = 0; userId < 4; userId++ )
+		if ( XINPUTGETCAPABILITIES )
 		{
-			XINPUT_CAPABILITIES	capabilities;
-			DWORD result;
-
-			if ( bOpenedXInputDevices[userId] == SDL_TRUE )
-				nCurrentOpenedXInputDevices++;
-
-			result = XINPUTGETCAPABILITIES( userId, XINPUT_FLAG_GAMEPAD, &capabilities );
-			if ( result == ERROR_SUCCESS )
+			// scan for any change in XInput devices
+			for ( userId = 0; userId < 4; userId++ )
 			{
-				bOpenedXInputDevices[userId] = SDL_TRUE;
-				nNewOpenedXInputDevices++;
-			}
-			else
-			{
-				bOpenedXInputDevices[userId] = SDL_FALSE;
+				XINPUT_CAPABILITIES	capabilities;
+				DWORD result;
+
+				if ( bOpenedXInputDevices[userId] == SDL_TRUE )
+					nCurrentOpenedXInputDevices++;
+
+				result = XINPUTGETCAPABILITIES( userId, XINPUT_FLAG_GAMEPAD, &capabilities );
+				if ( result == ERROR_SUCCESS )
+				{
+					bOpenedXInputDevices[userId] = SDL_TRUE;
+					nNewOpenedXInputDevices++;
+				}
+				else
+				{
+					bOpenedXInputDevices[userId] = SDL_FALSE;
+				}
 			}
 		}
-
 
 		if ( s_pKnownJoystickGUIDs && ( s_bWindowsDeviceChanged || nNewOpenedXInputDevices != nCurrentOpenedXInputDevices ) )
 		{

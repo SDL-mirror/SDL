@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>SDLtest</ProjectName>
+    <ProjectName>SDL2test</ProjectName>
     <ProjectGuid>{DA956FD3-E143-46F2-9FE5-C77BEBC56B1A}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -161,6 +161,8 @@
     <ClInclude Include="..\..\include\SDL_test_log.h" />
     <ClInclude Include="..\..\include\SDL_test_md5.h" />
     <ClInclude Include="..\..\include\SDL_test_random.h" />
+    <ClInclude Include="..\..\include\SDL_test_images.h" />
+    <ClInclude Include="..\..\include\SDL_test_compare.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\test\SDL_test_assert.c" />
@@ -172,6 +174,12 @@
     <ClCompile Include="..\..\src\test\SDL_test_log.c" />
     <ClCompile Include="..\..\src\test\SDL_test_md5.c" />
     <ClCompile Include="..\..\src\test\SDL_test_random.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_imageBlit.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_imageBlitBlend.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_imageFace.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_imagePrimitives.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_imagePrimitivesBlend.c" />
+    <ClCompile Include="..\..\src\test\SDL_test_compare.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

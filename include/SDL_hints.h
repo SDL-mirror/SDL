@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -202,6 +202,18 @@ extern "C" {
  *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
  */
 #define SDL_HINT_GAMECONTROLLERCONFIG "SDL_GAMECONTROLLERCONFIG"
+
+
+/**
+ *  \brief If set to 0 then never set the top most bit on a SDL Window, even if the video mode expects it.
+ *		This is a debugging aid for developers and not expected to be used by end users. The default is "1"
+ *
+ *  This variable can be set to the following values:
+ *    "0"       - don't allow topmost
+ *    "1"       - allow topmost
+ */
+#define SDL_HINT_ALLOW_TOPMOST "SDL_ALLOW_TOPMOST"
+
 
 
 /**

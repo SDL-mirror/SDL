@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2012 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -440,7 +440,7 @@ SDL_VideoInit(const char *driver_name)
     }
     if (driver_name != NULL) {
         for (i = 0; bootstrap[i]; ++i) {
-            if (SDL_strcasecmp(bootstrap[i]->name, driver_name) == 0) {
+            if (SDL_strncasecmp(bootstrap[i]->name, driver_name, SDL_strlen(driver_name)) == 0) {
                 video = bootstrap[i]->create(index);
                 break;
             }
@@ -584,6 +584,15 @@ SDL_AddVideoDisplay(const SDL_VideoDisplay * display)
         displays[index] = *display;
         displays[index].device = _this;
         _this->displays = displays;
+
+        if (display->name) {
+            displays[index].name = SDL_strdup(display->name);
+        } else {
+            char name[32];
+
+            SDL_itoa(index, name, 10);
+            displays[index].name = SDL_strdup(name);
+        }
     } else {
         SDL_OutOfMemory();
     }
@@ -613,6 +622,14 @@ SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 
     /* Couldn't find the display, just use index 0 */
     return 0;
+}
+
+const char *
+SDL_GetDisplayName(int displayIndex)
+{
+    CHECK_DISPLAY_INDEX(displayIndex, NULL);
+
+    return _this->displays[displayIndex].name;
 }
 
 int
@@ -917,7 +934,7 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
 }
 
 int
-SDL_GetWindowDisplay(SDL_Window * window)
+SDL_GetWindowDisplayIndex(SDL_Window * window)
 {
     int displayIndex;
     int i, dist;
@@ -979,7 +996,7 @@ SDL_GetWindowDisplay(SDL_Window * window)
 SDL_VideoDisplay *
 SDL_GetDisplayForWindow(SDL_Window *window)
 {
-    int displayIndex = SDL_GetWindowDisplay(window);
+    int displayIndex = SDL_GetWindowDisplayIndex(window);
     if (displayIndex >= 0) {
         return &_this->displays[displayIndex];
     } else {
@@ -1308,7 +1325,9 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 
     if ((window->flags & SDL_WINDOW_OPENGL) != (flags & SDL_WINDOW_OPENGL)) {
         if (flags & SDL_WINDOW_OPENGL) {
-            SDL_GL_LoadLibrary(NULL);
+            if (SDL_GL_LoadLibrary(NULL) < 0) {
+                return -1;
+            }
         } else {
             SDL_GL_UnloadLibrary();
         }
@@ -1621,6 +1640,45 @@ SDL_GetWindowMinimumSize(SDL_Window * window, int *min_w, int *min_h)
     if (_this && window && window->magic == &_this->window_magic) {
         *min_w = window->min_w;
         *min_h = window->min_h;
+    }
+}
+
+void
+SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
+{
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        window->max_w = max_w;
+        window->max_h = max_h;
+        if (_this->SetWindowMaximumSize) {
+            _this->SetWindowMaximumSize(_this, window);
+        }
+        /* Ensure that window is not larger than maximal size */
+        SDL_SetWindowSize(window, SDL_min(window->w, window->max_w), SDL_min(window->h, window->max_h));
+    }
+}
+
+void
+SDL_GetWindowMaximumSize(SDL_Window * window, int *max_w, int *max_h)
+{
+    int dummy;
+    
+    if (!max_w) {
+        max_w = &dummy;
+    }
+    if (!max_h) {
+        max_h = &dummy;
+    }
+    
+    *max_w = 0;
+    *max_h = 0;
+    
+    CHECK_WINDOW_MAGIC(window, );
+    
+    if (_this && window && window->magic == &_this->window_magic) {
+        *max_w = window->max_w;
+        *max_h = window->max_h;
     }
 }
 
@@ -2196,8 +2254,12 @@ SDL_VideoQuit(void)
         }
     }
     if (_this->displays) {
+        for (i = 0; i < _this->num_displays; ++i) {
+            SDL_free(_this->displays[i].name);
+        }
         SDL_free(_this->displays);
         _this->displays = NULL;
+        _this->num_displays = 0;
     }
     if (_this->clipboard_text) {
         SDL_free(_this->clipboard_text);
@@ -2932,40 +2994,51 @@ int
 SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int dummybutton;
+	int retval = -1;
+	SDL_bool relative_mode = SDL_GetRelativeMouseMode();
+	int show_cursor_prev = SDL_ShowCursor( 1 );
+
+	SDL_SetRelativeMouseMode( SDL_FALSE );
 
     if (!buttonid) {
         buttonid = &dummybutton;
     }
     if (_this && _this->ShowMessageBox) {
         if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
-            return 0;
+			retval = 0;
         }
     }
 
     /* It's completely fine to call this function before video is initialized */
 #if SDL_VIDEO_DRIVER_WINDOWS
-    if (WIN_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (WIN_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_COCOA
-    if (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_UIKIT
-    if (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 #if SDL_VIDEO_DRIVER_X11
-    if (X11_ShowMessageBox(messageboxdata, buttonid) == 0) {
-        return 0;
+    if ((retval == -1) && (X11_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+        retval = 0;
     }
 #endif
 
-    SDL_SetError("No message system available");
-    return -1;
+	SDL_ShowCursor( show_cursor_prev );
+	SDL_SetRelativeMouseMode( relative_mode );
+
+	if(retval == -1)
+	{
+		SDL_SetError("No message system available");
+	}
+    return retval;
 }
 
 int
@@ -2988,6 +3061,20 @@ SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, S
     button.text = "OK";
 
     return SDL_ShowMessageBox(&data, NULL);
+}
+
+SDL_bool
+SDL_ShouldAllowTopmost()
+{
+	const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
+	if (hint) {
+		if (*hint == '0') {
+			return SDL_FALSE;
+		} else {
+			return SDL_TRUE;
+		}
+	}
+	return SDL_TRUE;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

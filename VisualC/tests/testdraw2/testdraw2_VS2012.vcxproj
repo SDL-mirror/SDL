@@ -219,12 +219,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\test\common.c" />
     <ClCompile Include="..\..\..\test\testdraw2.c" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
     <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
+    <Library Include="..\..\SDLtest\$(Platform)\$(Configuration)\SDLtest.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
