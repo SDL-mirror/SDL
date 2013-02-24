@@ -89,7 +89,6 @@ HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
 HRESULT D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer);
 HRESULT D3D11_HandleDeviceLost(SDL_Renderer * renderer);
 
-// WinRT, TODO: fill in the Direct3D 11.1 renderer's max texture width and height
 extern "C" SDL_RenderDriver D3D11_RenderDriver = {
     D3D11_CreateRenderer,
     {
@@ -100,8 +99,8 @@ extern "C" SDL_RenderDriver D3D11_RenderDriver = {
             SDL_PIXELFORMAT_RGB888,
             SDL_PIXELFORMAT_ARGB8888
         },
-        0,                          // max_texture_width
-        0                           // max_texture_height
+        0,                          // max_texture_width: will be filled in later
+        0                           // max_texture_height: will be filled in later
     }
 };
 
@@ -339,6 +338,32 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     result = context.As(&data->d3dContext);
     if (FAILED(result)) {
         return result;
+    }
+
+    //
+    // Make note of the maximum texture size
+    // Max texture sizes are documented on MSDN, at:
+    // http://msdn.microsoft.com/en-us/library/windows/apps/ff476876.aspx
+    //
+    switch (data->d3dDevice->GetFeatureLevel()) {
+        case D3D_FEATURE_LEVEL_11_1:
+        case D3D_FEATURE_LEVEL_11_0:
+            renderer->info.max_texture_width = renderer->info.max_texture_height = 16384;
+            break;
+
+        case D3D_FEATURE_LEVEL_10_1:
+        case D3D_FEATURE_LEVEL_10_0:
+            renderer->info.max_texture_width = renderer->info.max_texture_height = 8192;
+            break;
+
+        case D3D_FEATURE_LEVEL_9_3:
+            renderer->info.max_texture_width = renderer->info.max_texture_height = 4096;
+            break;
+
+        case D3D_FEATURE_LEVEL_9_2:
+        case D3D_FEATURE_LEVEL_9_1:
+            renderer->info.max_texture_width = renderer->info.max_texture_height = 2048;
+            break;
     }
 
     //
