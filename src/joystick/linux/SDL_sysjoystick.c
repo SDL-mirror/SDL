@@ -62,7 +62,6 @@
 #include <libudev.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <unistd.h>
 
 /* we never link directly to libudev. */
 /* !!! FIXME: can we generalize this? ALSA, etc, do the same things. */
