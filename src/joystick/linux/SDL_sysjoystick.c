@@ -47,6 +47,11 @@
 #include "../../events/SDL_events_c.h"
 #endif
 
+/* This isn't defined in older Linux kernel headers */
+#ifndef SYN_DROPPED
+#define SYN_DROPPED 3
+#endif
+
 /*
  * !!! FIXME: move all the udev stuff to src/core/linux, so I can reuse it
  * !!! FIXME:  for audio hardware disconnects.
@@ -58,11 +63,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-/* This isn't defined in older Linux kernel headers */
-#ifndef SYN_DROPPED
-#define SYN_DROPPED 3
-#endif
 
 /* we never link directly to libudev. */
 /* !!! FIXME: can we generalize this? ALSA, etc, do the same things. */
