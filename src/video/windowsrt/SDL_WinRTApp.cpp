@@ -1,26 +1,28 @@
-﻿#include "SDLmain_WinRT_common.h"
-#include "SDL_WinRTApp.h"
+﻿
+#include <string>
+#include <unordered_map>
+#include <sstream>
+
 #include "ppltasks.h"
 
 extern "C" {
 #include "SDL_assert.h"
+#include "SDL_events.h"
+#include "SDL_hints.h"
+#include "SDL_log.h"
 #include "SDL_stdinc.h"
+#include "SDL_render.h"
 #include "../SDL_sysvideo.h"
+#include "../../SDL_hints_c.h"
+#include "../../events/scancodes_windows.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_windowevents_c.h"
-#include "../../events/scancodes_windows.h"
-#include "SDL_events.h"
-#include "SDL_log.h"
-#include "SDL_render.h"
 #include "../../render/SDL_sysrender.h"
-#include "SDL_hints.h"
-#include "../../SDL_hints_c.h"
 }
 
-#include <string>
-#include <unordered_map>
-#include <sstream>
+#include "SDL_winrtvideo.h"
+#include "SDL_WinRTApp.h"
 
 using namespace concurrency;
 using namespace std;

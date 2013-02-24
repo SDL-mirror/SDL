@@ -578,12 +578,6 @@
     <ClInclude Include="..\..\src\audio\xaudio2\SDL_xaudio2_winrthelpers.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\SDLmain_WinRT_common.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\DirectXHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\events\blank_cursor.h">
       <Filter>Source Files</Filter>
     </ClInclude>

@@ -321,12 +321,6 @@
     <ClInclude Include="..\..\src\video\SDL_sysvideo.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\DirectXHelper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\video\windowsrt\SDLmain_WinRT_common.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\video\windowsrt\SDL_WinRTApp.h">
       <Filter>Source Files</Filter>
     </ClInclude>

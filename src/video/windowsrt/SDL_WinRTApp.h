@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "SDLmain_WinRT_common.h"
-#include "SDL_winrtvideo.h"
+struct SDL_WindowData;
 
 ref class SDL_WinRTApp sealed : public Windows::ApplicationModel::Core::IFrameworkView
 {
