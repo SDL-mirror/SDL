@@ -431,7 +431,9 @@ void SDL_WinRTApp::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ a
 #endif
 
     if (m_sdlWindowData) {
-        SDL_SendMouseWheel(m_sdlWindowData->sdlWindow, 0, args->CurrentPoint->Properties->MouseWheelDelta);
+        // FIXME: This may need to accumulate deltas up to WHEEL_DELTA
+        short motion = args->CurrentPoint->Properties->MouseWheelDelta / WHEEL_DELTA;
+        SDL_SendMouseWheel(m_sdlWindowData->sdlWindow, 0, motion);
     }
 }
 
