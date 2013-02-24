@@ -1262,12 +1262,16 @@ D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     D3D11_RenderStartDrawOp(renderer);
     D3D11_RenderSetBlendMode(renderer, texture->blendMode);
 
-    // WinRT, TODO: get srcrect working in tandem with SDL_RenderCopy, etc.
+    float minu = (float) srcrect->x / texture->w;
+    float maxu = (float) (srcrect->x + srcrect->w) / texture->w;
+    float minv = (float) srcrect->y / texture->h;
+    float maxv = (float) (srcrect->y + srcrect->h) / texture->h;
+
     VertexPositionColor vertices[] = {
-        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(0.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(1.0f, 0.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
     };
     if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
         return -1;
