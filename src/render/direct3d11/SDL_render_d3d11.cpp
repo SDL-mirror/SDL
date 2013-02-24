@@ -94,7 +94,7 @@ extern "C" SDL_RenderDriver D3D11_RenderDriver = {
     D3D11_CreateRenderer,
     {
         "direct3d 11.1",
-        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),    // flags.  see SDL_RendererFlags
+        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),    // flags.  see SDL_RendererFlags
         2,                          // num_texture_formats
         {                           // texture_formats
             SDL_PIXELFORMAT_RGB888,
