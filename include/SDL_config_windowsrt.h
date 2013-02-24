@@ -104,7 +104,7 @@ typedef unsigned int uintptr_t;
 #define HAVE_STRCHR 1
 #define HAVE_STRRCHR 1
 #define HAVE_STRSTR 1
-#define HAVE_ITOA 1
+//#define HAVE_ITOA 1   // TODO, WinRT: consider using _itoa_s instead
 //#define HAVE__LTOA 1	// TODO, WinRT: consider using _ltoa_s instead
 //#define HAVE__ULTOA 1	// TODO, WinRT: consider using _ultoa_s instead
 #define HAVE_STRTOL 1
@@ -134,6 +134,7 @@ typedef unsigned int uintptr_t;
 #define HAVE_SIN 1
 #define HAVE_SINF 1
 #define HAVE_SQRT 1
+#define HAVE__FSEEKI64 1
 
 /* Enable various audio drivers */
 #define SDL_AUDIO_DRIVER_XAUDIO2	1

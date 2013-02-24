@@ -325,6 +325,10 @@ stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
     if (fseeko(context->hidden.stdio.fp, (off_t)offset, whence) == 0) {
         return ftello(context->hidden.stdio.fp);
     }
+#elif defined(HAVE__FSEEKI64)
+    if (_fseeki64(context->hidden.stdio.fp, offset, whence) == 0) {
+        return _ftelli64(context->hidden.stdio.fp);
+    }
 #else
     if (fseek(context->hidden.stdio.fp, offset, whence) == 0) {
         return (ftell(context->hidden.stdio.fp));
