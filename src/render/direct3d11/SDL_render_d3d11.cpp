@@ -89,18 +89,22 @@ HRESULT D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer);
 HRESULT D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer);
 HRESULT D3D11_HandleDeviceLost(SDL_Renderer * renderer);
 
-extern "C" {
-    SDL_RenderDriver D3D11_RenderDriver = {
+// WinRT, TODO: fill in the Direct3D 11.1 renderer's max texture width and height
+extern "C" SDL_RenderDriver D3D11_RenderDriver = {
     D3D11_CreateRenderer,
     {
-     "direct3d 11.1",
-     (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),
-     1,
-     {SDL_PIXELFORMAT_RGB888},
-     0,
-     0}
-    };
-}
+        "direct3d 11.1",
+        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE),    // flags.  see SDL_RendererFlags
+        2,                          // num_texture_formats
+        {                           // texture_formats
+            SDL_PIXELFORMAT_RGB888,
+            SDL_PIXELFORMAT_ARGB8888
+        },
+        0,                          // max_texture_width
+        0                           // max_texture_height
+    }
+};
+
 
 //typedef struct
 //{
@@ -782,6 +786,20 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
     D3D11_TextureData *textureData;
     HRESULT result;
+    DXGI_FORMAT textureFormat = DXGI_FORMAT_UNKNOWN;
+
+    switch (texture->format) {
+        case SDL_PIXELFORMAT_ARGB8888:
+            textureFormat = DXGI_FORMAT_B8G8R8A8_UNORM;
+            break;
+        case SDL_PIXELFORMAT_RGB888:
+            textureFormat = DXGI_FORMAT_B8G8R8X8_UNORM;
+            break;
+        default:
+            SDL_SetError("%s, An unsupported SDL pixel format (0x%x) was specified",
+                __FUNCTION__, texture->format);
+            return -1;
+    }
 
     textureData = new D3D11_TextureData;
     if (!textureData) {
@@ -799,7 +817,7 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     textureDesc.Height = texture->h;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_B8G8R8X8_UNORM;
+    textureDesc.Format = textureFormat;
     textureDesc.SampleDesc.Count = 1;
     textureDesc.SampleDesc.Quality = 0;
     textureDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -1099,8 +1117,13 @@ D3D11_RenderStartDrawOp(SDL_Renderer * renderer)
 		0,
 		0
 		);
+}
 
-    switch (renderer->blendMode) {
+static void
+D3D11_RenderSetBlendMode(SDL_Renderer * renderer, SDL_BlendMode blendMode)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    switch (blendMode) {
         case SDL_BLENDMODE_BLEND:
             rendererData->d3dContext->OMSetBlendState(rendererData->blendModeBlend.Get(), 0, 0xFFFFFFFF);
             break;
@@ -1168,6 +1191,7 @@ D3D11_RenderFillRects(SDL_Renderer * renderer,
 
     for (int i = 0; i < count; ++i) {
         D3D11_RenderStartDrawOp(renderer);
+        D3D11_RenderSetBlendMode(renderer, renderer->blendMode);
 
 #if 0
         // Set colors for the test pattern:
@@ -1211,6 +1235,7 @@ D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
 
     D3D11_RenderStartDrawOp(renderer);
+    D3D11_RenderSetBlendMode(renderer, texture->blendMode);
 
     // WinRT, TODO: get srcrect working in tandem with SDL_RenderCopy, etc.
     VertexPositionColor vertices[] = {
