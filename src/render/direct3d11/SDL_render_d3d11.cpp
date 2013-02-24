@@ -345,7 +345,7 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     // Load in SDL's one and only vertex shader:
     //
     vector<char> fileData;
-    if (!D3D11_ReadShaderContents(L"SimpleVertexShader.cso", fileData)) {
+    if (!D3D11_ReadShaderContents(L"SDL_D3D11_VertexShader_Default.cso", fileData)) {
         SDL_SetError("Unable to open SDL's vertex shader file.");
         return E_FAIL;
     }
