@@ -96,7 +96,7 @@ const char *s_ControllerMappings [] =
 	"5e040000000000008e02000000000000,X360 Controller,a:b0,b:b1,y:b3,x:b2,start:b8,guide:b10,back:b9,dpup:b11,dpleft:b13,dpdown:b12,dpright:b14,leftshoulder:b4,rightshoulder:b5,leftstick:b6,rightstick:b7,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5",
 	"4c050000000000006802000000000000,PS3 Controller,a:b14,b:b13,x:b12,y:b15,start:b3,guide:b16,back:b0,leftstick:b1,rightstick:b2,leftshoulder:b10,rightshoulder:b11,dpup:b4,dpleft:b6,dpdown:b7,dpright:b5,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b8,righttrigger:b9",
 #elif defined(__LINUX__)
-	
+	"030000005e0400008e02000014010000,X360 Controller,a:b0,b:b1,y:b3,x:b2,start:b7,guide:b8,back:b6,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b9,rightstick:b10,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5",
 #endif
 	NULL
 };
