@@ -435,7 +435,7 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 		}
 		else if ( axis != SDL_CONTROLLER_AXIS_INVALID )
 		{
-			SDL_assert( !"Support has as axis" );
+			SDL_assert( !"Support hat as axis" );
 		}
 		else
 		{
