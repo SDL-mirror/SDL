@@ -824,6 +824,16 @@ SDL_GameControllerOpen(int device_index)
     return (gamecontroller);
 }
 
+/*
+ * Manually pump for controller updates.
+ */
+void
+SDL_GameControllerUpdate(void)
+{
+    /* Just for API completeness; the joystick API does all the work. */
+    SDL_JoystickUpdate();
+}
+
 
 /*
  * Get the current state of an axis control on a controller
