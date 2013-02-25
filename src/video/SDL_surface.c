@@ -935,6 +935,16 @@ int SDL_ConvertPixels(int width, int height,
     SDL_Rect rect;
     void *nonconst_src = (void *) src;
 
+    /* Check to make sure we are bliting somewhere, so we don't crash */
+    if (!dst) {
+        SDL_InvalidParamError("dst");
+        return -1;
+    }
+    if (!dst_pitch) {
+        SDL_InvalidParamError("dst_pitch");
+        return -1;
+    }
+
     /* Fast path for same format copy */
     if (src_format == dst_format) {
         int bpp;
