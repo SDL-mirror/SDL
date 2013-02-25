@@ -88,19 +88,18 @@ ControllerButtonName(const SDL_CONTROLLER_BUTTON button)
 void
 WatchGameController(SDL_GameController * gamecontroller)
 {
-    const char *controllername = gamecontroller ? SDL_GameControllerName(gamecontroller) : "???";
+    const char *name = SDL_GameControllerName(gamecontroller);
     const char *basetitle = "Game Controller Test: ";
-    const size_t titlelen = SDL_strlen(basetitle) + SDL_strlen(controllername) + 1;
+    const size_t titlelen = SDL_strlen(basetitle) + SDL_strlen(name) + 1;
     char *title = SDL_malloc(titlelen);
     SDL_Window *window = NULL;
     SDL_Renderer *screen = NULL;
-    const char *name = NULL;
     int done = 0;
     SDL_Event event;
     int i;
 
     if (title) {
-        SDL_snprintf(title, titlelen, "%s%s", basetitle, controllername);
+        SDL_snprintf(title, titlelen, "%s%s", basetitle, name);
     }
 
     /* Create a window to display controller axis position */
@@ -125,7 +124,6 @@ WatchGameController(SDL_GameController * gamecontroller)
 	SDL_RaiseWindow(window);
 
     /* Print info about the controller we are watching */
-    name = SDL_GameControllerName(gamecontroller);
     printf("Watching controller %s\n",  name ? name : "Unknown Controller");
     
     /* Loop, getting controller events! */
