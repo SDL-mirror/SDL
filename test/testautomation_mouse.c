@@ -413,13 +413,13 @@ mouse_getSetRelativeMouseMode(void *arg)
 #define MOUSE_TESTWINDOW_HEIGHT 200
 
 /**
- * Create s test window
+ * Creates a test window
  */
-SDL_Window *_createTestWindow()
+SDL_Window *_createMouseSuiteTestWindow()
 {
   int posX = 100, posY = 100, width = MOUSE_TESTWINDOW_WIDTH, height = MOUSE_TESTWINDOW_HEIGHT;
   SDL_Window *window;
-  window = SDL_CreateWindow("mouse_createTestWindow", posX, posY, width, height, 0);
+  window = SDL_CreateWindow("mouse_createMouseSuiteTestWindow", posX, posY, width, height, 0);
   SDLTest_AssertPass("SDL_CreateWindow()");
   SDLTest_AssertCheck(window != NULL, "Check SDL_CreateWindow result");
   return window;
@@ -428,12 +428,12 @@ SDL_Window *_createTestWindow()
 /*
  * Destroy test window  
  */
-void _destroyTestWindow(SDL_Window *window)
+void _destroyMouseSuiteTestWindow(SDL_Window *window)
 {
   if (window != NULL) {  
      SDL_DestroyWindow(window);
      window = NULL;
-     SDLTest_AssertPass("SDL_DestroyWindow");
+     SDLTest_AssertPass("SDL_DestroyWindow()");
   }
 }
 
@@ -453,7 +453,7 @@ mouse_warpMouseInWindow(void *arg)
 	SDL_Window *window;
 	
 	/* Create test window */
-	window = _createTestWindow();
+	window = _createMouseSuiteTestWindow();
 	if (window == NULL) return TEST_ABORTED;
 
 	/* Mouse to random position inside window */	
@@ -482,7 +482,7 @@ mouse_warpMouseInWindow(void *arg)
 	
 
         /* Clean up test window */	
-	_destroyTestWindow(window);
+	_destroyMouseSuiteTestWindow(window);
 	
 	return TEST_COMPLETED;
 }
@@ -505,7 +505,7 @@ mouse_getMouseFocus(void *arg)
 	SDLTest_AssertPass("SDL_GetMouseFocus()");
 
         /* Create test window */	
-	window = _createTestWindow();
+	window = _createMouseSuiteTestWindow();
 	if (window == NULL) return TEST_ABORTED;
 
 	/* Mouse to random position inside window */	
@@ -531,7 +531,7 @@ mouse_getMouseFocus(void *arg)
 	SDLTest_AssertPass("SDL_WarpMouseInWindow(...,%i,%i)", x, y);
 
         /* Clean up test window */	
-	_destroyTestWindow(window);
+	_destroyMouseSuiteTestWindow(window);
 
 	/* Pump events to update focus state */
 	SDL_PumpEvents();
