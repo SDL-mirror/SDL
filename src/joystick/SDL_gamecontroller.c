@@ -64,12 +64,12 @@ struct _SDL_ControllerMapping
 	struct _SDL_HatMapping hatasbutton[SDL_CONTROLLER_BUTTON_MAX];
 
 	// reverse mapping, joystick indices to buttons
-	SDL_CONTROLLER_AXIS raxes[k_nMaxReverseEntries];
-	SDL_CONTROLLER_AXIS rbuttonasaxis[k_nMaxReverseEntries];
+	SDL_GameControllerAxis raxes[k_nMaxReverseEntries];
+	SDL_GameControllerAxis rbuttonasaxis[k_nMaxReverseEntries];
 
-	SDL_CONTROLLER_BUTTON rbuttons[k_nMaxReverseEntries];
-	SDL_CONTROLLER_BUTTON raxesasbutton[k_nMaxReverseEntries];
-	SDL_CONTROLLER_BUTTON rhatasbutton[k_nMaxHatEntries];
+	SDL_GameControllerButton rbuttons[k_nMaxReverseEntries];
+	SDL_GameControllerButton raxesasbutton[k_nMaxReverseEntries];
+	SDL_GameControllerButton rhatasbutton[k_nMaxHatEntries];
 
 };
 
@@ -118,8 +118,8 @@ struct _SDL_GameController
 };
 
 
-int SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLER_AXIS axis, Sint16 value);
-int	SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button, Uint8 state);
+int SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_GameControllerAxis axis, Sint16 value);
+int	SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_GameControllerButton button, Uint8 state);
 
 /*
  * Event filter to fire controller events from joystick ones
@@ -296,7 +296,7 @@ ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 /*
  * convert a string to its enum equivalent
  */
-SDL_CONTROLLER_AXIS SDL_GameControllerGetAxisFromString( const char *pchString )
+SDL_GameControllerAxis SDL_GameControllerGetAxisFromString( const char *pchString )
 {
 	if ( !pchString || !pchString[0] )
 		return SDL_CONTROLLER_AXIS_INVALID;
@@ -321,7 +321,7 @@ SDL_CONTROLLER_AXIS SDL_GameControllerGetAxisFromString( const char *pchString )
 /*
  * convert a string to its enum equivalent
  */
-SDL_CONTROLLER_BUTTON SDL_GameControllerGetButtonFromString( const char *pchString )
+SDL_GameControllerButton SDL_GameControllerGetButtonFromString( const char *pchString )
 {
 	if ( !pchString || !pchString[0] )
 		return SDL_CONTROLLER_BUTTON_INVALID;
@@ -367,8 +367,8 @@ SDL_CONTROLLER_BUTTON SDL_GameControllerGetButtonFromString( const char *pchStri
 void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char *szJoystickButton, struct _SDL_ControllerMapping *pMapping )
 {
 	int iSDLButton = 0;
-	SDL_CONTROLLER_BUTTON button;
-	SDL_CONTROLLER_AXIS axis;
+	SDL_GameControllerButton button;
+	SDL_GameControllerAxis axis;
 	button = SDL_GameControllerGetButtonFromString( szGameButton );
 	axis = SDL_GameControllerGetAxisFromString( szGameButton );
 	iSDLButton = SDL_atoi( &szJoystickButton[1] );
@@ -829,7 +829,7 @@ SDL_GameControllerOpen(int device_index)
  * Get the current state of an axis control on a controller
  */
 Sint16
-SDL_GameControllerGetAxis(SDL_GameController * gamecontroller, SDL_CONTROLLER_AXIS axis)
+SDL_GameControllerGetAxis(SDL_GameController * gamecontroller, SDL_GameControllerAxis axis)
 {
 	if ( !gamecontroller )
 		return 0;
@@ -854,7 +854,7 @@ SDL_GameControllerGetAxis(SDL_GameController * gamecontroller, SDL_CONTROLLER_AX
  * Get the current state of a button on a controller
  */
 Uint8
-SDL_GameControllerGetButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button)
+SDL_GameControllerGetButton(SDL_GameController * gamecontroller, SDL_GameControllerButton button)
 {
 	if ( !gamecontroller )
 		return 0;
@@ -925,7 +925,7 @@ SDL_Joystick *SDL_GameControllerGetJoystick(SDL_GameController * gamecontroller)
 /**
  *  get the sdl joystick layer binding for this controller axi mapping
  */
-SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis( SDL_GameController * gamecontroller, SDL_CONTROLLER_AXIS axis )
+SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis(SDL_GameController * gamecontroller, SDL_GameControllerAxis axis)
 {
 	SDL_GameControllerButtonBind bind;
 	SDL_memset( &bind, 0x0, sizeof(bind) );
@@ -951,7 +951,7 @@ SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis( SDL_GameControlle
 /**
  *  get the sdl joystick layer binding for this controller button mapping
  */
-SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton( SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button )
+SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton(SDL_GameController * gamecontroller, SDL_GameControllerButton button)
 {
 	SDL_GameControllerButtonBind bind;
 	SDL_memset( &bind, 0x0, sizeof(bind) );
@@ -1053,7 +1053,7 @@ SDL_GameControllerQuit(void)
  * Event filter to transform joystick events into appropriate game controller ones
  */
 int
-SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLER_AXIS axis, Sint16 value)
+SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_GameControllerAxis axis, Sint16 value)
 {
 	int posted;
 
@@ -1077,7 +1077,7 @@ SDL_PrivateGameControllerAxis(SDL_GameController * gamecontroller, SDL_CONTROLLE
  * Event filter to transform joystick events into appropriate game controller ones
  */
 int
-SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_CONTROLLER_BUTTON button, Uint8 state)
+SDL_PrivateGameControllerButton(SDL_GameController * gamecontroller, SDL_GameControllerButton button, Uint8 state)
 {
     int posted;
 #if !SDL_EVENTS_DISABLED

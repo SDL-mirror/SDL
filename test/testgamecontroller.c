@@ -41,7 +41,7 @@ DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
 }
 
 static const char *
-ControllerAxisName(const SDL_CONTROLLER_AXIS axis)
+ControllerAxisName(const SDL_GameControllerAxis axis)
 {
     switch (axis)
     {
@@ -59,7 +59,7 @@ ControllerAxisName(const SDL_CONTROLLER_AXIS axis)
 }
 
 static const char *
-ControllerButtonName(const SDL_CONTROLLER_BUTTON button)
+ControllerButtonName(const SDL_GameControllerButton button)
 {
     switch (button)
     {

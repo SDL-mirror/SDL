@@ -59,7 +59,8 @@ typedef enum
 	SDL_CONTROLLER_BINDTYPE_BUTTON,
 	SDL_CONTROLLER_BINDTYPE_AXIS,
 	SDL_CONTROLLER_BINDTYPE_HAT
-} SDL_CONTROLLER_BINDTYPE;
+} SDL_GameControllerBindType;
+
 /**
  *  get the sdl joystick layer binding for this controller button/axis mapping
  */
@@ -71,7 +72,7 @@ struct _SDL_GameControllerHatBind
 
 typedef struct _SDL_GameControllerButtonBind
 {
-	SDL_CONTROLLER_BINDTYPE m_eBindType;
+	SDL_GameControllerBindType m_eBindType;
 	union
 	{
 		int button;
@@ -172,19 +173,19 @@ typedef enum
 	SDL_CONTROLLER_AXIS_TRIGGERLEFT,
 	SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
 	SDL_CONTROLLER_AXIS_MAX
-} SDL_CONTROLLER_AXIS;
+} SDL_GameControllerAxis;
 
 /**
  *  turn this string into a axis mapping
  */
-extern DECLSPEC SDL_CONTROLLER_AXIS SDLCALL SDL_GameControllerGetAxisFromString(const char *pchString);
+extern DECLSPEC SDL_GameControllerAxis SDLCALL SDL_GameControllerGetAxisFromString(const char *pchString);
 
 /**
  *  get the sdl joystick layer binding for this controller button mapping
  */
 extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
 SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
-                                 SDL_CONTROLLER_AXIS button);
+                                 SDL_GameControllerAxis axis);
 
 /**
  *  Get the current state of an axis control on a game controller.
@@ -195,7 +196,7 @@ SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
  */
 extern DECLSPEC Sint16 SDLCALL
 SDL_GameControllerGetAxis(SDL_GameController *gamecontroller,
-                          SDL_CONTROLLER_AXIS axis);
+                          SDL_GameControllerAxis axis);
 
 /**
  *  The list of buttons available from a controller
@@ -219,12 +220,12 @@ typedef enum
 	SDL_CONTROLLER_BUTTON_DPAD_LEFT,
 	SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
 	SDL_CONTROLLER_BUTTON_MAX
-} SDL_CONTROLLER_BUTTON;
+} SDL_GameControllerButton;
 
 /**
  *  turn this string into a button mapping
  */
-extern DECLSPEC SDL_CONTROLLER_BUTTON SDLCALL SDL_GameControllerGetButtonFromString(const char *pchString);
+extern DECLSPEC SDL_GameControllerButton SDLCALL SDL_GameControllerGetButtonFromString(const char *pchString);
 
 
 /**
@@ -232,7 +233,7 @@ extern DECLSPEC SDL_CONTROLLER_BUTTON SDLCALL SDL_GameControllerGetButtonFromStr
  */
 extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
 SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,
-                                   SDL_CONTROLLER_BUTTON button);
+                                   SDL_GameControllerButton button);
 
 
 /**
@@ -241,7 +242,7 @@ SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,
  *  The button indices start at index 0.
  */
 extern DECLSPEC Uint8 SDLCALL SDL_GameControllerGetButton(SDL_GameController *gamecontroller,
-                                                          SDL_CONTROLLER_BUTTON button);
+                                                          SDL_GameControllerButton button);
 
 /**
  *  Close a controller previously opened with SDL_GameControllerOpen().

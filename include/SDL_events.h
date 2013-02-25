@@ -314,7 +314,7 @@ typedef struct SDL_ControllerAxisEvent
     Uint32 type;        /**< ::SDL_CONTROLLERAXISMOTION */
     Uint32 timestamp;
     Uint8 which;        /**< The joystick instance id */
-    SDL_CONTROLLER_AXIS axis;         /**< The joystick axis index */
+    SDL_GameControllerAxis axis;         /**< The joystick axis index */
     int value;          /**< The axis value (range: -32768 to 32767) */
 } SDL_ControllerAxisEvent;
 
@@ -327,7 +327,7 @@ typedef struct SDL_ControllerButtonEvent
     Uint32 type;        /**< ::SDL_CONTROLLERBUTTONDOWN or ::SDL_CONTROLLERBUTTONUP */
     Uint32 timestamp;
     Uint8 which;        /**< The joystick instance id */
-    SDL_CONTROLLER_BUTTON button;       /**< The joystick button index */
+    SDL_GameControllerButton button;       /**< The joystick button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
 } SDL_ControllerButtonEvent;
 
