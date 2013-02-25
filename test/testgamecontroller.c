@@ -40,9 +40,58 @@ DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
     SDL_RenderFillRect(r, &area);
 }
 
+static const char *
+ControllerAxisName(const SDL_CONTROLLER_AXIS axis)
+{
+    switch (axis)
+    {
+        #define AXIS_CASE(ax) case SDL_CONTROLLER_AXIS_##ax: return #ax
+        AXIS_CASE(INVALID);
+        AXIS_CASE(LEFTX);
+        AXIS_CASE(LEFTY);
+        AXIS_CASE(RIGHTX);
+        AXIS_CASE(RIGHTY);
+        AXIS_CASE(TRIGGERLEFT);
+        AXIS_CASE(TRIGGERRIGHT);
+        #undef AXIS_CASE
+        default: return "???";
+    }
+}
+
+static const char *
+ControllerButtonName(const SDL_CONTROLLER_BUTTON button)
+{
+    switch (button)
+    {
+        #define BUTTON_CASE(btn) case SDL_CONTROLLER_BUTTON_##btn: return #btn
+        BUTTON_CASE(INVALID);
+        BUTTON_CASE(A);
+        BUTTON_CASE(B);
+        BUTTON_CASE(X);
+        BUTTON_CASE(Y);
+        BUTTON_CASE(BACK);
+        BUTTON_CASE(GUIDE);
+        BUTTON_CASE(START);
+        BUTTON_CASE(LEFTSTICK);
+        BUTTON_CASE(RIGHTSTICK);
+        BUTTON_CASE(LEFTSHOULDER);
+        BUTTON_CASE(RIGHTSHOULDER);
+        BUTTON_CASE(DPAD_UP);
+        BUTTON_CASE(DPAD_DOWN);
+        BUTTON_CASE(DPAD_LEFT);
+        BUTTON_CASE(DPAD_RIGHT);
+        #undef BUTTON_CASE
+        default: return "???";
+    }
+}
+
 void
 WatchGameController(SDL_GameController * gamecontroller)
 {
+    const char *controllername = gamecontroller ? SDL_GameControllerName(gamecontroller) : "???";
+    const char *basetitle = "Game Controller Test: ";
+    const size_t titlelen = SDL_strlen(basetitle) + SDL_strlen(controllername) + 1;
+    char *title = SDL_malloc(titlelen);
     SDL_Window *window = NULL;
     SDL_Renderer *screen = NULL;
     const char *name = NULL;
@@ -50,8 +99,12 @@ WatchGameController(SDL_GameController * gamecontroller)
     SDL_Event event;
     int i;
 
+    if (title) {
+        SDL_snprintf(title, titlelen, "%s%s", basetitle, controllername);
+    }
+
     /* Create a window to display controller axis position */
-    window = SDL_CreateWindow("Game Controller Test", SDL_WINDOWPOS_CENTERED,
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
                               SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
@@ -84,17 +137,21 @@ WatchGameController(SDL_GameController * gamecontroller)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_CONTROLLERAXISMOTION:
-                printf("Controller %d axis %d value: %d\n",
+                printf("Controller %d axis %d ('%s') value: %d\n",
                        event.caxis.which,
-                       event.caxis.axis, event.caxis.value);
+                       event.caxis.axis,
+                       ControllerAxisName(event.caxis.axis),
+                       event.caxis.value);
                 break;
             case SDL_CONTROLLERBUTTONDOWN:
-                printf("Controller %d button %d down\n",
-                       event.cbutton.which, event.cbutton.button);
+                printf("Controller %d button %d ('%s') down\n",
+                       event.cbutton.which, event.cbutton.button,
+                       ControllerButtonName(event.cbutton.button));
                 break;
             case SDL_CONTROLLERBUTTONUP:
-                printf("Controller %d button %d up\n",
-                       event.cbutton.which, event.cbutton.button);
+                printf("Controller %d button %d ('%s') up\n",
+                       event.cbutton.which, event.cbutton.button,
+                       ControllerButtonName(event.cbutton.button));
                 break;
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym != SDLK_ESCAPE) {
@@ -103,7 +160,7 @@ WatchGameController(SDL_GameController * gamecontroller)
                 /* Fall through to signal quit */
             case SDL_QUIT:
                 done = 1;
-				s_ForceQuit = SDL_TRUE;
+                s_ForceQuit = SDL_TRUE;
                 break;
             default:
                 break;
