@@ -105,10 +105,12 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
 
     /* Initialize the timer subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_TIMER)) {
+    if ((flags & SDL_INIT_TIMER) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_TIMER)) {
 #if !SDL_TIMERS_DISABLED
-        if (SDL_TimerInit() < 0) {
-            return (-1);
+            if (SDL_TimerInit() < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_TIMER);
 #else
@@ -118,10 +120,12 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the video/event subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_VIDEO)) {
+    if ((flags & SDL_INIT_VIDEO) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_VIDEO)) {
 #if !SDL_VIDEO_DISABLED
-        if (SDL_VideoInit(NULL) < 0) {
-            return (-1);
+            if (SDL_VideoInit(NULL) < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_VIDEO);
 #else
@@ -131,10 +135,12 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the audio subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_AUDIO)) {
+    if ((flags & SDL_INIT_AUDIO) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_AUDIO)) {
 #if !SDL_AUDIO_DISABLED
-        if (SDL_AudioInit(NULL) < 0) {
-            return (-1);
+            if (SDL_AudioInit(NULL) < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_AUDIO);
 #else
@@ -149,10 +155,12 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the joystick subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_JOYSTICK)) {
+    if ((flags & SDL_INIT_JOYSTICK) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_JOYSTICK)) {
 #if !SDL_JOYSTICK_DISABLED
-        if (SDL_JoystickInit() < 0) {
-            return (-1);
+           if (SDL_JoystickInit() < 0) {
+               return (-1);
+           }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_JOYSTICK);
 #else
@@ -161,10 +169,12 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
     }
 
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_GAMECONTROLLER)) {
+    if ((flags & SDL_INIT_GAMECONTROLLER) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_GAMECONTROLLER)) {
 #if !SDL_JOYSTICK_DISABLED
-        if (SDL_GameControllerInit() < 0) {
-            return (-1);
+            if (SDL_GameControllerInit() < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_GAMECONTROLLER);
 #else
@@ -174,10 +184,12 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the haptic subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_HAPTIC)) {
+    if ((flags & SDL_INIT_HAPTIC) ){
+        if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_HAPTIC)) {
 #if !SDL_HAPTIC_DISABLED
-        if (SDL_HapticInit() < 0) {
-            return (-1);
+            if (SDL_HapticInit() < 0) {
+             return (-1);
+         }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_HAPTIC);
 #else
