@@ -1258,6 +1258,8 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
             case SDL_PIXELFORMAT_RGB888:
                 sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
                 break;
+            default:
+                return -1;
         }
     }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
@@ -1424,6 +1426,8 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
             case SDL_PIXELFORMAT_RGB888:
                 sourceType = GLES2_IMAGESOURCE_TEXTURE_RGB;
                 break;
+            default:
+                return -1;
         }
     }
     if (GLES2_SelectProgram(renderer, sourceType, blendMode) < 0)
