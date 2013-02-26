@@ -105,6 +105,126 @@ RemapVKEY(WPARAM wParam, LPARAM lParam)
     return wParam;
 }
 
+static SDL_Scancode 
+WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_map )
+{
+	SDL_Scancode code;
+	char bIsExtended;
+	int nScanCode = ( lParam >> 16 ) & 0xFF;
+
+	if ( nScanCode == 0 )
+	{
+		switch( wParam )
+		{
+		case VK_CLEAR: return SDL_SCANCODE_CLEAR;
+		case VK_MODECHANGE: return SDL_SCANCODE_MODE;
+		case VK_SELECT: return SDL_SCANCODE_SELECT;
+		case VK_EXECUTE: return SDL_SCANCODE_EXECUTE;
+		case VK_HELP: return SDL_SCANCODE_HELP;
+
+		case VK_F13: return SDL_SCANCODE_F13;
+		case VK_F14: return SDL_SCANCODE_F14;
+		case VK_F15: return SDL_SCANCODE_F15;
+		case VK_F16: return SDL_SCANCODE_F16;
+		case VK_F17: return SDL_SCANCODE_F17;
+		case VK_F18: return SDL_SCANCODE_F18;
+		case VK_F19: return SDL_SCANCODE_F19;
+		case VK_F20: return SDL_SCANCODE_F20;
+		case VK_F21: return SDL_SCANCODE_F21;
+		case VK_F22: return SDL_SCANCODE_F22;
+		case VK_F23: return SDL_SCANCODE_F23;
+		case VK_F24: return SDL_SCANCODE_F24;
+
+		case VK_OEM_NEC_EQUAL: return SDL_SCANCODE_KP_EQUALS;
+		case VK_BROWSER_BACK: return SDL_SCANCODE_AC_BACK;
+		case VK_BROWSER_FORWARD: return SDL_SCANCODE_AC_FORWARD;
+		case VK_BROWSER_REFRESH: return SDL_SCANCODE_AC_REFRESH;
+		case VK_BROWSER_STOP: return SDL_SCANCODE_AC_STOP;
+		case VK_BROWSER_SEARCH: return SDL_SCANCODE_AC_SEARCH;
+		case VK_BROWSER_FAVORITES: return SDL_SCANCODE_AC_BOOKMARKS;
+		case VK_BROWSER_HOME: return SDL_SCANCODE_AC_HOME;
+		case VK_VOLUME_MUTE: return SDL_SCANCODE_AUDIOMUTE;
+		case VK_VOLUME_DOWN: return SDL_SCANCODE_VOLUMEDOWN;
+		case VK_VOLUME_UP: return SDL_SCANCODE_VOLUMEUP;
+	
+		case VK_MEDIA_NEXT_TRACK: return SDL_SCANCODE_AUDIONEXT;
+		case VK_MEDIA_PREV_TRACK: return SDL_SCANCODE_AUDIOPREV;
+		case VK_MEDIA_STOP: return SDL_SCANCODE_AUDIOSTOP;
+		case VK_MEDIA_PLAY_PAUSE: return SDL_SCANCODE_AUDIOPLAY;
+		case VK_LAUNCH_MAIL: return SDL_SCANCODE_MAIL;
+		case VK_LAUNCH_MEDIA_SELECT: return SDL_SCANCODE_MEDIASELECT;
+		
+		case VK_OEM_102: return SDL_SCANCODE_NONUSBACKSLASH;
+
+		case VK_ATTN: return SDL_SCANCODE_SYSREQ;
+		case VK_CRSEL: return SDL_SCANCODE_CRSEL;
+		case VK_EXSEL: return SDL_SCANCODE_EXSEL;
+		case VK_OEM_CLEAR: return SDL_SCANCODE_CLEAR;
+
+		case VK_LAUNCH_APP1: return SDL_SCANCODE_APP1;
+		case VK_LAUNCH_APP2: return SDL_SCANCODE_APP2;
+
+		default: return SDL_SCANCODE_UNKNOWN;
+		}
+	}
+
+	if ( nScanCode > 127 )
+		return SDL_SCANCODE_UNKNOWN;
+
+	code = key_map[nScanCode];
+
+	bIsExtended = ( lParam & ( 1 << 24 ) ) != 0;
+	if ( !bIsExtended )
+	{
+		switch ( code )
+		{
+		case SDL_SCANCODE_HOME:
+			return SDL_SCANCODE_KP_7;
+		case SDL_SCANCODE_UP:
+			return SDL_SCANCODE_KP_8;
+		case SDL_SCANCODE_PAGEUP:
+			return SDL_SCANCODE_KP_9;
+		case SDL_SCANCODE_LEFT:
+			return SDL_SCANCODE_KP_4;
+		case SDL_SCANCODE_RIGHT:
+			return SDL_SCANCODE_KP_6;
+		case SDL_SCANCODE_END:
+			return SDL_SCANCODE_KP_1;
+		case SDL_SCANCODE_DOWN:
+			return SDL_SCANCODE_KP_2;
+		case SDL_SCANCODE_PAGEDOWN:
+			return SDL_SCANCODE_KP_3;
+		case SDL_SCANCODE_INSERT:
+			return SDL_SCANCODE_KP_0;
+		case SDL_SCANCODE_DELETE:
+			return SDL_SCANCODE_KP_DECIMAL;
+		case SDL_SCANCODE_PRINTSCREEN:
+			return SDL_SCANCODE_KP_MULTIPLY;
+		default:
+			break;
+		}
+	}
+	else
+	{
+		switch ( code )
+		{
+		case SDL_SCANCODE_RETURN:
+			return SDL_SCANCODE_KP_ENTER;
+		case SDL_SCANCODE_LALT:
+			return SDL_SCANCODE_RALT;
+		case SDL_SCANCODE_LCTRL:
+			return SDL_SCANCODE_RCTRL;
+		case SDL_SCANCODE_SLASH:
+			return SDL_SCANCODE_KP_DIVIDE;
+		case SDL_SCANCODE_CAPSLOCK:
+			return SDL_SCANCODE_KP_PLUS;
+		}
+	}
+
+	return code;
+}
+
+
 LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -311,6 +431,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
         {
+			SDL_Scancode code;
             wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
@@ -346,9 +467,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     wParam = VK_ENTER;
                 break;
             }
-            if (wParam < 256) {
-                SDL_SendKeyboardKey(SDL_PRESSED,
-                                    data->videodata->key_layout[wParam]);
+			code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
+			if ( code != SDL_SCANCODE_UNKNOWN ) {
+                SDL_SendKeyboardKey(SDL_PRESSED, code );
             }
         }
         returnCode = 0;
@@ -357,7 +478,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYUP:
     case WM_KEYUP:
         {
-            wParam = RemapVKEY(wParam, lParam);
+			SDL_Scancode code;
+			wParam = RemapVKEY(wParam, lParam);
             switch (wParam) {
             case VK_CONTROL:
                 if (lParam & EXTENDED_KEYMASK)
@@ -394,15 +516,15 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             }
 
             /* Windows only reports keyup for print screen */
-            if (wParam == VK_SNAPSHOT
-                && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
-                SDL_RELEASED) {
-                SDL_SendKeyboardKey(SDL_PRESSED,
-                                    data->videodata->key_layout[wParam]);
-            }
-            if (wParam < 256) {
-                SDL_SendKeyboardKey(SDL_RELEASED,
-                                    data->videodata->key_layout[wParam]);
+			code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
+			if ( code != SDL_SCANCODE_UNKNOWN ) {
+				if (wParam == VK_SNAPSHOT
+				    && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
+				    SDL_RELEASED) {
+				    SDL_SendKeyboardKey(SDL_PRESSED,
+				                         code);
+				}
+                SDL_SendKeyboardKey(SDL_RELEASED, code );
             }
         }
         returnCode = 0;

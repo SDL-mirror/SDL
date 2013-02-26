@@ -105,7 +105,7 @@ PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
                 "Unknown Key (scancode %d = %s) %s ",
                 sym->scancode,
                 SDL_GetScancodeName(sym->scancode),
-                pressed ? "pressed" : "released");
+                pressed ? "pressed " : "released");
     }
 
     /* Print the translated character, if one exists */
@@ -129,13 +129,13 @@ PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
     if (repeat) {
         print_string(&spot, &left, " (repeat)");
     }
-    SDL_Log("%s", message);
+    SDL_Log("%s\n", message);
 }
 
 static void
 PrintText(char *text)
 {
-    SDL_Log("Text: %s", text);
+    SDL_Log("Text: %s\n", text);
 }
 
 int

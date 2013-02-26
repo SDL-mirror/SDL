@@ -385,6 +385,9 @@ typedef enum
     SDL_SCANCODE_EJECT = 281,
     SDL_SCANCODE_SLEEP = 282,
     
+	SDL_SCANCODE_APP1 = 283,
+	SDL_SCANCODE_APP2 = 284,
+
     /*@}*//*Walther keys*/
 
     /* Add any other keys here. */

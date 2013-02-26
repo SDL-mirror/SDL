@@ -90,6 +90,7 @@ WIN_InitKeyboard(_THIS)
         }
     }
 
+	// windows scancode to SDL scancode table
     data->key_layout = windows_scancode_table;
 
     data->ime_com_initialized = SDL_FALSE;
@@ -150,24 +151,28 @@ WIN_UpdateKeymap()
     SDL_Scancode scancode;
     SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
-    SDL_GetDefaultKeymap(keymap);
+	for (i = 0; i < SDL_arraysize(keymap); ++i)
+	{
+		keymap[i] = SDL_SCANCODE_TO_KEYCODE( i );
+	}
 
     for (i = 0; i < SDL_arraysize(windows_scancode_table); i++) {
-
+		int vk;
         /* Make sure this scancode is a valid character scancode */
         scancode = windows_scancode_table[i];
-        if (scancode == SDL_SCANCODE_UNKNOWN || keymap[scancode] >= 127) {
+        if (scancode == SDL_SCANCODE_UNKNOWN ) {
             continue;
         }
 
-        /* Alphabetic keys are handled specially, since Windows remaps them */
-        if (i >= 'A' && i <= 'Z') {
-            BYTE vsc = alpha_scancodes[i - 'A'];
-            keymap[scancode] = MapVirtualKey(vsc, MAPVK_VSC_TO_VK) + 0x20;
-        } else {
-            keymap[scancode] = (MapVirtualKey(i, MAPVK_VK_TO_CHAR) & 0x7FFF);
-        }
+		vk =  MapVirtualKey(i, MAPVK_VSC_TO_VK);
+		if ( vk ) {
+			int ch;
+			ch = (MapVirtualKey( vk, MAPVK_VK_TO_CHAR ) & 0x7FFF);
+			 if ( ch )
+				 keymap[scancode] = ch;
+		}
     }
+
     SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
 }
 
