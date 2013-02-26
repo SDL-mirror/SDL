@@ -65,46 +65,6 @@
 #endif
 
 
-static WPARAM
-RemapVKEY(WPARAM wParam, LPARAM lParam)
-{
-    int i;
-    BYTE scancode = (BYTE) ((lParam >> 16) & 0xFF);
-
-    /* Windows remaps alphabetic keys based on current layout.
-       We try to provide USB scancodes, so undo this mapping.
-     */
-    if (wParam >= 'A' && wParam <= 'Z') {
-        if (scancode != alpha_scancodes[wParam - 'A']) {
-            for (i = 0; i < SDL_arraysize(alpha_scancodes); ++i) {
-                if (scancode == alpha_scancodes[i]) {
-                    wParam = 'A' + i;
-                    break;
-                }
-            }
-        }
-    }
-
-    /* Keypad keys are a little trickier, we always scan for them.
-       Keypad arrow keys have the same scancode as normal arrow keys,
-       except they don't have the extended bit (0x1000000) set.
-     */
-    if (!(lParam & 0x1000000)) {
-        if (wParam == VK_DELETE) {
-            wParam = VK_DECIMAL;
-        } else {
-            for (i = 0; i < SDL_arraysize(keypad_scancodes); ++i) {
-                if (scancode == keypad_scancodes[i]) {
-                    wParam = VK_NUMPAD0 + i;
-                    break;
-                }
-            }
-        }
-    }
-
-    return wParam;
-}
-
 static SDL_Scancode 
 WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_map )
 {
@@ -431,43 +391,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
         {
-			SDL_Scancode code;
-            wParam = RemapVKEY(wParam, lParam);
-            switch (wParam) {
-            case VK_CONTROL:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_RCONTROL;
-                else
-                    wParam = VK_LCONTROL;
-                break;
-            case VK_SHIFT:
-                /* EXTENDED trick doesn't work here */
-                {
-                    Uint8 *state = SDL_GetKeyboardState(NULL);
-                    if (state[SDL_SCANCODE_LSHIFT] == SDL_RELEASED
-                        && (GetKeyState(VK_LSHIFT) & 0x8000)) {
-                        wParam = VK_LSHIFT;
-                    } else if (state[SDL_SCANCODE_RSHIFT] == SDL_RELEASED
-                               && (GetKeyState(VK_RSHIFT) & 0x8000)) {
-                        wParam = VK_RSHIFT;
-                    } else {
-                        /* Probably a key repeat */
-                        wParam = 256;
-                    }
-                }
-                break;
-            case VK_MENU:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_RMENU;
-                else
-                    wParam = VK_LMENU;
-                break;
-            case VK_RETURN:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_ENTER;
-                break;
-            }
-			code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
+			SDL_Scancode code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
 			if ( code != SDL_SCANCODE_UNKNOWN ) {
                 SDL_SendKeyboardKey(SDL_PRESSED, code );
             }
@@ -478,45 +402,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYUP:
     case WM_KEYUP:
         {
-			SDL_Scancode code;
-			wParam = RemapVKEY(wParam, lParam);
-            switch (wParam) {
-            case VK_CONTROL:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_RCONTROL;
-                else
-                    wParam = VK_LCONTROL;
-                break;
-            case VK_SHIFT:
-                /* EXTENDED trick doesn't work here */
-                {
-                    Uint8 *state = SDL_GetKeyboardState(NULL);
-                    if (state[SDL_SCANCODE_LSHIFT] == SDL_PRESSED
-                        && !(GetKeyState(VK_LSHIFT) & 0x8000)) {
-                        wParam = VK_LSHIFT;
-                    } else if (state[SDL_SCANCODE_RSHIFT] == SDL_PRESSED
-                               && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
-                        wParam = VK_RSHIFT;
-                    } else {
-                        /* Probably a key repeat */
-                        wParam = 256;
-                    }
-                }
-                break;
-            case VK_MENU:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_RMENU;
-                else
-                    wParam = VK_LMENU;
-                break;
-            case VK_RETURN:
-                if (lParam & EXTENDED_KEYMASK)
-                    wParam = VK_ENTER;
-                break;
-            }
-
-            /* Windows only reports keyup for print screen */
-			code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
+			SDL_Scancode code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
 			if ( code != SDL_SCANCODE_UNKNOWN ) {
 				if (wParam == VK_SNAPSHOT
 				    && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==

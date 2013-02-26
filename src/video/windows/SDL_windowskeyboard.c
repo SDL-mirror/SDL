@@ -163,6 +163,12 @@ WIN_UpdateKeymap()
         if (scancode == SDL_SCANCODE_UNKNOWN ) {
             continue;
         }
+		/* Don't allow the number keys right above the qwerty row to translate or the top left key (grave/backquote) */
+		/* not mapping numbers fixes the AZERTY layout (french) causing non-shifted number to appear by default */
+		if ( ( scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_0 ) || 
+			  scancode == SDL_SCANCODE_GRAVE )  {
+			continue;
+		}
 
 		vk =  MapVirtualKey(i, MAPVK_VSC_TO_VK);
 		if ( vk ) {
