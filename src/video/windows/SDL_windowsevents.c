@@ -64,6 +64,10 @@
 #define WM_TOUCH 0x0240
 #endif
 
+/* Fix cygwin compile */
+#ifndef VK_OEM_NEC_EQUAL
+#define VK_OEM_NEC_EQUAL 0x92
+#endif
 
 static SDL_Scancode 
 WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_map )
