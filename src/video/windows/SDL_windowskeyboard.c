@@ -165,8 +165,12 @@ WIN_UpdateKeymap()
         }
 		/* Don't allow the number keys right above the qwerty row to translate or the top left key (grave/backquote) */
 		/* not mapping numbers fixes the AZERTY layout (french) causing non-shifted number to appear by default */
-		if ( ( scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_0 ) || 
-			  scancode == SDL_SCANCODE_GRAVE )  {
+		if ( scancode == SDL_SCANCODE_GRAVE ) {
+			keymap[scancode]  = SDLK_BACKQUOTE;
+			continue;
+		}
+		if ( scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_0 ) {
+			 keymap[scancode] = SDLK_1 + ( scancode - SDL_SCANCODE_1 );
 			continue;
 		}
 
@@ -175,7 +179,13 @@ WIN_UpdateKeymap()
 			int ch;
 			ch = (MapVirtualKey( vk, MAPVK_VK_TO_CHAR ) & 0x7FFF);
 			 if ( ch )
-				 keymap[scancode] = ch;
+			 {
+				 if ( ch >= 'A' && ch <= 'Z' )
+					keymap[scancode] =  SDLK_a + ( ch - 'A' );
+				 else
+					 keymap[scancode] = ch;
+			 }
+
 		}
     }
 
