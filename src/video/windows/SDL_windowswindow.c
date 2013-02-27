@@ -89,7 +89,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     data->hwnd = hwnd;
     data->hdc = GetDC(hwnd);
     data->created = created;
-    data->mouse_pressed = SDL_FALSE;
+    data->mouse_button_flags = 0;
     data->videodata = videodata;
 
     window->driverdata = data;

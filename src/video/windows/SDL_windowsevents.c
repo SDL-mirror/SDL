@@ -187,6 +187,54 @@ WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_ma
 }
 
 
+void 
+WIN_CheckWParamMouseButton( SDL_bool bwParamMousePressed, SDL_bool bSDLMousePressed, SDL_WindowData *data, Uint8 button )
+{
+	if ( bwParamMousePressed && !bSDLMousePressed )
+	{
+		SDL_SendMouseButton(data->window, SDL_PRESSED, button);
+	}
+	else if ( !bwParamMousePressed && bSDLMousePressed )
+	{
+		SDL_SendMouseButton(data->window, SDL_RELEASED, button);
+	}
+}
+
+/*
+* Some windows systems fail to send a WM_LBUTTONDOWN sometimes, but each mouse move contains the current button state also
+*  so this funciton reconciles our view of the world with the current buttons reported by windows
+*/
+void 
+WIN_CheckWParamMouseButtons( WPARAM wParam, SDL_WindowData *data )
+{
+	if ( wParam != data->mouse_button_flags )
+	{
+		Uint32 mouseFlags = SDL_GetMouseState( NULL, NULL );
+		WIN_CheckWParamMouseButton(  (wParam & MK_LBUTTON), (mouseFlags & SDL_BUTTON_LMASK), data, SDL_BUTTON_LEFT );
+		WIN_CheckWParamMouseButton(  (wParam & MK_MBUTTON), (mouseFlags & SDL_BUTTON_MMASK), data, SDL_BUTTON_MIDDLE );
+		WIN_CheckWParamMouseButton(  (wParam & MK_RBUTTON), (mouseFlags & SDL_BUTTON_RMASK), data, SDL_BUTTON_RIGHT );
+		WIN_CheckWParamMouseButton(  (wParam & MK_XBUTTON1), (mouseFlags & SDL_BUTTON_X1MASK), data, SDL_BUTTON_X1 );
+		WIN_CheckWParamMouseButton(  (wParam & MK_XBUTTON2), (mouseFlags & SDL_BUTTON_X2MASK), data, SDL_BUTTON_X2 );
+		data->mouse_button_flags = wParam;
+	}
+}
+
+
+void 
+WIN_CheckRawMouseButtons( ULONG rawButtons, SDL_WindowData *data )
+{
+	if ( rawButtons != data->mouse_button_flags )
+	{
+		Uint32 mouseFlags = SDL_GetMouseState( NULL, NULL );
+		WIN_CheckWParamMouseButton(  (rawButtons & RI_MOUSE_BUTTON_1_DOWN), (mouseFlags & SDL_BUTTON_LMASK), data, SDL_BUTTON_LEFT );
+		WIN_CheckWParamMouseButton(  (rawButtons & RI_MOUSE_BUTTON_2_DOWN), (mouseFlags & SDL_BUTTON_MMASK), data, SDL_BUTTON_RIGHT );
+		WIN_CheckWParamMouseButton(  (rawButtons & RI_MOUSE_BUTTON_3_DOWN), (mouseFlags & SDL_BUTTON_RMASK), data, SDL_BUTTON_MIDDLE );
+		WIN_CheckWParamMouseButton(  (rawButtons & RI_MOUSE_BUTTON_4_DOWN), (mouseFlags & SDL_BUTTON_X1MASK), data, SDL_BUTTON_X1 );
+		WIN_CheckWParamMouseButton(  (rawButtons & RI_MOUSE_BUTTON_5_DOWN), (mouseFlags & SDL_BUTTON_X2MASK), data, SDL_BUTTON_X2 );
+		data->mouse_button_flags = rawButtons;
+	}
+}
+
 LRESULT CALLBACK
 WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -257,6 +305,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 if (SDL_GetKeyboardFocus() != data->window) {
                     SDL_SetKeyboardFocus(data->window);
                 }
+				/* mouse buttons may have changed state here, in theory we would need
+				to resync them, but we will get a WM_MOUSEMOVE right away which will fix 
+				things up
+				*/
 
 				if(SDL_GetMouse()->relative_mode) {
 					LONG cx, cy;
@@ -293,10 +345,20 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
 	case WM_MOUSEMOVE:
-		if(SDL_GetMouse()->relative_mode)
-			break;
-        SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
-        break;
+		if( !SDL_GetMouse()->relative_mode )
+	        SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
+		/* don't break here, fall through to check the wParam like the button presses */
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONUP:
+	case WM_XBUTTONDOWN:
+	case WM_XBUTTONUP:
+		if(!SDL_GetMouse()->relative_mode)
+			WIN_CheckWParamMouseButtons( wParam, data );
+		break;
 
 	case WM_INPUT:
 	{
@@ -333,43 +395,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				initialMousePoint.x = mouse->lLastX;
 				initialMousePoint.y = mouse->lLastY;
 			}
+			WIN_CheckRawMouseButtons( mouse->usButtonFlags, data );
 		}
 		break;
 	}
-
-    case WM_LBUTTONDOWN:
-        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_LEFT);
-        break;
-
-    case WM_LBUTTONUP:
-        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_LEFT);
-        break;
-
-    case WM_RBUTTONDOWN:
-        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_RIGHT);
-        break;
-
-    case WM_RBUTTONUP:
-        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_RIGHT);
-        break;
-
-    case WM_MBUTTONDOWN:
-        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_MIDDLE);
-        break;
-
-    case WM_MBUTTONUP:
-        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_MIDDLE);
-        break;
-
-    case WM_XBUTTONDOWN:
-        SDL_SendMouseButton(data->window, SDL_PRESSED, SDL_BUTTON_X1 + GET_XBUTTON_WPARAM(wParam) - 1);
-        returnCode = TRUE;
-        break;
-
-    case WM_XBUTTONUP:
-        SDL_SendMouseButton(data->window, SDL_RELEASED, SDL_BUTTON_X1 + GET_XBUTTON_WPARAM(wParam) - 1);
-        returnCode = TRUE;
-        break;
 
     case WM_MOUSEWHEEL:
         {
