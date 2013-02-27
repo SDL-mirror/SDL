@@ -356,8 +356,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MBUTTONUP:
 	case WM_XBUTTONDOWN:
 	case WM_XBUTTONUP:
-		if(!SDL_GetMouse()->relative_mode)
-			WIN_CheckWParamMouseButtons( wParam, data );
+		WIN_CheckWParamMouseButtons( wParam, data );
 		break;
 
 	case WM_INPUT:
@@ -395,7 +394,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				initialMousePoint.x = mouse->lLastX;
 				initialMousePoint.y = mouse->lLastY;
 			}
-			WIN_CheckRawMouseButtons( mouse->usButtonFlags, data );
+			/ * this call doesn't actually work, usButtonFlags gets zero'd if you hold down button 1 and then move the mouse
+			WIN_CheckRawMouseButtons( mouse->usButtonFlags, data ); */
 		}
 		break;
 	}
