@@ -46,6 +46,9 @@
 #define EXTENDED_KEYMASK    (1<<24)
 
 #define VK_ENTER    10          /* Keypad Enter ... no VKEY defined? */
+#ifndef VK_OEM_NEC_EQUAL
+#define VK_OEM_NEC_EQUAL 0x92 
+#endif
 
 /* Make sure XBUTTON stuff is defined that isn't in older Platform SDKs... */
 #ifndef WM_XBUTTONDOWN
@@ -62,11 +65,6 @@
 #endif
 #ifndef WM_TOUCH
 #define WM_TOUCH 0x0240
-#endif
-
-/* Fix cygwin compile */
-#ifndef VK_OEM_NEC_EQUAL
-#define VK_OEM_NEC_EQUAL 0x92
 #endif
 
 static SDL_Scancode 
