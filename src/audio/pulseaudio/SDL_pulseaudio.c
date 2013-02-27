@@ -505,6 +505,7 @@ PULSEAUDIO_Init(SDL_AudioDriverImpl * impl)
     }
 
     if (!CheckPulseAudioAvailable()) {
+        UnloadPulseAudioLibrary();
         return 0;
     }
 
