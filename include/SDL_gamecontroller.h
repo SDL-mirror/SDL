@@ -62,23 +62,20 @@ typedef enum
 } SDL_GameControllerBindType;
 
 /**
- *  get the sdl joystick layer binding for this controller button/axis mapping
+ *  Get the SDL joystick layer binding for this controller button/axis mapping
  */
-struct _SDL_GameControllerHatBind
+typedef struct SDL_GameControllerButtonBind
 {
-	int hat;
-	int hat_mask;
-};
-
-typedef struct _SDL_GameControllerButtonBind
-{
-	SDL_GameControllerBindType m_eBindType;
+	SDL_GameControllerBindType bindType;
 	union
 	{
 		int button;
 		int axis;
-		struct _SDL_GameControllerHatBind hat;
-	};
+		struct {
+            int hat;
+            int hat_mask;
+        } hat;
+	} value;
 
 } SDL_GameControllerButtonBind;
 
@@ -190,7 +187,7 @@ typedef enum
 extern DECLSPEC SDL_GameControllerAxis SDLCALL SDL_GameControllerGetAxisFromString(const char *pchString);
 
 /**
- *  get the sdl joystick layer binding for this controller button mapping
+ *  Get the SDL joystick layer binding for this controller button mapping
  */
 extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
 SDL_GameControllerGetBindForAxis(SDL_GameController *gamecontroller,
@@ -238,7 +235,7 @@ extern DECLSPEC SDL_GameControllerButton SDLCALL SDL_GameControllerGetButtonFrom
 
 
 /**
- *  get the sdl joystick layer binding for this controller button mapping
+ *  Get the SDL joystick layer binding for this controller button mapping
  */
 extern DECLSPEC SDL_GameControllerButtonBind SDLCALL
 SDL_GameControllerGetBindForButton(SDL_GameController *gamecontroller,

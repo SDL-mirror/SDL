@@ -945,13 +945,13 @@ SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis(SDL_GameController
 
 	if (gamecontroller->mapping.axes[axis] >= 0 )
 	{
-		bind.m_eBindType = SDL_CONTROLLER_BINDTYPE_AXIS;
-		bind.button = gamecontroller->mapping.axes[axis];
+		bind.bindType = SDL_CONTROLLER_BINDTYPE_AXIS;
+		bind.value.button = gamecontroller->mapping.axes[axis];
 	}
 	else if (gamecontroller->mapping.buttonasaxis[axis] >= 0 )
 	{
-		bind.m_eBindType = SDL_CONTROLLER_BINDTYPE_BUTTON;
-		bind.button = gamecontroller->mapping.buttonasaxis[axis];
+		bind.bindType = SDL_CONTROLLER_BINDTYPE_BUTTON;
+		bind.value.button = gamecontroller->mapping.buttonasaxis[axis];
 	}
 
 	return bind;
@@ -971,19 +971,19 @@ SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton(SDL_GameControll
 
 	if ( gamecontroller->mapping.buttons[button] >= 0 )
 	{
-		bind.m_eBindType = SDL_CONTROLLER_BINDTYPE_BUTTON;
-		bind.button = gamecontroller->mapping.buttons[button];
+		bind.bindType = SDL_CONTROLLER_BINDTYPE_BUTTON;
+		bind.value.button = gamecontroller->mapping.buttons[button];
 	}
 	else if ( gamecontroller->mapping.axesasbutton[button] >= 0 )
 	{
-		bind.m_eBindType = SDL_CONTROLLER_BINDTYPE_AXIS;
-		bind.axis = gamecontroller->mapping.axesasbutton[button];
+		bind.bindType = SDL_CONTROLLER_BINDTYPE_AXIS;
+		bind.value.axis = gamecontroller->mapping.axesasbutton[button];
 	}
 	else if ( gamecontroller->mapping.hatasbutton[button].hat >= 0 )
 	{
-		bind.m_eBindType = SDL_CONTROLLER_BINDTYPE_HAT;
-		bind.hat.hat = gamecontroller->mapping.hatasbutton[button].hat;
-		bind.hat.hat_mask = gamecontroller->mapping.hatasbutton[button].mask;
+		bind.bindType = SDL_CONTROLLER_BINDTYPE_HAT;
+		bind.value.hat.hat = gamecontroller->mapping.hatasbutton[button].hat;
+		bind.value.hat.hat_mask = gamecontroller->mapping.hatasbutton[button].mask;
 	}
 
 	return bind;
