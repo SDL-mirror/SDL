@@ -497,6 +497,8 @@ video_getClosestDisplayModeRandomResolution(void *arg)
 
 /**
  * @brief Tests call to SDL_GetWindowBrightness
+ *
+* @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowBrightness
  */
 int
 video_getWindowBrightness(void *arg)
@@ -516,6 +518,218 @@ video_getWindowBrightness(void *arg)
   /* Clean up */    
   _destroyVideoSuiteTestWindow(window);
   
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests call to SDL_GetWindowBrightness with invalid input
+ *
+* @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowBrightness
+ */
+int
+video_getWindowBrightnessNegative(void *arg)
+{
+  const char *invalidWindowError = "Invalid window";
+  char *lastError;
+  const char* title = "video_getWindowBrightnessNegative Test Window";
+  float result;
+
+  /* Call against invalid window */ 
+  result = SDL_GetWindowBrightness(NULL);
+  SDLTest_AssertPass("Call to SDL_GetWindowBrightness(window=NULL)");
+  SDLTest_AssertCheck(result == 1.0, "Validate result value; expected: 1.0, got: %f", result);
+  lastError = (char *)SDL_GetError();
+  SDLTest_AssertPass("SDL_GetError()");
+  SDLTest_AssertCheck(lastError != NULL, "Verify error message is not NULL");
+  if (lastError != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(lastError, invalidWindowError) == 0,
+         "SDL_GetError(): expected message '%s', was message: '%s'",
+         invalidWindowError,
+         lastError);
+  }
+
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests call to SDL_GetWindowDisplayMode
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowDisplayMode
+ */
+int
+video_getWindowDisplayMode(void *arg)
+{
+  SDL_Window* window;
+  const char* title = "video_getWindowDisplayMode Test Window";
+  SDL_DisplayMode mode;
+  int result;
+
+  /* Invalidate part of the mode content so we can check values later */
+  mode.w = -1;
+  mode.h = -1;
+  mode.refresh_rate = -1;
+
+  /* Call against new test window */ 
+  window = _createVideoSuiteTestWindow(title);
+  if (window != NULL) {
+      result = SDL_GetWindowDisplayMode(window, &mode);
+      SDLTest_AssertPass("Call to SDL_GetWindowDisplayMode");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+      SDLTest_AssertCheck(mode.w > 0, "Validate mode.w content; expected: >0, got: %d", mode.w);
+      SDLTest_AssertCheck(mode.h > 0, "Validate mode.h content; expected: >0, got: %d", mode.h);
+      SDLTest_AssertCheck(mode.refresh_rate > 0, "Validate mode.refresh_rate content; expected: >0, got: %d", mode.refresh_rate);
+  }
+
+  /* Clean up */    
+  _destroyVideoSuiteTestWindow(window);
+  
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests call to SDL_GetWindowDisplayMode with invalid input
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowDisplayMode
+ */
+int
+video_getWindowDisplayModeNegative(void *arg)
+{
+  const char *expectedError = "Parameter 'mode' is invalid";
+  const char *invalidWindowError = "Invalid window";
+  char *lastError;
+  SDL_Window* window;
+  const char* title = "video_getWindowDisplayModeNegative Test Window";
+  SDL_DisplayMode mode;
+  int result;
+
+  /* Call against new test window */ 
+  window = _createVideoSuiteTestWindow(title);
+  if (window != NULL) {
+      result = SDL_GetWindowDisplayMode(window, NULL);
+      SDLTest_AssertPass("Call to SDL_GetWindowDisplayMode(...,mode=NULL)");
+      SDLTest_AssertCheck(result == -1, "Validate result value; expected: -1, got: %d", result);
+      lastError = (char *)SDL_GetError();
+      SDLTest_AssertPass("SDL_GetError()");
+      SDLTest_AssertCheck(lastError != NULL, "Verify error message is not NULL");
+      if (lastError != NULL) {
+      	SDLTest_AssertCheck(SDL_strcmp(lastError, expectedError) == 0,
+             "SDL_GetError(): expected message '%s', was message: '%s'",
+             expectedError,
+             lastError);
+      }
+  }
+
+  /* Clean up */    
+  _destroyVideoSuiteTestWindow(window);
+  
+  /* Call against invalid window */
+  result = SDL_GetWindowDisplayMode(NULL, &mode);
+  SDLTest_AssertPass("Call to SDL_GetWindowDisplayMode(window=NULL,...)");
+  SDLTest_AssertCheck(result == -1, "Validate result value; expected: -1, got: %d", result);
+  lastError = (char *)SDL_GetError();
+  SDLTest_AssertPass("SDL_GetError()");
+  SDLTest_AssertCheck(lastError != NULL, "Verify error message is not NULL");
+  if (lastError != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(lastError, invalidWindowError) == 0,
+         "SDL_GetError(): expected message '%s', was message: '%s'",
+         invalidWindowError,
+         lastError);
+  }
+  
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests call to SDL_GetWindowGammaRamp
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowGammaRamp
+ */
+int
+video_getWindowGammaRamp(void *arg)
+{
+  SDL_Window* window;
+  const char* title = "video_getWindowGammaRamp Test Window";
+  Uint16 red[256];
+  Uint16 green[256];
+  Uint16 blue[256];
+  int result;
+
+  /* Call against new test window */ 
+  window = _createVideoSuiteTestWindow(title);
+  if (window != NULL) {
+      /* Retrieve no channel */
+      result = SDL_GetWindowGammaRamp(window, NULL, NULL, NULL);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(all NULL)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      /* Retrieve single channel */
+      result = SDL_GetWindowGammaRamp(window, red, NULL, NULL);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(r)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      result = SDL_GetWindowGammaRamp(window, NULL, green, NULL);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(g)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      result = SDL_GetWindowGammaRamp(window, NULL, NULL, blue);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(b)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      /* Retrieve two channels */
+      result = SDL_GetWindowGammaRamp(window, red, green, NULL);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(r, g)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      result = SDL_GetWindowGammaRamp(window, NULL, green, blue);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(g,b)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      result = SDL_GetWindowGammaRamp(window, red, NULL, blue);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(r,b)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+
+      /* Retrieve all channels */
+      result = SDL_GetWindowGammaRamp(window, red, green, blue);
+      SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(r,g,b)");
+      SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0, got: %d", result);
+  }
+
+  /* Clean up */    
+  _destroyVideoSuiteTestWindow(window);
+  
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Tests call to SDL_GetWindowGammaRamp with invalid input
+ *
+* @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowGammaRamp
+ */
+int
+video_getWindowGammaRampNegative(void *arg)
+{
+  const char *invalidWindowError = "Invalid window";
+  char *lastError;
+  const char* title = "video_getWindowGammaRampNegative Test Window";
+  Uint16 red[256];
+  Uint16 green[256];
+  Uint16 blue[256];
+  int result;
+
+  /* Call against invalid window */ 
+  result = SDL_GetWindowGammaRamp(NULL, red, green, blue);
+  SDLTest_AssertPass("Call to SDL_GetWindowGammaRamp(window=NULL,r,g,b)");
+  SDLTest_AssertCheck(result == -1, "Validate result value; expected: -1, got: %f", result);
+  lastError = (char *)SDL_GetError();
+  SDLTest_AssertPass("SDL_GetError()");
+  SDLTest_AssertCheck(lastError != NULL, "Verify error message is not NULL");
+  if (lastError != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(lastError, invalidWindowError) == 0,
+         "SDL_GetError(): expected message '%s', was message: '%s'",
+         invalidWindowError,
+         lastError);
+  }
+
   return TEST_COMPLETED;
 }
 
@@ -552,10 +766,26 @@ static const SDLTest_TestCaseReference videoTest9 =
 static const SDLTest_TestCaseReference videoTest10 =
 		{ (SDLTest_TestCaseFp)video_getWindowBrightness, "video_getWindowBrightness",  "Get window brightness", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference videoTest11 =
+		{ (SDLTest_TestCaseFp)video_getWindowBrightnessNegative, "video_getWindowBrightnessNegative",  "Get window brightness with invalid input", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference videoTest12 =
+		{ (SDLTest_TestCaseFp)video_getWindowDisplayMode, "video_getWindowDisplayMode",  "Get window display mode", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference videoTest13 =
+		{ (SDLTest_TestCaseFp)video_getWindowDisplayModeNegative, "video_getWindowDisplayModeNegative",  "Get window display mode with invalid input", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference videoTest14 =
+		{ (SDLTest_TestCaseFp)video_getWindowGammaRamp, "video_getWindowGammaRamp",  "Get window gamma ramp", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference videoTest15 =
+		{ (SDLTest_TestCaseFp)video_getWindowGammaRampNegative, "video_getWindowGammaRampNegative",  "Get window gamma ramp against invalid input", TEST_ENABLED };
+
 /* Sequence of Video test cases */
 static const SDLTest_TestCaseReference *videoTests[] =  {
 	&videoTest1, &videoTest2, &videoTest3, &videoTest4, &videoTest5, &videoTest6, 
-	&videoTest7, &videoTest8, &videoTest9, &videoTest10, NULL
+	&videoTest7, &videoTest8, &videoTest9, &videoTest10, &videoTest11, &videoTest12, 
+	&videoTest13, &videoTest14, &videoTest15, NULL
 };
 
 /* Video test suite (global) */

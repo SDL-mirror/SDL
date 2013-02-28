@@ -1020,6 +1020,11 @@ SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
     SDL_DisplayMode fullscreen_mode;
 	SDL_VideoDisplay *display;
 
+    if (!mode) {
+      SDL_InvalidParamError("mode");
+      return -1;
+    }
+    
     CHECK_WINDOW_MAGIC(window, -1);
 
     fullscreen_mode = window->fullscreen_mode;
