@@ -20,13 +20,8 @@
 */
 #include "../../include/SDL_scancode.h"
 
-/* Win32 virtual key code to SDL scancode mapping table
-   Sources:
-   - msdn.microsoft.com
-*/
+/* Windows scancode to SDL scancode mapping table */
 /* *INDENT-OFF* */
-// this maps non-translated keyboard scan codes to engine key codes
-// Google for 'Keyboard Scan Code Specification'
 static const SDL_Scancode windows_scancode_table[] = 
 { 
 	//	0						1							2							3							4						5							6							7 
@@ -55,5 +50,4 @@ static const SDL_Scancode windows_scancode_table[] =
 	SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,	SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		// 7
 	SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,	SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN,		SDL_SCANCODE_UNKNOWN		// 7 
 };
-
 /* *INDENT-ON* */

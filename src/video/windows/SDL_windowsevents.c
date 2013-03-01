@@ -28,11 +28,10 @@
 #include "SDL_vkeys.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_touch_c.h"
+#include "../../events/scancodes_windows.h"
 
 /* Dropfile support */
 #include <shellapi.h>
-
-
 
 
 /*#define WMMSG_DEBUG*/
@@ -68,7 +67,7 @@
 #endif
 
 static SDL_Scancode 
-WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_map )
+WindowsScanCodeToSDLScanCode( int lParam, int wParam )
 {
 	SDL_Scancode code;
 	char bIsExtended;
@@ -133,7 +132,7 @@ WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_ma
 	if ( nScanCode > 127 )
 		return SDL_SCANCODE_UNKNOWN;
 
-	code = key_map[nScanCode];
+	code = windows_scancode_table[nScanCode];
 
 	bIsExtended = ( lParam & ( 1 << 24 ) ) != 0;
 	if ( !bIsExtended )
@@ -159,7 +158,7 @@ WindowsScanCodeToSDLScanCode( int lParam, int wParam, const SDL_Scancode *key_ma
 		case SDL_SCANCODE_INSERT:
 			return SDL_SCANCODE_KP_0;
 		case SDL_SCANCODE_DELETE:
-			return SDL_SCANCODE_KP_DECIMAL;
+			return SDL_SCANCODE_KP_PERIOD;
 		case SDL_SCANCODE_PRINTSCREEN:
 			return SDL_SCANCODE_KP_MULTIPLY;
 		default:
@@ -453,7 +452,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYDOWN:
     case WM_KEYDOWN:
         {
-			SDL_Scancode code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
+			SDL_Scancode code = WindowsScanCodeToSDLScanCode( lParam, wParam );
 			if ( code != SDL_SCANCODE_UNKNOWN ) {
                 SDL_SendKeyboardKey(SDL_PRESSED, code );
             }
@@ -464,15 +463,13 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_SYSKEYUP:
     case WM_KEYUP:
         {
-			SDL_Scancode code =  WindowsScanCodeToSDLScanCode( lParam, wParam, data->videodata->key_layout );
-			if ( code != SDL_SCANCODE_UNKNOWN ) {
-				if (wParam == VK_SNAPSHOT
-				    && SDL_GetKeyboardState(NULL)[SDL_SCANCODE_PRINTSCREEN] ==
-				    SDL_RELEASED) {
-				    SDL_SendKeyboardKey(SDL_PRESSED,
-				                         code);
-				}
-                SDL_SendKeyboardKey(SDL_RELEASED, code );
+            SDL_Scancode code = WindowsScanCodeToSDLScanCode( lParam, wParam );
+            if ( code != SDL_SCANCODE_UNKNOWN ) {
+                if (code == SDL_SCANCODE_PRINTSCREEN &&
+                    SDL_GetKeyboardState(NULL)[code] == SDL_RELEASED) {
+                    SDL_SendKeyboardKey(SDL_PRESSED, code);
+                }
+                SDL_SendKeyboardKey(SDL_RELEASED, code);
             }
         }
         returnCode = 0;
