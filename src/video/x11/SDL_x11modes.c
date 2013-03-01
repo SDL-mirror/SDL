@@ -576,25 +576,30 @@ X11_InitModes(_THIS)
                     int actual_format;
                     unsigned long nitems, bytes_after;
                     Atom actual_type;
-   
-	                if (props[i] == EDID) {
-                        XRRGetOutputProperty(data->display, res->outputs[output], props[i],
-                                             0, 100, False, False,
-                                             AnyPropertyType,
-                                             &actual_type, &actual_format,
-                                             &nitems, &bytes_after, &prop);
 
-                        MonitorInfo *info = decode_edid(prop);
-                        if (info) {
-#ifdef X11MODES_DEBUG
-                            printf("Found EDID data for %s\n", output_info->name);
-                            dump_monitor_info(info);
-#endif
-                            SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
-                            free(info);
+	                if (props[i] == EDID) {
+                        if (XRRGetOutputProperty(data->display,
+                                                 res->outputs[output], props[i],
+                                                 0, 100, False, False,
+                                                 AnyPropertyType,
+                                                 &actual_type, &actual_format,
+                                                 &nitems, &bytes_after, &prop) == Success ) {
+                            MonitorInfo *info = decode_edid(prop);
+                            if (info) {
+    #ifdef X11MODES_DEBUG
+                                printf("Found EDID data for %s\n", output_info->name);
+                                dump_monitor_info(info);
+    #endif
+                                SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
+                                free(info);
+                            }
+                            SDL_free(prop);
                         }
                         break;
                     }
+                }
+                if (props) {
+                    SDL_free(props);
                 }
 
                 if (*display_name && inches) {
