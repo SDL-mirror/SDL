@@ -115,7 +115,6 @@ typedef struct SDL_VideoData
 {
     int render;
 
-    const SDL_Scancode *key_layout;
 	DWORD clipboard_count;
 
 	/* Touch input functions */
