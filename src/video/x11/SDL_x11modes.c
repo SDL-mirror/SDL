@@ -593,13 +593,13 @@ X11_InitModes(_THIS)
                                 SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
                                 free(info);
                             }
-                            SDL_free(prop);
+                            XFree(prop);
                         }
                         break;
                     }
                 }
                 if (props) {
-                    SDL_free(props);
+                    XFree(props);
                 }
 
                 if (*display_name && inches) {
