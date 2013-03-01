@@ -642,7 +642,6 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_SetError("Unable to make GL context current");
         status = -1;
     }
-    XSync(display, False);
 
     return (status);
 }
