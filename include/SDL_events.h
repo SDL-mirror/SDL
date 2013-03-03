@@ -105,8 +105,6 @@ typedef enum
     SDL_FINGERDOWN      = 0x700,
     SDL_FINGERUP,
     SDL_FINGERMOTION,
-    SDL_TOUCHBUTTONDOWN,
-    SDL_TOUCHBUTTONUP,    
 
     /* Gesture events */
     SDL_DOLLARGESTURE   = 0x800,
@@ -367,41 +365,20 @@ typedef struct SDL_ControllerDeviceEvent
 
 
 /**
- *  \brief Touch finger motion/finger event structure (event.tfinger.*)
+ *  \brief Touch finger event structure (event.tfinger.*)
  */
 typedef struct SDL_TouchFingerEvent
 {
     Uint32 type;        /**< ::SDL_FINGERMOTION or ::SDL_FINGERDOWN or ::SDL_FINGERUP */
     Uint32 timestamp;
-    Uint32 windowID;    /**< The window with mouse focus, if any */
     SDL_TouchID touchId; /**< The touch device id */
     SDL_FingerID fingerId;
-    Uint8 state;        /**< The current button state */
-    Uint8 padding1;
-    Uint8 padding2;
-    Uint8 padding3;
-    Uint16 x;
-    Uint16 y;
-    Sint16 dx;
-    Sint16 dy;
-    Uint16 pressure;
+    float x;            /**< Normalized in the range 0...1 */
+    float y;            /**< Normalized in the range 0...1 */
+    float dx;           /**< Normalized in the range 0...1 */
+    float dy;           /**< Normalized in the range 0...1 */
+    float pressure;     /**< Normalized in the range 0...1 */
 } SDL_TouchFingerEvent;
-
-
-/**
- *  \brief Touch finger motion/finger event structure (event.tbutton.*)
- */
-typedef struct SDL_TouchButtonEvent
-{
-    Uint32 type;        /**< ::SDL_TOUCHBUTTONUP OR SDL_TOUCHBUTTONDOWN */
-    Uint32 timestamp;
-    Uint32 windowID;    /**< The window with mouse focus, if any */
-    SDL_TouchID touchId;        /**< The touch device index */
-    Uint8 state;        /**< The current button state */
-    Uint8 button;        /**< The button changing state */
-    Uint8 padding1;
-    Uint8 padding2;
-} SDL_TouchButtonEvent;
 
 
 /**
@@ -411,31 +388,27 @@ typedef struct SDL_MultiGestureEvent
 {
     Uint32 type;        /**< ::SDL_MULTIGESTURE */
     Uint32 timestamp;
-    Uint32 windowID;    /**< The window with mouse focus, if any */
-    SDL_TouchID touchId;        /**< The touch device index */
+    SDL_TouchID touchId; /**< The touch device index */
     float dTheta;
     float dDist;
-    float x;  /* currently 0...1. Change to screen coords? */
+    float x;
     float y;  
     Uint16 numFingers;
     Uint16 padding;
 } SDL_MultiGestureEvent;
+
 
 /* (event.dgesture.*) */
 typedef struct SDL_DollarGestureEvent
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */
     Uint32 timestamp;
-    Uint32 windowID;    /**< The window with mouse focus, if any */
-    SDL_TouchID touchId;        /**< The touch device index */
+    SDL_TouchID touchId; /**< The touch device id */
     SDL_GestureID gestureId;
     Uint32 numFingers;
     float error;
-  /*
-    //TODO: Enable to give location?
-    float x;  //currently 0...1. Change to screen coords?
-    float y;  
-  */
+    float x;            /**< Normalized center of gesture */
+    float y;            /**< Normalized center of gesture */
 } SDL_DollarGestureEvent;
 
 
@@ -518,9 +491,8 @@ typedef union SDL_Event
     SDL_UserEvent user;             /**< Custom event data */
     SDL_SysWMEvent syswm;           /**< System dependent window event data */
     SDL_TouchFingerEvent tfinger;   /**< Touch finger event data */
-    SDL_TouchButtonEvent tbutton;   /**< Touch button event data */
-    SDL_MultiGestureEvent mgesture; /**< Multi Finger Gesture data */
-    SDL_DollarGestureEvent dgesture; /**< Multi Finger Gesture data */
+    SDL_MultiGestureEvent mgesture; /**< Gesture event data */
+    SDL_DollarGestureEvent dgesture; /**< Gesture event data */
     SDL_DropEvent drop;             /**< Drag and drop event data */
 
     /* This is necessary for ABI compatibility between Visual C++ and GCC

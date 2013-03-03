@@ -23,16 +23,6 @@
 #ifndef _SDL_x11touch_h
 #define _SDL_x11touch_h
 
-#ifdef SDL_INPUT_LINUXEV
-typedef struct EventTouchData
-{
-    int x,y,pressure,finger; /* Temporary Variables until sync */
-    int eventStream;
-    SDL_bool up;
-    SDL_bool down;
-} EventTouchData;
-#endif
-
 extern void X11_InitTouch(_THIS);
 extern void X11_QuitTouch(_THIS);
 

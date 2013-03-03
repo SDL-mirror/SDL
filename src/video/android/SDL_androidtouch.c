@@ -64,19 +64,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
 
     touchDeviceId = (SDL_TouchID)touch_device_id_in;
     if (!SDL_GetTouch(touchDeviceId)) {
-        SDL_Touch touch;
-        memset( &touch, 0, sizeof(touch) );
-        touch.id = touchDeviceId;
-        touch.x_min = 0.0f;
-        touch.x_max = 1.0f;
-        touch.native_xres = touch.x_max - touch.x_min;
-        touch.y_min = 0.0f;
-        touch.y_max = 1.0f;
-        touch.native_yres = touch.y_max - touch.y_min;
-        touch.pressure_min = 0.0f;
-        touch.pressure_max = 1.0f;
-        touch.native_pressureres = touch.pressure_max - touch.pressure_min;
-        if (SDL_AddTouch(&touch, "") < 0) {
+        if (SDL_AddTouch(touchDeviceId, "") < 0) {
              SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
         }
     }
@@ -96,7 +84,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
 
                 leftFingerDown = fingerId;
             }
-            SDL_SendFingerDown(touchDeviceId, fingerId, SDL_TRUE, x, y, p);
+            SDL_SendTouch(touchDeviceId, fingerId, SDL_TRUE, x, y, p);
             break;
         case ACTION_MOVE:
             if (!leftFingerDown) {
@@ -105,7 +93,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
                 /* send moved event */
                 SDL_SendMouseMotion(NULL, SDL_TOUCH_MOUSEID, 0, window_x, window_y);
             }
-            SDL_SendTouchMotion(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
+            SDL_SendTouchMotion(touchDeviceId, fingerId, x, y, p);
             break;
         case ACTION_UP:
         case ACTION_POINTER_1_UP:
@@ -114,7 +102,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
                 SDL_SendMouseButton(NULL, SDL_TOUCH_MOUSEID, SDL_RELEASED, SDL_BUTTON_LEFT);
                 leftFingerDown = 0;
             }
-            SDL_SendFingerDown(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
+            SDL_SendTouch(touchDeviceId, fingerId, SDL_FALSE, x, y, p);
             break;
         default:
             break;

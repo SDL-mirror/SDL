@@ -691,23 +691,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				for (i = 0; i < num_inputs; ++i) {
 					PTOUCHINPUT input = &inputs[i];
 
-					const SDL_TouchID touchId = (SDL_TouchID)
-												((size_t)input->hSource);
+					const SDL_TouchID touchId = (SDL_TouchID)input->hSource;
 					if (!SDL_GetTouch(touchId)) {
-						SDL_Touch touch;
-
-						touch.id = touchId;
-						touch.x_min = 0;
-						touch.x_max = 1;
-						touch.native_xres = touch.x_max - touch.x_min;
-						touch.y_min = 0;
-						touch.y_max = 1;
-						touch.native_yres = touch.y_max - touch.y_min;
-						touch.pressure_min = 0;
-						touch.pressure_max = 1;
-						touch.native_pressureres = touch.pressure_max - touch.pressure_min;
-
-						if (SDL_AddTouch(&touch, "") < 0) {
+						if (SDL_AddTouch(touchId, "") < 0) {
 							continue;
 						}
 					}
@@ -717,13 +703,13 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					y = (float)(input->y - rect.top)/(rect.bottom - rect.top);
 
 					if (input->dwFlags & TOUCHEVENTF_DOWN) {
-						SDL_SendFingerDown(touchId, input->dwID, SDL_TRUE, x, y, 1);
+						SDL_SendTouch(touchId, input->dwID, SDL_TRUE, x, y, 1.0f);
 					}
 					if (input->dwFlags & TOUCHEVENTF_MOVE) {
-						SDL_SendTouchMotion(touchId, input->dwID, SDL_FALSE, x, y, 1);
+						SDL_SendTouchMotion(touchId, input->dwID, x, y, 1.0f);
 					}
 					if (input->dwFlags & TOUCHEVENTF_UP) {
-						SDL_SendFingerDown(touchId, input->dwID, SDL_FALSE, x, y, 1);
+						SDL_SendTouch(touchId, input->dwID, SDL_FALSE, x, y, 1.0f);
 					}
 				}
 			}

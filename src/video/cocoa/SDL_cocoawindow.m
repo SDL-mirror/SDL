@@ -408,27 +408,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
     enumerator = [touches objectEnumerator];
     touch = (NSTouch*)[enumerator nextObject];
     while (touch) {
-        const SDL_TouchID touchId = (SDL_TouchID) ((size_t) [touch device]);
+        const SDL_TouchID touchId = (SDL_TouchID)[touch device];
         if (!SDL_GetTouch(touchId)) {
-            SDL_Touch touch;
-
-            touch.id = touchId;
-            touch.x_min = 0;
-            touch.x_max = 1;
-            touch.native_xres = touch.x_max - touch.x_min;
-            touch.y_min = 0;
-            touch.y_max = 1;
-            touch.native_yres = touch.y_max - touch.y_min;
-            touch.pressure_min = 0;
-            touch.pressure_max = 1;
-            touch.native_pressureres = touch.pressure_max - touch.pressure_min;
-            
-            if (SDL_AddTouch(&touch, "") < 0) {
+            if (SDL_AddTouch(touchId, "") < 0) {
                 return;
             }
         } 
 
-        const SDL_FingerID fingerId = (SDL_FingerID) ((size_t) [touch identity]);
+        const SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
         /* Make the origin the upper left instead of the lower left */
@@ -436,17 +423,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
         switch (type) {
         case COCOA_TOUCH_DOWN:
-            SDL_SendFingerDown(touchId, fingerId, SDL_TRUE, x, y, 1);
+            SDL_SendTouch(touchId, fingerId, SDL_TRUE, x, y, 1.0f);
             break;
         case COCOA_TOUCH_UP:
         case COCOA_TOUCH_CANCELLED:
-            SDL_SendFingerDown(touchId, fingerId, SDL_FALSE, x, y, 1);
+            SDL_SendTouch(touchId, fingerId, SDL_FALSE, x, y, 1.0f);
             break;
         case COCOA_TOUCH_MOVE:
-            SDL_SendTouchMotion(touchId, fingerId, SDL_FALSE, x, y, 1);
+            SDL_SendTouchMotion(touchId, fingerId, x, y, 1.0f);
             break;
         }
-        
+
         touch = (NSTouch*)[enumerator nextObject];
     }
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= 1060 */
