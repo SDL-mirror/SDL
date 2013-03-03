@@ -408,14 +408,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
     enumerator = [touches objectEnumerator];
     touch = (NSTouch*)[enumerator nextObject];
     while (touch) {
-        const SDL_TouchID touchId = (SDL_TouchID)[touch device];
+        const SDL_TouchID touchId = (SDL_TouchID)(intptr_t)[touch device];
         if (!SDL_GetTouch(touchId)) {
             if (SDL_AddTouch(touchId, "") < 0) {
                 return;
             }
         } 
 
-        const SDL_FingerID fingerId = (SDL_FingerID)[touch identity];
+        const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
         /* Make the origin the upper left instead of the lower left */
