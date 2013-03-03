@@ -1580,7 +1580,6 @@ static int GLES2_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, flo
     GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
     GLES2_ActivateRenderer(renderer);
 
-    data->glActiveTexture(GL_TEXTURE0);
     data->glBindTexture(texturedata->texture_type, texturedata->texture);
 
     if(texw) *texw = 1.0;
