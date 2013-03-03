@@ -804,7 +804,6 @@ static int
 GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                 const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
-
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLfloat minx, miny, maxx, maxy;
@@ -1091,7 +1090,8 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh)
+{
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLES_ActivateRenderer(renderer);
@@ -1105,7 +1105,8 @@ static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, floa
     return 0;
 }
 
-static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture)
+{
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLES_ActivateRenderer(renderer);
@@ -1113,7 +1114,6 @@ static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
 
     return 0;
 }
-
 
 #endif /* SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED */
 
