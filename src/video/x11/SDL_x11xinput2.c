@@ -142,7 +142,7 @@ X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
 
             parse_valuators(rawev->raw_values,rawev->valuators.mask,
                             rawev->valuators.mask_len,relative_cords,2);
-            SDL_SendMouseMotion(mouse->focus,1,(int)relative_cords[0],(int)relative_cords[1]);
+            SDL_SendMouseMotion(mouse->focus,mouse->mouseID,1,(int)relative_cords[0],(int)relative_cords[1]);
             return 1;
             }
             break;

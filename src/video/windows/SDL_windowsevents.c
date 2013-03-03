@@ -191,11 +191,11 @@ WIN_CheckWParamMouseButton( SDL_bool bwParamMousePressed, SDL_bool bSDLMousePres
 {
 	if ( bwParamMousePressed && !bSDLMousePressed )
 	{
-		SDL_SendMouseButton(data->window, SDL_PRESSED, button);
+		SDL_SendMouseButton(data->window, 0, SDL_PRESSED, button);
 	}
 	else if ( !bwParamMousePressed && bSDLMousePressed )
 	{
-		SDL_SendMouseButton(data->window, SDL_RELEASED, button);
+		SDL_SendMouseButton(data->window, 0, SDL_RELEASED, button);
 	}
 }
 
@@ -376,7 +376,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	case WM_MOUSEMOVE:
 		if( !SDL_GetMouse()->relative_mode )
-	        SDL_SendMouseMotion(data->window, 0, LOWORD(lParam), HIWORD(lParam));
+	        SDL_SendMouseMotion(data->window, 0, 0, LOWORD(lParam), HIWORD(lParam));
 		/* don't break here, fall through to check the wParam like the button presses */
 	case WM_LBUTTONUP:
 	case WM_RBUTTONUP:
@@ -408,7 +408,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			if((mouse->usFlags & 0x01) == MOUSE_MOVE_RELATIVE)
 			{
-				SDL_SendMouseMotion(data->window, 1, (int)mouse->lLastX, (int)mouse->lLastY);
+				SDL_SendMouseMotion(data->window, 0, 1, (int)mouse->lLastX, (int)mouse->lLastY);
 			}
 			else
 			{
@@ -420,7 +420,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					initialMousePoint.y = mouse->lLastY;
 				}
 
-				SDL_SendMouseMotion(data->window, 1, (int)(mouse->lLastX-initialMousePoint.x), (int)(mouse->lLastY-initialMousePoint.y) );
+				SDL_SendMouseMotion(data->window, 0, 1, (int)(mouse->lLastX-initialMousePoint.x), (int)(mouse->lLastY-initialMousePoint.y) );
 
 				initialMousePoint.x = mouse->lLastX;
 				initialMousePoint.y = mouse->lLastY;
@@ -435,7 +435,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             // FIXME: This may need to accumulate deltas up to WHEEL_DELTA
             short motion = GET_WHEEL_DELTA_WPARAM(wParam) / WHEEL_DELTA;
 
-            SDL_SendMouseWheel(data->window, 0, motion);
+            SDL_SendMouseWheel(data->window, 0, 0, motion);
             break;
         }
 

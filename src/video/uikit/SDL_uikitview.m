@@ -104,10 +104,10 @@
             CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
             /* send moved event */
-            SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+            SDL_SendMouseMotion(NULL, SDL_TOUCH_MOUSEID, 0, locationInView.x, locationInView.y);
 
             /* send mouse down event */
-            SDL_SendMouseButton(NULL, SDL_PRESSED, SDL_BUTTON_LEFT);
+            SDL_SendMouseButton(NULL, SDL_TOUCH_MOUSEID, SDL_PRESSED, SDL_BUTTON_LEFT);
 
             leftFingerDown = (SDL_FingerID)touch;
         }
@@ -144,7 +144,7 @@
     while(touch) {
         if ((SDL_FingerID)touch == leftFingerDown) {
             /* send mouse up */
-            SDL_SendMouseButton(NULL, SDL_RELEASED, SDL_BUTTON_LEFT);
+            SDL_SendMouseButton(NULL, SDL_TOUCH_MOUSEID, SDL_RELEASED, SDL_BUTTON_LEFT);
             leftFingerDown = 0;
         }
 
@@ -189,7 +189,7 @@
             CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
             /* send moved event */
-            SDL_SendMouseMotion(NULL, 0, locationInView.x, locationInView.y);
+            SDL_SendMouseMotion(NULL, SDL_TOUCH_MOUSEID, 0, locationInView.x, locationInView.y);
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];

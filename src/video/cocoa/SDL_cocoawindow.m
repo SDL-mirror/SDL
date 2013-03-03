@@ -200,7 +200,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         y = (int)(window->h - point.y);
 
         if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
-            SDL_SendMouseMotion(window, 0, x, y);
+            SDL_SendMouseMotion(window, 0, 0, x, y);
             SDL_SetCursor(NULL);
         }
     }
@@ -263,7 +263,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber] + 1;
         break;
     }
-    SDL_SendMouseButton(_data->window, SDL_PRESSED, button);
+    SDL_SendMouseButton(_data->window, 0, SDL_PRESSED, button);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
@@ -294,7 +294,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber] + 1;
         break;
     }
-    SDL_SendMouseButton(_data->window, SDL_RELEASED, button);
+    SDL_SendMouseButton(_data->window, 0, SDL_RELEASED, button);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
@@ -342,7 +342,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         }
     }
-    SDL_SendMouseMotion(window, 0, x, y);
+    SDL_SendMouseMotion(window, 0, 0, x, y);
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent

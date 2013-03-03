@@ -151,8 +151,8 @@ typedef struct SDL_WindowEvent
     Uint8 padding1;
     Uint8 padding2;
     Uint8 padding3;
-    int data1;          /**< event dependent data */
-    int data2;          /**< event dependent data */
+    Sint32 data1;       /**< event dependent data */
+    Sint32 data2;       /**< event dependent data */
 } SDL_WindowEvent;
 
 /**
@@ -180,8 +180,8 @@ typedef struct SDL_TextEditingEvent
     Uint32 timestamp;
     Uint32 windowID;                            /**< The window with keyboard focus, if any */
     char text[SDL_TEXTEDITINGEVENT_TEXT_SIZE];  /**< The editing text */
-    int start;                                  /**< The start cursor of selected editing text */
-    int length;                                 /**< The length of selected editing text */
+    Sint32 start;                               /**< The start cursor of selected editing text */
+    Sint32 length;                              /**< The length of selected editing text */
 } SDL_TextEditingEvent;
 
 
@@ -205,14 +205,15 @@ typedef struct SDL_MouseMotionEvent
     Uint32 type;        /**< ::SDL_MOUSEMOTION */
     Uint32 timestamp;
     Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint32 which;       /**< The mouse instance id, or SDL_TOUCH_MOUSEID */
     Uint8 state;        /**< The current button state */
     Uint8 padding1;
     Uint8 padding2;
     Uint8 padding3;
-    int x;              /**< X coordinate, relative to window */
-    int y;              /**< Y coordinate, relative to window */
-    int xrel;           /**< The relative motion in the X direction */
-    int yrel;           /**< The relative motion in the Y direction */
+    Sint32 x;           /**< X coordinate, relative to window */
+    Sint32 y;           /**< Y coordinate, relative to window */
+    Sint32 xrel;        /**< The relative motion in the X direction */
+    Sint32 yrel;        /**< The relative motion in the Y direction */
 } SDL_MouseMotionEvent;
 
 /**
@@ -223,12 +224,13 @@ typedef struct SDL_MouseButtonEvent
     Uint32 type;        /**< ::SDL_MOUSEBUTTONDOWN or ::SDL_MOUSEBUTTONUP */
     Uint32 timestamp;
     Uint32 windowID;    /**< The window with mouse focus, if any */
+    Uint32 which;       /**< The mouse instance id, or SDL_TOUCH_MOUSEID */
     Uint8 button;       /**< The mouse button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
     Uint8 padding2;
-    int x;              /**< X coordinate, relative to window */
-    int y;              /**< Y coordinate, relative to window */
+    Sint32 x;           /**< X coordinate, relative to window */
+    Sint32 y;           /**< Y coordinate, relative to window */
 } SDL_MouseButtonEvent;
 
 /**
@@ -239,8 +241,9 @@ typedef struct SDL_MouseWheelEvent
     Uint32 type;        /**< ::SDL_MOUSEWHEEL */
     Uint32 timestamp;
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    int x;              /**< The amount scrolled horizontally */
-    int y;              /**< The amount scrolled vertically */
+    Uint32 which;       /**< The mouse instance id, or SDL_TOUCH_MOUSEID */
+    Sint32 x;           /**< The amount scrolled horizontally */
+    Sint32 y;           /**< The amount scrolled vertically */
 } SDL_MouseWheelEvent;
 
 /**
@@ -467,7 +470,7 @@ typedef struct SDL_UserEvent
     Uint32 type;        /**< ::SDL_USEREVENT through ::SDL_NUMEVENTS-1 */
     Uint32 timestamp;
     Uint32 windowID;    /**< The associated window if any */
-    int code;           /**< User defined event code */
+    Sint32 code;        /**< User defined event code */
     void *data1;        /**< User defined data pointer */
     void *data2;        /**< User defined data pointer */
 } SDL_UserEvent;

@@ -40,30 +40,25 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
-
 typedef Sint64 SDL_TouchID;
 typedef Sint64 SDL_FingerID;
 
+typedef struct SDL_Finger
+{
+    SDL_FingerID id;
+    Uint16 x;
+    Uint16 y;
+    Uint16 pressure;
+    Uint16 xdelta;
+    Uint16 ydelta;
+    Uint16 last_x, last_y,last_pressure;  /* the last reported coordinates */
+    SDL_bool down;
+} SDL_Finger;
 
-struct SDL_Finger {
-  SDL_FingerID id;
-  Uint16 x;
-  Uint16 y;
-  Uint16 pressure;
-  Uint16 xdelta;
-  Uint16 ydelta;
-  Uint16 last_x, last_y,last_pressure;  /* the last reported coordinates */
-  SDL_bool down;
-};
-
-typedef struct SDL_Touch SDL_Touch;
-typedef struct SDL_Finger SDL_Finger;
-
-
-struct SDL_Touch {
-  
+typedef struct SDL_Touch
+{
   /* Free the touch when it's time */
-  void (*FreeTouch) (SDL_Touch * touch);
+  void (*FreeTouch) (struct SDL_Touch * touch);
   
   /* data common for tablets */
   float pressure_max, pressure_min;
@@ -89,28 +84,23 @@ struct SDL_Touch {
   SDL_Finger** fingers;
     
   void *driverdata;
-};
+} SDL_Touch;
 
+/* Used as the device ID for mouse events simulated with touch input */
+#define SDL_TOUCH_MOUSEID ((Uint32)-1)
 
 
 /* Function prototypes */
 
 /**
- *  \brief Get the touch object at the given id.
- *
- *
+ *  \brief Get the touch object with the given id.
  */
-  extern DECLSPEC SDL_Touch* SDLCALL SDL_GetTouch(SDL_TouchID id);
-
-
+extern DECLSPEC SDL_Touch* SDLCALL SDL_GetTouch(SDL_TouchID id);
 
 /**
- *  \brief Get the finger object of the given touch, at the given id.
- *
- *
+ *  \brief Get the finger object of the given touch, with the given id.
  */
-  extern 
-  DECLSPEC SDL_Finger* SDLCALL SDL_GetFinger(SDL_Touch *touch, SDL_FingerID id);
+extern DECLSPEC SDL_Finger* SDLCALL SDL_GetFinger(SDL_Touch *touch, SDL_FingerID id);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus

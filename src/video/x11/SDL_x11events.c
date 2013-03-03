@@ -448,24 +448,23 @@ X11_DispatchEvent(_THIS)
                 printf("window %p: X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
 #endif
 
-                SDL_SendMouseMotion(data->window, 0, xevent.xmotion.x, xevent.xmotion.y);
+                SDL_SendMouseMotion(data->window, 0, 0, xevent.xmotion.x, xevent.xmotion.y);
             }
         }
         break;
 
     case ButtonPress:{
             int ticks = 0;
-            if (X11_IsWheelEvent(display,&xevent,&ticks) == SDL_TRUE) {
-                SDL_SendMouseWheel(data->window, 0, ticks);
-            }
-            else {
-                SDL_SendMouseButton(data->window, SDL_PRESSED, xevent.xbutton.button);
+            if (X11_IsWheelEvent(display,&xevent,&ticks)) {
+                SDL_SendMouseWheel(data->window, 0, 0, ticks);
+            } else {
+                SDL_SendMouseButton(data->window, 0, SDL_PRESSED, xevent.xbutton.button);
             }
         }
         break;
 
     case ButtonRelease:{
-            SDL_SendMouseButton(data->window, SDL_RELEASED, xevent.xbutton.button);
+            SDL_SendMouseButton(data->window, 0, SDL_RELEASED, xevent.xbutton.button);
         }
         break;
 
