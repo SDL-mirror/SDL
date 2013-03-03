@@ -131,6 +131,15 @@ typedef enum
 } SDL_EventType;
 
 /**
+ *  \brief Fields shared by every event
+ */
+typedef struct SDL_GenericEvent
+{
+    Uint32 type;
+    Uint32 timestamp;
+} SDL_GenericEvent;
+    
+/**
  *  \brief Window state change event data (event.window.*)
  */
 typedef struct SDL_WindowEvent
@@ -241,11 +250,13 @@ typedef struct SDL_JoyAxisEvent
 {
     Uint32 type;        /**< ::SDL_JOYAXISMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
+    Uint32 which;       /**< The joystick instance id */
     Uint8 axis;         /**< The joystick axis index */
     Uint8 padding1;
     Uint8 padding2;
-    int value;          /**< The axis value (range: -32768 to 32767) */
+    Uint8 padding3;
+    Sint16 value;       /**< The axis value (range: -32768 to 32767) */
+    Uint16 padding4;
 } SDL_JoyAxisEvent;
 
 /**
@@ -255,12 +266,13 @@ typedef struct SDL_JoyBallEvent
 {
     Uint32 type;        /**< ::SDL_JOYBALLMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
+    Uint32 which;       /**< The joystick instance id */
     Uint8 ball;         /**< The joystick trackball index */
     Uint8 padding1;
     Uint8 padding2;
-    int xrel;           /**< The relative motion in the X direction */
-    int yrel;           /**< The relative motion in the Y direction */
+    Uint8 padding3;
+    Sint16 xrel;        /**< The relative motion in the X direction */
+    Sint16 yrel;        /**< The relative motion in the Y direction */
 } SDL_JoyBallEvent;
 
 /**
@@ -270,7 +282,7 @@ typedef struct SDL_JoyHatEvent
 {
     Uint32 type;        /**< ::SDL_JOYHATMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
+    Uint32 which;       /**< The joystick instance id */
     Uint8 hat;          /**< The joystick hat index */
     Uint8 value;        /**< The hat position value.
                          *   \sa ::SDL_HAT_LEFTUP ::SDL_HAT_UP ::SDL_HAT_RIGHTUP
@@ -280,6 +292,7 @@ typedef struct SDL_JoyHatEvent
                          *   Note that zero means the POV is centered.
                          */
     Uint8 padding1;
+    Uint8 padding2;
 } SDL_JoyHatEvent;
 
 /**
@@ -289,10 +302,11 @@ typedef struct SDL_JoyButtonEvent
 {
     Uint32 type;        /**< ::SDL_JOYBUTTONDOWN or ::SDL_JOYBUTTONUP */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
+    Uint32 which;       /**< The joystick instance id */
     Uint8 button;       /**< The joystick button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
+    Uint8 padding2;
 } SDL_JoyButtonEvent;
 
 /**
@@ -302,7 +316,7 @@ typedef struct SDL_JoyDeviceEvent
 {
 	Uint32 type;        /**< ::SDL_JOYDEVICEADDED or ::SDL_JOYDEVICEREMOVED */
 	Uint32 timestamp;
-	Uint32 which;        /**< The joystick device index for ADD, instance_id for REMOVE*/
+	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
 } SDL_JoyDeviceEvent;
 
 
@@ -313,9 +327,13 @@ typedef struct SDL_ControllerAxisEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERAXISMOTION */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
-    SDL_GameControllerAxis axis;         /**< The joystick axis index */
-    int value;          /**< The axis value (range: -32768 to 32767) */
+    Uint32 which;       /**< The joystick instance id */
+    Uint8 axis;         /**< The controller axis (SDL_GameControllerAxis) */
+    Uint8 padding1;
+    Uint8 padding2;
+    Uint8 padding3;
+    Sint16 value;       /**< The axis value (range: -32768 to 32767) */
+    Uint16 padding4;
 } SDL_ControllerAxisEvent;
 
 
@@ -326,9 +344,11 @@ typedef struct SDL_ControllerButtonEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERBUTTONDOWN or ::SDL_CONTROLLERBUTTONUP */
     Uint32 timestamp;
-    Uint8 which;        /**< The joystick instance id */
-    SDL_GameControllerButton button;       /**< The joystick button index */
+    Uint32 which;       /**< The joystick instance id */
+    Uint8 button;       /**< The controller button (SDL_GameControllerButton) */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
+    Uint8 padding1;
+    Uint8 padding2;
 } SDL_ControllerButtonEvent;
 
 
@@ -339,7 +359,7 @@ typedef struct SDL_ControllerDeviceEvent
 {
 	Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED or ::SDL_CONTROLLERDEVICEREMOVED */
 	Uint32 timestamp;
-	Uint32 which;        /**< The joystick device index for ADD, instance_id for REMOVE*/
+	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
 } SDL_ControllerDeviceEvent;
 
 
@@ -348,11 +368,10 @@ typedef struct SDL_ControllerDeviceEvent
  */
 typedef struct SDL_TouchFingerEvent
 {
-    Uint32 type;        /**< ::SDL_FINGERMOTION OR 
-			   SDL_FINGERDOWN OR SDL_FINGERUP*/
+    Uint32 type;        /**< ::SDL_FINGERMOTION or ::SDL_FINGERDOWN or ::SDL_FINGERUP */
     Uint32 timestamp;
     Uint32 windowID;    /**< The window with mouse focus, if any */
-    SDL_TouchID touchId;        /**< The touch device id */
+    SDL_TouchID touchId; /**< The touch device id */
     SDL_FingerID fingerId;
     Uint8 state;        /**< The current button state */
     Uint8 padding1;
@@ -476,6 +495,7 @@ typedef struct SDL_SysWMEvent
 typedef union SDL_Event
 {
     Uint32 type;                    /**< Event type, shared with all events */
+    SDL_GenericEvent generic;       /**< Generic event data */
     SDL_WindowEvent window;         /**< Window event data */
     SDL_KeyboardEvent key;          /**< Keyboard event data */
     SDL_TextEditingEvent edit;      /**< Text editing event data */

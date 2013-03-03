@@ -67,7 +67,7 @@ typedef struct {
 	Uint8 data[16];
 } SDL_JoystickGUID;
 
-typedef int SDL_JoystickID;
+typedef Uint32 SDL_JoystickID;
 
 
 /* Function prototypes */
