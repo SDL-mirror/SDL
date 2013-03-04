@@ -22324,6 +22324,15 @@ $as_echo "#define SDL_POWER_BEOS 1" >>confdefs.h
         # The iOS platform requires special setup.
         SOURCES="$SOURCES $srcdir/src/video/uikit/*.m"
         SOURCES="$SOURCES $srcdir/src/video/uikit/*.c"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm -liconv -lobjc"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Foundation"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,UIKit"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGLES"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,QuartzCore"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AudioToolbox"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreGraphics"
         ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is
