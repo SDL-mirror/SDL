@@ -4,12 +4,13 @@ Simple DirectMedia Layer for Android
 
 Requirements:
 
-Android SDK
+Android SDK (version 10 or later)
 http://developer.android.com/sdk/index.html
 
 Android NDK r4 or later
 http://developer.android.com/sdk/ndk/index.html
 
+Minimum API Level supported by SDL: 10 (Android 2.3.3)
 
 ================================================================================
  How the port works
@@ -342,6 +343,15 @@ output file:
 When you're done instrumenting with valgrind, you can disable the wrapper:
 	adb shell setprop wrap.org.libsdl.app ""
 
+================================================================================
+ Why is API level 10 the minimum required?
+================================================================================
+
+Support for OpenGL ES/ES2 applications was introduced in the NDK for API level 9, 
+which has since then been obsoleted, and the recommendation to developers was to 
+bump the required level to 10.
+As of this writing, according to http://developer.android.com/about/dashboards/index.html
+about 90% of the existing Android devices support an API level 10 or higher.
 
 ================================================================================
  Known issues
