@@ -1524,18 +1524,16 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 void
 SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 {
-    /* Clear the values */
-    if (x) {
-        *x = 0;
-    }
-    if (y) {
-        *y = 0;
-    }
-
     CHECK_WINDOW_MAGIC(window, );
 
     /* Fullscreen windows are always at their display's origin */
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        if (x) {
+            *x = 0;
+        }
+        if (y) {
+            *y = 0;
+        }
     } else {
         if (x) {
             *x = window->x;
