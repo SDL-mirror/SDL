@@ -197,6 +197,15 @@ extern "C" {
 
 
 /**
+ *  \brief  A variable that lets you disable the detection and use of Xinput gamepad devices
+ *
+ *  The variable can be set to the following values:
+ *    "0"       - Disable XInput timer (only uses direct input)
+ *    "1"       - Enable XInput timer (the default)
+ */
+#define SD_HINT_XINPUT_ENABLED "SDL_XINPUT_ENABLED"
+
+/**
  *  \brief  A variable that lets you manually hint extra gamecontroller db entries
  *
  *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
