@@ -76,7 +76,7 @@ SDL_DestroyMutex(SDL_mutex * mutex)
     }
 }
 
-/* Lock the semaphore */
+/* Lock the mutex */
 int
 SDL_mutexP(SDL_mutex * mutex)
 {
@@ -104,6 +104,40 @@ SDL_mutexP(SDL_mutex * mutex)
     }
 
     return 0;
+#endif /* DISABLE_THREADS */
+}
+
+/* Try Lock the mutex */
+int
+SDL_TryLockMutex(SDL_mutex * mutex)
+{
+#ifdef DISABLE_THREADS
+    return 0;
+#else
+    int retval = 0;
+    SDL_threadID this_thread;
+
+    if (mutex == NULL) {
+        SDL_SetError("Passed a NULL mutex");
+        return -1;
+    }
+
+    this_thread = SDL_ThreadID();
+    if (mutex->owner == this_thread) {
+        ++mutex->recursive;
+    } else {
+        /* The order of operations is important.
+         We set the locking thread id after we obtain the lock
+         so unlocks from other threads will fail.
+         */
+        retval = SDL_SemTryWait(mutex->sem);
+        if (ret == 0) {
+            mutex->owner = this_thread;
+            mutex->recursive = 0;
+        }
+    }
+
+    return retval;
 #endif /* DISABLE_THREADS */
 }
 
