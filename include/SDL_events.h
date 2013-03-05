@@ -100,6 +100,7 @@ typedef enum
 	SDL_CONTROLLERBUTTONUP,            /**< Game controller button released */
 	SDL_CONTROLLERDEVICEADDED,         /**< A new Game controller has been inserted into the system */
 	SDL_CONTROLLERDEVICEREMOVED,       /**< An opened Game controller has been removed */
+	SDL_CONTROLLERDEVICEREMAPPED,      /**< The controller mapping was updated */
 
     /* Touch events */
     SDL_FINGERDOWN      = 0x700,
@@ -358,9 +359,9 @@ typedef struct SDL_ControllerButtonEvent
  */
 typedef struct SDL_ControllerDeviceEvent
 {
-	Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED or ::SDL_CONTROLLERDEVICEREMOVED */
+	Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED, ::SDL_CONTROLLERDEVICEREMOVED, or ::SDL_CONTROLLERDEVICEREMAPPED */
 	Uint32 timestamp;
-	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
+	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED or REMAPPED event */
 } SDL_ControllerDeviceEvent;
 
 
@@ -484,7 +485,7 @@ typedef union SDL_Event
     SDL_JoyHatEvent jhat;           /**< Joystick hat event data */
     SDL_JoyButtonEvent jbutton;     /**< Joystick button event data */
     SDL_JoyDeviceEvent jdevice;     /**< Joystick device change event data */
-	SDL_ControllerAxisEvent caxis;		/**< Game Controller button event data */
+	SDL_ControllerAxisEvent caxis;		/**< Game Controller axis event data */
 	SDL_ControllerButtonEvent cbutton;  /**< Game Controller button event data */
 	SDL_ControllerDeviceEvent cdevice;  /**< Game Controller device event data */
     SDL_QuitEvent quit;             /**< Quit request event data */
