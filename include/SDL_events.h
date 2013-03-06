@@ -77,14 +77,6 @@ typedef enum
     SDL_MOUSEBUTTONUP,          /**< Mouse button released */
     SDL_MOUSEWHEEL,             /**< Mouse wheel motion */
 
-    /* Tablet or multiple mice input device events */
-    SDL_INPUTMOTION    = 0x500, /**< Input moved */
-    SDL_INPUTBUTTONDOWN,        /**< Input button pressed */
-    SDL_INPUTBUTTONUP,          /**< Input button released */
-    SDL_INPUTWHEEL,             /**< Input wheel motion */
-    SDL_INPUTPROXIMITYIN,       /**< Input pen entered proximity */
-    SDL_INPUTPROXIMITYOUT,      /**< Input pen left proximity */
-
     /* Joystick events */
     SDL_JOYAXISMOTION  = 0x600, /**< Joystick axis motion */
     SDL_JOYBALLMOTION,          /**< Joystick trackball motion */
