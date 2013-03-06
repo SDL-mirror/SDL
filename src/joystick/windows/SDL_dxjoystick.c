@@ -42,6 +42,7 @@
 #include "SDL_timer.h"
 #include "SDL_mutex.h"
 #include "SDL_events.h"
+#include "SDL_hints.h"
 #if !SDL_EVENTS_DISABLED
 #include "../../events/SDL_events_c.h"
 #endif
