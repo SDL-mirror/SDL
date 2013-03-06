@@ -67,7 +67,7 @@ static SDL_bool coinitialized = SDL_FALSE;
 static LPDIRECTINPUT8 dinput = NULL;
 static SDL_bool s_bDeviceAdded = SDL_FALSE;
 static SDL_bool s_bDeviceRemoved = SDL_FALSE;
-static int s_nInstanceID = -1;
+static SDL_JoystickID s_nInstanceID = -1;
 static GUID *s_pKnownJoystickGUIDs = NULL;
 static SDL_cond *s_condJoystickThread = NULL;
 static SDL_mutex *s_mutexJoyStickEnum = NULL;
@@ -85,7 +85,7 @@ struct JoyStick_DeviceData_
 	DIDEVICEINSTANCE dxdevice;
 	char *joystickname;
 	Uint8 send_add_event;
-	int nInstanceID;
+	SDL_JoystickID nInstanceID;
 	SDL_bool bXInputDevice;
 	Uint8 XInputUserId;
 	struct JoyStick_DeviceData_ *pNext;

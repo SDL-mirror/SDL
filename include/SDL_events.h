@@ -244,7 +244,7 @@ typedef struct SDL_JoyAxisEvent
 {
     Uint32 type;        /**< ::SDL_JOYAXISMOTION */
     Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 axis;         /**< The joystick axis index */
     Uint8 padding1;
     Uint8 padding2;
@@ -259,8 +259,8 @@ typedef struct SDL_JoyAxisEvent
 typedef struct SDL_JoyBallEvent
 {
     Uint32 type;        /**< ::SDL_JOYBALLMOTION */
-    Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+	Uint32 timestamp;
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 ball;         /**< The joystick trackball index */
     Uint8 padding1;
     Uint8 padding2;
@@ -275,8 +275,8 @@ typedef struct SDL_JoyBallEvent
 typedef struct SDL_JoyHatEvent
 {
     Uint32 type;        /**< ::SDL_JOYHATMOTION */
-    Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+	Uint32 timestamp;
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 hat;          /**< The joystick hat index */
     Uint8 value;        /**< The hat position value.
                          *   \sa ::SDL_HAT_LEFTUP ::SDL_HAT_UP ::SDL_HAT_RIGHTUP
@@ -295,8 +295,8 @@ typedef struct SDL_JoyHatEvent
 typedef struct SDL_JoyButtonEvent
 {
     Uint32 type;        /**< ::SDL_JOYBUTTONDOWN or ::SDL_JOYBUTTONUP */
-    Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+	Uint32 timestamp;
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 button;       /**< The joystick button index */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
@@ -310,7 +310,7 @@ typedef struct SDL_JoyDeviceEvent
 {
 	Uint32 type;        /**< ::SDL_JOYDEVICEADDED or ::SDL_JOYDEVICEREMOVED */
 	Uint32 timestamp;
-	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
+	Sint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED event */
 } SDL_JoyDeviceEvent;
 
 
@@ -320,8 +320,8 @@ typedef struct SDL_JoyDeviceEvent
 typedef struct SDL_ControllerAxisEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERAXISMOTION */
-    Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+	Uint32 timestamp;
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 axis;         /**< The controller axis (SDL_GameControllerAxis) */
     Uint8 padding1;
     Uint8 padding2;
@@ -337,8 +337,8 @@ typedef struct SDL_ControllerAxisEvent
 typedef struct SDL_ControllerButtonEvent
 {
     Uint32 type;        /**< ::SDL_CONTROLLERBUTTONDOWN or ::SDL_CONTROLLERBUTTONUP */
-    Uint32 timestamp;
-    Uint32 which;       /**< The joystick instance id */
+	Uint32 timestamp;
+    SDL_JoystickID which; /**< The joystick instance id */
     Uint8 button;       /**< The controller button (SDL_GameControllerButton) */
     Uint8 state;        /**< ::SDL_PRESSED or ::SDL_RELEASED */
     Uint8 padding1;
@@ -353,7 +353,7 @@ typedef struct SDL_ControllerDeviceEvent
 {
 	Uint32 type;        /**< ::SDL_CONTROLLERDEVICEADDED, ::SDL_CONTROLLERDEVICEREMOVED, or ::SDL_CONTROLLERDEVICEREMAPPED */
 	Uint32 timestamp;
-	Uint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED or REMAPPED event */
+	Sint32 which;       /**< The joystick device index for the ADDED event, instance id for the REMOVED or REMAPPED event */
 } SDL_ControllerDeviceEvent;
 
 
