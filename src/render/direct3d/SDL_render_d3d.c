@@ -477,7 +477,9 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
 
         for (d3dxVersion=50;d3dxVersion>0;d3dxVersion--) {
             SDL_snprintf(d3dxDLLFile, 49, "D3DX9_%02d.dll", d3dxVersion);
-            data->d3dxDLL = SDL_LoadObject(d3dxDLLFile);
+            LPTSTR tmpstr = WIN_UTF8ToString(d3dxDLLFile);
+            data->d3dxDLL = (void *)LoadLibrary(tmpstr); /* not using SDL_LoadObject() as we want silently fail - no error message */
+            SDL_free(tmpstr);
             if (data->d3dxDLL) {
                 HRESULT (WINAPI *D3DXCreateMatrixStack) (DWORD Flags, LPD3DXMATRIXSTACK*  ppStack);
                 D3DXCreateMatrixStack = (HRESULT (WINAPI *) (DWORD, LPD3DXMATRIXSTACK*)) SDL_LoadFunction(data->d3dxDLL, "D3DXCreateMatrixStack");
