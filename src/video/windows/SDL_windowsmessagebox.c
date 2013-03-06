@@ -231,7 +231,8 @@ int
 WIN_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     WIN_DialogData *dialog;
-    int i, x, y, w, h, gap, which;
+    int i, x, y, w, h, gap;
+    INT_PTR which;
     const SDL_MessageBoxButtonData *buttons = messageboxdata->buttons;
  
     /* FIXME: Need a better algorithm for laying out the message box */

@@ -67,7 +67,7 @@
 #endif
 
 static SDL_Scancode 
-WindowsScanCodeToSDLScanCode( int lParam, int wParam )
+WindowsScanCodeToSDLScanCode( LPARAM lParam, WPARAM wParam )
 {
 	SDL_Scancode code;
 	char bIsExtended;
