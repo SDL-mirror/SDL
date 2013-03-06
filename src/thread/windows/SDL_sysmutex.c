@@ -79,12 +79,12 @@ SDL_mutexP(SDL_mutex * mutex)
 int
 SDL_TryLockMutex(SDL_mutex * mutex)
 {
+    int retval = 0;
     if (mutex == NULL) {
         SDL_SetError("Passed a NULL mutex");
         return -1;
     }
 
-    int retval = 0;
     if (TryEnterCriticalSection(&mutex->cs) == 0) {
         retval = SDL_MUTEX_TIMEDOUT;
     }
