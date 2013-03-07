@@ -678,16 +678,17 @@ SDL_GameControllerAddMapping( const char *mappingString )
     SDL_bool is_xinput_mapping = SDL_FALSE;
 #endif
 
-	pchGUID = SDL_PrivateGetControllerGUIDFromMappingString( mappingString );
-	if (!pchGUID) return -1;
+    pchGUID = SDL_PrivateGetControllerGUIDFromMappingString( mappingString );
+    if (!pchGUID) {
+        return -1;
+    }
 #ifdef SDL_JOYSTICK_DINPUT
     if ( !SDL_strcasecmp( pchGUID, "xinput" ) ) {
         is_xinput_mapping = SDL_TRUE;
     }
 #endif
+    jGUID = SDL_JoystickGetGUIDFromString(pchGUID);
     SDL_free(pchGUID);
-
-	jGUID = SDL_JoystickGetGUIDFromString(pchGUID);
 
 	pControllerMapping = SDL_PrivateGetControllerMappingForGUID(&jGUID);
 
