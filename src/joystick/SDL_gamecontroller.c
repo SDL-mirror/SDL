@@ -762,6 +762,33 @@ SDL_GameControllerMapping( SDL_GameController * gamecontroller )
 	return SDL_GameControllerMappingForGUID( gamecontroller->mapping.guid );
 }
 
+static void
+SDL_GameControllerLoadHints()
+{
+    const char *hint = SDL_GetHint(SDL_HINT_GAMECONTROLLERCONFIG);
+    if ( hint && hint[0] ) {
+        int nchHints = SDL_strlen( hint );
+        char *pUserMappings = SDL_malloc( nchHints + 1 );
+        char *pTempMappings = pUserMappings;
+        SDL_memcpy( pUserMappings, hint, nchHints );
+        while ( pUserMappings ) {
+            char *pchNewLine = NULL;
+
+            pchNewLine = SDL_strchr( pUserMappings, '\n' );
+            if ( pchNewLine )
+                *pchNewLine = '\0';
+
+            SDL_GameControllerAddMapping( pUserMappings );
+
+            if ( pchNewLine )
+                pUserMappings = pchNewLine + 1;
+            else
+                pUserMappings = NULL;
+        }
+        SDL_free(pTempMappings);
+    }
+}
+
 /*
  * Initialize the game controller system, mostly load our DB of controller config mappings
  */
@@ -781,35 +808,11 @@ SDL_GameControllerInit(void)
 	}
 
 	// load in any user supplied config
-	{
-		const char *hint = SDL_GetHint(SDL_HINT_GAMECONTROLLERCONFIG);
-		if ( hint && hint[0] )
-		{
-			int nchHints = SDL_strlen( hint );
-			char *pUserMappings = SDL_malloc( nchHints + 1 );
-			char *pTempMappings = pUserMappings;
-			SDL_memcpy( pUserMappings, hint, nchHints );
-			while ( pUserMappings )
-			{
-				char *pchNewLine = NULL;
-
-				pchNewLine = SDL_strchr( pUserMappings, '\n' );
-				if ( pchNewLine )
-					*pchNewLine = '\0';
-
-				SDL_GameControllerAddMapping( pUserMappings );
-
-				if ( pchNewLine )
-					pUserMappings = pchNewLine + 1;
-				else
-					pUserMappings = NULL;
-			}
-			SDL_free(pTempMappings);
-		}
-	}
+    SDL_GameControllerLoadHints();
 
 	/* watch for joy events and fire controller ones if needed */
 	SDL_AddEventWatch( SDL_GameControllerEventWatcher, NULL );
+
 	return (0);
 }
 
@@ -875,10 +878,11 @@ SDL_GameControllerOpen(int device_index)
 		gamecontrollerlist = gamecontrollerlist->next;
     }
 
-	// Find a Controller Mapping 
+	// Find a controller mapping 
+    // Check for hints in case someone has changed them recently
+    SDL_GameControllerLoadHints();
 	pSupportedController =  SDL_PrivateGetControllerMapping(device_index);
-	if ( !pSupportedController )
-	{
+	if ( !pSupportedController ) {
 		SDL_SetError("Couldn't find mapping for device (%d)", device_index );
 		return (NULL);
 	}
