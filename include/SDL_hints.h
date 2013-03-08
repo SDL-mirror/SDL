@@ -209,6 +209,9 @@ extern "C" {
  *  \brief  A variable that lets you manually hint extra gamecontroller db entries
  *
  *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
+ *
+ *  This hint must be set before calling SDL_Init(SDL_INIT_GAMECONTROLLER)
+ *  You can update hints after the system is initialized with SDL_GameControllerAddMapping()
  */
 #define SDL_HINT_GAMECONTROLLERCONFIG "SDL_GAMECONTROLLERCONFIG"
 

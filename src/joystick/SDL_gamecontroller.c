@@ -879,8 +879,6 @@ SDL_GameControllerOpen(int device_index)
     }
 
 	// Find a controller mapping 
-    // Check for hints in case someone has changed them recently
-    SDL_GameControllerLoadHints();
 	pSupportedController =  SDL_PrivateGetControllerMapping(device_index);
 	if ( !pSupportedController ) {
 		SDL_SetError("Couldn't find mapping for device (%d)", device_index );
