@@ -348,10 +348,28 @@ When you're done instrumenting with valgrind, you can disable the wrapper:
 ================================================================================
 
 Support for OpenGL ES/ES2 applications was introduced in the NDK for API level 9, 
-which has since then been obsoleted, and the recommendation to developers was to 
+which has since then been obsoleted, with the recommendation to developers to 
 bump the required level to 10.
 As of this writing, according to http://developer.android.com/about/dashboards/index.html
 about 90% of the existing Android devices support an API level 10 or higher.
+
+================================================================================
+ A note regarding the use of the "dirty rectangles" rendering technique
+================================================================================
+
+If your app uses a variation of the "dirty rectangles" rendering technique,
+where you only update a portion of the screen on each frame, you may notice a
+variety of visual glitches on Android, that are not present on other platforms.
+This is caused by SDL's use of EGL as the support system to handle OpenGL ES/ES2
+contexts, in particular the use of the eglSwapBuffers function. As stated in the
+documentation for the function "The contents of ancillary buffers are always 
+undefined after calling eglSwapBuffers".
+Setting the EGL_SWAP_BEHAVIOR attribute of the surface to EGL_BUFFER_PRESERVED
+is not possible for SDL as it requires EGL 1.4, available only on the API level
+17+, so the only workaround available on this platform is to redraw the entire
+screen each frame.
+
+Reference: http://www.khronos.org/registry/egl/specs/EGLTechNote0001.html
 
 ================================================================================
  Known issues
