@@ -41,13 +41,13 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
         /* Race condition on first lock... */
         _spinlock_mutex = SDL_CreateMutex();
     }
-    SDL_mutexP(_spinlock_mutex);
+    SDL_LockMutex(_spinlock_mutex);
     if (*lock == 0) {
         *lock = 1;
-        SDL_mutexV(_spinlock_mutex);
+        SDL_UnlockMutex(_spinlock_mutex);
         return SDL_TRUE;
     } else {
-        SDL_mutexV(_spinlock_mutex);
+        SDL_UnlockMutex(_spinlock_mutex);
         return SDL_FALSE;
     }
 

@@ -412,7 +412,7 @@ static SDL_bool EnqueueEvent_Mutex(SDL_EventQueue *queue, const SDL_Event *event
     int delta;
     SDL_bool status = SDL_FALSE;
 
-    SDL_mutexP(queue->mutex);
+    SDL_LockMutex(queue->mutex);
 
     queue_pos = (unsigned)queue->enqueue_pos.value;
     entry = &queue->entries[queue_pos & WRAP_MASK];
@@ -432,7 +432,7 @@ static SDL_bool EnqueueEvent_Mutex(SDL_EventQueue *queue, const SDL_Event *event
         printf("ERROR: mutex failed!\n");
     }
 
-    SDL_mutexV(queue->mutex);
+    SDL_UnlockMutex(queue->mutex);
 
     return status;
 }
@@ -445,7 +445,7 @@ static SDL_bool DequeueEvent_Mutex(SDL_EventQueue *queue, SDL_Event *event)
     int delta;
     SDL_bool status = SDL_FALSE;
 
-    SDL_mutexP(queue->mutex);
+    SDL_LockMutex(queue->mutex);
 
     queue_pos = (unsigned)queue->dequeue_pos.value;
     entry = &queue->entries[queue_pos & WRAP_MASK];
@@ -465,7 +465,7 @@ static SDL_bool DequeueEvent_Mutex(SDL_EventQueue *queue, SDL_Event *event)
         printf("ERROR: mutex failed!\n");
     }
 
-    SDL_mutexV(queue->mutex);
+    SDL_UnlockMutex(queue->mutex);
 
     return status;
 }

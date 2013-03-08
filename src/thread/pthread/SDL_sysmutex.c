@@ -79,7 +79,7 @@ SDL_DestroyMutex(SDL_mutex * mutex)
 
 /* Lock the mutex */
 int
-SDL_mutexP(SDL_mutex * mutex)
+SDL_LockMutex(SDL_mutex * mutex)
 {
     int retval;
 #if FAKE_RECURSIVE_MUTEX
@@ -165,7 +165,7 @@ SDL_TryLockMutex(SDL_mutex * mutex)
 }
 
 int
-SDL_mutexV(SDL_mutex * mutex)
+SDL_UnlockMutex(SDL_mutex * mutex)
 {
     int retval;
 

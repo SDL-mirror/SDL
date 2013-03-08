@@ -123,8 +123,8 @@ SDL_DestroySemaphore(SDL_sem * sem)
         }
         SDL_DestroyCond(sem->count_nonzero);
         if (sem->count_lock) {
-            SDL_mutexP(sem->count_lock);
-            SDL_mutexV(sem->count_lock);
+            SDL_LockMutex(sem->count_lock);
+            SDL_UnlockMutex(sem->count_lock);
             SDL_DestroyMutex(sem->count_lock);
         }
         SDL_free(sem);

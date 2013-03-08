@@ -54,18 +54,18 @@ FillSound(void *device, void *stream, size_t len,
 
     if (!audio->paused) {
         if (audio->convert.needed) {
-            SDL_mutexP(audio->mixer_lock);
+            SDL_LockMutex(audio->mixer_lock);
             (*audio->spec.callback) (audio->spec.userdata,
                                      (Uint8 *) audio->convert.buf,
                                      audio->convert.len);
-            SDL_mutexV(audio->mixer_lock);
+            SDL_UnlockMutex(audio->mixer_lock);
             SDL_ConvertAudio(&audio->convert);
             SDL_memcpy(stream, audio->convert.buf, audio->convert.len_cvt);
         } else {
-            SDL_mutexP(audio->mixer_lock);
+            SDL_LockMutex(audio->mixer_lock);
             (*audio->spec.callback) (audio->spec.userdata,
                                      (Uint8 *) stream, len);
-            SDL_mutexV(audio->mixer_lock);
+            SDL_UnlockMutex(audio->mixer_lock);
         }
     }
 }

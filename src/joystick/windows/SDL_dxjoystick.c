@@ -819,7 +819,7 @@ void SDL_SYS_JoystickDetect()
 		pCurList = SYS_Joystick;
 		SYS_Joystick = NULL;
 		s_iNewGUID = 0;
-		SDL_mutexP( s_mutexJoyStickEnum );
+		SDL_LockMutex( s_mutexJoyStickEnum );
 
 		if ( !s_pKnownJoystickGUIDs )
 			s_pKnownJoystickGUIDs = SDL_malloc( sizeof(GUID)*MAX_JOYSTICKS );
@@ -832,7 +832,7 @@ void SDL_SYS_JoystickDetect()
 			EnumJoysticksCallback,
 			&pCurList, DIEDFL_ATTACHEDONLY);
 
-		SDL_mutexV( s_mutexJoyStickEnum );
+		SDL_UnlockMutex( s_mutexJoyStickEnum );
 	}
 
 	if ( pCurList )

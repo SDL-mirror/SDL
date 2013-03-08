@@ -280,10 +280,10 @@ outputCallback(void *inRefCon,
         while (remaining > 0) {
             if (this->hidden->bufferOffset >= this->hidden->bufferSize) {
                 /* Generate the data */
-                SDL_mutexP(this->mixer_lock);
+                SDL_LockMutex(this->mixer_lock);
                 (*this->spec.callback)(this->spec.userdata,
                             this->hidden->buffer, this->hidden->bufferSize);
-                SDL_mutexV(this->mixer_lock);
+                SDL_UnlockMutex(this->mixer_lock);
                 this->hidden->bufferOffset = 0;
             }
 

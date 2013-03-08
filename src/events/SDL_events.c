@@ -212,7 +212,7 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
     }
     /* Lock the event queue */
     used = 0;
-    if (!SDL_EventQ.lock || SDL_mutexP(SDL_EventQ.lock) == 0) {
+    if (!SDL_EventQ.lock || SDL_LockMutex(SDL_EventQ.lock) == 0) {
         if (action == SDL_ADDEVENT) {
             for (i = 0; i < numevents; ++i) {
                 used += SDL_AddEvent(&events[i]);
@@ -242,7 +242,7 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
                 }
             }
         }
-        SDL_mutexV(SDL_EventQ.lock);
+        SDL_UnlockMutex(SDL_EventQ.lock);
     } else {
         SDL_SetError("Couldn't lock event queue");
         used = -1;
@@ -285,7 +285,7 @@ SDL_FlushEvents(Uint32 minType, Uint32 maxType)
 #endif
 
     /* Lock the event queue */
-    if (SDL_mutexP(SDL_EventQ.lock) == 0) {
+    if (SDL_LockMutex(SDL_EventQ.lock) == 0) {
         int spot = SDL_EventQ.head;
         while (spot != SDL_EventQ.tail) {
             Uint32 type = SDL_EventQ.event[spot].type;
@@ -295,7 +295,7 @@ SDL_FlushEvents(Uint32 minType, Uint32 maxType)
                 spot = (spot + 1) % MAXEVENTS;
             }
         }
-        SDL_mutexV(SDL_EventQ.lock);
+        SDL_UnlockMutex(SDL_EventQ.lock);
     }
 }
 
@@ -446,7 +446,7 @@ SDL_DelEventWatch(SDL_EventFilter filter, void *userdata)
 void
 SDL_FilterEvents(SDL_EventFilter filter, void *userdata)
 {
-    if (SDL_mutexP(SDL_EventQ.lock) == 0) {
+    if (SDL_LockMutex(SDL_EventQ.lock) == 0) {
         int spot;
 
         spot = SDL_EventQ.head;
@@ -458,7 +458,7 @@ SDL_FilterEvents(SDL_EventFilter filter, void *userdata)
             }
         }
     }
-    SDL_mutexV(SDL_EventQ.lock);
+    SDL_UnlockMutex(SDL_EventQ.lock);
 }
 
 Uint8
