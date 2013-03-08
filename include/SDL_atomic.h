@@ -196,9 +196,8 @@ typedef struct { int value; } SDL_atomic_t;
  * \note If you don't know what this function is for, you shouldn't use it!
 */
 #ifndef SDL_AtomicCAS
-#define SDL_AtomicCAS SDL_AtomicCAS_
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval);
 #endif
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval);
 
 /**
  * \brief Set an atomic variable to a value.
@@ -271,9 +270,8 @@ static __inline__ int SDL_AtomicAdd(SDL_atomic_t *a, int v)
  * \note If you don't know what this function is for, you shouldn't use it!
 */
 #ifndef SDL_AtomicCASPtr
-#define SDL_AtomicCASPtr SDL_AtomicCASPtr_
+extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr(void* *a, void *oldval, void *newval);
 #endif
-extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr_(void* *a, void *oldval, void *newval);
 
 /**
  * \brief Set a pointer to a value atomically.
