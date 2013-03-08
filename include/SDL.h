@@ -114,7 +114,10 @@ extern "C" {
 #define SDL_INIT_HAPTIC         0x00001000
 #define SDL_INIT_GAMECONTROLLER 0x00002000		/**< turn on game controller also implicitly does JOYSTICK */
 #define SDL_INIT_NOPARACHUTE    0x00100000      /**< Don't catch fatal signals */
-#define SDL_INIT_EVERYTHING     0x0000FFFF
+#define SDL_INIT_EVERYTHING ( \
+                SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_VIDEO | \
+                SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER \
+            )
 /*@}*/
 
 /**
