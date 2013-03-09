@@ -205,13 +205,14 @@ extern "C" {
  */
 #define SD_HINT_XINPUT_ENABLED "SDL_XINPUT_ENABLED"
 
+
 /**
  *  \brief  A variable that lets you manually hint extra gamecontroller db entries
- *
- *  The variable expected newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
+ *  
+ *  The variable should be newline delimited rows of gamecontroller config data, see SDL_gamecontroller.h
  *
  *  This hint must be set before calling SDL_Init(SDL_INIT_GAMECONTROLLER)
- *  You can update hints after the system is initialized with SDL_GameControllerAddMapping()
+ *  You can update mappings after the system is initialized with SDL_GameControllerMappingForGUID() and SDL_GameControllerAddMapping()
  */
 #define SDL_HINT_GAMECONTROLLERCONFIG "SDL_GAMECONTROLLERCONFIG"
 
