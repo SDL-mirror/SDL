@@ -1566,6 +1566,14 @@ void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (w <= 0) {
+        SDL_InvalidParamError("w");
+        return;
+    }
+    if (h <= 0) {
+        SDL_InvalidParamError("h");
+        return;
+    }
 
     /* FIXME: Should this change fullscreen modes? */
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
@@ -1584,30 +1592,27 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
 void
 SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
 {
-    int dummy;
-
-    if (!w) {
-        w = &dummy;
-    }
-    if (!h) {
-        h = &dummy;
-    }
-
-    *w = 0;
-    *h = 0;
-
     CHECK_WINDOW_MAGIC(window, );
-
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (w) {
         *w = window->w;
-        *h = window->h;
     }
+    if (h) {
+        *h = window->h;
+    }                                
 }
 
 void
 SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (min_w <= 0) {
+        SDL_InvalidParamError("min_w");
+        return;
+    }
+    if (min_h <= 0) {
+        SDL_InvalidParamError("min_h");
+        return;
+    }
     
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->min_w = min_w;
@@ -1623,22 +1628,11 @@ SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
 void
 SDL_GetWindowMinimumSize(SDL_Window * window, int *min_w, int *min_h)
 {
-    int dummy;
-    
-    if (!min_w) {
-        min_w = &dummy;
-    }
-    if (!min_h) {
-        min_h = &dummy;
-    }
-    
-    *min_w = 0;
-    *min_h = 0;
-    
     CHECK_WINDOW_MAGIC(window, );
-    
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (min_w) {
         *min_w = window->min_w;
+    }
+    if (min_h) {
         *min_h = window->min_h;
     }
 }
@@ -1647,6 +1641,14 @@ void
 SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (max_w <= 0) {
+        SDL_InvalidParamError("max_w");
+        return;
+    }
+    if (max_h <= 0) {
+        SDL_InvalidParamError("max_h");
+        return;
+    }
     
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->max_w = max_w;
@@ -1662,22 +1664,11 @@ SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
 void
 SDL_GetWindowMaximumSize(SDL_Window * window, int *max_w, int *max_h)
 {
-    int dummy;
-    
-    if (!max_w) {
-        max_w = &dummy;
-    }
-    if (!max_h) {
-        max_h = &dummy;
-    }
-    
-    *max_w = 0;
-    *max_h = 0;
-    
     CHECK_WINDOW_MAGIC(window, );
-    
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (max_w) {
         *max_w = window->max_w;
+    }
+    if (max_h) {
         *max_h = window->max_h;
     }
 }
