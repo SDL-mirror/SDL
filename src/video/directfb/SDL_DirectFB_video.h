@@ -31,6 +31,8 @@
 #include "SDL_scancode.h"
 #include "SDL_render.h"
 
+#include "SDL_log.h"
+
 #define DFB_VERSIONNUM(X, Y, Z)						\
 	((X)*1000 + (Y)*100 + (Z))
 
@@ -66,7 +68,6 @@
 #endif
 
 #define DIRECTFB_DEBUG 1
-#define LOG_CHANNEL 	stdout
 
 #define DFBENV_USE_YUV_UNDERLAY 	"SDL_DIRECTFB_YUV_UNDERLAY"     /* Default: off */
 #define DFBENV_USE_YUV_DIRECT   	"SDL_DIRECTFB_YUV_DIRECT"       /* Default: off */
@@ -80,23 +81,12 @@
 
 #define SDL_DFB_CONTEXT "SDL_DirectFB"
 
-#define SDL_DFB_ERR(x...) 							\
-	do {											\
-		fprintf(LOG_CHANNEL, "%s: %s <%d>:\n\t",	\
-			SDL_DFB_CONTEXT, __FILE__, __LINE__ );	\
-        fprintf(LOG_CHANNEL, x ); 					\
-	} while (0)
+#define SDL_DFB_ERR(x...) SDL_LogError(SDL_LOG_CATEGORY_ERROR, x)
 
 #if (DIRECTFB_DEBUG)
+#define SDL_DFB_LOG(x...) SDL_LogInfo(SDL_LOG_CATEGORY_VIDEO, x)
 
-#define SDL_DFB_LOG(x...) 							\
-	do {											\
-		fprintf(LOG_CHANNEL, "%s: ", SDL_DFB_CONTEXT);		\
-        fprintf(LOG_CHANNEL, x ); 					\
-		fprintf(LOG_CHANNEL, "\n");					\
-	} while (0)
-
-#define SDL_DFB_DEBUG(x...) SDL_DFB_ERR( x )
+#define SDL_DFB_DEBUG(x...) SDL_LogDebug(SDL_LOG_CATEGORY_VIDEO, x)
 
 static inline DFBResult sdl_dfb_check(DFBResult ret, const char *src_file, int src_line) {
 	if (ret != DFB_OK) {

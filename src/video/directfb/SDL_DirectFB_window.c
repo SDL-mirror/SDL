@@ -47,6 +47,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     int bshaped = 0;
 
     SDL_DFB_ALLOC_CLEAR(window->driverdata, sizeof(DFB_WindowData));
+    SDL_memset(&desc, 0, sizeof(DFBWindowDescription));
     windata = (DFB_WindowData *) window->driverdata;
 
     windata->is_managed = devdata->has_own_wm;
@@ -89,7 +90,12 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
     desc.height = windata->size.h;
     desc.pixelformat = dispdata->pixelformat;
     desc.surface_caps = DSCAPS_PREMULTIPLIED;
-    
+#if DIRECTFB_MAJOR_VERSION == 1 && DIRECTFB_MINOR_VERSION >= 4
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        desc.surface_caps |= DSCAPS_GL;
+    }
+#endif
+
     /* Create the window. */
     SDL_DFB_CHECKERR(dispdata->layer->CreateWindow(dispdata->layer, &desc,
                                                    &windata->dfbwin));
@@ -378,7 +384,7 @@ DirectFB_RestoreWindow(_THIS, SDL_Window * window)
 }
 
 void
-DirectFB_SetWindowGrab(_THIS, SDL_Window * window)
+DirectFB_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 {
     SDL_DFB_DEVICEDATA(_this);
     SDL_DFB_WINDOWDATA(window);

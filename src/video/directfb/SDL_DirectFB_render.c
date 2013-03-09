@@ -96,17 +96,17 @@ static void DirectFB_DirtyTexture(SDL_Renderer * renderer,
                                   const SDL_Rect * rects);
 static int DirectFB_SetDrawBlendMode(SDL_Renderer * renderer);
 static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
-                                const SDL_Point * points, int count);
+                                const SDL_FPoint * points, int count);
 static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
-                               const SDL_Point * points, int count);
+                               const SDL_FPoint * points, int count);
 static int DirectFB_RenderDrawRects(SDL_Renderer * renderer,
 		const SDL_Rect ** rects, int count);
 static int DirectFB_RenderFillRects(SDL_Renderer * renderer,
-		const SDL_Rect * rects, int count);
+		const SDL_FRect * rects, int count);
 static int DirectFB_RenderCopy(SDL_Renderer * renderer,
                                SDL_Texture * texture,
                                const SDL_Rect * srcrect,
-                               const SDL_Rect * dstrect);
+                               const SDL_FRect * dstrect);
 static void DirectFB_RenderPresent(SDL_Renderer * renderer);
 static void DirectFB_DestroyTexture(SDL_Renderer * renderer,
                                     SDL_Texture * texture);
@@ -175,6 +175,14 @@ SDLtoDFBRect(const SDL_Rect * sr, DFBRectangle * dr)
     dr->h = sr->h;
     dr->w = sr->w;
 }
+static __inline__ void
+SDLtoDFBRect_Float(const SDL_FRect * sr, DFBRectangle * dr)
+{
+    dr->x = sr->x;
+    dr->y = sr->y;
+    dr->h = sr->h;
+    dr->w = sr->w;
+}
 
 
 static int
@@ -206,6 +214,8 @@ TextureHasAlpha(DirectFB_TextureData * data)
 static inline IDirectFBSurface *get_dfb_surface(SDL_Window *window)
 {
 	SDL_SysWMinfo wm_info;
+    SDL_memset(&wm_info, 0, sizeof(SDL_SysWMinfo));
+
 	SDL_VERSION(&wm_info.version);
 	SDL_GetWindowWMInfo(window, &wm_info);
 
@@ -215,6 +225,8 @@ static inline IDirectFBSurface *get_dfb_surface(SDL_Window *window)
 static inline IDirectFBWindow *get_dfb_window(SDL_Window *window)
 {
 	SDL_SysWMinfo wm_info;
+    SDL_memset(&wm_info, 0, sizeof(SDL_SysWMinfo));
+
 	SDL_VERSION(&wm_info.version);
 	SDL_GetWindowWMInfo(window, &wm_info);
 
@@ -917,7 +929,7 @@ PrepareDraw(SDL_Renderer * renderer)
 }
 
 static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
-                                const SDL_Point * points, int count)
+                                const SDL_FPoint * points, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
 	IDirectFBSurface *destsurf = get_dfb_surface(data->window);
@@ -934,7 +946,7 @@ static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
 }
 
 static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
-                               const SDL_Point * points, int count)
+                               const SDL_FPoint * points, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
 	IDirectFBSurface *destsurf = get_dfb_surface(data->window);
@@ -977,7 +989,7 @@ DirectFB_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int c
 }
 
 static int
-DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int count)
+DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
 	IDirectFBSurface *destsurf = get_dfb_surface(data->window);
@@ -998,15 +1010,19 @@ DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_Rect * rects, int co
 
 static int
 DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
-                    const SDL_Rect * srcrect, const SDL_Rect * dstrect)
+                    const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
 	IDirectFBSurface *destsurf = get_dfb_surface(data->window);
     DirectFB_TextureData *texturedata =
         (DirectFB_TextureData *) texture->driverdata;
     Uint8 alpha, r, g, b;
+    DFBRectangle sr, dr;
 
     DirectFB_ActivateRenderer(renderer);
+
+    SDLtoDFBRect(srcrect, &sr);
+    SDLtoDFBRect_Float(dstrect, &dr);
 
     if (texturedata->display) {
         int px, py;
@@ -1018,20 +1034,17 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
         SDL_DFB_CHECKERR(dispdata->
                          vidlayer->SetSourceRectangle(dispdata->vidlayer,
-                                                      srcrect->x, srcrect->y,
-                                                      srcrect->w,
-                                                      srcrect->h));
+                                                      sr.x, sr.y, sr.w, sr.h));
         dfbwin->GetPosition(dfbwin, &px, &py);
         px += windata->client.x;
         py += windata->client.y;
         SDL_DFB_CHECKERR(dispdata->
                          vidlayer->SetScreenRectangle(dispdata->vidlayer,
-                                                      px + dstrect->x,
-                                                      py + dstrect->y,
-                                                      dstrect->w,
-                                                      dstrect->h));
+                                                      px + dr.x,
+                                                      py + dr.y,
+                                                      dr.w,
+                                                      dr.h));
     } else {
-        DFBRectangle sr, dr;
         DFBSurfaceBlittingFlags flags = 0;
 
 #if 0

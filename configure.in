@@ -1423,7 +1423,7 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
         else
             set -- `echo $DIRECTFB_REQUIRED_VERSION | sed 's/\./ /g'`
             NEED_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
-            set -- `directfb-config --version | sed 's/\./ /g'`
+            set -- `$DIRECTFBCONFIG --version | sed 's/\./ /g'`
             HAVE_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
             if test $HAVE_VERSION -ge $NEED_VERSION; then
                 DIRECTFB_CFLAGS=`$DIRECTFBCONFIG --cflags`
