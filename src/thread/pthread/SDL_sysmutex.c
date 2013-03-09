@@ -134,7 +134,7 @@ SDL_TryLockMutex(SDL_mutex * mutex)
     retval = 0;
 #if FAKE_RECURSIVE_MUTEX
     this_thread = pthread_self();
-    if (mutex->owner == this_thead) {
+    if (mutex->owner == this_thread) {
         ++mutex->recursive;
     } else {
         /* The order of operations is important.
