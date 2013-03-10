@@ -53,7 +53,7 @@ Simple Window Manager
 =====================
 
 The driver has support for a very, very basic window manager you may
-want to use when runnning with "wm=default". Use
+want to use when running with "wm=default". Use
 
 export SDL_DIRECTFB_WM=1
 
@@ -62,10 +62,10 @@ you need to have the following font installed:
 
 /usr/share/fonts/truetype/freefont/FreeSans.ttf
 
-OPENGL Support
+OpenGL Support
 ==============
 
-The following instructions will give you *software* opengl. However this
+The following instructions will give you *software* OpenGL. However this
 works at least on all directfb supported platforms.
 
 As of this writing 20100802 you need to pull Mesa from git and do the following:

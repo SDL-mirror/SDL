@@ -56,7 +56,7 @@ usually is "TestGame". You might also want to use @PACKAGE@ to use the package
 name as specified in your configure.in file.
 
 If your project builds more than one application, you will have to do a bit
-more.  For each of your target applications, you need a seperate rule.
+more. For each of your target applications, you need a separate rule.
 
 If you want the created bundles to be installed, you may want to add this
 rule to your Makefile.am:
@@ -75,13 +75,13 @@ the make rule accordingly.
 
 But beware! That is only part of the story! With the above, you end up with
 a bare bone .app bundle, which is double clickable from the Finder. But
-there are some  more things you should do before shipping yor product...
+there are some more things you should do before shipping your product...
 
 1) The bundle right now probably is dynamically linked against SDL. That 
    means that when you copy it to another computer, *it will not run*,
    unless you also install SDL on that other computer. A good solution
    for this dilemma is to static link against SDL. On OS X, you can
-   achieve that by linkinag against the libraries listed by
+   achieve that by linking against the libraries listed by
      sdl-config --static-libs
    instead of those listed by
      sdl-config --libs
@@ -120,7 +120,7 @@ normally from the Finder.
 - Building the Framework
 
 The SDL Library is packaged as a framework bundle, an organized
-relocatable folder heirarchy of executible code, interface headers, 
+relocatable folder hierarchy of executable code, interface headers,
 and additional resources. For practical purposes, you can think of a 
 framework as a more user and system-friendly shared library, whose library
 file behaves more or less like a standard UNIX shared library.
@@ -162,11 +162,11 @@ following locations:
 
 - Building from command line
     Use pbxbuild in the same directory as your .pbproj file
-         
+
 - Running your app
     You can send command line args to your app by either invoking it from
     the command line (in *.app/Contents/MacOS) or by entering them in the
-    "Executibles" panel of the target settings.
+    "Executables" panel of the target settings.
     
 - Implementation Notes
     Some things that may be of interest about how it all works...
@@ -181,6 +181,6 @@ following locations:
         You are free to modify your Cocoa app with generally no consequence 
         to SDL. You cannot, however, easily change the SDL window itself.
         Functionality may be added in the future to help this.
-	
+
 
 Known bugs are listed in the file "BUGS"
