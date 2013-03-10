@@ -42,6 +42,65 @@
 #include <xinput.h>
 #include <devguid.h>
 #include <dbt.h>
+#include <xinput.h>
+
+/* typedef's for XInput structs we use */
+typedef struct
+{
+    WORD wButtons;
+    BYTE bLeftTrigger;
+    BYTE bRightTrigger;
+    SHORT sThumbLX;
+    SHORT sThumbLY;
+    SHORT sThumbRX;
+    SHORT sThumbRY;
+    DWORD dwPaddingReserved;
+} XINPUT_GAMEPAD_EX;
+
+typedef struct 
+{
+    DWORD dwPacketNumber;
+    XINPUT_GAMEPAD_EX Gamepad;
+} XINPUT_STATE_EX;
+
+/* Forward decl's for XInput API's we load dynamically and use if available */
+typedef DWORD (WINAPI *XInputGetState_t)
+	(
+	DWORD         dwUserIndex,  // [in] Index of the gamer associated with the device
+	XINPUT_STATE_EX* pState        // [out] Receives the current state
+	);
+
+typedef DWORD (WINAPI *XInputSetState_t)
+	(
+	DWORD             dwUserIndex,  // [in] Index of the gamer associated with the device
+	XINPUT_VIBRATION* pVibration    // [in, out] The vibration information to send to the controller
+	);
+
+typedef DWORD (WINAPI *XInputGetCapabilities_t)
+	(
+	DWORD                dwUserIndex,   // [in] Index of the gamer associated with the device
+	DWORD                dwFlags,       // [in] Input flags that identify the device type
+	XINPUT_CAPABILITIES* pCapabilities  // [out] Receives the capabilities
+	);
+
+extern int WIN_LoadXInputDLL(void);
+extern void WIN_UnloadXInputDLL(void);
+
+extern XInputGetState_t SDL_XInputGetState;
+extern XInputSetState_t SDL_XInputSetState;
+extern XInputGetCapabilities_t SDL_XInputGetCapabilities;
+extern DWORD SDL_XInputVersion;  // ((major << 16) & 0xFF00) | (minor & 0xFF)
+
+#define XINPUTGETSTATE			SDL_XInputGetState
+#define XINPUTSETSTATE			SDL_XInputSetState
+#define XINPUTGETCAPABILITIES	SDL_XInputGetCapabilities
+#define INVALID_XINPUT_USERID 255
+#define SDL_XINPUT_MAX_DEVICES 4
+
+#ifndef XINPUT_CAPS_FFB_SUPPORTED
+#define XINPUT_CAPS_FFB_SUPPORTED 0x0001
+#endif
+
 
 #define MAX_INPUTS	256     /* each joystick can have up to 256 inputs */
 

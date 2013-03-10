@@ -33,7 +33,6 @@
 #define _WIN32_WINNT  0x501   /* Need 0x410 for AlphaBlend() and 0x500 for EnumDisplayDevices(), 0x501 for raw input */
 
 #include <windows.h>
-#include <xinput.h>
 
 /* Routines to convert from UTF8 to native Windows text */
 #if UNICODE
@@ -50,64 +49,6 @@ extern void WIN_SetError(const char *prefix);
 /* Wrap up the oddities of CoInitialize() into a common function. */
 extern HRESULT WIN_CoInitialize(void);
 extern void WIN_CoUninitialize(void);
-
-/* typedef's for XInput structs we use */
-typedef struct
-{
-    WORD wButtons;
-    BYTE bLeftTrigger;
-    BYTE bRightTrigger;
-    SHORT sThumbLX;
-    SHORT sThumbLY;
-    SHORT sThumbRX;
-    SHORT sThumbRY;
-    DWORD dwPaddingReserved;
-} XINPUT_GAMEPAD_EX;
-
-typedef struct 
-{
-    DWORD dwPacketNumber;
-    XINPUT_GAMEPAD_EX Gamepad;
-} XINPUT_STATE_EX;
-
-
-/* Forward decl's for XInput API's we load dynamically and use if available */
-typedef DWORD (WINAPI *XInputGetState_t)
-	(
-	DWORD         dwUserIndex,  // [in] Index of the gamer associated with the device
-	XINPUT_STATE_EX* pState        // [out] Receives the current state
-	);
-
-typedef DWORD (WINAPI *XInputSetState_t)
-	(
-	DWORD             dwUserIndex,  // [in] Index of the gamer associated with the device
-	XINPUT_VIBRATION* pVibration    // [in, out] The vibration information to send to the controller
-	);
-
-typedef DWORD (WINAPI *XInputGetCapabilities_t)
-	(
-	DWORD                dwUserIndex,   // [in] Index of the gamer associated with the device
-	DWORD                dwFlags,       // [in] Input flags that identify the device type
-	XINPUT_CAPABILITIES* pCapabilities  // [out] Receives the capabilities
-	);
-
-extern int WIN_LoadXInputDLL(void);
-extern void WIN_UnloadXInputDLL(void);
-
-extern XInputGetState_t SDL_XInputGetState;
-extern XInputSetState_t SDL_XInputSetState;
-extern XInputGetCapabilities_t SDL_XInputGetCapabilities;
-extern DWORD SDL_XInputVersion;  // ((major << 16) & 0xFF00) | (minor & 0xFF)
-
-#define XINPUTGETSTATE			SDL_XInputGetState
-#define XINPUTSETSTATE			SDL_XInputSetState
-#define XINPUTGETCAPABILITIES	SDL_XInputGetCapabilities
-#define INVALID_XINPUT_USERID 255
-#define SDL_XINPUT_MAX_DEVICES 4
-
-#ifndef XINPUT_CAPS_FFB_SUPPORTED
-#define XINPUT_CAPS_FFB_SUPPORTED 0x0001
-#endif
 
 #endif /* _INCLUDED_WINDOWS_H */
 
