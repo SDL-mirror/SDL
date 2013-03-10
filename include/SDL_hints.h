@@ -203,7 +203,7 @@ extern "C" {
  *    "0"       - Disable XInput timer (only uses direct input)
  *    "1"       - Enable XInput timer (the default)
  */
-#define SD_HINT_XINPUT_ENABLED "SDL_XINPUT_ENABLED"
+#define SDL_HINT_XINPUT_ENABLED "SDL_XINPUT_ENABLED"
 
 
 /**

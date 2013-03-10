@@ -62,25 +62,6 @@ typedef struct input_t
     Uint8 num;
 } input_t;
 
-/* typedef's for XInput structs we use */
-typedef struct
-{
-	WORD                                wButtons;
-	BYTE                                bLeftTrigger;
-	BYTE                                bRightTrigger;
-	SHORT                               sThumbLX;
-	SHORT                               sThumbLY;
-	SHORT                               sThumbRX;
-	SHORT                               sThumbRY;
-	DWORD								dwPaddingReserved;
-} XINPUT_GAMEPAD_EX;
-
-typedef struct 
-{
-	DWORD                               dwPacketNumber;
-	XINPUT_GAMEPAD_EX                   Gamepad;
-} XINPUT_STATE_EX;
-
 /* The private structure used to keep track of a joystick */
 struct joystick_hwdata
 {
@@ -95,6 +76,7 @@ struct joystick_hwdata
 	Uint8 removed;
 	Uint8 send_remove_event;
 	Uint8 bXInputDevice; // 1 if this device supports using the xinput API rather than DirectInput
+	Uint8 bXInputHaptic; // Supports force feedback via XInput.
 	Uint8 userid; // XInput userid index for this joystick
 	Uint8 currentXInputSlot; // the current position to write to in XInputState below, used so we can compare old and new values
 	XINPUT_STATE_EX	XInputState[2];

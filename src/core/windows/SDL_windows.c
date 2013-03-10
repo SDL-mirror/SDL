@@ -24,9 +24,72 @@
 
 #include "SDL_error.h"
 #include "SDL_windows.h"
+#include "SDL_assert.h"
 
 #include <objbase.h>  /* for CoInitialize/CoUninitialize */
 
+
+XInputGetState_t SDL_XInputGetState = NULL;
+XInputSetState_t SDL_XInputSetState = NULL;
+XInputGetCapabilities_t SDL_XInputGetCapabilities = NULL;
+DWORD SDL_XInputVersion = 0;
+
+static HANDLE s_pXInputDLL = 0;
+static int s_XInputDLLRefCount = 0;
+
+int
+WIN_LoadXInputDLL(void)
+{
+    DWORD version = 0;
+
+    if (s_pXInputDLL) {
+        SDL_assert(s_XInputDLLRefCount > 0);
+        s_XInputDLLRefCount++;
+        return 0;  /* already loaded */
+    }
+
+    version = (1 << 16) | 4;
+    s_pXInputDLL = LoadLibrary( L"XInput1_4.dll" );  // 1.4 Ships with Windows 8.
+    if (!s_pXInputDLL) {
+        version = (1 << 16) | 3;
+        s_pXInputDLL = LoadLibrary( L"XInput1_3.dll" );  // 1.3 Ships with Vista and Win7, can be installed as a restributable component.
+    }
+    if (!s_pXInputDLL) {
+        s_pXInputDLL = LoadLibrary( L"bin\\XInput1_3.dll" );
+    }
+    if (!s_pXInputDLL) {
+        return -1;
+    }
+
+    SDL_assert(s_XInputDLLRefCount == 0);
+    SDL_XInputVersion = version;
+    s_XInputDLLRefCount = 1;
+
+    /* 100 is the ordinal for _XInputGetStateEx, which returns the same struct as XinputGetState, but with extra data in wButtons for the guide button, we think... */
+    SDL_XInputGetState = (XInputGetState_t)GetProcAddress( (HMODULE)s_pXInputDLL, (LPCSTR)100 );
+    SDL_XInputSetState = (XInputSetState_t)GetProcAddress( (HMODULE)s_pXInputDLL, "XInputSetState" );
+    SDL_XInputGetCapabilities = (XInputGetCapabilities_t)GetProcAddress( (HMODULE)s_pXInputDLL, "XInputGetCapabilities" );
+    if ( !SDL_XInputGetState || !SDL_XInputSetState || !SDL_XInputGetCapabilities ) {
+        WIN_UnloadXInputDLL();
+        return -1;
+    }
+
+    return 0;
+}
+
+void
+WIN_UnloadXInputDLL(void)
+{
+    if ( s_pXInputDLL ) {
+        SDL_assert(s_XInputDLLRefCount > 0);
+        if (--s_XInputDLLRefCount == 0) {
+            FreeLibrary( s_pXInputDLL );
+            s_pXInputDLL = NULL;
+        }
+    } else {
+        SDL_assert(s_XInputDLLRefCount == 0);
+    }
+}
 
 /* Sets an error message based on GetLastError() */
 void
