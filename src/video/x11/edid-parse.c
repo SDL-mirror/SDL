@@ -333,7 +333,7 @@ decode_standard_timings (const uchar *edid, MonitorInfo *info)
 	if (first != 0x01 && second != 0x01)
 	{
 	    int w = 8 * (first + 31);
-	    int h;
+	    int h = 0;
 
 	    switch (get_bits (second, 6, 7))
 	    {
