@@ -33,6 +33,7 @@
  * let it return 0 events. */
 
 #include "SDL_error.h"
+#include "SDL_assert.h"
 #include "SDL_events.h"
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
