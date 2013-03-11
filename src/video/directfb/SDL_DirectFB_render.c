@@ -953,13 +953,18 @@ static int DirectFB_RenderDrawPoints(SDL_Renderer * renderer,
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     IDirectFBSurface *destsurf = data->target;
+    DFBRegion clip_region;
     int i;
 
     DirectFB_ActivateRenderer(renderer);
 
     PrepareDraw(renderer);
-    for (i=0; i < count; i++)
-        SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, points[i].x, points[i].y, points[i].x, points[i].y));
+    destsurf->GetClip(destsurf, &clip_region);
+    for (i=0; i < count; i++) {
+        int x = points[i].x + clip_region.x1;
+        int y = points[i].y + clip_region.y1;
+        SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x, y, x, y));
+    }
     return 0;
   error:
     return -1;
@@ -970,6 +975,7 @@ static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     IDirectFBSurface *destsurf = data->target;
+    DFBRegion clip_region;
     int i;
 
     DirectFB_ActivateRenderer(renderer);
@@ -980,8 +986,14 @@ static int DirectFB_RenderDrawLines(SDL_Renderer * renderer,
     SDL_DFB_CHECKERR(destsurf->SetRenderOptions(destsurf, DSRO_ANTIALIAS));
 #endif
 
-    for (i=0; i < count - 1; i++)
-        SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, points[i].x, points[i].y, points[i+1].x, points[i+1].y));
+    destsurf->GetClip(destsurf, &clip_region);
+    for (i=0; i < count - 1; i++) {
+        int x1 = points[i].x + clip_region.x1;
+        int y1 = points[i].y + clip_region.y1;
+        int x2 = points[i + 1].x + clip_region.x1;
+        int y2 = points[i + 1].y + clip_region.y1;
+        SDL_DFB_CHECKERR(destsurf->DrawLine(destsurf, x1, y1, x2, y2));
+    }
 
     return 0;
   error:
@@ -993,15 +1005,21 @@ DirectFB_RenderDrawRects(SDL_Renderer * renderer, const SDL_Rect ** rects, int c
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     IDirectFBSurface *destsurf = data->target;
+    DFBRegion clip_region;
     int i;
 
     DirectFB_ActivateRenderer(renderer);
 
     PrepareDraw(renderer);
 
-    for (i=0; i<count; i++)
-        SDL_DFB_CHECKERR(destsurf->DrawRectangle(destsurf, rects[i]->x, rects[i]->y,
-                rects[i]->w, rects[i]->h));
+    destsurf->GetClip(destsurf, &clip_region);
+    for (i=0; i<count; i++) {
+        SDL_Rect dst = {rects[i]->x, rects[i]->y, rects[i]->w, rects[i]->h};
+        dst.x += clip_region.x1;
+        dst.y += clip_region.y1;
+        SDL_DFB_CHECKERR(destsurf->DrawRectangle(destsurf, dst.x, dst.y,
+                dst.w, dst.h));
+    }
 
     return 0;
   error:
@@ -1013,15 +1031,21 @@ DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int c
 {
     DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
     IDirectFBSurface *destsurf = data->target;
+    DFBRegion clip_region;
     int i;
 
     DirectFB_ActivateRenderer(renderer);
 
     PrepareDraw(renderer);
 
-    for (i=0; i<count; i++)
-        SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, rects[i].x, rects[i].y,
-                rects[i].w, rects[i].h));
+    destsurf->GetClip(destsurf, &clip_region);
+    for (i=0; i<count; i++) {
+        SDL_Rect dst = {rects[i].x, rects[i].y, rects[i].w, rects[i].h};        
+        dst.x += clip_region.x1;
+        dst.y += clip_region.y1;
+        SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, dst.x, dst.y,
+                dst.w, dst.h));
+    }
 
     return 0;
   error:
@@ -1037,12 +1061,17 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     DirectFB_TextureData *texturedata =
         (DirectFB_TextureData *) texture->driverdata;
     Uint8 alpha, r, g, b;
+    DFBRegion clip_region;
     DFBRectangle sr, dr;
 
     DirectFB_ActivateRenderer(renderer);
 
     SDLtoDFBRect(srcrect, &sr);
     SDLtoDFBRect_Float(dstrect, &dr);
+
+    destsurf->GetClip(destsurf, &clip_region);
+    dr.x += clip_region.x1;
+    dr.y += clip_region.y1;
 
     if (texturedata->display) {
         int px, py;
@@ -1097,9 +1126,6 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
             DirectFB_UpdateTexture(renderer, texture, &rect, texturedata->pixels, texturedata->pitch);
         }
-
-        SDLtoDFBRect(srcrect, &sr);
-        SDLtoDFBRect_Float(dstrect, &dr);
 
         alpha = r = g = b = 0xff;
         if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA){
