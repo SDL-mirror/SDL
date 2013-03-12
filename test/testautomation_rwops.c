@@ -78,6 +78,7 @@ _testGenericRWopsValidations(SDL_RWops *rw, int write)
 {
    char buf[sizeof(RWopsHelloWorldTestString)];
    Sint64 i;
+   size_t s;
    int seekPos = SDLTest_RandomIntegerInRange(4, 8);
 
    /* Clear buffer */
@@ -89,13 +90,13 @@ _testGenericRWopsValidations(SDL_RWops *rw, int write)
    SDLTest_AssertCheck(i == (Sint64)0, "Verify seek to 0 with SDL_RWseek (RW_SEEK_SET), expected 0, got %i", i);
 
    /* Test write. */
-   i = SDL_RWwrite(rw, RWopsHelloWorldTestString, sizeof(RWopsHelloWorldTestString)-1, 1);
+   s = SDL_RWwrite(rw, RWopsHelloWorldTestString, sizeof(RWopsHelloWorldTestString)-1, 1);
    SDLTest_AssertPass("Call to SDL_RWwrite succeeded");
    if (write) {
-		SDLTest_AssertCheck(i == (Sint64)1, "Verify result of writing one byte with SDL_RWwrite, expected 1, got %i", i);
+		SDLTest_AssertCheck(s == (size_t)1, "Verify result of writing one byte with SDL_RWwrite, expected 1, got %i", s);
    }
    else {
-		SDLTest_AssertCheck(i != (Sint64)1, "Verify result of writing with SDL_RWwrite, expected !=1, got %i", i);
+		SDLTest_AssertCheck(s == (size_t)0, "Verify result of writing with SDL_RWwrite, expected: 0, got %i", s);
    }
 
    /* Test seek to random position */
@@ -109,13 +110,13 @@ _testGenericRWopsValidations(SDL_RWops *rw, int write)
    SDLTest_AssertCheck(i == (Sint64)0, "Verify seek to 0 with SDL_RWseek (RW_SEEK_SET), expected 0, got %i", i);
 
    /* Test read */
-   i = SDL_RWread( rw, buf, 1, sizeof(RWopsHelloWorldTestString)-1 );
+   s = SDL_RWread( rw, buf, 1, sizeof(RWopsHelloWorldTestString)-1 );
    SDLTest_AssertPass("Call to SDL_RWread succeeded");
    SDLTest_AssertCheck(
-	   i == (Sint64)(sizeof(RWopsHelloWorldTestString)-1), 
+	   s == (size_t)(sizeof(RWopsHelloWorldTestString)-1), 
 	   "Verify result from SDL_RWread, expected %i, got %i",
 	   sizeof(RWopsHelloWorldTestString)-1,
-	   i);
+	   s);
    SDLTest_AssertCheck(
 	   SDL_memcmp(buf, RWopsHelloWorldTestString, sizeof(RWopsHelloWorldTestString)-1 ) == 0, 
 	   "Verify read bytes match expected string, expected '%s', got '%s'", RWopsHelloWorldTestString, buf);

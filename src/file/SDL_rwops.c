@@ -451,7 +451,7 @@ static size_t SDLCALL
 mem_writeconst(SDL_RWops * context, const void *ptr, size_t size, size_t num)
 {
     SDL_SetError("Can't write to read-only memory");
-    return (-1);
+    return (0);
 }
 
 static int SDLCALL

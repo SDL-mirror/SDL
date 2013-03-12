@@ -54,7 +54,7 @@ typedef struct SDL_RWops
      *  Seek to \c offset relative to \c whence, one of stdio's whence values:
      *  RW_SEEK_SET, RW_SEEK_CUR, RW_SEEK_END
      *  
-     *  \return the final offset in the data stream.
+     *  \return the final offset in the data stream, or -1 on error.
      */
     Sint64 (SDLCALL * seek) (struct SDL_RWops * context, Sint64 offset,
                              int whence);
