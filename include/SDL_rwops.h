@@ -40,6 +40,14 @@ extern "C" {
 /* *INDENT-ON* */
 #endif
 
+/* RWops Types */
+#define SDL_RWOPS_UNKNOWN	0	/* Unknown stream type */
+#define SDL_RWOPS_WINFILE	1	/* Win32 file */
+#define SDL_RWOPS_STDFILE	2	/* Stdio file */
+#define SDL_RWOPS_JNIFILE	3	/* Android asset */
+#define SDL_RWOPS_MEMORY	4	/* Memory stream */
+#define SDL_RWOPS_MEMORY_RO	5	/* Read-Only memory stream */
+
 /**
  * This is the read/write operation structure -- very basic.
  */

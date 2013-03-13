@@ -513,6 +513,7 @@ SDL_RWFromFile(const char *file, const char *mode)
     rwops->read = Android_JNI_FileRead;
     rwops->write = Android_JNI_FileWrite;
     rwops->close = Android_JNI_FileClose;
+    rwops->type = SDL_RWOPS_JNIFILE;
 
 #elif defined(__WIN32__)
     rwops = SDL_AllocRW();
@@ -527,6 +528,7 @@ SDL_RWFromFile(const char *file, const char *mode)
     rwops->read = windows_file_read;
     rwops->write = windows_file_write;
     rwops->close = windows_file_close;
+    rwops->type = SDL_RWOPS_WINFILE;
 
 #elif HAVE_STDIO_H
     {
@@ -570,6 +572,7 @@ SDL_RWFromFP(FILE * fp, SDL_bool autoclose)
         rwops->close = stdio_close;
         rwops->hidden.stdio.fp = fp;
         rwops->hidden.stdio.autoclose = autoclose;
+        rwops->type = SDL_RWOPS_STDFILE;
     }
     return (rwops);
 }
@@ -585,7 +588,15 @@ SDL_RWFromFP(void * fp, SDL_bool autoclose)
 SDL_RWops *
 SDL_RWFromMem(void *mem, int size)
 {
-    SDL_RWops *rwops;
+    SDL_RWops *rwops = NULL;
+    if (!mem) {
+      SDL_InvalidParamError("mem");
+      return (rwops);
+    }
+    if (!size) {
+      SDL_InvalidParamError("size");
+      return (rwops);
+    }
 
     rwops = SDL_AllocRW();
     if (rwops != NULL) {
@@ -597,6 +608,7 @@ SDL_RWFromMem(void *mem, int size)
         rwops->hidden.mem.base = (Uint8 *) mem;
         rwops->hidden.mem.here = rwops->hidden.mem.base;
         rwops->hidden.mem.stop = rwops->hidden.mem.base + size;
+        rwops->type = SDL_RWOPS_MEMORY;
     }
     return (rwops);
 }
@@ -604,7 +616,15 @@ SDL_RWFromMem(void *mem, int size)
 SDL_RWops *
 SDL_RWFromConstMem(const void *mem, int size)
 {
-    SDL_RWops *rwops;
+    SDL_RWops *rwops = NULL;
+    if (!mem) {
+      SDL_InvalidParamError("mem");
+      return (rwops);
+    }
+    if (!size) {
+      SDL_InvalidParamError("size");
+      return (rwops);
+    }
 
     rwops = SDL_AllocRW();
     if (rwops != NULL) {
@@ -616,6 +636,7 @@ SDL_RWFromConstMem(const void *mem, int size)
         rwops->hidden.mem.base = (Uint8 *) mem;
         rwops->hidden.mem.here = rwops->hidden.mem.base;
         rwops->hidden.mem.stop = rwops->hidden.mem.base + size;
+        rwops->type = SDL_RWOPS_MEMORY_RO;
     }
     return (rwops);
 }
@@ -629,6 +650,7 @@ SDL_AllocRW(void)
     if (area == NULL) {
         SDL_OutOfMemory();
     }
+    area->type = SDL_RWOPS_UNKNOWN;
     return (area);
 }
 
