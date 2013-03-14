@@ -41,6 +41,62 @@
 
 #include <stdio.h>
 
+typedef struct {
+	unsigned char *data;
+	int format, count;
+	Atom type;
+} SDL_x11Prop;
+
+/* Reads property
+   Must call XFree on results
+ */
+static void X11_ReadProperty(SDL_x11Prop *p, Display *disp, Window w, Atom prop) 
+{
+    unsigned char *ret=NULL;
+    Atom type;
+    int fmt;
+    unsigned long count;
+    unsigned long bytes_left;
+    int bytes_fetch = 0;	
+    
+    do {
+        if (ret != 0) XFree(ret);
+        XGetWindowProperty(disp, w, prop, 0, bytes_fetch, False, AnyPropertyType, &type, &fmt, &count, &bytes_left, &ret);
+        bytes_fetch += bytes_left;
+    } while (bytes_left != 0);
+    
+    p->data=ret;
+    p->format=fmt;
+    p->count=count;
+    p->type=type;
+}
+
+/* Find text-uri-list in a list of targets and return it's atom
+   if available, else return None */
+static Atom X11_PickTarget(Display *disp, Atom list[], int list_count)
+{
+    Atom request = None;
+    char *name;
+    int i;
+    for (i=0; i < list_count && request == None; i++) {
+        name = XGetAtomName(disp, list[i]);
+        if (strcmp("text/uri-list", name)==0) request = list[i];
+        XFree(name);
+    }
+    return request;
+}
+
+/* Wrapper for X11_PickTarget for a maximum of three targets, a special
+   case in the Xdnd protocol */
+static Atom X11_PickTargetFromAtoms(Display *disp, Atom a0, Atom a1, Atom a2)
+{
+    int count=0;
+    Atom atom[3];
+    if (a0 != None) atom[count++] = a0;
+    if (a1 != None) atom[count++] = a1;
+    if (a2 != None) atom[count++] = a2;
+    return X11_PickTarget(disp, atom, count);
+}
 /*#define DEBUG_XEVENTS*/
 
 /* Check to see if this is a repeated key.
@@ -92,6 +148,41 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
     return SDL_FALSE;
 }
 
+/* Convert URI to local filename
+   return filename if possible, else NULL
+*/
+static char* X11_URIToLocal(char* uri) {
+    char *file = NULL;
+
+    if (memcmp(uri,"file:/",6) == 0) uri += 6;      /* local file? */
+    else if (strstr(uri,":/") != NULL) return file; /* wrong scheme */
+
+    SDL_bool local = uri[0] != '/' || ( uri[0] != '\0' && uri[1] == '/' );
+
+    /* got a hostname? */
+    if ( !local && uri[0] == '/' && uri[2] != '/' ) {
+      char* hostname_end = strchr( uri+1, '/' );
+      if ( hostname_end != NULL ) {
+          char hostname[ 257 ];
+          if ( gethostname( hostname, 255 ) == 0 ) {
+            hostname[ 256 ] = '\0';
+            if ( memcmp( uri+1, hostname, hostname_end - ( uri+1 )) == 0 ) {
+                uri = hostname_end + 1;
+                local = SDL_TRUE;
+            }
+          }
+      }
+    }
+    if ( local ) {
+      file = uri;
+      if ( uri[1] == '/' ) {
+          file++;
+      } else {
+          file--;
+      }
+    }
+    return file;
+}
 
 #if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
 static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
@@ -400,7 +491,68 @@ X11_DispatchEvent(_THIS)
 
         /* Have we been requested to quit (or another client message?) */
     case ClientMessage:{
-            if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
+
+            int xdnd_version=0;
+    
+            if (xevent.xclient.message_type == videodata->XdndEnter) {
+                SDL_bool use_list = xevent.xclient.data.l[1] & 1;
+                data->xdnd_source = xevent.xclient.data.l[0];
+                xdnd_version = ( xevent.xclient.data.l[1] >> 24);
+                if (use_list) {
+                    /* fetch conversion targets */
+                    SDL_x11Prop p;
+                    X11_ReadProperty(&p, display, data->xdnd_source, videodata->XdndTypeList);
+                    /* pick one */
+                    data->xdnd_req = X11_PickTarget(display, (Atom*)p.data, p.count);
+                    XFree(p.data);
+                } else {
+                    /* pick from list of three */
+                    data->xdnd_req = X11_PickTargetFromAtoms(display, xevent.xclient.data.l[2], xevent.xclient.data.l[3], xevent.xclient.data.l[4]);
+                }
+            }
+            else if (xevent.xclient.message_type == videodata->XdndPosition) {
+            
+                /* reply with status */
+                XClientMessageEvent m;
+                memset(&m, 0, sizeof(XClientMessageEvent));
+                m.type = ClientMessage;
+                m.display = xevent.xclient.display;
+                m.window = xevent.xclient.data.l[0];
+                m.message_type = videodata->XdndStatus;
+                m.format=32;
+                m.data.l[0] = data->xwindow;
+                m.data.l[1] = (data->xdnd_req != None);
+                m.data.l[2] = 0; /* specify an empty rectangle */
+                m.data.l[3] = 0;
+                m.data.l[4] = videodata->XdndActionCopy; /* we only accept copying anyway */
+                
+                XSendEvent(display, xevent.xclient.data.l[0], False, NoEventMask, (XEvent*)&m);
+                XFlush(display);
+            }
+            else if(xevent.xclient.message_type == videodata->XdndDrop) {
+                if (data->xdnd_req == None) {
+                    /* say again - not interested! */
+                    XClientMessageEvent m;
+                    memset(&m, 0, sizeof(XClientMessageEvent));
+                    m.type = ClientMessage;
+                    m.display = xevent.xclient.display;
+                    m.window = xevent.xclient.data.l[0];
+                    m.message_type = videodata->XdndFinished;
+                    m.format=32;
+                    m.data.l[0] = data->xwindow;
+                    m.data.l[1] = 0;
+                    m.data.l[2] = None; /* fail! */
+                    XSendEvent(display, xevent.xclient.data.l[0], False, NoEventMask, (XEvent*)&m);
+                } else {
+                    /* convert */
+                    if(xdnd_version >= 1) {
+                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, xevent.xclient.data.l[2]);
+                    } else {
+                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, CurrentTime);
+                    }
+                }
+            }
+            else if ((xevent.xclient.message_type == videodata->WM_PROTOCOLS) &&
                 (xevent.xclient.format == 32) &&
                 (xevent.xclient.data.l[0] == videodata->_NET_WM_PING)) {
                 Window root = DefaultRootWindow(display);
@@ -601,7 +753,66 @@ X11_DispatchEvent(_THIS)
             printf("window %p: SelectionNotify (requestor = %ld, target = %ld)\n", data,
                 xevent.xselection.requestor, xevent.xselection.target);
 #endif
-            videodata->selection_waiting = SDL_FALSE;
+            Atom target = xevent.xselection.target;
+            if (target == data->xdnd_req) {
+
+                /* read data */
+                SDL_x11Prop p;
+                X11_ReadProperty(&p, display, data->xwindow, videodata->PRIMARY);
+                
+                if(p.format==8) {
+                    SDL_bool expect_lf = SDL_FALSE;
+                    char *start = NULL;
+                    char *scan = (char*)p.data;
+                    char *fn;
+                    char *uri;
+                    int length = 0;
+                    while (p.count--) {
+                        if (!expect_lf) {
+                            if (*scan==0x0D) {
+                                expect_lf = SDL_TRUE;
+                            } else if(start == NULL) {
+                                start = scan;
+                                length = 0;
+                            }
+                            length++;
+                        } else {
+                            if (*scan==0x0A && length>0) {
+                                uri = malloc(length--);
+                                memcpy(uri, start, length);
+                                uri[length] = 0;
+                                fn = X11_URIToLocal(uri);
+                                if (fn) SDL_SendDropFile(fn);
+                                free(uri);
+                            }
+                            expect_lf = SDL_FALSE;
+                            start = NULL;
+                        }
+                        scan++;
+                    }
+                }
+                
+                XFree(p.data);
+                
+                /* send reply */
+                XClientMessageEvent m;
+                memset(&m, 0, sizeof(XClientMessageEvent));
+                m.type = ClientMessage;
+                m.display = display;
+                m.window = data->xdnd_source;
+                m.message_type = videodata->XdndFinished;
+                m.format=32;
+                m.data.l[0] = data->xwindow;
+                m.data.l[1] = 1;
+                m.data.l[2] = videodata->XdndActionCopy;
+                XSendEvent(display, data->xdnd_source, False, NoEventMask, (XEvent*)&m);
+                
+                XSync(display, False);
+        
+            } else {
+                videodata->selection_waiting = SDL_FALSE;
+            }
+        
         }
         break;
 

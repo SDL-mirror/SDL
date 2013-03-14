@@ -344,6 +344,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     Atom _NET_WM_PID;
+    Atom XdndAware, xdnd_version = 5;
     Uint32 fevent = 0;
 
 #if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
@@ -566,6 +567,11 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                  PointerMotionMask | KeyPressMask | KeyReleaseMask |
                  PropertyChangeMask | StructureNotifyMask |
                  KeymapStateMask | fevent));
+
+    XdndAware = XInternAtom(display, "XdndAware", False);
+    XChangeProperty(display, w, XdndAware, XA_ATOM, 32,
+                 PropModeReplace,
+                 (unsigned char*)&xdnd_version, 1); 
 
     XFlush(display);
 

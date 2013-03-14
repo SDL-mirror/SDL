@@ -101,7 +101,16 @@ typedef struct SDL_VideoData
     Atom _NET_WM_PING;
     Atom _NET_ACTIVE_WINDOW;
     Atom UTF8_STRING;
-
+    Atom PRIMARY;
+    Atom XdndEnter;
+    Atom XdndPosition;
+    Atom XdndStatus;
+    Atom XdndTypeList;
+    Atom XdndActionCopy;
+    Atom XdndDrop;
+    Atom XdndFinished;
+    Atom XdndSelection;
+    
     SDL_Scancode key_layout[256];
     SDL_bool selection_waiting;    
 

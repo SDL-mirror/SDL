@@ -57,6 +57,8 @@ typedef struct
     Uint32 pending_focus_time;
     XConfigureEvent last_xconfigure;
     struct SDL_VideoData *videodata;
+    Atom xdnd_req;
+    Window xdnd_source;
 } SDL_WindowData;
 
 extern void X11_SetNetWMState(_THIS, Window xwindow, Uint32 flags);
