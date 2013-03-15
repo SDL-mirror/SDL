@@ -205,7 +205,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int 
  * \return The previous value of the atomic variable.
  */
 #ifndef SDL_AtomicSet
-static __inline__ int SDL_AtomicSet(SDL_atomic_t *a, int v)
+SDL_FORCE_INLINE int SDL_AtomicSet(SDL_atomic_t *a, int v)
 {
     int value;
     do {
@@ -219,7 +219,7 @@ static __inline__ int SDL_AtomicSet(SDL_atomic_t *a, int v)
  * \brief Get the value of an atomic variable
  */
 #ifndef SDL_AtomicGet
-static __inline__ int SDL_AtomicGet(SDL_atomic_t *a)
+SDL_FORCE_INLINE int SDL_AtomicGet(SDL_atomic_t *a)
 {
     int value = a->value;
     SDL_CompilerBarrier();
@@ -235,7 +235,7 @@ static __inline__ int SDL_AtomicGet(SDL_atomic_t *a)
  * \note This same style can be used for any number operation
  */
 #ifndef SDL_AtomicAdd
-static __inline__ int SDL_AtomicAdd(SDL_atomic_t *a, int v)
+SDL_FORCE_INLINE int SDL_AtomicAdd(SDL_atomic_t *a, int v)
 {
     int value;
     do {
@@ -279,7 +279,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicCASPtr(void* *a, void *oldval, void *
  * \return The previous value of the pointer.
  */
 #ifndef SDL_AtomicSetPtr
-static __inline__ void* SDL_AtomicSetPtr(void* *a, void* v)
+SDL_FORCE_INLINE void* SDL_AtomicSetPtr(void* *a, void* v)
 {
     void* value;
     do {
@@ -293,7 +293,7 @@ static __inline__ void* SDL_AtomicSetPtr(void* *a, void* v)
  * \brief Get the value of a pointer atomically.
  */
 #ifndef SDL_AtomicGetPtr
-static __inline__ void* SDL_AtomicGetPtr(void* *a)
+SDL_FORCE_INLINE void* SDL_AtomicGetPtr(void* *a)
 {
     void* value = *a;
     SDL_CompilerBarrier();

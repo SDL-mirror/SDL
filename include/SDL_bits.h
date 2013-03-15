@@ -40,11 +40,6 @@ extern "C" {
 
 /**
  *  \file SDL_bits.h
- *
- *  Uses inline functions for compilers that support them, and static
- *  functions for those that do not.  Because these functions become
- *  static for compilers that do not support inline functions, this
- *  header should only be included in files that actually use them.
  */
 
 /**
@@ -54,7 +49,7 @@ extern "C" {
  *
  *  \return Index of the most significant bit.
  */
-static __inline__ Sint8
+SDL_FORCE_INLINE Sint8
 SDL_MostSignificantBitIndex32(Uint32 x)
 {
 #if defined(__GNUC__)
