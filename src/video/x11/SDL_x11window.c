@@ -220,7 +220,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     data->window = window;
     data->xwindow = w;
 #ifdef X_HAVE_UTF8_STRING
-    if (SDL_X11_HAVE_UTF8) {
+    if (SDL_X11_HAVE_UTF8 && videodata->im) {
         data->ic =
             pXCreateIC(videodata->im, XNClientWindow, w, XNFocusWindow, w,
                        XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
