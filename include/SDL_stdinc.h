@@ -175,10 +175,6 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
    enums having the size of an int must be enabled.
    This is "-b" for Borland C/C++ and "-ei" for Watcom C/C++ (v11).
 */
-/* Enable enums always int in CodeWarrior (for MPW use "-enum int") */
-#ifdef __MWERKS__
-#pragma enumsalwaysint on
-#endif
 
 /** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
@@ -239,14 +235,12 @@ char *alloca();
 
 /* SDL stdinc inline functions:
 
-   The theory here is that, by default, we forcibly inline what we can--with
-   real inline functions that avoid macro side-effects--and your app will use
-   the inline version by default. However, we expose a non-inline version
-   too, which internally just wraps the inline version in a real function,
-   so the symbol is always available in the library even if your app
-   bypassed it with the inline version. The SDL_*_inline versions aren't
-   guaranteed to exist, so never call them directly; use SDL_* instead,
-   and trust the system to give you the right thing.
+   The theory here is that by default we forcibly inline what we can, and your
+   app will use the inline version by default. However we expose a non-inline
+   version too, so the symbol is always available in the library even if your app
+   bypassed the inline version. The SDL_*_inline versions aren't guaranteed to
+   exist, so never call them directly; use SDL_* instead, and trust the system
+   to give you the right thing.
 
    The benefit here is that you can dlsym() these functions, which you
    couldn't if you had macros, you can link against a foreign build of SDL
