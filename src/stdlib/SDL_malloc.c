@@ -24,7 +24,18 @@
 
 #include "SDL_stdinc.h"
 
-#ifndef HAVE_MALLOC
+#ifdef SDL_malloc
+/* expose the symbol, but use what we figured out elsewhere. */
+#undef SDL_malloc
+#undef SDL_calloc
+#undef SDL_realloc
+#undef SDL_free
+void *SDL_malloc(size_t size) { return SDL_malloc_inline(size); }
+void *SDL_calloc(size_t nmemb, size_t size) { return SDL_calloc_inline(nmemb, size); }
+void *SDL_realloc(void *ptr, size_t size) { return SDL_realloc_inline(ptr, size); }
+void SDL_free(void *ptr) { SDL_free_inline(ptr); }
+
+#else  /* the rest of this is a LOT of tapdancing to implement malloc. :) */
 
 #define LACKS_SYS_TYPES_H
 #define LACKS_STDIO_H
