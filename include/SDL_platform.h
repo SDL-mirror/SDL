@@ -119,8 +119,8 @@
 #define __WIN32__	1
 #endif
 #if defined(__PSP__)
-#undef __PLAYSTATIONPORTABLE__
-#define __PLAYSTATIONPORTABLE__	1
+#undef __PSP__
+#define __PSP__	1
 #endif
 
 #include "begin_code.h"
