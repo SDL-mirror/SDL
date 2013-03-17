@@ -17,8 +17,6 @@
 
 #include "SDL_test_common.h"
 
-#define WINDOW_WIDTH    640
-#define WINDOW_HEIGHT   480
 
 static SDLTest_CommonState *state;
 
