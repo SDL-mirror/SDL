@@ -34,7 +34,6 @@ SDL_bool SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_Windows(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_MacOSX(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_BeOS(SDL_PowerState *, int *, int *);
-SDL_bool SDL_GetPowerInfo_NintendoDS(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_UIKit(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_Android(SDL_PowerState *, int *, int *);
 SDL_bool SDL_GetPowerInfo_PSP(SDL_PowerState *, int *, int *);
@@ -68,9 +67,6 @@ static SDL_GetPowerInfo_Impl implementations[] = {
 #endif
 #ifdef SDL_POWER_MACOSX         /* handles Mac OS X, Darwin. */
     SDL_GetPowerInfo_MacOSX,
-#endif
-#ifdef SDL_POWER_NINTENDODS     /* handles Nintendo DS. */
-    SDL_GetPowerInfo_NintendoDS,
 #endif
 #ifdef SDL_POWER_BEOS           /* handles BeOS, Zeta, with euc.jp apm driver. */
     SDL_GetPowerInfo_BeOS,

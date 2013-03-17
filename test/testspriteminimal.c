@@ -17,13 +17,8 @@
 
 #include "SDL.h"
 
-#ifdef __NDS__
-#define WINDOW_WIDTH    256
-#define WINDOW_HEIGHT   (2*192)
-#else
 #define WINDOW_WIDTH    640
 #define WINDOW_HEIGHT   480
-#endif
 #define NUM_SPRITES     100
 #define MAX_SPEED       1
 

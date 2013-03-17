@@ -37,11 +37,6 @@
 #include "../core/android/SDL_android.h"
 #endif
 
-#ifdef __NDS__
-/* include libfat headers for fatInitDefault(). */
-#include <fat.h>
-#endif /* __NDS__ */
-
 #ifdef __WIN32__
 
 /* Functions to read/write Win32 API file pointers */
@@ -555,13 +550,6 @@ SDL_RWops *
 SDL_RWFromFP(FILE * fp, SDL_bool autoclose)
 {
     SDL_RWops *rwops = NULL;
-
-#if 0
-/*#ifdef __NDS__*/
-    /* set it up so we can use stdio file function */
-    fatInitDefault();
-    printf("called fatInitDefault()");
-#endif /* __NDS__ */
 
     rwops = SDL_AllocRW();
     if (rwops != NULL) {

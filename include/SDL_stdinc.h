@@ -178,7 +178,7 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 
 /** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
-#if !defined(__NINTENDODS__) && !defined(__ANDROID__) 
+#if !defined(__ANDROID__) 
    /* TODO: include/SDL_stdinc.h:174: error: size of array 'SDL_dummy_enum' is negative */
 typedef enum
 {
@@ -189,10 +189,6 @@ SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 #endif
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /** \endcond */
-
-#if !defined(wchar_t) && defined(__NINTENDODS__)
-#define wchar_t short           /* TODO: figure out why libnds doesn't have this */
-#endif
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

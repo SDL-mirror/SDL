@@ -38,7 +38,6 @@
 		0097E2A812F70C4D00724AC5 /* SDL_config_iphoneos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_iphoneos.h; sourceTree = "<group>"; };
 		0097E2A912F70C4D00724AC5 /* SDL_config_macosx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_macosx.h; sourceTree = "<group>"; };
 		0097E2AA12F70C4D00724AC5 /* SDL_config_minimal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_minimal.h; sourceTree = "<group>"; };
-		0097E2AB12F70C4D00724AC5 /* SDL_config_nintendods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_nintendods.h; sourceTree = "<group>"; };
 		0097E2AC12F70C4D00724AC5 /* SDL_config_pandora.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_pandora.h; sourceTree = "<group>"; };
 		0097E2AD12F70C4D00724AC5 /* SDL_config_windows.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_windows.h; sourceTree = "<group>"; };
 		0097E2AE12F70C4D00724AC5 /* SDL_config_wiz.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_config_wiz.h; sourceTree = "<group>"; };
@@ -142,7 +141,6 @@
 				0097E2A812F70C4D00724AC5 /* SDL_config_iphoneos.h */,
 				0097E2A912F70C4D00724AC5 /* SDL_config_macosx.h */,
 				0097E2AA12F70C4D00724AC5 /* SDL_config_minimal.h */,
-				0097E2AB12F70C4D00724AC5 /* SDL_config_nintendods.h */,
 				0097E2AC12F70C4D00724AC5 /* SDL_config_pandora.h */,
 				0097E2AD12F70C4D00724AC5 /* SDL_config_windows.h */,
 				0097E2AE12F70C4D00724AC5 /* SDL_config_wiz.h */,

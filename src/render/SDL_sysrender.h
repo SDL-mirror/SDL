@@ -173,9 +173,6 @@ extern SDL_RenderDriver GLES_RenderDriver;
 #if SDL_VIDEO_RENDER_DIRECTFB
 extern SDL_RenderDriver DirectFB_RenderDriver;
 #endif
-#if SDL_VIDEO_RENDER_NDS
-extern SDL_RenderDriver NDS_RenderDriver;
-#endif
 #if SDL_VIDEO_RENDER_PSP
 extern SDL_RenderDriver PSP_RenderDriver;
 #endif

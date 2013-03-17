@@ -341,9 +341,6 @@ extern VideoBootStrap BWINDOW_bootstrap;
 #if SDL_VIDEO_DRIVER_PANDORA
 extern VideoBootStrap PND_bootstrap;
 #endif
-#if SDL_VIDEO_DRIVER_NDS
-extern VideoBootStrap NDS_bootstrap;
-#endif
 #if SDL_VIDEO_DRIVER_UIKIT
 extern VideoBootStrap UIKIT_bootstrap;
 #endif

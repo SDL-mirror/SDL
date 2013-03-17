@@ -44,11 +44,7 @@ SDLTest_CommonCreateState(char **argv, Uint32 flags)
     /* Initialize some defaults */
     state->argv = argv;
     state->flags = flags;
-#ifdef __NDS__
-    state->window_title = "";
-#else
     state->window_title = argv[0];
-#endif
     state->window_flags = 0;
     state->window_x = SDL_WINDOWPOS_UNDEFINED;
     state->window_y = SDL_WINDOWPOS_UNDEFINED;
@@ -86,10 +82,6 @@ int
 SDLTest_CommonArg(SDLTest_CommonState * state, int index)
 {
     char **argv = state->argv;
-
-#ifdef __NDS__
-    return 0;
-#endif
 
     if (SDL_strcasecmp(argv[index], "--video") == 0) {
         ++index;
