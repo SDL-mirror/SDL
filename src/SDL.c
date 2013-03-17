@@ -408,6 +408,8 @@ SDL_GetPlatform()
     return "Windows";
 #elif __IPHONEOS__
     return "iPhone OS";
+#elif __PSP__
+    return "PlayStation Portable";
 #else
     return "Unknown (see SDL_platform.h)";
 #endif

@@ -19,35 +19,51 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
+#include "SDL_thread.h"
+#include "SDL_timer.h"
+#include "SDL_error.h"
+#include "../SDL_timer_c.h"
+#include <stdlib.h>
+#include <time.h>
+#include <sys/time.h>
+#include <pspthreadman.h>
 
-#include "SDL_platform.h"
+static struct timeval start;
 
-/**
- *  \file SDL_config.h
+void SDL_StartTicks(void)
+{
+	gettimeofday(&start, NULL);
+}
+
+Uint32 SDL_GetTicks(void)
+{
+	struct timeval now;
+	Uint32 ticks;
+
+	gettimeofday(&now, NULL);
+	ticks=(now.tv_sec-start.tv_sec)*1000+(now.tv_usec-start.tv_usec)/1000;
+	return(ticks);
+}
+
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+    return SDL_GetTicks();
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+    return 1000;
+}
+
+void SDL_Delay(Uint32 ms)
+{
+	const Uint32 max_delay = 0xffffffffUL / 1000;
+	if(ms > max_delay)
+		ms = max_delay;
+	sceKernelDelayThreadCB(ms * 1000);
+}
+
+/* vim: ts=4 sw=4
  */
- 
-/* Add any platform that doesn't build using the configure system. */
-#if defined(__WIN32__)
-#include "SDL_config_windows.h"
-#elif defined(__MACOSX__)
-#include "SDL_config_macosx.h"
-#elif defined(__IPHONEOS__) 
-#include "SDL_config_iphoneos.h"
-#elif defined(__ANDROID__)
-#include "SDL_config_android.h"
-#elif defined(__NINTENDODS__)
-#include "SDL_config_nintendods.h"
-#elif defined(__PSP__)
-#include "SDL_config_psp.h"
-#else
-/* This is a minimal configuration just to get SDL running on new platforms */
-#include "SDL_config_minimal.h"
-#endif /* platform config */
-
-#ifdef USING_GENERATED_CONFIG_H
-#error Wrong SDL_config.h, check your include path?
-#endif
-
-#endif /* _SDL_config_h */

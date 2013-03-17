@@ -350,6 +350,9 @@ extern VideoBootStrap UIKIT_bootstrap;
 #if SDL_VIDEO_DRIVER_ANDROID
 extern VideoBootStrap Android_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_PSP
+extern VideoBootStrap PSP_bootstrap;
+#endif
 #if SDL_VIDEO_DRIVER_DUMMY
 extern VideoBootStrap DUMMY_bootstrap;
 #endif

@@ -19,35 +19,34 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
+#ifndef _SDL_pspgl_c_h
+#define _SDL_pspgl_c_h
 
-#include "SDL_platform.h"
 
-/**
- *  \file SDL_config.h
- */
- 
-/* Add any platform that doesn't build using the configure system. */
-#if defined(__WIN32__)
-#include "SDL_config_windows.h"
-#elif defined(__MACOSX__)
-#include "SDL_config_macosx.h"
-#elif defined(__IPHONEOS__) 
-#include "SDL_config_iphoneos.h"
-#elif defined(__ANDROID__)
-#include "SDL_config_android.h"
-#elif defined(__NINTENDODS__)
-#include "SDL_config_nintendods.h"
-#elif defined(__PSP__)
-#include "SDL_config_psp.h"
-#else
-/* This is a minimal configuration just to get SDL running on new platforms */
-#include "SDL_config_minimal.h"
-#endif /* platform config */
+#include <GLES/egl.h>
+#include <GLES/gl.h>
 
-#ifdef USING_GENERATED_CONFIG_H
-#error Wrong SDL_config.h, check your include path?
-#endif
+#include "SDL_pspvideo.h"
 
-#endif /* _SDL_config_h */
+
+typedef struct SDL_GLDriverData {
+		EGLDisplay display;
+		EGLContext context;
+		EGLSurface surface;
+    uint32_t swapinterval;
+}SDL_GLDriverData;
+
+extern void * PSP_GL_GetProcAddress(_THIS, const char *proc);
+extern int PSP_GL_MakeCurrent(_THIS,SDL_Window * window, SDL_GLContext context);
+extern void PSP_GL_SwapBuffers(_THIS);
+
+extern void PSP_GL_SwapWindow(_THIS, SDL_Window * window);
+extern SDL_GLContext PSP_GL_CreateContext(_THIS, SDL_Window * window);
+
+extern int PSP_GL_LoadLibrary(_THIS, const char *path);
+extern void PSP_GL_UnloadLibrary(_THIS);
+extern int PSP_GL_SetSwapInterval(_THIS, int interval);
+extern int PSP_GL_GetSwapInterval(_THIS);
+
+
+#endif /* _SDL_pspgl_c_h */

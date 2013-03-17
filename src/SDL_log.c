@@ -327,6 +327,20 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
             return;
         }
     }
+#elif defined(__PSP__)
+//Simple Log System for PSP
+	{
+		unsigned int length;
+		char*		 output;
+		FILE*		 pFile;
+		length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1;
+        output = SDL_stack_alloc(char, length);
+		SDL_snprintf(output, length, "%s: %s", SDL_priority_prefixes[priority], message);
+		pFile = fopen ("SDL_Log.txt", "a");
+		fwrite (output, strlen (output), 1, pFile);
+		SDL_stack_free(output);
+		fclose (pFile);
+	}
 #endif
 #if HAVE_STDIO_H
     fprintf(stderr, "%s: %s\n", SDL_priority_prefixes[priority], message);

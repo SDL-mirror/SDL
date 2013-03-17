@@ -124,6 +124,10 @@
 #define __NINTENDODS__	1
 #endif
 
+#if defined(__PSP__)
+#undef __PLAYSTATIONPORTABLE__
+#define __PLAYSTATIONPORTABLE__	1
+#endif
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

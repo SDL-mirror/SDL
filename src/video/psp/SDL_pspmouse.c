@@ -19,35 +19,17 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _SDL_config_h
-#define _SDL_config_h
 
-#include "SDL_platform.h"
+#include <stdio.h>
 
-/**
- *  \file SDL_config.h
- */
- 
-/* Add any platform that doesn't build using the configure system. */
-#if defined(__WIN32__)
-#include "SDL_config_windows.h"
-#elif defined(__MACOSX__)
-#include "SDL_config_macosx.h"
-#elif defined(__IPHONEOS__) 
-#include "SDL_config_iphoneos.h"
-#elif defined(__ANDROID__)
-#include "SDL_config_android.h"
-#elif defined(__NINTENDODS__)
-#include "SDL_config_nintendods.h"
-#elif defined(__PSP__)
-#include "SDL_config_psp.h"
-#else
-/* This is a minimal configuration just to get SDL running on new platforms */
-#include "SDL_config_minimal.h"
-#endif /* platform config */
+#include "SDL_error.h"
+#include "SDL_mouse.h"
+#include "../../events/SDL_events_c.h"
 
-#ifdef USING_GENERATED_CONFIG_H
-#error Wrong SDL_config.h, check your include path?
-#endif
+#include "SDL_pspmouse_c.h"
 
-#endif /* _SDL_config_h */
+
+/* The implementation dependent data for the window manager cursor */
+struct WMcursor {
+	int unused;
+};

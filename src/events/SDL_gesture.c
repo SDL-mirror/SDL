@@ -27,7 +27,10 @@
 #include "SDL_events_c.h"
 #include "SDL_gesture_c.h"
 
+#if !defined(__PSP__)
 #include <memory.h>
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
