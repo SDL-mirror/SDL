@@ -694,7 +694,7 @@ extern DECLSPEC int SDLCALL SDL_UpdateWindowSurface(SDL_Window * window);
  *  \sa SDL_UpdateWindowSurfaceRect()
  */
 extern DECLSPEC int SDLCALL SDL_UpdateWindowSurfaceRects(SDL_Window * window,
-                                                         SDL_Rect * rects,
+                                                         const SDL_Rect * rects,
                                                          int numrects);
 
 /**

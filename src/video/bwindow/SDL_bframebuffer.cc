@@ -98,7 +98,7 @@ int BE_CreateWindowFramebuffer(_THIS, SDL_Window * window,
 
 
 int BE_UpdateWindowFramebuffer(_THIS, SDL_Window * window,
-                                      SDL_Rect * rects, int numrects) {
+                                      const SDL_Rect * rects, int numrects) {
 	if(!window)
 		return 0;
 

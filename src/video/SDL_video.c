@@ -308,7 +308,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
 }
 
 static int
-SDL_UpdateWindowTexture(_THIS, SDL_Window * window, SDL_Rect * rects, int numrects)
+SDL_UpdateWindowTexture(_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects)
 {
     SDL_WindowTextureData *data;
     SDL_Rect rect;
@@ -1841,7 +1841,7 @@ SDL_UpdateWindowSurface(SDL_Window * window)
 }
 
 int
-SDL_UpdateWindowSurfaceRects(SDL_Window * window, SDL_Rect * rects,
+SDL_UpdateWindowSurfaceRects(SDL_Window * window, const SDL_Rect * rects,
                              int numrects)
 {
     CHECK_WINDOW_MAGIC(window, -1);
