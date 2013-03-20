@@ -24,6 +24,8 @@ import android.hardware.*;
 import android.content.*;
 
 import java.lang.*;
+import java.util.List;
+import java.util.ArrayList;
 
 
 /**
@@ -42,6 +44,11 @@ public class SDLActivity extends Activity {
 
     // This is what SDL runs in. It invokes SDL_main(), eventually
     private static Thread mSDLThread;
+    
+    // Joystick
+    private static List<Integer> mJoyIdList;
+    // TODO: Have a (somewhat) more efficient way of storing these?
+    private static List<List<Integer>> mJoyAxesLists;
 
     // Audio
     private static Thread mAudioThread;
@@ -156,12 +163,15 @@ public class SDLActivity extends Activity {
     public static native void nativePause();
     public static native void nativeResume();
     public static native void onNativeResize(int x, int y, int format);
+    public static native void onNativePadDown(int padId, int keycode);
+    public static native void onNativePadUp(int padId, int keycode);
+    public static native void onNativeJoy(int joyId, int axisNum, float value);
     public static native void onNativeKeyDown(int keycode);
     public static native void onNativeKeyUp(int keycode);
     public static native void onNativeTouch(int touchDevId, int pointerFingerId,
                                             int action, float x, 
                                             float y, float p);
-    public static native void onNativeAccel(float x, float y, float z);
+//  public static native void onNativeAccel(float x, float y, float z);
     public static native void nativeRunAudioThread();
 
 
@@ -178,6 +188,74 @@ public class SDLActivity extends Activity {
     public static void setActivityTitle(String title) {
         // Called from SDLMain() thread and can't directly affect the view
         mSingleton.sendCommand(COMMAND_CHANGE_TITLE, title);
+    }
+
+    // Call when initializing the joystick subsystem
+    public static void joystickInit() {
+        mJoyIdList = new ArrayList<Integer>();
+        mJoyAxesLists = new ArrayList<List<Integer>>();
+
+        int[] deviceIds = InputDevice.getDeviceIds();
+        for(int i=0; i<deviceIds.length; i++) {
+            if( (InputDevice.getDevice(deviceIds[i]).getSources() & 0x00000010 /* API 12: InputDevice.SOURCE_CLASS_JOYSTICK*/) != 0) {
+                mJoyIdList.add(deviceIds[i]);
+                List<Integer> axesList = new ArrayList<Integer>();
+                /* With API 12 and above we can get a list of all motion
+                 * ranges, hence all axes. Some of them may be irrelevant
+                 * (e.g. an embedded trackpad). We filter the desired axes.
+                 */
+                if(Build.VERSION.SDK_INT >= 12) {
+                     List<InputDevice.MotionRange> rangesList = InputDevice.getDevice(deviceIds[i]).getMotionRanges();
+                     for (InputDevice.MotionRange range : rangesList) {
+                         // Skip any possibly unrelated axis
+                         if ( (range.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+                             axesList.add(range.getAxis());
+                         }
+                     }
+                } else {
+                    // In older versions, we can assume a sane X-Y default configuration
+                    axesList.add(MotionEvent.AXIS_X);
+                    axesList.add(MotionEvent.AXIS_Y);
+                }
+                mJoyAxesLists.add(axesList);
+            }
+        }
+    }
+
+    // Call when one clears joystick subsystem resources
+    public static void joystickQuit() {
+        mJoyIdList = null;
+        mJoyAxesLists = null;
+    }
+
+    public static int getNumJoysticks() {
+        if (mJoyIdList == null)
+            return -1;
+        return mJoyIdList.size();
+    }
+
+    public static String getJoystickName(int joy) {
+        if (mJoyIdList == null)
+            return null;
+        return InputDevice.getDevice(mJoyIdList.get(joy)).getName();
+    }
+
+    public static List<Integer> getJoystickAxesList(int joy) {
+        if (mJoyIdList == null)
+            return null;
+        return mJoyAxesLists.get(joy);
+    }
+
+    public static int getJoystickNumOfAxes(int joy) {
+        if (mJoyIdList == null)
+            return -1;
+        return mJoyAxesLists.get(joy).size();
+    }
+
+    public static int getJoyId(int devId) {
+        if (mJoyIdList == null)
+            return -1;
+        return mJoyIdList.indexOf(devId);
     }
 
     public static void sendMessage(int command, int param) {
@@ -478,7 +556,12 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         setFocusableInTouchMode(true);
         requestFocus();
         setOnKeyListener(this); 
-        setOnTouchListener(this);   
+        setOnTouchListener(this);
+
+        // Listen to joystick motion events if supported
+        if (Build.VERSION.SDK_INT >= 12) {
+            setOnGenericMotionListener(new SDLOnGenericMotionListener());
+        }
 
         mSensorManager = (SensorManager)context.getSystemService("sensor");
 
@@ -568,18 +651,65 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
 
 
 
+    // Listen to joystick motion events if supported (API >= 12)
+    private static class SDLOnGenericMotionListener implements View.OnGenericMotionListener {
+        @Override
+        public boolean onGenericMotion(View view, MotionEvent event) {
+            int actionPointerIndex = event.getActionIndex();
+            int action = event.getActionMasked();
+
+            if ( (event.getSource() & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
+                switch(action) {
+                    case MotionEvent.ACTION_MOVE:
+                        int id = SDLActivity.getJoyId( event.getDeviceId() );
+                        // The joystick subsystem may be uninitialized, so ignore
+                        if (id < 0)
+                            return true;
+                        // Update values for all joystick axes
+                        List<Integer> axes = SDLActivity.getJoystickAxesList(id);
+                        for (int axisIndex = 0; axisIndex < axes.size(); axisIndex++) {
+                            SDLActivity.onNativeJoy(id, axisIndex, event.getAxisValue(axes.get(axisIndex), actionPointerIndex));
+                        }
+
+                        return true;
+                }
+            }
+            return false;
+        }
+    }
+
     // Key events
     public boolean onKey(View  v, int keyCode, KeyEvent event) {
-
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            //Log.v("SDL", "key down: " + keyCode);
-            SDLActivity.onNativeKeyDown(keyCode);
-            return true;
-        }
-        else if (event.getAction() == KeyEvent.ACTION_UP) {
-            //Log.v("SDL", "key up: " + keyCode);
-            SDLActivity.onNativeKeyUp(keyCode);
-            return true;
+        /* Dispatch the different events depending on where they come from:
+         * If the input device has some joystick source (probably differing
+         * from the source to which the given key belongs), assume it is a
+         * game controller button. Otherwise, assume a keyboard key.
+         * This should also take care of some kinds of manually toggled soft
+         * keyboards (i.e. not via the SDL text input API).
+         */
+        if ( (event.getDevice().getSources() & 0x00000010 /* API 12: InputDevice.SOURCE_CLASS_JOYSTICK*/) != 0) {
+            int id = SDLActivity.getJoyId( event.getDeviceId() );
+            // The joystick subsystem may be uninitialized, so ignore
+            if (id < 0)
+                return true;
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                SDLActivity.onNativePadDown(id, keyCode);
+                return true;
+            } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                SDLActivity.onNativePadUp(id, keyCode);
+                return true;
+            }
+        } else {
+            if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                //Log.v("SDL", "key down: " + keyCode);
+                SDLActivity.onNativeKeyDown(keyCode);
+                return true;
+            }
+            else if (event.getAction() == KeyEvent.ACTION_UP) {
+                //Log.v("SDL", "key up: " + keyCode);
+                SDLActivity.onNativeKeyUp(keyCode);
+                return true;
+            }
         }
         
         return false;
@@ -614,7 +744,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
              }
         }
       return true;
-   } 
+   }
 
     // Sensor events
     public void enableSensor(int sensortype, boolean enabled) {
@@ -634,13 +764,14 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     public void onSensorChanged(SensorEvent event) {
+/*
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             SDLActivity.onNativeAccel(event.values[0] / SensorManager.GRAVITY_EARTH,
                                       event.values[1] / SensorManager.GRAVITY_EARTH,
                                       event.values[2] / SensorManager.GRAVITY_EARTH);
         }
+*/
     }
-    
 }
 
 /* This is a fake invisible editor view that receives the input and defines the

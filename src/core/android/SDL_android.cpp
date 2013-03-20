@@ -31,11 +31,15 @@
 
 extern "C" {
 #include "../../events/SDL_events_c.h"
+#include "../../joystick/android/SDL_androidjoystick.h"
 #include "../../video/android/SDL_androidkeyboard.h"
 #include "../../video/android/SDL_androidtouch.h"
 #include "../../video/android/SDL_androidvideo.h"
 
 #include <android/log.h>
+#if ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
+#include <android/sensor.h>
+#endif
 #include <pthread.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -76,9 +80,11 @@ static jmethodID midAudioWriteShortBuffer;
 static jmethodID midAudioWriteByteBuffer;
 static jmethodID midAudioQuit;
 
+#ifdef ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
 // Accelerometer data storage
 static float fLastAccelerometer[3];
 static bool bHasNewData;
+#endif
 
 /*******************************************************************************
                  Functions called by JNI
@@ -130,7 +136,9 @@ extern "C" void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
     midAudioQuit = mEnv->GetStaticMethodID(mActivityClass,
                                 "audioQuit", "()V");
 
+#ifdef ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
     bHasNewData = false;
+#endif
 
     if(!midCreateGLContext || !midFlipBuffers || !midAudioInit ||
        !midAudioWriteShortBuffer || !midAudioWriteByteBuffer || !midAudioQuit) {
@@ -145,6 +153,27 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeResize(
                                     jint width, jint height, jint format)
 {
     Android_SetScreenResolution(width, height, format);
+}
+
+// Paddown
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativePadDown(
+                                    JNIEnv* env, jclass jcls, jint padId, jint keycode)
+{
+    Android_OnPadDown(padId, keycode);
+}
+
+// Padup
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativePadUp(
+                                    JNIEnv* env, jclass jcls, jint padId, jint keycode)
+{
+    Android_OnPadUp(padId, keycode);
+}
+
+// Joysticks
+extern "C" void Java_org_libsdl_app_SDLActivity_onNativeJoy(
+                                    JNIEnv* env, jclass jcls, jint joyId, jint axisNum, jfloat value)
+{
+    Android_OnJoy(joyId, axisNum, value);
 }
 
 // Keydown
@@ -170,6 +199,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeTouch(
     Android_OnTouch(touch_device_id_in, pointer_finger_id_in, action, x, y, p);
 }
 
+#if ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
 // Accelerometer
 extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
                                     JNIEnv* env, jclass jcls,
@@ -180,6 +210,7 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
     fLastAccelerometer[2] = z;
     bHasNewData = true;
 }
+#endif
 
 // Quit
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit(
@@ -347,6 +378,7 @@ extern "C" void Android_JNI_SetActivityTitle(const char *title)
     }
 }
 
+#if ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
 extern "C" SDL_bool Android_JNI_GetAccelerometerValues(float values[3])
 {
     int i;
@@ -362,6 +394,7 @@ extern "C" SDL_bool Android_JNI_GetAccelerometerValues(float values[3])
 
     return retval;
 }
+#endif
 
 static void Android_JNI_ThreadDestroyed(void* value) {
     /* The thread is being destroyed, detach it from the Java VM and set the mThreadKey value to NULL as required */
@@ -1081,6 +1114,101 @@ extern "C" int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery
 
     return 0;
 }
+
+// Initialize the joystick subsystem on the Java side
+int Android_JNI_JoystickInit()
+{
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "joystickInit", "()V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod(mActivityClass, mid);
+    return 0;
+}
+
+// Quit the joystick subsystem on the Java side
+int Android_JNI_JoystickQuit()
+{
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "joystickQuit", "()V");
+    if (!mid) {
+        return -1;
+    }
+    env->CallStaticVoidMethod(mActivityClass, mid);
+    return 0;
+}
+
+// return the total number of plugged in joysticks
+extern "C" int Android_JNI_GetNumJoysticks()
+{
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "getNumJoysticks", "()I");
+    if (!mid) {
+        return -1;
+    }
+    
+    return env->CallStaticIntMethod(mActivityClass, mid);
+}
+
+// Return the name of joystick number "index"
+extern "C" char* Android_JNI_GetJoystickName(int index)
+{
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!env) {
+        return SDL_strdup("");
+    }
+
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "getJoystickName", "(I)Ljava/lang/String;");
+    if (!mid) {
+            return SDL_strdup("");
+    }
+    jstring string = reinterpret_cast<jstring>(env->CallStaticObjectMethod(mActivityClass, mid, index));
+    const char* utf = env->GetStringUTFChars(string, 0);
+    if (!utf) {
+            return SDL_strdup("");
+    }
+
+    char* text = SDL_strdup(utf);
+    env->ReleaseStringUTFChars(string, utf);
+    return text;
+}
+
+// return the number of axes in the given joystick
+extern "C" int Android_JNI_GetJoystickNumOfAxes(int index)
+{
+    JNIEnv* env = Android_JNI_GetEnv();
+    if (!env) {
+        return -1;
+    }
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "getJoystickNumOfAxes", "(I)I");
+    if (!mid) {
+        return -1;
+    }
+    
+    return env->CallStaticIntMethod(mActivityClass, mid, index);
+}
+
+#if ENABLE_ACCELOMETER_AS_EMULATED_JOYSTICK
+// Return the name of the default accelerometer
+// This is much easier to be done with NDK than with JNI
+extern "C" char* Android_GetAccelName()
+{
+    ASensorManager* mSensorManager = ASensorManager_getInstance();
+    ASensor const* mAccelerometer = ASensorManager_getDefaultSensor(mSensorManager, ASENSOR_TYPE_ACCELEROMETER);
+
+    return SDL_strdup(ASensor_getName(mAccelerometer));
+}
+#endif
 
 // sends message to be handled on the UI event dispatch thread
 extern "C" int Android_JNI_SendMessage(int command, int param)
