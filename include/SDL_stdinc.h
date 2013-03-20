@@ -342,13 +342,12 @@ SDL_FORCE_INLINE void SDL_memset4(void *dst, int val, size_t len)
     );
 /* !!! FIXME: amd64? */
 #else
-    unsigned int _count = (len);
-    unsigned int _n = (_count + 3) / 4;
+    size_t _n = (len + 3) / 4;
     Uint32 *_p = SDL_static_cast(Uint32 *, dst);
     Uint32 _val = (val);
     if (len == 0)
         return;
-    switch (_count % 4)
+    switch (len % 4)
     {
         case 0: do {    *_p++ = _val;
         case 3:         *_p++ = _val;
