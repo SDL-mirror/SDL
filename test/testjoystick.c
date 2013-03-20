@@ -28,9 +28,6 @@
 #define SCREEN_HEIGHT	480
 #endif
 
-#define MAX_NUM_AXES 6
-#define MAX_NUM_HATS 2
-
 
 static void
 DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
@@ -121,10 +118,13 @@ WatchJoystick(SDL_Joystick * joystick)
                        event.jbutton.which, event.jbutton.button);
                 break;
             case SDL_KEYDOWN:
-                if (event.key.keysym.sym != SDLK_ESCAPE) {
+                if ((event.key.keysym.sym != SDLK_ESCAPE) &&
+                    (event.key.keysym.sym != SDLK_AC_BACK)) {
                     break;
                 }
                 /* Fall through to signal quit */
+            case SDL_FINGERDOWN:
+            case SDL_MOUSEBUTTONDOWN:
             case SDL_QUIT:
                 done = SDL_TRUE;
                 break;
@@ -136,15 +136,15 @@ WatchJoystick(SDL_Joystick * joystick)
         SDL_SetRenderDrawColor(screen, 0x00, 0xFF, 0x00, SDL_ALPHA_OPAQUE);
         for (i = 0; i < SDL_JoystickNumButtons(joystick); ++i) {
             if (SDL_JoystickGetButton(joystick, i) == SDL_PRESSED) {
-                DrawRect(screen, i * 34, SCREEN_HEIGHT - 34, 32, 32);
+                DrawRect(screen, (i%20) * 34, SCREEN_HEIGHT - 68 + (i/20) * 34, 32, 32);
             }
         }
 
         SDL_SetRenderDrawColor(screen, 0xFF, 0x00, 0x00, SDL_ALPHA_OPAQUE);
-        for (i = 0; i < SDL_JoystickNumAxes(joystick) / 2; ++i) {
+        for (i = 0; i < SDL_JoystickNumAxes(joystick); ++i) {
             /* Draw the X/Y axis */
             int x, y;
-            x = (((int) SDL_JoystickGetAxis(joystick, i * 2 + 0)) + 32768);
+            x = (((int) SDL_JoystickGetAxis(joystick, i)) + 32768);
             x *= SCREEN_WIDTH;
             x /= 65535;
             if (x < 0) {
@@ -152,7 +152,12 @@ WatchJoystick(SDL_Joystick * joystick)
             } else if (x > (SCREEN_WIDTH - 16)) {
                 x = SCREEN_WIDTH - 16;
             }
-            y = (((int) SDL_JoystickGetAxis(joystick, i * 2 + 1)) + 32768);
+            ++i;
+            if (i < SDL_JoystickNumAxes(joystick)) {
+                y = (((int) SDL_JoystickGetAxis(joystick, i)) + 32768);
+            } else {
+                y = 32768;
+            }
             y *= SCREEN_HEIGHT;
             y /= 65535;
             if (y < 0) {
@@ -235,11 +240,19 @@ main(int argc, char *argv[])
         }
     }
 
+#ifdef ANDROID
+    if (SDL_NumJoysticks() > 0) {
+#else
     if (argv[1]) {
+#endif
         SDL_bool reportederror = SDL_FALSE;
         SDL_bool keepGoing = SDL_TRUE;
         SDL_Event event;
+#ifdef ANDROID
+        joystick = SDL_JoystickOpen(0);
+#else
         joystick = SDL_JoystickOpen(atoi(argv[1]));
+#endif
         while ( keepGoing ) {
             if (joystick == NULL) {
                 if ( !reportederror ) {
@@ -259,7 +272,8 @@ main(int argc, char *argv[])
             }
             while (keepGoing) {
                 SDL_WaitEvent(&event);
-                if (event.type == SDL_QUIT) {
+                if ((event.type == SDL_QUIT) || (event.type == SDL_FINGERDOWN)
+                    || (event.type == SDL_MOUSEBUTTONDOWN)) {
                     keepGoing = SDL_FALSE;
                 } else if (event.type == SDL_JOYDEVICEADDED) {
                     joystick = SDL_JoystickOpen(atoi(argv[1]));
@@ -270,7 +284,11 @@ main(int argc, char *argv[])
     }
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
 
+#ifdef ANDROID
+    exit(0);
+#else
     return 0;
+#endif
 }
 
 #else
