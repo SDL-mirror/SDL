@@ -47,7 +47,8 @@ Instructions:
 
 If you want to use the Eclipse IDE, skip to the Eclipse section below.
 
-5. Edit <project>/local.properties to point to the Android SDK directory
+5. Create <project>/local.properties and use that to point to the Android SDK directory, by writing a line with the following form:
+sdk.dir=PATH_TO_ANDROID_SDK
 6. Run 'ant debug' in android/project. This compiles the .java and eventually 
    creates a .apk with the native code embedded
 7. 'ant debug install' will push the apk to the device or emulator (if connected)
