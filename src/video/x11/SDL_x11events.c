@@ -735,10 +735,18 @@ X11_DispatchEvent(_THIS)
                     XA_CUT_BUFFER0, 0, INT_MAX/4, False, req->target,
                     &sevent.xselection.target, &seln_format, &nbytes,
                     &overflow, &seln_data) == Success) {
+                Atom XA_TARGETS = XInternAtom(display, "TARGETS", 0);
                 if (sevent.xselection.target == req->target) {
                     XChangeProperty(display, req->requestor, req->property,
                         sevent.xselection.target, seln_format, PropModeReplace,
                         seln_data, nbytes);
+                    sevent.xselection.property = req->property;
+                } else if (XA_TARGETS == req->target) {
+                    Atom SupportedFormats[] = { sevent.xselection.target, XA_TARGETS };
+                    XChangeProperty(display, req->requestor, req->property,
+                        XA_ATOM, 32, PropModeReplace,
+                        (unsigned char*)SupportedFormats,
+                        sizeof(SupportedFormats)/sizeof(*SupportedFormats));
                     sevent.xselection.property = req->property;
                 }
                 XFree(seln_data);
