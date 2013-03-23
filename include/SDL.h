@@ -41,10 +41,9 @@
  *  Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
  *  Pike, Pliant, Python, Ruby, and Smalltalk.
  *  
- *  This library is distributed under GNU LGPL version 2, which can be
+ *  This library is distributed under the zlib license, which can be
  *  found in the file  "COPYING".  This license allows you to use SDL
- *  freely in commercial programs as long as you link with the dynamic
- *  library.
+ *  freely for any purpose as long as you retain the copyright notice.
  *  
  *  The best way to learn how to use SDL is to check out the header files in
  *  the "include" subdirectory and the programs in the "test" subdirectory.
