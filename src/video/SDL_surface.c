@@ -189,10 +189,18 @@ SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
         surface->map->info.colorkey = key;
         if (surface->format->palette) {
             surface->format->palette->colors[surface->map->info.colorkey].a = SDL_ALPHA_TRANSPARENT;
+            ++surface->format->palette->version;
+            if (!surface->format->palette->version) {
+                surface->format->palette->version = 1;
+            }
         }
     } else {
         if (surface->format->palette) {
             surface->format->palette->colors[surface->map->info.colorkey].a = SDL_ALPHA_OPAQUE;
+            ++surface->format->palette->version;
+            if (!surface->format->palette->version) {
+                surface->format->palette->version = 1;
+            }
         }
         surface->map->info.flags &= ~SDL_COPY_COLORKEY;
     }
