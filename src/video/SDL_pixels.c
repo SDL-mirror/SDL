@@ -762,12 +762,12 @@ SDL_CalculatePitch(SDL_Surface * surface)
  * Match an RGB value to a particular palette index
  */
 Uint8
-SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b)
+SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
 {
     /* Do colorspace distance matching */
     unsigned int smallest;
     unsigned int distance;
-    int rd, gd, bd;
+    int rd, gd, bd, ad;
     int i;
     Uint8 pixel = 0;
 
@@ -776,7 +776,8 @@ SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b)
         rd = pal->colors[i].r - r;
         gd = pal->colors[i].g - g;
         bd = pal->colors[i].b - b;
-        distance = (rd * rd) + (gd * gd) + (bd * bd);
+        ad = pal->colors[i].unused - a;
+        distance = (rd * rd) + (gd * gd) + (bd * bd) + (ad * ad);
         if (distance < smallest) {
             pixel = i;
             if (distance == 0) {        /* Perfect match! */
@@ -797,7 +798,7 @@ SDL_MapRGB(const SDL_PixelFormat * format, Uint8 r, Uint8 g, Uint8 b)
             | (g >> format->Gloss) << format->Gshift
             | (b >> format->Bloss) << format->Bshift | format->Amask;
     } else {
-        return SDL_FindColor(format->palette, r, g, b);
+        return SDL_FindColor(format->palette, r, g, b, SDL_ALPHA_OPAQUE);
     }
 }
 
@@ -812,7 +813,7 @@ SDL_MapRGBA(const SDL_PixelFormat * format, Uint8 r, Uint8 g, Uint8 b,
             | (b >> format->Bloss) << format->Bshift
             | ((a >> format->Aloss) << format->Ashift & format->Amask);
     } else {
-        return SDL_FindColor(format->palette, r, g, b);
+        return SDL_FindColor(format->palette, r, g, b, a);
     }
 }
 
@@ -858,7 +859,7 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
             *r = format->palette->colors[pixel].r;
             *g = format->palette->colors[pixel].g;
             *b = format->palette->colors[pixel].b;
-            *a = SDL_ALPHA_OPAQUE;
+            *a = format->palette->colors[pixel].unused;
         } else {
             *r = *g = *b = *a = 0;
         }
@@ -894,7 +895,7 @@ Map1to1(SDL_Palette * src, SDL_Palette * dst, int *identical)
     for (i = 0; i < src->ncolors; ++i) {
         map[i] = SDL_FindColor(dst,
                                src->colors[i].r, src->colors[i].g,
-                               src->colors[i].b);
+                               src->colors[i].b, src->colors[i].unused);
     }
     return (map);
 }
@@ -918,10 +919,10 @@ Map1toN(SDL_PixelFormat * src, Uint8 Rmod, Uint8 Gmod, Uint8 Bmod, Uint8 Amod,
 
     /* We memory copy to the pixel map so the endianness is preserved */
     for (i = 0; i < pal->ncolors; ++i) {
-        Uint8 A = Amod;
         Uint8 R = (Uint8) ((pal->colors[i].r * Rmod) / 255);
         Uint8 G = (Uint8) ((pal->colors[i].g * Gmod) / 255);
         Uint8 B = (Uint8) ((pal->colors[i].b * Bmod) / 255);
+        Uint8 A = (Uint8) ((pal->colors[i].unused * Amod) / 255);
         ASSEMBLE_RGBA(&map[i * bpp], dst->BytesPerPixel, dst, R, G, B, A);
     }
     return (map);

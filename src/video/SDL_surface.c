@@ -187,7 +187,13 @@ SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
     if (flag) {
         surface->map->info.flags |= SDL_COPY_COLORKEY;
         surface->map->info.colorkey = key;
+        if (surface->format->palette) {
+            surface->format->palette->colors[surface->map->info.colorkey].unused = SDL_ALPHA_TRANSPARENT;
+        }
     } else {
+        if (surface->format->palette) {
+            surface->format->palette->colors[surface->map->info.colorkey].unused = SDL_ALPHA_OPAQUE;
+        }
         surface->map->info.flags &= ~SDL_COPY_COLORKEY;
     }
     if (surface->map->info.flags != flags) {
@@ -843,14 +849,35 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
            SDL_COPY_RLE_ALPHAKEY));
     surface->map->info.flags = copy_flags;
     if (copy_flags & SDL_COPY_COLORKEY) {
-        Uint8 keyR, keyG, keyB, keyA;
+        SDL_bool set_colorkey_by_color = SDL_FALSE;
 
-        SDL_GetRGBA(surface->map->info.colorkey, surface->format, &keyR,
-                    &keyG, &keyB, &keyA);
-        SDL_SetColorKey(convert, 1,
-                        SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
-        /* This is needed when converting for 3D texture upload */
-        SDL_ConvertColorkeyToAlpha(convert);
+        if (surface->format->palette) {
+            if (format->palette && 
+                surface->format->palette->ncolors <= format->palette->ncolors &&
+                (SDL_memcmp(surface->format->palette->colors, format->palette->colors,
+                  surface->format->palette->ncolors * sizeof(SDL_Color)) == 0)) {
+                /* The palette is identical, just set the same colorkey */
+                SDL_SetColorKey(convert, 1, surface->map->info.colorkey);
+            } else if (format->Amask) {
+                /* The alpha was set in the destination from the palette */
+            } else {
+                set_colorkey_by_color = SDL_TRUE;
+            }
+        } else {
+            set_colorkey_by_color = SDL_TRUE;
+        }
+
+        if (set_colorkey_by_color) {
+            /* Set the colorkey by color, which needs to be unique */
+            Uint8 keyR, keyG, keyB, keyA;
+
+            SDL_GetRGBA(surface->map->info.colorkey, surface->format, &keyR,
+                        &keyG, &keyB, &keyA);
+            SDL_SetColorKey(convert, 1,
+                            SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
+            /* This is needed when converting for 3D texture upload */
+            SDL_ConvertColorkeyToAlpha(convert);
+        }
     }
     SDL_SetClipRect(convert, &surface->clip_rect);
 
