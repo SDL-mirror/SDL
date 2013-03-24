@@ -730,7 +730,7 @@ SDL_DitherColors(SDL_Color * colors, int bpp)
         b |= b << 2;
         b |= b << 4;
         colors[i].b = b;
-        colors[i].unused = SDL_ALPHA_OPAQUE;
+        colors[i].a = SDL_ALPHA_OPAQUE;
     }
 }
 
@@ -776,7 +776,7 @@ SDL_FindColor(SDL_Palette * pal, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
         rd = pal->colors[i].r - r;
         gd = pal->colors[i].g - g;
         bd = pal->colors[i].b - b;
-        ad = pal->colors[i].unused - a;
+        ad = pal->colors[i].a - a;
         distance = (rd * rd) + (gd * gd) + (bd * bd) + (ad * ad);
         if (distance < smallest) {
             pixel = i;
@@ -859,7 +859,7 @@ SDL_GetRGBA(Uint32 pixel, const SDL_PixelFormat * format,
             *r = format->palette->colors[pixel].r;
             *g = format->palette->colors[pixel].g;
             *b = format->palette->colors[pixel].b;
-            *a = format->palette->colors[pixel].unused;
+            *a = format->palette->colors[pixel].a;
         } else {
             *r = *g = *b = *a = 0;
         }
@@ -895,7 +895,7 @@ Map1to1(SDL_Palette * src, SDL_Palette * dst, int *identical)
     for (i = 0; i < src->ncolors; ++i) {
         map[i] = SDL_FindColor(dst,
                                src->colors[i].r, src->colors[i].g,
-                               src->colors[i].b, src->colors[i].unused);
+                               src->colors[i].b, src->colors[i].a);
     }
     return (map);
 }
@@ -922,7 +922,7 @@ Map1toN(SDL_PixelFormat * src, Uint8 Rmod, Uint8 Gmod, Uint8 Bmod, Uint8 Amod,
         Uint8 R = (Uint8) ((pal->colors[i].r * Rmod) / 255);
         Uint8 G = (Uint8) ((pal->colors[i].g * Gmod) / 255);
         Uint8 B = (Uint8) ((pal->colors[i].b * Bmod) / 255);
-        Uint8 A = (Uint8) ((pal->colors[i].unused * Amod) / 255);
+        Uint8 A = (Uint8) ((pal->colors[i].a * Amod) / 255);
         ASSEMBLE_RGBA(&map[i * bpp], dst->BytesPerPixel, dst, R, G, B, A);
     }
     return (map);
