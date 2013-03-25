@@ -463,98 +463,92 @@ HIDGetDeviceInfo(io_object_t hidDevice, CFMutableDictionaryRef hidProperties,
     /* Mac OS X currently is not mirroring all USB properties to HID page so need to look at USB device page also
      * get dictionary for usb properties: step up two levels and get CF dictionary for USB properties
      */
-    if ((KERN_SUCCESS ==
-         IORegistryEntryGetParentEntry(hidDevice, kIOServicePlane, &parent1))
-        && (KERN_SUCCESS ==
-            IORegistryEntryGetParentEntry(parent1, kIOServicePlane, &parent2))
-        && (KERN_SUCCESS ==
-            IORegistryEntryCreateCFProperties(parent2, &usbProperties,
-                                              kCFAllocatorDefault,
-                                              kNilOptions))) {
+    if ((KERN_SUCCESS == IORegistryEntryGetParentEntry(hidDevice, kIOServicePlane, &parent1))
+        && (KERN_SUCCESS == IORegistryEntryGetParentEntry(parent1, kIOServicePlane, &parent2))
+        && (KERN_SUCCESS == IORegistryEntryCreateCFProperties(parent2, &usbProperties, kCFAllocatorDefault, kNilOptions))) {
         if (usbProperties) {
             CFTypeRef refCF = 0;
             /* get device info
              * try hid dictionary first, if fail then go to usb dictionary
              */
 
-
             /* get product name */
-            refCF =
-                CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDProductKey));
-            if (!refCF)
-                refCF =
-                    CFDictionaryGetValue(usbProperties,
-                                         CFSTR("USB Product Name"));
+            refCF = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDProductKey));
+            if (!refCF) {
+                refCF = CFDictionaryGetValue(usbProperties, CFSTR("USB Product Name"));
+            }
             if (refCF) {
-                if (!CFStringGetCString
-                    (refCF, pDevice->product, 256,
-                     CFStringGetSystemEncoding()))
-                    SDL_SetError
-                        ("CFStringGetCString error retrieving pDevice->product.");
+                if (!CFStringGetCString(refCF, pDevice->product, 256, CFStringGetSystemEncoding())) {
+                    SDL_SetError("CFStringGetCString error retrieving pDevice->product.");
+                }
             }
 
             /* get usage page and usage */
-            refCF =
-                CFDictionaryGetValue(hidProperties,
-                                     CFSTR(kIOHIDPrimaryUsagePageKey));
+            refCF = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDPrimaryUsagePageKey));
             if (refCF) {
-                if (!CFNumberGetValue
-                    (refCF, kCFNumberLongType, &pDevice->usagePage))
-                    SDL_SetError
-                        ("CFNumberGetValue error retrieving pDevice->usagePage.");
-                refCF =
-                    CFDictionaryGetValue(hidProperties,
-                                         CFSTR(kIOHIDPrimaryUsageKey));
-                if (refCF)
-                    if (!CFNumberGetValue
-                        (refCF, kCFNumberLongType, &pDevice->usage))
-                        SDL_SetError
-                            ("CFNumberGetValue error retrieving pDevice->usage.");
+                if (!CFNumberGetValue (refCF, kCFNumberLongType, &pDevice->usagePage)) {
+                    SDL_SetError("CFNumberGetValue error retrieving pDevice->usagePage.");
+                }
+
+                refCF = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDPrimaryUsageKey));
+                if (refCF) {
+                    if (!CFNumberGetValue (refCF, kCFNumberLongType, &pDevice->usage)) {
+                        SDL_SetError("CFNumberGetValue error retrieving pDevice->usage.");
+                    }
+                }
             }
 
-			refCF =
-			CFDictionaryGetValue(hidProperties,
-								 CFSTR(kIOHIDVendorIDKey));
+			refCF = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDVendorIDKey));
             if (refCF) {
-                if (!CFNumberGetValue
-                    (refCF, kCFNumberLongType, &pDevice->guid.data[0]))
-                    SDL_SetError
-					("CFNumberGetValue error retrieving pDevice->guid.");
-            }
-			refCF =
-			CFDictionaryGetValue(hidProperties,
-								 CFSTR(kIOHIDProductIDKey));
-            if (refCF) {
-                if (!CFNumberGetValue
-                    (refCF, kCFNumberLongType, &pDevice->guid.data[8]))
-                    SDL_SetError
-					("CFNumberGetValue error retrieving pDevice->guid[8].");
+                if (!CFNumberGetValue(refCF, kCFNumberLongType, &pDevice->guid.data[0])) {
+                    SDL_SetError("CFNumberGetValue error retrieving pDevice->guid[0]");
+                }
             }
 
-			
-            if (NULL == refCF) {        /* get top level element HID usage page or usage */
+			refCF = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDProductIDKey));
+            if (refCF) {
+                if (!CFNumberGetValue(refCF, kCFNumberLongType, &pDevice->guid.data[8])) {
+                    SDL_SetError("CFNumberGetValue error retrieving pDevice->guid[8]");
+                }
+            }
+
+            /* Check to make sure we have a vendor and product ID
+               If we don't, use the same algorithm as the Linux code for Bluetooth devices */
+            {
+                Uint32 *guid32 = (Uint32*)pDevice->guid.data;
+                if (!guid32[0] && !guid32[1]) {
+                    const Uint16 BUS_BLUETOOTH = 0x05;
+                    Uint16 *guid16 = (Uint16 *)guid32;
+                    *guid16++ = BUS_BLUETOOTH;
+                    *guid16++ = 0;
+                    SDL_strlcpy((char*)guid16, pDevice->product, sizeof(pDevice->guid.data) - 4);
+                }
+            }
+
+            /* If we don't have a vendor and product ID this is probably a Bluetooth device */
+
+            if (NULL == refCF) {    /* get top level element HID usage page or usage */
                 /* use top level element instead */
                 CFTypeRef refCFTopElement = 0;
-                refCFTopElement =
-                    CFDictionaryGetValue(hidProperties,
-                                         CFSTR(kIOHIDElementKey));
+                refCFTopElement = CFDictionaryGetValue(hidProperties, CFSTR(kIOHIDElementKey));
                 {
                     /* refCFTopElement points to an array of element dictionaries */
                     CFRange range = { 0, CFArrayGetCount(refCFTopElement) };
-                    CFArrayApplyFunction(refCFTopElement, range,
-                                         HIDTopLevelElementHandler, pDevice);
+                    CFArrayApplyFunction(refCFTopElement, range, HIDTopLevelElementHandler, pDevice);
                 }
             }
 
             CFRelease(usbProperties);
-        } else
-            SDL_SetError
-                ("IORegistryEntryCreateCFProperties failed to create usbProperties.");
+        } else {
+            SDL_SetError("IORegistryEntryCreateCFProperties failed to create usbProperties.");
+        }
 
-        if (kIOReturnSuccess != IOObjectRelease(parent2))
-            SDL_SetError("IOObjectRelease error with parent2.");
-        if (kIOReturnSuccess != IOObjectRelease(parent1))
-            SDL_SetError("IOObjectRelease error with parent1.");
+        if (kIOReturnSuccess != IOObjectRelease(parent2)) {
+            SDL_SetError("IOObjectRelease error with parent2");
+        }
+        if (kIOReturnSuccess != IOObjectRelease(parent1)) {
+            SDL_SetError("IOObjectRelease error with parent1");
+        }
     }
 }
 
@@ -1100,4 +1094,5 @@ SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick *joystick)
 }
 
 #endif /* SDL_JOYSTICK_IOKIT */
+
 /* vi: set ts=4 sw=4 expandtab: */
