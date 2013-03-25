@@ -65,8 +65,8 @@ static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 //static int D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateViewport(SDL_Renderer * renderer);
 static int D3D11_RenderClear(SDL_Renderer * renderer);
-//static int D3D11_RenderDrawPoints(SDL_Renderer * renderer,
-//                                const SDL_FPoint * points, int count);
+static int D3D11_RenderDrawPoints(SDL_Renderer * renderer,
+                                  const SDL_FPoint * points, int count);
 static int D3D11_RenderDrawLines(SDL_Renderer * renderer,
                                  const SDL_FPoint * points, int count);
 static int D3D11_RenderFillRects(SDL_Renderer * renderer,
@@ -143,7 +143,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     //renderer->SetRenderTarget = D3D11_SetRenderTarget;
     renderer->UpdateViewport = D3D11_UpdateViewport;
     renderer->RenderClear = D3D11_RenderClear;
-    //renderer->RenderDrawPoints = D3D11_RenderDrawPoints;
+    renderer->RenderDrawPoints = D3D11_RenderDrawPoints;
     renderer->RenderDrawLines = D3D11_RenderDrawLines;
     renderer->RenderFillRects = D3D11_RenderFillRects;
     renderer->RenderCopy = D3D11_RenderCopy;
@@ -1198,6 +1198,42 @@ D3D11_RenderFinishDrawOp(SDL_Renderer * renderer,
     rendererData->d3dContext->VSSetConstantBuffers(0, 1, rendererData->vertexShaderConstants.GetAddressOf());
     rendererData->d3dContext->RSSetState(rendererData->mainRasterizer.Get());
     rendererData->d3dContext->Draw(vertexCount, 0);
+}
+
+static int
+D3D11_RenderDrawPoints(SDL_Renderer * renderer,
+                       const SDL_FPoint * points, int count)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    float r, g, b, a;
+
+    r = (float)(renderer->r / 255.0f);
+    g = (float)(renderer->g / 255.0f);
+    b = (float)(renderer->b / 255.0f);
+    a = (float)(renderer->a / 255.0f);
+
+    vector<VertexPositionColor> vertices;
+    vertices.reserve(count);
+    for (int i = 0; i < count; ++i) {
+        VertexPositionColor v = {XMFLOAT3(points[i].x, points[i].y, 0.0f),  XMFLOAT2(0.0f, 0.0f), XMFLOAT4(r, g, b, a)};
+        vertices.push_back(v);
+    }
+
+    D3D11_RenderStartDrawOp(renderer);
+    D3D11_RenderSetBlendMode(renderer, renderer->blendMode);
+    if (D3D11_UpdateVertexBuffer(renderer, &vertices[0], vertices.size() * sizeof(VertexPositionColor)) != 0) {
+        return -1;
+    }
+
+    D3D11_SetPixelShader(
+        renderer,
+        rendererData->colorPixelShader.Get(),
+        nullptr,
+        nullptr);
+
+    D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_POINTLIST, vertices.size());
+
+    return 0;
 }
 
 static int
