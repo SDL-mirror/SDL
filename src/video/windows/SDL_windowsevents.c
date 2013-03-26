@@ -179,6 +179,8 @@ WindowsScanCodeToSDLScanCode( LPARAM lParam, WPARAM wParam )
 			return SDL_SCANCODE_KP_DIVIDE;
 		case SDL_SCANCODE_CAPSLOCK:
 			return SDL_SCANCODE_KP_PLUS;
+        default:
+            break;
 		}
 	}
 
