@@ -26,6 +26,10 @@
 #include "SDL_windowsvideo.h"
 
 
+#ifndef SS_EDITCONTROL
+#define SS_EDITCONTROL  0x2000
+#endif
+
 /* Display a Windows message box */
 
 #pragma pack(push, 1)
