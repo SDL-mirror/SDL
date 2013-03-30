@@ -592,7 +592,7 @@ SDL_FORCE_INLINE Uint64 SDL_strtoull_inline(const char *str, char **endp, int ba
 
 extern DECLSPEC double SDLCALL SDL_strtod(const char *str, char **endp);
 #ifdef HAVE_STRTOD
-SDL_FORCE_INLINE Uint64 SDL_strtod_inline(const char *str, char **endp) { return strtod(str, endp); }
+SDL_FORCE_INLINE double SDL_strtod_inline(const char *str, char **endp) { return strtod(str, endp); }
 #define SDL_strtod SDL_strtod_inline
 #endif
 
