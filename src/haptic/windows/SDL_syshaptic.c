@@ -87,7 +87,7 @@ extern HWND SDL_HelperWindow;
 /*
  * Prototypes.
  */
-static void DI_SetError(const char *str, HRESULT err);
+static int DI_SetError(const char *str, HRESULT err);
 static int DI_GUIDIsSame(const GUID * a, const GUID * b);
 static int SDL_SYS_HapticOpenFromInstance(SDL_Haptic * haptic,
                                           DIDEVICEINSTANCE instance);
@@ -110,14 +110,14 @@ static BOOL CALLBACK DI_EffectCallback(LPCDIEFFECTINFO pei, LPVOID pv);
 /* 
  * Like SDL_SetError but for DX error codes.
  */
-static void
+static int
 DI_SetError(const char *str, HRESULT err)
 {
     /*
        SDL_SetError("Haptic: %s - %s: %s", str,
        DXGetErrorString8A(err), DXGetErrorDescription8A(err));
      */
-    SDL_SetError("Haptic error %s", str);
+    return SDL_SetError("Haptic error %s", str);
 }
 
 
@@ -142,8 +142,7 @@ SDL_SYS_HapticInit(void)
     HINSTANCE instance;
 
     if (dinput != NULL) {       /* Already open. */
-        SDL_SetError("Haptic: SubSystem already open.");
-        return -1;
+        return SDL_SetError("Haptic: SubSystem already open.");
     }
 
     /* Clear all the memory. */
@@ -153,8 +152,7 @@ SDL_SYS_HapticInit(void)
 
     ret = WIN_CoInitialize();
     if (FAILED(ret)) {
-        DI_SetError("Coinitialize", ret);
-        return -1;
+        return DI_SetError("Coinitialize", ret);
     }
 
     coinitialized = SDL_TRUE;
@@ -163,23 +161,20 @@ SDL_SYS_HapticInit(void)
                            &IID_IDirectInput8, (LPVOID) & dinput);
     if (FAILED(ret)) {
         SDL_SYS_HapticQuit();
-        DI_SetError("CoCreateInstance", ret);
-        return -1;
+        return DI_SetError("CoCreateInstance", ret);
     }
 
     /* Because we used CoCreateInstance, we need to Initialize it, first. */
     instance = GetModuleHandle(NULL);
     if (instance == NULL) {
         SDL_SYS_HapticQuit();
-        SDL_SetError("GetModuleHandle() failed with error code %d.",
-                     GetLastError());
-        return -1;
+        return SDL_SetError("GetModuleHandle() failed with error code %d.",
+                            GetLastError());
     }
     ret = IDirectInput8_Initialize(dinput, instance, DIRECTINPUT_VERSION);
     if (FAILED(ret)) {
         SDL_SYS_HapticQuit();
-        DI_SetError("Initializing DirectInput device", ret);
-        return -1;
+        return DI_SetError("Initializing DirectInput device", ret);
     }
 
     /* Look for haptic devices. */
@@ -191,8 +186,7 @@ SDL_SYS_HapticInit(void)
                                    DIEDFL_ATTACHEDONLY);
     if (FAILED(ret)) {
         SDL_SYS_HapticQuit();
-        DI_SetError("Enumerating DirectInput devices", ret);
-        return -1;
+        return DI_SetError("Enumerating DirectInput devices", ret);
     }
 
     if (!env || SDL_atoi(env)) {
@@ -411,8 +405,7 @@ SDL_SYS_HapticOpenFromXInput(SDL_Haptic * haptic, Uint8 userid)
     haptic->effects = (struct haptic_effect *)
         SDL_malloc(sizeof(struct haptic_effect) * haptic->neffects);
     if (haptic->effects == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     /* Clear the memory */
     SDL_memset(haptic->effects, 0,
@@ -422,8 +415,7 @@ SDL_SYS_HapticOpenFromXInput(SDL_Haptic * haptic, Uint8 userid)
     if (haptic->hwdata == NULL) {
         SDL_free(haptic->effects);
         haptic->effects = NULL;
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     SDL_memset(haptic->hwdata, 0, sizeof(*haptic->hwdata));
 
@@ -690,8 +682,7 @@ SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
     haptic->hwdata = (struct haptic_hwdata *)
         SDL_malloc(sizeof(*haptic->hwdata));
     if (haptic->hwdata == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     SDL_memset(haptic->hwdata, 0, sizeof(*haptic->hwdata));
 
@@ -809,8 +800,7 @@ SDL_SYS_SetDirection(DIEFFECT * effect, SDL_HapticDirection * dir, int naxes)
     /* Has axes. */
     rglDir = SDL_malloc(sizeof(LONG) * naxes);
     if (rglDir == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     SDL_memset(rglDir, 0, sizeof(LONG) * naxes);
     effect->rglDirection = rglDir;
@@ -838,8 +828,7 @@ SDL_SYS_SetDirection(DIEFFECT * effect, SDL_HapticDirection * dir, int naxes)
         return 0;
 
     default:
-        SDL_SetError("Haptic: Unknown direction type.");
-        return -1;
+        return SDL_SetError("Haptic: Unknown direction type.");
     }
 }
 
@@ -875,8 +864,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
     /* Envelope. */
     envelope = SDL_malloc(sizeof(DIENVELOPE));
     if (envelope == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     SDL_memset(envelope, 0, sizeof(DIENVELOPE));
     dest->lpEnvelope = envelope;
@@ -887,8 +875,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
     if (dest->cAxes > 0) {
         axes = SDL_malloc(sizeof(DWORD) * dest->cAxes);
         if (axes == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         axes[0] = haptic->hwdata->axes[0];      /* Always at least one axis. */
         if (dest->cAxes > 1) {
@@ -907,8 +894,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
         hap_constant = &src->constant;
         constant = SDL_malloc(sizeof(DICONSTANTFORCE));
         if (constant == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_memset(constant, 0, sizeof(DICONSTANTFORCE));
 
@@ -951,8 +937,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
         hap_periodic = &src->periodic;
         periodic = SDL_malloc(sizeof(DIPERIODIC));
         if (periodic == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_memset(periodic, 0, sizeof(DIPERIODIC));
 
@@ -997,8 +982,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
         hap_condition = &src->condition;
         condition = SDL_malloc(sizeof(DICONDITION) * dest->cAxes);
         if (condition == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_memset(condition, 0, sizeof(DICONDITION));
 
@@ -1040,8 +1024,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
         hap_ramp = &src->ramp;
         ramp = SDL_malloc(sizeof(DIRAMPFORCE));
         if (ramp == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_memset(ramp, 0, sizeof(DIRAMPFORCE));
 
@@ -1079,8 +1062,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
         hap_custom = &src->custom;
         custom = SDL_malloc(sizeof(DICUSTOMFORCE));
         if (custom == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_memset(custom, 0, sizeof(DICUSTOMFORCE));
 
@@ -1124,8 +1106,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
 
 
     default:
-        SDL_SetError("Haptic: Unknown effect type.");
-        return -1;
+        return SDL_SetError("Haptic: Unknown effect type.");
     }
 
     return 0;
@@ -1358,8 +1339,7 @@ SDL_SYS_HapticRunEffect(SDL_Haptic * haptic, struct haptic_effect *effect,
     /* Run the effect. */
     ret = IDirectInputEffect_Start(effect->hweffect->ref, iter, 0);
     if (FAILED(ret)) {
-        DI_SetError("Running the effect", ret);
-        return -1;
+        return DI_SetError("Running the effect", ret);
     }
 
     return 0;
@@ -1381,8 +1361,7 @@ SDL_SYS_HapticStopEffect(SDL_Haptic * haptic, struct haptic_effect *effect)
 
     ret = IDirectInputEffect_Stop(effect->hweffect->ref);
     if (FAILED(ret)) {
-        DI_SetError("Unable to stop effect", ret);
-        return -1;
+        return DI_SetError("Unable to stop effect", ret);
     }
 
     return 0;
@@ -1424,8 +1403,7 @@ SDL_SYS_HapticGetEffectStatus(SDL_Haptic * haptic,
 
     ret = IDirectInputEffect_GetEffectStatus(effect->hweffect->ref, &status);
     if (FAILED(ret)) {
-        DI_SetError("Getting effect status", ret);
-        return -1;
+        return DI_SetError("Getting effect status", ret);
     }
 
     if (status == 0)
@@ -1454,8 +1432,7 @@ SDL_SYS_HapticSetGain(SDL_Haptic * haptic, int gain)
     ret = IDirectInputDevice8_SetProperty(haptic->hwdata->device,
                                           DIPROP_FFGAIN, &dipdw.diph);
     if (FAILED(ret)) {
-        DI_SetError("Setting gain", ret);
-        return -1;
+        return DI_SetError("Setting gain", ret);
     }
 
     return 0;
@@ -1483,8 +1460,7 @@ SDL_SYS_HapticSetAutocenter(SDL_Haptic * haptic, int autocenter)
     ret = IDirectInputDevice8_SetProperty(haptic->hwdata->device,
                                           DIPROP_AUTOCENTER, &dipdw.diph);
     if (FAILED(ret)) {
-        DI_SetError("Setting autocenter", ret);
-        return -1;
+        return DI_SetError("Setting autocenter", ret);
     }
 
     return 0;
@@ -1503,8 +1479,7 @@ SDL_SYS_HapticPause(SDL_Haptic * haptic)
     ret = IDirectInputDevice8_SendForceFeedbackCommand(haptic->hwdata->device,
                                                        DISFFC_PAUSE);
     if (FAILED(ret)) {
-        DI_SetError("Pausing the device", ret);
-        return -1;
+        return DI_SetError("Pausing the device", ret);
     }
 
     return 0;
@@ -1523,8 +1498,7 @@ SDL_SYS_HapticUnpause(SDL_Haptic * haptic)
     ret = IDirectInputDevice8_SendForceFeedbackCommand(haptic->hwdata->device,
                                                        DISFFC_CONTINUE);
     if (FAILED(ret)) {
-        DI_SetError("Pausing the device", ret);
-        return -1;
+        return DI_SetError("Pausing the device", ret);
     }
 
     return 0;
@@ -1548,8 +1522,7 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
     ret = IDirectInputDevice8_SendForceFeedbackCommand(haptic->hwdata->device,
                                                        DISFFC_STOPALL);
     if (FAILED(ret)) {
-        DI_SetError("Stopping the device", ret);
-        return -1;
+        return DI_SetError("Stopping the device", ret);
     }
 
     return 0;

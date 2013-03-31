@@ -146,8 +146,7 @@ PSP_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 		if (!eglMakeCurrent(_this->gl_data->display, _this->gl_data->surface,
 	                      _this->gl_data->surface, _this->gl_data->context))
 		{
-			SDL_SetError("Unable to make EGL context current");
-			return -1;
+			return SDL_SetError("Unable to make EGL context current");
 		}
     return 0;
 }
@@ -163,8 +162,7 @@ PSP_GL_SetSwapInterval(_THIS, int interval)
         return 0;
     }
     /* Failed to set swap interval */
-    SDL_SetError("Unable to set the EGL swap interval");
-    return -1;
+    return SDL_SetError("Unable to set the EGL swap interval");
 }
 
 int

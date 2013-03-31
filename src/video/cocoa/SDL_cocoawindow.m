@@ -501,8 +501,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->window = window;
     data->nswindow = nswindow;
@@ -954,8 +953,7 @@ Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
 
     if (CGSetDisplayTransferByTable(display_id, tableSize,
                                     redTable, greenTable, blueTable) != CGDisplayNoErr) {
-        SDL_SetError("CGSetDisplayTransferByTable()");
-        return -1;
+        return SDL_SetError("CGSetDisplayTransferByTable()");
     }
     return 0;
 }
@@ -973,8 +971,7 @@ Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 
     if (CGGetDisplayTransferByTable(display_id, tableSize,
                                     redTable, greenTable, blueTable, &tableCopied) != CGDisplayNoErr) {
-        SDL_SetError("CGGetDisplayTransferByTable()");
-        return -1;
+        return SDL_SetError("CGGetDisplayTransferByTable()");
     }
 
     for (i = 0; i < tableCopied; i++) {

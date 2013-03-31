@@ -49,14 +49,14 @@ SDL_LookupString(const char *key)
 
 /* Public functions */
 
-void
+int
 SDL_SetError(const char *fmt, ...)
 {
     va_list ap;
     SDL_error *error;
 
     /* Ignore call if invalid format pointer was passed */
-    if (fmt == NULL) return;
+    if (fmt == NULL) return -1;
     
     /* Copy in the key, mark error as valid */
     error = SDL_GetErrBuf();
@@ -112,6 +112,8 @@ SDL_SetError(const char *fmt, ...)
 
     /* If we are in debug mode, print out an error message */
     SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
+
+    return -1;
 }
 
 /* This function has a bit more overhead than most error functions
@@ -216,28 +218,22 @@ SDL_ClearError(void)
 }
 
 /* Very common errors go here */
-void
+int
 SDL_Error(SDL_errorcode code)
 {
     switch (code) {
     case SDL_ENOMEM:
-        SDL_SetError("Out of memory");
-        break;
+        return SDL_SetError("Out of memory");
     case SDL_EFREAD:
-        SDL_SetError("Error reading from datastream");
-        break;
+        return SDL_SetError("Error reading from datastream");
     case SDL_EFWRITE:
-        SDL_SetError("Error writing to datastream");
-        break;
+        return SDL_SetError("Error writing to datastream");
     case SDL_EFSEEK:
-        SDL_SetError("Error seeking in datastream");
-        break;
+        return SDL_SetError("Error seeking in datastream");
     case SDL_UNSUPPORTED:
-        SDL_SetError("That operation is not supported");
-        break;
+        return SDL_SetError("That operation is not supported");
     default:
-        SDL_SetError("Unknown SDL error");
-        break;
+        return SDL_SetError("Unknown SDL error");
     }
 }
 

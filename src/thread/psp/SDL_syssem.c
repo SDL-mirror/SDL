@@ -105,8 +105,7 @@ int SDL_SemWaitTimeout(SDL_sem *sem, Uint32 timeout)
                case SCE_KERNEL_ERROR_WAIT_TIMEOUT:
                        return SDL_MUTEX_TIMEDOUT;
                default:
-                       SDL_SetError("WaitForSingleObject() failed");
-                       return -1;
+                       return SDL_SetError("WaitForSingleObject() failed");
 	}
 }
 
@@ -142,14 +141,12 @@ int SDL_SemPost(SDL_sem *sem)
 	int res;
 
 	if (sem == NULL) {
-		SDL_SetError("Passed a NULL sem");
-		return -1;
+		return SDL_SetError("Passed a NULL sem");
 	}
 
 	res = sceKernelSignalSema(sem->semid, 1);
 	if (res < 0) {
-		SDL_SetError("sceKernelSignalSema() failed");
-		return -1;
+		return SDL_SetError("sceKernelSignalSema() failed");
 	}
 
 	return 0;

@@ -809,12 +809,11 @@ SDL_RegisterApp(char *name, Uint32 style, void *hInst)
     class.cbWndExtra = 0;
     class.cbClsExtra = 0;
     if (!RegisterClass(&class)) {
-        SDL_SetError("Couldn't register application class");
-        return (-1);
+        return SDL_SetError("Couldn't register application class");
     }
 
     app_registered = 1;
-    return (0);
+    return 0;
 }
 
 /* Unregisters the windowclass registered in SDL_RegisterApp above. */

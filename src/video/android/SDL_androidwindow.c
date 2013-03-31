@@ -31,8 +31,7 @@ int
 Android_CreateWindow(_THIS, SDL_Window * window)
 {
     if (Android_Window) {
-        SDL_SetError("Android only supports one window");
-        return -1;
+        return SDL_SetError("Android only supports one window");
     }
     Android_Window = window;
     Android_PauseSem = SDL_CreateSemaphore(0);

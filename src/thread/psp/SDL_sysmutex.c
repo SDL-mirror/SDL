@@ -78,8 +78,7 @@ SDL_mutexP(SDL_mutex * mutex)
     SDL_threadID this_thread;
 
     if (mutex == NULL) {
-        SDL_SetError("Passed a NULL mutex");
-        return -1;
+        return SDL_SetError("Passed a NULL mutex");
     }
 
     this_thread = SDL_ThreadID();
@@ -107,14 +106,12 @@ SDL_mutexV(SDL_mutex * mutex)
     return 0;
 #else
     if (mutex == NULL) {
-        SDL_SetError("Passed a NULL mutex");
-        return -1;
+        return SDL_SetError("Passed a NULL mutex");
     }
 
     /* If we don't own the mutex, we can't unlock it */
     if (SDL_ThreadID() != mutex->owner) {
-        SDL_SetError("mutex not owned by this thread");
-        return -1;
+        return SDL_SetError("mutex not owned by this thread");
     }
 
     if (mutex->recursive) {

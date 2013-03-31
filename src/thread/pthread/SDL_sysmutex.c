@@ -81,17 +81,14 @@ SDL_DestroyMutex(SDL_mutex * mutex)
 int
 SDL_LockMutex(SDL_mutex * mutex)
 {
-    int retval;
 #if FAKE_RECURSIVE_MUTEX
     pthread_t this_thread;
 #endif
 
     if (mutex == NULL) {
-        SDL_SetError("Passed a NULL mutex");
-        return -1;
+        return SDL_SetError("Passed a NULL mutex");
     }
 
-    retval = 0;
 #if FAKE_RECURSIVE_MUTEX
     this_thread = pthread_self();
     if (mutex->owner == this_thread) {
@@ -105,17 +102,15 @@ SDL_LockMutex(SDL_mutex * mutex)
             mutex->owner = this_thread;
             mutex->recursive = 0;
         } else {
-            SDL_SetError("pthread_mutex_lock() failed");
-            retval = -1;
+            return SDL_SetError("pthread_mutex_lock() failed");
         }
     }
 #else
     if (pthread_mutex_lock(&mutex->id) < 0) {
-        SDL_SetError("pthread_mutex_lock() failed");
-        retval = -1;
+        return SDL_SetError("pthread_mutex_lock() failed");
     }
 #endif
-    return retval;
+    return 0;
 }
 
 int
@@ -127,8 +122,7 @@ SDL_TryLockMutex(SDL_mutex * mutex)
 #endif
 
     if (mutex == NULL) {
-        SDL_SetError("Passed a NULL mutex");
-        return -1;
+        return SDL_SetError("Passed a NULL mutex");
     }
 
     retval = 0;
@@ -147,8 +141,7 @@ SDL_TryLockMutex(SDL_mutex * mutex)
         } else if (errno == EBUSY) {
             retval = SDL_MUTEX_TIMEDOUT;
         } else {
-            SDL_SetError("pthread_mutex_trylock() failed");
-            retval = -1;
+            retval = SDL_SetError("pthread_mutex_trylock() failed");
         }
     }
 #else
@@ -156,8 +149,7 @@ SDL_TryLockMutex(SDL_mutex * mutex)
         if (errno == EBUSY) {
             retval = SDL_MUTEX_TIMEDOUT;
         } else {
-            SDL_SetError("pthread_mutex_trylock() failed");
-            retval = -1;
+            retval = SDL_SetError("pthread_mutex_trylock() failed");
         }
     }
 #endif
@@ -167,14 +159,10 @@ SDL_TryLockMutex(SDL_mutex * mutex)
 int
 SDL_UnlockMutex(SDL_mutex * mutex)
 {
-    int retval;
-
     if (mutex == NULL) {
-        SDL_SetError("Passed a NULL mutex");
-        return -1;
+        return SDL_SetError("Passed a NULL mutex");
     }
 
-    retval = 0;
 #if FAKE_RECURSIVE_MUTEX
     /* We can only unlock the mutex if we own it */
     if (pthread_self() == mutex->owner) {
@@ -190,18 +178,16 @@ SDL_UnlockMutex(SDL_mutex * mutex)
             pthread_mutex_unlock(&mutex->id);
         }
     } else {
-        SDL_SetError("mutex not owned by this thread");
-        retval = -1;
+        return SDL_SetError("mutex not owned by this thread");
     }
 
 #else
     if (pthread_mutex_unlock(&mutex->id) < 0) {
-        SDL_SetError("pthread_mutex_unlock() failed");
-        retval = -1;
+        return SDL_SetError("pthread_mutex_unlock() failed");
     }
 #endif /* FAKE_RECURSIVE_MUTEX */
 
-    return retval;
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

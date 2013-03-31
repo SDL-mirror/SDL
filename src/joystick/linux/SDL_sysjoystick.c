@@ -387,8 +387,7 @@ JoystickInitWithUdev(void)
     SDL_assert(udev == NULL);
     udev = UDEV_udev_new();
     if (udev == NULL) {
-        SDL_SetError("udev_new() failed");
-        return -1;
+        return SDL_SetError("udev_new() failed");
     }
 
     udev_mon = UDEV_udev_monitor_new_from_netlink(udev, "udev");
@@ -400,8 +399,7 @@ JoystickInitWithUdev(void)
 
     enumerate = UDEV_udev_enumerate_new(udev);
     if (enumerate == NULL) {
-        SDL_SetError("udev_enumerate_new() failed");
-        return -1;
+        return SDL_SetError("udev_enumerate_new() failed");
     }
 
     UDEV_udev_enumerate_add_match_subsystem(enumerate, "input");
@@ -725,15 +723,13 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     int fd = -1;
 
     if (item == NULL) {
-        SDL_SetError("No such device");
-        return -1;
+        return SDL_SetError("No such device");
     }
 
     fname = item->path;
     fd = open(fname, O_RDONLY, 0);
     if (fd < 0) {
-        SDL_SetError("Unable to open %s", fname);
-        return -1;
+        return SDL_SetError("Unable to open %s", fname);
     }
 
     joystick->instance_id = item->device_instance;
@@ -741,8 +737,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         SDL_malloc(sizeof(*joystick->hwdata));
     if (joystick->hwdata == NULL) {
         close(fd);
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
     SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
     joystick->hwdata->item = item;
@@ -753,8 +748,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
         SDL_free(joystick->hwdata);
         joystick->hwdata = NULL;
         close(fd);
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
 
     SDL_assert(item->hwdata == NULL);

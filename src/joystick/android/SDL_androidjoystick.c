@@ -77,31 +77,26 @@ SDL_SYS_JoystickInit(void)
 {
     int i = 0;
     if (Android_JNI_JoystickInit() < 0)
-        return (-1);
+        return -1;
     SYS_numjoysticks = Android_JNI_GetNumJoysticks();
     SYS_Joysticks = (SDL_Joystick **)SDL_malloc(SYS_numjoysticks*sizeof(SDL_Joystick *));
-    if (SYS_Joysticks == NULL)
-    {
-        SDL_OutOfMemory();
-        return (-1);
+    if (SYS_Joysticks == NULL) {
+        return SDL_OutOfMemory();
     }
     SYS_JoystickNames = (char **)SDL_malloc(SYS_numjoysticks*sizeof(char *));
-    if (SYS_JoystickNames == NULL)
-    {
+    if (SYS_JoystickNames == NULL) {
         SDL_free(SYS_Joysticks);
         SYS_Joysticks = NULL;
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
     SDL_memset(SYS_JoystickNames, 0, (SYS_numjoysticks*sizeof(char *)));
     SDL_memset(SYS_Joysticks, 0, (SYS_numjoysticks*sizeof(SDL_Joystick *)));
 
-    for (i = 0; i < SYS_numjoysticks; i++)
-    {
+    for (i = 0; i < SYS_numjoysticks; i++) {
         SYS_JoystickNames[i] = Android_JNI_GetJoystickName(i);
     }
 
-    return (SYS_numjoysticks);
+    return SYS_numjoysticks;
 }
 
 int SDL_SYS_NumJoysticks()

@@ -75,10 +75,10 @@ WIN_CreateDevice(int devindex)
         data = NULL;
     }
     if (!data) {
-        SDL_OutOfMemory();
         if (device) {
             SDL_free(device);
         }
+        SDL_OutOfMemory();
         return NULL;
     }
     device->driverdata = data;

@@ -270,11 +270,10 @@ SDL_CalculateBlit(SDL_Surface * surface)
     /* Make sure we have a blit function */
     if (blit == NULL) {
         SDL_InvalidateMap(map);
-        SDL_SetError("Blit combination not supported");
-        return (-1);
+        return SDL_SetError("Blit combination not supported");
     }
 
-    return (0);
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -85,8 +85,7 @@ int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, voi
     SDL_stack_free(info);
 
     if (!data->hbm) {
-        WIN_SetError("Unable to create DIB");
-        return -1;
+        return WIN_SetError("Unable to create DIB");
     }
     SelectObject(data->mdc, data->hbm);
 

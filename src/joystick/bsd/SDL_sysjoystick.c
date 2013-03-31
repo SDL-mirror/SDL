@@ -297,17 +297,15 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joy, int device_index)
 
     fd = open(path, O_RDONLY);
     if (fd == -1) {
-        SDL_SetError("%s: %s", path, strerror(errno));
-        return (-1);
+        return SDL_SetError("%s: %s", path, strerror(errno));
     }
 
     joy->instance_id = device_index;
     hw = (struct joystick_hwdata *)
         SDL_malloc(sizeof(struct joystick_hwdata));
     if (hw == NULL) {
-        SDL_OutOfMemory();
         close(fd);
-        return (-1);
+        return SDL_OutOfMemory();
     }
     joy->hwdata = hw;
     hw->fd = fd;
@@ -634,8 +632,7 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
 #endif
 
     if (len < 0) {
-        SDL_SetError("Negative HID report size");
-        return (-1);
+        return SDL_SetError("Negative HID report size");
     }
     r->size = len;
 
@@ -647,15 +644,14 @@ report_alloc(struct report *r, struct report_desc *rd, int repind)
                             r->size);
 #endif
         if (r->buf == NULL) {
-            SDL_OutOfMemory();
-            return (-1);
+            return SDL_OutOfMemory();
         }
     } else {
         r->buf = NULL;
     }
 
     r->status = SREPORT_CLEAN;
-    return (0);
+    return 0;
 }
 
 static void

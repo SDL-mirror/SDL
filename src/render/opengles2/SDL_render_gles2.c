@@ -189,8 +189,7 @@ static int GLES2_LoadFunctions(GLES2_DriverContext * data)
     do { \
         data->func = SDL_GL_GetProcAddress(#func); \
         if ( ! data->func ) { \
-            SDL_SetError("Couldn't load GLES2 function %s: %s\n", #func, SDL_GetError()); \
-            return -1; \
+            return SDL_SetError("Couldn't load GLES2 function %s: %s\n", #func, SDL_GetError()); \
         } \
     } while ( 0 );
 #endif /* _SDL_NOGETPROCADDR_ */
@@ -372,16 +371,13 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
         type = GL_UNSIGNED_BYTE;
         break;
     default:
-        SDL_SetError("Texture format not supported");
-        return -1;
+        return SDL_SetError("Texture format not supported");
     }
 
     /* Allocate a texture struct */
     tdata = (GLES2_TextureData *)SDL_calloc(1, sizeof(GLES2_TextureData));
-    if (!tdata)
-    {
-        SDL_OutOfMemory();
-        return -1;
+    if (!tdata) {
+        return SDL_OutOfMemory();
     }
     tdata->texture = 0;
     tdata->texture_type = GL_TEXTURE_2D;
@@ -390,15 +386,12 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     scaleMode = GetScaleQuality();
 
     /* Allocate a blob for image data */
-    if (texture->access == SDL_TEXTUREACCESS_STREAMING)
-    {
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
         tdata->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
         tdata->pixel_data = SDL_calloc(1, tdata->pitch * texture->h);
-        if (!tdata->pixel_data)
-        {
-            SDL_OutOfMemory();
+        if (!tdata->pixel_data) {
             SDL_free(tdata);
-            return -1;
+            return SDL_OutOfMemory();
         }
     }
 
@@ -414,10 +407,9 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     rdata->glTexImage2D(tdata->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);
     if (rdata->glGetError() != GL_NO_ERROR)
     {
-        SDL_SetError("Texture creation failed");
         rdata->glDeleteTextures(1, &tdata->texture);
         SDL_free(tdata);
-        return -1;
+        return SDL_SetError("Texture creation failed");
     }
     texture->driverdata = tdata;
 
@@ -497,13 +489,10 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     /* Reformat the texture data into a tightly packed array */
     srcPitch = rect->w * SDL_BYTESPERPIXEL(texture->format);
     src = (Uint8 *)pixels;
-    if (pitch != srcPitch)
-    {
+    if (pitch != srcPitch) {
         blob = (Uint8 *)SDL_malloc(srcPitch * rect->h);
-        if (!blob)
-        {
-            SDL_OutOfMemory();
-            return -1;
+        if (!blob) {
+            return SDL_OutOfMemory();
         }
         src = blob;
         for (y = 0; y < rect->h; ++y)
@@ -533,10 +522,8 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
         SDL_free(blob);
     }
 
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to update texture");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to update texture");
     }
     return 0;
 }
@@ -558,8 +545,7 @@ GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
         /* Check FBO status */
         status = data->glCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
-            SDL_SetError("glFramebufferTexture2D() failed");
-            return -1;
+            return SDL_SetError("glFramebufferTexture2D() failed");
         }
     }
     return 0;
@@ -636,9 +622,9 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
     rdata->glGetProgramiv(entry->id, GL_LINK_STATUS, &linkSuccessful);
     if (rdata->glGetError() != GL_NO_ERROR || !linkSuccessful)
     {
-        SDL_SetError("Failed to link shader program");
         rdata->glDeleteProgram(entry->id);
         SDL_free(entry);
+        SDL_SetError("Failed to link shader program");
         return NULL;
     }
 
@@ -930,10 +916,8 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
     locProjection = rdata->current_program->uniform_locations[GLES2_UNIFORM_PROJECTION];
     rdata->glGetError();
     rdata->glUniformMatrix4fv(locProjection, 1, GL_FALSE, (GLfloat *)projection);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to set orthographic projection");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to set orthographic projection");
     }
     return 0;
 }
@@ -1066,8 +1050,7 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int cou
 
     /* Emit the specified vertices as points */
     vertices = SDL_stack_alloc(GLfloat, count * 2);
-    for (idx = 0; idx < count; ++idx)
-    {
+    for (idx = 0; idx < count; ++idx) {
         GLfloat x = points[idx].x + 0.5f;
         GLfloat y = points[idx].y + 0.5f;
 
@@ -1078,10 +1061,8 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int cou
     rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
     rdata->glDrawArrays(GL_POINTS, 0, count);
     SDL_stack_free(vertices);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to render lines");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to render lines");
     }
     return 0;
 }
@@ -1099,8 +1080,7 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *points, int coun
 
     /* Emit a line strip including the specified vertices */
     vertices = SDL_stack_alloc(GLfloat, count * 2);
-    for (idx = 0; idx < count; ++idx)
-    {
+    for (idx = 0; idx < count; ++idx) {
         GLfloat x = points[idx].x + 0.5f;
         GLfloat y = points[idx].y + 0.5f;
 
@@ -1117,10 +1097,8 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *points, int coun
         rdata->glDrawArrays(GL_POINTS, count-1, 1);
     }
     SDL_stack_free(vertices);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to render lines");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to render lines");
     }
     return 0;
 }
@@ -1157,10 +1135,8 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count)
         rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);
         rdata->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to render lines");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to render lines");
     }
     return 0;
 }
@@ -1315,10 +1291,8 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     texCoords[7] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
     rdata->glVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
     rdata->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to render texture");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to render texture");
     }
     return 0;
 }
@@ -1499,10 +1473,8 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     rdata->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     rdata->glDisableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
     rdata->glDisableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
-        SDL_SetError("Failed to render texture");
-        return -1;
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        return SDL_SetError("Failed to render texture");
     }
     return 0;
 }
@@ -1525,8 +1497,7 @@ GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     temp_pitch = rect->w * SDL_BYTESPERPIXEL(temp_format);
     temp_pixels = SDL_malloc(rect->h * temp_pitch);
     if (!temp_pixels) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     SDL_GetWindowSize(window, &w, &h);

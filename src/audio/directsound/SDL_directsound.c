@@ -95,7 +95,7 @@ utf16_to_utf8(const WCHAR *S)
                             (SDL_wcslen(S)+1)*sizeof(WCHAR));
 }
 
-static void
+static int
 SetDSerror(const char *function, int code)
 {
     static const char *error;
@@ -145,8 +145,7 @@ SetDSerror(const char *function, int code)
         SDL_snprintf(errbuf, SDL_arraysize(errbuf), "%s: %s", function,
                      error);
     }
-    SDL_SetError("%s", errbuf);
-    return;
+    return SDL_SetError("%s", errbuf);
 }
 
 
@@ -380,16 +379,14 @@ CreateSecondary(_THIS, HWND focus, WAVEFORMATEX * wavefmt)
     format.dwBufferBytes = numchunks * chunksize;
     if ((format.dwBufferBytes < DSBSIZE_MIN) ||
         (format.dwBufferBytes > DSBSIZE_MAX)) {
-        SDL_SetError("Sound buffer size must be between %d and %d",
-                     DSBSIZE_MIN / numchunks, DSBSIZE_MAX / numchunks);
-        return (-1);
+        return SDL_SetError("Sound buffer size must be between %d and %d",
+                            DSBSIZE_MIN / numchunks, DSBSIZE_MAX / numchunks);
     }
     format.dwReserved = 0;
     format.lpwfxFormat = wavefmt;
     result = IDirectSound_CreateSoundBuffer(sndObj, &format, sndbuf, NULL);
     if (result != DS_OK) {
-        SetDSerror("DirectSound CreateSoundBuffer", result);
-        return (-1);
+        return SetDSerror("DirectSound CreateSoundBuffer", result);
     }
     IDirectSoundBuffer_SetFormat(*sndbuf, wavefmt);
 

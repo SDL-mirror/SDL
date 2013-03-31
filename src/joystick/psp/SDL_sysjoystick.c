@@ -113,13 +113,11 @@ int SDL_SYS_JoystickInit(void)
 
 	/* Start thread to read data */
 	if((pad_sem =  SDL_CreateSemaphore(1)) == NULL) {
-		SDL_SetError("Can't create input semaphore\n");
-		return -1;
+		return SDL_SetError("Can't create input semaphore");
 	}
 	running = 1;
 	if((thread = SDL_CreateThread(JoystickUpdate, "JoySitckThread",NULL)) == NULL) {
-		SDL_SetError("Can't create input thread\n");
-		return -1;
+		return SDL_SetError("Can't create input thread");
 	}
 
 	/* Create an accurate map from analog inputs (0 to 255) 

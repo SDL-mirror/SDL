@@ -143,8 +143,7 @@ int
 SDL_SetSurfacePalette(SDL_Surface * surface, SDL_Palette * palette)
 {
     if (!surface) {
-        SDL_SetError("SDL_SetSurfacePalette() passed a NULL surface");
-        return -1;
+        return SDL_SetError("SDL_SetSurfacePalette() passed a NULL surface");
     }
     return SDL_SetPixelFormatPalette(surface->format, palette);
 }
@@ -402,8 +401,7 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode blendMode)
         surface->map->info.flags |= SDL_COPY_MOD;
         break;
     default:
-        SDL_Unsupported();
-        status = -1;
+        status = SDL_Unsupported();
         break;
     }
 
@@ -518,12 +516,10 @@ SDL_UpperBlit(SDL_Surface * src, const SDL_Rect * srcrect,
 
     /* Make sure the surfaces aren't locked */
     if (!src || !dst) {
-        SDL_SetError("SDL_UpperBlit: passed a NULL surface");
-        return (-1);
+        return SDL_SetError("SDL_UpperBlit: passed a NULL surface");
     }
     if (src->locked || dst->locked) {
-        SDL_SetError("Surfaces must not be locked during blit");
-        return (-1);
+        return SDL_SetError("Surfaces must not be locked during blit");
     }
 
     /* If the destination rectangle is NULL, use the entire dest surface */
@@ -610,12 +606,10 @@ SDL_UpperBlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
 
     /* Make sure the surfaces aren't locked */
     if (!src || !dst) {
-        SDL_SetError("SDL_UpperBlitScaled: passed a NULL surface");
-        return (-1);
+        return SDL_SetError("SDL_UpperBlitScaled: passed a NULL surface");
     }
     if (src->locked || dst->locked) {
-        SDL_SetError("Surfaces must not be locked during blit");
-        return (-1);
+        return SDL_SetError("Surfaces must not be locked during blit");
     }
 
     /* If the destination rectangle is NULL, use the entire dest surface */
@@ -972,12 +966,10 @@ int SDL_ConvertPixels(int width, int height,
 
     /* Check to make sure we are bliting somewhere, so we don't crash */
     if (!dst) {
-        SDL_InvalidParamError("dst");
-        return -1;
+        return SDL_InvalidParamError("dst");
     }
     if (!dst_pitch) {
-        SDL_InvalidParamError("dst_pitch");
-        return -1;
+        return SDL_InvalidParamError("dst_pitch");
     }
 
     /* Fast path for same format copy */
@@ -994,8 +986,7 @@ int SDL_ConvertPixels(int width, int height,
                 bpp = 2;
                 break;
             default:
-                SDL_SetError("Unknown FOURCC pixel format");
-                return -1;
+                return SDL_SetError("Unknown FOURCC pixel format");
             }
         } else {
             bpp = SDL_BYTESPERPIXEL(src_format);

@@ -657,8 +657,7 @@ DirectFB_SetTexturePalette(SDL_Renderer * renderer,
                          palette->SetEntries(data->palette, entries, ncolors, firstcolor));
         return 0;
     } else {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
+        return SDL_SetError("YUV textures don't have a palette");
     }
   error:
     return -1;
@@ -688,8 +687,7 @@ DirectFB_GetTexturePalette(SDL_Renderer * renderer,
         }
         return 0;
     } else {
-        SDL_SetError("YUV textures don't have a palette");
-        return -1;
+        return SDL_SetError("YUV textures don't have a palette");
     }
   error:
     return -1;
@@ -718,9 +716,8 @@ DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
     case SDL_BLENDMODE_MOD:
         return 0;
     default:
-        SDL_Unsupported();
         texture->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
+        return SDL_Unsupported();
     }
 }
 
@@ -735,9 +732,8 @@ DirectFB_SetDrawBlendMode(SDL_Renderer * renderer)
     case SDL_BLENDMODE_MOD:
         return 0;
     default:
-        SDL_Unsupported();
         renderer->blendMode = SDL_BLENDMODE_NONE;
-        return -1;
+        return SDL_Unsupported();
     }
 }
 
@@ -762,10 +758,9 @@ DirectFB_SetTextureScaleMode(SDL_Renderer * renderer, SDL_Texture * texture)
             DSRO_SMOOTH_UPSCALE | DSRO_SMOOTH_DOWNSCALE | DSRO_ANTIALIAS;
         break;
     default:
-        SDL_Unsupported();
         data->render_options = DSRO_NONE;
         texture->scaleMode = SDL_SCALEMODE_NONE;
-        return -1;
+        return SDL_Unsupported();
     }
 #endif
     return 0;

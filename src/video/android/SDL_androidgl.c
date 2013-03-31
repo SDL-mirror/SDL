@@ -42,8 +42,7 @@ Android_GL_LoadLibrary(_THIS, const char *path)
     if (!Android_GLHandle) {
         Android_GLHandle = dlopen("libGLESv1_CM.so",RTLD_GLOBAL);
         if (!Android_GLHandle) {
-            SDL_SetError("Could not initialize GL ES library\n");
-            return -1;
+            return SDL_SetError("Could not initialize GL ES library\n");
         }
     }
     return 0;

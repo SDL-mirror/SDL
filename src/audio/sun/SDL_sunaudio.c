@@ -332,8 +332,7 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         this->hidden->frequency = 8;
         this->hidden->ulaw_buf = (Uint8 *) SDL_malloc(this->hidden->fragsize);
         if (this->hidden->ulaw_buf == NULL) {
-            SDL_OutOfMemory();
-            return (-1);
+            return SDL_OutOfMemory();
         }
         this->spec.channels = 1;
     } else {
@@ -353,8 +352,7 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Allocate mixing buffer */
     this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->spec.size);
     if (this->hidden->mixbuf == NULL) {
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 

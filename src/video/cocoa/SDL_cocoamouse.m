@@ -190,8 +190,7 @@ Cocoa_SetRelativeMouseMode(SDL_bool enabled)
         result = CGAssociateMouseAndMouseCursorPosition(YES);
     }
     if (result != kCGErrorSuccess) {
-        SDL_SetError("CGAssociateMouseAndMouseCursorPosition() failed");
-        return -1;
+        return SDL_SetError("CGAssociateMouseAndMouseCursorPosition() failed");
     }
     return 0;
 }

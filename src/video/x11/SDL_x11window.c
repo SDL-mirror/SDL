@@ -214,8 +214,7 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->window = window;
     data->xwindow = w;
@@ -242,9 +241,8 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
                                             (numwindows +
                                              1) * sizeof(*windowlist));
         if (!windowlist) {
-            SDL_OutOfMemory();
             SDL_free(data);
-            return -1;
+            return SDL_OutOfMemory();
         }
         windowlist[numwindows] = data;
         videodata->numwindows++;
@@ -392,15 +390,13 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
         /* If we can't create a colormap, then we must die */
         if (!xattr.colormap) {
-            SDL_SetError("Could not create writable colormap");
-            return -1;
+            return SDL_SetError("Could not create writable colormap");
         }
 
         /* OK, we got a colormap, now fill it in as best as we can */
         colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
         if (!colorcells) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         ncolors = visual->map_entries;
         rmax = 0xffff;
@@ -465,8 +461,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
     if (!w) {
-        SDL_SetError("Couldn't create window");
-        return -1;
+        return SDL_SetError("Couldn't create window");
     }
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     if ((window->flags & SDL_WINDOW_OPENGL) && (_this->gl_config.use_egl == 1)) {
@@ -483,9 +478,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                                                  (NativeWindowType) w, NULL);
 
         if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
-            SDL_SetError("Could not create GLES window surface");
             XDestroyWindow(display, w);
-            return -1;
+            return SDL_SetError("Could not create GLES window surface");
         }
     }
 #endif
@@ -1209,15 +1203,13 @@ X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
     int i;
 
     if (visual->class != DirectColor) {
-        SDL_SetError("Window doesn't have DirectColor visual");
-        return -1;
+        return SDL_SetError("Window doesn't have DirectColor visual");
     }
 
     ncolors = visual->map_entries;
     colorcells = SDL_malloc(ncolors * sizeof(XColor));
     if (!colorcells) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     rshift = 0;

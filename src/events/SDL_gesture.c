@@ -158,8 +158,7 @@ int SDL_SaveDollarTemplate(SDL_GestureID gestureId, SDL_RWops *src)
             }
         }
     }
-    SDL_SetError("Unknown gestureId");
-    return -1;
+    return SDL_SetError("Unknown gestureId");
 }
 
 //path is an already sampled set of points
@@ -176,8 +175,7 @@ static int SDL_AddDollarGesture_one(SDL_GestureTouch* inTouch, SDL_FloatPoint* p
                                           (index + 1) *
                                           sizeof(SDL_DollarTemplate));
     if (!dollarTemplate) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     inTouch->dollarTemplate = dollarTemplate;
 
@@ -419,8 +417,7 @@ int SDL_GestureAddTouch(SDL_TouchID touchId)
                                                                      sizeof(SDL_GestureTouch));
 
     if (!gestureTouch) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     SDL_gestureTouch = gestureTouch;

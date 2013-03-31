@@ -72,8 +72,7 @@ UIKit_GL_LoadLibrary(_THIS, const char *path)
         and because the SDK forbids loading an external SO
     */
     if (path != NULL) {
-        SDL_SetError("iPhone GL Load Library just here for compatibility");
-        return -1;
+        return SDL_SetError("iPhone GL Load Library just here for compatibility");
     }
     return 0;
 }

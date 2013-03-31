@@ -136,8 +136,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
     void *handle;
 
     if (_this->gl_data) {
-        SDL_SetError("OpenGL context already created");
-        return -1;
+        return SDL_SetError("OpenGL context already created");
     }
 
     /* If SDL_GL_CONTEXT_EGL has been changed to 1, switch over to X11_GLES functions  */
@@ -154,8 +153,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         _this->GL_DeleteContext = X11_GLES_DeleteContext;
         return X11_GLES_LoadLibrary(_this, path);
 #else
-        SDL_SetError("SDL not configured with OpenGL ES/EGL support");
-        return -1;
+        return SDL_SetError("SDL not configured with OpenGL ES/EGL support");
 #endif
     }
 
@@ -183,8 +181,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
                                                sizeof(struct
                                                       SDL_GLDriverData));
     if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Load function pointers */
@@ -216,8 +213,7 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         !_this->gl_data->glXDestroyContext ||
         !_this->gl_data->glXMakeCurrent ||
         !_this->gl_data->glXSwapBuffers) {
-        SDL_SetError("Could not retrieve OpenGL functions");
-        return -1;
+        return SDL_SetError("Could not retrieve OpenGL functions");
     }
 
     /* Initialize extensions */
@@ -656,20 +652,16 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     Window drawable =
         (context ? ((SDL_WindowData *) window->driverdata)->xwindow : None);
     GLXContext glx_context = (GLXContext) context;
-    int status;
 
     if (!_this->gl_data) {
-        SDL_SetError("OpenGL not initialized");
-        return -1;
+        return SDL_SetError("OpenGL not initialized");
     }
 
-    status = 0;
     if (!_this->gl_data->glXMakeCurrent(display, drawable, glx_context)) {
-        SDL_SetError("Unable to make GL context current");
-        status = -1;
+        return SDL_SetError("Unable to make GL context current");
     }
 
-    return (status);
+    return 0;
 }
 
 /* 

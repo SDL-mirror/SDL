@@ -176,8 +176,7 @@ DirectFB_CreateWindow(_THIS, SDL_Window * window)
 int
 DirectFB_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 {
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 }
 
 void
@@ -188,8 +187,9 @@ DirectFB_SetWindowTitle(_THIS, SDL_Window * window)
     if (windata->is_managed) {
         windata->wm_needs_redraw = 1;
         DirectFB_WM_RedrawLayout(_this, window);
-    } else
+    } else {
         SDL_Unsupported();
+    }
 }
 
 void

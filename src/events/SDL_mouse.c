@@ -413,8 +413,7 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
     }
 
     if (!mouse->SetRelativeMouseMode) {
-        SDL_Unsupported();
-        return -1;
+        return SDL_Unsupported();
     }
 
     if (mouse->SetRelativeMouseMode(enabled) < 0) {

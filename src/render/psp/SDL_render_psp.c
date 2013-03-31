@@ -493,9 +493,8 @@ PSP_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 	
 	if(!psp_texture->data)
 	{
-		SDL_OutOfMemory();
 		SDL_free(psp_texture);
-		return -1;
+		return SDL_OutOfMemory();
 	}
     texture->driverdata = psp_texture;
     

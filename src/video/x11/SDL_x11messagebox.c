@@ -168,8 +168,7 @@ X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * mess
     const SDL_MessageBoxColor *colorhints;
 
     if ( numbuttons > MAX_BUTTONS ) {
-        SDL_SetError("Too many buttons (%d max allowed)", MAX_BUTTONS);
-        return -1;
+        return SDL_SetError("Too many buttons (%d max allowed)", MAX_BUTTONS);
     }
 
     data->dialog_width = MIN_DIALOG_WIDTH;
@@ -181,8 +180,7 @@ X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * mess
 
     data->display = XOpenDisplay( NULL );
     if ( !data->display ) {
-        SDL_SetError("Couldn't open X11 display");
-        return -1;
+        return SDL_SetError("Couldn't open X11 display");
     }
 
     if (SDL_X11_HAVE_UTF8) {
@@ -194,14 +192,12 @@ X11_MessageBoxInit( SDL_MessageBoxDataX11 *data, const SDL_MessageBoxData * mess
             XFreeStringList(missing);
         }
         if ( data->font_set == NULL ) {
-            SDL_SetError("Couldn't load font %s", g_MessageBoxFont);
-            return -1;
+            return SDL_SetError("Couldn't load font %s", g_MessageBoxFont);
         }
     } else {
         data->font_struct = XLoadQueryFont( data->display, g_MessageBoxFontLatin1 );
         if ( data->font_struct == NULL ) {
-            SDL_SetError("Couldn't load font %s", g_MessageBoxFontLatin1);
-            return -1;
+            return SDL_SetError("Couldn't load font %s", g_MessageBoxFontLatin1);
         }
     }
 
@@ -388,8 +384,7 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
                        0, CopyFromParent, InputOutput, CopyFromParent,
                        CWEventMask, &wnd_attr );
     if ( data->window == None ) {
-        SDL_SetError("Couldn't create X window");
-        return -1;
+        return SDL_SetError("Couldn't create X window");
     }
 
     if ( windowdata ) {
@@ -520,8 +515,7 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
 
     ctx = XCreateGC( data->display, data->window, gcflags, &ctx_vals );
     if ( ctx == None ) {
-        SDL_SetError("Couldn't create graphics context");
-        return -1;
+        return SDL_SetError("Couldn't create graphics context");
     }
 
     data->button_press_index = -1;  /* Reset what button is currently depressed. */
@@ -660,8 +654,7 @@ X11_ShowMessageBoxImpl(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     if (origlocale != NULL) {
         origlocale = SDL_strdup(origlocale);
         if (origlocale == NULL) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         setlocale(LC_ALL, "");
     }
@@ -739,8 +732,7 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         SDL_assert(rc == pid);  /* not sure what to do if this fails. */
 
         if ((rc == -1) || (!WIFEXITED(status)) || (WEXITSTATUS(status) != 0)) {
-            SDL_SetError("msgbox child process failed");
-            return -1;
+            return SDL_SetError("msgbox child process failed");
         }
 
         if (read(fds[0], &status, sizeof (int)) != sizeof (int))

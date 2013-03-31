@@ -656,8 +656,7 @@ X11_InitModes(_THIS)
 #endif
 
     if (_this->num_displays == 0) {
-        SDL_SetError("No available displays");
-        return -1;
+        return SDL_SetError("No available displays");
     }
     return 0;
 }
@@ -798,23 +797,20 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
 
         res = XRRGetScreenResources (display, RootWindow(display, data->screen));
         if (!res) {
-            SDL_SetError("Couldn't get XRandR screen resources");
-            return -1;
+            return SDL_SetError("Couldn't get XRandR screen resources");
         }
 
         output_info = XRRGetOutputInfo(display, res, data->xrandr_output);
         if (!output_info || output_info->connection == RR_Disconnected) {
-            SDL_SetError("Couldn't get XRandR output info");
             XRRFreeScreenResources(res);
-            return -1;
+            return SDL_SetError("Couldn't get XRandR output info");
         }
 
         crtc = XRRGetCrtcInfo(display, res, output_info->crtc);
         if (!crtc) {
-            SDL_SetError("Couldn't get XRandR crtc info");
             XRRFreeOutputInfo(output_info);
             XRRFreeScreenResources(res);
-            return -1;
+            return SDL_SetError("Couldn't get XRandR crtc info");
         }
 
         status = XRRSetCrtcConfig (display, res, output_info->crtc, CurrentTime,
@@ -826,8 +822,7 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
         XRRFreeScreenResources(res);
 
         if (status != Success) {
-            SDL_SetError("XRRSetCrtcConfig failed");
-            return -1;
+            return SDL_SetError("XRRSetCrtcConfig failed");
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */

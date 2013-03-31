@@ -77,8 +77,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     thread->handle = spawn_thread(RunThread, name, B_NORMAL_PRIORITY, args);
     if ((thread->handle == B_NO_MORE_THREADS) ||
         (thread->handle == B_NO_MEMORY)) {
-        SDL_SetError("Not enough resources to create thread");
-        return (-1);
+        return SDL_SetError("Not enough resources to create thread");
     }
     resume_thread(thread->handle);
     return (0);

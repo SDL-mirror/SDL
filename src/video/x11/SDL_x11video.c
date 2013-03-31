@@ -305,8 +305,8 @@ X11_CreateDevice(int devindex)
     }
     data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
     if (!data) {
-        SDL_OutOfMemory();
         SDL_free(device);
+        SDL_OutOfMemory();
         return NULL;
     }
     device->driverdata = data;

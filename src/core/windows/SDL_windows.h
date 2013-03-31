@@ -43,8 +43,8 @@
 #define WIN_UTF8ToString(S) SDL_iconv_string("ASCII", "UTF-8", (char *)(S), SDL_strlen(S)+1)
 #endif
 
-/* Sets an error message based on GetLastError() */
-extern void WIN_SetError(const char *prefix);
+/* Sets an error message based on GetLastError(). Always return -1. */
+extern int WIN_SetError(const char *prefix);
 
 /* Wrap up the oddities of CoInitialize() into a common function. */
 extern HRESULT WIN_CoInitialize(void);

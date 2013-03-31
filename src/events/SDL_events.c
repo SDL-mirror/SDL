@@ -244,8 +244,7 @@ SDL_PeepEvents(SDL_Event * events, int numevents, SDL_eventaction action,
         }
         SDL_UnlockMutex(SDL_EventQ.lock);
     } else {
-        SDL_SetError("Couldn't lock event queue");
-        used = -1;
+        return SDL_SetError("Couldn't lock event queue");
     }
     return (used);
 }

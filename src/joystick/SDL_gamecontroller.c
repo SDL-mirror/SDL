@@ -722,10 +722,9 @@ SDL_GameControllerAddMapping( const char *mappingString )
 	} else {
 		pControllerMapping = SDL_malloc( sizeof(*pControllerMapping) );
 		if (!pControllerMapping) {
-			SDL_OutOfMemory();
 			SDL_free( pchName );
 			SDL_free( pchMapping );
-			return -1;
+			return SDL_OutOfMemory();
 		}
 #ifdef SDL_JOYSTICK_DINPUT
 		if ( is_xinput_mapping )

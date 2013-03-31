@@ -303,8 +303,7 @@ SDL_JoystickGetBall(SDL_Joystick * joystick, int ball, int *dx, int *dy)
         joystick->balls[ball].dx = 0;
         joystick->balls[ball].dy = 0;
     } else {
-        SDL_SetError("Joystick only has %d balls", joystick->nballs);
-        retval = -1;
+        return SDL_SetError("Joystick only has %d balls", joystick->nballs);
     }
     return (retval);
 }

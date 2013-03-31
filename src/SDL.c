@@ -109,8 +109,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_TIMER);
 #else
-        SDL_SetError("SDL not built with timer support");
-        return (-1);
+        return SDL_SetError("SDL not built with timer support");
 #endif
     }
 
@@ -124,8 +123,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_VIDEO);
 #else
-        SDL_SetError("SDL not built with video support");
-        return (-1);
+        return SDL_SetError("SDL not built with video support");
 #endif
     }
 
@@ -139,8 +137,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_AUDIO);
 #else
-        SDL_SetError("SDL not built with audio support");
-        return (-1);
+        return SDL_SetError("SDL not built with audio support");
 #endif
     }
 
@@ -159,8 +156,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_JOYSTICK);
 #else
-        SDL_SetError("SDL not built with joystick support");
-        return (-1);
+        return SDL_SetError("SDL not built with joystick support");
 #endif
     }
 
@@ -173,8 +169,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_GAMECONTROLLER);
 #else
-        SDL_SetError("SDL not built with joystick support");
-        return (-1);
+        return SDL_SetError("SDL not built with joystick support");
 #endif
     }
 
@@ -188,8 +183,7 @@ SDL_InitSubSystem(Uint32 flags)
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_HAPTIC);
 #else
-        SDL_SetError("SDL not built with haptic (force feedback) support");
-        return (-1);
+        return SDL_SetError("SDL not built with haptic (force feedback) support");
 #endif
     }
 

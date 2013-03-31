@@ -200,8 +200,7 @@ SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (!SDL_PixelFormatEnumToMasks
         (texture->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
-        SDL_SetError("Unknown texture format");
-        return -1;
+        return SDL_SetError("Unknown texture format");
     }
 
     texture->driverdata =
@@ -357,8 +356,7 @@ SW_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
 
     final_points = SDL_stack_alloc(SDL_Point, count);
     if (!final_points) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     if (renderer->viewport.x || renderer->viewport.y) {
         int x = renderer->viewport.x;
@@ -407,8 +405,7 @@ SW_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 
     final_points = SDL_stack_alloc(SDL_Point, count);
     if (!final_points) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     if (renderer->viewport.x || renderer->viewport.y) {
         int x = renderer->viewport.x;
@@ -456,8 +453,7 @@ SW_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 
     final_rects = SDL_stack_alloc(SDL_Rect, count);
     if (!final_rects) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     if (renderer->viewport.x || renderer->viewport.y) {
         int x = renderer->viewport.x;
@@ -647,8 +643,7 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     if (rect->x < 0 || rect->x+rect->w > surface->w ||
         rect->y < 0 || rect->y+rect->h > surface->h) {
-        SDL_SetError("Tried to read outside of surface bounds");
-        return -1;
+        return SDL_SetError("Tried to read outside of surface bounds");
     }
 
     src_format = surface->format->format;

@@ -72,8 +72,7 @@ DirectFB_GL_Initialize(_THIS)
                                                sizeof(struct
                                                       SDL_GLDriverData));
     if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     _this->gl_data->initialized = 0;
 
@@ -115,8 +114,7 @@ DirectFB_GL_LoadLibrary(_THIS, const char *path)
     SDL_DFB_DEBUG("Loadlibrary : %s\n", path);
 
     if (_this->gl_data->gl_active) {
-        SDL_SetError("OpenGL context already created");
-        return -1;
+        return SDL_SetError("OpenGL context already created");
     }
 
 
@@ -243,8 +241,7 @@ DirectFB_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 int
 DirectFB_GL_SetSwapInterval(_THIS, int interval)
 {
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 }
 
 int

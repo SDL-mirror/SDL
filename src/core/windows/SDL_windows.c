@@ -29,7 +29,7 @@
 #include <objbase.h>  /* for CoInitialize/CoUninitialize */
 
 /* Sets an error message based on GetLastError() */
-void
+int
 WIN_SetError(const char *prefix)
 {
     TCHAR buffer[1024];
@@ -39,6 +39,7 @@ WIN_SetError(const char *prefix)
     message = WIN_StringToUTF8(buffer);
     SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
     SDL_free(message);
+    return -1;
 }
 
 HRESULT

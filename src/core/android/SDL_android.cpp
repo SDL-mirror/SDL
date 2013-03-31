@@ -811,8 +811,7 @@ static int Android_JNI_FileClose(SDL_RWops* ctx, bool release)
     JNIEnv *mEnv = Android_JNI_GetEnv();
 
     if (!refs.init(mEnv)) {
-        SDL_SetError("Failed to allocate enough JVM local references");
-        return -1;
+        return SDL_SetError("Failed to allocate enough JVM local references");
     }
 
     if (ctx) {
@@ -875,8 +874,7 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
                 offset = ctx->hidden.androidio.offset + ctx->hidden.androidio.size + offset;
                 break;
             default:
-                SDL_SetError("Unknown value for 'whence'");
-                return -1;
+                return SDL_SetError("Unknown value for 'whence'");
         }
         whence = SEEK_SET;
 
@@ -897,14 +895,12 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
                 newPosition = ctx->hidden.androidio.size + offset;
                 break;
             default:
-                SDL_SetError("Unknown value for 'whence'");
-                return -1;
+                return SDL_SetError("Unknown value for 'whence'");
         }
 
         /* Validate the new position */
         if (newPosition < 0) {
-            SDL_Error(SDL_EFSEEK);
-            return -1;
+            return SDL_Error(SDL_EFSEEK);
         }
         if (newPosition > ctx->hidden.androidio.size) {
             newPosition = ctx->hidden.androidio.size;

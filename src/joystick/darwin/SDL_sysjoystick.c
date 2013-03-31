@@ -169,7 +169,7 @@ HIDCreateOpenDeviceInterface(io_object_t hidDevice, recDevice * pDevice)
                                                      &(pDevice->interface));
             if (S_OK != plugInResult)
                 HIDReportErrorNum
-                    ("CouldnÕt query HID class device interface from plugInInterface",
+                    ("Couldn't query HID class device interface from plugInInterface",
                      plugInResult);
             (*ppPlugInInterface)->Release(ppPlugInInterface);
         } else
@@ -724,14 +724,12 @@ SDL_SYS_JoystickInit(void)
 	io_iterator_t portIterator = 0;
 
     if (gpDeviceList) {
-        SDL_SetError("Joystick: Device list already inited.");
-        return -1;
+        return SDL_SetError("Joystick: Device list already inited.");
     }
 
     result = IOMasterPort(bootstrap_port, &masterPort);
     if (kIOReturnSuccess != result) {
-        SDL_SetError("Joystick: IOMasterPort error with bootstrap_port.");
-        return -1;
+        return SDL_SetError("Joystick: IOMasterPort error with bootstrap_port.");
     }
 
     /* Set up a matching dictionary to search I/O Registry by class name for all HID class devices. */
@@ -750,9 +748,8 @@ SDL_SYS_JoystickInit(void)
            CFDictionarySetValue (hidMatchDictionary, CFSTR (kIOHIDPrimaryUsagePageKey), refUsagePage);
          */
     } else {
-        SDL_SetError
+        return SDL_SetError
             ("Joystick: Failed to get HID CFMutableDictionaryRef via IOServiceMatching.");
-        return -1;
     }
 
     /*/ Now search I/O Registry for matching devices. */
@@ -761,8 +758,7 @@ SDL_SYS_JoystickInit(void)
                                      &hidObjectIterator);
     /* Check for errors */
     if (kIOReturnSuccess != result) {
-        SDL_SetError("Joystick: Couldn't create a HID object iterator.");
-        return -1;
+        return SDL_SetError("Joystick: Couldn't create a HID object iterator.");
     }
     if (!hidObjectIterator) {   /* there are no joysticks */
         gpDeviceList = NULL;

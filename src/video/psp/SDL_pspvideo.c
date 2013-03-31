@@ -223,8 +223,7 @@ PSP_CreateWindow(_THIS, SDL_Window * window)
     /* Allocate window internal data */
     wdata = (SDL_WindowData *) SDL_calloc(1, sizeof(SDL_WindowData));
     if (wdata == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Setup driver data for this window */

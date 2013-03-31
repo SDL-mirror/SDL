@@ -274,8 +274,7 @@ Cocoa_GL_SetSwapInterval(_THIS, int interval)
         [nscontext setValues:&value forParameter:NSOpenGLCPSwapInterval];
         status = 0;
     } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
+        status = SDL_SetError("No current OpenGL context");
     }
 
     [pool release];

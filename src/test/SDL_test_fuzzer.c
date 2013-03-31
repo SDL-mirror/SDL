@@ -251,7 +251,7 @@ SDLTest_GenerateUnsignedBoundaryValues(const Uint64 maxValue, Uint64 boundary1, 
 
 	if (index == 0) {
 		/* There are no valid boundaries */
-		SDL_Error(SDL_UNSUPPORTED);
+		SDL_Unsupported();
 		return 0;
 	}
 
@@ -379,7 +379,7 @@ SDLTest_GenerateSignedBoundaryValues(const Sint64 minValue, const Sint64 maxValu
 
 	if (index == 0) {
 		/* There are no valid boundaries */
-		SDL_Error(SDL_UNSUPPORTED);
+		SDL_Unsupported();
 		return minValue;
 	}
 

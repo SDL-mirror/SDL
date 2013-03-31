@@ -208,8 +208,7 @@ GL_LoadFunctions(GL_RenderData * data)
     do { \
         data->func = SDL_GL_GetProcAddress(#func); \
         if ( ! data->func ) { \
-            SDL_SetError("Couldn't load GL function %s: %s\n", #func, SDL_GetError()); \
-            return -1; \
+            return SDL_SetError("Couldn't load GL function %s: %s\n", #func, SDL_GetError()); \
         } \
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
@@ -500,15 +499,13 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     if (!convert_format(renderdata, texture->format, &internalFormat,
                         &format, &type)) {
-        SDL_SetError("Texture format %s not supported by OpenGL",
-                     SDL_GetPixelFormatName(texture->format));
-        return -1;
+        return SDL_SetError("Texture format %s not supported by OpenGL",
+                            SDL_GetPixelFormatName(texture->format));
     }
 
     data = (GL_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
@@ -522,9 +519,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         }
         data->pixels = SDL_calloc(1, size);
         if (!data->pixels) {
-            SDL_OutOfMemory();
             SDL_free(data);
-            return -1;
+            return SDL_OutOfMemory();
         }
     }
 
@@ -746,8 +742,7 @@ GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
     /* Check FBO status */
     status = data->glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
-        SDL_SetError("glFramebufferTexture2DEXT() failed");
-        return -1;
+        return SDL_SetError("glFramebufferTexture2DEXT() failed");
     }
     return 0;
 }
@@ -1157,8 +1152,7 @@ GL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     temp_pitch = rect->w * SDL_BYTESPERPIXEL(temp_format);
     temp_pixels = SDL_malloc(rect->h * temp_pitch);
     if (!temp_pixels) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     convert_format(data, temp_format, &internalFormat, &format, &type);

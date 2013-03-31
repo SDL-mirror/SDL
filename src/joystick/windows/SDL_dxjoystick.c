@@ -159,7 +159,7 @@ typedef struct JoyStick_DeviceData_ JoyStick_DeviceData;
 static JoyStick_DeviceData *SYS_Joystick;    /* array to hold joystick ID values */
 
 /* local prototypes */
-static void SetDIerror(const char *function, HRESULT code);
+static int SetDIerror(const char *function, HRESULT code);
 static BOOL CALLBACK EnumJoysticksCallback(const DIDEVICEINSTANCE *
                                            pdidInstance, VOID * pContext);
 static BOOL CALLBACK EnumDevObjectsCallback(LPCDIDEVICEOBJECTINSTANCE dev,
@@ -352,14 +352,14 @@ const DIDATAFORMAT c_dfDIJoystick2 = {
 
 
 /* Convert a DirectInput return code to a text message */
-static void
+static int
 SetDIerror(const char *function, HRESULT code)
 {
     /*
-    SDL_SetError("%s() [%s]: %s", function,
+    return SDL_SetError("%s() [%s]: %s", function,
                  DXGetErrorString9A(code), DXGetErrorDescription9A(code));
      */
-    SDL_SetError("%s() DirectX error %d", function, code);
+    return SDL_SetError("%s() DirectX error %d", function, code);
 }
 
 
@@ -565,17 +565,13 @@ SDL_JoystickThread(void *_data)
 
 	if (!RegisterClassEx (&wincl))
 	{		
-		SDL_SetError("Failed to create register class for joystick autodetect.",
-		GetLastError());
-		return -1;
+		return SDL_SetError("Failed to create register class for joystick autodetect.", GetLastError());
 	}
 
 	messageWindow = (HWND)CreateWindowEx( 0,  L"Message", NULL, 0, 0, 0, 0, 0, HWND_MESSAGE, NULL, NULL, NULL );
 	if ( !messageWindow )
 	{
-		SDL_SetError("Failed to create message window for joystick autodetect.",
-			GetLastError());
-		return -1;
+		return SDL_SetError("Failed to create message window for joystick autodetect.", GetLastError());
 	}
 
 	SDL_memset(&dbh, 0x0, sizeof(dbh));
@@ -587,9 +583,7 @@ SDL_JoystickThread(void *_data)
 	hNotify = RegisterDeviceNotification( messageWindow, &dbh, DEVICE_NOTIFY_WINDOW_HANDLE );
 	if ( !hNotify )
 	{
-		SDL_SetError("Failed to create notify device for joystick autodetect.",
-			GetLastError());
-		return -1;
+		return SDL_SetError("Failed to create notify device for joystick autodetect.", GetLastError());
 	}
 
 	SDL_LockMutex( s_mutexJoyStickEnum );
@@ -674,8 +668,7 @@ SDL_SYS_JoystickInit(void)
 
     result = WIN_CoInitialize();
     if (FAILED(result)) {
-        SetDIerror("CoInitialize", result);
-        return (-1);
+        return SetDIerror("CoInitialize", result);
     }
 
     coinitialized = SDL_TRUE;
@@ -685,24 +678,20 @@ SDL_SYS_JoystickInit(void)
 
     if (FAILED(result)) {
         SDL_SYS_JoystickQuit();
-        SetDIerror("CoCreateInstance", result);
-        return (-1);
+        return SetDIerror("CoCreateInstance", result);
     }
 
     /* Because we used CoCreateInstance, we need to Initialize it, first. */
     instance = GetModuleHandle(NULL);
     if (instance == NULL) {
         SDL_SYS_JoystickQuit();
-        SDL_SetError("GetModuleHandle() failed with error code %d.",
-                     GetLastError());
-        return (-1);
+        return SDL_SetError("GetModuleHandle() failed with error code %d.", GetLastError());
     }
     result = IDirectInput8_Initialize(dinput, instance, DIRECTINPUT_VERSION);
 
     if (FAILED(result)) {
         SDL_SYS_JoystickQuit();
-        SetDIerror("IDirectInput::Initialize", result);
-        return (-1);
+        return SetDIerror("IDirectInput::Initialize", result);
     }
 
     s_mutexJoyStickEnum = SDL_CreateMutex();
@@ -967,8 +956,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     joystick->hwdata =
         (struct joystick_hwdata *) SDL_malloc(sizeof(struct joystick_hwdata));
     if (joystick->hwdata == NULL) {
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
     SDL_memset(joystick->hwdata, 0, sizeof(struct joystick_hwdata));
     joystick->hwdata->buffered = 1;
@@ -1040,8 +1028,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			IDirectInput8_CreateDevice(dinput,
 									  &(joystickdevice->dxdevice.guidInstance), &device, NULL);
 		if (FAILED(result)) {
-			SetDIerror("IDirectInput::CreateDevice", result);
-			return (-1);
+			return SetDIerror("IDirectInput::CreateDevice", result);
 		}
 
 		/* Now get the IDirectInputDevice8 interface, instead. */
@@ -1053,8 +1040,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 		IDirectInputDevice8_Release(device);
 
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice8::QueryInterface", result);
-			return (-1);
+			return SetDIerror("IDirectInputDevice8::QueryInterface", result);
 		}
 
 		/* Aquire shared access. Exclusive access is required for forces,
@@ -1065,8 +1051,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 													DISCL_NONEXCLUSIVE |
 													DISCL_BACKGROUND);
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice8::SetCooperativeLevel", result);
-			return (-1);
+			return SetDIerror("IDirectInputDevice8::SetCooperativeLevel", result);
 		}
 
 		/* Use the extended data structure: DIJOYSTATE2. */
@@ -1074,8 +1059,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			IDirectInputDevice8_SetDataFormat(joystick->hwdata->InputDevice,
 											  &c_dfDIJoystick2);
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice8::SetDataFormat", result);
-			return (-1);
+			return SetDIerror("IDirectInputDevice8::SetDataFormat", result);
 		}
 
 		/* Get device capabilities */
@@ -1084,8 +1068,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 												&joystick->hwdata->Capabilities);
 
 		if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice8::GetCapabilities", result);
-			return (-1);
+			return SetDIerror("IDirectInputDevice8::GetCapabilities", result);
 		}
 
 		/* Force capable? */
@@ -1094,8 +1077,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			result = IDirectInputDevice8_Acquire(joystick->hwdata->InputDevice);
 
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice8::Acquire", result);
-				return (-1);
+				return SetDIerror("IDirectInputDevice8::Acquire", result);
 			}
 
 			/* reset all accuators. */
@@ -1106,17 +1088,14 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 
 			/* Not necessarily supported, ignore if not supported.
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice8::SendForceFeedbackCommand",
-						   result);
-				return (-1);
+				return SetDIerror("IDirectInputDevice8::SendForceFeedbackCommand", result);
 			}
 			*/
 
 			result = IDirectInputDevice8_Unacquire(joystick->hwdata->InputDevice);
 
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice8::Unacquire", result);
-				return (-1);
+				return SetDIerror("IDirectInputDevice8::Unacquire", result);
 			}
 
 			/* Turn on auto-centering for a ForceFeedback device (until told
@@ -1131,8 +1110,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 
 			/* Not necessarily supported, ignore if not supported.
 			if (FAILED(result)) {
-				SetDIerror("IDirectInputDevice8::SetProperty", result);
-				return (-1);
+				return SetDIerror("IDirectInputDevice8::SetProperty", result);
 			}
 			*/
 		}
@@ -1160,8 +1138,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			 * to use less reliable polling. */
 			joystick->hwdata->buffered = 0;
 		} else if (FAILED(result)) {
-			SetDIerror("IDirectInputDevice8::SetProperty", result);
-			return (-1);
+			return SetDIerror("IDirectInputDevice8::SetProperty", result);
 		}
 	}
     return (0);

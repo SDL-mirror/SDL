@@ -122,15 +122,12 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 		[[SDLUIAccelerationDelegate sharedDelegate] shutdown];
 	}
 	SDL_SetError("No joystick open with that index");
-
-    return;
 }
 
 /* Function to perform any system-specific joystick related cleanup */
 void
 SDL_SYS_JoystickQuit(void)
 {
-    return;
 }
 
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )

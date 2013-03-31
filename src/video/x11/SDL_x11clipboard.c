@@ -59,8 +59,7 @@ X11_SetClipboardText(_THIS, const char *text)
     /* Get the SDL window that will own the selection */
     window = GetWindow(_this);
     if (window == None) {
-        SDL_SetError("Couldn't find a window to own the selection");
-        return -1;
+        return SDL_SetError("Couldn't find a window to own the selection");
     }
 
     /* Save the selection on the root window */
