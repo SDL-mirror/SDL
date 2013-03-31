@@ -191,7 +191,7 @@ SDL_AudioDeinitialize_Default(void)
 static int
 SDL_AudioOpenDevice_Default(_THIS, const char *devname, int iscapture)
 {
-    return 0;
+    return -1;
 }
 
 static void
@@ -940,7 +940,7 @@ open_audio_device(const char *devname, int iscapture,
          ((!iscapture) && (current_audio.outputDevices == NULL)) )
         SDL_GetNumAudioDevices(iscapture);
 
-    if (!current_audio.impl.OpenDevice(device, devname, iscapture)) {
+    if (current_audio.impl.OpenDevice(device, devname, iscapture) < 0) {
         close_audio_device(device);
         return 0;
     }

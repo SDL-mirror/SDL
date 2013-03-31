@@ -228,8 +228,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
     this->hidden->audio_fd = -1;
@@ -257,8 +256,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (!found) {
         ESD_CloseDevice(this);
-        SDL_SetError("Couldn't find any hardware audio formats");
-        return 0;
+        return SDL_SetError("Couldn't find any hardware audio formats");
     }
 
     if (this->spec.channels == 1) {
@@ -277,8 +275,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (this->hidden->audio_fd < 0) {
         ESD_CloseDevice(this);
-        SDL_SetError("Couldn't open ESD connection");
-        return 0;
+        return SDL_SetError("Couldn't open ESD connection");
     }
 
     /* Calculate the final parameters for this audio specification */
@@ -292,8 +289,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
     if (this->hidden->mixbuf == NULL) {
         ESD_CloseDevice(this);
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
@@ -301,7 +297,7 @@ ESD_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->parent = getpid();
 
     /* We're ready to rock and roll. :-) */
-    return 1;
+    return 0;
 }
 
 static void

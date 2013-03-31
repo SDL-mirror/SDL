@@ -46,8 +46,7 @@ PSPAUD_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc(sizeof(*this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, sizeof(*this->hidden));
 	switch (this->spec.format & 0xff) {
@@ -56,8 +55,7 @@ PSPAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 			this->spec.format = AUDIO_S16LSB;
 			break;
 		default:
-			SDL_SetError("Unsupported audio format");
-			return 0;
+			return SDL_SetError("Unsupported audio format");
 	}
 
 	/* The sample count must be a multiple of 64. */
@@ -86,8 +84,7 @@ PSPAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 	mixlen = this->spec.size * NUM_BUFFERS;
 	this->hidden->rawbuf = (Uint8 *) memalign(64, mixlen);
 	if (this->hidden->rawbuf == NULL) {
-		SDL_SetError("Couldn't allocate mixing buffer");
-		return 0;
+		return SDL_SetError("Couldn't allocate mixing buffer");
 	}
 
 	/* Setup the hardware channel. */
@@ -98,10 +95,9 @@ PSPAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 	}
 	this->hidden->channel = sceAudioChReserve(PSP_AUDIO_NEXT_CHANNEL, this->spec.samples, format);
 	if (this->hidden->channel < 0) {
-		SDL_SetError("Couldn't reserve hardware channel");
 		free(this->hidden->rawbuf);
 		this->hidden->rawbuf = NULL;
-		return 0;
+		return SDL_SetError("Couldn't reserve hardware channel");
 	}
 
 	memset(this->hidden->rawbuf, 0, mixlen);
@@ -110,7 +106,7 @@ PSPAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 	}
 
 	this->hidden->next_buffer = 0;
-	return 1;
+	return 0;
 }
 
 static void PSPAUD_PlayDevice(_THIS)

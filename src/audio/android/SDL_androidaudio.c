@@ -42,21 +42,18 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
     
     if (iscapture) {
     	//TODO: implement capture
-    	SDL_SetError("Capture not supported on Android");
-    	return 0;
+    	return SDL_SetError("Capture not supported on Android");
     }
 
     if (audioDevice != NULL) {
-    	SDL_SetError("Only one audio device at a time please!");
-    	return 0;
+    	return SDL_SetError("Only one audio device at a time please!");
     }
 
     audioDevice = this;
 
     this->hidden = SDL_malloc(sizeof(*(this->hidden)));
     if (!this->hidden) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -71,8 +68,7 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
     
     if (test_format == 0) {
     	// Didn't find a compatible format :(
-    	SDL_SetError("No compatible audio format!");
-    	return 0;
+    	return SDL_SetError("No compatible audio format!");
     }
 
     if (this->spec.channels > 1) {
@@ -94,11 +90,10 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (this->spec.samples == 0) {
     	// Init failed?
-    	SDL_SetError("Java-side initialization failed!");
-    	return 0;
+    	return SDL_SetError("Java-side initialization failed!");
     }
 
-    return 1;
+    return 0;
 }
 
 static void

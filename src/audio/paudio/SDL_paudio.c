@@ -264,8 +264,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -274,8 +273,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->audio_fd = fd;
     if (fd < 0) {
         PAUDIO_CloseDevice(this);
-        SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
-        return 0;
+        return SDL_SetError("Couldn't open %s: %s", audiodev, strerror(errno));
     }
 
     /*
@@ -284,8 +282,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
      */
     if (ioctl(fd, AUDIO_BUFFER, &paud_bufinfo) < 0) {
         PAUDIO_CloseDevice(this);
-        SDL_SetError("Couldn't get audio buffer information");
-        return 0;
+        return SDL_SetError("Couldn't get audio buffer information");
     }
 
     if (this->spec.channels > 1)
@@ -399,8 +396,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         fprintf(stderr, "Couldn't find any hardware audio formats\n");
 #endif
         PAUDIO_CloseDevice(this);
-        SDL_SetError("Couldn't find any hardware audio formats");
-        return 0;
+        return SDL_SetError("Couldn't find any hardware audio formats");
     }
     this->spec.format = test_format;
 
@@ -458,8 +454,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (err != NULL) {
         PAUDIO_CloseDevice(this);
-        SDL_SetError("Paudio: %s", err);
-        return 0;
+        return SDL_SetError("Paudio: %s", err);
     }
 
     /* Allocate mixing buffer */
@@ -467,8 +462,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
     if (this->hidden->mixbuf == NULL) {
         PAUDIO_CloseDevice(this);
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
@@ -506,8 +500,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 #ifdef DEBUG_AUDIO
         fprintf(stderr, "Can't start audio play\n");
 #endif
-        SDL_SetError("Can't start audio play");
-        return 0;
+        return SDL_SetError("Can't start audio play");
     }
 
     /* Check to see if we need to use select() workaround */
@@ -518,7 +511,7 @@ PAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     /* We're ready to rock and roll. :-) */
-    return 1;
+    return 0;
 }
 
 static int

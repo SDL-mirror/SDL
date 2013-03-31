@@ -95,8 +95,7 @@ BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     /* Initialize all variables that we clean on shutdown */
     _this->hidden = new SDL_PrivateAudioData;
     if (_this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(_this->hidden, 0, (sizeof *_this->hidden));
 
@@ -153,8 +152,7 @@ BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (!valid_datatype) {      /* shouldn't happen, but just in case... */
         BEOSAUDIO_CloseDevice(_this);
-        SDL_SetError("Unsupported audio format");
-        return 0;
+        return SDL_SetError("Unsupported audio format");
     }
 
     /* Calculate the final parameters for this audio specification */
@@ -173,12 +171,11 @@ BEOSAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         _this->hidden->audio_obj->SetHasData(true);
     } else {
         BEOSAUDIO_CloseDevice(_this);
-        SDL_SetError("Unable to start Be audio");
-        return 0;
+        return SDL_SetError("Unable to start Be audio");
     }
 
     /* We're running! */
-    return 1;
+    return 0;
 }
 
 static void

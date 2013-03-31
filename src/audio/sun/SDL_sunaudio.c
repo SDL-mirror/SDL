@@ -213,8 +213,7 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     if (devname == NULL) {
         devname = SDL_GetAudioDeviceName(0, iscapture);
         if (devname == NULL) {
-            SDL_SetError("No such audio device");
-            return 0;
+            return SDL_SetError("No such audio device");
         }
     }
 
@@ -222,16 +221,14 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
     /* Open the audio device */
     this->hidden->audio_fd = open(devname, flags, 0);
     if (this->hidden->audio_fd < 0) {
-        SDL_SetError("Couldn't open %s: %s", devname, strerror(errno));
-        return 0;
+        return SDL_SetError("Couldn't open %s: %s", devname, strerror(errno));
     }
 
 #ifdef AUDIO_SETINFO
@@ -263,8 +260,7 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     default:
         {
             /* !!! FIXME: fallback to conversion on unsupported types! */
-            SDL_SetError("Unsupported audio format");
-            return (-1);
+            return SDL_SetError("Unsupported audio format");
         }
     }
     this->hidden->audio_fmt = this->spec.format;
@@ -285,9 +281,8 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
             /* Check to be sure we got what we wanted */
             if (ioctl(this->hidden->audio_fd, AUDIO_GETINFO, &info) < 0) {
-                SDL_SetError("Error getting audio parameters: %s",
-                             strerror(errno));
-                return -1;
+                return SDL_SetError("Error getting audio parameters: %s",
+                                    strerror(errno));
             }
             if (info.play.encoding == enc
                 && info.play.precision == (this->spec.format & 0xff)
@@ -316,9 +311,8 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
 
         default:
             /* oh well... */
-            SDL_SetError("Error setting audio parameters: %s",
-                         strerror(errno));
-            return -1;
+            return SDL_SetError("Error setting audio parameters: %s",
+                                strerror(errno));
         }
     }
 #endif /* AUDIO_SETINFO */
@@ -357,7 +351,7 @@ SUNAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
     /* We're ready to rock and roll. :-) */
-    return (1);
+    return 0;
 }
 
 /************************************************************************/

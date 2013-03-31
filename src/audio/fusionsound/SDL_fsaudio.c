@@ -200,8 +200,7 @@ SDL_FS_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -243,8 +242,7 @@ SDL_FS_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (format == 0) {
         SDL_FS_CloseDevice(this);
-        SDL_SetError("Couldn't find any hardware audio formats");
-        return 0;
+        return SDL_SetError("Couldn't find any hardware audio formats");
     }
     this->spec.format = test_format;
 
@@ -252,8 +250,7 @@ SDL_FS_OpenDevice(_THIS, const char *devname, int iscapture)
     ret = SDL_NAME(FusionSoundCreate) (&this->hidden->fs);
     if (ret) {
         SDL_FS_CloseDevice(this);
-        SDL_SetError("Unable to initialize FusionSound: %d", ret);
-        return 0;
+        return SDL_SetError("Unable to initialize FusionSound: %d", ret);
     }
 
     this->hidden->mixsamples = this->spec.size / bytes / this->spec.channels;
@@ -272,8 +269,7 @@ SDL_FS_OpenDevice(_THIS, const char *devname, int iscapture)
                                        &this->hidden->stream);
     if (ret) {
         SDL_FS_CloseDevice(this);
-        SDL_SetError("Unable to create FusionSoundStream: %d", ret);
-        return 0;
+        return SDL_SetError("Unable to create FusionSoundStream: %d", ret);
     }
 
     /* See what we got */
@@ -294,13 +290,12 @@ SDL_FS_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->mixbuf = (Uint8 *) SDL_AllocAudioMem(this->hidden->mixlen);
     if (this->hidden->mixbuf == NULL) {
         SDL_FS_CloseDevice(this);
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->spec.size);
 
     /* We're ready to rock and roll. :-) */
-    return 1;
+    return 0;
 }
 
 

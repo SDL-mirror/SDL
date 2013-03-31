@@ -363,8 +363,7 @@ CreateSecondary(_THIS, HWND focus, WAVEFORMATEX * wavefmt)
                                                   DSSCL_NORMAL);
     }
     if (result != DS_OK) {
-        SetDSerror("DirectSound SetCooperativeLevel", result);
-        return (-1);
+        return SetDSerror("DirectSound SetCooperativeLevel", result);
     }
 
     /* Try to create the secondary buffer */
@@ -449,8 +448,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
             pDirectSoundEnumerateW(FindDevGUID, &devguid);
 
         if (!devguid.found) {
-            SDL_SetError("DirectSound: Requested device not found");
-            return 0;
+            return SDL_SetError("DirectSound: Requested device not found");
         }
         guid = &devguid.guid;
     }
@@ -459,8 +457,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden = (struct SDL_PrivateAudioData *)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -478,8 +475,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (!valid_format) {
         DSOUND_CloseDevice(this);
-        SDL_SetError("DirectSound: Unsupported audio format");
-        return 0;
+        return SDL_SetError("DirectSound: Unsupported audio format");
     }
 
     SDL_memset(&waveformat, 0, sizeof(waveformat));
@@ -499,21 +495,20 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     result = pDirectSoundCreate8(guid, &this->hidden->sound, NULL);
     if (result != DS_OK) {
         DSOUND_CloseDevice(this);
-        SetDSerror("DirectSoundCreate", result);
-        return 0;
+        return SetDSerror("DirectSoundCreate", result);
     }
 
     /* Create the audio buffer to which we write */
     this->hidden->num_buffers = CreateSecondary(this, NULL, &waveformat);
     if (this->hidden->num_buffers < 0) {
         DSOUND_CloseDevice(this);
-        return 0;
+        return -1;
     }
 
     /* The buffer will auto-start playing in DSOUND_WaitDevice() */
     this->hidden->mixlen = this->spec.size;
 
-    return 1;                   /* good to go. */
+    return 0;                   /* good to go. */
 }
 
 
