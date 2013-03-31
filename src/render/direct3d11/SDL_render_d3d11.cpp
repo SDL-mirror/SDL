@@ -836,8 +836,6 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     texture->driverdata = textureData;
 
-    const int pixelSizeInBytes = textureData->pixelFormat->BytesPerPixel;
-
     D3D11_TEXTURE2D_DESC textureDesc = {0};
     textureDesc.Width = texture->w;
     textureDesc.Height = texture->h;
@@ -851,24 +849,26 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     textureDesc.MiscFlags = 0;
 
-    const int numPixels = textureDesc.Width * textureDesc.Height;
-    std::vector<uint8> initialTexturePixels(numPixels * pixelSizeInBytes, 0x00);
-
+#if 0
     // Fill the texture with a non-black color, for debugging purposes:
-    //for (int i = 0; i < (numPixels * pixelSizeInBytes); i += pixelSizeInBytes) {
-    //    initialTexturePixels[i+0] = 0xff;
-    //    initialTexturePixels[i+1] = 0xff;
-    //    initialTexturePixels[i+2] = 0x00;
-    //    initialTexturePixels[i+3] = 0xff;
-    //}
-
+    const int numPixels = textureDesc.Width * textureDesc.Height;
+    const int pixelSizeInBytes = textureData->pixelFormat->BytesPerPixel;
+    std::vector<uint8> initialTexturePixels(numPixels * pixelSizeInBytes, 0x00);
+    for (int i = 0; i < (numPixels * pixelSizeInBytes); i += pixelSizeInBytes) {
+        initialTexturePixels[i+0] = 0xff;
+        initialTexturePixels[i+1] = 0xff;
+        initialTexturePixels[i+2] = 0x00;
+        initialTexturePixels[i+3] = 0xff;
+    }
     D3D11_SUBRESOURCE_DATA initialTextureData = {0};
     initialTextureData.pSysMem = (void *)&(initialTexturePixels[0]);
     initialTextureData.SysMemPitch = textureDesc.Width * pixelSizeInBytes;
     initialTextureData.SysMemSlicePitch = numPixels * pixelSizeInBytes;
+#endif
+
     result = rendererData->d3dDevice->CreateTexture2D(
         &textureDesc,
-        &initialTextureData,
+        NULL,   // &initialTextureData,
         &textureData->mainTexture
         );
     if (FAILED(result)) {
