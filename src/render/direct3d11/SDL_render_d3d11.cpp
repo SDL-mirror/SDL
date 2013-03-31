@@ -59,9 +59,9 @@ static int D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, const void *pixels,
                              int pitch);
-//static int D3D11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-//                           const SDL_Rect * rect, void **pixels, int *pitch);
-//static void D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                             const SDL_Rect * rect, void **pixels, int *pitch);
+static void D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 //static int D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateViewport(SDL_Renderer * renderer);
 static int D3D11_RenderClear(SDL_Renderer * renderer);
@@ -138,8 +138,8 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->WindowEvent = D3D11_WindowEvent;
     renderer->CreateTexture = D3D11_CreateTexture;
     renderer->UpdateTexture = D3D11_UpdateTexture;
-    //renderer->LockTexture = D3D11_LockTexture;
-    //renderer->UnlockTexture = D3D11_UnlockTexture;
+    renderer->LockTexture = D3D11_LockTexture;
+    renderer->UnlockTexture = D3D11_UnlockTexture;
     //renderer->SetRenderTarget = D3D11_SetRenderTarget;
     renderer->UpdateViewport = D3D11_UpdateViewport;
     renderer->RenderClear = D3D11_RenderClear;
@@ -832,6 +832,7 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         return -1;
     }
     textureData->pixelFormat = SDL_AllocFormat(texture->format);
+    textureData->lockedTexturePosition = XMINT2(0, 0);
 
     texture->driverdata = textureData;
 
@@ -949,6 +950,94 @@ D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         0);
 
     return 0;
+}
+
+static int
+D3D11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
+                  const SDL_Rect * rect, void **pixels, int *pitch)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+    HRESULT result = S_OK;
+
+    if (textureData->stagingTexture) {
+        SDL_SetError("texture is already locked");
+        return -1;
+    }
+    
+    // Create a 'staging' texture, which will be used to write to a portion
+    // of the main texture.  This is necessary, as Direct3D 11.1 does not
+    // have the ability to write a CPU-bound pixel buffer to a rectangular
+    // subrect of a texture.  Direct3D 11.1 can, however, write a pixel
+    // buffer to an entire texture, hence the use of a staging texture.
+    D3D11_TEXTURE2D_DESC stagingTextureDesc;
+    textureData->mainTexture->GetDesc(&stagingTextureDesc);
+    stagingTextureDesc.Width = rect->w;
+    stagingTextureDesc.Height = rect->h;
+    stagingTextureDesc.BindFlags = 0;
+    stagingTextureDesc.MiscFlags = 0;
+    stagingTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    stagingTextureDesc.Usage = D3D11_USAGE_STAGING;
+    result = rendererData->d3dDevice->CreateTexture2D(
+        &stagingTextureDesc,
+        NULL,
+        &textureData->stagingTexture);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Create Staging Texture", result);
+        return -1;
+    }
+
+    // Get a write-only pointer to data in the staging texture:
+    D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
+    result = rendererData->d3dContext->Map(
+        textureData->stagingTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        D3D11_MAP_WRITE,
+        0,
+        &textureMemory
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Map Staging Texture", result);
+        textureData->stagingTexture = nullptr;
+        return -1;
+    }
+
+    // Make note of where the staging texture will be written to (on a
+    // call to SDL_UnlockTexture):
+    textureData->lockedTexturePosition = XMINT2(rect->x, rect->y);
+
+    // Make sure the caller has information on the texture's pixel buffer,
+    // then return:
+    *pixels = textureMemory.pData;
+    *pitch = textureMemory.RowPitch;
+    return 0;
+}
+
+static void
+D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+
+    // Commit the pixel buffer's changes back to the staging texture:
+    rendererData->d3dContext->Unmap(
+        textureData->stagingTexture.Get(),
+        0);
+
+    // Copy the staging texture's contents back to the main texture:
+    rendererData->d3dContext->CopySubresourceRegion(
+        textureData->mainTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        textureData->lockedTexturePosition.x,
+        textureData->lockedTexturePosition.y,
+        0,
+        textureData->stagingTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        NULL);
+
+    // Clean up and return:
+    textureData->stagingTexture = nullptr;
+    textureData->lockedTexturePosition = XMINT2(0, 0);
 }
 
 static int

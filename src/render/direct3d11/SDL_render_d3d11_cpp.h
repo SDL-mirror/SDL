@@ -23,6 +23,7 @@
 #include <D3D11_1.h>
 #include <DirectXMath.h>
 #include <wrl/client.h>
+#include <vector>
 
 struct SDL_VertexShaderConstants
 {
@@ -67,6 +68,8 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11Texture2D> mainTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mainTextureResourceView;
     SDL_PixelFormat * pixelFormat;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> stagingTexture;
+    DirectX::XMINT2 lockedTexturePosition;
 } D3D11_TextureData;
 
 struct VertexPositionColor
