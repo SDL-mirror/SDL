@@ -63,10 +63,8 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
     }
 
     touchDeviceId = (SDL_TouchID)touch_device_id_in;
-    if (!SDL_GetTouch(touchDeviceId)) {
-        if (SDL_AddTouch(touchDeviceId, "") < 0) {
-             SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
-        }
+    if (SDL_AddTouch(touchDeviceId, "") < 0) {
+        SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
     }
 
     fingerId = (SDL_FingerID)pointer_finger_id_in;
