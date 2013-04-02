@@ -14,12 +14,13 @@ extern "C" {
 }
 
 #include <string>
+#include <unordered_map>
 
 using namespace std;
 using namespace Windows::Storage;
 
 extern "C" const wchar_t *
-SDL_WinRTGetFileSystemPath(SDL_WinRT_Path pathType)
+SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path pathType)
 {
     switch (pathType) {
         case SDL_WINRT_PATH_INSTALLED_LOCATION:
@@ -66,6 +67,28 @@ SDL_WinRTGetFileSystemPath(SDL_WinRT_Path pathType)
 
     SDL_Unsupported();
     return NULL;
+}
+
+extern "C" const char *
+SDL_WinRTGetFSPathUTF8(SDL_WinRT_Path pathType)
+{
+    typedef unordered_map<SDL_WinRT_Path, string> UTF8PathMap;
+    static UTF8PathMap utf8Paths;
+
+    UTF8PathMap::iterator searchResult = utf8Paths.find(pathType);
+    if (searchResult != utf8Paths.end()) {
+        return searchResult->second.c_str();
+    }
+
+    const wchar_t * ucs2Path = SDL_WinRTGetFSPathUNICODE(pathType);
+    if (!ucs2Path) {
+        return NULL;
+    }
+
+    char * utf8Path = WIN_StringToUTF8(ucs2Path);
+    utf8Paths[pathType] = utf8Path;
+    SDL_free(utf8Path);
+    return utf8Paths[pathType].c_str();
 }
 
 #endif /* __WINRT__ */

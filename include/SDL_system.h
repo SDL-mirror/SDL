@@ -135,7 +135,25 @@ typedef enum
  *      SDL_WinRT_Path for more information on which path types are
  *      supported where.
  */
-extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFileSystemPath(SDL_WinRT_Path pathType);
+extern DECLSPEC const wchar_t * SDLCALL SDL_WinRTGetFSPathUNICODE(SDL_WinRT_Path pathType);
+
+/**
+ *  \brief Retrieves a Windows RT defined path on the local file system
+ *
+ *  \note Documentation on most app-specific path types on Windows RT
+ *      can be found on MSDN, at the URL:
+ *      http://msdn.microsoft.com/en-us/library/windows/apps/hh464917.aspx
+ *
+ *  \param pathType The type of path to retrieve.
+ *  \ret A UTF-8 string (8-bit, multi-byte) containing the path, or NULL
+ *      if the path is not available for any reason.  Not all paths are
+ *      available on all versions of Windows.  This is especially true on
+ *      Windows Phone.  Check the documentation for the given
+ *      SDL_WinRT_Path for more information on which path types are
+ *      supported where.
+ */
+extern DECLSPEC const char * SDLCALL SDL_WinRTGetFSPathUTF8(SDL_WinRT_Path pathType);
+
 
 #endif /* __WINRT__ */
 
