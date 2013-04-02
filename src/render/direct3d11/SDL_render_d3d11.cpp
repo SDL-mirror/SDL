@@ -1130,6 +1130,11 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
 #endif
 
     //
+    // Reset the model matrix
+    //
+    XMStoreFloat4x4(&data->vertexShaderConstantsData.model, XMMatrixIdentity());
+
+    //
     // Update the Direct3D viewport, which seems to be aligned to the
     // swap buffer's coordinate space, which is always in landscape:
     //
@@ -1250,15 +1255,6 @@ D3D11_RenderStartDrawOp(SDL_Renderer * renderer)
         rendererData->renderTargetView.GetAddressOf(),
         nullptr
         );
-
-    rendererData->d3dContext->UpdateSubresource(
-        rendererData->vertexShaderConstants.Get(),
-		0,
-		NULL,
-		&rendererData->vertexShaderConstantsData,
-		0,
-		0
-		);
 }
 
 static void
@@ -1299,6 +1295,16 @@ D3D11_RenderFinishDrawOp(SDL_Renderer * renderer,
                          UINT vertexCount)
 {
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+
+    rendererData->d3dContext->UpdateSubresource(
+        rendererData->vertexShaderConstants.Get(),
+        0,
+        NULL,
+        &rendererData->vertexShaderConstantsData,
+        0,
+        0
+        );
+
     rendererData->d3dContext->IASetPrimitiveTopology(primitiveTopology);
     rendererData->d3dContext->IASetInputLayout(rendererData->inputLayout.Get());
     rendererData->d3dContext->VSSetShader(rendererData->vertexShader.Get(), nullptr, 0);
@@ -1505,11 +1511,24 @@ D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         minv = tmp;
     }
 
+    XMFLOAT4X4 oldModelMatrix = rendererData->vertexShaderConstantsData.model;
+    XMStoreFloat4x4(
+        &rendererData->vertexShaderConstantsData.model,
+        XMMatrixMultiply(
+            XMMatrixRotationZ((float)(XM_PI * (float) angle / 180.0f)),
+            XMMatrixTranslation(dstrect->x + center->x, dstrect->y + center->y, 0)
+            ));
+
+    const float minx = -center->x;
+    const float maxx = dstrect->w - center->x;
+    const float miny = -center->y;
+    const float maxy = dstrect->h - center->y;
+
     VertexPositionColor vertices[] = {
-        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(minx, miny, 0.0f), XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(minx, maxy, 0.0f), XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(maxx, miny, 0.0f), XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(maxx, maxy, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
     };
     if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
         return -1;
@@ -1522,6 +1541,8 @@ D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         rendererData->mainSampler.Get());
 
     D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, sizeof(vertices) / sizeof(VertexPositionColor));
+
+    rendererData->vertexShaderConstantsData.model = oldModelMatrix;
 
     return 0;
 }
