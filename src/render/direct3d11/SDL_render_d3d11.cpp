@@ -73,9 +73,9 @@ static int D3D11_RenderFillRects(SDL_Renderer * renderer,
                                  const SDL_FRect * rects, int count);
 static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * srcrect, const SDL_FRect * dstrect);
-//static int D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
-//                          const SDL_Rect * srcrect, const SDL_FRect * dstrect,
-//                          const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
+static int D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                              const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+                              const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
 static int D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                   Uint32 format, void * pixels, int pitch);
 static void D3D11_RenderPresent(SDL_Renderer * renderer);
@@ -173,7 +173,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderDrawLines = D3D11_RenderDrawLines;
     renderer->RenderFillRects = D3D11_RenderFillRects;
     renderer->RenderCopy = D3D11_RenderCopy;
-    //renderer->RenderCopyEx = D3D11_RenderCopyEx;
+    renderer->RenderCopyEx = D3D11_RenderCopyEx;
     renderer->RenderReadPixels = D3D11_RenderReadPixels;
     renderer->RenderPresent = D3D11_RenderPresent;
     renderer->DestroyTexture = D3D11_DestroyTexture;
@@ -1456,6 +1456,54 @@ D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     float maxu = (float) (srcrect->x + srcrect->w) / texture->w;
     float minv = (float) srcrect->y / texture->h;
     float maxv = (float) (srcrect->y + srcrect->h) / texture->h;
+
+    VertexPositionColor vertices[] = {
+        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+    };
+    if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
+        return -1;
+    }
+
+    D3D11_SetPixelShader(
+        renderer,
+        rendererData->texturePixelShader.Get(),
+        textureData->mainTextureResourceView.Get(),
+        rendererData->mainSampler.Get());
+
+    D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, sizeof(vertices) / sizeof(VertexPositionColor));
+
+    return 0;
+}
+
+static int
+D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+                   const SDL_Rect * srcrect, const SDL_FRect * dstrect,
+                   const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+
+    D3D11_RenderStartDrawOp(renderer);
+    D3D11_RenderSetBlendMode(renderer, texture->blendMode);
+
+    float minu = (float) srcrect->x / texture->w;
+    float maxu = (float) (srcrect->x + srcrect->w) / texture->w;
+    float minv = (float) srcrect->y / texture->h;
+    float maxv = (float) (srcrect->y + srcrect->h) / texture->h;
+
+    if (flip & SDL_FLIP_HORIZONTAL) {
+        float tmp = maxu;
+        maxu = minu;
+        minu = tmp;
+    }
+    if (flip & SDL_FLIP_VERTICAL) {
+        float tmp = maxv;
+        maxv = minv;
+        minv = tmp;
+    }
 
     VertexPositionColor vertices[] = {
         {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
