@@ -1425,11 +1425,17 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
     SDL_WindowUserData *prev, *data;
 
     CHECK_WINDOW_MAGIC(window, NULL);
+    
+    /* Input validation */
+    if (name == NULL || SDL_strlen(name) == 0) {
+      SDL_InvalidParamError("name");
+      return NULL;
+    }
 
     /* See if the named data already exists */
     prev = NULL;
     for (data = window->data; data; prev = data, data = data->next) {
-        if (SDL_strcmp(data->name, name) == 0) {
+        if (data->name && SDL_strcmp(data->name, name) == 0) {
             void *last_value = data->data;
 
             if (userdata) {
@@ -1467,8 +1473,14 @@ SDL_GetWindowData(SDL_Window * window, const char *name)
 
     CHECK_WINDOW_MAGIC(window, NULL);
 
+    /* Input validation */
+    if (name == NULL || SDL_strlen(name) == 0) {
+      SDL_InvalidParamError("name");
+      return NULL;
+    }
+
     for (data = window->data; data; data = data->next) {
-        if (SDL_strcmp(data->name, name) == 0) {
+        if (data->name && SDL_strcmp(data->name, name) == 0) {
             return data->data;
         }
     }
