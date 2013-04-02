@@ -76,8 +76,8 @@ static int D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 //static int D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 //                          const SDL_Rect * srcrect, const SDL_FRect * dstrect,
 //                          const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
-//static int D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-//                                Uint32 format, void * pixels, int pitch);
+static int D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                                  Uint32 format, void * pixels, int pitch);
 static void D3D11_RenderPresent(SDL_Renderer * renderer);
 static void D3D11_DestroyTexture(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
@@ -103,6 +103,32 @@ extern "C" SDL_RenderDriver D3D11_RenderDriver = {
         0                           // max_texture_height: will be filled in later
     }
 };
+
+
+static Uint32
+DXGIFormatToSDLPixelFormat(DXGI_FORMAT dxgiFormat) {
+    switch (dxgiFormat) {
+        case DXGI_FORMAT_B8G8R8A8_UNORM:
+            return SDL_PIXELFORMAT_ARGB8888;
+        case DXGI_FORMAT_B8G8R8X8_UNORM:
+            return SDL_PIXELFORMAT_RGB888;
+        default:
+            return SDL_PIXELFORMAT_UNKNOWN;
+    }
+}
+
+static DXGI_FORMAT
+SDLPixelFormatToDXGIFormat(Uint32 sdlFormat)
+{
+    switch (sdlFormat) {
+        case SDL_PIXELFORMAT_ARGB8888:
+            return DXGI_FORMAT_B8G8R8A8_UNORM;
+        case SDL_PIXELFORMAT_RGB888:
+            return DXGI_FORMAT_B8G8R8X8_UNORM;
+        default:
+            return DXGI_FORMAT_UNKNOWN;
+    }
+}
 
 
 //typedef struct
@@ -148,7 +174,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->RenderFillRects = D3D11_RenderFillRects;
     renderer->RenderCopy = D3D11_RenderCopy;
     //renderer->RenderCopyEx = D3D11_RenderCopyEx;
-    //renderer->RenderReadPixels = D3D11_RenderReadPixels;
+    renderer->RenderReadPixels = D3D11_RenderReadPixels;
     renderer->RenderPresent = D3D11_RenderPresent;
     renderer->DestroyTexture = D3D11_DestroyTexture;
     renderer->DestroyRenderer = D3D11_DestroyRenderer;
@@ -206,10 +232,10 @@ D3D11_ReadShaderContents(const wstring & shaderName, vector<char> & out)
     wstring fileName;
 
 #if WINAPI_FAMILY == WINAPI_FAMILY_APP
-    fileName = SDL_WinRTGetFileSystemPath(SDL_WINRT_PATH_INSTALLED_LOCATION);
+    fileName = SDL_WinRTGetFSPathUNICODE(SDL_WINRT_PATH_INSTALLED_LOCATION);
     fileName += L"\\SDL_VS2012_WinRT\\";
 #elif WINAPI_FAMILY == WINAPI_PHONE_APP
-    fileName = SDL_WinRTGetFileSystemPath(SDL_WINRT_PATH_INSTALLED_LOCATION);
+    fileName = SDL_WinRTGetFSPathUNICODE(SDL_WINRT_PATH_INSTALLED_LOCATION);
     fileName += L"\\";
 #endif
     // WinRT, TODO: test Direct3D 11.1 shader loading on Win32
@@ -811,19 +837,11 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
     D3D11_TextureData *textureData;
     HRESULT result;
-    DXGI_FORMAT textureFormat = DXGI_FORMAT_UNKNOWN;
-
-    switch (texture->format) {
-        case SDL_PIXELFORMAT_ARGB8888:
-            textureFormat = DXGI_FORMAT_B8G8R8A8_UNORM;
-            break;
-        case SDL_PIXELFORMAT_RGB888:
-            textureFormat = DXGI_FORMAT_B8G8R8X8_UNORM;
-            break;
-        default:
-            SDL_SetError("%s, An unsupported SDL pixel format (0x%x) was specified",
-                __FUNCTION__, texture->format);
-            return -1;
+    DXGI_FORMAT textureFormat = SDLPixelFormatToDXGIFormat(texture->format);
+    if (textureFormat == SDL_PIXELFORMAT_UNKNOWN) {
+        SDL_SetError("%s, An unsupported SDL pixel format (0x%x) was specified",
+            __FUNCTION__, texture->format);
+        return -1;
     }
 
     textureData = new D3D11_TextureData;
@@ -1457,6 +1475,101 @@ D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     D3D11_RenderFinishDrawOp(renderer, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP, sizeof(vertices) / sizeof(VertexPositionColor));
 
+    return 0;
+}
+
+static int
+D3D11_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                       Uint32 format, void * pixels, int pitch)
+{
+    D3D11_RenderData * data = (D3D11_RenderData *) renderer->driverdata;
+    HRESULT result = S_OK;
+
+    // Retrieve a pointer to the back buffer:
+    ComPtr<ID3D11Texture2D> backBuffer;
+    result = data->swapChain->GetBuffer(
+        0,
+        __uuidof(ID3D11Texture2D),
+        &backBuffer
+        );
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Get Back Buffer", result);
+        return -1;
+    }
+
+    // Create a staging texture to copy the screen's data to:
+    ComPtr<ID3D11Texture2D> stagingTexture;
+    D3D11_TEXTURE2D_DESC stagingTextureDesc;
+    backBuffer->GetDesc(&stagingTextureDesc);
+    stagingTextureDesc.Width = rect->w;
+    stagingTextureDesc.Height = rect->h;
+    stagingTextureDesc.BindFlags = 0;
+    stagingTextureDesc.MiscFlags = 0;
+    stagingTextureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    stagingTextureDesc.Usage = D3D11_USAGE_STAGING;
+    result = data->d3dDevice->CreateTexture2D(
+        &stagingTextureDesc,
+        NULL,
+        &stagingTexture);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Create Staging Texture", result);
+        return -1;
+    }
+
+    // Copy the desired portion of the back buffer to the staging texture:
+    D3D11_BOX srcBox;
+    srcBox.left = rect->x;
+    srcBox.right = rect->x + rect->w;
+    srcBox.top = rect->y;
+    srcBox.bottom = rect->y + rect->h;
+    srcBox.front = 0;
+    srcBox.back = 1;
+    data->d3dContext->CopySubresourceRegion(
+        stagingTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        0, 0, 0,
+        backBuffer.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        &srcBox);
+
+    // Map the staging texture's data to CPU-accessible memory:
+    D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
+    result = data->d3dContext->Map(
+        stagingTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0),
+        D3D11_MAP_READ,
+        0,
+        &textureMemory);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Map Staging Texture to CPU Memory", result);
+        return -1;
+    }
+
+    // Copy the data into the desired buffer, converting pixels to the
+    // desired format at the same time:
+    if (SDL_ConvertPixels(
+        rect->w, rect->h,
+        DXGIFormatToSDLPixelFormat(stagingTextureDesc.Format),
+        textureMemory.pData,
+        textureMemory.RowPitch,
+        format,
+        pixels,
+        pitch) != 0)
+    {
+        // When SDL_ConvertPixels fails, it'll have already set the format.
+        // Get the error message, and attach some extra data to it.
+        std::string errorMessage = string(__FUNCTION__ ", Convert Pixels failed: ") + SDL_GetError();
+        SDL_SetError(errorMessage.c_str());
+        return -1;
+    }
+
+    // Unmap the texture:
+    data->d3dContext->Unmap(
+        stagingTexture.Get(),
+        D3D11CalcSubresource(0, 0, 0));
+
+    // All done.  The staging texture will be cleaned up in it's container
+    // ComPtr<>'s destructor.
     return 0;
 }
 
