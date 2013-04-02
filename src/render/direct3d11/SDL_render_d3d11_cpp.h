@@ -49,7 +49,6 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11SamplerState> mainSampler;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> mainRasterizer;
     D3D_FEATURE_LEVEL featureLevel;
-    bool loadingComplete;
 
     // Vertex buffer constants:
     SDL_VertexShaderConstants vertexShaderConstantsData;

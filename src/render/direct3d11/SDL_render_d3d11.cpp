@@ -157,7 +157,6 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
     data->featureLevel = (D3D_FEATURE_LEVEL) 0;
-    data->loadingComplete = false;
     data->windowSizeInDIPs = XMFLOAT2(0, 0);
     data->renderTargetSize = XMFLOAT2(0, 0);
 
@@ -555,7 +554,6 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     //
     // All done!
     //
-    data->loadingComplete = true;       // This variable can probably be factored-out
     return S_OK;
 }
 
