@@ -94,7 +94,7 @@
             /* send mouse down event */
             SDL_SendMouseButton(NULL, SDL_TOUCH_MOUSEID, SDL_PRESSED, SDL_BUTTON_LEFT);
 
-            leftFingerDown = (SDL_FingerID)touch;
+            leftFingerDown = touch;
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
@@ -102,7 +102,7 @@
         // FIXME: TODO: Using touch as the fingerId is potentially dangerous
         // It is also much more efficient than storing the UITouch pointer
         // and comparing it to the incoming event.
-        SDL_SendTouch(touchId, (SDL_FingerID)touch,
+        SDL_SendTouch(touchId, (SDL_FingerID)((size_t)touch),
                       SDL_TRUE, locationInView.x, locationInView.y, 1.0f);
 #else
         int i;
@@ -125,10 +125,10 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     while(touch) {
-        if ((SDL_FingerID)touch == leftFingerDown) {
+        if (touch == leftFingerDown) {
             /* send mouse up */
             SDL_SendMouseButton(NULL, SDL_TOUCH_MOUSEID, SDL_RELEASED, SDL_BUTTON_LEFT);
-            leftFingerDown = 0;
+            leftFingerDown = nil;
         }
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
@@ -166,7 +166,7 @@
     UITouch *touch = (UITouch*)[enumerator nextObject];
 
     while (touch) {
-        if ((SDL_FingerID)touch == leftFingerDown) {
+        if (touch == leftFingerDown) {
             CGPoint locationInView = [self touchLocation:touch shouldNormalize:NO];
 
             /* send moved event */
