@@ -164,7 +164,7 @@ static SDL_bool AddDialogString(WIN_DialogData *dialog, const char *string)
 
 static int s_BaseUnitsX;
 static int s_BaseUnitsY;
-static void Vec2ToDLU(WORD* x, WORD* y)
+static void Vec2ToDLU(short *x, short *y)
 {
     SDL_assert(s_BaseUnitsX != 0); // we init in WIN_ShowMessageBox(), which is the only public function...    
 
