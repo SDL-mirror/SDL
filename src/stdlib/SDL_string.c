@@ -31,8 +31,8 @@
 #undef SDL_atof
 char *SDL_itoa(int value, char *str, int radix) { return SDL_itoa_inline(value, str, radix); }
 char *SDL_uitoa(unsigned int value, char *str, int radix) { return SDL_uitoa_inline(value, str, radix); }
-int SDL_atoi(const char *str) { return SDL_atoi(str); }
-double SDL_atof(const char *str) { return SDL_atof(str); }
+int SDL_atoi(const char *str) { return SDL_atoi_inline(str); }
+double SDL_atof(const char *str) { return SDL_atof_inline(str); }
 
 
 
