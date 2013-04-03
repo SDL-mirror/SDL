@@ -22,7 +22,7 @@ typedef struct SurfaceImage_s {
    int width;
    int height;
    unsigned int  bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
-   const unsigned char *pixel_data;
+   const char *pixel_data;
 } SurfaceImage_t;
 
 #define ALLOWABLE_ERROR_OPAQUE	0
