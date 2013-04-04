@@ -30,7 +30,6 @@
 
 #include "SDL_config.h"
 
-
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -282,7 +281,7 @@ SDL_FORCE_INLINE int SDL_setenv_inline(const char *name, const char *value, int 
 
 extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *));
 #ifdef HAVE_QSORT
-SDL_FORCE_INLINE void SDL_qsort_inline(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *)) { return qsort(base, nmemb, size, compare); }
+SDL_FORCE_INLINE void SDL_qsort_inline(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *)) { qsort(base, nmemb, size, compare); }
 #define SDL_qsort SDL_qsort_inline
 #endif
 
@@ -512,10 +511,22 @@ SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return index(
 
 extern DECLSPEC char *SDLCALL SDL_strrchr(const char *str, int c);
 #ifdef HAVE_STRRCHR
-SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return (char*)strrchr(str, c); }
+SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) {
+#ifdef __cplusplus
+return const_cast<char*>(strrchr(str, c));
+#else
+return (char*)strrchr(str, c);
+#endif
+}
 #define SDL_strrchr SDL_strrchr_inline
 #elif defined(HAVE_RINDEX)  /* !!! FIXME: is there anywhere that has this but not strrchr? */
-SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return (char*)rindex(str, c); }
+SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) {
+#ifdef __cplusplus
+return const_cast<char*>(rindex(str, c));
+#else
+return (char*)rindex(str, c);
+#endif
+}
 #define SDL_strrchr SDL_strrchr_inline
 #endif
 
