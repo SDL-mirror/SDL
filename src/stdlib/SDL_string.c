@@ -923,7 +923,7 @@ SDL_strncmp(const char *str1, const char *str2, size_t maxlen)
 
 #ifdef SDL_strcasecmp
 #undef SDL_strcasecmp
-int SDL_strcasecmp(const char *str1, const char *str2) { return SDL_strcasecmp(str1, str2); }
+int SDL_strcasecmp(const char *str1, const char *str2) { return SDL_strcasecmp_inline(str1, str2); }
 #else
 int
 SDL_strcasecmp(const char *str1, const char *str2)
