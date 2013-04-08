@@ -436,7 +436,7 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
     //
     // Load in SDL's pixel shaders
     //
-    result = D3D11_LoadPixelShader(renderer, L"SDL_D3D11_PixelShader_TextureCopy.cso", &data->texturePixelShader);
+    result = D3D11_LoadPixelShader(renderer, L"SDL_D3D11_PixelShader_TextureColored.cso", &data->texturePixelShader);
     if (FAILED(result)) {
         // D3D11_LoadPixelShader will have aleady set the SDL error
         return result;
@@ -1461,11 +1461,24 @@ D3D11_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     float minv = (float) srcrect->y / texture->h;
     float maxv = (float) (srcrect->y + srcrect->h) / texture->h;
 
+    float r = 1.0f;
+    float g = 1.0f;
+    float b = 1.0f;
+    float a = 1.0f;
+    if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
+        r = (float)(texture->r / 255.0f);
+        g = (float)(texture->g / 255.0f);
+        b = (float)(texture->b / 255.0f);
+    }
+    if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
+        a = (float)(texture->a / 255.0f);
+    }
+
     VertexPositionColor vertices[] = {
-        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(dstrect->x, dstrect->y, 0.0f),                           XMFLOAT2(minu, minv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(dstrect->x, dstrect->y + dstrect->h, 0.0f),              XMFLOAT2(minu, maxv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y, 0.0f),              XMFLOAT2(maxu, minv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(dstrect->x + dstrect->w, dstrect->y + dstrect->h, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(r, g, b, a)},
     };
     if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
         return -1;
@@ -1498,6 +1511,19 @@ D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     float minv = (float) srcrect->y / texture->h;
     float maxv = (float) (srcrect->y + srcrect->h) / texture->h;
 
+    float r = 1.0f;
+    float g = 1.0f;
+    float b = 1.0f;
+    float a = 1.0f;
+    if (texture->modMode & SDL_TEXTUREMODULATE_COLOR) {
+        r = (float)(texture->r / 255.0f);
+        g = (float)(texture->g / 255.0f);
+        b = (float)(texture->b / 255.0f);
+    }
+    if (texture->modMode & SDL_TEXTUREMODULATE_ALPHA) {
+        a = (float)(texture->a / 255.0f);
+    }
+
     if (flip & SDL_FLIP_HORIZONTAL) {
         float tmp = maxu;
         maxu = minu;
@@ -1523,10 +1549,10 @@ D3D11_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     const float maxy = dstrect->h - center->y;
 
     VertexPositionColor vertices[] = {
-        {XMFLOAT3(minx, miny, 0.0f), XMFLOAT2(minu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(minx, maxy, 0.0f), XMFLOAT2(minu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(maxx, miny, 0.0f), XMFLOAT2(maxu, minv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
-        {XMFLOAT3(maxx, maxy, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f)},
+        {XMFLOAT3(minx, miny, 0.0f), XMFLOAT2(minu, minv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(minx, maxy, 0.0f), XMFLOAT2(minu, maxv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(maxx, miny, 0.0f), XMFLOAT2(maxu, minv), XMFLOAT4(r, g, b, a)},
+        {XMFLOAT3(maxx, maxy, 0.0f), XMFLOAT2(maxu, maxv), XMFLOAT4(r, g, b, a)},
     };
     if (D3D11_UpdateVertexBuffer(renderer, vertices, sizeof(vertices)) != 0) {
         return -1;

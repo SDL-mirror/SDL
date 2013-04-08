@@ -293,7 +293,7 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">4.0_level_9_1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">4.0_level_9_1</ShaderModel>
     </FxCompile>
-    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_TextureCopy.hlsl">
+    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_TextureColored.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
@@ -304,8 +304,6 @@
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0_level_9_1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_1</ShaderModel>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0_level_9_1</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">4.0_level_9_1</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">4.0_level_9_1</ShaderModel>
     </FxCompile>
     <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_VertexShader_Default.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">Vertex</ShaderType>

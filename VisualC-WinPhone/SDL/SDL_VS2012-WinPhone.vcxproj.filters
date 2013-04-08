@@ -592,13 +592,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_TextureCopy.hlsl">
-      <Filter>GPU Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_FixedColor.hlsl">
       <Filter>GPU Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_VertexShader_Default.hlsl">
+      <Filter>GPU Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\..\src\render\direct3d11\SDL_D3D11_PixelShader_TextureColored.hlsl">
       <Filter>GPU Shaders</Filter>
     </FxCompile>
   </ItemGroup>
