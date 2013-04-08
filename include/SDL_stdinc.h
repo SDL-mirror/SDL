@@ -502,7 +502,13 @@ SDL_FORCE_INLINE char *SDL_strlwr_inline(char *str) { return _strlwr(str); }
 
 extern DECLSPEC char *SDLCALL SDL_strchr(const char *str, int c);
 #ifdef HAVE_STRCHR
-SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return (char*)strchr(str, c); }
+SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) {
+#ifdef __cplusplus
+return const_cast<char*>(strchr(str, c));
+#else
+return (char*)strchr(str, c);
+#endif
+}
 #define SDL_strchr SDL_strchr_inline
 #elif defined(HAVE_INDEX)  /* !!! FIXME: is there anywhere that has this but not strchr? */
 SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return index(str, c); }
@@ -532,7 +538,13 @@ return (char*)rindex(str, c);
 
 extern DECLSPEC char *SDLCALL SDL_strstr(const char *haystack, const char *needle);
 #ifdef HAVE_STRSTR
-SDL_FORCE_INLINE char *SDL_strstr_inline(const char *haystack, const char *needle) { return (char*)strstr(haystack, needle); }
+SDL_FORCE_INLINE char *SDL_strstr_inline(const char *haystack, const char *needle) {
+#ifdef __cplusplus
+return const_cast<char*>(strstr(haystack, needle));
+#else
+return (char*)strstr(haystack, needle);
+#endif
+}
 #define SDL_strstr SDL_strstr_inline
 #endif
 
