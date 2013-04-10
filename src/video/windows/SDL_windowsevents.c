@@ -73,7 +73,8 @@ WindowsScanCodeToSDLScanCode( LPARAM lParam, WPARAM wParam )
 	char bIsExtended;
 	int nScanCode = ( lParam >> 16 ) & 0xFF;
 
-	if ( nScanCode == 0 )
+	/* 0x45 here to work around both pause and numlock sharing the same scancode, so use the VK key to tell them apart */
+	if ( nScanCode == 0 || nScanCode == 0x45 )
 	{
 		switch( wParam )
 		{
@@ -82,6 +83,8 @@ WindowsScanCodeToSDLScanCode( LPARAM lParam, WPARAM wParam )
 		case VK_SELECT: return SDL_SCANCODE_SELECT;
 		case VK_EXECUTE: return SDL_SCANCODE_EXECUTE;
 		case VK_HELP: return SDL_SCANCODE_HELP;
+		case VK_PAUSE: return SDL_SCANCODE_PAUSE;
+		case VK_NUMLOCK: return SDL_SCANCODE_NUMLOCKCLEAR;
 
 		case VK_F13: return SDL_SCANCODE_F13;
 		case VK_F14: return SDL_SCANCODE_F14;
