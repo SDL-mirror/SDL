@@ -111,7 +111,7 @@ typedef struct SDL_GameControllerButtonBind
  *
  * \return 1 if mapping is added, 0 if updated, -1 on error
  */
-extern DECLSPEC int SDLCALL SDL_GameControllerAddMapping( const char* mappingSring );
+extern DECLSPEC int SDLCALL SDL_GameControllerAddMapping( const char* mappingString );
 
 /**
  *  Get a mapping string for a GUID
