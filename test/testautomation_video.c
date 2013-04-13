@@ -601,7 +601,7 @@ void _checkInvalidWindowError()
   const char *invalidWindowError = "Invalid window";
   char *lastError;
 
- lastError = (char *)SDL_GetError();
+  lastError = (char *)SDL_GetError();
   SDLTest_AssertPass("SDL_GetError()");
   SDLTest_AssertCheck(lastError != NULL, "Verify error message is not NULL");
   if (lastError != NULL) {
@@ -1486,6 +1486,223 @@ video_getSetWindowMaximumSize(void *arg)
   return TEST_COMPLETED;
 }
 
+
+/**
+ * @brief Tests call to SDL_SetWindowData and SDL_GetWindowData
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_SetWindowData
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_GetWindowData
+ */
+int
+video_getSetWindowData(void *arg)
+{
+  int returnValue = TEST_COMPLETED;
+  const char* title = "video_setGetWindowData Test Window";
+  SDL_Window* window;
+  const char *referenceName = "TestName";
+  const char *name = "TestName";
+  const char *referenceName2 = "TestName2";
+  const char *name2 = "TestName2";
+  int datasize;
+  char *referenceUserdata;
+  char *userdata;
+  char *referenceUserdata2;
+  char *userdata2;
+  char *result;
+  int iteration;
+
+  /* Call against new test window */ 
+  window = _createVideoSuiteTestWindow(title);
+  if (window == NULL) return TEST_ABORTED;
+
+  /* Create testdata */
+  datasize = SDLTest_RandomIntegerInRange(1, 32); 
+  referenceUserdata =  SDLTest_RandomAsciiStringOfSize(datasize);
+  if (referenceUserdata == NULL) { 
+  	returnValue = TEST_ABORTED; 
+  	goto cleanup; 
+  }
+  userdata = (char *)strdup(referenceUserdata);
+  if (userdata == NULL) {
+  	returnValue = TEST_ABORTED; 
+  	goto cleanup; 
+  }
+  datasize = SDLTest_RandomIntegerInRange(1, 32); 
+  referenceUserdata2 =  SDLTest_RandomAsciiStringOfSize(datasize);
+  if (referenceUserdata2 == NULL) { 
+  	returnValue = TEST_ABORTED; 
+  	goto cleanup; 
+  }
+  userdata2 = (char *)strdup(referenceUserdata2);
+  if (userdata2 == NULL) {
+  	returnValue = TEST_ABORTED;
+  	goto cleanup;
+  }
+ 
+  /* Get non-existent data */
+  result = (char *)SDL_GetWindowData(window, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s)", name);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  
+  /* Set data */
+  result = SDL_SetWindowData(window, name, userdata);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,%s)", name, userdata);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  
+  /* Get data (twice) */
+  for (iteration = 1; iteration <= 2; iteration++) {
+    result = (char *)SDL_GetWindowData(window, name);
+    SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s) [iteration %d]", name, iteration);
+    SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata, result);
+    SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  }
+  
+  /* Set data again twice */
+  for (iteration = 1; iteration <= 2; iteration++) {
+    result = SDL_SetWindowData(window, name, userdata);
+    SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,%s) [iteration %d]", name, userdata, iteration);
+    SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata, result);
+    SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+    SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  }
+  
+  /* Get data again */
+  result = (char *)SDL_GetWindowData(window, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s) [again]", name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+
+  /* Set data with new data */
+  result = SDL_SetWindowData(window, name, userdata2);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,%s) [new userdata]", name, userdata2);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, userdata2) == 0, "Validate that userdata2 was not changed, expected: %s, got: %s", referenceUserdata2, userdata2);
+
+  /* Set data with new data again */
+  result = SDL_SetWindowData(window, name, userdata2);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,%s) [new userdata again]", name, userdata2);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata2, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, userdata2) == 0, "Validate that userdata2 was not changed, expected: %s, got: %s", referenceUserdata2, userdata2);
+  
+  /* Get new data */
+  result = (char *)SDL_GetWindowData(window, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s)", name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata2, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+
+  /* Set data with NULL to clear */
+  result = SDL_SetWindowData(window, name, NULL);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,NULL)", name, userdata);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata2, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, userdata2) == 0, "Validate that userdata2 was not changed, expected: %s, got: %s", referenceUserdata2, userdata2);
+
+  /* Set data with NULL to clear again */
+  result = SDL_SetWindowData(window, name, NULL);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,NULL) [again]", name, userdata);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata2, userdata2) == 0, "Validate that userdata2 was not changed, expected: %s, got: %s", referenceUserdata2, userdata2);
+  
+  /* Get non-existent data */
+  result = (char *)SDL_GetWindowData(window, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s)", name);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+
+  /* Get non-existent data new name */
+  result = (char *)SDL_GetWindowData(window, name2);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s)", name2);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName2, name2) == 0, "Validate that name2 was not changed, expected: %s, got: %s", referenceName2, name2);
+
+  /* Set data (again) */
+  result = SDL_SetWindowData(window, name, userdata);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(...%s,%s) [again, after clear]", name, userdata);
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, userdata) == 0, "Validate that userdata was not changed, expected: %s, got: %s", referenceUserdata, userdata);
+  
+  /* Get data (again) */
+  result = (char *)SDL_GetWindowData(window, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(..,%s) [again, after clear]", name);
+  SDLTest_AssertCheck(SDL_strcmp(referenceUserdata, result) == 0, "Validate that correct result was returned; expected: %s, got: %s", referenceUserdata, result);
+  SDLTest_AssertCheck(SDL_strcmp(referenceName, name) == 0, "Validate that name was not changed, expected: %s, got: %s", referenceName, name);
+
+  /* Negative test */
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
+
+  /* Set with invalid window */ 
+  result = SDL_SetWindowData(NULL, name, userdata);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(window=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidWindowError();
+  
+  /* Set data with NULL name, valid userdata */
+  result = SDL_SetWindowData(window, NULL, userdata);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(name=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Set data with empty name, valid userdata */
+  result = SDL_SetWindowData(window, "", userdata);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(name='')");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Set data with NULL name, NULL userdata */
+  result = SDL_SetWindowData(window, NULL, NULL);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(name=NULL,userdata=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Set data with empty name, NULL userdata */
+  result = SDL_SetWindowData(window, "", NULL);
+  SDLTest_AssertPass("Call to SDL_SetWindowData(name='',userdata=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Get with invalid window */
+  result = SDL_GetWindowData(NULL, name);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(window=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidWindowError();
+  
+  /* Get data with NULL name */
+  result = SDL_GetWindowData(window, NULL);
+  SDLTest_AssertPass("Call to SDL_GetWindowData(name=NULL)");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Get data with empty name */
+  result = SDL_GetWindowData(window, "");
+  SDLTest_AssertPass("Call to SDL_GetWindowData(name='')");
+  SDLTest_AssertCheck(result == NULL, "Validate that result is NULL");
+  _checkInvalidParameterError();
+
+  /* Clean up */
+  _destroyVideoSuiteTestWindow(window);
+         
+  cleanup:
+  if (referenceUserdata != NULL) SDL_free(referenceUserdata);
+  if (referenceUserdata2 != NULL) SDL_free(referenceUserdata2);
+  if (userdata != NULL) SDL_free(userdata);
+  if (userdata != NULL) SDL_free(userdata);
+  
+  return returnValue;
+}
+
+
 /* ================= Test References ================== */
 
 /* Video test cases */
@@ -1555,13 +1772,16 @@ static const SDLTest_TestCaseReference videoTest21 =
 static const SDLTest_TestCaseReference videoTest22 =
 		{ (SDLTest_TestCaseFp)video_getSetWindowMaximumSize, "video_getSetWindowMaximumSize",  "Checks SDL_GetWindowMaximumSize and SDL_SetWindowMaximumSize positive and negative cases", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference videoTest23 =
+		{ (SDLTest_TestCaseFp)video_getSetWindowData, "video_getSetWindowData",  "Checks SDL_SetWindowData and SDL_GetWindowData positive and negative cases", TEST_ENABLED };
+
 /* Sequence of Video test cases */
 static const SDLTest_TestCaseReference *videoTests[] =  {
 	&videoTest1, &videoTest2, &videoTest3, &videoTest4, &videoTest5, &videoTest6, 
 	&videoTest7, &videoTest8, &videoTest9, &videoTest10, &videoTest11, &videoTest12, 
 	&videoTest13, &videoTest14, &videoTest15, &videoTest16, &videoTest17, 
 	&videoTest18, &videoTest19, &videoTest20, &videoTest21, &videoTest22, 
-	NULL
+	&videoTest23, NULL
 };
 
 /* Video test suite (global) */
