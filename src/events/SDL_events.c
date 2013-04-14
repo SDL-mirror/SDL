@@ -33,6 +33,15 @@
 #endif
 #include "../video/SDL_sysvideo.h"
 
+/* HACK: Make sure the 'generic' field in SDL_Event works on
+   WinRT, whereby 'generic' is redefined as 'generic_', in order to
+   allow SDL.h to be included in code compiled with Microsoft's
+   C++/CX extension.
+*/
+#if defined(__WINRT__)
+#define generic generic_
+#endif
+
 /* Public data -- the event filter */
 SDL_EventFilter SDL_EventOK = NULL;
 void *SDL_EventOKParam;
