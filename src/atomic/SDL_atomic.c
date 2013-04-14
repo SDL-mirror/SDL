@@ -27,6 +27,8 @@
    doesn't have that compiler.  That way we always have a working set of
    atomic operations built into the library.
 */
+#undef SDL_AtomicCAS
+#undef SDL_AtomicCASPtr
  
 /* 
   If any of the operations are not provided then we must emulate some
@@ -69,8 +71,8 @@ leaveLock(void *a)
     SDL_AtomicUnlock(&locks[index]);
 }
 
-SDL_bool
-SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval)
+DECLSPEC SDL_bool SDLCALL
+SDL_AtomicCAS(SDL_atomic_t *a, int oldval, int newval)
 {
     SDL_bool retval = SDL_FALSE;
 
@@ -84,8 +86,8 @@ SDL_AtomicCAS_(SDL_atomic_t *a, int oldval, int newval)
     return retval;
 }
 
-SDL_bool
-SDL_AtomicCASPtr_(void **a, void *oldval, void *newval)
+DECLSPEC SDL_bool SDLCALL
+SDL_AtomicCASPtr(void **a, void *oldval, void *newval)
 {
     SDL_bool retval = SDL_FALSE;
 

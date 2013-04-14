@@ -125,8 +125,7 @@ extern "C"
         joystick->hwdata = (struct joystick_hwdata *)
             SDL_malloc(sizeof(*joystick->hwdata));
         if (joystick->hwdata == NULL) {
-            SDL_OutOfMemory();
-            return (-1);
+            return SDL_OutOfMemory();
         }
         SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
         stick = new BJoystick;
@@ -134,9 +133,8 @@ extern "C"
 
         /* Open the requested joystick for use */
         if (stick->Open(SDL_joyport[device_index]) == B_ERROR) {
-            SDL_SetError("Unable to open joystick");
             SDL_SYS_JoystickClose(joystick);
-            return (-1);
+            return SDL_SetError("Unable to open joystick");
         }
 
         /* Set the joystick to calibrated mode */
@@ -152,9 +150,8 @@ extern "C"
         joystick->hwdata->new_hats = (uint8 *)
             SDL_malloc(joystick->nhats * sizeof(uint8));
         if (!joystick->hwdata->new_hats || !joystick->hwdata->new_axes) {
-            SDL_OutOfMemory();
             SDL_SYS_JoystickClose(joystick);
-            return (-1);
+            return SDL_OutOfMemory();
         }
 
         /* We're done! */

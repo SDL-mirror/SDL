@@ -38,7 +38,7 @@
  *  SDL_Event structure.
  *  
  *  The values in this enumeration are based on the USB usage page standard:
- *  http://www.usb.org/developers/devclass_docs/Hut1_12.pdf
+ *  http://www.usb.org/developers/devclass_docs/Hut1_12v2.pdf
  */
 typedef enum
 {
@@ -385,6 +385,9 @@ typedef enum
     SDL_SCANCODE_EJECT = 281,
     SDL_SCANCODE_SLEEP = 282,
     
+	SDL_SCANCODE_APP1 = 283,
+	SDL_SCANCODE_APP2 = 284,
+
     /*@}*//*Walther keys*/
 
     /* Add any other keys here. */

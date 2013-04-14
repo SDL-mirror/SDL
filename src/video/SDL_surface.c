@@ -143,8 +143,7 @@ int
 SDL_SetSurfacePalette(SDL_Surface * surface, SDL_Palette * palette)
 {
     if (!surface) {
-        SDL_SetError("SDL_SetSurfacePalette() passed a NULL surface");
-        return -1;
+        return SDL_SetError("SDL_SetSurfacePalette() passed a NULL surface");
     }
     return SDL_SetPixelFormatPalette(surface->format, palette);
 }
@@ -187,7 +186,21 @@ SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
     if (flag) {
         surface->map->info.flags |= SDL_COPY_COLORKEY;
         surface->map->info.colorkey = key;
+        if (surface->format->palette) {
+            surface->format->palette->colors[surface->map->info.colorkey].a = SDL_ALPHA_TRANSPARENT;
+            ++surface->format->palette->version;
+            if (!surface->format->palette->version) {
+                surface->format->palette->version = 1;
+            }
+        }
     } else {
+        if (surface->format->palette) {
+            surface->format->palette->colors[surface->map->info.colorkey].a = SDL_ALPHA_OPAQUE;
+            ++surface->format->palette->version;
+            if (!surface->format->palette->version) {
+                surface->format->palette->version = 1;
+            }
+        }
         surface->map->info.flags &= ~SDL_COPY_COLORKEY;
     }
     if (surface->map->info.flags != flags) {
@@ -388,8 +401,7 @@ SDL_SetSurfaceBlendMode(SDL_Surface * surface, SDL_BlendMode blendMode)
         surface->map->info.flags |= SDL_COPY_MOD;
         break;
     default:
-        SDL_Unsupported();
-        status = -1;
+        status = SDL_Unsupported();
         break;
     }
 
@@ -504,12 +516,10 @@ SDL_UpperBlit(SDL_Surface * src, const SDL_Rect * srcrect,
 
     /* Make sure the surfaces aren't locked */
     if (!src || !dst) {
-        SDL_SetError("SDL_UpperBlit: passed a NULL surface");
-        return (-1);
+        return SDL_SetError("SDL_UpperBlit: passed a NULL surface");
     }
     if (src->locked || dst->locked) {
-        SDL_SetError("Surfaces must not be locked during blit");
-        return (-1);
+        return SDL_SetError("Surfaces must not be locked during blit");
     }
 
     /* If the destination rectangle is NULL, use the entire dest surface */
@@ -596,12 +606,10 @@ SDL_UpperBlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
 
     /* Make sure the surfaces aren't locked */
     if (!src || !dst) {
-        SDL_SetError("SDL_UpperBlitScaled: passed a NULL surface");
-        return (-1);
+        return SDL_SetError("SDL_UpperBlitScaled: passed a NULL surface");
     }
     if (src->locked || dst->locked) {
-        SDL_SetError("Surfaces must not be locked during blit");
-        return (-1);
+        return SDL_SetError("Surfaces must not be locked during blit");
     }
 
     /* If the destination rectangle is NULL, use the entire dest surface */
@@ -843,14 +851,35 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
            SDL_COPY_RLE_ALPHAKEY));
     surface->map->info.flags = copy_flags;
     if (copy_flags & SDL_COPY_COLORKEY) {
-        Uint8 keyR, keyG, keyB, keyA;
+        SDL_bool set_colorkey_by_color = SDL_FALSE;
 
-        SDL_GetRGBA(surface->map->info.colorkey, surface->format, &keyR,
-                    &keyG, &keyB, &keyA);
-        SDL_SetColorKey(convert, 1,
-                        SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
-        /* This is needed when converting for 3D texture upload */
-        SDL_ConvertColorkeyToAlpha(convert);
+        if (surface->format->palette) {
+            if (format->palette && 
+                surface->format->palette->ncolors <= format->palette->ncolors &&
+                (SDL_memcmp(surface->format->palette->colors, format->palette->colors,
+                  surface->format->palette->ncolors * sizeof(SDL_Color)) == 0)) {
+                /* The palette is identical, just set the same colorkey */
+                SDL_SetColorKey(convert, 1, surface->map->info.colorkey);
+            } else if (format->Amask) {
+                /* The alpha was set in the destination from the palette */
+            } else {
+                set_colorkey_by_color = SDL_TRUE;
+            }
+        } else {
+            set_colorkey_by_color = SDL_TRUE;
+        }
+
+        if (set_colorkey_by_color) {
+            /* Set the colorkey by color, which needs to be unique */
+            Uint8 keyR, keyG, keyB, keyA;
+
+            SDL_GetRGBA(surface->map->info.colorkey, surface->format, &keyR,
+                        &keyG, &keyB, &keyA);
+            SDL_SetColorKey(convert, 1,
+                            SDL_MapRGBA(convert->format, keyR, keyG, keyB, keyA));
+            /* This is needed when converting for 3D texture upload */
+            SDL_ConvertColorkeyToAlpha(convert);
+        }
     }
     SDL_SetClipRect(convert, &surface->clip_rect);
 
@@ -935,6 +964,14 @@ int SDL_ConvertPixels(int width, int height,
     SDL_Rect rect;
     void *nonconst_src = (void *) src;
 
+    /* Check to make sure we are bliting somewhere, so we don't crash */
+    if (!dst) {
+        return SDL_InvalidParamError("dst");
+    }
+    if (!dst_pitch) {
+        return SDL_InvalidParamError("dst_pitch");
+    }
+
     /* Fast path for same format copy */
     if (src_format == dst_format) {
         int bpp;
@@ -949,8 +986,7 @@ int SDL_ConvertPixels(int width, int height,
                 bpp = 2;
                 break;
             default:
-                SDL_SetError("Unknown FOURCC pixel format");
-                return -1;
+                return SDL_SetError("Unknown FOURCC pixel format");
             }
         } else {
             bpp = SDL_BYTESPERPIXEL(src_format);

@@ -12,7 +12,7 @@ This is the Simple DirectMedia Layer, a general API that provides low
 level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
 and 2D framebuffer across multiple platforms.
 
-The current version supports Windows, Windows CE, Mac OS X, Linux, FreeBSD,
+The current version supports Windows, Mac OS X, Linux, FreeBSD,
 NetBSD, OpenBSD, BSD/OS, Solaris, iOS, and Android. The code contains
 support for other operating systems but those are not officially supported.
 

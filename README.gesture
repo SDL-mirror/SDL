@@ -16,7 +16,7 @@ Recording terminates as soon as a finger comes up. Recording is acknowledged by 
 A SDL_DOLLARRECORD event is a dgesture with the following fields:
 
 event.dgesture.touchId   - the Id of the touch used to record the gesture.
-event.dgesture.gestureId - the unique id of the recoreded gesture.
+event.dgesture.gestureId - the unique id of the recorded gesture.
 
 
 Performing:
@@ -28,7 +28,7 @@ event.dgesture.gestureId  - the unique id of the closest gesture to the performe
 event.dgesture.error      - the difference between the gesture template and the actual performed gesture. Lower error is a better match.
 event.dgesture.numFingers - the number of fingers used to draw the stroke.
 
-Most programs will want to define an appropriate error threshold and check to be sure taht the error of a gesture is not abnormally high (an indicator that no gesture was performed). 
+Most programs will want to define an appropriate error threshold and check to be sure that the error of a gesture is not abnormally high (an indicator that no gesture was performed).
 
 
 
@@ -38,14 +38,14 @@ To save a template, call SDL_SaveDollarTemplate(gestureId, src) where gestureId 
 
 To save all currently loaded templates, call SDL_SaveAllDollarTemplates(src) where source is an SDL_RWops pointer to the file where the gesture will be stored.
 
-Both functions return the number of gestures sucessfully saved.
+Both functions return the number of gestures successfully saved.
 
 
 Loading:
 --------
 To load templates from a file, call SDL_LoadDollarTemplates(touchId,src) where touchId is the id of the touch to load to (or -1 to load to all touch devices), and src is an SDL_RWops pointer to a gesture save file. 
 
-SDL_LoadDollarTemplates returns the number of templates sucessfully loaded. 
+SDL_LoadDollarTemplates returns the number of templates successfully loaded.
 
 
 
@@ -56,8 +56,8 @@ SDL provides simple support for pinch/rotate/swipe gestures.
 Every time a finger is moved an SDL_MULTIGESTURE event is sent with the following fields:
 
 event.mgesture.touchId - the Id of the touch on which the gesture was performed.
-event.mgesture.x       - the normalized x cooridinate of the gesture. (0..1)
-event.mgesture.y       - the normalized y cooridinate of the gesture. (0..1)
+event.mgesture.x       - the normalized x coordinate of the gesture. (0..1)
+event.mgesture.y       - the normalized y coordinate of the gesture. (0..1)
 event.mgesture.dTheta  - the amount that the fingers rotated during this motion.
 event.mgesture.dDist   - the amount that the fingers pinched during this motion.
 event.mgesture.numFingers - the number of fingers used in the gesture.

@@ -85,7 +85,7 @@ SDL_AddThread(SDL_Thread * thread)
             return;
         }
     }
-    SDL_mutexP(thread_lock);
+    SDL_LockMutex(thread_lock);
 
     /* Expand the list of threads, if necessary */
 #ifdef DEBUG_THREADS
@@ -118,7 +118,7 @@ SDL_DelThread(SDL_Thread * thread)
     if (!thread_lock) {
         return;
     }
-    SDL_mutexP(thread_lock);
+    SDL_LockMutex(thread_lock);
     for (i = 0; i < SDL_numthreads; ++i) {
         if (thread == SDL_Threads[i]) {
             break;
@@ -164,7 +164,7 @@ SDL_GetErrBuf(void)
         SDL_threadID this_thread;
 
         this_thread = SDL_ThreadID();
-        SDL_mutexP(thread_lock);
+        SDL_LockMutex(thread_lock);
         for (i = 0; i < SDL_numthreads; ++i) {
             if (this_thread == SDL_Threads[i]->threadid) {
                 errbuf = &SDL_Threads[i]->errbuf;

@@ -896,8 +896,7 @@ SDL_SW_SetupYUVDisplay(SDL_SW_YUVTexture * swdata, Uint32 target_format)
 
     if (!SDL_PixelFormatEnumToMasks
         (target_format, &bpp, &Rmask, &Gmask, &Bmask, &Amask) || bpp < 15) {
-        SDL_SetError("Unsupported YUV destination format");
-        return -1;
+        return SDL_SetError("Unsupported YUV destination format");
     }
 
     swdata->target_format = target_format;
@@ -1057,8 +1056,8 @@ SDL_SW_CreateYUVTexture(Uint32 format, int w, int h)
     swdata->colortab = (int *) SDL_malloc(4 * 256 * sizeof(int));
     swdata->rgb_2_pix = (Uint32 *) SDL_malloc(3 * 768 * sizeof(Uint32));
     if (!swdata->pixels || !swdata->colortab || !swdata->rgb_2_pix) {
-        SDL_OutOfMemory();
         SDL_SW_DestroyYUVTexture(swdata);
+        SDL_OutOfMemory();
         return NULL;
     }
 
@@ -1197,9 +1196,8 @@ SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
         if (rect
             && (rect->x != 0 || rect->y != 0 || rect->w != swdata->w
                 || rect->h != swdata->h)) {
-            SDL_SetError
+            return SDL_SetError
                 ("YV12 and IYUV textures only support full surface locks");
-            return -1;
         }
         break;
     }
@@ -1309,8 +1307,7 @@ SDL_SW_CopyYUVToRGB(SDL_SW_YUVTexture * swdata, const SDL_Rect * srcrect,
         Cb = lum + 3;
         break;
     default:
-        SDL_SetError("Unsupported YUV format in copy");
-        return (-1);
+        return SDL_SetError("Unsupported YUV format in copy");
     }
     mod = (pitch / SDL_BYTESPERPIXEL(target_format));
 

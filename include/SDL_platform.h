@@ -138,11 +138,9 @@
 #endif /* if ! defined(WINAPI_FAMILY_PARTITION) ; else */
 #endif /* if defined(WIN32) || defined(_WIN32) */
 
-#if defined(__NDS__)
-#undef __NINTENDODS__
-#define __NINTENDODS__	1
+#if defined(__PSP__)
+#define __PSP__	1
 #endif
-
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */

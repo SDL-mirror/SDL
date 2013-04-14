@@ -794,6 +794,14 @@ AC_HELP_STRING([--enable-pulseaudio-shared], [dynamically load PulseAudio suppor
                test x$enable_pulseaudio_shared = xyes && test x$pulseaudio_lib != x; then
                 echo "-- dynamic libpulse-simple -> $pulseaudio_lib"
                 AC_DEFINE_UNQUOTED(SDL_AUDIO_DRIVER_PULSEAUDIO_DYNAMIC, "$pulseaudio_lib", [ ])
+
+                case "$host" in
+                    # On Solaris, pulseaudio must be linked deferred explicitly
+                    # to prevent undefined symbol failures.
+                    *-*-solaris*)
+                        PULSEAUDIO_LIBS=`echo $PULSEAUDIO_LIBS | sed 's/\-l/-Wl,-l/g'`
+                        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-zdeferred $PULSEAUDIO_LIBS -Wl,-znodeferred"
+                esac
             else
                 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PULSEAUDIO_LIBS"
             fi
@@ -1415,7 +1423,7 @@ AC_HELP_STRING([--enable-video-directfb], [use DirectFB video driver [[default=n
         else
             set -- `echo $DIRECTFB_REQUIRED_VERSION | sed 's/\./ /g'`
             NEED_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
-            set -- `directfb-config --version | sed 's/\./ /g'`
+            set -- `$DIRECTFBCONFIG --version | sed 's/\./ /g'`
             HAVE_VERSION=`expr $1 \* 10000 + $2 \* 100 + $3`
             if test $HAVE_VERSION -ge $NEED_VERSION; then
                 DIRECTFB_CFLAGS=`$DIRECTFBCONFIG --cflags`
@@ -1767,9 +1775,20 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             pthread_cflags="-D_REENTRANT"
             pthread_lib="-pthread"
             ;;
-        *-*-solaris*)
+        *-*-solaris2.9)
+            # From Solaris 9+, posix4's preferred name is rt.
             pthread_cflags="-D_REENTRANT"
-            pthread_lib="-lpthread -lposix4"
+            pthread_lib="-lpthread -lrt"
+            ;;
+        *-*-solaris2.10)
+            # Solaris 10+ merged pthread into libc.
+            pthread_cflags="-D_REENTRANT"
+            pthread_lib="-lrt"
+            ;;
+        *-*-solaris*)
+            # Solaris 11+ merged rt into libc.
+            pthread_cflags="-D_REENTRANT"
+            pthread_lib=""
             ;;
         *-*-sysv5*)
             pthread_cflags="-D_REENTRANT -Kthread"
@@ -2499,6 +2518,15 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # The iOS platform requires special setup.
         SOURCES="$SOURCES $srcdir/src/video/uikit/*.m"
         SOURCES="$SOURCES $srcdir/src/video/uikit/*.c"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm -liconv -lobjc"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Foundation"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,UIKit"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,OpenGLES"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,QuartzCore"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreAudio"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,AudioToolbox"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,CoreGraphics"
         ;;
     *-*-darwin* )
         # This could be either full "Mac OS X", or plain "Darwin" which is

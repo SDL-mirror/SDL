@@ -315,14 +315,12 @@ SDL_FillRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
     Uint8 *pixels;
 
     if (!dst) {
-        SDL_SetError("Passed NULL destination surface");
-        return -1;
+        return SDL_SetError("Passed NULL destination surface");
     }
 
     /* This function doesn't work on surfaces < 8 bpp */
     if (dst->format->BitsPerPixel < 8) {
-        SDL_SetError("SDL_FillRect(): Unsupported surface format");
-        return -1;
+        return SDL_SetError("SDL_FillRect(): Unsupported surface format");
     }
 
     /* If 'rect' == NULL, then fill the whole surface */
@@ -338,8 +336,7 @@ SDL_FillRect(SDL_Surface * dst, const SDL_Rect * rect, Uint32 color)
 
     /* Perform software fill */
     if (!dst->pixels) {
-        SDL_SetError("SDL_FillRect(): You must lock the surface");
-        return (-1);
+        return SDL_SetError("SDL_FillRect(): You must lock the surface");
     }
 
     pixels = (Uint8 *) dst->pixels + rect->y * dst->pitch +
@@ -423,8 +420,7 @@ SDL_FillRects(SDL_Surface * dst, const SDL_Rect * rects, int count,
     int status = 0;
 
     if (!rects) {
-        SDL_SetError("SDL_FillRects() passed NULL rects");
-        return -1;
+        return SDL_SetError("SDL_FillRects() passed NULL rects");
     }
 
     for (i = 0; i < count; ++i) {

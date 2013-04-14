@@ -36,7 +36,6 @@
 
 #include <windows.h>
 
-
 /* Routines to convert from UTF8 to native Windows text */
 #if UNICODE
 #define WIN_StringToUTF8(S) SDL_iconv_string("UTF-8", "UCS-2-INTERNAL", (char *)(S), (SDL_wcslen(S)+1)*sizeof(WCHAR))
@@ -47,10 +46,10 @@
 #endif
 
 /* Sets an error message based on a given HRESULT */
-extern void WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr);
+extern int WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr);
 
-/* Sets an error message based on GetLastError() */
-extern void WIN_SetError(const char *prefix);
+/* Sets an error message based on GetLastError(). Always return -1. */
+extern int WIN_SetError(const char *prefix);
 
 /* Wrap up the oddities of CoInitialize() into a common function. */
 extern HRESULT WIN_CoInitialize(void);

@@ -200,7 +200,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         y = (int)(window->h - point.y);
 
         if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
-            SDL_SendMouseMotion(window, 0, x, y);
+            SDL_SendMouseMotion(window, 0, 0, x, y);
             SDL_SetCursor(NULL);
         }
     }
@@ -263,7 +263,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber] + 1;
         break;
     }
-    SDL_SendMouseButton(_data->window, SDL_PRESSED, button);
+    SDL_SendMouseButton(_data->window, 0, SDL_PRESSED, button);
 }
 
 - (void)rightMouseDown:(NSEvent *)theEvent
@@ -294,7 +294,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
         button = [theEvent buttonNumber] + 1;
         break;
     }
-    SDL_SendMouseButton(_data->window, SDL_RELEASED, button);
+    SDL_SendMouseButton(_data->window, 0, SDL_RELEASED, button);
 }
 
 - (void)rightMouseUp:(NSEvent *)theEvent
@@ -342,7 +342,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
         }
     }
-    SDL_SendMouseMotion(window, 0, x, y);
+    SDL_SendMouseMotion(window, 0, 0, x, y);
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
@@ -408,27 +408,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
     enumerator = [touches objectEnumerator];
     touch = (NSTouch*)[enumerator nextObject];
     while (touch) {
-        const SDL_TouchID touchId = (SDL_TouchID) ((size_t) [touch device]);
+        const SDL_TouchID touchId = (SDL_TouchID)(intptr_t)[touch device];
         if (!SDL_GetTouch(touchId)) {
-            SDL_Touch touch;
-
-            touch.id = touchId;
-            touch.x_min = 0;
-            touch.x_max = 1;
-            touch.native_xres = touch.x_max - touch.x_min;
-            touch.y_min = 0;
-            touch.y_max = 1;
-            touch.native_yres = touch.y_max - touch.y_min;
-            touch.pressure_min = 0;
-            touch.pressure_max = 1;
-            touch.native_pressureres = touch.pressure_max - touch.pressure_min;
-            
-            if (SDL_AddTouch(&touch, "") < 0) {
+            if (SDL_AddTouch(touchId, "") < 0) {
                 return;
             }
         } 
 
-        const SDL_FingerID fingerId = (SDL_FingerID) ((size_t) [touch identity]);
+        const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];
         float x = [touch normalizedPosition].x;
         float y = [touch normalizedPosition].y;
         /* Make the origin the upper left instead of the lower left */
@@ -436,17 +423,17 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
         switch (type) {
         case COCOA_TOUCH_DOWN:
-            SDL_SendFingerDown(touchId, fingerId, SDL_TRUE, x, y, 1);
+            SDL_SendTouch(touchId, fingerId, SDL_TRUE, x, y, 1.0f);
             break;
         case COCOA_TOUCH_UP:
         case COCOA_TOUCH_CANCELLED:
-            SDL_SendFingerDown(touchId, fingerId, SDL_FALSE, x, y, 1);
+            SDL_SendTouch(touchId, fingerId, SDL_FALSE, x, y, 1.0f);
             break;
         case COCOA_TOUCH_MOVE:
-            SDL_SendTouchMotion(touchId, fingerId, SDL_FALSE, x, y, 1);
+            SDL_SendTouchMotion(touchId, fingerId, x, y, 1.0f);
             break;
         }
-        
+
         touch = (NSTouch*)[enumerator nextObject];
     }
 #endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= 1060 */
@@ -514,8 +501,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->window = window;
     data->nswindow = nswindow;
@@ -967,8 +953,7 @@ Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
 
     if (CGSetDisplayTransferByTable(display_id, tableSize,
                                     redTable, greenTable, blueTable) != CGDisplayNoErr) {
-        SDL_SetError("CGSetDisplayTransferByTable()");
-        return -1;
+        return SDL_SetError("CGSetDisplayTransferByTable()");
     }
     return 0;
 }
@@ -986,8 +971,7 @@ Cocoa_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp)
 
     if (CGGetDisplayTransferByTable(display_id, tableSize,
                                     redTable, greenTable, blueTable, &tableCopied) != CGDisplayNoErr) {
-        SDL_SetError("CGGetDisplayTransferByTable()");
-        return -1;
+        return SDL_SetError("CGGetDisplayTransferByTable()");
     }
 
     for (i = 0; i < tableCopied; i++) {

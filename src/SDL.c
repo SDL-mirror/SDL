@@ -68,14 +68,9 @@ SDL_PrivateSubsystemRefCountDecr(Uint32 subsystem)
 
 /* Private helper to check if a system needs init. */
 static SDL_bool
-SDL_PrivateShouldInitSubsystem(Uint32 flags, Uint32 subsystem)
+SDL_PrivateShouldInitSubsystem(Uint32 subsystem)
 {
-    int subsystem_index;
-    if ((flags & subsystem) == 0) {
-      return SDL_FALSE;
-    }
-
-    subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
+    int subsystem_index = SDL_MostSignificantBitIndex32(subsystem);
     SDL_assert(SDL_SubsystemRefCount[subsystem_index] < 255);
     return (SDL_SubsystemRefCount[subsystem_index] == 0);
 }
@@ -105,41 +100,44 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
 
     /* Initialize the timer subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_TIMER)) {
+    if ((flags & SDL_INIT_TIMER) ){
 #if !SDL_TIMERS_DISABLED
-        if (SDL_TimerInit() < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_TIMER)) {
+            if (SDL_TimerInit() < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_TIMER);
 #else
-        SDL_SetError("SDL not built with timer support");
-        return (-1);
+        return SDL_SetError("SDL not built with timer support");
 #endif
     }
 
     /* Initialize the video/event subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_VIDEO)) {
+    if ((flags & SDL_INIT_VIDEO) ){
 #if !SDL_VIDEO_DISABLED
-        if (SDL_VideoInit(NULL) < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_VIDEO)) {
+            if (SDL_VideoInit(NULL) < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_VIDEO);
 #else
-        SDL_SetError("SDL not built with video support");
-        return (-1);
+        return SDL_SetError("SDL not built with video support");
 #endif
     }
 
     /* Initialize the audio subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_AUDIO)) {
+    if ((flags & SDL_INIT_AUDIO) ){
 #if !SDL_AUDIO_DISABLED
-        if (SDL_AudioInit(NULL) < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_AUDIO)) {
+            if (SDL_AudioInit(NULL) < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_AUDIO);
 #else
-        SDL_SetError("SDL not built with audio support");
-        return (-1);
+        return SDL_SetError("SDL not built with audio support");
 #endif
     }
 
@@ -149,40 +147,43 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the joystick subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_JOYSTICK)) {
+    if ((flags & SDL_INIT_JOYSTICK) ){
 #if !SDL_JOYSTICK_DISABLED
-        if (SDL_JoystickInit() < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_JOYSTICK)) {
+           if (SDL_JoystickInit() < 0) {
+               return (-1);
+           }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_JOYSTICK);
 #else
-        SDL_SetError("SDL not built with joystick support");
-        return (-1);
+        return SDL_SetError("SDL not built with joystick support");
 #endif
     }
 
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_GAMECONTROLLER)) {
+    if ((flags & SDL_INIT_GAMECONTROLLER) ){
 #if !SDL_JOYSTICK_DISABLED
-        if (SDL_GameControllerInit() < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_GAMECONTROLLER)) {
+            if (SDL_GameControllerInit() < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_GAMECONTROLLER);
 #else
-        SDL_SetError("SDL not built with joystick support");
-        return (-1);
+        return SDL_SetError("SDL not built with joystick support");
 #endif
     }
 
     /* Initialize the haptic subsystem */
-    if (SDL_PrivateShouldInitSubsystem(flags, SDL_INIT_HAPTIC)) {
+    if ((flags & SDL_INIT_HAPTIC) ){
 #if !SDL_HAPTIC_DISABLED
-        if (SDL_HapticInit() < 0) {
-            return (-1);
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_HAPTIC)) {
+            if (SDL_HapticInit() < 0) {
+                return (-1);
+            }
         }
         SDL_PrivateSubsystemRefCountIncr(SDL_INIT_HAPTIC);
 #else
-        SDL_SetError("SDL not built with haptic (force feedback) support");
-        return (-1);
+        return SDL_SetError("SDL not built with haptic (force feedback) support");
 #endif
     }
 
@@ -383,8 +384,6 @@ SDL_GetPlatform()
     return "Mac OS X";
 #elif __NETBSD__
     return "NetBSD";
-#elif __NDS__
-    return "Nintendo DS";
 #elif __OPENBSD__
     return "OpenBSD";
 #elif __OS2__
@@ -401,6 +400,8 @@ SDL_GetPlatform()
     return "Windows";
 #elif __IPHONEOS__
     return "iPhone OS";
+#elif __PSP__
+    return "PlayStation Portable";
 #else
     return "Unknown (see SDL_platform.h)";
 #endif
@@ -429,4 +430,4 @@ _DllMainCRTStartup(HANDLE hModule,
 
 #endif /* __WIN32__ */
 
-/* vi: set ts=4 sw=4 expandtab: */
+/* vi: set sts=4 ts=4 sw=4 expandtab: */

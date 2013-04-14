@@ -509,7 +509,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
                                int format, int width, int height) {
         Log.v("SDL", "surfaceChanged()");
 
-        int sdlFormat = 0x85151002; // SDL_PIXELFORMAT_RGB565 by default
+        int sdlFormat = 0x15151002; // SDL_PIXELFORMAT_RGB565 by default
         switch (format) {
         case PixelFormat.A_8:
             Log.v("SDL", "pixel format A_8");
@@ -522,32 +522,32 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
             break;
         case PixelFormat.RGBA_4444:
             Log.v("SDL", "pixel format RGBA_4444");
-            sdlFormat = 0x85421002; // SDL_PIXELFORMAT_RGBA4444
+            sdlFormat = 0x15421002; // SDL_PIXELFORMAT_RGBA4444
             break;
         case PixelFormat.RGBA_5551:
             Log.v("SDL", "pixel format RGBA_5551");
-            sdlFormat = 0x85441002; // SDL_PIXELFORMAT_RGBA5551
+            sdlFormat = 0x15441002; // SDL_PIXELFORMAT_RGBA5551
             break;
         case PixelFormat.RGBA_8888:
             Log.v("SDL", "pixel format RGBA_8888");
-            sdlFormat = 0x86462004; // SDL_PIXELFORMAT_RGBA8888
+            sdlFormat = 0x16462004; // SDL_PIXELFORMAT_RGBA8888
             break;
         case PixelFormat.RGBX_8888:
             Log.v("SDL", "pixel format RGBX_8888");
-            sdlFormat = 0x86262004; // SDL_PIXELFORMAT_RGBX8888
+            sdlFormat = 0x16261804; // SDL_PIXELFORMAT_RGBX8888
             break;
         case PixelFormat.RGB_332:
             Log.v("SDL", "pixel format RGB_332");
-            sdlFormat = 0x84110801; // SDL_PIXELFORMAT_RGB332
+            sdlFormat = 0x14110801; // SDL_PIXELFORMAT_RGB332
             break;
         case PixelFormat.RGB_565:
             Log.v("SDL", "pixel format RGB_565");
-            sdlFormat = 0x85151002; // SDL_PIXELFORMAT_RGB565
+            sdlFormat = 0x15151002; // SDL_PIXELFORMAT_RGB565
             break;
         case PixelFormat.RGB_888:
             Log.v("SDL", "pixel format RGB_888");
             // Not sure this is right, maybe SDL_PIXELFORMAT_RGB24 instead?
-            sdlFormat = 0x86161804; // SDL_PIXELFORMAT_RGB888
+            sdlFormat = 0x16161804; // SDL_PIXELFORMAT_RGB888
             break;
         default:
             Log.v("SDL", "pixel format unknown " + format);

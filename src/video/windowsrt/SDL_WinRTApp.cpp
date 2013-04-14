@@ -407,7 +407,7 @@ void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
     if (m_sdlWindowData) {
         Uint8 button = WINRT_GetSDLButtonForPointerPoint(args->CurrentPoint);
         if (button) {
-            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_PRESSED, button);
+            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, 0, SDL_PRESSED, button);
         }
     }
 }
@@ -421,7 +421,7 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
     if (m_sdlWindowData) {
         Uint8 button = WINRT_GetSDLButtonForPointerPoint(args->CurrentPoint);
         if (button) {
-            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, SDL_RELEASED, button);
+            SDL_SendMouseButton(m_sdlWindowData->sdlWindow, 0, SDL_RELEASED, button);
         }
     }
 }
@@ -435,7 +435,7 @@ void SDL_WinRTApp::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ a
     if (m_sdlWindowData) {
         // FIXME: This may need to accumulate deltas up to WHEEL_DELTA
         short motion = args->CurrentPoint->Properties->MouseWheelDelta / WHEEL_DELTA;
-        SDL_SendMouseWheel(m_sdlWindowData->sdlWindow, 0, motion);
+        SDL_SendMouseWheel(m_sdlWindowData->sdlWindow, 0, 0, motion);
     }
 }
 
@@ -510,6 +510,7 @@ void SDL_WinRTApp::OnMouseMoved(MouseDevice^ mouseDevice, MouseEventArgs^ args)
         const Point mouseDeltaInSDLWindowCoords = TransformCursor(mouseDeltaInDIPs);
         SDL_SendMouseMotion(
             m_sdlWindowData->sdlWindow,
+            0,
             1,
             _lround(mouseDeltaInSDLWindowCoords.X),
             _lround(mouseDeltaInSDLWindowCoords.Y));
@@ -534,7 +535,7 @@ void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
     if (m_sdlWindowData && ! m_useRelativeMouseMode)
     {
         Point transformedPoint = TransformCursor(args->CurrentPoint->Position);
-        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, (int)transformedPoint.X, (int)transformedPoint.Y);
+        SDL_SendMouseMotion(m_sdlWindowData->sdlWindow, 0, 0, (int)transformedPoint.X, (int)transformedPoint.Y);
     }
 }
 

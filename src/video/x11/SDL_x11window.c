@@ -214,13 +214,12 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->window = window;
     data->xwindow = w;
 #ifdef X_HAVE_UTF8_STRING
-    if (SDL_X11_HAVE_UTF8) {
+    if (SDL_X11_HAVE_UTF8 && videodata->im) {
         data->ic =
             pXCreateIC(videodata->im, XNClientWindow, w, XNFocusWindow, w,
                        XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
@@ -242,9 +241,8 @@ SetupWindowData(_THIS, SDL_Window * window, Window w, BOOL created)
                                             (numwindows +
                                              1) * sizeof(*windowlist));
         if (!windowlist) {
-            SDL_OutOfMemory();
             SDL_free(data);
-            return -1;
+            return SDL_OutOfMemory();
         }
         windowlist[numwindows] = data;
         videodata->numwindows++;
@@ -344,6 +342,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     Atom _NET_WM_WINDOW_TYPE;
     Atom _NET_WM_WINDOW_TYPE_NORMAL;
     Atom _NET_WM_PID;
+    Atom XdndAware, xdnd_version = 5;
     Uint32 fevent = 0;
 
 #if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
@@ -391,15 +390,13 @@ X11_CreateWindow(_THIS, SDL_Window * window)
 
         /* If we can't create a colormap, then we must die */
         if (!xattr.colormap) {
-            SDL_SetError("Could not create writable colormap");
-            return -1;
+            return SDL_SetError("Could not create writable colormap");
         }
 
         /* OK, we got a colormap, now fill it in as best as we can */
         colorcells = SDL_malloc(visual->map_entries * sizeof(XColor));
         if (!colorcells) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         ncolors = visual->map_entries;
         rmax = 0xffff;
@@ -464,8 +461,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                       (CWOverrideRedirect | CWBackPixel | CWBorderPixel |
                        CWColormap), &xattr);
     if (!w) {
-        SDL_SetError("Couldn't create window");
-        return -1;
+        return SDL_SetError("Couldn't create window");
     }
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
     if ((window->flags & SDL_WINDOW_OPENGL) && (_this->gl_config.use_egl == 1)) {
@@ -482,9 +478,8 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                                                  (NativeWindowType) w, NULL);
 
         if (_this->gles_data->egl_surface == EGL_NO_SURFACE) {
-            SDL_SetError("Could not create GLES window surface");
             XDestroyWindow(display, w);
-            return -1;
+            return SDL_SetError("Could not create GLES window surface");
         }
     }
 #endif
@@ -566,6 +561,11 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                  PointerMotionMask | KeyPressMask | KeyReleaseMask |
                  PropertyChangeMask | StructureNotifyMask |
                  KeymapStateMask | fevent));
+
+    XdndAware = XInternAtom(display, "XdndAware", False);
+    XChangeProperty(display, w, XdndAware, XA_ATOM, 32,
+                 PropModeReplace,
+                 (unsigned char*)&xdnd_version, 1); 
 
     XFlush(display);
 
@@ -927,10 +927,39 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
     XFlush(display);
 }
 
+static void
+SetWindowActive(_THIS, SDL_Window * window)
+{
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata =
+        (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
+    Display *display = data->videodata->display;
+	Atom _NET_ACTIVE_WINDOW = data->videodata->_NET_ACTIVE_WINDOW;
+
+    if (X11_IsWindowMapped(_this, window)) {
+        XEvent e;
+
+        SDL_zero(e);
+        e.xany.type = ClientMessage;
+        e.xclient.message_type = _NET_ACTIVE_WINDOW;
+        e.xclient.format = 32;
+        e.xclient.window = data->xwindow;
+        e.xclient.data.l[0] = 1;  /* source indication. 1 = application */
+		e.xclient.data.l[1] = CurrentTime;
+		e.xclient.data.l[2] = 0;
+
+        XSendEvent(display, RootWindow(display, displaydata->screen), 0,
+                   SubstructureNotifyMask | SubstructureRedirectMask, &e);
+
+    	XFlush(display);
+    }
+}
+
 void
 X11_RestoreWindow(_THIS, SDL_Window * window)
 {
     SetWindowMaximized(_this, window, SDL_FALSE);
+	SetWindowActive(_this, window);
     X11_ShowWindow(_this, window);
 }
 
@@ -1174,15 +1203,13 @@ X11_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
     int i;
 
     if (visual->class != DirectColor) {
-        SDL_SetError("Window doesn't have DirectColor visual");
-        return -1;
+        return SDL_SetError("Window doesn't have DirectColor visual");
     }
 
     ncolors = visual->map_entries;
     colorcells = SDL_malloc(ncolors * sizeof(XColor));
     if (!colorcells) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     rshift = 0;

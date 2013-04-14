@@ -68,20 +68,17 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
     gcv.graphics_exposures = False;
     data->gc = XCreateGC(display, data->xwindow, GCGraphicsExposures, &gcv);
     if (!data->gc) {
-        SDL_SetError("Couldn't create graphics context");
-        return -1;
+        return SDL_SetError("Couldn't create graphics context");
     }
 
     /* Find out the pixel format and depth */
     if (X11_GetVisualInfoFromVisual(display, data->visual, &vinfo) < 0) {
-        SDL_SetError("Couldn't get window visual information");
-        return -1;
+        return SDL_SetError("Couldn't get window visual information");
     }
 
     *format = X11_GetPixelFormatFromVisualInfo(display, &vinfo);
     if (*format == SDL_PIXELFORMAT_UNKNOWN) {
-        SDL_SetError("Unknown window pixel format");
-        return -1;
+        return SDL_SetError("Unknown window pixel format");
     }
 
     /* Calculate pitch */
@@ -132,8 +129,7 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
 
     *pixels = SDL_malloc(window->h*(*pitch));
     if (*pixels == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     data->ximage = XCreateImage(display, data->visual,
@@ -141,14 +137,13 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
                       window->w, window->h, 32, 0);
     if (!data->ximage) {
         SDL_free(*pixels);
-        SDL_SetError("Couldn't create XImage");
-        return -1;
+        return SDL_SetError("Couldn't create XImage");
     }
     return 0;
 }
 
 int
-X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects,
+X11_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects,
                             int numrects)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;

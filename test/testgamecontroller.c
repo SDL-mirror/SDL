@@ -21,11 +21,11 @@
 #ifndef SDL_JOYSTICK_DISABLED
 
 #ifdef __IPHONEOS__
-#define SCREEN_WIDTH	320
-#define SCREEN_HEIGHT	480
+#define SCREEN_WIDTH    320
+#define SCREEN_HEIGHT    480
 #else
-#define SCREEN_WIDTH	640
-#define SCREEN_HEIGHT	480
+#define SCREEN_WIDTH    640
+#define SCREEN_HEIGHT    480
 #endif
 
 #define MAX_NUM_AXES 6
@@ -40,18 +40,70 @@ DrawRect(SDL_Renderer *r, const int x, const int y, const int w, const int h)
     SDL_RenderFillRect(r, &area);
 }
 
+static const char *
+ControllerAxisName(const SDL_GameControllerAxis axis)
+{
+    switch (axis)
+    {
+        #define AXIS_CASE(ax) case SDL_CONTROLLER_AXIS_##ax: return #ax
+        AXIS_CASE(INVALID);
+        AXIS_CASE(LEFTX);
+        AXIS_CASE(LEFTY);
+        AXIS_CASE(RIGHTX);
+        AXIS_CASE(RIGHTY);
+        AXIS_CASE(TRIGGERLEFT);
+        AXIS_CASE(TRIGGERRIGHT);
+        #undef AXIS_CASE
+        default: return "???";
+    }
+}
+
+static const char *
+ControllerButtonName(const SDL_GameControllerButton button)
+{
+    switch (button)
+    {
+        #define BUTTON_CASE(btn) case SDL_CONTROLLER_BUTTON_##btn: return #btn
+        BUTTON_CASE(INVALID);
+        BUTTON_CASE(A);
+        BUTTON_CASE(B);
+        BUTTON_CASE(X);
+        BUTTON_CASE(Y);
+        BUTTON_CASE(BACK);
+        BUTTON_CASE(GUIDE);
+        BUTTON_CASE(START);
+        BUTTON_CASE(LEFTSTICK);
+        BUTTON_CASE(RIGHTSTICK);
+        BUTTON_CASE(LEFTSHOULDER);
+        BUTTON_CASE(RIGHTSHOULDER);
+        BUTTON_CASE(DPAD_UP);
+        BUTTON_CASE(DPAD_DOWN);
+        BUTTON_CASE(DPAD_LEFT);
+        BUTTON_CASE(DPAD_RIGHT);
+        #undef BUTTON_CASE
+        default: return "???";
+    }
+}
+
 void
 WatchGameController(SDL_GameController * gamecontroller)
 {
+    const char *name = SDL_GameControllerName(gamecontroller);
+    const char *basetitle = "Game Controller Test: ";
+    const size_t titlelen = SDL_strlen(basetitle) + SDL_strlen(name) + 1;
+    char *title = SDL_malloc(titlelen);
     SDL_Window *window = NULL;
     SDL_Renderer *screen = NULL;
-    const char *name = NULL;
     int done = 0;
     SDL_Event event;
     int i;
 
+    if (title) {
+        SDL_snprintf(title, titlelen, "%s%s", basetitle, name);
+    }
+
     /* Create a window to display controller axis position */
-    window = SDL_CreateWindow("Game Controller Test", SDL_WINDOWPOS_CENTERED,
+    window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
                               SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     if (window == NULL) {
@@ -69,10 +121,9 @@ WatchGameController(SDL_GameController * gamecontroller)
     SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(screen);
     SDL_RenderPresent(screen);
-	SDL_RaiseWindow(window);
+    SDL_RaiseWindow(window);
 
     /* Print info about the controller we are watching */
-    name = SDL_GameControllerName(gamecontroller);
     printf("Watching controller %s\n",  name ? name : "Unknown Controller");
     
     /* Loop, getting controller events! */
@@ -84,17 +135,21 @@ WatchGameController(SDL_GameController * gamecontroller)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_CONTROLLERAXISMOTION:
-                printf("Controller %d axis %d value: %d\n",
+                printf("Controller %d axis %d ('%s') value: %d\n",
                        event.caxis.which,
-                       event.caxis.axis, event.caxis.value);
+                       event.caxis.axis,
+                       ControllerAxisName(event.caxis.axis),
+                       event.caxis.value);
                 break;
             case SDL_CONTROLLERBUTTONDOWN:
-                printf("Controller %d button %d down\n",
-                       event.cbutton.which, event.cbutton.button);
+                printf("Controller %d button %d ('%s') down\n",
+                       event.cbutton.which, event.cbutton.button,
+                       ControllerButtonName(event.cbutton.button));
                 break;
             case SDL_CONTROLLERBUTTONUP:
-                printf("Controller %d button %d up\n",
-                       event.cbutton.which, event.cbutton.button);
+                printf("Controller %d button %d ('%s') up\n",
+                       event.cbutton.which, event.cbutton.button,
+                       ControllerButtonName(event.cbutton.button));
                 break;
             case SDL_KEYDOWN:
                 if (event.key.keysym.sym != SDLK_ESCAPE) {
@@ -103,7 +158,7 @@ WatchGameController(SDL_GameController * gamecontroller)
                 /* Fall through to signal quit */
             case SDL_QUIT:
                 done = 1;
-				s_ForceQuit = SDL_TRUE;
+                s_ForceQuit = SDL_TRUE;
                 break;
             default:
                 break;
@@ -144,9 +199,9 @@ WatchGameController(SDL_GameController * gamecontroller)
         SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0xFF, SDL_ALPHA_OPAQUE);
 
         SDL_RenderPresent(screen);
-		
-		if ( !done )
-			done = SDL_GameControllerGetAttached( gamecontroller ) == 0;
+        
+        if ( !done )
+            done = SDL_GameControllerGetAttached( gamecontroller ) == 0;
     }
 
     SDL_DestroyRenderer(screen);
@@ -156,54 +211,60 @@ WatchGameController(SDL_GameController * gamecontroller)
 int
 main(int argc, char *argv[])
 {
-    const char *name;
     int i;
-	int nController = 0;
+    int nController = 0;
+    int retcode = 0;
+    char guid[64];
     SDL_GameController *gamecontroller;
 
-	SDL_SetHint( SDL_HINT_GAMECONTROLLERCONFIG, "341a3608000000000000504944564944,Aferglow PS3 Controller,a:b1,b:b2,y:b3,x:b0,start:b9,guide:b12,back:b8,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7" );
     /* Initialize SDL (Note: video is required to start event loop) */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER ) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        exit(1);
+        return 1;
     }
 
     /* Print information about the controller */
     for (i = 0; i < SDL_NumJoysticks(); ++i) {
-		if ( SDL_IsGameController(i) )
-		{
-			nController++;
-			name = SDL_GameControllerNameForIndex(i);
-			printf("Game Controller %d: %s\n", i, name ? name : "Unknown Controller");
-		}
+        const char *name;
+        const char *description = "Joystick (not recognized as game controller)";
+
+        SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i),
+                                  guid, sizeof (guid));
+
+        if ( SDL_IsGameController(i) )
+        {
+            nController++;
+            name = SDL_GameControllerNameForIndex(i);
+        } else {
+            name = SDL_JoystickNameForIndex(i);
+        }
+        printf("%s %d: %s (guid %s)\n", description, i, name ? name : "Unknown", guid);
     }
-	printf("There are %d game controllers attached\n", nController);
+    printf("There are %d game controller(s) attached (%d joystick(s))\n", nController, SDL_NumJoysticks());
 
     if (argv[1]) {
-		int nreportederror = 0;
-		SDL_Event event;
-		gamecontroller = SDL_GameControllerOpen(atoi(argv[1]));
-		while ( s_ForceQuit == SDL_FALSE ) {
-			if (gamecontroller == NULL) {
-				if ( nreportederror == 0 ) {
-					printf("Couldn't open joystick %d: %s\n", atoi(argv[1]), SDL_GetError());
-					nreportederror = 1;
-				}
-			} else {
-				nreportederror = 0;
-				WatchGameController(gamecontroller);
-				SDL_GameControllerClose(gamecontroller);
-			}
-			
-			gamecontroller = NULL;
-			SDL_WaitEvent( &event );
-			if ( event.type == SDL_JOYDEVICEADDED )
-				gamecontroller = SDL_GameControllerOpen(atoi(argv[1]));
-		}
-	}
-    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER );
+        int device = atoi(argv[1]);
+        if (device >= SDL_NumJoysticks()) {
+            printf("%i is an invalid joystick index.\n", device);
+            retcode = 1;
+        } else {
+            SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(device),
+                                      guid, sizeof (guid));
+            printf("Attempting to open device %i, guid %s\n", device, guid);
+            gamecontroller = SDL_GameControllerOpen(device);
+            if (gamecontroller == NULL) {
+                printf("Couldn't open joystick %d: %s\n", device, SDL_GetError());
+                retcode = 1;
+            } else {
+                WatchGameController(gamecontroller);
+                SDL_GameControllerClose(gamecontroller);
+            }
+        }
+    }
 
-    return (0);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
+
+    return retcode;
 }
 
 #else

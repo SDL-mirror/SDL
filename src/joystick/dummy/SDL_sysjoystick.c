@@ -73,8 +73,7 @@ SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
 int
 SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
-    SDL_SetError("Logic error: No joysticks available");
-    return (-1);
+    return SDL_SetError("Logic error: No joysticks available");
 }
 
 /* Function to determine is this joystick is attached to the system right now */

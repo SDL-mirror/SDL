@@ -214,8 +214,7 @@ WIN_InitModes(_THIS)
         }
     }
     if (_this->num_displays == 0) {
-        SDL_SetError("No displays available");
-        return -1;
+        return SDL_SetError("No displays available");
     }
     return 0;
 }
@@ -282,8 +281,7 @@ WIN_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
             reason = "DISP_CHANGE_FAILED";
             break;
         }
-        SDL_SetError("ChangeDisplaySettingsEx() failed: %s", reason);
-        return -1;
+        return SDL_SetError("ChangeDisplaySettingsEx() failed: %s", reason);
     }
     EnumDisplaySettings(displaydata->DeviceName, ENUM_CURRENT_SETTINGS, &data->DeviceMode);
     return 0;

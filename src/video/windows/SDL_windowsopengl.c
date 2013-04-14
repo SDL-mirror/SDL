@@ -91,8 +91,7 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         char message[1024];
         SDL_snprintf(message, SDL_arraysize(message), "LoadLibrary(\"%s\")",
                      path);
-        WIN_SetError(message);
-        return -1;
+        return WIN_SetError(message);
     }
     SDL_strlcpy(_this->gl_config.driver_path, path,
                 SDL_arraysize(_this->gl_config.driver_path));
@@ -103,8 +102,7 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
                                                sizeof(struct
                                                       SDL_GLDriverData));
     if (!_this->gl_data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Load function pointers */
@@ -124,9 +122,8 @@ WIN_GL_LoadLibrary(_THIS, const char *path)
         !_this->gl_data->wglCreateContext ||
         !_this->gl_data->wglDeleteContext ||
         !_this->gl_data->wglMakeCurrent) {
-        SDL_SetError("Could not retrieve OpenGL functions");
         SDL_UnloadObject(handle);
-        return -1;
+        return SDL_SetError("Could not retrieve OpenGL functions");
     }
 
     return 0;
@@ -512,12 +509,10 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         pixel_format = WIN_GL_ChoosePixelFormat(hdc, &pfd);
     }
     if (!pixel_format) {
-        SDL_SetError("No matching GL pixel format available");
-        return -1;
+        return SDL_SetError("No matching GL pixel format available");
     }
     if (!SetPixelFormat(hdc, pixel_format, &pfd)) {
-        WIN_SetError("SetPixelFormat()");
-        return (-1);
+        return WIN_SetError("SetPixelFormat()");
     }
     return 0;
 }
@@ -611,11 +606,9 @@ int
 WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     HDC hdc;
-    int status;
 
     if (!_this->gl_data) {
-        SDL_SetError("OpenGL not initialized");
-        return -1;
+        return SDL_SetError("OpenGL not initialized");
     }
 
     if (window) {
@@ -624,30 +617,24 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         hdc = NULL;
     }
     if (!_this->gl_data->wglMakeCurrent(hdc, (HGLRC) context)) {
-        WIN_SetError("wglMakeCurrent()");
-        status = -1;
-    } else {
-        status = 0;
+        return WIN_SetError("wglMakeCurrent()");
     }
-    return status;
+    return 0;
 }
 
 int
 WIN_GL_SetSwapInterval(_THIS, int interval)
 {
-    int retval = -1;
     if ((interval < 0) && (!_this->gl_data->HAS_WGL_EXT_swap_control_tear)) {
-        SDL_SetError("Negative swap interval unsupported in this GL");
+        return SDL_SetError("Negative swap interval unsupported in this GL");
     } else if (_this->gl_data->wglSwapIntervalEXT) {
-        if (_this->gl_data->wglSwapIntervalEXT(interval) == TRUE) {
-            retval = 0;
-        } else {
-            WIN_SetError("wglSwapIntervalEXT()");
+        if (_this->gl_data->wglSwapIntervalEXT(interval) != TRUE) {
+            return WIN_SetError("wglSwapIntervalEXT()");
         }
     } else {
-        SDL_Unsupported();
+        return SDL_Unsupported();
     }
-    return retval;
+    return 0;
 }
 
 int

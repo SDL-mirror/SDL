@@ -89,8 +89,7 @@ WIN_SetClipboardText(_THIS, const char *text)
 
             EmptyClipboard();
             if (!SetClipboardData(TEXT_FORMAT, hMem)) {
-                WIN_SetError("Couldn't set clipboard data");
-                result = -1;
+                result = WIN_SetError("Couldn't set clipboard data");
             }
             data->clipboard_count = GetClipboardSequenceNumber();
         }
@@ -98,8 +97,7 @@ WIN_SetClipboardText(_THIS, const char *text)
 
         CloseClipboard();
     } else {
-        WIN_SetError("Couldn't open clipboard");
-        result = -1;
+        result = WIN_SetError("Couldn't open clipboard");
     }
     return result;
 }

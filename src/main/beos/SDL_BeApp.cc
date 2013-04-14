@@ -20,7 +20,7 @@
 */
 #include "SDL_config.h"
 
-#ifdef __BEOS__
+#if defined(__BEOS__) || defined(__HAIKU__)
 
 /* Handle the BeApp specific portions of the application */
 
@@ -64,8 +64,7 @@ SDL_InitBeApp(void)
     if (SDL_BeAppActive <= 0) {
         SDL_AppThread = SDL_CreateThread(StartBeApp, "SDLApplication", NULL);
         if (SDL_AppThread == NULL) {
-            SDL_SetError("Couldn't create BApplication thread");
-            return (-1);
+            return SDL_SetError("Couldn't create BApplication thread");
         }
 
         /* Change working to directory to that of executable */

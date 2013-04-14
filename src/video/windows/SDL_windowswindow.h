@@ -32,7 +32,7 @@ typedef struct
     HBITMAP hbm;
     WNDPROC wndproc;
     SDL_bool created;
-    int mouse_pressed;
+    WPARAM mouse_button_flags;
     struct SDL_VideoData *videodata;
 } SDL_WindowData;
 

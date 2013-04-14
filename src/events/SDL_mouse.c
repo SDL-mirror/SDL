@@ -81,7 +81,7 @@ SDL_ResetMouse(void)
 #endif
     for (i = 1; i <= sizeof(mouse->buttonstate)*8; ++i) {
         if (mouse->buttonstate & SDL_BUTTON(i)) {
-            SDL_SendMouseButton(mouse->focus, SDL_RELEASED, i);
+            SDL_SendMouseButton(mouse->focus, mouse->mouseID, SDL_RELEASED, i);
         }
     }
     SDL_assert(mouse->buttonstate == 0);
@@ -174,7 +174,7 @@ SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
 }
 
 int
-SDL_SendMouseMotion(SDL_Window * window, int relative, int x, int y)
+SDL_SendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relative, int x, int y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
     int posted;
@@ -252,6 +252,7 @@ SDL_SendMouseMotion(SDL_Window * window, int relative, int x, int y)
         SDL_Event event;
         event.motion.type = SDL_MOUSEMOTION;
         event.motion.windowID = mouse->focus ? mouse->focus->id : 0;
+        event.motion.which = mouseID;
         event.motion.state = mouse->buttonstate;
         event.motion.x = mouse->x;
         event.motion.y = mouse->y;
@@ -266,7 +267,7 @@ SDL_SendMouseMotion(SDL_Window * window, int relative, int x, int y)
 }
 
 int
-SDL_SendMouseButton(SDL_Window * window, Uint8 state, Uint8 button)
+SDL_SendMouseButton(SDL_Window * window, SDL_MouseID mouseID, Uint8 state, Uint8 button)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
     int posted;
@@ -304,11 +305,12 @@ SDL_SendMouseButton(SDL_Window * window, Uint8 state, Uint8 button)
     if (SDL_GetEventState(type) == SDL_ENABLE) {
         SDL_Event event;
         event.type = type;
+        event.button.windowID = mouse->focus ? mouse->focus->id : 0;
+        event.button.which = mouseID;
         event.button.state = state;
         event.button.button = button;
         event.button.x = mouse->x;
         event.button.y = mouse->y;
-        event.button.windowID = mouse->focus ? mouse->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }
 
@@ -321,7 +323,7 @@ SDL_SendMouseButton(SDL_Window * window, Uint8 state, Uint8 button)
 }
 
 int
-SDL_SendMouseWheel(SDL_Window * window, int x, int y)
+SDL_SendMouseWheel(SDL_Window * window, SDL_MouseID mouseID, int x, int y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
     int posted;
@@ -340,6 +342,7 @@ SDL_SendMouseWheel(SDL_Window * window, int x, int y)
         SDL_Event event;
         event.type = SDL_MOUSEWHEEL;
         event.wheel.windowID = mouse->focus ? mouse->focus->id : 0;
+        event.wheel.which = mouseID;
         event.wheel.x = x;
         event.wheel.y = y;
         posted = (SDL_PushEvent(&event) > 0);
@@ -396,7 +399,7 @@ SDL_WarpMouseInWindow(SDL_Window * window, int x, int y)
     if (mouse->WarpMouse) {
         mouse->WarpMouse(window, x, y);
     } else {
-        SDL_SendMouseMotion(window, 0, x, y);
+        SDL_SendMouseMotion(window, mouse->mouseID, 0, x, y);
     }
 }
 
@@ -410,8 +413,7 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
     }
 
     if (!mouse->SetRelativeMouseMode) {
-        SDL_Unsupported();
-        return -1;
+        return SDL_Unsupported();
     }
 
     if (mouse->SetRelativeMouseMode(enabled) < 0) {

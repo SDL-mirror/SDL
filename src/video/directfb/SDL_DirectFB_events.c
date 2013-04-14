@@ -40,13 +40,13 @@
 #include "SDL_DirectFB_events.h"
 
 #if USE_MULTI_API
-#define SDL_SendMouseMotion_ex(w, id, relative, x, y, p) SDL_SendMouseMotion(id, relative, x, y, p)
-#define SDL_SendMouseButton_ex(w, id, state, button) SDL_SendMouseButton(id, state, button)
+#define SDL_SendMouseMotion_ex(w, id, relative, x, y, p) SDL_SendMouseMotion(w, id, relative, x, y, p)
+#define SDL_SendMouseButton_ex(w, id, state, button) SDL_SendMouseButton(w, id, state, button)
 #define SDL_SendKeyboardKey_ex(id, state, scancode) SDL_SendKeyboardKey(id, state, scancode)
 #define SDL_SendKeyboardText_ex(id, text) SDL_SendKeyboardText(id, text)
 #else
-#define SDL_SendMouseMotion_ex(w, id, relative, x, y, p) SDL_SendMouseMotion(w, relative, x, y)
-#define SDL_SendMouseButton_ex(w, id, state, button) SDL_SendMouseButton(w, state, button)
+#define SDL_SendMouseMotion_ex(w, id, relative, x, y, p) SDL_SendMouseMotion(w, id, relative, x, y)
+#define SDL_SendMouseButton_ex(w, id, state, button) SDL_SendMouseButton(w, id, state, button)
 #define SDL_SendKeyboardKey_ex(id, state, scancode) SDL_SendKeyboardKey(state, scancode)
 #define SDL_SendKeyboardText_ex(id, text) SDL_SendKeyboardText(text)
 #endif

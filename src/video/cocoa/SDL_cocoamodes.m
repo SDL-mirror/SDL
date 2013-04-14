@@ -84,7 +84,7 @@ IS_SNOW_LEOPARD_OR_LATER(_THIS)
 #endif
 }
 
-static void
+static int
 CG_SetError(const char *prefix, CGDisplayErr result)
 {
     const char *error;
@@ -124,7 +124,7 @@ CG_SetError(const char *prefix, CGDisplayErr result)
         error = "Unknown Error";
         break;
     }
-    SDL_SetError("%s: %s", prefix, error);
+    return SDL_SetError("%s: %s", prefix, error);
 }
 
 static SDL_bool

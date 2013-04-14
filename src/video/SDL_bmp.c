@@ -252,14 +252,14 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
                 SDL_RWread(src, &palette->colors[i].b, 1, 1);
                 SDL_RWread(src, &palette->colors[i].g, 1, 1);
                 SDL_RWread(src, &palette->colors[i].r, 1, 1);
-                palette->colors[i].unused = SDL_ALPHA_OPAQUE;
+                palette->colors[i].a = SDL_ALPHA_OPAQUE;
             }
         } else {
             for (i = 0; i < (int) biClrUsed; ++i) {
                 SDL_RWread(src, &palette->colors[i].b, 1, 1);
                 SDL_RWread(src, &palette->colors[i].g, 1, 1);
                 SDL_RWread(src, &palette->colors[i].r, 1, 1);
-                SDL_RWread(src, &palette->colors[i].unused, 1, 1);
+                SDL_RWread(src, &palette->colors[i].a, 1, 1);
             }
         }
     }
@@ -510,7 +510,7 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
                 SDL_RWwrite(dst, &colors[i].b, 1, 1);
                 SDL_RWwrite(dst, &colors[i].g, 1, 1);
                 SDL_RWwrite(dst, &colors[i].r, 1, 1);
-                SDL_RWwrite(dst, &colors[i].unused, 1, 1);
+                SDL_RWwrite(dst, &colors[i].a, 1, 1);
             }
         }
 

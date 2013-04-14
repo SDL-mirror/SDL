@@ -121,8 +121,6 @@ X11_InitXinput2(_THIS)
 #endif
 }
 
-
-
 int 
 X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
 {
@@ -142,32 +140,29 @@ X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
 
             parse_valuators(rawev->raw_values,rawev->valuators.mask,
                             rawev->valuators.mask_len,relative_cords,2);
-            SDL_SendMouseMotion(mouse->focus,1,(int)relative_cords[0],(int)relative_cords[1]);
+            SDL_SendMouseMotion(mouse->focus,mouse->mouseID,1,(int)relative_cords[0],(int)relative_cords[1]);
             return 1;
             }
             break;
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
         case XI_TouchBegin: {
             const XIDeviceEvent *xev = (const XIDeviceEvent *) cookie->data;
-            SDL_SendFingerDown(xev->sourceid,xev->detail,
-                      SDL_TRUE, (int)xev->event_x, (int)xev->event_y,
-		    		  1.0);
+            SDL_SendTouch(xev->sourceid,xev->detail,
+                      SDL_TRUE, xev->event_x, xev->event_y, 1.0);
             return 1;
             }
             break;
         case XI_TouchEnd: {
             const XIDeviceEvent *xev = (const XIDeviceEvent *) cookie->data;
-            SDL_SendFingerDown(xev->sourceid,xev->detail,
-                      SDL_FALSE, (int)xev->event_x, (int)xev->event_y,
-		    		  1.0);
+            SDL_SendTouch(xev->sourceid,xev->detail,
+                      SDL_FALSE, xev->event_x, xev->event_y, 1.0);
             return 1;
             }
             break;
         case XI_TouchUpdate: {
             const XIDeviceEvent *xev = (const XIDeviceEvent *) cookie->data;
             SDL_SendTouchMotion(xev->sourceid,xev->detail,
-                      SDL_FALSE, (int)xev->event_x, (int)xev->event_y,
-		    		  1.0);
+                                xev->event_x, xev->event_y, 1.0);
             return 1;
             }
             break;
@@ -198,22 +193,8 @@ X11_InitXinput2Multitouch(_THIS)
                 continue;
 
             touchId = t->sourceid;
-            /*Add the touch*/
             if (!SDL_GetTouch(touchId)) {
-                SDL_Touch touch;
-
-                touch.id = touchId;
-                touch.x_min = 0;
-                touch.x_max = 1;
-                touch.native_xres = touch.x_max - touch.x_min;
-                touch.y_min = 0;
-                touch.y_max = 1;
-                touch.native_yres = touch.y_max - touch.y_min;
-                touch.pressure_min = 0;
-                touch.pressure_max = 1;
-                touch.native_pressureres = touch.pressure_max - touch.pressure_min;
-
-                SDL_AddTouch(&touch,dev->name);
+                SDL_AddTouch(touchId, dev->name);
             }
         }
     }

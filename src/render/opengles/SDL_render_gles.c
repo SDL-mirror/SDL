@@ -135,7 +135,7 @@ typedef struct
     GLES_FBOList *fbo;
 } GLES_TextureData;
 
-static void
+static int
 GLES_SetError(const char *prefix, GLenum result)
 {
     const char *error;
@@ -166,7 +166,7 @@ GLES_SetError(const char *prefix, GLenum result)
         error = "UNKNOWN";
         break;
     }
-    SDL_SetError("%s: %s", prefix, error);
+    return SDL_SetError("%s: %s", prefix, error);
 }
 
 static int GLES_LoadFunctions(GLES_RenderData * data)
@@ -186,8 +186,7 @@ static int GLES_LoadFunctions(GLES_RenderData * data)
     do { \
         data->func = SDL_GL_GetProcAddress(#func); \
         if ( ! data->func ) { \
-            SDL_SetError("Couldn't load GLES function %s: %s\n", #func, SDL_GetError()); \
-            return -1; \
+            return SDL_SetError("Couldn't load GLES function %s: %s\n", #func, SDL_GetError()); \
         } \
     } while ( 0 );  
 #endif /* _SDL_NOGETPROCADDR_ */
@@ -442,23 +441,20 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         type = GL_UNSIGNED_BYTE;
         break;
     default:
-        SDL_SetError("Texture format not supported");
-        return -1;
+        return SDL_SetError("Texture format not supported");
     }
 
     data = (GLES_TextureData *) SDL_calloc(1, sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
         data->pitch = texture->w * SDL_BYTESPERPIXEL(texture->format);
         data->pixels = SDL_calloc(1, texture->h * data->pitch);
         if (!data->pixels) {
-            SDL_OutOfMemory();
             SDL_free(data);
-            return -1;
+            return SDL_OutOfMemory();
         }
     }
 
@@ -495,8 +491,7 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     result = renderdata->glGetError();
     if (result != GL_NO_ERROR) {
-        GLES_SetError("glTexImage2D()", result);
-        return -1;
+        return GLES_SetError("glTexImage2D()", result);
     }
     return 0;
 }
@@ -521,17 +516,13 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     /* Reformat the texture data into a tightly packed array */
     srcPitch = rect->w * SDL_BYTESPERPIXEL(texture->format);
     src = (Uint8 *)pixels;
-    if (pitch != srcPitch)
-    {
+    if (pitch != srcPitch) {
         blob = (Uint8 *)SDL_malloc(srcPitch * rect->h);
-        if (!blob)
-        {
-            SDL_OutOfMemory();
-            return -1;
+        if (!blob) {
+            return SDL_OutOfMemory();
         }
         src = blob;
-        for (y = 0; y < rect->h; ++y)
-        {
+        for (y = 0; y < rect->h; ++y) {
             SDL_memcpy(src, pixels, srcPitch);
             src += srcPitch;
             pixels = (Uint8 *)pixels + pitch;
@@ -559,8 +550,7 @@ GLES_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (renderdata->glGetError() != GL_NO_ERROR)
     {
-        SDL_SetError("Failed to update texture");
-        return -1;
+        return SDL_SetError("Failed to update texture");
     }
     return 0;
 }
@@ -613,8 +603,7 @@ GLES_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
     /* Check FBO status */
     status = data->glCheckFramebufferStatusOES(GL_FRAMEBUFFER_OES);
     if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
-        SDL_SetError("glFramebufferTexture2DOES() failed");
-        return -1;
+        return SDL_SetError("glFramebufferTexture2DOES() failed");
     }
     return 0;
 }
@@ -804,7 +793,6 @@ static int
 GLES_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                 const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
-
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLfloat minx, miny, maxx, maxy;
@@ -1007,8 +995,7 @@ GLES_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     temp_pitch = rect->w * SDL_BYTESPERPIXEL(temp_format);
     temp_pixels = SDL_malloc(rect->h * temp_pitch);
     if (!temp_pixels) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     SDL_GetWindowSize(window, &w, &h);
@@ -1091,7 +1078,8 @@ GLES_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh)
+{
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLES_ActivateRenderer(renderer);
@@ -1105,7 +1093,8 @@ static int GLES_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, floa
     return 0;
 }
 
-static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture)
+{
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     GLES_TextureData *texturedata = (GLES_TextureData *) texture->driverdata;
     GLES_ActivateRenderer(renderer);
@@ -1113,7 +1102,6 @@ static int GLES_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
 
     return 0;
 }
-
 
 #endif /* SDL_VIDEO_RENDER_OGL_ES && !SDL_RENDER_DISABLED */
 

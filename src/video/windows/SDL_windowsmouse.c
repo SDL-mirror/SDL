@@ -196,8 +196,7 @@ WIN_SetRelativeMouseMode(SDL_bool enabled)
 		/* Only return an error when registering. If we unregister and fail, then
 		it's probably that we unregistered twice. That's OK. */
 		if(enabled) {
-			SDL_Unsupported();
-			return -1;
+			return SDL_Unsupported();
 		}
 	}
 

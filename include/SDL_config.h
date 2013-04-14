@@ -39,8 +39,8 @@
 #include "SDL_config_iphoneos.h"
 #elif defined(__ANDROID__)
 #include "SDL_config_android.h"
-#elif defined(__NINTENDODS__)
-#include "SDL_config_nintendods.h"
+#elif defined(__PSP__)
+#include "SDL_config_psp.h"
 #else
 /* This is a minimal configuration just to get SDL running on new platforms */
 #include "SDL_config_minimal.h"

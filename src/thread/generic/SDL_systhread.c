@@ -28,8 +28,7 @@
 int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
-    SDL_SetError("Threads are not supported on this platform");
-    return (-1);
+    return SDL_SetError("Threads are not supported on this platform");
 }
 
 void

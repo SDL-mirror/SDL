@@ -24,12 +24,12 @@
 
 #include "SDL_error.h"
 #include "SDL_windows.h"
+#include "SDL_assert.h"
 
 #include <objbase.h>  /* for CoInitialize/CoUninitialize (Win32 only) */
 
-
 /* Sets an error message based on GetLastError() */
-void
+int
 WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr)
 {
     TCHAR buffer[1024];
@@ -39,13 +39,14 @@ WIN_SetErrorFromHRESULT(const char *prefix, HRESULT hr)
     message = WIN_StringToUTF8(buffer);
     SDL_SetError("%s%s%s", prefix ? prefix : "", prefix ? ": " : "", message);
     SDL_free(message);
+    return -1;
 }
 
 /* Sets an error message based on GetLastError() */
-void
+int
 WIN_SetError(const char *prefix)
 {
-    WIN_SetErrorFromHRESULT(prefix, GetLastError());
+    return WIN_SetErrorFromHRESULT(prefix, GetLastError());
 }
 
 HRESULT

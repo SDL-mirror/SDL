@@ -58,15 +58,14 @@ int SDL_DUMMY_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * forma
     return 0;
 }
 
-int SDL_DUMMY_UpdateWindowFramebuffer(_THIS, SDL_Window * window, SDL_Rect * rects, int numrects)
+int SDL_DUMMY_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects)
 {
     static int frame_number;
     SDL_Surface *surface;
 
     surface = (SDL_Surface *) SDL_GetWindowData(window, DUMMY_SURFACE);
     if (!surface) {
-        SDL_SetError("Couldn't find dummy surface for window");
-        return -1;
+        return SDL_SetError("Couldn't find dummy surface for window");
     }
 
     /* Send the data to the display */

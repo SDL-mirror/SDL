@@ -116,8 +116,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     pThreadStartParms pThreadParms =
         (pThreadStartParms) SDL_malloc(sizeof(tThreadStartParms));
     if (!pThreadParms) {
-        SDL_OutOfMemory();
-        return (-1);
+        return SDL_OutOfMemory();
     }
     // Save the function which we will have to call to clear the RTL of calling app!
     pThreadParms->pfnCurrentEndThread = pfnEndThread;
@@ -135,10 +134,9 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
                                       pThreadParms, 0, &threadid);
     }
     if (thread->handle == NULL) {
-        SDL_SetError("Not enough resources to create thread");
-        return (-1);
+        return SDL_SetError("Not enough resources to create thread");
     }
-    return (0);
+    return 0;
 }
 
 #ifdef _MSC_VER
@@ -198,8 +196,7 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
         value = THREAD_PRIORITY_NORMAL;
     }
     if (!SetThreadPriority(GetCurrentThread(), value)) {
-        WIN_SetError("SetThreadPriority()");
-        return -1;
+        return WIN_SetError("SetThreadPriority()");
     }
     return 0;
 }

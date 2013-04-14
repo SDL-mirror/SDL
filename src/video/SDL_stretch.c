@@ -102,14 +102,12 @@ generate_rowbytes(int src_w, int dst_w, int bpp)
         store = STORE_WORD;
         break;
     default:
-        SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
-        return (-1);
+        return SDL_SetError("ASM stretch of %d bytes isn't supported\n", bpp);
     }
 #ifdef HAVE_MPROTECT
     /* Make the code writeable */
     if (mprotect(copy_row, sizeof(copy_row), PROT_READ | PROT_WRITE) < 0) {
-        SDL_SetError("Couldn't make copy buffer writeable");
-        return (-1);
+        return SDL_SetError("Couldn't make copy buffer writeable");
     }
 #endif
     pos = 0x10000;
@@ -141,8 +139,7 @@ generate_rowbytes(int src_w, int dst_w, int bpp)
 #ifdef HAVE_MPROTECT
     /* Make the code executable but not writeable */
     if (mprotect(copy_row, sizeof(copy_row), PROT_READ | PROT_EXEC) < 0) {
-        SDL_SetError("Couldn't make copy buffer executable");
-        return (-1);
+        return SDL_SetError("Couldn't make copy buffer executable");
     }
 #endif
     last.status = 0;
@@ -224,8 +221,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
     const int bpp = dst->format->BytesPerPixel;
 
     if (src->format->BitsPerPixel != dst->format->BitsPerPixel) {
-        SDL_SetError("Only works with same format surfaces");
-        return (-1);
+        return SDL_SetError("Only works with same format surfaces");
     }
 
     /* Verify the blit rectangles */
@@ -233,8 +229,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
         if ((srcrect->x < 0) || (srcrect->y < 0) ||
             ((srcrect->x + srcrect->w) > src->w) ||
             ((srcrect->y + srcrect->h) > src->h)) {
-            SDL_SetError("Invalid source blit rectangle");
-            return (-1);
+            return SDL_SetError("Invalid source blit rectangle");
         }
     } else {
         full_src.x = 0;
@@ -247,8 +242,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
         if ((dstrect->x < 0) || (dstrect->y < 0) ||
             ((dstrect->x + dstrect->w) > dst->w) ||
             ((dstrect->y + dstrect->h) > dst->h)) {
-            SDL_SetError("Invalid destination blit rectangle");
-            return (-1);
+            return SDL_SetError("Invalid destination blit rectangle");
         }
     } else {
         full_dst.x = 0;
@@ -262,8 +256,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
     dst_locked = 0;
     if (SDL_MUSTLOCK(dst)) {
         if (SDL_LockSurface(dst) < 0) {
-            SDL_SetError("Unable to lock destination surface");
-            return (-1);
+            return SDL_SetError("Unable to lock destination surface");
         }
         dst_locked = 1;
     }
@@ -274,8 +267,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
             if (dst_locked) {
                 SDL_UnlockSurface(dst);
             }
-            SDL_SetError("Unable to lock source surface");
-            return (-1);
+            return SDL_SetError("Unable to lock source surface");
         }
         src_locked = 1;
     }

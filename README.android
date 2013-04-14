@@ -4,12 +4,13 @@ Simple DirectMedia Layer for Android
 
 Requirements:
 
-Android SDK
+Android SDK (version 10 or later)
 http://developer.android.com/sdk/index.html
 
-Android NDK r4 or later
+Android NDK r7 or later
 http://developer.android.com/sdk/ndk/index.html
 
+Minimum API level supported by SDL: 10 (Android 2.3.3)
 
 ================================================================================
  How the port works
@@ -18,7 +19,7 @@ http://developer.android.com/sdk/ndk/index.html
 - Android applications are Java-based, optionally with parts written in C
 - As SDL apps are C-based, we use a small Java shim that uses JNI to talk to 
 the SDL library
-- This means that your application C code must be placed inside an android 
+- This means that your application C code must be placed inside an Android 
 Java project, along with some C support code that communicates with Java
 - This eventually produces a standard Android .apk package
 
@@ -46,7 +47,8 @@ Instructions:
 
 If you want to use the Eclipse IDE, skip to the Eclipse section below.
 
-5. Edit <project>/local.properties to point to the Android SDK directory
+5. Create <project>/local.properties and use that to point to the Android SDK directory, by writing a line with the following form:
+sdk.dir=PATH_TO_ANDROID_SDK
 6. Run 'ant debug' in android/project. This compiles the .java and eventually 
    creates a .apk with the native code embedded
 7. 'ant debug install' will push the apk to the device or emulator (if connected)
@@ -59,8 +61,8 @@ android-project/
 	build.properties	- empty
 	build.xml		- build description file, used by ant. The actual application name
 				  is specified here.
-	default.properties	- holds the target ABI for the application, can range between
-				  android-5 and android-16
+	default.properties	- holds the target ABI for the application, android-10 and up
+	project.properties	- holds the target ABI for the application, android-10 and up
 	local.properties	- holds the SDK path, you should change this to the path to your SDK
 	jni/			- directory holding native code
 	jni/Android.mk		- Android makefile that can call recursively the Android.mk files
@@ -171,10 +173,10 @@ manually or quit the app (which is actually the kind of behaviour you'll see
 under iOS, if the OS can not restore your GL context it will just kill your app)
 
 ================================================================================
- Threads and the JAVA VM
+ Threads and the Java VM
 ================================================================================
 
-For a quick tour on how Linux native threads interoperate with the JAVA VM, take
+For a quick tour on how Linux native threads interoperate with the Java VM, take
 a look here: http://developer.android.com/guide/practices/jni.html
 If you want to use threads in your SDL app, it's strongly recommended that you
 do so by creating them using SDL functions. This way, the required attach/detach
@@ -342,6 +344,38 @@ output file:
 When you're done instrumenting with valgrind, you can disable the wrapper:
 	adb shell setprop wrap.org.libsdl.app ""
 
+================================================================================
+ Why is API level 10 the minimum required?
+================================================================================
+
+API level 10 is required because SDL requires some functionality for running not
+available on older devices and some for building which is not in older NDK/SDKs.
+
+Support for native OpenGL ES and ES2 applications was introduced in the NDK for
+API level 4 and 8. EGL was made a stable API in the NDK for API level 9, which
+has since then been obsoleted, with the recommendation to developers to bump the
+required API level to 10.
+As of this writing, according to http://developer.android.com/about/dashboards/index.html
+about 90% of the Android devices accessing Google Play support API level 10 or
+higher (March 2013).
+
+================================================================================
+ A note regarding the use of the "dirty rectangles" rendering technique
+================================================================================
+
+If your app uses a variation of the "dirty rectangles" rendering technique,
+where you only update a portion of the screen on each frame, you may notice a
+variety of visual glitches on Android, that are not present on other platforms.
+This is caused by SDL's use of EGL as the support system to handle OpenGL ES/ES2
+contexts, in particular the use of the eglSwapBuffers function. As stated in the
+documentation for the function "The contents of ancillary buffers are always 
+undefined after calling eglSwapBuffers".
+Setting the EGL_SWAP_BEHAVIOR attribute of the surface to EGL_BUFFER_PRESERVED
+is not possible for SDL as it requires EGL 1.4, available only on the API level
+17+, so the only workaround available on this platform is to redraw the entire
+screen each frame.
+
+Reference: http://www.khronos.org/registry/egl/specs/EGLTechNote0001.html
 
 ================================================================================
  Known issues

@@ -102,8 +102,9 @@ DirectFB_CreateDevice(int devindex)
 {
     SDL_VideoDevice *device;
 
-    if (!SDL_DirectFB_LoadLibrary())
+    if (!SDL_DirectFB_LoadLibrary()) {
         return NULL;
+    }
 
     /* Initialize all variables that we clean on shutdown */
     SDL_DFB_ALLOC_CLEAR(device, sizeof(SDL_VideoDevice));

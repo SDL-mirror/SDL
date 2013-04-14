@@ -53,9 +53,11 @@ test/checkkeys
 test/loopwave
 test/testatomic
 test/testaudioinfo
+test/testautomation
 test/testdraw2
 test/testerror
 test/testfile
+test/testgamecontroller
 test/testgesture
 test/testgl2
 test/testgles

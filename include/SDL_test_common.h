@@ -34,9 +34,9 @@
 
 #include "SDL.h"
 
-#ifdef __NDS__
-#define DEFAULT_WINDOW_WIDTH  256
-#define DEFAULT_WINDOW_HEIGHT (2*192)
+#if defined(__PSP__)
+#define DEFAULT_WINDOW_WIDTH  480
+#define DEFAULT_WINDOW_HEIGHT 272
 #else
 #define DEFAULT_WINDOW_WIDTH  640
 #define DEFAULT_WINDOW_HEIGHT 480

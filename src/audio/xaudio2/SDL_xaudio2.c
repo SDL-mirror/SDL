@@ -350,11 +350,9 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 #endif
 
     if (iscapture) {
-        SDL_SetError("XAudio2: capture devices unsupported.");
-        return 0;
+        return SDL_SetError("XAudio2: capture devices unsupported.");
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
-        SDL_SetError("XAudio2: XAudio2Create() failed.");
-        return 0;
+        return SDL_SetError("XAudio2: XAudio2Create() failed.");
     }
     /*
     XAUDIO2_DEBUG_CONFIGURATION debugConfig;
@@ -374,8 +372,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 
         if (IXAudio2_GetDeviceCount(ixa2, &devcount) != S_OK) {
             IXAudio2_Release(ixa2);
-            SDL_SetError("XAudio2: IXAudio2_GetDeviceCount() failed.");
-            return 0;
+            return SDL_SetError("XAudio2: IXAudio2_GetDeviceCount() failed.");
         }
         for (i = 0; i < devcount; i++) {
             XAUDIO2_DEVICE_DETAILS details;
@@ -399,8 +396,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 
         if (i == devcount) {
             IXAudio2_Release(ixa2);
-            SDL_SetError("XAudio2: Requested device not found.");
-            return 0;
+            return SDL_SetError("XAudio2: Requested device not found.");
         }
     }
 #endif
@@ -410,8 +406,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         SDL_malloc((sizeof *this->hidden));
     if (this->hidden == NULL) {
         IXAudio2_Release(ixa2);
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     SDL_memset(this->hidden, 0, (sizeof *this->hidden));
 
@@ -419,8 +414,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->semaphore = SDL_CreateSemaphore(1);
     if (this->hidden->semaphore == NULL) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: CreateSemaphore() failed!");
-        return 0;
+        return SDL_SetError("XAudio2: CreateSemaphore() failed!");
     }
 
     while ((!valid_format) && (test_format)) {
@@ -438,8 +432,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 
     if (!valid_format) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: Unsupported audio format");
-        return 0;
+        return SDL_SetError("XAudio2: Unsupported audio format");
     }
 
     /* Update the fragment size as size in bytes */
@@ -450,8 +443,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->mixbuf = (Uint8 *) SDL_malloc(2 * this->hidden->mixlen);
     if (this->hidden->mixbuf == NULL) {
         XAUDIO2_CloseDevice(this);
-        SDL_OutOfMemory();
-        return 0;
+        return SDL_OutOfMemory();
     }
     this->hidden->nextbuf = this->hidden->mixbuf;
     SDL_memset(this->hidden->mixbuf, 0, 2 * this->hidden->mixlen);
@@ -467,8 +459,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
                                            this->spec.freq, 0, devId, NULL);
     if (result != S_OK) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: Couldn't create mastering voice");
-        return 0;
+        return SDL_SetError("XAudio2: Couldn't create mastering voice");
     }
 
     SDL_zero(waveformat);
@@ -503,8 +494,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
 #endif
     if (result != S_OK) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: Couldn't create source voice");
-        return 0;
+        return SDL_SetError("XAudio2: Couldn't create source voice");
     }
     this->hidden->source = source;
 
@@ -512,18 +502,16 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     result = IXAudio2_StartEngine(ixa2);
     if (result != S_OK) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: Couldn't start engine");
-        return 0;
+        return SDL_SetError("XAudio2: Couldn't start engine");
     }
 
     result = IXAudio2SourceVoice_Start(source, 0, XAUDIO2_COMMIT_NOW);
     if (result != S_OK) {
         XAUDIO2_CloseDevice(this);
-        SDL_SetError("XAudio2: Couldn't start source voice");
-        return 0;
+        return SDL_SetError("XAudio2: Couldn't start source voice");
     }
 
-    return 1; /* good to go. */
+    return 0; /* good to go. */
 }
 
 static void

@@ -72,14 +72,14 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_PANDORA
     &PND_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_NDS
-    &NDS_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_UIKIT
     &UIKIT_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_ANDROID
     &Android_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_PSP
+    &PSP_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_DUMMY
     &DUMMY_bootstrap,
@@ -245,16 +245,14 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
             }
         }
         if (!renderer) {
-            SDL_SetError("No hardware accelerated renderers available");
-            return -1;
+            return SDL_SetError("No hardware accelerated renderers available");
         }
 
         /* Create the data after we successfully create the renderer (bug #1116) */
         data = (SDL_WindowTextureData *)SDL_calloc(1, sizeof(*data));
         if (!data) {
             SDL_DestroyRenderer(renderer);
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_SetWindowData(window, SDL_WINDOWTEXTUREDATA, data);
 
@@ -297,8 +295,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
     data->pitch = (((window->w * data->bytes_per_pixel) + 3) & ~3);
     data->pixels = SDL_malloc(window->h * data->pitch);
     if (!data->pixels) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     *pixels = data->pixels;
@@ -311,7 +308,7 @@ SDL_CreateWindowTexture(_THIS, SDL_Window * window, Uint32 * format, void ** pix
 }
 
 static int
-SDL_UpdateWindowTexture(_THIS, SDL_Window * window, SDL_Rect * rects, int numrects)
+SDL_UpdateWindowTexture(_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects)
 {
     SDL_WindowTextureData *data;
     SDL_Rect rect;
@@ -319,8 +316,7 @@ SDL_UpdateWindowTexture(_THIS, SDL_Window * window, SDL_Rect * rects, int numrec
 
     data = SDL_GetWindowData(window, SDL_WINDOWTEXTUREDATA);
     if (!data || !data->texture) {
-        SDL_SetError("No window texture data");
-        return -1;
+        return SDL_SetError("No window texture data");
     }
 
     /* Update a single rect that contains subrects for best DMA performance */
@@ -387,10 +383,10 @@ cmpmodes(const void *A, const void *B)
     return 0;
 }
 
-static void
+static int
 SDL_UninitializedVideo()
 {
-    SDL_SetError("Video subsystem has not been initialized");
+    return SDL_SetError("Video subsystem has not been initialized");
 }
 
 int
@@ -457,11 +453,9 @@ SDL_VideoInit(const char *driver_name)
     }
     if (video == NULL) {
         if (driver_name) {
-            SDL_SetError("%s not available", driver_name);
-        } else {
-            SDL_SetError("No available video device");
+            return SDL_SetError("%s not available", driver_name);
         }
-        return -1;
+        return SDL_SetError("No available video device");
     }
     _this = video;
     _this->name = bootstrap[i]->name;
@@ -513,9 +507,8 @@ SDL_VideoInit(const char *driver_name)
 
     /* Make sure some displays were added */
     if (_this->num_displays == 0) {
-        SDL_SetError("The video driver did not add any displays");
         SDL_VideoQuit();
-        return (-1);
+        return SDL_SetError("The video driver did not add any displays");
     }
 
     /* Add the renderer framebuffer emulation if desired */
@@ -724,9 +717,8 @@ SDL_GetDisplayMode(int displayIndex, int index, SDL_DisplayMode * mode)
 
     display = &_this->displays[displayIndex];
     if (index < 0 || index >= SDL_GetNumDisplayModesForDisplay(display)) {
-        SDL_SetError("index must be in the range of 0 - %d",
-                     SDL_GetNumDisplayModesForDisplay(display) - 1);
-        return -1;
+        return SDL_SetError("index must be in the range of 0 - %d",
+                            SDL_GetNumDisplayModesForDisplay(display) - 1);
     }
     if (mode) {
         *mode = display->display_modes[index];
@@ -907,9 +899,8 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
 
         /* Get a good video mode, the closest one possible */
         if (!SDL_GetClosestDisplayModeForDisplay(display, &display_mode, &display_mode)) {
-            SDL_SetError("No video mode large enough for %dx%d",
-                         display_mode.w, display_mode.h);
-            return -1;
+            return SDL_SetError("No video mode large enough for %dx%d",
+                                display_mode.w, display_mode.h);
         }
     } else {
         display_mode = display->desktop_mode;
@@ -923,8 +914,7 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
 
     /* Actually change the display mode */
     if (!_this->SetDisplayMode) {
-        SDL_SetError("Video driver doesn't support changing display mode");
-        return -1;
+        return SDL_SetError("Video driver doesn't support changing display mode");
     }
     if (_this->SetDisplayMode(_this, display, &display_mode) < 0) {
         return -1;
@@ -1023,6 +1013,10 @@ SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
     SDL_DisplayMode fullscreen_mode;
 	SDL_VideoDisplay *display;
 
+    if (!mode) {
+      return SDL_InvalidParamError("mode");
+    }
+    
     CHECK_WINDOW_MAGIC(window, -1);
 
     fullscreen_mode = window->fullscreen_mode;
@@ -1043,8 +1037,7 @@ SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
 	else if (!SDL_GetClosestDisplayModeForDisplay(SDL_GetDisplayForWindow(window),
                                              &fullscreen_mode,
                                              &fullscreen_mode)) {
-        SDL_SetError("Couldn't find display mode match");
-        return -1;
+        return SDL_SetError("Couldn't find display mode match");
     }
 
     if (mode) {
@@ -1297,8 +1290,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     char *title = window->title;
 
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
-        SDL_SetError("No OpenGL support in video driver");
-        return -1;
+        return SDL_SetError("No OpenGL support in video driver");
     }
 
     if (window->flags & SDL_WINDOW_FOREIGN) {
@@ -1436,11 +1428,17 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
     SDL_WindowUserData *prev, *data;
 
     CHECK_WINDOW_MAGIC(window, NULL);
+    
+    /* Input validation */
+    if (name == NULL || SDL_strlen(name) == 0) {
+      SDL_InvalidParamError("name");
+      return NULL;
+    }
 
     /* See if the named data already exists */
     prev = NULL;
     for (data = window->data; data; prev = data, data = data->next) {
-        if (SDL_strcmp(data->name, name) == 0) {
+        if (data->name && SDL_strcmp(data->name, name) == 0) {
             void *last_value = data->data;
 
             if (userdata) {
@@ -1478,8 +1476,14 @@ SDL_GetWindowData(SDL_Window * window, const char *name)
 
     CHECK_WINDOW_MAGIC(window, NULL);
 
+    /* Input validation */
+    if (name == NULL || SDL_strlen(name) == 0) {
+      SDL_InvalidParamError("name");
+      return NULL;
+    }
+
     for (data = window->data; data; data = data->next) {
-        if (SDL_strcmp(data->name, name) == 0) {
+        if (data->name && SDL_strcmp(data->name, name) == 0) {
             return data->data;
         }
     }
@@ -1522,18 +1526,16 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
 void
 SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
 {
-    /* Clear the values */
-    if (x) {
-        *x = 0;
-    }
-    if (y) {
-        *y = 0;
-    }
-
     CHECK_WINDOW_MAGIC(window, );
 
     /* Fullscreen windows are always at their display's origin */
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        if (x) {
+            *x = 0;
+        }
+        if (y) {
+            *y = 0;
+        }
     } else {
         if (x) {
             *x = window->x;
@@ -1566,6 +1568,14 @@ void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (w <= 0) {
+        SDL_InvalidParamError("w");
+        return;
+    }
+    if (h <= 0) {
+        SDL_InvalidParamError("h");
+        return;
+    }
 
     /* FIXME: Should this change fullscreen modes? */
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
@@ -1584,30 +1594,27 @@ SDL_SetWindowSize(SDL_Window * window, int w, int h)
 void
 SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
 {
-    int dummy;
-
-    if (!w) {
-        w = &dummy;
-    }
-    if (!h) {
-        h = &dummy;
-    }
-
-    *w = 0;
-    *h = 0;
-
     CHECK_WINDOW_MAGIC(window, );
-
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (w) {
         *w = window->w;
-        *h = window->h;
     }
+    if (h) {
+        *h = window->h;
+    }                                
 }
 
 void
 SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (min_w <= 0) {
+        SDL_InvalidParamError("min_w");
+        return;
+    }
+    if (min_h <= 0) {
+        SDL_InvalidParamError("min_h");
+        return;
+    }
     
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->min_w = min_w;
@@ -1623,22 +1630,11 @@ SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
 void
 SDL_GetWindowMinimumSize(SDL_Window * window, int *min_w, int *min_h)
 {
-    int dummy;
-    
-    if (!min_w) {
-        min_w = &dummy;
-    }
-    if (!min_h) {
-        min_h = &dummy;
-    }
-    
-    *min_w = 0;
-    *min_h = 0;
-    
     CHECK_WINDOW_MAGIC(window, );
-    
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (min_w) {
         *min_w = window->min_w;
+    }
+    if (min_h) {
         *min_h = window->min_h;
     }
 }
@@ -1647,6 +1643,14 @@ void
 SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
 {
     CHECK_WINDOW_MAGIC(window, );
+    if (max_w <= 0) {
+        SDL_InvalidParamError("max_w");
+        return;
+    }
+    if (max_h <= 0) {
+        SDL_InvalidParamError("max_h");
+        return;
+    }
     
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->max_w = max_w;
@@ -1662,22 +1666,11 @@ SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
 void
 SDL_GetWindowMaximumSize(SDL_Window * window, int *max_w, int *max_h)
 {
-    int dummy;
-    
-    if (!max_w) {
-        max_w = &dummy;
-    }
-    if (!max_h) {
-        max_h = &dummy;
-    }
-    
-    *max_w = 0;
-    *max_h = 0;
-    
     CHECK_WINDOW_MAGIC(window, );
-    
-    if (_this && window && window->magic == &_this->window_magic) {
+    if (max_w) {
         *max_w = window->max_w;
+    }
+    if (max_h) {
         *max_h = window->max_h;
     }
 }
@@ -1850,14 +1843,13 @@ SDL_UpdateWindowSurface(SDL_Window * window)
 }
 
 int
-SDL_UpdateWindowSurfaceRects(SDL_Window * window, SDL_Rect * rects,
+SDL_UpdateWindowSurfaceRects(SDL_Window * window, const SDL_Rect * rects,
                              int numrects)
 {
     CHECK_WINDOW_MAGIC(window, -1);
 
     if (!window->surface_valid) {
-        SDL_SetError("Window surface is invalid, please call SDL_GetWindowSurface() to get a new surface");
-        return -1;
+        return SDL_SetError("Window surface is invalid, please call SDL_GetWindowSurface() to get a new surface");
     }
 
     return _this->UpdateWindowFramebuffer(_this, window, rects, numrects);
@@ -1895,8 +1887,7 @@ SDL_SetWindowGammaRamp(SDL_Window * window, const Uint16 * red,
     CHECK_WINDOW_MAGIC(window, -1);
 
     if (!_this->SetWindowGammaRamp) {
-        SDL_Unsupported();
-        return -1;
+        return SDL_Unsupported();
     }
 
     if (!window->gamma) {
@@ -1933,8 +1924,7 @@ SDL_GetWindowGammaRamp(SDL_Window * window, Uint16 * red,
 
         window->gamma = (Uint16 *)SDL_malloc(256*6*sizeof(Uint16));
         if (!window->gamma) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         window->saved_gamma = window->gamma + 3*256;
 
@@ -2275,19 +2265,16 @@ SDL_GL_LoadLibrary(const char *path)
     int retval;
 
     if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
+        return SDL_UninitializedVideo();
     }
     if (_this->gl_config.driver_loaded) {
         if (path && SDL_strcmp(path, _this->gl_config.driver_path) != 0) {
-            SDL_SetError("OpenGL library already loaded");
-            return -1;
+            return SDL_SetError("OpenGL library already loaded");
         }
         retval = 0;
     } else {
         if (!_this->GL_LoadLibrary) {
-            SDL_SetError("No dynamic GL support in video driver");
-            return -1;
+            return  SDL_SetError("No dynamic GL support in video driver");
         }
         retval = _this->GL_LoadLibrary(_this, path);
     }
@@ -2397,8 +2384,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
     int retval;
 
     if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
+        return SDL_UninitializedVideo();
     }
     retval = 0;
     switch (attr) {
@@ -2467,8 +2453,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 		      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG |
 		      SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG |
 		      SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) ) {
-	    SDL_SetError("Unknown OpenGL context flag %d", value);
-	    retval = -1;
+	    retval = SDL_SetError("Unknown OpenGL context flag %d", value);
 	    break;
 	}
         _this->gl_config.flags = value;
@@ -2478,8 +2463,7 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
 	    value != SDL_GL_CONTEXT_PROFILE_CORE &&
 	    value != SDL_GL_CONTEXT_PROFILE_COMPATIBILITY &&
 	    value != SDL_GL_CONTEXT_PROFILE_ES ) {
-	    SDL_SetError("Unknown OpenGL context profile %d", value);
-	    retval = -1;
+	    retval = SDL_SetError("Unknown OpenGL context profile %d", value);
 	    break;
 	}
         _this->gl_config.profile_mask = value;
@@ -2488,14 +2472,12 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         _this->gl_config.share_with_current_context = value;
 	break;
     default:
-        SDL_SetError("Unknown OpenGL attribute");
-        retval = -1;
+        retval = SDL_SetError("Unknown OpenGL attribute");
         break;
     }
     return retval;
 #else
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 #endif /* SDL_VIDEO_OPENGL */
 }
 
@@ -2654,36 +2636,22 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
             return 0;
         }
     default:
-        SDL_SetError("Unknown OpenGL attribute");
-        return -1;
+        return SDL_SetError("Unknown OpenGL attribute");
     }
 
     glGetIntegervFunc(attrib, (GLint *) value);
     error = glGetErrorFunc();
     if (error != GL_NO_ERROR) {
-        switch (error) {
-        case GL_INVALID_ENUM:
-            {
-                SDL_SetError("OpenGL error: GL_INVALID_ENUM");
-            }
-            break;
-        case GL_INVALID_VALUE:
-            {
-                SDL_SetError("OpenGL error: GL_INVALID_VALUE");
-            }
-            break;
-        default:
-            {
-                SDL_SetError("OpenGL error: %08X", error);
-            }
-            break;
+        if (error == GL_INVALID_ENUM) {
+            return SDL_SetError("OpenGL error: GL_INVALID_ENUM");
+        } else if (error == GL_INVALID_VALUE) {
+            return SDL_SetError("OpenGL error: GL_INVALID_VALUE");
         }
-        return -1;
+        return SDL_SetError("OpenGL error: %08X", error);
     }
     return 0;
 #else
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 #endif /* SDL_VIDEO_OPENGL */
 }
 
@@ -2715,8 +2683,7 @@ SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
     CHECK_WINDOW_MAGIC(window, -1);
 
     if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        SDL_SetError("The specified window isn't an OpenGL window");
-        return -1;
+        return SDL_SetError("The specified window isn't an OpenGL window");
     }
     if (!ctx) {
         window = NULL;
@@ -2739,16 +2706,13 @@ int
 SDL_GL_SetSwapInterval(int interval)
 {
     if (!_this) {
-        SDL_UninitializedVideo();
-        return -1;
+        return SDL_UninitializedVideo();
     } else if (_this->current_glctx == NULL) {
-        SDL_SetError("No OpenGL context has been made current");
-        return -1;
+        return SDL_SetError("No OpenGL context has been made current");
     } else if (_this->GL_SetSwapInterval) {
         return _this->GL_SetSwapInterval(_this, interval);
     } else {
-        SDL_SetError("Setting the swap interval is not supported");
-        return -1;
+        return SDL_SetError("Setting the swap interval is not supported");
     }
 }
 
@@ -3034,8 +2998,7 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 	SDL_ShowCursor( show_cursor_prev );
 	SDL_SetRelativeMouseMode( relative_mode );
 
-	if(retval == -1)
-	{
+	if(retval == -1) {
 		SDL_SetError("No message system available");
 	}
     return retval;

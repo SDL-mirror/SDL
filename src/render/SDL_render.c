@@ -64,8 +64,8 @@ static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_DIRECTFB
     &DirectFB_RenderDriver,
 #endif
-#if SDL_VIDEO_RENDER_NDS
-    &NDS_RenderDriver,
+#if SDL_VIDEO_RENDER_PSP
+    &PSP_RenderDriver,
 #endif
     &SW_RenderDriver,
 #if SDL_VIDEO_RENDER_D3D11
@@ -89,9 +89,8 @@ int
 SDL_GetRenderDriverInfo(int index, SDL_RendererInfo * info)
 {
     if (index < 0 || index >= SDL_GetNumRenderDrivers()) {
-        SDL_SetError("index must be in the range of 0 - %d",
-                     SDL_GetNumRenderDrivers() - 1);
-        return -1;
+        return SDL_SetError("index must be in the range of 0 - %d",
+                            SDL_GetNumRenderDrivers() - 1);
     }
     *info = render_drivers[index]->info;
     return 0;
@@ -702,8 +701,7 @@ SDL_UpdateTextureYUV(SDL_Texture * texture, const SDL_Rect * rect,
         temp_pitch = (((rect->w * SDL_BYTESPERPIXEL(native->format)) + 3) & ~3);
         temp_pixels = SDL_malloc(rect->h * temp_pitch);
         if (!temp_pixels) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_SW_CopyYUVToRGB(texture->yuv, rect, native->format,
                             rect->w, rect->h, temp_pixels, temp_pitch);
@@ -739,8 +737,7 @@ SDL_UpdateTextureNative(SDL_Texture * texture, const SDL_Rect * rect,
         temp_pitch = (((rect->w * SDL_BYTESPERPIXEL(native->format)) + 3) & ~3);
         temp_pixels = SDL_malloc(rect->h * temp_pitch);
         if (!temp_pixels) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         SDL_ConvertPixels(rect->w, rect->h,
                           texture->format, pixels, pitch,
@@ -807,8 +804,7 @@ SDL_LockTexture(SDL_Texture * texture, const SDL_Rect * rect,
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     if (texture->access != SDL_TEXTUREACCESS_STREAMING) {
-        SDL_SetError("SDL_LockTexture(): texture must be streaming");
-        return -1;
+        return SDL_SetError("SDL_LockTexture(): texture must be streaming");
     }
 
     if (!rect) {
@@ -904,8 +900,7 @@ int
 SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
 {
     if (!SDL_RenderTargetSupported(renderer)) {
-        SDL_Unsupported();
-        return -1;
+        return SDL_Unsupported();
     }
     if (texture == renderer->target) {
         /* Nothing to do! */
@@ -916,12 +911,10 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
     if (texture) {
         CHECK_TEXTURE_MAGIC(texture, -1);
         if (renderer != texture->renderer) {
-            SDL_SetError("Texture was not created with this renderer");
-            return -1;
+            return SDL_SetError("Texture was not created with this renderer");
         }
         if (texture->access != SDL_TEXTUREACCESS_TARGET) {
-            SDL_SetError("Texture not created with SDL_TEXTUREACCESS_TARGET");
-            return -1;
+            return SDL_SetError("Texture not created with SDL_TEXTUREACCESS_TARGET");
         }
         if (texture->native) {
             /* Always render to the native texture */
@@ -986,8 +979,7 @@ UpdateLogicalSize(SDL_Renderer *renderer)
         SDL_GetWindowSize(renderer->window, &w, &h);
     } else {
         /* FIXME */
-        SDL_SetError("Internal error: No way to get output resolution");
-        return -1;
+        return SDL_SetError("Internal error: No way to get output resolution");
     }
 
     want_aspect = (float)renderer->logical_w / renderer->logical_h;
@@ -1205,8 +1197,7 @@ RenderDrawPointsWithRects(SDL_Renderer * renderer,
 
     frects = SDL_stack_alloc(SDL_FRect, count);
     if (!frects) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     for (i = 0; i < count; ++i) {
         frects[i].x = points[i].x * renderer->scale.x;
@@ -1233,8 +1224,7 @@ SDL_RenderDrawPoints(SDL_Renderer * renderer,
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
-        SDL_SetError("SDL_RenderDrawPoints(): Passed NULL points");
-        return -1;
+        return SDL_SetError("SDL_RenderDrawPoints(): Passed NULL points");
     }
     if (count < 1) {
         return 0;
@@ -1250,8 +1240,7 @@ SDL_RenderDrawPoints(SDL_Renderer * renderer,
 
     fpoints = SDL_stack_alloc(SDL_FPoint, count);
     if (!fpoints) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     for (i = 0; i < count; ++i) {
         fpoints[i].x = points[i].x * renderer->scale.x;
@@ -1289,8 +1278,7 @@ RenderDrawLinesWithRects(SDL_Renderer * renderer,
 
     frects = SDL_stack_alloc(SDL_FRect, count-1);
     if (!frects) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     status = 0;
@@ -1345,8 +1333,7 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!points) {
-        SDL_SetError("SDL_RenderDrawLines(): Passed NULL points");
-        return -1;
+        return SDL_SetError("SDL_RenderDrawLines(): Passed NULL points");
     }
     if (count < 2) {
         return 0;
@@ -1362,8 +1349,7 @@ SDL_RenderDrawLines(SDL_Renderer * renderer,
 
     fpoints = SDL_stack_alloc(SDL_FPoint, count);
     if (!fpoints) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     for (i = 0; i < count; ++i) {
         fpoints[i].x = points[i].x * renderer->scale.x;
@@ -1415,8 +1401,7 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
-        SDL_SetError("SDL_RenderDrawRects(): Passed NULL rects");
-        return -1;
+        return SDL_SetError("SDL_RenderDrawRects(): Passed NULL rects");
     }
     if (count < 1) {
         return 0;
@@ -1462,8 +1447,7 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!rects) {
-        SDL_SetError("SDL_RenderFillRects(): Passed NULL rects");
-        return -1;
+        return SDL_SetError("SDL_RenderFillRects(): Passed NULL rects");
     }
     if (count < 1) {
         return 0;
@@ -1475,8 +1459,7 @@ SDL_RenderFillRects(SDL_Renderer * renderer,
 
     frects = SDL_stack_alloc(SDL_FRect, count);
     if (!frects) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     for (i = 0; i < count; ++i) {
         frects[i].x = rects[i].x * renderer->scale.x;
@@ -1504,8 +1487,7 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     if (renderer != texture->renderer) {
-        SDL_SetError("Texture was not created with this renderer");
-        return -1;
+        return SDL_SetError("Texture was not created with this renderer");
     }
 
     real_srcrect.x = 0;
@@ -1573,12 +1555,10 @@ SDL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     CHECK_TEXTURE_MAGIC(texture, -1);
 
     if (renderer != texture->renderer) {
-        SDL_SetError("Texture was not created with this renderer");
-        return -1;
+        return SDL_SetError("Texture was not created with this renderer");
     }
     if (!renderer->RenderCopyEx) {
-        SDL_SetError("Renderer does not support RenderCopyEx");
-        return -1;
+        return SDL_SetError("Renderer does not support RenderCopyEx");
     }
     
     real_srcrect.x = 0;
@@ -1630,8 +1610,7 @@ SDL_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     CHECK_RENDERER_MAGIC(renderer, -1);
 
     if (!renderer->RenderReadPixels) {
-        SDL_Unsupported();
-        return -1;
+        return SDL_Unsupported();
     }
 
     if (!format) {
@@ -1736,8 +1715,7 @@ int SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh)
         return renderer->GL_BindTexture(renderer, texture, texw, texh);
     }
 
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 }
 
 int SDL_GL_UnbindTexture(SDL_Texture *texture)
@@ -1750,8 +1728,7 @@ int SDL_GL_UnbindTexture(SDL_Texture *texture)
         return renderer->GL_UnbindTexture(renderer, texture);
     }
 
-    SDL_Unsupported();
-    return -1;
+    return SDL_Unsupported();
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -128,6 +128,16 @@
 #define __inline__
 #endif
 
+#ifndef SDL_FORCE_INLINE
+#if defined(_MSC_VER)
+#define SDL_FORCE_INLINE __forceinline
+#elif ( (defined(__GNUC__) && (__GNUC__ >= 4)) || defined(__clang__) )
+#define SDL_FORCE_INLINE __attribute__((always_inline)) static inline
+#else
+#define SDL_FORCE_INLINE static __inline__
+#endif
+#endif
+
 /* Apparently this is needed by several Windows compilers */
 #if !defined(__MACH__)
 #ifndef NULL

@@ -29,7 +29,7 @@
 static int
 DUMMYAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 {
-    return 1;                   /* always succeeds. */
+    return 0;                   /* always succeeds. */
 }
 
 static int

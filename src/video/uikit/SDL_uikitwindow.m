@@ -54,8 +54,7 @@ static int SetupWindowData(_THIS, SDL_Window *window, UIWindow *uiwindow, SDL_bo
     /* Allocate the window data */
     data = (SDL_WindowData *)SDL_malloc(sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->uiwindow = uiwindow;
     data->viewcontroller = nil;
@@ -133,8 +132,7 @@ UIKit_CreateWindow(_THIS, SDL_Window *window)
 
     /* We currently only handle a single window per display on iOS */
     if (window->next != NULL) {
-        SDL_SetError("Only one window allowed per display.");
-        return -1;
+        return SDL_SetError("Only one window allowed per display.");
     }
 
     // If monitor has a resolution of 0x0 (hasn't been explicitly set by the
@@ -317,8 +315,7 @@ SDL_iPhoneSetAnimationCallback(SDL_Window * window, int interval, void (*callbac
     SDL_WindowData *data = window ? (SDL_WindowData *)window->driverdata : NULL;
 
     if (!data || !data->view) {
-        SDL_SetError("Invalid window or view not set");
-        return -1;
+        return SDL_SetError("Invalid window or view not set");
     }
 
     [data->view setAnimationCallback:interval callback:callback callbackParam:callbackParam];

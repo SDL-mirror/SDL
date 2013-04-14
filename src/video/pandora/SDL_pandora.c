@@ -211,8 +211,7 @@ PND_createwindow(_THIS, SDL_Window * window)
     /* Allocate window internal data */
     wdata = (SDL_WindowData *) SDL_calloc(1, sizeof(SDL_WindowData));
     if (wdata == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Setup driver data for this window */
@@ -230,14 +229,12 @@ PND_createwindow(_THIS, SDL_Window * window)
         if (phdata->egl_display == EGL_NO_DISPLAY) {
             phdata->egl_display = eglGetDisplay((NativeDisplayType) 0);
             if (phdata->egl_display == EGL_NO_DISPLAY) {
-                SDL_SetError("PND: Can't get connection to OpenGL ES");
-                return -1;
+                return SDL_SetError("PND: Can't get connection to OpenGL ES");
             }
 
             initstatus = eglInitialize(phdata->egl_display, NULL, NULL);
             if (initstatus != EGL_TRUE) {
-                SDL_SetError("PND: Can't init OpenGL ES library");
-                return -1;
+                return SDL_SetError("PND: Can't init OpenGL ES library");
             }
         }
 
@@ -356,8 +353,7 @@ PND_gl_loadlibrary(_THIS, const char *path)
     _this->gl_config.dll_handle = SDL_LoadObject(path);
     if (!_this->gl_config.dll_handle) {
         /* Failed to load new GL ES library */
-        SDL_SetError("PND: Failed to locate OpenGL ES library");
-        return -1;
+        return SDL_SetError("PND: Failed to locate OpenGL ES library");
     }
 
     /* Store OpenGL ES library path and name */
@@ -726,8 +722,7 @@ PND_gl_makecurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     EGLBoolean status;
 
     if (phdata->egl_initialized != SDL_TRUE) {
-        SDL_SetError("PND: GF initialization failed, no OpenGL ES support");
-        return -1;
+        return SDL_SetError("PND: GF initialization failed, no OpenGL ES support");
     }
 
     if ((window == NULL) && (context == NULL)) {
@@ -736,33 +731,28 @@ PND_gl_makecurrent(_THIS, SDL_Window * window, SDL_GLContext context)
                            EGL_NO_SURFACE, EGL_NO_CONTEXT);
         if (status != EGL_TRUE) {
             /* Failed to set current GL ES context */
-            SDL_SetError("PND: Can't set OpenGL ES context");
-            return -1;
+            return SDL_SetError("PND: Can't set OpenGL ES context");
         }
     } else {
         wdata = (SDL_WindowData *) window->driverdata;
         if (wdata->gles_surface == EGL_NO_SURFACE) {
-            SDL_SetError
+            return SDL_SetError
                 ("PND: OpenGL ES surface is not initialized for this window");
-            return -1;
         }
         if (wdata->gles_context == EGL_NO_CONTEXT) {
-            SDL_SetError
+            return SDL_SetError
                 ("PND: OpenGL ES context is not initialized for this window");
-            return -1;
         }
         if (wdata->gles_context != context) {
-            SDL_SetError
+            return SDL_SetError
                 ("PND: OpenGL ES context is not belong to this window");
-            return -1;
         }
         status =
             eglMakeCurrent(phdata->egl_display, wdata->gles_surface,
                            wdata->gles_surface, wdata->gles_context);
         if (status != EGL_TRUE) {
             /* Failed to set current GL ES context */
-            SDL_SetError("PND: Can't set OpenGL ES context");
-            return -1;
+            return SDL_SetError("PND: Can't set OpenGL ES context");
         }
     }
     return 0;
@@ -775,8 +765,7 @@ PND_gl_setswapinterval(_THIS, int interval)
     EGLBoolean status;
 
     if (phdata->egl_initialized != SDL_TRUE) {
-        SDL_SetError("PND: EGL initialization failed, no OpenGL ES support");
-        return -1;
+        return SDL_SetError("PND: EGL initialization failed, no OpenGL ES support");
     }
 
     /* Check if OpenGL ES connection has been initialized */
@@ -791,8 +780,7 @@ PND_gl_setswapinterval(_THIS, int interval)
     }
 
     /* Failed to set swap interval */
-    SDL_SetError("PND: Cannot set swap interval");
-    return -1;
+    return SDL_SetError("PND: Cannot set swap interval");
 }
 
 int

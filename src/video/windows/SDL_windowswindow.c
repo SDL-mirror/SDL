@@ -82,14 +82,13 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     /* Allocate the window data */
     data = (SDL_WindowData *) SDL_malloc(sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
     data->window = window;
     data->hwnd = hwnd;
     data->hdc = GetDC(hwnd);
     data->created = created;
-    data->mouse_pressed = SDL_FALSE;
+    data->mouse_button_flags = 0;
     data->videodata = videodata;
 
     window->driverdata = data;
@@ -98,8 +97,7 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     if (!SetProp(hwnd, TEXT("SDL_WindowData"), data)) {
         ReleaseDC(hwnd, data->hdc);
         SDL_free(data);
-        WIN_SetError("SetProp() failed");
-        return -1;
+        return WIN_SetError("SetProp() failed");
     }
 
     /* Set up the window proc function */
@@ -221,8 +219,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
         CreateWindow(SDL_Appname, TEXT(""), style, x, y, w, h, NULL, NULL,
                      SDL_Instance, NULL);
     if (!hwnd) {
-        WIN_SetError("Couldn't create window");
-        return -1;
+        return WIN_SetError("Couldn't create window");
     }
 
     WIN_PumpEvents(_this);
@@ -635,8 +632,7 @@ SDL_HelperWindowCreate(void)
     /* Register the class. */
     SDL_HelperWindowClass = RegisterClass(&wce);
     if (SDL_HelperWindowClass == 0) {
-        WIN_SetError("Unable to create Helper Window Class");
-        return -1;
+        return WIN_SetError("Unable to create Helper Window Class");
     }
 
     /* Create the window. */
@@ -648,8 +644,7 @@ SDL_HelperWindowCreate(void)
                                       hInstance, NULL);
     if (SDL_HelperWindow == NULL) {
         UnregisterClass(SDL_HelperWindowClassName, hInstance);
-        WIN_SetError("Unable to create Helper Window");
-        return -1;
+        return WIN_SetError("Unable to create Helper Window");
     }
 
     return 0;

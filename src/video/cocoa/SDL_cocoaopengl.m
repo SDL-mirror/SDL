@@ -35,9 +35,13 @@
 #define DEFAULT_OPENGL  "/System/Library/Frameworks/OpenGL.framework/Libraries/libGL.dylib"
 
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED < 1070
+#ifndef kCGLPFAOpenGLProfile
 #define kCGLPFAOpenGLProfile 99
+#endif
+#ifndef kCGLOGLPVersion_Legacy
 #define kCGLOGLPVersion_Legacy 0x1000
+#endif
+#ifndef kCGLOGLPVersion_3_2_Core
 #define kCGLOGLPVersion_3_2_Core 0x3200
 #endif
 
@@ -270,8 +274,7 @@ Cocoa_GL_SetSwapInterval(_THIS, int interval)
         [nscontext setValues:&value forParameter:NSOpenGLCPSwapInterval];
         status = 0;
     } else {
-        SDL_SetError("No current OpenGL context");
-        status = -1;
+        status = SDL_SetError("No current OpenGL context");
     }
 
     [pool release];

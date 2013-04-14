@@ -39,8 +39,7 @@ UIKit_AllocateDisplayModeData(SDL_DisplayMode * mode,
         /* Allocate the display mode data */
         data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
         if (!data) {
-            SDL_OutOfMemory();
-            return -1;
+            return SDL_OutOfMemory();
         }
         
         data->uiscreenmode = uiscreenmode;
@@ -160,9 +159,8 @@ UIKit_AddDisplay(UIScreen *uiscreen)
     /* Allocate the display data */
     SDL_DisplayData *data = (SDL_DisplayData *) SDL_malloc(sizeof(*data));
     if (!data) {
-        SDL_OutOfMemory();
         UIKit_FreeDisplayModeData(&display.desktop_mode);
-        return -1;
+        return SDL_OutOfMemory();
     }
 	
     [uiscreen retain];

@@ -223,10 +223,7 @@
     <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\test\testpower.c">
-      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\Debug/testpower.pch</PrecompiledHeaderOutputFile>
-      <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\Debug/testpower.pch</PrecompiledHeaderOutputFile>
-    </ClCompile>
+    <ClCompile Include="..\..\..\test\testpower.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

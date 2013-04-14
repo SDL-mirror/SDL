@@ -167,11 +167,8 @@ void DrawScreen(SDL_Surface* screen)
     if(event->type == SDL_FINGERMOTION || 
        event->type == SDL_FINGERDOWN ||
        event->type == SDL_FINGERUP) {
-      SDL_Touch* inTouch = SDL_GetTouch(event->tfinger.touchId);
-      if(inTouch == NULL) continue;
-
-      x = ((float)event->tfinger.x)/inTouch->xres;
-      y = ((float)event->tfinger.y)/inTouch->yres;      
+      x = event->tfinger.x;
+      y = event->tfinger.y;
       
       //draw the touch:      
       c = colors[event->tfinger.fingerId%7]; 
@@ -269,10 +266,6 @@ int main(int argc, char* argv[])
 	    SDL_Log("Finger: %i,x: %i, y: %i",event.tfinger.fingerId,
 	    	   event.tfinger.x,event.tfinger.y);
 #endif
-		{
-			SDL_Touch* inTouch = SDL_GetTouch(event.tfinger.touchId);
-			SDL_Finger* inFinger = SDL_GetFinger(inTouch,event.tfinger.fingerId);
-		}
 	    break;	    
 	  case SDL_FINGERDOWN:
 #if VERBOSE

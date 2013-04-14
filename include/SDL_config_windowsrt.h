@@ -109,7 +109,7 @@ typedef unsigned int uintptr_t;
 //#define HAVE__ULTOA 1	// TODO, WinRT: consider using _ultoa_s instead
 #define HAVE_STRTOL 1
 #define HAVE_STRTOUL 1
-#define HAVE_STRTOLL 1
+//#define HAVE_STRTOLL 1
 #define HAVE_STRTOD 1
 #define HAVE_ATOI 1
 #define HAVE_ATOF 1
@@ -123,14 +123,14 @@ typedef unsigned int uintptr_t;
 #define HAVE_ATAN 1
 #define HAVE_ATAN2 1
 #define HAVE_CEIL 1
-#define HAVE_COPYSIGN 1
+//#define HAVE_COPYSIGN 1   // TODO, WinRT: consider using _copysign instead
 #define HAVE_COS 1
 #define HAVE_COSF 1
 #define HAVE_FABS 1
 #define HAVE_FLOOR 1
 #define HAVE_LOG 1
 #define HAVE_POW 1
-#define HAVE_SCALBN 1
+//#define HAVE_SCALBN 1
 #define HAVE_SIN 1
 #define HAVE_SINF 1
 #define HAVE_SQRT 1

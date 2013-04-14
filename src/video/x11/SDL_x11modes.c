@@ -576,25 +576,30 @@ X11_InitModes(_THIS)
                     int actual_format;
                     unsigned long nitems, bytes_after;
                     Atom actual_type;
-   
-	                if (props[i] == EDID) {
-                        XRRGetOutputProperty(data->display, res->outputs[output], props[i],
-                                             0, 100, False, False,
-                                             AnyPropertyType,
-                                             &actual_type, &actual_format,
-                                             &nitems, &bytes_after, &prop);
 
-                        MonitorInfo *info = decode_edid(prop);
-                        if (info) {
-#ifdef X11MODES_DEBUG
-                            printf("Found EDID data for %s\n", output_info->name);
-                            dump_monitor_info(info);
-#endif
-                            SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
-                            free(info);
+	                if (props[i] == EDID) {
+                        if (XRRGetOutputProperty(data->display,
+                                                 res->outputs[output], props[i],
+                                                 0, 100, False, False,
+                                                 AnyPropertyType,
+                                                 &actual_type, &actual_format,
+                                                 &nitems, &bytes_after, &prop) == Success ) {
+                            MonitorInfo *info = decode_edid(prop);
+                            if (info) {
+    #ifdef X11MODES_DEBUG
+                                printf("Found EDID data for %s\n", output_info->name);
+                                dump_monitor_info(info);
+    #endif
+                                SDL_strlcpy(display_name, info->dsc_product_name, sizeof(display_name));
+                                free(info);
+                            }
+                            XFree(prop);
                         }
                         break;
                     }
+                }
+                if (props) {
+                    XFree(props);
                 }
 
                 if (*display_name && inches) {
@@ -651,8 +656,7 @@ X11_InitModes(_THIS)
 #endif
 
     if (_this->num_displays == 0) {
-        SDL_SetError("No available displays");
-        return -1;
+        return SDL_SetError("No available displays");
     }
     return 0;
 }
@@ -793,23 +797,20 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
 
         res = XRRGetScreenResources (display, RootWindow(display, data->screen));
         if (!res) {
-            SDL_SetError("Couldn't get XRandR screen resources");
-            return -1;
+            return SDL_SetError("Couldn't get XRandR screen resources");
         }
 
         output_info = XRRGetOutputInfo(display, res, data->xrandr_output);
         if (!output_info || output_info->connection == RR_Disconnected) {
-            SDL_SetError("Couldn't get XRandR output info");
             XRRFreeScreenResources(res);
-            return -1;
+            return SDL_SetError("Couldn't get XRandR output info");
         }
 
         crtc = XRRGetCrtcInfo(display, res, output_info->crtc);
         if (!crtc) {
-            SDL_SetError("Couldn't get XRandR crtc info");
             XRRFreeOutputInfo(output_info);
             XRRFreeScreenResources(res);
-            return -1;
+            return SDL_SetError("Couldn't get XRandR crtc info");
         }
 
         status = XRRSetCrtcConfig (display, res, output_info->crtc, CurrentTime,
@@ -821,8 +822,7 @@ X11_SetDisplayMode(_THIS, SDL_VideoDisplay * sdl_display, SDL_DisplayMode * mode
         XRRFreeScreenResources(res);
 
         if (status != Success) {
-            SDL_SetError("XRRSetCrtcConfig failed");
-            return -1;
+            return SDL_SetError("XRRSetCrtcConfig failed");
         }
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XRANDR */

@@ -26,12 +26,15 @@ There are two basic ways of building SDL at the moment:
    Add the top level include directory to the header search path, and then add
    the following sources to the project:
 	src/*.c
+	src/atomic/*.c
 	src/audio/*.c
-	src/cdrom/*.c
 	src/cpuinfo/*.c
 	src/events/*.c
 	src/file/*.c
+	src/haptic/*.c
 	src/joystick/*.c
+	src/power/*.c
+	src/render/*.c
 	src/stdlib/*.c
 	src/thread/*.c
 	src/timer/*.c
@@ -39,8 +42,9 @@ There are two basic ways of building SDL at the moment:
 	src/audio/disk/*.c
 	src/audio/dummy/*.c
 	src/video/dummy/*.c
+	src/haptic/dummy/*.c
 	src/joystick/dummy/*.c
-	src/cdrom/dummy/*.c
+	src/main/dummy/*.c
 	src/thread/generic/*.c
 	src/timer/dummy/*.c
 	src/loadso/dummy/*.c

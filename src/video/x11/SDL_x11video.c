@@ -305,8 +305,8 @@ X11_CreateDevice(int devindex)
     }
     data = (struct SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
     if (!data) {
-        SDL_OutOfMemory();
         SDL_free(device);
+        SDL_OutOfMemory();
         return NULL;
     }
     device->driverdata = data;
@@ -522,7 +522,17 @@ X11_VideoInit(_THIS)
     GET_ATOM(_NET_WM_ICON_NAME);
     GET_ATOM(_NET_WM_ICON);
     GET_ATOM(_NET_WM_PING);
+    GET_ATOM(_NET_ACTIVE_WINDOW);
     GET_ATOM(UTF8_STRING);
+    GET_ATOM(PRIMARY);
+    GET_ATOM(XdndEnter);
+    GET_ATOM(XdndPosition);
+    GET_ATOM(XdndStatus);
+    GET_ATOM(XdndTypeList);
+    GET_ATOM(XdndActionCopy);
+    GET_ATOM(XdndDrop);
+    GET_ATOM(XdndFinished);
+    GET_ATOM(XdndSelection);
 
     /* Detect the window manager */
     X11_CheckWindowManager(_this);

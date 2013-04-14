@@ -509,7 +509,8 @@ extern "C" void Android_JNI_CloseAudioDevice()
 }
 
 // Test for an exception and call SDL_SetError with its detail if one occurs
-static bool Android_JNI_ExceptionOccurred()
+// If optional parameter silent is truthy then SDL_SetError() is not called.
+static bool Android_JNI_ExceptionOccurred(bool silent = false)
 {
     SDL_assert(LocalReferenceHolder::IsActive());
     JNIEnv *mEnv = Android_JNI_GetEnv();
@@ -521,26 +522,27 @@ static bool Android_JNI_ExceptionOccurred()
         // Until this happens most JNI operations have undefined behaviour
         mEnv->ExceptionClear();
 
-        jclass exceptionClass = mEnv->GetObjectClass(exception);
-        jclass classClass = mEnv->FindClass("java/lang/Class");
+        if (!silent) {
+            jclass exceptionClass = mEnv->GetObjectClass(exception);
+            jclass classClass = mEnv->FindClass("java/lang/Class");
 
-        mid = mEnv->GetMethodID(classClass, "getName", "()Ljava/lang/String;");
-        jstring exceptionName = (jstring)mEnv->CallObjectMethod(exceptionClass, mid);
-        const char* exceptionNameUTF8 = mEnv->GetStringUTFChars(exceptionName, 0);
+            mid = mEnv->GetMethodID(classClass, "getName", "()Ljava/lang/String;");
+            jstring exceptionName = (jstring)mEnv->CallObjectMethod(exceptionClass, mid);
+            const char* exceptionNameUTF8 = mEnv->GetStringUTFChars(exceptionName, 0);
 
-        mid = mEnv->GetMethodID(exceptionClass, "getMessage", "()Ljava/lang/String;");
-        jstring exceptionMessage = (jstring)mEnv->CallObjectMethod(exception, mid);
+            mid = mEnv->GetMethodID(exceptionClass, "getMessage", "()Ljava/lang/String;");
+            jstring exceptionMessage = (jstring)mEnv->CallObjectMethod(exception, mid);
 
-        if (exceptionMessage != NULL) {
-            const char* exceptionMessageUTF8 = mEnv->GetStringUTFChars(
-                    exceptionMessage, 0);
-            SDL_SetError("%s: %s", exceptionNameUTF8, exceptionMessageUTF8);
-            mEnv->ReleaseStringUTFChars(exceptionMessage, exceptionMessageUTF8);
-        } else {
-            SDL_SetError("%s", exceptionNameUTF8);
+            if (exceptionMessage != NULL) {
+                const char* exceptionMessageUTF8 = mEnv->GetStringUTFChars(exceptionMessage, 0);
+                SDL_SetError("%s: %s", exceptionNameUTF8, exceptionMessageUTF8);
+                mEnv->ReleaseStringUTFChars(exceptionMessage, exceptionMessageUTF8);
+            } else {
+                SDL_SetError("%s", exceptionNameUTF8);
+            }
+
+            mEnv->ReleaseStringUTFChars(exceptionName, exceptionNameUTF8);
         }
-
-        mEnv->ReleaseStringUTFChars(exceptionName, exceptionNameUTF8);
 
         return true;
     }
@@ -588,19 +590,19 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     */
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(assetManager), "openFd", "(Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;");
     inputStream = mEnv->CallObjectMethod(assetManager, mid, fileNameJString);
-    if (Android_JNI_ExceptionOccurred()) {
+    if (Android_JNI_ExceptionOccurred(true)) {
         goto fallback;
     }
 
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(inputStream), "getStartOffset", "()J");
     ctx->hidden.androidio.offset = mEnv->CallLongMethod(inputStream, mid);
-    if (Android_JNI_ExceptionOccurred()) {
+    if (Android_JNI_ExceptionOccurred(true)) {
         goto fallback;
     }
 
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(inputStream), "getDeclaredLength", "()J");
     ctx->hidden.androidio.size = mEnv->CallLongMethod(inputStream, mid);
-    if (Android_JNI_ExceptionOccurred()) {
+    if (Android_JNI_ExceptionOccurred(true)) {
         goto fallback;
     }
 
@@ -778,8 +780,7 @@ static int Android_JNI_FileClose(SDL_RWops* ctx, bool release)
     JNIEnv *mEnv = Android_JNI_GetEnv();
 
     if (!refs.init(mEnv)) {
-        SDL_SetError("Failed to allocate enough JVM local references");
-        return -1;
+        return SDL_SetError("Failed to allocate enough JVM local references");
     }
 
     if (ctx) {
@@ -842,8 +843,7 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
                 offset = ctx->hidden.androidio.offset + ctx->hidden.androidio.size + offset;
                 break;
             default:
-                SDL_SetError("Unknown value for 'whence'");
-                return -1;
+                return SDL_SetError("Unknown value for 'whence'");
         }
         whence = SEEK_SET;
 
@@ -864,14 +864,12 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
                 newPosition = ctx->hidden.androidio.size + offset;
                 break;
             default:
-                SDL_SetError("Unknown value for 'whence'");
-                return -1;
+                return SDL_SetError("Unknown value for 'whence'");
         }
 
         /* Validate the new position */
         if (newPosition < 0) {
-            SDL_Error(SDL_EFSEEK);
-            return -1;
+            return SDL_Error(SDL_EFSEEK);
         }
         if (newPosition > ctx->hidden.androidio.size) {
             newPosition = ctx->hidden.androidio.size;

@@ -412,7 +412,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
 
 SDL_bool
 SDL_GetSpanEnclosingRect(int width, int height,
-                         int numrects, SDL_Rect * rects, SDL_Rect *span)
+                         int numrects, const SDL_Rect * rects, SDL_Rect *span)
 {
     int i;
     int span_y1, span_y2;

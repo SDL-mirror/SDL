@@ -92,9 +92,8 @@ EV_IsHaptic(int fd)
     /* Ask device for what it has. */
     ret = 0;
     if (ioctl(fd, EVIOCGBIT(EV_FF, sizeof(features)), features) < 0) {
-        SDL_SetError("Haptic: Unable to get device's features: %s",
-                     strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Unable to get device's features: %s",
+                            strerror(errno));
     }
 
     /* Convert supported features to SDL_HAPTIC platform-neutral features. */
@@ -309,9 +308,8 @@ SDL_SYS_HapticOpen(SDL_Haptic * haptic)
     /* Open the character device */
     fd = open(SDL_hapticlist[haptic->index].fname, O_RDWR, 0);
     if (fd < 0) {
-        SDL_SetError("Haptic: Unable to open %s: %s",
-                     SDL_hapticlist[haptic->index], strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Unable to open %s: %s",
+                            SDL_hapticlist[haptic->index], strerror(errno));
     }
 
     /* Try to create the haptic. */
@@ -340,9 +338,8 @@ SDL_SYS_HapticMouse(void)
         /* Open the device. */
         fd = open(SDL_hapticlist[i].fname, O_RDWR, 0);
         if (fd < 0) {
-            SDL_SetError("Haptic: Unable to open %s: %s",
-                         SDL_hapticlist[i], strerror(errno));
-            return -1;
+            return SDL_SetError("Haptic: Unable to open %s: %s",
+                                SDL_hapticlist[i], strerror(errno));
         }
 
         /* Is it a mouse? */
@@ -405,15 +402,13 @@ SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
         }
     }
     if (i >= MAX_HAPTICS) {
-        SDL_SetError("Haptic: Joystick doesn't have Haptic capabilities");
-        return -1;
+        return SDL_SetError("Haptic: Joystick doesn't have Haptic capabilities");
     }
 
     fd = open(joystick->hwdata->fname, O_RDWR, 0);
     if (fd < 0) {
-        SDL_SetError("Haptic: Unable to open %s: %s",
-                     joystick->hwdata->fname, strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Unable to open %s: %s",
+                            joystick->hwdata->fname, strerror(errno));
     }
     ret = SDL_SYS_HapticOpenFromFD(haptic, fd); /* Already closes on error. */
     if (ret < 0) {
@@ -544,8 +539,7 @@ SDL_SYS_ToDirection(SDL_HapticDirection * dir)
         return (Uint16) tmp;
 
     default:
-        SDL_SetError("Haptic: Unsupported direction type.");
-        return (Uint16) - 1;
+        return (Uint16) SDL_SetError("Haptic: Unsupported direction type.");
     }
 
     return 0;
@@ -733,8 +727,7 @@ SDL_SYS_ToFFEffect(struct ff_effect *dest, SDL_HapticEffect * src)
 
 
     default:
-        SDL_SetError("Haptic: Unknown effect type.");
-        return -1;
+        return SDL_SetError("Haptic: Unknown effect type.");
     }
 
     return 0;
@@ -754,8 +747,7 @@ SDL_SYS_HapticNewEffect(SDL_Haptic * haptic, struct haptic_effect *effect,
     effect->hweffect = (struct haptic_hweffect *)
         SDL_malloc(sizeof(struct haptic_hweffect));
     if (effect->hweffect == NULL) {
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     /* Prepare the ff_effect */
@@ -802,9 +794,8 @@ SDL_SYS_HapticUpdateEffect(SDL_Haptic * haptic,
 
     /* See if it can be uploaded. */
     if (ioctl(haptic->hwdata->fd, EVIOCSFF, &linux_effect) < 0) {
-        SDL_SetError("Haptic: Error updating the effect: %s",
-                     strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Error updating the effect: %s",
+                            strerror(errno));
     }
 
     /* Copy the new effect into memory. */
@@ -831,8 +822,7 @@ SDL_SYS_HapticRunEffect(SDL_Haptic * haptic, struct haptic_effect *effect,
     run.value = (iterations > INT_MAX) ? INT_MAX : iterations;
 
     if (write(haptic->hwdata->fd, (const void *) &run, sizeof(run)) < 0) {
-        SDL_SetError("Haptic: Unable to run the effect: %s", strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Unable to run the effect: %s", strerror(errno));
     }
 
     return 0;
@@ -852,9 +842,8 @@ SDL_SYS_HapticStopEffect(SDL_Haptic * haptic, struct haptic_effect *effect)
     stop.value = 0;
 
     if (write(haptic->hwdata->fd, (const void *) &stop, sizeof(stop)) < 0) {
-        SDL_SetError("Haptic: Unable to stop the effect: %s",
-                     strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Unable to stop the effect: %s",
+                            strerror(errno));
     }
 
     return 0;
@@ -891,8 +880,7 @@ SDL_SYS_HapticGetEffectStatus(SDL_Haptic * haptic,
     ie.code = effect->hweffect->effect.id;
 
     if (write(haptic->hwdata->fd, &ie, sizeof(ie)) < 0) {
-        SDL_SetError("Haptic: Error getting device status.");
-        return -1;
+        return SDL_SetError("Haptic: Error getting device status.");
     }
 
     return 0;
@@ -915,8 +903,7 @@ SDL_SYS_HapticSetGain(SDL_Haptic * haptic, int gain)
     ie.value = (0xFFFFUL * gain) / 100;
 
     if (write(haptic->hwdata->fd, &ie, sizeof(ie)) < 0) {
-        SDL_SetError("Haptic: Error setting gain: %s", strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Error setting gain: %s", strerror(errno));
     }
 
     return 0;
@@ -936,8 +923,7 @@ SDL_SYS_HapticSetAutocenter(SDL_Haptic * haptic, int autocenter)
     ie.value = (0xFFFFUL * autocenter) / 100;
 
     if (write(haptic->hwdata->fd, &ie, sizeof(ie)) < 0) {
-        SDL_SetError("Haptic: Error setting autocenter: %s", strerror(errno));
-        return -1;
+        return SDL_SetError("Haptic: Error setting autocenter: %s", strerror(errno));
     }
 
     return 0;
@@ -977,9 +963,8 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
         if (haptic->effects[i].hweffect != NULL) {
             ret = SDL_SYS_HapticStopEffect(haptic, &haptic->effects[i]);
             if (ret < 0) {
-                SDL_SetError
+                return SDL_SetError
                     ("Haptic: Error while trying to stop all playing effects.");
-                return -1;
             }
         }
     }
