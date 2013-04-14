@@ -57,12 +57,12 @@ static void D3D11_WindowEvent(SDL_Renderer * renderer,
                             const SDL_WindowEvent *event);
 static int D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                             const SDL_Rect * rect, const void *pixels,
-                             int pitch);
+                             const SDL_Rect * rect, const void *srcPixels,
+                             int srcPitch);
 static int D3D11_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                              const SDL_Rect * rect, void **pixels, int *pitch);
 static void D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
-//static int D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
+static int D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D11_UpdateViewport(SDL_Renderer * renderer);
 static int D3D11_RenderClear(SDL_Renderer * renderer);
 static int D3D11_RenderDrawPoints(SDL_Renderer * renderer,
@@ -93,7 +93,11 @@ extern "C" SDL_RenderDriver D3D11_RenderDriver = {
     D3D11_CreateRenderer,
     {
         "direct3d 11.1",
-        (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC),    // flags.  see SDL_RendererFlags
+        (
+            SDL_RENDERER_ACCELERATED |
+            SDL_RENDERER_PRESENTVSYNC |
+            SDL_RENDERER_TARGETTEXTURE
+        ),                          // flags.  see SDL_RendererFlags
         2,                          // num_texture_formats
         {                           // texture_formats
             SDL_PIXELFORMAT_RGB888,
@@ -165,7 +169,7 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UpdateTexture = D3D11_UpdateTexture;
     renderer->LockTexture = D3D11_LockTexture;
     renderer->UnlockTexture = D3D11_UnlockTexture;
-    //renderer->SetRenderTarget = D3D11_SetRenderTarget;
+    renderer->SetRenderTarget = D3D11_SetRenderTarget;
     renderer->UpdateViewport = D3D11_UpdateViewport;
     renderer->RenderClear = D3D11_RenderClear;
     renderer->RenderDrawPoints = D3D11_RenderDrawPoints;
@@ -178,7 +182,6 @@ D3D11_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = D3D11_DestroyTexture;
     renderer->DestroyRenderer = D3D11_DestroyRenderer;
     renderer->info = D3D11_RenderDriver.info;
-    renderer->info.flags = SDL_RENDERER_ACCELERATED;
     renderer->driverdata = data;
 
     // HACK: make sure the SDL_Renderer references the SDL_Window data now, in
@@ -752,7 +755,7 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
     result = data->d3dDevice->CreateRenderTargetView(
         backBuffer.Get(),
         nullptr,
-        &data->renderTargetView
+        &data->mainRenderTargetView
         );
     if (FAILED(result)) {
         WIN_SetErrorFromHRESULT(__FUNCTION__, result);
@@ -781,7 +784,7 @@ D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer)
     {
         ID3D11RenderTargetView* nullViews[] = {nullptr};
         data->d3dContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-        data->renderTargetView = nullptr;
+        data->mainRenderTargetView = nullptr;
         data->d3dContext->Flush();
         result = D3D11_CreateWindowSizeDependentResources(renderer);
         if (FAILED(result)) {
@@ -860,10 +863,21 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     textureDesc.Format = textureFormat;
     textureDesc.SampleDesc.Count = 1;
     textureDesc.SampleDesc.Quality = 0;
-    textureDesc.Usage = D3D11_USAGE_DYNAMIC;
-    textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-    textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     textureDesc.MiscFlags = 0;
+
+    if (texture->access == SDL_TEXTUREACCESS_STREAMING) {
+        textureDesc.Usage = D3D11_USAGE_DYNAMIC;
+        textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    } else {
+        textureDesc.Usage = D3D11_USAGE_DEFAULT;
+        textureDesc.CPUAccessFlags = 0;
+    }
+
+    if (texture->access == SDL_TEXTUREACCESS_TARGET) {
+        textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+    } else {
+        textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    }
 
 #if 0
     // Fill the texture with a non-black color, for debugging purposes:
@@ -891,6 +905,23 @@ D3D11_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         D3D11_DestroyTexture(renderer, texture);
         WIN_SetErrorFromHRESULT(__FUNCTION__, result);
         return -1;
+    }
+
+    if (texture->access & SDL_TEXTUREACCESS_TARGET) {
+        D3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+        renderTargetViewDesc.Format = textureDesc.Format;
+        renderTargetViewDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+        renderTargetViewDesc.Texture2D.MipSlice = 0;
+
+        result = rendererData->d3dDevice->CreateRenderTargetView(
+            textureData->mainTexture.Get(),
+            &renderTargetViewDesc,
+            &textureData->mainTextureRenderTargetView);
+        if (FAILED(result)) {
+            D3D11_DestroyTexture(renderer, texture);
+            WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+            return -1;
+        }
     }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
@@ -931,40 +962,33 @@ D3D11_DestroyTexture(SDL_Renderer * renderer,
 
 static int
 D3D11_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
-                    const SDL_Rect * rect, const void *pixels,
-                    int pitch)
+                    const SDL_Rect * rect, const void * srcPixels,
+                    int srcPitch)
 {
-    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
-    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
-    HRESULT result = S_OK;
-
-    D3D11_MAPPED_SUBRESOURCE textureMemory = {0};
-    result = rendererData->d3dContext->Map(
-        textureData->mainTexture.Get(),
-        0,
-        D3D11_MAP_WRITE_DISCARD,
-        0,
-        &textureMemory
-        );
-    if (FAILED(result)) {
-        WIN_SetErrorFromHRESULT(__FUNCTION__, result);
+    // Lock the texture, retrieving a buffer to write pixel data to:
+    void * destPixels = NULL;
+    int destPitch = 0;
+    if (D3D11_LockTexture(renderer, texture, rect, &destPixels, &destPitch) != 0) {
+        // An error is already set.  Attach some info to it, then return to
+        // the caller.
+        std::string errorMessage = string(__FUNCTION__ ", Lock Texture Failed: ") + SDL_GetError();
+        SDL_SetError(errorMessage.c_str());
         return -1;
     }
 
     // Copy pixel data to the locked texture's memory:
     for (int y = 0; y < rect->h; ++y) {
         memcpy(
-            ((Uint8 *)textureMemory.pData) + (textureMemory.RowPitch * y),
-            ((Uint8 *)pixels) + (pitch * y),
-            pitch
+            ((Uint8 *)destPixels) + (destPitch * y),
+            ((Uint8 *)srcPixels) + (srcPitch * y),
+            srcPitch
             );
     }
 
-    // Clean up a bit, then commit the texture's memory back to Direct3D:
-    rendererData->d3dContext->Unmap(
-        textureData->mainTexture.Get(),
-        0);
+    // Commit the texture's memory back to Direct3D:
+    D3D11_UnlockTexture(renderer, texture);
 
+    // Return to the caller:
     return 0;
 }
 
@@ -1054,6 +1078,29 @@ D3D11_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     // Clean up and return:
     textureData->stagingTexture = nullptr;
     textureData->lockedTexturePosition = XMINT2(0, 0);
+}
+
+static int
+D3D11_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    D3D11_RenderData *rendererData = (D3D11_RenderData *) renderer->driverdata;
+
+    if (texture == NULL) {
+        rendererData->currentOffscreenRenderTargetView = nullptr;
+        return 0;
+    }
+
+    D3D11_TextureData *textureData = (D3D11_TextureData *) texture->driverdata;
+
+    if (!textureData->mainTextureRenderTargetView) {
+        std::string errorMessage = string(__FUNCTION__) + ": specified texture is not a render target";
+        SDL_SetError(errorMessage.c_str());
+        return -1;
+    }
+
+    rendererData->currentOffscreenRenderTargetView = textureData->mainTextureRenderTargetView;
+
+    return 0;
 }
 
 static int
@@ -1177,6 +1224,17 @@ D3D11_UpdateViewport(SDL_Renderer * renderer)
     return 0;
 }
 
+static ComPtr<ID3D11RenderTargetView> &
+D3D11_GetCurrentRenderTargetView(SDL_Renderer * renderer)
+{
+    D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
+    if (data->currentOffscreenRenderTargetView) {
+        return data->currentOffscreenRenderTargetView;
+    } else {
+        return data->mainRenderTargetView;
+    }
+}
+
 static int
 D3D11_RenderClear(SDL_Renderer * renderer)
 {
@@ -1188,7 +1246,7 @@ D3D11_RenderClear(SDL_Renderer * renderer)
         (renderer->a / 255.0f)
     };
     data->d3dContext->ClearRenderTargetView(
-        data->renderTargetView.Get(),
+        D3D11_GetCurrentRenderTargetView(renderer).Get(),
         colorRGBA
         );
     return 0;
@@ -1250,7 +1308,7 @@ D3D11_RenderStartDrawOp(SDL_Renderer * renderer)
 
     rendererData->d3dContext->OMSetRenderTargets(
         1,
-        rendererData->renderTargetView.GetAddressOf(),
+        D3D11_GetCurrentRenderTargetView(renderer).GetAddressOf(),
         nullptr
         );
 }
@@ -1695,7 +1753,7 @@ D3D11_RenderPresent(SDL_Renderer * renderer)
     // Discard the contents of the render target.
     // This is a valid operation only when the existing contents will be entirely
     // overwritten. If dirty or scroll rects are used, this call should be removed.
-    data->d3dContext->DiscardView(data->renderTargetView.Get());
+    data->d3dContext->DiscardView(data->mainRenderTargetView.Get());
 
     // If the device was removed either by a disconnect or a driver upgrade, we 
     // must recreate all device resources.

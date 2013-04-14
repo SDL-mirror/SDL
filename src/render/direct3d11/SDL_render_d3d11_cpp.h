@@ -37,7 +37,8 @@ typedef struct
     Microsoft::WRL::ComPtr<ID3D11Device1> d3dDevice;
     Microsoft::WRL::ComPtr<ID3D11DeviceContext1> d3dContext;
     Microsoft::WRL::ComPtr<IDXGISwapChain1> swapChain;
-    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> renderTargetView;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mainRenderTargetView;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> currentOffscreenRenderTargetView;
     Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout;
     Microsoft::WRL::ComPtr<ID3D11Buffer> vertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11VertexShader> vertexShader;
@@ -67,6 +68,7 @@ typedef struct
 {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> mainTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> mainTextureResourceView;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> mainTextureRenderTargetView;
     SDL_PixelFormat * pixelFormat;
     Microsoft::WRL::ComPtr<ID3D11Texture2D> stagingTexture;
     DirectX::XMINT2 lockedTexturePosition;
