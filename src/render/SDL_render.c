@@ -1297,10 +1297,10 @@ RenderDrawLinesWithRects(SDL_Renderer * renderer,
             frect->h = renderer->scale.y;
         } else {
             /* FIXME: We can't use a rect for this line... */
-            frects[0].x = points[i].x * renderer->scale.x;
-            frects[0].y = points[i].y * renderer->scale.y;
-            frects[1].x = points[i+1].x * renderer->scale.x;
-            frects[1].y = points[i+1].y * renderer->scale.y;
+            fpoints[0].x = points[i].x * renderer->scale.x;
+            fpoints[0].y = points[i].y * renderer->scale.y;
+            fpoints[1].x = points[i+1].x * renderer->scale.x;
+            fpoints[1].y = points[i+1].y * renderer->scale.y;
             status += renderer->RenderDrawLines(renderer, fpoints, 2);
         }
     }
