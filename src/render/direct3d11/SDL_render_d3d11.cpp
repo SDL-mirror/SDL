@@ -23,6 +23,11 @@
 
 #if SDL_VIDEO_RENDER_D3D11 && !SDL_RENDER_DISABLED
 
+#ifdef __WINRT__
+#include <windows.ui.core.h>
+#include <windows.foundation.h>
+#endif
+
 extern "C" {
 #include "../../core/windows/SDL_windows.h"
 //#include "SDL_hints.h"
@@ -562,7 +567,7 @@ D3D11_CreateDeviceResources(SDL_Renderer * renderer)
 
 #ifdef __WINRT__
 
-static CoreWindow ^
+static ABI::Windows::UI::Core::ICoreWindow *
 D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer)
 {
     SDL_Window * sdlWindow = renderer->window;
@@ -580,12 +585,16 @@ D3D11_GetCoreWindowFromSDLRenderer(SDL_Renderer * renderer)
         return nullptr;
     }
 
-    CoreWindow ^* coreWindowPointer = (CoreWindow ^*) sdlWindowInfo.info.winrt.window;
-    if ( ! coreWindowPointer ) {
+    if ( ! sdlWindowInfo.info.winrt.window ) {
         return nullptr;
     }
 
-    return *coreWindowPointer;
+    ABI::Windows::UI::Core::ICoreWindow * coreWindow = nullptr;
+    if (FAILED(sdlWindowInfo.info.winrt.window->QueryInterface(&coreWindow))) {
+        return nullptr;
+    }
+
+    return coreWindow;
 }
 
 // Method to convert a length in device-independent pixels (DIPs) to a length in physical pixels.
@@ -604,12 +613,19 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
 {
     D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
     HRESULT result = S_OK;
-    Windows::UI::Core::CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
+    ABI::Windows::UI::Core::ICoreWindow * coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
 
     // Store the window bounds so the next time we get a SizeChanged event we can
     // avoid rebuilding everything if the size is identical.
-    data->windowSizeInDIPs.x = coreWindow->Bounds.Width;
-    data->windowSizeInDIPs.y = coreWindow->Bounds.Height;
+    ABI::Windows::Foundation::Rect coreWindowBounds;
+    result = coreWindow->get_Bounds(&coreWindowBounds);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__", Get Window Bounds", result);
+        return result;
+    }
+
+    data->windowSizeInDIPs.x = coreWindowBounds.Width;
+    data->windowSizeInDIPs.y = coreWindowBounds.Height;
 
     // Calculate the necessary swap chain and render target size in pixels.
     float windowWidth = D3D11_ConvertDipsToPixels(data->windowSizeInDIPs.x);
@@ -685,9 +701,16 @@ D3D11_CreateWindowSizeDependentResources(SDL_Renderer * renderer)
             return result;
         }
 
+        IUnknown * coreWindowAsIUnknown = nullptr;
+        result = coreWindow->QueryInterface(&coreWindowAsIUnknown);
+        if (FAILED(result)) {
+            WIN_SetErrorFromHRESULT(__FUNCTION__ ", CoreWindow to IUnknown", result);
+            return result;
+        }
+
         result = dxgiFactory->CreateSwapChainForCoreWindow(
             data->d3dDevice.Get(),
-            reinterpret_cast<IUnknown*>(coreWindow),
+            coreWindowAsIUnknown,
             &swapChainDesc,
             nullptr, // Allow on all displays.
             &data->swapChain
@@ -776,10 +799,17 @@ D3D11_UpdateForWindowSizeChange(SDL_Renderer * renderer)
 {
     D3D11_RenderData *data = (D3D11_RenderData *) renderer->driverdata;
     HRESULT result = S_OK;
-    Windows::UI::Core::CoreWindow ^ coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
+    ABI::Windows::UI::Core::ICoreWindow * coreWindow = D3D11_GetCoreWindowFromSDLRenderer(renderer);
+    ABI::Windows::Foundation::Rect coreWindowBounds;
 
-    if (coreWindow->Bounds.Width  != data->windowSizeInDIPs.x ||
-        coreWindow->Bounds.Height != data->windowSizeInDIPs.y ||
+    result = coreWindow->get_Bounds(&coreWindowBounds);
+    if (FAILED(result)) {
+        WIN_SetErrorFromHRESULT(__FUNCTION__ ", Get Window Bounds", result);
+        return result;
+    }
+
+    if (coreWindowBounds.Width  != data->windowSizeInDIPs.x ||
+        coreWindowBounds.Height != data->windowSizeInDIPs.y ||
         data->orientation != DisplayProperties::CurrentOrientation)
     {
         ID3D11RenderTargetView* nullViews[] = {nullptr};

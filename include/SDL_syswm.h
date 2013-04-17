@@ -58,6 +58,10 @@ struct SDL_SysWMinfo;
 #include <windows.h>
 #endif
 
+#if defined(SDL_VIDEO_DRIVER_WINRT)
+#include <Unknwn.h>
+#endif
+
 /* This is the structure for custom window manager events */
 #if defined(SDL_VIDEO_DRIVER_X11)
 #if defined(__APPLE__) && defined(__MACH__)
@@ -175,7 +179,7 @@ struct SDL_SysWMinfo
 #if defined(SDL_VIDEO_DRIVER_WINRT)
         struct
         {
-            void * window;          /**< The Windows RT CoreWindow, casted from 'CoreWindow ^*' to 'void *' */
+            IUnknown * window;          /**< The Windows RT CoreWindow */
         } winrt;
 #endif
 #if defined(SDL_VIDEO_DRIVER_X11)

@@ -172,7 +172,7 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
     }
     window->driverdata = data;
     data->sdlWindow = window;
-    data->coreWindow = new CoreWindow^(CoreWindow::GetForCurrentThread());
+    data->coreWindow = CoreWindow::GetForCurrentThread();
 
     /* Make sure the window is considered to be positioned at {0,0},
        and is considered fullscreen, shown, and the like.
@@ -233,13 +233,6 @@ WINRT_DestroyWindow(_THIS, SDL_Window * window)
     }
 
     if (data) {
-        // Delete the reference to the WinRT CoreWindow:
-        CoreWindow ^* windowPointer = ((SDL_WindowData *) window->driverdata)->coreWindow;
-        if (windowPointer) {
-            *windowPointer = nullptr;   // Clear the C++/CX reference to the CoreWindow
-            delete windowPointer;       // Delete the C++/CX reference itself
-        }
-
         // Delete the internal window data:
         delete data;
         data = NULL;
@@ -250,11 +243,10 @@ SDL_bool
 WINRT_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
 {
     SDL_WindowData * data = (SDL_WindowData *) window->driverdata;
-    CoreWindow ^* windowPointer = data->coreWindow;
 
     if (info->version.major <= SDL_MAJOR_VERSION) {
         info->subsystem = SDL_SYSWM_WINDOWSRT;
-        info->info.winrt.window = windowPointer;
+        info->info.winrt.window = reinterpret_cast<IUnknown *>(data->coreWindow.Get());
         return SDL_TRUE;
     } else {
         SDL_SetError("Application not compiled with SDL %d.%d\n",

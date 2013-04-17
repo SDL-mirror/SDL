@@ -27,10 +27,12 @@ extern "C" {
 #include "../SDL_sysvideo.h"
 }
 
+#include <agile.h>
+
 struct SDL_WindowData
 {
     SDL_Window *sdlWindow;
-    Windows::UI::Core::CoreWindow ^* coreWindow;
+    Platform::Agile<Windows::UI::Core::CoreWindow> coreWindow;
 };
 
 #endif /* _SDL_winrtvideo_h */
