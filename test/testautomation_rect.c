@@ -614,8 +614,11 @@ int rect_testIntersectRectEmpty (void *arg)
     SDL_Rect rectB;
     SDL_Rect result;
     SDL_bool intersection;
+    SDL_bool empty;
 
     // Rect A empty
+    result.w = SDLTest_RandomIntegerInRange(1, 100);
+    result.h = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.x = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.y = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.w = SDLTest_RandomIntegerInRange(1, 100);
@@ -627,8 +630,12 @@ int rect_testIntersectRectEmpty (void *arg)
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
     _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
-
+    empty = (SDL_bool)SDL_RectEmpty(&result);
+    SDLTest_AssertCheck(empty == SDL_TRUE, "Validate result is empty Rect; got: %s", (empty == SDL_TRUE) ? "SDL_TRUE" : "SDL_FALSE");
+    
     // Rect B empty
+    result.w = SDLTest_RandomIntegerInRange(1, 100);
+    result.h = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.x = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.y = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.w = SDLTest_RandomIntegerInRange(1, 100);
@@ -640,8 +647,12 @@ int rect_testIntersectRectEmpty (void *arg)
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
     _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    empty = (SDL_bool)SDL_RectEmpty(&result);
+    SDLTest_AssertCheck(empty == SDL_TRUE, "Validate result is empty Rect; got: %s", (empty == SDL_TRUE) ? "SDL_TRUE" : "SDL_FALSE");
 
     // Rect A and B empty
+    result.w = SDLTest_RandomIntegerInRange(1, 100);
+    result.h = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.x = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.y = SDLTest_RandomIntegerInRange(1, 100);
     refRectA.w = SDLTest_RandomIntegerInRange(1, 100);
@@ -655,8 +666,10 @@ int rect_testIntersectRectEmpty (void *arg)
     rectB = refRectB;
     intersection = SDL_IntersectRect(&rectA, &rectB, &result);
     _validateIntersectRectResults(intersection, SDL_FALSE, &rectA, &rectB, &refRectA, &refRectB, (SDL_Rect *)NULL, (SDL_Rect *)NULL);
+    empty = (SDL_bool)SDL_RectEmpty(&result);
+    SDLTest_AssertCheck(empty == SDL_TRUE, "Validate result is empty Rect; got: %s", (empty == SDL_TRUE) ? "SDL_TRUE" : "SDL_FALSE");
 
-	return TEST_COMPLETED;
+    return TEST_COMPLETED;
 }
 
 /*!
