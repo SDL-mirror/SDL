@@ -1635,7 +1635,7 @@ int QZ_GetGamma (_THIS, float *red, float *green, float *blue)
 
 int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 {
-    const uint32_t tableSize = 255;
+    const uint32_t tableSize = 256;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
     CGGammaValue blueTable[tableSize];
@@ -1644,13 +1644,13 @@ int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 
     /* Extract gamma values into separate tables, convert to floats between 0.0 and 1.0 */
     for (i = 0; i < 256; i++)
-        redTable[i % 256] = ramp[i] / 65535.0;
+        redTable[i % tableSize] = ramp[i] / 65535.0;
 
     for (i=256; i < 512; i++)
-        greenTable[i % 256] = ramp[i] / 65535.0;
+        greenTable[i % tableSize] = ramp[i] / 65535.0;
 
     for (i=512; i < 768; i++)
-        blueTable[i % 256] = ramp[i] / 65535.0;
+        blueTable[i % tableSize] = ramp[i] / 65535.0;
 
     if ( CGDisplayNoErr == CGSetDisplayTransferByTable
          (display_id, tableSize, redTable, greenTable, blueTable) )
@@ -1661,7 +1661,7 @@ int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 
 int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
 {
-    const uint32_t tableSize = 255;
+    const uint32_t tableSize = 256;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
     CGGammaValue blueTable[tableSize];
@@ -1676,13 +1676,13 @@ int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
 
     /* Pack tables into one array, with values from 0 to 65535 */
     for (i = 0; i < 256; i++)
-        ramp[i] = redTable[i % 256] * 65535.0;
+        ramp[i] = redTable[i % tableSize] * 65535.0;
 
     for (i=256; i < 512; i++)
-        ramp[i] = greenTable[i % 256] * 65535.0;
+        ramp[i] = greenTable[i % tableSize] * 65535.0;
 
     for (i=512; i < 768; i++)
-        ramp[i] = blueTable[i % 256] * 65535.0;
+        ramp[i] = blueTable[i % tableSize] * 65535.0;
 
     return 0;
 }
