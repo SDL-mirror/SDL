@@ -524,29 +524,17 @@ decode_edid (const uchar *edid)
 
     decode_check_sum (edid, info);
     
-    if (!decode_header (edid))
+    if (!decode_header (edid) ||
+        !decode_vendor_and_product_identification (edid, info) ||
+        !decode_edid_version (edid, info) ||
+        !decode_display_parameters (edid, info) ||
+        !decode_color_characteristics (edid, info) ||
+        !decode_established_timings (edid, info) ||
+        !decode_standard_timings (edid, info) ||
+        !decode_descriptors (edid, info)) {
+        free(info);
 	return NULL;
-
-    if (!decode_vendor_and_product_identification (edid, info))
-	return NULL;
-
-    if (!decode_edid_version (edid, info))
-	return NULL;
-
-    if (!decode_display_parameters (edid, info))
-	return NULL;
-
-    if (!decode_color_characteristics (edid, info))
-	return NULL;
-
-    if (!decode_established_timings (edid, info))
-	return NULL;
-
-    if (!decode_standard_timings (edid, info))
-	return NULL;
-    
-    if (!decode_descriptors (edid, info))
-	return NULL;
+    }
     
     return info;
 }
