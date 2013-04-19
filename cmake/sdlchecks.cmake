@@ -551,7 +551,7 @@ macro(CheckPTHREAD)
   if(PTHREADS)
     if(LINUX)
       set(PTHREAD_CFLAGS "-D_REENTRANT")
-      set(PTHREAD_LDFLAGS "-lpthread")
+      set(PTHREAD_LDFLAGS "-pthread")
     elseif(BSDI)
       set(PTHREAD_CFLAGS "-D_REENTRANT -D_THREAD_SAFE")
       set(PTHREAD_LDFLAGS "")
@@ -607,6 +607,7 @@ macro(CheckPTHREAD)
         int main(int argc, char **argv) {
           pthread_mutexattr_t attr;
           pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+          return 0;
         }" HAVE_RECURSIVE_MUTEXES)
       if(HAVE_RECURSIVE_MUTEXES)
         set(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1)
@@ -616,6 +617,7 @@ macro(CheckPTHREAD)
             int main(int argc, char **argv) {
               pthread_mutexattr_t attr;
               pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+              return 0;
             }" HAVE_RECURSIVE_MUTEXES_NP)
         if(HAVE_RECURSIVE_MUTEXES_NP)
           set(SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP 1)
@@ -624,7 +626,8 @@ macro(CheckPTHREAD)
 
       if(PTHREADS_SEM)
         check_c_source_compiles("#include <pthread.h>
-                                 #include <semaphore.h>" HAVE_PTHREADS_SEM)
+                                 #include <semaphore.h>
+                                 int main(int argc, char **argv) { return 0; }" HAVE_PTHREADS_SEM)
         if(HAVE_PTHREADS_SEM)
           check_c_source_compiles("
               #include <pthread.h>
