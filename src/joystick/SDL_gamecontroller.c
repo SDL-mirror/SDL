@@ -164,7 +164,7 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 							case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
 							case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
 								/* Shift it to be 0 - 32767. */
-								value = ( value + 32768 ) / 2;
+								value = value / 2 + 16384;
 							default:
 								break;
 						}
