@@ -32,7 +32,7 @@ import java.lang.*;
 public class SDLActivity extends Activity {
 
     // Keep track of the paused state
-    public static boolean mIsPaused;
+    public static boolean mIsPaused = false;
 
     // Main components
     private static SDLActivity mSingleton;
@@ -70,9 +70,6 @@ public class SDLActivity extends Activity {
         
         // So we can call stuff from static callbacks
         mSingleton = this;
-
-        // Keep track of the paused state
-        mIsPaused = false;
 
         // Set up the surface
         mSurface = new SDLSurface(getApplication());
