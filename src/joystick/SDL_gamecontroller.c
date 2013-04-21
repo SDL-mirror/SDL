@@ -157,7 +157,18 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 				{
 					if ( controllerlist->mapping.raxes[event->jaxis.axis] >= 0 ) // simple axis to axis, send it through
 					{
-						SDL_PrivateGameControllerAxis( controllerlist, controllerlist->mapping.raxes[event->jaxis.axis], event->jaxis.value );
+						SDL_GameControllerAxis axis = controllerlist->mapping.raxes[event->jaxis.axis];
+                        Sint16 value = event->jaxis.value;
+						switch (axis)
+						{
+							case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+							case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+								/* Shift it to be 0 - 32767. */
+								value = value / 2 + 16384;
+							default:
+								break;
+						}
+						SDL_PrivateGameControllerAxis( controllerlist, axis, value );
 					}
 					else if ( controllerlist->mapping.raxesasbutton[event->jaxis.axis] >= 0 ) // simlate an axis as a button
 					{
@@ -187,7 +198,7 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 					}
 					else if ( controllerlist->mapping.rbuttonasaxis[event->jbutton.button] >= 0 ) // an button pretending to be an axis
 					{
-						SDL_PrivateGameControllerAxis( controllerlist, controllerlist->mapping.rbuttonasaxis[event->jbutton.button], event->jbutton.state > 0 ? 32768 : 0 );
+						SDL_PrivateGameControllerAxis( controllerlist, controllerlist->mapping.rbuttonasaxis[event->jbutton.button], event->jbutton.state > 0 ? 32767 : 0 );
 					}
 					break;
 				}

@@ -132,12 +132,6 @@ SDL_StartEventLoop(void)
        FIXME: Does this introduce any other bugs with events at startup?
      */
 
-    /* No filter to start with, process most event types */
-    SDL_EventOK = NULL;
-    SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
-    SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
-    SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
-
     /* Create the lock and set ourselves active */
 #if !SDL_THREADS_DISABLED
     if (!SDL_EventQ.lock) {
@@ -147,6 +141,13 @@ SDL_StartEventLoop(void)
         return (-1);
     }
 #endif /* !SDL_THREADS_DISABLED */
+
+    /* No filter to start with, process most event types */
+    SDL_EventOK = NULL;
+    SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
+    SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
+    SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
+
     SDL_EventQ.active = 1;
 
     return (0);
@@ -373,7 +374,7 @@ int
 SDL_PushEvent(SDL_Event * event)
 {
     SDL_EventWatcher *curr;
-    event->generic.timestamp = SDL_GetTicks();
+    event->common.timestamp = SDL_GetTicks();
     if (SDL_EventOK && !SDL_EventOK(SDL_EventOKParam, event)) {
         return 0;
     }

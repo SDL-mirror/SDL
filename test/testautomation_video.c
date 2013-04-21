@@ -3,6 +3,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 /* Visual Studio 2008 doesn't have stdint.h */
 #if defined(_MSC_VER) && _MSC_VER <= 1500
@@ -1522,7 +1523,7 @@ video_getSetWindowData(void *arg)
   	returnValue = TEST_ABORTED; 
   	goto cleanup; 
   }
-  userdata = (char *)strdup(referenceUserdata);
+  userdata = SDL_strdup(referenceUserdata);
   if (userdata == NULL) {
   	returnValue = TEST_ABORTED; 
   	goto cleanup; 

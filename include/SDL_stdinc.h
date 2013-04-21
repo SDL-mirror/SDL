@@ -100,9 +100,11 @@
 #ifdef __cplusplus
 #define SDL_reinterpret_cast(type, expression) reinterpret_cast<type>(expression)
 #define SDL_static_cast(type, expression) static_cast<type>(expression)
+#define SDL_const_cast(type, expression) const_cast<type>(expression)
 #else
 #define SDL_reinterpret_cast(type, expression) ((type)(expression))
 #define SDL_static_cast(type, expression) ((type)(expression))
+#define SDL_const_cast(type, expression) ((type)(expression))
 #endif
 /*@}*//*Cast operators*/
 
@@ -509,49 +511,25 @@ SDL_FORCE_INLINE char *SDL_strlwr_inline(char *str) { return _strlwr(str); }
 
 extern DECLSPEC char *SDLCALL SDL_strchr(const char *str, int c);
 #ifdef HAVE_STRCHR
-SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) {
-#ifdef __cplusplus
-return const_cast<char*>(strchr(str, c));
-#else
-return (char*)strchr(str, c);
-#endif
-}
+SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return SDL_const_cast(char*,strchr(str, c)); }
 #define SDL_strchr SDL_strchr_inline
 #elif defined(HAVE_INDEX)  /* !!! FIXME: is there anywhere that has this but not strchr? */
-SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return index(str, c); }
+SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return SDL_const_cast(char*,index(str, c)); }
 #define SDL_strchr SDL_strchr_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strrchr(const char *str, int c);
 #ifdef HAVE_STRRCHR
-SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) {
-#ifdef __cplusplus
-return const_cast<char*>(strrchr(str, c));
-#else
-return (char*)strrchr(str, c);
-#endif
-}
+SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return SDL_const_cast(char*,strrchr(str, c)); }
 #define SDL_strrchr SDL_strrchr_inline
 #elif defined(HAVE_RINDEX)  /* !!! FIXME: is there anywhere that has this but not strrchr? */
-SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) {
-#ifdef __cplusplus
-return const_cast<char*>(rindex(str, c));
-#else
-return (char*)rindex(str, c);
-#endif
-}
+SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return SDL_const_cast(char*,rindex(str, c)); }
 #define SDL_strrchr SDL_strrchr_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strstr(const char *haystack, const char *needle);
 #ifdef HAVE_STRSTR
-SDL_FORCE_INLINE char *SDL_strstr_inline(const char *haystack, const char *needle) {
-#ifdef __cplusplus
-return const_cast<char*>(strstr(haystack, needle));
-#else
-return (char*)strstr(haystack, needle);
-#endif
-}
+SDL_FORCE_INLINE char *SDL_strstr_inline(const char *haystack, const char *needle) { return SDL_const_cast(char*,strstr(haystack, needle)); }
 #define SDL_strstr SDL_strstr_inline
 #endif
 

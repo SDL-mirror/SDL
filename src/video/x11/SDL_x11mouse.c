@@ -129,8 +129,14 @@ X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
     unsigned int width_bytes = ((surface->w + 7) & ~7) / 8;
 
     data_bits = SDL_calloc(1, surface->h * width_bytes);
+    if (!data_bits) {
+        SDL_OutOfMemory();
+        return None;
+    }
+
     mask_bits = SDL_calloc(1, surface->h * width_bytes);
-    if (!data_bits || !mask_bits) {
+    if (!mask_bits) {
+        SDL_free(data_bits);
         SDL_OutOfMemory();
         return None;
     }

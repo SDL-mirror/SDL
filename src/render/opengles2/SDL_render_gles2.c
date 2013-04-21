@@ -1564,8 +1564,7 @@ static int GLES2_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
     GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
     GLES2_ActivateRenderer(renderer);
 
-    data->glActiveTexture(GL_TEXTURE0);
-    data->glDisable(texturedata->texture_type);
+    data->glBindTexture(texturedata->texture_type, 0);
 
     return 0;
 }

@@ -124,11 +124,11 @@ typedef enum
 /**
  *  \brief Fields shared by every event
  */
-typedef struct SDL_GenericEvent
+typedef struct SDL_CommonEvent
 {
     Uint32 type;
     Uint32 timestamp;
-} SDL_GenericEvent;
+} SDL_CommonEvent;
     
 /**
  *  \brief Window state change event data (event.window.*)
@@ -464,7 +464,7 @@ typedef struct SDL_SysWMEvent
 typedef union SDL_Event
 {
     Uint32 type;                    /**< Event type, shared with all events */
-    SDL_GenericEvent generic;       /**< Generic event data */
+    SDL_CommonEvent common;         /**< Common event data */
     SDL_WindowEvent window;         /**< Window event data */
     SDL_KeyboardEvent key;          /**< Keyboard event data */
     SDL_TextEditingEvent edit;      /**< Text editing event data */

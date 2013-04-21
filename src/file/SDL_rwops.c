@@ -635,8 +635,9 @@ SDL_AllocRW(void)
     area = (SDL_RWops *) SDL_malloc(sizeof *area);
     if (area == NULL) {
         SDL_OutOfMemory();
+    } else {
+        area->type = SDL_RWOPS_UNKNOWN;
     }
-    area->type = SDL_RWOPS_UNKNOWN;
     return (area);
 }
 
