@@ -148,8 +148,3 @@
 #endif
 #endif /* NULL */
 #endif /* ! Mac OS X - breaks precompiled headers */
-
-/* HACK: Make sure C++/CX works when compiling WinRT code */
-#if defined(__WINRT__)
-#define generic generic_
-#endif

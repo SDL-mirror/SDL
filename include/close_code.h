@@ -35,8 +35,3 @@
 #endif
 #pragma pack(pop)
 #endif /* Compiler needs structure packing set */
-
-/* Revert hack used to get C++/CX (WinRT) code compiling. */
-#if defined(__WINRT__)
-#undef generic
-#endif
