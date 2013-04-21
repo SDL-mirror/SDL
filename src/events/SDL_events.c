@@ -365,7 +365,7 @@ int
 SDL_PushEvent(SDL_Event * event)
 {
     SDL_EventWatcher *curr;
-    event->generic.timestamp = SDL_GetTicks();
+    event->common.timestamp = SDL_GetTicks();
     if (SDL_EventOK && !SDL_EventOK(SDL_EventOKParam, event)) {
         return 0;
     }
