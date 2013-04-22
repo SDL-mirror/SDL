@@ -64,6 +64,7 @@ static recDevice *gpDeviceList = NULL;
 IONotificationPortRef notificationPort = 0;
 /* if 1 then a device was added since the last update call */
 static SDL_bool s_bDeviceAdded = SDL_FALSE;
+static SDL_bool s_bDeviceRemoved = SDL_FALSE;
 
 /* static incrementing counter for new joystick devices seen on the system. Devices should start with index 0 */
 static int s_joystick_instance_id = -1;
@@ -126,6 +127,7 @@ HIDRemovalCallback(void *target, IOReturn result, void *refcon, void *sender)
 {
     recDevice *device = (recDevice *) refcon;
     device->removed = 1;
+	s_bDeviceRemoved = SDL_TRUE;
 }
 
 
@@ -137,6 +139,7 @@ void JoystickDeviceWasRemovedCallback( void * refcon, io_service_t service, natu
     {
 		recDevice *device = (recDevice *) refcon;
 		device->removed = 1;
+		s_bDeviceRemoved = SDL_TRUE;
 	}
 }
 
@@ -804,7 +807,8 @@ SDL_SYS_NumJoysticks()
 	
 	while ( device )
 	{
-		nJoySticks++;
+		if ( !device->removed )
+			nJoySticks++;
         device = device->pNext;
 	}
 
@@ -816,10 +820,11 @@ SDL_SYS_NumJoysticks()
 void
 SDL_SYS_JoystickDetect()
 {
-	if ( s_bDeviceAdded )
+	if ( s_bDeviceAdded || s_bDeviceRemoved )
 	{
 		recDevice *device = gpDeviceList;
 		s_bDeviceAdded = SDL_FALSE;
+		s_bDeviceRemoved = SDL_FALSE;
 		int device_index = 0;
 		// send notifications
 		while ( device )
@@ -839,9 +844,49 @@ SDL_SYS_JoystickDetect()
 					}
 				}
 #endif /* !SDL_EVENTS_DISABLED */
+				
 			}
-			device_index++;
-			device = device->pNext;
+			
+			if ( device->removed )
+			{
+				recDevice *removeDevice = device;
+				if ( gpDeviceList == removeDevice )
+				{
+					device = device->pNext;
+					gpDeviceList = device;
+				}
+				else
+				{
+					device = gpDeviceList;
+					while ( device->pNext != removeDevice )
+					{
+						device = device->pNext;
+					}
+					
+					device->pNext = removeDevice->pNext;
+				}
+								
+#if !SDL_EVENTS_DISABLED
+				SDL_Event event;
+				event.type = SDL_JOYDEVICEREMOVED;
+				
+				if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+					event.jdevice.which = removeDevice->instance_id;
+					if ((SDL_EventOK == NULL)
+						|| (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+						SDL_PushEvent(&event);
+					}
+				}
+
+				DisposePtr((Ptr) removeDevice);
+#endif /* !SDL_EVENTS_DISABLED */	
+				
+			}
+			else
+			{
+				device = device->pNext;
+				device_index++;
+			}
 		}
 	}
 }
@@ -849,7 +894,7 @@ SDL_SYS_JoystickDetect()
 SDL_bool
 SDL_SYS_JoystickNeedsPolling()
 {
-	return s_bDeviceAdded;
+	return s_bDeviceAdded || s_bDeviceRemoved;
 }
 
 /* Function to get the device-dependent name of a joystick */

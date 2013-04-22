@@ -629,6 +629,8 @@ SDL_JoystickUpdate(void)
 		joystick = joysticknext;
 	}
 
+	// this needs to happen AFTER walking the joystick list above, so that any
+	// dangling hardware data from removed devices can be free'd
 	SDL_SYS_JoystickDetect();
 }
 
