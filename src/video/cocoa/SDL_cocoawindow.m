@@ -591,6 +591,11 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
         SDL_SetKeyboardFocus(data->window);
     }
 
+    /* Prevents the window's "window device" from being destroyed when it is
+     * hidden. See http://www.mikeash.com/pyblog/nsopenglcontext-and-one-shot.html
+     */
+    [nswindow setOneShot:NO];
+
     /* All done! */
     [pool release];
     window->driverdata = data;
@@ -633,7 +638,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
             rect.origin.y -= screenRect.origin.y;
         }
     }
-    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:YES screen:screen];
+    nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:NO screen:screen];
 
     // Create a default view for this window
     rect = [nswindow contentRectForFrameRect:[nswindow frame]];
@@ -856,8 +861,10 @@ Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
     }
 
     [data->listener close];
-    data->nswindow = [[SDLWindow alloc] initWithContentRect:[[nswindow contentView] frame] styleMask:style backing:NSBackingStoreBuffered defer:YES screen:[nswindow screen]];
+    data->nswindow = [[SDLWindow alloc] initWithContentRect:[[nswindow contentView] frame] styleMask:style backing:NSBackingStoreBuffered defer:NO screen:[nswindow screen]];
     [data->nswindow setContentView:[nswindow contentView]];
+    /* See comment in SetupWindowData. */
+    [data->nswindow setOneShot:NO];
     [data->listener listen:data];
 
     [nswindow close];
