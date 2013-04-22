@@ -1130,13 +1130,18 @@ extern "C" void *SDL_AndroidGetJNIEnv()
     return Android_JNI_GetEnv();
 }
 
+/*
+ * The jobject returned by SDL_AndroidGetActivity is a local reference.
+ * It is the caller's responsibility to properly release it
+ * (using LocalReferenceHolder or manually with env->DeleteLocalRef)
+ */
+
 extern "C" void *SDL_AndroidGetActivity()
 {
-    LocalReferenceHolder refs(__FUNCTION__);
     jmethodID mid;
 
     JNIEnv *env = Android_JNI_GetEnv();
-    if (!refs.init(env)) {
+    if (!env) {
         return NULL;
     }
 
