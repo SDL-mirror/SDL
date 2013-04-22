@@ -65,6 +65,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
         [window setDelegate:self];
     }
 
+    // Haven't found a delegate / notification that triggers when the window is
+    // ordered out (is not visible any more). You can be ordered out without
+    // minimizing, so DidMiniaturize doesn't work. (e.g. -[NSWindow orderOut:])
+    [window addObserver:self
+             forKeyPath:@"visible"
+                options:NSKeyValueObservingOptionNew
+                context:NULL];
+
     [window setNextResponder:self];
     [window setAcceptsMouseMovedEvents:YES];
 
@@ -75,6 +83,21 @@ static __inline__ void ConvertNSRect(NSRect *r)
         [view setAcceptsTouchEvents:YES];
     }
 #endif
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    if (object == _data->nswindow && [keyPath isEqualToString:@"visible"]) {
+        int newVisibility = [[change objectForKey:@"new"] intValue];
+        if (newVisibility) {
+            SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+        } else {
+            SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+        }
+    }
 }
 
 - (void)close
@@ -96,6 +119,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
     } else {
         [window setDelegate:nil];
     }
+
+    [window removeObserver:self
+                forKeyPath:@"visible"];
 
     if ([window nextResponder] == self) {
         [window setNextResponder:nil];
@@ -531,6 +557,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     } else {
         window->flags &= ~SDL_WINDOW_SHOWN;
     }
+
     {
         unsigned int style = [nswindow styleMask];
 
@@ -545,17 +572,20 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
             window->flags &= ~SDL_WINDOW_RESIZABLE;
         }
     }
+
     /* isZoomed always returns true if the window is not resizable */
     if ((window->flags & SDL_WINDOW_RESIZABLE) && [nswindow isZoomed]) {
         window->flags |= SDL_WINDOW_MAXIMIZED;
     } else {
         window->flags &= ~SDL_WINDOW_MAXIMIZED;
     }
+
     if ([nswindow isMiniaturized]) {
         window->flags |= SDL_WINDOW_MINIMIZED;
     } else {
         window->flags &= ~SDL_WINDOW_MINIMIZED;
     }
+
     if ([nswindow isKeyWindow]) {
         window->flags |= SDL_WINDOW_INPUT_FOCUS;
         SDL_SetKeyboardFocus(data->window);
