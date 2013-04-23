@@ -1097,10 +1097,33 @@ SDLTest_ScreenShot(SDL_Renderer *renderer)
     }
 }
 
+static void 
+FullscreenTo(int index, int windowId)
+{
+    Uint32 flags;
+    struct SDL_Rect rect = { 0, 0, 0, 0 };
+    SDL_Window *window = SDL_GetWindowFromID(windowId);
+    if (!window) {
+        return;
+    }
+
+    SDL_GetDisplayBounds( index, &rect );
+
+    flags = SDL_GetWindowFlags(window);
+    if (flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_SetWindowFullscreen( window, SDL_FALSE );
+        SDL_Delay( 15 );
+    }
+
+    SDL_SetWindowPosition( window, rect.x, rect.y );
+    SDL_SetWindowFullscreen( window, SDL_TRUE );
+}
+
 void
 SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
 {
     int i;
+    static SDL_MouseMotionEvent lastEvent;
 
     if (state->verbose & VERBOSE_EVENT) {
         SDLTest_PrintEvent(event);
@@ -1255,15 +1278,34 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
-        case SDLK_1:
+		case SDLK_0:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Test Message", "You're awesome!", window);
             }
             break;
+        case SDLK_1:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                FullscreenTo(0, event->key.windowID);
+            }
+            break;
+        case SDLK_2:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                FullscreenTo(1, event->key.windowID);
+            }
+            break;
         case SDLK_ESCAPE:
             *done = 1;
             break;
+        case SDLK_SPACE:
+        {
+            char message[256];
+            SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+
+            SDL_snprintf(message, sizeof(message), "(%i, %i), rel (%i, %i)\n", lastEvent.x, lastEvent.y, lastEvent.xrel, lastEvent.yrel);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Last mouse position", message, window);
+            break;
+        }
         default:
             break;
         }
@@ -1271,6 +1313,9 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
     case SDL_QUIT:
         *done = 1;
         break;
+    case SDL_MOUSEMOTION:
+        lastEvent = event->motion;
+		break;
     }
 }
 
