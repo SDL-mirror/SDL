@@ -29,13 +29,67 @@ quit(int rc)
     exit(rc);
 }
 
+static int
+button_messagebox(void *eventNumber)
+{
+    const SDL_MessageBoxButtonData buttons[] = {
+        {
+            SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
+            0,
+            "OK"
+        },{
+            SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
+            1,
+            "Cancel"
+        },
+    };
+
+    SDL_MessageBoxData data = {
+        SDL_MESSAGEBOX_INFORMATION,
+        NULL, // no parent window
+        "Custom MessageBox",
+        "This is a custom messagebox",
+        2,
+        buttons,
+        NULL // Default color scheme
+    };
+
+    int button = -1;
+    int success = 0;
+    if (eventNumber) {
+        data.message = "This is a custom messagebox from a background thread.";
+    }
+
+    success =SDL_ShowMessageBox(&data, &button);
+    if (success == -1) {
+        printf("Error Presenting MessageBox: %s\n", SDL_GetError());
+        if (eventNumber) {
+            SDL_UserEvent event;
+            event.type = (intptr_t)eventNumber;
+            SDL_PushEvent((SDL_Event*)&event);
+            return 1;
+        } else {
+            quit(2);
+        }
+    }
+    printf("Pressed button: %d, %s\n", button, button == 1 ? "Cancel" : "OK");
+
+    if (eventNumber) {
+        SDL_UserEvent event;
+        event.type = (intptr_t)eventNumber;
+        SDL_PushEvent((SDL_Event*)&event);
+    }
+
+    return 0;
+}
+
 int
 main(int argc, char *argv[])
 {
     int success;
 
     /* Load the SDL library */
-    if (SDL_Init(0) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         return (1);
     }
@@ -78,36 +132,27 @@ main(int argc, char *argv[])
         quit(1);
     }
 
+    button_messagebox(NULL);
+
+    /* Technically this isn't a supported operation for the API, but it doesn't
+     * hurt for it to work.
+     */
     {
-        const SDL_MessageBoxButtonData buttons[] = {
-            {
-                SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
-                0,
-                "OK"
-            },{
-                SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
-                1,
-                "Cancel"
-            },
-        };
+        int status = 0;
+        SDL_Event event;
+        intptr_t eventNumber = SDL_RegisterEvents(1);
+        SDL_Thread* thread = SDL_CreateThread(&button_messagebox, "MessageBox", (void*)eventNumber);
 
-        SDL_MessageBoxData data = {
-            SDL_MESSAGEBOX_INFORMATION,
-            NULL, // no parent window
-            "Custom MessageBox",
-            "This is a custom messagebox",
-            2,
-            buttons,
-            NULL // Default color scheme
-        };
-
-        int button = -1;
-        success = SDL_ShowMessageBox(&data, &button);
-        if (success == -1) {
-            printf("Error Presenting MessageBox: %s\n", SDL_GetError());
-            quit(2);
+        while (SDL_WaitEvent(&event))
+        {
+            if (event.type == eventNumber) {
+                break;
+            }
         }
-        printf("Pressed button: %d, %s\n", button, button == 1 ? "Cancel" : "OK");
+
+        SDL_WaitThread(thread, &status);
+
+        printf("Message box thread return %i\n", status);
     }
 
     SDL_Quit();
