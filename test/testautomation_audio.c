@@ -862,8 +862,11 @@ static const SDLTest_TestCaseReference audioTest11 =
 static const SDLTest_TestCaseReference audioTest12 =
 		{ (SDLTest_TestCaseFp)audio_quitInitAudioSubSystem, "audio_quitInitAudioSubSystem", "Quit and re-init audio subsystem.", TEST_ENABLED };
 
+/* TODO: enable when bugs 1343 and 1396 are fixed.                                          */
+/* For debugging, test case can be run manually using --filter audio_initQuitAudio */
+
 static const SDLTest_TestCaseReference audioTest13 =
-		{ (SDLTest_TestCaseFp)audio_initQuitAudio, "audio_initQuitAudio", "Init and quit audio drivers directly.", TEST_ENABLED };
+		{ (SDLTest_TestCaseFp)audio_initQuitAudio, "audio_initQuitAudio", "Init and quit audio drivers directly.", TEST_DISABLED };
 
 /* TODO: enable when bugs 1343 and 1396 are fixed.                                          */
 /* For debugging, test case can be run manually using --filter audio_initOpenCloseQuitAudio */
