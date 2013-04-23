@@ -62,6 +62,9 @@ extern DECLSPEC void * SDLCALL SDL_AndroidGetJNIEnv();
 
 /* Get the SDL Activity object for the application
    This returns jobject, but the prototype is void* so we don't need jni.h
+   The jobject returned by SDL_AndroidGetActivity is a local reference.
+   It is the caller's responsibility to properly release it
+   (using LocalReferenceHolder or manually with env->DeleteLocalRef)
  */
 extern DECLSPEC void * SDLCALL SDL_AndroidGetActivity();
 
