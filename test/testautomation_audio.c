@@ -26,7 +26,163 @@ _audioSetUp(void *arg)
 }
 
 
+/* Test callback function */
+void _audio_testCallback(void *userdata, Uint8 *stream, int len)
+{
+   /* TODO: add tracking if callback was called */
+}
+
+
 /* Test case functions */
+
+/**
+ * \brief Stop and restart audio subsystem
+ * 
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_QuitSubSystem
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_InitSubSystem
+ */
+int audio_quitInitAudioSubSystem()
+{
+	/* Stop SDL audio subsystem */
+	SDL_QuitSubSystem( SDL_INIT_AUDIO );
+        SDLTest_AssertPass("Call to SDL_QuitSubSystem(SDL_INIT_AUDIO)");
+
+        /* Restart audio again */
+        _audioSetUp(NULL);
+}
+
+/**
+ * \brief Start and stop audio directly
+ * 
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_InitAudio
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_QuitAudio
+ */
+int audio_initQuitAudio()
+{
+        int result;
+	int i, iMax;
+	const char* audioDriver;
+	
+	/* Stop SDL audio subsystem */
+	SDL_QuitSubSystem( SDL_INIT_AUDIO );
+        SDLTest_AssertPass("Call to SDL_QuitSubSystem(SDL_INIT_AUDIO)");
+
+        /* Loop over all available audio drivers */
+        iMax = SDL_GetNumAudioDrivers();
+        SDLTest_AssertPass("Call to SDL_GetNumAudioDrivers");
+        SDLTest_AssertCheck(iMax > 0, "Validate number of audio drivers; expected: >0 got: %d", iMax);
+        for (i = 0; i < iMax; i++) {
+        	audioDriver = SDL_GetAudioDriver(i);
+        	SDLTest_AssertPass("Call to SDL_GetAudioDriver(%d)", i);
+        	SDLTest_AssertCheck(audioDriver != NULL, "Audio driver name is not NULL");
+        	SDLTest_AssertCheck(SDL_strlen(audioDriver) > 0, "Audio driver name is not empty; got: %s", audioDriver);
+        	
+        	/* Call Init */
+        	result = SDL_AudioInit(audioDriver);
+        	SDLTest_AssertPass("Call to SDL_AudioInit('%s')", audioDriver);
+        	SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0 got: %d", result);
+        	
+        	/* Call Quit */
+        	SDL_AudioQuit();
+        	SDLTest_AssertPass("Call to SDL_AudioQuit()");
+	}
+	
+	/* NULL driver specification */
+	audioDriver = NULL;
+	
+	/* Call Init */
+	result = SDL_AudioInit(audioDriver);
+	SDLTest_AssertPass("Call to SDL_AudioInit(NULL)");
+	SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0 got: %d", result);
+        	
+	/* Call Quit */
+	SDL_AudioQuit();
+	SDLTest_AssertPass("Call to SDL_AudioQuit()");
+      
+        /* Restart audio again */
+        _audioSetUp(NULL);
+}
+
+/**
+ * \brief Start, open, close and stop audio
+ * 
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_InitAudio
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_OpenAudio
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_CloseAudio
+ * \sa http://wiki.libsdl.org/moin.cgi/SDL_QuitAudio
+ */
+int audio_initOpenCloseQuitAudio()
+{
+        int result;
+	int i, iMax, j;
+	const char* audioDriver;
+	SDL_AudioSpec desired;
+	SDL_AudioSpec obtained;
+	
+	/* Stop SDL audio subsystem */
+	SDL_QuitSubSystem( SDL_INIT_AUDIO );
+        SDLTest_AssertPass("Call to SDL_QuitSubSystem(SDL_INIT_AUDIO)");
+
+        /* Loop over all available audio drivers */
+        iMax = SDL_GetNumAudioDrivers();
+        SDLTest_AssertPass("Call to SDL_GetNumAudioDrivers");
+        SDLTest_AssertCheck(iMax > 0, "Validate number of audio drivers; expected: >0 got: %d", iMax);
+        for (i = 0; i < iMax; i++) {
+        	audioDriver = SDL_GetAudioDriver(i);
+        	SDLTest_AssertPass("Call to SDL_GetAudioDriver(%d)", i);
+        	SDLTest_AssertCheck(audioDriver != NULL, "Audio driver name is not NULL");
+        	SDLTest_AssertCheck(SDL_strlen(audioDriver) > 0, "Audio driver name is not empty; got: %s", audioDriver);
+        	
+        	/* Change specs */
+        	for (j = 0; j < 2; j++) {
+        	
+        		/* Call Init */
+        		result = SDL_AudioInit(audioDriver);
+        		SDLTest_AssertPass("Call to SDL_AudioInit('%s')", audioDriver);
+        		SDLTest_AssertCheck(result == 0, "Validate result value; expected: 0 got: %d", result);
+        	
+        		/* Set spec */
+        		SDL_memset(&desired, 0, sizeof(desired));
+        		switch (j) {
+        			case 0:
+        			/* Set standard desired spec */
+        			desired.freq = 22050;
+        			desired.format = AUDIO_S16SYS;
+        			desired.channels = 2;
+        			desired.samples = 4096;
+        			desired.callback = _audio_testCallback;
+        			desired.userdata = NULL;
+        			
+        			case 1:
+        			/* Set custom desired spec */
+        			desired.freq = 48000;
+        			desired.format = AUDIO_F32SYS;
+        			desired.channels = 2;
+        			desired.samples = 2048;
+        			desired.callback = _audio_testCallback;
+        			desired.userdata = NULL;        	
+        			break;        			
+			}
+
+			/* Call Open */
+			result = SDL_OpenAudio(&desired, NULL);
+			SDLTest_AssertPass("Call to SDL_OpenAudio(desired_spec_%d, NULL)", j);
+			SDLTest_AssertCheck(result == 0, "Verify return value; expected: 0 got: %d", result);
+			
+			/* Call Close */
+        	        SDL_CloseAudio();
+        	        SDLTest_AssertPass("Call to SDL_CloseAudio()");
+        	        	
+			/* Call Quit */
+			SDL_AudioQuit();
+			SDLTest_AssertPass("Call to SDL_AudioQuit()");
+			
+		} /* spec loop */
+	} /* driver loop */
+	      
+        /* Restart audio again */
+        _audioSetUp(NULL);
+}
 
 /**
  * \brief Enumerate and name available audio devices (output and capture).
@@ -377,11 +533,6 @@ int audio_getAudioStatus()
 }
 
 
-/* Test callback function */
-void _audio_testCallback(void *userdata, Uint8 *stream, int len)
-{
-   /* TODO: add tracking if callback was called */
-}
 
 /**
  * \brief Opens, checks current audio status, and closes a device.
@@ -708,10 +859,23 @@ static const SDLTest_TestCaseReference audioTest10 =
 static const SDLTest_TestCaseReference audioTest11 =
 		{ (SDLTest_TestCaseFp)audio_openCloseAudioDeviceConnected, "audio_openCloseAudioDeviceConnected", "Opens and closes audio device and get connected status.", TEST_DISABLED };
 
+static const SDLTest_TestCaseReference audioTest12 =
+		{ (SDLTest_TestCaseFp)audio_quitInitAudioSubSystem, "audio_quitInitAudioSubSystem", "Quit and re-init audio subsystem.", TEST_ENABLED };
+
+static const SDLTest_TestCaseReference audioTest13 =
+		{ (SDLTest_TestCaseFp)audio_initQuitAudio, "audio_initQuitAudio", "Init and quit audio drivers directly.", TEST_ENABLED };
+
+/* TODO: enable when bugs 1343 and 1396 are fixed.                                          */
+/* For debugging, test case can be run manually using --filter audio_initOpenCloseQuitAudio */
+
+static const SDLTest_TestCaseReference audioTest14 =
+		{ (SDLTest_TestCaseFp)audio_initOpenCloseQuitAudio, "audio_initOpenCloseQuitAudio", "Cycle through init, open, close and quit with various audio specs.", TEST_DISABLED };
+
 /* Sequence of Audio test cases */
 static const SDLTest_TestCaseReference *audioTests[] =  {
 	&audioTest1, &audioTest2, &audioTest3, &audioTest4, &audioTest5, &audioTest6, 
-	&audioTest7, &audioTest8, &audioTest9, &audioTest10, &audioTest11, NULL
+	&audioTest7, &audioTest8, &audioTest9, &audioTest10, &audioTest11, 
+	&audioTest12, &audioTest13, &audioTest14, NULL
 };
 
 /* Audio test suite (global) */
