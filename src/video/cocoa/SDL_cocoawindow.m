@@ -50,6 +50,8 @@ static __inline__ void ConvertNSRect(NSRect *r)
     NSView *view = [window contentView];
 
     _data = data;
+    observingVisible = YES;
+    wasVisible = [window isVisible];
 
     center = [NSNotificationCenter defaultCenter];
 
@@ -90,6 +92,10 @@ static __inline__ void ConvertNSRect(NSRect *r)
                         change:(NSDictionary *)change
                        context:(void *)context
 {
+    if (!observingVisible) {
+        return;
+    }
+
     if (object == _data->nswindow && [keyPath isEqualToString:@"visible"]) {
         int newVisibility = [[change objectForKey:@"new"] intValue];
         if (newVisibility) {
@@ -97,6 +103,27 @@ static __inline__ void ConvertNSRect(NSRect *r)
         } else {
             SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
         }
+    }
+}
+
+-(void) pauseVisibleObservation
+{
+    observingVisible = NO;
+    wasVisible = [_data->nswindow isVisible];
+}
+
+-(void) resumeVisibleObservation
+{
+    BOOL isVisible = [_data->nswindow isVisible];
+    observingVisible = YES;
+    if (wasVisible != isVisible) {
+        if (isVisible) {
+            SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_SHOWN, 0, 0);
+        } else {
+            SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_HIDDEN, 0, 0);
+        }
+
+        wasVisible = isVisible;
     }
 }
 
@@ -785,10 +812,13 @@ void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    SDL_WindowData *windowData = ((SDL_WindowData *) window->driverdata);
+    NSWindow *nswindow = windowData->nswindow;
 
     if (![nswindow isMiniaturized]) {
+        [windowData->listener pauseVisibleObservation];
         [nswindow makeKeyAndOrderFront:nil];
+        [windowData->listener resumeVisibleObservation];
     }
     [pool release];
 }
@@ -807,9 +837,13 @@ void
 Cocoa_RaiseWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    SDL_WindowData *windowData = ((SDL_WindowData *) window->driverdata);
+    NSWindow *nswindow = windowData->nswindow;
 
+    [windowData->listener pauseVisibleObservation];
     [nswindow makeKeyAndOrderFront:nil];
+    [windowData->listener resumeVisibleObservation];
+
     [pool release];
 }
 
@@ -960,7 +994,10 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         [nswindow setLevel:kCGNormalWindowLevel];
     }
 #endif
+
+    [data->listener pauseVisibleObservation];
     [nswindow makeKeyAndOrderFront:nil];
+    [data->listener resumeVisibleObservation];
 
     if (window == _this->current_glwin) {
         [((NSOpenGLContext *) _this->current_glctx) update];
