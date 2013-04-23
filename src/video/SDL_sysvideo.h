@@ -201,6 +201,7 @@ struct SDL_VideoDevice
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
     int (*UpdateWindowFramebuffer) (_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects);
     void (*DestroyWindowFramebuffer) (_THIS, SDL_Window * window);
+    void (*OnWindowEnter) (_THIS, SDL_Window * window);
 
     /* * * */
     /*
@@ -367,6 +368,8 @@ extern void SDL_OnWindowHidden(SDL_Window * window);
 extern void SDL_OnWindowResized(SDL_Window * window);
 extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
+extern void SDL_OnWindowEnter(SDL_Window * window);
+extern void SDL_OnWindowLeave(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern void SDL_UpdateWindowGrab(SDL_Window * window);

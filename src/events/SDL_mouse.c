@@ -33,6 +33,8 @@
 /* The mouse state */
 static SDL_Mouse SDL_mouse;
 
+static int
+SDL_PrivateSendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relative, int x, int y);
 
 /* Public functions */
 int
@@ -154,8 +156,9 @@ SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
 #endif
         if (window == mouse->focus) {
 #ifdef DEBUG_MOUSE
-            printf("Mouse left window, synthesizing focus lost event\n");
+            printf("Mouse left window, synthesizing move & focus lost event\n");
 #endif
+            SDL_PrivateSendMouseMotion(window, mouse->mouseID, 0, x, y);
             SDL_SetMouseFocus(NULL);
         }
         return SDL_FALSE;
@@ -176,17 +179,24 @@ SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
 int
 SDL_SendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relative, int x, int y)
 {
+    if (window && !relative) {
+        SDL_Mouse *mouse = SDL_GetMouse();
+        if (!SDL_UpdateMouseFocus(window, x, y, mouse->buttonstate)) {
+            return 0;
+        }
+    }
+
+    return SDL_PrivateSendMouseMotion(window, mouseID, relative, x, y);
+}
+
+static int
+SDL_PrivateSendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relative, int x, int y)
+{
     SDL_Mouse *mouse = SDL_GetMouse();
     int posted;
     int xrel;
     int yrel;
     int x_max = 0, y_max = 0;
-
-    if (window && !relative) {
-        if (!SDL_UpdateMouseFocus(window, x, y, mouse->buttonstate)) {
-            return 0;
-        }
-    }
 
     /* relative motion is calculated regarding the system cursor last position */
     if (relative) {

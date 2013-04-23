@@ -2029,6 +2029,19 @@ SDL_OnWindowRestored(SDL_Window * window)
 }
 
 void
+SDL_OnWindowEnter(SDL_Window * window)
+{
+    if (_this->OnWindowEnter) {
+        _this->OnWindowEnter(_this, window);
+    }
+}
+
+void
+SDL_OnWindowLeave(SDL_Window * window)
+{
+}
+
+void
 SDL_OnWindowFocusGained(SDL_Window * window)
 {
     if (window->gamma && _this->SetWindowGammaRamp) {

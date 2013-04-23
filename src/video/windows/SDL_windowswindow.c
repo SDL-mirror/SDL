@@ -678,6 +678,25 @@ SDL_HelperWindowDestroy(void)
     }
 }
 
+void WIN_OnWindowEnter(_THIS, SDL_Window * window)
+{
+#ifdef WM_MOUSELEAVE
+    SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    TRACKMOUSEEVENT trackMouseEvent;
+
+    if (!data || !data->hwnd) {
+        /* The window wasn't fully initialized */
+        return;
+    }
+
+    trackMouseEvent.cbSize = sizeof(TRACKMOUSEEVENT);
+    trackMouseEvent.dwFlags = TME_LEAVE;
+    trackMouseEvent.hwndTrack = data->hwnd;
+
+    TrackMouseEvent(&trackMouseEvent);
+#endif /* WM_MOUSELEAVE */
+}
+
 #endif /* SDL_VIDEO_DRIVER_WINDOWS */
 
 /* vi: set ts=4 sw=4 expandtab: */

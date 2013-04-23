@@ -324,6 +324,10 @@ X11_DispatchEvent(_THIS)
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
+            if (!SDL_GetMouse()->relative_mode) {
+                SDL_SendMouseMotion(data->window, 0, 0, xevent.xcrossing.x, xevent.xcrossing.y);
+            }
+
             if (xevent.xcrossing.mode != NotifyGrab &&
                 xevent.xcrossing.mode != NotifyUngrab &&
                 xevent.xcrossing.detail != NotifyInferior) {

@@ -445,10 +445,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
 
 #ifdef WM_MOUSELEAVE
-    /* FIXME: Do we need the SDL 1.2 hack to generate WM_MOUSELEAVE now? */
     case WM_MOUSELEAVE:
         if (SDL_GetMouseFocus() == data->window) {
-            SDL_SetMouseFocus(NULL);
+			if (!SDL_GetMouse()->relative_mode) {
+				POINT cursorPos;
+				GetCursorPos(&cursorPos);
+				ScreenToClient(hwnd, &cursorPos);
+				SDL_SendMouseMotion(data->window, 0, 0, cursorPos.x, cursorPos.y);
+			}
+
+			SDL_SetMouseFocus(NULL);
         }
         returnCode = 0;
         break;
