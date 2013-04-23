@@ -34,9 +34,13 @@ typedef struct SDL_WindowData SDL_WindowData;
 @interface Cocoa_WindowListener : NSResponder {
 #endif
     SDL_WindowData *_data;
+    BOOL observingVisible;
+    BOOL wasVisible;
 }
 
 -(void) listen:(SDL_WindowData *) data;
+-(void) pauseVisibleObservation;
+-(void) resumeVisibleObservation;
 -(void) close;
 
 /* Window delegate functionality */
