@@ -1241,8 +1241,7 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
                 GL_CheckError("", renderer);
                 SDL_free(data->framebuffers);
                 data->framebuffers = nextnode;
-            }            
-            /* SDL_GL_MakeCurrent(0, NULL); *//* doesn't do anything */
+            }
             SDL_GL_DeleteContext(data->context);
         }
         SDL_free(data);

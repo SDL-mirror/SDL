@@ -2690,13 +2690,14 @@ SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
 {
     int retval;
 
-    CHECK_WINDOW_MAGIC(window, -1);
-
-    if (!(window->flags & SDL_WINDOW_OPENGL)) {
-        return SDL_SetError("The specified window isn't an OpenGL window");
-    }
     if (!ctx) {
         window = NULL;
+    } else {
+        CHECK_WINDOW_MAGIC(window, -1);
+
+        if (!(window->flags & SDL_WINDOW_OPENGL)) {
+            return SDL_SetError("The specified window isn't an OpenGL window");
+        }
     }
 
     if ((window == _this->current_glwin) && (ctx == _this->current_glctx)) {
@@ -2758,7 +2759,11 @@ SDL_GL_DeleteContext(SDL_GLContext context)
     if (!_this || !context) {
         return;
     }
-    _this->GL_MakeCurrent(_this, NULL, NULL);
+
+    if (_this->current_glctx == context) {
+        SDL_GL_MakeCurrent(NULL, NULL);
+    }
+
     _this->GL_DeleteContext(_this, context);
 }
 
