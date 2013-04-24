@@ -240,6 +240,12 @@ WIN_InitMouse(_THIS)
 void
 WIN_QuitMouse(_THIS)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+    if ( mouse->def_cursor ) {
+        SDL_free(mouse->def_cursor);
+        mouse->def_cursor = NULL;
+        mouse->cur_cursor = NULL;
+    }
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINDOWS */
