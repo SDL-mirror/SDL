@@ -415,6 +415,8 @@ int
 SDL_SetRelativeMouseMode(SDL_bool enabled)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
+    SDL_Window *focusWindow = SDL_GetKeyboardFocus();
+    int original_x = mouse->x, original_y = mouse->y;
 
     if (enabled == mouse->relative_mode) {
         return 0;
@@ -422,6 +424,14 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
 
     if (!mouse->SetRelativeMouseMode) {
         return SDL_Unsupported();
+    }
+
+    if (enabled && focusWindow) {
+        /* Center it in the focused window to prevent clicks from going through
+         * to background windows.
+         */
+        SDL_SetMouseFocus(focusWindow);
+        SDL_WarpMouseInWindow(focusWindow, focusWindow->w/2, focusWindow->h/2);
     }
 
     if (mouse->SetRelativeMouseMode(enabled) < 0) {
@@ -433,8 +443,8 @@ SDL_SetRelativeMouseMode(SDL_bool enabled)
 
     if (enabled) {
         /* Save the expected mouse position */
-        mouse->original_x = mouse->x;
-        mouse->original_y = mouse->y;
+        mouse->original_x = original_x;
+        mouse->original_y = original_y;
     } else if (mouse->focus) {
         /* Restore the expected mouse position */
         SDL_WarpMouseInWindow(mouse->focus, mouse->original_x, mouse->original_y);

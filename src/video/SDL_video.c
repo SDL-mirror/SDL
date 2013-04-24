@@ -2044,8 +2044,15 @@ SDL_OnWindowLeave(SDL_Window * window)
 void
 SDL_OnWindowFocusGained(SDL_Window * window)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+
     if (window->gamma && _this->SetWindowGammaRamp) {
         _this->SetWindowGammaRamp(_this, window, window->gamma);
+    }
+
+    if (mouse && mouse->relative_mode) {
+        SDL_SetMouseFocus(window);
+        SDL_WarpMouseInWindow(window, window->w/2, window->h/2);
     }
 
     SDL_UpdateWindowGrab(window);
@@ -2067,8 +2074,15 @@ static SDL_bool ShouldMinimizeOnFocusLoss()
 void
 SDL_OnWindowFocusLost(SDL_Window * window)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+
     if (window->gamma && _this->SetWindowGammaRamp) {
         _this->SetWindowGammaRamp(_this, window, window->saved_gamma);
+    }
+
+    if (mouse && mouse->relative_mode) {
+        /* Restore the expected mouse position */
+        SDL_WarpMouseInWindow(window, mouse->original_x, mouse->original_y);
     }
 
     SDL_UpdateWindowGrab(window);
