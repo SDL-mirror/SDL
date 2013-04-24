@@ -187,11 +187,17 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
 static void
 Cocoa_WarpMouse(SDL_Window * window, int x, int y)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
     CGPoint point;
 
     point.x = (float)window->x + x;
     point.y = (float)window->y + y;
     CGWarpMouseCursorPosition(point);
+
+    /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
+     * other implementations' APIs.
+     */
+    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 0, x, y);
 }
 
 static int
