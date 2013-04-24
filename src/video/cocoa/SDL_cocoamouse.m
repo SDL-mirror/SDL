@@ -153,15 +153,24 @@ Cocoa_FreeCursor(SDL_Cursor * cursor)
 static int
 Cocoa_ShowCursor(SDL_Cursor * cursor)
 {
+	/* We need to track the previous state because hide and unhide calls need to
+	 * be matched, but ShowCursor calls don't.
+	 */
+	static SDL_bool isShown = SDL_TRUE;
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
     if (cursor) {
         NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
         [nscursor set];
-        [NSCursor unhide];
-    } else {
-        [NSCursor hide];
+
+		if (!isShown) {
+			[NSCursor unhide];
+			isShown = SDL_TRUE;
+		}
+	} else if (isShown) {
+		[NSCursor hide];
+		isShown = SDL_FALSE;
     }
 
     [pool release];
