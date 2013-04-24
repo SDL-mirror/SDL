@@ -392,7 +392,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
             cgpoint.x = window->x + x;
             cgpoint.y = window->y + y;
+
+            /* We have to disassociate the curosr & the mouse before issuing
+             * this cursor warp, otherwise it gets limited to one update per
+             * 250ms, and looks very choppy.
+             */
+            CGAssociateMouseAndMouseCursorPosition(NO);
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
+            CGAssociateMouseAndMouseCursorPosition(YES);
         }
     }
     SDL_SendMouseMotion(window, 0, 0, x, y);
