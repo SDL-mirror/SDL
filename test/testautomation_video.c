@@ -1698,7 +1698,7 @@ video_getSetWindowData(void *arg)
   if (referenceUserdata != NULL) SDL_free(referenceUserdata);
   if (referenceUserdata2 != NULL) SDL_free(referenceUserdata2);
   if (userdata != NULL) SDL_free(userdata);
-  if (userdata != NULL) SDL_free(userdata);
+  if (userdata2 != NULL) SDL_free(userdata2);
   
   return returnValue;
 }
