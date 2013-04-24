@@ -310,6 +310,10 @@ X11_DispatchEvent(_THIS)
                 printf("Mode: NotifyUngrab\n");
 #endif
             SDL_SetMouseFocus(data->window);
+
+            if (!SDL_GetMouse()->relative_mode) {
+                SDL_SendMouseMotion(data->window, 0, 0, xevent.xcrossing.x, xevent.xcrossing.y);
+            }
         }
         break;
         /* Losing mouse coverage? */

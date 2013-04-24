@@ -165,13 +165,11 @@ SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
     }
 
     if (window != mouse->focus) {
-        mouse->last_x = x;
-        mouse->last_y = y;
-
 #ifdef DEBUG_MOUSE
-        printf("Mouse entered window, synthesizing focus gain event\n");
+         printf("Mouse entered window, synthesizing focus gain & move event\n");
 #endif
-        SDL_SetMouseFocus(window);
+         SDL_SetMouseFocus(window);
+         SDL_PrivateSendMouseMotion(window, mouse->mouseID, 0, x, y);
     }
     return SDL_TRUE;
 }
