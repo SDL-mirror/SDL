@@ -245,12 +245,16 @@ WIN_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         }
         if (SDL_ISPIXELFORMAT_INDEXED(mode.format)) {
             /* We don't support palettized modes now */
+            SDL_free(mode.driverdata);
             continue;
         }
         if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
             if (!SDL_AddDisplayMode(display, &mode)) {
                 SDL_free(mode.driverdata);
             }
+        }
+        else {
+            SDL_free(mode.driverdata);
         }
     }
 }
