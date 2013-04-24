@@ -162,7 +162,13 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
     if (cursor) {
         NSCursor *nscursor = (NSCursor *)cursor->driverdata;
 
-        [nscursor set];
+        /* We're possibly executing from an event handler where this operation
+         * is unsupported. This will execute it in the main Cocoa event loop
+         * after this returns.
+         */
+        [nscursor performSelectorOnMainThread:@selector(set)
+                                   withObject:nil
+                                waitUntilDone:NO];
 
 		if (!isShown) {
 			[NSCursor unhide];
