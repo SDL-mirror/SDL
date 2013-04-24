@@ -626,6 +626,17 @@ SDL_GetCursor(void)
     return mouse->cur_cursor;
 }
 
+SDL_Cursor *
+SDL_GetDefaultCursor(void)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+
+    if (!mouse) {
+        return NULL;
+    }
+    return mouse->def_cursor;
+}
+
 void
 SDL_FreeCursor(SDL_Cursor * cursor)
 {

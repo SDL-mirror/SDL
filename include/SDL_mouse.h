@@ -175,6 +175,11 @@ extern DECLSPEC void SDLCALL SDL_SetCursor(SDL_Cursor * cursor);
 extern DECLSPEC SDL_Cursor *SDLCALL SDL_GetCursor(void);
 
 /**
+ *  \brief Return the default cursor.
+ */
+extern DECLSPEC SDL_Cursor *SDLCALL SDL_GetDefaultCursor(void);
+
+/**
  *  \brief Frees a cursor created with SDL_CreateCursor().
  *  
  *  \sa SDL_CreateCursor()
