@@ -44,8 +44,8 @@
     }
 
 
-static const SDL_RenderDriver *render_drivers[] = {
 #if !SDL_RENDER_DISABLED
+static const SDL_RenderDriver *render_drivers[] = {
 #if SDL_VIDEO_RENDER_D3D
     &D3D_RenderDriver,
 #endif
@@ -65,8 +65,9 @@ static const SDL_RenderDriver *render_drivers[] = {
     &PSP_RenderDriver,
 #endif
     &SW_RenderDriver
-#endif /* !SDL_RENDER_DISABLED */
 };
+#endif /* !SDL_RENDER_DISABLED */
+
 static char renderer_magic;
 static char texture_magic;
 
@@ -75,18 +76,26 @@ static int UpdateLogicalSize(SDL_Renderer *renderer);
 int
 SDL_GetNumRenderDrivers(void)
 {
+#if !SDL_RENDER_DISABLED
     return SDL_arraysize(render_drivers);
+#else
+    return 0;
+#endif
 }
 
 int
 SDL_GetRenderDriverInfo(int index, SDL_RendererInfo * info)
 {
+#if !SDL_RENDER_DISABLED
     if (index < 0 || index >= SDL_GetNumRenderDrivers()) {
         return SDL_SetError("index must be in the range of 0 - %d",
                             SDL_GetNumRenderDrivers() - 1);
     }
     *info = render_drivers[index]->info;
     return 0;
+#else
+    return SDL_SetError("SDL not built with rendering support");
+#endif
 }
 
 static int
@@ -197,6 +206,7 @@ SDL_CreateWindowAndRenderer(int width, int height, Uint32 window_flags,
 SDL_Renderer *
 SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
 {
+#if !SDL_RENDER_DISABLED
     SDL_Renderer *renderer = NULL;
     int n = SDL_GetNumRenderDrivers();
     const char *hint;
@@ -284,6 +294,10 @@ SDL_CreateRenderer(SDL_Window * window, int index, Uint32 flags)
                     "Created renderer: %s", renderer->info.name);
     }
     return renderer;
+#else
+    SDL_SetError("SDL not built with rendering support");
+    return NULL;
+#endif
 }
 
 SDL_Renderer *
