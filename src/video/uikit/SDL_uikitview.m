@@ -30,10 +30,10 @@
 
 #if SDL_IPHONE_KEYBOARD
 #include "keyinfotable.h"
+#endif
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
-#endif
 
 @implementation SDL_uikitview
 
