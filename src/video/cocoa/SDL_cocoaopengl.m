@@ -192,31 +192,6 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
         return NULL;
     }
 
-    /*
-     * Wisdom from Apple engineer in reference to UT2003's OpenGL performance:
-     *  "You are blowing a couple of the internal OpenGL function caches. This
-     *  appears to be happening in the VAO case.  You can tell OpenGL to up
-     *  the cache size by issuing the following calls right after you create
-     *  the OpenGL context.  The default cache size is 16."    --ryan.
-     */
-
-    #ifndef GLI_ARRAY_FUNC_CACHE_MAX
-    #define GLI_ARRAY_FUNC_CACHE_MAX 284
-    #endif
-
-    #ifndef GLI_SUBMIT_FUNC_CACHE_MAX
-    #define GLI_SUBMIT_FUNC_CACHE_MAX 280
-    #endif
-
-    {
-        GLint cache_max = 64;
-        CGLContextObj ctx = [context CGLContextObj];
-        CGLSetParameter (ctx, GLI_SUBMIT_FUNC_CACHE_MAX, &cache_max);
-        CGLSetParameter (ctx, GLI_ARRAY_FUNC_CACHE_MAX, &cache_max);
-    }
-
-    /* End Wisdom from Apple Engineer section. --ryan. */
-
     [pool release];
 
     if ( Cocoa_GL_MakeCurrent(_this, window, context) < 0 ) {
