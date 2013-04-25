@@ -36,7 +36,7 @@ extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
 extern void SDL_TimerQuit(void);
 #endif
-#if defined(__WIN32__)
+#if SDL_VIDEO_DRIVER_WINDOWS
 extern int SDL_HelperWindowCreate(void);
 extern int SDL_HelperWindowDestroy(void);
 #endif
@@ -200,7 +200,7 @@ SDL_Init(Uint32 flags)
     /* Clear the error message */
     SDL_ClearError();
 
-#if defined(__WIN32__)
+#if SDL_VIDEO_DRIVER_WINDOWS
     if (SDL_HelperWindowCreate() < 0) {
         return -1;
     }
@@ -310,7 +310,7 @@ SDL_Quit(void)
     SDL_bInMainQuit = SDL_TRUE;
 
     /* Quit all subsystems */
-#if defined(__WIN32__)
+#if SDL_VIDEO_DRIVER_WINDOWS
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
