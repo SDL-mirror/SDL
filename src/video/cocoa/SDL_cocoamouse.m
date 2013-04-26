@@ -24,7 +24,7 @@
 
 #include "SDL_assert.h"
 #include "SDL_events.h"
-#include "SDL_cocoavideo.h"
+#include "SDL_cocoamouse.h"
 
 #include "../../events/SDL_mouse_c.h"
 
@@ -193,6 +193,16 @@ Cocoa_WarpMouse(SDL_Window * window, int x, int y)
     point.x = (float)window->x + x;
     point.y = (float)window->y + y;
 
+    {
+        /* This makes Cocoa_HandleMouseEvent ignore this delta in the next
+         * movement event.
+         */
+        SDL_MouseData *driverdata = (SDL_MouseData*)mouse->driverdata;
+        NSPoint location =  [NSEvent mouseLocation];
+        driverdata->deltaXOffset = location.x - point.x;
+        driverdata->deltaYOffset = point.y - location.y;
+    }
+
     /* According to the docs, this was deprecated in 10.6, but it's still
      * around. The substitute requires a CGEventSource, but I'm not entirely
      * sure how we'd procure the right one for this event.
@@ -228,6 +238,8 @@ Cocoa_InitMouse(_THIS)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
+    mouse->driverdata = SDL_calloc(1, sizeof(SDL_MouseData));
+
     mouse->CreateCursor = Cocoa_CreateCursor;
     mouse->CreateSystemCursor = Cocoa_CreateSystemCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
@@ -248,8 +260,11 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
          [event type] == NSLeftMouseDragged ||
          [event type] == NSRightMouseDragged ||
          [event type] == NSOtherMouseDragged)) {
-        float x = [event deltaX];
-        float y = [event deltaY];
+        SDL_MouseData *driverdata = (SDL_MouseData*)mouse->driverdata;
+        float x = [event deltaX] + driverdata->deltaXOffset;
+        float y = [event deltaY] + driverdata->deltaYOffset;
+        driverdata->deltaXOffset = driverdata->deltaYOffset = 0;
+
         SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)x, (int)y);
     }
 }
@@ -278,6 +293,10 @@ Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent *event)
 void
 Cocoa_QuitMouse(_THIS)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+    if (mouse) {
+        SDL_free(mouse->driverdata);
+    }
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

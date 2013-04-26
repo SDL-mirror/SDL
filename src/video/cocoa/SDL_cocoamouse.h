@@ -23,10 +23,17 @@
 #ifndef _SDL_cocoamouse_h
 #define _SDL_cocoamouse_h
 
+#include "SDL_cocoavideo.h"
+
 extern void Cocoa_InitMouse(_THIS);
 extern void Cocoa_HandleMouseEvent(_THIS, NSEvent * event);
 extern void Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent * event);
 extern void Cocoa_QuitMouse(_THIS);
+
+typedef struct {
+    int deltaXOffset;
+    int deltaYOffset;
+} SDL_MouseData;
 
 #endif /* _SDL_cocoamouse_h */
 

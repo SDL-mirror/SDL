@@ -73,6 +73,9 @@ typedef struct
     SDL_Cursor *def_cursor;
     SDL_Cursor *cur_cursor;
     SDL_bool cursor_shown;
+
+    /* Driver-dependent data. */
+    void *driverdata;
 } SDL_Mouse;
 
 
