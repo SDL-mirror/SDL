@@ -192,7 +192,14 @@ Cocoa_WarpMouse(SDL_Window * window, int x, int y)
 
     point.x = (float)window->x + x;
     point.y = (float)window->y + y;
+
+    /* According to the docs, this was deprecated in 10.6, but it's still
+     * around. The substitute requires a CGEventSource, but I'm not entirely
+     * sure how we'd procure the right one for this event.
+     */
+    CGSetLocalEventsSuppressionInterval(0.0);
     CGWarpMouseCursorPosition(point);
+    CGSetLocalEventsSuppressionInterval(0.25);
 
     /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
      * other implementations' APIs.
