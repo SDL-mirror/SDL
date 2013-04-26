@@ -2074,15 +2074,8 @@ static SDL_bool ShouldMinimizeOnFocusLoss()
 void
 SDL_OnWindowFocusLost(SDL_Window * window)
 {
-    SDL_Mouse *mouse = SDL_GetMouse();
-
     if (window->gamma && _this->SetWindowGammaRamp) {
         _this->SetWindowGammaRamp(_this, window, window->saved_gamma);
-    }
-
-    if (mouse && mouse->relative_mode) {
-        /* Restore the expected mouse position */
-        SDL_WarpMouseInWindow(window, mouse->original_x, mouse->original_y);
     }
 
     SDL_UpdateWindowGrab(window);
