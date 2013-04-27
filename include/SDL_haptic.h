@@ -895,7 +895,7 @@ extern DECLSPEC void SDLCALL SDL_HapticClose(SDL_Haptic * haptic);
  *  \brief Returns the number of effects a haptic device can store.
  *  
  *  On some platforms this isn't fully supported, and therefore is an
- *  aproximation.  Always check to see if your created effect was actually
+ *  approximation.  Always check to see if your created effect was actually
  *  created and do not rely solely on SDL_HapticNumEffects().
  *  
  *  \param haptic The haptic device to query effect max.
@@ -912,7 +912,7 @@ extern DECLSPEC int SDLCALL SDL_HapticNumEffects(SDL_Haptic * haptic);
  *         time.
  *  
  *  This is not supported on all platforms, but will always return a value.  
- *  Added here for the sake of completness.
+ *  Added here for the sake of completeness.
  *  
  *  \param haptic The haptic device to query maximum playing effects.
  *  \return The number of effects the haptic device can play at the same time
@@ -999,7 +999,7 @@ extern DECLSPEC int SDLCALL SDL_HapticUpdateEffect(SDL_Haptic * haptic,
                                                    SDL_HapticEffect * data);
 
 /**
- *  \brief Runs the haptic effect on it's assosciated haptic device.
+ *  \brief Runs the haptic effect on it's associated haptic device.
  *  
  *  If iterations are ::SDL_HAPTIC_INFINITY, it'll run the effect over and over
  *  repeating the envelope (attack and fade) every time.  If you only want the
@@ -1021,7 +1021,7 @@ extern DECLSPEC int SDLCALL SDL_HapticRunEffect(SDL_Haptic * haptic,
                                                 Uint32 iterations);
 
 /**
- *  \brief Stops the haptic effect on it's assosciated haptic device.
+ *  \brief Stops the haptic effect on it's associated haptic device.
  *  
  *  \param haptic Haptic device to stop the effect on.
  *  \param effect Identifier of the effect to stop.
@@ -1068,7 +1068,7 @@ extern DECLSPEC int SDLCALL SDL_HapticGetEffectStatus(SDL_Haptic * haptic,
  *  
  *  Device must support the ::SDL_HAPTIC_GAIN feature.
  *  
- *  The user may specify the maxmimum gain by setting the environment variable
+ *  The user may specify the maximum gain by setting the environment variable
  *  ::SDL_HAPTIC_GAIN_MAX which should be between 0 and 100.  All calls to
  *  SDL_HapticSetGain() will scale linearly using ::SDL_HAPTIC_GAIN_MAX as the
  *  maximum.
@@ -1164,7 +1164,7 @@ extern DECLSPEC int SDLCALL SDL_HapticRumbleInit(SDL_Haptic * haptic);
  *
  *  \param haptic Haptic device to play rumble effect on.
  *  \param strength Strength of the rumble to play as a 0-1 float value.
- *  \param length Length of the rumble to play in miliseconds.
+ *  \param length Length of the rumble to play in milliseconds.
  *  \return 0 on success or -1 on error.
  *
  *  \sa SDL_HapticRumbleSupported
