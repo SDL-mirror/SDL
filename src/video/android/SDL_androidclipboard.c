@@ -29,18 +29,18 @@
 int
 Android_SetClipboardText(_THIS, const char *text)
 {
-	return Android_JNI_SetClipboardText(text);
+    return Android_JNI_SetClipboardText(text);
 }
 
 char *
 Android_GetClipboardText(_THIS)
 {
-	return Android_JNI_GetClipboardText();
+    return Android_JNI_GetClipboardText();
 }
 
 SDL_bool Android_HasClipboardText(_THIS)
 {
-	return Android_JNI_HasClipboardText();
+    return Android_JNI_HasClipboardText();
 }
 
 #endif /* SDL_VIDEO_DRIVER_ANDROID */
