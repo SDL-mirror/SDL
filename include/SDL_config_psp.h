@@ -133,4 +133,4 @@
 #define SDL_LOADSO_DISABLED	   1
 
 
-#endif /* _SDL_config_minimal_h */
+#endif /* _SDL_config_psp_h */
