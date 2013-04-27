@@ -404,7 +404,7 @@ extern DECLSPEC int SDLCALL SDL_FillRects
       SDL_SRCALPHA not set:
         copy RGB.
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
-        RGB values of the source colour key, ignoring alpha in the
+        RGB values of the source color key, ignoring alpha in the
         comparison.
    
     RGB->RGBA:
@@ -415,7 +415,7 @@ extern DECLSPEC int SDLCALL SDL_FillRects
         copy RGB, set destination alpha to source per-surface alpha value.
       both:
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
-        source colour key.
+        source color key.
    
     RGBA->RGBA:
       SDL_SRCALPHA set:
@@ -425,7 +425,7 @@ extern DECLSPEC int SDLCALL SDL_FillRects
       SDL_SRCALPHA not set:
         copy all of RGBA to the destination.
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
-        RGB values of the source colour key, ignoring alpha in the
+        RGB values of the source color key, ignoring alpha in the
        comparison.
    
     RGB->RGB: 
@@ -435,7 +435,7 @@ extern DECLSPEC int SDLCALL SDL_FillRects
         copy RGB.
       both:
         if SDL_SRCCOLORKEY set, only copy the pixels matching the
-        source colour key.
+        source color key.
     \endverbatim
  *  
  *  You should call SDL_BlitSurface() unless you know exactly how SDL

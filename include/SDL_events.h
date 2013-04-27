@@ -599,7 +599,7 @@ typedef int (SDLCALL * SDL_EventFilter) (void *userdata, SDL_Event * event);
  *  Sets up a filter to process all events before they change internal state and
  *  are posted to the internal event queue.
  *  
- *  The filter is protypted as:
+ *  The filter is prototyped as:
  *  \code
  *      int SDL_EventFilter(void *userdata, SDL_Event * event);
  *  \endcode
