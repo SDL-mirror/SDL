@@ -413,7 +413,7 @@ public class SDLActivity extends Activity {
                     // Nom nom
                 }
             } else {
-                Log.w("SDL", "SDL audio: error return from write(short)");
+                Log.w("SDL", "SDL audio: error return from write(byte)");
                 return;
             }
         }
