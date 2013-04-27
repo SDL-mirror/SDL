@@ -79,8 +79,6 @@ public class SDLActivity extends Activity {
         mLayout.addView(mSurface);
 
         setContentView(mLayout);
-
-        SurfaceHolder holder = mSurface.getHolder();
     }
 
     // Events
