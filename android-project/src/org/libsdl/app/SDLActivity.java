@@ -205,7 +205,7 @@ public class SDLActivity extends Activity {
         }
     }
     
-    static class ShowTextInputHandler implements Runnable {
+    static class ShowTextInputTask implements Runnable {
         /*
          * This is used to regulate the pan&scan method to have some offset from
          * the bottom edge of the input region and the top edge of an input
@@ -215,7 +215,7 @@ public class SDLActivity extends Activity {
 
         public int x, y, w, h;
 
-        public ShowTextInputHandler(int x, int y, int w, int h) {
+        public ShowTextInputTask(int x, int y, int w, int h) {
             this.x = x;
             this.y = y;
             this.w = w;
@@ -241,12 +241,11 @@ public class SDLActivity extends Activity {
             InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(mTextEdit, 0);
         }
-
     }
 
     public static void showTextInput(int x, int y, int w, int h) {
         // Transfer the task to the main thread as a Runnable
-        mSingleton.commandHandler.post(new ShowTextInputHandler(x, y, w, h));
+        mSingleton.commandHandler.post(new ShowTextInputTask(x, y, w, h));
     }
 
 
