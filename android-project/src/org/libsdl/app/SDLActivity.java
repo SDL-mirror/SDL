@@ -64,6 +64,7 @@ public class SDLActivity extends Activity {
     }
 
     // Setup
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Log.v("SDL", "onCreate()");
         super.onCreate(savedInstanceState);
@@ -95,6 +96,7 @@ public class SDLActivity extends Activity {
         // Don't call SDLActivity.nativeResume(); here, it will be called via SDLSurface::surfaceChanged->SDLActivity::startApp
     }*/
 
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.v("SDL", "onDestroy()");
@@ -220,6 +222,7 @@ public class SDLActivity extends Activity {
             this.h = h;
         }
 
+        @Override
         public void run() {
             AbsoluteLayout.LayoutParams params = new AbsoluteLayout.LayoutParams(
                     w, h + HEIGHT_PADDING, x, y);
@@ -372,6 +375,7 @@ public class SDLActivity extends Activity {
     
     public static void audioStartThread() {
         mAudioThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 mAudioTrack.play();
                 nativeRunAudioThread();
@@ -442,6 +446,7 @@ public class SDLActivity extends Activity {
     Simple nativeInit() runnable
 */
 class SDLMain implements Runnable {
+    @Override
     public void run() {
         // Runs SDL_main()
         SDLActivity.nativeInit();
@@ -485,6 +490,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // Called when we have a valid drawing surface
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SDL", "surfaceCreated()");
         holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
@@ -492,6 +498,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // Called when we lose the surface
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v("SDL", "surfaceDestroyed()");
         if (!SDLActivity.mIsPaused) {
@@ -502,6 +509,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // Called when the surface is resized
+    @Override
     public void surfaceChanged(SurfaceHolder holder,
                                int format, int width, int height) {
         Log.v("SDL", "surfaceChanged()");
@@ -560,12 +568,14 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // unused
+    @Override
     public void onDraw(Canvas canvas) {}
 
 
 
 
     // Key events
+    @Override
     public boolean onKey(View  v, int keyCode, KeyEvent event) {
 
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -583,6 +593,7 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     // Touch events
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
         {
              final int touchDevId = event.getDeviceId();
@@ -626,10 +637,12 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
     
+    @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         // TODO
     }
 
+    @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             SDLActivity.onNativeAccel(event.values[0] / SensorManager.GRAVITY_EARTH,
@@ -658,6 +671,7 @@ class DummyEdit extends View implements View.OnKeyListener {
         return true;
     }
 
+    @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
 
         // This handles the hardware keyboard input
