@@ -49,6 +49,8 @@ int audio_quitInitAudioSubSystem()
 
         /* Restart audio again */
         _audioSetUp(NULL);
+
+    return TEST_COMPLETED;
 }
 
 /**
@@ -101,6 +103,8 @@ int audio_initQuitAudio()
       
         /* Restart audio again */
         _audioSetUp(NULL);
+
+    return TEST_COMPLETED;
 }
 
 /**
@@ -182,6 +186,8 @@ int audio_initOpenCloseQuitAudio()
 	      
         /* Restart audio again */
         _audioSetUp(NULL);
+
+    return TEST_COMPLETED;
 }
 
 /**
