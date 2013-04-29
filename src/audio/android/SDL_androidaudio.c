@@ -38,8 +38,7 @@ static int
 AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 {
     SDL_AudioFormat test_format;
-    int valid_datatype = 0;
-    
+
     if (iscapture) {
     	//TODO: implement capture
     	return SDL_SetError("Capture not supported on Android");

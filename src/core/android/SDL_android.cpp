@@ -422,7 +422,6 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
 {
     int audioBufferFrames;
 
-    int status;
     JNIEnv *env = Android_JNI_GetEnv();
 
     if (!env) {
@@ -496,7 +495,6 @@ extern "C" void Android_JNI_WriteAudioBuffer()
 
 extern "C" void Android_JNI_CloseAudioDevice()
 {
-    int status;
     JNIEnv *env = Android_JNI_GetEnv();
 
     env->CallStaticVoidMethod(mActivityClass, midAudioQuit); 
