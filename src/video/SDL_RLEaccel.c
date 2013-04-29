@@ -464,7 +464,7 @@ SDL_RLEBlit(SDL_Surface * src, SDL_Rect * srcrect,
     srcbuf = (Uint8 *) src->map->data;
 
     {
-        /* skip lines at the top if neccessary */
+        /* skip lines at the top if necessary */
         int vskip = srcrect->y;
         int ofs = 0;
         if (vskip) {
@@ -1451,7 +1451,7 @@ SDL_RLESurface(SDL_Surface * surface)
 /*
  * Un-RLE a surface with pixel alpha
  * This may not give back exactly the image before RLE-encoding; all
- * completely transparent pixels will be lost, and colour and alpha depth
+ * completely transparent pixels will be lost, and color and alpha depth
  * may have been reduced (when encoding for 16bpp targets).
  */
 static SDL_bool
@@ -1545,7 +1545,7 @@ SDL_UnRLESurface(SDL_Surface * surface, int recode)
                     return;
                 }
 
-                /* fill it with the background colour */
+                /* fill it with the background color */
                 SDL_FillRect(surface, NULL, surface->map->info.colorkey);
 
                 /* now render the encoded surface */
