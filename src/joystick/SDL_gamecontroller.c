@@ -302,8 +302,8 @@ ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickGUID *gu
 		}
 		pSupportedController = pSupportedController->next;
 	}
-        return NULL;
-    }
+    return NULL;
+}
 
 /*
  * Helper function to determine pre-caclulated offset to certain joystick mappings
@@ -349,7 +349,7 @@ SDL_GameControllerAxis SDL_GameControllerGetAxisFromString( const char *pchStrin
         if ( !SDL_strcasecmp( pchString, map_StringForControllerAxis[entry] ) )
             return entry;
     }
-		return SDL_CONTROLLER_AXIS_INVALID;
+    return SDL_CONTROLLER_AXIS_INVALID;
 }
 
 /*
@@ -494,7 +494,6 @@ void SDL_PrivateGameControllerParseButton( const char *szGameButton, const char 
 			SDL_assert( !"How did we get here?" );
 		}
 	}
-
 }
 
 
@@ -1141,7 +1140,7 @@ SDL_GameControllerClose(SDL_GameController * gamecontroller)
 		gamecontrollerlistprev = gamecontrollerlist;
 		gamecontrollerlist = gamecontrollerlist->next;
 	}
- 
+
     SDL_free(gamecontroller);
 }
 
