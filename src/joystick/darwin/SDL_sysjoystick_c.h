@@ -69,7 +69,7 @@ struct joystick_hwdata
     long axes;                  /* number of axis (calculated, not reported by device) */
     long buttons;               /* number of buttons (calculated, not reported by device) */
     long hats;                  /* number of hat switches (calculated, not reported by device) */
-    long elements;              /* number of total elements (shouldbe total of above) (calculated, not reported by device) */
+    long elements;              /* number of total elements (should be total of above) (calculated, not reported by device) */
 
     recElement *firstAxis;
     recElement *firstButton;

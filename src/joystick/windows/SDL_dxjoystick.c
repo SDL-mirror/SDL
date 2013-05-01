@@ -99,7 +99,7 @@ WIN_LoadXInputDLL(void)
     s_pXInputDLL = LoadLibrary( L"XInput1_4.dll" );  // 1.4 Ships with Windows 8.
     if (!s_pXInputDLL) {
         version = (1 << 16) | 3;
-        s_pXInputDLL = LoadLibrary( L"XInput1_3.dll" );  // 1.3 Ships with Vista and Win7, can be installed as a restributable component.
+        s_pXInputDLL = LoadLibrary( L"XInput1_3.dll" );  // 1.3 Ships with Vista and Win7, can be installed as a redistributable component.
     }
     if (!s_pXInputDLL) {
         s_pXInputDLL = LoadLibrary( L"bin\\XInput1_3.dll" );
@@ -514,7 +514,7 @@ LCleanup:
 
 static SDL_bool s_bWindowsDeviceChanged = SDL_FALSE;
 
-/* windowproc for our joystick detect thread message only window, to detect any usb device addition/removal
+/* windowproc for our joystick detect thread message only window, to detect any USB device addition/removal
  */
 LRESULT CALLBACK SDL_PrivateJoystickDetectProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)    {
 	switch (message)    {
@@ -1043,7 +1043,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 			return SetDIerror("IDirectInputDevice8::QueryInterface", result);
 		}
 
-		/* Aquire shared access. Exclusive access is required for forces,
+		/* Acquire shared access. Exclusive access is required for forces,
 		 * though. */
 		result =
 			IDirectInputDevice8_SetCooperativeLevel(joystick->hwdata->

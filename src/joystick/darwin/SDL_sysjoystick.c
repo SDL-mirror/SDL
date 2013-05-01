@@ -145,7 +145,7 @@ void JoystickDeviceWasRemovedCallback( void * refcon, io_service_t service, natu
 
 
 /* Create and open an interface to device, required prior to extracting values or building queues.
- * Note: appliction now owns the device and must close and release it prior to exiting
+ * Note: application now owns the device and must close and release it prior to exiting
  */
 
 static IOReturn
@@ -218,7 +218,7 @@ HIDCreateOpenDeviceInterface(io_object_t hidDevice, recDevice * pDevice)
     return result;
 }
 
-/* Closes and releases interface to device, should be done prior to exting application
+/* Closes and releases interface to device, should be done prior to exiting application
  * Note: will have no affect if device or interface do not exist
  * application will "own" the device if interface is not closed
  * (device may have to be plug and re-plugged in different location to get it working again without a restart)
@@ -301,7 +301,7 @@ HIDGetElementInfo(CFTypeRef refElement, recElement * pElement)
 */
 }
 
-/* examines CF dictionary vlaue in device element hierarchy to determine if it is element of interest or a collection of more elements
+/* examines CF dictionary value in device element hierarchy to determine if it is element of interest or a collection of more elements
  * if element of interest allocate storage, add to list and retrieve element specific info
  * if collection then pass on to deconstruction collection into additional individual elements
  */
@@ -399,7 +399,7 @@ HIDAddElement(CFTypeRef refElement, recDevice * pDevice)
     }
 }
 
-/* collects information from each array member in device element list (each array memeber = element) */
+/* collects information from each array member in device element list (each array member = element) */
 
 static void
 HIDGetElementsCFArrayHandler(const void *value, void *parameter)
@@ -464,7 +464,7 @@ HIDGetDeviceInfo(io_object_t hidDevice, CFMutableDictionaryRef hidProperties,
     io_registry_entry_t parent1, parent2;
 
     /* Mac OS X currently is not mirroring all USB properties to HID page so need to look at USB device page also
-     * get dictionary for usb properties: step up two levels and get CF dictionary for USB properties
+     * get dictionary for USB properties: step up two levels and get CF dictionary for USB properties
      */
     if ((KERN_SUCCESS == IORegistryEntryGetParentEntry(hidDevice, kIOServicePlane, &parent1))
         && (KERN_SUCCESS == IORegistryEntryGetParentEntry(parent1, kIOServicePlane, &parent2))

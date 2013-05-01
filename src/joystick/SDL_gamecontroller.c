@@ -170,7 +170,7 @@ int SDL_GameControllerEventWatcher(void *userdata, SDL_Event * event)
 						}
 						SDL_PrivateGameControllerAxis( controllerlist, axis, value );
 					}
-					else if ( controllerlist->mapping.raxesasbutton[event->jaxis.axis] >= 0 ) // simlate an axis as a button
+					else if ( controllerlist->mapping.raxesasbutton[event->jaxis.axis] >= 0 ) // simulate an axis as a button
 					{
 						SDL_PrivateGameControllerButton( controllerlist, controllerlist->mapping.raxesasbutton[event->jaxis.axis], ABS(event->jaxis.value) > 32768/2 ? SDL_PRESSED : SDL_RELEASED );
 					}
@@ -306,7 +306,7 @@ ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickGUID *gu
 }
 
 /*
- * Helper function to determine pre-caclulated offset to certain joystick mappings
+ * Helper function to determine pre-calculated offset to certain joystick mappings
  */
 ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 {
@@ -1044,7 +1044,7 @@ SDL_Joystick *SDL_GameControllerGetJoystick(SDL_GameController * gamecontroller)
 }
 
 /**
- *  get the sdl joystick layer binding for this controller axi mapping
+ * Get the SDL joystick layer binding for this controller axis mapping
  */
 SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis(SDL_GameController * gamecontroller, SDL_GameControllerAxis axis)
 {
@@ -1070,7 +1070,7 @@ SDL_GameControllerButtonBind SDL_GameControllerGetBindForAxis(SDL_GameController
 
 
 /**
- *  get the sdl joystick layer binding for this controller button mapping
+ * Get the SDL joystick layer binding for this controller button mapping
  */
 SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton(SDL_GameController * gamecontroller, SDL_GameControllerButton button)
 {

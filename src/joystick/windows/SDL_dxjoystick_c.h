@@ -34,7 +34,7 @@
 
 #include "../../core/windows/SDL_windows.h"
 
-#define DIRECTINPUT_VERSION 0x0800      /* Need version 7 for force feedback. Need verison 8 so IDirectInput8_EnumDevices doesn't leak like a sieve... */
+#define DIRECTINPUT_VERSION 0x0800      /* Need version 7 for force feedback. Need version 8 so IDirectInput8_EnumDevices doesn't leak like a sieve... */
 #include <dinput.h>
 #define COBJMACROS
 #include <wbemcli.h>

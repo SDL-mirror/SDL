@@ -31,12 +31,12 @@ struct joystick_hwdata
     SDL_JoystickGUID guid;
     char *fname;                /* Used in haptic subsystem */
 
-    /* The current linux joystick driver maps hats to two axes */
+    /* The current Linux joystick driver maps hats to two axes */
     struct hwdata_hat
     {
         int axis[2];
     } *hats;
-    /* The current linux joystick driver maps balls to two axes */
+    /* The current Linux joystick driver maps balls to two axes */
     struct hwdata_ball
     {
         int axis[2];

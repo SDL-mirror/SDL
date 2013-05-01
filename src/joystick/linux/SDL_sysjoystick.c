@@ -938,7 +938,7 @@ HandleInputEvents(SDL_Joystick * joystick)
                 switch (code) {
                 case SYN_DROPPED :
 #ifdef DEBUG_INPUT_EVENTS
-                    printf("Event SYN_DROPPED dectected\n");
+                    printf("Event SYN_DROPPED detected\n");
 #endif
                     PollAllValues(joystick);
                     break;
