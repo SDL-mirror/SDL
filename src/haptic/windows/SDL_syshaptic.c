@@ -433,7 +433,7 @@ SDL_SYS_HapticOpenFromXInput(SDL_Haptic * haptic, Uint8 userid)
  *       - Set data format.
  *       - Acquire exclusiveness.
  *       - Reset actuators.
- *       - Get supported featuers.
+ *       - Get supported features.
  */
 static int
 SDL_SYS_HapticOpenFromDevice8(SDL_Haptic * haptic,
@@ -888,7 +888,7 @@ SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
     }
 
 
-    /* The big type handling switch, even bigger then linux's version. */
+    /* The big type handling switch, even bigger then Linux's version. */
     switch (src->type) {
     case SDL_HAPTIC_CONSTANT:
         hap_constant = &src->constant;

@@ -371,7 +371,7 @@ SDL_SYS_JoystickIsHaptic(SDL_Joystick * joystick)
 int
 SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    /* We are assuming linux is using evdev which should trump the old
+    /* We are assuming Linux is using evdev which should trump the old
      * joystick methods. */
     if (SDL_strcmp(joystick->hwdata->fname, haptic->hwdata->fname) == 0) {
         return 1;
@@ -548,7 +548,7 @@ SDL_SYS_ToDirection(SDL_HapticDirection * dir)
 
 #define  CLAMP(x)    (((x) > 32767) ? 32767 : x)
 /*
- * Initializes the linux effect struct from a haptic_effect.
+ * Initializes the Linux effect struct from a haptic_effect.
  * Values above 32767 (for unsigned) are unspecified so we must clamp.
  */
 static int
