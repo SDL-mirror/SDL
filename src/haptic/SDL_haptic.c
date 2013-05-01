@@ -397,7 +397,7 @@ unsigned int
 SDL_HapticQuery(SDL_Haptic * haptic)
 {
     if (!ValidHaptic(haptic)) {
-        return -1;
+        return 0; /* same as if no effects were supported */
     }
 
     return haptic->supported;
