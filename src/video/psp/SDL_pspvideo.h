@@ -92,10 +92,10 @@ void PSP_GL_SwapWindow(_THIS, SDL_Window * window);
 void PSP_GL_DeleteContext(_THIS, SDL_GLContext context);
 
 /*PSP on screen keyboard */
-SDL_bool PSP_SDL_HasScreenKeyboardSupport(_THIS);
-void PSP_SDL_ShowScreenKeyboard(_THIS, SDL_Window *window);
-void PSP_SDL_HideScreenKeyboard(_THIS, SDL_Window *window);
-SDL_bool PSP_SDL_IsScreenKeyboardShown(_THIS, SDL_Window *window);
+SDL_bool PSP_HasScreenKeyboardSupport(_THIS);
+void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window);
+void PSP_HideScreenKeyboard(_THIS, SDL_Window *window);
+SDL_bool PSP_IsScreenKeyboardShown(_THIS, SDL_Window *window);
     
 #endif /* __SDL_PANDORA_H__ */
 

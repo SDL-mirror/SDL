@@ -133,8 +133,8 @@ Android_CreateDevice(int devindex)
     device->SetTextInputRect = Android_SetTextInputRect;
 
     /* Screen keyboard */
-    device->SDL_HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
-    device->SDL_IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
+    device->HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
+    device->IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
 
     /* Clipboard */
     device->SetClipboardText = Android_SetClipboardText;

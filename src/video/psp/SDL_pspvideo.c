@@ -136,10 +136,10 @@ PSP_Create()
     device->GL_GetSwapInterval = PSP_GL_GetSwapInterval;
     device->GL_SwapWindow = PSP_GL_SwapWindow;
     device->GL_DeleteContext = PSP_GL_DeleteContext;
-	device->SDL_HasScreenKeyboardSupport = PSP_SDL_HasScreenKeyboardSupport;
-	device->SDL_ShowScreenKeyboard = PSP_SDL_ShowScreenKeyboard;
-	device->SDL_HideScreenKeyboard = PSP_SDL_HideScreenKeyboard;
-	device->SDL_IsScreenKeyboardShown = PSP_SDL_IsScreenKeyboardShown;    
+	device->HasScreenKeyboardSupport = PSP_HasScreenKeyboardSupport;
+	device->ShowScreenKeyboard = PSP_ShowScreenKeyboard;
+	device->HideScreenKeyboard = PSP_HideScreenKeyboard;
+	device->IsScreenKeyboardShown = PSP_IsScreenKeyboardShown;
     
     device->PumpEvents = PSP_PumpEvents;
 
@@ -312,17 +312,17 @@ PSP_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo *info)
 
 
 /* TO Write Me*/
-SDL_bool PSP_SDL_HasScreenKeyboardSupport(_THIS)
+SDL_bool PSP_HasScreenKeyboardSupport(_THIS)
 {
 	return SDL_TRUE;
 }
-void PSP_SDL_ShowScreenKeyboard(_THIS, SDL_Window *window)
+void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window)
 {
 }
-void PSP_SDL_HideScreenKeyboard(_THIS, SDL_Window *window)
+void PSP_HideScreenKeyboard(_THIS, SDL_Window *window)
 {
 }
-SDL_bool PSP_SDL_IsScreenKeyboardShown(_THIS, SDL_Window *window)
+SDL_bool PSP_IsScreenKeyboardShown(_THIS, SDL_Window *window)
 {
 	return SDL_FALSE;
 }
