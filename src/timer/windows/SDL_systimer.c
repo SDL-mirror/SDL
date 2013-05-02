@@ -48,13 +48,13 @@ SDL_StartTicks(void)
 #ifdef USE_GETTICKCOUNT
     start = GetTickCount();
 #else
-#if 0                           /* Apparently there are problems with QPC on Win2K */
+    /* QueryPerformanceCounter has had problems in the past, but lots of games 
+       use it, so we'll rely on it here.
+     */
     if (QueryPerformanceFrequency(&hires_ticks_per_second) == TRUE) {
         hires_timer_available = TRUE;
         QueryPerformanceCounter(&hires_start_ticks);
-    } else
-#endif
-    {
+    } else {
         hires_timer_available = FALSE;
         timeBeginPeriod(1);     /* use 1 ms timer precision */
         start = timeGetTime();
