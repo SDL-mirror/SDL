@@ -117,11 +117,10 @@ int audio_initQuitAudio()
  */
 int audio_initOpenCloseQuitAudio()
 {
-        int result;
+    int result;
 	int i, iMax, j;
 	const char* audioDriver;
 	SDL_AudioSpec desired;
-	SDL_AudioSpec obtained;
 	
 	/* Stop SDL audio subsystem */
 	SDL_QuitSubSystem( SDL_INIT_AUDIO );
@@ -347,17 +346,17 @@ int audio_printCurrentAudioDriver()
 }
 
 /* Definition of all formats, channels, and frequencies used to test audio conversions */
-const int _numFormats = 18;
-SDL_AudioFormat _formats[] = { AUDIO_S8, AUDIO_U8, AUDIO_S16LSB, AUDIO_S16MSB, AUDIO_S16SYS, AUDIO_S16, AUDIO_U16LSB, 
+const int _numAudioFormats = 18;
+SDL_AudioFormat _audioFormats[] = { AUDIO_S8, AUDIO_U8, AUDIO_S16LSB, AUDIO_S16MSB, AUDIO_S16SYS, AUDIO_S16, AUDIO_U16LSB, 
 				AUDIO_U16MSB, AUDIO_U16SYS, AUDIO_U16, AUDIO_S32LSB, AUDIO_S32MSB, AUDIO_S32SYS, AUDIO_S32, 
                                 AUDIO_F32LSB, AUDIO_F32MSB, AUDIO_F32SYS, AUDIO_F32 };
-char *_formatsVerbose[] = { "AUDIO_S8", "AUDIO_U8", "AUDIO_S16LSB", "AUDIO_S16MSB", "AUDIO_S16SYS", "AUDIO_S16", "AUDIO_U16LSB", 
+char *_audioFormatsVerbose[] = { "AUDIO_S8", "AUDIO_U8", "AUDIO_S16LSB", "AUDIO_S16MSB", "AUDIO_S16SYS", "AUDIO_S16", "AUDIO_U16LSB", 
 				"AUDIO_U16MSB", "AUDIO_U16SYS", "AUDIO_U16", "AUDIO_S32LSB", "AUDIO_S32MSB", "AUDIO_S32SYS", "AUDIO_S32", 
                                 "AUDIO_F32LSB", "AUDIO_F32MSB", "AUDIO_F32SYS", "AUDIO_F32" };
-const int _numChannels = 4;
-Uint8 _channels[] = { 1, 2, 4, 6 };
-const int _numFrequencies = 4;
-int _frequencies[] = { 11025, 22050, 44100, 48000 };
+const int _numAudioChannels = 4;
+Uint8 _audioChannels[] = { 1, 2, 4, 6 };
+const int _numAudioFrequencies = 4;
+int _audioFrequencies[] = { 11025, 22050, 44100, 48000 };
 
 
 /**
@@ -395,22 +394,22 @@ int audio_buildAudioCVT()
   SDLTest_AssertCheck(result == 1, "Verify result value; expected: 1, got: %i", result);
 
   /* All source conversions with random conversion targets, allow 'null' conversions */
-  for (i = 0; i < _numFormats; i++) {
-    for (j = 0; j < _numChannels; j++) {
-      for (k = 0; k < _numFrequencies; k++) {
-        spec1.format = _formats[i];
-        spec1.channels = _channels[j];
-        spec1.freq = _frequencies[k];
-        ii = SDLTest_RandomIntegerInRange(0, _numFormats - 1);
-        jj = SDLTest_RandomIntegerInRange(0, _numChannels - 1);
-        kk = SDLTest_RandomIntegerInRange(0, _numFrequencies - 1);
-        spec2.format = _formats[ii];
-        spec2.channels = _channels[jj];
-        spec2.freq = _frequencies[kk];
+  for (i = 0; i < _numAudioFormats; i++) {
+    for (j = 0; j < _numAudioChannels; j++) {
+      for (k = 0; k < _numAudioFrequencies; k++) {
+        spec1.format = _audioFormats[i];
+        spec1.channels = _audioChannels[j];
+        spec1.freq = _audioFrequencies[k];
+        ii = SDLTest_RandomIntegerInRange(0, _numAudioFormats - 1);
+        jj = SDLTest_RandomIntegerInRange(0, _numAudioChannels - 1);
+        kk = SDLTest_RandomIntegerInRange(0, _numAudioFrequencies - 1);
+        spec2.format = _audioFormats[ii];
+        spec2.channels = _audioChannels[jj];
+        spec2.freq = _audioFrequencies[kk];
         result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
                                          spec2.format, spec2.channels, spec2.freq);
         SDLTest_AssertPass("Call to SDL_BuildAudioCVT(format[%i]=%s(%i),channels[%i]=%i,freq[%i]=%i ==> format[%i]=%s(%i),channels[%i]=%i,freq[%i]=%i)", 
-            i, _formatsVerbose[i], spec1.format, j, spec1.channels, k, spec1.freq, ii, _formatsVerbose[ii], spec2.format, jj, spec2.channels, kk, spec2.freq);
+            i, _audioFormatsVerbose[i], spec1.format, j, spec1.channels, k, spec1.freq, ii, _audioFormatsVerbose[ii], spec2.format, jj, spec2.channels, kk, spec2.freq);
         SDLTest_AssertCheck(result == 0 || result == 1, "Verify result value; expected: 0 or 1, got: %i", result);
         if (result<0) {
           SDLTest_LogError(SDL_GetError());
@@ -691,39 +690,39 @@ int audio_convertAudio()
     }
     SDLTest_Log(message);
     /* All source conversions with random conversion targets */
-    for (i = 0; i < _numFormats; i++) {
-      for (j = 0; j < _numChannels; j++) {
-        for (k = 0; k < _numFrequencies; k++) {        
-          spec1.format = _formats[i];
-          spec1.channels = _channels[j];
-          spec1.freq = _frequencies[k];
+    for (i = 0; i < _numAudioFormats; i++) {
+      for (j = 0; j < _numAudioChannels; j++) {
+        for (k = 0; k < _numAudioFrequencies; k++) {        
+          spec1.format = _audioFormats[i];
+          spec1.channels = _audioChannels[j];
+          spec1.freq = _audioFrequencies[k];
         
           /* Ensure we have a different target format */
           do {
             if (c & 1) {
-              ii = SDLTest_RandomIntegerInRange(0, _numFormats - 1);
+              ii = SDLTest_RandomIntegerInRange(0, _numAudioFormats - 1);
             } else {
               ii = 1;
             }
             if (c & 2) {
-              jj = SDLTest_RandomIntegerInRange(0, _numChannels - 1);
+              jj = SDLTest_RandomIntegerInRange(0, _numAudioChannels - 1);
             } else {
               jj= j;
             }
             if (c & 4) {
-              kk = SDLTest_RandomIntegerInRange(0, _numFrequencies - 1);
+              kk = SDLTest_RandomIntegerInRange(0, _numAudioFrequencies - 1);
             } else {
               kk = k;
             }
           } while ((i == ii) && (j == jj) && (k == kk));
-          spec2.format = _formats[ii];
-          spec2.channels = _channels[jj];
-          spec2.freq = _frequencies[kk];
+          spec2.format = _audioFormats[ii];
+          spec2.channels = _audioChannels[jj];
+          spec2.freq = _audioFrequencies[kk];
         
           result = SDL_BuildAudioCVT(&cvt, spec1.format, spec1.channels, spec1.freq,
                                            spec2.format, spec2.channels, spec2.freq);
           SDLTest_AssertPass("Call to SDL_BuildAudioCVT(format[%i]=%s(%i),channels[%i]=%i,freq[%i]=%i ==> format[%i]=%s(%i),channels[%i]=%i,freq[%i]=%i)", 
-            i, _formatsVerbose[i], spec1.format, j, spec1.channels, k, spec1.freq, ii, _formatsVerbose[ii], spec2.format, jj, spec2.channels, kk, spec2.freq);
+            i, _audioFormatsVerbose[i], spec1.format, j, spec1.channels, k, spec1.freq, ii, _audioFormatsVerbose[ii], spec2.format, jj, spec2.channels, kk, spec2.freq);
           SDLTest_AssertCheck(result == 1, "Verify result value; expected: 1, got: %i", result);
           if (result != 1) {
             SDLTest_LogError(SDL_GetError());

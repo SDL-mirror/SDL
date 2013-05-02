@@ -24,6 +24,7 @@ extern SDLTest_TestSuiteReference sdltestTestSuite;
 extern SDLTest_TestSuiteReference videoTestSuite;
 extern SDLTest_TestSuiteReference mouseTestSuite;
 extern SDLTest_TestSuiteReference timerTestSuite;
+extern SDLTest_TestSuiteReference pixelsTestSuite;
 
 // All test suites
 SDLTest_TestSuiteReference *testSuites[] =  {
@@ -42,6 +43,7 @@ SDLTest_TestSuiteReference *testSuites[] =  {
 	&videoTestSuite,
 	&mouseTestSuite,
 	&timerTestSuite,
+	&pixelsTestSuite,
 	NULL
 };
 

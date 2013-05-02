@@ -83,7 +83,8 @@ testautomation$(EXE): $(srcdir)/testautomation.c \
 		      $(srcdir)/testautomation_syswm.c \
 		      $(srcdir)/testautomation_sdltest.c \
 		      $(srcdir)/testautomation_mouse.c \
-		      $(srcdir)/testautomation_timer.c
+		      $(srcdir)/testautomation_timer.c \
+		      $(srcdir)/testautomation_pixels.c		      
 	$(CC) -o $@ $^ $(CFLAGS) -lSDL2_test $(LIBS) 
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
