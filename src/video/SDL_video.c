@@ -29,6 +29,7 @@
 #include "SDL_pixels_c.h"
 #include "SDL_rect_c.h"
 #include "../events/SDL_events_c.h"
+#include "../timer/SDL_timer_c.h"
 
 #if SDL_VIDEO_OPENGL
 #include "SDL_opengl.h"
@@ -415,6 +416,10 @@ SDL_VideoInit(const char *driver_name)
     if (_this != NULL) {
         SDL_VideoQuit();
     }
+    
+#if !SDL_TIMERS_DISABLED
+    SDL_InitTicks();
+#endif
 
     /* Start the event loop */
     if (SDL_StartEventLoop() < 0 ||

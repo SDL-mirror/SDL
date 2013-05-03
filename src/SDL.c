@@ -32,9 +32,9 @@
 
 /* Initialization/Cleanup routines */
 #if !SDL_TIMERS_DISABLED
-extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
 extern void SDL_TimerQuit(void);
+extern void SDL_InitTicks(void);
 #endif
 #if SDL_VIDEO_DRIVER_WINDOWS
 extern int SDL_HelperWindowCreate(void);
@@ -43,7 +43,6 @@ extern int SDL_HelperWindowDestroy(void);
 
 
 /* The initialized subsystems */
-static Uint32 ticks_started = 0;
 static SDL_bool SDL_bInMainQuit = SDL_FALSE;
 static Uint8 SDL_SubsystemRefCount[ 32 ];
 
@@ -93,10 +92,7 @@ int
 SDL_InitSubSystem(Uint32 flags)
 {
 #if !SDL_TIMERS_DISABLED
-    if (!ticks_started) {
-        SDL_StartTicks();
-        ticks_started = 1;
-    }
+    SDL_InitTicks();
 #endif
 
     /* Initialize the timer subsystem */
