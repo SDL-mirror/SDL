@@ -275,6 +275,20 @@ GLES2_UpdateViewport(SDL_Renderer * renderer)
     return 0;
 }
 
+static int
+GLES2_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+
+    if (!SDL_RectEmpty(rect)) {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
+    }
+    return 0;
+}
+
 static void
 GLES2_DestroyRenderer(SDL_Renderer *renderer)
 {
@@ -934,11 +948,11 @@ static int GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *point
 static int GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count);
 static int GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *srcrect,
                             const SDL_FRect *dstrect);
-static int GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
-                    Uint32 pixel_format, void * pixels, int pitch);
 static int GLES2_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_FRect * dstrect,
                          const double angle, const SDL_FPoint *center, const SDL_RendererFlip flip);
+static int GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+                    Uint32 pixel_format, void * pixels, int pitch);
 static void GLES2_RenderPresent(SDL_Renderer *renderer);
 
 
@@ -1708,13 +1722,14 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     renderer->UnlockTexture       = &GLES2_UnlockTexture;
     renderer->SetRenderTarget     = &GLES2_SetRenderTarget;
     renderer->UpdateViewport      = &GLES2_UpdateViewport;
+    renderer->UpdateClipRect      = &GLES2_UpdateClipRect;
     renderer->RenderClear         = &GLES2_RenderClear;
     renderer->RenderDrawPoints    = &GLES2_RenderDrawPoints;
     renderer->RenderDrawLines     = &GLES2_RenderDrawLines;
     renderer->RenderFillRects     = &GLES2_RenderFillRects;
     renderer->RenderCopy          = &GLES2_RenderCopy;
-    renderer->RenderReadPixels    = &GLES2_RenderReadPixels;
     renderer->RenderCopyEx        = &GLES2_RenderCopyEx;
+    renderer->RenderReadPixels    = &GLES2_RenderReadPixels;
     renderer->RenderPresent       = &GLES2_RenderPresent;
     renderer->DestroyTexture      = &GLES2_DestroyTexture;
     renderer->DestroyRenderer     = &GLES2_DestroyRenderer;

@@ -1202,6 +1202,26 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 SDL_SetClipboardText("SDL rocks!\nYou know it!");
                 printf("Copied text to clipboard\n");
             }
+            if (event->key.keysym.mod & KMOD_ALT) {
+                /* Alt-C toggle a render clip rectangle */
+                for (i = 0; i < state->num_windows; ++i) {
+                    int w, h;
+                    if (state->renderers[i]) {
+                        SDL_Rect clip;
+                        SDL_GetWindowSize(state->windows[i], &w, &h);
+                        SDL_RenderGetClipRect(state->renderers[i], &clip);
+                        if (SDL_RectEmpty(&clip)) {
+                            clip.x = w/4;
+                            clip.y = h/4;
+                            clip.w = w/2;
+                            clip.h = h/2;
+                            SDL_RenderSetClipRect(state->renderers[i], &clip);
+                        } else {
+                            SDL_RenderSetClipRect(state->renderers[i], NULL);
+                        }
+                    }
+                }
+            }
             break;
         case SDLK_v:
             if (event->key.keysym.mod & KMOD_CTRL) {

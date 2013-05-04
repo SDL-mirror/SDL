@@ -54,6 +54,7 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_UpdateViewport(SDL_Renderer * renderer);
+static int SW_UpdateClipRect(SDL_Renderer * renderer);
 static int SW_RenderClear(SDL_Renderer * renderer);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_FPoint * points, int count);
@@ -151,6 +152,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UnlockTexture = SW_UnlockTexture;
     renderer->SetRenderTarget = SW_SetRenderTarget;
     renderer->UpdateViewport = SW_UpdateViewport;
+    renderer->UpdateClipRect = SW_UpdateClipRect;
     renderer->RenderClear = SW_RenderClear;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -317,6 +319,20 @@ SW_UpdateViewport(SDL_Renderer * renderer)
         renderer->viewport.h = surface->h;
     }
     SDL_SetClipRect(data->surface, &renderer->viewport);
+    return 0;
+}
+
+static int
+SW_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+    SDL_Surface* framebuffer = (SDL_Surface *) renderer->driverdata;
+
+    if (!SDL_RectEmpty(rect)) {
+        SDL_SetClipRect(framebuffer, rect);
+    } else {
+        SDL_SetClipRect(framebuffer, NULL);
+    }
     return 0;
 }
 

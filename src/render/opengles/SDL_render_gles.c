@@ -59,6 +59,7 @@ static void GLES_UnlockTexture(SDL_Renderer * renderer,
 static int GLES_SetRenderTarget(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
 static int GLES_UpdateViewport(SDL_Renderer * renderer);
+static int GLES_UpdateClipRect(SDL_Renderer * renderer);
 static int GLES_RenderClear(SDL_Renderer * renderer);
 static int GLES_RenderDrawPoints(SDL_Renderer * renderer,
                                  const SDL_FPoint * points, int count);
@@ -303,6 +304,7 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UnlockTexture = GLES_UnlockTexture;
     renderer->SetRenderTarget = GLES_SetRenderTarget;
     renderer->UpdateViewport = GLES_UpdateViewport;
+    renderer->UpdateClipRect = GLES_UpdateClipRect;
     renderer->RenderClear = GLES_RenderClear;
     renderer->RenderDrawPoints = GLES_RenderDrawPoints;
     renderer->RenderDrawLines = GLES_RenderDrawLines;
@@ -627,6 +629,20 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
              (GLfloat) renderer->viewport.w,
              (GLfloat) renderer->viewport.h,
              (GLfloat) 0, 0.0, 1.0);
+    return 0;
+}
+
+static int
+GLES_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+
+    if (!SDL_RectEmpty(rect)) {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+    } else {
+        glDisable(GL_SCISSOR_TEST);
+    }
     return 0;
 }
 

@@ -186,6 +186,7 @@ static int D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int D3D_UpdateViewport(SDL_Renderer * renderer);
+static int D3D_UpdateClipRect(SDL_Renderer * renderer);
 static int D3D_RenderClear(SDL_Renderer * renderer);
 static int D3D_RenderDrawPoints(SDL_Renderer * renderer,
                                 const SDL_FPoint * points, int count);
@@ -510,6 +511,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UnlockTexture = D3D_UnlockTexture;
     renderer->SetRenderTarget = D3D_SetRenderTarget;
     renderer->UpdateViewport = D3D_UpdateViewport;
+    renderer->UpdateClipRect = D3D_UpdateClipRect;
     renderer->RenderClear = D3D_RenderClear;
     renderer->RenderDrawPoints = D3D_RenderDrawPoints;
     renderer->RenderDrawLines = D3D_RenderDrawLines;
@@ -815,6 +817,39 @@ D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 static int
+D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+{
+    D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
+    D3D_TextureData *texturedata;
+    HRESULT result;
+
+    D3D_ActivateRenderer(renderer);
+
+    /* Release the previous render target if it wasn't the default one */
+    if (data->currentRenderTarget != NULL) {
+        IDirect3DSurface9_Release(data->currentRenderTarget);
+        data->currentRenderTarget = NULL;
+    }
+
+    if (texture == NULL) {
+        IDirect3DDevice9_SetRenderTarget(data->device, 0, data->defaultRenderTarget);
+        return 0;
+    }
+
+    texturedata = (D3D_TextureData *) texture->driverdata;
+    result = IDirect3DTexture9_GetSurfaceLevel(texturedata->texture, 0, &data->currentRenderTarget);
+    if(FAILED(result)) {
+        return D3D_SetError("GetSurfaceLevel()", result);
+    }
+    result = IDirect3DDevice9_SetRenderTarget(data->device, 0, data->currentRenderTarget);
+    if(FAILED(result)) {
+        return D3D_SetError("SetRenderTarget()", result);
+    }
+
+    return 0;
+}
+
+static int
 D3D_UpdateViewport(SDL_Renderer * renderer)
 {
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
@@ -853,35 +888,28 @@ D3D_UpdateViewport(SDL_Renderer * renderer)
 }
 
 static int
-D3D_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
+D3D_UpdateClipRect(SDL_Renderer * renderer)
 {
+    const SDL_Rect *rect = &renderer->clip_rect;
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
-    D3D_TextureData *texturedata;
+    RECT r;
     HRESULT result;
 
-    D3D_ActivateRenderer(renderer);
+    if (!SDL_RectEmpty(rect)) {
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE, TRUE);
+        r.left = rect->x;
+        r.top = rect->y;
+        r.right = rect->w + rect->w;
+        r.bottom = rect->y + rect->h;
 
-    /* Release the previous render target if it wasn't the default one */
-    if (data->currentRenderTarget != NULL) {
-        IDirect3DSurface9_Release(data->currentRenderTarget);
-        data->currentRenderTarget = NULL;
+        result = IDirect3DDevice9_SetScissorRect(data->device, &r);
+        if (result != D3D_OK) {
+            D3D_SetError("SetScissor()", result);
+            return -1;
+        }
+    } else {
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE, FALSE);
     }
-
-    if (texture == NULL) {
-        IDirect3DDevice9_SetRenderTarget(data->device, 0, data->defaultRenderTarget);
-        return 0;
-    }
-
-    texturedata = (D3D_TextureData *) texture->driverdata;
-    result = IDirect3DTexture9_GetSurfaceLevel(texturedata->texture, 0, &data->currentRenderTarget);
-    if(FAILED(result)) {
-        return D3D_SetError("GetSurfaceLevel()", result);
-    }
-    result = IDirect3DDevice9_SetRenderTarget(data->device, 0, data->currentRenderTarget);
-    if(FAILED(result)) {
-        return D3D_SetError("SetRenderTarget()", result);
-    }
-
     return 0;
 }
 

@@ -469,6 +469,8 @@ extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, i
  *
  *  The x,y of the viewport rect represents the origin for rendering.
  *
+ *  \return 0 on success, or -1 on error
+ *
  *  \note When the window is resized, the current viewport is automatically
  *        centered within the new window size.
  *
@@ -484,6 +486,30 @@ extern DECLSPEC int SDLCALL SDL_RenderSetViewport(SDL_Renderer * renderer,
  *  \sa SDL_RenderSetViewport()
  */
 extern DECLSPEC void SDLCALL SDL_RenderGetViewport(SDL_Renderer * renderer,
+                                                   SDL_Rect * rect);
+
+/**
+ *  \brief Set the clip rectangle for the current target.
+ *  
+ *  \param rect   A pointer to the rectangle to set as the clip rectangle, or
+ *                NULL to disable clipping.
+ *
+ *  \return 0 on success, or -1 on error
+ *
+ *  \sa SDL_RenderGetClipRect()
+ */
+extern DECLSPEC int SDLCALL SDL_RenderSetClipRect(SDL_Renderer * renderer,
+                                                  const SDL_Rect * rect);
+
+/**
+ *  \brief Get the clip rectangle for the current target.
+ *  
+ *  \param rect   A pointer filled in with the current clip rectangle, or
+ *                an empty rectangle if clipping is disabled.
+ *
+ *  \sa SDL_RenderSetClipRect()
+ */
+extern DECLSPEC void SDLCALL SDL_RenderGetClipRect(SDL_Renderer * renderer,
                                                    SDL_Rect * rect);
 
 /**

@@ -56,6 +56,7 @@ static int GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int GL_UpdateViewport(SDL_Renderer * renderer);
+static int GL_UpdateClipRect(SDL_Renderer * renderer);
 static int GL_RenderClear(SDL_Renderer * renderer);
 static int GL_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_FPoint * points, int count);
@@ -324,6 +325,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->UnlockTexture = GL_UnlockTexture;
     renderer->SetRenderTarget = GL_SetRenderTarget;
     renderer->UpdateViewport = GL_UpdateViewport;
+    renderer->UpdateClipRect = GL_UpdateClipRect;
     renderer->RenderClear = GL_RenderClear;
     renderer->RenderDrawPoints = GL_RenderDrawPoints;
     renderer->RenderDrawLines = GL_RenderDrawLines;
@@ -781,6 +783,21 @@ GL_UpdateViewport(SDL_Renderer * renderer)
                        0.0, 1.0);
     }
     GL_CheckError("", renderer);
+    return 0;
+}
+
+static int
+GL_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    if (!SDL_RectEmpty(rect)) {
+        data->glEnable(GL_SCISSOR_TEST);
+        data->glScissor(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+    } else {
+        data->glDisable(GL_SCISSOR_TEST);
+    }
     return 0;
 }
 

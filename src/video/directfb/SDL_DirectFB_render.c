@@ -116,6 +116,7 @@ static int DirectFB_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * r
 static int DirectFB_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                       Uint32 format, const void * pixels, int pitch);
 static int DirectFB_UpdateViewport(SDL_Renderer * renderer);
+static int DirectFB_UpdateClipRect(SDL_Renderer * renderer);
 static int DirectFB_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 
 static int PrepareDraw(SDL_Renderer * renderer);
@@ -380,8 +381,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* SetDrawColor - no needed */
     renderer->RenderFillRects = DirectFB_RenderFillRects;
 
-    /* RenderDrawEllipse - no reference implementation yet */
-    /* RenderFillEllipse - no reference implementation yet */
     renderer->RenderCopy = DirectFB_RenderCopy;
     renderer->RenderPresent = DirectFB_RenderPresent;
 
@@ -392,6 +391,7 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->DestroyTexture = DirectFB_DestroyTexture;
     renderer->DestroyRenderer = DirectFB_DestroyRenderer;
     renderer->UpdateViewport = DirectFB_UpdateViewport;
+    renderer->UpdateClipRect = DirectFB_UpdateClipRect;
     renderer->SetRenderTarget = DirectFB_SetRenderTarget;
 
 #if 0
@@ -1256,6 +1256,28 @@ DirectFB_UpdateViewport(SDL_Renderer * renderer)
 
     winsurf->SetClip(winsurf, &dreg);
     return 0;
+}
+
+static int
+DirectFB_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    IDirectFBSurface *destsurf = get_dfb_surface(data->window);
+    DFBRegion region;
+
+    if (!SDL_RectEmpty(rect)) {
+        region.x1 = rect->x;
+        region.x2 = rect->x + rect->w;
+        region.y1 = rect->y;
+        region.y2 = rect->y + rect->h;
+        SDL_DFB_CHECKERR(destsurf->SetClip(destsurf, &region));
+    } else {
+        SDL_DFB_CHECKERR(destsurf->SetClip(destsurf, NULL));
+    }
+    return 0;
+  error:
+    return -1;
 }
 
 static int

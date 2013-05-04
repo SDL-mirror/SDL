@@ -932,6 +932,7 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
     if (texture && !renderer->target) {
         /* Make a backup of the viewport */
         renderer->viewport_backup = renderer->viewport;
+        renderer->clip_rect_backup = renderer->clip_rect;
         renderer->scale_backup = renderer->scale;
         renderer->logical_w_backup = renderer->logical_w;
         renderer->logical_h_backup = renderer->logical_h;
@@ -953,11 +954,15 @@ SDL_SetRenderTarget(SDL_Renderer *renderer, SDL_Texture *texture)
         renderer->logical_h = 0;
     } else {
         renderer->viewport = renderer->viewport_backup;
+        renderer->clip_rect = renderer->clip_rect_backup;
         renderer->scale = renderer->scale_backup;
         renderer->logical_w = renderer->logical_w_backup;
         renderer->logical_h = renderer->logical_h_backup;
     }
     if (renderer->UpdateViewport(renderer) < 0) {
+        return -1;
+    }
+    if (renderer->UpdateClipRect(renderer) < 0) {
         return -1;
     }
 
@@ -1094,6 +1099,35 @@ SDL_RenderGetViewport(SDL_Renderer * renderer, SDL_Rect * rect)
         rect->y = (int)(renderer->viewport.y / renderer->scale.y);
         rect->w = (int)(renderer->viewport.w / renderer->scale.x);
         rect->h = (int)(renderer->viewport.h / renderer->scale.y);
+    }
+}
+
+int
+SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
+{
+    CHECK_RENDERER_MAGIC(renderer, )
+
+    if (rect) {
+        renderer->clip_rect.x = (int)SDL_floor(rect->x * renderer->scale.x);
+        renderer->clip_rect.y = (int)SDL_floor(rect->y * renderer->scale.y);
+        renderer->clip_rect.w = (int)SDL_ceil(rect->w * renderer->scale.x);
+        renderer->clip_rect.h = (int)SDL_ceil(rect->h * renderer->scale.y);
+    } else {
+        SDL_zero(renderer->clip_rect);
+    }
+    return renderer->UpdateClipRect(renderer);
+}
+
+void
+SDL_RenderGetClipRect(SDL_Renderer * renderer, SDL_Rect * rect)
+{
+    CHECK_RENDERER_MAGIC(renderer, )
+
+    if (rect) {
+        rect->x = (int)(renderer->clip_rect.x / renderer->scale.x);
+        rect->y = (int)(renderer->clip_rect.y / renderer->scale.y);
+        rect->w = (int)(renderer->clip_rect.w / renderer->scale.x);
+        rect->h = (int)(renderer->clip_rect.h / renderer->scale.y);
     }
 }
 
