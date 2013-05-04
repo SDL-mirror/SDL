@@ -101,6 +101,9 @@ char* _nonRGBPixelFormatsVerbose[] =
 
 /**
  * @brief Call to SDL_AllocFormat and SDL_FreeFormat
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_AllocFormat
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_FreeFormat 
  */
 int
 pixels_allocFreeFormat(void *arg)
@@ -145,18 +148,100 @@ pixels_allocFreeFormat(void *arg)
     SDLTest_AssertCheck(result == NULL, "Verify result is NULL");  
   }
   
+  /* Negative cases */
+  format = 0xffffffff;
+  result = SDL_AllocFormat(format);
+  SDLTest_AssertPass("Call to SDL_AllocFormat(0xffffffff)");
+  SDLTest_AssertCheck(result == NULL, "Verify result is NULL");  
+  /* TODO: check error code */
+
+  SDL_FreeFormat(NULL);
+  SDLTest_AssertPass("Call to SDL_FreeFormat(NULL)");
+  /* TODO: check error code */
+  
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Call to SDL_AllocPalette and SDL_FreePalette
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_AllocPalette
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_FreePalette
+ */
+int
+pixels_allocFreePalette(void *arg)
+{
+  int variation;
+  int i;
+  int ncolors;
+  SDL_Palette* result;
+
+  /* Allocate palette */
+  for (variation = 1; variation <= 3; variation++) {  
+    switch (variation) {
+      /* Just one color */
+      case 1:
+        ncolors = 1;
+        break;
+      /* Two colors */
+      case 2:
+        ncolors = 2;
+        break;
+      /* More than two colors */
+      case 3:
+        ncolors = SDLTest_RandomIntegerInRange(8, 16);
+        break;
+    }
+
+    result = SDL_AllocPalette(ncolors);
+    SDLTest_AssertPass("Call to SDL_AllocPalette(%d)", ncolors);
+    SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+    if (result != NULL) {
+      SDLTest_AssertCheck(result->ncolors == ncolors, "Verify value of result.ncolors; expected: %u, got %u", ncolors, result->ncolors);  
+      if (result->ncolors > 0) {
+        SDLTest_AssertCheck(result->colors != NULL, "Verify value of result.colors is not NULL");
+        if (result->colors != NULL) {
+          for(i = 0; i < result->ncolors; i++) {
+            SDLTest_AssertCheck(result->colors[i].r == 255, "Verify value of result.colors[%d].r; expected: 255, got %u", i, result->colors[i].r);  
+            SDLTest_AssertCheck(result->colors[i].g == 255, "Verify value of result.colors[%d].g; expected: 255, got %u", i, result->colors[i].g);  
+            SDLTest_AssertCheck(result->colors[i].b == 255, "Verify value of result.colors[%d].b; expected: 255, got %u", i, result->colors[i].b);  
+           }
+         } 
+      }
+      
+      /* Deallocate again */
+      SDL_FreePalette(result);
+      SDLTest_AssertPass("Call to SDL_FreePalette()");          
+    }
+  }
+
+  /* Negative cases */
+  for (ncolors = 0; ncolors > -3; ncolors--) {
+    result = SDL_AllocPalette(ncolors);
+    SDLTest_AssertPass("Call to SDL_AllocPalette(%d)", ncolors);
+    SDLTest_AssertCheck(result == NULL, "Verify result is NULL");
+    /* TODO: check error code */
+  }
+
+  SDL_FreePalette(NULL);
+  SDLTest_AssertPass("Call to SDL_FreePalette(NULL)");
+  /* TODO: check error code */
+    
   return TEST_COMPLETED;
 }
 
 /* ================= Test References ================== */
 
-/* SysWM test cases */
+/* Pixels test cases */
 static const SDLTest_TestCaseReference pixelsTest1 =
 		{ (SDLTest_TestCaseFp)pixels_allocFreeFormat, "pixels_allocFreeFormat", "Call to SDL_AllocFormat and SDL_FreeFormat", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference pixelsTest2 =
+		{ (SDLTest_TestCaseFp)pixels_allocFreePalette, "pixels_allocFreePalette", "Call to SDL_AllocPalette and SDL_FreePalette", TEST_ENABLED };
+
 /* Sequence of Pixels test cases */
 static const SDLTest_TestCaseReference *pixelsTests[] =  {
-	&pixelsTest1, NULL
+	&pixelsTest1, &pixelsTest2, NULL
 };
 
 /* Pixels test suite (global) */

@@ -503,6 +503,7 @@ SDL_AllocFormat(Uint32 pixel_format)
     }
     if (SDL_InitFormat(format, pixel_format) < 0) {
         SDL_free(format);
+        SDL_InvalidParamError("format");
         return NULL;
     }
 
@@ -585,6 +586,7 @@ SDL_FreeFormat(SDL_PixelFormat *format)
     SDL_PixelFormat *prev;
 
     if (!format) {
+        SDL_InvalidParamError("format");
         return;
     }
     if (--format->refcount > 0) {
@@ -613,6 +615,12 @@ SDL_Palette *
 SDL_AllocPalette(int ncolors)
 {
     SDL_Palette *palette;
+    
+    /* Input validation */
+    if (ncolors < 1) {
+      SDL_InvalidParamError("ncolors");
+      return NULL;
+    }
 
     palette = (SDL_Palette *) SDL_malloc(sizeof(*palette));
     if (!palette) {
@@ -693,6 +701,7 @@ void
 SDL_FreePalette(SDL_Palette * palette)
 {
     if (!palette) {
+        SDL_InvalidParamError("palette");
         return;
     }
     if (--palette->refcount > 0) {
