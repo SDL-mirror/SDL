@@ -1105,7 +1105,7 @@ SDL_RenderGetViewport(SDL_Renderer * renderer, SDL_Rect * rect)
 int
 SDL_RenderSetClipRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    CHECK_RENDERER_MAGIC(renderer, )
+    CHECK_RENDERER_MAGIC(renderer, -1)
 
     if (rect) {
         renderer->clip_rect.x = (int)SDL_floor(rect->x * renderer->scale.x);
