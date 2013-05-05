@@ -24,6 +24,7 @@ import android.hardware.*;
     SDL Activity
 */
 public class SDLActivity extends Activity {
+    private static final String TAG = "SDL";
 
     // Keep track of the paused state
     public static boolean mIsPaused = false;
@@ -113,25 +114,41 @@ public class SDLActivity extends Activity {
     static final int COMMAND_UNUSED = 2;
     static final int COMMAND_TEXTEDIT_HIDE = 3;
 
-    // Handler for the messages
-    Handler commandHandler = new Handler() {
+    /**
+     * A Handler class for Messages from native SDL applications.
+     * It uses current Activities as target (e.g. for the title).
+     * static to prevent implicit references to enclosing object.
+     */
+    protected static class SDLCommandHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
+            Context context = getContext();
+            if (context == null) {
+                Log.e(TAG, "error handling message, getContext() returned null");
+                return;
+            }
             switch (msg.arg1) {
             case COMMAND_CHANGE_TITLE:
-                setTitle((String)msg.obj);
+                if (context instanceof Activity) {
+                    ((Activity) context).setTitle((String)msg.obj);
+                } else {
+                    Log.e(TAG, "error handling message, getContext() returned no Activity");
+                }
                 break;
             case COMMAND_TEXTEDIT_HIDE:
                 if (mTextEdit != null) {
                     mTextEdit.setVisibility(View.GONE);
 
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(mTextEdit.getWindowToken(), 0);
                 }
                 break;
             }
         }
-    };
+    }
+
+    // Handler for the messages
+    Handler commandHandler = new SDLCommandHandler();
 
     // Send a message from the SDLMain thread
     void sendCommand(int command, Object data) {
