@@ -36,6 +36,10 @@ using namespace Windows::System;
 using namespace Windows::UI::Core;
 using namespace Windows::UI::Input;
 
+// Compile-time debugging options:
+// To enable, uncomment; to disable, comment them out.
+//#define LOG_POINTER_EVENTS 1
+
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
 // This seems wrong on some level, but does seem to work.
@@ -386,12 +390,13 @@ WINRT_ConvertPointerUpdateKindToString(PointerUpdateKind kind)
 }
 
 static void
-WINRT_LogPointerEvent(const string & header, PointerEventArgs ^ args)
+WINRT_LogPointerEvent(const string & header, PointerEventArgs ^ args, Point transformedPoint)
 {
     PointerPoint ^ pt = args->CurrentPoint;
-    SDL_Log("%s: Position={%f,%f}, MouseWheelDelta=%d, FrameId=%d, PointerId=%d, PointerUpdateKind=%s\n",
+    SDL_Log("%s: Position={%f,%f}, Transformed Pos={%f, %f}, MouseWheelDelta=%d, FrameId=%d, PointerId=%d, PointerUpdateKind=%s\n",
         header.c_str(),
         pt->Position.X, pt->Position.Y,
+        transformedPoint.X, transformedPoint.Y,
         pt->Properties->MouseWheelDelta,
         pt->FrameId,
         pt->PointerId,
@@ -400,8 +405,8 @@ WINRT_LogPointerEvent(const string & header, PointerEventArgs ^ args)
 
 void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 {
-#if 0
-    WINRT_LogPointerEvent("mouse down", args);
+#if LOG_POINTER_EVENTS
+    WINRT_LogPointerEvent("mouse down", args, TransformCursor(args->CurrentPoint->Position));
 #endif
 
     if (m_sdlWindowData) {
@@ -414,8 +419,8 @@ void SDL_WinRTApp::OnPointerPressed(CoreWindow^ sender, PointerEventArgs^ args)
 
 void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
 {
-#if 0
-    WINRT_LogPointerEvent("mouse up", args);
+#if LOG_POINTER_EVENTS
+    WINRT_LogPointerEvent("mouse up", args, TransformCursor(args->CurrentPoint->Position));
 #endif
 
     if (m_sdlWindowData) {
@@ -428,8 +433,8 @@ void SDL_WinRTApp::OnPointerReleased(CoreWindow^ sender, PointerEventArgs^ args)
 
 void SDL_WinRTApp::OnPointerWheelChanged(CoreWindow^ sender, PointerEventArgs^ args)
 {
-#if 0
-    WINRT_LogPointerEvent("wheel changed", args);
+#if LOG_POINTER_EVENTS
+    WINRT_LogPointerEvent("wheel changed", args, TransformCursor(args->CurrentPoint->Position));
 #endif
 
     if (m_sdlWindowData) {
@@ -532,6 +537,10 @@ Point SDL_WinRTApp::TransformCursor(Point rawPosition)
 
 void SDL_WinRTApp::OnPointerMoved(CoreWindow^ sender, PointerEventArgs^ args)
 {
+#if LOG_POINTER_EVENTS
+    WINRT_LogPointerEvent("pointer moved", args, TransformCursor(args->CurrentPoint->Position));
+#endif
+
     if (m_sdlWindowData && ! m_useRelativeMouseMode)
     {
         Point transformedPoint = TransformCursor(args->CurrentPoint->Position);
