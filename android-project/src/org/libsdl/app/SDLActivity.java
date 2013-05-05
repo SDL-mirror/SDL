@@ -114,6 +114,19 @@ public class SDLActivity extends Activity {
     static final int COMMAND_UNUSED = 2;
     static final int COMMAND_TEXTEDIT_HIDE = 3;
 
+    protected static final int COMMAND_USER = 0x8000;
+
+    /**
+     * This method is called by SDL if SDL did not handle a message itself.
+     * This happens if a received message contains an unsupported command.
+     * Method can be overwritten to handle Messages in a different class.
+     * @param msg the Message which was not handled.
+     * @return if the Message was handled in method.
+     */
+    protected boolean onUnhandledMessage(Message msg) {
+        return false;
+    }
+
     /**
      * A Handler class for Messages from native SDL applications.
      * It uses current Activities as target (e.g. for the title).
@@ -143,6 +156,11 @@ public class SDLActivity extends Activity {
                     imm.hideSoftInputFromWindow(mTextEdit.getWindowToken(), 0);
                 }
                 break;
+
+            default:
+                if ((context instanceof SDLActivity) && !((SDLActivity) context).onUnhandledMessage(msg)) {
+                    Log.e(TAG, "error handling message, command is " + msg.arg1);
+                }
             }
         }
     }
