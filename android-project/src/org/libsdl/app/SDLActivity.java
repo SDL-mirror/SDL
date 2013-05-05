@@ -622,11 +622,10 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // Touch events
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        {
              final int touchDevId = event.getDeviceId();
              final int pointerCount = event.getPointerCount();
              // touchId, pointerId, action, x, y, pressure
-             int actionPointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent. ACTION_POINTER_ID_SHIFT; /* API 8: event.getActionIndex(); */
+             int actionPointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT; /* API 8: event.getActionIndex(); */
              int pointerFingerId = event.getPointerId(actionPointerIndex);
              int action = (event.getAction() & MotionEvent.ACTION_MASK); /* API 8: event.getActionMasked(); */
 
@@ -647,7 +646,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
              } else {
                 SDLActivity.onNativeTouch(touchDevId, pointerFingerId, action, x, y, p);
              }
-        }
       return true;
    } 
 
