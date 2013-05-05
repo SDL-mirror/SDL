@@ -749,8 +749,10 @@ TranslateKeycode(int keycode)
 
 void SDL_WinRTApp::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args)
 {
+    SDL_Scancode sdlScancode = TranslateKeycode((int)args->VirtualKey);
 #if 0
-    SDL_Log("key down, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, scan code=%d, was down?=%s, vkey=%d\n",
+    SDL_Keycode keycode = SDL_GetKeyFromScancode(sdlScancode);
+    SDL_Log("key down, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, native scan code=%d, was down?=%s, vkey=%d, sdl scan code=%d (%s), sdl key code=%d (%s)\n",
         (args->Handled ? "1" : "0"),
         (args->KeyStatus.IsExtendedKey ? "1" : "0"),
         (args->KeyStatus.IsKeyReleased ? "1" : "0"),
@@ -758,17 +760,23 @@ void SDL_WinRTApp::OnKeyDown(Windows::UI::Core::CoreWindow^ sender, Windows::UI:
         args->KeyStatus.RepeatCount,
         args->KeyStatus.ScanCode,
         (args->KeyStatus.WasKeyDown ? "1" : "0"),
-        args->VirtualKey);
+        args->VirtualKey,
+        sdlScancode,
+        SDL_GetScancodeName(sdlScancode),
+        keycode,
+        SDL_GetKeyName(keycode));
     //args->Handled = true;
     //VirtualKey vkey = args->VirtualKey;
 #endif
-    SDL_SendKeyboardKey(SDL_PRESSED, TranslateKeycode((int)args->VirtualKey));
+    SDL_SendKeyboardKey(SDL_PRESSED, sdlScancode);
 }
 
 void SDL_WinRTApp::OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::KeyEventArgs^ args)
 {
+    SDL_Scancode sdlScancode = TranslateKeycode((int)args->VirtualKey);
 #if 0
-    SDL_Log("key up, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, scan code=%d, was down?=%s, vkey=%d\n",
+    SDL_Keycode keycode = SDL_GetKeyFromScancode(sdlScancode);
+    SDL_Log("key up, handled=%s, ext?=%s, released?=%s, menu key down?=%s, repeat count=%d, native scan code=%d, was down?=%s, vkey=%d, sdl scan code=%d (%s), sdl key code=%d (%s)\n",
         (args->Handled ? "1" : "0"),
         (args->KeyStatus.IsExtendedKey ? "1" : "0"),
         (args->KeyStatus.IsKeyReleased ? "1" : "0"),
@@ -776,10 +784,14 @@ void SDL_WinRTApp::OnKeyUp(Windows::UI::Core::CoreWindow^ sender, Windows::UI::C
         args->KeyStatus.RepeatCount,
         args->KeyStatus.ScanCode,
         (args->KeyStatus.WasKeyDown ? "1" : "0"),
-        args->VirtualKey);
+        args->VirtualKey,
+        sdlScancode,
+        SDL_GetScancodeName(sdlScancode),
+        keycode,
+        SDL_GetKeyName(keycode));
     //args->Handled = true;
 #endif
-    SDL_SendKeyboardKey(SDL_RELEASED, TranslateKeycode((int)args->VirtualKey));
+    SDL_SendKeyboardKey(SDL_RELEASED, sdlScancode);
 }
 
 void SDL_WinRTApp::OnActivated(CoreApplicationView^ applicationView, IActivatedEventArgs^ args)
