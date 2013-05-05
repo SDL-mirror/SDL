@@ -120,10 +120,11 @@ public class SDLActivity extends Activity {
      * This method is called by SDL if SDL did not handle a message itself.
      * This happens if a received message contains an unsupported command.
      * Method can be overwritten to handle Messages in a different class.
-     * @param msg the Message which was not handled.
-     * @return if the Message was handled in method.
+     * @param command the command of the message.
+     * @param param the parameter of the message. May be null.
+     * @return if the message was handled in overridden method.
      */
-    protected boolean onUnhandledMessage(Message msg) {
+    protected boolean onUnhandledMessage(int command, Object param) {
         return false;
     }
 
@@ -158,7 +159,7 @@ public class SDLActivity extends Activity {
                 break;
 
             default:
-                if ((context instanceof SDLActivity) && !((SDLActivity) context).onUnhandledMessage(msg)) {
+                if ((context instanceof SDLActivity) && !((SDLActivity) context).onUnhandledMessage(msg.arg1, msg.obj)) {
                     Log.e(TAG, "error handling message, command is " + msg.arg1);
                 }
             }
