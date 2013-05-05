@@ -1169,7 +1169,7 @@ sdltest_randomAsciiStringOfSize(void *arg)
          nonAsciiCharacters++;
        }
      }
-     SDLTest_AssertCheck(nonAsciiCharacters == 0, "Validate that result does not contain non-Ascii characters, got: %d", nonAsciiCharacters);
+     SDLTest_AssertCheck(nonAsciiCharacters == 0, "Validate that result does not contain non-ASCII characters, got: %d", nonAsciiCharacters);
      if (nonAsciiCharacters) {
      	SDLTest_LogError("Invalid result from generator: '%s'", result);
      }

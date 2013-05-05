@@ -90,7 +90,7 @@ timer_delayAndGetTicks(void *arg)
   SDLTest_AssertPass("Call to SDL_GetTicks()");
   SDLTest_AssertCheck(result > 0, "Check result value, expected: >0, got: %d", result);
 
-  /* Delay a bit longer and mesure ticks and verify difference */
+  /* Delay a bit longer and measure ticks and verify difference */
   SDL_Delay(testDelay);
   SDLTest_AssertPass("Call to SDL_Delay(%d)", testDelay);
   result2 = SDL_GetTicks();
@@ -144,7 +144,7 @@ timer_addRemoveTimer(void *arg)
   SDLTest_AssertCheck(result == SDL_TRUE, "Check result value, expected: %i, got: %i", SDL_TRUE, result);
   SDLTest_AssertCheck(_timerCallbackCalled == 0, "Check callback WAS NOT called, expected: 0, got: %i", _timerCallbackCalled);
 
-  /* Try to temove timer again (should be a NOOP) */
+  /* Try to remove timer again (should be a NOOP) */
   result = SDL_RemoveTimer(id);
   SDLTest_AssertPass("Call to SDL_RemoveTimer()");
   SDLTest_AssertCheck(result == SDL_FALSE, "Check result value, expected: %i, got: %i", SDL_FALSE, result);

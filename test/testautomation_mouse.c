@@ -403,7 +403,7 @@ mouse_getSetRelativeMouseMode(void *arg)
         SDLTest_AssertPass("Call to SDL_GetRelativeMouseMode()");
         SDLTest_AssertCheck(currentState == SDL_FALSE, "Validate current state is FALSE, got: %i", currentState);
         
-        /* Revert to originl state - ignore result */
+        /* Revert to original state - ignore result */
         result = SDL_SetRelativeMouseMode(initialState);
 
 	return TEST_COMPLETED;

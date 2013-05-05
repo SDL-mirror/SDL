@@ -96,7 +96,7 @@ clipboard_testClipboardTextFunctions(void *arg)
 	SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
 	if (boolResult == SDL_TRUE) {
         intResult = SDL_SetClipboardText((const char *)NULL);
-		SDLTest_AssertPass("Call to DL_SetClipboardText(NULL) succeeded");
+        SDLTest_AssertPass("Call to SDL_SetClipboardText(NULL) succeeded");
 	    SDLTest_AssertCheck(
 			intResult == 0,
 			"Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
