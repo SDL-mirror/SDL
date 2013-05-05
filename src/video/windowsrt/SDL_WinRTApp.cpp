@@ -870,13 +870,22 @@ void SDL_WinRTApp::OnResuming(Platform::Object^ sender, Platform::Object^ args)
 
 SDL_DisplayMode SDL_WinRTApp::GetMainDisplayMode()
 {
+    // Create an empty, zeroed-out display mode:
     SDL_DisplayMode mode;
     SDL_zero(mode);
+
+    // Fill in most fields:
     mode.format = SDL_PIXELFORMAT_RGB888;
-    mode.w = (int) CoreWindow::GetForCurrentThread()->Bounds.Width;
-    mode.h = (int) CoreWindow::GetForCurrentThread()->Bounds.Height;
     mode.refresh_rate = 0;  // TODO, WinRT: see if refresh rate data is available, or relevant (for WinRT apps)
     mode.driverdata = NULL;
+
+    // Calculate the display size given the window size, taking into account
+    // the current display's DPI:
+    const float currentDPI = Windows::Graphics::Display::DisplayProperties::LogicalDpi; 
+    const float dipsPerInch = 96.0f;
+    mode.w = (int) ((CoreWindow::GetForCurrentThread()->Bounds.Width * currentDPI) / dipsPerInch);
+    mode.h = (int) ((CoreWindow::GetForCurrentThread()->Bounds.Height * currentDPI) / dipsPerInch);
+
     return mode;
 }
 
