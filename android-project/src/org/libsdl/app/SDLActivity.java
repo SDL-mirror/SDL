@@ -170,11 +170,11 @@ public class SDLActivity extends Activity {
     Handler commandHandler = new SDLCommandHandler();
 
     // Send a message from the SDLMain thread
-    void sendCommand(int command, Object data) {
+    boolean sendCommand(int command, Object data) {
         Message msg = commandHandler.obtainMessage();
         msg.arg1 = command;
         msg.obj = data;
-        commandHandler.sendMessage(msg);
+        return commandHandler.sendMessage(msg);
     }
 
     // C functions we call
@@ -202,13 +202,13 @@ public class SDLActivity extends Activity {
         flipEGL();
     }
 
-    public static void setActivityTitle(String title) {
+    public static boolean setActivityTitle(String title) {
         // Called from SDLMain() thread and can't directly affect the view
-        mSingleton.sendCommand(COMMAND_CHANGE_TITLE, title);
+        return mSingleton.sendCommand(COMMAND_CHANGE_TITLE, title);
     }
 
-    public static void sendMessage(int command, int param) {
-        mSingleton.sendCommand(command, Integer.valueOf(param));
+    public static boolean sendMessage(int command, int param) {
+        return mSingleton.sendCommand(command, Integer.valueOf(param));
     }
 
     public static Context getContext() {
@@ -271,9 +271,9 @@ public class SDLActivity extends Activity {
         }
     }
 
-    public static void showTextInput(int x, int y, int w, int h) {
+    public static boolean showTextInput(int x, int y, int w, int h) {
         // Transfer the task to the main thread as a Runnable
-        mSingleton.commandHandler.post(new ShowTextInputTask(x, y, w, h));
+        return mSingleton.commandHandler.post(new ShowTextInputTask(x, y, w, h));
     }
 
 

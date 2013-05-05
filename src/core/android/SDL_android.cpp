@@ -339,10 +339,10 @@ extern "C" void Android_JNI_SetActivityTitle(const char *title)
 {
     jmethodID mid;
     JNIEnv *mEnv = Android_JNI_GetEnv();
-    mid = mEnv->GetStaticMethodID(mActivityClass,"setActivityTitle","(Ljava/lang/String;)V");
+    mid = mEnv->GetStaticMethodID(mActivityClass,"setActivityTitle","(Ljava/lang/String;)Z");
     if (mid) {
         jstring jtitle = reinterpret_cast<jstring>(mEnv->NewStringUTF(title));
-        mEnv->CallStaticVoidMethod(mActivityClass, mid, jtitle);
+        mEnv->CallStaticBooleanMethod(mActivityClass, mid, jtitle);
         mEnv->DeleteLocalRef(jtitle);
     }
 }
@@ -1085,12 +1085,12 @@ extern "C" int Android_JNI_SendMessage(int command, int param)
     if (!env) {
         return -1;
     }
-    jmethodID mid = env->GetStaticMethodID(mActivityClass, "sendMessage", "(II)V");
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "sendMessage", "(II)Z");
     if (!mid) {
         return -1;
     }
-    env->CallStaticVoidMethod(mActivityClass, mid, command, param);
-    return 0;
+    jboolean success = env->CallStaticBooleanMethod(mActivityClass, mid, command, param);
+    return success ? 0 : -1;
 }
 
 extern "C" void Android_JNI_ShowTextInput(SDL_Rect *inputRect)
@@ -1100,11 +1100,11 @@ extern "C" void Android_JNI_ShowTextInput(SDL_Rect *inputRect)
         return;
     }
 
-    jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)V");
+    jmethodID mid = env->GetStaticMethodID(mActivityClass, "showTextInput", "(IIII)Z");
     if (!mid) {
         return;
     }
-    env->CallStaticVoidMethod( mActivityClass, mid,
+    env->CallStaticBooleanMethod( mActivityClass, mid,
                                inputRect->x,
                                inputRect->y,
                                inputRect->w,
