@@ -108,6 +108,9 @@ char* _nonRGBPixelFormatsVerbose[] =
 int
 pixels_allocFreeFormat(void *arg)
 {
+  const char *expectedError = "Parameter 'format' is invalid";
+  const char *error;   
+  char message[256];
   int i;
   Uint32 format;
   Uint32 masks;
@@ -149,15 +152,34 @@ pixels_allocFreeFormat(void *arg)
   }
   
   /* Negative cases */
+  
+  /* Invalid Format */  
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
   format = 0xffffffff;
   result = SDL_AllocFormat(format);
   SDLTest_AssertPass("Call to SDL_AllocFormat(0xffffffff)");
   SDLTest_AssertCheck(result == NULL, "Verify result is NULL");  
-  /* TODO: check error code */
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+  }
 
+  /* Invalid free pointer */
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
   SDL_FreeFormat(NULL);
   SDLTest_AssertPass("Call to SDL_FreeFormat(NULL)");
-  /* TODO: check error code */
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+  }
   
   return TEST_COMPLETED;
 }
@@ -171,6 +193,10 @@ pixels_allocFreeFormat(void *arg)
 int
 pixels_allocFreePalette(void *arg)
 {
+  const char *expectedError1 = "Parameter 'ncolors' is invalid";
+  const char *expectedError2 = "Parameter 'palette' is invalid";
+  const char *error;   
+  char message[256];
   int variation;
   int i;
   int ncolors;
@@ -216,16 +242,140 @@ pixels_allocFreePalette(void *arg)
   }
 
   /* Negative cases */
+    
+  /* Invalid number of colors */
   for (ncolors = 0; ncolors > -3; ncolors--) {
+    SDL_ClearError();
+    SDLTest_AssertPass("Call to SDL_ClearError()");
     result = SDL_AllocPalette(ncolors);
     SDLTest_AssertPass("Call to SDL_AllocPalette(%d)", ncolors);
     SDLTest_AssertCheck(result == NULL, "Verify result is NULL");
-    /* TODO: check error code */
+    error = SDL_GetError();
+    SDLTest_AssertPass("Call to SDL_GetError()");
+    SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+    if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError1) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError1, error);
+    }
   }
 
+  /* Invalid free pointer */
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
   SDL_FreePalette(NULL);
   SDLTest_AssertPass("Call to SDL_FreePalette(NULL)");
-  /* TODO: check error code */
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError2) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError2, error);
+  }
+    
+  return TEST_COMPLETED;
+}
+
+/**
+ * @brief Call to SDL_CalculateGammaRamp
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_CalculateGammaRamp
+ */
+int
+pixels_calcGammaRamp(void *arg)
+{
+  const char *expectedError1 = "Parameter 'gamma' is invalid";
+  const char *expectedError2 = "Parameter 'ramp' is invalid";
+  const char *error;   
+  char message[256];
+  float gamma;
+  Uint16 *ramp;
+  int variation;
+  int i;
+  int changed;
+  Uint16 magic = 0xbeef;
+
+  /* Allocate temp ramp array and fill with some value*/
+  ramp = (Uint16 *)SDL_malloc(256 * sizeof(Uint16));
+  SDLTest_AssertCheck(ramp != NULL, "Validate temp ramp array could be allocated");
+  if (ramp == NULL) return TEST_ABORTED;
+  
+  /* Make call with different gamma values */
+  for (variation = 0; variation < 4; variation++) {
+    switch (variation) {
+      /* gamma = 0 all black */
+      case 0:      
+        gamma = 0.0f;
+        break;
+      /* gamma = 1 identity */
+      case 1:
+        gamma = 1.0f;
+        break;
+      /* gamma = ]0,1[ normal range */  
+      case 2:
+        gamma = 0.01f + 0.98f * SDLTest_RandomUnitFloat();
+        break;
+      /* gamma = >1.0 non-standard range */  
+      case 3:
+        gamma = 0.01f + 0.98f * SDLTest_RandomUnitFloat();
+        break;
+    }
+
+    /* Make call and check that values were updated */  
+    for (i = 0; i < 256; i++) ramp[i] = magic;
+    SDL_CalculateGammaRamp(gamma, ramp);
+    SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(%f)", gamma);
+    changed = 0;
+    for (i = 0; i < 256; i++) if (ramp[i] != magic) changed++;
+    SDLTest_AssertCheck(changed > 250, "Validate that ramp was calculated; expected: >250 values changed, got: %d values changed", changed);
+
+    /* Additional value checks for some cases */
+    i = SDLTest_RandomIntegerInRange(64,192);
+    switch (variation) {
+      case 0:
+        SDLTest_AssertCheck(ramp[i] == 0, "Validate value at position %d; expected: 0, got: %d", i, ramp[i]);
+        break;
+      case 1:
+        SDLTest_AssertCheck(ramp[i] == (i << 8) | i, "Validate value at position %d; expected: %d, got: %d", i, (i << 8) | i, ramp[i]);
+        break;
+      case 2:
+      case 3:
+        SDLTest_AssertCheck(ramp[i] > 0, "Validate value at position %d; expected: >0, got: %d", i, ramp[i]);
+        break;
+    }
+  }
+
+  
+  /* Negative cases */
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
+  gamma = -1;
+  for (i=0; i<256; i++) ramp[i] = magic;
+  SDL_CalculateGammaRamp(gamma, ramp);
+  SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(%f)", gamma);
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError1) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError1, error);
+  }
+  changed = 0;
+  for (i = 0; i < 256; i++) if (ramp[i] != magic) changed++;
+  SDLTest_AssertCheck(changed ==0, "Validate that ramp unchanged; expected: 0 values changed got: %d values changed", changed);
+
+  SDL_CalculateGammaRamp(0.5f, NULL);
+  SDLTest_AssertPass("Call to SDL_CalculateGammaRamp(0.5,NULL)");
+  error = SDL_GetError();
+  SDLTest_AssertPass("Call to SDL_GetError()");
+  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+  if (error != NULL) {
+      SDLTest_AssertCheck(SDL_strcmp(error, expectedError2) == 0, 
+          "Validate error message, expected: '%s', got: '%s'", expectedError2, error);
+  }
+  
+  /* Cleanup */
+  SDL_free(ramp);
+    
     
   return TEST_COMPLETED;
 }
@@ -239,9 +389,12 @@ static const SDLTest_TestCaseReference pixelsTest1 =
 static const SDLTest_TestCaseReference pixelsTest2 =
 		{ (SDLTest_TestCaseFp)pixels_allocFreePalette, "pixels_allocFreePalette", "Call to SDL_AllocPalette and SDL_FreePalette", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference pixelsTest3 =
+		{ (SDLTest_TestCaseFp)pixels_calcGammaRamp, "pixels_calcGammaRamp", "Call to SDL_CalculateGammaRamp", TEST_ENABLED };
+
 /* Sequence of Pixels test cases */
 static const SDLTest_TestCaseReference *pixelsTests[] =  {
-	&pixelsTest1, &pixelsTest2, NULL
+	&pixelsTest1, &pixelsTest2, &pixelsTest3, NULL
 };
 
 /* Pixels test suite (global) */

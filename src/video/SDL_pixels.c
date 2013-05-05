@@ -1090,9 +1090,19 @@ void
 SDL_CalculateGammaRamp(float gamma, Uint16 * ramp)
 {
     int i;
+    
+    /* Input validation */
+    if (gamma < 0.0f ) {
+      SDL_InvalidParamError("gamma");
+      return;
+    }
+    if (ramp == NULL) {
+      SDL_InvalidParamError("ramp");
+      return;
+    }
 
     /* 0.0 gamma is all black */
-    if (gamma <= 0.0f) {
+    if (gamma == 0.0f) {
         for (i = 0; i < 256; ++i) {
             ramp[i] = 0;
         }
