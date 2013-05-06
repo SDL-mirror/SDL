@@ -957,9 +957,7 @@ _hasTexAlpha(void)
 /**
  * @brief Compares screen pixels with image pixels. Helper function.
  *
- * @param msg Message on failure.
  * @param s Image to compare against.
- * @return 0 on success.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_RenderReadPixels
