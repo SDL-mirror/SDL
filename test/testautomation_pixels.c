@@ -97,6 +97,19 @@ char* _nonRGBPixelFormatsVerbose[] =
     "SDL_PIXELFORMAT_YVYU" 
   };
 
+/* Definition of some invalid formats for negative tests */
+const int _numInvalidPixelFormats = 2;
+Uint32 _invalidPixelFormats[] = 
+  {
+    0xfffffffe,
+    0xffffffff
+  };
+char* _invalidPixelFormatsVerbose[] = 
+  {
+    "SDL_PIXELFORMAT_UNKNOWN",
+    "SDL_PIXELFORMAT_UNKNOWN"
+  };
+
 /* Test case functions */
 
 /**
@@ -108,13 +121,33 @@ char* _nonRGBPixelFormatsVerbose[] =
 int
 pixels_allocFreeFormat(void *arg)
 {
+  const char *unknownFormat = "SDL_PIXELFORMAT_UNKNOWN";
   const char *expectedError = "Parameter 'format' is invalid";
   const char *error;   
-  char message[256];
   int i;
   Uint32 format;
   Uint32 masks;
   SDL_PixelFormat* result;
+
+  /* Blank/unknown format */
+  format = 0;
+  SDLTest_Log("RGB Format: %s (%u)", unknownFormat, format);
+  
+  /* Allocate format */
+  result = SDL_AllocFormat(format);
+  SDLTest_AssertPass("Call to SDL_AllocFormat()");
+  SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+  if (result != NULL) {
+    SDLTest_AssertCheck(result->format == format, "Verify value of result.format; expected: %u, got %u", format, result->format);  
+    SDLTest_AssertCheck(result->BitsPerPixel == 0, "Verify value of result.BitsPerPixel; expected: 0, got %u", result->BitsPerPixel);  
+    SDLTest_AssertCheck(result->BytesPerPixel == 0, "Verify value of result.BytesPerPixel; expected: 0, got %u", result->BytesPerPixel);  
+    masks = result->Rmask | result->Gmask | result->Bmask | result->Amask;
+    SDLTest_AssertCheck(masks == 0, "Verify value of result.[RGBA]mask combined; expected: 0, got %u", masks);
+      
+    /* Deallocate again */
+    SDL_FreeFormat(result);
+    SDLTest_AssertPass("Call to SDL_FreeFormat()");          
+  }
 
   /* RGB formats */
   for (i = 0; i < _numRGBPixelFormats; i++) {
@@ -153,19 +186,21 @@ pixels_allocFreeFormat(void *arg)
   
   /* Negative cases */
   
-  /* Invalid Format */  
-  SDL_ClearError();
-  SDLTest_AssertPass("Call to SDL_ClearError()");
-  format = 0xffffffff;
-  result = SDL_AllocFormat(format);
-  SDLTest_AssertPass("Call to SDL_AllocFormat(0xffffffff)");
-  SDLTest_AssertCheck(result == NULL, "Verify result is NULL");  
-  error = SDL_GetError();
-  SDLTest_AssertPass("Call to SDL_GetError()");
-  SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
-  if (error != NULL) {
+  /* Invalid Formats */  
+  for (i = 0; i < _numInvalidPixelFormats; i++) {
+    SDL_ClearError();
+    SDLTest_AssertPass("Call to SDL_ClearError()");
+    format = _invalidPixelFormats[i];
+    result = SDL_AllocFormat(format);
+    SDLTest_AssertPass("Call to SDL_AllocFormat(%u)", format);
+    SDLTest_AssertCheck(result == NULL, "Verify result is NULL");  
+    error = SDL_GetError();
+    SDLTest_AssertPass("Call to SDL_GetError()");
+    SDLTest_AssertCheck(error != NULL, "Validate that error message was not NULL");
+    if (error != NULL) {
       SDLTest_AssertCheck(SDL_strcmp(error, expectedError) == 0, 
           "Validate error message, expected: '%s', got: '%s'", expectedError, error);
+    }
   }
 
   /* Invalid free pointer */
@@ -185,6 +220,90 @@ pixels_allocFreeFormat(void *arg)
 }
 
 /**
+ * @brief Call to SDL_GetPixelFormatName
+ *
+ * @sa http://wiki.libsdl.org/moin.fcg/SDL_GetPixelFormatName
+ */
+int
+pixels_getPixelFormatName(void *arg)
+{
+  const char *unknownFormat = "SDL_PIXELFORMAT_UNKNOWN";
+  const char *error;   
+  int i;
+  Uint32 format;
+  char* result;
+
+  /* Blank/undefined format */
+  format = 0;
+  SDLTest_Log("RGB Format: %s (%u)", unknownFormat, format);
+  
+  /* Get name of format */
+  result = (char *)SDL_GetPixelFormatName(format);
+  SDLTest_AssertPass("Call to SDL_GetPixelFormatName()");
+  SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+  if (result != NULL) {
+      SDLTest_AssertCheck(SDL_strlen(result) > 0, "Verify result is non-empty");
+      SDLTest_AssertCheck(SDL_strcmp(result, unknownFormat) == 0, 
+        "Verify result text; expected: %s, got %s", unknownFormat, result);
+  }
+
+  /* RGB formats */
+  for (i = 0; i < _numRGBPixelFormats; i++) {
+    format = _RGBPixelFormats[i];
+    SDLTest_Log("RGB Format: %s (%u)", _RGBPixelFormatsVerbose[i], format);
+  
+    /* Get name of format */
+    result = (char *)SDL_GetPixelFormatName(format);
+    SDLTest_AssertPass("Call to SDL_GetPixelFormatName()");
+    SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+    if (result != NULL) {
+      SDLTest_AssertCheck(SDL_strlen(result) > 0, "Verify result is non-empty");
+      SDLTest_AssertCheck(SDL_strcmp(result, _RGBPixelFormatsVerbose[i]) == 0, 
+        "Verify result text; expected: %s, got %s", _RGBPixelFormatsVerbose[i], result);
+    }
+  }
+
+  /* Non-RGB formats */
+  for (i = 0; i < _numNonRGBPixelFormats; i++) {
+    format = _nonRGBPixelFormats[i];
+    SDLTest_Log("non-RGB Format: %s (%u)", _nonRGBPixelFormatsVerbose[i], format);
+  
+    /* Get name of format */
+    result = (char *)SDL_GetPixelFormatName(format);
+    SDLTest_AssertPass("Call to SDL_GetPixelFormatName()");
+    SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+    if (result != NULL) {
+      SDLTest_AssertCheck(SDL_strlen(result) > 0, "Verify result is non-empty");
+      SDLTest_AssertCheck(SDL_strcmp(result, _nonRGBPixelFormatsVerbose[i]) == 0, 
+        "Verify result text; expected: %s, got %s", _nonRGBPixelFormatsVerbose[i], result);
+    }
+  }
+  
+  /* Negative cases */
+  
+  /* Invalid Formats */  
+  SDL_ClearError();
+  SDLTest_AssertPass("Call to SDL_ClearError()");
+  for (i = 0; i < _numInvalidPixelFormats; i++) {
+    format = _invalidPixelFormats[i];
+    result = (char *)SDL_GetPixelFormatName(format);
+    SDLTest_AssertPass("Call to SDL_GetPixelFormatName(%u)", format);
+    SDLTest_AssertCheck(result != NULL, "Verify result is not NULL");  
+    if (result != NULL) {
+      SDLTest_AssertCheck(SDL_strlen(result) > 0, 
+        "Verify result is non-empty; got: %s", result);
+      SDLTest_AssertCheck(SDL_strcmp(result, _invalidPixelFormatsVerbose[i]) == 0,
+        "Validate name is UNKNOWN, expected: '%s', got: '%s'", _invalidPixelFormatsVerbose[i], result);
+    }
+    error = SDL_GetError();
+    SDLTest_AssertPass("Call to SDL_GetError()");
+    SDLTest_AssertCheck(error != NULL && SDL_strlen(error) == 0, "Validate that error message is empty");
+  }
+
+  return TEST_COMPLETED;
+}
+
+/**
  * @brief Call to SDL_AllocPalette and SDL_FreePalette
  *
  * @sa http://wiki.libsdl.org/moin.fcg/SDL_AllocPalette
@@ -196,7 +315,6 @@ pixels_allocFreePalette(void *arg)
   const char *expectedError1 = "Parameter 'ncolors' is invalid";
   const char *expectedError2 = "Parameter 'palette' is invalid";
   const char *error;   
-  char message[256];
   int variation;
   int i;
   int ncolors;
@@ -286,7 +404,6 @@ pixels_calcGammaRamp(void *arg)
   const char *expectedError1 = "Parameter 'gamma' is invalid";
   const char *expectedError2 = "Parameter 'ramp' is invalid";
   const char *error;   
-  char message[256];
   float gamma;
   Uint16 *ramp;
   int variation;
@@ -310,13 +427,13 @@ pixels_calcGammaRamp(void *arg)
       case 1:
         gamma = 1.0f;
         break;
-      /* gamma = ]0,1[ normal range */  
+      /* gamma = [0.2,0.8] normal range */  
       case 2:
-        gamma = 0.01f + 0.98f * SDLTest_RandomUnitFloat();
+        gamma = 0.2f + 0.8f * SDLTest_RandomUnitFloat();
         break;
-      /* gamma = >1.0 non-standard range */  
+      /* gamma = >1.1 non-standard range */  
       case 3:
-        gamma = 0.01f + 0.98f * SDLTest_RandomUnitFloat();
+        gamma = 1.1f + SDLTest_RandomUnitFloat();
         break;
     }
 
@@ -343,7 +460,6 @@ pixels_calcGammaRamp(void *arg)
         break;
     }
   }
-
   
   /* Negative cases */
   SDL_ClearError();
@@ -392,9 +508,12 @@ static const SDLTest_TestCaseReference pixelsTest2 =
 static const SDLTest_TestCaseReference pixelsTest3 =
 		{ (SDLTest_TestCaseFp)pixels_calcGammaRamp, "pixels_calcGammaRamp", "Call to SDL_CalculateGammaRamp", TEST_ENABLED };
 
+static const SDLTest_TestCaseReference pixelsTest4 =
+		{ (SDLTest_TestCaseFp)pixels_getPixelFormatName, "pixels_getPixelFormatName", "Call to SDL_GetPixelFormatName", TEST_ENABLED };
+
 /* Sequence of Pixels test cases */
 static const SDLTest_TestCaseReference *pixelsTests[] =  {
-	&pixelsTest1, &pixelsTest2, &pixelsTest3, NULL
+	&pixelsTest1, &pixelsTest2, &pixelsTest3, &pixelsTest4, NULL
 };
 
 /* Pixels test suite (global) */
