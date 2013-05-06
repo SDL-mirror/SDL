@@ -116,7 +116,6 @@ Uint32 _timerTestCallback(Uint32 interval, void *param)
    }
    
    return 0;
-  return interval;
 }
 
 /**
