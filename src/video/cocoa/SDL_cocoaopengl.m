@@ -90,6 +90,7 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     NSOpenGLPixelFormatAttribute attr[32];
     NSOpenGLPixelFormat *fmt;
     NSOpenGLContext *context;
+    NSOpenGLContext *share_context = nil;
     int i = 0;
 
     if (_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) {
@@ -182,7 +183,11 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
         return NULL;
     }
 
-    context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:nil];
+    if (_this->gl_config.share_with_current_context) {
+        share_context = (NSOpenGLContext*)(_this->current_glctx);
+    }
+
+    context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:share_context];
 
     [fmt release];
 
