@@ -13,7 +13,7 @@
 /* Test case functions */
 
 /* Helper to evaluate state returned from SDL_GetMouseState */
-int _mouseStateCheck(Uint8 state)
+int _mouseStateCheck(Uint32 state)
 {
   return (state == 0) || 
          (state == SDL_BUTTON(SDL_BUTTON_LEFT)) || 
@@ -32,7 +32,7 @@ mouse_getMouseState(void *arg)
 {
    int x;
    int y;
-   Uint8 state;
+   Uint32 state;
 
    /* Pump some events to update mouse state */
    SDL_PumpEvents();
@@ -78,7 +78,7 @@ mouse_getRelativeMouseState(void *arg)
 {
    int x;
    int y;
-   Uint8 state;
+   Uint32 state;
 
    /* Pump some events to update mouse state */
    SDL_PumpEvents();
