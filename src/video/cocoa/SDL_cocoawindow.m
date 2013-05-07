@@ -254,7 +254,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
         if (x >= 0 && x < window->w && y >= 0 && y < window->h) {
             SDL_SendMouseMotion(window, 0, 0, x, y);
-            SDL_SetCursor(NULL);
         }
     }
 
@@ -520,6 +519,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
 @end
 
 @interface SDLView : NSView
+
 /* The default implementation doesn't pass rightMouseDown to responder chain */
 - (void)rightMouseDown:(NSEvent *)theEvent;
 @end
@@ -528,6 +528,20 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)rightMouseDown:(NSEvent *)theEvent
 {
     [[self nextResponder] rightMouseDown:theEvent];
+}
+
+- (void)resetCursorRects
+{
+    [super resetCursorRects];
+    SDL_Mouse *mouse = SDL_GetMouse();
+
+    if (mouse->cursor_shown && mouse->cur_cursor) {
+        [self addCursorRect:[self bounds]
+                     cursor:mouse->cur_cursor->driverdata];
+    } else {
+        [self addCursorRect:[self bounds]
+                     cursor:[NSCursor invisibleCursor]];
+    }
 }
 @end
 

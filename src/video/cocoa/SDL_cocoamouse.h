@@ -35,6 +35,10 @@ typedef struct {
     int deltaYOffset;
 } SDL_MouseData;
 
+@interface NSCursor (InvisibleCursor)
++ (NSCursor *)invisibleCursor;
+@end
+
 #endif /* _SDL_cocoamouse_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
