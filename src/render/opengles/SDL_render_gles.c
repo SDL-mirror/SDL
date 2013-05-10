@@ -635,13 +635,19 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
 static int
 GLES_UpdateClipRect(SDL_Renderer * renderer)
 {
+    GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
     const SDL_Rect *rect = &renderer->clip_rect;
 
+    if (SDL_CurrentContext != data->context) {
+        /* We'll update the clip rect after we rebind the context */
+        return 0;
+    }
+
     if (!SDL_RectEmpty(rect)) {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
+        data->glEnable(GL_SCISSOR_TEST);
+        data->glScissor(rect->x, rect->h - rect->y, rect->w, rect->h);
     } else {
-        glDisable(GL_SCISSOR_TEST);
+        data->glDisable(GL_SCISSOR_TEST);
     }
     return 0;
 }
