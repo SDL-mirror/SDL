@@ -794,7 +794,7 @@ GL_UpdateClipRect(SDL_Renderer * renderer)
 
     if (!SDL_RectEmpty(rect)) {
         data->glEnable(GL_SCISSOR_TEST);
-        data->glScissor(rect->x, rect->h - rect->y, rect->x, rect->y);
+        data->glScissor(rect->x, rect->h - rect->y, rect->w, rect->h);
     } else {
         data->glDisable(GL_SCISSOR_TEST);
     }
