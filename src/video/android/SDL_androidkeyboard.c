@@ -28,6 +28,7 @@
 
 #include "SDL_androidkeyboard.h"
 
+#include "../../core/android/SDL_android.h"
 
 void Android_InitKeyboard()
 {

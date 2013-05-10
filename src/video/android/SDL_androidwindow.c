@@ -27,6 +27,8 @@
 #include "SDL_androidvideo.h"
 #include "SDL_androidwindow.h"
 
+#include "../../core/android/SDL_android.h"
+
 int
 Android_CreateWindow(_THIS, SDL_Window * window)
 {
