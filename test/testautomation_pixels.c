@@ -452,7 +452,7 @@ pixels_calcGammaRamp(void *arg)
         SDLTest_AssertCheck(ramp[i] == 0, "Validate value at position %d; expected: 0, got: %d", i, ramp[i]);
         break;
       case 1:
-        SDLTest_AssertCheck(ramp[i] == (i << 8) | i, "Validate value at position %d; expected: %d, got: %d", i, (i << 8) | i, ramp[i]);
+        SDLTest_AssertCheck(ramp[i] == ((i << 8) | i), "Validate value at position %d; expected: %d, got: %d", i, (i << 8) | i, ramp[i]);
         break;
       case 2:
       case 3:
