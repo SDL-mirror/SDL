@@ -2,6 +2,15 @@
  * SDL_test test suite
  */
 
+/* Visual Studio 2008 doesn't have stdint.h */
+#if defined(_MSC_VER) && _MSC_VER <= 1500
+#define UINT8_MAX   ~(Uint8)0
+#define UINT16_MAX  ~(Uint16)0
+#define UINT32_MAX  ~(Uint32)0
+#define UINT64_MAX  ~(Uint64)0
+#else
+#include <stdint.h>
+#endif
 #include <stdio.h>
 #include <limits.h>
 #include <float.h>
@@ -774,6 +783,13 @@ sdltest_randomBoundaryNumberSint32(void *arg)
   const char *expectedError = "That operation is not supported";
   char *lastError;
   Sint64 sresult;
+#if ((ULONG_MAX) == (UINT_MAX))
+  Sint32 long_min = LONG_MIN; 
+  Sint32 long_max = LONG_MAX;
+#else
+  Sint32 long_min = INT_MIN;
+  Sint32 long_max = INT_MAX;
+#endif
 
   /* Clean error messages */
   SDL_ClearError();
@@ -827,40 +843,40 @@ sdltest_randomBoundaryNumberSint32(void *arg)
   SDLTest_AssertCheck(
     sresult == 0 || sresult == 21,
     "Validate result value for parameters (1,20,SDL_FALSE); expected: 0|21, got: %lld", sresult);  
-            
+              
   /* RandomSintXBoundaryValue(LONG_MIN, 99, SDL_FALSE) returns 100 */
-  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(LONG_MIN, 99, SDL_FALSE);
+  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(long_min, 99, SDL_FALSE);
   SDLTest_AssertPass("Call to SDLTest_RandomSint32BoundaryValue");
   SDLTest_AssertCheck(
     sresult == 100,
     "Validate result value for parameters (LONG_MIN,99,SDL_FALSE); expected: 100, got: %lld", sresult);  
 
   /* RandomSintXBoundaryValue(LONG_MIN + 1, LONG_MAX, SDL_FALSE) returns LONG_MIN (no error) */
-  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(LONG_MIN + 1, LONG_MAX, SDL_FALSE);
+  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(long_min + 1, long_max, SDL_FALSE);
   SDLTest_AssertPass("Call to SDLTest_RandomSint32BoundaryValue");
   SDLTest_AssertCheck(
-    sresult == LONG_MIN,
-    "Validate result value for parameters (LONG_MIN+1,LONG_MAX,SDL_FALSE); expected: %d, got: %lld", LONG_MIN, sresult);
+    sresult == long_min,
+    "Validate result value for parameters (LONG_MIN+1,LONG_MAX,SDL_FALSE); expected: %d, got: %lld", long_min, sresult);
   lastError = (char *)SDL_GetError();
   SDLTest_AssertPass("SDL_GetError()");
   SDLTest_AssertCheck(lastError == NULL || SDL_strlen(lastError) == 0, "Validate no error message was set");
 
   /* RandomSintXBoundaryValue(LONG_MIN, LONG_MAX - 1, SDL_FALSE) returns LONG_MAX (no error) */
-  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(LONG_MIN, LONG_MAX - 1, SDL_FALSE);
+  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(long_min, long_max - 1, SDL_FALSE);
   SDLTest_AssertPass("Call to SDLTest_RandomSint32BoundaryValue");
   SDLTest_AssertCheck(
-    sresult == LONG_MAX,
-    "Validate result value for parameters (LONG_MIN,LONG_MAX - 1,SDL_FALSE); expected: %d, got: %lld", LONG_MAX, sresult);
+    sresult == long_max,
+    "Validate result value for parameters (LONG_MIN,LONG_MAX - 1,SDL_FALSE); expected: %d, got: %lld", long_max, sresult);
   lastError = (char *)SDL_GetError();
   SDLTest_AssertPass("SDL_GetError()");
   SDLTest_AssertCheck(lastError == NULL || SDL_strlen(lastError) == 0, "Validate no error message was set");
 
   /* RandomSintXBoundaryValue(LONG_MIN, LONG_MAX, SDL_FALSE) returns 0 (sets error) */
-  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(LONG_MIN, LONG_MAX, SDL_FALSE);
+  sresult = (Sint64)SDLTest_RandomSint32BoundaryValue(long_min, long_max, SDL_FALSE);
   SDLTest_AssertPass("Call to SDLTest_RandomSint32BoundaryValue");
   SDLTest_AssertCheck(
-    sresult == LONG_MIN,
-    "Validate result value for parameters(LONG_MIN,LONG_MAX,SDL_FALSE); expected: %d, got: %lld", LONG_MIN, sresult);
+    sresult == long_min,
+    "Validate result value for parameters(LONG_MIN,LONG_MAX,SDL_FALSE); expected: %d, got: %lld", long_min, sresult);
   lastError = (char *)SDL_GetError();
   SDLTest_AssertPass("SDL_GetError()");
   SDLTest_AssertCheck(lastError != NULL && SDL_strcmp(lastError, expectedError) == 0,
@@ -993,6 +1009,13 @@ sdltest_randomIntegerInRange(void *arg)
 {
   Sint32 min, max;
   Sint32 result;
+#if ((ULONG_MAX) == (UINT_MAX))
+  Sint32 long_min = LONG_MIN; 
+  Sint32 long_max = LONG_MAX;
+#else
+  Sint32 long_min = INT_MIN;
+  Sint32 long_max = INT_MAX;
+#endif
 
   /* Standard range */
   min = (Sint32)SDLTest_RandomSint16();
@@ -1029,24 +1052,23 @@ sdltest_randomIntegerInRange(void *arg)
   SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(max,min)");
   SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
 
-
   /* Range with min at integer limit */
-  min = LONG_MIN;
-  max = LONG_MIN + (Sint32)SDLTest_RandomSint16();
+  min = long_min;
+  max = long_max + (Sint32)SDLTest_RandomSint16();
   result = SDLTest_RandomIntegerInRange(min, max);
   SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(SINT32_MIN,...)");
   SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
 
   /* Range with max at integer limit */
-  min = LONG_MAX - (Sint32)SDLTest_RandomSint16();;
-  max = LONG_MAX;
+  min = long_min - (Sint32)SDLTest_RandomSint16();;
+  max = long_max;
   result = SDLTest_RandomIntegerInRange(min, max);
   SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(...,SINT32_MAX)");
   SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);
 
   /* Full integer range */
-  min = LONG_MIN;
-  max = LONG_MAX;
+  min = long_min;
+  max = long_max;
   result = SDLTest_RandomIntegerInRange(min, max);
   SDLTest_AssertPass("Call to SDLTest_RandomIntegerInRange(SINT32_MIN,SINT32_MAX)");
   SDLTest_AssertCheck(min <= result && result <= max, "Validated returned value; expected: [%d,%d], got: %d", min, max, result);

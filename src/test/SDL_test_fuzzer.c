@@ -283,7 +283,11 @@ Uint32
 SDLTest_RandomUint32BoundaryValue(Uint32 boundary1, Uint32 boundary2, SDL_bool validDomain)
 {
 	/* max value for Uint32 */
-	const Uint64 maxValue = ULONG_MAX;
+	#if ((ULONG_MAX) == (UINT_MAX))
+	  const Uint64 maxValue = ULONG_MAX;
+        #else
+	  const Uint64 maxValue = UINT_MAX;
+        #endif
 	return (Uint32)SDLTest_GenerateUnsignedBoundaryValues(maxValue,
 				(Uint64) boundary1, (Uint64) boundary2,
 				validDomain);
@@ -413,8 +417,13 @@ Sint32
 SDLTest_RandomSint32BoundaryValue(Sint32 boundary1, Sint32 boundary2, SDL_bool validDomain)
 {
 	/* min & max values for Sint32 */
-	const Sint64 maxValue = LONG_MAX;
-	const Sint64 minValue = LONG_MIN;
+	#if ((ULONG_MAX) == (UINT_MAX))
+  	  const Sint64 maxValue = LONG_MAX;
+	  const Sint64 minValue = LONG_MIN;
+        #else
+  	  const Sint64 maxValue = INT_MAX;
+	  const Sint64 minValue = INT_MIN;
+        #endif
 	return (Sint32)SDLTest_GenerateSignedBoundaryValues(minValue, maxValue,
 				(Sint64) boundary1, (Sint64) boundary2,
 				validDomain);

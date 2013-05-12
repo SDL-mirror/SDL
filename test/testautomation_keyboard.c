@@ -234,16 +234,8 @@ keyboard_getScancodeNameNegative(void *arg)
    SDL_ClearError();
    SDLTest_AssertPass("Call to SDL_ClearError()");
 
-   /* Negative scancode */
-   scancode = (SDL_Scancode)SDLTest_RandomIntegerInRange(LONG_MIN, -1);
-   result = (char *)SDL_GetScancodeName(scancode);
-   SDLTest_AssertPass("Call to SDL_GetScancodeName(%d/negative)", scancode);
-   SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
-   SDLTest_AssertCheck(SDL_strcmp(result, expected) == 0, "Verify result from call is valid, expected: '%s', got: '%s'", expected, result);
-   _checkInvalidScancodeError();
-
-   /* Large scancode */
-   scancode = (SDL_Scancode)SDLTest_RandomIntegerInRange(SDL_NUM_SCANCODES, LONG_MAX);
+   /* Out-of-bounds scancode */
+   scancode = (SDL_Scancode)SDL_NUM_SCANCODES;
    result = (char *)SDL_GetScancodeName(scancode);
    SDLTest_AssertPass("Call to SDL_GetScancodeName(%d/large)", scancode);
    SDLTest_AssertCheck(result != NULL, "Verify result from call is not NULL");
