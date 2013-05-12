@@ -264,6 +264,9 @@
     <ClCompile Include="..\..\src\render\direct3d11\SDL_render_d3d11.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\joystick\SDL_gamecontroller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\begin_code.h">
