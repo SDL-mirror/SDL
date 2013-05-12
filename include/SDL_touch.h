@@ -60,7 +60,7 @@ typedef struct SDL_Finger
 /**
  *  \brief Get the number of registered touch devices.
  */
-extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices();
+extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices(void);
 
 /**
  *  \brief Get the touch ID with the given index, or 0 if the index is invalid.

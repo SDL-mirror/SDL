@@ -39,7 +39,7 @@ SDL_TouchInit(void)
 }
 
 int
-SDL_GetNumTouchDevices()
+SDL_GetNumTouchDevices(void)
 {
     return SDL_num_touch;
 }
