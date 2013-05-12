@@ -604,6 +604,8 @@ extern DECLSPEC int SDLCALL SDL_GetRenderDrawBlendMode(SDL_Renderer * renderer,
  *  \brief Clear the current rendering target with the drawing color
  *
  *  This function clears the entire rendering target, ignoring the viewport.
+ *
+ *  \return 0 on success, or -1 on error
  */
 extern DECLSPEC int SDLCALL SDL_RenderClear(SDL_Renderer * renderer);
 
