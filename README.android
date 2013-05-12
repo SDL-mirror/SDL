@@ -23,7 +23,7 @@ the SDL library
 Java project, along with some C support code that communicates with Java
 - This eventually produces a standard Android .apk package
 
-The Android Java code implements an "activity" and can be found in:
+The Android Java code implements an "Activity" and can be found in:
 android-project/src/org/libsdl/app/SDLActivity.java
 
 The Java code loads your game code, the SDL shared library, and
@@ -57,7 +57,7 @@ Here's an explanation of the files in the Android project, so you can customize 
 
 android-project/
 	AndroidManifest.xml	- package manifest. Among others, it contains the class name
-				  of the main activity.
+				  of the main Activity and the package name of the application.
 	build.properties	- empty
 	build.xml		- build description file, used by ant. The actual application name
 				  is specified here.
@@ -116,10 +116,10 @@ class, .e.g. "MyGame"
  Customizing your application icon
 ================================================================================
 
-Conceptually changing your icon is just replacing the icon.png files in the
-drawable directories under the res directory. There are 3 directories for
-different screen sizes. These can be replaced with 1 dir called 'drawable',
-containing an icon file 'icon.png' with dimensions 48x48 or 72x72.
+Conceptually changing your icon is just replacing the "ic_launcher.png" files in
+the drawable directories under the res directory. There are four directories for
+different screen sizes. These can be replaced with one dir called "drawable",
+containing an icon file "ic_launcher.png" with dimensions 48x48 or 72x72.
 
 You may need to change the name of your icon in AndroidManifest.xml to match
 this icon filename.
