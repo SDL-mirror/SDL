@@ -288,8 +288,7 @@ GLES2_UpdateClipRect(SDL_Renderer * renderer)
 
     if (!SDL_RectEmpty(rect)) {
         rdata->glEnable(GL_SCISSOR_TEST);
-        int lowerLeft = renderer->viewport.h - rect->y - rect->h;
-        rdata->glScissor(rect->x, lowerLeft, rect->w, rect->h);
+        rdata->glScissor(rect->x, renderer->viewport.h - rect->y - rect->h, rect->w, rect->h);
     } else {
         rdata->glDisable(GL_SCISSOR_TEST);
     }
