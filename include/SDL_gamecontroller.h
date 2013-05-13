@@ -187,7 +187,7 @@ extern DECLSPEC void SDLCALL SDL_GameControllerUpdate(void);
 
 
 /**
- *  The list of axii available from a controller
+ *  The list of axes available from a controller
  */
 typedef enum
 {
