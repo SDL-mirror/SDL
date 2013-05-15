@@ -113,7 +113,7 @@ int render_testPrimitives (void *arg)
    int checkFailCount1;
    int checkFailCount2;
 
-   /* Need drawcolour or just skip test. */
+   /* Need drawcolor or just skip test. */
    SDLTest_AssertCheck(_hasDrawColor(), "_hasDrawColor");
 
    /* Draw a rectangle. */
@@ -216,7 +216,7 @@ int render_testPrimitivesBlend (void *arg)
    int checkFailCount2;
    int checkFailCount3;
 
-   /* Need drawcolour and blendmode or just skip test. */
+   /* Need drawcolor and blendmode or just skip test. */
    SDLTest_AssertCheck(_hasDrawColor(), "_hasDrawColor");
    SDLTest_AssertCheck(_hasBlendModes(), "_hasBlendModes");
 
@@ -363,7 +363,7 @@ render_testBlit(void *arg)
    int checkFailCount1;
 
 
-   /* Need drawcolour or just skip test. */
+   /* Need drawcolor or just skip test. */
    SDLTest_AssertCheck(_hasDrawColor(), "_hasDrawColor)");
 
    /* Create face surface. */
@@ -410,7 +410,7 @@ render_testBlit(void *arg)
 
 
 /**
- * @brief Blits doing colour tests.
+ * @brief Blits doing color tests.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureColorMod
@@ -445,12 +445,12 @@ render_testBlitColor (void *arg)
    ni     = TESTRENDER_SCREEN_W - tw;
    nj     = TESTRENDER_SCREEN_H - th;
 
-   /* Test blitting with colour mod. */
+   /* Test blitting with color mod. */
    checkFailCount1 = 0;
    checkFailCount2 = 0;
    for (j=0; j <= nj; j+=4) {
       for (i=0; i <= ni; i+=4) {
-         /* Set colour mod. */
+         /* Set color mod. */
          ret = SDL_SetTextureColorMod( tface, (255/nj)*j, (255/ni)*i, (255/nj)*j );
          if (ret != 0) checkFailCount1++;
 
@@ -698,7 +698,7 @@ render_testBlitBlend (void *arg)
    for (j=0; j <= nj; j+=4) {
       for (i=0; i <= ni; i+=4) {
 
-         /* Set colour mod. */
+         /* Set color mod. */
          ret = SDL_SetTextureColorMod( tface, (255/nj)*j, (255/ni)*i, (255/nj)*j );
          if (ret != 0) checkFailCount1++;
 
@@ -752,7 +752,7 @@ _isSupported( int code )
 }
 
 /**
- * @brief Test to see if we can vary the draw colour. Helper function.
+ * @brief Test to see if we can vary the draw color. Helper function.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_SetRenderDrawColor
@@ -766,7 +766,7 @@ _hasDrawColor (void)
 
    fail = 0;
 
-   /* Set colour. */
+   /* Set color. */
    ret = SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100 );
    if (!_isSupported(ret))
       fail = 1;
@@ -875,7 +875,7 @@ _loadTestFace(void)
 
 
 /**
- * @brief Test to see if can set texture colour mode. Helper function.
+ * @brief Test to see if can set texture color mode. Helper function.
  *
  * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_SetTextureColorMod
@@ -1016,7 +1016,7 @@ _clearScreen(void)
 {
    int ret;
 
-   /* Set colour. */
+   /* Set color. */
    ret = SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDL_SetRenderDrawColor, expected: 0, got: %i", ret);
 

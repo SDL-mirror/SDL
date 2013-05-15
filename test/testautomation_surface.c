@@ -155,7 +155,7 @@ void _testBlitBlendMode(int mode)
 	for (j=0; j <= nj; j+=4) {
 	  for (i=0; i <= ni; i+=4) {
 	  	if (mode == -2) {
-			/* Set colour mod. */
+			/* Set color mod. */
 			ret = SDL_SetSurfaceColorMod( face, (255/nj)*j, (255/ni)*i, (255/nj)*j );
 			if (ret != 0) checkFailCount2++;
 		}
