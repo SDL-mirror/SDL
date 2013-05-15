@@ -460,7 +460,7 @@ extern DECLSPEC int SDLCALL SDL_RenderSetLogicalSize(SDL_Renderer * renderer, in
  *
  *  \sa SDL_RenderSetLogicalSize()
  */
-extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, int *w, int *y);
+extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, int *w, int *h);
 
 /**
  *  \brief Set the drawing area for rendering on the current target.
