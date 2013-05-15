@@ -3054,7 +3054,7 @@ SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, S
 }
 
 SDL_bool
-SDL_ShouldAllowTopmost()
+SDL_ShouldAllowTopmost(void)
 {
 	const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
 	if (hint) {
