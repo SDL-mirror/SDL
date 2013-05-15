@@ -30,7 +30,7 @@
 
 #include "../../core/android/SDL_android.h"
 
-void Android_InitKeyboard()
+void Android_InitKeyboard(void)
 {
     SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
