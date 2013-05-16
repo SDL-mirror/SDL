@@ -449,11 +449,12 @@ endmacro(CheckX11)
 #
 macro(CheckCOCOA)
   if(VIDEO_COCOA)
-    check_c_source_compiles("
+    check_objc_source_compiles("
         #import <Cocoa/Cocoa.h>
         int main (int argc, char** argv) {}" HAVE_VIDEO_COCOA)
     if(HAVE_VIDEO_COCOA)
       file(GLOB COCOA_SOURCES ${SDL2_SOURCE_DIR}/src/video/cocoa/*.m)
+      set_source_files_properties(${COCOA_SOURCES} PROPERTIES LANGUAGE C)
       set(SOURCE_FILES ${SOURCE_FILES} ${COCOA_SOURCES})
       set(SDL_VIDEO_DRIVER_COCOA 1)
       set(HAVE_SDL_VIDEO TRUE)
