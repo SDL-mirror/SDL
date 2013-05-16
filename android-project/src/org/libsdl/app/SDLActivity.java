@@ -30,24 +30,24 @@ public class SDLActivity extends Activity {
     public static boolean mIsPaused = false;
 
     // Main components
-    private static SDLActivity mSingleton;
-    private static SDLSurface mSurface;
-    private static View mTextEdit;
-    private static ViewGroup mLayout;
+    protected static SDLActivity mSingleton;
+    protected static SDLSurface mSurface;
+    protected static View mTextEdit;
+    protected static ViewGroup mLayout;
 
     // This is what SDL runs in. It invokes SDL_main(), eventually
-    private static Thread mSDLThread;
+    protected static Thread mSDLThread;
 
     // Audio
-    private static Thread mAudioThread;
-    private static AudioTrack mAudioTrack;
+    protected static Thread mAudioThread;
+    protected static AudioTrack mAudioTrack;
 
     // EGL private objects
-    private static EGLContext  mEGLContext;
-    private static EGLSurface  mEGLSurface;
-    private static EGLDisplay  mEGLDisplay;
-    private static EGLConfig   mEGLConfig;
-    private static int mGLMajor, mGLMinor;
+    protected static EGLContext  mEGLContext;
+    protected static EGLSurface  mEGLSurface;
+    protected static EGLDisplay  mEGLDisplay;
+    protected static EGLConfig   mEGLConfig;
+    protected static int mGLMajor, mGLMinor;
 
     // Load the .so
     static {
@@ -493,10 +493,10 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     View.OnKeyListener, View.OnTouchListener, SensorEventListener  {
 
     // Sensors
-    private static SensorManager mSensorManager;
+    protected static SensorManager mSensorManager;
 
     // Keep track of the surface size to normalize touch events
-    private static float mWidth, mHeight;
+    protected static float mWidth, mHeight;
 
     // Startup    
     public SDLSurface(Context context) {
