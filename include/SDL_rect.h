@@ -71,14 +71,19 @@ typedef struct SDL_Rect
 /**
  *  \brief Returns true if the rectangle has no area.
  */
-#define SDL_RectEmpty(X)    ((!(X)) || ((X)->w <= 0) || ((X)->h <= 0))
+SDL_FORCE_INLINE SDL_bool SDL_RectEmpty(const SDL_Rect *r)
+{
+    return ((!r) || (r->w <= 0) || (r->h <= 0)) ? SDL_TRUE : SDL_FALSE;
+}
 
 /**
  *  \brief Returns true if the two rectangles are equal.
  */
-#define SDL_RectEquals(A, B)   (((A)) && ((B)) && \
-                                ((A)->x == (B)->x) && ((A)->y == (B)->y) && \
-                                ((A)->w == (B)->w) && ((A)->h == (B)->h))
+SDL_FORCE_INLINE SDL_bool SDL_RectEquals(const SDL_Rect *a, const SDL_Rect *b)
+{
+    return (a && b && (a->x == b->x) && (a->y == b->y) &&
+            (a->w == b->w) && (a->h == b->h)) ? SDL_TRUE : SDL_FALSE;
+}
 
 /**
  *  \brief Determine whether two rectangles intersect.
