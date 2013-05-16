@@ -1506,6 +1506,7 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
         }
         if (data->d3d) {
             IDirect3D9_Release(data->d3d);
+            ID3DXMatrixStack_Release(data->matrixStack);
             SDL_UnloadObject(data->d3dDLL);
         }
         SDL_free(data);
