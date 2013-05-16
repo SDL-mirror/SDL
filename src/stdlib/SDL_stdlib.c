@@ -191,7 +191,7 @@ _allmul()
         pop         esi
         pop         edi
         pop         ebp
-        ret
+        ret         10h
     }
     /* *INDENT-ON* */
 }
