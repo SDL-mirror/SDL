@@ -114,6 +114,7 @@ const char *s_ControllerMappings [] =
     "030000006d0400001dc2000014400000,Logitech F310 Gamepad (XInput),a:b0,b:b1,y:b3,x:b2,start:b7,guide:b8,back:b6,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:a2,righttrigger:a5,",
     "030000006d04000019c2000010010000,Logitech Cordless RumblePad 2,a:b1,b:b2,y:b3,x:b0,start:b9,guide:,back:b8,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,",
     "0500000047532047616d657061640000,GameStop Gamepad,a:b0,b:b1,y:b3,x:b2,start:b9,guide:,back:b8,leftstick:b10,rightstick:b11,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7,",
+    "03000000ba2200002010000001010000,Jess Technology USB Game Controller,start:b9,a:b2,b:b1,x:b3,y:b0,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a2,lefttrigger:b6,righttrigger:b7,leftshoulder:b4,rightshoulder:b5,guide:,back:b8",
 #endif
 	NULL
 };
