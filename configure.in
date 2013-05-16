@@ -2747,3 +2747,4 @@ AC_CONFIG_FILES([
     Makefile:Makefile.in:Makefile.rules sdl2-config SDL2.spec sdl2.pc
 ])
 AC_OUTPUT
+chmod a+x sdl2-config
