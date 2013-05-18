@@ -20,6 +20,6 @@
 */
 #include "SDL_config.h"
 
-#define SDL_AllocAudioMem	SDL_malloc
-#define SDL_FreeAudioMem	SDL_free
+#define SDL_AllocAudioMem   SDL_malloc
+#define SDL_FreeAudioMem    SDL_free
 /* vi: set ts=4 sw=4 expandtab: */

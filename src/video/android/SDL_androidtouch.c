@@ -36,7 +36,7 @@
 #define ACTION_MOVE 2
 #define ACTION_CANCEL 3
 #define ACTION_OUTSIDE 4
-// The following two are deprecated but it seems they are still emitted (instead the corresponding ACTION_UP/DOWN) as of Android 3.2
+/* The following two are deprecated but it seems they are still emitted (instead the corresponding ACTION_UP/DOWN) as of Android 3.2 */
 #define ACTION_POINTER_1_DOWN 5
 #define ACTION_POINTER_1_UP 6
 
@@ -52,7 +52,7 @@ static void Android_GetWindowCoordinates(float x, float y,
     *window_y = (int)(y * window_h);
 }
 
-void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int action, float x, float y, float p) 
+void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int action, float x, float y, float p)
 {
     SDL_TouchID touchDeviceId = 0;
     SDL_FingerID fingerId = 0;
@@ -104,7 +104,7 @@ void Android_OnTouch(int touch_device_id_in, int pointer_finger_id_in, int actio
             break;
         default:
             break;
-    } 
+    }
 }
 
 #endif /* SDL_VIDEO_DRIVER_ANDROID */

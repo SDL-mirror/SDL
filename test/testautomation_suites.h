@@ -28,23 +28,23 @@ extern SDLTest_TestSuiteReference pixelsTestSuite;
 
 // All test suites
 SDLTest_TestSuiteReference *testSuites[] =  {
-	&audioTestSuite,
-	&clipboardTestSuite,
-	&eventsTestSuite,
-	&keyboardTestSuite,
-	&mainTestSuite,
-	&platformTestSuite,
-	&rectTestSuite,
-	&renderTestSuite,
-	&rwopsTestSuite,
-	&surfaceTestSuite,
-	&syswmTestSuite,
-	&sdltestTestSuite,
-	&videoTestSuite,
-	&mouseTestSuite,
-	&timerTestSuite,
-	&pixelsTestSuite,
-	NULL
+    &audioTestSuite,
+    &clipboardTestSuite,
+    &eventsTestSuite,
+    &keyboardTestSuite,
+    &mainTestSuite,
+    &platformTestSuite,
+    &rectTestSuite,
+    &renderTestSuite,
+    &rwopsTestSuite,
+    &surfaceTestSuite,
+    &syswmTestSuite,
+    &sdltestTestSuite,
+    &videoTestSuite,
+    &mouseTestSuite,
+    &timerTestSuite,
+    &pixelsTestSuite,
+    NULL
 };
 
 #endif

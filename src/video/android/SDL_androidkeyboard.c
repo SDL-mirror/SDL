@@ -322,7 +322,7 @@ Android_SetTextInputRect(_THIS, SDL_Rect *rect)
         SDL_InvalidParamError("rect");
         return;
     }
-    
+
     videodata->textRect = *rect;
 }
 

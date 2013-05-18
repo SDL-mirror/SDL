@@ -41,8 +41,8 @@ static struct
     char *name;
     SDL_Haptic *haptic;
     DIDEVCAPS capabilities;
-    Uint8 bXInputHaptic; // Supports force feedback via XInput.
-    Uint8 userid; // XInput userid index for this joystick
+    Uint8 bXInputHaptic; /* Supports force feedback via XInput. */
+    Uint8 userid; /* XInput userid index for this joystick */
 } SDL_hapticlist[MAX_HAPTICS];
 
 
@@ -54,8 +54,8 @@ struct haptic_hwdata
     LPDIRECTINPUTDEVICE8 device;
     DWORD axes[3];              /* Axes to use. */
     int is_joystick;            /* Device is loaded as joystick. */
-    Uint8 bXInputHaptic; // Supports force feedback via XInput.
-    Uint8 userid; // XInput userid index for this joystick
+    Uint8 bXInputHaptic; /* Supports force feedback via XInput. */
+    Uint8 userid; /* XInput userid index for this joystick */
 };
 
 
@@ -107,7 +107,7 @@ static BOOL CALLBACK EnumHapticsCallback(const DIDEVICEINSTANCE *
 static BOOL CALLBACK DI_EffectCallback(LPCDIEFFECTINFO pei, LPVOID pv);
 
 
-/* 
+/*
  * Like SDL_SetError but for DX error codes.
  */
 static int
@@ -732,7 +732,7 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 }
 
 
-/* 
+/*
  * Clean up after system specific haptic stuff
  */
 void
@@ -1264,12 +1264,13 @@ SDL_SYS_HapticUpdateEffect(SDL_Haptic * haptic,
     DIEFFECT temp;
 
     if (haptic->hwdata->bXInputHaptic) {
-        // !!! FIXME: this isn't close to right. We only support "sine" effects,
-        // !!! FIXME:  we ignore most of the parameters, and we probably get
-        // !!! FIXME:  the ones we don't ignore wrong, too.
-        // !!! FIXME: if I had a better understanding of how the two motors
-        // !!! FIXME:  could be used in unison, perhaps I could implement other
-        // !!! FIXME:  effect types?
+        /* !!! FIXME: this isn't close to right. We only support "sine" effects,
+         * !!! FIXME:  we ignore most of the parameters, and we probably get
+         * !!! FIXME:  the ones we don't ignore wrong, too.
+         * !!! FIXME: if I had a better understanding of how the two motors
+         * !!! FIXME:  could be used in unison, perhaps I could implement other
+         * !!! FIXME:  effect types?
+         */
         /* From MSDN:
             "Note that the right motor is the high-frequency motor, the left
              motor is the low-frequency motor. They do not always need to be
@@ -1528,5 +1529,6 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
     return 0;
 }
 
-
 #endif /* SDL_HAPTIC_DINPUT */
+
+/* vi: set ts=4 sw=4 expandtab: */

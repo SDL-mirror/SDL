@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_system.h
- *  
+ *
  *  Include file for platform specific SDL API functions
  */
 
@@ -38,9 +38,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* Platform specific functions for iOS */
@@ -98,9 +96,7 @@ extern DECLSPEC const char * SDLCALL SDL_AndroidGetExternalStoragePath();
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

@@ -35,19 +35,19 @@ typedef struct SDL_VideoDevice SDL_VideoDevice;
 
 /* Define the SDL window-shaper structure */
 struct SDL_WindowShaper
-{   
+{
     /* The window associated with the shaper */
     SDL_Window *window;
-    
+
     /* The user's specified coordinates for the window, for once we give it a shape. */
     Uint32 userx,usery;
-    
+
     /* The parameters for shape calculation. */
     SDL_WindowShapeMode mode;
-    
+
     /* Has this window been assigned a shape? */
     SDL_bool hasshape;
-    
+
     void *driverdata;
 };
 
@@ -82,7 +82,7 @@ struct SDL_Window
     SDL_Rect windowed;
 
     SDL_DisplayMode fullscreen_mode;
-    
+
     float brightness;
     Uint16 *gamma;
     Uint16 *saved_gamma;        /* (just offset into gamma) */
@@ -128,7 +128,7 @@ struct SDL_VideoDisplay
 struct SDL_SysWMinfo;
 
 /* Define the SDL video driver structure */
-#define _THIS	SDL_VideoDevice *_this
+#define _THIS   SDL_VideoDevice *_this
 
 struct SDL_VideoDevice
 {

@@ -34,22 +34,22 @@ UIKit_AllocateDisplayModeData(SDL_DisplayMode * mode,
     UIScreenMode * uiscreenmode, CGFloat scale)
 {
     SDL_DisplayModeData *data = NULL;
-    
+
     if (uiscreenmode != nil) {
         /* Allocate the display mode data */
         data = (SDL_DisplayModeData *) SDL_malloc(sizeof(*data));
         if (!data) {
             return SDL_OutOfMemory();
         }
-        
+
         data->uiscreenmode = uiscreenmode;
         [data->uiscreenmode retain];
-        
+
         data->scale = scale;
     }
-    
+
     mode->driverdata = data;
-    
+
     return 0;
 }
 
@@ -57,7 +57,7 @@ static void
 UIKit_FreeDisplayModeData(SDL_DisplayMode * mode)
 {
     if (!SDL_UIKit_supports_multiple_displays) {
-        // Not on at least iPhoneOS 3.2 (versions prior to iPad).
+        /* Not on at least iPhoneOS 3.2 (versions prior to iPad). */
         SDL_assert(mode->driverdata == NULL);
     } else if (mode->driverdata != NULL) {
         SDL_DisplayModeData *data = (SDL_DisplayModeData *)mode->driverdata;
@@ -73,13 +73,13 @@ UIKit_AddSingleDisplayMode(SDL_VideoDisplay * display, int w, int h,
 {
     SDL_DisplayMode mode;
     SDL_zero(mode);
-    
+
     mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.refresh_rate = 0;
     if (UIKit_AllocateDisplayModeData(&mode, uiscreenmode, scale) < 0) {
         return -1;
     }
-    
+
     mode.w = w;
     mode.h = h;
     if (SDL_AddDisplayMode(display, &mode)) {
@@ -97,14 +97,14 @@ UIKit_AddDisplayMode(SDL_VideoDisplay * display, int w, int h, CGFloat scale,
     if (UIKit_AddSingleDisplayMode(display, w, h, uiscreenmode, scale) < 0) {
         return -1;
     }
-    
+
     if (addRotation) {
-        // Add the rotated version
+        /* Add the rotated version */
         if (UIKit_AddSingleDisplayMode(display, h, w, uiscreenmode, scale) < 0) {
             return -1;
         }
     }
-    
+
     return 0;
 }
 
@@ -113,25 +113,26 @@ UIKit_AddDisplay(UIScreen *uiscreen)
 {
     CGSize size = [uiscreen bounds].size;
 
-    // Make sure the width/height are oriented correctly
+    /* Make sure the width/height are oriented correctly */
     if (UIKit_IsDisplayLandscape(uiscreen) != (size.width > size.height)) {
         CGFloat height = size.width;
         size.width = size.height;
         size.height = height;
     }
 
-    // When dealing with UIKit all coordinates are specified in terms of
-    // what Apple refers to as points. On earlier devices without the
-    // so called "Retina" display, there is a one to one mapping between
-    // points and pixels. In other cases [UIScreen scale] indicates the
-    // relationship between points and pixels. Since SDL has no notion
-    // of points, we must compensate in all cases where dealing with such
-    // units.
+    /* When dealing with UIKit all coordinates are specified in terms of
+     * what Apple refers to as points. On earlier devices without the
+     * so called "Retina" display, there is a one to one mapping between
+     * points and pixels. In other cases [UIScreen scale] indicates the
+     * relationship between points and pixels. Since SDL has no notion
+     * of points, we must compensate in all cases where dealing with such
+     * units.
+     */
     CGFloat scale;
     if ([UIScreen instancesRespondToSelector:@selector(scale)]) {
-        scale = [uiscreen scale]; // iOS >= 4.0
+        scale = [uiscreen scale]; /* iOS >= 4.0 */
     } else {
-        scale = 1.0f; // iOS < 4.0
+        scale = 1.0f; /* iOS < 4.0 */
     }
 
     SDL_VideoDisplay display;
@@ -140,14 +141,15 @@ UIKit_AddDisplay(UIScreen *uiscreen)
     mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.w = (int)(size.width * scale);
     mode.h = (int)(size.height * scale);
- 
+
     UIScreenMode * uiscreenmode = nil;
-    // UIScreenMode showed up in 3.2 (the iPad and later). We're
-    //  misusing this supports_multiple_displays flag here for that.
+    /* UIScreenMode showed up in 3.2 (the iPad and later). We're
+     * misusing this supports_multiple_displays flag here for that.
+     */
     if (SDL_UIKit_supports_multiple_displays) {
         uiscreenmode = [uiscreen currentMode];
     }
-    
+
     if (UIKit_AllocateDisplayModeData(&mode, uiscreenmode, scale) < 0) {
         return -1;
     }
@@ -162,14 +164,14 @@ UIKit_AddDisplay(UIScreen *uiscreen)
         UIKit_FreeDisplayModeData(&display.desktop_mode);
         return SDL_OutOfMemory();
     }
-	
+
     [uiscreen retain];
     data->uiscreen = uiscreen;
     data->scale = scale;
-	
+
     display.driverdata = data;
     SDL_AddVideoDisplay(&display);
-    
+
     return 0;
 }
 
@@ -187,20 +189,21 @@ UIKit_IsDisplayLandscape(UIScreen *uiscreen)
 int
 UIKit_InitModes(_THIS)
 {
-    // this tells us whether we are running on ios >= 3.2
+    /* this tells us whether we are running on ios >= 3.2 */
     SDL_UIKit_supports_multiple_displays = [UIScreen instancesRespondToSelector:@selector(currentMode)];
 
-    // Add the main screen.
+    /* Add the main screen. */
     if (UIKit_AddDisplay([UIScreen mainScreen]) < 0) {
         return -1;
     }
 
-    // If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels.
-    //  The iPad added both a larger main screen and the ability to use
-    //  external displays. So, add the other displays (screens in UI speak).
+    /* If this is iPhoneOS < 3.2, all devices are one screen, 320x480 pixels. */
+    /*  The iPad added both a larger main screen and the ability to use
+     *  external displays. So, add the other displays (screens in UI speak).
+     */
     if (SDL_UIKit_supports_multiple_displays) {
         for (UIScreen *uiscreen in [UIScreen screens]) {
-            // Only add the other screens
+            /* Only add the other screens */
             if (uiscreen != [UIScreen mainScreen]) {
                 if (UIKit_AddDisplay(uiscreen) < 0) {
                     return -1;
@@ -222,27 +225,28 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
     SDL_bool addRotation = (data->uiscreen == [UIScreen mainScreen]);
 
     if (SDL_UIKit_supports_multiple_displays) {
-        // availableModes showed up in 3.2 (the iPad and later). We should only
-        //  land here for at least that version of the OS.
+        /* availableModes showed up in 3.2 (the iPad and later). We should only
+         * land here for at least that version of the OS.
+         */
         for (UIScreenMode *uimode in [data->uiscreen availableModes]) {
             CGSize size = [uimode size];
             int w = (int)size.width;
             int h = (int)size.height;
- 
-            // Make sure the width/height are oriented correctly
+
+            /* Make sure the width/height are oriented correctly */
             if (isLandscape != (w > h)) {
                 int tmp = w;
                 w = h;
                 h = tmp;
             }
 
-            // Add the native screen resolution.
+            /* Add the native screen resolution. */
             UIKit_AddDisplayMode(display, w, h, data->scale, uimode, addRotation);
 
             if (data->scale != 1.0f) {
-                // Add the native screen resolution divided by its scale.
-                // This is so devices capable of e.g. 640x960 also advertise
-                // 320x480.
+                /* Add the native screen resolution divided by its scale.
+                 * This is so devices capable of e.g. 640x960 also advertise 320x480.
+                 */
                 UIKit_AddDisplayMode(display,
                     (int)(size.width / data->scale),
                     (int)(size.height / data->scale),
@@ -254,7 +258,7 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         int w = (int)size.width;
         int h = (int)size.height;
 
-        // Make sure the width/height are oriented correctly
+        /* Make sure the width/height are oriented correctly */
         if (isLandscape != (w > h)) {
             int tmp = w;
             w = h;
@@ -262,7 +266,7 @@ UIKit_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
         }
 
         UIKit_AddDisplayMode(display, w, h, 1.0f, nil, addRotation);
-    } 
+    }
 }
 
 int
@@ -271,7 +275,7 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
     SDL_DisplayData *data = (SDL_DisplayData *) display->driverdata;
 
     if (!SDL_UIKit_supports_multiple_displays) {
-        // Not on at least iPhoneOS 3.2 (versions prior to iPad).
+        /* Not on at least iPhoneOS 3.2 (versions prior to iPad). */
         SDL_assert(mode->driverdata == NULL);
     } else {
         SDL_DisplayModeData *modedata = (SDL_DisplayModeData *)mode->driverdata;
@@ -295,7 +299,7 @@ UIKit_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 void
 UIKit_QuitModes(_THIS)
 {
-    // Release Objective-C objects, so higher level doesn't free() them.
+    /* Release Objective-C objects, so higher level doesn't free() them. */
     int i, j;
     for (i = 0; i < _this->num_displays; i++) {
         SDL_VideoDisplay *display = &_this->displays[i];

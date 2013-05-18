@@ -121,23 +121,23 @@ HRESULT WINAPI D3DXCreateMatrixStack(DWORD flags, LPD3DXMATRIXSTACK* ppstack);
 #endif
 
 #ifdef ASSEMBLE_SHADER
-///////////////////////////////////////////////////////////////////////////
-// ID3DXBuffer:
-// ------------
-// The buffer object is used by D3DX to return arbitrary size data.
-//
-// GetBufferPointer -
-//    Returns a pointer to the beginning of the buffer.
-//
-// GetBufferSize -
-//    Returns the size of the buffer, in bytes.
-///////////////////////////////////////////////////////////////////////////
+/**************************************************************************
+ * ID3DXBuffer:
+ * ------------
+ * The buffer object is used by D3DX to return arbitrary size data.
+ *
+ * GetBufferPointer -
+ *    Returns a pointer to the beginning of the buffer.
+ *
+ * GetBufferSize -
+ *    Returns the size of the buffer, in bytes.
+ **************************************************************************/
 
 typedef interface ID3DXBuffer ID3DXBuffer;
 typedef interface ID3DXBuffer *LPD3DXBUFFER;
 
-// {8BA5FB08-5195-40e2-AC58-0D989C3A0102}
-DEFINE_GUID(IID_ID3DXBuffer, 
+/* {8BA5FB08-5195-40e2-AC58-0D989C3A0102} */
+DEFINE_GUID(IID_ID3DXBuffer,
 0x8ba5fb08, 0x5195, 0x40e2, 0xac, 0x58, 0xd, 0x98, 0x9c, 0x3a, 0x1, 0x2);
 
 #undef INTERFACE
@@ -149,12 +149,12 @@ typedef interface ID3DXBuffer {
 typedef const struct ID3DXBufferVtbl ID3DXBufferVtbl;
 const struct ID3DXBufferVtbl
 {
-    // IUnknown
+    /* IUnknown */
     STDMETHOD(QueryInterface)(THIS_ REFIID iid, LPVOID *ppv) PURE;
     STDMETHOD_(ULONG, AddRef)(THIS) PURE;
     STDMETHOD_(ULONG, Release)(THIS) PURE;
 
-    // ID3DXBuffer
+    /* ID3DXBuffer */
     STDMETHOD_(LPVOID, GetBufferPointer)(THIS) PURE;
     STDMETHOD_(DWORD, GetBufferSize)(THIS) PURE;
 };
@@ -444,7 +444,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_DisplayMode fullscreen_mode;
     D3DMATRIX matrix;
     int d3dxVersion;
-	char d3dxDLLFile[50];
+    char d3dxDLLFile[50];
 
     renderer = (SDL_Renderer *) SDL_calloc(1, sizeof(*renderer));
     if (!renderer) {
@@ -496,7 +496,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
 
-    
+
     if (!data->d3d || !data->matrixStack) {
         SDL_free(renderer);
         SDL_free(data);
@@ -548,14 +548,14 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     pparams.SwapEffect = D3DSWAPEFFECT_DISCARD;
 
     if (window_flags & SDL_WINDOW_FULLSCREEN) {
-		if ( ( window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP )  {
-			pparams.Windowed = TRUE;
-			pparams.FullScreen_RefreshRateInHz = 0;
-		} else {
+        if ( ( window_flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP )  {
+            pparams.Windowed = TRUE;
+            pparams.FullScreen_RefreshRateInHz = 0;
+        } else {
         pparams.Windowed = FALSE;
         pparams.FullScreen_RefreshRateInHz =
             fullscreen_mode.refresh_rate;
-		}
+        }
     } else {
         pparams.Windowed = TRUE;
         pparams.FullScreen_RefreshRateInHz = 0;
@@ -1338,7 +1338,7 @@ D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 
     D3D_SetBlendMode(data, texture->blendMode);
 
-    // Rotate and translate
+    /* Rotate and translate */
     ID3DXMatrixStack_Push(data->matrixStack);
     ID3DXMatrixStack_LoadIdentity(data->matrixStack);
     ID3DXMatrixStack_RotateYawPitchRoll(data->matrixStack, 0.0, 0.0, (float)(M_PI * (float) angle / 180.0f));
@@ -1491,7 +1491,7 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
     D3D_RenderData *data = (D3D_RenderData *) renderer->driverdata;
 
     if (data) {
-        // Release the render target
+        /* Release the render target */
         if (data->defaultRenderTarget) {
             IDirect3DSurface9_Release(data->defaultRenderTarget);
             data->defaultRenderTarget = NULL;
@@ -1500,7 +1500,7 @@ D3D_DestroyRenderer(SDL_Renderer * renderer)
             IDirect3DSurface9_Release(data->currentRenderTarget);
             data->currentRenderTarget = NULL;
         }
-        
+
         if (data->device) {
             IDirect3DDevice9_Release(data->device);
         }

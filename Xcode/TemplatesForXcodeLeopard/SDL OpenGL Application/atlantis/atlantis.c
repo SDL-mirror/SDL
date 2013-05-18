@@ -63,37 +63,37 @@ static double mtime(void)
 {
    struct timeval tk_time;
    struct timezone tz;
-   
+
    gettimeofday(&tk_time, &tz);
-   
+
    return 4294.967296 * tk_time.tv_sec + 0.000001 * tk_time.tv_usec;
 }
 
 static double filter(double in, double *save)
 {
-	static double k1 = 0.9;
-	static double k2 = 0.05;
+    static double k1 = 0.9;
+    static double k2 = 0.05;
 
-	save[3] = in;
-	save[1] = save[0]*k1 + k2*(save[3] + save[2]);
+    save[3] = in;
+    save[1] = save[0]*k1 + k2*(save[3] + save[2]);
 
-	save[0]=save[1];
-	save[2]=save[3];
+    save[0]=save[1];
+    save[2]=save[3];
 
-	return(save[1]);
+    return(save[1]);
 }
 
 void DrawStr(const char *str)
 {
-	GLint i = 0;
-	
-	if(!str) return;
-        
-	while(str[i])
-	{
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
-		i++;
-	}
+    GLint i = 0;
+
+    if(!str) return;
+
+    while(str[i])
+    {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, str[i]);
+        i++;
+    }
 }
 
 void
@@ -168,9 +168,9 @@ Atlantis_Init(void)
     InitFishs();
 
     glEnable(GL_FOG);
-	glFogi(GL_FOG_MODE, GL_EXP);
-	glFogf(GL_FOG_DENSITY, 0.0000025);
-	glFogfv(GL_FOG_COLOR, fog_color);
+    glFogi(GL_FOG_MODE, GL_EXP);
+    glFogf(GL_FOG_DENSITY, 0.0000025);
+    glFogfv(GL_FOG_COLOR, fog_color);
 
     glClearColor(0.0, 0.5, 0.9, 1.0);
 }
@@ -178,9 +178,9 @@ Atlantis_Init(void)
 void
 Atlantis_Reshape(int width, int height)
 {
-	w_win = width;
-	h_win = height;
-	
+    w_win = width;
+    h_win = height;
+
     glViewport(0, 0, width, height);
 
     glMatrixMode(GL_PROJECTION);
@@ -212,37 +212,37 @@ Atlantis_Key(unsigned char key, int x, int y)
 {
     switch (key) {
     case 't':
-    	Timing = !Timing;
+        Timing = !Timing;
     break;
     case ' ':
-    	switch(StrMode)
-    	{
-		    case GL_EXTENSIONS:
-    			StrMode = GL_VENDOR;
-		    break;
-		    case GL_VENDOR:
-		    	StrMode = GL_RENDERER;
-		    break;
-		    case GL_RENDERER:
-		    	StrMode = GL_VERSION;
-		    break;
-		    case GL_VERSION:
-		    	StrMode = GL_EXTENSIONS;
-		    break;
-		}
-	break;
+        switch(StrMode)
+        {
+            case GL_EXTENSIONS:
+                StrMode = GL_VENDOR;
+            break;
+            case GL_VENDOR:
+                StrMode = GL_RENDERER;
+            break;
+            case GL_RENDERER:
+                StrMode = GL_VERSION;
+            break;
+            case GL_VERSION:
+                StrMode = GL_EXTENSIONS;
+            break;
+        }
+    break;
     case 27:           /* Esc will quit */
         exit(1);
     break;
-    case 's':             		/* "s" start animation */
+    case 's':                   /* "s" start animation */
         moving = GL_TRUE;
         //glutIdleFunc(Animate);
     break;
-    case 'a':          			/* "a" stop animation */
+    case 'a':                   /* "a" stop animation */
         moving = GL_FALSE;
         //glutIdleFunc(NULL);
     break;
-    case '.':          			/* "." will advance frame */
+    case '.':                   /* "." will advance frame */
         if (!moving) {
             Atlantis_Animate();
         }
@@ -251,21 +251,21 @@ Atlantis_Key(unsigned char key, int x, int y)
 /*
 void Display(void)
 {
-	static float P123[3] = {-448.94, -203.14, 9499.60};
-	static float P124[3] = {-442.64, -185.20, 9528.07};
-	static float P125[3] = {-441.07, -148.05, 9528.07};
-	static float P126[3] = {-443.43, -128.84, 9499.60};
-	static float P127[3] = {-456.87, -146.78, 9466.67};
-	static float P128[3] = {-453.68, -183.93, 9466.67};
+    static float P123[3] = {-448.94, -203.14, 9499.60};
+    static float P124[3] = {-442.64, -185.20, 9528.07};
+    static float P125[3] = {-441.07, -148.05, 9528.07};
+    static float P126[3] = {-443.43, -128.84, 9499.60};
+    static float P127[3] = {-456.87, -146.78, 9466.67};
+    static float P128[3] = {-453.68, -183.93, 9466.67};
 
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
-	glPushMatrix();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glPushMatrix();
     FishTransform(&dolph);
     DrawDolphin(&dolph);
     glPopMatrix();
- 
-	glutSwapBuffers();
+
+    glutSwapBuffers();
 }
 */
 
@@ -274,9 +274,9 @@ Atlantis_Display(void)
 {
     int i;
     static double th[4] = {0.0, 0.0, 0.0, 0.0};
-	static double t1 = 0.0, t2 = 0.0, t;
-	char num_str[128];
-    
+    static double t1 = 0.0, t2 = 0.0, t;
+    char num_str[128];
+
     t1 = t2;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -303,56 +303,56 @@ Atlantis_Display(void)
     glScalef(0.45, 0.45, 0.3);
     DrawWhale(&babyWhale);
     glPopMatrix();
-    
+
     if(Timing)
     {
-		t2 = mtime();
-		t = t2 - t1;
-		if(t > 0.0001) t = 1.0 / t;
-		
-		glDisable(GL_LIGHTING);
-		//glDisable(GL_DEPTH_TEST);
-		
-		glColor3f(1.0, 0.0, 0.0);
-		
-		glMatrixMode (GL_PROJECTION);
-		glPushMatrix();
-		glLoadIdentity();
-		glOrtho(0, w_win, 0, h_win, -10.0, 10.0);
-		
-		glRasterPos2f(5.0, 5.0);
-		
-		switch(StrMode)
-		{
-			case GL_VENDOR:
-				sprintf(num_str, "%0.2f Hz, %dx%d, VENDOR: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_VENDOR));
-			break;
-			case GL_RENDERER:
-				sprintf(num_str, "%0.2f Hz, %dx%d, RENDERER: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_RENDERER));
-			break;
-			case GL_VERSION:
-				sprintf(num_str, "%0.2f Hz, %dx%d, VERSION: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_VERSION));
-			break;
-			case GL_EXTENSIONS:
-				sprintf(num_str, "%0.2f Hz, %dx%d, EXTENSIONS: ", filter(t, th), w_win, h_win);
-				DrawStr(num_str);
-				DrawStr(glGetString(GL_EXTENSIONS));
-			break;
-		}
-		
-		glPopMatrix();
-		glMatrixMode(GL_MODELVIEW);
-		
-		glEnable(GL_LIGHTING);
-		//glEnable(GL_DEPTH_TEST);
-	}
-	
+        t2 = mtime();
+        t = t2 - t1;
+        if(t > 0.0001) t = 1.0 / t;
+
+        glDisable(GL_LIGHTING);
+        //glDisable(GL_DEPTH_TEST);
+
+        glColor3f(1.0, 0.0, 0.0);
+
+        glMatrixMode (GL_PROJECTION);
+        glPushMatrix();
+        glLoadIdentity();
+        glOrtho(0, w_win, 0, h_win, -10.0, 10.0);
+
+        glRasterPos2f(5.0, 5.0);
+
+        switch(StrMode)
+        {
+            case GL_VENDOR:
+                sprintf(num_str, "%0.2f Hz, %dx%d, VENDOR: ", filter(t, th), w_win, h_win);
+                DrawStr(num_str);
+                DrawStr(glGetString(GL_VENDOR));
+            break;
+            case GL_RENDERER:
+                sprintf(num_str, "%0.2f Hz, %dx%d, RENDERER: ", filter(t, th), w_win, h_win);
+                DrawStr(num_str);
+                DrawStr(glGetString(GL_RENDERER));
+            break;
+            case GL_VERSION:
+                sprintf(num_str, "%0.2f Hz, %dx%d, VERSION: ", filter(t, th), w_win, h_win);
+                DrawStr(num_str);
+                DrawStr(glGetString(GL_VERSION));
+            break;
+            case GL_EXTENSIONS:
+                sprintf(num_str, "%0.2f Hz, %dx%d, EXTENSIONS: ", filter(t, th), w_win, h_win);
+                DrawStr(num_str);
+                DrawStr(glGetString(GL_EXTENSIONS));
+            break;
+        }
+
+        glPopMatrix();
+        glMatrixMode(GL_MODELVIEW);
+
+        glEnable(GL_LIGHTING);
+        //glEnable(GL_DEPTH_TEST);
+    }
+
     count++;
 
     glutSwapBuffers();
@@ -377,18 +377,18 @@ timingSelect(int value)
 {
     switch(value)
     {
-		case 1:
-			StrMode = GL_VENDOR;
-		break;
-		case 2:
-			StrMode = GL_RENDERER;
-		break;
-		case 3:
-			StrMode = GL_VERSION;
-		break;
-		case 4:
-			StrMode = GL_EXTENSIONS;
-		break;
+        case 1:
+            StrMode = GL_VENDOR;
+        break;
+        case 2:
+            StrMode = GL_RENDERER;
+        break;
+        case 3:
+            StrMode = GL_VERSION;
+        break;
+        case 4:
+            StrMode = GL_EXTENSIONS;
+        break;
     }
 }
 
@@ -413,24 +413,24 @@ menuSelect(int value)
 int
 main(int argc, char **argv)
 {
-	GLboolean fullscreen = GL_FALSE; 
-	GLint time_menu;
- 	
- 	srand(0);
+    GLboolean fullscreen = GL_FALSE;
+    GLint time_menu;
+
+    srand(0);
 
         glutInit(&argc, argv);
-	if (argc > 1 && !strcmp(argv[1], "-w"))
-		fullscreen = GL_FALSE;
+    if (argc > 1 && !strcmp(argv[1], "-w"))
+        fullscreen = GL_FALSE;
 
-	//glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitDisplayString("rgba double depth=24");
-	if (fullscreen) {
-	  glutGameModeString("1024x768:32");
-	  glutEnterGameMode();
-	} else {
-	  glutInitWindowSize(320, 240);
-	  glutCreateWindow("Atlantis Timing");
-	}
+    //glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+    glutInitDisplayString("rgba double depth=24");
+    if (fullscreen) {
+      glutGameModeString("1024x768:32");
+      glutEnterGameMode();
+    } else {
+      glutInitWindowSize(320, 240);
+      glutCreateWindow("Atlantis Timing");
+    }
     Init();
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
@@ -438,19 +438,19 @@ main(int argc, char **argv)
     moving = GL_TRUE;
 glutIdleFunc(Animate);
     glutVisibilityFunc(Visible);
-    
+
     time_menu = glutCreateMenu(timingSelect);
     glutAddMenuEntry("GL_VENDOR", 1);
     glutAddMenuEntry("GL_RENDERER", 2);
     glutAddMenuEntry("GL_VERSION", 3);
     glutAddMenuEntry("GL_EXTENSIONS", 4);
-    
+
     glutCreateMenu(menuSelect);
     glutAddMenuEntry("Start motion", 1);
     glutAddMenuEntry("Stop motion", 2);
     glutAddSubMenu("Timing Mode", time_menu);
     glutAddMenuEntry("Quit", 4);
-    
+
     //glutAttachMenu(GLUT_RIGHT_BUTTON);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
     glutMainLoop();

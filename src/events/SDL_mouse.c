@@ -397,12 +397,12 @@ void
 SDL_WarpMouseInWindow(SDL_Window * window, int x, int y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
-	
-	if ( window == NULL )
-		window = mouse->focus;
-	
-	if ( window == NULL )
-		return;
+
+    if ( window == NULL )
+        window = mouse->focus;
+
+    if ( window == NULL )
+        return;
 
     if (mouse->WarpMouse) {
         mouse->WarpMouse(window, x, y);
@@ -572,13 +572,13 @@ SDL_CreateSystemCursor(SDL_SystemCursor id)
         return NULL;
     }
 
-	cursor = mouse->CreateSystemCursor(id);
+    cursor = mouse->CreateSystemCursor(id);
     if (cursor) {
         cursor->next = mouse->cursors;
         mouse->cursors = cursor;
     }
 
-	return cursor;
+    return cursor;
 }
 
 /* SDL_SetCursor(NULL) can be used to force the cursor redraw,

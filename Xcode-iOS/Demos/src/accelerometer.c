@@ -1,7 +1,7 @@
 /*
- *	accelerometer.c
- *	written by Holmes Futrell
- *	use however you want
+ *  accelerometer.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "SDL.h"
@@ -13,7 +13,7 @@
 #define FRICTION 0.0008f        /* coefficient of acceleration that opposes direction of motion */
 #define GRAVITY_CONSTANT 0.004f /* how sensitive the ship is to the accelerometer */
 
-/*	If we aren't on an iPhone, then this definition ought to yield reasonable behavior */
+/*  If we aren't on an iPhone, then this definition ought to yield reasonable behavior */
 #ifndef SDL_IPHONE_MAX_GFORCE
 #define SDL_IPHONE_MAX_GFORCE 5.0f
 #endif
@@ -48,7 +48,7 @@ render(SDL_Renderer *renderer)
 #define SINT16_MAX ((float)(0x7FFF))
 
     /* update velocity from accelerometer
-       the factor SDL_IPHONE_MAX_G_FORCE / SINT16_MAX converts between 
+       the factor SDL_IPHONE_MAX_G_FORCE / SINT16_MAX converts between
        SDL's units reported from the joytick, and units of g-force, as reported by the accelerometer
      */
     shipData.vx +=
@@ -159,7 +159,7 @@ main(int argc, char *argv[])
 {
 
     SDL_Window *window;         /* main window */
-	SDL_Renderer *renderer;
+    SDL_Renderer *renderer;
     Uint32 startFrame;          /* time frame began to process */
     Uint32 endFrame;            /* time frame ended processing */
     Uint32 delay;               /* time to pause waiting to draw next frame */

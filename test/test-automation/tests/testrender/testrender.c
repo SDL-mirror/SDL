@@ -30,38 +30,38 @@ static int _isSupported(int code);
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "render_testGetNumRenderDrivers", "Tests call to SDL_GetNumRenderDrivers", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testGetNumRenderDrivers", "Tests call to SDL_GetNumRenderDrivers", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "render_testCreateRenderer", "Tests SDL_CreateRenderer", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testCreateRenderer", "Tests SDL_CreateRenderer", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "render_testPrimitives", "Tests rendering primitives", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testPrimitives", "Tests rendering primitives", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "render_testPrimitivesBlend", "Tests rendering primitives with blending", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testPrimitivesBlend", "Tests rendering primitives with blending", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test5 =
-		(TestCaseReference){ "render_testBlit", "Tests blitting", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testBlit", "Tests blitting", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test6 =
-		(TestCaseReference){ "render_testBlitColour", "Tests blitting with color", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testBlitColour", "Tests blitting with color", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test7 =
-		(TestCaseReference){ "render_testBlitAlpha", "Tests blitting with alpha", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testBlitAlpha", "Tests blitting with alpha", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test8 =
-		(TestCaseReference){ "render_testBlitBlend", "Tests blitting with blending", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "render_testBlitBlend", "Tests blitting with blending", TEST_ENABLED, 0, 0 };
 
 
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, NULL
+    &test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
-	return (TestCaseReference **)testSuite;
+    return (TestCaseReference **)testSuite;
 }
 
 // Fixture
@@ -74,10 +74,10 @@ SetUp(void *arg)
   AssertTrue(ret==0, "SDL_Init(SDL_INIT_VIDEO): %s", SDL_GetError());
 
   SDL_Window *w = SDL_CreateWindow( "title", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-		  80, 60, SDL_WINDOW_SHOWN );
+          80, 60, SDL_WINDOW_SHOWN );
   renderer = SDL_CreateRenderer(w, 0, 0);
 }
-                        
+
 void
 TearDown(void *arg)
 {
@@ -88,7 +88,7 @@ TearDown(void *arg)
 /**
  * @brief Tests call to SDL_GetNumRenderDrivers
  *
- * \sa 
+ * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_GetNumRenderDrivers
  */
 int
@@ -118,7 +118,7 @@ render_testCreateRenderer(void *arg)
   if (window != NULL) {
     AssertPass("Window created");
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    if (renderer) {    
+    if (renderer) {
       AssertPass("Renderer created");
       SDL_DestroyRenderer(renderer);
     } else {
@@ -127,7 +127,7 @@ render_testCreateRenderer(void *arg)
     SDL_DestroyWindow(window);
   } else {
     AssertFail("Could not create window: %s", SDL_GetError());
-  }  
+  }
 }
 
 

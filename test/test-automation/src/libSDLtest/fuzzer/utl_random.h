@@ -1,11 +1,11 @@
-/* 
+/*
 
- A "32-bit Multiply with carry: random number generator. 
+ A "32-bit Multiply with carry: random number generator.
  Has a list of recommended multipliers.  Very fast and good.
-                         
+
  multiply-with-carry generator" x(n) = a*x(n-1) + carry mod 2^32.
  period" (a*2^31)-1
- 
+
 */
 
 #ifndef _utl_random_h
@@ -28,8 +28,8 @@ extern    "C" {
  * Macros that return random number in a specific format. See utl_random()
  * below for details. Float values are in the range [0.0-1.0].
  */
-#define utl_randomInt(c)		((int)utl_random(c))
-#define utl_randomFloat(c)	((double)utl_random(c)/(unsigned long)0xffffffff)
+#define utl_randomInt(c)        ((int)utl_random(c))
+#define utl_randomFloat(c)  ((double)utl_random(c)/(unsigned long)0xffffffff)
 
   typedef struct {
     unsigned int a;
@@ -51,8 +51,8 @@ extern    "C" {
 #define DLLINTERFACE
 #endif
 
-/* 
- * utl_randomInit: Initialize random number generator with two integers. 
+/*
+ * utl_randomInit: Initialize random number generator with two integers.
  *
  * Paramaters:
  *
@@ -68,10 +68,10 @@ extern    "C" {
  *
  */
   DLLINTERFACE void utl_randomInit(RND_CTX * rndContext, unsigned int xi,
-				  unsigned int ci);
+                  unsigned int ci);
 
-/* 
- * utl_randomInitTime: Initialize random number generator with the time 
+/*
+ * utl_randomInitTime: Initialize random number generator with the time
  *
  * Parameters:
  *
@@ -85,8 +85,8 @@ extern    "C" {
   DLLINTERFACE void utl_randomInitTime(RND_CTX * rndContext);
 
 
-/* 
- * utl_random: Returns random numbers 
+/*
+ * utl_random: Returns random numbers
  *
  * Parameters:
  *

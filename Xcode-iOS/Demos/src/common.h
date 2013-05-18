@@ -1,7 +1,7 @@
 /*
- *	common.h
- *	written by Holmes Futrell
- *	use however you want
+ *  common.h
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #define SCREEN_WIDTH 320

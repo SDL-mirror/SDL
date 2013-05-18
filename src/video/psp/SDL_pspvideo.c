@@ -51,7 +51,7 @@ PSP_Available(void)
 static void
 PSP_Destroy(SDL_VideoDevice * device)
 {
-//    SDL_VideoData *phdata = (SDL_VideoData *) device->driverdata;
+/*    SDL_VideoData *phdata = (SDL_VideoData *) device->driverdata; */
 
     if (device->driverdata != NULL) {
         device->driverdata = NULL;
@@ -87,15 +87,15 @@ PSP_Create()
         SDL_free(device);
         return NULL;
     }
-        
-		gldata = (SDL_GLDriverData *) SDL_calloc(1, sizeof(SDL_GLDriverData));
+
+        gldata = (SDL_GLDriverData *) SDL_calloc(1, sizeof(SDL_GLDriverData));
     if (gldata == NULL) {
         SDL_OutOfMemory();
         SDL_free(device);
         return NULL;
-    }	
+    }
     device->gl_data = gldata;
-    
+
     device->driverdata = phdata;
 
     phdata->egl_initialized = SDL_TRUE;
@@ -136,11 +136,11 @@ PSP_Create()
     device->GL_GetSwapInterval = PSP_GL_GetSwapInterval;
     device->GL_SwapWindow = PSP_GL_SwapWindow;
     device->GL_DeleteContext = PSP_GL_DeleteContext;
-	device->HasScreenKeyboardSupport = PSP_HasScreenKeyboardSupport;
-	device->ShowScreenKeyboard = PSP_ShowScreenKeyboard;
-	device->HideScreenKeyboard = PSP_HideScreenKeyboard;
-	device->IsScreenKeyboardShown = PSP_IsScreenKeyboardShown;
-    
+    device->HasScreenKeyboardSupport = PSP_HasScreenKeyboardSupport;
+    device->ShowScreenKeyboard = PSP_ShowScreenKeyboard;
+    device->HideScreenKeyboard = PSP_HideScreenKeyboard;
+    device->IsScreenKeyboardShown = PSP_IsScreenKeyboardShown;
+
     device->PumpEvents = PSP_PumpEvents;
 
     return device;
@@ -163,15 +163,14 @@ PSP_VideoInit(_THIS)
     SDL_DisplayMode current_mode;
 
     SDL_zero(current_mode);
-    
+
     current_mode.w = 480;
     current_mode.h = 272;
-    
+
     current_mode.refresh_rate = 60;
-    // 32 bpp for default 
-   // current_mode.format = SDL_PIXELFORMAT_RGBA8888;
+    /* 32 bpp for default */
     current_mode.format = SDL_PIXELFORMAT_ABGR8888;
-    
+
     current_mode.driverdata = NULL;
 
     SDL_zero(display);
@@ -201,23 +200,21 @@ PSP_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 {
     return 0;
 }
-#define EGLCHK(stmt)							\
-	do {										\
-		EGLint err;								\
-												\
-		stmt;									\
-		err = eglGetError();					\
-		if (err != EGL_SUCCESS) {				\
-			SDL_SetError("EGL error %d", err);	\
-			return 0;							\
-		}										\
-	} while (0)
-	
+#define EGLCHK(stmt)                            \
+    do {                                        \
+        EGLint err;                             \
+                                                \
+        stmt;                                   \
+        err = eglGetError();                    \
+        if (err != EGL_SUCCESS) {               \
+            SDL_SetError("EGL error %d", err);  \
+            return 0;                           \
+        }                                       \
+    } while (0)
+
 int
 PSP_CreateWindow(_THIS, SDL_Window * window)
 {
-//    SDL_VideoData *phdata = (SDL_VideoData *) _this->driverdata;
-
     SDL_WindowData *wdata;
 
     /* Allocate window internal data */
@@ -288,8 +285,6 @@ PSP_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 void
 PSP_DestroyWindow(_THIS, SDL_Window * window)
 {
-	
-//    eglTerminate(_this->gl_data->display);
 }
 
 /*****************************************************************************/
@@ -324,7 +319,7 @@ void PSP_HideScreenKeyboard(_THIS, SDL_Window *window)
 }
 SDL_bool PSP_IsScreenKeyboardShown(_THIS, SDL_Window *window)
 {
-	return SDL_FALSE;
+    return SDL_FALSE;
 }
 
 

@@ -700,8 +700,8 @@ X11_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     int fds[2];
     int status = 0;
 
-	/* Need to flush here in case someone has turned grab off and it hasn't gone through yet, etc. */
-	XFlush(data->display);
+    /* Need to flush here in case someone has turned grab off and it hasn't gone through yet, etc. */
+    XFlush(data->display);
 
     if (pipe(fds) == -1) {
         return X11_ShowMessageBoxImpl(messageboxdata, buttonid); /* oh well. */

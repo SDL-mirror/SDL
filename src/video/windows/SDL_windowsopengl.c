@@ -503,7 +503,7 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
     }
     if (!pixel_format && _this->gl_config.accelerated != 1) {
         iAttr[-1] = WGL_NO_ACCELERATION_ARB;
-	pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+    pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
     }
     if (!pixel_format) {
         pixel_format = WIN_GL_ChoosePixelFormat(hdc, &pfd);
@@ -530,13 +530,13 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
     }
 
     if (_this->gl_config.major_version < 3 &&
-	_this->gl_config.profile_mask == 0 &&
-	_this->gl_config.flags == 0) {
+    _this->gl_config.profile_mask == 0 &&
+    _this->gl_config.flags == 0) {
         /* Create legacy context */
         context = _this->gl_data->wglCreateContext(hdc);
-	if( share_context != 0 ) {
+    if( share_context != 0 ) {
             _this->gl_data->wglShareLists(share_context, context);
-	}
+    }
     } else {
         PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
         HGLRC temp_context = _this->gl_data->wglCreateContext(hdc);
@@ -558,27 +558,27 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
             SDL_SetError("GL 3.x is not supported");
             context = temp_context;
         } else {
-	    /* max 8 attributes plus terminator */
+        /* max 8 attributes plus terminator */
             int attribs[9] = {
                 WGL_CONTEXT_MAJOR_VERSION_ARB, _this->gl_config.major_version,
                 WGL_CONTEXT_MINOR_VERSION_ARB, _this->gl_config.minor_version,
                 0
             };
-	    int iattr = 4;
+        int iattr = 4;
 
-	    /* SDL profile bits match WGL profile bits */
-	    if( _this->gl_config.profile_mask != 0 ) {
-	        attribs[iattr++] = WGL_CONTEXT_PROFILE_MASK_ARB;
-		attribs[iattr++] = _this->gl_config.profile_mask;
-	    }
+        /* SDL profile bits match WGL profile bits */
+        if( _this->gl_config.profile_mask != 0 ) {
+            attribs[iattr++] = WGL_CONTEXT_PROFILE_MASK_ARB;
+        attribs[iattr++] = _this->gl_config.profile_mask;
+        }
 
-	    /* SDL flags match WGL flags */
-	    if( _this->gl_config.flags != 0 ) {
-	        attribs[iattr++] = WGL_CONTEXT_FLAGS_ARB;
-		attribs[iattr++] = _this->gl_config.flags;
-	    }
+        /* SDL flags match WGL flags */
+        if( _this->gl_config.flags != 0 ) {
+            attribs[iattr++] = WGL_CONTEXT_FLAGS_ARB;
+        attribs[iattr++] = _this->gl_config.flags;
+        }
 
-	    attribs[iattr++] = 0;
+        attribs[iattr++] = 0;
 
             /* Create the GL 3.x context */
             context = wglCreateContextAttribsARB(hdc, share_context, attribs);

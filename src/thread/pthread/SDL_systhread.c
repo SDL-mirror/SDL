@@ -34,7 +34,7 @@
 #include <sys/resource.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#endif // __LINUX__
+#endif /* __LINUX__ */
 
 #if defined(__LINUX__) || defined(__MACOSX__) || defined(__IPHONEOS__)
 #include <dlfcn.h>

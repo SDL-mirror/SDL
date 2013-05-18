@@ -119,7 +119,7 @@ static ShaderData shaders[NUM_SHADERS] = {
 "}"
     },
 };
-    
+
 static PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
 static PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
 static PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
@@ -195,7 +195,7 @@ static SDL_bool CompileShaderProgram(ShaderData *data)
         }
     }
     glUseProgramObjectARB(0);
- 
+
     return (glGetError() == GL_NO_ERROR);
 }
 
@@ -382,7 +382,7 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glLoadIdentity();                // Reset The View
 
     glTranslatef(-1.5f,0.0f,0.0f);        // Move Left 1.5 Units
-    
+
     // draw a triangle (in smooth coloring mode)
     glBegin(GL_POLYGON);                // start drawing a polygon
     glColor3f(1.0f,0.0f,0.0f);            // Set The Color To Red
@@ -390,8 +390,8 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glColor3f(0.0f,1.0f,0.0f);            // Set The Color To Green
     glVertex3f( 1.0f,-1.0f, 0.0f);        // Bottom Right
     glColor3f(0.0f,0.0f,1.0f);            // Set The Color To Blue
-    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left    
-    glEnd();                    // we're done with the polygon (smooth color interpolation)    
+    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left
+    glEnd();                    // we're done with the polygon (smooth color interpolation)
 
     glTranslatef(3.0f,0.0f,0.0f);         // Move Right 3 Units
 
@@ -416,7 +416,7 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glTexCoord2f(texcoord[MAXX], texcoord[MAXY]);
     glVertex3f( 1.0f,-1.0f, 0.0f);        // Bottom Right
     glTexCoord2f(texcoord[MINX], texcoord[MAXY]);
-    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left    
+    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left
     glEnd();                    // done with the polygon
 
     if (shaders_supported) {
@@ -428,8 +428,8 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     SDL_GL_SwapBuffers();
 }
 
-int main(int argc, char **argv) 
-{    
+int main(int argc, char **argv)
+{
     int done;
     SDL_Surface *surface;
     GLuint texture;

@@ -30,11 +30,11 @@
 /* WARNING ! those 2 files will be destroyed by this test program */
 
 #ifdef __IPHONEOS__
-#define FBASENAME1	"../Documents/sdldata1" /* this file will be created during tests */
+#define FBASENAME1  "../Documents/sdldata1" /* this file will be created during tests */
 #define FBASENAME2  "../Documents/sdldata2"     /* this file should not exist before starting test */
 #else
-#define FBASENAME1	"sdldata1"      /* this file will be created during tests */
-#define FBASENAME2	"sdldata2"      /* this file should not exist before starting test */
+#define FBASENAME1  "sdldata1"      /* this file will be created during tests */
+#define FBASENAME2  "sdldata2"      /* this file should not exist before starting test */
 #endif
 
 #ifndef NULL
@@ -61,7 +61,7 @@ rwops_error_quit(unsigned line, SDL_RWops * rwops)
     exit(1);                    /* quit with rwops error (test failed) */
 }
 
-#define RWOP_ERR_QUIT(x)	rwops_error_quit( __LINE__, (x) )
+#define RWOP_ERR_QUIT(x)    rwops_error_quit( __LINE__, (x) )
 
 
 
@@ -93,9 +93,9 @@ main(int argc, char *argv[])
     printf("test1 OK\n");
 
 /* test 2 : check that inexistant file is not successfully opened/created when required */
-/* modes : r, r+ implie that file MUST exist 
+/* modes : r, r+ implie that file MUST exist
    modes : a, a+, w, w+ checks that it succeeds (file may not exists)
-   
+
  */
     rwops = SDL_RWFromFile(FBASENAME2, "rb");   /* this file doesn't exist that call must fail */
     if (rwops)
@@ -125,8 +125,8 @@ main(int argc, char *argv[])
     unlink(FBASENAME2);
     printf("test2 OK\n");
 
-/* test 3 : creation, writing , reading, seeking, 
-	        test : w mode, r mode, w+ mode
+/* test 3 : creation, writing , reading, seeking,
+            test : w mode, r mode, w+ mode
  */
     rwops = SDL_RWFromFile(FBASENAME1, "wb");   /* write only */
     if (!rwops)

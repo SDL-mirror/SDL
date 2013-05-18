@@ -67,9 +67,10 @@ static __inline__ void ConvertNSRect(NSRect *r)
         [window setDelegate:self];
     }
 
-    // Haven't found a delegate / notification that triggers when the window is
-    // ordered out (is not visible any more). You can be ordered out without
-    // minimizing, so DidMiniaturize doesn't work. (e.g. -[NSWindow orderOut:])
+    /* Haven't found a delegate / notification that triggers when the window is
+     * ordered out (is not visible any more). You can be ordered out without
+     * minimizing, so DidMiniaturize doesn't work. (e.g. -[NSWindow orderOut:])
+     */
     [window addObserver:self
              forKeyPath:@"visible"
                 options:NSKeyValueObservingOptionNew
@@ -274,27 +275,29 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 }
 
-// We'll respond to key events by doing nothing so we don't beep.
-// We could handle key messages here, but we lose some in the NSApp dispatch,
-// where they get converted to action messages, etc.
+/* We'll respond to key events by doing nothing so we don't beep.
+ * We could handle key messages here, but we lose some in the NSApp dispatch,
+ * where they get converted to action messages, etc.
+ */
 - (void)flagsChanged:(NSEvent *)theEvent
 {
-    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+    /*Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);*/
 }
 - (void)keyDown:(NSEvent *)theEvent
 {
-    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+    /*Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);*/
 }
 - (void)keyUp:(NSEvent *)theEvent
 {
-    //Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);
+    /*Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);*/
 }
 
-// We'll respond to selectors by doing nothing so we don't beep.
-// The escape key gets converted to a "cancel" selector, etc.
+/* We'll respond to selectors by doing nothing so we don't beep.
+ * The escape key gets converted to a "cancel" selector, etc.
+ */
 - (void)doCommandBySelector:(SEL)aSelector
 {
-    //NSLog(@"doCommandBySelector: %@\n", NSStringFromSelector(aSelector));
+    /*NSLog(@"doCommandBySelector: %@\n", NSStringFromSelector(aSelector));*/
 }
 
 - (void)mouseDown:(NSEvent *)theEvent
@@ -472,7 +475,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             if (SDL_AddTouch(touchId, "") < 0) {
                 return;
             }
-        } 
+        }
 
         const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];
         float x = [touch normalizedPosition].x;
@@ -550,18 +553,18 @@ GetWindowStyle(SDL_Window * window)
 {
     unsigned int style;
 
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
         style = NSBorderlessWindowMask;
-	} else {
-		if (window->flags & SDL_WINDOW_BORDERLESS) {
-			style = NSBorderlessWindowMask;
-		} else {
-			style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
-		}
-		if (window->flags & SDL_WINDOW_RESIZABLE) {
-			style |= NSResizableWindowMask;
-		}
-	}
+    } else {
+        if (window->flags & SDL_WINDOW_BORDERLESS) {
+            style = NSBorderlessWindowMask;
+        } else {
+            style = (NSTitledWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask);
+        }
+        if (window->flags & SDL_WINDOW_RESIZABLE) {
+            style |= NSResizableWindowMask;
+        }
+    }
     return style;
 }
 
@@ -688,7 +691,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     }
     nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:NO screen:screen];
 
-    // Create a default view for this window
+    /* Create a default view for this window */
     rect = [nswindow contentRectForFrameRect:[nswindow frame]];
     NSView *contentView = [[SDLView alloc] initWithFrame:rect];
     [nswindow setContentView: contentView];
@@ -804,13 +807,13 @@ Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
-        
+
     NSSize minSize;
     minSize.width = window->min_w;
     minSize.height = window->min_h;
-        
+
     [windata->nswindow setContentMinSize:minSize];
-    
+
     [pool release];
 }
 
@@ -819,13 +822,13 @@ Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
-        
+
     NSSize maxSize;
     maxSize.width = window->max_w;
     maxSize.height = window->max_h;
-        
+
     [windata->nswindow setContentMaxSize:maxSize];
-    
+
     [pool release];
 }
 
@@ -937,7 +940,7 @@ Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
     if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
         [nswindow setStyleMask:GetWindowStyle(window)];
         if (bordered) {
-            Cocoa_SetWindowTitle(_this, window);  // this got blanked out.
+            Cocoa_SetWindowTitle(_this, window);  /* this got blanked out. */
         }
     }
     [pool release];
@@ -1090,17 +1093,17 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         cgpoint.y = window->y + y;
         CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
     }
-	
-    if ( window->flags & SDL_WINDOW_FULLSCREEN ) {
-		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
-		if (SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
-			/* OpenGL is rendering to the window, so make it visible! */
-			[data->nswindow setLevel:CGShieldingWindowLevel()];
-		} else {
-			[data->nswindow setLevel:kCGNormalWindowLevel];
-		}
-	}
+    if ( window->flags & SDL_WINDOW_FULLSCREEN ) {
+        SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+
+        if (SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
+            /* OpenGL is rendering to the window, so make it visible! */
+            [data->nswindow setLevel:CGShieldingWindowLevel()];
+        } else {
+            [data->nswindow setLevel:kCGNormalWindowLevel];
+        }
+    }
 }
 
 void

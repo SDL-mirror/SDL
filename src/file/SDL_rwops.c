@@ -47,7 +47,7 @@
 #define INVALID_SET_FILE_POINTER 0xFFFFFFFF
 #endif
 
-#define READAHEAD_BUFFER_SIZE	1024
+#define READAHEAD_BUFFER_SIZE   1024
 
 static int SDLCALL
 windows_file_open(SDL_RWops * context, const char *filename, const char *mode)
@@ -518,12 +518,12 @@ SDL_RWFromFile(const char *file, const char *mode)
 
 #elif HAVE_STDIO_H
     {
-    	#ifdef __APPLE__
-    	FILE *fp = SDL_OpenFPFromBundleOrFallback(file, mode);
+        #ifdef __APPLE__
+        FILE *fp = SDL_OpenFPFromBundleOrFallback(file, mode);
         #else
-    	FILE *fp = fopen(file, mode);
-    	#endif
-    	if (fp == NULL) {
+        FILE *fp = fopen(file, mode);
+        #endif
+        if (fp == NULL) {
             SDL_SetError("Couldn't open %s", file);
         } else {
             rwops = SDL_RWFromFP(fp, 1);

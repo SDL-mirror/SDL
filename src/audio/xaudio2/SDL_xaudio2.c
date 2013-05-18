@@ -41,7 +41,7 @@
 #include <XAudio2.h>
 
 /* Hidden "this" pointer for the audio functions */
-#define _THIS	SDL_AudioDevice *this
+#define _THIS   SDL_AudioDevice *this
 
 struct SDL_PrivateAudioData
 {
@@ -232,17 +232,17 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     IXAudio2SourceVoice *source = NULL;
     UINT32 devId = 0;  /* 0 == system default device. */
 
-	static IXAudio2VoiceCallbackVtbl callbacks_vtable = {
-	    VoiceCBOnVoiceProcessPassStart,
+    static IXAudio2VoiceCallbackVtbl callbacks_vtable = {
+        VoiceCBOnVoiceProcessPassStart,
         VoiceCBOnVoiceProcessPassEnd,
         VoiceCBOnStreamEnd,
         VoiceCBOnBufferStart,
         VoiceCBOnBufferEnd,
         VoiceCBOnLoopEnd,
         VoiceCBOnVoiceError
-	};
+    };
 
-	static IXAudio2VoiceCallback callbacks = { &callbacks_vtable };
+    static IXAudio2VoiceCallback callbacks = { &callbacks_vtable };
 
     if (iscapture) {
         return SDL_SetError("XAudio2: capture devices unsupported.");

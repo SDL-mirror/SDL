@@ -106,7 +106,7 @@ typedef struct
         Uint32 color;
         int blendMode;
     } current;
-    
+
     SDL_bool GL_EXT_framebuffer_object_supported;
     GL_FBOList *framebuffers;
 
@@ -119,7 +119,7 @@ typedef struct
     SDL_bool GL_ARB_multitexture_supported;
     PFNGLACTIVETEXTUREARBPROC glActiveTextureARB;
     GLint num_texture_units;
-    
+
     PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
     PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
     PFNGLFRAMEBUFFERTEXTURE2DEXTPROC glFramebufferTexture2DEXT;
@@ -147,7 +147,7 @@ typedef struct
     SDL_bool yuv;
     GLuint utexture;
     GLuint vtexture;
-    
+
     GL_FBOList *fbo;
 } GL_TextureData;
 
@@ -408,7 +408,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_YV12;
         renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
     }
-    
+
     if (SDL_GL_ExtensionSupported("GL_EXT_framebuffer_object")) {
         data->GL_EXT_framebuffer_object_supported = SDL_TRUE;
         data->glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSEXTPROC)
@@ -527,7 +527,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
     texture->driverdata = data;
-    
+
     if (texture->access == SDL_TEXTUREACCESS_TARGET) {
         data->fbo = GL_GetFBO(renderdata, texture->w, texture->h);
     } else {
@@ -702,7 +702,7 @@ GL_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
 
     data->locked_rect = *rect;
-    *pixels = 
+    *pixels =
         (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
                   rect->x * SDL_BYTESPERPIXEL(texture->format));
     *pitch = data->pitch;
@@ -717,7 +717,7 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     void *pixels;
 
     rect = &data->locked_rect;
-    pixels = 
+    pixels =
         (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
                   rect->x * SDL_BYTESPERPIXEL(texture->format));
     GL_UpdateTexture(renderer, texture, rect, pixels, data->pitch);
@@ -726,12 +726,12 @@ GL_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 GL_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;    
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata;
     GLenum status;
 
     GL_ActivateRenderer(renderer);
-    
+
     if (texture == NULL) {
         data->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
         return 0;
@@ -914,7 +914,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 
     GL_SetDrawingState(renderer);
 
-    if (count > 2 && 
+    if (count > 2 &&
         points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
         data->glBegin(GL_LINE_LOOP);
         /* GL_LINE_LOOP takes care of the final segment */
@@ -1125,11 +1125,11 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     maxv = (GLfloat) (srcrect->y + srcrect->h) / texture->h;
     maxv *= texturedata->texh;
 
-    // Translate to flip, rotate, translate to position
+    /* Translate to flip, rotate, translate to position */
     data->glPushMatrix();
-    data->glTranslatef((GLfloat)dstrect->x + centerx, (GLfloat)dstrect->y + centery, (GLfloat)0.0);    
+    data->glTranslatef((GLfloat)dstrect->x + centerx, (GLfloat)dstrect->y + centery, (GLfloat)0.0);
     data->glRotated(angle, (GLdouble)0.0, (GLdouble)0.0, (GLdouble)1.0);
-    
+
     data->glBegin(GL_TRIANGLE_STRIP);
     data->glTexCoord2f(minu, minv);
     data->glVertex2f(minx, miny);
@@ -1141,7 +1141,7 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     data->glVertex2f(maxx, maxy);
     data->glEnd();
     data->glPopMatrix();
-    
+
     data->glDisable(texturedata->type);
 
     GL_CheckError("", renderer);
@@ -1303,7 +1303,7 @@ static int GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
 
         data->glActiveTextureARB(GL_TEXTURE0_ARB);
     }
-    
+
     data->glDisable(texturedata->type);
 
     return 0;

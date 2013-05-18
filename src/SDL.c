@@ -138,7 +138,7 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     if ((flags & SDL_INIT_GAMECONTROLLER)) {
-        // Game controller implies Joystick.
+        /* Game controller implies Joystick. */
         flags |= SDL_INIT_JOYSTICK;
     }
 
@@ -221,19 +221,19 @@ SDL_QuitSubSystem(Uint32 flags)
     /* Shut down requested initialized subsystems */
 #if !SDL_JOYSTICK_DISABLED
     if ((flags & SDL_INIT_GAMECONTROLLER)) {
-        // Game controller implies Joystick.
+        /* Game controller implies Joystick. */
         flags |= SDL_INIT_JOYSTICK;
 
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_GAMECONTROLLER)) {
             SDL_GameControllerQuit();
-		}
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_GAMECONTROLLER);
     }
 
     if ((flags & SDL_INIT_JOYSTICK)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_JOYSTICK)) {
-			SDL_JoystickQuit();
-		}
+            SDL_JoystickQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_JOYSTICK);
     }
 #endif
@@ -241,8 +241,8 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_HAPTIC_DISABLED
     if ((flags & SDL_INIT_HAPTIC)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_HAPTIC)) {
-			SDL_HapticQuit();
-		}
+            SDL_HapticQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_HAPTIC);
     }
 #endif
@@ -250,8 +250,8 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_AUDIO_DISABLED
     if ((flags & SDL_INIT_AUDIO)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_AUDIO)) {
-			SDL_AudioQuit();
-		}
+            SDL_AudioQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_AUDIO);
     }
 #endif
@@ -259,8 +259,8 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_VIDEO_DISABLED
     if ((flags & SDL_INIT_VIDEO)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_VIDEO)) {
-			SDL_VideoQuit();
-		}
+            SDL_VideoQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_VIDEO);
     }
 #endif
@@ -268,8 +268,8 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_TIMERS_DISABLED
     if ((flags & SDL_INIT_TIMER)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_TIMER)) {
-			SDL_TimerQuit();
-		}
+            SDL_TimerQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_TIMER);
     }
 #endif

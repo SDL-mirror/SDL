@@ -55,8 +55,8 @@ static inline void Cocoa_ToggleMenuBar(const BOOL show)
 #endif
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED < 1050
-/* 
-    Add methods to get at private members of NSScreen. 
+/*
+    Add methods to get at private members of NSScreen.
     Since there is a bug in Apple's screen switching code
     that does not update this variable when switching
     to fullscreen, we'll set it manually (but only for the
@@ -226,7 +226,7 @@ Cocoa_GetDisplayName(CGDirectDisplayID displayID)
     NSDictionary *deviceInfo = (NSDictionary *)IODisplayCreateInfoDictionary(CGDisplayIOServicePort(displayID), kIODisplayOnlyPreferredName);
     NSDictionary *localizedNames = [deviceInfo objectForKey:[NSString stringWithUTF8String:kDisplayProductName]];
     const char* displayName = NULL;
-    
+
     if ([localizedNames count] > 0) {
         displayName = SDL_strdup([[localizedNames objectForKey:[[localizedNames allKeys] objectAtIndex:0]] UTF8String]);
     }
@@ -304,7 +304,7 @@ Cocoa_InitModes(_THIS)
             displaydata->display = displays[i];
 
             SDL_zero(display);
-            // this returns a stddup'ed string
+            /* this returns a stddup'ed string */
             display.name = (char *)Cocoa_GetDisplayName(displays[i]);
             if (!GetDisplayMode (_this, moderef, &mode)) {
                 Cocoa_ReleaseDisplayMode(_this, moderef);

@@ -21,25 +21,25 @@
 
 /**
  * \file SDL_atomic.h
- * 
+ *
  * Atomic operations.
- * 
+ *
  * IMPORTANT:
  * If you are not an expert in concurrent lockless programming, you should
  * only be using the atomic lock and reference counting functions in this
  * file.  In all other cases you should be protecting your data structures
  * with full mutexes.
- * 
+ *
  * The list of "safe" functions to use are:
  *  SDL_AtomicLock()
  *  SDL_AtomicUnlock()
  *  SDL_AtomicIncRef()
  *  SDL_AtomicDecRef()
- * 
+ *
  * Seriously, here be dragons!
  * ^^^^^^^^^^^^^^^^^^^^^^^^^^^
  *
- * You can find out a little more about lockless programming and the 
+ * You can find out a little more about lockless programming and the
  * subtle issues that can arise here:
  * http://msdn.microsoft.com/en-us/library/ee418650%28v=vs.85%29.aspx
  *
@@ -72,14 +72,12 @@
 
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
  * \name SDL AtomicLock
- * 
+ *
  * The atomic locks are efficient spinlocks using CPU instructions,
  * but are vulnerable to starvation and can spin forever if a thread
  * holding a lock has been terminated.  For this reason you should
@@ -98,7 +96,7 @@ typedef int SDL_SpinLock;
 
 /**
  * \brief Try to lock a spin lock by setting it to a non-zero value.
- * 
+ *
  * \param lock Points to the lock.
  *
  * \return SDL_TRUE if the lock succeeded, SDL_FALSE if the lock is already held.
@@ -107,7 +105,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_AtomicTryLock(SDL_SpinLock *lock);
 
 /**
  * \brief Lock a spin lock by setting it to a non-zero value.
- * 
+ *
  * \param lock Points to the lock.
  */
 extern DECLSPEC void SDLCALL SDL_AtomicLock(SDL_SpinLock *lock);
@@ -304,9 +302,7 @@ SDL_FORCE_INLINE void* SDL_AtomicGetPtr(void* *a)
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 
 #include "close_code.h"

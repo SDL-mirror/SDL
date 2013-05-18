@@ -1,7 +1,7 @@
 /*
- *	keyboard.c
- *	written by Holmes Futrell
- *	use however you want
+ *  keyboard.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #import "SDL.h"
@@ -97,14 +97,14 @@ fontMapping map[TABLE_SIZE] = {
 };
 
 /*
-	This function maps an SDL_KeySym to an index in the bitmap font.
-	It does so by scanning through the font mapping table one entry
-	at a time.
- 
-	If a match is found (scancode and allowed modifiers), the proper
-	index is returned.
- 
-	If there is no entry for the key, -1 is returned
+    This function maps an SDL_KeySym to an index in the bitmap font.
+    It does so by scanning through the font mapping table one entry
+    at a time.
+
+    If a match is found (scancode and allowed modifiers), the proper
+    index is returned.
+
+    If there is no entry for the key, -1 is returned
 */
 int
 keyToIndex(SDL_Keysym key)
@@ -125,8 +125,8 @@ keyToIndex(SDL_Keysym key)
     return index;
 }
 
-/* 
-	This function returns and x,y position for a given character number.
+/*
+    This function returns and x,y position for a given character number.
     It is used for positioning each character of text
 */
 void

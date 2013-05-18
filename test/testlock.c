@@ -10,7 +10,7 @@
   freely.
 */
 
-/* Test the thread and mutex locking functions 
+/* Test the thread and mutex locking functions
    Also exercises the system's signal/thread interaction
 */
 

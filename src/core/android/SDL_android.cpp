@@ -121,7 +121,7 @@ extern "C" void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
                                 "createGLContext","(II[I)Z");
     midFlipBuffers = mEnv->GetStaticMethodID(mActivityClass,
                                 "flipBuffers","()V");
-    midAudioInit = mEnv->GetStaticMethodID(mActivityClass, 
+    midAudioInit = mEnv->GetStaticMethodID(mActivityClass,
                                 "audioInit", "(IZZI)V");
     midAudioWriteShortBuffer = mEnv->GetStaticMethodID(mActivityClass,
                                 "audioWriteShortBuffer", "([S)V");
@@ -184,14 +184,14 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
 // Low memory
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeLowMemory(
                                     JNIEnv* env, jclass cls)
-{    
+{
     SDL_SendAppEvent(SDL_APP_LOWMEMORY);
 }
 
 // Quit
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit(
                                     JNIEnv* env, jclass cls)
-{    
+{
     // Inject a SDL_QUIT event
     SDL_SendQuit();
     SDL_SendAppEvent(SDL_APP_TERMINATING);
@@ -348,7 +348,7 @@ extern "C" SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion
 extern "C" void Android_JNI_SwapWindow()
 {
     JNIEnv *mEnv = Android_JNI_GetEnv();
-    mEnv->CallStaticVoidMethod(mActivityClass, midFlipBuffers); 
+    mEnv->CallStaticVoidMethod(mActivityClass, midFlipBuffers);
 }
 
 extern "C" void Android_JNI_SetActivityTitle(const char *title)
@@ -453,7 +453,7 @@ extern "C" int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int chan
 
     /* Allocating the audio buffer from the Java side and passing it as the return value for audioInit no longer works on
      * Android >= 4.2 due to a "stale global reference" error. So now we allocate this buffer directly from this side. */
-    
+
     if (is16Bit) {
         jshortArray audioBufferLocal = env->NewShortArray(desiredBufferFrames * (audioBufferStereo ? 2 : 1));
         if (audioBufferLocal) {
@@ -513,7 +513,7 @@ extern "C" void Android_JNI_CloseAudioDevice()
 {
     JNIEnv *env = Android_JNI_GetEnv();
 
-    env->CallStaticVoidMethod(mActivityClass, midAudioQuit); 
+    env->CallStaticVoidMethod(mActivityClass, midAudioQuit);
 
     if (audioBuffer) {
         env->DeleteGlobalRef(audioBuffer);
@@ -592,7 +592,7 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
     mid = mEnv->GetStaticMethodID(mActivityClass,
             "getContext","()Landroid/content/Context;");
     context = mEnv->CallStaticObjectMethod(mActivityClass, mid);
-    
+
 
     // assetManager = context.getAssets();
     mid = mEnv->GetMethodID(mEnv->GetObjectClass(context),
@@ -779,7 +779,7 @@ extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
             ctx->hidden.androidio.position += result;
         }
         return bytesRead / size;
-    }    
+    }
 }
 
 extern "C" size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer,
@@ -920,7 +920,7 @@ extern "C" Sint64 Android_JNI_FileSeek(SDL_RWops* ctx, Sint64 offset, int whence
     }
 
     return ctx->hidden.androidio.position;
-    
+
 }
 
 extern "C" int Android_JNI_FileClose(SDL_RWops* ctx)
@@ -1151,7 +1151,7 @@ extern "C" void *SDL_AndroidGetJNIEnv()
 extern "C" void *SDL_AndroidGetActivity()
 {
     /* See SDL_system.h for caveats on using this function. */
-    
+
     jmethodID mid;
 
     JNIEnv *env = Android_JNI_GetEnv();

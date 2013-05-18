@@ -18,7 +18,7 @@
 #define WINDOW_W    640
 #define WINDOW_H    480
 #define NUM_SPRITES 100
-#define MAX_SPEED 	1
+#define MAX_SPEED   1
 
 static NativeWindowFactory *factories[] = {
 #ifdef TEST_NATIVE_WINDOWS

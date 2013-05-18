@@ -349,7 +349,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     if (window->flags & SDL_WINDOW_OPENGL) {
         XVisualInfo *vinfo;
 
-#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2        
+#if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
         if (_this->gl_config.use_egl == 1) {
             vinfo = X11_GLES_GetVisual(_this, display, screen);
         } else
@@ -532,7 +532,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
                     PropModeReplace,
                     (unsigned char *)&_NET_WM_WINDOW_TYPE_NORMAL, 1);
 
-    
+
     {
         Atom protocols[] = {
             data->WM_DELETE_WINDOW, /* Allow window to be deleted by the WM */
@@ -565,7 +565,7 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     XdndAware = XInternAtom(display, "XdndAware", False);
     XChangeProperty(display, w, XdndAware, XA_ATOM, 32,
                  PropModeReplace,
-                 (unsigned char*)&xdnd_version, 1); 
+                 (unsigned char*)&xdnd_version, 1);
 
     XFlush(display);
 
@@ -836,7 +836,7 @@ X11_ShowWindow(_THIS, SDL_Window * window)
     if (!X11_IsWindowMapped(_this, window)) {
         XMapRaised(display, data->xwindow);
         /* Blocking wait for "MapNotify" event.
-         * We use XIfEvent because XWindowEvent takes a mask rather than a type, 
+         * We use XIfEvent because XWindowEvent takes a mask rather than a type,
          * and XCheckTypedWindowEvent doesn't block */
         XIfEvent(display, &event, &isMapNotify, (XPointer)&data->xwindow);
         XFlush(display);
@@ -853,7 +853,7 @@ X11_HideWindow(_THIS, SDL_Window * window)
     if (X11_IsWindowMapped(_this, window)) {
         XUnmapWindow(display, data->xwindow);
         /* Blocking wait for "UnmapNotify" event */
-        XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);    
+        XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);
         XFlush(display);
     }
 }
@@ -922,7 +922,7 @@ X11_MinimizeWindow(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
- 
+
     XIconifyWindow(display, data->xwindow, displaydata->screen);
     XFlush(display);
 }
@@ -934,7 +934,7 @@ SetWindowActive(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata =
         (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
-	Atom _NET_ACTIVE_WINDOW = data->videodata->_NET_ACTIVE_WINDOW;
+    Atom _NET_ACTIVE_WINDOW = data->videodata->_NET_ACTIVE_WINDOW;
 
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
@@ -945,13 +945,13 @@ SetWindowActive(_THIS, SDL_Window * window)
         e.xclient.format = 32;
         e.xclient.window = data->xwindow;
         e.xclient.data.l[0] = 1;  /* source indication. 1 = application */
-		e.xclient.data.l[1] = CurrentTime;
-		e.xclient.data.l[2] = 0;
+        e.xclient.data.l[1] = CurrentTime;
+        e.xclient.data.l[2] = 0;
 
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
 
-    	XFlush(display);
+        XFlush(display);
     }
 }
 
@@ -959,7 +959,7 @@ void
 X11_RestoreWindow(_THIS, SDL_Window * window)
 {
     SetWindowMaximized(_this, window, SDL_FALSE);
-	SetWindowActive(_this, window);
+    SetWindowActive(_this, window);
     X11_ShowWindow(_this, window);
 }
 

@@ -11,7 +11,7 @@
 */
 
 /* Simple program:  Loop, watching keystrokes
-   Note that you need to call SDL_PollEvent() or SDL_WaitEvent() to 
+   Note that you need to call SDL_PollEvent() or SDL_WaitEvent() to
    pump the event loop and catch keystrokes.
 */
 

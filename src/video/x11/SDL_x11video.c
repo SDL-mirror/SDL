@@ -32,7 +32,7 @@
 #include "SDL_x11video.h"
 #include "SDL_x11framebuffer.h"
 #include "SDL_x11shape.h"
-#include "SDL_x11touch.h" 
+#include "SDL_x11touch.h"
 #include "SDL_x11xinput2.h"
 
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2

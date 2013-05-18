@@ -336,7 +336,7 @@ SDL_AddTimer(Uint32 interval, SDL_TimerCallback callback, void *param)
     timer->interval = interval;
     timer->scheduled = SDL_GetTicks() + interval;
     timer->canceled = SDL_FALSE;
- 
+
     entry = (SDL_TimerMap *)SDL_malloc(sizeof(*entry));
     if (!entry) {
         SDL_free(timer);

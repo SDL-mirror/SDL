@@ -18,7 +18,7 @@
 
 #include "SDL_test_common.h"
 
-#define NUM_OBJECTS	100
+#define NUM_OBJECTS 100
 
 static SDLTest_CommonState *state;
 static int num_objects;

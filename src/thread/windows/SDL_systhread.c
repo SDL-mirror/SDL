@@ -36,7 +36,7 @@
 /* Cygwin gcc-3 ... MingW64 (even with a i386 host) does this like MSVC. */
 #if (defined(__MINGW32__) && (__GNUC__ < 4))
 typedef unsigned long (__cdecl *pfnSDL_CurrentBeginThread) (void *, unsigned,
-        unsigned (__stdcall *func)(void *), void *arg, 
+        unsigned (__stdcall *func)(void *), void *arg,
         unsigned, unsigned *threadID);
 typedef void (__cdecl *pfnSDL_CurrentEndThread)(unsigned code);
 
@@ -118,9 +118,9 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     if (!pThreadParms) {
         return SDL_OutOfMemory();
     }
-    // Save the function which we will have to call to clear the RTL of calling app!
+    /* Save the function which we will have to call to clear the RTL of calling app! */
     pThreadParms->pfnCurrentEndThread = pfnEndThread;
-    // Also save the real parameters we have to pass to thread function
+    /* Also save the real parameters we have to pass to thread function */
     pThreadParms->args = args;
 
     if (pfnBeginThread) {

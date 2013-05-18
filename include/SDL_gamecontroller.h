@@ -35,9 +35,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -55,10 +53,10 @@ typedef struct _SDL_GameController SDL_GameController;
 
 typedef enum
 {
-	SDL_CONTROLLER_BINDTYPE_NONE = 0,
-	SDL_CONTROLLER_BINDTYPE_BUTTON,
-	SDL_CONTROLLER_BINDTYPE_AXIS,
-	SDL_CONTROLLER_BINDTYPE_HAT
+    SDL_CONTROLLER_BINDTYPE_NONE = 0,
+    SDL_CONTROLLER_BINDTYPE_BUTTON,
+    SDL_CONTROLLER_BINDTYPE_AXIS,
+    SDL_CONTROLLER_BINDTYPE_HAT
 } SDL_GameControllerBindType;
 
 /**
@@ -66,43 +64,43 @@ typedef enum
  */
 typedef struct SDL_GameControllerButtonBind
 {
-	SDL_GameControllerBindType bindType;
-	union
-	{
-		int button;
-		int axis;
-		struct {
+    SDL_GameControllerBindType bindType;
+    union
+    {
+        int button;
+        int axis;
+        struct {
             int hat;
             int hat_mask;
         } hat;
-	} value;
+    } value;
 
 } SDL_GameControllerButtonBind;
 
 
 /**
  *  To count the number of game controllers in the system for the following:
- *	int nJoysticks = SDL_NumJoysticks();
- *	int nGameControllers = 0;
- *	for ( int i = 0; i < nJoysticks; i++ ) {
- *		if ( SDL_IsGameController(i) ) {
- *			nGameControllers++;
- *		}
+ *  int nJoysticks = SDL_NumJoysticks();
+ *  int nGameControllers = 0;
+ *  for ( int i = 0; i < nJoysticks; i++ ) {
+ *      if ( SDL_IsGameController(i) ) {
+ *          nGameControllers++;
+ *      }
  *  }
  *
  *  Using the SDL_HINT_GAMECONTROLLERCONFIG hint or the SDL_GameControllerAddMapping you can add support for controllers SDL is unaware of or cause an existing controller to have a different binding. The format is:
- *	guid,name,mappings
+ *  guid,name,mappings
  *
  *  Where GUID is the string value from SDL_JoystickGetGUIDString(), name is the human readable string for the device and mappings are controller mappings to joystick ones.
  *  Under Windows there is a reserved GUID of "xinput" that covers any XInput devices.
- *	The mapping format for joystick is:
- *		bX - a joystick button, index X
- *		hX.Y - hat X with value Y
- *		aX - axis X of the joystick
+ *  The mapping format for joystick is:
+ *      bX - a joystick button, index X
+ *      hX.Y - hat X with value Y
+ *      aX - axis X of the joystick
  *  Buttons can be used as a controller axis and vice versa.
  *
  *  This string shows an example of a valid mapping for a controller
- * 	"341a3608000000000000504944564944,Afterglow PS3 Controller,a:b1,b:b2,y:b3,x:b0,start:b9,guide:b12,back:b8,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7",
+ *  "341a3608000000000000504944564944,Afterglow PS3 Controller,a:b1,b:b2,y:b3,x:b0,start:b9,guide:b12,back:b8,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7",
  *
  */
 
@@ -179,7 +177,7 @@ extern DECLSPEC int SDLCALL SDL_GameControllerEventState(int state);
 
 /**
  *  Update the current state of the open game controllers.
- *  
+ *
  *  This is called automatically by the event loop if any game controller
  *  events are enabled.
  */
@@ -191,14 +189,14 @@ extern DECLSPEC void SDLCALL SDL_GameControllerUpdate(void);
  */
 typedef enum
 {
-	SDL_CONTROLLER_AXIS_INVALID = -1,
-	SDL_CONTROLLER_AXIS_LEFTX,
-	SDL_CONTROLLER_AXIS_LEFTY,
-	SDL_CONTROLLER_AXIS_RIGHTX,
-	SDL_CONTROLLER_AXIS_RIGHTY,
-	SDL_CONTROLLER_AXIS_TRIGGERLEFT,
-	SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
-	SDL_CONTROLLER_AXIS_MAX
+    SDL_CONTROLLER_AXIS_INVALID = -1,
+    SDL_CONTROLLER_AXIS_LEFTX,
+    SDL_CONTROLLER_AXIS_LEFTY,
+    SDL_CONTROLLER_AXIS_RIGHTX,
+    SDL_CONTROLLER_AXIS_RIGHTY,
+    SDL_CONTROLLER_AXIS_TRIGGERLEFT,
+    SDL_CONTROLLER_AXIS_TRIGGERRIGHT,
+    SDL_CONTROLLER_AXIS_MAX
 } SDL_GameControllerAxis;
 
 /**
@@ -234,23 +232,23 @@ SDL_GameControllerGetAxis(SDL_GameController *gamecontroller,
  */
 typedef enum
 {
-	SDL_CONTROLLER_BUTTON_INVALID = -1,
-	SDL_CONTROLLER_BUTTON_A,
-	SDL_CONTROLLER_BUTTON_B,
-	SDL_CONTROLLER_BUTTON_X,
-	SDL_CONTROLLER_BUTTON_Y,
-	SDL_CONTROLLER_BUTTON_BACK,
-	SDL_CONTROLLER_BUTTON_GUIDE,
-	SDL_CONTROLLER_BUTTON_START,
-	SDL_CONTROLLER_BUTTON_LEFTSTICK,
-	SDL_CONTROLLER_BUTTON_RIGHTSTICK,
-	SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
-	SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
-	SDL_CONTROLLER_BUTTON_DPAD_UP,
-	SDL_CONTROLLER_BUTTON_DPAD_DOWN,
-	SDL_CONTROLLER_BUTTON_DPAD_LEFT,
-	SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
-	SDL_CONTROLLER_BUTTON_MAX
+    SDL_CONTROLLER_BUTTON_INVALID = -1,
+    SDL_CONTROLLER_BUTTON_A,
+    SDL_CONTROLLER_BUTTON_B,
+    SDL_CONTROLLER_BUTTON_X,
+    SDL_CONTROLLER_BUTTON_Y,
+    SDL_CONTROLLER_BUTTON_BACK,
+    SDL_CONTROLLER_BUTTON_GUIDE,
+    SDL_CONTROLLER_BUTTON_START,
+    SDL_CONTROLLER_BUTTON_LEFTSTICK,
+    SDL_CONTROLLER_BUTTON_RIGHTSTICK,
+    SDL_CONTROLLER_BUTTON_LEFTSHOULDER,
+    SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,
+    SDL_CONTROLLER_BUTTON_DPAD_UP,
+    SDL_CONTROLLER_BUTTON_DPAD_DOWN,
+    SDL_CONTROLLER_BUTTON_DPAD_LEFT,
+    SDL_CONTROLLER_BUTTON_DPAD_RIGHT,
+    SDL_CONTROLLER_BUTTON_MAX
 } SDL_GameControllerButton;
 
 /**
@@ -287,9 +285,7 @@ extern DECLSPEC void SDLCALL SDL_GameControllerClose(SDL_GameController *gamecon
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

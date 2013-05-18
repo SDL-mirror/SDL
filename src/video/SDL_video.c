@@ -416,7 +416,7 @@ SDL_VideoInit(const char *driver_name)
     if (_this != NULL) {
         SDL_VideoQuit();
     }
-    
+
 #if !SDL_TIMERS_DISABLED
     SDL_InitTicks();
 #endif
@@ -1013,12 +1013,12 @@ int
 SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
 {
     SDL_DisplayMode fullscreen_mode;
-	SDL_VideoDisplay *display;
+    SDL_VideoDisplay *display;
 
     if (!mode) {
       return SDL_InvalidParamError("mode");
     }
-    
+
     CHECK_WINDOW_MAGIC(window, -1);
 
     fullscreen_mode = window->fullscreen_mode;
@@ -1028,15 +1028,15 @@ SDL_GetWindowDisplayMode(SDL_Window * window, SDL_DisplayMode * mode)
     if (!fullscreen_mode.h) {
         fullscreen_mode.h = window->h;
     }
-	
-	display = SDL_GetDisplayForWindow(window);
 
-	/* if in desktop size mode, just return the size of the desktop */
-	if ( ( window->flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP ) 
-	{
-		fullscreen_mode = display->desktop_mode;
-	}
-	else if (!SDL_GetClosestDisplayModeForDisplay(SDL_GetDisplayForWindow(window),
+    display = SDL_GetDisplayForWindow(window);
+
+    /* if in desktop size mode, just return the size of the desktop */
+    if ( ( window->flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) == SDL_WINDOW_FULLSCREEN_DESKTOP )
+    {
+        fullscreen_mode = display->desktop_mode;
+    }
+    else if (!SDL_GetClosestDisplayModeForDisplay(SDL_GetDisplayForWindow(window),
                                              &fullscreen_mode,
                                              &fullscreen_mode)) {
         return SDL_SetError("Couldn't find display mode match");
@@ -1110,13 +1110,13 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
                     resized = SDL_FALSE;
                 }
 
-				/* only do the mode change if we want exclusive fullscreen */
-				if ( ( window->flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) != SDL_WINDOW_FULLSCREEN_DESKTOP ) 
-					SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
-				else
-					SDL_SetDisplayModeForDisplay(display, NULL);
+                /* only do the mode change if we want exclusive fullscreen */
+                if ( ( window->flags & SDL_WINDOW_FULLSCREEN_DESKTOP ) != SDL_WINDOW_FULLSCREEN_DESKTOP )
+                    SDL_SetDisplayModeForDisplay(display, &fullscreen_mode);
+                else
+                    SDL_SetDisplayModeForDisplay(display, NULL);
 
-				
+
                 if (_this->SetWindowFullscreen) {
                     _this->SetWindowFullscreen(_this, other, display, SDL_TRUE);
                 }
@@ -1251,7 +1251,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
         SDL_SetWindowTitle(window, title);
     }
     SDL_FinishWindowCreation(window, flags);
-    
+
     /* If the window was created fullscreen, make sure the mode code matches */
     SDL_UpdateFullscreenMode(window, FULLSCREEN_VISIBLE(window));
 
@@ -1430,7 +1430,7 @@ SDL_SetWindowData(SDL_Window * window, const char *name, void *userdata)
     SDL_WindowUserData *prev, *data;
 
     CHECK_WINDOW_MAGIC(window, NULL);
-    
+
     /* Input validation */
     if (name == NULL || SDL_strlen(name) == 0) {
       SDL_InvalidParamError("name");
@@ -1602,7 +1602,7 @@ SDL_GetWindowSize(SDL_Window * window, int *w, int *h)
     }
     if (h) {
         *h = window->h;
-    }                                
+    }
 }
 
 void
@@ -1617,7 +1617,7 @@ SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
         SDL_InvalidParamError("min_h");
         return;
     }
-    
+
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->min_w = min_w;
         window->min_h = min_h;
@@ -1653,7 +1653,7 @@ SDL_SetWindowMaximumSize(SDL_Window * window, int max_w, int max_h)
         SDL_InvalidParamError("max_h");
         return;
     }
-    
+
     if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
         window->max_w = max_w;
         window->max_h = max_h;
@@ -1772,14 +1772,14 @@ SDL_SetWindowFullscreen(SDL_Window * window, Uint32 flags)
 {
     CHECK_WINDOW_MAGIC(window, -1);
 
-	flags &= FULLSCREEN_MASK;
-	
+    flags &= FULLSCREEN_MASK;
+
     if ( flags == (window->flags & FULLSCREEN_MASK) ) {
         return 0;
     }
-	
-	/* clear the previous flags and OR in the new ones */
-	window->flags &= ~FULLSCREEN_MASK;
+
+    /* clear the previous flags and OR in the new ones */
+    window->flags &= ~FULLSCREEN_MASK;
     window->flags |= flags;
 
     SDL_UpdateFullscreenMode(window, FULLSCREEN_VISIBLE(window));
@@ -2065,15 +2065,15 @@ SDL_OnWindowFocusGained(SDL_Window * window)
 
 static SDL_bool ShouldMinimizeOnFocusLoss()
 {
-	const char *hint = SDL_GetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS);
-	if (hint) {
-		if (*hint == '0') {
-			return SDL_FALSE;
-		} else {
-			return SDL_TRUE;
-		}
-	}
-	return SDL_TRUE;
+    const char *hint = SDL_GetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS);
+    if (hint) {
+        if (*hint == '0') {
+            return SDL_FALSE;
+        } else {
+            return SDL_TRUE;
+        }
+    }
+    return SDL_TRUE;
 }
 
 void
@@ -2086,8 +2086,8 @@ SDL_OnWindowFocusLost(SDL_Window * window)
     SDL_UpdateWindowGrab(window);
 
     /* If we're fullscreen on a single-head system and lose focus, minimize */
-	 if ((window->flags & SDL_WINDOW_FULLSCREEN) && ShouldMinimizeOnFocusLoss() ) {
-			SDL_MinimizeWindow(window);
+     if ((window->flags & SDL_WINDOW_FULLSCREEN) && ShouldMinimizeOnFocusLoss() ) {
+            SDL_MinimizeWindow(window);
     }
 }
 
@@ -2472,27 +2472,27 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
         break;
     case SDL_GL_CONTEXT_FLAGS:
         if( value & ~(SDL_GL_CONTEXT_DEBUG_FLAG |
-		      SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG |
-		      SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG |
-		      SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) ) {
-	    retval = SDL_SetError("Unknown OpenGL context flag %d", value);
-	    break;
-	}
+              SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG |
+              SDL_GL_CONTEXT_ROBUST_ACCESS_FLAG |
+              SDL_GL_CONTEXT_RESET_ISOLATION_FLAG) ) {
+        retval = SDL_SetError("Unknown OpenGL context flag %d", value);
+        break;
+    }
         _this->gl_config.flags = value;
         break;
     case SDL_GL_CONTEXT_PROFILE_MASK:
         if( value != 0 &&
-	    value != SDL_GL_CONTEXT_PROFILE_CORE &&
-	    value != SDL_GL_CONTEXT_PROFILE_COMPATIBILITY &&
-	    value != SDL_GL_CONTEXT_PROFILE_ES ) {
-	    retval = SDL_SetError("Unknown OpenGL context profile %d", value);
-	    break;
-	}
+        value != SDL_GL_CONTEXT_PROFILE_CORE &&
+        value != SDL_GL_CONTEXT_PROFILE_COMPATIBILITY &&
+        value != SDL_GL_CONTEXT_PROFILE_ES ) {
+        retval = SDL_SetError("Unknown OpenGL context profile %d", value);
+        break;
+    }
         _this->gl_config.profile_mask = value;
         break;
     case SDL_GL_SHARE_WITH_CURRENT_CONTEXT:
         _this->gl_config.share_with_current_context = value;
-	break;
+    break;
     default:
         retval = SDL_SetError("Unknown OpenGL attribute");
         break;
@@ -2779,7 +2779,7 @@ SDL_GL_DeleteContext(SDL_GLContext context)
     _this->GL_DeleteContext(_this, context);
 }
 
-#if 0                           // FIXME
+#if 0                           /* FIXME */
 /*
  * Utility function used by SDL_WM_SetIcon(); flags & 1 for color key, flags
  * & 2 for alpha channel.
@@ -2790,7 +2790,7 @@ CreateMaskFromColorKeyOrAlpha(SDL_Surface * icon, Uint8 * mask, int flags)
     int x, y;
     Uint32 colorkey;
 #define SET_MASKBIT(icon, x, y, mask) \
-	mask[(y*((icon->w+7)/8))+(x/8)] &= ~(0x01<<(7-(x%8)))
+    mask[(y*((icon->w+7)/8))+(x/8)] &= ~(0x01<<(7-(x%8)))
 
     colorkey = icon->format->colorkey;
     switch (icon->format->BytesPerPixel) {
@@ -2985,18 +2985,18 @@ int
 SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int dummybutton;
-	int retval = -1;
-	SDL_bool relative_mode = SDL_GetRelativeMouseMode();
-	int show_cursor_prev = SDL_ShowCursor( 1 );
+    int retval = -1;
+    SDL_bool relative_mode = SDL_GetRelativeMouseMode();
+    int show_cursor_prev = SDL_ShowCursor( 1 );
 
-	SDL_SetRelativeMouseMode( SDL_FALSE );
+    SDL_SetRelativeMouseMode( SDL_FALSE );
 
     if (!buttonid) {
         buttonid = &dummybutton;
     }
     if (_this && _this->ShowMessageBox) {
         if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
-			retval = 0;
+            retval = 0;
         }
     }
 
@@ -3022,12 +3022,12 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     }
 #endif
 
-	SDL_ShowCursor( show_cursor_prev );
-	SDL_SetRelativeMouseMode( relative_mode );
+    SDL_ShowCursor( show_cursor_prev );
+    SDL_SetRelativeMouseMode( relative_mode );
 
-	if(retval == -1) {
-		SDL_SetError("No message system available");
-	}
+    if(retval == -1) {
+        SDL_SetError("No message system available");
+    }
     return retval;
 }
 
@@ -3056,15 +3056,15 @@ SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, S
 SDL_bool
 SDL_ShouldAllowTopmost(void)
 {
-	const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
-	if (hint) {
-		if (*hint == '0') {
-			return SDL_FALSE;
-		} else {
-			return SDL_TRUE;
-		}
-	}
-	return SDL_TRUE;
+    const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
+    if (hint) {
+        if (*hint == '0') {
+            return SDL_FALSE;
+        } else {
+            return SDL_TRUE;
+        }
+    }
+    return SDL_TRUE;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

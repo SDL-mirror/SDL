@@ -85,7 +85,7 @@ SDL_IntersectRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         SDL_InvalidParamError("B");
         return SDL_FALSE;
     }
-    
+
     if (!result) {
         SDL_InvalidParamError("result");
         return SDL_FALSE;
@@ -97,7 +97,7 @@ SDL_IntersectRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         result->h = 0;
         return SDL_FALSE;
     }
-    
+
     /* Horizontal intersection */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -139,7 +139,7 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
         SDL_InvalidParamError("B");
         return;
     }
-    
+
     if (!result) {
         SDL_InvalidParamError("result");
         return;
@@ -155,14 +155,14 @@ SDL_UnionRect(const SDL_Rect * A, const SDL_Rect * B, SDL_Rect * result)
        *result = *B;
        return;
       }
-    } else {      
+    } else {
       if (SDL_RectEmpty(B)) {
        /* A not empty, B empty */
        *result = *A;
        return;
-      } 
+      }
     }
-    
+
     /* Horizontal union */
     Amin = A->x;
     Amax = Amin + A->w;
@@ -219,7 +219,7 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
         if (SDL_RectEmpty(clip)) {
             return SDL_FALSE;
         }
-        
+
         for (i = 0; i < count; ++i) {
             x = points[i].x;
             y = points[i].y;
@@ -259,7 +259,7 @@ SDL_EnclosePoints(const SDL_Point * points, int count, const SDL_Rect * clip,
         if (result == NULL) {
             return SDL_TRUE;
         }
-        
+
         /* No clipping, always add the first point */
         minx = maxx = points[0].x;
         miny = maxy = points[0].y;
@@ -330,22 +330,22 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
         SDL_InvalidParamError("rect");
         return SDL_FALSE;
     }
-    
+
     if (!X1) {
         SDL_InvalidParamError("X1");
         return SDL_FALSE;
     }
-    
+
     if (!Y1) {
         SDL_InvalidParamError("Y1");
         return SDL_FALSE;
     }
-    
+
     if (!X2) {
         SDL_InvalidParamError("X2");
         return SDL_FALSE;
     }
-    
+
     if (!Y2) {
         SDL_InvalidParamError("Y2");
         return SDL_FALSE;
@@ -355,7 +355,7 @@ SDL_IntersectRectAndLine(const SDL_Rect * rect, int *X1, int *Y1, int *X2,
     if (SDL_RectEmpty(rect)) {
         return SDL_FALSE;
     }
-    
+
     x1 = *X1;
     y1 = *Y1;
     x2 = *X2;

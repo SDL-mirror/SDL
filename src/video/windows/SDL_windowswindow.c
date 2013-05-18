@@ -201,7 +201,7 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     DWORD style = STYLE_BASIC;
     int x, y;
     int w, h;
-    
+
     style |= GetWindowStyle(window);
 
     /* Figure out what the window area will be */
@@ -352,7 +352,7 @@ WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
 
     /* Figure out what the window area will be */
     if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
-		top = HWND_TOPMOST;
+        top = HWND_TOPMOST;
     } else {
         top = HWND_NOTOPMOST;
     }
@@ -403,11 +403,11 @@ WIN_RaiseWindow(_THIS, SDL_Window * window)
     HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
     HWND top;
 
-	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
-		top = HWND_TOPMOST;
-	} else {
-		top = HWND_NOTOPMOST;
-	}
+    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+        top = HWND_TOPMOST;
+    } else {
+        top = HWND_NOTOPMOST;
+    }
     SetWindowPos(hwnd, top, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
 }
 
@@ -464,11 +464,11 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     int x, y;
     int w, h;
 
-	if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
-		top = HWND_TOPMOST;
-	} else {
-		top = HWND_NOTOPMOST;
-	}
+    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+        top = HWND_TOPMOST;
+    } else {
+        top = HWND_NOTOPMOST;
+    }
 
     style = GetWindowLong(hwnd, GWL_STYLE);
     style &= ~STYLE_MASK;
@@ -550,22 +550,22 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         ClipCursor(NULL);
     }
 
-	if ( window->flags & SDL_WINDOW_FULLSCREEN )
-	{
-		HWND top;
-		SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-		HWND hwnd = data->hwnd;
-		UINT flags = SWP_NOMOVE | SWP_NOSIZE;
+    if ( window->flags & SDL_WINDOW_FULLSCREEN )
+    {
+        HWND top;
+        SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+        HWND hwnd = data->hwnd;
+        UINT flags = SWP_NOMOVE | SWP_NOSIZE;
 
-		if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
-			top = HWND_TOPMOST;
-		} else {
-			top = HWND_NOTOPMOST;
-			flags |= SWP_NOZORDER;
-		}
-		
-		SetWindowPos(hwnd, top, 0, 0, 0, 0, flags);
-	}
+        if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
+            top = HWND_TOPMOST;
+        } else {
+            top = HWND_NOTOPMOST;
+            flags |= SWP_NOZORDER;
+        }
+
+        SetWindowPos(hwnd, top, 0, 0, 0, 0, flags);
+    }
 }
 
 void

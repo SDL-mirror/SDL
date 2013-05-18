@@ -26,8 +26,8 @@
 
 /* Logging levels */
 typedef enum LogLevel {
-	LOGGER_TERSE = 1,
-	LOGGER_VERBOSE
+    LOGGER_TERSE = 1,
+    LOGGER_VERBOSE
 } Level;
 
 //! Default logging level
@@ -35,14 +35,14 @@ typedef enum LogLevel {
 
 //! Contains information for the logger
 typedef struct LoggerData {
-	//! If enabled logger will write to stdout instead of file
-	int stdoutEnabled;
-	//!< Name and directory of the log file (ie. logs/runner-seed.log)
-	char *filename;
-	//!< Logging level of the logger (such as VERBOSE)
-	Level level;
-	//!< Some custom data that a logger needs
-	char  *custom;
+    //! If enabled logger will write to stdout instead of file
+    int stdoutEnabled;
+    //!< Name and directory of the log file (ie. logs/runner-seed.log)
+    char *filename;
+    //!< Logging level of the logger (such as VERBOSE)
+    Level level;
+    //!< Some custom data that a logger needs
+    char  *custom;
 } LoggerData;
 
 /*!
@@ -50,30 +50,30 @@ typedef struct LoggerData {
  * logging interface. See the headers of implementations (plain_logger.h or
  * xml_logger.h) for more information.
  */
-typedef	void (*RunStartedFp)(int parameterCount, char *runnerParameters[], char *runSeed, time_t eventTime, LoggerData *data);
-typedef	void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
+typedef void (*RunStartedFp)(int parameterCount, char *runnerParameters[], char *runSeed, time_t eventTime, LoggerData *data);
+typedef void (*RunEndedFp)(int testCount, int suiteCount, int testPassCount, int testFailCount,
                            int testSkippedCount, time_t endTime, double totalRuntime);
 
-typedef	void (*SuiteStartedFp)(const char *suiteName, time_t eventTime);
-typedef	void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
-		                time_t endTime, double totalRuntime);
+typedef void (*SuiteStartedFp)(const char *suiteName, time_t eventTime);
+typedef void (*SuiteEndedFp)(int testsPassed, int testsFailed, int testsSkipped,
+                        time_t endTime, double totalRuntime);
 
-typedef	void (*TestStartedFp)(const char *testName, const char *suiteName,
+typedef void (*TestStartedFp)(const char *testName, const char *suiteName,
                               const char *testDescription, Uint64 execKey, time_t startTime);
-typedef	void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
+typedef void (*TestEndedFp)(const char *testName, const char *suiteName, int testResult,
                             time_t endTime, double totalRuntime);
 
-typedef	void (*AssertFp)(const char *assertName, int assertResult,
-						 const char *assertMessage, time_t eventTime);
+typedef void (*AssertFp)(const char *assertName, int assertResult,
+                         const char *assertMessage, time_t eventTime);
 
-typedef	void (*AssertWithValuesFp)(const char *assertName, int assertResult,
-						 const char *assertMessage, int actualValue, int expected,
-						 time_t eventTime);
+typedef void (*AssertWithValuesFp)(const char *assertName, int assertResult,
+                         const char *assertMessage, int actualValue, int expected,
+                         time_t eventTime);
 
-typedef	void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
-								int numAssertsPass, time_t eventTime);
+typedef void (*AssertSummaryFp)(int numAsserts, int numAssertsFailed,
+                                int numAssertsPass, time_t eventTime);
 
-typedef	void (*LogFp)(time_t eventTime, char *fmt, ...);
+typedef void (*LogFp)(time_t eventTime, char *fmt, ...);
 
 
 /*! Function pointers to actual logging function implementations */

@@ -405,7 +405,7 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         return -1;
     }
     if (SDL_strcmp(argv[index], "-NSDocumentRevisionsDebugMode") == 0) {
-	/* Debug flag sent by Xcode */
+    /* Debug flag sent by Xcode */
         return 2;
     }
     return 0;
@@ -892,7 +892,7 @@ SDLTest_PrintEvent(SDL_Event * event)
 {
     if (event->type == SDL_MOUSEMOTION) {
         /* Mouse motion is really spammy */
-        //return;
+        return;
     }
 
     fprintf(stderr, "SDL EVENT: ");
@@ -1097,7 +1097,7 @@ SDLTest_ScreenShot(SDL_Renderer *renderer)
     }
 }
 
-static void 
+static void
 FullscreenTo(int index, int windowId)
 {
     Uint32 flags;
@@ -1151,12 +1151,12 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
             }
             break;
         case SDL_WINDOWEVENT_CLOSE:
-			{
+            {
                 SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
                 if (window) {
-					SDL_DestroyWindow(window);
-				}
-			}
+                    SDL_DestroyWindow(window);
+                }
+            }
             break;
         }
         break;
@@ -1298,7 +1298,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 }
             }
             break;
-		case SDLK_0:
+        case SDLK_0:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Test Message", "You're awesome!", window);
@@ -1335,7 +1335,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
         break;
     case SDL_MOUSEMOTION:
         lastEvent = event->motion;
-		break;
+        break;
     }
 }
 

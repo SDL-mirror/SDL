@@ -48,13 +48,13 @@
 #include <sys/audio.h>
 
 /* Open the audio device for playback, and don't block if busy */
-/* #define OPEN_FLAGS	(O_WRONLY|O_NONBLOCK) */
-#define OPEN_FLAGS	O_WRONLY
+/* #define OPEN_FLAGS   (O_WRONLY|O_NONBLOCK) */
+#define OPEN_FLAGS  O_WRONLY
 
 /* Get the name of the audio device we use for output */
 
 #ifndef _PATH_DEV_DSP
-#define _PATH_DEV_DSP	"/dev/%caud%c/%c"
+#define _PATH_DEV_DSP   "/dev/%caud%c/%c"
 #endif
 
 static char devsettings[][3] = {

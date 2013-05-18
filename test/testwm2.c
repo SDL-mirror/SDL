@@ -129,8 +129,8 @@ main(int argc, char *argv[])
     SDL_FreeCursor(cursor);
 
     quit(0);
-	// keep the compiler happy ...
-	return(0);
+    // keep the compiler happy ...
+    return(0);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

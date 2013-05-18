@@ -165,9 +165,10 @@
 
 - (void)startAnimation
 {
-    // CADisplayLink is API new to iPhone SDK 3.1. Compiling against earlier versions will result in a warning, but can be dismissed
-    // if the system version runtime check for CADisplayLink exists in -initWithCoder:. 
-    
+    /* CADisplayLink is API new to iPhone SDK 3.1.
+     * Compiling against earlier versions will result in a warning, but can be dismissed
+     * if the system version runtime check for CADisplayLink exists in -initWithCoder:.
+     */
     displayLink = [NSClassFromString(@"CADisplayLink") displayLinkWithTarget:self selector:@selector(doLoop:)];
     [displayLink setFrameInterval:animationInterval];
     [displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
@@ -181,7 +182,7 @@
 
 - (void)doLoop:(id)sender
 {
-    // Don't run the game loop while a messagebox is up
+    /* Don't run the game loop while a messagebox is up */
     if (!UIKit_ShowingMessageBox()) {
         animationCallback(animationCallbackParam);
     }

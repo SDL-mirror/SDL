@@ -27,7 +27,7 @@
 
 #include "SDL_timer.h"
 
-#define TIME_WRAP_VALUE	(~(DWORD)0)
+#define TIME_WRAP_VALUE (~(DWORD)0)
 
 /* The first (low-resolution) ticks value of the application */
 static DWORD start;
@@ -48,7 +48,7 @@ SDL_StartTicks(void)
 #ifdef USE_GETTICKCOUNT
     start = GetTickCount();
 #else
-    /* QueryPerformanceCounter has had problems in the past, but lots of games 
+    /* QueryPerformanceCounter has had problems in the past, but lots of games
        use it, so we'll rely on it here.
      */
     if (QueryPerformanceFrequency(&hires_ticks_per_second) == TRUE) {

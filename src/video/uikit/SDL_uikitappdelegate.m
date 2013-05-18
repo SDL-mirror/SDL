@@ -117,7 +117,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (self->splashLandscape) {
         [self->splashLandscape retain];
     }
- 
+
     [self updateSplashImage:[[UIApplication sharedApplication] statusBarOrientation]];
 
     return self;
@@ -126,8 +126,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 - (NSUInteger)supportedInterfaceOrientations
 {
     NSUInteger orientationMask = UIInterfaceOrientationMaskAll;
-    
-    // Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation
+
+    /* Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation */
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         orientationMask &= ~UIInterfaceOrientationMaskPortraitUpsideDown;
     }
@@ -148,7 +148,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 - (void)updateSplashImage:(UIInterfaceOrientation)interfaceOrientation
 {
     UIImage *image;
-    
+
     if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
         image = self->splashLandscape;
     } else {
@@ -199,9 +199,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     }
 
     /* exit, passing the return status from the user's application */
-    // We don't actually exit to support applications that do setup in
-    // their main function and then allow the Cocoa event loop to run.
-    // exit(exit_status);
+    /* We don't actually exit to support applications that do setup in
+     * their main function and then allow the Cocoa event loop to run.
+     */
+    /* exit(exit_status); */
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions

@@ -29,8 +29,8 @@
 */
 #undef SDL_AtomicCAS
 #undef SDL_AtomicCASPtr
- 
-/* 
+
+/*
   If any of the operations are not provided then we must emulate some
   of them. That means we need a nice implementation of spin locks
   that avoids the "one big lock" problem. We use a vector of spin
@@ -40,7 +40,7 @@
   To generate the index of the lock we first shift by 3 bits to get
   rid on the zero bits that result from 32 and 64 bit allignment of
   data. We then mask off all but 5 bits and use those 5 bits as an
-  index into the table. 
+  index into the table.
 
   Picking the lock this way insures that accesses to the same data at
   the same time will go to the same lock. OTOH, accesses to different

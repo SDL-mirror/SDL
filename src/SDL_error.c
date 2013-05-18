@@ -31,12 +31,12 @@
 #if SDL_THREADS_DISABLED
 /* The default (non-thread-safe) global error variable */
 static SDL_error SDL_global_error;
-#define SDL_GetErrBuf()	(&SDL_global_error)
+#define SDL_GetErrBuf() (&SDL_global_error)
 #else
 extern SDL_error *SDL_GetErrBuf(void);
 #endif /* SDL_THREADS_DISABLED */
 
-#define SDL_ERRBUFIZE	1024
+#define SDL_ERRBUFIZE   1024
 
 /* Private functions */
 
@@ -57,7 +57,7 @@ SDL_SetError(const char *fmt, ...)
 
     /* Ignore call if invalid format pointer was passed */
     if (fmt == NULL) return -1;
-    
+
     /* Copy in the key, mark error as valid */
     error = SDL_GetErrBuf();
     error->error = 1;

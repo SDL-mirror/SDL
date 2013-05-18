@@ -223,11 +223,11 @@ const SDLTest_SurfaceImage_t SDLTest_imageFace = {
  */
 SDL_Surface *SDLTest_ImageFace()
 {
-   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom( 
+   SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(
         (void*)SDLTest_imageFace.pixel_data,
-        SDLTest_imageFace.width, 
-        SDLTest_imageFace.height, 
-        SDLTest_imageFace.bytes_per_pixel * 8, 
+        SDLTest_imageFace.width,
+        SDLTest_imageFace.height,
+        SDLTest_imageFace.bytes_per_pixel * 8,
         SDLTest_imageFace.width * SDLTest_imageFace.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
          0xff000000, /* Red bit mask. */

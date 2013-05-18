@@ -155,7 +155,7 @@ SDL_SYS_HapticInit(void)
 
     numhaptics = 0;
 
-    /* 
+    /*
      * Limit amount of checks to MAX_HAPTICS since we may or may not have
      * permission to some or all devices.
      */
@@ -446,7 +446,7 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 }
 
 
-/* 
+/*
  * Clean up after system specific haptic stuff
  */
 void
@@ -498,44 +498,44 @@ SDL_SYS_ToDirection(SDL_HapticDirection * dir)
     switch (dir->type) {
     case SDL_HAPTIC_POLAR:
         /* Linux directions start from south.
-        		(and range from 0 to 0xFFFF)
-				   Quoting include/linux/input.h, line 926:
-				   Direction of the effect is encoded as follows:
-						0 deg -> 0x0000 (down)
-						90 deg -> 0x4000 (left)
-						180 deg -> 0x8000 (up)
-						270 deg -> 0xC000 (right)
-					*/
-        tmp = (((18000 + dir->dir[0]) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+                (and range from 0 to 0xFFFF)
+                   Quoting include/linux/input.h, line 926:
+                   Direction of the effect is encoded as follows:
+                        0 deg -> 0x0000 (down)
+                        90 deg -> 0x4000 (left)
+                        180 deg -> 0x8000 (up)
+                        270 deg -> 0xC000 (right)
+                    */
+        tmp = (((18000 + dir->dir[0]) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
-	   case SDL_HAPTIC_SPHERICAL:
-   			/*
-   				We convert to polar, because that's the only supported direction on Linux.
-   				The first value of a spherical direction is practically the same as a
-   				Polar direction, except that we have to add 90 degrees. It is the angle
-   				from EAST {1,0} towards SOUTH {0,1}.
-   				--> add 9000
-   				--> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
-   			*/
-		   	tmp = ((dir->dir[0]) + 9000) % 36000;    /* Convert to polars */
-        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+       case SDL_HAPTIC_SPHERICAL:
+            /*
+                We convert to polar, because that's the only supported direction on Linux.
+                The first value of a spherical direction is practically the same as a
+                Polar direction, except that we have to add 90 degrees. It is the angle
+                from EAST {1,0} towards SOUTH {0,1}.
+                --> add 9000
+                --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
+            */
+            tmp = ((dir->dir[0]) + 9000) % 36000;    /* Convert to polars */
+        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
     case SDL_HAPTIC_CARTESIAN:
         f = atan2(dir->dir[1], dir->dir[0]);
-					/* 
-					  atan2 takes the parameters: Y-axis-value and X-axis-value (in that order)
-					   - Y-axis-value is the second coordinate (from center to SOUTH)
-					   - X-axis-value is the first coordinate (from center to EAST)
-						We add 36000, because atan2 also returns negative values. Then we practically
-						have the first spherical value. Therefore we proceed as in case
-						SDL_HAPTIC_SPHERICAL and add another 9000 to get the polar value.
-					  --> add 45000 in total
-					  --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
-					*/
-				tmp = (((int) (f * 18000. / M_PI)) + 45000) % 36000;
-        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+                    /*
+                      atan2 takes the parameters: Y-axis-value and X-axis-value (in that order)
+                       - Y-axis-value is the second coordinate (from center to SOUTH)
+                       - X-axis-value is the first coordinate (from center to EAST)
+                        We add 36000, because atan2 also returns negative values. Then we practically
+                        have the first spherical value. Therefore we proceed as in case
+                        SDL_HAPTIC_SPHERICAL and add another 9000 to get the polar value.
+                      --> add 45000 in total
+                      --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
+                    */
+                tmp = (((int) (f * 18000. / M_PI)) + 45000) % 36000;
+        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
     default:

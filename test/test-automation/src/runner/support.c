@@ -25,28 +25,28 @@
 int
 PlatformSupportsAudio()
 {
-	int retValue = 0;
+    int retValue = 0;
 
 #ifdef SDL_AUDIO_DRIVER_COREAUDIO
-	retValue = 1;
+    retValue = 1;
 #endif
 #ifdef SDL_AUDIO_DRIVER_OSS
-	retValue = 1;
+    retValue = 1;
 #endif
 
-	return retValue;
+    return retValue;
 }
 
 int
 PlatformSupportsStdio()
 {
-	int retValue = 0;
+    int retValue = 0;
 
 #ifdef HAVE_STDIO_H
-	retValue = 1;
+    retValue = 1;
 #endif
 
-	return retValue;
+    return retValue;
 }
 
 
@@ -64,12 +64,12 @@ SDL_test.h
 
 int
 PlatformSupportsOpenGL() {
-	int retValue = 0;
+    int retValue = 0;
 #define SDL_VIDEO_OPENGL
-	retValue = 1;
+    retValue = 1;
 #endif
 
-	return retValue;
+    return retValue;
 }
 
 */

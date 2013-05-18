@@ -155,7 +155,7 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
             return 0;
         }
         window->flags &= ~SDL_WINDOW_MOUSE_FOCUS;
-		SDL_OnWindowLeave(window);
+        SDL_OnWindowLeave(window);
         break;
     case SDL_WINDOWEVENT_FOCUS_GAINED:
         if (window->flags & SDL_WINDOW_INPUT_FOCUS) {
@@ -196,13 +196,13 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
 
         posted = (SDL_PushEvent(&event) > 0);
     }
-	
-	if (windowevent == SDL_WINDOWEVENT_CLOSE) {
-		if ( !window->prev && !window->next ) {
-			// This is the last window in the list so send the SDL_QUIT event
-			SDL_SendQuit();
-		}
-	}
+
+    if (windowevent == SDL_WINDOWEVENT_CLOSE) {
+        if ( !window->prev && !window->next ) {
+            /* This is the last window in the list so send the SDL_QUIT event */
+            SDL_SendQuit();
+        }
+    }
 
     return (posted);
 }

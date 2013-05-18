@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_gesture.h
- *  
+ *
  *  Include file for SDL gesture event handling.
  */
 
@@ -38,9 +38,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 typedef Sint64 SDL_GestureID;
@@ -80,9 +78,7 @@ extern DECLSPEC int SDLCALL SDL_LoadDollarTemplates(SDL_TouchID touchId, SDL_RWo
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

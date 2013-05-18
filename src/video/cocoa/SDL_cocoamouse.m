@@ -153,7 +153,7 @@ Cocoa_CreateSystemCursor(SDL_SystemCursor id)
     if (nscursor) {
         cursor = SDL_calloc(1, sizeof(*cursor));
         if (cursor) {
-            // We'll free it later, so retain it here
+            /* We'll free it later, so retain it here */
             [nscursor retain];
             cursor->driverdata = nscursor;
         }

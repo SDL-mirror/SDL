@@ -48,178 +48,178 @@ static FILE *logFile;
 int
 Output(const int currentIndentLevel, const char *message, ...)
 {
-	if(logFile == NULL) {
-		fprintf(stderr, "logfile is NULL\n");
-		exit(3);
-	}
+    if(logFile == NULL) {
+        fprintf(stderr, "logfile is NULL\n");
+        exit(3);
+    }
 
-	int indent = 0;
-	for( ; indent < currentIndentLevel; ++indent) {
-		fprintf(logFile, "  "); // \todo make configurable?
-	}
+    int indent = 0;
+    for( ; indent < currentIndentLevel; ++indent) {
+        fprintf(logFile, "  "); // \todo make configurable?
+    }
 
-	char buffer[1024];
-	memset(buffer, 0, 1024);
+    char buffer[1024];
+    memset(buffer, 0, 1024);
 
-	va_list list;
-	va_start(list, message);
+    va_list list;
+    va_start(list, message);
 
-	SDL_vsnprintf(buffer, 1024, message, list);
+    SDL_vsnprintf(buffer, 1024, message, list);
 
-	va_end(list);
-	fprintf(logFile, "%s\n", buffer);
-	fflush(logFile);
+    va_end(list);
+    fprintf(logFile, "%s\n", buffer);
+    fflush(logFile);
 }
 
 
 void
 PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-			    time_t eventTime, LoggerData *data)
+                time_t eventTime, LoggerData *data)
 {
-	if(data == NULL) {
-		fprintf(stderr, "Logger data is NULL\n");
-		exit(3);
-	}
+    if(data == NULL) {
+        fprintf(stderr, "Logger data is NULL\n");
+        exit(3);
+    }
 
-	// Set up the logging destination
-	if(data->stdoutEnabled == 1) {
-		logFile = stdout;
-	} else {
-		logFile = fopen(data->filename, "w");
-		if(logFile == NULL) {
-			fprintf(stderr, "Log file %s couldn't opened\n", data->filename);
-			exit(3);
-		}
-	}
+    // Set up the logging destination
+    if(data->stdoutEnabled == 1) {
+        logFile = stdout;
+    } else {
+        logFile = fopen(data->filename, "w");
+        if(logFile == NULL) {
+            fprintf(stderr, "Log file %s couldn't opened\n", data->filename);
+            exit(3);
+        }
+    }
 
 
-	level = data->level;
+    level = data->level;
 
-	Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
-	Output(indentLevel, "Fuzzer seed is: %s", runSeed);
-	Output(indentLevel, "Runner parameters: ");
+    Output(indentLevel, "Test run started at %s", TimestampToString(eventTime));
+    Output(indentLevel, "Fuzzer seed is: %s", runSeed);
+    Output(indentLevel, "Runner parameters: ");
 
-	int counter = 0;
-	for(counter = 0; counter < parameterCount; counter++) {
-		char *parameter = runnerParameters[counter];
-		Output(indentLevel, "\t%s", parameter);
-	}
+    int counter = 0;
+    for(counter = 0; counter < parameterCount; counter++) {
+        char *parameter = runnerParameters[counter];
+        Output(indentLevel, "\t%s", parameter);
+    }
 
-	Output(indentLevel, "");
+    Output(indentLevel, "");
 }
 
 void
 PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-			  int testSkippedCount, time_t endTime, double totalRuntime)
+              int testSkippedCount, time_t endTime, double totalRuntime)
 {
-	Output(indentLevel, "Test run ended at %s", TimestampToString(endTime));
+    Output(indentLevel, "Test run ended at %s", TimestampToString(endTime));
 
-	Output(indentLevel, "Ran %d tests in %0.5f seconds from %d suites.",
-			testCount, totalRuntime, suiteCount);
+    Output(indentLevel, "Ran %d tests in %0.5f seconds from %d suites.",
+            testCount, totalRuntime, suiteCount);
 
-	Output(indentLevel, "%d tests passed", testPassCount);
-	Output(indentLevel, "%d tests failed", testFailCount);
-	Output(indentLevel, "%d tests skipped", testSkippedCount);
+    Output(indentLevel, "%d tests passed", testPassCount);
+    Output(indentLevel, "%d tests failed", testFailCount);
+    Output(indentLevel, "%d tests skipped", testSkippedCount);
 
-	fclose(logFile);
+    fclose(logFile);
 }
 
 void
 PlainSuiteStarted(const char *suiteName, time_t eventTime)
 {
-	Output(indentLevel++, "Executing tests from %s", suiteName);
+    Output(indentLevel++, "Executing tests from %s", suiteName);
 }
 
 void
 PlainSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
            time_t endTime, double totalRuntime)
 {
-	Output(--indentLevel, "Suite executed. %d passed, %d failed and %d skipped. Total runtime %0.5f seconds",
-			testsPassed, testsFailed, testsSkipped, totalRuntime);
-	Output(indentLevel, "");
+    Output(--indentLevel, "Suite executed. %d passed, %d failed and %d skipped. Total runtime %0.5f seconds",
+            testsPassed, testsFailed, testsSkipped, totalRuntime);
+    Output(indentLevel, "");
 }
 
 void
 PlainTestStarted(const char *testName, const char *suiteName,
-				const char *testDescription, Uint64 execKey, time_t startTime)
+                const char *testDescription, Uint64 execKey, time_t startTime)
 {
-	Output(indentLevel, "Executing test: %s (in %s, exec key: %llX)", testName, suiteName, execKey);
-	Output(indentLevel++, "Test description: %s", testDescription);
+    Output(indentLevel, "Executing test: %s (in %s, exec key: %llX)", testName, suiteName, execKey);
+    Output(indentLevel++, "Test description: %s", testDescription);
 }
 
 void
 PlainTestEnded(const char *testName, const char *suiteName,
           int testResult, time_t endTime, double totalRuntime)
 {
-	switch(testResult) {
-		case TEST_RESULT_PASS:
-			Output(--indentLevel, "%s: ok", testName);
-			break;
-		case TEST_RESULT_FAILURE:
-			Output(--indentLevel, "%s: failed", testName);
-			break;
-		case TEST_RESULT_NO_ASSERT:
-			Output(--indentLevel, "%s: failed -> no assert", testName);
-			break;
-		case TEST_RESULT_SKIPPED:
-			Output(--indentLevel, "%s: skipped", testName);
-			break;
-		case TEST_RESULT_KILLED:
-			Output(--indentLevel, "%s: killed, exceeded timeout", testName);
-			break;
-		case TEST_RESULT_SETUP_FAILURE:
-			Output(--indentLevel, "%s: killed, setup failure", testName);
-			break;
-	}
+    switch(testResult) {
+        case TEST_RESULT_PASS:
+            Output(--indentLevel, "%s: ok", testName);
+            break;
+        case TEST_RESULT_FAILURE:
+            Output(--indentLevel, "%s: failed", testName);
+            break;
+        case TEST_RESULT_NO_ASSERT:
+            Output(--indentLevel, "%s: failed -> no assert", testName);
+            break;
+        case TEST_RESULT_SKIPPED:
+            Output(--indentLevel, "%s: skipped", testName);
+            break;
+        case TEST_RESULT_KILLED:
+            Output(--indentLevel, "%s: killed, exceeded timeout", testName);
+            break;
+        case TEST_RESULT_SETUP_FAILURE:
+            Output(--indentLevel, "%s: killed, setup failure", testName);
+            break;
+    }
 }
 
 void
 PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
-		time_t eventTime)
+        time_t eventTime)
 {
-	// Log passed asserts only on VERBOSE level
-	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
-		return ;
-	}
+    // Log passed asserts only on VERBOSE level
+    if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
+        return ;
+    }
 
-	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s: %s - %s", assertName, result, assertMessage);
+    const char *result = (assertResult) ? "passed" : "failed";
+    Output(indentLevel, "%s: %s - %s", assertName, result, assertMessage);
 }
 
 void
 PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
-		int actualValue, int expectedValue, time_t eventTime)
+        int actualValue, int expectedValue, time_t eventTime)
 {
-	// Log passed asserts only on VERBOSE level
-	if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
-		return ;
-	}
+    // Log passed asserts only on VERBOSE level
+    if(level <= LOGGER_TERSE && assertResult == ASSERT_PASS) {
+        return ;
+    }
 
-	const char *result = (assertResult) ? "passed" : "failed";
-	Output(indentLevel, "%s: %s (expected %d, actualValue %d) - %s",
-			assertName, result, expectedValue, actualValue, assertMessage);
+    const char *result = (assertResult) ? "passed" : "failed";
+    Output(indentLevel, "%s: %s (expected %d, actualValue %d) - %s",
+            assertName, result, expectedValue, actualValue, assertMessage);
 }
 
 void
 PlainAssertSummary(int numAsserts, int numAssertsFailed, int numAssertsPass, time_t eventTime)
 {
-	Output(indentLevel, "Assert summary: %d failed, %d passed (total: %d)",
-			numAssertsFailed, numAssertsPass, numAsserts);
+    Output(indentLevel, "Assert summary: %d failed, %d passed (total: %d)",
+            numAssertsFailed, numAssertsPass, numAsserts);
 }
 
 void
 PlainLog(time_t eventTime, char *fmt, ...)
 {
-	// create the log message
-	va_list args;
-	char logMessage[1024];
-	memset(logMessage, 0, sizeof(logMessage));
+    // create the log message
+    va_list args;
+    char logMessage[1024];
+    memset(logMessage, 0, sizeof(logMessage));
 
-	va_start( args, fmt );
-	SDL_vsnprintf( logMessage, sizeof(logMessage), fmt, args );
-	va_end( args );
+    va_start( args, fmt );
+    SDL_vsnprintf( logMessage, sizeof(logMessage), fmt, args );
+    va_end( args );
 
-	Output(indentLevel, "%s", logMessage);
+    Output(indentLevel, "%s", logMessage);
 }
 
 #endif

@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_stdinc.h
- *  
+ *
  *  This is a general header that includes C language support.
  */
 
@@ -80,12 +80,12 @@
 /**
  *  The number of elements in an array.
  */
-#define SDL_arraysize(array)	(sizeof(array)/sizeof(array[0]))
-#define SDL_TABLESIZE(table)	SDL_arraysize(table)
+#define SDL_arraysize(array)    (sizeof(array)/sizeof(array[0]))
+#define SDL_TABLESIZE(table)    SDL_arraysize(table)
 
 /**
  *  \name Cast operators
- *  
+ *
  *  Use proper C++ casts when compiled as C++ to be compatible with the option
  *  -Wold-style-cast of GCC (and -Werror=old-style-cast in GCC 4.2 and above).
  */
@@ -179,7 +179,7 @@ SDL_COMPILE_TIME_ASSERT(sint64, sizeof(Sint64) == 8);
 
 /** \cond */
 #ifndef DOXYGEN_SHOULD_IGNORE_THIS
-#if !defined(__ANDROID__) 
+#if !defined(__ANDROID__)
    /* TODO: include/SDL_stdinc.h:174: error: size of array 'SDL_dummy_enum' is negative */
 typedef enum
 {
@@ -194,9 +194,7 @@ SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 #if defined(HAVE_ALLOCA) && !defined(alloca)
@@ -758,10 +756,10 @@ SDL_FORCE_INLINE double SDL_sqrt_inline(double x) { return sqrt(x); }
 #endif
 
 /* The SDL implementation of iconv() returns these error codes */
-#define SDL_ICONV_ERROR		(size_t)-1
-#define SDL_ICONV_E2BIG		(size_t)-2
-#define SDL_ICONV_EILSEQ	(size_t)-3
-#define SDL_ICONV_EINVAL	(size_t)-4
+#define SDL_ICONV_ERROR     (size_t)-1
+#define SDL_ICONV_E2BIG     (size_t)-2
+#define SDL_ICONV_EILSEQ    (size_t)-3
+#define SDL_ICONV_EINVAL    (size_t)-4
 
 /* SDL_iconv_* are now always real symbols/types, not macros or inlined. */
 typedef struct _SDL_iconv_t *SDL_iconv_t;
@@ -779,15 +777,13 @@ extern DECLSPEC char *SDLCALL SDL_iconv_string(const char *tocode,
                                                const char *fromcode,
                                                const char *inbuf,
                                                size_t inbytesleft);
-#define SDL_iconv_utf8_locale(S)	SDL_iconv_string("", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs2(S)		(Uint16 *)SDL_iconv_string("UCS-2-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
-#define SDL_iconv_utf8_ucs4(S)		(Uint32 *)SDL_iconv_string("UCS-4-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_locale(S)    SDL_iconv_string("", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs2(S)      (Uint16 *)SDL_iconv_string("UCS-2-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
+#define SDL_iconv_utf8_ucs4(S)      (Uint32 *)SDL_iconv_string("UCS-4-INTERNAL", "UTF-8", S, SDL_strlen(S)+1)
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_test_common.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
@@ -109,9 +109,7 @@ typedef struct
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* Function prototypes */
@@ -175,9 +173,7 @@ void SDLTest_CommonQuit(SDLTest_CommonState * state);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

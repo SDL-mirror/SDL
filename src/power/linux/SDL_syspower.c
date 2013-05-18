@@ -64,7 +64,7 @@ load_acpi_file(const char *base, const char *node, const char *key,
     if (br < 0) {
         return SDL_FALSE;
     }
-    buf[br] = '\0';             // null-terminate the string.
+    buf[br] = '\0';             /* null-terminate the string. */
     return SDL_TRUE;
 }
 
@@ -342,7 +342,7 @@ SDL_GetPowerInfo_Linux_proc_apm(SDL_PowerState * state,
         return SDL_FALSE;
     }
 
-    buf[br] = '\0';             // null-terminate the string.
+    buf[br] = '\0';             /* null-terminate the string. */
     if (!next_string(&ptr, &str)) {     /* driver version */
         return SDL_FALSE;
     }

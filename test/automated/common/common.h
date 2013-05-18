@@ -21,12 +21,12 @@
 typedef struct SurfaceImage_s {
    int width;
    int height;
-   unsigned int  bytes_per_pixel; /* 3:RGB, 4:RGBA */ 
+   unsigned int  bytes_per_pixel; /* 3:RGB, 4:RGBA */
    const char *pixel_data;
 } SurfaceImage_t;
 
-#define ALLOWABLE_ERROR_OPAQUE	0
-#define ALLOWABLE_ERROR_BLENDED	64
+#define ALLOWABLE_ERROR_OPAQUE  0
+#define ALLOWABLE_ERROR_BLENDED 64
 
 /**
  * @brief Compares a surface and a surface image for equality.

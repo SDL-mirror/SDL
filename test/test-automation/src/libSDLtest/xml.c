@@ -39,8 +39,8 @@ static const char *root;
  * Defines structure used for "counting" open XML-tags
  */
 typedef struct TagList {
-	const char *tag;
-	struct TagList *next;
+    const char *tag;
+    struct TagList *next;
 } TagList;
 
 static TagList *openTags = NULL;
@@ -53,26 +53,26 @@ static TagList *openTags = NULL;
 static int
 AddOpenTag(const char *tag)
 {
-	TagList *openTag = SDL_malloc(sizeof(TagList));
-	if(openTag == NULL) {
-		return 1;
-	}
-	memset(openTag, 0, sizeof(TagList));
+    TagList *openTag = SDL_malloc(sizeof(TagList));
+    if(openTag == NULL) {
+        return 1;
+    }
+    memset(openTag, 0, sizeof(TagList));
 
-	const int tagSize = SDL_strlen(tag) + 1;
-	openTag->tag = SDL_malloc(tagSize);
-	if(openTag->tag == NULL) {
-		SDL_free(openTag);
-		return 1;
-	}
+    const int tagSize = SDL_strlen(tag) + 1;
+    openTag->tag = SDL_malloc(tagSize);
+    if(openTag->tag == NULL) {
+        SDL_free(openTag);
+        return 1;
+    }
 
-	strncpy((char *)openTag->tag, (char *)tag, tagSize);
+    strncpy((char *)openTag->tag, (char *)tag, tagSize);
 
-	openTag->next = openTags;
+    openTag->next = openTags;
 
-	openTags = openTag;
+    openTags = openTag;
 
-	return 0;
+    return 0;
 }
 
 /*!
@@ -83,30 +83,30 @@ AddOpenTag(const char *tag)
 static int
 RemoveOpenTag(const char *tag)
 {
-	if(openTags == NULL || ValidateString(tag) == 0) {
-		return 1;
-	}
+    if(openTags == NULL || ValidateString(tag) == 0) {
+        return 1;
+    }
 
-	int retVal = 0;
+    int retVal = 0;
 
-	const int size = SDL_strlen(tag);
-	char *tempTag = SDL_malloc(size);
-	strncpy(tempTag, tag, size);
+    const int size = SDL_strlen(tag);
+    char *tempTag = SDL_malloc(size);
+    strncpy(tempTag, tag, size);
 
-	// Tag should always be the same as previously opened tag
-	// It prevents opening and ending tag mismatch
-	if(SDL_strncmp(tempTag, tag, size) == 0) {
-		TagList *openTag = openTags;
-		SDL_free((char *)openTag->tag);
+    // Tag should always be the same as previously opened tag
+    // It prevents opening and ending tag mismatch
+    if(SDL_strncmp(tempTag, tag, size) == 0) {
+        TagList *openTag = openTags;
+        SDL_free((char *)openTag->tag);
 
-		openTags  = openTags->next;
-		SDL_free(openTag);
-	} else {
-		//printf("Debug | xml.c:RemoveOpenTag(): open/end tag mismatch");
-		retVal = 1;
-	}
+        openTags  = openTags->next;
+        SDL_free(openTag);
+    } else {
+        //printf("Debug | xml.c:RemoveOpenTag(): open/end tag mismatch");
+        retVal = 1;
+    }
 
-	return retVal;
+    return retVal;
 }
 
 /*!
@@ -115,12 +115,12 @@ RemoveOpenTag(const char *tag)
 static void
 PrintOpenTags()
 {
-	printf("\nOpen tags:\n");
+    printf("\nOpen tags:\n");
 
-	TagList *openTag = NULL;
-	for(openTag = openTags; openTag; openTag = openTag->next) {
-		printf("\ttag: %s\n", openTag->tag);
-	}
+    TagList *openTag = NULL;
+    for(openTag = openTags; openTag; openTag = openTag->next) {
+        printf("\ttag: %s\n", openTag->tag);
+    }
 }
 
 
@@ -134,83 +134,83 @@ PrintOpenTags()
 const char *
 EscapeString(const char *string)
 {
-	// Calculate the size of the escaped string
-	int totalSize = 0;
+    // Calculate the size of the escaped string
+    int totalSize = 0;
 
-	const int maxCount = SDL_strlen(string);
+    const int maxCount = SDL_strlen(string);
 
-	int counter = 0;
-	for(; counter < maxCount; ++counter) {
-		char character = string[counter];
+    int counter = 0;
+    for(; counter < maxCount; ++counter) {
+        char character = string[counter];
 
-		switch(character) {
-		case '&': totalSize +=  5; //SDL_strlen("&amp;");
-			break;
-		case '\'': totalSize += 6; //SDL_strlen("&apos;");
-			break;
-		case '"': totalSize += 6;  //SDL_strlen("&quot;");
-			break;
-		case '<': totalSize += 4;  //SDL_strlen("&lt;");
-			break;
-		case  '>': totalSize += 4; //SDL_strlen("&gt;");
-			break;
-		default:
-			totalSize += 1;
-			break;
-		}
-	}
-	totalSize += 1; // for '\0'
+        switch(character) {
+        case '&': totalSize +=  5; //SDL_strlen("&amp;");
+            break;
+        case '\'': totalSize += 6; //SDL_strlen("&apos;");
+            break;
+        case '"': totalSize += 6;  //SDL_strlen("&quot;");
+            break;
+        case '<': totalSize += 4;  //SDL_strlen("&lt;");
+            break;
+        case  '>': totalSize += 4; //SDL_strlen("&gt;");
+            break;
+        default:
+            totalSize += 1;
+            break;
+        }
+    }
+    totalSize += 1; // for '\0'
 
-	char *retBuffer = SDL_malloc(totalSize * sizeof(char));
-	if(retBuffer == NULL) {
-		return NULL;
-	}
+    char *retBuffer = SDL_malloc(totalSize * sizeof(char));
+    if(retBuffer == NULL) {
+        return NULL;
+    }
 
-	// escape the string
-	char *curRetBuffer = retBuffer;
-	const char *curString =  string;
+    // escape the string
+    char *curRetBuffer = retBuffer;
+    const char *curString =  string;
 
-	char character = *curString;
-	while( (character = *curString++) ) {
+    char character = *curString;
+    while( (character = *curString++) ) {
 
-		switch(character) {
-		case '&':
-			memcpy((void *)curRetBuffer, (void *)"&amp;", 5);
-			curRetBuffer += 5;
-			break;
-		case '\'':
-			memcpy((void *)curRetBuffer, (void *)"&apos;", 6);
-			curRetBuffer += 6;
-			break;
-		case '"':
-			memcpy((void *)curRetBuffer, (void *)"&quot;", 6);
-			curRetBuffer += 6;
-			break;
-		case '<':
-			memcpy((void *)curRetBuffer, (void *)"&lt;", 4);
-			curRetBuffer += 4;
-			break;
-		case  '>':
-			memcpy((void *)curRetBuffer, (void *)"&gt;", 4);
-			curRetBuffer += 4;
-			break;
-		default:
-			*curRetBuffer = character;
-			curRetBuffer += 1;
-			break;
-		}
-	}
+        switch(character) {
+        case '&':
+            memcpy((void *)curRetBuffer, (void *)"&amp;", 5);
+            curRetBuffer += 5;
+            break;
+        case '\'':
+            memcpy((void *)curRetBuffer, (void *)"&apos;", 6);
+            curRetBuffer += 6;
+            break;
+        case '"':
+            memcpy((void *)curRetBuffer, (void *)"&quot;", 6);
+            curRetBuffer += 6;
+            break;
+        case '<':
+            memcpy((void *)curRetBuffer, (void *)"&lt;", 4);
+            curRetBuffer += 4;
+            break;
+        case  '>':
+            memcpy((void *)curRetBuffer, (void *)"&gt;", 4);
+            curRetBuffer += 4;
+            break;
+        default:
+            *curRetBuffer = character;
+            curRetBuffer += 1;
+            break;
+        }
+    }
 
-	*curRetBuffer = '\0';
+    *curRetBuffer = '\0';
 
-	return retBuffer;
+    return retBuffer;
 }
 
 
 /*
 ===================
 
-	Functions to handle creation of XML elements
+    Functions to handle creation of XML elements
 
 ===================
 */
@@ -218,159 +218,159 @@ EscapeString(const char *string)
 char *
 XMLOpenDocument(const char *rootTag, const char *xslStyle)
 {
-	const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
+    const char *doctype = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
 
-	//! \todo refactor this mess
-	char *style = NULL;
-	if(xslStyle) {
-		const char *styleStart = "<?xml-stylesheet type=\"text/xsl\" href=\"";
-		const char *styleEnd = "\"?>\n";
+    //! \todo refactor this mess
+    char *style = NULL;
+    if(xslStyle) {
+        const char *styleStart = "<?xml-stylesheet type=\"text/xsl\" href=\"";
+        const char *styleEnd = "\"?>\n";
 
-		const int sizeStyleStart = SDL_strlen(styleStart);
-		const int sizeStyleEnd = SDL_strlen(styleEnd);
-		const int sizeStyleSheetName = SDL_strlen(xslStyle);
+        const int sizeStyleStart = SDL_strlen(styleStart);
+        const int sizeStyleEnd = SDL_strlen(styleEnd);
+        const int sizeStyleSheetName = SDL_strlen(xslStyle);
 
-		const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
-		style = SDL_malloc(tempSize);
-		memset(style, 0, tempSize);
-		SDL_snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
-	}
+        const int tempSize = sizeStyleStart + sizeStyleEnd + sizeStyleSheetName + 1;
+        style = SDL_malloc(tempSize);
+        memset(style, 0, tempSize);
+        SDL_snprintf(style, tempSize, "%s%s%s", styleStart, xslStyle, styleEnd);
+    }
 
-	memset(buffer, 0, bufferSize);
-	SDL_snprintf(buffer, bufferSize, "<%s>", rootTag);
+    memset(buffer, 0, bufferSize);
+    SDL_snprintf(buffer, bufferSize, "<%s>", rootTag);
 
-	AddOpenTag(rootTag);
+    AddOpenTag(rootTag);
 
-	root = rootTag; // it's fine, as long as rootTag points to static memory?
+    root = rootTag; // it's fine, as long as rootTag points to static memory?
 
-	char *retBuf = NULL;
-	if(xslStyle) {
-		const int doctypeSize = SDL_strlen(doctype);
-		const int styleSize = SDL_strlen(style);
-		const int tagSize = SDL_strlen(buffer);
+    char *retBuf = NULL;
+    if(xslStyle) {
+        const int doctypeSize = SDL_strlen(doctype);
+        const int styleSize = SDL_strlen(style);
+        const int tagSize = SDL_strlen(buffer);
 
-		const int size = doctypeSize + styleSize + tagSize + 1; // extra byte for '\0'
-		retBuf = SDL_malloc(size);
+        const int size = doctypeSize + styleSize + tagSize + 1; // extra byte for '\0'
+        retBuf = SDL_malloc(size);
 
-		SDL_snprintf(retBuf, size, "%s%s%s", doctype, style, buffer);
+        SDL_snprintf(retBuf, size, "%s%s%s", doctype, style, buffer);
 
-		SDL_free(style);
-	} else {
-		const int doctypeSize = SDL_strlen(doctype);
-		const int tagSize = SDL_strlen(buffer);
+        SDL_free(style);
+    } else {
+        const int doctypeSize = SDL_strlen(doctype);
+        const int tagSize = SDL_strlen(buffer);
 
-		const int size = doctypeSize + tagSize + 1; // extra byte for '\0'
-		retBuf = SDL_malloc(size);
+        const int size = doctypeSize + tagSize + 1; // extra byte for '\0'
+        retBuf = SDL_malloc(size);
 
-		SDL_snprintf(retBuf, size, "%s%s", doctype, buffer);
-	}
+        SDL_snprintf(retBuf, size, "%s%s", doctype, buffer);
+    }
 
-	return retBuf;
+    return retBuf;
 }
 
 char *
 XMLCloseDocument() {
-	return XMLCloseElement(root);
+    return XMLCloseElement(root);
 }
 
 char *
 XMLOpenElement(const char *tag)
 {
-	memset(buffer, 0, bufferSize);
-	SDL_snprintf(buffer, bufferSize, "<%s>", tag);
+    memset(buffer, 0, bufferSize);
+    SDL_snprintf(buffer, bufferSize, "<%s>", tag);
 
-	AddOpenTag(tag);
+    AddOpenTag(tag);
 
-	const int size = SDL_strlen(buffer);
-	char *ret = SDL_malloc(size + 1);
-	strncpy(ret, buffer, size);
-	ret[size] = '\0';
+    const int size = SDL_strlen(buffer);
+    char *ret = SDL_malloc(size + 1);
+    strncpy(ret, buffer, size);
+    ret[size] = '\0';
 
-	return ret;
+    return ret;
 }
 
 char *
 XMLAddContent(const char *content)
 {
-	if(ValidateString(content) == 0) {
-		return NULL;
-	}
+    if(ValidateString(content) == 0) {
+        return NULL;
+    }
 
-	const char *escapedContent = EscapeString(content);
+    const char *escapedContent = EscapeString(content);
 
-	if(SDL_strlen(escapedContent) >= bufferSize) {
-		return NULL;
-	}
+    if(SDL_strlen(escapedContent) >= bufferSize) {
+        return NULL;
+    }
 
-	memset(buffer, 0, bufferSize);
-	SDL_snprintf(buffer, bufferSize, "%s", escapedContent);
-	SDL_free((char *)escapedContent);
+    memset(buffer, 0, bufferSize);
+    SDL_snprintf(buffer, bufferSize, "%s", escapedContent);
+    SDL_free((char *)escapedContent);
 
-	const int size = SDL_strlen(buffer);
-	char *ret = SDL_malloc(size + 1);
-	strncpy(ret, buffer, size);
-	ret[size] = '\0';
+    const int size = SDL_strlen(buffer);
+    char *ret = SDL_malloc(size + 1);
+    strncpy(ret, buffer, size);
+    ret[size] = '\0';
 
-	return ret;
+    return ret;
 }
 
 char *
 XMLCloseElement(const char *tag)
 {
-	if(ValidateString(tag) == 0) {
-		return NULL;
-	}
+    if(ValidateString(tag) == 0) {
+        return NULL;
+    }
 
-	int retBufferSize = 150;
-	char *ret = SDL_malloc(retBufferSize);
-	memset(ret, 0, retBufferSize);
+    int retBufferSize = 150;
+    char *ret = SDL_malloc(retBufferSize);
+    memset(ret, 0, retBufferSize);
 
-	// \todo check that element we're trying to close is actually open,
-	// otherwise it'll cause nesting problems
+    // \todo check that element we're trying to close is actually open,
+    // otherwise it'll cause nesting problems
 
-	// Close the open tags with proper nesting. Closes tags until it finds
-	// the given tag which is the last tag that will be closed
-	TagList *openTag = openTags;
-	while(openTag) {
-		TagList *temp = openTag->next;
+    // Close the open tags with proper nesting. Closes tags until it finds
+    // the given tag which is the last tag that will be closed
+    TagList *openTag = openTags;
+    while(openTag) {
+        TagList *temp = openTag->next;
 
-		char *lowOpenTag = ToLowerCase(openTag->tag);
-		char *lowTag = ToLowerCase(tag);
+        char *lowOpenTag = ToLowerCase(openTag->tag);
+        char *lowTag = ToLowerCase(tag);
 
-		const int openTagSize = SDL_strlen(lowOpenTag);
-		const int tagSize = SDL_strlen(lowTag);
-		const int compSize = (openTagSize > tagSize) ? openTagSize : tagSize;
+        const int openTagSize = SDL_strlen(lowOpenTag);
+        const int tagSize = SDL_strlen(lowTag);
+        const int compSize = (openTagSize > tagSize) ? openTagSize : tagSize;
 
-		memset(buffer, 0, bufferSize);
+        memset(buffer, 0, bufferSize);
 
-		int breakOut = 0;
-		if(SDL_strncmp(lowOpenTag, lowTag, compSize) == 0) {
-			breakOut = 1;
-			SDL_snprintf(buffer, bufferSize, "</%s>", tag);
-		} else {
-			SDL_snprintf(buffer, bufferSize, "</%s>", openTag->tag);
-		}
+        int breakOut = 0;
+        if(SDL_strncmp(lowOpenTag, lowTag, compSize) == 0) {
+            breakOut = 1;
+            SDL_snprintf(buffer, bufferSize, "</%s>", tag);
+        } else {
+            SDL_snprintf(buffer, bufferSize, "</%s>", openTag->tag);
+        }
 
-		SDL_free(lowOpenTag);
-		SDL_free(lowTag);
+        SDL_free(lowOpenTag);
+        SDL_free(lowTag);
 
-		int bytesLeft = bufferSize - SDL_strlen(ret);
-		if(bytesLeft) {
-			strncat(ret, buffer, bytesLeft);
-		} else {
-			// \! todo there's probably better way to report an error?
-			fprintf(stderr, "xml.c | XMLCloseElement: Buffer is full");
-		}
+        int bytesLeft = bufferSize - SDL_strlen(ret);
+        if(bytesLeft) {
+            strncat(ret, buffer, bytesLeft);
+        } else {
+            // \! todo there's probably better way to report an error?
+            fprintf(stderr, "xml.c | XMLCloseElement: Buffer is full");
+        }
 
-		RemoveOpenTag(openTag->tag);
+        RemoveOpenTag(openTag->tag);
 
-		openTag = temp;
+        openTag = temp;
 
-		if(breakOut) {
-			break;
-		}
-	}
+        if(breakOut) {
+            break;
+        }
+    }
 
-	return ret;
+    return ret;
 }
 

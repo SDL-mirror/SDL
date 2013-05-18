@@ -41,14 +41,14 @@ SDL_bool
 SDL_RegisterHintChangedCb(const char *name, SDL_HintChangedCb hintCb)
 {
     SDL_Hint *hint;
-	
+
     for (hint = SDL_hints; hint; hint = hint->next) {
         if (SDL_strcmp(name, hint->name) == 0) {
             hint->callback = hintCb;
             return SDL_TRUE;
         }
     }
-	
+
     return SDL_FALSE;
 }
 

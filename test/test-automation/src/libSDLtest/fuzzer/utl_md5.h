@@ -40,10 +40,10 @@ extern    "C" {
 
 /* Data structure for MD5 (Message-Digest) computation */
   typedef struct {
-    MD5UINT4  i[2];		/* number of _bits_ handled mod 2^64 */
-    MD5UINT4  buf[4];		/* scratch buffer */
-    unsigned char in[64];	/* input buffer */
-    unsigned char digest[16];	/* actual digest after MD5Final call */
+    MD5UINT4  i[2];     /* number of _bits_ handled mod 2^64 */
+    MD5UINT4  buf[4];       /* scratch buffer */
+    unsigned char in[64];   /* input buffer */
+    unsigned char digest[16];   /* actual digest after MD5Final call */
   } MD5_CTX;
 
 /* ---------- Function Prototypes ------------- */
@@ -58,19 +58,19 @@ extern    "C" {
 #define DLLINTERFACE
 #endif
 
-/* 
+/*
  * utl_md5Init: initialize the context
  *
  * Parameters:
  *
- *   mdContext		pointer to context variable
+ *   mdContext      pointer to context variable
  *
  * Return value:
  *
  *   none
  *
  * Note: The function initializes the message-digest context
- *       mdContext. Call before each new use of the context - 
+ *       mdContext. Call before each new use of the context -
  *       all fields are set to zero.
  */
   DLLINTERFACE void utl_md5Init(MD5_CTX * mdContext);
@@ -78,7 +78,7 @@ extern    "C" {
 
 /*
  * utl_md5update: update digest from variable length data
- * 
+ *
  * Parameters:
  *
  *   mdContext       pointer to context variable
@@ -89,13 +89,13 @@ extern    "C" {
  *
  *   none
  *
- * Note: The function updates the message-digest context to account 
+ * Note: The function updates the message-digest context to account
  *       for the presence of each of the characters inBuf[0..inLen-1]
  *       in the message whose digest is being computed.
 */
 
   DLLINTERFACE void utl_md5Update(MD5_CTX * mdContext, unsigned char *inBuf,
-				 unsigned int inLen);
+                 unsigned int inLen);
 
 
 /*
@@ -103,7 +103,7 @@ extern    "C" {
  *
  * Parameters:
  *
- *   mdContext		pointer to context variable
+ *   mdContext      pointer to context variable
  *
  * Return value:
  *

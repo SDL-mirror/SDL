@@ -31,7 +31,7 @@ typedef struct SDL_VideoData
 {
     SDL_bool egl_initialized;   /* OpenGL ES device initialization status */
     uint32_t egl_refcount;      /* OpenGL ES reference count              */
-    
+
 
 
 } SDL_VideoData;
@@ -46,7 +46,7 @@ typedef struct SDL_DisplayData
 typedef struct SDL_WindowData
 {
     SDL_bool uses_gles;         /* if true window must support OpenGL ES */
-    
+
 } SDL_WindowData;
 
 
@@ -96,7 +96,7 @@ SDL_bool PSP_HasScreenKeyboardSupport(_THIS);
 void PSP_ShowScreenKeyboard(_THIS, SDL_Window *window);
 void PSP_HideScreenKeyboard(_THIS, SDL_Window *window);
 SDL_bool PSP_IsScreenKeyboardShown(_THIS, SDL_Window *window);
-    
+
 #endif /* __SDL_PANDORA_H__ */
 
 /* vi: set ts=4 sw=4 expandtab: */

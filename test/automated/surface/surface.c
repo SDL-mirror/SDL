@@ -49,9 +49,9 @@ static void surface_testLoad( SDL_Surface *testsur )
 
    /* Create the blit surface. */
 #ifdef __APPLE__
-	face = SDL_LoadBMP("icon.bmp");
+    face = SDL_LoadBMP("icon.bmp");
 #else
-	face = SDL_LoadBMP("../icon.bmp");
+    face = SDL_LoadBMP("../icon.bmp");
 #endif
 
    if (SDL_ATassert( "SDL_CreateLoadBmp", face != NULL))
@@ -428,7 +428,7 @@ int test_surface (void)
     * Surface on surface tests.
     */
    /* Create the test surface. */
-   testsur = SDL_CreateRGBSurface( 0, 80, 60, 32, 
+   testsur = SDL_CreateRGBSurface( 0, 80, 60, 32,
          RMASK, GMASK, BMASK, AMASK );
    if (SDL_ATassert( "SDL_CreateRGBSurface", testsur != NULL))
       goto err;

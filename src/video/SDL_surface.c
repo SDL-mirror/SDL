@@ -473,13 +473,13 @@ SDL_GetClipRect(SDL_Surface * surface, SDL_Rect * rect)
     }
 }
 
-/* 
+/*
  * Set up a blit between two surfaces -- split into three parts:
- * The upper part, SDL_UpperBlit(), performs clipping and rectangle 
+ * The upper part, SDL_UpperBlit(), performs clipping and rectangle
  * verification.  The lower part is a pointer to a low level
  * accelerated blitting function.
  *
- * These parts are separated out and each used internally by this 
+ * These parts are separated out and each used internally by this
  * library in the optimimum places.  They are exported so that if
  * you know exactly what you are doing, you can optimize your code
  * by calling the one(s) you need.
@@ -738,7 +738,7 @@ SDL_LowerBlitScaled(SDL_Surface * src, SDL_Rect * srcrect,
     src->map->info.flags |= SDL_COPY_NEAREST;
 
     if ( !(src->map->info.flags & complex_copy_flags) &&
-         src->format->format == dst->format->format && 
+         src->format->format == dst->format->format &&
          !SDL_ISPIXELFORMAT_INDEXED(src->format->format) ) {
         return SDL_SoftStretch( src, &final_src, dst, &final_dst );
     } else {
@@ -785,7 +785,7 @@ SDL_UnlockSurface(SDL_Surface * surface)
     }
 }
 
-/* 
+/*
  * Convert a surface into the specified pixel format.
  */
 SDL_Surface *
@@ -854,7 +854,7 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
         SDL_bool set_colorkey_by_color = SDL_FALSE;
 
         if (surface->format->palette) {
-            if (format->palette && 
+            if (format->palette &&
                 surface->format->palette->ncolors <= format->palette->ncolors &&
                 (SDL_memcmp(surface->format->palette->colors, format->palette->colors,
                   surface->format->palette->ncolors * sizeof(SDL_Color)) == 0)) {
@@ -917,7 +917,7 @@ SDL_ConvertSurfaceFormat(SDL_Surface * surface, Uint32 pixel_format,
  */
 static __inline__ SDL_bool
 SDL_CreateSurfaceOnStack(int width, int height, Uint32 pixel_format,
-                         void * pixels, int pitch, SDL_Surface * surface, 
+                         void * pixels, int pitch, SDL_Surface * surface,
                          SDL_PixelFormat * format, SDL_BlitMap * blitmap)
 {
     if (SDL_ISPIXELFORMAT_INDEXED(pixel_format)) {

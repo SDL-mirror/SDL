@@ -42,29 +42,29 @@
 #include <stdio.h>
 
 typedef struct {
-	unsigned char *data;
-	int format, count;
-	Atom type;
+    unsigned char *data;
+    int format, count;
+    Atom type;
 } SDL_x11Prop;
 
 /* Reads property
    Must call XFree on results
  */
-static void X11_ReadProperty(SDL_x11Prop *p, Display *disp, Window w, Atom prop) 
+static void X11_ReadProperty(SDL_x11Prop *p, Display *disp, Window w, Atom prop)
 {
     unsigned char *ret=NULL;
     Atom type;
     int fmt;
     unsigned long count;
     unsigned long bytes_left;
-    int bytes_fetch = 0;	
-    
+    int bytes_fetch = 0;
+
     do {
         if (ret != 0) XFree(ret);
         XGetWindowProperty(disp, w, prop, 0, bytes_fetch, False, AnyPropertyType, &type, &fmt, &count, &bytes_left, &ret);
         bytes_fetch += bytes_left;
     } while (bytes_left != 0);
-    
+
     p->data=ret;
     p->format=fmt;
     p->count=count;
@@ -124,7 +124,7 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
         /* according to the xlib docs, no specific mouse wheel events exist.
            however, mouse wheel events trigger a button press and a button release
            immediately. thus, checking if the same button was released at the same
-           time as it was pressed, should be an adequate hack to derive a mouse 
+           time as it was pressed, should be an adequate hack to derive a mouse
            wheel event. */
         XPeekEvent(display,&peekevent);
         if ((peekevent.type           == ButtonRelease) &&
@@ -501,7 +501,7 @@ X11_DispatchEvent(_THIS)
     case ClientMessage:{
 
             int xdnd_version=0;
-    
+
             if (xevent.xclient.message_type == videodata->XdndEnter) {
                 SDL_bool use_list = xevent.xclient.data.l[1] & 1;
                 data->xdnd_source = xevent.xclient.data.l[0];
@@ -519,7 +519,7 @@ X11_DispatchEvent(_THIS)
                 }
             }
             else if (xevent.xclient.message_type == videodata->XdndPosition) {
-            
+
                 /* reply with status */
                 XClientMessageEvent m;
                 memset(&m, 0, sizeof(XClientMessageEvent));
@@ -533,7 +533,7 @@ X11_DispatchEvent(_THIS)
                 m.data.l[2] = 0; /* specify an empty rectangle */
                 m.data.l[3] = 0;
                 m.data.l[4] = videodata->XdndActionCopy; /* we only accept copying anyway */
-                
+
                 XSendEvent(display, xevent.xclient.data.l[0], False, NoEventMask, (XEvent*)&m);
                 XFlush(display);
             }
@@ -554,9 +554,9 @@ X11_DispatchEvent(_THIS)
                 } else {
                     /* convert */
                     if(xdnd_version >= 1) {
-                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, xevent.xclient.data.l[2]);
+                        XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, xevent.xclient.data.l[2]);
                     } else {
-                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, CurrentTime);
+                        XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, CurrentTime);
                     }
                 }
             }
@@ -596,7 +596,7 @@ X11_DispatchEvent(_THIS)
         break;
 
     case MotionNotify:{
-            SDL_Mouse *mouse = SDL_GetMouse();  
+            SDL_Mouse *mouse = SDL_GetMouse();
             if(!mouse->relative_mode) {
 #ifdef DEBUG_MOTION
                 printf("window %p: X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
@@ -775,7 +775,7 @@ X11_DispatchEvent(_THIS)
                 /* read data */
                 SDL_x11Prop p;
                 X11_ReadProperty(&p, display, data->xwindow, videodata->PRIMARY);
-                
+
                 if(p.format==8) {
                     SDL_bool expect_lf = SDL_FALSE;
                     char *start = NULL;
@@ -807,9 +807,9 @@ X11_DispatchEvent(_THIS)
                         scan++;
                     }
                 }
-                
+
                 XFree(p.data);
-                
+
                 /* send reply */
                 XClientMessageEvent m;
                 memset(&m, 0, sizeof(XClientMessageEvent));
@@ -822,13 +822,13 @@ X11_DispatchEvent(_THIS)
                 m.data.l[1] = 1;
                 m.data.l[2] = videodata->XdndActionCopy;
                 XSendEvent(display, data->xdnd_source, False, NoEventMask, (XEvent*)&m);
-                
+
                 XSync(display, False);
-        
+
             } else {
                 videodata->selection_waiting = SDL_FALSE;
             }
-        
+
         }
         break;
 
@@ -915,7 +915,7 @@ X11_PumpEvents(_THIS)
 
             data->screensaver_activity = now;
         }
-    }   
+    }
 
     /* Keep processing pending events */
     while (X11_Pending(data->display)) {

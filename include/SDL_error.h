@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_error.h
- *  
+ *
  *  Simple error message routines for SDL.
  */
 
@@ -33,9 +33,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* Public functions */
@@ -46,14 +44,14 @@ extern DECLSPEC void SDLCALL SDL_ClearError(void);
 
 /**
  *  \name Internal error functions
- *  
- *  \internal 
+ *
+ *  \internal
  *  Private error reporting function - used internally.
  */
 /*@{*/
-#define SDL_OutOfMemory()	SDL_Error(SDL_ENOMEM)
-#define SDL_Unsupported()	SDL_Error(SDL_UNSUPPORTED)
-#define SDL_InvalidParamError(param)	SDL_SetError("Parameter '%s' is invalid", (param))
+#define SDL_OutOfMemory()   SDL_Error(SDL_ENOMEM)
+#define SDL_Unsupported()   SDL_Error(SDL_UNSUPPORTED)
+#define SDL_InvalidParamError(param)    SDL_SetError("Parameter '%s' is invalid", (param))
 typedef enum
 {
     SDL_ENOMEM,
@@ -69,9 +67,7 @@ extern DECLSPEC int SDLCALL SDL_Error(SDL_errorcode code);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

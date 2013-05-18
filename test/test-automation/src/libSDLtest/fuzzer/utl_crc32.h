@@ -15,14 +15,14 @@ extern    "C" {
 /* Definition shared by all CRC routines */
 
 #ifndef CrcUint32
- #define CrcUint32	unsigned int
+ #define CrcUint32  unsigned int
 #endif
 #ifndef CrcUint8
- #define CrcUint8	unsigned char
+ #define CrcUint8   unsigned char
 #endif
 
 #ifdef ORIGINAL_METHOD
- #define CRC32_POLY 0x04c11db7 	 /* AUTODIN II, Ethernet, & FDDI */
+ #define CRC32_POLY 0x04c11db7   /* AUTODIN II, Ethernet, & FDDI */
 #else
  #define CRC32_POLY 0xEDB88320   /* Perl String::CRC32 compatible */
 #endif
@@ -45,12 +45,12 @@ extern    "C" {
 #define DLLINTERFACE
 #endif
 
-/* 
+/*
  * utl_crc32Init: initialize the CRC context
  *
  * Parameters:
  *
- *   crcContext		pointer to context variable
+ *   crcContext     pointer to context variable
  *
  * Return value:
  *
@@ -64,10 +64,10 @@ extern    "C" {
 
 /*
  * utl_crc32Calc: calculate a crc32 from a data block
- * 
+ *
  * Parameters:
  *
- *   crcContext		pointer to context variable
+ *   crcContext     pointer to context variable
  *   inBuf              input buffer to checksum
  *   inLen              length of input buffer
  *   crc32              pointer to Uint32 to store the final CRC into
@@ -93,7 +93,7 @@ extern    "C" {
  *
  * Parameters:
  *
- *   crcContext		pointer to context variable
+ *   crcContext     pointer to context variable
  *
  * Return value:
  *

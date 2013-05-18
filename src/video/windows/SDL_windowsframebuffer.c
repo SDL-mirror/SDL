@@ -77,7 +77,7 @@ int WIN_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, voi
     /* Fill in the size information */
     *pitch = (((window->w * SDL_BYTESPERPIXEL(*format)) + 3) & ~3);
     info->bmiHeader.biWidth = window->w;
-    info->bmiHeader.biHeight = -window->h;	/* negative for topdown bitmap */
+    info->bmiHeader.biHeight = -window->h;  /* negative for topdown bitmap */
     info->bmiHeader.biSizeImage = window->h * (*pitch);
 
     data->mdc = CreateCompatibleDC(data->hdc);

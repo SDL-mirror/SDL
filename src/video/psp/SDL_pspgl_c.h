@@ -30,9 +30,9 @@
 
 
 typedef struct SDL_GLDriverData {
-		EGLDisplay display;
-		EGLContext context;
-		EGLSurface surface;
+        EGLDisplay display;
+        EGLContext context;
+        EGLSurface surface;
     uint32_t swapinterval;
 }SDL_GLDriverData;
 

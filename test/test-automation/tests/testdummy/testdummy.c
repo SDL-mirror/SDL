@@ -35,25 +35,25 @@
 
 /* Test case references */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "test_dummy1", "description", TEST_ENABLED, 0, 4};
+        (TestCaseReference){ "test_dummy1", "description", TEST_ENABLED, 0, 4};
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "test_dummy2", "description", TEST_ENABLED, 0, 0};
+        (TestCaseReference){ "test_dummy2", "description", TEST_ENABLED, 0, 0};
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "test_fuzzy", "description", TEST_ENABLED, 0, 2};
+        (TestCaseReference){ "test_fuzzy", "description", TEST_ENABLED, 0, 2};
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "test_leak", "description", TEST_ENABLED, 0, 2};
+        (TestCaseReference){ "test_leak", "description", TEST_ENABLED, 0, 2};
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, NULL
+    &test1, &test2, &test3, &test4, NULL
 };
 
 
 TestCaseReference **QueryTestSuite() {
-	return (TestCaseReference **)testSuite;
+    return (TestCaseReference **)testSuite;
 }
 
 /* Create test fixture */
@@ -72,8 +72,8 @@ TestCaseReference **QueryTestSuite() {
 void
 SetUp(void *arg)
 {
-	// create test fixture,
-	// for example, set up static variables used by test cases here
+    // create test fixture,
+    // for example, set up static variables used by test cases here
 }
 
 /*!
@@ -87,71 +87,71 @@ SetUp(void *arg)
 void
 TearDown(void *arg)
 {
-	// destroy test fixture
+    // destroy test fixture
 }
 
 /* Test case functions */
 void
 test_dummy1(void *arg)
 {
-	AssertEquals(5, 5, "Assert message");
+    AssertEquals(5, 5, "Assert message");
 
-	/*
-	for( ; 1 ; )
-		Log(0, "uint8 (same value): %u", RandomUint32());
-	// */
+    /*
+    for( ; 1 ; )
+        Log(0, "uint8 (same value): %u", RandomUint32());
+    // */
 
-	//Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
+    //Log(0, "uint8 (same value): %d", RandomUint8BoundaryValue(200, 200, SDL_TRUE));
 
-	int c = 0;
-	//for(; c < 100 ;  c++)
-	printf("%f\n", RandomUnitFloat());
+    int c = 0;
+    //for(; c < 100 ;  c++)
+    printf("%f\n", RandomUnitFloat());
 
-	for(; 0 ; )
-		printf("%d\n", RandomSint16());
+    for(; 0 ; )
+        printf("%d\n", RandomSint16());
 
-	for( ; 0 ; ) {
-		//Log(0, "sint8: %d", RandomSint8BoundaryValue(-11, 10, SDL_TRUE));
-		//Log(0, "sint16: %d", RandomSint16BoundaryValue(SHRT_MIN, SHRT_MAX, SDL_FALSE));
-		Log(0, "sint32: %d", RandomSint32BoundaryValue(INT_MIN, 3000, SDL_FALSE));
-		//Log(0, "sint64: %lld", RandomSint64BoundaryValue(-34, -34, SDL_FALSE));
-	}
+    for( ; 0 ; ) {
+        //Log(0, "sint8: %d", RandomSint8BoundaryValue(-11, 10, SDL_TRUE));
+        //Log(0, "sint16: %d", RandomSint16BoundaryValue(SHRT_MIN, SHRT_MAX, SDL_FALSE));
+        Log(0, "sint32: %d", RandomSint32BoundaryValue(INT_MIN, 3000, SDL_FALSE));
+        //Log(0, "sint64: %lld", RandomSint64BoundaryValue(-34, -34, SDL_FALSE));
+    }
 
-	for(; 0 ;) {
-		//Log(0, "int8: %u", RandomUint8BoundaryValue(0, 255, SDL_FALSE));
-		//Log(0, "uint16: %u", RandomUint16BoundaryValue(0, UINT16_MAX, SDL_FALSE));
-		//Log(0, "int32: %u", RandomUint32BoundaryValue(0, 0xFFFFFFFE, SDL_FALSE));
-		Log(0, "int64: %llu", RandomUint64BoundaryValue(2, 0xFFFFFFFFFFFFFFFE, SDL_FALSE));
-	}
+    for(; 0 ;) {
+        //Log(0, "int8: %u", RandomUint8BoundaryValue(0, 255, SDL_FALSE));
+        //Log(0, "uint16: %u", RandomUint16BoundaryValue(0, UINT16_MAX, SDL_FALSE));
+        //Log(0, "int32: %u", RandomUint32BoundaryValue(0, 0xFFFFFFFE, SDL_FALSE));
+        Log(0, "int64: %llu", RandomUint64BoundaryValue(2, 0xFFFFFFFFFFFFFFFE, SDL_FALSE));
+    }
 
-	for(; 0 ;) {
-		int min = -5;
-		int max = 5;
-		int random =  RandomIntegerInRange(min, max);
-		if(random < min || random > max ) {
-			AssertFail("Generated incorrect integer");
-		}
-		Log(0, "%d", random);
-	}
+    for(; 0 ;) {
+        int min = -5;
+        int max = 5;
+        int random =  RandomIntegerInRange(min, max);
+        if(random < min || random > max ) {
+            AssertFail("Generated incorrect integer");
+        }
+        Log(0, "%d", random);
+    }
 
-	//Log(0, "Random: %s", RandomAsciiString());
+    //Log(0, "Random: %s", RandomAsciiString());
 }
 
 void
 test_dummy2(void *arg)
 {
-	char *msg = "eello";
-	//msg[0] = 'H';
-	AssertTrue(1, "Assert message");
-	AssertTrue(0, "Assert message");
-	AssertTrue(1, "Assert message");
+    char *msg = "eello";
+    //msg[0] = 'H';
+    AssertTrue(1, "Assert message");
+    AssertTrue(0, "Assert message");
+    AssertTrue(1, "Assert message");
 }
 
 void
 test_fuzzy(void *arg)
 {
-	// Simulates a fuzzing failure
-	AssertTrue(RandomUint8() != 100, "Value is 100");
+    // Simulates a fuzzing failure
+    AssertTrue(RandomUint8() != 100, "Value is 100");
 }
 
 static void
@@ -164,9 +164,9 @@ f(void) {
 void
 test_leak(void *arg)
 {
-	// Creates a memory leak
-	f();
+    // Creates a memory leak
+    f();
 
-	AssertPass("");
+    AssertPass("");
 }
 

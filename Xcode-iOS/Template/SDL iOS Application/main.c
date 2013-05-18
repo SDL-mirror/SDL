@@ -1,7 +1,7 @@
 /*
- *	rectangles.c
- *	written by Holmes Futrell
- *	use however you want
+ *  rectangles.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "SDL.h"

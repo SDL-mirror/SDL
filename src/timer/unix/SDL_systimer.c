@@ -85,7 +85,7 @@ SDL_GetTicks(void)
 #if HAVE_CLOCK_GETTIME
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        ticks = 
+        ticks =
             (now.tv_sec - start_ts.tv_sec) * 1000 + (now.tv_nsec -
                                                  start_ts.tv_nsec) / 1000000;
 #elif defined(__APPLE__)

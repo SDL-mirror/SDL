@@ -1,7 +1,7 @@
 /*
- *	fireworks.c
- *	written by Holmes Futrell
- *	use however you want
+ *  fireworks.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "SDL.h"
@@ -17,11 +17,11 @@
 
 static GLuint particleTextureID;        /* OpenGL particle texture id */
 static SDL_bool pointSizeExtensionSupported;    /* is GL_OES_point_size_array supported ? */
-/* 
-	used to describe what type of particle a given struct particle is.
-	emitter - this particle flies up, shooting off trail particles, then finally explodes into dust particles.
-	trail	- shoots off, following emitter particle
-	dust	- radiates outwards from emitter explosion
+/*
+    used to describe what type of particle a given struct particle is.
+    emitter - this particle flies up, shooting off trail particles, then finally explodes into dust particles.
+    trail   - shoots off, following emitter particle
+    dust    - radiates outwards from emitter explosion
 */
 enum particleType
 {
@@ -30,7 +30,7 @@ enum particleType
     dust
 };
 /*
-	struct particle is used to describe each particle displayed on screen
+    struct particle is used to describe each particle displayed on screen
 */
 struct particle
 {
@@ -57,8 +57,8 @@ int nextPowerOfTwo(int x);
 void drawParticles();
 void stepParticles(void);
 
-/*	helper function (used in texture loading)
-	returns next power of two greater than or equal to x
+/*  helper function (used in texture loading)
+    returns next power of two greater than or equal to x
 */
 int
 nextPowerOfTwo(int x)
@@ -70,8 +70,8 @@ nextPowerOfTwo(int x)
     return val;
 }
 
-/*	
-	steps each active particle by timestep MILLESECONDS_PER_FRAME
+/*
+    steps each active particle by timestep MILLESECONDS_PER_FRAME
 */
 void
 stepParticles(void)
@@ -145,13 +145,13 @@ stepParticles(void)
         curr++;
     }
     /* the number of active particles is computed as the difference between
-       old number of active particles, where slot points, and the 
+       old number of active particles, where slot points, and the
        new size of the array, where particles points */
     num_active_particles = slot - particles;
 }
 
 /*
-	This draws all the particles shown on screen
+    This draws all the particles shown on screen
 */
 void
 drawParticles()
@@ -177,7 +177,7 @@ drawParticles()
 }
 
 /*
-	This causes an emitter to explode in a circular bloom of dust particles
+    This causes an emitter to explode in a circular bloom of dust particles
 */
 void
 explodeEmitter(struct particle *emitter)
@@ -219,7 +219,7 @@ explodeEmitter(struct particle *emitter)
 }
 
 /*
-	This spawns a trail particle from an emitter
+    This spawns a trail particle from an emitter
 */
 void
 spawnTrailFromEmitter(struct particle *emitter)
@@ -254,7 +254,7 @@ spawnTrailFromEmitter(struct particle *emitter)
 }
 
 /*
-	spawns a new emitter particle at the bottom of the screen
+    spawns a new emitter particle at the bottom of the screen
     destined for the point (x,y).
 */
 void
@@ -313,7 +313,7 @@ initializeParticles(void)
 }
 
 /*
-	loads the particle texture
+    loads the particle texture
  */
 void
 initializeTexture()
@@ -375,7 +375,7 @@ main(int argc, char *argv[])
     }
     /* seed the random number generator */
     srand(time(NULL));
-    /*      
+    /*
        request some OpenGL parameters
        that may speed drawing
      */

@@ -349,7 +349,7 @@ char *RandomAsciiStringWithMaximumLength(int maxLength);
  * \param iterationNumber of test iteration
  *
  * \return Generated execution key as blob of 16 bytes. It needs be deallocated.
- * 			On error, returns NULL.
+ *          On error, returns NULL.
  */
 Uint64 GenerateExecKey(char *runSeed, char *suiteName, char *testName, int iterationNumber);
 

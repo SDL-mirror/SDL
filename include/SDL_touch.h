@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_touch.h
- *  
+ *
  *  Include file for SDL touch event handling.
  */
 
@@ -35,9 +35,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 typedef Sint64 SDL_TouchID;
@@ -79,9 +77,7 @@ extern DECLSPEC SDL_Finger * SDLCALL SDL_GetTouchFinger(SDL_TouchID touchID, int
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

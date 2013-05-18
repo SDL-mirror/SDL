@@ -115,12 +115,12 @@ DirectFB_CreateDefaultCursor(void)
     {
         for (j = 0; j < 32; j++)
         {
-        	switch (arrow[i][j])
-        	{
-        	case ' ': dest[j] = 0x00000000; break;
-        	case '.': dest[j] = 0xffffffff; break;
-        	case 'X': dest[j] = 0xff000000; break;
-        	}
+            switch (arrow[i][j])
+            {
+            case ' ': dest[j] = 0x00000000; break;
+            case '.': dest[j] = 0xffffffff; break;
+            case 'X': dest[j] = 0xff000000; break;
+            }
         }
         dest += (pitch >> 2);
     }

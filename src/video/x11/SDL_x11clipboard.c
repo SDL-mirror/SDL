@@ -139,7 +139,7 @@ X11_GetClipboardText(_THIS)
     if (!text) {
         text = SDL_strdup("");
     }
-    
+
     return text;
 }
 
@@ -151,7 +151,7 @@ X11_HasClipboardText(_THIS)
     if (text) {
         result = (SDL_strlen(text)>0) ? SDL_TRUE : SDL_FALSE;
         SDL_free(text);
-    }    
+    }
     return result;
 }
 

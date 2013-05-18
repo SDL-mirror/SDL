@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_cpuinfo.h
- *  
+ *
  *  CPU feature detection for SDL.
  */
 
@@ -66,9 +66,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* This is a guess for the cacheline size used for padding.
@@ -139,9 +137,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE42(void);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

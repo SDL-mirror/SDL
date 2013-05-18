@@ -33,12 +33,12 @@
  *  \returns Given integer as string
  */
 char *IntToString(const int integer) {
-	static char buffer[256]; // malloc might work better
-	memset(buffer, 0, sizeof(buffer));
+    static char buffer[256]; // malloc might work better
+    memset(buffer, 0, sizeof(buffer));
 
-	SDL_snprintf(buffer, sizeof(buffer), "%d", integer);
+    SDL_snprintf(buffer, sizeof(buffer), "%d", integer);
 
-	return buffer;
+    return buffer;
 }
 
 /*!
@@ -53,12 +53,12 @@ char *IntToString(const int integer) {
  *  \returns Given integer as string in hex fomat
  */
 char *IntToHexString(const Uint64 integer) {
-	static char buffer[256]; // malloc might work better
-	memset(buffer, 0, sizeof(buffer));
+    static char buffer[256]; // malloc might work better
+    memset(buffer, 0, sizeof(buffer));
 
-	SDL_snprintf(buffer, sizeof(buffer), "%llX", integer);
+    SDL_snprintf(buffer, sizeof(buffer), "%llX", integer);
 
-	return buffer;
+    return buffer;
 }
 
 /*!
@@ -72,12 +72,12 @@ char *IntToHexString(const Uint64 integer) {
  * \returns Given double value as string
  */
 char *DoubleToString(const double decimal) {
-	static char buffer[256]; // malloc might work better
-	memset(buffer, 0, sizeof(buffer));
+    static char buffer[256]; // malloc might work better
+    memset(buffer, 0, sizeof(buffer));
 
-	SDL_snprintf(buffer, sizeof(buffer), "%.5f", decimal);
+    SDL_snprintf(buffer, sizeof(buffer), "%.5f", decimal);
 
-	return buffer;
+    return buffer;
 }
 
 /*!
@@ -91,15 +91,15 @@ char *DoubleToString(const double decimal) {
  * \return Ascii presentation
  */
 char *TimestampToString(const time_t timestamp) {
-	static char buffer[256];
-	memset(buffer, 0, sizeof(buffer));
+    static char buffer[256];
+    memset(buffer, 0, sizeof(buffer));
 
-	time_t copy = timestamp;
+    time_t copy = timestamp;
 
-	struct tm *local = localtime(&copy);
-	strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", local);
+    struct tm *local = localtime(&copy);
+    strftime(buffer, sizeof(buffer), "%a %Y-%m-%d %H:%M:%S %Z", local);
 
-	return buffer;
+    return buffer;
 }
 
 /*!
@@ -115,15 +115,15 @@ char *TimestampToString(const time_t timestamp) {
  * \return Ascii presentation
  */
 char *TimestampToStringWithFormat(const time_t timestamp, char *format) {
-	static char buffer[256];
-	memset(buffer, 0, sizeof(buffer));
+    static char buffer[256];
+    memset(buffer, 0, sizeof(buffer));
 
-	time_t copy = timestamp;
+    time_t copy = timestamp;
 
-	struct tm *local = localtime(&copy);
-	strftime(buffer, sizeof(buffer), format, local);
+    struct tm *local = localtime(&copy);
+    strftime(buffer, sizeof(buffer), format, local);
 
-	return buffer;
+    return buffer;
 }
 
 /*! Turns all the characters of the given
@@ -135,23 +135,23 @@ char *TimestampToStringWithFormat(const time_t timestamp, char *format) {
 char *
 ToLowerCase(const char *string)
 {
-	if(ValidateString(string) == 0) {
-		return NULL;
-	}
+    if(ValidateString(string) == 0) {
+        return NULL;
+    }
 
-	const int size = SDL_strlen(string);
-	char *ret = SDL_malloc(size + 1);
-	strncpy(ret, string, size);
-	ret[size] = '\0';
+    const int size = SDL_strlen(string);
+    char *ret = SDL_malloc(size + 1);
+    strncpy(ret, string, size);
+    ret[size] = '\0';
 
-	int counter = 0;
-	for(; counter < size; ++counter) {
-		ret[counter] = tolower(ret[counter]);
-	}
+    int counter = 0;
+    for(; counter < size; ++counter) {
+        ret[counter] = tolower(ret[counter]);
+    }
 
-	// printf("Debug: %s == %s\n", string, ret);
+    // printf("Debug: %s == %s\n", string, ret);
 
-	return ret;
+    return ret;
 }
 
 /*!
@@ -164,19 +164,19 @@ ToLowerCase(const char *string)
 int
 ValidateString(const char *string)
 {
-	int retVal = 1;
+    int retVal = 1;
 
-	if(string != NULL) {
-		if(SDL_strlen(string) > 0) {
-			retVal = 1;
-		}
+    if(string != NULL) {
+        if(SDL_strlen(string) > 0) {
+            retVal = 1;
+        }
 
-		retVal = 1;
-	} else {
-		retVal = 0;
-	}
+        retVal = 1;
+    } else {
+        retVal = 0;
+    }
 
-	return retVal;
+    return retVal;
 }
 
 

@@ -35,7 +35,7 @@ main(int argc, char *argv[])
     int i, done;
     SDL_Event event;
 
- 
+
     /* Initialize test framework */
     state = SDLTest_CommonCreateState(argv, SDL_INIT_VIDEO);
     if (!state) {

@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    
+
     if (!SDLTest_CommonInit(state)) {
         return 2;
     }
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
         SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
         SDL_RenderClear(renderer);
     }
-    Redraw();    
+    Redraw();
     /* Main render loop */
     done = 0;
     while (!done) {
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
                 break;
-                    
+
             }
         }
     }

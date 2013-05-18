@@ -22,35 +22,35 @@ static const char const_mem[] = "Hello World!";
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "rwops_testParam", " Negative test for SDL_RWFromFile parameters", TEST_ENABLED, 0, 60 };
+        (TestCaseReference){ "rwops_testParam", " Negative test for SDL_RWFromFile parameters", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "rwops_testMem", "Tests opening from memory", TEST_ENABLED, 0, 60 };
+        (TestCaseReference){ "rwops_testMem", "Tests opening from memory", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 60 };
+        (TestCaseReference){ "rwops_testConstMem", "Tests opening from (const) memory", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "rwops_testFileRead", "Tests reading from a file", TEST_ENABLED, 0, 60 };
+        (TestCaseReference){ "rwops_testFileRead", "Tests reading from a file", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test5 =
-		(TestCaseReference){ "rwops_testFileWrite", "Test writing to a file", TEST_ENABLED, 0, 60 };
+        (TestCaseReference){ "rwops_testFileWrite", "Test writing to a file", TEST_ENABLED, 0, 60 };
 
 static const TestCaseReference test6 =
-		(TestCaseReference){ "rwops_testFPRead", "Test reading from stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
+        (TestCaseReference){ "rwops_testFPRead", "Test reading from stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
 
 static const TestCaseReference test7 =
-		(TestCaseReference){ "rwops_testFPWrite", "Test writing to stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
+        (TestCaseReference){ "rwops_testFPWrite", "Test writing to stdio", TEST_ENABLED, TEST_REQUIRES_STDIO, 60 };
 
 
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, &test6, &test7, NULL
+    &test1, &test2, &test3, &test4, &test5, &test6, &test7, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
-	return (TestCaseReference **)testSuite;
+    return (TestCaseReference **)testSuite;
 }
 
 
@@ -58,19 +58,19 @@ TestCaseReference **QueryTestSuite() {
 void
 SetUp(void *arg)
 {
-	FILE *handle = fopen(RWOPS_READ, "w");
-	AssertTrue(handle != NULL, "Creating file '%s' failed", RWOPS_READ);
+    FILE *handle = fopen(RWOPS_READ, "w");
+    AssertTrue(handle != NULL, "Creating file '%s' failed", RWOPS_READ);
 
-	fwrite(hello_world, 1, SDL_strlen(hello_world), handle);
-	fclose(handle);
+    fwrite(hello_world, 1, SDL_strlen(hello_world), handle);
+    fclose(handle);
 }
 
 void
 TearDown(void *arg)
 {
-	// Remove the created files
-	remove(RWOPS_READ);
-	remove(RWOPS_WRITE);
+    // Remove the created files
+    remove(RWOPS_READ);
+    remove(RWOPS_WRITE);
 }
 
 /**
@@ -93,10 +93,10 @@ int _testGeneric( SDL_RWops *rw, int write )
    i = SDL_RWwrite( rw, hello_world, sizeof(hello_world)-1, 1);
 
    if (write) {
-	   AssertEquals(i, 1, "Writing with SDL_RWwrite (failed to write)");
+       AssertEquals(i, 1, "Writing with SDL_RWwrite (failed to write)");
    }
    else {
-		AssertTrue(i <= 0, "Writing with SDL_RWwrite (wrote when shouldn't have): %d <= 0", i);
+        AssertTrue(i <= 0, "Writing with SDL_RWwrite (wrote when shouldn't have): %d <= 0", i);
    }
 
    /* Test seek. */

@@ -28,7 +28,7 @@
 #include "SDL_systhread.h"
 #include "../SDL_error_c.h"
 
-#define ARRAY_CHUNKSIZE	32
+#define ARRAY_CHUNKSIZE 32
 /* The array of threads currently active in the application
    (except the main thread)
    The manipulation of an array here is safer than using a linked list.

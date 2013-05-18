@@ -577,7 +577,7 @@ X11_InitModes(_THIS)
                     unsigned long nitems, bytes_after;
                     Atom actual_type;
 
-	                if (props[i] == EDID) {
+                    if (props[i] == EDID) {
                         if (XRRGetOutputProperty(data->display,
                                                  res->outputs[output], props[i],
                                                  0, 100, False, False,

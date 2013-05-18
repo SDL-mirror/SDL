@@ -39,7 +39,7 @@ static int xinput2_multitouch_supported = 0;
 /* Opcode returned XQueryExtension
  * It will be used in event processing
  * to know that the event came from
- * this extension */ 
+ * this extension */
 static int xinput2_opcode;
 
 static void parse_valuators(const double *input_values,unsigned char *mask,int mask_len,
@@ -61,7 +61,7 @@ static void parse_valuators(const double *input_values,unsigned char *mask,int m
 }
 #endif /* SDL_VIDEO_DRIVER_X11_XINPUT2 */
 
-void 
+void
 X11_InitXinput2(_THIS)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
@@ -78,8 +78,8 @@ X11_InitXinput2(_THIS)
     /*
     * Initialize XInput 2
     * According to http://who-t.blogspot.com/2009/05/xi2-recipes-part-1.html its better
-    * to inform Xserver what version of Xinput we support.The server will store the version we support. 
-    * "As XI2 progresses it becomes important that you use this call as the server may treat the client 
+    * to inform Xserver what version of Xinput we support.The server will store the version we support.
+    * "As XI2 progresses it becomes important that you use this call as the server may treat the client
     * differently depending on the supported version".
     *
     * FIXME:event and err are not needed but if not passed XQueryExtension returns SegmentationFault
@@ -114,14 +114,14 @@ X11_InitXinput2(_THIS)
     eventmask.mask = mask;
 
     XISetMask(mask, XI_RawMotion);
-         
+
     if (XISelectEvents(data->display,DefaultRootWindow(data->display),&eventmask,1) != Success) {
-        return;     
+        return;
     }
 #endif
 }
 
-int 
+int
 X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2
@@ -172,7 +172,7 @@ X11_HandleXinput2Event(SDL_VideoData *videodata,XGenericEventCookie *cookie)
     return 0;
 }
 
-void 
+void
 X11_InitXinput2Multitouch(_THIS)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
@@ -202,7 +202,7 @@ X11_InitXinput2Multitouch(_THIS)
 #endif
 }
 
-void 
+void
 X11_Xinput2SelectTouch(_THIS, SDL_Window *window)
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH
@@ -222,13 +222,13 @@ X11_Xinput2SelectTouch(_THIS, SDL_Window *window)
     XISetMask(mask, XI_TouchBegin);
     XISetMask(mask, XI_TouchUpdate);
     XISetMask(mask, XI_TouchEnd);
-         
+
     XISelectEvents(data->display,window_data->xwindow,&eventmask,1);
 #endif
 }
 
 
-int 
+int
 X11_Xinput2IsInitialized()
 {
 #if SDL_VIDEO_DRIVER_X11_XINPUT2

@@ -19,7 +19,7 @@
 #include "SDL_test_common.h"
 
 #define SWAP(typ,a,b) do{typ t=a;a=b;b=t;}while(0)
-#define NUM_OBJECTS	100
+#define NUM_OBJECTS 100
 
 static SDLTest_CommonState *state;
 static int num_objects;

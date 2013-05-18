@@ -187,12 +187,12 @@ void
 WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
 {
     SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
-    
+
     if (!rect) {
         SDL_InvalidParamError("rect");
         return;
     }
-    
+
     videodata->ime_rect = *rect;
 }
 
@@ -1031,7 +1031,7 @@ STDMETHODIMP UIElementSink_BeginUIElement(TSFSink *sink, DWORD dwUIElementId, BO
         }
         preading->lpVtbl->Release(preading);
     }
-    else if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfCandidateListUIElement, (LPVOID *)&pcandlist)))	{
+    else if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfCandidateListUIElement, (LPVOID *)&pcandlist))) {
         videodata->ime_candref++;
         UILess_GetCandidateList(videodata, pcandlist);
         pcandlist->lpVtbl->Release(pcandlist);
@@ -1058,7 +1058,7 @@ STDMETHODIMP UIElementSink_UpdateUIElement(TSFSink *sink, DWORD dwUIElementId)
         }
         preading->lpVtbl->Release(preading);
     }
-    else if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfCandidateListUIElement, (LPVOID *)&pcandlist)))	{
+    else if (SUCCEEDED(element->lpVtbl->QueryInterface(element, &IID_ITfCandidateListUIElement, (LPVOID *)&pcandlist))) {
         UILess_GetCandidateList(videodata, pcandlist);
         pcandlist->lpVtbl->Release(pcandlist);
     }
@@ -1512,7 +1512,7 @@ void IME_Present(SDL_VideoData *videodata)
     if (videodata->ime_dirty)
         IME_Render(videodata);
 
-    // FIXME: Need to show the IME bitmap
+    /* FIXME: Need to show the IME bitmap */
 }
 
 #endif /* SDL_DISABLE_WINDOWS_IME */

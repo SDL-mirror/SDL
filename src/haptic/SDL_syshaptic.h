@@ -56,7 +56,7 @@ struct _SDL_Haptic
     SDL_HapticEffect rumble_effect; /* Rumble effect. */
 };
 
-/* 
+/*
  * Scans the system for haptic devices.
  *
  * Returns 0 on success, -1 on error.

@@ -1,7 +1,7 @@
 /*
- *	rectangles.c
- *	written by Holmes Futrell
- *	use however you want
+ *  rectangles.c
+ *  written by Holmes Futrell
+ *  use however you want
 */
 
 #include "SDL.h"
@@ -39,7 +39,7 @@ main(int argc, char *argv[])
 {
 
     SDL_Window *window;
-	SDL_Renderer *renderer;
+    SDL_Renderer *renderer;
     int done;
     SDL_Event event;
 
@@ -59,7 +59,7 @@ main(int argc, char *argv[])
         fatalError("Could not initialize Window");
     }
     renderer = SDL_CreateRenderer(window, -1, 0);
-	if (!renderer) {
+    if (!renderer) {
         fatalError("Could not create renderer");
     }
 

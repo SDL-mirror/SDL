@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_rect.h
- *  
+ *
  *  Header file for SDL_rect definition and management functions.
  */
 
@@ -36,9 +36,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -54,7 +52,7 @@ typedef struct
 
 /**
  *  \brief A rectangle, with the origin at the upper left.
- *  
+ *
  *  \sa SDL_RectEmpty
  *  \sa SDL_RectEquals
  *  \sa SDL_HasIntersection
@@ -87,7 +85,7 @@ SDL_FORCE_INLINE SDL_bool SDL_RectEquals(const SDL_Rect *a, const SDL_Rect *b)
 
 /**
  *  \brief Determine whether two rectangles intersect.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasIntersection(const SDL_Rect * A,
@@ -95,7 +93,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasIntersection(const SDL_Rect * A,
 
 /**
  *  \brief Calculate the intersection of two rectangles.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRect(const SDL_Rect * A,
@@ -121,7 +119,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_EnclosePoints(const SDL_Point * points,
 
 /**
  *  \brief Calculate the intersection of a rectangle and line segment.
- *  
+ *
  *  \return SDL_TRUE if there is an intersection, SDL_FALSE otherwise.
  */
 extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
@@ -131,9 +129,7 @@ extern DECLSPEC SDL_bool SDLCALL SDL_IntersectRectAndLine(const SDL_Rect *
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

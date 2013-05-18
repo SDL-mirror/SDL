@@ -11,45 +11,45 @@
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "platform_testTypes", "Tests predefined types", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testTypes", "Tests predefined types", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test2 =
-		(TestCaseReference){ "platform_testEndianessAndSwap", "Tests endianess and swap functions", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testEndianessAndSwap", "Tests endianess and swap functions", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test3 =
-		(TestCaseReference){ "platform_testGetFunctions", "Tests various SDL_GetXYZ functions", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testGetFunctions", "Tests various SDL_GetXYZ functions", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test4 =
-		(TestCaseReference){ "platform_testHasFunctions", "Tests various SDL_HasXYZ functions", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testHasFunctions", "Tests various SDL_HasXYZ functions", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test5 =
-		(TestCaseReference){ "platform_testGetVersion", "Tests SDL_GetVersion function", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testGetVersion", "Tests SDL_GetVersion function", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test6 =
-		(TestCaseReference){ "platform_testSDLVersion", "Tests SDL_VERSION macro", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testSDLVersion", "Tests SDL_VERSION macro", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test7 =
-		(TestCaseReference){ "platform_testDefaultInit", "Tests default SDL_Init", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testDefaultInit", "Tests default SDL_Init", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test8 =
-		(TestCaseReference){ "platform_testGetSetClearError", "Tests SDL_Get/Set/ClearError", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testGetSetClearError", "Tests SDL_Get/Set/ClearError", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test9 =
-		(TestCaseReference){ "platform_testSetErrorEmptyInput", "Tests SDL_SetError with empty input", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testSetErrorEmptyInput", "Tests SDL_SetError with empty input", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test10 =
-		(TestCaseReference){ "platform_testSetErrorInvalidInput", "Tests SDL_SetError with invalid input", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testSetErrorInvalidInput", "Tests SDL_SetError with invalid input", TEST_ENABLED, 0, 0 };
 
 static const TestCaseReference test11 =
-		(TestCaseReference){ "platform_testGetPowerInfo", "Tests SDL_GetPowerInfo function", TEST_ENABLED, 0, 0 };
+        (TestCaseReference){ "platform_testGetPowerInfo", "Tests SDL_GetPowerInfo function", TEST_ENABLED, 0, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, NULL
+    &test1, &test2, &test3, &test4, &test5, &test6, &test7, &test8, &test9, &test10, &test11, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
-	return (TestCaseReference **)testSuite;
+    return (TestCaseReference **)testSuite;
 }
 
 /**
@@ -103,14 +103,14 @@ int platform_testEndianessAndSwap(void *arg)
     swapped64 = 0x1234ABCD;
     swapped64 <<= 32;
     swapped64 |= 0xDEADBEEF;
-    
+
     if ((*((char *) &value) >> 4) == 0x1) {
         real_byteorder = SDL_BIG_ENDIAN;
     } else {
         real_byteorder = SDL_LIL_ENDIAN;
     }
 
-    /* Test endianness. */    
+    /* Test endianness. */
     AssertTrue( real_byteorder == SDL_BYTEORDER,
              "Machine detected as %s endian, appears to be %s endian.",
              (SDL_BYTEORDER == SDL_LIL_ENDIAN) ? "little" : "big",
@@ -151,29 +151,29 @@ int platform_testGetFunctions (void *arg)
    char *revision;
    int ret;
    int len;
- 
+
    platform = (char *)SDL_GetPlatform();
    AssertPass("SDL_GetPlatform()");
    AssertTrue(platform != NULL, "SDL_GetPlatform() != NULL");
    if (platform != NULL) {
      len = strlen(platform);
-     AssertTrue(len > 0, 
-             "SDL_GetPlatform(): expected non-empty platform, was platform: '%s', len: %i", 
-             platform, 
+     AssertTrue(len > 0,
+             "SDL_GetPlatform(): expected non-empty platform, was platform: '%s', len: %i",
+             platform,
              len);
    }
-    
+
    ret = SDL_GetCPUCount();
    AssertPass("SDL_GetCPUCount()");
    AssertTrue(ret > 0,
-             "SDL_GetCPUCount(): expected count > 0, was: %i", 
-             ret);    
+             "SDL_GetCPUCount(): expected count > 0, was: %i",
+             ret);
 
    ret = SDL_GetCPUCacheLineSize();
    AssertPass("SDL_GetCPUCacheLineSize()");
    AssertTrue(ret >= 0,
-             "SDL_GetCPUCacheLineSize(): expected size >= 0, was: %i", 
-             ret);    
+             "SDL_GetCPUCacheLineSize(): expected size >= 0, was: %i",
+             ret);
 
    revision = (char *)SDL_GetRevision();
    AssertPass("SDL_GetRevision()");
@@ -199,12 +199,12 @@ int platform_testGetFunctions (void *arg)
 int platform_testHasFunctions (void *arg)
 {
    int ret;
-   
+
    // TODO: independently determine and compare values as well
-   
+
    ret = SDL_HasRDTSC();
    AssertPass("SDL_HasRDTSC()");
-   
+
    ret = SDL_HasAltiVec();
    AssertPass("SDL_HasAltiVec()");
 
@@ -238,16 +238,16 @@ int platform_testHasFunctions (void *arg)
 int platform_testGetVersion(void *arg)
 {
    SDL_version linked;
-   
+
    SDL_GetVersion(&linked);
    AssertTrue( linked.major >= SDL_MAJOR_VERSION,
              "SDL_GetVersion(): returned major %i (>= %i)",
              linked.major,
-             SDL_MAJOR_VERSION);   
+             SDL_MAJOR_VERSION);
    AssertTrue( linked.minor >= SDL_MINOR_VERSION,
              "SDL_GetVersion(): returned minor %i (>= %i)",
              linked.minor,
-             SDL_MINOR_VERSION);   
+             SDL_MINOR_VERSION);
 }
 
 /*!
@@ -256,16 +256,16 @@ int platform_testGetVersion(void *arg)
 int platform_testSDLVersion(void *arg)
 {
    SDL_version compiled;
-   
+
    SDL_VERSION(&compiled);
    AssertTrue( compiled.major >= SDL_MAJOR_VERSION,
              "SDL_VERSION() returned major %i (>= %i)",
              compiled.major,
-             SDL_MAJOR_VERSION);   
+             SDL_MAJOR_VERSION);
    AssertTrue( compiled.minor >= SDL_MINOR_VERSION,
              "SDL_VERSION() returned minor %i (>= %i)",
              compiled.minor,
-             SDL_MINOR_VERSION);   
+             SDL_MINOR_VERSION);
 }
 
 /*!
@@ -275,24 +275,24 @@ int platform_testDefaultInit(void *arg)
 {
    int ret;
    int subsystem;
-   
-   ret = SDL_Init(0);   
-   AssertTrue( ret == 0, 
+
+   ret = SDL_Init(0);
+   AssertTrue( ret == 0,
              "SDL_Init(0): returned %i, expected 0, error: %s",
              ret,
              SDL_GetError());
-             
+
    subsystem = SDL_WasInit(0);
-   AssertTrue( subsystem == 0, 
+   AssertTrue( subsystem == 0,
              "SDL_WasInit(0): returned %i, expected 0",
-             ret);   
-             
+             ret);
+
    SDL_Quit();
 }
 
 /*!
  * \brief Tests SDL_Get/Set/ClearError
- * \sa 
+ * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_GetError
  * http://wiki.libsdl.org/moin.cgi/SDL_SetError
  * http://wiki.libsdl.org/moin.cgi/SDL_ClearError
@@ -302,40 +302,40 @@ int platform_testGetSetClearError(void *arg)
    const char *testError = "Testing";
    char *lastError;
    int len;
-   
+
    SDL_ClearError();
    AssertPass("SDL_ClearError()");
-   
-   lastError = (char *)SDL_GetError();   
+
+   lastError = (char *)SDL_GetError();
    AssertPass("SDL_GetError()");
-   AssertTrue(lastError != NULL, 
+   AssertTrue(lastError != NULL,
              "SDL_GetError() != NULL");
    if (lastError != NULL)
    {
      len = strlen(lastError);
-     AssertTrue(len == 0, 
+     AssertTrue(len == 0,
              "SDL_GetError(): no message expected, len: %i", len);
    }
-   
+
    SDL_SetError("%s", testError);
    AssertPass("SDL_SetError()");
-   lastError = (char *)SDL_GetError();   
-   AssertTrue(lastError != NULL, 
+   lastError = (char *)SDL_GetError();
+   AssertTrue(lastError != NULL,
              "SDL_GetError() != NULL");
    if (lastError != NULL)
    {
      len = strlen(lastError);
-     AssertTrue(len == strlen(testError), 
-             "SDL_GetError(): expected message len %i, was len: %i", 
-             strlen(testError), 
+     AssertTrue(len == strlen(testError),
+             "SDL_GetError(): expected message len %i, was len: %i",
+             strlen(testError),
              len);
-     AssertTrue(strcmp(lastError, testError) == 0, 
-             "SDL_GetError(): expected message %s, was message: %s", 
-             testError, 
+     AssertTrue(strcmp(lastError, testError) == 0,
+             "SDL_GetError(): expected message %s, was message: %s",
+             testError,
              lastError);
    }
 
-   // Clean up                
+   // Clean up
    SDL_ClearError();
 }
 
@@ -349,32 +349,32 @@ int platform_testSetErrorEmptyInput(void *arg)
    const char *testError = "";
    char *lastError;
    int len;
-   
+
    SDL_SetError("%s", testError);
    AssertPass("SDL_SetError()");
-   lastError = (char *)SDL_GetError();   
-   AssertTrue(lastError != NULL, 
+   lastError = (char *)SDL_GetError();
+   AssertTrue(lastError != NULL,
              "SDL_GetError() != NULL");
    if (lastError != NULL)
    {
      len = strlen(lastError);
-     AssertTrue(len == strlen(testError), 
-             "SDL_GetError(): expected message len %i, was len: %i", 
-             strlen(testError), 
+     AssertTrue(len == strlen(testError),
+             "SDL_GetError(): expected message len %i, was len: %i",
+             strlen(testError),
              len);
-     AssertTrue(strcmp(lastError, testError) == 0, 
-             "SDL_GetError(): expected message '%s', was message: '%s'", 
-             testError, 
+     AssertTrue(strcmp(lastError, testError) == 0,
+             "SDL_GetError(): expected message '%s', was message: '%s'",
+             testError,
              lastError);
    }
 
-   // Clean up                
+   // Clean up
    SDL_ClearError();
 }
 
 /*!
  * \brief Tests SDL_SetError with invalid input
- * \sa 
+ * \sa
  * http://wiki.libsdl.org/moin.cgi/SDL_SetError
  */
 int platform_testSetErrorInvalidInput(void *arg)
@@ -386,48 +386,48 @@ int platform_testSetErrorInvalidInput(void *arg)
 
    // Reset
    SDL_ClearError();
-   
+
    // Check for no-op
    SDL_SetError(testError);
    AssertPass("SDL_SetError()");
-   lastError = (char *)SDL_GetError();   
-   AssertTrue(lastError != NULL, 
+   lastError = (char *)SDL_GetError();
+   AssertTrue(lastError != NULL,
              "SDL_GetError() != NULL");
    if (lastError != NULL)
    {
      len = strlen(lastError);
-     AssertTrue(len == 0, 
-             "SDL_GetError(): expected message len 0, was len: %i", 
-             0, 
+     AssertTrue(len == 0,
+             "SDL_GetError(): expected message len 0, was len: %i",
+             0,
              len);
-     AssertTrue(strcmp(lastError, "") == 0, 
-             "SDL_GetError(): expected message '', was message: '%s'",           
+     AssertTrue(strcmp(lastError, "") == 0,
+             "SDL_GetError(): expected message '', was message: '%s'",
              lastError);
    }
-   
+
    // Set
    SDL_SetError(probeError);
-   
+
    // Check for no-op
    SDL_SetError(testError);
    AssertPass("SDL_SetError()");
-   lastError = (char *)SDL_GetError();   
-   AssertTrue(lastError != NULL, 
+   lastError = (char *)SDL_GetError();
+   AssertTrue(lastError != NULL,
              "SDL_GetError() != NULL");
    if (lastError != NULL)
    {
      len = strlen(lastError);
-     AssertTrue(len == strlen(probeError), 
-             "SDL_GetError(): expected message len %i, was len: %i", 
-             strlen(probeError), 
+     AssertTrue(len == strlen(probeError),
+             "SDL_GetError(): expected message len %i, was len: %i",
+             strlen(probeError),
              len);
-     AssertTrue(strcmp(lastError, probeError) == 0, 
+     AssertTrue(strcmp(lastError, probeError) == 0,
              "SDL_GetError(): expected message '%s', was message: '%s'",
              probeError,
              lastError);
    }
 
-   // Clean up                
+   // Clean up
    SDL_ClearError();
 }
 
@@ -444,7 +444,7 @@ int platform_testGetPowerInfo(void *arg)
    int secsAgain;
    int pct;
    int pctAgain;
-   
+
    state = SDL_GetPowerInfo(&secs, &pct);
    AssertPass("SDL_GetPowerInfo()");
    AssertTrue(
@@ -455,7 +455,7 @@ int platform_testGetPowerInfo(void *arg)
        state==SDL_POWERSTATE_CHARGED,
        "SDL_GetPowerInfo(): state %i is one of the expected values",
        (int)state);
-       
+
    if (state==SDL_POWERSTATE_ON_BATTERY)
    {
       AssertTrue(
@@ -465,7 +465,7 @@ int platform_testGetPowerInfo(void *arg)
       AssertTrue(
          (pct >= 0) && (pct <= 100),
          "SDL_GetPowerInfo(): on battery, pct=[0,100], was: %i",
-         pct);         
+         pct);
    }
 
    if (state==SDL_POWERSTATE_UNKNOWN ||
@@ -478,31 +478,31 @@ int platform_testGetPowerInfo(void *arg)
       AssertTrue(
          pct == -1,
          "SDL_GetPowerInfo(): no battery, pct == -1, was: %i",
-         pct);         
+         pct);
    }
 
-   // Partial return value variations   
+   // Partial return value variations
    stateAgain = SDL_GetPowerInfo(&secsAgain, NULL);
    AssertTrue(
         state==stateAgain,
         "State %i returned when only 'secs' requested",
-        stateAgain);   
+        stateAgain);
    AssertTrue(
         secs==secsAgain,
         "Value %i matches when only 'secs' requested",
-        secsAgain);   
+        secsAgain);
    stateAgain = SDL_GetPowerInfo(NULL, &pctAgain);
    AssertTrue(
         state==stateAgain,
         "State %i returned when only 'pct' requested",
-        stateAgain);   
+        stateAgain);
    AssertTrue(
         pct==pctAgain,
         "Value %i matches when only 'pct' requested",
-        pctAgain);   
+        pctAgain);
    stateAgain = SDL_GetPowerInfo(NULL, NULL);
    AssertTrue(
         state==stateAgain,
         "State %i returned when no value requested",
-        stateAgain); 
+        stateAgain);
 }

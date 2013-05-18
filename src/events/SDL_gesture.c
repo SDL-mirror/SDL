@@ -35,12 +35,9 @@
 #include <stdio.h>
 #include <math.h>
 
-//TODO: Replace with malloc
+/* TODO: Replace with malloc */
 
 #define MAXPATHSIZE 1024
-
-
-
 
 #define DOLLARNPOINTS 64
 #define DOLLARSIZE 256

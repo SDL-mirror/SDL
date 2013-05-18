@@ -155,7 +155,7 @@ static void
 UnloadALSALibrary(void)
 {
     if (alsa_handle != NULL) {
-		SDL_UnloadObject(alsa_handle);
+        SDL_UnloadObject(alsa_handle);
         alsa_handle = NULL;
     }
 }

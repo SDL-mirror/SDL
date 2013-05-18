@@ -53,7 +53,7 @@ static SDL_DisabledEventBlock *SDL_disabled_events[256];
 static Uint32 SDL_userevents = SDL_USEREVENT;
 
 /* Private data -- event queue */
-#define MAXEVENTS	128
+#define MAXEVENTS   128
 static struct
 {
     SDL_mutex *lock;

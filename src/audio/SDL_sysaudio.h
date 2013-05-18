@@ -28,7 +28,7 @@
 
 /* The SDL audio driver */
 typedef struct SDL_AudioDevice SDL_AudioDevice;
-#define _THIS	SDL_AudioDevice *_this
+#define _THIS   SDL_AudioDevice *_this
 
 /* Used by audio targets during DetectDevices() */
 typedef void (*SDL_AddAudioDevice)(const char *name);

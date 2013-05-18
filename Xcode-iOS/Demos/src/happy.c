@@ -1,7 +1,7 @@
 /*
- *	happy.c
- *	written by Holmes Futrell
- *	use however you want
+ *  happy.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "SDL.h"
@@ -20,8 +20,8 @@ static struct
 } faces[NUM_HAPPY_FACES];
 
 /*
-	Sets initial positions and velocities of happyfaces
-	units of velocity are pixels per millesecond
+    Sets initial positions and velocities of happyfaces
+    units of velocity are pixels per millesecond
 */
 void
 initializeHappyFaces()
@@ -94,7 +94,7 @@ render(SDL_Renderer *renderer)
 }
 
 /*
-	loads the happyface graphic into a texture
+    loads the happyface graphic into a texture
 */
 void
 initializeTexture(SDL_Renderer *renderer)
@@ -125,7 +125,7 @@ main(int argc, char *argv[])
 {
 
     SDL_Window *window;
-	SDL_Renderer *renderer;
+    SDL_Renderer *renderer;
     Uint32 startFrame;
     Uint32 endFrame;
     Uint32 delay;

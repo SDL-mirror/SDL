@@ -189,7 +189,7 @@ static int GLES_LoadFunctions(GLES_RenderData * data)
         if ( ! data->func ) { \
             return SDL_SetError("Couldn't load GLES function %s: %s\n", #func, SDL_GetError()); \
         } \
-    } while ( 0 );  
+    } while ( 0 );
 #endif /* _SDL_NOGETPROCADDR_ */
 
 #include "SDL_glesfuncs.h"
@@ -270,11 +270,11 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
     GLES_RenderData *data;
     GLint value;
     Uint32 windowFlags;
-    
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_EGL, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-    
+
     windowFlags = SDL_GetWindowFlags(window);
     if (!(windowFlags & SDL_WINDOW_OPENGL)) {
         if (SDL_RecreateWindow(window, windowFlags | SDL_WINDOW_OPENGL) < 0) {
@@ -386,7 +386,7 @@ static void
 GLES_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
     GLES_RenderData *data = (GLES_RenderData *) renderer->driverdata;
-    
+
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED ||
         event->event == SDL_WINDOWEVENT_SHOWN ||
         event->event == SDL_WINDOWEVENT_HIDDEN) {
@@ -765,7 +765,7 @@ GLES_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
     GLES_SetDrawingState(renderer);
 
     data->glVertexPointer(2, GL_FLOAT, 0, points);
-    if (count > 2 && 
+    if (count > 2 &&
         points[0].x == points[count-1].x && points[0].y == points[count-1].y) {
         /* GL_LINE_LOOP takes care of the final segment */
         --count;
@@ -920,7 +920,7 @@ GLES_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     GLfloat minx, miny, maxx, maxy;
     GLfloat minu, maxu, minv, maxv;
     GLfloat centerx, centery;
-    
+
     GLES_ActivateRenderer(renderer);
 
     data->glEnable(GL_TEXTURE_2D);
@@ -940,7 +940,7 @@ GLES_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     centerx = center->x;
     centery = center->y;
 
-    // Rotate and translate
+    /* Rotate and translate */
     data->glPushMatrix();
     data->glTranslatef(dstrect->x + centerx, dstrect->y + centery, 0.0f);
     data->glRotatef((GLfloat)angle, 0.0f, 0.0f, 1.0f);

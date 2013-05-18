@@ -510,7 +510,7 @@ void SDL_SYS_JoystickDetect()
                         SDL_PushEvent(&event);
                     }
                 }
-                #endif // !SDL_EVENTS_DISABLED
+                #endif /* !SDL_EVENTS_DISABLED */
             }
         } else if (SDL_strcmp(action, "remove") == 0) {
             const int inst = MaybeRemoveDevice(devnode);
@@ -527,7 +527,7 @@ void SDL_SYS_JoystickDetect()
                         SDL_PushEvent(&event);
                     }
                 }
-                #endif // !SDL_EVENTS_DISABLED 
+                #endif /* !SDL_EVENTS_DISABLED */
             }
         }
         UDEV_udev_device_unref(dev);
@@ -760,7 +760,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
     /* Get the number of buttons and axes on the joystick */
     ConfigJoystick(joystick, fd);
 
-    // mark joystick as fresh and ready
+    /* mark joystick as fresh and ready */
     joystick->hwdata->fresh = 1;
 
     return (0);
@@ -840,7 +840,7 @@ PollAllValues(SDL_Joystick * joystick)
     struct input_absinfo absinfo;
     int a, b = 0;
 
-    // Poll all axis
+    /* Poll all axis */
     for (a = ABS_X; b < ABS_MAX; a++) {
         switch (a) {
         case ABS_HAT0X:
@@ -851,7 +851,7 @@ PollAllValues(SDL_Joystick * joystick)
         case ABS_HAT2Y:
         case ABS_HAT3X:
         case ABS_HAT3Y:
-            // ingore hats
+            /* ingore hats */
             break;
         default:
             if (joystick->hwdata->abs_correct[b].used) {

@@ -35,7 +35,7 @@
  * \param data LoggerData structure which contains data for the logger
  */
 void XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-					time_t eventTime, LoggerData *data);
+                    time_t eventTime, LoggerData *data);
 
 /*!
  * Prints out information about ending the test run in XML
@@ -49,7 +49,7 @@ void XMLRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
  * \param totalRuntime How long the execution took
  */
 void XMLRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-				 int testSkippedCount, time_t endTime, double totalRuntime);
+                 int testSkippedCount, time_t endTime, double totalRuntime);
 
 /*!
  * Prints the data about the test suite that'll be executed next in XML
@@ -81,7 +81,7 @@ void XMLSuiteEnded(int testsPassed, int testsFailed, int testsSkipped,
  * \param startTime When the test started to execute
  */
 void XMLTestStarted(const char *testName, const char *suiteName,
-					const char *testDescription, Uint64 execKey, time_t startTime);
+                    const char *testDescription, Uint64 execKey, time_t startTime);
 
 /*!
  * Prints information about the test test that was just executed in XML
@@ -104,7 +104,7 @@ void XMLTestEnded(const char *testName, const char *suiteName,
  * \param eventTime When the assert happened
  */
 void XMLAssert(const char *assertName, int assertResult, const char *assertMessage,
-			time_t eventTime);
+            time_t eventTime);
 
 /*!
  * Prints information about assert that has actual and expected values in XML
@@ -117,7 +117,7 @@ void XMLAssert(const char *assertName, int assertResult, const char *assertMessa
  * \param eventTime When the assert happened
  */
 void XMLAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
-		int actualValue, int expected, time_t eventTime);
+        int actualValue, int expected, time_t eventTime);
 
 /*!
  * Prints summary of all assertions of certain tests in XML

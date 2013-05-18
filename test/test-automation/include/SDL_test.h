@@ -35,12 +35,12 @@
 #define ASSERT_FAILURE 0
 
 //! Definition of all the possible test results
-#define TEST_RESULT_PASS			0
-#define TEST_RESULT_FAILURE			1
-#define TEST_RESULT_NO_ASSERT		2
-#define TEST_RESULT_SKIPPED			3
-#define TEST_RESULT_KILLED			4
-#define TEST_RESULT_SETUP_FAILURE	5
+#define TEST_RESULT_PASS            0
+#define TEST_RESULT_FAILURE         1
+#define TEST_RESULT_NO_ASSERT       2
+#define TEST_RESULT_SKIPPED         3
+#define TEST_RESULT_KILLED          4
+#define TEST_RESULT_SETUP_FAILURE   5
 
 //! Definitions for test requirements
 #define TEST_REQUIRES_AUDIO 1
@@ -51,16 +51,16 @@
  * Holds information about a test case
  */
 typedef struct TestCaseReference {
-	/*!< "Func2Stress" */
-	char *name;
-	/*!< "This test beats the crap out of func2()" */
-	char *description;
-	/*!< Set to TEST_ENABLED or TEST_DISABLED */
-	int enabled;
-	/*!< Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
-	long requirements;
-	/*<! Timeout value in seconds. If exceeded runner will kill the test. 0 means infinite time */
-	long timeout;
+    /*!< "Func2Stress" */
+    char *name;
+    /*!< "This test beats the crap out of func2()" */
+    char *description;
+    /*!< Set to TEST_ENABLED or TEST_DISABLED */
+    int enabled;
+    /*!< Set to TEST_REQUIRES_OPENGL, TEST_REQUIRES_AUDIO, ... */
+    long requirements;
+    /*<! Timeout value in seconds. If exceeded runner will kill the test. 0 means infinite time */
+    long timeout;
 } TestCaseReference;
 
 /*!

@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
 #include "SDL.h"
 
-#define DEFAULT_RESOLUTION	1
+#define DEFAULT_RESOLUTION  1
 
 static int ticks = 0;
 

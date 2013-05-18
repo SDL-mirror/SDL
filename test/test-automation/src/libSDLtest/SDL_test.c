@@ -46,37 +46,37 @@ SDL_bool canBailOut;
 void
 _InitTestEnvironment(Uint64 execKey, SDL_bool inproc)
 {
-	InitFuzzer(execKey);
+    InitFuzzer(execKey);
 
-	canBailOut = inproc == 0;
+    canBailOut = inproc == 0;
 
-	_testReturnValue = TEST_RESULT_PASS;
-	_testAssertsFailed = 0;
-	_testAssertsPassed = 0;
+    _testReturnValue = TEST_RESULT_PASS;
+    _testAssertsFailed = 0;
+    _testAssertsPassed = 0;
 }
 
 int
 _QuitTestEnvironment()
 {
-	AssertSummary(_testAssertsFailed + _testAssertsPassed,
+    AssertSummary(_testAssertsFailed + _testAssertsPassed,
                   _testAssertsFailed, _testAssertsPassed, time(0));
 
-	if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
-		_testReturnValue = TEST_RESULT_NO_ASSERT;
-	}
+    if(_testAssertsFailed == 0 && _testAssertsPassed == 0) {
+        _testReturnValue = TEST_RESULT_NO_ASSERT;
+    }
 
-	if(GetInvocationCount() > 0) {
-		Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
-	}
+    if(GetInvocationCount() > 0) {
+        Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+    }
 
-	DeinitFuzzer();
+    DeinitFuzzer();
 
-	return _testReturnValue;
+    return _testReturnValue;
 }
 
 int
 _CountFailedAsserts() {
-	return _testAssertsFailed;
+    return _testAssertsFailed;
 }
 
 /*!
@@ -87,18 +87,18 @@ void
 _BailOut()
 {
     if(!canBailOut)
-    	return ;
+        return ;
 
-	AssertSummary(_testAssertsFailed + _testAssertsPassed,
+    AssertSummary(_testAssertsFailed + _testAssertsPassed,
                   _testAssertsFailed, _testAssertsPassed, time(0));
 
-	if(GetInvocationCount() > 0) {
-		Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
-	}
+    if(GetInvocationCount() > 0) {
+        Log(time(0), "Fuzzer invocation count: %d", GetInvocationCount());
+    }
 
-	DeinitFuzzer();
+    DeinitFuzzer();
 
-	exit(TEST_RESULT_FAILURE); // bail out from the test
+    exit(TEST_RESULT_FAILURE); // bail out from the test
 }
 
 void
@@ -120,8 +120,8 @@ AssertEquals(int expected, int actual, char *message, ...)
 
       _BailOut();
       } else {
-	   AssertWithValues("AssertEquals", 1, buf,
-    		  actual, expected, time(0));
+       AssertWithValues("AssertEquals", 1, buf,
+              actual, expected, time(0));
 
       _testAssertsPassed++;
    }
@@ -145,9 +145,9 @@ AssertTrue(int condition, char *message, ...)
 
       _BailOut();
    } else {
-		Assert("AssertTrue", 1, buf, time(0));
+        Assert("AssertTrue", 1, buf, time(0));
 
-		_testAssertsPassed++;
+        _testAssertsPassed++;
    }
 }
 
@@ -156,7 +156,7 @@ AssertPass(char *message, ...)
 {
    va_list args;
    char buf[256];
-   
+
    va_start( args, message );
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );
@@ -172,7 +172,7 @@ AssertFail(char *message, ...)
 {
    va_list args;
    char buf[256];
-   
+
    va_start( args, message );
    SDL_vsnprintf( buf, sizeof(buf), message, args );
    va_end( args );

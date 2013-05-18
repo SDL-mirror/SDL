@@ -12,8 +12,8 @@
 
 /* Program to load a wave file and loop playing it using SDL sound */
 
-/* loopwaves.c is much more robust in handling WAVE files -- 
-	This is only for simple WAVEs
+/* loopwaves.c is much more robust in handling WAVE files --
+    This is only for simple WAVEs
 */
 #include "SDL_config.h"
 

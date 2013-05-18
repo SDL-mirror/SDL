@@ -80,7 +80,7 @@ UIKit_GL_LoadLibrary(_THIS, const char *path)
 void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 {
 #if SDL_POWER_UIKIT
-    // Check once a frame to see if we should turn off the battery monitor.
+    /* Check once a frame to see if we should turn off the battery monitor. */
     SDL_UIKit_UpdateBatteryMonitoring();
 #endif
 
@@ -134,8 +134,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         [view->viewcontroller retain];
     }
     [uiwindow addSubview: view];
-    
-    // The view controller needs to be the root in order to control rotation on iOS 6.0
+
+    /* The view controller needs to be the root in order to control rotation on iOS 6.0 */
     if (uiwindow.rootViewController == nil) {
         uiwindow.rootViewController = view->viewcontroller;
     }

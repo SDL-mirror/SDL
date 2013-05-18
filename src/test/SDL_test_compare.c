@@ -22,7 +22,7 @@
 /*
 
  Based on automated SDL_Surface tests originally written by Edgar Simo 'bobbens'.
- 
+
  Rewritten for test lib by Andreas Schiffler.
 
 */
@@ -62,7 +62,7 @@ int SDLTest_CompareSurfaces(SDL_Surface *surface, SDL_Surface *referenceSurface,
    if (allowable_error<0) {
       allowable_error = 0;
    }
-   
+
    SDL_LockSurface( surface );
    SDL_LockSurface( referenceSurface );
 
@@ -82,7 +82,7 @@ int SDLTest_CompareSurfaces(SDL_Surface *surface, SDL_Surface *referenceSurface,
          dist += (R-Rd)*(R-Rd);
          dist += (G-Gd)*(G-Gd);
          dist += (B-Bd)*(B-Bd);
-                  
+
          /* Allow some difference in blending accuracy */
          if (dist > allowable_error) {
             ret++;

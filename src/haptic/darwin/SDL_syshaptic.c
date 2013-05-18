@@ -35,7 +35,7 @@
 #include <ForceFeedback/ForceFeedbackConstants.h>
 
 #ifndef IO_OBJECT_NULL
-#define IO_OBJECT_NULL	((io_service_t)0)
+#define IO_OBJECT_NULL  ((io_service_t)0)
 #endif
 
 #define MAX_HAPTICS  32
@@ -83,7 +83,7 @@ static void SDL_SYS_HapticFreeFFEFFECT(FFEFFECT * effect, int type);
 static int HIDGetDeviceProduct(io_service_t dev, char *name);
 
 
-/* 
+/*
  * Like strerror but for force feedback errors.
  */
 static const char *
@@ -562,7 +562,7 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 }
 
 
-/* 
+/*
  * Clean up after system specific haptic stuff
  */
 void

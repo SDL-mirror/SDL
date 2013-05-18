@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_blendmode.h
- *  
+ *
  *  Header file declaring the SDL_BlendMode enumeration
  */
 
@@ -31,9 +31,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -49,9 +47,7 @@ typedef enum
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

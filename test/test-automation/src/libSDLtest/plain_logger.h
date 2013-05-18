@@ -36,7 +36,7 @@
  *
  */
 void PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed,
-					 time_t eventTime, LoggerData *data);
+                     time_t eventTime, LoggerData *data);
 
 /*!
  * Prints out information about ending the test run.
@@ -50,7 +50,7 @@ void PlainRunStarted(int parameterCount, char *runnerParameters[], char *runSeed
  * \param totalRuntime How long the execution took
  */
 void PlainRunEnded(int testCount, int suiteCount, int testPassCount, int testFailCount,
-				   int testSkippedCount, time_t endTime, double totalRuntime);
+                   int testSkippedCount, time_t endTime, double totalRuntime);
 
 /*!
  * Prints the data about the test suite that'll be executed next
@@ -106,7 +106,7 @@ void PlainTestEnded(const char *testName, const char *suiteName,
  * \param eventTime When the assert happened
  */
 void PlainAssert(const char *assertName, int assertResult, const char *assertMessage,
-				time_t eventTime);
+                time_t eventTime);
 
 /*!
  * Prints information about assert that has actual and expected values
@@ -119,7 +119,7 @@ void PlainAssert(const char *assertName, int assertResult, const char *assertMes
  * \param eventTime When the assert happened
  */
 void PlainAssertWithValues(const char *assertName, int assertResult, const char *assertMessage,
-		int actualValue, int expected, time_t eventTime);
+        int actualValue, int expected, time_t eventTime);
 
 /*!
  * Prints summary of all assertions of certain tests

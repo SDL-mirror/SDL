@@ -76,9 +76,9 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-#define MAX_UHID_JOYS	16
-#define MAX_JOY_JOYS	2
-#define MAX_JOYS	(MAX_UHID_JOYS + MAX_JOY_JOYS)
+#define MAX_UHID_JOYS   16
+#define MAX_JOY_JOYS    2
+#define MAX_JOYS    (MAX_UHID_JOYS + MAX_JOY_JOYS)
 
 
 struct report
@@ -589,7 +589,7 @@ SDL_SYS_JoystickQuit(void)
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     SDL_JoystickGUID guid;
-    // the GUID is just the first 16 chars of the name for now
+    /* the GUID is just the first 16 chars of the name for now */
     const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
     SDL_zero( guid );
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
@@ -599,7 +599,7 @@ SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
     SDL_JoystickGUID guid;
-    // the GUID is just the first 16 chars of the name for now
+    /* the GUID is just the first 16 chars of the name for now */
     const char *name = joystick->name;
     SDL_zero( guid );
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );

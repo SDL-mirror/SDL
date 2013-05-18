@@ -23,8 +23,8 @@
 
 /*! Defines attribute for XML elements */
 typedef struct Attribute {
-	const char *attribute;
-	const char *value;
+    const char *attribute;
+    const char *value;
 } Attribute;
 
 

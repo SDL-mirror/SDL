@@ -21,16 +21,16 @@
 
 /**
  *  \file SDL_test_fuzzer.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
  */
 
-/* 
+/*
 
   Data generators for fuzzing test data in a reproducible way.
- 
+
 */
 
 #ifndef _SDL_test_fuzzer_h
@@ -39,9 +39,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 
@@ -131,7 +129,7 @@ Sint64 SDLTest_RandomSint64();
 float SDLTest_RandomUnitFloat();
 
 /**
- * \returns random double in range [0.0 - 1.0[ 
+ * \returns random double in range [0.0 - 1.0[
  */
 double SDLTest_RandomUnitDouble();
 
@@ -333,7 +331,7 @@ Sint32 SDLTest_RandomIntegerInRange(Sint32 min, Sint32 max);
 
 /**
  * Generates random null-terminated string. The minimum length for
- * the string is 1 character, maximum length for the string is 255 
+ * the string is 1 character, maximum length for the string is 255
  * characters and it can contain ASCII characters from 32 to 126.
  *
  * Note: Returned string needs to be deallocated.
@@ -352,7 +350,7 @@ char * SDLTest_RandomAsciiString();
  *
  * \param maxLength The maximum length of the generated string.
  *
- * \returns Newly allocated random string; or NULL if maxLength was invalid or string could not be allocated. 
+ * \returns Newly allocated random string; or NULL if maxLength was invalid or string could not be allocated.
  */
 char * SDLTest_RandomAsciiStringWithMaximumLength(int maxLength);
 
@@ -377,9 +375,7 @@ int SDLTest_GetFuzzerInvocationCount();
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

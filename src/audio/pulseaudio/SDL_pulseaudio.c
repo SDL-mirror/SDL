@@ -131,7 +131,7 @@ static void
 UnloadPulseAudioLibrary(void)
 {
     if (pulseaudio_handle != NULL) {
-		SDL_UnloadObject(pulseaudio_handle);
+        SDL_UnloadObject(pulseaudio_handle);
         pulseaudio_handle = NULL;
     }
 }

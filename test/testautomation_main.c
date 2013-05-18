@@ -126,32 +126,32 @@ static int main_testImpliedJoystickQuit (void *arg)
 }
 
 static const SDLTest_TestCaseReference mainTest1 =
-		{ (SDLTest_TestCaseFp)main_testInitQuitJoystickHaptic, "main_testInitQuitJoystickHaptic", "Tests SDL_Init/Quit of Joystick and Haptic subsystem", TEST_ENABLED};
+        { (SDLTest_TestCaseFp)main_testInitQuitJoystickHaptic, "main_testInitQuitJoystickHaptic", "Tests SDL_Init/Quit of Joystick and Haptic subsystem", TEST_ENABLED};
 
 static const SDLTest_TestCaseReference mainTest2 =
-		{ (SDLTest_TestCaseFp)main_testInitQuitSubSystem, "main_testInitQuitSubSystem", "Tests SDL_InitSubSystem/QuitSubSystem", TEST_ENABLED};
+        { (SDLTest_TestCaseFp)main_testInitQuitSubSystem, "main_testInitQuitSubSystem", "Tests SDL_InitSubSystem/QuitSubSystem", TEST_ENABLED};
 
 static const SDLTest_TestCaseReference mainTest3 =
-		{ (SDLTest_TestCaseFp)main_testImpliedJoystickInit, "main_testImpliedJoystickInit", "Tests that init for gamecontroller properly implies joystick", TEST_ENABLED};
+        { (SDLTest_TestCaseFp)main_testImpliedJoystickInit, "main_testImpliedJoystickInit", "Tests that init for gamecontroller properly implies joystick", TEST_ENABLED};
 
 static const SDLTest_TestCaseReference mainTest4 =
-		{ (SDLTest_TestCaseFp)main_testImpliedJoystickQuit, "main_testImpliedJoystickQuit", "Tests that quit for gamecontroller doesn't quit joystick if you inited it explicitly", TEST_ENABLED};
+        { (SDLTest_TestCaseFp)main_testImpliedJoystickQuit, "main_testImpliedJoystickQuit", "Tests that quit for gamecontroller doesn't quit joystick if you inited it explicitly", TEST_ENABLED};
 
 /* Sequence of Platform test cases */
 static const SDLTest_TestCaseReference *mainTests[] =  {
-	&mainTest1,
-	&mainTest2,
-	&mainTest3,
-	&mainTest4,
-	NULL
+    &mainTest1,
+    &mainTest2,
+    &mainTest3,
+    &mainTest4,
+    NULL
 };
 
 /* Platform test suite (global) */
 SDLTest_TestSuiteReference mainTestSuite = {
-	"Main",
-	NULL,
-	mainTests,
-	NULL
+    "Main",
+    NULL,
+    mainTests,
+    NULL
 };
 
 /* vi: set ts=4 sw=4 expandtab: */

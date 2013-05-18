@@ -33,13 +33,13 @@
 
 #if defined(__IRIX__)
 /* IRIX doesn't have a GL library versioning system */
-#define DEFAULT_OPENGL	"libGL.so"
+#define DEFAULT_OPENGL  "libGL.so"
 #elif defined(__MACOSX__)
-#define DEFAULT_OPENGL	"/usr/X11R6/lib/libGL.1.dylib"
+#define DEFAULT_OPENGL  "/usr/X11R6/lib/libGL.1.dylib"
 #elif defined(__QNXNTO__)
-#define DEFAULT_OPENGL	"libGL.so.3"
+#define DEFAULT_OPENGL  "libGL.so.3"
 #else
-#define DEFAULT_OPENGL	"libGL.so.1"
+#define DEFAULT_OPENGL  "libGL.so.1"
 #endif
 
 #ifndef GLX_NONE_EXT
@@ -118,13 +118,13 @@ typedef GLXContext(*PFNGLXCREATECONTEXTATTRIBSARBPROC) (Display * dpy,
 #define OPENGL_REQUIRES_DLOPEN
 #if defined(OPENGL_REQUIRES_DLOPEN) && defined(SDL_LOADSO_DLOPEN)
 #include <dlfcn.h>
-#define GL_LoadObject(X)	dlopen(X, (RTLD_NOW|RTLD_GLOBAL))
-#define GL_LoadFunction		dlsym
-#define GL_UnloadObject		dlclose
+#define GL_LoadObject(X)    dlopen(X, (RTLD_NOW|RTLD_GLOBAL))
+#define GL_LoadFunction     dlsym
+#define GL_UnloadObject     dlclose
 #else
-#define GL_LoadObject	SDL_LoadObject
-#define GL_LoadFunction	SDL_LoadFunction
-#define GL_UnloadObject	SDL_UnloadObject
+#define GL_LoadObject   SDL_LoadObject
+#define GL_LoadFunction SDL_LoadFunction
+#define GL_UnloadObject SDL_UnloadObject
 #endif
 
 static void X11_GL_InitExtensions(_THIS);
@@ -369,21 +369,21 @@ X11_GL_InitExtensions(_THIS)
 }
 
 /* glXChooseVisual and glXChooseFBConfig have some small differences in
- * the attribute encoding, it can be chosen with the for_FBConfig parameter. 
+ * the attribute encoding, it can be chosen with the for_FBConfig parameter.
  */
-int 
+int
 X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int size, Bool for_FBConfig)
 {
     int i = 0;
-	const int MAX_ATTRIBUTES = 64;
+    const int MAX_ATTRIBUTES = 64;
 
-    /* assert buffer is large enough to hold all SDL attributes. */ 
+    /* assert buffer is large enough to hold all SDL attributes. */
     SDL_assert(size >= MAX_ATTRIBUTES);
 
     /* Setup our GLX attributes according to the gl_config. */
     if( for_FBConfig ) {
         attribs[i++] = GLX_RENDER_TYPE;
-	attribs[i++] = GLX_RGBA_BIT;
+    attribs[i++] = GLX_RGBA_BIT;
     } else {
         attribs[i++] = GLX_RGBA;
     }
@@ -401,8 +401,8 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
 
     if (_this->gl_config.double_buffer) {
         attribs[i++] = GLX_DOUBLEBUFFER;
-	if( for_FBConfig )
-	    attribs[i++] = True;
+    if( for_FBConfig )
+        attribs[i++] = True;
     }
 
     attribs[i++] = GLX_DEPTH_SIZE;
@@ -435,8 +435,8 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
 
     if (_this->gl_config.stereo) {
         attribs[i++] = GLX_STEREO;
-	if( for_FBConfig )
-	    attribs[i++] = True;
+    if( for_FBConfig )
+        attribs[i++] = True;
     }
 
     if (_this->gl_config.multisamplebuffers) {
@@ -467,7 +467,7 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
     attribs[i++] = None;
 
     SDL_assert(i <= MAX_ATTRIBUTES);
- 
+
     return i;
 }
 
@@ -631,7 +631,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     }
     XSync(display, False);
     XSetErrorHandler(handler);
-    
+
     if (!context) {
         SDL_SetError("Could not create GL context");
         return NULL;
@@ -664,7 +664,7 @@ X11_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     return 0;
 }
 
-/* 
+/*
    0 is a valid argument to glxSwapInterval(MESA|EXT) and setting it to 0
    will undo the effect of a previous call with a value that is greater
    than zero (or at least that is what the docs say). OTOH, 0 is an invalid

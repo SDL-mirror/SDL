@@ -24,7 +24,7 @@
  *
  *  System dependent library loading routines
  *
- *  Some things to keep in mind:                                        
+ *  Some things to keep in mind:
  *  \li These functions only work on C function names.  Other languages may
  *      have name mangling and intrinsic language support that varies from
  *      compiler to compiler.
@@ -47,9 +47,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /**
@@ -74,9 +72,7 @@ extern DECLSPEC void SDLCALL SDL_UnloadObject(void *handle);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

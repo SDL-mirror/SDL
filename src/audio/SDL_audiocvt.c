@@ -972,7 +972,7 @@ SDL_BuildAudioCVT(SDL_AudioCVT * cvt,
     if (cvt == NULL) {
         return SDL_InvalidParamError("cvt");
     }
-    
+
     /* there are no unsigned types over 16 bits, so catch this up front. */
     if ((SDL_AUDIO_BITSIZE(src_fmt) > 16) && (!SDL_AUDIO_ISSIGNED(src_fmt))) {
         return SDL_SetError("Invalid source format");

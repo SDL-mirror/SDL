@@ -74,7 +74,7 @@ TestWaitTimeout(void)
         fprintf(stderr, "Wait took %d milliseconds\n", duration);
 
     /* Check to make sure the return value indicates timed out */
-    if (retval != SDL_MUTEX_TIMEDOUT) 
+    if (retval != SDL_MUTEX_TIMEDOUT)
         fprintf(stderr, "SDL_SemWaitTimeout returned: %d; expected: %d\n", retval, SDL_MUTEX_TIMEDOUT);
 }
 

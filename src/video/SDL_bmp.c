@@ -20,14 +20,14 @@
 */
 #include "SDL_config.h"
 
-/* 
+/*
    Code to load and save surfaces in Windows BMP format.
 
    Why support BMP format?  Well, it's a native format for Windows, and
    most image processing programs can read and write it.  It would be nice
    to be able to have at least one image format that we can natively load
    and save, and since PNG is so complex that it would bloat the library,
-   BMP is a good alternative. 
+   BMP is a good alternative.
 
    This code currently supports Win32 DIBs in uncompressed 8 and 24 bpp.
 */
@@ -40,10 +40,10 @@
 
 /* Compression encodings for BMP files */
 #ifndef BI_RGB
-#define BI_RGB		0
-#define BI_RLE8		1
-#define BI_RLE4		2
-#define BI_BITFIELDS	3
+#define BI_RGB      0
+#define BI_RLE8     1
+#define BI_RLE4     2
+#define BI_BITFIELDS    3
 #endif
 
 
@@ -439,7 +439,7 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
             /* If the surface has a colorkey or alpha channel we'll save a
                32-bit BMP with alpha channel, otherwise save a 24-bit BMP. */
             if (save32bit) {
-                SDL_InitFormat(&format, 
+                SDL_InitFormat(&format,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
                                SDL_PIXELFORMAT_ARGB8888
 #else

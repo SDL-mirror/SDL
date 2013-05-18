@@ -13,15 +13,15 @@
 
 /* Test cases */
 static const TestCaseReference test1 =
-		(TestCaseReference){ "events_test", "description", TEST_DISABLED, 0, 0 };
+        (TestCaseReference){ "events_test", "description", TEST_DISABLED, 0, 0 };
 
 /* Test suite */
 extern const TestCaseReference *testSuite[] =  {
-	&test1, NULL
+    &test1, NULL
 };
 
 TestCaseReference **QueryTestSuite() {
-	return (TestCaseReference **)testSuite;
+    return (TestCaseReference **)testSuite;
 }
 
 /**
@@ -30,5 +30,5 @@ TestCaseReference **QueryTestSuite() {
 int
 events_test(void *arg)
 {
-	AssertPass("");
+    AssertPass("");
 }

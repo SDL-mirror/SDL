@@ -9,10 +9,10 @@ int utl_crc32Init(CRC32_CTX *crcContext)
   /* Sanity check context pointer */
   if (crcContext==NULL) {
    return(-1);
-  }  
- 
+  }
+
   /*
-   * Build auxiliary table for parallel byte-at-a-time CRC-32 
+   * Build auxiliary table for parallel byte-at-a-time CRC-32
    */
 #ifdef ORIGINAL_METHOD
   for (i = 0; i < 256; ++i) {
@@ -34,7 +34,7 @@ int utl_crc32Init(CRC32_CTX *crcContext)
    crcContext->crc32_table[i] = c;
   }
 #endif
-  
+
   return(0);
 }
 
@@ -50,7 +50,7 @@ int utl_crc32Calc(CRC32_CTX * crcContext, CrcUint8 *inBuf, CrcUint32 inLen, CrcU
   }
   if (utl_crc32CalcEnd(crcContext, crc32)) {
    return(-1);
-  } 
+  }
   return(0);
 }
 
@@ -62,10 +62,10 @@ int utl_crc32CalcStart(CRC32_CTX * crcContext, CrcUint32 *crc32)
   if (crcContext==NULL) {
    *crc32=0;
    return(-1);
-  }  
+  }
 
   /*
-   * Preload shift register, per CRC-32 spec 
+   * Preload shift register, per CRC-32 spec
    */
   *crc32 = 0xffffffff;
 
@@ -77,7 +77,7 @@ int utl_crc32CalcStart(CRC32_CTX * crcContext, CrcUint32 *crc32)
 int utl_crc32CalcEnd(CRC32_CTX * crcContext, CrcUint32 *crc32)
 {
   /*
-   * Return complement, per CRC-32 spec 
+   * Return complement, per CRC-32 spec
    */
   *crc32 = (~(*crc32));
 
@@ -95,22 +95,22 @@ int utl_crc32CalcBuffer(CRC32_CTX * crcContext, CrcUint8 *inBuf, CrcUint32 inLen
   if (crcContext==NULL) {
    *crc32=0;
    return(-1);
-  }  
+  }
 
 
   /*
-   * Calculate CRC from data 
+   * Calculate CRC from data
    */
   crc = *crc32;
   for (p = inBuf; inLen > 0; ++p, --inLen) {
-#ifdef ORIGINAL_METHOD  
+#ifdef ORIGINAL_METHOD
     crc = (crc << 8) ^ crcContext->crc32_table[(crc >> 24) ^ *p];
 #else
     crc = ((crc >> 8) & 0x00FFFFFF) ^ crcContext->crc32_table[ (crc ^ *p) & 0xFF ];
-#endif         
-  }  
+#endif
+  }
   *crc32 = crc;
-  
+
   return(0);
 }
 
@@ -119,7 +119,7 @@ int utl_crc32Done(CRC32_CTX * crcContext)
   /* Sanity check context pointer */
   if (crcContext==NULL) {
    return(-1);
-  }  
+  }
 
   return(0);
 }

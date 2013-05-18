@@ -139,7 +139,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         SDL_SetError("FOURCC pixel formats are not supported");
         return SDL_FALSE;
     }
- 
+
     /* Initialize the values here */
     if (SDL_BYTESPERPIXEL(format) <= 2) {
         *bpp = SDL_BITSPERPIXEL(format);
@@ -615,7 +615,7 @@ SDL_Palette *
 SDL_AllocPalette(int ncolors)
 {
     SDL_Palette *palette;
-    
+
     /* Input validation */
     if (ncolors < 1) {
       SDL_InvalidParamError("ncolors");
@@ -741,7 +741,7 @@ SDL_DitherColors(SDL_Color * colors, int bpp)
     }
 }
 
-/* 
+/*
  * Calculate the pad-aligned scanline width of a surface
  */
 int
@@ -1055,7 +1055,7 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
            while we're still pointing at it.
 
            A better method would be for the destination surface to keep
-           track of surfaces that are mapped to it and automatically 
+           track of surfaces that are mapped to it and automatically
            invalidate them when it is freed, but this will do for now.
         */
         ++map->dst->refcount;
@@ -1090,7 +1090,7 @@ void
 SDL_CalculateGammaRamp(float gamma, Uint16 * ramp)
 {
     int i;
-    
+
     /* Input validation */
     if (gamma < 0.0f ) {
       SDL_InvalidParamError("gamma");

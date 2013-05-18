@@ -30,10 +30,10 @@
 #include "../SDL_shape_internals.h"
 
 typedef struct {
-	NSGraphicsContext* context;
-	SDL_bool saved;
-	
-	SDL_ShapeTree* shape;
+    NSGraphicsContext* context;
+    SDL_bool saved;
+
+    SDL_ShapeTree* shape;
 } SDL_ShapeData;
 
 extern SDL_WindowShaper* Cocoa_CreateShaper(SDL_Window* window);

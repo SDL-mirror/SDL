@@ -125,7 +125,7 @@ WatchGameController(SDL_GameController * gamecontroller)
 
     /* Print info about the controller we are watching */
     printf("Watching controller %s\n",  name ? name : "Unknown Controller");
-    
+
     /* Loop, getting controller events! */
     while (!done) {
         /* blank screen, set up for drawing this frame. */
@@ -199,7 +199,7 @@ WatchGameController(SDL_GameController * gamecontroller)
         SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0xFF, SDL_ALPHA_OPAQUE);
 
         SDL_RenderPresent(screen);
-        
+
         if ( !done )
             done = SDL_GameControllerGetAttached( gamecontroller ) == 0;
     }
