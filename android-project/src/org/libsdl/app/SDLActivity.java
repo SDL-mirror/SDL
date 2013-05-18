@@ -78,17 +78,26 @@ public class SDLActivity extends Activity {
     }
 
     // Events
-    /*protected void onPause() {
+    @Override
+    protected void onPause() {
         Log.v("SDL", "onPause()");
         super.onPause();
         // Don't call SDLActivity.nativePause(); here, it will be called by SDLSurface::surfaceDestroyed
     }
 
+    @Override
     protected void onResume() {
         Log.v("SDL", "onResume()");
         super.onResume();
         // Don't call SDLActivity.nativeResume(); here, it will be called via SDLSurface::surfaceChanged->SDLActivity::startApp
-    }*/
+    }
+
+    @Override
+    public void onLowMemory() {
+        Log.v("SDL", "onLowMemory()");
+        super.onLowMemory();
+        SDLActivity.nativeLowMemory();
+    }
 
     @Override
     protected void onDestroy() {
@@ -180,6 +189,7 @@ public class SDLActivity extends Activity {
 
     // C functions we call
     public static native void nativeInit();
+    public static native void nativeLowMemory();
     public static native void nativeQuit();
     public static native void nativePause();
     public static native void nativeResume();
@@ -598,8 +608,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // unused
     @Override
     public void onDraw(Canvas canvas) {}
-
-
 
 
     // Key events

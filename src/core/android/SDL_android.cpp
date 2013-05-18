@@ -181,12 +181,20 @@ extern "C" void Java_org_libsdl_app_SDLActivity_onNativeAccel(
     bHasNewData = true;
 }
 
+// Low memory
+extern "C" void Java_org_libsdl_app_SDLActivity_nativeLowMemory(
+                                    JNIEnv* env, jclass cls)
+{    
+    SDL_SendAppEvent(SDL_APP_LOWMEMORY);
+}
+
 // Quit
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeQuit(
                                     JNIEnv* env, jclass cls)
 {    
     // Inject a SDL_QUIT event
     SDL_SendQuit();
+    SDL_SendAppEvent(SDL_APP_TERMINATING);
 }
 
 // Pause
@@ -199,12 +207,20 @@ extern "C" void Java_org_libsdl_app_SDLActivity_nativePause(
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
     }
+
+    __android_log_print(ANDROID_LOG_VERBOSE, "SDL", "nativePause()");
+    SDL_SendAppEvent(SDL_APP_WILLENTERBACKGROUND);
+    SDL_SendAppEvent(SDL_APP_DIDENTERBACKGROUND);
 }
 
 // Resume
 extern "C" void Java_org_libsdl_app_SDLActivity_nativeResume(
                                     JNIEnv* env, jclass cls)
 {
+    __android_log_print(ANDROID_LOG_VERBOSE, "SDL", "nativeResume()");
+    SDL_SendAppEvent(SDL_APP_WILLENTERFOREGROUND);
+    SDL_SendAppEvent(SDL_APP_DIDENTERFOREGROUND);
+
     if (Android_Window) {
         /* Signal the resume semaphore so the event loop knows to resume and restore the GL Context
          * We can't restore the GL Context here because it needs to be done on the SDL main thread
@@ -616,7 +632,9 @@ static int Android_JNI_FileOpen(SDL_RWops* ctx)
 
     if (false) {
 fallback:
-        __android_log_print(ANDROID_LOG_DEBUG, "SDL", "Falling back to legacy InputStream method for opening file");
+        // Disabled log message because of spam on the Nexus 7
+        //__android_log_print(ANDROID_LOG_DEBUG, "SDL", "Falling back to legacy InputStream method for opening file");
+
         /* Try the old method using InputStream */
         ctx->hidden.androidio.assetFileDescriptorRef = NULL;
 

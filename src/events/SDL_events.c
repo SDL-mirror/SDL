@@ -111,6 +111,7 @@ SDL_StopEventLoop(void)
         SDL_event_watchers = tmp->next;
         SDL_free(tmp);
     }
+    SDL_EventOK = NULL;
 }
 
 /* This function (and associated calls) may be called more than once */
@@ -133,8 +134,7 @@ SDL_StartEventLoop(void)
     }
 #endif /* !SDL_THREADS_DISABLED */
 
-    /* No filter to start with, process most event types */
-    SDL_EventOK = NULL;
+    /* Process most event types */
     SDL_EventState(SDL_TEXTINPUT, SDL_DISABLE);
     SDL_EventState(SDL_TEXTEDITING, SDL_DISABLE);
     SDL_EventState(SDL_SYSWMEVENT, SDL_DISABLE);
@@ -365,7 +365,9 @@ int
 SDL_PushEvent(SDL_Event * event)
 {
     SDL_EventWatcher *curr;
+
     event->common.timestamp = SDL_GetTicks();
+
     if (SDL_EventOK && !SDL_EventOK(SDL_EventOKParam, event)) {
         return 0;
     }
@@ -516,8 +518,20 @@ SDL_RegisterEvents(int numevents)
     return event_base;
 }
 
-/* This is a generic event handler.
- */
+int
+SDL_SendAppEvent(SDL_EventType eventType)
+{
+    int posted;
+
+    posted = 0;
+    if (SDL_GetEventState(eventType) == SDL_ENABLE) {
+        SDL_Event event;
+        event.type = eventType;
+        posted = (SDL_PushEvent(&event) > 0);
+    }
+    return (posted);
+}
+
 int
 SDL_SendSysWMEvent(SDL_SysWMmsg * message)
 {

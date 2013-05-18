@@ -91,8 +91,10 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
     }
     [data->view swapBuffers];
 
-    /* we need to let the event cycle run, or the OS won't update the OpenGL view! */
-    SDL_PumpEvents();
+    /* You need to pump events in order for the OS to make changes visible.
+       We don't pump events here because we don't want iOS application events
+       (low memory, terminate, etc.) to happen inside low level rendering.
+     */
 }
 
 SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)

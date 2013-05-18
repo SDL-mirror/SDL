@@ -61,6 +61,32 @@ typedef enum
     /* Application events */
     SDL_QUIT           = 0x100, /**< User-requested quit */
 
+    /* These application events have special meaning on iOS, see README.iOS for details */
+	SDL_APP_TERMINATING,        /**< The application is being terminated by the OS
+                                     Called on iOS in applicationWillTerminate()
+                                     Called on Android in onDestroy()
+                                */
+	SDL_APP_LOWMEMORY,          /**< The application is low on memory, free memory if possible.
+                                     Called on iOS in applicationDidReceiveMemoryWarning()
+                                     Called on Android in onLowMemory()
+                                */
+	SDL_APP_WILLENTERBACKGROUND, /**< The application is about to enter the background
+                                     Called on iOS in applicationWillResignActive()
+                                     Called on Android in onPause()
+                                */
+	SDL_APP_DIDENTERBACKGROUND, /**< The application did enter the background and may not get CPU for some time
+                                     Called on iOS in applicationDidEnterBackground()
+                                     Called on Android in onPause()
+                                */
+	SDL_APP_WILLENTERFOREGROUND, /**< The application is about to enter the foreground
+                                     Called on iOS in applicationWillEnterForeground()
+                                     Called on Android in onResume()
+                                */
+	SDL_APP_DIDENTERFOREGROUND, /**< The application is now interactive
+                                     Called on iOS in applicationDidBecomeActive()
+                                     Called on Android in onResume()
+                                */
+
     /* Window events */
     SDL_WINDOWEVENT    = 0x200, /**< Window state change */
     SDL_SYSWMEVENT,             /**< System specific event */
@@ -109,7 +135,7 @@ typedef enum
 
     /* Drag and drop events */
     SDL_DROPFILE        = 0x1000, /**< The system requests a file open */
-
+	
     /** Events ::SDL_USEREVENT through ::SDL_LASTEVENT are for your use,
      *  and should be allocated with SDL_RegisterEvents()
      */
@@ -427,6 +453,14 @@ typedef struct SDL_QuitEvent
     Uint32 timestamp;
 } SDL_QuitEvent;
 
+/**
+ *  \brief OS Specific event
+ */
+typedef struct SDL_OSEvent
+{
+    Uint32 type;        /**< ::SDL_QUIT */
+    Uint32 timestamp;
+} SDL_OSEvent;
 
 /**
  *  \brief A user-defined event type (event.user.*)

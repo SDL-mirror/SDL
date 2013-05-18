@@ -228,42 +228,48 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    SDL_SendQuit();
-     /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
-    longjmp(*(jump_env()), 1);
+    SDL_SendAppEvent(SDL_APP_TERMINATING);
+}
+
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
+    SDL_SendAppEvent(SDL_APP_LOWMEMORY);
 }
 
 - (void) applicationWillResignActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
-
-    // Send every window on every screen a MINIMIZED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
-    if (!_this) {
-        return;
+    if (_this) {
+        SDL_Window *window;
+        for (window = _this->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+        }
     }
+    SDL_SendAppEvent(SDL_APP_WILLENTERBACKGROUND);
+}
 
-    SDL_Window *window;
-    for (window = _this->windows; window != nil; window = window->next) {
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
-    }
+- (void) applicationDidEnterBackground:(UIApplication*)application
+{
+    SDL_SendAppEvent(SDL_APP_DIDENTERBACKGROUND);
+}
+
+- (void) applicationWillEnterForeground:(UIApplication*)application
+{
+    SDL_SendAppEvent(SDL_APP_WILLENTERFOREGROUND);
 }
 
 - (void) applicationDidBecomeActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
+    SDL_SendAppEvent(SDL_APP_DIDENTERFOREGROUND);
 
-    // Send every window on every screen a RESTORED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
-    if (!_this) {
-        return;
-    }
-
-    SDL_Window *window;
-    for (window = _this->windows; window != nil; window = window->next) {
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    if (_this) {
+        SDL_Window *window;
+        for (window = _this->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        }
     }
 }
 
