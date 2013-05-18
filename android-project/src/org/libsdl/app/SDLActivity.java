@@ -43,7 +43,7 @@ public class SDLActivity extends Activity {
     protected static Thread mAudioThread;
     protected static AudioTrack mAudioTrack;
 
-    // EGL private objects
+    // EGL objects
     protected static EGLContext  mEGLContext;
     protected static EGLSurface  mEGLSurface;
     protected static EGLDisplay  mEGLDisplay;
