@@ -51,8 +51,9 @@ extern "C" {
 
 //! Definition of all the possible test return values of the test case method
 #define TEST_ABORTED		-1
-#define TEST_COMPLETED		 0
-#define TEST_SKIPPED		 1
+#define TEST_STARTED		 0
+#define TEST_COMPLETED		 1
+#define TEST_SKIPPED		 2
 
 //! Definition of all the possible test results for the harness
 #define TEST_RESULT_PASSED				0
@@ -65,7 +66,7 @@ extern "C" {
 typedef void (*SDLTest_TestCaseSetUpFp)(void *arg);
 
 //!< Function pointer to a test case function
-typedef void (*SDLTest_TestCaseFp)(void *arg);
+typedef int (*SDLTest_TestCaseFp)(void *arg);
 
 //!< Function pointer to a test case teardown function (run after every test)
 typedef void  (*SDLTest_TestCaseTearDownFp)(void *arg);
