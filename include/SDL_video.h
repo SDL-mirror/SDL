@@ -323,6 +323,7 @@ extern DECLSPEC int SDLCALL SDL_GetCurrentDisplayMode(int displayIndex, SDL_Disp
 /**
  *  \brief Get the closest match to the requested display mode.
  *  
+ *  \param displayIndex The index of display from which mode should be queried.
  *  \param mode The desired display mode
  *  \param closest A pointer to a display mode to be filled in with the closest 
  *                 match of the available display modes.
@@ -356,6 +357,7 @@ extern DECLSPEC int SDLCALL SDL_GetWindowDisplayIndex(SDL_Window * window);
  *  By default the window's dimensions and the desktop format and refresh rate
  *  are used.
  *  
+ *  \param window The window for which the display mode should be set.
  *  \param mode The mode to use, or NULL for the default mode.
  *  
  *  \return 0 on success, or -1 if setting the display mode failed.
@@ -450,6 +452,7 @@ extern DECLSPEC const char *SDLCALL SDL_GetWindowTitle(SDL_Window * window);
 /**
  *  \brief Set the icon for a window.
  *  
+ *  \param window The window for which the icon should be set.
  *  \param icon The icon for the window.
  */
 extern DECLSPEC void SDLCALL SDL_SetWindowIcon(SDL_Window * window,
@@ -707,6 +710,7 @@ extern DECLSPEC int SDLCALL SDL_UpdateWindowSurfaceRects(SDL_Window * window,
 /**
  *  \brief Set a window's input grab mode.
  *  
+ *  \param window The window for which the input grab mode should be set.
  *  \param grabbed This is SDL_TRUE to grab input, and SDL_FALSE to release input.
  *  
  *  \sa SDL_GetWindowGrab()
@@ -745,6 +749,7 @@ extern DECLSPEC float SDLCALL SDL_GetWindowBrightness(SDL_Window * window);
 /**
  *  \brief Set the gamma ramp for a window.
  *  
+ *  \param window The window for which the gamma ramp should be set.
  *  \param red The translation table for the red channel, or NULL.
  *  \param green The translation table for the green channel, or NULL.
  *  \param blue The translation table for the blue channel, or NULL.
@@ -767,6 +772,7 @@ extern DECLSPEC int SDLCALL SDL_SetWindowGammaRamp(SDL_Window * window,
 /**
  *  \brief Get the gamma ramp for a window.
  *  
+ *  \param window The window from which the gamma ramp should be queried.
  *  \param red   A pointer to a 256 element array of 16-bit quantities to hold 
  *               the translation table for the red channel, or NULL.
  *  \param green A pointer to a 256 element array of 16-bit quantities to hold 

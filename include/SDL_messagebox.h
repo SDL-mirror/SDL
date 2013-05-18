@@ -108,6 +108,7 @@ typedef struct
  *  \brief Create a modal message box.
  *
  *  \param messageboxdata The SDL_MessageBoxData structure with title, text, etc.
+ *  \param buttonid The pointer to which user id of hit button should be copied.
  *
  *  \return -1 on error, otherwise 0 and buttonid contains user id of button
  *          hit or -1 if dialog was closed.

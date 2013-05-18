@@ -581,6 +581,7 @@ extern DECLSPEC int SDLCALL SDL_WaitEvent(SDL_Event * event);
  *  
  *  \param event If not NULL, the next event is removed from the queue and 
  *               stored in that area.
+ *  \param timeout The timeout (in milliseconds) to wait for next event.
  */
 extern DECLSPEC int SDLCALL SDL_WaitEventTimeout(SDL_Event * event,
                                                  int timeout);
