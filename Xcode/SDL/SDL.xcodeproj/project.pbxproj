@@ -635,7 +635,6 @@
 		00D8DA061195093100638393 /* img_primitivesblend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_primitivesblend.c; sourceTree = "<group>"; };
 		00D8DA081195093100638393 /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
 		00D8DA091195093100638393 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
-		00D8DA0A1195093100638393 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = ../../test/automated/README; sourceTree = SOURCE_ROOT; };
 		00D8DA0C1195093100638393 /* rect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rect.c; sourceTree = "<group>"; };
 		00D8DA0D1195093100638393 /* rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rect.h; sourceTree = "<group>"; };
 		00D8DA0F1195093100638393 /* render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = render.c; sourceTree = "<group>"; };
@@ -643,11 +642,8 @@
 		00D8DA121195093100638393 /* read */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = read; sourceTree = "<group>"; };
 		00D8DA131195093100638393 /* rwops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rwops.c; sourceTree = "<group>"; };
 		00D8DA141195093100638393 /* rwops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rwops.h; sourceTree = "<group>"; };
-		00D8DA151195093100638393 /* SDL_at.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_at.c; path = ../../test/automated/SDL_at.c; sourceTree = SOURCE_ROOT; };
-		00D8DA161195093100638393 /* SDL_at.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_at.h; path = ../../test/automated/SDL_at.h; sourceTree = SOURCE_ROOT; };
 		00D8DA181195093100638393 /* surface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = surface.c; sourceTree = "<group>"; };
 		00D8DA191195093100638393 /* surface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surface.h; sourceTree = "<group>"; };
-		00D8DA1A1195093100638393 /* testsdl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testsdl.c; path = ../../test/automated/testsdl.c; sourceTree = SOURCE_ROOT; };
 		00F5D79E0990CA0D0051C449 /* UniversalBinaryNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = UniversalBinaryNotes.rtf; sourceTree = "<group>"; };
 		04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		041B2C9E12FA0D680087D585 /* SDL_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render.c; sourceTree = "<group>"; };
@@ -967,103 +963,6 @@
 			);
 			name = TestResources;
 			sourceTree = "<group>";
-		};
-		00D8D9FA1195091500638393 /* AutomatedTests */ = {
-			isa = PBXGroup;
-			children = (
-				00D8D9FB1195093100638393 /* audio */,
-				00D8D9FE1195093100638393 /* common */,
-				00D8DA071195093100638393 /* platform */,
-				00D8DA0A1195093100638393 /* README */,
-				00D8DA0B1195093100638393 /* rect */,
-				00D8DA0E1195093100638393 /* render */,
-				00D8DA111195093100638393 /* rwops */,
-				00D8DA151195093100638393 /* SDL_at.c */,
-				00D8DA161195093100638393 /* SDL_at.h */,
-				00D8DA171195093100638393 /* surface */,
-				00D8DA1A1195093100638393 /* testsdl.c */,
-			);
-			name = AutomatedTests;
-			sourceTree = "<group>";
-		};
-		00D8D9FB1195093100638393 /* audio */ = {
-			isa = PBXGroup;
-			children = (
-				00D8D9FC1195093100638393 /* audio.c */,
-				00D8D9FD1195093100638393 /* audio.h */,
-			);
-			name = audio;
-			path = ../../test/automated/audio;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8D9FE1195093100638393 /* common */ = {
-			isa = PBXGroup;
-			children = (
-				00D8D9FF1195093100638393 /* common.c */,
-				00D8DA001195093100638393 /* common.h */,
-				00D8DA011195093100638393 /* images.h */,
-				00D8DA021195093100638393 /* img_blit.c */,
-				00D8DA031195093100638393 /* img_blitblend.c */,
-				00D8DA041195093100638393 /* img_face.c */,
-				00D8DA051195093100638393 /* img_primitives.c */,
-				00D8DA061195093100638393 /* img_primitivesblend.c */,
-			);
-			name = common;
-			path = ../../test/automated/common;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8DA071195093100638393 /* platform */ = {
-			isa = PBXGroup;
-			children = (
-				00D8DA081195093100638393 /* platform.c */,
-				00D8DA091195093100638393 /* platform.h */,
-			);
-			name = platform;
-			path = ../../test/automated/platform;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8DA0B1195093100638393 /* rect */ = {
-			isa = PBXGroup;
-			children = (
-				00D8DA0C1195093100638393 /* rect.c */,
-				00D8DA0D1195093100638393 /* rect.h */,
-			);
-			name = rect;
-			path = ../../test/automated/rect;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8DA0E1195093100638393 /* render */ = {
-			isa = PBXGroup;
-			children = (
-				00D8DA0F1195093100638393 /* render.c */,
-				00D8DA101195093100638393 /* render.h */,
-			);
-			name = render;
-			path = ../../test/automated/render;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8DA111195093100638393 /* rwops */ = {
-			isa = PBXGroup;
-			children = (
-				001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */,
-				001E39ED1196F75000A3F5B8 /* TestSupportRWops.h */,
-				00D8DA121195093100638393 /* read */,
-				00D8DA131195093100638393 /* rwops.c */,
-				00D8DA141195093100638393 /* rwops.h */,
-			);
-			name = rwops;
-			path = ../../test/automated/rwops;
-			sourceTree = SOURCE_ROOT;
-		};
-		00D8DA171195093100638393 /* surface */ = {
-			isa = PBXGroup;
-			children = (
-				00D8DA181195093100638393 /* surface.c */,
-				00D8DA191195093100638393 /* surface.h */,
-			);
-			name = surface;
-			path = ../../test/automated/surface;
-			sourceTree = SOURCE_ROOT;
 		};
 		0153844A006D81B07F000001 /* Public Headers */ = {
 			isa = PBXGroup;
@@ -1565,7 +1464,6 @@
 				F59C70FC00D5CB5801000001 /* pkg-support */,
 				0153844A006D81B07F000001 /* Public Headers */,
 				08FB77ACFE841707C02AAC07 /* Library Source */,
-				00D8D9FA1195091500638393 /* AutomatedTests */,
 				006E949B11951160001DE610 /* TestResources */,
 				034768DDFF38A45A11DB9C8B /* Products */,
 				BECDF66B0761BA81005FE872 /* Info-Framework.plist */,
