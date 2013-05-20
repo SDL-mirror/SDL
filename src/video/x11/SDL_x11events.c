@@ -356,7 +356,13 @@ X11_DispatchEvent(_THIS)
                 /* We want to reset the keyboard here, because we may have
                    missed keyboard messages after our previous FocusOut.
                  */
-                SDL_ResetKeyboard();
+                /* Actually, if we do this we clear the ALT key on Unity
+                   because it briefly takes focus for their dashboard.
+
+                   I think it's better to think the ALT key is held down
+                   when it's not, then always lose the ALT modifier on Unity.
+                 */
+                /*SDL_ResetKeyboard();*/
             }
             data->pending_focus = PENDING_FOCUS_IN;
             data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_IN_TIME;
