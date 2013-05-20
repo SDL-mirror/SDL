@@ -101,6 +101,7 @@ typedef struct
 {
     SDL_GLContext context;
 
+    SDL_bool debug_enabled;
     SDL_bool GL_ARB_debug_output_supported;
     int errors;
     char **error_messages;
@@ -182,6 +183,10 @@ GL_ClearErrors(SDL_Renderer *renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
+    if (!data->debug_enabled)
+    {
+        return;
+    }
     if (data->GL_ARB_debug_output_supported) {
         if (data->errors) {
             int i;
@@ -206,6 +211,10 @@ GL_CheckAllErrors (const char *prefix, SDL_Renderer *renderer, const char *file,
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int ret = 0;
 
+    if (!data->debug_enabled)
+    {
+        return 0;
+    }
     if (data->GL_ARB_debug_output_supported) {
         if (data->errors) {
             int i;
@@ -444,13 +453,20 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     }
 
     /* Check for debug output support */
-    if (SDL_GL_ExtensionSupported("GL_ARB_debug_output")) {
+    if (SDL_GL_GetAttribute(SDL_GL_CONTEXT_FLAGS, &value) == 0 &&
+        (value & SDL_GL_CONTEXT_DEBUG_FLAG)) {
+        data->debug_enabled = SDL_TRUE;
+    }
+    if (data->debug_enabled && SDL_GL_ExtensionSupported("GL_ARB_debug_output")) {
         PFNGLDEBUGMESSAGECALLBACKARBPROC glDebugMessageCallbackARBFunc = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
 
         data->GL_ARB_debug_output_supported = SDL_TRUE;
         data->glGetPointerv(GL_DEBUG_CALLBACK_FUNCTION_ARB, (GLvoid **)&data->next_error_callback);
         data->glGetPointerv(GL_DEBUG_CALLBACK_USER_PARAM_ARB, &data->next_error_userparam);
         glDebugMessageCallbackARBFunc(GL_HandleDebugMessage, renderer);
+
+        /* Make sure our callback is called when errors actually happen */
+        data->glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
     }
 
     if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
