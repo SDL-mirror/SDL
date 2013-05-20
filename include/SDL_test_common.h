@@ -104,6 +104,7 @@ typedef struct
     int gl_accelerated;
     int gl_major_version;
     int gl_minor_version;
+    int gl_debug;
 } SDLTest_CommonState;
 
 #include "begin_code.h"

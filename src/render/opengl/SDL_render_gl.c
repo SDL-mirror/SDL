@@ -100,6 +100,13 @@ struct GL_FBOList
 typedef struct
 {
     SDL_GLContext context;
+
+    SDL_bool GL_ARB_debug_output_supported;
+    int errors;
+    char **error_messages;
+    GLDEBUGPROCARB next_error_callback;
+    GLvoid *next_error_userparam;
+
     SDL_bool GL_ARB_texture_rectangle_supported;
     struct {
         GL_Shader shader;
@@ -151,7 +158,7 @@ typedef struct
     GL_FBOList *fbo;
 } GL_TextureData;
 
-static __inline__ const char*
+SDL_FORCE_INLINE const char*
 GL_TranslateError (GLenum error)
 {
 #define GL_ERROR_TRANSLATE(e) case e: return #e;
@@ -170,22 +177,57 @@ GL_TranslateError (GLenum error)
 #undef GL_ERROR_TRANSLATE
 }
 
-static __inline__ int
-GL_CheckAllErrors (const char *prefix, SDL_Renderer * renderer, const char *file, int line, const char *function)
+SDL_FORCE_INLINE void
+GL_ClearErrors(SDL_Renderer *renderer)
+{
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
+
+    if (data->GL_ARB_debug_output_supported) {
+        if (data->errors) {
+            int i;
+            for (i = 0; i < data->errors; ++i) {
+                SDL_free(data->error_messages[i]);
+            }
+            SDL_free(data->error_messages);
+
+            data->errors = 0;
+            data->error_messages = NULL;
+        }
+    } else {
+        while (data->glGetError() != GL_NO_ERROR) {
+            continue;
+        }
+    }
+}
+
+SDL_FORCE_INLINE int
+GL_CheckAllErrors (const char *prefix, SDL_Renderer *renderer, const char *file, int line, const char *function)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     int ret = 0;
-    /* check gl errors (can return multiple errors) */
-    for (;;) {
-        GLenum error = data->glGetError();
-        if (error != GL_NO_ERROR) {
-            if (prefix == NULL || prefix[0] == '\0') {
-                prefix = "generic";
+
+    if (data->GL_ARB_debug_output_supported) {
+        if (data->errors) {
+            int i;
+            for (i = 0; i < data->errors; ++i) {
+                SDL_SetError("%s: %s (%d): %s %s", prefix, file, line, function, data->error_messages[i]);
+                ret = -1;
             }
-            SDL_SetError("%s: %s (%d): %s %s (0x%X)", prefix, file, line, function, GL_TranslateError(error), error);
-            ret++;
-        } else {
-            break;
+            GL_ClearErrors(renderer);
+        }
+    } else {
+        /* check gl errors (can return multiple errors) */
+        for (;;) {
+            GLenum error = data->glGetError();
+            if (error != GL_NO_ERROR) {
+                if (prefix == NULL || prefix[0] == '\0') {
+                    prefix = "generic";
+                }
+                SDL_SetError("%s: %s (%d): %s %s (0x%X)", prefix, file, line, function, GL_TranslateError(error), error);
+                ret = -1;
+            } else {
+                break;
+            }
         }
     }
     return ret;
@@ -226,6 +268,7 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
+    GL_ClearErrors(renderer);
     if (SDL_CurrentContext != data->context) {
         if (SDL_GL_MakeCurrent(renderer->window, data->context) < 0) {
             return -1;
@@ -264,8 +307,35 @@ GL_ResetState(SDL_Renderer *renderer)
     GL_CheckError("", renderer);
 }
 
+static void
+GL_HandleDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam)
+{
+    SDL_Renderer *renderer = (SDL_Renderer *) userParam;
+    GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-GL_FBOList *
+    if (type == GL_DEBUG_TYPE_ERROR_ARB) {
+        /* Record this error */
+        ++data->errors;
+        data->error_messages = SDL_realloc(data->error_messages, data->errors * sizeof(*data->error_messages));
+        if (data->error_messages) {
+            data->error_messages[data->errors-1] = SDL_strdup(message);
+        }
+    }
+    printf("%s\n", message);
+
+    /* If there's another error callback, pass it along, otherwise log it */
+    if (data->next_error_callback) {
+        data->next_error_callback(source, type, id, severity, length, message, data->next_error_userparam);
+    } else {
+        if (type == GL_DEBUG_TYPE_ERROR_ARB) {
+            SDL_LogError(SDL_LOG_CATEGORY_RENDER, "%s", message);
+        } else {
+            SDL_LogDebug(SDL_LOG_CATEGORY_RENDER, "%s", message);
+        }
+    }
+}
+
+static GL_FBOList *
 GL_GetFBO(GL_RenderData *data, Uint32 w, Uint32 h)
 {
     GL_FBOList *result = data->framebuffers;
@@ -374,6 +444,16 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_PRESENTVSYNC;
     }
 
+    /* Check for debug output support */
+    if (SDL_GL_ExtensionSupported("GL_ARB_debug_output")) {
+        PFNGLDEBUGMESSAGECALLBACKARBPROC glDebugMessageCallbackARBFunc = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
+
+        data->GL_ARB_debug_output_supported = SDL_TRUE;
+        data->glGetPointerv(GL_DEBUG_CALLBACK_FUNCTION_ARB, (GLvoid **)&data->next_error_callback);
+        data->glGetPointerv(GL_DEBUG_CALLBACK_USER_PARAM_ARB, &data->next_error_userparam);
+        glDebugMessageCallbackARBFunc(GL_HandleDebugMessage, renderer);
+    }
+
     if (SDL_GL_ExtensionSupported("GL_ARB_texture_rectangle")
         || SDL_GL_ExtensionSupported("GL_EXT_texture_rectangle")) {
         data->GL_ARB_texture_rectangle_supported = SDL_TRUE;
@@ -442,7 +522,7 @@ GL_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
     }
 }
 
-static __inline__ int
+SDL_FORCE_INLINE int
 power_of_2(int input)
 {
     int value = 1;
@@ -453,7 +533,7 @@ power_of_2(int input)
     return value;
 }
 
-static __inline__ SDL_bool
+SDL_FORCE_INLINE SDL_bool
 convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
                GLint* internalFormat, GLenum* format, GLenum* type)
 {
@@ -602,7 +682,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
                                  texture_h, 0, format, type, NULL);
     }
     renderdata->glDisable(data->type);
-    if (GL_CheckError("glTexImage2D()", renderer) > 0) {
+    if (GL_CheckError("glTexImage2D()", renderer) < 0) {
         return -1;
     }
 
@@ -641,8 +721,7 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         renderdata->glDisable(data->type);
     }
 
-    GL_CheckError("", renderer);
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -654,7 +733,6 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     GL_ActivateRenderer(renderer);
 
-    GL_CheckError("", renderer);
     renderdata->glEnable(data->type);
     renderdata->glBindTexture(data->type, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -689,10 +767,7 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                                     data->format, data->formattype, pixels);
     }
     renderdata->glDisable(data->type);
-    if (GL_CheckError("glTexSubImage2D()", renderer) > 0) {
-        return -1;
-    }
-    return 0;
+    return GL_CheckError("glTexSubImage2D()", renderer);
 }
 
 static int
@@ -782,8 +857,7 @@ GL_UpdateViewport(SDL_Renderer * renderer)
                       (GLdouble) 0,
                        0.0, 1.0);
     }
-    GL_CheckError("", renderer);
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -965,9 +1039,7 @@ GL_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 #endif
         data->glEnd();
     }
-    GL_CheckError("", renderer);
-
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -983,9 +1055,7 @@ GL_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 
         data->glRectf(rect->x, rect->y, rect->x + rect->w, rect->y + rect->h);
     }
-    GL_CheckError("", renderer);
-
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -1052,9 +1122,7 @@ GL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glDisable(texturedata->type);
 
-    GL_CheckError("", renderer);
-
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -1067,6 +1135,7 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     GLfloat minx, miny, maxx, maxy;
     GLfloat centerx, centery;
     GLfloat minu, maxu, minv, maxv;
+
     GL_ActivateRenderer(renderer);
 
     data->glEnable(texturedata->type);
@@ -1144,9 +1213,7 @@ GL_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 
     data->glDisable(texturedata->type);
 
-    GL_CheckError("", renderer);
-
-    return 0;
+    return GL_CheckError("", renderer);
 }
 
 static int
@@ -1247,6 +1314,14 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
     if (data) {
+        GL_ClearErrors(renderer);
+        if (data->GL_ARB_debug_output_supported) {
+            PFNGLDEBUGMESSAGECALLBACKARBPROC glDebugMessageCallbackARBFunc = (PFNGLDEBUGMESSAGECALLBACKARBPROC) SDL_GL_GetProcAddress("glDebugMessageCallbackARB");
+
+            /* Uh oh, we don't have a safe way of removing ourselves from the callback chain, if it changed after we set our callback. */
+            /* For now, just always replace the callback with the original one */
+            glDebugMessageCallbackARBFunc(data->next_error_callback, data->next_error_userparam);
+        }
         if (data->shaders) {
             GL_DestroyShaderContext(data->shaders);
         }
@@ -1266,7 +1341,9 @@ GL_DestroyRenderer(SDL_Renderer * renderer)
     SDL_free(renderer);
 }
 
-static int GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh) {
+static int
+GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, float *texh)
+{
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
     GL_ActivateRenderer(renderer);
@@ -1289,7 +1366,9 @@ static int GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float 
     return 0;
 }
 
-static int GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture) {
+static int
+GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture)
+{
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
     GL_TextureData *texturedata = (GL_TextureData *) texture->driverdata;
     GL_ActivateRenderer(renderer);

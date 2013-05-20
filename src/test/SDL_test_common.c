@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--gldebug] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -74,6 +74,7 @@ SDLTest_CommonCreateState(char **argv, Uint32 flags)
     state->gl_multisamplesamples = 0;
     state->gl_retained_backing = 1;
     state->gl_accelerated = -1;
+    state->gl_debug = 0;
 
     return state;
 }
@@ -98,6 +99,10 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         }
         state->renderdriver = argv[index];
         return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--gldebug") == 0) {
+        state->gl_debug = 1;
+        return 1;
     }
     if (SDL_strcasecmp(argv[index], "--info") == 0) {
         ++index;
@@ -655,6 +660,9 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
         if (state->gl_major_version) {
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
+        }
+        if (state->gl_debug) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
         }
 
         if (state->verbose & VERBOSE_MODES) {

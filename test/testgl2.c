@@ -255,6 +255,7 @@ main(int argc, char *argv[])
     printf("Vendor        : %s\n", glGetString(GL_VENDOR));
     printf("Renderer      : %s\n", glGetString(GL_RENDERER));
     printf("Version       : %s\n", glGetString(GL_VERSION));
+    printf("Extensions    : %s\n", glGetString(GL_EXTENSIONS));
     printf("\n");
 
     status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
