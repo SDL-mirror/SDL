@@ -89,8 +89,10 @@ typedef struct _ControllerMapping_t
 /* default mappings we support */
 const char *s_ControllerMappings [] =
 {
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
 	"xinput,X360 Controller,a:b10,b:b11,y:b13,x:b12,start:b4,guide:b14,back:b5,dpup:b0,dpleft:b2,dpdown:b1,dpright:b3,leftshoulder:b8,rightshoulder:b9,leftstick:b6,rightstick:b7,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:a4,righttrigger:a5",
+#endif
+#ifdef SDL_JOYSTICK_DINPUT
 	"341a3608000000000000504944564944,Afterglow PS3 Controller,a:b1,b:b2,y:b3,x:b0,start:b9,guide:b12,back:b8,dpup:h0.1,dpleft:h0.8,dpdown:h0.4,dpright:h0.2,leftshoulder:b4,rightshoulder:b5,leftstick:b10,rightstick:b11,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b6,righttrigger:b7",
 	"88880803000000000000504944564944,PS3 Controller,a:b2,b:b1,x:b0,y:b3,start:b11,back:b8,leftstick:b9,rightstick:b10,leftshoulder:b4,rightshoulder:b5,dpup:h0.1,dpleft:h0.4,dpdown:h0.8,dpright:h0.2,leftx:a0,lefty:a1,rightx:a3,righty:a4,lefttrigger:b6,righttrigger:b7,guide:b12",
 	"4c056802000000000000504944564944,PS3 Controller,a:b14,b:b13,y:b12,x:b15,start:b3,guide:b16,back:b0,leftstick:b1,rightstick:b2,leftshoulder:b10,rightshoulder:b11,dpup:b4,dpleft:b7,dpdown:b6,dpright:b5,leftx:a0,lefty:a1,rightx:a2,righty:a3,lefttrigger:b8,righttrigger:b9,",
@@ -119,7 +121,7 @@ const char *s_ControllerMappings [] =
 };
 
 static ControllerMapping_t *s_pSupportedControllers = NULL;
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
 static ControllerMapping_t *s_pXInputMapping = NULL;
 #endif
 
@@ -310,7 +312,7 @@ ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickGUID *gu
  */
 ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 {
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
 	if ( SDL_SYS_IsXInputDeviceIndex(device_index) && s_pXInputMapping )
 	{
 		return s_pXInputMapping;
@@ -699,7 +701,7 @@ SDL_GameControllerAddMapping( const char *mappingString )
 	char *pchMapping;
     SDL_JoystickGUID jGUID;
     ControllerMapping_t *pControllerMapping;
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
     SDL_bool is_xinput_mapping = SDL_FALSE;
 #endif
 
@@ -707,7 +709,7 @@ SDL_GameControllerAddMapping( const char *mappingString )
     if (!pchGUID) {
         return -1;
     }
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
     if ( !SDL_strcasecmp( pchGUID, "xinput" ) ) {
         is_xinput_mapping = SDL_TRUE;
     }
@@ -742,7 +744,7 @@ SDL_GameControllerAddMapping( const char *mappingString )
 			SDL_free( pchMapping );
 			return SDL_OutOfMemory();
 		}
-#ifdef SDL_JOYSTICK_DINPUT
+#if defined(SDL_JOYSTICK_DINPUT) || defined(SDL_JOYSTICK_XINPUT)
 		if ( is_xinput_mapping )
 		{
 			s_pXInputMapping = pControllerMapping;

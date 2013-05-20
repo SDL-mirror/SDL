@@ -144,8 +144,12 @@ typedef unsigned int uintptr_t;
 /* Enable various input drivers */
 // TODO, WinRT: Get haptic support working
 #define SDL_HAPTIC_DISABLED	1
-// TODO, WinRT: Get joystick support working
-#define SDL_JOYSTICK_DISABLED	1
+
+#if WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
+#define SDL_JOYSTICK_DISABLED 1
+#else
+#define SDL_JOYSTICK_XINPUT 1
+#endif
 
 /* Enable various shared object loading systems */
 #define SDL_LOADSO_WINDOWS	1

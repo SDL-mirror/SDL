@@ -192,9 +192,6 @@
     <ClCompile Include="..\..\src\haptic\dummy\SDL_syshaptic.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\joystick\dummy\SDL_sysjoystick.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\loadso\windows\SDL_sysloadso.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -265,6 +262,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\joystick\SDL_gamecontroller.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\joystick\windowsrt\SDL_xinputjoystick.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

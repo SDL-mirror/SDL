@@ -75,9 +75,9 @@
     <ClCompile Include="..\..\src\file\SDL_rwops.c" />
     <ClCompile Include="..\..\src\haptic\dummy\SDL_syshaptic.c" />
     <ClCompile Include="..\..\src\haptic\SDL_haptic.c" />
-    <ClCompile Include="..\..\src\joystick\dummy\SDL_sysjoystick.c" />
     <ClCompile Include="..\..\src\joystick\SDL_gamecontroller.c" />
     <ClCompile Include="..\..\src\joystick\SDL_joystick.c" />
+    <ClCompile Include="..\..\src\joystick\windowsrt\SDL_xinputjoystick.c" />
     <ClCompile Include="..\..\src\loadso\windows\SDL_sysloadso.c" />
     <ClCompile Include="..\..\src\render\direct3d11\SDL_render_d3d11.cpp">
       <CompileAsWinRT Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</CompileAsWinRT>
@@ -426,7 +426,7 @@
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <AdditionalDependencies>xaudio2.lib;d2d1.lib;d3d11.lib;dxgi.lib;ole32.lib;windowscodecs.lib;dwrite.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>xinput.lib;xaudio2.lib;d2d1.lib;d3d11.lib;dxgi.lib;ole32.lib;windowscodecs.lib;dwrite.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -440,7 +440,7 @@
       <SubSystem>Console</SubSystem>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <AdditionalDependencies>xaudio2.lib;d2d1.lib;d3d11.lib;dxgi.lib;ole32.lib;windowscodecs.lib;dwrite.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>xinput.lib;xaudio2.lib;d2d1.lib;d3d11.lib;dxgi.lib;ole32.lib;windowscodecs.lib;dwrite.lib;kernel32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|arm'">
