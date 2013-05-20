@@ -307,7 +307,7 @@ GL_ResetState(SDL_Renderer *renderer)
     GL_CheckError("", renderer);
 }
 
-static void
+static void APIENTRY
 GL_HandleDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char *message, void *userParam)
 {
     SDL_Renderer *renderer = (SDL_Renderer *) userParam;
