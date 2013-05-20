@@ -321,7 +321,6 @@ GL_HandleDebugMessage(GLenum source, GLenum type, GLuint id, GLenum severity, GL
             data->error_messages[data->errors-1] = SDL_strdup(message);
         }
     }
-    printf("%s\n", message);
 
     /* If there's another error callback, pass it along, otherwise log it */
     if (data->next_error_callback) {
