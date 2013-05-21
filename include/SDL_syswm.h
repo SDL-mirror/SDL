@@ -82,6 +82,7 @@ struct SDL_SysWMinfo;
 #include <Cocoa/Cocoa.h>
 #else
 typedef struct _NSWindow NSWindow;
+typedef struct _NSView NSView;
 #endif
 #endif
 
@@ -187,6 +188,7 @@ struct SDL_SysWMinfo
         struct
         {
             NSWindow *window;           /* The Cocoa window */
+            NSView *view;               /* The Cocoa view */
         } cocoa;
 #endif
 #if defined(SDL_VIDEO_DRIVER_UIKIT)
