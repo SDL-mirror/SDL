@@ -221,10 +221,7 @@ typedef struct SDL_MouseMotionEvent
     Uint32 timestamp;
     Uint32 windowID;    /**< The window with mouse focus, if any */
     Uint32 which;       /**< The mouse instance id, or SDL_TOUCH_MOUSEID */
-    Uint8 state;        /**< The current button state */
-    Uint8 padding1;
-    Uint8 padding2;
-    Uint8 padding3;
+    Uint32 state;       /**< The current button state */
     Sint32 x;           /**< X coordinate, relative to window */
     Sint32 y;           /**< Y coordinate, relative to window */
     Sint32 xrel;        /**< The relative motion in the X direction */
