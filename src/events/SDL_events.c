@@ -388,12 +388,11 @@ SDL_PushEvent(SDL_Event * event)
 void
 SDL_SetEventFilter(SDL_EventFilter filter, void *userdata)
 {
-    SDL_Event bitbucket;
-
     /* Set filter and discard pending events */
-    SDL_EventOK = filter;
+    SDL_EventOK = NULL;
+    SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
     SDL_EventOKParam = userdata;
-    while (SDL_PollEvent(&bitbucket) > 0);
+    SDL_EventOK = filter;
 }
 
 SDL_bool
