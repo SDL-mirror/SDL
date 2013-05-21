@@ -2423,7 +2423,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos
-        ac_default_prefix=/boot/develop/tools/gnupro
+        ac_default_prefix=/boot/common
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
