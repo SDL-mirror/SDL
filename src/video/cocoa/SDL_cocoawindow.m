@@ -690,7 +690,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         }
     }
     nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:NO screen:screen];
-    [nswindow setBackgroundColor:NSColor.blackColor];
+    [nswindow setBackgroundColor:[NSColor blackColor]];
 
     /* Create a default view for this window */
     rect = [nswindow contentRectForFrameRect:[nswindow frame]];
