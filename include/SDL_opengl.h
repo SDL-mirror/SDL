@@ -40,10 +40,6 @@
 #include <windows.h>
 #endif
 
-#ifdef __HAIKU__  /* !!! FIXME: temp compiler warning fix... */
-#define NO_SDL_GLEXT 1
-#endif
-
 #ifdef __glext_h_
 /* Someone has already included glext.h */
 #define NO_SDL_GLEXT
