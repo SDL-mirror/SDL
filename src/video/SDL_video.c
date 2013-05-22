@@ -2392,6 +2392,9 @@ SDL_GL_ExtensionSupported(const char *extension)
             return SDL_FALSE;
         }
 
+        #ifndef GL_NUM_EXTENSIONS
+        #define GL_NUM_EXTENSIONS 0x821D
+        #endif
         glGetIntegervFunc(GL_NUM_EXTENSIONS, &num_exts);
         for (i = 0; i < num_exts; i++) {
             const char *thisext = (const char *) glGetStringiFunc(GL_EXTENSIONS, i);
