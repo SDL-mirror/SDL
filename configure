@@ -22255,7 +22255,7 @@ $as_echo "#define SDL_LOADSO_WINDOWS 1" >>confdefs.h
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos
-        ac_default_prefix=/boot/develop/tools/gnupro
+        ac_default_prefix=/boot/common
         CheckDummyVideo
         CheckDiskAudio
         CheckDummyAudio
