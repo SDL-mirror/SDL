@@ -37,6 +37,7 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 #include "SDL_events.h"
+#include "../../events/SDL_events_c.h"
 
 #include <Windows.h>
 #include <Xinput.h>
@@ -46,6 +47,7 @@ struct joystick_hwdata {
     DWORD userIndex;    // The XInput device index, in the range [0, XUSER_MAX_COUNT-1] (probably [0,3]).
     XINPUT_STATE XInputState;   // the last-read in XInputState, kept around to compare old and new values
     SDL_bool isDeviceConnected; // was the device connected (on the last polling, or during backend-initialization)?
+    SDL_bool isDeviceRemovalEventPending;   // was the device removed, and is the associated removal event pending?
 };
 
 /* Keep track of data on all XInput devices, regardless of whether or not
@@ -96,11 +98,67 @@ int SDL_SYS_NumJoysticks()
 
 void SDL_SYS_JoystickDetect()
 {
+    DWORD i;
+    XINPUT_STATE tempXInputState;
+    HRESULT result;
+    SDL_Event event;
+
+    /* Iterate through each possible XInput device, seeing if any devices
+       have been connected, or if they were removed.
+     */
+    for (i = 0; i < XUSER_MAX_COUNT; ++i) {
+        /* See if any new devices are connected. */
+        if (!g_XInputData[i].isDeviceConnected && !g_XInputData[i].isDeviceRemovalEventPending) {
+            result = XInputGetState(i, &tempXInputState);
+            if (result == ERROR_SUCCESS) {
+                /* Yup, a device is connected.  Mark the device as connected,
+                   then tell others about it (via an SDL_JOYDEVICEADDED event.)
+                 */
+                g_XInputData[i].isDeviceConnected = SDL_TRUE;
+
+#if !SDL_EVENTS_DISABLED
+                SDL_zero(event);
+                event.type = SDL_JOYDEVICEADDED;
+                
+                if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+                    event.jdevice.which = i;
+                    if ((SDL_EventOK == NULL)
+                        || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+                        SDL_PushEvent(&event);
+                    }
+                }
+#endif
+            }
+        } else if (g_XInputData[i].isDeviceRemovalEventPending) {
+            /* A device was previously marked as removed (by
+               SDL_SYS_JoystickUpdate).  Tell others about the device removal.
+            */
+
+            g_XInputData[i].isDeviceRemovalEventPending = SDL_FALSE;
+
+#if !SDL_EVENTS_DISABLED
+            SDL_zero(event);
+            event.type = SDL_JOYDEVICEREMOVED;
+                
+            if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+                event.jdevice.which = i; //joystick->hwdata->userIndex;
+                if ((SDL_EventOK == NULL)
+                    || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+                    SDL_PushEvent(&event);
+                }
+            }
+#endif
+        }
+    }
 }
 
 SDL_bool SDL_SYS_JoystickNeedsPolling()
 {
-    return SDL_FALSE;
+    /* Since XInput, or WinRT, provides any events to indicate when a game
+       controller gets connected, and instead indicates device availability
+       solely through polling, we'll poll (for new devices).
+     */
+    return SDL_TRUE;
 }
 
 /* Internal function to retreive device capabilities.
@@ -261,12 +319,11 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
     /* Poll for new data */
     result = XInputGetState(joystick->hwdata->userIndex, &joystick->hwdata->XInputState);
     if (result == ERROR_DEVICE_NOT_CONNECTED) {
-        /* TODO, WinRT: set a flag to indicate that a device-removal event
-           needs to be emitted.
-         */
-        //joystick->hwdata->send_remove_event = 1;
-        //joystick->hwdata->removed = 1;
-        joystick->hwdata->isDeviceConnected = SDL_FALSE;
+        if (joystick->hwdata->isDeviceConnected) {
+            joystick->hwdata->isDeviceConnected = SDL_FALSE;
+            joystick->hwdata->isDeviceRemovalEventPending = SDL_TRUE;
+            /* TODO, WinRT: make sure isDeviceRemovalEventPending gets cleared as appropriate, and that quick re-plugs don't cause trouble */
+        }
         return;
     }
 
