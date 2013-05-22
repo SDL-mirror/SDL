@@ -2347,6 +2347,12 @@ SDL_GL_UnloadLibrary(void)
     }
 }
 
+static __inline__ SDL_bool
+isAtLeastGL3(const char *verstr)
+{
+    return ( verstr && (SDL_atoi(verstr) >= 3) );
+}
+
 SDL_bool
 SDL_GL_ExtensionSupported(const char *extension)
 {
@@ -2366,13 +2372,40 @@ SDL_GL_ExtensionSupported(const char *extension)
     if (start && *start == '0') {
         return SDL_FALSE;
     }
+
     /* Lookup the available extensions */
+
     glGetStringFunc = SDL_GL_GetProcAddress("glGetString");
-    if (glGetStringFunc) {
-        extensions = (const char *) glGetStringFunc(GL_EXTENSIONS);
-    } else {
-        extensions = NULL;
+    if (!glGetStringFunc) {
+        return SDL_FALSE;
     }
+
+    if (isAtLeastGL3((const char *) glGetStringFunc(GL_VERSION))) {
+        const GLubyte *(APIENTRY * glGetStringiFunc) (GLenum, GLuint);
+        void (APIENTRY * glGetIntegervFunc) (GLenum pname, GLint * params);
+        GLint num_exts = 0;
+        GLint i;
+
+        glGetStringiFunc = SDL_GL_GetProcAddress("glGetStringi");
+        glGetIntegervFunc = SDL_GL_GetProcAddress("glGetIntegerv");
+        if ((!glGetStringiFunc) || (!glGetIntegervFunc)) {
+            return SDL_FALSE;
+        }
+
+        glGetIntegervFunc(GL_NUM_EXTENSIONS, &num_exts);
+        for (i = 0; i < num_exts; i++) {
+            const char *thisext = (const char *) glGetStringiFunc(GL_EXTENSIONS, i);
+            if (SDL_strcmp(thisext, extension) == 0) {
+                return SDL_TRUE;
+            }
+        }
+
+        return SDL_FALSE;
+    }
+
+    /* Try the old way with glGetString(GL_EXTENSIONS) ... */
+
+    extensions = (const char *) glGetStringFunc(GL_EXTENSIONS);
     if (!extensions) {
         return SDL_FALSE;
     }
