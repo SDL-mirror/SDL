@@ -187,10 +187,11 @@ static char* X11_URIToLocal(char* uri) {
 #if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
 static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
 {
-    XGenericEventCookie *cookie = &event.xcookie;
-    XGetEventData(videodata->display, cookie);
-    X11_HandleXinput2Event(videodata,cookie);
-    XFreeEventData(videodata->display,cookie);
+    if (XGetEventData(videodata->display, &event)) {
+        XGenericEventCookie *cookie = &event.xcookie;
+        X11_HandleXinput2Event(videodata, cookie);
+        XFreeEventData(videodata->display, cookie);
+    }
 }
 #endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
 
