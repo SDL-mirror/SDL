@@ -299,9 +299,9 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         size_t length;
         LPTSTR tstr;
 
-        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1;
+        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1 + 1;
         output = SDL_stack_alloc(char, length);
-        SDL_snprintf(output, length, "%s: %s", SDL_priority_prefixes[priority], message);
+        SDL_snprintf(output, length, "%s: %s\n", SDL_priority_prefixes[priority], message);
         tstr = WIN_UTF8ToString(output);
         OutputDebugString(tstr);
         SDL_free(tstr);
