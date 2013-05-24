@@ -1331,7 +1331,7 @@ static size_t
 SDL_PrintFloat(char *text, size_t maxlen, SDL_FormatInfo *info, double arg)
 {
     int i, width;
-    size_t len, spot;
+    size_t len;
     size_t left = maxlen;
     char *textstart = text;
 
