@@ -373,9 +373,10 @@ SetDIerror(const char *function, HRESULT code)
 
 
 DEFINE_GUID(CLSID_WbemLocator,   0x4590f811,0x1d3a,0x11d0,0x89,0x1F,0x00,0xaa,0x00,0x4b,0x2e,0x24);
-#ifndef __IWbemLocator_INTERFACE_DEFINED__
+#ifdef _MSC_VER
+/* The Windows SDK doesn't define this GUID */
 DEFINE_GUID(IID_IWbemLocator,    0xdc12a687,0x737f,0x11cf,0x88,0x4d,0x00,0xaa,0x00,0x4b,0x2e,0x24);
-#endif
+#endif /* _MSC_VER */
 
 /*-----------------------------------------------------------------------------
  *
