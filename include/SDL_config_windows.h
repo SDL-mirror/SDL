@@ -76,6 +76,7 @@ typedef unsigned int uintptr_t;
 # define SIZEOF_VOIDP 4
 #endif
 
+/* This is disabled by default to avoid C runtime dependencies and manifest requirements */
 #ifdef HAVE_LIBC
 /* Useful headers */
 #define HAVE_STDIO_H 1
