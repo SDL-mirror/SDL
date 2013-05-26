@@ -39,7 +39,7 @@ SDLMAIN_OBJECTS = @SDLMAIN_OBJECTS@
 SDLTEST_TARGET = libSDL2_test.a
 SDLTEST_OBJECTS = @SDLTEST_OBJECTS@
 
-SRC_DIST = acinclude Android.mk autogen.sh BUGS build-scripts configure configure.in COPYING CREDITS debian include INSTALL Makefile.minimal Makefile.in README* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test TODO VisualC.html VisualC WhatsNew Xcode Xcode-iOS
+SRC_DIST = *.txt acinclude Android.mk autogen.sh android-project build-scripts cmake configure configure.in debian include Makefile.* sdl2-config.in sdl2.m4 sdl2.pc.in SDL2.spec.in src test VisualC.html VisualC WhatsNew Xcode Xcode-iOS
 GEN_DIST = SDL2.spec
 
 HDRS = \
@@ -47,7 +47,7 @@ HDRS = \
 	SDL_assert.h \
 	SDL_atomic.h \
 	SDL_audio.h \
-        SDL_bits.h \
+    SDL_bits.h \
 	SDL_blendmode.h \
 	SDL_clipboard.h \
 	SDL_cpuinfo.h \
@@ -216,26 +216,3 @@ dist $(distfile):
 
 rpm: $(distfile)
 	rpmbuild -ta $?
-
-# Run indent on the source to standardize coding style
-indent:
-	@echo "Running indent... modified files:"
-	@cd $(srcdir) && \
-	find . \( \
-	    -name '*.h' -o \
-	    -name '*.c' -o \
-	    -name '*.cc' \) \
-	    -print | fgrep -v ./Xcode | \
-	while read file; do \
-	    indent "$$file" -o "$$file.indent"; \
-	    if cmp "$$file" "$$file.indent" >/dev/null; then \
-	        rm -f "$$file.indent"; \
-	    else \
-	        echo "$$file"; \
-	        mv -f "$$file.indent" "$$file"; \
-	    fi; \
-	done
-
-# Run indent and then commit modified files
-commit: indent
-	hg commit
