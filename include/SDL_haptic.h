@@ -614,7 +614,7 @@ typedef struct SDL_HapticCondition
  *
  *  The ramp effect starts at start strength and ends at end strength.
  *  It augments in linear fashion.  If you use attack and fade with a ramp
- *  they effects get added to the ramp effect making the effect become
+ *  the effects get added to the ramp effect making the effect become
  *  quadratic instead of linear.
  *
  *  \sa SDL_HAPTIC_RAMP
@@ -700,7 +700,7 @@ typedef struct SDL_HapticCustom
  *
  *  Button triggers may not be supported on all devices, it is advised to not
  *  use them if possible.  Buttons start at index 1 instead of index 0 like
- *  they joystick.
+ *  the joystick.
  *
  *  If both attack_length and fade_level are 0, the envelope is not used,
  *  otherwise both values are used.
@@ -767,7 +767,7 @@ typedef union SDL_HapticEffect
 
 /* Function prototypes */
 /**
- *  \brief Count the number of joysticks attached to the system.
+ *  \brief Count the number of haptic devices attached to the system.
  *
  *  \return Number of haptic devices detected on the system.
  */
