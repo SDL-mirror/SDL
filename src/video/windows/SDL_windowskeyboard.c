@@ -1351,7 +1351,6 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
     SIZE candsizes[MAX_CANDLIST];
     SIZE maxcandsize = {0};
     HBITMAP hbm = NULL;
-    BYTE *bits = NULL;
     const int candcount = SDL_min(SDL_min(MAX_CANDLIST, videodata->ime_candcount), videodata->ime_candpgsize);
     SDL_bool vertical = videodata->ime_candvertical;
 
@@ -1433,7 +1432,7 @@ IME_RenderCandidateList(SDL_VideoData *videodata, HDC hdc)
             ;
     }
 
-    bits = StartDrawToBitmap(hdc, &hbm, size.cx, size.cy);
+    StartDrawToBitmap(hdc, &hbm, size.cx, size.cy);
 
     SelectObject(hdc, listpen);
     SelectObject(hdc, listbrush);
