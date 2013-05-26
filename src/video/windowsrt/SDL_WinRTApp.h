@@ -27,6 +27,7 @@ internal:
 
 protected:
     // Event Handlers.
+    void OnOrientationChanged(Platform::Object^ sender);
     void OnWindowSizeChanged(Windows::UI::Core::CoreWindow^ sender, Windows::UI::Core::WindowSizeChangedEventArgs^ args);
     void OnLogicalDpiChanged(Platform::Object^ sender);
     void OnActivated(Windows::ApplicationModel::Core::CoreApplicationView^ applicationView, Windows::ApplicationModel::Activation::IActivatedEventArgs^ args);

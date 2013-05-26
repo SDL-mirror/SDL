@@ -39,6 +39,9 @@ using namespace Windows::UI::Input;
 // Compile-time debugging options:
 // To enable, uncomment; to disable, comment them out.
 //#define LOG_POINTER_EVENTS 1
+//#define LOG_WINDOW_EVENTS 1
+//#define LOG_ORIENTATION_EVENTS 1
+
 
 // HACK, DLudwig: The C-style main() will get loaded via the app's
 // WinRT-styled main(), which is part of SDLmain_for_WinRT.cpp.
@@ -152,6 +155,9 @@ void SDL_WinRTApp::Initialize(CoreApplicationView^ applicationView)
     CoreApplication::Resuming +=
         ref new EventHandler<Platform::Object^>(this, &SDL_WinRTApp::OnResuming);
 
+    DisplayProperties::OrientationChanged +=
+        ref new DisplayPropertiesEventHandler(this, &SDL_WinRTApp::OnOrientationChanged);
+
     // Register the hint, SDL_HINT_ORIENTATIONS, with SDL.  This needs to be
     // done before the hint's callback is registered (as of Feb 22, 2013),
     // otherwise the hint callback won't get registered.
@@ -161,8 +167,40 @@ void SDL_WinRTApp::Initialize(CoreApplicationView^ applicationView)
     SDL_RegisterHintChangedCb(SDL_HINT_ORIENTATIONS, WINRT_SetDisplayOrientationsPreference);
 }
 
+void SDL_WinRTApp::OnOrientationChanged(Object^ sender)
+{
+#if LOG_ORIENTATION_EVENTS==1
+    CoreWindow^ window = CoreWindow::GetForCurrentThread();
+    if (window) {
+        SDL_Log("%s, current orientation=%d, native orientation=%d, auto rot. pref=%d, CoreWindow Size={%f,%f}\n",
+            __FUNCTION__,
+            (int)DisplayProperties::CurrentOrientation,
+            (int)DisplayProperties::NativeOrientation,
+            (int)DisplayProperties::AutoRotationPreferences,
+            window->Bounds.Width,
+            window->Bounds.Height);
+    } else {
+        SDL_Log("%s, current orientation=%d, native orientation=%d, auto rot. pref=%d\n",
+            __FUNCTION__,
+            (int)DisplayProperties::CurrentOrientation,
+            (int)DisplayProperties::NativeOrientation,
+            (int)DisplayProperties::AutoRotationPreferences);
+    }
+#endif
+}
+
 void SDL_WinRTApp::SetWindow(CoreWindow^ window)
 {
+#if LOG_WINDOW_EVENTS==1
+    SDL_Log("%s, current orientation=%d, native orientation=%d, auto rot. pref=%d, window Size={%f,%f}\n",
+        __FUNCTION__,
+        (int)DisplayProperties::CurrentOrientation,
+        (int)DisplayProperties::NativeOrientation,
+        (int)DisplayProperties::AutoRotationPreferences,
+        window->Bounds.Width,
+        window->Bounds.Height);
+#endif
+
     window->SizeChanged += 
         ref new TypedEventHandler<CoreWindow^, WindowSizeChangedEventArgs^>(this, &SDL_WinRTApp::OnWindowSizeChanged);
 
@@ -238,8 +276,14 @@ void SDL_WinRTApp::Uninitialize()
 
 void SDL_WinRTApp::OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
 {
-#if 0
-    SDL_Log("%s, {%f,%f}\n", __FUNCTION__, args->Size.Width, args->Size.Height);
+#if LOG_WINDOW_EVENTS==1
+    SDL_Log("%s, size={%f,%f}, current orientation=%d, native orientation=%d, auto rot. pref=%d, m_sdlWindowData?=%s\n",
+        __FUNCTION__,
+        args->Size.Width, args->Size.Height,
+        (int)DisplayProperties::CurrentOrientation,
+        (int)DisplayProperties::NativeOrientation,
+        (int)DisplayProperties::AutoRotationPreferences,
+        (m_sdlWindowData ? "yes" : "no"));
 #endif
 
     if (m_sdlWindowData) {
@@ -300,6 +344,13 @@ void SDL_WinRTApp::OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEven
 
 void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEventArgs^ args)
 {
+#if LOG_WINDOW_EVENTS==1
+    SDL_Log("%s, visible?=%s, m_sdlWindowData?=%s\n",
+        __FUNCTION__,
+        (args->Visible ? "yes" : "no"),
+        (m_sdlWindowData ? "yes" : "no"));
+#endif
+
     m_windowVisible = args->Visible;
     if (m_sdlWindowData) {
         SDL_bool wasSDLWindowSurfaceValid = m_sdlWindowData->sdlWindow->surface_valid;
@@ -322,6 +373,9 @@ void SDL_WinRTApp::OnVisibilityChanged(CoreWindow^ sender, VisibilityChangedEven
 
 void SDL_WinRTApp::OnWindowClosed(CoreWindow^ sender, CoreWindowEventArgs^ args)
 {
+#if LOG_WINDOW_EVENTS==1
+    SDL_Log("%s\n", __FUNCTION__);
+#endif
     m_windowClosed = true;
 }
 
