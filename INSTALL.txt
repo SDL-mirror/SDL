@@ -1,17 +1,30 @@
 
 To compile and install SDL:
 
-    0.  If you have downloaded this from the website, skip to the next step.
-        If you have checked this out from subversion, you'll need to run
-        ./autogen.sh to build the configure script. 
+    1.  Windows with Visual Studio:
+        * Read VisualC.html
 
-    1.  Run './configure; make; make install'
+        Windows with gcc, either native or cross-compiling:
+        * Read the FAQ at http://wiki.libsdl.org/moin.fcg/FAQWindows
+        * Run './configure; make; make install'
 
-        If you are compiling for Windows using gcc, read the FAQ at:
-        http://www.libsdl.org/faq.php?action=listentries&category=4#42
+        Mac OS X with Xcode:
+        * Read README-macosx.txt
 
-        If you are compiling using Visual C++ on Win32, you should read
-        the file VisualC.html
+        Mac OS X from the command line:
+        * Run './configure; make; make install'
+
+        Linux and other UNIX systems:
+        * Run './configure; make; make install'
+
+        Android:
+        * Read README-android.txt
+
+        iOS:
+        * Read README-ios.txt
+
+        Using Cmake:
+        * Read README-cmake.txt
 
     2.  Look at the example programs in ./test, and check out the online
         documentation at http://wiki.libsdl.org/
