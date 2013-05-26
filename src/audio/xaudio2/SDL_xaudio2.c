@@ -28,17 +28,22 @@
 #include "../SDL_sysaudio.h"
 #include "SDL_assert.h"
 
+#ifdef __GNUC__
+/* The configure script already did any necessary checking */
+#  define SDL_XAUDIO2_HAS_SDK 1
+#else
 #include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
 #if (!defined(_DXSDK_BUILD_MAJOR) || (_DXSDK_BUILD_MAJOR < 1284))
 #  pragma message("Your DirectX SDK is too old. Disabling XAudio2 support.")
 #else
 #  define SDL_XAUDIO2_HAS_SDK 1
 #endif
+#endif /* __GNUC__ */
 
 #ifdef SDL_XAUDIO2_HAS_SDK
 
 #define INITGUID 1
-#include <XAudio2.h>
+#include <xaudio2.h>
 
 /* Hidden "this" pointer for the audio functions */
 #define _THIS   SDL_AudioDevice *this
@@ -69,7 +74,6 @@ XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
     IXAudio2 *ixa2 = NULL;
     UINT32 devcount = 0;
     UINT32 i = 0;
-    void *ptr = NULL;
 
     if (iscapture) {
         SDL_SetError("XAudio2: capture devices unsupported.");
