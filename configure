@@ -22243,10 +22243,7 @@ $as_echo "#define SDL_LOADSO_WINDOWS 1" >>confdefs.h
             have_loadso=yes
         fi
         # Set up the system libraries we need
-        # SDL is unicode, and unicows emulates this on Windows 98/ME
-        # You can get this here: http://libunicows.sourceforge.net/
-        #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lunicows"
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid"
+        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -luuid -static-libgcc"
         # The Windows platform requires special setup
         VERSION_SOURCES="$srcdir/src/main/windows/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
