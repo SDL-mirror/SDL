@@ -126,7 +126,7 @@ static const SDLTest_TestCaseReference stdlibTest1 =
         { (SDLTest_TestCaseFp)stdlib_strlcpy, "stdlib_strlcpy", "Call to SDL_strlcpy", TEST_ENABLED };
 
 static const SDLTest_TestCaseReference stdlibTest2 =
-        { (SDLTest_TestCaseFp)stdlib_snprintf, "stdlib_snprintf", "Call to SDL_sprintf", TEST_ENABLED };
+        { (SDLTest_TestCaseFp)stdlib_snprintf, "stdlib_snprintf", "Call to SDL_snprintf", TEST_ENABLED };
 
 /* Sequence of Standard C routine test cases */
 static const SDLTest_TestCaseReference *stdlibTests[] =  {
