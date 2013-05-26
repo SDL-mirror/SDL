@@ -75,7 +75,7 @@ XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
         SDL_SetError("XAudio2: capture devices unsupported.");
         return;
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
-        SDL_SetError("XAudio2: XAudio2Create() failed.");
+        SDL_SetError("XAudio2: XAudio2Create() failed at detection.");
         return;
     } else if (IXAudio2_GetDeviceCount(ixa2, &devcount) != S_OK) {
         SDL_SetError("XAudio2: IXAudio2::GetDeviceCount() failed.");
@@ -247,7 +247,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     if (iscapture) {
         return SDL_SetError("XAudio2: capture devices unsupported.");
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
-        return SDL_SetError("XAudio2: XAudio2Create() failed.");
+        return SDL_SetError("XAudio2: XAudio2Create() failed at open.");
     }
 
     if (devname != NULL) {
@@ -405,7 +405,7 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 
     if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
         WIN_CoUninitialize();
-        SDL_SetError("XAudio2: XAudio2Create() failed");
+        SDL_SetError("XAudio2: XAudio2Create() failed at initialization");
         return 0;  /* not available. */
     }
     IXAudio2_Release(ixa2);
