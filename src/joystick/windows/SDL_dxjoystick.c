@@ -373,7 +373,9 @@ SetDIerror(const char *function, HRESULT code)
 
 
 DEFINE_GUID(CLSID_WbemLocator,   0x4590f811,0x1d3a,0x11d0,0x89,0x1F,0x00,0xaa,0x00,0x4b,0x2e,0x24);
+#ifndef __IWbemLocator_INTERFACE_DEFINED__
 DEFINE_GUID(IID_IWbemLocator,    0xdc12a687,0x737f,0x11cf,0x88,0x4d,0x00,0xaa,0x00,0x4b,0x2e,0x24);
+#endif
 
 /*-----------------------------------------------------------------------------
  *
@@ -546,7 +548,6 @@ DEFINE_GUID(GUID_DEVINTERFACE_USB_DEVICE, 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1
 static int
 SDL_JoystickThread(void *_data)
 {
-    HRESULT result = S_OK;
     HWND messageWindow = 0;
     HDEVNOTIFY hNotify = 0;
     DEV_BROADCAST_DEVICEINTERFACE dbh;
@@ -555,7 +556,7 @@ SDL_JoystickThread(void *_data)
 
     SDL_memset( bOpenedXInputDevices, 0x0, sizeof(bOpenedXInputDevices) );
 
-    result = WIN_CoInitialize();
+    WIN_CoInitialize();
 
     SDL_memset( &wincl, 0x0, sizeof(wincl) );
     wincl.hInstance = GetModuleHandle( NULL );
@@ -813,7 +814,6 @@ static BOOL CALLBACK
 /* detect any new joysticks being inserted into the system */
 void SDL_SYS_JoystickDetect()
 {
-    HRESULT result;
     JoyStick_DeviceData *pCurList = NULL;
     /* only enum the devices if the joystick thread told us something changed */
     if ( s_bDeviceAdded || s_bDeviceRemoved )
@@ -832,7 +832,7 @@ void SDL_SYS_JoystickDetect()
         SDL_memset( s_pKnownJoystickGUIDs, 0x0, sizeof(GUID)*MAX_JOYSTICKS );
 
         /* Look for joysticks, wheels, head trackers, gamepads, etc.. */
-        result = IDirectInput8_EnumDevices(dinput,
+        IDirectInput8_EnumDevices(dinput,
             DI8DEVCLASS_GAMECTRL,
             EnumJoysticksCallback,
             &pCurList, DIEDFL_ATTACHEDONLY);
