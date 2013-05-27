@@ -310,29 +310,49 @@ void *SDL_memcpy(void *dst, const void *src, size_t len) { return SDL_memcpy_inl
 void *
 SDL_memcpy(void *dst, const void *src, size_t len)
 {
-    size_t left = (len % 4);
-    Uint32 *srcp4, *dstp4;
-    Uint8 *srcp1, *dstp1;
+#ifdef __GNUC__
+    /* Presumably this is well tuned for speed.
+       On my machine this is twice as fast as the C code below.
+     */
+    return __builtin_memcpy(dst, src, len);
+#else
+    /* GCC 4.9.0 with -O3 will generate movaps instructions with the loop
+       using Uint32* pointers, so we need to make sure the pointers are
+       aligned before we loop using them.
+     */
+    if (((intptr_t)src & 0x3) || ((intptr_t)dst & 0x3)) {
+        /* Do an unaligned byte copy */
+        Uint8 *srcp1 = (Uint8 *)src;
+        Uint8 *dstp1 = (Uint8 *)dst;
 
-    srcp4 = (Uint32 *) src;
-    dstp4 = (Uint32 *) dst;
-    len /= 4;
-    while (len--) {
-        *dstp4++ = *srcp4++;
+        while (len--) {
+            *dstp1++ = *srcp1++;
+        }
+    } else {
+        size_t left = (len % 4);
+        Uint32 *srcp4, *dstp4;
+        Uint8 *srcp1, *dstp1;
+
+        srcp4 = (Uint32 *) src;
+        dstp4 = (Uint32 *) dst;
+        len /= 4;
+        while (len--) {
+            *dstp4++ = *srcp4++;
+        }
+
+        srcp1 = (Uint8 *) srcp4;
+        dstp1 = (Uint8 *) dstp4;
+        switch (left) {
+        case 3:
+            *dstp1++ = *srcp1++;
+        case 2:
+            *dstp1++ = *srcp1++;
+        case 1:
+            *dstp1++ = *srcp1++;
+        }
     }
-
-    srcp1 = (Uint8 *) srcp4;
-    dstp1 = (Uint8 *) dstp4;
-    switch (left) {
-    case 3:
-        *dstp1++ = *srcp1++;
-    case 2:
-        *dstp1++ = *srcp1++;
-    case 1:
-        *dstp1++ = *srcp1++;
-    }
-
     return dst;
+#endif /* __GNUC__ */
 }
 #endif
 
