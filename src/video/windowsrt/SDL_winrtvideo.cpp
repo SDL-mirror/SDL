@@ -121,10 +121,49 @@ VideoBootStrap WINRT_bootstrap = {
 int
 WINRT_VideoInit(_THIS)
 {
+    // Pump events once, in order to flush out and process any pending
+    // window-size change events.  Doing this addresses the following:
+    //
+    // 1. An app, set to start up as a Landscape-only app (via a
+    //    Package.appxmanifest file), starts up on a device that is in Portrait
+    //    mode.
+    // 2. Control of the app reaches this function (WINRT_VideoInit).
+    // 3. The 'Size' property of the app's CoreWindow (a WinRT-defined object)
+    //    is not sized as if it were running on a device in landscape mode, but
+    //    rather, it's sized in portrait mode.  To note, this property will
+    //    normally changes as a device rotates, however it hasn't changed just yet.
+    // 4. WINRT_VideoInit calls WINRT_InitModes, which uses the app's
+    //    CoreWindow to register a display mode, whose width and height are
+    //    still oriented in portrait.
+    // 5. Once WINRT_VideoInit returns, and once control leaves SDL (and back
+    //    into its calling app), SDL_GetDisplayMode is called, which returns the
+    //    portrait-oriented display mode.  (Remember, this is supposed to be a
+    //    landscape-only app.)
+    // 6. The portrait-oriented display mode is used to initialize other
+    //    things.  The CoreWindow's size eventually changes (and window-resize
+    //    events are sent out accordingly), but damage has already been done,
+    //    as a variety of things were set up using the portrait-oriented
+    //    display mode (rather than a landscape-oriented display mode).
+    //
+    // By pumping events once, WinRT will make sure that the app's
+    // CoreWindow will get its size updated, and that a correctly-oriented
+    // display mode gets registered.
+    //
+    // Please note that if SDL_SetHint is used to set the app's orientation
+    // (in conjunction with SDL_HINT_ORIENTATION), then this technique will
+    // not work.  The size of the app's CoreWindow will still be off.  This
+    // technique is only known to fix cases where an app's orientation is set
+    // via its app-settings file, Package.appxmanifest.
+    SDL_WinRTGlobalApp->PumpEvents();
+
+    //
+    // Now that any pending window-size change events have been processed,
+    // continue initializing the SDL/WinRT video backend:
+    //
+
     if (WINRT_InitModes(_this) < 0) {
         return -1;
     }
-
     WINRT_InitMouse(_this);
 
     return 0;
