@@ -31,3 +31,40 @@ Thanks to everyone who made this possible, including:
 
 * Luke Benstead for OpenGL 3.0 support
 
+* Gaëtan de Menten for writing the PHP and SQL behind the SDL website
+
+* Tim Jones for the new look of the SDL website
+
+* Ryan Gordon for helping everybody out and keeping the dream alive. :)
+
+* Mattias Engdegård, for help with the Solaris port and lots of other help
+
+* Eric Wing, Max Horn, and Darrell Walisser for unflagging work on the Mac OS X port
+
+* David Carré, for the Pandora port
+
+* Couriersud for the DirectFB driver
+
+* Jon Atkins for SDL_image, SDL_mixer and SDL_net documentation
+
+* Arne Claus, for the 2004 winning SDL logo,
+  and Shandy Brown, Jac, Alex Lyman, Mikkel Gjoel, #Guy, Jonas Hartmann,
+  Daniel Liljeberg,  Ronald Sowa, DocD, Pekka Jaervinen, Patrick Avella,
+  Erkki Kontilla, Levon Gavalian, Hal Emerich, David Wiktorsson,
+  S. Schury and F. Hufsky, Ciska de Ruyver, Shredweat, Tyler Montbriand,
+  Martin Andersson, Merlyn Wysard, Fernando Ibanez, David Miller,
+  Andre Bommele, lovesby.com, Francisco Camenforte Torres, and David Igreja
+  for other logo entries.
+
+* Bob Pendleton and David Olofson for being long time contributors to
+  the SDL mailing list.
+
+* Everybody at Loki Software, Inc. for their great contributions!
+
+ And a big hand to everyone else who gave me appreciation, advice,
+ and suggestions, especially the good folks on the SDL mailing list.
+
+THANKS! :)
+
+  -- Sam Lantinga			<slouken@libsdl.org>
+
