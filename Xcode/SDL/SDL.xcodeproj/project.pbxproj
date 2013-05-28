@@ -21,16 +21,6 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		001E39EE1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */ = {isa = PBXBuildFile; fileRef = 001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */; };
-		006E94A3119511A1001DE610 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E949C119511A1001DE610 /* icon.bmp */; };
-		006E94A4119511A1001DE610 /* moose.dat in Resources */ = {isa = PBXBuildFile; fileRef = 006E949D119511A1001DE610 /* moose.dat */; };
-		006E94A5119511A1001DE610 /* picture.xbm in Resources */ = {isa = PBXBuildFile; fileRef = 006E949E119511A1001DE610 /* picture.xbm */; };
-		006E94A7119511A1001DE610 /* sample.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A0119511A1001DE610 /* sample.bmp */; };
-		006E94A8119511A1001DE610 /* sample.wav in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A1119511A1001DE610 /* sample.wav */; };
-		006E94A9119511A1001DE610 /* utf8.txt in Resources */ = {isa = PBXBuildFile; fileRef = 006E94A2119511A1001DE610 /* utf8.txt */; };
-		006E94BC11951217001DE610 /* read in Copy rwops */ = {isa = PBXBuildFile; fileRef = 00D8DA121195093100638393 /* read */; };
-		006E94EF11951255001DE610 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
-		006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */ = {isa = PBXBuildFile; fileRef = BECDF66C0761BA81005FE872 /* SDL2.framework */; };
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
 		007317A40858DECD00B2BC32 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179D0858DECD00B2BC32 /* Cocoa.framework */; };
@@ -47,15 +37,6 @@
 		00CFA89D106B4BA100758660 /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00CFA89C106B4BA100758660 /* ForceFeedback.framework */; };
 		00D0D08410675DD9004B05EF /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 00D0D08310675DD9004B05EF /* CoreFoundation.framework */; };
 		00D0D0D810675E46004B05EF /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 007317C10858E15000B2BC32 /* Carbon.framework */; };
-		00D8DA1B1195093100638393 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8D9FC1195093100638393 /* audio.c */; };
-		00D8DA1C1195093100638393 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8D9FF1195093100638393 /* common.c */; };
-		00D8DA221195093100638393 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA081195093100638393 /* platform.c */; };
-		00D8DA241195093100638393 /* rect.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA0C1195093100638393 /* rect.c */; };
-		00D8DA251195093100638393 /* render.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA0F1195093100638393 /* render.c */; };
-		00D8DA271195093100638393 /* rwops.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA131195093100638393 /* rwops.c */; };
-		00D8DA281195093100638393 /* SDL_at.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA151195093100638393 /* SDL_at.c */; };
-		00D8DA291195093100638393 /* surface.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA181195093100638393 /* surface.c */; };
-		00D8DA2A1195093100638393 /* testsdl.c in Sources */ = {isa = PBXBuildFile; fileRef = 00D8DA1A1195093100638393 /* testsdl.c */; };
 		04043BBB12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */; };
 		04043BBC12FEB1BE0076DB1F /* SDL_glfuncs.h in Headers */ = {isa = PBXBuildFile; fileRef = 04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */; };
 		041B2CA512FA0D680087D585 /* SDL_render.c in Sources */ = {isa = PBXBuildFile; fileRef = 041B2C9E12FA0D680087D585 /* SDL_render.c */; };
@@ -560,13 +541,6 @@
 			remoteGlobalIDString = 0083103F1072EA5700A531F1;
 			remoteInfo = "Generate Doxygen DocSet";
 		};
-		00D8DA2E1195094500638393 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BECDF5FE0761BA81005FE872;
-			remoteInfo = Framework;
-		};
 		BECDF6C50761BA81005FE872 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -576,40 +550,7 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		006E9491119510E1001DE610 /* Copy Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				006E94F01195125B001DE610 /* SDL2.framework in Copy Frameworks */,
-			);
-			name = "Copy Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		006E94B3119511CE001DE610 /* Copy rwops */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = rwops;
-			dstSubfolderSpec = 7;
-			files = (
-				006E94BC11951217001DE610 /* read in Copy rwops */,
-			);
-			name = "Copy rwops";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		001E39EC1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSupportRWops_Cocoa.m; sourceTree = "<group>"; };
-		001E39ED1196F75000A3F5B8 /* TestSupportRWops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSupportRWops.h; sourceTree = "<group>"; };
-		006E949C119511A1001DE610 /* icon.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = icon.bmp; path = ../../test/icon.bmp; sourceTree = SOURCE_ROOT; };
-		006E949D119511A1001DE610 /* moose.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = moose.dat; path = ../../test/moose.dat; sourceTree = SOURCE_ROOT; };
-		006E949E119511A1001DE610 /* picture.xbm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = picture.xbm; path = ../../test/picture.xbm; sourceTree = SOURCE_ROOT; };
-		006E94A0119511A1001DE610 /* sample.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = sample.bmp; path = ../../test/sample.bmp; sourceTree = SOURCE_ROOT; };
-		006E94A1119511A1001DE610 /* sample.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = sample.wav; path = ../../test/sample.wav; sourceTree = SOURCE_ROOT; };
-		006E94A2119511A1001DE610 /* utf8.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = utf8.txt; path = ../../test/utf8.txt; sourceTree = SOURCE_ROOT; };
 		0073179B0858DECD00B2BC32 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = /System/Library/Frameworks/AudioToolbox.framework; sourceTree = "<absolute>"; };
 		0073179C0858DECD00B2BC32 /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = /System/Library/Frameworks/AudioUnit.framework; sourceTree = "<absolute>"; };
 		0073179D0858DECD00B2BC32 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
@@ -617,34 +558,10 @@
 		0073179F0858DECD00B2BC32 /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = /System/Library/Frameworks/IOKit.framework; sourceTree = "<absolute>"; };
 		007317A00858DECD00B2BC32 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
 		007317C10858E15000B2BC32 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
-		00794D3F09D0C461003FC8A1 /* License.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = License.rtf; sourceTree = "<group>"; };
+		00794D3F09D0C461003FC8A1 /* License.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = License.txt; sourceTree = "<group>"; };
 		00AE6E1E08B958CC00255E2F /* ReadMeDevLite.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMeDevLite.txt; sourceTree = "<group>"; };
 		00CFA89C106B4BA100758660 /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = /System/Library/Frameworks/ForceFeedback.framework; sourceTree = "<absolute>"; };
 		00D0D08310675DD9004B05EF /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		00D8D9EF1195090700638393 /* testsdl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testsdl.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		00D8D9F11195090700638393 /* testsdl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testsdl-Info.plist"; sourceTree = "<group>"; };
-		00D8D9FC1195093100638393 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
-		00D8D9FD1195093100638393 /* audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio.h; sourceTree = "<group>"; };
-		00D8D9FF1195093100638393 /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = common.c; sourceTree = "<group>"; };
-		00D8DA001195093100638393 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
-		00D8DA011195093100638393 /* images.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = images.h; sourceTree = "<group>"; };
-		00D8DA021195093100638393 /* img_blit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_blit.c; sourceTree = "<group>"; };
-		00D8DA031195093100638393 /* img_blitblend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_blitblend.c; sourceTree = "<group>"; };
-		00D8DA041195093100638393 /* img_face.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_face.c; sourceTree = "<group>"; };
-		00D8DA051195093100638393 /* img_primitives.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_primitives.c; sourceTree = "<group>"; };
-		00D8DA061195093100638393 /* img_primitivesblend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_primitivesblend.c; sourceTree = "<group>"; };
-		00D8DA081195093100638393 /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
-		00D8DA091195093100638393 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
-		00D8DA0C1195093100638393 /* rect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rect.c; sourceTree = "<group>"; };
-		00D8DA0D1195093100638393 /* rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rect.h; sourceTree = "<group>"; };
-		00D8DA0F1195093100638393 /* render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = render.c; sourceTree = "<group>"; };
-		00D8DA101195093100638393 /* render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render.h; sourceTree = "<group>"; };
-		00D8DA121195093100638393 /* read */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = read; sourceTree = "<group>"; };
-		00D8DA131195093100638393 /* rwops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rwops.c; sourceTree = "<group>"; };
-		00D8DA141195093100638393 /* rwops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rwops.h; sourceTree = "<group>"; };
-		00D8DA181195093100638393 /* surface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = surface.c; sourceTree = "<group>"; };
-		00D8DA191195093100638393 /* surface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surface.h; sourceTree = "<group>"; };
-		00F5D79E0990CA0D0051C449 /* UniversalBinaryNotes.rtf */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; path = UniversalBinaryNotes.rtf; sourceTree = "<group>"; };
 		04043BBA12FEB1BE0076DB1F /* SDL_glfuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_glfuncs.h; sourceTree = "<group>"; };
 		041B2C9E12FA0D680087D585 /* SDL_render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_render.c; sourceTree = "<group>"; };
 		041B2C9F12FA0D680087D585 /* SDL_sysrender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysrender.h; sourceTree = "<group>"; };
@@ -904,20 +821,12 @@
 		F59C710500D5CB5801000001 /* SDL-devel.info */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "SDL-devel.info"; sourceTree = "<group>"; };
 		F59C710600D5CB5801000001 /* SDL.info */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = SDL.info; sourceTree = "<group>"; };
 		F59C710C00D5D15801000001 /* install.sh */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.script.sh; path = install.sh; sourceTree = "<group>"; };
-		F5A2EF3900C6A39A01000001 /* BUGS */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = BUGS; path = ../../BUGS; sourceTree = SOURCE_ROOT; };
-		F5A2EF3A00C6A3C201000001 /* README.MacOSX */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = README.MacOSX; path = ../../README.MacOSX; sourceTree = SOURCE_ROOT; };
+		F5A2EF3900C6A39A01000001 /* BUGS.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = BUGS.txt; path = ../../BUGS.txt; sourceTree = SOURCE_ROOT; };
+		F5A2EF3A00C6A3C201000001 /* README-macosx.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "README-macosx.txt"; path = "../../README-macosx.txt"; sourceTree = SOURCE_ROOT; };
 		F5F81AD400D706B101000001 /* Readme SDL Developer.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; name = "Readme SDL Developer.txt"; path = "pkg-support/Readme SDL Developer.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		00D8D9ED1195090700638393 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				006E94EF11951255001DE610 /* SDL2.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BECDF6680761BA81005FE872 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -951,19 +860,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		006E949B11951160001DE610 /* TestResources */ = {
-			isa = PBXGroup;
-			children = (
-				006E949C119511A1001DE610 /* icon.bmp */,
-				006E949D119511A1001DE610 /* moose.dat */,
-				006E949E119511A1001DE610 /* picture.xbm */,
-				006E94A0119511A1001DE610 /* sample.bmp */,
-				006E94A1119511A1001DE610 /* sample.wav */,
-				006E94A2119511A1001DE610 /* utf8.txt */,
-			);
-			name = TestResources;
-			sourceTree = "<group>";
-		};
 		0153844A006D81B07F000001 /* Public Headers */ = {
 			isa = PBXGroup;
 			children = (
@@ -1033,7 +929,6 @@
 				BECDF6B30761BA81005FE872 /* libSDL2.a */,
 				BECDF6BE0761BA81005FE872 /* Standard DMG */,
 				BECDF6C30761BA81005FE872 /* Developer Extras Package */,
-				00D8D9EF1195090700638393 /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -1459,16 +1354,14 @@
 		0867D691FE84028FC02AAC07 /* SDLFramework */ = {
 			isa = PBXGroup;
 			children = (
-				F5A2EF3900C6A39A01000001 /* BUGS */,
-				F5A2EF3A00C6A3C201000001 /* README.MacOSX */,
+				F5A2EF3900C6A39A01000001 /* BUGS.txt */,
+				F5A2EF3A00C6A3C201000001 /* README-macosx.txt */,
 				F59C70FC00D5CB5801000001 /* pkg-support */,
 				0153844A006D81B07F000001 /* Public Headers */,
 				08FB77ACFE841707C02AAC07 /* Library Source */,
-				006E949B11951160001DE610 /* TestResources */,
 				034768DDFF38A45A11DB9C8B /* Products */,
 				BECDF66B0761BA81005FE872 /* Info-Framework.plist */,
 				BEC562FE0761C0E800A33029 /* Linked Frameworks */,
-				00D8D9F11195090700638393 /* testsdl-Info.plist */,
 			);
 			comments = "To build Universal Binaries, we have experimented with a variety of different options.\nThe complication is that we must retain compatibility with at least 10.2. \nThe Universal Binary defaults only work for > 10.3.9\n\nSo far, we have found:\ngcc 4.0.0 with Xcode 2.1 always links against libgcc_s. gcc 4.0.1 from Xcode 2.2 fixes this problem.\n\nBut gcc 4.0 will not work with < 10.3.9 because we continue to get an undefined symbol to _fprintf$LDBL128.\nSo we must use gcc 3.3 on PPC to accomplish 10.2 support. (But 4.0 is required for i386.)\n\nSetting the deployment target to 10.4 will disable prebinding, so for PPC, we set it less than 10.4 to preserve prebinding for legacy support.\n\nSetting the PPC SDKROOT to /Developers/SDKs/MacOSX10.2.8.sdk will link to 63.0.0 libSystem.B.dylib. Leaving it at current or 10.4u links to 88.1.2. However, as long as we are using gcc 3.3, it doesn't seem to matter as testing has demonstrated both will run. We have decided not to invoke the 10.2.8 SDK because it is not a default installed component with Xcode which will probably cause most people problems. However, rather than deleting the SDKROOT_ppc entry entirely, we have mapped it to 10.4u in case we decide we need to change this setting.\n\nTo use Altivec or SSE, we needed architecture specific flags:\nOTHER_CFLAGS_ppc\nOTHER_CFLAGS_i386\nOTHER_CFLAGS=$(OTHER_CFLAGS_($CURRENT_ARCH))\n\nThe general OTHER_CFLAGS needed to be manually mapped to architecture specific options because Xcode didn't do this automatically for us.\n\n\n";
 			name = SDLFramework;
@@ -1552,8 +1445,7 @@
 		F59C710100D5CB5801000001 /* resources */ = {
 			isa = PBXGroup;
 			children = (
-				00794D3F09D0C461003FC8A1 /* License.rtf */,
-				00F5D79E0990CA0D0051C449 /* UniversalBinaryNotes.rtf */,
+				00794D3F09D0C461003FC8A1 /* License.txt */,
 				00AE6E1E08B958CC00255E2F /* ReadMeDevLite.txt */,
 				F59C710300D5CB5801000001 /* ReadMe.txt */,
 			);
@@ -1856,26 +1748,6 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		00D8D9EE1195090700638393 /* testsdl */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 00D8D9F71195090900638393 /* Build configuration list for PBXNativeTarget "testsdl" */;
-			buildPhases = (
-				00D8D9EB1195090700638393 /* Resources */,
-				00D8D9EC1195090700638393 /* Sources */,
-				00D8D9ED1195090700638393 /* Frameworks */,
-				006E9491119510E1001DE610 /* Copy Frameworks */,
-				006E94B3119511CE001DE610 /* Copy rwops */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				00D8DA2F1195094500638393 /* PBXTargetDependency */,
-			);
-			name = testsdl;
-			productName = testsdl;
-			productReference = 00D8D9EF1195090700638393 /* testsdl.app */;
-			productType = "com.apple.product-type.application";
-		};
 		BECDF5FE0761BA81005FE872 /* Framework */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0073177A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Framework" */;
@@ -1978,25 +1850,11 @@
 				BECDF6BB0761BA81005FE872 /* Standard DMG */,
 				BECDF6C00761BA81005FE872 /* Developer Extras Package */,
 				0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */,
-				00D8D9EE1195090700638393 /* testsdl */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		00D8D9EB1195090700638393 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				006E94A3119511A1001DE610 /* icon.bmp in Resources */,
-				006E94A4119511A1001DE610 /* moose.dat in Resources */,
-				006E94A5119511A1001DE610 /* picture.xbm in Resources */,
-				006E94A7119511A1001DE610 /* sample.bmp in Resources */,
-				006E94A8119511A1001DE610 /* sample.wav in Resources */,
-				006E94A9119511A1001DE610 /* utf8.txt in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BECDF62A0761BA81005FE872 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2052,23 +1910,6 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		00D8D9EC1195090700638393 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				00D8DA1B1195093100638393 /* audio.c in Sources */,
-				00D8DA1C1195093100638393 /* common.c in Sources */,
-				00D8DA221195093100638393 /* platform.c in Sources */,
-				00D8DA241195093100638393 /* rect.c in Sources */,
-				00D8DA251195093100638393 /* render.c in Sources */,
-				00D8DA271195093100638393 /* rwops.c in Sources */,
-				00D8DA281195093100638393 /* SDL_at.c in Sources */,
-				00D8DA291195093100638393 /* surface.c in Sources */,
-				00D8DA2A1195093100638393 /* testsdl.c in Sources */,
-				001E39EE1196F75000A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		BECDF62C0761BA81005FE872 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -2309,11 +2150,6 @@
 			target = 0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */;
 			targetProxy = 008310451072EA9000A531F1 /* PBXContainerItemProxy */;
 		};
-		00D8DA2F1195094500638393 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BECDF5FE0761BA81005FE872 /* Framework */;
-			targetProxy = 00D8DA2E1195094500638393 /* PBXContainerItemProxy */;
-		};
 		BECDF6C60761BA81005FE872 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BECDF5FE0761BA81005FE872 /* Framework */;
@@ -2464,34 +2300,6 @@
 			};
 			name = Debug;
 		};
-		00D8D9F41195090800638393 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PRODUCT_NAME = testsdl;
-			};
-			name = Debug;
-		};
-		00D8D9F51195090800638393 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				INFOPLIST_FILE = "testsdl-Info.plist";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PRODUCT_NAME = testsdl;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -2545,15 +2353,6 @@
 			buildConfigurations = (
 				008310421072EA5700A531F1 /* Debug */,
 				008310431072EA5700A531F1 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		00D8D9F71195090900638393 /* Build configuration list for PBXNativeTarget "testsdl" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00D8D9F41195090800638393 /* Debug */,
-				00D8D9F51195090800638393 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
