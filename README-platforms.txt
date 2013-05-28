@@ -5,12 +5,10 @@ Officially supported platforms
 ==============================
 (code compiles, and thoroughly tested for release)
 ==============================
-Windows XP
-Windows Vista
-Windows 7
-ac OS X 10.4+
+Windows XP/Vista/7/8
+Mac OS X 10.5+
 Linux 2.6+
-iOS 3.1.3+
+iOS 4.0.1+
 Android 2.3.3+
 
 Unofficially supported platforms
