@@ -384,6 +384,7 @@ D3D_Reset(SDL_Renderer * renderer)
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
     IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget);
+    data->scaleMode = D3DTEXF_FORCE_DWORD;
     return 0;
 }
 
