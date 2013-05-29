@@ -849,28 +849,25 @@ GL_UpdateViewport(SDL_Renderer * renderer)
         return 0;
     }
 
-    if (!renderer->viewport.w || !renderer->viewport.h) {
-        /* The viewport isn't set up yet, ignore it */
-        return -1;
-    }
-
     data->glViewport(renderer->viewport.x, renderer->viewport.y,
                      renderer->viewport.w, renderer->viewport.h);
 
     data->glMatrixMode(GL_PROJECTION);
     data->glLoadIdentity();
-    if (renderer->target) {
-        data->glOrtho((GLdouble) 0,
-                      (GLdouble) renderer->viewport.w,
-                      (GLdouble) 0,
-                      (GLdouble) renderer->viewport.h,
-                       0.0, 1.0);
-    } else {
-        data->glOrtho((GLdouble) 0,
-                      (GLdouble) renderer->viewport.w,
-                      (GLdouble) renderer->viewport.h,
-                      (GLdouble) 0,
-                       0.0, 1.0);
+    if (renderer->viewport.w && renderer->viewport.h) {
+        if (renderer->target) {
+            data->glOrtho((GLdouble) 0,
+                          (GLdouble) renderer->viewport.w,
+                          (GLdouble) 0,
+                          (GLdouble) renderer->viewport.h,
+                           0.0, 1.0);
+        } else {
+            data->glOrtho((GLdouble) 0,
+                          (GLdouble) renderer->viewport.w,
+                          (GLdouble) renderer->viewport.h,
+                          (GLdouble) 0,
+                           0.0, 1.0);
+        }
     }
     return GL_CheckError("", renderer);
 }

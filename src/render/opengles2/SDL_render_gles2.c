@@ -906,6 +906,10 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
     GLfloat projection[4][4];
     GLuint locProjection;
 
+    if (!renderer->viewport.w || !renderer->viewport.h) {
+        return 0;
+    }
+
     /* Prepare an orthographic projection */
     projection[0][0] = 2.0f / renderer->viewport.w;
     projection[0][1] = 0.0f;

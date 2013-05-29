@@ -623,12 +623,14 @@ GLES_UpdateViewport(SDL_Renderer * renderer)
     data->glViewport(renderer->viewport.x, renderer->viewport.y,
                renderer->viewport.w, renderer->viewport.h);
 
-    data->glMatrixMode(GL_PROJECTION);
-    data->glLoadIdentity();
-    data->glOrthof((GLfloat) 0,
-             (GLfloat) renderer->viewport.w,
-             (GLfloat) renderer->viewport.h,
-             (GLfloat) 0, 0.0, 1.0);
+    if (renderer->viewport.w && renderer->viewport.h) {
+        data->glMatrixMode(GL_PROJECTION);
+        data->glLoadIdentity();
+        data->glOrthof((GLfloat) 0,
+                 (GLfloat) renderer->viewport.w,
+                 (GLfloat) renderer->viewport.h,
+                 (GLfloat) 0, 0.0, 1.0);
+    }
     return 0;
 }
 
