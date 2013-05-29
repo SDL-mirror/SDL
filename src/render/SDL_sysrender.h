@@ -123,7 +123,6 @@ struct SDL_Renderer
     /* The window associated with the renderer */
     SDL_Window *window;
     SDL_bool hidden;
-    SDL_bool resized;
 
     /* The logical resolution for rendering */
     int logical_w;

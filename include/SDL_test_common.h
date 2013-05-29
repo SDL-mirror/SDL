@@ -69,6 +69,9 @@ typedef struct
     int window_minH;
     int window_maxW;
     int window_maxH;
+    int logical_w;
+    int logical_h;
+    float scale;
     int depth;
     int refresh_rate;
     int num_windows;

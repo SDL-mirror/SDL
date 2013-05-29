@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--gldebug] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--gldebug] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--logical WxH] [--scale N] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -299,6 +299,33 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         *h++ = '\0';
         state->window_maxW = SDL_atoi(w);
         state->window_maxH = SDL_atoi(h);
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--logical") == 0) {
+        char *w, *h;
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        w = argv[index];
+        h = argv[index];
+        while (*h && *h != 'x') {
+            ++h;
+        }
+        if (!*h) {
+            return -1;
+        }
+        *h++ = '\0';
+        state->logical_w = SDL_atoi(w);
+        state->logical_h = SDL_atoi(h);
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--scale") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        state->scale = SDL_atof(argv[index]);
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--depth") == 0) {
@@ -849,6 +876,11 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
                             SDL_GetError());
                     return SDL_FALSE;
                 }
+                if (state->logical_w && state->logical_h) {
+                    SDL_RenderSetLogicalSize(state->renderers[i], state->logical_w, state->logical_h);
+                } else if (state->scale) {
+                    SDL_RenderSetScale(state->renderers[i], state->scale, state->scale);
+                }
                 if (state->verbose & VERBOSE_RENDER) {
                     SDL_RendererInfo info;
 
@@ -1140,24 +1172,6 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
     switch (event->type) {
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
-        case SDL_WINDOWEVENT_SIZE_CHANGED:
-            {
-                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
-                if (window) {
-                    for (i = 0; i < state->num_windows; ++i) {
-                        if (window == state->windows[i] &&
-                            (state->window_flags & SDL_WINDOW_RESIZABLE)) {
-                            SDL_Rect viewport;
-
-                            viewport.x = 0;
-                            viewport.y = 0;
-                            SDL_GetWindowSize(window, &viewport.w, &viewport.h);
-                            SDL_RenderSetViewport(state->renderers[i], &viewport);
-                        }
-                    }
-                }
-            }
-            break;
         case SDL_WINDOWEVENT_CLOSE:
             {
                 SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);

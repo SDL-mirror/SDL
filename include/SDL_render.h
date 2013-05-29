@@ -481,8 +481,7 @@ extern DECLSPEC void SDLCALL SDL_RenderGetLogicalSize(SDL_Renderer * renderer, i
  *
  *  \return 0 on success, or -1 on error
  *
- *  \note When the window is resized, the current viewport is automatically
- *        centered within the new window size.
+ *  \note If the window associated with the renderer is resized, the viewport is automatically reset.
  *
  *  \sa SDL_RenderGetViewport()
  *  \sa SDL_RenderSetLogicalSize()

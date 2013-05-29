@@ -110,29 +110,11 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                 renderer->WindowEvent(renderer, &event->window);
             }
 
-            if (event->window.event == SDL_WINDOWEVENT_RESIZED) {
-                if (renderer->logical_w) {
-                    /* We'll update the renderer in the SIZE_CHANGED event */
-                } else {
-                    /* Try to keep the previous viewport centered */
-                    int w, h;
-
-                    SDL_GetWindowSize(window, &w, &h);
-                    if (renderer->target) {
-                        renderer->viewport_backup.x = (w - renderer->viewport_backup.w) / 2;
-                        renderer->viewport_backup.y = (h - renderer->viewport_backup.h) / 2;
-                    } else {
-                        renderer->viewport.x = (w - renderer->viewport.w) / 2;
-                        renderer->viewport.y = (h - renderer->viewport.h) / 2;
-                        renderer->UpdateViewport(renderer);
-                    }
-                }
-                renderer->resized = SDL_TRUE;
-            } else if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+            if (event->window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                 if (renderer->logical_w) {
                     UpdateLogicalSize(renderer);
-                } else if (!renderer->resized) {
-                    /* Window was programmatically resized, reset viewport */
+                } else {
+                    /* Window was resized, reset viewport */
                     int w, h;
 
                     SDL_GetWindowSize(window, &w, &h);
@@ -149,7 +131,6 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
                         renderer->UpdateViewport(renderer);
                     }
                 }
-                renderer->resized = SDL_FALSE;
             } else if (event->window.event == SDL_WINDOWEVENT_HIDDEN) {
                 renderer->hidden = SDL_TRUE;
             } else if (event->window.event == SDL_WINDOWEVENT_SHOWN) {
