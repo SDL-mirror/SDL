@@ -50,6 +50,8 @@ extern "C" {
 
 /* Implemented in audio/android/SDL_androidaudio.c */
 extern void Android_RunAudioThread();
+
+static void Android_JNI_ThreadDestroyed(void*);
 } // C
 
 /*******************************************************************************

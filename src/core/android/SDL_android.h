@@ -62,7 +62,6 @@ int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seco
 
 /* Threads */
 #include <jni.h>
-static void Android_JNI_ThreadDestroyed(void*);
 JNIEnv *Android_JNI_GetEnv(void);
 int Android_JNI_SetupThread(void);
 
