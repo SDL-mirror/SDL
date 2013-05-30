@@ -37,7 +37,7 @@ extern SDL_bool Android_JNI_GetAccelerometerValues(float values[3]);
 extern void Android_JNI_ShowTextInput(SDL_Rect *inputRect);
 extern void Android_JNI_HideTextInput();
 
-// Audio support
+/* Audio support */
 extern int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames);
 extern void* Android_JNI_GetAudioBuffer();
 extern void Android_JNI_WriteAudioBuffer();
@@ -60,13 +60,13 @@ SDL_bool Android_JNI_HasClipboardText();
 /* Power support */
 int Android_JNI_GetPowerInfo(int* plugged, int* charged, int* battery, int* seconds, int* percent);
 
-// Threads
+/* Threads */
 #include <jni.h>
 static void Android_JNI_ThreadDestroyed(void*);
 JNIEnv *Android_JNI_GetEnv(void);
 int Android_JNI_SetupThread(void);
 
-// Generic messages
+/* Generic messages */
 int Android_JNI_SendMessage(int command, int param);
 
 /* Ends C function definitions when using C++ */
