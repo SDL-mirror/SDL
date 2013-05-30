@@ -28,7 +28,7 @@ event.dgesture.gestureId  - the unique id of the closest gesture to the performe
 event.dgesture.error      - the difference between the gesture template and the actual performed gesture. Lower error is a better match.
 event.dgesture.numFingers - the number of fingers used to draw the stroke.
 
-ost programs will want to define an appropriate error threshold and check to be sure that the error of a gesture is not abnormally high (an indicator that no gesture was performed).
+Most programs will want to define an appropriate error threshold and check to be sure that the error of a gesture is not abnormally high (an indicator that no gesture was performed).
 
 
 
@@ -50,7 +50,7 @@ SDL_LoadDollarTemplates returns the number of templates successfully loaded.
 
 
 ===========================================================================
-ulti Gestures
+Multi Gestures
 ===========================================================================
 SDL provides simple support for pinch/rotate/swipe gestures. 
 Every time a finger is moved an SDL_MULTIGESTURE event is sent with the following fields:

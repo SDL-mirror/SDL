@@ -1,10 +1,10 @@
 The latest development version of SDL is available via Mercurial.
-ercurial allows you to get up-to-the-minute fixes and enhancements;
+Mercurial allows you to get up-to-the-minute fixes and enhancements;
 as a developer works on a source tree, you can use "hg" to mirror that
 source tree instead of waiting for an official release. Please look
 at the Mercurial website ( http://mercurial.selenic.com/ ) for more
 information on using hg, where you can also download software for
-ac OS X, Windows, and Unix systems.
+Mac OS X, Windows, and Unix systems.
 
   hg clone http://hg.libsdl.org/SDL
 

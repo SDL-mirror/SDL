@@ -10,7 +10,7 @@ http://developer.android.com/sdk/index.html
 Android NDK r7 or later
 http://developer.android.com/sdk/ndk/index.html
 
-inimum API level supported by SDL: 10 (Android 2.3.3)
+Minimum API level supported by SDL: 10 (Android 2.3.3)
 
 ================================================================================
  How the port works

@@ -34,7 +34,7 @@ By default, iosbuild.sh will autodetect the SDK version you have installed using
 xcodebuild -showsdks, and build for iOS >= 3.0, you can override this behaviour 
 by setting the MIN_OS_VERSION variable, ie:
 
-IN_OS_VERSION=4.2 ./iosbuild.sh
+MIN_OS_VERSION=4.2 ./iosbuild.sh
 
 ==============================================================================
 Using the Simple DirectMedia Layer for iOS
@@ -158,7 +158,7 @@ Each application installed on iPhone resides in a sandbox which includes its own
 
 Once your application is installed its directory tree looks like:
 
-ySDLApp Home/
+MySDLApp Home/
 	MySDLApp.app
 	Documents/
 	Library/
@@ -167,7 +167,7 @@ ySDLApp Home/
 
 When your SDL based iPhone application starts up, it sets the working directory to the main bundle (MySDLApp Home/MySDLApp.app), where your application resources are stored.  You cannot write to this directory.  Instead, I advise you to write document files to "../Documents/" and preferences to "../Library/Preferences".  
 
-ore information on this subject is available here:
+More information on this subject is available here:
 http://developer.apple.com/library/ios/#documentation/iPhone/Conceptual/iPhoneOSProgrammingGuide/Introduction/Introduction.html
 
 ==============================================================================

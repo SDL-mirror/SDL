@@ -4,7 +4,7 @@ System Specific Notes
 Linux:
 The linux touch system is currently based off event streams, and proc/bus/devices. The active user must be given permissions to read /dev/input/TOUCHDEVICE, where TOUCHDEVICE is the event stream for your device. Currently only Wacom tablets are supported. If you have an unsupported tablet contact me at jim.tla+sdl_touch@gmail.com and I will help you get support for it.
 
-ac: 
+Mac:
 The Mac and iPhone APIs are pretty. If your touch device supports them then you'll be fine. If it doesn't, then there isn't much we can do.
 
 iPhone: 

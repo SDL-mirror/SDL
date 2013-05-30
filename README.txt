@@ -27,7 +27,7 @@ in the file "COPYING".
 The best way to learn how to use SDL is to check out the header files in
 the "include" subdirectory and the programs in the "test" subdirectory.
 The header files and test programs are well commented and always up to date.
-ore documentation and FAQs are available online at:
+More documentation and FAQs are available online at:
 	http://wiki.libsdl.org/
 
 If you need help with the library, or just want to discuss SDL related
