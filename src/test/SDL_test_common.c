@@ -325,7 +325,7 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         if (!argv[index]) {
             return -1;
         }
-        state->scale = SDL_atof(argv[index]);
+        state->scale = (float)SDL_atof(argv[index]);
         return 2;
     }
     if (SDL_strcasecmp(argv[index], "--depth") == 0) {
@@ -1262,7 +1262,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 /* Ctrl-G toggle grab */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
-                    SDL_SetWindowGrab(window, !SDL_GetWindowGrab(window));
+                    SDL_SetWindowGrab(window, !SDL_GetWindowGrab(window) ? SDL_TRUE : SDL_FALSE);
                 }
             }
             break;
@@ -1283,7 +1283,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
         case SDLK_r:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-R toggle mouse relative mode */
-                SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
+                SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode() ? SDL_TRUE : SDL_FALSE);
             }
             break;
         case SDLK_z:
@@ -1315,7 +1315,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     const Uint32 flags = SDL_GetWindowFlags(window);
-                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0);
+                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0) ? SDL_TRUE : SDL_FALSE;
                     SDL_SetWindowBordered(window, b);
                 }
             }

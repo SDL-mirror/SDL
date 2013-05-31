@@ -110,7 +110,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -144,7 +144,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -186,7 +186,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -221,15 +221,15 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Bscmake>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
-    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
+    <Library Include="..\..\SDL\$(Platform)\$(Configuration)\SDL2.lib" />
+    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\Test\testplatform.c">

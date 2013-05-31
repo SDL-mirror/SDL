@@ -110,7 +110,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -145,7 +145,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -181,7 +181,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -216,7 +216,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -226,9 +226,9 @@
     <ClCompile Include="..\..\..\test\testgl2.c" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
-    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
-    <Library Include="..\..\SDLtest\$(Platform)\$(Configuration)\SDLtest.lib" />
+    <Library Include="..\..\SDL\$(Platform)\$(Configuration)\SDL2.lib" />
+    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDL2main.lib" />
+    <Library Include="..\..\SDLtest\$(Platform)\$(Configuration)\SDL2test.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
