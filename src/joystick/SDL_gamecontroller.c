@@ -960,7 +960,17 @@ SDL_GameControllerGetAxis(SDL_GameController * gamecontroller, SDL_GameControlle
 
     if (gamecontroller->mapping.axes[axis] >= 0 )
     {
-        return ( SDL_JoystickGetAxis( gamecontroller->joystick, gamecontroller->mapping.axes[axis]) );
+        Sint16 value = ( SDL_JoystickGetAxis( gamecontroller->joystick, gamecontroller->mapping.axes[axis]) );
+        switch (axis)
+        {
+            case SDL_CONTROLLER_AXIS_TRIGGERLEFT:
+            case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:
+                /* Shift it to be 0 - 32767. */
+                value = value / 2 + 16384;
+            default:
+                break;
+        }
+        return value;
     }
     else if (gamecontroller->mapping.buttonasaxis[axis] >= 0 )
     {
