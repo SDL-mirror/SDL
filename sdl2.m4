@@ -21,7 +21,7 @@ AC_ARG_WITH(sdl-exec-prefix,[  --with-sdl-exec-prefix=PFX Exec prefix where SDL 
 AC_ARG_ENABLE(sdltest, [  --disable-sdltest       Do not try to compile and run a test SDL program],
 		    , enable_sdltest=yes)
 
-  min_sdl_version=ifelse([$1], ,0.9.0,$1)
+  min_sdl_version=ifelse([$1], ,2.0.0,$1)
 
   if test "x$sdl_prefix$sdl_exec_prefix" = x ; then
     PKG_CHECK_MODULES([SDL], [sdl2 >= $min_sdl_version],
