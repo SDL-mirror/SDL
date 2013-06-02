@@ -145,7 +145,7 @@ main(int argc, char **argv)
     /* Now we'll try a SAWTOOTHUP */
     if (supported & SDL_HAPTIC_SAWTOOTHUP) {
         printf("   effect %d: Sawtooth Up\n", nefx);
-        efx[nefx].type = SDL_HAPTIC_SQUARE;
+        efx[nefx].type = SDL_HAPTIC_SAWTOOTHUP;
         efx[nefx].periodic.period = 500;
         efx[nefx].periodic.magnitude = 0x5000;
         efx[nefx].periodic.length = 5000;
