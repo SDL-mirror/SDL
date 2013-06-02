@@ -64,7 +64,7 @@ typedef struct IWbemLocatorVtbl {
     HRESULT (WINAPI *QueryInterface)(IWbemLocator *This,REFIID riid,void **ppvObject);
     ULONG (WINAPI *AddRef)(IWbemLocator *This);
     ULONG (WINAPI *Release)(IWbemLocator *This);
-    HRESULT (WINAPI *ConnectServer)(IWbemLocator *This,const BSTR strNetworkResource,const BSTR strUser,const BSTR strPassword,const BSTR strLocale,__LONG32 lSecurityFlags,const BSTR strAuthority,IWbemContext *pCtx,IWbemServices **ppNamespace);
+    HRESULT (WINAPI *ConnectServer)(IWbemLocator *This,const BSTR strNetworkResource,const BSTR strUser,const BSTR strPassword,const BSTR strLocale,LONG lSecurityFlags,const BSTR strAuthority,IWbemContext *pCtx,IWbemServices **ppNamespace);
   END_INTERFACE
 } IWbemLocatorVtbl;
 struct IWbemLocator {
