@@ -35,18 +35,43 @@
 #include "SDL_error.h"
 #include "SDL_assert.h"
 #include "SDL_events.h"
-#include "SDL_joystick.h"
-#include "../SDL_sysjoystick.h"
-#define INITGUID /* Only set here, if set twice will cause mingw32 to break. */
-#include "SDL_dxjoystick_c.h"
 #include "SDL_thread.h"
 #include "SDL_timer.h"
 #include "SDL_mutex.h"
 #include "SDL_events.h"
 #include "SDL_hints.h"
+#include "SDL_joystick.h"
+#include "../SDL_sysjoystick.h"
 #if !SDL_EVENTS_DISABLED
 #include "../../events/SDL_events_c.h"
 #endif
+
+/* The latest version of mingw-w64 defines IID_IWbemLocator in wbemcli.h
+   instead of declaring it like Visual Studio and other mingw32 compilers.
+   So, we need to take care of this here before we define INITGUID.
+*/
+#ifdef __MINGW32__
+#define __IWbemLocator_INTERFACE_DEFINED__
+#endif /* __MINGW32__ */
+
+#define INITGUID /* Only set here, if set twice will cause mingw32 to break. */
+#include "SDL_dxjoystick_c.h"
+
+#ifdef __MINGW32__
+/* And now that we've included wbemcli.h we need to declare these interfaces */
+typedef struct IWbemLocatorVtbl {
+  BEGIN_INTERFACE
+    HRESULT (WINAPI *QueryInterface)(IWbemLocator *This,REFIID riid,void **ppvObject);
+    ULONG (WINAPI *AddRef)(IWbemLocator *This);
+    ULONG (WINAPI *Release)(IWbemLocator *This);
+    HRESULT (WINAPI *ConnectServer)(IWbemLocator *This,const BSTR strNetworkResource,const BSTR strUser,const BSTR strPassword,const BSTR strLocale,__LONG32 lSecurityFlags,const BSTR strAuthority,IWbemContext *pCtx,IWbemServices **ppNamespace);
+  END_INTERFACE
+} IWbemLocatorVtbl;
+struct IWbemLocator {
+  CONST_VTBL struct IWbemLocatorVtbl *lpVtbl;
+};
+#define IWbemLocator_ConnectServer(This,strNetworkResource,strUser,strPassword,strLocale,lSecurityFlags,strAuthority,pCtx,ppNamespace) (This)->lpVtbl->ConnectServer(This,strNetworkResource,strUser,strPassword,strLocale,lSecurityFlags,strAuthority,pCtx,ppNamespace)
+#endif /* __MINGW32__ */
 
 #ifndef DIDFT_OPTIONAL
 #define DIDFT_OPTIONAL      0x80000000
@@ -373,10 +398,8 @@ SetDIerror(const char *function, HRESULT code)
 
 
 DEFINE_GUID(CLSID_WbemLocator,   0x4590f811,0x1d3a,0x11d0,0x89,0x1F,0x00,0xaa,0x00,0x4b,0x2e,0x24);
-#ifdef _MSC_VER
 /* The Windows SDK doesn't define this GUID */
 DEFINE_GUID(IID_IWbemLocator,    0xdc12a687,0x737f,0x11cf,0x88,0x4d,0x00,0xaa,0x00,0x4b,0x2e,0x24);
-#endif /* _MSC_VER */
 
 /*-----------------------------------------------------------------------------
  *
