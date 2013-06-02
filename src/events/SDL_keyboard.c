@@ -829,7 +829,7 @@ SDL_KeyboardQuit(void)
 {
 }
 
-Uint8 *
+const Uint8 *
 SDL_GetKeyboardState(int *numkeys)
 {
     SDL_Keyboard *keyboard = &SDL_keyboard;
