@@ -1169,6 +1169,17 @@ AC_HELP_STRING([--enable-video-x11-xrandr], [enable X11 Xrandr extension for ful
             if test x$definitely_enable_video_x11_xrandr = xyes; then
                 AC_DEFINE(SDL_VIDEO_DRIVER_X11_XRANDR)
             fi
+            AC_MSG_CHECKING(for const parameter to _XData32)
+            have_const_param_xdata32=no
+            AC_TRY_COMPILE([
+              #include <X11/Xlibint.h>
+              extern int _XData32(Display *dpy,register _Xconst long *data,unsigned len);
+            ],[
+            ],[
+            have_const_param_xdata32=yes
+            AC_DEFINE(SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32)
+            ])
+            AC_MSG_RESULT($have_const_param_xdata32)
         fi
     fi
 }
