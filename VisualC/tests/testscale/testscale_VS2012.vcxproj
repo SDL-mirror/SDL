@@ -19,27 +19,31 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectName>testrendertarget</ProjectName>
-    <ProjectGuid>{43A06713-A52D-4008-AD7E-A69DF3FCFFA8}</ProjectGuid>
-    <RootNamespace>testrendertarget</RootNamespace>
+    <ProjectName>testscale</ProjectName>
+    <ProjectGuid>{E7A6C41C-E059-4C9C-8CCC-73586A540B62}</ProjectGuid>
+    <RootNamespace>testscale</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v110</PlatformToolset>
   </PropertyGroup>
  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -223,7 +227,7 @@ copy "$(SolutionDir)\..\test\sample.bmp" "$(TargetDir)\sample.bmp"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\test\testrendertarget.c" />
+    <ClCompile Include="..\..\..\test\testscale.c" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\SDLmain\SDLmain_VS2010.vcxproj">

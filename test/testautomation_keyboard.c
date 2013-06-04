@@ -25,13 +25,13 @@ keyboard_getKeyboardState(void *arg)
    Uint8 *state;
 
    /* Case where numkeys pointer is NULL */
-   state = SDL_GetKeyboardState(NULL);
+   state = (Uint8 *)SDL_GetKeyboardState(NULL);
    SDLTest_AssertPass("Call to SDL_GetKeyboardState(NULL)");
    SDLTest_AssertCheck(state != NULL, "Validate that return value from SDL_GetKeyboardState is not NULL");
 
    /* Case where numkeys pointer is not NULL */
    numkeys = -1;
-   state = SDL_GetKeyboardState(&numkeys);
+   state = (Uint8 *)SDL_GetKeyboardState(&numkeys);
    SDLTest_AssertPass("Call to SDL_GetKeyboardState(&numkeys)");
    SDLTest_AssertCheck(state != NULL, "Validate that return value from SDL_GetKeyboardState is not NULL");
    SDLTest_AssertCheck(numkeys >= 0, "Validate that value of numkeys is >= 0, got: %i", numkeys);
