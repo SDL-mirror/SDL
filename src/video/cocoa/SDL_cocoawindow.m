@@ -240,12 +240,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidBecomeKey:(NSNotification *)aNotification
 {
     SDL_Window *window = _data->window;
+    SDL_Mouse *mouse = SDL_GetMouse();
 
     /* We're going to get keyboard events, since we're key. */
     SDL_SetKeyboardFocus(window);
 
     /* If we just gained focus we need the updated mouse position */
-    {
+    if (!mouse->relative_mode) {
         NSPoint point;
         int x, y;
 

@@ -224,10 +224,12 @@ Cocoa_WarpMouse(SDL_Window * window, int x, int y)
     CGWarpMouseCursorPosition(point);
     CGSetLocalEventsSuppressionInterval(0.25);
 
-    /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
-     * other implementations' APIs.
-     */
-    SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 0, x, y);
+    if (!mouse->relative_mode) {
+        /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
+         * other implementations' APIs.
+         */
+        SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 0, x, y);
+    }
 }
 
 static int
