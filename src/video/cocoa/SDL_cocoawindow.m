@@ -538,7 +538,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     [super resetCursorRects];
     SDL_Mouse *mouse = SDL_GetMouse();
 
-    if (mouse->cursor_shown && mouse->cur_cursor) {
+    if (mouse->cursor_shown && mouse->cur_cursor && !mouse->relative_mode) {
         [self addCursorRect:[self bounds]
                      cursor:mouse->cur_cursor->driverdata];
     } else {
