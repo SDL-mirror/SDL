@@ -1307,6 +1307,17 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                         SDL_SetWindowFullscreen(window, SDL_TRUE);
                     }
                 }
+            } else if (event->key.keysym.mod & KMOD_ALT) {
+                /* Ctrl-Enter toggle fullscreen desktop */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    Uint32 flags = SDL_GetWindowFlags(window);
+                    if (flags & SDL_WINDOW_FULLSCREEN) {
+                        SDL_SetWindowFullscreen(window, SDL_FALSE);
+                    } else {
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                }
             }
             break;
         case SDLK_b:
