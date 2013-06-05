@@ -446,14 +446,11 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 #ifdef WM_MOUSELEAVE
     case WM_MOUSELEAVE:
-        if (SDL_GetMouseFocus() == data->window) {
-            if (!SDL_GetMouse()->relative_mode) {
-                POINT cursorPos;
-                GetCursorPos(&cursorPos);
-                ScreenToClient(hwnd, &cursorPos);
-                SDL_SendMouseMotion(data->window, 0, 0, cursorPos.x, cursorPos.y);
-            }
-
+        if (SDL_GetMouseFocus() == data->window && !SDL_GetMouse()->relative_mode) {
+            POINT cursorPos;
+            GetCursorPos(&cursorPos);
+            ScreenToClient(hwnd, &cursorPos);
+            SDL_SendMouseMotion(data->window, 0, 0, cursorPos.x, cursorPos.y);
             SDL_SetMouseFocus(NULL);
         }
         returnCode = 0;
