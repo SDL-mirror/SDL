@@ -21427,6 +21427,14 @@ if test "x$ac_cv_header_xaudio2_h" = xyes; then :
 fi
 
 
+
+        # FIXME: latest Cygwin finds dinput headers, but we die on other win32 headers.
+        # FIXME:  ...so force it off for now.
+        case "$host" in
+            *-*-cygwin*)
+            have_dinput=false
+            ;;
+        esac
     fi
 }
 
