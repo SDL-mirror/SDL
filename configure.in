@@ -2016,6 +2016,14 @@ AC_HELP_STRING([--enable-directx], [use DirectX for Windows audio/video [[defaul
         AC_CHECK_HEADER(dsound.h, have_dsound=yes)
         AC_CHECK_HEADER(dinput.h, have_dinput=yes)
         AC_CHECK_HEADER(xaudio2.h, have_xaudio2=yes)
+
+        # FIXME: latest Cygwin finds dinput headers, but we die on other win32 headers.
+        # FIXME:  ...so force it off for now.
+        case "$host" in
+            *-*-cygwin*)
+            have_dinput=false
+            ;;
+        esac
     fi
 }
 
