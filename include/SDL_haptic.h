@@ -1052,8 +1052,7 @@ extern DECLSPEC void SDLCALL SDL_HapticDestroyEffect(SDL_Haptic * haptic,
  *
  *  \param haptic Haptic device to query the effect status on.
  *  \param effect Identifier of the effect to query its status.
- *  \return 0 if it isn't playing, ::SDL_HAPTIC_PLAYING if it is playing
- *          or -1 on error.
+ *  \return 0 if it isn't playing, 1 if it is playing or -1 on error.
  *
  *  \sa SDL_HapticRunEffect
  *  \sa SDL_HapticStopEffect
@@ -1067,8 +1066,8 @@ extern DECLSPEC int SDLCALL SDL_HapticGetEffectStatus(SDL_Haptic * haptic,
  *  Device must support the ::SDL_HAPTIC_GAIN feature.
  *
  *  The user may specify the maximum gain by setting the environment variable
- *  ::SDL_HAPTIC_GAIN_MAX which should be between 0 and 100.  All calls to
- *  SDL_HapticSetGain() will scale linearly using ::SDL_HAPTIC_GAIN_MAX as the
+ *  SDL_HAPTIC_GAIN_MAX which should be between 0 and 100.  All calls to
+ *  SDL_HapticSetGain() will scale linearly using SDL_HAPTIC_GAIN_MAX as the
  *  maximum.
  *
  *  \param haptic Haptic device to set the gain on.

@@ -462,7 +462,7 @@ typedef struct SDL_OSEvent
  */
 typedef struct SDL_UserEvent
 {
-    Uint32 type;        /**< ::SDL_USEREVENT through ::SDL_NUMEVENTS-1 */
+    Uint32 type;        /**< ::SDL_USEREVENT through ::SDL_LASTEVENT-1 */
     Uint32 timestamp;
     Uint32 windowID;    /**< The associated window if any */
     Sint32 code;        /**< User defined event code */
@@ -642,7 +642,7 @@ typedef int (SDLCALL * SDL_EventFilter) (void *userdata, SDL_Event * event);
  *  \warning  Be very careful of what you do in the event filter function, as
  *            it may run in a different thread!
  *
- *  There is one caveat when dealing with the ::SDL_QUITEVENT event type.  The
+ *  There is one caveat when dealing with the ::SDL_QuitEvent event type.  The
  *  event filter is only called when the window manager desires to close the
  *  application window.  If the event filter returns 1, then the window will
  *  be closed, otherwise the window will remain open if possible.

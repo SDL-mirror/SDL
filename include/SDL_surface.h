@@ -22,7 +22,7 @@
 /**
  *  \file SDL_surface.h
  *
- *  Header file for ::SDL_surface definition and management functions.
+ *  Header file for ::SDL_Surface definition and management functions.
  */
 
 #ifndef _SDL_surface_h
@@ -43,7 +43,7 @@ extern "C" {
 /**
  *  \name Surface flags
  *
- *  These are the currently supported flags for the ::SDL_surface.
+ *  These are the currently supported flags for the ::SDL_Surface.
  *
  *  \internal
  *  Used internally (read-only).
