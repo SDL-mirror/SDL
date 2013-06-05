@@ -37,7 +37,13 @@
 #cmakedefine volatile @HAVE_VOLATILE@
 
 /* C datatypes */
-#cmakedefine SIZEOF_VOIDP @SIZEOF_VOIDP@
+/* Define SIZEOF_VOIDP for 64/32 architectures */
+#ifdef __LP64__
+#define SIZEOF_VOIDP 8
+#else
+#define SIZEOF_VOIDP 4
+#endif
+
 #cmakedefine HAVE_GCC_ATOMICS @HAVE_GCC_ATOMICS@
 #cmakedefine HAVE_GCC_SYNC_LOCK_TEST_AND_SET @HAVE_GCC_SYNC_LOCK_TEST_AND_SET@
 #cmakedefine HAVE_PTHREAD_SPINLOCK @HAVE_PTHREAD_SPINLOCK@

@@ -43,6 +43,11 @@
 
 /* C datatypes */
 #undef SIZEOF_VOIDP
+#ifdef __LP64__
+#define SIZEOF_VOID_P 8
+#else
+#define SIZEOF_VOID_P 4
+#endif
 #undef HAVE_GCC_ATOMICS
 #undef HAVE_GCC_SYNC_LOCK_TEST_AND_SET
 #undef HAVE_PTHREAD_SPINLOCK
