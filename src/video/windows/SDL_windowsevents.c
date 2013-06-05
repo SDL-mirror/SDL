@@ -33,6 +33,8 @@
 /* Dropfile support */
 #include <shellapi.h>
 
+/* For GET_X_LPARAM, GET_Y_LPARAM. */
+#include <windowsx.h>
 
 /*#define WMMSG_DEBUG*/
 #ifdef WMMSG_DEBUG
@@ -381,7 +383,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
     case WM_MOUSEMOVE:
         if( !SDL_GetMouse()->relative_mode )
-            SDL_SendMouseMotion(data->window, 0, 0, LOWORD(lParam), HIWORD(lParam));
+            SDL_SendMouseMotion(data->window, 0, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
         /* don't break here, fall through to check the wParam like the button presses */
     case WM_LBUTTONUP:
     case WM_RBUTTONUP:
