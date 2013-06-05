@@ -39,6 +39,9 @@
 #define DEFAULT_APPLICATION_PRIORITY    SDL_LOG_PRIORITY_INFO
 #define DEFAULT_TEST_PRIORITY           SDL_LOG_PRIORITY_VERBOSE
 
+/* Forward definition of error function */
+extern int SDL_SetError(const char *fmt, ...);
+
 typedef struct SDL_LogLevel
 {
     int category;
@@ -288,6 +291,14 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
     SDL_stack_free(message);
 }
 
+#if defined(__WIN32__)
+/* Flag tracking the attachment of the console: 0=unattached, 1=attached, -1=error */
+static int consoleAttached = 0;
+
+/* Handle to stderr output of console. */
+static HANDLE stderrHandle = NULL;
+#endif
+
 static void
 SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
               const char *message)
@@ -298,12 +309,60 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         char *output;
         size_t length;
         LPTSTR tstr;
+        BOOL pbRemoteDebuggerPresent;        
+        BOOL attachResult;
+        DWORD attachError;
+        unsigned long charsWritten; 
+
+        /* Maybe attach console and get stderr handle */
+        if (consoleAttached == 0) {
+            attachResult = AttachConsole(ATTACH_PARENT_PROCESS);
+            if (!attachResult) {
+                    attachError = GetLastError();
+                    if (attachError == ERROR_INVALID_HANDLE) {
+                        SDL_SetError("Parent process has no console");
+                        consoleAttached = -1;
+                    } else if (attachError == ERROR_GEN_FAILURE) {
+                         SDL_SetError("Could not attach to console of parent process");
+                         consoleAttached = -1;
+                    } else if (attachError == ERROR_ACCESS_DENIED) {  
+                         /* Already attached */
+                        consoleAttached = 1;
+                    } else {
+                        SDL_SetError("Error %d attaching console", attachError);
+                        consoleAttached = -1;
+                    }
+                } else {
+                    /* Newly attached */
+                    consoleAttached = 1;
+                }
+			
+                if (consoleAttached == 1) {
+                        stderrHandle = GetStdHandle(STD_ERROR_HANDLE);
+                }
+        }
 
         length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1 + 1;
         output = SDL_stack_alloc(char, length);
         SDL_snprintf(output, length, "%s: %s\n", SDL_priority_prefixes[priority], message);
         tstr = WIN_UTF8ToString(output);
-        OutputDebugString(tstr);
+        
+        /* Debugger output, if attached. Check each time since debugger can be attached at runtime. */
+        CheckRemoteDebuggerPresent(GetCurrentProcess(), &pbRemoteDebuggerPresent);
+        if (pbRemoteDebuggerPresent || IsDebuggerPresent()) {
+            OutputDebugString(tstr);
+        }
+       
+        /* Screen output to stderr, if console was attached. */
+        if (consoleAttached == 1) {
+                if (!WriteConsole(stderrHandle, tstr, lstrlen(tstr), &charsWritten, NULL)) {
+                    SDL_SetError("Error %d calling WriteConsole", GetLastError());
+                }
+                if (charsWritten == ERROR_NOT_ENOUGH_MEMORY) {
+                    SDL_SetError("Insufficient heap memory to write message of size %d", length);
+                }
+        }
+
         SDL_free(tstr);
         SDL_stack_free(output);
     }
