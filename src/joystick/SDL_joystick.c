@@ -25,6 +25,7 @@
 #include "SDL_events.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_assert.h"
+#include "SDL_hints.h"
 
 #if !SDL_EVENTS_DISABLED
 #include "../events/SDL_events_c.h"
@@ -451,6 +452,22 @@ SDL_JoystickQuit(void)
 }
 
 
+static SDL_bool
+SDL_PrivateJoystickShouldIgnoreEvent()
+{
+    const char *hint;
+    if (SDL_GetKeyboardFocus() != NULL) {
+        return SDL_FALSE;
+    }
+
+    hint = SDL_GetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
+    if (hint && *hint == '1') {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+
 /* These are global for SDL_sysjoystick.c and SDL_events.c */
 
 int
@@ -468,6 +485,15 @@ SDL_PrivateJoystickAxis(SDL_Joystick * joystick, Uint8 axis, Sint16 value)
         return 0;
     }
     joystick->axes[axis] = value;
+
+    /* We ignore events if we don't have keyboard focus, except for centering
+     * events.
+     */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
+        if (!(joystick->closed && joystick->uncentered)) {
+            return 0;
+        }
+    }
 
     /* Post the event, if desired */
     posted = 0;
@@ -497,6 +523,16 @@ SDL_PrivateJoystickHat(SDL_Joystick * joystick, Uint8 hat, Uint8 value)
     /* Update internal joystick state */
     joystick->hats[hat] = value;
 
+    /* We ignore events if we don't have keyboard focus, except for centering
+     * events.
+     */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
+        if (!(joystick->closed && joystick->uncentered)) {
+            return 0;
+        }
+    }
+
+
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
@@ -520,6 +556,11 @@ SDL_PrivateJoystickBall(SDL_Joystick * joystick, Uint8 ball,
 
     /* Make sure we're not getting garbage events */
     if (ball >= joystick->nballs) {
+        return 0;
+    }
+
+    /* We ignore events if we don't have keyboard focus. */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
         return 0;
     }
 
@@ -568,6 +609,12 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
         return 0;
     }
 
+    /* We ignore events if we don't have keyboard focus, except for button
+     * release. */
+    if (SDL_PrivateJoystickShouldIgnoreEvent() && event.type == SDL_JOYBUTTONDOWN) {
+        return 0;
+    }
+
     /* Update internal joystick state */
     joystick->buttons[button] = state;
 
@@ -605,7 +652,6 @@ SDL_JoystickUpdate(void)
         if ( joystick->closed && joystick->uncentered )
         {
             int i;
-            joystick->uncentered = 0;
 
             /* Tell the app that everything is centered/unpressed...  */
             for (i = 0; i < joystick->naxes; i++)
@@ -617,6 +663,7 @@ SDL_JoystickUpdate(void)
             for (i = 0; i < joystick->nhats; i++)
                 SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
 
+            joystick->uncentered = 0;
         }
 
         SDL_updating_joystick = NULL;

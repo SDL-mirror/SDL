@@ -216,6 +216,20 @@ extern "C" {
 
 
 /**
+ *  \brief  A variable that lets you enable joystick (and gamecontroller) events even when your app is in the background.
+ *
+ * The default value is "0".
+ *
+ *  The variable can be set to the following values:
+ *    "0"       - Disable joystick & gamecontroller input events when the
+ *                application is in the background.
+ *    "1"       - Enable joystick & gamecontroller input events when the
+ *                application is in the backgroumd.
+ */
+#define SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS "SDL_JOYSTICK_ALLOW_BACKGROUND_EVENTS"
+
+
+/**
  *  \brief If set to 0 then never set the top most bit on a SDL Window, even if the video mode expects it.
  *      This is a debugging aid for developers and not expected to be used by end users. The default is "1"
  *
