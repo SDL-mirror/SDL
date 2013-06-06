@@ -25,14 +25,14 @@
 		006E9852119550FB001DE610 /* audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9831119550FB001DE610 /* audio.c */; };
 		006E9853119550FB001DE610 /* common.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9834119550FB001DE610 /* common.c */; };
 		006E9859119550FB001DE610 /* platform.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E983D119550FB001DE610 /* platform.c */; };
-		006E985A119550FB001DE610 /* README in Resources */ = {isa = PBXBuildFile; fileRef = 006E983F119550FB001DE610 /* README */; };
+		006E985A119550FB001DE610 /* (null) in Resources */ = {isa = PBXBuildFile; };
 		006E985B119550FB001DE610 /* rect.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9841119550FB001DE610 /* rect.c */; };
 		006E985C119550FB001DE610 /* render.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9844119550FB001DE610 /* render.c */; };
 		006E985D119550FB001DE610 /* read in Copy rwops */ = {isa = PBXBuildFile; fileRef = 006E9847119550FB001DE610 /* read */; };
 		006E985E119550FB001DE610 /* rwops.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9848119550FB001DE610 /* rwops.c */; };
-		006E9860119550FB001DE610 /* SDL_at.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E984C119550FB001DE610 /* SDL_at.c */; };
+		006E9860119550FB001DE610 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		006E9861119550FB001DE610 /* surface.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E984F119550FB001DE610 /* surface.c */; };
-		006E9862119550FB001DE610 /* testsdl.c in Sources */ = {isa = PBXBuildFile; fileRef = 006E9851119550FB001DE610 /* testsdl.c */; };
+		006E9862119550FB001DE610 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		006E986A1195513D001DE610 /* icon.bmp in Resources */ = {isa = PBXBuildFile; fileRef = 006E98631195513D001DE610 /* icon.bmp */; };
 		006E986B1195513D001DE610 /* moose.dat in Resources */ = {isa = PBXBuildFile; fileRef = 006E98641195513D001DE610 /* moose.dat */; };
 		006E986C1195513D001DE610 /* picture.xbm in Resources */ = {isa = PBXBuildFile; fileRef = 006E98651195513D001DE610 /* picture.xbm */; };
@@ -235,8 +235,6 @@
 		FDA685FC0DF244C800F98A1A /* SDL_nullevents_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA685F60DF244C800F98A1A /* SDL_nullevents_c.h */; };
 		FDA685FF0DF244C800F98A1A /* SDL_nullvideo.c in Sources */ = {isa = PBXBuildFile; fileRef = FDA685F90DF244C800F98A1A /* SDL_nullvideo.c */; };
 		FDA686000DF244C800F98A1A /* SDL_nullvideo.h in Headers */ = {isa = PBXBuildFile; fileRef = FDA685FA0DF244C800F98A1A /* SDL_nullvideo.h */; };
-		FDC656480E560DF800311C8E /* jumphack.c in Sources */ = {isa = PBXBuildFile; fileRef = FDC656440E560DF800311C8E /* jumphack.c */; };
-		FDC656490E560DF800311C8E /* jumphack.h in Headers */ = {isa = PBXBuildFile; fileRef = FDC656450E560DF800311C8E /* jumphack.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,30 +263,16 @@
 
 /* Begin PBXFileReference section */
 		001E39A51196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestSupportRWops_Cocoa.m; sourceTree = "<group>"; };
-		001E39A61196EE6F00A3F5B8 /* TestSupportRWops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestSupportRWops.h; sourceTree = "<group>"; };
 		006E982211955059001DE610 /* testsdl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = testsdl.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		006E982411955059001DE610 /* testsdl-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "testsdl-Info.plist"; sourceTree = "<group>"; };
 		006E9831119550FB001DE610 /* audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = audio.c; sourceTree = "<group>"; };
-		006E9832119550FB001DE610 /* audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio.h; sourceTree = "<group>"; };
 		006E9834119550FB001DE610 /* common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = common.c; sourceTree = "<group>"; };
-		006E9835119550FB001DE610 /* common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = common.h; sourceTree = "<group>"; };
-		006E9836119550FB001DE610 /* images.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = images.h; sourceTree = "<group>"; };
-		006E9837119550FB001DE610 /* img_blit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_blit.c; sourceTree = "<group>"; };
-		006E9838119550FB001DE610 /* img_blitblend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_blitblend.c; sourceTree = "<group>"; };
-		006E9839119550FB001DE610 /* img_face.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_face.c; sourceTree = "<group>"; };
-		006E983A119550FB001DE610 /* img_primitives.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_primitives.c; sourceTree = "<group>"; };
-		006E983B119550FB001DE610 /* img_primitivesblend.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = img_primitivesblend.c; sourceTree = "<group>"; };
 		006E983D119550FB001DE610 /* platform.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = platform.c; sourceTree = "<group>"; };
-		006E983E119550FB001DE610 /* platform.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = platform.h; sourceTree = "<group>"; };
 		006E9841119550FB001DE610 /* rect.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rect.c; sourceTree = "<group>"; };
-		006E9842119550FB001DE610 /* rect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rect.h; sourceTree = "<group>"; };
 		006E9844119550FB001DE610 /* render.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = render.c; sourceTree = "<group>"; };
-		006E9845119550FB001DE610 /* render.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = render.h; sourceTree = "<group>"; };
 		006E9847119550FB001DE610 /* read */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = read; sourceTree = "<group>"; };
 		006E9848119550FB001DE610 /* rwops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rwops.c; sourceTree = "<group>"; };
-		006E9849119550FB001DE610 /* rwops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rwops.h; sourceTree = "<group>"; };
 		006E984F119550FB001DE610 /* surface.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = surface.c; sourceTree = "<group>"; };
-		006E9850119550FB001DE610 /* surface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = surface.h; sourceTree = "<group>"; };
 		006E98631195513D001DE610 /* icon.bmp */ = {isa = PBXFileReference; lastKnownFileType = image.bmp; name = icon.bmp; path = ../../test/icon.bmp; sourceTree = SOURCE_ROOT; };
 		006E98641195513D001DE610 /* moose.dat */ = {isa = PBXFileReference; lastKnownFileType = file; name = moose.dat; path = ../../test/moose.dat; sourceTree = SOURCE_ROOT; };
 		006E98651195513D001DE610 /* picture.xbm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = picture.xbm; path = ../../test/picture.xbm; sourceTree = SOURCE_ROOT; };
@@ -515,8 +499,6 @@
 		FDA685F90DF244C800F98A1A /* SDL_nullvideo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_nullvideo.c; sourceTree = "<group>"; };
 		FDA685FA0DF244C800F98A1A /* SDL_nullvideo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_nullvideo.h; sourceTree = "<group>"; };
 		FDC261780E3A3FC8001C4554 /* keyinfotable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = keyinfotable.h; sourceTree = "<group>"; };
-		FDC656440E560DF800311C8E /* jumphack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = jumphack.c; sourceTree = "<group>"; };
-		FDC656450E560DF800311C8E /* jumphack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jumphack.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -754,8 +736,6 @@
 		FD689F090E26E5D900F90B21 /* uikit */ = {
 			isa = PBXGroup;
 			children = (
-				FDC656440E560DF800311C8E /* jumphack.c */,
-				FDC656450E560DF800311C8E /* jumphack.h */,
 				FDC261780E3A3FC8001C4554 /* keyinfotable.h */,
 				FD689FCD0E26E9D400F90B21 /* SDL_uikitappdelegate.h */,
 				FD689FCC0E26E9D400F90B21 /* SDL_uikitappdelegate.m */,
@@ -1084,7 +1064,6 @@
 				FD689F240E26E5D900F90B21 /* SDL_uikitwindow.h in Headers */,
 				FD689F260E26E5D900F90B21 /* SDL_uikitopenglview.h in Headers */,
 				FD689FCF0E26E9D400F90B21 /* SDL_uikitappdelegate.h in Headers */,
-				FDC656490E560DF800311C8E /* jumphack.h in Headers */,
 				047677BD0EA76A31008ABAF1 /* SDL_syshaptic.h in Headers */,
 				046387420F0B5B7D0041FD65 /* SDL_blit_slow.h in Headers */,
 				006E9888119552DD001DE610 /* SDL_rwopsbundlesupport.h in Headers */,
@@ -1239,7 +1218,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				006E985A119550FB001DE610 /* README in Resources */,
+				006E985A119550FB001DE610 /* (null) in Resources */,
 				006E986A1195513D001DE610 /* icon.bmp in Resources */,
 				006E986B1195513D001DE610 /* moose.dat in Resources */,
 				006E986C1195513D001DE610 /* picture.xbm in Resources */,
@@ -1279,9 +1258,9 @@
 				006E985B119550FB001DE610 /* rect.c in Sources */,
 				006E985C119550FB001DE610 /* render.c in Sources */,
 				006E985E119550FB001DE610 /* rwops.c in Sources */,
-				006E9860119550FB001DE610 /* SDL_at.c in Sources */,
+				006E9860119550FB001DE610 /* (null) in Sources */,
 				006E9861119550FB001DE610 /* surface.c in Sources */,
-				006E9862119550FB001DE610 /* testsdl.c in Sources */,
+				006E9862119550FB001DE610 /* (null) in Sources */,
 				001E39A71196EE6F00A3F5B8 /* TestSupportRWops_Cocoa.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1347,7 +1326,6 @@
 				FD689F270E26E5D900F90B21 /* SDL_uikitopenglview.m in Sources */,
 				FD689FCE0E26E9D400F90B21 /* SDL_uikitappdelegate.m in Sources */,
 				FD8BD8250E27E25900B52CD5 /* SDL_sysloadso.c in Sources */,
-				FDC656480E560DF800311C8E /* jumphack.c in Sources */,
 				047677BB0EA76A31008ABAF1 /* SDL_syshaptic.c in Sources */,
 				047677BC0EA76A31008ABAF1 /* SDL_haptic.c in Sources */,
 				047AF1B30EA98D6C00811173 /* SDL_sysloadso.c in Sources */,

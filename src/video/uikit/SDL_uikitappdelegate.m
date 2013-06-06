@@ -32,7 +32,6 @@
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "../../events/SDL_events_c.h"
-#include "jumphack.h"
 
 #ifdef main
 #undef main
