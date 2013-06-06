@@ -309,7 +309,6 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         char *output;
         size_t length;
         LPTSTR tstr;
-        BOOL pbRemoteDebuggerPresent;        
         BOOL attachResult;
         DWORD attachError;
         unsigned long charsWritten; 
@@ -347,11 +346,8 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         SDL_snprintf(output, length, "%s: %s\n", SDL_priority_prefixes[priority], message);
         tstr = WIN_UTF8ToString(output);
         
-        /* Debugger output, if attached. Check each time since debugger can be attached at runtime. */
-        CheckRemoteDebuggerPresent(GetCurrentProcess(), &pbRemoteDebuggerPresent);
-        if (pbRemoteDebuggerPresent || IsDebuggerPresent()) {
-            OutputDebugString(tstr);
-        }
+        /* Output to debugger */
+        OutputDebugString(tstr);
        
         /* Screen output to stderr, if console was attached. */
         if (consoleAttached == 1) {
