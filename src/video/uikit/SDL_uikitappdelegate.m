@@ -27,6 +27,7 @@
 #include "SDL_hints.h"
 #include "../../SDL_hints_c.h"
 #include "SDL_system.h"
+#include "SDL_main.h"
 
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
