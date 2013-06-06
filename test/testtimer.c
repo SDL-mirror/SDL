@@ -16,6 +16,7 @@
 
 #if 1 /* FIXME: Rework this using the 2.0 API */
 #include <stdio.h>
+#include "SDL.h"
 
 int main(int argc, char *argv[])
 {
