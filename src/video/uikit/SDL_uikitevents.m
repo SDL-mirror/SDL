@@ -28,7 +28,6 @@
 #include "SDL_uikitevents.h"
 
 #import <Foundation/Foundation.h>
-#include "jumphack.h"
 
 static BOOL UIKit_EventPumpEnabled = YES;
 

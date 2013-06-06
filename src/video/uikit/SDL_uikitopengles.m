@@ -27,7 +27,6 @@
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
-#include "jumphack.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
