@@ -43,6 +43,11 @@ extern int SDL_HelperWindowDestroy(void);
 
 
 /* The initialized subsystems */
+#ifdef SDL_MAIN_NEEDED
+static SDL_bool SDL_MainIsReady = SDL_FALSE;
+#else
+static SDL_bool SDL_MainIsReady = SDL_TRUE;
+#endif
 static SDL_bool SDL_bInMainQuit = SDL_FALSE;
 static Uint8 SDL_SubsystemRefCount[ 32 ];
 
@@ -88,9 +93,20 @@ SDL_PrivateShouldQuitSubsystem(Uint32 subsystem) {
     return SDL_SubsystemRefCount[subsystem_index] == 1 || SDL_bInMainQuit;
 }
 
+void
+SDL_SetMainReady(void)
+{
+    SDL_MainIsReady = SDL_TRUE;
+}
+
 int
 SDL_InitSubSystem(Uint32 flags)
 {
+    if (!SDL_MainIsReady) {
+        SDL_SetError("Application didn't initialize properly, did you include SDL_main.h in the file containing your main() function?");
+        return -1;
+    }
+
 #if !SDL_TIMERS_DISABLED
     SDL_InitTicks();
 #endif

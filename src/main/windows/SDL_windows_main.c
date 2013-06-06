@@ -134,6 +134,8 @@ console_main(int argc, char *argv[])
 {
     int status;
 
+    SDL_SetMainReady();
+
     /* Run the application main() code */
     status = SDL_main(argc, argv);
 

@@ -37,7 +37,6 @@
 #undef main
 #endif
 
-extern int SDL_main(int argc, char *argv[]);
 static int forward_argc;
 static char **forward_argv;
 static int exit_status;
@@ -187,6 +186,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void)postFinishLaunch
 {
+    SDL_SetMainReady();
+
     /* run the user's application, passing argc and argv */
     SDL_iPhoneSetEventPump(SDL_TRUE);
     exit_status = SDL_main(forward_argc, forward_argv);

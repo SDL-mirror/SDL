@@ -72,6 +72,15 @@ extern C_LINKAGE int SDL_main(int argc, char *argv[]);
 extern "C" {
 #endif
 
+/*
+ *  This is called by the real SDL main function to let the rest of the
+ *  library know that initialization was done properly.
+ *
+ *  Calling this yourself without knowing what you're doing can cause
+ *  crashes and hard to diagnose problems with your application.
+ */
+extern DECLSPEC void SDL_SetMainReady(void);
+
 #ifdef __WIN32__
 
 /**
