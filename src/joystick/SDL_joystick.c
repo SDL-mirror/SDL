@@ -729,6 +729,12 @@ SDL_PrivateJoystickNeedsPolling()
 /* return the guid for this index */
 SDL_JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
 {
+    if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
+        SDL_JoystickGUID emptyGUID;
+        SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
+        SDL_zero( emptyGUID );
+        return emptyGUID;
+    }
     return SDL_SYS_JoystickGetDeviceGUID( device_index );
 }
 
