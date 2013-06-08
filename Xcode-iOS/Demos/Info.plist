@@ -24,5 +24,7 @@
 	<string>1.0</string>
 	<key>NSMainNibFile</key>
 	<string></string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array/>
 </dict>
 </plist>
