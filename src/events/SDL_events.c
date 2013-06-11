@@ -33,6 +33,9 @@
 #endif
 #include "../video/SDL_sysvideo.h"
 
+/* An arbitrary limit so we don't have unbounded growth */
+#define SDL_MAX_QUEUED_EVENTS   65535
+
 /* Public data -- the event filter */
 SDL_EventFilter SDL_EventOK = NULL;
 void *SDL_EventOKParam;
@@ -71,6 +74,7 @@ static struct
 {
     SDL_mutex *lock;
     volatile SDL_bool active;
+    volatile int count;
     SDL_EventEntry *head;
     SDL_EventEntry *tail;
     SDL_EventEntry *free;
@@ -128,6 +132,7 @@ SDL_StopEventLoop(void)
         SDL_free(wmmsg);
         wmmsg = next;
     }
+    SDL_EventQ.count = 0;
     SDL_EventQ.head = NULL;
     SDL_EventQ.tail = NULL;
     SDL_EventQ.free = NULL;
@@ -193,6 +198,11 @@ SDL_AddEvent(SDL_Event * event)
 {
     SDL_EventEntry *entry;
 
+    if (SDL_EventQ.count >= SDL_MAX_QUEUED_EVENTS) {
+        SDL_SetError("Event queue is full (%d events)", SDL_EventQ.count);
+        return 0;
+    }
+
     if (SDL_EventQ.free == NULL) {
         entry = (SDL_EventEntry *)SDL_malloc(sizeof(*entry));
         if (!entry) {
@@ -221,6 +231,7 @@ SDL_AddEvent(SDL_Event * event)
         entry->prev = NULL;
         entry->next = NULL;
     }
+    ++SDL_EventQ.count;
 
     return 1;
 }
@@ -247,6 +258,8 @@ SDL_CutEvent(SDL_EventEntry *entry)
 
     entry->next = SDL_EventQ.free;
     SDL_EventQ.free = entry;
+    SDL_assert(SDL_EventQ.count > 0);
+    --SDL_EventQ.count;
 }
 
 /* Lock the event queue, take a peep at it, and unlock it */
