@@ -206,6 +206,7 @@ SDL_AddEvent(SDL_Event * event)
     entry->event = *event;
     if (event->type == SDL_SYSWMEVENT) {
         entry->msg = *event->syswm.msg;
+        entry->event.syswm.msg = &entry->msg;
     }
 
     if (SDL_EventQ.tail) {
