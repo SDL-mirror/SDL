@@ -63,7 +63,7 @@ report_power(void)
 int
 main(int argc, char *argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) == -1) {
+    if (SDL_Init(0) == -1) {
         fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
         return 1;
     }

@@ -611,7 +611,7 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
 
     /* We ignore events if we don't have keyboard focus, except for button
      * release. */
-    if (event.type == SDL_JOYBUTTONDOWN && SDL_PrivateJoystickShouldIgnoreEvent()) {
+    if (state == SDL_PRESSED && SDL_PrivateJoystickShouldIgnoreEvent()) {
         return 0;
     }
 

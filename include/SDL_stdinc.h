@@ -359,7 +359,7 @@ SDL_FORCE_INLINE void SDL_memset4(void *dst, int val, size_t len)
 
 
 extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src, size_t len);
-#if defined(__MACOSX__)
+#if defined(__MACOSX__) && defined(HAVE_MEMCPY)
 SDL_FORCE_INLINE void *SDL_memcpy_inline(void *dst, const void *src, size_t len)
 {
     /* We can count on memcpy existing on Mac OS X and being well-tuned. */

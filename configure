@@ -16936,7 +16936,10 @@ SOURCES="$SOURCES $srcdir/src/audio/*.c"
 SOURCES="$SOURCES $srcdir/src/cpuinfo/*.c"
 SOURCES="$SOURCES $srcdir/src/events/*.c"
 SOURCES="$SOURCES $srcdir/src/file/*.c"
+SOURCES="$SOURCES $srcdir/src/haptic/*.c"
+SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 SOURCES="$SOURCES $srcdir/src/libm/*.c"
+SOURCES="$SOURCES $srcdir/src/power/*.c"
 SOURCES="$SOURCES $srcdir/src/render/*.c"
 SOURCES="$SOURCES $srcdir/src/render/*/*.c"
 SOURCES="$SOURCES $srcdir/src/stdlib/*.c"
@@ -17016,8 +17019,6 @@ if test x$enable_joystick != xyes; then
 
 $as_echo "#define SDL_JOYSTICK_DISABLED 1" >>confdefs.h
 
-else
-    SOURCES="$SOURCES $srcdir/src/joystick/*.c"
 fi
 # Check whether --enable-haptic was given.
 if test "${enable_haptic+set}" = set; then :
@@ -17030,8 +17031,6 @@ if test x$enable_haptic != xyes; then
 
 $as_echo "#define SDL_HAPTIC_DISABLED 1" >>confdefs.h
 
-else
-    SOURCES="$SOURCES $srcdir/src/haptic/*.c"
 fi
 # Check whether --enable-power was given.
 if test "${enable_power+set}" = set; then :
@@ -17044,8 +17043,6 @@ if test x$enable_power != xyes; then
 
 $as_echo "#define SDL_POWER_DISABLED 1" >>confdefs.h
 
-else
-    SOURCES="$SOURCES $srcdir/src/power/*.c"
 fi
 # Check whether --enable-threads was given.
 if test "${enable_threads+set}" = set; then :
