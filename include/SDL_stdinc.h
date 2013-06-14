@@ -241,57 +241,62 @@ char *alloca();
    couldn't if you had macros, you can link against a foreign build of SDL
    even if you configured differently, and you can drop the unconfigured SDL
    headers into a project without #defining HAVE_MALLOC (etc) and still link.
+
+   If you want to disable the inline functions and just use SDL's functions,
+   you can define SDL_STDINC_NO_INLINES before including this file.
 */
 
 extern DECLSPEC void *SDLCALL SDL_malloc(size_t size);
-#ifdef HAVE_MALLOC
+#if defined(HAVE_MALLOC) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void *SDL_malloc_inline(size_t size) { return malloc(size); }
 #define SDL_malloc SDL_malloc_inline
 #endif
 
 extern DECLSPEC void *SDLCALL SDL_calloc(size_t nmemb, size_t size);
-#ifdef HAVE_CALLOC
+#if defined(HAVE_CALLOC) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void *SDL_calloc_inline(size_t nmemb, size_t size) { return calloc(nmemb, size); }
 #define SDL_calloc SDL_calloc_inline
 #endif
 
 extern DECLSPEC void *SDLCALL SDL_realloc(void *mem, size_t size);
-#ifdef HAVE_REALLOC
+#if defined(HAVE_REALLOC) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void *SDL_realloc_inline(void *mem, size_t size) { return realloc(mem, size); }
 #define SDL_realloc SDL_realloc_inline
 #endif
 
 extern DECLSPEC void SDLCALL SDL_free(void *mem);
-#ifdef HAVE_FREE
+#if defined(HAVE_FREE) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void SDL_free_inline(void *mem) { free(mem); }
 #define SDL_free SDL_free_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_getenv(const char *name);
-#ifdef HAVE_GETENV
+#if defined(HAVE_GETENV) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_getenv_inline(const char *name) { return getenv(name); }
 #define SDL_getenv SDL_getenv_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_setenv(const char *name, const char *value, int overwrite);
-#ifdef HAVE_SETENV
+#if defined(HAVE_SETENV) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE int SDL_setenv_inline(const char *name, const char *value, int overwrite) { return setenv(name, value, overwrite); }
 #define SDL_setenv SDL_setenv_inline
 #endif
 
 extern DECLSPEC void SDLCALL SDL_qsort(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *));
-#ifdef HAVE_QSORT
+#if defined(HAVE_QSORT) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void SDL_qsort_inline(void *base, size_t nmemb, size_t size, int (*compare) (const void *, const void *)) { qsort(base, nmemb, size, compare); }
 #define SDL_qsort SDL_qsort_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_abs(int x);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_ABS
 SDL_FORCE_INLINE int SDL_abs_inline(int x) { return abs(x); }
 #else
 SDL_FORCE_INLINE int SDL_abs_inline(int x) { return ((x) < 0 ? -(x) : (x)); }
 #endif
 #define SDL_abs SDL_abs_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 /* !!! FIXME: these have side effects. You probably shouldn't use them. */
 /* !!! FIXME: Maybe we do forceinline functions of SDL_mini, SDL_minf, etc? */
@@ -302,6 +307,7 @@ extern DECLSPEC int SDLCALL SDL_isdigit(int x);
 extern DECLSPEC int SDLCALL SDL_isspace(int x);
 extern DECLSPEC int SDLCALL SDL_toupper(int x);
 extern DECLSPEC int SDLCALL SDL_tolower(int x);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_CTYPE_H
 SDL_FORCE_INLINE int SDL_isdigit_inline(int x) { return isdigit(x); }
 SDL_FORCE_INLINE int SDL_isspace_inline(int x) { return isspace(x); }
@@ -317,9 +323,10 @@ SDL_FORCE_INLINE int SDL_tolower_inline(int x) { return ((x) >= 'A') && ((x) <= 
 #define SDL_isspace SDL_isspace_inline
 #define SDL_toupper SDL_toupper_inline
 #define SDL_tolower SDL_tolower_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC void *SDLCALL SDL_memset(void *dst, int c, size_t len);
-#ifdef HAVE_MEMSET
+#if defined(HAVE_MEMSET) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void *SDL_memset_inline(void *dst, int c, size_t len) { return memset(dst, c, len); }
 #define SDL_memset SDL_memset_inline
 #endif
@@ -359,6 +366,7 @@ SDL_FORCE_INLINE void SDL_memset4(void *dst, int val, size_t len)
 
 
 extern DECLSPEC void *SDLCALL SDL_memcpy(void *dst, const void *src, size_t len);
+#if !defined(SDL_STDINC_NO_INLINES)
 #if defined(__MACOSX__) && defined(HAVE_MEMCPY)
 SDL_FORCE_INLINE void *SDL_memcpy_inline(void *dst, const void *src, size_t len)
 {
@@ -404,6 +412,7 @@ SDL_FORCE_INLINE void *SDL_memcpy_inline(void *dst, const void *src, size_t len)
 }
 #define SDL_memcpy SDL_memcpy_inline
 #endif
+#endif /* !SDL_STDINC_NO_INLINES */
 
 
 SDL_FORCE_INLINE void *SDL_memcpy4(void *dst, const void *src, size_t dwords)
@@ -426,43 +435,43 @@ SDL_FORCE_INLINE void *SDL_memcpy4(void *dst, const void *src, size_t dwords)
 }
 
 extern DECLSPEC void *SDLCALL SDL_memmove(void *dst, const void *src, size_t len);
-#ifdef HAVE_MEMMOVE
+#if defined(HAVE_MEMMOVE) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE void *SDL_memmove_inline(void *dst, const void *src, size_t len) { return memmove(dst, src, len); }
 #define SDL_memmove SDL_memmove_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_memcmp(const void *s1, const void *s2, size_t len);
-#ifdef HAVE_MEMCMP
+#if defined(HAVE_MEMCMP) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE int SDL_memcmp_inline(const void *s1, const void *s2, size_t len) { return memcmp(s1, s2, len); }
 #define SDL_memcmp SDL_memcmp_inline
 #endif
 
 extern DECLSPEC size_t SDLCALL SDL_strlen(const char *str);
-#ifdef HAVE_STRLEN
+#if defined(HAVE_STRLEN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_strlen_inline(const char *str) { return strlen(str); }
 #define SDL_strlen SDL_strlen_inline
 #endif
 
 extern DECLSPEC size_t SDLCALL SDL_wcslen(const wchar_t *wstr);
-#ifdef HAVE_WCSLEN
+#if defined(HAVE_WCSLEN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_wcslen_inline(const wchar_t *wstr) { return wcslen(wstr); }
 #define SDL_wcslen SDL_wcslen_inline
 #endif
 
 extern DECLSPEC size_t SDLCALL SDL_wcslcpy(wchar_t *dst, const wchar_t *src, size_t maxlen);
-#ifdef HAVE_WCSLCPY
+#if defined(HAVE_WCSLCPY) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_wcslcpy_inline(wchar_t *dst, const wchar_t *src, size_t maxlen) { return wcslcpy(dst, src, maxlen); }
 #define SDL_wcslcpy SDL_wcslcpy_inline
 #endif
 
 extern DECLSPEC size_t SDLCALL SDL_wcslcat(wchar_t *dst, const wchar_t *src, size_t maxlen);
-#ifdef HAVE_WCSLCAT
+#if defined(HAVE_WCSLCAT) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_wcslcat_inline(wchar_t *dst, const wchar_t *src, size_t maxlen) { return wcslcat(dst, src, maxlen); }
 #define SDL_wcslcat SDL_wcslcat_inline
 #endif
 
 extern DECLSPEC size_t SDLCALL SDL_strlcpy(char *dst, const char *src, size_t maxlen);
-#ifdef HAVE_STRLCPY
+#if defined(HAVE_STRLCPY) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_strlcpy_inline(char *dst, const char *src, size_t maxlen) { return strlcpy(dst, src, maxlen); }
 #define SDL_strlcpy SDL_strlcpy_inline
 #else
@@ -471,36 +480,37 @@ SDL_FORCE_INLINE size_t SDL_strlcpy_inline(char *dst, const char *src, size_t ma
 extern DECLSPEC size_t SDLCALL SDL_utf8strlcpy(char *dst, const char *src, size_t dst_bytes);
 
 extern DECLSPEC size_t SDLCALL SDL_strlcat(char *dst, const char *src, size_t maxlen);
-#ifdef HAVE_STRLCAT
+#if defined(HAVE_STRLCAT) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE size_t SDL_strlcat_inline(char *dst, const char *src, size_t maxlen) { return strlcat(dst, src, maxlen); }
 #define SDL_strlcat SDL_strlcat_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strdup(const char *str);
-#ifdef HAVE_STRDUP
+#if defined(HAVE_STRDUP) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_strdup_inline(const char *str) { return strdup(str); }
 #define SDL_strdup SDL_strdup_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strrev(char *str);
-#ifdef HAVE__STRREV
+#if defined(HAVE__STRREV) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_strrev_inline(char *str) { return _strrev(str); }
 #define SDL_strrev SDL_strrev_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strupr(char *str);
-#ifdef HAVE__STRUPR
+#if defined(HAVE__STRUPR) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_strupr_inline(char *str) { return _strupr(str); }
 #define SDL_strupr SDL_strupr_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strlwr(char *str);
-#ifdef HAVE__STRLWR
+#if defined(HAVE__STRLWR) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_strlwr_inline(char *str) { return _strlwr(str); }
 #define SDL_strlwr SDL_strlwr_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_strchr(const char *str, int c);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_STRCHR
 SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return SDL_const_cast(char*,strchr(str, c)); }
 #define SDL_strchr SDL_strchr_inline
@@ -508,8 +518,10 @@ SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return SDL_co
 SDL_FORCE_INLINE char *SDL_strchr_inline(const char *str, int c) { return SDL_const_cast(char*,index(str, c)); }
 #define SDL_strchr SDL_strchr_inline
 #endif
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC char *SDLCALL SDL_strrchr(const char *str, int c);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_STRRCHR
 SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return SDL_const_cast(char*,strrchr(str, c)); }
 #define SDL_strrchr SDL_strrchr_inline
@@ -517,114 +529,124 @@ SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return SDL_c
 SDL_FORCE_INLINE char *SDL_strrchr_inline(const char *str, int c) { return SDL_const_cast(char*,rindex(str, c)); }
 #define SDL_strrchr SDL_strrchr_inline
 #endif
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC char *SDLCALL SDL_strstr(const char *haystack, const char *needle);
-#ifdef HAVE_STRSTR
+#if defined(HAVE_STRSTR) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_strstr_inline(const char *haystack, const char *needle) { return SDL_const_cast(char*,strstr(haystack, needle)); }
 #define SDL_strstr SDL_strstr_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_ltoa(long value, char *str, int radix);
-#ifdef HAVE__LTOA
+#if defined(HAVE__LTOA) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_ltoa_inline(long value, char *str, int radix) { return _ltoa(value, str, radix); }
 #define SDL_ltoa SDL_ltoa_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_itoa(int value, char *str, int radix);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_ITOA
 SDL_FORCE_INLINE char *SDL_itoa_inline(int value, char *str, int radix) { return itoa(value, str, radix); }
 #else
 SDL_FORCE_INLINE char *SDL_itoa_inline(int value, char *str, int radix) { return SDL_ltoa((long)value, str, radix); }
 #endif
 #define SDL_itoa SDL_itoa_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC char *SDLCALL SDL_ultoa(unsigned long value, char *str, int radix);
-#ifdef HAVE__ULTOA
+#if defined(HAVE__ULTOA) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_ultoa_inline(unsigned long value, char *str, int radix) { return _ultoa(value, str, radix); }
 #define SDL_ultoa SDL_ultoa_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_uitoa(unsigned int value, char *str, int radix);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE__UITOA
 SDL_FORCE_INLINE char *SDL_uitoa_inline(unsigned int value, char *str, int radix) { return _uitoa(value, str, radix); }
 #else
 SDL_FORCE_INLINE char *SDL_uitoa_inline(unsigned int value, char *str, int radix) { return SDL_ultoa((unsigned long)value, str, radix); }
 #endif
 #define SDL_uitoa SDL_uitoa_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 
 extern DECLSPEC long SDLCALL SDL_strtol(const char *str, char **endp, int base);
-#ifdef HAVE_STRTOL
+#if defined(HAVE_STRTOL) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE long SDL_strtol_inline(const char *str, char **endp, int base) { return strtol(str, endp, base); }
 #define SDL_strtol SDL_strtol_inline
 #endif
 
 extern DECLSPEC unsigned long SDLCALL SDL_strtoul(const char *str, char **endp, int base);
-#ifdef HAVE_STRTOUL
+#if defined(HAVE_STRTOUL) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE unsigned long SDLCALL SDL_strtoul_inline(const char *str, char **endp, int base) { return strtoul(str, endp, base); }
 #define SDL_strtoul SDL_strtoul_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_lltoa(Sint64 value, char *str, int radix);
-#ifdef HAVE__I64TOA
+#if defined(HAVE__I64TOA) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_lltoa_inline(Sint64 value, char *str, int radix) { return _i64toa(value, str, radix); }
 #define SDL_lltoa SDL_lltoa_inline
 #endif
 
 extern DECLSPEC char *SDLCALL SDL_ulltoa(Uint64 value, char *str, int radix);
-#ifdef HAVE__UI64TOA
+#if defined(HAVE__UI64TOA) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE char *SDL_ulltoa_inline(Uint64 value, char *str, int radix) { return _ui64toa(value, str, radix); }
 #define SDL_ulltoa SDL_ulltoa_inline
 #endif
 
 extern DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *str, char **endp, int base);
-#ifdef HAVE_STRTOLL
+#if defined(HAVE_STRTOLL) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE Sint64 SDL_strtoll_inline(const char *str, char **endp, int base) { return strtoll(str, endp, base); }
 #define SDL_strtoll SDL_strtoll_inline
 #endif
 
 extern DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *str, char **endp, int base);
-#ifdef HAVE_STRTOULL
+#if defined(HAVE_STRTOULL) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE Uint64 SDL_strtoull_inline(const char *str, char **endp, int base) { return strtoull(str, endp, base); }
 #define SDL_strtoull SDL_strtoull_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_strtod(const char *str, char **endp);
-#ifdef HAVE_STRTOD
+#if defined(HAVE_STRTOD) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_strtod_inline(const char *str, char **endp) { return strtod(str, endp); }
 #define SDL_strtod SDL_strtod_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_atoi(const char *str);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_ATOI
 SDL_FORCE_INLINE int SDL_atoi_inline(const char *str) { return atoi(str); }
 #else
 SDL_FORCE_INLINE int SDL_atoi_inline(const char *str) { return SDL_strtol(str, NULL, 0); }
 #endif
 #define SDL_atoi SDL_atoi_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC double SDLCALL SDL_atof(const char *str);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_ATOF
 SDL_FORCE_INLINE double SDL_atof_inline(const char *str) { return (double) atof(str); }
 #else
 SDL_FORCE_INLINE double SDL_atof_inline(const char *str) { return SDL_strtod(str, NULL); }
 #endif
 #define SDL_atof SDL_atof_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 
 extern DECLSPEC int SDLCALL SDL_strcmp(const char *str1, const char *str2);
-#ifdef HAVE_STRCMP
+#if defined(HAVE_STRCMP) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE int SDL_strcmp_inline(const char *str1, const char *str2) { return strcmp(str1, str2); }
 #define SDL_strcmp SDL_strcmp_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_strncmp(const char *str1, const char *str2, size_t maxlen);
-#ifdef HAVE_STRNCMP
+#if defined(HAVE_STRNCMP) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE int SDL_strncmp_inline(const char *str1, const char *str2, size_t maxlen) { return strncmp(str1, str2, maxlen); }
 #define SDL_strncmp SDL_strncmp_inline
 #endif
 
 extern DECLSPEC int SDLCALL SDL_strcasecmp(const char *str1, const char *str2);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_STRCASECMP
 SDL_FORCE_INLINE int SDL_strcasecmp_inline(const char *str1, const char *str2) { return strcasecmp(str1, str2); }
 #define SDL_strcasecmp SDL_strcasecmp_inline
@@ -632,8 +654,10 @@ SDL_FORCE_INLINE int SDL_strcasecmp_inline(const char *str1, const char *str2) {
 SDL_FORCE_INLINE int SDL_strcasecmp_inline(const char *str1, const char *str2) { return _stricmp(str1, str2); }
 #define SDL_strcasecmp SDL_strcasecmp_inline
 #endif
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1, const char *str2, size_t len);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_STRNCASECMP
 SDL_FORCE_INLINE int SDL_strncasecmp_inline(const char *str1, const char *str2, size_t len) { return strncasecmp(str1, str2, len); }
 #define SDL_strncasecmp SDL_strncasecmp_inline
@@ -641,6 +665,7 @@ SDL_FORCE_INLINE int SDL_strncasecmp_inline(const char *str1, const char *str2, 
 SDL_FORCE_INLINE int SDL_strncasecmp_inline(const char *str1, const char *str2, size_t len) { return _strnicmp(str1, str2, len); }
 #define SDL_strncasecmp SDL_strncasecmp_inline
 #endif
+#endif /* !SDL_STDINC_NO_INLINES */
 
 /* Not doing SDL_*_inline functions for these, because of the varargs. */
 extern DECLSPEC int SDLCALL SDL_sscanf(const char *text, const char *fmt, ...);
@@ -654,7 +679,7 @@ extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen, const char *
 #endif
 
 extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap);
-#ifdef HAVE_VSNPRINTF
+#if defined(HAVE_VSNPRINTF) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE int SDL_vsnprintf_inline(char *text, size_t maxlen, const char *fmt, va_list ap) { return vsnprintf(text, maxlen, fmt, ap); }
 #define SDL_vsnprintf SDL_vsnprintf_inline
 #endif
@@ -666,91 +691,97 @@ SDL_FORCE_INLINE int SDL_vsnprintf_inline(char *text, size_t maxlen, const char 
 #endif
 
 extern DECLSPEC double SDLCALL SDL_atan(double x);
-#ifdef HAVE_ATAN
+#if defined(HAVE_ATAN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_atan_inline(double x) { return atan(x); }
 #define SDL_atan SDL_atan_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_atan2(double x, double y);
-#ifdef HAVE_ATAN2
+#if defined(HAVE_ATAN2) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_atan2_inline(double x, double y) { return atan2(x, y); }
 #define SDL_atan2 SDL_atan2_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_ceil(double x);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_CEIL
 SDL_FORCE_INLINE double SDL_ceil_inline(double x) { return ceil(x); }
 #else
 SDL_FORCE_INLINE double SDL_ceil_inline(double x) { return (double)(int)((x)+0.5); }
 #endif
 #define SDL_ceil SDL_ceil_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC double SDLCALL SDL_copysign(double x, double y);
-#ifdef HAVE_COPYSIGN
+#if defined(HAVE_COPYSIGN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_copysign_inline(double x, double y) { return copysign(x, y); }
 #define SDL_copysign SDL_copysign_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_cos(double x);
-#ifdef HAVE_COS
+#if defined(HAVE_COS) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_cos_inline(double x) { return cos(x); }
 #define SDL_cos SDL_cos_inline
 #endif
 
 extern DECLSPEC float SDLCALL SDL_cosf(float x);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_COSF
 SDL_FORCE_INLINE float SDL_cosf_inline(float x) { return cosf(x); }
 #else
 SDL_FORCE_INLINE float SDL_cosf_inline(float x) { return (float)SDL_cos((double)x); }
 #endif
 #define SDL_cosf SDL_cosf_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC double SDLCALL SDL_fabs(double x);
-#ifdef HAVE_FABS
+#if defined(HAVE_FABS) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_fabs_inline(double x) { return fabs(x); }
 #define SDL_fabs SDL_fabs_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_floor(double x);
-#ifdef HAVE_FLOOR
+#if defined(HAVE_FLOOR) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_floor_inline(double x) { return floor(x); }
 #define SDL_floor SDL_floor_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_log(double x);
-#ifdef HAVE_LOG
+#if defined(HAVE_LOG) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_log_inline(double x) { return log(x); }
 #define SDL_log SDL_log_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_pow(double x, double y);
-#ifdef HAVE_POW
+#if defined(HAVE_POW) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_pow_inline(double x, double y) { return pow(x, y); }
 #define SDL_pow SDL_pow_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_scalbn(double x, int n);
-#ifdef HAVE_SCALBN
+#if defined(HAVE_SCALBN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_scalbn_inline(double x, int n) { return scalbn(x, n); }
 #define SDL_scalbn SDL_scalbn_inline
 #endif
 
 extern DECLSPEC double SDLCALL SDL_sin(double x);
-#ifdef HAVE_SIN
+#if defined(HAVE_SIN) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_sin_inline(double x) { return sin(x); }
 #define SDL_sin SDL_sin_inline
 #endif
 
 extern DECLSPEC float SDLCALL SDL_sinf(float x);
+#ifndef SDL_STDINC_NO_INLINES
 #ifdef HAVE_SINF
 SDL_FORCE_INLINE float SDL_sinf_inline(float x) { return sinf(x); }
 #else
 SDL_FORCE_INLINE float SDL_sinf_inline(float x) { return (float)SDL_sin((double)x); }
 #endif
 #define SDL_sinf SDL_sinf_inline
+#endif /* !SDL_STDINC_NO_INLINES */
 
 extern DECLSPEC double SDLCALL SDL_sqrt(double x);
-#ifdef HAVE_SQRT
+#if defined(HAVE_SQRT) && !defined(SDL_STDINC_NO_INLINES)
 SDL_FORCE_INLINE double SDL_sqrt_inline(double x) { return sqrt(x); }
 #define SDL_sqrt SDL_sqrt_inline
 #endif
