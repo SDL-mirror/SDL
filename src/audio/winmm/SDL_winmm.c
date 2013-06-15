@@ -162,16 +162,6 @@ WINMM_CloseDevice(_THIS)
             this->hidden->audio_sem = 0;
         }
 
-        if (this->hidden->hin) {
-            waveInClose(this->hidden->hin);
-            this->hidden->hin = 0;
-        }
-
-        if (this->hidden->hout) {
-            waveOutClose(this->hidden->hout);
-            this->hidden->hout = 0;
-        }
-
         /* Clean up mixing buffers */
         for (i = 0; i < NUM_BUFFERS; ++i) {
             if (this->hidden->wavebuf[i].dwUser != 0xFFFF) {
@@ -186,6 +176,16 @@ WINMM_CloseDevice(_THIS)
             /* Free raw mixing buffer */
             SDL_free(this->hidden->mixbuf);
             this->hidden->mixbuf = NULL;
+        }
+
+        if (this->hidden->hin) {
+            waveInClose(this->hidden->hin);
+            this->hidden->hin = 0;
+        }
+
+        if (this->hidden->hout) {
+            waveOutClose(this->hidden->hout);
+            this->hidden->hout = 0;
         }
 
         SDL_free(this->hidden);

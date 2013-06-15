@@ -77,15 +77,17 @@ WIN_SetClipboardText(_THIS, const char *text)
         hMem = GlobalAlloc(GMEM_MOVEABLE, size);
         if (hMem) {
             LPTSTR dst = (LPTSTR)GlobalLock(hMem);
-            /* Copy the text over, adding carriage returns as necessary */
-            for (i = 0; tstr[i]; ++i) {
-                if (tstr[i] == '\n' && (i == 0 || tstr[i-1] != '\r')) {
-                    *dst++ = '\r';
+            if (dst) {
+                /* Copy the text over, adding carriage returns as necessary */
+                for (i = 0; tstr[i]; ++i) {
+                    if (tstr[i] == '\n' && (i == 0 || tstr[i-1] != '\r')) {
+                        *dst++ = '\r';
+                    }
+                    *dst++ = tstr[i];
                 }
-                *dst++ = tstr[i];
+                *dst = 0;
+                GlobalUnlock(hMem);
             }
-            *dst = 0;
-            GlobalUnlock(hMem);
 
             EmptyClipboard();
             if (!SetClipboardData(TEXT_FORMAT, hMem)) {

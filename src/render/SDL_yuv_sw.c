@@ -1202,7 +1202,11 @@ SDL_SW_LockYUVTexture(SDL_SW_YUVTexture * swdata, const SDL_Rect * rect,
         break;
     }
 
-    *pixels = swdata->planes[0] + rect->y * swdata->pitches[0] + rect->x * 2;
+    if (rect) {
+        *pixels = swdata->planes[0] + rect->y * swdata->pitches[0] + rect->x * 2;
+    } else {
+        *pixels = swdata->planes[0];
+    }
     *pitch = swdata->pitches[0];
     return 0;
 }
