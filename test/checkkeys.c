@@ -107,24 +107,6 @@ PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
                 SDL_GetScancodeName(sym->scancode),
                 pressed ? "pressed " : "released");
     }
-
-    /* Print the translated character, if one exists */
-    if (sym->unicode) {
-        /* Is it a control-character? */
-        if (sym->unicode < ' ') {
-            print_string(&spot, &left, " (^%c)", sym->unicode + '@');
-        } else {
-#ifdef UNICODE
-            print_string(&spot, &left, " (%c)", sym->unicode);
-#else
-            /* This is a Latin-1 program, so only show 8-bits */
-            if (!(sym->unicode & 0xFF00))
-                print_string(&spot, &left, " (%c)", sym->unicode);
-            else
-                print_string(&spot, &left, " (0x%X)", sym->unicode);
-#endif
-        }
-    }
     print_modifiers(&spot, &left);
     if (repeat) {
         print_string(&spot, &left, " (repeat)");
