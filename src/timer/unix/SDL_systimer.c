@@ -66,10 +66,10 @@ SDL_StartTicks(void)
         has_monotonic_time = SDL_TRUE;
     } else
 #elif defined(__APPLE__)
-    start_mach = mach_absolute_time();
     kern_return_t ret = mach_timebase_info(&mach_base_info);
     if (ret == 0) {
         has_monotonic_time = SDL_TRUE;
+        start_mach = mach_absolute_time();
     } else
 #endif
     {
@@ -85,12 +85,11 @@ SDL_GetTicks(void)
 #if HAVE_CLOCK_GETTIME
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        ticks =
-            (now.tv_sec - start_ts.tv_sec) * 1000 + (now.tv_nsec -
+        ticks = (now.tv_sec - start_ts.tv_sec) * 1000 + (now.tv_nsec -
                                                  start_ts.tv_nsec) / 1000000;
 #elif defined(__APPLE__)
         uint64_t now = mach_absolute_time();
-        ticks = (now - start_mach) * mach_base_info.numer / mach_base_info.denom / 1000000;
+        ticks = (((now - start_mach) * mach_base_info.numer) / mach_base_info.denom) / 1000000;
 #endif
     } else {
         struct timeval now;
@@ -136,7 +135,10 @@ SDL_GetPerformanceFrequency(void)
 #if HAVE_CLOCK_GETTIME
         return 1000000000;
 #elif defined(__APPLE__)
-        return mach_base_info.denom / mach_base_info.numer * 1000000;
+        Uint64 freq = mach_base_info.numer;
+        freq *= 1000000000;
+        freq /= mach_base_info.denom;
+        return freq;
 #endif
     } else {
         return 1000000;
