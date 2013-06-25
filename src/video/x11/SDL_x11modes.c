@@ -689,9 +689,11 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
 
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     if (data->use_xinerama) {
-        /* Add the full (both screens combined) xinerama mode only on the display that starts at 0,0 */
-        if (!data->xinerama_info.x_org && !data->xinerama_info.y_org &&
+        if (data->use_vidmode && !data->xinerama_info.x_org && !data->xinerama_info.y_org &&
            (screen_w > data->xinerama_info.width || screen_h > data->xinerama_info.height)) {
+            /* Add the full (both screens combined) xinerama mode only on the display that starts at 0,0
+             * if we're using vidmode.
+             */
             mode.w = screen_w;
             mode.h = screen_h;
             mode.refresh_rate = 0;
@@ -702,6 +704,20 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
             mode.driverdata = modedata;
             SDL_AddDisplayMode(sdl_display, &mode);
         }
+        else
+        {
+            /* Add the current mode of each monitor otherwise */
+            mode.w = data->xinerama_info.width;
+            mode.h = data->xinerama_info.height;
+            mode.refresh_rate = 0;
+            modedata = (SDL_DisplayModeData *) SDL_calloc(1, sizeof(SDL_DisplayModeData));
+            if (modedata) {
+                *modedata = *(SDL_DisplayModeData *)sdl_display->desktop_mode.driverdata;
+            }
+            mode.driverdata = modedata;
+            SDL_AddDisplayMode(sdl_display, &mode);
+        }
+
     }
 #endif /* SDL_VIDEO_DRIVER_X11_XINERAMA */
 
