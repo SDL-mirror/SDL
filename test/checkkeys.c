@@ -117,7 +117,15 @@ PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
 static void
 PrintText(char *text)
 {
-    SDL_Log("Text: %s\n", text);
+    unsigned char *spot, expanded[1024];
+
+    expanded[0] = '\0';
+    for ( spot = text; *spot; ++spot )
+    {
+        size_t length = SDL_strlen(expanded);
+        SDL_snprintf(expanded + length, sizeof(expanded) - length, "\\x%.2x", *spot);
+    }
+    SDL_Log("Text (%s): \"%s%s\"\n", expanded, *text == '"' ? "\\" : "", text);
 }
 
 int
