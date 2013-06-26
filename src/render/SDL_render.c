@@ -1739,11 +1739,13 @@ int SDL_GL_BindTexture(SDL_Texture *texture, float *texw, float *texh)
 
     CHECK_TEXTURE_MAGIC(texture, -1);
     renderer = texture->renderer;
-    if (renderer && renderer->GL_BindTexture) {
+    if (texture->native) {
+        return SDL_GL_BindTexture(texture->native, texw, texh);
+    } else if (renderer && renderer->GL_BindTexture) {
         return renderer->GL_BindTexture(renderer, texture, texw, texh);
+    } else {
+        return SDL_Unsupported();
     }
-
-    return SDL_Unsupported();
 }
 
 int SDL_GL_UnbindTexture(SDL_Texture *texture)
