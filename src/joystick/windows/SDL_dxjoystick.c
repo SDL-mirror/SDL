@@ -1507,9 +1507,9 @@ SDL_SYS_JoystickUpdate_XInput(SDL_Joystick * joystick)
         XINPUT_STATE_EX *pXInputStatePrev = &joystick->hwdata->XInputState[joystick->hwdata->currentXInputSlot ^ 1];
 
         SDL_PrivateJoystickAxis( joystick, 0, (Sint16)pXInputState->Gamepad.sThumbLX );
-        SDL_PrivateJoystickAxis( joystick, 1, (Sint16)(-pXInputState->Gamepad.sThumbLY) );
+        SDL_PrivateJoystickAxis( joystick, 1, (Sint16)(-SDL_max(-32767, pXInputState->Gamepad.sThumbLY)) );
         SDL_PrivateJoystickAxis( joystick, 2, (Sint16)pXInputState->Gamepad.sThumbRX );
-        SDL_PrivateJoystickAxis( joystick, 3, (Sint16)(-pXInputState->Gamepad.sThumbRY) );
+        SDL_PrivateJoystickAxis( joystick, 3, (Sint16)(-SDL_max(-32767, pXInputState->Gamepad.sThumbRY)) );
         SDL_PrivateJoystickAxis( joystick, 4, (Sint16)(((int)pXInputState->Gamepad.bLeftTrigger*65535/255) - 32768));
         SDL_PrivateJoystickAxis( joystick, 5, (Sint16)(((int)pXInputState->Gamepad.bRightTrigger*65535/255) - 32768));
 
