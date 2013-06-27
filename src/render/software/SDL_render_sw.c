@@ -118,6 +118,7 @@ SW_ActivateRenderer(SDL_Renderer * renderer)
             renderer->viewport.h = surface->h;
 
             SW_UpdateViewport(renderer);
+            SW_UpdateClipRect(renderer);
         }
     }
     return data->surface;
@@ -346,13 +347,16 @@ SW_UpdateViewport(SDL_Renderer * renderer)
 static int
 SW_UpdateClipRect(SDL_Renderer * renderer)
 {
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Surface *surface = data->surface;
     const SDL_Rect *rect = &renderer->clip_rect;
-    SDL_Surface* framebuffer = (SDL_Surface *) renderer->driverdata;
 
-    if (!SDL_RectEmpty(rect)) {
-        SDL_SetClipRect(framebuffer, rect);
-    } else {
-        SDL_SetClipRect(framebuffer, NULL);
+    if (surface) {
+        if (!SDL_RectEmpty(rect)) {
+            SDL_SetClipRect(surface, rect);
+        } else {
+            SDL_SetClipRect(surface, NULL);
+        }
     }
     return 0;
 }
