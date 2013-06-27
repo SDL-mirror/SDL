@@ -637,7 +637,7 @@ SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 int
 SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    int i, ret;
+    int i;
     HRESULT idret;
     DIDEVICEINSTANCE joy_instance;
     joy_instance.dwSize = sizeof(DIDEVICEINSTANCE);
