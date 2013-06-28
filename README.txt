@@ -22,7 +22,7 @@ Go, Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
 Pike, Pliant, Python, Ruby, and Smalltalk.
 
 This library is distributed under the zlib license, which can be found
-in the file "COPYING".
+in the file "COPYING.txt".
 
 The best way to learn how to use SDL is to check out the header files in
 the "include" subdirectory and the programs in the "test" subdirectory.
