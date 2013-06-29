@@ -22,6 +22,7 @@
 
 /* This is the joystick API for Simple DirectMedia Layer */
 
+#include "SDL.h"
 #include "SDL_events.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_assert.h"
@@ -31,17 +32,25 @@
 #include "../events/SDL_events_c.h"
 #endif
 
+static SDL_bool SDL_joystick_allows_background_events = SDL_FALSE;
 static SDL_Joystick *SDL_joysticks = NULL;
 static SDL_Joystick *SDL_updating_joystick = NULL;
 
 int
 SDL_JoystickInit(void)
 {
+    const char *hint;
     int status;
+	
+    /* Check to see if we should allow joystick events while in the background */
+    hint = SDL_GetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
+    if (hint && *hint == '1') {
+        SDL_joystick_allows_background_events = SDL_TRUE;
+    }
 
     status = SDL_SYS_JoystickInit();
     if (status >= 0) {
-      status = 0;
+        status = 0;
     }
     return (status);
 }
@@ -455,17 +464,22 @@ SDL_JoystickQuit(void)
 static SDL_bool
 SDL_PrivateJoystickShouldIgnoreEvent()
 {
-    const char *hint;
-    if (SDL_GetKeyboardFocus() != NULL) {
+    if (SDL_joystick_allows_background_events)
+    {
         return SDL_FALSE;
     }
 
-    hint = SDL_GetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
-    if (hint && *hint == '1') {
-        return SDL_FALSE;
+    if (SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_GetKeyboardFocus() == NULL) {
+            // Video is initialized and we don't have focus, ignore the event.
+            return SDL_TRUE;
+        } else {
+            return SDL_FALSE;
+        }
     }
 
-    return SDL_TRUE;
+    // Video subsystem wasn't initialized, always allow the event
+    return SDL_FALSE;
 }
 
 /* These are global for SDL_sysjoystick.c and SDL_events.c */
