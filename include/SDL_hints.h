@@ -48,9 +48,9 @@ extern "C" {
 #endif
 
 /**
- *  \brief  A variable controlling how 3D acceleration is used to accelerate the SDL 1.2 screen surface.
+ *  \brief  A variable controlling how 3D acceleration is used to accelerate the SDL screen surface.
  *
- *  SDL can try to accelerate the SDL 1.2 screen surface by using streaming
+ *  SDL can try to accelerate the SDL screen surface by using streaming
  *  textures with a 3D rendering engine.  This variable controls whether and
  *  how this is done.
  *
@@ -107,7 +107,7 @@ extern "C" {
 #define SDL_HINT_RENDER_SCALE_QUALITY       "SDL_RENDER_SCALE_QUALITY"
 
 /**
- *  \brief  A variable controlling whether updates to the SDL 1.2 screen surface should be synchronized with the vertical refresh, to avoid tearing.
+ *  \brief  A variable controlling whether updates to the SDL screen surface should be synchronized with the vertical refresh, to avoid tearing.
  *
  *  This variable can be set to the following values:
  *    "0"       - Disable vsync

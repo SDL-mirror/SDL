@@ -412,7 +412,9 @@ typedef struct SDL_MultiGestureEvent
 } SDL_MultiGestureEvent;
 
 
-/* (event.dgesture.*) */
+/**
+ * \brief Dollar Gesture Event (event.dgesture.*)
+ */
 typedef struct SDL_DollarGestureEvent
 {
     Uint32 type;        /**< ::SDL_DOLLARGESTURE */

@@ -774,7 +774,6 @@ SDL_SendKeyboardKey(Uint8 state, SDL_Scancode scancode)
         event.key.keysym.scancode = scancode;
         event.key.keysym.sym = keyboard->keymap[scancode];
         event.key.keysym.mod = modstate;
-        event.key.keysym.unicode = 0;
         event.key.windowID = keyboard->focus ? keyboard->focus->id : 0;
         posted = (SDL_PushEvent(&event) > 0);
     }

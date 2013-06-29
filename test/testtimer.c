@@ -14,16 +14,6 @@
    platform
 */
 
-#if 1 /* FIXME: Rework this using the 2.0 API */
-#include <stdio.h>
-#include "SDL.h"
-
-int main(int argc, char *argv[])
-{
-    printf("FIXME\n");
-    return 0;
-}
-#else
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -34,7 +24,7 @@ int main(int argc, char *argv[])
 static int ticks = 0;
 
 static Uint32 SDLCALL
-ticktock(Uint32 interval)
+ticktock(Uint32 interval, void *param)
 {
     ++ticks;
     return (interval);
@@ -52,6 +42,7 @@ main(int argc, char *argv[])
 {
     int i, desired;
     SDL_TimerID t1, t2, t3;
+    Uint32 start32, now32;
     Uint64 start, now;
 
     if (SDL_Init(SDL_INIT_TIMER) < 0) {
@@ -67,14 +58,14 @@ main(int argc, char *argv[])
     if (desired == 0) {
         desired = DEFAULT_RESOLUTION;
     }
-    SDL_SetTimer(desired, ticktock);
+    t1 = SDL_AddTimer(desired, ticktock, NULL);
 
     /* Wait 10 seconds */
     printf("Waiting 10 seconds\n");
     SDL_Delay(10 * 1000);
 
     /* Stop the timer */
-    SDL_SetTimer(0, NULL);
+    SDL_RemoveTimer(t1);
 
     /* Print the results */
     if (ticks) {
@@ -109,14 +100,21 @@ main(int argc, char *argv[])
 
     start = SDL_GetPerformanceCounter();
     for (i = 0; i < 1000000; ++i) {
-        ticktock(0);
+        ticktock(0, NULL);
     }
     now = SDL_GetPerformanceCounter();
     printf("1 million iterations of ticktock took %f ms\n", (double)((now - start)*1000) / SDL_GetPerformanceFrequency());
 
+    printf("Performance counter frequency: %lld\n", SDL_GetPerformanceFrequency());
+    start32 = SDL_GetTicks();
+    start = SDL_GetPerformanceCounter();
+    SDL_Delay(1000);
+    now = SDL_GetPerformanceCounter();
+    now32 = SDL_GetTicks();
+    printf("Delay 1 second = %d ms in ticks, %f ms according to performance counter\n", (now32-start32), (double)((now - start)*1000) / SDL_GetPerformanceFrequency());
+
     SDL_Quit();
     return (0);
 }
-#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

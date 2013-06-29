@@ -6,20 +6,6 @@
 	objectVersion = 46;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 008310471072EAAE00A531F1 /* Build configuration list for PBXAggregateTarget "Generate Doxygen DocSet" */;
-			buildPhases = (
-				0083103E1072EA5700A531F1 /* ShellScript */,
-			);
-			dependencies = (
-			);
-			name = "Generate Doxygen DocSet";
-			productName = "Generate Doxygen DocSet";
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		007317A20858DECD00B2BC32 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179B0858DECD00B2BC32 /* AudioToolbox.framework */; };
 		007317A30858DECD00B2BC32 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0073179C0858DECD00B2BC32 /* AudioUnit.framework */; };
@@ -789,13 +775,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		008310451072EA9000A531F1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 0083103F1072EA5700A531F1;
-			remoteInfo = "Generate Doxygen DocSet";
-		};
 		BECDF6C50761BA81005FE872 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0867D690FE84028FC02AAC07 /* Project object */;
@@ -1069,7 +1048,6 @@
 		BECDF66C0761BA81005FE872 /* SDL2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SDL2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6B30761BA81005FE872 /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		BECDF6BE0761BA81005FE872 /* Standard DMG */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Standard DMG"; sourceTree = BUILT_PRODUCTS_DIR; };
-		BECDF6C30761BA81005FE872 /* Developer Extras Package */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Developer Extras Package"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB31407717554B71006C0E22 /* libSDL2.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libSDL2.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		F59C70FF00D5CB5801000001 /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = ReadMe.txt; sourceTree = "<group>"; };
 		F59C710000D5CB5801000001 /* Welcome.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = Welcome.txt; sourceTree = "<group>"; };
@@ -1200,7 +1178,6 @@
 				BECDF66C0761BA81005FE872 /* SDL2.framework */,
 				BECDF6B30761BA81005FE872 /* libSDL2.a */,
 				BECDF6BE0761BA81005FE872 /* Standard DMG */,
-				BECDF6C30761BA81005FE872 /* Developer Extras Package */,
 				DB31407717554B71006C0E22 /* libSDL2.dylib */,
 			);
 			name = Products;
@@ -2222,23 +2199,6 @@
 			productReference = BECDF6BE0761BA81005FE872 /* Standard DMG */;
 			productType = "com.apple.product-type.tool";
 		};
-		BECDF6C00761BA81005FE872 /* Developer Extras Package */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 0073178A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Developer Extras Package" */;
-			buildPhases = (
-				BECDF6C20761BA81005FE872 /* ShellScript */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				008310461072EA9000A531F1 /* PBXTargetDependency */,
-			);
-			name = "Developer Extras Package";
-			productInstallPath = /usr/local/bin;
-			productName = "Devel Package";
-			productReference = BECDF6C30761BA81005FE872 /* Developer Extras Package */;
-			productType = "com.apple.product-type.tool";
-		};
 		DB313F7217554B71006C0E22 /* Shared Library */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = DB31407417554B71006C0E22 /* Build configuration list for PBXNativeTarget "Shared Library" */;
@@ -2286,8 +2246,6 @@
 				BECDF66D0761BA81005FE872 /* Static Library */,
 				DB313F7217554B71006C0E22 /* Shared Library */,
 				BECDF6BB0761BA81005FE872 /* Standard DMG */,
-				BECDF6C00761BA81005FE872 /* Developer Extras Package */,
-				0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */,
 			);
 		};
 /* End PBXProject section */
@@ -2320,19 +2278,6 @@
 /* End PBXRezBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		0083103E1072EA5700A531F1 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# DOXYGEN_EXE is defined in the Enclosing Target's Build Tab\n# DOXYGEN_EXE=/Applications/Doxygen.app/Contents/Resources/doxygen\n#echo DOXYGEN_EXE dir is $DOXYGEN_EXE\n\nDOC_DIR=$SRCROOT/../XcodeDocSet\n#echo Doc dir is $DOC_DIR\ncd $DOC_DIR\n$DOXYGEN_EXE $DOC_DIR/Doxyfile\ncd html\nmake\nif [ -d $SRCROOT/../XcodeDocSet/org.libsdl.sdl.docset ] ; then\n\t# remove previous docset\n\trm -rf $SRCROOT/../XcodeDocSet/org.libsdl.sdl.docset\nfi\nmv org.libsdl.sdl.docset ..\ncd ..\nrm -rf html\nexit 0";
-		};
 		BECDF6BD0761BA81005FE872 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 12;
@@ -2340,17 +2285,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\nmkdir -p build/dmg-tmp/devel-lite\n`xcode-select -print-path`/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\ncp pkg-support/resources/ReadMeDevLite.txt build/dmg-tmp/devel-lite\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
-		};
-		BECDF6C20761BA81005FE872 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			comments = "The old .pkg generator script:\n\n# make a copy of the framework to work with\nmkdir -p build/pkg-tmp\n\n## We're changing this to follow OS X conventions, where the headers and\n## framework are bundled together. Thus this development package won't \n## actually contain any direct framework elements.\n#/Developer/Tools/CpMac -r build/SDL.framework build/pkg-tmp/\n\n# copy in some files they might want around...\ncp ../../docs.html build/pkg-tmp\ncp -r ../../docs build/pkg-tmp\n#cp -r ../../src/main/macosx build/pkg-tmp/\n#rm -rf build/pkg-tmp/main/exports\ncp -r \"../Project Stationary\" build/pkg-tmp/\ncp \"pkg-support/Readme SDL Developer.txt\" build/pkg-tmp/\n#cp \"../uninstall.csh\" build/pkg-tmp/\n\n## We shouldn't have any framework stuff to deal with now\n# clean up the framework, remove extra files\n# rm -rf build/pkg-tmp/SDL.framework/Resources/pbdevelopment.plist\n\n# remove the .DS_Store file to keep tool from crapping out\nfind pkg-support -name \".DS_Store\" -exec rm -rf \"{}\" \";\" \n\n# create the .pkg\n../package build/pkg-tmp pkg-support/SDL-devel.info -d build -r pkg-support/devel-resources \n#\"/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker\" -build -p build/ -f build/pkg-tmp -r pkg-support/devel-resources -i Info.plist -d Description.plist\n\n# create install scripts\nDIR=build/SDL-devel.pkg/\ncp $DIR/install.sh $DIR/SDL-devel.post_install\nmv $DIR/install.sh $DIR/SDL-devel.post_upgrade\n\n# add execute flag to scripts\nchmod 755 $DIR/SDL-devel.post_install $DIR/SDL-devel.post_upgrade\n\n# remove temporary files\n#rm -rf build/pkg-tmp\n\n# compress\n(cd build; gnutar -zcvf SDL-devel.pkg.tar.gz SDL-devel.pkg)";
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# make a directory to hold the stuff we're going to package up\nmkdir -p build/devel-extras-tmp\nmkdir -p build/devel-extras-tmp/Documentation\nmkdir -p build/devel-extras-tmp/Documentation/docs/XcodeDocSet\nmkdir -p build/devel-extras-tmp/XcodeTemplates\n#mkdir -p build/devel-extras-tmp/SDLMain\n#mkdir -p build/devel-extras-tmp/SDLMain/NIBless\n#mkdir -p build/devel-extras-tmp/SDLMain/CocoaMenus\n\n# copy the docs\ncp ../../docs.html build/devel-extras-tmp/Documentation\ncp -r ../../docs build/devel-extras-tmp/Documentation\n\n# Copy Doxyfile for DocSet\ncp $SRCROOT/../XcodeDocSet/Doxyfile build/devel-extras-tmp/Documentation/docs/XcodeDocSet\n\n# Copy DocSet (if it exists)\nif [ -d $SRCROOT/../XcodeDocSet/org.libsdl.sdl.docset ] ; then\n#\techo Found docset directory\n\tmv $SRCROOT/../XcodeDocSet/org.libsdl.sdl.docset build/devel-extras-tmp/Documentation/docs/XcodeDocSet/\nelse\n\techo Warning: Could not find DocSet and will be omitted from package\nfi\n\n# copy the Xcode Project user templates\ncp -r \"../TemplatesForXcodeTiger\" build/devel-extras-tmp/XcodeTemplates\ncp -r \"../TemplatesForXcodeLeopard\" build/devel-extras-tmp/XcodeTemplates\ncp -r \"../TemplatesForXcodeSnowLeopard\" build/devel-extras-tmp/XcodeTemplates\n\ncp \"pkg-support/Readme SDL Developer.txt\" build/devel-extras-tmp\n\n\n# readme file\n#cp pkg-support/resources/ReadMe.txt build/devel-extras-tmp\n\n#cp pkg-support/resources/UniversalBinaryNotes.rtf build/devel-extras-tmp\n\n# Copy the devel-lite stuff just in case the user didn't notice it in the main package\n# I should copy all the different SDLMain versions (and nibs) instead.\n# I'm assuming the default is the same as the SDL App and SDL/OpenGL templates\n\n#cp pkg-support/resources/ReadMeDevLite.txt build/devel-extras-tmp/SDLMain/NIBless\n#cp ../../src/main/macosx/SDLMain.h build/devel-extras-tmp/SDLMain/NIBless\n#cp ../../src/main/macosx/SDLMain.m build/devel-extras-tmp/SDLMain/NIBless\n\n# Nib stuff from SDL-Cocoa App\n#/Developer/Tools/CpMac -r \"../TemplatesForXcodeSnowLeopard/SDL Cocoa Application/#SDLMain.h\" build/devel-extras-tmp/SDLMain/CocoaMenus\n#/Developer/Tools/CpMac -r \"../TemplatesForXcodeSnowLeopard/SDL Cocoa Application/#SDLMain.m\" build/devel-extras-tmp/SDLMain/CocoaMenus\n#/Developer/Tools/CpMac -r \"../TemplatesForXcodeSnowLeopard/SDL Cocoa Application/#English.lproj/SDLMain.nib\" build/devel-extras-tmp/SDLMain/CocoaMenus\n\n# Copy precompiled libSDLmain.a's here??? We have potentially 3 different ones?\n# /Developer/Tools/CpMac -r $TARGET_BUILD_DIR/libSDLmain.a build/devel-extras-tmp/SDLMain/NIBless\n#\n#\n\n# Copy sdl-config's for those who've been wanting one? Will need to document that it may\n# require manual changes if you don't install the framework to /Library/Frameworks\n# <<sdl-config here>>\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/devel-extras-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n# remove CVS stuff\nfind build/devel-extras-tmp -name .cvsignore -exec rm -f \"{}\" \\;\n# depth first traversal, type=directory, remove recursively\nfind -d build/devel-extras-tmp -type d -name CVS -exec rm -rf \"{}\" \\;\nfind -d build/devel-extras-tmp -type d -name .svn -exec rm -rf \"{}\" \\;\n\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL-devel-extras -srcfolder build/devel-extras-tmp build/SDL-devel-extras.dmg\n\n# clean up\nrm -rf build/devel-extras-tmp\n\n# compress it???\n#(cd build; gnutar -zcvf SDL.dmg.tar.gz SDL.dmg)\n\n";
+			shellScript = "# clean up the framework, remove headers, extra files\nmkdir -p build/dmg-tmp\n`xcode-select -print-path`/Tools/CpMac -r $TARGET_BUILD_DIR/SDL2.framework build/dmg-tmp/\n\ncp pkg-support/resources/License.txt build/dmg-tmp\ncp pkg-support/resources/ReadMe.txt build/dmg-tmp\n\n# remove the .DS_Store files if any (we may want to provide one in the future for fancy .dmgs)\nfind build/dmg-tmp -name .DS_Store -exec rm -f \"{}\" \\;\n\n# for fancy .dmg\nmkdir -p build/dmg-tmp/.logo\ncp pkg-support/resources/SDL_DS_Store build/dmg-tmp/.DS_Store\ncp pkg-support/sdl_logo.pdf build/dmg-tmp/.logo\n\n# create the dmg\nhdiutil create -ov -fs HFS+ -volname SDL2 -srcfolder build/dmg-tmp build/SDL2.dmg\n\n# clean up\nrm -rf build/dmg-tmp";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -2706,11 +2641,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		008310461072EA9000A531F1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 0083103F1072EA5700A531F1 /* Generate Doxygen DocSet */;
-			targetProxy = 008310451072EA9000A531F1 /* PBXContainerItemProxy */;
-		};
 		BECDF6C60761BA81005FE872 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = BECDF5FE0761BA81005FE872 /* Framework */;
@@ -2719,24 +2649,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		008310421072EA5700A531F1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Debug;
-		};
-		008310431072EA5700A531F1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				DOXYGEN_EXE = /Applications/Doxygen.app/Contents/Resources/doxygen;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				PRODUCT_NAME = "Generate Doxygen DocSet";
-			};
-			name = Release;
-		};
 		00CFA621106A567900758660 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2793,13 +2705,6 @@
 			};
 			name = Release;
 		};
-		00CFA626106A567900758660 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Developer Extras Package";
-			};
-			name = Release;
-		};
 		00CFA627106A568900758660 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2851,13 +2756,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				PRODUCT_NAME = "Standard DMG";
-			};
-			name = Debug;
-		};
-		00CFA62C106A568900758660 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				PRODUCT_NAME = "Developer Extras Package";
 			};
 			name = Debug;
 		};
@@ -2929,29 +2827,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		0073178A0858DB0500B2BC32 /* Build configuration list for PBXNativeTarget "Developer Extras Package" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00CFA62C106A568900758660 /* Debug */,
-				00CFA626106A567900758660 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
 		0073178E0858DB0500B2BC32 /* Build configuration list for PBXProject "SDL" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				00CFA627106A568900758660 /* Debug */,
 				00CFA621106A567900758660 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		008310471072EAAE00A531F1 /* Build configuration list for PBXAggregateTarget "Generate Doxygen DocSet" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				008310421072EA5700A531F1 /* Debug */,
-				008310431072EA5700A531F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

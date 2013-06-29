@@ -21,6 +21,8 @@
 #include "../../include/SDL_scancode.h"
 
 /* Windows scancode to SDL scancode mapping table */
+/* derived from Microsoft scan code document, http://download.microsoft.com/download/1/6/1/161ba512-40e2-4cc9-843a-923143f3456c/scancode.doc */
+
 /* *INDENT-OFF* */
 static const SDL_Scancode windows_scancode_table[] = 
 { 
