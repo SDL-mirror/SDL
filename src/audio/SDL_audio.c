@@ -1174,7 +1174,9 @@ SDL_AudioQuit(void)
 {
     SDL_AudioDeviceID i;
     for (i = 0; i < SDL_arraysize(open_devices); i++) {
-        SDL_CloseAudioDevice(i);
+        if (open_devices[i] != NULL) {
+            SDL_CloseAudioDevice(i);
+        }
     }
 
     /* Free the driver data */
