@@ -371,9 +371,6 @@ SDL_GetPlatform()
     return "AIX";
 #elif __ANDROID__
     return "Android";
-#elif __HAIKU__
-/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
-    return "Haiku";
 #elif __BEOS__
     return "BeOS";
 #elif __BSDI__
@@ -382,6 +379,8 @@ SDL_GetPlatform()
     return "Dreamcast";
 #elif __FREEBSD__
     return "FreeBSD";
+#elif __HAIKU__
+    return "Haiku";
 #elif __HPUX__
     return "HP-UX";
 #elif __IRIX__
