@@ -1172,11 +1172,12 @@ SDL_CloseAudio(void)
 void
 SDL_AudioQuit(void)
 {
+    SDL_AudioDeviceID i;
+
     if (!current_audio.name) {  /* not initialized?! */
         return;
     }
 
-    SDL_AudioDeviceID i;
     for (i = 0; i < SDL_arraysize(open_devices); i++) {
         if (open_devices[i] != NULL) {
             SDL_CloseAudioDevice(i);
