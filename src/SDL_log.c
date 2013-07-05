@@ -266,6 +266,7 @@ void
 SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list ap)
 {
     char *message;
+    size_t len;
 
     /* Nothing to do if we don't have an output function */
     if (!SDL_log_function) {
@@ -286,7 +287,18 @@ SDL_LogMessageV(int category, SDL_LogPriority priority, const char *fmt, va_list
     if (!message) {
         return;
     }
+
     SDL_vsnprintf(message, SDL_MAX_LOG_MESSAGE, fmt, ap);
+
+    /* Chop off final endline. */
+    len = SDL_strlen(message);
+    if ((len > 0) && (message[len-1] == '\n')) {
+        message[--len] = '\0';
+        if ((len > 0) && (message[len-1] == '\r')) {  /* catch "\r\n", too. */
+            message[--len] = '\0';
+        }
+    }
+
     SDL_log_function(SDL_log_userdata, category, priority, message);
     SDL_stack_free(message);
 }
@@ -390,9 +402,9 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         char*        output;
         FILE*        pFile;
         /* !!! FIXME: is there any reason we didn't just use fprintf() here? */
-        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1;
+        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 2;
         output = SDL_stack_alloc(char, length);
-        SDL_snprintf(output, length, "%s: %s", SDL_priority_prefixes[priority], message);
+        SDL_snprintf(output, length, "%s: %s\n", SDL_priority_prefixes[priority], message);
         pFile = fopen ("SDL_Log.txt", "a");
         fwrite (output, strlen (output), 1, pFile);
         SDL_stack_free(output);
