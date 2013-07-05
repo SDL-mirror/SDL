@@ -223,7 +223,7 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
             [nscontext setFullScreen];
         } else
 #endif
-        {
+        if ([nscontext view] != [windowdata->nswindow contentView]) {
             [nscontext setView:[windowdata->nswindow contentView]];
             [nscontext update];
         }
