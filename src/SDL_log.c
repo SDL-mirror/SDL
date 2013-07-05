@@ -389,6 +389,7 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         unsigned int length;
         char*        output;
         FILE*        pFile;
+        /* !!! FIXME: is there any reason we didn't just use fprintf() here? */
         length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 1;
         output = SDL_stack_alloc(char, length);
         SDL_snprintf(output, length, "%s: %s", SDL_priority_prefixes[priority], message);
