@@ -48,6 +48,12 @@ SDL_JoystickInit(void)
         SDL_joystick_allows_background_events = SDL_TRUE;
     }
 
+#if !SDL_EVENTS_DISABLED
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS) < 0) {
+        return -1;
+    }
+#endif /* !SDL_EVENTS_DISABLED */
+
     status = SDL_SYS_JoystickInit();
     if (status >= 0) {
         status = 0;
@@ -458,6 +464,10 @@ SDL_JoystickQuit(void)
 
     /* Quit the joystick setup */
     SDL_SYS_JoystickQuit();
+
+#if !SDL_EVENTS_DISABLED
+    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+#endif
 }
 
 
