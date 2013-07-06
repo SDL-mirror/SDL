@@ -526,7 +526,7 @@ char *
 SDL_strrev(char *string)
 {
 #if defined(HAVE__STRREV)
-    return _strrev(str);
+    return _strrev(string);
 #else
     size_t len = SDL_strlen(string);
     char *a = &string[0];
@@ -545,7 +545,7 @@ char *
 SDL_strupr(char *string)
 {
 #if defined(HAVE__STRUPR)
-    return _strupr(str);
+    return _strupr(string);
 #else
     char *bufp = string;
     while (*bufp) {
@@ -560,7 +560,7 @@ char *
 SDL_strlwr(char *string)
 {
 #if defined(HAVE__STRLWR)
-    return _strlwr(str);
+    return _strlwr(string);
 #else
     char *bufp = string;
     while (*bufp) {
@@ -625,8 +625,8 @@ SDL_strstr(const char *haystack, const char *needle)
 #endif /* HAVE_STRSTR */
 }
 
-#if !defined(HAVE__LTOA) || !defined(SDL_lltoa) || \
-    !defined(SDL_ultoa) || !defined(SDL_ulltoa)
+#if !defined(HAVE__LTOA) || !defined(HAVE__I64TOA) || \
+    !defined(HAVE__ULTOA) || !defined(HAVE__UI64TOA)
 static const char ntoa_table[] = {
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
@@ -636,22 +636,22 @@ static const char ntoa_table[] = {
 #endif /* ntoa() conversion table */
 
 char *
-SDL_itoa(int value, char *str, int radix)
+SDL_itoa(int value, char *string, int radix)
 {
 #ifdef HAVE_ITOA
-    return itoa(value, str, radix);
+    return itoa(value, string, radix);
 #else
-    return SDL_ltoa((long)value, str, radix);
+    return SDL_ltoa((long)value, string, radix);
 #endif /* HAVE_ITOA */
 }
 
 char *
-SDL_uitoa(unsigned int value, char *str, int radix)
+SDL_uitoa(unsigned int value, char *string, int radix)
 {
 #ifdef HAVE__UITOA
-    return _uitoa(value, str, radix);
+    return _uitoa(value, string, radix);
 #else
-    return SDL_ultoa((unsigned long)value, str, radix);
+    return SDL_ultoa((unsigned long)value, string, radix);
 #endif /* HAVE__UITOA */
 }
 
@@ -659,7 +659,7 @@ char *
 SDL_ltoa(long value, char *string, int radix)
 {
 #if defined(HAVE__LTOA)
-    return _ltoa(value, str, radix);
+    return _ltoa(value, string, radix);
 #else
     char *bufp = string;
 
@@ -692,7 +692,7 @@ char *
 SDL_ultoa(unsigned long value, char *string, int radix)
 {
 #if defined(HAVE__ULTOA)
-    return _ultoa(value, str, radix);
+    return _ultoa(value, string, radix);
 #else
     char *bufp = string;
 
@@ -717,7 +717,7 @@ char *
 SDL_lltoa(Sint64 value, char *string, int radix)
 {
 #if defined(HAVE__I64TOA)
-    return _i64toa(value, str, radix);
+    return _i64toa(value, string, radix);
 #else
     char *bufp = string;
 
@@ -750,7 +750,7 @@ char *
 SDL_ulltoa(Uint64 value, char *string, int radix)
 {
 #if defined(HAVE__UI64TOA)
-    return _ui64toa(value, str, radix);
+    return _ui64toa(value, string, radix);
 #else
     char *bufp = string;
 
@@ -771,21 +771,21 @@ SDL_ulltoa(Uint64 value, char *string, int radix)
 #endif /* HAVE__UI64TOA */
 }
 
-int SDL_atoi(const char *str)
+int SDL_atoi(const char *string)
 {
 #ifdef HAVE_ATOI
-    return atoi(str);
+    return atoi(string);
 #else
-    return SDL_strtol(str, NULL, 0);
+    return SDL_strtol(string, NULL, 0);
 #endif /* HAVE_ATOI */
 }
 
-double SDL_atof(const char *str)
+double SDL_atof(const char *string)
 {
 #ifdef HAVE_ATOF
-    return (double) atof(str);
+    return (double) atof(string);
 #else
-    return SDL_strtod(str, NULL);
+    return SDL_strtod(string, NULL);
 #endif /* HAVE_ATOF */
 }
 
