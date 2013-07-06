@@ -389,7 +389,7 @@ size_t
 SDL_strlen(const char *string)
 {
 #if defined(HAVE_STRLEN)
-    return strlen(str);
+    return strlen(string);
 #else
     size_t len = 0;
     while (*string++) {
@@ -403,7 +403,7 @@ size_t
 SDL_wcslen(const wchar_t * string)
 {
 #if defined(HAVE_WCSLEN)
-    return wcslen(wstr);
+    return wcslen(string);
 #else
     size_t len = 0;
     while (*string++) {
@@ -511,7 +511,7 @@ char *
 SDL_strdup(const char *string)
 {
 #if defined(HAVE_STRDUP)
-    return strdup(str);
+    return strdup(string);
 #else
     size_t len = SDL_strlen(string) + 1;
     char *newstr = SDL_malloc(len);
@@ -575,9 +575,9 @@ char *
 SDL_strchr(const char *string, int c)
 {
 #ifdef HAVE_STRCHR
-    return SDL_const_cast(char*,strchr(str, c));
+    return SDL_const_cast(char*,strchr(string, c));
 #elif defined(HAVE_INDEX)
-    return SDL_const_cast(char*,index(str, c));
+    return SDL_const_cast(char*,index(string, c));
 #else
     while (*string) {
         if (*string == c) {
@@ -593,9 +593,9 @@ char *
 SDL_strrchr(const char *string, int c)
 {
 #ifdef HAVE_STRRCHR
-    return SDL_const_cast(char*,strrchr(str, c));
+    return SDL_const_cast(char*,strrchr(string, c));
 #elif defined(HAVE_RINDEX)
-    return SDL_const_cast(char*,rindex(str, c));
+    return SDL_const_cast(char*,rindex(string, c));
 #else
     const char *bufp = string + SDL_strlen(string) - 1;
     while (bufp >= string) {
@@ -793,7 +793,7 @@ long
 SDL_strtol(const char *string, char **endp, int base)
 {
 #if defined(HAVE_STRTOL)
-    return strtol(str, endp, base);
+    return strtol(string, endp, base);
 #else
     size_t len;
     long value;
@@ -818,7 +818,7 @@ unsigned long
 SDL_strtoul(const char *string, char **endp, int base)
 {
 #if defined(HAVE_STRTOUL)
-    return strtoul(str, endp, base);
+    return strtoul(string, endp, base);
 #else
     size_t len;
     unsigned long value;
@@ -843,7 +843,7 @@ Sint64
 SDL_strtoll(const char *string, char **endp, int base)
 {
 #if defined(HAVE_STRTOLL)
-    return strtoll(str, endp, base);
+    return strtoll(string, endp, base);
 #else
     size_t len;
     Sint64 value;
@@ -868,7 +868,7 @@ Uint64
 SDL_strtoull(const char *string, char **endp, int base)
 {
 #if defined(HAVE_STRTOULL)
-    return strtoull(str, endp, base);
+    return strtoull(string, endp, base);
 #else
     size_t len;
     Uint64 value;
@@ -893,7 +893,7 @@ double
 SDL_strtod(const char *string, char **endp)
 {
 #if defined(HAVE_STRTOD)
-    return strtod(str, endp);
+    return strtod(string, endp);
 #else
     size_t len;
     double value;
@@ -970,9 +970,9 @@ int
 SDL_strncasecmp(const char *str1, const char *str2, size_t maxlen)
 {
 #ifdef HAVE_STRNCASECMP
-    return strncasecmp(str1, str2, len);
+    return strncasecmp(str1, str2, maxlen);
 #elif defined(HAVE__STRNICMP)
-    return _strnicmp(str1, str2, len);
+    return _strnicmp(str1, str2, maxlen);
 #else
     char a = 0;
     char b = 0;
