@@ -28,7 +28,7 @@ public class SDLActivity extends Activity {
     private static final String TAG = "SDL";
 
     // Keep track of the paused state
-    public static boolean mIsPaused = false;
+    public static boolean mIsPaused = false, mIsSurfaceReady = false;
 
     // Main components
     protected static SDLActivity mSingleton;
@@ -70,6 +70,7 @@ public class SDLActivity extends Activity {
         mSingleton = this;
 
         // Set up the surface
+        mEGLSurface = EGL10.EGL_NO_SURFACE;
         mSurface = new SDLSurface(getApplication());
 
         mLayout = new AbsoluteLayout(this);
@@ -83,14 +84,14 @@ public class SDLActivity extends Activity {
     protected void onPause() {
         Log.v("SDL", "onPause()");
         super.onPause();
-        // Don't call SDLActivity.nativePause(); here, it will be called by SDLSurface::surfaceDestroyed
+        SDLActivity.handlePause();
     }
 
     @Override
     protected void onResume() {
         Log.v("SDL", "onResume()");
         super.onResume();
-        // Don't call SDLActivity.nativeResume(); here, it will be called via SDLSurface::surfaceChanged->SDLActivity::startApp
+        SDLActivity.handleResume();
     }
 
     @Override
@@ -119,6 +120,32 @@ public class SDLActivity extends Activity {
             //Log.v("SDL", "Finished waiting for SDL thread");
         }
     }
+
+
+    /** Called by onPause or surfaceDestroyed. Even if surfaceDestroyed
+     *  is the first to be called, mIsSurfaceReady should still be set
+     *  to 'true' during the call to onPause (in a usual scenario).
+     */
+    public static void handlePause() {
+        if (!SDLActivity.mIsPaused && SDLActivity.mIsSurfaceReady) {
+            SDLActivity.mIsPaused = true;
+            SDLActivity.nativePause();
+            mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, false);
+        }
+    }
+
+    /** Called by onResume or surfaceCreated. An actual resume should be done only when the surface is ready.
+     * Note: Some Android variants may send multiple surfaceChanged events, so we don't need to resume
+     * every time we get one of those events, only if it comes after surfaceDestroyed
+     */
+    public static void handleResume() {
+        if (SDLActivity.mIsPaused && SDLActivity.mIsSurfaceReady) {
+            SDLActivity.mIsPaused = false;
+            SDLActivity.nativeResume();
+            mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, true);
+        }
+    }
+
 
     // Messages from the SDLMain thread
     static final int COMMAND_CHANGE_TITLE = 1;
@@ -227,24 +254,6 @@ public class SDLActivity extends Activity {
         return mSingleton;
     }
 
-    public static void startApp() {
-        // Start up the C app thread
-        if (mSDLThread == null) {
-            mSDLThread = new Thread(new SDLMain(), "SDLThread");
-            mSDLThread.start();
-        }
-        else {
-            /*
-             * Some Android variants may send multiple surfaceChanged events, so we don't need to resume every time
-             * every time we get one of those events, only if it comes after surfaceDestroyed
-             */
-            if (mIsPaused) {
-                SDLActivity.nativeResume();
-                SDLActivity.mIsPaused = false;
-            }
-        }
-    }
-    
     static class ShowTextInputTask implements Runnable {
         /*
          * This is used to regulate the pan&scan method to have some offset from
@@ -343,25 +352,30 @@ public class SDLActivity extends Activity {
             EGL10 egl = (EGL10)EGLContext.getEGL();
             if (SDLActivity.mEGLContext == null) createEGLContext();
 
-            Log.v("SDL", "Creating new EGL Surface");
-            EGLSurface surface = egl.eglCreateWindowSurface(SDLActivity.mEGLDisplay, SDLActivity.mEGLConfig, SDLActivity.mSurface, null);
-            if (surface == EGL10.EGL_NO_SURFACE) {
-                Log.e("SDL", "Couldn't create surface");
-                return false;
+            if (SDLActivity.mEGLSurface == EGL10.EGL_NO_SURFACE) {
+                Log.v("SDL", "Creating new EGL Surface");
+                SDLActivity.mEGLSurface = egl.eglCreateWindowSurface(SDLActivity.mEGLDisplay, SDLActivity.mEGLConfig, SDLActivity.mSurface, null);
+                if (SDLActivity.mEGLSurface == EGL10.EGL_NO_SURFACE) {
+                    Log.e("SDL", "Couldn't create surface");
+                    return false;
+                }
             }
+            else Log.v("SDL", "EGL Surface remains valid");
 
             if (egl.eglGetCurrentContext() != SDLActivity.mEGLContext) {
-                if (!egl.eglMakeCurrent(SDLActivity.mEGLDisplay, surface, surface, SDLActivity.mEGLContext)) {
+                if (!egl.eglMakeCurrent(SDLActivity.mEGLDisplay, SDLActivity.mEGLSurface, SDLActivity.mEGLSurface, SDLActivity.mEGLContext)) {
                     Log.e("SDL", "Old EGL Context doesnt work, trying with a new one");
                     // TODO: Notify the user via a message that the old context could not be restored, and that textures need to be manually restored.
                     createEGLContext();
-                    if (!egl.eglMakeCurrent(SDLActivity.mEGLDisplay, surface, surface, SDLActivity.mEGLContext)) {
+                    if (!egl.eglMakeCurrent(SDLActivity.mEGLDisplay, SDLActivity.mEGLSurface, SDLActivity.mEGLSurface, SDLActivity.mEGLContext)) {
                         Log.e("SDL", "Failed making EGL Context current");
                         return false;
                     }
                 }
+                else Log.v("SDL", "EGL Context made current");
             }
-            SDLActivity.mEGLSurface = surface;
+            else Log.v("SDL", "EGL Context remains current");
+
             return true;
         } else {
             Log.e("SDL", "Surface creation failed, display = " + SDLActivity.mEGLDisplay + ", config = " + SDLActivity.mEGLConfig);
@@ -533,18 +547,27 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceCreated(SurfaceHolder holder) {
         Log.v("SDL", "surfaceCreated()");
         holder.setType(SurfaceHolder.SURFACE_TYPE_GPU);
-        enableSensor(Sensor.TYPE_ACCELEROMETER, true);
+        // Set mIsSurfaceReady to 'true' *before* any call to handleResume
+        SDLActivity.mIsSurfaceReady = true;
     }
 
     // Called when we lose the surface
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         Log.v("SDL", "surfaceDestroyed()");
-        if (!SDLActivity.mIsPaused) {
-            SDLActivity.mIsPaused = true;
-            SDLActivity.nativePause();
-        }
-        enableSensor(Sensor.TYPE_ACCELEROMETER, false);
+        // Call this *before* setting mIsSurfaceReady to 'false'
+        SDLActivity.handlePause();
+        SDLActivity.mIsSurfaceReady = false;
+
+        /* We have to clear the current context and destroy the egl surface here
+         * Otherwise there's BAD_NATIVE_WINDOW errors coming from eglCreateWindowSurface on resume
+         * Ref: http://stackoverflow.com/questions/8762589/eglcreatewindowsurface-on-ics-and-switching-from-2d-to-3d
+         */
+        
+        EGL10 egl = (EGL10)EGLContext.getEGL();
+        egl.eglMakeCurrent(SDLActivity.mEGLDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+        egl.eglDestroySurface(SDLActivity.mEGLDisplay, SDLActivity.mEGLSurface);
+        SDLActivity.mEGLSurface = EGL10.EGL_NO_SURFACE;
     }
 
     // Called when the surface is resized
@@ -603,7 +626,22 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
         SDLActivity.onNativeResize(width, height, sdlFormat);
         Log.v("SDL", "Window size:" + width + "x"+height);
 
-        SDLActivity.startApp();
+        // Set mIsSurfaceReady to 'true' *before* making a call to handleResume
+        SDLActivity.mIsSurfaceReady = true;
+
+        if (SDLActivity.mSDLThread == null) {
+            // This is the entry point to the C app.
+            // Start up the C app thread and enable sensor input for the first time
+
+            SDLActivity.mSDLThread = new Thread(new SDLMain(), "SDLThread");
+            enableSensor(Sensor.TYPE_ACCELEROMETER, true);
+            SDLActivity.mSDLThread.start();
+        } else {
+            // The app already exists, we resume via handleResume
+            // Multiple sequential calls to surfaceChanged are handled internally by handleResume
+
+            SDLActivity.handleResume();
+        }
     }
 
     // unused
