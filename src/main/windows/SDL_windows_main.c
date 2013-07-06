@@ -176,6 +176,8 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
     /* Run the main program */
     console_main(argc, argv);
 
+    SDL_stack_free(argv);
+
     SDL_free(cmdline);
 
     /* Hush little compiler, don't you cry... */
