@@ -8,18 +8,18 @@
 ---
 http://www.libsdl.org/
 
-This is the Simple DirectMedia Layer, a general API that provides low
-level access to audio, keyboard, mouse, joystick, 3D hardware via OpenGL,
-and 2D framebuffer across multiple platforms.
+Simple DirectMedia Layer is a cross-platform development library designed
+to provide low level access to audio, keyboard, mouse, joystick, and graphics
+hardware via OpenGL and DirectX. It is used by video playback software,
+emulators, and popular games including Valve's award winning catalog
+and many Humble Bundle games.
 
-The current version supports Windows, Mac OS X, Linux, FreeBSD,
-NetBSD, OpenBSD, BSD/OS, Solaris, iOS, and Android. The code contains
-support for other operating systems but those are not officially supported.
+The current version supports Windows, Mac OS X, Linux, iOS, and Android.
+The code contains support for other operating systems but those are not
+officially supported.
 
 SDL is written in C, but works with C++ natively, and has bindings to
-several other languages, including Ada, C#, Eiffel, Erlang, Euphoria,
-Go, Guile, Haskell, Java, Lisp, Lua, ML, Objective C, Pascal, Perl, PHP,
-Pike, Pliant, Python, Ruby, and Smalltalk.
+several other languages, including C#, Python and more in progress.
 
 This library is distributed under the zlib license, which can be found
 in the file "COPYING.txt".
