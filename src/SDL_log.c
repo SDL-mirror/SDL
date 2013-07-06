@@ -398,16 +398,9 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
     }
 #elif defined(__PSP__)
     {
-        unsigned int length;
-        char*        output;
         FILE*        pFile;
-        /* !!! FIXME: is there any reason we didn't just use fprintf() here? */
-        length = SDL_strlen(SDL_priority_prefixes[priority]) + 2 + SDL_strlen(message) + 2;
-        output = SDL_stack_alloc(char, length);
-        SDL_snprintf(output, length, "%s: %s\n", SDL_priority_prefixes[priority], message);
         pFile = fopen ("SDL_Log.txt", "a");
-        fwrite (output, strlen (output), 1, pFile);
-        SDL_stack_free(output);
+        fprintf(pFile, "%s: %s\n", SDL_priority_prefixes[priority], message);
         fclose (pFile);
     }
 #endif
