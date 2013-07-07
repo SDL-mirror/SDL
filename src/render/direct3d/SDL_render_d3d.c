@@ -29,7 +29,7 @@
 #include "SDL_loadso.h"
 #include "SDL_syswm.h"
 #include "../SDL_sysrender.h"
-#include "stdio.h"
+#include <stdio.h>
 
 #if SDL_VIDEO_RENDER_D3D
 #define D3D_DEBUG_INFO
