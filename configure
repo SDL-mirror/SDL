@@ -812,6 +812,8 @@ enable_arts
 enable_arts_shared
 enable_nas
 enable_nas_shared
+enable_sndio
+enable_sndio_shared
 enable_diskaudio
 enable_dummyaudio
 enable_video_x11
@@ -1524,6 +1526,8 @@ Optional Features:
   --enable-arts-shared    dynamically load aRts audio support [[default=yes]]
   --enable-nas            support the NAS audio API [[default=yes]]
   --enable-nas-shared     dynamically load NAS audio support [[default=yes]]
+  --enable-sndio          support the sndio audio API [[default=yes]]
+  --enable-sndio-shared   dynamically load sndio audio support [[default=yes]]
   --enable-diskaudio      support the disk writer audio driver [[default=yes]]
   --enable-dummyaudio     support the dummy audio driver [[default=yes]]
   --enable-video-x11      use X11 video driver [[default=yes]]
@@ -18487,6 +18491,112 @@ $as_echo "#define SDL_AUDIO_DRIVER_NAS 1" >>confdefs.h
     fi
 }
 
+CheckSNDIO()
+{
+    # Check whether --enable-sndio was given.
+if test "${enable_sndio+set}" = set; then :
+  enableval=$enable_sndio;
+else
+  enable_sndio=yes
+fi
+
+    if test x$enable_audio = xyes -a x$enable_sndio = xyes; then
+        ac_fn_c_check_header_mongrel "$LINENO" "sndio.h" "ac_cv_header_sndio_h" "$ac_includes_default"
+if test "x$ac_cv_header_sndio_h" = xyes; then :
+  have_sndio_hdr=yes
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sio_open in -lsndio" >&5
+$as_echo_n "checking for sio_open in -lsndio... " >&6; }
+if ${ac_cv_lib_sndio_sio_open+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lsndio  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char sio_open ();
+int
+main ()
+{
+return sio_open ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_sndio_sio_open=yes
+else
+  ac_cv_lib_sndio_sio_open=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_sndio_sio_open" >&5
+$as_echo "$ac_cv_lib_sndio_sio_open" >&6; }
+if test "x$ac_cv_lib_sndio_sio_open" = xyes; then :
+  have_sndio_lib=yes
+fi
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for sndio audio support" >&5
+$as_echo_n "checking for sndio audio support... " >&6; }
+        have_sndio=no
+
+        if test x$have_sndio_hdr = xyes -a x$have_sndio_lib = xyes; then
+            have_sndio=yes
+            SNDIO_LIBS="-lsndio"
+        fi
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_sndio" >&5
+$as_echo "$have_sndio" >&6; }
+
+        if test x$have_sndio = xyes; then
+            # Check whether --enable-sndio-shared was given.
+if test "${enable_sndio_shared+set}" = set; then :
+  enableval=$enable_sndio_shared;
+else
+  enable_sndio_shared=yes
+fi
+
+            sndio_lib=`find_lib "libsndio.so.*" "$SNDIO_LIBS" | sed 's/.*\/\(.*\)/\1/; q'`
+
+            if test x$have_loadso != xyes && \
+               test x$enable_sndio_shared = xyes; then
+                { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: You must have SDL_LoadObject() support for dynamic sndio loading" >&5
+$as_echo "$as_me: WARNING: You must have SDL_LoadObject() support for dynamic sndio loading" >&2;}
+            fi
+            if test x$have_loadso = xyes && \
+               test x$enable_sndio_shared = xyes && test x$sndio_lib != x; then
+                echo "-- dynamic libsndio -> $sndio_lib"
+
+cat >>confdefs.h <<_ACEOF
+#define SDL_AUDIO_DRIVER_SNDIO_DYNAMIC "$sndio_lib"
+_ACEOF
+
+            else
+                EXTRA_LDFLAGS="$EXTRA_LDFLAGS $SNDIO_LIBS"
+            fi
+
+
+$as_echo "#define SDL_AUDIO_DRIVER_SNDIO 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/audio/sndio/*.c"
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $SNDIO_CFLAGS"
+            have_audio=yes
+        fi
+    fi
+}
+
 CheckDiskAudio()
 {
     # Check whether --enable-diskaudio was given.
@@ -22069,6 +22179,7 @@ case "$host" in
         CheckARTSC
         CheckESD
         CheckNAS
+        CheckSNDIO
         CheckX11
         CheckDirectFB
         CheckFusionSound
