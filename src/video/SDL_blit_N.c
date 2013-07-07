@@ -993,6 +993,116 @@ Blit_RGB888_index8(SDL_BlitInfo * info)
     }
 }
 
+/* Special optimized blit for RGB 10-10-10 --> RGB 3-3-2 */
+#define RGB101010_RGB332(dst, src) { \
+    dst = (Uint8)((((src)&0x38000000)>>22)| \
+                  (((src)&0x000E0000)>>15)| \
+                  (((src)&0x00000300)>>8)); \
+}
+static void
+Blit_RGB101010_index8(SDL_BlitInfo * info)
+{
+#ifndef USE_DUFFS_LOOP
+    int c;
+#endif
+    int width, height;
+    Uint32 *src;
+    const Uint8 *map;
+    Uint8 *dst;
+    int srcskip, dstskip;
+
+    /* Set up some basic variables */
+    width = info->dst_w;
+    height = info->dst_h;
+    src = (Uint32 *) info->src;
+    srcskip = info->src_skip / 4;
+    dst = info->dst;
+    dstskip = info->dst_skip;
+    map = info->table;
+
+    if (map == NULL) {
+        while (height--) {
+#ifdef USE_DUFFS_LOOP
+            /* *INDENT-OFF* */
+            DUFFS_LOOP(
+                RGB101010_RGB332(*dst++, *src);
+            , width);
+            /* *INDENT-ON* */
+#else
+            for (c = width / 4; c; --c) {
+                /* Pack RGB into 8bit pixel */
+                ++src;
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+            }
+            switch (width & 3) {
+            case 3:
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+            case 2:
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+            case 1:
+                RGB101010_RGB332(*dst++, *src);
+                ++src;
+            }
+#endif /* USE_DUFFS_LOOP */
+            src += srcskip;
+            dst += dstskip;
+        }
+    } else {
+        int Pixel;
+
+        while (height--) {
+#ifdef USE_DUFFS_LOOP
+            /* *INDENT-OFF* */
+            DUFFS_LOOP(
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+            , width);
+            /* *INDENT-ON* */
+#else
+            for (c = width / 4; c; --c) {
+                /* Pack RGB into 8bit pixel */
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+            }
+            switch (width & 3) {
+            case 3:
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+            case 2:
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+            case 1:
+                RGB101010_RGB332(Pixel, *src);
+                *dst++ = map[Pixel];
+                ++src;
+            }
+#endif /* USE_DUFFS_LOOP */
+            src += srcskip;
+            dst += dstskip;
+        }
+    }
+}
+
 /* Special optimized blit for RGB 8-8-8 --> RGB 5-5-5 */
 #define RGB888_RGB555(dst, src) { \
     *(Uint16 *)(dst) = (Uint16)((((*src)&0x00F80000)>>9)| \
@@ -1860,85 +1970,6 @@ Blit_RGB565_BGRA8888(SDL_BlitInfo * info)
     Blit_RGB565_32(info, RGB565_BGRA8888_LUT);
 }
 
-/* Special optimized blit for RGB 8-8-8 --> RGB 3-3-2 */
-#ifndef RGB888_RGB332
-#define RGB888_RGB332(dst, src) { \
-    dst = (((src)&0x00E00000)>>16)| \
-          (((src)&0x0000E000)>>11)| \
-          (((src)&0x000000C0)>>6); \
-}
-#endif
-static void
-Blit_RGB888_index8_map(SDL_BlitInfo * info)
-{
-#ifndef USE_DUFFS_LOOP
-    int c;
-#endif
-    int Pixel;
-    int width, height;
-    Uint32 *src;
-    const Uint8 *map;
-    Uint8 *dst;
-    int srcskip, dstskip;
-
-    /* Set up some basic variables */
-    width = info->dst_w;
-    height = info->dst_h;
-    src = (Uint32 *) info->src;
-    srcskip = info->src_skip / 4;
-    dst = info->dst;
-    dstskip = info->dst_skip;
-    map = info->table;
-
-#ifdef USE_DUFFS_LOOP
-    while (height--) {
-        /* *INDENT-OFF* */
-        DUFFS_LOOP(
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-        , width);
-        /* *INDENT-ON* */
-        src += srcskip;
-        dst += dstskip;
-    }
-#else
-    while (height--) {
-        for (c = width / 4; c; --c) {
-            /* Pack RGB into 8bit pixel */
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-        }
-        switch (width & 3) {
-        case 3:
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-        case 2:
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-        case 1:
-            RGB888_RGB332(Pixel, *src);
-            *dst++ = map[Pixel];
-            ++src;
-        }
-        src += srcskip;
-        dst += dstskip;
-    }
-#endif /* USE_DUFFS_LOOP */
-}
-
 static void
 BlitNto1(SDL_BlitInfo * info)
 {
@@ -2440,11 +2471,12 @@ SDL_CalculateBlitN(SDL_Surface * surface)
                 (srcfmt->Rmask == 0x00FF0000) &&
                 (srcfmt->Gmask == 0x0000FF00) &&
                 (srcfmt->Bmask == 0x000000FF)) {
-                if (surface->map->info.table) {
-                    blitfun = Blit_RGB888_index8_map;
-                } else {
-                    blitfun = Blit_RGB888_index8;
-                }
+                blitfun = Blit_RGB888_index8;
+            } else if ((srcfmt->BytesPerPixel == 4) &&
+                (srcfmt->Rmask == 0x3FF00000) &&
+                (srcfmt->Gmask == 0x000FFC00) &&
+                (srcfmt->Bmask == 0x000003FF)) {
+                blitfun = Blit_RGB101010_index8;
             } else {
                 blitfun = BlitNto1;
             }
