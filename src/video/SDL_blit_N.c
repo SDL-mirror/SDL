@@ -2344,8 +2344,8 @@ struct blit_table
     { NO_ALPHA = 1, SET_ALPHA = 2, COPY_ALPHA = 4 } alpha;
 };
 static const struct blit_table normal_blit_1[] = {
-    /* Default for 8-bit RGB source, an invalid combination */
-    {0, 0, 0, 0, 0, 0, 0, 0, NULL},
+    /* Default for 8-bit RGB source, never optimized */
+    {0, 0, 0, 0, 0, 0, 0, 0, BlitNtoN, 0}
 };
 
 static const struct blit_table normal_blit_2[] = {
