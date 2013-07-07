@@ -757,7 +757,7 @@ extern "C" size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
 
         JNIEnv *mEnv = Android_JNI_GetEnv();
         if (!refs.init(mEnv)) {
-            return -1;
+            return 0;
         }
 
         jobject readableByteChannel = (jobject)ctx->hidden.androidio.readableByteChannelRef;
