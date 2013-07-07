@@ -249,6 +249,14 @@ do {                                                                    \
 {                                                                       \
     Pixel = (b<<24)|(g<<16)|(r<<8)|a;                                   \
 }
+#define ARGB2101010_FROM_RGBA(Pixel, r, g, b, a)                        \
+{                                                                       \
+    r = r ? ((r << 2) | 0x3) : 0;                                       \
+    g = g ? ((g << 2) | 0x3) : 0;                                       \
+    b = b ? ((b << 2) | 0x3) : 0;                                       \
+    a = (a * 3) / 255;                                                  \
+    Pixel = (a<<30)|(r<<20)|(g<<10)|b;                                  \
+}
 #define ASSEMBLE_RGB(buf, bpp, fmt, r, g, b)                            \
 {                                                                       \
     switch (bpp) {                                                      \
@@ -333,6 +341,13 @@ do {                                                                    \
     g = ((Pixel>>16)&0xFF);                                             \
     b = (Pixel>>24);                                                    \
     a = (Pixel&0xFF);                                                   \
+}
+#define RGBA_FROM_ARGB2101010(Pixel, r, g, b, a)                        \
+{                                                                       \
+    r = ((Pixel>>22)&0xFF);                                             \
+    g = ((Pixel>>12)&0xFF);                                             \
+    b = ((Pixel>>2)&0xFF);                                              \
+    a = SDL_expand_byte[6][(Pixel>>30)];                                \
 }
 #define DISEMBLE_RGBA(buf, bpp, fmt, Pixel, r, g, b, a)                 \
 do {                                                                    \
