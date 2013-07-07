@@ -226,6 +226,37 @@ macro(CheckNAS)
 endmacro(CheckNAS)
 
 # Requires:
+# - n/a
+# Optional:
+# - SNDIO_SHARED opt
+# - HAVE_DLOPEN opt
+macro(CheckSNDIO)
+  if(SNDIO)
+    # TODO: set include paths properly, so the sndio headers are found
+    check_include_file(sndio.h HAVE_SNDIO_H)
+    find_library(D_SNDIO_LIB audio)
+    if(HAVE_SNDIO_H AND D_SNDIO_LIB)
+      set(HAVE_SNDIO TRUE)
+      file(GLOB SNDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/sndio/*.c)
+      set(SOURCE_FILES ${SOURCE_FILES} ${SNDIO_SOURCES})
+      set(SDL_AUDIO_DRIVER_SNDIO 1)
+      if(SNDIO_SHARED)
+        if(NOT HAVE_DLOPEN)
+          message_warn("You must have SDL_LoadObject() support for dynamic sndio loading")
+        else()
+          get_filename_component(F_SNDIO_LIB ${D_SNDIO_LIB} NAME)
+          set(SDL_AUDIO_DRIVER_SNDIO_DYNAMIC "\"${F_SNDIO_LIB}\"")
+          set(HAVE_SNDIO_SHARED TRUE)
+        endif(NOT HAVE_DLOPEN)
+      else(SNDIO_SHARED)
+        list(APPEND EXTRA_LIBS ${D_SNDIO_LIB})
+      endif(SNDIO_SHARED)
+      set(HAVE_SDL_AUDIO TRUE)
+    endif(HAVE_SNDIO_H AND D_SNDIO_LIB)
+  endif(SNDIO)
+endmacro(CheckSNDIO)
+
+# Requires:
 # - PkgCheckModules
 # Optional:
 # - FUSIONSOUND_SHARED opt

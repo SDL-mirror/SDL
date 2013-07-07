@@ -67,6 +67,7 @@ extern AudioBootStrap NDSAUD_bootstrap;
 extern AudioBootStrap FUSIONSOUND_bootstrap;
 extern AudioBootStrap ANDROIDAUD_bootstrap;
 extern AudioBootStrap PSPAUD_bootstrap;
+extern AudioBootStrap SNDIO_bootstrap;
 
 /* Available audio drivers */
 static const AudioBootStrap *const bootstrap[] = {
@@ -75,6 +76,9 @@ static const AudioBootStrap *const bootstrap[] = {
 #endif
 #if SDL_AUDIO_DRIVER_ALSA
     &ALSA_bootstrap,
+#endif
+#if SDL_AUDIO_DRIVER_SNDIO
+    &SNDIO_bootstrap,
 #endif
 #if SDL_AUDIO_DRIVER_BSD
     &BSD_AUDIO_bootstrap,
