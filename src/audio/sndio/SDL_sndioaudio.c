@@ -146,13 +146,15 @@ LoadSNDIOLibrary(void)
 static void
 SNDIO_WaitDevice(_THIS)
 {
-    /* no-op; sio_write() blocks if necessary. */
+    /* no-op; SNDIO_sio_write() blocks if necessary. */
 }
 
 static void
 SNDIO_PlayDevice(_THIS)
 {
-    const int written = sio_write(this->hidden->dev, this->hidden->mixbuf, this->hidden->mixlen);
+    const int written = SNDIO_sio_write(this->hidden->dev,
+                                        this->hidden->mixbuf,
+                                        this->hidden->mixlen);
 
     /* If we couldn't write, assume fatal error for now */
     if ( written == 0 ) {
@@ -172,7 +174,7 @@ SNDIO_GetDeviceBuf(_THIS)
 static void
 SNDIO_WaitDone(_THIS)
 {
-    sio_stop(this->hidden->dev);
+    SNDIO_sio_stop(this->hidden->dev);
 }
 
 static void
@@ -184,7 +186,7 @@ SNDIO_CloseDevice(_THIS)
             this->hidden->mixbuf = NULL;
         }
         if ( this->hidden->dev != NULL ) {
-            sio_close(this->hidden->dev);
+            SNDIO_sio_close(this->hidden->dev);
             this->hidden->dev = NULL;
         }
         SDL_free(this->hidden);
@@ -209,12 +211,12 @@ SNDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     this->hidden->mixlen = this->spec.size;
 
     /* !!! FIXME: SIO_DEVANY can be a specific device... */
-    if ((this->hidden->dev = sio_open(0 /*SIO_DEVANY*/, SIO_PLAY, 0)) == NULL) {
+    if ((this->hidden->dev = SNDIO_sio_open(NULL, SIO_PLAY, 0)) == NULL) {
         SNDIO_CloseDevice(this);
         return SDL_SetError("sio_open() failed");
     }
 
-    sio_initpar(&par);
+    SNDIO_sio_initpar(&par);
 
     par.rate = this->spec.freq;
     par.pchan = this->spec.channels;
@@ -229,7 +231,7 @@ SNDIO_OpenDevice(_THIS, const char *devname, int iscapture)
             par.sig = SDL_AUDIO_ISSIGNED(test_format) ? 1 : 0;
             par.bits = SDL_AUDIO_BITSIZE(test_format);
 
-            if (sio_setpar(this->hidden->dev, &par) == 1) {
+            if (SNDIO_sio_setpar(this->hidden->dev, &par) == 1) {
                 status = 0;
                 break;
             }
@@ -242,7 +244,7 @@ SNDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         return SDL_SetError("sndio: Couldn't find any hardware audio formats");
     }
 
-    if (sio_getpar(this->hidden->dev, &par) == 0) {
+    if (SNDIO_sio_getpar(this->hidden->dev, &par) == 0) {
         SNDIO_CloseDevice(this);
         return SDL_SetError("sio_getpar() failed");
     }
@@ -284,7 +286,7 @@ SNDIO_OpenDevice(_THIS, const char *devname, int iscapture)
     }
     SDL_memset(this->hidden->mixbuf, this->spec.silence, this->hidden->mixlen);
 
-    if (!sio_start(this->hidden->dev)) {
+    if (!SNDIO_sio_start(this->hidden->dev)) {
         return SDL_SetError("sio_start() failed");
     }
 
