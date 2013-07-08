@@ -195,9 +195,9 @@ main(int argc, char *argv[])
 
         consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
-            if (SDL_strcasecmp(argv[i], "--fsaa") == 0) {
-                ++fsaa;
-                consumed = 1;
+            if (SDL_strcasecmp(argv[i], "--fsaa") == 0 && i+1 < argc) {
+                fsaa = atoi(argv[i+1]);
+                consumed = 2;
             } else if (SDL_strcasecmp(argv[i], "--accel") == 0 && i+1 < argc) {
                 accel = atoi(argv[i+1]);
                 consumed = 2;
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel n]\n", argv[0],
+            fprintf(stderr, "Usage: %s %s [--fsaa n] [--accel n]\n", argv[0],
                     SDLTest_CommonUsage(state));
             quit(1);
         }
