@@ -15791,6 +15791,8 @@ else
 fi
 
 
+srcdir=`cd $srcdir && pwd`
+
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
     INCLUDE="-Iinclude $INCLUDE"

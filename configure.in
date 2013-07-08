@@ -57,6 +57,9 @@ AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 AC_CHECK_TOOL(WINDRES, [windres], [:])
 
+dnl Make sure that srcdir is a full pathname
+srcdir=`cd $srcdir && pwd`
+
 dnl Set up the compiler and linker flags
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
