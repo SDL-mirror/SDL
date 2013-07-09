@@ -19,26 +19,11 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#import <UIKit/UIKit.h>
-#import <SDL_types.h>
+/**
+ *  \file SDL_types.h
+ *
+ *  \deprecated
+ */
 
-/* *INDENT-OFF* */
-@interface SDLUIAccelerationDelegate: NSObject <UIAccelerometerDelegate> {
-
-	UIAccelerationValue x, y, z;
-	BOOL isRunning;
-	BOOL hasNewData;
-	
-}
-
-+(SDLUIAccelerationDelegate *)sharedDelegate;
--(void)accelerometer:(UIAccelerometer *)accelerometer didAccelerate:(UIAcceleration *)acceleration;
--(void)getLastOrientation:(Sint16 *)data;
--(void)startup;
--(void)shutdown;
--(BOOL)isRunning;
--(BOOL)hasNewData;
--(void)setHasNewData:(BOOL)value;
-
-@end
-/* *INDENT-ON* */
+/* DEPRECATED */
+#include "SDL_stdinc.h"

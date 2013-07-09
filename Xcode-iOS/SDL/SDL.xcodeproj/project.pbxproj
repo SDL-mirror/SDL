@@ -128,6 +128,7 @@
 		AA7558C41595D55500BBD41B /* SDL_thread.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558911595D55500BBD41B /* SDL_thread.h */; };
 		AA7558C51595D55500BBD41B /* SDL_timer.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558921595D55500BBD41B /* SDL_timer.h */; };
 		AA7558C61595D55500BBD41B /* SDL_touch.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558931595D55500BBD41B /* SDL_touch.h */; };
+		AA7558C71595D55500BBD41B /* SDL_types.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558941595D55500BBD41B /* SDL_types.h */; };
 		AA7558C81595D55500BBD41B /* SDL_version.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558951595D55500BBD41B /* SDL_version.h */; };
 		AA7558C91595D55500BBD41B /* SDL_video.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558961595D55500BBD41B /* SDL_video.h */; };
 		AA7558CA1595D55500BBD41B /* SDL.h in Headers */ = {isa = PBXBuildFile; fileRef = AA7558971595D55500BBD41B /* SDL.h */; };
@@ -319,6 +320,7 @@
 		AA7558911595D55500BBD41B /* SDL_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_thread.h; sourceTree = "<group>"; };
 		AA7558921595D55500BBD41B /* SDL_timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_timer.h; sourceTree = "<group>"; };
 		AA7558931595D55500BBD41B /* SDL_touch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_touch.h; sourceTree = "<group>"; };
+		AA7558941595D55500BBD41B /* SDL_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_types.h; sourceTree = "<group>"; };
 		AA7558951595D55500BBD41B /* SDL_version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_version.h; sourceTree = "<group>"; };
 		AA7558961595D55500BBD41B /* SDL_video.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_video.h; sourceTree = "<group>"; };
 		AA7558971595D55500BBD41B /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
@@ -711,6 +713,7 @@
 				AA7558911595D55500BBD41B /* SDL_thread.h */,
 				AA7558921595D55500BBD41B /* SDL_timer.h */,
 				AA7558931595D55500BBD41B /* SDL_touch.h */,
+				AA7558941595D55500BBD41B /* SDL_types.h */,
 				AA7558951595D55500BBD41B /* SDL_version.h */,
 				AA7558961595D55500BBD41B /* SDL_video.h */,
 			);
@@ -1011,6 +1014,7 @@
 				AA7558C41595D55500BBD41B /* SDL_thread.h in Headers */,
 				AA7558C51595D55500BBD41B /* SDL_timer.h in Headers */,
 				AA7558C61595D55500BBD41B /* SDL_touch.h in Headers */,
+				AA7558C71595D55500BBD41B /* SDL_types.h in Headers */,
 				AA7558C81595D55500BBD41B /* SDL_version.h in Headers */,
 				AA7558C91595D55500BBD41B /* SDL_video.h in Headers */,
 				AA7558CA1595D55500BBD41B /* SDL.h in Headers */,

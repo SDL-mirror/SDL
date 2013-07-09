@@ -261,6 +261,7 @@
     <ClInclude Include="..\..\include\SDL_thread.h" />
     <ClInclude Include="..\..\include\SDL_timer.h" />
     <ClInclude Include="..\..\include\SDL_touch.h" />
+    <ClInclude Include="..\..\include\SDL_types.h" />
     <ClInclude Include="..\..\include\SDL_version.h" />
     <ClInclude Include="..\..\include\SDL_video.h" />
     <ClInclude Include="..\..\src\core\windows\SDL_windows.h" />

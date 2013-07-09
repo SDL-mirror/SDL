@@ -560,6 +560,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\include\SDL_types.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\include\SDL_version.h"
 				>
 			</File>
