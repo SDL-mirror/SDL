@@ -2592,7 +2592,6 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         fi
         # The iOS platform requires special setup.
         SOURCES="$SOURCES $srcdir/src/video/uikit/*.m"
-        SOURCES="$SOURCES $srcdir/src/video/uikit/*.c"
         EXTRA_CFLAGS="$EXTRA_CFLAGS -fpascal-strings"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm -liconv -lobjc"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-framework,Foundation"
