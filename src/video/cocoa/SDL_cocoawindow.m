@@ -1012,14 +1012,12 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
         Cocoa_SetWindowTitle(_this, window);
     }
 
-#ifdef FULLSCREEN_TOGGLEABLE
     if (SDL_ShouldAllowTopmost() && fullscreen) {
         /* OpenGL is rendering to the window, so make it visible! */
         [nswindow setLevel:CGShieldingWindowLevel()];
     } else {
         [nswindow setLevel:kCGNormalWindowLevel];
     }
-#endif
 
     [data->listener pauseVisibleObservation];
     [nswindow makeKeyAndOrderFront:nil];
