@@ -28,7 +28,7 @@ public class SDLActivity extends Activity {
     private static final String TAG = "SDL";
 
     // Keep track of the paused state
-    public static boolean mIsPaused = false, mIsSurfaceReady = false;
+    public static boolean mIsPaused = false, mIsSurfaceReady = false, mHasFocus = true;
 
     // Main components
     protected static SDLActivity mSingleton;
@@ -94,6 +94,18 @@ public class SDLActivity extends Activity {
         SDLActivity.handleResume();
     }
 
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        Log.v("SDL", "onWindowFocusChanged(): " + hasFocus);
+
+        SDLActivity.mHasFocus = hasFocus;
+        if (hasFocus) {
+            SDLActivity.handleResume();
+        }
+    }
+
     @Override
     public void onLowMemory() {
         Log.v("SDL", "onLowMemory()");
@@ -139,7 +151,7 @@ public class SDLActivity extends Activity {
      * every time we get one of those events, only if it comes after surfaceDestroyed
      */
     public static void handleResume() {
-        if (SDLActivity.mIsPaused && SDLActivity.mIsSurfaceReady) {
+        if (SDLActivity.mIsPaused && SDLActivity.mIsSurfaceReady && SDLActivity.mHasFocus) {
             SDLActivity.mIsPaused = false;
             SDLActivity.nativeResume();
             mSurface.enableSensor(Sensor.TYPE_ACCELEROMETER, true);
