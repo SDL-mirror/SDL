@@ -25,6 +25,7 @@
 
 #include "SDL_messagebox.h"
 #include "SDL_shape.h"
+#include "SDL_thread.h"
 
 /* The SDL video driver */
 
@@ -301,6 +302,7 @@ struct SDL_VideoDevice
     /* Cache current GL context; don't call the OS when it hasn't changed. */
     SDL_Window *current_glwin;
     SDL_GLContext current_glctx;
+    SDL_threadID current_glthread;
 
     /* * * */
     /* Data private to this driver */

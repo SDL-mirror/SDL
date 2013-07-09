@@ -2730,6 +2730,7 @@ SDL_GL_CreateContext(SDL_Window * window)
     /* Creating a context is assumed to make it current in the SDL driver. */
     _this->current_glwin = window;
     _this->current_glctx = ctx;
+    _this->current_glthread = SDL_ThreadID();
 
     return ctx;
 }
@@ -2738,6 +2739,7 @@ int
 SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
 {
     int retval;
+    SDL_threadID thread = SDL_ThreadID();
 
     if (!ctx) {
         window = NULL;
@@ -2749,13 +2751,14 @@ SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
         }
     }
 
-    if ((window == _this->current_glwin) && (ctx == _this->current_glctx)) {
+    if ((window == _this->current_glwin) && (ctx == _this->current_glctx) && (thread == _this->current_glthread)) {
         retval = 0;  /* we're already current. */
     } else {
         retval = _this->GL_MakeCurrent(_this, window, ctx);
         if (retval == 0) {
             _this->current_glwin = window;
             _this->current_glctx = ctx;
+            _this->current_glthread = thread;
         }
     }
 
