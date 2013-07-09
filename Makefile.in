@@ -87,7 +87,6 @@ HDRS = \
 	SDL_thread.h \
 	SDL_timer.h \
 	SDL_touch.h \
-	SDL_types.h \
 	SDL_version.h \
 	SDL_video.h \
 	begin_code.h \
