@@ -254,7 +254,7 @@ extern DECLSPEC void *SDLCALL SDL_memset(void *dst, int c, size_t len);
 #define SDL_zero(x) SDL_memset(&(x), 0, sizeof((x)))
 #define SDL_zerop(x) SDL_memset((x), 0, sizeof(*(x)))
 
-/* Note that the semantics are different from memset() in that this is a 32-bit assignment */
+/* Note that memset() is a byte assignment and this is a 32-bit assignment, so they're not directly equivalent. */
 SDL_FORCE_INLINE void SDL_memset4(void *dst, int val, size_t dwords)
 {
 #if defined(__GNUC__) && defined(i386)
