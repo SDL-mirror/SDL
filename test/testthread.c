@@ -19,6 +19,7 @@
 #include "SDL.h"
 #include "SDL_thread.h"
 
+static SDL_TLSID tls;
 static int alive = 0;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
@@ -32,8 +33,9 @@ quit(int rc)
 int SDLCALL
 ThreadFunc(void *data)
 {
-    printf("Started thread %s: My thread id is %lu\n",
-           (char *) data, SDL_ThreadID());
+    SDL_TLSSet(tls, "baby thread");
+    printf("Started thread %s: My thread id is %lu, thread data = %s\n",
+           (char *) data, SDL_ThreadID(), (const char *)SDL_TLSGet(tls));
     while (alive) {
         printf("Thread '%s' is alive!\n", (char *) data);
         SDL_Delay(1 * 1000);
@@ -62,6 +64,11 @@ main(int argc, char *argv[])
         return (1);
     }
 
+    tls = SDL_TLSCreate();
+    SDL_assert(tls);
+    SDL_TLSSet(tls, "main thread");
+    printf("Main thread data initially: %s\n", (const char *)SDL_TLSGet(tls));
+
     alive = 1;
     thread = SDL_CreateThread(ThreadFunc, "One", "#1");
     if (thread == NULL) {
@@ -72,6 +79,8 @@ main(int argc, char *argv[])
     printf("Waiting for thread #1\n");
     alive = 0;
     SDL_WaitThread(thread, NULL);
+
+    printf("Main thread data finally: %s\n", (const char *)SDL_TLSGet(tls));
 
     alive = 1;
     signal(SIGTERM, killed);

@@ -1511,7 +1511,7 @@ Optional Features:
   --enable-sse            use SSE assembly routines [[default=yes]]
   --enable-sse2           use SSE2 assembly routines [[default=no]]
   --enable-altivec        use Altivec assembly routines [[default=yes]]
-  --enable-oss            support the OSS audio API [[default=yes]]
+  --enable-oss            support the OSS audio API [[default=maybe]]
   --enable-alsa           support the ALSA audio API [[default=yes]]
   --disable-alsatest      Do not try to compile and run a test Alsa program
   --enable-alsa-shared    dynamically load ALSA audio support [[default=yes]]
@@ -17535,8 +17535,20 @@ CheckOSS()
 if test "${enable_oss+set}" = set; then :
   enableval=$enable_oss;
 else
-  enable_oss=yes
+  enable_oss=maybe
 fi
+
+
+    # OpenBSD "has" OSS, but it's not really for app use. They want you to
+    #  use sndio instead. So on there, we default to disabled. You can force
+    #  it on if you really want, though.
+    if test x$enable_oss = xmaybe; then
+        enable_oss=yes
+        case "$host" in
+            *-*-openbsd*)
+                enable_oss=no;;
+        esac
+    fi
 
     if test x$enable_audio = xyes -a x$enable_oss = xyes; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OSS audio support" >&5
@@ -21423,6 +21435,9 @@ $as_echo "$has_pthread_set_name_np" >&6; }
             # We can fake these with semaphores and mutexes if necessary
             SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_syscond.c"
 
+            # Thread local storage
+            SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_systls.c"
+
             have_threads=yes
         fi
     fi
@@ -22206,7 +22221,7 @@ $as_echo "#define SDL_AUDIO_DRIVER_SUNAUDIO 1" >>confdefs.h
                 SOURCES="$SOURCES $srcdir/src/audio/sun/*.c"
                 have_audio=yes
             ;;
-            netbsd|openbsd)
+            netbsd)  # Don't use this on OpenBSD, it's busted.
 
 $as_echo "#define SDL_AUDIO_DRIVER_BSD 1" >>confdefs.h
 
@@ -22367,9 +22382,7 @@ $as_echo "#define SDL_POWER_WINDOWS 1" >>confdefs.h
 
 $as_echo "#define SDL_THREAD_WINDOWS 1" >>confdefs.h
 
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_sysmutex.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_syssem.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_systhread.c"
+            SOURCES="$SOURCES $srcdir/src/thread/windows/*.c"
             SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
             have_threads=yes
         fi

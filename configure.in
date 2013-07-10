@@ -657,6 +657,7 @@ AC_HELP_STRING([--enable-oss], [support the OSS audio API [[default=maybe]]]),
         case "$host" in
             *-*-openbsd*)
                 enable_oss=no;;
+        esac
     fi
 
     if test x$enable_audio = xyes -a x$enable_oss = xyes; then
@@ -2019,6 +2020,9 @@ AC_HELP_STRING([--enable-pthread-sem], [use pthread semaphores [[default=yes]]])
             # We can fake these with semaphores and mutexes if necessary
             SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_syscond.c"
 
+            # Thread local storage
+            SOURCES="$SOURCES $srcdir/src/thread/pthread/SDL_systls.c"
+
             have_threads=yes
         fi
     fi
@@ -2470,9 +2474,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         # Set up files for the thread library
         if test x$enable_threads = xyes; then
             AC_DEFINE(SDL_THREAD_WINDOWS, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_sysmutex.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_syssem.c"
-            SOURCES="$SOURCES $srcdir/src/thread/windows/SDL_systhread.c"
+            SOURCES="$SOURCES $srcdir/src/thread/windows/*.c"
             SOURCES="$SOURCES $srcdir/src/thread/generic/SDL_syscond.c"
             have_threads=yes
         fi

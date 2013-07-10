@@ -1133,6 +1133,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\thread\windows\SDL_systls.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\thread\SDL_systhread.h"
 			>
 		</File>

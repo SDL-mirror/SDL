@@ -398,6 +398,9 @@
 		A77E6EB4167AB0A90010E40B /* SDL_gamecontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A77E6EB5167AB0A90010E40B /* SDL_gamecontroller.h in Headers */ = {isa = PBXBuildFile; fileRef = A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */; };
 		AA0AD09D16648D1700CE5896 /* SDL_gamecontroller.c in Sources */ = {isa = PBXBuildFile; fileRef = BBFC088A164C6514003E6A99 /* SDL_gamecontroller.c */; };
+		AA0F8491178D5ECC00823F9D /* SDL_systls.c in Sources */ = {isa = PBXBuildFile; fileRef = AA0F8490178D5ECC00823F9D /* SDL_systls.c */; };
+		AA0F8492178D5ECC00823F9D /* SDL_systls.c in Sources */ = {isa = PBXBuildFile; fileRef = AA0F8490178D5ECC00823F9D /* SDL_systls.c */; };
+		AA0F8493178D5ECC00823F9D /* SDL_systls.c in Sources */ = {isa = PBXBuildFile; fileRef = AA0F8490178D5ECC00823F9D /* SDL_systls.c */; };
 		AA41F88014B8F1F500993C4F /* SDL_dropevents.c in Sources */ = {isa = PBXBuildFile; fileRef = 566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */; };
 		AA628ACA159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
 		AA628ACB159367B7005138DD /* SDL_rotate.c in Sources */ = {isa = PBXBuildFile; fileRef = AA628AC8159367B7005138DD /* SDL_rotate.c */; };
@@ -984,6 +987,7 @@
 		566CDE8D148F0AC200C5A9BB /* SDL_dropevents_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_dropevents_c.h; sourceTree = "<group>"; };
 		566CDE8E148F0AC200C5A9BB /* SDL_dropevents.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_dropevents.c; sourceTree = "<group>"; };
 		A77E6EB3167AB0A90010E40B /* SDL_gamecontroller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_gamecontroller.h; sourceTree = "<group>"; };
+		AA0F8490178D5ECC00823F9D /* SDL_systls.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_systls.c; sourceTree = "<group>"; };
 		AA628AC8159367B7005138DD /* SDL_rotate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_rotate.c; sourceTree = "<group>"; };
 		AA628AC9159367B7005138DD /* SDL_rotate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_rotate.h; sourceTree = "<group>"; };
 		AA628ACF159367F2005138DD /* SDL_x11xinput2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_x11xinput2.c; sourceTree = "<group>"; };
@@ -1462,6 +1466,7 @@
 				04BDFE8112E6671800899322 /* SDL_syssem.c */,
 				04BDFE8212E6671800899322 /* SDL_systhread.c */,
 				04BDFE8312E6671800899322 /* SDL_systhread_c.h */,
+				AA0F8490178D5ECC00823F9D /* SDL_systls.c */,
 			);
 			path = pthread;
 			sourceTree = "<group>";
@@ -2403,6 +2408,7 @@
 				AA9E4093163BE51E007A2AD0 /* SDL_x11messagebox.c in Sources */,
 				AABCC38F164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */,
 				AA0AD09D16648D1700CE5896 /* SDL_gamecontroller.c in Sources */,
+				AA0F8491178D5ECC00823F9D /* SDL_systls.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2519,6 +2525,7 @@
 				AA628AD2159367F2005138DD /* SDL_x11xinput2.c in Sources */,
 				AA9E4094163BE51E007A2AD0 /* SDL_x11messagebox.c in Sources */,
 				AABCC390164063D200AB8930 /* SDL_cocoamessagebox.m in Sources */,
+				AA0F8492178D5ECC00823F9D /* SDL_systls.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2635,6 +2642,7 @@
 				DB31406817554B71006C0E22 /* SDL_x11xinput2.c in Sources */,
 				DB31406917554B71006C0E22 /* SDL_x11messagebox.c in Sources */,
 				DB31406A17554B71006C0E22 /* SDL_cocoamessagebox.m in Sources */,
+				AA0F8493178D5ECC00823F9D /* SDL_systls.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
