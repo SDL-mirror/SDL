@@ -92,9 +92,7 @@ SDL_TLSSet(SDL_TLSID id, const void *value)
         for (i = oldlimit; i < newlimit; ++i) {
             data->data[i] = NULL;
         }
-        if (!tls_set(thread_local_storage, data)) {
-            return SDL_SetError("TlsSetValue() failed");
-        }
+        tls_set(thread_local_storage, data);
     }
 
     data->data[id-1] = SDL_const_cast(void*, value);
