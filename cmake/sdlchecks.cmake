@@ -698,6 +698,7 @@ macro(CheckPTHREAD)
           ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_systhread.c
           ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_sysmutex.c   # Can be faked, if necessary
           ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_syscond.c    # Can be faked, if necessary
+          ${SDL2_SOURCE_DIR}/src/thread/pthread/SDL_systls.c
           )
       if(HAVE_PTHREADS_SEM)
         set(SOURCE_FILES ${SOURCE_FILES}
