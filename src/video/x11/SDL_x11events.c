@@ -187,8 +187,9 @@ static char* X11_URIToLocal(char* uri) {
 #if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
 static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
 {
-    if (XGetEventData(videodata->display, &event)) {
-        XGenericEventCookie *cookie = &event.xcookie;
+    /* event is a union, so cookie == &event, but this is type safe. */
+    XGenericEventCookie *cookie = &event.xcookie;
+    if (XGetEventData(videodata->display, cookie)) {
         X11_HandleXinput2Event(videodata, cookie);
         XFreeEventData(videodata->display, cookie);
     }
