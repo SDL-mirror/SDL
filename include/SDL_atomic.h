@@ -155,11 +155,31 @@ void _ReadWriteBarrier(void);
  * For more information on these semantics, take a look at the blog post:
  * http://preshing.com/20120913/acquire-and-release-semantics
  */
-/* FIXME: This is correct for x86 and x64 but not other CPUs
-   For PPC we need the lwsync instruction, and on ARM some variant of dmb
- */
+#if defined(__GNUC__) && (defined(__powerpc__) || defined(__ppc__))
+#define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("lwsync" : : : "memory")
+#define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("lwsync" : : : "memory")
+#elif defined(__GNUC__) && defined(__arm__)
+#if defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7EM__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__)
+#define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("dmb ish" : : : "memory")
+#define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("dmb ish" : : : "memory")
+#elif defined(__ARM_ARCH_6__) || defined(__ARM_ARCH_6J__) || defined(__ARM_ARCH_6K__) || defined(__ARM_ARCH_6T2__) || defined(__ARM_ARCH_6Z__) || defined(__ARM_ARCH_6ZK__)
+#ifdef __thumb__
+/* The mcr instruction isn't available in thumb mode, use real functions */
+extern DECLSPEC void SDLCALL SDL_MemoryBarrierRelease();
+extern DECLSPEC void SDLCALL SDL_MemoryBarrierAcquire();
+#else
+#define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" : : "r"(0) : "memory")
+#define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("mcr p15, 0, %0, c7, c10, 5" : : "r"(0) : "memory")
+#endif /* __thumb__ */
+#else
+#define SDL_MemoryBarrierRelease()   __asm__ __volatile__ ("" : : : "memory")
+#define SDL_MemoryBarrierAcquire()   __asm__ __volatile__ ("" : : : "memory")
+#endif /* __GNUC__ && __arm__ */
+#else
+/* This is correct for the x86 and x64 CPUs, and we'll expand this over time. */
 #define SDL_MemoryBarrierRelease()  SDL_CompilerBarrier()
 #define SDL_MemoryBarrierAcquire()  SDL_CompilerBarrier()
+#endif
 
 
 /* Platform specific optimized versions of the atomic functions,
