@@ -343,8 +343,7 @@ surface_testCompleteSurfaceConversion(void *arg)
     };
     SDL_Surface *face = NULL, *cvt1, *cvt2, *final;
     SDL_PixelFormat *fmt1, *fmt2;
-    Uint32 rgba[4];
-    int bpp, i, j, ret = 0;
+    int i, j, ret = 0;
 
     /* Create sample surface */
     face = SDLTest_ImageFace();
