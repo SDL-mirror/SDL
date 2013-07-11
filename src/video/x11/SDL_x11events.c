@@ -778,12 +778,11 @@ X11_DispatchEvent(_THIS)
 #endif
             Atom target = xevent.xselection.target;
             if (target == data->xdnd_req) {
-
                 /* read data */
                 SDL_x11Prop p;
                 X11_ReadProperty(&p, display, data->xwindow, videodata->PRIMARY);
 
-                if(p.format==8) {
+                if (p.format == 8) {
                     SDL_bool expect_lf = SDL_FALSE;
                     char *start = NULL;
                     char *scan = (char*)p.data;
@@ -792,21 +791,24 @@ X11_DispatchEvent(_THIS)
                     int length = 0;
                     while (p.count--) {
                         if (!expect_lf) {
-                            if (*scan==0x0D) {
+                            if (*scan == 0x0D) {
                                 expect_lf = SDL_TRUE;
-                            } else if(start == NULL) {
+                            }
+                            if (start == NULL) {
                                 start = scan;
                                 length = 0;
                             }
                             length++;
                         } else {
-                            if (*scan==0x0A && length>0) {
-                                uri = malloc(length--);
-                                memcpy(uri, start, length);
-                                uri[length] = 0;
+                            if (*scan == 0x0A && length > 0) {
+                                uri = SDL_malloc(length--);
+                                SDL_memcpy(uri, start, length);
+                                uri[length] = '\0';
                                 fn = X11_URIToLocal(uri);
-                                if (fn) SDL_SendDropFile(fn);
-                                free(uri);
+                                if (fn) {
+                                    SDL_SendDropFile(fn);
+                                }
+                                SDL_free(uri);
                             }
                             expect_lf = SDL_FALSE;
                             start = NULL;
@@ -819,12 +821,12 @@ X11_DispatchEvent(_THIS)
 
                 /* send reply */
                 XClientMessageEvent m;
-                memset(&m, 0, sizeof(XClientMessageEvent));
+                SDL_memset(&m, 0, sizeof(XClientMessageEvent));
                 m.type = ClientMessage;
                 m.display = display;
                 m.window = data->xdnd_source;
                 m.message_type = videodata->XdndFinished;
-                m.format=32;
+                m.format = 32;
                 m.data.l[0] = data->xwindow;
                 m.data.l[1] = 1;
                 m.data.l[2] = videodata->XdndActionCopy;
@@ -835,7 +837,6 @@ X11_DispatchEvent(_THIS)
             } else {
                 videodata->selection_waiting = SDL_FALSE;
             }
-
         }
         break;
 
