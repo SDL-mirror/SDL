@@ -425,6 +425,7 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
     int pixel_format = 0;
     int iAttribs[64];
     int *iAttr;
+    int *iAccelAttr;
     float fAttribs[1] = { 0 };
 
     WIN_GL_SetupPixelFormat(_this, &pfd);
@@ -492,18 +493,28 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         *iAttr++ = _this->gl_config.multisamplesamples;
     }
 
+    /* We always choose either FULL or NO accel on Windows, because of flaky
+       drivers. If the app didn't specify, we use FULL, because that's
+       probably what they wanted (and if you didn't care and got FULL, that's
+       a perfectly valid result in any case). */
     *iAttr++ = WGL_ACCELERATION_ARB;
-    *iAttr++ = WGL_FULL_ACCELERATION_ARB;
+    iAccelAttr = iAttr;
+    if (_this->gl_config.accelerated) {
+        *iAttr++ = WGL_FULL_ACCELERATION_ARB;
+    } else {
+        *iAttr++ = WGL_NO_ACCELERATION_ARB;
+    }
 
     *iAttr = 0;
 
     /* Choose and set the closest available pixel format */
-    if (_this->gl_config.accelerated != 0) {
-        pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
-    }
-    if (!pixel_format && _this->gl_config.accelerated != 1) {
-        iAttr[-1] = WGL_NO_ACCELERATION_ARB;
     pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+
+    /* App said "don't care about accel" and FULL accel failed. Try NO. */
+    if ( ( !pixel_format ) && ( _this->gl_config.accelerated < 0 ) ) {
+        *iAccelAttr = WGL_NO_ACCELERATION_ARB;
+        pixel_format = WIN_GL_ChoosePixelFormatARB(_this, iAttribs, fAttribs);
+        *iAccelAttr = WGL_FULL_ACCELERATION_ARB;  /* if we try again. */
     }
     if (!pixel_format) {
         pixel_format = WIN_GL_ChoosePixelFormat(hdc, &pfd);
