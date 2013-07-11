@@ -795,6 +795,7 @@ elseif(WINDOWS)
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_sysmutex.c
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_syssem.c
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_systhread.c
+      ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_systls.c
       ${SDL2_SOURCE_DIR}/src/thread/generic/SDL_syscond.c)
     set(HAVE_SDL_THREADS TRUE)
   endif(SDL_THREADS)
