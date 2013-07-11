@@ -1212,6 +1212,10 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
         }
     }
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
+    if (!window) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
     window->magic = &_this->window_magic;
     window->id = _this->next_object_id++;
     window->x = x;
@@ -1267,6 +1271,10 @@ SDL_CreateWindowFrom(const void *data)
         return NULL;
     }
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
+    if (!window) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
     window->magic = &_this->window_magic;
     window->id = _this->next_object_id++;
     window->flags = SDL_WINDOW_FOREIGN;
