@@ -360,6 +360,18 @@ PULSEAUDIO_OpenDevice(_THIS, const char *devname, int iscapture)
         case AUDIO_S16MSB:
             paspec.format = PA_SAMPLE_S16BE;
             break;
+        case AUDIO_S32LSB:
+            paspec.format = PA_SAMPLE_S32LE;
+            break;
+        case AUDIO_S32MSB:
+            paspec.format = PA_SAMPLE_S32BE;
+            break;
+        case AUDIO_F32LSB:
+            paspec.format = PA_SAMPLE_FLOAT32LE
+            break;
+        case AUDIO_F32MSB:
+            paspec.format = PA_SAMPLE_FLOAT32BE
+            break;
         default:
             paspec.format = PA_SAMPLE_INVALID;
             break;
