@@ -25,7 +25,9 @@
 #define libm_hidden_proto(x)
 #define libm_hidden_def(x)
 
+#ifndef __HAIKU__ /* already defined in a system header. */
 typedef unsigned int u_int32_t;
+#endif
 
 #define atan            SDL_uclibc_atan
 #define __ieee754_atan2 SDL_uclibc_atan2
