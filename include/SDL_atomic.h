@@ -45,6 +45,7 @@
  *
  * There's also lots of good information here:
  * http://www.1024cores.net/home/lock-free-algorithms
+ * http://preshing.com/
  *
  * These operations may or may not actually be implemented using
  * processor specific atomic operations. When possible they are
@@ -134,6 +135,32 @@ void _ReadWriteBarrier(void);
 #define SDL_CompilerBarrier()   \
 { SDL_SpinLock _tmp = 0; SDL_AtomicLock(&_tmp); SDL_AtomicUnlock(&_tmp); }
 #endif
+
+/**
+ * Memory barriers are designed to prevent reads and writes from being
+ * reordered by the compiler and being seen out of order on multi-core CPUs.
+ *
+ * A typical pattern would be for thread A to write some data and a flag,
+ * and for thread B to read the flag and get the data. In this case you
+ * would insert a release barrier between writing the data and the flag,
+ * guaranteeing that the data write completes no later than the flag is
+ * written, and you would insert an acquire barrier between reading the
+ * flag and reading the data, to ensure that all the reads associated
+ * with the flag have completed.
+ *
+ * In this pattern you should always see a release barrier paired with
+ * an acquire barrier and you should gate the data reads/writes with a
+ * single flag variable.
+ *
+ * For more information on these semantics, take a look at the blog post:
+ * http://preshing.com/20120913/acquire-and-release-semantics
+ */
+/* FIXME: This is correct for x86 and x64 but not other CPUs
+   For PPC we need the lwsync instruction, and on ARM some variant of dmb
+ */
+#define SDL_MemoryBarrierRelease()  SDL_CompilerBarrier()
+#define SDL_MemoryBarrierAcquire()  SDL_CompilerBarrier()
+
 
 /* Platform specific optimized versions of the atomic functions,
  * you can disable these by defining SDL_DISABLE_ATOMIC_INLINE

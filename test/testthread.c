@@ -33,7 +33,7 @@ quit(int rc)
 int SDLCALL
 ThreadFunc(void *data)
 {
-    SDL_TLSSet(tls, "baby thread");
+    SDL_TLSSet(tls, "baby thread", NULL);
     printf("Started thread %s: My thread id is %lu, thread data = %s\n",
            (char *) data, SDL_ThreadID(), (const char *)SDL_TLSGet(tls));
     while (alive) {
@@ -66,7 +66,7 @@ main(int argc, char *argv[])
 
     tls = SDL_TLSCreate();
     SDL_assert(tls);
-    SDL_TLSSet(tls, "main thread");
+    SDL_TLSSet(tls, "main thread", NULL);
     printf("Main thread data initially: %s\n", (const char *)SDL_TLSGet(tls));
 
     alive = 1;

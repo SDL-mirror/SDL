@@ -21,81 +21,47 @@
 
 #include "SDL_config.h"
 #include "SDL_thread.h"
+#include "../SDL_thread_c.h"
 
 #if SDL_THREAD_BEOS
 
 #include <support/TLS.h>
 
 
-#define TLS_ALLOC_CHUNKSIZE 8
-
-typedef struct {
-    int limit;
-    void *data[1];
-} SDL_TLSData;
-
-static SDL_SpinLock tls_lock;
 static int32 thread_local_storage = B_NO_MEMORY;
-static SDL_atomic_t tls_id;
+static SDL_bool generic_local_storage = SDL_FALSE;
 
-
-SDL_TLSID
-SDL_TLSCreate()
+SDL_TLSData *
+SDL_SYS_GetTLSData()
 {
-    if (thread_local_storage == B_NO_MEMORY) {
-        SDL_AtomicLock(&tls_lock);
-        if (thread_local_storage == B_NO_MEMORY) {
-            thread_local_storage = tls_allocate();
-            if (thread_local_storage == B_NO_MEMORY) {
-                SDL_SetError("tls_allocate() failed");
-                SDL_AtomicUnlock(&tls_lock);
-                return 0;
+    if (thread_local_storage == B_NO_MEMORY && !generic_local_storage) {
+        static SDL_SpinLock lock;
+        SDL_AtomicLock(&lock);
+        if (thread_local_storage == B_NO_MEMORY && !generic_local_storage) {
+            int32 storage = tls_allocate();
+            if (storage != B_NO_MEMORY) {
+                SDL_MemoryBarrierRelease();
+                thread_local_storage = storage;
+            } else {
+                generic_local_storage = SDL_TRUE;
             }
         }
-        SDL_AtomicUnlock(&tls_lock);
+        SDL_AtomicUnlock(&lock);
     }
-    return SDL_AtomicIncRef(&tls_id)+1;
-}
-
-void *
-SDL_TLSGet(SDL_TLSID id)
-{
-    SDL_TLSData *data;
-
-    data = (SDL_TLSData *)tls_get(thread_local_storage);
-    if (!data || id <= 0 || id > data->limit) {
-        return NULL;
+    if (generic_local_storage) {
+        return SDL_Generic_GetTLSData();
     }
-    return data->data[id-1];
+    SDL_MemoryBarrierAcquire();
+    return (SDL_TLSData *)tls_get(thread_local_storage);
 }
 
 int
-SDL_TLSSet(SDL_TLSID id, const void *value)
+SDL_SYS_SetTLSData(SDL_TLSData *data)
 {
-    SDL_TLSData *data;
-
-    if (thread_local_storage == B_NO_MEMORY || id <= 0) {
-        return SDL_InvalidParamError(id);
+    if (generic_local_storage) {
+        return SDL_Generic_SetTLSData(data);
     }
-
-    data = (SDL_TLSData *)tls_get(thread_local_storage);
-    if (!data || id > data->limit) {
-        int i, oldlimit, newlimit;
-
-        oldlimit = data ? data->limit : 0;
-        newlimit = (id + TLS_ALLOC_CHUNKSIZE);
-        data = (SDL_TLSData *)SDL_realloc(data, sizeof(*data)+(newlimit-1)*sizeof(void*));
-        if (!data) {
-            return SDL_OutOfMemory();
-        }
-        data->limit = newlimit;
-        for (i = oldlimit; i < newlimit; ++i) {
-            data->data[i] = NULL;
-        }
-        tls_set(thread_local_storage, data);
-    }
-
-    data->data[id-1] = SDL_const_cast(void*, value);
+    tls_set(thread_local_storage, data);
     return 0;
 }
 

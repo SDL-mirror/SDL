@@ -48,8 +48,8 @@ typedef struct SDL_Thread SDL_Thread;
 /* The SDL thread ID */
 typedef unsigned long SDL_threadID;
 
-/* Thread local storage ID */
-typedef int SDL_TLSID;
+/* Thread local storage ID, 0 is the invalid ID */
+typedef unsigned SDL_TLSID;
 
 /* The SDL thread priority
  *
@@ -219,13 +219,14 @@ extern DECLSPEC void * SDLCALL SDL_TLSGet(SDL_TLSID id);
  *
  *  \param id The thread local storage ID
  *  \param value The value to associate with the ID for the current thread
+ *  \param destructor A function called when the thread exits, to free the value.
  *
  *  \return 0 on success, -1 on error
  *
  *  \sa SDL_TLSCreate()
  *  \sa SDL_TLSGet()
  */
-extern DECLSPEC int SDLCALL SDL_TLSSet(SDL_TLSID id, const void *value);
+extern DECLSPEC int SDLCALL SDL_TLSSet(SDL_TLSID id, const void *value, void (*destructor)(void*));
 
 
 /* Ends C function definitions when using C++ */
