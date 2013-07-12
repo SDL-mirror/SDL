@@ -200,7 +200,7 @@ extern DECLSPEC void SDLCALL SDL_WaitThread(SDL_Thread * thread, int *status);
  *  \sa SDL_TLSGet()
  *  \sa SDL_TLSSet()
  */
-extern DECLSPEC SDL_TLSID SDLCALL SDL_TLSCreate();
+extern DECLSPEC SDL_TLSID SDLCALL SDL_TLSCreate(void);
 
 /**
  *  \brief Get the value associated with a thread local storage ID for the current thread.
