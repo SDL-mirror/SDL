@@ -461,6 +461,7 @@ SDL_RunAudio(void *devicep)
         }
     } else {
         /* Otherwise, do not use the streamer. This is the old code. */
+        const int silence = (int) device->spec.silence;
 
         /* Loop, filling the audio buffers */
         while (device->enabled) {
@@ -484,9 +485,13 @@ SDL_RunAudio(void *devicep)
                 }
             }
 
-            SDL_LockMutex(device->mixer_lock);
-            (*fill) (udata, stream, stream_len);
-            SDL_UnlockMutex(device->mixer_lock);
+            if (device->paused) {
+                SDL_memset(stream, silence, stream_len);
+            } else {
+                SDL_LockMutex(device->mixer_lock);
+                (*fill) (udata, stream, stream_len);
+                SDL_UnlockMutex(device->mixer_lock);
+            }
 
             /* Convert the audio if necessary */
             if (device->convert.needed) {
