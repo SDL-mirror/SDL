@@ -532,7 +532,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     GLXContext context = NULL, share_context;
 
     if (_this->gl_config.share_with_current_context) {
-        share_context = SDL_GL_GetCurrentContext();
+        share_context = (GLXContext)SDL_GL_GetCurrentContext();
     } else {
         share_context = NULL;
     }
