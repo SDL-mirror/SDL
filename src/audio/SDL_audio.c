@@ -466,11 +466,6 @@ SDL_RunAudio(void *devicep)
         /* Loop, filling the audio buffers */
         while (device->enabled) {
 
-            if (device->paused) {
-                SDL_Delay(delay);
-                continue;
-            }
-
             /* Fill the current buffer with sound */
             if (device->convert.needed) {
                 if (device->convert.buf) {
