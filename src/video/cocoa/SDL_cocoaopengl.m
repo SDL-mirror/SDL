@@ -212,6 +212,7 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
 
+        windowdata->nscontext = nscontext;
         if ([nscontext view] != [windowdata->nswindow contentView]) {
             [nscontext setView:[windowdata->nswindow contentView]];
             [nscontext update];
@@ -272,12 +273,12 @@ void
 Cocoa_GL_SwapWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool;
-    NSOpenGLContext *nscontext;
+    SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
+    NSOpenGLContext *nscontext = windowdata->nscontext;
 
     pool = [[NSAutoreleasePool alloc] init];
 
-    /* FIXME: Do we need to get the context for the window? */
-    [[NSOpenGLContext currentContext] flushBuffer];
+    [nscontext flushBuffer];
 
     [pool release];
 }
