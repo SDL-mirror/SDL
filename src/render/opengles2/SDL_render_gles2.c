@@ -1508,7 +1508,6 @@ GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     Uint32 pixel_format, void * pixels, int pitch)
 {
     GLES2_DriverContext *rdata = (GLES2_DriverContext *)renderer->driverdata;
-    SDL_Window *window = renderer->window;
     Uint32 temp_format = SDL_PIXELFORMAT_ABGR8888;
     void *temp_pixels;
     int temp_pitch;
@@ -1524,7 +1523,7 @@ GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         return SDL_OutOfMemory();
     }
 
-    SDL_GetWindowSize(window, &w, &h);
+    SDL_GetRendererOutputSize(renderer, &w, &h);
 
     rdata->glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
