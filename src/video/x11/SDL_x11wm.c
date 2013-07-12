@@ -43,7 +43,6 @@ static Uint8 reverse_byte(Uint8 x)
 
 void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 {
-	Atom _NET_WM_ICON = XInternAtom(SDL_Display, "_NET_WM_ICON", False);
 	SDL_Surface *sicon;
 	XWMHints *wmhints;
 	XImage *icon_image;
@@ -60,81 +59,6 @@ void X11_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 	int masksize;
 
 	SDL_Lock_EventThread();
-
-	if (_NET_WM_ICON) {   /* better interface for modern systems. */
-		SDL_PixelFormat format;
-		SDL_Surface *surface;
-		int propsize;
-		long *propdata;
-
-		/* Convert the icon to ARGB for modern window managers */
-		SDL_memset(&format, 0, sizeof (format));
-		format.BitsPerPixel = 32;
-		format.BytesPerPixel = 4;
-		#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-		format.Rshift = 8;
-		format.Gshift = 16;
-		format.Bshift = 24;
-		format.Ashift = 0;
-		#else
-		format.Rshift = 16;
-		format.Gshift = 8;
-		format.Bshift = 0;
-		format.Ashift = 24;
-		#endif
-		format.Rmask = 0xFF << format.Rshift;
-		format.Gmask = 0xFF << format.Gshift;
-		format.Bmask = 0xFF << format.Bshift;
-		format.Amask = 0xFF << format.Ashift;
-		format.alpha = SDL_ALPHA_OPAQUE;
-
-		surface = SDL_ConvertSurface(icon, &format, 0);
-		if (!surface) {
-			return;
-		}
-
-		/* Set the _NET_WM_ICON property */
-		propsize = 2 + (icon->w * icon->h);
-		propdata = SDL_malloc(propsize * sizeof(long));
-		if (propdata) {
-			const Uint32 alpha = format.Amask;
-			int x, y;
-			Uint32 *src;
-			long *dst;
-
-			propdata[0] = icon->w;
-			propdata[1] = icon->h;
-			dst = &propdata[2];
-
-			size_t maskidx = 0;
-			for (y = 0; y < icon->h; ++y) {
-				src = (Uint32*)((Uint8*)surface->pixels + y * surface->pitch);
-				for (x = 0; x < icon->w; ++x) {
-					const Uint32 pixel = *(src++);
-					if (mask[maskidx / 8] & (1<<(7-(maskidx % 8)))) {
-						*dst++ = pixel | alpha;
-					} else {
-						*dst++ = pixel & ~alpha;
-					}
-					maskidx++;
-				}
-			}
-
-			XChangeProperty(SDL_Display, WMwindow, _NET_WM_ICON, XA_CARDINAL,
-			                32, PropModeReplace, (unsigned char *) propdata,
-			                propsize);
-		}
-
-		SDL_FreeSurface(surface);
-		SDL_free(propdata);
-
-		XFlush(SDL_Display);
-		SDL_Unlock_EventThread();
-
-		return;
-	}
-
-	/* Do it the old way... */
 
 	/* The icon must use the default visual, depth and colormap of the
 	   screen, so it might need a conversion */
