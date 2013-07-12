@@ -890,6 +890,16 @@ extern DECLSPEC int SDLCALL SDL_GL_MakeCurrent(SDL_Window * window,
                                                SDL_GLContext context);
 
 /**
+ *  \brief Get the currently active OpenGL window.
+ */
+extern DECLSPEC SDL_Window* SDLCALL SDL_GL_GetCurrentWindow(void);
+
+/**
+ *  \brief Get the currently active OpenGL context.
+ */
+extern DECLSPEC SDL_GLContext SDLCALL SDL_GL_GetCurrentContext(void);
+
+/**
  *  \brief Set the swap interval for the current OpenGL context.
  *
  *  \param interval 0 for immediate updates, 1 for updates synchronized with the

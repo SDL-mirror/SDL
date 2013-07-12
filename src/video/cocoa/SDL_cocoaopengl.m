@@ -178,7 +178,7 @@ Cocoa_GL_CreateContext(_THIS, SDL_Window * window)
     }
 
     if (_this->gl_config.share_with_current_context) {
-        share_context = (NSOpenGLContext*)(_this->current_glctx);
+        share_context = (NSOpenGLContext*)SDL_GL_GetCurrentContext();
     }
 
     context = [[NSOpenGLContext alloc] initWithFormat:fmt shareContext:share_context];

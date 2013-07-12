@@ -302,7 +302,8 @@ struct SDL_VideoDevice
     /* Cache current GL context; don't call the OS when it hasn't changed. */
     SDL_Window *current_glwin;
     SDL_GLContext current_glctx;
-    SDL_threadID current_glthread;
+    SDL_TLSID current_glwin_tls;
+    SDL_TLSID current_glctx_tls;
 
     /* * * */
     /* Data private to this driver */

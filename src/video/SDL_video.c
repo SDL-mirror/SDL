@@ -500,6 +500,9 @@ SDL_VideoInit(const char *driver_name)
     _this->gl_config.profile_mask = 0;
     _this->gl_config.share_with_current_context = 0;
 
+    _this->current_glwin_tls = SDL_TLSCreate();
+    _this->current_glctx_tls = SDL_TLSCreate();
+
     /* Initialize the video subsystem */
     if (_this->VideoInit(_this) < 0) {
         SDL_VideoQuit();
@@ -2738,7 +2741,8 @@ SDL_GL_CreateContext(SDL_Window * window)
     /* Creating a context is assumed to make it current in the SDL driver. */
     _this->current_glwin = window;
     _this->current_glctx = ctx;
-    _this->current_glthread = SDL_ThreadID();
+    SDL_TLSSet(_this->current_glwin_tls, window, NULL);
+    SDL_TLSSet(_this->current_glctx_tls, ctx, NULL);
 
     return ctx;
 }
@@ -2747,7 +2751,12 @@ int
 SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
 {
     int retval;
-    SDL_threadID thread = SDL_ThreadID();
+
+    if (window == SDL_GL_GetCurrentWindow() &&
+        ctx == SDL_GL_GetCurrentContext()) {
+        /* We're already current. */
+        return 0;
+    }
 
     if (!ctx) {
         window = NULL;
@@ -2759,18 +2768,34 @@ SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
         }
     }
 
-    if ((window == _this->current_glwin) && (ctx == _this->current_glctx) && (thread == _this->current_glthread)) {
-        retval = 0;  /* we're already current. */
-    } else {
-        retval = _this->GL_MakeCurrent(_this, window, ctx);
-        if (retval == 0) {
-            _this->current_glwin = window;
-            _this->current_glctx = ctx;
-            _this->current_glthread = thread;
-        }
+    retval = _this->GL_MakeCurrent(_this, window, ctx);
+    if (retval == 0) {
+        _this->current_glwin = window;
+        _this->current_glctx = ctx;
+        SDL_TLSSet(_this->current_glwin_tls, window, NULL);
+        SDL_TLSSet(_this->current_glctx_tls, ctx, NULL);
     }
-
     return retval;
+}
+
+SDL_Window *
+SDL_GL_GetCurrentWindow(void)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return NULL;
+    }
+    return (SDL_Window *)SDL_TLSGet(_this->current_glwin_tls);
+}
+
+SDL_GLContext
+SDL_GL_GetCurrentContext(void)
+{
+    if (!_this) {
+        SDL_UninitializedVideo();
+        return NULL;
+    }
+    return (SDL_GLContext)SDL_TLSGet(_this->current_glctx_tls);
 }
 
 int
@@ -2778,7 +2803,7 @@ SDL_GL_SetSwapInterval(int interval)
 {
     if (!_this) {
         return SDL_UninitializedVideo();
-    } else if (_this->current_glctx == NULL) {
+    } else if (SDL_GL_GetCurrentContext() == NULL) {
         return SDL_SetError("No OpenGL context has been made current");
     } else if (_this->GL_SetSwapInterval) {
         return _this->GL_SetSwapInterval(_this, interval);
@@ -2792,7 +2817,7 @@ SDL_GL_GetSwapInterval(void)
 {
     if (!_this) {
         return 0;
-    } else if (_this->current_glctx == NULL) {
+    } else if (SDL_GL_GetCurrentContext() == NULL) {
         return 0;
     } else if (_this->GL_GetSwapInterval) {
         return _this->GL_GetSwapInterval(_this);
@@ -2820,7 +2845,7 @@ SDL_GL_DeleteContext(SDL_GLContext context)
         return;
     }
 
-    if (_this->current_glctx == context) {
+    if (SDL_GL_GetCurrentContext() == context) {
         SDL_GL_MakeCurrent(NULL, NULL);
     }
 

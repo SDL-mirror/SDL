@@ -535,7 +535,7 @@ WIN_GL_CreateContext(_THIS, SDL_Window * window)
     HGLRC context, share_context;
 
     if (_this->gl_config.share_with_current_context) {
-        share_context = (HGLRC)(_this->current_glctx);
+        share_context = (HGLRC)SDL_GL_GetCurrentContext();
     } else {
         share_context = 0;
     }

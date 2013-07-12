@@ -532,7 +532,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
     GLXContext context = NULL, share_context;
 
     if (_this->gl_config.share_with_current_context) {
-        share_context = (GLXContext)(_this->current_glctx);
+        share_context = SDL_GL_GetCurrentContext();
     } else {
         share_context = NULL;
     }
@@ -683,7 +683,7 @@ X11_GL_SetSwapInterval(_THIS, int interval)
     } else if (_this->gl_data->glXSwapIntervalEXT) {
         Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         const SDL_WindowData *windowdata = (SDL_WindowData *)
-            _this->current_glwin->driverdata;
+            SDL_GL_GetCurrentWindow()->driverdata;
 
         Window drawable = windowdata->xwindow;
 
@@ -727,7 +727,7 @@ X11_GL_GetSwapInterval(_THIS)
     if (_this->gl_data->glXSwapIntervalEXT) {
         Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         const SDL_WindowData *windowdata = (SDL_WindowData *)
-            _this->current_glwin->driverdata;
+            SDL_GL_GetCurrentWindow()->driverdata;
         Window drawable = windowdata->xwindow;
         unsigned int allow_late_swap_tearing = 0;
         unsigned int interval = 0;
