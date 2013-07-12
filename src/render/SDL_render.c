@@ -764,6 +764,13 @@ SDL_UpdateTexture(SDL_Texture * texture, const SDL_Rect * rect,
 
     CHECK_TEXTURE_MAGIC(texture, -1);
 
+    if (!pixels) {
+        return SDL_InvalidParamError("pixels");
+    }
+    if (!pitch) {
+        return SDL_InvalidParamError("pitch");
+    }
+
     if (!rect) {
         full_rect.x = 0;
         full_rect.y = 0;
