@@ -1691,9 +1691,14 @@ SDL_DestroyTexture(SDL_Texture * texture)
     SDL_Renderer *renderer;
 
     CHECK_TEXTURE_MAGIC(texture, );
-    texture->magic = NULL;
 
     renderer = texture->renderer;
+    if (texture == renderer->target) {
+        SDL_SetRenderTarget(renderer, NULL);
+    }
+
+    texture->magic = NULL;
+
     if (texture->next) {
         texture->next->prev = texture->prev;
     }
