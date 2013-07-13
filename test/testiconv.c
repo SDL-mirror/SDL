@@ -84,5 +84,6 @@ main(int argc, char *argv[])
         fputs(test[0], stdout);
         SDL_free(test[0]);
     }
+    fclose(file);
     return (errors ? errors + 1 : 0);
 }
