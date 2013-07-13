@@ -1157,6 +1157,18 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             CFLAGS="$CFLAGS $X_CFLAGS"
             LDFLAGS="$LDFLAGS $X_LIBS"
 
+            AC_CHECK_HEADER(X11/extensions/Xext.h,
+                            have_xext_h_hdr=yes,
+                            have_xext_h_hdr=no,
+                            [#include <X11/Xlib.h>
+                             #include <X11/Xproto.h>
+                            ])
+            if test x$have_xext_h_hdr != xyes; then
+               AC_MSG_ERROR([
+*** Missing Xext.h, maybe you need to install the libxext-dev package?
+               ])
+            fi
+
             AC_DEFINE(SDL_VIDEO_DRIVER_X11, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
