@@ -104,6 +104,11 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata = display->driverdata;
     SDL_DisplayModeData *displaymodedata = display->current_mode.driverdata;
     UIWindow *uiwindow = data->uiwindow;
+    EAGLSharegroup *share_group = nil;
+
+    if (_this->gl_config.share_with_current_context) {
+        share_group = [((SDL_uikitopenglview *) SDL_GL_GetCurrentContext() sharegroup];
+    }
 
     /* construct our view, passing in SDL's OpenGL configuration data */
     CGRect frame;
@@ -121,7 +126,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     aBits: _this->gl_config.alpha_size
                                     depthBits: _this->gl_config.depth_size
                                     stencilBits: _this->gl_config.stencil_size
-                                    majorVersion: _this->gl_config.major_version];
+                                    majorVersion: _this->gl_config.major_version
+                                    shareGroup: share_group];
     if (!view) {
         return NULL;
     }
