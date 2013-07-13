@@ -2739,11 +2739,12 @@ SDL_GL_CreateContext(SDL_Window * window)
     ctx = _this->GL_CreateContext(_this, window);
 
     /* Creating a context is assumed to make it current in the SDL driver. */
-    _this->current_glwin = window;
-    _this->current_glctx = ctx;
-    SDL_TLSSet(_this->current_glwin_tls, window, NULL);
-    SDL_TLSSet(_this->current_glctx_tls, ctx, NULL);
-
+    if (ctx) {
+        _this->current_glwin = window;
+        _this->current_glctx = ctx;
+        SDL_TLSSet(_this->current_glwin_tls, window, NULL);
+        SDL_TLSSet(_this->current_glctx_tls, ctx, NULL);
+    }
     return ctx;
 }
 
