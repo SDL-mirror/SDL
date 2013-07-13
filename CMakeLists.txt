@@ -104,6 +104,12 @@ else()
   set(UNIX_SYS OFF)
 endif(UNIX AND NOT APPLE)
 
+if(UNIX OR APPLE)
+  set(UNIX_OR_MAC_SYS ON)
+else()
+  set(UNIX_OR_MAC_SYS OFF)
+endif(UNIX OR APPLE)
+
 # Default option knobs
 if(APPLE OR ARCH_64)
   set(OPT_DEF_SSEMATH ON)
@@ -190,7 +196,7 @@ dep_option(FUSIONSOUND_SHARED  "Dynamically load fusionsound audio support" ON "
 set_option(VIDEO_DUMMY         "Use dummy video driver" ON)
 set_option(VIDEO_OPENGL        "Include OpenGL support" ON)
 set_option(VIDEO_OPENGLES      "Include OpenGL ES support" ON)
-set_option(PTHREADS            "Use POSIX threads for multi-threading" ${UNIX_SYS})
+set_option(PTHREADS            "Use POSIX threads for multi-threading" ${UNIX_OR_MAC_SYS})
 dep_option(PTHREADS_SEM        "Use pthread semaphores" ON "PTHREADS" OFF)
 set_option(SDL_DLOPEN          "Use dlopen for shared object loading" ON)
 set_option(OSS                 "Support the OSS audio API" ${UNIX_SYS})
