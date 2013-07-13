@@ -498,7 +498,6 @@ static int FIFO_Writer(void* _data)
 {
     WriterData *data = (WriterData *)_data;
     SDL_EventQueue *queue = data->queue;
-    int index = data->index;
     int i;
     SDL_Event event;
 
