@@ -21,7 +21,7 @@ print_devices(int iscapture)
     printf("%s devices:\n", typestr);
 
     if (n == -1)
-        printf("  Driver can't detect specific devices.\n\n", typestr);
+        printf("  Driver can't detect specific %s devices.\n\n", typestr);
     else if (n == 0)
         printf("  No %s devices found.\n\n", typestr);
     else {
