@@ -8,7 +8,7 @@ Officially supported platforms
 Windows XP/Vista/7/8
 Mac OS X 10.5+
 Linux 2.6+
-iOS 4.0.1+
+iOS 5.1.1+
 Android 2.3.3+
 
 Unofficially supported platforms
