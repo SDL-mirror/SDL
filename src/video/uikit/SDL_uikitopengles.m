@@ -107,7 +107,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     EAGLSharegroup *share_group = nil;
 
     if (_this->gl_config.share_with_current_context) {
-        share_group = [((SDL_uikitopenglview *) SDL_GL_GetCurrentContext()) sharegroup];
+        SDL_uikitopenglview *view = (SDL_uikitopenglview *) SDL_GL_GetCurrentContext();
+        share_group = [view.context sharegroup];
     }
 
     /* construct our view, passing in SDL's OpenGL configuration data */
