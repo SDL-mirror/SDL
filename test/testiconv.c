@@ -45,7 +45,7 @@ main(int argc, char *argv[])
     char buffer[BUFSIZ];
     char *ucs4;
     char *test[2];
-    int i, index = 0;
+    int i;
     FILE *file;
     int errors = 0;
 

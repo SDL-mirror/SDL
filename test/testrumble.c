@@ -50,10 +50,6 @@ main(int argc, char **argv)
     int i;
     char *name;
     int index;
-    SDL_HapticEffect efx[5];
-    int id[5];
-    int nefx;
-    unsigned int supported;
 
     name = NULL;
     index = -1;
@@ -130,7 +126,7 @@ main(int argc, char **argv)
     SDL_HapticRumbleStop(haptic);
     SDL_Delay(2000);
     printf("Playing 2 second rumble at 0.3 magnitude.\n");
-    if (SDL_HapticRumblePlay(haptic, 0.3, 5000) != 0) {
+    if (SDL_HapticRumblePlay(haptic, 0.3f, 5000) != 0) {
        printf("\nFailed to play rumble: %s\n", SDL_GetError() );
        return 1;
     }

@@ -98,7 +98,6 @@ void
 DrawLines(SDL_Renderer * renderer)
 {
     int i;
-    int x1, y1, x2, y2;
     SDL_Rect viewport;
 
     /* Query the sizes */
