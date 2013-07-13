@@ -1184,4 +1184,5 @@ if(NOT WINDOWS OR CYGWIN)
   endif(FREEBSD)
   install(PROGRAMS ${SDL2_BINARY_DIR}/sdl2-config DESTINATION bin)
   # TODO: what about the .spec file? Is it only needed for RPM creation?
+  install(FILES "${SDL2_SOURCE_DIR}/sdl2.m4" DESTINATION "share/aclocal")
 endif(NOT WINDOWS OR CYGWIN)
