@@ -67,7 +67,6 @@
 		04F7808512FB753F00FC43C0 /* SDL_nullframebuffer.c in Sources */ = {isa = PBXBuildFile; fileRef = 04F7808312FB753F00FC43C0 /* SDL_nullframebuffer.c */; };
 		04FFAB8B12E23B8D00BA343D /* SDL_atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = 04FFAB8912E23B8D00BA343D /* SDL_atomic.c */; };
 		04FFAB8C12E23B8D00BA343D /* SDL_spinlock.c in Sources */ = {isa = PBXBuildFile; fileRef = 04FFAB8A12E23B8D00BA343D /* SDL_spinlock.c */; };
-		22C905CD13A22646003FE4E4 /* SDL_hints_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 22C905CC13A22646003FE4E4 /* SDL_hints_c.h */; };
 		56EA86FB13E9EC2B002E47EB /* SDL_coreaudio.c in Sources */ = {isa = PBXBuildFile; fileRef = 56EA86F913E9EC2B002E47EB /* SDL_coreaudio.c */; };
 		56EA86FC13E9EC2B002E47EB /* SDL_coreaudio.h in Headers */ = {isa = PBXBuildFile; fileRef = 56EA86FA13E9EC2B002E47EB /* SDL_coreaudio.h */; };
 		56ED04E1118A8EE200A56AA6 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 56ED04E0118A8EE200A56AA6 /* SDL_power.c */; };
@@ -260,7 +259,6 @@
 		04F7808312FB753F00FC43C0 /* SDL_nullframebuffer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_nullframebuffer.c; sourceTree = "<group>"; };
 		04FFAB8912E23B8D00BA343D /* SDL_atomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_atomic.c; sourceTree = "<group>"; };
 		04FFAB8A12E23B8D00BA343D /* SDL_spinlock.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_spinlock.c; sourceTree = "<group>"; };
-		22C905CC13A22646003FE4E4 /* SDL_hints_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_hints_c.h; path = ../../src/SDL_hints_c.h; sourceTree = "<group>"; };
 		56EA86F913E9EC2B002E47EB /* SDL_coreaudio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_coreaudio.c; path = coreaudio/SDL_coreaudio.c; sourceTree = "<group>"; };
 		56EA86FA13E9EC2B002E47EB /* SDL_coreaudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_coreaudio.h; path = coreaudio/SDL_coreaudio.h; sourceTree = "<group>"; };
 		56ED04E0118A8EE200A56AA6 /* SDL_power.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_power.c; path = ../../src/power/SDL_power.c; sourceTree = SOURCE_ROOT; };
@@ -747,7 +745,6 @@
 				FD99B9D60DD52EDC00FB1D6B /* SDL_fatal.c */,
 				FD99B9D70DD52EDC00FB1D6B /* SDL_fatal.h */,
 				0442EC5412FE1C3F004C9285 /* SDL_hints.c */,
-				22C905CC13A22646003FE4E4 /* SDL_hints_c.h */,
 				04BAC09B1300C1290055DE28 /* SDL_log.c */,
 				FD99B9D80DD52EDC00FB1D6B /* SDL.c */,
 			);
@@ -967,7 +964,6 @@
 				0442EC5012FE1C1E004C9285 /* SDL_render_sw_c.h in Headers */,
 				0402A85A12FE70C600CECEE3 /* SDL_shaders_gles2.h in Headers */,
 				04BAC09C1300C1290055DE28 /* SDL_assert_c.h in Headers */,
-				22C905CD13A22646003FE4E4 /* SDL_hints_c.h in Headers */,
 				56EA86FC13E9EC2B002E47EB /* SDL_coreaudio.h in Headers */,
 				93CB792313FC5E5200BD3E05 /* SDL_uikitviewcontroller.h in Headers */,
 				AA628ADC159369E3005138DD /* SDL_rotate.h in Headers */,

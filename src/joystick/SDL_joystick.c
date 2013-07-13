@@ -36,17 +36,24 @@ static SDL_bool SDL_joystick_allows_background_events = SDL_FALSE;
 static SDL_Joystick *SDL_joysticks = NULL;
 static SDL_Joystick *SDL_updating_joystick = NULL;
 
+static void
+SDL_JoystickAllowBackgroundEventsChanged(void *userdata, const char *name, const char *oldValue, const char *hint)
+{
+    if (hint && *hint == '1') {
+        SDL_joystick_allows_background_events = SDL_TRUE;
+    } else {
+        SDL_joystick_allows_background_events = SDL_FALSE;
+    }
+}
+
 int
 SDL_JoystickInit(void)
 {
-    const char *hint;
     int status;
 	
-    /* Check to see if we should allow joystick events while in the background */
-    hint = SDL_GetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS);
-    if (hint && *hint == '1') {
-        SDL_joystick_allows_background_events = SDL_TRUE;
-    }
+    /* See if we should allow joystick events while in the background */
+    SDL_AddHintCallback(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
+                        SDL_JoystickAllowBackgroundEventsChanged, NULL);
 
 #if !SDL_EVENTS_DISABLED
     if (SDL_InitSubSystem(SDL_INIT_EVENTS) < 0) {
