@@ -704,9 +704,9 @@ X11_GetDisplayModes(_THIS, SDL_VideoDisplay * sdl_display)
             mode.driverdata = modedata;
             SDL_AddDisplayMode(sdl_display, &mode);
         }
-        else
+        else if (!data->use_xrandr)
         {
-            /* Add the current mode of each monitor otherwise */
+            /* Add the current mode of each monitor otherwise if we can't get them from xrandr */
             mode.w = data->xinerama_info.width;
             mode.h = data->xinerama_info.height;
             mode.refresh_rate = 0;
