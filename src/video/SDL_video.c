@@ -3057,48 +3057,54 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
     int dummybutton;
     int retval = -1;
-    SDL_bool relative_mode = SDL_GetRelativeMouseMode();
-    int show_cursor_prev = SDL_ShowCursor( 1 );
+    SDL_bool relative_mode;
+    int show_cursor_prev;
 
-    SDL_SetRelativeMouseMode( SDL_FALSE );
+    if (!messageboxdata) {
+        return SDL_InvalidParamError("messageboxdata");
+    }
+
+    relative_mode = SDL_GetRelativeMouseMode();
+    SDL_SetRelativeMouseMode(SDL_FALSE);
+    show_cursor_prev = SDL_ShowCursor(1);
 
     if (!buttonid) {
         buttonid = &dummybutton;
     }
     if (_this && _this->ShowMessageBox) {
-        if (_this->ShowMessageBox(_this, messageboxdata, buttonid) == 0) {
-            retval = 0;
+        retval = _this->ShowMessageBox(_this, messageboxdata, buttonid);
+    } else {
+        /* It's completely fine to call this function before video is initialized */
+        if (messageboxdata->window == NULL) {
+#if SDL_VIDEO_DRIVER_WINDOWS
+            if ((retval == -1) && (WIN_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+                retval = 0;
+            }
+#endif
+#if SDL_VIDEO_DRIVER_COCOA
+            if ((retval == -1) && (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+                retval = 0;
+            }
+#endif
+#if SDL_VIDEO_DRIVER_UIKIT
+            if ((retval == -1) && (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+                retval = 0;
+            }
+#endif
+#if SDL_VIDEO_DRIVER_X11
+            if ((retval == -1) && (X11_ShowMessageBox(messageboxdata, buttonid) == 0)) {
+                retval = 0;
+            }
+#endif
+        }
+        if (retval == -1) {
+            SDL_SetError("No message system available");
         }
     }
 
-    /* It's completely fine to call this function before video is initialized */
-#if SDL_VIDEO_DRIVER_WINDOWS
-    if ((retval == -1) && (WIN_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-        retval = 0;
-    }
-#endif
-#if SDL_VIDEO_DRIVER_COCOA
-    if ((retval == -1) && (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-        retval = 0;
-    }
-#endif
-#if SDL_VIDEO_DRIVER_UIKIT
-    if ((retval == -1) && (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-        retval = 0;
-    }
-#endif
-#if SDL_VIDEO_DRIVER_X11
-    if ((retval == -1) && (X11_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-        retval = 0;
-    }
-#endif
+    SDL_ShowCursor(show_cursor_prev);
+    SDL_SetRelativeMouseMode(relative_mode);
 
-    SDL_ShowCursor( show_cursor_prev );
-    SDL_SetRelativeMouseMode( relative_mode );
-
-    if(retval == -1) {
-        SDL_SetError("No message system available");
-    }
     return retval;
 }
 
