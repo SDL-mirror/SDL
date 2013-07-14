@@ -667,7 +667,7 @@ SDL_AddDisplayMode(SDL_VideoDisplay * display,  const SDL_DisplayMode * mode)
     modes = display->display_modes;
     nmodes = display->num_display_modes;
     for (i = nmodes; i--;) {
-        if (SDL_memcmp(mode, &modes[i], sizeof(*mode)) == 0) {
+        if (cmpmodes(mode, &modes[i]) == 0) {
             return SDL_FALSE;
         }
     }
