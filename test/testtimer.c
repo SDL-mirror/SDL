@@ -105,7 +105,7 @@ main(int argc, char *argv[])
     now = SDL_GetPerformanceCounter();
     printf("1 million iterations of ticktock took %f ms\n", (double)((now - start)*1000) / SDL_GetPerformanceFrequency());
 
-    printf("Performance counter frequency: %lld\n", SDL_GetPerformanceFrequency());
+    printf("Performance counter frequency: %llu\n", (unsigned long long) SDL_GetPerformanceFrequency());
     start32 = SDL_GetTicks();
     start = SDL_GetPerformanceCounter();
     SDL_Delay(1000);
