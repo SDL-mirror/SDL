@@ -12,6 +12,8 @@
 /* Simple program:  Create a native window and attach an SDL renderer */
 
 #include <stdio.h>
+#include <stdlib.h> /* for srand() */
+#include <time.h> /* for time() */
 
 #include "testnative.h"
 

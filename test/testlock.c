@@ -16,6 +16,7 @@
 
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h> /* for atexit() */
 
 #include "SDL.h"
 #include "SDL_mutex.h"

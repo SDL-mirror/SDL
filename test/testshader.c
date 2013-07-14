@@ -11,6 +11,7 @@
 */
 /* This is a simple example of using GLSL shaders with SDL */
 
+#include <stdio.h> /* for printf() */
 #include "SDL.h"
 
 #ifdef HAVE_OPENGL
