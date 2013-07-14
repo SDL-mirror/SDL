@@ -360,23 +360,20 @@ SDL_DestroyWindowTexture(_THIS, SDL_Window * window)
 static int
 cmpmodes(const void *A, const void *B)
 {
-    SDL_DisplayMode a = *(const SDL_DisplayMode *) A;
-    SDL_DisplayMode b = *(const SDL_DisplayMode *) B;
-
-    if (a.w != b.w) {
-        return b.w - a.w;
-    }
-    if (a.h != b.h) {
-        return b.h - a.h;
-    }
-    if (SDL_BITSPERPIXEL(a.format) != SDL_BITSPERPIXEL(b.format)) {
-        return SDL_BITSPERPIXEL(b.format) - SDL_BITSPERPIXEL(a.format);
-    }
-    if (SDL_PIXELLAYOUT(a.format) != SDL_PIXELLAYOUT(b.format)) {
-        return SDL_PIXELLAYOUT(b.format) - SDL_PIXELLAYOUT(a.format);
-    }
-    if (a.refresh_rate != b.refresh_rate) {
-        return b.refresh_rate - a.refresh_rate;
+    const SDL_DisplayMode *a = (const SDL_DisplayMode *) A;
+    const SDL_DisplayMode *b = (const SDL_DisplayMode *) B;
+    if (a == b) {
+        return 0;
+    } else if (a->w != b->w) {
+        return b->w - a->w;
+    } else if (a->h != b->h) {
+        return b->h - a->h;
+    } else if (SDL_BITSPERPIXEL(a->format) != SDL_BITSPERPIXEL(b->format)) {
+        return SDL_BITSPERPIXEL(b->format) - SDL_BITSPERPIXEL(a->format);
+    } else if (SDL_PIXELLAYOUT(a->format) != SDL_PIXELLAYOUT(b->format)) {
+        return SDL_PIXELLAYOUT(b->format) - SDL_PIXELLAYOUT(a->format);
+    } else if (a->refresh_rate != b->refresh_rate) {
+        return b->refresh_rate - a->refresh_rate;
     }
     return 0;
 }
