@@ -3052,6 +3052,20 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
 #include "x11/SDL_x11messagebox.h"
 #endif
 
+static SDL_bool SDL_MessageboxValidForDriver(const SDL_MessageBoxData *messageboxdata, SDL_SYSWM_TYPE drivertype)
+{
+    SDL_SysWMinfo info;
+    SDL_Window *window = messageboxdata->window;
+
+    if (!window) {
+        return SDL_TRUE;
+    }
+
+    SDL_VERSION(&info.version);
+    SDL_GetWindowWMInfo(window, &info);
+    return (info.subsystem == drivertype);
+}
+
 int
 SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
@@ -3071,35 +3085,42 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     if (!buttonid) {
         buttonid = &dummybutton;
     }
+
     if (_this && _this->ShowMessageBox) {
         retval = _this->ShowMessageBox(_this, messageboxdata, buttonid);
-    } else {
-        /* It's completely fine to call this function before video is initialized */
-        if (messageboxdata->window == NULL) {
+    }
+
+    /* It's completely fine to call this function before video is initialized */
 #if SDL_VIDEO_DRIVER_WINDOWS
-            if ((retval == -1) && (WIN_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-                retval = 0;
-            }
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_WINDOWS) &&
+        WIN_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
 #endif
 #if SDL_VIDEO_DRIVER_COCOA
-            if ((retval == -1) && (Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-                retval = 0;
-            }
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_COCOA) &&
+        Cocoa_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
 #endif
 #if SDL_VIDEO_DRIVER_UIKIT
-            if ((retval == -1) && (UIKit_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-                retval = 0;
-            }
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_UIKIT) &&
+        UIKit_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
 #endif
 #if SDL_VIDEO_DRIVER_X11
-            if ((retval == -1) && (X11_ShowMessageBox(messageboxdata, buttonid) == 0)) {
-                retval = 0;
-            }
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_X11) &&
+        X11_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
 #endif
-        }
-        if (retval == -1) {
-            SDL_SetError("No message system available");
-        }
+    if (retval == -1) {
+        SDL_SetError("No message system available");
     }
 
     SDL_ShowCursor(show_cursor_prev);
