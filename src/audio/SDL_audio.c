@@ -480,13 +480,13 @@ SDL_RunAudio(void *devicep)
                 }
             }
 
+            SDL_LockMutex(device->mixer_lock);
             if (device->paused) {
                 SDL_memset(stream, silence, stream_len);
             } else {
-                SDL_LockMutex(device->mixer_lock);
                 (*fill) (udata, stream, stream_len);
-                SDL_UnlockMutex(device->mixer_lock);
             }
+            SDL_UnlockMutex(device->mixer_lock);
 
             /* Convert the audio if necessary */
             if (device->convert.needed) {
@@ -1114,7 +1114,9 @@ SDL_PauseAudioDevice(SDL_AudioDeviceID devid, int pause_on)
 {
     SDL_AudioDevice *device = get_audio_device(devid);
     if (device) {
+        current_audio.impl.LockDevice(device);
         device->paused = pause_on;
+        current_audio.impl.UnlockDevice(device);
     }
 }
 
