@@ -60,7 +60,7 @@ button_messagebox(void *eventNumber)
         data.message = "This is a custom messagebox from a background thread.";
     }
 
-    success =SDL_ShowMessageBox(&data, &button);
+    success = SDL_ShowMessageBox(&data, &button);
     if (success == -1) {
         printf("Error Presenting MessageBox: %s\n", SDL_GetError());
         if (eventNumber) {
@@ -88,13 +88,6 @@ main(int argc, char *argv[])
 {
     int success;
 
-    /* Load the SDL library */
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
-        return (1);
-    }
-
-#if 0
     success = SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                 "Simple MessageBox",
                 "This is a simple error MessageBox",
@@ -135,7 +128,16 @@ main(int argc, char *argv[])
 
     button_messagebox(NULL);
 
-    /* Test showing a message box from a background thread */
+    /* Test showing a message box from a background thread.
+
+       On Mac OS X, the video subsystem needs to be initialized for this
+       to work, since the message box events are dispatched by the Cocoa
+       subsystem on the main thread.
+     */
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        fprintf(stderr, "Couldn't initialize SDL video subsystem: %s\n", SDL_GetError());
+        return (1);
+    }
     {
         int status = 0;
         SDL_Event event;
@@ -153,7 +155,6 @@ main(int argc, char *argv[])
 
         printf("Message box thread return %i\n", status);
     }
-#endif
 
     /* Test showing a message box with a parent window */
     {
