@@ -663,7 +663,7 @@ SDL_AddDisplayMode(SDL_VideoDisplay * display,  const SDL_DisplayMode * mode)
     /* Make sure we don't already have the mode in the list */
     modes = display->display_modes;
     nmodes = display->num_display_modes;
-    for (i = nmodes; i--;) {
+    for (i = 0; i < nmodes; ++i) {
         if (cmpmodes(mode, &modes[i]) == 0) {
             return SDL_FALSE;
         }
@@ -2253,7 +2253,7 @@ SDL_VideoQuit(void)
     }
     _this->VideoQuit(_this);
 
-    for (i = _this->num_displays; i--;) {
+    for (i = 0; i < _this->num_displays; ++i) {
         SDL_VideoDisplay *display = &_this->displays[i];
         for (j = display->num_display_modes; j--;) {
             if (display->display_modes[j].driverdata) {
