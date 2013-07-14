@@ -1031,13 +1031,6 @@ X11_SetWindowFullscreenViaWM(_THIS, SDL_Window * window, SDL_VideoDisplay * _dis
     XFlush(display);
 }
 
-static __inline__ int
-maxint(const int a, const int b)
-{
-    return (a > b ? a : b);
-}
-
-
 /* This handles fullscreen itself, outside the Window Manager. */
 static void
 X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _display)
