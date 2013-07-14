@@ -1184,7 +1184,7 @@ SDL_AudioQuit(void)
 
     for (i = 0; i < SDL_arraysize(open_devices); i++) {
         if (open_devices[i] != NULL) {
-            SDL_CloseAudioDevice(i);
+            SDL_CloseAudioDevice(i+1);
         }
     }
 
