@@ -32,6 +32,10 @@
 #include "../SDL_audio_c.h"
 #include "SDL_winmm.h"
 
+#ifndef WAVE_FORMAT_IEEE_FLOAT
+#define WAVE_FORMAT_IEEE_FLOAT 0x0003
+#endif
+
 #define DETECT_DEV_IMPL(typ, capstyp) \
 static void DetectWave##typ##Devs(SDL_AddAudioDevice addfn) { \
     const UINT devcount = wave##typ##GetNumDevs(); \
@@ -257,6 +261,7 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
         case AUDIO_U8:
         case AUDIO_S16:
         case AUDIO_S32:
+        case AUDIO_F32:
             break;              /* valid. */
 
         default:
@@ -273,7 +278,12 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
 
     /* Set basic WAVE format parameters */
     SDL_memset(&waveformat, '\0', sizeof(waveformat));
-    waveformat.wFormatTag = WAVE_FORMAT_PCM;
+
+    if (SDL_AUDIO_ISFLOAT(this->spec.format))
+        waveformat.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    else
+        waveformat.wFormatTag = WAVE_FORMAT_PCM;
+
     waveformat.wBitsPerSample = SDL_AUDIO_BITSIZE(this->spec.format);
 
     if (this->spec.channels > 2)

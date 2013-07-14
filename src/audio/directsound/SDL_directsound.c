@@ -30,6 +30,10 @@
 #include "../SDL_audio_c.h"
 #include "SDL_directsound.h"
 
+#ifndef WAVE_FORMAT_IEEE_FLOAT
+#define WAVE_FORMAT_IEEE_FLOAT 0x0003
+#endif
+
 /* DirectX function pointers for audio */
 static void* DSoundDLL = NULL;
 typedef HRESULT(WINAPI*fnDirectSoundCreate8)(LPGUID,LPDIRECTSOUND*,LPUNKNOWN);
@@ -466,6 +470,7 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
         case AUDIO_U8:
         case AUDIO_S16:
         case AUDIO_S32:
+        case AUDIO_F32:
             this->spec.format = test_format;
             valid_format = 1;
             break;
@@ -479,7 +484,12 @@ DSOUND_OpenDevice(_THIS, const char *devname, int iscapture)
     }
 
     SDL_memset(&waveformat, 0, sizeof(waveformat));
-    waveformat.wFormatTag = WAVE_FORMAT_PCM;
+
+    if (SDL_AUDIO_ISFLOAT(this->spec.format))
+        waveformat.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    else
+        waveformat.wFormatTag = WAVE_FORMAT_PCM;
+
     waveformat.wBitsPerSample = SDL_AUDIO_BITSIZE(this->spec.format);
     waveformat.nChannels = this->spec.channels;
     waveformat.nSamplesPerSec = this->spec.freq;
