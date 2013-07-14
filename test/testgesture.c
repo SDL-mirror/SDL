@@ -141,8 +141,8 @@ void drawCircle(SDL_Surface* screen,float x,float y,float r,unsigned int c)
 
 void drawKnob(SDL_Surface* screen,Knob k) {
   drawCircle(screen,k.p.x*screen->w,k.p.y*screen->h,k.r*screen->w,0xFFFFFF);
-  drawCircle(screen,(k.p.x+k.r/2*cosf(k.ang))*screen->w,
-                (k.p.y+k.r/2*sinf(k.ang))*screen->h,k.r/4*screen->w,0);
+  drawCircle(screen,(k.p.x+k.r/2*SDL_cosf(k.ang))*screen->w,
+                (k.p.y+k.r/2*SDL_sinf(k.ang))*screen->h,k.r/4*screen->w,0);
 }
 
 void DrawScreen(SDL_Surface* screen)
