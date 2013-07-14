@@ -94,6 +94,7 @@ main(int argc, char *argv[])
         return (1);
     }
 
+#if 0
     success = SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                 "Simple MessageBox",
                 "This is a simple error MessageBox",
@@ -134,9 +135,7 @@ main(int argc, char *argv[])
 
     button_messagebox(NULL);
 
-    /* Technically this isn't a supported operation for the API, but it doesn't
-     * hurt for it to work.
-     */
+    /* Test showing a message box from a background thread */
     {
         int status = 0;
         SDL_Event event;
@@ -153,6 +152,29 @@ main(int argc, char *argv[])
         SDL_WaitThread(thread, &status);
 
         printf("Message box thread return %i\n", status);
+    }
+#endif
+
+    /* Test showing a message box with a parent window */
+    {
+        SDL_Event event;
+        SDL_Window *window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_SHOWN);
+
+        success = SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                    "Simple MessageBox",
+                    "This is a simple error MessageBox with a parent window",
+                    window);
+        if (success == -1) {
+            printf("Error Presenting MessageBox: %s\n", SDL_GetError());
+            quit(1);
+        }
+
+        while (SDL_WaitEvent(&event))
+        {
+            if (event.type == SDL_QUIT || event.type == SDL_KEYUP) {
+                break;
+            }
+        }
     }
 
     SDL_Quit();
