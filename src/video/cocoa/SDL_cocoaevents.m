@@ -43,6 +43,7 @@
 
 @interface SDLAppDelegate : NSObject
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
+- (void)applicationDidBecomeActive:(NSNotification *)aNotification;
 @end
 
 @implementation SDLAppDelegate : NSObject
@@ -50,6 +51,33 @@
 {
     SDL_SendQuit();
     return NSTerminateCancel;
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)aNotification
+{
+    SDL_VideoDevice *device = SDL_GetVideoDevice();
+    if (device && device->windows)
+    {
+        SDL_Window *window = device->windows;
+        int i;
+        for (i = 0; i < device->num_displays; ++i)
+        {
+            SDL_Window *fullscreen_window = device->displays[i].fullscreen_window;
+            if (fullscreen_window)
+            {
+                if (fullscreen_window->flags & SDL_WINDOW_MINIMIZED) {
+                    SDL_RestoreWindow(fullscreen_window);
+                }
+                return;
+            }
+        }
+
+        if (window->flags & SDL_WINDOW_MINIMIZED) {
+            SDL_RestoreWindow(window);
+        } else {
+            SDL_RaiseWindow(window);
+        }
+    }
 }
 
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
