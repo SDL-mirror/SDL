@@ -383,7 +383,7 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
     /* Setup our GLX attributes according to the gl_config. */
     if( for_FBConfig ) {
         attribs[i++] = GLX_RENDER_TYPE;
-    attribs[i++] = GLX_RGBA_BIT;
+        attribs[i++] = GLX_RGBA_BIT;
     } else {
         attribs[i++] = GLX_RGBA;
     }
@@ -401,8 +401,9 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
 
     if (_this->gl_config.double_buffer) {
         attribs[i++] = GLX_DOUBLEBUFFER;
-    if( for_FBConfig )
-        attribs[i++] = True;
+        if( for_FBConfig ) {
+            attribs[i++] = True;
+        }
     }
 
     attribs[i++] = GLX_DEPTH_SIZE;
@@ -435,8 +436,9 @@ X11_GL_GetAttributes(_THIS, Display * display, int screen, int * attribs, int si
 
     if (_this->gl_config.stereo) {
         attribs[i++] = GLX_STEREO;
-    if( for_FBConfig )
-        attribs[i++] = True;
+        if( for_FBConfig ) {
+            attribs[i++] = True;
+        }
     }
 
     if (_this->gl_config.multisamplebuffers) {
