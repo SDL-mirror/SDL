@@ -197,6 +197,30 @@ WINMM_CloseDevice(_THIS)
     }
 }
 
+static SDL_bool
+PrepWaveFormat(_THIS, UINT_PTR devId, WAVEFORMATEX *pfmt, const int iscapture)
+{
+    SDL_zerop(pfmt);
+
+    if (SDL_AUDIO_ISFLOAT(this->spec.format)) {
+        pfmt->wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
+    } else {
+        pfmt->wFormatTag = WAVE_FORMAT_PCM;
+    }
+    pfmt->wBitsPerSample = SDL_AUDIO_BITSIZE(this->spec.format);
+
+    pfmt->nChannels = this->spec.channels;
+    pfmt->nSamplesPerSec = this->spec.freq;
+    pfmt->nBlockAlign = pfmt->nChannels * (pfmt->wBitsPerSample / 8);
+    pfmt->nAvgBytesPerSec = pfmt->nSamplesPerSec * pfmt->nBlockAlign;
+
+    if (iscapture) {
+        return (waveInOpen(0, devId, pfmt, 0, 0, WAVE_FORMAT_QUERY) == 0);
+    } else {
+        return (waveOutOpen(0, devId, pfmt, 0, 0, WAVE_FORMAT_QUERY) == 0);
+    }
+}
+
 static int
 WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
 {
@@ -254,18 +278,28 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
     for (i = 0; i < NUM_BUFFERS; ++i)
         this->hidden->wavebuf[i].dwUser = 0xFFFF;
 
+    if (this->spec.channels > 2)
+        this->spec.channels = 2;        /* !!! FIXME: is this right? */
+
+    /* Check the buffer size -- minimum of 1/4 second (word aligned) */
+    if (this->spec.samples < (this->spec.freq / 4))
+        this->spec.samples = ((this->spec.freq / 4) + 3) & ~3;
+
     while ((!valid_datatype) && (test_format)) {
-        valid_datatype = 1;
-        this->spec.format = test_format;
         switch (test_format) {
         case AUDIO_U8:
         case AUDIO_S16:
         case AUDIO_S32:
         case AUDIO_F32:
-            break;              /* valid. */
+            this->spec.format = test_format;
+            if (PrepWaveFormat(this, devId, &waveformat, iscapture)) {
+                valid_datatype = 1;
+            } else {
+                test_format = SDL_NextAudioFormat();
+            }
+            break;
 
         default:
-            valid_datatype = 0;
             test_format = SDL_NextAudioFormat();
             break;
         }
@@ -275,30 +309,6 @@ WINMM_OpenDevice(_THIS, const char *devname, int iscapture)
         WINMM_CloseDevice(this);
         return SDL_SetError("Unsupported audio format");
     }
-
-    /* Set basic WAVE format parameters */
-    SDL_memset(&waveformat, '\0', sizeof(waveformat));
-
-    if (SDL_AUDIO_ISFLOAT(this->spec.format))
-        waveformat.wFormatTag = WAVE_FORMAT_IEEE_FLOAT;
-    else
-        waveformat.wFormatTag = WAVE_FORMAT_PCM;
-
-    waveformat.wBitsPerSample = SDL_AUDIO_BITSIZE(this->spec.format);
-
-    if (this->spec.channels > 2)
-        this->spec.channels = 2;        /* !!! FIXME: is this right? */
-
-    waveformat.nChannels = this->spec.channels;
-    waveformat.nSamplesPerSec = this->spec.freq;
-    waveformat.nBlockAlign =
-        waveformat.nChannels * (waveformat.wBitsPerSample / 8);
-    waveformat.nAvgBytesPerSec =
-        waveformat.nSamplesPerSec * waveformat.nBlockAlign;
-
-    /* Check the buffer size -- minimum of 1/4 second (word aligned) */
-    if (this->spec.samples < (this->spec.freq / 4))
-        this->spec.samples = ((this->spec.freq / 4) + 3) & ~3;
 
     /* Update the fragment size as size in bytes */
     SDL_CalculateAudioSpec(&this->spec);
