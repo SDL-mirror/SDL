@@ -2247,6 +2247,8 @@ SDL_VideoQuit(void)
 
     SDL_EnableScreenSaver();
 
+    SDL_ShowCursor(1);
+
     /* Clean up the system video */
     while (_this->windows) {
         SDL_DestroyWindow(_this->windows);
