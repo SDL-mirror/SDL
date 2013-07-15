@@ -1297,6 +1297,7 @@ int
 SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
 {
     char *title = window->title;
+    SDL_Surface *icon = window->icon;
 
     if ((flags & SDL_WINDOW_OPENGL) && !_this->GL_CreateContext) {
         return SDL_SetError("No OpenGL support in video driver");
@@ -1335,6 +1336,7 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     }
 
     window->title = NULL;
+    window->icon = NULL;
     window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
 
     if (_this->CreateWindow && !(flags & SDL_WINDOW_FOREIGN)) {
@@ -1349,6 +1351,10 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
     if (title) {
         SDL_SetWindowTitle(window, title);
         SDL_free(title);
+    }
+    if (icon) {
+        SDL_SetWindowIcon(window, icon);
+        SDL_FreeSurface(icon);
     }
     SDL_FinishWindowCreation(window, flags);
 
@@ -1426,8 +1432,18 @@ SDL_SetWindowIcon(SDL_Window * window, SDL_Surface * icon)
         return;
     }
 
+    if (window->icon) {
+        SDL_FreeSurface(window->icon);
+    }
+
+    /* Convert the icon into ARGB8888 */
+    window->icon = SDL_ConvertSurfaceFormat(icon, SDL_PIXELFORMAT_ARGB8888, 0);
+    if (!window->icon) {
+        return;
+    }
+
     if (_this->SetWindowIcon) {
-        _this->SetWindowIcon(_this, window, icon);
+        _this->SetWindowIcon(_this, window, window->icon);
     }
 }
 
@@ -2166,6 +2182,9 @@ SDL_DestroyWindow(SDL_Window * window)
     /* Free memory associated with the window */
     if (window->title) {
         SDL_free(window->title);
+    }
+    if (window->icon) {
+        SDL_FreeSurface(window->icon);
     }
     if (window->gamma) {
         SDL_free(window->gamma);

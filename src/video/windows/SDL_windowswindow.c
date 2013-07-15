@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_WINDOWS
 
+#include "SDL_assert.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_keyboard_c.h"
@@ -292,7 +293,6 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     BYTE *icon_bmp;
     int icon_len;
     SDL_RWops *dst;
-    SDL_Surface *surface;
 
     /* Create temporary bitmap buffer */
     icon_len = 40 + icon->h * icon->w * 4;
@@ -316,19 +316,16 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     SDL_WriteLE32(dst, 0);
     SDL_WriteLE32(dst, 0);
 
-    /* Convert the icon to a 32-bit surface with alpha channel */
-    surface = SDL_ConvertSurfaceFormat(icon, SDL_PIXELFORMAT_ARGB8888, 0);
-    if (surface) {
-        /* Write the pixels upside down into the bitmap buffer */
-        int y = surface->h;
-        while (y--) {
-            Uint8 *src = (Uint8 *) surface->pixels + y * surface->pitch;
-            SDL_RWwrite(dst, src, surface->pitch, 1);
-        }
-        SDL_FreeSurface(surface);
-
-        hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+    /* Write the pixels upside down into the bitmap buffer */
+    SDL_assert(icon->format->format == SDL_PIXELFORMAT_ARGB8888);
+    int y = icon->h;
+    while (y--) {
+        Uint8 *src = (Uint8 *) icon->pixels + y * icon->pitch;
+        SDL_RWwrite(dst, src, icon->pitch, 1);
     }
+
+    hicon = CreateIconFromResource(icon_bmp, icon_len, TRUE, 0x00030000);
+
     SDL_RWclose(dst);
     SDL_stack_free(icon_bmp);
 

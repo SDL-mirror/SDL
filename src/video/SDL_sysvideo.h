@@ -73,6 +73,7 @@ struct SDL_Window
     const void *magic;
     Uint32 id;
     char *title;
+    SDL_Surface *icon;
     int x, y;
     int w, h;
     int min_w, min_h;

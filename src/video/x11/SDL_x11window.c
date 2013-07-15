@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_X11
 
+#include "SDL_assert.h"
 #include "SDL_hints.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
@@ -698,19 +699,11 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     Atom _NET_WM_ICON = data->videodata->_NET_WM_ICON;
 
     if (icon) {
-        SDL_PixelFormat format;
-        SDL_Surface *surface;
         int propsize;
         long *propdata;
 
-        /* Convert the icon to ARGB for modern window managers */
-        SDL_InitFormat(&format, SDL_PIXELFORMAT_ARGB8888);
-        surface = SDL_ConvertSurface(icon, &format, 0);
-        if (!surface) {
-            return;
-        }
-
         /* Set the _NET_WM_ICON property */
+        SDL_assert(icon->format->format == SDL_PIXELFORMAT_ARGB8888);
         propsize = 2 + (icon->w * icon->h);
         propdata = SDL_malloc(propsize * sizeof(long));
         if (propdata) {
@@ -722,7 +715,7 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
             propdata[1] = icon->h;
             dst = &propdata[2];
             for (y = 0; y < icon->h; ++y) {
-                src = (Uint32*)((Uint8*)surface->pixels + y * surface->pitch);
+                src = (Uint32*)((Uint8*)icon->pixels + y * icon->pitch);
                 for (x = 0; x < icon->w; ++x) {
                     *dst++ = *src++;
                 }
@@ -732,7 +725,6 @@ X11_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
                             propsize);
         }
         SDL_free(propdata);
-        SDL_FreeSurface(surface);
     } else {
         XDeleteProperty(display, data->xwindow, _NET_WM_ICON);
     }
