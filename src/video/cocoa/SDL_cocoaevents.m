@@ -41,12 +41,27 @@
 - (void)setAppleMenu:(NSMenu *)menu;
 @end
 
-@interface SDLAppDelegate : NSObject
+@interface SDLAppDelegate : NSObject {
+    BOOL seenFirstActivate;
+}
+
+- (id)init;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification;
 @end
 
 @implementation SDLAppDelegate : NSObject
+- (id)init
+{
+    self = [super init];
+
+    if (self) {
+        seenFirstActivate = NO;
+    }
+
+    return self;
+}
+
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
     SDL_SendQuit();
@@ -55,6 +70,16 @@
 
 - (void)applicationDidBecomeActive:(NSNotification *)aNotification
 {
+    /* HACK: Ignore the first call. The application gets a
+     * applicationDidBecomeActive: a little bit after the first window is
+     * created, and if we don't ignore it, a window that has been created with
+     * SDL_WINDOW_MINIZED will ~immediately be restored.
+     */
+    if (!seenFirstActivate) {
+        seenFirstActivate = YES;
+        return;
+    }
+
     SDL_VideoDevice *device = SDL_GetVideoDevice();
     if (device && device->windows)
     {

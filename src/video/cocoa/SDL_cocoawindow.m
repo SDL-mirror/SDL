@@ -866,8 +866,12 @@ Cocoa_RaiseWindow(_THIS, SDL_Window * window)
     SDL_WindowData *windowData = ((SDL_WindowData *) window->driverdata);
     NSWindow *nswindow = windowData->nswindow;
 
+    // makeKeyAndOrderFront: has the side-effect of deminiaturizing and showing
+    // a minimized or hidden window, so check for that before showing it.
     [windowData->listener pauseVisibleObservation];
-    [nswindow makeKeyAndOrderFront:nil];
+    if (![nswindow isMiniaturized] && [nswindow isVisible]) {
+        [nswindow makeKeyAndOrderFront:nil];
+    }
     [windowData->listener resumeVisibleObservation];
 
     [pool release];
