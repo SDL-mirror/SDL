@@ -212,7 +212,7 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
     /* 64 seems nice. */
     EGLint attribs[64];
     EGLint found_configs = 0;
-    VisualID visual_id;
+    EGLint visual_id;
     int i;
 
     if (!_this->gles_data) {
@@ -277,7 +277,7 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
     if (_this->gles_data->eglGetConfigAttrib(_this->gles_data->egl_display,
                                              _this->gles_data->egl_config,
                                              EGL_NATIVE_VISUAL_ID,
-                                             (EGLint *) & visual_id) ==
+                                             &visual_id) ==
         EGL_FALSE || !visual_id) {
         /* Use the default visual when all else fails */
         XVisualInfo vi_in;
