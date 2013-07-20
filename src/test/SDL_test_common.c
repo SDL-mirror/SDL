@@ -1208,7 +1208,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
             break;
         case SDLK_EQUALS:
             if (event->key.keysym.mod & KMOD_CTRL) {
-                /* Ctrt-+ double the size of the window */
+                /* Ctrl-+ double the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
@@ -1219,7 +1219,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
             break;
         case SDLK_MINUS:
             if (event->key.keysym.mod & KMOD_CTRL) {
-                /* Ctrt-- double the size of the window */
+                /* Ctrl-- half the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
@@ -1318,7 +1318,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                     }
                 }
             } else if (event->key.keysym.mod & KMOD_ALT) {
-                /* Ctrl-Enter toggle fullscreen desktop */
+                /* Alt-Enter toggle fullscreen desktop */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     Uint32 flags = SDL_GetWindowFlags(window);
