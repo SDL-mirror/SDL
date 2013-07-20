@@ -105,7 +105,7 @@ WatchGameController(SDL_GameController * gamecontroller)
     /* Create a window to display controller axis position */
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
-                              SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+                              SCREEN_HEIGHT, 0);
     if (window == NULL) {
         fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
         return;

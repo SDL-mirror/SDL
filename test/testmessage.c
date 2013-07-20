@@ -159,7 +159,7 @@ main(int argc, char *argv[])
     /* Test showing a message box with a parent window */
     {
         SDL_Event event;
-        SDL_Window *window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_SHOWN);
+        SDL_Window *window = SDL_CreateWindow("Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
 
         success = SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                     "Simple MessageBox",

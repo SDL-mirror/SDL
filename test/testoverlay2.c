@@ -496,7 +496,7 @@ main(int argc, char **argv)
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               window_w, window_h,
-                              SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+                              SDL_WINDOW_RESIZABLE);
     if (!window) {
         fprintf(stderr, "Couldn't set create window: %s\n", SDL_GetError());
         free(RawMooseData);

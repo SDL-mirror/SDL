@@ -113,7 +113,7 @@ main(int argc, char **argv)
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               MOOSEPIC_W*4, MOOSEPIC_H*4,
-                              SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+                              SDL_WINDOW_RESIZABLE);
     if (!window) {
         fprintf(stderr, "Couldn't set create window: %s\n", SDL_GetError());
         quit(3);
