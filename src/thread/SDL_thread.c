@@ -88,7 +88,7 @@ SDL_TLSCleanup()
 
     storage = SDL_SYS_GetTLSData();
     if (storage) {
-        int i;
+        unsigned int i;
         for (i = 0; i < storage->limit; ++i) {
             if (storage->array[i].destructor) {
                 storage->array[i].destructor(storage->array[i].data);
