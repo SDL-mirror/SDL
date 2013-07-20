@@ -140,7 +140,7 @@ clipboard_testClipboardTextFunctions(void *arg)
     charResult = SDL_GetClipboardText();
     SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
     SDLTest_AssertCheck(
-        strcmp(textRef, charResult) == 0,
+        SDL_strcmp(textRef, charResult) == 0,
         "Verify SDL_GetClipboardText returned correct string, expected '%s', got '%s'",
         textRef, charResult);
 
