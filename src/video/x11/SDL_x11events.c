@@ -99,37 +99,60 @@ static Atom X11_PickTargetFromAtoms(Display *disp, Atom a0, Atom a1, Atom a2)
 }
 /*#define DEBUG_XEVENTS*/
 
+struct KeyRepeatCheckData
+{
+    XEvent *event;
+    SDL_bool found;
+};
+
+static Bool X11_KeyRepeatCheckIfEvent(Display *display, XEvent *chkev,
+    XPointer arg)
+{
+    struct KeyRepeatCheckData *d = (struct KeyRepeatCheckData *) arg;
+    if (chkev->type == KeyPress &&
+        chkev->xkey.keycode == d->event->xkey.keycode &&
+        chkev->xkey.time - d->event->xkey.time < 2)
+        d->found = SDL_TRUE;
+    return False;
+}
+
 /* Check to see if this is a repeated key.
    (idea shamelessly lifted from GII -- thanks guys! :)
  */
 static SDL_bool X11_KeyRepeat(Display *display, XEvent *event)
 {
-    XEvent peekevent;
+    XEvent dummyev;
+    struct KeyRepeatCheckData d;
+    d.event = event;
+    d.found = SDL_FALSE;
+    if (XPending(display))
+        XCheckIfEvent(display, &dummyev, X11_KeyRepeatCheckIfEvent,
+            (XPointer) &d);
+    return d.found;
+}
 
-    if (XPending(display)) {
-        XPeekEvent(display, &peekevent);
-        if ((peekevent.type == KeyPress) &&
-            (peekevent.xkey.keycode == event->xkey.keycode) &&
-            ((peekevent.xkey.time-event->xkey.time) < 2)) {
-            return SDL_TRUE;
-        }
-    }
-    return SDL_FALSE;
+static Bool X11_IsWheelCheckIfEvent(Display *display, XEvent *chkev,
+    XPointer arg)
+{
+    XEvent *event = (XEvent *) arg;
+    if (chkev->type == ButtonRelease &&
+        chkev->xbutton.button == event->xbutton.button &&
+        chkev->xbutton.time == event->xbutton.time)
+        return True;
+    return False;
 }
 
 static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
 {
-    XEvent peekevent;
+    XEvent relevent;
     if (XPending(display)) {
         /* according to the xlib docs, no specific mouse wheel events exist.
            however, mouse wheel events trigger a button press and a button release
            immediately. thus, checking if the same button was released at the same
            time as it was pressed, should be an adequate hack to derive a mouse
            wheel event. */
-        XPeekEvent(display,&peekevent);
-        if ((peekevent.type           == ButtonRelease) &&
-            (peekevent.xbutton.button == event->xbutton.button) &&
-            (peekevent.xbutton.time   == event->xbutton.time)) {
+        if (XCheckIfEvent(display, &relevent, X11_IsWheelCheckIfEvent,
+            (XPointer) event)) {
 
             /* by default, X11 only knows 5 buttons. on most 3 button + wheel mouse,
                Button4 maps to wheel up, Button5 maps to wheel down. */
@@ -139,9 +162,6 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
             else if (event->xbutton.button == Button5) {
                 *ticks = -1;
             }
-
-            /* remove the following release event, as this is now a wheel event */
-            XNextEvent(display,&peekevent);
             return SDL_TRUE;
         }
     }
