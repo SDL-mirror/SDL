@@ -902,7 +902,7 @@ D3D_UpdateClipRect(SDL_Renderer * renderer)
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_SCISSORTESTENABLE, TRUE);
         r.left = rect->x;
         r.top = rect->y;
-        r.right = rect->w + rect->w;
+        r.right = rect->x + rect->w;
         r.bottom = rect->y + rect->h;
 
         result = IDirect3DDevice9_SetScissorRect(data->device, &r);
