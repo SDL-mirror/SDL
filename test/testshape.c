@@ -79,7 +79,7 @@ int main(int argc,char** argv)
     }
 
     num_pictures = argc - 1;
-    pictures = (LoadedPicture *)malloc(sizeof(LoadedPicture)*num_pictures);
+    pictures = (LoadedPicture *)SDL_malloc(sizeof(LoadedPicture)*num_pictures);
     for(i=0;i<num_pictures;i++)
         pictures[i].surface = NULL;
     for(i=0;i<num_pictures;i++) {
@@ -89,7 +89,7 @@ int main(int argc,char** argv)
             for(j=0;j<num_pictures;j++)
                 if(pictures[j].surface != NULL)
                     SDL_FreeSurface(pictures[j].surface);
-            free(pictures);
+            SDL_free(pictures);
             SDL_VideoQuit();
             printf("Could not load surface from named bitmap file.\n");
             exit(-3);
@@ -110,7 +110,7 @@ int main(int argc,char** argv)
     if(window == NULL) {
         for(i=0;i<num_pictures;i++)
             SDL_FreeSurface(pictures[i].surface);
-        free(pictures);
+        SDL_free(pictures);
         SDL_VideoQuit();
         printf("Could not create shaped window for SDL_Shape.\n");
         exit(-4);
@@ -120,7 +120,7 @@ int main(int argc,char** argv)
         SDL_DestroyWindow(window);
         for(i=0;i<num_pictures;i++)
             SDL_FreeSurface(pictures[i].surface);
-        free(pictures);
+        SDL_free(pictures);
         SDL_VideoQuit();
         printf("Could not create rendering context for SDL_Shape window.\n");
         exit(-5);
@@ -137,7 +137,7 @@ int main(int argc,char** argv)
                     SDL_DestroyTexture(pictures[i].texture);
             for(i=0;i<num_pictures;i++)
                 SDL_FreeSurface(pictures[i].surface);
-            free(pictures);
+            SDL_free(pictures);
             SDL_DestroyRenderer(renderer);
             SDL_DestroyWindow(window);
             SDL_VideoQuit();
@@ -194,7 +194,7 @@ int main(int argc,char** argv)
     //Free the original surfaces backing the textures.
     for(i=0;i<num_pictures;i++)
         SDL_FreeSurface(pictures[i].surface);
-    free(pictures);
+    SDL_free(pictures);
     //Call SDL_VideoQuit() before quitting.
     SDL_VideoQuit();
 
