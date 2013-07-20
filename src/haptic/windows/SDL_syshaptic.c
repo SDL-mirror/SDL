@@ -23,6 +23,9 @@
 #ifdef SDL_HAPTIC_DINPUT
 
 #include "SDL_assert.h"
+#include "SDL_thread.h"
+#include "SDL_mutex.h"
+#include "SDL_timer.h"
 #include "SDL_hints.h"
 #include "SDL_haptic.h"
 #include "../SDL_syshaptic.h"
@@ -56,6 +59,10 @@ struct haptic_hwdata
     SDL_bool is_joystick;       /* Device is loaded as joystick. */
     Uint8 bXInputHaptic; /* Supports force feedback via XInput. */
     Uint8 userid; /* XInput userid index for this joystick */
+    SDL_Thread *thread;
+    SDL_mutex *mutex;
+    volatile Uint32 stopTicks;
+    volatile int stopThread;
 };
 
 
@@ -102,6 +109,8 @@ static int SDL_SYS_ToDIEFFECT(SDL_Haptic * haptic, DIEFFECT * dest,
                               SDL_HapticEffect * src);
 static void SDL_SYS_HapticFreeDIEFFECT(DIEFFECT * effect, int type);
 static REFGUID SDL_SYS_HapticEffectType(SDL_HapticEffect * effect);
+static int SDLCALL SDL_RunXInputHaptic(void *arg);
+
 /* Callbacks. */
 static BOOL CALLBACK EnumHapticsCallback(const DIDEVICEINSTANCE *
                                          pdidInstance, VOID * pContext);
@@ -376,6 +385,7 @@ SDL_SYS_HapticOpenFromInstance(SDL_Haptic * haptic, DIDEVICEINSTANCE instance)
 static int
 SDL_SYS_HapticOpenFromXInput(SDL_Haptic * haptic, Uint8 userid)
 {
+    char threadName[32];
     XINPUT_VIBRATION vibration = { 0, 0 };  /* stop any current vibration */
     XINPUTSETSTATE(userid, &vibration);
 
@@ -405,6 +415,30 @@ SDL_SYS_HapticOpenFromXInput(SDL_Haptic * haptic, Uint8 userid)
 
     haptic->hwdata->bXInputHaptic = 1;
     haptic->hwdata->userid = userid;
+
+    haptic->hwdata->mutex = SDL_CreateMutex();
+    if (haptic->hwdata->mutex == NULL) {
+        SDL_free(haptic->effects);
+        SDL_free(haptic->hwdata);
+        haptic->effects = NULL;
+        return SDL_SetError("Couldn't create XInput haptic mutex");
+    }
+
+    SDL_snprintf(threadName, sizeof (threadName), "SDLXInputDev%d", (int) userid);
+
+#if defined(__WIN32__) && !defined(HAVE_LIBC)  /* !!! FIXME: this is nasty. */
+    #undef SDL_CreateThread
+    haptic->hwdata->thread = SDL_CreateThread(SDL_RunXInputHaptic, threadName, haptic->hwdata, NULL, NULL);
+#else
+    haptic->hwdata->thread = SDL_CreateThread(SDL_RunXInputHaptic, threadName, haptic->hwdata);
+#endif
+    if (haptic->hwdata->thread == NULL) {
+        SDL_DestroyMutex(haptic->hwdata->mutex);
+        SDL_free(haptic->effects);
+        SDL_free(haptic->hwdata);
+        haptic->effects = NULL;
+        return SDL_SetError("Couldn't create XInput haptic thread");
+    }
 
     return 0;
  }
@@ -684,7 +718,11 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
         haptic->neffects = 0;
 
         /* Clean up */
-        if (!haptic->hwdata->bXInputHaptic) {
+        if (haptic->hwdata->bXInputHaptic) {
+            haptic->hwdata->stopThread = 1;
+            SDL_WaitThread(haptic->hwdata->thread, NULL);
+            SDL_DestroyMutex(haptic->hwdata->mutex);
+        } else {
             IDirectInputDevice8_Unacquire(haptic->hwdata->device);
             /* Only release if isn't grabbed by a joystick. */
             if (haptic->hwdata->is_joystick == 0) {
@@ -1295,7 +1333,11 @@ SDL_SYS_HapticRunEffect(SDL_Haptic * haptic, struct haptic_effect *effect,
 
     if (haptic->hwdata->bXInputHaptic) {
         XINPUT_VIBRATION *vib = &effect->hweffect->vibration;
-        return (XINPUTSETSTATE(haptic->hwdata->userid, vib) == ERROR_SUCCESS);
+        SDL_assert(effect->effect.type == SDL_HAPTIC_SINE);  /* should catch this at higher level */
+        SDL_LockMutex(haptic->hwdata->mutex);
+        haptic->hwdata->stopTicks = SDL_GetTicks() + (effect->effect.periodic.length * iterations);
+        SDL_UnlockMutex(haptic->hwdata->mutex);
+        return (XINPUTSETSTATE(haptic->hwdata->userid, vib) == ERROR_SUCCESS) ? 0 : -1;
     }
 
     /* Check if it's infinite. */
@@ -1324,7 +1366,10 @@ SDL_SYS_HapticStopEffect(SDL_Haptic * haptic, struct haptic_effect *effect)
 
     if (haptic->hwdata->bXInputHaptic) {
         XINPUT_VIBRATION vibration = { 0, 0 };
-        return (XINPUTSETSTATE(haptic->hwdata->userid, &vibration) == ERROR_SUCCESS);
+        SDL_LockMutex(haptic->hwdata->mutex);
+        haptic->hwdata->stopTicks = 0;
+        SDL_UnlockMutex(haptic->hwdata->mutex);
+        return (XINPUTSETSTATE(haptic->hwdata->userid, &vibration) == ERROR_SUCCESS) ? 0 : -1;
     }
 
     ret = IDirectInputEffect_Stop(effect->hweffect->ref);
@@ -1483,7 +1528,10 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
 
     if (haptic->hwdata->bXInputHaptic) {
         XINPUT_VIBRATION vibration = { 0, 0 };
-        return (XINPUTSETSTATE(haptic->hwdata->userid, &vibration) == ERROR_SUCCESS);
+        SDL_LockMutex(haptic->hwdata->mutex);
+        haptic->hwdata->stopTicks = 0;
+        SDL_UnlockMutex(haptic->hwdata->mutex);
+        return (XINPUTSETSTATE(haptic->hwdata->userid, &vibration) == ERROR_SUCCESS) ? 0 : -1;
     }
 
     /* Try to stop the effects. */
@@ -1491,6 +1539,41 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
                                                        DISFFC_STOPALL);
     if (FAILED(ret)) {
         return DI_SetError("Stopping the device", ret);
+    }
+
+    return 0;
+}
+
+
+/* !!! FIXME: this is a hack, remove this later. */
+/* Since XInput doesn't offer a way to vibrate for X time, we hook into
+ *  SDL_PumpEvents() to check if it's time to stop vibrating with some
+ *  frequency.
+ * In practice, this works for 99% of use cases. But in an ideal world,
+ *  we do this in a separate thread so that:
+ *    - we aren't bound to when the app chooses to pump the event queue.
+ *    - we aren't adding more polling to the event queue
+ *    - we can emulate all the haptic effects correctly (start on a delay,
+ *      mix multiple effects, etc).
+ *
+ * Mostly, this is here to get rumbling to work, and all the other features
+ *  are absent in the XInput path for now.  :(
+ */
+static int SDLCALL
+SDL_RunXInputHaptic(void *arg)
+{
+    struct haptic_hwdata *hwdata = (struct haptic_hwdata *) arg;
+
+    while (!hwdata->stopThread) {
+        SDL_Delay(50);
+        SDL_LockMutex(hwdata->mutex);
+        /* If we're currently running and need to stop... */
+        if ((hwdata->stopTicks) && (hwdata->stopTicks < SDL_GetTicks())) {
+            XINPUT_VIBRATION vibration = { 0, 0 };
+            hwdata->stopTicks = 0;
+            XINPUTSETSTATE(hwdata->userid, &vibration);
+        }
+        SDL_UnlockMutex(hwdata->mutex);
     }
 
     return 0;
