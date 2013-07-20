@@ -57,8 +57,8 @@ SDL_TLSSet(SDL_TLSID id, const void *value, void (*destructor)(void *))
     }
 
     storage = SDL_SYS_GetTLSData();
-    if (!storage || id > storage->limit) {
-        int i, oldlimit, newlimit;
+    if (!storage || (id > storage->limit)) {
+        unsigned int i, oldlimit, newlimit;
 
         oldlimit = storage ? storage->limit : 0;
         newlimit = (id + TLS_ALLOC_CHUNKSIZE);

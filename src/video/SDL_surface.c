@@ -178,7 +178,7 @@ SDL_SetColorKey(SDL_Surface * surface, int flag, Uint32 key)
         return SDL_InvalidParamError("surface");
     }
 
-    if (surface->format->palette && key >= surface->format->palette->ncolors) {
+    if (surface->format->palette && key >= ((Uint32) surface->format->palette->ncolors)) {
         return SDL_InvalidParamError("key");
     }
 

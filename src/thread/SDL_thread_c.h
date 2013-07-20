@@ -58,7 +58,7 @@ extern void SDL_RunThread(void *data);
 
 /* This is the system-independent thread local storage structure */
 typedef struct {
-    int limit;
+    unsigned int limit;
     struct {
         void *data;
         void (*destructor)(void*);

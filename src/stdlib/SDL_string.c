@@ -1350,7 +1350,7 @@ SDL_PrintUnsignedLongLong(char *text, size_t maxlen, SDL_FormatInfo *info, Uint6
 static size_t
 SDL_PrintFloat(char *text, size_t maxlen, SDL_FormatInfo *info, double arg)
 {
-    int i, width;
+    int width;
     size_t len;
     size_t left = maxlen;
     char *textstart = text;
