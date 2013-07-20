@@ -1357,7 +1357,6 @@ SDL_PrintFloat(char *text, size_t maxlen, SDL_FormatInfo *info, double arg)
 
     if (arg) {
         /* This isn't especially accurate, but hey, it's easy. :) */
-        double precision = 1.0;
         unsigned long value;
 
         if (arg < 0) {
@@ -1385,9 +1384,6 @@ SDL_PrintFloat(char *text, size_t maxlen, SDL_FormatInfo *info, double arg)
         arg -= value;
         if (info->precision < 0) {
             info->precision = 6;
-        }
-        for (i = 0; i < info->precision; ++i) {
-            precision *= 0.1;
         }
         if (info->force_type || info->precision > 0) {
             int mult = 10;
