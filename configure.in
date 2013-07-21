@@ -1173,6 +1173,9 @@ AC_HELP_STRING([--enable-x11-shared], [dynamically load X11 support [[default=ma
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
 
+            # Needed so SDL applications can include SDL_syswm.h
+            SDL_CFLAGS="$SDL_CFLAGS $X_CFLAGS"
+
             if test x$enable_x11_shared = xmaybe; then
                 enable_x11_shared=$x11_symbols_private
             fi

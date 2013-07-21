@@ -19562,6 +19562,9 @@ $as_echo "#define SDL_VIDEO_DRIVER_X11 1" >>confdefs.h
             SOURCES="$SOURCES $srcdir/src/video/x11/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $X_CFLAGS"
 
+            # Needed so SDL applications can include SDL_syswm.h
+            SDL_CFLAGS="$SDL_CFLAGS $X_CFLAGS"
+
             if test x$enable_x11_shared = xmaybe; then
                 enable_x11_shared=$x11_symbols_private
             fi
