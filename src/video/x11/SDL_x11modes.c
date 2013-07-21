@@ -860,7 +860,6 @@ X11_QuitModes(_THIS)
 int
 X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
 {
-    Display *display = ((SDL_VideoData *) _this->driverdata)->display;
     SDL_DisplayData *data = (SDL_DisplayData *) sdl_display->driverdata;
 
     rect->x = data->x;
@@ -871,6 +870,7 @@ X11_GetDisplayBounds(_THIS, SDL_VideoDisplay * sdl_display, SDL_Rect * rect)
 #if SDL_VIDEO_DRIVER_X11_XINERAMA
     /* Get the real current bounds of the display */
     if (data->use_xinerama) {
+        Display *display = ((SDL_VideoData *) _this->driverdata)->display;
         int screencount;
         XineramaScreenInfo *xinerama = XineramaQueryScreens(display, &screencount);
         if (xinerama) {
