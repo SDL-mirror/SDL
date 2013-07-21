@@ -277,7 +277,6 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
 {
     GL_RenderData *data = (GL_RenderData *) renderer->driverdata;
 
-    GL_ClearErrors(renderer);
     if (SDL_CurrentContext != data->context) {
         if (SDL_GL_MakeCurrent(renderer->window, data->context) < 0) {
             return -1;
@@ -286,6 +285,9 @@ GL_ActivateRenderer(SDL_Renderer * renderer)
 
         GL_UpdateViewport(renderer);
     }
+
+    GL_ClearErrors(renderer);
+
     return 0;
 }
 
