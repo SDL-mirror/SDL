@@ -150,8 +150,9 @@ testlock$(EXE): $(srcdir)/testlock.c
 
 ifeq (@ISMACOSX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
-			$(srcdir)/testnativecocoa.m
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -framework Cocoa
+			$(srcdir)/testnativecocoa.m \
+			$(srcdir)/testnativex11.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -framework Cocoa @XLIB@
 endif
 
 ifeq (@ISWINDOWS@,true)
@@ -163,7 +164,7 @@ endif
 ifeq (@ISUNIX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
 			$(srcdir)/testnativex11.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @XLIB@
 endif
 
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c

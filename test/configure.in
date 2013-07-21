@@ -100,6 +100,7 @@ if test x$have_x = xyes; then
         :
     else
         XPATH="-L$ac_x_libraries"
+        XLIB="-L$ac_x_libraries -lX11"
     fi
 fi
 
@@ -141,6 +142,7 @@ else
 fi
 
 AC_SUBST(GLLIB)
+AC_SUBST(XLIB)
 
 dnl Check for SDL_ttf
 AC_CHECK_LIB(SDL2_ttf, TTF_Init, have_SDL_ttf=yes)

@@ -585,6 +585,7 @@ ac_unique_file="README"
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
 SDL_TTF_LIB
+XLIB
 GLLIB
 CPP
 XMKMF
@@ -3793,6 +3794,7 @@ if test x$have_x = xyes; then
         :
     else
         XPATH="-L$ac_x_libraries"
+        XLIB="-L$ac_x_libraries -lX11"
     fi
 fi
 
@@ -3862,6 +3864,7 @@ elif test x$have_opengl = xyes; then
 else
     GLLIB=""
 fi
+
 
 
 
