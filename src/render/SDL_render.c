@@ -151,6 +151,16 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
             event->motion.y -= renderer->viewport.y;
             event->motion.x = (int)(event->motion.x / renderer->scale.x);
             event->motion.y = (int)(event->motion.y / renderer->scale.y);
+            if (event->motion.xrel > 0) {
+                event->motion.xrel = SDL_max(1, (int)(event->motion.xrel / renderer->scale.x));
+            } else if (event->motion.xrel < 0) {
+                event->motion.xrel = SDL_min(-1, (int)(event->motion.xrel / renderer->scale.x));
+            }
+            if (event->motion.yrel > 0) {
+                event->motion.yrel = SDL_max(1, (int)(event->motion.yrel / renderer->scale.y));
+            } else if (event->motion.yrel < 0) {
+                event->motion.yrel = SDL_min(-1, (int)(event->motion.yrel / renderer->scale.y));
+            }
         }
     } else if (event->type == SDL_MOUSEBUTTONDOWN ||
                event->type == SDL_MOUSEBUTTONUP) {
