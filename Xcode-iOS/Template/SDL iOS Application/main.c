@@ -67,7 +67,7 @@ main(int argc, char *argv[])
     /* create window and renderer */
     window =
         SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
-                         SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
+                         SDL_WINDOW_OPENGL);
     if (!window) {
         printf("Could not initialize Window\n");
         return 1;

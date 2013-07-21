@@ -68,7 +68,7 @@ main(int argc, char *argv[])
     _sdl_window = SDL_CreateWindow("fred",
                                    0, 0,
                                    sx, sy,
-                                   SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_BORDERLESS);
+                                   SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
     
     SDL_SetHint("SDL_HINT_ORIENTATIONS", "LandscapeLeft LandscapeRight");
     
