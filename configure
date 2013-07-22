@@ -15802,15 +15802,45 @@ elif test -d .hg; then
     separate directory so you don't clobber SDL_config.h, SDL_revision.h
 " "$LINENO" 5
 fi
+BASE_CFLAGS=""
+BASE_LDFLAGS=""
 case "$host" in
     *-*-cygwin*)
         # We build SDL on cygwin without the UNIX emulation layer
-        BASE_CFLAGS="-I/usr/include/mingw -mno-cygwin"
-        BASE_LDFLAGS="-mno-cygwin"
-        ;;
-    *)
-        BASE_CFLAGS=""
-        BASE_LDFLAGS=""
+        save_CFLAGS="$CFLAGS"
+        have_no_cygwin=no
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GCC -mno-cygwin option" >&5
+$as_echo_n "checking for GCC -mno-cygwin option... " >&6; }
+        CFLAGS="$save_CFLAGS -mno-cygwin"
+
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+        have_no_cygwin=yes
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_no_cygwin" >&5
+$as_echo "$have_no_cygwin" >&6; }
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_no_cygwin = xyes; then
+            BASE_CFLAGS="-mno-cygwin"
+            BASE_LDFLAGS="-mno-cygwin"
+        fi
+        BASE_CFLAGS="$BASE_CFLAGS -I/usr/include/mingw"
         ;;
 esac
 # Uncomment the following line if you want to force SDL and applications
@@ -22428,7 +22458,49 @@ $as_echo "#define SDL_LOADSO_WINDOWS 1" >>confdefs.h
         VERSION_SOURCES="$srcdir/src/main/windows/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDL2main $SDL_LIBS -mwindows"
+        SDL_LIBS="-lSDL2main $SDL_LIBS -mwindows"
+
+        # Check to see if this is a mingw or cygwin build
+        have_mingw32=
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmingw32" >&5
+$as_echo_n "checking for main in -lmingw32... " >&6; }
+if ${ac_cv_lib_mingw32_main+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmingw32  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_mingw32_main=yes
+else
+  ac_cv_lib_mingw32_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mingw32_main" >&5
+$as_echo "$ac_cv_lib_mingw32_main" >&6; }
+if test "x$ac_cv_lib_mingw32_main" = xyes; then :
+  have_mingw32=yes
+fi
+
+        if test x$have_mingw32 = xyes; then
+            SDL_LIBS="-lmingw32 $SDL_LIBS"
+        else
+            SDL_LIBS="-lcygwin $SDL_LIBS"
+        fi
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos

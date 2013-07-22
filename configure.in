@@ -70,15 +70,29 @@ elif test -d .hg; then
     separate directory so you don't clobber SDL_config.h, SDL_revision.h
 ])
 fi
+BASE_CFLAGS=""
+BASE_LDFLAGS=""
 case "$host" in
     *-*-cygwin*)
         # We build SDL on cygwin without the UNIX emulation layer
-        BASE_CFLAGS="-I/usr/include/mingw -mno-cygwin"
-        BASE_LDFLAGS="-mno-cygwin"
-        ;;
-    *)
-        BASE_CFLAGS=""
-        BASE_LDFLAGS=""
+        save_CFLAGS="$CFLAGS"
+        have_no_cygwin=no
+        AC_MSG_CHECKING(for GCC -mno-cygwin option)
+        CFLAGS="$save_CFLAGS -mno-cygwin"
+
+        AC_TRY_COMPILE([
+        ],[
+        ],[
+        have_no_cygwin=yes
+        ])
+        AC_MSG_RESULT($have_no_cygwin)
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_no_cygwin = xyes; then
+            BASE_CFLAGS="-mno-cygwin"
+            BASE_LDFLAGS="-mno-cygwin"
+        fi
+        BASE_CFLAGS="$BASE_CFLAGS -I/usr/include/mingw"
         ;;
 esac
 # Uncomment the following line if you want to force SDL and applications
@@ -2511,7 +2525,16 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         VERSION_SOURCES="$srcdir/src/main/windows/*.rc"
         SDLMAIN_SOURCES="$srcdir/src/main/windows/*.c"
         SDL_CFLAGS="$SDL_CFLAGS -Dmain=SDL_main"
-        SDL_LIBS="-lmingw32 -lSDL2main $SDL_LIBS -mwindows"
+        SDL_LIBS="-lSDL2main $SDL_LIBS -mwindows"
+
+        # Check to see if this is a mingw or cygwin build
+        have_mingw32=
+        AC_CHECK_LIB(mingw32, main, [have_mingw32=yes])
+        if test x$have_mingw32 = xyes; then
+            SDL_LIBS="-lmingw32 $SDL_LIBS"
+        else
+            SDL_LIBS="-lcygwin $SDL_LIBS"
+        fi
         ;;
     *-*-beos* | *-*-haiku*)
         ARCH=beos
