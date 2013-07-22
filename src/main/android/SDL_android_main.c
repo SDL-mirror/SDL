@@ -12,10 +12,10 @@
 #include <jni.h>
 
 // Called before SDL_main() to initialize JNI bindings in SDL library
-extern "C" void SDL_Android_Init(JNIEnv* env, jclass cls);
+extern void SDL_Android_Init(JNIEnv* env, jclass cls);
 
 // Start up the SDL app
-extern "C" void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj)
+void Java_org_libsdl_app_SDLActivity_nativeInit(JNIEnv* env, jclass cls, jobject obj)
 {
     /* This interface could expand with ABI negotiation, calbacks, etc. */
     SDL_Android_Init(env, cls);

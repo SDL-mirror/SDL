@@ -28,10 +28,10 @@ android-project/src/org/libsdl/app/SDLActivity.java
 
 The Java code loads your game code, the SDL shared library, and
 dispatches to native functions implemented in the SDL library:
-src/SDL_android.cpp
+src/SDL_android.c
 
 Your project must include some glue code that starts your main() routine:
-src/main/android/SDL_android_main.cpp
+src/main/android/SDL_android_main.c
 
 
 ================================================================================
