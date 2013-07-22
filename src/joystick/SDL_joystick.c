@@ -50,7 +50,7 @@ int
 SDL_JoystickInit(void)
 {
     int status;
-	
+
     /* See if we should allow joystick events while in the background */
     SDL_AddHintCallback(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
                         SDL_JoystickAllowBackgroundEventsChanged, NULL);
@@ -353,7 +353,7 @@ SDL_JoystickGetButton(SDL_Joystick * joystick, int button)
 
 /*
  * Return if the joystick in question is currently attached to the system,
- *  \return 0 if not plugged in, 1 if still present.
+ *  \return SDL_FALSE if not plugged in, SDL_TRUE if still present.
  */
 SDL_bool
 SDL_JoystickGetAttached(SDL_Joystick * joystick)
