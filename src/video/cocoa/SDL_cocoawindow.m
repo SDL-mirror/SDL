@@ -131,6 +131,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     NSNotificationCenter *center;
     NSWindow *window = _data->nswindow;
     NSView *view = [window contentView];
+    NSArray *windows = nil;
 
     center = [NSNotificationCenter defaultCenter];
 
@@ -154,6 +155,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
     if ([view nextResponder] == self) {
         [view setNextResponder:nil];
+    }
+
+    /* Make the next window in the z-order Key. If we weren't the foreground
+       when closed, this is a no-op. */
+    windows = [NSApp orderedWindows];
+    if ([windows count] > 0) {
+        NSWindow *win = (NSWindow *) [windows objectAtIndex:0];
+        [win makeKeyAndOrderFront:self];
     }
 }
 
