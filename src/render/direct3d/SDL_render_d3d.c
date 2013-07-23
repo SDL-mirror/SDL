@@ -169,6 +169,32 @@ HRESULT WINAPI
         LPD3DXBUFFER*                   ppShader,
         LPD3DXBUFFER*                   ppErrorMsgs);
 
+static void PrintShaderData(LPDWORD shader_data, DWORD shader_size)
+{
+    OutputDebugStringA("const DWORD shader_data[] = {\n\t");
+    {
+        SDL_bool newline = SDL_FALSE;
+        unsigned i;
+        for (i = 0; i < shader_size / sizeof(DWORD); ++i) {
+            char dword[11];
+            if (i > 0) {
+                if ((i%6) == 0) {
+                    newline = SDL_TRUE;
+                }
+                if (newline) {
+                    OutputDebugStringA(",\n    ");
+                    newline = SDL_FALSE;
+                } else {
+                    OutputDebugStringA(", ");
+                }
+            }
+            SDL_snprintf(dword, sizeof(dword), "0x%8.8x", shader_data[i]);
+            OutputDebugStringA(dword);
+        }
+        OutputDebugStringA("\n};\n");
+    }
+}
+
 #endif /* ASSEMBLE_SHADER */
 
 
@@ -228,17 +254,26 @@ typedef struct
     SDL_bool updateSize;
     SDL_bool beginScene;
     SDL_bool enableSeparateAlphaBlend;
-    D3DTEXTUREFILTERTYPE scaleMode;
+    D3DTEXTUREFILTERTYPE scaleMode[8];
     IDirect3DSurface9 *defaultRenderTarget;
     IDirect3DSurface9 *currentRenderTarget;
     void* d3dxDLL;
     ID3DXMatrixStack *matrixStack;
+    LPDIRECT3DPIXELSHADER9 ps_yuv;
 } D3D_RenderData;
 
 typedef struct
 {
     IDirect3DTexture9 *texture;
     D3DTEXTUREFILTERTYPE scaleMode;
+
+    /* YV12 texture support */
+    SDL_bool yuv;
+    IDirect3DTexture9 *utexture;
+    IDirect3DTexture9 *vtexture;
+    Uint8 *pixels;
+    int pitch;
+    SDL_Rect locked_rect;
 } D3D_TextureData;
 
 typedef struct
@@ -337,6 +372,9 @@ PixelFormatToD3DFMT(Uint32 format)
         return D3DFMT_X8R8G8B8;
     case SDL_PIXELFORMAT_ARGB8888:
         return D3DFMT_A8R8G8B8;
+    case SDL_PIXELFORMAT_YV12:
+    case SDL_PIXELFORMAT_IYUV:
+        return D3DFMT_L8;
     default:
         return D3DFMT_UNKNOWN;
     }
@@ -385,7 +423,7 @@ D3D_Reset(SDL_Renderer * renderer)
                                     D3DCULL_NONE);
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
     IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget);
-    data->scaleMode = D3DTEXF_FORCE_DWORD;
+    SDL_memset(data->scaleMode, 0xFF, sizeof(data->scaleMode));
     return 0;
 }
 
@@ -587,7 +625,7 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         return NULL;
     }
     data->beginScene = SDL_TRUE;
-    data->scaleMode = D3DTEXF_FORCE_DWORD;
+    SDL_memset(data->scaleMode, 0xFF, sizeof(data->scaleMode));
 
     /* Get presentation parameters to fill info */
     result = IDirect3DDevice9_GetSwapChain(data->device, 0, &chain);
@@ -676,6 +714,136 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
     IDirect3DDevice9_SetTransform(data->device, D3DTS_WORLD, &matrix);
     IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, &matrix);
 
+    if (caps.MaxSimultaneousTextures >= 3)
+    {
+#ifdef ASSEMBLE_SHADER
+        /* This shader was created by running the following HLSL through the fxc compiler
+           and then tuning the generated assembly.
+
+           fxc /T fx_4_0 /O3 /Gfa /Fc yuv.fxc yuv.fx
+
+           --- yuv.fx ---
+           Texture2D g_txY;
+           Texture2D g_txU;
+           Texture2D g_txV;
+
+           SamplerState samLinear
+           {
+               Filter = ANISOTROPIC;
+               AddressU = Clamp;
+               AddressV = Clamp;
+               MaxAnisotropy = 1;
+           };
+
+           struct VS_OUTPUT
+           {
+                float2 TextureUV  : TEXCOORD0;
+           };
+
+           struct PS_OUTPUT
+           {
+                float4 RGBAColor : SV_Target;
+           };
+
+           PS_OUTPUT YUV420( VS_OUTPUT In ) 
+           {
+               const float3 offset = {-0.0625, -0.5, -0.5};
+               const float3 Rcoeff = {1.164,  0.000,  1.596};
+               const float3 Gcoeff = {1.164, -0.391, -0.813};
+               const float3 Bcoeff = {1.164,  2.018,  0.000};
+
+               PS_OUTPUT Output;
+               float2 TextureUV = In.TextureUV;
+
+               float3 yuv;
+               yuv.x = g_txY.Sample( samLinear, TextureUV ).r;
+               yuv.y = g_txU.Sample( samLinear, TextureUV ).r;
+               yuv.z = g_txV.Sample( samLinear, TextureUV ).r;
+
+               yuv += offset;
+               Output.RGBAColor.r = dot(yuv, Rcoeff);
+               Output.RGBAColor.g = dot(yuv, Gcoeff);
+               Output.RGBAColor.b = dot(yuv, Bcoeff);
+               Output.RGBAColor.a = 1.0f;
+
+               return Output;
+           }
+
+           technique10 RenderYUV420
+           {
+               pass P0
+               {
+                    SetPixelShader( CompileShader( ps_4_0_level_9_0, YUV420() ) );
+               }
+           }
+        */
+        const char *shader_text =
+            "ps_2_0\n"
+            "def c0, -0.0625, -0.5, -0.5, 1\n"
+            "def c1, 1.16400003, 0, 1.59599996, 0\n"
+            "def c2, 1.16400003, -0.391000003, -0.813000023, 0\n"
+            "def c3, 1.16400003, 2.01799989, 0, 0\n"
+            "dcl t0.xy\n"
+            "dcl v0.xyzw\n"
+            "dcl_2d s0\n"
+            "dcl_2d s1\n"
+            "dcl_2d s2\n"
+            "texld r0, t0, s0\n"
+            "texld r1, t0, s1\n"
+            "texld r2, t0, s2\n"
+            "mov r0.y, r1.x\n"
+            "mov r0.z, r2.x\n"
+            "add r0.xyz, r0, c0\n"
+            "dp3 r1.x, r0, c1\n"
+            "dp3 r1.y, r0, c2\n"
+            "dp2add r1.z, r0, c3, c3.z\n"   /* Logically this is "dp3 r1.z, r0, c3" but the optimizer did its magic */
+            "mov r1.w, c0.w\n"
+            "mul r0, r1, v0\n"              /* Not in the HLSL, multiply by vertex color */
+            "mov oC0, r0\n"
+        ;
+        LPD3DXBUFFER pCode;
+        LPD3DXBUFFER pErrorMsgs;
+        LPDWORD shader_data = NULL;
+        DWORD   shader_size = 0;
+        result = D3DXAssembleShader(shader_text, SDL_strlen(shader_text), NULL, NULL, 0, &pCode, &pErrorMsgs);
+        if (!FAILED(result)) {
+            shader_data = (DWORD*)pCode->lpVtbl->GetBufferPointer(pCode);
+            shader_size = pCode->lpVtbl->GetBufferSize(pCode);
+            PrintShaderData(shader_data, shader_size);
+        } else {
+            const char *error = (const char *)pErrorMsgs->lpVtbl->GetBufferPointer(pErrorMsgs);
+            SDL_SetError("Couldn't assemble shader: %s", error);
+        }
+#else
+        const DWORD shader_data[] = {
+            0xffff0200, 0x05000051, 0xa00f0000, 0xbd800000, 0xbf000000, 0xbf000000,
+            0x3f800000, 0x05000051, 0xa00f0001, 0x3f94fdf4, 0x00000000, 0x3fcc49ba,
+            0x00000000, 0x05000051, 0xa00f0002, 0x3f94fdf4, 0xbec83127, 0xbf5020c5,
+            0x00000000, 0x05000051, 0xa00f0003, 0x3f94fdf4, 0x400126e9, 0x00000000,
+            0x00000000, 0x0200001f, 0x80000000, 0xb0030000, 0x0200001f, 0x80000000,
+            0x900f0000, 0x0200001f, 0x90000000, 0xa00f0800, 0x0200001f, 0x90000000,
+            0xa00f0801, 0x0200001f, 0x90000000, 0xa00f0802, 0x03000042, 0x800f0000,
+            0xb0e40000, 0xa0e40800, 0x03000042, 0x800f0001, 0xb0e40000, 0xa0e40801,
+            0x03000042, 0x800f0002, 0xb0e40000, 0xa0e40802, 0x02000001, 0x80020000,
+            0x80000001, 0x02000001, 0x80040000, 0x80000002, 0x03000002, 0x80070000,
+            0x80e40000, 0xa0e40000, 0x03000008, 0x80010001, 0x80e40000, 0xa0e40001,
+            0x03000008, 0x80020001, 0x80e40000, 0xa0e40002, 0x0400005a, 0x80040001,
+            0x80e40000, 0xa0e40003, 0xa0aa0003, 0x02000001, 0x80080001, 0xa0ff0000,
+            0x03000005, 0x800f0000, 0x80e40001, 0x90e40000, 0x02000001, 0x800f0800,
+            0x80e40000, 0x0000ffff
+        };
+#endif
+        if (shader_data) {
+            result = IDirect3DDevice9_CreatePixelShader(data->device, shader_data, &data->ps_yuv);
+            if (!FAILED(result)) {
+                renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_YV12;
+                renderer->info.texture_formats[renderer->info.num_texture_formats++] = SDL_PIXELFORMAT_IYUV;
+            } else {
+                D3D_SetError("CreatePixelShader()", result);
+            }
+        }
+    }
+
     return renderer;
 }
 
@@ -744,6 +912,70 @@ D3D_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         return D3D_SetError("CreateTexture()", result);
     }
 
+    if (texture->format == SDL_PIXELFORMAT_YV12 ||
+        texture->format == SDL_PIXELFORMAT_IYUV) {
+        data->yuv = SDL_TRUE;
+
+        result =
+            IDirect3DDevice9_CreateTexture(renderdata->device, texture->w / 2,
+                                           texture->h / 2, 1, usage,
+                                           PixelFormatToD3DFMT(texture->format),
+                                           pool, &data->utexture, NULL);
+        if (FAILED(result)) {
+            return D3D_SetError("CreateTexture()", result);
+        }
+
+        result =
+            IDirect3DDevice9_CreateTexture(renderdata->device, texture->w / 2,
+                                           texture->h / 2, 1, usage,
+                                           PixelFormatToD3DFMT(texture->format),
+                                           pool, &data->vtexture, NULL);
+        if (FAILED(result)) {
+            return D3D_SetError("CreateTexture()", result);
+        }
+    }
+
+    return 0;
+}
+
+static int
+D3D_UpdateTextureInternal(IDirect3DTexture9 *texture, Uint32 format, SDL_bool full_texture, int x, int y, int w, int h, const void *pixels, int pitch)
+{
+    RECT d3drect;
+    D3DLOCKED_RECT locked;
+    const Uint8 *src;
+    Uint8 *dst;
+    int row, length;
+    HRESULT result;
+
+    if (full_texture) {
+        result = IDirect3DTexture9_LockRect(texture, 0, &locked, NULL, D3DLOCK_DISCARD);
+    } else {
+        d3drect.left = x;
+        d3drect.right = x + w;
+        d3drect.top = y;
+        d3drect.bottom = y + h;
+        result = IDirect3DTexture9_LockRect(texture, 0, &locked, &d3drect, 0);
+    }
+
+    if (FAILED(result)) {
+        return D3D_SetError("LockRect()", result);
+    }
+
+    src = (const Uint8 *)pixels;
+    dst = locked.pBits;
+    length = w * SDL_BYTESPERPIXEL(format);
+    if (length == pitch && length == locked.Pitch) {
+        SDL_memcpy(dst, src, length*h);
+    } else {
+        for (row = 0; row < h; ++row) {
+            SDL_memcpy(dst, src, length);
+            src += pitch;
+            dst += locked.Pitch;
+        }
+    }
+    IDirect3DTexture9_UnlockRect(texture, 0);
+
     return 0;
 }
 
@@ -752,46 +984,34 @@ D3D_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                   const SDL_Rect * rect, const void *pixels, int pitch)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
-    RECT d3drect;
-    D3DLOCKED_RECT locked;
-    const Uint8 *src;
-    Uint8 *dst;
-    int row, length;
-    HRESULT result;
+    SDL_bool full_texture = SDL_FALSE;
 
 #ifdef USE_DYNAMIC_TEXTURE
     if (texture->access == SDL_TEXTUREACCESS_STREAMING &&
         rect->x == 0 && rect->y == 0 &&
         rect->w == texture->w && rect->h == texture->h) {
-        result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, NULL, D3DLOCK_DISCARD);
-    } else
+        full_texture = SDL_TRUE;
+    }
 #endif
-    {
-        d3drect.left = rect->x;
-        d3drect.right = rect->x + rect->w;
-        d3drect.top = rect->y;
-        d3drect.bottom = rect->y + rect->h;
-        result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+
+    if (D3D_UpdateTextureInternal(data->texture, texture->format, full_texture, rect->x, rect->y, rect->w, rect->h, pixels, pitch) < 0) {
+        return -1;
     }
 
-    if (FAILED(result)) {
-        return D3D_SetError("LockRect()", result);
-    }
+    if (data->yuv) {
+        /* Skip to the correct offset into the next texture */
+        pixels = (const void*)((const Uint8*)pixels + rect->h * pitch);
 
-    src = pixels;
-    dst = locked.pBits;
-    length = rect->w * SDL_BYTESPERPIXEL(texture->format);
-    if (length == pitch && length == locked.Pitch) {
-        SDL_memcpy(dst, src, length*rect->h);
-    } else {
-        for (row = 0; row < rect->h; ++row) {
-            SDL_memcpy(dst, src, length);
-            src += pitch;
-            dst += locked.Pitch;
+        if (D3D_UpdateTextureInternal(texture->format == SDL_PIXELFORMAT_YV12 ? data->vtexture : data->utexture, texture->format, full_texture, rect->x / 2, rect->y / 2, rect->w / 2, rect->h / 2, pixels, pitch / 2) < 0) {
+            return -1;
+        }
+
+        /* Skip to the correct offset into the next texture */
+        pixels = (const void*)((const Uint8*)pixels + (rect->h * pitch)/4);
+        if (D3D_UpdateTextureInternal(texture->format == SDL_PIXELFORMAT_YV12 ? data->utexture : data->vtexture, texture->format, full_texture, rect->x / 2, rect->y / 2, rect->w / 2, rect->h / 2, pixels, pitch / 2) < 0) {
+            return -1;
         }
     }
-    IDirect3DTexture9_UnlockRect(data->texture, 0);
-
     return 0;
 }
 
@@ -804,17 +1024,33 @@ D3D_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     D3DLOCKED_RECT locked;
     HRESULT result;
 
-    d3drect.left = rect->x;
-    d3drect.right = rect->x + rect->w;
-    d3drect.top = rect->y;
-    d3drect.bottom = rect->y + rect->h;
+    if (data->yuv) {
+        // It's more efficient to upload directly...
+        if (!data->pixels) {
+            data->pitch = texture->w;
+            data->pixels = (Uint8 *)SDL_malloc((texture->h * data->pitch * 3) / 2);
+            if (!data->pixels) {
+                return SDL_OutOfMemory();
+            }
+        }
+        data->locked_rect = *rect;
+        *pixels =
+            (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
+                      rect->x * SDL_BYTESPERPIXEL(texture->format));
+        *pitch = data->pitch;
+    } else {
+        d3drect.left = rect->x;
+        d3drect.right = rect->x + rect->w;
+        d3drect.top = rect->y;
+        d3drect.bottom = rect->y + rect->h;
 
-    result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
-    if (FAILED(result)) {
-        return D3D_SetError("LockRect()", result);
+        result = IDirect3DTexture9_LockRect(data->texture, 0, &locked, &d3drect, 0);
+        if (FAILED(result)) {
+            return D3D_SetError("LockRect()", result);
+        }
+        *pixels = locked.pBits;
+        *pitch = locked.Pitch;
     }
-    *pixels = locked.pBits;
-    *pitch = locked.Pitch;
     return 0;
 }
 
@@ -823,7 +1059,15 @@ D3D_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     D3D_TextureData *data = (D3D_TextureData *) texture->driverdata;
 
-    IDirect3DTexture9_UnlockRect(data->texture, 0);
+    if (data->yuv) {
+        const SDL_Rect *rect = &data->locked_rect;
+        void *pixels =
+            (void *) ((Uint8 *) data->pixels + rect->y * data->pitch +
+                      rect->x * SDL_BYTESPERPIXEL(texture->format));
+        D3D_UpdateTexture(renderer, texture, rect, pixels, data->pitch);
+    } else {
+        IDirect3DTexture9_UnlockRect(data->texture, 0);
+    }
 }
 
 static int
@@ -1196,6 +1440,18 @@ D3D_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects,
     return 0;
 }
 
+static void
+D3D_UpdateTextureScaleMode(D3D_RenderData *data, D3D_TextureData *texturedata, unsigned index)
+{
+    if (texturedata->scaleMode != data->scaleMode[index]) {
+        IDirect3DDevice9_SetSamplerState(data->device, index, D3DSAMP_MINFILTER,
+                                         texturedata->scaleMode);
+        IDirect3DDevice9_SetSamplerState(data->device, index, D3DSAMP_MAGFILTER,
+                                         texturedata->scaleMode);
+        data->scaleMode[index] = texturedata->scaleMode;
+    }
+}
+
 static int
 D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                const SDL_Rect * srcrect, const SDL_FRect * dstrect)
@@ -1255,13 +1511,7 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     D3D_SetBlendMode(data, texture->blendMode);
 
-    if (texturedata->scaleMode != data->scaleMode) {
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
-                                         texturedata->scaleMode);
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
-                                         texturedata->scaleMode);
-        data->scaleMode = texturedata->scaleMode;
-    }
+    D3D_UpdateTextureScaleMode(data, texturedata, 0);
 
     result =
         IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)
@@ -1269,6 +1519,28 @@ D3D_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     if (FAILED(result)) {
         return D3D_SetError("SetTexture()", result);
     }
+
+    if (texturedata->yuv) {
+        shader = data->ps_yuv;
+
+        D3D_UpdateTextureScaleMode(data, texturedata, 1);
+        D3D_UpdateTextureScaleMode(data, texturedata, 2);
+
+        result =
+            IDirect3DDevice9_SetTexture(data->device, 1, (IDirect3DBaseTexture9 *)
+                                        texturedata->utexture);
+        if (FAILED(result)) {
+            return D3D_SetError("SetTexture()", result);
+        }
+
+        result =
+            IDirect3DDevice9_SetTexture(data->device, 2, (IDirect3DBaseTexture9 *)
+                                        texturedata->vtexture);
+        if (FAILED(result)) {
+            return D3D_SetError("SetTexture()", result);
+        }
+    }
+
     if (shader) {
         result = IDirect3DDevice9_SetPixelShader(data->device, shader);
         if (FAILED(result)) {
@@ -1375,13 +1647,7 @@ D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     ID3DXMatrixStack_Translate(data->matrixStack, (float)dstrect->x + centerx, (float)dstrect->y + centery, (float)0.0);
     IDirect3DDevice9_SetTransform(data->device, D3DTS_VIEW, (D3DMATRIX*)ID3DXMatrixStack_GetTop(data->matrixStack));
 
-    if (texturedata->scaleMode != data->scaleMode) {
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MINFILTER,
-                                         texturedata->scaleMode);
-        IDirect3DDevice9_SetSamplerState(data->device, 0, D3DSAMP_MAGFILTER,
-                                         texturedata->scaleMode);
-        data->scaleMode = texturedata->scaleMode;
-    }
+    D3D_UpdateTextureScaleMode(data, texturedata, 0);
 
     result =
         IDirect3DDevice9_SetTexture(data->device, 0, (IDirect3DBaseTexture9 *)
@@ -1389,6 +1655,28 @@ D3D_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     if (FAILED(result)) {
         return D3D_SetError("SetTexture()", result);
     }
+
+    if (texturedata->yuv) {
+        shader = data->ps_yuv;
+
+        D3D_UpdateTextureScaleMode(data, texturedata, 1);
+        D3D_UpdateTextureScaleMode(data, texturedata, 2);
+
+        result =
+            IDirect3DDevice9_SetTexture(data->device, 1, (IDirect3DBaseTexture9 *)
+                                        texturedata->utexture);
+        if (FAILED(result)) {
+            return D3D_SetError("SetTexture()", result);
+        }
+
+        result =
+            IDirect3DDevice9_SetTexture(data->device, 2, (IDirect3DBaseTexture9 *)
+                                        texturedata->vtexture);
+        if (FAILED(result)) {
+            return D3D_SetError("SetTexture()", result);
+        }
+    }
+
     if (shader) {
         result = IDirect3DDevice9_SetPixelShader(data->device, shader);
         if (FAILED(result)) {
@@ -1510,6 +1798,15 @@ D3D_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
     if (data->texture) {
         IDirect3DTexture9_Release(data->texture);
+    }
+    if (data->utexture) {
+        IDirect3DTexture9_Release(data->utexture);
+    }
+    if (data->vtexture) {
+        IDirect3DTexture9_Release(data->vtexture);
+    }
+    if (data->pixels) {
+        SDL_free(data->pixels);
     }
     SDL_free(data);
     texture->driverdata = NULL;
