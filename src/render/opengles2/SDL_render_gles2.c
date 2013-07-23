@@ -994,15 +994,15 @@ GLES2_SetBlendMode(GLES2_DriverContext *rdata, int blendMode)
             break;
         case SDL_BLENDMODE_BLEND:
             rdata->glEnable(GL_BLEND);
-            rdata->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            rdata->glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             break;
         case SDL_BLENDMODE_ADD:
             rdata->glEnable(GL_BLEND);
-            rdata->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            rdata->glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
             break;
         case SDL_BLENDMODE_MOD:
             rdata->glEnable(GL_BLEND);
-            rdata->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            rdata->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
             break;
         }
         rdata->current.blendMode = blendMode;

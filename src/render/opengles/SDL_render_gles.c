@@ -121,6 +121,7 @@ typedef struct
 
     SDL_bool useDrawTexture;
     SDL_bool GL_OES_draw_texture_supported;
+    SDL_bool GL_OES_blend_func_separate_supported;
 } GLES_RenderData;
 
 typedef struct
@@ -375,6 +376,10 @@ GLES_CreateRenderer(SDL_Window * window, Uint32 flags)
         data->window_framebuffer = (GLuint)value;
     }
     data->framebuffers = NULL;
+
+    if (SDL_GL_ExtensionSupported("GL_OES_blend_func_separate")) {
+        data->GL_OES_blend_func_separate_supported = SDL_TRUE;
+    }
 
     /* Set up parameters for rendering */
     GLES_ResetState(renderer);
@@ -680,17 +685,29 @@ GLES_SetBlendMode(GLES_RenderData * data, int blendMode)
         case SDL_BLENDMODE_BLEND:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            if (data->GL_OES_blend_func_separate_supported) {
+                data->glBlendFuncSeparateOES(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            } else {
+                data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
             break;
         case SDL_BLENDMODE_ADD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            if (data->GL_OES_blend_func_separate_supported) {
+                data->glBlendFuncSeparateOES(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
+            } else {
+                data->glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            }
             break;
         case SDL_BLENDMODE_MOD:
             data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
             data->glEnable(GL_BLEND);
-            data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            if (data->GL_OES_blend_func_separate_supported) {
+                data->glBlendFuncSeparateOES(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+            } else {
+                data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            }
             break;
         }
         data->current.blendMode = blendMode;

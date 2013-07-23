@@ -227,6 +227,7 @@ typedef struct
     D3DPRESENT_PARAMETERS pparams;
     SDL_bool updateSize;
     SDL_bool beginScene;
+    SDL_bool enableSeparateAlphaBlend;
     D3DTEXTUREFILTERTYPE scaleMode;
     IDirect3DSurface9 *defaultRenderTarget;
     IDirect3DSurface9 *currentRenderTarget;
@@ -615,6 +616,10 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
         renderer->info.flags |= SDL_RENDERER_TARGETTEXTURE;
     }
 
+    if (caps.PrimitiveMiscCaps & D3DPMISCCAPS_SEPARATEALPHABLEND) {
+        data->enableSeparateAlphaBlend = SDL_TRUE;
+    }
+
     /* Set up parameters for rendering */
     IDirect3DDevice9_SetVertexShader(data->device, NULL);
     IDirect3DDevice9_SetFVF(data->device,
@@ -637,6 +642,10 @@ D3D_CreateRenderer(SDL_Window * window, Uint32 flags)
                                           D3DTA_TEXTURE);
     IDirect3DDevice9_SetTextureStageState(data->device, 0, D3DTSS_ALPHAARG2,
                                           D3DTA_DIFFUSE);
+    /* Enable separate alpha blend function, if possible */
+    if (data->enableSeparateAlphaBlend) {
+        IDirect3DDevice9_SetRenderState(data->device, D3DRS_SEPARATEALPHABLENDENABLE, TRUE);
+    }
     /* Disable second texture stage, since we're done */
     IDirect3DDevice9_SetTextureStageState(data->device, 1, D3DTSS_COLOROP,
                                           D3DTOP_DISABLE);
@@ -979,6 +988,12 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
                                         D3DBLEND_SRCALPHA);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_INVSRCALPHA);
+        if (data->enableSeparateAlphaBlend) {
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLENDALPHA,
+                                            D3DBLEND_ONE);
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLENDALPHA,
+                                            D3DBLEND_INVSRCALPHA);
+        }
         break;
     case SDL_BLENDMODE_ADD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
@@ -987,6 +1002,12 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
                                         D3DBLEND_SRCALPHA);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_ONE);
+        if (data->enableSeparateAlphaBlend) {
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLENDALPHA,
+                                            D3DBLEND_ZERO);
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLENDALPHA,
+                                            D3DBLEND_ONE);
+        }
         break;
     case SDL_BLENDMODE_MOD:
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_ALPHABLENDENABLE,
@@ -995,6 +1016,12 @@ D3D_SetBlendMode(D3D_RenderData * data, int blendMode)
                                         D3DBLEND_ZERO);
         IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLEND,
                                         D3DBLEND_SRCCOLOR);
+        if (data->enableSeparateAlphaBlend) {
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_SRCBLENDALPHA,
+                                            D3DBLEND_ZERO);
+            IDirect3DDevice9_SetRenderState(data->device, D3DRS_DESTBLENDALPHA,
+                                            D3DBLEND_ONE);
+        }
         break;
     }
 }

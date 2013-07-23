@@ -56,7 +56,7 @@ quit(int rc)
 }
 
 int
-LoadSprite(char *file)
+LoadSprite(const char *file)
 {
     int i;
     SDL_Surface *temp;
@@ -243,6 +243,7 @@ main(int argc, char *argv[])
     SDL_Event event;
     Uint32 then, now, frames;
 	Uint64 seed;
+    const char *icon = "icon.bmp";
 
     /* Initialize parameters */
     num_sprites = NUM_SPRITES;
@@ -292,11 +293,14 @@ main(int argc, char *argv[])
             } else if (SDL_isdigit(*argv[i])) {
                 num_sprites = SDL_atoi(argv[i]);
                 consumed = 1;
+            } else if (argv[i][0] != '-') {
+                icon = argv[i];
+                consumed = 1;
             }
         }
         if (consumed < 0) {
             fprintf(stderr,
-                    "Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha] [--iterations N]\n",
+                    "Usage: %s %s [--blend none|blend|add|mod] [--cyclecolor] [--cyclealpha] [--iterations N] [num_sprites] [icon.bmp]\n",
                     argv[0], SDLTest_CommonUsage(state));
             quit(1);
         }
@@ -318,7 +322,7 @@ main(int argc, char *argv[])
         SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
         SDL_RenderClear(renderer);
     }
-    if (LoadSprite("icon.bmp") < 0) {
+    if (LoadSprite(icon) < 0) {
         quit(2);
     }
 
