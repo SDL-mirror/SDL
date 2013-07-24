@@ -799,7 +799,6 @@ size_t Android_JNI_FileRead(SDL_RWops* ctx, void* buffer,
         LocalReferenceHolder_Cleanup(&refs);                    
         return bytesRead / size;
     }
-    LocalReferenceHolder_Cleanup(&refs);            
 }
 
 size_t Android_JNI_FileWrite(SDL_RWops* ctx, const void* buffer,
