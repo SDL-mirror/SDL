@@ -293,7 +293,7 @@ static SDL_bool LocalReferenceHolder_Init(struct LocalReferenceHolder *refholder
     const int capacity = 16;
     if ((*env)->PushLocalFrame(env, capacity) < 0) {
         SDL_SetError("Failed to allocate enough JVM local references");
-        return false;
+        return SDL_FALSE;
     }
     ++s_active;
     refholder->m_env = env;
