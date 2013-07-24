@@ -138,6 +138,10 @@ CreateApplicationMenus(void)
     NSMenu *windowMenu;
     NSMenuItem *menuItem;
 
+    if (!NSApp) {
+        return;
+    }
+    
     /* Create the main menu bar */
     [NSApp setMainMenu:[[NSMenu alloc] init]];
 
@@ -228,7 +232,7 @@ Cocoa_RegisterApp(void)
         }
         [NSApp finishLaunching];
     }
-    if ([NSApp delegate] == nil) {
+    if (NSApp && ![NSApp delegate]) {
         [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
     }
     [pool release];

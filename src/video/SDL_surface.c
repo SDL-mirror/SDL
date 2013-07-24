@@ -619,6 +619,8 @@ SDL_UpperBlitScaled(SDL_Surface * src, const SDL_Rect * srcrect,
     /* If the destination rectangle is NULL, use the entire dest surface */
     if (dstrect == NULL) {
         fulldst.x = fulldst.y = 0;
+        fulldst.w = dst->w;
+        fulldst.h = dst->h;
         dstrect = &fulldst;
     }
 

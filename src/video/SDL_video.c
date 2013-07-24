@@ -3062,8 +3062,11 @@ static SDL_bool SDL_MessageboxValidForDriver(const SDL_MessageBoxData *messagebo
     }
 
     SDL_VERSION(&info.version);
-    SDL_GetWindowWMInfo(window, &info);
-    return (info.subsystem == drivertype);
+    if (!SDL_GetWindowWMInfo(window, &info)) {
+        return SDL_TRUE;
+    } else {
+        return (info.subsystem == drivertype);
+    }
 }
 
 int

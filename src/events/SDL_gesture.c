@@ -392,7 +392,7 @@ static int dollarNormalize(const SDL_DollarPath *path,SDL_FloatPoint *points)
 static float dollarRecognize(const SDL_DollarPath *path,int *bestTempl,SDL_GestureTouch* touch)
 {
 
-    SDL_FloatPoint points[DOLLARNPOINTS];
+    SDL_FloatPoint points[DOLLARNPOINTS] = {};
     int i;
     float bestDiff = 10000;
 
