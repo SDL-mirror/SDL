@@ -1467,7 +1467,7 @@ SDL_RenderDrawRects(SDL_Renderer * renderer,
 int
 SDL_RenderFillRect(SDL_Renderer * renderer, const SDL_Rect * rect)
 {
-    SDL_Rect full_rect = {0};
+    SDL_Rect full_rect = { 0, 0, 0, 0 };
 
     CHECK_RENDERER_MAGIC(renderer, -1);
 

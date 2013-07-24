@@ -138,7 +138,7 @@ CreateApplicationMenus(void)
     NSMenu *windowMenu;
     NSMenuItem *menuItem;
 
-    if (!NSApp) {
+    if (NSApp == nil) {
         return;
     }
     
