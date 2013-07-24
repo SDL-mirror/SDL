@@ -133,6 +133,7 @@ static void X11_GL_InitExtensions(_THIS);
 int
 X11_GL_LoadLibrary(_THIS, const char *path)
 {
+    Display *display;
     void *handle;
 
     if (_this->gl_data) {
@@ -186,6 +187,9 @@ X11_GL_LoadLibrary(_THIS, const char *path)
 
     /* Load function pointers */
     handle = _this->gl_config.dll_handle;
+    _this->gl_data->glXQueryExtension =
+        (Bool (*)(Display *, int *, int *))
+            GL_LoadFunction(handle, "glXQueryExtension");
     _this->gl_data->glXGetProcAddress =
         (void *(*)(const GLubyte *))
             GL_LoadFunction(handle, "glXGetProcAddressARB");
@@ -208,12 +212,18 @@ X11_GL_LoadLibrary(_THIS, const char *path)
         (void (*)(Display*,GLXDrawable,int,unsigned int*))
             X11_GL_GetProcAddress(_this, "glXQueryDrawable");
 
-    if (!_this->gl_data->glXChooseVisual ||
+    if (!_this->gl_data->glXQueryExtension ||
+        !_this->gl_data->glXChooseVisual ||
         !_this->gl_data->glXCreateContext ||
         !_this->gl_data->glXDestroyContext ||
         !_this->gl_data->glXMakeCurrent ||
         !_this->gl_data->glXSwapBuffers) {
         return SDL_SetError("Could not retrieve OpenGL functions");
+    }
+
+    display = ((SDL_VideoData *) _this->driverdata)->display;
+    if (!_this->gl_data->glXQueryExtension(display, &_this->gl_data->errorBase, &_this->gl_data->eventBase)) {
+        return SDL_SetError("GLX is not supported");
     }
 
     /* Initialize extensions */
@@ -504,19 +514,23 @@ X11_GL_GetVisual(_THIS, Display * display, int screen)
 #define GLXBadProfileARB 13
 #endif
 static int (*handler) (Display *, XErrorEvent *) = NULL;
+static int errorBase = 0;
 static int
 X11_GL_CreateContextErrorHandler(Display * d, XErrorEvent * e)
 {
     switch (e->error_code) {
-    case GLXBadContext:
-    case GLXBadFBConfig:
-    case GLXBadProfileARB:
     case BadRequest:
     case BadMatch:
     case BadValue:
     case BadAlloc:
         return (0);
     default:
+        if (errorBase && 
+            (e->error_code == errorBase + GLXBadContext ||
+             e->error_code == errorBase + GLXBadFBConfig ||
+             e->error_code == errorBase + GLXBadProfileARB)) {
+            return (0);
+        }
         return (handler(d, e));
     }
 }
@@ -541,6 +555,7 @@ X11_GL_CreateContext(_THIS, SDL_Window * window)
 
     /* We do this to create a clean separation between X and GLX errors. */
     XSync(display, False);
+    errorBase = _this->gl_data->errorBase;
     handler = XSetErrorHandler(X11_GL_CreateContextErrorHandler);
     XGetWindowAttributes(display, data->xwindow, &xattr);
     v.screen = screen;
