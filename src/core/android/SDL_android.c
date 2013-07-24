@@ -530,7 +530,7 @@ void Android_JNI_CloseAudioDevice()
 }
 
 // Test for an exception and call SDL_SetError with its detail if one occurs
-// If optional parameter silent is truthy then SDL_SetError() is not called.
+// If the parameter silent is truthy then SDL_SetError() will not be called.
 static bool Android_JNI_ExceptionOccurred(bool silent)
 {
     SDL_assert(LocalReferenceHolder_IsActive());
