@@ -91,7 +91,7 @@ void
 DrawComposite(DrawState *s)
 {
     SDL_Rect viewport, R;
-    SDL_Texture *target, *A, *B;
+    SDL_Texture *target;
 
     static SDL_bool blend_tested = SDL_FALSE;
     if (!blend_tested) {
