@@ -18,10 +18,10 @@ macro(CheckDLOPEN)
     endif()
     check_c_source_compiles("
        #include <dlfcn.h>
-       #if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED <= 1020
-       #error Use dlcompat for Mac OS X 10.2 compatibility
-       #endif
-       int main(int argc, char **argv) {}" HAVE_DLOPEN)
+       int main(int argc, char **argv) {
+         void *handle = dlopen("", RTLD_NOW);
+         const char *loaderror = (char *) dlerror();
+       }" HAVE_DLOPEN)
     set(CMAKE_REQUIRED_LIBRARIES)
   endif()
 

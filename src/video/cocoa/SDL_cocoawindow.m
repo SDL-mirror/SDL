@@ -81,11 +81,9 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
     [view setNextResponder:self];
 
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
     if ([view respondsToSelector:@selector(setAcceptsTouchEvents:)]) {
         [view setAcceptsTouchEvents:YES];
     }
-#endif
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -450,7 +448,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
 - (void)handleTouches:(cocoaTouchType)type withEvent:(NSEvent *)event
 {
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
     NSSet *touches = 0;
     NSEnumerator *enumerator;
     NSTouch *touch;
@@ -499,7 +496,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 
         touch = (NSTouch*)[enumerator nextObject];
     }
-#endif /* MAC_OS_X_VERSION_MAX_ALLOWED >= 1060 */
 }
 
 @end
@@ -939,8 +935,6 @@ Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
 void
 Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
 {
-    /* this message arrived in 10.6. You're out of luck on older OSes. */
-#if MAC_OS_X_VERSION_MAX_ALLOWED >= 1060
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     if ([nswindow respondsToSelector:@selector(setStyleMask:)]) {
@@ -950,7 +944,6 @@ Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
         }
     }
     [pool release];
-#endif
 }
 
 void

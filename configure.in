@@ -2129,9 +2129,8 @@ AC_HELP_STRING([--enable-sdl-dlopen], [use dlopen for shared object loading [[de
         AC_TRY_COMPILE([
          #include <dlfcn.h>
         ],[
-         #if defined(MAC_OS_X_VERSION_MIN_REQUIRED) && MAC_OS_X_VERSION_MIN_REQUIRED <= 1020
-         #error Use dlcompat for Mac OS X 10.2 compatibility
-         #endif
+         void *handle = dlopen("", RTLD_NOW);
+         const char *loaderror = (char *) dlerror();
         ],[
         have_dlopen=yes
         ])
