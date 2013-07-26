@@ -19,7 +19,7 @@ macro(CheckDLOPEN)
     check_c_source_compiles("
        #include <dlfcn.h>
        int main(int argc, char **argv) {
-         void *handle = dlopen("", RTLD_NOW);
+         void *handle = dlopen(\"\", RTLD_NOW);
          const char *loaderror = (char *) dlerror();
        }" HAVE_DLOPEN)
     set(CMAKE_REQUIRED_LIBRARIES)
