@@ -343,12 +343,12 @@ public class SDLActivity extends Activity {
                         if (attribs[j] == EGL10.EGL_NONE)
                             break;
 
-                        if (attribs[j] == EGL10.EGL_RED_SIZE ||
+                        if (attribs[j+1] != EGL10.EGL_DONT_CARE && (attribs[j] == EGL10.EGL_RED_SIZE ||
                             attribs[j] == EGL10.EGL_GREEN_SIZE ||
                             attribs[j] == EGL10.EGL_BLUE_SIZE ||
                             attribs[j] == EGL10.EGL_ALPHA_SIZE ||
                             attribs[j] == EGL10.EGL_DEPTH_SIZE ||
-                            attribs[j] == EGL10.EGL_STENCIL_SIZE) {
+                            attribs[j] == EGL10.EGL_STENCIL_SIZE)) {
                             egl.eglGetConfigAttrib(dpy, configs[i], attribs[j], value);
                             bitdiff += value[0] - attribs[j + 1]; // value is always >= attrib
                         }
