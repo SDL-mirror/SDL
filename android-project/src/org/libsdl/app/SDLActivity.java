@@ -323,13 +323,47 @@ public class SDLActivity extends Activity {
                 int[] version = new int[2];
                 egl.eglInitialize(dpy, version);
 
-                EGLConfig[] configs = new EGLConfig[1];
+                EGLConfig[] configs = new EGLConfig[128];
                 int[] num_config = new int[1];
                 if (!egl.eglChooseConfig(dpy, attribs, configs, 1, num_config) || num_config[0] == 0) {
                     Log.e("SDL", "No EGL config available");
                     return false;
                 }
-                EGLConfig config = configs[0];
+                EGLConfig config = null;
+                int bestdiff = -1, bitdiff;
+                int[] value = new int[1];
+                
+                // eglChooseConfig returns a number of configurations that match or exceed the requested attribs.
+                // From those, we select the one that matches our requirements more closely
+                Log.v("SDL", "Got " + num_config[0] + " valid modes from egl");
+                for(int i = 0; i < num_config[0]; i++) {
+                    bitdiff = 0;
+                    // Go through some of the attributes and compute the bit difference between what we want and what we get.
+                    for (int j = 0; ; j += 2) {
+                        if (attribs[j] == EGL10.EGL_NONE)
+                            break;
+
+                        if (attribs[j] == EGL10.EGL_RED_SIZE ||
+                            attribs[j] == EGL10.EGL_GREEN_SIZE ||
+                            attribs[j] == EGL10.EGL_BLUE_SIZE ||
+                            attribs[j] == EGL10.EGL_ALPHA_SIZE ||
+                            attribs[j] == EGL10.EGL_DEPTH_SIZE ||
+                            attribs[j] == EGL10.EGL_STENCIL_SIZE) {
+                            egl.eglGetConfigAttrib(dpy, configs[i], attribs[j], value);
+                            bitdiff += value[0] - attribs[j + 1]; // value is always >= attrib
+                        }
+                    }
+                    
+                    if (bitdiff < bestdiff || bestdiff == -1) {
+                        config = configs[i];
+                        bestdiff = bitdiff;
+                    }
+                    
+                    if (bitdiff == 0) break; // we found an exact match!
+                }
+                
+                Log.d("SDL", "Selected mode with a total bit difference of " + bestdiff);
+               
 
                 SDLActivity.mEGLDisplay = dpy;
                 SDLActivity.mEGLConfig = config;
