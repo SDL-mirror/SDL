@@ -38,6 +38,8 @@ set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}"
 math(EXPR LT_CURRENT "${SDL_MICRO_VERSION} - ${SDL_INTERFACE_AGE}")
 math(EXPR LT_AGE "${SDL_BINARY_AGE} - ${SDL_INTERFACE_AGE}")
 set(LT_REVISION "${SDL_INTERFACE_AGE}")
+set(LT_RELEASE "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}")
+set(LT_VERSION "${LT_CURRENT}.${LT_REVISION}.${LT_AGE}")
 
 # General settings & flags
 set(LIBRARY_OUTPUT_DIRECTORY "build")
@@ -1144,9 +1146,17 @@ set(_INSTALL_LIBS "SDL2main")
 
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES})
-  set_target_properties(SDL2 PROPERTIES
-    VERSION ${SDL_VERSION}
-    SOVERSION ${LT_CURRENT})
+  if(UNIX)
+    set_target_properties(SDL2 PROPERTIES
+      VERSION ${LT_VERSION}
+      SOVERSION ${LT_CURRENT}
+      OUTPUT_NAME "SDL2-${LT_RELEASE}")
+  else(UNIX)
+    set_target_properties(SDL2 PROPERTIES
+      VERSION ${SDL_VERSION}
+      SOVERSION ${LT_CURRENT}
+      OUTPUT_NAME "SDL2")
+  endif(UNIX)
  set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
  target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
 endif(SDL_SHARED)
@@ -1173,6 +1183,13 @@ foreach(_FNAME ${BIN_INCLUDE_FILES})
 endforeach()
 list(APPEND INCLUDE_FILES ${BIN_INCLUDE_FILES})
 install(FILES ${INCLUDE_FILES} DESTINATION include/SDL2)
+
+if(SDL_SHARED)
+  install(CODE "
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+    \"libSDL2-2.0.so\" \"libSDL2.so\")")
+  install(FILES ${SDL2_BINARY_DIR}/libSDL2.so DESTINATION "lib${LIB_SUFFIX}")
+endif(SDL_SHARED)
 
 if(NOT WINDOWS OR CYGWIN)
   if(FREEBSD)
