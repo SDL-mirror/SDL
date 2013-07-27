@@ -853,11 +853,12 @@ void
 X11_HideWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+    SDL_DisplayData *displaydata = (SDL_DisplayData *) SDL_GetDisplayForWindow(window)->driverdata;
     Display *display = data->videodata->display;
     XEvent event;
 
     if (X11_IsWindowMapped(_this, window)) {
-        XUnmapWindow(display, data->xwindow);
+        XWithdrawWindow(display, data->xwindow, displaydata->screen);
         /* Blocking wait for "UnmapNotify" event */
         XIfEvent(display, &event, &isUnmapNotify, (XPointer)&data->xwindow);
         XFlush(display);
@@ -1146,7 +1147,7 @@ X11_EndWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _di
     SetWindowBordered(display, screen, data->xwindow,
                       (window->flags & SDL_WINDOW_BORDERLESS) == 0);
 
-    XUnmapWindow(display, fswindow);
+    XWithdrawWindow(display, fswindow, screen);
 
     /* Wait to be unmapped. */
     XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&fswindow);
