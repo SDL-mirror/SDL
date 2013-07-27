@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 		return 1;
 	}
 
-	/* Clear the rendering surface with the specidfied colour */
+	/* Clear the rendering surface with the specified color */
 	SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0);
 	SDL_RenderClear(renderer);
 
@@ -94,7 +94,7 @@ main(int argc, char *argv[])
 		
 		DrawChessBoard(renderer);
 		
-		/* Got everything on redering surface,
+		/* Got everything on rendering surface,
  		   now Update the drawing image on window screen */
 		SDL_UpdateWindowSurface(window);
 

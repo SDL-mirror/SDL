@@ -91,7 +91,7 @@ void RunBasicTest()
 /* Tests semantics of atomic operations.  Also a stress test
  * to see if they are really atomic.
  *
- * Serveral threads adding to the same variable.
+ * Several threads adding to the same variable.
  * at the end the value is compared with the expected
  * and with a non-atomic counter.
  */

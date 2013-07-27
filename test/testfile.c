@@ -92,8 +92,8 @@ main(int argc, char *argv[])
         RWOP_ERR_QUIT(rwops);
     printf("test1 OK\n");
 
-/* test 2 : check that inexistant file is not successfully opened/created when required */
-/* modes : r, r+ implie that file MUST exist
+/* test 2 : check that inexistent file is not successfully opened/created when required */
+/* modes : r, r+ imply that file MUST exist
    modes : a, a+, w, w+ checks that it succeeds (file may not exists)
 
  */
