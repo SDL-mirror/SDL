@@ -20,13 +20,6 @@
 */
 #include "SDL_config.h"
 
-/* Set up for C function definitions, even when using C++ */
-#ifdef __cplusplus
-/* *INDENT-OFF* */
-extern "C" {
-/* *INDENT-ON* */
-#endif
-
 #include "SDL_rect.h"
 
 /* Interface from the SDL library into the Android Java activity */
@@ -67,12 +60,5 @@ int Android_JNI_SetupThread(void);
 
 /* Generic messages */
 int Android_JNI_SendMessage(int command, int param);
-
-/* Ends C function definitions when using C++ */
-#ifdef __cplusplus
-/* *INDENT-OFF* */
-}
-/* *INDENT-ON* */
-#endif
 
 /* vi: set ts=4 sw=4 expandtab: */
