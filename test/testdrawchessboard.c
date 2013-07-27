@@ -50,7 +50,6 @@ DrawChessBoard(SDL_Renderer * renderer)
 int
 main(int argc, char *argv[])
 {
-	SDL_Event event;
 
 	/* Initialize SDL */
 	if(SDL_Init(SDL_INIT_VIDEO) != 0)
