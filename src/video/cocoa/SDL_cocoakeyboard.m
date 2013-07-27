@@ -390,14 +390,6 @@ HandleCapsLock(unsigned short scancode,
         SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_CAPSLOCK);
         SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_CAPSLOCK);
     }
-
-    oldMask = oldMods & NSNumericPadKeyMask;
-    newMask = newMods & NSNumericPadKeyMask;
-
-    if (oldMask != newMask) {
-        SDL_SendKeyboardKey(SDL_PRESSED, SDL_SCANCODE_NUMLOCKCLEAR);
-        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_NUMLOCKCLEAR);
-    }
 }
 
 /* This function will handle the modifier keys and also determine the
