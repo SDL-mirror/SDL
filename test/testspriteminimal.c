@@ -84,7 +84,7 @@ LoadSprite(char *file, SDL_Renderer *renderer)
 }
 
 void
-MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
+MoveSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 {
     int i;
     int window_w = WINDOW_WIDTH;
@@ -158,7 +158,7 @@ main(int argc, char *argv[])
                 done = 1;
             }
         }
-        MoveSprites(window, renderer, sprite);
+        MoveSprites(renderer, sprite);
     }
 
     quit(0);
