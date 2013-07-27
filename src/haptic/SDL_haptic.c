@@ -182,7 +182,7 @@ SDL_HapticOpened(int device_index)
     if ((device_index < 0) || (device_index >= SDL_numhaptics)) {
         SDL_SetError("Haptic: There are %d haptic devices available",
                      SDL_numhaptics);
-        return -1;
+        return 0;
     }
 
     opened = 0;
