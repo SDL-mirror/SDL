@@ -50,6 +50,9 @@ DrawChessBoard(SDL_Renderer * renderer)
 int
 main(int argc, char *argv[])
 {
+	SDL_Window *window;
+	SDL_Surface *surface;
+	SDL_Renderer *renderer;
 
 	/* Initialize SDL */
 	if(SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -60,14 +63,14 @@ main(int argc, char *argv[])
 
 
 	/* Create window and renderer for given surface */
-	SDL_Window *window = SDL_CreateWindow("Chess Board",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,640,480,SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Chess Board", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
 	if(!window)
 	{
 		fprintf(stderr,"Window creation fail : %s\n",SDL_GetError());
 		return 1;
 	}	
-	SDL_Surface *surface = SDL_GetWindowSurface(window);
-	SDL_Renderer *renderer = SDL_CreateSoftwareRenderer(surface);
+	surface = SDL_GetWindowSurface(window);
+	renderer = SDL_CreateSoftwareRenderer(surface);
 	if(!renderer)
 	{
 		fprintf(stderr,"Render creation for surface fail : %s\n",SDL_GetError());
