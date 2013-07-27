@@ -13,6 +13,7 @@ TARGETS = \
 	testaudioinfo$(EXE) \
 	testautomation$(EXE) \
 	testdraw2$(EXE) \
+	testdrawchessboard$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
 	testgamecontroller$(EXE) \
@@ -101,6 +102,9 @@ testrelative$(EXE): $(srcdir)/testrelative.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testdraw2$(EXE): $(srcdir)/testdraw2.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testdrawchessboard$(EXE): $(srcdir)/testdrawchessboard.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testerror$(EXE): $(srcdir)/testerror.c
