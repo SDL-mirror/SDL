@@ -530,7 +530,7 @@ SDL_HapticUpdateEffect(SDL_Haptic * haptic, int effect,
 
     SDL_memcpy(&haptic->effects[effect].effect, data,
                sizeof(SDL_HapticEffect));
-    return effect;
+    return 0;
 }
 
 
