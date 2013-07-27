@@ -158,7 +158,14 @@ static __inline__ void ConvertNSRect(NSRect *r)
     }
 
     /* Make the next window in the z-order Key. If we weren't the foreground
-       when closed, this is a no-op. */
+       when closed, this is a no-op.
+       !!! FIXME: Note that this is a hack, and there are corner cases where
+       !!! FIXME:  this fails (such as the About box). The typical nib+RunLoop
+       !!! FIXME:  handles this for Cocoa apps, but we bypass all that in SDL.
+       !!! FIXME:  We should remove this code when we find a better way to
+       !!! FIXME:  have the system do this for us. See discussion in
+       !!! FIXME:   http://bugzilla.libsdl.org/show_bug.cgi?id=1825
+    */
     windows = [NSApp orderedWindows];
     if ([windows count] > 0) {
         NSWindow *win = (NSWindow *) [windows objectAtIndex:0];
