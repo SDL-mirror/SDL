@@ -183,6 +183,17 @@ typedef void (SDLCALL * SDL_AudioFilter) (struct SDL_AudioCVT * cvt,
 /**
  *  A structure to hold a set of audio conversion filters and buffers.
  */
+#ifdef __GNUC__
+/* This structure is 84 bytes on 32-bit architectures, make sure GCC doesn't
+   pad it out to 88 bytes to guarantee ABI compatibility between compilers.
+   vvv
+   The next time we rev the ABI, make sure to size the ints and add padding.
+*/
+#define SDL_AUDIOCVT_PACKED __attribute__((packed))
+#else
+#define SDL_AUDIOCVT_PACKED
+#endif
+/* */
 typedef struct SDL_AudioCVT
 {
     int needed;                 /**< Set to 1 if conversion possible */
@@ -196,7 +207,7 @@ typedef struct SDL_AudioCVT
     double len_ratio;           /**< Given len, final size is len*len_ratio */
     SDL_AudioFilter filters[10];        /**< Filter list */
     int filter_index;           /**< Current audio conversion function */
-} SDL_AudioCVT;
+} SDL_AUDIOCVT_PACKED SDL_AudioCVT;
 
 
 /* Function prototypes */
