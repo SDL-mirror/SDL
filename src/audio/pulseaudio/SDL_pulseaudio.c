@@ -49,7 +49,7 @@
 
 #if (PA_API_VERSION < 12)
 /** Return non-zero if the passed state is one of the connected states */
-static inline int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
+static __inline__ int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
     return
         x == PA_CONTEXT_CONNECTING ||
         x == PA_CONTEXT_AUTHORIZING ||
@@ -57,7 +57,7 @@ static inline int PA_CONTEXT_IS_GOOD(pa_context_state_t x) {
         x == PA_CONTEXT_READY;
 }
 /** Return non-zero if the passed state is one of the connected states */
-static inline int PA_STREAM_IS_GOOD(pa_stream_state_t x) {
+static __inline__ int PA_STREAM_IS_GOOD(pa_stream_state_t x) {
     return
         x == PA_STREAM_CREATING ||
         x == PA_STREAM_READY;
