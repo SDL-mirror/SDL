@@ -701,7 +701,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 for (i = 0; i < num_inputs; ++i) {
                     PTOUCHINPUT input = &inputs[i];
 
-                    const SDL_TouchID touchId = (SDL_TouchID)input->hSource;
+                    const SDL_TouchID touchId = (SDL_TouchID)((size_t)input->hSource);
                     if (!SDL_GetTouch(touchId)) {
                         if (SDL_AddTouch(touchId, "") < 0) {
                             continue;
