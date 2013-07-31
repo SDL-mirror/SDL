@@ -452,7 +452,7 @@ public class SDLActivity extends Activity {
     }
 
     // Audio
-    public static void audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
+    public static int audioInit(int sampleRate, boolean is16Bit, boolean isStereo, int desiredFrames) {
         int channelConfig = isStereo ? AudioFormat.CHANNEL_CONFIGURATION_STEREO : AudioFormat.CHANNEL_CONFIGURATION_MONO;
         int audioFormat = is16Bit ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
         int frameSize = (isStereo ? 2 : 1) * (is16Bit ? 2 : 1);
@@ -467,9 +467,20 @@ public class SDLActivity extends Activity {
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, sampleRate,
                 channelConfig, audioFormat, desiredFrames * frameSize, AudioTrack.MODE_STREAM);
         
+        // Instantiating AudioTrack can "succeed" without an exception and the track may still be invalid
+        // Ref: https://android.googlesource.com/platform/frameworks/base/+/refs/heads/master/media/java/android/media/AudioTrack.java
+        // Ref: http://developer.android.com/reference/android/media/AudioTrack.html#getState()
+        
+        if (mAudioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
+            Log.e("SDL", "Failed during initialization of Audio Track");
+            return -1;
+        }
+        
         audioStartThread();
         
         Log.v("SDL", "SDL audio: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono") + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit") + " " + (mAudioTrack.getSampleRate() / 1000f) + "kHz, " + desiredFrames + " frames buffer");
+        
+        return 0;
     }
     
     public static void audioStartThread() {
