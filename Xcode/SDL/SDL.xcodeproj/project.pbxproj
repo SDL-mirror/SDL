@@ -2697,7 +2697,7 @@
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
+				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
@@ -2751,7 +2751,7 @@
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
 				INFOPLIST_FILE = "Info-Framework.plist";
-				INSTALL_PATH = "@executable_path/../Frameworks";
+				INSTALL_PATH = "@rpath";
 				OTHER_LDFLAGS = "-liconv";
 				PRODUCT_NAME = SDL2;
 				WRAPPER_EXTENSION = framework;
