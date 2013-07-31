@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_WINDOWS
 
+#include "SDL_assert.h"
 #include "SDL_windowsvideo.h"
 
 /* WGL implementation of SDL OpenGL support */
@@ -407,7 +408,7 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
                                                     &matching);
         }
 
-        _this->gl_data->wglMakeCurrent(NULL, NULL);
+        _this->gl_data->wglMakeCurrent(hdc, NULL);
         _this->gl_data->wglDeleteContext(hglrc);
     }
     ReleaseDC(hwnd, hdc);
@@ -622,11 +623,22 @@ WIN_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         return SDL_SetError("OpenGL not initialized");
     }
 
-    if (window) {
-        hdc = ((SDL_WindowData *) window->driverdata)->hdc;
-    } else {
-        hdc = NULL;
+    /* sanity check that higher level handled this. */
+    SDL_assert(window || (!window && !context));
+
+    /* Some Windows drivers freak out if hdc is NULL, even when context is
+       NULL, against spec. Since hdc is _supposed_ to be ignored if context
+       is NULL, we either use the current GL window, or do nothing if we
+       already have no current context. */
+    if (!window) {
+        window = SDL_GL_GetCurrentWindow();
+        if (!window) {
+            SDL_assert(SDL_GL_GetCurrentContext() == NULL);
+            return 0;  /* already done. */
+        }
     }
+
+    hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     if (!_this->gl_data->wglMakeCurrent(hdc, (HGLRC) context)) {
         return WIN_SetError("wglMakeCurrent()");
     }
