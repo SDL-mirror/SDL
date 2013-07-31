@@ -473,6 +473,7 @@ public class SDLActivity extends Activity {
         
         if (mAudioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
             Log.e("SDL", "Failed during initialization of Audio Track");
+            mAudioTrack = null;
             return -1;
         }
         
