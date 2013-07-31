@@ -265,7 +265,7 @@ if test x$enable_libc = xyes; then
     AC_CHECK_MEMBER(struct sigaction.sa_sigaction,[AC_DEFINE(HAVE_SA_SIGACTION)], ,[#include <signal.h>])
 fi
 
-AC_CHECK_SIZEOF(void*)
+dnl AC_CHECK_SIZEOF(void*)
 
 dnl See whether we can use gcc atomic operations on this architecture
 AC_ARG_ENABLE(gcc-atomics,
