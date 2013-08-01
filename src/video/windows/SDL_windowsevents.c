@@ -766,10 +766,23 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 void
 WIN_PumpEvents(_THIS)
 {
+    const Uint8 *keystate;
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
+    }
+
+    /* Windows loses a shift KEYUP event when you have both pressed at once and let go of one.
+       You won't get a KEYUP until both are released, and that keyup will only be for the second
+       key you released. Take heroic measures and check the keystate as of the last handled event,
+       and if we think a key is pressed when Windows doesn't, unstick it in SDL's state. */
+    keystate = SDL_GetKeyboardState(NULL);
+    if ((keystate[SDL_SCANCODE_LSHIFT] == SDL_PRESSED) && !(GetKeyState(VK_LSHIFT) & 0x8000)) {
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_LSHIFT);
+    }
+    if ((keystate[SDL_SCANCODE_RSHIFT] == SDL_PRESSED) && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
+        SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RSHIFT);
     }
 }
 
