@@ -1549,22 +1549,10 @@ SDL_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     real_dstrect.x = 0;
     real_dstrect.y = 0;
     if (dstrect) {
-        if (!SDL_IntersectRect(dstrect, &real_dstrect, &real_dstrect)) {
+        if (!SDL_HasIntersection(dstrect, &real_dstrect)) {
             return 0;
         }
-        /* Clip srcrect by the same amount as dstrect was clipped */
-        if (dstrect->w != real_dstrect.w) {
-            int deltax = (real_dstrect.x - dstrect->x);
-            int deltaw = (real_dstrect.w - dstrect->w);
-            real_srcrect.x += (deltax * real_srcrect.w) / dstrect->w;
-            real_srcrect.w += (deltaw * real_srcrect.w) / dstrect->w;
-        }
-        if (dstrect->h != real_dstrect.h) {
-            int deltay = (real_dstrect.y - dstrect->y);
-            int deltah = (real_dstrect.h - dstrect->h);
-            real_srcrect.y += (deltay * real_srcrect.h) / dstrect->h;
-            real_srcrect.h += (deltah * real_srcrect.h) / dstrect->h;
-        }
+        real_dstrect = *dstrect;
     }
 
     if (texture->native) {
