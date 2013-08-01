@@ -231,15 +231,10 @@ WIN_CreateWindow(_THIS, SDL_Window * window)
     }
 #if SDL_VIDEO_OPENGL_WGL
     if (window->flags & SDL_WINDOW_OPENGL) {
-        /* The current context is lost in SDL_GL_SetupWindow; recover it. */
-        SDL_Window *current_win = SDL_GL_GetCurrentWindow();
-        SDL_GLContext current_ctx = SDL_GL_GetCurrentContext();
         if (WIN_GL_SetupWindow(_this, window) < 0) {
             WIN_DestroyWindow(_this, window);
-            WIN_GL_MakeCurrent(_this, current_win, current_ctx);
             return -1;
         }
-        WIN_GL_MakeCurrent(_this, current_win, current_ctx);
     }
 #endif
     return 0;

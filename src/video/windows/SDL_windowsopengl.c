@@ -418,8 +418,9 @@ WIN_GL_ChoosePixelFormatARB(_THIS, int *iAttribs, float *fAttribs)
     return pixel_format;
 }
 
-int
-WIN_GL_SetupWindow(_THIS, SDL_Window * window)
+/* actual work of WIN_GL_SetupWindow() happens here. */
+static int
+WIN_GL_SetupWindowInternal(_THIS, SDL_Window * window)
 {
     HDC hdc = ((SDL_WindowData *) window->driverdata)->hdc;
     PIXELFORMATDESCRIPTOR pfd;
@@ -527,6 +528,17 @@ WIN_GL_SetupWindow(_THIS, SDL_Window * window)
         return WIN_SetError("SetPixelFormat()");
     }
     return 0;
+}
+
+int
+WIN_GL_SetupWindow(_THIS, SDL_Window * window)
+{
+    /* The current context is lost in here; save it and reset it. */
+    SDL_Window *current_win = SDL_GL_GetCurrentWindow();
+    SDL_GLContext current_ctx = SDL_GL_GetCurrentContext();
+    const int retval = WIN_GL_SetupWindowInternal(_this, window);
+    WIN_GL_MakeCurrent(_this, current_win, current_ctx);
+    return retval;
 }
 
 SDL_GLContext
