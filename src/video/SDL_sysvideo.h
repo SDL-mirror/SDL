@@ -301,6 +301,9 @@ struct SDL_VideoDevice
 
     /* * * */
     /* Cache current GL context; don't call the OS when it hasn't changed. */
+    /* We have the global pointers here so Cocoa continues to work the way
+       it always has, and the thread-local storage for the general case.
+     */
     SDL_Window *current_glwin;
     SDL_GLContext current_glctx;
     SDL_TLSID current_glwin_tls;
