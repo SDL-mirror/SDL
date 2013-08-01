@@ -510,13 +510,15 @@ do {                                                                    \
     if (n & 2) {                                                        \
         pixel_copy_increment2; n -= 2;                                  \
     }                                                                   \
+    if (n & 4) {                                                        \
+        pixel_copy_increment4; n -= 4;                                  \
+    }                                                                   \
     if (n) {                                                            \
-        n = (n+7)/ 8;                                                   \
-        switch (n & 4) {                                                \
-        case 0: do {    pixel_copy_increment4;                          \
-        case 4:     pixel_copy_increment4;                              \
-            } while (--n > 0);                                          \
-        }                                                               \
+        n /= 8;                                                         \
+        do {                                                            \
+            pixel_copy_increment4;                                      \
+            pixel_copy_increment4;                                      \
+        } while (--n > 0);                                              \
     }                                                                   \
 }
 
