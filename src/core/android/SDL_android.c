@@ -162,6 +162,15 @@ void Java_org_libsdl_app_SDLActivity_onNativeKeyUp(
     Android_OnKeyUp(keycode);
 }
 
+// Keyboard Focus Lost
+void Java_org_libsdl_app_SDLActivity_onNativeKeyboardFocusLost(
+                                    JNIEnv* env, jclass jcls)
+{
+    /* Calling SDL_StopTextInput will take care of hiding the keyboard and cleaning up the DummyText widget */
+    SDL_StopTextInput();
+}
+
+
 // Touch
 void Java_org_libsdl_app_SDLActivity_onNativeTouch(
                                     JNIEnv* env, jclass jcls,
