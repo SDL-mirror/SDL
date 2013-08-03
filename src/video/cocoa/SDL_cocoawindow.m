@@ -239,6 +239,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
        or resizing from a corner */
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MOVED, x, y);
     SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESIZED, w, h);
+
+    const BOOL zoomed = [_data->nswindow isZoomed];
+    if (!zoomed) {
+        SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    } else if (zoomed) {
+        SDL_SendWindowEvent(_data->window, SDL_WINDOWEVENT_MAXIMIZED, 0, 0);
+    }
 }
 
 - (void)windowDidMiniaturize:(NSNotification *)aNotification

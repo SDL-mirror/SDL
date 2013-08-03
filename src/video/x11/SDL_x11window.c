@@ -878,6 +878,12 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
     Atom _NET_WM_STATE_MAXIMIZED_VERT = data->videodata->_NET_WM_STATE_MAXIMIZED_VERT;
     Atom _NET_WM_STATE_MAXIMIZED_HORZ = data->videodata->_NET_WM_STATE_MAXIMIZED_HORZ;
 
+    if (maximized) {
+        window->flags |= SDL_WINDOW_MAXIMIZED;
+    } else {
+        window->flags &= ~SDL_WINDOW_MAXIMIZED;
+    }
+
     if (X11_IsWindowMapped(_this, window)) {
         XEvent e;
 
@@ -895,15 +901,7 @@ SetWindowMaximized(_THIS, SDL_Window * window, SDL_bool maximized)
         XSendEvent(display, RootWindow(display, displaydata->screen), 0,
                    SubstructureNotifyMask | SubstructureRedirectMask, &e);
     } else {
-        Uint32 flags;
-
-        flags = window->flags;
-        if (maximized) {
-            flags |= SDL_WINDOW_MAXIMIZED;
-        } else {
-            flags &= ~SDL_WINDOW_MAXIMIZED;
-        }
-        X11_SetNetWMState(_this, data->xwindow, flags);
+        X11_SetNetWMState(_this, data->xwindow, window->flags);
     }
     XFlush(display);
 }
