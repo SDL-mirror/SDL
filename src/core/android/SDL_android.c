@@ -368,7 +368,7 @@ SDL_bool Android_JNI_DeleteContext(SDL_GLContext context)
 {
     /* There's only one context, so the parameter is ignored for now */
     JNIEnv *env = Android_JNI_GetEnv();
-    (*env)->CallStaticBooleanMethod(env, mActivityClass, midDeleteGLContext);
+    (*env)->CallStaticVoidMethod(env, mActivityClass, midDeleteGLContext);
 }
 
 void Android_JNI_SwapWindow()
