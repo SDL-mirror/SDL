@@ -71,6 +71,7 @@ static jclass mActivityClass;
 
 // method signatures
 static jmethodID midCreateGLContext;
+static jmethodID midDeleteGLContext;
 static jmethodID midFlipBuffers;
 static jmethodID midAudioInit;
 static jmethodID midAudioWriteShortBuffer;
@@ -120,6 +121,8 @@ void SDL_Android_Init(JNIEnv* mEnv, jclass cls)
 
     midCreateGLContext = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "createGLContext","(II[I)Z");
+    midDeleteGLContext = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
+                                "deleteGLContext","()V");
     midFlipBuffers = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "flipBuffers","()V");
     midAudioInit = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
@@ -359,6 +362,13 @@ SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion,
     (*env)->DeleteLocalRef(env, array);
 
     return success ? SDL_TRUE : SDL_FALSE;
+}
+
+SDL_bool Android_JNI_DeleteContext(SDL_GLContext context) 
+{
+    /* There's only one context, so the parameter is ignored for now */
+    JNIEnv *env = Android_JNI_GetEnv();
+    (*env)->CallStaticBooleanMethod(env, mActivityClass, midDeleteGLContext);
 }
 
 void Android_JNI_SwapWindow()

@@ -72,6 +72,7 @@ public class SDLActivity extends Activity {
         // Set up the surface
         mEGLSurface = EGL10.EGL_NO_SURFACE;
         mSurface = new SDLSurface(getApplication());
+        mEGLContext = EGL10.EGL_NO_CONTEXT;
 
         mLayout = new AbsoluteLayout(this);
         mLayout.addView(mSurface);
@@ -249,6 +250,20 @@ public class SDLActivity extends Activity {
     public static boolean createGLContext(int majorVersion, int minorVersion, int[] attribs) {
         return initEGL(majorVersion, minorVersion, attribs);
     }
+    
+    public static void deleteGLContext() {
+        if (SDLActivity.mEGLDisplay != null && SDLActivity.mEGLContext != EGL10.EGL_NO_CONTEXT) {
+            EGL10 egl = (EGL10)EGLContext.getEGL();
+            egl.eglMakeCurrent(SDLActivity.mEGLDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            egl.eglDestroyContext(SDLActivity.mEGLDisplay, SDLActivity.mEGLContext);
+            SDLActivity.mEGLContext = EGL10.EGL_NO_CONTEXT;
+
+            if (SDLActivity.mEGLSurface != EGL10.EGL_NO_SURFACE) {
+                egl.eglDestroySurface(SDLActivity.mEGLDisplay, SDLActivity.mEGLSurface);
+                SDLActivity.mEGLSurface = EGL10.EGL_NO_SURFACE;
+            }
+        }
+    }
 
     public static void flipBuffers() {
         flipEGL();
@@ -314,19 +329,20 @@ public class SDLActivity extends Activity {
     // EGL functions
     public static boolean initEGL(int majorVersion, int minorVersion, int[] attribs) {
         try {
+            EGL10 egl = (EGL10)EGLContext.getEGL();
+            
             if (SDLActivity.mEGLDisplay == null) {
-                Log.v("SDL", "Starting up OpenGL ES " + majorVersion + "." + minorVersion);
-
-                EGL10 egl = (EGL10)EGLContext.getEGL();
-
-                EGLDisplay dpy = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-
+                SDLActivity.mEGLDisplay = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
                 int[] version = new int[2];
-                egl.eglInitialize(dpy, version);
-
+                egl.eglInitialize(SDLActivity.mEGLDisplay, version);
+            }
+            
+            if (SDLActivity.mEGLDisplay != null && SDLActivity.mEGLContext == EGL10.EGL_NO_CONTEXT) {
+                // No current GL context exists, we will create a new one.
+                Log.v("SDL", "Starting up OpenGL ES " + majorVersion + "." + minorVersion);
                 EGLConfig[] configs = new EGLConfig[128];
                 int[] num_config = new int[1];
-                if (!egl.eglChooseConfig(dpy, attribs, configs, 1, num_config) || num_config[0] == 0) {
+                if (!egl.eglChooseConfig(SDLActivity.mEGLDisplay, attribs, configs, 1, num_config) || num_config[0] == 0) {
                     Log.e("SDL", "No EGL config available");
                     return false;
                 }
@@ -350,7 +366,7 @@ public class SDLActivity extends Activity {
                             attribs[j] == EGL10.EGL_ALPHA_SIZE ||
                             attribs[j] == EGL10.EGL_DEPTH_SIZE ||
                             attribs[j] == EGL10.EGL_STENCIL_SIZE)) {
-                            egl.eglGetConfigAttrib(dpy, configs[i], attribs[j], value);
+                            egl.eglGetConfigAttrib(SDLActivity.mEGLDisplay, configs[i], attribs[j], value);
                             bitdiff += value[0] - attribs[j + 1]; // value is always >= attrib
                         }
                     }
@@ -364,13 +380,12 @@ public class SDLActivity extends Activity {
                 }
                 
                 Log.d("SDL", "Selected mode with a total bit difference of " + bestdiff);
-               
 
-                SDLActivity.mEGLDisplay = dpy;
                 SDLActivity.mEGLConfig = config;
                 SDLActivity.mGLMajor = majorVersion;
                 SDLActivity.mGLMinor = minorVersion;
             }
+            
             return SDLActivity.createEGLSurface();
 
         } catch(Exception e) {
@@ -397,7 +412,7 @@ public class SDLActivity extends Activity {
     public static boolean createEGLSurface() {
         if (SDLActivity.mEGLDisplay != null && SDLActivity.mEGLConfig != null) {
             EGL10 egl = (EGL10)EGLContext.getEGL();
-            if (SDLActivity.mEGLContext == null) createEGLContext();
+            if (SDLActivity.mEGLContext == EGL10.EGL_NO_CONTEXT) createEGLContext();
 
             if (SDLActivity.mEGLSurface == EGL10.EGL_NO_SURFACE) {
                 Log.v("SDL", "Creating new EGL Surface");
