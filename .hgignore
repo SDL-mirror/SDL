@@ -38,6 +38,7 @@ Release
 *.user
 *.ncb
 *.suo
+*.sdf
 
 # for Android
 android-project/local.properties
