@@ -58,7 +58,14 @@ AC_PROG_MAKE_SET
 AC_CHECK_TOOL(WINDRES, [windres], [:])
 
 dnl Make sure that srcdir is a full pathname
-srcdir=`cd $srcdir && pwd`
+case "$host" in
+    *-*-mingw32*)
+        # Except on msys, where make can't handle full pathnames (bug 1972)
+        ;;
+    *)
+        srcdir=`cd $srcdir && pwd`
+        ;;
+esac
 
 dnl Set up the compiler and linker flags
 INCLUDE="-I$srcdir/include"

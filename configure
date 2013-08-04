@@ -15791,7 +15791,14 @@ else
 fi
 
 
-srcdir=`cd $srcdir && pwd`
+case "$host" in
+    *-*-mingw32*)
+        # Except on msys, where make can't handle full pathnames (bug 1972)
+        ;;
+    *)
+        srcdir=`cd $srcdir && pwd`
+        ;;
+esac
 
 INCLUDE="-I$srcdir/include"
 if test x$srcdir != x.; then
