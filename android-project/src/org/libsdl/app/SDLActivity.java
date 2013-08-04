@@ -134,6 +134,16 @@ public class SDLActivity extends Activity {
         }
     }
 
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        int keyCode = event.getKeyCode();
+        // Ignore volume keys so they're handled by Android
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
+            keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            return false;
+        }
+        return super.dispatchKeyEvent(event);
+    }
 
     /** Called by onPause or surfaceDestroyed. Even if surfaceDestroyed
      *  is the first to be called, mIsSurfaceReady should still be set
@@ -726,12 +736,6 @@ class SDLSurface extends SurfaceView implements SurfaceHolder.Callback,
     // Key events
     @Override
     public boolean onKey(View  v, int keyCode, KeyEvent event) {
-
-        // Ignore volume keys so they're handled by Android
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN ||
-            keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            return false;
-        }
         
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             //Log.v("SDL", "key down: " + keyCode);
