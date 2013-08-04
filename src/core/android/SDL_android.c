@@ -364,9 +364,9 @@ SDL_bool Android_JNI_CreateContext(int majorVersion, int minorVersion,
     return success ? SDL_TRUE : SDL_FALSE;
 }
 
-SDL_bool Android_JNI_DeleteContext(SDL_GLContext context) 
+SDL_bool Android_JNI_DeleteContext(void)
 {
-    /* There's only one context, so the parameter is ignored for now */
+    /* There's only one context, so no parameter for now */
     JNIEnv *env = Android_JNI_GetEnv();
     (*env)->CallStaticVoidMethod(env, mActivityClass, midDeleteGLContext);
     return SDL_TRUE;

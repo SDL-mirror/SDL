@@ -120,7 +120,7 @@ void
 Android_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     if (context) {
-        Android_JNI_DeleteContext(context);
+        Android_JNI_DeleteContext();
     }
 }
 
