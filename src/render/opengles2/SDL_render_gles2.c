@@ -1086,7 +1086,7 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int cou
     rdata->glDrawArrays(GL_POINTS, 0, count);
     SDL_stack_free(vertices);
     if (rdata->glGetError() != GL_NO_ERROR) {
-        return SDL_SetError("Failed to render lines");
+        return SDL_SetError("Failed to render points");
     }
     return 0;
 }
@@ -1160,7 +1160,7 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count)
         rdata->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     if (rdata->glGetError() != GL_NO_ERROR) {
-        return SDL_SetError("Failed to render lines");
+        return SDL_SetError("Failed to render filled rects");
     }
     return 0;
 }
