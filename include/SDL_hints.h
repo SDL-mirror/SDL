@@ -100,7 +100,7 @@ extern "C" {
  *  This variable can be set to the following values:
  *    "0" or "nearest" - Nearest pixel sampling
  *    "1" or "linear"  - Linear filtering (supported by OpenGL and Direct3D)
- *    "2" or "best"    - Anisotropic filtering (supported by Direct3D)
+ *    "2" or "best"    - Currently this is the same as "linear"
  *
  *  By default nearest pixel sampling is used
  */
