@@ -495,12 +495,6 @@ extern DECLSPEC void SDLCALL SDL_UnlockAudioDevice(SDL_AudioDeviceID dev);
 extern DECLSPEC void SDLCALL SDL_CloseAudio(void);
 extern DECLSPEC void SDLCALL SDL_CloseAudioDevice(SDL_AudioDeviceID dev);
 
-/**
- * \return 1 if audio device is still functioning, zero if not, -1 on error.
- */
-extern DECLSPEC int SDLCALL SDL_AudioDeviceConnected(SDL_AudioDeviceID dev);
-
-
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
