@@ -74,6 +74,38 @@ GetWindowStyle(SDL_Window * window)
     return style;
 }
 
+static void
+WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
+{
+    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
+    RECT rect;
+    DWORD style;
+    HWND top;
+    BOOL menu;
+    int x, y;
+    int w, h;
+
+    /* Figure out what the window area will be */
+    if (SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) {
+        top = HWND_TOPMOST;
+    } else {
+        top = HWND_NOTOPMOST;
+    }
+    style = GetWindowLong(hwnd, GWL_STYLE);
+    rect.left = 0;
+    rect.top = 0;
+    rect.right = window->w;
+    rect.bottom = window->h;
+    menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
+    AdjustWindowRectEx(&rect, style, menu, 0);
+    w = (rect.right - rect.left);
+    h = (rect.bottom - rect.top);
+    x = window->x + rect.left;
+    y = window->y + rect.top;
+
+    SetWindowPos(hwnd, top, x, y, w, h, flags);
+}
+
 static int
 SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 {
@@ -120,26 +152,26 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
 
     /* Fill in the SDL window with the window data */
     {
-        POINT point;
-        point.x = 0;
-        point.y = 0;
-        if (ClientToScreen(hwnd, &point)) {
-            window->x = point.x;
-            window->y = point.y;
-        }
-    }
-    {
         RECT rect;
         if (GetClientRect(hwnd, &rect)) {
             int w = rect.right;
             int h = rect.bottom;
             if ((window->w && window->w != w) || (window->h && window->h != h)) {
                 // We tried to create a window larger than the desktop and Windows didn't allow it.  Override!
-                SetWindowPos(hwnd, NULL, 0, 0, window->w, window->h, SWP_NOCOPYBITS | SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+                WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOZORDER | SWP_NOACTIVATE);
             } else {
                 window->w = w;
                 window->h = h;
             }
+        }
+    }
+    {
+        POINT point;
+        point.x = 0;
+        point.y = 0;
+        if (ClientToScreen(hwnd, &point)) {
+            window->x = point.x;
+            window->y = point.y;
         }
     }
     {
@@ -343,38 +375,6 @@ WIN_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
     SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM) hicon);
 }
 
-static void
-WIN_SetWindowPositionInternal(_THIS, SDL_Window * window, UINT flags)
-{
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    RECT rect;
-    DWORD style;
-    HWND top;
-    BOOL menu;
-    int x, y;
-    int w, h;
-
-    /* Figure out what the window area will be */
-    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
-        top = HWND_TOPMOST;
-    } else {
-        top = HWND_NOTOPMOST;
-    }
-    style = GetWindowLong(hwnd, GWL_STYLE);
-    rect.left = 0;
-    rect.top = 0;
-    rect.right = window->w;
-    rect.bottom = window->h;
-    menu = (style & WS_CHILDWINDOW) ? FALSE : (GetMenu(hwnd) != NULL);
-    AdjustWindowRectEx(&rect, style, menu, 0);
-    w = (rect.right - rect.left);
-    h = (rect.bottom - rect.top);
-    x = window->x + rect.left;
-    y = window->y + rect.top;
-
-    SetWindowPos(hwnd, top, x, y, w, h, flags);
-}
-
 void
 WIN_SetWindowPosition(_THIS, SDL_Window * window)
 {
@@ -404,15 +404,7 @@ WIN_HideWindow(_THIS, SDL_Window * window)
 void
 WIN_RaiseWindow(_THIS, SDL_Window * window)
 {
-    HWND hwnd = ((SDL_WindowData *) window->driverdata)->hwnd;
-    HWND top;
-
-    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
-        top = HWND_TOPMOST;
-    } else {
-        top = HWND_NOTOPMOST;
-    }
-    SetWindowPos(hwnd, top, 0, 0, 0, 0, (SWP_NOMOVE | SWP_NOSIZE));
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE);
 }
 
 void
@@ -444,7 +436,7 @@ WIN_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
     }
 
     SetWindowLong(hwnd, GWL_STYLE, style);
-    SetWindowPos(hwnd, hwnd, window->x, window->y, window->w, window->h, SWP_FRAMECHANGED | SWP_NOREPOSITION | SWP_NOZORDER |SWP_NOACTIVATE | SWP_NOSENDCHANGING);
+    WIN_SetWindowPositionInternal(_this, window, SWP_NOCOPYBITS | SWP_FRAMECHANGED | SWP_NOREPOSITION | SWP_NOZORDER |SWP_NOACTIVATE | SWP_NOSENDCHANGING);
 }
 
 void
@@ -468,7 +460,7 @@ WIN_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
     int x, y;
     int w, h;
 
-    if ( SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS )) {
+    if (SDL_ShouldAllowTopmost() && (window->flags & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) == (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_INPUT_FOCUS)) {
         top = HWND_TOPMOST;
     } else {
         top = HWND_NOTOPMOST;
@@ -554,25 +546,13 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         ClipCursor(NULL);
     }
 
-    if ( window->flags & SDL_WINDOW_FULLSCREEN )
-    {
-        HWND top;
-        SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
-        HWND hwnd = data->hwnd;
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
         UINT flags = SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE;
-
-        if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
-            top = HWND_TOPMOST;
-        } else {
-            top = HWND_NOTOPMOST;
-            flags |= SWP_NOZORDER;
-        }
 
         if (!(window->flags & SDL_WINDOW_SHOWN)) {
             flags |= SWP_NOACTIVATE;
         }
-
-        SetWindowPos(hwnd, top, 0, 0, 0, 0, flags);
+        WIN_SetWindowPositionInternal(_this, window, flags);
     }
 }
 
