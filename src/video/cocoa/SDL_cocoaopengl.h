@@ -25,10 +25,25 @@
 
 #if SDL_VIDEO_OPENGL_CGL
 
+#include "SDL_atomic.h"
+#import <Cocoa/Cocoa.h>
+
 struct SDL_GLDriverData
 {
     int initialized;
 };
+
+@interface SDLOpenGLContext : NSOpenGLContext {
+    SDL_atomic_t dirty;
+}
+
+- (id)initWithFormat:(NSOpenGLPixelFormat *)format
+        shareContext:(NSOpenGLContext *)share;
+- (void)scheduleUpdate;
+- (void)updateIfNeeded;
+
+@end
+
 
 /* OpenGL functions */
 extern int Cocoa_GL_LoadLibrary(_THIS, const char *path);

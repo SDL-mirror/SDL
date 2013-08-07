@@ -32,6 +32,7 @@
 #include "SDL_cocoavideo.h"
 #include "SDL_cocoashape.h"
 #include "SDL_cocoamouse.h"
+#include "SDL_cocoaopengl.h"
 
 
 static Uint32 s_moveHack;
@@ -187,7 +188,6 @@ static __inline__ void ConvertNSRect(NSRect *r)
 - (void)windowDidMove:(NSNotification *)aNotification
 {
     int x, y;
-    SDL_VideoDevice *device = SDL_GetVideoDevice();
     SDL_Window *window = _data->window;
     NSWindow *nswindow = _data->nswindow;
     NSRect rect = [nswindow contentRectForFrameRect:[nswindow frame]];
@@ -211,16 +211,13 @@ static __inline__ void ConvertNSRect(NSRect *r)
     x = (int)rect.origin.x;
     y = (int)rect.origin.y;
 
-    if (window == device->current_glwin) {
-        [((NSOpenGLContext *) device->current_glctx) update];
-    }
+    [_data->nscontext scheduleUpdate];
 
     SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, x, y);
 }
 
 - (void)windowDidResize:(NSNotification *)aNotification
 {
-    SDL_VideoDevice *device = SDL_GetVideoDevice();
     int x, y, w, h;
     NSRect rect = [_data->nswindow contentRectForFrameRect:[_data->nswindow frame]];
     ConvertNSRect(&rect);
@@ -231,9 +228,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     if (SDL_IsShapedWindow(_data->window))
         Cocoa_ResizeWindowShape(_data->window);
 
-    if (_data->window == device->current_glwin) {
-        [((NSOpenGLContext *) device->current_glctx) update];
-    }
+    [_data->nscontext scheduleUpdate];
 
     /* The window can move during a resize event, such as when maximizing
        or resizing from a corner */
@@ -788,7 +783,8 @@ void
 Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+    NSWindow *nswindow = windata->nswindow;
     NSRect rect;
     Uint32 moveHack;
 
@@ -803,9 +799,7 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     [nswindow setFrameOrigin:rect.origin];
     s_moveHack = moveHack;
 
-    if (window == _this->current_glwin) {
-        [((NSOpenGLContext *) _this->current_glctx) update];
-    }
+    [windata->nscontext scheduleUpdate];
 
     [pool release];
 }
@@ -822,9 +816,7 @@ Cocoa_SetWindowSize(_THIS, SDL_Window * window)
     size.height = window->h;
     [nswindow setContentSize:size];
 
-    if (window == _this->current_glwin) {
-        [((NSOpenGLContext *) _this->current_glctx) update];
-    }
+    [windata->nscontext scheduleUpdate];
 
     [pool release];
 }
@@ -906,13 +898,12 @@ void
 Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
+    SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
+    NSWindow *nswindow = windata->nswindow;
 
     [nswindow zoom:nil];
 
-    if (window == _this->current_glwin) {
-        [((NSOpenGLContext *) _this->current_glctx) update];
-    }
+    [windata->nscontext scheduleUpdate];
 
     [pool release];
 }
@@ -1049,9 +1040,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     [nswindow makeKeyAndOrderFront:nil];
     [data->listener resumeVisibleObservation];
 
-    if (window == _this->current_glwin) {
-        [((NSOpenGLContext *) _this->current_glctx) update];
-    }
+    [data->nscontext scheduleUpdate];
 
     [pool release];
 }
