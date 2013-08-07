@@ -2,7 +2,6 @@ TARGET_LIB = libSDL2.a
 OBJS= src/SDL.o \
       src/SDL_assert.o \
       src/SDL_error.o \
-      src/SDL_fatal.o \
       src/SDL_hints.o \
       src/SDL_log.o \
       src/atomic/SDL_atomic.o \

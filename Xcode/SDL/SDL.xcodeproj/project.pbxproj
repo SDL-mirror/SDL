@@ -113,8 +113,6 @@
 		04BD009C12E6671800899322 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5612E6671700899322 /* SDL_assert.c */; };
 		04BD009E12E6671800899322 /* SDL_error_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5812E6671700899322 /* SDL_error_c.h */; };
 		04BD009F12E6671800899322 /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5912E6671700899322 /* SDL_error.c */; };
-		04BD00A012E6671800899322 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5A12E6671700899322 /* SDL_fatal.c */; };
-		04BD00A112E6671800899322 /* SDL_fatal.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5B12E6671700899322 /* SDL_fatal.h */; };
 		04BD00A212E6671800899322 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5C12E6671700899322 /* SDL.c */; };
 		04BD00A312E6671800899322 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5E12E6671700899322 /* SDL_getenv.c */; };
 		04BD00A412E6671800899322 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5F12E6671700899322 /* SDL_iconv.c */; };
@@ -269,8 +267,6 @@
 		04BD02B612E6671800899322 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5612E6671700899322 /* SDL_assert.c */; };
 		04BD02B812E6671800899322 /* SDL_error_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5812E6671700899322 /* SDL_error_c.h */; };
 		04BD02B912E6671800899322 /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5912E6671700899322 /* SDL_error.c */; };
-		04BD02BA12E6671800899322 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5A12E6671700899322 /* SDL_fatal.c */; };
-		04BD02BB12E6671800899322 /* SDL_fatal.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5B12E6671700899322 /* SDL_fatal.h */; };
 		04BD02BC12E6671800899322 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5C12E6671700899322 /* SDL.c */; };
 		04BD02BD12E6671800899322 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5E12E6671700899322 /* SDL_getenv.c */; };
 		04BD02BE12E6671800899322 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5F12E6671700899322 /* SDL_iconv.c */; };
@@ -549,7 +545,6 @@
 		DB313F8E17554B71006C0E22 /* SDL_sysjoystick.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE1812E6671700899322 /* SDL_sysjoystick.h */; };
 		DB313F8F17554B71006C0E22 /* SDL_assert_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5512E6671700899322 /* SDL_assert_c.h */; };
 		DB313F9017554B71006C0E22 /* SDL_error_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5812E6671700899322 /* SDL_error_c.h */; };
-		DB313F9117554B71006C0E22 /* SDL_fatal.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE5B12E6671700899322 /* SDL_fatal.h */; };
 		DB313F9217554B71006C0E22 /* SDL_sysmutex_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE8012E6671800899322 /* SDL_sysmutex_c.h */; };
 		DB313F9317554B71006C0E22 /* SDL_systhread_c.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE8312E6671800899322 /* SDL_systhread_c.h */; };
 		DB313F9417554B71006C0E22 /* SDL_systhread.h in Headers */ = {isa = PBXBuildFile; fileRef = 04BDFE8B12E6671800899322 /* SDL_systhread.h */; };
@@ -690,7 +685,6 @@
 		DB31401C17554B71006C0E22 /* SDL_power.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE4E12E6671700899322 /* SDL_power.c */; };
 		DB31401D17554B71006C0E22 /* SDL_assert.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5612E6671700899322 /* SDL_assert.c */; };
 		DB31401E17554B71006C0E22 /* SDL_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5912E6671700899322 /* SDL_error.c */; };
-		DB31401F17554B71006C0E22 /* SDL_fatal.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5A12E6671700899322 /* SDL_fatal.c */; };
 		DB31402017554B71006C0E22 /* SDL.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5C12E6671700899322 /* SDL.c */; };
 		DB31402117554B71006C0E22 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5E12E6671700899322 /* SDL_getenv.c */; };
 		DB31402217554B71006C0E22 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = 04BDFE5F12E6671700899322 /* SDL_iconv.c */; };
@@ -875,8 +869,6 @@
 		04BDFE5612E6671700899322 /* SDL_assert.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_assert.c; path = ../../src/SDL_assert.c; sourceTree = SOURCE_ROOT; };
 		04BDFE5812E6671700899322 /* SDL_error_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_error_c.h; path = ../../src/SDL_error_c.h; sourceTree = SOURCE_ROOT; };
 		04BDFE5912E6671700899322 /* SDL_error.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_error.c; path = ../../src/SDL_error.c; sourceTree = SOURCE_ROOT; };
-		04BDFE5A12E6671700899322 /* SDL_fatal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL_fatal.c; path = ../../src/SDL_fatal.c; sourceTree = SOURCE_ROOT; };
-		04BDFE5B12E6671700899322 /* SDL_fatal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDL_fatal.h; path = ../../src/SDL_fatal.h; sourceTree = SOURCE_ROOT; };
 		04BDFE5C12E6671700899322 /* SDL.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = SDL.c; path = ../../src/SDL.c; sourceTree = SOURCE_ROOT; };
 		04BDFE5E12E6671700899322 /* SDL_getenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_getenv.c; sourceTree = "<group>"; };
 		04BDFE5F12E6671700899322 /* SDL_iconv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_iconv.c; sourceTree = "<group>"; };
@@ -1650,8 +1642,6 @@
 				04BDFE5612E6671700899322 /* SDL_assert.c */,
 				04BDFE5812E6671700899322 /* SDL_error_c.h */,
 				04BDFE5912E6671700899322 /* SDL_error.c */,
-				04BDFE5A12E6671700899322 /* SDL_fatal.c */,
-				04BDFE5B12E6671700899322 /* SDL_fatal.h */,
 				0442EC5E12FE1C75004C9285 /* SDL_hints.c */,
 				04BAC0C71300C2160055DE28 /* SDL_log.c */,
 				04BDFE5C12E6671700899322 /* SDL.c */,
@@ -1795,7 +1785,6 @@
 				04BD007212E6671800899322 /* SDL_sysjoystick.h in Headers */,
 				04BD009B12E6671800899322 /* SDL_assert_c.h in Headers */,
 				04BD009E12E6671800899322 /* SDL_error_c.h in Headers */,
-				04BD00A112E6671800899322 /* SDL_fatal.h in Headers */,
 				04BD00BF12E6671800899322 /* SDL_sysmutex_c.h in Headers */,
 				04BD00C212E6671800899322 /* SDL_systhread_c.h in Headers */,
 				04BD00C912E6671800899322 /* SDL_systhread.h in Headers */,
@@ -1889,7 +1878,6 @@
 				04BD028D12E6671800899322 /* SDL_sysjoystick.h in Headers */,
 				04BD02B512E6671800899322 /* SDL_assert_c.h in Headers */,
 				04BD02B812E6671800899322 /* SDL_error_c.h in Headers */,
-				04BD02BB12E6671800899322 /* SDL_fatal.h in Headers */,
 				04BD02D912E6671800899322 /* SDL_sysmutex_c.h in Headers */,
 				04BD02DC12E6671800899322 /* SDL_systhread_c.h in Headers */,
 				04BD02E312E6671800899322 /* SDL_systhread.h in Headers */,
@@ -2033,7 +2021,6 @@
 				DB313F8E17554B71006C0E22 /* SDL_sysjoystick.h in Headers */,
 				DB313F8F17554B71006C0E22 /* SDL_assert_c.h in Headers */,
 				DB313F9017554B71006C0E22 /* SDL_error_c.h in Headers */,
-				DB313F9117554B71006C0E22 /* SDL_fatal.h in Headers */,
 				DB313F9217554B71006C0E22 /* SDL_sysmutex_c.h in Headers */,
 				DB313F9317554B71006C0E22 /* SDL_systhread_c.h in Headers */,
 				DB313F9417554B71006C0E22 /* SDL_systhread.h in Headers */,
@@ -2345,7 +2332,6 @@
 				04BD009612E6671800899322 /* SDL_power.c in Sources */,
 				04BD009C12E6671800899322 /* SDL_assert.c in Sources */,
 				04BD009F12E6671800899322 /* SDL_error.c in Sources */,
-				04BD00A012E6671800899322 /* SDL_fatal.c in Sources */,
 				04BD00A212E6671800899322 /* SDL.c in Sources */,
 				04BD00A312E6671800899322 /* SDL_getenv.c in Sources */,
 				04BD00A412E6671800899322 /* SDL_iconv.c in Sources */,
@@ -2464,7 +2450,6 @@
 				04BD02B012E6671800899322 /* SDL_power.c in Sources */,
 				04BD02B612E6671800899322 /* SDL_assert.c in Sources */,
 				04BD02B912E6671800899322 /* SDL_error.c in Sources */,
-				04BD02BA12E6671800899322 /* SDL_fatal.c in Sources */,
 				04BD02BC12E6671800899322 /* SDL.c in Sources */,
 				04BD02BD12E6671800899322 /* SDL_getenv.c in Sources */,
 				04BD02BE12E6671800899322 /* SDL_iconv.c in Sources */,
@@ -2581,7 +2566,6 @@
 				DB31401C17554B71006C0E22 /* SDL_power.c in Sources */,
 				DB31401D17554B71006C0E22 /* SDL_assert.c in Sources */,
 				DB31401E17554B71006C0E22 /* SDL_error.c in Sources */,
-				DB31401F17554B71006C0E22 /* SDL_fatal.c in Sources */,
 				DB31402017554B71006C0E22 /* SDL.c in Sources */,
 				DB31402117554B71006C0E22 /* SDL_getenv.c in Sources */,
 				DB31402217554B71006C0E22 /* SDL_iconv.c in Sources */,
