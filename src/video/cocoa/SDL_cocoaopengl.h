@@ -35,12 +35,14 @@ struct SDL_GLDriverData
 
 @interface SDLOpenGLContext : NSOpenGLContext {
     SDL_atomic_t dirty;
+    SDL_Window *window;
 }
 
 - (id)initWithFormat:(NSOpenGLPixelFormat *)format
         shareContext:(NSOpenGLContext *)share;
 - (void)scheduleUpdate;
 - (void)updateIfNeeded;
+- (void)setWindow:(SDL_Window *)window;
 
 @end
 

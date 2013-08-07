@@ -42,6 +42,16 @@ static __inline__ void ConvertNSRect(NSRect *r)
     r->origin.y = CGDisplayPixelsHigh(kCGDirectMainDisplay) - r->origin.y - r->size.height;
 }
 
+static void ScheduleContextUpdates(SDL_WindowData *data)
+{
+    NSMutableArray *contexts = data->nscontexts;
+    @synchronized (contexts) {
+        for (SDLOpenGLContext *context in contexts) {
+            [context scheduleUpdate];
+        }
+    }
+}
+
 @implementation Cocoa_WindowListener
 
 - (void)listen:(SDL_WindowData *)data
@@ -211,7 +221,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     x = (int)rect.origin.x;
     y = (int)rect.origin.y;
 
-    [_data->nscontext scheduleUpdate];
+    ScheduleContextUpdates(_data);
 
     SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, x, y);
 }
@@ -228,7 +238,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
     if (SDL_IsShapedWindow(_data->window))
         Cocoa_ResizeWindowShape(_data->window);
 
-    [_data->nscontext scheduleUpdate];
+    ScheduleContextUpdates(_data);
 
     /* The window can move during a resize event, such as when maximizing
        or resizing from a corner */
@@ -605,6 +615,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     data->nswindow = nswindow;
     data->created = created;
     data->videodata = videodata;
+    data->nscontexts = [[NSMutableArray alloc] init];
 
     pool = [[NSAutoreleasePool alloc] init];
 
@@ -799,7 +810,7 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     [nswindow setFrameOrigin:rect.origin];
     s_moveHack = moveHack;
 
-    [windata->nscontext scheduleUpdate];
+    ScheduleContextUpdates(windata);
 
     [pool release];
 }
@@ -816,7 +827,7 @@ Cocoa_SetWindowSize(_THIS, SDL_Window * window)
     size.height = window->h;
     [nswindow setContentSize:size];
 
-    [windata->nscontext scheduleUpdate];
+    ScheduleContextUpdates(windata);
 
     [pool release];
 }
@@ -903,7 +914,7 @@ Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
 
     [nswindow zoom:nil];
 
-    [windata->nscontext scheduleUpdate];
+    ScheduleContextUpdates(windata);
 
     [pool release];
 }
@@ -1040,7 +1051,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     [nswindow makeKeyAndOrderFront:nil];
     [data->listener resumeVisibleObservation];
 
-    [data->nscontext scheduleUpdate];
+    ScheduleContextUpdates(data);
 
     [pool release];
 }
@@ -1133,6 +1144,14 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
         if (data->created) {
             [data->nswindow close];
         }
+
+        NSArray *contexts = [[data->nscontexts copy] autorelease];
+        for (SDLOpenGLContext *context in contexts) {
+            /* Calling setWindow:NULL causes the context to remove itself from the context list. */            
+            [context setWindow:NULL];
+        }
+        [data->nscontexts release];
+
         SDL_free(data);
     }
     [pool release];

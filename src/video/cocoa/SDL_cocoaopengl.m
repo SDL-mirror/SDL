@@ -51,8 +51,12 @@
 - (id)initWithFormat:(NSOpenGLPixelFormat *)format
         shareContext:(NSOpenGLContext *)share
 {
-    SDL_AtomicSet(&self->dirty, 0);
-    return [super initWithFormat:format shareContext:share];
+    self = [super initWithFormat:format shareContext:share];
+    if (self) {
+        SDL_AtomicSet(&self->dirty, 0);
+        self->window = NULL;
+    }
+    return self;
 }
 
 - (void)scheduleUpdate
@@ -76,6 +80,40 @@
     /* This ensures that regular 'update' calls clear the atomic dirty flag. */
     [self scheduleUpdate];
     [self updateIfNeeded];
+}
+
+/* Updates the drawable for the contexts and manages related state. */
+- (void)setWindow:(SDL_Window *)newWindow
+{
+    if (self->window) {
+        SDL_WindowData *oldwindowdata = (SDL_WindowData *)self->window->driverdata;
+
+        /* Make sure to remove us from the old window's context list, or we'll get scheduled updates from it too. */
+        NSMutableArray *contexts = oldwindowdata->nscontexts;
+        @synchronized (contexts) {
+            [contexts removeObject:self];
+        }
+    }
+
+    self->window = newWindow;
+
+    if (newWindow) {
+        SDL_WindowData *windowdata = (SDL_WindowData *)newWindow->driverdata;
+
+        /* Now sign up for scheduled updates for the new window. */
+        NSMutableArray *contexts = windowdata->nscontexts;
+        @synchronized (contexts) {
+            [contexts addObject:self];
+        }
+
+        if ([self view] != [windowdata->nswindow contentView]) {
+            [self setView:[windowdata->nswindow contentView]];
+            [self scheduleUpdate];
+        }
+    } else {
+        [self clearDrawable];
+        [self scheduleUpdate];
+    }
 }
 
 @end
@@ -244,14 +282,8 @@ Cocoa_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     pool = [[NSAutoreleasePool alloc] init];
 
     if (context) {
-        SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
         SDLOpenGLContext *nscontext = (SDLOpenGLContext *)context;
-        windowdata->nscontext = nscontext;
-        if ([nscontext view] != [windowdata->nswindow contentView]) {
-            [nscontext setView:[windowdata->nswindow contentView]];
-            [nscontext scheduleUpdate];
-        }
-
+        [nscontext setWindow:window];
         [nscontext updateIfNeeded];
         [nscontext makeCurrentContext];
     } else {
@@ -309,11 +341,10 @@ void
 Cocoa_GL_SwapWindow(_THIS, SDL_Window * window)
 {
     NSAutoreleasePool *pool;
-    SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
-    SDLOpenGLContext *nscontext = windowdata->nscontext;
 
     pool = [[NSAutoreleasePool alloc] init];
 
+    SDLOpenGLContext* nscontext = (NSOpenGLContext*)SDL_GL_GetCurrentContext();
     [nscontext flushBuffer];
     [nscontext updateIfNeeded];
 
@@ -324,11 +355,11 @@ void
 Cocoa_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     NSAutoreleasePool *pool;
-    NSOpenGLContext *nscontext = (NSOpenGLContext *)context;
+    SDLOpenGLContext *nscontext = (SDLOpenGLContext *)context;
 
     pool = [[NSAutoreleasePool alloc] init];
 
-    [nscontext clearDrawable];
+    [nscontext setWindow:NULL];
     [nscontext release];
 
     [pool release];

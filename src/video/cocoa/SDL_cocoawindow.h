@@ -83,7 +83,7 @@ struct SDL_WindowData
 {
     SDL_Window *window;
     NSWindow *nswindow;
-    SDLOpenGLContext *nscontext;
+    NSMutableArray *nscontexts;
     SDL_bool created;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
