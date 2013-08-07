@@ -107,6 +107,15 @@ SDL_InitSubSystem(Uint32 flags)
         return -1;
     }
 
+    /* Clear the error message */
+    SDL_ClearError();
+
+#if SDL_VIDEO_DRIVER_WINDOWS
+    if (SDL_HelperWindowCreate() < 0) {
+        return -1;
+    }
+#endif
+
 #if !SDL_TIMERS_DISABLED
     SDL_InitTicks();
 #endif
@@ -225,21 +234,7 @@ SDL_InitSubSystem(Uint32 flags)
 int
 SDL_Init(Uint32 flags)
 {
-    /* Clear the error message */
-    SDL_ClearError();
-
-#if SDL_VIDEO_DRIVER_WINDOWS
-    if (SDL_HelperWindowCreate() < 0) {
-        return -1;
-    }
-#endif
-
-    /* Initialize the desired subsystems */
-    if (SDL_InitSubSystem(flags) < 0) {
-        return (-1);
-    }
-
-    return (0);
+    return SDL_InitSubSystem(flags);
 }
 
 void
