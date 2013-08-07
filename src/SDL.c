@@ -349,9 +349,6 @@ SDL_Quit(void)
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
 
-    /* Uninstall any parachute signal handlers */
-    SDL_UninstallParachute();
-
     SDL_ClearHints();
     SDL_AssertionsQuit();
     SDL_LogResetPriorities();
