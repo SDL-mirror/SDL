@@ -559,13 +559,17 @@ WIN_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
         HWND top;
         SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
         HWND hwnd = data->hwnd;
-        UINT flags = SWP_NOMOVE | SWP_NOSIZE;
+        UINT flags = SWP_NOCOPYBITS | SWP_NOMOVE | SWP_NOSIZE;
 
         if ( SDL_ShouldAllowTopmost() && (window->flags & SDL_WINDOW_INPUT_FOCUS ) ) {
             top = HWND_TOPMOST;
         } else {
             top = HWND_NOTOPMOST;
             flags |= SWP_NOZORDER;
+        }
+
+        if (!(window->flags & SDL_WINDOW_SHOWN)) {
+            flags |= SWP_NOACTIVATE;
         }
 
         SetWindowPos(hwnd, top, 0, 0, 0, 0, flags);
