@@ -424,6 +424,7 @@ D3D_Reset(SDL_Renderer * renderer)
     IDirect3DDevice9_SetRenderState(data->device, D3DRS_LIGHTING, FALSE);
     IDirect3DDevice9_GetRenderTarget(data->device, 0, &data->defaultRenderTarget);
     SDL_memset(data->scaleMode, 0xFF, sizeof(data->scaleMode));
+    D3D_UpdateViewport(renderer);
     return 0;
 }
 
@@ -449,7 +450,6 @@ D3D_ActivateRenderer(SDL_Renderer * renderer)
         if (D3D_Reset(renderer) < 0) {
             return -1;
         }
-        D3D_UpdateViewport(renderer);
 
         data->updateSize = SDL_FALSE;
     }
