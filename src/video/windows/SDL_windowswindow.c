@@ -131,8 +131,15 @@ SetupWindowData(_THIS, SDL_Window * window, HWND hwnd, SDL_bool created)
     {
         RECT rect;
         if (GetClientRect(hwnd, &rect)) {
-            window->w = rect.right;
-            window->h = rect.bottom;
+            int w = rect.right;
+            int h = rect.bottom;
+            if ((window->w && window->w != w) || (window->h && window->h != h)) {
+                // We tried to create a window larger than the desktop and Windows didn't allow it.  Override!
+                SetWindowPos(hwnd, NULL, 0, 0, window->w, window->h, SWP_NOCOPYBITS | SWP_NOZORDER | SWP_NOMOVE | SWP_NOACTIVATE);
+            } else {
+                window->w = w;
+                window->h = h;
+            }
         }
     }
     {
