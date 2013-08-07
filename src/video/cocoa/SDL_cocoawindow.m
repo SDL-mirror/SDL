@@ -414,6 +414,11 @@ static __inline__ void ConvertNSRect(NSRect *r)
                 y = window->h - 1;
             }
 
+#if !SDL_MAC_NO_SANDBOX
+            /* When SDL_MAC_NO_SANDBOX is set, this is handled by
+             * SDL_cocoamousetap.m.
+             */
+
             cgpoint.x = window->x + x;
             cgpoint.y = window->y + y;
 
@@ -424,6 +429,7 @@ static __inline__ void ConvertNSRect(NSRect *r)
             CGSetLocalEventsSuppressionInterval(0.0);
             CGDisplayMoveCursorToPoint(kCGDirectMainDisplay, cgpoint);
             CGSetLocalEventsSuppressionInterval(0.25);
+#endif
         }
     }
     SDL_SendMouseMotion(window, 0, 0, x, y);

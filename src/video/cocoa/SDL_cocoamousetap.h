@@ -20,26 +20,14 @@
 */
 #include "SDL_config.h"
 
-#ifndef _SDL_cocoamouse_h
-#define _SDL_cocoamouse_h
+#ifndef _SDL_cocoamousetap_h
+#define _SDL_cocoamousetap_h
 
-#include "SDL_cocoavideo.h"
+#include "SDL_cocoamouse.h"
 
-extern void Cocoa_InitMouse(_THIS);
-extern void Cocoa_HandleMouseEvent(_THIS, NSEvent * event);
-extern void Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent * event);
-extern void Cocoa_QuitMouse(_THIS);
+extern void Cocoa_InitMouseEventTap(SDL_MouseData *driverdata);
+extern void Cocoa_QuitMouseEventTap(SDL_MouseData *driverdata);
 
-typedef struct {
-    int deltaXOffset;
-    int deltaYOffset;
-    void *tapdata;
-} SDL_MouseData;
-
-@interface NSCursor (InvisibleCursor)
-+ (NSCursor *)invisibleCursor;
-@end
-
-#endif /* _SDL_cocoamouse_h */
+#endif /* _SDL_cocoamousetap_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
