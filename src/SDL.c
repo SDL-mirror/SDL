@@ -429,7 +429,7 @@ SDL_GetPlatform()
 #elif __WIN32__
     return "Windows";
 #elif __IPHONEOS__
-    return "iPhone OS";
+    return "iOS";
 #elif __PSP__
     return "PlayStation Portable";
 #else
