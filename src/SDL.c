@@ -226,10 +226,6 @@ SDL_InitSubSystem(Uint32 flags)
 int
 SDL_Init(Uint32 flags)
 {
-    if (SDL_AssertionsInit() < 0) {
-        return -1;
-    }
-
     /* Clear the error message */
     SDL_ClearError();
 
