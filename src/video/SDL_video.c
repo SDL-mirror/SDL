@@ -2854,6 +2854,12 @@ SDL_GL_SwapWindow(SDL_Window * window)
         SDL_SetError("The specified window isn't an OpenGL window");
         return;
     }
+
+    if (SDL_GL_GetCurrentWindow() != window) {
+        SDL_SetError("The specified window has not been made current");
+        return;
+    }
+
     _this->GL_SwapWindow(_this, window);
 }
 
