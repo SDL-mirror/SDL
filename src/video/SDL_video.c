@@ -2210,11 +2210,6 @@ SDL_DestroyWindow(SDL_Window * window)
     }
 
     SDL_free(window);
-
-    if (_this->windows == NULL) {
-        /* This is the last window in the list so send the SDL_QUIT event */
-        SDL_SendQuit();
-    }
 }
 
 SDL_bool

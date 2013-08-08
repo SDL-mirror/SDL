@@ -197,6 +197,13 @@ SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
         posted = (SDL_PushEvent(&event) > 0);
     }
 
+    if (windowevent == SDL_WINDOWEVENT_CLOSE) {
+        if ( !window->prev && !window->next ) {
+            /* This is the last window in the list so send the SDL_QUIT event */
+            SDL_SendQuit();
+        }
+    }
+
     return (posted);
 }
 
