@@ -255,11 +255,13 @@ SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
             Uint16 ckey = (Uint16) surface->map->info.colorkey;
             Uint16 mask = (Uint16) (~surface->format->Amask);
 
+            /* Ignore alpha in colorkey comparison */
+            ckey &= mask;
             row = (Uint16 *) surface->pixels;
             for (y = surface->h; y--;) {
                 spot = row;
                 for (x = surface->w; x--;) {
-                    if (*spot == ckey) {
+                    if ((*spot & mask) == ckey) {
                         *spot &= mask;
                     }
                     ++spot;
@@ -277,10 +279,13 @@ SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
             Uint32 ckey = surface->map->info.colorkey;
             Uint32 mask = ~surface->format->Amask;
 
+            /* Ignore alpha in colorkey comparison */
+            ckey &= mask;
             row = (Uint32 *) surface->pixels;
             for (y = surface->h; y--;) {
                 spot = row;
                 for (x = surface->w; x--;) {
+                    if ((*spot & mask) == ckey) {
                     if (*spot == ckey) {
                         *spot &= mask;
                     }
@@ -802,6 +807,7 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
 {
     SDL_Surface *convert;
     Uint32 copy_flags;
+    SDL_Color copy_color;
     SDL_Rect bounds;
 
     /* Check for empty destination palette! (results in empty image) */
@@ -838,7 +844,16 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
 
     /* Save the original copy flags */
     copy_flags = surface->map->info.flags;
+    copy_color.r = surface->map->info.r;
+    copy_color.g = surface->map->info.g;
+    copy_color.b = surface->map->info.b;
+    copy_color.a = surface->map->info.a;
+    surface->map->info.r = 0xFF;
+    surface->map->info.g = 0xFF;
+    surface->map->info.b = 0xFF;
+    surface->map->info.a = 0xFF;
     surface->map->info.flags = 0;
+    SDL_InvalidateMap(surface->map);
 
     /* Copy over the image data */
     bounds.x = 0;
@@ -848,16 +863,21 @@ SDL_ConvertSurface(SDL_Surface * surface, SDL_PixelFormat * format,
     SDL_LowerBlit(surface, &bounds, convert, &bounds);
 
     /* Clean up the original surface, and update converted surface */
-    convert->map->info.r = surface->map->info.r;
-    convert->map->info.g = surface->map->info.g;
-    convert->map->info.b = surface->map->info.b;
-    convert->map->info.a = surface->map->info.a;
+    convert->map->info.r = copy_color.r;
+    convert->map->info.g = copy_color.g;
+    convert->map->info.b = copy_color.b;
+    convert->map->info.a = copy_color.a;
     convert->map->info.flags =
         (copy_flags &
          ~(SDL_COPY_COLORKEY | SDL_COPY_BLEND
            | SDL_COPY_RLE_DESIRED | SDL_COPY_RLE_COLORKEY |
            SDL_COPY_RLE_ALPHAKEY));
+    surface->map->info.r = copy_color.r;
+    surface->map->info.g = copy_color.g;
+    surface->map->info.b = copy_color.b;
+    surface->map->info.a = copy_color.a;
     surface->map->info.flags = copy_flags;
+    SDL_InvalidateMap(surface->map);
     if (copy_flags & SDL_COPY_COLORKEY) {
         SDL_bool set_colorkey_by_color = SDL_FALSE;
 
