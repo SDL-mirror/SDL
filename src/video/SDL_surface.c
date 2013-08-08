@@ -286,7 +286,6 @@ SDL_ConvertColorkeyToAlpha(SDL_Surface * surface)
                 spot = row;
                 for (x = surface->w; x--;) {
                     if ((*spot & mask) == ckey) {
-                    if (*spot == ckey) {
                         *spot &= mask;
                     }
                     ++spot;
