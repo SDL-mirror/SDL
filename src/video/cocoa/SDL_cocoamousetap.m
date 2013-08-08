@@ -22,8 +22,6 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
-#define SDL_MAC_NO_SANDBOX 1
-
 #include "SDL_cocoamousetap.h"
 
 /* Event taps are forbidden in the Mac App Store, so we can only enable this
