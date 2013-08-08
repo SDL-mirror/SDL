@@ -131,6 +131,12 @@ Cocoa_MouseTapCallback(CGEventTapProxy proxy, CGEventType type, CGEventRef event
     return event;
 }
 
+static void
+SemaphorePostCallback(CFRunLoopTimerRef timer, void *info)
+{
+    SDL_SemPost((SDL_sem*)info);
+}
+
 static int
 Cocoa_MouseTapThread(void *data)
 {
@@ -163,10 +169,11 @@ Cocoa_MouseTapThread(void *data)
 
     tapdata->runloop = CFRunLoopGetCurrent();
     CFRunLoopAddSource(tapdata->runloop, tapdata->runloopSource, kCFRunLoopCommonModes);
-    CFRunLoopPerformBlock(tapdata->runloop, kCFRunLoopCommonModes, ^{
-        /* We signal this *after* the run loop has started, indicating it's safe to CFRunLoopStop it. */
-        SDL_SemPost(tapdata->runloopStartedSemaphore);
-    });
+    CFRunLoopTimerContext context = {.info = tapdata->runloopStartedSemaphore};
+    /* We signal the runloop started semaphore *after* the run loop has started, indicating it's safe to CFRunLoopStop it. */
+    CFRunLoopTimerRef timer = CFRunLoopTimerCreate(kCFAllocatorDefault, CFAbsoluteTimeGetCurrent(), 0, 0, 0, &SemaphorePostCallback, &context);
+    CFRunLoopAddTimer(tapdata->runloop, timer, kCFRunLoopCommonModes);
+    CFRelease(timer);
 
     /* Run the event loop to handle events in the event tap. */
     CFRunLoopRun();
