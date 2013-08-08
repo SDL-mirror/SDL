@@ -2798,7 +2798,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INSTALL_PATH = "@loader_path";
+				INSTALL_PATH = "@rpath";
 				PRODUCT_NAME = SDL2;
 				SKIP_INSTALL = YES;
 			};
@@ -2817,7 +2817,7 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				HEADER_SEARCH_PATHS = /usr/X11R6/include;
-				INSTALL_PATH = "@loader_path";
+				INSTALL_PATH = "@rpath";
 				PRODUCT_NAME = SDL2;
 				SKIP_INSTALL = YES;
 			};
