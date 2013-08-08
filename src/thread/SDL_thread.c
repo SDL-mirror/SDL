@@ -319,7 +319,9 @@ SDL_CreateThread(int (SDLCALL * fn) (void *),
     args = (thread_args *) SDL_malloc(sizeof(*args));
     if (args == NULL) {
         SDL_OutOfMemory();
-        SDL_free(thread->name);
+        if (thread->name) {
+            SDL_free(thread->name);
+        }
         SDL_free(thread);
         return (NULL);
     }
@@ -328,7 +330,9 @@ SDL_CreateThread(int (SDLCALL * fn) (void *),
     args->info = thread;
     args->wait = SDL_CreateSemaphore(0);
     if (args->wait == NULL) {
-        SDL_free(thread->name);
+        if (thread->name) {
+            SDL_free(thread->name);
+        }
         SDL_free(thread);
         SDL_free(args);
         return (NULL);
@@ -345,7 +349,9 @@ SDL_CreateThread(int (SDLCALL * fn) (void *),
         SDL_SemWait(args->wait);
     } else {
         /* Oops, failed.  Gotta free everything */
-        SDL_free(thread->name);
+        if (thread->name) {
+            SDL_free(thread->name);
+        }
         SDL_free(thread);
         thread = NULL;
     }
@@ -372,7 +378,11 @@ SDL_GetThreadID(SDL_Thread * thread)
 const char *
 SDL_GetThreadName(SDL_Thread * thread)
 {
-    return thread->name;
+    if (thread) {
+        return thread->name;
+    } else {
+        return NULL;
+    }
 }
 
 int
@@ -389,7 +399,9 @@ SDL_WaitThread(SDL_Thread * thread, int *status)
         if (status) {
             *status = thread->status;
         }
-        SDL_free(thread->name);
+        if (thread->name) {
+            SDL_free(thread->name);
+        }
         SDL_free(thread);
     }
 }
