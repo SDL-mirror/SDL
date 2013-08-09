@@ -1081,6 +1081,7 @@ video_getSetWindowSize(void *arg)
   SDL_Window* window;
   int result;
   SDL_Rect display;
+  int maxwVariation, maxhVariation;
   int wVariation, hVariation;
   int referenceW, referenceH;
   int currentW, currentH;
@@ -1096,8 +1097,18 @@ video_getSetWindowSize(void *arg)
   window = _createVideoSuiteTestWindow(title);
   if (window == NULL) return TEST_ABORTED;
 
-  for (wVariation = 0; wVariation < 4; wVariation++) {
-   for (hVariation = 0; hVariation < 4; hVariation++) {
+#ifdef __WIN32__
+  /* Platform clips window size to screen size */
+  maxwVariation = 4;
+  maxhVariation = 4;
+#else
+  /* Platform allows window size >= screen size */
+  maxwVariation = 5;
+  maxhVariation = 5;
+#endif
+  
+  for (wVariation = 0; wVariation < maxwVariation; wVariation++) {
+   for (hVariation = 0; hVariation < maxhVariation; hVariation++) {
     switch(wVariation) {
      case 0:
       /* 1 Pixel Wide */
@@ -1108,10 +1119,14 @@ video_getSetWindowSize(void *arg)
       desiredW = SDLTest_RandomIntegerInRange(1, 100);
       break;
      case 2:
+      /* Width 1 pixel smaller than screen */
+      desiredW = display.w - 1;
+      break;
+     case 3:
       /* Width at screen size */
       desiredW = display.w;
       break;
-     case 3:
+     case 4:
       /* Width 1 pixel larger than screen */
       desiredW = display.w + 1;
       break;
@@ -1127,10 +1142,14 @@ video_getSetWindowSize(void *arg)
       desiredH = SDLTest_RandomIntegerInRange(1, 100);
       break;
      case 2:
+      /* Height 1 pixel smaller than screen */
+      desiredH = display.h - 1;
+      break;
+     case 3:
       /* Height at screen size */
       desiredH = display.h;
       break;
-     case 3:
+     case 4:
       /* Height 1 pixel larger than screen */
       desiredH = display.h + 1;
       break;
@@ -1152,13 +1171,13 @@ video_getSetWindowSize(void *arg)
     currentW = desiredW + 1;
     SDL_GetWindowSize(window, &currentW, NULL);
     SDLTest_AssertPass("Call to SDL_GetWindowSize(&h=NULL)");
-    SDLTest_AssertCheck(desiredW == currentW, "Verify returned width; expected: %d, got: %d", desiredW, currentH);
+    SDLTest_AssertCheck(desiredW == currentW, "Verify returned width; expected: %d, got: %d", desiredW, currentW);
 
     /* Get just height */
     currentH = desiredH + 1;
     SDL_GetWindowSize(window, NULL, &currentH);
     SDLTest_AssertPass("Call to SDL_GetWindowSize(&w=NULL)");
-    SDLTest_AssertCheck(desiredH == currentH, "Verify returned height; expected: %d, got: %d", desiredW, currentH);
+    SDLTest_AssertCheck(desiredH == currentH, "Verify returned height; expected: %d, got: %d", desiredH, currentH);
    }
   }
 
