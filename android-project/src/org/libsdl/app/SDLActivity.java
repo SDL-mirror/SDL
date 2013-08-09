@@ -252,8 +252,6 @@ public class SDLActivity extends Activity {
                                             int action, float x, 
                                             float y, float p);
     public static native void onNativeAccel(float x, float y, float z);
-    public static native void nativeRunAudioThread();
-
 
     // Java functions called from C
 
@@ -503,29 +501,13 @@ public class SDLActivity extends Activity {
                 mAudioTrack = null;
                 return -1;
             }
+            
+            mAudioTrack.play();
         }
-        
-        audioStartThread();
-        
+       
         Log.v("SDL", "SDL audio: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono") + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit") + " " + (mAudioTrack.getSampleRate() / 1000f) + "kHz, " + desiredFrames + " frames buffer");
         
         return 0;
-    }
-    
-    public static void audioStartThread() {
-        if (mAudioThread == null) {
-            mAudioThread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    mAudioTrack.play();
-                    nativeRunAudioThread();
-                }
-            });
-            
-            // I'd take REALTIME if I could get it!
-            mAudioThread.setPriority(Thread.MAX_PRIORITY);
-            mAudioThread.start();
-        }
     }
     
     public static void audioWriteShortBuffer(short[] buffer) {
@@ -565,17 +547,6 @@ public class SDLActivity extends Activity {
     }
 
     public static void audioQuit() {
-        if (mAudioThread != null) {
-            try {
-                mAudioThread.join();
-            } catch(Exception e) {
-                Log.v("SDL", "Problem stopping audio thread: " + e);
-            }
-            mAudioThread = null;
-
-            //Log.v("SDL", "Finished waiting for audio thread");
-        }
-
         if (mAudioTrack != null) {
             mAudioTrack.stop();
             mAudioTrack = null;
@@ -932,3 +903,4 @@ class SDLInputConnection extends BaseInputConnection {
     public native void nativeSetComposingText(String text, int newCursorPosition);
 
 }
+

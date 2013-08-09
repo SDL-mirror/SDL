@@ -47,9 +47,6 @@
 /* Uncomment this to log messages entering and exiting methods in this file */
 //#define DEBUG_JNI
 
-/* Implemented in audio/android/SDL_androidaudio.c */
-extern void Android_RunAudioThread();
-
 static void Android_JNI_ThreadDestroyed(void*);
 
 /*******************************************************************************
@@ -243,15 +240,6 @@ void Java_org_libsdl_app_SDLActivity_nativeResume(
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
         SDL_SendWindowEvent(Android_Window, SDL_WINDOWEVENT_RESTORED, 0, 0);
     }
-}
-
-void Java_org_libsdl_app_SDLActivity_nativeRunAudioThread(
-                                    JNIEnv* env, jclass cls)
-{
-    /* This is the audio thread, with a different environment */
-    Android_JNI_SetupThread();
-
-    Android_RunAudioThread();
 }
 
 void Java_org_libsdl_app_SDLInputConnection_nativeCommitText(
@@ -1374,3 +1362,4 @@ const char * SDL_AndroidGetExternalStoragePath()
 #endif /* __ANDROID__ */
 
 /* vi: set ts=4 sw=4 expandtab: */
+
