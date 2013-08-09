@@ -63,7 +63,7 @@ sdltest_randomNumber(void *arg)
   SDLTest_AssertCheck(result >= 0 && result <= (Sint64)umax, "Verify result value, expected: [0,%llu], got: %lld", umax, result);
 
   result = (Sint64)SDLTest_RandomSint8();
-  min = 1 - (1 << 7);
+  min = 0 - (1 << 7);
   max =     (1 << 7) - 1;
   SDLTest_AssertPass("Call to SDLTest_RandomSint8");
   SDLTest_AssertCheck(result >= min && result <= max, "Verify result value, expected: [%lld,%lld], got: %lld", min, max, result);
@@ -74,7 +74,7 @@ sdltest_randomNumber(void *arg)
   SDLTest_AssertCheck(result >= 0 && result <= (Sint64)umax, "Verify result value, expected: [0,%llu], got: %lld", umax, result);
 
   result = (Sint64)SDLTest_RandomSint16();
-  min = 1 - (1 << 15);
+  min = 0 - (1 << 15);
   max =     (1 << 15) - 1;
   SDLTest_AssertPass("Call to SDLTest_RandomSint16");
   SDLTest_AssertCheck(result >= min && result <= max, "Verify result value, expected: [%lld,%lld], got: %lld", min, max, result);
@@ -85,7 +85,7 @@ sdltest_randomNumber(void *arg)
   SDLTest_AssertCheck(result >= 0 && result <= (Sint64)umax, "Verify result value, expected: [0,%llu], got: %lld", umax, result);
 
   result = (Sint64)SDLTest_RandomSint32();
-  min = 1 - ((Sint64)1 << 31);
+  min = 0 - ((Sint64)1 << 31);
   max =     ((Sint64)1 << 31) - 1;
   SDLTest_AssertPass("Call to SDLTest_RandomSint32");
   SDLTest_AssertCheck(result >= min && result <= max, "Verify result value, expected: [%lld,%lld], got: %lld", min, max, result);

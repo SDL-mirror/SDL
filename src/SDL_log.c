@@ -317,6 +317,7 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
 {
 #if defined(__WIN32__)
     /* Way too many allocations here, urgh */
+    /* Note: One can't call SDL_SetError here, since that function itself logs. */
     {
         char *output;
         size_t length;
@@ -331,16 +332,16 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
             if (!attachResult) {
                     attachError = GetLastError();
                     if (attachError == ERROR_INVALID_HANDLE) {
-                        SDL_SetError("Parent process has no console");
+                        OutputDebugString(TEXT("Parent process has no console"));
                         consoleAttached = -1;
                     } else if (attachError == ERROR_GEN_FAILURE) {
-                         SDL_SetError("Could not attach to console of parent process");
+                         OutputDebugString(TEXT("Could not attach to console of parent process"));
                          consoleAttached = -1;
                     } else if (attachError == ERROR_ACCESS_DENIED) {  
                          /* Already attached */
                         consoleAttached = 1;
                     } else {
-                        SDL_SetError("Error %d attaching console", attachError);
+                        OutputDebugString(TEXT("Error attaching console"));
                         consoleAttached = -1;
                     }
                 } else {
@@ -364,10 +365,10 @@ SDL_LogOutput(void *userdata, int category, SDL_LogPriority priority,
         /* Screen output to stderr, if console was attached. */
         if (consoleAttached == 1) {
                 if (!WriteConsole(stderrHandle, tstr, lstrlen(tstr), &charsWritten, NULL)) {
-                    SDL_SetError("Error %d calling WriteConsole", GetLastError());
+                    OutputDebugString(TEXT("Error calling WriteConsole"));
                 }
                 if (charsWritten == ERROR_NOT_ENOUGH_MEMORY) {
-                    SDL_SetError("Insufficient heap memory to write message of size %d", length);
+                    OutputDebugString(TEXT("Insufficient heap memory to write message"));
                 }
         }
 
