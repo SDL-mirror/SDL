@@ -50,12 +50,6 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
 
     audioDevice = this;
 
-    this->hidden = (struct SDL_PrivateAudioData *) SDL_malloc(sizeof(*(this->hidden)));
-    if (!this->hidden) {
-        return SDL_OutOfMemory();
-    }
-    SDL_memset(this->hidden, 0, (sizeof *this->hidden));
-
     test_format = SDL_FirstAudioFormat(this->spec.format);
     while (test_format != 0) { /* no "UNKNOWN" constant */
         if ((test_format == AUDIO_U8) || (test_format == AUDIO_S16LSB)) {
@@ -91,13 +85,6 @@ AndroidAUD_OpenDevice(_THIS, const char *devname, int iscapture)
         /* Init failed? */
         return SDL_SetError("Java-side initialization failed!");
     }
-    
-    /* Audio thread is started here, after audio buffers and Java's AudioTrack are in place and ready to go */
-    this->thread = SDL_CreateThread(SDL_RunAudio, "AndroidAudioThread", this);
-    if (this->thread == NULL) {
-        AndroidAUD_CloseDevice(this);
-        return SDL_SetError("Couldn't create audio thread");
-    }
 
     return 0;
 }
@@ -120,11 +107,6 @@ AndroidAUD_CloseDevice(_THIS)
     /* At this point SDL_CloseAudioDevice via close_audio_device took care of terminating the audio thread
        so it's safe to terminate the Java side buffer and AudioTrack
      */
-   
-    if (this->hidden != NULL) {
-        SDL_free(this->hidden);
-        this->hidden = NULL;
-    }
     Android_JNI_CloseAudioDevice();
 
     if (audioDevice == this) {
@@ -142,7 +124,6 @@ AndroidAUD_Init(SDL_AudioDriverImpl * impl)
     impl->CloseDevice = AndroidAUD_CloseDevice;
 
     /* and the capabilities */
-    impl->ProvidesOwnCallbackThread = 1;
     impl->HasCaptureSupport = 0; /* TODO */
     impl->OnlyHasDefaultOutputDevice = 1;
     impl->OnlyHasDefaultInputDevice = 1;
