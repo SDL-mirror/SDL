@@ -418,6 +418,10 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     /* Allocate the texture */
     rdata->glGetError();
     rdata->glGenTextures(1, &tdata->texture);
+    if (rdata->glGetError() != GL_NO_ERROR) {
+        SDL_free(tdata);
+        return SDL_SetError("Texture creation failed in glGenTextures()");
+    }
     rdata->glActiveTexture(GL_TEXTURE0);
     rdata->glBindTexture(tdata->texture_type, tdata->texture);
     rdata->glTexParameteri(tdata->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
@@ -425,8 +429,7 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     rdata->glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     rdata->glTexParameteri(tdata->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     rdata->glTexImage2D(tdata->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);
-    if (rdata->glGetError() != GL_NO_ERROR)
-    {
+    if (rdata->glGetError() != GL_NO_ERROR) {
         rdata->glDeleteTextures(1, &tdata->texture);
         SDL_free(tdata);
         return SDL_SetError("Texture creation failed");

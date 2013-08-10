@@ -475,6 +475,11 @@ GLES_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     renderdata->glGetError();
     renderdata->glEnable(GL_TEXTURE_2D);
     renderdata->glGenTextures(1, &data->texture);
+    result = renderdata->glGetError();
+    if (result != GL_NO_ERROR) {
+        SDL_free(data);
+        return GLES_SetError("glGenTextures()", result);
+    }
 
     data->type = GL_TEXTURE_2D;
     /* no NPOV textures allowed in OpenGL ES (yet) */

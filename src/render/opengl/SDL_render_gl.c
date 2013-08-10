@@ -633,6 +633,10 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     GL_CheckError("", renderer);
     renderdata->glGenTextures(1, &data->texture);
+    if (GL_CheckError("glGenTexures()", renderer) < 0) {
+        SDL_free(data);
+        return -1;
+    }
     if ((renderdata->GL_ARB_texture_rectangle_supported)
         /*&& texture->access != SDL_TEXTUREACCESS_TARGET*/){
         data->type = GL_TEXTURE_RECTANGLE_ARB;
