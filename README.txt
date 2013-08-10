@@ -14,12 +14,11 @@ hardware via OpenGL and Direct3D. It is used by video playback software,
 emulators, and popular games including Valve's award winning catalog
 and many Humble Bundle games.
 
-The current version supports Windows, Mac OS X, Linux, iOS, and Android.
-The code contains support for other operating systems but those are not
-officially supported.
+SDL officially supports Windows, Mac OS X, Linux, iOS, and Android.
+Support for other platforms may be found in the source code.
 
-SDL is written in C, but works with C++ natively, and has bindings to
-several other languages, including C#, Python and more in progress.
+SDL is written in C, works natively with C++, and there are bindings 
+available for several other languages, including C# and Python.
 
 This library is distributed under the zlib license, which can be found
 in the file "COPYING.txt".
