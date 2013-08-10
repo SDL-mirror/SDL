@@ -23,7 +23,7 @@
 #include "SDL_syshaptic.h"
 #include "SDL_haptic_c.h"
 #include "../joystick/SDL_joystick_c.h" /* For SDL_PrivateJoystickValid */
-
+#include "SDL_assert.h"
 
 Uint8 SDL_numhaptics = 0;
 SDL_Haptic **SDL_haptics = NULL;
@@ -723,32 +723,18 @@ SDL_HapticStopAll(SDL_Haptic * haptic)
     return SDL_SYS_HapticStopAll(haptic);
 }
 
-static void
-SDL_HapticRumbleCreate(SDL_HapticEffect * efx)
-{
-   SDL_memset(efx, 0, sizeof(SDL_HapticEffect));
-   efx->type = SDL_HAPTIC_SINE;
-   efx->periodic.period = 1000;
-   efx->periodic.magnitude = 0x4000;
-   efx->periodic.length = 5000;
-   efx->periodic.attack_length = 0;
-   efx->periodic.fade_length = 0;
-}
-
 /*
  * Checks to see if rumble is supported.
  */
 int
 SDL_HapticRumbleSupported(SDL_Haptic * haptic)
 {
-    SDL_HapticEffect efx;
-
     if (!ValidHaptic(haptic)) {
         return -1;
     }
 
-    SDL_HapticRumbleCreate(&efx);
-    return SDL_HapticEffectSupported(haptic, &efx);
+    /* Most things can use SINE, but XInput only has LEFTRIGHT. */
+    return ((haptic->supported & (SDL_HAPTIC_SINE|SDL_HAPTIC_LEFTRIGHT)) != 0);
 }
 
 /*
@@ -757,6 +743,8 @@ SDL_HapticRumbleSupported(SDL_Haptic * haptic)
 int
 SDL_HapticRumbleInit(SDL_Haptic * haptic)
 {
+    SDL_HapticEffect *efx = &haptic->rumble_effect;
+
     if (!ValidHaptic(haptic)) {
         return -1;
     }
@@ -766,8 +754,23 @@ SDL_HapticRumbleInit(SDL_Haptic * haptic)
         return 0;
     }
 
-    /* Copy over. */
-    SDL_HapticRumbleCreate(&haptic->rumble_effect);
+    SDL_zerop(efx);
+    if (haptic->supported & SDL_HAPTIC_SINE) {
+        efx->type = SDL_HAPTIC_SINE;
+        efx->periodic.period = 1000;
+        efx->periodic.magnitude = 0x4000;
+        efx->periodic.length = 5000;
+        efx->periodic.attack_length = 0;
+        efx->periodic.fade_length = 0;
+    } else if (haptic->supported & SDL_HAPTIC_LEFTRIGHT) {  /* XInput? */
+        efx->type = SDL_HAPTIC_LEFTRIGHT;
+        efx->leftright.length = 5000;
+        efx->leftright.large_magnitude = 0x4000;
+        efx->leftright.small_magnitude = 0x4000;
+    } else {
+        return SDL_SetError("Device doesn't support rumble");
+    }
+
     haptic->rumble_id = SDL_HapticNewEffect(haptic, &haptic->rumble_effect);
     if (haptic->rumble_id >= 0) {
         return 0;
@@ -781,7 +784,8 @@ SDL_HapticRumbleInit(SDL_Haptic * haptic)
 int
 SDL_HapticRumblePlay(SDL_Haptic * haptic, float strength, Uint32 length)
 {
-    SDL_HapticPeriodic *efx;
+    SDL_HapticEffect *efx;
+    Sint16 magnitude;
 
     if (!ValidHaptic(haptic)) {
         return -1;
@@ -794,15 +798,22 @@ SDL_HapticRumblePlay(SDL_Haptic * haptic, float strength, Uint32 length)
     /* Clamp strength. */
     if (strength > 1.0f) {
         strength = 1.0f;
-    }
-    else if (strength < 0.0f) {
+    } else if (strength < 0.0f) {
         strength = 0.0f;
     }
+    magnitude = (Sint16)(32767.0f*strength);
 
-    /* New effect. */
-    efx = &haptic->rumble_effect.periodic;
-    efx->magnitude = (Sint16)(32767.0f*strength);
-    efx->length = length;
+    efx = &haptic->rumble_effect;
+    if (efx->type == SDL_HAPTIC_SINE) {
+        efx->periodic.magnitude = magnitude;
+        efx->periodic.length = length;
+    } else if (efx->type == SDL_HAPTIC_LEFTRIGHT) {
+        efx->leftright.small_magnitude = efx->leftright.large_magnitude = magnitude;
+        efx->leftright.length = length;
+    } else {
+        SDL_assert(0 && "This should have been caught elsewhere");
+    }
+
     if (SDL_HapticUpdateEffect(haptic, haptic->rumble_id, &haptic->rumble_effect) < 0) {
         return -1;
     }
@@ -826,5 +837,4 @@ SDL_HapticRumbleStop(SDL_Haptic * haptic)
 
     return SDL_HapticStopEffect(haptic, haptic->rumble_id);
 }
-
 

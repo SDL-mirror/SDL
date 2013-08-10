@@ -166,13 +166,18 @@ typedef struct _SDL_Haptic SDL_Haptic;
 #define SDL_HAPTIC_SINE       (1<<1)
 
 /**
- *  \brief Square wave effect supported.
+ *  \brief Left/Right effect supported.
  *
- *  Periodic haptic effect that simulates square waves.
+ *  Haptic effect for direct control over high/low frequency motors.
  *
- *  \sa SDL_HapticPeriodic
+ *  \sa SDL_HapticLeftRight
+ * \warning this value was SDL_HAPTIC_SQUARE right before 2.0.0 shipped. Sorry,
+ *          we ran out of bits, and this is important for XInput devices.
  */
-#define SDL_HAPTIC_SQUARE     (1<<2)
+#define SDL_HAPTIC_LEFTRIGHT     (1<<2)
+
+/* !!! FIXME: put this back when we have more bits in 2.1 */
+/*#define SDL_HAPTIC_SQUARE     (1<<2)*/
 
 /**
  *  \brief Triangle wave effect supported.
@@ -646,6 +651,31 @@ typedef struct SDL_HapticRamp
 } SDL_HapticRamp;
 
 /**
+ * \brief A structure containing a template for a Left/Right effect.
+ *
+ * This struct is exclusively for the ::SDL_HAPTIC_LEFTRIGHT effect.
+ *
+ * The Left/Right effect is used to explicitly control the large and small
+ * motors, commonly found in modern game controllers. One motor is high
+ * frequency, the other is low frequency.
+ *
+ * \sa SDL_HAPTIC_LEFTRIGHT
+ * \sa SDL_HapticEffect
+ */
+typedef struct SDL_HapticLeftRight
+{
+    /* Header */
+    Uint16 type;            /**< ::SDL_HAPTIC_LEFTRIGHT */
+
+    /* Replay */
+    Uint32 length;          /**< Duration of the effect. */
+
+    /* Rumble */
+    Uint16 large_magnitude; /**< Control of the large controller motor. */
+    Uint16 small_magnitude; /**< Control of the small controller motor. */
+} SDL_HapticLeftRight;
+
+/**
  *  \brief A structure containing a template for the ::SDL_HAPTIC_CUSTOM effect.
  *
  *  A custom force feedback effect is much like a periodic effect, where the
@@ -751,6 +781,7 @@ typedef struct SDL_HapticCustom
  *  \sa SDL_HapticPeriodic
  *  \sa SDL_HapticCondition
  *  \sa SDL_HapticRamp
+ *  \sa SDL_HapticLeftRight
  *  \sa SDL_HapticCustom
  */
 typedef union SDL_HapticEffect
@@ -761,6 +792,7 @@ typedef union SDL_HapticEffect
     SDL_HapticPeriodic periodic;    /**< Periodic effect. */
     SDL_HapticCondition condition;  /**< Condition effect. */
     SDL_HapticRamp ramp;            /**< Ramp effect. */
+    SDL_HapticLeftRight leftright;  /**< Left/Right effect. */
     SDL_HapticCustom custom;        /**< Custom effect. */
 } SDL_HapticEffect;
 
@@ -1181,8 +1213,6 @@ extern DECLSPEC int SDLCALL SDL_HapticRumblePlay(SDL_Haptic * haptic, float stre
  *  \sa SDL_HapticRumblePlay
  */
 extern DECLSPEC int SDLCALL SDL_HapticRumbleStop(SDL_Haptic * haptic);
-
-
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
