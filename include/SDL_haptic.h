@@ -483,7 +483,7 @@ typedef struct SDL_HapticConstant
  *
  *  The struct handles the following effects:
  *   - ::SDL_HAPTIC_SINE
- *   - ::SDL_HAPTIC_SQUARE
+ *   - ::SDL_HAPTIC_LEFTRIGHT
  *   - ::SDL_HAPTIC_TRIANGLE
  *   - ::SDL_HAPTIC_SAWTOOTHUP
  *   - ::SDL_HAPTIC_SAWTOOTHDOWN
@@ -529,7 +529,7 @@ typedef struct SDL_HapticConstant
     \endverbatim
  *
  *  \sa SDL_HAPTIC_SINE
- *  \sa SDL_HAPTIC_SQUARE
+ *  \sa SDL_HAPTIC_LEFTRIGHT
  *  \sa SDL_HAPTIC_TRIANGLE
  *  \sa SDL_HAPTIC_SAWTOOTHUP
  *  \sa SDL_HAPTIC_SAWTOOTHDOWN
@@ -538,7 +538,7 @@ typedef struct SDL_HapticConstant
 typedef struct SDL_HapticPeriodic
 {
     /* Header */
-    Uint16 type;        /**< ::SDL_HAPTIC_SINE, ::SDL_HAPTIC_SQUARE,
+    Uint16 type;        /**< ::SDL_HAPTIC_SINE, ::SDL_HAPTIC_LEFTRIGHT,
                              ::SDL_HAPTIC_TRIANGLE, ::SDL_HAPTIC_SAWTOOTHUP or
                              ::SDL_HAPTIC_SAWTOOTHDOWN */
     SDL_HapticDirection direction;  /**< Direction of the effect. */
