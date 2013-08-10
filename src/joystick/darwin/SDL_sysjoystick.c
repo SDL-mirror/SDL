@@ -340,6 +340,22 @@ static void HIDAddElement (CFTypeRef refElement, recDevice* pDevice)
 							headElement = &(pDevice->firstButton);
 						}
 						break;
+					case kHIDPage_Simulation:
+                        {
+                            switch (usage) /* look at usage to determine function */
+                            {
+                                case kHIDUsage_Sim_Rudder:
+                                case kHIDUsage_Sim_Throttle:
+                                    element = (recElement *) NewPtrClear (sizeof (recElement));
+                                    if (element)
+                                    {
+                                        pDevice->axes++;
+                                        headElement = &(pDevice->firstAxis);
+                                    }
+                                    break;
+                            }							
+                        }
+						break;
 					default:
 						break;
 				}
