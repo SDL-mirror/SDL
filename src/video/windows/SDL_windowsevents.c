@@ -689,6 +689,9 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
                 if (!GetClientRect(hwnd, &rect) ||
                     (rect.right == rect.left && rect.bottom == rect.top)) {
+                    if (inputs) {
+                        SDL_stack_free(inputs);
+                    }
                     break;
                 }
                 ClientToScreen(hwnd, (LPPOINT) & rect);
