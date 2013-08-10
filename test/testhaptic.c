@@ -213,7 +213,7 @@ main(int argc, char **argv)
         nefx++;
     }
 
-    /* First we'll try a SINE effect. */
+    /* Finally we'll try a left/right effect. */
     if (supported & SDL_HAPTIC_LEFTRIGHT) {
         printf("   effect %d: Left/Right\n", nefx);
         efx[nefx].type = SDL_HAPTIC_LEFTRIGHT;
