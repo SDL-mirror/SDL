@@ -926,7 +926,7 @@ extern DECLSPEC int SDLCALL SDL_HapticNumEffectsPlaying(SDL_Haptic * haptic);
  *
  *  Example:
  *  \code
- *  if (SDL_HapticQueryEffects(haptic) & SDL_HAPTIC_CONSTANT) {
+ *  if (SDL_HapticQuery(haptic) & SDL_HAPTIC_CONSTANT) {
  *      printf("We have constant haptic effect!");
  *  }
  *  \endcode
@@ -1132,7 +1132,7 @@ extern DECLSPEC int SDLCALL SDL_HapticUnpause(SDL_Haptic * haptic);
 extern DECLSPEC int SDLCALL SDL_HapticStopAll(SDL_Haptic * haptic);
 
 /**
- *  \brief Checks to see if rumble is supported on a haptic device..
+ *  \brief Checks to see if rumble is supported on a haptic device.
  *
  *  \param haptic Haptic device to check to see if it supports rumble.
  *  \return SDL_TRUE if effect is supported, SDL_FALSE if it isn't or -1 on error.
