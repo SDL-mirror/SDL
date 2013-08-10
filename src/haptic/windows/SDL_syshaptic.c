@@ -1275,6 +1275,11 @@ SDL_SYS_HapticUpdateEffect(SDL_Haptic * haptic,
         SDL_assert(data->type == SDL_HAPTIC_LEFTRIGHT);
         vib->wLeftMotorSpeed = data->leftright.large_magnitude;
         vib->wRightMotorSpeed = data->leftright.small_magnitude;
+        SDL_LockMutex(haptic->hwdata->mutex);
+        if (haptic->hwdata->stopTicks) {  /* running right now? Update it. */
+            XINPUTSETSTATE(haptic->hwdata->userid, vib);
+        }
+        SDL_UnlockMutex(haptic->hwdata->mutex);
         return 0;
     }
 
