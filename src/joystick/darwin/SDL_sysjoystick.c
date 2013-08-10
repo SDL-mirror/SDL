@@ -363,20 +363,20 @@ HIDAddElement(CFTypeRef refElement, recDevice * pDevice)
                     }
                     break;
                 case kHIDPage_Simulation:
-		    switch (usage) {
-			case kHIDUsage_Sim_Rudder:
-			case kHIDUsage_Sim_Throttle:
+                    switch (usage) {
+                        case kHIDUsage_Sim_Rudder:
+                        case kHIDUsage_Sim_Throttle:
                             element = (recElement *)
                                 NewPtrClear(sizeof(recElement));
                             if (element) {
                                 pDevice->axes++;
                                 headElement = &(pDevice->firstAxis);
                             }
-			    break;
+                            break;
 
-			default:
-			    break;
-		    }
+                        default:
+                            break;
+                    }
                     break;
                 case kHIDPage_Button:
                     element = (recElement *)
