@@ -1271,10 +1271,6 @@ SDL_SYS_HapticUpdateEffect(SDL_Haptic * haptic,
     DIEFFECT temp;
 
     if (haptic->hwdata->bXInputHaptic) {
-        /* From MSDN:
-            "Note that the right motor is the high-frequency motor, the left
-             motor is the low-frequency motor. They do not always need to be
-             set to the same amount, as they provide different effects." */
         XINPUT_VIBRATION *vib = &effect->hweffect->vibration;
         SDL_assert(data->type == SDL_HAPTIC_LEFTRIGHT);
         vib->wLeftMotorSpeed = data->leftright.large_magnitude;
