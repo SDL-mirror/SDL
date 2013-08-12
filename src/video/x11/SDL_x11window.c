@@ -59,6 +59,21 @@ static Bool isConfigureNotify(Display *dpy, XEvent *ev, XPointer win)
     return ev->type == ConfigureNotify && ev->xconfigure.window == *((Window*)win);
 }
 
+/*
+static Bool
+XIfEventTimeout(Display *display, XEvent *event_return, Bool (*predicate)(), XPointer arg, int timeoutMS)
+{
+    Uint32 start = SDL_GetTicks();
+
+    while (!XCheckIfEvent(display, event_return, predicate, arg)) {
+        if ((SDL_GetTicks() - start) >= timeoutMS) {
+            return False;
+        }
+    }
+    return True;
+}
+*/
+
 static SDL_bool
 X11_IsWindowLegacyFullscreen(_THIS, SDL_Window * window)
 {
@@ -1150,6 +1165,9 @@ X11_BeginWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _
     XReparentWindow(display, data->xwindow, data->fswindow,
                     (rect.w - window->w) / 2, (rect.h - window->h) / 2);
 
+    /* Move the mouse to the upper left to make sure it's on-screen */
+    XWarpPointer(display, None, root, 0, 0, 0, 0, rect.x, rect.y);
+
     /* Center mouse in the fullscreen window. */
     rect.x += (rect.w / 2);
     rect.y += (rect.h / 2);
@@ -1190,8 +1208,9 @@ X11_EndWindowFullscreenLegacy(_THIS, SDL_Window * window, SDL_VideoDisplay * _di
     XReparentWindow(display, data->xwindow, root, window->x, window->y);
 
     /* flush these events so they don't confuse normal event handling */
-    XIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
-    XIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
+    XSync(display, False);
+    XCheckIfEvent(display, &ev, &isMapNotify, (XPointer)&data->xwindow);
+    XCheckIfEvent(display, &ev, &isUnmapNotify, (XPointer)&data->xwindow);
 
     SetWindowBordered(display, screen, data->xwindow,
                       (window->flags & SDL_WINDOW_BORDERLESS) == 0);
